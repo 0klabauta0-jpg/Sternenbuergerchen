@@ -97,6 +97,19 @@ git checkout -b batch/<batch-name>
 - TASK_465 - Fireteam Engage Resume Contact Progress
 - TASK_466 - Fireteam Live Defend Contact Fire Damage
 - TASK_467 - Fireteam Engage Contact Halt Fire
+- TASK_468 - Fireteam Engage Live Command Conflict Audit
+- TASK_469 - Fireteam F6 Drill Combat Config
+- TASK_470 - Fireteam CombatLoop Unit Bridge Recovery
+- TASK_471 - Fireteam Weapon Fire VFX Hit Feedback Perf
+- TASK_472 - Fireteam Contact Performance Bubble Card Readability
+- TASK_473 - Fireteam Combat Feedback Runtime Overhaul
+- TASK_474 - Fireteam Down VFX Performance Stabilization
+- TASK_475 - Fireteam Pathfinding Avoidance Stability Pass
+- TASK_476 - Fireteam Corridor Lane Cover Navigation
+- TASK_477 - Fireteam Contact Cover Decision V1
+- TASK_478 - Fireteam Soft Completion Final Stage Guard
+- TASK_479 - Fireteam Runtime Hotpath Guards
+- TASK_480 - Mission UI Hotpath Feedback Guard
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

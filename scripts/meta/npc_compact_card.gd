@@ -39,6 +39,10 @@ var _progress_value: float = 0.0
 var _show_remove_action: bool = false
 var _fixed_size: bool = false
 var _fixed_card_size: Vector2 = Vector2.ZERO
+var _compact_wrap_text_enabled: bool = false
+var _compact_data_a_max_lines: int = 1
+var _compact_data_b_max_lines: int = 1
+var _compact_text_min_width_override: float = 0.0
 var _is_drag_preview: bool = false
 var _drag_preview_size: Vector2 = Vector2.ZERO
 var _drag_preview_text_width: float = 0.0
@@ -88,6 +92,10 @@ func setup_from_profile(profile, options: Dictionary = {}) -> void:
 	_progress_value = clampf(float(options.get("progress_value", _progress_value)), 0.0, 100.0)
 	_show_remove_action = bool(options.get("show_remove_action", _show_remove_action))
 	_fixed_size = bool(options.get("fixed_size", _fixed_size))
+	_compact_wrap_text_enabled = bool(options.get("compact_wrap_text", _compact_wrap_text_enabled))
+	_compact_data_a_max_lines = maxi(1, int(options.get("compact_data_a_max_lines", _compact_data_a_max_lines)))
+	_compact_data_b_max_lines = maxi(1, int(options.get("compact_data_b_max_lines", _compact_data_b_max_lines)))
+	_compact_text_min_width_override = maxf(0.0, float(options.get("compact_text_min_width", _compact_text_min_width_override)))
 	var requested_fixed_size = options.get("fixed_card_size", _fixed_card_size)
 	if typeof(requested_fixed_size) == TYPE_VECTOR2:
 		_fixed_card_size = requested_fixed_size
@@ -390,14 +398,14 @@ func _refresh_card() -> void:
 	progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	if _compact_mode:
 		name_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-		data_a_label.autowrap_mode = TextServer.AUTOWRAP_OFF
-		data_b_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		data_a_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if _compact_wrap_text_enabled else TextServer.AUTOWRAP_OFF
+		data_b_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if _compact_wrap_text_enabled else TextServer.AUTOWRAP_OFF
 		name_label.max_lines_visible = 1
-		data_a_label.max_lines_visible = 1
-		data_b_label.max_lines_visible = 1
+		data_a_label.max_lines_visible = _compact_data_a_max_lines if _compact_wrap_text_enabled else 1
+		data_b_label.max_lines_visible = _compact_data_b_max_lines if _compact_wrap_text_enabled else 1
 		name_label.clip_text = true
-		data_a_label.clip_text = true
-		data_b_label.clip_text = true
+		data_a_label.clip_text = not _compact_wrap_text_enabled
+		data_b_label.clip_text = not _compact_wrap_text_enabled
 	else:
 		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		data_a_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -521,10 +529,14 @@ func _apply_density(
 		var compact_text_width := 76.0 if is_mission_drop_pilot else COMPACT_TEXT_MIN_WIDTH
 		if _drag_preview_text_width > compact_text_width:
 			compact_text_width = _drag_preview_text_width
+		if _compact_text_min_width_override > 0.0:
+			compact_text_width = _compact_text_min_width_override
 		text_vbox.custom_minimum_size = Vector2(compact_text_width, 0.0)
 		name_label.custom_minimum_size = Vector2(0.0, 12.0 if is_mission_drop_pilot else 14.0)
-		data_a_label.custom_minimum_size = Vector2(0.0, 10.0 if is_mission_drop_pilot else 12.0)
-		data_b_label.custom_minimum_size = Vector2(0.0, 10.0 if is_mission_drop_pilot else 12.0)
+		var data_a_line_height: float = 10.0 if is_mission_drop_pilot else 12.0
+		var data_b_line_height: float = 10.0 if is_mission_drop_pilot else 12.0
+		data_a_label.custom_minimum_size = Vector2(0.0, data_a_line_height * float(_compact_data_a_max_lines if _compact_wrap_text_enabled else 1))
+		data_b_label.custom_minimum_size = Vector2(0.0, data_b_line_height * float(_compact_data_b_max_lines if _compact_wrap_text_enabled else 1))
 		badge_row.custom_minimum_size = Vector2(0.0, 22.0)
 		name_label.add_theme_font_size_override("font_size", 10 if is_mission_drop_pilot else 12)
 		data_a_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)

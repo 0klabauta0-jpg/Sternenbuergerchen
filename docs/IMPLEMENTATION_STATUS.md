@@ -10,6 +10,141 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_480 - Mission UI Hotpath Feedback Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_480_mission_ui_hotpath_feedback_guard.md`, `docs/tasks/TASK_399_dropship_flow_contract_performance_pass.md`, `docs/dev/loadout_playability_rules.md`
+- Stand: Parallel-Dropship-Bewegungsframes aktualisieren Welt-Overlay und Dropship-Panel leichtgewichtig, statt bei jedem Frame Planning-Emit und vollen `_update_ui()` zu erzwingen.
+- Stand: Event-Log-Panel-Refresh und die uebrigen Runtime-HUD-Surfaces sind getrennt. Ein fehlendes optionales Event-Log blockiert Selected Cards, Mini Cards, World Overlays oder Dynamic Buttons nicht mehr.
+- Stand: Fireteam-Mini-Cards behalten den konfigurierten Lead-Summary-Text und zeigen darunter weiter Live-Status. Die Loadout-Doku nennt `rail_gun` wieder als selektierbare kanonische Weapon-ID.
+- Risiken/offen: Die verbleibenden Mission-UI-SceneTree-Helper bleiben Folgearbeit fuer einen Cache-/Registry-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_399_dropship_flow_contract_performance_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_mission_fireteam_fob_payload_and_bubbles.gd`, TASK_479-Regression und `git diff --check`.
+- Naechster Schritt: Mission-F6/Playtest mit zwei Dropships und sichtbarer Mini-Card pruefen. Erwartet: kein UI-Flackern durch parallel laufende Dropships, Lead bleibt auf der Fireteamkarte lesbar.
+
+### TASK_479 - Fireteam Runtime Hotpath Guards
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_479_fireteam_runtime_hotpath_guards.md`, `docs/tasks/TASK_470_fireteam_combatloop_unit_bridge_recovery.md`, `docs/tasks/TASK_478_fireteam_soft_completion_final_stage_guard.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Der `MissionCombatLoopDriver` trennt aktive registrierte Runtime-Units jetzt von kampffaehigen Combat-Kandidaten und cached diese Listen ticklokal fuer Contact-/Fire-/Overwatch-Hotpaths.
+- Stand: Presence- und Hotpath-Audits melden aktive, inaktive und kampffaehige Unit-IDs sowie Pair-/LOS-Zaehler, damit Drop-/Staging-Filter, Down-/Respawn-Zustaende und Scan-Kosten sichtbar werden.
+- Stand: Die Review-Idee wird bewusst ohne neue per-Unit-KI, ohne Unit-`Area2D`-Scanner und ohne NavigationServer-/NavigationAgent-Umbau umgesetzt.
+- Risiken/offen: Das ist noch keine finale Spatial-Bucket-Zielsuche. Wenn spaeter sehr viele aktive Units laufen, sollte ein separater Bucket-/Budget-Task auf diesen Audits aufsetzen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_479_fireteam_runtime_hotpath_guards.gd`, relevante TASK_470/TASK_473/TASK_477/TASK_478-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill erneut mit aktiven/down/respawnenden Einheiten beobachten. Erwartet: Combat-Loop schiesst nur mit/auf fitte registrierte Kandidaten, waehrend Respawn-/Bleedout-Logik Down-Units weiter kennt.
+
+### TASK_478 - Fireteam Soft Completion Final Stage Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_478_fireteam_soft_completion_final_stage_guard.md`, `docs/tasks/TASK_462_fireteam_auto_defend_completion_release.md`, `docs/tasks/TASK_463_fireteam_auto_defend_guard_enemy_model_visibility.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Die weiche Movement-Zielslot-Completion prueft jetzt zusaetzlich, ob der aktuelle Movement-Anchor bereits am finalen Wegpunktziel liegt. Zwischen-Bounds, Take-/Engage-Vorrueckpositionen und Cover-/Stage-Ziele koennen dadurch nicht mehr den ganzen Waypoint abschliessen.
+- Stand: Auto-`DEF 360` bleibt nach echtem letztem Zielabschluss aktiv, wird aber nicht mehr durch soft-reached Zwischenziele ausgeloest.
+- Risiken/offen: Wenn der finale Stage selbst schlecht gesetzt ist, kann der Auftrag weiterhin nach finaler Zielnaehe korrekt abschliessen. Das bleibt ein Zielslot-/Formationsthema.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_478_fireteam_soft_completion_final_stage_guard.gd`, relevante TASK_462/TASK_463/TASK_477-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill mit `Take`/`Engage` in C/N erneut testen. Erwartet: Zwischenhalt/Buddy-Bound bleibt im aktiven Befehl, Auto-DEF erst nach finalem Zielabschluss.
+
+### TASK_477 - Fireteam Contact Cover Decision V1
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_477_fireteam_contact_cover_decision_v1.md`, `docs/tasks/TASK_467_fireteam_engage_contact_halt_fire.md`, `docs/tasks/TASK_476_fireteam_corridor_lane_cover_navigation.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Engage-Contact-Halt entscheidet jetzt pro Mitglied zwischen `take_cover` und `fire_now`. C/N/A steuert Suchradius, noetigen Deckungsgewinn und wie stark Feuer jetzt gegen Deckung gewinnt.
+- Stand: Cover-Move-Commands bleiben im bestehenden Fireteam-/SimulationRoot-Pfad: `move_to_position`, `source_command_type = engage`, `fire_at_will`, Aim-Posture und die TASK_476-Navigation-Metadaten.
+- Stand: Der Movement-Snapshot meldet `contact_cover_decision_active`, Modus, Assignment-/Fire-Now-Zaehler und per-Unit-Diagnose.
+- Risiken/offen: V1 validiert die neue Deckungsposition noch nicht erneut gegen LOS/Waffenwirkung. Das ist der naechste sinnvolle Feinschnitt, sobald der Playtest zeigt, ob die Auswahl lesbar genug ist.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_477_fireteam_contact_cover_decision_v1.gd`, TASK_476/TASK_467-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill mit Engage C/N/A gegen Gegnergruppe testen: C sollte sichtbarer Deckung nehmen, A eher wirken, #18/#17 sollten die Entscheidung nachvollziehbar zeigen.
+
+### TASK_476 - Fireteam Corridor Lane Cover Navigation
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_476_fireteam_corridor_lane_cover_navigation.md`, `docs/tasks/TASK_475_fireteam_pathfinding_avoidance_stability_pass.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Fireteam Move/Engage/Take/Defend-Movement-Commands tragen jetzt Korridor-, Lane-, Cover-/Exposure- und Blocker-Clearance-Metadaten. Der Movement-Snapshot meldet die per Unit erzeugte Navigation-Diagnose.
+- Stand: `SimulationRoot` normalisiert die Command-Felder in Grid-Optionen fuer den bestehenden Terrain-/HPA-Pathfinder.
+- Stand: `TerrainPathfinder` bewertet Korridor-Abweichung, Buddy-Lane-Abweichung und blocker-nahe Schritte zusaetzlich zu Surface-/Cover-/Exposure-Kosten.
+- Risiken/offen: Noch keine finale Bottleneck-Reservierung und keine Enemy-Gefahrenkarte ohne Kontaktkontext. Bei echten Engstellen braucht es spaeter vermutlich eine Zeit-/Reservierungslogik.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_476_fireteam_corridor_lane_cover_navigation.gd`, TASK_475/TASK_460/TASK_461-Regressionen und TASK_129 Cover-aware-Navigation.
+- Naechster Schritt: F6-Drill gegen Move/Engage/Take beobachten: weniger Gaensemarsch auf dem Weg, weniger blocker-nahe Klemmer, weiterhin brauchbare Deckungsnaehe bei C/N.
+
+### TASK_475 - Fireteam Pathfinding Avoidance Stability Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_475_fireteam_pathfinding_avoidance_stability_pass.md`, `docs/tasks/TASK_460_fireteam_movement_avoidance_stability.md`, `docs/tasks/TASK_461_fireteam_engage_visual_stuck_hotfix.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: `FireteamMovementController` prueft walkable-normalisierte Movement-Zielslots jetzt gegen bereits vergebene Zielslots. Wenn mehrere Mitglieder auf dieselbe Grid-Zelle oder zu dicht fallen, werden nahe, walkable Ersatzslots links/rechts der Marschachse gesucht.
+- Stand: Die reparierten Zielslots sind die einzige Grundlage fuer UnitCommands und Completion-State. Der Movement-Snapshot meldet Reparaturzaehler, Konflikte, unresolved Slots, Mindestabstand und kurze Slot-Diagnosen.
+- Stand: `SimulationRoot` konsumiert `local_avoidance_repath_requested` jetzt als Repath-Signal. Ein Avoidance-Deadlock kann dadurch einen alten Terrain-Pfad verwerfen, statt denselben Pfad weiter abzulaufen.
+- Risiken/offen: Dieser Pass ist noch keine Deckungssuche und keine finale Bottleneck-Reservierung. Echte Engstellen koennen spaeter weitere Reservierungs-/Sequenzlogik brauchen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_475_fireteam_pathfinding_avoidance_stability_pass.gd`, relevante TASK_460/TASK_461-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill erneut mit `Move -> Engage/Take` beobachten. Erwartet: weniger Zielslot-Kollaps/Gaensemarsch am Ziel, klarere Diagnose bei Slot-Reparatur oder weiterem Haenger.
+
+### TASK_474 - Fireteam Down VFX Performance Stabilization
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_474_fireteam_down_vfx_performance_stabilization.md`, `docs/tasks/TASK_473_fireteam_combat_feedback_runtime_overhaul.md`, `docs/tasks/TASK_471_fireteam_weapon_fire_vfx_hit_feedback_perf.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Der CombatLoop haelt frisch gedownte Units jetzt fuer ein kurzes Mindestfenster sichtbar im Down-Zustand, bevor Bleedout/Respawn enqueued wird. Damit kippt ein Treffer nicht mehr im naechsten Tick unsichtbar direkt in Respawn weiter.
+- Stand: `respawning` bleibt optisch liegend: 2D-TestUnits und 3D-Proxies richten sich erst beim echten Respawn-Effekt wieder auf.
+- Stand: Weapon-Fire-VFX bleibt gecappt, hat aber neben der kurzen Muzzle-Line jetzt einen kleinen hellen Flare-Cross am Waffenpunkt, damit Schuesse im Drillfenster lesbarer sind.
+- Stand: Combat-Visual-Refreshes werden gedrosselt und gepuffert; dynamische Fire-/Bubble-/Communication-Signaturen werden nur noch gecappt ausgewertet, statt jedes Mal komplette Payloads zu serialisieren.
+- Risiken/offen: Die Performance sollte im F6-Fenster deutlich ruhiger sein, muss aber noch manuell mit echtem Feuerkontakt beobachtet werden. Die finale Death-/Ragdoll-/Medic-Logik bleibt ein eigener Gameplay-Pass.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_474_fireteam_down_vfx_performance_stabilization.gd`, relevante TASK_471/TASK_472/TASK_473-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill erneut mit `Move -> Engage` testen. Erwartet: sichtbarer kleiner Muzzle-Impuls, Treffer lassen Units kurz liegen, Respawn bleibt liegend mit Countdown und #18/Visuals triggern nicht mehr bei jedem Schuss mehrere Voll-Rebuilds.
+
+### TASK_473 - Fireteam Combat Feedback Runtime Overhaul
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_473_fireteam_combat_feedback_runtime_overhaul.md`, `docs/tasks/TASK_472_fireteam_contact_perf_bubble_card_readability.md`, `docs/tasks/TASK_471_fireteam_weapon_fire_vfx_hit_feedback_perf.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: `SimulationRoot` normalisiert Cover-Werte jetzt vor der Trefferrechnung und meldet zu jedem Damage-Effekt ein autoritatives `damage_effect_resolved`-Outcome mit Hit/Miss, Trefferchance, Roll, Schaden, Cover-Ratio, Ziel-HP und Vital-State.
+- Stand: `MissionCombatLoopDriver` verbindet Fire-Events mit diesem Outcome, sodass #18/Visuals nicht mehr nur melden, dass geschossen wurde, sondern ob der Schuss traf, verfehlte oder Schaden erzeugte.
+- Stand: Suppression ist in leichte Hemmung und schweren Pinned-Zustand getrennt. Leichte Suppression bremst und verschlechtert Aim/Angriff, bricht aber nicht mehr sofort GO/Engage ab; nur schwere Suppression blockt Recovery wie ein echter Unterbrechungszustand.
+- Stand: #16 zeigt Ad-Hoc-/Recovery-Kommandos nur noch bei echtem Recovery-Kontext statt bei jedem Kampfkontakt. #17 bekommt laengere, aber gleich breite Member-Karten und lesbarere Statuszeilen fuer Befehl, Bewegung, Sicherung, Flank und Lead.
+- Stand: Weapon-Fire-VFX ist weiter gecappt, nutzt kurze gelbe Muzzle-Impulse und zusaetzlich kleine Impact-Marker am Ziel, damit der sichtbare Schuss nicht wie eine riesige gelbe Wand wirkt.
+- Risiken/offen: Treffer-/Suppression-Werte bleiben Prototype-Balancing. Der F6-Drill muss visuell gegen echte Frames geprueft werden: Gegner sollten HP/Down zeigen, #16 darf nicht flackern und #17 darf trotz Mehrtext nicht in Ein-Buchstaben-Zeilen fallen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_473_fireteam_combat_feedback_runtime_overhaul.gd`, relevante TASK_471/TASK_472-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill mit `Move -> Engage` testen. Erwartet: Fire-Events erzeugen sichtbare Hit/Miss-/Damage-Outcomes, leichte Suppression haelt die Teams nicht im alten Recovery-Flicker fest und schwere Suppression ist klar als `PINNED` erkennbar.
+
+### TASK_472 - Fireteam Contact Performance Bubble Card Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_472_fireteam_contact_perf_bubble_card_readability.md`, `docs/tasks/TASK_471_fireteam_weapon_fire_vfx_hit_feedback_perf.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Der dynamische 3D-Order-Refresh raeumt jetzt auch HUD-Sprechblasen ab, bevor die aktive Bubble neu aufgebaut wird. Dadurch bleibt oben links nur eine Leader-Bubble statt eines Stapels alter Befehlsblasen.
+- Stand: Kontakt-/Fire-Visuals sind im Drill guenstiger: weniger gleichzeitige Weapon-Fire-VFX, weniger Map-Communication-Marker und ein langsamerer dynamischer Visual-Refresh. Der Muzzle-Flash ist weiter klein, aber mit gelbem Tip/Bloom sichtbarer.
+- Stand: Flank-Vulnerability ist fuer die aktuelle Baseline per Default deaktiviert. Engage/Defend-Feuer wird damit nicht mehr durch unfertige Flanking-Ansagen oder Flank-Mali/-Boni ueberlagert.
+- Stand: Die #17-Unit-Karten bleiben 156px breit, werden fuer Missionsmitglieder aber nach unten laenger und wrappen Laufzeit-, Kontakt- und Posture-Text ueber mehrere kurze Zeilen.
+- Risiken/offen: Flanking muss spaeter als eigener expliziter Behavior-Pass wieder aktiviert und getestet werden. Die Performance-Bremse reduziert Debug-Dichte; falls spaeter mehr Trefferfeedback noetig ist, sollte es gezielt und gecappt dazu.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_472_fireteam_contact_perf_bubble_card_readability.gd`, relevante TASK_471/TASK_435-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill im Kontakt erneut ansehen. Erwartet: deutlich weniger Bubble-/Marker-Stapel, keine automatische `Flanking!`-Ansage, #17 zeigt erklaerenden Umbruchtext.
+
+### TASK_471 - Fireteam Weapon Fire VFX Hit Feedback Perf
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_471_fireteam_weapon_fire_vfx_hit_feedback_perf.md`, `docs/tasks/TASK_470_fireteam_combatloop_unit_bridge_recovery.md`, `docs/tasks/TASK_466_fireteam_live_defend_contact_fire_damage.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Weapon-Fire-VFX nutzt im 3D-View jetzt eine kleine gelbe, gerichtete Muzzle-Impulse-Line plus kleinen Bloom. Die grosse Texture-Card wird im Debug-/Drill-Pfad bewusst unterdrueckt, damit kein gelber Wand-Flash entsteht.
+- Stand: Der 3D-View rendert nur noch die neuesten Weapon-Fire-Events bis zu einem festen Limit. Das verhindert, dass lange Feuerwechsel unbounded alte Flash-/Trace-Geometrie aufbauen.
+- Stand: Unit-Proxies melden HP, letzten Damage-Kontext, Damage-Visual-Status und Down-Pose im Render-Snapshot. Fit-Units mit Schaden zeigen eine HP-Badge, Down-/Bleedout-Units kippen im Proxy sichtbar in einen Down-Zustand.
+- Risiken/offen: Das ist eine lesbare Debug-/Prototype-Loesung, keine finale Muzzle-Particle- oder Death-Animation. Ob Gegner schnell genug sterben, bleibt Combat-Balancing; die Sichtbarkeit von Treffer/HP/Down ist jetzt separat pruefbar.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_471_fireteam_weapon_fire_vfx_hit_feedback_perf.gd`, relevante TASK_432/TASK_435/TASK_436/TASK_438/TASK_461/TASK_466/TASK_470-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill erneut mit `Move -> Engage` testen. Erwartet: kleiner gelber Muzzle-Impuls statt grosser Flaeche, rote Trace bleibt lesbar, Gegner zeigen HP/Down statt nur `IDLE`.
+
+### TASK_470 - Fireteam CombatLoop Unit Bridge Recovery
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_470_fireteam_combatloop_unit_bridge_recovery.md`, `docs/tasks/TASK_469_fireteam_f6_drill_combat_config.md`, `docs/tasks/TASK_468_fireteam_engage_live_command_conflict_audit.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Der CombatLoop nutzt konfigurierte NodePaths weiterhin zuerst, faellt bei leeren Listen aber auf die `UnitRegistry` zurueck. Damit darf #18 im F6-Drill nicht mehr `F0/E0` melden, wenn registrierte Friendlies/Enemies sichtbar aktiv sind.
+- Stand: Fruehe Startup-Defeats werden verhindert, solange der Loop noch nie aktive Friendlies gesehen hat. Ein bereits gesetzter Startup-Defeat kann recovern, sobald aktive Friendlies registriert sind.
+- Stand: Contact-Diagnosen werden beim Lesen mit aktuellen Presence-Daten aufgefrischt, und Overwatch-Fire schreibt ebenfalls eine `fired`-Diagnose fuer #18.
+- Stand: Die Fireteam-Command-Drill-Scene enthaelt jetzt vier explizite Enemy-Nodes und vier CombatLoop-Enemy-Pfade. Der F6-Start haengt dadurch nicht mehr davon ab, dass das Scenario spaeter zwei Gegner dupliziert.
+- Risiken/offen: Wenn danach weiter kein Feuer sichtbar ist, ist der naechste Diagnosepunkt jetzt LOS/Range/Detection/FireStatus/Damage-VFX, nicht mehr Unit-Presence.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_470_fireteam_combatloop_unit_bridge_recovery.gd`, relevante TASK_469/TASK_468/TASK_467/TASK_466-Regressionen und `git diff --check`.
+- Naechster Schritt: F6-Drill neu starten, `Move -> Engage` in die rechte Gegnergruppe spielen und #18 pruefen. Erwartet: aktive Counts statt `F0/E0`, danach `CONTACT FIRE` oder konkreter Blockgrund.
+
+### TASK_469 - Fireteam F6 Drill Combat Config
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_469_fireteam_f6_drill_combat_config.md`, `docs/tasks/TASK_468_fireteam_engage_live_command_conflict_audit.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Das Fireteam-Drill-Szenario traegt jetzt eine eigene `win_condition = elimination`. `MissionTestSetup` uebertraegt diesen Wert beim direkten Szenenstart auf den `CombatLoopDriver`, damit geerbtes `objective_capture` den CombatLoop nicht mehr im Behavior-Drill beendet.
+- Stand: Der Meta-Missionskatalog setzt fuer `fireteam_command_drill` ebenfalls `elimination`, damit Meta-Start und F6-Start dieselbe Combat-Regel benutzen.
+- Stand: Ein neuer TASK_469-Verifier prueft den Szenario-Import, den direkten F6-Drill-Start und die Basisszene mit injiziertem Drill-Szenario auf aktive Friendlies/Enemies im CombatLoop.
+- Risiken/offen: Dieser Slice repariert die F6-Combat-Konfiguration und den F0/E0-Pfad. Falls danach weiter kein Feuer entsteht, muss #18 konkret LOS/Range/Detection/FireStatus ausweisen statt leerer Unit-Counts.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_469_fireteam_f6_drill_combat_config.gd`, relevante TASK_468/TASK_467/TASK_466-Regressionen und `git diff --check`.
+- Naechster Schritt: Godot-Szene neu starten, dann im Drill `Move -> Engage` gegen die rechte Gegnergruppe testen. Erwartet: #18 zeigt aktive Counts und bei LOS/Reichweite `CONTACT FIRE` oder einen konkreten Blockgrund.
+
+### TASK_468 - Fireteam Engage Live Command Conflict Audit
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_468_fireteam_engage_live_command_conflict_audit.md`, `docs/tasks/TASK_467_fireteam_engage_contact_halt_fire.md`, `docs/dev/fireteam_behavior_modes_contract.md`
+- Stand: Der Engage-Contact-Halt nutzt jetzt einen eigenen `contact_halt`-Command-Token. Alte requeueende Stage-Move-/Engage-Commands koennen den Halt dadurch nicht mehr als gueltigen alten Token erkennen und den Unit-Command wieder ueberschreiben.
+- Stand: Die Fireteam-Command-Drill-Map ueberschreibt die geerbte Objective-Capture-Wincondition auf `elimination`. Damit beendet ein Objective-Defeat den Combat-Loop nicht mehr waehrend des Behavior-Playtests; Kontakttracking, Fire-Decision, Damage und Muzzle-/Fire-Events bleiben aktiv.
+- Stand: Der rote Contact-Marker in der 3D-View ist jetzt ein flacher Bodenmarker statt eines hohen Zylinders ueber der Unit. Gegner-Modelle werden dadurch nicht mehr vom roten Marker verdeckt.
+- Stand: Ein neuer TASK_468-Verifier prueft den Live-Pfad auf zwei Dinge: stale Stage-Requeue darf Contact-Halt nicht ueberschreiben, und ein echter Engage-Drill-Tick kann ohne manuelles `_try_enqueue_attacks()` ein Fire-Event erzeugen.
+- Risiken/offen: Gegner-Proxy-Lesbarkeit und finale Cover-/Area-Taktik bleiben eigene Follow-ups. Dieser Slice repariert den Befehlskampf und den toten Combat-Loop in der Drill-Map.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_468_fireteam_engage_live_command_conflict_audit.gd`, relevante TASK_467/TASK_466/TASK_465-Regressionen und `git diff --check`.
+- Naechster Schritt: Im Drillfenster neu starten und `Move -> Engage N/A in Gegnernaehe` testen. Erwartet: kein Rueckfall durch alte Move-Requeues, kein Objective-Defeat-Stop, Fire-Event/Muzzle bei LOS/Reichweite oder konkrete NO-FIRE-Diagnose.
+
 ### TASK_467 - Fireteam Engage Contact Halt Fire
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_467_fireteam_engage_contact_halt_fire.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_465_fireteam_engage_resume_contact_progress.md`, `docs/tasks/TASK_466_fireteam_live_defend_contact_fire_damage.md`

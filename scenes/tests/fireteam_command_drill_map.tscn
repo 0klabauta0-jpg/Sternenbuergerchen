@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/tests/mission_reactivity_test.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scripts/npc/test_unit.gd" id="2_unit"]
+[ext_resource type="Texture2D" path="res://Assets/kenney_space-kit/Isometric/astronautB_SW.png" id="3_enemy_visual"]
 
 [node name="FireteamCommandDrillMap" instance=ExtResource("1_base")]
 
@@ -39,12 +41,38 @@ weapon_2_id = "none"
 [node name="MissionSetup" parent="." index="16"]
 map_file_path = "res://maps/fireteam_command_drill_24x24.json"
 scenario_file_path = "res://data/mission_scenarios/fireteam_command_drill_24x24.json"
+unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../UnitDelta"), NodePath("../UnitEcho"), NodePath("../UnitFoxtrot"), NodePath("../UnitGolf"), NodePath("../UnitHotel"), NodePath("../EnemyDelta"), NodePath("../EnemyEcho"), NodePath("../EnemyFoxtrot"), NodePath("../EnemyGolf")])
 selected_team_unit_ids = PackedStringArray("unit_alpha", "unit_bravo", "unit_charlie", "unit_delta")
 selected_team_fireteam_ids = PackedStringArray("drill", "drill", "drill", "drill")
 defer_friendly_runtime_activation = false
 allow_full_roster_when_selection_empty = false
 
+[node name="EnemyFoxtrot" type="Node2D" parent="." index="17"]
+script = ExtResource("2_unit")
+position = Vector2(228, 274)
+unit_id = "enemy_foxtrot"
+display_name = "Enemy Foxtrot"
+team_id = "team_bravo"
+
+[node name="Visual" type="Sprite2D" parent="EnemyFoxtrot" index="0"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("3_enemy_visual")
+
+[node name="EnemyGolf" type="Node2D" parent="." index="18"]
+script = ExtResource("2_unit")
+position = Vector2(282, 274)
+unit_id = "enemy_golf"
+display_name = "Enemy Golf"
+team_id = "team_bravo"
+
+[node name="Visual" type="Sprite2D" parent="EnemyGolf" index="0"]
+position = Vector2(0, -26)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("3_enemy_visual")
+
 [node name="CombatLoopDriver" parent="." index="19"]
 contact_range = 360.0
+win_condition = "elimination"
 friendly_unit_paths = Array[NodePath]([NodePath("../UnitAlpha"), NodePath("../UnitBravo"), NodePath("../UnitCharlie"), NodePath("../UnitDelta")])
-enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho")])
+enemy_unit_paths = Array[NodePath]([NodePath("../EnemyDelta"), NodePath("../EnemyEcho"), NodePath("../EnemyFoxtrot"), NodePath("../EnemyGolf")])

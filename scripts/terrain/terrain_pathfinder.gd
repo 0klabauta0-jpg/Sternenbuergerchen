@@ -23,6 +23,8 @@ const DIAGONAL_COST_MULTIPLIER: float = 1.41421356237
 const MIN_SURFACE_PATH_COST: float = 0.7
 const DEFAULT_EXPOSURE_MAX_GRID_DISTANCE: float = 8.0
 const MIN_COVER_AWARE_STEP_COST: float = 0.05
+const LANE_PENALTY_SCALE: float = 0.35
+const BLOCKER_CLEARANCE_PENALTY_SCALE: float = 0.4
 
 
 func find_path(from_grid: Vector2i, to_grid: Vector2i, registry) -> Array:
@@ -228,6 +230,9 @@ func _get_step_cost(current_grid: Vector2i, neighbor_grid: Vector2i, registry, o
 		var exposure_score: float = get_exposure_score(neighbor_grid, registry, options)
 		var cover_score: float = _get_cover_score(neighbor_grid, registry, options)
 		base_cost = maxf(base_cost + (exposure_weight * exposure_score) - (cover_weight * cover_score), MIN_COVER_AWARE_STEP_COST)
+	base_cost += _get_corridor_penalty(neighbor_grid, options)
+	base_cost += _get_lane_penalty(neighbor_grid, options)
+	base_cost += _get_blocker_clearance_penalty(neighbor_grid, registry, options)
 
 	var delta: Vector2i = neighbor_grid - current_grid
 	if abs(delta.x) == 1 and abs(delta.y) == 1:
@@ -243,6 +248,77 @@ func _get_cover_score(grid_position: Vector2i, registry, options: Dictionary = {
 	if tile_data == null:
 		return 0.0
 	return clampf(float(tile_data.cover_value) / 100.0, 0.0, 1.0)
+
+
+func _get_corridor_penalty(grid_position: Vector2i, options: Dictionary) -> float:
+	if not bool(options.get("corridor_enabled", false)):
+		return 0.0
+	var corridor_weight: float = maxf(float(options.get("corridor_weight", 0.0)), 0.0)
+	if corridor_weight <= 0.0:
+		return 0.0
+	var from_grid: Vector2i = Vector2i(options.get("corridor_from_grid", grid_position))
+	var to_grid: Vector2i = Vector2i(options.get("corridor_to_grid", grid_position))
+	var half_width: float = maxf(float(options.get("corridor_half_width_grid", 0.0)), 0.0)
+	var distance: float = absf(_signed_grid_line_distance(grid_position, from_grid, to_grid))
+	if distance <= half_width:
+		return 0.0
+	_increment_diagnostic_counter(options, "corridor_penalty_count")
+	return (distance - half_width) * corridor_weight
+
+
+func _get_lane_penalty(grid_position: Vector2i, options: Dictionary) -> float:
+	if not bool(options.get("lane_enabled", false)):
+		return 0.0
+	var lane_weight: float = maxf(float(options.get("lane_weight", 0.0)), 0.0)
+	if lane_weight <= 0.0:
+		return 0.0
+	var from_grid: Vector2i = Vector2i(options.get("corridor_from_grid", grid_position))
+	var to_grid: Vector2i = Vector2i(options.get("corridor_to_grid", grid_position))
+	var signed_distance: float = _signed_grid_line_distance(grid_position, from_grid, to_grid)
+	var desired_offset: float = float(options.get("lane_offset_grid", 0.0))
+	_increment_diagnostic_counter(options, "lane_penalty_count")
+	return absf(signed_distance - desired_offset) * lane_weight * LANE_PENALTY_SCALE
+
+
+func _get_blocker_clearance_penalty(grid_position: Vector2i, registry, options: Dictionary) -> float:
+	var blocker_weight: float = maxf(float(options.get("blocker_clearance_weight", 0.0)), 0.0)
+	if blocker_weight <= 0.0 or registry == null or not registry.has_method("get_tile_at_grid"):
+		return 0.0
+	var radius: int = maxi(int(options.get("blocker_clearance_radius", 1)), 1)
+	var blocker_score: float = 0.0
+	var sample_count: int = 0
+	for offset_x in range(-radius, radius + 1):
+		for offset_y in range(-radius, radius + 1):
+			if offset_x == 0 and offset_y == 0:
+				continue
+			var probe_grid: Vector2i = grid_position + Vector2i(offset_x, offset_y)
+			var tile_data = registry.call("get_tile_at_grid", probe_grid)
+			sample_count += 1
+			if tile_data == null:
+				blocker_score += 1.0
+				continue
+			if not bool(tile_data.walkable):
+				blocker_score += 1.0
+			elif bool(tile_data.blocks_los):
+				blocker_score += 0.45
+	if sample_count <= 0:
+		return 0.0
+	var normalized_score: float = clampf(blocker_score / float(sample_count), 0.0, 1.0)
+	if normalized_score > 0.0:
+		_increment_diagnostic_counter(options, "blocker_clearance_penalty_count")
+	return normalized_score * blocker_weight * BLOCKER_CLEARANCE_PENALTY_SCALE
+
+
+func _signed_grid_line_distance(grid_position: Vector2i, from_grid: Vector2i, to_grid: Vector2i) -> float:
+	var from_value: Vector2 = Vector2(from_grid)
+	var to_value: Vector2 = Vector2(to_grid)
+	var point_value: Vector2 = Vector2(grid_position)
+	var line: Vector2 = to_value - from_value
+	var length: float = line.length()
+	if length <= 0.001:
+		return 0.0
+	var delta: Vector2 = point_value - from_value
+	return line.cross(delta) / length
 
 
 func _grid_distance_score(a: Vector2i, b: Vector2i) -> float:

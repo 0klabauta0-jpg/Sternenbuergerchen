@@ -276,18 +276,38 @@ const FRIENDLY_FIRE_SECTOR_VISUAL_MODE_LOS_LINE: String = "los_line_only"
 const FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS: String = "tile_aligned_los"
 const FRIENDLY_FIRE_SECTOR_SCAN_MODE_LOS_LINE: String = "single_facing_los_line"
 const FRIENDLY_FIRE_SECTOR_SCAN_MODE_TILE_CACHE: String = "range_bounded_los_cache"
-const WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE: float = 0.044
-const WEAPON_FIRE_MUZZLE_BLOOM_RADIUS: float = 0.24
-const WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT: float = 0.08
-const WEAPON_FIRE_MUZZLE_BLOOM_COLOR: Color = Color(1.0, 0.82, 0.20, 0.78)
+const WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED: bool = false
+const WEAPON_FIRE_VISIBLE_EVENT_LIMIT: int = 3
+const WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE: float = 0.006
+const WEAPON_FIRE_MUZZLE_MAX_PIXEL_SIZE: float = 0.014
+const WEAPON_FIRE_MUZZLE_FLASH_LENGTH_WORLD: float = 10.0
+const WEAPON_FIRE_MUZZLE_FLASH_WIDTH: float = 0.045
+const WEAPON_FIRE_MUZZLE_FLASH_COLOR: Color = Color(1.0, 0.84, 0.12, 0.92)
+const WEAPON_FIRE_MUZZLE_BLOOM_RADIUS: float = 0.12
+const WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT: float = 0.06
+const WEAPON_FIRE_MUZZLE_BLOOM_COLOR: Color = Color(1.0, 0.86, 0.18, 0.78)
+const WEAPON_FIRE_MUZZLE_TIP_RADIUS: float = 0.08
+const WEAPON_FIRE_MUZZLE_TIP_HEIGHT: float = 0.07
+const WEAPON_FIRE_MUZZLE_TIP_COLOR: Color = Color(1.0, 0.96, 0.24, 0.92)
+const WEAPON_FIRE_MUZZLE_FLARE_CROSS_WORLD: float = 8.0
+const WEAPON_FIRE_MUZZLE_FLARE_CROSS_WIDTH: float = 0.04
 const WEAPON_FIRE_CONTACT_TRACE_COLOR: Color = Color(1.0, 0.16, 0.10, 0.88)
 const WEAPON_FIRE_FRIENDLY_TRACE_COLOR: Color = Color(1.0, 0.05, 0.04, 0.94)
-const WEAPON_FIRE_TRACE_WIDTH: float = 0.06
+const WEAPON_FIRE_TRACE_WIDTH: float = 0.012
+const WEAPON_FIRE_IMPACT_RADIUS: float = 0.09
+const WEAPON_FIRE_IMPACT_CROSS_WORLD: float = 6.0
+const WEAPON_FIRE_IMPACT_CROSS_WIDTH: float = 0.018
+const WEAPON_FIRE_IMPACT_HIT_COLOR: Color = Color(1.0, 0.58, 0.10, 0.92)
+const WEAPON_FIRE_IMPACT_MISS_COLOR: Color = Color(0.95, 0.82, 0.46, 0.64)
+const UNIT_DAMAGE_BADGE_HEALTH_THRESHOLD: float = 0.995
+const UNIT_DOWN_POSE_ROTATION_DEGREES: Vector3 = Vector3(72.0, 0.0, 18.0)
+const UNIT_BLEEDOUT_POSE_ROTATION_DEGREES: Vector3 = Vector3(86.0, 0.0, 28.0)
 const SELECTED_UNIT_MARKER_COLOR: Color = Color(1.0, 0.84, 0.20, 0.50)
 const SELECTED_UNIT_MARKER_RADIUS: float = 0.32
 const SELECTED_UNIT_MARKER_HEIGHT: float = 0.018
 const SELECTED_UNIT_MARKER_SURFACE_OFFSET: float = 0.006
-const DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC: int = 90
+const DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC: int = 150
+const TACTICAL_COMMUNICATION_EVENT_VISIBLE_LIMIT: int = 4
 const MISSION_LOS_DEBUG_SAMPLE_LIMIT: int = 24
 const MISSION_LOS_DEBUG_CLEAR_LINE_COLOR: Color = Color(0.38, 1.0, 0.68, 0.76)
 const MISSION_LOS_DEBUG_BLOCKED_LINE_COLOR: Color = Color(1.0, 0.32, 0.22, 0.82)
@@ -795,7 +815,7 @@ func set_area_order_preview_payload(preview_payload: Dictionary) -> void:
 
 func _build_order_visual_signature(order_payload: Dictionary) -> String:
 	var parts: PackedStringArray = PackedStringArray()
-	parts.append(var_to_str(order_payload))
+	parts.append(var_to_str(_build_order_visual_signature_payload(order_payload)))
 	var orientation_fireteam_ids: PackedStringArray = _get_valid_fireteam_orientation_payload_ids(order_payload)
 	if not orientation_fireteam_ids.is_empty():
 		parts.append("orientation:%s" % _build_live_fireteam_orientation_signature(orientation_fireteam_ids))
@@ -842,6 +862,90 @@ func _build_order_visual_signature(order_payload: Dictionary) -> String:
 		debug_unit_parts.sort()
 		parts.append("los_debug:%s:%d" % ["|".join(debug_unit_parts), _contact_payload_apply_count])
 	return "\n".join(parts)
+
+
+func _build_order_visual_signature_payload(order_payload: Dictionary) -> Dictionary:
+	var signature_payload: Dictionary = {}
+	for key_variant in order_payload.keys():
+		var key: String = String(key_variant)
+		match key:
+			"fire_event_dicts":
+				signature_payload[key] = _build_fire_event_visual_signature_array(Array(order_payload.get(key, [])))
+			"feedback_bubble_dicts":
+				signature_payload[key] = _build_feedback_bubble_visual_signature_array(Array(order_payload.get(key, [])))
+			"tactical_communication_event_dicts":
+				signature_payload[key] = _build_tactical_communication_visual_signature_array(Array(order_payload.get(key, [])))
+			_:
+				signature_payload[key] = order_payload.get(key_variant)
+	return signature_payload
+
+
+func _build_fire_event_visual_signature_array(fire_events: Array) -> Array:
+	var signature_entries: Array = []
+	var selected_events: Array = _slice_last_dictionary_entries(fire_events, WEAPON_FIRE_VISIBLE_EVENT_LIMIT)
+	for event_variant in selected_events:
+		var event: Dictionary = Dictionary(event_variant)
+		signature_entries.append({
+			"event_id": String(event.get("event_id", "")),
+			"attacker_unit_id": String(event.get("attacker_unit_id", "")),
+			"target_unit_id": String(event.get("target_unit_id", "")),
+			"weapon_id": String(event.get("weapon_id", "")),
+			"combat_outcome": String(event.get("combat_outcome", "")),
+			"damage_resolved": int(event.get("damage_resolved", 0)),
+			"attacker_position": event.get("attacker_position", Vector2.ZERO),
+			"target_position": event.get("target_position", Vector2.ZERO),
+			"is_friendly_fire": bool(event.get("is_friendly_fire", false)),
+		})
+	return signature_entries
+
+
+func _build_feedback_bubble_visual_signature_array(feedback_bubbles: Array) -> Array:
+	var signature_entries: Array = []
+	var selected_bubbles: Array = _slice_last_dictionary_entries(feedback_bubbles, 6)
+	for bubble_variant in selected_bubbles:
+		var bubble: Dictionary = Dictionary(bubble_variant)
+		signature_entries.append({
+			"bubble_id": String(bubble.get("bubble_id", "")),
+			"fireteam_id": String(bubble.get("fireteam_id", "")),
+			"unit_id": String(bubble.get("unit_id", "")),
+			"text": String(bubble.get("text", "")),
+			"category": String(bubble.get("category", "")),
+			"purpose": String(bubble.get("purpose", "")),
+			"anchor_space": String(bubble.get("anchor_space", "")),
+			"anchor_position": bubble.get("anchor_position", Vector2.ZERO),
+			"hud_anchor_position": bubble.get("hud_anchor_position", Vector2.ZERO),
+		})
+	return signature_entries
+
+
+func _build_tactical_communication_visual_signature_array(communication_events: Array) -> Array:
+	var signature_entries: Array = []
+	var selected_events: Array = _slice_last_dictionary_entries(communication_events, TACTICAL_COMMUNICATION_EVENT_VISIBLE_LIMIT)
+	for event_variant in selected_events:
+		var event: Dictionary = Dictionary(event_variant)
+		signature_entries.append({
+			"event_id": String(event.get("event_id", "")),
+			"unit_id": String(event.get("unit_id", "")),
+			"fireteam_id": String(event.get("fireteam_id", "")),
+			"event_type": String(event.get("event_type", "")),
+			"text": String(event.get("text", "")),
+			"priority": int(event.get("priority", 0)),
+			"anchor_position": event.get("anchor_position", Vector2.ZERO),
+		})
+	return signature_entries
+
+
+func _slice_last_dictionary_entries(entries: Array, limit: int) -> Array:
+	var normalized_limit: int = maxi(limit, 0)
+	if normalized_limit == 0:
+		return []
+	var filtered: Array = []
+	for entry_variant in entries:
+		if typeof(entry_variant) == TYPE_DICTIONARY:
+			filtered.append(entry_variant)
+	if filtered.size() <= normalized_limit:
+		return filtered
+	return filtered.slice(filtered.size() - normalized_limit)
 
 
 func _refresh_dynamic_order_visuals_if_needed() -> void:
@@ -4328,6 +4432,7 @@ func _update_drop_visual_motion() -> void:
 
 func _rebuild_order_visuals() -> void:
 	_clear_children(_order_root)
+	_clear_children(_feedback_bubble_hud_root)
 	_area_order_count = 0
 	_waypoint_visual_count = 0
 	_area_order_tile_marker_count = 0
@@ -4419,7 +4524,7 @@ func _rebuild_order_visuals() -> void:
 			continue
 		_add_enemy_tactics_visual(enemy_tactics)
 
-	for fire_event_variant in Array(_order_payload.get("fire_event_dicts", [])):
+	for fire_event_variant in _select_weapon_fire_events_for_visuals(Array(_order_payload.get("fire_event_dicts", []))):
 		if typeof(fire_event_variant) != TYPE_DICTIONARY:
 			continue
 		var fire_event: Dictionary = Dictionary(fire_event_variant)
@@ -4437,7 +4542,7 @@ func _rebuild_order_visuals() -> void:
 			continue
 		_add_feedback_bubble_visual(feedback_bubble)
 
-	for communication_event_variant in Array(_order_payload.get("tactical_communication_event_dicts", [])):
+	for communication_event_variant in _select_tactical_communication_events_for_visuals(Array(_order_payload.get("tactical_communication_event_dicts", []))):
 		if typeof(communication_event_variant) != TYPE_DICTIONARY:
 			continue
 		var communication_event: Dictionary = Dictionary(communication_event_variant)
@@ -4445,6 +4550,18 @@ func _rebuild_order_visuals() -> void:
 			_fow_hidden_order_visual_count += 1
 			continue
 		_add_tactical_communication_event_visual(communication_event)
+
+
+func _select_weapon_fire_events_for_visuals(fire_events: Array) -> Array:
+	var filtered: Array = []
+	for event_variant in fire_events:
+		if typeof(event_variant) == TYPE_DICTIONARY:
+			filtered.append(event_variant)
+	var overflow_count: int = maxi(filtered.size() - WEAPON_FIRE_VISIBLE_EVENT_LIMIT, 0)
+	if overflow_count <= 0:
+		return filtered
+	_fow_hidden_order_visual_count += overflow_count
+	return filtered.slice(overflow_count)
 
 
 func _select_feedback_bubbles_for_visuals(feedback_bubbles: Array) -> Array:
@@ -4697,6 +4814,18 @@ func _resolve_live_fireteam_orientation_state(fireteam_id: String) -> Dictionary
 		result["heading_angle"] = direction.angle()
 		result["heading_source"] = heading_source
 	return result
+
+
+func _select_tactical_communication_events_for_visuals(communication_events: Array) -> Array:
+	var filtered: Array = []
+	for event_variant in communication_events:
+		if typeof(event_variant) == TYPE_DICTIONARY:
+			filtered.append(event_variant)
+	var overflow_count: int = maxi(filtered.size() - TACTICAL_COMMUNICATION_EVENT_VISIBLE_LIMIT, 0)
+	if overflow_count <= 0:
+		return filtered
+	_fow_hidden_order_visual_count += overflow_count
+	return filtered.slice(overflow_count)
 
 
 func _add_movement_group_markers(movement_state: Dictionary, origin_position: Vector2, target_position: Vector2, color: Color) -> void:
@@ -5478,16 +5607,32 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var muzzle_entry: Dictionary = _get_weapon_fire_vfx_entry(weapon_id)
 	var texture: Texture2D = _get_weapon_fire_vfx_texture(String(muzzle_entry.get("path", "")))
 	var barrel_offset: float = float(muzzle_entry.get("barrel_offset_world", 28.0))
-	var muzzle_position: Vector2 = attacker_position + direction.normalized() * barrel_offset
+	var normalized_direction: Vector2 = direction.normalized()
+	var muzzle_position: Vector2 = attacker_position + normalized_direction * barrel_offset
+	var muzzle_tip_position: Vector2 = muzzle_position + normalized_direction * WEAPON_FIRE_MUZZLE_FLASH_LENGTH_WORLD
 	var catalog_pixel_size: float = float(muzzle_entry.get("pixel_size", 0.010))
-	var pixel_size: float = maxf(catalog_pixel_size, WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE)
+	var pixel_size: float = clampf(catalog_pixel_size, WEAPON_FIRE_MUZZLE_MIN_PIXEL_SIZE, WEAPON_FIRE_MUZZLE_MAX_PIXEL_SIZE)
 	var is_friendly_fire: bool = bool(fire_event.get("is_friendly_fire", false))
 	var trace_color: Color = WEAPON_FIRE_FRIENDLY_TRACE_COLOR if is_friendly_fire else WEAPON_FIRE_CONTACT_TRACE_COLOR
-	var muzzle_texture_visible: bool = texture != null
-	if muzzle_texture_visible:
+	var combat_outcome: String = String(fire_event.get("combat_outcome", "")).strip_edges().to_lower()
+	var impact_color: Color = WEAPON_FIRE_IMPACT_HIT_COLOR if combat_outcome == "hit" else WEAPON_FIRE_IMPACT_MISS_COLOR
+	var muzzle_texture_available: bool = texture != null
+	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
+	if muzzle_texture_card_visible:
 		_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
-	_add_marker3d(_order_root, muzzle_position, WEAPON_FIRE_MUZZLE_BLOOM_COLOR, "WeaponFireMuzzleBloom_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_BLOOM_RADIUS, WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT, 16, 0.84)
+	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.84), _world_to_surface_3d_position(muzzle_tip_position, 0.84), WEAPON_FIRE_MUZZLE_FLASH_COLOR, "WeaponFireMuzzleFlash_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_FLASH_WIDTH)
+	var muzzle_perp: Vector2 = Vector2(-normalized_direction.y, normalized_direction.x)
+	var muzzle_cross_a: Vector2 = muzzle_position - muzzle_perp * WEAPON_FIRE_MUZZLE_FLARE_CROSS_WORLD
+	var muzzle_cross_b: Vector2 = muzzle_position + muzzle_perp * WEAPON_FIRE_MUZZLE_FLARE_CROSS_WORLD
+	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_cross_a, 0.865), _world_to_surface_3d_position(muzzle_cross_b, 0.865), WEAPON_FIRE_MUZZLE_TIP_COLOR, "WeaponFireMuzzleFlareCross_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_FLARE_CROSS_WIDTH)
+	_add_marker3d(_order_root, muzzle_position, WEAPON_FIRE_MUZZLE_BLOOM_COLOR, "WeaponFireMuzzleBloom_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_BLOOM_RADIUS, WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT, 8, 0.84)
+	_add_marker3d(_order_root, muzzle_tip_position, WEAPON_FIRE_MUZZLE_TIP_COLOR, "WeaponFireMuzzleTip_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_TIP_RADIUS, WEAPON_FIRE_MUZZLE_TIP_HEIGHT, 8, 0.84)
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), trace_color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_TRACE_WIDTH)
+	_add_marker3d(_order_root, target_position, impact_color, "WeaponFireImpact_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_IMPACT_RADIUS, 0.065, 8, 0.82)
+	var impact_perp: Vector2 = Vector2(-normalized_direction.y, normalized_direction.x)
+	var impact_cross_a: Vector2 = target_position - impact_perp * WEAPON_FIRE_IMPACT_CROSS_WORLD
+	var impact_cross_b: Vector2 = target_position + impact_perp * WEAPON_FIRE_IMPACT_CROSS_WORLD
+	_add_wide_line3d(_order_root, _world_to_surface_3d_position(impact_cross_a, 0.83), _world_to_surface_3d_position(impact_cross_b, 0.83), impact_color, "WeaponFireImpactCross_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_IMPACT_CROSS_WIDTH)
 	var flank_label: String = _build_flank_fire_vfx_label(fire_event)
 	if not flank_label.is_empty():
 		_add_label3d(_order_root, flank_label, _world_to_surface_3d_position(target_position + Vector2(0.0, -22.0), MOVEMENT_LABEL_HEIGHT + 0.82), "WeaponFireFlank_%s" % _sanitize_node_name(event_id), Color(1.0, 0.70, 0.24, 0.96), 12)
@@ -5503,14 +5648,33 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"attacker_unit_id": String(fire_event.get("attacker_unit_id", "")),
 		"target_unit_id": String(fire_event.get("target_unit_id", "")),
 		"muzzle_position": muzzle_position,
-		"muzzle_flash_visible": muzzle_texture_visible,
-		"muzzle_texture_missing": not muzzle_texture_visible,
+		"muzzle_flash_visible": true,
+		"muzzle_texture_missing": not muzzle_texture_available,
+		"muzzle_texture_card_visible": muzzle_texture_card_visible,
+		"muzzle_texture_card_suppressed": muzzle_texture_available and not muzzle_texture_card_visible,
 		"muzzle_bloom_visible": true,
+		"muzzle_tip_visible": true,
+		"muzzle_flare_cross_visible": true,
+		"muzzle_flare_cross_world": WEAPON_FIRE_MUZZLE_FLARE_CROSS_WORLD,
+		"muzzle_flare_cross_width": WEAPON_FIRE_MUZZLE_FLARE_CROSS_WIDTH,
 		"muzzle_catalog_pixel_size": catalog_pixel_size,
 		"muzzle_flash_pixel_size": pixel_size,
+		"muzzle_flash_length_world": WEAPON_FIRE_MUZZLE_FLASH_LENGTH_WORLD,
+		"muzzle_flash_width": WEAPON_FIRE_MUZZLE_FLASH_WIDTH,
+		"muzzle_bloom_radius": WEAPON_FIRE_MUZZLE_BLOOM_RADIUS,
+		"muzzle_tip_radius": WEAPON_FIRE_MUZZLE_TIP_RADIUS,
+		"visible_event_limit": WEAPON_FIRE_VISIBLE_EVENT_LIMIT,
 		"trace_visible": true,
 		"trace_width": WEAPON_FIRE_TRACE_WIDTH,
 		"trace_color": trace_color,
+		"impact_marker_visible": true,
+		"impact_cross_visible": true,
+		"impact_radius": WEAPON_FIRE_IMPACT_RADIUS,
+		"impact_cross_world": WEAPON_FIRE_IMPACT_CROSS_WORLD,
+		"impact_color": impact_color,
+		"combat_outcome": combat_outcome,
+		"damage_resolved": int(fire_event.get("damage_resolved", 0)),
+		"hit_chance_resolved": float(fire_event.get("hit_chance_resolved", 0.0)),
 		"audio_event_id": String(audio_result.get("event_id", "")),
 		"audio_played": bool(audio_result.get("played", false)),
 		"audio_reason": String(audio_result.get("reason", "")),
@@ -6093,7 +6257,7 @@ func _rebuild_contact_visuals() -> void:
 		if typeof(position_variant) != TYPE_VECTOR2:
 			continue
 		var detection_state: String = String(contact.get("detection_state", "unknown")).strip_edges().to_lower()
-		_add_marker3d(_contact_root, Vector2(position_variant), _get_contact_color(detection_state), "Contact_%s" % String(contact.get("unit_id", _contact_count)), 0.36, 0.48, 4)
+		_add_marker3d(_contact_root, Vector2(position_variant), _get_contact_color(detection_state), "Contact_%s" % String(contact.get("unit_id", _contact_count)), 0.26, 0.035, 16, 0.015)
 		var enemy_profile_label: String = String(contact.get("enemy_profile_label", "")).strip_edges()
 		if bool(contact.get("enemy_profile_revealed", false)) and not enemy_profile_label.is_empty():
 			_add_label3d(_contact_root, enemy_profile_label.to_upper(), _world_to_surface_3d_position(Vector2(position_variant) + Vector2(0.0, -24.0), MOVEMENT_LABEL_HEIGHT + 0.52), "ContactProfile_%s" % String(contact.get("unit_id", _contact_count)), Color(1.0, 0.76, 0.32, 0.95), 11)
@@ -6738,6 +6902,8 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			changed = true
 		if _update_unit_weapon_aim_pose(proxy, active_fire_event, displayed_weapon_posture, weapon_pose_direction):
 			changed = true
+		if _update_unit_vital_visual(proxy, unit):
+			changed = true
 		if _update_unit_status_badge(proxy, unit):
 			unit_status_badge_count += 1
 		if bool(proxy.get_meta("uses_unit_texture", false)):
@@ -6942,6 +7108,67 @@ func _normalize_unit_weapon_posture(value: String) -> String:
 			return "lowered"
 
 
+func _update_unit_vital_visual(proxy: Node3D, unit: Node) -> bool:
+	if proxy == null:
+		return false
+	var vital_state: String = _get_unit_vital_state(unit)
+	var health_points: int = _get_unit_health_points(unit)
+	var max_health_points: int = _get_unit_max_health_points(unit)
+	var health_percent: float = 1.0
+	if max_health_points > 0:
+		health_percent = clampf(float(health_points) / float(max_health_points), 0.0, 1.0)
+	var last_damage_context: Dictionary = _get_unit_last_damage_context(unit)
+	var down_pose_active: bool = vital_state == "down" or vital_state == "bleedout" or vital_state == "respawning"
+	var damaged_visual_active: bool = health_percent < UNIT_DAMAGE_BADGE_HEALTH_THRESHOLD or not last_damage_context.is_empty()
+	var changed: bool = false
+	changed = _set_proxy_int_meta(proxy, "unit_health_points", health_points) or changed
+	changed = _set_proxy_int_meta(proxy, "unit_max_health_points", max_health_points) or changed
+	if absf(float(proxy.get_meta("unit_health_percent", 1.0)) - health_percent) > 0.0001:
+		proxy.set_meta("unit_health_percent", health_percent)
+		changed = true
+	changed = _set_proxy_bool_meta(proxy, "unit_damage_visual_active", damaged_visual_active) or changed
+	changed = _set_proxy_bool_meta(proxy, "unit_down_pose_active", down_pose_active) or changed
+	changed = _set_proxy_string_meta(proxy, "unit_last_damage_event_id", String(last_damage_context.get("fire_event_id", last_damage_context.get("event_id", ""))).strip_edges()) or changed
+	var model_root: Node3D = _find_unit_model_root(proxy)
+	changed = _set_proxy_bool_meta(proxy, "unit_vital_visual_target_node_available", model_root != null) or changed
+	if model_root == null:
+		return changed
+	if not model_root.has_meta("unit_vital_visual_base_rotation_degrees"):
+		model_root.set_meta("unit_vital_visual_base_rotation_degrees", model_root.rotation_degrees)
+	if not model_root.has_meta("unit_vital_visual_base_position"):
+		model_root.set_meta("unit_vital_visual_base_position", model_root.position)
+	var base_rotation: Vector3 = _get_vector3_meta(model_root, "unit_vital_visual_base_rotation_degrees", model_root.rotation_degrees)
+	var base_position: Vector3 = _get_vector3_meta(model_root, "unit_vital_visual_base_position", model_root.position)
+	var desired_rotation: Vector3 = base_rotation
+	var desired_position: Vector3 = base_position
+	if vital_state == "down":
+		desired_rotation = base_rotation + UNIT_DOWN_POSE_ROTATION_DEGREES
+		desired_position = base_position + Vector3(0.0, -0.16, 0.0)
+	elif vital_state == "bleedout" or vital_state == "respawning":
+		desired_rotation = base_rotation + UNIT_BLEEDOUT_POSE_ROTATION_DEGREES
+		desired_position = base_position + Vector3(0.0, -0.20, 0.0)
+	if model_root.rotation_degrees.distance_squared_to(desired_rotation) > 0.0001:
+		model_root.rotation_degrees = desired_rotation
+		changed = true
+	if model_root.position.distance_squared_to(desired_position) > 0.000001:
+		model_root.position = desired_position
+		changed = true
+	return changed
+
+
+func _find_unit_model_root(node: Node) -> Node3D:
+	if node == null:
+		return null
+	var node_3d := node as Node3D
+	if node_3d != null and String(node.name).begins_with("UnitModel_"):
+		return node_3d
+	for child in node.get_children():
+		var found: Node3D = _find_unit_model_root(child)
+		if found != null:
+			return found
+	return null
+
+
 func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
 	if proxy == null:
 		return false
@@ -6973,6 +7200,10 @@ func _get_unit_status_badge_text(unit: Node) -> String:
 			var respawn_seconds: int = _get_unit_respawn_remaining_seconds(unit)
 			return "RESPAWN %ds" % respawn_seconds if respawn_seconds > 0 else "RESPAWN"
 		return vital_state.to_upper()
+	var health_points: int = _get_unit_health_points(unit)
+	var max_health_points: int = _get_unit_max_health_points(unit)
+	if max_health_points > 0 and health_points < max_health_points:
+		return "HP %d/%d" % [health_points, max_health_points]
 	if unit.has_method("is_in_contact") and bool(unit.call("is_in_contact")):
 		return "CONTACT"
 	if bool(unit.get_meta("overwatch_ready", false)):
@@ -7009,14 +7240,18 @@ func _get_unit_status_badge_text(unit: Node) -> String:
 
 
 func _get_unit_status_badge_color(unit: Node) -> Color:
-	if unit != null and unit.has_method("get_team_id") and String(unit.call("get_team_id")).strip_edges() != "team_alpha":
-		return Color(1.0, 0.56, 0.46, 1.0)
 	var vital_state: String = String(unit.call("get_vital_state")).strip_edges().to_lower() if unit != null and unit.has_method("get_vital_state") else ""
 	match vital_state:
 		"down", "bleedout":
 			return Color(1.0, 0.42, 0.38, 1.0)
 		"respawning":
 			return Color(0.72, 0.9, 1.0, 1.0)
+	var health_points: int = _get_unit_health_points(unit)
+	var max_health_points: int = _get_unit_max_health_points(unit)
+	if max_health_points > 0 and health_points < max_health_points:
+		return Color(1.0, 0.68, 0.28, 1.0)
+	if unit != null and unit.has_method("get_team_id") and String(unit.call("get_team_id")).strip_edges() != "team_alpha":
+		return Color(1.0, 0.56, 0.46, 1.0)
 	if unit != null and unit.has_method("is_in_contact") and bool(unit.call("is_in_contact")):
 		return Color(1.0, 0.78, 0.34, 1.0)
 	if unit != null and bool(unit.get_meta("overwatch_ready", false)):
@@ -8166,6 +8401,13 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"rotation_y_degrees": float(proxy.rotation_degrees.y),
 			"team_id": String(proxy.get_meta("team_id", "")).strip_edges(),
 			"vital_state": String(proxy.get_meta("vital_state", "")).strip_edges(),
+			"unit_health_points": int(proxy.get_meta("unit_health_points", 0)),
+			"unit_max_health_points": int(proxy.get_meta("unit_max_health_points", 0)),
+			"unit_health_percent": float(proxy.get_meta("unit_health_percent", 1.0)),
+			"unit_damage_visual_active": bool(proxy.get_meta("unit_damage_visual_active", false)),
+			"unit_down_pose_active": bool(proxy.get_meta("unit_down_pose_active", false)),
+			"unit_vital_visual_target_node_available": bool(proxy.get_meta("unit_vital_visual_target_node_available", false)),
+			"unit_last_damage_event_id": String(proxy.get_meta("unit_last_damage_event_id", "")).strip_edges(),
 			"missing_unit_model": bool(proxy.get_meta("missing_unit_model", false)),
 			"unit_visual_error": bool(proxy.get_meta("unit_visual_error", false)),
 			"uses_unit_texture": bool(proxy.get_meta("uses_unit_texture", false)),
@@ -9724,6 +9966,26 @@ func _get_unit_vital_state(unit: Node) -> String:
 	if unit != null and unit.has_method("get_vital_state"):
 		return String(unit.call("get_vital_state")).strip_edges().to_lower()
 	return ""
+
+
+func _get_unit_health_points(unit: Node) -> int:
+	if unit != null and unit.has_method("get_health"):
+		return maxi(int(unit.call("get_health")), 0)
+	return 0
+
+
+func _get_unit_max_health_points(unit: Node) -> int:
+	if unit != null and unit.has_method("get_max_health_points"):
+		return maxi(int(unit.call("get_max_health_points")), 0)
+	return maxi(_get_unit_health_points(unit), 0)
+
+
+func _get_unit_last_damage_context(unit: Node) -> Dictionary:
+	if unit != null and unit.has_method("get_last_damage_context"):
+		var value: Variant = unit.call("get_last_damage_context")
+		if typeof(value) == TYPE_DICTIONARY:
+			return Dictionary(value)
+	return {}
 
 
 func _get_unit_role_id(unit: Node) -> String:

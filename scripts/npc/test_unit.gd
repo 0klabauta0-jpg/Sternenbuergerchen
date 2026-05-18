@@ -1220,7 +1220,7 @@ func _apply_vital_visual() -> void:
 			rotation_degrees = 45.0
 		"respawning":
 			modulate = Color(0.7, 0.9, 1.0, 0.5)
-			rotation_degrees = 0.0
+			rotation_degrees = 45.0
 		_:
 			modulate = Color(1.0, 1.0, 1.0, 1.0)
 			rotation_degrees = 0.0

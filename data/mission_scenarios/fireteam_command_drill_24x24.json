@@ -93,6 +93,7 @@
 	},
 	"time_limit_seconds": 0.0,
 	"version": 1,
+	"win_condition": "elimination",
 	"wave_config": {
 		"first_wave_delay_seconds": 0.0,
 		"units_per_wave": 4,

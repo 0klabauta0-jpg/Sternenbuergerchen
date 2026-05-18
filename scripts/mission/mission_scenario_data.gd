@@ -9,6 +9,14 @@ const CONTRACT_VERSION: int = 1
 const DEFAULT_CAPTURE_RADIUS: float = 80.0
 const DEFAULT_TEAM_ID: String = "team_bravo"
 const DEFAULT_PATROL_MODE: String = "pre_contact"
+const WIN_CONDITION_ELIMINATION: String = "elimination"
+const WIN_CONDITION_OBJECTIVE_CAPTURE: String = "objective_capture"
+const WIN_CONDITION_OBJECTIVE_DEFENSE: String = "objective_defense"
+const ALLOWED_WIN_CONDITIONS: PackedStringArray = [
+	WIN_CONDITION_ELIMINATION,
+	WIN_CONDITION_OBJECTIVE_CAPTURE,
+	WIN_CONDITION_OBJECTIVE_DEFENSE,
+]
 const DEFAULT_TACTICAL_AUTHORING: Dictionary = {
 	"communication_intensity": "normal",
 	"fireteam_defaults": {
@@ -40,6 +48,7 @@ var scenario_id: String = ""
 var display_name: String = ""
 var map_file_path: String = ""
 var time_limit_seconds: float = 0.0
+var win_condition: String = ""
 var mission_slot_count_override: int = -1
 var objective: Dictionary = {}
 var enemy_groups: Array = []
@@ -134,6 +143,8 @@ func to_dict() -> Dictionary:
 		"patrol_bindings": _serialize_patrol_bindings(),
 		"tactical_authoring": _serialize_tactical_authoring(),
 	}
+	if not win_condition.is_empty():
+		data["win_condition"] = win_condition
 	if mission_slot_count_override > 0:
 		data["mission_slot_count_override"] = mission_slot_count_override
 	if not notes.is_empty():
@@ -157,6 +168,8 @@ func validate() -> Dictionary:
 		errors.append("map_file_path does not exist: %s" % map_file_path)
 	if time_limit_seconds < 0.0:
 		errors.append("time_limit_seconds must be >= 0")
+	if not win_condition.is_empty() and not ALLOWED_WIN_CONDITIONS.has(win_condition):
+		errors.append("win_condition is not allowed: %s" % win_condition)
 	if mission_slot_count_override != -1 and mission_slot_count_override < 1:
 		errors.append("mission_slot_count_override must be unset or >= 1")
 
@@ -285,6 +298,7 @@ func _apply_dict(data: Dictionary) -> void:
 	display_name = String(data.get("display_name", scenario_id)).strip_edges()
 	map_file_path = String(data.get("map_file_path", "")).strip_edges()
 	time_limit_seconds = maxf(float(data.get("time_limit_seconds", 0.0)), -1.0)
+	win_condition = _coerce_win_condition(data.get("win_condition", ""))
 	mission_slot_count_override = int(data.get("mission_slot_count_override", -1))
 	objective = _coerce_objective(Dictionary(data.get("objective", {})))
 	enemy_groups = _coerce_enemy_groups(data.get("enemy_groups", []))
@@ -292,6 +306,10 @@ func _apply_dict(data: Dictionary) -> void:
 	patrol_bindings = _coerce_patrol_bindings(data.get("patrol_bindings", []))
 	tactical_authoring = _coerce_tactical_authoring(Dictionary(data.get("tactical_authoring", data.get("tactical_profile", {}))))
 	notes = _coerce_notes(data.get("notes", []))
+
+
+func _coerce_win_condition(value: Variant) -> String:
+	return String(value).strip_edges().to_lower()
 
 
 func _load_referenced_map(errors: PackedStringArray):

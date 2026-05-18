@@ -128,6 +128,26 @@ const ENGAGE_AGGRESSIVE_PARALLEL_TARGET_SPACING: float = 121.0
 const TAKE_CAUTIOUS_FORMATION_SLOT_SPACING: float = 88.0
 const TAKE_NORMAL_FORMATION_SLOT_SPACING: float = 82.0
 const TAKE_AGGRESSIVE_PARALLEL_TARGET_SPACING: float = 104.0
+const TARGET_SLOT_MIN_SPACING_WORLD: float = 48.0
+const TARGET_SLOT_REPAIR_LANE_LIMIT: int = 4
+const TARGET_SLOT_REPAIR_FORWARD_FACTOR: float = 0.55
+const NAVIGATION_CORRIDOR_MIN_HALF_WIDTH_WORLD: float = 96.0
+const NAVIGATION_CORRIDOR_PARALLEL_WIDTH_FACTOR: float = 1.35
+const NAVIGATION_CORRIDOR_SLOT_WIDTH_FACTOR: float = 1.1
+const NAVIGATION_LANE_OFFSET_SCALE: float = 1.0
+const NAVIGATION_BLOCKER_CLEARANCE_RADIUS: int = 1
+const CONTACT_COVER_SEARCH_RADIUS_CAUTIOUS: float = 176.0
+const CONTACT_COVER_SEARCH_RADIUS_NORMAL: float = 128.0
+const CONTACT_COVER_SEARCH_RADIUS_AGGRESSIVE: float = 80.0
+const CONTACT_COVER_MIN_GAIN_CAUTIOUS: float = 10.0
+const CONTACT_COVER_MIN_GAIN_NORMAL: float = 18.0
+const CONTACT_COVER_MIN_GAIN_AGGRESSIVE: float = 34.0
+const CONTACT_COVER_SUFFICIENT_CAUTIOUS: float = 68.0
+const CONTACT_COVER_SUFFICIENT_NORMAL: float = 56.0
+const CONTACT_COVER_SUFFICIENT_AGGRESSIVE: float = 46.0
+const CONTACT_COVER_ASSIGNMENT_MIN_SPACING: float = 44.0
+const CONTACT_COVER_AGGRESSIVE_FIRE_RANGE_FACTOR: float = 0.65
+const CONTACT_COVER_NORMAL_FIRE_RANGE_FACTOR: float = 0.45
 const FORMATION_MAX_DISTANCE_BASE_FACTOR: float = 1.0
 const FORMATION_MAX_DISTANCE_PAIR_FACTOR: float = 0.75
 const FORMATION_MAX_DISTANCE_CAP_FACTOR: float = 2.8
@@ -249,6 +269,12 @@ func start_execution(
 		"current_anchor_origin_position": origin_anchor,
 		"current_anchor_target_position": resolved_target_position,
 		"current_target_positions": {},
+		"current_target_spacing_adjustment_count": 0,
+		"current_target_spacing_conflict_count": 0,
+		"current_target_spacing_unresolved_count": 0,
+		"current_target_spacing_min_distance": INF,
+		"current_target_spacing_debug": [],
+		"current_navigation_context_debug": [],
 		"current_moving_unit_ids": PackedStringArray(),
 		"current_covering_unit_ids": PackedStringArray(),
 		"local_avoidance_command_opt_in": true,
@@ -291,7 +317,7 @@ func update_execution(fireteam_id: String, units: Array, leader, simulation_root
 		_execution_by_fireteam.erase(normalized_fireteam_id)
 		return {"finished": true, "movement_state": {}}
 	if _should_pause_engage_for_contact(state, contact_context):
-		_issue_engage_contact_halt(state, member_records, simulation_root, contact_context)
+		_issue_engage_contact_halt(state, member_records, simulation_root, terrain_registry, contact_context)
 		_execution_by_fireteam[normalized_fireteam_id] = state
 		return {
 			"contact_halt": true,
@@ -337,12 +363,15 @@ func _should_pause_engage_for_contact(state: Dictionary, contact_context: Dictio
 	return bool(contact_context.get("should_halt", false))
 
 
-func _issue_engage_contact_halt(state: Dictionary, member_records: Array, simulation_root, contact_context: Dictionary) -> void:
+func _issue_engage_contact_halt(state: Dictionary, member_records: Array, simulation_root, terrain_registry, contact_context: Dictionary) -> void:
 	if simulation_root == null:
 		return
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var modifiers: Dictionary = _resolve_stage_behavior_modifiers(state)
+	var readout: Dictionary = Dictionary(contact_context.get("readout", {})).duplicate(true)
+	var cover_decision_result: Dictionary = _build_contact_cover_decisions(state, member_records, current_positions, terrain_registry, contact_context, readout)
+	var cover_decisions: Dictionary = Dictionary(cover_decision_result.get("by_unit_id", {}))
 	var halted_unit_ids: PackedStringArray = PackedStringArray()
 	var issued_count: int = 0
 	for record in member_records:
@@ -350,27 +379,75 @@ func _issue_engage_contact_halt(state: Dictionary, member_records: Array, simula
 		if unit_id.is_empty():
 			continue
 		halted_unit_ids.append(unit_id)
+		var current_position: Vector2 = Vector2(current_positions.get(unit_id, state.get("current_anchor_target_position", Vector2.ZERO)))
+		var cover_decision: Dictionary = Dictionary(cover_decisions.get(unit_id, _build_default_contact_cover_decision(state, current_position, terrain_registry, "missing_decision")))
+		var command_extra_fields: Dictionary = _build_contact_cover_command_fields(cover_decision, contact_context, readout)
+		if String(cover_decision.get("decision", "")).strip_edges().to_lower() == "take_cover":
+			var cover_target: Vector2 = Vector2(cover_decision.get("target_position", current_position))
+			var cover_moving_unit_ids: PackedStringArray = PackedStringArray([unit_id])
+			var cover_move_speed_factor: float = _build_move_speed_factor(
+				style,
+				String(state.get("command_type", "")),
+				member_records,
+				cover_moving_unit_ids,
+				current_positions,
+				float(state.get("cohesion_threshold", 100.0)),
+				float(record.get("speed", 0.5)),
+				float(state.get("move_speed_multiplier", 1.0))
+			)
+			cover_move_speed_factor *= _resolve_behavior_command_speed_multiplier(state)
+			var cover_navigation_context: Dictionary = _build_stage_navigation_context(
+				state,
+				unit_id,
+				current_position,
+				cover_target,
+				terrain_registry
+			)
+			if _enqueue_unit_command(
+				simulation_root,
+				String(record.get("team_id", "")),
+				unit_id,
+				UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION,
+				cover_target,
+				cover_move_speed_factor,
+				maxf(_resolve_stage_cover_score(state, float(state.get("cover_priority", 0.0))), float(cover_decision.get("target_cover_score", 0.0))),
+				_resolve_stage_attack_bonus(state, style, true),
+				String(state.get("command_type", "")),
+				int(state.get("phase", -1)),
+				record.get("unit", null),
+				_build_contact_halt_command_token(state, unit_id),
+				_resolve_stage_movement_posture(state, style, false),
+				UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED,
+				_resolve_stage_posture_policy_id(state),
+				_resolve_stage_sight_range_factor(state),
+				modifiers,
+				cover_navigation_context,
+				command_extra_fields
+			):
+				issued_count += 1
+			continue
 		if _enqueue_unit_command(
 			simulation_root,
 			String(record.get("team_id", "")),
 			unit_id,
 			UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION,
-			Vector2(current_positions.get(unit_id, state.get("current_anchor_target_position", Vector2.ZERO))),
+			current_position,
 			0.0,
 			_resolve_stage_cover_score(state, float(state.get("cover_priority", 0.0))),
 			_resolve_stage_attack_bonus(state, style, true),
 			String(state.get("command_type", "")),
 			int(state.get("phase", -1)),
 			record.get("unit", null),
-			_build_stage_command_token(state, unit_id),
+			_build_contact_halt_command_token(state, unit_id),
 			UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_OVERWATCH,
 			UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED,
 			_resolve_stage_posture_policy_id(state),
 			_resolve_stage_sight_range_factor(state),
-			modifiers
+			modifiers,
+			{},
+			command_extra_fields
 		):
 			issued_count += 1
-	var readout: Dictionary = Dictionary(contact_context.get("readout", {})).duplicate(true)
 	var halt_context: Dictionary = {
 		"reason": String(contact_context.get("reason", "attackable_contact")).strip_edges().to_lower(),
 		"target_unit_id": String(contact_context.get("target_unit_id", readout.get("target_unit_id", ""))).strip_edges(),
@@ -384,10 +461,311 @@ func _issue_engage_contact_halt(state: Dictionary, member_records: Array, simula
 	}
 	if typeof(contact_context.get("target_position", null)) == TYPE_VECTOR2:
 		halt_context["target_position"] = Vector2(contact_context.get("target_position", Vector2.ZERO))
+	halt_context["contact_cover_decision_active"] = true
+	halt_context["contact_cover_decision_mode"] = String(cover_decision_result.get("mode", "fire_now"))
+	halt_context["contact_cover_assignment_count"] = int(cover_decision_result.get("assignment_count", 0))
+	halt_context["contact_cover_fire_now_count"] = int(cover_decision_result.get("fire_now_count", 0))
+	halt_context["contact_cover_decisions"] = Array(cover_decision_result.get("decisions", [])).duplicate(true)
+	halt_context["contact_cover_summary"] = "COVER %d/%d | FIRE %d" % [
+		int(cover_decision_result.get("assignment_count", 0)),
+		member_records.size(),
+		int(cover_decision_result.get("fire_now_count", 0)),
+	]
 	state["contact_halt_active"] = true
 	state["contact_halt_unit_ids"] = halted_unit_ids
 	state["contact_halt_issued_count"] = issued_count
 	state["contact_halt_context"] = halt_context
+
+
+func _build_contact_cover_decisions(
+	state: Dictionary,
+	member_records: Array,
+	current_positions: Dictionary,
+	terrain_registry,
+	contact_context: Dictionary,
+	readout: Dictionary
+) -> Dictionary:
+	var by_unit_id: Dictionary = {}
+	var decisions: Array = []
+	var claimed_positions: Array = []
+	var assignment_count: int = 0
+	var fire_now_count: int = 0
+	for record in member_records:
+		var unit_id: String = String(record.get("unit_id", ""))
+		if unit_id.is_empty():
+			continue
+		var current_position: Vector2 = Vector2(current_positions.get(unit_id, state.get("current_anchor_target_position", Vector2.ZERO)))
+		var decision: Dictionary = _select_contact_cover_decision(
+			state,
+			record,
+			current_position,
+			terrain_registry,
+			contact_context,
+			readout,
+			claimed_positions
+		)
+		by_unit_id[unit_id] = decision
+		decisions.append(decision.duplicate(true))
+		if String(decision.get("decision", "")).strip_edges().to_lower() == "take_cover":
+			assignment_count += 1
+			claimed_positions.append(Vector2(decision.get("target_position", current_position)))
+		else:
+			fire_now_count += 1
+	var mode: String = "fire_now"
+	if assignment_count > 0 and fire_now_count > 0:
+		mode = "mixed"
+	elif assignment_count > 0:
+		mode = "take_cover"
+	return {
+		"by_unit_id": by_unit_id,
+		"decisions": decisions,
+		"assignment_count": assignment_count,
+		"fire_now_count": fire_now_count,
+		"mode": mode,
+	}
+
+
+func _select_contact_cover_decision(
+	state: Dictionary,
+	record: Dictionary,
+	current_position: Vector2,
+	terrain_registry,
+	contact_context: Dictionary,
+	readout: Dictionary,
+	claimed_positions: Array
+) -> Dictionary:
+	var unit_id: String = String(record.get("unit_id", ""))
+	var tactical_stance: String = _normalize_tactical_stance(String(state.get("tactical_stance", "")))
+	var current_cover_score: float = _get_contact_cover_score_at_world(terrain_registry, current_position)
+	var target_position: Vector2 = _extract_contact_target_position(state, contact_context, readout)
+	var distance_to_contact: float = float(readout.get("distance_world", -1.0))
+	if distance_to_contact < 0.0 and _has_contact_target_position(target_position):
+		distance_to_contact = current_position.distance_to(target_position)
+	var sufficient_cover_score: float = _resolve_contact_cover_sufficient_score(tactical_stance)
+	if current_cover_score >= sufficient_cover_score:
+		return _build_contact_cover_decision(unit_id, "fire_now", "already_in_cover", current_position, current_position, current_cover_score, current_cover_score, 0.0, 0.0, distance_to_contact, tactical_stance)
+
+	var candidate: Dictionary = _find_best_contact_cover_candidate(state, current_position, terrain_registry, tactical_stance, current_cover_score, target_position, claimed_positions)
+	if candidate.is_empty():
+		return _build_contact_cover_decision(unit_id, "fire_now", "no_cover_candidate", current_position, current_position, current_cover_score, current_cover_score, 0.0, 0.0, distance_to_contact, tactical_stance)
+	var target_cover_score: float = float(candidate.get("cover_score", current_cover_score))
+	var cover_gain: float = target_cover_score - current_cover_score
+	var min_gain: float = _resolve_contact_cover_min_gain(tactical_stance)
+	if cover_gain < min_gain:
+		return _build_contact_cover_decision(unit_id, "fire_now", "cover_gain_low", current_position, Vector2(candidate.get("target_position", current_position)), current_cover_score, target_cover_score, cover_gain, float(candidate.get("distance_to_cover", 0.0)), distance_to_contact, tactical_stance)
+	if _contact_cover_prefers_fire_now(tactical_stance, candidate, distance_to_contact, float(readout.get("weapon_range_world", 0.0)), cover_gain):
+		return _build_contact_cover_decision(unit_id, "fire_now", "fire_now_preferred", current_position, Vector2(candidate.get("target_position", current_position)), current_cover_score, target_cover_score, cover_gain, float(candidate.get("distance_to_cover", 0.0)), distance_to_contact, tactical_stance)
+	return _build_contact_cover_decision(unit_id, "take_cover", "better_cover_nearby", current_position, Vector2(candidate.get("target_position", current_position)), current_cover_score, target_cover_score, cover_gain, float(candidate.get("distance_to_cover", 0.0)), distance_to_contact, tactical_stance)
+
+
+func _find_best_contact_cover_candidate(
+	state: Dictionary,
+	current_position: Vector2,
+	terrain_registry,
+	tactical_stance: String,
+	current_cover_score: float,
+	target_position: Vector2,
+	claimed_positions: Array
+) -> Dictionary:
+	if terrain_registry == null or not terrain_registry.has_method("get_walkable_cover_tiles_in_radius"):
+		return {}
+	var search_radius: float = _resolve_contact_cover_search_radius(tactical_stance)
+	var best_candidate: Dictionary = {}
+	var best_score: float = -INF
+	for tile in terrain_registry.call("get_walkable_cover_tiles_in_radius", current_position, search_radius):
+		var tile_position: Vector2 = _extract_contact_cover_tile_position(tile)
+		if tile_position == Vector2.INF:
+			continue
+		if _contact_cover_candidate_is_claimed(tile_position, claimed_positions, terrain_registry):
+			continue
+		var cover_score: float = _extract_contact_cover_tile_score(tile)
+		if cover_score <= current_cover_score:
+			continue
+		var distance_to_cover: float = current_position.distance_to(tile_position)
+		var score: float = cover_score - (distance_to_cover * _resolve_contact_cover_distance_penalty(tactical_stance))
+		if _has_contact_target_position(target_position):
+			var current_target_distance: float = current_position.distance_to(target_position)
+			var candidate_target_distance: float = tile_position.distance_to(target_position)
+			var away_distance: float = candidate_target_distance - current_target_distance
+			if away_distance > 0.0:
+				score -= away_distance * 0.04
+			else:
+				score += minf(absf(away_distance) * 0.02, 6.0)
+		var final_target_position: Vector2 = Vector2(state.get("final_target_position", current_position))
+		var final_distance_delta: float = tile_position.distance_to(final_target_position) - current_position.distance_to(final_target_position)
+		if final_distance_delta > 0.0:
+			score -= final_distance_delta * 0.025
+		if score <= best_score:
+			continue
+		best_score = score
+		best_candidate = {
+			"target_position": tile_position,
+			"cover_score": cover_score,
+			"distance_to_cover": distance_to_cover,
+			"score": score,
+		}
+	return best_candidate
+
+
+func _build_default_contact_cover_decision(state: Dictionary, current_position: Vector2, terrain_registry, reason: String) -> Dictionary:
+	var tactical_stance: String = _normalize_tactical_stance(String(state.get("tactical_stance", "")))
+	var current_cover_score: float = _get_contact_cover_score_at_world(terrain_registry, current_position)
+	return _build_contact_cover_decision("", "fire_now", reason, current_position, current_position, current_cover_score, current_cover_score, 0.0, 0.0, -1.0, tactical_stance)
+
+
+func _build_contact_cover_decision(
+	unit_id: String,
+	decision: String,
+	reason: String,
+	current_position: Vector2,
+	target_position: Vector2,
+	current_cover_score: float,
+	target_cover_score: float,
+	cover_gain: float,
+	distance_to_cover: float,
+	distance_to_contact: float,
+	tactical_stance: String
+) -> Dictionary:
+	return {
+		"unit_id": unit_id,
+		"decision": decision,
+		"reason": reason,
+		"current_position": current_position,
+		"target_position": target_position,
+		"current_cover_score": current_cover_score,
+		"target_cover_score": target_cover_score,
+		"cover_gain": cover_gain,
+		"distance_to_cover": distance_to_cover,
+		"distance_to_contact": distance_to_contact,
+		"tactical_stance": tactical_stance,
+	}
+
+
+func _build_contact_cover_command_fields(cover_decision: Dictionary, contact_context: Dictionary, readout: Dictionary) -> Dictionary:
+	return {
+		"contact_cover_decision": String(cover_decision.get("decision", "fire_now")),
+		"contact_cover_reason": String(cover_decision.get("reason", "")),
+		"contact_cover_current_score": float(cover_decision.get("current_cover_score", 0.0)),
+		"contact_cover_target_score": float(cover_decision.get("target_cover_score", 0.0)),
+		"contact_cover_gain": float(cover_decision.get("cover_gain", 0.0)),
+		"contact_cover_distance": float(cover_decision.get("distance_to_cover", 0.0)),
+		"contact_target_unit_id": String(contact_context.get("target_unit_id", readout.get("target_unit_id", ""))).strip_edges(),
+	}
+
+
+func _extract_contact_target_position(state: Dictionary, contact_context: Dictionary, readout: Dictionary) -> Vector2:
+	var contact_target_variant: Variant = contact_context.get("target_position", null)
+	if typeof(contact_target_variant) == TYPE_VECTOR2:
+		return Vector2(contact_target_variant)
+	var readout_target_variant: Variant = readout.get("target_position", null)
+	if typeof(readout_target_variant) == TYPE_VECTOR2:
+		return Vector2(readout_target_variant)
+	return Vector2(state.get("current_anchor_target_position", Vector2.INF))
+
+
+func _has_contact_target_position(target_position: Vector2) -> bool:
+	return target_position != Vector2.INF
+
+
+func _get_contact_cover_score_at_world(terrain_registry, world_position: Vector2) -> float:
+	if terrain_registry == null or not terrain_registry.has_method("get_cover_at_world"):
+		return 0.0
+	return float(terrain_registry.call("get_cover_at_world", world_position))
+
+
+func _extract_contact_cover_tile_position(tile) -> Vector2:
+	if tile == null:
+		return Vector2.INF
+	if typeof(tile) == TYPE_DICTIONARY:
+		var tile_dict: Dictionary = Dictionary(tile)
+		if typeof(tile_dict.get("world_position", null)) == TYPE_VECTOR2:
+			return Vector2(tile_dict.get("world_position", Vector2.INF))
+		return Vector2.INF
+	return Vector2(tile.world_position)
+
+
+func _extract_contact_cover_tile_score(tile) -> float:
+	if tile == null:
+		return 0.0
+	if typeof(tile) == TYPE_DICTIONARY:
+		return float(Dictionary(tile).get("cover_value", 0.0))
+	return float(tile.cover_value)
+
+
+func _contact_cover_candidate_is_claimed(candidate_position: Vector2, claimed_positions: Array, terrain_registry) -> bool:
+	var candidate_grid: Vector2i = Vector2i.ZERO
+	var has_grid: bool = terrain_registry != null and terrain_registry.has_method("world_to_grid")
+	if has_grid:
+		candidate_grid = Vector2i(terrain_registry.call("world_to_grid", candidate_position))
+	for claimed_variant in claimed_positions:
+		if typeof(claimed_variant) != TYPE_VECTOR2:
+			continue
+		var claimed_position: Vector2 = Vector2(claimed_variant)
+		if has_grid and candidate_grid == Vector2i(terrain_registry.call("world_to_grid", claimed_position)):
+			return true
+		if candidate_position.distance_to(claimed_position) < CONTACT_COVER_ASSIGNMENT_MIN_SPACING:
+			return true
+	return false
+
+
+func _resolve_contact_cover_search_radius(tactical_stance: String) -> float:
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			return CONTACT_COVER_SEARCH_RADIUS_CAUTIOUS
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			return CONTACT_COVER_SEARCH_RADIUS_AGGRESSIVE
+		_:
+			return CONTACT_COVER_SEARCH_RADIUS_NORMAL
+
+
+func _resolve_contact_cover_min_gain(tactical_stance: String) -> float:
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			return CONTACT_COVER_MIN_GAIN_CAUTIOUS
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			return CONTACT_COVER_MIN_GAIN_AGGRESSIVE
+		_:
+			return CONTACT_COVER_MIN_GAIN_NORMAL
+
+
+func _resolve_contact_cover_sufficient_score(tactical_stance: String) -> float:
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			return CONTACT_COVER_SUFFICIENT_CAUTIOUS
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			return CONTACT_COVER_SUFFICIENT_AGGRESSIVE
+		_:
+			return CONTACT_COVER_SUFFICIENT_NORMAL
+
+
+func _resolve_contact_cover_distance_penalty(tactical_stance: String) -> float:
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			return 0.12
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			return 0.28
+		_:
+			return 0.18
+
+
+func _contact_cover_prefers_fire_now(
+	tactical_stance: String,
+	candidate: Dictionary,
+	distance_to_contact: float,
+	weapon_range_world: float,
+	cover_gain: float
+) -> bool:
+	if tactical_stance == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+		if float(candidate.get("distance_to_cover", 0.0)) > 64.0:
+			return true
+		if float(candidate.get("cover_score", 0.0)) < 70.0:
+			return true
+		if weapon_range_world > 0.0 and distance_to_contact >= 0.0 and distance_to_contact <= weapon_range_world * CONTACT_COVER_AGGRESSIVE_FIRE_RANGE_FACTOR:
+			return true
+	if tactical_stance == FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL:
+		if weapon_range_world > 0.0 and distance_to_contact >= 0.0 and distance_to_contact <= weapon_range_world * CONTACT_COVER_NORMAL_FIRE_RANGE_FACTOR and cover_gain < 32.0:
+			return true
+	return false
 
 
 func _clear_engage_contact_halt_state(state: Dictionary) -> void:
@@ -463,6 +841,8 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 			moving_unit_ids = _packed_unit_ids(member_records)
 	var anchor_origin_position: Vector2 = Vector2(state.get("progress_anchor_position", state.get("current_anchor_target_position", Vector2.ZERO)))
 	var next_anchor_target: Vector2 = _resolve_stage_anchor_target(state, member_records, group_count)
+	state["current_anchor_origin_position"] = anchor_origin_position
+	state["current_anchor_target_position"] = next_anchor_target
 	var stage_scatter_factor: float = _resolve_stage_formation_scatter_factor(state, next_anchor_target)
 	var formation_targets: Dictionary = _build_formation_targets(
 		next_anchor_target,
@@ -475,6 +855,12 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var issued_count: int = 0
 	var walkable_adjustment_count: int = 0
+	var target_spacing_adjustment_count: int = 0
+	var target_spacing_conflict_count: int = 0
+	var target_spacing_unresolved_count: int = 0
+	var accepted_moving_targets: Dictionary = {}
+	var target_spacing_debug: Array = []
+	var navigation_context_debug: Array = []
 	for record in member_records:
 		var unit_id: String = String(record.get("unit_id", ""))
 		if unit_id.is_empty():
@@ -506,11 +892,31 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 			continue
 		var move_target: Vector2 = Vector2(formation_targets.get(unit_id, next_anchor_target))
 		move_target = _avoid_backward_move_target(state, Vector2(current_positions.get(unit_id, move_target)), move_target)
-		var walkable_target: Vector2 = _resolve_walkable_stage_target(move_target, terrain_registry)
-		if walkable_target.distance_squared_to(move_target) > 0.25:
+		var target_resolution: Dictionary = _resolve_spacing_safe_stage_target(state, unit_id, move_target, accepted_moving_targets, terrain_registry)
+		var walkable_target: Vector2 = Vector2(target_resolution.get("target_position", move_target))
+		if bool(target_resolution.get("walkable_adjusted", false)):
 			walkable_adjustment_count += 1
+		if bool(target_resolution.get("spacing_adjusted", false)):
+			target_spacing_adjustment_count += 1
+		target_spacing_conflict_count += int(target_resolution.get("conflict_count_before", 0))
+		if bool(target_resolution.get("spacing_unresolved", false)):
+			target_spacing_unresolved_count += 1
+		var spacing_diagnostic: Dictionary = Dictionary(target_resolution.get("diagnostic", {}))
+		if not spacing_diagnostic.is_empty():
+			target_spacing_debug.append(spacing_diagnostic)
 		move_target = walkable_target
+		accepted_moving_targets[unit_id] = move_target
 		formation_targets[unit_id] = move_target
+		var navigation_context: Dictionary = _build_stage_navigation_context(
+			state,
+			unit_id,
+			Vector2(current_positions.get(unit_id, move_target)),
+			move_target,
+			terrain_registry
+		)
+		var navigation_diagnostic: Dictionary = Dictionary(navigation_context.get("diagnostic", {}))
+		if not navigation_diagnostic.is_empty():
+			navigation_context_debug.append(navigation_diagnostic)
 		var move_speed_factor: float = _build_move_speed_factor(style, String(state.get("command_type", "")), member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0)))
 		move_speed_factor *= _resolve_behavior_command_speed_multiplier(state)
 		var unit_command_type: String = _map_waypoint_command_to_unit_command(String(state.get("command_type", "")))
@@ -531,7 +937,8 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 			_resolve_stage_weapon_posture(state, style, false),
 			_resolve_stage_posture_policy_id(state),
 			_resolve_stage_sight_range_factor(state),
-			_resolve_stage_behavior_modifiers(state)
+			_resolve_stage_behavior_modifiers(state),
+			navigation_context
 		):
 			issued_count += 1
 	state["current_anchor_origin_position"] = anchor_origin_position
@@ -540,6 +947,12 @@ func _issue_stage(state: Dictionary, member_records: Array, simulation_root, ter
 	state["current_moving_unit_ids"] = moving_unit_ids
 	state["current_covering_unit_ids"] = covering_unit_ids
 	state["current_walkable_target_adjustment_count"] = walkable_adjustment_count
+	state["current_target_spacing_adjustment_count"] = target_spacing_adjustment_count
+	state["current_target_spacing_conflict_count"] = target_spacing_conflict_count
+	state["current_target_spacing_unresolved_count"] = target_spacing_unresolved_count
+	state["current_target_spacing_min_distance"] = _calculate_minimum_target_spacing(accepted_moving_targets)
+	state["current_target_spacing_debug"] = target_spacing_debug
+	state["current_navigation_context_debug"] = navigation_context_debug
 	state["group_count_for_anchor"] = group_count
 	state["groups_issued_for_anchor"] = int(state.get("groups_issued_for_anchor", 0)) + 1
 	if style == ADVANCE_STYLE_RUSH or int(state.get("groups_issued_for_anchor", 0)) >= group_count:
@@ -653,6 +1066,257 @@ func _resolve_walkable_stage_target(target_position: Vector2, terrain_registry) 
 	return Vector2(resolution.get("replacement_position", target_position))
 
 
+func _resolve_spacing_safe_stage_target(state: Dictionary, unit_id: String, desired_target: Vector2, accepted_targets: Dictionary, terrain_registry) -> Dictionary:
+	var resolved_target: Vector2 = _resolve_walkable_stage_target(desired_target, terrain_registry)
+	var minimum_spacing: float = _resolve_target_slot_minimum_spacing(state)
+	var conflicts: Array = _find_target_spacing_conflicts(resolved_target, accepted_targets, terrain_registry, minimum_spacing)
+	var result: Dictionary = {
+		"unit_id": unit_id,
+		"target_position": resolved_target,
+		"walkable_adjusted": resolved_target.distance_squared_to(desired_target) > 0.25,
+		"spacing_adjusted": false,
+		"spacing_unresolved": false,
+		"conflict_count_before": conflicts.size(),
+		"minimum_spacing": minimum_spacing,
+	}
+	if conflicts.is_empty():
+		return result
+
+	var candidates: Array = _build_target_spacing_candidate_positions(state, desired_target, resolved_target, accepted_targets.size())
+	var tested_count: int = 0
+	for candidate_variant in candidates:
+		var candidate_position: Vector2 = Vector2(candidate_variant)
+		var candidate_target: Vector2 = _resolve_walkable_stage_target(candidate_position, terrain_registry)
+		tested_count += 1
+		var candidate_conflicts: Array = _find_target_spacing_conflicts(candidate_target, accepted_targets, terrain_registry, minimum_spacing)
+		if not candidate_conflicts.is_empty():
+			continue
+		result["target_position"] = candidate_target
+		result["walkable_adjusted"] = bool(result.get("walkable_adjusted", false)) or candidate_target.distance_squared_to(candidate_position) > 0.25
+		result["spacing_adjusted"] = candidate_target.distance_squared_to(resolved_target) > 0.25
+		result["repair_candidate_count"] = tested_count
+		result["diagnostic"] = _build_target_spacing_diagnostic(unit_id, desired_target, resolved_target, candidate_target, conflicts, minimum_spacing, false)
+		return result
+
+	result["spacing_unresolved"] = true
+	result["repair_candidate_count"] = tested_count
+	result["diagnostic"] = _build_target_spacing_diagnostic(unit_id, desired_target, resolved_target, resolved_target, conflicts, minimum_spacing, true)
+	return result
+
+
+func _build_target_spacing_candidate_positions(state: Dictionary, desired_target: Vector2, resolved_target: Vector2, accepted_count: int) -> Array:
+	var axes: Dictionary = _resolve_target_spacing_axes(state)
+	var forward: Vector2 = Vector2(axes.get("forward", Vector2.RIGHT))
+	var lateral: Vector2 = Vector2(axes.get("lateral", Vector2.DOWN))
+	var spacing: float = _resolve_target_slot_minimum_spacing(state)
+	var candidates: Array = []
+	var signs: Array = [1.0, -1.0] if accepted_count % 2 == 0 else [-1.0, 1.0]
+	var origins: Array = [desired_target, resolved_target]
+	for lane in range(1, TARGET_SLOT_REPAIR_LANE_LIMIT + 1):
+		for sign_variant in signs:
+			var sign: float = float(sign_variant)
+			var lateral_offset: Vector2 = lateral * spacing * float(lane) * sign
+			for origin_variant in origins:
+				var origin: Vector2 = Vector2(origin_variant)
+				_append_unique_target_candidate(candidates, origin + lateral_offset)
+				_append_unique_target_candidate(candidates, origin + lateral_offset + forward * spacing * TARGET_SLOT_REPAIR_FORWARD_FACTOR)
+				_append_unique_target_candidate(candidates, origin + lateral_offset - forward * spacing * TARGET_SLOT_REPAIR_FORWARD_FACTOR)
+	return candidates
+
+
+func _append_unique_target_candidate(candidates: Array, candidate: Vector2) -> void:
+	for existing_variant in candidates:
+		if Vector2(existing_variant).distance_squared_to(candidate) <= 0.25:
+			return
+	candidates.append(candidate)
+
+
+func _find_target_spacing_conflicts(target_position: Vector2, accepted_targets: Dictionary, terrain_registry, minimum_spacing: float) -> Array:
+	var conflicts: Array = []
+	for other_unit_id_variant in accepted_targets.keys():
+		var other_unit_id: String = String(other_unit_id_variant)
+		var other_position: Vector2 = Vector2(accepted_targets.get(other_unit_id_variant, target_position))
+		var distance: float = target_position.distance_to(other_position)
+		var same_grid: bool = _target_positions_share_grid(target_position, other_position, terrain_registry)
+		if not same_grid and distance >= minimum_spacing - 0.001:
+			continue
+		conflicts.append({
+			"unit_id": other_unit_id,
+			"distance": distance,
+			"same_grid": same_grid,
+			"position": other_position,
+		})
+	return conflicts
+
+
+func _target_positions_share_grid(a: Vector2, b: Vector2, terrain_registry) -> bool:
+	if terrain_registry == null or not terrain_registry.has_method("world_to_grid"):
+		return false
+	return Vector2i(terrain_registry.call("world_to_grid", a)) == Vector2i(terrain_registry.call("world_to_grid", b))
+
+
+func _resolve_target_spacing_axes(state: Dictionary) -> Dictionary:
+	var origin_position: Vector2 = Vector2(state.get("current_anchor_origin_position", state.get("origin_anchor_position", Vector2.ZERO)))
+	var target_position: Vector2 = Vector2(state.get("current_anchor_target_position", state.get("final_target_position", origin_position + Vector2.RIGHT)))
+	var forward: Vector2 = target_position - origin_position
+	if forward.length_squared() <= 0.001:
+		forward = Vector2(state.get("final_target_position", origin_position + Vector2.RIGHT)) - origin_position
+	if forward.length_squared() <= 0.001:
+		forward = Vector2.RIGHT
+	forward = forward.normalized()
+	var lateral: Vector2 = forward.orthogonal()
+	if lateral.length_squared() <= 0.001:
+		lateral = Vector2.DOWN
+	return {
+		"forward": forward,
+		"lateral": lateral.normalized(),
+	}
+
+
+func _resolve_target_slot_minimum_spacing(state: Dictionary) -> float:
+	var slot_spacing: float = maxf(_resolve_formation_slot_spacing(state), TARGET_SLOT_MIN_SPACING_WORLD)
+	var parallel_spacing: float = _resolve_parallel_travel_spacing(state)
+	var spacing_floor: float = maxf(TARGET_SLOT_MIN_SPACING_WORLD, slot_spacing * 0.5)
+	if parallel_spacing > 0.0:
+		spacing_floor = maxf(spacing_floor, parallel_spacing * 0.35)
+	return minf(spacing_floor, slot_spacing)
+
+
+func _calculate_minimum_target_spacing(targets: Dictionary) -> float:
+	var unit_ids: Array = targets.keys()
+	unit_ids.sort()
+	if unit_ids.size() < 2:
+		return INF
+	var minimum_distance: float = INF
+	for index_a in range(unit_ids.size()):
+		for index_b in range(index_a + 1, unit_ids.size()):
+			var position_a: Vector2 = Vector2(targets.get(unit_ids[index_a], Vector2.ZERO))
+			var position_b: Vector2 = Vector2(targets.get(unit_ids[index_b], Vector2.ZERO))
+			minimum_distance = minf(minimum_distance, position_a.distance_to(position_b))
+	return minimum_distance
+
+
+func _build_target_spacing_diagnostic(unit_id: String, desired_target: Vector2, initial_target: Vector2, final_target: Vector2, conflicts: Array, minimum_spacing: float, unresolved: bool) -> Dictionary:
+	var conflict_unit_ids: Array = []
+	for conflict_variant in conflicts:
+		conflict_unit_ids.append(String(Dictionary(conflict_variant).get("unit_id", "")))
+	conflict_unit_ids.sort()
+	return {
+		"unit_id": unit_id,
+		"desired_target": desired_target,
+		"initial_resolved_target": initial_target,
+		"final_target": final_target,
+		"conflict_unit_ids": conflict_unit_ids,
+		"conflict_count": conflicts.size(),
+		"minimum_spacing": minimum_spacing,
+		"unresolved": unresolved,
+	}
+
+
+func _build_stage_navigation_context(state: Dictionary, unit_id: String, current_position: Vector2, target_position: Vector2, terrain_registry) -> Dictionary:
+	if terrain_registry == null:
+		return {}
+	var source_command_type: String = String(state.get("command_type", "")).strip_edges().to_lower()
+	if not ["move", "engage", "take", "defend"].has(source_command_type):
+		return {}
+	var origin_position: Vector2 = Vector2(state.get("current_anchor_origin_position", state.get("origin_anchor_position", current_position)))
+	var anchor_target_position: Vector2 = Vector2(state.get("current_anchor_target_position", state.get("final_target_position", target_position)))
+	if origin_position.distance_squared_to(anchor_target_position) <= 0.001:
+		anchor_target_position = Vector2(state.get("final_target_position", target_position))
+	if origin_position.distance_squared_to(anchor_target_position) <= 0.001:
+		return {}
+	var axes: Dictionary = _resolve_target_spacing_axes(state)
+	var lateral: Vector2 = Vector2(axes.get("lateral", Vector2.DOWN)).normalized()
+	var lane_offset_world: float = lateral.dot(target_position - anchor_target_position) * NAVIGATION_LANE_OFFSET_SCALE
+	var weights: Dictionary = _resolve_stage_navigation_weights(state)
+	var context: Dictionary = {
+		"navigation_cover_aware": true,
+		"navigation_corridor_enabled": true,
+		"navigation_corridor_start_position": origin_position,
+		"navigation_corridor_end_position": anchor_target_position,
+		"navigation_corridor_half_width_world": _resolve_navigation_corridor_half_width(state),
+		"navigation_corridor_weight": float(weights.get("corridor_weight", 0.0)),
+		"navigation_lane_enabled": true,
+		"navigation_lane_sample_position": target_position,
+		"navigation_lane_offset_world": lane_offset_world,
+		"navigation_lane_weight": float(weights.get("lane_weight", 0.0)),
+		"navigation_exposure_weight": float(weights.get("exposure_weight", 0.0)),
+		"navigation_cover_weight": float(weights.get("cover_weight", 0.0)),
+		"navigation_blocker_clearance_weight": float(weights.get("blocker_clearance_weight", 0.0)),
+		"navigation_blocker_clearance_radius": NAVIGATION_BLOCKER_CLEARANCE_RADIUS,
+		"diagnostic": {
+			"unit_id": unit_id,
+			"source_command_type": source_command_type,
+			"corridor_start": origin_position,
+			"corridor_end": anchor_target_position,
+			"corridor_half_width_world": _resolve_navigation_corridor_half_width(state),
+			"lane_offset_world": lane_offset_world,
+			"corridor_weight": float(weights.get("corridor_weight", 0.0)),
+			"lane_weight": float(weights.get("lane_weight", 0.0)),
+			"cover_weight": float(weights.get("cover_weight", 0.0)),
+			"blocker_clearance_weight": float(weights.get("blocker_clearance_weight", 0.0)),
+		},
+	}
+	return context
+
+
+func _resolve_navigation_corridor_half_width(state: Dictionary) -> float:
+	var parallel_width: float = maxf(_resolve_parallel_travel_spacing(state), 0.0) * NAVIGATION_CORRIDOR_PARALLEL_WIDTH_FACTOR
+	var slot_width: float = maxf(_resolve_formation_slot_spacing(state), 0.0) * NAVIGATION_CORRIDOR_SLOT_WIDTH_FACTOR
+	var spacing_width: float = _resolve_target_slot_minimum_spacing(state) * 2.0
+	return maxf(NAVIGATION_CORRIDOR_MIN_HALF_WIDTH_WORLD, maxf(parallel_width, maxf(slot_width, spacing_width)))
+
+
+func _resolve_stage_navigation_weights(state: Dictionary) -> Dictionary:
+	var tactical_stance: String = _normalize_tactical_stance(String(state.get("tactical_stance", "")))
+	var command_type: String = String(state.get("command_type", "")).strip_edges().to_lower()
+	var behavior_modifiers: Dictionary = _resolve_stage_behavior_modifiers(state)
+	var cover_priority_percent: float = clampf(float(behavior_modifiers.get("cover_priority_percent", float(state.get("cover_priority", 0.4)) * 100.0)), 0.0, 100.0)
+	var cover_factor: float = cover_priority_percent / 100.0
+	var weights: Dictionary = {}
+	match tactical_stance:
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
+			weights = {
+				"corridor_weight": 0.38,
+				"lane_weight": 0.62,
+				"exposure_weight": 0.85,
+				"cover_weight": 0.65,
+				"blocker_clearance_weight": 0.18,
+			}
+		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
+			weights = {
+				"corridor_weight": 0.95,
+				"lane_weight": 0.92,
+				"exposure_weight": 0.38,
+				"cover_weight": 0.18,
+				"blocker_clearance_weight": 0.48,
+			}
+		_:
+			weights = {
+				"corridor_weight": 0.62,
+				"lane_weight": 0.78,
+				"exposure_weight": 0.62,
+				"cover_weight": 0.42,
+				"blocker_clearance_weight": 0.32,
+			}
+	match command_type:
+		"engage":
+			weights["exposure_weight"] = float(weights.get("exposure_weight", 0.0)) + 0.22
+			weights["cover_weight"] = float(weights.get("cover_weight", 0.0)) + 0.12
+		"take":
+			weights["cover_weight"] = float(weights.get("cover_weight", 0.0)) + 0.18
+			weights["corridor_weight"] = float(weights.get("corridor_weight", 0.0)) + 0.08
+		"move":
+			weights["lane_weight"] = float(weights.get("lane_weight", 0.0)) + 0.10
+		"defend":
+			weights["cover_weight"] = float(weights.get("cover_weight", 0.0)) + 0.25
+			weights["corridor_weight"] = float(weights.get("corridor_weight", 0.0)) * 0.75
+	weights["cover_weight"] = float(weights.get("cover_weight", 0.0)) + cover_factor * 0.35
+	weights["exposure_weight"] = float(weights.get("exposure_weight", 0.0)) + cover_factor * 0.25
+	weights["blocker_clearance_weight"] = float(weights.get("blocker_clearance_weight", 0.0)) + (1.0 - cover_factor) * 0.12
+	return weights
+
+
 func _reissue_current_stage(state: Dictionary, member_records: Array, simulation_root, terrain_registry = null) -> void:
 	if simulation_root == null:
 		return
@@ -664,6 +1328,12 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 	var current_positions: Dictionary = _build_current_positions(member_records)
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
 	var walkable_adjustment_count: int = 0
+	var target_spacing_adjustment_count: int = 0
+	var target_spacing_conflict_count: int = 0
+	var target_spacing_unresolved_count: int = 0
+	var accepted_moving_targets: Dictionary = {}
+	var target_spacing_debug: Array = []
+	var navigation_context_debug: Array = []
 	for record in member_records:
 		var unit_id: String = String(record.get("unit_id", ""))
 		if unit_id.is_empty():
@@ -692,11 +1362,31 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 		if not moving_unit_ids.has(unit_id) or not current_target_positions.has(unit_id):
 			continue
 		var move_target: Vector2 = _avoid_backward_move_target(state, Vector2(current_positions.get(unit_id, current_target_positions.get(unit_id))), Vector2(current_target_positions.get(unit_id)))
-		var walkable_target: Vector2 = _resolve_walkable_stage_target(move_target, terrain_registry)
-		if walkable_target.distance_squared_to(move_target) > 0.25:
+		var target_resolution: Dictionary = _resolve_spacing_safe_stage_target(state, unit_id, move_target, accepted_moving_targets, terrain_registry)
+		var walkable_target: Vector2 = Vector2(target_resolution.get("target_position", move_target))
+		if bool(target_resolution.get("walkable_adjusted", false)):
 			walkable_adjustment_count += 1
+		if bool(target_resolution.get("spacing_adjusted", false)):
+			target_spacing_adjustment_count += 1
+		target_spacing_conflict_count += int(target_resolution.get("conflict_count_before", 0))
+		if bool(target_resolution.get("spacing_unresolved", false)):
+			target_spacing_unresolved_count += 1
+		var spacing_diagnostic: Dictionary = Dictionary(target_resolution.get("diagnostic", {}))
+		if not spacing_diagnostic.is_empty():
+			target_spacing_debug.append(spacing_diagnostic)
 		move_target = walkable_target
+		accepted_moving_targets[unit_id] = move_target
 		current_target_positions[unit_id] = move_target
+		var navigation_context: Dictionary = _build_stage_navigation_context(
+			state,
+			unit_id,
+			Vector2(current_positions.get(unit_id, move_target)),
+			move_target,
+			terrain_registry
+		)
+		var navigation_diagnostic: Dictionary = Dictionary(navigation_context.get("diagnostic", {}))
+		if not navigation_diagnostic.is_empty():
+			navigation_context_debug.append(navigation_diagnostic)
 		var move_speed_factor: float = _build_move_speed_factor(style, String(state.get("command_type", "")), member_records, moving_unit_ids, current_positions, float(state.get("cohesion_threshold", 100.0)), float(record.get("speed", 0.5)), float(state.get("move_speed_multiplier", 1.0)))
 		move_speed_factor *= _resolve_behavior_command_speed_multiplier(state)
 		_enqueue_unit_command(
@@ -716,10 +1406,17 @@ func _reissue_current_stage(state: Dictionary, member_records: Array, simulation
 			_resolve_stage_weapon_posture(state, style, false),
 			_resolve_stage_posture_policy_id(state),
 			_resolve_stage_sight_range_factor(state),
-			_resolve_stage_behavior_modifiers(state)
+			_resolve_stage_behavior_modifiers(state),
+			navigation_context
 		)
 	state["current_target_positions"] = current_target_positions
 	state["current_walkable_target_adjustment_count"] = walkable_adjustment_count
+	state["current_target_spacing_adjustment_count"] = target_spacing_adjustment_count
+	state["current_target_spacing_conflict_count"] = target_spacing_conflict_count
+	state["current_target_spacing_unresolved_count"] = target_spacing_unresolved_count
+	state["current_target_spacing_min_distance"] = _calculate_minimum_target_spacing(accepted_moving_targets)
+	state["current_target_spacing_debug"] = target_spacing_debug
+	state["current_navigation_context_debug"] = navigation_context_debug
 
 
 func _build_member_records(units: Array, leader) -> Array:
@@ -1250,7 +1947,9 @@ func _enqueue_unit_command(
 	weapon_posture: String = "",
 	posture_policy_id: String = "",
 	sight_range_factor: float = 1.0,
-	behavior_modifiers: Dictionary = {}
+	behavior_modifiers: Dictionary = {},
+	navigation_context: Dictionary = {},
+	extra_fields: Dictionary = {}
 ) -> bool:
 	if simulation_root == null:
 		return false
@@ -1282,12 +1981,44 @@ func _enqueue_unit_command(
 		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
 	_append_behavior_modifier_fields(command_dict, behavior_modifiers)
+	_append_navigation_context_fields(command_dict, navigation_context)
+	_append_extra_command_fields(command_dict, extra_fields)
 	if _should_enable_fireteam_local_avoidance(command.command_type, command.move_speed_factor):
 		command_dict["local_avoidance_enabled"] = true
 		command_dict["local_avoidance_source"] = FIRETEAM_LOCAL_AVOIDANCE_SOURCE_ID
 	command_dict["requeue_until_target"] = command_type != UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
 	simulation_root.call("enqueue_command", command_dict)
 	return true
+
+
+func _append_extra_command_fields(command_dict: Dictionary, extra_fields: Dictionary) -> void:
+	if extra_fields.is_empty():
+		return
+	for key in extra_fields.keys():
+		command_dict[String(key)] = extra_fields[key]
+
+
+func _append_navigation_context_fields(command_dict: Dictionary, navigation_context: Dictionary) -> void:
+	if navigation_context.is_empty():
+		return
+	for key in [
+		"navigation_cover_aware",
+		"navigation_corridor_enabled",
+		"navigation_corridor_start_position",
+		"navigation_corridor_end_position",
+		"navigation_corridor_half_width_world",
+		"navigation_corridor_weight",
+		"navigation_lane_enabled",
+		"navigation_lane_sample_position",
+		"navigation_lane_offset_world",
+		"navigation_lane_weight",
+		"navigation_exposure_weight",
+		"navigation_cover_weight",
+		"navigation_blocker_clearance_weight",
+		"navigation_blocker_clearance_radius",
+	]:
+		if navigation_context.has(key):
+			command_dict[key] = navigation_context[key]
 
 
 func _should_enable_fireteam_local_avoidance(command_type: String, move_speed_factor: float) -> bool:
@@ -1608,6 +2339,10 @@ func _build_stage_command_token(state: Dictionary, unit_id: String) -> String:
 		int(state.get("command_revision", 0)),
 		unit_id,
 	]
+
+
+func _build_contact_halt_command_token(state: Dictionary, unit_id: String) -> String:
+	return "%s:contact_halt" % _build_stage_command_token(state, unit_id)
 
 
 func _resolve_origin_anchor(member_records: Array, leader) -> Vector2:
@@ -1958,6 +2693,12 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"order_target_offset": Vector2(state.get("order_target_offset", Vector2.ZERO)),
 		"current_target_positions": Dictionary(state.get("current_target_positions", {})).duplicate(true),
 		"current_walkable_target_adjustment_count": int(state.get("current_walkable_target_adjustment_count", 0)),
+		"current_target_spacing_adjustment_count": int(state.get("current_target_spacing_adjustment_count", 0)),
+		"current_target_spacing_conflict_count": int(state.get("current_target_spacing_conflict_count", 0)),
+		"current_target_spacing_unresolved_count": int(state.get("current_target_spacing_unresolved_count", 0)),
+		"current_target_spacing_min_distance": float(state.get("current_target_spacing_min_distance", INF)),
+		"current_target_spacing_debug": Array(state.get("current_target_spacing_debug", [])).duplicate(true),
+		"current_navigation_context_debug": Array(state.get("current_navigation_context_debug", [])).duplicate(true),
 		"current_moving_unit_ids": moving_unit_ids,
 		"current_covering_unit_ids": covering_unit_ids,
 		"moving_unit_ids": moving_unit_ids,
@@ -1988,6 +2729,11 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"contact_halt_unit_ids": PackedStringArray(state.get("contact_halt_unit_ids", PackedStringArray())),
 		"contact_halt_issued_count": int(state.get("contact_halt_issued_count", 0)),
 		"contact_halt_context": Dictionary(state.get("contact_halt_context", {})).duplicate(true),
+		"contact_cover_decision_active": bool(Dictionary(state.get("contact_halt_context", {})).get("contact_cover_decision_active", false)),
+		"contact_cover_decision_mode": String(Dictionary(state.get("contact_halt_context", {})).get("contact_cover_decision_mode", "")),
+		"contact_cover_assignment_count": int(Dictionary(state.get("contact_halt_context", {})).get("contact_cover_assignment_count", 0)),
+		"contact_cover_fire_now_count": int(Dictionary(state.get("contact_halt_context", {})).get("contact_cover_fire_now_count", 0)),
+		"contact_cover_decisions": Array(Dictionary(state.get("contact_halt_context", {})).get("contact_cover_decisions", [])).duplicate(true),
 		"engage_doctrine": _build_engage_doctrine_snapshot(state),
 		"take_doctrine": _build_take_doctrine_snapshot(state),
 	}

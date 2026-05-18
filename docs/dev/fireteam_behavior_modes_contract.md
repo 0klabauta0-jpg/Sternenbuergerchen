@@ -213,6 +213,64 @@ TASK_467 schneidet die erste harte Regel gegen das beobachtete "Engage laeuft zw
 
 Noch offen: Der Kontakthalt sucht nicht aktiv das beste Deckungsfeld. Der naechste Doctrine-Slice darf daraus "direkt schiessen" vs. "nahe Deckung nehmen und schiessen" ableiten.
 
+### TASK_475 Pathfinding-/Avoidance-Stability-Pass
+
+TASK_475 stabilisiert den bestehenden Movement-/Avoidance-Pfad, ohne eine neue Navigation einzufuehren:
+
+- Walkable-normalisierte Fireteam-Zielslots duerfen nicht still auf dieselbe Grid-Zelle oder zu nahe Weltposition kollabieren.
+- Wenn Zielslots kollabieren, sucht `FireteamMovementController` deterministisch nahe Ersatzslots links/rechts der Marschachse und uebergibt dieselben reparierten Slots an UnitCommands und Completion-State.
+- Der Movement-Snapshot exportiert `current_target_spacing_adjustment_count`, Konflikt-/Unresolved-Zaehler, Mindestabstand und eine kurze Diagnose pro repariertem Zielslot.
+- `SimulationRoot` behandelt `local_avoidance_repath_requested` als echtes Repath-Signal und verwirft einen alten Terrain-Pfad statt eine Avoidance-Deadlock-Bahn weiter abzulaufen.
+- Das bleibt ein Stabilitaets-Slice. Deckungssuche, Bottleneck-Reservierung und zeitabhaengige Doctrine-Sequenzen bleiben eigene Folgearbeiten.
+
+### TASK_476 Wegkorridor-/Buddy-Lane-/Deckungsgewichtung
+
+TASK_476 erweitert die bestehende Navigation um Fireteam-Absicht, ohne `SimulationRoot` oder `TerrainRegistry` als Wahrheitsquelle zu ersetzen:
+
+- Fireteam-Bewegungscommands tragen einen Marschkorridor vom aktuellen Anchor zum naechsten Anchor. Aggressive Haltungen halten diesen Korridor staerker, vorsichtige Haltungen duerfen fuer Deckung etwas mehr abweichen.
+- Jede bewegende Unit bekommt eine signierte Buddy-/Formation-Lane relativ zur Marschachse. Der Pathfinder kann dadurch parallele Wege bevorzugen, statt alle Mitglieder auf dieselbe kuerzeste Linie zu ziehen.
+- C/N/A und Command-Typ setzen Startgewichte fuer Cover, Exposure, Lane-Haltung, Korridor-Treue und Blocker-Clearance. Diese Werte sind Command-Metadaten, keine UI-Wahrheit.
+- Blocker-Clearance ist ein Stabilitaetsgewicht: nicht-walkable oder LOS-blockende Nachbarzellen verteuern den Schritt leicht, damit Units weniger an Saeulen/Waenden kleben. Echter Cover-Wert bleibt separat positiv gewichtet.
+- Wenn kein TerrainRegistry/Pathfinder-Kontext vorhanden ist, bleiben die Commands kompatibel und laufen ohne diese Zusatzkosten.
+
+Das ist weiterhin keine finale Deckungssuche. Es ist die erste Bruecke zwischen Formation/Workbench-Zielbild und dem konkreten Terrain-Pfad pro Unit.
+
+### TASK_477 Contact-Deckungsentscheidung V1
+
+TASK_477 macht aus dem bisherigen Engage-Kontakthalt eine erste echte Entscheidung:
+
+- Ein aktiver `Engage`-Auftrag bleibt bei attackierbarem Kontakt weiterhin im Contact-Halt und darf nicht sofort als Waypoint abgeschlossen oder durch Auto-`DEF 360` ersetzt werden.
+- Pro Fireteam-Mitglied wird entschieden:
+  - `take_cover`: nahe, bessere Deckung nehmen und dabei `fire_at_will`/Aim behalten.
+  - `fire_now`: aktuelle Position halten und sofort wirken.
+- C/N/A ist dabei die erste harte Gameplay-Achse:
+  - `C`: grosser Suchradius, kleiner noetiger Deckungsgewinn, Deckung wird frueh genommen.
+  - `N`: mittlerer Suchradius, mittlerer Gewinn; bei sehr gutem Schuss kann Feuer vor Deckung gewinnen.
+  - `A`: kleiner Suchradius; moderate oder entfernte Deckung wird ignoriert, Feuer jetzt ist die Default-Neigung.
+- Cover-Moves laufen weiter ueber `UnitCommand.move_to_position` mit `source_command_type = engage`, `fire_at_will`, Aim-Posture und den TASK_476-Navigation-Metadaten.
+- Die Runtime-Diagnose muss sichtbar sagen koennen, ob eine Unit wegen `better_cover_nearby`, `already_in_cover`, `cover_gain_low`, `fire_now_preferred` oder `no_cover_candidate` handelt.
+
+Nicht enthalten: finale LOS-Revalidierung aus der neuen Deckungsposition, suppression-spezifische Sonderregeln und zeitliche Sequenzen wie raupenartiges/ueberschlagendes Vorgehen.
+
+### TASK_478 Final-Stage Completion Guard
+
+Die weiche Waypoint-Completion bleibt ein Unstick-Schutz, darf aber keine Zwischenphasen beenden:
+
+- Ein aktiver Movement-Snapshot gilt nur dann weich als abgeschlossen, wenn der aktuelle Movement-Anchor bereits auf dem finalen Wegpunktziel liegt.
+- Reine Zwischenziele, Bounds, Buddy-Stage-Ziele, Take-/Engage-Vorrueckpositionen und Cover-Haltepositionen halten den Waypoint aktiv.
+- Auto-`DEF 360` greift erst nach hartem `finished` oder nach soft-reached finalem Movement-Stage ohne Folgeauftrag.
+- Damit kann ein Team bei `Take`/`Engage` kurz halten oder sich ordnen, ohne dass der Befehl als fertig gilt und durch Default-Defense ueberschrieben wird.
+
+### TASK_479 Runtime-Hotpath-Guards
+
+TASK_479 uebernimmt die sinnvollen Punkte aus der externen Architektur-Review in den bestehenden Fireteam-Pfad:
+
+- Drop-/Staging-Units werden nicht durch eine zweite Unit-KI geloest, sondern fallen durch den bestehenden `UnitRegistry`-Aktivfilter aus Combat-Hotpaths.
+- Der Combat-Loop unterscheidet registrierte Runtime-Units von kampffaehigen Kandidaten. Down-, bleedout- oder respawning-Units bleiben fuer Bleedout/Respawn erreichbar, tauchen aber nicht als Contact-/Fire-/Overwatch-Kandidaten auf.
+- Friendlies und Enemies werden ticklokal gecached, damit Contact Tracking, Fire-Candidate-Diagnose und Overwatch nicht mehrfach dieselben Path-/Registry-Listen aufloesen.
+- `get_combat_hotpath_audit_snapshot()` und `get_unit_presence_audit_snapshot()` sind die Debug-Oberflaeche fuer aktive Counts, kampffaehige Counts, inaktive Friendly-Slots, Pair-/LOS-Zaehler und die bewusst nicht genutzten Alternativen: keine per-Unit-`Area2D`-KI, kein NavigationServer-/NavigationAgent-Umbau.
+- C/N/A, Skills und Doctrine bleiben Daten im bestehenden Command-/Movement-/Combat-Pfad. Es entsteht keine separate "Gefuehlsgabe"-State-Machine auf einzelnen Units.
+
 ## Kontakt-Initiative V0
 
 `Kontakt-Initiative` beschreibt die Zeit vom ersten sichtbaren oder suspekten Kontakt bis zum ersten koordinierten Schuss. Sie ersetzt nicht die Waffen-Feuerrate und nicht die harte Combat-Wahrheit. Ein Schuss bleibt nur moeglich, wenn LOS, Waffenreichweite, Vital-State, Fire-Status und Kontaktstatus passen.

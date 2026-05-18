@@ -119,6 +119,7 @@ const SUPPRESSION_HIT_CHANCE_MALUS: float = -0.3
 const SUPPRESSION_MOVE_FACTOR: float = 0.3
 const SUPPRESSION_HEAVY_MOVE_FACTOR: float = 0.0
 const SUPPRESSION_COVER_BONUS: float = 24.0
+const SUPPRESSION_RUNTIME_BASELINE_META_KEY: String = "fireteam_suppression_runtime_baseline"
 const LEADER_INITIATED_FLANK_COOLDOWN_SECONDS: float = 6.0
 const AUTONOMOUS_LEADER_FLANKS_ENABLED: bool = false
 const WAYPOINT_MENU_MOVE_ID: int = 100
@@ -2260,6 +2261,7 @@ func _update_ui() -> void:
 	_refresh_mission_nav_timer_label()
 	_refresh_mission_dropship_panel()
 	_refresh_tactical_event_log_panel()
+	_refresh_runtime_mission_hud_surfaces()
 
 	var strategic_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label
 	if strategic_status_label != null:
@@ -2308,6 +2310,9 @@ func _refresh_tactical_event_log_panel() -> void:
 	if panel == null or not panel.has_method("set_feedback_snapshot"):
 		return
 	panel.call("set_feedback_snapshot", get_command_feedback_snapshot())
+
+
+func _refresh_runtime_mission_hud_surfaces() -> void:
 	_refresh_mission_control_craft_summary()
 	_refresh_dynamic_button_styles()
 	_apply_drop_light_hud_button_labels()
@@ -2643,23 +2648,32 @@ func _is_fireteam_go_recovery_blocked(fireteam_id: String) -> bool:
 		return false
 	var suppression_value: float = maxf(float(suppression_state.get("value", 0.0)), 0.0)
 	var suppression_threshold: float = maxf(float(suppression_state.get("threshold", 1.0)), 1.0)
-	return (
-		bool(suppression_state.get("is_suppressed", false))
-		or bool(suppression_state.get("is_heavily_suppressed", false))
-		or suppression_value >= suppression_threshold
-	)
+	return bool(suppression_state.get("is_heavily_suppressed", false)) or suppression_value >= suppression_threshold * 1.8
 
 
 func _refresh_ad_hoc_panel_visibility() -> void:
 	var panel := _ensure_ad_hoc_panel()
 	if panel == null:
 		return
-	var in_combat: bool = false
+	panel.visible = not preview_mode and _can_issue_local_commands() and _selected_fireteams_have_ad_hoc_panel_context()
+
+
+func _selected_fireteams_have_ad_hoc_panel_context() -> bool:
+	_ensure_ad_hoc_order_controller()
 	for fireteam_id in _selected_fireteam_ids:
-		if _is_fireteam_in_combat(String(fireteam_id)):
-			in_combat = true
-			break
-	panel.visible = not preview_mode and _can_issue_local_commands() and in_combat
+		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
+		if normalized_fireteam_id.is_empty():
+			continue
+		if _ad_hoc_execution_by_fireteam.has(normalized_fireteam_id) or _ad_hoc_resume_state_by_fireteam.has(normalized_fireteam_id):
+			return true
+		if bool(_suppression_interrupt_pending_by_fireteam.get(normalized_fireteam_id, false)):
+			return true
+		if _ad_hoc_order_controller != null and bool(_ad_hoc_order_controller.call("has_active_order", normalized_fireteam_id)):
+			return true
+		var plan = _order_plans_by_key.get(_build_order_plan_key(normalized_fireteam_id, _get_live_order_phase_index()), null)
+		if plan != null and String(plan.status) == FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_INTERRUPTED:
+			return true
+	return false
 
 
 func _on_ad_hoc_button_pressed(button: Button) -> void:
@@ -2717,7 +2731,7 @@ func _refresh_selected_fireteam_cards() -> void:
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit != null and unit.has_method("get_unit_id") else ""
 		var in_drop_transit: bool = not unit_id.is_empty() and _embarked_unit_ids.has(unit_id) and not _deployed_unit_ids.has(unit_id)
-		card.custom_minimum_size = Vector2(156.0, 70.0)
+		card.custom_minimum_size = Vector2(156.0, 118.0)
 		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		card.call(
 			"setup_from_profile",
@@ -2731,7 +2745,11 @@ func _refresh_selected_fireteam_cards() -> void:
 				"selected": _is_selected_member_card_unit(unit, selected_cards_fireteam_id),
 				"disabled": in_drop_transit,
 				"fixed_size": true,
-				"fixed_card_size": Vector2(156.0, 70.0),
+				"fixed_card_size": Vector2(156.0, 118.0),
+				"compact_wrap_text": true,
+				"compact_data_a_max_lines": 2,
+				"compact_data_b_max_lines": 4,
+				"compact_text_min_width": 76.0,
 			}
 		)
 		if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
@@ -2822,6 +2840,7 @@ func _refresh_fireteam_mini_cards() -> void:
 		var selected_fireteam: bool = _selected_fireteam_ids.has(normalized_fireteam_id)
 		var runtime_inactive: bool = not preview_mode and not _is_fireteam_runtime_active(normalized_fireteam_id)
 		var lead_name: String = String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "Kein Lead"
+		var lead_summary: String = _build_mission_fireteam_reference_summary(normalized_fireteam_id, lead_name, units)
 		card.call(
 			"setup_card",
 			normalized_fireteam_id,
@@ -2829,9 +2848,10 @@ func _refresh_fireteam_mini_cards() -> void:
 			selected_fireteam,
 			false,
 			_get_mission_fireteam_loadout_id(normalized_fireteam_id),
-			_build_mission_fireteam_reference_summary(normalized_fireteam_id, lead_name, units),
+			lead_summary,
 			"mission_mini"
 		)
+		card.set_meta("mission_fireteam_lead_summary", lead_summary)
 		_apply_fireteam_mini_card_status_context(card, normalized_fireteam_id, units)
 		_apply_fireteam_mini_card_leader_portrait(card, lead)
 		card.modulate = Color(1.0, 1.0, 1.0, 0.58) if runtime_inactive else Color.WHITE
@@ -2983,7 +3003,12 @@ func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Diction
 		stage_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		stage_label.set_meta("mission_fireteam_status_secondary", true)
 	if member_label != null:
-		member_label.text = String(status_snapshot.get("primary_text", "")).strip_edges()
+		var primary_text: String = String(status_snapshot.get("primary_text", "")).strip_edges()
+		var lead_summary: String = String(card.get_meta("mission_fireteam_lead_summary", "")).strip_edges()
+		if not lead_summary.is_empty() and not primary_text.contains(lead_summary):
+			member_label.text = "%s\n%s" % [lead_summary, primary_text] if not primary_text.is_empty() else lead_summary
+		else:
+			member_label.text = primary_text
 		member_label.visible = not member_label.text.is_empty()
 		member_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		member_label.set_meta("mission_fireteam_status_primary", true)
@@ -3887,13 +3912,13 @@ func _build_fireteam_suppression_status_context(fireteam_id: String) -> Dictiona
 	var label: String = "READY"
 	var status_key: String = "success"
 	if is_heavily_suppressed:
-		suppression_state = "heavy"
-		label = "HEAVY"
-		status_key = "danger"
-	elif is_suppressed:
 		suppression_state = "pinned"
 		label = "PINNED"
 		status_key = "danger"
+	elif is_suppressed:
+		suppression_state = "suppressed"
+		label = "SUPP"
+		status_key = "warning"
 	elif value > 0.001:
 		suppression_state = "contact"
 		label = "CONTACT"
@@ -4187,16 +4212,39 @@ func _build_live_fireteam_card_runtime_line(unit: Node) -> String:
 func _build_live_fireteam_card_detail_line(unit: Node) -> String:
 	if unit == null:
 		return "No unit data"
-	var detail_parts: PackedStringArray = []
+	var detail_lines: PackedStringArray = []
 	var posture_text: String = _build_unit_posture_readability_text(unit)
 	if not posture_text.is_empty():
-		detail_parts.append(posture_text)
+		detail_lines.append(posture_text)
+	var contact_text: String = _build_unit_contact_readability_text(unit)
+	if not contact_text.is_empty():
+		detail_lines.append(contact_text)
+	var suppression_text: String = _build_unit_suppression_readability_text(unit)
+	if not suppression_text.is_empty():
+		detail_lines.append(suppression_text)
+	var detail_parts: PackedStringArray = []
 	if unit.has_method("get_skill_summary_text"):
 		detail_parts.append(String(unit.call("get_skill_summary_text")))
 	var trait_text: String = String(unit.call("get_trait_summary_text")).strip_edges() if unit.has_method("get_trait_summary_text") else ""
 	if not trait_text.is_empty():
 		detail_parts.append(trait_text)
-	return " | ".join(detail_parts)
+	if not detail_parts.is_empty():
+		detail_lines.append(" | ".join(detail_parts))
+	return "\n".join(detail_lines)
+
+
+func _build_unit_suppression_readability_text(unit: Node) -> String:
+	if unit == null or not unit.has_method("get_fireteam_id"):
+		return ""
+	var suppression_context: Dictionary = _build_fireteam_suppression_status_context(String(unit.call("get_fireteam_id")))
+	var percent: int = int(suppression_context.get("percent", 0))
+	if percent <= 0:
+		return ""
+	if bool(suppression_context.get("is_heavily_suppressed", false)):
+		return "Suppression %d%%: pinned, Befehl haelt" % percent
+	if bool(suppression_context.get("is_suppressed", false)):
+		return "Suppression %d%%: Tempo/Aim gehemmt" % percent
+	return "Suppression %d%%: Kontaktstress" % percent
 
 
 func _format_unit_fire_status_short(fire_status: String) -> String:
@@ -4309,6 +4357,66 @@ func _get_unit_aim_readiness_percent(unit: Node) -> float:
 	if runtime_status == null or not runtime_status.has_method("get"):
 		return 0.0
 	return clampf(float(runtime_status.get("aim_readiness_percent")), 0.0, 100.0)
+
+
+func _build_unit_contact_readability_text(unit: Node) -> String:
+	if unit == null:
+		return ""
+	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else ""
+	var contact_target_id: String = String(unit.call("get_contact_target_id")).strip_edges() if unit.has_method("get_contact_target_id") else ""
+	var contact_entry: Dictionary = _find_contact_entry_for_card(fireteam_id, contact_target_id)
+	if contact_target_id.is_empty() and not contact_entry.is_empty():
+		contact_target_id = String(contact_entry.get("unit_id", "")).strip_edges()
+	if contact_target_id.is_empty():
+		var runtime_status = unit.call("get_runtime_status") if unit.has_method("get_runtime_status") else null
+		var source_command_type: String = String(runtime_status.get("source_command_type")).strip_edges().to_lower() if runtime_status != null and runtime_status.has_method("get") else ""
+		if source_command_type == "engage" or source_command_type == "take" or source_command_type == "defend":
+			return "Kontakt: sucht"
+		return ""
+	var state_text: String = _format_contact_detection_state_text(String(contact_entry.get("detection_state", ""))) if not contact_entry.is_empty() else ""
+	if state_text.is_empty():
+		return "Ziel %s" % _shorten_unit_id_for_card(contact_target_id)
+	return "Ziel %s | %s" % [_shorten_unit_id_for_card(contact_target_id), state_text]
+
+
+func _find_contact_entry_for_card(fireteam_id: String, preferred_unit_id: String = "") -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var normalized_preferred_unit_id: String = preferred_unit_id.strip_edges()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var fallback: Dictionary = {}
+	for contact_variant in get_contact_snapshot():
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		if String(contact.get("fireteam_id", "")).strip_edges().to_lower() != normalized_fireteam_id:
+			continue
+		if fallback.is_empty():
+			fallback = contact
+		if not normalized_preferred_unit_id.is_empty() and String(contact.get("unit_id", "")).strip_edges() == normalized_preferred_unit_id:
+			return contact
+	return fallback
+
+
+func _format_contact_detection_state_text(detection_state: String) -> String:
+	match detection_state.strip_edges().to_lower():
+		"confirmed":
+			return "bestaetigt"
+		"spotted":
+			return "gesehen"
+		"suspected":
+			return "vermutet"
+		"lost":
+			return "verloren"
+		_:
+			return ""
+
+
+func _shorten_unit_id_for_card(unit_id: String) -> String:
+	var cleaned: String = unit_id.strip_edges()
+	if cleaned.length() <= 10:
+		return cleaned
+	return cleaned.substr(0, 9) + "."
 
 
 func _build_fireteam_group_status_text(fireteam_id: String, units: Array) -> String:
@@ -4848,8 +4956,74 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text = "%d deployed | Lead %s" % [deployed_count, lead_name]
 	var mode_text: String = "PREVIEW - START MISSION FOR GO | " if preview_mode else ""
 	var decision_text: String = _build_selected_decision_status_text()
-	var decision_segment: String = "" if decision_text == "-" else " | CMD %s" % decision_text
-	return "%s%s | %d Karten | %d Wegpunkte | %d Gebiete | STANCE %s | EXEC %s | MOVE %s%s | SEC %s | FLK %s | %s" % [mode_text, _get_fireteam_name(), units.size(), planned_waypoint_count, planned_area_count, _build_selected_tactical_stance_text(), _build_selected_execution_quality_text(), _build_selected_movement_text(), decision_segment, _build_selected_security_text(), _build_selected_flank_vulnerability_text(), drop_state_text]
+	var command_text: String = "kein aktiver Befehl" if decision_text == "-" else _format_selected_status_segment(decision_text)
+	var first_line: String = "%s%s | Karten %d | Wegpunkte %d | Gebiete %d | Stance %s | Ausfuehrung %s" % [
+		mode_text,
+		_get_fireteam_name(),
+		units.size(),
+		planned_waypoint_count,
+		planned_area_count,
+		_build_selected_tactical_stance_display_text(),
+		_format_selected_status_segment(_build_selected_execution_quality_text()),
+	]
+	var second_line: String = "Befehl %s | Bewegung %s | Sicherung %s | Flank %s | %s" % [
+		command_text,
+		_format_selected_status_segment(_build_selected_movement_text()),
+		_build_selected_security_display_text(),
+		_build_selected_flank_display_text(),
+		drop_state_text,
+	]
+	return "%s\n%s" % [first_line, second_line]
+
+
+func _format_selected_status_segment(text: String) -> String:
+	var result: String = text.strip_edges()
+	if result.is_empty() or result == "-":
+		return "-"
+	result = result.replace("EXEC ", "")
+	result = result.replace("STEADY", "stabil")
+	result = result.replace("LOW", "niedrig")
+	result = result.replace("MOVE", "Move")
+	result = result.replace("ENGAGE", "Engage")
+	result = result.replace("TAKE", "Take")
+	result = result.replace("DEFEND", "Defend")
+	result = result.replace("DEF ", "Defend ")
+	result = result.replace("CMD ", "")
+	result = result.replace("FAW", "Feuer frei")
+	result = result.replace("SEC", "Feuer gehemmt")
+	return result
+
+
+func _build_selected_tactical_stance_display_text() -> String:
+	match _build_selected_tactical_stance_text().strip_edges().to_upper():
+		"C":
+			return "vorsichtig"
+		"N":
+			return "normal"
+		"A":
+			return "aggressiv"
+		"MIXED":
+			return "gemischt"
+		_:
+			return "-"
+
+
+func _build_selected_security_display_text() -> String:
+	var raw: String = _build_selected_security_text().strip_edges()
+	if raw == "-" or raw == "SEC -":
+		return "-"
+	raw = raw.replace("DEF 360", "Defend 360")
+	raw = raw.replace("DEF", "Defend")
+	raw = raw.replace("MOV", "Sicherung in Bewegung")
+	raw = raw.replace("DIR", "Richtung")
+	return raw
+
+
+func _build_selected_flank_display_text() -> String:
+	var raw: String = _build_selected_flank_vulnerability_text().strip_edges()
+	if raw.is_empty() or raw == "-":
+		return "aus"
+	return raw.replace("FLK", "Flank")
 
 
 func _build_selected_waypoint_info_text() -> String:
@@ -5340,6 +5514,10 @@ func _build_fireteamleader_feedback_context(fireteam_id: String, feedback_action
 func _resolve_fireteam_feedback_order_context(fireteam_id: String, feedback_action: String, _detail: String = "") -> Dictionary:
 	var normalized_action: String = feedback_action.strip_edges().to_lower()
 	if normalized_action == "go":
+		var movement_state: Dictionary = get_fireteam_movement_state(fireteam_id)
+		if not movement_state.is_empty():
+			var movement_target: Vector2 = Vector2(movement_state.get("current_anchor_target_position", movement_state.get("final_target_position", Vector2.ZERO)))
+			return _build_order_decision_context(fireteam_id, String(movement_state.get("command_type", "move")), movement_target, false, 1)
 		var active_context: Dictionary = _resolve_fireteam_current_decision_context(fireteam_id, true)
 		if not active_context.is_empty():
 			return active_context
@@ -5417,7 +5595,7 @@ func _build_order_decision_context(fireteam_id: String, command_type: String, ta
 	var bubble_line_one: String = "%s %s" % [command_label, direction_label]
 	if is_area:
 		bubble_line_one = "%s AREA %s" % [command_label, direction_label]
-	var bubble_line_two: String = "%d Felder" % tile_distance
+	var bubble_line_two: String = "%dF" % tile_distance
 	if not effect_text.is_empty():
 		bubble_line_two = "%s | %s" % [bubble_line_two, effect_text]
 	return {
@@ -9579,10 +9757,26 @@ func record_fireteamleader_feedback_bubble_for_unit(
 	))
 	if not bool(payload.get("ok", false)):
 		return {}
-	if not bool(_get_comic_bubble_runtime_gate().call("should_emit_payload", payload, COMIC_BUBBLE_SETTINGS_SCRIPT.CATEGORY_FTL_COMMAND_FEEDBACK)):
+	if not bool(_get_comic_bubble_runtime_gate().call("should_emit_payload", payload, COMIC_BUBBLE_SETTINGS_SCRIPT.CATEGORY_FTL_COMMAND_FEEDBACK)) and not _should_replace_command_feedback_bubble_after_cooldown(payload):
 		return {}
 	_store_fireteamleader_feedback_bubble(payload)
 	return payload
+
+
+func _should_replace_command_feedback_bubble_after_cooldown(payload: Dictionary) -> bool:
+	if payload.is_empty():
+		return false
+	if String(payload.get("source", "")).strip_edges() != "fireteamleader_command_feedback":
+		return false
+	if String(payload.get("text", "")).strip_edges().is_empty():
+		return false
+	var fireteam_id: String = String(payload.get("fireteam_id", "")).strip_edges().to_lower()
+	if fireteam_id.is_empty():
+		return false
+	var state: String = String(payload.get("feedback_state", "")).strip_edges().to_lower()
+	if state == "blocked":
+		return false
+	return String(payload.get("text_source", "")).strip_edges() == "command_context"
 
 
 func _record_fireteamleader_feedback_for_selected_fireteams(feedback_action: String, feedback_state: String, detail: String = "") -> void:
@@ -10327,7 +10521,7 @@ func _update_fireteam_suppression(delta: float) -> void:
 		state["is_heavily_suppressed"] = is_heavy
 		state["hold_until_msec"] = hold_until_msec if is_suppressed else 0
 		_suppression_state_by_fireteam[normalized_fireteam_id] = state
-		if is_suppressed and not _should_ignore_suppression(normalized_fireteam_id):
+		if is_heavy and not was_heavy and not _should_ignore_suppression(normalized_fireteam_id):
 			_interrupt_plan_for_suppression(normalized_fireteam_id)
 		if (was_suppressed != is_suppressed) or (was_heavy != is_heavy):
 			_notify_suppression_changed(normalized_fireteam_id, state)
@@ -10427,40 +10621,107 @@ func _apply_suppression_effects_for_fireteam(fireteam_id: String, suppression_st
 		var runtime_status = unit.call("get_runtime_status")
 		if runtime_status == null:
 			continue
-		var next_move_speed_factor: float = float(runtime_status.move_speed_factor)
-		var next_fire_status: String = String(runtime_status.fire_status)
-		var next_cover_score: float = float(runtime_status.cover_score)
-		var next_attack_bonus: float = float(runtime_status.attack_bonus)
+		var baseline: Dictionary = _get_or_store_suppression_runtime_baseline(unit, runtime_status, suppression_level)
+		if suppression_level == 0:
+			if not baseline.is_empty():
+				_apply_suppression_runtime_snapshot(unit, baseline)
+				if unit is Node:
+					(unit as Node).remove_meta(SUPPRESSION_RUNTIME_BASELINE_META_KEY)
+			continue
+		var next_move_speed_factor: float = float(baseline.get("move_speed_factor", runtime_status.move_speed_factor))
+		var next_fire_status: String = String(baseline.get("fire_status", runtime_status.fire_status))
+		var next_cover_score: float = float(baseline.get("cover_score", runtime_status.cover_score))
+		var next_attack_bonus: float = float(baseline.get("attack_bonus", runtime_status.attack_bonus))
 		if suppression_level == 2:
 			next_move_speed_factor = SUPPRESSION_HEAVY_MOVE_FACTOR
 			next_fire_status = "semi_disciplined"
 			next_cover_score = maxf(next_cover_score, SUPPRESSION_COVER_BONUS)
-			next_attack_bonus = SUPPRESSION_HIT_CHANCE_MALUS
+			next_attack_bonus += SUPPRESSION_HIT_CHANCE_MALUS
 		elif suppression_level == 1:
-			next_move_speed_factor = minf(next_move_speed_factor, SUPPRESSION_MOVE_FACTOR)
-			next_fire_status = "semi_disciplined"
+			next_move_speed_factor = maxf(next_move_speed_factor * 0.65, SUPPRESSION_MOVE_FACTOR)
+			if next_fire_status.strip_edges().to_lower() == "hold_fire":
+				next_fire_status = "hold_fire"
 			next_cover_score = maxf(next_cover_score, SUPPRESSION_COVER_BONUS)
-			next_attack_bonus = SUPPRESSION_HIT_CHANCE_MALUS
+			next_attack_bonus += SUPPRESSION_HIT_CHANCE_MALUS
 		unit.call(
 			"set_runtime_status",
-			String(runtime_status.status),
-			String(runtime_status.active_command_type),
-			int(runtime_status.priority),
+			String(baseline.get("status", runtime_status.status)),
+			String(baseline.get("active_command_type", runtime_status.active_command_type)),
+			int(baseline.get("priority", runtime_status.priority)),
 			next_fire_status,
-			String(runtime_status.source_command_type),
+			String(baseline.get("source_command_type", runtime_status.source_command_type)),
 			next_move_speed_factor,
 			next_cover_score,
 			next_attack_bonus,
-			int(runtime_status.phase),
-			runtime_status.target_position,
-			String(runtime_status.movement_posture),
-			String(runtime_status.weapon_posture),
-			String(runtime_status.posture_policy_id),
-			float(runtime_status.sight_range_factor)
+			int(baseline.get("phase", runtime_status.phase)),
+			baseline.get("target_position", runtime_status.target_position),
+			String(baseline.get("movement_posture", runtime_status.movement_posture)),
+			String(baseline.get("weapon_posture", runtime_status.weapon_posture)),
+			String(baseline.get("posture_policy_id", runtime_status.posture_policy_id)),
+			float(baseline.get("sight_range_factor", runtime_status.sight_range_factor)),
+			float(baseline.get("aim_readiness_percent", runtime_status.get("aim_readiness_percent")))
 		)
 	var next_state := suppression_state.duplicate(true)
 	next_state["applied_level"] = suppression_level
 	_suppression_state_by_fireteam[fireteam_id] = next_state
+
+
+func _get_or_store_suppression_runtime_baseline(unit, runtime_status, suppression_level: int) -> Dictionary:
+	if not (unit is Node):
+		return _build_suppression_runtime_snapshot(runtime_status)
+	var unit_node: Node = unit as Node
+	if unit_node.has_meta(SUPPRESSION_RUNTIME_BASELINE_META_KEY):
+		return Dictionary(unit_node.get_meta(SUPPRESSION_RUNTIME_BASELINE_META_KEY)).duplicate(true)
+	if suppression_level <= 0:
+		return {}
+	var baseline: Dictionary = _build_suppression_runtime_snapshot(runtime_status)
+	unit_node.set_meta(SUPPRESSION_RUNTIME_BASELINE_META_KEY, baseline.duplicate(true))
+	return baseline
+
+
+func _build_suppression_runtime_snapshot(runtime_status) -> Dictionary:
+	if runtime_status == null:
+		return {}
+	return {
+		"status": String(runtime_status.status),
+		"active_command_type": String(runtime_status.active_command_type),
+		"priority": int(runtime_status.priority),
+		"fire_status": String(runtime_status.fire_status),
+		"source_command_type": String(runtime_status.source_command_type),
+		"move_speed_factor": float(runtime_status.move_speed_factor),
+		"cover_score": float(runtime_status.cover_score),
+		"attack_bonus": float(runtime_status.attack_bonus),
+		"phase": int(runtime_status.phase),
+		"target_position": runtime_status.target_position,
+		"movement_posture": String(runtime_status.movement_posture),
+		"weapon_posture": String(runtime_status.weapon_posture),
+		"posture_policy_id": String(runtime_status.posture_policy_id),
+		"sight_range_factor": float(runtime_status.sight_range_factor),
+		"aim_readiness_percent": float(runtime_status.get("aim_readiness_percent")),
+	}
+
+
+func _apply_suppression_runtime_snapshot(unit, snapshot: Dictionary) -> void:
+	if unit == null or snapshot.is_empty() or not unit.has_method("set_runtime_status"):
+		return
+	unit.call(
+		"set_runtime_status",
+		String(snapshot.get("status", "idle")),
+		String(snapshot.get("active_command_type", "")),
+		int(snapshot.get("priority", 0)),
+		String(snapshot.get("fire_status", "fire_at_will")),
+		String(snapshot.get("source_command_type", "")),
+		float(snapshot.get("move_speed_factor", 1.0)),
+		float(snapshot.get("cover_score", 0.0)),
+		float(snapshot.get("attack_bonus", 0.0)),
+		int(snapshot.get("phase", -1)),
+		snapshot.get("target_position", null),
+		String(snapshot.get("movement_posture", "")),
+		String(snapshot.get("weapon_posture", "")),
+		String(snapshot.get("posture_policy_id", "")),
+		float(snapshot.get("sight_range_factor", 1.0)),
+		float(snapshot.get("aim_readiness_percent", 0.0))
+	)
 
 
 func _try_auto_resume_after_suppression(fireteam_id: String) -> void:
@@ -12239,7 +12500,7 @@ func _is_phase_waypoint_target_reached(fireteam_id: String, resolved_target_posi
 		return true
 	var movement_state: Dictionary = Dictionary(movement_result.get("movement_state", {})).duplicate(true)
 	if not movement_state.is_empty():
-		if _is_phase_waypoint_soft_completion_allowed(execution_state) and _are_movement_state_targets_soft_reached(fireteam_id, movement_state):
+		if _is_phase_waypoint_soft_completion_allowed(execution_state) and _is_movement_state_on_final_waypoint_stage(resolved_target_position, movement_state) and _are_movement_state_targets_soft_reached(fireteam_id, movement_state):
 			return true
 		return false
 	if movement_was_active:
@@ -12257,6 +12518,16 @@ func _is_phase_waypoint_soft_completion_allowed(execution_state: Dictionary) -> 
 	if started_msec <= 0:
 		return false
 	return Time.get_ticks_msec() - started_msec >= PHASE_WAYPOINT_SOFT_RELEASE_MIN_MSEC
+
+
+func _is_movement_state_on_final_waypoint_stage(resolved_target_position: Vector2, movement_state: Dictionary) -> bool:
+	if movement_state.is_empty():
+		return false
+	var final_target_position: Vector2 = Vector2(movement_state.get("final_target_position", resolved_target_position))
+	var current_anchor_target_position: Vector2 = Vector2(movement_state.get("current_anchor_target_position", final_target_position))
+	if current_anchor_target_position.distance_to(final_target_position) > PHASE_WAYPOINT_COMPLETE_RADIUS:
+		return false
+	return final_target_position.distance_to(resolved_target_position) <= PHASE_WAYPOINT_SOFT_CENTER_REACHED_RADIUS
 
 
 func _are_movement_state_targets_soft_reached(fireteam_id: String, movement_state: Dictionary) -> bool:
@@ -15291,7 +15562,13 @@ func _update_parallel_drop_sequences(delta: float) -> void:
 	for completed_craft_id in completed_craft_ids:
 		_parallel_drop_sequences_by_craft.erase(completed_craft_id)
 	if changed:
-		_flush_mission_dropship_runtime_feedback(force_feedback_flush, true)
+		if force_feedback_flush:
+			_flush_mission_dropship_runtime_feedback(true, true)
+		else:
+			_refresh_world_overlays()
+			if _mission_dropship_runtime_ui_refresh_remaining <= 0.0:
+				_mission_dropship_runtime_ui_refresh_remaining = MISSION_DROPSHIP_RUNTIME_UI_REFRESH_SECONDS
+				_refresh_mission_dropship_panel()
 
 
 func _update_drop_sequence_dict(sequence: Dictionary, delta: float) -> bool:

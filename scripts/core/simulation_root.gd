@@ -2,6 +2,7 @@ class_name SimulationRoot
 extends Node
 
 signal tick_processed(tick: int)
+signal damage_effect_resolved(result: Dictionary)
 
 const MOVE_SPEED_PER_SECOND: float = 80.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
@@ -117,6 +118,7 @@ var _local_avoidance_prepared_tick: int = -1
 var _local_avoidance_debug_by_unit_id: Dictionary = {}
 var _local_avoidance_stuck_seconds_by_unit_id: Dictionary = {}
 var _bottleneck_reservation_debug_snapshot: Dictionary = {}
+var _last_damage_effect_resolution: Dictionary = {}
 
 
 func _init() -> void:
@@ -374,6 +376,10 @@ func set_combat_rng_seed(seed_value: int) -> void:
 
 func get_next_combat_roll() -> float:
 	return _combat_rng.randf()
+
+
+func get_last_damage_effect_resolution() -> Dictionary:
+	return _last_damage_effect_resolution.duplicate(true)
 
 
 func register_known_unit(unit_id: String, unit: Node) -> bool:
@@ -1615,6 +1621,12 @@ func _should_recompute_move_path(
 	if unit_id.is_empty():
 		return false
 
+	if bool(cmd.get("local_avoidance_repath_requested", false)):
+		cmd.erase("local_avoidance_repath_requested")
+		cmd.erase("local_avoidance_deadlock")
+		_contact_path_recompute_ready_at_msec.erase(unit_id)
+		return true
+
 	if not bool(cmd.get("requeue_until_target", true)) or not _is_unit_in_contact(unit):
 		_contact_path_recompute_ready_at_msec.erase(unit_id)
 		return false
@@ -2124,13 +2136,15 @@ func _build_navigation_cost_options(cmd: Dictionary, terrain_registry) -> Dictio
 	if cmd.has("navigation_cover_weight"):
 		weights["cover_weight"] = maxf(float(cmd.get("navigation_cover_weight", 0.0)), 0.0)
 
-	return {
+	var options: Dictionary = {
 		"cover_aware_enabled": cover_aware_enabled,
 		"exposure_weight": float(weights.get("exposure_weight", navigation_default_exposure_weight)),
 		"cover_weight": float(weights.get("cover_weight", navigation_default_cover_weight)),
 		"exposure_max_grid_distance": float(cmd.get("navigation_exposure_max_grid_distance", navigation_exposure_max_grid_distance)),
 		"hazard_grids": _extract_navigation_hazard_grids(cmd, terrain_registry),
 	}
+	_append_navigation_corridor_options(options, cmd, terrain_registry)
+	return options
 
 
 func _get_navigation_cost_weights_for_command(cmd: Dictionary) -> Dictionary:
@@ -2181,6 +2195,72 @@ func _extract_navigation_hazard_grids(cmd: Dictionary, terrain_registry) -> Arra
 func _append_unique_navigation_hazard_grid(hazard_grids: Array, grid_position: Vector2i) -> void:
 	if not hazard_grids.has(grid_position):
 		hazard_grids.append(grid_position)
+
+
+func _append_navigation_corridor_options(options: Dictionary, cmd: Dictionary, terrain_registry) -> void:
+	if terrain_registry == null or not terrain_registry.has_method("world_to_grid"):
+		return
+	if bool(cmd.get("navigation_corridor_enabled", false)):
+		var start_position_variant: Variant = cmd.get("navigation_corridor_start_position", null)
+		var end_position_variant: Variant = cmd.get("navigation_corridor_end_position", null)
+		if typeof(start_position_variant) == TYPE_VECTOR2 and typeof(end_position_variant) == TYPE_VECTOR2:
+			options["corridor_enabled"] = true
+			options["corridor_from_grid"] = terrain_registry.call("world_to_grid", Vector2(start_position_variant))
+			options["corridor_to_grid"] = terrain_registry.call("world_to_grid", Vector2(end_position_variant))
+			options["corridor_half_width_grid"] = _world_distance_to_navigation_grid_distance(
+				maxf(float(cmd.get("navigation_corridor_half_width_world", 0.0)), 0.0),
+				terrain_registry
+			)
+			options["corridor_weight"] = maxf(float(cmd.get("navigation_corridor_weight", 0.0)), 0.0)
+	if bool(cmd.get("navigation_lane_enabled", false)):
+		options["lane_enabled"] = true
+		var lane_sample_variant: Variant = cmd.get("navigation_lane_sample_position", null)
+		if (
+			bool(options.get("corridor_enabled", false))
+			and typeof(lane_sample_variant) == TYPE_VECTOR2
+			and options.has("corridor_from_grid")
+			and options.has("corridor_to_grid")
+		):
+			options["lane_offset_grid"] = _signed_navigation_grid_line_distance(
+				Vector2i(terrain_registry.call("world_to_grid", Vector2(lane_sample_variant))),
+				Vector2i(options.get("corridor_from_grid", Vector2i.ZERO)),
+				Vector2i(options.get("corridor_to_grid", Vector2i.ZERO))
+			)
+		else:
+			options["lane_offset_grid"] = _world_distance_to_navigation_grid_distance(
+				float(cmd.get("navigation_lane_offset_world", 0.0)),
+				terrain_registry
+			)
+		options["lane_weight"] = maxf(float(cmd.get("navigation_lane_weight", 0.0)), 0.0)
+	if cmd.has("navigation_blocker_clearance_weight"):
+		options["blocker_clearance_weight"] = maxf(float(cmd.get("navigation_blocker_clearance_weight", 0.0)), 0.0)
+	if cmd.has("navigation_blocker_clearance_radius"):
+		options["blocker_clearance_radius"] = maxi(int(cmd.get("navigation_blocker_clearance_radius", 1)), 1)
+
+
+func _world_distance_to_navigation_grid_distance(world_distance: float, terrain_registry) -> float:
+	if is_zero_approx(world_distance):
+		return 0.0
+	if terrain_registry == null or not terrain_registry.has_method("grid_to_world"):
+		return world_distance
+	var origin_world: Vector2 = Vector2(terrain_registry.call("grid_to_world", Vector2i.ZERO))
+	var x_world: Vector2 = Vector2(terrain_registry.call("grid_to_world", Vector2i.RIGHT))
+	var y_world: Vector2 = Vector2(terrain_registry.call("grid_to_world", Vector2i.DOWN))
+	var tile_world_distance: float = maxf((x_world - origin_world).length(), (y_world - origin_world).length())
+	if tile_world_distance <= 0.001:
+		return world_distance
+	return world_distance / tile_world_distance
+
+
+func _signed_navigation_grid_line_distance(grid_position: Vector2i, from_grid: Vector2i, to_grid: Vector2i) -> float:
+	var from_value: Vector2 = Vector2(from_grid)
+	var to_value: Vector2 = Vector2(to_grid)
+	var point_value: Vector2 = Vector2(grid_position)
+	var line: Vector2 = to_value - from_value
+	var length: float = line.length()
+	if length <= 0.001:
+		return 0.0
+	return line.cross(point_value - from_value) / length
 
 
 func _annotate_navigation_query_metrics(query: Dictionary, path_grid_points: Array, terrain_registry, navigation_options: Dictionary) -> void:
@@ -2438,23 +2518,65 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		target_cover_score = clampf(_extract_float(effect.get("target_cover_override", target_cover_score), target_cover_score), 0.0, 80.0)
 	var attacker_attack_bonus: float = _extract_unit_attack_bonus(attacker_unit)
 	var attacker_cover_score: float = _extract_unit_cover_score(attacker_unit)
+	var target_cover_ratio: float = _normalize_cover_score_for_combat(target_cover_score)
+	var attacker_cover_ratio: float = _normalize_cover_score_for_combat(attacker_cover_score)
 	var hit_chance: float = _extract_float(effect.get("hit_chance", 1.0), 1.0)
 	hit_chance *= _extract_unit_accuracy_multiplier(attacker_unit)
 	hit_chance = clampf(
-		hit_chance + attacker_attack_bonus + _extract_unit_hit_modifier(attacker_unit) + _extract_height_accuracy_modifier(attacker_unit, unit) + (attacker_cover_score * ATTACKER_COVER_HIT_BONUS_FACTOR) - _extract_unit_evasion_modifier(unit) - (target_cover_score * TARGET_COVER_HIT_PENALTY_FACTOR),
+		hit_chance
+		+ attacker_attack_bonus
+		+ _extract_unit_hit_modifier(attacker_unit)
+		+ _extract_height_accuracy_modifier(attacker_unit, unit)
+		+ (attacker_cover_ratio * ATTACKER_COVER_HIT_BONUS_FACTOR)
+		- _extract_unit_evasion_modifier(unit)
+		- (target_cover_ratio * TARGET_COVER_HIT_PENALTY_FACTOR),
 		HIT_CHANCE_MIN,
 		HIT_CHANCE_MAX
 	)
 	var roll: float = _extract_damage_roll(effect)
 	var damage_multiplier: float = _extract_float(effect.get("damage_multiplier", 1.0), 1.0)
-	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_score * TARGET_COVER_DAMAGE_PENALTY_FACTOR), DAMAGE_MULTIPLIER_MIN)
+	damage_multiplier = maxf(damage_multiplier + attacker_attack_bonus - (target_cover_ratio * TARGET_COVER_DAMAGE_PENALTY_FACTOR), DAMAGE_MULTIPLIER_MIN)
 	damage_multiplier *= _extract_unit_damage_taken_multiplier(unit)
 	var damage_model = DAMAGE_MODEL_SCRIPT.new()
 	if not bool(damage_model.call("resolve_hit", hit_chance, roll)):
+		_emit_damage_effect_resolution(_build_damage_effect_resolution(
+			effect,
+			unit,
+			attacker_unit,
+			false,
+			hit_chance,
+			roll,
+			base_damage,
+			0,
+			damage_multiplier,
+			attacker_attack_bonus,
+			attacker_cover_score,
+			attacker_cover_ratio,
+			target_cover_score,
+			target_cover_ratio,
+			is_friendly_fire
+		))
 		return
 
 	var resolved_damage: int = int(damage_model.call("resolve_damage", base_damage, damage_multiplier))
 	if resolved_damage <= 0:
+		_emit_damage_effect_resolution(_build_damage_effect_resolution(
+			effect,
+			unit,
+			attacker_unit,
+			true,
+			hit_chance,
+			roll,
+			base_damage,
+			resolved_damage,
+			damage_multiplier,
+			attacker_attack_bonus,
+			attacker_cover_score,
+			attacker_cover_ratio,
+			target_cover_score,
+			target_cover_ratio,
+			is_friendly_fire
+		))
 		return
 
 	var hit_context: Dictionary = {
@@ -2467,6 +2589,12 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		"target_profile_evasion_modifier": _extract_unit_evasion_modifier(unit),
 		"height_accuracy_modifier": _extract_height_accuracy_modifier(attacker_unit, unit),
 		"target_cover_score": target_cover_score,
+		"target_cover_ratio": target_cover_ratio,
+		"attacker_cover_score": attacker_cover_score,
+		"attacker_cover_ratio": attacker_cover_ratio,
+		"resolved_hit_chance": hit_chance,
+		"roll": roll,
+		"damage_multiplier": damage_multiplier,
 		"friendly_fire": is_friendly_fire,
 		"weapon_id": String(effect.get("weapon_id", "")),
 		"fire_event_id": String(effect.get("fire_event_id", "")),
@@ -2478,6 +2606,84 @@ func _apply_damage_effect(effect: Dictionary) -> void:
 		hit_context["flank_direction_label"] = String(effect.get("flank_direction_label", "")).strip_edges().to_lower()
 		hit_context["flank_morale_state"] = String(effect.get("flank_morale_state", "")).strip_edges().to_lower()
 	unit.call("apply_damage", resolved_damage, hit_context)
+	_emit_damage_effect_resolution(_build_damage_effect_resolution(
+		effect,
+		unit,
+		attacker_unit,
+		true,
+		hit_chance,
+		roll,
+		base_damage,
+		resolved_damage,
+		damage_multiplier,
+		attacker_attack_bonus,
+		attacker_cover_score,
+		attacker_cover_ratio,
+		target_cover_score,
+		target_cover_ratio,
+		is_friendly_fire
+	))
+
+
+func _build_damage_effect_resolution(
+	effect: Dictionary,
+	unit,
+	attacker_unit,
+	did_hit: bool,
+	hit_chance: float,
+	roll: float,
+	base_damage: int,
+	resolved_damage: int,
+	damage_multiplier: float,
+	attacker_attack_bonus: float,
+	attacker_cover_score: float,
+	attacker_cover_ratio: float,
+	target_cover_score: float,
+	target_cover_ratio: float,
+	is_friendly_fire: bool
+) -> Dictionary:
+	var target_health_points: int = -1
+	var target_vital_state: String = ""
+	if unit != null:
+		if unit.has_method("get_health_points"):
+			target_health_points = int(unit.call("get_health_points"))
+		elif unit.has_method("get_health"):
+			target_health_points = int(unit.call("get_health"))
+		if unit.has_method("get_vital_state"):
+			target_vital_state = String(unit.call("get_vital_state"))
+	return {
+		"effect_type": "damage",
+		"unit_id": String(effect.get("unit_id", "")),
+		"target_unit_id": String(effect.get("unit_id", "")),
+		"attacker_unit_id": String(effect.get("attacker_unit_id", "")),
+		"attacker_team_id": String(effect.get("attacker_team_id", "")),
+		"weapon_id": String(effect.get("weapon_id", "")),
+		"fire_event_id": String(effect.get("fire_event_id", "")),
+		"hit": did_hit,
+		"outcome": "hit" if did_hit else "miss",
+		"hit_chance_resolved": hit_chance,
+		"roll": roll,
+		"base_damage": base_damage,
+		"damage_resolved": resolved_damage,
+		"damage_multiplier_resolved": damage_multiplier,
+		"attacker_attack_bonus": attacker_attack_bonus,
+		"attacker_cover_score": attacker_cover_score,
+		"attacker_cover_ratio": attacker_cover_ratio,
+		"target_cover_score": target_cover_score,
+		"target_cover_ratio": target_cover_ratio,
+		"target_health_points": target_health_points,
+		"target_vital_state": target_vital_state,
+		"target_position": _get_unit_world_position_for_damage_resolution(unit),
+		"attacker_position": _get_unit_world_position_for_damage_resolution(attacker_unit),
+		"friendly_fire": is_friendly_fire,
+	}
+
+
+func _emit_damage_effect_resolution(result: Dictionary) -> void:
+	var snapshot: Dictionary = result.duplicate(true)
+	snapshot["read_only"] = true
+	_last_damage_effect_resolution = snapshot
+	damage_effect_resolved.emit(snapshot.duplicate(true))
 
 
 func _extract_damage_roll(effect: Dictionary) -> float:
@@ -2575,6 +2781,10 @@ func _extract_unit_cover_score(unit) -> float:
 	return float(unit.call("get_cover_score"))
 
 
+func _normalize_cover_score_for_combat(cover_score: float) -> float:
+	return clampf(cover_score / 100.0, 0.0, 1.0)
+
+
 func _extract_effective_cover_score(unit) -> float:
 	var command_cover_score: float = _extract_unit_cover_score(unit)
 	var terrain_cover_score: float = _extract_terrain_cover_score(unit)
@@ -2583,10 +2793,16 @@ func _extract_effective_cover_score(unit) -> float:
 
 func _extract_terrain_cover_score(unit) -> float:
 	var terrain_registry = _get_terrain_registry()
-	if terrain_registry == null or unit == null or not (unit is Node2D):
+	if terrain_registry == null or unit == null or not (unit is Node2D) or not terrain_registry.has_method("get_cover_at_world"):
 		return 0.0
 
 	return float(terrain_registry.call("get_cover_at_world", (unit as Node2D).global_position))
+
+
+func _get_unit_world_position_for_damage_resolution(unit) -> Vector2:
+	if unit is Node2D:
+		return (unit as Node2D).global_position
+	return Vector2.ZERO
 
 
 func _extract_unit_attack_bonus(unit) -> float:

@@ -36,6 +36,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 		"scenario_file_path": "res://data/mission_scenarios/fireteam_command_drill_24x24.json",
 		"slot_count": 4,
 		"time_limit_seconds": 900.0,
+		"win_condition": "elimination",
 	},
 	{
 		"mission_id": "frontier_probe",
@@ -583,6 +584,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 	if selected_fireteam_ids.is_empty():
 		selected_fireteam_ids = _selected_fireteam_ids.duplicate()
 	_configure_mission_overlay_nodes(mission_instance, preview_mode)
+	var selected_mission: Dictionary = _get_selected_mission_definition()
 
 	var mission_setup = mission_instance.get_node_or_null("MissionSetup")
 	if mission_setup != null:
@@ -602,7 +604,6 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			var fob_screen_for_configs: Node = get_node_or_null("FOBScreen")
 			if fob_screen_for_configs != null and fob_screen_for_configs.has_method("get_selected_unit_configs"):
 				mission_setup.set("selected_team_unit_configs", Array(fob_screen_for_configs.call("get_selected_unit_configs")).duplicate(true))
-		var selected_mission: Dictionary = _get_selected_mission_definition()
 		mission_setup.set("map_file_path", String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
 		mission_setup.set("scenario_file_path", String(selected_mission.get("scenario_file_path", "")).strip_edges())
 		mission_setup.set("defer_friendly_runtime_activation", _should_defer_friendly_runtime_activation())
@@ -633,7 +634,10 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 	var combat_driver = mission_instance.get_node_or_null("CombatLoopDriver")
 	if combat_driver != null:
 		combat_driver.set("friendly_unit_paths", _build_selected_friendly_paths(selected_unit_ids))
-		combat_driver.set("mission_time_limit_seconds", float(_get_selected_mission_definition().get("time_limit_seconds", 1200.0)))
+		combat_driver.set("mission_time_limit_seconds", float(selected_mission.get("time_limit_seconds", 1200.0)))
+		var selected_win_condition: String = String(selected_mission.get("win_condition", "")).strip_edges().to_lower()
+		if not selected_win_condition.is_empty():
+			combat_driver.set("win_condition", selected_win_condition)
 		if _active_mission_started_at_msec > 0:
 			combat_driver.set("mission_timer_started_at_msec", _active_mission_started_at_msec)
 

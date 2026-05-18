@@ -120,9 +120,10 @@ func _test_muzzle_flash_snapshot_is_visible() -> void:
 	var entries: Array = Array(snapshot.get("weapon_fire_vfx_entries", []))
 	var entry: Dictionary = _find_entry(entries, "event_id", "task432_fire")
 	_assert(int(snapshot.get("weapon_fire_vfx_visual_count", 0)) == 1, "One fire event still creates one VFX token")
-	_assert(bool(entry.get("muzzle_flash_visible", false)), "Muzzle flash sprite is visible")
+	_assert(bool(entry.get("muzzle_flash_visible", false)), "Muzzle flash impulse is visible")
 	_assert(bool(entry.get("muzzle_bloom_visible", false)), "Muzzle bloom marker is visible")
-	_assert(float(entry.get("muzzle_flash_pixel_size", 0.0)) >= 0.026, "Muzzle flash is clamped to a readable size")
+	_assert(float(entry.get("muzzle_flash_pixel_size", 0.0)) >= 0.006 and float(entry.get("muzzle_flash_pixel_size", 0.0)) <= 0.014, "Muzzle texture scale stays in the small debug baseline")
+	_assert(bool(entry.get("muzzle_texture_card_suppressed", false)) or bool(entry.get("muzzle_texture_missing", false)), "Large muzzle texture card is not rendered in the debug VFX path")
 	primary_view.queue_free()
 	await _wait_frames(2)
 
