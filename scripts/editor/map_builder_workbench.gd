@@ -13,6 +13,7 @@ const DEFAULT_MANIFEST_PATH: String = "res://data/map_builder_workbench_manifest
 @export var output_path: String = "res://maps/map_builder_workbench_output.json"
 @export var auto_configure_on_ready: bool = true
 @export var seed_demo_layout_when_empty: bool = true
+@export var show_runtime_f6_hint: bool = true
 
 var _manifest: Dictionary = {}
 var _item_type_map: Dictionary = {}
@@ -24,6 +25,8 @@ var _last_warnings: Array[String] = []
 func _ready() -> void:
 	if auto_configure_on_ready:
 		call_deferred("configure_workbench")
+	if not Engine.is_editor_hint() and show_runtime_f6_hint:
+		call_deferred("_show_runtime_hint")
 
 
 func configure_workbench(force_rebuild: bool = false) -> Dictionary:
@@ -107,6 +110,32 @@ func get_workbench_snapshot() -> Dictionary:
 		"item_type_map_count": _item_type_map.size(),
 		"warnings": _last_warnings.duplicate(),
 	}
+
+
+func _show_runtime_hint() -> void:
+	if get_node_or_null("RuntimeHintLayer") != null:
+		return
+	var layer := CanvasLayer.new()
+	layer.name = "RuntimeHintLayer"
+	add_child(layer)
+
+	var panel := PanelContainer.new()
+	panel.position = Vector2(16.0, 16.0)
+	panel.custom_minimum_size = Vector2(520.0, 0.0)
+	layer.add_child(panel)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 12)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 12)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	panel.add_child(margin)
+
+	var label := Label.new()
+	label.text = "Map Builder Workbench\nF6 ist nur Vorschau. Zum Bauen im Godot-Editor das Dock 'Map Builder' nutzen: Workbench vorbereiten, GridMap auswaehlen, Props unter AssetPlacerProps setzen, dann kompilieren."
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	margin.add_child(label)
 
 
 func _load_manifest() -> Dictionary:

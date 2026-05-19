@@ -118,6 +118,7 @@ git checkout -b batch/<batch-name>
 - TASK_486 - Map Builder Tooling Spike
 - TASK_487 - Install Godot Asset Placer
 - TASK_488 - Map Builder Workbench MeshLibrary MVP
+- TASK_489 - Map Builder Workbench Editor Entry
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
