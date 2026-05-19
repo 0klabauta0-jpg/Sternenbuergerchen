@@ -134,6 +134,11 @@ const GROUND_MULTIMESH_MODEL_KEYS: PackedStringArray = [
 	"modular_floor",
 	"modular_floor_big",
 	"modular_floor_raised",
+	"spacekit_terrain_road_corner",
+	"spacekit_terrain_road_cross",
+	"spacekit_terrain_road_end",
+	"spacekit_terrain_road_split",
+	"spacekit_terrain_road_straight",
 ]
 const STATIC_PROP_MULTIMESH_MODEL_KEYS: PackedStringArray = [
 	"nature_tree_blocker",
@@ -2209,7 +2214,7 @@ func _add_ground_model_visual(tile_data, top_y: float, visual_type_id: String = 
 	var ground_root := Node3D.new()
 	ground_root.name = "Tile_%d_%d" % [tile_data.grid_position.x, tile_data.grid_position.y]
 	var model_height: float = _get_normalized_model_height(model_instance)
-	var model_scale: float = _get_ground_surface_model_scale(normalized_visual_type_id)
+	var model_scale: float = _get_ground_surface_model_scale(normalized_visual_type_id) * _get_tile_object_scale(tile_data)
 	var visual_height: float = model_height * model_scale
 	var surface_top_y_offset: float = _get_ground_surface_top_y_offset(normalized_visual_type_id)
 	var visual_top_y: float = top_y + surface_top_y_offset
@@ -2247,7 +2252,7 @@ func _queue_ground_model_batch(tile_data, top_y: float, visual_type_id: String =
 		_space_station_model_count += 1
 		_space_station_textured_surface_count += maxi(int(source.get("surface_count", 0)), 1)
 
-	var model_scale: float = _get_ground_surface_model_scale(normalized_visual_type_id)
+	var model_scale: float = _get_ground_surface_model_scale(normalized_visual_type_id) * _get_tile_object_scale(tile_data)
 	var visual_height: float = float(source.get("model_height", 0.0)) * model_scale
 	var surface_top_y_offset: float = _get_ground_surface_top_y_offset(normalized_visual_type_id)
 	var visual_top_y: float = top_y + surface_top_y_offset
@@ -2403,7 +2408,7 @@ func _get_ground_batch_chunk_position(grid_position: Vector2i) -> Vector2i:
 
 func _ground_surface_supports_tile_rotation(visual_type_id: String) -> bool:
 	var normalized_visual_type_id: String = visual_type_id.strip_edges().to_lower()
-	return normalized_visual_type_id == "station_floor_panel" or normalized_visual_type_id.begins_with("station_set_floor") or normalized_visual_type_id == "modular_floor" or normalized_visual_type_id == "modular_floor_big" or normalized_visual_type_id == "modular_floor_raised"
+	return normalized_visual_type_id == "station_floor_panel" or normalized_visual_type_id.begins_with("station_set_floor") or normalized_visual_type_id == "modular_floor" or normalized_visual_type_id == "modular_floor_big" or normalized_visual_type_id == "modular_floor_raised" or normalized_visual_type_id.begins_with("spacekit_terrain_road_")
 
 
 func _get_surface_theme_dictionary_field(field_name: String) -> Dictionary:
@@ -2592,6 +2597,8 @@ func _get_ground_surface_model_override_color(visual_type_id: String, tile_data)
 			return Color(0.36, 0.35, 0.31, 1.0)
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
 			return Color(0.34, 0.36, 0.34, 1.0)
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_WATER:
+			return Color(0.18, 0.38, 0.55, 1.0)
 		_:
 			return Color(0.38, 0.34, 0.24, 1.0)
 
@@ -2665,6 +2672,8 @@ func _add_surface_tint_visual(tile_data, top_y: float) -> void:
 			tint_color = Color(0.64, 0.69, 0.72, 0.30)
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
 			tint_color = Color(0.54, 0.50, 0.42, 0.32)
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_WATER:
+			tint_color = Color(0.22, 0.58, 0.88, 0.30)
 		_:
 			return
 	if _queue_surface_tint_batch(tile_data, top_y, surface_type, tint_color):
@@ -3424,7 +3433,7 @@ func _queue_static_prop_model_batch(tile_data, top_y: float, visual_type_id: Str
 	var source: Dictionary = _get_static_prop_batch_source(normalized_visual_type_id)
 	if source.is_empty():
 		return false
-	var model_scale: float = _get_asset_model_scale(normalized_visual_type_id)
+	var model_scale: float = _get_asset_model_scale(normalized_visual_type_id) * _get_tile_object_scale(tile_data)
 	var rotation_y: float = _get_asset_rotation_y(normalized_visual_type_id)
 	if apply_tile_rotation:
 		rotation_y += _get_tile_object_rotation_degrees(tile_data)
@@ -3560,7 +3569,7 @@ func _add_asset_model_visual(tile_data, top_y: float, visual_type_id: String, ap
 	visual_root.rotation_degrees.y = _get_asset_rotation_y(visual_type_id)
 	if apply_tile_rotation:
 		visual_root.rotation_degrees.y += _get_tile_object_rotation_degrees(tile_data)
-	visual_root.scale = Vector3.ONE * _get_asset_model_scale(visual_type_id)
+	visual_root.scale = Vector3.ONE * (_get_asset_model_scale(visual_type_id) * _get_tile_object_scale(tile_data))
 	visual_root.add_child(model_instance)
 	_map_root.add_child(visual_root)
 	var mapped_entry: Dictionary = _get_model_entry_for_type(visual_type_id)
@@ -3580,6 +3589,12 @@ func _get_tile_object_rotation_degrees(tile_data) -> float:
 	if tile_data == null:
 		return 0.0
 	return fposmod(float(tile_data.object_rotation_degrees), 360.0)
+
+
+func _get_tile_object_scale(tile_data) -> float:
+	if tile_data == null:
+		return 1.0
+	return clampf(float(tile_data.object_scale), 0.25, 2.5)
 
 
 func _register_nature_prop_visual(

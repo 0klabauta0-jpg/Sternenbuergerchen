@@ -31,6 +31,12 @@ const DEFAULT_TACTICAL_AUTHORING: Dictionary = {
 		"loss_consequence": "replacement_recovery",
 	},
 }
+const BRIEFING_MINIMAP_MODE_NONE: String = "none"
+const BRIEFING_MINIMAP_MODE_TERRAIN_ONLY: String = "terrain_only"
+const ALLOWED_BRIEFING_MINIMAP_MODES: PackedStringArray = [
+	BRIEFING_MINIMAP_MODE_NONE,
+	BRIEFING_MINIMAP_MODE_TERRAIN_ONLY,
+]
 const FORBIDDEN_LZ_KEYS: PackedStringArray = [
 	"lz",
 	"player_lz",
@@ -55,6 +61,7 @@ var enemy_groups: Array = []
 var wave_config: Dictionary = {}
 var patrol_bindings: Array = []
 var tactical_authoring: Dictionary = {}
+var briefing: Dictionary = {}
 var notes: PackedStringArray = PackedStringArray()
 
 var _load_issues: PackedStringArray = PackedStringArray()
@@ -147,6 +154,9 @@ func to_dict() -> Dictionary:
 		data["win_condition"] = win_condition
 	if mission_slot_count_override > 0:
 		data["mission_slot_count_override"] = mission_slot_count_override
+	var serialized_briefing: Dictionary = _serialize_briefing()
+	if _briefing_has_content(serialized_briefing):
+		data["briefing"] = serialized_briefing
 	if not notes.is_empty():
 		data["notes"] = Array(notes)
 	return data
@@ -179,6 +189,7 @@ func validate() -> Dictionary:
 	_validate_wave_config(errors)
 	_validate_patrol_bindings(terrain_map_data, enemy_ids, errors)
 	_validate_tactical_authoring(terrain_map_data, errors)
+	_validate_briefing(errors)
 
 	return {
 		"valid": errors.is_empty(),
@@ -236,6 +247,14 @@ func get_tactical_authoring_config() -> Dictionary:
 
 func get_air_asset_risk_config() -> Dictionary:
 	return Dictionary(get_tactical_authoring_config().get("air_asset_risk", {})).duplicate(true)
+
+
+func get_briefing() -> Dictionary:
+	return _coerce_briefing(briefing).duplicate(true)
+
+
+func get_briefing_recommended_loadout() -> Array:
+	return Array(get_briefing().get("recommended_loadout", [])).duplicate(true)
 
 
 func get_enemy_air_asset_threats(terrain_map_data = null) -> Array:
@@ -305,6 +324,7 @@ func _apply_dict(data: Dictionary) -> void:
 	wave_config = _coerce_wave_config(Dictionary(data.get("wave_config", {})))
 	patrol_bindings = _coerce_patrol_bindings(data.get("patrol_bindings", []))
 	tactical_authoring = _coerce_tactical_authoring(Dictionary(data.get("tactical_authoring", data.get("tactical_profile", {}))))
+	briefing = _coerce_briefing(data.get("briefing", data.get("mission_briefing", {})))
 	notes = _coerce_notes(data.get("notes", []))
 
 
@@ -385,6 +405,27 @@ func _validate_tactical_authoring(terrain_map_data, errors: PackedStringArray) -
 		errors.append("tactical_authoring.air_asset_risk.lz_threat_zone_id does not exist in map: %s" % lz_threat_zone_id)
 	if risk_profile == "loss_capable" and get_enemy_air_asset_threats(terrain_map_data).is_empty():
 		errors.append("tactical_authoring.air_asset_risk loss_capable needs at least one anti-armor enemy group")
+
+
+func _validate_briefing(errors: PackedStringArray) -> void:
+	var normalized_briefing: Dictionary = get_briefing()
+	if normalized_briefing.is_empty():
+		return
+	var minimap_mode: String = String(normalized_briefing.get("minimap_mode", BRIEFING_MINIMAP_MODE_TERRAIN_ONLY)).strip_edges().to_lower()
+	if not ALLOWED_BRIEFING_MINIMAP_MODES.has(minimap_mode):
+		errors.append("briefing.minimap_mode is not allowed: %s" % minimap_mode)
+	var background_image_path: String = String(normalized_briefing.get("background_image_path", "")).strip_edges()
+	if not background_image_path.is_empty():
+		if not background_image_path.begins_with("res://"):
+			errors.append("briefing.background_image_path must use res://: %s" % background_image_path)
+		elif not ResourceLoader.exists(background_image_path) and not FileAccess.file_exists(background_image_path):
+			errors.append("briefing.background_image_path does not exist: %s" % background_image_path)
+	for loadout_index in range(Array(normalized_briefing.get("recommended_loadout", [])).size()):
+		var entry: Dictionary = Dictionary(Array(normalized_briefing.get("recommended_loadout", []))[loadout_index])
+		for weapon_id_variant in Array(entry.get("weapon_ids", [])):
+			var weapon_id: String = String(weapon_id_variant).strip_edges()
+			if not bool(WEAPON_DATA_SCRIPT.call("is_valid_weapon_id", weapon_id)):
+				errors.append("briefing.recommended_loadout[%d].weapon_ids contains unknown weapon id: %s" % [loadout_index, weapon_id])
 
 
 func _validate_wave_config(errors: PackedStringArray) -> void:
@@ -535,6 +576,163 @@ func _coerce_patrol_bindings(value: Variant) -> Array:
 	return result
 
 
+func _coerce_briefing(value: Variant) -> Dictionary:
+	if typeof(value) != TYPE_DICTIONARY:
+		return {}
+	var raw: Dictionary = Dictionary(value)
+	var result: Dictionary = {}
+	var title: String = String(raw.get("title", raw.get("headline", ""))).strip_edges()
+	if not title.is_empty():
+		result["title"] = title
+	var summary: String = String(raw.get("summary", raw.get("body", ""))).strip_edges()
+	if not summary.is_empty():
+		result["summary"] = summary
+	var background_image_path: String = String(raw.get("background_image_path", raw.get("background_path", raw.get("image_path", "")))).strip_edges()
+	if not background_image_path.is_empty():
+		result["background_image_path"] = background_image_path
+	var objectives: Array = _coerce_briefing_text_entries(raw.get("objectives", raw.get("objective_lines", [])))
+	if not objectives.is_empty():
+		result["objectives"] = objectives
+	var threats: Array = _coerce_briefing_text_entries(raw.get("threats", raw.get("threat_lines", [])))
+	if not threats.is_empty():
+		result["threats"] = threats
+	var recommended_loadout: Array = _coerce_briefing_loadout_entries(raw.get("recommended_loadout", raw.get("loadout_recommendations", [])))
+	if not recommended_loadout.is_empty():
+		result["recommended_loadout"] = recommended_loadout
+	var annotations: Array = _coerce_briefing_annotations(raw.get("annotations", []))
+	if not annotations.is_empty():
+		result["annotations"] = annotations
+	var minimap_mode_value = raw.get("minimap_mode", BRIEFING_MINIMAP_MODE_TERRAIN_ONLY)
+	if typeof(raw.get("minimap", null)) == TYPE_DICTIONARY:
+		minimap_mode_value = Dictionary(raw.get("minimap", {})).get("mode", minimap_mode_value)
+	var minimap_mode: String = String(minimap_mode_value).strip_edges().to_lower()
+	if minimap_mode.is_empty():
+		minimap_mode = BRIEFING_MINIMAP_MODE_TERRAIN_ONLY
+	if _briefing_has_content(result) or _briefing_has_minimap_authoring(raw):
+		result["minimap_mode"] = minimap_mode
+	return result
+
+
+func _coerce_briefing_text_entries(value: Variant) -> Array:
+	var result: Array = []
+	if value is PackedStringArray:
+		value = Array(PackedStringArray(value))
+	elif typeof(value) == TYPE_STRING:
+		value = [String(value)]
+	if not (value is Array):
+		return result
+	for item_variant in Array(value):
+		if typeof(item_variant) == TYPE_DICTIONARY:
+			var item_dict: Dictionary = Dictionary(item_variant)
+			var text: String = String(item_dict.get("text", item_dict.get("label", ""))).strip_edges()
+			if text.is_empty():
+				continue
+			var entry: Dictionary = {"text": text}
+			var target_id: String = String(item_dict.get("target_id", "")).strip_edges()
+			if not target_id.is_empty():
+				entry["target_id"] = target_id
+			result.append(entry)
+			continue
+		var item_text: String = String(item_variant).strip_edges()
+		if not item_text.is_empty() and not result.has(item_text):
+			result.append(item_text)
+	return result
+
+
+func _coerce_briefing_loadout_entries(value: Variant) -> Array:
+	var result: Array = []
+	if typeof(value) == TYPE_DICTIONARY:
+		value = [value]
+	elif typeof(value) == TYPE_STRING:
+		value = [{"weapon_ids": [String(value)]}]
+	if not (value is Array):
+		return result
+	for entry_variant in Array(value):
+		var raw_entry: Dictionary = {}
+		if typeof(entry_variant) == TYPE_DICTIONARY:
+			raw_entry = Dictionary(entry_variant)
+		elif typeof(entry_variant) == TYPE_STRING:
+			raw_entry = {"weapon_ids": [String(entry_variant)]}
+		else:
+			continue
+		var entry: Dictionary = {}
+		var role_id: String = String(raw_entry.get("role_id", raw_entry.get("role", ""))).strip_edges().to_lower()
+		if not role_id.is_empty():
+			entry["role_id"] = role_id
+		var label: String = String(raw_entry.get("label", "")).strip_edges()
+		if not label.is_empty():
+			entry["label"] = label
+		var armor_id: String = String(raw_entry.get("armor_id", raw_entry.get("armor", ""))).strip_edges().to_lower()
+		if not armor_id.is_empty():
+			entry["armor_id"] = armor_id
+		var count: int = int(raw_entry.get("count", 0))
+		if count > 0:
+			entry["count"] = count
+		var weapon_ids: PackedStringArray = _coerce_briefing_weapon_ids(raw_entry.get("weapon_ids", raw_entry.get("weapons", raw_entry.get("weapon_id", []))))
+		if not weapon_ids.is_empty():
+			entry["weapon_ids"] = Array(weapon_ids)
+		var reason: String = String(raw_entry.get("reason", "")).strip_edges()
+		if not reason.is_empty():
+			entry["reason"] = reason
+		if not entry.is_empty():
+			result.append(entry)
+	return result
+
+
+func _coerce_briefing_weapon_ids(value: Variant) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	if value is PackedStringArray:
+		value = Array(PackedStringArray(value))
+	elif typeof(value) == TYPE_STRING:
+		value = [String(value)]
+	if not (value is Array):
+		return result
+	for weapon_variant in Array(value):
+		var normalized_weapon_id: String = String(WEAPON_DATA_SCRIPT.call("normalize_weapon_id", String(weapon_variant))).strip_edges()
+		if normalized_weapon_id.is_empty():
+			continue
+		if not bool(WEAPON_DATA_SCRIPT.call("is_valid_weapon_id", normalized_weapon_id)):
+			continue
+		if not result.has(normalized_weapon_id):
+			result.append(normalized_weapon_id)
+	return result
+
+
+func _coerce_briefing_annotations(value: Variant) -> Array:
+	var result: Array = []
+	if typeof(value) == TYPE_DICTIONARY:
+		value = [value]
+	elif typeof(value) == TYPE_STRING:
+		value = [{"kind": "note", "text": String(value)}]
+	if not (value is Array):
+		return result
+	for annotation_variant in Array(value):
+		var raw_annotation: Dictionary = {}
+		if typeof(annotation_variant) == TYPE_DICTIONARY:
+			raw_annotation = Dictionary(annotation_variant)
+		elif typeof(annotation_variant) == TYPE_STRING:
+			raw_annotation = {"kind": "note", "text": String(annotation_variant)}
+		else:
+			continue
+		var annotation: Dictionary = {}
+		var kind: String = String(raw_annotation.get("kind", "note")).strip_edges().to_lower()
+		annotation["kind"] = kind if not kind.is_empty() else "note"
+		var text: String = String(raw_annotation.get("text", raw_annotation.get("label", ""))).strip_edges()
+		if not text.is_empty():
+			annotation["text"] = text
+		var target_id: String = String(raw_annotation.get("target_id", "")).strip_edges()
+		if not target_id.is_empty():
+			annotation["target_id"] = target_id
+		if raw_annotation.has("position") and _is_vector2_payload(raw_annotation.get("position", null)):
+			annotation["position"] = _serialize_vector2(_coerce_vector2(raw_annotation.get("position", Vector2.ZERO), Vector2.ZERO))
+		var radius: float = float(raw_annotation.get("radius", 0.0))
+		if radius > 0.0:
+			annotation["radius"] = radius
+		if annotation.size() > 1:
+			result.append(annotation)
+	return result
+
+
 func _serialize_objective() -> Dictionary:
 	var result: Dictionary = {
 		"capture_radius": float(objective.get("capture_radius", DEFAULT_CAPTURE_RADIUS)),
@@ -567,7 +765,13 @@ func _serialize_enemy_groups() -> Array:
 
 
 func _serialize_tactical_authoring() -> Dictionary:
-	return _coerce_tactical_authoring(tactical_authoring)
+	var result: Dictionary = _coerce_tactical_authoring(tactical_authoring)
+	var risk: Dictionary = Dictionary(result.get("air_asset_risk", {})).duplicate(true)
+	for optional_key in ["enemy_group_id", "lz_threat_zone_id"]:
+		if String(risk.get(optional_key, "")).strip_edges().is_empty():
+			risk.erase(optional_key)
+	result["air_asset_risk"] = risk
+	return result
 
 
 func _serialize_wave_config() -> Dictionary:
@@ -589,6 +793,10 @@ func _serialize_patrol_bindings() -> Array:
 	return result
 
 
+func _serialize_briefing() -> Dictionary:
+	return _coerce_briefing(briefing)
+
+
 func _coerce_string_array(value: Variant) -> PackedStringArray:
 	var result: PackedStringArray = PackedStringArray()
 	if value is PackedStringArray:
@@ -608,6 +816,23 @@ func _coerce_string_array(value: Variant) -> PackedStringArray:
 
 func _coerce_notes(value: Variant) -> PackedStringArray:
 	return _coerce_string_array(value)
+
+
+func _briefing_has_content(data: Dictionary) -> bool:
+	if data.is_empty():
+		return false
+	for text_key in ["title", "summary", "background_image_path"]:
+		if not String(data.get(text_key, "")).strip_edges().is_empty():
+			return true
+	for array_key in ["objectives", "threats", "recommended_loadout", "annotations"]:
+		if Array(data.get(array_key, [])).size() > 0:
+			return true
+	var minimap_mode: String = String(data.get("minimap_mode", "")).strip_edges().to_lower()
+	return not minimap_mode.is_empty() and minimap_mode != BRIEFING_MINIMAP_MODE_TERRAIN_ONLY
+
+
+func _briefing_has_minimap_authoring(data: Dictionary) -> bool:
+	return data.has("minimap_mode") or data.has("minimap")
 
 
 static func _collect_forbidden_lz_keys(value: Variant, path: String, errors: PackedStringArray) -> void:

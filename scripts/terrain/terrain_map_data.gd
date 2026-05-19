@@ -216,6 +216,9 @@ func save_to_file(path: String) -> Error:
 		var object_rotation_degrees: float = float(tile_dict.get("object_rotation_degrees", 0.0))
 		if absf(object_rotation_degrees) > 0.001:
 			serialized_tile["object_rotation_degrees"] = object_rotation_degrees
+		var object_scale: float = float(tile_dict.get("object_scale", TERRAIN_TILE_DATA_SCRIPT.DEFAULT_OBJECT_SCALE))
+		if absf(object_scale - TERRAIN_TILE_DATA_SCRIPT.DEFAULT_OBJECT_SCALE) > 0.001:
+			serialized_tile["object_scale"] = object_scale
 		json_root["tiles"].append(serialized_tile)
 
 	file.store_string(JSON.stringify(json_root, "\t") + "\n")

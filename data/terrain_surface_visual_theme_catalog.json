@@ -7,7 +7,8 @@
 		"paths": "res_only_no_local_user_paths",
 		"visual_only": true,
 		"no_gameplay_state": true,
-		"no_new_surface_types": true,
+		"no_new_surface_types": false,
+		"allowed_surface_types": ["ground", "sand", "rock", "road", "water"],
 		"surface_type_remains_gameplay_truth": true,
 		"height_edge_fields_unchanged": true
 	},
@@ -16,7 +17,8 @@
 		"ground": "ground_flat",
 		"sand": "ground_flat",
 		"rock": "ground_flat",
-		"road": "ground_flat"
+		"road": "ground_flat",
+		"water": "nature_ground_dirt_river_tile"
 	},
 	"themes": {
 		"space_default_v1": {
@@ -26,7 +28,8 @@
 				"ground": "ground_flat",
 				"sand": "ground_flat",
 				"rock": "ground_flat",
-				"road": "ground_flat"
+				"road": "ground_flat",
+				"water": "nature_ground_dirt_river_tile"
 			},
 			"tile_type_overrides": {}
 		},
@@ -37,7 +40,8 @@
 				"ground": "nature_ground_dirt",
 				"sand": "nature_ground_dirt",
 				"rock": "nature_ground_dirt",
-				"road": "nature_ground_dirt"
+				"road": "nature_ground_dirt",
+				"water": "nature_ground_dirt_river_tile"
 			},
 			"tile_type_overrides": {
 				"ground_flat": ""
@@ -51,7 +55,8 @@
 				"ground": "nature_ground_dirt",
 				"sand": "nature_ground_dirt",
 				"rock": "nature_ground_dirt",
-				"road": "ground_flat"
+				"road": "ground_flat",
+				"water": "nature_ground_dirt_river_tile"
 			},
 			"tile_type_overrides": {
 				"ground_flat": "",
@@ -59,6 +64,12 @@
 				"nature_ground_sand_dirt": "nature_ground_dirt",
 				"nature_ground_rock_dirt": "nature_ground_dirt",
 				"nature_ground_grass_patch": "nature_ground_grass_patch",
+				"nature_ground_dirt_river_tile": "nature_ground_dirt_river_tile",
+				"spacekit_terrain_road_corner": "spacekit_terrain_road_corner",
+				"spacekit_terrain_road_cross": "spacekit_terrain_road_cross",
+				"spacekit_terrain_road_end": "spacekit_terrain_road_end",
+				"spacekit_terrain_road_split": "spacekit_terrain_road_split",
+				"spacekit_terrain_road_straight": "spacekit_terrain_road_straight",
 				"modular_floor": "modular_floor",
 				"modular_floor_big": "modular_floor_big",
 				"modular_floor_raised": "modular_floor_raised",
@@ -80,6 +91,11 @@
 		"nature_ground_rock_dirt": "nature_ground_dirt",
 		"nature_ground_grass_patch": "nature_ground_grass_patch",
 		"nature_ground_dirt_river_tile": "nature_ground_dirt_river_tile",
+		"spacekit_terrain_road_corner": "spacekit_terrain_road_corner",
+		"spacekit_terrain_road_cross": "spacekit_terrain_road_cross",
+		"spacekit_terrain_road_end": "spacekit_terrain_road_end",
+		"spacekit_terrain_road_split": "spacekit_terrain_road_split",
+		"spacekit_terrain_road_straight": "spacekit_terrain_road_straight",
 		"station_floor_panel": "station_floor_panel",
 		"station_set_floor_corner": "station_set_floor_corner",
 		"station_set_floor_detail": "station_set_floor_detail",
@@ -101,8 +117,8 @@
 	"surface_detail_by_tile_type": {},
 	"surface_tint_policy": {
 		"retain_non_ground_tints": true,
-		"reason": "The Space Kit ground mesh remains the base shape; Nature Boden entries are offset detail visuals and existing sand/rock/road tints keep surface_type gameplay readable.",
-		"affected_surfaces": ["sand", "rock", "road"]
+		"reason": "The Space Kit ground mesh remains the base shape; Nature Boden entries are flush surface visuals and sand/rock/road/water tints keep surface_type gameplay readable.",
+		"affected_surfaces": ["sand", "rock", "road", "water"]
 	},
 	"editor_palette": {
 		"palette_group": "nature_ground",
@@ -110,7 +126,8 @@
 			"nature_ground_dirt",
 			"nature_ground_sand_dirt",
 			"nature_ground_rock_dirt",
-			"nature_ground_grass_patch"
+			"nature_ground_grass_patch",
+			"nature_ground_dirt_river_tile"
 		],
 		"authoring_policy": "Palette entries may set type_id and surface_type, but must preserve height_level, edge_type, object_type_id, cover, walkable and LOS fields."
 	},
@@ -145,8 +162,8 @@
 			"source_asset_id": "nature_ground_dirt_river_tile",
 			"model_key": "nature_ground_dirt_river_tile",
 			"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirtRiverTile.gltf",
-			"theme": "dirt_detail_candidate",
-			"surface_roles": ["future_detail"],
+			"theme": "water",
+			"surface_roles": ["water"],
 			"active_default": false,
 			"fallback_model_key": "ground_flat",
 			"visual_only": true

@@ -16,6 +16,7 @@ const DEV_UI_FIELDS: PackedStringArray = [
 	"blocks_los",
 	"cover_value",
 	"object_rotation_degrees",
+	"object_scale",
 	"blocker_type",
 	"wall_segment_count",
 ]
@@ -67,6 +68,7 @@ static func build_tile_truth_entry(tile_data, tile_catalog = null) -> Dictionary
 		"blocks_los": bool(tile_data.blocks_los),
 		"cover_value": int(tile_data.cover_value),
 		"object_rotation_degrees": float(tile_data.object_rotation_degrees),
+		"object_scale": float(tile_data.object_scale),
 		"ground_layer_state": ground_layer_state,
 		"object_layer_state": object_layer_state,
 		"has_object_layer": has_object_layer,

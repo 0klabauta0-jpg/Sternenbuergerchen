@@ -21,6 +21,7 @@ Terrain-Debugansichten sollen diese Werte aus der Tile-Wahrheit anzeigen koennen
 - `blocks_los`
 - `cover_value`
 - `object_rotation_degrees`
+- `object_scale`
 - `blocker_type`
 - `wall_segment_count`
 
@@ -65,6 +66,7 @@ Der MapEditor darf fuer das aktuell ausgewaehlte Tile einen read-only Inspector 
 - Grid, Tile-ID, `type_id`, `object_type_id`
 - Boden-/Objektlayer-State
 - Walkable, LOS, Cover, Hoehe, Objekt-Hoehe
+- Objekt-Rotation und Objekt-Scale
 - Blocker-Art und Wandsegmentanzahl
 - aktuelle Runtime-LOS-Policy
 

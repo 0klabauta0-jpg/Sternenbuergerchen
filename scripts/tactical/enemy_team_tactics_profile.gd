@@ -383,6 +383,8 @@ static func normalize_config(raw_config: Variant, grid_size: Vector2i = Vector2i
 static func serialize_config(raw_config: Variant, grid_size: Vector2i = Vector2i.ZERO) -> Dictionary:
 	var normalized: Dictionary = normalize_config(raw_config, grid_size)
 	normalized.erase("diagnostics")
+	if String(normalized.get("lz_threat_zone_id", "")).strip_edges().is_empty():
+		normalized.erase("lz_threat_zone_id")
 	return normalized
 
 

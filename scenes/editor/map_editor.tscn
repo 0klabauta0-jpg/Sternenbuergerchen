@@ -296,8 +296,7 @@ exclusive = true
 title = "Save Map As"
 size = Vector2i(600, 400)
 exclusive = true
-file_mode = 2
-access = 1
+file_mode = 4
 filters = ["*.json ; JSON terrain map"]
 
 [node name="DirtyConfirmDialog" type="ConfirmationDialog" parent="UI"]

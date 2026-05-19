@@ -40,8 +40,17 @@ func _test_surface_visual_catalog(terrain_mapping: Dictionary, surface_catalog: 
 	_assert(not terrain_mapping.is_empty(), "Terrain 3D mapping parses")
 	_assert(not surface_catalog.is_empty(), "Surface visual theme catalog parses")
 	_assert(String(Dictionary(terrain_mapping.get("nature_kit", {})).get("surface_visual_theme_catalog", "")) == SURFACE_THEME_CATALOG_PATH, "Terrain mapping links surface visual theme catalog")
-	_assert(bool(Dictionary(surface_catalog.get("runtime_contract", {})).get("no_new_surface_types", false)), "Surface visual catalog forbids new gameplay surface types")
-	_assert(bool(Dictionary(surface_catalog.get("runtime_contract", {})).get("surface_type_remains_gameplay_truth", false)), "Surface type remains gameplay truth")
+	var runtime_contract: Dictionary = Dictionary(surface_catalog.get("runtime_contract", {}))
+	_assert(bool(runtime_contract.get("surface_type_remains_gameplay_truth", false)), "Surface type remains gameplay truth")
+	var allowed_surface_types: Array = Array(runtime_contract.get("allowed_surface_types", []))
+	for surface_type in [
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND,
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND,
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK,
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD,
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_WATER,
+	]:
+		_assert(allowed_surface_types.has(surface_type), "Surface visual catalog declares gameplay surface type: %s" % surface_type)
 	var surface_model_by_surface: Dictionary = Dictionary(surface_catalog.get("surface_model_by_surface", {}))
 	for surface_type in [
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND,
@@ -50,11 +59,12 @@ func _test_surface_visual_catalog(terrain_mapping: Dictionary, surface_catalog: 
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD,
 	]:
 		_assert(String(surface_model_by_surface.get(surface_type, "")) == "ground_flat", "Surface keeps Space Kit ground base: %s" % surface_type)
+	_assert(String(surface_model_by_surface.get(TERRAIN_TILE_DATA_SCRIPT.SURFACE_WATER, "")) == "nature_ground_dirt_river_tile", "Water surface maps to the Nature river tile")
 	var detail_by_type: Dictionary = Dictionary(surface_catalog.get("surface_detail_by_tile_type", {}))
 	for type_id in ["nature_ground_dirt", "nature_ground_sand_dirt", "nature_ground_rock_dirt", "nature_ground_grass_patch"]:
 		_assert(String(detail_by_type.get(type_id, "")).is_empty(), "Nature Boden no longer maps to an offset detail visual: %s" % type_id)
 	var type_overrides: Dictionary = Dictionary(surface_catalog.get("tile_type_overrides", {}))
-	for type_id in ["nature_ground_dirt", "nature_ground_sand_dirt", "nature_ground_rock_dirt", "nature_ground_grass_patch"]:
+	for type_id in ["nature_ground_dirt", "nature_ground_sand_dirt", "nature_ground_rock_dirt", "nature_ground_grass_patch", "nature_ground_dirt_river_tile"]:
 		_assert(not String(type_overrides.get(type_id, "")).is_empty(), "Nature Boden maps to flush ground visual: %s" % type_id)
 	var models: Dictionary = Dictionary(terrain_mapping.get("models", {}))
 	for model_key in ["nature_ground_dirt", "nature_ground_grass_patch", "nature_ground_dirt_river_tile"]:

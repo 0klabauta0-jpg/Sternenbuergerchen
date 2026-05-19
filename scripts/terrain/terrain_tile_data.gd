@@ -5,12 +5,16 @@ const SURFACE_GROUND: String = "ground"
 const SURFACE_ROAD: String = "road"
 const SURFACE_SAND: String = "sand"
 const SURFACE_ROCK: String = "rock"
+const SURFACE_WATER: String = "water"
 
 const DEFAULT_WALKABLE: bool = true
 const DEFAULT_BLOCKS_LOS: bool = false
 const DEFAULT_COVER_VALUE: int = 0
 const DEFAULT_HEIGHT_LEVEL: int = 0
 const DEFAULT_OBJECT_HEIGHT: int = 0
+const DEFAULT_OBJECT_SCALE: float = 1.0
+const MIN_OBJECT_SCALE: float = 0.25
+const MAX_OBJECT_SCALE: float = 2.5
 const DEFAULT_SURFACE_TYPE: String = SURFACE_GROUND
 
 const EDGE_CLIFF: String = "cliff"
@@ -28,6 +32,7 @@ var cover_value: int = DEFAULT_COVER_VALUE
 var height_level: int = DEFAULT_HEIGHT_LEVEL
 var object_height: int = DEFAULT_OBJECT_HEIGHT
 var object_rotation_degrees: float = 0.0
+var object_scale: float = DEFAULT_OBJECT_SCALE
 var surface_type: String = DEFAULT_SURFACE_TYPE
 var edge_type: String = EDGE_CLIFF
 
@@ -58,6 +63,7 @@ func to_dict() -> Dictionary:
 		"height_level": height_level,
 		"object_height": object_height,
 		"object_rotation_degrees": object_rotation_degrees,
+		"object_scale": object_scale,
 		"surface_type": surface_type,
 		"edge_type": edge_type,
 	}
@@ -71,6 +77,8 @@ static func get_surface_speed_factor(next_surface_type: String) -> float:
 			return 0.6
 		SURFACE_ROCK:
 			return 0.8
+		SURFACE_WATER:
+			return 0.35
 		_:
 			return 1.0
 
@@ -83,6 +91,8 @@ static func get_surface_path_cost(next_surface_type: String) -> float:
 			return 1.5
 		SURFACE_ROCK:
 			return 1.3
+		SURFACE_WATER:
+			return 4.0
 		_:
 			return 1.0
 
@@ -95,6 +105,8 @@ static func get_surface_short_code(next_surface_type: String) -> String:
 			return "SND"
 		SURFACE_ROCK:
 			return "RCK"
+		SURFACE_WATER:
+			return "WTR"
 		_:
 			return "GND"
 
@@ -118,7 +130,7 @@ static func _normalize_surface_type(next_surface_type: String) -> String:
 
 static func _is_surface_type_valid(next_surface_type: String) -> bool:
 	match _normalize_surface_type(next_surface_type):
-		SURFACE_GROUND, SURFACE_ROAD, SURFACE_SAND, SURFACE_ROCK:
+		SURFACE_GROUND, SURFACE_ROAD, SURFACE_SAND, SURFACE_ROCK, SURFACE_WATER:
 			return true
 		_:
 			return false
@@ -136,6 +148,7 @@ func _apply_dict(data: Dictionary) -> void:
 	height_level = clampi(int(data.get("height_level", DEFAULT_HEIGHT_LEVEL)), 0, 2)
 	object_height = clampi(int(data.get("object_height", DEFAULT_OBJECT_HEIGHT)), 0, 3)
 	object_rotation_degrees = _normalize_object_rotation_degrees(float(data.get("object_rotation_degrees", 0.0)))
+	object_scale = _normalize_object_scale(float(data.get("object_scale", DEFAULT_OBJECT_SCALE)))
 	surface_type = _normalize_surface_type(String(data.get("surface_type", DEFAULT_SURFACE_TYPE)))
 	edge_type = _normalize_edge_type(String(data.get("edge_type", EDGE_CLIFF)))
 
@@ -145,6 +158,12 @@ static func _normalize_object_rotation_degrees(value: float) -> float:
 	if absf(normalized - 360.0) < 0.001:
 		return 0.0
 	return snappedf(normalized, 0.001)
+
+
+static func _normalize_object_scale(value: float) -> float:
+	if is_nan(value) or is_inf(value):
+		return DEFAULT_OBJECT_SCALE
+	return snappedf(clampf(value, MIN_OBJECT_SCALE, MAX_OBJECT_SCALE), 0.001)
 
 
 func _coerce_grid_position(value: Variant) -> Vector2i:

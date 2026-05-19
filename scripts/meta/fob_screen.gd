@@ -23,15 +23,6 @@ const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
 const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SW.png")
 const DROPSHIP_FOB_TEXTURE: Texture2D = DROPSHIP_TEXTURE_SE
-const SMG_BLASTER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/blaster_kit/previews/blaster-a.png")
-const SMG_BLASTER_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-a.png"
-const MEDICTOOL_BLASTER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/blaster_kit/previews/blaster-b.png")
-const MEDICTOOL_BLASTER_PREVIEW_PATH := "res://Assets/used/npc/blaster_kit/previews/blaster-b.png"
-const SNIPER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/weapon_pack/previews/sniper.png")
-const SNIPER_PREVIEW_PATH := "res://Assets/used/npc/weapon_pack/previews/sniper.png"
-const ROCKET_LAUNCHER_PREVIEW_TEXTURE: Texture2D = preload("res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png")
-const ROCKET_LAUNCHER_PREVIEW_PATH := "res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png"
-
 signal mission_start_requested(selected_unit_ids, selected_fireteam_ids)
 signal transport_craft_mission_stage_requested(craft_id)
 signal transport_craft_pilot_assigned(craft_id, pilot_unit_id)
@@ -2896,7 +2887,7 @@ func _build_compact_weapon_label(weapon_id: String) -> String:
 func _build_compact_weapon_preview(preview_name: String, weapon_id: String) -> TextureRect:
 	var preview_rect := TextureRect.new()
 	preview_rect.name = preview_name
-	preview_rect.custom_minimum_size = Vector2.ZERO
+	preview_rect.custom_minimum_size = Vector2(34.0, 18.0)
 	preview_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	preview_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3457,7 +3448,7 @@ func _build_weapon_slot_control(slot_name: String, selected_weapon_id: String, f
 
 	var preview_rect := TextureRect.new()
 	preview_rect.name = "%sPreview" % slot_name
-	preview_rect.custom_minimum_size = Vector2(56.0, 24.0)
+	preview_rect.custom_minimum_size = Vector2(68.0, 28.0)
 	preview_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	preview_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	preview_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -3474,43 +3465,14 @@ func _build_weapon_slot_control(slot_name: String, selected_weapon_id: String, f
 
 
 func _get_weapon_preview_path(weapon_id: String) -> String:
-	match _normalize_weapon_id(weapon_id):
-		"smg":
-			return SMG_BLASTER_PREVIEW_PATH
-		"rifle":
-			return SMG_BLASTER_PREVIEW_PATH
-		"rail_gun":
-			return SMG_BLASTER_PREVIEW_PATH
-		"sniper":
-			return SNIPER_PREVIEW_PATH
-		"rocket_launcher":
-			return ROCKET_LAUNCHER_PREVIEW_PATH
-		"medictool":
-			return MEDICTOOL_BLASTER_PREVIEW_PATH
-		"none":
-			return ""
-		_:
-			return ""
+	return String(WEAPON_DATA_SCRIPT.call("get_preview_path", _normalize_weapon_id(weapon_id))).strip_edges()
 
 
 func _get_weapon_preview_texture(weapon_id: String) -> Texture2D:
-	match _normalize_weapon_id(weapon_id):
-		"smg":
-			return SMG_BLASTER_PREVIEW_TEXTURE
-		"rifle":
-			return SMG_BLASTER_PREVIEW_TEXTURE
-		"rail_gun":
-			return SMG_BLASTER_PREVIEW_TEXTURE
-		"sniper":
-			return SNIPER_PREVIEW_TEXTURE
-		"rocket_launcher":
-			return ROCKET_LAUNCHER_PREVIEW_TEXTURE
-		"medictool":
-			return MEDICTOOL_BLASTER_PREVIEW_TEXTURE
-		"none":
-			return null
-		_:
-			return null
+	var preview_path: String = _get_weapon_preview_path(weapon_id)
+	if preview_path.is_empty() or not ResourceLoader.exists(preview_path):
+		return null
+	return load(preview_path) as Texture2D
 
 
 func _calculate_fireteam_loadout_weight(fireteam_id: String, member_ids: PackedStringArray) -> float:

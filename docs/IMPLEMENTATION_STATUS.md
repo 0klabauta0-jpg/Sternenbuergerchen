@@ -10,6 +10,58 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_485 - Map Editor Save As and Modular Scale Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_485_map_editor_saveas_modular_scale_fix.md`, `docs/dev/map_editor_asset_workflow_contract.md`
+- Stand: Der Map-Editor-`Save As`-Dialog ist wieder ein JSON-Save-Dialog im Projektressourcenbereich und startet bei `res://maps`, statt als Userdaten-Directory-Dialog auf einem fremden Pfad zu landen.
+- Stand: Projekt-absolute Save-As-Pfade werden intern zu `res://...` normalisiert; Pfade ohne `.json` bekommen die Endung.
+- Stand: Die Kenney-Modular-Space-Kit-Modelle nutzen im 3D-Asset-Mapping `0.25`, damit ein 4er-Quellmodul einer 3D-Zelle entspricht und Modular Wall/Gate/Corner nicht mehr uebergross auf der Karte stehen.
+- Stand: Space-Kit-Strassenplatten sind Terrain-/Surface-Varianten mit `surface_type = road`, liegen mit der Oberkante auf Bodenhoehe und bewahren vorhandene Objekt-Layer; `nature_ground_dirt_river_tile` ist als Wasser-/Flussplatte mit `surface_type = water` fuer Hafen-/Kai-Authoring nutzbar.
+- Risiken/offen: Der Branch baut auf dem noch nicht integrierten TASK_484/TASK_483-Arbeitsstand auf. Finaler Sichtcheck der Modular-, Strassen- und Wasser-Assets im Editor bleibt offen; spezielle Dock-/Kai-Walkability bleibt Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_485_map_editor_saveas_modular_scale_fix.gd`, TASK_484, TASK_483 und `git diff --check`.
+- Naechster Schritt: Manuell im Editor `Save As` oeffnen und Modular Wall/Gate/Floor sowie Strassen-/Wasserplatten gegen eine kleine Testplatte pruefen.
+
+### TASK_484 - Map Editor Palette Browser Layout
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_484_map_editor_palette_browser_layout.md`, `docs/dev/map_editor_asset_workflow_contract.md`
+- Stand: Der sichtbare Palette-Browser aus dem Editor-Screenshot ist korrigiert: Kategorien sind in einem kompakten Scrollbereich, die Asset-Liste bekommt mehr Platz und nutzt groessere 72px-Previews.
+- Stand: Die Asset-Liste nutzt einen zweispaltigen Icon-Browser mit Top-Icons; der alte `PaletteGroups/PaletteGroup_*`-Pfad bleibt fuer bestehende Verifier als versteckter Kompatibilitaetspfad erhalten.
+- Stand: Sichtbare Asset-Eintraege laden jetzt echte Katalog-Preview-Texturen statt generierter Platzhalter-Quadrate, damit Factory-/Fahrzeug-/Kit-Assets erkennbar sind.
+- Risiken/offen: Der Branch baut auf dem noch nicht integrierten TASK_483-Arbeitsstand auf. Floor-/Asset-Hoehenalignment bleibt separater Follow-up.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_484_map_editor_palette_browser_layout.gd`, TASK_483, TASK_296, Asset-Rotation-Bugfix, TASK_132, TASK_258, TASK_295 und `git diff --check`.
+- Naechster Schritt: Floor-/Asset-Hoehenalignment als separaten Follow-up wieder aufnehmen.
+
+### TASK_483 - Map Editor Asset Workflow Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_483_map_editor_asset_workflow_polish.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/dev/map_editor_module_split.md`, `docs/dev/terrain_truth_visual_audit_contract.md`
+- Stand: Der Asset-Authoring-Hotspot hat jetzt groessere Palette-Vorschauen, sortierte Gruppenansicht, Selected-Asset-Preview, Platzierungs-Scale und per-Tile-`object_scale`.
+- Stand: `object_scale` wird in `TerrainTileData`, Save/Load, Undo, Snapshots, Terrain-Truth-Audit sowie 2D-/3D-Visuals gefuehrt; Mapping-Scale und Tile-Scale bleiben getrennt.
+- Stand: Wand-/Cliff-Ziehen, Auto-Snapping, Door-Open-Logik und Preset-Speicher bleiben bewusst Folgearbeit, damit keine UI-Sonderwahrheit entsteht.
+- Risiken/offen: Der Branch baut auf den noch nicht integrierten TASK_481/TASK_482-Arbeitsstaenden auf.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_483_map_editor_asset_workflow_polish.gd`, TASK_295, TASK_296, `bugfix_map_editor_asset_rotation_context_menu.gd`, TASK_298 und `git diff --check`.
+- Naechster Schritt: TASK_484 als Wand-/Cliff-Ziehwerkzeug mit Auto-Rotation/Snapping und klarer Segment-Preview schneiden.
+
+### TASK_482 - Mission Briefing Data Contract
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_482_mission_briefing_data_contract.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/loadout_playability_rules.md`
+- Stand: `MissionScenarioData` speichert und normalisiert ein `briefing`-Payload fuer Pre-Mission-Lagebild, Hintergrundbild, terrain-only Minimap-Modus, Ziele, Bedrohungen, Empfehlungen und vorbereitete Annotationen.
+- Stand: Briefing-Loadout-Empfehlungen nutzen kanonische `WeaponData`-IDs; visuelle Loadout-IDs werden nicht als Gameplay-Waffen uebernommen und Empfehlungen mutieren keine Loadouts.
+- Stand: Der Map Editor hat schlanke Authoring-API-Haken, damit der naechste UI-Task Bildauswahl und Briefing-Felder ohne neuen Save/Load-Pfad anbinden kann.
+- Stand: Leere optionale Air-Risk-Threat-Zone-Felder werden beim Serialisieren ausgelassen, damit alte Guards weiter zwischen Player-LZ und Bedrohungsmarker unterscheiden koennen.
+- Risiken/offen: Sichtbares Briefing-Panel, Bildauswahl, Minimap-Rendering und Painting bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_482_mission_briefing_data_contract.gd`, relevante Mission-Scenario-Regressionen und `git diff --check`.
+- Naechster Schritt: TASK_483 als Map-Editor-Briefing-Panel mit Hintergrundbild-Auswahl und erster terrain-only Minimap-Vorschau schneiden.
+
+### TASK_481 - Loadout Heavy Weapon Selection
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_481_loadout_heavy_weapon_selection.md`, `docs/dev/loadout_playability_rules.md`
+- Stand: Homebase- und FOB-Loadouts behalten das erweiterte Weapon-Set mit `sniper`, `rocket_launcher`, `rail_gun`, `medictool`, `rifle`, `smg` und `none` dort, wo der Contract es erlaubt.
+- Stand: `WeaponData` schaerft Sniper als laengere Praezisionswaffe und Rocket Launcher als schweren Anti-Armor-Pick; `LoadoutModifierResolver` spiegelt die Gewichte/Tempoauswirkungen.
+- Stand: FOB-Weapon-Previews lesen den Preview-Pfad jetzt aus `WeaponData`, statt Sniper/Rocket erneut im FOB-Skript zu duplizieren. Die vorhandenen Sniper-/Rocket-Preview-Texturen und GLB-Visual-Loadouts sind per Verifier abgesichert.
+- Risiken/offen: Der finale optische Sitz/Groesseneindruck von Sniper/Rocket an den 2.5D-Unit-Proxies braucht weiter einen manuellen Sichtcheck.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_481_loadout_heavy_weapon_selection.gd`, TASK_176/TASK_353/TASK_175, `scripts/tests/test_weapon_data.gd` und `git diff --check`.
+- Naechster Schritt: Im naechsten Vertical-Slice-Playtest pruefen, ob Sniper/Rocket-Auswahl im Loadout spuerbar genug ist und ob das Rocket-Visual fuer AA-/Outpost-Ziele gross genug wirkt.
+
 ### TASK_480 - Mission UI Hotpath Feedback Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_480_mission_ui_hotpath_feedback_guard.md`, `docs/tasks/TASK_399_dropship_flow_contract_performance_pass.md`, `docs/dev/loadout_playability_rules.md`
@@ -2244,7 +2296,7 @@
 
 ### TASK_253 - Nature Ground Surface Editor Palette Pass
 - Status: implementiert
-- Stand: `data/terrain_surface_visual_theme_catalog.json` definiert die aktive Nature-Classic-Dirt-Theme, Projektpfade, Surface-Default-Zuordnung und den Vertrag, dass `surface_type` die Gameplay-Wahrheit bleibt und keine neuen Surface-Typen entstehen.
+- Stand: `data/terrain_surface_visual_theme_catalog.json` definiert die aktive Nature-Classic-Dirt-Theme, Projektpfade, Surface-Default-Zuordnung und den Vertrag, dass `surface_type` die Gameplay-Wahrheit bleibt. TASK_485 erweitert diesen Vertrag spaeter um den expliziten Surface-Typ `water`.
 - Stand: `TerrainMap3DView` nutzt Nature-Kit-Ground-Modelle fuer 2.5D-Top-Surfaces und meldet Surface-Visual-Eintraege, Nature-Surface-Zaehler und Theme-Verteilung im Render-Snapshot. Sand/Rock/Road behalten die bestehenden Surface-Tints fuer taktische Lesbarkeit.
 - Stand: `terrain_tile_catalog.json` enthaelt die neue Palette `Nature Boden`. `TerrainTileCatalog` behandelt diese Eintraege als visuelle Surface-Varianten: `type_id` und `surface_type` koennen wechseln, waehrend `height_level`, `edge_type`, `object_type_id`, Cover, Walkable und LOS erhalten bleiben.
 - Offene Punkte: Manueller Editor-/Mission-Sichtcheck bleibt offen; Headless prueft Overlays und Ressourcenzuordnung, aber nicht die finale optische Wirkung.
