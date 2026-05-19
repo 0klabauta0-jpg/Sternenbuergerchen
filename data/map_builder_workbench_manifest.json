@@ -1,0 +1,232 @@
+{
+	"catalog_version": 1,
+	"task": "TASK_488",
+	"purpose": "Godot-native map builder MVP: GridMap/MeshLibrary for modular tiles plus Asset-Placer-compatible prop nodes, compiled into TerrainMapData.",
+	"mesh_library": {
+		"grid_cell_size": {
+			"x": 1.0,
+			"y": 0.5,
+			"z": 1.0
+		},
+		"items": [
+			{
+				"item_id": 1,
+				"type_id": "ground_flat",
+				"label": "Ground",
+				"category": "terrain",
+				"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain.glb",
+				"preview_path": "res://Assets/kenney_space-kit/Isometric/terrain_SW.png",
+				"scale": 1.0,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 2,
+				"type_id": "spacekit_terrain_road_straight",
+				"label": "Road Straight",
+				"category": "road",
+				"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadStraight.glb",
+				"preview_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadStraight_SW.png",
+				"scale": 1.0,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 3,
+				"type_id": "spacekit_terrain_road_corner",
+				"label": "Road Corner",
+				"category": "road",
+				"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadCorner.glb",
+				"preview_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadCorner_SW.png",
+				"scale": 1.0,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 4,
+				"type_id": "spacekit_terrain_road_cross",
+				"label": "Road Cross",
+				"category": "road",
+				"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadCross.glb",
+				"preview_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadCross_SW.png",
+				"scale": 1.0,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 5,
+				"type_id": "spacekit_terrain_road_end",
+				"label": "Road End",
+				"category": "road",
+				"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadEnd.glb",
+				"preview_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadEnd_SW.png",
+				"scale": 1.0,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 6,
+				"type_id": "spacekit_terrain_road_split",
+				"label": "Road Split",
+				"category": "road",
+				"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/terrain_roadSplit.glb",
+				"preview_path": "res://Assets/kenney_space-kit/Isometric/terrain_roadSplit_SW.png",
+				"scale": 1.0,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 7,
+				"type_id": "nature_ground_dirt_river_tile",
+				"label": "Water River Tile",
+				"category": "water",
+				"model_path": "res://Assets/used/terrain/nature_kit_classic/ground/ground_dirtRiverTile.gltf",
+				"scale": 1.0,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 8,
+				"type_id": "modular_floor",
+				"label": "Modular Floor",
+				"category": "modular_floor",
+				"model_path": "res://Assets/curated/kenney/modular_space/models/template-floor.glb",
+				"preview_path": "res://Assets/curated/kenney/modular_space/previews/template-floor.png",
+				"scale": 0.25,
+				"y_offset": -0.04
+			},
+			{
+				"item_id": 9,
+				"type_id": "modular_wall",
+				"label": "Modular Wall",
+				"category": "modular_wall",
+				"model_path": "res://Assets/curated/kenney/modular_space/models/template-wall.glb",
+				"preview_path": "res://Assets/curated/kenney/modular_space/previews/template-wall.png",
+				"scale": 0.25,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 10,
+				"type_id": "modular_wall_corner",
+				"label": "Modular Wall Corner",
+				"category": "modular_wall",
+				"model_path": "res://Assets/curated/kenney/modular_space/models/template-wall-corner.glb",
+				"preview_path": "res://Assets/curated/kenney/modular_space/previews/template-wall-corner.png",
+				"scale": 0.25,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 11,
+				"type_id": "modular_gate",
+				"label": "Modular Gate",
+				"category": "door",
+				"model_path": "res://Assets/curated/kenney/modular_space/models/gate.glb",
+				"preview_path": "res://Assets/curated/kenney/modular_space/previews/gate.png",
+				"scale": 0.25,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 12,
+				"type_id": "modular_gate_door",
+				"label": "Modular Gate Door",
+				"category": "door",
+				"model_path": "res://Assets/curated/kenney/modular_space/models/gate-door.glb",
+				"preview_path": "res://Assets/curated/kenney/modular_space/previews/gate-door.png",
+				"scale": 0.25,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 13,
+				"type_id": "station_floor_panel",
+				"label": "Station Floor Panel",
+				"category": "station_floor",
+				"model_path": "res://Assets/curated/kenney/space_station/models/floor-panel.glb",
+				"preview_path": "res://Assets/curated/kenney/space_station/previews_all/floor-panel.png",
+				"scale": 0.84,
+				"y_offset": -0.04
+			},
+			{
+				"item_id": 14,
+				"type_id": "station_wall",
+				"label": "Station Wall",
+				"category": "station_wall",
+				"model_path": "res://Assets/curated/kenney/space_station/models/wall.glb",
+				"preview_path": "res://Assets/curated/kenney/space_station/previews_all/wall.png",
+				"scale": 0.86,
+				"y_offset": 0.0
+			},
+			{
+				"item_id": 15,
+				"type_id": "station_wall_door",
+				"label": "Station Door Wall",
+				"category": "door",
+				"model_path": "res://Assets/curated/kenney/space_station/models/wall-door.glb",
+				"preview_path": "res://Assets/curated/kenney/space_station/previews_all/wall-door.png",
+				"scale": 0.86,
+				"y_offset": 0.0
+			}
+		]
+	},
+	"asset_placer_props": {
+		"parent_node": "AssetPlacerProps",
+		"required_meta": [
+			"sb_type_id",
+			"sb_grid_position",
+			"sb_rotation_degrees",
+			"sb_object_scale"
+		],
+		"sample_assets": [
+			{
+				"type_id": "factory_building_a",
+				"label": "Factory Building A",
+				"model_path": "res://Assets/curated/kenney/factory/models/building-a.glb",
+				"scale": 0.78
+			},
+			{
+				"type_id": "spacekit_rover",
+				"label": "Rover",
+				"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/rover.glb",
+				"scale": 1.0
+			},
+			{
+				"type_id": "spacekit_satellite_dish_large",
+				"label": "Satellite Dish Large",
+				"model_path": "res://Assets/kenney_space-kit/Models/GLTF format/satelliteDish_large.glb",
+				"scale": 1.0
+			},
+			{
+				"type_id": "station_computer",
+				"label": "Station Computer",
+				"model_path": "res://Assets/curated/kenney/space_station/models/computer.glb",
+				"scale": 0.92
+			}
+		]
+	},
+	"demo_layout": {
+		"map_name": "map_builder_workbench_demo",
+		"grid_size": {
+			"x": 8,
+			"y": 6
+		},
+		"terrain_visual_theme_id": "ground_mission_mixed_v1",
+		"cells": [
+			{"grid": [0, 0, 0], "item_id": 1, "rotation_degrees": 0},
+			{"grid": [1, 0, 0], "item_id": 2, "rotation_degrees": 90},
+			{"grid": [2, 0, 0], "item_id": 3, "rotation_degrees": 180},
+			{"grid": [3, 0, 0], "item_id": 4, "rotation_degrees": 0},
+			{"grid": [4, 0, 0], "item_id": 5, "rotation_degrees": 270},
+			{"grid": [5, 0, 0], "item_id": 6, "rotation_degrees": 0},
+			{"grid": [0, 0, 1], "item_id": 7, "rotation_degrees": 0},
+			{"grid": [1, 0, 1], "item_id": 8, "rotation_degrees": 0},
+			{"grid": [2, 0, 1], "item_id": 9, "rotation_degrees": 90},
+			{"grid": [3, 0, 1], "item_id": 10, "rotation_degrees": 180},
+			{"grid": [4, 0, 1], "item_id": 11, "rotation_degrees": 0},
+			{"grid": [5, 0, 1], "item_id": 12, "rotation_degrees": 0},
+			{"grid": [0, 0, 2], "item_id": 13, "rotation_degrees": 0},
+			{"grid": [1, 0, 2], "item_id": 14, "rotation_degrees": 90},
+			{"grid": [2, 0, 2], "item_id": 15, "rotation_degrees": 180}
+		],
+		"props": [
+			{"type_id": "factory_building_a", "grid_position": [1, 1], "rotation_degrees": 180, "object_scale": 1.15},
+			{"type_id": "spacekit_rover", "grid_position": [3, 3], "rotation_degrees": 90, "object_scale": 1.0},
+			{"type_id": "spacekit_satellite_dish_large", "grid_position": [4, 3], "rotation_degrees": 0, "object_scale": 1.0},
+			{"type_id": "station_computer", "grid_position": [0, 2], "rotation_degrees": 270, "object_scale": 1.0}
+		]
+	},
+	"compiler": {
+		"default_output_path": "res://maps/map_builder_workbench_output.json"
+	}
+}

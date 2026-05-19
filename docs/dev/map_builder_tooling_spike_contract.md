@@ -35,6 +35,9 @@ Dieser Contract beschreibt den TASK_486-Spike fuer Godot-native Map-Erstellung. 
 - Die Installation enthaelt eine kleine lokale Godot-4.6.2-Kompatibilitaetsbremse: `EditorDock` wird nur in sichtbaren Editor-Sessions genutzt, headless Import/Verifier ueberspringen den Dock-/Panel-UI-Aufbau.
 - Asset Placer ist weiterhin nur Authoring-Tooling. Collections, Asset-Placer-Nodes und Plugin-Docks werden nicht zur Gameplay-Wahrheit.
 - Die Plugin-Asset-Bibliothek bleibt standardmaessig `user://asset_library.json`; ein gemeinsamer Projektpfad muss spaeter bewusst als Team-Workflow entschieden werden.
-- Erst nach einem echten Godot-Editor-Sichttest entscheiden, ob der Plugin-Pfad in den regulaeren Map-Baufluss uebernommen wird.
+- TASK_488 fuehrt eine kleine `MapBuilderWorkbench` ein: `scenes/editor/map_builder_workbench.tscn` erzeugt aus `data/map_builder_workbench_manifest.json` eine GridMap-/MeshLibrary-Palette fuer 15 Kernteile und einen `AssetPlacerProps`-Root fuer freie Props.
+- Die Workbench ist der erste regulaere Testpfad: GridMap-Zellen liefern `item_id -> type_id`, Asset-Placer-kompatible Nodes liefern `sb_type_id`, `sb_grid_position`, `sb_rotation_degrees` und `sb_object_scale`.
+- Der Compile-Pfad bleibt autoritativ: `scripts/editor/map_builder_scene_importer.gd` uebersetzt GridMap plus Prop-Nodes in `TerrainMapData`; `scripts/editor/compile_map_builder_workbench.gd` kann das Ergebnis als JSON speichern.
+- GridMap-Yaw-Rotation wird ueber Godots orthogonalen Index beim Compile in `object_rotation_degrees` normalisiert. Wenn spaeter Boden-/Road-Rotation und Prop-Rotation getrennt gebraucht werden, braucht `TerrainTileData` einen separaten Transform-Speicher.
 - Ein spaeterer Task kann MeshLibraries automatisch aus dem Asset-Mapping erzeugen.
 - Separater Task noetig, wenn Road-/Floor-Rotation und Gebaeude-Rotation auf demselben Tile getrennt gespeichert werden sollen.
