@@ -15,6 +15,8 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Innerhalb einer aktiven Gruppe werden sichtbare Assets nach Displayname sortiert.
 - Preview-Icons muessen gross genug sein, damit Space-Station-, Modular-, Factory- und Nature-Assets ohne Raten unterscheidbar sind.
 - Der aktuell gewaehlte Palette-Typ darf in einem groesseren Preview-Block mit Name, Gruppe und Platzierungs-Scale angezeigt werden.
+- Kategorieauswahl darf scrollbar sein; der Asset-Browser darunter bekommt den Hauptplatz.
+- Asset-Listen duerfen als mehrspaltiger Icon-Browser dargestellt werden, solange die Palette-Metadaten und Selection-Snapshots stabil bleiben.
 
 ## Rotation
 - Manuelle Rotation bleibt in 90-Grad-Schritten.

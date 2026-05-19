@@ -106,9 +106,15 @@ const AUTHORING_TOOL_MARKER: String = "marker"
 const AUTHORING_TOOL_PATROL: String = "patrol"
 const TOOL_BUTTON_SIZE: Vector2 = Vector2(34.0, 30.0)
 const MAX_UNDO_STACK_SIZE: int = 32
-const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(44, 44)
-const PALETTE_PANEL_MIN_WIDTH: float = 300.0
-const PALETTE_SELECTED_PREVIEW_SIZE: Vector2 = Vector2(84.0, 84.0)
+const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(72, 72)
+const PALETTE_PANEL_MIN_WIDTH: float = 430.0
+const PALETTE_SELECTED_PREVIEW_SIZE: Vector2 = Vector2(112.0, 112.0)
+const PALETTE_GROUP_SCROLL_HEIGHT: float = 150.0
+const PALETTE_GROUP_COLUMNS: int = 2
+const PALETTE_GROUP_BUTTON_HEIGHT: float = 22.0
+const PALETTE_ASSET_COLUMNS: int = 2
+const PALETTE_ASSET_LIST_MIN_HEIGHT: float = 560.0
+const PALETTE_ASSET_COLUMN_WIDTH: int = 190
 const OBJECT_SCALE_DEFAULT: float = 1.0
 const OBJECT_SCALE_MIN: float = 0.25
 const OBJECT_SCALE_MAX: float = 2.5
@@ -242,6 +248,7 @@ func _ready() -> void:
 	_ensure_object_rotation_controls()
 	_ensure_object_scale_controls()
 	_ensure_palette_workflow_controls()
+	_ensure_palette_browser_layout_controls()
 	_ensure_terrain_truth_inspector_controls()
 	_ensure_editor_context_menu()
 	_populate_tile_palette()
@@ -1533,6 +1540,42 @@ func _ensure_palette_workflow_controls() -> void:
 	_refresh_palette_workflow_controls()
 
 
+func _ensure_palette_browser_layout_controls() -> void:
+	var palette_parent := get_node_or_null("UI/PalettePanel/Margin/VBox") as VBoxContainer
+	if palette_parent == null:
+		return
+	var legacy_groups := palette_parent.get_node_or_null("PaletteGroups") as VBoxContainer
+	var scroll := palette_parent.get_node_or_null("PaletteGroupsScroll") as ScrollContainer
+	if scroll == null:
+		scroll = ScrollContainer.new()
+		scroll.name = "PaletteGroupsScroll"
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+		scroll.custom_minimum_size = Vector2(0.0, PALETTE_GROUP_SCROLL_HEIGHT)
+		scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		palette_parent.add_child(scroll)
+		var insert_after := palette_parent.get_node_or_null("PaletteSelectedPreviewRow")
+		if insert_after == null:
+			insert_after = palette_parent.get_node_or_null("PaletteTitle")
+		if insert_after != null:
+			palette_parent.move_child(scroll, insert_after.get_index() + 1)
+	else:
+		scroll.custom_minimum_size = Vector2(0.0, PALETTE_GROUP_SCROLL_HEIGHT)
+		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	var grid := scroll.get_node_or_null("PaletteGroupsGrid") as GridContainer
+	if grid == null:
+		grid = GridContainer.new()
+		grid.name = "PaletteGroupsGrid"
+		grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		scroll.add_child(grid)
+	grid.columns = PALETTE_GROUP_COLUMNS
+	grid.add_theme_constant_override("h_separation", 4)
+	grid.add_theme_constant_override("v_separation", 3)
+	if legacy_groups != null:
+		legacy_groups.visible = false
+
+
 func _ensure_terrain_truth_inspector_controls() -> void:
 	var panel_parent := get_node_or_null("UI/PropertyPanel/Margin/VBox") as VBoxContainer
 	if panel_parent == null:
@@ -1582,9 +1625,14 @@ func _apply_editor_control_panel_style() -> void:
 	var tile_type_list := _get_tile_type_list()
 	if tile_type_list != null:
 		tile_type_list.fixed_icon_size = PALETTE_PREVIEW_ICON_SIZE
-		tile_type_list.icon_mode = ItemList.ICON_MODE_LEFT
-		tile_type_list.max_columns = 1
-		tile_type_list.custom_minimum_size = Vector2(PALETTE_PANEL_MIN_WIDTH - 36.0, 360.0)
+		tile_type_list.icon_mode = ItemList.ICON_MODE_TOP
+		tile_type_list.max_columns = PALETTE_ASSET_COLUMNS
+		tile_type_list.fixed_column_width = PALETTE_ASSET_COLUMN_WIDTH
+		tile_type_list.max_text_lines = 2
+		tile_type_list.custom_minimum_size = Vector2(PALETTE_PANEL_MIN_WIDTH - 36.0, PALETTE_ASSET_LIST_MIN_HEIGHT)
+		tile_type_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		tile_type_list.add_theme_constant_override("h_separation", 10)
+		tile_type_list.add_theme_constant_override("v_separation", 10)
 		tile_type_list.add_theme_color_override("font_color", PALETTE_ITEM_FG_COLOR)
 		tile_type_list.add_theme_color_override("font_selected_color", PALETTE_SELECTED_FG_COLOR)
 	var palette_title := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteTitle") as Label
@@ -3180,8 +3228,16 @@ func _build_palette_snapshot() -> Dictionary:
 	var visible_display_names: PackedStringArray = PackedStringArray()
 	var selected_items: PackedInt32Array = PackedInt32Array()
 	var preview_icon_count: int = 0
+	var asset_list_icon_mode: int = -1
+	var asset_list_max_columns: int = 0
+	var asset_list_fixed_column_width: int = 0
+	var asset_list_min_size: Vector2 = Vector2.ZERO
 	var tile_type_list := _get_tile_type_list()
 	if tile_type_list != null:
+		asset_list_icon_mode = int(tile_type_list.icon_mode)
+		asset_list_max_columns = int(tile_type_list.max_columns)
+		asset_list_fixed_column_width = int(tile_type_list.fixed_column_width)
+		asset_list_min_size = tile_type_list.custom_minimum_size
 		selected_items = tile_type_list.get_selected_items()
 		for index in range(tile_type_list.item_count):
 			var type_id: String = String(tile_type_list.get_item_metadata(index)).strip_edges()
@@ -3195,6 +3251,19 @@ func _build_palette_snapshot() -> Dictionary:
 		for group_variant in _tile_catalog.get_palette_groups():
 			var group: Dictionary = Dictionary(group_variant)
 			group_ids.append(String(group.get("group_id", "")))
+	var palette_panel := get_node_or_null("UI/PalettePanel") as Control
+	var group_scroll := _get_palette_groups_scroll()
+	var palette_groups_root := _get_palette_groups_root()
+	var group_button_count: int = 0
+	var group_button_max_height: float = 0.0
+	if palette_groups_root != null:
+		for child in palette_groups_root.get_children():
+			var child_control := child as Control
+			if child_control == null:
+				continue
+			group_button_count += 1
+			group_button_max_height = maxf(group_button_max_height, child_control.custom_minimum_size.y)
+	var selected_preview_rect := _get_palette_selected_preview_texture_rect()
 	return {
 		"active_group": _active_palette_group_id,
 		"group_ids": group_ids,
@@ -3210,6 +3279,17 @@ func _build_palette_snapshot() -> Dictionary:
 		"preview_icon_count": preview_icon_count,
 		"all_visible_items_have_preview_icons": tile_type_list != null and preview_icon_count == tile_type_list.item_count,
 		"preview_icon_size": PALETTE_PREVIEW_ICON_SIZE,
+		"panel_min_width": palette_panel.custom_minimum_size.x if palette_panel != null else 0.0,
+		"group_scrollable": group_scroll != null and int(group_scroll.vertical_scroll_mode) != int(ScrollContainer.SCROLL_MODE_DISABLED),
+		"group_scroll_min_height": group_scroll.custom_minimum_size.y if group_scroll != null else 0.0,
+		"group_columns": PALETTE_GROUP_COLUMNS,
+		"group_button_count": group_button_count,
+		"group_button_max_height": group_button_max_height,
+		"asset_list_icon_mode": asset_list_icon_mode,
+		"asset_list_max_columns": asset_list_max_columns,
+		"asset_list_fixed_column_width": asset_list_fixed_column_width,
+		"asset_list_min_size": asset_list_min_size,
+		"selected_preview_size": selected_preview_rect.custom_minimum_size if selected_preview_rect != null else Vector2.ZERO,
 		"placement_scale": _placement_object_scale,
 		"scale_min": OBJECT_SCALE_MIN,
 		"scale_max": OBJECT_SCALE_MAX,
@@ -6461,6 +6541,7 @@ func _load_tile_catalog() -> void:
 func _populate_tile_palette() -> void:
 	var tile_type_list := _get_tile_type_list()
 	var palette_groups_root := _get_palette_groups_root()
+	var palette_groups_compat_root := _get_palette_groups_compat_root()
 	if tile_type_list == null or _tile_catalog == null:
 		return
 
@@ -6494,30 +6575,24 @@ func _populate_tile_palette() -> void:
 		for child in palette_groups_root.get_children():
 			palette_groups_root.remove_child(child)
 			child.queue_free()
+	if palette_groups_compat_root != null:
+		for child in palette_groups_compat_root.get_children():
+			palette_groups_compat_root.remove_child(child)
+			child.queue_free()
+	if palette_groups_root != null:
 		if available_group_ids.has("all"):
-			var all_button := Button.new()
-			all_button.name = "PaletteGroup_all"
-			all_button.text = "Alle"
-			all_button.toggle_mode = true
-			all_button.button_pressed = _active_palette_group_id == "all"
-			all_button.tooltip_text = "Alle Palette-Assets anzeigen."
-			_configure_palette_group_button(all_button, all_button.button_pressed)
-			all_button.pressed.connect(_on_palette_group_button_pressed.bind("all"))
+			var all_button := _create_palette_group_button("all", "Alle", _active_palette_group_id == "all", "Alle Palette-Assets anzeigen.", true)
 			palette_groups_root.add_child(all_button)
+			_add_palette_group_compat_button(palette_groups_compat_root, "all", "Alle", _active_palette_group_id == "all", "Alle Palette-Assets anzeigen.")
 		for group in _tile_catalog.get_palette_groups():
 			var group_dict: Dictionary = Dictionary(group)
 			var group_id: String = String(group_dict.get("group_id", "")).strip_edges().to_lower()
 			if group_id.is_empty() or not types_by_group.has(group_id):
 				continue
-			var group_button := Button.new()
-			group_button.name = "PaletteGroup_%s" % group_id
-			group_button.text = String(group_dict.get("display_name", group_id.capitalize()))
-			group_button.toggle_mode = true
-			group_button.button_pressed = group_id == _active_palette_group_id
-			group_button.tooltip_text = "Filter palette group: %s" % group_button.text
-			_configure_palette_group_button(group_button, group_button.button_pressed)
-			group_button.pressed.connect(_on_palette_group_button_pressed.bind(group_id))
+			var group_text: String = String(group_dict.get("display_name", group_id.capitalize()))
+			var group_button := _create_palette_group_button(group_id, group_text, group_id == _active_palette_group_id, "Filter palette group: %s" % group_text, true)
 			palette_groups_root.add_child(group_button)
+			_add_palette_group_compat_button(palette_groups_compat_root, group_id, group_text, group_id == _active_palette_group_id, "Filter palette group: %s" % group_text)
 
 	var visible_types: Array = Array(types_by_group.get(_active_palette_group_id, []))
 	visible_types.sort_custom(_sort_palette_type_dicts)
@@ -6540,6 +6615,26 @@ func _on_palette_group_button_pressed(group_id: String) -> void:
 	_populate_tile_palette()
 	_refresh_palette_workflow_controls()
 	_refresh_authoring_status_controls()
+
+
+func _create_palette_group_button(group_id: String, label: String, selected: bool, tooltip_text: String, connect_signal: bool) -> Button:
+	var button := Button.new()
+	button.name = "PaletteGroup_%s" % group_id.strip_edges().to_lower()
+	button.text = label
+	button.toggle_mode = true
+	button.button_pressed = selected
+	button.tooltip_text = tooltip_text
+	_configure_palette_group_button(button, selected)
+	if connect_signal:
+		button.pressed.connect(_on_palette_group_button_pressed.bind(group_id))
+	return button
+
+
+func _add_palette_group_compat_button(root: Container, group_id: String, label: String, selected: bool, tooltip_text: String) -> void:
+	if root == null or root == _get_palette_groups_root():
+		return
+	var button := _create_palette_group_button(group_id, label, selected, tooltip_text, false)
+	root.add_child(button)
 
 
 func _sort_palette_type_dicts(a: Dictionary, b: Dictionary) -> bool:
@@ -6612,7 +6707,8 @@ func _refresh_palette_workflow_controls() -> void:
 func _configure_palette_group_button(button: Button, selected: bool) -> void:
 	if button == null:
 		return
-	button.custom_minimum_size = Vector2(0.0, 28.0)
+	button.custom_minimum_size = Vector2(0.0, PALETTE_GROUP_BUTTON_HEIGHT)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var normal_style := StyleBoxFlat.new()
 	normal_style.bg_color = Color(0.085, 0.12, 0.13, 0.92)
 	normal_style.border_color = Color(0.18, 0.32, 0.34, 0.72)
@@ -6632,6 +6728,7 @@ func _configure_palette_group_button(button: Button, selected: bool) -> void:
 		button.add_theme_stylebox_override("pressed", pressed_style)
 	button.add_theme_color_override("font_color", Color(0.86, 0.94, 0.95, 1.0))
 	button.add_theme_color_override("font_pressed_color", Color(0.08, 0.07, 0.03, 1.0))
+	button.add_theme_font_size_override("font_size", 11)
 
 
 func _get_palette_preview_texture(type_id: String) -> Texture2D:
@@ -6921,8 +7018,19 @@ func _get_tile_type_list() -> ItemList:
 	return get_node_or_null("UI/PalettePanel/Margin/VBox/TileTypeList") as ItemList
 
 
-func _get_palette_groups_root() -> VBoxContainer:
-	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteGroups") as VBoxContainer
+func _get_palette_groups_root() -> Container:
+	var scroll_grid := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteGroupsScroll/PaletteGroupsGrid") as Container
+	if scroll_grid != null:
+		return scroll_grid
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteGroups") as Container
+
+
+func _get_palette_groups_compat_root() -> Container:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteGroups") as Container
+
+
+func _get_palette_groups_scroll() -> ScrollContainer:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteGroupsScroll") as ScrollContainer
 
 
 func _find_matching_type_id(tile_data) -> String:

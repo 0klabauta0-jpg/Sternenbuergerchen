@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_484 - Map Editor Palette Browser Layout
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_484_map_editor_palette_browser_layout.md`, `docs/dev/map_editor_asset_workflow_contract.md`
+- Stand: Der sichtbare Palette-Browser aus dem Editor-Screenshot ist korrigiert: Kategorien sind in einem kompakten Scrollbereich, die Asset-Liste bekommt mehr Platz und nutzt groessere 72px-Previews.
+- Stand: Die Asset-Liste nutzt einen zweispaltigen Icon-Browser mit Top-Icons; der alte `PaletteGroups/PaletteGroup_*`-Pfad bleibt fuer bestehende Verifier als versteckter Kompatibilitaetspfad erhalten.
+- Risiken/offen: Der Branch baut auf dem noch nicht integrierten TASK_483-Arbeitsstand auf. Floor-/Asset-Hoehenalignment bleibt separater Follow-up.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_484_map_editor_palette_browser_layout.gd`, TASK_483, TASK_296, Asset-Rotation-Bugfix, TASK_132, TASK_258, TASK_295 und `git diff --check`.
+- Naechster Schritt: Floor-/Asset-Hoehenalignment als separaten Follow-up wieder aufnehmen.
+
 ### TASK_483 - Map Editor Asset Workflow Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_483_map_editor_asset_workflow_polish.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/dev/map_editor_module_split.md`, `docs/dev/terrain_truth_visual_audit_contract.md`
