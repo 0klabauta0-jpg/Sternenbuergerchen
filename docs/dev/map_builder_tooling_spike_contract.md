@@ -41,5 +41,6 @@ Dieser Contract beschreibt den TASK_486-Spike fuer Godot-native Map-Erstellung. 
 - GridMap-Yaw-Rotation wird ueber Godots orthogonalen Index beim Compile in `object_rotation_degrees` normalisiert. Wenn spaeter Boden-/Road-Rotation und Prop-Rotation getrennt gebraucht werden, braucht `TerrainTileData` einen separaten Transform-Speicher.
 - TASK_489 macht den Pfad bedienbar: ein eigenes Godot-Dock `Map Builder` sitzt links, nutzt eine Icon-Werkzeugleiste fuer Workbench, GridMap, Props und Compile und zeigt in der F6-Preview ausdruecklich, dass F6 kein Builder-Modus ist.
 - TASK_490 macht die Workbench funktional: Das Dock bietet eine Manifest-Palette, Paint/Erase/Rotate und verarbeitet 3D-Viewport-Linksklicks, die GridMap-Zellen oder `AssetPlacerProps`-Nodes schreiben. Diese Authoring-Daten werden weiterhin erst durch den Compile-Pfad zur `TerrainMapData`-Wahrheit.
+- TASK_491 korrigiert die Zielschicht: Der eigentliche Builder-Workflow liegt im Sternenbuergerchen-Runtime-Map-Editor. `map_builder_workbench.tscn` ist nun der F6-Einstieg in `map_editor.tscn`; Godot-Dock, GridMap und Asset-Placer bleiben Legacy-/Compiler-Fallbacks und Recherchematerial.
 - Ein spaeterer Task kann MeshLibraries automatisch aus dem Asset-Mapping erzeugen.
 - Separater Task noetig, wenn Road-/Floor-Rotation und Gebaeude-Rotation auf demselben Tile getrennt gespeichert werden sollen.

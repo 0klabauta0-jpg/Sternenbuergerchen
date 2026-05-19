@@ -5,6 +5,7 @@ extends Node3D
 const IMPORTER_SCRIPT: GDScript = preload("res://scripts/editor/map_builder_scene_importer.gd")
 const TERRAIN_TILE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_catalog.gd")
 const DEFAULT_MANIFEST_PATH: String = "res://data/map_builder_workbench_manifest.json"
+const RUNTIME_MAP_EDITOR_SCENE_PATH: String = "res://scenes/editor/map_editor.tscn"
 
 @export var manifest_path: String = DEFAULT_MANIFEST_PATH
 @export var map_name: String = "map_builder_workbench_demo"
@@ -14,6 +15,7 @@ const DEFAULT_MANIFEST_PATH: String = "res://data/map_builder_workbench_manifest
 @export var auto_configure_on_ready: bool = true
 @export var seed_demo_layout_when_empty: bool = true
 @export var show_runtime_f6_hint: bool = true
+@export var launch_runtime_map_editor_on_play: bool = true
 
 var _manifest: Dictionary = {}
 var _item_type_map: Dictionary = {}
@@ -23,6 +25,9 @@ var _last_warnings: Array[String] = []
 
 
 func _ready() -> void:
+	if _should_launch_runtime_map_editor():
+		call_deferred("_launch_runtime_map_editor")
+		return
 	if auto_configure_on_ready:
 		call_deferred("configure_workbench")
 	if not Engine.is_editor_hint() and show_runtime_f6_hint:
@@ -141,6 +146,8 @@ func get_workbench_snapshot() -> Dictionary:
 	var mesh_item_count: int = _mesh_library.get_item_list().size() if _mesh_library != null else 0
 	return {
 		"manifest_path": manifest_path,
+		"runtime_map_editor_scene_path": RUNTIME_MAP_EDITOR_SCENE_PATH,
+		"launch_runtime_map_editor_on_play": launch_runtime_map_editor_on_play,
 		"map_name": map_name,
 		"grid_size": grid_size,
 		"terrain_visual_theme_id": terrain_visual_theme_id,
@@ -151,6 +158,20 @@ func get_workbench_snapshot() -> Dictionary:
 		"item_type_map_count": _item_type_map.size(),
 		"warnings": _last_warnings.duplicate(),
 	}
+
+
+func _should_launch_runtime_map_editor() -> bool:
+	if Engine.is_editor_hint() or not launch_runtime_map_editor_on_play:
+		return false
+	if DisplayServer.get_name() == "headless":
+		return false
+	return FileAccess.file_exists(RUNTIME_MAP_EDITOR_SCENE_PATH)
+
+
+func _launch_runtime_map_editor() -> void:
+	if get_tree() == null or not FileAccess.file_exists(RUNTIME_MAP_EDITOR_SCENE_PATH):
+		return
+	get_tree().change_scene_to_file(RUNTIME_MAP_EDITOR_SCENE_PATH)
 
 
 func _show_runtime_hint() -> void:
@@ -173,7 +194,7 @@ func _show_runtime_hint() -> void:
 	panel.add_child(margin)
 
 	var label := Label.new()
-	label.text = "Map Builder Workbench\nF6 ist nur Vorschau. Zum Bauen im Godot-Editor das Dock 'Map Builder' nutzen: Workbench vorbereiten, GridMap auswaehlen, Props unter AssetPlacerProps setzen, dann kompilieren."
+	label.text = "Map Builder Workbench\nF6 startet normalerweise den Sternenbuergerchen-Map-Editor. F6 ist nur Vorschau, wenn launch_runtime_map_editor_on_play deaktiviert ist; Dock 'Map Builder' bleibt Legacy-/Compile-Fallback."
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	margin.add_child(label)

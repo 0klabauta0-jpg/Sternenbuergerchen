@@ -35,6 +35,14 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Rotierbare Assets speichern Rotation pro Tile in `object_rotation_degrees`.
 - Rotation ist visuell und authoring-relevant, aber keine zweite Gameplay-Wahrheit.
 
+## Runtime Builder Workbench
+- Der primaere Zielworkflow ist der Sternenbuergerchen-Map-Editor, nicht ein Godot-Editor-Dock.
+- `scenes/editor/map_builder_workbench.tscn` dient als F6-Einstieg fuer Sichttests und startet im sichtbaren Spielmodus den Runtime-Map-Editor `scenes/editor/map_editor.tscn`.
+- Der Map-Editor darf eine linke Builder-Toolleiste anbieten, solange sie bestehende Authoring-Kommandos ausloest und keine zweite Tile-/Mission-Wahrheit speichert.
+- Quick-Tools fuer Terrain, Road und Asset waehlen nur Katalog-`type_id`s aus und aktivieren den vorhandenen Brush.
+- Erase, Height, Marker, Patrol und Rotation bleiben Wrapper um bestehende Editor-Funktionen.
+- Der Godot-Plugin-/GridMap-Pfad bleibt ein Legacy-/Compiler-Fallback und darf nicht als alleiniger Zielworkflow fuer spielbare Editor-Bedienung gelten.
+
 ## Scale
 - Neue Objekt-/Struktur-Assets koennen mit einem Platzierungs-Scale gepinselt werden.
 - Der gespeicherte Tile-Wert ist `object_scale`.

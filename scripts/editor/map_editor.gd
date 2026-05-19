@@ -115,6 +115,15 @@ const PALETTE_GROUP_BUTTON_HEIGHT: float = 22.0
 const PALETTE_ASSET_COLUMNS: int = 2
 const PALETTE_ASSET_LIST_MIN_HEIGHT: float = 560.0
 const PALETTE_ASSET_COLUMN_WIDTH: int = 190
+const RUNTIME_BUILDER_RAIL_NAME: String = "RuntimeBuilderToolRail"
+const RUNTIME_BUILDER_RAIL_WIDTH: float = 58.0
+const RUNTIME_BUILDER_RAIL_GAP: float = 6.0
+const RUNTIME_BUILDER_BUTTON_SIZE: Vector2 = Vector2(44.0, 34.0)
+const RUNTIME_BUILDER_ENTRY_SCENE_PATH: String = "res://scenes/editor/map_builder_workbench.tscn"
+const RUNTIME_MAP_EDITOR_SCENE_PATH: String = "res://scenes/editor/map_editor.tscn"
+const BUILDER_QUICK_TERRAIN_TYPE_ID: String = "ground_flat"
+const BUILDER_QUICK_ROAD_TYPE_ID: String = "spacekit_terrain_road_straight"
+const BUILDER_QUICK_ASSET_TYPE_ID: String = "factory_building_a"
 const OBJECT_SCALE_DEFAULT: float = 1.0
 const OBJECT_SCALE_MIN: float = 0.25
 const OBJECT_SCALE_MAX: float = 2.5
@@ -226,6 +235,7 @@ var _right_mouse_press_world_position: Vector2 = Vector2.ZERO
 var _right_mouse_additive_selection: bool = false
 var _right_drag_selection_active: bool = false
 var _editor_context_menu: PopupMenu = null
+var _runtime_builder_status_text: String = "Runtime Map-Editor bereit."
 var _inspector_section_collapsed: Dictionary = {
 	INSPECTOR_SECTION_MAP_SETTINGS: false,
 	INSPECTOR_SECTION_MARKERS: false,
@@ -250,6 +260,7 @@ func _ready() -> void:
 	_ensure_object_scale_controls()
 	_ensure_palette_workflow_controls()
 	_ensure_palette_browser_layout_controls()
+	_ensure_runtime_builder_workbench_controls()
 	_ensure_terrain_truth_inspector_controls()
 	_ensure_editor_context_menu()
 	_populate_tile_palette()
@@ -277,6 +288,7 @@ func _ready() -> void:
 
 func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("UI/PalettePanel"), "editor.tile_palette")
+	_apply_help_id(get_node_or_null("UI/%s" % RUNTIME_BUILDER_RAIL_NAME), "map_editor.runtime_builder")
 	_apply_help_id(get_node_or_null("UI/PalettePanel/Margin/VBox/TileTypeList"), "editor.tile_palette")
 	_apply_help_id(get_node_or_null("UI/TopBar/Margin/HBox/BrushButton"), "editor.tile_palette")
 	_apply_help_id(_get_brush_size_option_button(), "editor.brush_size")
@@ -1366,6 +1378,222 @@ func _arrange_topbar_authoring_tools() -> void:
 			continue
 		button_row.move_child(node, insert_index)
 		insert_index += 1
+
+
+func _ensure_runtime_builder_workbench_controls() -> void:
+	var ui := get_node_or_null("UI") as CanvasLayer
+	if ui == null:
+		return
+	var rail := ui.get_node_or_null(RUNTIME_BUILDER_RAIL_NAME) as PanelContainer
+	if rail == null:
+		rail = PanelContainer.new()
+		rail.name = RUNTIME_BUILDER_RAIL_NAME
+		ui.add_child(rail)
+	_apply_runtime_builder_layout_offsets()
+	_apply_panel_style(rail, Color(0.045, 0.065, 0.075, 0.97), Color(0.35, 0.64, 0.70, 0.72))
+
+	var margin := rail.get_node_or_null("Margin") as MarginContainer
+	if margin == null:
+		margin = MarginContainer.new()
+		margin.name = "Margin"
+		margin.add_theme_constant_override("margin_left", 5)
+		margin.add_theme_constant_override("margin_top", 7)
+		margin.add_theme_constant_override("margin_right", 5)
+		margin.add_theme_constant_override("margin_bottom", 7)
+		rail.add_child(margin)
+	var tools := margin.get_node_or_null("Tools") as VBoxContainer
+	if tools == null:
+		tools = VBoxContainer.new()
+		tools.name = "Tools"
+		tools.add_theme_constant_override("separation", 5)
+		margin.add_child(tools)
+	_ensure_runtime_builder_tool_button(tools, "select", "S", "Select: Kachel, Objekt oder Marker inspizieren und bearbeiten.", true)
+	_ensure_runtime_builder_tool_button(tools, "terrain", "T", "Terrain: normales Bodentile als Brush waehlen.", true)
+	_ensure_runtime_builder_tool_button(tools, "road", "R", "Road: Strassenplatte als Brush waehlen.", true)
+	_ensure_runtime_builder_tool_button(tools, "asset", "A", "Asset: Gebaeude-Asset als Brush waehlen; danach Palette fuer Varianten nutzen.", true)
+	_ensure_runtime_builder_tool_button(tools, "erase", "X", "Erase: Objekt-/Struktur-Layer entfernen, Boden und Marker bleiben erhalten.", true)
+	_ensure_runtime_builder_tool_button(tools, "height", "H", "Hoehe/Cliff: vorhandenes Hoehenwerkzeug aktivieren.", true)
+	_ensure_runtime_builder_tool_button(tools, "marker", "M", "Marker: Spawn- und Objective-Punkte platzieren.", true)
+	_ensure_runtime_builder_tool_button(tools, "patrol", "P", "Patrol: NPC-Patrolpunkte fuer den gewaehlten Spawn setzen.", true)
+	_ensure_runtime_builder_separator(tools, "RuntimeBuilderRotateSeparator")
+	_ensure_runtime_builder_tool_button(tools, "rotate_left", "-90", "Ausgewaehltes rotierbares Objekt links drehen.", false)
+	_ensure_runtime_builder_tool_button(tools, "rotate_right", "+90", "Ausgewaehltes rotierbares Objekt rechts drehen.", false)
+	_refresh_runtime_builder_workbench_controls()
+
+
+func _ensure_runtime_builder_tool_button(parent: VBoxContainer, tool_id: String, label_text: String, tooltip: String, is_toggle: bool) -> Button:
+	var button_name: String = _build_runtime_builder_button_name(tool_id)
+	var button := parent.get_node_or_null(button_name) as Button
+	if button == null:
+		button = Button.new()
+		button.name = button_name
+		button.focus_mode = Control.FOCUS_NONE
+		button.pressed.connect(activate_runtime_builder_tool.bind(tool_id))
+		parent.add_child(button)
+	button.text = label_text
+	button.toggle_mode = is_toggle
+	button.custom_minimum_size = RUNTIME_BUILDER_BUTTON_SIZE
+	button.tooltip_text = tooltip
+	button.set_meta("builder_tool_id", tool_id)
+	button.add_theme_font_size_override("font_size", 11)
+	return button
+
+
+func _ensure_runtime_builder_separator(parent: VBoxContainer, separator_name: String) -> void:
+	if parent.get_node_or_null(separator_name) != null:
+		return
+	var separator := HSeparator.new()
+	separator.name = separator_name
+	separator.custom_minimum_size = Vector2(0.0, 4.0)
+	parent.add_child(separator)
+
+
+func _build_runtime_builder_button_name(tool_id: String) -> String:
+	var normalized: String = tool_id.strip_edges().to_lower().replace("_", "")
+	return "BuilderTool_%s" % normalized
+
+
+func _apply_runtime_builder_layout_offsets() -> void:
+	var rail := get_node_or_null("UI/%s" % RUNTIME_BUILDER_RAIL_NAME) as PanelContainer
+	if rail != null:
+		rail.anchor_left = 0.0
+		rail.anchor_top = 0.0
+		rail.anchor_right = 0.0
+		rail.anchor_bottom = 1.0
+		rail.offset_left = 0.0
+		rail.offset_top = 44.0
+		rail.offset_right = RUNTIME_BUILDER_RAIL_WIDTH
+		rail.offset_bottom = 0.0
+		rail.grow_vertical = Control.GROW_DIRECTION_BOTH
+		rail.custom_minimum_size = Vector2(RUNTIME_BUILDER_RAIL_WIDTH, 0.0)
+	var palette_panel := get_node_or_null("UI/PalettePanel") as PanelContainer
+	if palette_panel != null:
+		var left_edge: float = RUNTIME_BUILDER_RAIL_WIDTH + RUNTIME_BUILDER_RAIL_GAP
+		palette_panel.offset_left = left_edge
+		palette_panel.offset_right = left_edge + PALETTE_PANEL_MIN_WIDTH
+		palette_panel.custom_minimum_size = Vector2(PALETTE_PANEL_MIN_WIDTH, palette_panel.custom_minimum_size.y)
+
+
+func activate_runtime_builder_tool(tool_id: String) -> bool:
+	var normalized_tool_id: String = tool_id.strip_edges().to_lower()
+	var handled: bool = false
+	match normalized_tool_id:
+		"select":
+			handled = set_authoring_tool(AUTHORING_TOOL_SELECT)
+		"terrain":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_TERRAIN_TYPE_ID)
+		"road":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_ROAD_TYPE_ID)
+		"asset":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_ASSET_TYPE_ID)
+		"erase":
+			handled = set_authoring_tool(AUTHORING_TOOL_ERASER)
+		"height":
+			handled = set_authoring_tool(AUTHORING_TOOL_HEIGHT)
+		"marker":
+			handled = set_authoring_tool(AUTHORING_TOOL_MARKER)
+		"patrol":
+			handled = set_authoring_tool(AUTHORING_TOOL_PATROL)
+		"rotate_left":
+			handled = _rotate_selected_object(-90.0)
+		"rotate_right":
+			handled = _rotate_selected_object(90.0)
+		_:
+			handled = false
+	if handled:
+		_runtime_builder_status_text = _build_runtime_builder_status_text()
+	else:
+		_runtime_builder_status_text = "Builder-Tool nicht verfuegbar: %s" % normalized_tool_id
+	_refresh_runtime_builder_workbench_controls()
+	_refresh_authoring_status_controls()
+	return handled
+
+
+func _activate_runtime_builder_palette_brush(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
+		return false
+	if not set_palette_type_for_authoring(normalized_type_id):
+		return false
+	return set_authoring_tool(AUTHORING_TOOL_BRUSH)
+
+
+func _refresh_runtime_builder_workbench_controls() -> void:
+	var rail := get_node_or_null("UI/%s" % RUNTIME_BUILDER_RAIL_NAME) as PanelContainer
+	if rail == null:
+		return
+	var active_tool: String = _get_active_authoring_tool()
+	for button in _get_runtime_builder_tool_buttons():
+		if button == null or not button.toggle_mode:
+			continue
+		var tool_id: String = String(button.get_meta("builder_tool_id", "")).strip_edges().to_lower()
+		button.button_pressed = _runtime_builder_button_is_active(tool_id, active_tool)
+
+
+func _runtime_builder_button_is_active(tool_id: String, active_tool: String) -> bool:
+	match tool_id:
+		"select":
+			return active_tool == AUTHORING_TOOL_SELECT
+		"terrain":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_TERRAIN_TYPE_ID
+		"road":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_ROAD_TYPE_ID
+		"asset":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_ASSET_TYPE_ID
+		"erase":
+			return active_tool == AUTHORING_TOOL_ERASER
+		"height":
+			return active_tool == AUTHORING_TOOL_HEIGHT
+		"marker":
+			return active_tool == AUTHORING_TOOL_MARKER
+		"patrol":
+			return active_tool == AUTHORING_TOOL_PATROL
+	return false
+
+
+func _get_runtime_builder_tool_buttons() -> Array[Button]:
+	var buttons: Array[Button] = []
+	var tools := get_node_or_null("UI/%s/Margin/Tools" % RUNTIME_BUILDER_RAIL_NAME) as VBoxContainer
+	if tools == null:
+		return buttons
+	for child in tools.get_children():
+		var button := child as Button
+		if button != null and button.has_meta("builder_tool_id"):
+			buttons.append(button)
+	return buttons
+
+
+func _build_runtime_builder_status_text() -> String:
+	var selected_label: String = _get_palette_type_display_name(_selected_type_id)
+	if selected_label.is_empty():
+		selected_label = "-"
+	return "Tool %s | Asset %s" % [_format_option_label(_get_active_authoring_tool()), selected_label]
+
+
+func _build_runtime_builder_workbench_snapshot() -> Dictionary:
+	var rail := get_node_or_null("UI/%s" % RUNTIME_BUILDER_RAIL_NAME) as PanelContainer
+	var palette_panel := get_node_or_null("UI/PalettePanel") as Control
+	var tool_ids: PackedStringArray = PackedStringArray()
+	for button in _get_runtime_builder_tool_buttons():
+		tool_ids.append(String(button.get_meta("builder_tool_id", "")))
+	return {
+		"enabled": rail != null,
+		"entry_scene_path": RUNTIME_BUILDER_ENTRY_SCENE_PATH,
+		"runtime_editor_scene_path": RUNTIME_MAP_EDITOR_SCENE_PATH,
+		"runs_from_f6_workbench": true,
+		"ui_sets_gameplay_truth": false,
+		"tool_ids": tool_ids,
+		"tool_count": tool_ids.size(),
+		"rail_width": RUNTIME_BUILDER_RAIL_WIDTH,
+		"palette_panel_offset_left": palette_panel.offset_left if palette_panel != null else 0.0,
+		"palette_panel_offset_right": palette_panel.offset_right if palette_panel != null else 0.0,
+		"active_tool": _get_active_authoring_tool(),
+		"selected_type_id": _selected_type_id,
+		"quick_terrain_type_id": BUILDER_QUICK_TERRAIN_TYPE_ID,
+		"quick_road_type_id": BUILDER_QUICK_ROAD_TYPE_ID,
+		"quick_asset_type_id": BUILDER_QUICK_ASSET_TYPE_ID,
+		"status": _runtime_builder_status_text,
+	}
 
 
 func _ensure_editor_save_controls() -> void:
@@ -3100,6 +3328,7 @@ func set_authoring_tool(tool_id: String) -> bool:
 		_clear_patrol_route_preview(true)
 	_update_height_topbar_state()
 	_update_patrol_topbar_state()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 	return true
 
@@ -3151,6 +3380,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 			"enabled": _eraser_tool_enabled,
 			"scope": "object_layer_only",
 		},
+		"runtime_builder_workbench": _build_runtime_builder_workbench_snapshot(),
 		"toolbar": _build_toolbar_snapshot(),
 		"palette": _build_palette_snapshot(),
 		"context_menu": _build_context_menu_snapshot(),
@@ -6188,6 +6418,7 @@ func _on_tile_type_selected(index: int) -> void:
 			marker_tool_button.button_pressed = false
 	_refresh_palette_selection_visual()
 	_refresh_palette_workflow_controls()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
 
@@ -6208,6 +6439,7 @@ func set_palette_type_for_authoring(type_id: String) -> bool:
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	if brush_button != null and not brush_button.button_pressed:
 		brush_button.button_pressed = true
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 	return true
 
@@ -6222,6 +6454,7 @@ func _on_tile_type_deselected() -> void:
 	_hide_hover_preview()
 	_refresh_palette_selection_visual()
 	_refresh_palette_workflow_controls()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
 

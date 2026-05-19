@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_491 - Map Editor Runtime Builder Workbench
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/dev/map_builder_tooling_spike_contract.md`
+- Stand: Der primaere Baufluss liegt wieder im Sternenbuergerchen-Map-Editor: `map_editor.tscn` erzeugt links eine Runtime-Builder-Toolleiste fuer Select, Terrain, Road, Asset, Erase, Height, Marker, Patrol und Rotation.
+- Stand: Die Builder-Quick-Tools nutzen bestehende Map-Editor-Kommandos (`set_authoring_tool`, `set_palette_type_for_authoring`) und schreiben keine zweite Gameplay-Wahrheit.
+- Stand: `map_builder_workbench.tscn` startet im sichtbaren F6-Spielmodus direkt den Runtime-Map-Editor; headless bleibt der alte Workbench-/Compile-Pfad fuer Verifier verfuegbar.
+- Risiken/offen: Auto-Snapping/Auto-Rotation fuer Strassen, Waende, Tueren und Cliffs sowie echte Icon-Politur bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_491_map_editor_runtime_builder_workbench.gd`, relevante TASK_490-/TASK_488-Regressionen und `git diff --check`.
+- Naechster Schritt: Sichttest per F6 auf `res://scenes/editor/map_builder_workbench.tscn`, danach Road-/Wall-Drag-Tool als eigener Runtime-Editor-Slice.
+
 ### TASK_490 - Map Builder Paint Tools MVP
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_490_map_builder_paint_tools_mvp.md`, `docs/tasks/TASK_489_map_builder_workbench_editor_entry.md`, `docs/dev/map_builder_tooling_spike_contract.md`
