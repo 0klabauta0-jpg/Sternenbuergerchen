@@ -19,6 +19,17 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Kategorieauswahl darf scrollbar sein; der Asset-Browser darunter bekommt den Hauptplatz.
 - Asset-Listen duerfen als mehrspaltiger Icon-Browser dargestellt werden, solange die Palette-Metadaten und Selection-Snapshots stabil bleiben.
 
+## Save As
+- Der Map-`Save As`-Dialog ist ein JSON-`FILE_MODE_SAVE_FILE`-Dialog im Projektressourcenbereich.
+- Er startet bei `res://maps`, ist nicht per `root_subfolder` auf einen Sonderpfad eingeschraenkt und behaelt den JSON-Filter.
+- Pfade ohne `.json` werden beim Speichern normalisiert; projekt-absolute Pfade werden intern wieder als `res://...` referenziert.
+
+## Street and water plates
+- Strassen- und Asphaltplatten, die als Boden gebaut werden, sind Terrain-/Surface-Varianten und keine Object-Layer-Props.
+- Space-Kit-Strassenplatten schreiben `surface_type = road`, behalten vorhandene Objekt-Layer und werden in der 3D-Ansicht mit derselben Oberkante wie normale Bodenplatten gerendert.
+- Wasser-/Flussplatten schreiben `surface_type = water`; spaeter gesetzte Hafen-, Kai-, Gebaeude- oder Objekt-Assets duerfen diese Surface-Wahrheit nicht auf `ground` zuruecksetzen.
+- Wasser ist ein Surface-Typ fuer Editor- und Pfadkosten-Wahrheit. Spezielle Schiff-, Schwimm- oder Kai-Walkability-Regeln gehoeren in einen separaten Dock-/Harbor-Task.
+
 ## Rotation
 - Manuelle Rotation bleibt in 90-Grad-Schritten.
 - Rotierbare Assets speichern Rotation pro Tile in `object_rotation_degrees`.
@@ -31,6 +42,7 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Der Default ist 1.0. Defaultwerte duerfen beim Speichern ausgelassen werden.
 - Eraser setzt `object_scale` wieder auf 1.0, wenn das Objekt oder die Struktur entfernt wird.
 - Visuals multiplizieren ihren bestehenden Mapping-Scale mit `object_scale`; Mapping-Skalen bleiben weiterhin im Asset-Mapping.
+- Die Kenney-`Modular Space Kit`-Modelle sind in 4er-Modul-Einheiten authoriert. Ihr Mapping-Scale nutzt `0.25`, damit `modular_wall`/`modular_gate` ein Tile breit bleiben, waehrend groessere Raum-/Korridor-Teile bewusst multi-tile sind.
 
 ## Naechste Editor-Slices
 - Freies Wand-/Cliff-Ziehen mit Segment-/Edge-Preview.

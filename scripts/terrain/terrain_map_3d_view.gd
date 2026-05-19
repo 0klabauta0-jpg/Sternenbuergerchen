@@ -134,6 +134,11 @@ const GROUND_MULTIMESH_MODEL_KEYS: PackedStringArray = [
 	"modular_floor",
 	"modular_floor_big",
 	"modular_floor_raised",
+	"spacekit_terrain_road_corner",
+	"spacekit_terrain_road_cross",
+	"spacekit_terrain_road_end",
+	"spacekit_terrain_road_split",
+	"spacekit_terrain_road_straight",
 ]
 const STATIC_PROP_MULTIMESH_MODEL_KEYS: PackedStringArray = [
 	"nature_tree_blocker",
@@ -2403,7 +2408,7 @@ func _get_ground_batch_chunk_position(grid_position: Vector2i) -> Vector2i:
 
 func _ground_surface_supports_tile_rotation(visual_type_id: String) -> bool:
 	var normalized_visual_type_id: String = visual_type_id.strip_edges().to_lower()
-	return normalized_visual_type_id == "station_floor_panel" or normalized_visual_type_id.begins_with("station_set_floor") or normalized_visual_type_id == "modular_floor" or normalized_visual_type_id == "modular_floor_big" or normalized_visual_type_id == "modular_floor_raised"
+	return normalized_visual_type_id == "station_floor_panel" or normalized_visual_type_id.begins_with("station_set_floor") or normalized_visual_type_id == "modular_floor" or normalized_visual_type_id == "modular_floor_big" or normalized_visual_type_id == "modular_floor_raised" or normalized_visual_type_id.begins_with("spacekit_terrain_road_")
 
 
 func _get_surface_theme_dictionary_field(field_name: String) -> Dictionary:
@@ -2592,6 +2597,8 @@ func _get_ground_surface_model_override_color(visual_type_id: String, tile_data)
 			return Color(0.36, 0.35, 0.31, 1.0)
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD:
 			return Color(0.34, 0.36, 0.34, 1.0)
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_WATER:
+			return Color(0.18, 0.38, 0.55, 1.0)
 		_:
 			return Color(0.38, 0.34, 0.24, 1.0)
 
@@ -2665,6 +2672,8 @@ func _add_surface_tint_visual(tile_data, top_y: float) -> void:
 			tint_color = Color(0.64, 0.69, 0.72, 0.30)
 		TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
 			tint_color = Color(0.54, 0.50, 0.42, 0.32)
+		TERRAIN_TILE_DATA_SCRIPT.SURFACE_WATER:
+			tint_color = Color(0.22, 0.58, 0.88, 0.30)
 		_:
 			return
 	if _queue_surface_tint_batch(tile_data, top_y, surface_type, tint_color):

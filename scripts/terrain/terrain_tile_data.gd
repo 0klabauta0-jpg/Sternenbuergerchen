@@ -5,6 +5,7 @@ const SURFACE_GROUND: String = "ground"
 const SURFACE_ROAD: String = "road"
 const SURFACE_SAND: String = "sand"
 const SURFACE_ROCK: String = "rock"
+const SURFACE_WATER: String = "water"
 
 const DEFAULT_WALKABLE: bool = true
 const DEFAULT_BLOCKS_LOS: bool = false
@@ -76,6 +77,8 @@ static func get_surface_speed_factor(next_surface_type: String) -> float:
 			return 0.6
 		SURFACE_ROCK:
 			return 0.8
+		SURFACE_WATER:
+			return 0.35
 		_:
 			return 1.0
 
@@ -88,6 +91,8 @@ static func get_surface_path_cost(next_surface_type: String) -> float:
 			return 1.5
 		SURFACE_ROCK:
 			return 1.3
+		SURFACE_WATER:
+			return 4.0
 		_:
 			return 1.0
 
@@ -100,6 +105,8 @@ static func get_surface_short_code(next_surface_type: String) -> String:
 			return "SND"
 		SURFACE_ROCK:
 			return "RCK"
+		SURFACE_WATER:
+			return "WTR"
 		_:
 			return "GND"
 
@@ -123,7 +130,7 @@ static func _normalize_surface_type(next_surface_type: String) -> String:
 
 static func _is_surface_type_valid(next_surface_type: String) -> bool:
 	match _normalize_surface_type(next_surface_type):
-		SURFACE_GROUND, SURFACE_ROAD, SURFACE_SAND, SURFACE_ROCK:
+		SURFACE_GROUND, SURFACE_ROAD, SURFACE_SAND, SURFACE_ROCK, SURFACE_WATER:
 			return true
 		_:
 			return false

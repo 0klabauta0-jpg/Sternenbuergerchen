@@ -114,6 +114,7 @@ git checkout -b batch/<batch-name>
 - TASK_482 - Mission Briefing Data Contract
 - TASK_483 - Map Editor Asset Workflow Polish
 - TASK_484 - Map Editor Palette Browser Layout
+- TASK_485 - Map Editor Save As and Modular Scale Fix
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

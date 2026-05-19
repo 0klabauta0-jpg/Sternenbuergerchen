@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_485 - Map Editor Save As and Modular Scale Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_485_map_editor_saveas_modular_scale_fix.md`, `docs/dev/map_editor_asset_workflow_contract.md`
+- Stand: Der Map-Editor-`Save As`-Dialog ist wieder ein JSON-Save-Dialog im Projektressourcenbereich und startet bei `res://maps`, statt als Userdaten-Directory-Dialog auf einem fremden Pfad zu landen.
+- Stand: Projekt-absolute Save-As-Pfade werden intern zu `res://...` normalisiert; Pfade ohne `.json` bekommen die Endung.
+- Stand: Die Kenney-Modular-Space-Kit-Modelle nutzen im 3D-Asset-Mapping `0.25`, damit ein 4er-Quellmodul einer 3D-Zelle entspricht und Modular Wall/Gate/Corner nicht mehr uebergross auf der Karte stehen.
+- Stand: Space-Kit-Strassenplatten sind Terrain-/Surface-Varianten mit `surface_type = road`, liegen mit der Oberkante auf Bodenhoehe und bewahren vorhandene Objekt-Layer; `nature_ground_dirt_river_tile` ist als Wasser-/Flussplatte mit `surface_type = water` fuer Hafen-/Kai-Authoring nutzbar.
+- Risiken/offen: Der Branch baut auf dem noch nicht integrierten TASK_484/TASK_483-Arbeitsstand auf. Finaler Sichtcheck der Modular-, Strassen- und Wasser-Assets im Editor bleibt offen; spezielle Dock-/Kai-Walkability bleibt Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_485_map_editor_saveas_modular_scale_fix.gd`, TASK_484, TASK_483 und `git diff --check`.
+- Naechster Schritt: Manuell im Editor `Save As` oeffnen und Modular Wall/Gate/Floor sowie Strassen-/Wasserplatten gegen eine kleine Testplatte pruefen.
+
 ### TASK_484 - Map Editor Palette Browser Layout
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_484_map_editor_palette_browser_layout.md`, `docs/dev/map_editor_asset_workflow_contract.md`
@@ -2285,7 +2296,7 @@
 
 ### TASK_253 - Nature Ground Surface Editor Palette Pass
 - Status: implementiert
-- Stand: `data/terrain_surface_visual_theme_catalog.json` definiert die aktive Nature-Classic-Dirt-Theme, Projektpfade, Surface-Default-Zuordnung und den Vertrag, dass `surface_type` die Gameplay-Wahrheit bleibt und keine neuen Surface-Typen entstehen.
+- Stand: `data/terrain_surface_visual_theme_catalog.json` definiert die aktive Nature-Classic-Dirt-Theme, Projektpfade, Surface-Default-Zuordnung und den Vertrag, dass `surface_type` die Gameplay-Wahrheit bleibt. TASK_485 erweitert diesen Vertrag spaeter um den expliziten Surface-Typ `water`.
 - Stand: `TerrainMap3DView` nutzt Nature-Kit-Ground-Modelle fuer 2.5D-Top-Surfaces und meldet Surface-Visual-Eintraege, Nature-Surface-Zaehler und Theme-Verteilung im Render-Snapshot. Sand/Rock/Road behalten die bestehenden Surface-Tints fuer taktische Lesbarkeit.
 - Stand: `terrain_tile_catalog.json` enthaelt die neue Palette `Nature Boden`. `TerrainTileCatalog` behandelt diese Eintraege als visuelle Surface-Varianten: `type_id` und `surface_type` koennen wechseln, waehrend `height_level`, `edge_type`, `object_type_id`, Cover, Walkable und LOS erhalten bleiben.
 - Offene Punkte: Manueller Editor-/Mission-Sichtcheck bleibt offen; Headless prueft Overlays und Ressourcenzuordnung, aber nicht die finale optische Wirkung.

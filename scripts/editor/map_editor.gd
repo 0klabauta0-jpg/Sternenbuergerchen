@@ -5236,6 +5236,7 @@ func _populate_surface_type_options() -> void:
 	option_button.add_item(TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD)
 	option_button.add_item(TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND)
 	option_button.add_item(TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK)
+	option_button.add_item(TERRAIN_TILE_DATA_SCRIPT.SURFACE_WATER)
 	option_button.select(0)
 
 
@@ -5306,8 +5307,10 @@ func _connect_ui_signals() -> void:
 		save_button.pressed.connect(_on_save_pressed)
 	if save_as_button != null and not save_as_button.pressed.is_connected(_on_save_as_pressed):
 		save_as_button.pressed.connect(_on_save_as_pressed)
-	if save_as_dialog != null and not save_as_dialog.file_selected.is_connected(_on_save_as_file_selected):
-		save_as_dialog.file_selected.connect(_on_save_as_file_selected)
+	if save_as_dialog != null:
+		_configure_map_save_as_dialog(save_as_dialog)
+		if not save_as_dialog.file_selected.is_connected(_on_save_as_file_selected):
+			save_as_dialog.file_selected.connect(_on_save_as_file_selected)
 	if load_button != null and not load_button.pressed.is_connected(_on_load_pressed):
 		load_button.pressed.connect(_on_load_pressed)
 	if new_map_button != null and not new_map_button.pressed.is_connected(_on_new_map_pressed):
@@ -5400,9 +5403,26 @@ func _open_save_as_dialog() -> void:
 	var save_as_dialog := get_node_or_null("UI/SaveAsDialog") as FileDialog
 	if save_as_dialog == null:
 		return
-	save_as_dialog.current_dir = "res://maps"
+	_configure_map_save_as_dialog(save_as_dialog)
+	save_as_dialog.current_dir = _get_map_save_as_start_dir()
 	save_as_dialog.current_file = _build_suggested_map_filename()
 	save_as_dialog.popup_centered_ratio(0.65)
+
+
+func _configure_map_save_as_dialog(save_as_dialog: FileDialog) -> void:
+	if save_as_dialog == null:
+		return
+	save_as_dialog.access = FileDialog.ACCESS_RESOURCES
+	save_as_dialog.file_mode = FileDialog.FILE_MODE_SAVE_FILE
+	save_as_dialog.root_subfolder = ""
+	save_as_dialog.filters = PackedStringArray(["*.json ; JSON terrain map"])
+
+
+func _get_map_save_as_start_dir() -> String:
+	var current_directory: String = _current_map_path.strip_edges().get_base_dir()
+	if current_directory.begins_with("res://"):
+		return current_directory
+	return "res://maps"
 
 
 func _should_route_save_to_save_as() -> bool:
@@ -5428,9 +5448,13 @@ func _build_suggested_map_filename() -> String:
 
 
 func _normalize_map_save_path(path: String) -> String:
-	var normalized_path: String = path.strip_edges()
+	var normalized_path: String = path.strip_edges().replace("\\", "/")
 	if normalized_path.is_empty():
 		return normalized_path
+	if normalized_path.is_absolute_path():
+		var localized_path: String = ProjectSettings.localize_path(normalized_path)
+		if localized_path.begins_with("res://") or localized_path.begins_with("user://"):
+			normalized_path = localized_path
 	if normalized_path.get_extension().strip_edges().to_lower() != "json":
 		normalized_path = "%s.json" % normalized_path
 	return normalized_path

@@ -115,6 +115,8 @@ func build_tile_modulate(tile_data) -> Color:
 				tile_color = Color(1.0, 0.95, 0.72, 1.0)
 			TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK:
 				tile_color = Color(0.88, 0.78, 0.66, 1.0)
+			TERRAIN_TILE_DATA_SCRIPT.SURFACE_WATER:
+				tile_color = Color(0.34, 0.60, 0.82, 1.0)
 
 		var height_level: int = int(tile_data.height_level)
 		if height_level == 1:
