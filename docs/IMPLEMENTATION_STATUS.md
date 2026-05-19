@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_489 - Map Builder Workbench Editor Entry
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_489_map_builder_workbench_editor_entry.md`, `docs/tasks/TASK_488_map_builder_workbench_meshlibrary_mvp.md`, `docs/dev/map_builder_tooling_spike_contract.md`
+- Stand: Das Projekt aktiviert ein eigenes Godot-Editor-Plugin `Map Builder Workbench` unter `addons/map_builder_workbench`.
+- Stand: Das Dock sitzt links und nutzt eine kompakte Icon-Leiste fuer Workbench oeffnen, MeshLibrary vorbereiten, GridMap auswaehlen, AssetPlacerProps auswaehlen und nach Mission-JSON kompilieren.
+- Stand: F6 zeigt in der Workbench jetzt einen Hinweis, dass die Scene nur Vorschau ist und der Baufluss ueber das Editor-Dock laeuft.
+- Risiken/offen: Der sichtbare Bediencheck in Godot steht noch aus: Editor neu starten, Dock `Map Builder` suchen, `GridMap` auswaehlen und einmal sichtbar kompilieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_489_map_builder_workbench_editor_entry.gd`, TASK_488-Regression, `godot_console.exe --headless --path . --import` und `git diff --check`.
+- Naechster Schritt: Sichttest der linken Icon-Leiste gegen den echten Godot-Editor-Workflow, danach erst weitere Palette-/Placement-Politur.
+
 ### TASK_488 - Map Builder Workbench MeshLibrary MVP
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_488_map_builder_workbench_meshlibrary_mvp.md`, `docs/dev/map_builder_tooling_spike_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`
