@@ -116,6 +116,7 @@ git checkout -b batch/<batch-name>
 - TASK_484 - Map Editor Palette Browser Layout
 - TASK_485 - Map Editor Save As and Modular Scale Fix
 - TASK_486 - Map Builder Tooling Spike
+- TASK_487 - Install Godot Asset Placer
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -31,6 +31,10 @@ Dieser Contract beschreibt den TASK_486-Spike fuer Godot-native Map-Erstellung. 
 - Runtime, Mission und Pfadkosten lesen weiterhin `TerrainMapData`, `TerrainTileData`, `TerrainRegistry` und bestehende Contracts.
 
 ## Folgeentscheidungen
-- Erst nach einem echten Godot-Editor-Sichttest entscheiden, ob ein externes Plugin vendored wird.
+- TASK_487 installiert Godot Asset Placer 1.4.0 unter `addons/asset_placer` und aktiviert es als Editor-Plugin.
+- Die Installation enthaelt eine kleine lokale Godot-4.6.2-Kompatibilitaetsbremse: `EditorDock` wird nur in sichtbaren Editor-Sessions genutzt, headless Import/Verifier ueberspringen den Dock-/Panel-UI-Aufbau.
+- Asset Placer ist weiterhin nur Authoring-Tooling. Collections, Asset-Placer-Nodes und Plugin-Docks werden nicht zur Gameplay-Wahrheit.
+- Die Plugin-Asset-Bibliothek bleibt standardmaessig `user://asset_library.json`; ein gemeinsamer Projektpfad muss spaeter bewusst als Team-Workflow entschieden werden.
+- Erst nach einem echten Godot-Editor-Sichttest entscheiden, ob der Plugin-Pfad in den regulaeren Map-Baufluss uebernommen wird.
 - Ein spaeterer Task kann MeshLibraries automatisch aus dem Asset-Mapping erzeugen.
 - Separater Task noetig, wenn Road-/Floor-Rotation und Gebaeude-Rotation auf demselben Tile getrennt gespeichert werden sollen.
