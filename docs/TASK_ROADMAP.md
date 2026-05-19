@@ -121,6 +121,7 @@ git checkout -b batch/<batch-name>
 - TASK_489 - Map Builder Workbench Editor Entry
 - TASK_490 - Map Builder Paint Tools MVP
 - TASK_491 - Map Editor Runtime Builder Workbench
+- TASK_492 - Map Editor Network Drag Snap Tools
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

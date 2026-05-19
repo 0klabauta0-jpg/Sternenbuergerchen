@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_492 - Map Editor Network Drag Snap Tools
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`
+- Stand: Die Runtime-Builder-Leiste bietet Linienwerkzeuge fuer Road, Rail, Pipe, Wall und Cliff sowie Quick-Brushes fuer Factory und Modular-/Space-Floor.
+- Stand: `apply_runtime_network_path_for_authoring` setzt orthogonale Pfade als einen Undo-Schritt und waehlt End-, Straight-, Corner-, Split- und Cross-Varianten anhand der lokalen Nachbarn.
+- Stand: Der Grundstrassensatz nutzt die Space-Kit-Road-Surface-Varianten, Rails/Pipes bleiben Object-Layer-Assets, und Factory-/SpaceKit-/StationSet-/Modular-/Wall-/Cliff-Prefixe sind fuer Placement-Scale-Korrekturen freigeschaltet.
+- Risiken/offen: Bruecken, Rampen, Gruenstrassen, Hoch-/Runter-Strassen sowie Door-/Computer-/Pipeline-Gameplay brauchen eigene Folgeslices.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_492_map_editor_network_drag_snap_tools.gd`, TASK_491-/TASK_483-/TASK_485-Regressionen und `git diff --check`.
+- Naechster Schritt: Sichttest per F6 in `res://scenes/editor/map_builder_workbench.tscn`, dann Drag-Preview/Icons und Door-/Computer-Interaction-Contract schneiden.
+
 ### TASK_491 - Map Editor Runtime Builder Workbench
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/dev/map_builder_tooling_spike_contract.md`

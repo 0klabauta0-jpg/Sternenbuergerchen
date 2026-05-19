@@ -104,6 +104,7 @@ const AUTHORING_TOOL_ERASER: String = "eraser"
 const AUTHORING_TOOL_HEIGHT: String = "height"
 const AUTHORING_TOOL_MARKER: String = "marker"
 const AUTHORING_TOOL_PATROL: String = "patrol"
+const AUTHORING_TOOL_NETWORK_DRAG: String = "network_drag"
 const TOOL_BUTTON_SIZE: Vector2 = Vector2(34.0, 30.0)
 const MAX_UNDO_STACK_SIZE: int = 32
 const PALETTE_PREVIEW_ICON_SIZE: Vector2i = Vector2i(72, 72)
@@ -124,6 +125,17 @@ const RUNTIME_MAP_EDITOR_SCENE_PATH: String = "res://scenes/editor/map_editor.ts
 const BUILDER_QUICK_TERRAIN_TYPE_ID: String = "ground_flat"
 const BUILDER_QUICK_ROAD_TYPE_ID: String = "spacekit_terrain_road_straight"
 const BUILDER_QUICK_ASSET_TYPE_ID: String = "factory_building_a"
+const BUILDER_QUICK_FACTORY_TYPE_ID: String = "factory_building_a"
+const BUILDER_QUICK_SPACE_FLOOR_TYPE_ID: String = "modular_floor"
+const NETWORK_KIND_ROAD: String = "road"
+const NETWORK_KIND_RAIL: String = "rail"
+const NETWORK_KIND_PIPE: String = "pipe"
+const NETWORK_KIND_WALL: String = "wall"
+const NETWORK_KIND_CLIFF: String = "cliff"
+const NETWORK_DIR_N: int = 1
+const NETWORK_DIR_E: int = 2
+const NETWORK_DIR_S: int = 4
+const NETWORK_DIR_W: int = 8
 const OBJECT_SCALE_DEFAULT: float = 1.0
 const OBJECT_SCALE_MIN: float = 0.25
 const OBJECT_SCALE_MAX: float = 2.5
@@ -182,6 +194,13 @@ var _height_tool_edge_type: String = TERRAIN_TILE_DATA_SCRIPT.EDGE_SLOPE
 var _patrol_tool_enabled: bool = false
 var _patrol_spawn_id: String = "enemy_delta"
 var _dragged_patrol_waypoint_index: int = -1
+var _network_drag_tool_enabled: bool = false
+var _network_tool_kind: String = NETWORK_KIND_ROAD
+var _is_network_dragging: bool = false
+var _network_drag_start_grid: Vector2i = Vector2i(-1, -1)
+var _network_drag_current_grid: Vector2i = Vector2i(-1, -1)
+var _network_drag_preview_path: Array[Vector2i] = []
+var _last_network_apply_snapshot: Dictionary = {}
 var _marker_tool_enabled: bool = false
 var _selected_marker_id: String = ""
 var _dragged_marker_id: String = ""
@@ -411,12 +430,18 @@ func _unhandled_input(event: InputEvent) -> void:
 					_dragged_patrol_waypoint_index = -1
 				return
 			if not mouse_button_event.pressed:
+				if _is_network_dragging:
+					_finish_network_drag_at_world_position(world_position)
+					return
 				if _is_painting:
 					commit_undo_transaction()
 				_is_painting = false
 				_last_painted_grid = Vector2i(-1, -1)
 				return
 			if _is_pointer_over_control():
+				return
+			if _network_drag_tool_enabled:
+				_begin_network_drag_at_world_position(world_position)
 				return
 			if _height_tool_enabled:
 				begin_undo_transaction("height_stroke")
@@ -481,6 +506,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 		if _is_painting and _is_brush_enabled() and _has_selected_type():
 			_apply_brush_at_world_position(world_position)
+			return
+		if _is_network_dragging and not _is_pointer_over_control():
+			_update_network_drag_preview_at_world_position(world_position)
 			return
 		if _patrol_tool_enabled and not _is_pointer_over_control():
 			_queue_hover_preview_hide()
@@ -1410,7 +1438,14 @@ func _ensure_runtime_builder_workbench_controls() -> void:
 	_ensure_runtime_builder_tool_button(tools, "select", "S", "Select: Kachel, Objekt oder Marker inspizieren und bearbeiten.", true)
 	_ensure_runtime_builder_tool_button(tools, "terrain", "T", "Terrain: normales Bodentile als Brush waehlen.", true)
 	_ensure_runtime_builder_tool_button(tools, "road", "R", "Road: Strassenplatte als Brush waehlen.", true)
+	_ensure_runtime_builder_tool_button(tools, "road_line", "RD", "Road-Line: Ziehen setzt zusammenhaengende Strassen mit Enden, Geraden, Ecken, T- und Kreuzungen.", true)
+	_ensure_runtime_builder_tool_button(tools, "rail_line", "RL", "Rail-Line: Ziehen setzt Space-Kit-Rails fuer spaetere Bahn-/Monorail-Logistik.", true)
+	_ensure_runtime_builder_tool_button(tools, "pipe_line", "PI", "Pipe-Line: Ziehen setzt Pipelines fuer Energie, Oel, Rohstoffe oder Abwasser.", true)
+	_ensure_runtime_builder_tool_button(tools, "wall_line", "WL", "Wall-Line: Ziehen setzt modulare Waende als vorbereitete Segmentkette.", true)
+	_ensure_runtime_builder_tool_button(tools, "cliff_line", "CL", "Cliff-Line: Ziehen setzt vorbereitete Cliff-Segmente.", true)
 	_ensure_runtime_builder_tool_button(tools, "asset", "A", "Asset: Gebaeude-Asset als Brush waehlen; danach Palette fuer Varianten nutzen.", true)
+	_ensure_runtime_builder_tool_button(tools, "factory", "F", "Factory: Factory-Kit-Gebaeude als Brush waehlen.", true)
+	_ensure_runtime_builder_tool_button(tools, "space_floor", "SF", "Space Floor: Modular-/Station-Boden als Brush waehlen; Scale kann im Preview-Block korrigiert werden.", true)
 	_ensure_runtime_builder_tool_button(tools, "erase", "X", "Erase: Objekt-/Struktur-Layer entfernen, Boden und Marker bleiben erhalten.", true)
 	_ensure_runtime_builder_tool_button(tools, "height", "H", "Hoehe/Cliff: vorhandenes Hoehenwerkzeug aktivieren.", true)
 	_ensure_runtime_builder_tool_button(tools, "marker", "M", "Marker: Spawn- und Objective-Punkte platzieren.", true)
@@ -1484,8 +1519,22 @@ func activate_runtime_builder_tool(tool_id: String) -> bool:
 			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_TERRAIN_TYPE_ID)
 		"road":
 			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_ROAD_TYPE_ID)
+		"road_line":
+			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_ROAD)
+		"rail_line":
+			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_RAIL)
+		"pipe_line":
+			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_PIPE)
+		"wall_line":
+			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_WALL)
+		"cliff_line":
+			handled = _activate_runtime_builder_network_tool(NETWORK_KIND_CLIFF)
 		"asset":
 			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_ASSET_TYPE_ID)
+		"factory":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_FACTORY_TYPE_ID)
+		"space_floor":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_SPACE_FLOOR_TYPE_ID)
 		"erase":
 			handled = set_authoring_tool(AUTHORING_TOOL_ERASER)
 		"height":
@@ -1518,6 +1567,20 @@ func _activate_runtime_builder_palette_brush(type_id: String) -> bool:
 	return set_authoring_tool(AUTHORING_TOOL_BRUSH)
 
 
+func _activate_runtime_builder_network_tool(kind: String) -> bool:
+	var normalized_kind: String = kind.strip_edges().to_lower()
+	if not _network_tool_kind_is_valid(normalized_kind):
+		return false
+	var default_type_id: String = String(_get_network_tool_definition(normalized_kind).get("default_type_id", "")).strip_edges().to_lower()
+	if default_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(default_type_id):
+		return false
+	_network_tool_kind = normalized_kind
+	_selected_type_id = default_type_id
+	_refresh_palette_selection_visual()
+	_refresh_palette_workflow_controls()
+	return set_authoring_tool(AUTHORING_TOOL_NETWORK_DRAG)
+
+
 func _refresh_runtime_builder_workbench_controls() -> void:
 	var rail := get_node_or_null("UI/%s" % RUNTIME_BUILDER_RAIL_NAME) as PanelContainer
 	if rail == null:
@@ -1538,8 +1601,22 @@ func _runtime_builder_button_is_active(tool_id: String, active_tool: String) -> 
 			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_TERRAIN_TYPE_ID
 		"road":
 			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_ROAD_TYPE_ID
+		"road_line":
+			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_ROAD
+		"rail_line":
+			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_RAIL
+		"pipe_line":
+			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_PIPE
+		"wall_line":
+			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_WALL
+		"cliff_line":
+			return active_tool == AUTHORING_TOOL_NETWORK_DRAG and _network_tool_kind == NETWORK_KIND_CLIFF
 		"asset":
 			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_ASSET_TYPE_ID
+		"factory":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_FACTORY_TYPE_ID
+		"space_floor":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_SPACE_FLOOR_TYPE_ID
 		"erase":
 			return active_tool == AUTHORING_TOOL_ERASER
 		"height":
@@ -1592,7 +1669,413 @@ func _build_runtime_builder_workbench_snapshot() -> Dictionary:
 		"quick_terrain_type_id": BUILDER_QUICK_TERRAIN_TYPE_ID,
 		"quick_road_type_id": BUILDER_QUICK_ROAD_TYPE_ID,
 		"quick_asset_type_id": BUILDER_QUICK_ASSET_TYPE_ID,
+		"quick_factory_type_id": BUILDER_QUICK_FACTORY_TYPE_ID,
+		"quick_space_floor_type_id": BUILDER_QUICK_SPACE_FLOOR_TYPE_ID,
+		"network": _build_network_drag_tool_snapshot(),
 		"status": _runtime_builder_status_text,
+	}
+
+
+func apply_runtime_network_path_for_authoring(kind: String, start_grid: Vector2i, end_grid: Vector2i) -> bool:
+	var normalized_kind: String = kind.strip_edges().to_lower()
+	if not _network_tool_kind_is_valid(normalized_kind):
+		return false
+	_network_tool_kind = normalized_kind
+	var path: Array[Vector2i] = _build_network_drag_path(start_grid, end_grid)
+	return _apply_network_path(normalized_kind, path)
+
+
+func _begin_network_drag_at_world_position(world_position: Vector2) -> bool:
+	if _terrain_registry == null or _terrain_map_data == null:
+		return false
+	var grid_position: Vector2i = _terrain_registry.world_to_grid(world_position)
+	if _terrain_map_data.call("get_tile_at_grid", grid_position) == null:
+		return false
+	_is_network_dragging = true
+	_network_drag_start_grid = grid_position
+	_network_drag_current_grid = grid_position
+	_network_drag_preview_path = _build_network_drag_path(grid_position, grid_position)
+	_set_selected_grid_position(grid_position)
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
+	_queue_hover_preview_hide()
+	return true
+
+
+func _update_network_drag_preview_at_world_position(world_position: Vector2) -> bool:
+	if not _is_network_dragging or _terrain_registry == null:
+		return false
+	var grid_position: Vector2i = _terrain_registry.world_to_grid(world_position)
+	if _terrain_map_data == null or _terrain_map_data.call("get_tile_at_grid", grid_position) == null:
+		return false
+	_network_drag_current_grid = grid_position
+	_network_drag_preview_path = _build_network_drag_path(_network_drag_start_grid, grid_position)
+	_set_selected_grid_position(grid_position)
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
+	_queue_hover_preview_hide()
+	return true
+
+
+func _finish_network_drag_at_world_position(world_position: Vector2) -> bool:
+	if not _is_network_dragging:
+		return false
+	_update_network_drag_preview_at_world_position(world_position)
+	var path: Array[Vector2i] = []
+	for grid_variant in _network_drag_preview_path:
+		path.append(Vector2i(grid_variant))
+	_clear_network_drag_preview()
+	if path.is_empty():
+		return false
+	return _apply_network_path(_network_tool_kind, path)
+
+
+func _clear_network_drag_preview() -> void:
+	_is_network_dragging = false
+	_network_drag_start_grid = Vector2i(-1, -1)
+	_network_drag_current_grid = Vector2i(-1, -1)
+	_network_drag_preview_path.clear()
+
+
+func _build_network_drag_path(start_grid: Vector2i, end_grid: Vector2i) -> Array[Vector2i]:
+	var path: Array[Vector2i] = []
+	if start_grid == Vector2i(-1, -1) or end_grid == Vector2i(-1, -1):
+		return path
+	var current := Vector2i(start_grid)
+	_append_network_path_grid(path, current)
+	var delta: Vector2i = end_grid - start_grid
+	var horizontal_first: bool = abs(delta.x) >= abs(delta.y)
+	if horizontal_first:
+		current = _walk_network_axis(path, current, Vector2i(_network_axis_sign(delta.x), 0), abs(delta.x))
+		current = _walk_network_axis(path, current, Vector2i(0, _network_axis_sign(delta.y)), abs(delta.y))
+	else:
+		current = _walk_network_axis(path, current, Vector2i(0, _network_axis_sign(delta.y)), abs(delta.y))
+		current = _walk_network_axis(path, current, Vector2i(_network_axis_sign(delta.x), 0), abs(delta.x))
+	return path
+
+
+func _network_axis_sign(value: int) -> int:
+	if value > 0:
+		return 1
+	if value < 0:
+		return -1
+	return 0
+
+
+func _walk_network_axis(path: Array[Vector2i], start_grid: Vector2i, step: Vector2i, count: int) -> Vector2i:
+	var current := Vector2i(start_grid)
+	if step == Vector2i.ZERO:
+		return current
+	for _index in range(count):
+		current += step
+		_append_network_path_grid(path, current)
+	return current
+
+
+func _append_network_path_grid(path: Array[Vector2i], grid_position: Vector2i) -> void:
+	if path.is_empty() or Vector2i(path[path.size() - 1]) != grid_position:
+		path.append(grid_position)
+
+
+func _apply_network_path(kind: String, path: Array[Vector2i]) -> bool:
+	var normalized_kind: String = kind.strip_edges().to_lower()
+	if path.is_empty() or not _network_tool_kind_is_valid(normalized_kind) or _terrain_map_data == null:
+		return false
+	var candidate_lookup: Dictionary = {}
+	for path_grid in path:
+		var grid_position := Vector2i(path_grid)
+		if _terrain_map_data.call("get_tile_at_grid", grid_position) == null:
+			continue
+		candidate_lookup[grid_position] = true
+		for offset in _get_network_neighbor_offsets():
+			var neighbor_grid: Vector2i = grid_position + offset
+			var neighbor_tile = _terrain_map_data.call("get_tile_at_grid", neighbor_grid)
+			if _tile_matches_network_kind(neighbor_tile, normalized_kind):
+				candidate_lookup[neighbor_grid] = true
+	var candidate_grids: Array[Vector2i] = _sort_grid_lookup_keys(candidate_lookup)
+	if candidate_grids.is_empty():
+		return false
+
+	var changed_grids: Array[Vector2i] = []
+	var owns_undo_transaction: bool = _ensure_undo_transaction("network_drag_%s" % normalized_kind)
+	for grid_position in candidate_grids:
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+		if tile_data == null:
+			continue
+		var connection_mask: int = _build_network_connection_mask(grid_position, normalized_kind, candidate_lookup)
+		var piece: Dictionary = _resolve_network_piece_for_mask(normalized_kind, connection_mask)
+		if _apply_network_piece_to_tile(tile_data, piece):
+			changed_grids.append(grid_position)
+			_refresh_tile_visual(tile_data, false)
+	if changed_grids.is_empty():
+		if owns_undo_transaction:
+			cancel_empty_undo_transaction()
+		_last_network_apply_snapshot = _build_network_apply_snapshot(normalized_kind, path, changed_grids, candidate_grids)
+		return false
+
+	_refresh_dirty_visual_neighborhoods(changed_grids)
+	if owns_undo_transaction:
+		commit_undo_transaction()
+	_mark_dirty(true)
+	_set_selected_grid_position(Vector2i(path[path.size() - 1]))
+	_last_network_apply_snapshot = _build_network_apply_snapshot(normalized_kind, path, changed_grids, candidate_grids)
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
+	return true
+
+
+func _apply_network_piece_to_tile(tile_data, piece: Dictionary) -> bool:
+	if tile_data == null or piece.is_empty() or _tile_catalog == null:
+		return false
+	var type_id: String = String(piece.get("type_id", "")).strip_edges().to_lower()
+	if type_id.is_empty() or not _tile_catalog.has_type(type_id):
+		return false
+	var rotation_degrees: float = fposmod(float(piece.get("rotation_degrees", 0.0)), 360.0)
+	var placement_layer: String = _get_catalog_placement_layer(type_id)
+	var current_layer_type: String = String(tile_data.object_type_id).strip_edges().to_lower() if placement_layer == "object" else String(tile_data.type_id).strip_edges().to_lower()
+	var next_scale: float = _placement_object_scale if _network_piece_uses_object_scale(type_id) else float(tile_data.object_scale)
+	var already_matches: bool = (
+		current_layer_type == type_id
+		and absf(wrapf(float(tile_data.object_rotation_degrees) - rotation_degrees, -180.0, 180.0)) <= 0.001
+		and (not _network_piece_uses_object_scale(type_id) or absf(float(tile_data.object_scale) - next_scale) <= 0.001)
+	)
+	if already_matches:
+		return false
+	_store_undo_state(tile_data)
+	if not _tile_catalog.apply_type_to_tile(tile_data, type_id):
+		return false
+	tile_data.object_rotation_degrees = rotation_degrees
+	if _network_piece_uses_object_scale(type_id):
+		tile_data.object_scale = next_scale
+	return true
+
+
+func _build_network_connection_mask(grid_position: Vector2i, kind: String, candidate_lookup: Dictionary) -> int:
+	var mask: int = 0
+	var direction_entries: Array = [
+		[Vector2i(0, -1), NETWORK_DIR_N],
+		[Vector2i(1, 0), NETWORK_DIR_E],
+		[Vector2i(0, 1), NETWORK_DIR_S],
+		[Vector2i(-1, 0), NETWORK_DIR_W],
+	]
+	for entry in direction_entries:
+		var neighbor_grid: Vector2i = grid_position + Vector2i(entry[0])
+		var neighbor_tile = _terrain_map_data.call("get_tile_at_grid", neighbor_grid) if _terrain_map_data != null else null
+		if candidate_lookup.has(neighbor_grid) or _tile_matches_network_kind(neighbor_tile, kind):
+			mask = mask | int(entry[1])
+	return mask
+
+
+func _resolve_network_piece_for_mask(kind: String, mask: int) -> Dictionary:
+	var definition: Dictionary = _get_network_tool_definition(kind)
+	var connection_count: int = _count_network_mask_dirs(mask)
+	var piece_key: String = "straight"
+	if connection_count <= 1:
+		piece_key = "end" if definition.has("end") and connection_count == 1 else "straight"
+	elif connection_count == 2:
+		piece_key = "straight" if _network_mask_has_opposite_pair(mask) else "corner"
+	elif connection_count == 3:
+		piece_key = "split" if definition.has("split") else "straight"
+	else:
+		piece_key = "cross" if definition.has("cross") else "straight"
+	if not definition.has(piece_key):
+		piece_key = "straight"
+	var type_id: String = String(definition.get(piece_key, definition.get("default_type_id", ""))).strip_edges().to_lower()
+	if _tile_catalog != null and not _tile_catalog.has_type(type_id):
+		type_id = String(definition.get("default_type_id", "")).strip_edges().to_lower()
+	return {
+		"type_id": type_id,
+		"piece_key": piece_key,
+		"rotation_degrees": _resolve_network_piece_rotation_degrees(piece_key, mask),
+	}
+
+
+func _resolve_network_piece_rotation_degrees(piece_key: String, mask: int) -> float:
+	match piece_key:
+		"straight":
+			return 90.0 if (mask & (NETWORK_DIR_E | NETWORK_DIR_W)) != 0 and (mask & (NETWORK_DIR_N | NETWORK_DIR_S)) == 0 else 0.0
+		"end":
+			return _network_direction_rotation_degrees(_first_network_mask_dir(mask))
+		"corner":
+			if (mask & NETWORK_DIR_N) != 0 and (mask & NETWORK_DIR_E) != 0:
+				return 0.0
+			if (mask & NETWORK_DIR_E) != 0 and (mask & NETWORK_DIR_S) != 0:
+				return 90.0
+			if (mask & NETWORK_DIR_S) != 0 and (mask & NETWORK_DIR_W) != 0:
+				return 180.0
+			if (mask & NETWORK_DIR_W) != 0 and (mask & NETWORK_DIR_N) != 0:
+				return 270.0
+		"split":
+			return _network_direction_rotation_degrees(_missing_network_mask_dir(mask))
+	return 0.0
+
+
+func _get_network_tool_definition(kind: String) -> Dictionary:
+	match kind.strip_edges().to_lower():
+		NETWORK_KIND_ROAD:
+			return {
+				"default_type_id": "spacekit_terrain_road_straight",
+				"straight": "spacekit_terrain_road_straight",
+				"corner": "spacekit_terrain_road_corner",
+				"end": "spacekit_terrain_road_end",
+				"split": "spacekit_terrain_road_split",
+				"cross": "spacekit_terrain_road_cross",
+			}
+		NETWORK_KIND_RAIL:
+			return {
+				"default_type_id": "spacekit_rail",
+				"straight": "spacekit_rail",
+				"corner": "spacekit_rail_corner",
+				"end": "spacekit_rail_end",
+				"split": "spacekit_rail_middle",
+				"cross": "spacekit_rail_middle",
+			}
+		NETWORK_KIND_PIPE:
+			return {
+				"default_type_id": "spacekit_pipe_straight",
+				"straight": "spacekit_pipe_straight",
+				"corner": "spacekit_pipe_corner",
+				"end": "spacekit_pipe_end",
+				"split": "spacekit_pipe_split",
+				"cross": "spacekit_pipe_cross",
+			}
+		NETWORK_KIND_WALL:
+			return {
+				"default_type_id": "modular_wall",
+				"straight": "modular_wall",
+				"corner": "modular_wall_corner",
+			}
+		NETWORK_KIND_CLIFF:
+			return {
+				"default_type_id": "cliff_straight_se",
+				"straight": "cliff_straight_se",
+				"corner": "cliff_corner_se",
+			}
+	return {}
+
+
+func _network_tool_kind_is_valid(kind: String) -> bool:
+	return [
+		NETWORK_KIND_ROAD,
+		NETWORK_KIND_RAIL,
+		NETWORK_KIND_PIPE,
+		NETWORK_KIND_WALL,
+		NETWORK_KIND_CLIFF,
+	].has(kind.strip_edges().to_lower())
+
+
+func _tile_matches_network_kind(tile_data, kind: String) -> bool:
+	if tile_data == null:
+		return false
+	var type_id: String = String(tile_data.type_id).strip_edges().to_lower() if tile_data.type_id is String else ""
+	var object_type_id: String = String(tile_data.object_type_id).strip_edges().to_lower() if tile_data.object_type_id is String else ""
+	match kind.strip_edges().to_lower():
+		NETWORK_KIND_ROAD:
+			return type_id.begins_with("spacekit_terrain_road_")
+		NETWORK_KIND_RAIL:
+			return object_type_id.begins_with("spacekit_rail") or type_id.begins_with("spacekit_rail")
+		NETWORK_KIND_PIPE:
+			return object_type_id.begins_with("spacekit_pipe") or type_id.begins_with("spacekit_pipe")
+		NETWORK_KIND_WALL:
+			return type_id.begins_with("modular_wall") or type_id.begins_with("wall_") or type_id.begins_with("station_wall") or object_type_id.begins_with("modular_wall") or object_type_id.begins_with("station_wall")
+		NETWORK_KIND_CLIFF:
+			return type_id.begins_with("cliff_")
+	return false
+
+
+func _network_piece_uses_object_scale(type_id: String) -> bool:
+	return _palette_type_uses_object_scale(type_id) or type_id.strip_edges().to_lower().begins_with("spacekit_terrain_road_")
+
+
+func _get_network_neighbor_offsets() -> Array[Vector2i]:
+	return [
+		Vector2i(0, -1),
+		Vector2i(1, 0),
+		Vector2i(0, 1),
+		Vector2i(-1, 0),
+	]
+
+
+func _get_catalog_placement_layer(type_id: String) -> String:
+	if _tile_catalog == null or not _tile_catalog.has_type(type_id):
+		return "terrain"
+	return String(Dictionary(_tile_catalog.get_type(type_id)).get("placement_layer", "terrain")).strip_edges().to_lower()
+
+
+func _count_network_mask_dirs(mask: int) -> int:
+	var count: int = 0
+	for direction in [NETWORK_DIR_N, NETWORK_DIR_E, NETWORK_DIR_S, NETWORK_DIR_W]:
+		if (mask & direction) != 0:
+			count += 1
+	return count
+
+
+func _network_mask_has_opposite_pair(mask: int) -> bool:
+	return ((mask & NETWORK_DIR_N) != 0 and (mask & NETWORK_DIR_S) != 0) or ((mask & NETWORK_DIR_E) != 0 and (mask & NETWORK_DIR_W) != 0)
+
+
+func _first_network_mask_dir(mask: int) -> int:
+	for direction in [NETWORK_DIR_N, NETWORK_DIR_E, NETWORK_DIR_S, NETWORK_DIR_W]:
+		if (mask & direction) != 0:
+			return direction
+	return NETWORK_DIR_N
+
+
+func _missing_network_mask_dir(mask: int) -> int:
+	for direction in [NETWORK_DIR_N, NETWORK_DIR_E, NETWORK_DIR_S, NETWORK_DIR_W]:
+		if (mask & direction) == 0:
+			return direction
+	return NETWORK_DIR_N
+
+
+func _network_direction_rotation_degrees(direction: int) -> float:
+	match direction:
+		NETWORK_DIR_N:
+			return 0.0
+		NETWORK_DIR_E:
+			return 90.0
+		NETWORK_DIR_S:
+			return 180.0
+		NETWORK_DIR_W:
+			return 270.0
+	return 0.0
+
+
+func _build_network_drag_tool_snapshot() -> Dictionary:
+	var definitions: Dictionary = {}
+	for kind in [NETWORK_KIND_ROAD, NETWORK_KIND_RAIL, NETWORK_KIND_PIPE, NETWORK_KIND_WALL, NETWORK_KIND_CLIFF]:
+		var definition: Dictionary = _get_network_tool_definition(kind)
+		var available: bool = true
+		for key in definition.keys():
+			if String(key) == "default_type_id":
+				continue
+			var type_id: String = String(definition.get(key, "")).strip_edges().to_lower()
+			if type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(type_id):
+				available = false
+		definitions[kind] = {
+			"available": available,
+			"definition": definition,
+		}
+	return {
+		"enabled": _network_drag_tool_enabled,
+		"kind": _network_tool_kind,
+		"is_dragging": _is_network_dragging,
+		"start_grid": _network_drag_start_grid,
+		"current_grid": _network_drag_current_grid,
+		"preview_path": _network_drag_preview_path.duplicate(),
+		"preview_count": _network_drag_preview_path.size(),
+		"definitions": definitions,
+		"last_apply": _last_network_apply_snapshot.duplicate(true),
+		"scale_correctable_prefixes": PackedStringArray(["factory_", "spacekit_", "station_set_", "modular_", "wall_", "cliff_"]),
+	}
+
+
+func _build_network_apply_snapshot(kind: String, path: Array[Vector2i], changed_grids: Array[Vector2i], candidate_grids: Array[Vector2i]) -> Dictionary:
+	return {
+		"kind": kind,
+		"path": path.duplicate(),
+		"path_count": path.size(),
+		"changed_grids": changed_grids.duplicate(),
+		"changed_count": changed_grids.size(),
+		"candidate_grids": candidate_grids.duplicate(),
+		"candidate_count": candidate_grids.size(),
 	}
 
 
@@ -1948,6 +2431,8 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 	_selection_tool_enabled = pressed
 	if pressed:
 		_clear_height_tool()
+		_network_drag_tool_enabled = false
+		_clear_network_drag_preview()
 		_eraser_tool_enabled = false
 		var eraser_button := _get_eraser_tool_button()
 		if eraser_button != null and eraser_button.button_pressed:
@@ -1968,12 +2453,15 @@ func _on_selection_tool_toggled(pressed: bool) -> void:
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
 	_update_patrol_topbar_state()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
 
 func _on_brush_tool_toggled(pressed: bool) -> void:
 	if pressed:
 		_clear_height_tool()
+		_network_drag_tool_enabled = false
+		_clear_network_drag_preview()
 		_selection_tool_enabled = false
 		_eraser_tool_enabled = false
 		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
@@ -1996,6 +2484,7 @@ func _on_brush_tool_toggled(pressed: bool) -> void:
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
 	_update_patrol_topbar_state()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
 
@@ -2003,6 +2492,8 @@ func _on_eraser_tool_toggled(pressed: bool) -> void:
 	_eraser_tool_enabled = pressed
 	if pressed:
 		_clear_height_tool()
+		_network_drag_tool_enabled = false
+		_clear_network_drag_preview()
 		_selection_tool_enabled = false
 		var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
 		if select_button != null and select_button.button_pressed:
@@ -2024,6 +2515,7 @@ func _on_eraser_tool_toggled(pressed: bool) -> void:
 		_last_painted_grid = Vector2i(-1, -1)
 		_hide_hover_preview()
 	_update_patrol_topbar_state()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
 
@@ -2031,6 +2523,8 @@ func _on_patrol_tool_toggled(pressed: bool) -> void:
 	_patrol_tool_enabled = pressed
 	if pressed:
 		_clear_height_tool()
+		_network_drag_tool_enabled = false
+		_clear_network_drag_preview()
 		_marker_tool_enabled = false
 		_eraser_tool_enabled = false
 		var marker_tool_button := _get_marker_tool_button()
@@ -2048,6 +2542,7 @@ func _on_patrol_tool_toggled(pressed: bool) -> void:
 		_clear_patrol_route_preview(true)
 	_update_patrol_topbar_state()
 	_refresh_patrol_overlay()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
 
@@ -3300,7 +3795,7 @@ func set_authoring_tool(tool_id: String) -> bool:
 	var marker_button := _get_marker_tool_button()
 	var patrol_button := get_node_or_null("UI/TopBar/Margin/HBox/PatrolButton") as Button
 	var select_button := get_node_or_null("UI/TopBar/Margin/HBox/SelectButton") as Button
-	if not ["select", "selection", "terrain_brush", "brush", "eraser", "erase", "height", "marker", "patrol"].has(normalized_tool_id):
+	if not ["select", "selection", "terrain_brush", "brush", "eraser", "erase", "height", "marker", "patrol", "network", "network_drag"].has(normalized_tool_id):
 		return false
 
 	_selection_tool_enabled = normalized_tool_id == AUTHORING_TOOL_SELECT or normalized_tool_id == "selection"
@@ -3308,6 +3803,9 @@ func set_authoring_tool(tool_id: String) -> bool:
 	_height_tool_enabled = normalized_tool_id == AUTHORING_TOOL_HEIGHT
 	_marker_tool_enabled = normalized_tool_id == AUTHORING_TOOL_MARKER
 	_patrol_tool_enabled = normalized_tool_id == AUTHORING_TOOL_PATROL
+	_network_drag_tool_enabled = normalized_tool_id == AUTHORING_TOOL_NETWORK_DRAG or normalized_tool_id == "network"
+	if not _network_drag_tool_enabled:
+		_clear_network_drag_preview()
 	if brush_button != null:
 		brush_button.button_pressed = normalized_tool_id == AUTHORING_TOOL_BRUSH or normalized_tool_id == "brush"
 	if eraser_button != null:
@@ -3373,6 +3871,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 			"spawn_id": _patrol_spawn_id,
 			"waypoint_count": _get_patrol_waypoint_count(_patrol_spawn_id),
 		},
+		"network_drag_tool": _build_network_drag_tool_snapshot(),
 		"patrol_route_preview": get_patrol_route_preview_snapshot(),
 		"tile_property_overlay": get_tile_property_overlay_debug_snapshot(),
 		"adjacency_debug_overlay": get_adjacency_debug_overlay_snapshot(),
@@ -3431,6 +3930,7 @@ func _build_toolbar_snapshot() -> Dictionary:
 		AUTHORING_TOOL_HEIGHT,
 		AUTHORING_TOOL_MARKER,
 		AUTHORING_TOOL_PATROL,
+		AUTHORING_TOOL_NETWORK_DRAG,
 	])
 	var pressed: Dictionary = {
 		AUTHORING_TOOL_SELECT: _selection_tool_enabled,
@@ -3439,6 +3939,7 @@ func _build_toolbar_snapshot() -> Dictionary:
 		AUTHORING_TOOL_HEIGHT: _height_tool_enabled,
 		AUTHORING_TOOL_MARKER: _marker_tool_enabled,
 		AUTHORING_TOOL_PATROL: _patrol_tool_enabled,
+		AUTHORING_TOOL_NETWORK_DRAG: _network_drag_tool_enabled,
 	}
 	var active_count: int = 0
 	for tool_id in tool_ids:
@@ -3633,6 +4134,8 @@ func get_authoring_action_contract_snapshot() -> Dictionary:
 
 
 func _get_active_authoring_tool() -> String:
+	if _network_drag_tool_enabled:
+		return AUTHORING_TOOL_NETWORK_DRAG
 	if _height_tool_enabled:
 		return AUTHORING_TOOL_HEIGHT
 	if _marker_tool_enabled:
@@ -4289,6 +4792,8 @@ func _on_remove_marker_button_pressed() -> void:
 func _on_height_tool_toggled(pressed: bool) -> void:
 	_height_tool_enabled = pressed
 	if pressed:
+		_network_drag_tool_enabled = false
+		_clear_network_drag_preview()
 		_selection_tool_enabled = false
 		_eraser_tool_enabled = false
 		_patrol_tool_enabled = false
@@ -4316,6 +4821,7 @@ func _on_height_tool_toggled(pressed: bool) -> void:
 		_refresh_marker_editor_controls()
 	_update_height_topbar_state()
 	_update_patrol_topbar_state()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
 
@@ -4349,6 +4855,8 @@ func _on_marker_tool_toggled(pressed: bool) -> void:
 		_refresh_marker_editor_controls()
 		return
 	_clear_height_tool()
+	_network_drag_tool_enabled = false
+	_clear_network_drag_preview()
 	_selection_tool_enabled = false
 	_eraser_tool_enabled = false
 	_patrol_tool_enabled = false
@@ -4367,6 +4875,7 @@ func _on_marker_tool_toggled(pressed: bool) -> void:
 		brush_button.button_pressed = false
 	_hide_hover_preview()
 	_refresh_marker_editor_controls()
+	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
 
@@ -4801,7 +5310,16 @@ func _palette_type_uses_object_scale(type_id: String) -> bool:
 			return true
 		if _tile_catalog.has_method("is_structure_layer_type") and bool(_tile_catalog.call("is_structure_layer_type", normalized_type_id)):
 			return true
-	return normalized_type_id.begins_with("station_") or normalized_type_id.begins_with("modular_") or normalized_type_id.begins_with("wall_") or normalized_type_id.begins_with("rock_")
+	return (
+		normalized_type_id.begins_with("station_")
+		or normalized_type_id.begins_with("station_set_")
+		or normalized_type_id.begins_with("modular_")
+		or normalized_type_id.begins_with("factory_")
+		or normalized_type_id.begins_with("spacekit_")
+		or normalized_type_id.begins_with("wall_")
+		or normalized_type_id.begins_with("cliff_")
+		or normalized_type_id.begins_with("rock_")
+	)
 
 
 func _get_tile_object_rotation_degrees(tile_data) -> float:
@@ -6405,6 +6923,8 @@ func _on_tile_type_selected(index: int) -> void:
 
 	# Auto-enable brush when a type is selected
 	_clear_height_tool()
+	_network_drag_tool_enabled = false
+	_clear_network_drag_preview()
 	_eraser_tool_enabled = false
 	var eraser_button := _get_eraser_tool_button()
 	if eraser_button != null and eraser_button.button_pressed:
@@ -6435,6 +6955,8 @@ func set_palette_type_for_authoring(type_id: String) -> bool:
 		_refresh_palette_selection_visual()
 		_refresh_palette_workflow_controls()
 	_clear_height_tool()
+	_network_drag_tool_enabled = false
+	_clear_network_drag_preview()
 	_eraser_tool_enabled = false
 	var brush_button := get_node_or_null("UI/TopBar/Margin/HBox/BrushButton") as Button
 	if brush_button != null and not brush_button.button_pressed:

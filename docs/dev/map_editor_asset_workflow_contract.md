@@ -43,6 +43,15 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Erase, Height, Marker, Patrol und Rotation bleiben Wrapper um bestehende Editor-Funktionen.
 - Der Godot-Plugin-/GridMap-Pfad bleibt ein Legacy-/Compiler-Fallback und darf nicht als alleiniger Zielworkflow fuer spielbare Editor-Bedienung gelten.
 
+## Network Drag Tools
+- Linienwerkzeuge fuer Road, Rail, Pipe, Wall und Cliff sind Runtime-Editor-Werkzeuge.
+- Ein Drag-Stroke baut einen orthogonalen Pfad aus Start- und End-Tile und ist ein Undo-Schritt.
+- Varianten werden aus lokalen Verbindungen abgeleitet: End, Straight, Corner, Split und Cross, soweit die Asset-Familie diese Teile besitzt.
+- Der Grundstrassensatz nutzt `spacekit_terrain_road_straight`, `spacekit_terrain_road_corner`, `spacekit_terrain_road_end`, `spacekit_terrain_road_split` und `spacekit_terrain_road_cross`.
+- Rails nutzen `spacekit_rail*`, Pipes nutzen `spacekit_pipe*`; beide bleiben Object-Layer-Assets und duerfen vorhandene Ground-/Road-/Water-Surfaces nicht ueberschreiben.
+- Factory-, SpaceKit-, StationSet-, Modular-, Wall- und Cliff-Prefixe duerfen den Placement-Scale nutzen, damit zu grosse Kit-Teile lokal korrigierbar bleiben.
+- Logistik-Bedeutung wie Energie, Oel, Rohstoffe oder Abwasser wird nur vorbereitet. Die echte Ressourcen-/Pipeline-Simulation gehoert in einen spaeteren Gameplay-Contract.
+
 ## Scale
 - Neue Objekt-/Struktur-Assets koennen mit einem Platzierungs-Scale gepinselt werden.
 - Der gespeicherte Tile-Wert ist `object_scale`.
