@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_488 - Map Builder Workbench MeshLibrary MVP
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_488_map_builder_workbench_meshlibrary_mvp.md`, `docs/dev/map_builder_tooling_spike_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`
+- Stand: `scenes/editor/map_builder_workbench.tscn` ist als kleiner Godot-Builder-Arbeitsplatz angelegt: GridMap/MeshLibrary fuer 15 Kernitems und ein `AssetPlacerProps`-Root fuer freie Gebaeude-/Fahrzeug-/Technik-Props.
+- Stand: `data/map_builder_workbench_manifest.json` bindet Boden, Strassen, Wasser, Modular-Walls/Tueren und Space-Station-Teile an bestehende `TerrainTileCatalog`-Type-IDs und reale GLB/GLTF-Assets.
+- Stand: `MapBuilderSceneImporter` kompiliert GridMap-Zellen und Asset-Placer-kompatible Nodes in einem Lauf nach `TerrainMapData`; Road-/Water-Surfaces bleiben beim Layern mit Props erhalten, GridMap-Yaw wird als Rotation uebernommen.
+- Risiken/offen: Die Workbench braucht noch den sichtbaren Godot-Editor-Test mit GridMap-Palette und Asset-Placer-Dock; eine dauerhaft gespeicherte Team-`MeshLibrary.tres` und echte Door-/Computer-Interactions bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_488_map_builder_workbench_meshlibrary_mvp.gd`, CLI-Compile-Runner mit `--output=user://task_488_cli_workbench_output.json`, TASK_486-/TASK_487-Regressionen, `godot_console.exe --headless --path . --import` und `git diff --check`.
+- Naechster Schritt: In Godot `res://scenes/editor/map_builder_workbench.tscn` oeffnen, 10-20 Tiles/Props setzen, dann per Compile-Runner nach Mission-JSON speichern.
+
 ### TASK_487 - Install Godot Asset Placer
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_487_install_godot_asset_placer.md`, `docs/dev/map_builder_tooling_spike_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`

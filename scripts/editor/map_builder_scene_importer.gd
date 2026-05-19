@@ -74,29 +74,22 @@ func build_map_from_nodes(root: Node, options: Dictionary = {}) -> Dictionary:
 	return build_map_from_authoring(authoring)
 
 
+func build_map_from_scene_authoring(grid_map: GridMap, item_type_map: Dictionary, node_root: Node, options: Dictionary = {}) -> Dictionary:
+	var placements: Array = []
+	if grid_map != null:
+		placements.append_array(_collect_grid_map_placements(grid_map, item_type_map, options))
+	if node_root != null:
+		_collect_node_placements(node_root, placements)
+	var authoring: Dictionary = options.duplicate(true)
+	authoring["placements"] = placements
+	return build_map_from_authoring(authoring)
+
+
 func build_map_from_grid_map(grid_map: GridMap, item_type_map: Dictionary, options: Dictionary = {}) -> Dictionary:
 	if grid_map == null:
 		return _make_result(false, null, ["Missing GridMap node"], [], {})
 	var placements: Array = []
-	var use_cell_y_as_height: bool = bool(options.get("use_cell_y_as_height", true))
-	for cell_variant in grid_map.get_used_cells():
-		var cell: Vector3i = Vector3i(cell_variant)
-		var item_id: int = int(grid_map.get_cell_item(cell))
-		if item_id < 0:
-			continue
-		var item_mapping: Variant = item_type_map.get(item_id, "")
-		var placement: Dictionary = _placement_from_grid_item(cell, item_id, item_mapping)
-		if placement.is_empty():
-			placement = {
-				"grid_position": Vector2i(cell.x, cell.z),
-				"missing_item_id": item_id,
-			}
-		if use_cell_y_as_height and not placement.has("height_level"):
-			placement["height_level"] = cell.y
-		var orientation: int = int(grid_map.get_cell_item_orientation(cell))
-		if orientation != 0 and not placement.has("rotation_degrees"):
-			placement["gridmap_orientation"] = orientation
-		placements.append(placement)
+	placements.append_array(_collect_grid_map_placements(grid_map, item_type_map, options))
 	var authoring: Dictionary = options.duplicate(true)
 	authoring["placements"] = placements
 	return build_map_from_authoring(authoring)
@@ -108,7 +101,8 @@ func summarize_tooling_recommendation() -> Dictionary:
 		"grid_authoring": "Use Godot GridMap/MeshLibrary for modular terrain, roads, water, walls and doors.",
 		"prop_authoring": "Use an Asset-Placer-style workflow for buildings, vehicles, props and decoration.",
 		"gameplay_truth": "Compile authoring placements into TerrainMapData; do not read plugin scene state at runtime.",
-		"plugin_candidate": "Godot Asset Placer 1.4.0, MIT, Godot 4.3+, no vendor drop in this spike.",
+		"plugin_candidate": "Godot Asset Placer 1.4.0, MIT, Godot 4.3+, installed in TASK_487 for editor authoring only.",
+		"workbench": "TASK_488 provides a small GridMap/MeshLibrary workbench scene plus Asset-Placer-compatible prop metadata.",
 		"known_limitation": "TerrainTileData currently stores one rotation and one scale per tile, so layered floor/object transforms cannot be independent yet.",
 	}
 
@@ -193,6 +187,32 @@ func _collect_node_placements(node: Node, placements: Array) -> void:
 		_collect_node_placements(child, placements)
 
 
+func _collect_grid_map_placements(grid_map: GridMap, item_type_map: Dictionary, options: Dictionary) -> Array:
+	var placements: Array = []
+	var use_cell_y_as_height: bool = bool(options.get("use_cell_y_as_height", true))
+	for cell_variant in grid_map.get_used_cells():
+		var cell: Vector3i = Vector3i(cell_variant)
+		var item_id: int = int(grid_map.get_cell_item(cell))
+		if item_id < 0:
+			continue
+		var item_mapping: Variant = item_type_map.get(item_id, "")
+		var placement: Dictionary = _placement_from_grid_item(cell, item_id, item_mapping)
+		if placement.is_empty():
+			placement = {
+				"grid_position": Vector2i(cell.x, cell.z),
+				"missing_item_id": item_id,
+			}
+		if use_cell_y_as_height and not placement.has("height_level"):
+			placement["height_level"] = cell.y
+		var orientation: int = int(grid_map.get_cell_item_orientation(cell))
+		if orientation != 0:
+			placement["gridmap_orientation"] = orientation
+			if not placement.has("rotation_degrees"):
+				placement["rotation_degrees"] = _rotation_degrees_from_grid_map_orientation(grid_map, orientation)
+		placements.append(placement)
+	return placements
+
+
 func _placement_from_grid_item(cell: Vector3i, item_id: int, item_mapping: Variant) -> Dictionary:
 	var placement: Dictionary = {
 		"grid_position": Vector2i(cell.x, cell.z),
@@ -209,6 +229,14 @@ func _placement_from_grid_item(cell: Vector3i, item_id: int, item_mapping: Varia
 		if mapping.has(key):
 			placement[key] = mapping.get(key)
 	return placement
+
+
+func _rotation_degrees_from_grid_map_orientation(grid_map: GridMap, orientation: int) -> float:
+	if grid_map == null or not grid_map.has_method("get_basis_with_orthogonal_index"):
+		return 0.0
+	var basis: Basis = grid_map.call("get_basis_with_orthogonal_index", orientation)
+	var euler: Vector3 = basis.get_euler()
+	return _normalize_rotation_degrees(rad_to_deg(euler.y))
 
 
 func _apply_authoring_overrides(tile_data, placement: Dictionary, type_id: String, transform_owner_by_grid: Dictionary, warnings: Array[String]) -> void:
