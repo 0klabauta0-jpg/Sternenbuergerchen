@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_487 - Install Godot Asset Placer
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_487_install_godot_asset_placer.md`, `docs/dev/map_builder_tooling_spike_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`
+- Stand: Godot Asset Placer 1.4.0 ist als Editor-Plugin unter `addons/asset_placer` installiert, mit MIT-Lizenz im Addon und aktivem `project.godot`-Eintrag.
+- Stand: Eine lokale headless EditorDock-Kompatibilitaetsbremse verhindert den Godot-4.6.2-Crash bei Asset-Placer-Dock-/Panel-Aufbau in `--headless --import`; sichtbare Editor-Sessions behalten den `EditorDock`-Pfad.
+- Stand: Die Installation bleibt Authoring-Tooling fuer den naechsten Godot-Editor-Sichttest; Asset-Placer-Collections, Docks und `user://asset_library.json` sind keine Gameplay-Wahrheit.
+- Risiken/offen: Der manuelle Editor-Test steht noch aus: Godot starten, Asset-Placer-Dock oeffnen, Asset-Folder synchronisieren, eine kleine 3D-Authoring-Szene bauen und per TASK_486-Importer kompilieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_487_install_godot_asset_placer.gd`, TASK_486-Regression, `godot_console.exe --headless --path . --import` und `git diff --check`.
+- Naechster Schritt: In Godot das Dock `Asset Placer` pruefen und einen kleinen Test mit 5-10 Kernassets gegen den Map-Builder-Importer fahren.
+
 ### TASK_486 - Map Builder Tooling Spike
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_486_map_builder_tooling_spike.md`, `docs/dev/map_builder_tooling_spike_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`
