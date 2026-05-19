@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_486 - Map Builder Tooling Spike
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_486_map_builder_tooling_spike.md`, `docs/dev/map_builder_tooling_spike_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`
+- Stand: Der Spike empfiehlt GridMap/MeshLibrary fuer modulare Terrain-/Road-/Wall-Teile, einen Asset-Placer-artigen Godot-Workflow fuer Props und unseren eigenen Importer als Gameplay-Compiler nach `TerrainMapData`.
+- Stand: `MapBuilderSceneImporter` kann Dictionary-Placements, Node-Metadaten und Godot-`GridMap`-Zellen in bestehende Tile-Wahrheit uebersetzen. Road-/Water-Surfaces bleiben beim Layern mit Gebaeuden erhalten; Rotation und Scale werden aus Authoring-Daten normalisiert.
+- Risiken/offen: Es wurde bewusst kein externes Plugin vendored. Der echte Godot-Editor-Sichttest mit GridMap/MeshLibrary und Godot Asset Placer bleibt der naechste Entscheidungspunkt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_486_map_builder_tooling_spike.gd`, TASK_485/TASK_484/TASK_483 und `git diff --check`.
+- Naechster Schritt: Kleines Godot-Editor-Projektsetup bauen: MeshLibrary aus 10-15 Kernassets, Godot Asset Placer testweise installieren, dann eine Testkarte per Importer kompilieren.
+
 ### TASK_485 - Map Editor Save As and Modular Scale Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_485_map_editor_saveas_modular_scale_fix.md`, `docs/dev/map_editor_asset_workflow_contract.md`

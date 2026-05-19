@@ -115,6 +115,7 @@ git checkout -b batch/<batch-name>
 - TASK_483 - Map Editor Asset Workflow Polish
 - TASK_484 - Map Editor Palette Browser Layout
 - TASK_485 - Map Editor Save As and Modular Scale Fix
+- TASK_486 - Map Builder Tooling Spike
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
