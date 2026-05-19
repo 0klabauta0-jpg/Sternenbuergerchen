@@ -216,6 +216,7 @@ var _adjacency_debug_overlay_skipped_disabled_count: int = 0
 var _adjacency_debug_overlay_drawn_entries_by_grid: Dictionary = {}
 var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
+var _palette_preview_sources: Dictionary = {}
 var _placement_object_scale: float = OBJECT_SCALE_DEFAULT
 var _last_dirty_neighborhood_snapshot: Dictionary = {}
 var _right_mouse_pressed: bool = false
@@ -3228,6 +3229,8 @@ func _build_palette_snapshot() -> Dictionary:
 	var visible_display_names: PackedStringArray = PackedStringArray()
 	var selected_items: PackedInt32Array = PackedInt32Array()
 	var preview_icon_count: int = 0
+	var catalog_preview_icon_count: int = 0
+	var generated_preview_icon_count: int = 0
 	var asset_list_icon_mode: int = -1
 	var asset_list_max_columns: int = 0
 	var asset_list_fixed_column_width: int = 0
@@ -3246,6 +3249,11 @@ func _build_palette_snapshot() -> Dictionary:
 				visible_display_names.append(tile_type_list.get_item_text(index))
 			if tile_type_list.get_item_icon(index) != null:
 				preview_icon_count += 1
+				var preview_source: String = String(_palette_preview_sources.get(type_id, "")).strip_edges().to_lower()
+				if preview_source == "catalog":
+					catalog_preview_icon_count += 1
+				elif preview_source == "generated":
+					generated_preview_icon_count += 1
 	var group_ids: PackedStringArray = PackedStringArray()
 	if _tile_catalog != null:
 		for group_variant in _tile_catalog.get_palette_groups():
@@ -3277,6 +3285,9 @@ func _build_palette_snapshot() -> Dictionary:
 		"selected_item_index": int(selected_items[0]) if selected_items.size() > 0 else -1,
 		"filtered": not _active_palette_group_id.is_empty(),
 		"preview_icon_count": preview_icon_count,
+		"catalog_preview_icon_count": catalog_preview_icon_count,
+		"generated_preview_icon_count": generated_preview_icon_count,
+		"visible_types_use_catalog_previews": tile_type_list != null and preview_icon_count == tile_type_list.item_count and catalog_preview_icon_count == preview_icon_count and generated_preview_icon_count == 0,
 		"all_visible_items_have_preview_icons": tile_type_list != null and preview_icon_count == tile_type_list.item_count,
 		"preview_icon_size": PALETTE_PREVIEW_ICON_SIZE,
 		"panel_min_width": palette_panel.custom_minimum_size.x if palette_panel != null else 0.0,
@@ -6738,19 +6749,17 @@ func _get_palette_preview_texture(type_id: String) -> Texture2D:
 	if _palette_preview_textures.has(normalized_type_id):
 		return _palette_preview_textures[normalized_type_id] as Texture2D
 	if _tile_catalog != null:
-		var should_use_real_thumbnail: bool = normalized_type_id == _selected_type_id
-		if not should_use_real_thumbnail and _tile_catalog.has_method("is_texture_cached"):
-			should_use_real_thumbnail = bool(_tile_catalog.call("is_texture_cached", normalized_type_id))
-		if should_use_real_thumbnail:
-			var catalog_texture: Texture2D = _tile_catalog.get_texture(normalized_type_id)
-			if catalog_texture != null:
-				var thumbnail: Texture2D = _get_thumbnail_palette_preview_texture(catalog_texture, normalized_type_id)
-				_palette_preview_textures[normalized_type_id] = thumbnail
-				return thumbnail
+		var catalog_texture: Texture2D = _tile_catalog.get_texture(normalized_type_id)
+		if catalog_texture != null:
+			var thumbnail: Texture2D = _get_thumbnail_palette_preview_texture(catalog_texture, normalized_type_id)
+			_palette_preview_textures[normalized_type_id] = thumbnail
+			_palette_preview_sources[normalized_type_id] = "catalog"
+			return thumbnail
 	var entry: Dictionary = Dictionary(_tile_catalog.call("get_type", normalized_type_id)) if _tile_catalog != null and _tile_catalog.has_method("get_type") else {}
 	var color: Color = _get_palette_preview_color(normalized_type_id, entry)
 	var generated_texture: Texture2D = _get_generated_palette_preview_texture(normalized_type_id, color, entry)
 	_palette_preview_textures[normalized_type_id] = generated_texture
+	_palette_preview_sources[normalized_type_id] = "generated"
 	return generated_texture
 
 

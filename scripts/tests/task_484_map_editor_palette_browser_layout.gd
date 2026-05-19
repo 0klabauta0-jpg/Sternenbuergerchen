@@ -58,10 +58,18 @@ func _test_palette_browser_layout() -> void:
 	_assert(int(palette.get("asset_list_fixed_column_width", 0)) >= 180, "Asset columns have enough width for labels")
 	_assert(asset_list_min_size.y >= 540.0, "Asset list gets the main vertical space")
 	_assert(String(palette.get("active_group", "")) == "fahrzeuge", "Vehicle group remains selectable")
+	_assert(bool(palette.get("visible_types_use_catalog_previews", false)), "Vehicle browser uses real catalog previews")
+	_assert(int(palette.get("generated_preview_icon_count", 99)) == 0, "Vehicle browser has no generated placeholder previews")
 	var visible_ids: PackedStringArray = PackedStringArray(palette.get("visible_type_ids", PackedStringArray()))
 	_assert(visible_ids.has("fahrzeug_speeder_b_ne") or visible_ids.has("fahrzeug_speeder_b_se"), "Vehicle browser still exposes vehicle assets")
 	var legacy_group_button := editor.get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteGroups/PaletteGroup_fahrzeuge") as Button
 	_assert(legacy_group_button != null, "Legacy palette group path remains available for older tests")
+	editor.call("_on_palette_group_button_pressed", "gebaeude")
+	await _wait_frames(2)
+	palette = Dictionary(Dictionary(editor.call("get_map_editor_usability_snapshot", false)).get("palette", {}))
+	_assert(String(palette.get("active_group", "")) == "gebaeude", "Building group remains selectable")
+	_assert(bool(palette.get("visible_types_use_catalog_previews", false)), "Building browser uses real factory/catalog previews")
+	_assert(int(palette.get("catalog_preview_icon_count", 0)) == int(palette.get("preview_icon_count", -1)), "All visible building previews come from catalog textures")
 	editor.queue_free()
 	await _wait_frames(2)
 

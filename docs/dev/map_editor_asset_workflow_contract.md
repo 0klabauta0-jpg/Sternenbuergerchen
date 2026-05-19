@@ -14,6 +14,7 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Palette-Gruppen bleiben aus dem Katalog abgeleitet.
 - Innerhalb einer aktiven Gruppe werden sichtbare Assets nach Displayname sortiert.
 - Preview-Icons muessen gross genug sein, damit Space-Station-, Modular-, Factory- und Nature-Assets ohne Raten unterscheidbar sind.
+- Wenn ein Palette-Typ einen `texture_path` besitzt, muss die Palette diese echte Preview-Textur anzeigen; generierte Platzhalter sind nur Fallback fuer fehlende Texturen.
 - Der aktuell gewaehlte Palette-Typ darf in einem groesseren Preview-Block mit Name, Gruppe und Platzierungs-Scale angezeigt werden.
 - Kategorieauswahl darf scrollbar sein; der Asset-Browser darunter bekommt den Hauptplatz.
 - Asset-Listen duerfen als mehrspaltiger Icon-Browser dargestellt werden, solange die Palette-Metadaten und Selection-Snapshots stabil bleiben.

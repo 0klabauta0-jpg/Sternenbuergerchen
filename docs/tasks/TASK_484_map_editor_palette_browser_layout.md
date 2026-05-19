@@ -9,6 +9,7 @@ TASK_483 hat die technische Basis fuer groessere Previews gelegt. Im realen Layo
 ## Umfang
 - Palette-Panel weiter verbreitern.
 - Asset-Previews in der Liste sichtbar groesser machen.
+- Echte Katalog-/Preview-Texturen fuer sichtbare Assets laden statt generierter Platzhalter-Quadrate.
 - Asset-Liste als zweispaltigen Icon-Browser statt schmaler Textliste darstellen.
 - Kategorien in einen eigenen kompakten Scrollbereich verschieben.
 - Snapshot-Felder fuer Panelbreite, Previewgroesse, Kategorie-Scrollbereich und Asset-Browser-Layout ergaenzen.
@@ -28,6 +29,7 @@ TASK_483 hat die technische Basis fuer groessere Previews gelegt. Im realen Layo
 
 ## Akzeptanzkriterien
 - Palette-Snapshot meldet Preview-Icons mit mindestens 64 px Kantenlaenge.
+- Sichtbare Assets nutzen echte Katalog-Previews, wenn `texture_path` vorhanden ist.
 - Asset-Liste nutzt mindestens zwei Spalten mit Top-Icons.
 - Kategorie-Auswahl ist als eigener Scrollbereich vorhanden.
 - Kategorie-Buttons bleiben kompakt und nehmen nicht den Hauptbereich weg.
