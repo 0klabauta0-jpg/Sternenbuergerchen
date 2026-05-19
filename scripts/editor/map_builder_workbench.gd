@@ -65,6 +65,47 @@ func get_gridmap_item_type_map() -> Dictionary:
 	return _item_type_map.duplicate(true)
 
 
+func place_grid_item(item_id: int, cell: Vector3i, rotation_degrees: float = 0.0) -> bool:
+	_configure_without_demo_seed()
+	var grid_map := get_grid_map()
+	if grid_map == null or not _item_type_map.has(item_id):
+		return false
+	var orientation: int = _orientation_for_yaw(rotation_degrees, grid_map)
+	grid_map.set_cell_item(cell, item_id, orientation)
+	return true
+
+
+func erase_grid_cell(cell: Vector3i) -> bool:
+	var grid_map := get_grid_map()
+	if grid_map == null:
+		return false
+	grid_map.set_cell_item(cell, -1)
+	return true
+
+
+func place_prop(type_id: String, grid_position: Vector2i, rotation_degrees: float = 0.0, object_scale: float = 1.0) -> Node3D:
+	_configure_without_demo_seed()
+	var prop_root := get_prop_root()
+	if prop_root == null:
+		return null
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		return null
+	var node := _create_prop_node(normalized_type_id, grid_position, rotation_degrees, object_scale)
+	prop_root.add_child(node)
+	node.owner = self
+	for child in node.get_children():
+		child.owner = self
+	return node
+
+
+func _configure_without_demo_seed() -> void:
+	var previous_seed_value: bool = seed_demo_layout_when_empty
+	seed_demo_layout_when_empty = false
+	configure_workbench()
+	seed_demo_layout_when_empty = previous_seed_value
+
+
 func compile_to_map_data() -> Dictionary:
 	configure_workbench()
 	var importer = IMPORTER_SCRIPT.new()
@@ -232,21 +273,26 @@ func _seed_demo_props(prop_root: Node3D) -> void:
 		var type_id: String = String(prop.get("type_id", "")).strip_edges().to_lower()
 		if type_id.is_empty():
 			continue
-		var node := Node3D.new()
-		node.name = _make_node_name(type_id)
 		var grid_position: Vector2i = _coerce_vector2i(prop.get("grid_position", Vector2i.ZERO))
 		var rotation_degrees: float = float(prop.get("rotation_degrees", 0.0))
 		var object_scale: float = float(prop.get("object_scale", 1.0))
-		node.position = Vector3(grid_position.x, 0.0, grid_position.y)
-		node.rotation_degrees.y = rotation_degrees
-		node.scale = Vector3.ONE * object_scale
-		node.set_meta("sb_type_id", type_id)
-		node.set_meta("sb_grid_position", grid_position)
-		node.set_meta("sb_rotation_degrees", rotation_degrees)
-		node.set_meta("sb_object_scale", object_scale)
+		var node := _create_prop_node(type_id, grid_position, rotation_degrees, object_scale)
 		prop_root.add_child(node)
-		if _should_attach_visual_previews():
-			_attach_prop_visual(node, type_id, object_scale)
+
+
+func _create_prop_node(type_id: String, grid_position: Vector2i, rotation_degrees: float, object_scale: float) -> Node3D:
+	var node := Node3D.new()
+	node.name = _make_node_name(type_id)
+	node.position = Vector3(grid_position.x, 0.0, grid_position.y)
+	node.rotation_degrees.y = rotation_degrees
+	node.scale = Vector3.ONE * object_scale
+	node.set_meta("sb_type_id", type_id)
+	node.set_meta("sb_grid_position", grid_position)
+	node.set_meta("sb_rotation_degrees", rotation_degrees)
+	node.set_meta("sb_object_scale", object_scale)
+	if _should_attach_visual_previews():
+		_attach_prop_visual(node, type_id, object_scale)
+	return node
 
 
 func _attach_prop_visual(node: Node3D, type_id: String, object_scale: float) -> void:

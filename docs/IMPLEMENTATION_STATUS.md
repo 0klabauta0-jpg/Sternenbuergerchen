@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_490 - Map Builder Paint Tools MVP
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_490_map_builder_paint_tools_mvp.md`, `docs/tasks/TASK_489_map_builder_workbench_editor_entry.md`, `docs/dev/map_builder_tooling_spike_contract.md`
+- Stand: Das `Map Builder`-Dock hat jetzt eine Manifest-Palette mit Kategorie-Filter, Auswahl-Label, Rotation, Hoehenwert und Scale.
+- Stand: Paint/Erase/Rotate laufen als echte Editor-Werkzeuge: Linksklick im 3D-Viewport setzt GridMap-Tiles oder legt Prop-Nodes unter `AssetPlacerProps` mit `sb_*`-Metadaten an; Q/E drehen die Platzierung.
+- Stand: Die Workbench bietet pruefbare APIs `place_grid_item`, `erase_grid_cell` und `place_prop`, damit der funktionale Editor-Pfad headless gegen den Compile nach `TerrainMapData` abgesichert ist.
+- Risiken/offen: Sichtbarer Viewport-Test in Godot bleibt offen; Auto-Tiling fuer Strassen/Waende und Drag-Paint-Politur sind Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_490_map_builder_paint_tools_mvp.gd`, TASK_489-/TASK_488-Regressionen und `git diff --check`.
+- Naechster Schritt: Im sichtbaren Editor eine kleine Map mit Paint/Erase/Rotate bauen und dann Auto-Road-/Wall-Snapping als naechsten Bedien-Slice schneiden.
+
 ### TASK_489 - Map Builder Workbench Editor Entry
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_489_map_builder_workbench_editor_entry.md`, `docs/tasks/TASK_488_map_builder_workbench_meshlibrary_mvp.md`, `docs/dev/map_builder_tooling_spike_contract.md`
