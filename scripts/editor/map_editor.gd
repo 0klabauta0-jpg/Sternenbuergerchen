@@ -127,6 +127,10 @@ const BUILDER_QUICK_ROAD_TYPE_ID: String = "spacekit_terrain_road_straight"
 const BUILDER_QUICK_ASSET_TYPE_ID: String = "factory_building_a"
 const BUILDER_QUICK_FACTORY_TYPE_ID: String = "factory_building_a"
 const BUILDER_QUICK_SPACE_FLOOR_TYPE_ID: String = "modular_floor"
+const BUILDER_QUICK_STATION_DOOR_WALL_TYPE_ID: String = "station_wall_door"
+const BUILDER_QUICK_STATION_DOOR_CLOSED_TYPE_ID: String = "station_set_door_single_closed"
+const BUILDER_QUICK_STATION_DOOR_HALF_TYPE_ID: String = "station_set_door_single_half"
+const BUILDER_QUICK_STATION_DOOR_OPEN_TYPE_ID: String = "station_set_door_single"
 const NETWORK_KIND_ROAD: String = "road"
 const NETWORK_KIND_RAIL: String = "rail"
 const NETWORK_KIND_PIPE: String = "pipe"
@@ -1435,17 +1439,21 @@ func _ensure_runtime_builder_workbench_controls() -> void:
 		tools.name = "Tools"
 		tools.add_theme_constant_override("separation", 5)
 		margin.add_child(tools)
+	_remove_runtime_builder_tool_button(tools, "road_line")
+	_remove_runtime_builder_tool_button(tools, "rail_line")
 	_ensure_runtime_builder_tool_button(tools, "select", "S", "Select: Kachel, Objekt oder Marker inspizieren und bearbeiten.", true)
 	_ensure_runtime_builder_tool_button(tools, "terrain", "T", "Terrain: normales Bodentile als Brush waehlen.", true)
 	_ensure_runtime_builder_tool_button(tools, "road", "R", "Road: Strassenplatte als Brush waehlen.", true)
-	_ensure_runtime_builder_tool_button(tools, "road_line", "RD", "Road-Line: Ziehen setzt zusammenhaengende Strassen mit Enden, Geraden, Ecken, T- und Kreuzungen.", true)
-	_ensure_runtime_builder_tool_button(tools, "rail_line", "RL", "Rail-Line: Ziehen setzt Space-Kit-Rails fuer spaetere Bahn-/Monorail-Logistik.", true)
 	_ensure_runtime_builder_tool_button(tools, "pipe_line", "PI", "Pipe-Line: Ziehen setzt Pipelines fuer Energie, Oel, Rohstoffe oder Abwasser.", true)
 	_ensure_runtime_builder_tool_button(tools, "wall_line", "WL", "Wall-Line: Ziehen setzt modulare Waende als vorbereitete Segmentkette.", true)
 	_ensure_runtime_builder_tool_button(tools, "cliff_line", "CL", "Cliff-Line: Ziehen setzt vorbereitete Cliff-Segmente.", true)
 	_ensure_runtime_builder_tool_button(tools, "asset", "A", "Asset: Gebaeude-Asset als Brush waehlen; danach Palette fuer Varianten nutzen.", true)
 	_ensure_runtime_builder_tool_button(tools, "factory", "F", "Factory: Factory-Kit-Gebaeude als Brush waehlen.", true)
 	_ensure_runtime_builder_tool_button(tools, "space_floor", "SF", "Space Floor: Modular-/Station-Boden als Brush waehlen; Scale kann im Preview-Block korrigiert werden.", true)
+	_ensure_runtime_builder_tool_button(tools, "door_wall", "DW", "Door Wall: Space-Station-Wand mit Tuer-Oeffnung als Brush waehlen.", true)
+	_ensure_runtime_builder_tool_button(tools, "door_closed", "DC", "Door Closed: Space-Station-Tuer im geschlossenen Authoring-Zustand waehlen.", true)
+	_ensure_runtime_builder_tool_button(tools, "door_half", "DH", "Door Half: Space-Station-Tuer im halb offenen Authoring-Zustand waehlen.", true)
+	_ensure_runtime_builder_tool_button(tools, "door_open", "DO", "Door Open: Space-Station-Tuer im offenen Authoring-Zustand waehlen.", true)
 	_ensure_runtime_builder_tool_button(tools, "erase", "X", "Erase: Objekt-/Struktur-Layer entfernen, Boden und Marker bleiben erhalten.", true)
 	_ensure_runtime_builder_tool_button(tools, "height", "H", "Hoehe/Cliff: vorhandenes Hoehenwerkzeug aktivieren.", true)
 	_ensure_runtime_builder_tool_button(tools, "marker", "M", "Marker: Spawn- und Objective-Punkte platzieren.", true)
@@ -1472,6 +1480,15 @@ func _ensure_runtime_builder_tool_button(parent: VBoxContainer, tool_id: String,
 	button.set_meta("builder_tool_id", tool_id)
 	button.add_theme_font_size_override("font_size", 11)
 	return button
+
+
+func _remove_runtime_builder_tool_button(parent: VBoxContainer, tool_id: String) -> void:
+	var button_name: String = _build_runtime_builder_button_name(tool_id)
+	var button := parent.get_node_or_null(button_name) as Button
+	if button == null:
+		return
+	parent.remove_child(button)
+	button.queue_free()
 
 
 func _ensure_runtime_builder_separator(parent: VBoxContainer, separator_name: String) -> void:
@@ -1535,6 +1552,14 @@ func activate_runtime_builder_tool(tool_id: String) -> bool:
 			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_FACTORY_TYPE_ID)
 		"space_floor":
 			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_SPACE_FLOOR_TYPE_ID)
+		"door_wall":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_STATION_DOOR_WALL_TYPE_ID)
+		"door_closed":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_STATION_DOOR_CLOSED_TYPE_ID)
+		"door_half":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_STATION_DOOR_HALF_TYPE_ID)
+		"door_open":
+			handled = _activate_runtime_builder_palette_brush(BUILDER_QUICK_STATION_DOOR_OPEN_TYPE_ID)
 		"erase":
 			handled = set_authoring_tool(AUTHORING_TOOL_ERASER)
 		"height":
@@ -1617,6 +1642,14 @@ func _runtime_builder_button_is_active(tool_id: String, active_tool: String) -> 
 			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_FACTORY_TYPE_ID
 		"space_floor":
 			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_SPACE_FLOOR_TYPE_ID
+		"door_wall":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_STATION_DOOR_WALL_TYPE_ID
+		"door_closed":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_STATION_DOOR_CLOSED_TYPE_ID
+		"door_half":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_STATION_DOOR_HALF_TYPE_ID
+		"door_open":
+			return active_tool == AUTHORING_TOOL_BRUSH and _selected_type_id == BUILDER_QUICK_STATION_DOOR_OPEN_TYPE_ID
 		"erase":
 			return active_tool == AUTHORING_TOOL_ERASER
 		"height":
@@ -1671,7 +1704,12 @@ func _build_runtime_builder_workbench_snapshot() -> Dictionary:
 		"quick_asset_type_id": BUILDER_QUICK_ASSET_TYPE_ID,
 		"quick_factory_type_id": BUILDER_QUICK_FACTORY_TYPE_ID,
 		"quick_space_floor_type_id": BUILDER_QUICK_SPACE_FLOOR_TYPE_ID,
+		"quick_station_door_wall_type_id": BUILDER_QUICK_STATION_DOOR_WALL_TYPE_ID,
+		"quick_station_door_closed_type_id": BUILDER_QUICK_STATION_DOOR_CLOSED_TYPE_ID,
+		"quick_station_door_half_type_id": BUILDER_QUICK_STATION_DOOR_HALF_TYPE_ID,
+		"quick_station_door_open_type_id": BUILDER_QUICK_STATION_DOOR_OPEN_TYPE_ID,
 		"network": _build_network_drag_tool_snapshot(),
+		"station_doors": _build_station_door_authoring_snapshot(),
 		"status": _runtime_builder_status_text,
 	}
 
@@ -2064,6 +2102,42 @@ func _build_network_drag_tool_snapshot() -> Dictionary:
 		"definitions": definitions,
 		"last_apply": _last_network_apply_snapshot.duplicate(true),
 		"scale_correctable_prefixes": PackedStringArray(["factory_", "spacekit_", "station_set_", "modular_", "wall_", "cliff_"]),
+	}
+
+
+func _build_station_door_authoring_snapshot() -> Dictionary:
+	var single_states: Dictionary = {
+		"closed": BUILDER_QUICK_STATION_DOOR_CLOSED_TYPE_ID,
+		"half": BUILDER_QUICK_STATION_DOOR_HALF_TYPE_ID,
+		"open": BUILDER_QUICK_STATION_DOOR_OPEN_TYPE_ID,
+	}
+	var double_states: Dictionary = {
+		"closed": "station_set_door_double_closed",
+		"half": "station_set_door_double_half",
+		"open": "station_set_door_double",
+	}
+	return {
+		"ui_sets_gameplay_truth": false,
+		"runtime_animation_truth": false,
+		"door_wall_type_id": BUILDER_QUICK_STATION_DOOR_WALL_TYPE_ID,
+		"single": _build_station_door_state_family_snapshot(single_states),
+		"double": _build_station_door_state_family_snapshot(double_states),
+		"quick_tool_ids": PackedStringArray(["door_wall", "door_closed", "door_half", "door_open"]),
+	}
+
+
+func _build_station_door_state_family_snapshot(state_type_ids: Dictionary) -> Dictionary:
+	var availability: Dictionary = {}
+	var all_available: bool = true
+	for state in state_type_ids.keys():
+		var type_id: String = String(state_type_ids.get(state, "")).strip_edges().to_lower()
+		var available: bool = not type_id.is_empty() and _tile_catalog != null and _tile_catalog.has_type(type_id)
+		availability[String(state)] = available
+		all_available = all_available and available
+	return {
+		"available": all_available,
+		"states": state_type_ids.duplicate(true),
+		"availability": availability,
 	}
 
 
@@ -3872,6 +3946,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 			"waypoint_count": _get_patrol_waypoint_count(_patrol_spawn_id),
 		},
 		"network_drag_tool": _build_network_drag_tool_snapshot(),
+		"station_door_authoring": _build_station_door_authoring_snapshot(),
 		"patrol_route_preview": get_patrol_route_preview_snapshot(),
 		"tile_property_overlay": get_tile_property_overlay_debug_snapshot(),
 		"adjacency_debug_overlay": get_adjacency_debug_overlay_snapshot(),

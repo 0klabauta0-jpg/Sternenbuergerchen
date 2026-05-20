@@ -44,7 +44,7 @@ func _test_runtime_network_drag_tools() -> void:
 	var snapshot: Dictionary = Dictionary(editor.call("get_map_editor_usability_snapshot", false))
 	var builder: Dictionary = Dictionary(snapshot.get("runtime_builder_workbench", {}))
 	var tool_ids: PackedStringArray = PackedStringArray(builder.get("tool_ids", PackedStringArray()))
-	for required_tool in ["road_line", "rail_line", "pipe_line", "wall_line", "cliff_line", "factory", "space_floor"]:
+	for required_tool in ["pipe_line", "wall_line", "cliff_line", "factory", "space_floor"]:
 		_assert(tool_ids.has(required_tool), "Runtime builder exposes %s" % required_tool)
 	var network: Dictionary = Dictionary(builder.get("network", {}))
 	var definitions: Dictionary = Dictionary(network.get("definitions", {}))

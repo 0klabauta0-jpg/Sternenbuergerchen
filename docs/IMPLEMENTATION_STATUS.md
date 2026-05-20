@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_493 - Map Editor Station Builder Focus
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_493_map_editor_station_builder_focus.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`
+- Stand: Die sichtbare Runtime-Builder-Leiste fokussiert den aktuellen Station-/Outpost-Workflow: Pipe-Line, Wall-Line, Cliff-Line, Factory, Space-Floor und Space-Station-Tueren.
+- Stand: Road-Line und Rail-Line bleiben als vorbereitete Backend-Pfade testbar, sind aber nicht mehr als Hauptbuttons in der linken Builder-Leiste sichtbar.
+- Stand: Door-Wall, Door-Closed, Door-Half und Door-Open nutzen vorhandene Space-Station-Katalog-IDs; der Usability-Snapshot beschreibt Closed/Half/Open fuer Single- und Double-Doors als Authoring-Contract.
+- Risiken/offen: Tueranimation, Naehebedienung und Computer-/Pipeline-Gameplay sind weiterhin Folge-Contracts.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_493_map_editor_station_builder_focus.gd`, TASK_492-/TASK_491-Regressionen und `git diff --check`.
+- Naechster Schritt: Sichttest per F6 und danach Door-/Computer-Interaction-Contract schneiden.
+
 ### TASK_492 - Map Editor Network Drag Snap Tools
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`

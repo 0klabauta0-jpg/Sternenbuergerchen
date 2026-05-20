@@ -44,13 +44,21 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Der Godot-Plugin-/GridMap-Pfad bleibt ein Legacy-/Compiler-Fallback und darf nicht als alleiniger Zielworkflow fuer spielbare Editor-Bedienung gelten.
 
 ## Network Drag Tools
-- Linienwerkzeuge fuer Road, Rail, Pipe, Wall und Cliff sind Runtime-Editor-Werkzeuge.
+- Sichtbare Linienwerkzeuge fuer den aktuellen Station-/Outpost-Builder sind Pipe, Wall und Cliff.
+- Road- und Rail-Line bleiben vorbereitete/Legacy-Backend-Pfade fuer Tests oder spaetere Karten, sind aber kein sichtbarer Hauptworkflow fuer den aktuellen Builder.
 - Ein Drag-Stroke baut einen orthogonalen Pfad aus Start- und End-Tile und ist ein Undo-Schritt.
 - Varianten werden aus lokalen Verbindungen abgeleitet: End, Straight, Corner, Split und Cross, soweit die Asset-Familie diese Teile besitzt.
 - Der Grundstrassensatz nutzt `spacekit_terrain_road_straight`, `spacekit_terrain_road_corner`, `spacekit_terrain_road_end`, `spacekit_terrain_road_split` und `spacekit_terrain_road_cross`.
 - Rails nutzen `spacekit_rail*`, Pipes nutzen `spacekit_pipe*`; beide bleiben Object-Layer-Assets und duerfen vorhandene Ground-/Road-/Water-Surfaces nicht ueberschreiben.
 - Factory-, SpaceKit-, StationSet-, Modular-, Wall- und Cliff-Prefixe duerfen den Placement-Scale nutzen, damit zu grosse Kit-Teile lokal korrigierbar bleiben.
 - Logistik-Bedeutung wie Energie, Oel, Rohstoffe oder Abwasser wird nur vorbereitet. Die echte Ressourcen-/Pipeline-Simulation gehoert in einen spaeteren Gameplay-Contract.
+
+## Station Doors
+- Space-Station-Tueren werden im Editor als Authoring-States behandelt: Closed, Half und Open.
+- Quick-Brushes nutzen `station_wall_door`, `station_set_door_single_closed`, `station_set_door_single_half` und `station_set_door_single`.
+- Double-Door-Varianten (`station_set_door_double_closed`, `station_set_door_double_half`, `station_set_door_double`) bleiben im Authoring-Contract sichtbar und ueber die Palette nutzbar.
+- Der Editor speichert weiterhin nur Tile-Typ, Rotation und Scale; er erzeugt keine zweite Runtime-Tuer-Wahrheit.
+- Spaetere Runtime-Animation darf aus Closed/Half/Open-Assetfamilien ableiten, muss aber einen eigenen Door-/Computer-Interaction-Contract bekommen.
 
 ## Scale
 - Neue Objekt-/Struktur-Assets koennen mit einem Platzierungs-Scale gepinselt werden.
@@ -62,7 +70,7 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Die Kenney-`Modular Space Kit`-Modelle sind in 4er-Modul-Einheiten authoriert. Ihr Mapping-Scale nutzt `0.25`, damit `modular_wall`/`modular_gate` ein Tile breit bleiben, waehrend groessere Raum-/Korridor-Teile bewusst multi-tile sind.
 
 ## Naechste Editor-Slices
-- Freies Wand-/Cliff-Ziehen mit Segment-/Edge-Preview.
+- Sichtbare Drag-Preview fuer Pipe-, Wand- und Cliff-Linien.
 - Auto-Rotation/Snapping fuer Ketten von Waenden, Tueren und Cliffs.
 - Door-/Computer-Interaction-Contract fuer Runtime-Naehe und Bedienzeit.
 - Palette-Suche, Favoriten und gespeicherte Asset-Override-Presets.
