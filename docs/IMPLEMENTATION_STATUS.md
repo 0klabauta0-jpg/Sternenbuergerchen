@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_494 - Station Outpost 64x64 Map
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_494_station_outpost_64_map.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_493_map_editor_station_builder_focus.md`
+- Stand: `maps/station_outpost_64x64.json` ist eine 64x64-Authoring-/Playtest-Map mit Station-Komplex, Door-States, Hoehenruecken, Cliff-Assets, Factory-Yard, Pipes, Cover und Markern.
+- Stand: `scripts/tools/generate_station_outpost_64x64.gd` erzeugt die Map reproduzierbar aus bestehenden Terrain-/Station-/Factory-/Pipe-Katalog-IDs.
+- Stand: Der Verifier prueft Groesse, Katalog-IDs, Station-/Factory-/Pipe-/Door-Mix, Hoehen, Cliffs, Nature-Cover, Marker und Patrol-Routen.
+- Risiken/offen: Die Map ist noch kein balanciertes Missionsszenario; sichtbarer F6-Test und manuelles Feintuning von Asset-Groessen/Rotationen bleiben sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_station_outpost_64x64.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_494_station_outpost_64_map.gd`, `git diff --check`.
+- Naechster Schritt: Map im Runtime-Editor laden und sichtbare Station-/Huegel-/Pipe-Details manuell nachziehen.
+
 ### TASK_493 - Map Editor Station Builder Focus
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_493_map_editor_station_builder_focus.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`

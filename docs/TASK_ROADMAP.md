@@ -123,6 +123,7 @@ git checkout -b batch/<batch-name>
 - TASK_491 - Map Editor Runtime Builder Workbench
 - TASK_492 - Map Editor Network Drag Snap Tools
 - TASK_493 - Map Editor Station Builder Focus
+- TASK_494 - Station Outpost 64x64 Map
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
