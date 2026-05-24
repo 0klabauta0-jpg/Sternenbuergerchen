@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_499 - Review Followup Architecture Cleanup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_499_review_followup_architecture_cleanup.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/audio_event_contract.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`
+- Stand: Die unreferenzierte `scenes/main.tscn` ohne Script-Zuweisungen ist entfernt; `project.godot` startet weiter in `res://scenes/ui/main_menu.tscn`.
+- Stand: `SimulationRoot._resolve_audio_event_bus()` nutzt nur noch exportierten NodePath, direkten Child-Node oder direkten Parent-Sibling und cached den Treffer; der Deep-SceneTree-Scan ist aus dem Snapshot-Audiopfad entfernt.
+- Stand: Die Homebase-Katalogeintraege `frontier_probe` und `wall_breach` markieren map-only Missionen explizit mit `NO_SCENARIO_FILE_PATH`, und `show_npc_thoughts` hat im Projekt eine T-Defaultbindung.
+- Risiken/offen: `frontier_probe` verweist weiter auf die lokal vorhandene, aber nicht getrackte `res://maps/new_map.json`; die Entscheidung Versionierung vs. Umbiegen auf eine getrackte Karte bleibt offen. Weitere Audio-Deep-Scans in UI-/Visual-/Legacy-Pfaden und die `scripts/tests/`-Produktionspfad-Extraktion bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_499_review_followup_architecture_cleanup.gd`, `git diff --check`.
+- Naechster Schritt: Eigenen Folgetask fuer AudioEventBus-Resolver-Vereinheitlichung oder fuer die MissionCombatLoopDriver-Extraktion schneiden.
+
 ### TASK_498 - Runtime Script Layout Alignment
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_498_runtime_script_layout_alignment.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`, `docs/tasks/TASK_003_simulation_root.md`, `docs/tasks/TASK_162_combat_loop_authority_split.md`

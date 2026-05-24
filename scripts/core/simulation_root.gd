@@ -88,6 +88,7 @@ var _snapshot_audio_event_ids_played: Dictionary = {}
 var _snapshot_audio_played_count: int = 0
 var _snapshot_audio_suppressed_count: int = 0
 var _last_snapshot_audio_result: Dictionary = {}
+var _audio_event_bus = null
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
 var _last_server_state: Dictionary = {}
 var _combat_rng := RandomNumberGenerator.new()
@@ -1141,25 +1142,24 @@ func _emit_snapshot_audio_events(snapshot: Dictionary) -> void:
 
 
 func _resolve_audio_event_bus():
+	if _audio_event_bus != null and is_instance_valid(_audio_event_bus) and _audio_event_bus.has_method("emit_weapon_fire"):
+		return _audio_event_bus
+	_audio_event_bus = null
 	if audio_event_bus_path != NodePath():
 		var path_bus := get_node_or_null(audio_event_bus_path)
 		if path_bus != null and path_bus.has_method("emit_weapon_fire"):
-			return path_bus
+			_audio_event_bus = path_bus
+			return _audio_event_bus
 	var child_bus := get_node_or_null("AudioEventBus")
 	if child_bus != null and child_bus.has_method("emit_weapon_fire"):
-		return child_bus
-	var tree: SceneTree = null
-	if is_inside_tree():
-		tree = get_tree()
-	if tree != null:
-		var current_scene := tree.current_scene
-		if current_scene != null:
-			var scene_bus := current_scene.find_child("AudioEventBus", true, false)
-			if scene_bus != null and scene_bus.has_method("emit_weapon_fire"):
-				return scene_bus
-		var root_bus := tree.root.find_child("AudioEventBus", true, false)
-		if root_bus != null and root_bus.has_method("emit_weapon_fire"):
-			return root_bus
+		_audio_event_bus = child_bus
+		return _audio_event_bus
+	var parent_node := get_parent()
+	if parent_node != null:
+		var sibling_bus := parent_node.get_node_or_null("AudioEventBus")
+		if sibling_bus != null and sibling_bus.has_method("emit_weapon_fire"):
+			_audio_event_bus = sibling_bus
+			return _audio_event_bus
 	return null
 
 

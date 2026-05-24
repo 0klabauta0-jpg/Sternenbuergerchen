@@ -128,6 +128,7 @@ git checkout -b batch/<batch-name>
 - TASK_496 - Mission Combat Registry and Elimination Hotfix
 - TASK_497 - Mission TestSetup Reference Cleanup
 - TASK_498 - Runtime Script Layout Alignment
+- TASK_499 - Review Followup Architecture Cleanup
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

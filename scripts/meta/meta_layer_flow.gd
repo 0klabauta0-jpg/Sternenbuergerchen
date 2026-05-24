@@ -12,6 +12,7 @@ const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_s
 const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie", "UnitDelta", "UnitEcho", "UnitFoxtrot", "UnitGolf", "UnitHotel"]
 const DEFAULT_META_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
 const DEFAULT_META_SCENARIO_PATH: String = "res://data/mission_scenarios/ground_mission01_default.json"
+const NO_SCENARIO_FILE_PATH: String = ""
 const HOMEBASE_MISSION_CATALOG: Array = [
 	{
 		"mission_id": "fob_transfer",
@@ -42,6 +43,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 		"mission_id": "frontier_probe",
 		"mission_name": "Operation: Frontier Probe",
 		"map_file_path": "res://maps/new_map.json",
+		"scenario_file_path": NO_SCENARIO_FILE_PATH,
 		"slot_count": 3,
 		"time_limit_seconds": 1200.0,
 	},
@@ -49,6 +51,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 		"mission_id": "wall_breach",
 		"mission_name": "Operation: Wall Breach",
 		"map_file_path": "res://maps/wall_test_4x4.json",
+		"scenario_file_path": NO_SCENARIO_FILE_PATH,
 		"slot_count": 3,
 		"time_limit_seconds": 1200.0,
 	},
@@ -605,7 +608,7 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 			if fob_screen_for_configs != null and fob_screen_for_configs.has_method("get_selected_unit_configs"):
 				mission_setup.set("selected_team_unit_configs", Array(fob_screen_for_configs.call("get_selected_unit_configs")).duplicate(true))
 		mission_setup.set("map_file_path", String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
-		mission_setup.set("scenario_file_path", String(selected_mission.get("scenario_file_path", "")).strip_edges())
+		mission_setup.set("scenario_file_path", String(selected_mission.get("scenario_file_path", NO_SCENARIO_FILE_PATH)).strip_edges())
 		mission_setup.set("defer_friendly_runtime_activation", _should_defer_friendly_runtime_activation())
 		mission_setup.set("allow_full_roster_when_selection_empty", false)
 		var gameplay_settings: Dictionary = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_settings"))
