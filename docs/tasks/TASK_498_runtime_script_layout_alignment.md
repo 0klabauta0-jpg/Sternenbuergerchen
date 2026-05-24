@@ -1,5 +1,8 @@
 # TASK_498 - Runtime Script Layout Alignment
 
+## Status
+Implementiert im Arbeitsstand.
+
 ## Ziel / Problem
 Das Verzeichnis `scripts/simulation/` enthaelt aktuell keine produktiven Simulationsskripte, waehrend zentrale Runtime-Dateien wie `simulation_root.gd`, `damage_model.gd`, `objective_status.gd`, `respawn_manager.gd`, `event_router.gd` und `update_manager.gd` unter `scripts/core/` liegen.
 
@@ -24,7 +27,8 @@ Die Architektur spricht von `SimulationRoot` und autoritativer Simulation, der l
 - `docs/ARCHITECTURE.md`
 - `docs/CODEX_RULES.md`
 - `docs/IMPLEMENTATION_STATUS.md`
-- `docs/tasks/TASK_003_simulationroot.md`
+- `docs/dev/runtime_script_layout_contract.md`
+- `docs/tasks/TASK_003_simulation_root.md`
 - `docs/tasks/TASK_162_combat_loop_authority_split.md`
 
 ## Akzeptanzkriterien
@@ -47,3 +51,14 @@ Die Architektur spricht von `SimulationRoot` und autoritativer Simulation, der l
 ## Risiken / offene Punkte
 - Eine echte Pfadmigration ist breit und riskant, weil Godot-Szenen und Skripte viele `res://`-Referenzen halten.
 - Wahrscheinlich ist kurzfristig eine Doku-Entscheidung besser als eine mechanische Verschiebung.
+
+## Umsetzung
+- `scripts/core/` bleibt der definierte Runtime-Kernpfad fuer `SimulationRoot`, `DamageModel`, `ObjectiveStatus`, `RespawnManager`, `EventRouter`, `UpdateManager`, LOS/Fog-of-War und gemeinsame Runtime-Lesedaten.
+- `scripts/mission/` bleibt der Pfad fuer Mission-Contracts, Adapter und Bridges.
+- `scripts/tactical/` bleibt der Pfad fuer taktische Resolver, Controller und UI-/Visual-Adapter.
+- `scripts/tests/` bleibt der Pfad fuer Verifier, Harnesses und Legacy-Szenen-Driver.
+- `scripts/simulation/` ist als inaktiver/reservierter Pfad erklaert; neue produktive Skripte gehoeren dort nicht hinein, solange kein eigener Migration-Task existiert.
+
+## Abschluss-Pruefung
+- `godot_console.exe --headless --path . --script scripts/tests/task_498_runtime_script_layout_alignment.gd`
+- `git diff --check`

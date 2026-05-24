@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_498 - Runtime Script Layout Alignment
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_498_runtime_script_layout_alignment.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`, `docs/tasks/TASK_003_simulation_root.md`, `docs/tasks/TASK_162_combat_loop_authority_split.md`
+- Stand: `scripts/core/` ist dokumentiert als aktueller Runtime-Kernpfad fuer `SimulationRoot`, `DamageModel`, `ObjectiveStatus`, `RespawnManager`, `EventRouter`, `UpdateManager`, LOS/Fog-of-War und gemeinsame Runtime-Lesedaten.
+- Stand: `scripts/mission/`, `scripts/tactical/` und `scripts/tests/` haben klare Schreibgrenzen fuer Mission-Contracts/Adapter, Tactical-Resolver/Controller und Verifier/Harnesses.
+- Stand: `scripts/simulation/` ist als inaktiver/reservierter Pfad erklaert; die alte `.gitkeep` ist durch eine README mit Migrationshinweis ersetzt.
+- Risiken/offen: Keine Runtime-Pfade wurden verschoben. Eine echte Migration nach `scripts/simulation/` bleibt ein eigener, breiter Godot-`res://`-Kompatibilitaets-Task.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_498_runtime_script_layout_alignment.gd`, `git diff --check`.
+- Naechster Schritt: Die Mission-Combat-Driver-Extraktionen weiter in kleinen Boundary-Slices schneiden, ohne neue produktive Logik in `scripts/tests/` oder `scripts/simulation/` abzulegen.
+
 ### TASK_497 - Mission TestSetup Reference Cleanup
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_497_mission_test_setup_reference_cleanup.md`, `docs/tasks/TASK_064_mission_terrain_aus_json.md`, `docs/tasks/TASK_159_2_5d_editor_and_mission_primary_view.md`, `docs/tasks/TASK_494_station_outpost_64_map.md`, `docs/dev/terrain_truth_visual_audit_contract.md`
