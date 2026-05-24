@@ -15,6 +15,47 @@ const LINE_OF_SIGHT_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_sy
 
 const FOW_UPDATE_INTERVAL_SECONDS: float = 0.35
 const FOW_DEFAULT_SIGHT_RANGE_WORLD: float = 640.0
+const LEGACY_FALLBACK_BLOCKED_TILES: Array[Vector2i] = [
+	Vector2i(4, 1),
+	Vector2i(4, 2),
+	Vector2i(5, 2),
+]
+const LEGACY_FALLBACK_LOS_BLOCKING_TILES: Array[Vector2i] = [
+	Vector2i(4, 2),
+	Vector2i(5, 2),
+]
+const LEGACY_FALLBACK_COVER_BY_TILE: Dictionary = {
+	Vector2i(3, 4): 20,
+	Vector2i(4, 4): 20,
+	Vector2i(4, 5): 20,
+	Vector2i(5, 3): 35,
+	Vector2i(2, 5): 35,
+}
+const LEGACY_FALLBACK_HEIGHT_BY_TILE: Dictionary = {
+	Vector2i(3, 3): 1,
+	Vector2i(4, 3): 1,
+	Vector2i(3, 4): 1,
+	Vector2i(5, 4): 1,
+	Vector2i(3, 5): 1,
+	Vector2i(4, 5): 1,
+	Vector2i(5, 5): 1,
+	Vector2i(4, 4): 2,
+	Vector2i(5, 3): 2,
+}
+const LEGACY_FALLBACK_SURFACE_BY_TILE: Dictionary = {
+	Vector2i(4, 0): "road",
+	Vector2i(3, 1): "road",
+	Vector2i(3, 2): "road",
+	Vector2i(3, 3): "road",
+	Vector2i(4, 4): "road",
+	Vector2i(3, 5): "road",
+	Vector2i(2, 7): "sand",
+	Vector2i(2, 6): "sand",
+	Vector2i(1, 6): "sand",
+	Vector2i(2, 5): "sand",
+	Vector2i(5, 3): "rock",
+	Vector2i(5, 4): "rock",
+}
 
 @export var team_id: String = "team_alpha"
 @export var runtime_leader_path: NodePath
@@ -32,6 +73,7 @@ const FOW_DEFAULT_SIGHT_RANGE_WORLD: float = 640.0
 @export var respawn_manager_path: NodePath
 @export var enemy_wave_controller_path: NodePath
 @export var terrain_registry_path: NodePath
+@export var simulation_root_path: NodePath
 @export var map_file_path: String = "res://maps/Ground_Mission01_32x32.json"
 @export var scenario_file_path: String = ""
 @export var defer_friendly_runtime_activation: bool = true
@@ -68,7 +110,7 @@ func _ready() -> void:
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var unit_registry = get_node_or_null(unit_registry_path)
 	var ftl_registry = get_node_or_null(ftl_registry_path)
-	var simulation_root = get_node_or_null("../SimulationRoot")
+	var simulation_root = _get_simulation_root()
 	if runtime_leader == null or unit_registry == null or ftl_registry == null or simulation_root == null:
 		push_warning("MissionTestSetup requires direct references to RuntimeLeader, UnitRegistry, FTLRegistry and SimulationRoot.")
 		return
@@ -218,7 +260,7 @@ func apply_runtime_selection_contract() -> void:
 		return
 	var runtime_leader = get_node_or_null(runtime_leader_path)
 	var unit_registry = get_node_or_null(unit_registry_path)
-	var simulation_root = get_node_or_null("../SimulationRoot")
+	var simulation_root = _get_simulation_root()
 	if runtime_leader == null or unit_registry == null or simulation_root == null:
 		return
 	_build_unit_loadout_modifiers()
@@ -289,6 +331,12 @@ func _build_current_friendly_unit_slot_paths() -> Array:
 		if unit_team_id == team_id or unit_team_id == "team_unused":
 			result.append(unit_path)
 	return result
+
+
+func _get_simulation_root() -> Node:
+	if simulation_root_path.is_empty():
+		return null
+	return get_node_or_null(simulation_root_path)
 
 
 func get_expected_unit_presence_snapshot() -> Dictionary:
@@ -806,22 +854,6 @@ func _try_load_terrain_from_json(terrain_registry) -> bool:
 	return true
 
 
-func _find_tile_sprite_at(terrain_root: Node, world_position: Vector2) -> Sprite2D:
-	var best_sprite: Sprite2D = null
-	var best_distance: float = INF
-	for child in terrain_root.get_children():
-		if not child is Sprite2D:
-			continue
-
-		var tile_center: Vector2 = _get_tile_world_center(child)
-		var distance: float = tile_center.distance_squared_to(world_position)
-		if distance < best_distance:
-			best_distance = distance
-			best_sprite = child
-
-	return best_sprite
-
-
 func _setup_terrain_from_hardcode(terrain_registry) -> void:
 	_loaded_terrain_map_data = null
 	var terrain_root: Node = get_node_or_null("../MapRoot/Terrain")
@@ -850,18 +882,7 @@ func _setup_terrain_from_hardcode(terrain_registry) -> void:
 	for terrain_tile in terrain_tiles:
 		var tile_center: Vector2 = _get_tile_world_center(terrain_tile)
 		var grid_position: Vector2i = terrain_registry.call("world_to_grid", tile_center)
-		var tile_data = TERRAIN_TILE_DATA_SCRIPT.new(
-			{
-				"tile_id": "tile_%d_%d" % [grid_position.x, grid_position.y],
-				"grid_position": grid_position,
-				"world_position": tile_center,
-				"walkable": not _is_blocked_tile(grid_position),
-				"blocks_los": _blocks_line_of_sight(grid_position),
-				"cover_value": _get_cover_value_for_tile(grid_position),
-				"height_level": _get_height_level_for_tile(grid_position),
-				"surface_type": _get_surface_type_for_tile(grid_position),
-			}
-		)
+		var tile_data = TERRAIN_TILE_DATA_SCRIPT.new(_build_legacy_fallback_tile_payload(grid_position, tile_center))
 		terrain_registry.call("register_tile", tile_data)
 		_apply_terrain_tile_visual(terrain_tile, tile_data)
 
@@ -1244,65 +1265,17 @@ func _get_tile_world_center(tile_sprite: Sprite2D) -> Vector2:
 	return tile_sprite.global_position + (tile_sprite.texture.get_size() * 0.5)
 
 
-func _is_blocked_tile(grid_position: Vector2i) -> bool:
-	return grid_position == Vector2i(4, 1) or grid_position == Vector2i(4, 2) or grid_position == Vector2i(5, 2)
-
-
-func _blocks_line_of_sight(grid_position: Vector2i) -> bool:
-	return grid_position == Vector2i(4, 2) or grid_position == Vector2i(5, 2)
-
-
-func _get_cover_value_for_tile(grid_position: Vector2i) -> int:
-	if grid_position == Vector2i(3, 4) or grid_position == Vector2i(4, 4) or grid_position == Vector2i(4, 5):
-		return 20
-
-	if grid_position == Vector2i(5, 3) or grid_position == Vector2i(2, 5):
-		return 35
-
-	return 0
-
-
-func _get_height_level_for_tile(grid_position: Vector2i) -> int:
-	if grid_position == Vector2i(4, 4) or grid_position == Vector2i(5, 3):
-		return 2
-
-	if (
-		grid_position == Vector2i(3, 3)
-		or grid_position == Vector2i(4, 3)
-		or grid_position == Vector2i(3, 4)
-		or grid_position == Vector2i(5, 4)
-		or grid_position == Vector2i(3, 5)
-		or grid_position == Vector2i(4, 5)
-		or grid_position == Vector2i(5, 5)
-	):
-		return 1
-
-	return 0
-
-
-func _get_surface_type_for_tile(grid_position: Vector2i) -> String:
-	if (
-		grid_position == Vector2i(4, 0)
-		or grid_position == Vector2i(3, 1)
-		or grid_position == Vector2i(3, 2)
-		or grid_position == Vector2i(3, 3)
-		or grid_position == Vector2i(4, 4)
-		or grid_position == Vector2i(3, 5)
-	):
-		return TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROAD
-
-	if (
-		grid_position == Vector2i(2, 7)
-		or grid_position == Vector2i(2, 6)
-		or grid_position == Vector2i(1, 6)
-		or grid_position == Vector2i(2, 5)
-	):
-		return TERRAIN_TILE_DATA_SCRIPT.SURFACE_SAND
-
-	if grid_position == Vector2i(5, 3) or grid_position == Vector2i(5, 4):
-		return TERRAIN_TILE_DATA_SCRIPT.SURFACE_ROCK
-
-	return TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND
+func _build_legacy_fallback_tile_payload(grid_position: Vector2i, world_position: Vector2) -> Dictionary:
+	return {
+		"tile_id": "legacy_tile_%d_%d" % [grid_position.x, grid_position.y],
+		"grid_position": grid_position,
+		"world_position": world_position,
+		"walkable": not LEGACY_FALLBACK_BLOCKED_TILES.has(grid_position),
+		"blocks_los": LEGACY_FALLBACK_LOS_BLOCKING_TILES.has(grid_position),
+		"cover_value": int(LEGACY_FALLBACK_COVER_BY_TILE.get(grid_position, 0)),
+		"height_level": int(LEGACY_FALLBACK_HEIGHT_BY_TILE.get(grid_position, 0)),
+		"surface_type": String(LEGACY_FALLBACK_SURFACE_BY_TILE.get(grid_position, TERRAIN_TILE_DATA_SCRIPT.SURFACE_GROUND)),
+	}
 
 
 func _apply_terrain_tile_visual(tile_sprite: Sprite2D, tile_data) -> void:

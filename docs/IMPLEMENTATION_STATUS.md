@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_497 - Mission TestSetup Reference Cleanup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_497_mission_test_setup_reference_cleanup.md`, `docs/tasks/TASK_064_mission_terrain_aus_json.md`, `docs/tasks/TASK_159_2_5d_editor_and_mission_primary_view.md`, `docs/tasks/TASK_494_station_outpost_64_map.md`, `docs/dev/terrain_truth_visual_audit_contract.md`
+- Stand: `MissionTestSetup` nutzt `simulation_root_path` als exportierten Setup-Contract und loest den Root ueber `_get_simulation_root()` auf.
+- Stand: Die alte Terrain-Hardcode-Fallbacklogik ist als `LEGACY_FALLBACK_*`-Fixture-Datenstruktur gebuendelt, waehrend JSON-TerrainMapData fuer 64x64-Maps weiter direkt in die TerrainRegistry registriert wird.
+- Stand: Der ungenutzte `_find_tile_sprite_at()`-Nearest-Sprite-Suchhelper ist entfernt; der neue Verifier deckt Source-Contract, Szenen-NodePath, JSON-Prioritaet und Legacy-Fallbackwerte ab.
+- Risiken/offen: Der Fix aendert keine Terrain-Wahrheit, LOS-Regeln oder 2.5D-Rendering. `TASK_159` ist lokal bei 2.5D-Visual-Checks rot; `TASK_160` bleibt lokal beim bekannten LZ-Terrain-Field-Marker-Check rot.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_497_mission_test_setup_reference_cleanup.gd`, TASK_494-Regression und `git diff --check` gruen; `TASK_159` lokal rot bei Field-Border-/Kenney-Ground-/Unit-Facing-/Dropship-Facing-Checks, `TASK_160` lokal rot bei `2.5D primary view shows the LZ as a terrain field marker`.
+- Naechster Schritt: `TASK_498 - Runtime Script Layout Alignment` oder separater LZ-Terrain-Field-Marker-Fix.
+
 ### TASK_496 - Mission Combat Registry and Elimination Hotfix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_496_mission_combat_registry_and_elimination_hotfix.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_041_siegbedingung.md`, `docs/tasks/TASK_479_fireteam_runtime_hotpath_guards.md`
