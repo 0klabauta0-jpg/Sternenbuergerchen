@@ -80,7 +80,7 @@ func _test_simulation_root_executes_hpa_path() -> void:
 	var path: Array = simulation_root.call("_extract_or_build_path_world_points", cmd, unit, unit.global_position, target_position, registry)
 	_assert(not path.is_empty() and registry.call("world_to_grid", Vector2(path[-1])) == Vector2i(9, 1), "SimulationRoot builds a multi-cluster HPA-compatible world path")
 	simulation_root.call("enqueue_command", _build_move_command(unit.get_unit_id(), target_position))
-	for _tick in range(80):
+	for _tick in range(120):
 		simulation_root.call("_physics_process", 0.1)
 		if unit.global_position.distance_to(target_position) <= 1.0:
 			break

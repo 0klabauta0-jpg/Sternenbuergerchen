@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_501 - Integrated Movement Command Lifecycle Hardening
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_501_integrated_movement_command_lifecycle_hardening.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/tactical_command_doctrine_game_abstraction.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/dev/combat_loop_authority_contract.md`
+- Stand: `SimulationRoot` verwirft unaufloesbare oder token-stale Move-Commands jetzt ohne Requeue und legt dazu eine read-only Discard-Diagnose mit Reason, Unit, Token, Zielposition und Count ab.
+- Stand: `TASK_192` folgt dem aktuellen Movement-Contract: normale Move-Wegpunkte duerfen als kompakte Rush-/Gruppenbewegung sichtbar sein, waehrend Bounding/Caterpillar weiter fuer passende Taktikpfade gueltig bleibt. Der Medic-Smoke sucht eine echte walkable Nah-/Zwei-Tile-Fixture statt an einer zu engen Objective-Naheinstellung zu haengen.
+- Stand: `TASK_127` nutzt ein Ausfuehrungsfenster, das die aktuellen Unit-Speed-/Surface-Vertraege beruecksichtigt, ohne HPA-Pfadaufbau oder Traversal-Regeln zu lockern.
+- Risiken/offen: Die grossen Mission-Controller bleiben Legacy-Bridge unter `scripts/tests/`; dieser Task behebt den Lifecycle-Guard und die roten Gates, ersetzt aber keine strukturelle Extraktion.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd`, `task_127_verifier.gd`, `task_192_mission_map_npc_behavior_playability_smoke.gd`, `task_160_tactical_playability_verifier.gd`, `task_475_fireteam_pathfinding_avoidance_stability_pass.gd`, `task_479_fireteam_runtime_hotpath_guards.gd`, `task_500_gameflow_spine_hardening.gd`, `git diff --check`.
+- Naechster Schritt: Bei Bedarf die grosse Mission-Controller-Extraktion als separaten Folge-Task schneiden.
+
 ### TASK_500 - Gameflow Spine Hardening
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_500_gameflow_spine_hardening.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/flight_altitude_layer_contract.md`

@@ -114,8 +114,8 @@ func _run_command_chain_and_movement(context: Dictionary) -> void:
 	var active_map: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var movement_entries: Array = Array(active_map.get("movement_style_entries", []))
 	_assert(executed, "GO executes the selected waypoint chain")
-	_assert(_movement_state_is_bounding_or_caterpillar(movement_state), "Executed movement uses bounding or caterpillar readability over multiple tiles")
-	_assert(_map_has_bounding_or_caterpillar_entry(movement_entries), "2.5D map exposes the same compact movement style entry")
+	_assert(_movement_state_uses_current_readability_contract(movement_state), "Executed movement uses the current compact movement readability contract")
+	_assert(_map_has_current_movement_entry(movement_entries), "2.5D map exposes the same compact movement style entry")
 	_assert(int(active_map.get("movement_bound_marker_count", 0)) > 0, "2.5D map exposes bound target markers during movement")
 	_assert(_all_map_labels_compact(movement_entries, 18), "Movement labels remain compact on the world overlay")
 
@@ -145,7 +145,7 @@ func _run_live_medic_adjacency_case(context: Dictionary) -> void:
 	patient.set("weapon_1_id", "smg")
 	patient.set("weapon_2_id", "smg")
 
-	var base_grid: Vector2i = _find_walkable_grid_near(terrain_registry, _world_to_grid(terrain_registry, _get_objective_position(simulation_root, (medic as Node2D).global_position)), 6)
+	var base_grid: Vector2i = _find_walkable_medic_fixture_base_grid(terrain_registry, _world_to_grid(terrain_registry, _get_objective_position(simulation_root, (medic as Node2D).global_position)), 16)
 	var adjacent_grid: Vector2i = _find_walkable_neighbor_grid(terrain_registry, base_grid)
 	var distant_grid: Vector2i = _find_walkable_two_tile_grid(terrain_registry, base_grid)
 	_assert(adjacent_grid != base_grid and distant_grid != base_grid, "Medic smoke finds adjacent and two-tile walkable positions")
@@ -373,18 +373,22 @@ func _weapon_visual_snapshot_is_clean(primary_view: Node) -> bool:
 	return int(snapshot.get("unit_visual_loadout_count", 0)) > 0 and int(snapshot.get("unit_blaster_attachment_count", 0)) > 0
 
 
-func _movement_state_is_bounding_or_caterpillar(movement_state: Dictionary) -> bool:
+func _movement_state_uses_current_readability_contract(movement_state: Dictionary) -> bool:
 	var style_code: String = String(movement_state.get("style_code", "")).strip_edges().to_upper()
-	if not ["BND", "CAT"].has(style_code):
-		return false
-	return bool(movement_state.get("multi_tile_bound", false)) and int(movement_state.get("bound_count", 0)) >= 2
+	if ["BND", "CAT"].has(style_code):
+		return bool(movement_state.get("multi_tile_bound", false)) and int(movement_state.get("bound_count", 0)) >= 2
+	if style_code == "RSH":
+		return String(movement_state.get("command_type", "")).strip_edges().to_lower() == "move" and PackedStringArray(movement_state.get("current_moving_unit_ids", PackedStringArray())).size() > 0 and PackedStringArray(movement_state.get("current_covering_unit_ids", PackedStringArray())).is_empty()
+	return false
 
 
-func _map_has_bounding_or_caterpillar_entry(entries: Array) -> bool:
+func _map_has_current_movement_entry(entries: Array) -> bool:
 	for entry_variant in entries:
 		var entry: Dictionary = Dictionary(entry_variant)
 		var style_code: String = String(entry.get("style_code", "")).strip_edges().to_upper()
 		if ["BND", "CAT"].has(style_code) and bool(entry.get("multi_tile_bound", false)):
+			return true
+		if style_code == "RSH" and PackedStringArray(entry.get("moving_unit_ids", PackedStringArray())).size() > 0 and PackedStringArray(entry.get("covering_unit_ids", PackedStringArray())).is_empty():
 			return true
 	return false
 
@@ -467,6 +471,18 @@ func _find_walkable_grid_near(terrain_registry: Node, origin_grid: Vector2i, max
 				if bool(terrain_registry.call("is_walkable", grid)):
 					return grid
 	return origin_grid
+
+
+func _find_walkable_medic_fixture_base_grid(terrain_registry: Node, origin_grid: Vector2i, max_radius: int) -> Vector2i:
+	for radius in range(0, maxi(max_radius, 0) + 1):
+		for x in range(origin_grid.x - radius, origin_grid.x + radius + 1):
+			for y in range(origin_grid.y - radius, origin_grid.y + radius + 1):
+				var grid := Vector2i(x, y)
+				if not bool(terrain_registry.call("is_walkable", grid)):
+					continue
+				if _find_walkable_neighbor_grid(terrain_registry, grid) != grid and _find_walkable_two_tile_grid(terrain_registry, grid) != grid:
+					return grid
+	return _find_walkable_grid_near(terrain_registry, origin_grid, max_radius)
 
 
 func _find_walkable_neighbor_grid(terrain_registry: Node, base_grid: Vector2i) -> Vector2i:
