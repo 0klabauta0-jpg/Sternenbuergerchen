@@ -20,7 +20,10 @@ addons/**/bin/~*
 # Local raw source asset packs; commit curated subsets under Assets/used or Assets/curated.
 Assets/Weapon Pack/
 
-# Unity sidecar spikes
+# Unity spike is external at C:/dev/SternenBuergerchen_UnityCommanderFlow.
+/spikes/unity_commander_flow/
+
+# Local Unity sidecar cache/output folders if a spike is opened inside this repo again.
 spikes/**/Library/
 spikes/**/Temp/
 spikes/**/Obj/

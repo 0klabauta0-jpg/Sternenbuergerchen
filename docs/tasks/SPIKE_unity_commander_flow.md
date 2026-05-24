@@ -14,7 +14,8 @@ Pruefen, ob die zentrale SternenBuergerchen-Spielidee in Unity sinnvoll spielbar
 Der Spike ist ein Engine-Vergleich fuer Spielgefuehl und Arbeitsfluss. Er ist keine Migration und keine Abkehr von Godot. Entscheidend ist, ob Unity den Commander-Flow und die indirekte Kontrolle schnell und lesbar darstellen kann.
 
 ## Umfang
-- Sidecar-Unity-Projekt unter `spikes/unity_commander_flow`.
+- Sidecar-Unity-Projekt lokal ausserhalb dieses Godot-Repositories unter `C:\dev\SternenBuergerchen_UnityCommanderFlow`.
+- Das Godot-Repository trackt keine Unity-Projektdateien, Unity-Assets, Unity-Caches oder Unity-Builds mehr.
 - Lokale Sidecar-Assets aus einem kleinen CC0-Subset von Quaternius.
 - Kleines Daten-/Simulationsmodell in C#, damit UI nicht die Gameplay-Wahrheit ist.
 - Zwei Fireteams, zwei Dropships und mehrere gleichzeitig laufende Missionsinstanzen.
@@ -51,17 +52,18 @@ Der Spike ist ein Engine-Vergleich fuer Spielgefuehl und Arbeitsfluss. Er ist ke
 - `.gitignore`
 - `docs/tasks/SPIKE_unity_commander_flow.md`
 - `docs/IMPLEMENTATION_STATUS.md`
-- `spikes/unity_commander_flow/**`
+- externer lokaler Ordner `C:\dev\SternenBuergerchen_UnityCommanderFlow`
 
 ## Lokale Pruefung
 - Unity Batchmode Verifier ueber `SternenBuergerUnitySpike.Editor.SpikeFlowVerifier.Run`.
 - Unity Scene Builder ueber `SternenBuergerUnitySpike.Editor.SpikeSceneBuilder.Build`.
 - Windows-Player-Build ueber `SternenBuergerUnitySpike.Editor.SpikePlayerBuilder.BuildWindows`.
-- Pure-C# Verifier ueber `dotnet run --project spikes/unity_commander_flow/Verifier/SpikeVerifier.csproj`.
+- Pure-C# Verifier ueber `dotnet run --project C:\dev\SternenBuergerchen_UnityCommanderFlow\Verifier\SpikeVerifier.csproj`.
 - `git diff --check`.
 
 ## Risiken / offene Punkte
 - Unity-Editor- und Package-Generierung erzeugt lokale Cache-Dateien, die ignoriert bleiben muessen.
+- Der externe Unity-Ordner ist lokale Arbeitsablage und wird nicht durch dieses Git-Repository versioniert.
 - Der Spike bewertet Spielgefuehl und Arbeitsfluss, nicht Produktionskosten einer Migration.
 - UI/IMGUI ist fuer schnelle Bewertung gebaut, nicht als finale Unity-UI.
 - Die importierten Quaternius-Assets sind als Sidecar-Subset dokumentiert; vor Produktivnutzung Lizenz-/Quelllinks erneut pruefen.
