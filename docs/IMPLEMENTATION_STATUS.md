@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_495 - Mission Combat Driver Boundary Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/reviews/mission_combat_driver_boundary_review_2026_05_24.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_118_combat_entscheidungen_aus_mission_driver_herausloesen.md`, `docs/tasks/TASK_162_combat_loop_authority_split.md`
+- Stand: Der aktuelle `MissionCombatLoopDriver` wurde als 3845-Zeilen-Orchestrator mit Tick-Reihenfolge, Combat, Enemy-Behavior, Objective-/Mission-Result, Respawn/Bleedout, UI-Readability und Remote-Events gegen die bestehenden Resolver/Contracts abgeglichen.
+- Stand: Bereits produktiv ausgelagerte Grenzen (`CombatFireDecisionResolver`, `MedicSupportResolver`, `OverwatchController`, `ContactTracker`, `FlankVulnerabilityResolver`, `MissionCombatAuthorityContract`, `MissionCombatRemoteEventBridge`) sind dokumentiert; veraltete Review-Befunde wie `roll_override: 0.4` und duplizierter Bleedout-Code sind als obsolete markiert.
+- Stand: Die Folge-Reihenfolge ist festgelegt: zuerst `TASK_496` fuer Registry/Elimination, danach Objective-/Mission-Result-Boundary, Enemy-Behavior-Orchestrator, Readability-Presenter und Remote-Event-Bridge-Completion.
+- Risiken/offen: Keine Runtime-Codeaenderung in diesem Task. Der Driver bleibt gross; die eigentliche Entflechtung muss in kleinen Folge-Slices passieren.
+- Lokale Pruefung: `rg`/Code-Lektuere gegen Driver-Funktionen und vorhandene Resolver/Contracts, `git diff --check`.
+- Naechster Schritt: `TASK_496 - Mission Combat Registry and Elimination Hotfix`.
+
 ### TASK_494 - Station Outpost 64x64 Map
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_494_station_outpost_64_map.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_493_map_editor_station_builder_focus.md`

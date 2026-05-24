@@ -1,5 +1,7 @@
 # TASK_495 - Mission Combat Driver Boundary Review
 
+## Status: IMPLEMENTIERT
+
 ## Ziel / Problem
 Der aktuelle `MissionCombatLoopDriver` ist wieder zu einem grossen Missions-Orchestrator mit vielen Verantwortlichkeiten angewachsen. Er umfasst Combat-Tick, Zielwahl, Gegnerverhalten, Objective-Auswertung, Respawn-Koordination, RPC-/Remote-Events und sichtbare UI-Hilfsnodes.
 
@@ -53,3 +55,14 @@ Die frueheren Tasks `TASK_118` und `TASK_162` haben produktive Resolver und Cont
 ## Risiken / offene Punkte
 - Der Driver ist mit vielen Verifiern verdrahtet; grosse Verschiebungen koennen Snapshot- oder Szenenpfade brechen.
 - Dieser Task soll bewusst Planung und Schnittklaerung liefern. Umsetzung der einzelnen Extraktionen folgt separat.
+
+## Umsetzung
+- `docs/reviews/mission_combat_driver_boundary_review_2026_05_24.md` dokumentiert den aktuellen Verantwortungsumfang, vorhandene Auslagerungen, verifizierte Risiken, veraltete Review-Befunde und die empfohlene Folge-Reihenfolge.
+- `docs/dev/combat_loop_authority_contract.md` enthaelt einen TASK_495-Follow-up-Abschnitt, der die erlaubten naechsten Grenzen festhaelt.
+- `roll_override: 0.4` und duplizierter Bleedout-Code wurden als obsolete Befunde markiert; Registry-/Elimination-Risiko bleibt fuer `TASK_496`.
+
+## Abschluss-Pruefung
+- [x] Driver-Verantwortungen per `rg` und Code-Lektuere gegen aktuelle Funktionen geprueft.
+- [x] Ausgelagerte Resolver/Contracts gegen Driver-Aufgaben abgeglichen.
+- [x] Keine Gameplay- oder Runtime-Codeaenderung in diesem Task.
+- [x] `git diff --check`
