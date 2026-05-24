@@ -8146,7 +8146,7 @@ func _should_show_mission_dropship_body_for_state(state: String) -> bool:
 
 func _should_show_lz_marker_for_state(state: String) -> bool:
 	match state.strip_edges().to_lower():
-		DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE, DROP_SEQUENCE_OUTBOUND, "to_fob", "to_homebase":
+		DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE, "to_fob", "to_homebase":
 			return false
 		_:
 			return true

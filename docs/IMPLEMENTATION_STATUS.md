@@ -10,13 +10,24 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_500 - Gameflow Spine Hardening
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_500_gameflow_spine_hardening.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/flight_altitude_layer_contract.md`
+- Stand: Outbound-Dropships behalten die zuletzt genutzte LZ wieder als Terrain-Field-Marker in der 2.5D-Missionsansicht, waehrend Touchdown/Deboarding den geplanten LZ-/Approach-Marker weiter ausblendet.
+- Stand: Der alte Multi-Dropship-Regressionstest folgt jetzt dem aktuellen nummerierten LZ-Labelvertrag (`LZ1/LZ2` plus Dropship-Displayname), ohne die per-craft Payload-/LZ-Besitzchecks aufzuweichen.
+- Stand: `task_399_dropship_flow_contract_performance_pass.gd` prueft seine Dropship-Hotpath-Zaehler in einer gemeinsamen Missionsinstanz statt mit drei Vollszenen-Instanzierungen und laeuft wieder lokal durch.
+- Stand: `frontier_probe` nutzt im Homebase-Missionskatalog die getrackte `res://maps/station_outpost_64x64.json` statt der lokalen Editor-Arbeitsdatei `res://maps/new_map.json`.
+- Risiken/offen: Die grossen Mission-Controller bleiben Legacy-Bridge unter `scripts/tests/`; die eigentliche Extraktion bleibt Folgearbeit. `TASK_160` ist gruen, meldet aber weiter bekannte SimulationRoot-Warnungen fuer nicht aufloesbare Move-Command-Ziele.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `task_160_tactical_playability_verifier.gd`, `bugfix_mission_multi_dropship_cards.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_399_dropship_flow_contract_performance_pass.gd`, `task_499_review_followup_architecture_cleanup.gd`, `git diff --check`.
+- Naechster Schritt: Kleinen Folgetask fuer die Move-Command-Warnungen oder fuer die erste Mission-Controller-Extraktion schneiden.
+
 ### TASK_499 - Review Followup Architecture Cleanup
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_499_review_followup_architecture_cleanup.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/audio_event_contract.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`
 - Stand: Die unreferenzierte `scenes/main.tscn` ohne Script-Zuweisungen ist entfernt; `project.godot` startet weiter in `res://scenes/ui/main_menu.tscn`.
 - Stand: `SimulationRoot._resolve_audio_event_bus()` nutzt nur noch exportierten NodePath, direkten Child-Node oder direkten Parent-Sibling und cached den Treffer; der Deep-SceneTree-Scan ist aus dem Snapshot-Audiopfad entfernt.
 - Stand: Die Homebase-Katalogeintraege `frontier_probe` und `wall_breach` markieren map-only Missionen explizit mit `NO_SCENARIO_FILE_PATH`, und `show_npc_thoughts` hat im Projekt eine T-Defaultbindung.
-- Risiken/offen: `frontier_probe` verweist weiter auf die lokal vorhandene, aber nicht getrackte `res://maps/new_map.json`; die Entscheidung Versionierung vs. Umbiegen auf eine getrackte Karte bleibt offen. Weitere Audio-Deep-Scans in UI-/Visual-/Legacy-Pfaden und die `scripts/tests/`-Produktionspfad-Extraktion bleiben Folgearbeit.
+- Risiken/offen: Weitere Audio-Deep-Scans in UI-/Visual-/Legacy-Pfaden und die `scripts/tests/`-Produktionspfad-Extraktion bleiben Folgearbeit. Der offene `frontier_probe`-Map-Verweis wurde in TASK_500 auf eine getrackte Karte umgebogen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_499_review_followup_architecture_cleanup.gd`, `git diff --check`.
 - Naechster Schritt: Eigenen Folgetask fuer AudioEventBus-Resolver-Vereinheitlichung oder fuer die MissionCombatLoopDriver-Extraktion schneiden.
 

@@ -53,6 +53,6 @@ Die Befunde sind kleine, voneinander abgrenzbare Cleanup-Punkte. Sie reduzieren 
 - `git diff --check`
 
 ## Risiken / offene Punkte
-- `frontier_probe` verweist weiter auf `res://maps/new_map.json`. Diese Datei ist lokal vorhanden, aber aktuell nicht im Git-Repository getrackt; die Entscheidung, ob diese Karte wieder versioniert oder die Mission auf eine getrackte Karte umgebogen wird, bleibt offen.
+- Der vormals offene `frontier_probe`-Map-Verweis auf `res://maps/new_map.json` wurde in TASK_500 auf die getrackte `res://maps/station_outpost_64x64.json` umgebogen.
 - Audio-Bus-Deep-Scans existieren noch in UI-/Visual-Helfern und im Legacy-Driver. Dieser Task entfernt nur den Review-Hotpath im `SimulationRoot`.
 - Die grosse Legacy-Extraktion aus `scripts/tests/` bleibt Folgearbeit.

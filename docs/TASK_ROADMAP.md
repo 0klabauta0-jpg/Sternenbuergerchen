@@ -129,6 +129,7 @@ git checkout -b batch/<batch-name>
 - TASK_497 - Mission TestSetup Reference Cleanup
 - TASK_498 - Runtime Script Layout Alignment
 - TASK_499 - Review Followup Architecture Cleanup
+- TASK_500 - Gameflow Spine Hardening
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

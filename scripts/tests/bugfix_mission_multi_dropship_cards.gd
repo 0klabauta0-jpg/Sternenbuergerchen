@@ -212,7 +212,7 @@ func _test_second_dropship_can_be_selected_and_planned_while_first_is_inbound() 
 	_assert(Vector2(controller.get("_drop_sequence_lz_position")).is_equal_approx(Vector2(320.0, 180.0)), "Changing Dropship 2 to LZ2 does not retarget the active Dropship 1 sequence")
 	_assert(Vector2(replanned_first_card.get("lz_position", Vector2.ZERO)).is_equal_approx(Vector2(320.0, 180.0)), "Dropship 1 card keeps LZ1 after Dropship 2 is replanned")
 	_assert(Vector2(replanned_second_card.get("lz_position", Vector2.ZERO)).is_equal_approx(Vector2(704.0, 352.0)), "Dropship 2 replaces its old LZ with the newly placed LZ2")
-	_assert(String(replanned_first_card.get("lz_label", "")) == "LZ Dropship 1" and String(replanned_second_card.get("lz_label", "")) == "LZ Dropship 2", "Planned LZ labels are named after their owning dropship")
+	_assert(_is_numbered_lz_label_for_craft(replanned_first_card, "LZ1", "Dropship 1") and _is_numbered_lz_label_for_craft(replanned_second_card, "LZ2", "Dropship 2"), "Planned LZ labels are numbered and named after their owning dropship")
 	_assert(Array(replanned_first_card.get("boarded_fireteam_ids", [])) == ["blue"] and Array(replanned_second_card.get("boarded_fireteam_ids", [])) == ["gold"], "Dropship cards keep their own boarded fireteam identity while selection changes")
 
 	controller.call("_on_call_dropship_pressed")
@@ -329,6 +329,11 @@ func _find_card(cards: Array, craft_id: String) -> Dictionary:
 		if String(card.get("craft_id", "")).strip_edges() == craft_id:
 			return card
 	return {}
+
+
+func _is_numbered_lz_label_for_craft(card: Dictionary, expected_prefix: String, expected_display_name: String) -> bool:
+	var label: String = String(card.get("lz_label", card.get("lz_name", ""))).strip_edges()
+	return label.begins_with(expected_prefix) and label.find(expected_display_name) >= 0
 
 
 func _assert(condition: bool, message: String) -> void:
