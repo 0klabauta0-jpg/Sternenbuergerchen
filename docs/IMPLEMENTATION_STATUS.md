@@ -80,6 +80,17 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_492_map_editor_network_drag_snap_tools.gd`, TASK_491-/TASK_483-/TASK_485-Regressionen und `git diff --check`.
 - Naechster Schritt: Sichttest per F6 in `res://scenes/editor/map_builder_workbench.tscn`, dann Drag-Preview/Icons und Door-/Computer-Interaction-Contract schneiden.
 
+### SPIKE - Unity Commander Flow Prototype
+- Status: erweitert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/SPIKE_unity_commander_flow.md`, `docs/PROJECT_BRIEF.md`, `docs/DESIGN_NOTES.md`, `docs/User-Handbuch.md`, `docs/GDD_STATUS.md`
+- Stand: Unter `spikes/unity_commander_flow` liegt ein Unity-6000.4.1f1-Sidecar-Projekt mit einer spielbaren `CommanderFlowSpike`-Szene.
+- Stand: Der Spike bildet den Kernfluss ab: Homebase-Roster, Fireteam-Bildung, Loadout-/Armor-Auswahl, Dropship-Zuweisung, parallele Missionsstarts und isometrische 3D-Missionsansicht.
+- Stand: Die Missionen nutzen jetzt ein kleines CC0-Quaternius-Asset-Subset fuer Infanterie, Dropships, Gegner, Waffen und Sci-Fi-Props. Commands laufen als Fireteam-Auftraege (`Move`, `Defend`, `Take`, `Engage`, `Flank`) und werden ueber ein kleines C#-Simulationsmodell verarbeitet.
+- Stand: Ein Runtime-Missionseditor im Play-Mode schreibt Kacheltypen, LZ, Objective und Gegner-Spawns in den MissionCatalog; beim Missionsstart wird daraus ein stabiler MissionState kopiert.
+- Risiken/offen: Das ist keine Engine-Migration und kein Produktions-UI. Editor-Persistenz, echtes Save/Load, Balancing und finales Terrain bleiben offen. Unity-Projektcaches (`Library`, `Logs`, `UserSettings`) bleiben ignoriert. Ein manueller Sicht-/Klicktest im Unity-Play-Mode bleibt als Spielgefuehl-Check sinnvoll.
+- Lokale Pruefung: `dotnet run --project spikes/unity_commander_flow/Verifier/SpikeVerifier.csproj`, Unity-Batch `SternenBuergerUnitySpike.Editor.SpikeSceneBuilder.Build`, Unity-Batch `SternenBuergerUnitySpike.Editor.SpikeFlowVerifier.Run`, Unity-Batch `SternenBuergerUnitySpike.Editor.SpikePlayerBuilder.BuildWindows`.
+- Naechster Schritt: Im Unity-Editor per Vulkan-Starter Play druecken, Alpha/Bravo parallel testen und den Runtime-Editor einmal Kacheln/LZ/OBJ/Enemy-Spawns malen lassen.
+
 ### TASK_491 - Map Editor Runtime Builder Workbench
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/dev/map_builder_tooling_spike_contract.md`
