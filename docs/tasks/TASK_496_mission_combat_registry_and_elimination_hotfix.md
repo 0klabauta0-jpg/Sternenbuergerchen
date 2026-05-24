@@ -1,5 +1,7 @@
 # TASK_496 - Mission Combat Registry and Elimination Hotfix
 
+## Status: IMPLEMENTIERT
+
 ## Ziel / Problem
 Der `MissionCombatLoopDriver` ruft aktuell einen privaten `SimulationRoot`-Helper `_get_unit_registry()` von aussen auf. Ausserdem liefert `_is_enemy_team_eliminated()` bei leerer aktiver Enemy-Liste immer `false`, auch wenn keine Enemy-Waves und keine Enemy-Respawns mehr ausstehen.
 
@@ -50,3 +52,17 @@ Der private Registry-Zugriff koppelt Driver und SimulationRoot an eine nicht oef
 ## Risiken / offene Punkte
 - Manche Tests koennen private Helper indirekt erwarten. Der neue Zugriffspfad muss kompatibel bleiben, ohne die private Methode als externen Contract zu zementieren.
 - Elimination darf Objective-Defense-/Objective-Capture-Szenarien nicht vorzeitig beenden.
+- `TASK_160` faellt lokal reproduzierbar an `2.5D primary view shows the LZ as a terrain field marker` aus; der Missionsfluss bis Victory bleibt gruen. Das ist nicht Teil des TASK_496-Schnitts und bleibt als separates Primary3DView-/LZ-Marker-Thema offen.
+
+## Umsetzung
+- `SimulationRoot` exponiert `get_unit_registry()` als oeffentlichen, lesenden Registry-Zugriff.
+- `MissionCombatLoopDriver._get_unit_registry()` nutzt nur noch `SimulationRoot.get_unit_registry()` und ruft den privaten Root-Helper nicht mehr extern auf.
+- `_is_enemy_team_eliminated()` blockt zuerst pending Waves/Respawns und wertet danach leere aktive Enemy-Listen als eliminiert.
+- `scripts/tests/task_496_mission_combat_registry_and_elimination_hotfix.gd` prueft den oeffentlichen Registry-Zugriff, den entfernten privaten Driver-Aufruf und Elimination-Edge-Cases.
+
+## Abschluss-Pruefung
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_496_mission_combat_registry_and_elimination_hotfix.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_479_fireteam_runtime_hotpath_guards.gd`
+- [x] `godot_console.exe --headless --path . --script scripts/tests/task_473_fireteam_combat_feedback_runtime_overhaul.gd`
+- [ ] `godot_console.exe --headless --path . --script scripts/tests/task_160_tactical_playability_verifier.gd` - lokal rot: LZ-Terrain-Field-Marker-Check sieht den Marker nicht.
+- [x] `git diff --check`

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_496 - Mission Combat Registry and Elimination Hotfix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_496_mission_combat_registry_and_elimination_hotfix.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_041_siegbedingung.md`, `docs/tasks/TASK_479_fireteam_runtime_hotpath_guards.md`
+- Stand: `SimulationRoot` bietet mit `get_unit_registry()` einen oeffentlichen lesenden Registry-Zugriff, und der `MissionCombatLoopDriver` ruft den privaten Root-Helper `_get_unit_registry()` nicht mehr von aussen auf.
+- Stand: `_is_enemy_team_eliminated()` prueft pending Enemy-Waves und pending Enemy-Respawns zuerst; wenn danach keine aktiven Enemy-Units mehr vorhanden sind, gilt die Eliminierung als erreicht.
+- Stand: Der neue Verifier deckt oeffentlichen Registry-Zugriff, entfernten privaten Driver-Aufruf, leere aktive Enemy-Listen, pending Waves, pending Respawns, downed Enemies und fitte aktive Enemies ab.
+- Risiken/offen: Der Fix aendert nur die Elimination-Wincondition; Objective-Capture und Objective-Defense bleiben unveraendert. Die groessere Driver-Entflechtung bleibt Folgearbeit aus TASK_495. `TASK_160` faellt lokal weiterhin am LZ-Terrain-Field-Marker-Check aus, obwohl der Missionsfluss bis Victory gruen bleibt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_496_mission_combat_registry_and_elimination_hotfix.gd`, TASK_479-/TASK_473-Regressionen und `git diff --check` gruen; `TASK_160` lokal rot bei `2.5D primary view shows the LZ as a terrain field marker`.
+- Naechster Schritt: Objective-/Mission-Result-Boundary als kleiner Folgeslice oder `TASK_497 - Mission TestSetup Reference Cleanup`.
+
 ### TASK_495 - Mission Combat Driver Boundary Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/reviews/mission_combat_driver_boundary_review_2026_05_24.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_118_combat_entscheidungen_aus_mission_driver_herausloesen.md`, `docs/tasks/TASK_162_combat_loop_authority_split.md`

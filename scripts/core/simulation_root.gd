@@ -2744,6 +2744,10 @@ func _apply_bleedout_effect(effect: Dictionary) -> void:
 	unit.call("advance_bleedout")
 
 
+func get_unit_registry():
+	return _get_unit_registry()
+
+
 func _get_unit_registry():
 	if unit_registry_path.is_empty():
 		return null
