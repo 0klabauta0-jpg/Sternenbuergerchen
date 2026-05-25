@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_504 - Startmap Expansion Performance Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_504_startmap_expansion_performance_pass.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_494_station_outpost_64_map.md`, `docs/tasks/TASK_500_gameflow_spine_hardening.md`
+- Stand: `maps/station_outpost_192x192.json` erweitert die bisherige 64x64-Startmap als 3x3-Stempelkarte; der bisherige Startbereich bleibt exakt im mittleren Sektor erhalten.
+- Stand: Die Aussen-Sektoren nutzen gedrehte/leicht variierte Kopien mit Station-, Factory-, Pipe-, Cliff-, Hoehen- und Nature-Content, waehrend Marker und Patrol-Routen nur einmalig in den mittleren Sektor verschoben werden.
+- Stand: `frontier_probe` nutzt im Homebase-Missionskatalog die neue getrackte `res://maps/station_outpost_192x192.json`; der Verifier prueft zusaetzlich das 2.5D-Visual-Streaming fuer die grosse Map.
+- Risiken/offen: Die 192x192-Map ist eine grosse Playtest-Startkarte, aber noch kein final balanciertes Szenario. Spaeter kann ein Sparse-/Chunk-Mapformat sinnvoll werden, falls JSON-Groesse oder Editor-Speichern spuerbar werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tools/generate_station_outpost_192x192.gd`, `task_504_startmap_expansion_performance_pass.gd`, `task_494_station_outpost_64_map.gd`, `task_500_gameflow_spine_hardening.gd`, `git diff --check`.
+- Naechster Schritt: Sichttest in der Mission und danach entscheiden, ob Aussen-Sektoren manuell weitergebaut oder als eigenes Szenario balanciert werden.
+
 ### TASK_501 - Integrated Movement Command Lifecycle Hardening
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_501_integrated_movement_command_lifecycle_hardening.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/tactical_command_doctrine_game_abstraction.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/dev/combat_loop_authority_contract.md`
@@ -26,7 +36,7 @@
 - Stand: Outbound-Dropships behalten die zuletzt genutzte LZ wieder als Terrain-Field-Marker in der 2.5D-Missionsansicht, waehrend Touchdown/Deboarding den geplanten LZ-/Approach-Marker weiter ausblendet.
 - Stand: Der alte Multi-Dropship-Regressionstest folgt jetzt dem aktuellen nummerierten LZ-Labelvertrag (`LZ1/LZ2` plus Dropship-Displayname), ohne die per-craft Payload-/LZ-Besitzchecks aufzuweichen.
 - Stand: `task_399_dropship_flow_contract_performance_pass.gd` prueft seine Dropship-Hotpath-Zaehler in einer gemeinsamen Missionsinstanz statt mit drei Vollszenen-Instanzierungen und laeuft wieder lokal durch.
-- Stand: `frontier_probe` nutzt im Homebase-Missionskatalog die getrackte `res://maps/station_outpost_64x64.json` statt der lokalen Editor-Arbeitsdatei `res://maps/new_map.json`.
+- Stand: `frontier_probe` nutzt im Homebase-Missionskatalog eine getrackte Station-Outpost-Map statt der lokalen Editor-Arbeitsdatei `res://maps/new_map.json`; TASK_504 erweitert diese Startkarte auf `res://maps/station_outpost_192x192.json`.
 - Risiken/offen: Die grossen Mission-Controller bleiben Legacy-Bridge unter `scripts/tests/`; die eigentliche Extraktion bleibt Folgearbeit. `TASK_160` ist gruen, meldet aber weiter bekannte SimulationRoot-Warnungen fuer nicht aufloesbare Move-Command-Ziele.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `task_160_tactical_playability_verifier.gd`, `bugfix_mission_multi_dropship_cards.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_399_dropship_flow_contract_performance_pass.gd`, `task_499_review_followup_architecture_cleanup.gd`, `git diff --check`.
 - Naechster Schritt: Kleinen Folgetask fuer die Move-Command-Warnungen oder fuer die erste Mission-Controller-Extraktion schneiden.

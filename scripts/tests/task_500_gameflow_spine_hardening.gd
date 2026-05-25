@@ -70,8 +70,8 @@ func _test_outbound_lz_remains_a_terrain_marker() -> void:
 func _test_frontier_probe_uses_tracked_map() -> void:
 	var source_text: String = FileAccess.get_file_as_string("res://scripts/meta/meta_layer_flow.gd")
 	_assert(source_text.find('"mission_id": "frontier_probe"') >= 0, "Homebase catalog still contains frontier_probe")
-	_assert(source_text.find('"map_file_path": "res://maps/station_outpost_64x64.json"') >= 0, "frontier_probe uses the tracked station outpost map")
-	_assert(FileAccess.file_exists("res://maps/station_outpost_64x64.json"), "Tracked frontier_probe map exists in the project")
+	_assert(source_text.find('"map_file_path": "res://maps/station_outpost_192x192.json"') >= 0, "frontier_probe uses the tracked expanded station outpost map")
+	_assert(FileAccess.file_exists("res://maps/station_outpost_192x192.json"), "Tracked expanded frontier_probe map exists in the project")
 
 
 func _wait_frames(frame_count: int) -> void:

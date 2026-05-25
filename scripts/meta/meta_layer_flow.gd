@@ -42,7 +42,7 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 	{
 		"mission_id": "frontier_probe",
 		"mission_name": "Operation: Frontier Probe",
-		"map_file_path": "res://maps/station_outpost_64x64.json",
+		"map_file_path": "res://maps/station_outpost_192x192.json",
 		"scenario_file_path": NO_SCENARIO_FILE_PATH,
 		"slot_count": 3,
 		"time_limit_seconds": 1200.0,

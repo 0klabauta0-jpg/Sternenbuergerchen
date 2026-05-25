@@ -132,6 +132,7 @@ git checkout -b batch/<batch-name>
 - TASK_500 - Gameflow Spine Hardening
 - TASK_501 - Integrated Movement Command Lifecycle Hardening
 - TASK_503 - Mission Dropship Fireteam HUD Truth
+- TASK_504 - Startmap Expansion Performance Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
