@@ -131,6 +131,7 @@ git checkout -b batch/<batch-name>
 - TASK_499 - Review Followup Architecture Cleanup
 - TASK_500 - Gameflow Spine Hardening
 - TASK_501 - Integrated Movement Command Lifecycle Hardening
+- TASK_503 - Mission Dropship Fireteam HUD Truth
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
