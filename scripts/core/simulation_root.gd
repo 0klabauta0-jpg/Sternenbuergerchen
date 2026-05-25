@@ -70,6 +70,9 @@ var _contact_path_recompute_ready_at_msec: Dictionary = {}
 var _objective_status: RefCounted = null
 var _terrain_pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
 var _last_terrain_move_debug_by_unit_id: Dictionary = {}
+var _last_discarded_move_command: Dictionary = {}
+var _discarded_move_command_count: int = 0
+var _discarded_move_command_counts_by_reason: Dictionary = {}
 var _known_units_by_id: Dictionary = {}
 var _peer_team_assignments: Dictionary = {1: "team_alpha"}
 var _peer_role_assignments: Dictionary = {1: "commander"}
@@ -88,6 +91,7 @@ var _snapshot_audio_event_ids_played: Dictionary = {}
 var _snapshot_audio_played_count: int = 0
 var _snapshot_audio_suppressed_count: int = 0
 var _last_snapshot_audio_result: Dictionary = {}
+var _audio_event_bus = null
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
 var _last_server_state: Dictionary = {}
 var _combat_rng := RandomNumberGenerator.new()
@@ -182,6 +186,23 @@ func get_terrain_move_debug_snapshot(unit_id: String = "") -> Variant:
 			result.append(Dictionary(_last_terrain_move_debug_by_unit_id.get(unit_id_variant, {})).duplicate(true))
 		return result
 	return Dictionary(_last_terrain_move_debug_by_unit_id.get(unit_id.strip_edges(), {})).duplicate(true)
+
+
+func clear_discarded_move_command_debug() -> void:
+	_last_discarded_move_command.clear()
+	_discarded_move_command_count = 0
+	_discarded_move_command_counts_by_reason.clear()
+
+
+func get_discarded_move_command_count(reason: String = "") -> int:
+	var normalized_reason: String = reason.strip_edges().to_lower()
+	if normalized_reason.is_empty():
+		return _discarded_move_command_count
+	return int(_discarded_move_command_counts_by_reason.get(normalized_reason, 0))
+
+
+func get_last_discarded_move_command() -> Dictionary:
+	return _last_discarded_move_command.duplicate(true)
 
 
 func set_navigation_budget_enabled(enabled: bool) -> void:
@@ -1141,25 +1162,24 @@ func _emit_snapshot_audio_events(snapshot: Dictionary) -> void:
 
 
 func _resolve_audio_event_bus():
+	if _audio_event_bus != null and is_instance_valid(_audio_event_bus) and _audio_event_bus.has_method("emit_weapon_fire"):
+		return _audio_event_bus
+	_audio_event_bus = null
 	if audio_event_bus_path != NodePath():
 		var path_bus := get_node_or_null(audio_event_bus_path)
 		if path_bus != null and path_bus.has_method("emit_weapon_fire"):
-			return path_bus
+			_audio_event_bus = path_bus
+			return _audio_event_bus
 	var child_bus := get_node_or_null("AudioEventBus")
 	if child_bus != null and child_bus.has_method("emit_weapon_fire"):
-		return child_bus
-	var tree: SceneTree = null
-	if is_inside_tree():
-		tree = get_tree()
-	if tree != null:
-		var current_scene := tree.current_scene
-		if current_scene != null:
-			var scene_bus := current_scene.find_child("AudioEventBus", true, false)
-			if scene_bus != null and scene_bus.has_method("emit_weapon_fire"):
-				return scene_bus
-		var root_bus := tree.root.find_child("AudioEventBus", true, false)
-		if root_bus != null and root_bus.has_method("emit_weapon_fire"):
-			return root_bus
+		_audio_event_bus = child_bus
+		return _audio_event_bus
+	var parent_node := get_parent()
+	if parent_node != null:
+		var sibling_bus := parent_node.get_node_or_null("AudioEventBus")
+		if sibling_bus != null and sibling_bus.has_method("emit_weapon_fire"):
+			_audio_event_bus = sibling_bus
+			return _audio_event_bus
 	return null
 
 
@@ -1359,29 +1379,34 @@ func _extract_effect_type(effect: Dictionary) -> String:
 func _apply_move_command(cmd: Dictionary, delta: float) -> void:
 	var unit_id: String = String(cmd.get("unit_id", ""))
 	if unit_id.is_empty():
+		_record_discarded_move_command(cmd, "missing_unit_id")
 		push_warning("SimulationRoot move command expects a non-empty unit_id.")
 		return
 
 	var target_position: Variant = cmd.get("target_position", null)
 	if typeof(target_position) != TYPE_VECTOR2:
+		_record_discarded_move_command(cmd, "invalid_target_position", {"unit_id": unit_id})
 		push_warning("SimulationRoot move command expects a Vector2 target_position.")
 		return
 
 	var unit_registry = _get_unit_registry()
 	if unit_registry == null or not unit_registry.has_method("get_unit"):
+		_record_discarded_move_command(cmd, "missing_unit_registry", {"unit_id": unit_id})
 		push_warning("SimulationRoot requires a direct UnitRegistry reference for move commands.")
 		return
 
 	var unit = unit_registry.call("get_unit", unit_id)
 	if unit == null:
-		push_warning("SimulationRoot could not resolve the target unit for a move command.")
+		_record_discarded_move_command(cmd, "unit_not_registered", {"unit_id": unit_id})
 		return
 
 	if not (unit is Node2D):
+		_record_discarded_move_command(cmd, "unit_not_node2d", {"unit_id": unit_id})
 		push_warning("SimulationRoot move command expects a Node2D-compatible unit.")
 		return
 
 	if _is_stale_tokenized_move_command(cmd, unit):
+		_record_discarded_move_command(cmd, "stale_command_token", {"unit_id": unit_id})
 		return
 
 	_apply_unit_command_status(cmd, unit)
@@ -1575,6 +1600,30 @@ func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
 	elif current_command is Object:
 		current_token = String(current_command.get("command_token")).strip_edges()
 	return current_token != command_token
+
+
+func _record_discarded_move_command(cmd: Dictionary, reason: String, details: Dictionary = {}) -> void:
+	var normalized_reason: String = reason.strip_edges().to_lower()
+	if normalized_reason.is_empty():
+		normalized_reason = "unknown"
+	_discarded_move_command_count += 1
+	_discarded_move_command_counts_by_reason[normalized_reason] = int(_discarded_move_command_counts_by_reason.get(normalized_reason, 0)) + 1
+	var record: Dictionary = {
+		"tick": tick_counter,
+		"reason": normalized_reason,
+		"command_type": String(cmd.get("command_type", cmd.get("type", ""))).strip_edges(),
+		"unit_id": String(cmd.get("unit_id", "")).strip_edges(),
+		"team_id": String(cmd.get("team_id", "")).strip_edges(),
+		"source_command_type": String(cmd.get("source_command_type", cmd.get("origin_command_type", ""))).strip_edges(),
+		"phase": int(cmd.get("phase", -1)),
+		"command_token": String(cmd.get("command_token", "")).strip_edges(),
+		"target_position": cmd.get("target_position", null),
+		"requeue_until_target": bool(cmd.get("requeue_until_target", false)),
+		"will_requeue": false,
+	}
+	for key in details.keys():
+		record[key] = details[key]
+	_last_discarded_move_command = record
 
 
 func _extract_or_build_path_world_points(
@@ -2742,6 +2791,10 @@ func _apply_bleedout_effect(effect: Dictionary) -> void:
 		return
 
 	unit.call("advance_bleedout")
+
+
+func get_unit_registry():
+	return _get_unit_registry()
 
 
 func _get_unit_registry():

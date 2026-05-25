@@ -2713,8 +2713,6 @@ func _refresh_selected_fireteam_cards() -> void:
 	else:
 		units = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
 	units = _filter_ground_fireteam_card_units(units)
-	if units.is_empty() and not selected_cards_fireteam_id.is_empty() and _fireteam_has_embarked_payload(selected_cards_fireteam_id):
-		units = _get_fireteam_units(selected_cards_fireteam_id, true)
 	card_row.set_meta("selected_member_cards_fireteam_id", selected_cards_fireteam_id)
 	if units.is_empty():
 		var empty_label := Label.new()
@@ -2820,8 +2818,8 @@ func _refresh_fireteam_mini_cards() -> void:
 	for fireteam_id in available_fireteam_ids:
 		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
 		var units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(normalized_fireteam_id, not _use_visible_units_for_fireteam_ui()))
-		if units.is_empty() and _fireteam_has_embarked_payload(normalized_fireteam_id):
-			units = _get_fireteam_units(normalized_fireteam_id, true)
+		if units.is_empty():
+			continue
 		active_fireteam_ids[normalized_fireteam_id] = true
 		var card: FOBFireteamCard = existing_cards_by_id.get(normalized_fireteam_id, null) as FOBFireteamCard
 		var is_new_card: bool = card == null
@@ -2873,6 +2871,8 @@ func _refresh_fireteam_mini_cards() -> void:
 			continue
 		card_host.remove_child(child)
 		child.queue_free()
+	if fireteam_panel != null:
+		fireteam_panel.visible = desired_index > 0
 
 
 func _on_fireteam_mini_card_gui_input(event: InputEvent, fireteam_id: String) -> void:
@@ -2906,7 +2906,7 @@ func _get_selected_member_cards_fireteam_id() -> String:
 	var selected_fireteam_id: String = _get_selected_fireteam_id().strip_edges().to_lower()
 	if selected_fireteam_id.is_empty():
 		return ""
-	if _is_fireteam_runtime_active(selected_fireteam_id) or not _filter_ground_fireteam_card_units(_get_fireteam_units(selected_fireteam_id, true)).is_empty() or _fireteam_has_embarked_payload(selected_fireteam_id):
+	if _is_fireteam_runtime_active(selected_fireteam_id) or not _filter_ground_fireteam_card_units(_get_fireteam_units(selected_fireteam_id, true)).is_empty():
 		return selected_fireteam_id
 	return ""
 
@@ -4899,7 +4899,7 @@ func _get_selected_friendly_units(include_hidden: bool = true) -> Array:
 		if String(child.call("get_team_id")).strip_edges() != FRIENDLY_TEAM_ID:
 			continue
 		var unit_id: String = String(child.call("get_unit_id"))
-		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible and not _embarked_unit_ids.has(unit_id):
+		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
 			continue
 		var child_fireteam_id: String = String(child.call("get_fireteam_id")).strip_edges().to_lower()
 		if not selected_fireteam_id.is_empty() and child_fireteam_id != selected_fireteam_id:
@@ -8146,7 +8146,7 @@ func _should_show_mission_dropship_body_for_state(state: String) -> bool:
 
 func _should_show_lz_marker_for_state(state: String) -> bool:
 	match state.strip_edges().to_lower():
-		DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE, DROP_SEQUENCE_OUTBOUND, "to_fob", "to_homebase":
+		DROP_SEQUENCE_LANDED, DROP_SEQUENCE_UNLOADING, DROP_SEQUENCE_COMPLETE, "to_fob", "to_homebase":
 			return false
 		_:
 			return true
@@ -10267,7 +10267,7 @@ func _get_all_friendly_units(include_hidden: bool = true) -> Array:
 			continue
 		if String(child.call("get_team_id")).strip_edges() != FRIENDLY_TEAM_ID:
 			continue
-		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible and not _embarked_unit_ids.has(String(child.call("get_unit_id"))):
+		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
 			continue
 		result.append(child)
 
@@ -10903,15 +10903,13 @@ func _get_available_fireteam_ids() -> PackedStringArray:
 
 
 func _get_displayable_fireteam_ids() -> PackedStringArray:
-	if not _use_visible_units_for_fireteam_ui():
-		return _get_available_fireteam_ids()
 	var displayable_fireteam_ids: PackedStringArray = []
-	for unit in _get_all_friendly_units(false):
-		var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty() or displayable_fireteam_ids.has(fireteam_id):
 			continue
-		if _is_unit_embarked_without_deployment(unit):
-			displayable_fireteam_ids.append(fireteam_id)
+		var units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(fireteam_id, not _use_visible_units_for_fireteam_ui()))
+		if units.is_empty():
 			continue
 		displayable_fireteam_ids.append(fireteam_id)
 	return displayable_fireteam_ids

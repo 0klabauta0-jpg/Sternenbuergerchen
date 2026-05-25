@@ -10,6 +10,77 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_501 - Integrated Movement Command Lifecycle Hardening
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_501_integrated_movement_command_lifecycle_hardening.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/tactical_command_doctrine_game_abstraction.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/dev/combat_loop_authority_contract.md`
+- Stand: `SimulationRoot` verwirft unaufloesbare oder token-stale Move-Commands jetzt ohne Requeue und legt dazu eine read-only Discard-Diagnose mit Reason, Unit, Token, Zielposition und Count ab.
+- Stand: `TASK_192` folgt dem aktuellen Movement-Contract: normale Move-Wegpunkte duerfen als kompakte Rush-/Gruppenbewegung sichtbar sein, waehrend Bounding/Caterpillar weiter fuer passende Taktikpfade gueltig bleibt. Der Medic-Smoke sucht eine echte walkable Nah-/Zwei-Tile-Fixture statt an einer zu engen Objective-Naheinstellung zu haengen.
+- Stand: `TASK_127` nutzt ein Ausfuehrungsfenster, das die aktuellen Unit-Speed-/Surface-Vertraege beruecksichtigt, ohne HPA-Pfadaufbau oder Traversal-Regeln zu lockern.
+- Risiken/offen: Die grossen Mission-Controller bleiben Legacy-Bridge unter `scripts/tests/`; dieser Task behebt den Lifecycle-Guard und die roten Gates, ersetzt aber keine strukturelle Extraktion.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_501_integrated_movement_command_lifecycle_hardening.gd`, `task_127_verifier.gd`, `task_192_mission_map_npc_behavior_playability_smoke.gd`, `task_160_tactical_playability_verifier.gd`, `task_475_fireteam_pathfinding_avoidance_stability_pass.gd`, `task_479_fireteam_runtime_hotpath_guards.gd`, `task_500_gameflow_spine_hardening.gd`, `git diff --check`.
+- Naechster Schritt: Bei Bedarf die grosse Mission-Controller-Extraktion als separaten Folge-Task schneiden.
+
+### TASK_500 - Gameflow Spine Hardening
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_500_gameflow_spine_hardening.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/flight_altitude_layer_contract.md`
+- Stand: Outbound-Dropships behalten die zuletzt genutzte LZ wieder als Terrain-Field-Marker in der 2.5D-Missionsansicht, waehrend Touchdown/Deboarding den geplanten LZ-/Approach-Marker weiter ausblendet.
+- Stand: Der alte Multi-Dropship-Regressionstest folgt jetzt dem aktuellen nummerierten LZ-Labelvertrag (`LZ1/LZ2` plus Dropship-Displayname), ohne die per-craft Payload-/LZ-Besitzchecks aufzuweichen.
+- Stand: `task_399_dropship_flow_contract_performance_pass.gd` prueft seine Dropship-Hotpath-Zaehler in einer gemeinsamen Missionsinstanz statt mit drei Vollszenen-Instanzierungen und laeuft wieder lokal durch.
+- Stand: `frontier_probe` nutzt im Homebase-Missionskatalog die getrackte `res://maps/station_outpost_64x64.json` statt der lokalen Editor-Arbeitsdatei `res://maps/new_map.json`.
+- Risiken/offen: Die grossen Mission-Controller bleiben Legacy-Bridge unter `scripts/tests/`; die eigentliche Extraktion bleibt Folgearbeit. `TASK_160` ist gruen, meldet aber weiter bekannte SimulationRoot-Warnungen fuer nicht aufloesbare Move-Command-Ziele.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `task_160_tactical_playability_verifier.gd`, `bugfix_mission_multi_dropship_cards.gd`, `task_393_direct_dropship_independence_lz_vector.gd`, `task_396_mission_dropship_lz_drop_hotfix.gd`, `task_399_dropship_flow_contract_performance_pass.gd`, `task_499_review_followup_architecture_cleanup.gd`, `git diff --check`.
+- Naechster Schritt: Kleinen Folgetask fuer die Move-Command-Warnungen oder fuer die erste Mission-Controller-Extraktion schneiden.
+
+### TASK_499 - Review Followup Architecture Cleanup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_499_review_followup_architecture_cleanup.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/audio_event_contract.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`
+- Stand: Die unreferenzierte `scenes/main.tscn` ohne Script-Zuweisungen ist entfernt; `project.godot` startet weiter in `res://scenes/ui/main_menu.tscn`.
+- Stand: `SimulationRoot._resolve_audio_event_bus()` nutzt nur noch exportierten NodePath, direkten Child-Node oder direkten Parent-Sibling und cached den Treffer; der Deep-SceneTree-Scan ist aus dem Snapshot-Audiopfad entfernt.
+- Stand: Die Homebase-Katalogeintraege `frontier_probe` und `wall_breach` markieren map-only Missionen explizit mit `NO_SCENARIO_FILE_PATH`, und `show_npc_thoughts` hat im Projekt eine T-Defaultbindung.
+- Risiken/offen: Weitere Audio-Deep-Scans in UI-/Visual-/Legacy-Pfaden und die `scripts/tests/`-Produktionspfad-Extraktion bleiben Folgearbeit. Der offene `frontier_probe`-Map-Verweis wurde in TASK_500 auf eine getrackte Karte umgebogen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_499_review_followup_architecture_cleanup.gd`, `git diff --check`.
+- Naechster Schritt: Eigenen Folgetask fuer AudioEventBus-Resolver-Vereinheitlichung oder fuer die MissionCombatLoopDriver-Extraktion schneiden.
+
+### TASK_498 - Runtime Script Layout Alignment
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_498_runtime_script_layout_alignment.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`, `docs/tasks/TASK_003_simulation_root.md`, `docs/tasks/TASK_162_combat_loop_authority_split.md`
+- Stand: `scripts/core/` ist dokumentiert als aktueller Runtime-Kernpfad fuer `SimulationRoot`, `DamageModel`, `ObjectiveStatus`, `RespawnManager`, `EventRouter`, `UpdateManager`, LOS/Fog-of-War und gemeinsame Runtime-Lesedaten.
+- Stand: `scripts/mission/`, `scripts/tactical/` und `scripts/tests/` haben klare Schreibgrenzen fuer Mission-Contracts/Adapter, Tactical-Resolver/Controller und Verifier/Harnesses.
+- Stand: `scripts/simulation/` ist als inaktiver/reservierter Pfad erklaert; die alte `.gitkeep` ist durch eine README mit Migrationshinweis ersetzt.
+- Risiken/offen: Keine Runtime-Pfade wurden verschoben. Eine echte Migration nach `scripts/simulation/` bleibt ein eigener, breiter Godot-`res://`-Kompatibilitaets-Task.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_498_runtime_script_layout_alignment.gd`, `git diff --check`.
+- Naechster Schritt: Die Mission-Combat-Driver-Extraktionen weiter in kleinen Boundary-Slices schneiden, ohne neue produktive Logik in `scripts/tests/` oder `scripts/simulation/` abzulegen.
+
+### TASK_497 - Mission TestSetup Reference Cleanup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_497_mission_test_setup_reference_cleanup.md`, `docs/tasks/TASK_064_mission_terrain_aus_json.md`, `docs/tasks/TASK_159_2_5d_editor_and_mission_primary_view.md`, `docs/tasks/TASK_494_station_outpost_64_map.md`, `docs/dev/terrain_truth_visual_audit_contract.md`
+- Stand: `MissionTestSetup` nutzt `simulation_root_path` als exportierten Setup-Contract und loest den Root ueber `_get_simulation_root()` auf.
+- Stand: Die alte Terrain-Hardcode-Fallbacklogik ist als `LEGACY_FALLBACK_*`-Fixture-Datenstruktur gebuendelt, waehrend JSON-TerrainMapData fuer 64x64-Maps weiter direkt in die TerrainRegistry registriert wird.
+- Stand: Der ungenutzte `_find_tile_sprite_at()`-Nearest-Sprite-Suchhelper ist entfernt; der neue Verifier deckt Source-Contract, Szenen-NodePath, JSON-Prioritaet und Legacy-Fallbackwerte ab.
+- Risiken/offen: Der Fix aendert keine Terrain-Wahrheit, LOS-Regeln oder 2.5D-Rendering. `TASK_159` ist lokal bei 2.5D-Visual-Checks rot; `TASK_160` bleibt lokal beim bekannten LZ-Terrain-Field-Marker-Check rot.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_497_mission_test_setup_reference_cleanup.gd`, TASK_494-Regression und `git diff --check` gruen; `TASK_159` lokal rot bei Field-Border-/Kenney-Ground-/Unit-Facing-/Dropship-Facing-Checks, `TASK_160` lokal rot bei `2.5D primary view shows the LZ as a terrain field marker`.
+- Naechster Schritt: `TASK_498 - Runtime Script Layout Alignment` oder separater LZ-Terrain-Field-Marker-Fix.
+
+### TASK_496 - Mission Combat Registry and Elimination Hotfix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_496_mission_combat_registry_and_elimination_hotfix.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_041_siegbedingung.md`, `docs/tasks/TASK_479_fireteam_runtime_hotpath_guards.md`
+- Stand: `SimulationRoot` bietet mit `get_unit_registry()` einen oeffentlichen lesenden Registry-Zugriff, und der `MissionCombatLoopDriver` ruft den privaten Root-Helper `_get_unit_registry()` nicht mehr von aussen auf.
+- Stand: `_is_enemy_team_eliminated()` prueft pending Enemy-Waves und pending Enemy-Respawns zuerst; wenn danach keine aktiven Enemy-Units mehr vorhanden sind, gilt die Eliminierung als erreicht.
+- Stand: Der neue Verifier deckt oeffentlichen Registry-Zugriff, entfernten privaten Driver-Aufruf, leere aktive Enemy-Listen, pending Waves, pending Respawns, downed Enemies und fitte aktive Enemies ab.
+- Risiken/offen: Der Fix aendert nur die Elimination-Wincondition; Objective-Capture und Objective-Defense bleiben unveraendert. Die groessere Driver-Entflechtung bleibt Folgearbeit aus TASK_495. `TASK_160` faellt lokal weiterhin am LZ-Terrain-Field-Marker-Check aus, obwohl der Missionsfluss bis Victory gruen bleibt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_496_mission_combat_registry_and_elimination_hotfix.gd`, TASK_479-/TASK_473-Regressionen und `git diff --check` gruen; `TASK_160` lokal rot bei `2.5D primary view shows the LZ as a terrain field marker`.
+- Naechster Schritt: Objective-/Mission-Result-Boundary als kleiner Folgeslice oder `TASK_497 - Mission TestSetup Reference Cleanup`.
+
+### TASK_495 - Mission Combat Driver Boundary Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/reviews/mission_combat_driver_boundary_review_2026_05_24.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_118_combat_entscheidungen_aus_mission_driver_herausloesen.md`, `docs/tasks/TASK_162_combat_loop_authority_split.md`
+- Stand: Der aktuelle `MissionCombatLoopDriver` wurde als 3845-Zeilen-Orchestrator mit Tick-Reihenfolge, Combat, Enemy-Behavior, Objective-/Mission-Result, Respawn/Bleedout, UI-Readability und Remote-Events gegen die bestehenden Resolver/Contracts abgeglichen.
+- Stand: Bereits produktiv ausgelagerte Grenzen (`CombatFireDecisionResolver`, `MedicSupportResolver`, `OverwatchController`, `ContactTracker`, `FlankVulnerabilityResolver`, `MissionCombatAuthorityContract`, `MissionCombatRemoteEventBridge`) sind dokumentiert; veraltete Review-Befunde wie `roll_override: 0.4` und duplizierter Bleedout-Code sind als obsolete markiert.
+- Stand: Die Folge-Reihenfolge ist festgelegt: zuerst `TASK_496` fuer Registry/Elimination, danach Objective-/Mission-Result-Boundary, Enemy-Behavior-Orchestrator, Readability-Presenter und Remote-Event-Bridge-Completion.
+- Risiken/offen: Keine Runtime-Codeaenderung in diesem Task. Der Driver bleibt gross; die eigentliche Entflechtung muss in kleinen Folge-Slices passieren.
+- Lokale Pruefung: `rg`/Code-Lektuere gegen Driver-Funktionen und vorhandene Resolver/Contracts, `git diff --check`.
+- Naechster Schritt: `TASK_496 - Mission Combat Registry and Elimination Hotfix`.
+
 ### TASK_494 - Station Outpost 64x64 Map
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_494_station_outpost_64_map.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_493_map_editor_station_builder_focus.md`
@@ -39,6 +110,18 @@
 - Risiken/offen: Bruecken, Rampen, Gruenstrassen, Hoch-/Runter-Strassen sowie Door-/Computer-/Pipeline-Gameplay brauchen eigene Folgeslices.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_492_map_editor_network_drag_snap_tools.gd`, TASK_491-/TASK_483-/TASK_485-Regressionen und `git diff --check`.
 - Naechster Schritt: Sichttest per F6 in `res://scenes/editor/map_builder_workbench.tscn`, dann Drag-Preview/Icons und Door-/Computer-Interaction-Contract schneiden.
+
+### SPIKE - Unity Commander Flow Prototype
+- Status: erweitert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/SPIKE_unity_commander_flow.md`, `docs/PROJECT_BRIEF.md`, `docs/DESIGN_NOTES.md`, `docs/User-Handbuch.md`, `docs/GDD_STATUS.md`
+- Stand: Das Unity-6000.4.1f1-Sidecar-Projekt liegt lokal ausserhalb des Godot-Repositories unter `C:\dev\SternenBuergerchen_UnityCommanderFlow` und enthaelt eine spielbare `CommanderFlowSpike`-Szene.
+- Stand: Das Godot-Repository trackt keine Unity-Projektdateien, Unity-Assets, Unity-Caches oder Unity-Builds mehr; `spikes/unity_commander_flow` ist entfernt und ignoriert.
+- Stand: Der Spike bildet den Kernfluss ab: Homebase-Roster, Fireteam-Bildung, Loadout-/Armor-Auswahl, Dropship-Zuweisung, parallele Missionsstarts und isometrische 3D-Missionsansicht.
+- Stand: Die Missionen nutzen jetzt ein kleines CC0-Quaternius-Asset-Subset fuer Infanterie, Dropships, Gegner, Waffen und Sci-Fi-Props. Commands laufen als Fireteam-Auftraege (`Move`, `Defend`, `Take`, `Engage`, `Flank`) und werden ueber ein kleines C#-Simulationsmodell verarbeitet.
+- Stand: Ein Runtime-Missionseditor im Play-Mode schreibt Kacheltypen, LZ, Objective und Gegner-Spawns in den MissionCatalog; beim Missionsstart wird daraus ein stabiler MissionState kopiert.
+- Risiken/offen: Das ist keine Engine-Migration und kein Produktions-UI. Editor-Persistenz, echtes Save/Load, Balancing und finales Terrain bleiben offen. Der externe Unity-Ordner ist lokale Arbeitsablage und wird nicht durch dieses Git-Repository versioniert. Ein manueller Sicht-/Klicktest im Unity-Play-Mode bleibt als Spielgefuehl-Check sinnvoll.
+- Lokale Pruefung: `dotnet run --project C:\dev\SternenBuergerchen_UnityCommanderFlow\Verifier\SpikeVerifier.csproj`, Unity-Batch `SternenBuergerUnitySpike.Editor.SpikeSceneBuilder.Build`, Unity-Batch `SternenBuergerUnitySpike.Editor.SpikeFlowVerifier.Run`, Unity-Batch `SternenBuergerUnitySpike.Editor.SpikePlayerBuilder.BuildWindows`.
+- Naechster Schritt: Im Unity-Editor per Vulkan-Starter Play druecken, Alpha/Bravo parallel testen und den Runtime-Editor einmal Kacheln/LZ/OBJ/Enemy-Spawns malen lassen.
 
 ### TASK_491 - Map Editor Runtime Builder Workbench
 - Status: implementiert im Arbeitsstand

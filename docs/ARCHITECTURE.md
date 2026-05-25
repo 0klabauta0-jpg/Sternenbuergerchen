@@ -50,6 +50,17 @@ Simulation, Darstellung und UI strikt trennen.
 - dirty-basierte Batch-Verarbeitung
 - keine Vollupdates aller Units pro Frame
 
+## Script-Layout
+Der aktuelle Runtime-Kernpfad ist `scripts/core/`, nicht `scripts/simulation/`.
+
+- `scripts/core/`: autoritative Runtime-Kernskripte wie `SimulationRoot`, `DamageModel`, `ObjectiveStatus`, `RespawnManager`, `EventRouter`, `UpdateManager`, LOS/Fog-of-War und gemeinsame Runtime-Lesedaten.
+- `scripts/mission/`: Mission-scope Contracts, Adapter und Bridges. Sie normalisieren Mission-Payloads, bauen Commands/Effects oder kapseln Input-/Visualgrenzen, ohne zweite Gameplay-Wahrheit zu speichern.
+- `scripts/tactical/`: Fireteam-, Enemy-, Movement-, Cover-, Contact-, Communication- und Order-Resolver. Sie lesen State und erzeugen Plan-/Command-Daten; autoritative Mutationen laufen weiter ueber `SimulationRoot`.
+- `scripts/tests/`: Verifier, Harnesses und historisch gewachsene Szenen-Driver. Produktive Logik soll dort nur als Legacy-Bridge bleiben, bis ein eigener Extraction-Task sie verschiebt.
+- `scripts/simulation/`: inaktiver/reservierter Pfad. Keine neuen produktiven Skripte dort ablegen, solange kein eigener Migration-Task die Godot-`res://`-Kompatibilitaet absichert.
+
+Details stehen in `docs/dev/runtime_script_layout_contract.md`.
+
 ## UI-Regeln
 - UI liest State, setzt höchstens Commands
 - kein Gameplay-Commit in UI-Callbacks

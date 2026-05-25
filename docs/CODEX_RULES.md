@@ -41,6 +41,8 @@ Du arbeitest als vorsichtiger Senior-Entwickler im bestehenden Godot-4.6.2-Proje
 - Signale / EventRouter statt enger Direktkopplung
 - Dirty-Flags statt per-frame Komplett-Refresh
 - Keine versteckte Logik in Editor-/UI-Callbacks
+- Das Runtime-Script-Layout folgt `docs/dev/runtime_script_layout_contract.md`: Runtime-Kern nach `scripts/core/`, Mission-Contracts/Adapter nach `scripts/mission/`, Tactical-Resolver nach `scripts/tactical/`, Verifier/Harnesses nach `scripts/tests/`.
+- Neue produktive Skripte nicht unter `scripts/simulation/` ablegen, solange kein eigener Migration-Task die Godot-`res://`-Kompatibilitaet absichert.
 
 ## Wahrheitsquellen
 - `SimulationRoot` und Runtime-Komponenten besitzen Gameplay-State und verarbeiten Mutationen.

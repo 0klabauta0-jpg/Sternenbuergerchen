@@ -124,6 +124,14 @@ git checkout -b batch/<batch-name>
 - TASK_492 - Map Editor Network Drag Snap Tools
 - TASK_493 - Map Editor Station Builder Focus
 - TASK_494 - Station Outpost 64x64 Map
+- TASK_495 - Mission Combat Driver Boundary Review
+- TASK_496 - Mission Combat Registry and Elimination Hotfix
+- TASK_497 - Mission TestSetup Reference Cleanup
+- TASK_498 - Runtime Script Layout Alignment
+- TASK_499 - Review Followup Architecture Cleanup
+- TASK_500 - Gameflow Spine Hardening
+- TASK_501 - Integrated Movement Command Lifecycle Hardening
+- TASK_503 - Mission Dropship Fireteam HUD Truth
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

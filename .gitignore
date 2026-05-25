@@ -3,5 +3,35 @@
 /android/
 *.uid
 
+# Root-level Unity editor artifacts created by accidental repo-root opens.
+/Library/
+/Temp/
+/Obj/
+/Logs/
+/UserSettings/
+/ProjectSettings/
+/Packages/
+/tmp/
+/Assets/**/*.meta
+
+# Temporary native plugin files from local editor sessions.
+addons/**/bin/~*
+
 # Local raw source asset packs; commit curated subsets under Assets/used or Assets/curated.
 Assets/Weapon Pack/
+
+# Unity spike is external at C:/dev/SternenBuergerchen_UnityCommanderFlow.
+/spikes/unity_commander_flow/
+
+# Local Unity sidecar cache/output folders if a spike is opened inside this repo again.
+spikes/**/Library/
+spikes/**/Temp/
+spikes/**/Obj/
+spikes/**/Logs/
+spikes/**/UserSettings/
+spikes/**/Builds/
+spikes/*/*.csproj
+spikes/**/*.sln
+spikes/**/*.user
+spikes/**/bin/
+spikes/**/obj/

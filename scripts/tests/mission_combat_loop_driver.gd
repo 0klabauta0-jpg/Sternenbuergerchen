@@ -2871,18 +2871,15 @@ func _is_victory_condition_met() -> bool:
 
 
 func _is_enemy_team_eliminated() -> bool:
-	var active_enemy_units: Array = _get_active_enemy_units()
-	if active_enemy_units.is_empty():
-		if _has_pending_enemy_waves():
-			return false
-
-		return false
-
 	if _has_pending_enemy_waves():
 		return false
 
 	if _has_pending_enemy_respawns():
 		return false
+
+	var active_enemy_units: Array = _get_active_enemy_units()
+	if active_enemy_units.is_empty():
+		return true
 
 	return _count_fit_enemy_units() == 0
 
@@ -4194,10 +4191,10 @@ func _has_pending_friendly_insertions() -> bool:
 
 func _get_unit_registry():
 	var simulation_root = get_node_or_null(simulation_root_path)
-	if simulation_root == null or not simulation_root.has_method("_get_unit_registry"):
+	if simulation_root == null or not simulation_root.has_method("get_unit_registry"):
 		return null
 
-	return simulation_root.call("_get_unit_registry")
+	return simulation_root.call("get_unit_registry")
 
 
 func _get_objective_position() -> Vector2:

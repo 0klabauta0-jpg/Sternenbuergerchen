@@ -12,9 +12,7 @@ func _init() -> void:
 
 func _run_tests() -> void:
 	print("=== TASK_399 Dropship Flow Contract Performance Pass Verifier ===")
-	await _test_deboarding_runtime_feedback_is_throttled()
-	await _test_parallel_drop_runtime_feedback_is_throttled()
-	await _test_legacy_unit_suppression_is_cached_but_explicit_call_still_works()
+	await _test_dropship_runtime_feedback_gate()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("TASK_399: FAILED")
@@ -24,11 +22,11 @@ func _run_tests() -> void:
 		quit(0)
 
 
-func _test_deboarding_runtime_feedback_is_throttled() -> void:
+func _test_dropship_runtime_feedback_gate() -> void:
 	root.size = Vector2i(1920, 1080)
 	var scene: Node = await _build_mission_scene_with_two_waiting_dropships()
 	var controller := scene.get_node_or_null("TacticalController")
-	_assert(controller != null, "Mission scene exposes controller for deboarding feedback throttle")
+	_assert(controller != null, "Mission scene exposes controller for dropship feedback gates")
 	if controller == null:
 		scene.queue_free()
 		await _wait_frames(2)
@@ -36,6 +34,7 @@ func _test_deboarding_runtime_feedback_is_throttled() -> void:
 
 	controller.call("_on_mission_dropship_card_drop_pressed", "dropship_alpha")
 	await _wait_until_drop_phase(controller, "unloading", 80)
+	_assert(String(controller.get("_drop_sequence_phase")) == "unloading", "Alpha Dropship reaches deboarding for feedback throttle")
 	controller.call("_debug_reset_mission_dropship_runtime_performance_counters")
 	var simulated_frames: int = 24
 	for _index in range(simulated_frames):
@@ -47,49 +46,19 @@ func _test_deboarding_runtime_feedback_is_throttled() -> void:
 	_assert(flush_count < simulated_frames / 2, "Deboarding does not rebuild full mission HUD on every simulated frame")
 	_assert(int(snapshot.get("runtime_planning_emit_count", -1)) == flush_count, "Throttled deboarding keeps planning emits paired with runtime feedback flushes")
 
-	scene.queue_free()
-	await _wait_frames(2)
-
-
-func _test_parallel_drop_runtime_feedback_is_throttled() -> void:
-	root.size = Vector2i(1920, 1080)
-	var scene: Node = await _build_mission_scene_with_two_waiting_dropships()
-	var controller := scene.get_node_or_null("TacticalController")
-	_assert(controller != null, "Mission scene exposes controller for parallel feedback throttle")
-	if controller == null:
-		scene.queue_free()
-		await _wait_frames(2)
-		return
-
-	controller.call("_on_mission_dropship_card_drop_pressed", "dropship_alpha")
-	await _wait_until_drop_phase(controller, "unloading", 80)
 	controller.call("_on_mission_dropship_card_drop_pressed", "dropship_beta")
 	await _wait_frames(4)
 	controller.call("_debug_reset_mission_dropship_runtime_performance_counters")
-	var simulated_frames: int = 20
-	for _index in range(simulated_frames):
+	var parallel_simulated_frames: int = 20
+	for _index in range(parallel_simulated_frames):
 		controller.call("_update_drop_sequence", 0.05)
 		await process_frame
-	var snapshot: Dictionary = Dictionary(controller.call("get_mission_dropship_runtime_performance_snapshot"))
-	var flush_count: int = int(snapshot.get("runtime_feedback_flush_count", 999))
+	var parallel_snapshot: Dictionary = Dictionary(controller.call("get_mission_dropship_runtime_performance_snapshot"))
+	var parallel_flush_count: int = int(parallel_snapshot.get("runtime_feedback_flush_count", 999))
 	var drop_state: Dictionary = Dictionary(controller.call("get_planning_state"))
 	var beta_card: Dictionary = _find_card(Array(drop_state.get("mission_drop_cards", [])), "dropship_beta")
 	_assert(not beta_card.is_empty() and String(beta_card.get("state", "")).strip_edges() in ["inbound", "landed", "unloading", "outbound", "to_homebase"], "Parallel Dropship keeps updating its independent card state")
-	_assert(flush_count < simulated_frames, "Parallel Dropships do not force full UI/planning feedback on every motion frame")
-
-	scene.queue_free()
-	await _wait_frames(2)
-
-
-func _test_legacy_unit_suppression_is_cached_but_explicit_call_still_works() -> void:
-	root.size = Vector2i(1920, 1080)
-	var scene: Node = await _build_mission_scene_with_two_waiting_dropships()
-	var controller := scene.get_node_or_null("TacticalController")
-	_assert(controller != null, "Mission scene exposes controller for legacy suppression cache")
-	if controller == null:
-		scene.queue_free()
-		await _wait_frames(2)
-		return
+	_assert(parallel_flush_count < parallel_simulated_frames, "Parallel Dropships do not force full UI/planning feedback on every motion frame")
 
 	controller.call("_debug_reset_mission_dropship_runtime_performance_counters")
 	for _index in range(4):

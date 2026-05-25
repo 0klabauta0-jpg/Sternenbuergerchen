@@ -38,3 +38,25 @@ godot_console.exe --headless --path . --script scripts/tests/task_119_verifier.g
 godot_console.exe --headless --path . --script scripts/tests/task_118_verifier.gd
 godot_console.exe --headless --path . --script scripts/tests/bugfix_dropship_mission_flow_verifier.gd
 ```
+
+## TASK_495 Boundary-Follow-up
+Der aktuelle `MissionCombatLoopDriver` bleibt vorerst der Tick-Orchestrator, darf aber nicht wieder zur fachlichen Sammelstelle fuer neue Combat- und Mission-Regeln werden.
+
+Bereits ausgelagerte Entscheidungsschichten sind:
+- `CombatFireDecisionResolver` fuer Ziel-/Feuerentscheidung und Damage-Effect-Payload.
+- `MedicSupportResolver` fuer Medic-Zielwahl, Tool-Gates und Support-Actions.
+- `OverwatchController` fuer Overwatch-Schussentscheidungen.
+- `ContactTracker` fuer read-only Kontaktstatus und Relay.
+- `FlankVulnerabilityResolver` fuer Flanken-/Morale-Modifikatoren.
+- `MissionCombatAuthorityContract` und `MissionCombatRemoteEventBridge` fuer Snapshots, Mission-Result und read-only UI-Events.
+
+Naechste Grenzen:
+- Registry-Zugriff und Elimination-Hotfix vor struktureller Extraktion.
+- Objective-/Mission-Result-Aufloesung in einen kleinen Resolver/Contract-Helfer.
+- Enemy-Behavior-Orchestrierung aus dem Driver herausloesen, ohne Command-/Effect-Authority aus `SimulationRoot` zu verschieben.
+- Readability-Labels, Kontaktlinie und Eventtexte in einen Presenter verschieben, der nur Snapshots/Events liest.
+
+Nicht erlaubt:
+- UI-/Presenter-Code darf keinen Combat-State besitzen.
+- Neue Resolver duerfen keine direkten Damage-, Heal-, Respawn- oder Movement-Mutationen an Units ausfuehren.
+- Snapshot-Key-Umbenennungen brauchen einen eigenen Contract-/Migrationstask.
