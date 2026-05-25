@@ -135,6 +135,7 @@ const AREA_ORDER_MENU_FLANK_ID: int = 204
 const AREA_ORDER_MENU_DELETE_ID: int = 299
 const DROP_OFFMAP_DISTANCE_MULTIPLIER: float = 1.8
 const DROP_OFFMAP_MIN_DISTANCE: float = 720.0
+const DROP_OFFMAP_MAX_DISTANCE: float = 3200.0
 const DROP_SHIP_SPEED: float = 1200.0
 const DROP_LANDING_HOLD_SECONDS: float = 0.75
 const DROP_UNLOAD_INTERVAL_SECONDS: float = 0.45
@@ -294,6 +295,9 @@ var _fireteam_runtime_ui_refresh_frames_remaining: int = 0
 var _mission_dropship_runtime_ui_refresh_remaining: float = 0.0
 var _mission_dropship_runtime_feedback_flush_count: int = 0
 var _mission_dropship_runtime_planning_emit_count: int = 0
+var _map_world_bounds_cache: Rect2 = Rect2()
+var _map_world_bounds_cache_revision: int = -1
+var _map_world_bounds_cache_valid: bool = false
 var _legacy_unit_visual_suppression_count: int = 0
 var _primary_view_legacy_unit_visuals_suppressed_once: bool = false
 var _live_drop_bootstrap_consumed: bool = false
@@ -15972,18 +15976,20 @@ func _get_drop_staging_position() -> Vector2:
 	var offset: Vector2 = _get_drop_approach_offset()
 	if offset.length_squared() <= 0.001:
 		offset = Vector2(180.0, -112.0)
-	var map_bounds: Rect2 = _get_map_world_bounds()
-	var map_span: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * DROP_OFFMAP_DISTANCE_MULTIPLIER, DROP_OFFMAP_MIN_DISTANCE)
-	return _lz_position + offset.normalized() * map_span
+	return _lz_position + offset.normalized() * _get_drop_offmap_distance()
 
 
 func _get_drop_sequence_staging_position() -> Vector2:
 	var offset: Vector2 = Vector2(APPROACH_OFFSETS.get(_get_drop_sequence_approach_angle_name(), Vector2(180.0, -112.0)))
 	if offset.length_squared() <= 0.001:
 		offset = Vector2(180.0, -112.0)
+	return _drop_sequence_lz_position + offset.normalized() * _get_drop_offmap_distance()
+
+
+func _get_drop_offmap_distance() -> float:
 	var map_bounds: Rect2 = _get_map_world_bounds()
-	var map_span: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * DROP_OFFMAP_DISTANCE_MULTIPLIER, DROP_OFFMAP_MIN_DISTANCE)
-	return _drop_sequence_lz_position + offset.normalized() * map_span
+	var scaled_distance: float = maxf(maxf(map_bounds.size.x, map_bounds.size.y) * DROP_OFFMAP_DISTANCE_MULTIPLIER, DROP_OFFMAP_MIN_DISTANCE)
+	return clampf(scaled_distance, DROP_OFFMAP_MIN_DISTANCE, DROP_OFFMAP_MAX_DISTANCE)
 
 
 func _get_primary_dropship_target_position(current_dropship_position: Vector2) -> Vector2:
@@ -16004,6 +16010,11 @@ func _get_drop_sequence_exit_position() -> Vector2:
 
 func _get_map_world_bounds() -> Rect2:
 	var terrain_registry = get_node_or_null("../TerrainRegistry")
+	var terrain_revision: int = -1
+	if terrain_registry != null and terrain_registry.has_method("get_revision"):
+		terrain_revision = int(terrain_registry.call("get_revision"))
+	if _map_world_bounds_cache_valid and _map_world_bounds_cache_revision == terrain_revision:
+		return _map_world_bounds_cache
 	var has_point: bool = false
 	var min_pos: Vector2 = Vector2.ZERO
 	var max_pos: Vector2 = Vector2.ZERO
@@ -16022,7 +16033,7 @@ func _get_map_world_bounds() -> Rect2:
 			max_pos.x = maxf(max_pos.x, world_position.x)
 			max_pos.y = maxf(max_pos.y, world_position.y)
 	if has_point:
-		return Rect2(min_pos, (max_pos - min_pos).abs())
+		return _store_map_world_bounds_cache(Rect2(min_pos, (max_pos - min_pos).abs()), terrain_revision)
 	var map_root := get_node_or_null("../MapRoot") as Node2D
 	if map_root != null:
 		for child in map_root.get_children():
@@ -16040,9 +16051,16 @@ func _get_map_world_bounds() -> Rect2:
 			max_pos.x = maxf(max_pos.x, world_position.x)
 			max_pos.y = maxf(max_pos.y, world_position.y)
 	if has_point:
-		return Rect2(min_pos, (max_pos - min_pos).abs())
+		return _store_map_world_bounds_cache(Rect2(min_pos, (max_pos - min_pos).abs()), terrain_revision)
 	var fallback_lz_position: Vector2 = _drop_sequence_lz_position if _is_drop_sequence_active() else _lz_position
-	return Rect2(fallback_lz_position - Vector2(256.0, 192.0), Vector2(512.0, 384.0))
+	return _store_map_world_bounds_cache(Rect2(fallback_lz_position - Vector2(256.0, 192.0), Vector2(512.0, 384.0)), terrain_revision)
+
+
+func _store_map_world_bounds_cache(bounds: Rect2, terrain_revision: int) -> Rect2:
+	_map_world_bounds_cache = bounds
+	_map_world_bounds_cache_revision = terrain_revision
+	_map_world_bounds_cache_valid = true
+	return bounds
 
 
 func _get_dropship_marker_texture() -> Texture2D:
