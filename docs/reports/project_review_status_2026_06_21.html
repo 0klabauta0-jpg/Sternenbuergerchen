@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SternenBuergerchen Gesamt-Review 2026-06-21</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #11171c;
+      --panel: #182229;
+      --panel-2: #202c35;
+      --panel-3: #10161b;
+      --line: #3b4c58;
+      --line-soft: rgba(255,255,255,0.08);
+      --text: #edf5f8;
+      --muted: #a8b7c0;
+      --quiet: #7f909a;
+      --accent: #ffd34d;
+      --cyan: #62d4dd;
+      --green: #76d99a;
+      --red: #ff8c7a;
+      --blue: #9cbcff;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.48; }
+    header {
+      padding: 28px clamp(18px, 4vw, 54px) 20px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #172128 0%, #11171c 100%);
+    }
+    main { width: min(1360px, calc(100vw - 32px)); margin: 0 auto; padding: 22px 0 56px; }
+    h1, h2, h3, h4 { margin: 0; line-height: 1.16; letter-spacing: 0; }
+    h1 { font-size: clamp(30px, 3vw, 46px); }
+    h2 { font-size: 23px; }
+    h3 { font-size: 16px; color: var(--cyan); }
+    h4 { font-size: 14px; color: var(--text); }
+    p { margin: 8px 0 0; color: var(--muted); }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { color: #f8dfa0; font-family: Consolas, "Courier New", monospace; font-size: 0.94em; }
+    button, input, select, textarea { font: inherit; }
+    button {
+      border: 1px solid var(--line);
+      background: #dce5ef;
+      color: #11171c;
+      border-radius: 6px;
+      min-height: 38px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    button.secondary { background: transparent; color: var(--text); }
+    button.choice.active { border-color: var(--accent); background: var(--accent); color: #18130a; }
+    input, select, textarea, [contenteditable="true"] {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0d1318;
+      color: var(--text);
+      padding: 8px 10px;
+    }
+    textarea { min-height: 116px; resize: vertical; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #74848e; }
+    .meta-row, .tabbar, .button-row, .toolbar, .metric-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .meta-row { margin-top: 16px; }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.035);
+      font-size: 13px;
+    }
+    .pill.good { color: var(--green); border-color: rgba(118,217,154,0.52); }
+    .pill.warn { color: var(--accent); border-color: rgba(255,211,77,0.58); }
+    .pill.bad { color: var(--red); border-color: rgba(255,140,122,0.58); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 18px; }
+    .card {
+      grid-column: span 4;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .wide { grid-column: span 8; }
+    .half { grid-column: span 6; }
+    .full { grid-column: 1 / -1; }
+    .stack { display: grid; gap: 12px; }
+    .finding {
+      border-left: 4px solid var(--line);
+      padding: 12px 12px 12px 14px;
+      background: rgba(255,255,255,0.025);
+      border-radius: 6px;
+    }
+    .finding.high { border-left-color: var(--red); }
+    .finding.medium { border-left-color: var(--accent); }
+    .finding.low { border-left-color: var(--cyan); }
+    .finding.good { border-left-color: var(--green); }
+    .finding p { margin-top: 6px; }
+    .metric {
+      flex: 1 1 160px;
+      min-width: 150px;
+      background: var(--panel-3);
+      border: 1px solid var(--line-soft);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .metric strong { display: block; font-size: 22px; }
+    .metric span { color: var(--quiet); font-size: 12px; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; min-width: 780px; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: top; }
+    th { color: var(--cyan); background: rgba(255,255,255,0.03); font-weight: 600; }
+    tr:last-child td { border-bottom: 0; }
+    .checkline { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; color: var(--text); padding: 8px 0; border-bottom: 1px solid var(--line-soft); }
+    .checkline:last-child { border-bottom: 0; }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; }
+    .tabbar { margin-top: 22px; border-bottom: 1px solid var(--line); }
+    .tab { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: transparent; color: var(--muted); border-bottom: 0; }
+    .tab.active { background: var(--panel); color: var(--text); border-color: var(--line); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .toolbar {
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      justify-content: space-between;
+      background: rgba(17,23,28,0.95);
+      border-top: 1px solid var(--line);
+      padding: 12px clamp(18px, 4vw, 54px);
+      backdrop-filter: blur(8px);
+    }
+    .toolbar textarea {
+      min-height: 74px;
+      max-height: 180px;
+      flex: 1 1 420px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+    }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-status[data-tone="good"] { color: var(--green); }
+    .export-status[data-tone="warn"] { color: var(--accent); }
+    @media (max-width: 980px) {
+      .card, .wide, .half { grid-column: 1 / -1; }
+      .toolbar { position: static; }
+    }
+  </style>
+</head>
+<body data-report-id="project_review_status_2026_06_21" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>SternenBuergerchen Gesamt-Review</h1>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Erstellt am 2026-06-21 auf Branch <code>task/startmap-expansion-performance-pass</code>.</p>
+    <div class="meta-row">
+      <span class="pill good">Mission-Smokes gruen</span>
+      <span class="pill good">Windows-Export laeuft</span>
+      <span class="pill warn">Legacy-Driver in scripts/tests</span>
+      <span class="pill warn">Release-Hygiene offen</span>
+      <span class="pill bad">Dirty Worktree vorhanden</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabbar" aria-label="Reportbereiche">
+      <button class="tab active" type="button" data-tab-target="overview">Uebersicht</button>
+      <button class="tab" type="button" data-tab-target="gameflow">Spiel-Flow</button>
+      <button class="tab" type="button" data-tab-target="code">Code-Review</button>
+      <button class="tab" type="button" data-tab-target="friction">Reibungen</button>
+      <button class="tab" type="button" data-tab-target="roadmap">Naechste Schritte</button>
+      <button class="tab" type="button" data-tab-target="checks">Checks</button>
+      <button class="tab" type="button" data-tab-target="notes">Notizen</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Kurzfazit</h2>
+          <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
+          <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
+          <p>Die naechste gute Richtung ist: erst Release-/Projekt-Hygiene und laute Asset-Warnungen leiser machen, dann den Mission-Controller in kleine Grenzen schneiden, ohne den gerade stabilisierten Spiel-Flow zu zerlegen.</p>
+        </article>
+        <article class="card">
+          <h2>Statusampel</h2>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.gameflow_green"> Gameflow-Ruecken spielbar</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.large_map_streaming_green"> 192x192-Streaming aktiv</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.release_hygiene_done"> Release-Preset sauber</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.legacy_driver_extracted"> Legacy-Driver extrahiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.editor_final_workflow"> Editor-Workflow final</label>
+        </article>
+        <article class="card full">
+          <h2>Messpunkte</h2>
+          <div class="metric-row">
+            <div class="metric"><strong>36.864</strong><span>Tiles auf der aktuellen 192x192-Startkarte</span></div>
+            <div class="metric"><strong>5.184</strong><span>gerenderte Tiles im typischen aktiven 3D-Chunk-Fenster</span></div>
+            <div class="metric"><strong>~445-561 ms</strong><span>Headless-Render-Snapshot bei Kamera-Fokuswechseln</span></div>
+            <div class="metric"><strong>242 MB</strong><span>aktuelle Windows-PCK durch <code>all_resources</code></span></div>
+            <div class="metric"><strong>16.499</strong><span>Zeilen im MissionTacticalSandboxController</span></div>
+            <div class="metric"><strong>10.149</strong><span>Zeilen im TerrainMap3DView</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="gameflow" class="tab-panel">
+      <div class="grid">
+        <article class="card half">
+          <h2>Was funktioniert</h2>
+          <div class="stack">
+            <div class="finding good">
+              <h3>Homebase -> Mission-Spine</h3>
+              <p><code>frontier_probe</code> nutzt die getrackte 192x192-Station-Outpost-Map. Der Gameflow-Smoke prueft Mission-Szene, Primary3DView, LZ-State und Outbound-LZ-Marker.</p>
+            </div>
+            <div class="finding good">
+              <h3>Dropship und Fireteam-Wahrheit</h3>
+              <p>Embarked Fireteams verschwinden aus der linken Boden-Fireteam-Liste und bleiben im Dropship-Kontext, bis sie deboarded sind. Deployed Fireteams tauchen danach wieder als Bodentrupp auf.</p>
+            </div>
+            <div class="finding good">
+              <h3>Live-Mission-Loop</h3>
+              <p>Der aktuelle Playtest-Smoke setzt LZ, laesst das Dropship ausfliegen, aktiviert 360-Sicherung, authoriert Move/Defend/Take/Area-Orders, erzeugt Kontaktmarker und endet mit Objective-Victory.</p>
+            </div>
+          </div>
+        </article>
+        <article class="card half">
+          <h2>Was noch reibt</h2>
+          <div class="stack">
+            <div class="finding medium">
+              <h3>Spielbarkeit ist stabiler als Bedienbarkeit</h3>
+              <p>Die Runtime kann schon viel, aber Authoring und UI fuehlen sich noch nach gewachsenen Werkzeugen an. Der Editor hat Linienwerkzeuge und Palette, aber noch nicht den final angenehmen Builder-Flow.</p>
+            </div>
+            <div class="finding medium">
+              <h3>Mission-Controller ist zu breit</h3>
+              <p><code>scripts/tests/mission_tactical_sandbox_controller.gd:431</code> tickt UI, Planning, Dropship, Security, Karten und Fireteam-Ausfuehrung. Das funktioniert, ist aber schwer als Produktcode zu verstehen.</p>
+            </div>
+            <div class="finding low">
+              <h3>NPC-Taktik ist brauchbar, aber noch kein Spiel-Design-Loop</h3>
+              <p>Enemy-Team-Tactics, Limbo-Cover, Patrol, Contact-Hold und Damage-Reposition existieren. Was fehlt, ist ein kleiner spielbarer Missionstyp mit klarer Sieg-/Gegenwehr-Dramaturgie.</p>
+            </div>
+          </div>
+        </article>
+        <article class="card full">
+          <h2>Spiel-Flow-Bewertung</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Station</th><th>Stand</th><th>Reibung</th><th>Naechste sinnvolle Arbeit</th></tr></thead>
+              <tbody>
+                <tr><td>Homebase</td><td>Missionen, Roster, Dropship-Flow vorhanden.</td><td>Unity-Sidecar-Doku liegt wieder im Godot-Status; das verwirrt die Quelle der Wahrheit.</td><td>Godot-Status von Unity-Arbeitsstand trennen.</td></tr>
+                <tr><td>Fireteam/Loadout</td><td>Mehrere Waffen und visuelle Attachments sind angebunden.</td><td>UI- und Visual-Loadout duerfen nicht mit Combat-Werten vermischen.</td><td>Loadout-Contract weiter klein halten; pro Waffe klare Werte/Visuals.</td></tr>
+                <tr><td>Dropship</td><td>Parallelitaet, LZ, Outbound, HUD-Wahrheit sind aktuell gruen.</td><td>Viele Felder werden noch als Planning-State im grossen Controller gespiegelt.</td><td>Dropship-Mission-State als eigener Mission-Adapter/Presenter.</td></tr>
+                <tr><td>Insertion</td><td>Deployed Fireteam wird runtime-aktiv und bekommt Post-Drop-Sicherung.</td><td>Post-Drop-Aktivierung und Default-Verhalten liegen tief im Controller.</td><td>Insertion-Outcome als eigener kleiner Resolver.</td></tr>
+                <tr><td>Bewegung</td><td>Stale Move-Commands werden verworfen; HPA/A* und Surface-Kosten sind dokumentiert.</td><td>Kein echter Pfad-Cache, bewusst diagnostiziert.</td><td>Erst bei spuerbarem Bedarf Path-Cache mit Invalidation-Contract.</td></tr>
+                <tr><td>Kampf</td><td>LOS, Cover, Friendly Fire, Medic, Overwatch, Fire Decision Resolver existieren.</td><td>CombatLoopDriver orchestriert noch zu viele Enemy-/Objective-/UI-Themen.</td><td>Resolution und Enemy-Behavior in kleine Slices auslagern.</td></tr>
+                <tr><td>Result</td><td>Objective-Victory und Mission-Result sichtbar.</td><td>Mission-Result-Grenze noch nahe am Driver.</td><td><code>MissionCombatResolutionResolver</code> als naechster Boundary-Slice.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="code" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Code-Hotspots</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Datei</th><th>Groesse</th><th>Befund</th><th>Empfehlung</th></tr></thead>
+              <tbody>
+                <tr><td><code>scripts/tests/mission_tactical_sandbox_controller.gd</code></td><td>16.499 Zeilen</td><td>Produktiver sichtbarer Mission-Controller im Testpfad. Enthalt Planning, Dropship, Fireteam-Ausfuehrung, UI-Refresh, Selection, Security und Area Orders.</td><td>Keine Massenverschiebung. Erst Dropship-State, Fireteam-Execution und Planning-Serialization in kleine Adapter/Presenter schneiden.</td></tr>
+                <tr><td><code>scripts/terrain/terrain_map_3d_view.gd</code></td><td>10.149 Zeilen</td><td>Visual-Renderer, Streaming, Batching, Units, Waffen, Helme, Bubbles, FoW, Dropship-Visuals in einer Datei.</td><td>Visual-Subsysteme nach Feature-Helpers trennen: UnitVisualAttachments, FireVfx, FeedbackBubbles, StreamingChunks.</td></tr>
+                <tr><td><code>scripts/editor/map_editor.gd</code></td><td>8.466 Zeilen</td><td>Editor-UI, Palette, Save/Load, Builder-Toolbar, Network-Drag, Cliff/Wall-Overlays, Mission-Scenario in einem Skript.</td><td>Palette/Builder/NetworkDrag/ScenarioPanel in Module extrahieren, aber vorhandene Authoring-Wahrheit in TerrainMapData lassen.</td></tr>
+                <tr><td><code>scripts/tests/mission_combat_loop_driver.gd</code></td><td>4.576 Zeilen</td><td>Tick-Orchestrator mit Enemy-Behavior, Objective/Result, Respawn/Bleedout, UI-Readability und Remote-Events.</td><td>Bereits begonnene TASK_495-Kette fortsetzen: Resolution, EnemyBehavior, Readability Presenter.</td></tr>
+                <tr><td><code>scripts/core/simulation_root.gd</code></td><td>3.201 Zeilen</td><td>Autoritativer Kern ist groesser, aber hat klare Command-/Effect-Grenzen. TODOs fuer spaetere echte Commits existieren bei <code>:1271</code> und <code>:1302</code>.</td><td>Nicht aufblaehen. Neue Gameplay-Mutationen nur als kleine Effect-/Command-Handler mit Tests.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="card half">
+          <h2>Gute technische Entscheidungen</h2>
+          <div class="stack">
+            <div class="finding good"><h3>SimulationRoot bleibt Authority</h3><p><code>enqueue_command</code> und <code>enqueue_effect</code> sind der erkennbare Mutationspfad. TASK_501 hat stale Move-Commands diagnostisch statt still requeued geloest.</p></div>
+            <div class="finding good"><h3>Terrain/Navigation ist datengetrieben</h3><p><code>TerrainTileData</code> fuehrt Surface, Walkable, Cover; HPA und Dirty-Cluster sind dokumentiert. Das ist ein solides Fundament fuer 64/128/192 Maps.</p></div>
+            <div class="finding good"><h3>Performance-Gates existieren</h3><p>Visual Streaming trennt <code>total_tile_count</code> und <code>rendered_tile_count</code>. 192x192 rendert nicht mehr die volle Karte.</p></div>
+          </div>
+        </article>
+        <article class="card half">
+          <h2>Code-Risiken</h2>
+          <div class="stack">
+            <div class="finding high"><h3>Produktionslogik im Testpfad</h3><p>Der Testpfad ist historisch gewachsen und technisch bequem, aber fuer neue Entwickler und spaetere Builds irrefuehrend.</p></div>
+            <div class="finding medium"><h3>String-/Dictionary-Vertraege sind breit</h3><p>Viele Subsysteme sprechen ueber Dictionaries mit vielen optionalen Keys. Das ist flexibel, aber Refactors brauchen Snapshot-Verifier.</p></div>
+            <div class="finding medium"><h3>UI- und Visual-Refresh bleiben empfindlich</h3><p>Es gibt Throttles und Dirty-Flags, aber mehrere grosse Controls bauen sichtbare Zustandsoberflaechen aus vielen Teilquellen.</p></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="friction" class="tab-panel">
+      <div class="grid">
+        <article class="card half">
+          <h2>Reibungen aus Vorgaben</h2>
+          <div class="stack">
+            <div class="finding medium">
+              <h3>Roadmap-Strenge vs. spontaner Spielbau</h3>
+              <p>Die Roadmap verlangt kleine Tasks in Reihenfolge. Das schuetzt Architektur, kann aber Kreativ-Iteration am Editor/Missiondesign bremsen. Loesung: weiter kleine Slices, aber jeweils mit sichtbarem Playtest-Ziel.</p>
+            </div>
+            <div class="finding medium">
+              <h3>SimulationRoot-Authority vs. schnelle UI-Fixes</h3>
+              <p>Viele Bugs zeigen sich in UI/HUD, die Wahrheit liegt aber tiefer. Das verursacht Extraarbeit, verhindert aber zweite Fireteam-/Dropship-Wahrheiten.</p>
+            </div>
+            <div class="finding medium">
+              <h3>Godot-Editor-Plugin vs. Ingame-Editor</h3>
+              <p>Asset Placer/GridMap sind hilfreich als Vorbild, aber Ziel ist der Sternenbuergerchen-Map-Editor. Das erfordert mehr Eigenbau fuer Bedienbarkeit.</p>
+            </div>
+          </div>
+        </article>
+        <article class="card half">
+          <h2>Technische Reibungen</h2>
+          <div class="stack">
+            <div class="finding high">
+              <h3>Dirty Worktree</h3>
+              <p>Aktuell sind <code>docs/IMPLEMENTATION_STATUS.md</code>, <code>project.godot</code> und <code>docs/tasks/TASK_505_unity_homebase_functionality_slice.md</code> lokal veraendert. Besonders Unity im Godot-Status widerspricht der Entscheidung, den Unity-Client auszulagern.</p>
+            </div>
+            <div class="finding medium">
+              <h3>Release-Preset packt alles</h3>
+              <p><code>export_presets.cfg:8</code> steht auf <code>all_resources</code>, <code>exclude_filter</code> ist leer. Dadurch landen Tests, Tools, Editor-Plugins und Referenzmaterial im Release-PCK.</p>
+            </div>
+            <div class="finding low">
+              <h3>Laute Asset-Warnungen</h3>
+              <p>Factory-GLBs referenzieren eine alte UID fuer <code>colormap.png</code>. Godot fallbackt auf den Textpfad, aber die Warnungen wirken beim Export/Test wie echte Fehler.</p>
+            </div>
+            <div class="finding low">
+              <h3>Referenzprojekt im Addon-Ordner</h3>
+              <p>Der Export meldet <code>addons/godot_open_rts_reference</code> mit eigenem <code>project.godot</code>. Das wird ignoriert, sollte aber fuer Release-Hygiene eindeutig aus Export/Scan verschwinden.</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="roadmap" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Priorisierte Empfehlung</h2>
+          <div class="stack">
+            <div class="finding high"><h3>1. TASK_506 - Export und Projekt-Hygiene</h3><p>Release-Preset filtern, Godot-Open-RTS-Referenz sauber neutralisieren, Factory-GLB-UID-Warnungen pruefen, Unity-Sidecar-Status aus Godot-Doku entfernen oder separat parken. Ziel: Export ohne Schreckenswand und ohne Editor-/Testballast.</p></div>
+            <div class="finding high"><h3>2. TASK_507 - Mission Controller Boundary Slice</h3><p>Nicht refactoren um des Refactors willen. Einen konkreten kleinen Schnitt waehlen: Dropship-Mission-State oder Fireteam-Runtime-Activation aus <code>mission_tactical_sandbox_controller.gd</code> ziehen.</p></div>
+            <div class="finding medium"><h3>3. TASK_508 - Mission Combat Resolution Boundary</h3><p>Objective, Elimination, Countdown und MissionResult aus <code>mission_combat_loop_driver.gd</code> in einen Resolver/Contract-Helper, Snapshot-Keys stabil halten.</p></div>
+            <div class="finding medium"><h3>4. TASK_509 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
+            <div class="finding low"><h3>5. TASK_510 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Entscheidung</h2>
+          <p>Welchen Pfad willst du als naechstes erzwingen?</p>
+          <div class="button-row" style="margin-top:12px" data-choice-group="next_path">
+            <button class="choice active" type="button" data-choice-value="export_hygiene">Export zuerst</button>
+            <button class="choice" type="button" data-choice-value="mission_boundary">Mission-Controller</button>
+            <button class="choice" type="button" data-choice-value="editor_ux">Editor-UX</button>
+            <button class="choice" type="button" data-choice-value="scenario_slice">Szenario-Slice</button>
+          </div>
+          <label style="display:block;margin-top:14px;">Prioritaetsnotiz
+            <textarea data-export-key="roadmap.priority_note" placeholder="Was soll beim naechsten Task auf keinen Fall kaputtgehen?"></textarea>
+          </label>
+        </article>
+      </div>
+    </section>
+
+    <section id="checks" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Lokale Pruefung 2026-06-21</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Check</th><th>Ergebnis</th><th>Wichtige Beobachtung</th></tr></thead>
+              <tbody>
+                <tr><td><code>task_500_gameflow_spine_hardening.gd</code></td><td>7 passed, 0 failed</td><td>LZ bleibt outbound sichtbar; Frontier-Probe-Map existiert.</td></tr>
+                <tr><td><code>task_501_integrated_movement_command_lifecycle_hardening.gd</code></td><td>10 passed, 0 failed</td><td>Unregistered/stale Move-Commands werden verworfen statt requeued.</td></tr>
+                <tr><td><code>task_503_mission_dropship_fireteam_hud_truth.gd</code></td><td>10 passed, 0 failed</td><td>Embarked vs. deployed Fireteam-Anzeige konsistent.</td></tr>
+                <tr><td><code>task_504_startmap_expansion_performance_pass.gd</code></td><td>35 passed, 0 failed</td><td>192x192-Map, 36.864 Tiles, Streaming aktiv; JSON Load ca. 1224 ms.</td></tr>
+                <tr><td><code>task_505_frontier_probe_large_map_playtest_hotfix.gd</code></td><td>PASS</td><td>Drop, 360 Security, Orders, Contact, Objective Victory; Renderfenster bleibt chunked.</td></tr>
+                <tr><td>Windows Export</td><td>Exit 0</td><td><code>review_export.pck</code> ca. 242 MB; Warnung zu <code>godot_open_rts_reference</code>.</td></tr>
+                <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="card half">
+          <h2>Bekannte Warnungen</h2>
+          <p>Die Kenney-Factory-GLBs <code>detail-tank.glb</code>, <code>building-a.glb</code>, <code>chimney-medium.glb</code> und <code>building-d.glb</code> melden invalid UID fuer <code>uid://dsxohkhemn17r</code> und nutzen den Textpfad zu <code>Textures/colormap.png</code>. Funktional gruen, aber UX/Export-Laerm.</p>
+        </article>
+        <article class="card half">
+          <h2>Git-Stand</h2>
+          <p>HEAD: <code>654e8c67 Harden frontier probe large map drop flow</code>. Branch: <code>task/startmap-expansion-performance-pass</code>. Lokale ungecommittete Fremd-/Nebenstaende bleiben unberuehrt.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="notes" class="tab-panel">
+      <div class="grid">
+        <article class="card half">
+          <h2>Review-Notizen</h2>
+          <div contenteditable="true" data-note-key="notes.review" data-placeholder="Eigene Review-Notizen hier eintragen..."></div>
+        </article>
+        <article class="card half">
+          <h2>Playtest-Fragen</h2>
+          <label class="checkline"><input type="checkbox" data-export-key="questions.export_hygiene"> Soll der naechste Task Export-Hygiene sein?</label>
+          <label class="checkline"><input type="checkbox" data-export-key="questions.editor_focus"> Soll der Editor vor Szenarioarbeit weiter poliert werden?</label>
+          <label class="checkline"><input type="checkbox" data-export-key="questions.scenario_first"> Soll direkt ein spielbares Luftabwehr-/Outpost-Szenario gebaut werden?</label>
+          <label class="checkline"><input type="checkbox" data-export-key="questions.boundary_first"> Soll zuerst der Mission-Controller kleiner geschnitten werden?</label>
+        </article>
+        <article class="card full">
+          <h2>Freitext fuer Codex</h2>
+          <textarea data-export-key="notes.free_text" placeholder="Was soll ich aus diesem Bericht als naechstes tun?"></textarea>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="toolbar">
+    <div class="export-actions">
+      <button id="exportJsonButton" type="button">JSON exportieren</button>
+      <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+      <span id="exportStatus" class="export-status">Export erzeugt lokal eine JSON-Datei und fuellt das Textfeld.</span>
+    </div>
+    <textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea>
+  </footer>
+
+  <script>
+    (function () {
+      const reportId = document.body.dataset.reportId || "project_review";
+      const schema = document.body.dataset.reportSchema || "sternenbuergerchen.html_workbench.v1";
+      const output = document.getElementById("jsonOutput");
+      const exportStatus = document.getElementById("exportStatus");
+      let exportSequence = 0;
+
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+
+      function readControlValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        if (element.type === "number" || element.type === "range") return Number(element.value);
+        return element.value;
+      }
+
+      function setExportStatus(message, tone) {
+        exportStatus.textContent = message;
+        exportStatus.dataset.tone = tone || "";
+      }
+
+      function buildPayload() {
+        const exportedAt = new Date().toISOString();
+        const payload = {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: exportedAt,
+          controls: {},
+          notes: {},
+          active_choices: {},
+          computed: {
+            recommended_next_tasks: [
+              "TASK_506 - Export und Projekt-Hygiene",
+              "TASK_507 - Mission Controller Boundary Slice",
+              "TASK_508 - Mission Combat Resolution Boundary",
+              "TASK_509 - Editor Builder UX Pass",
+              "TASK_510 - Mission Scenario Vertical Slice"
+            ],
+            smoke_status: "green",
+            export_status: "green_with_warning"
+          },
+          metadata: {
+            branch: "task/startmap-expansion-performance-pass",
+            head: "654e8c67 Harden frontier probe large map drop flow",
+            generated_on: "2026-06-21",
+            source: "local_code_review"
+          }
+        };
+
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = readControlValue(element);
+          if (value !== undefined) setPath(payload.controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          setPath(payload.notes, element.dataset.noteKey, element.innerText.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const active = group.querySelector(".choice.active");
+          if (active) setPath(payload.active_choices, group.dataset.choiceGroup, active.dataset.choiceValue || active.textContent.trim());
+        });
+        return payload;
+      }
+
+      function buildExportFilename(exportedAt) {
+        exportSequence += 1;
+        const stamp = String(exportedAt || new Date().toISOString()).replace(/[:.]/g, "-");
+        return `${reportId}_${stamp}_${String(exportSequence).padStart(2, "0")}.json`;
+      }
+
+      function downloadExport(text, fileName) {
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function exportJson() {
+        const payload = buildPayload();
+        const text = JSON.stringify(payload, null, 2);
+        const fileName = buildExportFilename(payload.exported_at);
+        output.value = text;
+        downloadExport(text, fileName);
+        setExportStatus(`Export bereit: ${fileName}`, "good");
+      }
+
+      async function copyJson() {
+        const payload = buildPayload();
+        const text = JSON.stringify(payload, null, 2);
+        output.value = text;
+        try {
+          await navigator.clipboard.writeText(text);
+          setExportStatus("JSON in die Zwischenablage kopiert.", "good");
+        } catch (error) {
+          setExportStatus("Kopieren nicht erlaubt; JSON steht im Textfeld.", "warn");
+        }
+      }
+
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.tabTarget;
+          document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
+          document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        });
+      });
+
+      document.querySelectorAll("[data-choice-group]").forEach((group) => {
+        group.querySelectorAll(".choice").forEach((button) => {
+          button.addEventListener("click", () => {
+            group.querySelectorAll(".choice").forEach((candidate) => candidate.classList.toggle("active", candidate === button));
+          });
+        });
+      });
+
+      document.getElementById("exportJsonButton").addEventListener("click", exportJson);
+      document.getElementById("copyJsonButton").addEventListener("click", copyJson);
+    })();
+  </script>
+</body>
+</html>
