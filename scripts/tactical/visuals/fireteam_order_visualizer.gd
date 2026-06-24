@@ -18,6 +18,12 @@ const OFFENSIVE_ORDER_LINE_COLOR: Color = Color(1.0, 0.28, 0.22, 0.95)
 const MOVEMENT_RUSH_COLOR: Color = Color(0.32, 0.72, 1.0, 0.9)
 const MOVEMENT_BOUNDING_COLOR: Color = Color(1.0, 0.78, 0.24, 0.92)
 const MOVEMENT_CATERPILLAR_COLOR: Color = Color(0.48, 0.96, 0.62, 0.92)
+const PREVIEW_SAFE_COLOR: Color = Color(0.38, 1.0, 0.64, 0.82)
+const PREVIEW_RISKY_COLOR: Color = Color(1.0, 0.82, 0.24, 0.84)
+const PREVIEW_SUICIDAL_COLOR: Color = Color(1.0, 0.24, 0.18, 0.88)
+const PREVIEW_UNKNOWN_COLOR: Color = Color(0.62, 0.76, 1.0, 0.64)
+const PREVIEW_BLOCKED_LINE_COLOR: Color = Color(0.62, 0.66, 0.7, 0.48)
+const PREVIEW_FRIENDLY_FIRE_LINE_COLOR: Color = Color(1.0, 0.55, 0.08, 0.84)
 const FIRETEAM_ORIENTATION_ARROW_LENGTH: float = 28.0
 const FIRETEAM_ORIENTATION_ARROW_HEAD_LENGTH: float = 8.0
 const FIRETEAM_ORIENTATION_ARROW_HEAD_WIDTH: float = 5.0
@@ -359,12 +365,17 @@ func _draw_waypoint_intent_previews() -> void:
 		if points.size() < 2:
 			continue
 		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
-		var base_color: Color = _get_fireteam_color(fireteam_id)
-		var preview_color: Color = Color(base_color.r, base_color.g, base_color.b, 0.42)
+		var preview_color: Color = _get_preview_risk_color(String(entry.get("risk_state", "unknown")))
 		for index in range(1, points.size()):
 			_draw_dashed_line(Vector2(points[index - 1]), Vector2(points[index]), preview_color, 2.0)
 		var ghost_position: Vector2 = Vector2(entry.get("ghost_ftl_position", points[points.size() - 1]))
 		_draw_iso_marker_base(ghost_position, Color(preview_color.r, preview_color.g, preview_color.b, 0.18), preview_color.lightened(0.18), 0.58)
+		for line_variant in Array(entry.get("line_of_fire_entries", [])):
+			if typeof(line_variant) != TYPE_DICTIONARY:
+				continue
+			var line_entry: Dictionary = Dictionary(line_variant)
+			var line_color: Color = _get_preview_line_color(String(line_entry.get("visual_role", "")), bool(line_entry.get("blocked", false)))
+			_draw_dashed_line(Vector2(line_entry.get("from_position", ghost_position)), Vector2(line_entry.get("to_position", ghost_position)), line_color, 1.35)
 		var heading_direction: Vector2 = Vector2(entry.get("heading_direction", Vector2.ZERO))
 		if heading_direction.length_squared() > 0.0001:
 			var arrow_start: Vector2 = Vector2(points[0])
@@ -375,7 +386,8 @@ func _draw_waypoint_intent_previews() -> void:
 			continue
 		var eta_seconds: int = maxi(int(ceil(float(entry.get("eta_seconds_estimate", 0.0)))), 0)
 		var distance_text: String = "%dm" % int(round(float(entry.get("distance_world", 0.0))))
-		var label_text: String = "ETA~%ds %s" % [eta_seconds, distance_text]
+		var risk_text: String = String(entry.get("risk_state", "unknown")).strip_edges().to_upper()
+		var label_text: String = "%s ETA~%ds %s" % [risk_text, eta_seconds, distance_text]
 		draw_string(fallback_font, ghost_position + Vector2(14.0, -16.0), label_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 11, preview_color.lightened(0.32))
 
 
@@ -574,6 +586,32 @@ func _get_movement_style_color(style: String) -> Color:
 			return MOVEMENT_RUSH_COLOR
 		_:
 			return Color(0.88, 0.88, 0.88, 0.82)
+
+
+func _get_preview_risk_color(risk_state: String) -> Color:
+	match risk_state.strip_edges().to_lower():
+		"safe":
+			return PREVIEW_SAFE_COLOR
+		"risky":
+			return PREVIEW_RISKY_COLOR
+		"suicidal":
+			return PREVIEW_SUICIDAL_COLOR
+		_:
+			return PREVIEW_UNKNOWN_COLOR
+
+
+func _get_preview_line_color(visual_role: String, blocked: bool) -> Color:
+	if blocked or visual_role == "blocked":
+		return PREVIEW_BLOCKED_LINE_COLOR
+	match visual_role.strip_edges().to_lower():
+		"friendly_fire_risk":
+			return PREVIEW_FRIENDLY_FIRE_LINE_COLOR
+		"enemy_overwatch":
+			return PREVIEW_SUICIDAL_COLOR
+		"clear_friendly_shot":
+			return PREVIEW_SAFE_COLOR
+		_:
+			return PREVIEW_RISKY_COLOR
 
 
 func _build_movement_map_label(movement_state: Dictionary) -> String:

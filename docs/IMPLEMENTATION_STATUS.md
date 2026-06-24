@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_506-TASK_509 - Tactical Decision Clarity Block
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_506_tactical_decision_clarity_contract.md`, `docs/tasks/TASK_507_order_preview_ghosts_mvp.md`, `docs/tasks/TASK_508_line_of_fire_threat_analyzer_mvp.md`, `docs/tasks/TASK_509_combined_preview_overlay.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/tasks/TASK_375_waypoint_intent_preview.md`, `docs/dev/runtime_script_layout_contract.md`
+- Stand: Der bestehende `waypoint_intent_preview` wurde zum Tactical-Decision-Clarity-Payload erweitert: Ghost-Pfad, ETA, Risk-State, Threat-Analyse, Cover-State, Enemy-Exposure und Line-of-Fire-Eintraege bleiben ein read-only Preview-Snapshot vor `GO`.
+- Stand: `TacticalDecisionThreatAnalyzer` bewertet uebergebene Enemy-/Contact-Snapshots mit `LineOfSightSystem`, Terrain-Cover und Friendly-Fire-Korridor. Ohne Contact-/Threat-Kontext bleibt das Risiko bewusst `unknown`, statt Gegnerwissen zu erfinden.
+- Stand: `FireteamOrderVisualizer` und `TerrainMap3DView` zeichnen den kombinierten Preview-Payload mit Gruen/Gelb/Rot/Grau/Orange und melden Primary-View-Zaehler fuer Ghost-, Pfad- und Threat-Linien.
+- Risiken/offen: Die Klassifikation ist ein grober MVP fuer Entscheidungslesbarkeit. Contact-Report-UI, AI-Intent-Bubbles, Squad-Spacing-Modi, Hold-Fire-Disziplin, Command-Kosten und Mini-AAR bleiben Folge-Tasks.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_506_tactical_decision_clarity_contract.gd`, `task_375_waypoint_intent_preview.gd`, `task_456_wall_segment_los_and_tile_truth_inspector.gd`, `git diff --check`.
+- Naechster Schritt: F6-Sichttest in der Mission: Move-Ziel klicken, Ghost/Pfad/Threat-Linien vor `GO` lesen und danach TASK_510 Contact Report Upgrade schneiden.
 ### TASK_504 - Startmap Expansion Performance Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_504_startmap_expansion_performance_pass.md`, `docs/dev/terrain_truth_visual_audit_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_494_station_outpost_64_map.md`, `docs/tasks/TASK_500_gameflow_spine_hardening.md`

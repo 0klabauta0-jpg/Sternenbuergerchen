@@ -50,7 +50,7 @@ func _test_resolver_builds_estimated_path_eta_and_unknown_risk() -> void:
 	_assert(is_equal_approx(float(entry.get("distance_world", 0.0)), 200.0), "Preview reports straight-line chain distance")
 	_assert(is_equal_approx(float(entry.get("eta_seconds_estimate", 0.0)), 2.0), "Preview reports ETA estimate from provided speed")
 	_assert(String(entry.get("eta_state", "")) == "estimated", "Preview marks ETA as estimate")
-	_assert(String(entry.get("risk_state", "")) == "unknown" and String(entry.get("risk_reason", "")).contains("no_morale"), "Preview does not invent morale or fatigue risk")
+	_assert(String(entry.get("risk_state", "")) == "unknown" and String(entry.get("risk_reason", "")).contains("no_threat_context"), "Preview does not invent threat risk without contact context")
 	_assert(bool(entry.get("read_only", false)) and not bool(entry.get("ui_sets_gameplay_truth", true)), "Preview contract is read-only")
 
 

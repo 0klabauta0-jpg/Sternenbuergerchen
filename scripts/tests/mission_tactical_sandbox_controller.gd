@@ -33,6 +33,7 @@ const FIRETEAM_ORDER_VISUALIZER_SCRIPT: GDScript = preload("res://scripts/tactic
 const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/ad_hoc_order_controller.gd")
 const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
 const WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/waypoint_intent_preview_resolver.gd")
+const TACTICAL_DECISION_THREAT_ANALYZER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_decision_threat_analyzer.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -355,6 +356,7 @@ var _coordination_manager = null
 var _fireteam_movement_controller = null
 var _fireteam_security_controller = null
 var _waypoint_intent_preview_resolver = WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT.new()
+var _tactical_decision_threat_analyzer = TACTICAL_DECISION_THREAT_ANALYZER_SCRIPT.new()
 var _comic_bubble_runtime_gate = null
 var _active_coordination_by_id: Dictionary = {}
 var _leader_initiated_flank_ready_at_msec_by_fireteam: Dictionary = {}
@@ -11113,7 +11115,7 @@ func get_waypoint_intent_preview_contract_snapshot() -> Dictionary:
 		"entries": entries,
 		"source": "WaypointIntentPreviewResolver",
 		"eta_state": "estimated",
-		"risk_policy": "unknown_until_morale_or_fatigue_data_exists",
+		"risk_policy": "unknown_until_contact_or_threat_context_exists_then_tactical_decision_threat_analyzer",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -12018,9 +12020,44 @@ func _build_waypoint_intent_preview_entries() -> Array:
 				"phase_index": _get_live_order_phase_index(),
 				"selected_fireteam_ids": _selected_fireteam_ids,
 				"speed_world_per_second_by_fireteam": _build_waypoint_preview_speed_by_fireteam(),
+				"threat_analyzer": _tactical_decision_threat_analyzer,
+				"threat_context_by_fireteam": _build_waypoint_preview_threat_context_by_fireteam(),
 			}
 		)
 	).duplicate(true)
+
+
+func _build_waypoint_preview_threat_context_by_fireteam() -> Dictionary:
+	var result: Dictionary = {}
+	var terrain_registry = _get_terrain_registry()
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var contact_entries: Array = get_fireteam_contact_snapshot(fireteam_id)
+		if contact_entries.is_empty():
+			continue
+		result[fireteam_id] = {
+			"contact_entries": contact_entries,
+			"friendly_units": _build_waypoint_preview_friendly_unit_entries(fireteam_id),
+			"terrain_registry": terrain_registry,
+			"enemy_los_range_world": 560.0,
+			"friendly_fire_corridor_radius": 18.0,
+		}
+	return result
+
+
+func _build_waypoint_preview_friendly_unit_entries(fireteam_id: String) -> Array:
+	var entries: Array = []
+	for unit in _get_fireteam_units(fireteam_id, true):
+		if unit == null or not (unit is Node2D):
+			continue
+		entries.append({
+			"unit_id": String(unit.call("get_unit_id")).strip_edges() if unit.has_method("get_unit_id") else String(unit.name),
+			"fireteam_id": fireteam_id.strip_edges().to_lower(),
+			"position": (unit as Node2D).global_position,
+		})
+	return entries
 
 
 func _build_waypoint_preview_speed_by_fireteam() -> Dictionary:

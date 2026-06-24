@@ -134,6 +134,10 @@ git checkout -b batch/<batch-name>
 - TASK_503 - Mission Dropship Fireteam HUD Truth
 - TASK_504 - Startmap Expansion Performance Pass
 - TASK_505 - Frontier Probe Large Map Playtest Hotfix
+- TASK_506 - Tactical Decision Clarity Contract (implementiert)
+- TASK_507 - Order Preview Ghosts MVP (implementiert)
+- TASK_508 - Line-of-Fire / Threat Analyzer MVP (implementiert)
+- TASK_509 - Combined Preview Overlay (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -10,6 +10,8 @@ func build_preview_entries(plan_dicts: Array, fireteam_anchor_dicts: Array, opti
 	var phase_index: int = maxi(int(options.get("phase_index", 0)), 0)
 	var selected_fireteam_ids: PackedStringArray = _coerce_string_array(options.get("selected_fireteam_ids", PackedStringArray()))
 	var speed_by_fireteam: Dictionary = Dictionary(options.get("speed_world_per_second_by_fireteam", {}))
+	var threat_analyzer = options.get("threat_analyzer", null)
+	var threat_context_by_fireteam: Dictionary = Dictionary(options.get("threat_context_by_fireteam", {}))
 	var anchor_by_fireteam: Dictionary = _build_anchor_lookup(fireteam_anchor_dicts)
 	var entries: Array = []
 	for plan_variant in plan_dicts:
@@ -29,6 +31,7 @@ func build_preview_entries(plan_dicts: Array, fireteam_anchor_dicts: Array, opti
 		var entry: Dictionary = _build_entry_for_plan(plan, Vector2(anchor_position), float(speed_by_fireteam.get(fireteam_id, DEFAULT_SPEED_WORLD_PER_SECOND)))
 		if entry.is_empty():
 			continue
+		_apply_threat_analysis(entry, threat_analyzer, Dictionary(threat_context_by_fireteam.get(fireteam_id, {})))
 		entries.append(entry)
 	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return String(a.get("fireteam_id", "")) < String(b.get("fireteam_id", ""))
@@ -84,12 +87,40 @@ func _build_entry_for_plan(plan, anchor_position: Vector2, speed_world_per_secon
 		"eta_state": "estimated",
 		"speed_world_per_second_estimate": normalized_speed,
 		"risk_state": "unknown",
-		"risk_reason": "no_morale_fatigue_data",
+		"expected_exposure": "unknown",
+		"risk_reason": "no_threat_context",
+		"threat_analysis": {},
+		"line_of_fire_entries": [],
 		"pending_waypoint_count": pending_waypoint_count,
 		"source": "WaypointIntentPreviewResolver",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
+
+
+func _apply_threat_analysis(entry: Dictionary, threat_analyzer, threat_context: Dictionary) -> void:
+	if threat_analyzer == null or not threat_analyzer.has_method("analyze_position"):
+		return
+	var ghost_position_variant = entry.get("ghost_ftl_position", null)
+	if typeof(ghost_position_variant) != TYPE_VECTOR2:
+		return
+	var analysis_options: Dictionary = threat_context.duplicate(true)
+	analysis_options["fireteam_id"] = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+	analysis_options["path_points"] = Array(entry.get("ghost_path_points", [])).duplicate(true)
+	var analysis: Dictionary = Dictionary(threat_analyzer.call("analyze_position", Vector2(ghost_position_variant), analysis_options))
+	if analysis.is_empty():
+		return
+	entry["risk_state"] = String(analysis.get("risk_state", entry.get("risk_state", "unknown"))).strip_edges().to_lower()
+	entry["expected_exposure"] = String(analysis.get("expected_exposure", entry.get("expected_exposure", "unknown"))).strip_edges().to_lower()
+	entry["risk_reason"] = String(analysis.get("risk_reason", entry.get("risk_reason", ""))).strip_edges()
+	entry["threat_analysis"] = analysis.duplicate(true)
+	entry["line_of_fire_entries"] = Array(analysis.get("line_of_fire_entries", [])).duplicate(true)
+	entry["cover_value"] = int(analysis.get("cover_value", 0))
+	entry["cover_state"] = String(analysis.get("cover_state", "unknown")).strip_edges().to_lower()
+	entry["enemy_exposure_count"] = int(analysis.get("enemy_exposure_count", 0))
+	entry["enemy_overwatch_count"] = int(analysis.get("enemy_overwatch_count", 0))
+	entry["friendly_fire_risk_count"] = int(analysis.get("friendly_fire_risk_count", 0))
+	entry["clear_friendly_shot_count"] = int(analysis.get("clear_friendly_shot_count", 0))
 
 
 func _build_anchor_lookup(fireteam_anchor_dicts: Array) -> Dictionary:

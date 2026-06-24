@@ -318,6 +318,12 @@ const MISSION_LOS_DEBUG_CLEAR_LINE_COLOR: Color = Color(0.38, 1.0, 0.68, 0.76)
 const MISSION_LOS_DEBUG_BLOCKED_LINE_COLOR: Color = Color(1.0, 0.32, 0.22, 0.82)
 const MISSION_LOS_DEBUG_BLOCKER_MARKER_COLOR: Color = Color(1.0, 0.72, 0.24, 0.46)
 const MISSION_LOS_DEBUG_CONTACT_MARKER_COLOR: Color = Color(0.72, 0.9, 1.0, 0.42)
+const WAYPOINT_PREVIEW_SAFE_COLOR: Color = Color(0.38, 1.0, 0.64, 0.74)
+const WAYPOINT_PREVIEW_RISKY_COLOR: Color = Color(1.0, 0.82, 0.24, 0.78)
+const WAYPOINT_PREVIEW_SUICIDAL_COLOR: Color = Color(1.0, 0.24, 0.18, 0.84)
+const WAYPOINT_PREVIEW_UNKNOWN_COLOR: Color = Color(0.62, 0.76, 1.0, 0.58)
+const WAYPOINT_PREVIEW_BLOCKED_LINE_COLOR: Color = Color(0.62, 0.66, 0.70, 0.42)
+const WAYPOINT_PREVIEW_FRIENDLY_FIRE_LINE_COLOR: Color = Color(1.0, 0.55, 0.08, 0.82)
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -538,6 +544,10 @@ var _mission_los_debug_fow_hidden_contact_count: int = 0
 var _mission_los_debug_source_unit_count: int = 0
 var _mission_los_debug_contact_candidate_count: int = 0
 var _mission_los_debug_entries: Array = []
+var _waypoint_intent_preview_visual_count: int = 0
+var _waypoint_intent_preview_path_line_count: int = 0
+var _waypoint_intent_preview_threat_line_count: int = 0
+var _waypoint_intent_preview_entries: Array = []
 var _selected_unit_marker_count: int = 0
 var _selected_unit_marker_entries: Array = []
 var _weapon_fire_vfx_visual_count: int = 0
@@ -1516,6 +1526,10 @@ func get_render_snapshot() -> Dictionary:
 		"mission_los_debug_contact_candidate_count": _mission_los_debug_contact_candidate_count,
 		"mission_los_debug_entries": _mission_los_debug_entries.duplicate(true),
 		"mission_los_debug_contact_visibility_policy": "selected_fireteams_known_contacts_fow_last_known_only",
+		"waypoint_intent_preview_visual_count": _waypoint_intent_preview_visual_count,
+		"waypoint_intent_preview_path_line_count": _waypoint_intent_preview_path_line_count,
+		"waypoint_intent_preview_threat_line_count": _waypoint_intent_preview_threat_line_count,
+		"waypoint_intent_preview_entries": _waypoint_intent_preview_entries.duplicate(true),
 		"selected_unit_marker_count": _selected_unit_marker_count,
 		"selected_unit_marker_entries": _selected_unit_marker_entries.duplicate(true),
 		"weapon_fire_vfx_visual_count": _weapon_fire_vfx_visual_count,
@@ -4471,6 +4485,7 @@ func _rebuild_order_visuals() -> void:
 	_friendly_aim_blocker_marker_count = 0
 	_friendly_aim_los_line_count = 0
 	_reset_mission_los_debug_counters()
+	_reset_waypoint_intent_preview_counters()
 	_weapon_fire_vfx_visual_count = 0
 	_weapon_fire_vfx_entries.clear()
 	_feedback_bubble_visual_count = 0
@@ -4499,6 +4514,7 @@ func _rebuild_order_visuals() -> void:
 	_add_selected_fireteam_aim_visuals()
 	_add_mission_los_debug_visuals()
 	_add_fireteam_orientation_visuals(fireteam_anchor_entries)
+	_add_waypoint_intent_preview_visuals()
 
 	for area_variant in Array(_order_payload.get("area_order_dicts", [])):
 		if typeof(area_variant) != TYPE_DICTIONARY:
@@ -5187,6 +5203,99 @@ func _reset_mission_los_debug_counters() -> void:
 	_mission_los_debug_source_unit_count = 0
 	_mission_los_debug_contact_candidate_count = 0
 	_mission_los_debug_entries.clear()
+
+
+func _reset_waypoint_intent_preview_counters() -> void:
+	_waypoint_intent_preview_visual_count = 0
+	_waypoint_intent_preview_path_line_count = 0
+	_waypoint_intent_preview_threat_line_count = 0
+	_waypoint_intent_preview_entries.clear()
+
+
+func _add_waypoint_intent_preview_visuals() -> void:
+	for preview_variant in Array(_order_payload.get("waypoint_intent_preview_entries", [])):
+		if typeof(preview_variant) != TYPE_DICTIONARY:
+			continue
+		var preview: Dictionary = Dictionary(preview_variant)
+		var points: Array = Array(preview.get("ghost_path_points", []))
+		if points.size() < 2:
+			continue
+		var risk_state: String = String(preview.get("risk_state", "unknown")).strip_edges().to_lower()
+		var preview_color: Color = _get_waypoint_preview_risk_color(risk_state)
+		for index in range(1, points.size()):
+			_add_line3d(
+				_order_root,
+				_world_to_surface_3d_position(Vector2(points[index - 1]), 0.92),
+				_world_to_surface_3d_position(Vector2(points[index]), 0.92),
+				preview_color,
+				"WaypointIntentPreviewPath_%d_%d" % [_waypoint_intent_preview_visual_count, index]
+			)
+			_waypoint_intent_preview_path_line_count += 1
+		var ghost_position: Vector2 = Vector2(preview.get("ghost_ftl_position", points[points.size() - 1]))
+		if _add_world_tile_marker(_order_root, ghost_position, preview_color, "WaypointIntentGhost_%d" % _waypoint_intent_preview_visual_count, 0.085, 0.72):
+			_waypoint_intent_preview_visual_count += 1
+		for line_variant in Array(preview.get("line_of_fire_entries", [])):
+			if typeof(line_variant) != TYPE_DICTIONARY:
+				continue
+			var line_entry: Dictionary = Dictionary(line_variant)
+			var line_color: Color = _get_waypoint_preview_line_color(String(line_entry.get("visual_role", "")), bool(line_entry.get("blocked", false)))
+			_add_line3d(
+				_order_root,
+				_world_to_surface_3d_position(Vector2(line_entry.get("from_position", ghost_position)), 1.08),
+				_world_to_surface_3d_position(Vector2(line_entry.get("to_position", ghost_position)), 1.08),
+				line_color,
+				"WaypointIntentThreat_%d_%d" % [_waypoint_intent_preview_visual_count, _waypoint_intent_preview_threat_line_count]
+			)
+			_waypoint_intent_preview_threat_line_count += 1
+		var label_text: String = _build_waypoint_preview_label(preview)
+		if not label_text.is_empty():
+			_add_label3d(_order_root, label_text, _world_to_surface_3d_position(ghost_position, 1.46), "WaypointIntentPreviewLabel_%d" % _waypoint_intent_preview_visual_count, preview_color.lightened(0.1), 14)
+		_waypoint_intent_preview_entries.append({
+			"fireteam_id": String(preview.get("fireteam_id", "")).strip_edges().to_lower(),
+			"risk_state": risk_state,
+			"risk_reason": String(preview.get("risk_reason", "")).strip_edges(),
+			"ghost_ftl_position": ghost_position,
+			"path_line_count": maxi(points.size() - 1, 0),
+			"threat_line_count": Array(preview.get("line_of_fire_entries", [])).size(),
+			"read_only": true,
+		})
+
+
+func _build_waypoint_preview_label(preview: Dictionary) -> String:
+	var risk_state: String = String(preview.get("risk_state", "unknown")).strip_edges().to_upper()
+	var eta_seconds: int = maxi(int(ceil(float(preview.get("eta_seconds_estimate", 0.0)))), 0)
+	var exposure_count: int = int(preview.get("enemy_exposure_count", 0))
+	if risk_state.is_empty():
+		risk_state = "UNKNOWN"
+	if exposure_count > 0:
+		return "%s E%d ETA~%ds" % [risk_state, exposure_count, eta_seconds]
+	return "%s ETA~%ds" % [risk_state, eta_seconds]
+
+
+func _get_waypoint_preview_risk_color(risk_state: String) -> Color:
+	match risk_state.strip_edges().to_lower():
+		"safe":
+			return WAYPOINT_PREVIEW_SAFE_COLOR
+		"risky":
+			return WAYPOINT_PREVIEW_RISKY_COLOR
+		"suicidal":
+			return WAYPOINT_PREVIEW_SUICIDAL_COLOR
+		_:
+			return WAYPOINT_PREVIEW_UNKNOWN_COLOR
+
+
+func _get_waypoint_preview_line_color(visual_role: String, blocked: bool) -> Color:
+	if blocked or visual_role.strip_edges().to_lower() == "blocked":
+		return WAYPOINT_PREVIEW_BLOCKED_LINE_COLOR
+	match visual_role.strip_edges().to_lower():
+		"friendly_fire_risk":
+			return WAYPOINT_PREVIEW_FRIENDLY_FIRE_LINE_COLOR
+		"enemy_overwatch":
+			return WAYPOINT_PREVIEW_SUICIDAL_COLOR
+		"clear_friendly_shot":
+			return WAYPOINT_PREVIEW_SAFE_COLOR
+		_:
+			return WAYPOINT_PREVIEW_RISKY_COLOR
 
 
 func _add_mission_los_debug_visuals() -> void:
