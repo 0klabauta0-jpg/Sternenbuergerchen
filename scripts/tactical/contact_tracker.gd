@@ -9,6 +9,8 @@ const STATE_LOST: String = "lost"
 
 const CONFIRM_AFTER_LOS_TICKS: int = 2
 const MAX_RELAY_DELAY_SECONDS: float = 3.0
+const APPROXIMATE_POSITION_GRID_SIZE: float = 64.0
+const STALE_REPORT_AFTER_SECONDS: float = 8.0
 
 var _entries_by_key: Dictionary = {}
 var _keys_by_fireteam: Dictionary = {}
@@ -21,14 +23,14 @@ func reset_all() -> void:
 	_relay_queue_by_key.clear()
 
 
-func get_contact_state(fireteam_id: String, enemy_unit_id: String) -> Dictionary:
+func get_contact_state(fireteam_id: String, enemy_unit_id: String, current_tick: int = -1) -> Dictionary:
 	var key: String = _make_entry_key(fireteam_id, enemy_unit_id)
 	if key.is_empty():
 		return {}
-	return _build_public_entry(Dictionary(_entries_by_key.get(key, {})))
+	return _build_public_entry(Dictionary(_entries_by_key.get(key, {})), current_tick)
 
 
-func get_fireteam_contacts(fireteam_id: String) -> Array:
+func get_fireteam_contacts(fireteam_id: String, current_tick: int = -1) -> Array:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return []
@@ -37,19 +39,19 @@ func get_fireteam_contacts(fireteam_id: String) -> Array:
 	keys.sort()
 	for key_variant in keys:
 		var entry: Dictionary = Dictionary(_entries_by_key.get(String(key_variant), {}))
-		var public_entry: Dictionary = _build_public_entry(entry)
+		var public_entry: Dictionary = _build_public_entry(entry, current_tick)
 		if public_entry.is_empty():
 			continue
 		result.append(public_entry)
 	return result
 
 
-func get_contact_snapshot() -> Array:
+func get_contact_snapshot(current_tick: int = -1) -> Array:
 	var result: Array = []
 	var keys: Array = _entries_by_key.keys()
 	keys.sort()
 	for key_variant in keys:
-		var public_entry: Dictionary = _build_public_entry(Dictionary(_entries_by_key.get(String(key_variant), {})))
+		var public_entry: Dictionary = _build_public_entry(Dictionary(_entries_by_key.get(String(key_variant), {})), current_tick)
 		if public_entry.is_empty():
 			continue
 		result.append(public_entry)
@@ -86,7 +88,7 @@ func _apply_observation(current_tick: int, observation: Dictionary, known_firete
 	var entry_key: String = _make_entry_key(fireteam_id, enemy_unit_id)
 	if entry_key.is_empty():
 		return false
-	var previous_public: String = JSON.stringify(_build_public_entry(Dictionary(_entries_by_key.get(entry_key, {}))))
+	var previous_public: String = JSON.stringify(_build_public_entry(Dictionary(_entries_by_key.get(entry_key, {})), current_tick))
 	var entry: Dictionary = Dictionary(_entries_by_key.get(entry_key, {})).duplicate(true)
 	var last_seen_tick: int = int(entry.get("last_seen_tick", -999999))
 	var los_ticks: int = 1
@@ -99,16 +101,19 @@ func _apply_observation(current_tick: int, observation: Dictionary, known_firete
 	entry["fireteam_id"] = fireteam_id
 	entry["unit_id"] = enemy_unit_id
 	entry["team_id"] = String(observation.get("team_id", observation.get("enemy_team_id", ""))).strip_edges()
+	entry["enemy_type"] = _normalize_enemy_type(String(observation.get("enemy_type", observation.get("role_id", observation.get("enemy_profile_label", "")))))
 	entry["last_known_position"] = position
 	entry["detection_state"] = next_state
 	entry["detected_by"] = _merge_detected_by(Array(entry.get("detected_by", [])), [fireteam_id])
 	entry["last_updated_tick"] = current_tick
 	entry["last_seen_tick"] = current_tick
 	entry["los_ticks"] = los_ticks
+	if observation.has("confidence") or observation.has("contact_report_confidence"):
+		entry["contact_report_confidence_hint"] = clampf(float(observation.get("contact_report_confidence", observation.get("confidence", 0.0))), 0.0, 1.0)
 	_store_entry(entry_key, entry)
 	if next_state == STATE_CONFIRMED:
 		_schedule_confirmed_relays(current_tick, fireteam_id, enemy_unit_id, entry, known_fireteam_ids, leadership_by_fireteam)
-	var next_public: String = JSON.stringify(_build_public_entry(entry))
+	var next_public: String = JSON.stringify(_build_public_entry(entry, current_tick))
 	return previous_public != next_public
 
 
@@ -142,8 +147,11 @@ func _schedule_confirmed_relays(current_tick: int, source_fireteam_id: String, e
 			"receiver_fireteam_id": receiver_fireteam_id,
 			"unit_id": enemy_unit_id,
 			"team_id": String(entry.get("team_id", "")),
+			"enemy_type": _normalize_enemy_type(String(entry.get("enemy_type", ""))),
 			"last_known_position": Vector2(entry.get("last_known_position", Vector2.ZERO)),
 			"detected_by": Array(entry.get("detected_by", [])).duplicate(true),
+			"last_seen_tick": int(entry.get("last_seen_tick", current_tick)),
+			"contact_report_confidence_hint": float(entry.get("contact_report_confidence_hint", -1.0)),
 			"due_tick": current_tick + delay_ticks,
 		}
 
@@ -162,7 +170,7 @@ func _deliver_due_relays(current_tick: int) -> bool:
 		var entry_key: String = _make_entry_key(receiver_fireteam_id, enemy_unit_id)
 		if entry_key.is_empty():
 			continue
-		var previous_public: String = JSON.stringify(_build_public_entry(Dictionary(_entries_by_key.get(entry_key, {}))))
+		var previous_public: String = JSON.stringify(_build_public_entry(Dictionary(_entries_by_key.get(entry_key, {})), current_tick))
 		var entry: Dictionary = Dictionary(_entries_by_key.get(entry_key, {})).duplicate(true)
 		var current_state: String = String(entry.get("detection_state", STATE_UNKNOWN))
 		if current_state != STATE_SPOTTED and current_state != STATE_CONFIRMED:
@@ -170,12 +178,16 @@ func _deliver_due_relays(current_tick: int) -> bool:
 		entry["fireteam_id"] = receiver_fireteam_id
 		entry["unit_id"] = enemy_unit_id
 		entry["team_id"] = String(relay.get("team_id", ""))
+		entry["enemy_type"] = _normalize_enemy_type(String(relay.get("enemy_type", "")))
 		entry["last_known_position"] = Vector2(relay.get("last_known_position", Vector2.ZERO))
 		entry["detected_by"] = _merge_detected_by(Array(entry.get("detected_by", [])), Array(relay.get("detected_by", [])) + [receiver_fireteam_id])
 		entry["last_updated_tick"] = current_tick
+		entry["last_seen_tick"] = int(relay.get("last_seen_tick", current_tick))
 		entry["los_ticks"] = 0
+		if float(relay.get("contact_report_confidence_hint", -1.0)) >= 0.0:
+			entry["contact_report_confidence_hint"] = clampf(float(relay.get("contact_report_confidence_hint", 0.0)), 0.0, 1.0)
 		_store_entry(entry_key, entry)
-		var next_public: String = JSON.stringify(_build_public_entry(entry))
+		var next_public: String = JSON.stringify(_build_public_entry(entry, current_tick))
 		if previous_public != next_public:
 			changed = true
 	for relay_key in delivered_keys:
@@ -232,21 +244,118 @@ func _merge_detected_by(existing: Array, additions: Array) -> Array:
 	return result
 
 
-func _build_public_entry(entry: Dictionary) -> Dictionary:
+func _build_public_entry(entry: Dictionary, current_tick: int = -1) -> Dictionary:
 	if entry.is_empty():
 		return {}
 	var state: String = String(entry.get("detection_state", STATE_UNKNOWN))
 	if state == STATE_UNKNOWN:
 		return {}
+	var snapshot_tick: int = current_tick
+	if snapshot_tick < 0:
+		snapshot_tick = int(entry.get("last_updated_tick", entry.get("last_seen_tick", 0)))
+	var last_seen_tick: int = int(entry.get("last_seen_tick", entry.get("last_updated_tick", snapshot_tick)))
+	var age_ticks: int = maxi(snapshot_tick - last_seen_tick, 0)
+	var age_seconds: float = float(age_ticks) / maxf(float(Engine.physics_ticks_per_second), 1.0)
+	var enemy_type: String = _normalize_enemy_type(String(entry.get("enemy_type", "")))
+	var confidence: float = _build_report_confidence(entry, state, age_seconds)
+	var approximate_position: Vector2 = _build_approximate_position(Vector2(entry.get("last_known_position", Vector2.ZERO)), confidence)
+	var report_state: String = _build_report_state(state, age_seconds)
+	var uncertainty_world: float = _build_position_uncertainty_world(confidence, age_seconds)
 	return {
 		"fireteam_id": String(entry.get("fireteam_id", "")),
 		"unit_id": String(entry.get("unit_id", "")),
 		"team_id": String(entry.get("team_id", "")),
+		"enemy_type": enemy_type,
 		"last_known_position": Vector2(entry.get("last_known_position", Vector2.ZERO)),
+		"approximate_position": approximate_position,
+		"position_uncertainty_world": uncertainty_world,
 		"detection_state": state,
+		"report_state": report_state,
+		"confidence": confidence,
+		"confidence_level": _build_confidence_level(confidence),
 		"detected_by": Array(entry.get("detected_by", [])).duplicate(true),
 		"last_updated_tick": int(entry.get("last_updated_tick", -1)),
+		"last_seen_tick": last_seen_tick,
+		"last_seen_age_ticks": age_ticks,
+		"last_seen_age_seconds": age_seconds,
+		"report_text": _build_report_text(enemy_type, age_seconds, confidence),
+		"fow_last_known": report_state != "current",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
 	}
+
+
+func _build_report_confidence(entry: Dictionary, state: String, age_seconds: float) -> float:
+	if float(entry.get("contact_report_confidence_hint", -1.0)) >= 0.0:
+		return clampf(float(entry.get("contact_report_confidence_hint", 0.0)) - minf(age_seconds / 30.0, 0.35), 0.05, 1.0)
+	var confidence: float = 0.12
+	match state.strip_edges().to_lower():
+		STATE_CONFIRMED:
+			confidence = 0.92
+		STATE_SPOTTED:
+			confidence = 0.74
+		STATE_SUSPECTED:
+			confidence = 0.55
+		STATE_LOST:
+			confidence = 0.48
+		_:
+			confidence = 0.2
+	confidence += minf(float(entry.get("los_ticks", 0)) * 0.025, 0.08)
+	confidence -= minf(age_seconds / 24.0, 0.35)
+	return clampf(confidence, 0.05, 0.98)
+
+
+func _build_report_state(state: String, age_seconds: float) -> String:
+	var normalized_state: String = state.strip_edges().to_lower()
+	if (normalized_state == STATE_SPOTTED or normalized_state == STATE_CONFIRMED) and age_seconds <= 0.25:
+		return "current"
+	if age_seconds >= STALE_REPORT_AFTER_SECONDS:
+		return "stale"
+	return "last_known"
+
+
+func _build_confidence_level(confidence: float) -> String:
+	if confidence >= 0.75:
+		return "high"
+	if confidence >= 0.45:
+		return "medium"
+	return "low"
+
+
+func _build_position_uncertainty_world(confidence: float, age_seconds: float) -> float:
+	var confidence_penalty: float = lerpf(96.0, 16.0, clampf(confidence, 0.0, 1.0))
+	var age_penalty: float = minf(age_seconds * 6.0, 96.0)
+	return maxf(12.0, confidence_penalty + age_penalty)
+
+
+func _build_approximate_position(position: Vector2, confidence: float) -> Vector2:
+	if confidence >= 0.75:
+		return position
+	var grid_size: float = APPROXIMATE_POSITION_GRID_SIZE
+	return Vector2(round(position.x / grid_size) * grid_size, round(position.y / grid_size) * grid_size)
+
+
+func _build_report_text(enemy_type: String, age_seconds: float, confidence: float) -> String:
+	return "1 contact, %s, last seen %s, %d%% conf" % [
+		enemy_type,
+		_format_age_label(age_seconds),
+		int(round(clampf(confidence, 0.0, 1.0) * 100.0)),
+	]
+
+
+func _format_age_label(age_seconds: float) -> String:
+	if age_seconds < 0.75:
+		return "now"
+	if age_seconds < 1.5:
+		return "1s ago"
+	return "%ds ago" % int(round(age_seconds))
+
+
+func _normalize_enemy_type(value: String) -> String:
+	var normalized: String = value.strip_edges().to_lower()
+	if normalized.is_empty():
+		return "unknown"
+	return normalized.replace("_", " ")
 
 
 func _make_entry_key(fireteam_id: String, enemy_unit_id: String) -> String:

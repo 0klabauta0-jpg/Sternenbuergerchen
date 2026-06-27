@@ -34,10 +34,14 @@ func _draw() -> void:
 		if typeof(contact_variant) != TYPE_DICTIONARY:
 			continue
 		var contact: Dictionary = Dictionary(contact_variant)
-		var position: Vector2 = Vector2(contact.get("last_known_position", Vector2.ZERO))
+		var position: Vector2 = Vector2(contact.get("approximate_position", contact.get("last_known_position", Vector2.ZERO)))
 		var detection_state: String = String(contact.get("detection_state", "unknown")).strip_edges().to_lower()
+		var report_state: String = String(contact.get("report_state", "current")).strip_edges().to_lower()
 		var edge_color: Color = _get_fireteam_color(String(contact.get("fireteam_id", "")))
-		var fill_color: Color = _get_contact_color(detection_state)
+		var fill_color: Color = _get_contact_color(detection_state, report_state)
+		var uncertainty_radius: float = clampf(float(contact.get("position_uncertainty_world", 0.0)) / 8.0, ICON_RADIUS + 2.0, ICON_RADIUS + 18.0)
+		if report_state == "last_known" or report_state == "stale":
+			draw_arc(position, uncertainty_radius, 0.0, TAU, 24, fill_color.lightened(0.2), 1.0)
 		match detection_state:
 			"suspected":
 				draw_circle(position, ICON_RADIUS, fill_color)
@@ -120,7 +124,12 @@ func _contact_state_rank(detection_state: String) -> int:
 			return 0
 
 
-func _get_contact_color(detection_state: String) -> Color:
+func _get_contact_color(detection_state: String, report_state: String = "current") -> Color:
+	match report_state.strip_edges().to_lower():
+		"stale":
+			return Color(0.48, 0.51, 0.56, 0.34)
+		"last_known":
+			return Color(0.95, 0.78, 0.34, 0.54)
 	match detection_state.strip_edges().to_lower():
 		"suspected":
 			return Color(0.95, 0.92, 0.45, 0.72)

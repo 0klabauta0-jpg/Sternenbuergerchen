@@ -138,6 +138,7 @@ git checkout -b batch/<batch-name>
 - TASK_507 - Order Preview Ghosts MVP (implementiert)
 - TASK_508 - Line-of-Fire / Threat Analyzer MVP (implementiert)
 - TASK_509 - Combined Preview Overlay (implementiert)
+- TASK_510 - Contact Report Upgrade (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

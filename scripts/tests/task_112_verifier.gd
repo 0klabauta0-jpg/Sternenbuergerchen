@@ -143,7 +143,7 @@ func _test_scene_exposes_contact_snapshot_and_overlay() -> void:
 	_assert(started, "Mission scene starts successfully for contact integration")
 	_assert(overlay != null, "Mission scene attaches a ContactMapOverlay node")
 	_assert(not tactical_snapshot.is_empty(), "Tactical controller exposes live contact tracker snapshots")
-	_assert(JSON.stringify(tactical_snapshot) == JSON.stringify(combat_snapshot), "Tactical controller proxies the combat loop contact snapshot without divergence")
+	_assert(_contact_snapshots_share_core_fields(tactical_snapshot, combat_snapshot), "Tactical controller preserves combat contact core fields while allowing UI/report enrichment")
 	scene.queue_free()
 	await process_frame
 
@@ -156,6 +156,41 @@ func _build_observation(fireteam_id: String, enemy_unit_id: String, position_val
 		"last_known_position": position_value,
 		"detection_complete": detection_complete,
 	}
+
+
+func _contact_snapshots_share_core_fields(tactical_snapshot: Array, combat_snapshot: Array) -> bool:
+	if tactical_snapshot.size() != combat_snapshot.size():
+		return false
+	var tactical_by_key: Dictionary = _index_contacts_by_key(tactical_snapshot)
+	var combat_by_key: Dictionary = _index_contacts_by_key(combat_snapshot)
+	if tactical_by_key.keys().size() != combat_by_key.keys().size():
+		return false
+	for key_variant in combat_by_key.keys():
+		var key: String = String(key_variant)
+		if not tactical_by_key.has(key):
+			return false
+		var tactical: Dictionary = Dictionary(tactical_by_key.get(key, {}))
+		var combat: Dictionary = Dictionary(combat_by_key.get(key, {}))
+		for field in ["fireteam_id", "unit_id", "team_id", "detection_state", "last_known_position", "last_updated_tick"]:
+			if tactical.get(String(field), null) != combat.get(String(field), null):
+				return false
+	return true
+
+
+func _index_contacts_by_key(snapshot: Array) -> Dictionary:
+	var result: Dictionary = {}
+	for contact_variant in snapshot:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var key: String = "%s:%s" % [
+			String(contact.get("fireteam_id", "")).strip_edges().to_lower(),
+			String(contact.get("unit_id", contact.get("target_id", ""))).strip_edges(),
+		]
+		if key.strip_edges() == ":":
+			continue
+		result[key] = contact
+	return result
 
 
 func _build_behavior_profile(command_type: String) -> Dictionary:

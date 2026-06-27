@@ -343,7 +343,7 @@ func get_combat_hotpath_audit_snapshot() -> Dictionary:
 func get_contact_snapshot() -> Array:
 	if _contact_tracker == null:
 		return []
-	return Array(_contact_tracker.call("get_contact_snapshot")).duplicate(true)
+	return Array(_contact_tracker.call("get_contact_snapshot", _current_tick)).duplicate(true)
 
 
 func get_unit_presence_audit_snapshot() -> Dictionary:
@@ -369,7 +369,7 @@ func get_unit_presence_audit_snapshot() -> Dictionary:
 func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
 	if _contact_tracker == null:
 		return []
-	return Array(_contact_tracker.call("get_fireteam_contacts", fireteam_id)).duplicate(true)
+	return Array(_contact_tracker.call("get_fireteam_contacts", fireteam_id, _current_tick)).duplicate(true)
 
 
 func _publish_multiplayer_snapshot_context(simulation_root: Node) -> void:
@@ -2095,6 +2095,7 @@ func _update_contact_tracking() -> void:
 				"fireteam_id": fireteam_id,
 				"unit_id": enemy_unit_id,
 				"team_id": String(enemy.call("get_team_id")) if enemy.has_method("get_team_id") else "",
+				"enemy_type": _get_contact_enemy_type(enemy),
 				"last_known_position": (enemy as Node2D).global_position if enemy is Node2D else Vector2.ZERO,
 				"detection_complete": _is_detection_complete(attacker_id, enemy_unit_id),
 			})
@@ -2266,6 +2267,21 @@ func _describe_enemy_unit(unit) -> String:
 
 func _get_unit_active_weapon_id(unit) -> String:
 	return String(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("get_unit_active_weapon_id", unit))
+
+
+func _get_contact_enemy_type(enemy) -> String:
+	if enemy == null:
+		return "unknown"
+	var weapon_id: String = _get_unit_active_weapon_id(enemy).strip_edges().to_lower()
+	if weapon_id == "sniper" or weapon_id == "rocket_launcher" or weapon_id == "rail_gun":
+		return weapon_id
+	if enemy.has_method("get_role_id"):
+		var role_id: String = String(enemy.call("get_role_id")).strip_edges().to_lower()
+		if not role_id.is_empty():
+			return role_id
+	if not weapon_id.is_empty():
+		return weapon_id
+	return "unknown"
 
 
 func _find_first_contact_pair() -> Dictionary:

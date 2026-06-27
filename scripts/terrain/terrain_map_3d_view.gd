@@ -5460,6 +5460,9 @@ func _add_mission_los_debug_pair_visual(source_unit: Node, contact: Dictionary, 
 		"source_fireteam_id": _get_unit_fireteam_id(source_unit),
 		"target_id": target_id,
 		"detection_state": String(contact.get("detection_state", "unknown")).strip_edges().to_lower(),
+		"report_state": String(contact.get("report_state", "current")).strip_edges().to_lower(),
+		"confidence": clampf(float(contact.get("confidence", 0.0)), 0.0, 1.0),
+		"confidence_level": String(contact.get("confidence_level", "unknown")),
 		"origin_position": origin_position,
 		"target_position": target_position,
 		"origin_grid": origin_grid,
@@ -6377,11 +6380,12 @@ func _rebuild_contact_visuals() -> void:
 		if not _fow_allows_contact_visual(contact):
 			_fow_hidden_contact_count += 1
 			continue
-		var position_variant = contact.get("last_known_position", null)
+		var position_variant = contact.get("approximate_position", contact.get("last_known_position", null))
 		if typeof(position_variant) != TYPE_VECTOR2:
 			continue
 		var detection_state: String = String(contact.get("detection_state", "unknown")).strip_edges().to_lower()
-		_add_marker3d(_contact_root, Vector2(position_variant), _get_contact_color(detection_state), "Contact_%s" % String(contact.get("unit_id", _contact_count)), 0.26, 0.035, 16, 0.015)
+		var report_state: String = String(contact.get("report_state", "current")).strip_edges().to_lower()
+		_add_marker3d(_contact_root, Vector2(position_variant), _get_contact_color(detection_state, report_state), "Contact_%s" % String(contact.get("unit_id", _contact_count)), 0.26, 0.035, 16, 0.015)
 		var enemy_profile_label: String = String(contact.get("enemy_profile_label", "")).strip_edges()
 		if bool(contact.get("enemy_profile_revealed", false)) and not enemy_profile_label.is_empty():
 			_add_label3d(_contact_root, enemy_profile_label.to_upper(), _world_to_surface_3d_position(Vector2(position_variant) + Vector2(0.0, -24.0), MOVEMENT_LABEL_HEIGHT + 0.52), "ContactProfile_%s" % String(contact.get("unit_id", _contact_count)), Color(1.0, 0.76, 0.32, 0.95), 11)
@@ -6391,7 +6395,12 @@ func _rebuild_contact_visuals() -> void:
 			"unit_id": String(contact.get("unit_id", contact.get("target_id", ""))).strip_edges(),
 			"target_id": String(contact.get("target_id", contact.get("unit_id", ""))).strip_edges(),
 			"detection_state": detection_state,
+			"report_state": report_state,
+			"confidence": clampf(float(contact.get("confidence", 0.0)), 0.0, 1.0),
+			"confidence_level": String(contact.get("confidence_level", "unknown")),
 			"last_known_position": Vector2(position_variant),
+			"position_uncertainty_world": float(contact.get("position_uncertainty_world", 0.0)),
+			"report_text": String(contact.get("report_text", "")),
 			"fow_last_known": bool(contact.get("fow_last_known", false)),
 			"enemy_profile_revealed": bool(contact.get("enemy_profile_revealed", false)),
 			"enemy_profile_id": String(contact.get("enemy_profile_id", "")),
@@ -9726,7 +9735,12 @@ func _get_command_color(command_type: String) -> Color:
 			return Color(0.32, 0.72, 1.0, 0.92)
 
 
-func _get_contact_color(detection_state: String) -> Color:
+func _get_contact_color(detection_state: String, report_state: String = "current") -> Color:
+	match report_state.strip_edges().to_lower():
+		"stale":
+			return Color(0.48, 0.51, 0.56, 0.48)
+		"last_known":
+			return Color(0.95, 0.78, 0.34, 0.66)
 	match detection_state.strip_edges().to_lower():
 		"suspected":
 			return Color(0.95, 0.92, 0.45, 0.82)

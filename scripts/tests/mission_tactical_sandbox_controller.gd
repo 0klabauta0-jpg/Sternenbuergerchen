@@ -233,6 +233,7 @@ var _fireteamleader_feedback_sequence: int = 0
 var _tactical_communication_resolver = null
 var _tactical_communication_events: Array = []
 var _tactical_event_log = null
+var _last_contact_report_event_signature_by_id: Dictionary = {}
 var _tactical_breakout_resolver = null
 var _tactical_breakout_records: Array = []
 var _npc_thought_bubbles: Array = []
@@ -1287,13 +1288,18 @@ func _enrich_contact_entries_with_recon(contact_entries: Array, fallback_firetea
 		var detection_state: String = String(contact.get("detection_state", "")).strip_edges().to_lower()
 		var unit_id: String = String(contact.get("unit_id", contact.get("target_id", ""))).strip_edges()
 		var report_quality: float = _get_contact_report_quality_for_fireteam(fireteam_id)
+		var base_confidence: float = clampf(float(contact.get("confidence", 0.5)), 0.0, 1.0)
+		contact["contact_report_quality"] = report_quality
+		contact["confidence"] = clampf((base_confidence * 0.72) + (report_quality * 0.28), 0.05, 0.98)
 		if detection_state == "confirmed" and report_quality >= 0.66 and tactics_by_unit_id.has(unit_id):
 			var tactics_state: Dictionary = Dictionary(tactics_by_unit_id.get(unit_id, {}))
 			var profile_id: String = String(tactics_state.get("profile_id", "")).strip_edges().to_lower()
 			contact["enemy_profile_revealed"] = true
 			contact["enemy_profile_id"] = profile_id
 			contact["enemy_profile_label"] = _get_enemy_profile_player_label(profile_id, String(tactics_state.get("tactic_label", "")))
-			contact["contact_report_quality"] = report_quality
+			if String(contact.get("enemy_type", "unknown")).strip_edges().to_lower() == "unknown":
+				contact["enemy_type"] = String(contact.get("enemy_profile_label", "unknown")).strip_edges().to_lower()
+		contact["report_text"] = _build_contact_report_text(contact)
 		result.append(contact)
 	return result
 
@@ -1318,6 +1324,104 @@ func _get_contact_report_quality_for_fireteam(fireteam_id: String) -> float:
 	if public_snapshot.has("contact_report_quality"):
 		return clampf(float(public_snapshot.get("contact_report_quality", 0.5)), 0.0, 1.0)
 	return clampf(float(profile_dict.get("contact_report_quality", 0.5)), 0.0, 1.0)
+
+
+func _build_contact_report_text(contact: Dictionary) -> String:
+	var enemy_type: String = String(contact.get("enemy_type", "unknown")).strip_edges()
+	if enemy_type.is_empty():
+		enemy_type = "unknown"
+	var confidence: float = clampf(float(contact.get("confidence", 0.0)), 0.0, 1.0)
+	return "1 Kontakt, %s, zuletzt %s, %d%% sicher" % [
+		enemy_type,
+		_format_contact_report_age(float(contact.get("last_seen_age_seconds", 0.0))),
+		int(round(confidence * 100.0)),
+	]
+
+
+func _format_contact_report_age(age_seconds: float) -> String:
+	if age_seconds < 0.75:
+		return "jetzt"
+	if age_seconds < 1.5:
+		return "vor 1s"
+	return "vor %ds" % int(round(age_seconds))
+
+
+func _emit_contact_report_events_from_snapshot(contact_entries: Array) -> void:
+	var events: Array = []
+	for contact_variant in contact_entries:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
+		var unit_id: String = String(contact.get("unit_id", contact.get("target_id", ""))).strip_edges()
+		if fireteam_id.is_empty() or unit_id.is_empty():
+			continue
+		var signature: String = _build_contact_report_event_signature(contact)
+		var report_key: String = "%s:%s" % [fireteam_id, unit_id]
+		if String(_last_contact_report_event_signature_by_id.get(report_key, "")) == signature:
+			continue
+		_last_contact_report_event_signature_by_id[report_key] = signature
+		events.append(_build_contact_report_event(contact, signature))
+	if events.is_empty():
+		return
+	_record_tactical_communication_events(events, {"now_msec": Time.get_ticks_msec(), "cooldown_msec": 0, "max_events": 5, "max_per_channel": 5})
+
+
+func _build_contact_report_event_signature(contact: Dictionary) -> String:
+	var position: Vector2 = Vector2(contact.get("approximate_position", contact.get("last_known_position", Vector2.ZERO)))
+	var confidence_bucket: int = int(floor(clampf(float(contact.get("confidence", 0.0)), 0.0, 1.0) * 10.0))
+	return "%s:%s:%d:%d:%d:%d" % [
+		String(contact.get("detection_state", "unknown")).strip_edges().to_lower(),
+		String(contact.get("report_state", "last_known")).strip_edges().to_lower(),
+		confidence_bucket,
+		roundi(position.x),
+		roundi(position.y),
+		int(floor(float(contact.get("last_seen_age_seconds", 0.0)) / 8.0)),
+	]
+
+
+func _build_contact_report_event(contact: Dictionary, signature: String) -> Dictionary:
+	var fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
+	var unit_id: String = String(contact.get("unit_id", contact.get("target_id", ""))).strip_edges()
+	var target_position: Vector2 = Vector2(contact.get("approximate_position", contact.get("last_known_position", Vector2.ZERO)))
+	var short_text: String = String(contact.get("report_text", _build_contact_report_text(contact))).strip_edges()
+	var report_state: String = String(contact.get("report_state", "last_known")).strip_edges().to_lower()
+	return {
+		"event_id": "contact_report_%s_%s_%s" % [_sanitize_contact_report_id_part(fireteam_id), _sanitize_contact_report_id_part(unit_id), _sanitize_contact_report_id_part(signature)],
+		"event_type": TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_CONTACT_REPORT,
+		"fireteam_id": fireteam_id,
+		"unit_id": unit_id,
+		"priority": TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_HIGH if report_state == "current" else TACTICAL_COMMUNICATION_EVENT_SCRIPT.PRIORITY_NORMAL,
+		"duration_seconds": 2.2,
+		"channels": PackedStringArray([
+			TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_SELECTED_FIRETEAM,
+			TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_MISSION_CONTROL,
+			TACTICAL_COMMUNICATION_EVENT_SCRIPT.CHANNEL_MAP_MARKER,
+		]),
+		"feedback_action": "engage",
+		"feedback_state": "contact",
+		"short_text": short_text,
+		"detail_text": "%s | state %s | confidence %s | uncertainty %.0fm" % [
+			short_text,
+			String(contact.get("detection_state", "unknown")),
+			String(contact.get("confidence_level", "unknown")),
+			float(contact.get("position_uncertainty_world", 0.0)),
+		],
+		"map_label": "CONTACT",
+		"created_msec": Time.get_ticks_msec(),
+		"source": TACTICAL_COMMUNICATION_EVENT_SCRIPT.SOURCE_ID,
+		"visual_only": true,
+		"target_position": target_position,
+		"anchor_position": target_position,
+		"cooldown_key": "contact_report:%s:%s:%s" % [fireteam_id, unit_id, report_state],
+	}
+
+
+func _sanitize_contact_report_id_part(value: String) -> String:
+	var sanitized: String = value.strip_edges().to_lower()
+	for character in [":", "/", "\\", " ", ",", ".", "(", ")", "[", "]"]:
+		sanitized = sanitized.replace(character, "_")
+	return sanitized
 
 
 func _get_enemy_profile_player_label(profile_id: String, fallback_label: String = "") -> String:
@@ -11595,14 +11699,16 @@ func _refresh_order_visuals() -> void:
 func refresh_contact_overlay() -> void:
 	var overlay := get_node_or_null("../ContactMapOverlay")
 	var primary_3d_view = _get_primary_3d_view()
+	var contact_snapshot: Array = get_contact_snapshot()
+	_emit_contact_report_events_from_snapshot(contact_snapshot)
 	if primary_3d_view != null:
-		_primary_view_bridge.call("sync_contact_entries", get_parent(), get_contact_snapshot(), _selected_fireteam_ids)
+		_primary_view_bridge.call("sync_contact_entries", get_parent(), contact_snapshot, _selected_fireteam_ids)
 	if overlay == null:
 		return
 	if overlay is CanvasItem:
 		_primary_view_bridge.call("hide_canvas_item_when_primary", get_parent(), overlay as CanvasItem)
 	overlay.call("set_selected_fireteam_ids", _selected_fireteam_ids)
-	overlay.call("set_contact_entries", get_contact_snapshot())
+	overlay.call("set_contact_entries", contact_snapshot)
 
 
 func _sync_primary_3d_order_visuals() -> void:

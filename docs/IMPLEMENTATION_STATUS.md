@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_510 - Contact Report Upgrade
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_510_contact_report_upgrade.md`, `docs/dev/contact_report_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`
+- Stand: `ContactTracker` liefert Contact Reports mit `enemy_type`, `approximate_position`, `confidence`, `confidence_level`, `report_state`, Sichtungsalter, Unsicherheit und `report_text`; UI-Felder bleiben read-only und setzen keine Gameplay-Wahrheit.
+- Stand: Mission-Combat reicht den aktuellen Tick und grobe Gegner-Typen in den Tracker; der TacticalController reichert die Meldungen mit FTL-Reportqualitaet an und speist deduplizierte `contact_report`-Eintraege in den bestehenden Tactical-Event-Log-Adapter.
+- Stand: 2D-ContactMapOverlay und Primary-3D-View unterscheiden aktuelle, last-known und stale Kontakte sichtbar und expose die neuen Report-Felder in ihren Snapshots.
+- Risiken/offen: Enemy-Typisierung und Gruppierung sind MVP; aggregierte Meldungen wie "2 Gegner, vermutlich Riflemen" bleiben ein spaeterer Politur-Slice. Manueller F6-Sichttest wurde auf Wunsch uebersprungen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_510_contact_report_upgrade.gd`, `task_112_verifier.gd`, `task_506_tactical_decision_clarity_contract.gd`, `git diff --check`.
+- Naechster Schritt: TASK_511 AI Intent Bubble Debug Toggle oder kleiner Sicht-/UX-Polish fuer Contact-Report-Gruppierung.
 ### TASK_506-TASK_509 - Tactical Decision Clarity Block
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_506_tactical_decision_clarity_contract.md`, `docs/tasks/TASK_507_order_preview_ghosts_mvp.md`, `docs/tasks/TASK_508_line_of_fire_threat_analyzer_mvp.md`, `docs/tasks/TASK_509_combined_preview_overlay.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/tasks/TASK_375_waypoint_intent_preview.md`, `docs/dev/runtime_script_layout_contract.md`
