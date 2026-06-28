@@ -55,6 +55,13 @@ func get_status_text() -> String:
 	return status_label.text
 
 
+func get_team_readability_text() -> String:
+	var label := get_node_or_null("Panel/Margin/VBox/TeamReadabilityLabel") as Label
+	if label == null:
+		return ""
+	return label.text
+
+
 func get_last_mission_result() -> Dictionary:
 	return _last_mission_result.duplicate(true)
 
@@ -234,6 +241,7 @@ func _refresh_from_session() -> void:
 
 func _apply_session_snapshot(snapshot: Dictionary) -> void:
 	_set_status_text(String(snapshot.get("status_text", "Ready. Host or join a local test session.")))
+	_set_team_readability_text(_build_team_readability_text(snapshot))
 	_refresh_lobby_controls(snapshot)
 
 
@@ -273,6 +281,38 @@ func _set_status_text(status_text: String) -> void:
 		return
 
 	status_label.text = status_text
+
+
+func _build_team_readability_text(snapshot: Dictionary) -> String:
+	var direct_summary: String = String(snapshot.get("team_readability_summary", "")).strip_edges()
+	if not direct_summary.is_empty():
+		return direct_summary
+	var team_readability: Dictionary = Dictionary(snapshot.get("team_readability", {}))
+	return String(team_readability.get("summary_text", "")).strip_edges()
+
+
+func _set_team_readability_text(text: String) -> void:
+	var label := _get_or_create_team_readability_label()
+	if label == null:
+		return
+	label.text = text
+	label.visible = not text.strip_edges().is_empty()
+
+
+func _get_or_create_team_readability_label() -> Label:
+	var vbox := get_node_or_null("Panel/Margin/VBox") as VBoxContainer
+	if vbox == null:
+		return null
+	var label := vbox.get_node_or_null("TeamReadabilityLabel") as Label
+	if label != null:
+		return label
+	label = Label.new()
+	label.name = "TeamReadabilityLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", 11)
+	label.modulate = Color(0.72, 0.88, 1.0, 0.95)
+	vbox.add_child(label)
+	return label
 
 
 func _set_lobby_visible(is_visible: bool) -> void:

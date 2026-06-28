@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf <code>task/cargo-touchdown-visual-polish</code>; diese Datei dient jetzt auch als laufender Zwischenbericht.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf <code>task/pvp-team-readability-ui-pass</code>; diese Datei dient jetzt auch als laufender Zwischenbericht.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -170,6 +170,7 @@
       <span class="pill good">TASK_520 MP-Ownership</span>
       <span class="pill good">TASK_521 Builder-Preview</span>
       <span class="pill good">TASK_522 Cargo-Visuals</span>
+      <span class="pill good">TASK_523 PvP-Teamlesbarkeit</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -193,7 +194,7 @@
           <h2>Kurzfazit</h2>
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
-          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, TASK_518 macht daraus lesbare Runtime-Gates, TASK_519 koppelt den Cargo-Frachter als read-only Runtime-Snapshot an diese Gates, TASK_520 klaert Alpha/Bravo-/NPC-/Peer-Ownership fuer PvP-Smokes, TASK_521 macht Network-Drag im Builder als read-only 3D-Preview sichtbar, und TASK_522 macht den Cargo-Touchdown im Missionsbild sichtbar. Die naechste Verdichtung sitzt vor allem noch in PvP-UI-Teamlesbarkeit, Enemy-State-Aufbereitung und den grossen Editor-/Visual-Skripten.</p>
+          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, TASK_518 macht daraus lesbare Runtime-Gates, TASK_519 koppelt den Cargo-Frachter als read-only Runtime-Snapshot an diese Gates, TASK_520 klaert Alpha/Bravo-/NPC-/Peer-Ownership fuer PvP-Smokes, TASK_521 macht Network-Drag im Builder als read-only 3D-Preview sichtbar, TASK_522 macht den Cargo-Touchdown im Missionsbild sichtbar, und TASK_523 macht Alpha/Bravo-/NPC-/Peer-Besitz in Lobby und Session lesbar. Die naechste Verdichtung sitzt vor allem noch in Export-Warn-Laerm, Team-Badges/Spawn-Lesbarkeit und den grossen Editor-/Visual-Skripten.</p>
           <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
@@ -249,8 +250,8 @@
               <p><code>scripts/tests/mission_tactical_sandbox_controller.gd:431</code> tickt UI, Planning, Dropship, Security, Karten und Fireteam-Ausfuehrung. TASK_512 hat den Fireteam-Runtime-Lesestatus herausgezogen, aber der Controller bleibt insgesamt noch zu breit.</p>
             </div>
             <div class="finding low">
-              <h3>Runtime-Gates sind da, Cargo-Flow ist noch abstrakt</h3>
-              <p>Enemy-Team-Tactics, Limbo-Cover, Patrol, Contact-Hold und Damage-Reposition existieren. TASK_518 wertet AA/Computer/Cargo als Mission-Gates aus; der Frachter selbst braucht noch eine sichtbare Touchdown-/Abflug-Bridge.</p>
+              <h3>Runtime-Gates und Cargo-Visuals sind da</h3>
+              <p>Enemy-Team-Tactics, Limbo-Cover, Patrol, Contact-Hold und Damage-Reposition existieren. TASK_518 wertet AA/Computer/Cargo als Mission-Gates aus; TASK_522 zeigt den Cargo-Touchdown sichtbar im Missionsbild.</p>
             </div>
           </div>
         </article>
@@ -339,7 +340,7 @@
             </div>
             <div class="finding medium">
               <h3>Berichtspflege bleibt bewusst task-lokal</h3>
-              <p>Die Integration enthaelt TASK_521; dieser Branch aktualisiert den Review-/Zwischenbericht und baut TASK_522 als sichtbaren Cargo-Visual-Slice. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
+              <p>Die Integration enthaelt TASK_522; dieser Branch aktualisiert den Review-/Zwischenbericht und baut TASK_523 als PvP-Teamlesbarkeit fuer Session und Lobby. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
             </div>
             <div class="finding low">
               <h3>Laute Asset-Warnungen</h3>
@@ -366,17 +367,18 @@
                 <tr><td>Tactical Clarity</td><td>TASK_506 bis TASK_510 liefern Preview-/Threat-/Contact-Vertraege.</td><td>Bewegungsentscheidungen werden lesbarer, bevor noch mehr Combat-Komplexitaet dazukommt.</td><td>Preview- und LOS-Daten im sichtbaren Missions-HUD weiter polieren.</td></tr>
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
-                <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523: PvP-Team-/NPC-Besitz sichtbar machen.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag.</td><td>TASK_523: Besitz, Teamfarben und NPC-Kontrolle sichtbar machen.</td></tr>
+                <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt diese Ownership in Session und Lobby an.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und sind im Setup lesbar.</td><td>Naechster UI-Schritt waeren Team-Badges, Spawnkarten oder Mission-HUD-Teamchips.</td></tr>
               </tbody>
             </table>
           </div>
         </article>
         <article class="card">
           <h2>Aktuelle Lage</h2>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_521 sauber</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_522 sauber</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.next_tasks_visible"> Naechste Tasks sind sichtbar priorisiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="worklog.visual_playtest_done"> Manueller Sichttest fuer naechsten Visual-Slice erledigt</label>
         </article>
@@ -385,8 +387,8 @@
           <div class="stack">
             <div class="finding good"><h3>Erledigt: Editor-Drag sichtbar machen</h3><p>Network-Drag-Pfade fuer Pipe/Wall/Cliff werden als read-only 3D-Preview mit Start-/Zielmarkern gespiegelt.</p></div>
             <div class="finding good"><h3>Erledigt: Cargo-Flow sichtbar machen</h3><p>Die Runtime weiss bereits, ob der Frachter geblockt, inbound, gelandet oder departed ist. TASK_522 haengt diesen Snapshot an Marker, Anfluglinie, Statuslabel und Air-Visual-Zaehler.</p></div>
-            <div class="finding medium"><h3>1. PvP-Lesbarkeit zeigen</h3><p>Nach dem Ownership-Smoke sollten Lobby/Briefing/Mission klar zeigen, welcher Peer welches Team besitzt und welche NPCs neutral oder teamgebunden sind.</p></div>
-            <div class="finding low"><h3>2. Warn-Laerm reduzieren</h3><p>Factory-UID-Warnungen und Referenzprojekt-Scanwarnung sind keine harten Blocker, aber sie machen echte Export-/Runtime-Probleme schwerer erkennbar.</p></div>
+            <div class="finding good"><h3>Erledigt: PvP-Teamlesbarkeit zeigen</h3><p>TASK_523 zeigt Alpha/Bravo-Besitz, NPC-Kontrolle und Peer-Zuweisung als read-only Summary in Session und Lobby.</p></div>
+            <div class="finding medium"><h3>1. Warn-Laerm reduzieren</h3><p>Factory-UID-Warnungen und Referenzprojekt-Scanwarnung sind keine harten Blocker, aber sie machen echte Export-/Runtime-Probleme schwerer erkennbar.</p></div>
           </div>
         </article>
       </div>
@@ -409,15 +411,17 @@
             <div class="finding good"><h3>Erledigt: TASK_520 - Multiplayer Team Ownership Smoke</h3><p><code>MissionMultiplayerTeamOwnershipContract</code> klaert, dass Bravo solo/coop NPC-besetzt bleibt, im PvP aber Peer2 zuweisbar ist; ungueltige NPC-Team-Zuweisungen werden rot. Roster-Defaults bleiben privacy-sicher <code>host_roster</code>.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_521 - Builder Drag Preview Visual Polish</h3><p>Pipe-/Wall-/Cliff-Drag wird als read-only Network-Preview an die Primary3DView gespiegelt und dort als farbige 3D-Linie mit Start-/Zielmarkern gezeichnet.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_522 - Cargo Touchdown Visual Polish</h3><p>Frachter-Icon/VFX im Missionsbild sichtbar machen, ohne neue Gameplay-Wahrheit in HUD oder 2.5D-View zu erzeugen.</p></div>
-            <div class="finding medium"><h3>1. TASK_523 - PvP Team Readability UI Pass</h3><p>Alpha/Bravo-Besitz, NPC-Kontrolle und Peer-Teamfarben im Lobby-/Briefing-/Mission-HUD lesbar machen.</p></div>
-            <div class="finding low"><h3>2. TASK_524 - Export Warning Noise Cleanup</h3><p>Factory-UID- und Referenzprojekt-Scanwarnungen reduzieren, damit echte Exportprobleme klarer auffallen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_523 - PvP Team Readability UI Pass</h3><p>Alpha/Bravo-Besitz, NPC-Kontrolle und Peer-Teamfarben werden in Session und Lobby als read-only Summary lesbar.</p></div>
+            <div class="finding medium"><h3>1. TASK_524 - Export Warning Noise Cleanup</h3><p>Factory-UID- und Referenzprojekt-Scanwarnungen reduzieren, damit echte Exportprobleme klarer auffallen.</p></div>
+            <div class="finding low"><h3>2. TASK_525 - Team Badge / Spawn Readability Polish</h3><p>Teamfarben und Alpha/Bravo-Spawnpunkte als Badges/Kartenchips in Briefing oder Mission-HUD weiter sichtbar machen.</p></div>
           </div>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
           <p>Welchen Pfad willst du als naechstes erzwingen?</p>
           <div class="button-row" style="margin-top:12px" data-choice-group="next_path">
-            <button class="choice active" type="button" data-choice-value="cargo_visuals">Cargo-Visuals</button>
+            <button class="choice" type="button" data-choice-value="cargo_visuals">Cargo-Visuals</button>
+            <button class="choice active" type="button" data-choice-value="warning_cleanup">Warn-Laerm</button>
             <button class="choice" type="button" data-choice-value="pvp_readability">PvP-Lesbarkeit</button>
             <button class="choice" type="button" data-choice-value="editor_ux">Editor-UX</button>
           </div>
@@ -453,6 +457,7 @@
                 <tr><td><code>task_520_multiplayer_team_ownership_smoke.gd</code></td><td>31 passed, 0 failed</td><td>Alpha/Bravo-/NPC-/Peer-Ownership ist fuer Solo/Coop/PvP gruen.</td></tr>
                 <tr><td><code>task_521_builder_drag_preview_visual_polish.gd</code></td><td>29 passed, 0 failed</td><td>Read-only Builder-Drag-Preview, Primary3DView-Segmente, Apply-Clear und Doku-Anbindung sind gruen.</td></tr>
                 <tr><td><code>task_522_cargo_touchdown_visual_polish.gd</code></td><td>24 passed, 0 failed</td><td>Blocked/inbound/landed/departed Cargo-Visuals, Statuslabel und Render-Snapshot-Zaehler sind gruen.</td></tr>
+                <tr><td><code>task_523_pvp_team_readability_ui_pass.gd</code></td><td>32 passed, 0 failed</td><td>Contract-, Session- und Lobby-Teamlesbarkeit fuer Alpha/Bravo/NPC/Peer.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -466,7 +471,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_521-Merge. Arbeitsbranch fuer diese Berichtspflege und TASK_522: <code>task/cargo-touchdown-visual-polish</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_522-Merge. Arbeitsbranch fuer diese Berichtspflege und TASK_523: <code>task/pvp-team-readability-ui-pass</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -545,8 +550,8 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_523 - PvP Team Readability UI Pass",
-              "TASK_524 - Export Warning Noise Cleanup"
+              "TASK_524 - Export Warning Noise Cleanup",
+              "TASK_525 - Team Badge / Spawn Readability Polish"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -555,7 +560,8 @@
               "TASK_519 - Cargo Touchdown Visual/Runtime Bridge",
               "TASK_520 - Multiplayer Team Ownership Smoke",
               "TASK_521 - Builder Drag Preview Visual Polish",
-              "TASK_522 - Cargo Touchdown Visual Polish"
+              "TASK_522 - Cargo Touchdown Visual Polish",
+              "TASK_523 - PvP Team Readability UI Pass"
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
@@ -563,9 +569,9 @@
             report_mode: "rolling_interim_status"
           },
           metadata: {
-            branch: "task/cargo-touchdown-visual-polish",
-            integration_base: "integration/core-foundation after TASK_521",
-            head: "working_tree_task_522",
+            branch: "task/pvp-team-readability-ui-pass",
+            integration_base: "integration/core-foundation after TASK_522",
+            head: "working_tree_task_523",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }

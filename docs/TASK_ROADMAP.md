@@ -151,6 +151,8 @@ git checkout -b batch/<batch-name>
 - TASK_520 - Multiplayer Team Ownership Smoke (implementiert)
 - TASK_521 - Builder Drag Preview Visual Polish (implementiert)
 - TASK_522 - Cargo Touchdown Visual Polish (implementiert)
+- TASK_523 - PvP Team Readability UI Pass (implementiert)
+- TASK_524 - Export Warning Noise Cleanup
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_523 - PvP Team Readability UI Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_523_pvp_team_readability_ui_pass.md`, `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/dev/multiplayer_session_lobby.md`, `docs/dev/multiplayer_player_roster_ownership_contract.md`, `docs/dev/html_report_workbench_contract.md`
+- Stand: `MissionMultiplayerTeamOwnershipContract` liefert zusaetzlich read-only Anzeige-Felder fuer Teamfarbe, Kurzlabel, Owner-/Control-Text, UI-Chip und Team-Readability-Summary.
+- Stand: `MultiplayerSession` haengt einen kompakten Team-Readability-Snapshot an Session-Snapshots, ohne Team-Assignments oder Gameplay-State im UI zu mutieren.
+- Stand: Produktive Multiplayer-Lobby und Lobby-Testscreen zeigen die Summary sichtbar an und expose'n sie fuer Verifier-Snapshots.
+- Stand: Der laufende HTML-Reviewbericht ist als Zwischenbericht auf TASK_523 aktualisiert und nennt TASK_524 als naechsten Anschluss.
+- Risiken/offen: Die Anzeige ist noch textuell; Team-Badges, Spawnkarten und Mission-HUD-Teamchips bleiben Folgearbeit. Echter Zwei-Instanzen-LAN-Test bleibt manuell.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_523_pvp_team_readability_ui_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_520_multiplayer_team_ownership_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_167_multiplayer_session_verifier.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_524 - Export Warning Noise Cleanup`, wenn der Warn-Laerm aus Factory-UIDs und Referenzprojekt-Scan weiter reduziert werden soll.
+
 ### TASK_522 - Cargo Touchdown Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_522_cargo_touchdown_visual_polish.md`, `docs/tasks/TASK_519_cargo_touchdown_runtime_bridge.md`, `docs/tasks/TASK_518_mission_scenario_runtime_gates.md`, `docs/dev/air_asset_threat_damage_contract.md`, `docs/dev/html_report_workbench_contract.md`

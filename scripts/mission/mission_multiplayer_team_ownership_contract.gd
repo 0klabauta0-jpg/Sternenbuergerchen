@@ -9,6 +9,9 @@ const SCENARIO_OWNER_PEER_ID: int = 0
 const PLAY_MODE_SINGLEPLAYER: String = "singleplayer"
 const PLAY_MODE_COOP: String = "coop"
 const PLAY_MODE_MULTIPLAYER_PVP: String = "multiplayer_pvp"
+const TEAM_ALPHA_COLOR_HEX: String = "#5fb7ff"
+const TEAM_BRAVO_COLOR_HEX: String = "#ff9b5e"
+const TEAM_NPC_COLOR_HEX: String = "#9aa3ad"
 
 
 static func build_team_ownership_snapshot(slice: Dictionary, session_assignments: Dictionary = {}, play_mode: String = PLAY_MODE_SINGLEPLAYER) -> Dictionary:
@@ -34,6 +37,7 @@ static func build_team_ownership_snapshot(slice: Dictionary, session_assignments
 		else:
 			if not player_team_ids.has(team_id):
 				player_team_ids.append(team_id)
+	var team_readability: Array = _build_team_readability_entries(team_entries, normalized_play_mode)
 
 	return {
 		"configured": not team_entries.is_empty(),
@@ -43,6 +47,8 @@ static func build_team_ownership_snapshot(slice: Dictionary, session_assignments
 		"ui_sets_gameplay_truth": false,
 		"play_mode": normalized_play_mode,
 		"team_ownership": team_entries,
+		"team_readability": team_readability,
+		"team_readability_summary": _build_team_readability_summary(team_readability, normalized_play_mode),
 		"player_team_ids": player_team_ids,
 		"npc_team_ids": npc_team_ids,
 		"peer_team_assignments": peer_teams.duplicate(true),
@@ -80,7 +86,7 @@ static func _build_team_entry(slot: Dictionary, peer_teams: Dictionary, peer_ros
 		var roster_entry: Dictionary = Dictionary(peer_rosters.get(peer_id, peer_rosters.get(str(peer_id), {})))
 		roster_owner_snapshots.append(_build_peer_owner_snapshot(peer_id, roster_entry))
 
-	return {
+	var entry: Dictionary = {
 		"team_id": team_id,
 		"role": String(slot.get("role", "")).strip_edges(),
 		"spawn_marker_id": String(slot.get("spawn_marker_id", "")).strip_edges(),
@@ -90,11 +96,173 @@ static func _build_team_entry(slot: Dictionary, peer_teams: Dictionary, peer_ros
 		"assigned_peer_ids": assigned_peer_ids,
 		"assigned_peer_count": assigned_peer_ids.size(),
 		"npc_controlled": npc_controlled,
-		"owner_peer_id": SCENARIO_OWNER_PEER_ID if npc_controlled else int(assigned_peer_ids[0]),
+		"owner_peer_id": _resolve_owner_peer_id(assigned_peer_ids, npc_controlled),
 		"roster_source": ROSTER_CONTRACT_SCRIPT.ROSTER_SOURCE_SCENARIO if npc_controlled else _first_roster_source(roster_owner_snapshots),
 		"character_gameplay_authority": ROSTER_CONTRACT_SCRIPT.CHARACTER_GAMEPLAY_AUTHORITY,
 		"roster_owners": roster_owner_snapshots,
 	}
+	var display_fields: Dictionary = _build_team_display_fields(entry, play_mode)
+	for key in display_fields.keys():
+		entry[key] = display_fields[key]
+	return entry
+
+
+static func _build_team_readability_entries(team_entries: Array, play_mode: String) -> Array:
+	var result: Array = []
+	for entry_variant in team_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var display_entry: Dictionary = {
+			"team_id": String(entry.get("team_id", "")),
+			"display_name": String(entry.get("display_name", "")),
+			"short_label": String(entry.get("short_label", "")),
+			"role_label": String(entry.get("role_label", "")),
+			"team_color_hex": String(entry.get("team_color_hex", TEAM_NPC_COLOR_HEX)),
+			"ownership_label": String(entry.get("ownership_label", "")),
+			"control_label": String(entry.get("control_label", "")),
+			"peer_label": String(entry.get("peer_label", "")),
+			"spawn_label": String(entry.get("spawn_label", "")),
+			"ui_chip_text": String(entry.get("ui_chip_text", "")),
+			"readability_tone": String(entry.get("readability_tone", "")),
+			"play_mode": play_mode,
+			"npc_controlled": bool(entry.get("npc_controlled", false)),
+			"assigned_peer_ids": PackedInt32Array(entry.get("assigned_peer_ids", PackedInt32Array())),
+			"ui_sets_gameplay_truth": false,
+		}
+		result.append(display_entry)
+	return result
+
+
+static func _build_team_display_fields(entry: Dictionary, play_mode: String) -> Dictionary:
+	var team_id: String = String(entry.get("team_id", "")).strip_edges()
+	var role: String = String(entry.get("role", "")).strip_edges()
+	var npc_controlled: bool = bool(entry.get("npc_controlled", false))
+	var assigned_peer_ids: PackedInt32Array = PackedInt32Array(entry.get("assigned_peer_ids", PackedInt32Array()))
+	var short_label: String = _team_short_label(team_id)
+	var ownership_label: String = _build_ownership_label(assigned_peer_ids, npc_controlled)
+	return {
+		"display_name": _team_display_name(team_id, role),
+		"short_label": short_label,
+		"role_label": _role_label(role),
+		"team_color_hex": _team_color_hex(team_id),
+		"ownership_label": ownership_label,
+		"control_label": _build_control_label(npc_controlled, play_mode),
+		"peer_label": _build_peer_label(assigned_peer_ids, npc_controlled),
+		"spawn_label": _spawn_label(String(entry.get("spawn_marker_id", "")).strip_edges()),
+		"ui_chip_text": "%s: %s" % [short_label, ownership_label],
+		"readability_tone": "npc" if npc_controlled else "player",
+	}
+
+
+static func _build_team_readability_summary(readability_entries: Array, play_mode: String) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for entry_variant in readability_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var short_label: String = String(entry.get("short_label", "")).strip_edges()
+		var ownership_label: String = String(entry.get("ownership_label", "")).strip_edges()
+		if short_label.is_empty() or ownership_label.is_empty():
+			continue
+		parts.append("%s -> %s" % [short_label, ownership_label])
+	var prefix: String = _play_mode_label(play_mode)
+	if parts.is_empty():
+		return "%s: no team ownership display" % prefix
+	return "%s: %s" % [prefix, " | ".join(parts)]
+
+
+static func _resolve_owner_peer_id(assigned_peer_ids: PackedInt32Array, npc_controlled: bool) -> int:
+	if npc_controlled:
+		return SCENARIO_OWNER_PEER_ID
+	if assigned_peer_ids.is_empty():
+		return -1
+	return int(assigned_peer_ids[0])
+
+
+static func _team_display_name(team_id: String, role: String) -> String:
+	var short_label: String = _team_short_label(team_id)
+	var role_label: String = _role_label(role)
+	if role_label.is_empty():
+		return short_label
+	return "%s %s" % [short_label, role_label]
+
+
+static func _team_short_label(team_id: String) -> String:
+	match team_id.strip_edges().to_lower():
+		"team_alpha":
+			return "Alpha"
+		"team_bravo":
+			return "Bravo"
+		_:
+			var label: String = team_id.strip_edges()
+			if label.is_empty():
+				return "Team"
+			return label.capitalize()
+
+
+static func _role_label(role: String) -> String:
+	match role.strip_edges().to_lower():
+		"attacker":
+			return "Attack"
+		"defender":
+			return "Defense"
+		"neutral", "":
+			return ""
+		_:
+			return role.strip_edges().capitalize()
+
+
+static func _team_color_hex(team_id: String) -> String:
+	match team_id.strip_edges().to_lower():
+		"team_alpha":
+			return TEAM_ALPHA_COLOR_HEX
+		"team_bravo":
+			return TEAM_BRAVO_COLOR_HEX
+		_:
+			return TEAM_NPC_COLOR_HEX
+
+
+static func _build_ownership_label(assigned_peer_ids: PackedInt32Array, npc_controlled: bool) -> String:
+	if npc_controlled:
+		return "NPC / Scenario"
+	if assigned_peer_ids.is_empty():
+		return "Unassigned"
+	var parts: PackedStringArray = PackedStringArray()
+	for peer_id in assigned_peer_ids:
+		if peer_id == HOST_PEER_ID:
+			parts.append("Host Peer 1")
+		else:
+			parts.append("Peer %d" % peer_id)
+	return " + ".join(parts)
+
+
+static func _build_control_label(npc_controlled: bool, play_mode: String) -> String:
+	if npc_controlled:
+		return "NPC controlled"
+	if play_mode == PLAY_MODE_MULTIPLAYER_PVP:
+		return "PvP player controlled"
+	return "Player controlled"
+
+
+static func _build_peer_label(assigned_peer_ids: PackedInt32Array, npc_controlled: bool) -> String:
+	if npc_controlled:
+		return "Scenario AI"
+	if assigned_peer_ids.is_empty():
+		return "No peer"
+	return _build_ownership_label(assigned_peer_ids, false)
+
+
+static func _spawn_label(spawn_marker_id: String) -> String:
+	if spawn_marker_id.strip_edges().is_empty():
+		return "Spawn not set"
+	return "Spawn %s" % spawn_marker_id.strip_edges()
+
+
+static func _play_mode_label(play_mode: String) -> String:
+	match play_mode.strip_edges().to_lower():
+		PLAY_MODE_MULTIPLAYER_PVP:
+			return "PvP"
+		PLAY_MODE_COOP:
+			return "Coop"
+		_:
+			return "Singleplayer"
 
 
 static func _build_peer_owner_snapshot(peer_id: int, roster_entry: Dictionary) -> Dictionary:

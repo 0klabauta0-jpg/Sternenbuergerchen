@@ -20,6 +20,7 @@ const CONNECTION_MODE_UPNP: String = "upnp"
 const DEFAULT_MAP_FILE_NAME: String = "Ground_Mission01_32x32.json"
 
 @onready var _status_label: Label = get_node("Panel/Margin/VBox/StatusLabel")
+@onready var _team_readability_label: Label = get_node("Panel/Margin/VBox/TeamReadabilityLabel")
 @onready var _host_port_spin: SpinBox = get_node("Panel/Margin/VBox/HostJoinGrid/HostPortSpinBox")
 @onready var _host_button: Button = get_node("Panel/Margin/VBox/HostJoinGrid/HostButton")
 @onready var _join_address_edit: LineEdit = get_node("Panel/Margin/VBox/HostJoinGrid/JoinAddressLineEdit")
@@ -238,6 +239,7 @@ func get_lobby_ui_snapshot() -> Dictionary:
 		"roster_mode_selected": String(_roster_mode_option.get_item_metadata(_roster_mode_option.selected)) if _roster_mode_option.selected >= 0 else "",
 		"roster_mode_disabled": _roster_mode_option.disabled,
 		"status_text": _status_label.text,
+		"team_readability_text": _team_readability_label.text,
 		"peer_text": _peer_label.text,
 		"assignment_text": _assignment_label.text,
 		"settings_text": _settings_label.text,
@@ -641,6 +643,8 @@ func _apply_session_snapshot(snapshot: Dictionary) -> void:
 	_apply_roster_mode_snapshot(Dictionary(snapshot.get("roster", {})))
 	_peer_label.text = _format_peer_lines(Array(snapshot.get("peers", [])))
 	_assignment_label.text = _format_assignment_lines(Dictionary(snapshot.get("assignments", {})))
+	_team_readability_label.text = _build_team_readability_text(snapshot)
+	_team_readability_label.visible = not _team_readability_label.text.strip_edges().is_empty()
 	_refresh_settings_summary()
 	_refresh_lobby_controls(snapshot)
 
@@ -913,3 +917,11 @@ func _format_assignment_lines(assignments: Dictionary) -> String:
 			",".join(PackedStringArray(fireteams.get(peer_id_variant, PackedStringArray()))),
 		])
 	return "\n".join(lines)
+
+
+func _build_team_readability_text(snapshot: Dictionary) -> String:
+	var direct_summary: String = String(snapshot.get("team_readability_summary", "")).strip_edges()
+	if not direct_summary.is_empty():
+		return direct_summary
+	var team_readability: Dictionary = Dictionary(snapshot.get("team_readability", {}))
+	return String(team_readability.get("summary_text", "")).strip_edges()
