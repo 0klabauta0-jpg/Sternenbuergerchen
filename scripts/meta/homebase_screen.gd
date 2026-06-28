@@ -357,13 +357,53 @@ func get_pre_mission_readiness_snapshot() -> Dictionary:
 	var snapshot: Dictionary = _pre_mission_readiness_snapshot.duplicate(true)
 	snapshot["panel_visible"] = _node_is_visible("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel")
 	var summary_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessSummaryLabel") as Label
-	var list := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessItemList") as VBoxContainer
+	var list := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessItemList") as Container
 	if summary_label != null:
 		snapshot["rendered_summary_text"] = summary_label.text
 	if list != null:
 		snapshot["rendered_item_count"] = list.get_child_count()
 		snapshot["rendered_item_text"] = _build_readiness_item_list_text(list)
+		snapshot["rendered_item_columns"] = int(list.get("columns")) if list is GridContainer else 1
 	return snapshot
+
+
+func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_homebase_layout")
+	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
+	var roster_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/RosterPanel") as Control
+	var fireteam_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") as Control
+	var flightdeck_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel") as Control
+	var briefing_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel") as Control
+	var readiness_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel") as Control
+	var start_button := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
+	var mission_rect: Rect2 = _control_global_rect(mission_panel)
+	var roster_rect: Rect2 = _control_global_rect(roster_panel)
+	var fireteam_rect: Rect2 = _control_global_rect(fireteam_panel)
+	var flightdeck_rect: Rect2 = _control_global_rect(flightdeck_panel)
+	var child_bottom: float = _visible_child_max_bottom(mission_panel)
+	return {
+		"ui_sets_gameplay_truth": false,
+		"layout_source": "drop_light_homebase_fullhd",
+		"target_viewport": DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("TARGET_VIEWPORT"),
+		"mission_contract_rect": layout.get("mission_brief"),
+		"roster_contract_rect": layout.get("roster"),
+		"fireteams_contract_rect": layout.get("fireteams"),
+		"flightdeck_contract_rect": layout.get("flightdeck"),
+		"mission_rect": mission_rect,
+		"roster_rect": roster_rect,
+		"fireteam_rect": fireteam_rect,
+		"flightdeck_rect": flightdeck_rect,
+		"briefing_min_height": briefing_panel.custom_minimum_size.y if briefing_panel != null else 0.0,
+		"readiness_min_height": readiness_panel.custom_minimum_size.y if readiness_panel != null else 0.0,
+		"mission_child_max_bottom": child_bottom,
+		"mission_child_overflows": mission_panel != null and child_bottom > mission_rect.end.y + 0.5,
+		"mission_overlaps_work_columns": _rects_overlap(mission_rect, roster_rect) or _rects_overlap(mission_rect, fireteam_rect) or _rects_overlap(mission_rect, flightdeck_rect),
+		"start_button_text": start_button.text if start_button != null else "",
+		"start_button_disabled": start_button.disabled if start_button != null else true,
+		"start_button_tooltip": start_button.tooltip_text if start_button != null else "",
+		"readiness_summary": String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges(),
+		"readiness_overall_state": String(_pre_mission_readiness_snapshot.get("overall_state", "")).strip_edges(),
+	}
 
 
 func get_aircraft_panel_snapshot() -> Dictionary:
@@ -2441,6 +2481,7 @@ func _update_pre_mission_readiness_panel() -> void:
 	panel.set_meta("pre_mission_readiness_snapshot", _pre_mission_readiness_snapshot.duplicate(true))
 	_set_pre_mission_readiness_summary(String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges())
 	_set_pre_mission_readiness_items(Array(_pre_mission_readiness_snapshot.get("items", [])))
+	_sync_start_button_with_readiness_snapshot()
 
 
 func _ensure_mission_briefing_panel() -> PanelContainer:
@@ -2450,7 +2491,7 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 		return existing
 	var panel := PanelContainer.new()
 	panel.name = "MissionBriefingPanel"
-	panel.custom_minimum_size = Vector2(0.0, 330.0)
+	panel.custom_minimum_size = Vector2(0.0, 158.0)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "body")
 	var margin := MarginContainer.new()
@@ -2479,7 +2520,7 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 		if label_name == "BriefingBackgroundImage":
 			var texture_rect := TextureRect.new()
 			texture_rect.name = label_name
-			texture_rect.custom_minimum_size = Vector2(0.0, 72.0)
+			texture_rect.custom_minimum_size = Vector2(0.0, 44.0)
 			texture_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -2490,7 +2531,7 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 		if label_name == "BriefingMinimapVisual":
 			var minimap_visual: Control = MISSION_BRIEFING_MINIMAP_VISUAL_SCRIPT.new()
 			minimap_visual.name = label_name
-			minimap_visual.custom_minimum_size = Vector2(0.0, 96.0)
+			minimap_visual.custom_minimum_size = Vector2(0.0, 58.0)
 			minimap_visual.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			minimap_visual.mouse_filter = Control.MOUSE_FILTER_PASS
 			vbox.add_child(minimap_visual)
@@ -2504,9 +2545,10 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 			continue
 		var label := Label.new()
 		label.name = label_name
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.autowrap_mode = TextServer.AUTOWRAP_OFF
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		label.custom_minimum_size = Vector2(0.0, 12.0)
 		var font_size: int = 9
 		if label_name == "BriefingTitleLabel":
 			font_size = 11
@@ -2532,7 +2574,7 @@ func _ensure_pre_mission_readiness_panel() -> PanelContainer:
 		return existing
 	var panel := PanelContainer.new()
 	panel.name = "PreMissionReadinessPanel"
-	panel.custom_minimum_size = Vector2(0.0, 112.0)
+	panel.custom_minimum_size = Vector2(0.0, 74.0)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
 	var margin := MarginContainer.new()
@@ -2553,13 +2595,14 @@ func _ensure_pre_mission_readiness_panel() -> PanelContainer:
 	vbox.add_child(title_label)
 	var summary_label := Label.new()
 	summary_label.name = "ReadinessSummaryLabel"
-	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	summary_label.clip_text = true
 	summary_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	META_UI_SKIN_SCRIPT.style_body_label(summary_label, 8)
 	vbox.add_child(summary_label)
-	var list := VBoxContainer.new()
+	var list := GridContainer.new()
 	list.name = "ReadinessItemList"
+	list.columns = 4
 	list.add_theme_constant_override("separation", 1)
 	vbox.add_child(list)
 	mission_vbox.add_child(panel)
@@ -2625,9 +2668,10 @@ func _set_mission_briefing_loadout_cards(entries: Array) -> void:
 		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		button.clip_text = true
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.custom_minimum_size = Vector2(0.0, 24.0)
 		button.add_theme_font_size_override("font_size", 8)
 		META_UI_SKIN_SCRIPT.style_secondary_button(button)
-		button.text = "%s | %s\n%s" % [
+		button.text = "%s | %s | %s" % [
 			String(entry.get("label", "Loadout")).strip_edges(),
 			String(entry.get("subtitle", "-")).strip_edges(),
 			String(entry.get("body", "")).strip_edges(),
@@ -2673,7 +2717,7 @@ func _set_pre_mission_readiness_summary(text: String) -> void:
 
 
 func _set_pre_mission_readiness_items(items: Array) -> void:
-	var list := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessItemList") as VBoxContainer
+	var list := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessItemList") as Container
 	if list == null:
 		return
 	_clear_container(list)
@@ -2685,16 +2729,16 @@ func _set_pre_mission_readiness_items(items: Array) -> void:
 		row.name = "ReadinessItemLabel"
 		row.clip_text = true
 		row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.custom_minimum_size = Vector2(220.0, 14.0)
 		row.add_theme_font_size_override("font_size", 8)
 		META_UI_SKIN_SCRIPT.style_body_label(row, 8)
 		var state: String = String(item.get("state", "")).strip_edges()
 		var marker: String = "OK" if state == "ready" else "!" if state == "warn" else "X"
-		row.text = "%s %s: %s" % [
+		row.text = "%s %s" % [
 			marker,
 			String(item.get("label", "")).strip_edges(),
-			String(item.get("detail", "")).strip_edges(),
 		]
-		row.tooltip_text = row.text
+		row.tooltip_text = "%s: %s" % [row.text, String(item.get("detail", "")).strip_edges()]
 		row.set_meta("pre_mission_readiness_item", true)
 		row.set_meta("readiness_id", String(item.get("id", "")).strip_edges())
 		row.set_meta("readiness_state", state)
@@ -2702,7 +2746,7 @@ func _set_pre_mission_readiness_items(items: Array) -> void:
 		list.add_child(row)
 
 
-func _build_readiness_item_list_text(list: VBoxContainer) -> String:
+func _build_readiness_item_list_text(list: Container) -> String:
 	var lines: PackedStringArray = PackedStringArray()
 	for child in list.get_children():
 		var label := child as Label
@@ -2712,6 +2756,23 @@ func _build_readiness_item_list_text(list: VBoxContainer) -> String:
 		if not text.is_empty():
 			lines.append(text)
 	return " | ".join(lines)
+
+
+func _sync_start_button_with_readiness_snapshot() -> void:
+	var start_button := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
+	if start_button == null:
+		return
+	var overall_state: String = String(_pre_mission_readiness_snapshot.get("overall_state", "")).strip_edges()
+	var summary_text: String = String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges()
+	if overall_state == "ready":
+		start_button.text = "Start Mission"
+	elif overall_state == "warn":
+		start_button.text = "Start pruefen"
+	else:
+		start_button.text = "Start blockiert"
+	start_button.tooltip_text = summary_text
+	start_button.set_meta("pre_mission_readiness_state", overall_state)
+	start_button.set_meta("pre_mission_readiness_summary", summary_text)
 
 
 func _ensure_mission_briefing_loadout_bridge_controls() -> void:
@@ -6094,6 +6155,32 @@ func _get_roster_drop_panel():
 func _node_is_visible(path: String) -> bool:
 	var control := get_node_or_null(path) as Control
 	return control != null and control.visible and (control.is_visible_in_tree() if control.is_inside_tree() else true)
+
+
+func _control_global_rect(control: Control) -> Rect2:
+	if control == null:
+		return Rect2()
+	return Rect2(control.global_position, control.size)
+
+
+func _rects_overlap(first: Rect2, second: Rect2) -> bool:
+	if first.size == Vector2.ZERO or second.size == Vector2.ZERO:
+		return false
+	return first.intersects(second)
+
+
+func _visible_child_max_bottom(root_control: Control) -> float:
+	if root_control == null:
+		return 0.0
+	var max_bottom: float = root_control.global_position.y
+	for child in root_control.get_children():
+		var child_control := child as Control
+		if child_control == null or not child_control.visible:
+			continue
+		var child_rect := _control_global_rect(child_control)
+		max_bottom = maxf(max_bottom, child_rect.end.y)
+		max_bottom = maxf(max_bottom, _visible_child_max_bottom(child_control))
+	return max_bottom
 
 
 func _clear_container(container: Node) -> void:

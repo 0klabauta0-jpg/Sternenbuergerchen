@@ -69,11 +69,11 @@ static func get_homebase_layout() -> Dictionary:
 	return {
 		"viewport": Rect2i(Vector2i.ZERO, TARGET_VIEWPORT),
 		"topbar": Rect2i(0, 0, 1920, 64),
-		"mission_brief": Rect2i(24, 80, 1872, 112),
-		"roster": Rect2i(24, 200, 520, 856),
-		"fireteams": Rect2i(560, 200, 456, 856),
-		"transfer_team": Rect2i(560, 200, 456, 856),
-		"flightdeck": Rect2i(1032, 200, 864, 856),
+		"mission_brief": Rect2i(24, 80, 1872, 568),
+		"roster": Rect2i(24, 664, 520, 392),
+		"fireteams": Rect2i(560, 664, 456, 392),
+		"transfer_team": Rect2i(560, 664, 456, 392),
+		"flightdeck": Rect2i(1032, 664, 864, 392),
 		"character_popup": Rect2i(1136, 144, 720, 840),
 	}
 

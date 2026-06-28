@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_535 - Pre-Mission FullHD Startflow Visual Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_535_pre_mission_fullhd_startflow_visual_pass.md`, `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
+- Stand: `DropLightLayoutContract.get_homebase_layout()` reserviert fuer die Homebase jetzt ein echtes 320px-Mission-Deck und setzt Roster, Fireteams und Flightdeck darunter.
+- Stand: `HomebaseTestScreen` rendert Briefing, Minimap, Loadout-Empfehlungen und Readiness kompakter und expose't einen read-only `get_pre_mission_startflow_visual_snapshot()`.
+- Stand: Der Startbutton bleibt an `can_request_mission_start()` gebunden, zeigt aber anhand des Readiness-Snapshots `Start blockiert`, `Start pruefen` oder `Start Mission` plus Tooltip.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_535 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf Statusfarben/Icon-Polish.
+- Risiken/offen: Kein echter F6-Screenshot in diesem Task. Die Statussprache ist noch ASCII-/Label-basiert; visuelle Icon-/Farbsprache bleibt Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_535_pre_mission_fullhd_startflow_visual_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_534_pre_mission_readiness_checklist.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_536 - Startflow Icon And Status Color Polish`, wenn die Status-Chips von ASCII-Markern zu klareren Icons/Farben wachsen sollen.
+
 ### TASK_534 - Pre-Mission Readiness Checklist
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/tasks/TASK_533_recommended_loadout_selection_bridge.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
@@ -19,7 +30,7 @@
 - Stand: Der Rolling-HTML-Bericht nennt TASK_534 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf FullHD-/Startflow-Visual-Polish.
 - Risiken/offen: Cargo ist aktuell optional lesbar; missionsspezifische Cargo-Pflichten brauchen spaeter Szenario-Gate-Daten. Manueller FullHD-Sichttest bleibt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_534_pre_mission_readiness_checklist.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_533_recommended_loadout_selection_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_382_homebase_direct_mission_flightdeck_display.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_535 - Pre-Mission FullHD Startflow Visual Pass`, wenn die neue Startbereitschaft im echten Fenster poliert werden soll.
+- Naechster Schritt: Siehe `TASK_535 - Pre-Mission FullHD Startflow Visual Pass`.
 
 ### TASK_533 - Recommended Loadout Selection Bridge
 - Status: implementiert im Arbeitsstand
