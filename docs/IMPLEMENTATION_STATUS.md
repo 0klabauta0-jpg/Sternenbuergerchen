@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_541 - Mission First Move Execution Feedback Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_540_mission_first_move_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_mission_first_move_execution_feedback_snapshot()` fuer GO-Feedback, aktive Phase-Execution, aktiven Movement-State, OrderPlan-/Waypoint-Trace und Runtime-Execution-Path.
+- Stand: Der Smoke startet eine Homebase-Direktmission, setzt LZ, dropped/deboarded das Fireteam, plant eine erste Move-Order, fuehrt GO ueber `execute_selected_fireteam_orders()` aus und prueft Ausfuehrungslesbarkeit.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_541 als erledigten Execution-Feedback-Slice und verschiebt den naechsten Anschluss auf First-Contact-Readability.
+- Risiken/offen: Der Task prueft Headless-Snapshots und keine menschliche Pixelwirkung. Der naechste spielbare Reibungspunkt ist, ob Feindkontakt/Threat waehrend oder nach der Bewegung klar genug sichtbar wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_541_mission_first_move_execution_feedback_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_540_mission_first_move_decision_readability_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_542 - Mission First Contact Readability Pass`, damit Sichtkontakt, Bedrohung und Feuer-/Deckungsfeedback nach der ersten Bewegung lesbar werden.
+
 ### TASK_540 - Mission First Move Decision Readability Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_540_mission_first_move_decision_readability_pass.md`, `docs/tasks/TASK_539_mission_insertion_first_order_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`

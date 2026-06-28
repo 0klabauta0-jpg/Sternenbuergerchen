@@ -11895,6 +11895,89 @@ func get_mission_first_move_decision_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_mission_first_move_execution_feedback_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var selected_fireteam_ids: Array = Array(_selected_fireteam_ids)
+	var deployed_selected_unit_ids: Array = _build_deployed_selected_fireteam_unit_ids()
+	var active_execution: Dictionary = _find_first_phase_execution_for_fireteams(selected_fireteam_ids)
+	var movement_state: Dictionary = _find_first_movement_state_for_fireteams(selected_fireteam_ids, get_fireteam_movement_snapshot())
+	var order_plan: Dictionary = _find_first_order_plan_for_fireteams(selected_fireteam_ids, get_order_plans_snapshot())
+	var visualized_waypoint: Dictionary = _find_first_visualized_waypoint_for_fireteams(selected_fireteam_ids, get_visualized_waypoints_snapshot())
+	var last_command_text: String = String(command_feedback.get("last_command_text", "")).strip_edges()
+	var selected_status_text: String = String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges()
+	var selected_order_text: String = String(command_feedback.get("selected_order_text", "")).strip_edges()
+	var mission_control_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	var feedback_text: String = "%s\n%s\n%s\n%s" % [last_command_text, selected_status_text, selected_order_text, mission_control_text]
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_deployed",
+			not selected_fireteam_ids.is_empty() and not deployed_selected_unit_ids.is_empty(),
+			"Selected fireteam still has deployed units after GO."
+		),
+		_build_mission_first_move_readability_check(
+			"go_feedback_visible",
+			_does_execution_feedback_text_show_go_or_running(feedback_text),
+			"Command feedback reports GO, active execution, movement or completion."
+		),
+		_build_mission_first_move_readability_check(
+			"phase_execution_visible",
+			not active_execution.is_empty(),
+			"Selected fireteam has an active phase execution state."
+		),
+		_build_mission_first_move_readability_check(
+			"movement_state_visible",
+			not movement_state.is_empty(),
+			"Selected fireteam has an active movement controller state."
+		),
+		_build_mission_first_move_readability_check(
+			"movement_target_visible",
+			_movement_state_has_target_data(movement_state),
+			"Movement state exposes origin, progress and target positions."
+		),
+		_build_mission_first_move_readability_check(
+			"movement_readability_visible",
+			_movement_state_has_readability_data(movement_state),
+			"Movement state exposes a compact readability/status line."
+		),
+		_build_mission_first_move_readability_check(
+			"order_plan_still_traceable",
+			not order_plan.is_empty() or not visualized_waypoint.is_empty(),
+			"Execution remains traceable through order plan or visualized waypoint."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			true,
+			"Snapshot reports execution feedback without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_541",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"deployed_selected_unit_ids": deployed_selected_unit_ids,
+		"last_command_text": last_command_text,
+		"selected_fireteam_status_text": selected_status_text,
+		"selected_order_text": selected_order_text,
+		"mission_control_status_text": mission_control_text,
+		"active_execution": active_execution,
+		"active_execution_count": _phase_execution_by_fireteam.size(),
+		"movement_state": movement_state,
+		"movement_state_count": get_fireteam_movement_snapshot().size(),
+		"order_plan": order_plan,
+		"visualized_waypoint": visualized_waypoint,
+		"runtime_execution_path": get_fireteam_runtime_execution_path_snapshot(),
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_deployed_selected_fireteam_unit_ids() -> Array:
 	var result: Array = []
 	var seen_unit_ids: Dictionary = {}
@@ -11940,6 +12023,46 @@ func _find_first_visualized_waypoint_for_fireteams(fireteam_ids: Array, entries:
 	return {}
 
 
+func _find_first_phase_execution_for_fireteams(fireteam_ids: Array) -> Dictionary:
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	var keys: Array = _phase_execution_by_fireteam.keys()
+	keys.sort()
+	for fireteam_id_variant in keys:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not lookup.has(fireteam_id):
+			continue
+		var execution_state: Dictionary = Dictionary(_phase_execution_by_fireteam.get(fireteam_id, {})).duplicate(true)
+		if execution_state.is_empty():
+			continue
+		execution_state["fireteam_id"] = fireteam_id
+		return execution_state
+	return {}
+
+
+func _find_first_movement_state_for_fireteams(fireteam_ids: Array, entries: Array) -> Dictionary:
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		if lookup.has(fireteam_id):
+			return entry.duplicate(true)
+	return {}
+
+
+func _find_first_order_plan_for_fireteams(fireteam_ids: Array, entries: Array) -> Dictionary:
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		if lookup.has(fireteam_id):
+			return entry.duplicate(true)
+	return {}
+
+
 func _build_fireteam_lookup_from_array(fireteam_ids: Array) -> Dictionary:
 	var lookup: Dictionary = {}
 	for fireteam_id_variant in fireteam_ids:
@@ -11955,6 +12078,33 @@ func _build_mission_first_move_readability_check(check_id: String, passed: bool,
 		"passed": passed,
 		"details": details,
 	}
+
+
+func _does_execution_feedback_text_show_go_or_running(text: String) -> bool:
+	var normalized_text: String = text.strip_edges().to_upper()
+	if normalized_text.is_empty():
+		return false
+	for token in ["GO", "ACTIVE", "RUNNING", "STARTED", "BEWEGUNG", "MOVE", "WEGPUNKT", "COMPLETE", "ANKUNFT"]:
+		if normalized_text.contains(token):
+			return true
+	return false
+
+
+func _movement_state_has_target_data(movement_state: Dictionary) -> bool:
+	if movement_state.is_empty():
+		return false
+	return typeof(movement_state.get("origin_anchor_position", null)) == TYPE_VECTOR2 \
+		and typeof(movement_state.get("progress_anchor_position", null)) == TYPE_VECTOR2 \
+		and typeof(movement_state.get("current_anchor_target_position", null)) == TYPE_VECTOR2 \
+		and typeof(movement_state.get("final_target_position", null)) == TYPE_VECTOR2
+
+
+func _movement_state_has_readability_data(movement_state: Dictionary) -> bool:
+	if movement_state.is_empty():
+		return false
+	if not String(movement_state.get("readability_status_line", "")).strip_edges().is_empty():
+		return true
+	return typeof(movement_state.get("map_readability", null)) == TYPE_DICTIONARY and not Dictionary(movement_state.get("map_readability", {})).is_empty()
 
 
 func get_command_feedback_snapshot() -> Dictionary:
