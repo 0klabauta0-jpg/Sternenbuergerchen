@@ -364,6 +364,7 @@ func get_pre_mission_readiness_snapshot() -> Dictionary:
 		snapshot["rendered_item_count"] = list.get_child_count()
 		snapshot["rendered_item_text"] = _build_readiness_item_list_text(list)
 		snapshot["rendered_item_columns"] = int(list.get("columns")) if list is GridContainer else 1
+		snapshot["rendered_item_visuals"] = _build_readiness_chip_visual_snapshot(list)
 	return snapshot
 
 
@@ -401,6 +402,7 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 		"start_button_text": start_button.text if start_button != null else "",
 		"start_button_disabled": start_button.disabled if start_button != null else true,
 		"start_button_tooltip": start_button.tooltip_text if start_button != null else "",
+		"start_button_readiness_color": String(start_button.get_meta("pre_mission_readiness_color_hex", "")) if start_button != null else "",
 		"readiness_summary": String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges(),
 		"readiness_overall_state": String(_pre_mission_readiness_snapshot.get("overall_state", "")).strip_edges(),
 	}
@@ -2725,37 +2727,143 @@ func _set_pre_mission_readiness_items(items: Array) -> void:
 		if typeof(item_variant) != TYPE_DICTIONARY:
 			continue
 		var item: Dictionary = Dictionary(item_variant)
-		var row := Label.new()
-		row.name = "ReadinessItemLabel"
-		row.clip_text = true
-		row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		row.custom_minimum_size = Vector2(220.0, 14.0)
-		row.add_theme_font_size_override("font_size", 8)
-		META_UI_SKIN_SCRIPT.style_body_label(row, 8)
 		var state: String = String(item.get("state", "")).strip_edges()
-		var marker: String = "OK" if state == "ready" else "!" if state == "warn" else "X"
-		row.text = "%s %s" % [
-			marker,
-			String(item.get("label", "")).strip_edges(),
-		]
-		row.tooltip_text = "%s: %s" % [row.text, String(item.get("detail", "")).strip_edges()]
-		row.set_meta("pre_mission_readiness_item", true)
-		row.set_meta("readiness_id", String(item.get("id", "")).strip_edges())
-		row.set_meta("readiness_state", state)
-		row.set_meta("readiness_blocking", bool(item.get("blocking", false)))
-		list.add_child(row)
+		var icon_text: String = _get_readiness_icon_text(state)
+		var legacy_marker: String = _get_readiness_legacy_marker(state)
+		var color_hex: String = _get_readiness_color(state).to_html(false)
+		var label_text: String = String(item.get("label", "")).strip_edges()
+		var chip_text: String = "%s %s" % [legacy_marker, label_text]
+		var visible_text: String = "%s %s" % [icon_text, label_text]
+		var chip := PanelContainer.new()
+		chip.name = "ReadinessItemChip"
+		chip.custom_minimum_size = Vector2(220.0, 18.0)
+		chip.tooltip_text = "%s: %s" % [visible_text, String(item.get("detail", "")).strip_edges()]
+		chip.add_theme_stylebox_override("panel", _build_readiness_chip_style(state))
+		chip.set_meta("pre_mission_readiness_item", true)
+		chip.set_meta("readiness_id", String(item.get("id", "")).strip_edges())
+		chip.set_meta("readiness_state", state)
+		chip.set_meta("readiness_blocking", bool(item.get("blocking", false)))
+		chip.set_meta("readiness_icon_text", icon_text)
+		chip.set_meta("readiness_color_hex", color_hex)
+		chip.set_meta("readiness_text", chip_text)
+		var margin := MarginContainer.new()
+		margin.name = "ReadinessChipMargin"
+		margin.add_theme_constant_override("margin_left", 4)
+		margin.add_theme_constant_override("margin_right", 4)
+		margin.add_theme_constant_override("margin_top", 1)
+		margin.add_theme_constant_override("margin_bottom", 1)
+		chip.add_child(margin)
+		var row := HBoxContainer.new()
+		row.name = "ReadinessChipRow"
+		row.add_theme_constant_override("separation", 4)
+		margin.add_child(row)
+		var swatch := ColorRect.new()
+		swatch.name = "ReadinessStateSwatch"
+		swatch.color = _get_readiness_color(state)
+		swatch.custom_minimum_size = Vector2(5.0, 12.0)
+		swatch.set_meta("readiness_color_hex", color_hex)
+		row.add_child(swatch)
+		var label := Label.new()
+		label.name = "ReadinessItemLabel"
+		label.text = visible_text
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.add_theme_font_size_override("font_size", 8)
+		META_UI_SKIN_SCRIPT.style_body_label(label, 8)
+		label.add_theme_color_override("font_color", _get_readiness_text_color(state))
+		label.set_meta("readiness_icon_text", icon_text)
+		label.set_meta("readiness_color_hex", color_hex)
+		row.add_child(label)
+		list.add_child(chip)
 
 
 func _build_readiness_item_list_text(list: Container) -> String:
 	var lines: PackedStringArray = PackedStringArray()
 	for child in list.get_children():
-		var label := child as Label
-		if label == null:
-			continue
-		var text: String = label.text.strip_edges()
+		var text: String = String(child.get_meta("readiness_text", "")).strip_edges() if child is Control else ""
+		if text.is_empty() and child is Label:
+			text = (child as Label).text.strip_edges()
 		if not text.is_empty():
 			lines.append(text)
 	return " | ".join(lines)
+
+
+func _build_readiness_chip_visual_snapshot(list: Container) -> Array:
+	var entries: Array = []
+	for child in list.get_children():
+		var control := child as Control
+		if control == null or not bool(control.get_meta("pre_mission_readiness_item", false)):
+			continue
+		entries.append({
+			"id": String(control.get_meta("readiness_id", "")).strip_edges(),
+			"state": String(control.get_meta("readiness_state", "")).strip_edges(),
+			"icon_text": String(control.get_meta("readiness_icon_text", "")).strip_edges(),
+			"color_hex": String(control.get_meta("readiness_color_hex", "")).strip_edges(),
+			"text": String(control.get_meta("readiness_text", "")).strip_edges(),
+			"tooltip": control.tooltip_text,
+		})
+	return entries
+
+
+func _get_readiness_icon_text(state: String) -> String:
+	match state.strip_edges().to_lower():
+		"ready":
+			return "OK"
+		"warn":
+			return "WARN"
+		_:
+			return "STOP"
+
+
+func _get_readiness_legacy_marker(state: String) -> String:
+	match state.strip_edges().to_lower():
+		"ready":
+			return "OK"
+		"warn":
+			return "!"
+		_:
+			return "X"
+
+
+func _get_readiness_color(state: String) -> Color:
+	match state.strip_edges().to_lower():
+		"ready":
+			return Color("69c391")
+		"warn":
+			return Color("d89b31")
+		_:
+			return Color("d66c66")
+
+
+func _get_readiness_text_color(state: String) -> Color:
+	match state.strip_edges().to_lower():
+		"ready":
+			return Color("dff6e8")
+		"warn":
+			return Color("ffe8b8")
+		_:
+			return Color("ffd6d2")
+
+
+func _build_readiness_chip_style(state: String) -> StyleBoxFlat:
+	var color := _get_readiness_color(state)
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.07, 0.09, 0.10, 0.92)
+	stylebox.border_color = color
+	stylebox.border_width_left = 1
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 4
+	stylebox.corner_radius_top_right = 4
+	stylebox.corner_radius_bottom_left = 4
+	stylebox.corner_radius_bottom_right = 4
+	stylebox.content_margin_left = 2
+	stylebox.content_margin_right = 2
+	stylebox.content_margin_top = 1
+	stylebox.content_margin_bottom = 1
+	return stylebox
 
 
 func _sync_start_button_with_readiness_snapshot() -> void:
@@ -2773,6 +2881,7 @@ func _sync_start_button_with_readiness_snapshot() -> void:
 	start_button.tooltip_text = summary_text
 	start_button.set_meta("pre_mission_readiness_state", overall_state)
 	start_button.set_meta("pre_mission_readiness_summary", summary_text)
+	start_button.set_meta("pre_mission_readiness_color_hex", _get_readiness_color(overall_state).to_html(false))
 
 
 func _ensure_mission_briefing_loadout_bridge_controls() -> void:

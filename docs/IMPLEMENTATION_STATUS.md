@@ -10,16 +10,27 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_536 - Startflow Icon And Status Color Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_536_startflow_icon_status_color_polish.md`, `docs/tasks/TASK_535_pre_mission_fullhd_startflow_visual_pass.md`, `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/dev/mission_briefing_contract.md`
+- Stand: `HomebaseTestScreen` rendert Pre-Mission-Readiness-Items als farbige Chips mit Status-Indikator, Icon-Text, Label und detailreichem Tooltip.
+- Stand: `get_pre_mission_readiness_snapshot()` expose't `rendered_item_visuals` mit Item-ID, State, Icon, Farbe, Text und Tooltip fuer Regressionen.
+- Stand: Der Startbutton expose't `pre_mission_readiness_color_hex` und spiegelt dieselbe Readiness-Farbe im Startflow-Snapshot.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_536 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf einen echten F6-/Screenshot-Sichttest.
+- Risiken/offen: Die Chips nutzen Godot-Control-Farben und ASCII-Icon-Text, aber noch keine finalen Texture-Icons. Manueller FullHD-Sichttest bleibt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_536_startflow_icon_status_color_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_535_pre_mission_fullhd_startflow_visual_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_534_pre_mission_readiness_checklist.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_537 - Pre-Mission F6 Screenshot Visual Audit`, wenn die neue Startflow-Optik im echten Fenster kontrolliert werden soll.
+
 ### TASK_535 - Pre-Mission FullHD Startflow Visual Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_535_pre_mission_fullhd_startflow_visual_pass.md`, `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
-- Stand: `DropLightLayoutContract.get_homebase_layout()` reserviert fuer die Homebase jetzt ein echtes 320px-Mission-Deck und setzt Roster, Fireteams und Flightdeck darunter.
+- Stand: `DropLightLayoutContract.get_homebase_layout()` reserviert fuer die Homebase jetzt ein echtes 568px-Mission-Deck und setzt Roster, Fireteams und Flightdeck darunter.
 - Stand: `HomebaseTestScreen` rendert Briefing, Minimap, Loadout-Empfehlungen und Readiness kompakter und expose't einen read-only `get_pre_mission_startflow_visual_snapshot()`.
 - Stand: Der Startbutton bleibt an `can_request_mission_start()` gebunden, zeigt aber anhand des Readiness-Snapshots `Start blockiert`, `Start pruefen` oder `Start Mission` plus Tooltip.
 - Stand: Der Rolling-HTML-Bericht nennt TASK_535 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf Statusfarben/Icon-Polish.
 - Risiken/offen: Kein echter F6-Screenshot in diesem Task. Die Statussprache ist noch ASCII-/Label-basiert; visuelle Icon-/Farbsprache bleibt Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_535_pre_mission_fullhd_startflow_visual_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_534_pre_mission_readiness_checklist.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_179_homebase_drop_light_fixed_fullhd_layout_verifier.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_536 - Startflow Icon And Status Color Polish`, wenn die Status-Chips von ASCII-Markern zu klareren Icons/Farben wachsen sollen.
+- Naechster Schritt: Siehe `TASK_536 - Startflow Icon And Status Color Polish`.
 
 ### TASK_534 - Pre-Mission Readiness Checklist
 - Status: implementiert im Arbeitsstand
