@@ -201,6 +201,7 @@
 				"step_id": "disable_air_defense",
 				"objective_type": "air_defense_shutdown",
 				"target_marker_id": "factory_danger_zone",
+				"enemy_group_id": "bravo_air_defense",
 				"required_state": "aa_disabled",
 				"min_hold_seconds": 0.0,
 				"blocks_cargo_until_complete": true

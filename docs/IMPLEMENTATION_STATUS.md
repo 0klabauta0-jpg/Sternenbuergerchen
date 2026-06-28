@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_518 - Mission Scenario Runtime Gates
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_518_mission_scenario_runtime_gates.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/air_asset_threat_damage_contract.md`, `docs/dev/combat_loop_authority_contract.md`
+- Stand: `scripts/mission/mission_scenario_runtime_gates.gd` wertet `vertical_slice.flow_steps` als read-only Runtime-Gates fuer AA-Shutdown, Computer-Hold und Cargo-Touchdown/Extract aus.
+- Stand: `MissionCombatLoopDriver` kann Scenario-Gates aus der Scenario-Datei konfigurieren, liefert `get_mission_scenario_runtime_gate_snapshot()`, spiegelt den Computer-Hold-Countdown in `ObjectiveStatus` und laesst den Szenario-Slice erst gewinnen, wenn alle Gates abgeschlossen sind.
+- Stand: `MissionTestSetup` reicht Scenario-Dateien an die Gate-Bridge weiter; alte map-only Missionen bleiben davon unberuehrt.
+- Risiken/offen: Cargo-State ist in diesem Slice noch ein Contract-Input. Die echte Frachter-Lande-/Abflug-Animation und PvP-Team-Ownership bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_518_mission_scenario_runtime_gates.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_517_mission_scenario_vertical_slice.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_505_frontier_probe_large_map_playtest_hotfix.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_519 - Cargo Touchdown Visual/Runtime Bridge` oder `TASK_520 - Multiplayer Team Ownership Smoke`, je nachdem ob zuerst sichtbarer Cargo-Flow oder MP-Faehigkeit gehaertet werden soll.
+
 ### TASK_517 - Mission Scenario Vertical Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/air_asset_threat_damage_contract.md`, `docs/tasks/TASK_482_mission_briefing_data_contract.md`, `docs/tasks/TASK_500_gameflow_spine_hardening.md`, `docs/tasks/TASK_504_startmap_expansion_performance_pass.md`

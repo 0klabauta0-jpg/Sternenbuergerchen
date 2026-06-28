@@ -136,7 +136,7 @@ static func _normalize_flow_steps(value: Variant) -> Array:
 			"required_state": String(step.get("required_state", "")).strip_edges(),
 			"min_hold_seconds": maxf(float(step.get("min_hold_seconds", 0.0)), 0.0),
 		}
-		for optional_key in ["blocks_cargo_until_complete", "operator_team_id", "requires_step_id"]:
+		for optional_key in ["blocks_cargo_until_complete", "enemy_group_id", "operator_team_id", "requires_step_id"]:
 			if step.has(optional_key):
 				normalized[optional_key] = step.get(optional_key)
 		result.append(normalized)

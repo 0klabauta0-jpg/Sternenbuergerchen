@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/mission-scenario-vertical-slice</code>.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/mission-scenario-runtime-gates</code>.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -165,6 +165,7 @@
       <span class="pill good">TASK_515 Readability-Presenter</span>
       <span class="pill good">TASK_516 Editor-UX</span>
       <span class="pill good">TASK_517 Scenario-Slice</span>
+      <span class="pill good">TASK_518 Runtime-Gates</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
   </header>
@@ -186,7 +187,7 @@
           <h2>Kurzfazit</h2>
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
-          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, und TASK_517 liefert den ersten konkreten AA-/Computer-/Cargo-Szenario-Slice. Die naechste technische Verdichtung sitzt vor allem noch in echten Runtime-Gates, Enemy-State-Aufbereitung, Remote-Event-Resten und den grossen Editor-/Visual-Skripten.</p>
+          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, und TASK_518 macht daraus lesbare Runtime-Gates. Die naechste Verdichtung sitzt vor allem noch in sichtbarem Cargo-Flow, Multiplayer-Team-Ownership, Enemy-State-Aufbereitung und den grossen Editor-/Visual-Skripten.</p>
         </article>
         <article class="card">
           <h2>Statusampel</h2>
@@ -241,8 +242,8 @@
               <p><code>scripts/tests/mission_tactical_sandbox_controller.gd:431</code> tickt UI, Planning, Dropship, Security, Karten und Fireteam-Ausfuehrung. TASK_512 hat den Fireteam-Runtime-Lesestatus herausgezogen, aber der Controller bleibt insgesamt noch zu breit.</p>
             </div>
             <div class="finding low">
-              <h3>Scenario-Daten sind da, Runtime-Gates fehlen noch</h3>
-              <p>Enemy-Team-Tactics, Limbo-Cover, Patrol, Contact-Hold und Damage-Reposition existieren. TASK_517 beschreibt jetzt den kleinen Missionstyp mit AA/Computer/Cargo; echte Objective-Gates fuer diese Schritte muessen noch autoritativ gebaut werden.</p>
+              <h3>Runtime-Gates sind da, Cargo-Flow ist noch abstrakt</h3>
+              <p>Enemy-Team-Tactics, Limbo-Cover, Patrol, Contact-Hold und Damage-Reposition existieren. TASK_518 wertet AA/Computer/Cargo als Mission-Gates aus; der Frachter selbst braucht noch eine sichtbare Touchdown-/Abflug-Bridge.</p>
             </div>
           </div>
         </article>
@@ -331,7 +332,7 @@
             </div>
             <div class="finding medium">
               <h3>Arbeitsstand bleibt bewusst task-lokal</h3>
-              <p>Der aktuelle Branch enthaelt TASK_517, das neue Frontier-Probe-Scenario, den Vertical-Slice-Contract und diesen aktualisierten Bericht. Der lokale <code>export_presets.cfg</code> wird nach Export wieder restauriert und bleibt untracked.</p>
+              <p>Der aktuelle Branch enthaelt TASK_518, den Runtime-Gate-Service, die Combat-Driver-Bridge und diesen aktualisierten Bericht. Der lokale <code>export_presets.cfg</code> wird nach Export wieder restauriert und bleibt untracked.</p>
             </div>
             <div class="finding low">
               <h3>Laute Asset-Warnungen</h3>
@@ -358,9 +359,10 @@
             <div class="finding good"><h3>Erledigt: TASK_515 - Combat Readability Presenter</h3><p>Eventtexte, Kontaktlinien, Winnerlabel und Statuslabel-Formatierung liegen in <code>CombatReadabilityPresenter</code>; Unit-Kontaktstatus und Authority bleiben im Driver/Simulation-Pfad.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_516 - Editor Builder UX Pass</h3><p>Palette-Suche, Favoriten/Recent, Scale-Preset-Buttons und kompakter Network-Drag-Preview-Snapshot sind im Runtime-Map-Editor angebunden.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_517 - Mission Scenario Vertical Slice</h3><p><code>frontier_probe_vertical_slice</code> beschreibt Luftabwehr/Computer/Gebaeude/Cargo mit Briefing, Team-Slots, Play-Modes und Flow-Steps auf der 192x192-Startmap.</p></div>
-            <div class="finding high"><h3>1. TASK_518 - Mission Scenario Runtime Gates</h3><p>AA-Shutdown, Computer-Hold und Cargo-Touchdown/Extract als echte, autoritative Mission-Gates bauen. UI zeigt nur Status; <code>SimulationRoot</code>/Runtime bleibt Wahrheit.</p></div>
-            <div class="finding medium"><h3>2. TASK_519 - Builder Drag Preview Visual Polish</h3><p>Pipe-/Wall-/Cliff-Linien beim Ziehen sichtbar im 2.5D/3D-Editor anzeigen und mit dem neuen Preview-Snapshot synchron halten.</p></div>
-            <div class="finding low"><h3>3. TASK_520 - Multiplayer Team Ownership Smoke</h3><p>Alpha/Bravo-Slots, NPC-Besitz und Lobby-/Manifest-Annahmen fuer den Scenario-Slice pruefen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_518 - Mission Scenario Runtime Gates</h3><p><code>MissionScenarioRuntimeGates</code> bewertet AA-Shutdown, Computer-Hold und Cargo-Touchdown/Extract; der Combat-Driver gewinnt den Slice erst, wenn alle Gates abgeschlossen sind.</p></div>
+            <div class="finding high"><h3>1. TASK_519 - Cargo Touchdown Visual/Runtime Bridge</h3><p>Frachter-Status sichtbar und runtime-nah an die Cargo-Gates koppeln: inbound, landed, loading/hold, departing, departed.</p></div>
+            <div class="finding medium"><h3>2. TASK_520 - Multiplayer Team Ownership Smoke</h3><p>Alpha/Bravo-Slots, NPC-Besitz und Lobby-/Manifest-Annahmen fuer den Scenario-Slice pruefen.</p></div>
+            <div class="finding low"><h3>3. TASK_521 - Builder Drag Preview Visual Polish</h3><p>Pipe-/Wall-/Cliff-Linien beim Ziehen sichtbar im 2.5D/3D-Editor anzeigen und mit dem neuen Preview-Snapshot synchron halten.</p></div>
           </div>
         </article>
         <article class="card">
@@ -398,6 +400,7 @@
                 <tr><td><code>task_515_combat_readability_presenter.gd</code></td><td>38 passed, 0 failed</td><td>Readability-Presenter, Driver-Anbindung, read-only Grenzen und Doku-Anbindung gruen.</td></tr>
                 <tr><td><code>task_516_editor_builder_ux_pass.gd</code></td><td>47 passed, 0 failed</td><td>Palette-Suche, Favoriten/Recent, Scale-Presets und Network-Preview-Snapshot gruen.</td></tr>
                 <tr><td><code>task_517_mission_scenario_vertical_slice.gd</code></td><td>38 passed, 0 failed</td><td>ScenarioData, Briefing, Air-Risk, Homebase-Katalog und Vertical-Slice-Payload sind gruen.</td></tr>
+                <tr><td><code>task_518_mission_scenario_runtime_gates.gd</code></td><td>28 passed, 0 failed</td><td>Runtime-Gate-Service, Computer-Hold-Countdown und Combat-Driver-Bridge sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
               </tbody>
@@ -410,7 +413,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_516-Merge. Arbeitsbranch: <code>task/mission-scenario-vertical-slice</code>. Aktueller Arbeitsstand enthaelt TASK_517 plus diesen aktualisierten Review-Report.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_517-Merge. Arbeitsbranch: <code>task/mission-scenario-runtime-gates</code>. Aktueller Arbeitsstand enthaelt TASK_518 plus diesen aktualisierten Review-Report.</p>
         </article>
       </div>
     </section>
@@ -489,17 +492,17 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_518 - Mission Scenario Runtime Gates",
-              "TASK_519 - Builder Drag Preview Visual Polish",
-              "TASK_520 - Multiplayer Team Ownership Smoke"
+              "TASK_519 - Cargo Touchdown Visual/Runtime Bridge",
+              "TASK_520 - Multiplayer Team Ownership Smoke",
+              "TASK_521 - Builder Drag Preview Visual Polish"
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194203876
           },
           metadata: {
-            branch: "task/mission-scenario-vertical-slice",
-            head: "working_tree_after_task_517",
+            branch: "task/mission-scenario-runtime-gates",
+            head: "working_tree_after_task_518",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }

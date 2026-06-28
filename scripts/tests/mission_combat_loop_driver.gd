@@ -18,6 +18,7 @@ const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd"
 const MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_authority_contract.gd")
 const MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_remote_event_bridge.gd")
 const MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_resolution_resolver.gd")
+const MISSION_SCENARIO_RUNTIME_GATES_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_runtime_gates.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const COMBAT_READABILITY_PRESENTER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_readability_presenter.gd")
 const WIN_CONDITION_ELIMINATION: String = "elimination"
@@ -177,6 +178,12 @@ var _enemy_limbo_behavior_adapter = ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.new()
 var _enemy_behavior_orchestrator = ENEMY_BEHAVIOR_ORCHESTRATOR_SCRIPT.new()
 var _remote_event_bridge = MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT.new()
 var _combat_resolution_resolver = MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT.new()
+var _mission_scenario_runtime_gates = MISSION_SCENARIO_RUNTIME_GATES_SCRIPT.new()
+var _mission_scenario_runtime_gate_snapshot: Dictionary = {}
+var _mission_scenario_runtime_step_states: Dictionary = {}
+var _mission_scenario_completed_step_ids: Array = []
+var _mission_scenario_cargo_state: String = ""
+var _mission_scenario_cargo_hold_seconds: float = 0.0
 var _readability_presenter = COMBAT_READABILITY_PRESENTER_SCRIPT.new()
 var _audio_event_bus = null
 
@@ -263,6 +270,49 @@ func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
 
 
+func configure_scenario_runtime_gates_from_file(path: String) -> bool:
+	if _mission_scenario_runtime_gates == null:
+		return false
+	_mission_scenario_runtime_gates.call("configure_from_file", path)
+	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
+	return bool(_mission_scenario_runtime_gates.call("is_configured"))
+
+
+func configure_scenario_runtime_gates(slice: Dictionary) -> bool:
+	if _mission_scenario_runtime_gates == null:
+		return false
+	_mission_scenario_runtime_gates.call("configure_from_slice", slice)
+	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
+	return bool(_mission_scenario_runtime_gates.call("is_configured"))
+
+
+func get_mission_scenario_runtime_gate_snapshot() -> Dictionary:
+	_update_mission_scenario_runtime_gates()
+	return _mission_scenario_runtime_gate_snapshot.duplicate(true)
+
+
+func set_mission_scenario_runtime_step_state(step_id: String, state: String) -> void:
+	var normalized_step_id: String = step_id.strip_edges()
+	if normalized_step_id.is_empty():
+		return
+	_mission_scenario_runtime_step_states[normalized_step_id] = state.strip_edges()
+	_update_mission_scenario_runtime_gates()
+
+
+func mark_mission_scenario_runtime_step_complete(step_id: String) -> void:
+	var normalized_step_id: String = step_id.strip_edges()
+	if normalized_step_id.is_empty() or _mission_scenario_completed_step_ids.has(normalized_step_id):
+		return
+	_mission_scenario_completed_step_ids.append(normalized_step_id)
+	_update_mission_scenario_runtime_gates()
+
+
+func set_mission_scenario_cargo_state(state: String, hold_seconds: float = 0.0) -> void:
+	_mission_scenario_cargo_state = state.strip_edges().to_lower()
+	_mission_scenario_cargo_hold_seconds = maxf(hold_seconds, 0.0)
+	_update_mission_scenario_runtime_gates()
+
+
 func get_playability_snapshot() -> Dictionary:
 	if _runs_local_authority:
 		_sync_objective_countdown_state()
@@ -277,6 +327,7 @@ func get_playability_snapshot() -> Dictionary:
 		"duration_seconds": _get_duration_seconds(),
 		"remaining_time_limit_seconds": get_remaining_time_limit_seconds(),
 		"last_event_text": _last_event_text,
+		"mission_scenario_runtime_gates": get_mission_scenario_runtime_gate_snapshot(),
 	}
 	return Dictionary(MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call("build_playability_snapshot", base_snapshot, _get_objective_status(), _mission_result))
 
@@ -1294,6 +1345,7 @@ func _try_recover_premature_startup_resolution() -> bool:
 func _update_combat_resolution() -> void:
 	if _combat_finished:
 		return
+	_update_mission_scenario_runtime_gates()
 	var decision: Dictionary = Dictionary(_combat_resolution_resolver.call(
 		"build_resolution_decision",
 		{
@@ -1315,6 +1367,54 @@ func _update_combat_resolution() -> void:
 		String(decision.get("winning_team_id", "")),
 		String(decision.get("result_condition_override", ""))
 	)
+
+
+func _update_mission_scenario_runtime_gates() -> void:
+	if _mission_scenario_runtime_gates == null or not bool(_mission_scenario_runtime_gates.call("is_configured")):
+		_mission_scenario_runtime_gate_snapshot = {}
+		return
+	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("update", _build_mission_scenario_runtime_gate_context())).duplicate(true)
+
+
+func _build_mission_scenario_runtime_gate_context() -> Dictionary:
+	return {
+		"now_msec": Time.get_ticks_msec(),
+		"objective_status": _get_objective_status(),
+		"friendly_team_id": friendly_team_id,
+		"enemy_group_fit_counts": _build_enemy_group_fit_counts(),
+		"completed_step_ids": _mission_scenario_completed_step_ids.duplicate(true),
+		"step_states": _mission_scenario_runtime_step_states.duplicate(true),
+		"cargo_state": _mission_scenario_cargo_state,
+		"cargo_hold_seconds": _mission_scenario_cargo_hold_seconds,
+	}
+
+
+func _build_enemy_group_fit_counts() -> Dictionary:
+	var result: Dictionary = {}
+	for group_id_variant in _enemy_team_tactics_states_by_group_id.keys():
+		var group_id: String = String(group_id_variant).strip_edges()
+		if group_id.is_empty():
+			continue
+		var state: Dictionary = Dictionary(_enemy_team_tactics_states_by_group_id.get(group_id_variant, {}))
+		var fit_count: int = 0
+		var candidate_units: Array = _get_active_enemy_units()
+		for unit_id_variant in Array(state.get("unit_ids", [])):
+			var unit = _find_unit_by_id(candidate_units, String(unit_id_variant))
+			if _is_unit_fit_for_gate_count(unit):
+				fit_count += 1
+		result[group_id] = fit_count
+	return result
+
+
+func _is_unit_fit_for_gate_count(unit) -> bool:
+	if unit == null:
+		return false
+	if unit.has_method("is_fit_for_combat"):
+		return bool(unit.call("is_fit_for_combat"))
+	if unit.has_method("get_vital_state"):
+		var vital_state: String = String(unit.call("get_vital_state")).strip_edges().to_lower()
+		return vital_state != "downed" and vital_state != "dead"
+	return true
 
 
 func _refresh_hotpath_unit_cache_for_tick() -> void:
@@ -2178,6 +2278,7 @@ func _build_readability_status_context() -> Dictionary:
 		"show_hold_timer": win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_msec >= 0 and not _combat_finished,
 		"objective_defense_elapsed_seconds": _get_objective_defense_elapsed_seconds(),
 		"objective_defense_hold_seconds": objective_defense_hold_seconds,
+		"mission_scenario_runtime_gates": get_mission_scenario_runtime_gate_snapshot(),
 		"attack_readiness_text": _build_attack_readiness_text(),
 		"last_event_text": _last_event_text,
 		"last_contact": _last_contact.duplicate(true),
@@ -2815,6 +2916,9 @@ func _remove_readability_nodes() -> void:
 
 
 func _is_victory_condition_met() -> bool:
+	if _mission_scenario_runtime_gates != null and bool(_mission_scenario_runtime_gates.call("is_configured")):
+		_update_mission_scenario_runtime_gates()
+		return bool(_mission_scenario_runtime_gates.call("are_all_gates_complete"))
 	if win_condition == WIN_CONDITION_OBJECTIVE_CAPTURE or win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE:
 		_update_objective_hold_tracking()
 	var enemy_team_eliminated: bool = _is_enemy_team_eliminated() if win_condition != WIN_CONDITION_OBJECTIVE_CAPTURE and win_condition != WIN_CONDITION_OBJECTIVE_DEFENSE else false
@@ -2862,7 +2966,7 @@ func _resolve_combat(result: String, winning_team_id: String, result_condition_o
 
 func _build_mission_result(result: String, winning_team_id: String) -> Dictionary:
 	var result_condition: String = _mission_result_condition_override if not _mission_result_condition_override.is_empty() else win_condition
-	return Dictionary(_combat_resolution_resolver.call(
+	var mission_result: Dictionary = Dictionary(_combat_resolution_resolver.call(
 		"build_mission_result",
 		{
 			"result": result,
@@ -2875,6 +2979,9 @@ func _build_mission_result(result: String, winning_team_id: String) -> Dictionar
 			"fireteam_tactical_debrief": _build_fireteam_tactical_debrief_entries(),
 		}
 	))
+	if not _mission_scenario_runtime_gate_snapshot.is_empty():
+		mission_result["mission_scenario_runtime_gates"] = _mission_scenario_runtime_gate_snapshot.duplicate(true)
+	return mission_result
 
 
 func _build_fireteam_tactical_debrief_entries() -> Array:
@@ -2948,6 +3055,11 @@ func _sync_objective_countdown_state() -> void:
 
 
 func _build_objective_countdown_source() -> Dictionary:
+	if _mission_scenario_runtime_gates != null and bool(_mission_scenario_runtime_gates.call("is_configured")):
+		_update_mission_scenario_runtime_gates()
+		var scenario_countdown: Dictionary = Dictionary(_mission_scenario_runtime_gates.call("build_countdown_source"))
+		if not scenario_countdown.is_empty():
+			return scenario_countdown
 	if win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE:
 		_update_objective_hold_tracking()
 	return Dictionary(_combat_resolution_resolver.call(
