@@ -120,8 +120,11 @@ static func _build_team_readability_entries(team_entries: Array, play_mode: Stri
 			"ownership_label": String(entry.get("ownership_label", "")),
 			"control_label": String(entry.get("control_label", "")),
 			"peer_label": String(entry.get("peer_label", "")),
+			"spawn_marker_id": String(entry.get("spawn_marker_id", "")),
 			"spawn_label": String(entry.get("spawn_label", "")),
 			"ui_chip_text": String(entry.get("ui_chip_text", "")),
+			"badge_text": String(entry.get("badge_text", "")),
+			"spawn_chip_text": String(entry.get("spawn_chip_text", "")),
 			"readability_tone": String(entry.get("readability_tone", "")),
 			"play_mode": play_mode,
 			"npc_controlled": bool(entry.get("npc_controlled", false)),
@@ -139,6 +142,8 @@ static func _build_team_display_fields(entry: Dictionary, play_mode: String) -> 
 	var assigned_peer_ids: PackedInt32Array = PackedInt32Array(entry.get("assigned_peer_ids", PackedInt32Array()))
 	var short_label: String = _team_short_label(team_id)
 	var ownership_label: String = _build_ownership_label(assigned_peer_ids, npc_controlled)
+	var spawn_marker_id: String = String(entry.get("spawn_marker_id", "")).strip_edges()
+	var spawn_label: String = _spawn_label(spawn_marker_id)
 	return {
 		"display_name": _team_display_name(team_id, role),
 		"short_label": short_label,
@@ -147,8 +152,10 @@ static func _build_team_display_fields(entry: Dictionary, play_mode: String) -> 
 		"ownership_label": ownership_label,
 		"control_label": _build_control_label(npc_controlled, play_mode),
 		"peer_label": _build_peer_label(assigned_peer_ids, npc_controlled),
-		"spawn_label": _spawn_label(String(entry.get("spawn_marker_id", "")).strip_edges()),
+		"spawn_label": spawn_label,
 		"ui_chip_text": "%s: %s" % [short_label, ownership_label],
+		"badge_text": _build_badge_text(short_label, ownership_label, spawn_marker_id),
+		"spawn_chip_text": "%s | %s" % [short_label, spawn_label],
 		"readability_tone": "npc" if npc_controlled else "player",
 	}
 
@@ -253,6 +260,13 @@ static func _spawn_label(spawn_marker_id: String) -> String:
 	if spawn_marker_id.strip_edges().is_empty():
 		return "Spawn not set"
 	return "Spawn %s" % spawn_marker_id.strip_edges()
+
+
+static func _build_badge_text(short_label: String, ownership_label: String, spawn_marker_id: String) -> String:
+	var spawn_text: String = spawn_marker_id.strip_edges()
+	if spawn_text.is_empty():
+		spawn_text = "spawn ?"
+	return "%s | %s | %s" % [short_label, ownership_label, spawn_text]
 
 
 static func _play_mode_label(play_mode: String) -> String:

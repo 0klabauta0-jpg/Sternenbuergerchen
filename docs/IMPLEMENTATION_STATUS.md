@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_525 - Team Badge / Spawn Readability Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_525_team_badge_spawn_readability_polish.md`, `docs/tasks/TASK_523_pvp_team_readability_ui_pass.md`, `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/dev/multiplayer_session_lobby.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/html_report_workbench_contract.md`
+- Stand: `MissionMultiplayerTeamOwnershipContract` liefert zusaetzlich `badge_text`, `spawn_chip_text` und `spawn_marker_id` in den read-only Team-Readability-Eintraegen.
+- Stand: Die produktive Multiplayer-Lobby rendert Alpha/Bravo aus dem Team-Readability-Snapshot als farbige Badges mit Owner und Spawn-Marker.
+- Stand: `get_lobby_ui_snapshot()` expose't Badge-Text, Badge-Anzahl und Badge-Daten fuer Verifier und spaetere UI-Polish-Slices.
+- Stand: Der laufende HTML-Reviewbericht ist als Zwischenbericht auf TASK_525 aktualisiert und nennt TASK_526 als naechsten Anschluss.
+- Risiken/offen: Die Badges sind Label-basiert und noch keine finalen Icons. Briefing-Minimap-Overlays und Mission-HUD-Teamchips bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_525_team_badge_spawn_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_523_pvp_team_readability_ui_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_520_multiplayer_team_ownership_smoke.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_526 - Mission HUD Team Chip Polish`, wenn Alpha/Bravo-Besitz auch im laufenden Missionsbild als kompakte Teamchips sichtbar werden soll.
+
 ### TASK_524 - Export Warning Noise Cleanup
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_524_export_warning_noise_cleanup.md`, `docs/tasks/TASK_511_export_runtime_package_hygiene.md`, `docs/dev/html_report_workbench_contract.md`, `data/export_runtime_package_contract.json`

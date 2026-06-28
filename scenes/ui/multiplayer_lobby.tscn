@@ -56,6 +56,10 @@ theme_override_font_sizes/font_size = 12
 text = "PvP: Alpha -> Host Peer 1 | Bravo -> Peer 2"
 autowrap_mode = 3
 
+[node name="TeamBadgeRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
 [node name="HostJoinGrid" type="GridContainer" parent="Panel/Margin/VBox"]
 layout_mode = 2
 columns = 3

@@ -21,6 +21,7 @@ const DEFAULT_MAP_FILE_NAME: String = "Ground_Mission01_32x32.json"
 
 @onready var _status_label: Label = get_node("Panel/Margin/VBox/StatusLabel")
 @onready var _team_readability_label: Label = get_node("Panel/Margin/VBox/TeamReadabilityLabel")
+@onready var _team_badge_row: HBoxContainer = get_node("Panel/Margin/VBox/TeamBadgeRow")
 @onready var _host_port_spin: SpinBox = get_node("Panel/Margin/VBox/HostJoinGrid/HostPortSpinBox")
 @onready var _host_button: Button = get_node("Panel/Margin/VBox/HostJoinGrid/HostButton")
 @onready var _join_address_edit: LineEdit = get_node("Panel/Margin/VBox/HostJoinGrid/JoinAddressLineEdit")
@@ -240,6 +241,9 @@ func get_lobby_ui_snapshot() -> Dictionary:
 		"roster_mode_disabled": _roster_mode_option.disabled,
 		"status_text": _status_label.text,
 		"team_readability_text": _team_readability_label.text,
+		"team_badge_text": _build_team_badge_summary(session_snapshot),
+		"team_badge_count": _team_badge_row.get_child_count(),
+		"team_badges": _build_team_badge_data(session_snapshot),
 		"peer_text": _peer_label.text,
 		"assignment_text": _assignment_label.text,
 		"settings_text": _settings_label.text,
@@ -645,6 +649,7 @@ func _apply_session_snapshot(snapshot: Dictionary) -> void:
 	_assignment_label.text = _format_assignment_lines(Dictionary(snapshot.get("assignments", {})))
 	_team_readability_label.text = _build_team_readability_text(snapshot)
 	_team_readability_label.visible = not _team_readability_label.text.strip_edges().is_empty()
+	_refresh_team_badges(snapshot)
 	_refresh_settings_summary()
 	_refresh_lobby_controls(snapshot)
 
@@ -925,3 +930,73 @@ func _build_team_readability_text(snapshot: Dictionary) -> String:
 		return direct_summary
 	var team_readability: Dictionary = Dictionary(snapshot.get("team_readability", {}))
 	return String(team_readability.get("summary_text", "")).strip_edges()
+
+
+func _refresh_team_badges(snapshot: Dictionary) -> void:
+	for child in _team_badge_row.get_children():
+		child.queue_free()
+	var badge_entries: Array = _build_team_badge_data(snapshot)
+	_team_badge_row.visible = not badge_entries.is_empty()
+	for entry_variant in badge_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label := Label.new()
+		label.text = String(entry.get("badge_text", ""))
+		label.tooltip_text = String(entry.get("tooltip", ""))
+		label.custom_minimum_size = Vector2(192.0, 30.0)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.clip_text = true
+		label.add_theme_font_size_override("font_size", 11)
+		label.add_theme_color_override("font_color", Color(0.95, 0.98, 1.0, 1.0))
+		label.add_theme_stylebox_override("normal", _make_team_badge_style(String(entry.get("team_color_hex", ""))))
+		_team_badge_row.add_child(label)
+
+
+func _build_team_badge_data(snapshot: Dictionary) -> Array:
+	var team_readability: Dictionary = Dictionary(snapshot.get("team_readability", {}))
+	var result: Array = []
+	for entry_variant in Array(team_readability.get("entries", [])):
+		var entry: Dictionary = Dictionary(entry_variant)
+		var badge_text: String = String(entry.get("badge_text", "")).strip_edges()
+		if badge_text.is_empty():
+			badge_text = "%s | %s | %s" % [
+				String(entry.get("short_label", "Team")),
+				String(entry.get("ownership_label", "Unassigned")),
+				String(entry.get("spawn_marker_id", "spawn ?")),
+			]
+		result.append({
+			"team_id": String(entry.get("team_id", "")),
+			"team_color_hex": String(entry.get("team_color_hex", "#9aa3ad")),
+			"badge_text": badge_text,
+			"spawn_chip_text": String(entry.get("spawn_chip_text", "")),
+			"tooltip": "%s | %s | %s" % [
+				String(entry.get("display_name", "")),
+				String(entry.get("control_label", "")),
+				String(entry.get("spawn_label", "")),
+			],
+		})
+	return result
+
+
+func _build_team_badge_summary(snapshot: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for entry_variant in _build_team_badge_data(snapshot):
+		var entry: Dictionary = Dictionary(entry_variant)
+		var text: String = String(entry.get("badge_text", "")).strip_edges()
+		if not text.is_empty():
+			parts.append(text)
+	return " || ".join(parts)
+
+
+func _make_team_badge_style(color_hex: String) -> StyleBoxFlat:
+	var team_color: Color = Color.from_string(color_hex.strip_edges(), Color(0.45, 0.52, 0.58, 1.0))
+	var style := StyleBoxFlat.new()
+	style.bg_color = team_color.darkened(0.45)
+	style.border_color = team_color.lightened(0.15)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(6)
+	style.content_margin_left = 10.0
+	style.content_margin_right = 10.0
+	style.content_margin_top = 5.0
+	style.content_margin_bottom = 5.0
+	return style
