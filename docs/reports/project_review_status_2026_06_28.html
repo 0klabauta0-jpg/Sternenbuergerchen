@@ -347,11 +347,11 @@
           <div class="stack">
             <div class="finding good">
               <h3>Release-Paket ist jetzt gefiltert</h3>
-              <p>TASK_511 versioniert den Runtime-Export-Contract und nutzt <code>scripts/tools/export_runtime_release.ps1</code>, um <code>export_presets.cfg</code> nur temporaer zu patchen. Das PCK fiel im Test von <code>242312564</code> auf <code>194203876</code> Bytes.</p>
+              <p>TASK_511 versioniert den Runtime-Export-Contract und nutzt <code>scripts/tools/export_runtime_release.ps1</code>, um <code>export_presets.cfg</code> nur temporaer zu patchen. Der aktuelle Runtime-Export schreibt nach <code>C:\dev\Sternenbuergerchen_rel</code>; das PCK liegt nach TASK_534 bei <code>194633380</code> Bytes.</p>
             </div>
             <div class="finding good">
               <h3>Berichtspflege bleibt bewusst task-lokal</h3>
-              <p>Die Integration enthaelt TASK_533; dieser Branch aktualisiert die Pre-Mission-Readiness-Checkliste als TASK_534. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
+              <p>Die Integration enthaelt TASK_534; dieser Mini-Branch zieht nur den laufenden HTML-Bericht mit Merge-, Push- und Runtime-Exportstand nach. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
             </div>
             <div class="finding good">
               <h3>Factory-UID-Warnung bereinigt</h3>
@@ -516,7 +516,7 @@
                 <tr><td><code>task_533_recommended_loadout_selection_bridge.gd</code></td><td>30 passed, 0 failed</td><td>Bestaetigte Empfehlungsauswahl und Homebase-Member-Loadout-Bridge.</td></tr>
                 <tr><td><code>task_534_pre_mission_readiness_checklist.gd</code></td><td>25 passed, 0 failed</td><td>Read-only Startbereitschaft aus Briefing, Loadout, Dropship, Pilot, Cargo und Boarding.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
-                <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
+                <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
               </tbody>
             </table>
@@ -528,7 +528,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_533-Merge. Arbeitsbranch fuer die Readiness-Checkliste: <code>task/pre-mission-readiness-checklist</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_534-Merge und Push. Arbeitsbranch fuer diesen Nachtrag: <code>task/rolling-report-export-status-update</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -637,13 +637,13 @@
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
-            runtime_pck_bytes: 194203876,
+            runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status"
           },
           metadata: {
-            branch: "task/pre-mission-readiness-checklist",
-            integration_base: "integration/core-foundation after TASK_533",
-            head: "working_tree_task_534",
+            branch: "task/rolling-report-export-status-update",
+            integration_base: "integration/core-foundation after TASK_534",
+            head: "working_tree_report_export_status",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }
