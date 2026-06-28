@@ -20,6 +20,7 @@ const HOMEBASE_FIRETEAM_DROP_TARGET_SCRIPT: GDScript = preload("res://scripts/me
 const HOMEBASE_UNIT_DROP_TARGET_SCRIPT: GDScript = preload("res://scripts/meta/homebase_unit_drop_target.gd")
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
+const MISSION_BRIEFING_PANEL_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_briefing_panel_presenter.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
 const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
@@ -103,12 +104,15 @@ var _aircraft_feedback_text: String = ""
 var _mission_catalog: Array = []
 var _selected_mission_id: String = "fob_transfer"
 var _selected_mission_map_path: String = "res://maps/Ground_Mission01_32x32.json"
+var _selected_mission_scenario_path: String = "res://data/mission_scenarios/ground_mission01_default.json"
 var _selected_mission_name: String = "Operation: FOB Transfer"
 var _selected_mission_slot_count: int = 3
 var _mission_launch_ready: bool = false
 var _mission_launch_summary: String = ""
 var _mission_slot_usage_override: int = -1
 var _mission_pilot_count_override: int = -1
+var _mission_briefing_panel_presenter = MISSION_BRIEFING_PANEL_PRESENTER_SCRIPT.new()
+var _mission_briefing_panel_snapshot: Dictionary = {}
 var _aircraft_manager = AIRCRAFT_MANAGER_SCRIPT.new()
 var _team_transfer_entries: Array = []
 var _personnel_events: Array = []
@@ -215,6 +219,7 @@ func set_mission_context(mission_catalog: Array, selected_map_path: String, miss
 	_selected_mission_map_path = selected_map_path.strip_edges() if not selected_map_path.strip_edges().is_empty() else _selected_mission_map_path
 	_selected_mission_name = mission_name.strip_edges() if not mission_name.strip_edges().is_empty() else _selected_mission_name
 	_selected_mission_slot_count = maxi(mission_slot_count, 1)
+	_selected_mission_scenario_path = _resolve_selected_mission_scenario_path()
 	if is_inside_tree():
 		_update_mission_info()
 
@@ -291,6 +296,24 @@ func get_personnel_notification_snapshot() -> Dictionary:
 		"event_count": _personnel_events.size(),
 		"messages": _build_personnel_notification_messages(),
 	}
+
+
+func get_mission_briefing_panel_snapshot() -> Dictionary:
+	var snapshot: Dictionary = _mission_briefing_panel_snapshot.duplicate(true)
+	snapshot["panel_visible"] = _node_is_visible("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel")
+	var title_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingTitleLabel") as Label
+	var status_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingStatusLabel") as Label
+	var objectives_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingObjectivesLabel") as Label
+	var teams_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingTeamsLabel") as Label
+	if title_label != null:
+		snapshot["rendered_title_text"] = title_label.text
+	if status_label != null:
+		snapshot["rendered_status_text"] = status_label.text
+	if objectives_label != null:
+		snapshot["rendered_objective_text"] = objectives_label.text
+	if teams_label != null:
+		snapshot["rendered_team_text"] = teams_label.text
+	return snapshot
 
 
 func get_aircraft_panel_snapshot() -> Dictionary:
@@ -2294,6 +2317,7 @@ func _update_mission_info() -> void:
 	mission_summary_label.set_meta("homebase_direct_payload_fireteam_count", direct_payload_fireteam_count)
 	mission_summary_label.set_meta("homebase_direct_payload_status_text", direct_payload_status_text)
 	_update_personnel_notifications()
+	_update_mission_briefing_panel()
 
 
 func _update_personnel_notifications() -> void:
@@ -2322,6 +2346,91 @@ func _ensure_personnel_notifications_label() -> Label:
 	if summary_label != null:
 		mission_vbox.move_child(label, summary_label.get_index() + 1)
 	return label
+
+
+func _update_mission_briefing_panel() -> void:
+	_selected_mission_scenario_path = _resolve_selected_mission_scenario_path()
+	var panel := _ensure_mission_briefing_panel()
+	if _selected_mission_scenario_path.strip_edges().is_empty():
+		_mission_briefing_panel_snapshot = Dictionary(_mission_briefing_panel_presenter.call("build_snapshot_from_files", "", _selected_mission_map_path, "multiplayer_pvp"))
+		panel.visible = false
+		return
+	_mission_briefing_panel_snapshot = Dictionary(_mission_briefing_panel_presenter.call(
+		"build_snapshot_from_files",
+		_selected_mission_scenario_path,
+		_selected_mission_map_path,
+		"multiplayer_pvp"
+	))
+	panel.visible = bool(_mission_briefing_panel_snapshot.get("configured", false))
+	_set_mission_briefing_label("BriefingTitleLabel", String(_mission_briefing_panel_snapshot.get("title", "Mission Briefing")).strip_edges())
+	_set_mission_briefing_label("BriefingSummaryLabel", String(_mission_briefing_panel_snapshot.get("summary", "")).strip_edges())
+	_set_mission_briefing_label("BriefingStatusLabel", String(_mission_briefing_panel_snapshot.get("panel_status_text", "")).strip_edges())
+	_set_mission_briefing_label("BriefingObjectivesLabel", "Ziele: %s" % String(_mission_briefing_panel_snapshot.get("objective_text", "-")).strip_edges())
+	_set_mission_briefing_label("BriefingThreatsLabel", "Risiken: %s" % String(_mission_briefing_panel_snapshot.get("threat_text", "-")).strip_edges())
+	_set_mission_briefing_label("BriefingTeamsLabel", "Teams: %s" % String(_mission_briefing_panel_snapshot.get("team_spawn_text", "-")).strip_edges())
+	_set_mission_briefing_label("BriefingLoadoutLabel", "Empfohlen: %s" % String(_mission_briefing_panel_snapshot.get("loadout_text", "-")).strip_edges())
+	panel.set_meta("mission_briefing_snapshot", _mission_briefing_panel_snapshot.duplicate(true))
+
+
+func _ensure_mission_briefing_panel() -> PanelContainer:
+	var mission_vbox := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
+	var existing := mission_vbox.get_node_or_null("MissionBriefingPanel") as PanelContainer
+	if existing != null:
+		return existing
+	var panel := PanelContainer.new()
+	panel.name = "MissionBriefingPanel"
+	panel.custom_minimum_size = Vector2(0.0, 116.0)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "body")
+	var margin := MarginContainer.new()
+	margin.name = "BriefingMargin"
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 6)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	panel.add_child(margin)
+	var vbox := VBoxContainer.new()
+	vbox.name = "BriefingVBox"
+	vbox.add_theme_constant_override("separation", 2)
+	margin.add_child(vbox)
+	for label_name in [
+		"BriefingTitleLabel",
+		"BriefingSummaryLabel",
+		"BriefingStatusLabel",
+		"BriefingObjectivesLabel",
+		"BriefingThreatsLabel",
+		"BriefingTeamsLabel",
+		"BriefingLoadoutLabel",
+	]:
+		var label := Label.new()
+		label.name = label_name
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		var font_size: int = 9
+		if label_name == "BriefingTitleLabel":
+			font_size = 11
+			META_UI_SKIN_SCRIPT.style_header_label(label, font_size)
+			label.add_theme_color_override("font_color", Color("e7edf4"))
+		else:
+			META_UI_SKIN_SCRIPT.style_body_label(label, font_size)
+			label.add_theme_color_override("font_color", Color("cad7df"))
+		vbox.add_child(label)
+	mission_vbox.add_child(panel)
+	var anchor := mission_vbox.get_node_or_null("PersonnelEventsLabel")
+	if anchor == null:
+		anchor = mission_vbox.get_node_or_null("MissionSummaryLabel")
+	if anchor != null:
+		mission_vbox.move_child(panel, anchor.get_index() + 1)
+	return panel
+
+
+func _set_mission_briefing_label(label_name: String, text: String) -> void:
+	var label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/%s" % label_name) as Label
+	if label == null:
+		return
+	label.text = text
+	label.tooltip_text = text
 
 
 func _build_personnel_notification_messages() -> PackedStringArray:
@@ -4558,6 +4667,18 @@ func _build_selected_mission_map_label() -> String:
 	if map_file_path.is_empty():
 		return "unknown_map"
 	return map_file_path
+
+
+func _resolve_selected_mission_scenario_path() -> String:
+	for mission_variant in _mission_catalog:
+		var mission_definition: Dictionary = Dictionary(mission_variant)
+		if String(mission_definition.get("mission_id", "")).strip_edges() == _selected_mission_id:
+			return String(mission_definition.get("scenario_file_path", "")).strip_edges()
+	for mission_variant in _mission_catalog:
+		var mission_definition: Dictionary = Dictionary(mission_variant)
+		if String(mission_definition.get("map_file_path", "")).strip_edges() == _selected_mission_map_path:
+			return String(mission_definition.get("scenario_file_path", "")).strip_edges()
+	return _selected_mission_scenario_path.strip_edges()
 
 
 func _populate_mission_selector(selector: OptionButton) -> void:
