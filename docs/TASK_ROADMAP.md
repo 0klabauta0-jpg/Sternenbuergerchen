@@ -157,7 +157,7 @@ git checkout -b batch/<batch-name>
 - TASK_526 - Mission HUD Team Chip Polish (implementiert)
 - TASK_527 - Briefing Minimap Team Spawn Overlay (implementiert)
 - TASK_528 - Rolling HTML Status Report (implementiert)
-- TASK_529 - Mission HUD Team Icon Polish
+- TASK_529 - Mission HUD Team Icon Polish (implementiert)
 - TASK_530 - Briefing Panel Renderer MVP
 
 Phase 0 – Fundament (abgeschlossen)

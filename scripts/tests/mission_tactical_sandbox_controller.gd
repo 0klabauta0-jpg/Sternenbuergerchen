@@ -6599,7 +6599,7 @@ func _refresh_mission_team_chip_label() -> void:
 	if label == null:
 		return
 	var snapshot: Dictionary = get_mission_team_chip_snapshot()
-	label.text = String(snapshot.get("status_text", "Teams: not configured"))
+	label.text = String(snapshot.get("compact_status_text", snapshot.get("status_text", "Teams: not configured")))
 
 
 func get_mission_team_chip_snapshot() -> Dictionary:
@@ -6613,6 +6613,7 @@ func get_mission_team_chip_snapshot() -> Dictionary:
 			"chips": [],
 			"summary_text": "",
 			"status_text": "Teams: presenter unavailable",
+			"compact_status_text": "Teams: presenter unavailable",
 		}
 	var simulation_root = get_node_or_null("../SimulationRoot")
 	var network_snapshot: Dictionary = {}

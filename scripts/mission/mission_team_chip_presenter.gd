@@ -29,6 +29,7 @@ func build_snapshot(network_contract_snapshot: Dictionary, play_mode: String = "
 		"chips": chips,
 		"summary_text": String(ownership_snapshot.get("team_readability_summary", "")),
 		"status_text": _build_status_text(chips),
+		"compact_status_text": _build_compact_status_text(chips),
 	}
 
 
@@ -44,6 +45,11 @@ func _build_chip_entry(entry: Dictionary) -> Dictionary:
 		"team_id": String(entry.get("team_id", "")).strip_edges(),
 		"short_label": short_label,
 		"team_color_hex": String(entry.get("team_color_hex", "")),
+		"icon_text": _team_icon_text(String(entry.get("team_id", ""))),
+		"spawn_icon_text": _spawn_icon_text(spawn_marker_id),
+		"compact_text": _build_compact_chip_text(String(entry.get("team_id", "")), short_label, ownership_label, spawn_marker_id),
+		"icon_tooltip": _build_icon_tooltip(short_label, ownership_label, spawn_marker_id),
+		"visual_priority": _team_visual_priority(String(entry.get("team_id", ""))),
 		"ownership_label": ownership_label,
 		"control_label": String(entry.get("control_label", "")),
 		"spawn_marker_id": spawn_marker_id,
@@ -73,6 +79,71 @@ func _build_status_text(chips: Array) -> String:
 	if parts.is_empty():
 		return "Teams: not configured"
 	return "Teams: %s" % " | ".join(parts)
+
+
+func _build_compact_status_text(chips: Array) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for chip_variant in chips:
+		var chip: Dictionary = Dictionary(chip_variant)
+		var compact_text: String = String(chip.get("compact_text", "")).strip_edges()
+		if compact_text.is_empty():
+			continue
+		parts.append(compact_text)
+	if parts.is_empty():
+		return "Teams: not configured"
+	return "Teams: %s" % " | ".join(parts)
+
+
+func _build_compact_chip_text(team_id: String, short_label: String, ownership_label: String, spawn_marker_id: String) -> String:
+	var label: String = short_label.strip_edges()
+	if label.is_empty():
+		label = "Team"
+	var owner: String = ownership_label.strip_edges()
+	if owner.is_empty():
+		owner = "?"
+	return "%s %s %s @ %s" % [_team_icon_text(team_id), label, owner, _spawn_icon_text(spawn_marker_id)]
+
+
+func _build_icon_tooltip(short_label: String, ownership_label: String, spawn_marker_id: String) -> String:
+	var owner: String = ownership_label.strip_edges()
+	if owner.is_empty():
+		owner = "Owner not set"
+	var spawn: String = spawn_marker_id.strip_edges()
+	if spawn.is_empty():
+		spawn = "spawn not set"
+	return "%s | %s | %s" % [short_label, owner, spawn]
+
+
+func _team_icon_text(team_id: String) -> String:
+	match team_id.strip_edges().to_lower():
+		"team_alpha":
+			return "[A]"
+		"team_bravo":
+			return "[B]"
+		_:
+			return "[T]"
+
+
+func _spawn_icon_text(spawn_marker_id: String) -> String:
+	match spawn_marker_id.strip_edges().to_lower():
+		"spawn_alpha":
+			return "A-LZ"
+		"spawn_bravo":
+			return "B-LZ"
+		"":
+			return "LZ?"
+		_:
+			return spawn_marker_id.strip_edges()
+
+
+func _team_visual_priority(team_id: String) -> int:
+	match team_id.strip_edges().to_lower():
+		"team_alpha":
+			return 10
+		"team_bravo":
+			return 20
+		_:
+			return 90
 
 
 func _resolve_play_mode(peer_teams: Dictionary, requested_play_mode: String) -> String:
