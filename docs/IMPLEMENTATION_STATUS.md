@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_540 - Mission First Move Decision Readability Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_540_mission_first_move_decision_readability_pass.md`, `docs/tasks/TASK_539_mission_insertion_first_order_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_mission_first_move_decision_readability_snapshot()` fuer deployed/aktive Fireteams, geplante Waypoints, Waypoint-Intent-Preview, visualisierte Waypoints und GO-Bereitschaft.
+- Stand: Der Smoke startet eine Homebase-Direktmission, setzt LZ, dropped/deboarded das Fireteam, plant eine erste Move-Order ueber den bestehenden Right-Click-Pfad und prueft Preview/GO-Lesbarkeit.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_540 als erledigten First-Move-Decision-Slice und verschiebt den naechsten Anschluss auf GO-Ausfuehrungs-/Ankunftsfeedback.
+- Risiken/offen: Der Task prueft die Entscheidung vor GO, aber nicht die tatsaechliche Move-Ausfuehrung bis zur Ankunft. Das bleibt der naechste sinnvolle spielbare Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_540_mission_first_move_decision_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_539_mission_insertion_first_order_readability_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_541 - Mission First Move Execution Feedback Pass`, damit GO, Bewegung, Fortschritt und Ankunft direkt nach der ersten Entscheidung lesbar werden.
+
 ### TASK_539 - Mission Insertion First Order Readability Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_539_mission_insertion_first_order_readability_pass.md`, `docs/tasks/TASK_538_homebase_to_mission_launch_handoff_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`

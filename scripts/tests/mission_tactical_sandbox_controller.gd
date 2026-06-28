@@ -11807,6 +11807,156 @@ func _build_mission_insertion_readability_check(check_id: String, passed: bool, 
 	}
 
 
+func get_mission_first_move_decision_readability_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var command_buttons: Dictionary = Dictionary(command_feedback.get("command_buttons", {}))
+	var move_button: Dictionary = Dictionary(command_buttons.get("move", {}))
+	var go_button: Dictionary = Dictionary(command_buttons.get("go_plan", {}))
+	var visualized_waypoints: Array = get_visualized_waypoints_snapshot()
+	var waypoint_preview: Array = get_waypoint_intent_preview_snapshot()
+	var selected_fireteam_ids: Array = Array(_selected_fireteam_ids)
+	var deployed_selected_unit_ids: Array = _build_deployed_selected_fireteam_unit_ids()
+	var active_selected_fireteam_ids: Array = []
+	for fireteam_id_variant in selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or active_selected_fireteam_ids.has(fireteam_id):
+			continue
+		if _is_fireteam_runtime_active(fireteam_id):
+			active_selected_fireteam_ids.append(fireteam_id)
+	var planned_waypoint_count: int = int(command_feedback.get("planned_waypoint_count", _count_selected_phase_waypoints()))
+	var first_preview: Dictionary = _find_first_waypoint_preview_for_fireteams(selected_fireteam_ids, waypoint_preview)
+	var first_visualized_waypoint: Dictionary = _find_first_visualized_waypoint_for_fireteams(selected_fireteam_ids, visualized_waypoints)
+	var go_ready: bool = bool(go_button.get("exists", false)) and not bool(go_button.get("disabled", true))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_deployed",
+			not selected_fireteam_ids.is_empty() and not deployed_selected_unit_ids.is_empty() and not active_selected_fireteam_ids.is_empty(),
+			"Selected fireteam has deployed units and an active runtime state."
+		),
+		_build_mission_first_move_readability_check(
+			"move_control_visible",
+			bool(move_button.get("exists", false)) and bool(move_button.get("is_visible_in_tree", false)),
+			"Move control is present in the command feedback contract."
+		),
+		_build_mission_first_move_readability_check(
+			"planned_waypoint_present",
+			planned_waypoint_count > 0,
+			"Selected fireteam has a planned waypoint before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"waypoint_preview_visible",
+			not first_preview.is_empty(),
+			"Waypoint intent preview exists for the selected fireteam."
+		),
+		_build_mission_first_move_readability_check(
+			"waypoint_visualized",
+			not first_visualized_waypoint.is_empty() or visualized_waypoints.size() > 0,
+			"Order visualizer exposes a visible waypoint."
+		),
+		_build_mission_first_move_readability_check(
+			"go_ready",
+			go_ready,
+			"GO is present and enabled for the planned order."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			true,
+			"Snapshot reports first-move readability and does not execute GO."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_540",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"active_selected_fireteam_ids": active_selected_fireteam_ids,
+		"deployed_selected_unit_ids": deployed_selected_unit_ids,
+		"selected_fireteam_status_text": String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges(),
+		"selected_order_text": String(command_feedback.get("selected_order_text", "")).strip_edges(),
+		"selected_tile": Dictionary(command_feedback.get("selected_tile", {})).duplicate(true),
+		"planned_waypoint_count": planned_waypoint_count,
+		"visualized_waypoint_count": visualized_waypoints.size(),
+		"waypoint_intent_preview_count": waypoint_preview.size(),
+		"first_waypoint_preview": first_preview,
+		"first_visualized_waypoint": first_visualized_waypoint,
+		"first_order_controls": {
+			"move": move_button,
+			"go_plan": go_button,
+		},
+		"go_ready": go_ready,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_deployed_selected_fireteam_unit_ids() -> Array:
+	var result: Array = []
+	var seen_unit_ids: Dictionary = {}
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		for unit in _get_fireteam_units(fireteam_id, true):
+			if unit == null or not unit.has_method("get_unit_id"):
+				continue
+			var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+			if unit_id.is_empty() or seen_unit_ids.has(unit_id) or not _deployed_unit_ids.has(unit_id):
+				continue
+			seen_unit_ids[unit_id] = true
+			result.append(unit_id)
+	result.sort()
+	return result
+
+
+func _find_first_waypoint_preview_for_fireteams(fireteam_ids: Array, entries: Array) -> Dictionary:
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		if lookup.has(fireteam_id):
+			return entry.duplicate(true)
+	return {}
+
+
+func _find_first_visualized_waypoint_for_fireteams(fireteam_ids: Array, entries: Array) -> Dictionary:
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			fireteam_id = String(entry.get("owner_id", "")).strip_edges().to_lower()
+		if lookup.has(fireteam_id):
+			return entry.duplicate(true)
+	return {}
+
+
+func _build_fireteam_lookup_from_array(fireteam_ids: Array) -> Dictionary:
+	var lookup: Dictionary = {}
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not fireteam_id.is_empty():
+			lookup[fireteam_id] = true
+	return lookup
+
+
+func _build_mission_first_move_readability_check(check_id: String, passed: bool, details: String) -> Dictionary:
+	return {
+		"id": check_id,
+		"passed": passed,
+		"details": details,
+	}
+
+
 func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	return {

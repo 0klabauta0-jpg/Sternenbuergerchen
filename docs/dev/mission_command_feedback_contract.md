@@ -27,6 +27,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Insertion-/First-Order-Readability
 `get_mission_insertion_first_order_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten spielbaren Missionsmoment nach dem Homebase-Launch. Der Snapshot darf nur bestehende Planning-, Dropship-Karten-, Command-Feedback- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: Dropship-Payload vorhanden, Card sichtbar, LZ-Zustand sichtbar, Drop ohne LZ blockiert, ausgewaehltes Fireteam sichtbar, erste Order-Kontrollen vorhanden, und nach LZ-Setzung ein sichtbarer LZ-Marker plus bereiter Drop-Button.
 
+## First-Move-Decision-Readability
+`get_mission_first_move_decision_readability_snapshot()` ist der Headless-Pruefpunkt fuer die erste Move-/GO-Entscheidung nach dem Deboarding. Der Snapshot darf nur bestehende Selection-, Deploy-, Command-Feedback-, Waypoint-Intent- und Visualizer-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf GO nicht ausfuehren. Erwartete Lesbarkeit: ausgewaehltes Fireteam ist deployed und runtime-aktiv, geplante Waypoints existieren, Waypoint-Intent-Preview und visualisierte Waypoints sind vorhanden, und GO ist fuer die geplante Order bereit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
