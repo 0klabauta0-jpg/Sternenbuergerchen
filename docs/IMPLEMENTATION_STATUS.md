@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_514 - Enemy Behavior Orchestrator
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_514_enemy_behavior_orchestrator.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/tasks/TASK_513_mission_combat_resolution_boundary.md`
+- Stand: `scripts/tactical/enemy_behavior_orchestrator.gd` baut die Command-Payloads fuer Enemy-Team-Tactics, Patrol, Fallback-Advance, Limbo-Cover/Hold und Damage-Reposition.
+- Stand: `MissionCombatLoopDriver` behaelt Tick-Reihenfolge, LimboAI-Auswertung, Patrol-Indizes, Cooldowns und den autoritativen `SimulationRoot.enqueue_command()`-Aufruf, delegiert aber Payload-Building an den taktischen Orchestrator.
+- Stand: Der Orchestrator hat keine SceneTree-Abhaengigkeit, enqueued keine Commands/Effects und fuehrt keinen Unit-State direkt mutierend aus.
+- Risiken/offen: Enemy-Security-State, Team-Tactics-State-Building und LimboAI-Auswahl bleiben noch im Driver. Ein Folge-Slice kann diese State-Aufbereitung weiter in Tactical-Resolver verschieben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_514_enemy_behavior_orchestrator.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_513_mission_combat_resolution_boundary.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_160_tactical_playability_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `git diff --check`.
+- Naechster Schritt: Combat Readability Presenter oder Editor Builder UX Pass schneiden, je nachdem ob der naechste Fokus technische Entflechtung oder sichtbare Bedienbarkeit ist.
+
 ### TASK_513 - Mission Combat Resolution Boundary
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_513_mission_combat_resolution_boundary.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/reviews/mission_combat_driver_boundary_review_2026_05_24.md`

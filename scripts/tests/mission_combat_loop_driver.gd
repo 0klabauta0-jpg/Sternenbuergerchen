@@ -10,6 +10,7 @@ const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tac
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
 const COMBAT_FIRE_DECISION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_fire_decision_resolver.gd")
 const ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_limbo_behavior_adapter.gd")
+const ENEMY_BEHAVIOR_ORCHESTRATOR_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_behavior_orchestrator.gd")
 const TACTICAL_COMMUNICATION_EVENT_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_communication_event.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/character_gameplay_resolver.gd")
@@ -178,6 +179,7 @@ var _overwatch_controller = OVERWATCH_CONTROLLER_SCRIPT.new()
 var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
 var _flank_vulnerability_resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
 var _enemy_limbo_behavior_adapter = ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.new()
+var _enemy_behavior_orchestrator = ENEMY_BEHAVIOR_ORCHESTRATOR_SCRIPT.new()
 var _remote_event_bridge = MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT.new()
 var _combat_resolution_resolver = MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT.new()
 var _audio_event_bus = null
@@ -3764,78 +3766,38 @@ func _try_enqueue_enemy_team_tactics_move(simulation_root: Node, enemy) -> bool:
 	if unit_id.is_empty():
 		return false
 	var state: Dictionary = get_enemy_team_tactics_state_for_unit(unit_id)
-	if state.is_empty() or not bool(state.get("has_explicit_tactics", false)):
+	var decision: Dictionary = Dictionary(_enemy_behavior_orchestrator.call(
+		"build_team_tactics_decision",
+		enemy,
+		state,
+		unit_id,
+		ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE,
+		enemy_advance_speed_factor
+	))
+	if not bool(decision.get("handled", false)):
 		return false
-	var advance_style: String = String(state.get("advance_style", "hold"))
-	if advance_style == "hold":
-		_enqueue_enemy_posture_hold_command(simulation_root, enemy, state, unit_id)
+	var command: Dictionary = Dictionary(decision.get("command", {}))
+	if command.is_empty():
 		return true
-	var moving_unit_ids: PackedStringArray = PackedStringArray(state.get("moving_unit_ids", PackedStringArray()))
-	if not moving_unit_ids.has(unit_id):
-		_enqueue_enemy_posture_hold_command(simulation_root, enemy, state, unit_id)
-		return true
-	var target_positions: Dictionary = Dictionary(state.get("target_positions_by_unit_id", {}))
-	if not target_positions.has(unit_id):
-		_enqueue_enemy_posture_hold_command(simulation_root, enemy, state, unit_id)
-		return true
-	var target_position: Vector2 = Vector2(target_positions.get(unit_id, (enemy as Node2D).global_position))
-	if (enemy as Node2D).global_position.distance_to(target_position) <= ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE:
-		_enqueue_enemy_posture_hold_command(simulation_root, enemy, state, unit_id)
-		return true
-	var posture_fields: Dictionary = _build_enemy_posture_command_fields(state, unit_id)
-	simulation_root.call(
-		"enqueue_command",
-		{
-			"command_type": "move_to_position",
-			"priority": int(state.get("priority", 8)),
-			"unit_id": unit_id,
-			"target_position": target_position,
-			"move_speed_factor": float(posture_fields.get("move_speed_factor", state.get("move_speed_factor", enemy_advance_speed_factor))),
-			"movement_posture": String(posture_fields.get("movement_posture", ENEMY_POSTURE_TACTICAL)),
-			"weapon_posture": String(posture_fields.get("weapon_posture", ENEMY_WEAPON_READY)),
-			"posture_policy_id": String(posture_fields.get("posture_policy_id", state.get("movement_posture_policy", ""))),
-			"source_command_type": "enemy_team_tactics",
-			"requeue_until_target": false,
-			"enemy_tactic_label": String(state.get("tactic_label", "")),
-			"enemy_advance_style": advance_style,
-		}
-	)
-	return true
+	return _enqueue_enemy_behavior_command(simulation_root, command)
 
 
 func _enqueue_enemy_posture_hold_command(simulation_root: Node, enemy, state: Dictionary, unit_id: String) -> void:
 	if simulation_root == null or enemy == null or unit_id.strip_edges().is_empty():
 		return
-	var posture_fields: Dictionary = _build_enemy_posture_command_fields(state, unit_id)
-	simulation_root.call(
-		"enqueue_command",
-		{
-			"command_type": "hold_position",
-			"priority": int(state.get("priority", 6)),
-			"unit_id": unit_id,
-			"move_speed_factor": float(posture_fields.get("move_speed_factor", 0.0)),
-			"movement_posture": String(posture_fields.get("movement_posture", ENEMY_POSTURE_OVERWATCH)),
-			"weapon_posture": String(posture_fields.get("weapon_posture", ENEMY_WEAPON_READY)),
-			"posture_policy_id": String(posture_fields.get("posture_policy_id", state.get("movement_posture_policy", ""))),
-			"source_command_type": "enemy_team_tactics",
-			"enemy_tactic_label": String(state.get("tactic_label", "")),
-			"enemy_advance_style": String(state.get("advance_style", "hold")),
-		}
-	)
+	var decision: Dictionary = Dictionary(_enemy_behavior_orchestrator.call(
+		"build_team_tactics_decision",
+		enemy,
+		state,
+		unit_id,
+		ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE,
+		enemy_advance_speed_factor
+	))
+	_enqueue_enemy_behavior_command(simulation_root, Dictionary(decision.get("command", {})))
 
 
 func _build_enemy_posture_command_fields(state: Dictionary, unit_id: String) -> Dictionary:
-	var normalized_unit_id: String = unit_id.strip_edges()
-	var movement_by_unit_id: Dictionary = Dictionary(state.get("movement_posture_by_unit_id", {}))
-	var weapon_by_unit_id: Dictionary = Dictionary(state.get("weapon_posture_by_unit_id", {}))
-	var policy_by_unit_id: Dictionary = Dictionary(state.get("posture_policy_by_unit_id", {}))
-	var speed_by_unit_id: Dictionary = Dictionary(state.get("move_speed_factor_by_unit_id", {}))
-	return {
-		"movement_posture": String(movement_by_unit_id.get(normalized_unit_id, ENEMY_POSTURE_TACTICAL)),
-		"weapon_posture": String(weapon_by_unit_id.get(normalized_unit_id, ENEMY_WEAPON_READY)),
-		"posture_policy_id": String(policy_by_unit_id.get(normalized_unit_id, state.get("movement_posture_policy", ""))),
-		"move_speed_factor": float(speed_by_unit_id.get(normalized_unit_id, state.get("move_speed_factor", enemy_advance_speed_factor))),
-	}
+	return Dictionary(_enemy_behavior_orchestrator.call("build_posture_command_fields", state, unit_id, enemy_advance_speed_factor))
 
 
 func _build_enemy_patrol_posture_command_fields(enemy) -> Dictionary:
@@ -3872,10 +3834,10 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 		if String(enemy.call("get_vital_state")) != "fit":
 			continue
 
-		if _try_enqueue_enemy_limbo_behavior(simulation_root, enemy):
+		if _try_enqueue_enemy_team_tactics_move(simulation_root, enemy):
 			continue
 
-		if _try_enqueue_enemy_team_tactics_move(simulation_root, enemy):
+		if _try_enqueue_enemy_limbo_behavior(simulation_root, enemy):
 			continue
 
 		if _try_enqueue_enemy_patrol_move(simulation_root, enemy):
@@ -3885,20 +3847,15 @@ func _advance_enemy_units(simulation_root: Node) -> void:
 			continue
 
 		var posture_fields: Dictionary = _build_enemy_fallback_posture_command_fields(enemy)
-		simulation_root.call(
-			"enqueue_command",
-			{
-				"command_type": "move_to_position",
-				"priority": 8,
-				"unit_id": String(enemy.call("get_unit_id")),
-				"target_position": objective_position,
-				"move_speed_factor": float(posture_fields.get("move_speed_factor", enemy_advance_speed_factor)),
-				"movement_posture": String(posture_fields.get("movement_posture", ENEMY_POSTURE_TACTICAL)),
-				"weapon_posture": String(posture_fields.get("weapon_posture", ENEMY_WEAPON_READY)),
-				"posture_policy_id": String(posture_fields.get("posture_policy_id", "travel_until_threat")),
-				"source_command_type": "enemy_advance",
-				"requeue_until_target": false,
-			}
+		_enqueue_enemy_behavior_command(
+			simulation_root,
+			Dictionary(_enemy_behavior_orchestrator.call(
+				"build_fallback_advance_command",
+				String(enemy.call("get_unit_id")),
+				objective_position,
+				posture_fields,
+				enemy_advance_speed_factor
+			))
 		)
 
 
@@ -3929,41 +3886,27 @@ func _try_enqueue_enemy_patrol_move(simulation_root: Node, enemy) -> bool:
 	var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
 	if unit_id.is_empty() or not _enemy_patrol_paths_by_unit_id.has(unit_id):
 		return false
-	if bool(_enemy_patrol_contact_locked.get(unit_id, false)):
-		return false
-	if _enemy_should_hold_position(enemy):
+	var decision: Dictionary = Dictionary(_enemy_behavior_orchestrator.call(
+		"build_patrol_decision",
+		enemy,
+		{
+			"unit_id": unit_id,
+			"patrol_path": Array(_enemy_patrol_paths_by_unit_id.get(unit_id, [])),
+			"waypoint_index": int(_enemy_patrol_waypoint_index_by_unit_id.get(unit_id, 0)),
+			"contact_locked": bool(_enemy_patrol_contact_locked.get(unit_id, false)),
+			"should_hold": _enemy_should_hold_position(enemy),
+			"waypoint_reached_distance": ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE,
+			"posture_fields": _build_enemy_patrol_posture_command_fields(enemy),
+			"default_speed_factor": enemy_advance_speed_factor,
+		}
+	))
+	if bool(decision.get("contact_locked", false)):
 		_enemy_patrol_contact_locked[unit_id] = true
 		return false
-	var patrol_path: Array = Array(_enemy_patrol_paths_by_unit_id.get(unit_id, []))
-	if patrol_path.is_empty():
+	if not bool(decision.get("handled", false)):
 		return false
-	var waypoint_index: int = int(_enemy_patrol_waypoint_index_by_unit_id.get(unit_id, 0))
-	if waypoint_index < 0:
-		waypoint_index = 0
-	if waypoint_index >= patrol_path.size():
-		waypoint_index = 0
-	var target_position: Vector2 = _coerce_vector2(patrol_path[waypoint_index], (enemy as Node2D).global_position)
-	if (enemy as Node2D).global_position.distance_to(target_position) <= ENEMY_PATROL_WAYPOINT_REACHED_DISTANCE:
-		waypoint_index = (waypoint_index + 1) % patrol_path.size()
-		_enemy_patrol_waypoint_index_by_unit_id[unit_id] = waypoint_index
-		target_position = _coerce_vector2(patrol_path[waypoint_index], target_position)
-	var posture_fields: Dictionary = _build_enemy_patrol_posture_command_fields(enemy)
-	simulation_root.call(
-		"enqueue_command",
-		{
-			"command_type": "move_to_position",
-			"priority": 7,
-			"unit_id": unit_id,
-			"target_position": target_position,
-			"move_speed_factor": float(posture_fields.get("move_speed_factor", enemy_advance_speed_factor)),
-			"movement_posture": String(posture_fields.get("movement_posture", ENEMY_POSTURE_TRAVEL)),
-			"weapon_posture": String(posture_fields.get("weapon_posture", ENEMY_WEAPON_LOWERED)),
-			"posture_policy_id": String(posture_fields.get("posture_policy_id", "travel_until_threat")),
-			"source_command_type": "enemy_patrol",
-			"requeue_until_target": false,
-		}
-	)
-	return true
+	_enemy_patrol_waypoint_index_by_unit_id[unit_id] = int(decision.get("waypoint_index", _enemy_patrol_waypoint_index_by_unit_id.get(unit_id, 0)))
+	return _enqueue_enemy_behavior_command(simulation_root, Dictionary(decision.get("command", {})))
 
 
 func _try_enqueue_enemy_limbo_behavior(simulation_root: Node, enemy) -> bool:
@@ -4050,24 +3993,15 @@ func _try_enqueue_enemy_limbo_cover_move(simulation_root: Node, enemy) -> bool:
 	var cover_target: Vector2 = _build_enemy_limbo_cover_target(enemy)
 	if cover_target == Vector2.INF:
 		return false
-	simulation_root.call(
-		"enqueue_command",
-		{
-			"command_type": "move_to_position",
-			"priority": 11,
-			"unit_id": unit_id,
-			"target_position": cover_target,
-			"move_speed_factor": enemy_reposition_move_speed_factor,
-			"fire_status": "fire_at_will",
-			"movement_posture": ENEMY_POSTURE_TACTICAL,
-			"weapon_posture": ENEMY_WEAPON_READY,
-			"posture_policy_id": "aggressive_ready",
-			"source_command_type": "enemy_limbo_cover",
-			"requeue_until_target": false,
-			"enemy_bt_action": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_SEEK_COVER,
-			"enemy_bt_reason": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_SEEK_COVER,
-		}
-	)
+	if not _enqueue_enemy_behavior_command(simulation_root, Dictionary(_enemy_behavior_orchestrator.call(
+		"build_limbo_cover_command",
+		unit_id,
+		cover_target,
+		enemy_reposition_move_speed_factor,
+		ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_SEEK_COVER,
+		ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_SEEK_COVER
+	))):
+		return false
 	_enemy_limbo_cover_ready_at_msec[unit_id] = Time.get_ticks_msec() + int(enemy_limbo_cover_cooldown_seconds * 1000.0)
 	if _enemy_patrol_paths_by_unit_id.has(unit_id):
 		_enemy_patrol_contact_locked[unit_id] = true
@@ -4080,22 +4014,13 @@ func _try_enqueue_enemy_limbo_contact_hold(simulation_root: Node, enemy) -> bool
 	var unit_id: String = String(enemy.call("get_unit_id")).strip_edges()
 	if unit_id.is_empty() or not _enemy_should_hold_position(enemy):
 		return false
-	simulation_root.call(
-		"enqueue_command",
-		{
-			"command_type": "hold_position",
-			"priority": 9,
-			"unit_id": unit_id,
-			"move_speed_factor": 0.0,
-			"fire_status": "fire_at_will",
-			"movement_posture": ENEMY_POSTURE_OVERWATCH,
-			"weapon_posture": ENEMY_WEAPON_READY,
-			"posture_policy_id": "overwatch",
-			"source_command_type": "enemy_limbo_contact_hold",
-			"enemy_bt_action": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_CONTACT_HOLD,
-			"enemy_bt_reason": ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_CONTACT_HOLD,
-		}
-	)
+	if not _enqueue_enemy_behavior_command(simulation_root, Dictionary(_enemy_behavior_orchestrator.call(
+		"build_limbo_contact_hold_command",
+		unit_id,
+		ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.ACTION_CONTACT_HOLD,
+		ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.REASON_CONTACT_HOLD
+	))):
+		return false
 	if _enemy_patrol_paths_by_unit_id.has(unit_id):
 		_enemy_patrol_contact_locked[unit_id] = true
 	return true
@@ -4232,21 +4157,14 @@ func _try_reposition_enemy_on_damage(unit, hit_context: Dictionary) -> void:
 		return
 
 	var reposition_target: Vector2 = _build_enemy_reposition_target(unit, hit_context)
-	simulation_root.call(
-		"enqueue_command",
-		{
-			"command_type": "move_to_position",
-			"priority": 12,
-			"unit_id": unit_id,
-			"target_position": reposition_target,
-			"move_speed_factor": enemy_reposition_move_speed_factor,
-			"movement_posture": ENEMY_POSTURE_TACTICAL,
-			"weapon_posture": ENEMY_WEAPON_READY,
-			"posture_policy_id": ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_AGGRESSIVE_READY,
-			"source_command_type": "enemy_damage_reposition",
-			"requeue_until_target": true,
-		}
-	)
+	if not _enqueue_enemy_behavior_command(simulation_root, Dictionary(_enemy_behavior_orchestrator.call(
+		"build_damage_reposition_command",
+		unit_id,
+		reposition_target,
+		enemy_reposition_move_speed_factor,
+		ENEMY_TEAM_TACTICS_PROFILE_SCRIPT.MOVEMENT_POSTURE_POLICY_AGGRESSIVE_READY
+	))):
+		return
 	_enemy_reposition_ready_at_msec[unit_id] = now_msec + int(round(enemy_reposition_cooldown_seconds * 1000.0))
 
 
@@ -4292,6 +4210,13 @@ func _build_deterministic_axis(seed_text: String) -> Vector2:
 func _build_deterministic_unit_interval(seed_text: String) -> float:
 	var hash_value: int = abs(int(seed_text.hash()))
 	return float(hash_value % 10000) / 9999.0
+
+
+func _enqueue_enemy_behavior_command(simulation_root: Node, command: Dictionary) -> bool:
+	if simulation_root == null or command.is_empty() or not simulation_root.has_method("enqueue_command"):
+		return false
+	simulation_root.call("enqueue_command", command)
+	return true
 
 
 func _resolve_unit_by_id(unit_id: String):
