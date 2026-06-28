@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf <code>task/mission-hud-team-icon-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 nach TASK_540 auf <code>integration/core-foundation</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -188,6 +188,7 @@
       <span class="pill good">TASK_538 Launch-Handoff</span>
       <span class="pill good">TASK_539 Insertion-Readability</span>
       <span class="pill good">TASK_540 First-Move</span>
+      <span class="pill warn">TASK_541 als naechster Slice</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -388,7 +389,7 @@
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
                 <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot und TASK_540 als First-Move-Decision-Snapshot.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zur ersten Move-/GO-Entscheidung lesbar.</td><td>Naechster spielbarer Schritt ist TASK_541: GO-Ausfuehrung, Bewegung und Ankunftsfeedback sichtbar machen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_540 plus TASK_541-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
           </div>
@@ -397,6 +398,7 @@
           <h2>Aktuelle Lage</h2>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_540 sauber</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_541_selected_next"> TASK_541 ist als naechster spielbarer Slice ausgewaehlt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_524_done"> TASK_524 Warn-Laerm-Bereinigung ist im Arbeitsstand implementiert</label>
@@ -416,8 +418,23 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_538_done"> TASK_538 Launch-Handoff-Smoke ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_539_done"> TASK_539 Insertion-/First-Order-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_540_done"> TASK_540 First-Move-Decision-Readability ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="worklog.task_541_done"> TASK_541 First-Move-Execution-Feedback ist umgesetzt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.next_tasks_visible"> Naechste Tasks sind sichtbar priorisiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="worklog.visual_playtest_done"> Manueller Sichttest fuer naechsten Visual-Slice erledigt</label>
+        </article>
+        <article class="card full">
+          <h2>Laufender Arbeitsbericht</h2>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
+              <tbody>
+                <tr><td>Erledigt</td><td>TASK_540 sichert die erste Move-Entscheidung nach Deboarding: Fireteam ist deployed, Waypoint ist geplant, Preview/Visualizer sind sichtbar und GO ist bereit.</td><td>Wenn TASK_541 GO-Ausfuehrung, Bewegung und Ankunft lesbar macht.</td></tr>
+                <tr><td>Jetzt dran</td><td>TASK_541 - Mission First Move Execution Feedback Pass. Ziel: Nach GO muss klar sein, dass der Befehl angenommen wurde, welches Fireteam laeuft, ob Fortschritt entsteht und wann die Ankunft erfolgt.</td><td>Nach Testlauf/Commit mit konkreten Smoke-Ergebnissen.</td></tr>
+                <tr><td>Offen</td><td>Der echte menschliche F6-/Sichttest wurde fuer die letzten Headless-Slices bewusst nicht behauptet. Die naechste manuelle Runde sollte sichtbare Bewegung, Panel-Feedback und Drop-/Fireteam-Konsistenz pruefen.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
+                <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </article>
         <article class="card full">
           <h2>Was als naechstes getan werden sollte</h2>
@@ -547,6 +564,7 @@
                 <tr><td><code>task_538_homebase_to_mission_launch_handoff_smoke.gd</code></td><td>30 passed, 0 failed</td><td>Homebase-Startflow bis MissionSetup/TacticalController mit Mission, Fireteam, Dropship, Loadout und Timer.</td></tr>
                 <tr><td><code>task_539_mission_insertion_first_order_readability_pass.gd</code></td><td>22 passed, 0 failed</td><td>Read-only Insertion-/First-Order-Snapshot fuer Dropship-Payload, Card, LZ, Drop-Bereitschaft, Fireteam und erste Controls; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>19 passed, 0 failed</td><td>Read-only First-Move-Decision-Snapshot fuer deployed Fireteam, geplanten Waypoint, Preview, Visualizer und GO-Bereitschaft; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
+                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_540 aktualisiert, nennt TASK_541 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -560,7 +578,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_537-Merge und Push. Arbeitsbranch fuer den Launch-Handoff-Slice: <code>task/homebase-to-mission-launch-handoff-smoke</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_540-Merge und Push. Berichtspflege-Branch: <code>task/rolling-html-status-refresh</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -671,17 +689,20 @@
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Manueller FullHD-/F6-Sichttest bleibt trotz Visual-Audit-Snapshot offen.",
-              "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden."
+              "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
+              "TASK_541 muss noch pruefen, ob GO-Ausfuehrung, Bewegung, Fortschritt und Ankunft nach der ersten Move-Entscheidung sichtbar konsistent bleiben."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194633380,
-            report_mode: "rolling_interim_status"
+            report_mode: "rolling_interim_status",
+            current_focus: "TASK_541 - Mission First Move Execution Feedback Pass",
+            latest_completed_task: "TASK_540 - Mission First Move Decision Readability Pass"
           },
           metadata: {
-            branch: "task/mission-first-move-decision-readability-pass",
-            integration_base: "integration/core-foundation after TASK_539",
-            head: "task/mission-first-move-decision-readability-pass",
+            branch: "task/rolling-html-status-refresh",
+            integration_base: "integration/core-foundation after TASK_540",
+            head: "task/rolling-html-status-refresh",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }
