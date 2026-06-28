@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SternenBuergerchen Gesamt-Review 2026-06-21</title>
+  <title>SternenBuergerchen Gesamt-Review 2026-06-28</title>
   <style>
     :root {
       color-scheme: dark;
@@ -150,16 +150,16 @@
     }
   </style>
 </head>
-<body data-report-id="project_review_status_2026_06_21" data-report-schema="sternenbuergerchen.html_workbench.v1">
+<body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Erstellt am 2026-06-21 auf Branch <code>task/startmap-expansion-performance-pass</code>.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/export-runtime-package-hygiene</code>.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
-      <span class="pill good">Windows-Export laeuft</span>
+      <span class="pill good">Windows-Export gefiltert</span>
       <span class="pill warn">Legacy-Driver in scripts/tests</span>
-      <span class="pill warn">Release-Hygiene offen</span>
-      <span class="pill bad">Dirty Worktree vorhanden</span>
+      <span class="pill good">Release-Hygiene implementiert</span>
+      <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
   </header>
 
@@ -180,13 +180,13 @@
           <h2>Kurzfazit</h2>
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
-          <p>Die naechste gute Richtung ist: erst Release-/Projekt-Hygiene und laute Asset-Warnungen leiser machen, dann den Mission-Controller in kleine Grenzen schneiden, ohne den gerade stabilisierten Spiel-Flow zu zerlegen.</p>
+          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 jetzt umgesetzt: der Runtime-Export wird gefiltert, der lokale Godot-Preset bleibt untracked und wird nur temporaer gepatcht. Die naechste gute Richtung ist nun ein kleiner Mission-Controller-Boundary-Slice, ohne den gerade stabilisierten Spiel-Flow zu zerlegen.</p>
         </article>
         <article class="card">
           <h2>Statusampel</h2>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.gameflow_green"> Gameflow-Ruecken spielbar</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.large_map_streaming_green"> 192x192-Streaming aktiv</label>
-          <label class="checkline"><input type="checkbox" data-export-key="status.release_hygiene_done"> Release-Preset sauber</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.release_hygiene_done"> Release-Preset sauber</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.legacy_driver_extracted"> Legacy-Driver extrahiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.editor_final_workflow"> Editor-Workflow final</label>
         </article>
@@ -196,7 +196,7 @@
             <div class="metric"><strong>36.864</strong><span>Tiles auf der aktuellen 192x192-Startkarte</span></div>
             <div class="metric"><strong>5.184</strong><span>gerenderte Tiles im typischen aktiven 3D-Chunk-Fenster</span></div>
             <div class="metric"><strong>~445-561 ms</strong><span>Headless-Render-Snapshot bei Kamera-Fokuswechseln</span></div>
-            <div class="metric"><strong>242 MB</strong><span>aktuelle Windows-PCK durch <code>all_resources</code></span></div>
+            <div class="metric"><strong>194 MB</strong><span>gefilterte Runtime-PCK nach TASK_511</span></div>
             <div class="metric"><strong>16.499</strong><span>Zeilen im MissionTacticalSandboxController</span></div>
             <div class="metric"><strong>10.149</strong><span>Zeilen im TerrainMap3DView</span></div>
           </div>
@@ -318,13 +318,13 @@
         <article class="card half">
           <h2>Technische Reibungen</h2>
           <div class="stack">
-            <div class="finding high">
-              <h3>Dirty Worktree</h3>
-              <p>Aktuell sind <code>docs/IMPLEMENTATION_STATUS.md</code>, <code>project.godot</code> und <code>docs/tasks/TASK_505_unity_homebase_functionality_slice.md</code> lokal veraendert. Besonders Unity im Godot-Status widerspricht der Entscheidung, den Unity-Client auszulagern.</p>
+            <div class="finding good">
+              <h3>Release-Paket ist jetzt gefiltert</h3>
+              <p>TASK_511 versioniert den Runtime-Export-Contract und nutzt <code>scripts/tools/export_runtime_release.ps1</code>, um <code>export_presets.cfg</code> nur temporaer zu patchen. Das PCK fiel im Test von <code>242312564</code> auf <code>194203876</code> Bytes.</p>
             </div>
             <div class="finding medium">
-              <h3>Release-Preset packt alles</h3>
-              <p><code>export_presets.cfg:8</code> steht auf <code>all_resources</code>, <code>exclude_filter</code> ist leer. Dadurch landen Tests, Tools, Editor-Plugins und Referenzmaterial im Release-PCK.</p>
+              <h3>Arbeitsstand bleibt bewusst task-lokal</h3>
+              <p>Der aktuelle Branch enthaelt die TASK_511-Dateien und den aktualisierten Bericht. Der lokale <code>export_presets.cfg</code> wird nach Export wieder restauriert und bleibt untracked.</p>
             </div>
             <div class="finding low">
               <h3>Laute Asset-Warnungen</h3>
@@ -332,7 +332,7 @@
             </div>
             <div class="finding low">
               <h3>Referenzprojekt im Addon-Ordner</h3>
-              <p>Der Export meldet <code>addons/godot_open_rts_reference</code> mit eigenem <code>project.godot</code>. Das wird ignoriert, sollte aber fuer Release-Hygiene eindeutig aus Export/Scan verschwinden.</p>
+              <p>Godot meldet beim Filesystem-Scan weiterhin <code>addons/godot_open_rts_reference</code> mit eigenem <code>project.godot</code>. Das ist nach TASK_511 kein Export-Abbruch und kein Pack-Eintrag mehr, bleibt aber als laute Editor-Hygiene offen.</p>
             </div>
           </div>
         </article>
@@ -344,19 +344,18 @@
         <article class="card wide">
           <h2>Priorisierte Empfehlung</h2>
           <div class="stack">
-            <div class="finding high"><h3>1. TASK_506 - Export und Projekt-Hygiene</h3><p>Release-Preset filtern, Godot-Open-RTS-Referenz sauber neutralisieren, Factory-GLB-UID-Warnungen pruefen, Unity-Sidecar-Status aus Godot-Doku entfernen oder separat parken. Ziel: Export ohne Schreckenswand und ohne Editor-/Testballast.</p></div>
-            <div class="finding high"><h3>2. TASK_507 - Mission Controller Boundary Slice</h3><p>Nicht refactoren um des Refactors willen. Einen konkreten kleinen Schnitt waehlen: Dropship-Mission-State oder Fireteam-Runtime-Activation aus <code>mission_tactical_sandbox_controller.gd</code> ziehen.</p></div>
-            <div class="finding medium"><h3>3. TASK_508 - Mission Combat Resolution Boundary</h3><p>Objective, Elimination, Countdown und MissionResult aus <code>mission_combat_loop_driver.gd</code> in einen Resolver/Contract-Helper, Snapshot-Keys stabil halten.</p></div>
-            <div class="finding medium"><h3>4. TASK_509 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
-            <div class="finding low"><h3>5. TASK_510 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_511 - Export Runtime Package Hygiene</h3><p>Runtime-Export-Contract, temporaeres Preset-Patching und Pack-Log-Stichprobe sind umgesetzt. Der Export laeuft mit <code>EXPORT_EXIT=0</code> und ohne Editor-/Test-/Docs-Packentries.</p></div>
+            <div class="finding high"><h3>1. TASK_512 - Mission Controller Boundary Slice</h3><p>Nicht refactoren um des Refactors willen. Einen konkreten kleinen Schnitt waehlen: Dropship-Mission-State oder Fireteam-Runtime-Activation aus <code>mission_tactical_sandbox_controller.gd</code> ziehen.</p></div>
+            <div class="finding medium"><h3>2. TASK_513 - Mission Combat Resolution Boundary</h3><p>Objective, Elimination, Countdown und MissionResult aus <code>mission_combat_loop_driver.gd</code> in einen Resolver/Contract-Helper, Snapshot-Keys stabil halten.</p></div>
+            <div class="finding medium"><h3>3. TASK_514 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
+            <div class="finding low"><h3>4. TASK_515 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
           </div>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
           <p>Welchen Pfad willst du als naechstes erzwingen?</p>
           <div class="button-row" style="margin-top:12px" data-choice-group="next_path">
-            <button class="choice active" type="button" data-choice-value="export_hygiene">Export zuerst</button>
-            <button class="choice" type="button" data-choice-value="mission_boundary">Mission-Controller</button>
+            <button class="choice active" type="button" data-choice-value="mission_boundary">Mission-Controller</button>
             <button class="choice" type="button" data-choice-value="editor_ux">Editor-UX</button>
             <button class="choice" type="button" data-choice-value="scenario_slice">Szenario-Slice</button>
           </div>
@@ -370,7 +369,7 @@
     <section id="checks" class="tab-panel">
       <div class="grid">
         <article class="card full">
-          <h2>Lokale Pruefung 2026-06-21</h2>
+          <h2>Lokale Pruefung 2026-06-28</h2>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Check</th><th>Ergebnis</th><th>Wichtige Beobachtung</th></tr></thead>
@@ -380,7 +379,8 @@
                 <tr><td><code>task_503_mission_dropship_fireteam_hud_truth.gd</code></td><td>10 passed, 0 failed</td><td>Embarked vs. deployed Fireteam-Anzeige konsistent.</td></tr>
                 <tr><td><code>task_504_startmap_expansion_performance_pass.gd</code></td><td>35 passed, 0 failed</td><td>192x192-Map, 36.864 Tiles, Streaming aktiv; JSON Load ca. 1224 ms.</td></tr>
                 <tr><td><code>task_505_frontier_probe_large_map_playtest_hotfix.gd</code></td><td>PASS</td><td>Drop, 360 Security, Orders, Contact, Objective Victory; Renderfenster bleibt chunked.</td></tr>
-                <tr><td>Windows Export</td><td>Exit 0</td><td><code>review_export.pck</code> ca. 242 MB; Warnung zu <code>godot_open_rts_reference</code>.</td></tr>
+                <tr><td><code>task_511_export_runtime_package_hygiene.gd</code></td><td>27 passed, 0 failed</td><td>Contract, Script, Excludes, Allowlist, Report-Workbench und Doku-Anbindung gruen.</td></tr>
+                <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
               </tbody>
             </table>
@@ -392,7 +392,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>HEAD: <code>654e8c67 Harden frontier probe large map drop flow</code>. Branch: <code>task/startmap-expansion-performance-pass</code>. Lokale ungecommittete Fremd-/Nebenstaende bleiben unberuehrt.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_510-Merge. Arbeitsbranch: <code>task/export-runtime-package-hygiene</code>. Aktueller Arbeitsstand enthaelt TASK_511 plus diesen aktualisierten Review-Report.</p>
         </article>
       </div>
     </section>
@@ -405,7 +405,7 @@
         </article>
         <article class="card half">
           <h2>Playtest-Fragen</h2>
-          <label class="checkline"><input type="checkbox" data-export-key="questions.export_hygiene"> Soll der naechste Task Export-Hygiene sein?</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="questions.export_hygiene_done"> Export-Hygiene ist als TASK_511 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="questions.editor_focus"> Soll der Editor vor Szenarioarbeit weiter poliert werden?</label>
           <label class="checkline"><input type="checkbox" data-export-key="questions.scenario_first"> Soll direkt ein spielbares Luftabwehr-/Outpost-Szenario gebaut werden?</label>
           <label class="checkline"><input type="checkbox" data-export-key="questions.boundary_first"> Soll zuerst der Mission-Controller kleiner geschnitten werden?</label>
@@ -471,19 +471,19 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_506 - Export und Projekt-Hygiene",
-              "TASK_507 - Mission Controller Boundary Slice",
-              "TASK_508 - Mission Combat Resolution Boundary",
-              "TASK_509 - Editor Builder UX Pass",
-              "TASK_510 - Mission Scenario Vertical Slice"
+              "TASK_512 - Mission Controller Boundary Slice",
+              "TASK_513 - Mission Combat Resolution Boundary",
+              "TASK_514 - Editor Builder UX Pass",
+              "TASK_515 - Mission Scenario Vertical Slice"
             ],
             smoke_status: "green",
-            export_status: "green_with_warning"
+            export_status: "filtered_runtime_export_green_scan_warning_remaining",
+            runtime_pck_bytes: 194203876
           },
           metadata: {
-            branch: "task/startmap-expansion-performance-pass",
-            head: "654e8c67 Harden frontier probe large map drop flow",
-            generated_on: "2026-06-21",
+            branch: "task/export-runtime-package-hygiene",
+            head: "working_tree_after_task_511",
+            generated_on: "2026-06-28",
             source: "local_code_review"
           }
         };

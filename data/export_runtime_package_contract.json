@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "preset_name": "Windows Desktop",
+  "export_preset_path": "export_presets.cfg",
+  "runtime_export_path": "../Sternenbuergerchen_rel/Sternenbuergerchen_rel.exe",
+  "exclude_filter_patterns": [
+    "addons/asset_placer/**",
+    "addons/godot_mcp/**",
+    "addons/godot_open_rts_reference/**",
+    "addons/map_builder_workbench/**",
+    "docs/**",
+    "scripts/tests/**",
+    "scripts/tools/**",
+    "tmp/**"
+  ],
+  "runtime_addon_allowlist": [
+    "addons/limboai",
+    "addons/terrain_3d",
+    "addons/netfox",
+    "addons/netfox.internals"
+  ],
+  "restore_local_export_preset_after_run": true,
+  "release_workflow_script": "scripts/tools/export_runtime_release.ps1",
+  "notes": "The local export_presets.cfg is ignored. Use the release workflow script for runtime package hygiene."
+}

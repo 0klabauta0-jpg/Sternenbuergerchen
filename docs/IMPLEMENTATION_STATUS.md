@@ -10,6 +10,18 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_511 - Export Runtime Package Hygiene
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_511_export_runtime_package_hygiene.md`, `docs/dev/export_runtime_package_contract.md`, `docs/performance/performance_regression_gate.md`
+- Stand: `data/export_runtime_package_contract.json` definiert die Runtime-Export-Excludes fuer Editor-/Authoring-/Docs-/Test-/Tool-Pfade, ohne Runtime-Addons wie `limboai`, `terrain_3d`, `netfox` oder `netfox.internals` auszuschliessen.
+- Stand: `scripts/tools/export_runtime_release.ps1` patcht den lokal ignorierten `export_presets.cfg` nur temporaer, fuehrt den Windows-Release-Export aus und stellt den lokalen Preset danach wieder her.
+- Stand: Der neue Verifier prueft Contract, Script, Exclude-Patterns, Runtime-Addon-Allowlist und Doku-/Roadmap-Anbindung.
+- Stand: Echter Release-Export ueber das Script laeuft mit `EXPORT_EXIT=0`; `Sternenbuergerchen_rel.pck` liegt bei `194203876` Bytes statt `242312564` Bytes im vorherigen breiten Roh-Export.
+- Stand: Pack-Log-Stichprobe zeigt keine gespeicherten Editor-/Authoring-/Docs-/Test-/Tool-Pfade aus dem Contract; die verbleibende Godot-Meldung ist eine Scanwarnung fuer das zweite `project.godot` im ausgeschlossenen Referenzprojekt.
+- Risiken/offen: Der lokale `export_presets.cfg` bleibt absichtlich untracked. Die Referenzprojekt-Scanwarnung kann spaeter durch Umzug/Deaktivierung des Referenz-Addons weiter bereinigt werden, ist aber kein Release-Abbruch.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_511_export_runtime_package_hygiene.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1 -SkipExport`, `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `git diff --check`.
+- Naechster Schritt: Full-Review-Report aktualisieren und danach entscheiden, ob die verbleibende Editor-Scanwarnung separat als Plugin-/Referenzprojekt-Hygiene-Task geschnitten wird.
+
 ### TASK_510 - Contact Report Upgrade
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_510_contact_report_upgrade.md`, `docs/dev/contact_report_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`
