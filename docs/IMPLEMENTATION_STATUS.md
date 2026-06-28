@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_524 - Export Warning Noise Cleanup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_524_export_warning_noise_cleanup.md`, `docs/tasks/TASK_511_export_runtime_package_hygiene.md`, `docs/dev/html_report_workbench_contract.md`, `data/export_runtime_package_contract.json`
+- Stand: Das inaktive `godot-open-rts`-Referenzpaket behaelt seine upstream Projektdatei nur noch als `project.godot.reference`, damit Godot den Ordner nicht mehr als verschachteltes Projekt erkennt.
+- Stand: Die Referenzpaket-Doku warnt explizit davor, die Datei ohne eigenen Integration-Task wieder zu `project.godot` umzubenennen.
+- Stand: Der TASK_524-Verifier prueft Factory-GLBs, Factory-Colormap-Import, Export-Excludes und lokalen Godot-Filesystem-Cache auf die alte `uid://dsxohkhemn17r`-Warnquelle.
+- Stand: Der laufende HTML-Reviewbericht ist als Zwischenbericht auf TASK_524 aktualisiert und nennt TASK_525 als naechsten Anschluss.
+- Risiken/offen: Die Bereinigung deckt die aktuell bekannten Warnquellen ab. Neue Importwarnungen aus spaeteren Asset-Paketen brauchen eigene kleine Hygiene-Tasks.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_524_export_warning_noise_cleanup.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_511_export_runtime_package_hygiene.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_523_pvp_team_readability_ui_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_525 - Team Badge / Spawn Readability Polish`, wenn Alpha/Bravo-Teamfarben und Spawnpunkte im Briefing/Mission-HUD sichtbarer werden sollen.
+
 ### TASK_523 - PvP Team Readability UI Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_523_pvp_team_readability_ui_pass.md`, `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/dev/multiplayer_session_lobby.md`, `docs/dev/multiplayer_player_roster_ownership_contract.md`, `docs/dev/html_report_workbench_contract.md`
