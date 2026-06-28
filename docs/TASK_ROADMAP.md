@@ -167,7 +167,8 @@ git checkout -b batch/<batch-name>
 - TASK_536 - Startflow Icon And Status Color Polish (implementiert)
 - TASK_537 - Pre-Mission F6 Screenshot Visual Audit (implementiert)
 - TASK_538 - Homebase To Mission Launch Handoff Smoke (implementiert)
-- TASK_539 - Mission Insertion First Order Readability Pass
+- TASK_539 - Mission Insertion First Order Readability Pass (implementiert)
+- TASK_540 - Mission First Move Decision Readability Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
