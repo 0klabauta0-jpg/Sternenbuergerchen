@@ -153,13 +153,14 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/mission-controller-boundary-slice</code>.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/mission-combat-resolution-boundary</code>.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
       <span class="pill warn">Legacy-Driver in scripts/tests</span>
       <span class="pill good">Release-Hygiene implementiert</span>
       <span class="pill good">TASK_512 Boundary-Slice</span>
+      <span class="pill good">TASK_513 Result-Boundary</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
   </header>
@@ -181,7 +182,7 @@
           <h2>Kurzfazit</h2>
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
-          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat danach den ersten kleinen Mission-Controller-Boundary-Slice gezogen: Fireteam-Dropship-/Runtime-Lesestatus liegt jetzt in einem Mission-Helper, waehrend Commands und Effects weiter ueber die bestehenden autoritativen Pfade laufen.</p>
+          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen; TASK_513 kapselt nun auch Objective-/MissionResult-Resolution im Combat-Pfad. Die naechste technische Verdichtung sitzt vor allem noch in Enemy-Behavior und Readability-Presenter-Resten.</p>
         </article>
         <article class="card">
           <h2>Statusampel</h2>
@@ -348,16 +349,17 @@
           <div class="stack">
             <div class="finding good"><h3>Erledigt: TASK_511 - Export Runtime Package Hygiene</h3><p>Runtime-Export-Contract, temporaeres Preset-Patching und Pack-Log-Stichprobe sind umgesetzt. Der Export laeuft mit <code>EXPORT_EXIT=0</code> und ohne Editor-/Test-/Docs-Packentries.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_512 - Mission Controller Boundary Slice</h3><p>Fireteam-Dropship-/Runtime-Lesestatus liegt in <code>MissionFireteamRuntimeState</code>; die HUD-Regression fuer embarked/deployed Fireteams bleibt gruen.</p></div>
-            <div class="finding high"><h3>1. TASK_513 - Mission Combat Resolution Boundary</h3><p>Objective, Elimination, Countdown und MissionResult aus <code>mission_combat_loop_driver.gd</code> in einen Resolver/Contract-Helper, Snapshot-Keys stabil halten.</p></div>
-            <div class="finding medium"><h3>2. TASK_514 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
-            <div class="finding low"><h3>3. TASK_515 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_513 - Mission Combat Resolution Boundary</h3><p>Objective-/MissionResult-Resolution liegt in <code>MissionCombatResolutionResolver</code>; der Driver bleibt Tick-/Event-Orchestrator.</p></div>
+            <div class="finding high"><h3>1. TASK_514 - Enemy Behavior Orchestrator</h3><p>Enemy-Team-Tactics, Patrol, Limbo-Cover/Hold und Damage-Reposition aus dem Combat-Driver herausloesen, ohne Command-/Effect-Authority aus <code>SimulationRoot</code> zu verschieben.</p></div>
+            <div class="finding medium"><h3>2. TASK_515 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
+            <div class="finding low"><h3>3. TASK_516 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
           </div>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
           <p>Welchen Pfad willst du als naechstes erzwingen?</p>
           <div class="button-row" style="margin-top:12px" data-choice-group="next_path">
-            <button class="choice active" type="button" data-choice-value="combat_resolution_boundary">Combat-Resolution</button>
+            <button class="choice active" type="button" data-choice-value="enemy_behavior_boundary">Enemy-Behavior</button>
             <button class="choice" type="button" data-choice-value="editor_ux">Editor-UX</button>
             <button class="choice" type="button" data-choice-value="scenario_slice">Szenario-Slice</button>
           </div>
@@ -383,6 +385,7 @@
                 <tr><td><code>task_505_frontier_probe_large_map_playtest_hotfix.gd</code></td><td>PASS</td><td>Drop, 360 Security, Orders, Contact, Objective Victory; Renderfenster bleibt chunked.</td></tr>
                 <tr><td><code>task_511_export_runtime_package_hygiene.gd</code></td><td>27 passed, 0 failed</td><td>Contract, Script, Excludes, Allowlist, Report-Workbench und Doku-Anbindung gruen.</td></tr>
                 <tr><td><code>task_512_mission_controller_boundary_slice.gd</code></td><td>18 passed, 0 failed</td><td>Helper-Vertrag, read-only Grenze, Controller-Anbindung und Doku-Anbindung gruen.</td></tr>
+                <tr><td><code>task_513_mission_combat_resolution_boundary.gd</code></td><td>26 passed, 0 failed</td><td>Resolution-Resolver, Driver-Anbindung und Doku-Anbindung gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
               </tbody>
@@ -395,7 +398,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_511-Merge. Arbeitsbranch: <code>task/mission-controller-boundary-slice</code>. Aktueller Arbeitsstand enthaelt TASK_512 plus diesen aktualisierten Review-Report.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_512-Merge. Arbeitsbranch: <code>task/mission-combat-resolution-boundary</code>. Aktueller Arbeitsstand enthaelt TASK_513 plus diesen aktualisierten Review-Report.</p>
         </article>
       </div>
     </section>
@@ -474,17 +477,17 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_513 - Mission Combat Resolution Boundary",
-              "TASK_514 - Editor Builder UX Pass",
-              "TASK_515 - Mission Scenario Vertical Slice"
+              "TASK_514 - Enemy Behavior Orchestrator",
+              "TASK_515 - Editor Builder UX Pass",
+              "TASK_516 - Mission Scenario Vertical Slice"
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194203876
           },
           metadata: {
-            branch: "task/mission-controller-boundary-slice",
-            head: "working_tree_after_task_512",
+            branch: "task/mission-combat-resolution-boundary",
+            head: "working_tree_after_task_513",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }

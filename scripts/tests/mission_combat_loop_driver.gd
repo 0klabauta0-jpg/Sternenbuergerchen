@@ -16,6 +16,7 @@ const CHARACTER_GAMEPLAY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_authority_contract.gd")
 const MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_remote_event_bridge.gd")
+const MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_resolution_resolver.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const CONTACT_LINE_NAME: String = "CombatContactLine"
 const EVENT_LABEL_NAME: String = "CombatEventLabel"
@@ -178,6 +179,7 @@ var _contact_tracker = CONTACT_TRACKER_SCRIPT.new()
 var _flank_vulnerability_resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
 var _enemy_limbo_behavior_adapter = ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.new()
 var _remote_event_bridge = MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT.new()
+var _combat_resolution_resolver = MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT.new()
 var _audio_event_bus = null
 
 
@@ -1294,26 +1296,27 @@ func _try_recover_premature_startup_resolution() -> bool:
 func _update_combat_resolution() -> void:
 	if _combat_finished:
 		return
-
-	if mission_time_limit_seconds > 0.0 and _get_duration_seconds() >= mission_time_limit_seconds:
-		_resolve_combat("defeat", _get_enemy_team_id(), "time_limit")
+	var decision: Dictionary = Dictionary(_combat_resolution_resolver.call(
+		"build_resolution_decision",
+		{
+			"combat_finished": false,
+			"duration_seconds": _get_duration_seconds(),
+			"mission_time_limit_seconds": mission_time_limit_seconds,
+			"victory_condition_met": _is_victory_condition_met(),
+			"friendly_fit_count": _count_fit_units(friendly_unit_paths),
+			"has_seen_active_friendly_units": _has_seen_active_friendly_units,
+			"has_pending_friendly_insertions": _has_pending_friendly_insertions(),
+			"friendly_team_id": friendly_team_id,
+			"enemy_team_id": _get_enemy_team_id(),
+		}
+	))
+	if not bool(decision.get("resolved", false)):
 		return
-
-	if _is_victory_condition_met():
-		_resolve_combat("victory", friendly_team_id)
-		return
-
-	var friendly_fit_count: int = _count_fit_units(friendly_unit_paths)
-	if friendly_fit_count > 0:
-		return
-
-	if not _has_seen_active_friendly_units:
-		return
-
-	if _has_pending_friendly_insertions():
-		return
-
-	_resolve_combat("defeat", _get_enemy_team_id())
+	_resolve_combat(
+		String(decision.get("result", "")),
+		String(decision.get("winning_team_id", "")),
+		String(decision.get("result_condition_override", ""))
+	)
 
 
 func _refresh_hotpath_unit_cache_for_tick() -> void:
@@ -2875,15 +2878,17 @@ func _remove_readability_nodes() -> void:
 
 
 func _is_victory_condition_met() -> bool:
-	match win_condition:
-		WIN_CONDITION_OBJECTIVE_CAPTURE:
-			_update_objective_hold_tracking()
-			return _is_objective_captured_by_friendly()
-		WIN_CONDITION_OBJECTIVE_DEFENSE:
-			_update_objective_hold_tracking()
-			return _is_objective_captured_by_friendly() and _get_objective_defense_elapsed_seconds() >= objective_defense_hold_seconds
-		_:
-			return _is_enemy_team_eliminated()
+	if win_condition == WIN_CONDITION_OBJECTIVE_CAPTURE or win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE:
+		_update_objective_hold_tracking()
+	var enemy_team_eliminated: bool = _is_enemy_team_eliminated() if win_condition != WIN_CONDITION_OBJECTIVE_CAPTURE and win_condition != WIN_CONDITION_OBJECTIVE_DEFENSE else false
+	return bool(_combat_resolution_resolver.call(
+		"is_victory_condition_met",
+		win_condition,
+		_is_objective_captured_by_friendly(),
+		_get_objective_defense_elapsed_seconds(),
+		objective_defense_hold_seconds,
+		enemy_team_eliminated
+	))
 
 
 func _is_enemy_team_eliminated() -> bool:
@@ -2920,20 +2925,19 @@ func _resolve_combat(result: String, winning_team_id: String, result_condition_o
 
 func _build_mission_result(result: String, winning_team_id: String) -> Dictionary:
 	var result_condition: String = _mission_result_condition_override if not _mission_result_condition_override.is_empty() else win_condition
-	var mission_result: Dictionary = Dictionary(
-		MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call(
-			"build_mission_result",
-			result,
-			winning_team_id,
-			friendly_team_id,
-			result_condition,
-			_is_objective_captured_by_friendly(),
-			_get_duration_seconds(),
-			_build_team_states(friendly_unit_paths)
-		)
-	)
-	mission_result["fireteam_tactical_debrief"] = _build_fireteam_tactical_debrief_entries()
-	return mission_result
+	return Dictionary(_combat_resolution_resolver.call(
+		"build_mission_result",
+		{
+			"result": result,
+			"winning_team_id": winning_team_id,
+			"friendly_team_id": friendly_team_id,
+			"win_condition_type": result_condition,
+			"objective_captured": _is_objective_captured_by_friendly(),
+			"duration_seconds": _get_duration_seconds(),
+			"team_states": _build_team_states(friendly_unit_paths),
+			"fireteam_tactical_debrief": _build_fireteam_tactical_debrief_entries(),
+		}
+	))
 
 
 func _build_fireteam_tactical_debrief_entries() -> Array:
@@ -3007,36 +3011,17 @@ func _sync_objective_countdown_state() -> void:
 
 
 func _build_objective_countdown_source() -> Dictionary:
-	if win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and objective_defense_hold_seconds > 0.0:
+	if win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE:
 		_update_objective_hold_tracking()
-		var hold_elapsed_seconds: float = _get_objective_defense_elapsed_seconds()
-		var hold_remaining_seconds: float = maxf(objective_defense_hold_seconds - hold_elapsed_seconds, 0.0)
-		var is_holding_objective: bool = _is_objective_captured_by_friendly()
-		return {
-			"countdown_seconds": hold_remaining_seconds,
-			"countdown_total_seconds": objective_defense_hold_seconds,
-			"timer_state": "expired" if is_holding_objective and hold_remaining_seconds <= 0.0 else ("active" if is_holding_objective else "paused"),
-			"timer_source": "objective_defense_hold",
-			"timer_label": "HOLD",
-		}
-	if mission_time_limit_seconds > 0.0:
-		var time_remaining_seconds: float = get_remaining_time_limit_seconds()
-		if time_remaining_seconds < 0.0:
-			return {
-				"countdown_seconds": mission_time_limit_seconds,
-				"countdown_total_seconds": mission_time_limit_seconds,
-				"timer_state": "paused",
-				"timer_source": "mission_time_limit",
-				"timer_label": "TIME",
-			}
-		return {
-			"countdown_seconds": time_remaining_seconds,
-			"countdown_total_seconds": mission_time_limit_seconds,
-			"timer_state": "expired" if time_remaining_seconds <= 0.0 else "active",
-			"timer_source": "mission_time_limit",
-			"timer_label": "TIME",
-		}
-	return {}
+	return Dictionary(_combat_resolution_resolver.call(
+		"build_objective_countdown_source",
+		win_condition,
+		objective_defense_hold_seconds,
+		_get_objective_defense_elapsed_seconds(),
+		_is_objective_captured_by_friendly(),
+		mission_time_limit_seconds,
+		get_remaining_time_limit_seconds()
+	))
 
 
 func _get_objective_status():

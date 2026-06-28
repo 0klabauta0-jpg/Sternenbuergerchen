@@ -141,6 +141,7 @@ git checkout -b batch/<batch-name>
 - TASK_510 - Contact Report Upgrade (implementiert)
 - TASK_511 - Export Runtime Package Hygiene (implementiert)
 - TASK_512 - Mission Controller Boundary Slice (implementiert)
+- TASK_513 - Mission Combat Resolution Boundary (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

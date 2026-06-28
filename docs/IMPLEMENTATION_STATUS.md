@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_513 - Mission Combat Resolution Boundary
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_513_mission_combat_resolution_boundary.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/reviews/mission_combat_driver_boundary_review_2026_05_24.md`
+- Stand: `scripts/mission/mission_combat_resolution_resolver.gd` kapselt die read-only Entscheidung fuer Zeitlimit-Defeat, Victory-Conditions, Friendly-Defeat, Objective-/Time-Countdown und MissionResult-Payload.
+- Stand: `MissionCombatLoopDriver` bleibt Tick-/Event-/RPC-Orchestrator, delegiert aber Resolution-Entscheidung, Victory-Condition-Check, Countdown-Source und MissionResult-Building an den Resolver.
+- Stand: Der Resolver hat keine SceneTree-Abhaengigkeit, enqueued keine Commands/Effects und behaelt die bestehenden MissionResult-/Snapshot-Keys bei.
+- Risiken/offen: Enemy-Behavior, Readability-UI und Remote-Event-Reste bleiben im Driver. Naechste Review-Slices bleiben Enemy Behavior Orchestrator oder Combat Readability Presenter.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_513_mission_combat_resolution_boundary.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_496_mission_combat_registry_and_elimination_hotfix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_160_tactical_playability_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `git diff --check`.
+- Naechster Schritt: Enemy-Behavior-Orchestrator als TASK_514 schneiden oder sichtbarere Spiel-/Editor-UX-Politur priorisieren, wenn der Fokus gerade Bedienbarkeit ist.
+
 ### TASK_512 - Mission Controller Boundary Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_512_mission_controller_boundary_slice.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
