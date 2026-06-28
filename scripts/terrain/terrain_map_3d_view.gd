@@ -17,6 +17,7 @@ const MAP_ROOT_NAME: String = "MapRoot3D"
 const MARKER_ROOT_NAME: String = "MarkerRoot3D"
 const FOW_ROOT_NAME: String = "FogOfWarRoot3D"
 const PATROL_ROOT_NAME: String = "PatrolRoot3D"
+const NETWORK_PREVIEW_ROOT_NAME: String = "NetworkPreviewRoot3D"
 const SELECTION_ROOT_NAME: String = "SelectionRoot3D"
 const UNIT_ROOT_NAME: String = "UnitRoot3D"
 const ORDER_ROOT_NAME: String = "OrderRoot3D"
@@ -358,6 +359,7 @@ var _map_root: Node3D = null
 var _marker_root: Node3D = null
 var _fow_root: Node3D = null
 var _patrol_root: Node3D = null
+var _network_preview_root: Node3D = null
 var _selection_root: Node3D = null
 var _unit_root: Node3D = null
 var _order_root: Node3D = null
@@ -511,6 +513,14 @@ var _compass_marker_count: int = 0
 var _patrol_segment_count: int = 0
 var _patrol_preview_segment_count: int = 0
 var _editor_patrol_preview_path_id: String = ""
+var _editor_network_drag_preview_snapshot: Dictionary = {}
+var _editor_network_drag_preview_kind: String = ""
+var _editor_network_drag_preview_path_count: int = 0
+var _editor_network_drag_preview_segment_count: int = 0
+var _editor_network_drag_preview_marker_count: int = 0
+var _editor_network_drag_preview_active: bool = false
+var _editor_network_drag_preview_start_grid: Vector2i = Vector2i(-1, -1)
+var _editor_network_drag_preview_current_grid: Vector2i = Vector2i(-1, -1)
 var _area_order_count: int = 0
 var _waypoint_visual_count: int = 0
 var _area_order_tile_marker_count: int = 0
@@ -649,6 +659,7 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_marker_root)
 	_clear_children(_fow_root)
 	_clear_children(_patrol_root)
+	_clear_children(_network_preview_root)
 	_clear_children(_selection_root)
 	_clear_children(_order_root)
 	_clear_children(_contact_root)
@@ -713,6 +724,7 @@ func render_map(terrain_map_data = null) -> void:
 	_compass_marker_count = 0
 	_patrol_segment_count = 0
 	_patrol_preview_segment_count = 0
+	_reset_editor_network_drag_preview_counters(false)
 	_movement_style_visual_count = 0
 	_movement_bound_marker_count = 0
 	_movement_group_marker_count = 0
@@ -761,6 +773,7 @@ func render_map(terrain_map_data = null) -> void:
 	_rebuild_fog_of_war_visuals()
 	_rebuild_marker_visuals()
 	_rebuild_patrol_visuals()
+	_rebuild_network_drag_preview_visuals()
 	_rebuild_selection_visuals()
 	_rebuild_order_visuals()
 	_rebuild_contact_visuals()
@@ -1382,6 +1395,16 @@ func set_editor_patrol_preview_path_id(path_id: String) -> void:
 	_request_viewport_redraw()
 
 
+func set_editor_network_drag_preview_snapshot(snapshot: Dictionary) -> void:
+	var next_snapshot: Dictionary = Dictionary(snapshot).duplicate(true)
+	if _editor_network_drag_preview_snapshot == next_snapshot:
+		return
+	_editor_network_drag_preview_snapshot = next_snapshot
+	if _network_preview_root != null and _terrain_map_data != null:
+		_rebuild_network_drag_preview_visuals()
+	_request_viewport_redraw()
+
+
 func get_render_snapshot() -> Dictionary:
 	_render_snapshot_request_count += 1
 	var render_budget_by_category: Dictionary = _build_render_budget_by_category()
@@ -1475,6 +1498,13 @@ func get_render_snapshot() -> Dictionary:
 		"patrol_segment_count": _patrol_segment_count,
 		"editor_patrol_preview_path_id": _editor_patrol_preview_path_id,
 		"editor_patrol_preview_segment_count": _patrol_preview_segment_count,
+		"editor_network_drag_preview_active": _editor_network_drag_preview_active,
+		"editor_network_drag_preview_kind": _editor_network_drag_preview_kind,
+		"editor_network_drag_preview_path_count": _editor_network_drag_preview_path_count,
+		"editor_network_drag_preview_segment_count": _editor_network_drag_preview_segment_count,
+		"editor_network_drag_preview_marker_count": _editor_network_drag_preview_marker_count,
+		"editor_network_drag_preview_start_grid": _editor_network_drag_preview_start_grid,
+		"editor_network_drag_preview_current_grid": _editor_network_drag_preview_current_grid,
 		"selected_grid_count": _selected_grid_positions.size(),
 		"selected_grid_positions": _selected_grid_positions.duplicate(),
 		"unit_proxy_count": _unit_proxies_by_id.size(),
@@ -1902,6 +1932,7 @@ func _ensure_nodes() -> void:
 	_marker_root = _ensure_node3d(_world_root, MARKER_ROOT_NAME)
 	_fow_root = _ensure_node3d(_world_root, FOW_ROOT_NAME)
 	_patrol_root = _ensure_node3d(_world_root, PATROL_ROOT_NAME)
+	_network_preview_root = _ensure_node3d(_world_root, NETWORK_PREVIEW_ROOT_NAME)
 	_selection_root = _ensure_node3d(_world_root, SELECTION_ROOT_NAME)
 	_unit_root = _ensure_node3d(_world_root, UNIT_ROOT_NAME)
 	_order_root = _ensure_node3d(_world_root, ORDER_ROOT_NAME)
@@ -3832,6 +3863,78 @@ func _rebuild_patrol_visuals() -> void:
 			_patrol_segment_count += 1
 			if is_preview:
 				_patrol_preview_segment_count += 1
+
+
+func _reset_editor_network_drag_preview_counters(clear_snapshot: bool = true) -> void:
+	if clear_snapshot:
+		_editor_network_drag_preview_snapshot.clear()
+	_editor_network_drag_preview_kind = ""
+	_editor_network_drag_preview_path_count = 0
+	_editor_network_drag_preview_segment_count = 0
+	_editor_network_drag_preview_marker_count = 0
+	_editor_network_drag_preview_active = false
+	_editor_network_drag_preview_start_grid = Vector2i(-1, -1)
+	_editor_network_drag_preview_current_grid = Vector2i(-1, -1)
+
+
+func _rebuild_network_drag_preview_visuals() -> void:
+	_clear_children(_network_preview_root)
+	_reset_editor_network_drag_preview_counters(false)
+	if _network_preview_root == null or _terrain_map_data == null or _editor_network_drag_preview_snapshot.is_empty():
+		return
+	var visual_preview: Dictionary = Dictionary(_editor_network_drag_preview_snapshot.get("visual_preview", _editor_network_drag_preview_snapshot))
+	if not bool(visual_preview.get("active", false)):
+		return
+	var segments: Array = Array(visual_preview.get("segments", []))
+	var path: Array = Array(visual_preview.get("path", []))
+	_editor_network_drag_preview_kind = String(visual_preview.get("kind", _editor_network_drag_preview_snapshot.get("kind", ""))).strip_edges().to_lower()
+	_editor_network_drag_preview_path_count = int(visual_preview.get("path_count", path.size()))
+	_editor_network_drag_preview_start_grid = Vector2i(visual_preview.get("start_grid", Vector2i(-1, -1)))
+	_editor_network_drag_preview_current_grid = Vector2i(visual_preview.get("current_grid", Vector2i(-1, -1)))
+	_editor_network_drag_preview_active = _editor_network_drag_preview_path_count > 0
+	if not _editor_network_drag_preview_active:
+		return
+	var color_variant = visual_preview.get("color", Color(0.45, 0.9, 1.0, 0.88))
+	var color: Color = color_variant if color_variant is Color else Color(0.45, 0.9, 1.0, 0.88)
+	var line_width: float = maxf(float(visual_preview.get("line_width", 0.12)), 0.04)
+	var surface_offset: float = float(visual_preview.get("surface_offset", 0.44))
+	for index in range(segments.size()):
+		var segment: Dictionary = Dictionary(segments[index])
+		var from_world: Vector2 = Vector2(segment.get("from_world", Vector2.ZERO))
+		var to_world: Vector2 = Vector2(segment.get("to_world", Vector2.ZERO))
+		if from_world == to_world:
+			continue
+		_add_wide_line3d(
+			_network_preview_root,
+			_world_to_surface_3d_position(from_world, surface_offset),
+			_world_to_surface_3d_position(to_world, surface_offset),
+			color,
+			"NetworkDragPreview_%d" % index,
+			line_width
+		)
+		_editor_network_drag_preview_segment_count += 1
+	_add_network_drag_preview_endpoint("Start", _editor_network_drag_preview_start_grid, color, surface_offset + 0.035)
+	_add_network_drag_preview_endpoint("Target", _editor_network_drag_preview_current_grid, color.lightened(0.12), surface_offset + 0.04)
+
+
+func _add_network_drag_preview_endpoint(label: String, grid_position: Vector2i, color: Color, surface_offset: float) -> void:
+	if _network_preview_root == null or _terrain_map_data == null or grid_position == Vector2i(-1, -1):
+		return
+	var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position)
+	if tile_data == null:
+		return
+	var marker := MeshInstance3D.new()
+	marker.name = "NetworkDragPreview%s_%d_%d" % [label, grid_position.x, grid_position.y]
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = 0.18
+	mesh.bottom_radius = 0.18
+	mesh.height = 0.055
+	mesh.radial_segments = 8
+	marker.mesh = mesh
+	marker.material_override = _make_material(color, true)
+	marker.position = _world_to_surface_3d_position(Vector2(tile_data.world_position), surface_offset)
+	_network_preview_root.add_child(marker)
+	_editor_network_drag_preview_marker_count += 1
 
 
 func _rebuild_selection_visuals() -> void:

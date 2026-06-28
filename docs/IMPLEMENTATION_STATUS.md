@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_521 - Builder Drag Preview Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_521_builder_drag_preview_visual_polish.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`, `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`, `docs/tasks/TASK_516_editor_builder_ux_pass.md`
+- Stand: Der Map-Editor kann mit `preview_runtime_network_path_for_authoring(...)` einen read-only Network-Drag-Pfad fuer Pipe/Wall/Cliff/Road/Rail anzeigen, ohne Tile- oder Gameplay-Wahrheit zu mutieren.
+- Stand: `MapEditor` spiegelt den bestehenden Network-Preview-Snapshot an die Primary3DView; Apply, Toolwechsel, Palette-Auswahl und explizites Clear entfernen die Preview wieder.
+- Stand: `TerrainMap3DView` rendert aktive Network-Drag-Previews als farbige 3D-Linien mit Start-/Zielmarkern und meldet Art, Pfadlaenge, Segmentzahl und Markerzahl im Render-Snapshot.
+- Risiken/offen: Der Headless-Test prueft Snapshot/Node-Zaehler und keine finale FullHD-Art-Direction. Segmentnummern, Handles und Icon-Polish bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_521_builder_drag_preview_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_516_editor_builder_ux_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_492_map_editor_network_drag_snap_tools.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_491_map_editor_runtime_builder_workbench.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_522 - Cargo Touchdown Visual Polish` oder `TASK_523 - PvP Team Readability UI Pass`, wenn der Fokus wieder vom Editor auf Missions-/Multiplayer-Lesbarkeit wechselt.
+
 ### TASK_520 - Multiplayer Team Ownership Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/dev/multiplayer_session_lobby.md`, `docs/dev/multiplayer_player_roster_ownership_contract.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`
