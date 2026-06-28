@@ -143,6 +143,7 @@ git checkout -b batch/<batch-name>
 - TASK_512 - Mission Controller Boundary Slice (implementiert)
 - TASK_513 - Mission Combat Resolution Boundary (implementiert)
 - TASK_514 - Enemy Behavior Orchestrator (implementiert)
+- TASK_515 - Combat Readability Presenter (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

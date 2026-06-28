@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/enemy-behavior-orchestrator</code>.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/combat-readability-presenter</code>.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -162,6 +162,7 @@
       <span class="pill good">TASK_512 Boundary-Slice</span>
       <span class="pill good">TASK_513 Result-Boundary</span>
       <span class="pill good">TASK_514 Enemy-Behavior</span>
+      <span class="pill good">TASK_515 Readability-Presenter</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
   </header>
@@ -183,7 +184,7 @@
           <h2>Kurzfazit</h2>
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
-          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, und TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator. Die naechste technische Verdichtung sitzt vor allem noch in Readability-Presenter- und Enemy-State-Aufbereitungsresten.</p>
+          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, und TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter. Die naechste technische Verdichtung sitzt vor allem noch in Enemy-State-Aufbereitung, Remote-Event-Resten und den grossen Editor-/Visual-Skripten.</p>
         </article>
         <article class="card">
           <h2>Statusampel</h2>
@@ -254,8 +255,8 @@
                 <tr><td>Dropship</td><td>Parallelitaet, LZ, Outbound, HUD-Wahrheit sind aktuell gruen.</td><td>Viele Felder werden noch als Planning-State im grossen Controller gespiegelt.</td><td>Dropship-Mission-State als eigener Mission-Adapter/Presenter.</td></tr>
                 <tr><td>Insertion</td><td>Deployed Fireteam wird runtime-aktiv und bekommt Post-Drop-Sicherung.</td><td>Post-Drop-Aktivierung und Default-Verhalten liegen tief im Controller.</td><td>Insertion-Outcome als eigener kleiner Resolver.</td></tr>
                 <tr><td>Bewegung</td><td>Stale Move-Commands werden verworfen; HPA/A* und Surface-Kosten sind dokumentiert.</td><td>Kein echter Pfad-Cache, bewusst diagnostiziert.</td><td>Erst bei spuerbarem Bedarf Path-Cache mit Invalidation-Contract.</td></tr>
-                <tr><td>Kampf</td><td>LOS, Cover, Friendly Fire, Medic, Overwatch, Fire Decision Resolver existieren.</td><td>CombatLoopDriver orchestriert noch zu viele Enemy-/Objective-/UI-Themen.</td><td>Resolution und Enemy-Behavior in kleine Slices auslagern.</td></tr>
-                <tr><td>Result</td><td>Objective-Victory und Mission-Result sichtbar.</td><td>Mission-Result-Grenze noch nahe am Driver.</td><td><code>MissionCombatResolutionResolver</code> als naechster Boundary-Slice.</td></tr>
+                <tr><td>Kampf</td><td>LOS, Cover, Friendly Fire, Medic, Overwatch, Fire Decision Resolver, Resolution, Enemy-Behavior-Orchestrator und Readability-Presenter existieren.</td><td>CombatLoopDriver orchestriert weiterhin Tick-Reihenfolge, Unit-Signale, Respawn/Bleedout und Remote-Events.</td><td>Nur noch kleine Boundary-Slices, wenn sie reale Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
+                <tr><td>Result</td><td>Objective-Victory und Mission-Result sichtbar; Result-Building ist gekapselt.</td><td>Presentation und Event-Bridges sind noch historisch gemischt.</td><td>Erst wieder anfassen, wenn Multiplayer-/AAR-Flow konkrete Daten braucht.</td></tr>
               </tbody>
             </table>
           </div>
@@ -275,7 +276,7 @@
                 <tr><td><code>scripts/mission/mission_fireteam_runtime_state.gd</code></td><td>klein</td><td>Read-only Helper fuer embarked/deployed/ground/displayable/runtime-active Fireteam-Status. Keine SceneTree-Abhaengigkeit, keine Commands/Effects.</td><td>Als Muster fuer weitere Boundary-Slices nutzen: klein, testbar, ohne neue Gameplay-Wahrheit.</td></tr>
                 <tr><td><code>scripts/terrain/terrain_map_3d_view.gd</code></td><td>10.149 Zeilen</td><td>Visual-Renderer, Streaming, Batching, Units, Waffen, Helme, Bubbles, FoW, Dropship-Visuals in einer Datei.</td><td>Visual-Subsysteme nach Feature-Helpers trennen: UnitVisualAttachments, FireVfx, FeedbackBubbles, StreamingChunks.</td></tr>
                 <tr><td><code>scripts/editor/map_editor.gd</code></td><td>8.466 Zeilen</td><td>Editor-UI, Palette, Save/Load, Builder-Toolbar, Network-Drag, Cliff/Wall-Overlays, Mission-Scenario in einem Skript.</td><td>Palette/Builder/NetworkDrag/ScenarioPanel in Module extrahieren, aber vorhandene Authoring-Wahrheit in TerrainMapData lassen.</td></tr>
-                <tr><td><code>scripts/tests/mission_combat_loop_driver.gd</code></td><td>4.576 Zeilen</td><td>Tick-Orchestrator mit Enemy-Behavior, Objective/Result, Respawn/Bleedout, UI-Readability und Remote-Events.</td><td>Bereits begonnene TASK_495-Kette fortsetzen: Resolution, EnemyBehavior, Readability Presenter.</td></tr>
+                <tr><td><code>scripts/tests/mission_combat_loop_driver.gd</code></td><td>4.5k+ Zeilen</td><td>Tick-Orchestrator mit Unit-Signalen, Respawn/Bleedout, Remote-Events und mehreren delegierten Resolvern/Presentern.</td><td>Nicht breit verschieben. Weitere Schnitte nur mit konkretem Playtest- oder Multiplayer-Nutzen.</td></tr>
                 <tr><td><code>scripts/core/simulation_root.gd</code></td><td>3.201 Zeilen</td><td>Autoritativer Kern ist groesser, aber hat klare Command-/Effect-Grenzen. TODOs fuer spaetere echte Commits existieren bei <code>:1271</code> und <code>:1302</code>.</td><td>Nicht aufblaehen. Neue Gameplay-Mutationen nur als kleine Effect-/Command-Handler mit Tests.</td></tr>
               </tbody>
             </table>
@@ -328,7 +329,7 @@
             </div>
             <div class="finding medium">
               <h3>Arbeitsstand bleibt bewusst task-lokal</h3>
-              <p>Der aktuelle Branch enthaelt die TASK_511-Dateien und den aktualisierten Bericht. Der lokale <code>export_presets.cfg</code> wird nach Export wieder restauriert und bleibt untracked.</p>
+              <p>Der aktuelle Branch enthaelt TASK_515, den neuen Presenter und diesen aktualisierten Bericht. Der lokale <code>export_presets.cfg</code> wird nach Export wieder restauriert und bleibt untracked.</p>
             </div>
             <div class="finding low">
               <h3>Laute Asset-Warnungen</h3>
@@ -352,17 +353,18 @@
             <div class="finding good"><h3>Erledigt: TASK_512 - Mission Controller Boundary Slice</h3><p>Fireteam-Dropship-/Runtime-Lesestatus liegt in <code>MissionFireteamRuntimeState</code>; die HUD-Regression fuer embarked/deployed Fireteams bleibt gruen.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_513 - Mission Combat Resolution Boundary</h3><p>Objective-/MissionResult-Resolution liegt in <code>MissionCombatResolutionResolver</code>; der Driver bleibt Tick-/Event-Orchestrator.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_514 - Enemy Behavior Orchestrator</h3><p>Enemy-Team-Tactics, Patrol, Limbo-Cover/Hold und Damage-Reposition bauen ihre Command-Payloads in <code>EnemyBehaviorOrchestrator</code>; der Driver queued weiter autoritativ ueber <code>SimulationRoot</code>.</p></div>
-            <div class="finding high"><h3>1. TASK_515 - Combat Readability Presenter</h3><p>Eventtexte, Kontaktlinien und taktische Readability-Anzeigen aus dem Combat-Driver in einen read-only Presenter ziehen, ohne Gameplay-State ins HUD zu verschieben.</p></div>
-            <div class="finding medium"><h3>2. TASK_516 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
-            <div class="finding low"><h3>3. TASK_517 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_515 - Combat Readability Presenter</h3><p>Eventtexte, Kontaktlinien, Winnerlabel und Statuslabel-Formatierung liegen in <code>CombatReadabilityPresenter</code>; Unit-Kontaktstatus und Authority bleiben im Driver/Simulation-Pfad.</p></div>
+            <div class="finding high"><h3>1. TASK_516 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
+            <div class="finding medium"><h3>2. TASK_517 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
+            <div class="finding low"><h3>3. TASK_518 - Enemy State Builder Extraction</h3><p>Nur wenn weiter technische Entflechtung gewuenscht ist: Enemy-Security-/Team-Tactics-State-Aufbereitung aus dem Combat-Driver ziehen.</p></div>
           </div>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
           <p>Welchen Pfad willst du als naechstes erzwingen?</p>
           <div class="button-row" style="margin-top:12px" data-choice-group="next_path">
-            <button class="choice active" type="button" data-choice-value="enemy_behavior_boundary">Enemy-Behavior</button>
-            <button class="choice" type="button" data-choice-value="editor_ux">Editor-UX</button>
+            <button class="choice" type="button" data-choice-value="enemy_behavior_boundary">Enemy-Behavior</button>
+            <button class="choice active" type="button" data-choice-value="editor_ux">Editor-UX</button>
             <button class="choice" type="button" data-choice-value="scenario_slice">Szenario-Slice</button>
           </div>
           <label style="display:block;margin-top:14px;">Prioritaetsnotiz
@@ -389,6 +391,7 @@
                 <tr><td><code>task_512_mission_controller_boundary_slice.gd</code></td><td>18 passed, 0 failed</td><td>Helper-Vertrag, read-only Grenze, Controller-Anbindung und Doku-Anbindung gruen.</td></tr>
                 <tr><td><code>task_513_mission_combat_resolution_boundary.gd</code></td><td>26 passed, 0 failed</td><td>Resolution-Resolver, Driver-Anbindung und Doku-Anbindung gruen.</td></tr>
                 <tr><td><code>task_514_enemy_behavior_orchestrator.gd</code></td><td>31 passed, 0 failed</td><td>Enemy-Behavior-Orchestrator, Payload-Vertraege, Driver-Anbindung und Doku-Anbindung gruen.</td></tr>
+                <tr><td><code>task_515_combat_readability_presenter.gd</code></td><td>38 passed, 0 failed</td><td>Readability-Presenter, Driver-Anbindung, read-only Grenzen und Doku-Anbindung gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
               </tbody>
@@ -401,7 +404,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_513-Merge. Arbeitsbranch: <code>task/enemy-behavior-orchestrator</code>. Aktueller Arbeitsstand enthaelt TASK_514 plus diesen aktualisierten Review-Report.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_514-Merge. Arbeitsbranch: <code>task/combat-readability-presenter</code>. Aktueller Arbeitsstand enthaelt TASK_515 plus diesen aktualisierten Review-Report.</p>
         </article>
       </div>
     </section>
@@ -480,17 +483,17 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_515 - Combat Readability Presenter",
               "TASK_516 - Editor Builder UX Pass",
-              "TASK_517 - Mission Scenario Vertical Slice"
+              "TASK_517 - Mission Scenario Vertical Slice",
+              "TASK_518 - Enemy State Builder Extraction"
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194203876
           },
           metadata: {
-            branch: "task/enemy-behavior-orchestrator",
-            head: "working_tree_after_task_514",
+            branch: "task/combat-readability-presenter",
+            head: "working_tree_after_task_515",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }

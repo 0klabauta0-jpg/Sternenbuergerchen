@@ -19,9 +19,7 @@ const MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT: GDScript = preload("res://script
 const MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_remote_event_bridge.gd")
 const MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_resolution_resolver.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
-const CONTACT_LINE_NAME: String = "CombatContactLine"
-const EVENT_LABEL_NAME: String = "CombatEventLabel"
-const WINNER_LABEL_NAME: String = "CombatWinnerLabel"
+const COMBAT_READABILITY_PRESENTER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_readability_presenter.gd")
 const WIN_CONDITION_ELIMINATION: String = "elimination"
 const WIN_CONDITION_OBJECTIVE_CAPTURE: String = "objective_capture"
 const WIN_CONDITION_OBJECTIVE_DEFENSE: String = "objective_defense"
@@ -129,9 +127,6 @@ var _last_contact: Dictionary = {}
 var _current_tick: int = 0
 var _next_attack_tick: int = 1
 var _last_event_text: String = "Combat waiting"
-var _contact_line: Line2D = null
-var _event_label: Label = null
-var _winner_label: Label = null
 var _mission_started_at_msec: int = 0
 var _objective_owned_since_msec: int = -1
 var _mission_result: Dictionary = {}
@@ -182,6 +177,7 @@ var _enemy_limbo_behavior_adapter = ENEMY_LIMBO_BEHAVIOR_ADAPTER_SCRIPT.new()
 var _enemy_behavior_orchestrator = ENEMY_BEHAVIOR_ORCHESTRATOR_SCRIPT.new()
 var _remote_event_bridge = MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT.new()
 var _combat_resolution_resolver = MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT.new()
+var _readability_presenter = COMBAT_READABILITY_PRESENTER_SCRIPT.new()
 var _audio_event_bus = null
 
 
@@ -2164,40 +2160,28 @@ func _is_engage_ready(unit) -> bool:
 
 func _update_status_label(state_name: String) -> void:
 	var status_label = get_node_or_null(status_label_path)
-	if status_label == null:
+	if _readability_presenter == null:
 		return
-	if preview_mode:
-		status_label.set("visible", false)
-		return
-
-	status_label.set("visible", _overlays_visible)
-	status_label.set("text", _build_status_text(state_name))
+	_readability_presenter.call("update_status_label", status_label, state_name, _build_readability_status_context(), _overlays_visible, preview_mode)
 
 
-func _build_status_text(state_name: String) -> String:
-	var lines: PackedStringArray = []
-	lines.append("Combat: %s" % state_name)
-	lines.append("Win condition: %s" % win_condition)
-
-	if _combat_finished and not _winning_team_id.is_empty():
-		lines.append("Winner: %s" % _winning_team_id)
-
-	lines.append("Enemies fit: %d" % _count_fit_enemy_units())
-	lines.append("Friendlies fit: %d" % _count_fit_units(friendly_unit_paths))
-	lines.append("Duration: %.1fs" % _get_duration_seconds())
-	lines.append(_build_objective_status_text())
-	lines.append(_build_wave_status_text())
-
-	if win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_msec >= 0 and not _combat_finished:
-		lines.append("Hold timer: %.1fs / %.1fs" % [_get_objective_defense_elapsed_seconds(), objective_defense_hold_seconds])
-
-	lines.append("Next shot: %s" % _build_attack_readiness_text())
-	lines.append("Last event: %s" % _last_event_text)
-
-	if not _last_contact.is_empty():
-		lines.append("Last contact: %s -> %s" % [String(_last_contact.get("attacker_id", "")), String(_last_contact.get("target_id", ""))])
-
-	return "\n".join(lines)
+func _build_readability_status_context() -> Dictionary:
+	return {
+		"win_condition": win_condition,
+		"combat_finished": _combat_finished,
+		"winning_team_id": _winning_team_id,
+		"enemy_fit_count": _count_fit_enemy_units(),
+		"friendly_fit_count": _count_fit_units(friendly_unit_paths),
+		"duration_seconds": _get_duration_seconds(),
+		"objective_status_text": _build_objective_status_text(),
+		"wave_status_text": _build_wave_status_text(),
+		"show_hold_timer": win_condition == WIN_CONDITION_OBJECTIVE_DEFENSE and _objective_owned_since_msec >= 0 and not _combat_finished,
+		"objective_defense_elapsed_seconds": _get_objective_defense_elapsed_seconds(),
+		"objective_defense_hold_seconds": objective_defense_hold_seconds,
+		"attack_readiness_text": _build_attack_readiness_text(),
+		"last_event_text": _last_event_text,
+		"last_contact": _last_contact.duplicate(true),
+	}
 
 
 func _build_team_states(paths: Array[NodePath]) -> Array:
@@ -2543,42 +2527,9 @@ func _get_fireteam_leadership_snapshot() -> Dictionary:
 
 
 func _ensure_readability_nodes() -> void:
-	if preview_mode:
+	if _readability_presenter == null:
 		return
-	var scene_root = get_parent()
-	if scene_root == null:
-		return
-
-	_contact_line = scene_root.get_node_or_null(CONTACT_LINE_NAME) as Line2D
-	if _contact_line == null:
-		_contact_line = Line2D.new()
-		_contact_line.name = CONTACT_LINE_NAME
-		_contact_line.default_color = Color(1.0, 0.92, 0.35, 0.9)
-		_contact_line.width = 2.0
-		_contact_line.z_index = 20
-		scene_root.add_child(_contact_line)
-
-	_event_label = scene_root.get_node_or_null(EVENT_LABEL_NAME) as Label
-	if _event_label == null:
-		_event_label = Label.new()
-		_event_label.name = EVENT_LABEL_NAME
-		_event_label.top_level = true
-		_event_label.position = Vector2(16.0, 220.0)
-		_event_label.add_theme_font_size_override("font_size", 14)
-		_event_label.add_theme_constant_override("outline_size", 2)
-		_event_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
-		scene_root.add_child(_event_label)
-
-	_winner_label = scene_root.get_node_or_null(WINNER_LABEL_NAME) as Label
-	if _winner_label == null:
-		_winner_label = Label.new()
-		_winner_label.name = WINNER_LABEL_NAME
-		_winner_label.top_level = true
-		_winner_label.position = Vector2(280.0, 16.0)
-		_winner_label.add_theme_font_size_override("font_size", 20)
-		_winner_label.add_theme_constant_override("outline_size", 3)
-		_winner_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.95))
-		scene_root.add_child(_winner_label)
+	_readability_presenter.call("ensure_nodes", get_parent(), preview_mode)
 
 
 func _connect_unit_signals() -> void:
@@ -2632,15 +2583,12 @@ func _on_unit_respawn_completed(unit_id: String) -> void:
 func _set_contact_visuals(attacker, target) -> void:
 	_clear_unit_contact_states()
 	if attacker == null or target == null:
-		if _contact_line != null:
-			_contact_line.clear_points()
+		if _readability_presenter != null:
+			_readability_presenter.call("clear_contact_line")
 		return
 
-	if _contact_line != null:
-		_contact_line.default_color = Color(1.0, 0.18, 0.12, 0.92)
-		_contact_line.clear_points()
-		_contact_line.add_point(attacker.position)
-		_contact_line.add_point(target.position)
+	if _readability_presenter != null:
+		_readability_presenter.call("set_contact_line", attacker, target)
 
 	if attacker.has_method("set_contact_state"):
 		attacker.call("set_contact_state", true, String(target.call("get_unit_id")))
@@ -2651,8 +2599,8 @@ func _set_contact_visuals(attacker, target) -> void:
 
 func _clear_contact_visuals() -> void:
 	_clear_unit_contact_states()
-	if _contact_line != null:
-		_contact_line.clear_points()
+	if _readability_presenter != null:
+		_readability_presenter.call("clear_contact_line")
 
 
 func _clear_unit_contact_states() -> void:
@@ -2746,10 +2694,9 @@ func _broadcast_remote_event(
 
 
 func _update_event_label() -> void:
-	if _event_label == null:
+	if _readability_presenter == null:
 		return
-
-	_event_label.text = "Event: %s" % _last_event_text
+	_readability_presenter.call("update_event_label", _last_event_text)
 
 
 func _should_run_local_combat(simulation_root: Node) -> bool:
@@ -2791,16 +2738,17 @@ func _can_broadcast_to_clients() -> bool:
 
 
 func _update_winner_label() -> void:
-	if _winner_label == null:
+	if _readability_presenter == null:
 		return
-
-	if _combat_finished and not _winning_team_id.is_empty():
-		var result_text: String = String(_mission_result.get("result", "")).to_upper()
-		var condition_text: String = String(_mission_result.get("win_condition_type", ""))
-		_winner_label.text = "%s\nWinner: %s\nCondition: %s" % [result_text, _winning_team_id, condition_text]
-		return
-
-	_winner_label.text = ""
+	_readability_presenter.call(
+		"update_winner_label",
+		{
+			"combat_finished": _combat_finished,
+			"winning_team_id": _winning_team_id,
+			"result": String(_mission_result.get("result", "")),
+			"win_condition_type": String(_mission_result.get("win_condition_type", "")),
+		}
+	)
 
 
 func _count_fit_units(paths: Array[NodePath]) -> int:
@@ -2857,26 +2805,13 @@ func set_overlay_visible(is_visible: bool) -> void:
 
 func _apply_overlay_visibility() -> void:
 	var status_label = get_node_or_null(status_label_path)
-	if status_label != null:
-		status_label.set("visible", _overlays_visible and not preview_mode)
-	if _contact_line != null:
-		_contact_line.visible = _overlays_visible and not preview_mode
-	if _event_label != null:
-		_event_label.visible = _overlays_visible and not preview_mode
-	if _winner_label != null:
-		_winner_label.visible = _overlays_visible and not preview_mode
+	if _readability_presenter != null:
+		_readability_presenter.call("apply_overlay_visibility", status_label, _overlays_visible, preview_mode)
 
 
 func _remove_readability_nodes() -> void:
-	if _contact_line != null:
-		_contact_line.queue_free()
-		_contact_line = null
-	if _event_label != null:
-		_event_label.queue_free()
-		_event_label = null
-	if _winner_label != null:
-		_winner_label.queue_free()
-		_winner_label = null
+	if _readability_presenter != null:
+		_readability_presenter.call("remove_nodes")
 
 
 func _is_victory_condition_met() -> bool:

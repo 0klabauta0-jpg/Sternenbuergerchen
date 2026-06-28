@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_515 - Combat Readability Presenter
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_515_combat_readability_presenter.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/tasks/TASK_514_enemy_behavior_orchestrator.md`
+- Stand: `scripts/tactical/combat_readability_presenter.gd` erzeugt und verwaltet die Legacy-Readability-Nodes fuer Combat-Kontaktlinie, Eventlabel, Winnerlabel und Statuslabel-Text.
+- Stand: `MissionCombatLoopDriver` behaelt Tick-Reihenfolge, Remote-Event-Broadcast, Unit-`set_contact_state()` und Combat-Snapshots, delegiert aber Readability-Node-Erzeugung, Label-Formatierung, Sichtbarkeit und Kontaktlinienzeichnung an den Presenter.
+- Stand: Der Presenter ist read-only gegen Gameplay-Authority: keine Commands, keine Effects, keine `SimulationRoot`-Referenz und keine Unit-Kontaktstatus-Mutation.
+- Risiken/offen: Der Combat-Driver bleibt weiterhin Legacy-Bridge fuer Combat-State, Unit-Signale, Respawn/Bleedout, Remote-Events und Tick-Orchestrierung. Ein Folge-Slice sollte entweder Editor-UX sichtbar verbessern oder Enemy-/Combat-State-Aufbereitung weiter entflechten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_515_combat_readability_presenter.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_160_tactical_playability_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_192_mission_map_npc_behavior_playability_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `git diff --check`.
+- Naechster Schritt: Sichtbar spielbare Politur priorisieren: Editor Builder UX Pass oder ein kleines Mission Scenario Vertical Slice.
+
 ### TASK_514 - Enemy Behavior Orchestrator
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_514_enemy_behavior_orchestrator.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/tasks/TASK_513_mission_combat_resolution_boundary.md`
