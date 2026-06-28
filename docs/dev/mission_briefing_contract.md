@@ -23,6 +23,7 @@ Mission-Briefings sind Szenario-Autorendaten. Sie erklaeren dem Spieler vor Miss
 - Briefing-Bild-/Loadout-Polish: UI-Schichten duerfen `background_image_path` als kleine Vorschau und `recommended_loadout` als passive Empfehlungskarten rendern. Diese Karten sind keine Loadout-Befehle und erzeugen keine `apply_loadout`-/`set_loadout`-Mutation.
 - Recommended-Loadout-Selection-Bridge: UI-Schichten duerfen Empfehlungskarten auswaehlbar machen und eine `loadout_patch_preview` anzeigen. Die Auswahl bleibt Anzeige-/Staging-Zustand. Erst eine separate Bestaetigung darf ueber den bestehenden Homebase-Member-Loadout-Pfad schreiben.
 - Pre-Mission-Readiness: UI-Schichten duerfen vorhandene Briefing-, Loadout-, Aircraft- und Homebase-Dropship-Snapshots in einer read-only Checkliste zusammenfassen. Diese Checkliste folgt dem bestehenden Start-Guard und ersetzt ihn nicht.
+- Startflow-Statuschips: UI-Schichten duerfen Pre-Mission-Readiness-Items als farbige Chips mit Icon-Text, Tooltip und read-only Visual-Metadaten rendern. Diese Chips sind Anzeigehilfe und keine Start-, Loadout-, Dropship- oder Cargo-Wahrheit.
 
 ## Regeln
 - Briefings duplizieren keine Map-Daten wie `tiles`, `markers` oder `patrol_paths`.
@@ -35,4 +36,5 @@ Mission-Briefings sind Szenario-Autorendaten. Sie erklaeren dem Spieler vor Miss
 - Briefing-Minimap-Visuals duerfen aus Performancegruenden gesampelte Terrain-Farbzellen statt vollstaendiger Tile-Daten rendern. Sie duplizieren keine `tiles`, `markers` oder `patrol_paths`-Schluessel in Briefing-Daten.
 - Briefing-Loadout-Empfehlungen bleiben beratend, bis der Spieler sie explizit bestaetigt. Der bestaetigte Apply nutzt `LoadoutContract` und Homebase-Member-Loadout-Sync; er schreibt nicht direkt in Missionsruntime oder `SimulationRoot`.
 - Pre-Mission-Readiness-Items sind Diagnose und Bedienhilfe. `can_request_mission_start()` bleibt die Startwahrheit; die Checkliste darf keinen Start freischalten oder blockieren, den der bestehende Guard anders bewertet.
+- Startflow-Statuschips duerfen Farben, Icon-Text und Tooltips aus Readiness-Items ableiten, aber keine neuen Blocker oder Freigaben berechnen.
 - Annotation Painting, Bildauswahl-UI und Pre-Mission-Dialog sind Folgetasks auf diesem Datencontract.
