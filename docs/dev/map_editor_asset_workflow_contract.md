@@ -19,6 +19,14 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Kategorieauswahl darf scrollbar sein; der Asset-Browser darunter bekommt den Hauptplatz.
 - Asset-Listen duerfen als mehrspaltiger Icon-Browser dargestellt werden, solange die Palette-Metadaten und Selection-Snapshots stabil bleiben.
 
+## Palette Search, Favorites and Presets
+- Palette-Suche ist ein reiner UI-/Authoring-Filter auf Katalog-Displayname, Type-ID und Gruppe.
+- Favoriten und Recent-Assets sind session-lokale Editor-Hilfen. Sie duerfen keine Tile-, Terrain- oder Gameplay-Wahrheit speichern.
+- Der Favoritenfilter zeigt Favoriten und zuletzt genutzte Assets, damit haeufige Station-/Factory-/Pipe-/Wall-Teile ohne Kategoriejagd erreichbar bleiben.
+- Scale-Presets nutzen denselben Placement-Scale-Pfad wie die Spinbox. Der gespeicherte Tile-Wert bleibt `object_scale`.
+- 1.6 bleibt als wichtiger Korrekturwert sichtbar, weil einige Kit-Teile bewusst ueber den Authoring-Scale angepasst werden muessen.
+- Der Usability-Snapshot nennt Suchbegriff, Favoriten, Recent, Trefferzahl, Preview-Groessen und Scale-Presets.
+
 ## Save As
 - Der Map-`Save As`-Dialog ist ein JSON-`FILE_MODE_SAVE_FILE`-Dialog im Projektressourcenbereich.
 - Er startet bei `res://maps`, ist nicht per `root_subfolder` auf einen Sonderpfad eingeschraenkt und behaelt den JSON-Filter.
@@ -52,6 +60,7 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Rails nutzen `spacekit_rail*`, Pipes nutzen `spacekit_pipe*`; beide bleiben Object-Layer-Assets und duerfen vorhandene Ground-/Road-/Water-Surfaces nicht ueberschreiben.
 - Factory-, SpaceKit-, StationSet-, Modular-, Wall- und Cliff-Prefixe duerfen den Placement-Scale nutzen, damit zu grosse Kit-Teile lokal korrigierbar bleiben.
 - Logistik-Bedeutung wie Energie, Oel, Rohstoffe oder Abwasser wird nur vorbereitet. Die echte Ressourcen-/Pipeline-Simulation gehoert in einen spaeteren Gameplay-Contract.
+- Aktive Network-Tools liefern einen kompakten Drag-Preview-Snapshot mit Art, Start, Ziel, Pfadlaenge und lesbarem Label. Eine spaetere sichtbare 3D-Drag-Linie darf daraus lesen, aber keine eigene Netzwerk-Wahrheit speichern.
 
 ## Station Doors
 - Space-Station-Tueren werden im Editor als Authoring-States behandelt: Closed, Half und Open.

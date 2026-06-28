@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/combat-readability-presenter</code>.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/editor-builder-ux-pass</code>.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -163,6 +163,7 @@
       <span class="pill good">TASK_513 Result-Boundary</span>
       <span class="pill good">TASK_514 Enemy-Behavior</span>
       <span class="pill good">TASK_515 Readability-Presenter</span>
+      <span class="pill good">TASK_516 Editor-UX</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
   </header>
@@ -329,7 +330,7 @@
             </div>
             <div class="finding medium">
               <h3>Arbeitsstand bleibt bewusst task-lokal</h3>
-              <p>Der aktuelle Branch enthaelt TASK_515, den neuen Presenter und diesen aktualisierten Bericht. Der lokale <code>export_presets.cfg</code> wird nach Export wieder restauriert und bleibt untracked.</p>
+              <p>Der aktuelle Branch enthaelt TASK_516, Palette-Suche/Favoriten/Recent, Scale-Presets und diesen aktualisierten Bericht. Der lokale <code>export_presets.cfg</code> wird nach Export wieder restauriert und bleibt untracked.</p>
             </div>
             <div class="finding low">
               <h3>Laute Asset-Warnungen</h3>
@@ -354,9 +355,10 @@
             <div class="finding good"><h3>Erledigt: TASK_513 - Mission Combat Resolution Boundary</h3><p>Objective-/MissionResult-Resolution liegt in <code>MissionCombatResolutionResolver</code>; der Driver bleibt Tick-/Event-Orchestrator.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_514 - Enemy Behavior Orchestrator</h3><p>Enemy-Team-Tactics, Patrol, Limbo-Cover/Hold und Damage-Reposition bauen ihre Command-Payloads in <code>EnemyBehaviorOrchestrator</code>; der Driver queued weiter autoritativ ueber <code>SimulationRoot</code>.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_515 - Combat Readability Presenter</h3><p>Eventtexte, Kontaktlinien, Winnerlabel und Statuslabel-Formatierung liegen in <code>CombatReadabilityPresenter</code>; Unit-Kontaktstatus und Authority bleiben im Driver/Simulation-Pfad.</p></div>
-            <div class="finding high"><h3>1. TASK_516 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
-            <div class="finding medium"><h3>2. TASK_517 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
-            <div class="finding low"><h3>3. TASK_518 - Enemy State Builder Extraction</h3><p>Nur wenn weiter technische Entflechtung gewuenscht ist: Enemy-Security-/Team-Tactics-State-Aufbereitung aus dem Combat-Driver ziehen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_516 - Editor Builder UX Pass</h3><p>Palette-Suche, Favoriten/Recent, Scale-Preset-Buttons und kompakter Network-Drag-Preview-Snapshot sind im Runtime-Map-Editor angebunden.</p></div>
+            <div class="finding high"><h3>1. TASK_517 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
+            <div class="finding medium"><h3>2. TASK_518 - Builder Drag Preview Visual Polish</h3><p>Pipe-/Wall-/Cliff-Linien beim Ziehen sichtbar im 2.5D/3D-Editor anzeigen und mit dem neuen Preview-Snapshot synchron halten.</p></div>
+            <div class="finding low"><h3>3. TASK_519 - Enemy State Builder Extraction</h3><p>Nur wenn weiter technische Entflechtung gewuenscht ist: Enemy-Security-/Team-Tactics-State-Aufbereitung aus dem Combat-Driver ziehen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -392,6 +394,7 @@
                 <tr><td><code>task_513_mission_combat_resolution_boundary.gd</code></td><td>26 passed, 0 failed</td><td>Resolution-Resolver, Driver-Anbindung und Doku-Anbindung gruen.</td></tr>
                 <tr><td><code>task_514_enemy_behavior_orchestrator.gd</code></td><td>31 passed, 0 failed</td><td>Enemy-Behavior-Orchestrator, Payload-Vertraege, Driver-Anbindung und Doku-Anbindung gruen.</td></tr>
                 <tr><td><code>task_515_combat_readability_presenter.gd</code></td><td>38 passed, 0 failed</td><td>Readability-Presenter, Driver-Anbindung, read-only Grenzen und Doku-Anbindung gruen.</td></tr>
+                <tr><td><code>task_516_editor_builder_ux_pass.gd</code></td><td>47 passed, 0 failed</td><td>Palette-Suche, Favoriten/Recent, Scale-Presets und Network-Preview-Snapshot gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
               </tbody>
@@ -404,7 +407,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_514-Merge. Arbeitsbranch: <code>task/combat-readability-presenter</code>. Aktueller Arbeitsstand enthaelt TASK_515 plus diesen aktualisierten Review-Report.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_515-Merge. Arbeitsbranch: <code>task/editor-builder-ux-pass</code>. Aktueller Arbeitsstand enthaelt TASK_516 plus diesen aktualisierten Review-Report.</p>
         </article>
       </div>
     </section>
@@ -483,17 +486,17 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_516 - Editor Builder UX Pass",
               "TASK_517 - Mission Scenario Vertical Slice",
-              "TASK_518 - Enemy State Builder Extraction"
+              "TASK_518 - Builder Drag Preview Visual Polish",
+              "TASK_519 - Enemy State Builder Extraction"
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194203876
           },
           metadata: {
-            branch: "task/combat-readability-presenter",
-            head: "working_tree_after_task_515",
+            branch: "task/editor-builder-ux-pass",
+            head: "working_tree_after_task_516",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }

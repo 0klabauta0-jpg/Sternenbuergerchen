@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_516 - Editor Builder UX Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_516_editor_builder_ux_pass.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`, `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`, `docs/tasks/TASK_493_map_editor_station_builder_focus.md`
+- Stand: Der Runtime-Map-Editor hat eine Palette-Suche, session-lokale Favoriten/Recent-Assets und Scale-Preset-Buttons fuer 0.5, 1.0, 1.6 und 2.0.
+- Stand: Normale Palette-Auswahl, Quick-Brushes und Network-Tools pflegen die Recent-Liste, ohne Tile- oder Gameplay-State zu veraendern.
+- Stand: Palette- und Builder-Snapshots melden Suchbegriff, Favoriten, Recent, Preview-Groessen, Scale-Presets und eine kompakte Network-Drag-Preview-Zusammenfassung.
+- Risiken/offen: Favoriten/Recent sind noch nicht persistent. Eine sichtbare 3D-Drag-Linie fuer Pipe/Wall/Cliff bleibt ein eigener Visual-Polish-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_516_editor_builder_ux_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_493_map_editor_station_builder_focus.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_492_map_editor_network_drag_snap_tools.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_491_map_editor_runtime_builder_workbench.gd`, `git diff --check`.
+- Naechster Schritt: Entweder sichtbare 3D-Drag-Preview fuer Pipe/Wall/Cliff oder `TASK_517 - Mission Scenario Vertical Slice`.
+
 ### TASK_515 - Combat Readability Presenter
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_515_combat_readability_presenter.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/tasks/TASK_495_mission_combat_driver_boundary_review.md`, `docs/tasks/TASK_514_enemy_behavior_orchestrator.md`

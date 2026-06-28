@@ -144,6 +144,7 @@ git checkout -b batch/<batch-name>
 - TASK_513 - Mission Combat Resolution Boundary (implementiert)
 - TASK_514 - Enemy Behavior Orchestrator (implementiert)
 - TASK_515 - Combat Readability Presenter (implementiert)
+- TASK_516 - Editor Builder UX Pass (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

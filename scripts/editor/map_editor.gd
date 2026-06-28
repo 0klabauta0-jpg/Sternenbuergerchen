@@ -116,6 +116,8 @@ const PALETTE_GROUP_BUTTON_HEIGHT: float = 22.0
 const PALETTE_ASSET_COLUMNS: int = 2
 const PALETTE_ASSET_LIST_MIN_HEIGHT: float = 560.0
 const PALETTE_ASSET_COLUMN_WIDTH: int = 190
+const PALETTE_RECENT_MAX_COUNT: int = 8
+const PALETTE_SCALE_PRESETS: Array = [0.5, 1.0, 1.6, 2.0]
 const RUNTIME_BUILDER_RAIL_NAME: String = "RuntimeBuilderToolRail"
 const RUNTIME_BUILDER_RAIL_WIDTH: float = 58.0
 const RUNTIME_BUILDER_RAIL_GAP: float = 6.0
@@ -250,6 +252,10 @@ var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
 var _palette_preview_sources: Dictionary = {}
 var _placement_object_scale: float = OBJECT_SCALE_DEFAULT
+var _palette_search_query: String = ""
+var _palette_favorite_type_ids: PackedStringArray = PackedStringArray()
+var _palette_recent_type_ids: PackedStringArray = PackedStringArray()
+var _palette_favorites_filter_enabled: bool = false
 var _last_dirty_neighborhood_snapshot: Dictionary = {}
 var _right_mouse_pressed: bool = false
 var _right_mouse_dragged: bool = false
@@ -283,6 +289,7 @@ func _ready() -> void:
 	_ensure_object_scale_controls()
 	_ensure_palette_workflow_controls()
 	_ensure_palette_browser_layout_controls()
+	_ensure_palette_quick_filter_controls()
 	_ensure_runtime_builder_workbench_controls()
 	_ensure_terrain_truth_inspector_controls()
 	_ensure_editor_context_menu()
@@ -1601,8 +1608,10 @@ func _activate_runtime_builder_network_tool(kind: String) -> bool:
 		return false
 	_network_tool_kind = normalized_kind
 	_selected_type_id = default_type_id
+	_remember_palette_recent_type_id(default_type_id)
 	_refresh_palette_selection_visual()
 	_refresh_palette_workflow_controls()
+	_refresh_palette_filter_controls()
 	return set_authoring_tool(AUTHORING_TOOL_NETWORK_DRAG)
 
 
@@ -1709,6 +1718,7 @@ func _build_runtime_builder_workbench_snapshot() -> Dictionary:
 		"quick_station_door_half_type_id": BUILDER_QUICK_STATION_DOOR_HALF_TYPE_ID,
 		"quick_station_door_open_type_id": BUILDER_QUICK_STATION_DOOR_OPEN_TYPE_ID,
 		"network": _build_network_drag_tool_snapshot(),
+		"network_drag_preview": _build_network_drag_preview_summary(),
 		"station_doors": _build_station_door_authoring_snapshot(),
 		"status": _runtime_builder_status_text,
 	}
@@ -2099,9 +2109,23 @@ func _build_network_drag_tool_snapshot() -> Dictionary:
 		"current_grid": _network_drag_current_grid,
 		"preview_path": _network_drag_preview_path.duplicate(),
 		"preview_count": _network_drag_preview_path.size(),
+		"preview_summary": _build_network_drag_preview_summary(),
 		"definitions": definitions,
 		"last_apply": _last_network_apply_snapshot.duplicate(true),
 		"scale_correctable_prefixes": PackedStringArray(["factory_", "spacekit_", "station_set_", "modular_", "wall_", "cliff_"]),
+	}
+
+
+func _build_network_drag_preview_summary() -> Dictionary:
+	return {
+		"active": _network_drag_tool_enabled,
+		"dragging": _is_network_dragging,
+		"kind": _network_tool_kind,
+		"start_grid": _network_drag_start_grid,
+		"current_grid": _network_drag_current_grid,
+		"path_count": _network_drag_preview_path.size(),
+		"path": _network_drag_preview_path.duplicate(),
+		"label": "%s line: %d tiles" % [_network_tool_kind.capitalize(), _network_drag_preview_path.size()],
 	}
 
 
@@ -2273,6 +2297,7 @@ func _ensure_palette_workflow_controls() -> void:
 	if palette_parent == null:
 		return
 	if palette_parent.get_node_or_null("PaletteSelectedPreviewRow") != null:
+		_ensure_palette_scale_preset_buttons(palette_parent.get_node_or_null("PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow") as HBoxContainer)
 		_refresh_palette_workflow_controls()
 		return
 	var row := HBoxContainer.new()
@@ -2317,6 +2342,7 @@ func _ensure_palette_workflow_controls() -> void:
 	reset_button.text = "1.0"
 	reset_button.tooltip_text = "Setzt den Platzierungs-Scale fuer neue Assets auf 1.0."
 	scale_row.add_child(reset_button)
+	_ensure_palette_scale_preset_buttons(scale_row)
 	info_box.add_child(scale_row)
 	row.add_child(info_box)
 	palette_parent.add_child(row)
@@ -2324,6 +2350,74 @@ func _ensure_palette_workflow_controls() -> void:
 	if insert_after != null:
 		palette_parent.move_child(row, insert_after.get_index() + 1)
 	_refresh_palette_workflow_controls()
+
+
+func _ensure_palette_scale_preset_buttons(scale_row: HBoxContainer) -> void:
+	if scale_row == null:
+		return
+	for preset_variant in PALETTE_SCALE_PRESETS:
+		var preset_value: float = float(preset_variant)
+		var button_name: String = "PlacementScalePreset_%s" % _format_scale_token(preset_value)
+		var button := scale_row.get_node_or_null(button_name) as Button
+		if button == null:
+			button = Button.new()
+			button.name = button_name
+			button.text = _format_scale_label(preset_value)
+			button.tooltip_text = "Setzt den Platzierungs-Scale auf %s." % _format_scale_label(preset_value)
+			button.custom_minimum_size = Vector2(36.0, 0.0)
+			scale_row.add_child(button)
+		if not button.pressed.is_connected(set_object_placement_scale_preset.bind(preset_value)):
+			button.pressed.connect(set_object_placement_scale_preset.bind(preset_value))
+
+
+func _ensure_palette_quick_filter_controls() -> void:
+	var palette_parent := get_node_or_null("UI/PalettePanel/Margin/VBox") as VBoxContainer
+	if palette_parent == null:
+		return
+	var row := palette_parent.get_node_or_null("PaletteQuickFilterRow") as HBoxContainer
+	if row == null:
+		row = HBoxContainer.new()
+		row.name = "PaletteQuickFilterRow"
+		row.custom_minimum_size = Vector2(0.0, 30.0)
+		palette_parent.add_child(row)
+		var insert_after := palette_parent.get_node_or_null("PaletteGroupsScroll")
+		if insert_after == null:
+			insert_after = palette_parent.get_node_or_null("PaletteSelectedPreviewRow")
+		if insert_after != null:
+			palette_parent.move_child(row, insert_after.get_index() + 1)
+	var search := row.get_node_or_null("PaletteSearchLineEdit") as LineEdit
+	if search == null:
+		search = LineEdit.new()
+		search.name = "PaletteSearchLineEdit"
+		search.placeholder_text = "Asset suchen"
+		search.clear_button_enabled = true
+		search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		search.tooltip_text = "Filtert Assets nach Name, Gruppe oder Type-ID."
+		row.add_child(search)
+	if not search.text_changed.is_connected(_on_palette_search_text_changed):
+		search.text_changed.connect(_on_palette_search_text_changed)
+	var favorite_filter := row.get_node_or_null("PaletteFavoriteFilterButton") as Button
+	if favorite_filter == null:
+		favorite_filter = Button.new()
+		favorite_filter.name = "PaletteFavoriteFilterButton"
+		favorite_filter.text = "Fav"
+		favorite_filter.toggle_mode = true
+		favorite_filter.tooltip_text = "Zeigt Favoriten und zuletzt genutzte Assets."
+		favorite_filter.custom_minimum_size = Vector2(48.0, 0.0)
+		row.add_child(favorite_filter)
+	if not favorite_filter.toggled.is_connected(set_palette_favorites_filter_enabled):
+		favorite_filter.toggled.connect(set_palette_favorites_filter_enabled)
+	var favorite_toggle := row.get_node_or_null("PaletteFavoriteToggleButton") as Button
+	if favorite_toggle == null:
+		favorite_toggle = Button.new()
+		favorite_toggle.name = "PaletteFavoriteToggleButton"
+		favorite_toggle.text = "+"
+		favorite_toggle.tooltip_text = "Aktuelles Asset als Favorit merken oder entfernen."
+		favorite_toggle.custom_minimum_size = Vector2(34.0, 0.0)
+		row.add_child(favorite_toggle)
+	if not favorite_toggle.pressed.is_connected(toggle_palette_favorite_for_authoring):
+		favorite_toggle.pressed.connect(toggle_palette_favorite_for_authoring)
+	_refresh_palette_filter_controls()
 
 
 func _ensure_palette_browser_layout_controls() -> void:
@@ -4078,18 +4172,30 @@ func _build_palette_snapshot() -> Dictionary:
 			group_button_count += 1
 			group_button_max_height = maxf(group_button_max_height, child_control.custom_minimum_size.y)
 	var selected_preview_rect := _get_palette_selected_preview_texture_rect()
+	var scale_presets: PackedFloat32Array = PackedFloat32Array()
+	for preset_variant in PALETTE_SCALE_PRESETS:
+		scale_presets.append(float(preset_variant))
 	return {
 		"active_group": _active_palette_group_id,
 		"group_ids": group_ids,
 		"visible_type_ids": visible_type_ids,
 		"visible_display_names": visible_display_names,
+		"visible_count": visible_type_ids.size(),
 		"selected_type_id": _selected_type_id,
 		"selected_display_name": _get_palette_type_display_name(_selected_type_id),
 		"selected_palette_group": _get_palette_group_for_type(_selected_type_id),
 		"selected_type_visible": visible_type_ids.has(_selected_type_id),
 		"selected_item_count": selected_items.size(),
 		"selected_item_index": int(selected_items[0]) if selected_items.size() > 0 else -1,
-		"filtered": not _active_palette_group_id.is_empty(),
+		"filtered": not _active_palette_group_id.is_empty() or not _palette_search_query.is_empty() or _palette_favorites_filter_enabled,
+		"search_query": _palette_search_query,
+		"search_active": not _palette_search_query.is_empty(),
+		"favorites_filter_enabled": _palette_favorites_filter_enabled,
+		"favorite_type_ids": _palette_favorite_type_ids.duplicate(),
+		"favorite_count": _palette_favorite_type_ids.size(),
+		"recent_type_ids": _palette_recent_type_ids.duplicate(),
+		"recent_count": _palette_recent_type_ids.size(),
+		"selected_is_favorite": _palette_type_is_favorite(_selected_type_id),
 		"preview_icon_count": preview_icon_count,
 		"catalog_preview_icon_count": catalog_preview_icon_count,
 		"generated_preview_icon_count": generated_preview_icon_count,
@@ -4108,6 +4214,7 @@ func _build_palette_snapshot() -> Dictionary:
 		"asset_list_min_size": asset_list_min_size,
 		"selected_preview_size": selected_preview_rect.custom_minimum_size if selected_preview_rect != null else Vector2.ZERO,
 		"placement_scale": _placement_object_scale,
+		"scale_presets": scale_presets,
 		"scale_min": OBJECT_SCALE_MIN,
 		"scale_max": OBJECT_SCALE_MAX,
 	}
@@ -5460,8 +5567,154 @@ func set_object_placement_scale(value: float) -> bool:
 	return changed
 
 
+func set_object_placement_scale_preset(value: float) -> bool:
+	return set_object_placement_scale(value)
+
+
 func get_object_placement_scale() -> float:
 	return _placement_object_scale
+
+
+func set_palette_search_query_for_authoring(query: String) -> bool:
+	var normalized_query: String = query.strip_edges().to_lower()
+	if _palette_search_query == normalized_query:
+		_refresh_palette_filter_controls()
+		return false
+	_palette_search_query = normalized_query
+	var search := _get_palette_search_line_edit()
+	if search != null and search.text.strip_edges().to_lower() != _palette_search_query:
+		search.text = _palette_search_query
+	_populate_tile_palette()
+	_refresh_palette_filter_controls()
+	_refresh_runtime_builder_workbench_controls()
+	_refresh_authoring_status_controls()
+	return true
+
+
+func set_palette_favorites_filter_enabled(is_enabled: bool) -> bool:
+	if _palette_favorites_filter_enabled == is_enabled:
+		_refresh_palette_filter_controls()
+		return false
+	_palette_favorites_filter_enabled = is_enabled
+	_populate_tile_palette()
+	_refresh_palette_filter_controls()
+	_refresh_runtime_builder_workbench_controls()
+	return true
+
+
+func toggle_palette_favorite_for_authoring(type_id: String = "") -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		normalized_type_id = _selected_type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
+		return false
+	var next_favorites: PackedStringArray = PackedStringArray()
+	var removed: bool = false
+	for existing in _palette_favorite_type_ids:
+		var existing_id: String = String(existing).strip_edges().to_lower()
+		if existing_id == normalized_type_id:
+			removed = true
+			continue
+		if not existing_id.is_empty():
+			next_favorites.append(existing_id)
+	if not removed:
+		next_favorites.append(normalized_type_id)
+	_palette_favorite_type_ids = next_favorites
+	if _palette_favorites_filter_enabled:
+		_populate_tile_palette()
+	else:
+		_refresh_palette_selection_visual()
+	_refresh_palette_filter_controls()
+	_refresh_palette_workflow_controls()
+	return true
+
+
+func _on_palette_search_text_changed(query: String) -> void:
+	set_palette_search_query_for_authoring(query)
+
+
+func _remember_palette_recent_type_id(type_id: String) -> void:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
+		return
+	var next_recent: PackedStringArray = PackedStringArray([normalized_type_id])
+	for existing in _palette_recent_type_ids:
+		var existing_id: String = String(existing).strip_edges().to_lower()
+		if existing_id.is_empty() or existing_id == normalized_type_id:
+			continue
+		next_recent.append(existing_id)
+		if next_recent.size() >= PALETTE_RECENT_MAX_COUNT:
+			break
+	_palette_recent_type_ids = next_recent
+
+
+func _palette_type_is_favorite(type_id: String) -> bool:
+	return _palette_favorite_type_ids.has(type_id.strip_edges().to_lower())
+
+
+func _palette_type_is_recent(type_id: String) -> bool:
+	return _palette_recent_type_ids.has(type_id.strip_edges().to_lower())
+
+
+func _palette_type_matches_fast_filter(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	return _palette_type_is_favorite(normalized_type_id) or _palette_type_is_recent(normalized_type_id)
+
+
+func _palette_type_matches_search(tile_type: Dictionary, query: String) -> bool:
+	var normalized_query: String = query.strip_edges().to_lower()
+	if normalized_query.is_empty():
+		return true
+	var type_id: String = String(tile_type.get("type_id", "")).strip_edges().to_lower()
+	var display_name: String = String(tile_type.get("display_name", type_id)).strip_edges().to_lower()
+	var palette_group: String = String(tile_type.get("palette_group", "")).strip_edges().to_lower()
+	return type_id.contains(normalized_query) or display_name.contains(normalized_query) or palette_group.contains(normalized_query)
+
+
+func _rank_palette_types_for_workflow(sorted_types: Array) -> Array:
+	var favorites: Array = []
+	var recent: Array = []
+	var rest: Array = []
+	for tile_type_variant in sorted_types:
+		var tile_type: Dictionary = Dictionary(tile_type_variant)
+		var type_id: String = String(tile_type.get("type_id", "")).strip_edges().to_lower()
+		if _palette_type_is_favorite(type_id):
+			favorites.append(tile_type)
+		elif _palette_type_is_recent(type_id):
+			recent.append(tile_type)
+		else:
+			rest.append(tile_type)
+	favorites.sort_custom(_sort_palette_type_dicts)
+	recent.sort_custom(_sort_palette_type_dicts)
+	rest.sort_custom(_sort_palette_type_dicts)
+	var result: Array = []
+	result.append_array(favorites)
+	result.append_array(recent)
+	result.append_array(rest)
+	return result
+
+
+func _refresh_palette_filter_controls() -> void:
+	var search := _get_palette_search_line_edit()
+	if search != null and search.text.strip_edges().to_lower() != _palette_search_query:
+		search.text = _palette_search_query
+	var favorite_filter := _get_palette_favorite_filter_button()
+	if favorite_filter != null:
+		favorite_filter.button_pressed = _palette_favorites_filter_enabled
+	var favorite_toggle := _get_palette_favorite_toggle_button()
+	if favorite_toggle != null:
+		var has_selection: bool = not _selected_type_id.strip_edges().is_empty()
+		favorite_toggle.disabled = not has_selection
+		favorite_toggle.text = "-" if has_selection and _palette_type_is_favorite(_selected_type_id) else "+"
+		favorite_toggle.tooltip_text = "Entfernt das aktuelle Asset aus den Favoriten." if has_selection and _palette_type_is_favorite(_selected_type_id) else "Merkt das aktuelle Asset als Favorit."
+
+
+func _format_scale_token(value: float) -> String:
+	return _format_scale_label(value).replace(".", "_")
+
+
+func _format_scale_label(value: float) -> String:
+	return "%.1f" % value
 
 
 func _on_object_scale_value_changed(value: float) -> void:
@@ -6995,6 +7248,7 @@ func _on_tile_type_selected(index: int) -> void:
 		if index < 0 or index >= type_ids.size():
 			return
 		_selected_type_id = type_ids[index]
+	_remember_palette_recent_type_id(_selected_type_id)
 
 	# Auto-enable brush when a type is selected
 	_clear_height_tool()
@@ -7013,6 +7267,7 @@ func _on_tile_type_selected(index: int) -> void:
 			marker_tool_button.button_pressed = false
 	_refresh_palette_selection_visual()
 	_refresh_palette_workflow_controls()
+	_refresh_palette_filter_controls()
 	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
@@ -7022,6 +7277,7 @@ func set_palette_type_for_authoring(type_id: String) -> bool:
 	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
 		return false
 	_selected_type_id = normalized_type_id
+	_remember_palette_recent_type_id(normalized_type_id)
 	var type_group: String = _get_palette_group_for_type(normalized_type_id)
 	if not type_group.is_empty() and _active_palette_group_id != type_group:
 		_active_palette_group_id = type_group
@@ -7037,6 +7293,7 @@ func set_palette_type_for_authoring(type_id: String) -> bool:
 	if brush_button != null and not brush_button.button_pressed:
 		brush_button.button_pressed = true
 	_refresh_runtime_builder_workbench_controls()
+	_refresh_palette_filter_controls()
 	_refresh_authoring_status_controls()
 	return true
 
@@ -7051,6 +7308,7 @@ func _on_tile_type_deselected() -> void:
 	_hide_hover_preview()
 	_refresh_palette_selection_visual()
 	_refresh_palette_workflow_controls()
+	_refresh_palette_filter_controls()
 	_refresh_runtime_builder_workbench_controls()
 	_refresh_authoring_status_controls()
 
@@ -7249,6 +7507,18 @@ func _get_placement_object_scale_spinbox() -> SpinBox:
 
 func _get_placement_object_scale_reset_button() -> Button:
 	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow/PlacementObjectScaleResetButton") as Button
+
+
+func _get_palette_search_line_edit() -> LineEdit:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteQuickFilterRow/PaletteSearchLineEdit") as LineEdit
+
+
+func _get_palette_favorite_filter_button() -> Button:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteQuickFilterRow/PaletteFavoriteFilterButton") as Button
+
+
+func _get_palette_favorite_toggle_button() -> Button:
+	return get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteQuickFilterRow/PaletteFavoriteToggleButton") as Button
 
 
 func _get_palette_selected_preview_texture_rect() -> TextureRect:
@@ -7459,8 +7729,18 @@ func _populate_tile_palette() -> void:
 			palette_groups_root.add_child(group_button)
 			_add_palette_group_compat_button(palette_groups_compat_root, group_id, group_text, group_id == _active_palette_group_id, "Filter palette group: %s" % group_text)
 
-	var visible_types: Array = Array(types_by_group.get(_active_palette_group_id, []))
+	var visible_types: Array = []
+	var palette_source_types: Array = all_types if _palette_favorites_filter_enabled else Array(types_by_group.get(_active_palette_group_id, []))
+	for tile_type_variant in palette_source_types:
+		var tile_type: Dictionary = Dictionary(tile_type_variant)
+		var type_id: String = String(tile_type.get("type_id", "")).strip_edges().to_lower()
+		if _palette_favorites_filter_enabled and not _palette_type_matches_fast_filter(type_id):
+			continue
+		if not _palette_type_matches_search(tile_type, _palette_search_query):
+			continue
+		visible_types.append(tile_type)
 	visible_types.sort_custom(_sort_palette_type_dicts)
+	visible_types = _rank_palette_types_for_workflow(visible_types)
 	var visible_type_ids: PackedStringArray = PackedStringArray()
 	for tile_type in visible_types:
 		var type_id := String(Dictionary(tile_type).get("type_id", ""))
@@ -7473,6 +7753,7 @@ func _populate_tile_palette() -> void:
 		_selected_type_id = String(visible_type_ids[0]) if not visible_type_ids.is_empty() else ""
 	_refresh_palette_selection_visual()
 	_refresh_palette_workflow_controls()
+	_refresh_palette_filter_controls()
 
 
 func _on_palette_group_button_pressed(group_id: String) -> void:
