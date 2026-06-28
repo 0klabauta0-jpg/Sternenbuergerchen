@@ -187,13 +187,15 @@
 				"team_id": "team_alpha",
 				"role": "attacker",
 				"spawn_marker_id": "spawn_alpha",
-				"npc_owned": false
+				"npc_owned": false,
+				"player_assignable_modes": ["singleplayer", "coop", "multiplayer_pvp"]
 			},
 			{
 				"team_id": "team_bravo",
 				"role": "defender",
 				"spawn_marker_id": "spawn_bravo",
-				"npc_owned": true
+				"npc_owned": true,
+				"player_assignable_modes": ["multiplayer_pvp"]
 			}
 		],
 		"flow_steps": [

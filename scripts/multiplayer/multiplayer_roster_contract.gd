@@ -71,7 +71,7 @@ static func normalize_roster_mode(mode: Variant) -> String:
 	var normalized: String = String(mode).strip_edges().to_lower()
 	if VALID_ROSTER_MODES.has(normalized):
 		return normalized
-	return ROSTER_MODE_PLAYER_ROSTERS
+	return ROSTER_MODE_HOST_ROSTER
 
 
 static func is_valid_roster_mode(mode: Variant) -> bool:
@@ -81,7 +81,7 @@ static func is_valid_roster_mode(mode: Variant) -> bool:
 static func get_roster_mode_label(mode: Variant) -> String:
 	match normalize_roster_mode(mode):
 		ROSTER_MODE_PLAYER_ROSTERS:
-			return "Local player rosters"
+			return "Player rosters"
 		ROSTER_MODE_SCENARIO_ROSTER:
 			return "Scenario roster"
 		_:

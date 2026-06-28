@@ -114,6 +114,7 @@ static func _normalize_team_slots(value: Variant) -> Array:
 			"role": String(slot.get("role", "")).strip_edges(),
 			"spawn_marker_id": String(slot.get("spawn_marker_id", "")).strip_edges(),
 			"npc_owned": bool(slot.get("npc_owned", false)),
+			"player_assignable_modes": _normalize_string_array(slot.get("player_assignable_modes", [])),
 		})
 	return result
 
@@ -145,6 +146,12 @@ static func _normalize_flow_steps(value: Variant) -> Array:
 
 static func _normalize_string_array(value: Variant) -> PackedStringArray:
 	var result: PackedStringArray = PackedStringArray()
+	if value is PackedStringArray:
+		for packed_item in PackedStringArray(value):
+			var packed_text: String = String(packed_item).strip_edges()
+			if not packed_text.is_empty() and not result.has(packed_text):
+				result.append(packed_text)
+		return result
 	if typeof(value) != TYPE_ARRAY:
 		return result
 	for item_variant in Array(value):
