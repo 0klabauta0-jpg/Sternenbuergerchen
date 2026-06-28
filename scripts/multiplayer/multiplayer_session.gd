@@ -51,7 +51,7 @@ const VALID_CONNECTION_MODES: PackedStringArray = [
 @export var client_role_id: String = ROLE_COMMANDER
 @export var host_fireteam_ids: PackedStringArray = PackedStringArray(["blue", "gold"])
 @export var client_fireteam_ids: PackedStringArray = PackedStringArray(["red"])
-@export var roster_mode: String = MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.ROSTER_MODE_PLAYER_ROSTERS
+@export var roster_mode: String = MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.ROSTER_MODE_HOST_ROSTER
 
 var _peers_by_id: Dictionary = {}
 var _connection_state: String = STATE_IDLE
@@ -69,7 +69,7 @@ var _map_transfer_state: Dictionary = {
 var _player_name: String = "Player"
 var _selected_roster_path: String = ""
 var _selected_team_slot: String = "team_alpha"
-var _team_play_mode: String = TEAM_PLAY_MODE_COOP
+var _team_play_mode: String = TEAM_PLAY_MODE_VERSUS
 var _selected_map_path: String = ""
 var _connection_mode: String = CONNECTION_MODE_LAN
 var _upnp_mapping: Dictionary = {

@@ -10,15 +10,26 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_520 - Multiplayer Team Ownership Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/dev/multiplayer_session_lobby.md`, `docs/dev/multiplayer_player_roster_ownership_contract.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`
+- Stand: `frontier_probe_vertical_slice` unterscheidet jetzt Default-NPC-Besitz und `player_assignable_modes`, sodass Bravo solo/coop NPC bleibt, im `multiplayer_pvp` aber einem Peer zuweisbar ist.
+- Stand: `scripts/mission/mission_multiplayer_team_ownership_contract.gd` baut einen read-only Team-Ownership-Snapshot aus Vertical-Slice-Team-Slots und MultiplayerSession-Assignments.
+- Stand: Der Smoke prueft Host/Alpha, Peer2/Bravo, Scenario-owned NPC-Teams und ungueltige Peer-Zuweisungen auf nicht assignable NPC-Teams.
+- Stand: `MultiplayerRosterContract` und `MultiplayerSession` fallen wieder auf `host_roster` als privacy-sicheren Default zurueck; `player_rosters` bleibt explizit waehlbar.
+- Risiken/offen: Der echte Zwei-Instanzen-LAN-Test bleibt manuell; sichtbare PvP-Teamfarben, Spawn-/Ownership-Anzeige und Mission-UI-Polish sind Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_520_multiplayer_team_ownership_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_517_mission_scenario_vertical_slice.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_167_multiplayer_session_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_240_multiplayer_player_roster_ownership_contract.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_521 - Builder Drag Preview Visual Polish` oder `TASK_522 - Cargo Touchdown Visual Polish`, wenn der Fokus wieder auf Bedienbarkeit/Sichtbarkeit statt MP-Contract liegen soll.
+
 ### TASK_519 - Cargo Touchdown Visual/Runtime Bridge
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_519_cargo_touchdown_runtime_bridge.md`, `docs/tasks/TASK_518_mission_scenario_runtime_gates.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/dev/air_asset_threat_damage_contract.md`, `docs/dev/combat_loop_authority_contract.md`
 - Stand: `scripts/mission/mission_cargo_touchdown_bridge.gd` bildet den Cargo-Frachter als read-only Runtime-Snapshot mit `blocked`, `inbound`, `landed`, `departing` und `departed` ab.
 - Stand: `MissionCombatLoopDriver` konfiguriert die Cargo-Bridge aus Scenario-Dateien, spiegelt sie in `get_mission_cargo_touchdown_snapshot()` und reicht `cargo_state`/`cargo_hold_seconds` an die Runtime-Gates weiter.
 - Stand: `get_playability_snapshot()` enthaelt `mission_cargo_touchdown`, ohne UI/Overlay zur Gameplay-Wahrheit zu machen; der alte `set_mission_scenario_cargo_state(...)`-Pfad bleibt kompatibel.
-- Risiken/offen: Sichtbare Frachter-VFX/Map-Animation ist noch Folgearbeit; Multiplayer-Team-Ownership fuer Cargo-Ausloeser sollte separat gehaertet werden.
+- Risiken/offen: Sichtbare Frachter-VFX/Map-Animation ist noch Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_519_cargo_touchdown_runtime_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_518_mission_scenario_runtime_gates.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_520 - Multiplayer Team Ownership Smoke` oder `TASK_521 - Builder Drag Preview Visual Polish`, je nachdem ob zuerst MP-Slice-Sicherheit oder sichtbares Editor-/Cargo-Feedback priorisiert wird.
+- Naechster Schritt: Siehe `TASK_520 - Multiplayer Team Ownership Smoke`.
 
 ### TASK_518 - Mission Scenario Runtime Gates
 - Status: implementiert im Arbeitsstand
