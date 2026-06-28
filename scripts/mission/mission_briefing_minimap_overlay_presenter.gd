@@ -66,10 +66,18 @@ func _build_team_spawn_entries(vertical_slice: Dictionary, terrain_map_data, map
 		var marker_snapshot: Dictionary = _build_marker_position_snapshot(marker_id, terrain_map_data, map_bounds)
 		var readability: Dictionary = Dictionary(readability_by_team.get(team_id, {}))
 		var short_label: String = String(readability.get("short_label", team_id.capitalize())).strip_edges()
+		var icon_text: String = _team_icon_text(team_id)
+		var spawn_icon_text: String = _spawn_icon_text(marker_id)
 		result.append({
 			"kind": "team_spawn",
 			"team_id": team_id,
 			"team_label": short_label,
+			"icon_text": icon_text,
+			"spawn_icon_text": spawn_icon_text,
+			"compact_label": "%s %s" % [icon_text, short_label],
+			"compact_text": "%s %s @ %s" % [icon_text, short_label, spawn_icon_text],
+			"icon_tooltip": "%s | %s | %s" % [short_label, String(readability.get("ownership_label", "")).strip_edges(), marker_id],
+			"visual_priority": _team_visual_priority(team_id),
 			"role": String(slot.get("role", "")).strip_edges(),
 			"target_id": marker_id,
 			"text": "%s SPAWN" % short_label.to_upper(),
@@ -184,6 +192,38 @@ func _team_color_hex(team_id: String) -> String:
 			return "#ff9b5e"
 		_:
 			return "#9aa3ad"
+
+
+func _team_icon_text(team_id: String) -> String:
+	match team_id.strip_edges().to_lower():
+		"team_alpha":
+			return "[A]"
+		"team_bravo":
+			return "[B]"
+		_:
+			return "[T]"
+
+
+func _spawn_icon_text(spawn_marker_id: String) -> String:
+	match spawn_marker_id.strip_edges().to_lower():
+		"spawn_alpha":
+			return "A-LZ"
+		"spawn_bravo":
+			return "B-LZ"
+		"":
+			return "LZ?"
+		_:
+			return spawn_marker_id.strip_edges()
+
+
+func _team_visual_priority(team_id: String) -> int:
+	match team_id.strip_edges().to_lower():
+		"team_alpha":
+			return 10
+		"team_bravo":
+			return 20
+		_:
+			return 90
 
 
 func _serialize_vector2(value: Vector2) -> Dictionary:

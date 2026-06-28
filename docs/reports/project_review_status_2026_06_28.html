@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf <code>task/rolling-html-status-report</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf <code>task/mission-hud-team-icon-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -176,6 +176,7 @@
       <span class="pill good">TASK_526 Mission-Teamchips</span>
       <span class="pill good">TASK_527 Briefing-Spawns</span>
       <span class="pill good">TASK_528 Arbeitsbericht</span>
+      <span class="pill good">TASK_529 Team-Icons</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -199,7 +200,7 @@
           <h2>Kurzfazit</h2>
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
-          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, TASK_518 macht daraus lesbare Runtime-Gates, TASK_519 koppelt den Cargo-Frachter als read-only Runtime-Snapshot an diese Gates, TASK_520 klaert Alpha/Bravo-/NPC-/Peer-Ownership fuer PvP-Smokes, TASK_521 macht Network-Drag im Builder als read-only 3D-Preview sichtbar, TASK_522 macht den Cargo-Touchdown im Missionsbild sichtbar, TASK_523 macht Alpha/Bravo-/NPC-/Peer-Besitz in Lobby und Session lesbar, TASK_524 reduziert bekannten Export-/Import-Warn-Laerm, TASK_525 macht Alpha/Bravo-Besitz plus Spawnmarker als farbige Lobby-Badges sichtbar, TASK_526 zeigt dieselbe Teamchip-Information im laufenden Missions-HUD, TASK_527 liefert Alpha/Bravo-Spawn-Overlays fuer die Briefing-Minimap, und TASK_528 macht diesen Bericht als laufenden Arbeitsstand explizit. Die naechste Verdichtung sitzt vor allem noch in Icon-/Art-Polish und den grossen Editor-/Visual-Skripten.</p>
+          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, TASK_518 macht daraus lesbare Runtime-Gates, TASK_519 koppelt den Cargo-Frachter als read-only Runtime-Snapshot an diese Gates, TASK_520 klaert Alpha/Bravo-/NPC-/Peer-Ownership fuer PvP-Smokes, TASK_521 macht Network-Drag im Builder als read-only 3D-Preview sichtbar, TASK_522 macht den Cargo-Touchdown im Missionsbild sichtbar, TASK_523 macht Alpha/Bravo-/NPC-/Peer-Besitz in Lobby und Session lesbar, TASK_524 reduziert bekannten Export-/Import-Warn-Laerm, TASK_525 macht Alpha/Bravo-Besitz plus Spawnmarker als farbige Lobby-Badges sichtbar, TASK_526 zeigt dieselbe Teamchip-Information im laufenden Missions-HUD, TASK_527 liefert Alpha/Bravo-Spawn-Overlays fuer die Briefing-Minimap, TASK_528 macht diesen Bericht als laufenden Arbeitsstand explizit, und TASK_529 macht Teamchips/Briefing-Spawns kompakter mit ASCII-sicheren Icon-Feldern. Die naechste Verdichtung sitzt vor allem im echten Briefing-Panel-Renderer und den grossen Editor-/Visual-Skripten.</p>
           <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
@@ -345,7 +346,7 @@
             </div>
             <div class="finding good">
               <h3>Berichtspflege bleibt bewusst task-lokal</h3>
-              <p>Die Integration enthaelt TASK_527; dieser Branch aktualisiert den Review-/Zwischenbericht als TASK_528. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
+              <p>Die Integration enthaelt TASK_528; dieser Branch aktualisiert Teamchip-/Briefing-Spawn-Icons als TASK_529. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
             </div>
             <div class="finding good">
               <h3>Factory-UID-Warnung bereinigt</h3>
@@ -373,7 +374,7 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis ins Missionsbild lesbar.</td><td>Naechster UI-Schritt ist TASK_529: Icon-/Symbol-Polish fuer Team-Readability.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis ins Missionsbild lesbar.</td><td>Naechster UI-Schritt ist TASK_530: Briefing-Panel-Renderer.</td></tr>
                 <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
@@ -390,6 +391,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_526_done"> TASK_526 Mission-HUD-Teamchips sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_527_done"> TASK_527 Briefing-Minimap-Team-Spawns sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_528_done"> TASK_528 laufender HTML-Arbeitsbericht ist aktualisiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_529_done"> TASK_529 Team-Icon-Polish ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.next_tasks_visible"> Naechste Tasks sind sichtbar priorisiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="worklog.visual_playtest_done"> Manueller Sichttest fuer naechsten Visual-Slice erledigt</label>
         </article>
@@ -404,7 +406,8 @@
             <div class="finding good"><h3>Erledigt: Mission-HUD-Teamchips</h3><p>TASK_526 rendert Alpha/Bravo-Owner und Spawnmarker im laufenden Strategic-HUD aus einem read-only MissionTeamChipPresenter.</p></div>
             <div class="finding good"><h3>Erledigt: Briefing-Minimap-Spawn-Overlay</h3><p>TASK_527 liefert Alpha/Bravo-Spawn-Entries aus Vertical-Slice-Team-Slots plus TerrainMapData-Positionen fuer spaetere Briefing-Minimap-Renderer.</p></div>
             <div class="finding good"><h3>Erledigt: Laufender HTML-Arbeitsbericht</h3><p>TASK_528 haelt diesen Report als aktuellen Zwischenstand mit erledigten Blocks, offenen Risiken, lokalen Checks und exportierbarer Notizflaeche.</p></div>
-            <div class="finding medium"><h3>1. TASK_529 - Team-Icon-Polish</h3><p>Der naechste lesbare Multiplayer-Schritt waere, Teamchips und Briefing-Spawns mit klareren Symbolen statt nur Text zu versehen.</p></div>
+            <div class="finding good"><h3>Erledigt: Team-Icon-Polish</h3><p>TASK_529 gibt Mission-Teamchips und Briefing-Spawns kompakte Felder wie <code>[A]</code>, <code>[B]</code>, <code>A-LZ</code> und <code>B-LZ</code>, ohne die Volltextdaten zu verlieren.</p></div>
+            <div class="finding medium"><h3>1. TASK_530 - Briefing Panel Renderer MVP</h3><p>Der naechste lesbare Multiplayer-Schritt waere, die Briefing-Minimap-Overlays wirklich in einem Pre-Mission-Panel sichtbar zu rendern.</p></div>
           </div>
         </article>
       </div>
@@ -433,7 +436,8 @@
             <div class="finding good"><h3>Erledigt: TASK_526 - Mission HUD Team Chip Polish</h3><p>Dieselbe Alpha/Bravo-/Peer-/NPC-Besitzinformation im laufenden Missions-HUD als kompakte Teamchips sichtbar machen.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_527 - Briefing Minimap Team Spawn Overlay</h3><p>Alpha/Bravo-Spawnpunkte und Teamfarben als read-only Overlay-Snapshot fuer die Briefing-Minimap liefern.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_528 - Rolling HTML Status Report</h3><p>Diesen HTML-Report als laufenden Arbeitsbericht aktualisieren und die naechsten Schritte maschinenlesbar exportieren.</p></div>
-            <div class="finding medium"><h3>1. TASK_529 - Mission HUD Team Icon Polish</h3><p>Teamchips und Spawn-Overlays visuell kompakter machen: kleine Symbole, bessere Farben, weniger Textlast.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_529 - Mission HUD Team Icon Polish</h3><p>Teamchips und Spawn-Overlays visuell kompakter machen: kleine Symbole, Kurzlabels und Tooltips statt nur langer Textketten.</p></div>
+            <div class="finding medium"><h3>1. TASK_530 - Briefing Panel Renderer MVP</h3><p>Die vorhandenen Briefing-Daten und Team-Spawn-Overlays in einem sichtbaren Pre-Mission-Panel zusammenfuehren.</p></div>
           </div>
         </article>
         <article class="card">
@@ -444,7 +448,7 @@
             <button class="choice" type="button" data-choice-value="warning_cleanup">Warn-Laerm</button>
             <button class="choice" type="button" data-choice-value="pvp_readability">PvP-Lesbarkeit</button>
             <button class="choice" type="button" data-choice-value="team_badges">Team-Badges</button>
-            <button class="choice active" type="button" data-choice-value="team_icon_polish">Team-Icons</button>
+            <button class="choice active" type="button" data-choice-value="briefing_panel">Briefing-Panel</button>
             <button class="choice" type="button" data-choice-value="editor_ux">Editor-UX</button>
           </div>
           <label style="display:block;margin-top:14px;">Prioritaetsnotiz
@@ -485,6 +489,7 @@
                 <tr><td><code>task_526_mission_hud_team_chip_polish.gd</code></td><td>40 passed, 0 failed</td><td>Mission-HUD-Teamchips, Presenter, shared Default-Team-Slice und Command-Snapshot.</td></tr>
                 <tr><td><code>task_527_briefing_minimap_team_spawn_overlay.gd</code></td><td>36 passed, 0 failed</td><td>Briefing-Minimap-Team-Spawns, Markerpositionen und read-only Overlay-Snapshot.</td></tr>
                 <tr><td><code>TASK_528 HTML-Report-Sanity</code></td><td>PASS</td><td>Workbench bleibt mit <code>JSON exportieren</code>, laufendem Zwischenstand und exportierten Next-Task-Metadaten nutzbar.</td></tr>
+                <tr><td><code>task_529_mission_hud_team_icon_polish.gd</code></td><td>PASS</td><td>Kompakte Teamicons fuer Mission-HUD und Briefing-Spawns, Legacy-Daten bleiben erhalten.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -498,7 +503,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_527-Merge. Arbeitsbranch fuer diese Berichtspflege: <code>task/rolling-html-status-report</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_528-Merge. Arbeitsbranch fuer diese Team-Icon-Politur: <code>task/mission-hud-team-icon-polish</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -577,7 +582,6 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_529 - Mission HUD Team Icon Polish",
               "TASK_530 - Briefing Panel Renderer MVP"
             ],
             recently_completed_tasks: [
@@ -593,10 +597,10 @@
               "TASK_525 - Team Badge / Spawn Readability Polish",
               "TASK_526 - Mission HUD Team Chip Polish",
               "TASK_527 - Briefing Minimap Team Spawn Overlay",
-              "TASK_528 - Rolling HTML Status Report"
+              "TASK_528 - Rolling HTML Status Report",
+              "TASK_529 - Mission HUD Team Icon Polish"
             ],
             open_risks: [
-              "Mission HUD Teamchips sind noch textlastig und brauchen Icon-/Symbol-Polish.",
               "Briefing-Minimap-Spawns haben einen read-only Overlay-Snapshot, aber noch keinen finalen Panel-Renderer.",
               "Manueller FullHD-/F6-Sichttest bleibt fuer den naechsten Visual-Slice offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden."
@@ -607,9 +611,9 @@
             report_mode: "rolling_interim_status"
           },
           metadata: {
-            branch: "task/rolling-html-status-report",
-            integration_base: "integration/core-foundation after TASK_527",
-            head: "working_tree_task_528",
+            branch: "task/mission-hud-team-icon-polish",
+            integration_base: "integration/core-foundation after TASK_528",
+            head: "working_tree_task_529",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }

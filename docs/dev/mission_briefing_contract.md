@@ -17,7 +17,7 @@ Mission-Briefings sind Szenario-Autorendaten. Sie erklaeren dem Spieler vor Miss
 - `threats`: Textzeilen oder `{ text, target_id }`-Eintraege.
 - `recommended_loadout`: optionale, rein beratende Eintraege mit `label`, `role_id`, `armor_id`, `weapon_ids`, `count` und `reason`.
 - `annotations`: vorbereiteter Platz fuer spaetere Briefing-Minimap-Hinweise. V1 erlaubt `kind`, `text`, `target_id`, `position` und `radius`, aber keine Terrain-Kopien.
-- Team-Spawn-Overlays: UI-/Presenter-Schichten duerfen aus `vertical_slice.team_slots` read-only `team_spawn`-Eintraege fuer die Minimap ableiten. Diese Eintraege werden nicht als zweite Wahrheit in `briefing` gespeichert, sondern referenzieren bestehende Map-Marker wie `spawn_alpha` und `spawn_bravo`.
+- Team-Spawn-Overlays: UI-/Presenter-Schichten duerfen aus `vertical_slice.team_slots` read-only `team_spawn`-Eintraege fuer die Minimap ableiten. Diese Eintraege werden nicht als zweite Wahrheit in `briefing` gespeichert, sondern referenzieren bestehende Map-Marker wie `spawn_alpha` und `spawn_bravo`. Seit TASK_529 duerfen diese abgeleiteten Eintraege zusaetzlich kompakte Anzeige-Felder wie `icon_text`, `compact_label`, `compact_text`, `spawn_icon_text`, `icon_tooltip` und `visual_priority` enthalten.
 
 ## Regeln
 - Briefings duplizieren keine Map-Daten wie `tiles`, `markers` oder `patrol_paths`.
@@ -25,4 +25,5 @@ Mission-Briefings sind Szenario-Autorendaten. Sie erklaeren dem Spieler vor Miss
 - `weapon_ids` werden strikt gegen `WeaponData` normalisiert. Visuelle Loadout-IDs wie `heavy_blaster` werden nicht zu Gameplay-Waffen.
 - `minimap_mode = terrain_only` bedeutet: spaetere UI darf eine aus der aktuellen Map abgeleitete Gelaendedarstellung zeigen, speichert aber kein zweites Terrain.
 - Briefing-Minimap-Overlays lesen Markerpositionen aus `TerrainMapData`; Briefing-Daten duplizieren weiterhin keine Marker- oder Tile-Daten.
+- Kompakte Team-Icons sind Anzeigehilfen. Vollstaendige Marker-IDs und Ownership bleiben in den bestehenden Feldern/Tooltips erhalten.
 - Annotation Painting, Bildauswahl-UI und Pre-Mission-Dialog sind Folgetasks auf diesem Datencontract.
