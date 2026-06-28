@@ -598,6 +598,8 @@ func _apply_scenario_timer_to_combat_driver() -> void:
 	var scenario_win_condition: String = String(_mission_scenario.get("win_condition")).strip_edges().to_lower()
 	if not scenario_win_condition.is_empty():
 		_set_property_if_present(combat_driver, "win_condition", scenario_win_condition)
+	if combat_driver.has_method("configure_scenario_runtime_gates_from_file"):
+		combat_driver.call("configure_scenario_runtime_gates_from_file", scenario_file_path)
 	var scenario_time_limit: float = maxf(float(_mission_scenario.get("time_limit_seconds")), 0.0)
 	if scenario_time_limit <= 0.0:
 		return

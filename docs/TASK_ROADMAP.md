@@ -146,6 +146,7 @@ git checkout -b batch/<batch-name>
 - TASK_515 - Combat Readability Presenter (implementiert)
 - TASK_516 - Editor Builder UX Pass (implementiert)
 - TASK_517 - Mission Scenario Vertical Slice (implementiert)
+- TASK_518 - Mission Scenario Runtime Gates (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
