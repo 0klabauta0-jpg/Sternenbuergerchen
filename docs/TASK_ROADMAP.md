@@ -156,7 +156,9 @@ git checkout -b batch/<batch-name>
 - TASK_525 - Team Badge / Spawn Readability Polish (implementiert)
 - TASK_526 - Mission HUD Team Chip Polish (implementiert)
 - TASK_527 - Briefing Minimap Team Spawn Overlay (implementiert)
-- TASK_528 - Mission HUD Team Icon Polish
+- TASK_528 - Rolling HTML Status Report (implementiert)
+- TASK_529 - Mission HUD Team Icon Polish
+- TASK_530 - Briefing Panel Renderer MVP
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -10,16 +10,26 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_528 - Rolling HTML Status Report
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_528_rolling_html_status_report.md`, `docs/dev/html_report_workbench_contract.md`, `docs/tasks/TASK_527_briefing_minimap_team_spawn_overlay.md`, `docs/TASK_ROADMAP.md`
+- Stand: Der bestehende Gesamt-Review-Report bleibt die laufende HTML-Workbench fuer Zwischenstaende, erledigte Blocks, offene Reibungen, lokale Checks und priorisierte naechste Schritte.
+- Stand: Der Report nennt TASK_528 als Berichtspflege, verschiebt Mission-HUD-Team-Icon-Polish auf TASK_529 und Briefing-Panel-Renderer auf TASK_530.
+- Stand: Der JSON-Export enthaelt weiterhin `recommended_next_tasks`, `recently_completed_tasks`, Report-Metadaten und jetzt auch offene Risiken fuer die naechste Arbeitsauswahl.
+- Risiken/offen: Der Bericht ersetzt keinen manuellen FullHD-/F6-Sichttest. Der naechste echte Spielbarkeitsfortschritt sollte wieder UI-/Mission-Polish statt weitere Reportpflege sein.
+- Lokale Pruefung: `git diff --check`, HTML-Struktur-/Export-Sanity per Textcheck.
+- Naechster Schritt: `TASK_529 - Mission HUD Team Icon Polish`, wenn Teamchips/Briefing-Overlays von Text zu klareren Symbolen wachsen sollen.
+
 ### TASK_527 - Briefing Minimap Team Spawn Overlay
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_527_briefing_minimap_team_spawn_overlay.md`, `docs/tasks/TASK_526_mission_hud_team_chip_polish.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/html_report_workbench_contract.md`
 - Stand: `MissionBriefingMinimapOverlayPresenter` kombiniert bestehende `briefing.annotations` mit automatisch abgeleiteten `team_spawn`-Eintraegen aus `vertical_slice.team_slots`.
 - Stand: Die Team-Spawn-Overlays lesen Markerpositionen aus `TerrainMapData`, liefern Weltposition und normalisierte Minimap-UVs und setzen `ui_sets_gameplay_truth` auf `false`.
 - Stand: `frontier_probe_vertical_slice` kann Alpha/Bravo-Spawnpunkte fuer Briefing-Minimap-Renderer expose'n, ohne Marker, Tiles oder Patrols ins Briefing zu duplizieren.
-- Stand: Der laufende HTML-Reviewbericht ist als Zwischenbericht auf TASK_527 aktualisiert und nennt TASK_528 als naechsten Anschluss.
+- Stand: Der laufende HTML-Reviewbericht war auf TASK_527 aktualisiert; TASK_528 fuehrt ihn als Rolling-Status weiter.
 - Risiken/offen: Es gibt noch kein finales Briefing-Panel, das diese Overlays sichtbar rendert. Icon-/Art-Polish und ein echter FullHD-Sichttest bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_527_briefing_minimap_team_spawn_overlay.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_526_mission_hud_team_chip_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_517_mission_scenario_vertical_slice.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_528 - Mission HUD Team Icon Polish`, wenn Teamchips/Briefing-Overlays von Text zu klareren Symbolen wachsen sollen.
+- Naechster Schritt: Siehe `TASK_528 - Rolling HTML Status Report`; danach `TASK_529 - Mission HUD Team Icon Polish`.
 
 ### TASK_526 - Mission HUD Team Chip Polish
 - Status: implementiert im Arbeitsstand
