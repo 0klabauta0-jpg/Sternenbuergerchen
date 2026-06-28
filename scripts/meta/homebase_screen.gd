@@ -408,6 +408,114 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 	}
 
 
+func get_pre_mission_visual_audit_snapshot() -> Dictionary:
+	var startflow: Dictionary = get_pre_mission_startflow_visual_snapshot()
+	var readiness: Dictionary = get_pre_mission_readiness_snapshot()
+	var checks: Array = []
+	var density: float = _calculate_mission_deck_density(startflow)
+	var chips: Array = Array(readiness.get("rendered_item_visuals", []))
+	var contrast: Dictionary = _calculate_readiness_chip_contrast(chips)
+	var readiness_state: String = String(startflow.get("readiness_overall_state", "")).strip_edges()
+	var expected_color_hex: String = _get_readiness_color(readiness_state).to_html(false)
+	var start_color_hex: String = String(startflow.get("start_button_readiness_color", "")).strip_edges()
+
+	_append_visual_audit_check(
+		checks,
+		"read_only_snapshot",
+		not bool(startflow.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"Visual audit reads existing startflow snapshots only."
+	)
+	_append_visual_audit_check(
+		checks,
+		"mission_deck_bounds",
+		not bool(startflow.get("mission_child_overflows", true)) and not bool(startflow.get("mission_overlaps_work_columns", true)),
+		"critical",
+		"Mission deck must not overflow or overlap roster, fireteams or flightdeck.",
+		{
+			"density": density,
+			"mission_child_overflows": bool(startflow.get("mission_child_overflows", true)),
+			"mission_overlaps_work_columns": bool(startflow.get("mission_overlaps_work_columns", true)),
+		}
+	)
+	_append_visual_audit_check(
+		checks,
+		"mission_deck_density",
+		density >= 0.20 and density <= 0.96,
+		"warning",
+		"Mission deck content should use the available FullHD space without crowding it.",
+		{"density": density}
+	)
+	_append_visual_audit_check(
+		checks,
+		"readiness_chip_grid",
+		int(readiness.get("rendered_item_columns", 0)) == 4 \
+			and int(readiness.get("rendered_item_count", 0)) >= 6 \
+			and chips.size() == int(readiness.get("rendered_item_count", 0)),
+		"critical",
+		"Readiness chips should stay in a stable four-column grid with visual metadata.",
+		{
+			"columns": int(readiness.get("rendered_item_columns", 0)),
+			"rendered_item_count": int(readiness.get("rendered_item_count", 0)),
+			"visual_count": chips.size(),
+		}
+	)
+	_append_visual_audit_check(
+		checks,
+		"readiness_chip_contrast",
+		float(contrast.get("min_text_contrast", 0.0)) >= 4.5 \
+			and float(contrast.get("min_status_contrast", 0.0)) >= 3.0 \
+			and int(contrast.get("chips_with_detailed_tooltip", 0)) == chips.size(),
+		"critical",
+		"Readiness status chips need readable text, visible status color and useful tooltips.",
+		contrast
+	)
+	_append_visual_audit_check(
+		checks,
+		"start_button_matches_readiness",
+		_start_button_matches_readiness(startflow),
+		"critical",
+		"Start button label, disabled state and readiness state should agree.",
+		{
+			"readiness_state": readiness_state,
+			"start_button_text": String(startflow.get("start_button_text", "")),
+			"start_button_disabled": bool(startflow.get("start_button_disabled", true)),
+		}
+	)
+	_append_visual_audit_check(
+		checks,
+		"start_button_color_matches_readiness",
+		start_color_hex == expected_color_hex,
+		"critical",
+		"Start button readiness color should mirror the readiness state.",
+		{
+			"expected_color_hex": expected_color_hex,
+			"actual_color_hex": start_color_hex,
+		}
+	)
+
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	var warning_count: int = _count_visual_audit_failures(checks, "warning")
+	return {
+		"ui_sets_gameplay_truth": false,
+		"audit_id": "pre_mission_f6_visual_audit_v1",
+		"automated_visual_gate": "pass" if failed_count == 0 else "fail",
+		"manual_screenshot_required": true,
+		"manual_screenshot_done": false,
+		"check_count": checks.size(),
+		"failed_count": failed_count,
+		"warning_count": warning_count,
+		"mission_deck_density": density,
+		"readiness_overall_state": readiness_state,
+		"readiness_chip_count": chips.size(),
+		"readiness_text_min_contrast": float(contrast.get("min_text_contrast", 0.0)),
+		"readiness_status_min_contrast": float(contrast.get("min_status_contrast", 0.0)),
+		"checks": checks,
+		"issues": _build_visual_audit_issue_list(checks),
+		"recommended_next_action": "Run a real F6 FullHD screenshot pass and tune only visible spacing or contrast issues.",
+	}
+
+
 func get_aircraft_panel_snapshot() -> Dictionary:
 	var selected_craft: Dictionary = _get_selected_aircraft_definition()
 	var direct_craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
@@ -2731,6 +2839,7 @@ func _set_pre_mission_readiness_items(items: Array) -> void:
 		var icon_text: String = _get_readiness_icon_text(state)
 		var legacy_marker: String = _get_readiness_legacy_marker(state)
 		var color_hex: String = _get_readiness_color(state).to_html(false)
+		var text_color_hex: String = _get_readiness_text_color(state).to_html(false)
 		var label_text: String = String(item.get("label", "")).strip_edges()
 		var chip_text: String = "%s %s" % [legacy_marker, label_text]
 		var visible_text: String = "%s %s" % [icon_text, label_text]
@@ -2745,6 +2854,7 @@ func _set_pre_mission_readiness_items(items: Array) -> void:
 		chip.set_meta("readiness_blocking", bool(item.get("blocking", false)))
 		chip.set_meta("readiness_icon_text", icon_text)
 		chip.set_meta("readiness_color_hex", color_hex)
+		chip.set_meta("readiness_text_color_hex", text_color_hex)
 		chip.set_meta("readiness_text", chip_text)
 		var margin := MarginContainer.new()
 		margin.name = "ReadinessChipMargin"
@@ -2774,6 +2884,7 @@ func _set_pre_mission_readiness_items(items: Array) -> void:
 		label.add_theme_color_override("font_color", _get_readiness_text_color(state))
 		label.set_meta("readiness_icon_text", icon_text)
 		label.set_meta("readiness_color_hex", color_hex)
+		label.set_meta("readiness_text_color_hex", text_color_hex)
 		row.add_child(label)
 		list.add_child(chip)
 
@@ -2800,10 +2911,107 @@ func _build_readiness_chip_visual_snapshot(list: Container) -> Array:
 			"state": String(control.get_meta("readiness_state", "")).strip_edges(),
 			"icon_text": String(control.get_meta("readiness_icon_text", "")).strip_edges(),
 			"color_hex": String(control.get_meta("readiness_color_hex", "")).strip_edges(),
+			"text_color_hex": String(control.get_meta("readiness_text_color_hex", "")).strip_edges(),
 			"text": String(control.get_meta("readiness_text", "")).strip_edges(),
 			"tooltip": control.tooltip_text,
 		})
 	return entries
+
+
+func _calculate_mission_deck_density(startflow: Dictionary) -> float:
+	var mission_rect: Rect2 = startflow.get("mission_rect", Rect2())
+	if mission_rect.size.y <= 0.0:
+		return 0.0
+	var child_bottom: float = float(startflow.get("mission_child_max_bottom", mission_rect.position.y))
+	return clampf((child_bottom - mission_rect.position.y) / mission_rect.size.y, 0.0, 99.0)
+
+
+func _append_visual_audit_check(checks: Array, check_id: String, passed: bool, severity: String, message: String, details: Dictionary = {}) -> void:
+	checks.append({
+		"id": check_id,
+		"passed": passed,
+		"severity": severity,
+		"message": message,
+		"details": details.duplicate(true),
+	})
+
+
+func _count_visual_audit_failures(checks: Array, severity_filter: String) -> int:
+	var count: int = 0
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)) and String(check.get("severity", "")) == severity_filter:
+			count += 1
+	return count
+
+
+func _build_visual_audit_issue_list(checks: Array) -> Array:
+	var issues: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			issues.append({
+				"id": String(check.get("id", "")),
+				"severity": String(check.get("severity", "")),
+				"message": String(check.get("message", "")),
+			})
+	return issues
+
+
+func _calculate_readiness_chip_contrast(chips: Array) -> Dictionary:
+	var dark_chip_background := Color(0.07, 0.09, 0.10, 0.92)
+	var min_text_contrast: float = 99.0
+	var min_status_contrast: float = 99.0
+	var chips_with_detailed_tooltip: int = 0
+	for chip_variant in chips:
+		var chip: Dictionary = Dictionary(chip_variant)
+		var state: String = String(chip.get("state", "")).strip_edges()
+		var text: String = String(chip.get("text", "")).strip_edges()
+		var tooltip: String = String(chip.get("tooltip", "")).strip_edges()
+		min_text_contrast = minf(min_text_contrast, _contrast_ratio(_get_readiness_text_color(state), dark_chip_background))
+		min_status_contrast = minf(min_status_contrast, _contrast_ratio(_get_readiness_color(state), dark_chip_background))
+		if not tooltip.is_empty() and tooltip.length() > text.length():
+			chips_with_detailed_tooltip += 1
+	if chips.is_empty():
+		min_text_contrast = 0.0
+		min_status_contrast = 0.0
+	return {
+		"min_text_contrast": min_text_contrast,
+		"min_status_contrast": min_status_contrast,
+		"chips_with_detailed_tooltip": chips_with_detailed_tooltip,
+		"chip_count": chips.size(),
+	}
+
+
+func _start_button_matches_readiness(startflow: Dictionary) -> bool:
+	var state: String = String(startflow.get("readiness_overall_state", "")).strip_edges()
+	var text: String = String(startflow.get("start_button_text", "")).strip_edges()
+	var disabled: bool = bool(startflow.get("start_button_disabled", true))
+	match state:
+		"ready":
+			return text == "Start Mission" and not disabled
+		"warn":
+			return text == "Start pruefen"
+		_:
+			return text == "Start blockiert" and disabled
+
+
+func _contrast_ratio(a: Color, b: Color) -> float:
+	var lighter: float = maxf(_relative_luminance(a), _relative_luminance(b))
+	var darker: float = minf(_relative_luminance(a), _relative_luminance(b))
+	return (lighter + 0.05) / (darker + 0.05)
+
+
+func _relative_luminance(color: Color) -> float:
+	return 0.2126 * _srgb_channel_to_linear(color.r) \
+		+ 0.7152 * _srgb_channel_to_linear(color.g) \
+		+ 0.0722 * _srgb_channel_to_linear(color.b)
+
+
+func _srgb_channel_to_linear(value: float) -> float:
+	if value <= 0.03928:
+		return value / 12.92
+	return pow((value + 0.055) / 1.055, 2.4)
 
 
 func _get_readiness_icon_text(state: String) -> String:

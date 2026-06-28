@@ -24,6 +24,7 @@ Mission-Briefings sind Szenario-Autorendaten. Sie erklaeren dem Spieler vor Miss
 - Recommended-Loadout-Selection-Bridge: UI-Schichten duerfen Empfehlungskarten auswaehlbar machen und eine `loadout_patch_preview` anzeigen. Die Auswahl bleibt Anzeige-/Staging-Zustand. Erst eine separate Bestaetigung darf ueber den bestehenden Homebase-Member-Loadout-Pfad schreiben.
 - Pre-Mission-Readiness: UI-Schichten duerfen vorhandene Briefing-, Loadout-, Aircraft- und Homebase-Dropship-Snapshots in einer read-only Checkliste zusammenfassen. Diese Checkliste folgt dem bestehenden Start-Guard und ersetzt ihn nicht.
 - Startflow-Statuschips: UI-Schichten duerfen Pre-Mission-Readiness-Items als farbige Chips mit Icon-Text, Tooltip und read-only Visual-Metadaten rendern. Diese Chips sind Anzeigehilfe und keine Start-, Loadout-, Dropship- oder Cargo-Wahrheit.
+- Pre-Mission-Visual-Audit: UI-Schichten duerfen aus Startflow-, Layout- und Readiness-Snapshots einen read-only Audit-Snapshot fuer Ueberlauf, Ueberlappung, Statuschip-Kontrast und Startbutton-Konsistenz ableiten. Dieser Audit ist Diagnose und ersetzt keinen echten Spielstart- oder Screenshot-Entscheid.
 
 ## Regeln
 - Briefings duplizieren keine Map-Daten wie `tiles`, `markers` oder `patrol_paths`.
@@ -37,4 +38,5 @@ Mission-Briefings sind Szenario-Autorendaten. Sie erklaeren dem Spieler vor Miss
 - Briefing-Loadout-Empfehlungen bleiben beratend, bis der Spieler sie explizit bestaetigt. Der bestaetigte Apply nutzt `LoadoutContract` und Homebase-Member-Loadout-Sync; er schreibt nicht direkt in Missionsruntime oder `SimulationRoot`.
 - Pre-Mission-Readiness-Items sind Diagnose und Bedienhilfe. `can_request_mission_start()` bleibt die Startwahrheit; die Checkliste darf keinen Start freischalten oder blockieren, den der bestehende Guard anders bewertet.
 - Startflow-Statuschips duerfen Farben, Icon-Text und Tooltips aus Readiness-Items ableiten, aber keine neuen Blocker oder Freigaben berechnen.
+- Pre-Mission-Visual-Audits duerfen nur vorhandene UI-/Contract-Snapshots pruefen. Sie duerfen keine Start-, Loadout-, Dropship-, Team- oder Missionsdaten mutieren und muessen einen manuellen F6-/Screenshot-Sichttest als gesonderte offene Pruefung kenntlich lassen.
 - Annotation Painting, Bildauswahl-UI und Pre-Mission-Dialog sind Folgetasks auf diesem Datencontract.
