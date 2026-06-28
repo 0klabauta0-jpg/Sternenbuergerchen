@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_530 - Briefing Panel Renderer MVP
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_530_briefing_panel_renderer_mvp.md`, `docs/tasks/TASK_529_mission_hud_team_icon_polish.md`, `docs/tasks/TASK_527_briefing_minimap_team_spawn_overlay.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
+- Stand: `MissionBriefingPanelPresenter` baut aus `MissionScenarioData`, `TerrainMapData` und `MissionBriefingMinimapOverlayPresenter` einen read-only Panel-Snapshot fuer Titel, Summary, Ziele, Risiken, Team-Spawns und Loadout-Empfehlungen.
+- Stand: `HomebaseTestScreen` rendert fuer Szenario-Missionen einen kompakten `MissionBriefingPanel`-Block im bestehenden Mission-Brief-Fenster und expose't den gerenderten Zustand fuer Regressionen.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_530 als erledigten Zwischenstand und verschiebt den naechsten sinnvollen Schritt auf visuelle Briefing-Minimap-/Loadout-Brueckenarbeit.
+- Risiken/offen: Das Panel ist textbasiert; Hintergrundbild, echte Minimap-Zeichnung und interaktive Briefing-Annotationen bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_530_briefing_panel_renderer_mvp.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_529_mission_hud_team_icon_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_527_briefing_minimap_team_spawn_overlay.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_531 - Briefing Minimap Visual Renderer`, wenn die Terrain-/Spawn-/Objective-Daten als echte Pre-Mission-Karte sichtbar werden sollen.
+
 ### TASK_529 - Mission HUD Team Icon Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_529_mission_hud_team_icon_polish.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`, `docs/tasks/TASK_527_briefing_minimap_team_spawn_overlay.md`, `docs/tasks/TASK_526_mission_hud_team_chip_polish.md`, `docs/dev/mission_briefing_contract.md`
 - Stand: `MissionTeamChipPresenter` liefert pro Team kompakte ASCII-sichere Symbolfelder (`icon_text`, `spawn_icon_text`, `compact_text`, `icon_tooltip`, `visual_priority`) und weiterhin die ausfuehrlichen Legacy-Felder.
 - Stand: Das Mission-HUD liest `compact_status_text` fuer das sichtbare Label, waehrend `status_text` weiter die vollstaendigen Owner-/Spawnmarker-Daten fuer Regressionen und Debug enthaelt.
 - Stand: `MissionBriefingMinimapOverlayPresenter` gibt dieselben kompakten Icon-/Label-Felder fuer generierte `team_spawn`-Overlays aus, ohne Briefing- oder Terrain-Daten zu duplizieren.
-- Risiken/offen: Die Symbole sind bewusst ASCII-Text und noch keine finalen Texture-/Icon-Controls. Der eigentliche Briefing-Panel-Renderer bleibt TASK_530.
+- Risiken/offen: Die Symbole sind bewusst ASCII-Text und noch keine finalen Texture-/Icon-Controls. Der eigentliche visuelle Minimap-Renderer bleibt Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_529_mission_hud_team_icon_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_526_mission_hud_team_chip_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_527_briefing_minimap_team_spawn_overlay.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_530 - Briefing Panel Renderer MVP`, wenn die Briefing-Minimap-Overlays sichtbar gerendert werden sollen.
+- Naechster Schritt: Siehe `TASK_530 - Briefing Panel Renderer MVP`.
 
 ### TASK_528 - Rolling HTML Status Report
 - Status: implementiert im Arbeitsstand
