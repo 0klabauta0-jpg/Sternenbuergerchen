@@ -165,7 +165,8 @@ git checkout -b batch/<batch-name>
 - TASK_534 - Pre-Mission Readiness Checklist (implementiert)
 - TASK_535 - Pre-Mission FullHD Startflow Visual Pass (implementiert)
 - TASK_536 - Startflow Icon And Status Color Polish (implementiert)
-- TASK_537 - Pre-Mission F6 Screenshot Visual Audit
+- TASK_537 - Pre-Mission F6 Screenshot Visual Audit (implementiert)
+- TASK_538 - Homebase To Mission Launch Handoff Smoke
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

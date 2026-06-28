@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_537 - Pre-Mission F6 Screenshot Visual Audit
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_537_pre_mission_f6_screenshot_visual_audit.md`, `docs/tasks/TASK_536_startflow_icon_status_color_polish.md`, `docs/tasks/TASK_535_pre_mission_fullhd_startflow_visual_pass.md`, `docs/dev/mission_briefing_contract.md`
+- Stand: `HomebaseTestScreen` expose't einen read-only `get_pre_mission_visual_audit_snapshot()` fuer Startflow-Layout, Readiness-Chips, Kontrast und Startbutton-Konsistenz.
+- Stand: Readiness-Chip-Snapshots enthalten jetzt zusaetzlich `text_color_hex`, damit Statusfarbe und Textkontrast regressionsfest pruefbar bleiben.
+- Stand: Der Audit markiert den manuellen F6-/Screenshot-Sichttest weiterhin als offen, behauptet also keinen menschlichen Sichtcheck.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_537 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf den Homebase-zu-Mission-Handoff.
+- Risiken/offen: Kein echter Fenster-Screenshot in diesem Task. Der Audit prueft Layout-/Kontrast-Vertraege, aber nicht die tatsaechliche Pixelwirkung im Godot-Fenster.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_537_pre_mission_f6_screenshot_visual_audit.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_536_startflow_icon_status_color_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_535_pre_mission_fullhd_startflow_visual_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_538 - Homebase To Mission Launch Handoff Smoke`, damit die lesbare Startbereitschaft in einen pruefbaren Missionsstart uebergeht.
+
 ### TASK_536 - Startflow Icon And Status Color Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_536_startflow_icon_status_color_polish.md`, `docs/tasks/TASK_535_pre_mission_fullhd_startflow_visual_pass.md`, `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/dev/mission_briefing_contract.md`
@@ -19,7 +30,7 @@
 - Stand: Der Rolling-HTML-Bericht nennt TASK_536 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf einen echten F6-/Screenshot-Sichttest.
 - Risiken/offen: Die Chips nutzen Godot-Control-Farben und ASCII-Icon-Text, aber noch keine finalen Texture-Icons. Manueller FullHD-Sichttest bleibt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_536_startflow_icon_status_color_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_535_pre_mission_fullhd_startflow_visual_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_534_pre_mission_readiness_checklist.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_537 - Pre-Mission F6 Screenshot Visual Audit`, wenn die neue Startflow-Optik im echten Fenster kontrolliert werden soll.
+- Naechster Schritt: Siehe `TASK_537 - Pre-Mission F6 Screenshot Visual Audit`.
 
 ### TASK_535 - Pre-Mission FullHD Startflow Visual Pass
 - Status: implementiert im Arbeitsstand
