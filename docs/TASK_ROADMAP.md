@@ -150,6 +150,7 @@ git checkout -b batch/<batch-name>
 - TASK_519 - Cargo Touchdown Visual/Runtime Bridge (implementiert)
 - TASK_520 - Multiplayer Team Ownership Smoke (implementiert)
 - TASK_521 - Builder Drag Preview Visual Polish (implementiert)
+- TASK_522 - Cargo Touchdown Visual Polish (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

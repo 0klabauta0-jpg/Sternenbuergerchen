@@ -501,6 +501,11 @@ var _dropship_lz_label_count: int = 0
 var _dropship_texture_visible: bool = false
 var _dropship_model_visible: bool = false
 var _air_visual_count: int = 0
+var _cargo_touchdown_visual_count: int = 0
+var _cargo_touchdown_lz_marker_count: int = 0
+var _cargo_touchdown_approach_line_count: int = 0
+var _cargo_touchdown_label_count: int = 0
+var _cargo_touchdown_state: String = ""
 var _fow_hidden_air_visual_count: int = 0
 var _air_unknown_terrain_reveal_block_count: int = 0
 var _dropship_air_y: float = 0.0
@@ -1625,6 +1630,12 @@ func get_render_snapshot() -> Dictionary:
 		"dropship_texture_visible": _dropship_texture_visible,
 		"dropship_model_visible": _dropship_model_visible,
 		"dropship_visual_count": _air_visual_count,
+		"cargo_touchdown_visual_count": _cargo_touchdown_visual_count,
+		"cargo_touchdown_lz_marker_count": _cargo_touchdown_lz_marker_count,
+		"cargo_touchdown_approach_line_count": _cargo_touchdown_approach_line_count,
+		"cargo_touchdown_label_count": _cargo_touchdown_label_count,
+		"cargo_touchdown_state": _cargo_touchdown_state,
+		"cargo_touchdown_visible": _cargo_touchdown_visual_count > 0 or _cargo_touchdown_lz_marker_count > 0 or _cargo_touchdown_label_count > 0,
 		"dropship_approach_line_count": _dropship_approach_lines_by_id.size(),
 		"dropship_approach_arrow_count": _dropship_approach_arrow_count,
 		"flight_altitude_layer": String(_drop_payload.get("air_layer", AIR_LAYER_ID)),
@@ -4500,6 +4511,13 @@ func _build_drop_visual_static_signature(payload: Dictionary) -> String:
 			String(entry.get("approach_vector_shape", "wide_arrow")).strip_edges(),
 			String(entry.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges(),
 		])
+		if bool(entry.get("cargo_visual", false)):
+			parts.append("cargo:%s:%s:%s:%s" % [
+				String(entry.get("cargo_state", entry.get("state", ""))).strip_edges().to_lower(),
+				_vector2_signature(entry.get("dropship_position", null)),
+				str(bool(entry.get("blocked", false))),
+				str(float(entry.get("cargo_progress", 0.0))),
+			])
 		parts.append("lz:%s:%s:%s" % [
 			_vector2_signature(entry.get("lz_position", null)),
 			_vector2_signature(entry.get("dropship_target_position", null)),
@@ -6552,6 +6570,11 @@ func _rebuild_drop_visuals() -> void:
 	_dropship_texture_visible = false
 	_dropship_model_visible = false
 	_missing_dropship_model_count = 0
+	_cargo_touchdown_visual_count = 0
+	_cargo_touchdown_lz_marker_count = 0
+	_cargo_touchdown_approach_line_count = 0
+	_cargo_touchdown_label_count = 0
+	_cargo_touchdown_state = ""
 	_lz_tile_marker_count = 0
 	_requested_lz_marker_count = 0
 	_resolved_lz_marker_count = 0
@@ -6595,30 +6618,84 @@ func _rebuild_drop_visuals() -> void:
 			continue
 		var ship_position: Vector2 = Vector2(entry.get("dropship_position", Vector2.ZERO))
 		var visual_id: String = _get_dropship_visual_id(entry, index)
+		var is_cargo_visual: bool = bool(entry.get("cargo_visual", false))
+		if is_cargo_visual:
+			_cargo_touchdown_state = String(entry.get("cargo_state", entry.get("state", ""))).strip_edges().to_lower()
 		var show_entry_lz_marker: bool = bool(entry.get("show_lz_marker", bool(entry.get("has_lz_position", false))))
 		if show_entry_lz_marker and bool(entry.get("has_lz_position", false)) and typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
 			var entry_lz_position: Vector2 = Vector2(entry.get("lz_position", Vector2.ZERO))
 			if _air_layer_allows_surface_marker(entry_lz_position):
 				var lz_color := Color(0.42, 0.72, 1.0, 0.46)
+				if is_cargo_visual:
+					lz_color = Color(1.0, 0.72, 0.28, 0.58)
 				if bool(entry.get("selected", false)):
 					lz_color = Color(0.50, 1.0, 0.66, 0.54)
+					if is_cargo_visual:
+						lz_color = Color(1.0, 0.84, 0.36, 0.66)
 				if _add_planned_lz_marker(entry_lz_position, lz_color, "DropshipLZ_%s" % _sanitize_node_name(visual_id)):
 					_requested_lz_marker_count += 1
+					if is_cargo_visual:
+						_cargo_touchdown_lz_marker_count += 1
 					var lz_label: String = String(entry.get("lz_label", entry.get("lz_name", ""))).strip_edges()
 					if not lz_label.is_empty():
 						_add_label3d(_drop_root, lz_label, _world_to_surface_3d_position(entry_lz_position, 0.62), "DropshipLZLabel_%s" % _sanitize_node_name(visual_id), lz_color.lightened(0.18), 13)
 						_dropship_lz_label_count += 1
 			else:
 				_fow_hidden_air_visual_count += 1
+		var had_approach_line: bool = _dropship_approach_lines_by_id.has(visual_id)
 		_add_dropship_approach_line(entry, visual_id, ship_position)
+		if is_cargo_visual and not had_approach_line and _dropship_approach_lines_by_id.has(visual_id):
+			_cargo_touchdown_approach_line_count += 1
+		if is_cargo_visual:
+			_add_cargo_touchdown_status_label(entry, visual_id, ship_position)
 		if not bool(entry.get("dropship_visible", false)):
 			continue
 		if _air_layer_allows_air_visual_for_payload(entry, ship_position):
 			var visual_node := _add_dropship_proxy(ship_position, entry, visual_id)
 			if visual_node != null:
 				_dropship_visual_nodes_by_id[visual_id] = visual_node
+				if is_cargo_visual:
+					_cargo_touchdown_visual_count += 1
 		else:
 			_fow_hidden_air_visual_count += 1
+
+
+func _add_cargo_touchdown_status_label(entry: Dictionary, visual_id: String, ship_position: Vector2) -> void:
+	var label_text: String = _build_cargo_touchdown_status_text(entry)
+	if label_text.is_empty():
+		return
+	var label_position: Vector3
+	if bool(entry.get("dropship_visible", false)):
+		label_position = _world_to_air_layer_3d_position_for_payload(entry, ship_position, 0.92)
+	elif typeof(entry.get("lz_position", null)) == TYPE_VECTOR2:
+		label_position = _world_to_surface_3d_position(Vector2(entry.get("lz_position", Vector2.ZERO)), 0.84)
+	else:
+		label_position = _world_to_surface_3d_position(ship_position, 0.84)
+	var label := _add_label3d(
+		_drop_root,
+		label_text,
+		label_position,
+		"CargoTouchdownLabel_%s" % _sanitize_node_name(visual_id),
+		Color(1.0, 0.84, 0.36, 0.98),
+		13
+	)
+	if label != null:
+		_cargo_touchdown_label_count += 1
+
+
+func _build_cargo_touchdown_status_text(entry: Dictionary) -> String:
+	var display_name: String = String(entry.get("display_name", "Cargo Freighter")).strip_edges()
+	if display_name.is_empty():
+		display_name = "Cargo Freighter"
+	var cargo_state: String = String(entry.get("cargo_state", entry.get("state", ""))).strip_edges().to_upper()
+	if cargo_state.is_empty():
+		cargo_state = "PENDING"
+	if bool(entry.get("blocked", false)):
+		var blocker: String = String(entry.get("blocked_by_step_id", "")).strip_edges()
+		if not blocker.is_empty():
+			return "%s | BLOCKED: %s" % [display_name, blocker]
+		return "%s | BLOCKED" % display_name
+	return "%s | %s" % [display_name, cargo_state]
 
 
 func _air_layer_allows_surface_marker(world_position: Vector2) -> bool:
