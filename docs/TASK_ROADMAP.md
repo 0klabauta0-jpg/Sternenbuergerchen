@@ -161,7 +161,8 @@ git checkout -b batch/<batch-name>
 - TASK_530 - Briefing Panel Renderer MVP (implementiert)
 - TASK_531 - Briefing Minimap Visual Renderer (implementiert)
 - TASK_532 - Briefing Background / Loadout Recommendation Polish (implementiert)
-- TASK_533 - Recommended Loadout Selection Bridge
+- TASK_533 - Recommended Loadout Selection Bridge (implementiert)
+- TASK_534 - Pre-Mission Readiness Checklist
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

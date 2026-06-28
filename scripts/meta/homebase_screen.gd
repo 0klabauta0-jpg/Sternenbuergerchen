@@ -92,6 +92,10 @@ var _homebase_direct_boarding_refresh_deferred_for_drag: bool = false
 var _pending_homebase_direct_mission_craft_id: String = ""
 var _member_loadout_by_unit_id: Dictionary = {}
 var _homebase_loadout_preview_texture_cache: Dictionary = {}
+var _selected_briefing_loadout_recommendation_id: String = ""
+var _selected_briefing_loadout_recommendation: Dictionary = {}
+var _briefing_loadout_apply_count: int = 0
+var _briefing_loadout_feedback_text: String = ""
 var _roster_sort_mode: String = HOMEBASE_ROSTER_SORT_NAME_ASC
 var _profiles_by_id: Dictionary = {}
 var _focused_unit_id: String = ""
@@ -309,6 +313,8 @@ func get_mission_briefing_panel_snapshot() -> Dictionary:
 	var background_image := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingBackgroundImage") as TextureRect
 	var minimap_visual := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingMinimapVisual") as Control
 	var loadout_cards := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingLoadoutCards") as VBoxContainer
+	var bridge_status_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingLoadoutBridgeStatusLabel") as Label
+	var bridge_apply_button := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingLoadoutBridgeRow/BriefingLoadoutApplyButton") as Button
 	if title_label != null:
 		snapshot["rendered_title_text"] = title_label.text
 	if status_label != null:
@@ -330,6 +336,17 @@ func get_mission_briefing_panel_snapshot() -> Dictionary:
 	if loadout_cards != null:
 		snapshot["rendered_loadout_card_count"] = loadout_cards.get_child_count()
 		snapshot["rendered_loadout_card_text"] = _build_briefing_loadout_card_text(loadout_cards)
+		snapshot["rendered_recommended_loadout_button_count"] = _count_briefing_recommendation_buttons(loadout_cards)
+	if bridge_status_label != null:
+		snapshot["recommended_loadout_status_text"] = bridge_status_label.text
+	if bridge_apply_button != null:
+		snapshot["recommended_loadout_apply_button_disabled"] = bridge_apply_button.disabled
+		snapshot["recommended_loadout_apply_button_text"] = bridge_apply_button.text
+	snapshot["selected_recommended_loadout_id"] = _selected_briefing_loadout_recommendation_id
+	snapshot["selected_recommended_loadout_label"] = String(_selected_briefing_loadout_recommendation.get("label", "")).strip_edges()
+	snapshot["recommended_loadout_apply_ready"] = _is_briefing_loadout_apply_ready()
+	snapshot["recommended_loadout_apply_count"] = _briefing_loadout_apply_count
+	snapshot["recommended_loadout_feedback_text"] = _briefing_loadout_feedback_text
 	return snapshot
 
 
@@ -2516,37 +2533,242 @@ func _set_mission_briefing_loadout_cards(entries: Array) -> void:
 		return
 	_clear_container(cards)
 	cards.visible = not entries.is_empty()
+	var visible_recommendation_ids: PackedStringArray = PackedStringArray()
 	for entry_variant in entries:
 		var entry: Dictionary = Dictionary(entry_variant)
-		var label := Label.new()
-		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.clip_text = true
-		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		label.add_theme_font_size_override("font_size", 8)
-		META_UI_SKIN_SCRIPT.style_body_label(label, 8)
-		label.add_theme_color_override("font_color", Color("dce7ec"))
-		label.text = "%s | %s\n%s" % [
+		var recommendation_id: String = String(entry.get("recommendation_id", "")).strip_edges()
+		if recommendation_id.is_empty():
+			recommendation_id = "rec_%d" % visible_recommendation_ids.size()
+		visible_recommendation_ids.append(recommendation_id)
+		var button := Button.new()
+		button.name = "BriefingLoadoutRecommendationButton"
+		button.toggle_mode = true
+		button.button_pressed = recommendation_id == _selected_briefing_loadout_recommendation_id
+		button.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		button.clip_text = true
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.add_theme_font_size_override("font_size", 8)
+		META_UI_SKIN_SCRIPT.style_secondary_button(button)
+		button.text = "%s | %s\n%s" % [
 			String(entry.get("label", "Loadout")).strip_edges(),
 			String(entry.get("subtitle", "-")).strip_edges(),
 			String(entry.get("body", "")).strip_edges(),
 		]
-		label.tooltip_text = label.text
-		label.set_meta("ui_sets_gameplay_truth", false)
-		cards.add_child(label)
+		button.tooltip_text = "%s\n%s" % [button.text, String(entry.get("apply_hint_text", "")).strip_edges()]
+		button.set_meta("ui_sets_gameplay_truth", false)
+		button.set_meta("briefing_loadout_recommendation_button", true)
+		button.set_meta("recommendation_id", recommendation_id)
+		button.set_meta("loadout_patch_preview", Dictionary(entry.get("loadout_patch_preview", {})).duplicate(true))
+		button.pressed.connect(Callable(self, "_on_briefing_loadout_recommendation_pressed").bind(recommendation_id))
+		cards.add_child(button)
+	if not _selected_briefing_loadout_recommendation_id.is_empty() and not visible_recommendation_ids.has(_selected_briefing_loadout_recommendation_id):
+		_selected_briefing_loadout_recommendation_id = ""
+		_selected_briefing_loadout_recommendation = {}
+	_ensure_mission_briefing_loadout_bridge_controls()
+	_update_mission_briefing_loadout_bridge_controls()
 
 
 func _build_briefing_loadout_card_text(cards: VBoxContainer) -> String:
 	var lines: PackedStringArray = PackedStringArray()
 	for child in cards.get_children():
-		var label := child as Label
-		if label == null:
+		var control := child as Control
+		if control == null:
 			continue
-		var text: String = label.text.strip_edges()
+		var text: String = ""
+		if control is Button:
+			text = (control as Button).text.strip_edges()
+		elif control is Label:
+			text = (control as Label).text.strip_edges()
 		if not text.is_empty():
 			lines.append(text.replace("\n", " / "))
 	if lines.is_empty():
 		return ""
 	return " | ".join(lines)
+
+
+func _ensure_mission_briefing_loadout_bridge_controls() -> void:
+	var briefing_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox") as VBoxContainer
+	if briefing_vbox == null:
+		return
+	var status_label := briefing_vbox.get_node_or_null("BriefingLoadoutBridgeStatusLabel") as Label
+	if status_label == null:
+		status_label = Label.new()
+		status_label.name = "BriefingLoadoutBridgeStatusLabel"
+		status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		status_label.clip_text = true
+		status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		status_label.add_theme_font_size_override("font_size", 8)
+		META_UI_SKIN_SCRIPT.style_body_label(status_label, 8)
+		status_label.add_theme_color_override("font_color", Color("c7d2dc"))
+		briefing_vbox.add_child(status_label)
+	var bridge_row := briefing_vbox.get_node_or_null("BriefingLoadoutBridgeRow") as HBoxContainer
+	if bridge_row == null:
+		bridge_row = HBoxContainer.new()
+		bridge_row.name = "BriefingLoadoutBridgeRow"
+		bridge_row.add_theme_constant_override("separation", 4)
+		briefing_vbox.add_child(bridge_row)
+	var apply_button := bridge_row.get_node_or_null("BriefingLoadoutApplyButton") as Button
+	if apply_button == null:
+		apply_button = Button.new()
+		apply_button.name = "BriefingLoadoutApplyButton"
+		apply_button.text = "Empfehlung anwenden"
+		apply_button.custom_minimum_size = Vector2(140.0, 26.0)
+		META_UI_SKIN_SCRIPT.style_primary_button(apply_button)
+		apply_button.set_meta("briefing_loadout_apply_button", true)
+		apply_button.pressed.connect(Callable(self, "apply_selected_briefing_loadout_recommendation_to_selected_units"))
+		bridge_row.add_child(apply_button)
+
+
+func _update_mission_briefing_loadout_bridge_controls() -> void:
+	var cards := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingLoadoutCards") as VBoxContainer
+	if cards != null:
+		for child in cards.get_children():
+			var button := child as Button
+			if button == null:
+				continue
+			var recommendation_id: String = String(button.get_meta("recommendation_id", "")).strip_edges()
+			button.button_pressed = recommendation_id == _selected_briefing_loadout_recommendation_id
+	var status_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingLoadoutBridgeStatusLabel") as Label
+	if status_label != null:
+		status_label.text = _build_briefing_loadout_bridge_status_text()
+		status_label.tooltip_text = status_label.text
+	var apply_button := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingLoadoutBridgeRow/BriefingLoadoutApplyButton") as Button
+	if apply_button != null:
+		apply_button.disabled = not _is_briefing_loadout_apply_ready()
+		apply_button.tooltip_text = _build_briefing_loadout_bridge_status_text()
+
+
+func _count_briefing_recommendation_buttons(cards: VBoxContainer) -> int:
+	var count: int = 0
+	for child in cards.get_children():
+		var control := child as Control
+		if control != null and bool(control.get_meta("briefing_loadout_recommendation_button", false)):
+			count += 1
+	return count
+
+
+func _on_briefing_loadout_recommendation_pressed(recommendation_id: String) -> void:
+	select_briefing_loadout_recommendation(recommendation_id)
+
+
+func select_briefing_loadout_recommendation(recommendation_id: String) -> Dictionary:
+	var normalized_id: String = recommendation_id.strip_edges()
+	var recommendation: Dictionary = _get_briefing_loadout_recommendation(normalized_id)
+	if recommendation.is_empty():
+		_selected_briefing_loadout_recommendation_id = ""
+		_selected_briefing_loadout_recommendation = {}
+		_briefing_loadout_feedback_text = "Keine Briefing-Empfehlung ausgewaehlt."
+	else:
+		_selected_briefing_loadout_recommendation_id = normalized_id
+		_selected_briefing_loadout_recommendation = recommendation.duplicate(true)
+		_briefing_loadout_feedback_text = "Empfehlung ausgewaehlt: %s" % String(recommendation.get("label", normalized_id)).strip_edges()
+	_update_mission_briefing_loadout_bridge_controls()
+	return get_briefing_loadout_bridge_snapshot()
+
+
+func apply_selected_briefing_loadout_recommendation_to_selected_units() -> Dictionary:
+	return apply_briefing_loadout_recommendation_to_unit_ids(
+		_selected_briefing_loadout_recommendation_id,
+		_selected_unit_ids
+	)
+
+
+func apply_briefing_loadout_recommendation_to_unit_ids(recommendation_id: String, unit_ids: PackedStringArray) -> Dictionary:
+	var normalized_id: String = recommendation_id.strip_edges()
+	var recommendation: Dictionary = _get_briefing_loadout_recommendation(normalized_id)
+	if recommendation.is_empty():
+		_briefing_loadout_feedback_text = "Keine gueltige Briefing-Empfehlung gewaehlt."
+		_update_mission_briefing_loadout_bridge_controls()
+		return get_briefing_loadout_bridge_snapshot()
+	var armor_id: String = String(recommendation.get("armor_id", HOMEBASE_DEFAULT_LOADOUT_ID)).strip_edges()
+	var weapon_1_id: String = String(recommendation.get("primary_weapon_id", HOMEBASE_DEFAULT_PRIMARY_WEAPON)).strip_edges()
+	var weapon_2_id: String = String(recommendation.get("secondary_weapon_id", HOMEBASE_DEFAULT_SECONDARY_WEAPON)).strip_edges()
+	if armor_id.is_empty():
+		armor_id = HOMEBASE_DEFAULT_LOADOUT_ID
+	if weapon_1_id.is_empty():
+		weapon_1_id = HOMEBASE_DEFAULT_PRIMARY_WEAPON
+	if weapon_2_id.is_empty():
+		weapon_2_id = HOMEBASE_DEFAULT_SECONDARY_WEAPON
+	var applied_unit_ids: PackedStringArray = PackedStringArray()
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or applied_unit_ids.has(unit_id):
+			continue
+		var fireteam_id: String = _get_fireteam_id_for_unit(unit_id)
+		if fireteam_id.is_empty():
+			continue
+		_set_homebase_member_loadout(fireteam_id, unit_id, armor_id, weapon_1_id, weapon_2_id)
+		applied_unit_ids.append(unit_id)
+	if applied_unit_ids.is_empty():
+		_briefing_loadout_feedback_text = "Empfehlung nicht angewendet: keine gestagten Operatoren mit Fireteam-Zuweisung."
+	else:
+		_briefing_loadout_apply_count += 1
+		_selected_briefing_loadout_recommendation_id = normalized_id
+		_selected_briefing_loadout_recommendation = recommendation.duplicate(true)
+		_briefing_loadout_feedback_text = "%s auf %d Operatoren angewendet." % [
+			String(recommendation.get("label", normalized_id)).strip_edges(),
+			applied_unit_ids.size(),
+		]
+		if is_inside_tree():
+			_render_homebase_fireteams()
+			_update_homebase_loadout_panel()
+	_update_mission_briefing_loadout_bridge_controls()
+	var result: Dictionary = get_briefing_loadout_bridge_snapshot()
+	result["applied_unit_ids"] = Array(applied_unit_ids)
+	result["ok"] = not applied_unit_ids.is_empty()
+	return result
+
+
+func get_briefing_loadout_bridge_snapshot() -> Dictionary:
+	return {
+		"selected_recommendation_id": _selected_briefing_loadout_recommendation_id,
+		"selected_recommendation_label": String(_selected_briefing_loadout_recommendation.get("label", "")).strip_edges(),
+		"selected_patch_preview": Dictionary(_selected_briefing_loadout_recommendation.get("loadout_patch_preview", {})).duplicate(true),
+		"selected_unit_ids": Array(_selected_unit_ids),
+		"selected_unit_count": _selected_unit_ids.size(),
+		"selected_unit_loadouts": _build_member_loadout_snapshot_for_unit_ids(_selected_unit_ids),
+		"apply_ready": _is_briefing_loadout_apply_ready(),
+		"apply_count": _briefing_loadout_apply_count,
+		"feedback_text": _briefing_loadout_feedback_text,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _get_briefing_loadout_recommendation(recommendation_id: String) -> Dictionary:
+	var normalized_id: String = recommendation_id.strip_edges()
+	if normalized_id.is_empty():
+		return {}
+	for entry_variant in Array(_mission_briefing_panel_snapshot.get("loadout_card_entries", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		if String(entry.get("recommendation_id", "")).strip_edges() == normalized_id:
+			return entry
+	return {}
+
+
+func _is_briefing_loadout_apply_ready() -> bool:
+	return not _selected_briefing_loadout_recommendation_id.is_empty() and not _selected_unit_ids.is_empty()
+
+
+func _build_briefing_loadout_bridge_status_text() -> String:
+	if not _briefing_loadout_feedback_text.is_empty():
+		return _briefing_loadout_feedback_text
+	if _selected_briefing_loadout_recommendation_id.is_empty():
+		return "Loadout-Empfehlung auswaehlen; Apply bleibt bestaetigungspflichtig."
+	if _selected_unit_ids.is_empty():
+		return "Empfehlung gewaehlt, aber keine Operatoren gestagt."
+	return "Bereit: Empfehlung kann auf %d gestagte Operatoren angewendet werden." % _selected_unit_ids.size()
+
+
+func _build_member_loadout_snapshot_for_unit_ids(unit_ids: PackedStringArray) -> Dictionary:
+	var result: Dictionary = {}
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty():
+			continue
+		result[unit_id] = _get_member_loadout(unit_id)
+	return result
 
 
 func _build_personnel_notification_messages() -> PackedStringArray:
