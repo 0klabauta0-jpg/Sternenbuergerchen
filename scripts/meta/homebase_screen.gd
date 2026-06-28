@@ -21,6 +21,7 @@ const HOMEBASE_UNIT_DROP_TARGET_SCRIPT: GDScript = preload("res://scripts/meta/h
 const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_model.gd")
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const MISSION_BRIEFING_PANEL_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_briefing_panel_presenter.gd")
+const MISSION_BRIEFING_MINIMAP_VISUAL_SCRIPT: GDScript = preload("res://scripts/ui/mission_briefing_minimap_visual.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
 const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
@@ -305,6 +306,7 @@ func get_mission_briefing_panel_snapshot() -> Dictionary:
 	var status_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingStatusLabel") as Label
 	var objectives_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingObjectivesLabel") as Label
 	var teams_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingTeamsLabel") as Label
+	var minimap_visual := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingMinimapVisual") as Control
 	if title_label != null:
 		snapshot["rendered_title_text"] = title_label.text
 	if status_label != null:
@@ -313,6 +315,12 @@ func get_mission_briefing_panel_snapshot() -> Dictionary:
 		snapshot["rendered_objective_text"] = objectives_label.text
 	if teams_label != null:
 		snapshot["rendered_team_text"] = teams_label.text
+	if minimap_visual != null and minimap_visual.has_method("get_visual_snapshot"):
+		var visual_snapshot: Dictionary = Dictionary(minimap_visual.call("get_visual_snapshot"))
+		snapshot["rendered_minimap_visible"] = minimap_visual.visible
+		snapshot["rendered_minimap_sample_count"] = int(visual_snapshot.get("sample_count", 0))
+		snapshot["rendered_minimap_entry_count"] = int(visual_snapshot.get("entry_count", 0))
+		snapshot["rendered_minimap_draw_mode"] = String(visual_snapshot.get("draw_mode", ""))
 	return snapshot
 
 
@@ -2369,6 +2377,7 @@ func _update_mission_briefing_panel() -> void:
 	_set_mission_briefing_label("BriefingThreatsLabel", "Risiken: %s" % String(_mission_briefing_panel_snapshot.get("threat_text", "-")).strip_edges())
 	_set_mission_briefing_label("BriefingTeamsLabel", "Teams: %s" % String(_mission_briefing_panel_snapshot.get("team_spawn_text", "-")).strip_edges())
 	_set_mission_briefing_label("BriefingLoadoutLabel", "Empfohlen: %s" % String(_mission_briefing_panel_snapshot.get("loadout_text", "-")).strip_edges())
+	_set_mission_briefing_minimap_visual(Dictionary(_mission_briefing_panel_snapshot.get("minimap_visual_snapshot", {})))
 	panel.set_meta("mission_briefing_snapshot", _mission_briefing_panel_snapshot.duplicate(true))
 
 
@@ -2379,7 +2388,7 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 		return existing
 	var panel := PanelContainer.new()
 	panel.name = "MissionBriefingPanel"
-	panel.custom_minimum_size = Vector2(0.0, 116.0)
+	panel.custom_minimum_size = Vector2(0.0, 220.0)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "body")
 	var margin := MarginContainer.new()
@@ -2397,11 +2406,20 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 		"BriefingTitleLabel",
 		"BriefingSummaryLabel",
 		"BriefingStatusLabel",
+		"BriefingMinimapVisual",
 		"BriefingObjectivesLabel",
 		"BriefingThreatsLabel",
 		"BriefingTeamsLabel",
 		"BriefingLoadoutLabel",
 	]:
+		if label_name == "BriefingMinimapVisual":
+			var minimap_visual: Control = MISSION_BRIEFING_MINIMAP_VISUAL_SCRIPT.new()
+			minimap_visual.name = label_name
+			minimap_visual.custom_minimum_size = Vector2(0.0, 96.0)
+			minimap_visual.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			minimap_visual.mouse_filter = Control.MOUSE_FILTER_PASS
+			vbox.add_child(minimap_visual)
+			continue
 		var label := Label.new()
 		label.name = label_name
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -2431,6 +2449,14 @@ func _set_mission_briefing_label(label_name: String, text: String) -> void:
 		return
 	label.text = text
 	label.tooltip_text = text
+
+
+func _set_mission_briefing_minimap_visual(snapshot: Dictionary) -> void:
+	var minimap_visual := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingMinimapVisual") as Control
+	if minimap_visual == null or not minimap_visual.has_method("set_visual_snapshot"):
+		return
+	minimap_visual.visible = bool(snapshot.get("configured", false))
+	minimap_visual.call("set_visual_snapshot", snapshot)
 
 
 func _build_personnel_notification_messages() -> PackedStringArray:

@@ -159,7 +159,8 @@ git checkout -b batch/<batch-name>
 - TASK_528 - Rolling HTML Status Report (implementiert)
 - TASK_529 - Mission HUD Team Icon Polish (implementiert)
 - TASK_530 - Briefing Panel Renderer MVP (implementiert)
-- TASK_531 - Briefing Minimap Visual Renderer
+- TASK_531 - Briefing Minimap Visual Renderer (implementiert)
+- TASK_532 - Briefing Background / Loadout Recommendation Polish
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

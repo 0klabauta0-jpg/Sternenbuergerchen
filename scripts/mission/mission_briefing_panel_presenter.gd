@@ -5,6 +5,7 @@ const TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const BRIEFING_MINIMAP_OVERLAY_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_briefing_minimap_overlay_presenter.gd")
+const BRIEFING_MINIMAP_VISUAL_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_briefing_minimap_visual_presenter.gd")
 
 
 func build_snapshot_from_files(scenario_path: String, map_path: String = "", play_mode: String = TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP) -> Dictionary:
@@ -29,6 +30,11 @@ func build_snapshot(scenario, terrain_map_data, minimap_snapshot: Dictionary = {
 	if scenario == null or not scenario.has_method("get_briefing"):
 		return _empty_snapshot("Scenario could not be loaded.")
 	var briefing: Dictionary = Dictionary(scenario.call("get_briefing"))
+	var minimap_visual_snapshot: Dictionary = Dictionary(BRIEFING_MINIMAP_VISUAL_PRESENTER_SCRIPT.new().call(
+		"build_snapshot",
+		terrain_map_data,
+		minimap_snapshot
+	))
 	var source_path: String = String(scenario.call("get_source_path")) if scenario.has_method("get_source_path") else ""
 	var title: String = String(briefing.get("title", "")).strip_edges()
 	if title.is_empty():
@@ -53,6 +59,7 @@ func build_snapshot(scenario, terrain_map_data, minimap_snapshot: Dictionary = {
 		"scenario_source": "MissionScenarioData",
 		"terrain_source": "TerrainMapData" if terrain_map_data != null else "",
 		"minimap_source": "MissionBriefingMinimapOverlayPresenter",
+		"minimap_visual_source": "MissionBriefingMinimapVisualPresenter",
 		"source_path": source_path,
 		"map_path": _get_object_string(scenario, "map_file_path"),
 		"play_mode": play_mode,
@@ -72,6 +79,9 @@ func build_snapshot(scenario, terrain_map_data, minimap_snapshot: Dictionary = {
 		"recommended_loadout_count": loadout_entries.size(),
 		"team_spawn_overlay_count": team_spawn_lines.size(),
 		"minimap_snapshot": minimap_snapshot.duplicate(true),
+		"minimap_visual_snapshot": minimap_visual_snapshot.duplicate(true),
+		"minimap_visual_sample_count": int(minimap_visual_snapshot.get("sample_count", 0)),
+		"minimap_visual_entry_count": int(minimap_visual_snapshot.get("entry_count", 0)),
 		"panel_status_text": _build_panel_status_text(objectives.size(), threats.size(), team_spawn_lines.size(), loadout_entries.size()),
 		"summary_line": _join_or_dash(PackedStringArray([summary])),
 		"objective_text": _join_or_dash(objective_lines),
@@ -97,6 +107,9 @@ func _empty_snapshot(reason: String) -> Dictionary:
 		"threat_lines": PackedStringArray(),
 		"loadout_lines": PackedStringArray(),
 		"team_spawn_lines": PackedStringArray(),
+		"minimap_visual_snapshot": {},
+		"minimap_visual_sample_count": 0,
+		"minimap_visual_entry_count": 0,
 		"panel_status_text": reason,
 		"objective_text": "-",
 		"threat_text": "-",
