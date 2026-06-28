@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/multiplayer-team-ownership-smoke</code>.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf <code>integration/core-foundation</code> nach TASK_520; diese Datei dient jetzt auch als laufender Zwischenbericht.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -168,6 +168,7 @@
       <span class="pill good">TASK_518 Runtime-Gates</span>
       <span class="pill good">TASK_519 Cargo-Bridge</span>
       <span class="pill good">TASK_520 MP-Ownership</span>
+      <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
   </header>
@@ -178,6 +179,7 @@
       <button class="tab" type="button" data-tab-target="gameflow">Spiel-Flow</button>
       <button class="tab" type="button" data-tab-target="code">Code-Review</button>
       <button class="tab" type="button" data-tab-target="friction">Reibungen</button>
+      <button class="tab" type="button" data-tab-target="worklog">Arbeitsstand</button>
       <button class="tab" type="button" data-tab-target="roadmap">Naechste Schritte</button>
       <button class="tab" type="button" data-tab-target="checks">Checks</button>
       <button class="tab" type="button" data-tab-target="notes">Notizen</button>
@@ -190,6 +192,7 @@
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
           <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, TASK_518 macht daraus lesbare Runtime-Gates, TASK_519 koppelt den Cargo-Frachter als read-only Runtime-Snapshot an diese Gates, und TASK_520 klaert Alpha/Bravo-/NPC-/Peer-Ownership fuer PvP-Smokes. Die naechste Verdichtung sitzt vor allem noch in sichtbaren Cargo-/Editor-Visuals, PvP-UI-Teamlesbarkeit, Enemy-State-Aufbereitung und den grossen Editor-/Visual-Skripten.</p>
+          <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
           <h2>Statusampel</h2>
@@ -333,8 +336,8 @@
               <p>TASK_511 versioniert den Runtime-Export-Contract und nutzt <code>scripts/tools/export_runtime_release.ps1</code>, um <code>export_presets.cfg</code> nur temporaer zu patchen. Das PCK fiel im Test von <code>242312564</code> auf <code>194203876</code> Bytes.</p>
             </div>
             <div class="finding medium">
-              <h3>Arbeitsstand bleibt bewusst task-lokal</h3>
-              <p>Der aktuelle Branch enthaelt TASK_518, den Runtime-Gate-Service, die Combat-Driver-Bridge und diesen aktualisierten Bericht. Der lokale <code>export_presets.cfg</code> wird nach Export wieder restauriert und bleibt untracked.</p>
+              <h3>Berichtspflege bleibt bewusst task-lokal</h3>
+              <p>Die Integration enthaelt TASK_520; dieser Branch aktualisiert nur den Review-/Zwischenbericht. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
             </div>
             <div class="finding low">
               <h3>Laute Asset-Warnungen</h3>
@@ -344,6 +347,43 @@
               <h3>Referenzprojekt im Addon-Ordner</h3>
               <p>Godot meldet beim Filesystem-Scan weiterhin <code>addons/godot_open_rts_reference</code> mit eigenem <code>project.godot</code>. Das ist nach TASK_511 kein Export-Abbruch und kein Pack-Eintrag mehr, bleibt aber als laute Editor-Hygiene offen.</p>
             </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="worklog" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Zwischenbericht</h2>
+          <p>Dieser Bereich ist der schnelle Arbeitsstand fuer den laufenden Chat: Was wurde zuletzt integriert, was ist gesichert, und was sollte als naechstes passieren, ohne dass wir uns im Klein-Klein verlieren.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Block</th><th>Was erledigt ist</th><th>Warum es wichtig ist</th><th>Naechster Anschluss</th></tr></thead>
+              <tbody>
+                <tr><td>Tactical Clarity</td><td>TASK_506 bis TASK_510 liefern Preview-/Threat-/Contact-Vertraege.</td><td>Bewegungsentscheidungen werden lesbarer, bevor noch mehr Combat-Komplexitaet dazukommt.</td><td>Preview- und LOS-Daten im sichtbaren Missions-HUD weiter polieren.</td></tr>
+                <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
+                <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot.</td><td>Map-Bauen wird weniger muehsam, aber der Drag-Preview ist noch nicht visuell genug.</td><td>TASK_521: Builder Drag Preview Visual Polish.</td></tr>
+                <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_519 beschreiben AA/Computer/Cargo als Vertical Slice und Runtime-Gates.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_522: sichtbare Cargo-Touchdown-/Abflug-Politur.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag.</td><td>TASK_523: Besitz, Teamfarben und NPC-Kontrolle sichtbar machen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Aktuelle Lage</h2>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_520 sauber</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.next_tasks_visible"> Naechste Tasks sind sichtbar priorisiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="worklog.visual_playtest_done"> Manueller Sichttest fuer naechsten Visual-Slice erledigt</label>
+        </article>
+        <article class="card full">
+          <h2>Was als naechstes getan werden sollte</h2>
+          <div class="stack">
+            <div class="finding high"><h3>1. Editor sichtbar besser machen</h3><p>Der Map-Builder ist der groesste Reibungspunkt fuer Content. Sichtbare Drag-Linien fuer Wall/Pipe/Cliff geben sofort Rueckmeldung, ob das Tool das baut, was du gerade zeichnest.</p></div>
+            <div class="finding medium"><h3>2. Cargo-Flow sichtbar machen</h3><p>Die Runtime weiss bereits, ob der Frachter geblockt, inbound, gelandet oder departed ist. Jetzt muss das im Missionsbild lesbar werden.</p></div>
+            <div class="finding medium"><h3>3. PvP-Lesbarkeit zeigen</h3><p>Nach dem Ownership-Smoke sollten Lobby/Briefing/Mission klar zeigen, welcher Peer welches Team besitzt und welche NPCs neutral oder teamgebunden sind.</p></div>
+            <div class="finding low"><h3>4. Warn-Laerm reduzieren</h3><p>Factory-UID-Warnungen und Referenzprojekt-Scanwarnung sind keine harten Blocker, aber sie machen echte Export-/Runtime-Probleme schwerer erkennbar.</p></div>
           </div>
         </article>
       </div>
@@ -373,9 +413,9 @@
           <h2>Entscheidung</h2>
           <p>Welchen Pfad willst du als naechstes erzwingen?</p>
           <div class="button-row" style="margin-top:12px" data-choice-group="next_path">
-            <button class="choice" type="button" data-choice-value="enemy_behavior_boundary">Enemy-Behavior</button>
-            <button class="choice" type="button" data-choice-value="editor_ux">Editor-UX</button>
-            <button class="choice active" type="button" data-choice-value="scenario_slice">Szenario-Slice</button>
+            <button class="choice active" type="button" data-choice-value="editor_ux">Editor-UX</button>
+            <button class="choice" type="button" data-choice-value="cargo_visuals">Cargo-Visuals</button>
+            <button class="choice" type="button" data-choice-value="pvp_readability">PvP-Lesbarkeit</button>
           </div>
           <label style="display:block;margin-top:14px;">Prioritaetsnotiz
             <textarea data-export-key="roadmap.priority_note" placeholder="Was soll beim naechsten Task auf keinen Fall kaputtgehen?"></textarea>
@@ -420,7 +460,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_519-Merge. Arbeitsbranch: <code>task/multiplayer-team-ownership-smoke</code>. Aktueller Arbeitsstand enthaelt TASK_520 plus diesen aktualisierten Review-Report.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_520-Merge. Arbeitsbranch fuer diese Berichtspflege: <code>task/review-html-report-refresh</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -503,13 +543,22 @@
               "TASK_522 - Cargo Touchdown Visual Polish",
               "TASK_523 - PvP Team Readability UI Pass"
             ],
+            recently_completed_tasks: [
+              "TASK_516 - Editor Builder UX Pass",
+              "TASK_517 - Mission Scenario Vertical Slice",
+              "TASK_518 - Mission Scenario Runtime Gates",
+              "TASK_519 - Cargo Touchdown Visual/Runtime Bridge",
+              "TASK_520 - Multiplayer Team Ownership Smoke"
+            ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
-            runtime_pck_bytes: 194203876
+            runtime_pck_bytes: 194203876,
+            report_mode: "rolling_interim_status"
           },
           metadata: {
-            branch: "task/mission-scenario-runtime-gates",
-            head: "working_tree_after_task_518",
+            branch: "task/review-html-report-refresh",
+            integration_base: "integration/core-foundation after TASK_520",
+            head: "working_tree_report_refresh",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }
