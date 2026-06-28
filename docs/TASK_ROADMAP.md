@@ -169,7 +169,8 @@ git checkout -b batch/<batch-name>
 - TASK_538 - Homebase To Mission Launch Handoff Smoke (implementiert)
 - TASK_539 - Mission Insertion First Order Readability Pass (implementiert)
 - TASK_540 - Mission First Move Decision Readability Pass (implementiert)
-- TASK_541 - Mission First Move Execution Feedback Pass
+- TASK_541 - Mission First Move Execution Feedback Pass (implementiert)
+- TASK_542 - Mission First Contact Readability Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

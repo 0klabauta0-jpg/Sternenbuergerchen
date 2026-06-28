@@ -30,6 +30,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## First-Move-Decision-Readability
 `get_mission_first_move_decision_readability_snapshot()` ist der Headless-Pruefpunkt fuer die erste Move-/GO-Entscheidung nach dem Deboarding. Der Snapshot darf nur bestehende Selection-, Deploy-, Command-Feedback-, Waypoint-Intent- und Visualizer-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf GO nicht ausfuehren. Erwartete Lesbarkeit: ausgewaehltes Fireteam ist deployed und runtime-aktiv, geplante Waypoints existieren, Waypoint-Intent-Preview und visualisierte Waypoints sind vorhanden, und GO ist fuer die geplante Order bereit.
 
+## First-Move-Execution-Feedback
+`get_mission_first_move_execution_feedback_snapshot()` ist der Headless-Pruefpunkt fuer die erste laufende Move-Ausfuehrung nach GO. Der Snapshot darf nur bestehende Command-Feedback-, Phase-Execution-, Movement-, OrderPlan- und Visualizer-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: GO wurde ueber `execute_selected_fireteam_orders()` angenommen, das ausgewaehlte Fireteam hat einen aktiven Execution-State, der Movement-State zeigt Ziel/Progress-/Readability-Daten, und das sichtbare Feedback benennt laufende oder angenommene Ausfuehrung.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
