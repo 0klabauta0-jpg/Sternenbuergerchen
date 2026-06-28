@@ -7,6 +7,7 @@ signal session_disconnected(message: String)
 
 const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const MULTIPLAYER_ROSTER_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_roster_contract.gd")
+const TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 
 const DEFAULT_PORT: int = 7777
 const DEFAULT_ADDRESS: String = "127.0.0.1"
@@ -189,6 +190,8 @@ func can_start_mission() -> bool:
 
 
 func get_session_snapshot() -> Dictionary:
+	var assignments: Dictionary = build_session_assignments()
+	var team_readability: Dictionary = _build_team_readability_snapshot(assignments)
 	return {
 		"connection_state": _connection_state,
 		"status_text": _last_status_text,
@@ -206,7 +209,9 @@ func get_session_snapshot() -> Dictionary:
 		"mission_started": _mission_started,
 		"local_ready": _is_local_peer_ready(),
 		"peers": _build_peer_snapshot_array(),
-		"assignments": build_session_assignments(),
+		"assignments": assignments,
+		"team_readability": team_readability,
+		"team_readability_summary": String(team_readability.get("summary_text", "")),
 		"roster": MULTIPLAYER_ROSTER_CONTRACT_SCRIPT.call("build_lobby_roster_mode_snapshot", roster_mode, _get_local_peer_id()),
 		"map_manifest": _host_map_manifest.duplicate(true),
 		"map_transfer": _map_transfer_state.duplicate(true),
@@ -225,6 +230,64 @@ func build_session_assignments() -> Dictionary:
 		"team_play_mode": _team_play_mode,
 		"selected_map_path": _selected_map_path,
 		"lobby_setup": get_lobby_setup_snapshot(),
+	}
+
+
+func get_team_readability_snapshot() -> Dictionary:
+	return _build_team_readability_snapshot(build_session_assignments())
+
+
+func _build_team_readability_snapshot(assignments: Dictionary) -> Dictionary:
+	var contract_play_mode: String = TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP
+	if _team_play_mode == TEAM_PLAY_MODE_COOP:
+		contract_play_mode = TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_COOP
+	var ownership_snapshot: Dictionary = Dictionary(TEAM_OWNERSHIP_CONTRACT_SCRIPT.call(
+		"build_team_ownership_snapshot",
+		_build_lobby_team_readability_slice(),
+		assignments,
+		contract_play_mode
+	))
+	return {
+		"configured": bool(ownership_snapshot.get("configured", false)),
+		"valid": bool(ownership_snapshot.get("valid", false)),
+		"errors": PackedStringArray(ownership_snapshot.get("errors", PackedStringArray())),
+		"runtime_authority": String(ownership_snapshot.get("runtime_authority", "MissionMultiplayerTeamOwnershipContract")),
+		"ui_sets_gameplay_truth": false,
+		"play_mode": String(ownership_snapshot.get("play_mode", contract_play_mode)),
+		"summary_text": String(ownership_snapshot.get("team_readability_summary", "")),
+		"entries": Array(ownership_snapshot.get("team_readability", [])).duplicate(true),
+	}
+
+
+func _build_lobby_team_readability_slice() -> Dictionary:
+	return {
+		"play_modes": PackedStringArray([
+			TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_SINGLEPLAYER,
+			TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_COOP,
+			TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP,
+		]),
+		"team_slots": [
+			{
+				"team_id": host_team_id,
+				"role": "attacker",
+				"spawn_marker_id": "spawn_alpha",
+				"npc_owned": false,
+				"player_assignable_modes": PackedStringArray([
+					TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_SINGLEPLAYER,
+					TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_COOP,
+					TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP,
+				]),
+			},
+			{
+				"team_id": client_team_id,
+				"role": "defender",
+				"spawn_marker_id": "spawn_bravo",
+				"npc_owned": true,
+				"player_assignable_modes": PackedStringArray([
+					TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP,
+				]),
+			},
+		],
 	}
 
 
