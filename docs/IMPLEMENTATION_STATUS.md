@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_517 - Mission Scenario Vertical Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/air_asset_threat_damage_contract.md`, `docs/tasks/TASK_482_mission_briefing_data_contract.md`, `docs/tasks/TASK_500_gameflow_spine_hardening.md`, `docs/tasks/TASK_504_startmap_expansion_performance_pass.md`
+- Stand: `data/mission_scenarios/frontier_probe_vertical_slice.json` beschreibt den naechsten spielbaren Mission-Slice auf `res://maps/station_outpost_192x192.json`: Luftabwehr ausschalten, Stationscomputer halten und Cargo-Touchdown/Extract decken.
+- Stand: `scripts/mission/mission_scenario_vertical_slice_contract.gd` normalisiert und validiert den read-only `vertical_slice`-Payload fuer Play-Modes, Team-Slots und Flow-Steps, ohne Runtime-/UI-Gameplay-State zu mutieren.
+- Stand: Der Homebase-Katalog bietet `frontier_probe_vertical_slice` mit Scenario-Datei an; die bestehende `frontier_probe` bleibt absichtlich map-only fuer alte Contracts.
+- Stand: Das Briefing nutzt terrain-only Minimap, AA-/Computer-/Cargo-Ziele und kanonische `WeaponData`-Loadout-Empfehlungen (`sniper`, `rocket_launcher`, `rail_gun`, `medictool`).
+- Risiken/offen: Echte Runtime-Gates fuer AA aus, Computer-Hold und Cargo-Abflug sind Folgearbeit; PvP braucht danach Team-/NPC-Besitz und Lobby-Smoke.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_517_mission_scenario_vertical_slice.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_504_startmap_expansion_performance_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_482_mission_briefing_data_contract.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_518 - Mission Scenario Runtime Gates` fuer AA-Shutdown, Computer-Hold und Cargo-Touchdown/Extract als autoritativen Runtime-Pfad schneiden.
+
 ### TASK_516 - Editor Builder UX Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_516_editor_builder_ux_pass.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`, `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`, `docs/tasks/TASK_493_map_editor_station_builder_focus.md`

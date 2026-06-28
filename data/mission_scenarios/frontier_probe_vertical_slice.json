@@ -1,0 +1,234 @@
+{
+	"version": 1,
+	"scenario_id": "frontier_probe_vertical_slice",
+	"display_name": "Frontier Probe: AA / Cargo Slice",
+	"map_file_path": "res://maps/station_outpost_192x192.json",
+	"time_limit_seconds": 1500.0,
+	"mission_slot_count_override": 8,
+	"win_condition": "objective_capture",
+	"objective": {
+		"marker_id": "objective_point",
+		"capture_radius": 128.0
+	},
+	"enemy_groups": [
+		{
+			"group_id": "bravo_station_guard",
+			"display_name": "Bravo Outpost Guard",
+			"team_id": "team_bravo",
+			"spawn_marker_id": "spawn_bravo",
+			"enemy_ids": [
+				"bravo_guard_01",
+				"bravo_guard_02",
+				"bravo_guard_03",
+				"bravo_guard_04"
+			],
+			"tactics": {
+				"profile_id": "defensive_cover",
+				"stance": "defend",
+				"cover_behavior": "hold_best_cover",
+				"security_mode": "cover_arc",
+				"facing": "west",
+				"advance_style": "hold",
+				"allowed_weapon_roles": ["rifle", "smg", "heavy"],
+				"sight_behavior": "cover_arc",
+				"contact_behavior": "suppress_from_cover",
+				"weapon_profile": "defensive_mid",
+				"visual_archetype": "enemy_space_suit_orange",
+				"movement_posture_policy": "hold_ready",
+				"ready_distance_world": 760.0,
+				"travel_speed_factor": 0.35,
+				"ready_speed_factor": 0.24,
+				"aim_move_speed_factor": 0.18,
+				"heavy_weapon_role": "none",
+				"anti_armor_threat": false,
+				"air_asset_risk_profile": "none",
+				"communication_intensity": "normal"
+			}
+		},
+		{
+			"group_id": "bravo_air_defense",
+			"display_name": "Bravo Air Defense Team",
+			"team_id": "team_bravo",
+			"spawn_marker_id": "spawn_bravo",
+			"enemy_ids": [
+				"bravo_aa_01",
+				"bravo_aa_02",
+				"bravo_aa_03",
+				"bravo_aa_04"
+			],
+			"tactics": {
+				"profile_id": "sniper_watch",
+				"stance": "overwatch",
+				"cover_behavior": "hold_high_cover",
+				"security_mode": "overwatch",
+				"facing": "south_west",
+				"advance_style": "hold",
+				"allowed_weapon_roles": ["marksman", "rifle"],
+				"sight_behavior": "long_lane",
+				"contact_behavior": "prioritize_exposed_targets",
+				"weapon_profile": "anti_armor",
+				"weapon_id": "rocket_launcher",
+				"visual_archetype": "enemy_space_suit_orange",
+				"movement_posture_policy": "hold_ready",
+				"ready_distance_world": 920.0,
+				"travel_speed_factor": 0.3,
+				"ready_speed_factor": 0.2,
+				"aim_move_speed_factor": 0.12,
+				"heavy_weapon_role": "anti_armor",
+				"anti_armor_threat": true,
+				"air_asset_risk_profile": "watch_warning",
+				"lz_threat_zone_id": "factory_danger_zone",
+				"communication_intensity": "normal"
+			}
+		}
+	],
+	"wave_config": {
+		"wave_count": 1,
+		"units_per_wave": 8,
+		"first_wave_delay_seconds": 0.0,
+		"wave_delay_seconds": 120.0
+	},
+	"patrol_bindings": [
+		{
+			"binding_id": "bravo_guard_station_loop",
+			"target_id": "spawn_bravo",
+			"patrol_path_id": "station_loop_route",
+			"mode": "pre_contact"
+		},
+		{
+			"binding_id": "bravo_aa_factory_watch",
+			"target_id": "bravo_aa_01",
+			"patrol_path_id": "factory_watch_route",
+			"mode": "pre_contact"
+		}
+	],
+	"tactical_authoring": {
+		"communication_intensity": "normal",
+		"fireteam_defaults": {
+			"advance_style": "bounding",
+			"security_mode": "360"
+		},
+		"air_asset_risk": {
+			"profile_id": "watch_warning",
+			"enemy_group_id": "bravo_air_defense",
+			"lz_threat_zone_id": "factory_danger_zone",
+			"warning_required_before_damage": true,
+			"loss_consequence": "abort_cargo_run"
+		}
+	},
+	"briefing": {
+		"title": "Operation Frontier Probe",
+		"summary": "Schalte die Luftabwehr aus, halte das Stationsgebaeude und sichere einen kurzen Frachtanflug.",
+		"background_image_path": "res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png",
+		"minimap_mode": "terrain_only",
+		"objectives": [
+			{
+				"text": "Luftabwehr ausschalten",
+				"target_id": "factory_danger_zone"
+			},
+			{
+				"text": "Stationscomputer 18 Sekunden halten",
+				"target_id": "objective_point"
+			},
+			{
+				"text": "Frachter anlanden lassen und Abflug decken",
+				"target_id": "spawn_alpha"
+			}
+		],
+		"threats": [
+			"Bravo-Wache im Aussenposten",
+			"Raketenwerfer-Team deckt den Frachtkorridor",
+			"PvP-ready: Alpha und Bravo nutzen getrennte Team-/Spawn-Annahmen"
+		],
+		"recommended_loadout": [
+			{
+				"label": "Solo / Alpha",
+				"role_id": "solo_infiltration",
+				"weapon_ids": ["sniper", "rocket_launcher", "medictool"],
+				"armor_id": "medium",
+				"count": 1,
+				"reason": "Reichweite fuer das AA-Team, Anti-Armor fuer Luftabwehr und Support fuer den langen Weg."
+			},
+			{
+				"label": "Coop / Fireteam",
+				"role_id": "fireteam_support",
+				"weapon_ids": ["rifle", "rail_gun", "medictool"],
+				"armor_id": "heavy",
+				"count": 4,
+				"reason": "Gebaeude halten, Computer bedienen und Frachter decken."
+			}
+		],
+		"annotations": [
+			{
+				"kind": "danger",
+				"text": "AA",
+				"target_id": "factory_danger_zone",
+				"radius": 160.0
+			},
+			{
+				"kind": "objective",
+				"text": "COM",
+				"target_id": "objective_point",
+				"radius": 96.0
+			},
+			{
+				"kind": "route",
+				"text": "CARGO",
+				"target_id": "spawn_alpha",
+				"radius": 128.0
+			}
+		]
+	},
+	"vertical_slice": {
+		"contract_version": 1,
+		"play_modes": ["singleplayer", "coop", "multiplayer_pvp"],
+		"team_slots": [
+			{
+				"team_id": "team_alpha",
+				"role": "attacker",
+				"spawn_marker_id": "spawn_alpha",
+				"npc_owned": false
+			},
+			{
+				"team_id": "team_bravo",
+				"role": "defender",
+				"spawn_marker_id": "spawn_bravo",
+				"npc_owned": true
+			}
+		],
+		"flow_steps": [
+			{
+				"step_id": "disable_air_defense",
+				"objective_type": "air_defense_shutdown",
+				"target_marker_id": "factory_danger_zone",
+				"required_state": "aa_disabled",
+				"min_hold_seconds": 0.0,
+				"blocks_cargo_until_complete": true
+			},
+			{
+				"step_id": "occupy_station_computer",
+				"objective_type": "computer_hold",
+				"target_marker_id": "objective_point",
+				"required_state": "computer_controlled",
+				"min_hold_seconds": 18.0,
+				"operator_team_id": "team_alpha"
+			},
+			{
+				"step_id": "cargo_touchdown_extract",
+				"objective_type": "cargo_touchdown_extract",
+				"target_marker_id": "spawn_alpha",
+				"required_state": "cargo_departed",
+				"min_hold_seconds": 12.0,
+				"requires_step_id": "disable_air_defense"
+			}
+		],
+		"runtime_gate_notes": [
+			"Slice ist Daten-/Contract-Vorbereitung; echte Runtime-Gates folgen separat.",
+			"Keine Spieler-LZ wird im Szenario gespeichert; der Frachtkorridor nutzt Map-Marker."
+		]
+	},
+	"notes": [
+		"TASK_517 vertical slice scenario for AA shutdown, computer hold and cargo touch-and-go.",
+		"Preview/briefing data only; SimulationRoot remains authoritative for real mission commands."
+	]
+}
