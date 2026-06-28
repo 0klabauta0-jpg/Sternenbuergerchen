@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_519 - Cargo Touchdown Visual/Runtime Bridge
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_519_cargo_touchdown_runtime_bridge.md`, `docs/tasks/TASK_518_mission_scenario_runtime_gates.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/dev/air_asset_threat_damage_contract.md`, `docs/dev/combat_loop_authority_contract.md`
+- Stand: `scripts/mission/mission_cargo_touchdown_bridge.gd` bildet den Cargo-Frachter als read-only Runtime-Snapshot mit `blocked`, `inbound`, `landed`, `departing` und `departed` ab.
+- Stand: `MissionCombatLoopDriver` konfiguriert die Cargo-Bridge aus Scenario-Dateien, spiegelt sie in `get_mission_cargo_touchdown_snapshot()` und reicht `cargo_state`/`cargo_hold_seconds` an die Runtime-Gates weiter.
+- Stand: `get_playability_snapshot()` enthaelt `mission_cargo_touchdown`, ohne UI/Overlay zur Gameplay-Wahrheit zu machen; der alte `set_mission_scenario_cargo_state(...)`-Pfad bleibt kompatibel.
+- Risiken/offen: Sichtbare Frachter-VFX/Map-Animation ist noch Folgearbeit; Multiplayer-Team-Ownership fuer Cargo-Ausloeser sollte separat gehaertet werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_519_cargo_touchdown_runtime_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_518_mission_scenario_runtime_gates.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_520 - Multiplayer Team Ownership Smoke` oder `TASK_521 - Builder Drag Preview Visual Polish`, je nachdem ob zuerst MP-Slice-Sicherheit oder sichtbares Editor-/Cargo-Feedback priorisiert wird.
+
 ### TASK_518 - Mission Scenario Runtime Gates
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_518_mission_scenario_runtime_gates.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/air_asset_threat_damage_contract.md`, `docs/dev/combat_loop_authority_contract.md`
 - Stand: `scripts/mission/mission_scenario_runtime_gates.gd` wertet `vertical_slice.flow_steps` als read-only Runtime-Gates fuer AA-Shutdown, Computer-Hold und Cargo-Touchdown/Extract aus.
 - Stand: `MissionCombatLoopDriver` kann Scenario-Gates aus der Scenario-Datei konfigurieren, liefert `get_mission_scenario_runtime_gate_snapshot()`, spiegelt den Computer-Hold-Countdown in `ObjectiveStatus` und laesst den Szenario-Slice erst gewinnen, wenn alle Gates abgeschlossen sind.
 - Stand: `MissionTestSetup` reicht Scenario-Dateien an die Gate-Bridge weiter; alte map-only Missionen bleiben davon unberuehrt.
-- Risiken/offen: Cargo-State ist in diesem Slice noch ein Contract-Input. Die echte Frachter-Lande-/Abflug-Animation und PvP-Team-Ownership bleiben Folgearbeit.
+- Risiken/offen: Die echte Frachter-Lande-/Abflug-Animation und PvP-Team-Ownership bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_518_mission_scenario_runtime_gates.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_517_mission_scenario_vertical_slice.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_505_frontier_probe_large_map_playtest_hotfix.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_519 - Cargo Touchdown Visual/Runtime Bridge` oder `TASK_520 - Multiplayer Team Ownership Smoke`, je nachdem ob zuerst sichtbarer Cargo-Flow oder MP-Faehigkeit gehaertet werden soll.
+- Naechster Schritt: Siehe `TASK_519 - Cargo Touchdown Visual/Runtime Bridge`.
 
 ### TASK_517 - Mission Scenario Vertical Slice
 - Status: implementiert im Arbeitsstand

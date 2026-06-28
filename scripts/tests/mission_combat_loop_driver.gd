@@ -19,6 +19,7 @@ const MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT: GDScript = preload("res://script
 const MISSION_COMBAT_REMOTE_EVENT_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_remote_event_bridge.gd")
 const MISSION_COMBAT_RESOLUTION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/mission/mission_combat_resolution_resolver.gd")
 const MISSION_SCENARIO_RUNTIME_GATES_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_runtime_gates.gd")
+const MISSION_CARGO_TOUCHDOWN_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_cargo_touchdown_bridge.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const COMBAT_READABILITY_PRESENTER_SCRIPT: GDScript = preload("res://scripts/tactical/combat_readability_presenter.gd")
 const WIN_CONDITION_ELIMINATION: String = "elimination"
@@ -184,6 +185,8 @@ var _mission_scenario_runtime_step_states: Dictionary = {}
 var _mission_scenario_completed_step_ids: Array = []
 var _mission_scenario_cargo_state: String = ""
 var _mission_scenario_cargo_hold_seconds: float = 0.0
+var _mission_cargo_touchdown_bridge = MISSION_CARGO_TOUCHDOWN_BRIDGE_SCRIPT.new()
+var _mission_cargo_touchdown_snapshot: Dictionary = {}
 var _readability_presenter = COMBAT_READABILITY_PRESENTER_SCRIPT.new()
 var _audio_event_bus = null
 
@@ -275,6 +278,9 @@ func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 		return false
 	_mission_scenario_runtime_gates.call("configure_from_file", path)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
+	if _mission_cargo_touchdown_bridge != null:
+		_mission_cargo_touchdown_bridge.call("configure_from_file", path)
+		_update_mission_cargo_touchdown_bridge(_mission_scenario_runtime_gate_snapshot)
 	return bool(_mission_scenario_runtime_gates.call("is_configured"))
 
 
@@ -283,12 +289,29 @@ func configure_scenario_runtime_gates(slice: Dictionary) -> bool:
 		return false
 	_mission_scenario_runtime_gates.call("configure_from_slice", slice)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
+	if _mission_cargo_touchdown_bridge != null:
+		_mission_cargo_touchdown_bridge.call("configure_from_slice", slice)
+		_update_mission_cargo_touchdown_bridge(_mission_scenario_runtime_gate_snapshot)
 	return bool(_mission_scenario_runtime_gates.call("is_configured"))
 
 
 func get_mission_scenario_runtime_gate_snapshot() -> Dictionary:
 	_update_mission_scenario_runtime_gates()
 	return _mission_scenario_runtime_gate_snapshot.duplicate(true)
+
+
+func configure_mission_cargo_touchdown_bridge(config: Dictionary) -> bool:
+	if _mission_cargo_touchdown_bridge == null:
+		return false
+	_mission_cargo_touchdown_bridge.call("configure", config)
+	_update_mission_cargo_touchdown_bridge(_mission_scenario_runtime_gate_snapshot)
+	_update_mission_scenario_runtime_gates()
+	return bool(_mission_cargo_touchdown_bridge.call("is_configured"))
+
+
+func get_mission_cargo_touchdown_snapshot() -> Dictionary:
+	_update_mission_scenario_runtime_gates()
+	return _mission_cargo_touchdown_snapshot.duplicate(true)
 
 
 func set_mission_scenario_runtime_step_state(step_id: String, state: String) -> void:
@@ -308,14 +331,21 @@ func mark_mission_scenario_runtime_step_complete(step_id: String) -> void:
 
 
 func set_mission_scenario_cargo_state(state: String, hold_seconds: float = 0.0) -> void:
+	set_mission_cargo_touchdown_state(state, hold_seconds)
+
+
+func set_mission_cargo_touchdown_state(state: String, hold_seconds: float = 0.0, progress: float = -1.0) -> void:
 	_mission_scenario_cargo_state = state.strip_edges().to_lower()
 	_mission_scenario_cargo_hold_seconds = maxf(hold_seconds, 0.0)
+	if _mission_cargo_touchdown_bridge != null and bool(_mission_cargo_touchdown_bridge.call("is_configured")):
+		_mission_cargo_touchdown_bridge.call("set_runtime_state", _mission_scenario_cargo_state, _mission_scenario_cargo_hold_seconds, progress)
 	_update_mission_scenario_runtime_gates()
 
 
 func get_playability_snapshot() -> Dictionary:
 	if _runs_local_authority:
 		_sync_objective_countdown_state()
+	_update_mission_scenario_runtime_gates()
 	var base_snapshot: Dictionary = {
 		"combat_state": "resolved" if _combat_finished else "active",
 		"win_condition_type": win_condition,
@@ -327,7 +357,8 @@ func get_playability_snapshot() -> Dictionary:
 		"duration_seconds": _get_duration_seconds(),
 		"remaining_time_limit_seconds": get_remaining_time_limit_seconds(),
 		"last_event_text": _last_event_text,
-		"mission_scenario_runtime_gates": get_mission_scenario_runtime_gate_snapshot(),
+		"mission_scenario_runtime_gates": _mission_scenario_runtime_gate_snapshot.duplicate(true),
+		"mission_cargo_touchdown": _mission_cargo_touchdown_snapshot.duplicate(true),
 	}
 	return Dictionary(MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call("build_playability_snapshot", base_snapshot, _get_objective_status(), _mission_result))
 
@@ -1372,11 +1403,32 @@ func _update_combat_resolution() -> void:
 func _update_mission_scenario_runtime_gates() -> void:
 	if _mission_scenario_runtime_gates == null or not bool(_mission_scenario_runtime_gates.call("is_configured")):
 		_mission_scenario_runtime_gate_snapshot = {}
+		_update_mission_cargo_touchdown_bridge({})
 		return
+	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("update", _build_mission_scenario_runtime_gate_context())).duplicate(true)
+	_update_mission_cargo_touchdown_bridge(_mission_scenario_runtime_gate_snapshot)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("update", _build_mission_scenario_runtime_gate_context())).duplicate(true)
 
 
+func _update_mission_cargo_touchdown_bridge(gate_snapshot: Dictionary) -> void:
+	if _mission_cargo_touchdown_bridge == null or not bool(_mission_cargo_touchdown_bridge.call("is_configured")):
+		_mission_cargo_touchdown_snapshot = {}
+		return
+	_mission_cargo_touchdown_snapshot = Dictionary(_mission_cargo_touchdown_bridge.call("update", {
+		"scenario_gate_snapshot": gate_snapshot,
+		"cargo_state": _mission_scenario_cargo_state,
+		"cargo_hold_seconds": _mission_scenario_cargo_hold_seconds,
+	})).duplicate(true)
+
+
 func _build_mission_scenario_runtime_gate_context() -> Dictionary:
+	var cargo_state: String = _mission_scenario_cargo_state
+	var cargo_hold_seconds: float = _mission_scenario_cargo_hold_seconds
+	if not _mission_cargo_touchdown_snapshot.is_empty():
+		var bridged_cargo_state: String = String(_mission_cargo_touchdown_snapshot.get("cargo_state", "")).strip_edges().to_lower()
+		if not bridged_cargo_state.is_empty() and bridged_cargo_state != "unconfigured":
+			cargo_state = bridged_cargo_state
+		cargo_hold_seconds = maxf(float(_mission_cargo_touchdown_snapshot.get("hold_seconds", cargo_hold_seconds)), 0.0)
 	return {
 		"now_msec": Time.get_ticks_msec(),
 		"objective_status": _get_objective_status(),
@@ -1384,8 +1436,8 @@ func _build_mission_scenario_runtime_gate_context() -> Dictionary:
 		"enemy_group_fit_counts": _build_enemy_group_fit_counts(),
 		"completed_step_ids": _mission_scenario_completed_step_ids.duplicate(true),
 		"step_states": _mission_scenario_runtime_step_states.duplicate(true),
-		"cargo_state": _mission_scenario_cargo_state,
-		"cargo_hold_seconds": _mission_scenario_cargo_hold_seconds,
+		"cargo_state": cargo_state,
+		"cargo_hold_seconds": cargo_hold_seconds,
 	}
 
 

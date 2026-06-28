@@ -147,6 +147,7 @@ git checkout -b batch/<batch-name>
 - TASK_516 - Editor Builder UX Pass (implementiert)
 - TASK_517 - Mission Scenario Vertical Slice (implementiert)
 - TASK_518 - Mission Scenario Runtime Gates (implementiert)
+- TASK_519 - Cargo Touchdown Visual/Runtime Bridge (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
