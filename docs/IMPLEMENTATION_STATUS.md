@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_539 - Mission Insertion First Order Readability Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_539_mission_insertion_first_order_readability_pass.md`, `docs/tasks/TASK_538_homebase_to_mission_launch_handoff_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_mission_insertion_first_order_readability_snapshot()` fuer Dropship-Payload, Card-UI, LZ-Status, Drop-Blockade/-Bereitschaft, ausgewaehltes Fireteam und erste Order-Kontrollen.
+- Stand: Der Smoke startet eine Homebase-Direktmission, zeigt die Mission, prueft den Zustand vor LZ, setzt eine LZ ueber den bestehenden Card-Flow und prueft danach Render-LZ plus Drop-Bereitschaft.
+- Stand: Der Rolling-HTML-Bericht bleibt als laufender Zwischenbericht gepflegt und nennt TASK_539 als erledigten Missions-Insertion-Lesbarkeitsslice.
+- Risiken/offen: Der Task prueft Headless-Snapshots und Render-Zaehler, aber keinen menschlichen Pixel-Sichttest. Der naechste spielbare Anschluss ist die erste echte Move-/GO-Entscheidung nach Deboarding.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_539_mission_insertion_first_order_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_396_mission_dropship_lz_drop_hotfix.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_540 - Mission First Move Decision Readability Pass`, damit nach dem Drop die erste echte Bewegungs-/GO-Entscheidung ebenso klar wird.
+
 ### TASK_538 - Homebase To Mission Launch Handoff Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_538_homebase_to_mission_launch_handoff_smoke.md`, `docs/tasks/TASK_537_pre_mission_f6_screenshot_visual_audit.md`, `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/dev/mission_briefing_contract.md`

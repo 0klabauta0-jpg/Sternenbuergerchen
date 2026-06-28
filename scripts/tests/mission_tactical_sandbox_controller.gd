@@ -11638,6 +11638,175 @@ func _compact_cover_effectiveness_label(value: String) -> String:
 			return "?"
 
 
+func get_mission_insertion_first_order_readability_snapshot() -> Dictionary:
+	var planning_state: Dictionary = get_planning_state()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var mission_drop_cards: Array = Array(planning_state.get("mission_drop_cards", []))
+	var selected_craft_id: String = String(planning_state.get("mission_drop_craft_id", _mission_drop_craft_id)).strip_edges()
+	var selected_card: Dictionary = _find_mission_dropship_card_entry(selected_craft_id)
+	if selected_card.is_empty() and mission_drop_cards.size() == 1:
+		selected_card = Dictionary(mission_drop_cards[0]).duplicate(true)
+		selected_craft_id = String(selected_card.get("craft_id", selected_craft_id)).strip_edges()
+	var selected_has_lz: bool = bool(selected_card.get("has_lz_position", bool(planning_state.get("has_lz_position", false))))
+	var selected_payload_ids: Array = _sanitize_drop_payload_ids(Array(selected_card.get("embarked_unit_ids", [])))
+	var selected_payload_count: int = maxi(selected_payload_ids.size(), int(selected_card.get("passenger_count", int(planning_state.get("mission_drop_passenger_count", 0)))))
+	var card_ui: Dictionary = _build_mission_dropship_card_ui_readability_snapshot(selected_craft_id)
+	var command_buttons: Dictionary = Dictionary(command_feedback.get("command_buttons", {}))
+	var move_button: Dictionary = Dictionary(command_buttons.get("move", {}))
+	var defend_button: Dictionary = Dictionary(command_buttons.get("defend", {}))
+	var go_button: Dictionary = Dictionary(command_buttons.get("go_plan", {}))
+	var mission_control_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	var selected_status_text: String = String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges()
+	var render_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		render_snapshot = Dictionary(primary_3d_view.call("get_render_snapshot"))
+	var lz_marker_count: int = int(render_snapshot.get("requested_lz_marker_count", 0))
+	var dropship_lz_label_count: int = int(render_snapshot.get("dropship_lz_label_count", 0))
+	var checks: Array = [
+		_build_mission_insertion_readability_check(
+			"drop_payload_present",
+			selected_payload_count > 0,
+			"Selected dropship carries %d operator(s)." % selected_payload_count
+		),
+		_build_mission_insertion_readability_check(
+			"dropship_card_readable",
+			bool(card_ui.get("panel_visible", false)) and bool(card_ui.get("selected_card_present", false)),
+			"Dropship panel/card must be visible before the first insertion order."
+		),
+		_build_mission_insertion_readability_check(
+			"lz_status_readable",
+			mission_control_text.find("LZ") >= 0 or bool(card_ui.get("set_lz_button_present", false)),
+			"Mission Control or selected card exposes LZ state."
+		),
+		_build_mission_insertion_readability_check(
+			"deploy_requires_lz",
+			selected_has_lz or bool(card_ui.get("drop_button_disabled", true)),
+			"Drop is blocked until the selected craft has an LZ."
+		),
+		_build_mission_insertion_readability_check(
+			"selected_fireteam_visible",
+			not _selected_fireteam_ids.is_empty() and not selected_status_text.is_empty(),
+			"Selected fireteam status remains readable during insertion planning."
+		),
+		_build_mission_insertion_readability_check(
+			"first_order_controls_visible",
+			bool(move_button.get("exists", false)) and bool(defend_button.get("exists", false)) and bool(go_button.get("exists", false)),
+			"Move/Defend/GO controls exist in the command feedback contract."
+		),
+		_build_mission_insertion_readability_check(
+			"read_only",
+			true,
+			"Snapshot reports UI readability and does not enqueue commands."
+		),
+	]
+	if selected_has_lz:
+		checks.append(_build_mission_insertion_readability_check(
+			"planned_lz_rendered",
+			lz_marker_count > 0 or dropship_lz_label_count > 0,
+			"Planned LZ has a world marker or dropship LZ label."
+		))
+		checks.append(_build_mission_insertion_readability_check(
+			"drop_ready_after_lz",
+			bool(card_ui.get("drop_button_present", false)) and not bool(card_ui.get("drop_button_disabled", true)),
+			"Selected card exposes an enabled Drop command after LZ placement."
+		))
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_539",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"mission_drop_craft_id": selected_craft_id,
+		"mission_drop_source": String(planning_state.get("mission_drop_source", "")).strip_edges(),
+		"mission_drop_state": String(selected_card.get("state", planning_state.get("mission_drop_state", ""))).strip_edges().to_lower(),
+		"mission_drop_card_count": mission_drop_cards.size(),
+		"selected_card": selected_card.duplicate(true),
+		"selected_card_has_lz": selected_has_lz,
+		"selected_payload_count": selected_payload_count,
+		"selected_payload_ids": selected_payload_ids,
+		"card_ui": card_ui,
+		"mission_control_status_text": mission_control_text,
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"selected_fireteam_status_text": selected_status_text,
+		"first_order_controls": {
+			"move": move_button,
+			"defend": defend_button,
+			"go_plan": go_button,
+		},
+		"lz_marker_count": lz_marker_count,
+		"dropship_lz_label_count": dropship_lz_label_count,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_mission_dropship_card_ui_readability_snapshot(craft_id: String) -> Dictionary:
+	var panel := get_node_or_null("../TacticalUI/MissionDropshipPanel") as Control
+	var result: Dictionary = {
+		"panel_present": panel != null,
+		"panel_visible": false,
+		"card_count": 0,
+		"selected_card_present": false,
+		"selected_card_visible": false,
+		"set_lz_button_present": false,
+		"set_lz_button_disabled": true,
+		"drop_button_present": false,
+		"drop_button_disabled": true,
+		"commands": {},
+	}
+	if panel == null:
+		return result
+	result["panel_visible"] = panel.visible and panel.is_visible_in_tree()
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var commands: Dictionary = {}
+	for node in _collect_node_tree(panel):
+		var control := node as Control
+		if control != null and bool(control.get_meta("mission_dropship_card", false)):
+			result["card_count"] = int(result.get("card_count", 0)) + 1
+			if String(control.get_meta("mission_dropship_craft_id", "")).strip_edges() == normalized_craft_id:
+				result["selected_card_present"] = true
+				result["selected_card_visible"] = control.visible and control.is_visible_in_tree()
+		var button := node as Button
+		if button == null or not bool(button.get_meta("mission_dropship_card_command_button", false)):
+			continue
+		if String(button.get_meta("mission_dropship_craft_id", "")).strip_edges() != normalized_craft_id:
+			continue
+		var action_id: String = String(button.get_meta("mission_dropship_card_command", "")).strip_edges()
+		if action_id.is_empty():
+			continue
+		var command_snapshot: Dictionary = {
+			"exists": true,
+			"text": button.text,
+			"disabled": button.disabled,
+			"visible": button.visible,
+			"is_visible_in_tree": button.is_visible_in_tree(),
+			"tooltip_text": button.tooltip_text,
+			"active": bool(button.get_meta("mission_dropship_card_command_active", false)),
+		}
+		commands[action_id] = command_snapshot
+		if action_id == "set_lz":
+			result["set_lz_button_present"] = true
+			result["set_lz_button_disabled"] = button.disabled
+		elif action_id == "drop":
+			result["drop_button_present"] = true
+			result["drop_button_disabled"] = button.disabled
+	result["commands"] = commands
+	return result
+
+
+func _build_mission_insertion_readability_check(check_id: String, passed: bool, details: String) -> Dictionary:
+	return {
+		"id": check_id,
+		"passed": passed,
+		"details": details,
+	}
+
+
 func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	return {

@@ -186,6 +186,7 @@
       <span class="pill good">TASK_536 Statuschips</span>
       <span class="pill good">TASK_537 Visual-Audit</span>
       <span class="pill good">TASK_538 Launch-Handoff</span>
+      <span class="pill good">TASK_539 Insertion-Readability</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -210,6 +211,7 @@
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
           <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, TASK_518 macht daraus lesbare Runtime-Gates, TASK_519 koppelt den Cargo-Frachter als read-only Runtime-Snapshot an diese Gates, TASK_520 klaert Alpha/Bravo-/NPC-/Peer-Ownership fuer PvP-Smokes, TASK_521 macht Network-Drag im Builder als read-only 3D-Preview sichtbar, TASK_522 macht den Cargo-Touchdown im Missionsbild sichtbar, TASK_523 macht Alpha/Bravo-/NPC-/Peer-Besitz in Lobby und Session lesbar, TASK_524 reduziert bekannten Export-/Import-Warn-Laerm, TASK_525 macht Alpha/Bravo-Besitz plus Spawnmarker als farbige Lobby-Badges sichtbar, TASK_526 zeigt dieselbe Teamchip-Information im laufenden Missions-HUD, TASK_527 liefert Alpha/Bravo-Spawn-Overlays fuer die Briefing-Minimap, TASK_528 macht diesen Bericht als laufenden Arbeitsstand explizit, TASK_529 macht Teamchips/Briefing-Spawns kompakter mit ASCII-sicheren Icon-Feldern, TASK_530 rendert die Briefing-Daten als sichtbaren Homebase-Pre-Mission-Block, TASK_531 zeichnet dazu eine grob gesampelte Briefing-Minimap mit Terrain, Spawns und Markern, TASK_532 zeigt Briefing-Bild plus strukturierte Loadout-Empfehlungskarten, TASK_533 fuehrt diese Empfehlungen bestaetigt in den bestehenden Homebase-Loadout-Workflow, TASK_534 fasst Briefing, Team, Loadout, Pilot, Cargo, Dropship und Boarding als Startbereitschaft zusammen, TASK_535 macht diesen Startflow im FullHD-Homebase-Deck ueberlappungsfrei und kompakter, TASK_536 gibt den Readiness-Chips Statusfarben, Icon-Text und pruefbare Tooltips, TASK_537 macht Layout, Kontrast und Startbutton-Konsistenz als read-only Visual-Audit pruefbar, und TASK_538 beweist den Homebase-zu-Mission-Handoff fuer Mission, Fireteam, Dropship, Loadout und Timer. Der naechste spielbare Anschluss sollte die erste Insertion und erste Befehlsentscheidung im Missionsbild sein.</p>
+          <p>TASK_539 ist als aktueller Zwischenstand umgesetzt: Im Missionsbild gibt es jetzt einen read-only Insertion-/First-Order-Readability-Snapshot fuer Dropship-Payload, Card-Sichtbarkeit, LZ-Zustand, Drop-Blockade/-Bereitschaft, ausgewaehltes Fireteam und erste Order-Kontrollen. Der naechste Anschluss ist die erste echte Move-/GO-Entscheidung nach dem Deboarding.</p>
           <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
@@ -355,7 +357,7 @@
             </div>
             <div class="finding good">
               <h3>Berichtspflege bleibt bewusst task-lokal</h3>
-              <p>Dieser Arbeitsstand enthaelt TASK_538: Der Homebase-Startflow wird ueber den bestehenden Launch-Pfad bis in MissionSetup und TacticalController verfolgt. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
+              <p>Dieser Arbeitsstand enthaelt TASK_539: Der gestartete Missionszustand wird bis zur LZ-Setzung als read-only Insertion-/First-Order-Readability-Snapshot verfolgt. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
             </div>
             <div class="finding good">
               <h3>Factory-UID-Warnung bereinigt</h3>
@@ -383,7 +385,7 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit und TASK_538 als Launch-Handoff-Smoke.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis ins Missionsbild lesbar.</td><td>Naechster spielbarer Schritt ist TASK_539: Insertion und erste Befehlsentscheidung sichtbar machen.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke und TASK_539 als Insertion-/First-Order-Readability-Snapshot.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zur ersten Missionsentscheidung lesbar.</td><td>Naechster spielbarer Schritt ist TASK_540: erste Move-/GO-Entscheidung nach Deboarding sichtbar machen.</td></tr>
                 <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
@@ -391,7 +393,7 @@
         </article>
         <article class="card">
           <h2>Aktuelle Lage</h2>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_529 sauber</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_539 sauber</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
@@ -410,6 +412,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_536_done"> TASK_536 Startflow-Statuschips sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_537_done"> TASK_537 Pre-Mission-Visual-Audit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_538_done"> TASK_538 Launch-Handoff-Smoke ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_539_done"> TASK_539 Insertion-/First-Order-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.next_tasks_visible"> Naechste Tasks sind sichtbar priorisiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="worklog.visual_playtest_done"> Manueller Sichttest fuer naechsten Visual-Slice erledigt</label>
         </article>
@@ -434,7 +437,8 @@
             <div class="finding good"><h3>Erledigt: Startflow Icon And Status Color Polish</h3><p>TASK_536 macht aus der Readiness-Zeile farbige Statuschips mit Icon-Text, Tooltip und pruefbaren Visual-Metadaten.</p></div>
             <div class="finding good"><h3>Erledigt: Pre-Mission F6 Screenshot Visual Audit</h3><p>TASK_537 prueft den Startflow als read-only Visual-Audit auf Layout, Kontrast, Chip-Metadaten und Startbutton-Konsistenz.</p></div>
             <div class="finding good"><h3>Erledigt: Homebase To Mission Launch Handoff Smoke</h3><p>TASK_538 prueft, dass Mission, Fireteam, Dropship, Loadout und Timer nach Homebase-Start im aktiven Missionspfad ankommen.</p></div>
-            <div class="finding medium"><h3>1. TASK_539 - Mission Insertion First Order Readability Pass</h3><p>Der naechste spielbare Schritt ist, im Missionsbild die erste Insertion, LZ-Wahl und erste Commander-Order so sichtbar zu machen, dass der Spieler sofort weiss, was passiert.</p></div>
+            <div class="finding good"><h3>Erledigt: Mission Insertion First Order Readability Pass</h3><p>TASK_539 prueft, dass Dropship-Payload, Card, LZ-Status, Drop-Bereitschaft, ausgewaehltes Fireteam und erste Order-Kontrollen im Missionsbild lesbar sind.</p></div>
+            <div class="finding medium"><h3>1. TASK_540 - Mission First Move Decision Readability Pass</h3><p>Nach dem Deboarding sollte die erste echte Move-/GO-Entscheidung mit Ziel, Preview, Fireteam-Bezug und Command-Status sichtbar abgesichert werden.</p></div>
           </div>
         </article>
       </div>
@@ -473,7 +477,8 @@
             <div class="finding good"><h3>Erledigt: TASK_536 - Startflow Icon And Status Color Polish</h3><p>Statusfarben, Icon-Text und Tooltips fuer Readiness-Chips sauberer gestalten.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_537 - Pre-Mission F6 Screenshot Visual Audit</h3><p>Layout-/Kontrast-/Startbutton-Audit aus bestehenden Startflow-Snapshots ableiten und den manuellen Screenshot bewusst offen lassen.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_538 - Homebase To Mission Launch Handoff Smoke</h3><p>Startbereiten Homebase-Zustand bis zum Missionsstart verfolgen: Mission-ID, Fireteam, Dropship, Team, Loadout und Boarding kommen konsistent im aktiven MissionSetup/TacticalController an.</p></div>
-            <div class="finding medium"><h3>1. TASK_539 - Mission Insertion First Order Readability Pass</h3><p>Die erste Missionsminute aus Spielersicht polieren: Dropship-Karte, LZ-Status, Deploy-Bereitschaft, gewaehltes Fireteam und erste Order muessen ohne Sucharbeit lesbar sein.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_539 - Mission Insertion First Order Readability Pass</h3><p>Die erste Missionsminute ist als read-only Snapshot pruefbar: Dropship-Karte, LZ-Status, Deploy-Bereitschaft, gewaehltes Fireteam und erste Order-Kontrollen.</p></div>
+            <div class="finding medium"><h3>1. TASK_540 - Mission First Move Decision Readability Pass</h3><p>Die erste echte Move-/GO-Entscheidung nach Deboarding polieren, damit Ziel, Preview, Fireteam-Bezug und Command-Status ohne Sucharbeit klar sind.</p></div>
           </div>
         </article>
         <article class="card">
@@ -535,6 +540,7 @@
                 <tr><td><code>task_536_startflow_icon_status_color_polish.gd</code></td><td>21 passed, 0 failed</td><td>Readiness-Chip-Farben, Icon-Text, Tooltips und Startbutton-Farbmetadaten.</td></tr>
                 <tr><td><code>task_537_pre_mission_f6_screenshot_visual_audit.gd</code></td><td>28 passed, 0 failed</td><td>Read-only Visual-Audit fuer Layout, Kontrast, Readiness-Chips und Startbutton-Konsistenz.</td></tr>
                 <tr><td><code>task_538_homebase_to_mission_launch_handoff_smoke.gd</code></td><td>30 passed, 0 failed</td><td>Homebase-Startflow bis MissionSetup/TacticalController mit Mission, Fireteam, Dropship, Loadout und Timer.</td></tr>
+                <tr><td><code>task_539_mission_insertion_first_order_readability_pass.gd</code></td><td>22 passed, 0 failed</td><td>Read-only Insertion-/First-Order-Snapshot fuer Dropship-Payload, Card, LZ, Drop-Bereitschaft, Fireteam und erste Controls; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -627,7 +633,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_539 - Mission Insertion First Order Readability Pass"
+              "TASK_540 - Mission First Move Decision Readability Pass"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -652,7 +658,8 @@
               "TASK_535 - Pre-Mission FullHD Startflow Visual Pass",
               "TASK_536 - Startflow Icon And Status Color Polish",
               "TASK_537 - Pre-Mission F6 Screenshot Visual Audit",
-              "TASK_538 - Homebase To Mission Launch Handoff Smoke"
+              "TASK_538 - Homebase To Mission Launch Handoff Smoke",
+              "TASK_539 - Mission Insertion First Order Readability Pass"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -665,9 +672,9 @@
             report_mode: "rolling_interim_status"
           },
           metadata: {
-            branch: "task/homebase-to-mission-launch-handoff-smoke",
-            integration_base: "integration/core-foundation after TASK_537",
-            head: "task/homebase-to-mission-launch-handoff-smoke",
+            branch: "task/mission-insertion-first-order-readability-pass",
+            integration_base: "integration/core-foundation after TASK_538",
+            head: "task/mission-insertion-first-order-readability-pass",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }
