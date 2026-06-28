@@ -153,12 +153,13 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/export-runtime-package-hygiene</code>.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-28 auf Branch <code>task/mission-controller-boundary-slice</code>.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
       <span class="pill warn">Legacy-Driver in scripts/tests</span>
       <span class="pill good">Release-Hygiene implementiert</span>
+      <span class="pill good">TASK_512 Boundary-Slice</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
   </header>
@@ -180,7 +181,7 @@
           <h2>Kurzfazit</h2>
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
-          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 jetzt umgesetzt: der Runtime-Export wird gefiltert, der lokale Godot-Preset bleibt untracked und wird nur temporaer gepatcht. Die naechste gute Richtung ist nun ein kleiner Mission-Controller-Boundary-Slice, ohne den gerade stabilisierten Spiel-Flow zu zerlegen.</p>
+          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat danach den ersten kleinen Mission-Controller-Boundary-Slice gezogen: Fireteam-Dropship-/Runtime-Lesestatus liegt jetzt in einem Mission-Helper, waehrend Commands und Effects weiter ueber die bestehenden autoritativen Pfade laufen.</p>
         </article>
         <article class="card">
           <h2>Statusampel</h2>
@@ -232,7 +233,7 @@
             </div>
             <div class="finding medium">
               <h3>Mission-Controller ist zu breit</h3>
-              <p><code>scripts/tests/mission_tactical_sandbox_controller.gd:431</code> tickt UI, Planning, Dropship, Security, Karten und Fireteam-Ausfuehrung. Das funktioniert, ist aber schwer als Produktcode zu verstehen.</p>
+              <p><code>scripts/tests/mission_tactical_sandbox_controller.gd:431</code> tickt UI, Planning, Dropship, Security, Karten und Fireteam-Ausfuehrung. TASK_512 hat den Fireteam-Runtime-Lesestatus herausgezogen, aber der Controller bleibt insgesamt noch zu breit.</p>
             </div>
             <div class="finding low">
               <h3>NPC-Taktik ist brauchbar, aber noch kein Spiel-Design-Loop</h3>
@@ -268,7 +269,8 @@
             <table>
               <thead><tr><th>Datei</th><th>Groesse</th><th>Befund</th><th>Empfehlung</th></tr></thead>
               <tbody>
-                <tr><td><code>scripts/tests/mission_tactical_sandbox_controller.gd</code></td><td>16.499 Zeilen</td><td>Produktiver sichtbarer Mission-Controller im Testpfad. Enthalt Planning, Dropship, Fireteam-Ausfuehrung, UI-Refresh, Selection, Security und Area Orders.</td><td>Keine Massenverschiebung. Erst Dropship-State, Fireteam-Execution und Planning-Serialization in kleine Adapter/Presenter schneiden.</td></tr>
+                <tr><td><code>scripts/tests/mission_tactical_sandbox_controller.gd</code></td><td>16k+ Zeilen</td><td>Produktiver sichtbarer Mission-Controller im Testpfad. Fireteam-Runtime-Status ist jetzt ueber <code>MissionFireteamRuntimeState</code> gekapselt, aber Planning, Dropship, Fireteam-Ausfuehrung, UI-Refresh, Selection, Security und Area Orders bleiben breit.</td><td>Keine Massenverschiebung. Naechster Schnitt: Mission-Result/Objective oder Dropship-Mission-State.</td></tr>
+                <tr><td><code>scripts/mission/mission_fireteam_runtime_state.gd</code></td><td>klein</td><td>Read-only Helper fuer embarked/deployed/ground/displayable/runtime-active Fireteam-Status. Keine SceneTree-Abhaengigkeit, keine Commands/Effects.</td><td>Als Muster fuer weitere Boundary-Slices nutzen: klein, testbar, ohne neue Gameplay-Wahrheit.</td></tr>
                 <tr><td><code>scripts/terrain/terrain_map_3d_view.gd</code></td><td>10.149 Zeilen</td><td>Visual-Renderer, Streaming, Batching, Units, Waffen, Helme, Bubbles, FoW, Dropship-Visuals in einer Datei.</td><td>Visual-Subsysteme nach Feature-Helpers trennen: UnitVisualAttachments, FireVfx, FeedbackBubbles, StreamingChunks.</td></tr>
                 <tr><td><code>scripts/editor/map_editor.gd</code></td><td>8.466 Zeilen</td><td>Editor-UI, Palette, Save/Load, Builder-Toolbar, Network-Drag, Cliff/Wall-Overlays, Mission-Scenario in einem Skript.</td><td>Palette/Builder/NetworkDrag/ScenarioPanel in Module extrahieren, aber vorhandene Authoring-Wahrheit in TerrainMapData lassen.</td></tr>
                 <tr><td><code>scripts/tests/mission_combat_loop_driver.gd</code></td><td>4.576 Zeilen</td><td>Tick-Orchestrator mit Enemy-Behavior, Objective/Result, Respawn/Bleedout, UI-Readability und Remote-Events.</td><td>Bereits begonnene TASK_495-Kette fortsetzen: Resolution, EnemyBehavior, Readability Presenter.</td></tr>
@@ -345,17 +347,17 @@
           <h2>Priorisierte Empfehlung</h2>
           <div class="stack">
             <div class="finding good"><h3>Erledigt: TASK_511 - Export Runtime Package Hygiene</h3><p>Runtime-Export-Contract, temporaeres Preset-Patching und Pack-Log-Stichprobe sind umgesetzt. Der Export laeuft mit <code>EXPORT_EXIT=0</code> und ohne Editor-/Test-/Docs-Packentries.</p></div>
-            <div class="finding high"><h3>1. TASK_512 - Mission Controller Boundary Slice</h3><p>Nicht refactoren um des Refactors willen. Einen konkreten kleinen Schnitt waehlen: Dropship-Mission-State oder Fireteam-Runtime-Activation aus <code>mission_tactical_sandbox_controller.gd</code> ziehen.</p></div>
-            <div class="finding medium"><h3>2. TASK_513 - Mission Combat Resolution Boundary</h3><p>Objective, Elimination, Countdown und MissionResult aus <code>mission_combat_loop_driver.gd</code> in einen Resolver/Contract-Helper, Snapshot-Keys stabil halten.</p></div>
-            <div class="finding medium"><h3>3. TASK_514 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
-            <div class="finding low"><h3>4. TASK_515 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_512 - Mission Controller Boundary Slice</h3><p>Fireteam-Dropship-/Runtime-Lesestatus liegt in <code>MissionFireteamRuntimeState</code>; die HUD-Regression fuer embarked/deployed Fireteams bleibt gruen.</p></div>
+            <div class="finding high"><h3>1. TASK_513 - Mission Combat Resolution Boundary</h3><p>Objective, Elimination, Countdown und MissionResult aus <code>mission_combat_loop_driver.gd</code> in einen Resolver/Contract-Helper, Snapshot-Keys stabil halten.</p></div>
+            <div class="finding medium"><h3>2. TASK_514 - Editor Builder UX Pass</h3><p>Palette-Suche/Favoriten, echte Icons/Preview, Drag-Preview fuer Pipe/Wall/Cliff und gespeicherte Scale-Presets. Fokus: Map bauen soll weniger nach Verwaltung aussehen.</p></div>
+            <div class="finding low"><h3>3. TASK_515 - Mission Scenario Vertical Slice</h3><p>Ein konkretes Szenario: Luftabwehr/Computerpunkte/Gebaeude besetzen/Fracht landen und wieder abheben. Singleplayer gegen NPCs, spaeter 1v1 mit NPC-Besatzung.</p></div>
           </div>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
           <p>Welchen Pfad willst du als naechstes erzwingen?</p>
           <div class="button-row" style="margin-top:12px" data-choice-group="next_path">
-            <button class="choice active" type="button" data-choice-value="mission_boundary">Mission-Controller</button>
+            <button class="choice active" type="button" data-choice-value="combat_resolution_boundary">Combat-Resolution</button>
             <button class="choice" type="button" data-choice-value="editor_ux">Editor-UX</button>
             <button class="choice" type="button" data-choice-value="scenario_slice">Szenario-Slice</button>
           </div>
@@ -380,6 +382,7 @@
                 <tr><td><code>task_504_startmap_expansion_performance_pass.gd</code></td><td>35 passed, 0 failed</td><td>192x192-Map, 36.864 Tiles, Streaming aktiv; JSON Load ca. 1224 ms.</td></tr>
                 <tr><td><code>task_505_frontier_probe_large_map_playtest_hotfix.gd</code></td><td>PASS</td><td>Drop, 360 Security, Orders, Contact, Objective Victory; Renderfenster bleibt chunked.</td></tr>
                 <tr><td><code>task_511_export_runtime_package_hygiene.gd</code></td><td>27 passed, 0 failed</td><td>Contract, Script, Excludes, Allowlist, Report-Workbench und Doku-Anbindung gruen.</td></tr>
+                <tr><td><code>task_512_mission_controller_boundary_slice.gd</code></td><td>18 passed, 0 failed</td><td>Helper-Vertrag, read-only Grenze, Controller-Anbindung und Doku-Anbindung gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
               </tbody>
@@ -392,7 +395,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_510-Merge. Arbeitsbranch: <code>task/export-runtime-package-hygiene</code>. Aktueller Arbeitsstand enthaelt TASK_511 plus diesen aktualisierten Review-Report.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_511-Merge. Arbeitsbranch: <code>task/mission-controller-boundary-slice</code>. Aktueller Arbeitsstand enthaelt TASK_512 plus diesen aktualisierten Review-Report.</p>
         </article>
       </div>
     </section>
@@ -408,7 +411,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="questions.export_hygiene_done"> Export-Hygiene ist als TASK_511 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="questions.editor_focus"> Soll der Editor vor Szenarioarbeit weiter poliert werden?</label>
           <label class="checkline"><input type="checkbox" data-export-key="questions.scenario_first"> Soll direkt ein spielbares Luftabwehr-/Outpost-Szenario gebaut werden?</label>
-          <label class="checkline"><input type="checkbox" data-export-key="questions.boundary_first"> Soll zuerst der Mission-Controller kleiner geschnitten werden?</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="questions.boundary_first"> Erster Mission-Controller-Schnitt ist erledigt</label>
         </article>
         <article class="card full">
           <h2>Freitext fuer Codex</h2>
@@ -471,7 +474,6 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_512 - Mission Controller Boundary Slice",
               "TASK_513 - Mission Combat Resolution Boundary",
               "TASK_514 - Editor Builder UX Pass",
               "TASK_515 - Mission Scenario Vertical Slice"
@@ -481,8 +483,8 @@
             runtime_pck_bytes: 194203876
           },
           metadata: {
-            branch: "task/export-runtime-package-hygiene",
-            head: "working_tree_after_task_511",
+            branch: "task/mission-controller-boundary-slice",
+            head: "working_tree_after_task_512",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }

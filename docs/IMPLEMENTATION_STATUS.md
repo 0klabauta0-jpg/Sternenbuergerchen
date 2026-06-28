@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_512 - Mission Controller Boundary Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_512_mission_controller_boundary_slice.md`, `docs/dev/runtime_script_layout_contract.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `scripts/mission/mission_fireteam_runtime_state.gd` kapselt den lesenden Fireteam-Dropship-/Runtime-Status fuer embarked, deployed, ground-filtered, displayable und runtime-active.
+- Stand: `MissionTacticalSandboxController` behaelt seine privaten Kompatibilitaetsmethoden, delegiert die Statusberechnung aber an den Mission-Helper. Die Mini-Card-Displayable-Liste gruppiert Kandidaten-Units einmal statt pro Fireteam wiederholt zu scannen.
+- Stand: Der Helper hat keine SceneTree-Abhaengigkeit und enqueued keine Commands/Effects; Gameplay-Mutationen bleiben weiter bei `SimulationRoot` und den bestehenden Dropship-Effect-Adaptern.
+- Risiken/offen: Der grosse Mission-Controller bleibt Legacy-Bridge. Gute Folge-Slices sind Dropship-Mission-State, Fireteam-Execution-Adapter und Mission-Combat-Result-Boundary.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_512_mission_controller_boundary_slice.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_503_mission_dropship_fireteam_hud_truth.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_500_gameflow_spine_hardening.gd`, `git diff --check`.
+- Naechster Schritt: TASK_513 als Mission Combat Resolution Boundary schneiden oder vorher eine kleine sichtbare UX-Politur an Editor/Fireteam-HUD aus dem Review priorisieren.
+
 ### TASK_511 - Export Runtime Package Hygiene
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_511_export_runtime_package_hygiene.md`, `docs/dev/export_runtime_package_contract.md`, `docs/performance/performance_regression_gate.md`

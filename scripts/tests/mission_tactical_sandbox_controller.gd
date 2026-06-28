@@ -18,6 +18,7 @@ const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/c
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_primary_view_bridge.gd")
 const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_dropship_effect_adapter.gd")
+const MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_fireteam_runtime_state.gd")
 const AIR_ASSET_STATUS_SCRIPT: GDScript = preload("res://scripts/mission/air_asset_status.gd")
 const AIR_ASSET_THREAT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/combat/air_asset_threat_resolver.gd")
 const MISSION_COMMAND_INPUT_GUARD_SCRIPT: GDScript = preload("res://scripts/mission/mission_command_input_guard.gd")
@@ -217,6 +218,7 @@ var preview_mode: bool = false
 var _tactical_ui_visible: bool = true
 var _primary_view_bridge = MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT.new()
 var _dropship_effect_adapter = MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT.new()
+var _mission_fireteam_runtime_state = MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT.new()
 var _command_input_guard = MISSION_COMMAND_INPUT_GUARD_SCRIPT.new()
 var _selection_adapter = FIRETEAM_SELECTION_ADAPTER_SCRIPT.new()
 
@@ -2866,19 +2868,11 @@ func _refresh_selected_fireteam_cards() -> void:
 
 
 func _filter_ground_fireteam_card_units(units: Array) -> Array:
-	var result: Array = []
-	for unit in units:
-		if _is_unit_embarked_without_deployment(unit):
-			continue
-		result.append(unit)
-	return result
+	return _mission_fireteam_runtime_state.filter_ground_units(units, _embarked_unit_ids, _deployed_unit_ids)
 
 
 func _is_unit_embarked_without_deployment(unit) -> bool:
-	if unit == null or not unit.has_method("get_unit_id"):
-		return false
-	var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
-	return not unit_id.is_empty() and _embarked_unit_ids.has(unit_id) and not _deployed_unit_ids.has(unit_id)
+	return _mission_fireteam_runtime_state.is_unit_embarked_without_deployment(unit, _embarked_unit_ids, _deployed_unit_ids)
 
 
 func _selected_fireteams_have_embarked_payload() -> bool:
@@ -2892,10 +2886,7 @@ func _fireteam_has_embarked_payload(fireteam_id: String) -> bool:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return false
-	for unit in _get_fireteam_units(normalized_fireteam_id, true):
-		if _is_unit_embarked_without_deployment(unit):
-			return true
-	return false
+	return _mission_fireteam_runtime_state.fireteam_has_embarked_payload(_get_fireteam_units(normalized_fireteam_id, true), _embarked_unit_ids, _deployed_unit_ids)
 
 
 func _refresh_fireteam_mini_cards() -> void:
@@ -11013,16 +11004,14 @@ func _get_available_fireteam_ids() -> PackedStringArray:
 
 
 func _get_displayable_fireteam_ids() -> PackedStringArray:
-	var displayable_fireteam_ids: PackedStringArray = []
-	for fireteam_id_variant in _get_available_fireteam_ids():
-		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
-		if fireteam_id.is_empty() or displayable_fireteam_ids.has(fireteam_id):
-			continue
-		var units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(fireteam_id, not _use_visible_units_for_fireteam_ui()))
-		if units.is_empty():
-			continue
-		displayable_fireteam_ids.append(fireteam_id)
-	return displayable_fireteam_ids
+	var use_visible_units_for_ui: bool = _use_visible_units_for_fireteam_ui()
+	var candidate_units: Array = _get_all_friendly_units(not use_visible_units_for_ui)
+	return _mission_fireteam_runtime_state.build_displayable_fireteam_ids(
+		_get_available_fireteam_ids(),
+		candidate_units,
+		_embarked_unit_ids,
+		_deployed_unit_ids
+	)
 
 
 func _use_visible_units_for_fireteam_ui() -> bool:
@@ -16592,23 +16581,18 @@ func _enqueue_initial_loadout_effect_for_unit(unit_id: String) -> void:
 
 
 func _is_fireteam_runtime_active(fireteam_id: String) -> bool:
-	if preview_mode:
-		return false
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return false
-	if not _use_visible_units_for_fireteam_ui():
-		for active_unit in _get_fireteam_units(normalized_fireteam_id, false):
-			if active_unit != null and active_unit.has_method("get_unit_id"):
-				return true
-		return false
-	for unit in _get_fireteam_units(normalized_fireteam_id, true):
-		if unit == null or not unit.has_method("get_unit_id"):
-			continue
-		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
-		if _deployed_unit_ids.has(unit_id):
-			return true
-	return false
+	var use_visible_units_for_ui: bool = _use_visible_units_for_fireteam_ui()
+	return _mission_fireteam_runtime_state.is_fireteam_runtime_active(
+		normalized_fireteam_id,
+		_get_fireteam_units(normalized_fireteam_id, false),
+		_get_fireteam_units(normalized_fireteam_id, true),
+		_deployed_unit_ids,
+		use_visible_units_for_ui,
+		preview_mode
+	)
 
 
 func _maybe_start_active_phase_for_fireteam(fireteam_id: String) -> bool:
