@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_538 - Homebase To Mission Launch Handoff Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_538_homebase_to_mission_launch_handoff_smoke.md`, `docs/tasks/TASK_537_pre_mission_f6_screenshot_visual_audit.md`, `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/dev/mission_briefing_contract.md`
+- Stand: `MetaLayerFlow` expose't einen read-only `get_homebase_to_mission_handoff_snapshot()` fuer Mission-Auswahl, Planning-State, MissionSetup, TacticalController und Timer.
+- Stand: Der Smoke startet eine Homebase-Direktmission ueber den bestehenden `request_mission_start()`-Pfad und prueft Unit-IDs, Fireteam-IDs, Dropship, Scenario/Map, Member-Loadouts und Handoff-Checks.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_538 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf Mission-Insertion-/First-Order-Readability.
+- Risiken/offen: Der Handoff ist jetzt pruefbar; die erste Insertion, LZ-Wahl und erste Commander-Befehlsrunde im Missionsbild bleiben der naechste spielerische Lesbarkeits-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_537_pre_mission_f6_screenshot_visual_audit.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_536_startflow_icon_status_color_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_539 - Mission Insertion First Order Readability Pass`, damit die gestartete Mission die erste LZ-/Insertion-/Befehlsentscheidung gut lesbar macht.
+
 ### TASK_537 - Pre-Mission F6 Screenshot Visual Audit
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_537_pre_mission_f6_screenshot_visual_audit.md`, `docs/tasks/TASK_536_startflow_icon_status_color_polish.md`, `docs/tasks/TASK_535_pre_mission_fullhd_startflow_visual_pass.md`, `docs/dev/mission_briefing_contract.md`
@@ -19,7 +29,7 @@
 - Stand: Der Rolling-HTML-Bericht nennt TASK_537 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf den Homebase-zu-Mission-Handoff.
 - Risiken/offen: Kein echter Fenster-Screenshot in diesem Task. Der Audit prueft Layout-/Kontrast-Vertraege, aber nicht die tatsaechliche Pixelwirkung im Godot-Fenster.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_537_pre_mission_f6_screenshot_visual_audit.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_536_startflow_icon_status_color_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_535_pre_mission_fullhd_startflow_visual_pass.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_538 - Homebase To Mission Launch Handoff Smoke`, damit die lesbare Startbereitschaft in einen pruefbaren Missionsstart uebergeht.
+- Naechster Schritt: Siehe `TASK_538 - Homebase To Mission Launch Handoff Smoke`.
 
 ### TASK_536 - Startflow Icon And Status Color Polish
 - Status: implementiert im Arbeitsstand
