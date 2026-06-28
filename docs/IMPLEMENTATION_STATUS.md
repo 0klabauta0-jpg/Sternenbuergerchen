@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_526 - Mission HUD Team Chip Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_526_mission_hud_team_chip_polish.md`, `docs/tasks/TASK_525_team_badge_spawn_readability_polish.md`, `docs/tasks/TASK_523_pvp_team_readability_ui_pass.md`, `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/dev/multiplayer_session_lobby.md`, `docs/dev/html_report_workbench_contract.md`
+- Stand: `MissionMultiplayerTeamOwnershipContract` liefert den Alpha/Bravo-Default-Team-Slice jetzt als shared Contract, damit Lobby und Mission denselben read-only Ownership-Vertrag lesen.
+- Stand: `MissionTeamChipPresenter` baut aus `SimulationRoot.get_network_command_contract_snapshot()` kompakte Teamchips fuer Alpha/Bravo, Owner und Spawnmarker, ohne UI-Gameplay-Wahrheit zu erzeugen.
+- Stand: Das laufende Mission-HUD zeigt die Teamchips im bestehenden Strategic-HUD und exposed Text plus Snapshot in `get_command_feedback_snapshot()`.
+- Stand: Der laufende HTML-Reviewbericht ist als Zwischenbericht auf TASK_526 aktualisiert und nennt TASK_527 als naechsten Anschluss.
+- Risiken/offen: Die Teamchips sind noch textuell. Briefing-Minimap-Spawn-Overlays, Icon-Sprache und manueller Zwei-Instanzen-LAN-Sichttest bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_526_mission_hud_team_chip_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_525_team_badge_spawn_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_523_pvp_team_readability_ui_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_527 - Briefing Minimap Team Spawn Overlay`, wenn Alpha/Bravo-Spawnpunkte auch im Briefing sichtbar werden sollen.
+
 ### TASK_525 - Team Badge / Spawn Readability Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_525_team_badge_spawn_readability_polish.md`, `docs/tasks/TASK_523_pvp_team_readability_ui_pass.md`, `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/dev/multiplayer_session_lobby.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/html_report_workbench_contract.md`

@@ -55,6 +55,38 @@ static func build_team_ownership_snapshot(slice: Dictionary, session_assignments
 	}
 
 
+static func build_default_team_readability_slice(host_team_id: String = "team_alpha", client_team_id: String = "team_bravo") -> Dictionary:
+	return {
+		"play_modes": PackedStringArray([
+			PLAY_MODE_SINGLEPLAYER,
+			PLAY_MODE_COOP,
+			PLAY_MODE_MULTIPLAYER_PVP,
+		]),
+		"team_slots": [
+			{
+				"team_id": host_team_id.strip_edges(),
+				"role": "attacker",
+				"spawn_marker_id": "spawn_alpha",
+				"npc_owned": false,
+				"player_assignable_modes": PackedStringArray([
+					PLAY_MODE_SINGLEPLAYER,
+					PLAY_MODE_COOP,
+					PLAY_MODE_MULTIPLAYER_PVP,
+				]),
+			},
+			{
+				"team_id": client_team_id.strip_edges(),
+				"role": "defender",
+				"spawn_marker_id": "spawn_bravo",
+				"npc_owned": true,
+				"player_assignable_modes": PackedStringArray([
+					PLAY_MODE_MULTIPLAYER_PVP,
+				]),
+			},
+		],
+	}
+
+
 static func get_team_entry(snapshot: Dictionary, team_id: String) -> Dictionary:
 	var normalized_team_id: String = team_id.strip_edges()
 	for entry_variant in Array(snapshot.get("team_ownership", [])):

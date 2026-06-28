@@ -50,6 +50,7 @@ const TACTICAL_EVENT_LOG_SCRIPT: GDScript = preload("res://scripts/tactical/tact
 const FTL_READINESS_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/tactical/ftl_readiness_snapshot_contract.gd")
 const FIRETEAM_RUNTIME_EXECUTION_PATH_CONTRACT_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_runtime_execution_path_contract.gd")
 const TACTICAL_BREAKOUT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_breakout_resolver.gd")
+const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -78,6 +79,9 @@ const FIRETEAM_MINI_PANEL_PATH: String = "../TacticalUI/FireteamMiniPanel"
 const FIRETEAM_MINI_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniHeaderLabel"
 const FIRETEAM_MINI_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
 const TACTICAL_EVENT_LOG_PANEL_PATH: String = "../TacticalUI/TacticalEventLogPanel"
+const STRATEGIC_VBOX_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox"
+const STRATEGIC_STATUS_LABEL_PATH: String = STRATEGIC_VBOX_PATH + "/StrategicStatusLabel"
+const MISSION_TEAM_CHIP_LABEL_PATH: String = STRATEGIC_VBOX_PATH + "/MissionTeamChipLabel"
 const FIRETEAM_MINI_PANEL_Z_INDEX: int = 38
 const FIRETEAM_MINI_CARD_Z_INDEX: int = 42
 const TACTICAL_EVENT_LOG_Z_INDEX: int = 8
@@ -360,6 +364,7 @@ var _fireteam_movement_controller = null
 var _fireteam_security_controller = null
 var _waypoint_intent_preview_resolver = WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT.new()
 var _tactical_decision_threat_analyzer = TACTICAL_DECISION_THREAT_ANALYZER_SCRIPT.new()
+var _mission_team_chip_presenter = MISSION_TEAM_CHIP_PRESENTER_SCRIPT.new()
 var _comic_bubble_runtime_gate = null
 var _active_coordination_by_id: Dictionary = {}
 var _leader_initiated_flank_ready_at_msec_by_fireteam: Dictionary = {}
@@ -410,6 +415,7 @@ func _ready() -> void:
 	_ensure_order_visualizer()
 	_ensure_contact_map_overlay()
 	_ensure_mission_nav_timer_label()
+	_ensure_mission_team_chip_label()
 	_ensure_mission_dropship_panel()
 	_ensure_air_asset_status()
 	_apply_drop_light_fixed_hud_layout()
@@ -2371,11 +2377,12 @@ func _update_ui() -> void:
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
 	_refresh_mission_nav_timer_label()
+	_refresh_mission_team_chip_label()
 	_refresh_mission_dropship_panel()
 	_refresh_tactical_event_log_panel()
 	_refresh_runtime_mission_hud_surfaces()
 
-	var strategic_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label
+	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
 		strategic_status_label.text = _build_strategic_status_text()
 
@@ -6569,6 +6576,49 @@ func _refresh_mission_nav_timer_label() -> void:
 			timer_label.text = "%02d:%02d" % [floori(float(total_seconds) / 60.0), total_seconds % 60]
 			return
 	timer_label.text = "--:--"
+
+
+func _ensure_mission_team_chip_label() -> void:
+	var strategic_vbox := get_node_or_null(STRATEGIC_VBOX_PATH) as VBoxContainer
+	if strategic_vbox == null:
+		return
+	var label := strategic_vbox.get_node_or_null("MissionTeamChipLabel") as Label
+	if label != null:
+		return
+	label = Label.new()
+	label.name = "MissionTeamChipLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", 10)
+	label.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0, 1.0))
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	strategic_vbox.add_child(label)
+
+
+func _refresh_mission_team_chip_label() -> void:
+	var label := get_node_or_null(MISSION_TEAM_CHIP_LABEL_PATH) as Label
+	if label == null:
+		return
+	var snapshot: Dictionary = get_mission_team_chip_snapshot()
+	label.text = String(snapshot.get("status_text", "Teams: not configured"))
+
+
+func get_mission_team_chip_snapshot() -> Dictionary:
+	if _mission_team_chip_presenter == null or not _mission_team_chip_presenter.has_method("build_snapshot"):
+		return {
+			"configured": false,
+			"valid": false,
+			"runtime_authority": "MissionTeamChipPresenter",
+			"ui_sets_gameplay_truth": false,
+			"chip_count": 0,
+			"chips": [],
+			"summary_text": "",
+			"status_text": "Teams: presenter unavailable",
+		}
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	var network_snapshot: Dictionary = {}
+	if simulation_root != null and simulation_root.has_method("get_network_command_contract_snapshot"):
+		network_snapshot = Dictionary(simulation_root.call("get_network_command_contract_snapshot")).duplicate(true)
+	return Dictionary(_mission_team_chip_presenter.call("build_snapshot", network_snapshot)).duplicate(true)
 
 
 func _ensure_mission_dropship_panel() -> void:
@@ -11604,7 +11654,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"last_command_text": _last_command_text,
 		"command_feedback_text": _get_label_text(command_feedback_label_path),
 		"selected_fireteam_status_label_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
-		"mission_control_status_text": _get_label_text("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel"),
+		"mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH),
+		"mission_team_chip_text": _get_label_text(MISSION_TEAM_CHIP_LABEL_PATH),
+		"mission_team_chip": get_mission_team_chip_snapshot(),
 		"command_buttons": _build_command_control_snapshot(),
 		"command_hierarchy": get_command_hierarchy_snapshot(),
 		"planned_waypoint_count": _count_selected_phase_waypoints(),
