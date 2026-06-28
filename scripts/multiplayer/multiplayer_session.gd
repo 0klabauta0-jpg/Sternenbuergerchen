@@ -260,35 +260,7 @@ func _build_team_readability_snapshot(assignments: Dictionary) -> Dictionary:
 
 
 func _build_lobby_team_readability_slice() -> Dictionary:
-	return {
-		"play_modes": PackedStringArray([
-			TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_SINGLEPLAYER,
-			TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_COOP,
-			TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP,
-		]),
-		"team_slots": [
-			{
-				"team_id": host_team_id,
-				"role": "attacker",
-				"spawn_marker_id": "spawn_alpha",
-				"npc_owned": false,
-				"player_assignable_modes": PackedStringArray([
-					TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_SINGLEPLAYER,
-					TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_COOP,
-					TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP,
-				]),
-			},
-			{
-				"team_id": client_team_id,
-				"role": "defender",
-				"spawn_marker_id": "spawn_bravo",
-				"npc_owned": true,
-				"player_assignable_modes": PackedStringArray([
-					TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP,
-				]),
-			},
-		],
-	}
+	return Dictionary(TEAM_OWNERSHIP_CONTRACT_SCRIPT.call("build_default_team_readability_slice", host_team_id, client_team_id)).duplicate(true)
 
 
 func set_roster_mode(mode: String) -> bool:
