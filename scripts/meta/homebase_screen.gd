@@ -306,7 +306,9 @@ func get_mission_briefing_panel_snapshot() -> Dictionary:
 	var status_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingStatusLabel") as Label
 	var objectives_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingObjectivesLabel") as Label
 	var teams_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingTeamsLabel") as Label
+	var background_image := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingBackgroundImage") as TextureRect
 	var minimap_visual := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingMinimapVisual") as Control
+	var loadout_cards := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingLoadoutCards") as VBoxContainer
 	if title_label != null:
 		snapshot["rendered_title_text"] = title_label.text
 	if status_label != null:
@@ -315,12 +317,19 @@ func get_mission_briefing_panel_snapshot() -> Dictionary:
 		snapshot["rendered_objective_text"] = objectives_label.text
 	if teams_label != null:
 		snapshot["rendered_team_text"] = teams_label.text
+	if background_image != null:
+		snapshot["rendered_background_visible"] = background_image.visible
+		snapshot["rendered_background_has_texture"] = background_image.texture != null
+		snapshot["rendered_background_tooltip"] = background_image.tooltip_text
 	if minimap_visual != null and minimap_visual.has_method("get_visual_snapshot"):
 		var visual_snapshot: Dictionary = Dictionary(minimap_visual.call("get_visual_snapshot"))
 		snapshot["rendered_minimap_visible"] = minimap_visual.visible
 		snapshot["rendered_minimap_sample_count"] = int(visual_snapshot.get("sample_count", 0))
 		snapshot["rendered_minimap_entry_count"] = int(visual_snapshot.get("entry_count", 0))
 		snapshot["rendered_minimap_draw_mode"] = String(visual_snapshot.get("draw_mode", ""))
+	if loadout_cards != null:
+		snapshot["rendered_loadout_card_count"] = loadout_cards.get_child_count()
+		snapshot["rendered_loadout_card_text"] = _build_briefing_loadout_card_text(loadout_cards)
 	return snapshot
 
 
@@ -2377,7 +2386,9 @@ func _update_mission_briefing_panel() -> void:
 	_set_mission_briefing_label("BriefingThreatsLabel", "Risiken: %s" % String(_mission_briefing_panel_snapshot.get("threat_text", "-")).strip_edges())
 	_set_mission_briefing_label("BriefingTeamsLabel", "Teams: %s" % String(_mission_briefing_panel_snapshot.get("team_spawn_text", "-")).strip_edges())
 	_set_mission_briefing_label("BriefingLoadoutLabel", "Empfohlen: %s" % String(_mission_briefing_panel_snapshot.get("loadout_text", "-")).strip_edges())
+	_set_mission_briefing_background_image(String(_mission_briefing_panel_snapshot.get("background_image_path", "")).strip_edges())
 	_set_mission_briefing_minimap_visual(Dictionary(_mission_briefing_panel_snapshot.get("minimap_visual_snapshot", {})))
+	_set_mission_briefing_loadout_cards(Array(_mission_briefing_panel_snapshot.get("loadout_card_entries", [])))
 	panel.set_meta("mission_briefing_snapshot", _mission_briefing_panel_snapshot.duplicate(true))
 
 
@@ -2388,7 +2399,7 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 		return existing
 	var panel := PanelContainer.new()
 	panel.name = "MissionBriefingPanel"
-	panel.custom_minimum_size = Vector2(0.0, 220.0)
+	panel.custom_minimum_size = Vector2(0.0, 330.0)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "body")
 	var margin := MarginContainer.new()
@@ -2406,12 +2417,25 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 		"BriefingTitleLabel",
 		"BriefingSummaryLabel",
 		"BriefingStatusLabel",
+		"BriefingBackgroundImage",
 		"BriefingMinimapVisual",
 		"BriefingObjectivesLabel",
 		"BriefingThreatsLabel",
 		"BriefingTeamsLabel",
 		"BriefingLoadoutLabel",
+		"BriefingLoadoutCards",
 	]:
+		if label_name == "BriefingBackgroundImage":
+			var texture_rect := TextureRect.new()
+			texture_rect.name = label_name
+			texture_rect.custom_minimum_size = Vector2(0.0, 72.0)
+			texture_rect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			texture_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			texture_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			texture_rect.mouse_filter = Control.MOUSE_FILTER_PASS
+			texture_rect.visible = false
+			vbox.add_child(texture_rect)
+			continue
 		if label_name == "BriefingMinimapVisual":
 			var minimap_visual: Control = MISSION_BRIEFING_MINIMAP_VISUAL_SCRIPT.new()
 			minimap_visual.name = label_name
@@ -2419,6 +2443,13 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 			minimap_visual.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			minimap_visual.mouse_filter = Control.MOUSE_FILTER_PASS
 			vbox.add_child(minimap_visual)
+			continue
+		if label_name == "BriefingLoadoutCards":
+			var cards := VBoxContainer.new()
+			cards.name = label_name
+			cards.add_theme_constant_override("separation", 3)
+			cards.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			vbox.add_child(cards)
 			continue
 		var label := Label.new()
 		label.name = label_name
@@ -2451,12 +2482,71 @@ func _set_mission_briefing_label(label_name: String, text: String) -> void:
 	label.tooltip_text = text
 
 
+func _set_mission_briefing_background_image(image_path: String) -> void:
+	var texture_rect := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingBackgroundImage") as TextureRect
+	if texture_rect == null:
+		return
+	var normalized_path: String = image_path.strip_edges()
+	texture_rect.texture = null
+	texture_rect.visible = false
+	texture_rect.tooltip_text = "Briefing image: none"
+	if normalized_path.is_empty() or not ResourceLoader.exists(normalized_path):
+		texture_rect.tooltip_text = "Briefing image missing: %s" % normalized_path if not normalized_path.is_empty() else "Briefing image: none"
+		return
+	var texture := load(normalized_path) as Texture2D
+	if texture == null:
+		texture_rect.tooltip_text = "Briefing image could not load: %s" % normalized_path
+		return
+	texture_rect.texture = texture
+	texture_rect.visible = true
+	texture_rect.tooltip_text = "Briefing image: %s" % normalized_path.get_file()
+
+
 func _set_mission_briefing_minimap_visual(snapshot: Dictionary) -> void:
 	var minimap_visual := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingMinimapVisual") as Control
 	if minimap_visual == null or not minimap_visual.has_method("set_visual_snapshot"):
 		return
 	minimap_visual.visible = bool(snapshot.get("configured", false))
 	minimap_visual.call("set_visual_snapshot", snapshot)
+
+
+func _set_mission_briefing_loadout_cards(entries: Array) -> void:
+	var cards := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel/BriefingMargin/BriefingVBox/BriefingLoadoutCards") as VBoxContainer
+	if cards == null:
+		return
+	_clear_container(cards)
+	cards.visible = not entries.is_empty()
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label := Label.new()
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		label.add_theme_font_size_override("font_size", 8)
+		META_UI_SKIN_SCRIPT.style_body_label(label, 8)
+		label.add_theme_color_override("font_color", Color("dce7ec"))
+		label.text = "%s | %s\n%s" % [
+			String(entry.get("label", "Loadout")).strip_edges(),
+			String(entry.get("subtitle", "-")).strip_edges(),
+			String(entry.get("body", "")).strip_edges(),
+		]
+		label.tooltip_text = label.text
+		label.set_meta("ui_sets_gameplay_truth", false)
+		cards.add_child(label)
+
+
+func _build_briefing_loadout_card_text(cards: VBoxContainer) -> String:
+	var lines: PackedStringArray = PackedStringArray()
+	for child in cards.get_children():
+		var label := child as Label
+		if label == null:
+			continue
+		var text: String = label.text.strip_edges()
+		if not text.is_empty():
+			lines.append(text.replace("\n", " / "))
+	if lines.is_empty():
+		return ""
+	return " | ".join(lines)
 
 
 func _build_personnel_notification_messages() -> PackedStringArray:
