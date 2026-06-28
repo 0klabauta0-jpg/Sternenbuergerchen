@@ -12,6 +12,7 @@ const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_s
 const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie", "UnitDelta", "UnitEcho", "UnitFoxtrot", "UnitGolf", "UnitHotel"]
 const DEFAULT_META_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
 const DEFAULT_META_SCENARIO_PATH: String = "res://data/mission_scenarios/ground_mission01_default.json"
+const FRONTIER_VERTICAL_SLICE_SCENARIO_PATH: String = "res://data/mission_scenarios/frontier_probe_vertical_slice.json"
 const NO_SCENARIO_FILE_PATH: String = ""
 const HOMEBASE_MISSION_CATALOG: Array = [
 	{
@@ -46,6 +47,15 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 		"scenario_file_path": NO_SCENARIO_FILE_PATH,
 		"slot_count": 3,
 		"time_limit_seconds": 1200.0,
+	},
+	{
+		"mission_id": "frontier_probe_vertical_slice",
+		"mission_name": "Operation: Frontier Probe Slice",
+		"map_file_path": "res://maps/station_outpost_192x192.json",
+		"scenario_file_path": FRONTIER_VERTICAL_SLICE_SCENARIO_PATH,
+		"slot_count": 8,
+		"time_limit_seconds": 1500.0,
+		"win_condition": "objective_capture",
 	},
 	{
 		"mission_id": "wall_breach",
