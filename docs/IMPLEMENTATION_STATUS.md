@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_522 - Cargo Touchdown Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_522_cargo_touchdown_visual_polish.md`, `docs/tasks/TASK_519_cargo_touchdown_runtime_bridge.md`, `docs/tasks/TASK_518_mission_scenario_runtime_gates.md`, `docs/dev/air_asset_threat_damage_contract.md`, `docs/dev/html_report_workbench_contract.md`
+- Stand: `MissionTacticalSandboxController` baut aus dem read-only `MissionCargoTouchdownBridge`-Snapshot einen Cargo-Air-Visual-Eintrag fuer blocked/pending/inbound/landed/departing.
+- Stand: `TerrainMap3DView` rendert Cargo-Zielmarker, Anfluglinie, Frachterkoerper und Statuslabel im bestehenden Air-Visualpfad und meldet Cargo-spezifische Snapshot-Zaehler.
+- Stand: Der laufende HTML-Reviewbericht nennt TASK_522 jetzt als aktuellen Zwischenstand und exportiert ihn in den Workbench-Metadaten.
+- Risiken/offen: Der Frachter nutzt noch den bestehenden Air-/Dropship-Renderer als Visual-Proxy. Finales Cargo-Modell, Sound und manueller FullHD-Sichtcheck bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_522_cargo_touchdown_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_519_cargo_touchdown_runtime_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_518_mission_scenario_runtime_gates.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_523 - PvP Team Readability UI Pass`, wenn Team-/Peer-/NPC-Besitz im Slice sichtbar werden soll.
+
 ### TASK_521 - Builder Drag Preview Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_521_builder_drag_preview_visual_polish.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_491_map_editor_runtime_builder_workbench.md`, `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`, `docs/tasks/TASK_516_editor_builder_ux_pass.md`
@@ -18,7 +28,7 @@
 - Stand: `TerrainMap3DView` rendert aktive Network-Drag-Previews als farbige 3D-Linien mit Start-/Zielmarkern und meldet Art, Pfadlaenge, Segmentzahl und Markerzahl im Render-Snapshot.
 - Risiken/offen: Der Headless-Test prueft Snapshot/Node-Zaehler und keine finale FullHD-Art-Direction. Segmentnummern, Handles und Icon-Polish bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_521_builder_drag_preview_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_516_editor_builder_ux_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_492_map_editor_network_drag_snap_tools.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_491_map_editor_runtime_builder_workbench.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_522 - Cargo Touchdown Visual Polish` oder `TASK_523 - PvP Team Readability UI Pass`, wenn der Fokus wieder vom Editor auf Missions-/Multiplayer-Lesbarkeit wechselt.
+- Naechster Schritt: `TASK_523 - PvP Team Readability UI Pass`, wenn der Fokus wieder auf Missions-/Multiplayer-Lesbarkeit wechselt.
 
 ### TASK_520 - Multiplayer Team Ownership Smoke
 - Status: implementiert im Arbeitsstand
@@ -29,7 +39,7 @@
 - Stand: `MultiplayerRosterContract` und `MultiplayerSession` fallen wieder auf `host_roster` als privacy-sicheren Default zurueck; `player_rosters` bleibt explizit waehlbar.
 - Risiken/offen: Der echte Zwei-Instanzen-LAN-Test bleibt manuell; sichtbare PvP-Teamfarben, Spawn-/Ownership-Anzeige und Mission-UI-Polish sind Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_520_multiplayer_team_ownership_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_517_mission_scenario_vertical_slice.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_167_multiplayer_session_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_240_multiplayer_player_roster_ownership_contract.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_521 - Builder Drag Preview Visual Polish` oder `TASK_522 - Cargo Touchdown Visual Polish`, wenn der Fokus wieder auf Bedienbarkeit/Sichtbarkeit statt MP-Contract liegen soll.
+- Naechster Schritt: `TASK_522 - Cargo Touchdown Visual Polish` ist umgesetzt; danach bietet sich `TASK_523 - PvP Team Readability UI Pass` an.
 
 ### TASK_519 - Cargo Touchdown Visual/Runtime Bridge
 - Status: implementiert im Arbeitsstand

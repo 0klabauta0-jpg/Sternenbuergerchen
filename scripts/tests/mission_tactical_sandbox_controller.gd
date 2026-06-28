@@ -8179,7 +8179,146 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 				"selected": true,
 			}
 		)
+	var cargo_entry: Dictionary = _build_mission_cargo_touchdown_visual_entry(entries.size())
+	if not cargo_entry.is_empty():
+		entries.append(cargo_entry)
 	return entries
+
+
+func _build_mission_cargo_touchdown_visual_entry(index: int = 0) -> Dictionary:
+	var cargo_snapshot: Dictionary = _get_mission_cargo_touchdown_snapshot_for_visuals()
+	if cargo_snapshot.is_empty() or not bool(cargo_snapshot.get("configured", false)):
+		return {}
+	var cargo_state: String = String(cargo_snapshot.get("cargo_state", cargo_snapshot.get("state", ""))).strip_edges().to_lower()
+	if cargo_state.is_empty() or cargo_state == "unconfigured" or cargo_state == "departed":
+		return {}
+	var target_position: Vector2 = _get_mission_cargo_touchdown_target_position(cargo_snapshot)
+	var approach_angle: String = _sanitize_approach_angle_name(String(cargo_snapshot.get("approach_angle", _get_approach_angle_name())))
+	var staging_position: Vector2 = _get_drop_staging_position_for_lz(target_position, approach_angle)
+	var progress: float = clampf(float(cargo_snapshot.get("progress", 0.0)), 0.0, 1.0)
+	var ship_position: Vector2 = _get_mission_cargo_touchdown_position(cargo_state, staging_position, target_position, progress)
+	var body_visible: bool = _should_show_mission_cargo_touchdown_body_for_state(cargo_state) and _is_mission_dropship_position_inside_player_area(ship_position)
+	var show_lz_marker: bool = cargo_state == "blocked" or cargo_state == "pending" or cargo_state == "inbound"
+	var show_approach_vector: bool = cargo_state == "inbound" or cargo_state == "departing"
+	var asset_id: String = String(cargo_snapshot.get("asset_id", cargo_snapshot.get("cargo_id", "frontier_cargo_freighter"))).strip_edges()
+	if asset_id.is_empty():
+		asset_id = "frontier_cargo_freighter"
+	var display_name: String = String(cargo_snapshot.get("display_name", "Cargo Freighter")).strip_edges()
+	if display_name.is_empty():
+		display_name = "Cargo Freighter"
+	return {
+		"craft_id": "%s_visual" % asset_id,
+		"asset_id": asset_id,
+		"display_name": display_name,
+		"state": cargo_state,
+		"cargo_visual": true,
+		"cargo_state": cargo_state,
+		"cargo_progress": progress,
+		"blocked": bool(cargo_snapshot.get("blocked", false)),
+		"blocked_by_step_id": String(cargo_snapshot.get("blocked_by_step_id", "")).strip_edges(),
+		"runtime_authority": String(cargo_snapshot.get("runtime_authority", "MissionCargoTouchdownBridge")).strip_edges(),
+		"ui_sets_gameplay_truth": false,
+		"dropship_visible": body_visible,
+		"dropship_position": ship_position,
+		"dropship_target_position": target_position if cargo_state != "departing" else staging_position,
+		"approach_origin_position": staging_position if cargo_state != "departing" else target_position,
+		"approach_vector_origin_position": staging_position if cargo_state != "departing" else target_position,
+		"approach_vector_target_position": target_position if cargo_state != "departing" else staging_position,
+		"approach_vector_shape": "wide_arrow",
+		"approach_angle": approach_angle,
+		"show_approach_vector": show_approach_vector,
+		"has_lz_position": true,
+		"show_lz_marker": show_lz_marker,
+		"lz_position": target_position,
+		"lz_label": _build_mission_cargo_touchdown_lz_label(cargo_snapshot, index),
+		"dropship_texture": _get_mission_dropship_texture(),
+		"team_id": FRIENDLY_TEAM_ID,
+		"selected": true,
+	}
+
+
+func _get_mission_cargo_touchdown_snapshot_for_visuals() -> Dictionary:
+	var combat_driver := get_node_or_null("../CombatLoopDriver")
+	if combat_driver == null or not combat_driver.has_method("get_mission_cargo_touchdown_snapshot"):
+		return {}
+	var snapshot_variant = combat_driver.call("get_mission_cargo_touchdown_snapshot")
+	if typeof(snapshot_variant) != TYPE_DICTIONARY:
+		return {}
+	return Dictionary(snapshot_variant).duplicate(true)
+
+
+func _get_mission_cargo_touchdown_position(state: String, staging_position: Vector2, target_position: Vector2, progress: float) -> Vector2:
+	match state.strip_edges().to_lower():
+		"inbound":
+			return staging_position.lerp(target_position, progress)
+		"landed":
+			return target_position
+		"departing":
+			return target_position.lerp(staging_position, progress)
+		_:
+			return staging_position
+
+
+func _get_mission_cargo_touchdown_target_position(cargo_snapshot: Dictionary) -> Vector2:
+	var marker_id: String = String(cargo_snapshot.get("target_marker_id", "")).strip_edges()
+	var fallback: Vector2 = _lz_position if _has_lz_position else _get_target_position()
+	return _get_mission_marker_world_position(marker_id, fallback)
+
+
+func _get_mission_marker_world_position(marker_id: String, fallback: Vector2 = Vector2.ZERO) -> Vector2:
+	var normalized_marker_id: String = marker_id.strip_edges()
+	if normalized_marker_id.is_empty():
+		return fallback
+	if normalized_marker_id == "objective_point":
+		var objective_marker := get_node_or_null(objective_point_path) as Node2D
+		if objective_marker != null:
+			return objective_marker.global_position
+	var marker_node := _get_mission_setup_marker_node(normalized_marker_id)
+	if marker_node != null:
+		return marker_node.global_position
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	if mission_setup != null:
+		var terrain_map_data = mission_setup.get("_loaded_terrain_map_data")
+		if terrain_map_data != null and terrain_map_data.has_method("has_marker") and terrain_map_data.has_method("get_marker_position"):
+			if bool(terrain_map_data.call("has_marker", normalized_marker_id)):
+				return terrain_map_data.call("get_marker_position", normalized_marker_id, fallback)
+	return fallback
+
+
+func _get_mission_setup_marker_node(marker_id: String) -> Node2D:
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	if mission_setup == null:
+		return null
+	var marker_path_property_by_id: Dictionary = {
+		"spawn_alpha": "spawn_alpha_path",
+		"spawn_bravo": "spawn_bravo_path",
+		"objective_point": "objective_point_path",
+	}
+	var path_property: String = String(marker_path_property_by_id.get(marker_id, "")).strip_edges()
+	if path_property.is_empty():
+		return null
+	var marker_path_variant = mission_setup.get(path_property)
+	if typeof(marker_path_variant) != TYPE_NODE_PATH:
+		return null
+	return mission_setup.get_node_or_null(NodePath(marker_path_variant)) as Node2D
+
+
+func _build_mission_cargo_touchdown_lz_label(cargo_snapshot: Dictionary, index: int = 0) -> String:
+	var display_name: String = String(cargo_snapshot.get("display_name", "Cargo Freighter")).strip_edges()
+	if display_name.is_empty():
+		display_name = "Cargo Freighter"
+	var state: String = String(cargo_snapshot.get("cargo_state", cargo_snapshot.get("state", ""))).strip_edges().to_upper()
+	if state.is_empty():
+		state = "PENDING"
+	return "%s | %s" % [display_name, state]
+
+
+func _should_show_mission_cargo_touchdown_body_for_state(state: String) -> bool:
+	match state.strip_edges().to_lower():
+		"inbound", "landed", "departing":
+			return true
+		_:
+			return false
 
 
 func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_visible: bool, primary_position: Vector2, is_selected: bool, is_active_sequence_card: bool, card_count: int = 1) -> Dictionary:
