@@ -163,7 +163,8 @@ git checkout -b batch/<batch-name>
 - TASK_532 - Briefing Background / Loadout Recommendation Polish (implementiert)
 - TASK_533 - Recommended Loadout Selection Bridge (implementiert)
 - TASK_534 - Pre-Mission Readiness Checklist (implementiert)
-- TASK_535 - Pre-Mission FullHD Startflow Visual Pass
+- TASK_535 - Pre-Mission FullHD Startflow Visual Pass (implementiert)
+- TASK_536 - Startflow Icon And Status Color Polish
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
