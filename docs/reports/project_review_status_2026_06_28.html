@@ -179,6 +179,7 @@
       <span class="pill good">TASK_529 Team-Icons</span>
       <span class="pill good">TASK_530 Briefing-Panel</span>
       <span class="pill good">TASK_531 Briefing-Minimap</span>
+      <span class="pill good">TASK_532 Briefing-Bild</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -202,7 +203,7 @@
           <h2>Kurzfazit</h2>
           <p>Das Spiel hat inzwischen einen funktionsfaehigen taktischen Ruecken: Homebase-Mission, Dropship-Handoff, Fireteam-Insertion, LZ, 360-Sicherung, Waypoints, Kontakt, Objective-Capture und Victory laufen in den aktuellen Smokes auf der 192x192-Startkarte durch. Das ist ein echter Fortschritt.</p>
           <p>Die groesste Gefahr ist nicht ein einzelner roter Test, sondern strukturelle Verdichtung: mehrere produktive Kernpfade liegen noch in sehr grossen Godot-Skripten, teils unter <code>scripts/tests/</code>. Dadurch wird jede neue Gameplay-Idee schneller eingebaut, aber spaeter teurer zu entwirren.</p>
-          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, TASK_518 macht daraus lesbare Runtime-Gates, TASK_519 koppelt den Cargo-Frachter als read-only Runtime-Snapshot an diese Gates, TASK_520 klaert Alpha/Bravo-/NPC-/Peer-Ownership fuer PvP-Smokes, TASK_521 macht Network-Drag im Builder als read-only 3D-Preview sichtbar, TASK_522 macht den Cargo-Touchdown im Missionsbild sichtbar, TASK_523 macht Alpha/Bravo-/NPC-/Peer-Besitz in Lobby und Session lesbar, TASK_524 reduziert bekannten Export-/Import-Warn-Laerm, TASK_525 macht Alpha/Bravo-Besitz plus Spawnmarker als farbige Lobby-Badges sichtbar, TASK_526 zeigt dieselbe Teamchip-Information im laufenden Missions-HUD, TASK_527 liefert Alpha/Bravo-Spawn-Overlays fuer die Briefing-Minimap, TASK_528 macht diesen Bericht als laufenden Arbeitsstand explizit, TASK_529 macht Teamchips/Briefing-Spawns kompakter mit ASCII-sicheren Icon-Feldern, TASK_530 rendert die Briefing-Daten als sichtbaren Homebase-Pre-Mission-Block, und TASK_531 zeichnet dazu eine grob gesampelte Briefing-Minimap mit Terrain, Spawns und Markern. Die naechste Verdichtung sitzt vor allem in Briefing-Bild/Loadout-Workflow und den grossen Editor-/Visual-Skripten.</p>
+          <p>Die Release-/Projekt-Hygiene ist mit TASK_511 umgesetzt. TASK_512 hat Fireteam-Dropship-/Runtime-Lesestatus aus dem Mission-Controller gezogen, TASK_513 kapselt Objective-/MissionResult-Resolution, TASK_514 zieht Enemy-Behavior-Command-Payloads in einen taktischen Orchestrator, TASK_515 verschiebt Legacy-Combat-Readability in einen read-only Presenter, TASK_516 verbessert den Editor-Builder-Workflow, TASK_517 liefert den konkreten AA-/Computer-/Cargo-Szenario-Slice, TASK_518 macht daraus lesbare Runtime-Gates, TASK_519 koppelt den Cargo-Frachter als read-only Runtime-Snapshot an diese Gates, TASK_520 klaert Alpha/Bravo-/NPC-/Peer-Ownership fuer PvP-Smokes, TASK_521 macht Network-Drag im Builder als read-only 3D-Preview sichtbar, TASK_522 macht den Cargo-Touchdown im Missionsbild sichtbar, TASK_523 macht Alpha/Bravo-/NPC-/Peer-Besitz in Lobby und Session lesbar, TASK_524 reduziert bekannten Export-/Import-Warn-Laerm, TASK_525 macht Alpha/Bravo-Besitz plus Spawnmarker als farbige Lobby-Badges sichtbar, TASK_526 zeigt dieselbe Teamchip-Information im laufenden Missions-HUD, TASK_527 liefert Alpha/Bravo-Spawn-Overlays fuer die Briefing-Minimap, TASK_528 macht diesen Bericht als laufenden Arbeitsstand explizit, TASK_529 macht Teamchips/Briefing-Spawns kompakter mit ASCII-sicheren Icon-Feldern, TASK_530 rendert die Briefing-Daten als sichtbaren Homebase-Pre-Mission-Block, TASK_531 zeichnet dazu eine grob gesampelte Briefing-Minimap mit Terrain, Spawns und Markern, und TASK_532 zeigt Briefing-Bild plus strukturierte Loadout-Empfehlungskarten. Die naechste Verdichtung sitzt vor allem in der bestaetigten Empfehlung-zu-Loadout-Bruecke und den grossen Editor-/Visual-Skripten.</p>
           <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
@@ -348,7 +349,7 @@
             </div>
             <div class="finding good">
               <h3>Berichtspflege bleibt bewusst task-lokal</h3>
-              <p>Die Integration enthaelt TASK_530; dieser Branch aktualisiert die sichtbare Briefing-Minimap als TASK_531. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
+              <p>Die Integration enthaelt TASK_531; dieser Branch aktualisiert Briefing-Bild und Loadout-Empfehlungskarten als TASK_532. Der lokale <code>export_presets.cfg</code> wird nach Export weiter restauriert und bleibt untracked.</p>
             </div>
             <div class="finding good">
               <h3>Factory-UID-Warnung bereinigt</h3>
@@ -376,7 +377,7 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot und TASK_531 als sichtbare Minimap.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis ins Missionsbild lesbar.</td><td>Naechster UI-Schritt ist TASK_532: Briefing-Bild und Loadout-Empfehlung besser fuehren.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap und TASK_532 als Bild-/Loadout-Karten-Polish.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis ins Missionsbild lesbar.</td><td>Naechster UI-Schritt ist TASK_533: Empfehlungen bestaetigt in den Loadout-Workflow fuehren.</td></tr>
                 <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
@@ -396,6 +397,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_529_done"> TASK_529 Team-Icon-Polish ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_530_done"> TASK_530 Briefing-Panel-Renderer ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_531_done"> TASK_531 Briefing-Minimap-Visual ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_532_done"> TASK_532 Briefing-Bild und Loadout-Karten sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.next_tasks_visible"> Naechste Tasks sind sichtbar priorisiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="worklog.visual_playtest_done"> Manueller Sichttest fuer naechsten Visual-Slice erledigt</label>
         </article>
@@ -413,7 +415,8 @@
             <div class="finding good"><h3>Erledigt: Team-Icon-Polish</h3><p>TASK_529 gibt Mission-Teamchips und Briefing-Spawns kompakte Felder wie <code>[A]</code>, <code>[B]</code>, <code>A-LZ</code> und <code>B-LZ</code>, ohne die Volltextdaten zu verlieren.</p></div>
             <div class="finding good"><h3>Erledigt: Briefing Panel Renderer MVP</h3><p>TASK_530 zeigt Titel, Lage, Ziele, Risiken, Team-Spawns und Loadout-Hinweise im Homebase-Mission-Brief als read-only Snapshot.</p></div>
             <div class="finding good"><h3>Erledigt: Briefing Minimap Visual Renderer</h3><p>TASK_531 zeichnet im Homebase-Briefing eine grobe Terrain-Minimap mit Danger-/Objective-/Route-Markern und Alpha/Bravo-Spawns.</p></div>
-            <div class="finding medium"><h3>1. TASK_532 - Briefing Background / Loadout Recommendation Polish</h3><p>Der naechste lesbare Schritt waere, Briefing-Bild und Loadout-Empfehlung staerker in den Startworkflow zu fuehren.</p></div>
+            <div class="finding good"><h3>Erledigt: Briefing Background / Loadout Recommendation Polish</h3><p>TASK_532 rendert das Briefing-Bild und strukturierte, passive Loadout-Empfehlungskarten.</p></div>
+            <div class="finding medium"><h3>1. TASK_533 - Recommended Loadout Selection Bridge</h3><p>Der naechste spielbare Schritt waere, Empfehlungen mit klarer Bestaetigung in den bestehenden Loadout-Workflow zu fuehren.</p></div>
           </div>
         </article>
       </div>
@@ -445,7 +448,8 @@
             <div class="finding good"><h3>Erledigt: TASK_529 - Mission HUD Team Icon Polish</h3><p>Teamchips und Spawn-Overlays visuell kompakter machen: kleine Symbole, Kurzlabels und Tooltips statt nur langer Textketten.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_530 - Briefing Panel Renderer MVP</h3><p>Die vorhandenen Briefing-Daten und Team-Spawn-Overlays in einem sichtbaren Pre-Mission-Panel zusammenfuehren.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_531 - Briefing Minimap Visual Renderer</h3><p>Das neue Briefing-Panel um eine echte, einfache Terrain-/Spawn-/Objective-Minimap ergaenzen.</p></div>
-            <div class="finding medium"><h3>1. TASK_532 - Briefing Background / Loadout Recommendation Polish</h3><p>Briefing-Bild und empfohlene Loadouts im Pre-Mission-Workflow besser nutzbar machen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_532 - Briefing Background / Loadout Recommendation Polish</h3><p>Briefing-Bild und empfohlene Loadouts im Pre-Mission-Workflow besser nutzbar machen.</p></div>
+            <div class="finding medium"><h3>1. TASK_533 - Recommended Loadout Selection Bridge</h3><p>Empfehlungen bestaetigt in den bestehenden Loadout-Workflow fuehren, ohne UI-Parallelwahrheit zu erzeugen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -500,6 +504,7 @@
                 <tr><td><code>task_529_mission_hud_team_icon_polish.gd</code></td><td>PASS</td><td>Kompakte Teamicons fuer Mission-HUD und Briefing-Spawns, Legacy-Daten bleiben erhalten.</td></tr>
                 <tr><td><code>task_530_briefing_panel_renderer_mvp.gd</code></td><td>30 passed, 0 failed</td><td>Read-only Briefing-Panel-Snapshot und Homebase-Rendering fuer den Frontier-Slice.</td></tr>
                 <tr><td><code>task_531_briefing_minimap_visual_renderer.gd</code></td><td>30 passed, 0 failed</td><td>Grob gesampelte Briefing-Minimap, Overlay-Marker und Homebase-Rendering.</td></tr>
+                <tr><td><code>task_532_briefing_background_loadout_recommendation_polish.gd</code></td><td>26 passed, 0 failed</td><td>Briefing-Bild und passive Loadout-Empfehlungskarten.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>Sternenbuergerchen_rel.pck</code> 194203876 Bytes; Pack-Log ohne ausgeschlossene Editor-/Test-/Docs-Pfade.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -592,7 +597,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_532 - Briefing Background / Loadout Recommendation Polish"
+              "TASK_533 - Recommended Loadout Selection Bridge"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -610,10 +615,11 @@
               "TASK_528 - Rolling HTML Status Report",
               "TASK_529 - Mission HUD Team Icon Polish",
               "TASK_530 - Briefing Panel Renderer MVP",
-              "TASK_531 - Briefing Minimap Visual Renderer"
+              "TASK_531 - Briefing Minimap Visual Renderer",
+              "TASK_532 - Briefing Background / Loadout Recommendation Polish"
             ],
             open_risks: [
-              "Briefing-Minimap ist sichtbar, aber noch grob gesampelt und ohne Hover/Zoom/Annotation-Painting.",
+              "Briefing-Empfehlungen sind sichtbar, aber noch nicht bestaetigt an den Loadout-Workflow angebunden.",
               "Manueller FullHD-/F6-Sichttest bleibt fuer den naechsten Visual-Slice offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden."
             ],
@@ -623,9 +629,9 @@
             report_mode: "rolling_interim_status"
           },
           metadata: {
-            branch: "task/briefing-minimap-visual-renderer",
-            integration_base: "integration/core-foundation after TASK_530",
-            head: "working_tree_task_531",
+            branch: "task/briefing-background-loadout-polish",
+            integration_base: "integration/core-foundation after TASK_531",
+            head: "working_tree_task_532",
             generated_on: "2026-06-28",
             source: "local_code_review"
           }

@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_532 - Briefing Background / Loadout Recommendation Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_532_briefing_background_loadout_recommendation_polish.md`, `docs/tasks/TASK_531_briefing_minimap_visual_renderer.md`, `docs/tasks/TASK_530_briefing_panel_renderer_mvp.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
+- Stand: `MissionBriefingPanelPresenter` expose't `background_image_exists`, `background_image_status_text` und strukturierte `loadout_card_entries`, ohne Loadout-Commands zu erzeugen.
+- Stand: `HomebaseTestScreen` rendert das Briefing-Bild als `TextureRect` und empfohlene Loadouts als kompakte Card-Zeilen im bestehenden Briefing-Panel.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_532 als erledigten Zwischenstand und verschiebt den naechsten sinnvollen Schritt auf eine bestaetigte Loadout-/Startworkflow-Bruecke.
+- Risiken/offen: Empfehlungen bleiben bewusst passiv. Eine spaetere Apply-/Preview-Bruecke braucht eine eigene Bestaetigungs-UX, damit UI keine Loadout-Wahrheit erfindet.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_532_briefing_background_loadout_recommendation_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_531_briefing_minimap_visual_renderer.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_530_briefing_panel_renderer_mvp.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_529_mission_hud_team_icon_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_533 - Recommended Loadout Selection Bridge`, wenn Briefing-Empfehlungen bestaetigt in den bestehenden Loadout-Workflow fuehren sollen.
+
 ### TASK_531 - Briefing Minimap Visual Renderer
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_531_briefing_minimap_visual_renderer.md`, `docs/tasks/TASK_530_briefing_panel_renderer_mvp.md`, `docs/tasks/TASK_527_briefing_minimap_team_spawn_overlay.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
 - Stand: `MissionBriefingMinimapVisualPresenter` baut einen read-only Visual-Snapshot mit grob gesampelten Terrain-Zellen, Overlay-Entries, Legende, Sample-Stride und Markerzaehlern.
 - Stand: `MissionBriefingMinimapVisual` zeichnet den Snapshot im Homebase-Briefing-Panel als kompaktes Minimap-Control mit Terrainfarben, Danger-/Objective-/Route-Markern und Alpha/Bravo-Team-Spawns.
 - Stand: `MissionBriefingPanelPresenter` reicht den Visual-Snapshot weiter; `HomebaseTestScreen` expose't die gerenderten Minimap-Zaehler fuer Regressionen.
-- Risiken/offen: Die Minimap ist ein performanter Preview-Renderer, keine finale Tileset-/Zoom-/Hover-/Annotation-Painting-Loesung.
+- Risiken/offen: Die Minimap ist ein performanter Preview-Renderer, keine finale Tileset-/Zoom-/Hover-/Annotation-Painting-Loesung. TASK_532 ergaenzt Bild und Empfehlungskarten.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_531_briefing_minimap_visual_renderer.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_530_briefing_panel_renderer_mvp.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_529_mission_hud_team_icon_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_527_briefing_minimap_team_spawn_overlay.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_532 - Briefing Background / Loadout Recommendation Polish`, wenn Briefing-Bild und empfohlene Loadouts besser in den Startworkflow fuehren sollen.
+- Naechster Schritt: Siehe `TASK_532 - Briefing Background / Loadout Recommendation Polish`.
 
 ### TASK_530 - Briefing Panel Renderer MVP
 - Status: implementiert im Arbeitsstand

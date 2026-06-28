@@ -160,7 +160,8 @@ git checkout -b batch/<batch-name>
 - TASK_529 - Mission HUD Team Icon Polish (implementiert)
 - TASK_530 - Briefing Panel Renderer MVP (implementiert)
 - TASK_531 - Briefing Minimap Visual Renderer (implementiert)
-- TASK_532 - Briefing Background / Loadout Recommendation Polish
+- TASK_532 - Briefing Background / Loadout Recommendation Polish (implementiert)
+- TASK_533 - Recommended Loadout Selection Bridge
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

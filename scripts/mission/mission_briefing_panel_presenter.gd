@@ -42,9 +42,11 @@ func build_snapshot(scenario, terrain_map_data, minimap_snapshot: Dictionary = {
 	if title.is_empty():
 		title = "Mission Briefing"
 	var summary: String = String(briefing.get("summary", "")).strip_edges()
+	var background_image_path: String = String(briefing.get("background_image_path", "")).strip_edges()
 	var objectives: Array = _normalize_text_entries(Array(briefing.get("objectives", [])), "objective")
 	var threats: Array = _normalize_text_entries(Array(briefing.get("threats", [])), "threat")
 	var loadout_entries: Array = _normalize_loadout_entries(Array(briefing.get("recommended_loadout", [])))
+	var loadout_card_entries: Array = _build_loadout_card_entries(loadout_entries)
 	var team_spawn_lines: PackedStringArray = _build_team_spawn_lines(Array(minimap_snapshot.get("team_spawn_overlays", [])))
 	var objective_lines: PackedStringArray = _build_entry_lines(objectives)
 	var threat_lines: PackedStringArray = _build_entry_lines(threats)
@@ -65,11 +67,14 @@ func build_snapshot(scenario, terrain_map_data, minimap_snapshot: Dictionary = {
 		"play_mode": play_mode,
 		"title": title,
 		"summary": summary,
-		"background_image_path": String(briefing.get("background_image_path", "")).strip_edges(),
+		"background_image_path": background_image_path,
+		"background_image_exists": _resource_exists(background_image_path),
+		"background_image_status_text": _build_background_image_status_text(background_image_path),
 		"minimap_mode": String(briefing.get("minimap_mode", "none")).strip_edges().to_lower(),
 		"objectives": objectives,
 		"threats": threats,
 		"recommended_loadout": loadout_entries,
+		"loadout_card_entries": loadout_card_entries,
 		"objective_lines": objective_lines,
 		"threat_lines": threat_lines,
 		"loadout_lines": loadout_lines,
@@ -77,6 +82,7 @@ func build_snapshot(scenario, terrain_map_data, minimap_snapshot: Dictionary = {
 		"objective_count": objectives.size(),
 		"threat_count": threats.size(),
 		"recommended_loadout_count": loadout_entries.size(),
+		"loadout_card_count": loadout_card_entries.size(),
 		"team_spawn_overlay_count": team_spawn_lines.size(),
 		"minimap_snapshot": minimap_snapshot.duplicate(true),
 		"minimap_visual_snapshot": minimap_visual_snapshot.duplicate(true),
@@ -103,6 +109,10 @@ func _empty_snapshot(reason: String) -> Dictionary:
 		"objectives": [],
 		"threats": [],
 		"recommended_loadout": [],
+		"loadout_card_entries": [],
+		"background_image_path": "",
+		"background_image_exists": false,
+		"background_image_status_text": reason,
 		"objective_lines": PackedStringArray(),
 		"threat_lines": PackedStringArray(),
 		"loadout_lines": PackedStringArray(),
@@ -164,12 +174,41 @@ func _normalize_loadout_entries(entries: Array) -> Array:
 			"role_id": String(entry.get("role_id", "")).strip_edges(),
 			"armor_id": String(entry.get("armor_id", "")).strip_edges(),
 			"weapon_ids": weapon_ids,
+			"weapon_summary": _join_or_dash(weapon_ids),
 			"count": int(entry.get("count", 0)),
 			"reason": String(entry.get("reason", "")).strip_edges(),
 			"ui_sets_gameplay_truth": false,
 		}
 		normalized["display_text"] = _format_loadout_entry(normalized)
 		result.append(normalized)
+	return result
+
+
+func _build_loadout_card_entries(entries: Array) -> Array:
+	var result: Array = []
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label: String = String(entry.get("label", "Loadout")).strip_edges()
+		var weapon_summary: String = String(entry.get("weapon_summary", "-")).strip_edges()
+		var armor_id: String = String(entry.get("armor_id", "")).strip_edges()
+		var reason: String = String(entry.get("reason", "")).strip_edges()
+		var subtitle_parts: PackedStringArray = PackedStringArray()
+		if not weapon_summary.is_empty() and weapon_summary != "-":
+			subtitle_parts.append("Weapons: %s" % weapon_summary)
+		if not armor_id.is_empty():
+			subtitle_parts.append("Armor: %s" % armor_id)
+		var subtitle: String = _join_or_dash(subtitle_parts)
+		var body: String = reason if not reason.is_empty() else String(entry.get("display_text", "")).strip_edges()
+		result.append({
+			"label": label,
+			"subtitle": subtitle,
+			"body": body,
+			"weapon_summary": weapon_summary,
+			"armor_id": armor_id,
+			"count": int(entry.get("count", 0)),
+			"role_id": String(entry.get("role_id", "")).strip_edges(),
+			"ui_sets_gameplay_truth": false,
+		})
 	return result
 
 
@@ -225,6 +264,20 @@ func _format_loadout_entry(entry: Dictionary) -> String:
 	if parts.is_empty():
 		return "%s%s" % [label, suffix]
 	return "%s: %s%s" % [label, " / ".join(parts), suffix]
+
+
+func _resource_exists(path: String) -> bool:
+	var normalized: String = path.strip_edges()
+	return not normalized.is_empty() and ResourceLoader.exists(normalized)
+
+
+func _build_background_image_status_text(path: String) -> String:
+	var normalized: String = path.strip_edges()
+	if normalized.is_empty():
+		return "Briefing image: none"
+	if _resource_exists(normalized):
+		return "Briefing image: %s" % normalized.get_file()
+	return "Briefing image missing: %s" % normalized
 
 
 func _build_panel_status_text(objective_count: int, threat_count: int, team_count: int, loadout_count: int) -> String:
