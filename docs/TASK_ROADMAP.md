@@ -152,7 +152,8 @@ git checkout -b batch/<batch-name>
 - TASK_521 - Builder Drag Preview Visual Polish (implementiert)
 - TASK_522 - Cargo Touchdown Visual Polish (implementiert)
 - TASK_523 - PvP Team Readability UI Pass (implementiert)
-- TASK_524 - Export Warning Noise Cleanup
+- TASK_524 - Export Warning Noise Cleanup (implementiert)
+- TASK_525 - Team Badge / Spawn Readability Polish
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
