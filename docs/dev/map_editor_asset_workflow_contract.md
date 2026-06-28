@@ -60,7 +60,8 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Rails nutzen `spacekit_rail*`, Pipes nutzen `spacekit_pipe*`; beide bleiben Object-Layer-Assets und duerfen vorhandene Ground-/Road-/Water-Surfaces nicht ueberschreiben.
 - Factory-, SpaceKit-, StationSet-, Modular-, Wall- und Cliff-Prefixe duerfen den Placement-Scale nutzen, damit zu grosse Kit-Teile lokal korrigierbar bleiben.
 - Logistik-Bedeutung wie Energie, Oel, Rohstoffe oder Abwasser wird nur vorbereitet. Die echte Ressourcen-/Pipeline-Simulation gehoert in einen spaeteren Gameplay-Contract.
-- Aktive Network-Tools liefern einen kompakten Drag-Preview-Snapshot mit Art, Start, Ziel, Pfadlaenge und lesbarem Label. Eine spaetere sichtbare 3D-Drag-Linie darf daraus lesen, aber keine eigene Netzwerk-Wahrheit speichern.
+- Aktive Network-Tools liefern einen kompakten Drag-Preview-Snapshot mit Art, Start, Ziel, Pfadlaenge, Segmenten, lesbarem Label und `ui_sets_gameplay_truth = false`.
+- Sichtbare Drag-Preview-Linien fuer Pipe, Wall und Cliff lesen ausschliesslich diesen Snapshot. Apply/Cancel/Toolwechsel muessen die Preview loeschen; echte Tile-Aenderungen passieren erst ueber den bestehenden Network-Apply-Pfad.
 
 ## Station Doors
 - Space-Station-Tueren werden im Editor als Authoring-States behandelt: Closed, Half und Open.
@@ -79,7 +80,7 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Die Kenney-`Modular Space Kit`-Modelle sind in 4er-Modul-Einheiten authoriert. Ihr Mapping-Scale nutzt `0.25`, damit `modular_wall`/`modular_gate` ein Tile breit bleiben, waehrend groessere Raum-/Korridor-Teile bewusst multi-tile sind.
 
 ## Naechste Editor-Slices
-- Sichtbare Drag-Preview fuer Pipe-, Wand- und Cliff-Linien.
+- Weitere Politur der sichtbaren Drag-Preview fuer Pipe-, Wand- und Cliff-Linien: Handles, Segmentnummern und finale FullHD-Art-Direction.
 - Auto-Rotation/Snapping fuer Ketten von Waenden, Tueren und Cliffs.
 - Door-/Computer-Interaction-Contract fuer Runtime-Naehe und Bedienzeit.
 - Palette-Suche, Favoriten und gespeicherte Asset-Override-Presets.

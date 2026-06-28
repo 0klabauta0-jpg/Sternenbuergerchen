@@ -1730,7 +1730,34 @@ func apply_runtime_network_path_for_authoring(kind: String, start_grid: Vector2i
 		return false
 	_network_tool_kind = normalized_kind
 	var path: Array[Vector2i] = _build_network_drag_path(start_grid, end_grid)
-	return _apply_network_path(normalized_kind, path)
+	var applied: bool = _apply_network_path(normalized_kind, path)
+	if applied:
+		_clear_network_drag_preview()
+	return applied
+
+
+func preview_runtime_network_path_for_authoring(kind: String, start_grid: Vector2i, end_grid: Vector2i) -> bool:
+	var normalized_kind: String = kind.strip_edges().to_lower()
+	if not _network_tool_kind_is_valid(normalized_kind) or _terrain_map_data == null:
+		return false
+	if _terrain_map_data.call("get_tile_at_grid", start_grid) == null or _terrain_map_data.call("get_tile_at_grid", end_grid) == null:
+		return false
+	_network_tool_kind = normalized_kind
+	_network_drag_tool_enabled = true
+	_is_network_dragging = true
+	_network_drag_start_grid = start_grid
+	_network_drag_current_grid = end_grid
+	_network_drag_preview_path = _build_network_drag_path(start_grid, end_grid)
+	_set_selected_grid_position(end_grid)
+	_queue_hover_preview_hide()
+	_sync_network_drag_preview_to_primary_view()
+	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES | EDITOR_UI_REFRESH_TOOL_STATE)
+	_refresh_runtime_builder_workbench_controls()
+	return true
+
+
+func clear_runtime_network_preview_for_authoring() -> void:
+	_clear_network_drag_preview()
 
 
 func _begin_network_drag_at_world_position(world_position: Vector2) -> bool:
@@ -1746,6 +1773,7 @@ func _begin_network_drag_at_world_position(world_position: Vector2) -> bool:
 	_set_selected_grid_position(grid_position)
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
 	_queue_hover_preview_hide()
+	_sync_network_drag_preview_to_primary_view()
 	return true
 
 
@@ -1760,6 +1788,7 @@ func _update_network_drag_preview_at_world_position(world_position: Vector2) -> 
 	_set_selected_grid_position(grid_position)
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION | EDITOR_UI_REFRESH_PROPERTIES)
 	_queue_hover_preview_hide()
+	_sync_network_drag_preview_to_primary_view()
 	return true
 
 
@@ -1781,6 +1810,7 @@ func _clear_network_drag_preview() -> void:
 	_network_drag_start_grid = Vector2i(-1, -1)
 	_network_drag_current_grid = Vector2i(-1, -1)
 	_network_drag_preview_path.clear()
+	_sync_network_drag_preview_to_primary_view()
 
 
 func _build_network_drag_path(start_grid: Vector2i, end_grid: Vector2i) -> Array[Vector2i]:
@@ -2117,6 +2147,7 @@ func _build_network_drag_tool_snapshot() -> Dictionary:
 
 
 func _build_network_drag_preview_summary() -> Dictionary:
+	var visual_preview: Dictionary = _build_network_drag_visual_preview_snapshot()
 	return {
 		"active": _network_drag_tool_enabled,
 		"dragging": _is_network_dragging,
@@ -2125,8 +2156,71 @@ func _build_network_drag_preview_summary() -> Dictionary:
 		"current_grid": _network_drag_current_grid,
 		"path_count": _network_drag_preview_path.size(),
 		"path": _network_drag_preview_path.duplicate(),
+		"visual_preview": visual_preview,
+		"visual_active": bool(visual_preview.get("active", false)),
+		"visual_segment_count": int(visual_preview.get("segment_count", 0)),
+		"ui_sets_gameplay_truth": false,
 		"label": "%s line: %d tiles" % [_network_tool_kind.capitalize(), _network_drag_preview_path.size()],
 	}
+
+
+func _build_network_drag_visual_preview_snapshot() -> Dictionary:
+	var path: Array = []
+	var segments: Array = []
+	for grid_variant in _network_drag_preview_path:
+		var grid_position := Vector2i(grid_variant)
+		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position) if _terrain_map_data != null else null
+		var world_position: Vector2 = Vector2(tile_data.world_position) if tile_data != null else Vector2.ZERO
+		path.append({
+			"grid": grid_position,
+			"world_position": world_position,
+		})
+	for index in range(1, path.size()):
+		var previous: Dictionary = Dictionary(path[index - 1])
+		var current: Dictionary = Dictionary(path[index])
+		segments.append({
+			"from_grid": Vector2i(previous.get("grid", Vector2i.ZERO)),
+			"to_grid": Vector2i(current.get("grid", Vector2i.ZERO)),
+			"from_world": Vector2(previous.get("world_position", Vector2.ZERO)),
+			"to_world": Vector2(current.get("world_position", Vector2.ZERO)),
+		})
+	return {
+		"active": _network_drag_tool_enabled and path.size() > 0,
+		"dragging": _is_network_dragging,
+		"kind": _network_tool_kind,
+		"path": path,
+		"path_count": path.size(),
+		"segments": segments,
+		"segment_count": segments.size(),
+		"start_grid": _network_drag_start_grid,
+		"current_grid": _network_drag_current_grid,
+		"color": _get_network_drag_preview_color(_network_tool_kind),
+		"line_width": 0.12,
+		"surface_offset": 0.44,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _get_network_drag_preview_color(kind: String) -> Color:
+	match kind.strip_edges().to_lower():
+		NETWORK_KIND_PIPE:
+			return Color(0.45, 0.9, 1.0, 0.9)
+		NETWORK_KIND_WALL:
+			return Color(1.0, 0.84, 0.34, 0.92)
+		NETWORK_KIND_CLIFF:
+			return Color(1.0, 0.56, 0.32, 0.9)
+		NETWORK_KIND_RAIL:
+			return Color(0.74, 0.78, 0.86, 0.88)
+		NETWORK_KIND_ROAD:
+			return Color(0.35, 0.95, 0.55, 0.86)
+	return Color(0.9, 0.95, 1.0, 0.86)
+
+
+func _sync_network_drag_preview_to_primary_view() -> void:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null or not primary_3d_view.has_method("set_editor_network_drag_preview_snapshot"):
+		return
+	primary_3d_view.call("set_editor_network_drag_preview_snapshot", _build_network_drag_preview_summary())
 
 
 func _build_station_door_authoring_snapshot() -> Dictionary:
@@ -7398,6 +7492,7 @@ func _refresh_3d_map_view() -> void:
 	if primary_3d_view.has_method("set_editor_patrol_preview_path_id"):
 		primary_3d_view.call("set_editor_patrol_preview_path_id", _patrol_preview_path_id)
 	MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT.call("refresh_map_view", primary_3d_view, _terrain_map_data, _selected_grids, _selected_grid_position)
+	_sync_network_drag_preview_to_primary_view()
 	_set_legacy_2d_map_visible(false)
 
 
