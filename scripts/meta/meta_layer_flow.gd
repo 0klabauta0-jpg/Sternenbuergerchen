@@ -219,6 +219,272 @@ func get_active_mission():
 	return _active_mission
 
 
+func get_homebase_to_mission_handoff_snapshot() -> Dictionary:
+	var selected_mission: Dictionary = _get_selected_mission_definition()
+	var active_mission: Node = _active_mission
+	var mission_setup: Node = active_mission.get_node_or_null("MissionSetup") if active_mission != null else null
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var planning_state: Dictionary = _mission_planning_state.duplicate(true)
+	var mission_setup_snapshot: Dictionary = _build_mission_setup_handoff_snapshot(mission_setup)
+	var tactical_snapshot: Dictionary = _build_tactical_controller_handoff_snapshot(tactical_controller)
+	var checks: Array = []
+	var selected_unit_ids: Array = Array(_selected_unit_ids)
+	var selected_fireteam_ids: Array = Array(_selected_fireteam_ids)
+	var embarked_unit_ids: Array = Array(planning_state.get("embarked_unit_ids", []))
+	var mission_setup_unit_ids: Array = Array(mission_setup_snapshot.get("selected_team_unit_ids", []))
+	var mission_setup_fireteam_ids: Array = Array(mission_setup_snapshot.get("selected_team_fireteam_ids", []))
+	var planning_fireteam_definitions: Array = Array(planning_state.get("selected_fireteam_definitions", []))
+	var planning_member_loadouts: Dictionary = Dictionary(planning_state.get("member_loadouts", {}))
+	var mission_setup_member_loadouts: Dictionary = Dictionary(mission_setup_snapshot.get("member_loadouts", {}))
+	var mission_cards: Array = Array(planning_state.get("mission_drop_cards", []))
+
+	_append_handoff_check(
+		checks,
+		"active_mission_exists",
+		active_mission != null,
+		"critical",
+		"Homebase start should create or update one active mission."
+	)
+	_append_handoff_check(
+		checks,
+		"mission_setup_exists",
+		mission_setup != null,
+		"critical",
+		"Active mission should expose MissionSetup."
+	)
+	_append_handoff_check(
+		checks,
+		"mission_selection_matches",
+		String(mission_setup_snapshot.get("map_file_path", "")).strip_edges() == String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges() \
+			and String(mission_setup_snapshot.get("scenario_file_path", "")).strip_edges() == String(selected_mission.get("scenario_file_path", NO_SCENARIO_FILE_PATH)).strip_edges(),
+		"critical",
+		"MissionSetup should receive the selected mission map and scenario.",
+		{
+			"selected_mission_id": String(selected_mission.get("mission_id", "")).strip_edges(),
+			"selected_map_path": String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges(),
+			"setup_map_path": String(mission_setup_snapshot.get("map_file_path", "")).strip_edges(),
+			"selected_scenario_path": String(selected_mission.get("scenario_file_path", NO_SCENARIO_FILE_PATH)).strip_edges(),
+			"setup_scenario_path": String(mission_setup_snapshot.get("scenario_file_path", "")).strip_edges(),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"unit_selection_matches",
+		_arrays_match_ordered(selected_unit_ids, mission_setup_unit_ids) and _arrays_match_ordered(embarked_unit_ids, mission_setup_unit_ids),
+		"critical",
+		"Selected, embarked and MissionSetup unit IDs should match.",
+		{
+			"selected_unit_ids": selected_unit_ids.duplicate(true),
+			"embarked_unit_ids": embarked_unit_ids.duplicate(true),
+			"mission_setup_unit_ids": mission_setup_unit_ids.duplicate(true),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"fireteam_selection_matches",
+		_arrays_match_ordered(selected_fireteam_ids, mission_setup_fireteam_ids),
+		"critical",
+		"Selected Fireteam IDs should reach MissionSetup in the same order.",
+		{
+			"selected_fireteam_ids": selected_fireteam_ids.duplicate(true),
+			"mission_setup_fireteam_ids": mission_setup_fireteam_ids.duplicate(true),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"fireteam_definitions_present",
+		not planning_fireteam_definitions.is_empty() \
+			and int(mission_setup_snapshot.get("selected_fireteam_definition_count", 0)) == planning_fireteam_definitions.size(),
+		"critical",
+		"Fireteam definitions should be copied from Homebase planning into MissionSetup.",
+		{
+			"planning_definition_count": planning_fireteam_definitions.size(),
+			"setup_definition_count": int(mission_setup_snapshot.get("selected_fireteam_definition_count", 0)),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"member_loadouts_match",
+		not planning_member_loadouts.is_empty() \
+			and _member_loadout_keys_match(planning_member_loadouts, mission_setup_member_loadouts),
+		"critical",
+		"Member loadouts should be preserved across the Handoff.",
+		{
+			"planning_loadout_unit_ids": _sorted_dictionary_keys(planning_member_loadouts),
+			"setup_loadout_unit_ids": _sorted_dictionary_keys(mission_setup_member_loadouts),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"dropship_payload_present",
+		String(planning_state.get("mission_drop_source", "")).strip_edges() == MISSION_DROP_SOURCE_HOMEBASE_DIRECT \
+			and not String(planning_state.get("mission_drop_craft_id", "")).strip_edges().is_empty() \
+			and int(planning_state.get("mission_drop_passenger_count", 0)) == mission_setup_unit_ids.size() \
+			and not mission_cards.is_empty(),
+		"critical",
+		"Planning state should keep the Homebase-direct Dropship payload.",
+		{
+			"mission_drop_source": String(planning_state.get("mission_drop_source", "")).strip_edges(),
+			"mission_drop_craft_id": String(planning_state.get("mission_drop_craft_id", "")).strip_edges(),
+			"mission_drop_passenger_count": int(planning_state.get("mission_drop_passenger_count", 0)),
+			"mission_drop_card_count": mission_cards.size(),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_planning_state_matches",
+		bool(tactical_snapshot.get("planning_state_present", false)) \
+			and String(tactical_snapshot.get("mission_drop_craft_id", "")).strip_edges() == String(planning_state.get("mission_drop_craft_id", "")).strip_edges(),
+		"critical",
+		"TacticalController should receive the same planning-state dropship reference.",
+		tactical_snapshot
+	)
+	_append_handoff_check(
+		checks,
+		"timer_started",
+		_active_mission_started_at_msec > 0,
+		"critical",
+		"Mission timer should start when the Homebase start request launches the mission.",
+		{"active_mission_started_at_msec": _active_mission_started_at_msec}
+	)
+
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"ui_sets_gameplay_truth": false,
+		"handoff_id": "homebase_to_mission_launch_handoff_v1",
+		"handoff_gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"selected_mission_id": String(selected_mission.get("mission_id", "")).strip_edges(),
+		"selected_mission_name": String(selected_mission.get("mission_name", "")).strip_edges(),
+		"selected_unit_ids": selected_unit_ids.duplicate(true),
+		"selected_fireteam_ids": selected_fireteam_ids.duplicate(true),
+		"planning": {
+			"mission_drop_source": String(planning_state.get("mission_drop_source", "")).strip_edges(),
+			"mission_drop_craft_id": String(planning_state.get("mission_drop_craft_id", "")).strip_edges(),
+			"mission_drop_state": String(planning_state.get("mission_drop_state", "")).strip_edges(),
+			"mission_drop_passenger_count": int(planning_state.get("mission_drop_passenger_count", 0)),
+			"embarked_unit_ids": embarked_unit_ids.duplicate(true),
+			"drop_queued_fireteam_ids": Array(planning_state.get("drop_queued_fireteam_ids", [])).duplicate(true),
+			"mission_drop_card_count": mission_cards.size(),
+			"member_loadout_unit_ids": _sorted_dictionary_keys(planning_member_loadouts),
+		},
+		"mission_setup": mission_setup_snapshot,
+		"tactical_controller": tactical_snapshot,
+		"checks": checks,
+		"issues": _build_handoff_issue_list(checks),
+		"recommended_next_action": "Verify first insertion, LZ selection and first Commander order readability in the live mission HUD.",
+	}
+
+
+func _build_mission_setup_handoff_snapshot(mission_setup: Node) -> Dictionary:
+	if mission_setup == null:
+		return {
+			"present": false,
+			"selected_team_unit_ids": [],
+			"selected_team_fireteam_ids": [],
+			"selected_fireteam_definition_count": 0,
+			"selected_team_unit_config_count": 0,
+			"member_loadouts": {},
+			"map_file_path": "",
+			"scenario_file_path": "",
+		}
+	return {
+		"present": true,
+		"selected_team_unit_ids": Array(PackedStringArray(mission_setup.get("selected_team_unit_ids"))),
+		"selected_team_fireteam_ids": Array(PackedStringArray(mission_setup.get("selected_team_fireteam_ids"))),
+		"selected_fireteam_definition_count": Array(mission_setup.get("selected_fireteam_definitions")).size(),
+		"selected_team_unit_config_count": Array(mission_setup.get("selected_team_unit_configs")).size(),
+		"member_loadouts": Dictionary(mission_setup.get("member_loadouts")).duplicate(true),
+		"map_file_path": String(mission_setup.get("map_file_path")).strip_edges(),
+		"scenario_file_path": String(mission_setup.get("scenario_file_path")).strip_edges(),
+		"defer_friendly_runtime_activation": bool(mission_setup.get("defer_friendly_runtime_activation")),
+	}
+
+
+func _build_tactical_controller_handoff_snapshot(tactical_controller: Node) -> Dictionary:
+	if tactical_controller == null:
+		return {
+			"present": false,
+			"planning_state_present": false,
+			"mission_drop_craft_id": "",
+			"mission_drop_source": "",
+			"mission_drop_state": "",
+			"mission_drop_card_count": 0,
+		}
+	var planning_state: Dictionary = {}
+	if tactical_controller.has_method("get_planning_state"):
+		planning_state = Dictionary(tactical_controller.call("get_planning_state")).duplicate(true)
+	return {
+		"present": true,
+		"planning_state_present": not planning_state.is_empty(),
+		"mission_drop_craft_id": String(planning_state.get("mission_drop_craft_id", "")).strip_edges(),
+		"mission_drop_source": String(planning_state.get("mission_drop_source", "")).strip_edges(),
+		"mission_drop_state": String(planning_state.get("mission_drop_state", "")).strip_edges(),
+		"mission_drop_card_count": Array(planning_state.get("mission_drop_cards", [])).size(),
+		"drop_ship_staged": bool(planning_state.get("drop_ship_staged", false)),
+	}
+
+
+func _append_handoff_check(checks: Array, check_id: String, passed: bool, severity: String, message: String, details: Dictionary = {}) -> void:
+	checks.append({
+		"id": check_id,
+		"passed": passed,
+		"severity": severity,
+		"message": message,
+		"details": details.duplicate(true),
+	})
+
+
+func _count_handoff_failures(checks: Array, severity_filter: String) -> int:
+	var count: int = 0
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)) and String(check.get("severity", "")) == severity_filter:
+			count += 1
+	return count
+
+
+func _build_handoff_issue_list(checks: Array) -> Array:
+	var issues: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			issues.append({
+				"id": String(check.get("id", "")),
+				"severity": String(check.get("severity", "")),
+				"message": String(check.get("message", "")),
+			})
+	return issues
+
+
+func _arrays_match_ordered(left: Array, right: Array) -> bool:
+	if left.size() != right.size():
+		return false
+	for index in range(left.size()):
+		if String(left[index]).strip_edges() != String(right[index]).strip_edges():
+			return false
+	return true
+
+
+func _member_loadout_keys_match(left: Dictionary, right: Dictionary) -> bool:
+	var left_keys: PackedStringArray = _sorted_dictionary_keys(left)
+	var right_keys: PackedStringArray = _sorted_dictionary_keys(right)
+	return _arrays_match_ordered(Array(left_keys), Array(right_keys))
+
+
+func _sorted_dictionary_keys(dictionary: Dictionary) -> PackedStringArray:
+	var keys: PackedStringArray = []
+	for key_variant in dictionary.keys():
+		var key: String = String(key_variant).strip_edges()
+		if not key.is_empty():
+			keys.append(key)
+	keys.sort()
+	return keys
+
+
 func get_air_asset_recovery_snapshot() -> Dictionary:
 	var result: Dictionary = {}
 	var craft_ids: Array = _air_asset_recovery_by_craft.keys()
