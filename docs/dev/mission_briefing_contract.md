@@ -22,6 +22,7 @@ Mission-Briefings sind Szenario-Autorendaten. Sie erklaeren dem Spieler vor Miss
 - Briefing-Minimap-Visuals: UI-Schichten duerfen aus `TerrainMapData` grob gesampelte Preview-Daten und aus `MissionBriefingMinimapOverlayPresenter` Marker-/Overlay-Daten zeichnen. Diese Visual-Snapshots sind bewusst verdichtete Anzeige-Samples und keine persistierte Terrain- oder Marker-Wahrheit.
 - Briefing-Bild-/Loadout-Polish: UI-Schichten duerfen `background_image_path` als kleine Vorschau und `recommended_loadout` als passive Empfehlungskarten rendern. Diese Karten sind keine Loadout-Befehle und erzeugen keine `apply_loadout`-/`set_loadout`-Mutation.
 - Recommended-Loadout-Selection-Bridge: UI-Schichten duerfen Empfehlungskarten auswaehlbar machen und eine `loadout_patch_preview` anzeigen. Die Auswahl bleibt Anzeige-/Staging-Zustand. Erst eine separate Bestaetigung darf ueber den bestehenden Homebase-Member-Loadout-Pfad schreiben.
+- Pre-Mission-Readiness: UI-Schichten duerfen vorhandene Briefing-, Loadout-, Aircraft- und Homebase-Dropship-Snapshots in einer read-only Checkliste zusammenfassen. Diese Checkliste folgt dem bestehenden Start-Guard und ersetzt ihn nicht.
 
 ## Regeln
 - Briefings duplizieren keine Map-Daten wie `tiles`, `markers` oder `patrol_paths`.
@@ -33,4 +34,5 @@ Mission-Briefings sind Szenario-Autorendaten. Sie erklaeren dem Spieler vor Miss
 - Briefing-Panel-Renderer duerfen kompakte Textzeilen aus Objectives, Threats, Team-Spawns und Loadout-Empfehlungen erzeugen, speichern aber keine zweite Missions-, Loadout-, Team- oder Terrain-Wahrheit.
 - Briefing-Minimap-Visuals duerfen aus Performancegruenden gesampelte Terrain-Farbzellen statt vollstaendiger Tile-Daten rendern. Sie duplizieren keine `tiles`, `markers` oder `patrol_paths`-Schluessel in Briefing-Daten.
 - Briefing-Loadout-Empfehlungen bleiben beratend, bis der Spieler sie explizit bestaetigt. Der bestaetigte Apply nutzt `LoadoutContract` und Homebase-Member-Loadout-Sync; er schreibt nicht direkt in Missionsruntime oder `SimulationRoot`.
+- Pre-Mission-Readiness-Items sind Diagnose und Bedienhilfe. `can_request_mission_start()` bleibt die Startwahrheit; die Checkliste darf keinen Start freischalten oder blockieren, den der bestehende Guard anders bewertet.
 - Annotation Painting, Bildauswahl-UI und Pre-Mission-Dialog sind Folgetasks auf diesem Datencontract.

@@ -22,6 +22,7 @@ const PERSONNEL_EVENT_MODEL_SCRIPT: GDScript = preload("res://scripts/meta/perso
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const MISSION_BRIEFING_PANEL_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_briefing_panel_presenter.gd")
 const MISSION_BRIEFING_MINIMAP_VISUAL_SCRIPT: GDScript = preload("res://scripts/ui/mission_briefing_minimap_visual.gd")
+const PRE_MISSION_READINESS_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/pre_mission_readiness_presenter.gd")
 const FLIGHTDECK_PLATFORM_TEXTURE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/platform_large_NW.png")
 const HOMEBASE_OPERATOR_CARD_SIZE := Vector2(316.0, 66.0)
 const HOMEBASE_STAGED_CARD_SIZE := Vector2(316.0, 66.0)
@@ -118,6 +119,8 @@ var _mission_slot_usage_override: int = -1
 var _mission_pilot_count_override: int = -1
 var _mission_briefing_panel_presenter = MISSION_BRIEFING_PANEL_PRESENTER_SCRIPT.new()
 var _mission_briefing_panel_snapshot: Dictionary = {}
+var _pre_mission_readiness_presenter = PRE_MISSION_READINESS_PRESENTER_SCRIPT.new()
+var _pre_mission_readiness_snapshot: Dictionary = {}
 var _aircraft_manager = AIRCRAFT_MANAGER_SCRIPT.new()
 var _team_transfer_entries: Array = []
 var _personnel_events: Array = []
@@ -350,6 +353,19 @@ func get_mission_briefing_panel_snapshot() -> Dictionary:
 	return snapshot
 
 
+func get_pre_mission_readiness_snapshot() -> Dictionary:
+	var snapshot: Dictionary = _pre_mission_readiness_snapshot.duplicate(true)
+	snapshot["panel_visible"] = _node_is_visible("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel")
+	var summary_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessSummaryLabel") as Label
+	var list := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessItemList") as VBoxContainer
+	if summary_label != null:
+		snapshot["rendered_summary_text"] = summary_label.text
+	if list != null:
+		snapshot["rendered_item_count"] = list.get_child_count()
+		snapshot["rendered_item_text"] = _build_readiness_item_list_text(list)
+	return snapshot
+
+
 func get_aircraft_panel_snapshot() -> Dictionary:
 	var selected_craft: Dictionary = _get_selected_aircraft_definition()
 	var direct_craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
@@ -519,6 +535,8 @@ func get_homebase_direct_staging_snapshot() -> Dictionary:
 		"homebase_direct_craft_ready": bool(craft_gate.get("can_stage", false)),
 		"homebase_direct_craft_block_reason": String(craft_gate.get("block_reason", "")).strip_edges(),
 		"homebase_direct_craft_block_text": String(craft_gate.get("block_text", "")).strip_edges(),
+		"mission_drop_pilot_unit_id": String(drop_state.get("mission_drop_pilot_unit_id", "")).strip_edges(),
+		"mission_drop_pilot_display_name": String(drop_state.get("mission_drop_pilot_display_name", "")).strip_edges(),
 		"can_request_mission_start": can_request_mission_start(),
 		"uses_fob_drop_panel_contract": bool(get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel").get_meta("homebase_uses_fob_drop_panel_contract", false)) if get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") != null else false,
 	}
@@ -2352,6 +2370,7 @@ func _update_mission_info() -> void:
 	mission_summary_label.set_meta("homebase_direct_payload_status_text", direct_payload_status_text)
 	_update_personnel_notifications()
 	_update_mission_briefing_panel()
+	_update_pre_mission_readiness_panel()
 
 
 func _update_personnel_notifications() -> void:
@@ -2407,6 +2426,21 @@ func _update_mission_briefing_panel() -> void:
 	_set_mission_briefing_minimap_visual(Dictionary(_mission_briefing_panel_snapshot.get("minimap_visual_snapshot", {})))
 	_set_mission_briefing_loadout_cards(Array(_mission_briefing_panel_snapshot.get("loadout_card_entries", [])))
 	panel.set_meta("mission_briefing_snapshot", _mission_briefing_panel_snapshot.duplicate(true))
+
+
+func _update_pre_mission_readiness_panel() -> void:
+	var panel := _ensure_pre_mission_readiness_panel()
+	_pre_mission_readiness_snapshot = Dictionary(_pre_mission_readiness_presenter.call("build_snapshot", {
+		"briefing": _mission_briefing_panel_snapshot.duplicate(true),
+		"loadout": get_briefing_loadout_bridge_snapshot(),
+		"aircraft": get_aircraft_panel_snapshot(),
+		"staging": get_homebase_direct_staging_snapshot(),
+		"can_start": can_request_mission_start(),
+	}))
+	panel.visible = true
+	panel.set_meta("pre_mission_readiness_snapshot", _pre_mission_readiness_snapshot.duplicate(true))
+	_set_pre_mission_readiness_summary(String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges())
+	_set_pre_mission_readiness_items(Array(_pre_mission_readiness_snapshot.get("items", [])))
 
 
 func _ensure_mission_briefing_panel() -> PanelContainer:
@@ -2488,6 +2522,50 @@ func _ensure_mission_briefing_panel() -> PanelContainer:
 		anchor = mission_vbox.get_node_or_null("MissionSummaryLabel")
 	if anchor != null:
 		mission_vbox.move_child(panel, anchor.get_index() + 1)
+	return panel
+
+
+func _ensure_pre_mission_readiness_panel() -> PanelContainer:
+	var mission_vbox := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
+	var existing := mission_vbox.get_node_or_null("PreMissionReadinessPanel") as PanelContainer
+	if existing != null:
+		return existing
+	var panel := PanelContainer.new()
+	panel.name = "PreMissionReadinessPanel"
+	panel.custom_minimum_size = Vector2(0.0, 112.0)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+	var margin := MarginContainer.new()
+	margin.name = "ReadinessMargin"
+	margin.add_theme_constant_override("margin_left", 8)
+	margin.add_theme_constant_override("margin_top", 5)
+	margin.add_theme_constant_override("margin_right", 8)
+	margin.add_theme_constant_override("margin_bottom", 5)
+	panel.add_child(margin)
+	var vbox := VBoxContainer.new()
+	vbox.name = "ReadinessVBox"
+	vbox.add_theme_constant_override("separation", 3)
+	margin.add_child(vbox)
+	var title_label := Label.new()
+	title_label.name = "ReadinessTitleLabel"
+	title_label.text = "Pre-Mission Readiness"
+	META_UI_SKIN_SCRIPT.style_header_label(title_label, 10)
+	vbox.add_child(title_label)
+	var summary_label := Label.new()
+	summary_label.name = "ReadinessSummaryLabel"
+	summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary_label.clip_text = true
+	summary_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	META_UI_SKIN_SCRIPT.style_body_label(summary_label, 8)
+	vbox.add_child(summary_label)
+	var list := VBoxContainer.new()
+	list.name = "ReadinessItemList"
+	list.add_theme_constant_override("separation", 1)
+	vbox.add_child(list)
+	mission_vbox.add_child(panel)
+	var briefing_panel := mission_vbox.get_node_or_null("MissionBriefingPanel")
+	if briefing_panel != null:
+		mission_vbox.move_child(panel, briefing_panel.get_index() + 1)
 	return panel
 
 
@@ -2583,6 +2661,56 @@ func _build_briefing_loadout_card_text(cards: VBoxContainer) -> String:
 			lines.append(text.replace("\n", " / "))
 	if lines.is_empty():
 		return ""
+	return " | ".join(lines)
+
+
+func _set_pre_mission_readiness_summary(text: String) -> void:
+	var label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessSummaryLabel") as Label
+	if label == null:
+		return
+	label.text = text
+	label.tooltip_text = text
+
+
+func _set_pre_mission_readiness_items(items: Array) -> void:
+	var list := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessItemList") as VBoxContainer
+	if list == null:
+		return
+	_clear_container(list)
+	for item_variant in items:
+		if typeof(item_variant) != TYPE_DICTIONARY:
+			continue
+		var item: Dictionary = Dictionary(item_variant)
+		var row := Label.new()
+		row.name = "ReadinessItemLabel"
+		row.clip_text = true
+		row.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		row.add_theme_font_size_override("font_size", 8)
+		META_UI_SKIN_SCRIPT.style_body_label(row, 8)
+		var state: String = String(item.get("state", "")).strip_edges()
+		var marker: String = "OK" if state == "ready" else "!" if state == "warn" else "X"
+		row.text = "%s %s: %s" % [
+			marker,
+			String(item.get("label", "")).strip_edges(),
+			String(item.get("detail", "")).strip_edges(),
+		]
+		row.tooltip_text = row.text
+		row.set_meta("pre_mission_readiness_item", true)
+		row.set_meta("readiness_id", String(item.get("id", "")).strip_edges())
+		row.set_meta("readiness_state", state)
+		row.set_meta("readiness_blocking", bool(item.get("blocking", false)))
+		list.add_child(row)
+
+
+func _build_readiness_item_list_text(list: VBoxContainer) -> String:
+	var lines: PackedStringArray = PackedStringArray()
+	for child in list.get_children():
+		var label := child as Label
+		if label == null:
+			continue
+		var text: String = label.text.strip_edges()
+		if not text.is_empty():
+			lines.append(text)
 	return " | ".join(lines)
 
 

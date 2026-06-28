@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_534 - Pre-Mission Readiness Checklist
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/tasks/TASK_533_recommended_loadout_selection_bridge.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
+- Stand: `PreMissionReadinessPresenter` baut aus vorhandenen Briefing-, Loadout-, Aircraft- und Homebase-Dropship-Snapshots eine read-only Checkliste.
+- Stand: `HomebaseTestScreen` rendert die Checkliste als kompakten `PreMissionReadinessPanel`-Block unter dem Briefing und expose't Summary/Items im Snapshot.
+- Stand: Der bestehende Start-Guard `can_request_mission_start()` bleibt die Startwahrheit; die Checkliste zeigt ihn nur an.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_534 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf FullHD-/Startflow-Visual-Polish.
+- Risiken/offen: Cargo ist aktuell optional lesbar; missionsspezifische Cargo-Pflichten brauchen spaeter Szenario-Gate-Daten. Manueller FullHD-Sichttest bleibt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_534_pre_mission_readiness_checklist.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_533_recommended_loadout_selection_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_382_homebase_direct_mission_flightdeck_display.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_535 - Pre-Mission FullHD Startflow Visual Pass`, wenn die neue Startbereitschaft im echten Fenster poliert werden soll.
+
 ### TASK_533 - Recommended Loadout Selection Bridge
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_533_recommended_loadout_selection_bridge.md`, `docs/tasks/TASK_532_briefing_background_loadout_recommendation_polish.md`, `docs/dev/mission_briefing_contract.md`, `docs/tasks/TASK_528_rolling_html_status_report.md`
@@ -19,7 +30,7 @@
 - Stand: Der Rolling-HTML-Bericht nennt TASK_533 als aktuellen Zwischenstand und haelt offene naechste Schritte sichtbar.
 - Risiken/offen: Die Anwendung ist homogen fuer gestagte Operatoren; rollenfeine Verteilung und manueller FullHD-Sichttest bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_533_recommended_loadout_selection_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_532_briefing_background_loadout_recommendation_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_531_briefing_minimap_visual_renderer.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_534 - Pre-Mission Readiness Checklist`, wenn Briefing, Loadout, Teams, Pilot, Cargo und Dropship vor Start zusammen lesbar werden sollen.
+- Naechster Schritt: Siehe `TASK_534 - Pre-Mission Readiness Checklist`.
 
 ### TASK_532 - Briefing Background / Loadout Recommendation Polish
 - Status: implementiert im Arbeitsstand
