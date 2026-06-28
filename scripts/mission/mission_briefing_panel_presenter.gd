@@ -186,10 +186,16 @@ func _normalize_loadout_entries(entries: Array) -> Array:
 
 func _build_loadout_card_entries(entries: Array) -> Array:
 	var result: Array = []
-	for entry_variant in entries:
+	for entry_index in range(entries.size()):
+		var entry_variant: Variant = entries[entry_index]
 		var entry: Dictionary = Dictionary(entry_variant)
 		var label: String = String(entry.get("label", "Loadout")).strip_edges()
+		if label.is_empty():
+			label = "Loadout"
 		var weapon_summary: String = String(entry.get("weapon_summary", "-")).strip_edges()
+		var weapon_ids: PackedStringArray = PackedStringArray(Array(entry.get("weapon_ids", [])))
+		var primary_weapon_id: String = String(weapon_ids[0]).strip_edges() if weapon_ids.size() > 0 else ""
+		var secondary_weapon_id: String = String(weapon_ids[1]).strip_edges() if weapon_ids.size() > 1 else "none"
 		var armor_id: String = String(entry.get("armor_id", "")).strip_edges()
 		var reason: String = String(entry.get("reason", "")).strip_edges()
 		var subtitle_parts: PackedStringArray = PackedStringArray()
@@ -200,15 +206,53 @@ func _build_loadout_card_entries(entries: Array) -> Array:
 		var subtitle: String = _join_or_dash(subtitle_parts)
 		var body: String = reason if not reason.is_empty() else String(entry.get("display_text", "")).strip_edges()
 		result.append({
+			"recommendation_id": _make_recommendation_id(entry_index, label, String(entry.get("role_id", "")).strip_edges()),
 			"label": label,
 			"subtitle": subtitle,
 			"body": body,
+			"weapon_ids": weapon_ids,
+			"primary_weapon_id": primary_weapon_id,
+			"secondary_weapon_id": secondary_weapon_id,
+			"support_weapon_ids": _slice_weapon_ids(weapon_ids, 2),
 			"weapon_summary": weapon_summary,
 			"armor_id": armor_id,
 			"count": int(entry.get("count", 0)),
 			"role_id": String(entry.get("role_id", "")).strip_edges(),
+			"apply_hint_text": "Auswaehlen, dann bestaetigt auf gestagte Operatoren anwenden.",
+			"loadout_patch_preview": {
+				"armor": armor_id,
+				"weapon_1": primary_weapon_id,
+				"weapon_2": secondary_weapon_id,
+			},
 			"ui_sets_gameplay_truth": false,
 		})
+	return result
+
+
+func _make_recommendation_id(index: int, label: String, role_id: String) -> String:
+	var source: String = role_id.strip_edges()
+	if source.is_empty():
+		source = label.strip_edges()
+	var slug: String = source.to_lower()
+	for separator in [" ", "/", "\\", "|", ":", ";", ",", ".", "(", ")", "[", "]"]:
+		slug = slug.replace(separator, "_")
+	while slug.contains("__"):
+		slug = slug.replace("__", "_")
+	while slug.begins_with("_"):
+		slug = slug.substr(1)
+	while slug.ends_with("_"):
+		slug = slug.substr(0, slug.length() - 1)
+	if slug.is_empty():
+		slug = "loadout"
+	return "rec_%d_%s" % [index, slug]
+
+
+func _slice_weapon_ids(weapon_ids: PackedStringArray, start_index: int) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	for index in range(start_index, weapon_ids.size()):
+		var weapon_id: String = String(weapon_ids[index]).strip_edges()
+		if not weapon_id.is_empty():
+			result.append(weapon_id)
 	return result
 
 
