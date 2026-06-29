@@ -214,6 +214,11 @@ TASK_589 macht die sichtbare TASK_588-AAR-Sektion reproduzierbar pruefbar. `Debr
 
 Erwartete Struktur: `get_debrief_aar_visual_evidence_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_aar_visual_evidence.v1`, `layout_key = debrief_aar_visual_evidence_v1`, `bridge_gate`, `source_schema`, `panel_rect`, `aar_section_rect`, `aar_summary_rect`, `aar_chip_strip_rect`, `aar_rows_rect`, `aar_limit_rect`, `button_row_rect`, `button_gap`, `aar_summary_text`, `aar_chip_count`, `aar_row_count`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Gates: TASK_588-Bridge gruen, alle AAR-Controls im Panel, AAR vor ButtonRow, kein Button-Overlap, kompakte Summary/Rows/Limit und mindestens fuenf Chips.
 
+## Debrief-AAR-Layout-Polish
+TASK_590 wendet belegten Layout-Polish aus der TASK_589-Evidence an. `DebriefTestScreen` darf die AAR-Summary nur als Presenter normalisieren: aus Quelltexten wie `AAR | FIRE ...` wird genau eine sichtbare `AAR | ...`-Zeile, nicht `AAR: AAR | ...`. Summary, Rows und Grenztext bekommen stabile Clip-/Overrun-Regeln und Style-Metadaten, damit der Debrief knapp scanbar bleibt. Der Snapshot ist read-only und darf keine Mission-, Combat-, XP-, Ammo-, Skill- oder Suppression-Wahrheit erzeugen.
+
+Erwartete Struktur: `get_debrief_aar_layout_polish_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_aar_layout_polish.v1`, `layout_key = debrief_aar_layout_polish_v1`, `bridge_gate`, `visual_gate`, `source_schema`, `aar_summary_text`, `summary_has_duplicate_prefix = false`, `aar_rows_text`, `aar_limit_text`, Textlaengen, Chip-/Row-Anzahl, Button-Gap, AAR-Section-Hoehe, `style_ids`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Gates: TASK_588-Bridge gruen, TASK_589-Visual-Evidence gruen, Prefix sauber, Summary/Rows/Limit kompakt, `debrief_aar_summary_v2`, `debrief_aar_rows_v2`, `debrief_aar_limit_v2` gesetzt und mindestens fuenf AAR-Chips sichtbar.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

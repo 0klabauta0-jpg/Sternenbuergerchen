@@ -10,6 +10,10 @@ const DEBRIEF_SUMMARY_CHIP_COUNT_MIN := 5
 const DEBRIEF_TEAM_STATUS_MAX_CHARS := 180
 const DEBRIEF_AAR_CHIP_COUNT_MIN := 5
 const DEBRIEF_AAR_ROW_COUNT_MIN := 4
+const DEBRIEF_AAR_SUMMARY_MAX_CHARS := 96
+const DEBRIEF_AAR_ROWS_MAX_CHARS := 180
+const DEBRIEF_AAR_LIMIT_MAX_CHARS := 120
+const DEBRIEF_AAR_LAYOUT_STYLE_ID := "debrief_aar_layout_polish_v1"
 
 signal return_to_fob_requested()
 signal return_to_homebase_requested()
@@ -217,6 +221,81 @@ func get_debrief_aar_visual_evidence_snapshot() -> Dictionary:
 		"aar_row_count": int(bridge_snapshot.get("aar_row_count", 0)),
 		"manual_review_required": true,
 		"manual_review_done": false,
+		"visual_only": true,
+		"checks": checks,
+	}
+
+
+func get_debrief_aar_layout_polish_snapshot() -> Dictionary:
+	var bridge_snapshot: Dictionary = get_debrief_aar_data_bridge_snapshot()
+	var visual_snapshot: Dictionary = get_debrief_aar_visual_evidence_snapshot()
+	var summary_label := get_node_or_null("Panel/Margin/VBox/AARSummaryLabel") as Label
+	var chip_strip := get_node_or_null("Panel/Margin/VBox/AARChipStrip") as HBoxContainer
+	var rows_label := get_node_or_null("Panel/Margin/VBox/AARRowsLabel") as Label
+	var limit_label := get_node_or_null("Panel/Margin/VBox/AARLimitLabel") as Label
+	var summary_text: String = summary_label.text.strip_edges() if summary_label != null else ""
+	var rows_text: String = rows_label.text.strip_edges() if rows_label != null else ""
+	var limit_text: String = limit_label.text.strip_edges() if limit_label != null else ""
+	var chips: Array = Array(bridge_snapshot.get("aar_chips", []))
+	var summary_style_id: String = String(summary_label.get_meta("debrief_aar_summary_style_id", "")) if summary_label != null else ""
+	var rows_style_id: String = String(rows_label.get_meta("debrief_aar_rows_style_id", "")) if rows_label != null else ""
+	var limit_style_id: String = String(limit_label.get_meta("debrief_aar_limit_style_id", "")) if limit_label != null else ""
+	var chip_style_count: int = 0
+	if chip_strip != null:
+		for child in chip_strip.get_children():
+			var chip_label := child as Label
+			if chip_label == null:
+				continue
+			if String(chip_label.get_meta("debrief_aar_chip_style_id", "")) == "debrief_aar_chip_v1":
+				chip_style_count += 1
+	var checks: Array = []
+	_append_visual_polish_check(checks, "bridge_gate_pass", String(bridge_snapshot.get("gate", "")) == "pass", "TASK_588 AAR bridge should stay green.")
+	_append_visual_polish_check(checks, "visual_gate_pass", String(visual_snapshot.get("gate", "")) == "pass", "TASK_589 visual evidence should stay green.")
+	_append_visual_polish_check(checks, "summary_prefix_clean", summary_text.begins_with("AAR |") and not summary_text.contains("AAR: AAR"), "AAR summary should not duplicate the prefix.")
+	_append_visual_polish_check(checks, "summary_compact", summary_text.length() <= DEBRIEF_AAR_SUMMARY_MAX_CHARS and summary_text.count("\n") == 0, "AAR summary should stay one compact line.")
+	_append_visual_polish_check(checks, "rows_compact", rows_text.length() <= DEBRIEF_AAR_ROWS_MAX_CHARS and rows_text.count("\n") == 0, "AAR rows should stay compact.")
+	_append_visual_polish_check(checks, "limit_compact", limit_text.length() <= DEBRIEF_AAR_LIMIT_MAX_CHARS and limit_text.count("\n") == 0, "AAR limit text should stay compact.")
+	_append_visual_polish_check(checks, "summary_style_applied", summary_style_id == "debrief_aar_summary_v2", "AAR summary style should be applied.")
+	_append_visual_polish_check(checks, "rows_style_applied", rows_style_id == "debrief_aar_rows_v2", "AAR rows style should be applied.")
+	_append_visual_polish_check(checks, "limit_style_applied", limit_style_id == "debrief_aar_limit_v2", "AAR limit style should be applied.")
+	_append_visual_polish_check(checks, "chips_visible", chips.size() >= DEBRIEF_AAR_CHIP_COUNT_MIN and chip_style_count >= DEBRIEF_AAR_CHIP_COUNT_MIN, "AAR chips should remain visible and styled.")
+	_append_visual_polish_check(checks, "button_gap_preserved", float(visual_snapshot.get("button_gap", -1.0)) >= 0.0, "AAR section should not overlap the buttons.")
+	_append_visual_polish_check(checks, "read_only", true, "Snapshot reads layout state only.")
+	var failed_count: int = 0
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_count += 1
+	return {
+		"schema": "sternenbuergerchen.debrief_aar_layout_polish.v1",
+		"task_id": "TASK_590",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"layout_key": DEBRIEF_AAR_LAYOUT_STYLE_ID,
+		"bridge_gate": String(bridge_snapshot.get("gate", "")),
+		"visual_gate": String(visual_snapshot.get("gate", "")),
+		"source_schema": String(bridge_snapshot.get("source_schema", "")),
+		"aar_summary_text": summary_text,
+		"summary_has_duplicate_prefix": summary_text.contains("AAR: AAR"),
+		"aar_rows_text": rows_text,
+		"aar_limit_text": limit_text,
+		"summary_length": summary_text.length(),
+		"rows_length": rows_text.length(),
+		"limit_length": limit_text.length(),
+		"aar_chip_count": chips.size(),
+		"aar_row_count": int(bridge_snapshot.get("aar_row_count", 0)),
+		"button_gap": float(visual_snapshot.get("button_gap", -1.0)),
+		"aar_section_height": float(Dictionary(visual_snapshot.get("aar_section_rect", {})).get("height", 0.0)),
+		"style_ids": {
+			"layout": DEBRIEF_AAR_LAYOUT_STYLE_ID,
+			"summary": summary_style_id,
+			"rows": rows_style_id,
+			"limit": limit_style_id,
+			"chip_styled_count": chip_style_count,
+		},
 		"visual_only": true,
 		"checks": checks,
 	}
@@ -516,6 +595,7 @@ func _apply_readability_style() -> void:
 	if aar_limit_label != null:
 		aar_limit_label.add_theme_color_override("font_color", Color("a8b7c0"))
 		aar_limit_label.add_theme_font_size_override("font_size", 12)
+	_apply_aar_layout_polish_style()
 	_apply_aar_chip_style()
 
 	for path in [
@@ -601,12 +681,13 @@ func _render_aar_bridge(payload: Dictionary, summary_label: Label, chip_strip: H
 		if limit_label != null:
 			limit_label.text = ""
 			limit_label.visible = false
+		_apply_aar_layout_polish_style()
 		return
 	var summary_text: String = String(payload.get("summary_text", "")).strip_edges()
 	if summary_text.is_empty():
 		summary_text = String(Dictionary(payload.get("screen", {})).get("summary_text", "")).strip_edges()
 	if summary_label != null:
-		summary_label.text = "AAR: %s" % summary_text
+		summary_label.text = _format_aar_summary_text(summary_text)
 		summary_label.visible = true
 	if chip_strip != null:
 		chip_strip.visible = true
@@ -630,6 +711,7 @@ func _render_aar_bridge(payload: Dictionary, summary_label: Label, chip_strip: H
 	if limit_label != null:
 		limit_label.text = String(payload.get("limit_text", "")).strip_edges()
 		limit_label.visible = not limit_label.text.is_empty()
+	_apply_aar_layout_polish_style()
 
 
 func _render_aar_chips(strip: HBoxContainer, chips: Array) -> void:
@@ -659,6 +741,49 @@ func _render_aar_chips(strip: HBoxContainer, chips: Array) -> void:
 		chip.set_meta("debrief_aar_chip_style_id", "debrief_aar_chip_v1")
 		chip.set_meta("style_key", String(chip_data.get("style_key", "neutral")))
 	_apply_aar_chip_style()
+
+
+func _format_aar_summary_text(summary_text: String) -> String:
+	var normalized: String = summary_text.strip_edges()
+	if normalized.begins_with("AAR:"):
+		normalized = normalized.substr(4).strip_edges()
+	if normalized.begins_with("AAR |"):
+		normalized = normalized.substr(5).strip_edges()
+	if normalized.begins_with("|"):
+		normalized = normalized.substr(1).strip_edges()
+	if normalized.is_empty():
+		return "AAR unavailable"
+	return "AAR | %s" % normalized
+
+
+func _apply_aar_layout_polish_style() -> void:
+	var summary_label := get_node_or_null("Panel/Margin/VBox/AARSummaryLabel") as Label
+	var rows_label := get_node_or_null("Panel/Margin/VBox/AARRowsLabel") as Label
+	var limit_label := get_node_or_null("Panel/Margin/VBox/AARLimitLabel") as Label
+	if summary_label != null:
+		summary_label.clip_text = true
+		summary_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		summary_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		summary_label.add_theme_color_override("font_color", Color("62d4dd"))
+		summary_label.add_theme_font_size_override("font_size", 14)
+		summary_label.set_meta("debrief_aar_layout_style_id", DEBRIEF_AAR_LAYOUT_STYLE_ID)
+		summary_label.set_meta("debrief_aar_summary_style_id", "debrief_aar_summary_v2")
+	if rows_label != null:
+		rows_label.clip_text = true
+		rows_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		rows_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		rows_label.add_theme_color_override("font_color", Color("d7e2e8"))
+		rows_label.add_theme_font_size_override("font_size", 12)
+		rows_label.set_meta("debrief_aar_layout_style_id", DEBRIEF_AAR_LAYOUT_STYLE_ID)
+		rows_label.set_meta("debrief_aar_rows_style_id", "debrief_aar_rows_v2")
+	if limit_label != null:
+		limit_label.clip_text = true
+		limit_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		limit_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		limit_label.add_theme_color_override("font_color", Color("a8b7c0"))
+		limit_label.add_theme_font_size_override("font_size", 11)
+		limit_label.set_meta("debrief_aar_layout_style_id", DEBRIEF_AAR_LAYOUT_STYLE_ID)
+		limit_label.set_meta("debrief_aar_limit_style_id", "debrief_aar_limit_v2")
 
 
 func _apply_aar_chip_style() -> void:

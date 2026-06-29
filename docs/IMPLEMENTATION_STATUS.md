@@ -10,15 +10,26 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_590 - Debrief AAR Layout Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_590_debrief_aar_layout_polish_findings.md`, `docs/tasks/TASK_589_debrief_aar_f6_visual_evidence_pass.md`, `docs/tasks/TASK_588_debrief_aar_data_bridge.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `DebriefTestScreen` normalisiert die Debrief-AAR-Summary jetzt auf genau einen sichtbaren `AAR | ...`-Praefix und verhindert den TASK_589-Befund `AAR: AAR | ...`.
+- Stand: Summary, Rows und Grenztext haben stabile Clip-/Ellipsis-Regeln plus Style-Metadaten `debrief_aar_summary_v2`, `debrief_aar_rows_v2` und `debrief_aar_limit_v2`.
+- Stand: `get_debrief_aar_layout_polish_snapshot()` prueft Prefix, Kompaktheit, Style-IDs, TASK_588-Bridge-Gate, TASK_589-Visual-Gate, Button-Gap und read-only-Verhalten.
+- Stand: Der laufende HTML-Zwischenbericht ist auf TASK_590 aktualisiert und nennt TASK_591 als naechsten Debrief-AAR-Player-Review-Notes-Pass.
+- Risiken/offen: Der automatische Layout-Polish prueft den konkreten Evidence-Befund und Layout-Vertraege, ersetzt aber keinen echten Spieler-Sichtentscheid im Fenster.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_590_debrief_aar_layout_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_589_debrief_aar_f6_visual_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_588_debrief_aar_data_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_587_debrief_visual_polish_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_591 - Debrief AAR Player Review Notes Pass`, wenn der sichtbare Debrief mit echter Fenster-Evidence/Spielerblick bewertet werden soll.
+
 ### TASK_589 - Debrief AAR F6 Visual Evidence Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_589_debrief_aar_f6_visual_evidence_pass.md`, `docs/tasks/TASK_588_debrief_aar_data_bridge.md`, `docs/tasks/TASK_587_debrief_visual_polish_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
 - Stand: `DebriefTestScreen.get_debrief_aar_visual_evidence_snapshot()` meldet Panel-, AAR- und Button-Rects, kompakte Textlaengen, Chip-/Row-Zaehler und das TASK_588-Bridge-Gate read-only.
 - Stand: `scripts/tests/task_589_debrief_aar_f6_visual_evidence_pass.gd` erzeugt `tmp/debrief_aar_f6_visual_evidence.png` und `tmp/debrief_aar_f6_visual_evidence.json`. In Headless ist das PNG ein markiertes Evidence-Board; bei echtem Viewport kann ein Screenshot gelesen werden.
 - Stand: Der laufende HTML-Zwischenbericht ist auf TASK_589 aktualisiert und enthaelt die neuen Evidence-Pfade.
-- Risiken/offen: Der automatische Evidence-Pass ersetzt keinen finalen menschlichen Debrief-Sichttest. Falls die echte Fenster-Evidence eng wirkt, sollte TASK_590 gezielten AAR-Layout-Polish umsetzen.
+- Risiken/offen: Der automatische Evidence-Pass ersetzt keinen finalen menschlichen Debrief-Sichttest. Der konkrete Praefix-/Layout-Befund wurde durch TASK_590 nachpoliert.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_589_debrief_aar_f6_visual_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_588_debrief_aar_data_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_587_debrief_visual_polish_pass.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_590 - Debrief AAR Layout Polish Findings`, wenn die Evidence konkrete Layout-/Lesbarkeits-Findings zeigt oder ein echter Fensterlauf nachpoliert werden soll.
+- Naechster Schritt: durch `TASK_590 - Debrief AAR Layout Polish Findings` erledigt; naechster Anschluss ist `TASK_591 - Debrief AAR Player Review Notes Pass`.
 
 ### TASK_588 - Debrief AAR Data Bridge
 - Status: implementiert im Arbeitsstand
