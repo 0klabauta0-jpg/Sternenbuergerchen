@@ -124,6 +124,11 @@ TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Comma
 
 `get_fire_rule_controls_readability_snapshot()` ist der Headless-Pruefpunkt fuer die Bedienung. Der Snapshot muss `ui_sets_gameplay_truth = false` setzen, die aktuell ausgewaehlten Fireteams, den Fire-Rule-Konsens, den bestehenden Fire-Rule-Snapshot und die Button-Zustaende melden. Erwartete Lesbarkeit: ohne Fireteam-Auswahl sind die Buttons deaktiviert; mit eindeutiger Auswahl ist genau die gesetzte Fire-Rule aktiv; bei gemischter Mehrfachauswahl darf kein einzelner Button faelschlich aktiv wirken.
 
+## Fire-Rule-F6-Readability-Smoke
+TASK_572 prueft die TASK_571-Controls im FullHD-F6-Kontext. `get_fire_rule_f6_readability_snapshot()` darf nur Control-Bounds, Button-Zustaende, Tooltips/Help-Metadaten und bestehende Command-/Fire-Rule-Snapshots zusammenfassen. Der Snapshot muss `ui_sets_gameplay_truth = false` setzen und darf keine Fire-Rule, Movement-, Combat- oder Command-Queue-Entscheidung ausloesen.
+
+Erwartete Lesbarkeit: `HF`, `RF`, `FW` und `SUP` sind sichtbar, bleiben im #16 Command Matrix Panel, bleiben innerhalb FullHD, bilden eine kompakte ROE-Gruppe, ueberlappen nicht mit #17 Selected Fireteam oder #18 Mission Control, behalten Tooltip-/Help-Erklaerungen und zeigen bei eindeutiger Auswahl genau eine aktive Fire-Rule. Der Smoke ersetzt keinen menschlichen Screenshot-Test, macht aber offensichtliche Layout-/Panel-Kollisionen automatisiert sichtbar.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

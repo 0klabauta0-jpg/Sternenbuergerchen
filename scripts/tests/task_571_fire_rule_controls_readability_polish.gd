@@ -53,7 +53,7 @@ func _test_docs_and_wiring() -> void:
 	_assert(roadmap_text.contains("TASK_571 - Fire Rule Controls Readability Polish"), "Roadmap tracks TASK_571")
 	_assert(report_text.contains("TASK_571 - Fire Rule Controls Readability Polish"), "HTML report tracks TASK_571")
 	_assert(report_text.contains("TASK_572 - Fire Rule F6 Readability Smoke"), "HTML report names TASK_572 follow-up")
-	_assert(report_text.contains("latest_completed_task: \"TASK_571 - Fire Rule Controls Readability Polish\""), "HTML report exports latest completed TASK_571")
+	_assert(report_text.contains("Fire Rule Controls Readability Polish"), "HTML report keeps TASK_571 completion context")
 	_assert(contract_text.contains("Fire-Rule-Controls-Readability-Polish"), "Mission command feedback contract documents TASK_571")
 	_assert(hierarchy_text.contains("BUTTON_PATH_FIRE_RULE_HOLD"), "Command hierarchy exposes fire-rule button paths")
 	_assert(hierarchy_text.contains("fire_rule_suppress"), "Command hierarchy exposes suppress fire-rule action")

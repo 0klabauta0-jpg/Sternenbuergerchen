@@ -8505,6 +8505,167 @@ func get_fire_rule_controls_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_fire_rule_f6_readability_snapshot() -> Dictionary:
+	var controls_snapshot: Dictionary = get_fire_rule_controls_readability_snapshot()
+	var command_snapshot: Dictionary = get_command_feedback_snapshot()
+	var viewport_size: Vector2 = _get_current_viewport_size()
+	var viewport_rect := Rect2(Vector2.ZERO, viewport_size)
+	var command_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel") as Control
+	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
+	var fireteam_panel := get_node_or_null(FIRETEAM_PANEL_PATH) as Control
+	var strategic_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control
+	var command_panel_rect: Rect2 = _get_control_global_rect_or_empty(command_panel)
+	var command_grid_rect: Rect2 = _get_control_global_rect_or_empty(command_grid)
+	var fireteam_panel_rect: Rect2 = _get_control_global_rect_or_empty(fireteam_panel)
+	var strategic_panel_rect: Rect2 = _get_control_global_rect_or_empty(strategic_panel)
+	var button_rects: Array = []
+	var button_labels: PackedStringArray = PackedStringArray()
+	var button_tooltips: PackedStringArray = PackedStringArray()
+	var button_help_ids: PackedStringArray = PackedStringArray()
+	var active_button_rules: PackedStringArray = PackedStringArray()
+	var all_buttons_visible: bool = true
+	var all_buttons_inside_command_panel: bool = true
+	var all_buttons_inside_viewport: bool = true
+	var all_tooltips_and_help_present: bool = true
+	var max_label_length: int = 0
+	var min_button_y: float = INF
+	var max_button_y: float = -INF
+	for spec_variant in _get_fire_rule_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		var rule: String = String(spec.get("rule", "")).strip_edges().to_lower()
+		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
+		var button_rect: Rect2 = _get_control_global_rect_or_empty(button)
+		var label: String = button.text.strip_edges() if button != null else ""
+		var tooltip: String = button.tooltip_text.strip_edges() if button != null else ""
+		var help_id: String = String(button.get_meta("help_id", "")).strip_edges() if button != null else ""
+		button_rects.append(button_rect)
+		button_labels.append(label)
+		button_tooltips.append(tooltip)
+		button_help_ids.append(help_id)
+		max_label_length = maxi(max_label_length, label.length())
+		all_buttons_visible = all_buttons_visible \
+			and button != null \
+			and button.visible \
+			and button.is_visible_in_tree() \
+			and button_rect.size.x > 0.0 \
+			and button_rect.size.y > 0.0
+		all_buttons_inside_command_panel = all_buttons_inside_command_panel and _rect_contains_rect_with_margin(command_panel_rect, button_rect, 2.0)
+		all_buttons_inside_viewport = all_buttons_inside_viewport and _rect_inside_rect_with_margin(viewport_rect, button_rect, 0.0)
+		all_tooltips_and_help_present = all_tooltips_and_help_present \
+			and not tooltip.is_empty() \
+			and help_id.contains("fire_rule")
+		if button != null and button.button_pressed:
+			active_button_rules.append(rule)
+		if button_rect.size != Vector2.ZERO:
+			min_button_y = minf(min_button_y, button_rect.position.y)
+			max_button_y = maxf(max_button_y, button_rect.position.y)
+	var fire_rule_group_rect: Rect2 = _merge_non_empty_rects(button_rects)
+	var row_y_spread: float = 0.0 if min_button_y == INF or max_button_y == -INF else max_button_y - min_button_y
+	var selected_consensus: String = String(controls_snapshot.get("selected_fire_rule_consensus", "")).strip_edges().to_lower()
+	var expected_active_count: int = 0 if selected_consensus.is_empty() or selected_consensus == "mixed" else 1
+	var bottom_hud_rect: Rect2 = _merge_non_empty_rects([command_panel_rect, fireteam_panel_rect, strategic_panel_rect])
+	var bottom_hud_occlusion_ratio: float = 0.0
+	if viewport_size.y > 0.0 and bottom_hud_rect.size.y > 0.0:
+		bottom_hud_occlusion_ratio = bottom_hud_rect.size.y / viewport_size.y
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"task571_controls_gate_passes",
+			not bool(controls_snapshot.get("ui_sets_gameplay_truth", true))
+				and int(controls_snapshot.get("button_count", 0)) == 4,
+			"TASK_571 Fire-Rule controls remain available and read-only before F6 layout is evaluated."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_rule_buttons_visible",
+			all_buttons_visible,
+			"HF/RF/FW/SUP buttons are visible with non-zero FullHD control bounds."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_rule_buttons_inside_command_panel",
+			command_panel != null
+				and command_grid != null
+				and all_buttons_inside_command_panel
+				and _rect_contains_rect_with_margin(command_panel_rect, command_grid_rect, 2.0),
+			"Fire-Rule buttons stay inside #16 Command Matrix instead of floating over the map."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_rule_buttons_inside_fullhd",
+			all_buttons_inside_viewport
+				and _rect_inside_rect_with_margin(viewport_rect, command_panel_rect, 0.0),
+			"Fire-Rule controls and their Command Matrix panel stay inside FullHD bounds."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_rule_group_compact",
+			fire_rule_group_rect.size.x > 0.0
+				and fire_rule_group_rect.size.y > 0.0
+				and row_y_spread <= 4.0
+				and fire_rule_group_rect.size.x <= command_panel_rect.size.x * 0.74
+				and max_label_length <= 3,
+			"Fire-Rule controls read as one compact ROE row with short labels."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_rule_controls_do_not_overlap_core_panels",
+			not fire_rule_group_rect.intersects(fireteam_panel_rect, true)
+				and not fire_rule_group_rect.intersects(strategic_panel_rect, true),
+			"Fire-Rule controls do not overlap Selected Fireteam or Mission Control panels."
+		),
+		_build_mission_first_move_readability_check(
+			"active_fire_rule_visible",
+			active_button_rules.size() == expected_active_count
+				and (expected_active_count == 0 or active_button_rules.has(selected_consensus)),
+			"Selected Fire-Rule consensus maps to exactly one active compact button."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltips_and_help_explain_labels",
+			all_tooltips_and_help_present,
+			"Short HF/RF/FW/SUP labels keep their longer explanation in tooltip and help metadata."
+		),
+		_build_mission_first_move_readability_check(
+			"bottom_hud_stays_world_readable",
+			bottom_hud_rect.size.y > 0.0
+				and bottom_hud_occlusion_ratio <= 0.30
+				and bottom_hud_rect.position.y >= viewport_size.y * 0.68
+				and _rect_inside_rect_with_margin(viewport_rect, bottom_hud_rect, 0.0),
+			"Bottom HUD including Command Matrix stays in the lower screen band."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(controls_snapshot.get("ui_sets_gameplay_truth", true)),
+			"F6 Fire-Rule readability reads UI state and does not mutate gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_572",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"viewport_size": {"width": viewport_size.x, "height": viewport_size.y},
+		"selected_fireteam_ids": Array(controls_snapshot.get("selected_fireteam_ids", [])),
+		"selected_fire_rule_consensus": selected_consensus,
+		"active_button_rules": Array(active_button_rules),
+		"button_labels": Array(button_labels),
+		"button_tooltips": Array(button_tooltips),
+		"button_help_ids": Array(button_help_ids),
+		"max_label_length": max_label_length,
+		"fire_rule_group_row_y_spread": row_y_spread,
+		"bottom_hud_occlusion_ratio": bottom_hud_occlusion_ratio,
+		"command_panel_rect": _rect_to_audit_dictionary(command_panel_rect),
+		"command_grid_rect": _rect_to_audit_dictionary(command_grid_rect),
+		"fire_rule_group_rect": _rect_to_audit_dictionary(fire_rule_group_rect),
+		"fireteam_panel_rect": _rect_to_audit_dictionary(fireteam_panel_rect),
+		"strategic_panel_rect": _rect_to_audit_dictionary(strategic_panel_rect),
+		"bottom_hud_rect": _rect_to_audit_dictionary(bottom_hud_rect),
+		"fire_rule_controls": controls_snapshot,
+		"command_feedback": command_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 	var button := get_node_or_null(button_path) as BaseButton
 	if button == null:

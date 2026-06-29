@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_572 - Fire Rule F6 Readability Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_572_fire_rule_f6_readability_smoke.md`, `docs/tasks/TASK_571_fire_rule_controls_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `get_fire_rule_f6_readability_snapshot()` prueft die vier Fire-Rule-Controls im FullHD-HUD-Kontext read-only.
+- Stand: Der Snapshot misst Sichtbarkeit, FullHD-/Command-Panel-Bounds, kompakte Button-Gruppe, Overlap gegen #17/#18, aktive Rule, kurze Labels sowie Tooltip-/Help-Metadaten.
+- Stand: Der TASK_572-Verifier baut die Missionsszene in 1920x1080 auf, setzt ein Fireteam auf `hold` und prueft die neue F6-Lesbarkeit ohne Commands oder Combat-State zu mutieren.
+- Risiken/offen: Der automatisierte Smoke ersetzt keinen menschlichen Screenshot-/Spielgefuehl-Test; `suppress` bleibt weiterhin ein Rule-/Diagnosezustand.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_572_fire_rule_f6_readability_smoke.gd` (28 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_571_fire_rule_controls_readability_polish.gd` (32 passed, 0 failed), `git diff --check` (Exit 0).
+- Naechster Schritt: `TASK_573 - Fire Rule Manual Screenshot Notes Pass`, wenn echte Sichtnotizen/Spielgefuehl aus dem F6-Fenster strukturiert in den HTML-Bericht sollen.
+
 ### TASK_571 - Fire Rule Controls Readability Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_571_fire_rule_controls_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_command_rules_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
