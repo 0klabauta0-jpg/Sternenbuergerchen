@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_605 auf <code>task/host-client-f6-visual-review-pass</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_606 auf <code>task/host-client-f6-visual-polish-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -275,7 +275,8 @@
       <span class="pill good">TASK_603 HUD-Dichte</span>
       <span class="pill good">TASK_604 Host/Client-Smoke</span>
       <span class="pill good">TASK_605 F6-Evidence</span>
-      <span class="pill warn">TASK_606 Polish offen</span>
+      <span class="pill good">TASK_606 F6-Polish</span>
+      <span class="pill warn">TASK_607 Runtime-Smoke offen</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -515,17 +516,18 @@
             <div class="metric"><strong>TASK_603</strong><span>umgesetzt: Mission-Control-Interaction-Stack fuer Objective, Cargo, ROE und Contact/Combat</span></div>
             <div class="metric"><strong>TASK_604</strong><span>umgesetzt: Core-Loop Host/Client Feel Smoke als kombinierter Read-only-Snapshot</span></div>
             <div class="metric"><strong>TASK_605</strong><span>umgesetzt: Host/Client-F6-Evidence mit PNG/Manifest und Review-Feldern</span></div>
-            <div class="metric"><strong>TASK_606</strong><span>naechster sinnvoller Slice: belegte Host/Client-F6-Polish-Findings anwenden</span></div>
+            <div class="metric"><strong>TASK_606</strong><span>umgesetzt: Host/Client-F6 ACT-Zeile kompakter und Selected-Fireteam-Status dedupliziert</span></div>
+            <div class="metric"><strong>TASK_607</strong><span>naechster sinnvoller Slice: echter Zwei-Instanz-Host/Client-Runtime-Smoke</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke und TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar.</td><td>Naechster Schritt: TASK_606 soll belegte Host/Client-F6-Polish-Findings gezielt anwenden.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar und TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte.</td><td>Naechster Schritt: TASK_607 soll den Host/Client-Pfad in zwei echten Instanzen pruefen.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
-                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_605 ist hier bewusst mitgepflegt, damit der Host/Client-F6-Evidence-Ort und der naechste Polish-Slice nicht nur im Verlauf stecken.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
+                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_606 ist hier bewusst mitgepflegt, damit der Host/Client-F6-Polish und der naechste Runtime-Smoke nicht nur im Verlauf stecken.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
               </tbody>
             </table>
           </div>
@@ -571,6 +573,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_603_done"> TASK_603 Mission-HUD-Density-Interaction-Polish ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_604_done"> TASK_604 Core-Loop-Host-Client-Feel-Smoke ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_605_done"> TASK_605 Host-Client-F6-Visual-Review-Pass ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_606_done"> TASK_606 Host-Client-F6-Visual-Polish-Findings ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_586_done"> TASK_586 Debrief-Return-To-Homebase-Handoff ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -1009,6 +1012,33 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_606 Host Client F6 Visual Polish Findings</h2>
+          <p>TASK_606 wendet die belegten TASK_605-Findings an: Die Host/Client-F6-<code>ACT</code>-Zeile bekommt eine kompakte Displayfassung fuer den Spielerblick, die volle Quellzeile bleibt fuer Diagnose erhalten, und der Selected-Fireteam-Status wird nicht mehr als doppelter Karten-/Statusblock zusammengesetzt.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Polish / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Kompakte ACT-Zeile</td><td><input readonly value="ACT OBJ/CARGO/ROE/COMBAT tokens" data-export-key="host_client_f6_polish.compact_act_line"></td><td>Der Host/Client-F6-Blick zeigt kurze Tokens statt kompletter Debug-Zeile.</td></tr>
+                <tr><td>Volle ACT-Quelle</td><td><input readonly value="mission_hud_interaction_line_full" data-export-key="host_client_f6_polish.full_act_line_key"></td><td>Diagnose und alte Contract-Daten bleiben erreichbar.</td></tr>
+                <tr><td>Zeichenbudget</td><td><input readonly value="112" data-export-key="host_client_f6_polish.compact_act_line_limit"></td><td>Automatischer Gate gegen ausufernde Host/Client-Displayzeilen.</td></tr>
+                <tr><td>Selected Fireteam dedupliziert</td><td><input readonly value="true" data-export-key="host_client_f6_polish.selected_fireteam_deduped"></td><td>Statuslabel und Fallback werden nicht mehr als zwei gleiche Statusbloecke gestapelt.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="host_client_f6_polish.read_only"></td><td>Der Polish fasst vorhandene Snapshots zusammen und enqueued keine Commands.</td></tr>
+                <tr><td>Regressionen</td><td><input readonly value="TASK_604 + TASK_605 bleiben gruen" data-export-key="host_client_f6_polish.regressions"></td><td>Bestehender Host/Client-Feel-Smoke und Evidence-Capture bleiben die Basis.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_607 - Two Instance Host Client Runtime Smoke" data-export-key="host_client_f6_polish.recommended_next_task"></td><td>Nach kombinierten Snapshots sollte der Pfad in echten Host-/Client-Instanzen laufen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="choice-row" data-choice-group="host_client_f6_polish.next_priority">
+            <button class="choice active" type="button" data-choice-value="two_instance_runtime">TASK_607 Runtime-Smoke</button>
+            <button class="choice" type="button" data-choice-value="real_window_review">Echter Sichttest</button>
+            <button class="choice" type="button" data-choice-value="hud_layout_polish">HUD Layout</button>
+            <button class="choice" type="button" data-choice-value="teamchip_runtime">Teamchip Runtime</button>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_606 Arbeitsnotiz
+            <textarea data-note-key="notes.host_client_f6_polish" data-export-key="host_client_f6_polish.notes" placeholder="Welche Host/Client-F6-Reibung bleibt nach TASK_606 noch sichtbar?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -1357,6 +1387,7 @@
                 <tr><td><code>task_603_mission_hud_density_interaction_polish.gd</code></td><td>PASS</td><td>Mission-Control-<code>ACT</code>-Stack fuer Objective, Cargo, ROE und Contact/Combat plus TASK_604-Follow-up.</td></tr>
                 <tr><td><code>task_604_core_loop_host_client_feel_smoke.gd</code></td><td>PASS</td><td>Kombinierter Host/Client-Feel-Smoke fuer MP-F6-Readability, Teamchip/Ownership, ACT-Zeile und Selected-Fireteam-Kontext plus TASK_605-Follow-up.</td></tr>
                 <tr><td><code>task_605_host_client_f6_visual_review_pass.gd</code></td><td>PASS</td><td>Host/Client-F6-Evidence-Capture mit PNG/Manifest, TASK_604-Gate, Teamchip/ACT/OBJ/CARGO/ROE/Selected-Fireteam-Gates plus TASK_606-Follow-up.</td></tr>
+                <tr><td><code>task_606_host_client_f6_visual_polish_findings.gd</code></td><td>PASS</td><td>Host/Client-F6-Polish-Smoke fuer kompakte ACT-Displayzeile, volle ACT-Quelle, deduplizierten Selected-Fireteam-Status und TASK_607-Follow-up.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>Timeout nach Doku-Pruefung</td><td>Meta-Homebase-Flow haengt in diesem Arbeitslauf nach der Doku-Pruefung; TASK_567 nutzt die stabile Mission-Fixture, Meta-Flow-Testhygiene bleibt offen.</td></tr>
                 <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_570 aktualisiert, nennt die Fire-Rule-Mission-Bridge und TASK_571 als naechsten Slice.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
@@ -1372,7 +1403,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_604-Merge und Push. Dieser Report-Refresh laeuft auf <code>task/host-client-f6-visual-review-pass</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Fire-Rule-/ROE-/SUP-/Debrief-AAR-/Skill-Award-/Homebase-Progression-/Host-Client-Notizen und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_605-Merge und Push. Dieser Report-Refresh laeuft auf <code>task/host-client-f6-visual-polish-findings</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Fire-Rule-/ROE-/SUP-/Debrief-AAR-/Skill-Award-/Homebase-Progression-/Host-Client-Notizen und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -1848,7 +1879,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_606 - Host Client F6 Visual Polish Findings"
+              "TASK_607 - Two Instance Host Client Runtime Smoke"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -1940,7 +1971,8 @@
               "TASK_602 - Core Loop Transition Pacing Polish",
               "TASK_603 - Mission HUD Density Interaction Polish",
               "TASK_604 - Core Loop Host Client Feel Smoke",
-              "TASK_605 - Host Client F6 Visual Review Pass"
+              "TASK_605 - Host Client F6 Visual Review Pass",
+              "TASK_606 - Host Client F6 Visual Polish Findings"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -1955,7 +1987,8 @@
               "TASK_603 verdichtet Mission-Control-Interaktionsdaten als ACT-Zeile; der finale menschliche F6-Sichtentscheid bleibt offen.",
               "TASK_604 kombiniert MP-F6-Readability, Teamchip/Ownership und ACT-HUD-Dichte als read-only Host/Client-Feel-Smoke.",
               "TASK_605 erzeugt Host/Client-F6-Evidence als PNG/Manifest; der finale menschliche Spielgefuehlentscheid bleibt offen.",
-              "TASK_606 bleibt offen: Belegte Host/Client-F6-Polish-Findings muessen aus Screenshot, Manifest oder Review angewendet werden."
+              "TASK_606 wendet belegte Host/Client-F6-Polish-Findings auf ACT-Zeile und Selected-Fireteam-Status an.",
+              "TASK_607 bleibt offen: Der Host/Client-Pfad muss als echter Zwei-Instanz-Runtime-Smoke geprueft werden."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -1964,14 +1997,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_605",
-            current_focus: "TASK_606 - Host Client F6 Visual Polish Findings",
-            latest_completed_task: "TASK_605 - Host Client F6 Visual Review Pass"
+            current_repo_base: "integration/core-foundation after TASK_606",
+            current_focus: "TASK_607 - Two Instance Host Client Runtime Smoke",
+            latest_completed_task: "TASK_606 - Host Client F6 Visual Polish Findings"
           },
           metadata: {
-            branch: "task/host-client-f6-visual-review-pass",
-            integration_base: "integration/core-foundation after TASK_604",
-            head: "task/host-client-f6-visual-review-pass",
+            branch: "task/host-client-f6-visual-polish-findings",
+            integration_base: "integration/core-foundation after TASK_605",
+            head: "task/host-client-f6-visual-polish-findings",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

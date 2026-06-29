@@ -20,6 +20,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_605_host_client_f6_visual_review_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_604_core_loop_host_client_feel_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_606 - Host Client F6 Visual Polish Findings`, damit belegte Teamchip-/ACT-/Selected-Fireteam-Reibung gezielt angewendet werden kann.
 
+### TASK_606 - Host Client F6 Visual Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_606_host_client_f6_visual_polish_findings.md`, `docs/tasks/TASK_605_host_client_f6_visual_review_pass.md`, `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MissionTacticalSandboxController.get_core_loop_host_client_feel_snapshot()` liefert fuer Host/Client-F6 eine kompakte `ACT`-Displayzeile und behaelt die volle Quelle als `mission_hud_interaction_line_full`.
+- Stand: Selected-Fireteam-Status wird im Host/Client-F6-Snapshot aus einer bevorzugten Statusquelle zusammengesetzt und nicht mehr als doppelter Karten-/Statusblock ausgegeben.
+- Stand: Der laufende HTML-Zwischenbericht nennt TASK_606 als aktuellen erledigten Arbeitsstand und haelt die naechste offene Multiplayer-Pruefung als TASK_607 fest.
+- Risiken/offen: TASK_606 ist kein echter Zwei-Prozess-Client-Test. Der naechste sinnvolle Schritt ist ein Runtime-Smoke mit Host- und Client-Instanz oder ein belegter manueller Sichttest.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_606_host_client_f6_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_605_host_client_f6_visual_review_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_604_core_loop_host_client_feel_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_607 - Two Instance Host Client Runtime Smoke`, damit die bisher kombinierten Host/Client-Snapshots gegen einen echten Mehrinstanz-Ablauf geprueft werden.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

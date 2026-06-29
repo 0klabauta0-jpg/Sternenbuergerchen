@@ -6173,6 +6173,110 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 	}
 
 
+func _build_host_client_f6_compact_act_line(interaction_density: Dictionary, fallback_line: String) -> String:
+	var compact_parts: PackedStringArray = PackedStringArray()
+	var objective_token: String = _compact_host_client_f6_objective_token(String(interaction_density.get("objective_line", "")))
+	var cargo_token: String = _compact_host_client_f6_cargo_token(String(interaction_density.get("cargo_line", "")))
+	var fire_rule_text: String = String(interaction_density.get("fire_rule_text", "")).strip_edges().to_upper()
+	var combat_source: String = String(interaction_density.get("combat_line", "")).strip_edges()
+	if combat_source.is_empty():
+		combat_source = String(interaction_density.get("contact_line", "")).strip_edges()
+	var combat_token: String = _compact_host_client_f6_combat_token(combat_source)
+	for token in [objective_token, cargo_token]:
+		if not token.is_empty():
+			compact_parts.append(token)
+	if not fire_rule_text.is_empty():
+		compact_parts.append("ROE %s" % fire_rule_text)
+	if not combat_token.is_empty():
+		compact_parts.append(combat_token)
+	if compact_parts.is_empty():
+		return fallback_line.strip_edges()
+	return "ACT %s" % " | ".join(compact_parts)
+
+
+func _compact_host_client_f6_objective_token(objective_line: String) -> String:
+	var line: String = objective_line.strip_edges()
+	if line.is_empty():
+		return ""
+	var percent_token: String = _first_percent_token(line)
+	if not percent_token.is_empty():
+		return "OBJ %s" % percent_token
+	return "OBJ"
+
+
+func _compact_host_client_f6_cargo_token(cargo_line: String) -> String:
+	var line: String = cargo_line.strip_edges()
+	if line.is_empty():
+		return ""
+	var upper_line: String = line.to_upper()
+	for state in ["READY", "BLOCKED", "LANDED", "INBOUND", "DEPARTING", "DEPARTED"]:
+		if upper_line.contains(state):
+			return "CARGO %s" % state
+	return "CARGO"
+
+
+func _compact_host_client_f6_combat_token(combat_line: String) -> String:
+	var line: String = combat_line.strip_edges()
+	if line.is_empty():
+		return ""
+	var upper_line: String = line.to_upper()
+	var tokens: PackedStringArray = PackedStringArray()
+	for state in ["NO FIRE", "FIRE", "WAIT", "CONTACT"]:
+		if upper_line.contains(state):
+			tokens.append(state)
+			break
+	for token in ["SUP", "COV OPEN", "COV PART", "COV FULL", "LOS CLR", "LOS BLK"]:
+		if upper_line.contains(token):
+			tokens.append(token)
+	return " ".join(tokens) if not tokens.is_empty() else "CONTACT"
+
+
+func _first_percent_token(text: String) -> String:
+	for raw_token in text.split(" "):
+		var token: String = String(raw_token).strip_edges()
+		if token.ends_with("%"):
+			return token
+	return ""
+
+
+func _join_unique_nonempty_lines(lines: Array) -> String:
+	var result: PackedStringArray = PackedStringArray()
+	var seen: Dictionary = {}
+	for line_variant in lines:
+		var raw_line: String = String(line_variant).strip_edges()
+		if raw_line.is_empty():
+			continue
+		for raw_subline in raw_line.split("\n"):
+			var subline: String = String(raw_subline).strip_edges()
+			if subline.is_empty() or seen.has(subline):
+				continue
+			seen[subline] = true
+			result.append(subline)
+	return "\n".join(result)
+
+
+func _count_nonempty_status_lines(text: String) -> int:
+	var count: int = 0
+	for raw_line in text.split("\n"):
+		if not String(raw_line).strip_edges().is_empty():
+			count += 1
+	return count
+
+
+func _count_substring_occurrences(text: String, needle: String) -> int:
+	if needle.is_empty():
+		return 0
+	var count: int = 0
+	var offset: int = 0
+	while true:
+		var found_at: int = text.find(needle, offset)
+		if found_at < 0:
+			break
+		count += 1
+		offset = found_at + needle.length()
+	return count
+
+
 func _compact_fire_rule_for_hud(fire_rule: String) -> String:
 	match fire_rule.strip_edges().to_lower():
 		TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_HOLD:
@@ -14801,15 +14905,18 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 	var command_snapshot: Dictionary = get_command_feedback_snapshot()
 	var team_chip_context: String = String(readability_snapshot.get("mission_team_chip_context_text", "")).strip_edges()
 	var mission_control_text: String = String(command_snapshot.get("mission_control_status_text", "")).strip_edges()
-	var selected_fireteam_text: String = "%s\n%s\n%s" % [
-		String(command_snapshot.get("selected_fireteam_label", "")).strip_edges(),
-		String(command_snapshot.get("selected_fireteam_status_label_text", "")).strip_edges(),
-		String(command_snapshot.get("selected_status_text", "")).strip_edges(),
-	]
+	var selected_fireteam_label: String = String(command_snapshot.get("selected_fireteam_label", "")).strip_edges()
+	var selected_status_label_text: String = String(command_snapshot.get("selected_fireteam_status_label_text", "")).strip_edges()
+	var selected_status_fallback_text: String = String(command_snapshot.get("selected_status_text", "")).strip_edges()
+	var selected_fireteam_detail_text: String = selected_status_label_text if not selected_status_label_text.is_empty() else selected_status_fallback_text
+	var selected_fireteam_text: String = _join_unique_nonempty_lines([selected_fireteam_label, selected_fireteam_detail_text])
 	var interaction_density: Dictionary = Dictionary(command_snapshot.get("mission_hud_interaction_density", {}))
-	var act_line: String = String(command_snapshot.get("mission_hud_interaction_line", hud_density_snapshot.get("mission_control_line", ""))).strip_edges()
-	if not act_line.is_empty() and not mission_control_text.contains(act_line):
+	var act_line_full: String = String(command_snapshot.get("mission_hud_interaction_line", hud_density_snapshot.get("mission_control_line", ""))).strip_edges()
+	if not act_line_full.is_empty() and not mission_control_text.contains(act_line_full):
 		mission_control_text = String(hud_density_snapshot.get("mission_control_status_text", mission_control_text)).strip_edges()
+	var act_line: String = _build_host_client_f6_compact_act_line(interaction_density, act_line_full).strip_edges()
+	if not act_line_full.is_empty() and not act_line.is_empty() and mission_control_text.contains(act_line_full):
+		mission_control_text = mission_control_text.replace(act_line_full, act_line)
 	var host_client_readability_context_passes: bool = String(readability_snapshot.get("gate", "")) == "pass" \
 		or (
 			not readability_snapshot.is_empty()
@@ -14844,6 +14951,16 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 			"Mission Control keeps the compact ACT line visible in the multiplayer feel smoke."
 		),
 		_build_mission_first_move_readability_check(
+			"host_client_act_line_compacted",
+			not act_line.is_empty()
+				and act_line.length() <= 112
+				and (act_line_full.is_empty() or act_line.length() <= act_line_full.length())
+				and act_line.contains("OBJ")
+				and act_line.contains("CARGO")
+				and act_line.contains("ROE"),
+			"Host/client F6 review uses a scanable ACT display line while retaining the full source line."
+		),
+		_build_mission_first_move_readability_check(
 			"objective_cargo_roe_context_visible",
 			mission_control_text.contains("OBJ")
 				and mission_control_text.contains("CARGO")
@@ -14857,10 +14974,17 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 			"Selected Fireteam panel keeps the current fireteam context visible."
 		),
 		_build_mission_first_move_readability_check(
+			"selected_fireteam_context_deduped",
+			not selected_fireteam_text.strip_edges().is_empty()
+				and _count_nonempty_status_lines(selected_fireteam_text) <= 5
+				and _count_substring_occurrences(selected_fireteam_text, "Karten") <= 1,
+			"Selected Fireteam context avoids duplicating the same status block in the host/client F6 snapshot."
+		),
+		_build_mission_first_move_readability_check(
 			"command_feedback_exports_density",
 			not interaction_density.is_empty()
 				and String(interaction_density.get("source", "")) == "objective_cargo_contact_roe_combat_snapshots"
-				and not act_line.is_empty(),
+				and not act_line_full.is_empty(),
 			"Command feedback exposes the same density snapshot used by the HUD."
 		),
 		_build_mission_first_move_readability_check(
@@ -14884,6 +15008,11 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 		"mission_control_status_text": mission_control_text,
 		"selected_fireteam_status_text": selected_fireteam_text.strip_edges(),
 		"mission_hud_interaction_line": act_line,
+		"mission_hud_interaction_line_full": act_line_full,
+		"mission_hud_interaction_line_compacted": act_line != act_line_full,
+		"mission_hud_interaction_line_char_limit": 112,
+		"mission_hud_interaction_line_length": act_line.length(),
+		"selected_fireteam_status_line_count": _count_nonempty_status_lines(selected_fireteam_text),
 		"interaction_density": interaction_density,
 		"readability_snapshot": readability_snapshot,
 		"hud_density_snapshot": hud_density_snapshot,

@@ -289,6 +289,11 @@ TASK_605 macht den TASK_604-Host/Client-Zustand als lokales PNG/Manifest reviewb
 
 Erwartete Struktur: `tmp/host_client_f6_visual_review.json` enthaelt `task_id = TASK_605`, `capture_type = host_client_f6_visual_review`, `task_604_gate`, `team_context`, `mission_hud_interaction_line`, `mission_control_status_text`, `selected_fireteam_status_text`, `host_client_context_visible`, `act_line_visible`, `objective_cargo_roe_visible`, `selected_fireteam_visible`, `viewport_readback_available`, `generated_evidence_board`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_606 - Host Client F6 Visual Polish Findings`.
 
+## Host-Client-F6-Visual-Polish-Findings
+TASK_606 wendet belegte Reibung aus TASK_605 an: Der Host/Client-F6-Snapshot darf fuer die sichtbare Mission-Control-Zeile eine kompakte `ACT`-Displayfassung bilden und den Selected-Fireteam-Status deduplizieren. Die volle `ACT`-Quelle muss fuer Diagnose erhalten bleiben. Der Polish-Snapshot ist weiterhin Berichtsfutter und darf keine Objective-, Cargo-, Combat-, Movement-, Peer- oder UI-Wahrheit speichern.
+
+Erwartete Struktur: `get_core_loop_host_client_feel_snapshot()` enthaelt weiter `task_id = TASK_604`, meldet aber zusaetzlich `mission_hud_interaction_line_full`, `mission_hud_interaction_line_compacted`, `mission_hud_interaction_line_char_limit`, `mission_hud_interaction_line_length` und `selected_fireteam_status_line_count`. Die Checks muessen `host_client_act_line_compacted` und `selected_fireteam_context_deduped` enthalten. `mission_hud_interaction_line` bleibt die kompakte Displayzeile fuer den Host/Client-F6-Blick; `mission_hud_interaction_line_full` bleibt die Debug-/Quellzeile aus dem Mission-HUD-Density-Stack. TASK_607 bleibt fuer einen echten Zwei-Instanz-Host/Client-Runtime-Smoke vorgesehen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
