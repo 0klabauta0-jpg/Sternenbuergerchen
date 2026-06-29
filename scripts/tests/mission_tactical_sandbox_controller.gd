@@ -12067,6 +12067,89 @@ func get_mission_first_contact_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_mission_first_engagement_feedback_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var selected_fireteam_ids: Array = Array(_selected_fireteam_ids)
+	var selected_contacts: Array = _build_selected_fireteam_contact_readability_entries(selected_fireteam_ids)
+	var fire_events: Array = get_fire_event_snapshot()
+	var contact_decision_diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
+	var first_fire_event: Dictionary = _find_first_relevant_fire_event_for_fireteams(selected_fireteam_ids, fire_events, contact_decision_diagnostics)
+	var engagement_status: String = String(contact_decision_diagnostics.get("status", "")).strip_edges().to_lower()
+	var engagement_reason: String = String(contact_decision_diagnostics.get("reason", "")).strip_edges().to_lower()
+	var cover_effectiveness_readout: Dictionary = Dictionary(command_feedback.get("cover_effectiveness_readout", get_cover_effectiveness_readout_snapshot())).duplicate(true)
+	var security_state: Dictionary = _find_first_security_state_for_fireteams(selected_fireteam_ids, get_fireteam_security_snapshot())
+	var primary_contact_snapshot: Dictionary = _get_primary_3d_contact_render_snapshot()
+	var decision_text: String = String(command_feedback.get("contact_decision_diagnostics_text", "")).strip_edges()
+	var mission_control_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	var selected_status_text: String = String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges()
+	var feedback_text: String = "%s\n%s\n%s" % [decision_text, mission_control_text, selected_status_text]
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_has_contact",
+			not selected_fireteam_ids.is_empty() and not selected_contacts.is_empty(),
+			"Selected fireteam keeps at least one readable contact for the engagement decision."
+		),
+		_build_mission_first_move_readability_check(
+			"engagement_decision_visible",
+			_engagement_decision_has_visible_status(contact_decision_diagnostics),
+			"Contact decision diagnostics expose fired, waiting or blocked status."
+		),
+		_build_mission_first_move_readability_check(
+			"target_or_block_reason_visible",
+			_engagement_target_or_block_reason_visible(contact_decision_diagnostics),
+			"Engagement decision names attacker/target when fired, or cooldown/block candidate when not fired."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_event_or_block_visible",
+			_engagement_fire_event_or_block_visible(contact_decision_diagnostics, fire_events),
+			"Fired engagements expose a fire event; non-fired decisions expose waiting/block reason."
+		),
+		_build_mission_first_move_readability_check(
+			"cover_range_los_context_visible",
+			_engagement_has_cover_range_los_context(contact_decision_diagnostics, cover_effectiveness_readout),
+			"Engagement decision carries range, LOS or cover context."
+		),
+		_build_mission_first_move_readability_check(
+			"feedback_text_visible",
+			_does_first_engagement_feedback_text_show_decision(feedback_text),
+			"Mission Control or command feedback names CONTACT FIRE/WAIT/NO FIRE style status."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			true,
+			"Snapshot reports first engagement feedback without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_543",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"selected_contact_count": selected_contacts.size(),
+		"selected_contacts": selected_contacts,
+		"engagement_status": engagement_status,
+		"engagement_reason": engagement_reason,
+		"contact_decision_diagnostics": contact_decision_diagnostics,
+		"fire_event_count": fire_events.size(),
+		"fire_events": fire_events,
+		"first_fire_event": first_fire_event,
+		"cover_effectiveness_readout": cover_effectiveness_readout,
+		"security_state": security_state,
+		"primary_contact_snapshot": primary_contact_snapshot,
+		"contact_decision_text": decision_text,
+		"mission_control_status_text": mission_control_text,
+		"selected_fireteam_status_text": selected_status_text,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_deployed_selected_fireteam_unit_ids() -> Array:
 	var result: Array = []
 	var seen_unit_ids: Dictionary = {}
@@ -12286,6 +12369,102 @@ func _first_contact_has_threat_or_cover_context(security_state: Dictionary, cove
 		return true
 	var readout_text: String = String(cover_readout.get("readout_text", "")).strip_edges().to_lower()
 	return not readout_text.is_empty() and not readout_text.contains("unknown")
+
+
+func _find_first_relevant_fire_event_for_fireteams(fireteam_ids: Array, fire_events: Array, contact_decision: Dictionary) -> Dictionary:
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	var diagnostic_attacker_id: String = String(contact_decision.get("attacker_unit_id", "")).strip_edges()
+	var diagnostic_target_id: String = String(contact_decision.get("target_unit_id", contact_decision.get("actual_target_id", ""))).strip_edges()
+	for event_variant in fire_events:
+		if typeof(event_variant) != TYPE_DICTIONARY:
+			continue
+		var event: Dictionary = Dictionary(event_variant)
+		var attacker_id: String = String(event.get("attacker_unit_id", "")).strip_edges()
+		var target_id: String = String(event.get("target_unit_id", "")).strip_edges()
+		if not diagnostic_attacker_id.is_empty() and attacker_id == diagnostic_attacker_id:
+			return event.duplicate(true)
+		if not diagnostic_target_id.is_empty() and target_id == diagnostic_target_id:
+			return event.duplicate(true)
+		var attacker_fireteam_id: String = _get_deployed_unit_fireteam_id(attacker_id)
+		if lookup.has(attacker_fireteam_id):
+			return event.duplicate(true)
+	return {}
+
+
+func _get_deployed_unit_fireteam_id(unit_id: String) -> String:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return ""
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		for unit in _get_fireteam_units(fireteam_id, true):
+			if unit == null or not unit.has_method("get_unit_id"):
+				continue
+			if String(unit.call("get_unit_id")).strip_edges() == normalized_unit_id:
+				return fireteam_id
+	return ""
+
+
+func _engagement_decision_has_visible_status(contact_decision: Dictionary) -> bool:
+	if contact_decision.is_empty():
+		return false
+	var status: String = String(contact_decision.get("status", "")).strip_edges().to_lower()
+	var reason: String = String(contact_decision.get("reason", "")).strip_edges().to_lower()
+	return ["fired", "waiting", "blocked"].has(status) and not reason.is_empty()
+
+
+func _engagement_target_or_block_reason_visible(contact_decision: Dictionary) -> bool:
+	if contact_decision.is_empty():
+		return false
+	var status: String = String(contact_decision.get("status", "")).strip_edges().to_lower()
+	if status == "fired":
+		return not String(contact_decision.get("attacker_unit_id", "")).strip_edges().is_empty() \
+			and not String(contact_decision.get("target_unit_id", contact_decision.get("actual_target_id", ""))).strip_edges().is_empty() \
+			and not String(contact_decision.get("weapon_id", "")).strip_edges().is_empty()
+	if status == "waiting":
+		return int(contact_decision.get("cooldown_ticks_remaining", 0)) > 0
+	var reason: String = String(contact_decision.get("reason", "")).strip_edges()
+	if reason.is_empty():
+		return false
+	if typeof(contact_decision.get("candidate", null)) == TYPE_DICTIONARY:
+		return not String(Dictionary(contact_decision.get("candidate", {})).get("candidate_reason", "")).strip_edges().is_empty()
+	return true
+
+
+func _engagement_fire_event_or_block_visible(contact_decision: Dictionary, fire_events: Array) -> bool:
+	var status: String = String(contact_decision.get("status", "")).strip_edges().to_lower()
+	if status == "fired":
+		if not String(contact_decision.get("fire_event_id", "")).strip_edges().is_empty():
+			return true
+		return not fire_events.is_empty()
+	return _engagement_target_or_block_reason_visible(contact_decision)
+
+
+func _engagement_has_cover_range_los_context(contact_decision: Dictionary, cover_readout: Dictionary) -> bool:
+	if not String(contact_decision.get("range_state", "")).strip_edges().is_empty():
+		return true
+	if not String(contact_decision.get("los_state", "")).strip_edges().is_empty():
+		return true
+	if not String(contact_decision.get("cover_state", "")).strip_edges().is_empty():
+		return true
+	if not String(contact_decision.get("attack_quality_label", "")).strip_edges().is_empty():
+		return true
+	if not Array(cover_readout.get("contact_readouts", [])).is_empty():
+		return true
+	var text: String = String(cover_readout.get("readout_text", "")).strip_edges().to_lower()
+	return not text.is_empty() and not text.contains("unknown")
+
+
+func _does_first_engagement_feedback_text_show_decision(text: String) -> bool:
+	var normalized_text: String = text.strip_edges().to_upper()
+	if normalized_text.is_empty():
+		return false
+	for token in ["CONTACT FIRE", "CONTACT WAIT", "NO FIRE", "ENGAGE", "FIRE", "BLOCK", "COOLDOWN", "KONTAKT", "FEUER"]:
+		if normalized_text.contains(token):
+			return true
+	return false
 
 
 func get_command_feedback_snapshot() -> Dictionary:

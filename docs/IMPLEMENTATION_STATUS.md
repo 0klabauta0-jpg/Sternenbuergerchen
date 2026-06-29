@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_543 - Mission First Engagement Feedback Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_mission_first_engagement_feedback_snapshot()` fuer FireEvents, ContactDecision-Diagnostics, Ziel-/Angreifer-/Waffenfelder, Cooldown-/Blockgruende, Cover-/Range-/LOS-Kontext und Mission-Control-/Command-Feedback.
+- Stand: Der Smoke startet den Homebase-zu-Mission-Pfad, setzt LZ, dropped/deboarded das Fireteam, plant und fuehrt den ersten Move aus, erzeugt reproduzierbaren Kontakt und stoesst die bestehende Combat-Entscheidung an.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_543 als erledigten Zwischenstand und verschiebt den naechsten Anschluss auf sichtbare Fire-/Cover-Visual-Politur.
+- Risiken/offen: Der Task prueft Headless-Snapshots und keinen menschlichen Pixel-Sichttest. Der naechste spielbare Reibungspunkt ist, ob FireTrace, Ziel-/Deckungsanzeige und Statuschips im Godot-Fenster angenehm lesbar aussehen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_543_mission_first_engagement_feedback_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_542_mission_first_contact_readability_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_544 - Mission Fire And Cover Visual Polish Pass`, damit die nun pruefbare Engagement-Wahrheit im sichtbaren Missionsbild schicker und schneller lesbar wird.
+
 ### TASK_542 - Mission First Contact Readability Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
