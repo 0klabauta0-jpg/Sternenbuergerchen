@@ -93,6 +93,9 @@ TASK_561 erweitert den laufenden HTML-Zwischenbericht um eine gefuehrte MP-F6-Si
 ## Frontier-Probe-Multiplayer-F6-Visual-Evidence-Capture
 TASK_562 erzeugt eine reproduzierbare MP-F6-Visual-Evidence-Basis fuer den Frontier-Probe-Slice. Der Capture-Smoke darf den bestehenden FullHD-F6-Testzustand, TASK_557-Readability, TASK_560-Teamchip-Tooltip und ein lokales PNG/JSON-Manifest unter `tmp/` zusammenfassen, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern. Erwartete Struktur: `tmp/frontier_probe_mp_f6_visual_evidence.png`, `tmp/frontier_probe_mp_f6_visual_evidence.json`, Readability-/Tooltip-Gates, ein Readback-/Evidence-Board-Flag und eine klare Markierung, dass der echte manuelle Review weiterhin offen ist.
 
+## Frontier-Probe-Multiplayer-F6-Evidence-Report-Preview
+TASK_563 macht die TASK_562-Artefakte im laufenden HTML-Zwischenbericht sichtbar. Der Bericht darf das lokale PNG referenzieren und PNG-/Manifest-Pfade, Viewport, Readability-/Tooltip-Gates, Viewport-Readback-Status, Evidence-Board-Status und manuellen Review-Status exportieren. Er darf keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern und darf den menschlichen F6-/Hover-Test nicht als erledigt markieren. Der naechste Apply-Slice bleibt TASK_564.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_563_frontier_probe_multiplayer_f6_evidence_report_preview.md`, `docs/tasks/TASK_562_frontier_probe_multiplayer_f6_visual_evidence_capture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der laufende HTML-Zwischenbericht zeigt die TASK_562-Evidence direkt als Preview ueber `../../tmp/frontier_probe_mp_f6_visual_evidence.png`.
+- Stand: Der Bericht exportiert PNG-Pfad, Manifest-Pfad, Viewport, Readability-Gate, Teamchip-Tooltip-Gate, Viewport-Readback-Status, Evidence-Board-Status und den weiterhin offenen manuellen Review-Status.
+- Stand: Roadmap, Status, Contract und bestehende Manual-/Capture-Verifier sind auf TASK_563 als erledigten Report-Slice und TASK_564 als naechsten Apply-Polish-Slice weitergezogen.
+- Risiken/offen: Wenn `tmp/` geloescht wurde, muss TASK_562 erneut laufen, damit die Preview im Browser ein Bild findet; der echte menschliche F6-/Hover-Sichttest bleibt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_563_frontier_probe_multiplayer_f6_evidence_report_preview.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings`, sobald Screenshot/Manifest oder echte MP-F6-Review-Notizen konkrete Reibung nennen.
+
 ### TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_562_frontier_probe_multiplayer_f6_visual_evidence_capture.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_560_frontier_probe_multiplayer_teamchip_tooltip_polish.md`, `docs/tasks/TASK_561_frontier_probe_multiplayer_manual_visual_review_guide.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Stand: Das Manifest enthaelt PNG-Pfad, Viewport, Readback-/Evidence-Board-Status, Gate-Status, Teamchip-Text, Tooltip-Laenge und markiert den manuellen Review weiterhin als offen.
 - Risiken/offen: Der Capture liefert Bildbeweis, ersetzt aber keinen menschlichen Hover-/Lesbarkeitsentscheid.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_563 - Frontier Probe Multiplayer Apply Visual Polish Findings`, sobald Screenshot/Manifest oder exportierte Review-Notizen konkrete Reibung nennen.
+- Naechster Schritt: TASK_563 haengt die Evidence in den Bericht; danach `TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings`, sobald Screenshot/Manifest oder exportierte Review-Notizen konkrete Reibung nennen.
 
 ### TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide
 - Status: implementiert im Arbeitsstand
