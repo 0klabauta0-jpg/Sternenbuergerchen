@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_548 - Combat HUD Visual Detail Tooltip Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_548_combat_hud_visual_detail_tooltip_pass.md`, `docs/tasks/TASK_547_multi_fireteam_combat_hud_consistency_smoke.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_combat_hud_visual_detail_tooltip_snapshot()` fuer die Detailhilfe zur kompakten Combat-HUD-Zeile.
+- Stand: #17 Selected Fireteam und #18 Mission Control erhalten denselben Tooltip-Text aus bestehenden ContactDecision-, Cover- und FireEvent-Snapshots.
+- Stand: Der Tooltip erklaert Fire-State, Angreifer/Ziel, Waffe/Outcome falls vorhanden sowie Cover, Range, LOS und Flank-Kontext, waehrend die kompakte HUD-Zeile im TASK_546-Budget bleibt.
+- Stand: Der Rolling-HTML-Bericht ist als laufender Zwischenbericht auf TASK_548 aktualisiert und nennt den naechsten sichtbaren Anschluss.
+- Risiken/offen: Der Task prueft Headless-Snapshots und Control-Tooltips, keinen menschlichen F6-/Screenshot-Sichttest des Hover-Verhaltens im Fenster.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_548_combat_hud_visual_detail_tooltip_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_547_multi_fireteam_combat_hud_consistency_smoke.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_549 - Combat HUD F6 Visual Audit`, damit die neue Detailhilfe im echten 1920x1080-Missionsfenster sichtbar auf Lesbarkeit, Position und Ueberlagerungen geprueft wird.
+
 ### TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_547_multi_fireteam_combat_hud_consistency_smoke.md`, `docs/tasks/TASK_546_mission_combat_feedback_hud_density_polish.md`, `docs/dev/mission_command_feedback_contract.md`

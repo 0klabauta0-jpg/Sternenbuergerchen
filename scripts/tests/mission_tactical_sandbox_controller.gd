@@ -2374,6 +2374,7 @@ func _update_ui() -> void:
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
 		fireteam_status_label.text = _build_fireteam_status_text()
+		fireteam_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
 	_refresh_mission_nav_timer_label()
@@ -2385,6 +2386,7 @@ func _update_ui() -> void:
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
 		strategic_status_label.text = _build_strategic_status_text()
+		strategic_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 
 	var phase_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseStatusLabel") as Label
 	if phase_status_label != null:
@@ -5965,6 +5967,7 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 	var fire_events: Array = get_fire_event_snapshot()
 	var first_fire_event: Dictionary = _find_first_relevant_fire_event_for_fireteams(Array(_selected_fireteam_ids), fire_events, diagnostics)
 	var compact_line: String = _build_mission_combat_hud_compact_line(diagnostics, cover_readout, first_fire_event)
+	var detail_snapshot: Dictionary = _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics, cover_readout, first_fire_event, compact_line)
 	var selected_line: String = "Kampf %s" % compact_line if not compact_line.is_empty() else ""
 	var line_limit: int = 96
 	return {
@@ -5983,6 +5986,8 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 		"reason": String(diagnostics.get("reason", "")).strip_edges().to_lower(),
 		"fire_event_id": String(first_fire_event.get("event_id", diagnostics.get("fire_event_id", ""))).strip_edges(),
 		"cover_text": _build_mission_combat_cover_token_text(cover_readout),
+		"detail_tooltip": detail_snapshot,
+		"tooltip_text": String(detail_snapshot.get("tooltip_text", "")),
 		"contains_fire_state": _combat_hud_line_contains_any(compact_line, ["FIRE", "WAIT", "NO FIRE", "CONTACT"]),
 		"contains_cover_context": compact_line.contains("COV"),
 		"contains_los_context": compact_line.contains("LOS"),
@@ -5993,6 +5998,71 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 func _build_selected_fireteam_combat_hud_line() -> String:
 	var snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	return String(snapshot.get("selected_fireteam_line", "")).strip_edges()
+
+
+func _build_mission_combat_hud_detail_tooltip_text() -> String:
+	var snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
+	return String(snapshot.get("tooltip_text", "")).strip_edges()
+
+
+func _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary, compact_line: String) -> Dictionary:
+	if diagnostics.is_empty() or compact_line.strip_edges().is_empty():
+		return {
+			"active": false,
+			"tooltip_text": "",
+			"detail_lines": [],
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		}
+	var primary: Dictionary = Dictionary(cover_readout.get("primary", cover_readout))
+	var reason: String = String(diagnostics.get("reason", "")).strip_edges().to_upper()
+	var status: String = String(diagnostics.get("status", "")).strip_edges().to_upper()
+	var attacker_id: String = String(diagnostics.get("attacker_unit_id", fire_event.get("attacker_unit_id", ""))).strip_edges()
+	var target_id: String = String(diagnostics.get("target_unit_id", diagnostics.get("actual_target_id", fire_event.get("target_unit_id", "")))).strip_edges()
+	var pair_text: String = "%s -> %s" % [_compact_unit_id_for_diagnostics(attacker_id), _compact_unit_id_for_diagnostics(target_id)]
+	var weapon_id: String = String(diagnostics.get("weapon_id", fire_event.get("weapon_id", ""))).strip_edges().to_upper()
+	var outcome: String = String(fire_event.get("combat_outcome", diagnostics.get("outcome", ""))).strip_edges().to_upper()
+	var state_bits: PackedStringArray = PackedStringArray()
+	if not reason.is_empty():
+		state_bits.append(reason)
+	if not status.is_empty() and status != reason:
+		state_bits.append(status)
+	var fire_line: String = "Fire: %s" % (" / ".join(state_bits) if not state_bits.is_empty() else "CONTACT")
+	if pair_text != "? -> ?":
+		fire_line += " | %s" % pair_text
+	if not weapon_id.is_empty():
+		fire_line += " | %s" % weapon_id
+	if not outcome.is_empty():
+		fire_line += " | %s" % outcome
+	var cover_line: String = "Cover: %s | Range: %s" % [
+		_compact_cover_effectiveness_label(String(primary.get("cover_state", "unknown"))),
+		_compact_cover_effectiveness_label(String(primary.get("range_state", "unknown"))),
+	]
+	var sight_line: String = "LOS: %s | Flank: %s" % [
+		_compact_cover_effectiveness_label(String(primary.get("los_state", "unknown"))),
+		_compact_cover_effectiveness_label(String(primary.get("flank_state", "unknown"))),
+	]
+	var why_line: String = "Tokens: COV cover, RNG range, LOS sight, FLK flank"
+	var detail_lines: PackedStringArray = PackedStringArray([fire_line, cover_line, sight_line, why_line])
+	var tooltip_text: String = "\n".join(detail_lines)
+	var line_limit: int = 112
+	return {
+		"active": true,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"compact_line": compact_line,
+		"tooltip_text": tooltip_text,
+		"detail_lines": Array(detail_lines),
+		"detail_line_count": detail_lines.size(),
+		"tooltip_line_limit": line_limit,
+		"max_tooltip_line_length": _max_string_length(Array(detail_lines)),
+		"tooltip_within_limit": _max_string_length(Array(detail_lines)) <= line_limit,
+		"contains_fire_state": _combat_hud_line_contains_any(fire_line, ["FIRE", "WAIT", "NO FIRE", "CONTACT", "FIRED", "COOLDOWN"]),
+		"contains_cover_detail": cover_line.contains("Cover:"),
+		"contains_range_detail": cover_line.contains("Range:"),
+		"contains_los_detail": sight_line.contains("LOS:"),
+		"contains_flank_detail": sight_line.contains("Flank:"),
+	}
 
 
 func _build_mission_combat_hud_compact_line(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary) -> String:
@@ -6052,6 +6122,13 @@ func _combat_hud_line_contains_any(line: String, tokens: Array) -> bool:
 		if normalized_line.contains(String(token_variant).to_upper()):
 			return true
 	return false
+
+
+func _max_string_length(lines: Array) -> int:
+	var result: int = 0
+	for line_variant in lines:
+		result = maxi(result, String(line_variant).length())
+	return result
 
 
 func _build_meta_transfer_status_text() -> String:
@@ -12455,6 +12532,87 @@ func get_multi_fireteam_combat_hud_consistency_snapshot() -> Dictionary:
 		"fireteam_status_card_count": fireteam_status_cards.size(),
 		"fireteam_status_cards": fireteam_status_cards,
 		"visible_card_fireteam_ids": visible_card_fireteam_ids,
+		"combat_hud_density": hud_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_combat_hud_visual_detail_tooltip_snapshot() -> Dictionary:
+	var hud_snapshot: Dictionary = get_mission_combat_feedback_hud_density_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(hud_snapshot.get("combat_hud_density", {}))
+	var detail_tooltip: Dictionary = Dictionary(combat_hud_density.get("detail_tooltip", {}))
+	var compact_line: String = String(hud_snapshot.get("compact_line", "")).strip_edges()
+	var tooltip_text: String = String(detail_tooltip.get("tooltip_text", "")).strip_edges()
+	var fireteam_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
+	var strategic_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	var fireteam_tooltip: String = String(fireteam_label.tooltip_text if fireteam_label != null else "").strip_edges()
+	var mission_control_tooltip: String = String(strategic_label.tooltip_text if strategic_label != null else "").strip_edges()
+	if fireteam_tooltip.is_empty() and not tooltip_text.is_empty():
+		fireteam_tooltip = tooltip_text
+	if mission_control_tooltip.is_empty() and not tooltip_text.is_empty():
+		mission_control_tooltip = tooltip_text
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"combat_hud_density_gate_passes",
+			String(hud_snapshot.get("gate", "")) == "pass",
+			"Detail tooltip builds on the existing compact combat HUD density snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"compact_line_stays_short",
+			bool(combat_hud_density.get("line_within_limit", false)) and not compact_line.is_empty(),
+			"Detail tooltip does not lengthen the compact HUD line."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltip_text_available",
+			bool(detail_tooltip.get("active", false)) and not tooltip_text.is_empty(),
+			"Combat HUD detail tooltip text is available."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltip_within_limit",
+			bool(detail_tooltip.get("tooltip_within_limit", false)),
+			"Tooltip detail lines stay within the HUD text budget."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltip_explains_fire_cover_los_range",
+			bool(detail_tooltip.get("contains_fire_state", false))
+				and bool(detail_tooltip.get("contains_cover_detail", false))
+				and bool(detail_tooltip.get("contains_range_detail", false))
+				and bool(detail_tooltip.get("contains_los_detail", false))
+				and bool(detail_tooltip.get("contains_flank_detail", false)),
+			"Tooltip explains fire state, cover, range, LOS and flank context."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_tooltip_matches",
+			not tooltip_text.is_empty() and fireteam_tooltip == tooltip_text,
+			"Selected Fireteam label exposes the same combat detail tooltip."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_tooltip_matches",
+			not tooltip_text.is_empty() and mission_control_tooltip == tooltip_text,
+			"Mission Control label exposes the same combat detail tooltip."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(detail_tooltip.get("read_only", false)) and not bool(detail_tooltip.get("ui_sets_gameplay_truth", true)),
+			"Detail tooltip reports existing combat data without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_548",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"compact_line": compact_line,
+		"tooltip_text": tooltip_text,
+		"detail_tooltip": detail_tooltip,
+		"selected_fireteam_tooltip_text": fireteam_tooltip,
+		"mission_control_tooltip_text": mission_control_tooltip,
 		"combat_hud_density": hud_snapshot,
 		"checks": checks,
 		"failed_checks": failed_checks,
