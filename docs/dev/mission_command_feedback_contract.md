@@ -339,6 +339,11 @@ TASK_615 wendet den belegten ersten TASK_614-Befund nur im Review-Tooling an: Ei
 
 Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` darf zusaetzlich `planned_godot_bin`, `visible_godot_bin`, `visible_godot_bin_source`, `console_binary_replaced`, `window_focus_attempted`, `window_position_attempted`, `host_window_status` und `client_window_status` melden. Diese Felder sind Review-Evidence und duerfen keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit erzeugen. Der laufende HTML-Bericht darf diese Felder unter `host_client_real_run_findings.*` exportieren und TASK_616 als naechsten sichtbaren UI-Befund empfehlen.
 
+## Host-Client-Visible-UI-Real-Run-Review
+TASK_616 wendet den belegten GUI-Capture-Befund am sichtbaren Renderpfad an: Der Host zeigte die Mission-Welt, der Client zeigte HUD/Fireteam-Karten, aber die Terrain-/World-Flaeche blieb schwarz. Zulaessig ist ein zeitlich begrenzter Bootstrap-/Resize-/Map-Render-Redraw-Guard im `TerrainMap3DView`, damit sichtbare Multi-Window-Starts nicht an einem zu fruehen `SubViewport.UPDATE_ONCE` haengen bleiben. Zulaessig ist ausserdem, Host-/Client-Fenster im Real-Run-Capture direkt nach Prozessstart zu fokussieren/positionieren, damit der sichtbare Renderimpuls nicht erst nach Ablauf der Wartezeit kommt. Nicht zulaessig sind neue Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit.
+
+Erwartete Struktur: `TerrainMap3DView` behaelt `SubViewport.UPDATE_ONCE` als Normalzustand, darf aber fuer Bootstrap/Resize/Map-Render kurz `SubViewport.UPDATE_ALWAYS` setzen und danach automatisch zurueckfallen. `tmp/host_client_two_window_real_run_review.json` darf `initial_host_window_status` und `initial_client_window_status` als Review-Evidence melden. Der laufende HTML-Bericht darf TASK_616-Felder unter `host_client_visible_ui_real_run.*` exportieren; ein Screenshot-/Manifest-Review bleibt Evidence und darf keine Gameplay-Entscheidung mutieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -66,8 +66,8 @@ func _test_report_export_fields(report_text: String) -> void:
 	for export_key in required_export_keys:
 		_assert(report_text.contains('data-export-key="%s"' % export_key), "Report exports %s" % export_key)
 	_assert(report_text.contains('data-note-key="notes.host_client_real_run_findings"'), "Report exports free TASK_615 findings note")
-	_assert(report_text.contains('latest_completed_task: "TASK_615 - Host Client Real Run Findings"'), "JSON payload lists TASK_615 as latest completed task")
-	_assert(report_text.contains('current_focus: "TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload sets current focus to TASK_616")
+	_assert(report_text.contains('"TASK_615 - Host Client Real Run Findings"'), "JSON payload keeps TASK_615 in completed tasks")
+	_assert(report_text.contains('latest_completed_task: "TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload advances latest completed task to TASK_616")
 
 
 func _test_tooling_guards() -> void:
