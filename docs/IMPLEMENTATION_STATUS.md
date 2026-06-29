@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_583 - Suppress Fire AAR Report Panel Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_583_suppress_fire_aar_report_panel_readability.md`, `docs/tasks/TASK_582_suppress_fire_outcome_aar_diagnostic_stub.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MissionTacticalSandboxController.get_suppress_fire_aar_report_panel_snapshot()` baut aus dem TASK_582-Zaehler ein kompaktes read-only Report-Panel-Snapshot mit Titel, Summary, Chips und Fireteam-Zeilen.
+- Stand: Der Panel-Detailtext nennt explizit die Grenze: keine Ammo, keine echte Suppression und kein Damage-Mod. Damit bleibt der AAR-Wert ehrlich lesbar, ohne Gameplay-Wahrheit in UI/Report zu verschieben.
+- Stand: Der Verifier prueft den integrierten Missionspfad bis SUP-Fire, liest das Report-Panel zweimal und bestaetigt, dass weder Command-Queue noch SUP-Count durch Snapshot-Lesezugriffe mutieren.
+- Risiken/offen: Noch kein vollstaendiger Debriefing-Screen und keine allgemeinen AAR-Kampfmetriken; echte Suppression-Wirkung und Munitionsverbrauch bleiben eigene Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_583_suppress_fire_aar_report_panel_readability.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_582_suppress_fire_outcome_aar_diagnostic_stub.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_581_suppress_fire_intent_outcome_smoke.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_584 - Mini AAR Combat Metrics Shell`, wenn SUP-Zaehler, FireEvents, Friendly-Fire-Risiko und Wounded/Extracted spaeter als gemeinsame Mini-AAR-Schale lesbar werden sollen.
+
 ### TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_582_suppress_fire_outcome_aar_diagnostic_stub.md`, `docs/tasks/TASK_581_suppress_fire_intent_outcome_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
@@ -18,7 +28,7 @@
 - Stand: `MissionTacticalSandboxController.get_suppress_fire_outcome_aar_diagnostic_snapshot()` prueft die integrierte Grenze und bestaetigt, dass Snapshot-Lesezugriffe keine Command-Queue und keinen SUP-Count mutieren.
 - Risiken/offen: Noch kein echtes Debriefing-Panel, kein Ammo-Verbrauch und keine echte Suppression-Wirkung; der Stub ist nur der messbare Anker fuer Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_582_suppress_fire_outcome_aar_diagnostic_stub.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_581_suppress_fire_intent_outcome_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_580_suppress_fire_visual_tuning_findings.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_583 - Suppress Fire AAR Report Panel Readability`, wenn der Messwert im spaeteren Debriefing/Report lesbar werden soll.
+- Naechster Schritt: durch `TASK_583 - Suppress Fire AAR Report Panel Readability` erledigt; naechster Anschluss ist `TASK_584 - Mini AAR Combat Metrics Shell`.
 
 ### TASK_581 - Suppress Fire Intent Outcome Smoke
 - Status: implementiert im Arbeitsstand
@@ -28,7 +38,7 @@
 - Stand: `get_suppress_fire_intent_outcome_snapshot()` prueft die integrierte Grenze: SUP-Intent sichtbar, aber keine Suppression-Effect-Payloads, kein Ammo-Verbrauch, keine Damage-Modifikation und keine UI-seitige Gameplay-Wahrheit.
 - Risiken/offen: Echte Suppression-Wirkung, Munitionsverbrauch, Treffer-/Damage-Tuning und AAR-Messwerte bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_581_suppress_fire_intent_outcome_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_580_suppress_fire_visual_tuning_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd`, `git diff --check`.
-- Naechster Schritt: durch `TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub` erledigt; naechster Anschluss ist `TASK_583 - Suppress Fire AAR Report Panel Readability`.
+- Naechster Schritt: durch `TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub` und `TASK_583 - Suppress Fire AAR Report Panel Readability` erledigt; naechster Anschluss ist `TASK_584 - Mini AAR Combat Metrics Shell`.
 
 ### TASK_580 - Suppress Fire Visual Tuning Findings
 - Status: implementiert im Arbeitsstand

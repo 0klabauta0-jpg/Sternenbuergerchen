@@ -13165,6 +13165,135 @@ func get_suppress_fire_outcome_aar_diagnostic_snapshot() -> Dictionary:
 	}
 
 
+func get_suppress_fire_aar_report_panel_snapshot() -> Dictionary:
+	var aar_snapshot: Dictionary = get_suppress_fire_outcome_aar_diagnostic_snapshot()
+	var report_panel: Dictionary = _build_suppress_fire_aar_report_panel(aar_snapshot)
+	var report_rows: Array = Array(report_panel.get("fireteam_rows", []))
+	var summary_text: String = String(report_panel.get("summary_text", "")).strip_edges()
+	var detail_text: String = String(report_panel.get("detail_text", "")).strip_edges()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"aar_report_panel_available",
+			String(report_panel.get("schema", "")) == "sternenbuergerchen.suppress_fire_aar_report_panel.v1",
+			"SUP AAR report panel exposes a stable read-only schema."
+		),
+		_build_mission_first_move_readability_check(
+			"sup_count_visible",
+			summary_text.to_upper().contains("SUP")
+				and int(report_panel.get("suppress_fire_outcome_count", 0)) >= 1
+				and summary_text.contains(str(int(report_panel.get("suppress_fire_outcome_count", 0)))),
+			"SUP AAR report panel shows the measured SUP count."
+		),
+		_build_mission_first_move_readability_check(
+			"fireteam_rows_visible",
+			not report_rows.is_empty()
+				and String(Dictionary(report_rows[0]).get("value_text", "")).to_upper().contains("SUP"),
+			"SUP AAR report panel shows fireteam rows."
+		),
+		_build_mission_first_move_readability_check(
+			"no_false_effect_claims",
+			bool(report_panel.get("no_suppression_effect_payload", false))
+				and bool(report_panel.get("no_ammo_consumption", false))
+				and bool(report_panel.get("no_suppress_damage_modifier", false))
+				and detail_text.to_lower().contains("keine ammo")
+				and detail_text.to_lower().contains("keine echte suppression"),
+			"SUP AAR report panel states the current no-ammo/no-suppression boundary."
+		),
+		_build_mission_first_move_readability_check(
+			"source_diagnostic_still_green",
+			String(aar_snapshot.get("gate", "")) == "pass",
+			"SUP AAR report panel reads the green TASK_582 diagnostic gate."
+		),
+		_build_mission_first_move_readability_check(
+			"compact_report_text",
+			summary_text.length() <= 96 and detail_text.length() <= 180,
+			"SUP AAR report panel text stays compact enough for a future Debriefing surface."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(report_panel.get("read_only", false))
+				and not bool(report_panel.get("ui_sets_gameplay_truth", true))
+				and bool(aar_snapshot.get("read_only", false))
+				and not bool(aar_snapshot.get("ui_sets_gameplay_truth", true)),
+			"SUP AAR report panel is a read-only presentation of existing diagnostics."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_583",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"aar_snapshot": aar_snapshot,
+		"report_panel": report_panel,
+		"summary_text": summary_text,
+		"detail_text": detail_text,
+		"fireteam_rows": report_rows,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_suppress_fire_aar_report_panel(aar_snapshot: Dictionary) -> Dictionary:
+	var aar_diagnostic: Dictionary = Dictionary(aar_snapshot.get("aar_diagnostic", {})).duplicate(true)
+	var count_by_fireteam: Dictionary = Dictionary(aar_snapshot.get("suppress_fire_outcome_by_fireteam", {})).duplicate(true)
+	var total_count: int = int(aar_snapshot.get("suppress_fire_outcome_count", aar_diagnostic.get("suppress_fire_outcome_count", 0)))
+	var last_fireteam_id: String = String(aar_snapshot.get("last_fireteam_id", "")).strip_edges().to_lower()
+	var rows: Array = _build_suppress_fire_aar_report_rows(count_by_fireteam)
+	var count_label: String = "SUP x%d" % total_count
+	var summary_text: String = "%s | Druckabsicht gemessen" % count_label
+	if not last_fireteam_id.is_empty():
+		summary_text = "%s | zuletzt FT %s" % [summary_text, last_fireteam_id.to_upper()]
+	var detail_text: String = "AAR-Debug: SUP wurde als Druckabsicht gezaehlt. Keine Ammo, keine echte Suppression, kein Damage-Mod."
+	return {
+		"schema": "sternenbuergerchen.suppress_fire_aar_report_panel.v1",
+		"source": "MissionTacticalSandboxController",
+		"source_snapshot_schema": String(aar_diagnostic.get("schema", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"title": "SUP AAR",
+		"summary_text": summary_text,
+		"detail_text": detail_text,
+		"count_label": count_label,
+		"suppress_fire_outcome_count": total_count,
+		"suppress_fire_outcome_by_fireteam": count_by_fireteam,
+		"last_fireteam_id": last_fireteam_id,
+		"fireteam_rows": rows,
+		"chips": [
+			{"label": "SUP", "value": str(total_count), "tone": "info"},
+			{"label": "Ammo", "value": "0", "tone": "muted"},
+			{"label": "Effect", "value": "debug", "tone": "muted"},
+		],
+		"no_suppression_effect_payload": bool(aar_diagnostic.get("no_suppression_effect_payload", false)),
+		"no_ammo_consumption": bool(aar_diagnostic.get("no_ammo_consumption", false)),
+		"no_suppress_damage_modifier": bool(aar_diagnostic.get("no_suppress_damage_modifier", false)),
+	}
+
+
+func _build_suppress_fire_aar_report_rows(count_by_fireteam: Dictionary) -> Array:
+	var rows: Array = []
+	var keys: Array = count_by_fireteam.keys()
+	keys.sort()
+	for key_variant in keys:
+		var fireteam_id: String = String(key_variant).strip_edges().to_lower()
+		var count: int = int(count_by_fireteam.get(key_variant, 0))
+		if fireteam_id.is_empty() or count <= 0:
+			continue
+		rows.append({
+			"fireteam_id": fireteam_id,
+			"label": "FT %s" % fireteam_id.to_upper(),
+			"value_text": "SUP x%d" % count,
+			"meaning_text": "Druckabsicht eingesetzt",
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+	return rows
+
+
 func _count_waypoint_intent_preview_ghost_entries(entries: Array) -> int:
 	var count: int = 0
 	for entry_variant in entries:

@@ -179,6 +179,11 @@ TASK_582 macht den TASK_581-Outcome als kleinen AAR-/Debug-Anker zaehlbar. Gezae
 
 Erwartete Struktur: `MissionCombatLoopDriver.get_suppress_fire_outcome_aar_diagnostic_snapshot()` enthaelt `schema = sternenbuergerchen.suppress_fire_outcome_aar_diagnostic.v1`, `suppress_fire_outcome_count`, `suppress_fire_outcome_by_fireteam`, `last_suppress_fire_outcome`, `dedupe_key_count`, `read_only = true`, `ui_sets_gameplay_truth = false`, `no_suppression_effect_payload = true`, `no_ammo_consumption = true` und `no_suppress_damage_modifier = true`. `get_suppress_fire_outcome_aar_diagnostic_snapshot()` im Mission-Controller darf daraus ein Test-/Report-Gate bauen, aber keinen Gameplay-State mutieren. Nicht zulaessig sind echtes Debriefing, Ammo-Verbrauch, Suppression-Effect-Payloads, Damage-Modifikation oder eine UI-seitige zweite Combat-Wahrheit.
 
+## Suppress-Fire-AAR-Report-Panel-Readability
+TASK_583 macht den TASK_582-Zaehler als kleine Debriefing-/Report-Vorstufe lesbar. Der Mission-Controller darf aus dem read-only AAR-Diagnostic-Snapshot ein kompaktes Report-Panel-Snapshot bauen: Titel, Summary, Count-Chips, Fireteam-Zeilen und einen kurzen Grenztext. Das Panel bleibt reine Praesentation und darf keine Mission-Result-, Combat-, Ammo- oder Suppression-Wahrheit speichern.
+
+Erwartete Struktur: `get_suppress_fire_aar_report_panel_snapshot()` enthaelt `report_panel.schema = sternenbuergerchen.suppress_fire_aar_report_panel.v1`, `title = SUP AAR`, `summary_text`, `detail_text`, `count_label`, `chips`, `fireteam_rows`, `suppress_fire_outcome_count`, `read_only = true` und `ui_sets_gameplay_truth = false`. Der Detailtext muss klarstellen, dass dieser Slice keine Ammo, keine echte Suppression und keinen Damage-Mod erzeugt. Nicht zulaessig sind ein vollstaendiges Debriefing-System, neue Mission-Result-Mutationen oder UI-seitige Combat-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
