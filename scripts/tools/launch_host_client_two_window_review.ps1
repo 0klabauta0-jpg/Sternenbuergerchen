@@ -7,7 +7,8 @@ param(
     [int]$WindowHeight = 720,
     [int]$HostX = 40,
     [int]$ClientX = 1380,
-    [int]$Y = 80
+    [int]$Y = 80,
+    [switch]$DisableAutoFitLayout
 )
 
 $ErrorActionPreference = "Stop"
@@ -66,6 +67,83 @@ function Resolve-GodotCandidate {
     return $result
 }
 
+function Resolve-PrimaryScreenBounds {
+    $result = [ordered]@{
+        available = $false
+        width = 0
+        height = 0
+        source = "unavailable"
+    }
+    try {
+        Add-Type -AssemblyName System.Windows.Forms
+        $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
+        $result.available = $true
+        $result.width = [int]$bounds.Width
+        $result.height = [int]$bounds.Height
+        $result.source = "System.Windows.Forms.Screen.PrimaryScreen.WorkingArea"
+    } catch {
+        $result.source = "System.Windows.Forms_unavailable"
+    }
+    return $result
+}
+
+function Resolve-WindowLayout {
+    param(
+        [int]$RequestedWidth,
+        [int]$RequestedHeight,
+        [int]$RequestedHostX,
+        [int]$RequestedClientX,
+        [int]$RequestedY,
+        [bool]$DisableAutoFit
+    )
+    $screen = Resolve-PrimaryScreenBounds
+    $gap = 32
+    $rightMargin = 40
+    $minWidth = 640
+    $minHeight = 420
+    $effective = [ordered]@{
+        width = $RequestedWidth
+        height = $RequestedHeight
+        y = $RequestedY
+        host_x = $RequestedHostX
+        client_x = $RequestedClientX
+    }
+    $result = [ordered]@{
+        auto_fit_attempted = $false
+        auto_fit_applied = $false
+        auto_fit_reason = ""
+        screen = $screen
+        requested = [ordered]@{
+            width = $RequestedWidth
+            height = $RequestedHeight
+            y = $RequestedY
+            host_x = $RequestedHostX
+            client_x = $RequestedClientX
+        }
+        effective = $effective
+    }
+    if ($DisableAutoFit -or -not [bool]$screen.available) {
+        return $result
+    }
+    $result.auto_fit_attempted = $true
+    $screenWidth = [int]$screen.width
+    $screenHeight = [int]$screen.height
+    $requestedRight = [Math]::Max($RequestedHostX + $RequestedWidth, $RequestedClientX + $RequestedWidth)
+    $requestedBottom = $RequestedY + $RequestedHeight
+    if ($requestedRight -le ($screenWidth - 8) -and $requestedBottom -le ($screenHeight - 8)) {
+        return $result
+    }
+    $usableWidth = [Math]::Max($screenWidth - $RequestedHostX - $rightMargin - $gap, $minWidth * 2 + $gap)
+    $nextWidth = [Math]::Max([Math]::Min([int][Math]::Floor($usableWidth / 2), $RequestedWidth), $minWidth)
+    $nextHeight = [Math]::Max([Math]::Min($RequestedHeight, $screenHeight - $RequestedY - $rightMargin), $minHeight)
+    $effective.width = $nextWidth
+    $effective.height = $nextHeight
+    $effective.client_x = $RequestedHostX + $nextWidth + $gap
+    $result.auto_fit_applied = $true
+    $result.auto_fit_reason = "requested_layout_exceeded_primary_work_area"
+    return $result
+}
+
 function Build-Args {
     param(
         [string]$Role,
@@ -88,6 +166,12 @@ function Build-Args {
 
 $resolvedProjectPath = Resolve-ProjectPath $ProjectPath
 $godot = Resolve-GodotCandidate $GodotBin
+$layout = Resolve-WindowLayout -RequestedWidth $WindowWidth -RequestedHeight $WindowHeight -RequestedHostX $HostX -RequestedClientX $ClientX -RequestedY $Y -DisableAutoFit ([bool]$DisableAutoFitLayout)
+$WindowWidth = [int]$layout.effective.width
+$WindowHeight = [int]$layout.effective.height
+$HostX = [int]$layout.effective.host_x
+$ClientX = [int]$layout.effective.client_x
+$Y = [int]$layout.effective.y
 $tmpDir = Join-Path $resolvedProjectPath "tmp"
 New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
 
@@ -108,6 +192,14 @@ $plan = [ordered]@{
     godot_bin_source = $godot.source
     plan_path = "tmp/host_client_two_window_launch_plan.json"
     helper_path = "scripts/tools/launch_host_client_two_window_review.ps1"
+    requested_window_layout = $layout.requested
+    window_layout_auto_fit = [ordered]@{
+        attempted = [bool]$layout.auto_fit_attempted
+        applied = [bool]$layout.auto_fit_applied
+        reason = [string]$layout.auto_fit_reason
+        screen = $layout.screen
+        disable_auto_fit = [bool]$DisableAutoFitLayout
+    }
     window_layout = [ordered]@{
         width = $WindowWidth
         height = $WindowHeight
