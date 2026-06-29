@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_600 auf <code>task/integrated-core-loop-flow-polish-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_601 auf <code>task/core-loop-manual-fullhd-playtest-capture</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -270,7 +270,8 @@
       <span class="pill good">TASK_598 Evidence-Polish</span>
       <span class="pill good">TASK_599 Core-Loop-Evidence</span>
       <span class="pill good">TASK_600 Flow-Polish-Findings</span>
-      <span class="pill warn">TASK_601 FullHD-Capture offen</span>
+      <span class="pill good">TASK_601 FullHD-Capture</span>
+      <span class="pill warn">TASK_602 Pacing-Polish offen</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -505,17 +506,18 @@
             <div class="metric"><strong>TASK_598</strong><span>umgesetzt: Headless-Evidence-Board bekommt Labels, Callouts und Manifest-Gate</span></div>
             <div class="metric"><strong>TASK_599</strong><span>aktuell umgesetzt: integrierter Core-Loop-Evidence-Index als JSON-Manifest</span></div>
             <div class="metric"><strong>TASK_600</strong><span>umgesetzt: priorisierte Flow-Polish-Findings als JSON-Manifest und Report-Workbench</span></div>
-            <div class="metric"><strong>TASK_601</strong><span>naechster sinnvoller Slice: echter Core-Loop-FullHD-Capture mit Screenshot-/Spielgefuehl-Evidence</span></div>
+            <div class="metric"><strong>TASK_601</strong><span>umgesetzt: Core-Loop-FullHD-Capture mit PNG/Manifest und manueller Review-Flaeche</span></div>
+            <div class="metric"><strong>TASK_602</strong><span>naechster sinnvoller Slice: belegten Transition-/Pacing-Polish anwenden</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. SUP ist jetzt zusaetzlich als deduplizierter AAR-/Debug-Wert messbar, als kompaktes Report-Panel lesbar, in einer Mini-AAR-Schale mit Fire-/Friendly-Fire-/Statusmetriken zusammengefuehrt, als kleine Debrief-Screen-Struktur praesentierbar und per Debrief->Homebase-Handoff wieder in den Meta-Loop zurueckfuehrbar. TASK_590 bereinigt den sichtbaren Debrief-AAR-Praefix, TASK_591 macht den echten Spielerblick darauf exportierbar, TASK_592 zeigt Skillentwicklung als read-only Vorschau, TASK_593 zeigt echte Resolver-Awards als `Skill Awards` im Debrief, TASK_594 macht diese Deltas im Character-Sheet auffindbar, TASK_595 hebt sie dort als `MISSION GAIN`-Row hervor, TASK_596 macht den Spielerblick darauf exportierbar, TASK_597 erzeugt reproduzierbare Evidence dafuer, TASK_598 macht dieses Board direkt lesbar, TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen und TASK_600 priorisiert daraus die naechsten Flow-Polish-Findings.</td><td>Naechster Schritt: TASK_601 soll echte FullHD-/Spielgefuehl-Evidence fuer Pacing, HUD-Dichte, Klickfluss und Host/Client-Gefuehl liefern.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. SUP ist jetzt zusaetzlich als deduplizierter AAR-/Debug-Wert messbar, als kompaktes Report-Panel lesbar, in einer Mini-AAR-Schale mit Fire-/Friendly-Fire-/Statusmetriken zusammengefuehrt, als kleine Debrief-Screen-Struktur praesentierbar und per Debrief->Homebase-Handoff wieder in den Meta-Loop zurueckfuehrbar. TASK_590 bereinigt den sichtbaren Debrief-AAR-Praefix, TASK_591 macht den echten Spielerblick darauf exportierbar, TASK_592 zeigt Skillentwicklung als read-only Vorschau, TASK_593 zeigt echte Resolver-Awards als `Skill Awards` im Debrief, TASK_594 macht diese Deltas im Character-Sheet auffindbar, TASK_595 hebt sie dort als `MISSION GAIN`-Row hervor, TASK_596 macht den Spielerblick darauf exportierbar, TASK_597 erzeugt reproduzierbare Evidence dafuer, TASK_598 macht dieses Board direkt lesbar, TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings und TASK_601 stellt den FullHD-Capture-Ort mit PNG/Manifest bereit.</td><td>Naechster Schritt: TASK_602 sollte nur belegtes Transition-/Pacing-Polish anwenden.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
-                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_600 ist hier bewusst mitgepflegt, damit die Flow-Polish-Findings und naechsten Captures nicht nur im Verlauf stecken.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
+                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_601 ist hier bewusst mitgepflegt, damit Capture-Artefakt, Pflichtchecks und naechster Pacing-Anschluss nicht nur im Verlauf stecken.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
               </tbody>
             </table>
           </div>
@@ -556,6 +558,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_598_done"> TASK_598 Homebase-Progression-Evidence-Polish ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_599_done"> TASK_599 Integrated-Core-Loop-Evidence-Pass ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_600_done"> TASK_600 Integrated-Core-Loop-Flow-Polish-Findings sind im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_601_done"> TASK_601 Core-Loop-Manual-FullHD-Playtest-Capture ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_586_done"> TASK_586 Debrief-Return-To-Homebase-Handoff ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -625,8 +628,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Aktueller Stand</td><td>TASK_600 ist der aktuelle Arbeitsstand: Die TASK_599-Einzelgates sind in eine priorisierte read-only Flow-Polish-Queue ueberfuehrt.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
-                <tr><td>Naechster Schritt</td><td>TASK_601 sollte den echten Core-Loop-FullHD-Capture liefern, damit Pacing, HUD-Dichte, Klickfluss und Host/Client-Gefuehl belegbar werden.</td><td>Wenn der naechste Flow-Sichttest konkrete Nacharbeit zeigt.</td></tr>
+                <tr><td>Aktueller Stand</td><td>TASK_601 ist der aktuelle Arbeitsstand: Der Core Loop hat jetzt einen FullHD-Capture-Ort mit PNG/Manifest und manueller Review-Flaeche.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
+                <tr><td>Naechster Schritt</td><td>TASK_602 sollte nur belegtes Transition-/Pacing-Polish anwenden, wenn TASK_601-Capture, Screenshot oder HTML-Export eine konkrete Reibung zeigt.</td><td>Wenn der naechste Flow-Sichttest konkrete Nacharbeit zeigt.</td></tr>
                 <tr><td>Noch nicht bauen</td><td>Kein grosses Ammo-, Suppression- oder AAR-System, solange der kleine Intent-/Outcome-Pfad nicht sauber gelesen und getestet ist.</td><td>Wenn spaeter echte Suppression-Wirkung, Munitionsverbrauch oder AAR-Messwerte als eigener Task beginnen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_562 erzeugt eine reproduzierbare MP-F6-Bildbasis unter <code>tmp/frontier_probe_mp_f6_visual_evidence.png</code> plus Manifest; im Headless-Dummy als Evidence-Board aus Snapshot-Rects.</td><td>Wenn TASK_565 aus echtem MP-F6-Export konkrete Gameplay-HUD-Polish-Aenderungen ableitet.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_563 macht diese lokale Evidence direkt im HTML-Zwischenbericht sichtbar und exportiert die Artefaktpfade sowie Readback-/Evidence-Board-Flags.</td><td>Wenn neue Capture-Artefakte, manuelle Sichtnotizen oder echte Host/Client-F6-Screenshots hinzukommen.</td></tr>
@@ -667,7 +670,8 @@
                 <tr><td>Erledigt</td><td>TASK_598 - Homebase Progression Evidence Polish Findings. Das Headless-Evidence-Board hat jetzt Labels/Callouts und meldet Legende, Labelcount und Readability-Gate im Manifest.</td><td>Wenn echte AAR-/Debriefing-UI oder Meta-Loop-Folgewerte starten.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_599 - Integrated Core Loop Playtest Evidence Pass. Das Composite-Manifest unter <code>tmp/integrated_core_loop_playtest_evidence.json</code> verknuepft die gruenen Flow-Smokes.</td><td>Wenn echte AAR-/Debriefing-UI oder Meta-Loop-Folgewerte starten.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_600 - Integrated Core Loop Flow Polish Findings. Das Findings-Manifest unter <code>tmp/integrated_core_loop_flow_polish_findings.json</code> priorisiert FullHD-Capture, Pacing, HUD-Dichte und Host/Client-Gefuehl.</td><td>Wenn echte Flow-Polish-Fixes aus TASK_601-Findings starten.</td></tr>
-                <tr><td>Naechst</td><td>TASK_601 - Core Loop Manual FullHD Playtest Capture. Ziel: echter Fenster-/Screenshot-Durchlauf mit Spielgefuehl-Notizen.</td><td>Wenn der naechste integrierte Flow-Test konkrete Nacharbeit zeigt.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_601 - Core Loop Manual FullHD Playtest Capture. Das Capture-Artefakt unter <code>tmp/core_loop_manual_fullhd_playtest_capture.png</code> plus Manifest haelt Route, Pflichtchecks und Manual-Review-Status fest.</td><td>Wenn echte Flow-Polish-Fixes aus TASK_601-Findings starten.</td></tr>
+                <tr><td>Naechst</td><td>TASK_602 - Core Loop Transition Pacing Polish. Ziel: belegte Pacing-Reibungen im Core Loop gezielt glätten.</td><td>Wenn der naechste integrierte Flow-Test konkrete Nacharbeit zeigt.</td></tr>
                 <tr><td>Offen</td><td>Der finale menschliche Spielgefuehl-Test bleibt offen. Die naechste manuelle Runde sollte pruefen, ob Teamchip-Hover, erste Move-Preview, Kontaktlinien und Paneldichte zusammen angenehm wirken.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -688,7 +692,7 @@
                 <tr><td>Visual Gate</td><td><input readonly value="pass" data-export-key="debrief_aar_evidence.visual_gate"></td><td>AAR-Sektion liegt im Panel, vor den Buttons und bleibt kompakt.</td></tr>
                 <tr><td>Bridge Gate</td><td><input readonly value="pass" data-export-key="debrief_aar_evidence.bridge_gate"></td><td>TASK_588-AAR-Datenbruecke bleibt gruen.</td></tr>
                 <tr><td>Manual Review</td><td><input readonly value="offen" data-export-key="debrief_aar_evidence.manual_review_status"></td><td>Automatische Evidence ersetzt nicht den finalen menschlichen Sichttest.</td></tr>
-                <tr><td>Naechster Task</td><td><input readonly value="TASK_601 - Core Loop Manual FullHD Playtest Capture" data-export-key="debrief_aar_evidence.recommended_next_task"></td><td>Nach TASK_600 echte FullHD-/Spielgefuehl-Evidence sammeln.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_602 - Core Loop Transition Pacing Polish" data-export-key="debrief_aar_evidence.recommended_next_task"></td><td>Nach TASK_601 nur belegte Pacing-Reibung anwenden.</td></tr>
               </tbody>
             </table>
           </div>
@@ -713,7 +717,7 @@
                 <tr><td>Readability Gate</td><td><input readonly value="pass" data-export-key="homebase_progression_evidence.evidence_board_readability_gate"></td><td>Das synthetische Evidence-Board ist nicht mehr nur farbige Rect-Geometrie.</td></tr>
                 <tr><td>Polish-Task</td><td><input readonly value="TASK_598" data-export-key="homebase_progression_evidence.evidence_polish_task_id"></td><td>Manifest-Metadatum fuer diesen Evidence-Polish.</td></tr>
                 <tr><td>Manual Review</td><td><input readonly value="offen" data-export-key="homebase_progression_evidence.manual_review_status"></td><td>Automatische Evidence ersetzt nicht den finalen menschlichen Sichttest.</td></tr>
-                <tr><td>Naechster Task</td><td><input readonly value="TASK_601 - Core Loop Manual FullHD Playtest Capture" data-export-key="homebase_progression_evidence.recommended_next_task"></td><td>Nach TASK_600 echte FullHD-/Spielgefuehl-Evidence sammeln.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_602 - Core Loop Transition Pacing Polish" data-export-key="homebase_progression_evidence.recommended_next_task"></td><td>Nach TASK_601 nur belegte Pacing-Reibung anwenden.</td></tr>
               </tbody>
             </table>
           </div>
@@ -732,7 +736,7 @@
                 <tr><td>Evidence-Staerke</td><td><input readonly value="composite_regression_manifest" data-export-key="core_loop_evidence.evidence_strength"></td><td>Automatisierter Stand aus vorhandenen Flow-Smokes, nicht manuelles Spielgefuehl.</td></tr>
                 <tr><td>Manual Full Playtest</td><td><input readonly value="offen" data-export-key="core_loop_evidence.manual_full_playtest_status"></td><td>Pacing, Klickgefuehl, HUD-Dichte und Host/Client-Gefuehl bleiben Sichttest-Folgearbeit.</td></tr>
                 <tr><td>Read-only</td><td><input readonly value="true" data-export-key="core_loop_evidence.read_only"></td><td>Der Bericht und das Manifest setzen keine Gameplay-Wahrheit.</td></tr>
-                <tr><td>Naechster Task</td><td><input readonly value="TASK_601 - Core Loop Manual FullHD Playtest Capture" data-export-key="core_loop_evidence.recommended_next_task"></td><td>Jetzt echte Fenster-/Screenshot-Evidence fuer die priorisierten Flow-Reibungen sammeln.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_602 - Core Loop Transition Pacing Polish" data-export-key="core_loop_evidence.recommended_next_task"></td><td>Nach TASK_601 nur belegte Pacing-Reibung anwenden.</td></tr>
               </tbody>
             </table>
           </div>
@@ -780,6 +784,48 @@
           </div>
           <label style="display:block;margin-top:14px;">Flow-Polish-Notiz
             <textarea data-export-key="flow_polish_manual.notes" placeholder="Was fuehlt sich im Gesamtfluss noch langsam, voll, unklar oder widerspruechlich an?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
+          <h2>TASK_601 Core-Loop Manual FullHD Playtest Capture</h2>
+          <p>Dieser Block macht den naechsten echten Spielerblick greifbar: ein FullHD-Capture-Artefakt fuer den Core Loop plus Pflichtchecks und freie Notizen. Headless ist das PNG ein Evidence-Board; ein Fensterlauf darf einen echten Viewport-Readback liefern.</p>
+          <img class="evidence-preview" src="../../tmp/core_loop_manual_fullhd_playtest_capture.png" alt="TASK_601 Core Loop FullHD Capture">
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Artefakt / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>PNG</td><td><input readonly value="tmp/core_loop_manual_fullhd_playtest_capture.png" data-export-key="core_loop_capture.png_path"></td><td>Lokales FullHD-Capture-Artefakt fuer den Gesamtfluss.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/core_loop_manual_fullhd_playtest_capture.json" data-export-key="core_loop_capture.manifest_path"></td><td>Lokales JSON mit Route, Pflichtchecks und Review-Status.</td></tr>
+                <tr><td>Schema</td><td><input readonly value="sternenbuergerchen.core_loop_manual_fullhd_playtest_capture.v1" data-export-key="core_loop_capture.schema"></td><td>Stabile TASK_601-Capture-Struktur.</td></tr>
+                <tr><td>Route</td><td><input readonly value="Homebase -> Briefing/Loadout -> Dropship -> Mission -> Debrief -> Homebase Progression" data-export-key="core_loop_capture.route"></td><td>Sechs sichtbare Core-Loop-Stationen.</td></tr>
+                <tr><td>Viewport</td><td><input readonly value="1920x1080" data-export-key="core_loop_capture.viewport"></td><td>FullHD-Ziel fuer den Spielerblick.</td></tr>
+                <tr><td>Manual Review</td><td><input readonly value="offen" data-export-key="core_loop_capture.manual_review_status"></td><td>TASK_601 behauptet keinen abgeschlossenen menschlichen Durchlauf.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="core_loop_capture.read_only"></td><td>Capture und Bericht setzen keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_602 - Core Loop Transition Pacing Polish" data-export-key="core_loop_capture.recommended_next_task"></td><td>Nur belegtes Pacing-Polish aus Capture, Screenshot oder Export anwenden.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input type="checkbox" data-export-key="core_loop_manual.fullhd_route_checked"> Gesamtfluss im echten 1920x1080-Fenster geprueft</label>
+            <label class="checkline"><input type="checkbox" data-export-key="core_loop_manual.transition_pacing_checked"> Uebergaenge und Wartezeiten wirken zuegig</label>
+            <label class="checkline"><input type="checkbox" data-export-key="core_loop_manual.hud_density_checked"> HUD-Dichte bleibt bei Mission/Contact/ROE/SUP lesbar</label>
+            <label class="checkline"><input type="checkbox" data-export-key="core_loop_manual.click_flow_checked"> Klickfluss fuehlt sich direkt und vorhersehbar an</label>
+            <label class="checkline"><input type="checkbox" data-export-key="core_loop_manual.host_client_feel_checked"> Host/Client-Gefuehl ist zumindest grob bewertet</label>
+          </div>
+          <div class="choice-row" data-choice-group="core_loop_manual.result">
+            <button class="choice active" type="button" data-choice-value="open">Offen</button>
+            <button class="choice" type="button" data-choice-value="usable">Spielbar</button>
+            <button class="choice" type="button" data-choice-value="needs_pacing">Pacing</button>
+            <button class="choice" type="button" data-choice-value="needs_hud">HUD</button>
+          </div>
+          <div class="choice-row" data-choice-group="core_loop_manual.next_priority">
+            <button class="choice active" type="button" data-choice-value="pacing">TASK_602 Pacing</button>
+            <button class="choice" type="button" data-choice-value="hud_density">HUD-Dichte</button>
+            <button class="choice" type="button" data-choice-value="click_flow">Klickfluss</button>
+            <button class="choice" type="button" data-choice-value="host_client">Host/Client</button>
+          </div>
+          <label style="display:block;margin-top:14px;">Core-Loop-Sichtnotiz
+            <textarea data-export-key="core_loop_manual.notes" placeholder="Welche Stelle fuehlt sich langsam, ueberladen, unklar oder widerspruechlich an?"></textarea>
           </label>
         </article>
         <article class="card full">
@@ -930,7 +976,7 @@
             <div class="finding good"><h3>Erledigt: TASK_597 - Homebase Progression F6 Evidence Capture</h3><p>Die Highlight-Zeile schreibt jetzt lokale PNG-/Manifest-Evidence mit Popup-/Award-Rects, Badge und Style-ID.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_598 - Homebase Progression Evidence Polish Findings</h3><p>Das Headless-Evidence-Board erklaert Popup, Sheet, Award-Row, Value und Gate jetzt direkt im Bild.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_599 - Integrated Core Loop Playtest Evidence Pass</h3><p>Der Gesamtfluss hat jetzt ein Composite-Evidence-Manifest mit sechs verlinkten gruenen Flow-Steps.</p></div>
-            <div class="finding medium"><h3>1. TASK_601 - Core Loop Manual FullHD Playtest Capture</h3><p>Als naechstes echte Fenster-/Screenshot-Evidence fuer Pacing, HUD-Dichte, Klickfluss und Host/Client-Gefuehl sammeln.</p></div>
+            <div class="finding medium"><h3>1. TASK_602 - Core Loop Transition Pacing Polish</h3><p>Als naechstes nur belegte Pacing-Reibungen aus Capture, Screenshot oder Workbench-Export glätten.</p></div>
           </div>
         </article>
       </div>
@@ -1015,7 +1061,7 @@
             <div class="finding good"><h3>Erledigt: TASK_597 - Homebase Progression F6 Evidence Capture</h3><p>Die Homebase-Progression ist jetzt als reproduzierbares Evidence-Artefakt sichtbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_598 - Homebase Progression Evidence Polish Findings</h3><p>Die Evidence ist jetzt als Arbeitsbild lesbarer, nicht nur als Rect-Diagnose.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_599 - Integrated Core Loop Playtest Evidence Pass</h3><p>Der Gesamtfluss ist als Composite-Regression-Manifest dokumentiert.</p></div>
-            <div class="finding medium"><h3>1. TASK_601 - Core Loop Manual FullHD Playtest Capture</h3><p>Der naechste Spielbarkeitshebel ist echte FullHD-Evidence, damit Flow-Polish nicht geraten wird.</p></div>
+            <div class="finding medium"><h3>1. TASK_602 - Core Loop Transition Pacing Polish</h3><p>Der naechste Spielbarkeitshebel ist belegtes Pacing-Polish entlang des Core Loops.</p></div>
           </div>
         </article>
         <article class="card">
@@ -1126,6 +1172,7 @@
                 <tr><td><code>task_598_homebase_progression_evidence_polish_findings.gd</code></td><td>PASS</td><td>Verifier fuer Headless-Board-Labels, Manifest-Legende, Callout-Count, Report-Export-Keys und TASK_599-Follow-up.</td></tr>
                 <tr><td><code>task_599_integrated_core_loop_playtest_evidence_pass.gd</code></td><td>PASS</td><td>Composite-Evidence-Manifest fuer Homebase-Launch, Mission-Fire/Cover, Objective/Cargo, Debrief-Return, Skill-Awards und Homebase-Progression.</td></tr>
                 <tr><td><code>task_600_integrated_core_loop_flow_polish_findings.gd</code></td><td>PASS</td><td>Read-only Flow-Polish-Queue fuer FullHD-Capture, Pacing, HUD-Dichte und Host/Client-Gefuehl.</td></tr>
+                <tr><td><code>task_601_core_loop_manual_fullhd_playtest_capture.gd</code></td><td>PASS</td><td>FullHD-Core-Loop-Capture mit PNG/Manifest, Route, Pflichtchecks und offenem Manual-Review-Status.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>Timeout nach Doku-Pruefung</td><td>Meta-Homebase-Flow haengt in diesem Arbeitslauf nach der Doku-Pruefung; TASK_567 nutzt die stabile Mission-Fixture, Meta-Flow-Testhygiene bleibt offen.</td></tr>
                 <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_570 aktualisiert, nennt die Fire-Rule-Mission-Bridge und TASK_571 als naechsten Slice.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
@@ -1617,7 +1664,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_601 - Core Loop Manual FullHD Playtest Capture"
+              "TASK_602 - Core Loop Transition Pacing Polish"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -1704,7 +1751,8 @@
               "TASK_597 - Homebase Progression F6 Evidence Capture",
               "TASK_598 - Homebase Progression Evidence Polish Findings",
               "TASK_599 - Integrated Core Loop Playtest Evidence Pass",
-              "TASK_600 - Integrated Core Loop Flow Polish Findings"
+              "TASK_600 - Integrated Core Loop Flow Polish Findings",
+              "TASK_601 - Core Loop Manual FullHD Playtest Capture"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -1714,7 +1762,8 @@
               "Suppress ist weiterhin ein Rule-/Preview-/Intent-Zustand; TASK_576 macht ihn vor GO lesbar, TASK_577 belegt ihn als lokale Visual-Evidence, TASK_578 zeichnet die Area sichtbar, TASK_579 sammelt den menschlichen F6-Befund, TASK_580 tuned die Area-Lesbarkeit, TASK_581 traegt den Intent durch Combat-Diagnostics, TASK_582 zaehlt ihn als kleinen AAR-/Debug-Anker, TASK_583 zeigt ihn als Report-Panel, TASK_584 sammelt ihn mit Fire-/Friendly-Fire-/Statusmetriken in einer Mini-AAR-Schale, TASK_585 macht daraus einen Debrief-Screen-Stub und TASK_586 fuehrt ihn pruefbar zur Homebase zurueck. Echte Suppression-Wirkung, Ammo-Verbrauch, XP und vollstaendige Debriefing-UI bleiben Folgearbeit.",
               "TASK_599 fasst die gruenen Einzel-Smokes als Composite-Evidence zusammen; der finale menschliche FullHD-Spielgefuehl-Test bleibt offen.",
               "TASK_600 priorisiert die offenen Flow-Reibungen als read-only Findings-Queue.",
-              "TASK_601 sollte als naechstes echte FullHD-/Fenster-Evidence fuer Pacing, HUD-Dichte, Klickfluss und Host/Client-Gefuehl liefern."
+              "TASK_601 liefert den FullHD-Capture-Ort; der echte menschliche Spielgefuehl-Entscheid bleibt ueber den HTML-Export offen.",
+              "TASK_602 darf nur belegte Transition-/Pacing-Reibung aus Screenshot, Manifest oder Workbench-Export anwenden."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -1723,14 +1772,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_600",
-            current_focus: "TASK_601 - Core Loop Manual FullHD Playtest Capture",
-            latest_completed_task: "TASK_600 - Integrated Core Loop Flow Polish Findings"
+            current_repo_base: "integration/core-foundation after TASK_601",
+            current_focus: "TASK_602 - Core Loop Transition Pacing Polish",
+            latest_completed_task: "TASK_601 - Core Loop Manual FullHD Playtest Capture"
           },
           metadata: {
-            branch: "task/integrated-core-loop-flow-polish-findings",
-            integration_base: "integration/core-foundation after TASK_599",
-            head: "task/integrated-core-loop-flow-polish-findings",
+            branch: "task/core-loop-manual-fullhd-playtest-capture",
+            integration_base: "integration/core-foundation after TASK_600",
+            head: "task/core-loop-manual-fullhd-playtest-capture",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

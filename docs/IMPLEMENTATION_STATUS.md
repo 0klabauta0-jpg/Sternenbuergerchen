@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_601 - Core Loop Manual FullHD Playtest Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_601_core_loop_manual_fullhd_playtest_capture.md`, `docs/tasks/TASK_600_integrated_core_loop_flow_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `scripts/tests/task_601_core_loop_manual_fullhd_playtest_capture.gd` erzeugt `tmp/core_loop_manual_fullhd_playtest_capture.png` und `tmp/core_loop_manual_fullhd_playtest_capture.json` als FullHD-Capture-Arbeitsstand fuer den Pfad Homebase -> Briefing/Loadout -> Dropship -> Mission -> Debrief -> Homebase Progression.
+- Stand: Headless erzeugt ein markiertes Evidence-Board; ein Fensterlauf kann einen echten Viewport-Readback liefern. Das Manifest unterscheidet `viewport_readback_available` und `generated_evidence_board`.
+- Stand: Der laufende HTML-Zwischenbericht markiert TASK_601 als erledigt, exportiert Screenshot-/Manifestpfade, Pflichtchecks, Rating-Felder und empfiehlt TASK_602 als naechsten Pacing-Polish-Slice.
+- Risiken/offen: TASK_601 schafft den Capture-Ort und die Review-Flaeche, behauptet aber keinen abgeschlossenen menschlichen FullHD-Playtest. `manual_review_done` bleibt false.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_601_core_loop_manual_fullhd_playtest_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_600_integrated_core_loop_flow_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_599_integrated_core_loop_playtest_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_602 - Core Loop Transition Pacing Polish`, aber nur fuer belegte Reibung aus TASK_601-Manifest, Screenshot oder HTML-Workbench-Export.
+
 ### TASK_600 - Integrated Core Loop Flow Polish Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_600_integrated_core_loop_flow_polish_findings.md`, `docs/tasks/TASK_599_integrated_core_loop_playtest_evidence_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

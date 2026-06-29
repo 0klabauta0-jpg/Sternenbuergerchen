@@ -229,7 +229,8 @@ git checkout -b batch/<batch-name>
 - TASK_598 - Homebase Progression Evidence Polish Findings (implementiert)
 - TASK_599 - Integrated Core Loop Playtest Evidence Pass (implementiert)
 - TASK_600 - Integrated Core Loop Flow Polish Findings (implementiert)
-- TASK_601 - Core Loop Manual FullHD Playtest Capture
+- TASK_601 - Core Loop Manual FullHD Playtest Capture (implementiert)
+- TASK_602 - Core Loop Transition Pacing Polish
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

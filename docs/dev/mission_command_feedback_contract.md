@@ -264,6 +264,11 @@ TASK_600 macht aus dem TASK_599-Evidence-Stand eine priorisierte read-only Flow-
 
 Erwartete Struktur: Das Manifest enthaelt `schema = sternenbuergerchen.integrated_core_loop_flow_polish_findings.v1`, `task_id = TASK_600`, `source_task = TASK_599`, `source_evidence_strength = composite_regression_manifest`, `finding_count`, `actionable_followup_count`, `findings`, `recommended_next_task = TASK_601 - Core Loop Manual FullHD Playtest Capture`, `manual_full_playtest_done = false`, `manual_review_required = true`, `read_only = true` und `ui_sets_gameplay_truth = false`. Die Findings muessen konkrete Folge-Slices fuer FullHD-Capture, Pacing, HUD-Dichte und Host/Client-Gefuehl benennen.
 
+## Core-Loop-Manual-FullHD-Playtest-Capture
+TASK_601 erzeugt einen reproduzierbaren FullHD-Capture-Ort fuer den kompletten Core Loop. Der Verifier darf `tmp/core_loop_manual_fullhd_playtest_capture.png` und `tmp/core_loop_manual_fullhd_playtest_capture.json` schreiben. In Headless darf das PNG ein markiertes Evidence-Board sein; in einem Fensterlauf darf es ein echter Viewport-Readback sein. Beide Varianten bleiben Arbeits-/Review-Artefakte und duerfen keine Mission-, UI-, XP-, Skill-, Roster-, Multiplayer- oder Combat-Wahrheit erzeugen.
+
+Erwartete Struktur: Das Manifest enthaelt `schema = sternenbuergerchen.core_loop_manual_fullhd_playtest_capture.v1`, `task_id = TASK_601`, `source_task = TASK_600`, `route_stages`, `route_stage_count`, `manual_checks`, `manual_check_count`, `viewport_readback_available`, `generated_evidence_board`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_602 - Core Loop Transition Pacing Polish`. Erwartete Route-Stages sind Homebase, Briefing/Loadout, Dropship, Mission, Debrief und Homebase Progression.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
