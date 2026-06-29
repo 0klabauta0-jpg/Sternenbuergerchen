@@ -195,7 +195,8 @@ git checkout -b batch/<batch-name>
 - TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings (implementiert)
 - TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass (implementiert)
 - TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass (implementiert)
-- TASK_567 - Frontier Probe First Move Threat Preview Readability Pass
+- TASK_567 - Frontier Probe First Move Threat Preview Readability Pass (implementiert)
+- TASK_568 - Frontier Probe Risky Contact Preview Fixture
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

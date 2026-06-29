@@ -46,7 +46,8 @@ func _test_docs_and_report_wiring() -> void:
 	_assert(contract_text.contains("Frontier-Probe-Multiplayer-Manual-Screenshot-Notes"), "Mission feedback contract documents TASK_558")
 	_assert(html_contract_text.contains("JSON exportieren"), "HTML workbench contract still requires JSON export")
 	_assert(report_text.contains("TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass"), "Review workbench tracks TASK_558")
-	_assert(report_text.contains("TASK_567 - Frontier Probe First Move Threat Preview Readability Pass"), "Review workbench names TASK_567 follow-up")
+	_assert(report_text.contains("TASK_567 - Frontier Probe First Move Threat Preview Readability Pass"), "Review workbench tracks TASK_567")
+	_assert(report_text.contains("TASK_568 - Frontier Probe Risky Contact Preview Fixture"), "Review workbench names TASK_568 follow-up")
 	_assert(FileAccess.file_exists(TASK_557_TEST_PATH), "TASK_557 F6 readability smoke remains available")
 
 
@@ -69,7 +70,7 @@ func _test_manual_review_export_fields() -> void:
 	_assert(report_text.contains("data-export-key=\"mp_f6_manual.followup\""), "Report exports concrete follow-up notes")
 	_assert(report_text.contains("data-note-key=\"notes.mp_f6_manual_review\""), "Report exports free-form MP-F6 review note")
 	_assert(report_text.contains("\"TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass\""), "JSON metadata lists TASK_558 as completed")
-	_assert(report_text.contains("current_focus: \"TASK_567 - Frontier Probe First Move Threat Preview Readability Pass\""), "JSON metadata points current focus to TASK_567")
+	_assert(report_text.contains("current_focus: \"TASK_568 - Frontier Probe Risky Contact Preview Fixture\""), "JSON metadata points current focus to TASK_568")
 	_assert(not report_text.contains("data-export-key=\"mp_f6_manual.screenshot_done\" checked"), "Manual MP-F6 screenshot is not pre-marked as done")
 
 
