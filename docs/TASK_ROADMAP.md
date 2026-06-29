@@ -190,7 +190,8 @@ git checkout -b batch/<batch-name>
 - TASK_559 - Factory Colormap UID Loader Guard (implementiert)
 - TASK_560 - Frontier Probe Multiplayer Teamchip Tooltip Polish (implementiert)
 - TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide (implementiert)
-- TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings
+- TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture (implementiert)
+- TASK_563 - Frontier Probe Multiplayer Apply Visual Polish Findings
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

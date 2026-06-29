@@ -90,6 +90,9 @@ TASK_558 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workben
 ## Frontier-Probe-Multiplayer-Manual-Visual-Review-Guide
 TASK_561 erweitert den laufenden HTML-Zwischenbericht um eine gefuehrte MP-F6-Sichtpruefung. Der Bericht darf Detailchecks, Ratings und eine naechste Polish-Prioritaet fuer Teamchip-Hover, Objective/Cargo, Selected Fireteam, Dropship-/Panel-Dichte und Weltverdeckung exportieren, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern. Erwartete Struktur: exportierbare `mp_f6_manual.*` Detailfelder, `mp_f6_manual.next_polish_priority`, die freie `notes.mp_f6_manual_review`-Notiz und eine klare Markierung, dass der echte Screenshot-/Hover-Test erst durch User/Playtest bestaetigt wird.
 
+## Frontier-Probe-Multiplayer-F6-Visual-Evidence-Capture
+TASK_562 erzeugt eine reproduzierbare MP-F6-Visual-Evidence-Basis fuer den Frontier-Probe-Slice. Der Capture-Smoke darf den bestehenden FullHD-F6-Testzustand, TASK_557-Readability, TASK_560-Teamchip-Tooltip und ein lokales PNG/JSON-Manifest unter `tmp/` zusammenfassen, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern. Erwartete Struktur: `tmp/frontier_probe_mp_f6_visual_evidence.png`, `tmp/frontier_probe_mp_f6_visual_evidence.json`, Readability-/Tooltip-Gates, ein Readback-/Evidence-Board-Flag und eine klare Markierung, dass der echte manuelle Review weiterhin offen ist.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
