@@ -14,7 +14,7 @@ Damit der naechste UI-/Layout-Polish nicht aus Bauchgefuehl entsteht, braucht de
 - Der Smoke prueft TASK_557-Readability und TASK_560-Teamchip-Tooltip weiter.
 - Der Smoke schreibt ein PNG nach `tmp/frontier_probe_mp_f6_visual_evidence.png`; im Headless-Dummy-Renderer ist das ein markiertes Evidence-Board aus Snapshot-Rects, bei verfuegbarem Viewport-Readback ein Viewport-Bild.
 - Der Smoke schreibt ein Manifest nach `tmp/frontier_probe_mp_f6_visual_evidence.json`.
-- Der Rolling-HTML-Bericht nennt den Capture als aktuellen Zwischenstand und TASK_563 als naechsten Apply-Slice.
+- Der Rolling-HTML-Bericht nennt den Capture als aktuellen Zwischenstand; TASK_563 macht die Evidence direkt sichtbar, TASK_564 ist der naechste Apply-Slice.
 
 ## Nicht-Ziele
 - Kein behaupteter menschlicher Screenshot-/Hover-Test.
@@ -52,4 +52,4 @@ Damit der naechste UI-/Layout-Polish nicht aus Bauchgefuehl entsteht, braucht de
 
 ## Risiken / offene Punkte
 - Der Capture liefert in Headless eine reproduzierbare Evidence-Board-Bildbasis, ersetzt aber weiterhin nicht den menschlichen Hover-/Lesbarkeitsentscheid im echten Fenster.
-- Der naechste sinnvolle Schritt ist TASK_563: Screenshot/Manifest oder exportierte MP-F6-Review-Notizen in konkrete UI-/Layout-Korrekturen uebersetzen.
+- Der naechste sinnvolle Apply-Schritt ist TASK_564: Screenshot/Manifest oder exportierte MP-F6-Review-Notizen in konkrete UI-/Layout-Korrekturen uebersetzen.

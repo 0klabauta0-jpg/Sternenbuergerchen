@@ -12,6 +12,7 @@ const CONTRACT_PATH: String = "res://docs/dev/mission_command_feedback_contract.
 const TASK_557_TEST_PATH: String = "res://scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd"
 const TASK_560_TEST_PATH: String = "res://scripts/tests/task_560_frontier_probe_multiplayer_teamchip_tooltip_polish.gd"
 const TASK_561_TEST_PATH: String = "res://scripts/tests/task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd"
+const TASK_563_TEST_PATH: String = "res://scripts/tests/task_563_frontier_probe_multiplayer_f6_evidence_report_preview.gd"
 const OUTPUT_DIR: String = "res://tmp"
 const OUTPUT_PNG_PATH: String = "res://tmp/frontier_probe_mp_f6_visual_evidence.png"
 const OUTPUT_MANIFEST_PATH: String = "res://tmp/frontier_probe_mp_f6_visual_evidence.json"
@@ -47,13 +48,16 @@ func _test_docs_and_wiring() -> void:
 	_assert(task_text.contains("Frontier Probe Multiplayer F6 Visual Evidence Capture"), "TASK_562 task file names the task")
 	_assert(status_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture"), "Implementation status tracks TASK_562")
 	_assert(roadmap_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture (implementiert)"), "Roadmap marks TASK_562 implemented")
-	_assert(roadmap_text.contains("TASK_563 - Frontier Probe Multiplayer Apply Visual Polish Findings"), "Roadmap names TASK_563 follow-up")
+	_assert(roadmap_text.contains("TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview (implementiert)"), "Roadmap tracks TASK_563 evidence preview")
+	_assert(roadmap_text.contains("TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"), "Roadmap names TASK_564 follow-up")
 	_assert(contract_text.contains("Frontier-Probe-Multiplayer-F6-Visual-Evidence-Capture"), "Mission feedback contract documents TASK_562")
 	_assert(report_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture"), "Review workbench tracks TASK_562")
-	_assert(report_text.contains("TASK_563 - Frontier Probe Multiplayer Apply Visual Polish Findings"), "Review workbench names TASK_563 follow-up")
+	_assert(report_text.contains("TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview"), "Review workbench tracks TASK_563")
+	_assert(report_text.contains("TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"), "Review workbench names TASK_564 follow-up")
 	_assert(FileAccess.file_exists(TASK_557_TEST_PATH), "TASK_557 readability verifier remains available")
 	_assert(FileAccess.file_exists(TASK_560_TEST_PATH), "TASK_560 teamchip tooltip verifier remains available")
 	_assert(FileAccess.file_exists(TASK_561_TEST_PATH), "TASK_561 manual review guide verifier remains available")
+	_assert(FileAccess.file_exists(TASK_563_TEST_PATH), "TASK_563 evidence report preview verifier remains available")
 
 
 func _test_capture_frontier_probe_mp_f6_visual_evidence() -> void:
@@ -202,7 +206,7 @@ func _build_manifest(readability_snapshot: Dictionary, tooltip_snapshot: Diction
 		"selected_fireteam_ids": Array(readability_snapshot.get("selected_fireteam_ids", [])),
 		"manual_review_required": true,
 		"manual_review_done": false,
-		"recommended_next_task": "TASK_563 - Frontier Probe Multiplayer Apply Visual Polish Findings",
+		"recommended_next_task": "TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings",
 	}
 
 
