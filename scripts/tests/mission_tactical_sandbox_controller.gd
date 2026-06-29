@@ -7304,19 +7304,40 @@ func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
 	var result := team_chip_snapshot.duplicate(true)
 	var session_snapshot: Dictionary = _get_review_session_identity_snapshot()
 	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
+	var authority_visual: Dictionary = Dictionary(result.get("authority_visual", {})).duplicate(true)
+	var authority_compact_text: String = String(authority_visual.get("compact_text", result.get("authority_compact_text", ""))).strip_edges()
+	var authority_tooltip_text: String = String(authority_visual.get("tooltip_text", result.get("authority_tooltip_text", ""))).strip_edges()
+	var authority_visible: bool = bool(authority_visual.get("visible", result.get("authority_visible", false))) and not authority_compact_text.is_empty()
 	var base_text: String = String(result.get("compact_status_text", result.get("status_text", ""))).strip_edges()
 	var display_text := base_text
+	var display_tokens: PackedStringArray = PackedStringArray()
 	if not badge_text.is_empty():
-		display_text = badge_text if base_text.is_empty() else "%s | %s" % [badge_text, base_text]
+		display_tokens.append(badge_text)
+	if authority_visible:
+		display_tokens.append(authority_compact_text)
+	if not base_text.is_empty():
+		display_tokens.append(base_text)
+	if not display_tokens.is_empty():
+		display_text = " | ".join(display_tokens)
 	var base_tooltip: String = String(result.get("tooltip_text", result.get("status_text", ""))).strip_edges()
 	var display_tooltip := base_tooltip
+	var tooltip_tokens: PackedStringArray = PackedStringArray()
 	if not badge_text.is_empty():
-		var session_tooltip := "Review Session: %s" % badge_text
-		display_tooltip = session_tooltip if base_tooltip.is_empty() else "%s\n%s" % [session_tooltip, base_tooltip]
+		tooltip_tokens.append("Review Session: %s" % badge_text)
+	if authority_visible and not authority_tooltip_text.is_empty():
+		tooltip_tokens.append(authority_tooltip_text)
+	if not base_tooltip.is_empty():
+		tooltip_tokens.append(base_tooltip)
+	if not tooltip_tokens.is_empty():
+		display_tooltip = "\n".join(tooltip_tokens)
 	result["review_session"] = session_snapshot
 	result["review_session_badge_text"] = badge_text
 	result["review_session_badge_visible"] = not badge_text.is_empty()
 	result["review_session_badge_style_id"] = REVIEW_SESSION_BADGE_STYLE_ID
+	result["authority_visual"] = authority_visual
+	result["authority_visible"] = authority_visible
+	result["authority_compact_text"] = authority_compact_text
+	result["authority_tooltip_text"] = authority_tooltip_text
 	result["display_text"] = display_text
 	result["display_tooltip_text"] = display_tooltip
 	result["read_only"] = true
@@ -7387,6 +7408,9 @@ func _refresh_mission_team_chip_label() -> void:
 	label.set_meta("review_session_badge_text", String(snapshot.get("review_session_badge_text", "")))
 	label.set_meta("review_session_badge_visible", bool(snapshot.get("review_session_badge_visible", false)))
 	label.set_meta("review_session_badge_task", "TASK_619")
+	label.set_meta("authority_visual_task", "TASK_623")
+	label.set_meta("authority_visual_visible", bool(snapshot.get("authority_visible", false)))
+	label.set_meta("authority_visual_text", String(snapshot.get("authority_compact_text", "")))
 
 
 func get_mission_team_chip_snapshot() -> Dictionary:
@@ -15017,6 +15041,7 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 	var hud_density_snapshot: Dictionary = get_mission_hud_density_interaction_polish_snapshot()
 	var command_snapshot: Dictionary = get_command_feedback_snapshot()
 	var review_session_badge: Dictionary = Dictionary(command_snapshot.get("review_session_badge", {})).duplicate(true)
+	var authority_visual: Dictionary = Dictionary(command_snapshot.get("authority_visual", {})).duplicate(true)
 	var team_chip_context: String = String(readability_snapshot.get("mission_team_chip_context_text", "")).strip_edges()
 	var mission_control_text: String = String(command_snapshot.get("mission_control_status_text", "")).strip_edges()
 	var selected_fireteam_label: String = String(command_snapshot.get("selected_fireteam_label", "")).strip_edges()
@@ -15109,6 +15134,18 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 			"Host/client review session badge is exported as read-only display context."
 		),
 		_build_mission_first_move_readability_check(
+			"authority_visual_readable",
+			authority_visual.is_empty()
+				or not bool(authority_visual.get("visible", false))
+				or (
+					String(authority_visual.get("schema", "")) == "sternenbuergerchen.host_client_authority_visual.v1"
+					and String(authority_visual.get("compact_text", "")).begins_with("AUTH")
+					and bool(authority_visual.get("read_only", false))
+					and not bool(authority_visual.get("ui_sets_gameplay_truth", true))
+				),
+			"Host/client authority accept/reject status is exported as a compact read-only visual hint."
+		),
+		_build_mission_first_move_readability_check(
 			"read_only",
 			not bool(readability_snapshot.get("ui_sets_gameplay_truth", true))
 				and not bool(hud_density_snapshot.get("ui_sets_gameplay_truth", true))
@@ -15137,6 +15174,9 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 		"interaction_density": interaction_density,
 		"review_session_badge": review_session_badge,
 		"review_session_badge_text": String(command_snapshot.get("review_session_badge_text", "")),
+		"authority_visual": authority_visual,
+		"authority_visual_text": String(command_snapshot.get("authority_visual_text", "")),
+		"authority_visual_visible": bool(command_snapshot.get("authority_visual_visible", false)),
 		"readability_snapshot": readability_snapshot,
 		"hud_density_snapshot": hud_density_snapshot,
 		"command_feedback": command_snapshot,
@@ -16215,6 +16255,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_team_chip_text": _get_label_text(MISSION_TEAM_CHIP_LABEL_PATH),
 		"mission_team_chip": mission_team_chip_snapshot,
 		"mission_team_chip_tooltip_text": _get_label_tooltip_text(MISSION_TEAM_CHIP_LABEL_PATH),
+		"authority_visual": Dictionary(mission_team_chip_snapshot.get("authority_visual", {})).duplicate(true),
+		"authority_visual_text": String(mission_team_chip_snapshot.get("authority_compact_text", "")),
+		"authority_visual_visible": bool(mission_team_chip_snapshot.get("authority_visible", false)),
+		"authority_visual_tooltip_text": String(mission_team_chip_snapshot.get("authority_tooltip_text", "")),
 		"review_session_badge": Dictionary(mission_team_chip_snapshot.get("review_session", {})).duplicate(true),
 		"review_session_badge_text": String(mission_team_chip_snapshot.get("review_session_badge_text", "")),
 		"review_session_badge_visible": bool(mission_team_chip_snapshot.get("review_session_badge_visible", false)),

@@ -46,8 +46,8 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(report_text.contains("TASK_620 Host Client Badge Re-Capture Review"), "Rolling review workbench tracks TASK_620")
 	_assert(report_text.contains("TASK_621 - Host Client Multiplayer Feel Review Bundle"), "Rolling report keeps TASK_621 after TASK_620")
 	_assert(handbook_text.contains("TASK_620 Re-Capture-Evidence"), "Status handbook tracks TASK_620 evidence")
-	_assert(handbook_text.contains('current_task: "TASK_622 - Host Client Command Authority Live Interaction Review"'), "Status handbook JSON metadata advances current task")
-	_assert(handbook_text.contains('latest_completed_task: "TASK_622 - Host Client Command Authority Live Interaction Review"'), "Status handbook JSON metadata advances latest task")
+	_assert(handbook_text.contains('current_task: "TASK_623 - Host Client Authority Visual Findings"'), "Status handbook JSON metadata advances current task")
+	_assert(handbook_text.contains('latest_completed_task: "TASK_623 - Host Client Authority Visual Findings"'), "Status handbook JSON metadata advances latest task")
 	_test_report_export_fields(report_text, handbook_text)
 
 
@@ -69,7 +69,7 @@ func _test_report_export_fields(report_text: String, handbook_text: String) -> v
 		_assert(report_text.contains('data-export-key="%s"' % export_key), "Rolling report exports %s" % export_key)
 	_assert(report_text.contains('data-note-key="notes.host_client_badge_recapture"'), "Rolling report exports TASK_620 free note")
 	_assert(handbook_text.contains('data-export-key="status.task_620_done"'), "Status handbook exports TASK_620 checkbox")
-	_assert(handbook_text.contains("Host Client Command Authority Live Interaction Review"), "Reports recommend command authority review next")
+	_assert(report_text.contains("Host Client Command Authority Live Interaction Review"), "Reports keep command authority review history")
 
 
 func _test_capture_tool_contract() -> void:

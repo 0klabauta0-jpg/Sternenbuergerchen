@@ -7,6 +7,7 @@ const TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/
 func build_snapshot(network_contract_snapshot: Dictionary, play_mode: String = "") -> Dictionary:
 	var peer_teams: Dictionary = Dictionary(network_contract_snapshot.get("peer_teams", {})).duplicate(true)
 	var resolved_play_mode: String = _resolve_play_mode(peer_teams, play_mode)
+	var authority_visual: Dictionary = build_authority_visual_snapshot(network_contract_snapshot)
 	var ownership_snapshot: Dictionary = Dictionary(TEAM_OWNERSHIP_CONTRACT_SCRIPT.call(
 		"build_team_ownership_snapshot",
 		TEAM_OWNERSHIP_CONTRACT_SCRIPT.call("build_default_team_readability_slice"),
@@ -31,7 +32,53 @@ func build_snapshot(network_contract_snapshot: Dictionary, play_mode: String = "
 		"status_text": _build_status_text(chips),
 		"compact_status_text": _build_compact_status_text(chips),
 		"tooltip_text": _build_tooltip_text(chips),
+		"authority_visual": authority_visual,
+		"authority_visible": bool(authority_visual.get("visible", false)),
+		"authority_compact_text": String(authority_visual.get("compact_text", "")),
+		"authority_tooltip_text": String(authority_visual.get("tooltip_text", "")),
 	}
+
+
+func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> Dictionary:
+	var accepted_count: int = int(network_contract_snapshot.get("accepted_count", 0))
+	var rejected_count: int = int(network_contract_snapshot.get("rejected_count", 0))
+	var last_rejection: Dictionary = Dictionary(network_contract_snapshot.get("last_rejection", {})).duplicate(true)
+	var last_reason: String = String(last_rejection.get("reason", "")).strip_edges()
+	var last_peer_id: int = int(last_rejection.get("peer_id", 0))
+	var visible: bool = accepted_count > 0 or rejected_count > 0 or not last_reason.is_empty()
+	var compact_text := ""
+	if visible:
+		compact_text = "AUTH OK%d/RJ%d" % [accepted_count, rejected_count]
+	var tooltip_parts: PackedStringArray = PackedStringArray()
+	if visible:
+		tooltip_parts.append("Authority: %d accepted, %d rejected" % [accepted_count, rejected_count])
+		if not last_reason.is_empty():
+			var peer_text: String = "Peer %d" % last_peer_id if last_peer_id > 0 else "Peer ?"
+			tooltip_parts.append("Last reject: %s | %s" % [peer_text, last_reason])
+	return {
+		"schema": "sternenbuergerchen.host_client_authority_visual.v1",
+		"task_id": "TASK_623",
+		"visible": visible,
+		"accepted_count": accepted_count,
+		"rejected_count": rejected_count,
+		"last_reject_reason": last_reason,
+		"last_reject_peer_id": last_peer_id,
+		"compact_text": compact_text,
+		"tooltip_text": "\n".join(tooltip_parts),
+		"tone": _build_authority_tone(accepted_count, rejected_count),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _build_authority_tone(accepted_count: int, rejected_count: int) -> String:
+	if rejected_count > 0 and accepted_count > 0:
+		return "mixed"
+	if rejected_count > 0:
+		return "reject"
+	if accepted_count > 0:
+		return "accepted"
+	return "idle"
 
 
 func _build_chip_entry(entry: Dictionary) -> Dictionary:
