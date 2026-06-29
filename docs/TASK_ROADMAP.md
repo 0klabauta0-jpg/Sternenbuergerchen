@@ -224,7 +224,8 @@ git checkout -b batch/<batch-name>
 - TASK_593 - Skill Progress Award Contract (implementiert)
 - TASK_594 - Post Mission Skill Delta Homebase Bridge (implementiert)
 - TASK_595 - Homebase Progression Visual Polish (implementiert)
-- TASK_596 - Homebase Progression Player Review Notes
+- TASK_596 - Homebase Progression Player Review Notes (implementiert)
+- TASK_597 - Homebase Progression F6 Evidence Capture
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

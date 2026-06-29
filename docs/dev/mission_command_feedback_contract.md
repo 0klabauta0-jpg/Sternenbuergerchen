@@ -244,6 +244,11 @@ TASK_595 staerkt nur die Lesbarkeit dieser Homebase-Progression. Das Character-S
 
 Erwartete Struktur: `CharacterSheetFormatter` liefert fuer die Post-Mission-Delta-Row `label = Last Award`, `help_id = character_sheet.post_mission_skill_delta`, `value_text`, `detail_text`, `style_key`, `style_id`, `badge_text`, `read_only = true` und `source = progression_award_summary`. `HomebaseTestScreen.get_post_mission_skill_delta_snapshot()` meldet zusaetzlich `style_id`, `badge_text` und `visual_polish_ready = true`, wenn fuer den fokussierten Operator ein Award sichtbar ist.
 
+## Homebase-Progression-Player-Review-Notes
+TASK_596 legt nur den manuellen Review-Ort im laufenden HTML-Bericht an. Exportfelder unter `homebase_progression_manual.*` und `notes.homebase_progression_manual_review` sind Arbeitsnotizen fuer Screenshotpfad, Pflichtchecks, Ratings und Follow-up. Sie duerfen keine Runtime-, Roster-, XP-, Skill- oder Character-Sheet-Wahrheit setzen.
+
+Erwartete Struktur: Der Bericht exportiert mindestens `screenshot_done`, `return_flow_checked`, `character_sheet_open_checked`, `mission_gain_badge_checked`, `xp_delta_checked`, `style_contrast_checked`, `read_only_source_checked`, `screenshot_path`, `viewport`, `highlighted_unit`, `style_id`, `badge_text`, `badge_notes`, `contrast_notes`, `placement_notes`, `return_flow_notes` und `followup`. Choice-Groups liefern Review-Ergebnis, Badge-, Kontrast-, Platzierungs-, Return-Flow- und naechste-Prioritaets-Einschaetzung.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

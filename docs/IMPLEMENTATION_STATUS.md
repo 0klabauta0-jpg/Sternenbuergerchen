@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_596 - Homebase Progression Player Review Notes
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_596_homebase_progression_player_review_notes.md`, `docs/tasks/TASK_595_homebase_progression_visual_polish.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der laufende HTML-Zwischenbericht enthaelt einen eigenen `TASK_596 Homebase-Progression Player-Review`-Block fuer Screenshotpfad, Viewport, Operator-Kontext, Pflichtchecks, Ratings, Follow-up und freie Notiz.
+- Stand: Alle Review-Daten werden ueber `homebase_progression_manual.*` und `notes.homebase_progression_manual_review` exportierbar gemacht und bleiben Arbeitsnotizen, keine Runtime- oder Gameplay-Wahrheit.
+- Stand: `scripts/tests/task_596_homebase_progression_player_review_notes.gd` prueft Task-Datei, Contract, Status, Roadmap, Report-Export-Keys, Choice-Groups, `JSON exportieren` und die TASK_597-Follow-up-Kette.
+- Risiken/offen: TASK_596 fuehrt keinen echten Sichttest aus. Der naechste sinnvolle Anschluss ist reproduzierbare Homebase-Progression-Evidence oder ein echter Fenster-/Screenshot-Lauf.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_595_homebase_progression_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_597 - Homebase Progression F6 Evidence Capture`, damit die neue Review-Flaeche mit reproduzierbarer visueller Evidence gefuettert werden kann.
+
 ### TASK_595 - Homebase Progression Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_595_homebase_progression_visual_polish.md`, `docs/tasks/TASK_594_post_mission_skill_delta_homebase_bridge.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
