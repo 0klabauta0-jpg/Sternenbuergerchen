@@ -45,6 +45,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Fire-/Cover-Integrated-Flow
 `task_545_mission_fire_cover_integrated_flow_smoke.gd` prueft denselben Fire-/Cover-Visual-Polish-Snapshot im echten ersten Spielerpfad von Homebase ueber Dropship, LZ, Deboarding, Move, Contact und Engagement. Der Smoke darf nur bestehende Test-Hilfswege nutzen, keine neue Gameplay-Entscheidung einfuehren und keinen manuellen F6-/Screenshot-Sichttest behaupten.
 
+## Combat-HUD-Density
+`get_mission_combat_feedback_hud_density_snapshot()` ist der Headless-Pruefpunkt fuer kompaktere Combat-Feedback-Zeilen in #17 Selected Fireteam und #18 Mission Control. Der Snapshot darf nur bestehende ContactDecision-, Cover- und FireEvent-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine FireEvents, Damage-Events, Befehle oder Kontaktentscheidungen erzeugen. Erwartete Lesbarkeit: Eine kurze Zeile benennt FIRE, WAIT, NO FIRE oder CONTACT und behaelt Cover, LOS und Range als kompakte Tokens sichtbar. Die Zeile muss in Mission Control und Selected Fireteam auftauchen und innerhalb des HUD-Zeichenbudgets bleiben.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
