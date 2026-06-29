@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_551 - Combat HUD Tooltip Style Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_551_combat_hud_tooltip_style_polish.md`, `docs/tasks/TASK_550_combat_hud_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_549_combat_hud_f6_visual_audit.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Die Combat-HUD-Tooltip-Labels in #17 Selected Fireteam und #18 Mission Control tragen jetzt eine gemeinsame dezente Style-Signatur.
+- Stand: Beide Labels bleiben hoverbar, clippen Text, nutzen Help-Cursor, Tactical-UI-Akzentfarbe, 10px-HUD-Schrift und Outline fuer besseren Kontrast.
+- Stand: `get_combat_hud_f6_visual_audit_snapshot()` exportiert die Style-Metadaten read-only und prueft, dass beide Panels denselben Tooltip-Style-Hinweis tragen.
+- Stand: Der Rolling-HTML-Bericht ist auf TASK_551 aktualisiert und nennt TASK_552 als naechsten spielbaren Anschluss.
+- Risiken/offen: Der Task prueft Style-/Theme-Daten headless; ein menschlicher FullHD-Sichttest bleibt fuer finales Hover-Gefuehl und optische Gewichtung sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_551_combat_hud_tooltip_style_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_549_combat_hud_f6_visual_audit.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_552 - Mission Objective Interaction Readability Pass`, damit nach Insertion, Move, Contact und Combat auch die erste Objective-/Computer-/Gebaeude-Interaktion lesbar wird.
+
 ### TASK_550 - Combat HUD Manual Screenshot Notes Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_550_combat_hud_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_549_combat_hud_f6_visual_audit.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`

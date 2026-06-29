@@ -179,7 +179,8 @@ git checkout -b batch/<batch-name>
 - TASK_548 - Combat HUD Visual Detail Tooltip Pass (implementiert)
 - TASK_549 - Combat HUD F6 Visual Audit (implementiert)
 - TASK_550 - Combat HUD Manual Screenshot Notes Pass (implementiert)
-- TASK_551 - Combat HUD Tooltip Style Polish
+- TASK_551 - Combat HUD Tooltip Style Polish (implementiert)
+- TASK_552 - Mission Objective Interaction Readability Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
