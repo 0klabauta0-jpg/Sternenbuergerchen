@@ -332,7 +332,14 @@ const WAYPOINT_PREVIEW_SUICIDAL_COLOR: Color = Color(1.0, 0.24, 0.18, 0.84)
 const WAYPOINT_PREVIEW_UNKNOWN_COLOR: Color = Color(0.62, 0.76, 1.0, 0.58)
 const WAYPOINT_PREVIEW_BLOCKED_LINE_COLOR: Color = Color(0.62, 0.66, 0.70, 0.42)
 const WAYPOINT_PREVIEW_FRIENDLY_FIRE_LINE_COLOR: Color = Color(1.0, 0.55, 0.08, 0.82)
-const WAYPOINT_PREVIEW_SUPPRESS_AREA_COLOR: Color = Color(1.0, 0.62, 0.10, 0.24)
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_COLOR: Color = Color(1.0, 0.62, 0.10, 0.34)
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_COLOR: Color = Color(1.0, 0.78, 0.20, 0.82)
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_VISUAL_KEY: String = "suppress_area_v2"
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_RING_SEGMENTS: int = 16
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_AXIS_LINE_COUNT: int = 2
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_BOUNDARY_MARKER_COUNT: int = 4
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_SURFACE_OFFSET: float = 0.88
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_SURFACE_OFFSET: float = 0.96
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -5436,17 +5443,92 @@ func _add_waypoint_suppress_area_visual(ghost_position: Vector2, suppress_previe
 		radius_3d,
 		0.035,
 		32,
-		0.12
+		WAYPOINT_PREVIEW_SUPPRESS_AREA_SURFACE_OFFSET
+	)
+	var outline_report: Dictionary = _add_waypoint_suppress_area_outline_visual(
+		ghost_position,
+		radius_world,
+		"WaypointIntentSuppressAreaOutline_%d" % _waypoint_intent_preview_suppress_area_count
 	)
 	_waypoint_intent_preview_suppress_area_count += 1
 	return {
 		"visible": true,
-		"visual_key": "suppress_area_v1",
+		"visual_key": WAYPOINT_PREVIEW_SUPPRESS_AREA_VISUAL_KEY,
 		"target_position": ghost_position,
 		"radius_world": radius_world,
 		"radius_3d": radius_3d,
 		"pressure_state": String(suppress_preview.get("pressure_state", "")).strip_edges(),
+		"fill_alpha": WAYPOINT_PREVIEW_SUPPRESS_AREA_COLOR.a,
+		"outline_alpha": WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_COLOR.a,
+		"surface_offset": WAYPOINT_PREVIEW_SUPPRESS_AREA_SURFACE_OFFSET,
+		"outline_surface_offset": WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_SURFACE_OFFSET,
+		"outline_visible": bool(outline_report.get("outline_visible", false)),
+		"outline_segment_count": int(outline_report.get("outline_segment_count", 0)),
+		"axis_line_count": int(outline_report.get("axis_line_count", 0)),
+		"boundary_marker_count": int(outline_report.get("boundary_marker_count", 0)),
 		"read_only": true,
+	}
+
+
+func _add_waypoint_suppress_area_outline_visual(ghost_position: Vector2, radius_world: float, node_name: String) -> Dictionary:
+	var safe_radius: float = maxf(radius_world, 0.0)
+	if safe_radius <= 0.0 or _order_root == null:
+		return {
+			"outline_visible": false,
+			"outline_segment_count": 0,
+			"axis_line_count": 0,
+			"boundary_marker_count": 0,
+		}
+	var ring_segments: int = maxi(WAYPOINT_PREVIEW_SUPPRESS_AREA_RING_SEGMENTS, 8)
+	var outline_segment_count: int = 0
+	var surface_offset: float = WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_SURFACE_OFFSET
+	var line_width: float = maxf(_get_3d_cell_size() * 0.035, 0.018)
+	var previous_point: Vector2 = ghost_position + Vector2.RIGHT * safe_radius
+	for index in range(1, ring_segments + 1):
+		var angle: float = (TAU * float(index)) / float(ring_segments)
+		var next_point: Vector2 = ghost_position + Vector2(cos(angle), sin(angle)) * safe_radius
+		_add_wide_line3d(
+			_order_root,
+			_world_to_surface_3d_position(previous_point, surface_offset),
+			_world_to_surface_3d_position(next_point, surface_offset),
+			WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_COLOR,
+			"%sRing_%02d" % [node_name, index],
+			line_width
+		)
+		outline_segment_count += 1
+		previous_point = next_point
+	var axis_line_count: int = 0
+	for axis_index in range(WAYPOINT_PREVIEW_SUPPRESS_AREA_AXIS_LINE_COUNT):
+		var axis_direction: Vector2 = Vector2.RIGHT if axis_index == 0 else Vector2.UP
+		_add_wide_line3d(
+			_order_root,
+			_world_to_surface_3d_position(ghost_position - axis_direction * safe_radius, surface_offset + 0.01),
+			_world_to_surface_3d_position(ghost_position + axis_direction * safe_radius, surface_offset + 0.01),
+			WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_COLOR.lightened(0.08),
+			"%sAxis_%d" % [node_name, axis_index],
+			line_width * 0.82
+		)
+		axis_line_count += 1
+	var boundary_marker_count: int = 0
+	var boundary_directions: Array[Vector2] = [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]
+	for marker_index in range(mini(boundary_directions.size(), WAYPOINT_PREVIEW_SUPPRESS_AREA_BOUNDARY_MARKER_COUNT)):
+		var marker_direction: Vector2 = boundary_directions[marker_index]
+		_add_marker3d(
+			_order_root,
+			ghost_position + marker_direction * safe_radius,
+			WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_COLOR.lightened(0.14),
+			"%sTick_%d" % [node_name, marker_index],
+			maxf(_get_3d_cell_size() * 0.065, 0.055),
+			0.055,
+			8,
+			surface_offset + 0.08
+		)
+		boundary_marker_count += 1
+	return {
+		"outline_visible": outline_segment_count >= ring_segments and axis_line_count >= WAYPOINT_PREVIEW_SUPPRESS_AREA_AXIS_LINE_COUNT and boundary_marker_count >= WAYPOINT_PREVIEW_SUPPRESS_AREA_BOUNDARY_MARKER_COUNT,
+		"outline_segment_count": outline_segment_count,
+		"axis_line_count": axis_line_count,
+		"boundary_marker_count": boundary_marker_count,
 	}
 
 

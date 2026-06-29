@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_580 - Suppress Fire Visual Tuning Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_580_suppress_fire_visual_tuning_findings.md`, `docs/tasks/TASK_579_suppress_fire_manual_f6_review.md`, `docs/tasks/TASK_578_suppress_fire_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Die lokale SUP-F6-Evidence zeigte, dass die transparente Suppress-Area im dichten Raster/Stationsbild zu schwach als eigenstaendiger Zielbereich lesbar war.
+- Stand: `TerrainMap3DView` nutzt jetzt `suppress_area_v2` mit staerkerer transparenter Fuellung, Overlay-Hoehe, Outline-Ring, zwei Achsenlinien, Boundary-Ticks und Snapshot-Metadaten fuer Fill/Outline/Hoehe/Line-/Marker-Counts.
+- Stand: Der laufende HTML-Zwischenbericht nennt TASK_580 als erledigten Tuning-Slice und haelt die Grenze zu echter Suppression-/Ammo-/Combat-Wirkung weiter offen.
+- Risiken/offen: Der finale menschliche Spielgefuehl-Test bleibt offen; echte Suppression-Wirkung, Munitionsverbrauch und AAR-Messwerte bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_580_suppress_fire_visual_tuning_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_579_suppress_fire_manual_f6_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_578_suppress_fire_visual_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: Vorschlag nach diesem Slice: ein kleiner Suppression-Intent-Outcome-Smoke, der ohne echtes Ammo-System prueft, ob `SUP` im Combat-Resolver nur als Disziplin-/Druckabsicht diagnostisch sichtbar bleibt.
+
 ### TASK_579 - Suppress Fire Manual F6 Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_579_suppress_fire_manual_f6_review.md`, `docs/tasks/TASK_578_suppress_fire_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

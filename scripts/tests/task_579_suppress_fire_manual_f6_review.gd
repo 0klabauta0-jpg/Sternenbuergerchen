@@ -71,7 +71,7 @@ func _test_manual_review_export_fields() -> void:
 	_assert(report_text.contains("\"TASK_579 - Suppress Fire Manual F6 Review\""), "JSON metadata lists TASK_579 as completed")
 	_assert(report_text.contains("\"TASK_580 - Suppress Fire Visual Tuning Findings\""), "JSON metadata lists TASK_580 as next task")
 	_assert(not report_text.contains("data-export-key=\"suppress_fire_manual.screenshot_done\" checked"), "Manual SUP screenshot is not pre-marked as done")
-	_assert(report_text.contains("suppress_area_v1"), "Report keeps stable suppress area visual key")
+	_assert(report_text.contains("suppress_area_v2"), "Report keeps current suppress area visual key")
 	_assert(report_text.contains("Kein <code>GO</code>") or report_text.contains("keinen <code>GO</code>"), "Report names read-only no-GO boundary")
 
 

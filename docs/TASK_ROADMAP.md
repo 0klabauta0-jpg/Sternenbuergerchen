@@ -208,7 +208,8 @@ git checkout -b batch/<batch-name>
 - TASK_577 - Suppress Fire Visual Evidence Pass (implementiert)
 - TASK_578 - Suppress Fire Visual Polish Findings (implementiert)
 - TASK_579 - Suppress Fire Manual F6 Review (implementiert)
-- TASK_580 - Suppress Fire Visual Tuning Findings
+- TASK_580 - Suppress Fire Visual Tuning Findings (implementiert)
+- TASK_581 - Suppress Fire Intent Outcome Smoke
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

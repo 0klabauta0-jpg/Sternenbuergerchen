@@ -15758,7 +15758,7 @@ func _attach_suppress_fire_preview_to_waypoint_entries(entries: Array) -> Array:
 		var suppress_preview: Dictionary = _build_suppress_fire_preview_entry(fireteam_id, entry)
 		if bool(suppress_preview.get("enabled", false)):
 			entry["suppress_preview"] = suppress_preview
-			entry["suppress_preview_visual_key"] = "suppress_area_v1"
+			entry["suppress_preview_visual_key"] = "suppress_area_v2"
 		result.append(entry)
 	return result
 
