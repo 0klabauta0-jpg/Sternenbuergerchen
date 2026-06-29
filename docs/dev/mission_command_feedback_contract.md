@@ -72,6 +72,9 @@ TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dez
 ## Frontier-Probe-Integrated-Objective-Playthrough
 `get_frontier_probe_integrated_objective_playthrough_snapshot()` ist der Headless-Pruefpunkt fuer TASK_554. Der Snapshot darf nur bestehende TASK_552-/TASK_553-Snapshots, `MissionScenarioRuntimeGates`, Command-Feedback und `TerrainMap3DView` zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Objective-, Cargo-, Combat-, Team- oder Command-Entscheidung erzeugen. Erwartete Lesbarkeit: AA, Computer und Cargo-Gates sind im finalen Zustand gemeinsam komplett; Mission Control zeigt AA/COM/OBJ und CARGO im selben Statusbild; Cargo `ready` komplettiert noch nicht, `departed` komplettiert CargoBridge plus Runtime-Gates; Primary3D behaelt Objective-Status sichtbar und entfernt aktive Cargo-Visuals nach Departure.
 
+## Frontier-Probe-Multiplayer-Objective-Ownership
+`get_frontier_probe_multiplayer_objective_ownership_snapshot()` ist der Headless-Pruefpunkt fuer TASK_555. Der Snapshot darf nur den integrierten TASK_554-Snapshot, `MissionMultiplayerTeamOwnershipContract`, `MissionTeamChipPresenter` und die Frontier-Probe-Scenario-Daten zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Peer-, Team-, Objective-, Cargo-, Combat- oder Command-Entscheidung erzeugen. Erwartete Lesbarkeit: Alpha bleibt player-assignable attacker auf `spawn_alpha`; Bravo bleibt solo/coop NPC-defender auf `spawn_bravo`, ist aber in PvP Peer 2 zuweisbar; Mission-Team-Chip nennt beide Owner und Spawnmarker; Computer- und Cargo-Gates gehoeren zum Alpha-Pfad; die Bravo-Air-Defense-Gruppe besitzt die AA-Bedrohung.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

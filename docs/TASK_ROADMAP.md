@@ -183,7 +183,8 @@ git checkout -b batch/<batch-name>
 - TASK_552 - Mission Objective Interaction Readability Pass (implementiert)
 - TASK_553 - Mission Cargo Extract Readability Pass (implementiert)
 - TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke (implementiert)
-- TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke
+- TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke (implementiert)
+- TASK_556 - Frontier Probe Host Client Objective Handoff Smoke
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_554 auf <code>task/frontier-probe-integrated-objective-smoke</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_555 auf <code>task/frontier-probe-multiplayer-objective-ownership</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -202,7 +202,8 @@
       <span class="pill good">TASK_552 Objective-Interaktion</span>
       <span class="pill good">TASK_553 Cargo-Extract</span>
       <span class="pill good">TASK_554 Integrated-Objective-Smoke</span>
-      <span class="pill warn">TASK_555 MP-Objective-Ownership</span>
+      <span class="pill good">TASK_555 MP-Objective-Ownership</span>
+      <span class="pill warn">TASK_556 Host/Client-Handoff</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -239,8 +240,8 @@
           <p>TASK_548 ist als aktueller Zwischenstand umgesetzt: Die kompakte Combat-HUD-Zeile bleibt kurz, aber #17 Selected Fireteam und #18 Mission Control bekommen denselben read-only Detail-Tooltip mit Fire-State, Cover, Range, LOS und Flank-Kontext. Der naechste Anschluss ist ein echter F6-/FullHD-Sichtaudit fuer Hover-/Panel-Lesbarkeit.</p>
           <p>TASK_549 ist als aktueller Zwischenstand umgesetzt: Die Combat-HUD-Labels sind hover-faehig, clippen sichtbaren Headertext und ein read-only F6-Visual-Audit prueft Panel-Bounds, Nichtueberlappung, Tooltip-Kuerze und geschaetzte FullHD-Tooltip-Flaechen. Der naechste Anschluss ist ein echter manueller Screenshot-/Notizdurchlauf.</p>
           <p>TASK_550 ist als aktueller Zwischenstand umgesetzt: Der Bericht hat jetzt einen exportierbaren Combat-HUD-Screenshot-/Hover-Notizblock fuer Screenshotpfad, Viewport, #17/#18-Hover, Stilnotizen, Follow-up und freie Review-Notiz. Der naechste Anschluss ist ein konkreter Tooltip-Style-Polish aus diesen Notizen.</p>
-          <p>TASK_554 ist als aktueller Zwischenstand umgesetzt: Der Frontier-Probe-Smoke prueft AA, Computer und Cargo als zusammenhaengenden Missionsabschluss. Mission Control muss AA/COM/OBJ und CARGO gemeinsam zeigen; Cargo ready darf noch nicht abschliessen, departed komplettiert den Slice.</p>
-          <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
+          <p>TASK_555 ist als aktueller Zwischenstand umgesetzt: Der Frontier-Probe-Smoke prueft jetzt zusaetzlich, dass Alpha/Bravo-, NPC- und Peer-Ownership im AA-/Computer-/Cargo-Abschluss nicht auseinanderlaufen.</p>
+          <p>Dieser Report ist bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
           <h2>Statusampel</h2>
@@ -413,15 +414,15 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit und TASK_554 als integrierter Objective-Playthrough.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zum kompletten AA-/Computer-/Cargo-Abschluss lesbar.</td><td>Naechster spielbarer Schritt ist TASK_555: Multiplayer-Ownership fuer denselben Objective-Slice pruefen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_554 plus TASK_555-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough und TASK_555 als MP-Objective-Ownership-Smoke.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zum kompletten AA-/Computer-/Cargo-Abschluss lesbar.</td><td>Naechster spielbarer Schritt ist TASK_556: derselbe Slice als echter Host/Client-Handoff-Smoke.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_555 plus TASK_556-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
           </div>
         </article>
         <article class="card">
           <h2>Aktuelle Lage</h2>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_553 sauber; TASK_554 laeuft auf eigenem Branch</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_554 sauber; TASK_555 laeuft auf eigenem Branch</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -436,7 +437,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_552_done"> TASK_552 Objective-Interaktions-Slice ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_553_done"> TASK_553 Cargo-Extract-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_554_done"> TASK_554 integrierter Objective-Playthrough-Smoke ist im Arbeitsstand implementiert</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_555_selected_next"> TASK_555 Multiplayer-Objective-Ownership ist als naechster Slice vorgeschlagen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_555_done"> TASK_555 Multiplayer-Objective-Ownership ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_556_selected_next"> TASK_556 Host/Client-Handoff ist als naechster Slice vorgeschlagen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_524_done"> TASK_524 Warn-Laerm-Bereinigung ist im Arbeitsstand implementiert</label>
@@ -466,8 +468,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Erledigt</td><td>TASK_554 beweist AA, Computer und Cargo als gemeinsamen Frontier-Probe-Abschluss: ready ist noch nicht complete, departed komplettiert alles.</td><td>Wenn TASK_555 denselben Objective-Slice mit Alpha/Bravo-/NPC-/Peer-Ownership prueft.</td></tr>
-                <tr><td>Jetzt dran</td><td>TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke. Ziel: Team-/Peer-Besitz und NPC-Ownership fuer AA/Computer/Cargo im PvP-ready Slice absichern.</td><td>Nach MP-Ownership-Smoke oder manuellem Host/Client-Test.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_555 beweist Alpha/Bravo-/NPC-/Peer-Ownership fuer denselben Frontier-Probe-Abschluss: Alpha fuehrt Computer/Cargo, Bravo haelt AA, PvP kann Bravo Peer 2 zuweisen.</td><td>Wenn TASK_556 denselben Objective-Slice als Host/Client-Handoff prueft.</td></tr>
+                <tr><td>Jetzt dran</td><td>TASK_556 - Frontier Probe Host Client Objective Handoff Smoke. Ziel: denselben Besitz-/Objective-Pfad nicht nur per Contract, sondern ueber einen echten Host/Client-Uebergang pruefen.</td><td>Nach Host/Client-Smoke oder manuellem MP-Playtest.</td></tr>
                 <tr><td>Offen</td><td>Der echte menschliche F6-/Sichttest wurde fuer die letzten Headless-Slices bewusst nicht behauptet. Die naechste manuelle Runde sollte sichtbare Bewegung, Panel-Feedback, Kontaktlinien und Drop-/Fireteam-Konsistenz pruefen.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -506,7 +508,8 @@
             <div class="finding good"><h3>Erledigt: Combat HUD F6 Visual Audit</h3><p>TASK_549 prueft die Tooltip-/Panel-Grundlage automatisiert: FullHD-Bounds, Nichtueberlappung, Hover-Faehigkeit und kurze Tooltip-Zeilen.</p></div>
             <div class="finding good"><h3>Erledigt: Combat HUD Manual Screenshot Notes Pass</h3><p>TASK_550 macht Screenshotpfad, Hover-Ergebnis, Stilnotizen und Follow-up-Entscheidung im HTML-Bericht exportierbar.</p></div>
             <div class="finding good"><h3>Erledigt: Frontier Probe Integrated Objective Playthrough Smoke</h3><p>TASK_554 prueft AA/Computer/Cargo als zusammenhaengenden Missionsabschluss.</p></div>
-            <div class="finding medium"><h3>1. TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke</h3><p>Der gleiche Objective-Slice sollte jetzt fuer Alpha/Bravo-, NPC- und Peer-Ownership gehaertet werden.</p></div>
+            <div class="finding good"><h3>Erledigt: Frontier Probe Multiplayer Objective Ownership Smoke</h3><p>TASK_555 prueft Alpha/Bravo-, NPC- und Peer-Ownership fuer denselben Objective-Slice.</p></div>
+            <div class="finding medium"><h3>1. TASK_556 - Frontier Probe Host Client Objective Handoff Smoke</h3><p>Der gleiche Objective-Slice sollte jetzt als echter Host/Client-Handoff gehaertet werden.</p></div>
           </div>
         </article>
       </div>
@@ -556,7 +559,8 @@
             <div class="finding good"><h3>Erledigt: TASK_549 - Combat HUD F6 Visual Audit</h3><p>Combat-HUD-Tooltip, Label-Hover, Panel-Bounds und geschaetzte Tooltip-Flaechen sind als read-only Audit pruefbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_550 - Combat HUD Manual Screenshot Notes Pass</h3><p>Der Bericht nimmt Screenshot-/Hover-Feedback strukturiert auf und exportiert es fuer den naechsten Codex-Slice.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke</h3><p>Der gesamte AA-/Computer-/Cargo-Pfad ist als finaler Missionsabschluss pruefbar.</p></div>
-            <div class="finding medium"><h3>1. TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke</h3><p>Alpha/Bravo-/NPC-/Peer-Besitz fuer denselben Objective-Pfad absichern.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke</h3><p>Alpha/Bravo-/NPC-/Peer-Besitz fuer denselben Objective-Pfad ist per Contract/HUD/Scenario-Smoke abgesichert.</p></div>
+            <div class="finding medium"><h3>1. TASK_556 - Frontier Probe Host Client Objective Handoff Smoke</h3><p>Den gleichen Objective-Pfad in einem echten Host/Client-Uebergang pruefen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -634,7 +638,8 @@
                 <tr><td><code>task_552_mission_objective_interaction_readability_pass.gd</code></td><td>26 passed, 0 failed</td><td>Headless-Smoke fuer AA/COM/OBJ-Zeile, Objective-Tile, Take-Control, Scenario-Gates und Primary-3D-Objective-Visual.</td></tr>
                 <tr><td><code>task_553_mission_cargo_extract_readability_pass.gd</code></td><td>27 passed, 0 failed</td><td>Headless-Smoke fuer CargoBridge, Cargo-Gate, Hold-Fortschritt, Mission-Control-Zeile, Primary3D-Cargo-Visual und Departure-Completion.</td></tr>
                 <tr><td><code>task_554_frontier_probe_integrated_objective_playthrough_smoke.gd</code></td><td>24 passed, 0 failed</td><td>Headless-Smoke fuer AA/Computer/Cargo als zusammenhaengenden Frontier-Probe-Missionsabschluss.</td></tr>
-                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_554 aktualisiert, nennt TASK_555 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
+                <tr><td><code>task_555_frontier_probe_multiplayer_objective_ownership_smoke.gd</code></td><td>25 passed, 0 failed</td><td>Headless-Smoke fuer Alpha/Bravo-/NPC-/Peer-Ownership im integrierten Frontier-Probe-Objective-Slice.</td></tr>
+                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_555 aktualisiert, nennt TASK_556 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -648,7 +653,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_550-Merge und Push. Arbeitsbranch: <code>task/combat-hud-tooltip-style-polish</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_554-Merge und Push. Arbeitsbranch: <code>task/frontier-probe-multiplayer-objective-ownership</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -756,7 +761,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke"
+              "TASK_556 - Frontier Probe Host Client Objective Handoff Smoke"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -797,25 +802,26 @@
               "TASK_551 - Combat HUD Tooltip Style Polish",
               "TASK_552 - Mission Objective Interaction Readability Pass",
               "TASK_553 - Mission Cargo Extract Readability Pass",
-              "TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke"
+              "TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke",
+              "TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Manueller FullHD-/F6-Sichttest bleibt trotz integrierter Headless-Smokes offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
-              "Der integrierte Objective-Pfad ist nach TASK_554 noch nicht als Host/Client- oder Peer-Ownership-Smoke abgesichert."
+              "Der integrierte Objective-Pfad ist nach TASK_555 noch nicht als echter Host/Client-Handoff-Smoke abgesichert."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status",
-            current_focus: "TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke",
-            latest_completed_task: "TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke"
+            current_focus: "TASK_556 - Frontier Probe Host Client Objective Handoff Smoke",
+            latest_completed_task: "TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke"
           },
           metadata: {
-            branch: "task/frontier-probe-integrated-objective-smoke",
-            integration_base: "integration/core-foundation after TASK_553",
-            head: "task/frontier-probe-integrated-objective-smoke",
+            branch: "task/frontier-probe-multiplayer-objective-ownership",
+            integration_base: "integration/core-foundation after TASK_554",
+            head: "task/frontier-probe-multiplayer-objective-ownership",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

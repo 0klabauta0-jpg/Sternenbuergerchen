@@ -50,6 +50,8 @@ const TACTICAL_EVENT_LOG_SCRIPT: GDScript = preload("res://scripts/tactical/tact
 const FTL_READINESS_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/tactical/ftl_readiness_snapshot_contract.gd")
 const FIRETEAM_RUNTIME_EXECUTION_PATH_CONTRACT_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_runtime_execution_path_contract.gd")
 const TACTICAL_BREAKOUT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_breakout_resolver.gd")
+const MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_vertical_slice_contract.gd")
+const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
@@ -12931,6 +12933,174 @@ func get_frontier_probe_integrated_objective_playthrough_snapshot() -> Dictionar
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
 	}
+
+
+func get_frontier_probe_multiplayer_objective_ownership_snapshot() -> Dictionary:
+	var integrated_snapshot: Dictionary = get_frontier_probe_integrated_objective_playthrough_snapshot()
+	var scenario: Dictionary = _load_frontier_probe_scenario_snapshot()
+	var vertical_slice: Dictionary = Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("load_slice_from_file", "res://data/mission_scenarios/frontier_probe_vertical_slice.json"))
+	var alpha_slot: Dictionary = _find_team_slot_in_slice(vertical_slice, "team_alpha")
+	var bravo_slot: Dictionary = _find_team_slot_in_slice(vertical_slice, "team_bravo")
+	var pvp_assignments: Dictionary = {
+		"peer_teams": {
+			1: "team_alpha",
+			2: "team_bravo",
+		},
+	}
+	var pvp_ownership_snapshot: Dictionary = Dictionary(MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT.call(
+		"build_team_ownership_snapshot",
+		vertical_slice,
+		pvp_assignments,
+		MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_MULTIPLAYER_PVP
+	))
+	var singleplayer_ownership_snapshot: Dictionary = Dictionary(MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT.call(
+		"build_team_ownership_snapshot",
+		vertical_slice,
+		{},
+		MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT.PLAY_MODE_SINGLEPLAYER
+	))
+	var alpha_pvp_entry: Dictionary = Dictionary(MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT.call("get_team_entry", pvp_ownership_snapshot, "team_alpha"))
+	var bravo_pvp_entry: Dictionary = Dictionary(MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT.call("get_team_entry", pvp_ownership_snapshot, "team_bravo"))
+	var bravo_singleplayer_entry: Dictionary = Dictionary(MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT.call("get_team_entry", singleplayer_ownership_snapshot, "team_bravo"))
+	var team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
+	var objective_snapshot: Dictionary = Dictionary(integrated_snapshot.get("objective_snapshot", {}))
+	var objective_state: Dictionary = Dictionary(objective_snapshot.get("objective_state", {}))
+	var cargo_gate: Dictionary = Dictionary(integrated_snapshot.get("cargo_gate", {}))
+	var computer_gate: Dictionary = Dictionary(integrated_snapshot.get("computer_gate", {}))
+	var aa_group: Dictionary = _find_scenario_enemy_group(scenario, "bravo_air_defense")
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"integrated_objective_gate_passes",
+			String(integrated_snapshot.get("gate", "")) == "pass",
+			"Integrated Frontier Probe AA/computer/cargo slice is green before ownership is evaluated."
+		),
+		_build_mission_first_move_readability_check(
+			"team_slots_expose_alpha_bravo",
+			not alpha_slot.is_empty() and not bravo_slot.is_empty(),
+			"Scenario vertical slice exposes Alpha and Bravo team slots."
+		),
+		_build_mission_first_move_readability_check(
+			"alpha_is_player_assignable_attacker",
+			String(alpha_slot.get("role", "")) == "attacker"
+				and not bool(alpha_slot.get("npc_owned", true))
+				and String(alpha_slot.get("spawn_marker_id", "")) == "spawn_alpha"
+				and _variant_string_array_has(alpha_slot.get("player_assignable_modes", []), "singleplayer")
+				and _variant_string_array_has(alpha_slot.get("player_assignable_modes", []), "coop")
+				and _variant_string_array_has(alpha_slot.get("player_assignable_modes", []), "multiplayer_pvp"),
+			"Alpha remains the player-assignable attacker from spawn_alpha in all advertised play modes."
+		),
+		_build_mission_first_move_readability_check(
+			"bravo_is_npc_defender_but_pvp_assignable",
+			String(bravo_slot.get("role", "")) == "defender"
+				and bool(bravo_slot.get("npc_owned", false))
+				and String(bravo_slot.get("spawn_marker_id", "")) == "spawn_bravo"
+				and _variant_string_array_has(bravo_slot.get("player_assignable_modes", []), "multiplayer_pvp")
+				and not _variant_string_array_has(bravo_slot.get("player_assignable_modes", []), "singleplayer"),
+			"Bravo stays scenario/NPC owned for solo but is explicitly assignable in PvP."
+		),
+		_build_mission_first_move_readability_check(
+			"pvp_assigns_alpha_host_and_bravo_peer",
+			bool(pvp_ownership_snapshot.get("valid", false))
+				and int(alpha_pvp_entry.get("owner_peer_id", 0)) == 1
+				and int(bravo_pvp_entry.get("owner_peer_id", 0)) == 2
+				and not bool(bravo_pvp_entry.get("npc_controlled", true)),
+			"PvP ownership resolves Alpha to host peer and Bravo to peer 2 without changing gameplay authority."
+		),
+		_build_mission_first_move_readability_check(
+			"singleplayer_keeps_bravo_npc",
+			bool(singleplayer_ownership_snapshot.get("valid", false))
+				and bool(bravo_singleplayer_entry.get("npc_controlled", false))
+				and int(bravo_singleplayer_entry.get("owner_peer_id", -1)) == 0,
+			"Singleplayer keeps Bravo as scenario-owned NPC team."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_team_chip_names_both_owners",
+			String(team_chip_snapshot.get("status_text", "")).contains("Host Peer 1")
+				and String(team_chip_snapshot.get("status_text", "")).contains("Peer 2")
+				and String(team_chip_snapshot.get("status_text", "")).contains("spawn_alpha")
+				and String(team_chip_snapshot.get("status_text", "")).contains("spawn_bravo"),
+			"Mission HUD team chip keeps both owners and spawn markers visible."
+		),
+		_build_mission_first_move_readability_check(
+			"objective_and_flow_steps_belong_to_alpha_path",
+			String(objective_state.get("owning_team_id", "")) == "team_alpha"
+				and String(computer_gate.get("operator_team_id", "")) == "team_alpha"
+				and String(cargo_gate.get("target_marker_id", "")) == "spawn_alpha",
+			"Computer and cargo gates remain attached to Alpha's objective path."
+		),
+		_build_mission_first_move_readability_check(
+			"bravo_air_defense_group_owns_aa_threat",
+			String(aa_group.get("team_id", "")) == "team_bravo"
+				and String(aa_group.get("spawn_marker_id", "")) == "spawn_bravo",
+			"Bravo air-defense group owns the AA threat side of the slice."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(integrated_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(pvp_ownership_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(singleplayer_ownership_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(team_chip_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Ownership snapshot combines runtime/contracts/HUD snapshots without moving gameplay truth into UI."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_555",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"integrated_snapshot": integrated_snapshot,
+		"vertical_slice": vertical_slice,
+		"alpha_slot": alpha_slot,
+		"bravo_slot": bravo_slot,
+		"pvp_ownership_snapshot": pvp_ownership_snapshot,
+		"singleplayer_ownership_snapshot": singleplayer_ownership_snapshot,
+		"mission_team_chip": team_chip_snapshot,
+		"objective_state": objective_state,
+		"aa_group": aa_group,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _load_frontier_probe_scenario_snapshot() -> Dictionary:
+	var scenario_path: String = "res://data/mission_scenarios/frontier_probe_vertical_slice.json"
+	if not FileAccess.file_exists(scenario_path):
+		return {}
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(scenario_path))
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return {}
+	return Dictionary(parsed).duplicate(true)
+
+
+func _find_team_slot_in_slice(slice: Dictionary, team_id: String) -> Dictionary:
+	var normalized_team_id: String = team_id.strip_edges()
+	for slot_variant in Array(slice.get("team_slots", [])):
+		var slot: Dictionary = Dictionary(slot_variant)
+		if String(slot.get("team_id", "")).strip_edges() == normalized_team_id:
+			return slot.duplicate(true)
+	return {}
+
+
+func _find_scenario_enemy_group(scenario: Dictionary, group_id: String) -> Dictionary:
+	var normalized_group_id: String = group_id.strip_edges()
+	for group_variant in Array(scenario.get("enemy_groups", [])):
+		var group: Dictionary = Dictionary(group_variant)
+		if String(group.get("group_id", "")).strip_edges() == normalized_group_id:
+			return group.duplicate(true)
+	return {}
+
+
+func _variant_string_array_has(value: Variant, expected_value: String) -> bool:
+	var normalized_expected: String = expected_value.strip_edges()
+	for entry_variant in Array(value):
+		if String(entry_variant).strip_edges() == normalized_expected:
+			return true
+	return false
 
 
 func _build_mission_objective_state_snapshot() -> Dictionary:
