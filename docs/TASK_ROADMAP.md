@@ -193,7 +193,8 @@ git checkout -b batch/<batch-name>
 - TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture (implementiert)
 - TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview (implementiert)
 - TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings (implementiert)
-- TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass
+- TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass (implementiert)
+- TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

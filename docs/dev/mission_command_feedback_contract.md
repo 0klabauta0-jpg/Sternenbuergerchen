@@ -99,6 +99,9 @@ TASK_563 macht die TASK_562-Artefakte im laufenden HTML-Zwischenbericht sichtbar
 ## Frontier-Probe-Multiplayer-Apply-Visual-Polish-Findings
 TASK_564 darf nur belegte visuelle Reibung aus TASK_562/TASK_563 anwenden. Der aktuelle belegte Befund ist das zu kontextarme Headless-Evidence-Board. Zulaessig sind deshalb Region-Outlines, Raster, Swatch-Leiste, Manifest-Regionen und HTML-Legende fuer Review-Lesbarkeit. TASK_564 darf keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern und darf den menschlichen F6-/Hover-Test nicht als erledigt markieren. Der naechste echte Sichtreview-Slice ist TASK_565.
 
+## Frontier-Probe-Multiplayer-Real-F6-Screenshot-Review
+TASK_565 nutzt einen echten nicht-headless Viewport-Readback aus TASK_562 als belegbaren F6-Sichtbefund. Der Screenshot darf UI-Widersprueche, Paneldichte und Hover-Kandidaten fuer den laufenden HTML-Zwischenbericht markieren, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern. Der belegte Fix ist der #17-Selected-Fireteam-Widerspruch: Statuszeile und sichtbare Member-Cards muessen denselben read-only Fireteam-Unit-Fallback verwenden, damit bei sichtbaren Karten nicht `keine Einheiten aktiv` steht. Der echte Hover-/Panel-Polish bleibt ein eigener TASK_566-Follow-up und wird durch TASK_565 nicht als abgeschlossen behauptet.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
