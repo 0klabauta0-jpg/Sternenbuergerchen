@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_586 - Debrief Return To Homebase Handoff
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_586_debrief_return_homebase_handoff.md`, `docs/tasks/TASK_585_mini_aar_debrief_screen_stub.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MetaLayerFlow.get_debrief_return_homebase_handoff_snapshot()` beschreibt den vorhandenen Debrief->Homebase-Rueckweg als read-only Handoff mit aktuellem View, Ziel-View, Return-Action, Signalbindung, Screen-Sichtbarkeit, MissionResult-Erhalt und aktivem Missionszustand.
+- Stand: `request_debrief_return_homebase_for_test()` nutzt nur den bestehenden Return-Handler und dient dem Verifier als kontrollierter Ausloeser. Die Navigation bleibt im MetaLayerFlow, UI speichert keine zweite Wahrheit.
+- Stand: Der laufende HTML-Zwischenbericht ist auf TASK_586 aktualisiert und nennt TASK_587 als naechsten visuellen Debrief-Polish.
+- Risiken/offen: Der Rueckweg ist pruefbar, aber der Debrief selbst bleibt optisch roh. XP, Skillentwicklung, Ammo, echte Suppression-Wirkung und eine schoene AAR-Visualisierung bleiben eigene Tasks.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_586_debrief_return_homebase_handoff.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_585_mini_aar_debrief_screen_stub.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_584_mini_aar_combat_metrics_shell.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_587 - Debrief Visual Polish Pass`, wenn der sichtbare Debrief in F6/Meta angenehm lesbar werden soll.
+
 ### TASK_585 - Mini AAR Debrief Screen Stub
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_585_mini_aar_debrief_screen_stub.md`, `docs/tasks/TASK_584_mini_aar_combat_metrics_shell.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
 - Stand: `MissionTacticalSandboxController.get_mini_aar_debrief_screen_snapshot()` baut aus dem TASK_584-Mini-AAR-Snapshot eine kleine read-only Debrief-Screen-Struktur mit Titel, Untertitel, Summary, Metrik-Rows, Chips und Grenztext.
 - Stand: Der Grenztext benennt bewusst: keine XP, keine Ammo und keine echte Suppression. Der Stub mutiert weder MissionResult noch Combat-, Ammo-, XP- oder Skill-State.
-- Stand: Der laufende HTML-Zwischenbericht benennt TASK_585 als erledigten Arbeitsstand und TASK_586 als naechsten moeglichen Return-to-Homebase-Handoff.
-- Risiken/offen: Noch kein navigierbarer Debriefing-Screen und kein Ruecksprung in den Homebase-/Meta-Loop. Echte Mission-Result-Visualisierung, XP, Skillentwicklung, Ammo und Suppression-Wirkung bleiben eigene Tasks.
+- Stand: Der laufende HTML-Zwischenbericht benennt TASK_585 als erledigten Arbeitsstand; der Return-to-Homebase-Handoff ist durch TASK_586 pruefbar.
+- Risiken/offen: Noch kein schoen polierter Debriefing-Screen. Echte Mission-Result-Visualisierung, XP, Skillentwicklung, Ammo und Suppression-Wirkung bleiben eigene Tasks.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_585_mini_aar_debrief_screen_stub.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_584_mini_aar_combat_metrics_shell.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_583_suppress_fire_aar_report_panel_readability.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_586 - Debrief Return To Homebase Handoff`, wenn der Debrief-Stub nach Missionsende sauber in den Homebase-/Meta-Loop fuehren soll.
+- Naechster Schritt: durch `TASK_586 - Debrief Return To Homebase Handoff` erledigt; naechster Anschluss ist `TASK_587 - Debrief Visual Polish Pass`.
 
 ### TASK_584 - Mini AAR Combat Metrics Shell
 - Status: implementiert im Arbeitsstand

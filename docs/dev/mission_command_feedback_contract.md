@@ -194,6 +194,11 @@ TASK_585 macht die TASK_584-Mini-AAR-Schale als kleine Debrief-Screen-Struktur l
 
 Erwartete Struktur: `get_mini_aar_debrief_screen_snapshot()` enthaelt `schema = sternenbuergerchen.mini_aar_debrief_screen_stub.v1`, `source_schema = sternenbuergerchen.mini_aar_combat_metrics.v1`, `screen`, `summary_text`, `rows`, `chips`, `limit_text`, `mini_aar`, `read_only = true` und `ui_sets_gameplay_truth = false`. `screen` muss mindestens `title_text`, `subtitle_text`, `summary_text`, `rows`, `chips`, `limit_text`, `layout_key`, `primary_action_label` und `secondary_action_label` enthalten. Nicht zulaessig sind ein vollstaendiger Debriefing-Screen, Return-to-Homebase-Handoff, XP-/Skill-Vergabe, Ammo-Verbrauch, echte Suppression-Wirkung oder eine zweite UI-seitige Combat-Wahrheit.
 
+## Debrief-Return-Homebase-Handoff
+TASK_586 macht den vorhandenen Meta-Rueckweg vom Debrief in die Homebase pruefbar. `MetaLayerFlow.get_debrief_return_homebase_handoff_snapshot()` darf nur bestehende Meta-Screen-, Signal-, MissionResult- und aktive-Mission-Zustaende lesen. Der Snapshot darf keine Navigation ausloesen und keine Mission-, XP-, Skill-, Ammo-, Suppression- oder UI-Wahrheit erzeugen. Der Testhelfer `request_debrief_return_homebase_for_test()` nutzt ausschliesslich den bestehenden Return-Handler und ist kein zweiter Navigationspfad.
+
+Erwartete Struktur: `get_debrief_return_homebase_handoff_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_return_homebase_handoff.v1`, `current_meta_view`, `target_meta_view = homebase`, `return_action_available`, `return_signal_connected`, `homebase_visible`, `debrief_visible`, `navigation_visible`, `active_mission_released`, `last_mission_result`, `debrief_mission_result`, `mission_result_preserved`, `read_only = true` und `ui_sets_gameplay_truth = false`. Vor dem Return muss Debrief sichtbar und Homebase verborgen sein; nach dem Return muss Homebase sichtbar, Debrief verborgen und die Meta-Navigation wieder sichtbar sein. TASK_587 bleibt fuer sichtbaren Debrief-Polish vorgesehen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

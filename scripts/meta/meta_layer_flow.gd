@@ -379,6 +379,116 @@ func get_homebase_to_mission_handoff_snapshot() -> Dictionary:
 	}
 
 
+func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
+	var homebase_screen: Node = _get_homebase_screen()
+	var fob_screen: Node = _get_fob_screen()
+	var debrief_screen: Node = _get_debrief_screen()
+	var mission_host: Node = _get_mission_host()
+	var return_button := get_node_or_null("DebriefScreen/Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton") as Button
+	var debrief_result: Dictionary = {}
+	if debrief_screen != null and debrief_screen.has_method("get_mission_result"):
+		debrief_result = Dictionary(debrief_screen.call("get_mission_result")).duplicate(true)
+	var result_preserved: bool = _debrief_handoff_results_match(_last_mission_result, debrief_result)
+	var signal_connected: bool = debrief_screen != null \
+		and debrief_screen.has_signal("return_to_homebase_requested") \
+		and debrief_screen.is_connected("return_to_homebase_requested", Callable(self, "_on_debrief_return_to_homebase_requested"))
+	var return_action_available: bool = debrief_screen != null \
+		and return_button != null \
+		and not return_button.disabled \
+		and signal_connected
+	var active_mission_released: bool = _active_mission == null
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"homebase_target_available",
+		homebase_screen != null,
+		"critical",
+		"Debrief return should have a Homebase target screen."
+	)
+	_append_handoff_check(
+		checks,
+		"debrief_source_available",
+		debrief_screen != null,
+		"critical",
+		"Debrief return should have a Debrief source screen."
+	)
+	_append_handoff_check(
+		checks,
+		"return_action_connected",
+		signal_connected,
+		"critical",
+		"Debrief return signal should be connected to the MetaLayerFlow handoff."
+	)
+	_append_handoff_check(
+		checks,
+		"return_action_available",
+		return_action_available,
+		"critical",
+		"Return to Homebase action should be available from Debrief."
+	)
+	_append_handoff_check(
+		checks,
+		"mission_result_preserved",
+		result_preserved,
+		"critical",
+		"Debrief and MetaLayerFlow should carry the same last mission result."
+	)
+	_append_handoff_check(
+		checks,
+		"active_mission_released",
+		active_mission_released,
+		"critical",
+		"Returning from Debrief should not leave the finished active mission attached."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_snapshot",
+		true,
+		"critical",
+		"Snapshot reads handoff state only."
+	)
+
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.debrief_return_homebase_handoff.v1",
+		"task_id": "TASK_586",
+		"ui_sets_gameplay_truth": false,
+		"read_only": true,
+		"handoff_id": "debrief_return_homebase_handoff_v1",
+		"handoff_gate": "pass" if failed_count == 0 else "fail",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"current_meta_view": _current_meta_view,
+		"target_meta_view": "homebase",
+		"return_action_id": "debrief_return_homebase",
+		"return_action_label": "Return to Homebase",
+		"return_action_available": return_action_available,
+		"return_signal_connected": signal_connected,
+		"homebase_target_exists": homebase_screen != null,
+		"debrief_source_exists": debrief_screen != null,
+		"homebase_visible": homebase_screen != null and homebase_screen.visible,
+		"fob_visible": fob_screen != null and fob_screen.visible,
+		"debrief_visible": debrief_screen != null and debrief_screen.visible,
+		"navigation_visible": _is_meta_navigation_visible(),
+		"expected_post_return_navigation_visible": true,
+		"active_mission_released": active_mission_released,
+		"mission_host_child_count": mission_host.get_child_count() if mission_host != null else -1,
+		"last_mission_result": _last_mission_result.duplicate(true),
+		"debrief_mission_result": debrief_result.duplicate(true),
+		"debrief_has_mission_result": not debrief_result.is_empty(),
+		"mission_result_preserved": result_preserved,
+		"checks": checks,
+		"issues": _build_handoff_issue_list(checks),
+		"recommended_next_action": "Polish the visible Debrief screen layout and make the AAR data pleasant to read.",
+	}
+
+
+func request_debrief_return_homebase_for_test() -> Dictionary:
+	_on_debrief_return_to_homebase_requested()
+	return get_debrief_return_homebase_handoff_snapshot()
+
+
 func _build_mission_setup_handoff_snapshot(mission_setup: Node) -> Dictionary:
 	if mission_setup == null:
 		return {
@@ -483,6 +593,28 @@ func _sorted_dictionary_keys(dictionary: Dictionary) -> PackedStringArray:
 			keys.append(key)
 	keys.sort()
 	return keys
+
+
+func _debrief_handoff_results_match(left: Dictionary, right: Dictionary) -> bool:
+	if left.is_empty() or right.is_empty():
+		return false
+	for key in ["result", "mission_outcome", "winning_team_id", "win_condition_type"]:
+		if String(left.get(key, "")).strip_edges() != String(right.get(key, "")).strip_edges():
+			return false
+	if absf(float(left.get("duration_seconds", 0.0)) - float(right.get("duration_seconds", -1.0))) > 0.01:
+		return false
+	return Array(left.get("team_states", [])).size() == Array(right.get("team_states", [])).size()
+
+
+func _is_meta_navigation_visible() -> bool:
+	for path in [
+		"HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
+		"FOBScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow",
+	]:
+		var nav_row := get_node_or_null(String(path)) as Control
+		if nav_row != null and nav_row.visible:
+			return true
+	return false
 
 
 func get_air_asset_recovery_snapshot() -> Dictionary:
