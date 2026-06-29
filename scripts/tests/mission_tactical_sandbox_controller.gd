@@ -16259,6 +16259,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"authority_visual_text": String(mission_team_chip_snapshot.get("authority_compact_text", "")),
 		"authority_visual_visible": bool(mission_team_chip_snapshot.get("authority_visible", false)),
 		"authority_visual_tooltip_text": String(mission_team_chip_snapshot.get("authority_tooltip_text", "")),
+		"authority_feedback_line": String(Dictionary(mission_team_chip_snapshot.get("authority_visual", {})).get("feedback_line", "")),
+		"authority_feedback_detail": String(Dictionary(mission_team_chip_snapshot.get("authority_visual", {})).get("feedback_detail", "")),
 		"review_session_badge": Dictionary(mission_team_chip_snapshot.get("review_session", {})).duplicate(true),
 		"review_session_badge_text": String(mission_team_chip_snapshot.get("review_session_badge_text", "")),
 		"review_session_badge_visible": bool(mission_team_chip_snapshot.get("review_session_badge_visible", false)),

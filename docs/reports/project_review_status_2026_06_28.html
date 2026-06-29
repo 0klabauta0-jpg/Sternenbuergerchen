@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_623 auf <code>task/host-client-authority-visual-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_624 auf <code>task/host-client-live-input-feedback-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -291,6 +291,7 @@
       <span class="pill good">TASK_621 Feel-Bundle</span>
       <span class="pill good">TASK_622 Authority-Review</span>
       <span class="pill good">TASK_623 Authority-Visual</span>
+      <span class="pill good">TASK_624 Input-Feedback</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -544,13 +545,14 @@
             <div class="metric"><strong>TASK_617</strong><span>umgesetzt: Standard-Launchplan passt Host/Client-Fenster bei Bedarf an und Real-Run-Capture hebt sie sichtbar an</span></div>
             <div class="metric"><strong>TASK_622</strong><span>umgesetzt: Peer-2-Bravo-Accept, Alpha-Reject, State-Mutation-Reject und Client-Snapshot-Apply sind als Review-Manifest belegt</span></div>
             <div class="metric"><strong>TASK_623</strong><span>umgesetzt: Mission-Teamchip zeigt Network-Command-Accept-/Reject-Status als kompaktes AUTH-Feedback</span></div>
+            <div class="metric"><strong>TASK_624</strong><span>umgesetzt: rohe Reject-Codes werden als kurze Spielertexte und Tooltip-Details erklaert</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe, TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar, TASK_609 beschriftet das Board fuer menschliche Reviewbarkeit, TASK_610 bereitet echte Zwei-Fenster-Notizen im Bericht vor, TASK_611 macht den Fensterlauf als Dry-Run-Plan plus expliziten Launcher reproduzierbarer, TASK_612 sichert den Screenshot-Review als Board/Manifest/Workbench-Paket ab, TASK_613 macht dieses Board durch Labels/Legende lesbarer, TASK_614 stellt den echten Fensterlauf als expliziten Capture-Helper mit Dry-Run-Manifest bereit, TASK_615 korrigiert den belegten Console-Binary-/Fensterfokus-Fall, TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls plus fruehen Fensterfokus, TASK_617 macht den Standard-Launchplan monitorfest, TASK_618 erzeugt getrennte Host-/Client-Crops, TASK_619 macht Role/Peer/Team im Mission-HUD sichtbar, TASK_620 haelt den Badge-Re-Capture als Evidence fest, TASK_621 buendelt diese Evidence fuer den Live-Interaction-Review, TASK_622 belegt die kritische Command-Authority-/Snapshot-Kette und TASK_623 macht Accept-/Reject-Feedback im Teamchip sichtbar.</td><td>Naechster Schritt: echten Host/Client-Klicklauf auf Input-Latenz, Reject-Verstaendlichkeit und laengere Sync-Stabilitaet pruefen.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe, TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar, TASK_609 beschriftet das Board fuer menschliche Reviewbarkeit, TASK_610 bereitet echte Zwei-Fenster-Notizen im Bericht vor, TASK_611 macht den Fensterlauf als Dry-Run-Plan plus expliziten Launcher reproduzierbarer, TASK_612 sichert den Screenshot-Review als Board/Manifest/Workbench-Paket ab, TASK_613 macht dieses Board durch Labels/Legende lesbarer, TASK_614 stellt den echten Fensterlauf als expliziten Capture-Helper mit Dry-Run-Manifest bereit, TASK_615 korrigiert den belegten Console-Binary-/Fensterfokus-Fall, TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls plus fruehen Fensterfokus, TASK_617 macht den Standard-Launchplan monitorfest, TASK_618 erzeugt getrennte Host-/Client-Crops, TASK_619 macht Role/Peer/Team im Mission-HUD sichtbar, TASK_620 haelt den Badge-Re-Capture als Evidence fest, TASK_621 buendelt diese Evidence fuer den Live-Interaction-Review, TASK_622 belegt die kritische Command-Authority-/Snapshot-Kette, TASK_623 macht Accept-/Reject-Feedback im Teamchip sichtbar und TASK_624 erklaert Rejects in Spielertext.</td><td>Naechster Schritt: echten Host/Client-Klicklauf auf Input-Latenz, Reject-Verstaendlichkeit und laengere Sync-Stabilitaet pruefen.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
                 <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_617 ist hier bewusst mitgepflegt, damit Standardplan, Auto-Fit und sichtbarer Host/Client-Anschluss nachvollziehbar bleiben.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
@@ -1677,6 +1679,35 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_624 Host Client Live Input Feedback Review</h2>
+          <p>TASK_624 macht aus rohen Server-Rejects einen kurzen Spielertext. Der kompakte <code>AUTH OK/RJ</code>-Status bleibt sichtbar, aber der Tooltip erklaert zum Beispiel: <code>AUTH BLOCKED P2: wrong team</code> und nennt das Ziel, ohne Gameplay-State in der UI zu speichern.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Feedback-Feld</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_624 - Host Client Live Input Feedback Review" data-export-key="host_client_live_input_feedback.task_id"></td><td>Aktueller Input-Feedback-Slice.</td></tr>
+                <tr><td>Feedback Line</td><td><input readonly value="AUTH BLOCKED P2: wrong team" data-export-key="host_client_live_input_feedback.feedback_line"></td><td>Kurzer, sicht-/tooltip-tauglicher Spielertext.</td></tr>
+                <tr><td>Feedback Detail</td><td><input readonly value="Peer 2 cannot command team_alpha / FT blue / task624_alpha." data-export-key="host_client_live_input_feedback.feedback_detail"></td><td>Detail erklaert die Ownership-Grenze.</td></tr>
+                <tr><td>Reject Label</td><td><input readonly value="wrong team" data-export-key="host_client_live_input_feedback.last_reject_label"></td><td>Player-facing Uebersetzung von <code>peer_team_mismatch</code>.</td></tr>
+                <tr><td>Reject Target</td><td><input readonly value="team_alpha / FT blue / task624_alpha" data-export-key="host_client_live_input_feedback.last_reject_target"></td><td>Team/Fireteam/Unit-Kontext fuer Debug und Tooltip.</td></tr>
+                <tr><td>Raw Reason</td><td><input readonly value="true" data-export-key="host_client_live_input_feedback.raw_reason_preserved"></td><td>Der Servergrund bleibt fuer Debugging erhalten.</td></tr>
+                <tr><td>Ready</td><td><input readonly value="true" data-export-key="host_client_live_input_feedback.input_feedback_ready"></td><td>Snapshot ist fuer sichtbaren Klick-Review nutzbar.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="host_client_live_input_feedback.read_only"></td><td>Presenter baut nur Lesetext aus Authority-Snapshotdaten.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_625 - Host Client Visible Reject Feedback Polish" data-export-key="host_client_live_input_feedback.recommended_next_task"></td><td>Nur falls ein echter Klicklauf einen auffaelligeren Hinweis braucht.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input type="checkbox" checked data-export-key="host_client_live_input_feedback.reason_label_checked"> Reject-Code wird in Spielertext uebersetzt</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="host_client_live_input_feedback.target_context_checked"> Team/Fireteam/Unit-Kontext im Detail sichtbar</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="host_client_live_input_feedback.raw_reason_checked"> Rohgrund bleibt im Tooltip erhalten</label>
+            <label class="checkline"><input type="checkbox" data-export-key="host_client_live_input_feedback.real_click_run_checked"> Echter Zwei-Fenster-Klicklauf geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_624 Live-Input-Feedback-Notiz
+            <textarea data-note-key="notes.host_client_live_input_feedback" data-export-key="host_client_live_input_feedback.notes" placeholder="Reicht der Tooltip im echten Klicklauf oder braucht es eine sichtbare Toast/Bubble/Panel-Reaktion?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -2042,6 +2073,7 @@
                 <tr><td><code>task_621_host_client_multiplayer_feel_review_bundle.gd</code></td><td>PASS</td><td>Verifier fuer TASK_621-Bundle, Reportfelder, Contract, Evidence-Tests und manuelle Review-Checks.</td></tr>
                 <tr><td><code>task_622_host_client_command_authority_live_interaction_review.gd</code></td><td>PASS</td><td>Verifier fuer Peer-2-Bravo-Accept, Alpha-Reject, State-Mutation-Reject, Host-Queue und Client-Snapshot-Apply.</td></tr>
                 <tr><td><code>task_623_host_client_authority_visual_findings.gd</code></td><td>PASS</td><td>Verifier fuer Authority-Visual-Snapshot, Teamchip-AUTH-Text, Tooltip-Reject-Grund und read-only Grenzen.</td></tr>
+                <tr><td><code>task_624_host_client_live_input_feedback_review.gd</code></td><td>PASS</td><td>Verifier fuer Spielertext aus rohen Authority-Rejects, Tooltip-Detail, Controller-Feedback-Snapshot und read-only Grenzen.</td></tr>
                 <tr><td><code>task_620_host_client_badge_recapture_review.gd</code></td><td>PASS</td><td>Verifier fuer Badge-Re-Capture-Manifestfelder, Reports, Contract und TASK_620-Follow-up.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>Timeout nach Doku-Pruefung</td><td>Meta-Homebase-Flow haengt in diesem Arbeitslauf nach der Doku-Pruefung; TASK_567 nutzt die stabile Mission-Fixture, Meta-Flow-Testhygiene bleibt offen.</td></tr>
                 <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_570 aktualisiert, nennt die Fire-Rule-Mission-Bridge und TASK_571 als naechsten Slice.</td></tr>
@@ -2645,7 +2677,8 @@
               "TASK_620 - Host Client Badge Re-Capture Review",
               "TASK_621 - Host Client Multiplayer Feel Review Bundle",
               "TASK_622 - Host Client Command Authority Live Interaction Review",
-              "TASK_623 - Host Client Authority Visual Findings"
+              "TASK_623 - Host Client Authority Visual Findings",
+              "TASK_624 - Host Client Live Input Feedback Review"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -2677,7 +2710,8 @@
               "TASK_620 haelt den Badge-Re-Capture als Manifest-/Crop-Evidence fest; OCR und finaler menschlicher Sichtentscheid bleiben bewusst getrennt.",
               "TASK_621 buendelt Badge-/Crop-Evidence, Authority-/Sync-Smokes und offene manuelle Checks fuer den naechsten Zwei-Fenster-Live-Interaction-Review.",
               "TASK_622 belegt Peer-2-Bravo-Accept, Alpha-Reject, State-Mutation-Reject und Client-Snapshot-Apply als read-only Authority-Review; sichtbares Feedback und Input-Gefuehl bleiben offen.",
-              "TASK_623 macht Network-Command-Accept-/Reject-Daten als kompaktes AUTH-Feedback im Mission-Teamchip sichtbar; echter Klicklauf bleibt offen."
+              "TASK_623 macht Network-Command-Accept-/Reject-Daten als kompaktes AUTH-Feedback im Mission-Teamchip sichtbar; echter Klicklauf bleibt offen.",
+              "TASK_624 uebersetzt rohe Authority-Rejects in kurze Spielertexte und Tooltip-Details; auffaelligere Toast-/Bubble-Feedbacks bleiben echte Klicklauf-Folgearbeit."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -2686,14 +2720,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_623",
-            current_focus: "Host Client Live Input Feedback Review",
-            latest_completed_task: "TASK_623 - Host Client Authority Visual Findings"
+            current_repo_base: "integration/core-foundation after TASK_624",
+            current_focus: "Host Client Visible Reject Feedback Polish",
+            latest_completed_task: "TASK_624 - Host Client Live Input Feedback Review"
           },
           metadata: {
-            branch: "task/host-client-authority-visual-findings",
-            integration_base: "integration/core-foundation after TASK_622",
-            head: "task/host-client-authority-visual-findings",
+            branch: "task/host-client-live-input-feedback-review",
+            integration_base: "integration/core-foundation after TASK_623",
+            head: "task/host-client-live-input-feedback-review",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }
