@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_553 - Mission Cargo Extract Readability Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_553_mission_cargo_extract_readability_pass.md`, `docs/tasks/TASK_522_cargo_touchdown_visual_polish.md`, `docs/tasks/TASK_519_cargo_touchdown_runtime_bridge.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Mission Control zeigt jetzt eine kompakte `CARGO ...`-Zeile fuer blocked/inbound/hold/ready/departing/departed.
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_mission_cargo_extract_readability_snapshot()` fuer CargoBridge, Cargo-Gate, Hold-Fortschritt, Mission-Control-Zeile, Primary3D-Cargo-Visual und Completion-Konsistenz.
+- Stand: Der Verifier prueft `landed/ready` und danach `departed`, sodass Hold-Fortschritt nicht versehentlich schon als Missionsabschluss gilt und `departed` Bridge plus Scenario-Gates komplettiert.
+- Stand: Der Rolling-HTML-Bericht ist auf TASK_553 aktualisiert und nennt TASK_554 als naechsten spielbaren Anschluss.
+- Risiken/offen: TASK_553 prueft Headless-Snapshots/Render-Zaehler, keinen menschlichen F6-Sichttest und noch keinen kompletten AA-Computer-Cargo-Playthrough-Smoke.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_553_mission_cargo_extract_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_552_mission_objective_interaction_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_522_cargo_touchdown_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke`, damit AA, Computer und Cargo als zusammenhaengender Missionsablauf geprueft werden.
+
 ### TASK_552 - Mission Objective Interaction Readability Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_552_mission_objective_interaction_readability_pass.md`, `docs/tasks/TASK_518_mission_scenario_runtime_gates.md`, `docs/dev/mission_command_feedback_contract.md`

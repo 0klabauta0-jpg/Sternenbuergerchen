@@ -181,7 +181,8 @@ git checkout -b batch/<batch-name>
 - TASK_550 - Combat HUD Manual Screenshot Notes Pass (implementiert)
 - TASK_551 - Combat HUD Tooltip Style Polish (implementiert)
 - TASK_552 - Mission Objective Interaction Readability Pass (implementiert)
-- TASK_553 - Mission Cargo Extract Readability Pass
+- TASK_553 - Mission Cargo Extract Readability Pass (implementiert)
+- TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
