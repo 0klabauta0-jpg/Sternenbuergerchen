@@ -133,6 +133,18 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_616_host_client_visible_ui_real_run_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_615_host_client_real_run_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_614_host_client_two_window_real_run_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
 - Naechster Schritt: Echter GUI-Re-Capture mit TASK_616-Guard pruefen; bei weiter schwarzer Client-Welt einen kleinen Client-World-Init-Diagnostic-Task schneiden.
 
+### TASK_617 - Host Client Standard Window Layout Hardening
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_617_host_client_standard_window_layout_hardening.md`, `docs/tasks/TASK_616_host_client_visible_ui_real_run_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `launch_host_client_two_window_review.ps1` berechnet bei Bedarf ein effektives Side-by-Side-Fensterlayout aus der Primaer-Monitor-Arbeitsflaeche.
+- Stand: Der Launchplan meldet `requested_window_layout` und `window_layout_auto_fit`; `window_layout`, Host-/Client-Fenster und Godot-Argumente nutzen das effektive Layout.
+- Stand: `capture_host_client_two_window_real_run.ps1` hebt Host-/Client-Fenster vor dem Desktop-Capture explizit an und meldet `window_raise_attempted`.
+- Stand: Der echte Standardplan-Capture zeigt Host und Client nebeneinander mit sichtbarer Mission-Welt plus UI.
+- Stand: Der Standard-Dry-Run bleibt read-only und setzt keine Gameplay-Wahrheit.
+- Risiken/offen: Wenn `System.Windows.Forms` nicht verfuegbar ist, bleibt der angeforderte Plan bestehen und das Manifest meldet `screen.available = false`. Der menschliche Host/Client-Spielgefuehltest bleibt offen.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_617_host_client_standard_window_layout_hardening.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_611_host_client_two_window_launch_helper.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_616_host_client_visible_ui_real_run_review.gd`, `git diff --check`.
+- Naechster Schritt: Standard-GUI-Real-Run mit Auto-Fit-Plan als echter Multiplayer-Feel-Review.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

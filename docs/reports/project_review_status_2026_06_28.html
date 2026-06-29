@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_616 auf <code>task/host-client-visible-ui-real-run-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_617 auf <code>task/host-client-standard-window-layout-hardening</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -286,6 +286,7 @@
       <span class="pill good">TASK_614 Real-Run-Helper</span>
       <span class="pill good">TASK_615 Real-Run-Findings</span>
       <span class="pill good">TASK_616 UI-Render-Guard</span>
+      <span class="pill good">TASK_617 Fenster-Autofit</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -536,16 +537,17 @@
             <div class="metric"><strong>TASK_614</strong><span>umgesetzt: expliziter Real-Run-/Capture-Helper mit Dry-Run-Manifest</span></div>
             <div class="metric"><strong>TASK_615</strong><span>umgesetzt: GUI-Binary-/Fensterfokus-Fix fuer echte Real-Run-Captures</span></div>
             <div class="metric"><strong>TASK_616</strong><span>umgesetzt: Terrain-SubViewport-Redraw-Guard plus frueher Fensterfokus fuer sichtbare Client-Fenster</span></div>
+            <div class="metric"><strong>TASK_617</strong><span>umgesetzt: Standard-Launchplan passt Host/Client-Fenster bei Bedarf an und Real-Run-Capture hebt sie sichtbar an</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe, TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar, TASK_609 beschriftet das Board fuer menschliche Reviewbarkeit, TASK_610 bereitet echte Zwei-Fenster-Notizen im Bericht vor, TASK_611 macht den Fensterlauf als Dry-Run-Plan plus expliziten Launcher reproduzierbarer, TASK_612 sichert den Screenshot-Review als Board/Manifest/Workbench-Paket ab, TASK_613 macht dieses Board durch Labels/Legende lesbarer, TASK_614 stellt den echten Fensterlauf als expliziten Capture-Helper mit Dry-Run-Manifest bereit, TASK_615 korrigiert den belegten Console-Binary-/Fensterfokus-Fall und TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls plus fruehen Fensterfokus. Der Re-Capture zeigt jetzt Host und Client mit sichtbarer Mission-Welt.</td><td>Naechster Schritt: echter menschlicher Spielgefuehltest fuer Authority, Sync, Lesbarkeit und Performance.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe, TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar, TASK_609 beschriftet das Board fuer menschliche Reviewbarkeit, TASK_610 bereitet echte Zwei-Fenster-Notizen im Bericht vor, TASK_611 macht den Fensterlauf als Dry-Run-Plan plus expliziten Launcher reproduzierbarer, TASK_612 sichert den Screenshot-Review als Board/Manifest/Workbench-Paket ab, TASK_613 macht dieses Board durch Labels/Legende lesbarer, TASK_614 stellt den echten Fensterlauf als expliziten Capture-Helper mit Dry-Run-Manifest bereit, TASK_615 korrigiert den belegten Console-Binary-/Fensterfokus-Fall, TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls plus fruehen Fensterfokus und TASK_617 macht den Standard-Launchplan monitorfest. Der Re-Capture zeigt jetzt Host und Client mit sichtbarer Mission-Welt.</td><td>Naechster Schritt: echter menschlicher Spielgefuehltest fuer Authority, Sync, Lesbarkeit und Performance mit dem Standardplan.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
-                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_616 ist hier bewusst mitgepflegt, damit der Client-World-Blackout und der begrenzte Redraw-Guard sichtbar bleiben.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
+                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_617 ist hier bewusst mitgepflegt, damit Standardplan, Auto-Fit und sichtbarer Host/Client-Anschluss nachvollziehbar bleiben.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
               </tbody>
             </table>
           </div>
@@ -559,7 +561,7 @@
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
                 <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture, TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht, TASK_564 als lesbare Evidence-Board-Legende, TASK_565 als echten F6-Screenshot-Fix fuer den Selected-Fireteam-Status, TASK_566 als kompakten Teamchip-/Hover-/Panel-Polish, TASK_567 als First-Move-Threat-Preview-Lesbarkeit, TASK_568 als reproduzierbares Risky-/Suicidal-Contact-Fixture, TASK_569 als messbare Threat-Line-Farbsprache, TASK_570 als Hold-/Return-/Free-/Suppress-Fire-Bridge, TASK_571 als sichtbare Fire-Rule-Controls, TASK_572 als FullHD-F6-Readability-Smoke, TASK_573 als exportierbaren ROE-Screenshot-/Spielgefuehl-Notizblock, TASK_574 als reproduzierbare ROE-F6-Evidence mit PNG/Manifest, TASK_575 als belegten Active-ROE-Affordance-Polish, TASK_576 als `SUP AREA`-Preview vor GO, TASK_577 als lokale SUP-F6-/Visual-Evidence, TASK_578 als eigene Suppress-Area-Visualisierung, TASK_579 als exportierbaren SUP-F6-Sichtreview, TASK_580 als getunte SUP-Area-Lesemarkierung, TASK_581 als SUP-Intent-/Outcome-Diagnose, TASK_582 als deduplizierten SUP-AAR-/Debug-Stub, TASK_583 als kompaktes SUP-AAR-Report-Panel, TASK_584 als gemeinsame Mini-AAR-Kampfmetriken-Schale, TASK_585 als kleinen Debrief-Screen-Stub, TASK_586 als Debrief->Homebase-Handoff, TASK_587 als sichtbaren Debrief-Polish, TASK_588 als AAR-Datenbruecke, TASK_589 als Debrief-AAR-FullHD-Evidence, TASK_590 als Debrief-AAR-Layout-Polish, TASK_591 als exportierbaren Debrief-AAR-Player-Review, TASK_592 als Skill-Progress-Preview-Shell, TASK_593 als echte Skill-Award-Summary im Debrief, TASK_594 als Homebase-Skill-Delta-Bruecke, TASK_595 als Homebase-Progression-Highlight, TASK_596 als exportierbaren Player-Review-Ort dafuer, TASK_597 als lokale Evidence dafuer, TASK_598 als lesbares Evidence-Board, TASK_599 als Composite-Core-Loop-Evidence und TASK_600 als priorisierte Flow-Polish-Queue.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns im Tooltip, waehrend die erste Move-Order vor GO Risiko/Ungewissheit, farbige Kontaktlinien und direkt bedienbare Feuerdisziplin kennt. `SUP` ist jetzt vor GO sichtbar, im Combat-Outcome als Druckabsicht lesbar, als kleiner AAR-/Debug-Wert zaehlbar, als Panel-Summary erklaert, mit Fire-/Friendly-Fire-/Statusmetriken in einer Mini-AAR-Schale zusammengefuehrt, als Debrief-Screen-Struktur lesbar, sauber zur Homebase zurueckgefuehrt und im Meta-Debrief mit Summary-Chips/kompaktem Teamstatus plus AAR-Summary/Chips/Rows, Skill-Preview, echten Skill-Awards, Rueckweg, Homebase-Progression-Review, lesbarer Homebase-Evidence, Gesamtfluss-Manifest und Flow-Polish-Findings schneller auswertbar.</td><td>Naechster spielbarer Anschluss ist TASK_601: echter FullHD-Core-Loop-Capture fuer Pacing, HUD-Dichte, Klickfluss und Host/Client-Gefuehl.</td></tr>
                 <tr><td>Asset-/Warn-Hygiene</td><td>TASK_559 registriert die deterministische Factory-Colormap-UID vor Factory-GLB-Loads und entfernt damit eine wiederkehrende Godot-Importwarnung aus F6-Smokes.</td><td>Test- und Exportausgaben werden leiser, damit neue echte Fehler schneller auffallen.</td><td>Weitere Warnquellen nur als eigene kleine Hygiene-Slices angehen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview an, TASK_579 macht den SUP-F6-Sichtreview exportierbar, TASK_584 dokumentiert die Mini-AAR-Kampfmetriken-Schale, TASK_586 dokumentiert den Debrief->Homebase-Handoff, TASK_591 macht den Debrief-AAR-Player-Review exportierbar, TASK_592 dokumentiert die Skill-Progress-Preview-Schale, TASK_593 dokumentiert die echte Skill-Award-Summary, TASK_596 dokumentiert den Homebase-Progression-Spielerblick, TASK_597 haengt Homebase-Progression-Evidence an, TASK_598 macht deren Headless-Board sprechender, TASK_599 exportiert ein Core-Loop-Evidence-Manifest, TASK_614 dokumentiert den Real-Run-Capture-Helper, TASK_615 dokumentiert den GUI-Binary-/Fokus-Fix und TASK_616 dokumentiert den sichtbaren Client-World-Render-Guard.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview an, TASK_579 macht den SUP-F6-Sichtreview exportierbar, TASK_584 dokumentiert die Mini-AAR-Kampfmetriken-Schale, TASK_586 dokumentiert den Debrief->Homebase-Handoff, TASK_591 macht den Debrief-AAR-Player-Review exportierbar, TASK_592 dokumentiert die Skill-Progress-Preview-Schale, TASK_593 dokumentiert die echte Skill-Award-Summary, TASK_596 dokumentiert den Homebase-Progression-Spielerblick, TASK_597 haengt Homebase-Progression-Evidence an, TASK_598 macht deren Headless-Board sprechender, TASK_599 exportiert ein Core-Loop-Evidence-Manifest, TASK_614 dokumentiert den Real-Run-Capture-Helper, TASK_615 dokumentiert den GUI-Binary-/Fokus-Fix, TASK_616 dokumentiert den sichtbaren Client-World-Render-Guard und TASK_617 dokumentiert das Standardfenster-Autofit.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
               </tbody>
             </table>
           </div>
@@ -602,6 +604,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_614_done"> TASK_614 Host-Client-Two-Window-Real-Run-Review ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_615_done"> TASK_615 Host-Client-Real-Run-Findings ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_616_done"> TASK_616 Host-Client-Visible-UI-Real-Run-Review ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_617_done"> TASK_617 Host-Client-Standard-Window-Layout-Hardening ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_586_done"> TASK_586 Debrief-Return-To-Homebase-Handoff ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -1459,6 +1462,31 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_617 Host Client Standard Window Layout Hardening</h2>
+          <p>Der TASK_616-Re-Capture war sichtbar gut, aber der Standard-Launchplan durfte nicht von einem zufaellig kleineren <code>tmp</code>-Plan abhaengen. TASK_617 haertet den eigentlichen Standardpfad: Der Helper liest die Primaer-Arbeitsflaeche, prueft ob das angeforderte Host/Client-Fensterlayout hineinpasst, und schreibt bei Bedarf ein effektives Side-by-Side-Layout in Plan, Fensterdaten und Godot-Argumente. Der Capture-Helper hebt die gefundenen Fenster vor dem Screenshot explizit an, damit Browser oder andere Apps den Beleg nicht verdecken. Das bleibt Tooling-/Review-Evidence und erzeugt keine Gameplay-Wahrheit.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Layout-Feld</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Tool</td><td><input readonly value="scripts/tools/launch_host_client_two_window_review.ps1" data-export-key="host_client_standard_window_layout.tool_path"></td><td>Quelle fuer Dry-Run und sichtbaren Host/Client-Start.</td></tr>
+                <tr><td>Plan</td><td><input readonly value="tmp/host_client_two_window_launch_plan.json" data-export-key="host_client_standard_window_layout.plan_path"></td><td>Lokales JSON mit Requested- und Effective-Layout.</td></tr>
+                <tr><td>Requested Layout</td><td><input readonly value="requested_window_layout" data-export-key="host_client_standard_window_layout.requested_layout"></td><td>Angeforderte Werte vor Auto-Fit.</td></tr>
+                <tr><td>Effective Layout</td><td><input readonly value="window_layout" data-export-key="host_client_standard_window_layout.effective_layout"></td><td>Tatsaechlich genutzte Host-/Client-Fensterwerte.</td></tr>
+                <tr><td>Auto-Fit versucht</td><td><input readonly value="manifest flag: attempted" data-export-key="host_client_standard_window_layout.auto_fit_attempted"></td><td>Prueft Primaer-Arbeitsflaeche, wenn verfuegbar.</td></tr>
+                <tr><td>Auto-Fit angewendet</td><td><input readonly value="manifest flag: applied" data-export-key="host_client_standard_window_layout.auto_fit_applied"></td><td>True, wenn das angeforderte Layout nicht gepasst haette.</td></tr>
+                <tr><td>Fenster angehoben</td><td><input readonly value="manifest flag: window_raise_attempted" data-export-key="host_client_standard_window_layout.window_raise_attempted"></td><td>Capture-Helper bringt Host/Client-Fenster vor dem Desktop-Screenshot nach oben.</td></tr>
+                <tr><td>Screen Source</td><td><input readonly value="System.Windows.Forms Screen.PrimaryScreen.WorkingArea" data-export-key="host_client_standard_window_layout.screen_source"></td><td>Quelle fuer die sichtbare Arbeitsflaeche.</td></tr>
+                <tr><td>Standard-Capture</td><td><input readonly value="host_and_client_world_visible_from_standard_plan" data-export-key="host_client_standard_window_layout.standard_capture_result"></td><td>Der echte Standardplan-Capture zeigt beide Fenster mit Mission-Welt plus UI.</td></tr>
+                <tr><td>Grenze</td><td><input readonly value="read_only_no_gameplay_truth" data-export-key="host_client_standard_window_layout.boundary"></td><td>Plan und Bericht setzen keine Runtime- oder Peer-Wahrheit.</td></tr>
+                <tr><td>Naechste Pruefung</td><td><input readonly value="standard-plan GUI host/client feel review" data-export-key="host_client_standard_window_layout.next_check"></td><td>Jetzt kann der echte Sichttest vom Standardplan ausgehen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_617 Layout-/Spielgefuehl-Notiz
+            <textarea data-note-key="notes.host_client_standard_window_layout" data-export-key="host_client_standard_window_layout.notes" placeholder="Passt das Standardfenster-Layout fuer den naechsten Host/Client-Spieltest?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -1818,6 +1846,7 @@
                 <tr><td><code>task_614_host_client_two_window_real_run_review.gd</code></td><td>PASS</td><td>Host/Client-Zwei-Fenster-Real-Run-Review-Helper mit Dry-Run-Manifest, explizitem <code>-Launch</code>, optionalem <code>-CloseAfterCapture</code> und TASK_615-Follow-up.</td></tr>
                 <tr><td><code>task_615_host_client_real_run_findings.gd</code></td><td>PASS</td><td>Verifier fuer Console-Binary-Finding, GUI-Binary-Praeferenz, sichtbares Binary, Fenster-Fokus-/Positionierungsfelder und TASK_616-Follow-up.</td></tr>
                 <tr><td><code>task_616_host_client_visible_ui_real_run_review.gd</code></td><td>PASS</td><td>Verifier fuer Client-World-Blackout-Doku, begrenzten Terrain-SubViewport-Redraw-Guard, fruehen Fensterfokus, Contract und Report-Exportfelder.</td></tr>
+                <tr><td><code>task_617_host_client_standard_window_layout_hardening.gd</code></td><td>PASS</td><td>Verifier fuer Standardfenster-Autofit, Requested-/Effective-Layout, Fenster-Raise im Capture-Helper, Contract und Report-Exportfelder.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>Timeout nach Doku-Pruefung</td><td>Meta-Homebase-Flow haengt in diesem Arbeitslauf nach der Doku-Pruefung; TASK_567 nutzt die stabile Mission-Fixture, Meta-Flow-Testhygiene bleibt offen.</td></tr>
                 <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_570 aktualisiert, nennt die Fire-Rule-Mission-Bridge und TASK_571 als naechsten Slice.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
@@ -2309,7 +2338,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "Human Host/Client Multiplayer Feel Review",
+              "Standard-Plan Host/Client Multiplayer Feel Review",
               "Client-World-Init-Diagnostic nur falls die Welt spaeter wieder schwarz bleibt"
             ],
             recently_completed_tasks: [
@@ -2413,7 +2442,8 @@
               "TASK_613 - Host Client Two Window Visual Polish Findings",
               "TASK_614 - Host Client Two Window Real Run Review",
               "TASK_615 - Host Client Real Run Findings",
-              "TASK_616 - Host Client Visible UI Real Run Review"
+              "TASK_616 - Host Client Visible UI Real Run Review",
+              "TASK_617 - Host Client Standard Window Layout Hardening"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -2438,7 +2468,8 @@
               "TASK_613 macht das TASK_612-Review-Board mit Labels, Legende und Readability-Gate menschlich reviewbarer.",
               "TASK_614 stellt den echten Host-/Client-Fensterlauf als expliziten Capture-Helper mit Dry-Run-Manifest bereit.",
               "TASK_615 behebt den belegten Console-Binary-/Konsolen-Capture-Fall im Review-Tooling.",
-              "TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls mit einem begrenzten SubViewport-Redraw-Guard und fruehem Fensterfokus; der Re-Capture zeigt Host und Client mit sichtbarer Mission-Welt."
+              "TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls mit einem begrenzten SubViewport-Redraw-Guard und fruehem Fensterfokus; der Re-Capture zeigt Host und Client mit sichtbarer Mission-Welt.",
+              "TASK_617 haertet den Standard-Launchplan mit Requested-/Effective-Layout, Monitor-Autofit und Fenster-Raise im Capture-Helper; der echte Standardplan-Capture zeigt Host und Client mit sichtbarer Mission-Welt."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -2447,14 +2478,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_616",
-            current_focus: "Human Host/Client Multiplayer Feel Review",
-            latest_completed_task: "TASK_616 - Host Client Visible UI Real Run Review"
+            current_repo_base: "integration/core-foundation after TASK_617",
+            current_focus: "Standard-Plan Host/Client Multiplayer Feel Review",
+            latest_completed_task: "TASK_617 - Host Client Standard Window Layout Hardening"
           },
           metadata: {
-            branch: "task/host-client-visible-ui-real-run-review",
-            integration_base: "integration/core-foundation after TASK_615",
-            head: "task/host-client-visible-ui-real-run-review",
+            branch: "task/host-client-standard-window-layout-hardening",
+            integration_base: "integration/core-foundation after TASK_616",
+            head: "task/host-client-standard-window-layout-hardening",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

@@ -73,6 +73,8 @@ namespace Win32 {
         public static extern bool SetForegroundWindow(IntPtr hWnd);
         [DllImport("user32.dll")]
         public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+        [DllImport("user32.dll", SetLastError=true)]
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, UInt32 uFlags);
     }
 }
 "@
@@ -88,6 +90,8 @@ function Focus-ReviewWindow {
         focus_succeeded = $false
         position_attempted = $false
         position_succeeded = $false
+        raise_attempted = $false
+        raise_succeeded = $false
         main_window_handle = 0
     }
     if ($null -eq $Process) {
@@ -119,8 +123,42 @@ function Focus-ReviewWindow {
             [int]$Window.height,
             $true
         )
+        $result.raise_attempted = $true
+        $result.raise_succeeded = [Win32.Task615WindowTools]::SetWindowPos(
+            $handle,
+            [IntPtr](-1),
+            [int]$Window.x,
+            [int]$Window.y,
+            [int]$Window.width,
+            [int]$Window.height,
+            [uint32]0x0040
+        )
     }
     return $result
+}
+
+function Release-ReviewWindowTopmost {
+    param(
+        [System.Diagnostics.Process]$Process,
+        [object]$Window
+    )
+    if ($null -eq $Process -or $null -eq $Window) {
+        return
+    }
+    $Process.Refresh()
+    $handle = $Process.MainWindowHandle
+    if ($handle -eq 0) {
+        return
+    }
+    [Win32.Task615WindowTools]::SetWindowPos(
+        $handle,
+        [IntPtr](-2),
+        [int]$Window.x,
+        [int]$Window.y,
+        [int]$Window.width,
+        [int]$Window.height,
+        [uint32]0x0040
+    ) | Out-Null
 }
 
 function Capture-Desktop {
@@ -204,6 +242,8 @@ if ($Launch) {
         $captureAttempted = $true
         $launchError = $_.Exception.Message
     }
+    Release-ReviewWindowTopmost -Process $clientProcess -Window $plan.client.window
+    Release-ReviewWindowTopmost -Process $hostProcess -Window $plan.host.window
     if ($CloseAfterCapture) {
         foreach ($process in @($clientProcess, $hostProcess)) {
             if ($null -ne $process -and -not $process.HasExited) {
@@ -240,6 +280,7 @@ $manifest = [ordered]@{
     console_binary_replaced = [bool]$consoleBinaryReplaced
     window_focus_attempted = [bool]($hostWindowStatus.focus_attempted -or $clientWindowStatus.focus_attempted)
     window_position_attempted = [bool]($hostWindowStatus.position_attempted -or $clientWindowStatus.position_attempted)
+    window_raise_attempted = [bool]($hostWindowStatus.raise_attempted -or $clientWindowStatus.raise_attempted)
     initial_host_window_status = $initialHostWindowStatus
     initial_client_window_status = $initialClientWindowStatus
     host_window_status = $hostWindowStatus

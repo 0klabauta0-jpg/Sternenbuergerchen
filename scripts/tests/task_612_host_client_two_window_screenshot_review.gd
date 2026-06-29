@@ -89,8 +89,8 @@ func _test_report_export_fields(report_text: String) -> void:
 	for choice_group in required_choice_groups:
 		_assert(report_text.contains('data-choice-group="%s"' % choice_group), "Report exports choice group %s" % choice_group)
 	_assert(report_text.contains('data-note-key="notes.host_client_two_window_screenshot_review"'), "Report exports free TASK_612 screenshot review note")
-	_assert(report_text.contains('latest_completed_task: "TASK_615 - Host Client Real Run Findings"'), "JSON payload lists TASK_615 as latest completed task")
-	_assert(report_text.contains('current_focus: "TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload sets current focus to TASK_616")
+	_assert(report_text.contains('"TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload keeps TASK_616 in completed chain")
+	_assert(report_text.contains('latest_completed_task: "TASK_617 - Host Client Standard Window Layout Hardening"'), "JSON payload advances latest completed task to TASK_617")
 	_assert(not report_text.contains('data-export-key="host_client_two_window_screenshot.host_screenshot_done" checked'), "Host screenshot is not pre-marked done")
 	_assert(not report_text.contains('data-export-key="host_client_two_window_screenshot.client_screenshot_done" checked'), "Client screenshot is not pre-marked done")
 

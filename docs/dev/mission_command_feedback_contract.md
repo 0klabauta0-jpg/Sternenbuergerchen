@@ -344,6 +344,11 @@ TASK_616 wendet den belegten GUI-Capture-Befund am sichtbaren Renderpfad an: Der
 
 Erwartete Struktur: `TerrainMap3DView` behaelt `SubViewport.UPDATE_ONCE` als Normalzustand, darf aber fuer Bootstrap/Resize/Map-Render kurz `SubViewport.UPDATE_ALWAYS` setzen und danach automatisch zurueckfallen. `tmp/host_client_two_window_real_run_review.json` darf `initial_host_window_status` und `initial_client_window_status` als Review-Evidence melden. Der laufende HTML-Bericht darf TASK_616-Felder unter `host_client_visible_ui_real_run.*` exportieren; ein Screenshot-/Manifest-Review bleibt Evidence und darf keine Gameplay-Entscheidung mutieren.
 
+## Host-Client-Standard-Window-Layout-Hardening
+TASK_617 haertet den Standard-Launchplan fuer sichtbare Host-/Client-Reviews: Der Helper darf die Primaer-Monitor-Arbeitsflaeche lesen und ein effektives Side-by-Side-Layout berechnen, wenn das angeforderte Fensterlayout rechts oder unten aus dem sichtbaren Bereich laufen wuerde. Das ist Review-/Tooling-Evidence, keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit.
+
+Erwartete Struktur: `tmp/host_client_two_window_launch_plan.json` enthaelt zusaetzlich `requested_window_layout` und `window_layout_auto_fit` mit `attempted`, `applied`, `reason`, `screen` und `disable_auto_fit`. `window_layout`, `host.window`, `client.window` und die Godot-Argumente nutzen das effektive Layout. `tmp/host_client_two_window_real_run_review.json` darf `window_raise_attempted` und `raise_*`-Fensterstatus als Review-Evidence melden. Der laufende HTML-Bericht darf TASK_617-Felder unter `host_client_standard_window_layout.*` exportieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

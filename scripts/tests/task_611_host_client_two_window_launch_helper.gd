@@ -85,6 +85,8 @@ func _test_launch_plan_if_present() -> void:
 	_assert(not bool(plan.get("ui_sets_gameplay_truth", true)), "Launch plan does not set gameplay truth")
 	_assert(String(plan.get("scene", "")) == "res://scenes/tests/mission_reactivity_test.tscn", "Launch plan records default scene")
 	_assert(String(plan.get("recommended_next_task", "")) == "TASK_612 - Host Client Two Window Screenshot Review", "Launch plan recommends TASK_612")
+	_assert(plan.has("requested_window_layout"), "Launch plan records requested window layout")
+	_assert(plan.has("window_layout_auto_fit"), "Launch plan records auto-fit metadata")
 	var host: Dictionary = Dictionary(plan.get("host", {}))
 	var client: Dictionary = Dictionary(plan.get("client", {}))
 	_assert(String(host.get("role", "")) == "host", "Launch plan includes host role")
@@ -93,6 +95,12 @@ func _test_launch_plan_if_present() -> void:
 	_assert(int(client.get("peer_id", 0)) == 2, "Launch plan includes client peer id")
 	_assert(Array(host.get("command_args", [])).has("--review-role=host"), "Launch plan includes host review arg")
 	_assert(Array(client.get("command_args", [])).has("--review-role=client"), "Launch plan includes client review arg")
+	var auto_fit: Dictionary = Dictionary(plan.get("window_layout_auto_fit", {}))
+	var screen: Dictionary = Dictionary(auto_fit.get("screen", {}))
+	if bool(screen.get("available", false)):
+		var screen_width: int = int(screen.get("width", 0))
+		var client_window: Dictionary = Dictionary(client.get("window", {}))
+		_assert(int(client_window.get("x", 0)) + int(client_window.get("width", 0)) <= screen_width, "Launch plan keeps client window inside primary work area width")
 
 
 func _read_json(path: String) -> Dictionary:
