@@ -185,7 +185,8 @@ git checkout -b batch/<batch-name>
 - TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke (implementiert)
 - TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke (implementiert)
 - TASK_556 - Frontier Probe Host Client Objective Handoff Smoke (implementiert)
-- TASK_557 - Frontier Probe Multiplayer F6 Readability Pass
+- TASK_557 - Frontier Probe Multiplayer F6 Readability Pass (implementiert)
+- TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -13067,6 +13067,150 @@ func get_frontier_probe_multiplayer_objective_ownership_snapshot() -> Dictionary
 	}
 
 
+func get_frontier_probe_multiplayer_f6_readability_snapshot() -> Dictionary:
+	var ownership_snapshot: Dictionary = get_frontier_probe_multiplayer_objective_ownership_snapshot()
+	var f6_visual_snapshot: Dictionary = get_combat_hud_f6_visual_audit_snapshot()
+	var command_snapshot: Dictionary = get_command_feedback_snapshot()
+	var viewport_size: Vector2 = _get_current_viewport_size()
+	var viewport_rect := Rect2(Vector2.ZERO, viewport_size)
+	var strategic_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control
+	var fireteam_panel := get_node_or_null(FIRETEAM_PANEL_PATH) as Control
+	var team_chip_label := get_node_or_null(MISSION_TEAM_CHIP_LABEL_PATH) as Label
+	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
+	var strategic_panel_rect: Rect2 = _get_control_global_rect_or_empty(strategic_panel)
+	var fireteam_panel_rect: Rect2 = _get_control_global_rect_or_empty(fireteam_panel)
+	var team_chip_rect: Rect2 = _get_control_global_rect_or_empty(team_chip_label)
+	var strategic_status_rect: Rect2 = _get_control_global_rect_or_empty(strategic_status_label)
+	var fireteam_status_rect: Rect2 = _get_control_global_rect_or_empty(fireteam_status_label)
+	var team_chip_text: String = String(command_snapshot.get("mission_team_chip_text", "")).strip_edges()
+	var team_chip_context_text: String = "%s\n%s\n%s" % [
+		team_chip_text,
+		String(Dictionary(command_snapshot.get("mission_team_chip", {})).get("status_text", "")).strip_edges(),
+		String(Dictionary(ownership_snapshot.get("mission_team_chip", {})).get("status_text", "")).strip_edges(),
+	]
+	var mission_control_text: String = String(command_snapshot.get("mission_control_status_text", "")).strip_edges()
+	var selected_fireteam_text: String = String(command_snapshot.get("selected_fireteam_status_label_text", "")).strip_edges()
+	var selected_status_text: String = String(command_snapshot.get("selected_status_text", "")).strip_edges()
+	var selected_fireteam_label_text: String = String(command_snapshot.get("selected_fireteam_label", "")).strip_edges()
+	var combined_mission_text: String = "%s\n%s" % [mission_control_text, team_chip_text]
+	var combined_selection_text: String = "%s\n%s\n%s" % [
+		selected_fireteam_label_text,
+		selected_fireteam_text,
+		selected_status_text,
+	]
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"ownership_gate_passes",
+			String(ownership_snapshot.get("gate", "")) == "pass",
+			"MP ownership and objective ownership stay green before F6 readability is evaluated."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_f6_layout_gate_passes",
+			_snapshot_check_passed(f6_visual_snapshot, "hud_controls_present")
+				and _snapshot_check_passed(f6_visual_snapshot, "labels_inside_panels")
+				and _snapshot_check_passed(f6_visual_snapshot, "panels_inside_fullhd_bounds")
+				and _snapshot_check_passed(f6_visual_snapshot, "selected_and_mission_panels_do_not_overlap"),
+			"Existing F6 visual audit keeps the relevant HUD controls inside panels and FullHD bounds."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_team_chip_visible",
+			team_chip_label != null
+				and team_chip_label.visible
+				and not team_chip_text.is_empty()
+				and team_chip_rect.size.x > 0.0
+				and team_chip_rect.size.y > 0.0,
+			"Mission Team chip label is visible and has readable text."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_team_chip_names_multiplayer_context",
+			team_chip_context_text.contains("Host Peer 1")
+				and team_chip_context_text.contains("Peer 2")
+				and team_chip_context_text.contains("spawn_alpha")
+				and team_chip_context_text.contains("spawn_bravo"),
+			"Mission Team chip keeps Host/Peer and Alpha/Bravo spawn context visible."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_shows_objective_and_cargo_context",
+			combined_mission_text.contains("AA")
+				and combined_mission_text.contains("COM")
+				and combined_mission_text.contains("OBJ")
+				and combined_mission_text.contains("CARGO"),
+			"Mission Control keeps AA, computer, objective and cargo context together."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_context_visible",
+			not combined_selection_text.strip_edges().is_empty()
+				and not Array(command_snapshot.get("selected_fireteam_ids", [])).is_empty()
+				and (not selected_fireteam_label_text.is_empty()
+					or not selected_fireteam_text.is_empty()
+					or not selected_status_text.is_empty()),
+			"Selected Fireteam panel exposes the selected fireteam context."
+		),
+		_build_mission_first_move_readability_check(
+			"critical_panels_inside_fullhd_bounds",
+			_rect_inside_rect_with_margin(viewport_rect, strategic_panel_rect, 0.0)
+				and _rect_inside_rect_with_margin(viewport_rect, fireteam_panel_rect, 0.0)
+				and _rect_inside_rect_with_margin(viewport_rect, team_chip_rect, 0.0)
+				and _rect_inside_rect_with_margin(viewport_rect, strategic_status_rect, 0.0)
+				and _rect_inside_rect_with_margin(viewport_rect, fireteam_status_rect, 0.0),
+			"Mission Control, Selected Fireteam, team chip and status labels fit inside FullHD."
+		),
+		_build_mission_first_move_readability_check(
+			"team_chip_stays_inside_mission_control",
+			_rect_contains_rect_with_margin(strategic_panel_rect, team_chip_rect, 2.0),
+			"Mission Team chip stays inside Mission Control instead of floating over the map."
+		),
+		_build_mission_first_move_readability_check(
+			"team_chip_not_overlapping_selected_fireteam_panel",
+			not team_chip_rect.intersects(fireteam_panel_rect, true),
+			"Mission Team chip does not overlap the Selected Fireteam panel."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(ownership_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(f6_visual_snapshot.get("ui_sets_gameplay_truth", true)),
+			"F6 readability snapshot combines existing snapshots without moving gameplay truth into UI."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_557",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"viewport_size": {"width": viewport_size.x, "height": viewport_size.y},
+		"mission_team_chip_text": team_chip_text,
+		"mission_team_chip_context_text": team_chip_context_text,
+		"mission_control_status_text": mission_control_text,
+		"selected_fireteam_status_text": selected_fireteam_text,
+		"selected_status_text": selected_status_text,
+		"selected_fireteam_ids": Array(command_snapshot.get("selected_fireteam_ids", [])),
+		"strategic_panel_rect": _rect_to_audit_dictionary(strategic_panel_rect),
+		"fireteam_panel_rect": _rect_to_audit_dictionary(fireteam_panel_rect),
+		"mission_team_chip_rect": _rect_to_audit_dictionary(team_chip_rect),
+		"mission_control_status_rect": _rect_to_audit_dictionary(strategic_status_rect),
+		"selected_fireteam_status_rect": _rect_to_audit_dictionary(fireteam_status_rect),
+		"ownership_snapshot": ownership_snapshot,
+		"combat_f6_visual_audit": f6_visual_snapshot,
+		"command_feedback": command_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _snapshot_check_passed(snapshot: Dictionary, check_id: String) -> bool:
+	for check_variant in Array(snapshot.get("checks", [])):
+		var check: Dictionary = Dictionary(check_variant)
+		if String(check.get("id", "")) == check_id:
+			return bool(check.get("passed", false))
+	return false
+
+
 func _load_frontier_probe_scenario_snapshot() -> Dictionary:
 	var scenario_path: String = "res://data/mission_scenarios/frontier_probe_vertical_slice.json"
 	if not FileAccess.file_exists(scenario_path):

@@ -78,6 +78,9 @@ TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dez
 ## Frontier-Probe-Host-Client-Objective-Handoff
 `FrontierProbeHostClientHandoffContract.build_snapshot()` ist der Headless-Pruefpunkt fuer TASK_556. Der Contract darf nur bestehende `MultiplayerSession`-Assignments, `SimulationRoot`-Network-Command-Ergebnisse, TASK_555-Ownership und `MultiplayerSnapshotContract`-Apply-Daten bewerten. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Session, Peer-, Objective-, Cargo-, Combat- oder Command-Entscheidung ausloesen. Erwartete Lesbarkeit: Host Peer 1 bleibt Alpha, Peer 2 bleibt Bravo, Peer 2 darf Bravo-Befehle serverseitig einreichen, Peer 2 darf Alpha nicht kommandieren, State-Mutations bleiben abgelehnt, und der Client akzeptiert Objective-/MissionResult-Snapshotdaten aus dem Serverzustand.
 
+## Frontier-Probe-Multiplayer-F6-Readability
+`get_frontier_probe_multiplayer_f6_readability_snapshot()` ist der Headless-Pruefpunkt fuer TASK_557. Der Snapshot darf nur TASK_555-Ownership, relevante TASK_549-F6-Layoutchecks, `get_command_feedback_snapshot()` und vorhandene Control-Bounds zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Peer-, Objective-, Cargo-, Combat-, Command- oder UI-State-Entscheidung ausloesen. Erwartete Lesbarkeit: Mission-Team-Chip ist sichtbar und nennt Host Peer 1, Peer 2, `spawn_alpha` und `spawn_bravo`; Mission Control zeigt AA/COM/OBJ/CARGO; Selected Fireteam zeigt den gewaehlten Fireteam-Kontext; und Teamchip, Mission Control sowie Selected Fireteam bleiben im FullHD-Missionslayout ohne kritische Ueberlappung lesbar.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
