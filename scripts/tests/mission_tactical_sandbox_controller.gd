@@ -2375,6 +2375,7 @@ func _update_ui() -> void:
 	if fireteam_status_label != null:
 		fireteam_status_label.text = _build_fireteam_status_text()
 		fireteam_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
+		_apply_combat_hud_detail_tooltip_label_contract(fireteam_status_label)
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
 	_refresh_mission_nav_timer_label()
@@ -2387,6 +2388,7 @@ func _update_ui() -> void:
 	if strategic_status_label != null:
 		strategic_status_label.text = _build_strategic_status_text()
 		strategic_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
+		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
 
 	var phase_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseStatusLabel") as Label
 	if phase_status_label != null:
@@ -6005,6 +6007,17 @@ func _build_mission_combat_hud_detail_tooltip_text() -> String:
 	return String(snapshot.get("tooltip_text", "")).strip_edges()
 
 
+func _apply_combat_hud_detail_tooltip_label_contract(label: Label) -> void:
+	if label == null:
+		return
+	label.visible = true
+	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.set_meta("combat_hud_detail_tooltip_label", true)
+	label.set_meta("combat_hud_detail_tooltip_task", "TASK_549")
+
+
 func _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary, compact_line: String) -> Dictionary:
 	if diagnostics.is_empty() or compact_line.strip_edges().is_empty():
 		return {
@@ -9338,10 +9351,10 @@ func _apply_card_bound_mission_control_layout() -> void:
 		control.visible = false
 		control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		control.set_meta("mission_control_card_bound_hidden", true)
-	var status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Control
+	var status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicStatusLabel") as Label
 	if status_label != null:
 		status_label.visible = true
-		status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_apply_combat_hud_detail_tooltip_label_contract(status_label)
 		status_label.set_meta("mission_control_card_bound_hidden", false)
 
 
@@ -12617,6 +12630,184 @@ func get_combat_hud_visual_detail_tooltip_snapshot() -> Dictionary:
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_combat_hud_f6_visual_audit_snapshot() -> Dictionary:
+	var detail_snapshot: Dictionary = get_combat_hud_visual_detail_tooltip_snapshot()
+	var detail_tooltip: Dictionary = Dictionary(detail_snapshot.get("detail_tooltip", {}))
+	var tooltip_text: String = String(detail_snapshot.get("tooltip_text", "")).strip_edges()
+	var tooltip_lines: PackedStringArray = tooltip_text.split("\n", false)
+	var viewport_size: Vector2 = _get_current_viewport_size()
+	var viewport_rect: Rect2 = Rect2(Vector2.ZERO, viewport_size)
+	var fireteam_panel := get_node_or_null(FIRETEAM_PANEL_PATH) as Control
+	var mission_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control
+	var fireteam_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
+	var mission_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	var fireteam_panel_rect: Rect2 = _get_control_global_rect_or_empty(fireteam_panel)
+	var mission_panel_rect: Rect2 = _get_control_global_rect_or_empty(mission_panel)
+	var fireteam_label_rect: Rect2 = _get_control_global_rect_or_empty(fireteam_label)
+	var mission_label_rect: Rect2 = _get_control_global_rect_or_empty(mission_label)
+	var fireteam_tooltip_rect: Rect2 = _estimate_combat_hud_tooltip_preview_rect(fireteam_label_rect, tooltip_lines, viewport_size)
+	var mission_tooltip_rect: Rect2 = _estimate_combat_hud_tooltip_preview_rect(mission_label_rect, tooltip_lines, viewport_size)
+	var max_tooltip_line_length: int = _max_string_length(Array(tooltip_lines))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"task_548_tooltip_gate_passes",
+			String(detail_snapshot.get("gate", "")) == "pass",
+			"F6 visual audit builds on the green TASK_548 tooltip snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"hud_controls_present",
+			fireteam_panel != null and mission_panel != null and fireteam_label != null and mission_label != null,
+			"Selected Fireteam and Mission Control panels plus their combat labels exist."
+		),
+		_build_mission_first_move_readability_check(
+			"labels_visible_and_hoverable",
+			fireteam_label_rect.size.x > 0.0
+				and fireteam_label_rect.size.y > 0.0
+				and mission_label_rect.size.x > 0.0
+				and mission_label_rect.size.y > 0.0
+				and fireteam_label.mouse_filter != Control.MOUSE_FILTER_IGNORE
+				and mission_label.mouse_filter != Control.MOUSE_FILTER_IGNORE
+				and not fireteam_label.tooltip_text.strip_edges().is_empty()
+				and not mission_label.tooltip_text.strip_edges().is_empty(),
+			"Combat HUD labels are visible and can receive tooltip hover."
+		),
+		_build_mission_first_move_readability_check(
+			"labels_inside_panels",
+			_rect_contains_rect_with_margin(fireteam_panel_rect, fireteam_label_rect, 2.0)
+				and _rect_contains_rect_with_margin(mission_panel_rect, mission_label_rect, 2.0),
+			"Combat HUD labels stay inside their parent panels."
+		),
+		_build_mission_first_move_readability_check(
+			"panels_inside_fullhd_bounds",
+			_rect_inside_rect_with_margin(viewport_rect, fireteam_panel_rect, 0.0)
+				and _rect_inside_rect_with_margin(viewport_rect, mission_panel_rect, 0.0),
+			"Selected Fireteam and Mission Control panels stay inside the FullHD viewport."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_and_mission_panels_do_not_overlap",
+			not fireteam_panel_rect.intersects(mission_panel_rect, true),
+			"Selected Fireteam and Mission Control panels do not overlap."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltip_payload_matches_both_labels",
+			not tooltip_text.is_empty()
+				and String(detail_snapshot.get("selected_fireteam_tooltip_text", "")).strip_edges() == tooltip_text
+				and String(detail_snapshot.get("mission_control_tooltip_text", "")).strip_edges() == tooltip_text,
+			"Both HUD panels expose the same detail tooltip payload."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltip_lines_short_and_scannable",
+			tooltip_lines.size() > 0
+				and tooltip_lines.size() <= 4
+				and bool(detail_tooltip.get("tooltip_within_limit", false))
+				and max_tooltip_line_length <= int(detail_tooltip.get("tooltip_line_limit", 112)),
+			"Tooltip line count and line length stay scannable."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltip_preview_fits_fullhd",
+			_rect_inside_rect_with_margin(viewport_rect, fireteam_tooltip_rect, 0.0)
+				and _rect_inside_rect_with_margin(viewport_rect, mission_tooltip_rect, 0.0),
+			"Estimated native tooltip preview areas fit inside FullHD bounds."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(detail_snapshot.get("ui_sets_gameplay_truth", true)),
+			"F6 visual audit summarizes existing HUD state without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_549",
+		"audit_id": "combat_hud_f6_visual_audit_v1",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"automated_visual_gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_screenshot_required": true,
+		"manual_screenshot_done": false,
+		"viewport_size": {"width": viewport_size.x, "height": viewport_size.y},
+		"selected_fireteam_panel_rect": _rect_to_audit_dictionary(fireteam_panel_rect),
+		"mission_control_panel_rect": _rect_to_audit_dictionary(mission_panel_rect),
+		"selected_fireteam_label_rect": _rect_to_audit_dictionary(fireteam_label_rect),
+		"mission_control_label_rect": _rect_to_audit_dictionary(mission_label_rect),
+		"selected_fireteam_tooltip_preview_rect": _rect_to_audit_dictionary(fireteam_tooltip_rect),
+		"mission_control_tooltip_preview_rect": _rect_to_audit_dictionary(mission_tooltip_rect),
+		"selected_fireteam_label_mouse_filter": int(fireteam_label.mouse_filter) if fireteam_label != null else -1,
+		"mission_control_label_mouse_filter": int(mission_label.mouse_filter) if mission_label != null else -1,
+		"selected_fireteam_label_visible": bool(fireteam_label.visible) if fireteam_label != null else false,
+		"mission_control_label_visible": bool(mission_label.visible) if mission_label != null else false,
+		"selected_fireteam_label_tooltip_length": fireteam_label.tooltip_text.length() if fireteam_label != null else 0,
+		"mission_control_label_tooltip_length": mission_label.tooltip_text.length() if mission_label != null else 0,
+		"tooltip_line_count": tooltip_lines.size(),
+		"max_tooltip_line_length": max_tooltip_line_length,
+		"tooltip_text": tooltip_text,
+		"compact_line": String(detail_snapshot.get("compact_line", "")).strip_edges(),
+		"detail_tooltip": detail_tooltip,
+		"task_548_snapshot": detail_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"failed_count": failed_checks.size(),
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _get_current_viewport_size() -> Vector2:
+	var viewport := get_viewport()
+	if viewport == null:
+		return Vector2(1920.0, 1080.0)
+	return viewport.get_visible_rect().size
+
+
+func _get_control_global_rect_or_empty(control: Control) -> Rect2:
+	if control == null or not control.is_inside_tree():
+		return Rect2()
+	return control.get_global_rect()
+
+
+func _estimate_combat_hud_tooltip_preview_rect(anchor_rect: Rect2, tooltip_lines: PackedStringArray, viewport_size: Vector2) -> Rect2:
+	if anchor_rect.size == Vector2.ZERO:
+		return Rect2()
+	var line_count: int = maxi(tooltip_lines.size(), 1)
+	var max_line_length: int = _max_string_length(Array(tooltip_lines))
+	var estimated_size := Vector2(
+		clampf(float(max_line_length * 7 + 28), 120.0, 720.0),
+		clampf(float(line_count * 18 + 20), 40.0, 180.0)
+	)
+	var position := anchor_rect.position + Vector2(0.0, -estimated_size.y - 8.0)
+	if position.y < 0.0:
+		position.y = anchor_rect.end.y + 8.0
+	position.x = clampf(position.x, 0.0, maxf(0.0, viewport_size.x - estimated_size.x))
+	position.y = clampf(position.y, 0.0, maxf(0.0, viewport_size.y - estimated_size.y))
+	return Rect2(position, estimated_size)
+
+
+func _rect_inside_rect_with_margin(outer: Rect2, inner: Rect2, margin: float) -> bool:
+	if outer.size == Vector2.ZERO or inner.size == Vector2.ZERO:
+		return false
+	return inner.position.x >= outer.position.x - margin \
+		and inner.position.y >= outer.position.y - margin \
+		and inner.end.x <= outer.end.x + margin \
+		and inner.end.y <= outer.end.y + margin
+
+
+func _rect_contains_rect_with_margin(outer: Rect2, inner: Rect2, margin: float) -> bool:
+	return _rect_inside_rect_with_margin(outer, inner, margin)
+
+
+func _rect_to_audit_dictionary(rect: Rect2) -> Dictionary:
+	return {
+		"x": rect.position.x,
+		"y": rect.position.y,
+		"width": rect.size.x,
+		"height": rect.size.y,
+		"right": rect.end.x,
+		"bottom": rect.end.y,
 	}
 
 

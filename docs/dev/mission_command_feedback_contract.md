@@ -54,6 +54,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Combat-HUD-Detail-Tooltip
 `get_combat_hud_visual_detail_tooltip_snapshot()` ist der Headless-Pruefpunkt fuer TASK_548. Der Snapshot darf nur bestehende Combat-HUD-Density-, ContactDecision-, Cover- und FireEvent-Daten sowie die Label-Tooltips von #17 Selected Fireteam und #18 Mission Control zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Combat-, Damage-, Contact- oder UI-State-Entscheidung erzeugen. Erwartete Lesbarkeit: Die kompakte HUD-Zeile bleibt kurz, waehrend beide HUD-Panels denselben kurzen Detail-Tooltip mit Fire-State, Cover, Range, LOS und Flank-Kontext erhalten.
 
+## Combat-HUD-F6-Visual-Audit
+`get_combat_hud_f6_visual_audit_snapshot()` ist der Headless-Pruefpunkt fuer TASK_549. Der Snapshot darf nur den TASK_548-Tooltip-Snapshot, Control-/Label-Bounds und HUD-Layout-Metadaten zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Combat-, Damage-, Contact-, Movement- oder UI-State-Entscheidung erzeugen. Erwartete Lesbarkeit: #17 und #18 haben sichtbare, hover-faehige Combat-HUD-Labels, dieselbe Tooltip-Payload, FullHD-konforme Panel-/Tooltip-Bounds und keine Ueberlappung zwischen Selected-Fireteam- und Mission-Control-Panel. Ein manueller Screenshot bleibt als separater Sichttest markiert.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
