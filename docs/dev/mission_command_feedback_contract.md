@@ -42,6 +42,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Fire-/Cover-Visual-Polish
 `get_mission_fire_cover_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer die sichtbare Fire-/Cover-Lesbarkeit nach der ersten Combat-Entscheidung. Der Snapshot darf nur den bestehenden First-Engagement-Snapshot und `TerrainMap3DView.get_render_snapshot()` zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine FireEvents, Damage-Events oder Befehle erzeugen. Erwartete Lesbarkeit: FireTrace ist sichtbar und duenn, Impact hat Ziel-Fokus plus kurzes Statuslabel, Unit-Badges liefern Text/Farbe/Style, und Range-/LOS-/Cover-Kontext bleibt weiter erreichbar.
 
+## Fire-/Cover-Integrated-Flow
+`task_545_mission_fire_cover_integrated_flow_smoke.gd` prueft denselben Fire-/Cover-Visual-Polish-Snapshot im echten ersten Spielerpfad von Homebase ueber Dropship, LZ, Deboarding, Move, Contact und Engagement. Der Smoke darf nur bestehende Test-Hilfswege nutzen, keine neue Gameplay-Entscheidung einfuehren und keinen manuellen F6-/Screenshot-Sichttest behaupten.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
