@@ -13294,6 +13294,180 @@ func _build_suppress_fire_aar_report_rows(count_by_fireteam: Dictionary) -> Arra
 	return rows
 
 
+func get_mini_aar_combat_metrics_snapshot() -> Dictionary:
+	var schema_id: String = "sternenbuergerchen.mini_aar_combat_metrics.v1"
+	var sup_panel_snapshot: Dictionary = get_suppress_fire_aar_report_panel_snapshot()
+	var sup_panel: Dictionary = Dictionary(sup_panel_snapshot.get("report_panel", {})).duplicate(true)
+	var fire_events: Array = get_fire_event_snapshot()
+	var fire_metrics: Dictionary = _build_mini_aar_fire_event_metrics(fire_events)
+	var status_metrics: Dictionary = _build_mini_aar_fireteam_status_metrics()
+	var mission_result: Dictionary = _get_mission_result_for_mini_aar()
+	var extracted_count: int = int(mission_result.get("extracted_count", mission_result.get("friendly_extracted_count", 0)))
+	var friendly_fire_risk_count: int = maxi(
+		int(fire_metrics.get("friendly_fire_event_count", 0)),
+		_get_current_preview_friendly_fire_risk_count()
+	)
+	var metrics: Dictionary = {
+		"shots_fired": int(fire_metrics.get("shots_fired", 0)),
+		"hit_count": int(fire_metrics.get("hit_count", 0)),
+		"miss_count": int(fire_metrics.get("miss_count", 0)),
+		"friendly_fire_event_count": int(fire_metrics.get("friendly_fire_event_count", 0)),
+		"friendly_fire_risk_count": friendly_fire_risk_count,
+		"suppress_fire_outcome_count": int(sup_panel.get("suppress_fire_outcome_count", 0)),
+		"wounded_count": int(status_metrics.get("wounded_count", 0)),
+		"down_count": int(status_metrics.get("down_count", 0)),
+		"fit_count": int(status_metrics.get("fit_count", 0)),
+		"extracted_count": extracted_count,
+	}
+	var summary_text: String = _build_mini_aar_summary_text(metrics)
+	var rows: Array = _build_mini_aar_metric_rows(metrics, sup_panel)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"mini_aar_schema_available",
+			schema_id == "sternenbuergerchen.mini_aar_combat_metrics.v1",
+			"Mini AAR combat metrics exposes a stable read-only schema."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_event_metrics_visible",
+			int(metrics.get("shots_fired", 0)) >= 1
+				and summary_text.contains("FIRE"),
+			"Mini AAR combat metrics shows fired weapon events."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_metric_reused",
+			int(metrics.get("suppress_fire_outcome_count", 0)) >= 1
+				and String(sup_panel_snapshot.get("gate", "")) == "pass",
+			"Mini AAR combat metrics reuses the green SUP AAR panel snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"friendly_fire_metric_visible",
+			metrics.has("friendly_fire_event_count")
+				and metrics.has("friendly_fire_risk_count")
+				and summary_text.contains("FF"),
+			"Mini AAR combat metrics includes friendly-fire event/risk fields."
+		),
+		_build_mission_first_move_readability_check(
+			"status_metrics_visible",
+			metrics.has("wounded_count")
+				and metrics.has("down_count")
+				and metrics.has("extracted_count")
+				and summary_text.contains("WOUND")
+				and summary_text.contains("EXT"),
+			"Mini AAR combat metrics includes wounded/down/extracted fields."
+		),
+		_build_mission_first_move_readability_check(
+			"rows_are_compact",
+			rows.size() >= 4 and summary_text.length() <= 120,
+			"Mini AAR combat metrics stays compact enough for a future report shell."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(sup_panel_snapshot.get("read_only", false))
+				and not bool(sup_panel_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Mini AAR combat metrics reads existing snapshots and does not create gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": schema_id,
+		"task_id": "TASK_584",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"summary_text": summary_text,
+		"metrics": metrics,
+		"rows": rows,
+		"fire_events": fire_events,
+		"sup_panel": sup_panel,
+		"status_metrics": status_metrics,
+		"mission_result": mission_result,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_mini_aar_fire_event_metrics(fire_events: Array) -> Dictionary:
+	var hit_count: int = 0
+	var miss_count: int = 0
+	var friendly_fire_event_count: int = 0
+	for event_variant in fire_events:
+		if typeof(event_variant) != TYPE_DICTIONARY:
+			continue
+		var event: Dictionary = Dictionary(event_variant)
+		if bool(event.get("is_friendly_fire", false)):
+			friendly_fire_event_count += 1
+		var outcome: String = String(event.get("combat_outcome", "")).strip_edges().to_lower()
+		if bool(event.get("combat_hit", false)) or outcome == "hit":
+			hit_count += 1
+		elif not outcome.is_empty():
+			miss_count += 1
+	return {
+		"shots_fired": fire_events.size(),
+		"hit_count": hit_count,
+		"miss_count": miss_count,
+		"friendly_fire_event_count": friendly_fire_event_count,
+	}
+
+
+func _build_mini_aar_fireteam_status_metrics() -> Dictionary:
+	var result: Dictionary = {
+		"fit_count": 0,
+		"wounded_count": 0,
+		"down_count": 0,
+		"suppressed_count": 0,
+		"busy_count": 0,
+	}
+	for row_variant in get_fireteam_member_status_row_snapshot():
+		if typeof(row_variant) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = Dictionary(row_variant)
+		var counts: Dictionary = Dictionary(row.get("counts", {}))
+		result["fit_count"] = int(result.get("fit_count", 0)) + int(counts.get("fit", 0))
+		result["wounded_count"] = int(result.get("wounded_count", 0)) + int(counts.get("wounded", 0))
+		result["down_count"] = int(result.get("down_count", 0)) + int(counts.get("down", 0))
+		result["suppressed_count"] = int(result.get("suppressed_count", 0)) + int(counts.get("suppressed", 0))
+		result["busy_count"] = int(result.get("busy_count", 0)) + int(counts.get("busy", 0))
+	return result
+
+
+func _get_mission_result_for_mini_aar() -> Dictionary:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_mission_result"):
+		return {}
+	return Dictionary(combat_driver.call("get_mission_result")).duplicate(true)
+
+
+func _get_current_preview_friendly_fire_risk_count() -> int:
+	var snapshot: Dictionary = get_mission_first_move_decision_readability_snapshot()
+	var preview: Dictionary = Dictionary(snapshot.get("first_waypoint_preview", {}))
+	return int(preview.get("friendly_fire_risk_count", snapshot.get("friendly_fire_risk_count", 0)))
+
+
+func _build_mini_aar_summary_text(metrics: Dictionary) -> String:
+	return "AAR | FIRE %d | HIT %d | FF %d/%d | SUP %d | WOUND %d | EXT %d" % [
+		int(metrics.get("shots_fired", 0)),
+		int(metrics.get("hit_count", 0)),
+		int(metrics.get("friendly_fire_event_count", 0)),
+		int(metrics.get("friendly_fire_risk_count", 0)),
+		int(metrics.get("suppress_fire_outcome_count", 0)),
+		int(metrics.get("wounded_count", 0)),
+		int(metrics.get("extracted_count", 0)),
+	]
+
+
+func _build_mini_aar_metric_rows(metrics: Dictionary, sup_panel: Dictionary) -> Array:
+	return [
+		{"id": "fire", "label": "Fire", "value_text": "FIRE %d | HIT %d" % [int(metrics.get("shots_fired", 0)), int(metrics.get("hit_count", 0))], "read_only": true},
+		{"id": "friendly_fire", "label": "Friendly Fire", "value_text": "FF %d / Risk %d" % [int(metrics.get("friendly_fire_event_count", 0)), int(metrics.get("friendly_fire_risk_count", 0))], "read_only": true},
+		{"id": "suppress", "label": "Suppress", "value_text": String(sup_panel.get("count_label", "SUP x0")), "read_only": true},
+		{"id": "status", "label": "Status", "value_text": "WOUND %d | DOWN %d | EXT %d" % [int(metrics.get("wounded_count", 0)), int(metrics.get("down_count", 0)), int(metrics.get("extracted_count", 0))], "read_only": true},
+	]
+
+
 func _count_waypoint_intent_preview_ghost_entries(entries: Array) -> int:
 	var count: int = 0
 	for entry_variant in entries:

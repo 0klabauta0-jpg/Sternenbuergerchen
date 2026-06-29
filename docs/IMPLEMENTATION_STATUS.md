@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_584 - Mini AAR Combat Metrics Shell
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_584_mini_aar_combat_metrics_shell.md`, `docs/tasks/TASK_583_suppress_fire_aar_report_panel_readability.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MissionTacticalSandboxController.get_mini_aar_combat_metrics_snapshot()` sammelt vorhandene FireEvents, Hit-/Miss-Zaehler, Friendly-Fire-Event/Risk-Felder, TASK_583-SUP-Panel-Werte und Fireteam-Member-Status in einer kleinen read-only Mini-AAR-Schale.
+- Stand: Der Snapshot liefert kompakte Summary- und Row-Daten fuer eine spaetere Debriefing-Oberflaeche, ohne MissionResult, Combat, Ammo, Suppression, XP oder Skills zu mutieren.
+- Stand: Der laufende HTML-Zwischenbericht benennt TASK_584 als erledigten Arbeitsstand und TASK_585 als naechsten sinnvollen Debrief-Screen-Stub.
+- Risiken/offen: Noch kein vollstaendiger Debriefing-Screen; `extracted_count` bleibt 0, solange kein konkretes Extract-Result-Feld geliefert wird. Echte Suppression-Wirkung, Ammo-Verbrauch, XP und Skillentwicklung bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_584_mini_aar_combat_metrics_shell.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_583_suppress_fire_aar_report_panel_readability.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_582_suppress_fire_outcome_aar_diagnostic_stub.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_585 - Mini AAR Debrief Screen Stub`, wenn die Mini-AAR-Schale in einer kleinen sichtbaren Debrief-UI gelesen werden soll.
+
 ### TASK_583 - Suppress Fire AAR Report Panel Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_583_suppress_fire_aar_report_panel_readability.md`, `docs/tasks/TASK_582_suppress_fire_outcome_aar_diagnostic_stub.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
 - Stand: `MissionTacticalSandboxController.get_suppress_fire_aar_report_panel_snapshot()` baut aus dem TASK_582-Zaehler ein kompaktes read-only Report-Panel-Snapshot mit Titel, Summary, Chips und Fireteam-Zeilen.
 - Stand: Der Panel-Detailtext nennt explizit die Grenze: keine Ammo, keine echte Suppression und kein Damage-Mod. Damit bleibt der AAR-Wert ehrlich lesbar, ohne Gameplay-Wahrheit in UI/Report zu verschieben.
 - Stand: Der Verifier prueft den integrierten Missionspfad bis SUP-Fire, liest das Report-Panel zweimal und bestaetigt, dass weder Command-Queue noch SUP-Count durch Snapshot-Lesezugriffe mutieren.
-- Risiken/offen: Noch kein vollstaendiger Debriefing-Screen und keine allgemeinen AAR-Kampfmetriken; echte Suppression-Wirkung und Munitionsverbrauch bleiben eigene Folgearbeit.
+- Risiken/offen: Noch kein vollstaendiger Debriefing-Screen; allgemeine AAR-Kampfmetriken sind durch TASK_584 als Mini-Schale vorbereitet. Echte Suppression-Wirkung und Munitionsverbrauch bleiben eigene Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_583_suppress_fire_aar_report_panel_readability.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_582_suppress_fire_outcome_aar_diagnostic_stub.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_581_suppress_fire_intent_outcome_smoke.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_584 - Mini AAR Combat Metrics Shell`, wenn SUP-Zaehler, FireEvents, Friendly-Fire-Risiko und Wounded/Extracted spaeter als gemeinsame Mini-AAR-Schale lesbar werden sollen.
+- Naechster Schritt: durch `TASK_584 - Mini AAR Combat Metrics Shell` erledigt; naechster Anschluss ist `TASK_585 - Mini AAR Debrief Screen Stub`.
 
 ### TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub
 - Status: implementiert im Arbeitsstand

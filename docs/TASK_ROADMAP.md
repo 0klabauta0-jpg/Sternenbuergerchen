@@ -212,7 +212,8 @@ git checkout -b batch/<batch-name>
 - TASK_581 - Suppress Fire Intent Outcome Smoke (implementiert)
 - TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub (implementiert)
 - TASK_583 - Suppress Fire AAR Report Panel Readability (implementiert)
-- TASK_584 - Mini AAR Combat Metrics Shell
+- TASK_584 - Mini AAR Combat Metrics Shell (implementiert)
+- TASK_585 - Mini AAR Debrief Screen Stub
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

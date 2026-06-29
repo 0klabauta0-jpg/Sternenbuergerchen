@@ -184,6 +184,11 @@ TASK_583 macht den TASK_582-Zaehler als kleine Debriefing-/Report-Vorstufe lesba
 
 Erwartete Struktur: `get_suppress_fire_aar_report_panel_snapshot()` enthaelt `report_panel.schema = sternenbuergerchen.suppress_fire_aar_report_panel.v1`, `title = SUP AAR`, `summary_text`, `detail_text`, `count_label`, `chips`, `fireteam_rows`, `suppress_fire_outcome_count`, `read_only = true` und `ui_sets_gameplay_truth = false`. Der Detailtext muss klarstellen, dass dieser Slice keine Ammo, keine echte Suppression und keinen Damage-Mod erzeugt. Nicht zulaessig sind ein vollstaendiges Debriefing-System, neue Mission-Result-Mutationen oder UI-seitige Combat-Wahrheit.
 
+## Mini-AAR-Combat-Metrics-Shell
+TASK_584 fuehrt SUP nicht als alleinstehenden Report-Wert weiter, sondern sammelt die wichtigsten vorhandenen Kampfmetriken in einer kleinen read-only Mini-AAR-Schale. Der Mission-Controller darf dafuer bestehende FireEvents, das TASK_583-SUP-Panel, Friendly-Fire-Risiko, Fireteam-Member-Status und vorhandene MissionResult-Felder zusammenfassen. Der Snapshot bleibt reine Vorschau-/Report-Diagnostik und darf keine Mission-Result-, Combat-, Ammo-, Suppression-, XP- oder Skill-Wahrheit erzeugen.
+
+Erwartete Struktur: `get_mini_aar_combat_metrics_snapshot()` enthaelt `schema = sternenbuergerchen.mini_aar_combat_metrics.v1`, `summary_text`, `metrics`, `rows`, `fire_events`, `sup_panel`, `status_metrics`, `mission_result`, `read_only = true` und `ui_sets_gameplay_truth = false`. `metrics` muss mindestens `shots_fired`, `hit_count`, `friendly_fire_event_count`, `friendly_fire_risk_count`, `suppress_fire_outcome_count`, `wounded_count`, `down_count` und `extracted_count` enthalten. Nicht zulaessig sind ein vollstaendiger Debriefing-Screen, MissionResult-Mutationen, XP-/Skill-Vergabe, Ammo-Verbrauch, echte Suppression-Wirkung oder eine zweite UI-seitige Combat-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
