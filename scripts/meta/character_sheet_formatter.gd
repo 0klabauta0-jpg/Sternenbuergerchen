@@ -322,15 +322,46 @@ static func _build_relationship_rows(profile, _options: Dictionary = {}) -> Arra
 	]
 
 
-static func _build_progress_rows(profile, _options: Dictionary = {}) -> Array:
+static func _build_progress_rows(profile, options: Dictionary = {}) -> Array:
 	var progression: Dictionary = Dictionary(profile.progression)
-	return [
+	var rows: Array = [
 		{"label": "XP", "value_text": str(int(progression.get("xp", 0))), "help_id": "character_sheet.xp"},
 		{"label": "Missions", "value_text": str(int(progression.get("missions_completed", Array(profile.mission_history).size()))), "help_id": "character_sheet.missions"},
 		{"label": "FTL Impact", "value_text": _format_ftl_tactical_impact(profile), "help_id": "character_sheet.ftl_tactical_impact"},
 		{"label": "Last Mission", "value_text": _format_last_history(Array(profile.mission_history), "mission_id"), "help_id": "character_sheet.last_mission"},
 		{"label": "Fireteam History", "value_text": _format_last_history(Array(profile.fireteam_history), "fireteam_id"), "help_id": "character_sheet.fireteam_history"},
 	]
+	var post_mission_row: Dictionary = _build_post_mission_skill_delta_row(options)
+	if not post_mission_row.is_empty():
+		rows.insert(1, post_mission_row)
+	return rows
+
+
+static func _build_post_mission_skill_delta_row(options: Dictionary) -> Dictionary:
+	var award: Dictionary = Dictionary(options.get("post_mission_skill_delta", {}))
+	if award.is_empty():
+		return {}
+	var value_text: String = String(options.get("post_mission_skill_delta_text", "")).strip_edges()
+	if value_text.is_empty():
+		var parts: PackedStringArray = PackedStringArray()
+		var xp_delta: int = int(award.get("xp_delta", 0))
+		if xp_delta > 0:
+			parts.append("XP +%d" % xp_delta)
+		var skill_gain_count: int = int(award.get("skill_gain_count", 0))
+		if skill_gain_count > 0:
+			parts.append("Skills +%d" % skill_gain_count)
+		var ftl_gain: float = float(award.get("ftl_tactical_gain", 0.0))
+		if ftl_gain > 0.0:
+			parts.append("FTL +%.3f" % ftl_gain)
+		value_text = " | ".join(parts)
+	if value_text.is_empty():
+		value_text = "no delta"
+	return {
+		"label": "Last Award",
+		"value_text": value_text,
+		"help_id": "character_sheet.post_mission_skill_delta",
+		"detail_text": "Read-only MissionProgressionResolver delta from the last Debrief/Homebase return.",
+	}
 
 
 static func _build_derived_rows(profile) -> Array:

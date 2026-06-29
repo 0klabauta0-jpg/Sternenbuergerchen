@@ -124,6 +124,8 @@ var _pre_mission_readiness_snapshot: Dictionary = {}
 var _aircraft_manager = AIRCRAFT_MANAGER_SCRIPT.new()
 var _team_transfer_entries: Array = []
 var _personnel_events: Array = []
+var _post_mission_skill_delta_summary: Dictionary = {}
+var _post_mission_skill_delta_by_unit_id: Dictionary = {}
 
 
 func _ready() -> void:
@@ -297,6 +299,96 @@ func set_personnel_events(personnel_events: Array) -> void:
 		_personnel_events.append(Dictionary(event_variant).duplicate(true))
 	if is_inside_tree():
 		_update_personnel_notifications()
+
+
+func set_post_mission_skill_delta_summary(summary: Dictionary) -> void:
+	_post_mission_skill_delta_summary = summary.duplicate(true)
+	_rebuild_post_mission_skill_delta_lookup()
+	if is_inside_tree() and _character_sheet_open:
+		_update_character_sheet()
+
+
+func get_post_mission_skill_delta_snapshot() -> Dictionary:
+	var focused_delta: Dictionary = _get_post_mission_skill_delta_for_unit(_focused_unit_id)
+	var focused_text: String = _format_post_mission_skill_delta_text(focused_delta)
+	var has_expected_schema: bool = String(_post_mission_skill_delta_summary.get("schema", "")) == "sternenbuergerchen.skill_progress_award_summary.v1"
+	var has_resolver_authority: bool = String(_post_mission_skill_delta_summary.get("authority", "")) == "MissionProgressionResolver"
+	var focused_has_delta: bool = not focused_delta.is_empty()
+	var sheet_visible: bool = _character_sheet_open and focused_has_delta
+	var checks: Array = [
+		{"id": "source_schema", "passed": has_expected_schema},
+		{"id": "authority_resolver", "passed": has_resolver_authority},
+		{"id": "unit_delta_lookup", "passed": _post_mission_skill_delta_by_unit_id.size() > 0},
+		{"id": "focused_delta_visible", "passed": focused_has_delta and not focused_text.is_empty()},
+		{"id": "character_sheet_delta_visible", "passed": sheet_visible},
+		{"id": "read_only", "passed": bool(_post_mission_skill_delta_summary.get("read_only", false)) and not bool(_post_mission_skill_delta_summary.get("ui_sets_gameplay_truth", true))},
+	]
+	return {
+		"schema": "sternenbuergerchen.post_mission_skill_delta_homebase_bridge.v1",
+		"task_id": "TASK_594",
+		"source_schema": String(_post_mission_skill_delta_summary.get("schema", "")),
+		"authority": String(_post_mission_skill_delta_summary.get("authority", "")),
+		"source": String(_post_mission_skill_delta_summary.get("source", "")),
+		"unit_delta_count": _post_mission_skill_delta_by_unit_id.size(),
+		"focused_unit_id": _focused_unit_id,
+		"focused_delta_text": focused_text,
+		"homebase_delta_visible": focused_has_delta,
+		"character_sheet_delta_visible": sheet_visible,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"checks": checks,
+		"gate": "pass" if _all_snapshot_checks_passed(checks) else "needs_attention",
+	}
+
+
+func _rebuild_post_mission_skill_delta_lookup() -> void:
+	_post_mission_skill_delta_by_unit_id = {}
+	if String(_post_mission_skill_delta_summary.get("schema", "")) != "sternenbuergerchen.skill_progress_award_summary.v1":
+		return
+	for award_variant in Array(_post_mission_skill_delta_summary.get("listed_awards", [])):
+		if typeof(award_variant) != TYPE_DICTIONARY:
+			continue
+		var award: Dictionary = Dictionary(award_variant).duplicate(true)
+		var unit_id: String = String(award.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty():
+			continue
+		_post_mission_skill_delta_by_unit_id[unit_id] = award
+
+
+func _get_post_mission_skill_delta_for_unit(unit_id: String) -> Dictionary:
+	var normalized_unit_id := unit_id.strip_edges()
+	if normalized_unit_id.is_empty() or not _post_mission_skill_delta_by_unit_id.has(normalized_unit_id):
+		return {}
+	return Dictionary(_post_mission_skill_delta_by_unit_id.get(normalized_unit_id, {})).duplicate(true)
+
+
+func _format_post_mission_skill_delta_text(award: Dictionary) -> String:
+	if award.is_empty():
+		return ""
+	var parts: PackedStringArray = PackedStringArray()
+	var xp_delta: int = int(award.get("xp_delta", 0))
+	if xp_delta > 0:
+		parts.append("XP +%d" % xp_delta)
+	var skill_gain_count: int = int(award.get("skill_gain_count", 0))
+	if skill_gain_count > 0:
+		parts.append("Skills +%d" % skill_gain_count)
+	var ftl_gain: float = float(award.get("ftl_tactical_gain", 0.0))
+	if ftl_gain > 0.0:
+		parts.append("FTL +%.3f" % ftl_gain)
+	if parts.is_empty():
+		parts.append("no delta")
+	return " | ".join(parts)
+
+
+func _all_snapshot_checks_passed(checks: Array) -> bool:
+	if checks.is_empty():
+		return false
+	for check_variant in checks:
+		if typeof(check_variant) != TYPE_DICTIONARY:
+			return false
+		if not bool(Dictionary(check_variant).get("passed", false)):
+			return false
+	return true
 
 
 func get_personnel_notification_snapshot() -> Dictionary:
@@ -3472,12 +3564,15 @@ func _update_character_sheet() -> void:
 	if content_host == null:
 		return
 	var profile = _profiles_by_id.get(_focused_unit_id, null)
+	var post_mission_delta: Dictionary = _get_post_mission_skill_delta_for_unit(_focused_unit_id)
 	CHARACTER_SHEET_VIEW_SCRIPT.render(
 		content_host,
 		profile,
 		{
 			"status_text": _build_sheet_status_text(_focused_unit_id),
 			"fireteam_text": _build_homebase_fireteam_text(_focused_unit_id),
+			"post_mission_skill_delta": post_mission_delta,
+			"post_mission_skill_delta_text": _format_post_mission_skill_delta_text(post_mission_delta),
 			"editable_metrics": false,
 			"two_column_layout": true,
 			"show_badge_progress": true,

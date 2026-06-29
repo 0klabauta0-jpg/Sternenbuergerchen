@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_594 - Post Mission Skill Delta Homebase Bridge
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_594_post_mission_skill_delta_homebase_bridge.md`, `docs/tasks/TASK_593_skill_progress_award_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MetaLayerFlow` reicht `progression_award_summary` nach dem Debrief-/Homebase-Return an `HomebaseTestScreen` weiter.
+- Stand: `HomebaseTestScreen` indexiert die read-only `listed_awards` pro Unit und meldet `get_post_mission_skill_delta_snapshot()` mit Resolver-Authority, Source-Schema, Gate und Read-only-Grenze.
+- Stand: Das Character-Sheet zeigt fuer ausgezeichnete Operator eine kompakte `Last Award`-Zeile mit XP-, Skill- und FTL-Delta, ohne Gameplay-State zu berechnen oder zu mutieren.
+- Risiken/offen: Die Anzeige ist noch funktional-kompakt. Ein spaeterer Visual-Polish sollte die Homebase-Fortschrittswahrnehmung mit besserer Hervorhebung, Filtern oder Animation verbessern.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_594_post_mission_skill_delta_homebase_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_593_skill_progress_award_contract.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_259_character_card_roster_switching_playability.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_595 - Homebase Progression Visual Polish`, damit die Award-Deltas nicht nur technisch sichtbar, sondern im Homebase-Workflow angenehm lesbar sind.
+
 ### TASK_592 - Debrief Skill Progress Preview Shell
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_592_debrief_skill_progress_preview_shell.md`, `docs/tasks/TASK_591_debrief_aar_player_review_notes_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

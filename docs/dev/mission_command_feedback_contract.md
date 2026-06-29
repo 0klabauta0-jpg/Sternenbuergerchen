@@ -234,6 +234,11 @@ TASK_593 verbindet die Debrief-Preview mit dem bestehenden autoritativen Progres
 
 Erwartete Struktur: `MissionProgressionResolver.build_award_summary()` liefert `schema = sternenbuergerchen.skill_progress_award_summary.v1`, `authority = MissionProgressionResolver`, `source = progression_unit_updates`, `award_applied = true`, `total_xp_delta`, `skill_gain_count`, `ftl_tactical_gain_count`, `recovery_count`, `objective_award_count`, `listed_awards`, Kappungswerte und `read_only = true` / `ui_sets_gameplay_truth = false`. `DebriefTestScreen.get_debrief_skill_award_contract_snapshot()` liefert `schema = sternenbuergerchen.debrief_skill_award_contract.v1`, sichtbaren Text `Skill Awards: ...`, dieselben Kernzaehler, Resolver-Authority, Preview-Gate und read-only-Grenze. Die `Skill Preview` bleibt weiterhin Vorschau; echte Awards kommen nur aus `progression_award_summary`.
 
+## Post-Mission-Skill-Delta-Homebase-Bridge
+TASK_594 schliesst den kleinen Core-Loop-Anschluss nach dem Debrief: `MetaLayerFlow` darf die vorhandene `progression_award_summary` an die Homebase weiterreichen. `HomebaseTestScreen` darf daraus einen read-only Lookup pro Unit bauen und dem Character-Sheet als Render-Option uebergeben. Die Homebase berechnet keine Awards, schreibt keine XP-/Skillwerte und bleibt Anzeige-/Handoff-Schicht.
+
+Erwartete Struktur: `HomebaseTestScreen.get_post_mission_skill_delta_snapshot()` liefert `schema = sternenbuergerchen.post_mission_skill_delta_homebase_bridge.v1`, `task_id = TASK_594`, `source_schema = sternenbuergerchen.skill_progress_award_summary.v1`, `authority = MissionProgressionResolver`, `source = progression_unit_updates`, `unit_delta_count`, `focused_unit_id`, `focused_delta_text`, `homebase_delta_visible`, `character_sheet_delta_visible`, `read_only = true`, `ui_sets_gameplay_truth = false` und ein `gate`. Das Character-Sheet darf eine kompakte `Last Award`-Zeile anzeigen, solange sie eindeutig read-only aus dem Resolver-Award stammt.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

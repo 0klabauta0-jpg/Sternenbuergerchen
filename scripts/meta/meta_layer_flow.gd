@@ -1562,6 +1562,8 @@ func _refresh_homebase_screen() -> void:
 		homebase_screen.set_mission_launch_state(_has_preview_deployed_mission_payload(), "Fireteam already deployed on the mission map. Start live mission when ready.")
 	if homebase_screen.has_method("set_personnel_events"):
 		homebase_screen.call("set_personnel_events", Array(_last_mission_result.get("personnel_events", [])))
+	if homebase_screen.has_method("set_post_mission_skill_delta_summary"):
+		homebase_screen.call("set_post_mission_skill_delta_summary", Dictionary(_last_mission_result.get("progression_award_summary", {})))
 
 
 func _build_homebase_aircraft_definitions_with_recovery() -> Array:

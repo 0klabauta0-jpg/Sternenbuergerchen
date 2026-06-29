@@ -222,7 +222,8 @@ git checkout -b batch/<batch-name>
 - TASK_591 - Debrief AAR Player Review Notes Pass (implementiert)
 - TASK_592 - Debrief Skill Progress Preview Shell (implementiert)
 - TASK_593 - Skill Progress Award Contract (implementiert)
-- TASK_594 - Post Mission Skill Delta Homebase Bridge
+- TASK_594 - Post Mission Skill Delta Homebase Bridge (implementiert)
+- TASK_595 - Homebase Progression Visual Polish
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
