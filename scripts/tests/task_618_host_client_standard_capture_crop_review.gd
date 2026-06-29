@@ -42,7 +42,7 @@ func _test_docs_report_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_618 - Host Client Standard Capture Crop Review (implementiert)"), "Roadmap marks TASK_618 implemented")
 	_assert(contract_text.contains("Host-Client-Standard-Capture-Crop-Review"), "Mission feedback contract documents TASK_618")
 	_assert(report_text.contains("TASK_618 Host Client Standard Capture Crop Review"), "Review workbench tracks TASK_618")
-	_assert(report_text.contains('latest_completed_task: "TASK_618 - Host Client Standard Capture Crop Review"'), "JSON payload lists TASK_618 as latest completed task")
+	_assert(report_text.contains('latest_completed_task: "TASK_619 - Host Client Role Peer Badge HUD"'), "JSON payload lists TASK_619 as latest completed task")
 	_assert(report_text.contains("TASK_619 - Host Client Role Peer Badge HUD"), "Report recommends TASK_619 role/peer HUD follow-up")
 	_test_report_export_fields(report_text)
 

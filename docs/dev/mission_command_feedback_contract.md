@@ -354,6 +354,11 @@ TASK_618 macht den Standard-Real-Run-Capture als Host-/Client-Vergleich sauberer
 
 Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` enthaelt zusaetzlich `host_screenshot_path`, `client_screenshot_path`, `host_screenshot_written`, `client_screenshot_written`, `host_crop_status`, `client_crop_status` und `recommended_next_capture_task = TASK_618 - Host Client Standard Capture Crop Review`. Die Crop-Statusobjekte melden `attempted`, `succeeded`, `reason`, `width` und `height`. Der laufende HTML-Bericht darf TASK_618-Felder unter `host_client_standard_capture_crop.*` exportieren und den naechsten belegten UI-Fund festhalten: Host und Client brauchen im eigentlichen Missionsfenster einen klaren Role-/Peer-/Team-Hinweis.
 
+## Host-Client-Role-Peer-Badge-HUD
+TASK_619 macht die bereits vorhandenen Review-Launchdaten im Missions-HUD sichtbar. `--review-role`, `--peer-id` und `--team` duerfen aus `OS.get_cmdline_user_args()` gelesen und als kompakter Anzeige-Badge im Mission-Team-Chip gezeigt werden. Der Badge ist nur Review-/Session-Kontext und darf keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement-, Team- oder UI-Wahrheit setzen.
+
+Erwartete Struktur: `MissionTacticalSandboxController.build_review_session_identity_snapshot()` liefert `active`, `style_id = host_client_role_peer_badge_v1`, `source`, `role`, `role_label`, `peer_id`, `peer_label`, `team_id`, `team_label`, `badge_text`, `read_only = true` und `ui_sets_gameplay_truth = false`. `get_mission_team_chip_snapshot()` meldet zusaetzlich `review_session`, `review_session_badge_text`, `review_session_badge_visible`, `review_session_badge_style_id`, `display_text` und `display_tooltip_text`. Der sichtbare Mission-Identity-Header darf denselben Badge vor dem Live-Tactical-Grid-Text anzeigen, damit Host/Client in Crops sofort unterscheidbar sind. `get_command_feedback_snapshot()` und `get_core_loop_host_client_feel_snapshot()` exportieren den Badge read-only fuer Verifier und HTML-Berichte. Ohne Review-Argumente bleibt der Badge leer und der bisherige Team-Chip-/Mission-Identity-Text unveraendert.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
