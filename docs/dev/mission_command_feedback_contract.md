@@ -324,6 +324,11 @@ TASK_612 baut aus dem TASK_611-Launchplan ein lokales Screenshot-Review-Paket. D
 
 Erwartete Struktur: `tmp/host_client_two_window_screenshot_review.json` enthaelt `schema = sternenbuergerchen.host_client_two_window_screenshot_review.v1`, `task_id = TASK_612`, `source_plan_task_id = TASK_611`, `source_plan_path`, `review_board_path`, `review_manifest_path`, `host_screenshot_path`, `client_screenshot_path`, Host-/Client-Rollen, `manual_review_required = true`, `manual_review_done = false`, `generated_review_board = true`, `real_window_screenshots_required = true`, `read_only = true`, `ui_sets_gameplay_truth = false`, `review_checks` und `recommended_next_task = TASK_613 - Host Client Two Window Visual Polish Findings`. Der HTML-Bericht nutzt Exportfelder unter `host_client_two_window_screenshot.*`; Host-/Client-Screenshot-Checkboxen bleiben standardmaessig offen.
 
+## Host-Client-Two-Window-Visual-Polish-Findings
+TASK_613 wendet nur den belegten TASK_612-Board-Fund an: Das automatische Review-Board war ohne Labels/Legende zu abstrakt. Zulaessig sind Pixel-Labels, Host-/Client-Callouts, Status-Legende, Footer-Hinweis und Manifestfelder fuer Board-Lesbarkeit. Nicht zulaessig sind neue Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit.
+
+Erwartete Struktur: `tmp/host_client_two_window_screenshot_review.json` bleibt ein TASK_612-Review-Manifest, meldet aber zusaetzlich `visual_polish_task_id = TASK_613`, `region_legend_present = true`, `callout_label_count >= 10`, `evidence_board_readability_gate = pass`, `visible_followup_candidate = host_client_two_window_window_run_review`, `read_only = true` und `ui_sets_gameplay_truth = false`. Der laufende HTML-Bericht darf diese Felder unter `host_client_two_window_screenshot.*` exportieren und TASK_614 als echten Fensterlauf-Review empfehlen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
