@@ -11978,6 +11978,95 @@ func get_mission_first_move_execution_feedback_snapshot() -> Dictionary:
 	}
 
 
+func get_mission_first_contact_readability_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var selected_fireteam_ids: Array = Array(_selected_fireteam_ids)
+	var selected_contacts: Array = _build_selected_fireteam_contact_readability_entries(selected_fireteam_ids)
+	var first_contact: Dictionary = Dictionary(selected_contacts[0]).duplicate(true) if not selected_contacts.is_empty() else {}
+	var contact_overlay_contacts: Array = _get_contact_overlay_visible_contacts_snapshot()
+	var primary_contact_snapshot: Dictionary = _get_primary_3d_contact_render_snapshot()
+	var security_state: Dictionary = _find_first_security_state_for_fireteams(selected_fireteam_ids, get_fireteam_security_snapshot())
+	var cover_effectiveness_readout: Dictionary = Dictionary(command_feedback.get("cover_effectiveness_readout", get_cover_effectiveness_readout_snapshot())).duplicate(true)
+	var contact_decision_diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
+	var tactical_event_count: int = int(command_feedback.get("tactical_communication_event_count", get_tactical_communication_event_snapshot().size()))
+	var tactical_log_count: int = int(command_feedback.get("tactical_event_log_count", get_tactical_event_log_snapshot().size()))
+	var feedback_text: String = "%s\n%s\n%s\n%s\n%s" % [
+		String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges(),
+		String(command_feedback.get("mission_control_status_text", "")).strip_edges(),
+		String(command_feedback.get("selected_tactical_communication_text", "")).strip_edges(),
+		String(command_feedback.get("mission_control_tactical_communication_text", "")).strip_edges(),
+		String(command_feedback.get("contact_decision_diagnostics_text", "")).strip_edges(),
+	]
+	var contact_context_visible: bool = _first_contact_has_threat_or_cover_context(
+		security_state,
+		cover_effectiveness_readout,
+		contact_decision_diagnostics
+	)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_has_contact",
+			not selected_fireteam_ids.is_empty() and not selected_contacts.is_empty(),
+			"Selected fireteam has at least one contact entry after movement."
+		),
+		_build_mission_first_move_readability_check(
+			"contact_fields_visible",
+			_contact_entry_has_readability_fields(first_contact),
+			"Contact exposes detection state, last-known position and confidence-like report data."
+		),
+		_build_mission_first_move_readability_check(
+			"contact_report_text_visible",
+			not String(first_contact.get("report_text", "")).strip_edges().is_empty(),
+			"Contact entry contains player-facing report text."
+		),
+		_build_mission_first_move_readability_check(
+			"contact_overlay_or_primary_visible",
+			not contact_overlay_contacts.is_empty() or int(primary_contact_snapshot.get("contact_count", 0)) > 0,
+			"Contact is mirrored to ContactMapOverlay or Primary3D render snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"tactical_feedback_mentions_contact",
+			_does_first_contact_feedback_text_show_contact(feedback_text) or tactical_event_count > 0 or tactical_log_count > 0,
+			"Tactical feedback/event stream gives the contact moment context."
+		),
+		_build_mission_first_move_readability_check(
+			"threat_or_cover_context_visible",
+			contact_context_visible,
+			"Security, cover readout or contact decision diagnostics explain why the contact matters."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			true,
+			"Snapshot reports first-contact readability without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_542",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"selected_contact_count": selected_contacts.size(),
+		"selected_contacts": selected_contacts,
+		"first_contact": first_contact,
+		"contact_overlay_visible_count": contact_overlay_contacts.size(),
+		"contact_overlay_contacts": contact_overlay_contacts,
+		"primary_contact_snapshot": primary_contact_snapshot,
+		"security_state": security_state,
+		"cover_effectiveness_readout": cover_effectiveness_readout,
+		"contact_decision_diagnostics": contact_decision_diagnostics,
+		"tactical_communication_event_count": tactical_event_count,
+		"tactical_event_log_count": tactical_log_count,
+		"contact_feedback_text": feedback_text.strip_edges(),
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_deployed_selected_fireteam_unit_ids() -> Array:
 	var result: Array = []
 	var seen_unit_ids: Dictionary = {}
@@ -12105,6 +12194,98 @@ func _movement_state_has_readability_data(movement_state: Dictionary) -> bool:
 	if not String(movement_state.get("readability_status_line", "")).strip_edges().is_empty():
 		return true
 	return typeof(movement_state.get("map_readability", null)) == TYPE_DICTIONARY and not Dictionary(movement_state.get("map_readability", {})).is_empty()
+
+
+func _build_selected_fireteam_contact_readability_entries(fireteam_ids: Array) -> Array:
+	var result: Array = []
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	var seen_keys: Dictionary = {}
+	for fireteam_id_variant in lookup.keys():
+		var fireteam_id: String = String(fireteam_id_variant)
+		for contact_variant in get_fireteam_contact_snapshot(fireteam_id):
+			if typeof(contact_variant) != TYPE_DICTIONARY:
+				continue
+			var contact: Dictionary = Dictionary(contact_variant).duplicate(true)
+			var normalized_fireteam_id: String = String(contact.get("fireteam_id", fireteam_id)).strip_edges().to_lower()
+			if not lookup.has(normalized_fireteam_id):
+				continue
+			contact["fireteam_id"] = normalized_fireteam_id
+			var contact_key: String = "%s:%s" % [normalized_fireteam_id, String(contact.get("unit_id", ""))]
+			if seen_keys.has(contact_key):
+				continue
+			seen_keys[contact_key] = true
+			result.append(contact)
+	return result
+
+
+func _get_contact_overlay_visible_contacts_snapshot() -> Array:
+	var overlay := get_node_or_null("../ContactMapOverlay")
+	if overlay == null or not overlay.has_method("get_visible_contacts"):
+		return []
+	return Array(overlay.call("get_visible_contacts")).duplicate(true)
+
+
+func _get_primary_3d_contact_render_snapshot() -> Dictionary:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null or not primary_3d_view.has_method("get_render_snapshot"):
+		return {}
+	var render_snapshot: Dictionary = Dictionary(primary_3d_view.call("get_render_snapshot"))
+	return {
+		"contact_count": int(render_snapshot.get("contact_count", 0)),
+		"contact_entries": Array(render_snapshot.get("contact_entries", [])).duplicate(true),
+		"contact_payload_apply_count": int(render_snapshot.get("contact_payload_apply_count", 0)),
+		"fow_allowed_contact_count": int(render_snapshot.get("fow_allowed_contact_count", 0)),
+		"fow_hidden_contact_count": int(render_snapshot.get("fow_hidden_contact_count", 0)),
+		"mission_los_debug_line_count": int(render_snapshot.get("mission_los_debug_line_count", 0)),
+	}
+
+
+func _find_first_security_state_for_fireteams(fireteam_ids: Array, entries: Array) -> Dictionary:
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	for state_variant in entries:
+		if typeof(state_variant) != TYPE_DICTIONARY:
+			continue
+		var state: Dictionary = Dictionary(state_variant)
+		var fireteam_id: String = String(state.get("fireteam_id", "")).strip_edges().to_lower()
+		if lookup.has(fireteam_id):
+			return state.duplicate(true)
+	return {}
+
+
+func _contact_entry_has_readability_fields(contact: Dictionary) -> bool:
+	if contact.is_empty():
+		return false
+	if String(contact.get("detection_state", "")).strip_edges().is_empty():
+		return false
+	if typeof(contact.get("last_known_position", null)) != TYPE_VECTOR2 and typeof(contact.get("approximate_position", null)) != TYPE_VECTOR2:
+		return false
+	if not contact.has("confidence") and not contact.has("confidence_level") and not contact.has("detection_confidence"):
+		return false
+	return true
+
+
+func _does_first_contact_feedback_text_show_contact(text: String) -> bool:
+	var normalized_text: String = text.strip_edges().to_upper()
+	if normalized_text.is_empty():
+		return false
+	for token in ["CONTACT", "KONTAKT", "FEIND", "ENEMY", "SICHT", "SPOTTED", "CONFIRMED", "THREAT", "BEDROHUNG"]:
+		if normalized_text.contains(token):
+			return true
+	return false
+
+
+func _first_contact_has_threat_or_cover_context(security_state: Dictionary, cover_readout: Dictionary, contact_diagnostics: Dictionary) -> bool:
+	if not security_state.is_empty():
+		if bool(security_state.get("is_active", false)):
+			return true
+		if typeof(security_state.get("main_threat_position", null)) == TYPE_VECTOR2:
+			return true
+	if not contact_diagnostics.is_empty():
+		return true
+	if not Array(cover_readout.get("contact_readouts", [])).is_empty():
+		return true
+	var readout_text: String = String(cover_readout.get("readout_text", "")).strip_edges().to_lower()
+	return not readout_text.is_empty() and not readout_text.contains("unknown")
 
 
 func get_command_feedback_snapshot() -> Dictionary:
