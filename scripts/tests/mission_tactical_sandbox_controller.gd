@@ -5914,6 +5914,9 @@ func _build_strategic_status_text() -> String:
 	if not transfer_text.is_empty():
 		lines.append(transfer_text)
 	lines.append(_build_mission_time_limit_text())
+	var objective_interaction_line: String = _build_mission_objective_interaction_line()
+	if not objective_interaction_line.is_empty():
+		lines.append(objective_interaction_line)
 	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text()
 	var combat_hud_snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var combat_hud_line: String = String(combat_hud_snapshot.get("mission_control_line", "")).strip_edges()
@@ -5922,6 +5925,54 @@ func _build_strategic_status_text() -> String:
 	elif not contact_diagnostics_text.is_empty():
 		lines.append(contact_diagnostics_text)
 	return "\n".join(lines)
+
+
+func _build_mission_objective_interaction_line() -> String:
+	var objective_state: Dictionary = _build_mission_objective_state_snapshot()
+	var gate_snapshot: Dictionary = _get_mission_scenario_runtime_gate_snapshot_for_readability()
+	var gate_entries: Array = Array(gate_snapshot.get("gates", []))
+	if objective_state.is_empty() and gate_entries.is_empty():
+		return ""
+
+	var parts: PackedStringArray = PackedStringArray()
+	var aa_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "air_defense_shutdown")
+	if not aa_gate.is_empty():
+		parts.append("AA %s" % _compact_runtime_gate_status(String(aa_gate.get("status", ""))))
+
+	var computer_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "computer_hold")
+	if not computer_gate.is_empty():
+		var computer_status: String = _compact_runtime_gate_status(String(computer_gate.get("status", "")))
+		var elapsed_seconds: int = int(round(float(computer_gate.get("hold_elapsed_seconds", 0.0))))
+		var required_seconds: int = int(round(float(computer_gate.get("hold_required_seconds", 0.0))))
+		if required_seconds > 0:
+			parts.append("COM %s %d/%ds" % [computer_status, mini(elapsed_seconds, required_seconds), required_seconds])
+		else:
+			parts.append("COM %s" % computer_status)
+
+	if not objective_state.is_empty():
+		var owner_text: String = String(objective_state.get("owning_team_id", "")).strip_edges()
+		if owner_text.is_empty():
+			owner_text = "neutral"
+		var progress_percent: int = int(round(clampf(float(objective_state.get("capture_progress", 0.0)), 0.0, 1.0) * 100.0))
+		parts.append("OBJ %s %d%%" % [owner_text, progress_percent])
+
+	if parts.is_empty():
+		return ""
+	return " | ".join(parts)
+
+
+func _compact_runtime_gate_status(status: String) -> String:
+	match status.strip_edges().to_lower():
+		"complete":
+			return "OK"
+		"active":
+			return "ACTIVE"
+		"blocked":
+			return "BLOCKED"
+		"pending":
+			return "PENDING"
+		_:
+			return "UNKNOWN"
 
 
 func _build_mission_control_contact_diagnostics_text() -> String:
@@ -12559,6 +12610,154 @@ func get_multi_fireteam_combat_hud_consistency_snapshot() -> Dictionary:
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
 	}
+
+
+func get_mission_objective_interaction_readability_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var command_buttons: Dictionary = Dictionary(command_feedback.get("command_buttons", {}))
+	var take_button: Dictionary = Dictionary(command_buttons.get("take", {}))
+	var selected_tile: Dictionary = Dictionary(command_feedback.get("selected_tile", {}))
+	var objective_state: Dictionary = _build_mission_objective_state_snapshot()
+	var gate_snapshot: Dictionary = _get_mission_scenario_runtime_gate_snapshot_for_readability()
+	var gate_entries: Array = Array(gate_snapshot.get("gates", []))
+	var aa_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "air_defense_shutdown")
+	var computer_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "computer_hold")
+	var cargo_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "cargo_touchdown_extract")
+	var objective_line: String = _build_mission_objective_interaction_line()
+	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	if not objective_line.is_empty() and not mission_control_status_text.contains(objective_line):
+		mission_control_status_text = _build_strategic_status_text()
+	var primary_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		primary_snapshot = Dictionary(primary_3d_view.call("get_render_snapshot")).duplicate(true)
+	var selected_tile_targets_objective: bool = _is_selected_tile_close_to_objective(selected_tile, objective_state)
+	var objective_progress: float = clampf(float(objective_state.get("capture_progress", 0.0)), 0.0, 1.0)
+	var primary_progress: float = clampf(float(primary_snapshot.get("objective_capture_progress", -1.0)), 0.0, 1.0)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"take_control_visible",
+			not take_button.is_empty() and bool(take_button.get("visible", false)),
+			"Command Matrix keeps the Take/Objective interaction control visible."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_tile_targets_objective",
+			selected_tile_targets_objective,
+			"Selected tile points at the current objective interaction space."
+		),
+		_build_mission_first_move_readability_check(
+			"objective_state_available",
+			not objective_state.is_empty() and bool(objective_state.get("available", false)),
+			"SimulationRoot exposes the objective state used by the UI."
+		),
+		_build_mission_first_move_readability_check(
+			"objective_progress_readable",
+			objective_state.has("capture_progress") and objective_progress >= 0.0 and objective_progress <= 1.0,
+			"Objective capture progress is normalized and readable."
+		),
+		_build_mission_first_move_readability_check(
+			"scenario_gates_visible",
+			bool(gate_snapshot.get("configured", false)) and gate_entries.size() >= 3,
+			"Scenario runtime gates expose AA, computer and cargo steps."
+		),
+		_build_mission_first_move_readability_check(
+			"computer_gate_readable",
+			not computer_gate.is_empty()
+				and String(computer_gate.get("target_marker_id", "")) == "objective_point"
+				and float(computer_gate.get("hold_required_seconds", 0.0)) > 0.0,
+			"Computer hold gate keeps target, status and hold timer data visible."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_names_objective_interaction",
+			not objective_line.is_empty() and mission_control_status_text.contains(objective_line),
+			"Mission Control names AA/COM/OBJ status in one compact line."
+		),
+		_build_mission_first_move_readability_check(
+			"primary_objective_visual_visible",
+			bool(primary_snapshot.get("objective_status_visible", false)) and absf(primary_progress - objective_progress) <= 0.01,
+			"Primary 3D view renders the same objective progress."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(gate_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Objective interaction snapshot reads gameplay truth without writing it from UI."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_552",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"objective_interaction_line": objective_line,
+		"mission_control_status_text": mission_control_status_text,
+		"selected_tile": selected_tile,
+		"selected_tile_targets_objective": selected_tile_targets_objective,
+		"take_button": take_button,
+		"objective_state": objective_state,
+		"scenario_gate_snapshot": gate_snapshot,
+		"aa_gate": aa_gate,
+		"computer_gate": computer_gate,
+		"cargo_gate": cargo_gate,
+		"primary_3d": primary_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_mission_objective_state_snapshot() -> Dictionary:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or not simulation_root.has_method("get_objective_status"):
+		return {}
+	var objective_status = simulation_root.call("get_objective_status")
+	if objective_status == null:
+		return {}
+	var result: Dictionary = {}
+	if objective_status.has_method("to_dict"):
+		result = Dictionary(objective_status.call("to_dict")).duplicate(true)
+	else:
+		result = {
+			"objective_id": String(objective_status.objective_id),
+			"position": objective_status.position,
+			"capture_radius": float(objective_status.capture_radius),
+			"owning_team_id": String(objective_status.owning_team_id),
+			"capture_progress": float(objective_status.capture_progress),
+			"capturing_team_id": String(objective_status.capturing_team_id),
+			"contested": bool(objective_status.call("is_contested")) if objective_status.has_method("is_contested") else false,
+		}
+	result["available"] = true
+	result["capture_progress"] = clampf(float(result.get("capture_progress", 0.0)), 0.0, 1.0)
+	result["capture_radius"] = maxf(float(result.get("capture_radius", 0.0)), 0.0)
+	return result
+
+
+func _get_mission_scenario_runtime_gate_snapshot_for_readability() -> Dictionary:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_mission_scenario_runtime_gate_snapshot"):
+		return {}
+	return Dictionary(combat_driver.call("get_mission_scenario_runtime_gate_snapshot")).duplicate(true)
+
+
+func _find_runtime_gate_by_objective_type(gate_entries: Array, objective_type: String) -> Dictionary:
+	var normalized_type: String = objective_type.strip_edges()
+	for gate_variant in gate_entries:
+		var gate: Dictionary = Dictionary(gate_variant)
+		if String(gate.get("objective_type", "")).strip_edges() == normalized_type:
+			return gate
+	return {}
+
+
+func _is_selected_tile_close_to_objective(selected_tile: Dictionary, objective_state: Dictionary) -> bool:
+	if not bool(selected_tile.get("has_selected_tile", false)) or objective_state.is_empty():
+		return false
+	var tile_position: Vector2 = Vector2(selected_tile.get("world_position", Vector2.ZERO))
+	var objective_position: Vector2 = Vector2(objective_state.get("position", Vector2.ZERO))
+	var capture_radius: float = maxf(float(objective_state.get("capture_radius", 0.0)), 1.0)
+	return tile_position.distance_to(objective_position) <= capture_radius + 1.0
 
 
 func get_combat_hud_visual_detail_tooltip_snapshot() -> Dictionary:
