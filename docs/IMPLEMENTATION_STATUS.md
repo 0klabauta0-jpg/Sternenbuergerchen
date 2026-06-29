@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_557 - Frontier Probe Multiplayer F6 Readability Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_549_combat_hud_f6_visual_audit.md`, `docs/tasks/TASK_555_frontier_probe_multiplayer_objective_ownership_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_frontier_probe_multiplayer_f6_readability_snapshot()` fuer den sichtbaren FullHD-F6-Missionsmoment des Frontier-Probe-Multiplayer-Slice.
+- Stand: Der Smoke kombiniert TASK_555-Ownership, relevante TASK_549-F6-Layoutchecks, Command-Feedback, Mission-Team-Chip und Control-Bounds, ohne UI oder Bericht zur Gameplay-Wahrheit zu machen.
+- Stand: Geprueft werden sichtbarer Teamchip mit Host Peer 1, Peer 2, `spawn_alpha`, `spawn_bravo`, Mission-Control-Kontext fuer AA/COM/OBJ/CARGO, Selected-Fireteam-Kontext sowie FullHD-Bounds und kritische Panel-Ueberlappungen.
+- Stand: Der Rolling-HTML-Bericht ist auf TASK_557 aktualisiert und bleibt als laufender Zwischenbericht gepflegt.
+- Risiken/offen: Der Smoke ersetzt keinen echten manuellen Screenshot-/Hover-Sichttest im F6-Fenster.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_556_frontier_probe_host_client_objective_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_555_frontier_probe_multiplayer_objective_ownership_smoke.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass`, damit der echte F6-MP-Blick als Sichttest/Notiz im HTML-Bericht festgehalten wird.
+
 ### TASK_556 - Frontier Probe Host Client Objective Handoff Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_555_frontier_probe_multiplayer_objective_ownership_smoke.md`, `docs/tasks/TASK_169_multiplayer_two_client_playability_smoke.md`, `docs/dev/mission_command_feedback_contract.md`
