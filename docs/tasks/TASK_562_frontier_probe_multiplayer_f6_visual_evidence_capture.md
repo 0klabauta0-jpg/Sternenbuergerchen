@@ -14,7 +14,8 @@ Damit der naechste UI-/Layout-Polish nicht aus Bauchgefuehl entsteht, braucht de
 - Der Smoke prueft TASK_557-Readability und TASK_560-Teamchip-Tooltip weiter.
 - Der Smoke schreibt ein PNG nach `tmp/frontier_probe_mp_f6_visual_evidence.png`; im Headless-Dummy-Renderer ist das ein markiertes Evidence-Board aus Snapshot-Rects, bei verfuegbarem Viewport-Readback ein Viewport-Bild.
 - Der Smoke schreibt ein Manifest nach `tmp/frontier_probe_mp_f6_visual_evidence.json`.
-- Der Rolling-HTML-Bericht nennt den Capture als aktuellen Zwischenstand; TASK_563 macht die Evidence direkt sichtbar, TASK_564 ist der naechste Apply-Slice.
+- Das Manifest nennt Evidence-Board-Regionen, damit der HTML-Bericht die Farben sauber erklaeren kann.
+- Der Rolling-HTML-Bericht nennt den Capture als aktuellen Zwischenstand; TASK_563 macht die Evidence direkt sichtbar, TASK_564 poliert die Evidence-Lesbarkeit, TASK_565 ist der naechste echte Sichtreview-Slice.
 
 ## Nicht-Ziele
 - Kein behaupteter menschlicher Screenshot-/Hover-Test.
@@ -32,7 +33,7 @@ Damit der naechste UI-/Layout-Polish nicht aus Bauchgefuehl entsteht, braucht de
 ## Akzeptanzkriterien
 - Der Capture-Smoke laeuft gruen.
 - PNG und Manifest werden unter `tmp/` erzeugt.
-- Das Manifest enthaelt PNG-Pfad, Viewport, Readback-/Evidence-Board-Status, TASK_557-Gate, TASK_560-Gate, Teamchip-Text und Tooltip-Laenge.
+- Das Manifest enthaelt PNG-Pfad, Viewport, Readback-/Evidence-Board-Status, TASK_557-Gate, TASK_560-Gate, Teamchip-Text, Tooltip-Laenge und Evidence-Board-Regionen.
 - Der Screenshot ist nicht leer und hat FullHD-Abmessungen.
 - Der Smoke bleibt read-only und setzt keine Gameplay-Wahrheit in UI/Report.
 - Status, Roadmap, Contract und HTML-Bericht sind aktualisiert.
@@ -52,4 +53,4 @@ Damit der naechste UI-/Layout-Polish nicht aus Bauchgefuehl entsteht, braucht de
 
 ## Risiken / offene Punkte
 - Der Capture liefert in Headless eine reproduzierbare Evidence-Board-Bildbasis, ersetzt aber weiterhin nicht den menschlichen Hover-/Lesbarkeitsentscheid im echten Fenster.
-- Der naechste sinnvolle Apply-Schritt ist TASK_564: Screenshot/Manifest oder exportierte MP-F6-Review-Notizen in konkrete UI-/Layout-Korrekturen uebersetzen.
+- Der naechste sinnvolle Sichtreview-Schritt ist TASK_565: echten F6-/Hover-Screenshot oder exportierte MP-F6-Review-Notizen in konkrete UI-/Layout-Korrekturen uebersetzen.
