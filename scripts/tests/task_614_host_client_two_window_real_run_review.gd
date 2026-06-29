@@ -78,7 +78,7 @@ func _test_report_export_fields(report_text: String) -> void:
 	_assert(report_text.contains('data-note-key="notes.host_client_two_window_real_run_review"'), "Report exports free TASK_614 real-run review note")
 	_assert(report_text.contains('"TASK_615 - Host Client Real Run Findings"'), "JSON payload keeps TASK_615 in completed tasks")
 	_assert(report_text.contains('"TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload keeps TASK_616 in completed chain")
-	_assert(report_text.contains('latest_completed_task: "TASK_617 - Host Client Standard Window Layout Hardening"'), "JSON payload advances latest completed task to TASK_617")
+	_assert(report_text.contains('latest_completed_task: "TASK_618 - Host Client Standard Capture Crop Review"'), "JSON payload advances latest completed task to TASK_618")
 
 
 func _test_capture_tool_script() -> void:
@@ -88,6 +88,8 @@ func _test_capture_tool_script() -> void:
 		"TASK_614",
 		"host_client_two_window_real_run_review.json",
 		"host_client_two_window_real_run_desktop.png",
+		"host_client_two_window_host_review.png",
+		"host_client_two_window_client_review.png",
 		"Launch",
 		"CloseAfterCapture",
 		"Capture-Desktop",
@@ -113,11 +115,14 @@ func _test_dry_run_manifest_if_present() -> void:
 	_assert(not bool(manifest.get("launch_requested", true)), "Dry-run manifest did not request launch")
 	_assert(not bool(manifest.get("real_run_done", true)), "Dry-run manifest does not claim real run done")
 	_assert(not bool(manifest.get("screenshot_written", true)), "Dry-run manifest does not claim screenshot written")
+	_assert(not bool(manifest.get("host_screenshot_written", true)), "Dry-run manifest does not claim host screenshot written")
+	_assert(not bool(manifest.get("client_screenshot_written", true)), "Dry-run manifest does not claim client screenshot written")
 	_assert(bool(manifest.get("manual_review_required", false)), "Manifest requires manual review")
 	_assert(not bool(manifest.get("manual_review_done", true)), "Manifest does not claim manual review done")
 	_assert(bool(manifest.get("read_only", false)), "Manifest remains read-only")
 	_assert(not bool(manifest.get("ui_sets_gameplay_truth", true)), "Manifest does not set gameplay truth")
 	_assert(String(manifest.get("recommended_next_task", "")) == "TASK_615 - Host Client Real Run Findings", "Manifest recommends TASK_615")
+	_assert(String(manifest.get("recommended_next_capture_task", "")) == "TASK_618 - Host Client Standard Capture Crop Review", "Manifest recommends TASK_618 capture review")
 
 
 func _read_json(path: String) -> Dictionary:

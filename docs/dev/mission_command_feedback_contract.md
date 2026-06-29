@@ -349,6 +349,11 @@ TASK_617 haertet den Standard-Launchplan fuer sichtbare Host-/Client-Reviews: De
 
 Erwartete Struktur: `tmp/host_client_two_window_launch_plan.json` enthaelt zusaetzlich `requested_window_layout` und `window_layout_auto_fit` mit `attempted`, `applied`, `reason`, `screen` und `disable_auto_fit`. `window_layout`, `host.window`, `client.window` und die Godot-Argumente nutzen das effektive Layout. `tmp/host_client_two_window_real_run_review.json` darf `window_raise_attempted` und `raise_*`-Fensterstatus als Review-Evidence melden. Der laufende HTML-Bericht darf TASK_617-Felder unter `host_client_standard_window_layout.*` exportieren.
 
+## Host-Client-Standard-Capture-Crop-Review
+TASK_618 macht den Standard-Real-Run-Capture als Host-/Client-Vergleich sauberer: Aus dem Desktop-Screenshot duerfen die geplanten Host- und Client-Fensterrechtecke als eigene lokale PNGs ausgeschnitten werden. Diese Crops sind Review-Artefakte und duerfen keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit setzen.
+
+Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` enthaelt zusaetzlich `host_screenshot_path`, `client_screenshot_path`, `host_screenshot_written`, `client_screenshot_written`, `host_crop_status`, `client_crop_status` und `recommended_next_capture_task = TASK_618 - Host Client Standard Capture Crop Review`. Die Crop-Statusobjekte melden `attempted`, `succeeded`, `reason`, `width` und `height`. Der laufende HTML-Bericht darf TASK_618-Felder unter `host_client_standard_capture_crop.*` exportieren und den naechsten belegten UI-Fund festhalten: Host und Client brauchen im eigentlichen Missionsfenster einen klaren Role-/Peer-/Team-Hinweis.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
