@@ -175,7 +175,8 @@ git checkout -b batch/<batch-name>
 - TASK_544 - Mission Fire And Cover Visual Polish Pass (implementiert)
 - TASK_545 - Mission Fire Cover Integrated Flow Smoke (implementiert)
 - TASK_546 - Mission Combat Feedback HUD Density Polish (implementiert)
-- TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke
+- TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke (implementiert)
+- TASK_548 - Combat HUD Visual Detail Tooltip Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
