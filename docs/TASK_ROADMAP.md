@@ -231,7 +231,8 @@ git checkout -b batch/<batch-name>
 - TASK_600 - Integrated Core Loop Flow Polish Findings (implementiert)
 - TASK_601 - Core Loop Manual FullHD Playtest Capture (implementiert)
 - TASK_602 - Core Loop Transition Pacing Polish (implementiert)
-- TASK_603 - Mission HUD Density Interaction Polish
+- TASK_603 - Mission HUD Density Interaction Polish (implementiert)
+- TASK_604 - Core Loop Host Client Feel Smoke
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

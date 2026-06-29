@@ -274,6 +274,11 @@ TASK_602 definiert kleine Zielbudgets fuer die wichtigsten Core-Loop-Uebergaenge
 
 Erwartete Struktur: Das Manifest enthaelt `schema = sternenbuergerchen.core_loop_transition_pacing_polish.v1`, `task_id = TASK_602`, `source_task = TASK_601`, `transition_budgets`, `transition_budget_count`, `total_target_seconds`, `total_tolerance_seconds`, `budget_policy`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_603 - Mission HUD Density Interaction Polish`. Jedes Budget muss Zielzeit, Toleranz, Schweregrad und `measurement_status = manual_open` tragen.
 
+## Mission-HUD-Density-Interaction-Polish
+TASK_603 verdichtet vorhandene Mission-Control-Interaktionsdaten in eine kompakte `ACT`-Zeile. Die Zeile darf Objective-, Cargo-, ROE- und Contact-/Combat-Kontext anzeigen, aber keine Mission-, Combat-, Objective-, Cargo- oder UI-Wahrheit erzeugen.
+
+Erwartete Struktur: `get_mission_hud_density_interaction_polish_snapshot()` enthaelt `task_id = TASK_603`, `interaction_density`, `mission_control_line`, `mission_control_status_text`, `combat_hud_density`, `command_feedback`, `read_only = true` und `ui_sets_gameplay_truth = false`. `interaction_density` enthaelt `source = objective_cargo_contact_roe_combat_snapshots`, `mission_control_line`, `visible_line_count`, `max_visible_line_count`, `source_line_count`, `line_char_limit`, `line_within_limit`, `objective_line`, `cargo_line`, `combat_line`, `contact_line`, `fire_rule_text`, `contains_contact_or_combat`, `contains_roe`, `contains_suppress`, `contains_objective` und `contains_cargo`. `get_command_feedback_snapshot()` muss dieselben Daten unter `mission_hud_interaction_density` und `mission_hud_interaction_line` exportieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

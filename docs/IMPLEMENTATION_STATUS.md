@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_603 - Mission HUD Density Interaction Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/tasks/TASK_602_core_loop_transition_pacing_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MissionTacticalSandboxController` verdichtet Objective, Cargo, ROE und Contact/Combat in eine kompakte `ACT`-Zeile fuer Mission Control.
+- Stand: `get_mission_hud_density_interaction_polish_snapshot()` und `get_command_feedback_snapshot().mission_hud_interaction_density` liefern den read-only Interaction-Density-Stack mit Linecount-, Zeichenbudget- und SUP-/Objective-/Cargo-/Combat-Gates.
+- Stand: `scripts/tests/task_603_mission_hud_density_interaction_polish.gd` prueft den Frontier-Probe-Kontext mit Objective, Cargo, SUP-ROE und Combat-Kontakt.
+- Risiken/offen: TASK_603 ersetzt keinen echten FullHD-Spielgefuehl-Test. Falls die `ACT`-Zeile im Fenster zu lang wirkt, braucht es einen Sichttest-/Tuning-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_603_mission_hud_density_interaction_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_554_frontier_probe_integrated_objective_playthrough_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_581_suppress_fire_intent_outcome_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_546_mission_combat_feedback_hud_density_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_604 - Core Loop Host Client Feel Smoke`, damit derselbe angenehmere Flow danach im Host/Client-Gefuehl geprueft wird.
+
 ### TASK_602 - Core Loop Transition Pacing Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_602_core_loop_transition_pacing_polish.md`, `docs/tasks/TASK_601_core_loop_manual_fullhd_playtest_capture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

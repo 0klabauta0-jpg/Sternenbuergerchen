@@ -6106,20 +6106,87 @@ func _build_strategic_status_text() -> String:
 	if not transfer_text.is_empty():
 		lines.append(transfer_text)
 	lines.append(_build_mission_time_limit_text())
-	var objective_interaction_line: String = _build_mission_objective_interaction_line()
-	if not objective_interaction_line.is_empty():
-		lines.append(objective_interaction_line)
-	var cargo_extract_line: String = _build_mission_cargo_extract_line()
-	if not cargo_extract_line.is_empty():
-		lines.append(cargo_extract_line)
-	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text()
+	var interaction_density: Dictionary = _build_mission_hud_interaction_density_snapshot()
+	var interaction_line: String = String(interaction_density.get("mission_control_line", "")).strip_edges()
+	if not interaction_line.is_empty():
+		lines.append(interaction_line)
+	return "\n".join(lines)
+
+
+func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
+	var objective_line: String = _build_mission_objective_interaction_line().strip_edges()
+	var cargo_line: String = _build_mission_cargo_extract_line().strip_edges()
+	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text().strip_edges()
 	var combat_hud_snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var combat_hud_line: String = String(combat_hud_snapshot.get("mission_control_line", "")).strip_edges()
-	if not combat_hud_line.is_empty():
-		lines.append(combat_hud_line)
-	elif not contact_diagnostics_text.is_empty():
-		lines.append(contact_diagnostics_text)
-	return "\n".join(lines)
+	var combat_or_contact_line: String = combat_hud_line if not combat_hud_line.is_empty() else contact_diagnostics_text
+	var fire_rule_text: String = _compact_fire_rule_for_hud(_get_selected_fire_rule_consensus())
+	var source_lines: PackedStringArray = PackedStringArray()
+	if not objective_line.is_empty():
+		source_lines.append(objective_line)
+	if not cargo_line.is_empty():
+		source_lines.append(cargo_line)
+	if not combat_or_contact_line.is_empty():
+		source_lines.append(combat_or_contact_line)
+	var compact_parts: PackedStringArray = PackedStringArray()
+	if not objective_line.is_empty():
+		compact_parts.append(objective_line)
+	if not cargo_line.is_empty():
+		compact_parts.append(cargo_line)
+	if not fire_rule_text.is_empty():
+		compact_parts.append("ROE %s" % fire_rule_text)
+	if not combat_or_contact_line.is_empty():
+		compact_parts.append(combat_or_contact_line)
+	var mission_control_line: String = ""
+	if not compact_parts.is_empty():
+		mission_control_line = "ACT %s" % " | ".join(compact_parts)
+	var line_limit: int = 180
+	var visible_lines: PackedStringArray = PackedStringArray()
+	if not mission_control_line.is_empty():
+		visible_lines.append(mission_control_line)
+	return {
+		"active": not mission_control_line.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"source": "objective_cargo_contact_roe_combat_snapshots",
+		"mission_control_line": mission_control_line,
+		"visible_lines": Array(visible_lines),
+		"visible_line_count": visible_lines.size(),
+		"max_visible_line_count": 1,
+		"source_lines": Array(source_lines),
+		"source_line_count": source_lines.size(),
+		"line_char_limit": line_limit,
+		"max_line_length": _max_string_length(Array(visible_lines)),
+		"line_within_limit": _max_string_length(Array(visible_lines)) <= line_limit,
+		"objective_line": objective_line,
+		"cargo_line": cargo_line,
+		"combat_line": combat_hud_line,
+		"contact_line": contact_diagnostics_text,
+		"fire_rule": _get_selected_fire_rule_consensus(),
+		"fire_rule_text": fire_rule_text,
+		"combat_hud_density": combat_hud_snapshot,
+		"contains_contact_or_combat": not combat_or_contact_line.is_empty(),
+		"contains_roe": not fire_rule_text.is_empty(),
+		"contains_suppress": fire_rule_text == "SUP" or mission_control_line.to_upper().contains("SUP"),
+		"contains_objective": not objective_line.is_empty() and mission_control_line.contains(objective_line),
+		"contains_cargo": not cargo_line.is_empty() and mission_control_line.contains(cargo_line),
+	}
+
+
+func _compact_fire_rule_for_hud(fire_rule: String) -> String:
+	match fire_rule.strip_edges().to_lower():
+		TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_HOLD:
+			return "HF"
+		TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_RETURN:
+			return "RF"
+		TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_FREE:
+			return "FW"
+		TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS:
+			return "SUP"
+		"mixed":
+			return "MIX"
+		_:
+			return ""
 
 
 func _build_mission_cargo_extract_line() -> String:
@@ -14090,6 +14157,89 @@ func get_multi_fireteam_combat_hud_consistency_snapshot() -> Dictionary:
 	}
 
 
+func get_mission_hud_density_interaction_polish_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var interaction_density: Dictionary = Dictionary(command_feedback.get("mission_hud_interaction_density", _build_mission_hud_interaction_density_snapshot())).duplicate(true)
+	var mission_control_line: String = String(interaction_density.get("mission_control_line", "")).strip_edges()
+	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	if not mission_control_line.is_empty() and not mission_control_status_text.contains(mission_control_line):
+		mission_control_status_text = _build_strategic_status_text()
+	var combat_hud_snapshot: Dictionary = get_mission_combat_feedback_hud_density_snapshot()
+	var objective_line: String = String(interaction_density.get("objective_line", "")).strip_edges()
+	var cargo_line: String = String(interaction_density.get("cargo_line", "")).strip_edges()
+	var contact_or_combat_present: bool = bool(interaction_density.get("contains_contact_or_combat", false))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"interaction_density_active",
+			bool(interaction_density.get("active", false)) and not mission_control_line.is_empty(),
+			"Mission HUD density stack exposes a compact interaction line."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_uses_interaction_stack",
+			not mission_control_line.is_empty() and mission_control_status_text.contains(mission_control_line),
+			"Mission Control shows the compact ACT interaction stack."
+		),
+		_build_mission_first_move_readability_check(
+			"stack_reduces_visible_line_count",
+			int(interaction_density.get("visible_line_count", 99)) <= int(interaction_density.get("max_visible_line_count", 1))
+				and int(interaction_density.get("source_line_count", 0)) >= int(interaction_density.get("visible_line_count", 0)),
+			"Objective, Cargo and Combat context are compressed into the configured visible line budget."
+		),
+		_build_mission_first_move_readability_check(
+			"stack_within_character_budget",
+			bool(interaction_density.get("line_within_limit", false)),
+			"Interaction line stays within the configured HUD character budget."
+		),
+		_build_mission_first_move_readability_check(
+			"contact_or_combat_visible",
+			contact_or_combat_present and String(combat_hud_snapshot.get("gate", "")) == "pass",
+			"Contact or combat state remains visible through the existing compact combat HUD snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"roe_visible",
+			bool(interaction_density.get("contains_roe", false)) and mission_control_line.contains("ROE"),
+			"Current ROE/fire-rule context is visible in the interaction stack."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_visible_when_active",
+			String(interaction_density.get("fire_rule_text", "")) != "SUP" or bool(interaction_density.get("contains_suppress", false)),
+			"SUP is visible when suppress fire is the selected rule."
+		),
+		_build_mission_first_move_readability_check(
+			"objective_or_cargo_preserved",
+			(objective_line.is_empty() or mission_control_status_text.contains(objective_line))
+				and (cargo_line.is_empty() or mission_control_status_text.contains(cargo_line)),
+			"Objective and Cargo readouts stay findable even after density compression."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(interaction_density.get("read_only", false))
+				and not bool(interaction_density.get("ui_sets_gameplay_truth", true))
+				and not bool(combat_hud_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Interaction density snapshot combines existing read-only HUD data without gameplay mutation."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_603",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"interaction_density": interaction_density,
+		"mission_control_line": mission_control_line,
+		"mission_control_status_text": mission_control_status_text,
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"combat_hud_density": combat_hud_snapshot,
+		"command_feedback": command_feedback,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func get_mission_objective_interaction_readability_snapshot() -> Dictionary:
 	var command_feedback: Dictionary = get_command_feedback_snapshot()
 	var command_buttons: Dictionary = Dictionary(command_feedback.get("command_buttons", {}))
@@ -15691,6 +15841,7 @@ func _fire_cover_visual_has_status_badge_readability(primary_snapshot: Dictionar
 func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
+	var mission_hud_interaction_density: Dictionary = _build_mission_hud_interaction_density_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
@@ -15727,6 +15878,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"contact_decision_diagnostics_text": _build_mission_control_contact_diagnostics_text(),
 		"combat_hud_density": combat_hud_density,
 		"combat_hud_compact_line": String(combat_hud_density.get("compact_line", "")),
+		"mission_hud_interaction_density": mission_hud_interaction_density,
+		"mission_hud_interaction_line": String(mission_hud_interaction_density.get("mission_control_line", "")),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),
