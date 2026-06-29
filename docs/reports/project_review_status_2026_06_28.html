@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_580 auf <code>task/suppress-fire-visual-tuning-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 nach TASK_580-Merge auf <code>integration/core-foundation</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -251,6 +251,7 @@
       <span class="pill good">TASK_577 SUP-Evidence</span>
       <span class="pill good">TASK_580 SUP-Tuning</span>
       <span class="pill warn">TASK_581 SUP-Outcome offen</span>
+      <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -464,6 +465,22 @@
         <article class="card wide">
           <h2>Zwischenbericht</h2>
           <p>Dieser Bereich ist der schnelle Arbeitsstand fuer den laufenden Chat: Was wurde zuletzt integriert, was ist gerade in Arbeit, und was sollte als naechstes passieren, ohne dass wir uns im Klein-Klein verlieren.</p>
+          <div class="metric-row" style="margin-top:14px">
+            <div class="metric"><strong>TASK_580</strong><span>zuletzt integriert: SUP-Area-Tuning, Merge und Push auf <code>integration/core-foundation</code></span></div>
+            <div class="metric"><strong>TASK_581</strong><span>naechster sinnvoller Slice: SUP als Intent/Outcome-Smoke durch Combat-/Resolver-Diagnostik tragen</span></div>
+            <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
+          </div>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
+              <tbody>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-Feedback ist in kleinen Smokes abgesichert.</td><td>Der naechste Test soll nicht mehr nur Preview sein, sondern zeigen, ob `SUP` im Outcome/Resolver diagnostisch sauber bleibt.</td></tr>
+                <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
+                <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
+                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
+              </tbody>
+            </table>
+          </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Block</th><th>Was erledigt ist</th><th>Warum es wichtig ist</th><th>Naechster Anschluss</th></tr></thead>
@@ -481,8 +498,10 @@
         </article>
         <article class="card">
           <h2>Aktuelle Lage</h2>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> TASK_575 ist im Arbeitsstand implementiert auf <code>task/fire-rule-evidence-polish-findings</code></label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> <code>integration/core-foundation</code> ist nach TASK_580 als aktuelle Arbeitsbasis vorgesehen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert und als laufende Workbench sichtbar</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_580_integrated"> TASK_580 Suppress-Fire-Visual-Tuning ist integriert, gepusht und als letzter erledigter Block dokumentiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="worklog.task_581_done"> TASK_581 Suppress-Fire-Intent-Outcome-Smoke ist noch offen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_544_done"> TASK_544 Fire-/Cover-Visual-Polish ist im Arbeitsstand implementiert</label>
@@ -551,6 +570,9 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
+                <tr><td>Aktueller Stand</td><td>TASK_580 ist der letzte integrierte Slice: Die SUP-Area ist als <code>suppress_area_v2</code> sichtbar getunt und bleibt read-only.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
+                <tr><td>Naechster Schritt</td><td>TASK_581 soll pruefen, ob <code>SUP</code> nicht nur vor <code>GO</code> sichtbar ist, sondern im Combat-/Resolver-Outcome diagnostisch sauber als Intent gefuehrt wird.</td><td>Wenn der Outcome-Smoke implementiert oder bewusst zurueckgestellt wird.</td></tr>
+                <tr><td>Noch nicht bauen</td><td>Kein grosses Ammo-, Suppression- oder AAR-System, solange der kleine Intent-/Outcome-Pfad nicht sauber gelesen und getestet ist.</td><td>Wenn spaeter echte Suppression-Wirkung, Munitionsverbrauch oder AAR-Messwerte als eigener Task beginnen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_562 erzeugt eine reproduzierbare MP-F6-Bildbasis unter <code>tmp/frontier_probe_mp_f6_visual_evidence.png</code> plus Manifest; im Headless-Dummy als Evidence-Board aus Snapshot-Rects.</td><td>Wenn TASK_565 aus echtem MP-F6-Export konkrete Gameplay-HUD-Polish-Aenderungen ableitet.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_563 macht diese lokale Evidence direkt im HTML-Zwischenbericht sichtbar und exportiert die Artefaktpfade sowie Readback-/Evidence-Board-Flags.</td><td>Wenn neue Capture-Artefakte, manuelle Sichtnotizen oder echte Host/Client-F6-Screenshots hinzukommen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_564 setzt den ersten belegbaren Visual-Polish um: Das Evidence-Board bekommt Region-Outlines, Raster, Swatches und eine Report-Legende.</td><td>Wenn die Capture-Evidence weitere konkrete UI-Reibung zeigt.</td></tr>
@@ -895,7 +917,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_579-Merge und Push. Arbeitsbranch: <code>task/suppress-fire-visual-tuning-findings</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Fire-Rule-/ROE-/SUP-Notizen und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_580-Merge und Push. Dieser Report-Refresh laeuft auf <code>task/rolling-html-report-status-refresh</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Fire-Rule-/ROE-/SUP-Notizen und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -1302,13 +1324,16 @@
             runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status",
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
+            interim_report_visible: true,
+            interim_report_last_refresh: "2026-06-29",
+            current_repo_base: "integration/core-foundation after TASK_580",
             current_focus: "TASK_581 - Suppress Fire Intent Outcome Smoke",
             latest_completed_task: "TASK_580 - Suppress Fire Visual Tuning Findings"
           },
           metadata: {
-            branch: "task/suppress-fire-visual-tuning-findings",
-            integration_base: "integration/core-foundation after TASK_579",
-            head: "task/suppress-fire-visual-tuning-findings",
+            branch: "task/rolling-html-report-status-refresh",
+            integration_base: "integration/core-foundation after TASK_580",
+            head: "task/rolling-html-report-status-refresh",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }
