@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_556 - Frontier Probe Host Client Objective Handoff Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_555_frontier_probe_multiplayer_objective_ownership_smoke.md`, `docs/tasks/TASK_169_multiplayer_two_client_playability_smoke.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `FrontierProbeHostClientHandoffContract` bewertet read-only, ob der Frontier-Probe-Objective-Slice ueber Session-Assignments, `SimulationRoot.submit_network_command_for_peer()` und Multiplayer-Snapshot-Replikation konsistent bleibt.
+- Stand: Der Smoke prueft Host/Client-Readiness, Mission-Start-Assignments, Alpha Host Peer 1, Bravo Peer 2, erlaubten Bravo-Client-Move, abgelehnten Alpha-Fremdteam-Move, abgelehnte State-Mutation sowie Objective-/MissionResult-Replikation zum Client.
+- Stand: TASK_555-Ownership bleibt Teil des Handoff-Snapshots und muss gruen bleiben.
+- Stand: Der Rolling-HTML-Bericht ist auf TASK_556 aktualisiert und nennt TASK_557 als naechsten visuellen Multiplayer-Anschluss.
+- Risiken/offen: Der Smoke nutzt Host-/Client-Testharnesses und keinen echten LAN-/Zwei-Prozess-Socket.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_556_frontier_probe_host_client_objective_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_555_frontier_probe_multiplayer_objective_ownership_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_169_multiplayer_two_client_playability_smoke.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_557 - Frontier Probe Multiplayer F6 Readability Pass`, damit die MP-Ownership-/Objective-Lesbarkeit sichtbar im FullHD-Missionslayout geprueft wird.
+
 ### TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_555_frontier_probe_multiplayer_objective_ownership_smoke.md`, `docs/tasks/TASK_554_frontier_probe_integrated_objective_playthrough_smoke.md`, `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/tasks/TASK_526_mission_hud_team_chip_polish.md`, `docs/dev/mission_command_feedback_contract.md`
