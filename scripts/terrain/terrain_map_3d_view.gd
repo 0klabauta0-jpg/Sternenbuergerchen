@@ -305,6 +305,11 @@ const WEAPON_FIRE_IMPACT_CROSS_WORLD: float = 6.0
 const WEAPON_FIRE_IMPACT_CROSS_WIDTH: float = 0.018
 const WEAPON_FIRE_IMPACT_HIT_COLOR: Color = Color(1.0, 0.58, 0.10, 0.92)
 const WEAPON_FIRE_IMPACT_MISS_COLOR: Color = Color(0.95, 0.82, 0.46, 0.64)
+const WEAPON_FIRE_TARGET_FOCUS_RADIUS: float = 0.16
+const WEAPON_FIRE_TARGET_FOCUS_HEIGHT: float = 0.045
+const WEAPON_FIRE_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.72, 0.18, 0.42)
+const WEAPON_FIRE_STATUS_LABEL_FONT_SIZE: int = 11
+const WEAPON_FIRE_STATUS_LABEL_OFFSET: Vector2 = Vector2(0.0, -28.0)
 const UNIT_DAMAGE_BADGE_HEALTH_THRESHOLD: float = 0.995
 const UNIT_DOWN_POSE_ROTATION_DEGREES: Vector3 = Vector3(72.0, 0.0, 18.0)
 const UNIT_BLEEDOUT_POSE_ROTATION_DEGREES: Vector3 = Vector3(86.0, 0.0, 28.0)
@@ -5877,10 +5882,14 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	_add_marker3d(_order_root, muzzle_tip_position, WEAPON_FIRE_MUZZLE_TIP_COLOR, "WeaponFireMuzzleTip_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_TIP_RADIUS, WEAPON_FIRE_MUZZLE_TIP_HEIGHT, 8, 0.84)
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), trace_color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_TRACE_WIDTH)
 	_add_marker3d(_order_root, target_position, impact_color, "WeaponFireImpact_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_IMPACT_RADIUS, 0.065, 8, 0.82)
+	_add_marker3d(_order_root, target_position, WEAPON_FIRE_TARGET_FOCUS_COLOR, "WeaponFireTargetFocus_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_TARGET_FOCUS_RADIUS, WEAPON_FIRE_TARGET_FOCUS_HEIGHT, 16, 0.815)
 	var impact_perp: Vector2 = Vector2(-normalized_direction.y, normalized_direction.x)
 	var impact_cross_a: Vector2 = target_position - impact_perp * WEAPON_FIRE_IMPACT_CROSS_WORLD
 	var impact_cross_b: Vector2 = target_position + impact_perp * WEAPON_FIRE_IMPACT_CROSS_WORLD
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(impact_cross_a, 0.83), _world_to_surface_3d_position(impact_cross_b, 0.83), impact_color, "WeaponFireImpactCross_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_IMPACT_CROSS_WIDTH)
+	var fire_status_label: String = _build_weapon_fire_vfx_status_label(fire_event, combat_outcome, is_friendly_fire)
+	if not fire_status_label.is_empty():
+		_add_label3d(_order_root, fire_status_label, _world_to_surface_3d_position(target_position + WEAPON_FIRE_STATUS_LABEL_OFFSET, MOVEMENT_LABEL_HEIGHT + 0.86), "WeaponFireStatus_%s" % _sanitize_node_name(event_id), Color(1.0, 0.84, 0.34, 0.98), WEAPON_FIRE_STATUS_LABEL_FONT_SIZE)
 	var flank_label: String = _build_flank_fire_vfx_label(fire_event)
 	if not flank_label.is_empty():
 		_add_label3d(_order_root, flank_label, _world_to_surface_3d_position(target_position + Vector2(0.0, -22.0), MOVEMENT_LABEL_HEIGHT + 0.82), "WeaponFireFlank_%s" % _sanitize_node_name(event_id), Color(1.0, 0.70, 0.24, 0.96), 12)
@@ -5896,6 +5905,7 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"attacker_unit_id": String(fire_event.get("attacker_unit_id", "")),
 		"target_unit_id": String(fire_event.get("target_unit_id", "")),
 		"muzzle_position": muzzle_position,
+		"target_position": target_position,
 		"muzzle_flash_visible": true,
 		"muzzle_texture_missing": not muzzle_texture_available,
 		"muzzle_texture_card_visible": muzzle_texture_card_visible,
@@ -5915,11 +5925,20 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"trace_visible": true,
 		"trace_width": WEAPON_FIRE_TRACE_WIDTH,
 		"trace_color": trace_color,
+		"trace_color_hex": trace_color.to_html(true),
 		"impact_marker_visible": true,
 		"impact_cross_visible": true,
 		"impact_radius": WEAPON_FIRE_IMPACT_RADIUS,
 		"impact_cross_world": WEAPON_FIRE_IMPACT_CROSS_WORLD,
 		"impact_color": impact_color,
+		"impact_color_hex": impact_color.to_html(true),
+		"target_focus_visible": true,
+		"target_focus_radius": WEAPON_FIRE_TARGET_FOCUS_RADIUS,
+		"target_focus_height": WEAPON_FIRE_TARGET_FOCUS_HEIGHT,
+		"target_focus_color_hex": WEAPON_FIRE_TARGET_FOCUS_COLOR.to_html(true),
+		"fire_status_label_visible": not fire_status_label.is_empty(),
+		"fire_status_label_text": fire_status_label,
+		"fire_status_label_font_size": WEAPON_FIRE_STATUS_LABEL_FONT_SIZE,
 		"combat_outcome": combat_outcome,
 		"damage_resolved": int(fire_event.get("damage_resolved", 0)),
 		"hit_chance_resolved": float(fire_event.get("hit_chance_resolved", 0.0)),
@@ -5932,6 +5951,19 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"is_friendly_fire": is_friendly_fire,
 		"friendly_fire_target_unit_id": String(fire_event.get("friendly_fire_target_unit_id", "")),
 	})
+
+
+func _build_weapon_fire_vfx_status_label(fire_event: Dictionary, combat_outcome: String, is_friendly_fire: bool) -> String:
+	if is_friendly_fire:
+		return "FF"
+	var normalized_outcome: String = combat_outcome.strip_edges().to_lower()
+	if normalized_outcome == "hit":
+		return "HIT"
+	if normalized_outcome == "miss":
+		return "MISS"
+	if int(fire_event.get("damage_resolved", 0)) > 0:
+		return "HIT"
+	return "FIRE"
 
 
 func _build_flank_fire_vfx_label(fire_event: Dictionary) -> String:
@@ -7499,6 +7531,10 @@ func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
 		label.text = badge_text
 		label.modulate = _get_unit_status_badge_color(unit)
 		label.visible = true
+	var badge_color: Color = _get_unit_status_badge_color(unit)
+	proxy.set_meta("unit_status_badge_text", badge_text)
+	proxy.set_meta("unit_status_badge_color_hex", badge_color.to_html(true))
+	proxy.set_meta("unit_status_badge_style", _get_unit_status_badge_style(unit, badge_text))
 	return true
 
 
@@ -7572,6 +7608,24 @@ func _get_unit_status_badge_color(unit: Node) -> Color:
 			return Color(0.48, 0.72, 0.78, 0.9)
 		return Color(0.46, 0.98, 0.92, 1.0)
 	return Color(0.62, 0.92, 1.0, 1.0)
+
+
+func _get_unit_status_badge_style(unit: Node, badge_text: String = "") -> String:
+	var normalized_text: String = badge_text.strip_edges().to_upper()
+	if ["DOWN", "BLEEDOUT"].has(normalized_text):
+		return "critical"
+	if normalized_text.begins_with("HP ") or normalized_text.begins_with("RESPAWN"):
+		return "wounded"
+	if normalized_text == "CONTACT" or normalized_text == "ENGAGE":
+		return "engagement"
+	var overwatch_ready: bool = bool(unit.get_meta("overwatch_ready", false)) if unit != null else false
+	if normalized_text == "DEF" or overwatch_ready:
+		return "covering"
+	if normalized_text == "MOVE" or normalized_text == "FLANK":
+		return "movement"
+	if normalized_text == "HOLD":
+		return "holding"
+	return "ready"
 
 
 func _get_unit_respawn_remaining_seconds(unit: Node) -> int:
@@ -8773,6 +8827,8 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_weapon_upper_body_pose_source_animation": String(proxy.get_meta("unit_weapon_upper_body_pose_source_animation", "")).strip_edges(),
 			"unit_status_badge_visible": badge_visible,
 			"unit_status_badge_text": badge.text if badge_visible else "",
+			"unit_status_badge_color_hex": String(proxy.get_meta("unit_status_badge_color_hex", "")).strip_edges(),
+			"unit_status_badge_style": String(proxy.get_meta("unit_status_badge_style", "")).strip_edges(),
 		}
 	return result
 

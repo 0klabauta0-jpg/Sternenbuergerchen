@@ -12150,6 +12150,65 @@ func get_mission_first_engagement_feedback_snapshot() -> Dictionary:
 	}
 
 
+func get_mission_fire_cover_visual_polish_snapshot() -> Dictionary:
+	var engagement_snapshot: Dictionary = get_mission_first_engagement_feedback_snapshot()
+	var primary_snapshot: Dictionary = _get_primary_3d_fire_cover_visual_snapshot()
+	var first_fire_visual: Dictionary = _find_first_fire_cover_visual_entry(Array(primary_snapshot.get("weapon_fire_vfx_entries", [])))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"engagement_feedback_gate_available",
+			String(engagement_snapshot.get("gate", "")) == "pass" or String(engagement_snapshot.get("gate", "")) == "review",
+			"Visual polish snapshot builds on the first-engagement feedback contract."
+		),
+		_build_mission_first_move_readability_check(
+			"weapon_fire_visual_present",
+			int(primary_snapshot.get("weapon_fire_vfx_visual_count", 0)) > 0 and not first_fire_visual.is_empty(),
+			"Primary3D exposes at least one weapon-fire visual entry."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_trace_readable",
+			_fire_cover_visual_has_trace_readability(first_fire_visual),
+			"Fire trace keeps a visible but thin performance-friendly line plus color metadata."
+		),
+		_build_mission_first_move_readability_check(
+			"target_focus_readable",
+			_fire_cover_visual_has_target_focus(first_fire_visual),
+			"Impact target has a readable focus marker and compact fire status label."
+		),
+		_build_mission_first_move_readability_check(
+			"unit_status_badges_readable",
+			_fire_cover_visual_has_status_badge_readability(primary_snapshot),
+			"Unit proxy snapshot exposes visible status badge text plus color/style metadata."
+		),
+		_build_mission_first_move_readability_check(
+			"cover_context_still_available",
+			_engagement_has_cover_range_los_context(Dictionary(engagement_snapshot.get("contact_decision_diagnostics", {})), Dictionary(engagement_snapshot.get("cover_effectiveness_readout", {}))),
+			"Fire polish does not hide the existing range, LOS or cover context."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			true,
+			"Snapshot reports fire/cover readability without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_544",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"engagement_snapshot": engagement_snapshot,
+		"primary_3d": primary_snapshot,
+		"first_fire_visual": first_fire_visual,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_deployed_selected_fireteam_unit_ids() -> Array:
 	var result: Array = []
 	var seen_unit_ids: Dictionary = {}
@@ -12464,6 +12523,72 @@ func _does_first_engagement_feedback_text_show_decision(text: String) -> bool:
 	for token in ["CONTACT FIRE", "CONTACT WAIT", "NO FIRE", "ENGAGE", "FIRE", "BLOCK", "COOLDOWN", "KONTAKT", "FEUER"]:
 		if normalized_text.contains(token):
 			return true
+	return false
+
+
+func _get_primary_3d_fire_cover_visual_snapshot() -> Dictionary:
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view == null or not primary_3d_view.has_method("get_render_snapshot"):
+		return {}
+	var render_snapshot: Dictionary = Dictionary(primary_3d_view.call("get_render_snapshot"))
+	return {
+		"weapon_fire_vfx_visual_count": int(render_snapshot.get("weapon_fire_vfx_visual_count", 0)),
+		"weapon_fire_vfx_entries": Array(render_snapshot.get("weapon_fire_vfx_entries", [])).duplicate(true),
+		"unit_status_badge_count": int(render_snapshot.get("unit_status_badge_count", 0)),
+		"unit_proxy_state_by_id": Dictionary(render_snapshot.get("unit_proxy_state_by_id", {})).duplicate(true),
+		"friendly_aim_visual_count": int(render_snapshot.get("friendly_aim_visual_count", 0)),
+		"contact_entries": Array(render_snapshot.get("contact_entries", [])).duplicate(true),
+	}
+
+
+func _find_first_fire_cover_visual_entry(entries: Array) -> Dictionary:
+	for entry_variant in entries:
+		if typeof(entry_variant) == TYPE_DICTIONARY:
+			var entry: Dictionary = Dictionary(entry_variant)
+			if bool(entry.get("trace_visible", false)):
+				return entry.duplicate(true)
+	return {}
+
+
+func _fire_cover_visual_has_trace_readability(entry: Dictionary) -> bool:
+	if entry.is_empty():
+		return false
+	return bool(entry.get("trace_visible", false)) \
+		and float(entry.get("trace_width", 0.0)) > 0.0 \
+		and float(entry.get("trace_width", 1.0)) <= 0.035 \
+		and not String(entry.get("trace_color_hex", "")).strip_edges().is_empty() \
+		and typeof(entry.get("muzzle_position", null)) == TYPE_VECTOR2 \
+		and typeof(entry.get("target_position", null)) == TYPE_VECTOR2
+
+
+func _fire_cover_visual_has_target_focus(entry: Dictionary) -> bool:
+	if entry.is_empty():
+		return false
+	return bool(entry.get("impact_marker_visible", false)) \
+		and bool(entry.get("impact_cross_visible", false)) \
+		and bool(entry.get("target_focus_visible", false)) \
+		and float(entry.get("target_focus_radius", 0.0)) > float(entry.get("impact_radius", 0.0)) \
+		and bool(entry.get("fire_status_label_visible", false)) \
+		and not String(entry.get("fire_status_label_text", "")).strip_edges().is_empty()
+
+
+func _fire_cover_visual_has_status_badge_readability(primary_snapshot: Dictionary) -> bool:
+	if int(primary_snapshot.get("unit_status_badge_count", 0)) <= 0:
+		return false
+	var proxy_state_by_id: Dictionary = Dictionary(primary_snapshot.get("unit_proxy_state_by_id", {}))
+	for proxy_variant in proxy_state_by_id.values():
+		if typeof(proxy_variant) != TYPE_DICTIONARY:
+			continue
+		var proxy: Dictionary = Dictionary(proxy_variant)
+		if not bool(proxy.get("unit_status_badge_visible", false)):
+			continue
+		if String(proxy.get("unit_status_badge_text", "")).strip_edges().is_empty():
+			continue
+		if String(proxy.get("unit_status_badge_color_hex", "")).strip_edges().is_empty():
+			continue
+		if String(proxy.get("unit_status_badge_style", "")).strip_edges().is_empty():
+			continue
+		return true
 	return false
 
 

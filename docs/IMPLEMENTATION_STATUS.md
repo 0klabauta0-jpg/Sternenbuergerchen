@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_544 - Mission Fire And Cover Visual Polish Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_544_mission_fire_cover_visual_polish_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `TerrainMap3DView` rendert FireEvents jetzt mit zusaetzlichem Ziel-Fokusmarker und kompaktem Fire-Statuslabel (`FIRE`, `HIT`, `MISS`, `FF`) am Impact.
+- Stand: Unit-Statusbadges schreiben Text, Farb-Hexwert und Style in den Render-Snapshot, damit Contact/Engage/Covering-Zustaende ohne Pixelraten regressionsfest pruefbar bleiben.
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_mission_fire_cover_visual_polish_snapshot()` fuer FireTrace, Ziel-Fokus, Fire-Label, Badge-Lesbarkeit und weiterhin vorhandenen Cover-/LOS-/Range-Kontext.
+- Stand: Der Rolling-HTML-Bericht ist als laufender Zwischenbericht auf TASK_544 aktualisiert und nennt den naechsten Anschluss.
+- Risiken/offen: Der Task prueft Headless-Render-Snapshots und keinen menschlichen F6-/Screenshot-Sichttest. Die echte optische Wirkung im Godot-Fenster bleibt als naechste kurze Sichtpruefung sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_544_mission_fire_cover_visual_polish_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_543_mission_first_engagement_feedback_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_545 - Mission Engagement F6 Visual Audit`, damit die Headless-Politur im echten Fenster mit Screenshot-/Notizstand abgeglichen wird.
+
 ### TASK_543 - Mission First Engagement Feedback Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
