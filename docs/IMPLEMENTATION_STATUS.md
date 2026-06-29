@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_562_frontier_probe_multiplayer_f6_visual_evidence_capture.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_560_frontier_probe_multiplayer_teamchip_tooltip_polish.md`, `docs/tasks/TASK_561_frontier_probe_multiplayer_manual_visual_review_guide.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der neue Capture-Smoke baut den 1920x1080-Frontier-Probe-MP-F6-Zustand mit Host Peer 1 Alpha und Peer 2 Bravo reproduzierbar auf.
+- Stand: Der Smoke prueft TASK_557-Readability und TASK_560-Teamchip-Tooltip weiter und schreibt `tmp/frontier_probe_mp_f6_visual_evidence.png` plus `tmp/frontier_probe_mp_f6_visual_evidence.json`; im Headless-Dummy ist das PNG ein markiertes Evidence-Board aus Snapshot-Rects.
+- Stand: Das Manifest enthaelt PNG-Pfad, Viewport, Readback-/Evidence-Board-Status, Gate-Status, Teamchip-Text, Tooltip-Laenge und markiert den manuellen Review weiterhin als offen.
+- Risiken/offen: Der Capture liefert Bildbeweis, ersetzt aber keinen menschlichen Hover-/Lesbarkeitsentscheid.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_563 - Frontier Probe Multiplayer Apply Visual Polish Findings`, sobald Screenshot/Manifest oder exportierte Review-Notizen konkrete Reibung nennen.
+
 ### TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_561_frontier_probe_multiplayer_manual_visual_review_guide.md`, `docs/tasks/TASK_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_560_frontier_probe_multiplayer_teamchip_tooltip_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
@@ -18,7 +28,7 @@
 - Stand: Der bestehende TASK_558-Verifier wird auf die aktuelle TASK_562-Follow-up-Kette korrigiert; TASK_561 bekommt einen eigenen statischen Verifier.
 - Risiken/offen: Der Guide ersetzt keinen echten manuellen F6-Screenshot-/Hover-Sichttest und wertet noch keine User-Notizen aus.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings`, sobald ein exportierter MP-F6-Review konkrete Reibung nennt.
+- Naechster Schritt: `TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture`, damit ohne geratenen Stilpolish zuerst eine reproduzierbare Bildbasis entsteht.
 
 ### TASK_560 - Frontier Probe Multiplayer Teamchip Tooltip Polish
 - Status: implementiert im Arbeitsstand
