@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_610 auf <code>task/host-client-two-window-playtest-notes</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_611 auf <code>task/host-client-two-window-launch-helper</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -280,7 +280,8 @@
       <span class="pill good">TASK_608 Runtime-Capture</span>
       <span class="pill good">TASK_609 Capture-Labels</span>
       <span class="pill good">TASK_610 Fenster-Notizen</span>
-      <span class="pill warn">TASK_611 Launcher offen</span>
+      <span class="pill good">TASK_611 Launcher</span>
+      <span class="pill warn">TASK_612 Screenshot-Review offen</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -525,17 +526,18 @@
             <div class="metric"><strong>TASK_608</strong><span>umgesetzt: sichtbarer Host/Client-Runtime-Capture mit PNG/Manifest</span></div>
             <div class="metric"><strong>TASK_609</strong><span>umgesetzt: Host/Client-Runtime-Capture mit Labels, Legende und Readability-Gate</span></div>
             <div class="metric"><strong>TASK_610</strong><span>umgesetzt: Zwei-Fenster-Playtest-Notizen fuer Host/Client im Bericht</span></div>
-            <div class="metric"><strong>TASK_611</strong><span>naechster sinnvoller Slice: reproduzierbarer Host/Client-Fenster-Launcher</span></div>
+            <div class="metric"><strong>TASK_611</strong><span>umgesetzt: Dry-Run-Launch-Plan plus expliziter Host/Client-Fensterstart</span></div>
+            <div class="metric"><strong>TASK_612</strong><span>naechster sinnvoller Slice: echter Zwei-Fenster-Screenshot-Review</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe, TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar, TASK_609 beschriftet das Board fuer menschliche Reviewbarkeit und TASK_610 bereitet echte Zwei-Fenster-Notizen im Bericht vor.</td><td>Naechster Schritt: TASK_611 soll den echten Host/Client-Fensterlauf reproduzierbarer startbar machen.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe, TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar, TASK_609 beschriftet das Board fuer menschliche Reviewbarkeit, TASK_610 bereitet echte Zwei-Fenster-Notizen im Bericht vor und TASK_611 macht den Fensterlauf als Dry-Run-Plan plus expliziten Launcher reproduzierbarer.</td><td>Naechster Schritt: TASK_612 soll den echten Host/Client-Fensterlauf als Screenshot-/Bedienbefund sichern.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
-                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_610 ist hier bewusst mitgepflegt, damit echte Host/Client-Fensterbefunde nicht als lose Screenshots oder Chatnotizen verloren gehen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
+                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_611 ist hier bewusst mitgepflegt, damit der echte Host/Client-Fensterlauf nicht als lose lokale Startanweisung oder Chatnotiz verloren geht.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
               </tbody>
             </table>
           </div>
@@ -586,6 +588,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_608_done"> TASK_608 Host-Client-Runtime-Visual-Capture ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_609_done"> TASK_609 Host-Client-Runtime-Visual-Polish-Findings ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_610_done"> TASK_610 Host-Client-Two-Window-Playtest-Notes ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_611_done"> TASK_611 Host-Client-Two-Window-Launch-Helper ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_586_done"> TASK_586 Debrief-Return-To-Homebase-Handoff ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -1226,6 +1229,36 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_611 Host Client Two Window Launch Helper</h2>
+          <p>TASK_611 macht den echten Host-/Client-Fensterlauf reproduzierbarer startbar. Der Helper schreibt standardmaessig nur einen Dry-Run-Plan nach <code>tmp/host_client_two_window_launch_plan.json</code>; sichtbare Godot-Fenster starten erst mit explizitem <code>-Launch</code>. Diese Felder sind Start-/Review-Metadaten und setzen keine Runtime-Wahrheit.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Launch-Baustein</th><th>Wert</th><th>Hinweis</th></tr></thead>
+              <tbody>
+                <tr><td>Helper</td><td><input readonly value="scripts/tools/launch_host_client_two_window_review.ps1" data-export-key="host_client_two_window_launch.script_path"></td><td>Lokaler PowerShell-Helper fuer den Review-Start.</td></tr>
+                <tr><td>Plan</td><td><input readonly value="tmp/host_client_two_window_launch_plan.json" data-export-key="host_client_two_window_launch.plan_path"></td><td>Dry-Run-Plan mit Rollen, Szene und Fensterlayout.</td></tr>
+                <tr><td>Default Mode</td><td><input readonly value="dry_run" data-export-key="host_client_two_window_launch.default_mode"></td><td>Keine Fensterstarts ohne explizites <code>-Launch</code>.</td></tr>
+                <tr><td>Scene</td><td><input readonly value="res://scenes/tests/mission_reactivity_test.tscn" data-export-key="host_client_two_window_launch.scene"></td><td>Gemeinsamer lokaler Review-Einstieg fuer Host und Client.</td></tr>
+                <tr><td>Host Window</td><td><input readonly value="1280x720 @ 40,80 | peer 1 | team_alpha" data-export-key="host_client_two_window_launch.host_window"></td><td>Host-Rolle und Alpha-Kontext.</td></tr>
+                <tr><td>Client Window</td><td><input readonly value="1280x720 @ 1380,80 | peer 2 | team_bravo" data-export-key="host_client_two_window_launch.client_window"></td><td>Client-Rolle und Bravo-Kontext.</td></tr>
+                <tr><td>Dry Run</td><td><input readonly value="powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1" data-export-key="host_client_two_window_launch.dry_run_command"></td><td>Schreibt Plan, oeffnet keine Fenster.</td></tr>
+                <tr><td>Launch</td><td><input readonly value="powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1 -Launch" data-export-key="host_client_two_window_launch.launch_command"></td><td>Startet zwei sichtbare Godot-Fenster fuer den manuellen Review.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="host_client_two_window_launch.read_only"></td><td>Plan und Bericht halten keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_612 - Host Client Two Window Screenshot Review" data-export-key="host_client_two_window_launch.recommended_next_task"></td><td>Der echte Sichtbefund bleibt der naechste Schritt.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="choice-row" data-choice-group="host_client_two_window_launch.next_priority">
+            <button class="choice active" type="button" data-choice-value="screenshot_review">TASK_612 Screenshot Review</button>
+            <button class="choice" type="button" data-choice-value="launcher_tuning">Launcher Tuning</button>
+            <button class="choice" type="button" data-choice-value="connection_args">Connection Args</button>
+            <button class="choice" type="button" data-choice-value="window_layout">Window Layout</button>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_611 Launcher-Notiz
+            <textarea data-note-key="notes.host_client_two_window_launch" data-export-key="host_client_two_window_launch.notes" placeholder="Was muss am Startplan oder an den Fensterparametern vor dem Screenshot-Review noch angepasst werden?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -1579,6 +1612,7 @@
                 <tr><td><code>task_608_host_client_runtime_visual_capture.gd</code></td><td>PASS</td><td>Sichtbarer Host/Client-Runtime-Capture mit PNG/Manifest, Transport-/Authority-/Snapshot-/F6-Gates plus TASK_609-Follow-up.</td></tr>
                 <tr><td><code>task_609_host_client_runtime_visual_polish_findings.gd</code></td><td>PASS</td><td>Host/Client-Runtime-Capture-Polish fuer Pixel-Labels, Legende, Manifest-Readability-Gate und TASK_610-Follow-up.</td></tr>
                 <tr><td><code>task_610_host_client_two_window_playtest_notes.gd</code></td><td>PASS</td><td>Host/Client-Zwei-Fenster-Playtest-Notizen mit Screenshotpfaden, Authority-/Sync-/F6-/Performance-Checks und TASK_611-Follow-up.</td></tr>
+                <tr><td><code>task_611_host_client_two_window_launch_helper.gd</code></td><td>PASS</td><td>Host/Client-Zwei-Fenster-Launch-Helper mit Dry-Run-Plan, explizitem <code>-Launch</code>, Report-Exportfeldern und TASK_612-Follow-up.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>Timeout nach Doku-Pruefung</td><td>Meta-Homebase-Flow haengt in diesem Arbeitslauf nach der Doku-Pruefung; TASK_567 nutzt die stabile Mission-Fixture, Meta-Flow-Testhygiene bleibt offen.</td></tr>
                 <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_570 aktualisiert, nennt die Fire-Rule-Mission-Bridge und TASK_571 als naechsten Slice.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
@@ -2070,7 +2104,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_611 - Host Client Two Window Launch Helper"
+              "TASK_612 - Host Client Two Window Screenshot Review"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -2167,7 +2201,8 @@
               "TASK_607 - Two Instance Host Client Runtime Smoke",
               "TASK_608 - Host Client Runtime Visual Capture",
               "TASK_609 - Host Client Runtime Visual Polish Findings",
-              "TASK_610 - Host Client Two Window Playtest Notes"
+              "TASK_610 - Host Client Two Window Playtest Notes",
+              "TASK_611 - Host Client Two Window Launch Helper"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -2187,7 +2222,8 @@
               "TASK_608 macht den Runtime-Pfad als sichtbaren Host/Client-Capture mit PNG/Manifest reviewbar.",
               "TASK_609 macht den Runtime-Capture mit Pixel-Labels, Legende und Readability-Gate menschlich reviewbarer.",
               "TASK_610 macht den echten Zwei-Fenster-/Host-Client-Sichttest als HTML-Notizworkflow exportierbar.",
-              "TASK_611 bleibt offen: Ein reproduzierbarer Host/Client-Fenster-Launcher fehlt noch."
+              "TASK_611 macht den echten Host/Client-Fensterlauf als Dry-Run-Plan und expliziten Launcher reproduzierbarer.",
+              "TASK_612 bleibt offen: Der sichtbare Host-/Client-Fensterlauf muss noch als Screenshot-/Bedienbefund bewertet werden."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -2196,14 +2232,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_610",
-            current_focus: "TASK_611 - Host Client Two Window Launch Helper",
-            latest_completed_task: "TASK_610 - Host Client Two Window Playtest Notes"
+            current_repo_base: "integration/core-foundation after TASK_611",
+            current_focus: "TASK_612 - Host Client Two Window Screenshot Review",
+            latest_completed_task: "TASK_611 - Host Client Two Window Launch Helper"
           },
           metadata: {
-            branch: "task/host-client-two-window-playtest-notes",
-            integration_base: "integration/core-foundation after TASK_609",
-            head: "task/host-client-two-window-playtest-notes",
+            branch: "task/host-client-two-window-launch-helper",
+            integration_base: "integration/core-foundation after TASK_610",
+            head: "task/host-client-two-window-launch-helper",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

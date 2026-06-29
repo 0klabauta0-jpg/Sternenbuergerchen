@@ -96,8 +96,8 @@ func _test_two_window_export_fields() -> void:
 		_assert(report_text.contains('data-choice-group="%s"' % choice_group), "Report exports choice group %s" % choice_group)
 	_assert(report_text.contains('data-note-key="notes.host_client_two_window_manual_review"'), "Report exports free Host/Client two-window notes")
 	_assert(report_text.contains('"TASK_610 - Host Client Two Window Playtest Notes"'), "JSON metadata lists TASK_610 as completed")
-	_assert(report_text.contains('current_focus: "TASK_611 - Host Client Two Window Launch Helper"'), "JSON payload sets current focus to TASK_611")
-	_assert(report_text.contains('latest_completed_task: "TASK_610 - Host Client Two Window Playtest Notes"'), "JSON payload lists TASK_610 as latest completed task")
+	_assert(report_text.contains('current_focus: "TASK_612 - Host Client Two Window Screenshot Review"'), "JSON payload sets current focus to TASK_612")
+	_assert(report_text.contains('latest_completed_task: "TASK_611 - Host Client Two Window Launch Helper"'), "JSON payload lists TASK_611 as latest completed task")
 	_assert(not report_text.contains('data-export-key="host_client_two_window_manual.host_screenshot_done" checked'), "Host screenshot is not pre-marked done")
 	_assert(not report_text.contains('data-export-key="host_client_two_window_manual.client_screenshot_done" checked'), "Client screenshot is not pre-marked done")
 
