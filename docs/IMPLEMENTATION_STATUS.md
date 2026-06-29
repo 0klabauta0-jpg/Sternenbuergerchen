@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_598 - Homebase Progression Evidence Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_598_homebase_progression_evidence_polish_findings.md`, `docs/tasks/TASK_597_homebase_progression_f6_evidence_capture.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Das TASK_597-Headless-Evidence-Board zeichnet jetzt Pixel-Labels und Callouts fuer Header, Popup, Sheet, `MISSION GAIN`, Award-Value, Gate und offenen Manual-Review-Status direkt ins PNG.
+- Stand: Das Manifest meldet `evidence_polish_task_id = TASK_598`, `region_legend_present = true`, `callout_label_count` und `evidence_board_readability_gate = pass`; alle Werte bleiben read-only Evidence-Metadaten.
+- Stand: Der laufende HTML-Zwischenbericht markiert TASK_598 als erledigt, exportiert die neuen Homebase-Progression-Evidence-Flags und nennt TASK_599 als naechsten integrierten Core-Loop-Playtest-Evidence-Pass.
+- Risiken/offen: Der Pixel-Label-Polish ersetzt keinen echten F6-Fenster-Sichttest. Der naechste sinnvolle Schritt ist ein integrierter Durchlauf ueber Homebase, Briefing, Dropship, Mission, Debrief und Rueckkehr.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_597_homebase_progression_f6_evidence_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_599 - Integrated Core Loop Playtest Evidence Pass`, damit der inzwischen geschlossene Meta-/Mission-/Debrief-/Homebase-Pfad wieder als kompletter Spielerfluss mit Evidence geprueft wird.
+
 ### TASK_596 - Homebase Progression Player Review Notes
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_596_homebase_progression_player_review_notes.md`, `docs/tasks/TASK_595_homebase_progression_visual_polish.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

@@ -226,7 +226,8 @@ git checkout -b batch/<batch-name>
 - TASK_595 - Homebase Progression Visual Polish (implementiert)
 - TASK_596 - Homebase Progression Player Review Notes (implementiert)
 - TASK_597 - Homebase Progression F6 Evidence Capture (implementiert)
-- TASK_598 - Homebase Progression Evidence Polish Findings
+- TASK_598 - Homebase Progression Evidence Polish Findings (implementiert)
+- TASK_599 - Integrated Core Loop Playtest Evidence Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
