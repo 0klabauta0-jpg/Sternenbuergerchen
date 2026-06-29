@@ -134,6 +134,11 @@ TASK_573 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workben
 
 Erwartete Struktur: exportierbare `fire_rule_manual.*` Controls, eine freie `notes.fire_rule_manual_review`-Notiz und eine klare Markierung, dass der echte manuelle Screenshot erst durch User/Playtest bestaetigt wird. Ein nachfolgender Polish-Task darf nur konkrete, exportierte Sichtbefunde anwenden.
 
+## Fire-Rule-Real-F6-Screenshot-Review
+TASK_574 erzeugt eine reproduzierbare Fire-Rule-/ROE-F6-Evidence fuer den bestehenden Mission-Tactical-Pfad. Der Capture-Smoke darf den TASK_572-Readability-Snapshot, einen echten nicht-headless Viewport-Readback oder ein markiertes Headless-Evidence-Board und ein lokales PNG/JSON-Manifest unter `tmp/` zusammenfassen, aber keine Fire-Rule-, Combat-, Movement-, Command- oder Gameplay-Wahrheit speichern.
+
+Erwartete Struktur: `tmp/fire_rule_f6_real_review.png`, `tmp/fire_rule_f6_real_review.json`, `readability_gate`, `selected_fire_rule_consensus`, Button-Labels, aktive Button-Regeln, `viewport_readback_available`, `manual_review_required = true` und `manual_review_done = false`. Der naechste Polish-Slice darf nur konkrete Befunde aus Screenshot, Manifest oder HTML-Workbench-Export anwenden.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

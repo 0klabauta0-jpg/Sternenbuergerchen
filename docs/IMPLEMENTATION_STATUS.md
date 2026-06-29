@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_574 - Fire Rule Real F6 Screenshot Review Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_574_fire_rule_real_f6_screenshot_review_pass.md`, `docs/tasks/TASK_573_fire_rule_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_572_fire_rule_f6_readability_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der TASK_574-Capture-Smoke erzeugt eine Fire-Rule-/ROE-F6-Evidence unter `tmp/fire_rule_f6_real_review.png` und `tmp/fire_rule_f6_real_review.json`.
+- Stand: Das Manifest meldet Readability-Gate, aktive Rule, Button-Labels, aktive Button-Regeln, Viewport-Readback-Status und markiert den menschlichen Review weiterhin als offen.
+- Stand: Der HTML-Zwischenbericht nennt PNG/Manifest und zieht den naechsten Schritt auf belegte Fire-Rule-Evidence-Polish-Findings.
+- Risiken/offen: Ein echter User-/Playtest-Geschmackstest bleibt offen; TASK_574 liefert Evidence, aber behauptet keinen abgeschlossenen Hover-/Tasteindruck. Sichtbarer Folgepunkt fuer TASK_575: aktive ROE darf im Bild staerker hervorgehoben werden, wenn der Screenshot-/Workbench-Befund das bestaetigt.
+- Lokale Pruefung: `godot_console.exe --path . --script scripts/tests/task_574_fire_rule_real_f6_screenshot_review_pass.gd` (26 passed, 0 failed; `viewport_readback_available=true`), `godot_console.exe --headless --path . --script scripts/tests/task_573_fire_rule_manual_screenshot_notes_pass.gd` (32 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_572_fire_rule_f6_readability_smoke.gd` (28 passed, 0 failed), `git diff --check` (Exit 0).
+- Naechster Schritt: `TASK_575 - Fire Rule Evidence Polish Findings`, wenn konkrete Befunde aus Screenshot/Manifest/Workbench-Export angewendet werden sollen.
+
 ### TASK_573 - Fire Rule Manual Screenshot Notes Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_573_fire_rule_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_572_fire_rule_f6_readability_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

@@ -70,7 +70,7 @@ func _test_manual_review_export_fields() -> void:
 	_assert(report_text.contains("data-export-key=\"fire_rule_manual.followup\""), "Report exports concrete follow-up notes")
 	_assert(report_text.contains("data-note-key=\"notes.fire_rule_manual_review\""), "Report exports free-form Fire-Rule review note")
 	_assert(report_text.contains("\"TASK_573 - Fire Rule Manual Screenshot Notes Pass\""), "JSON metadata lists TASK_573 as completed")
-	_assert(report_text.contains("current_focus: \"TASK_574 - Fire Rule Real F6 Screenshot Review Pass\""), "JSON metadata points current focus to TASK_574")
+	_assert(report_text.contains("Fire Rule Real F6 Screenshot Review Pass"), "JSON metadata/report history preserves TASK_574 follow-up context")
 	_assert(not report_text.contains("data-export-key=\"fire_rule_manual.screenshot_done\" checked"), "Manual Fire-Rule screenshot is not pre-marked as done")
 
 
