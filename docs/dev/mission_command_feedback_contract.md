@@ -174,6 +174,11 @@ TASK_581 traegt `SUP` nach der Preview als read-only Intent/Outcome-Diagnose dur
 
 Erwartete Struktur: `get_suppress_fire_intent_outcome_snapshot()` enthaelt `fire_rule_outcome`, `contact_decision_diagnostics`, `diagnostics_text`, `compact_combat_line`, `outcome_label = suppress_pressure_intent`, `suppress_intent_active = true`, `suppress_effect_applied = false`, `suppression_effect_payload_enqueued = false`, `ammo_consumed = false`, `suppress_damage_modifier_applied = false`, `read_only = true` und `ui_sets_gameplay_truth = false`. Mission-Control oder die kompakte Combat-HUD-Zeile duerfen `SUP` nennen. Nicht zulaessig sind echte Suppression-Wirkung, Ammo-Verbrauch, Damage-Modifikation, AAR-Messwerte oder eine zweite UI-seitige Combat-Wahrheit.
 
+## Suppress-Fire-Outcome-AAR-Diagnostic-Stub
+TASK_582 macht den TASK_581-Outcome als kleinen AAR-/Debug-Anker zaehlbar. Gezaehlt werden nur deduplizierte Contact-Decision-Diagnostics mit `status = fired`, aktiver SUP-Absicht und `outcome_label = suppress_pressure_intent`. Snapshot-Lesezugriffe, Preview, Cooldown und blockierte Decisions duerfen den Count nicht erhoehen.
+
+Erwartete Struktur: `MissionCombatLoopDriver.get_suppress_fire_outcome_aar_diagnostic_snapshot()` enthaelt `schema = sternenbuergerchen.suppress_fire_outcome_aar_diagnostic.v1`, `suppress_fire_outcome_count`, `suppress_fire_outcome_by_fireteam`, `last_suppress_fire_outcome`, `dedupe_key_count`, `read_only = true`, `ui_sets_gameplay_truth = false`, `no_suppression_effect_payload = true`, `no_ammo_consumption = true` und `no_suppress_damage_modifier = true`. `get_suppress_fire_outcome_aar_diagnostic_snapshot()` im Mission-Controller darf daraus ein Test-/Report-Gate bauen, aber keinen Gameplay-State mutieren. Nicht zulaessig sind echtes Debriefing, Ammo-Verbrauch, Suppression-Effect-Payloads, Damage-Modifikation oder eine UI-seitige zweite Combat-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

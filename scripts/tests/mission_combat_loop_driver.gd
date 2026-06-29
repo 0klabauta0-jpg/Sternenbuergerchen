@@ -158,6 +158,10 @@ var _combat_outcome_by_fire_event_id: Dictionary = {}
 var _next_fire_event_sequence: int = 1
 var _combat_tick_budget_debug_snapshot: Dictionary = {}
 var _last_contact_decision_diagnostics: Dictionary = {}
+var _suppress_fire_outcome_diagnostic_count: int = 0
+var _suppress_fire_outcome_diagnostic_by_fireteam: Dictionary = {}
+var _suppress_fire_outcome_diagnostic_keys_seen: Dictionary = {}
+var _last_suppress_fire_outcome_diagnostic: Dictionary = {}
 var _hotpath_unit_cache_active: bool = false
 var _hotpath_unit_cache_tick: int = -1
 var _hotpath_friendly_units: Array = []
@@ -249,6 +253,25 @@ func get_contact_decision_diagnostics_snapshot() -> Dictionary:
 		return snapshot
 	_refresh_contact_decision_snapshot_presence(snapshot)
 	return snapshot
+
+
+func get_suppress_fire_outcome_aar_diagnostic_snapshot() -> Dictionary:
+	var last_outcome: Dictionary = _last_suppress_fire_outcome_diagnostic.duplicate(true)
+	return {
+		"schema": "sternenbuergerchen.suppress_fire_outcome_aar_diagnostic.v1",
+		"source": "MissionCombatLoopDriver",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"suppress_fire_outcome_count": _suppress_fire_outcome_diagnostic_count,
+		"suppress_fire_outcome_by_fireteam": _suppress_fire_outcome_diagnostic_by_fireteam.duplicate(true),
+		"last_suppress_fire_outcome": last_outcome,
+		"dedupe_key_count": _suppress_fire_outcome_diagnostic_keys_seen.size(),
+		"last_outcome_label": String(last_outcome.get("outcome_label", "")).strip_edges(),
+		"last_fireteam_id": String(last_outcome.get("attacker_fireteam_id", "")).strip_edges(),
+		"no_suppression_effect_payload": not bool(last_outcome.get("suppression_effect_payload_enqueued", false)),
+		"no_ammo_consumption": not bool(last_outcome.get("ammo_consumed", false)),
+		"no_suppress_damage_modifier": not bool(last_outcome.get("suppress_damage_modifier_applied", false)),
+	}
 
 
 func _refresh_contact_decision_snapshot_presence(snapshot: Dictionary) -> void:
@@ -1197,6 +1220,7 @@ func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {})
 	for key in data.keys():
 		snapshot[key] = data[key]
 	_last_contact_decision_diagnostics = snapshot
+	_record_suppress_fire_outcome_diagnostic_if_needed(snapshot)
 
 
 func _resolve_contact_decision_status(reason: String) -> String:
@@ -1209,6 +1233,61 @@ func _resolve_contact_decision_status(reason: String) -> String:
 			return "blocked"
 		_:
 			return "unknown"
+
+
+func _record_suppress_fire_outcome_diagnostic_if_needed(snapshot: Dictionary) -> void:
+	if not _is_suppress_fire_outcome_diagnostic_countable(snapshot):
+		return
+	var dedupe_key: String = _build_suppress_fire_outcome_diagnostic_key(snapshot)
+	if dedupe_key.is_empty() or bool(_suppress_fire_outcome_diagnostic_keys_seen.get(dedupe_key, false)):
+		return
+	_suppress_fire_outcome_diagnostic_keys_seen[dedupe_key] = true
+	_suppress_fire_outcome_diagnostic_count += 1
+	var fireteam_id: String = String(snapshot.get("attacker_fireteam_id", "")).strip_edges().to_lower()
+	if not fireteam_id.is_empty():
+		_suppress_fire_outcome_diagnostic_by_fireteam[fireteam_id] = int(_suppress_fire_outcome_diagnostic_by_fireteam.get(fireteam_id, 0)) + 1
+	var fire_rule_outcome: Dictionary = Dictionary(snapshot.get("fire_rule_outcome", {})).duplicate(true)
+	_last_suppress_fire_outcome_diagnostic = {
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"dedupe_key": dedupe_key,
+		"tick": int(snapshot.get("tick", _current_tick)),
+		"reason": String(snapshot.get("reason", "")).strip_edges().to_lower(),
+		"status": String(snapshot.get("status", "")).strip_edges().to_lower(),
+		"fire_event_id": String(snapshot.get("fire_event_id", "")).strip_edges(),
+		"attacker_unit_id": String(snapshot.get("attacker_unit_id", "")).strip_edges(),
+		"target_unit_id": String(snapshot.get("target_unit_id", "")).strip_edges(),
+		"attacker_fireteam_id": fireteam_id,
+		"attacker_fire_rule": String(snapshot.get("attacker_fire_rule", "")).strip_edges().to_lower(),
+		"outcome_label": String(fire_rule_outcome.get("outcome_label", snapshot.get("attacker_fire_rule_outcome", ""))).strip_edges(),
+		"suppress_intent_active": bool(snapshot.get("suppress_intent_active", fire_rule_outcome.get("suppress_intent_active", false))),
+		"suppress_pressure_intent_visible": bool(snapshot.get("suppress_pressure_intent_visible", fire_rule_outcome.get("suppress_pressure_intent_visible", false))),
+		"suppress_effect_applied": bool(snapshot.get("suppress_effect_applied", fire_rule_outcome.get("suppress_effect_applied", false))),
+		"suppression_effect_payload_enqueued": bool(snapshot.get("suppression_effect_payload_enqueued", fire_rule_outcome.get("suppression_effect_payload_enqueued", false))),
+		"ammo_consumed": bool(snapshot.get("ammo_consumed", fire_rule_outcome.get("ammo_consumed", false))),
+		"suppress_damage_modifier_applied": bool(snapshot.get("suppress_damage_modifier_applied", fire_rule_outcome.get("suppress_damage_modifier_applied", false))),
+	}
+
+
+func _is_suppress_fire_outcome_diagnostic_countable(snapshot: Dictionary) -> bool:
+	if String(snapshot.get("status", "")).strip_edges().to_lower() != "fired":
+		return false
+	var fire_rule_outcome: Dictionary = Dictionary(snapshot.get("fire_rule_outcome", {}))
+	var outcome_label: String = String(fire_rule_outcome.get("outcome_label", snapshot.get("attacker_fire_rule_outcome", ""))).strip_edges().to_lower()
+	return bool(snapshot.get("suppress_intent_active", fire_rule_outcome.get("suppress_intent_active", false))) \
+		and outcome_label == "suppress_pressure_intent"
+
+
+func _build_suppress_fire_outcome_diagnostic_key(snapshot: Dictionary) -> String:
+	var fire_event_id: String = String(snapshot.get("fire_event_id", "")).strip_edges()
+	if not fire_event_id.is_empty():
+		return "fire_event:%s" % fire_event_id
+	return "tick:%d:%s:%s:%s" % [
+		int(snapshot.get("tick", _current_tick)),
+		String(snapshot.get("attacker_unit_id", "")).strip_edges(),
+		String(snapshot.get("target_unit_id", "")).strip_edges(),
+		String(snapshot.get("reason", "")).strip_edges().to_lower(),
+	]
 
 
 func _build_contact_pair_decision_diagnostic(contact_pair: Dictionary, decision: Dictionary = {}) -> Dictionary:

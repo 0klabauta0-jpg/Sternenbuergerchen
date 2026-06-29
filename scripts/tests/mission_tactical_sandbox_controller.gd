@@ -13084,6 +13084,87 @@ func get_suppress_fire_intent_outcome_snapshot() -> Dictionary:
 	}
 
 
+func get_suppress_fire_outcome_aar_diagnostic_snapshot() -> Dictionary:
+	var intent_snapshot: Dictionary = get_suppress_fire_intent_outcome_snapshot()
+	var combat_driver = _get_combat_loop_driver()
+	var aar_diagnostic: Dictionary = {}
+	if combat_driver != null and combat_driver.has_method("get_suppress_fire_outcome_aar_diagnostic_snapshot"):
+		aar_diagnostic = Dictionary(combat_driver.call("get_suppress_fire_outcome_aar_diagnostic_snapshot")).duplicate(true)
+	var last_outcome: Dictionary = Dictionary(aar_diagnostic.get("last_suppress_fire_outcome", {})).duplicate(true)
+	var count_by_fireteam: Dictionary = Dictionary(aar_diagnostic.get("suppress_fire_outcome_by_fireteam", {})).duplicate(true)
+	var last_fireteam_id: String = String(last_outcome.get("attacker_fireteam_id", aar_diagnostic.get("last_fireteam_id", ""))).strip_edges().to_lower()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"aar_diagnostic_available",
+			String(aar_diagnostic.get("schema", "")) == "sternenbuergerchen.suppress_fire_outcome_aar_diagnostic.v1",
+			"Combat driver exposes a stable SUP AAR diagnostic schema."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_outcome_counted",
+			int(aar_diagnostic.get("suppress_fire_outcome_count", 0)) >= 1
+				and String(last_outcome.get("outcome_label", "")).strip_edges().to_lower() == "suppress_pressure_intent",
+			"At least one fired SUP outcome is counted for later AAR/debug use."
+		),
+		_build_mission_first_move_readability_check(
+			"fireteam_bucket_visible",
+			not last_fireteam_id.is_empty()
+				and int(count_by_fireteam.get(last_fireteam_id, 0)) >= 1,
+			"SUP outcome count is grouped by fireteam."
+		),
+		_build_mission_first_move_readability_check(
+			"intent_outcome_still_green",
+			String(intent_snapshot.get("gate", "")) == "pass",
+			"Existing TASK_581 SUP intent/outcome gate remains green."
+		),
+		_build_mission_first_move_readability_check(
+			"no_suppression_effect_payload",
+			bool(aar_diagnostic.get("no_suppression_effect_payload", false))
+				and not bool(last_outcome.get("suppression_effect_payload_enqueued", true)),
+			"TASK_582 does not enqueue a suppression effect payload."
+		),
+		_build_mission_first_move_readability_check(
+			"no_ammo_consumption",
+			bool(aar_diagnostic.get("no_ammo_consumption", false))
+				and not bool(last_outcome.get("ammo_consumed", true)),
+			"TASK_582 does not consume ammo."
+		),
+		_build_mission_first_move_readability_check(
+			"no_suppress_damage_modifier",
+			bool(aar_diagnostic.get("no_suppress_damage_modifier", false))
+				and not bool(last_outcome.get("suppress_damage_modifier_applied", true)),
+			"TASK_582 does not change damage through SUP."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(aar_diagnostic.get("read_only", false))
+				and not bool(aar_diagnostic.get("ui_sets_gameplay_truth", true))
+				and bool(last_outcome.get("read_only", false))
+				and not bool(last_outcome.get("ui_sets_gameplay_truth", true)),
+			"SUP AAR diagnostic reads combat diagnostics and does not create gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_582",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"intent_snapshot": intent_snapshot,
+		"aar_diagnostic": aar_diagnostic,
+		"last_suppress_fire_outcome": last_outcome,
+		"suppress_fire_outcome_count": int(aar_diagnostic.get("suppress_fire_outcome_count", 0)),
+		"suppress_fire_outcome_by_fireteam": count_by_fireteam,
+		"last_outcome_label": String(last_outcome.get("outcome_label", "")).strip_edges(),
+		"last_fireteam_id": last_fireteam_id,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _count_waypoint_intent_preview_ghost_entries(entries: Array) -> int:
 	var count: int = 0
 	for entry_variant in entries:

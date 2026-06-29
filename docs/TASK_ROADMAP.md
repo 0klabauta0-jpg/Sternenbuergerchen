@@ -210,7 +210,8 @@ git checkout -b batch/<batch-name>
 - TASK_579 - Suppress Fire Manual F6 Review (implementiert)
 - TASK_580 - Suppress Fire Visual Tuning Findings (implementiert)
 - TASK_581 - Suppress Fire Intent Outcome Smoke (implementiert)
-- TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub
+- TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub (implementiert)
+- TASK_583 - Suppress Fire AAR Report Panel Readability
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

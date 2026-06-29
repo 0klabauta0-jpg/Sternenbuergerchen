@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_582_suppress_fire_outcome_aar_diagnostic_stub.md`, `docs/tasks/TASK_581_suppress_fire_intent_outcome_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: SUP-Contact-Decisions werden jetzt als deduplizierter read-only AAR-/Debug-Stub zaehlbar, sobald der Combat-Pfad tatsaechlich einen `fired`-Outcome mit `suppress_pressure_intent` meldet.
+- Stand: `MissionCombatLoopDriver.get_suppress_fire_outcome_aar_diagnostic_snapshot()` liefert Schema, Gesamtcount, Count pro Fireteam, letzten SUP-Outcome und explizite No-Ammo-/No-Suppression-/No-Damage-Flags.
+- Stand: `MissionTacticalSandboxController.get_suppress_fire_outcome_aar_diagnostic_snapshot()` prueft die integrierte Grenze und bestaetigt, dass Snapshot-Lesezugriffe keine Command-Queue und keinen SUP-Count mutieren.
+- Risiken/offen: Noch kein echtes Debriefing-Panel, kein Ammo-Verbrauch und keine echte Suppression-Wirkung; der Stub ist nur der messbare Anker fuer Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_582_suppress_fire_outcome_aar_diagnostic_stub.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_581_suppress_fire_intent_outcome_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_580_suppress_fire_visual_tuning_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_583 - Suppress Fire AAR Report Panel Readability`, wenn der Messwert im spaeteren Debriefing/Report lesbar werden soll.
+
 ### TASK_581 - Suppress Fire Intent Outcome Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_581_suppress_fire_intent_outcome_smoke.md`, `docs/tasks/TASK_580_suppress_fire_visual_tuning_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
@@ -18,7 +28,7 @@
 - Stand: `get_suppress_fire_intent_outcome_snapshot()` prueft die integrierte Grenze: SUP-Intent sichtbar, aber keine Suppression-Effect-Payloads, kein Ammo-Verbrauch, keine Damage-Modifikation und keine UI-seitige Gameplay-Wahrheit.
 - Risiken/offen: Echte Suppression-Wirkung, Munitionsverbrauch, Treffer-/Damage-Tuning und AAR-Messwerte bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_581_suppress_fire_intent_outcome_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_580_suppress_fire_visual_tuning_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub`, wenn SUP spaeter als messbarer AAR-/Debug-Wert erfasst werden soll, weiterhin ohne grosses Ammo-System.
+- Naechster Schritt: durch `TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub` erledigt; naechster Anschluss ist `TASK_583 - Suppress Fire AAR Report Panel Readability`.
 
 ### TASK_580 - Suppress Fire Visual Tuning Findings
 - Status: implementiert im Arbeitsstand
