@@ -5049,6 +5049,10 @@ func _build_fireteam_status_text() -> String:
 		return "NO SELECTION | 0 Karten | Click unit or drag leaders"
 
 	var units: Array = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
+	if units.is_empty():
+		var selected_cards_fireteam_id: String = _get_selected_member_cards_fireteam_id()
+		if not selected_cards_fireteam_id.is_empty():
+			units = _filter_ground_fireteam_card_units(_get_fireteam_units(selected_cards_fireteam_id, true))
 	var planned_waypoint_count: int = _count_selected_phase_waypoints()
 	var planned_area_count: int = _count_selected_area_orders()
 	if units.is_empty():

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_565_frontier_probe_multiplayer_real_f6_screenshot_review_pass.md`, `docs/tasks/TASK_562_frontier_probe_multiplayer_f6_visual_evidence_capture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: TASK_562 wurde ohne `--headless` ausgefuehrt und erzeugt in dieser Umgebung einen echten FullHD-F6-Viewport-Readback mit `viewport_readback_available = true` und `generated_evidence_board = false`.
+- Stand: Der reale Screenshot zeigte eine konkrete Reibung: #17 Selected Fireteam meldete `keine Einheiten aktiv`, obwohl sichtbare Member-Cards im Panel standen.
+- Stand: `_build_fireteam_status_text()` nutzt nun denselben Fireteam-Unit-Fallback wie die sichtbaren Member-Cards, wenn die normale Selection-Liste leer laeuft.
+- Risiken/offen: Der echte Hover-Teil bleibt manuell; TASK_565 behebt den ersten belegten Screenshot-Widerspruch und behauptet keinen abgeschlossenen Hover-Test.
+- Lokale Pruefung: `godot_console.exe --path . --script scripts/tests/task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_565_frontier_probe_multiplayer_real_f6_screenshot_review_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass`, damit Teamchip-Hover, Paneldichte und Weltverdeckung aus dem echten Fensterlauf gezielt weiter poliert werden.
+
 ### TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_564_frontier_probe_multiplayer_apply_visual_polish_findings.md`, `docs/tasks/TASK_562_frontier_probe_multiplayer_f6_visual_evidence_capture.md`, `docs/tasks/TASK_563_frontier_probe_multiplayer_f6_evidence_report_preview.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
@@ -18,7 +28,7 @@
 - Stand: Roadmap, Status, Contract und Verifier sind auf TASK_564 als erledigten Evidence-Polish und TASK_565 als naechsten echten F6-Screenshot-/Hover-Review-Slice weitergezogen.
 - Risiken/offen: Der echte menschliche F6-/Hover-Sichttest bleibt offen; TASK_564 verbessert die automatische Review-Evidence und vermeidet geratenes HUD-Redesign.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_564_frontier_probe_multiplayer_apply_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_563_frontier_probe_multiplayer_f6_evidence_report_preview.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass`, damit echte Fenster-/Hover-Befunde den naechsten Gameplay-HUD-Polish steuern.
+- Naechster Schritt: TASK_565 nutzt den echten Viewport-Readback und behebt den ersten belegten #17-Widerspruch; danach `TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass`.
 
 ### TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview
 - Status: implementiert im Arbeitsstand

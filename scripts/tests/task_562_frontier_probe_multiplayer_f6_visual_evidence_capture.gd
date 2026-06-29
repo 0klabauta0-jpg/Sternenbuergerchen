@@ -50,12 +50,13 @@ func _test_docs_and_wiring() -> void:
 	_assert(roadmap_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture (implementiert)"), "Roadmap marks TASK_562 implemented")
 	_assert(roadmap_text.contains("TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview (implementiert)"), "Roadmap tracks TASK_563 evidence preview")
 	_assert(roadmap_text.contains("TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings (implementiert)"), "Roadmap tracks TASK_564 evidence polish")
-	_assert(roadmap_text.contains("TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass"), "Roadmap names TASK_565 follow-up")
+	_assert(roadmap_text.contains("TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass (implementiert)"), "Roadmap tracks TASK_565 real screenshot review")
+	_assert(roadmap_text.contains("TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass"), "Roadmap names TASK_566 follow-up")
 	_assert(contract_text.contains("Frontier-Probe-Multiplayer-F6-Visual-Evidence-Capture"), "Mission feedback contract documents TASK_562")
 	_assert(report_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture"), "Review workbench tracks TASK_562")
 	_assert(report_text.contains("TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview"), "Review workbench tracks TASK_563")
 	_assert(report_text.contains("TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"), "Review workbench tracks TASK_564")
-	_assert(report_text.contains("TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass"), "Review workbench names TASK_565 follow-up")
+	_assert(report_text.contains("TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass"), "Review workbench names TASK_566 follow-up")
 	_assert(FileAccess.file_exists(TASK_557_TEST_PATH), "TASK_557 readability verifier remains available")
 	_assert(FileAccess.file_exists(TASK_560_TEST_PATH), "TASK_560 teamchip tooltip verifier remains available")
 	_assert(FileAccess.file_exists(TASK_561_TEST_PATH), "TASK_561 manual review guide verifier remains available")
@@ -265,7 +266,7 @@ func _build_manifest(readability_snapshot: Dictionary, tooltip_snapshot: Diction
 		"evidence_board_region_count": evidence_board_regions.size(),
 		"manual_review_required": true,
 		"manual_review_done": false,
-		"recommended_next_task": "TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass",
+		"recommended_next_task": "TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass",
 	}
 
 
