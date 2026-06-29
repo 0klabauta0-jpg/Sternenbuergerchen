@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_595 - Homebase Progression Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_595_homebase_progression_visual_polish.md`, `docs/tasks/TASK_594_post_mission_skill_delta_homebase_bridge.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Die Post-Mission-`Last Award`-Zeile im Character-Sheet bekommt einen stabilen Visual-Contract mit `style_key = post_mission_award`, `style_id = homebase_progression_delta_v1`, Badge `MISSION GAIN`, Read-only-Flag und Source `progression_award_summary`.
+- Stand: `CharacterSheetView` rendert diese Row als hervorgehobene Progression-Delta-Zeile, ohne Gameplay-State zu berechnen oder zu mutieren.
+- Stand: `HomebaseTestScreen.get_post_mission_skill_delta_snapshot()` meldet Style-ID, Badge und `visual_polish_ready`, damit der UI-Anker automatisiert pruefbar bleibt.
+- Risiken/offen: Der automatisierte Style-Polish ersetzt keinen echten menschlichen Homebase-Sichttest. Der naechste sinnvolle Slice ist ein exportierbarer Player-Review-Notes-Pass fuer den Homebase-Progression-Return.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_595_homebase_progression_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_594_post_mission_skill_delta_homebase_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_259_character_card_roster_switching_playability.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_596 - Homebase Progression Player Review Notes`, damit der echte Spielerblick auf die neue Hervorhebung exportierbar wird.
+
 ### TASK_594 - Post Mission Skill Delta Homebase Bridge
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_594_post_mission_skill_delta_homebase_bridge.md`, `docs/tasks/TASK_593_skill_progress_award_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

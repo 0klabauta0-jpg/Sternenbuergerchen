@@ -311,9 +311,11 @@ func set_post_mission_skill_delta_summary(summary: Dictionary) -> void:
 func get_post_mission_skill_delta_snapshot() -> Dictionary:
 	var focused_delta: Dictionary = _get_post_mission_skill_delta_for_unit(_focused_unit_id)
 	var focused_text: String = _format_post_mission_skill_delta_text(focused_delta)
+	var focused_has_delta: bool = not focused_delta.is_empty()
+	var style_id: String = "homebase_progression_delta_v1" if focused_has_delta else ""
+	var badge_text: String = "MISSION GAIN" if focused_has_delta else ""
 	var has_expected_schema: bool = String(_post_mission_skill_delta_summary.get("schema", "")) == "sternenbuergerchen.skill_progress_award_summary.v1"
 	var has_resolver_authority: bool = String(_post_mission_skill_delta_summary.get("authority", "")) == "MissionProgressionResolver"
-	var focused_has_delta: bool = not focused_delta.is_empty()
 	var sheet_visible: bool = _character_sheet_open and focused_has_delta
 	var checks: Array = [
 		{"id": "source_schema", "passed": has_expected_schema},
@@ -321,6 +323,7 @@ func get_post_mission_skill_delta_snapshot() -> Dictionary:
 		{"id": "unit_delta_lookup", "passed": _post_mission_skill_delta_by_unit_id.size() > 0},
 		{"id": "focused_delta_visible", "passed": focused_has_delta and not focused_text.is_empty()},
 		{"id": "character_sheet_delta_visible", "passed": sheet_visible},
+		{"id": "visual_style_ready", "passed": style_id == "homebase_progression_delta_v1" and badge_text == "MISSION GAIN"},
 		{"id": "read_only", "passed": bool(_post_mission_skill_delta_summary.get("read_only", false)) and not bool(_post_mission_skill_delta_summary.get("ui_sets_gameplay_truth", true))},
 	]
 	return {
@@ -334,6 +337,9 @@ func get_post_mission_skill_delta_snapshot() -> Dictionary:
 		"focused_delta_text": focused_text,
 		"homebase_delta_visible": focused_has_delta,
 		"character_sheet_delta_visible": sheet_visible,
+		"style_id": style_id,
+		"badge_text": badge_text,
+		"visual_polish_ready": style_id == "homebase_progression_delta_v1" and badge_text == "MISSION GAIN" and focused_has_delta,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"checks": checks,

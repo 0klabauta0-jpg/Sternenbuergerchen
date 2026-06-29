@@ -239,6 +239,11 @@ TASK_594 schliesst den kleinen Core-Loop-Anschluss nach dem Debrief: `MetaLayerF
 
 Erwartete Struktur: `HomebaseTestScreen.get_post_mission_skill_delta_snapshot()` liefert `schema = sternenbuergerchen.post_mission_skill_delta_homebase_bridge.v1`, `task_id = TASK_594`, `source_schema = sternenbuergerchen.skill_progress_award_summary.v1`, `authority = MissionProgressionResolver`, `source = progression_unit_updates`, `unit_delta_count`, `focused_unit_id`, `focused_delta_text`, `homebase_delta_visible`, `character_sheet_delta_visible`, `read_only = true`, `ui_sets_gameplay_truth = false` und ein `gate`. Das Character-Sheet darf eine kompakte `Last Award`-Zeile anzeigen, solange sie eindeutig read-only aus dem Resolver-Award stammt.
 
+## Homebase-Progression-Visual-Polish
+TASK_595 staerkt nur die Lesbarkeit dieser Homebase-Progression. Das Character-Sheet darf die `Last Award`-Zeile als hervorgehobene Row mit `style_key = post_mission_award`, `style_id = homebase_progression_delta_v1` und Badge `MISSION GAIN` rendern. Diese Metadaten sind UI-/Visual-Vertrag, keine Gameplay-Wahrheit.
+
+Erwartete Struktur: `CharacterSheetFormatter` liefert fuer die Post-Mission-Delta-Row `label = Last Award`, `help_id = character_sheet.post_mission_skill_delta`, `value_text`, `detail_text`, `style_key`, `style_id`, `badge_text`, `read_only = true` und `source = progression_award_summary`. `HomebaseTestScreen.get_post_mission_skill_delta_snapshot()` meldet zusaetzlich `style_id`, `badge_text` und `visual_polish_ready = true`, wenn fuer den fokussierten Operator ein Award sichtbar ist.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

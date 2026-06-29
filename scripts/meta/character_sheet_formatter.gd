@@ -361,6 +361,11 @@ static func _build_post_mission_skill_delta_row(options: Dictionary) -> Dictiona
 		"value_text": value_text,
 		"help_id": "character_sheet.post_mission_skill_delta",
 		"detail_text": "Read-only MissionProgressionResolver delta from the last Debrief/Homebase return.",
+		"style_key": "post_mission_award",
+		"style_id": "homebase_progression_delta_v1",
+		"badge_text": "MISSION GAIN",
+		"read_only": true,
+		"source": "progression_award_summary",
 	}
 
 

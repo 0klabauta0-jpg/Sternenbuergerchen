@@ -373,21 +373,44 @@ static func _add_value_rows(host: VBoxContainer, rows: Array, profile = null, op
 		if title == "ABGELEITET:":
 			_add_stacked_value_row(section_vbox, row_data)
 			continue
+		var style_key: String = String(row_data.get("style_key", "")).strip_edges()
+		var is_post_mission_award: bool = style_key == "post_mission_award"
+		var row_panel: PanelContainer = null
+		if is_post_mission_award:
+			row_panel = PanelContainer.new()
+			row_panel.name = "PostMissionAwardHighlightRow"
+			row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			row_panel.add_theme_stylebox_override("panel", _build_post_mission_award_stylebox())
+			row_panel.set_meta("style_id", String(row_data.get("style_id", "")))
+			_set_help_id(row_panel, String(row_data.get("help_id", "")))
+			row_panel.tooltip_text = String(row_data.get("detail_text", row_data.get("effect_text", ""))).strip_edges()
+			section_vbox.add_child(row_panel)
 		var row := HBoxContainer.new()
+		row.name = "PostMissionAwardValueRow" if is_post_mission_award else "ValueRow_%s" % _sanitize_node_fragment(String(row_data.get("label", "value")))
 		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_theme_constant_override("separation", 8)
 		var help_id: String = String(row_data.get("help_id", ""))
 		var detail_text: String = String(row_data.get("detail_text", row_data.get("effect_text", ""))).strip_edges()
 		_set_help_id(row, help_id)
 		row.tooltip_text = detail_text
-		section_vbox.add_child(row)
+		if is_post_mission_award:
+			row.set_meta("style_id", String(row_data.get("style_id", "")))
+			row_panel.add_child(row)
+		else:
+			section_vbox.add_child(row)
 
 		var label := Label.new()
-		label.text = "%s:" % String(row_data.get("label", "Value"))
-		label.custom_minimum_size = Vector2(ROW_LABEL_WIDTH, 0.0)
+		label.name = "PostMissionAwardLabel" if is_post_mission_award else "ValueLabel_%s" % _sanitize_node_fragment(String(row_data.get("label", "value")))
+		var row_label_text: String = "%s:" % String(row_data.get("label", "Value"))
+		if is_post_mission_award:
+			row_label_text = "%s | %s" % [String(row_data.get("badge_text", "MISSION GAIN")), row_label_text]
+		label.text = row_label_text
+		label.custom_minimum_size = Vector2(168.0 if is_post_mission_award else ROW_LABEL_WIDTH, 0.0)
 		_set_help_id(label, help_id)
 		label.tooltip_text = detail_text
 		META_UI_SKIN_SCRIPT.style_body_label(label, 10)
+		if is_post_mission_award:
+			label.add_theme_color_override("font_color", Color("ffe9a3"))
 		row.add_child(label)
 
 		var value_vbox := VBoxContainer.new()
@@ -395,12 +418,15 @@ static func _add_value_rows(host: VBoxContainer, rows: Array, profile = null, op
 		value_vbox.add_theme_constant_override("separation", 1)
 		row.add_child(value_vbox)
 		var value_label := Label.new()
+		value_label.name = "PostMissionAwardValue" if is_post_mission_award else "ValueText_%s" % _sanitize_node_fragment(String(row_data.get("label", "value")))
 		value_label.text = String(row_data.get("value_text", "n/a"))
 		value_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		value_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_set_help_id(value_label, help_id)
 		value_label.tooltip_text = detail_text
 		META_UI_SKIN_SCRIPT.style_body_label(value_label, 10)
+		if is_post_mission_award:
+			value_label.add_theme_color_override("font_color", Color("f4fbff"))
 		value_vbox.add_child(value_label)
 		if not detail_text.is_empty():
 			var detail_label := Label.new()
@@ -1250,6 +1276,25 @@ static func _sanitize_node_fragment(value: String) -> String:
 	if result.is_empty():
 		result = "metric"
 	return result
+
+
+static func _build_post_mission_award_stylebox() -> StyleBoxFlat:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color("25353a")
+	stylebox.border_color = Color("d8b950")
+	stylebox.border_width_left = 1
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 5
+	stylebox.corner_radius_top_right = 5
+	stylebox.corner_radius_bottom_left = 5
+	stylebox.corner_radius_bottom_right = 5
+	stylebox.content_margin_left = 8
+	stylebox.content_margin_top = 5
+	stylebox.content_margin_right = 8
+	stylebox.content_margin_bottom = 5
+	return stylebox
 
 
 static func _load_portrait_texture(portrait_id: String, portrait_path: String) -> Texture2D:

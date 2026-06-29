@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_594 auf <code>task/post-mission-skill-delta-homebase-bridge</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_595 auf <code>task/homebase-progression-visual-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -264,7 +264,8 @@
       <span class="pill good">TASK_592 Skill-Preview</span>
       <span class="pill good">TASK_593 Skill-Awards</span>
       <span class="pill good">TASK_594 Homebase-Delta</span>
-      <span class="pill warn">TASK_595 Progression-Polish offen</span>
+      <span class="pill good">TASK_595 Progression-Polish</span>
+      <span class="pill warn">TASK_596 Player-Review offen</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -492,18 +493,19 @@
             <div class="metric"><strong>TASK_591</strong><span>aktuell umgesetzt: Debrief-AAR-Player-Review mit Screenshot-, Rating- und Follow-up-Export</span></div>
             <div class="metric"><strong>TASK_592</strong><span>aktuell umgesetzt: Skill Preview im Debrief sichtbar, aber read-only</span></div>
             <div class="metric"><strong>TASK_593</strong><span>umgesetzt: echte Resolver-Awards als kompakte Debrief-Summary</span></div>
-            <div class="metric"><strong>TASK_594</strong><span>aktuell umgesetzt: Skill-Deltas nach Homebase-Rueckkehr im Character-Sheet wiederfinden</span></div>
-            <div class="metric"><strong>TASK_595</strong><span>naechster sinnvoller Slice: Homebase-Progression visuell staerker hervorheben</span></div>
+            <div class="metric"><strong>TASK_594</strong><span>umgesetzt: Skill-Deltas nach Homebase-Rueckkehr im Character-Sheet wiederfinden</span></div>
+            <div class="metric"><strong>TASK_595</strong><span>aktuell umgesetzt: Homebase-Progression als Highlight-Row mit Badge sichtbar machen</span></div>
+            <div class="metric"><strong>TASK_596</strong><span>naechster sinnvoller Slice: echten Spielerblick auf den Return-Progression-Polish exportierbar machen</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. SUP ist jetzt zusaetzlich als deduplizierter AAR-/Debug-Wert messbar, als kompaktes Report-Panel lesbar, in einer Mini-AAR-Schale mit Fire-/Friendly-Fire-/Statusmetriken zusammengefuehrt, als kleine Debrief-Screen-Struktur praesentierbar und per Debrief->Homebase-Handoff wieder in den Meta-Loop zurueckfuehrbar. TASK_590 bereinigt den sichtbaren Debrief-AAR-Praefix, TASK_591 macht den echten Spielerblick darauf exportierbar, TASK_592 zeigt Skillentwicklung als read-only Vorschau, TASK_593 zeigt echte Resolver-Awards als `Skill Awards` im Debrief und TASK_594 macht diese Deltas nach Homebase-Rueckkehr im Character-Sheet wieder auffindbar.</td><td>Der naechste Test sollte pruefen, ob die Progressionsanzeige in der Homebase auffaellig und angenehm genug ist.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. SUP ist jetzt zusaetzlich als deduplizierter AAR-/Debug-Wert messbar, als kompaktes Report-Panel lesbar, in einer Mini-AAR-Schale mit Fire-/Friendly-Fire-/Statusmetriken zusammengefuehrt, als kleine Debrief-Screen-Struktur praesentierbar und per Debrief->Homebase-Handoff wieder in den Meta-Loop zurueckfuehrbar. TASK_590 bereinigt den sichtbaren Debrief-AAR-Praefix, TASK_591 macht den echten Spielerblick darauf exportierbar, TASK_592 zeigt Skillentwicklung als read-only Vorschau, TASK_593 zeigt echte Resolver-Awards als `Skill Awards` im Debrief, TASK_594 macht diese Deltas im Character-Sheet auffindbar und TASK_595 hebt sie dort als `MISSION GAIN`-Row hervor.</td><td>Der naechste Test sollte den echten Spielerblick auf diese Homebase-Progression strukturiert einsammeln.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
-                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_594 ist hier bewusst mitgepflegt, damit der laufende Chat-Stand nicht nur im Verlauf steckt.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
+                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_595 ist hier bewusst mitgepflegt, damit der laufende Chat-Stand nicht nur im Verlauf steckt.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
               </tbody>
             </table>
           </div>
@@ -538,6 +540,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_592_done"> TASK_592 Debrief-Skill-Progress-Preview ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_593_done"> TASK_593 Skill-Progress-Award-Contract ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_594_done"> TASK_594 Post-Mission-Skill-Delta-Homebase-Bridge ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_595_done"> TASK_595 Homebase-Progression-Visual-Polish ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_586_done"> TASK_586 Debrief-Return-To-Homebase-Handoff ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -607,8 +610,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Aktueller Stand</td><td>TASK_594 ist der aktuelle Arbeitsstand: Die Homebase erhaelt `progression_award_summary` aus dem MissionResult und das Character-Sheet zeigt ausgezeichneten Operatoren eine read-only `Last Award`-Zeile.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
-                <tr><td>Naechster Schritt</td><td>TASK_595 sollte die Homebase-Progression visuell polieren, damit XP-/Skill-Deltas nicht nur auffindbar, sondern beim Return wirklich angenehm erkennbar sind.</td><td>Wenn der Debrief->Homebase-Core-Loop weitergeschlossen wird.</td></tr>
+                <tr><td>Aktueller Stand</td><td>TASK_595 ist der aktuelle Arbeitsstand: Die Homebase-Progression wird im Character-Sheet als read-only Highlight-Row mit `MISSION GAIN`, Style-ID und Resolver-Source angezeigt.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
+                <tr><td>Naechster Schritt</td><td>TASK_596 sollte den echten Spielerblick auf die Homebase-Progression als exportierbare Review-Notiz erfassen.</td><td>Wenn der Debrief->Homebase-Core-Loop weitergeschlossen wird.</td></tr>
                 <tr><td>Noch nicht bauen</td><td>Kein grosses Ammo-, Suppression- oder AAR-System, solange der kleine Intent-/Outcome-Pfad nicht sauber gelesen und getestet ist.</td><td>Wenn spaeter echte Suppression-Wirkung, Munitionsverbrauch oder AAR-Messwerte als eigener Task beginnen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_562 erzeugt eine reproduzierbare MP-F6-Bildbasis unter <code>tmp/frontier_probe_mp_f6_visual_evidence.png</code> plus Manifest; im Headless-Dummy als Evidence-Board aus Snapshot-Rects.</td><td>Wenn TASK_565 aus echtem MP-F6-Export konkrete Gameplay-HUD-Polish-Aenderungen ableitet.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_563 macht diese lokale Evidence direkt im HTML-Zwischenbericht sichtbar und exportiert die Artefaktpfade sowie Readback-/Evidence-Board-Flags.</td><td>Wenn neue Capture-Artefakte, manuelle Sichtnotizen oder echte Host/Client-F6-Screenshots hinzukommen.</td></tr>
@@ -643,7 +646,8 @@
                 <tr><td>Erledigt</td><td>TASK_592 - Debrief Skill Progress Preview Shell. Der Debrief zeigt Skillentwicklung als kompakte read-only Vorschau, ohne XP, Skills oder Persistenz zu mutieren.</td><td>Wenn echte AAR-/Debriefing-UI oder Meta-Loop-Folgewerte starten.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_593 - Skill Progress Award Contract. Echte Resolver-Awards werden als kompakte `Skill Awards`-Zeile im Debrief sichtbar.</td><td>Wenn echte AAR-/Debriefing-UI oder Meta-Loop-Folgewerte starten.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_594 - Post Mission Skill Delta Homebase Bridge. Award-Deltas sind nach der Rueckkehr in Homebase/Character-Sheet wieder auffindbar.</td><td>Wenn echte AAR-/Debriefing-UI oder Meta-Loop-Folgewerte starten.</td></tr>
-                <tr><td>Naechst</td><td>TASK_595 - Homebase Progression Visual Polish. Ziel: Award-Deltas im Homebase-Workflow staerker und schoener hervorheben.</td><td>Wenn der naechste kleine Meta-Progression-Slice gestartet wird.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_595 - Homebase Progression Visual Polish. Award-Deltas sind im Character-Sheet als `MISSION GAIN`-Highlight hervorgehoben.</td><td>Wenn echte AAR-/Debriefing-UI oder Meta-Loop-Folgewerte starten.</td></tr>
+                <tr><td>Naechst</td><td>TASK_596 - Homebase Progression Player Review Notes. Ziel: echten Sichttest/Spielgefuehl-Notizen fuer die Return-Progression exportierbar machen.</td><td>Wenn der naechste kleine Meta-Progression-Slice gestartet wird.</td></tr>
                 <tr><td>Offen</td><td>Der finale menschliche Spielgefuehl-Test bleibt offen. Die naechste manuelle Runde sollte pruefen, ob Teamchip-Hover, erste Move-Preview, Kontaktlinien und Paneldichte zusammen angenehm wirken.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -664,7 +668,7 @@
                 <tr><td>Visual Gate</td><td><input readonly value="pass" data-export-key="debrief_aar_evidence.visual_gate"></td><td>AAR-Sektion liegt im Panel, vor den Buttons und bleibt kompakt.</td></tr>
                 <tr><td>Bridge Gate</td><td><input readonly value="pass" data-export-key="debrief_aar_evidence.bridge_gate"></td><td>TASK_588-AAR-Datenbruecke bleibt gruen.</td></tr>
                 <tr><td>Manual Review</td><td><input readonly value="offen" data-export-key="debrief_aar_evidence.manual_review_status"></td><td>Automatische Evidence ersetzt nicht den finalen menschlichen Sichttest.</td></tr>
-                <tr><td>Naechster Task</td><td><input readonly value="TASK_595 - Homebase Progression Visual Polish" data-export-key="debrief_aar_evidence.recommended_next_task"></td><td>Nach TASK_594 als Visual-Polish, damit echte Award-Deltas in der Homebase besser ins Auge fallen.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_596 - Homebase Progression Player Review Notes" data-export-key="debrief_aar_evidence.recommended_next_task"></td><td>Nach TASK_595 als Player-Review-Ort, damit der echte Homebase-Return-Blick exportierbar wird.</td></tr>
               </tbody>
             </table>
           </div>
@@ -812,7 +816,8 @@
             <div class="finding good"><h3>Erledigt: TASK_592 - Debrief Skill Progress Preview Shell</h3><p>Der Debrief zeigt eine kompakte Skill-Preview aus Team- und Fireteam-Debriefdaten, bleibt aber read-only.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_593 - Skill Progress Award Contract</h3><p>Der Debrief zeigt echte Resolver-Awards als `Skill Awards`, getrennt von der Preview.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_594 - Post Mission Skill Delta Homebase Bridge</h3><p>Die Award-Deltas bleiben nach der Rueckkehr in Homebase/Character-Sheet als read-only `Last Award` auffindbar.</p></div>
-            <div class="finding medium"><h3>1. TASK_595 - Homebase Progression Visual Polish</h3><p>Als naechstes sollten die Award-Deltas in der Homebase visuell staerker hervorgehoben werden.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_595 - Homebase Progression Visual Polish</h3><p>Die Award-Deltas werden im Character-Sheet als `MISSION GAIN`-Highlight mit stabiler Style-ID hervorgehoben.</p></div>
+            <div class="finding medium"><h3>1. TASK_596 - Homebase Progression Player Review Notes</h3><p>Als naechstes sollte der echte Spielerblick auf diese Highlight-Zeile exportierbar gemacht werden.</p></div>
           </div>
         </article>
       </div>
@@ -892,7 +897,8 @@
             <div class="finding good"><h3>Erledigt: TASK_592 - Debrief Skill Progress Preview Shell</h3><p>Skillentwicklung ist jetzt im Meta-Debrief sichtbar, ohne neue Gameplay-Wahrheit im UI anzulegen.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_593 - Skill Progress Award Contract</h3><p>Die Preview ist jetzt an echte Award-Daten aus dem autoritativen Resolver angebunden, ohne dass der Debrief Awards berechnet.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_594 - Post Mission Skill Delta Homebase Bridge</h3><p>Der Fortschritt ist nach dem Return-Handoff in der Homebase wiederzuerkennen.</p></div>
-            <div class="finding medium"><h3>1. TASK_595 - Homebase Progression Visual Polish</h3><p>Der naechste Spielbarkeitshebel ist, die Progression in der Homebase deutlicher und schoener wahrnehmbar zu machen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_595 - Homebase Progression Visual Polish</h3><p>Die Progression ist in der Homebase deutlicher und schoener wahrnehmbar.</p></div>
+            <div class="finding medium"><h3>1. TASK_596 - Homebase Progression Player Review Notes</h3><p>Der naechste Spielbarkeitshebel ist, den echten Sichttest dieser Progressionszeile strukturiert festzuhalten.</p></div>
           </div>
         </article>
         <article class="card">
@@ -1407,7 +1413,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_595 - Homebase Progression Visual Polish"
+              "TASK_596 - Homebase Progression Player Review Notes"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -1488,7 +1494,8 @@
               "TASK_591 - Debrief AAR Player Review Notes Pass",
               "TASK_592 - Debrief Skill Progress Preview Shell",
               "TASK_593 - Skill Progress Award Contract",
-              "TASK_594 - Post Mission Skill Delta Homebase Bridge"
+              "TASK_594 - Post Mission Skill Delta Homebase Bridge",
+              "TASK_595 - Homebase Progression Visual Polish"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -1496,7 +1503,7 @@
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
               "Fire-Rule-Controls sind als TASK_572 automatisiert geprueft; TASK_573 stellt die exportierbare Notizflaeche; TASK_574 erzeugt lokale Evidence; TASK_575 poliert den aktiven ROE-Affordance-State, aber der finale menschliche Hover-/Spielgefuehl-Test bleibt offen.",
               "Suppress ist weiterhin ein Rule-/Preview-/Intent-Zustand; TASK_576 macht ihn vor GO lesbar, TASK_577 belegt ihn als lokale Visual-Evidence, TASK_578 zeichnet die Area sichtbar, TASK_579 sammelt den menschlichen F6-Befund, TASK_580 tuned die Area-Lesbarkeit, TASK_581 traegt den Intent durch Combat-Diagnostics, TASK_582 zaehlt ihn als kleinen AAR-/Debug-Anker, TASK_583 zeigt ihn als Report-Panel, TASK_584 sammelt ihn mit Fire-/Friendly-Fire-/Statusmetriken in einer Mini-AAR-Schale, TASK_585 macht daraus einen Debrief-Screen-Stub und TASK_586 fuehrt ihn pruefbar zur Homebase zurueck. Echte Suppression-Wirkung, Ammo-Verbrauch, XP und vollstaendige Debriefing-UI bleiben Folgearbeit.",
-              "TASK_594 macht Award-Deltas nach Rueckkehr in Homebase/Character-Sheet wieder auffindbar; visuelle Hervorhebung und Spielgefuehl bleiben TASK_595."
+              "TASK_595 hebt Award-Deltas im Homebase-Character-Sheet hervor; echter Spielerblick und Exportnotizen bleiben TASK_596."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -1505,14 +1512,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_593",
-            current_focus: "TASK_595 - Homebase Progression Visual Polish",
-            latest_completed_task: "TASK_594 - Post Mission Skill Delta Homebase Bridge"
+            current_repo_base: "integration/core-foundation after TASK_594",
+            current_focus: "TASK_596 - Homebase Progression Player Review Notes",
+            latest_completed_task: "TASK_595 - Homebase Progression Visual Polish"
           },
           metadata: {
-            branch: "task/post-mission-skill-delta-homebase-bridge",
-            integration_base: "integration/core-foundation after TASK_593",
-            head: "task/post-mission-skill-delta-homebase-bridge",
+            branch: "task/homebase-progression-visual-polish",
+            integration_base: "integration/core-foundation after TASK_594",
+            head: "task/homebase-progression-visual-polish",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }
