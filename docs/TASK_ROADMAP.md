@@ -237,7 +237,8 @@ git checkout -b batch/<batch-name>
 - TASK_606 - Host Client F6 Visual Polish Findings (implementiert)
 - TASK_607 - Two Instance Host Client Runtime Smoke (implementiert)
 - TASK_608 - Host Client Runtime Visual Capture (implementiert)
-- TASK_609 - Host Client Runtime Visual Polish Findings
+- TASK_609 - Host Client Runtime Visual Polish Findings (implementiert)
+- TASK_610 - Host Client Two Window Playtest Notes
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

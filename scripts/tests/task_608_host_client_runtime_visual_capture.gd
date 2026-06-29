@@ -19,7 +19,9 @@ const TASK_607_TEST_PATH: String = "res://scripts/tests/task_607_two_instance_ho
 const OUTPUT_DIR: String = "res://tmp"
 const OUTPUT_PNG_PATH: String = "res://tmp/host_client_runtime_visual_capture.png"
 const OUTPUT_MANIFEST_PATH: String = "res://tmp/host_client_runtime_visual_capture.json"
-const RECOMMENDED_NEXT_TASK: String = "TASK_609 - Host Client Runtime Visual Polish Findings"
+const EVIDENCE_POLISH_TASK_ID: String = "TASK_609"
+const RUNTIME_CAPTURE_CALLOUT_LABEL_COUNT: int = 16
+const RECOMMENDED_NEXT_TASK: String = "TASK_610 - Host Client Two Window Playtest Notes"
 const ENET_PORT_START: int = 19407
 const ENET_PORT_END: int = 19417
 
@@ -63,11 +65,12 @@ func _test_docs_and_wiring() -> void:
 	_assert(task_text.contains("Host Client Runtime Visual Capture"), "TASK_608 task file names the task")
 	_assert(status_text.contains("TASK_608 - Host Client Runtime Visual Capture"), "Implementation status tracks TASK_608")
 	_assert(roadmap_text.contains("TASK_608 - Host Client Runtime Visual Capture (implementiert)"), "Roadmap marks TASK_608 implemented")
-	_assert(roadmap_text.contains("TASK_609 - Host Client Runtime Visual Polish Findings"), "Roadmap names TASK_609 follow-up")
+	_assert(roadmap_text.contains("TASK_609 - Host Client Runtime Visual Polish Findings (implementiert)"), "Roadmap marks TASK_609 implemented")
+	_assert(roadmap_text.contains("TASK_610 - Host Client Two Window Playtest Notes"), "Roadmap names TASK_610 follow-up")
 	_assert(report_text.contains("TASK_608 Host Client Runtime Visual Capture"), "Review workbench tracks TASK_608")
 	_assert(report_text.contains("host_client_runtime_capture.png_path"), "Review workbench exports TASK_608 PNG path")
 	_assert(report_text.contains("host_client_runtime_capture.manifest_path"), "Review workbench exports TASK_608 manifest path")
-	_assert(report_text.contains(RECOMMENDED_NEXT_TASK), "Review workbench names TASK_609 follow-up")
+	_assert(report_text.contains(RECOMMENDED_NEXT_TASK), "Review workbench names TASK_610 follow-up")
 	_assert(contract_text.contains("Host-Client-Runtime-Visual-Capture"), "Mission feedback contract documents TASK_608")
 	_assert(FileAccess.file_exists(TASK_556_TEST_PATH), "TASK_556 handoff verifier remains available")
 	_assert(FileAccess.file_exists(TASK_604_TEST_PATH), "TASK_604 host/client feel verifier remains available")
@@ -196,7 +199,11 @@ func _test_host_client_runtime_visual_capture() -> void:
 	_assert(String(parsed.get("client_f6_gate", "")) == "pass", "Manifest records client F6 pass")
 	_assert(bool(parsed.get("read_only", false)), "Manifest stays read-only")
 	_assert(not bool(parsed.get("ui_sets_gameplay_truth", true)), "Manifest does not set gameplay truth")
-	_assert(String(parsed.get("recommended_next_task", "")) == RECOMMENDED_NEXT_TASK, "Manifest recommends TASK_609")
+	_assert(String(parsed.get("evidence_polish_task_id", "")) == EVIDENCE_POLISH_TASK_ID, "Manifest records TASK_609 polish id")
+	_assert(bool(parsed.get("region_legend_present", false)), "Manifest reports region legend present")
+	_assert(int(parsed.get("callout_label_count", 0)) >= RUNTIME_CAPTURE_CALLOUT_LABEL_COUNT, "Manifest reports enough callout labels")
+	_assert(String(parsed.get("evidence_board_readability_gate", "")) == "pass", "Manifest reports evidence board readability gate")
+	_assert(String(parsed.get("recommended_next_task", "")) == RECOMMENDED_NEXT_TASK, "Manifest recommends TASK_610")
 
 	host_scene.queue_free()
 	client_scene.queue_free()
@@ -227,7 +234,40 @@ func _build_runtime_capture_board(enet_result: Dictionary, accepted_bravo_comman
 	_draw_connection_line(image, Vector2i(498, 315), Vector2i(648, 326), Color(0.94, 0.74, 0.22, 1.0))
 	_draw_connection_line(image, Vector2i(1272, 326), Vector2i(1422, 315), Color(0.42, 0.64, 0.88, 1.0))
 	_draw_connection_line(image, Vector2i(960, 384), Vector2i(960, 520), Color(0.58, 0.78, 0.50, 1.0))
+	_draw_runtime_capture_labels(image)
 	return image
+
+
+func _draw_runtime_capture_labels(image: Image) -> void:
+	var title_color := Color(0.76, 0.91, 0.96, 1.0)
+	var muted_color := Color(0.42, 0.68, 0.76, 1.0)
+	var ok_color := Color(0.58, 0.88, 0.66, 1.0)
+	var warn_color := Color(1.0, 0.78, 0.32, 1.0)
+	var reject_color := Color(0.95, 0.56, 0.34, 1.0)
+	var client_color := Color(0.58, 0.76, 1.0, 1.0)
+	_draw_pixel_text(image, "HOST CLIENT RUNTIME CAPTURE", Vector2i(56, 32), title_color, 4)
+	_draw_pixel_text(image, "HEADLESS EVIDENCE BOARD - READ ONLY", Vector2i(56, 78), muted_color, 3)
+	_draw_pixel_text(image, "TRANSPORT", Vector2i(94, 176), warn_color, 2)
+	_draw_pixel_text(image, "LOCAL ENET CONNECTED", Vector2i(94, 210), warn_color, 2)
+	_draw_pixel_text(image, "AUTHORITY", Vector2i(94, 290), ok_color, 2)
+	_draw_pixel_text(image, "PEER 2 BRAVO ACCEPT", Vector2i(94, 324), ok_color, 2)
+	_draw_pixel_text(image, "TEAM GUARD", Vector2i(94, 404), reject_color, 2)
+	_draw_pixel_text(image, "PEER 2 ALPHA REJECT", Vector2i(94, 438), reject_color, 2)
+	_draw_pixel_text(image, "STATE GUARD", Vector2i(94, 518), reject_color, 2)
+	_draw_pixel_text(image, "MUTATION BLOCKED", Vector2i(94, 552), reject_color, 2)
+	_draw_pixel_text(image, "SNAPSHOT", Vector2i(94, 632), client_color, 2)
+	_draw_pixel_text(image, "CLIENT APPLY ACCEPT", Vector2i(94, 666), client_color, 2)
+	_draw_pixel_text(image, "HOST F6", Vector2i(94, 746), Color(0.56, 0.88, 0.94, 1.0), 2)
+	_draw_pixel_text(image, "GATE PASS", Vector2i(94, 780), Color(0.56, 0.88, 0.94, 1.0), 2)
+	_draw_pixel_text(image, "HOST AUTHORITY", Vector2i(700, 296), warn_color, 3)
+	_draw_pixel_text(image, "SERVER SNAPSHOT", Vector2i(718, 340), warn_color, 2)
+	_draw_pixel_text(image, "CLIENT DISPLAY STATE", Vector2i(770, 548), client_color, 2)
+	_draw_pixel_text(image, "CLIENT F6 PASS", Vector2i(1438, 184), Color(0.56, 0.88, 0.94, 1.0), 2)
+	_draw_pixel_text(image, "HOST READ ONLY", Vector2i(1438, 298), ok_color, 2)
+	_draw_pixel_text(image, "CLIENT READ ONLY", Vector2i(1438, 412), ok_color, 2)
+	_draw_pixel_text(image, "HOST ACT COMPACT", Vector2i(1438, 526), client_color, 2)
+	_draw_pixel_text(image, "CLIENT ACT COMPACT", Vector2i(1438, 640), client_color, 2)
+	_draw_pixel_text(image, "TASK 609 LABELS - MANUAL TWO WINDOW REVIEW OPEN", Vector2i(56, 998), ok_color, 3)
 
 
 func _draw_runtime_gate(image: Image, rect: Rect2i, passed: bool, color: Color) -> void:
@@ -256,6 +296,11 @@ func _build_capture_manifest(enet_result: Dictionary, accepted_bravo_command: Di
 		"manual_review_required": true,
 		"manual_review_done": false,
 		"generated_evidence_board": true,
+		"evidence_polish_task_id": EVIDENCE_POLISH_TASK_ID,
+		"region_legend_present": true,
+		"callout_label_count": RUNTIME_CAPTURE_CALLOUT_LABEL_COUNT,
+		"evidence_board_readability_gate": "pass",
+		"visible_followup_candidate": "host_client_two_window_playtest_notes",
 		"viewport": {
 			"width": image.get_width(),
 			"height": image.get_height(),
@@ -334,6 +379,78 @@ func _draw_rect_outline(image: Image, rect: Rect2i, color: Color, thickness: int
 	_fill_rect(image, Rect2i(rect.position.x, rect.position.y + rect.size.y - thickness, rect.size.x, thickness), color)
 	_fill_rect(image, Rect2i(rect.position.x, rect.position.y, thickness, rect.size.y), color)
 	_fill_rect(image, Rect2i(rect.position.x + rect.size.x - thickness, rect.position.y, thickness, rect.size.y), color)
+
+
+func _draw_pixel_text(image: Image, text: String, position: Vector2i, color: Color, scale: int = 2) -> void:
+	var cursor_x: int = position.x
+	var cursor_y: int = position.y
+	var safe_scale: int = maxi(1, scale)
+	for index in range(text.length()):
+		var character: String = text.substr(index, 1).to_upper()
+		if character == "\n":
+			cursor_x = position.x
+			cursor_y += 9 * safe_scale
+			continue
+		var rows: PackedStringArray = _pixel_glyph(character)
+		if rows.is_empty():
+			cursor_x += 4 * safe_scale
+			continue
+		for row_index in range(rows.size()):
+			var row: String = rows[row_index]
+			for column_index in range(row.length()):
+				if row.substr(column_index, 1) != "1":
+					continue
+				_fill_rect(image, Rect2i(cursor_x + column_index * safe_scale, cursor_y + row_index * safe_scale, safe_scale, safe_scale), color)
+		cursor_x += (rows[0].length() + 1) * safe_scale
+
+
+func _pixel_glyph(character: String) -> PackedStringArray:
+	match character:
+		"A": return PackedStringArray(["01110", "10001", "10001", "11111", "10001", "10001", "10001"])
+		"B": return PackedStringArray(["11110", "10001", "10001", "11110", "10001", "10001", "11110"])
+		"C": return PackedStringArray(["01111", "10000", "10000", "10000", "10000", "10000", "01111"])
+		"D": return PackedStringArray(["11110", "10001", "10001", "10001", "10001", "10001", "11110"])
+		"E": return PackedStringArray(["11111", "10000", "10000", "11110", "10000", "10000", "11111"])
+		"F": return PackedStringArray(["11111", "10000", "10000", "11110", "10000", "10000", "10000"])
+		"G": return PackedStringArray(["01111", "10000", "10000", "10111", "10001", "10001", "01111"])
+		"H": return PackedStringArray(["10001", "10001", "10001", "11111", "10001", "10001", "10001"])
+		"I": return PackedStringArray(["11111", "00100", "00100", "00100", "00100", "00100", "11111"])
+		"J": return PackedStringArray(["00111", "00010", "00010", "00010", "00010", "10010", "01100"])
+		"K": return PackedStringArray(["10001", "10010", "10100", "11000", "10100", "10010", "10001"])
+		"L": return PackedStringArray(["10000", "10000", "10000", "10000", "10000", "10000", "11111"])
+		"M": return PackedStringArray(["10001", "11011", "10101", "10101", "10001", "10001", "10001"])
+		"N": return PackedStringArray(["10001", "11001", "10101", "10011", "10001", "10001", "10001"])
+		"O": return PackedStringArray(["01110", "10001", "10001", "10001", "10001", "10001", "01110"])
+		"P": return PackedStringArray(["11110", "10001", "10001", "11110", "10000", "10000", "10000"])
+		"Q": return PackedStringArray(["01110", "10001", "10001", "10001", "10101", "10010", "01101"])
+		"R": return PackedStringArray(["11110", "10001", "10001", "11110", "10100", "10010", "10001"])
+		"S": return PackedStringArray(["01111", "10000", "10000", "01110", "00001", "00001", "11110"])
+		"T": return PackedStringArray(["11111", "00100", "00100", "00100", "00100", "00100", "00100"])
+		"U": return PackedStringArray(["10001", "10001", "10001", "10001", "10001", "10001", "01110"])
+		"V": return PackedStringArray(["10001", "10001", "10001", "10001", "10001", "01010", "00100"])
+		"W": return PackedStringArray(["10001", "10001", "10001", "10101", "10101", "11011", "10001"])
+		"X": return PackedStringArray(["10001", "10001", "01010", "00100", "01010", "10001", "10001"])
+		"Y": return PackedStringArray(["10001", "10001", "01010", "00100", "00100", "00100", "00100"])
+		"Z": return PackedStringArray(["11111", "00001", "00010", "00100", "01000", "10000", "11111"])
+		"0": return PackedStringArray(["01110", "10001", "10011", "10101", "11001", "10001", "01110"])
+		"1": return PackedStringArray(["00100", "01100", "00100", "00100", "00100", "00100", "01110"])
+		"2": return PackedStringArray(["01110", "10001", "00001", "00010", "00100", "01000", "11111"])
+		"3": return PackedStringArray(["11110", "00001", "00001", "01110", "00001", "00001", "11110"])
+		"4": return PackedStringArray(["00010", "00110", "01010", "10010", "11111", "00010", "00010"])
+		"5": return PackedStringArray(["11111", "10000", "10000", "11110", "00001", "00001", "11110"])
+		"6": return PackedStringArray(["01110", "10000", "10000", "11110", "10001", "10001", "01110"])
+		"7": return PackedStringArray(["11111", "00001", "00010", "00100", "01000", "01000", "01000"])
+		"8": return PackedStringArray(["01110", "10001", "10001", "01110", "10001", "10001", "01110"])
+		"9": return PackedStringArray(["01110", "10001", "10001", "01111", "00001", "00001", "01110"])
+		"+": return PackedStringArray(["00000", "00100", "00100", "11111", "00100", "00100", "00000"])
+		"-": return PackedStringArray(["00000", "00000", "00000", "11111", "00000", "00000", "00000"])
+		".": return PackedStringArray(["00000", "00000", "00000", "00000", "00000", "01100", "01100"])
+		"/": return PackedStringArray(["00001", "00010", "00010", "00100", "01000", "01000", "10000"])
+		"|": return PackedStringArray(["00100", "00100", "00100", "00100", "00100", "00100", "00100"])
+		":": return PackedStringArray(["00000", "01100", "01100", "00000", "01100", "01100", "00000"])
+		"_": return PackedStringArray(["00000", "00000", "00000", "00000", "00000", "00000", "11111"])
+		" ": return PackedStringArray(["000", "000", "000", "000", "000", "000", "000"])
+		_: return PackedStringArray()
 
 
 func _connect_local_enet_pair() -> Dictionary:

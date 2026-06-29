@@ -50,6 +50,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_608_host_client_runtime_visual_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_607_two_instance_host_client_runtime_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_606_host_client_f6_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_609 - Host Client Runtime Visual Polish Findings`, aber nur fuer belegte Reibung aus dem Capture oder manuellen Bericht.
 
+### TASK_609 - Host Client Runtime Visual Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_609_host_client_runtime_visual_polish_findings.md`, `docs/tasks/TASK_608_host_client_runtime_visual_capture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Das TASK_608-Headless-Evidence-Board zeichnet jetzt Pixel-Labels fuer Header, Transport-/Authority-/Guard-/Snapshot-Gates, Host-/Client-F6-Gates und Footer direkt ins PNG.
+- Stand: Das Manifest meldet `evidence_polish_task_id = TASK_609`, `region_legend_present = true`, `callout_label_count`, `evidence_board_readability_gate = pass` und empfiehlt TASK_610 als echten Zwei-Fenster-/Playtest-Notizen-Slice.
+- Stand: Der laufende HTML-Zwischenbericht zeigt die neuen TASK_609-Felder und behaelt den manuellen Review-Status offen.
+- Risiken/offen: Das beschriftete Board ersetzt keinen echten Zwei-Fenster-/LAN-Sichttest. TASK_610 sollte den realen Host/Client-Fensterlauf oder Screenshot-/Notiz-Workflow vorbereiten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_608_host_client_runtime_visual_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_609_host_client_runtime_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_607_two_instance_host_client_runtime_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_610 - Host Client Two Window Playtest Notes`, damit ein echter Host/Client-Fensterlauf oder Screenshot-Review strukturiert dokumentiert werden kann.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
