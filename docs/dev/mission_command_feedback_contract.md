@@ -314,6 +314,11 @@ TASK_610 nutzt den laufenden HTML-Zwischenbericht als manuelle Zwei-Fenster-Play
 
 Erwartete Struktur: Der Bericht enthaelt Exportfelder unter `host_client_two_window_manual.*`, mindestens `host_screenshot_done`, `client_screenshot_done`, `both_windows_visible_checked`, `local_connection_checked`, `host_authority_checked`, `client_read_only_checked`, `peer2_bravo_command_checked`, `peer2_alpha_reject_checked`, `snapshot_sync_checked`, `f6_readability_checked`, `performance_checked`, `host_screenshot_path`, `client_screenshot_path`, `viewport`, `connection_mode`, `scenario`, `host_identity_notes`, `client_identity_notes`, `command_authority_notes`, `snapshot_sync_notes`, `performance_notes`, `visual_readability_notes` und `followup`. Choice-Groups liefern `result`, `connection_rating`, `authority_rating`, `sync_rating`, `readability_rating`, `performance_rating` und `next_priority`. Die freie Notiz nutzt `notes.host_client_two_window_manual_review`. Host-/Client-Screenshot-Checkboxen muessen standardmaessig offen bleiben.
 
+## Host-Client-Two-Window-Launch-Helper
+TASK_611 stellt den lokalen Host-/Client-Zwei-Fenster-Start als reproduzierbaren Review-Plan bereit. `scripts/tools/launch_host_client_two_window_review.ps1` schreibt standardmaessig nur `tmp/host_client_two_window_launch_plan.json`; zwei sichtbare Godot-Fenster werden erst mit explizitem `-Launch` gestartet. Der Plan und der HTML-Bericht sind read-only und duerfen keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit erzeugen.
+
+Erwartete Struktur: `tmp/host_client_two_window_launch_plan.json` enthaelt `schema = sternenbuergerchen.host_client_two_window_launch_helper.v1`, `task_id = TASK_611`, `launch_mode`, `launch_requested`, `read_only = true`, `ui_sets_gameplay_truth = false`, `project_path`, `scene`, `godot_bin`, `godot_bin_found`, `godot_bin_source`, `helper_path`, `plan_path`, `window_layout`, `host`, `client`, `launch_command` und `recommended_next_task = TASK_612 - Host Client Two Window Screenshot Review`. Der laufende HTML-Bericht darf Helper-, Plan-, Szene-, Fenster- und Launch-Command-Felder unter `host_client_two_window_launch.*` exportieren, darf aber den echten Screenshot-/Fensterreview nicht als erledigt markieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

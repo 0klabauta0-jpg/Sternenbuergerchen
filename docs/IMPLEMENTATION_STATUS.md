@@ -70,6 +70,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_610_host_client_two_window_playtest_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_609_host_client_runtime_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_611 - Host Client Two Window Launch Helper`, damit der echte Fensterlauf reproduzierbarer gestartet werden kann.
 
+### TASK_611 - Host Client Two Window Launch Helper
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_611_host_client_two_window_launch_helper.md`, `docs/tasks/TASK_610_host_client_two_window_playtest_notes.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `scripts/tools/launch_host_client_two_window_review.ps1` schreibt standardmaessig einen Dry-Run-Plan nach `tmp/host_client_two_window_launch_plan.json` und startet sichtbare Host-/Client-Godot-Fenster erst mit explizitem `-Launch`.
+- Stand: Der Plan enthaelt TASK_611-Schema, Szene, Godot-Pfadstatus, Host-/Client-Rollen, Peer-/Team-Zuordnung, Fensterlayout, Launch-Command, `read_only = true`, `ui_sets_gameplay_truth = false` und TASK_612 als naechsten Screenshot-Review.
+- Stand: Der laufende HTML-Zwischenbericht enthaelt einen eigenen TASK_611-Block fuer Helper-Pfad, Plan-Pfad, Szene, Fensterlayout, Dry-Run/Launch-Command, Read-only-Grenze und Folgeprioritaet.
+- Risiken/offen: TASK_611 erleichtert den echten Fensterlauf, ersetzt ihn aber nicht. TASK_612 sollte Host-/Client-Screenshots und Bedienbefunde aus dem sichtbaren Lauf dokumentieren.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_611_host_client_two_window_launch_helper.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_610_host_client_two_window_playtest_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_609_host_client_runtime_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_612 - Host Client Two Window Screenshot Review`, damit der echte sichtbare Host-/Client-Lauf bewertet und als Befund gesichert wird.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
