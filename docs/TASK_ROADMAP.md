@@ -199,7 +199,8 @@ git checkout -b batch/<batch-name>
 - TASK_568 - Frontier Probe Risky Contact Preview Fixture (implementiert)
 - TASK_569 - Frontier Probe Threat Preview Visual Review (implementiert)
 - TASK_570 - Hold Fire Discipline Mission Bridge (implementiert)
-- TASK_571 - Fire Rule Controls Readability Polish
+- TASK_571 - Fire Rule Controls Readability Polish (implementiert)
+- TASK_572 - Fire Rule F6 Readability Smoke
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

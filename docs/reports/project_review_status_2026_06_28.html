@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_567 auf <code>task/frontier-probe-first-move-threat-preview-readability</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_571 auf <code>task/fire-rule-controls-readability-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -449,7 +449,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Zwischenbericht</h2>
-          <p>Dieser Bereich ist der schnelle Arbeitsstand fuer den laufenden Chat: Was wurde zuletzt integriert, was ist gesichert, und was sollte als naechstes passieren, ohne dass wir uns im Klein-Klein verlieren.</p>
+          <p>Dieser Bereich ist der schnelle Arbeitsstand fuer den laufenden Chat: Was wurde zuletzt integriert, was ist gerade in Arbeit, und was sollte als naechstes passieren, ohne dass wir uns im Klein-Klein verlieren.</p>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Block</th><th>Was erledigt ist</th><th>Warum es wichtig ist</th><th>Naechster Anschluss</th></tr></thead>
@@ -458,16 +458,16 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture, TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht, TASK_564 als lesbare Evidence-Board-Legende, TASK_565 als echten F6-Screenshot-Fix fuer den Selected-Fireteam-Status, TASK_566 als kompakten Teamchip-/Hover-/Panel-Polish, TASK_567 als First-Move-Threat-Preview-Lesbarkeit, TASK_568 als reproduzierbares Risky-/Suicidal-Contact-Fixture, TASK_569 als messbare Threat-Line-Farbsprache und TASK_570 als Hold-/Return-/Free-/Suppress-Fire-Bridge.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns im Tooltip, waehrend die erste Move-Order vor GO Risiko/Ungewissheit, farbige Kontaktlinien und jetzt eine durchgereichte Feuerdisziplin kennt.</td><td>Naechster spielbarer Schritt ist TASK_571: Fire-Rule-Controls im Missions-HUD lesbar und angenehm bedienbar machen.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture, TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht, TASK_564 als lesbare Evidence-Board-Legende, TASK_565 als echten F6-Screenshot-Fix fuer den Selected-Fireteam-Status, TASK_566 als kompakten Teamchip-/Hover-/Panel-Polish, TASK_567 als First-Move-Threat-Preview-Lesbarkeit, TASK_568 als reproduzierbares Risky-/Suicidal-Contact-Fixture, TASK_569 als messbare Threat-Line-Farbsprache, TASK_570 als Hold-/Return-/Free-/Suppress-Fire-Bridge und TASK_571 als sichtbare Fire-Rule-Controls.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns im Tooltip, waehrend die erste Move-Order vor GO Risiko/Ungewissheit, farbige Kontaktlinien und jetzt direkt bedienbare Feuerdisziplin kennt.</td><td>Naechster spielbarer Sichtcheck ist TASK_572: Fire-Rule-Controls im echten F6-Blick pruefen.</td></tr>
                 <tr><td>Asset-/Warn-Hygiene</td><td>TASK_559 registriert die deterministische Factory-Colormap-UID vor Factory-GLB-Loads und entfernt damit eine wiederkehrende Godot-Importwarnung aus F6-Smokes.</td><td>Test- und Exportausgaben werden leiser, damit neue echte Fehler schneller auffallen.</td><td>Weitere Warnquellen nur als eigene kleine Hygiene-Slices angehen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview an, TASK_564 erklaert die Evidence-Regionen, TASK_565 dokumentiert den echten F6-Befund, TASK_566 dokumentiert den kompakten Hover-/Panel-Polish, TASK_567 dokumentiert die First-Move-Threat-Preview, TASK_568 dokumentiert die Risky-/Suicidal-Fixture, TASK_569 dokumentiert die Threat-Line-Farbsprache und TASK_570 dokumentiert die Fire-Rule-Mission-Bridge.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview an, TASK_564 erklaert die Evidence-Regionen, TASK_565 dokumentiert den echten F6-Befund, TASK_566 dokumentiert den kompakten Hover-/Panel-Polish, TASK_567 dokumentiert die First-Move-Threat-Preview, TASK_568 dokumentiert die Risky-/Suicidal-Fixture, TASK_569 dokumentiert die Threat-Line-Farbsprache, TASK_570 dokumentiert die Fire-Rule-Mission-Bridge und TASK_571 fuehrt die Berichtspflege als laufenden Zwischenstand weiter.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
               </tbody>
             </table>
           </div>
         </article>
         <article class="card">
           <h2>Aktuelle Lage</h2>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> TASK_570 ist im Arbeitsstand implementiert; Integration/Merge folgt nach lokaler Pruefung</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> TASK_571 ist im Arbeitsstand implementiert auf <code>task/fire-rule-controls-readability-polish</code></label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -498,7 +498,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_568_done"> TASK_568 Risky-Contact-Preview-Fixture ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_569_done"> TASK_569 Threat-Preview-Visual-Review ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_570_done"> TASK_570 Hold-Fire-Discipline-Mission-Bridge ist im Arbeitsstand implementiert</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_571_selected_next"> TASK_571 Fire-Rule-Controls-Readability-Polish ist als naechster Slice vorgeschlagen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_571_done"> TASK_571 Fire-Rule-Controls-Readability-Polish ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_524_done"> TASK_524 Warn-Laerm-Bereinigung ist im Arbeitsstand implementiert</label>
@@ -537,7 +537,8 @@
                 <tr><td>Erledigt</td><td>TASK_568 macht eine riskante und eine suizidale Kontaktlage im Frontier-Probe-Flow reproduzierbar und prueft HUD-Text, Primary3D-Linien und read-only Preview-State.</td><td>Wenn neue Contact-/Threat-Gewichte die erste Move-Preview veraendern.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_569 macht die Threat-Line-Farbsprache messbar: Risky-Linien werden gelb/risky, Suicidal-Linien rot/suicidal, Rollen bleiben im Render-Snapshot zaehlbar.</td><td>Wenn neue Visual-Regeln oder echte Screenshot-Befunde andere Kontraste brauchen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_570 schliesst Hold/Return/Free/Suppress als Fire-Rule-Mission-Bridge an Movement-State, UnitCommand und Combat-Resolver-Diagnostik an.</td><td>Wenn neue ROE-Regeln oder ein echtes Suppress-/Ammo-System die Bridge erweitern.</td></tr>
-                <tr><td>Jetzt dran</td><td>TASK_571 - Fire Rule Controls Readability Polish. Ziel: die neuen Fire-Rules im Missions-HUD sichtbar und angenehm bedienbar machen.</td><td>Wenn der naechste spielbare Taktikhebel direkt im Command-Workflow nutzbar werden soll.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_571 - Fire Rule Controls Readability Polish. Die Fire-Rules sind als kompakte `HF`/`RF`/`FW`/`SUP`-Controls im Missions-HUD vorhanden und nutzen den bestehenden Fireteam-Fire-Rule-Pfad.</td><td>Wenn neue ROE-Regeln oder ein echter F6-Sichttest andere Textdichte/Positionierung verlangen.</td></tr>
+                <tr><td>Naechst</td><td>TASK_572 - Fire Rule F6 Readability Smoke. Ziel: die neuen Controls im echten FullHD-F6-Blick auf Lesbarkeit, Panelplatz und Spielgefuehl kontrollieren.</td><td>Wenn die automatische Bedienbarkeit nicht reicht und das UI im Fenster bewertet werden soll.</td></tr>
                 <tr><td>Offen</td><td>Der finale menschliche Spielgefuehl-Test bleibt offen. Die naechste manuelle Runde sollte pruefen, ob Teamchip-Hover, erste Move-Preview, Kontaktlinien und Paneldichte zusammen angenehm wirken.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -623,7 +624,8 @@
             <div class="finding good"><h3>Erledigt: TASK_568 - Frontier Probe Risky Contact Preview Fixture</h3><p>Risky- und Suicidal-Faelle sind im Frontier-Probe-Flow reproduzierbar und bleiben read-only bis GO.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_569 - Frontier Probe Threat Preview Visual Review</h3><p>Threat-Linien bekommen Risk-State-Farbkeys und bleiben im Primary3D-Snapshot nach Rolle und Farbe pruefbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_570 - Hold Fire Discipline Mission Bridge</h3><p>Hold/Return/Free/Suppress werden als Fire-Rule durch Mission, Movement, UnitCommand und Combat-Diagnostik getragen.</p></div>
-            <div class="finding medium"><h3>1. TASK_571 - Fire Rule Controls Readability Polish</h3><p>Als naechstes sollten die Fire-Rules im Command-Workflow sichtbar, knapp und gut bedienbar werden.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_571 - Fire Rule Controls Readability Polish</h3><p>Die Fire-Rules sind jetzt als kompakte HF/RF/FW/SUP-Controls im Command-Workflow sichtbar und pruefbar bedienbar.</p></div>
+            <div class="finding medium"><h3>1. TASK_572 - Fire Rule F6 Readability Smoke</h3><p>Als naechstes sollte der echte FullHD-F6-Blick pruefen, ob die neuen Controls angenehm sitzen und nicht mit Panels oder Weltblick konkurrieren.</p></div>
           </div>
         </article>
       </div>
@@ -689,7 +691,8 @@
             <div class="finding good"><h3>Erledigt: TASK_568 - Frontier Probe Risky Contact Preview Fixture</h3><p>Risky/Suicidal-Faelle werden im Frontier-Probe-Flow als Fixture sichtbar geprobt.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_569 - Frontier Probe Threat Preview Visual Review</h3><p>Risky-/Suicidal-Linien sind jetzt nicht nur Daten, sondern als gelbe/rote Visualkeys pruefbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_570 - Hold Fire Discipline Mission Bridge</h3><p>Hold Fire, Return Fire, Fire at Will und Suppress werden als Missionsregel bis in den Combat-Resolver getragen.</p></div>
-            <div class="finding medium"><h3>1. TASK_571 - Fire Rule Controls Readability Polish</h3><p>Der naechste Spielbarkeitshebel ist Bedienbarkeit: Fire-Rule-Buttons/Status so bauen, dass der Spieler die ROE vor GO erkennt.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_571 - Fire Rule Controls Readability Polish</h3><p>Fire-Rule-Buttons/Status sind so angebunden, dass der Spieler die ROE vor GO setzen und erkennen kann.</p></div>
+            <div class="finding medium"><h3>1. TASK_572 - Fire Rule F6 Readability Smoke</h3><p>Der naechste Spielbarkeitshebel ist Sichtkontrolle: echte F6-Lesbarkeit, Panelplatz und Tasteindruck der neuen ROE-Buttons pruefen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -1004,7 +1007,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_571 - Fire Rule Controls Readability Polish"
+              "TASK_572 - Fire Rule F6 Readability Smoke"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -1061,25 +1064,27 @@
               "TASK_567 - Frontier Probe First Move Threat Preview Readability Pass",
               "TASK_568 - Frontier Probe Risky Contact Preview Fixture",
               "TASK_569 - Frontier Probe Threat Preview Visual Review",
-              "TASK_570 - Hold Fire Discipline Mission Bridge"
+              "TASK_570 - Hold Fire Discipline Mission Bridge",
+              "TASK_571 - Fire Rule Controls Readability Polish"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Finaler manueller Hover-/Panel-/Threat-Preview-/Fire-Rule-Spielgefuehl-Test bleibt trotz TASK_570-Bridge offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
-              "Fire-Rule-Controls muessen als TASK_571 noch sichtbar und angenehm im Missions-HUD bedienbar werden."
+              "Fire-Rule-Controls sind als TASK_571 implementiert und muessen als TASK_572 noch im echten F6-Spielgefuehl kontrolliert werden."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
             runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status",
-            current_focus: "TASK_571 - Fire Rule Controls Readability Polish",
-            latest_completed_task: "TASK_570 - Hold Fire Discipline Mission Bridge"
+            report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
+            current_focus: "TASK_572 - Fire Rule F6 Readability Smoke",
+            latest_completed_task: "TASK_571 - Fire Rule Controls Readability Polish"
           },
           metadata: {
-            branch: "task/hold-fire-discipline-mission-bridge",
-            integration_base: "integration/core-foundation after TASK_569",
-            head: "task/hold-fire-discipline-mission-bridge",
+            branch: "task/fire-rule-controls-readability-polish",
+            integration_base: "integration/core-foundation after TASK_570",
+            head: "task/fire-rule-controls-readability-polish",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

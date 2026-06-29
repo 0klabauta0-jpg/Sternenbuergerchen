@@ -96,6 +96,10 @@ const COMMAND_GRID_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomR
 const DELETE_ORDER_BUTTON_PATH: String = COMMAND_GRID_PATH + "/DeleteOrderButton"
 const WAYPOINT_ERASE_BUTTON_PATH: String = COMMAND_GRID_PATH + "/WaypointEraseButton"
 const SORT_COMMAND_BUTTON_PATH: String = COMMAND_GRID_PATH + "/SortCommandMatrixButton"
+const FIRE_RULE_HOLD_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleHoldButton"
+const FIRE_RULE_RETURN_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleReturnButton"
+const FIRE_RULE_FREE_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleFreeButton"
+const FIRE_RULE_SUPPRESS_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleSuppressButton"
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
 const AREA_ORDER_PREVIEW_REFRESH_MSEC: int = 80
@@ -8138,6 +8142,47 @@ func _connect_named_button(button_path: String, callback: Callable) -> void:
 		button.pressed.connect(callback)
 
 
+func _get_fire_rule_button_specs() -> Array:
+	return [
+		{
+			"rule": TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_HOLD,
+			"name": "FireRuleHoldButton",
+			"path": FIRE_RULE_HOLD_BUTTON_PATH,
+			"text": "HF",
+			"tooltip": "Hold Fire: kein freiwilliges Feuer",
+			"help_id": "mission.rule.fire_rule_hold",
+			"slot": 11,
+		},
+		{
+			"rule": TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_RETURN,
+			"name": "FireRuleReturnButton",
+			"path": FIRE_RULE_RETURN_BUTTON_PATH,
+			"text": "RF",
+			"tooltip": "Return Fire: nur nach Beschuss antworten",
+			"help_id": "mission.rule.fire_rule_return",
+			"slot": 12,
+		},
+		{
+			"rule": TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_FREE,
+			"name": "FireRuleFreeButton",
+			"path": FIRE_RULE_FREE_BUTTON_PATH,
+			"text": "FW",
+			"tooltip": "Fire at Will: sichtbare Ziele frei bekaempfen",
+			"help_id": "mission.rule.fire_rule_free",
+			"slot": 13,
+		},
+		{
+			"rule": TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS,
+			"name": "FireRuleSuppressButton",
+			"path": FIRE_RULE_SUPPRESS_BUTTON_PATH,
+			"text": "SUP",
+			"tooltip": "Suppress: feuerbereit fuer Unterdrueckung",
+			"help_id": "mission.rule.fire_rule_suppress",
+			"slot": 14,
+		},
+	]
+
+
 func _apply_contextual_help_ids() -> void:
 	_ensure_fireteam_status_panel()
 	_ensure_tactical_stance_panel()
@@ -8153,6 +8198,9 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id(DELETE_ORDER_BUTTON_PATH, "mission.command.clear_target")
 	_apply_help_id(WAYPOINT_ERASE_BUTTON_PATH, "mission.command.clear_target")
 	_apply_help_id(SORT_COMMAND_BUTTON_PATH, "mission.command.go_plan")
+	for spec_variant in _get_fire_rule_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		_apply_help_id(String(spec.get("path", "")), String(spec.get("help_id", "")))
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton", "mission.command.go_plan")
 	_apply_help_id("../TacticalUI/AreaOrderCommandMenu", "mission.command.defend_area")
 	_apply_help_id(FIRETEAM_PANEL_PATH, "mission.selected_fireteam")
@@ -8334,6 +8382,7 @@ func _refresh_button_state() -> void:
 	var sort_button := get_node_or_null(SORT_COMMAND_BUTTON_PATH) as BaseButton
 	if sort_button != null:
 		sort_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty()
+	_refresh_fire_rule_button_state()
 
 	for path in [
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/PrevEditPhaseButton",
@@ -8364,6 +8413,46 @@ func _refresh_button_state() -> void:
 	_refresh_tactical_stance_panel()
 
 
+func _on_fire_rule_button_pressed(fire_rule: String) -> void:
+	if set_selected_fireteams_fire_rule(fire_rule):
+		_refresh_fire_rule_button_state()
+		_apply_command_hierarchy_metadata()
+
+
+func _refresh_fire_rule_button_state() -> void:
+	var enabled: bool = not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty()
+	var consensus_rule: String = _get_selected_fire_rule_consensus()
+	for spec_variant in _get_fire_rule_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
+		if button == null:
+			continue
+		var rule: String = String(spec.get("rule", "")).strip_edges().to_lower()
+		var is_active: bool = enabled and not consensus_rule.is_empty() and consensus_rule != "mixed" and rule == consensus_rule
+		button.disabled = not enabled
+		button.button_pressed = is_active
+		button.set_meta("fire_rule_active", is_active)
+		button.set_meta("fire_rule_consensus", consensus_rule)
+		button.set_meta("command_hierarchy_disabled_reason", "" if enabled else "Requires selected local fireteam")
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, is_active)
+
+
+func _get_selected_fire_rule_consensus() -> String:
+	if _selected_fireteam_ids.is_empty():
+		return ""
+	var consensus_rule: String = ""
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var rule: String = get_fireteam_fire_rule(fireteam_id)
+		if consensus_rule.is_empty():
+			consensus_rule = rule
+		elif consensus_rule != rule:
+			return "mixed"
+	return consensus_rule
+
+
 func _build_command_control_snapshot() -> Dictionary:
 	return {
 		"move": _build_button_snapshot(move_button_path),
@@ -8379,7 +8468,40 @@ func _build_command_control_snapshot() -> Dictionary:
 		"call_dropship": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CALL_DROPSHIP")))),
 		"go_plan": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_GO_PLAN")))),
 		"return_to_plan": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_RETURN_TO_PLAN")))),
+		"fire_rule_controls": _build_fire_rule_button_snapshot(),
 		"hierarchy": get_command_hierarchy_snapshot(),
+	}
+
+
+func _build_fire_rule_button_snapshot() -> Dictionary:
+	var result: Dictionary = {}
+	for spec_variant in _get_fire_rule_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		var rule: String = String(spec.get("rule", "")).strip_edges().to_lower()
+		if rule.is_empty():
+			continue
+		var button_snapshot: Dictionary = _build_button_snapshot(NodePath(String(spec.get("path", ""))))
+		button_snapshot["rule"] = rule
+		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
+		button_snapshot["active"] = button != null and button.button_pressed
+		result[rule] = button_snapshot
+	return result
+
+
+func get_fire_rule_controls_readability_snapshot() -> Dictionary:
+	var buttons: Dictionary = _build_fire_rule_button_snapshot()
+	return {
+		"schema": "sternenbuergerchen.fire_rule_controls_readability.v1",
+		"source": "MissionTacticalSandboxController",
+		"visual_only": true,
+		"ui_sets_gameplay_truth": false,
+		"uses_existing_setter": true,
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"selected_fireteam_count": _selected_fireteam_ids.size(),
+		"selected_fire_rule_consensus": _get_selected_fire_rule_consensus(),
+		"fire_rule_snapshot": get_fireteam_fire_rule_snapshot(),
+		"button_count": buttons.size(),
+		"buttons": buttons,
 	}
 
 
@@ -8393,6 +8515,8 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 			"disabled": true,
 			"visible": false,
 			"is_visible_in_tree": false,
+			"toggle_mode": false,
+			"button_pressed": false,
 			"tooltip_text": "",
 			"help_id": "",
 			"command_hierarchy_action_id": "",
@@ -8410,6 +8534,8 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 		"disabled": bool(button.disabled),
 		"visible": bool(button.visible),
 		"is_visible_in_tree": bool(button.is_visible_in_tree()) if button.is_inside_tree() else bool(button.visible),
+		"toggle_mode": bool(button.toggle_mode),
+		"button_pressed": bool(button.button_pressed),
 		"tooltip_text": button.tooltip_text,
 		"help_id": str(button.get_meta("help_id", "")),
 		"command_hierarchy_action_id": str(button.get_meta("command_hierarchy_action_id", "")),
@@ -9360,13 +9486,17 @@ func _apply_command_button_markers() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "16.6",
 		DELETE_ORDER_BUTTON_PATH: "16.7",
 		SORT_COMMAND_BUTTON_PATH: "16.10",
+		FIRE_RULE_HOLD_BUTTON_PATH: "16.11",
+		FIRE_RULE_RETURN_BUTTON_PATH: "16.12",
+		FIRE_RULE_FREE_BUTTON_PATH: "16.13",
+		FIRE_RULE_SUPPRESS_BUTTON_PATH: "16.14",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton": "16.15",
 		WAYPOINT_ERASE_BUTTON_PATH: "16.20",
 	}
 	for path_variant in marker_by_path.keys():
 		_apply_button_corner_marker(String(path_variant), String(marker_by_path[path_variant]))
 	for slot_index in range(7, 21):
-		if [7, 10, 15, 20].has(slot_index):
+		if [7, 10, 11, 12, 13, 14, 15, 20].has(slot_index):
 			continue
 		_apply_button_corner_marker("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/CommandSlot%02d" % slot_index, "16.%d" % slot_index)
 
@@ -9402,6 +9532,10 @@ func _apply_drop_light_hud_button_labels() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "Clear",
 		DELETE_ORDER_BUTTON_PATH: "Del",
 		SORT_COMMAND_BUTTON_PATH: "Sort",
+		FIRE_RULE_HOLD_BUTTON_PATH: "HF",
+		FIRE_RULE_RETURN_BUTTON_PATH: "RF",
+		FIRE_RULE_FREE_BUTTON_PATH: "FW",
+		FIRE_RULE_SUPPRESS_BUTTON_PATH: "SUP",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton": "GO",
 		WAYPOINT_ERASE_BUTTON_PATH: "WP-",
 	}
@@ -9511,6 +9645,10 @@ func _apply_compact_mission_control_layout() -> void:
 		DELETE_ORDER_BUTTON_PATH,
 		WAYPOINT_ERASE_BUTTON_PATH,
 		SORT_COMMAND_BUTTON_PATH,
+		FIRE_RULE_HOLD_BUTTON_PATH,
+		FIRE_RULE_RETURN_BUTTON_PATH,
+		FIRE_RULE_FREE_BUTTON_PATH,
+		FIRE_RULE_SUPPRESS_BUTTON_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton",
@@ -9609,7 +9747,7 @@ func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:
 		if child == null:
 			continue
 		command_grid.move_child(child, index)
-	command_grid.set_meta("command_hierarchy_order", PackedStringArray(["move", "take", "defend", "flank", "engage", "clear_target", "delete_order", "sort_fireteam", "go", "waypoint_erase"]))
+	command_grid.set_meta("command_hierarchy_order", PackedStringArray(["move", "take", "defend", "flank", "engage", "clear_target", "delete_order", "sort_fireteam", "fire_rule_hold", "fire_rule_return", "fire_rule_free", "fire_rule_suppress", "go", "waypoint_erase"]))
 	command_grid.set_meta("command_hierarchy_columns", command_grid.columns)
 
 
@@ -9623,6 +9761,10 @@ func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> vo
 			continue
 		if slot_index == 10:
 			_ensure_command_grid_action_button(command_grid, "SortCommandMatrixButton", "Sort", "Center and sort selected fireteam", Callable(self, "_on_sort_fireteam_pressed"), slot_index)
+			continue
+		var fire_rule_spec: Dictionary = _find_fire_rule_button_spec_for_slot(slot_index)
+		if not fire_rule_spec.is_empty():
+			_ensure_fire_rule_command_button(command_grid, fire_rule_spec)
 			continue
 		if slot_index == 15:
 			_ensure_command_grid_action_button(command_grid, "GoCommandMatrixButton", "GO", "Execute selected orders", Callable(self, "_on_go_phase_pressed"), slot_index)
@@ -9651,7 +9793,7 @@ func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> vo
 		_configure_square_hud_button(button, action_button_size)
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 		command_grid.move_child(button, slot_index - 1)
-	command_grid.set_meta("command_placeholder_slots", 10)
+	command_grid.set_meta("command_placeholder_slots", 6)
 
 
 func _ensure_command_grid_action_button(command_grid: GridContainer, button_name: String, text: String, tooltip: String, callback: Callable, slot_index: int) -> void:
@@ -9674,6 +9816,53 @@ func _ensure_command_grid_action_button(command_grid: GridContainer, button_name
 	if callback.is_valid() and not button.pressed.is_connected(callback):
 		button.pressed.connect(callback)
 	_configure_square_hud_button(button, DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE"))
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
+	command_grid.move_child(button, slot_index - 1)
+
+
+func _find_fire_rule_button_spec_for_slot(slot_index: int) -> Dictionary:
+	for spec_variant in _get_fire_rule_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		if int(spec.get("slot", -1)) == slot_index:
+			return spec
+	return {}
+
+
+func _ensure_fire_rule_command_button(command_grid: GridContainer, spec: Dictionary) -> void:
+	if command_grid == null or spec.is_empty():
+		return
+	var slot_index: int = int(spec.get("slot", -1))
+	if slot_index <= 0:
+		return
+	var stale_placeholder := command_grid.get_node_or_null("CommandSlot%02d" % slot_index) as Button
+	if stale_placeholder != null:
+		command_grid.remove_child(stale_placeholder)
+		stale_placeholder.queue_free()
+	var button_name: String = String(spec.get("name", "")).strip_edges()
+	if button_name.is_empty():
+		return
+	var button := command_grid.get_node_or_null(button_name) as Button
+	if button == null:
+		button = Button.new()
+		button.name = button_name
+		button.focus_mode = Control.FOCUS_ALL
+		button.toggle_mode = true
+		command_grid.add_child(button)
+	button.text = String(spec.get("text", ""))
+	button.tooltip_text = String(spec.get("tooltip", ""))
+	button.disabled = false
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.toggle_mode = true
+	button.set_meta("drop_light_command_placeholder", false)
+	button.set_meta("command_matrix_slot_id", "16.%d" % slot_index)
+	button.set_meta("fire_rule_control", true)
+	button.set_meta("fire_rule", String(spec.get("rule", "")))
+	button.set_meta("help_id", String(spec.get("help_id", "")))
+	var callback := Callable(self, "_on_fire_rule_button_pressed").bind(String(spec.get("rule", "")))
+	if not bool(button.get_meta("fire_rule_button_connected", false)):
+		button.pressed.connect(callback)
+		button.set_meta("fire_rule_button_connected", true)
+	_configure_square_hud_button(button, DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE"), 7)
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 	command_grid.move_child(button, slot_index - 1)
 
@@ -9735,6 +9924,10 @@ func _refresh_dynamic_button_styles() -> void:
 		DELETE_ORDER_BUTTON_PATH,
 		WAYPOINT_ERASE_BUTTON_PATH,
 		SORT_COMMAND_BUTTON_PATH,
+		FIRE_RULE_HOLD_BUTTON_PATH,
+		FIRE_RULE_RETURN_BUTTON_PATH,
+		FIRE_RULE_FREE_BUTTON_PATH,
+		FIRE_RULE_SUPPRESS_BUTTON_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton",
@@ -9757,6 +9950,7 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(DELETE_ORDER_BUTTON_PATH) as Button, _has_deletable_order_focus())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(WAYPOINT_ERASE_BUTTON_PATH) as Button, _has_deletable_order_focus())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(SORT_COMMAND_BUTTON_PATH) as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
+	_refresh_fire_rule_button_state()
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and _has_selected_fireteam_orders_to_execute())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)

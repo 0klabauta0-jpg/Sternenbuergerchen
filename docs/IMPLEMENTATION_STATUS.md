@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_571 - Fire Rule Controls Readability Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_571_fire_rule_controls_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_command_rules_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Das Missions-Command-Grid erzeugt vier kompakte Fire-Rule-Controls (`HF`, `RF`, `FW`, `SUP`) als bestehende HUD-Buttons statt als neue UI-Wahrheit.
+- Stand: Die Controls nutzen den vorhandenen `set_selected_fireteams_fire_rule()`-Pfad, sind ohne Auswahl deaktiviert und spiegeln die eindeutige Fire-Rule der aktuellen Auswahl als aktiven Button.
+- Stand: Command-Hierarchy-Metadaten, Help-IDs, Slotmarker und `get_fire_rule_controls_readability_snapshot()` machen die Bedienung pruefbar.
+- Risiken/offen: Der finale menschliche FullHD-F6-Sichttest bleibt Folgearbeit; `suppress` bleibt weiterhin Rule-/Diagnosezustand bis zu einem spaeteren Suppression-/Ammo-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_571_fire_rule_controls_readability_polish.gd` (32 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd` (46 passed, 0 failed), `git diff --check` (Exit 0).
+- Naechster Schritt: `TASK_572 - Fire Rule F6 Readability Smoke`, wenn die neue Bedienung im echten F6-Blick auf Spielgefuehl, Textdichte und Panelplatz geprueft werden soll.
+
 ### TASK_570 - Hold Fire Discipline Mission Bridge
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_570_hold_fire_discipline_mission_bridge.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_command_rules_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

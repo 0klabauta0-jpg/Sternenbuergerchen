@@ -119,6 +119,11 @@ TASK_570 verbindet die bestehenden taktischen Fire-Rules mit dem Live-Missionspf
 
 Erwartete Rule-Abbildung: `hold` und `return` setzen `UnitCommand.fire_status = hold_fire`; `free` und `suppress` setzen `fire_at_will`. `CombatFireDecisionResolver` blockiert `hold`, erlaubt `return` nur bei aktivem Incoming-Fire-Fenster des Fireteams und behandelt `free`/`suppress` als feuerbereit. `suppress` ist in TASK_570 noch kein vollstaendiges Suppression-/Ammo-System, sondern ein durchgereichter Fire-Rule-Zustand fuer den naechsten Gameplay-Slice. Contact-Decision-Diagnostik muss `attacker_fire_rule`, `attacker_fire_status` und `attacker_return_fire_window_active` sichtbar machen.
 
+## Fire-Rule-Controls-Readability-Polish
+TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Command-Grid-Controls `HF`, `RF`, `FW` und `SUP` duerfen nur den bestehenden `MissionTacticalSandboxController.set_selected_fireteams_fire_rule()`-Pfad ausloesen. Sie duerfen keine Movement-, Combat-, Unit- oder Command-Queue-Wahrheit direkt schreiben.
+
+`get_fire_rule_controls_readability_snapshot()` ist der Headless-Pruefpunkt fuer die Bedienung. Der Snapshot muss `ui_sets_gameplay_truth = false` setzen, die aktuell ausgewaehlten Fireteams, den Fire-Rule-Konsens, den bestehenden Fire-Rule-Snapshot und die Button-Zustaende melden. Erwartete Lesbarkeit: ohne Fireteam-Auswahl sind die Buttons deaktiviert; mit eindeutiger Auswahl ist genau die gesetzte Fire-Rule aktiv; bei gemischter Mehrfachauswahl darf kein einzelner Button faelschlich aktiv wirken.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
