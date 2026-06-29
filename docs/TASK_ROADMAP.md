@@ -219,7 +219,8 @@ git checkout -b batch/<batch-name>
 - TASK_588 - Debrief AAR Data Bridge (implementiert)
 - TASK_589 - Debrief AAR F6 Visual Evidence Pass (implementiert)
 - TASK_590 - Debrief AAR Layout Polish Findings (implementiert)
-- TASK_591 - Debrief AAR Player Review Notes Pass
+- TASK_591 - Debrief AAR Player Review Notes Pass (implementiert)
+- TASK_592 - Debrief AAR Player Review Findings
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

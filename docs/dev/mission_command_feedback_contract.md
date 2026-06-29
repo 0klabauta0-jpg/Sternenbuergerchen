@@ -219,6 +219,11 @@ TASK_590 wendet belegten Layout-Polish aus der TASK_589-Evidence an. `DebriefTes
 
 Erwartete Struktur: `get_debrief_aar_layout_polish_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_aar_layout_polish.v1`, `layout_key = debrief_aar_layout_polish_v1`, `bridge_gate`, `visual_gate`, `source_schema`, `aar_summary_text`, `summary_has_duplicate_prefix = false`, `aar_rows_text`, `aar_limit_text`, Textlaengen, Chip-/Row-Anzahl, Button-Gap, AAR-Section-Hoehe, `style_ids`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Gates: TASK_588-Bridge gruen, TASK_589-Visual-Evidence gruen, Prefix sauber, Summary/Rows/Limit kompakt, `debrief_aar_summary_v2`, `debrief_aar_rows_v2`, `debrief_aar_limit_v2` gesetzt und mindestens fuenf AAR-Chips sichtbar.
 
+## Debrief-AAR-Player-Review-Notes
+TASK_591 macht den echten Spielerblick auf den Debrief-AAR-Block im laufenden HTML-Bericht exportierbar. Der Bericht darf Screenshotpfad, Viewport, Pflichtchecks, Ratings, Folgeprioritaet und freie Notizen sammeln. Diese Daten sind Playtest-/Review-Arbeitsnotizen und duerfen keine Mission-, Combat-, XP-, Ammo-, Skill-, Fireteam- oder Suppression-Wahrheit erzeugen.
+
+Erwartete Struktur: `docs/reports/project_review_status_2026_06_28.html` enthaelt einen sichtbaren `TASK_591 Debrief-AAR Player-Review`-Block mit Export-Keys unter `debrief_aar_manual.*`, darunter `screenshot_path`, `viewport`, `summary_prefix_checked`, `chips_checked`, `rows_checked`, `limit_checked`, `return_flow_checked`, `summary_notes`, `chip_notes`, `rows_limit_notes`, `return_flow_notes` und `followup`. Auswahlgruppen sollen `debrief_aar_manual.result`, `debrief_aar_manual.summary_rating`, `debrief_aar_manual.chip_rating`, `debrief_aar_manual.rows_limit_rating` und `debrief_aar_manual.next_polish_priority` exportieren. Ein Freitextfeld unter `notes.debrief_aar_manual_review` sammelt offene Spieler-/Reviewer-Notizen. TASK_592 bleibt fuer belegte Findings aus diesem Export vorgesehen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
