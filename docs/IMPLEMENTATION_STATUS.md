@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_577 - Suppress Fire Visual Evidence Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_577_suppress_fire_visual_evidence_pass.md`, `docs/tasks/TASK_576_suppress_fire_preview_readability_spike.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der TASK_577-Capture-Smoke erzeugt eine lokale SUP-F6-/Visual-Evidence unter `tmp/suppress_fire_visual_evidence.png` und `tmp/suppress_fire_visual_evidence.json`.
+- Stand: Das Manifest meldet SUP-Preview-Gate, Threat-Preview-Gate, `SUP AREA`-Text, Fire-Rule, Pressure-State, Radius, Primary3D-Preview-Zaehler und Viewport-Readback-/Evidence-Board-Status.
+- Stand: Der laufende HTML-Zwischenbericht nennt die neuen Artefaktpfade und haelt den manuellen Review bewusst offen.
+- Risiken/offen: Echte Suppression-Wirkung, Ammo-Verbrauch, AAR-Messwerte und finaler menschlicher Spielgefuehl-Test bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --path . --script scripts/tests/task_577_suppress_fire_visual_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_576_suppress_fire_preview_readability_spike.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_575_fire_rule_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_578 - Suppress Fire Visual Polish Findings`, wenn die Evidence konkrete Lesbarkeitsprobleme zeigt.
+
 ### TASK_576 - Suppress Fire Preview Readability Spike
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_576_suppress_fire_preview_readability_spike.md`, `docs/tasks/TASK_575_fire_rule_evidence_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/tactical_command_rules_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

@@ -205,7 +205,8 @@ git checkout -b batch/<batch-name>
 - TASK_574 - Fire Rule Real F6 Screenshot Review Pass (implementiert)
 - TASK_575 - Fire Rule Evidence Polish Findings (implementiert)
 - TASK_576 - Suppress Fire Preview Readability Spike (implementiert)
-- TASK_577 - Suppress Fire Visual Evidence Pass
+- TASK_577 - Suppress Fire Visual Evidence Pass (implementiert)
+- TASK_578 - Suppress Fire Visual Polish Findings
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

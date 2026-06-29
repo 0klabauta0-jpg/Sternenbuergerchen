@@ -149,6 +149,11 @@ TASK_576 macht den vorhandenen `SUP`-Fire-Rule-Zustand vor `GO` lesbar. Die Prev
 
 Erwartete Struktur: `get_suppress_fire_preview_readability_snapshot()` enthaelt `fire_rule = suppress`, `enabled`, `preview_text`, `pressure_state`, `radius_world`, `selected_order_text`, `first_waypoint_preview` und `ui_sets_gameplay_truth = false`. Der sichtbare Text im Selected-Fireteam-Ordertext darf knapp `SUP AREA ...` nennen. Ohne aktive `suppress`-Rule darf kein stale `SUP AREA` erscheinen. Der naechste Sicht-Slice ist TASK_577 fuer echte F6-/Visual-Evidence, nicht fuer ein grosses Suppression-/Ammo-System.
 
+## Suppress-Fire-Visual-Evidence
+TASK_577 erzeugt eine reproduzierbare lokale Visual-Evidence fuer die TASK_576-`SUP AREA`-Preview. Der Capture darf `get_suppress_fire_preview_readability_snapshot()`, `get_frontier_probe_first_move_threat_preview_readability_snapshot()` und `TerrainMap3DView.get_render_snapshot()` zusammenfassen, ein echtes nicht-headless Viewport-Readback oder ein markiertes Headless-Evidence-Board schreiben und die Artefaktpfade im laufenden HTML-Zwischenbericht nennen.
+
+Erwartete Struktur: Das Manifest unter `tmp/suppress_fire_visual_evidence.json` enthaelt `capture_type = suppress_fire_visual_evidence`, `read_only = true`, `ui_sets_gameplay_truth = false`, `suppress_preview_gate`, `threat_preview_gate`, `preview_text`, `fire_rule`, `pressure_state`, `radius_world`, `render_preview_visual_count`, `render_preview_path_line_count`, `viewport_readback_available`, `generated_evidence_board`, `manual_review_required = true` und `manual_review_done = false`. Der Capture darf keinen `GO` ausfuehren und keine Suppression-/Ammo-/Combat-Wirkung behaupten. TASK_578 ist nur fuer belegte Visual-Polish-Findings vorgesehen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
