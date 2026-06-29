@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_545 auf <code>task/mission-fire-cover-integrated-flow-smoke</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_546 auf <code>task/mission-combat-feedback-hud-density-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -193,7 +193,8 @@
       <span class="pill good">TASK_543 First-Engagement</span>
       <span class="pill good">TASK_544 Fire-/Cover-Polish</span>
       <span class="pill good">TASK_545 Integrated-Flow</span>
-      <span class="pill warn">TASK_546 als naechster HUD-Polish</span>
+      <span class="pill good">TASK_546 HUD-Density</span>
+      <span class="pill warn">TASK_547 Multi-Fireteam-Smoke</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -225,6 +226,7 @@
           <p>TASK_543 ist als aktueller Zwischenstand umgesetzt: Nach dem ersten Kontakt gibt es jetzt einen read-only First-Engagement-Feedback-Snapshot fuer FireEvents, ContactDecision-Diagnostics, Angreifer/Ziel/Waffe, Cooldown-/Blockgruende, Cover-/Range-/LOS-Kontext und Mission-Control-/Command-Feedback.</p>
           <p>TASK_544 ist als aktueller Zwischenstand umgesetzt: FireEvents im Missionsbild haben jetzt zusaetzlichen Ziel-Fokus, ein kompaktes HIT/MISS/FIRE/FF-Label, weiterhin duenne FireTraces und pruefbare Unit-Badge-Farb-/Style-Metadaten.</p>
           <p>TASK_545 ist als aktueller Zwischenstand umgesetzt: Der Fire-/Cover-Polish wird jetzt im echten Homebase-zu-Mission-Pfad geprueft, inklusive Dropship, LZ, Deboarding, Move, Contact und erstem Engagement. Der naechste Anschluss ist kompakteres Combat-Feedback in den HUD-Panels.</p>
+          <p>TASK_546 ist als aktueller Zwischenstand umgesetzt: Mission Control und Selected Fireteam bekommen eine kompakte Combat-HUD-Zeile aus ContactDecision-, Cover- und FireEvent-Snapshots. Der naechste Anschluss ist ein Multi-Fireteam-/Dropship-Smoke, damit diese Lesbarkeit auch bei parallelen Fireteams konsistent bleibt.</p>
           <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
@@ -398,21 +400,22 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish und TASK_545 als integrierter Fire-/Cover-Flow-Smoke.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zur ersten Combat-Entscheidung lesbar.</td><td>Naechster spielbarer Schritt ist TASK_546: Combat-Feedback im HUD kompakter scannbar machen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_545 plus TASK_546-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke und TASK_546 als kompakte Combat-HUD-Dichte.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zur ersten Combat-Entscheidung lesbar.</td><td>Naechster spielbarer Schritt ist TASK_547: kompakte Combat-HUD-Lesbarkeit bei mehreren Fireteams/Dropships pruefen.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_546 plus TASK_547-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
           </div>
         </article>
         <article class="card">
           <h2>Aktuelle Lage</h2>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_544 sauber; TASK_545 laeuft auf eigenem Branch</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_545 sauber; TASK_546 laeuft auf eigenem Branch</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_544_done"> TASK_544 Fire-/Cover-Visual-Polish ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_545_done"> TASK_545 integrierter Fire-/Cover-Flow-Smoke ist im Arbeitsstand implementiert</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_546_selected_next"> TASK_546 ist als naechster HUD-Polish vorgeschlagen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_546_done"> TASK_546 Combat-HUD-Density ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_547_selected_next"> TASK_547 ist als naechster Multi-Fireteam-Smoke vorgeschlagen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_524_done"> TASK_524 Warn-Laerm-Bereinigung ist im Arbeitsstand implementiert</label>
@@ -442,8 +445,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Erledigt</td><td>TASK_545 beweist, dass die TASK_544-Fire-/Cover-Politur durch den echten Homebase-Dropship-Mission-Engagement-Flow bis in den Render-Snapshot gelangt.</td><td>Wenn TASK_546 die HUD-Panel-Lesbarkeit kompakter macht.</td></tr>
-                <tr><td>Jetzt dran</td><td>TASK_546 - Mission Combat Feedback HUD Density Polish. Ziel: Combat-Feedback, Fire-/Cover-Kontext und Selected-Fireteam-/Mission-Control-Texte enger und angenehmer scannbar machen.</td><td>Nach HUD-Polish-Smoke mit konkreten Snapshot-Ergebnissen.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_546 beweist, dass Mission Control und Selected Fireteam eine kompakte Combat-HUD-Zeile aus ContactDecision-, Cover- und FireEvent-Snapshots anzeigen.</td><td>Wenn TASK_547 dieselbe Lesbarkeit bei mehreren Fireteams/Dropships prueft.</td></tr>
+                <tr><td>Jetzt dran</td><td>TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke. Ziel: mehrere Fireteams/Dropships pruefen, ohne die kompakte HUD-Wahrheit auseinanderlaufen zu lassen.</td><td>Nach Multi-Fireteam-Smoke mit konkreten Snapshot-Ergebnissen.</td></tr>
                 <tr><td>Offen</td><td>Der echte menschliche F6-/Sichttest wurde fuer die letzten Headless-Slices bewusst nicht behauptet. Die naechste manuelle Runde sollte sichtbare Bewegung, Panel-Feedback, Kontaktlinien und Drop-/Fireteam-Konsistenz pruefen.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -476,7 +479,8 @@
             <div class="finding good"><h3>Erledigt: Mission First Move Execution Feedback Pass</h3><p>TASK_541 prueft, dass nach GO aktive Execution, Movement-State, Ziel-/Progress-Daten und OrderPlan-/Waypoint-Trace sichtbar bleiben.</p></div>
             <div class="finding good"><h3>Erledigt: Mission First Contact Readability Pass</h3><p>TASK_542 prueft, dass nach der ersten Bewegung Contact, Detection-State, Position, Confidence, Report-Text, Overlay/Primary3D und Security-/Cover-Kontext lesbar bleiben.</p></div>
             <div class="finding good"><h3>Erledigt: Mission Fire Cover Integrated Flow Smoke</h3><p>TASK_545 prueft, dass FireTrace, Ziel-Fokus, Fire-Label und Unit-Badge-Metadaten im echten ersten Mission-Engagement-Flow ankommen.</p></div>
-            <div class="finding medium"><h3>1. TASK_546 - Mission Combat Feedback HUD Density Polish</h3><p>Combat-Feedback und Fire-/Cover-Kontext sollten im HUD kompakter und schneller scannbar werden.</p></div>
+            <div class="finding good"><h3>Erledigt: Mission Combat Feedback HUD Density Polish</h3><p>TASK_546 verdichtet Combat-Feedback, Cover, LOS und Range in Mission Control und Selected Fireteam zu einer kurzen HUD-Zeile.</p></div>
+            <div class="finding medium"><h3>1. TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke</h3><p>Die kompakte Combat-Lesbarkeit sollte jetzt bei mehreren Fireteams und Dropships gegeneinander geprueft werden.</p></div>
           </div>
         </article>
       </div>
@@ -520,7 +524,8 @@
             <div class="finding good"><h3>Erledigt: TASK_541 - Mission First Move Execution Feedback Pass</h3><p>Die erste GO-Ausfuehrung ist als read-only Snapshot pruefbar: Execution-State, Movement-State, Ziel/Progress und OrderPlan-/Waypoint-Trace.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_542 - Mission First Contact Readability Pass</h3><p>Der erste Kontakt nach Bewegung ist als read-only Snapshot pruefbar: Fireteam-Kontakt, Detection, Position, Confidence, Report-Text, Overlay/Primary3D und Security-/Cover-Kontext.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_545 - Mission Fire Cover Integrated Flow Smoke</h3><p>Die Fire-/Cover-Visual-Politur ist nicht nur in der kleinen Render-Fixture, sondern auch im echten ersten Mission-Engagement-Flow pruefbar.</p></div>
-            <div class="finding medium"><h3>1. TASK_546 - Mission Combat Feedback HUD Density Polish</h3><p>Selected-Fireteam- und Mission-Control-Texte fuer Combat, Cover und FireEvents dichter und angenehmer scannbar machen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_546 - Mission Combat Feedback HUD Density Polish</h3><p>Selected-Fireteam- und Mission-Control-Texte fuer Combat, Cover und FireEvents sind dichter und pruefbar scannbar.</p></div>
+            <div class="finding medium"><h3>1. TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke</h3><p>Mehrere Fireteams/Dropships im Combat-HUD pruefen, damit Selektion, Ship-State und Combat-Zeile nicht durcheinanderlaufen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -589,7 +594,8 @@
                 <tr><td><code>task_543_mission_first_engagement_feedback_pass.gd</code></td><td>21 passed, 0 failed</td><td>Read-only First-Engagement-Snapshot fuer FireEvent oder Blockgrund, Ziel, Angreifer, Waffe, Cooldown und Cover-/Range-/LOS-Kontext; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
                 <tr><td><code>task_544_mission_fire_cover_visual_polish_pass.gd</code></td><td>18 passed, 0 failed</td><td>Read-only Fire-/Cover-Visual-Polish fuer FireTrace, Ziel-Fokus, HIT/MISS/FIRE/FF-Label und Unit-Badge-Farb-/Style-Metadaten.</td></tr>
                 <tr><td><code>task_545_mission_fire_cover_integrated_flow_smoke.gd</code></td><td>23 passed, 0 failed</td><td>Integrierter Homebase-Dropship-Mission-Engagement-Smoke fuer den TASK_544-Fire-/Cover-Visual-Polish-Snapshot; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
-                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_545 aktualisiert, nennt TASK_546 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
+                <tr><td><code>task_546_mission_combat_feedback_hud_density_polish.gd</code></td><td>23 passed, 0 failed</td><td>Integrierter Homebase-Dropship-Mission-Engagement-Smoke fuer kompakte Combat-HUD-Zeile in Mission Control und Selected Fireteam; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
+                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_546 aktualisiert, nennt TASK_547 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -603,7 +609,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_544-Merge und Push. Arbeitsbranch: <code>task/mission-fire-cover-integrated-flow-smoke</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_545-Merge und Push. Arbeitsbranch: <code>task/mission-combat-feedback-hud-density-polish</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -682,7 +688,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_546 - Mission Combat Feedback HUD Density Polish"
+              "TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -714,25 +720,26 @@
               "TASK_542 - Mission First Contact Readability Pass",
               "TASK_543 - Mission First Engagement Feedback Pass",
               "TASK_544 - Mission Fire And Cover Visual Polish Pass",
-              "TASK_545 - Mission Fire Cover Integrated Flow Smoke"
+              "TASK_545 - Mission Fire Cover Integrated Flow Smoke",
+              "TASK_546 - Mission Combat Feedback HUD Density Polish"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Manueller FullHD-/F6-Sichttest bleibt trotz integrierter Headless-Smokes offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
-              "TASK_546 muss noch pruefen, ob Combat-Feedback, Fire-/Cover-Kontext und Statuschips in den HUD-Panels angenehm dicht und schnell scannbar sind."
+              "TASK_547 muss noch pruefen, ob die kompakte Combat-HUD-Zeile bei mehreren Fireteams/Dropships konsistent bleibt."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status",
-            current_focus: "TASK_546 - Mission Combat Feedback HUD Density Polish",
-            latest_completed_task: "TASK_545 - Mission Fire Cover Integrated Flow Smoke"
+            current_focus: "TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke",
+            latest_completed_task: "TASK_546 - Mission Combat Feedback HUD Density Polish"
           },
           metadata: {
-            branch: "task/mission-fire-cover-integrated-flow-smoke",
-            integration_base: "integration/core-foundation after TASK_544",
-            head: "task/mission-fire-cover-integrated-flow-smoke",
+            branch: "task/mission-combat-feedback-hud-density-polish",
+            integration_base: "integration/core-foundation after TASK_545",
+            head: "task/mission-combat-feedback-hud-density-polish",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

@@ -5065,6 +5065,7 @@ func _build_fireteam_status_text() -> String:
 	var mode_text: String = "PREVIEW - START MISSION FOR GO | " if preview_mode else ""
 	var decision_text: String = _build_selected_decision_status_text()
 	var command_text: String = "kein aktiver Befehl" if decision_text == "-" else _format_selected_status_segment(decision_text)
+	var combat_hud_line: String = _build_selected_fireteam_combat_hud_line()
 	var first_line: String = "%s%s | Karten %d | Wegpunkte %d | Gebiete %d | Stance %s | Ausfuehrung %s" % [
 		mode_text,
 		_get_fireteam_name(),
@@ -5081,6 +5082,8 @@ func _build_fireteam_status_text() -> String:
 		_build_selected_flank_display_text(),
 		drop_state_text,
 	]
+	if not combat_hud_line.is_empty():
+		return "%s\n%s\n%s" % [first_line, second_line, combat_hud_line]
 	return "%s\n%s" % [first_line, second_line]
 
 
@@ -5905,7 +5908,11 @@ func _build_strategic_status_text() -> String:
 		lines.append(transfer_text)
 	lines.append(_build_mission_time_limit_text())
 	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text()
-	if not contact_diagnostics_text.is_empty():
+	var combat_hud_snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
+	var combat_hud_line: String = String(combat_hud_snapshot.get("mission_control_line", "")).strip_edges()
+	if not combat_hud_line.is_empty():
+		lines.append(combat_hud_line)
+	elif not contact_diagnostics_text.is_empty():
 		lines.append(contact_diagnostics_text)
 	return "\n".join(lines)
 
@@ -5950,6 +5957,101 @@ func _compact_unit_id_for_diagnostics(unit_id: String) -> String:
 	if normalized.length() <= 10:
 		return normalized
 	return normalized.substr(0, 10)
+
+
+func _build_mission_combat_hud_density_snapshot() -> Dictionary:
+	var diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
+	var cover_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
+	var fire_events: Array = get_fire_event_snapshot()
+	var first_fire_event: Dictionary = _find_first_relevant_fire_event_for_fireteams(Array(_selected_fireteam_ids), fire_events, diagnostics)
+	var compact_line: String = _build_mission_combat_hud_compact_line(diagnostics, cover_readout, first_fire_event)
+	var selected_line: String = "Kampf %s" % compact_line if not compact_line.is_empty() else ""
+	var line_limit: int = 96
+	return {
+		"active": not compact_line.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"source": "contact_decision_cover_fireevent_snapshot",
+		"compact_line": compact_line,
+		"mission_control_line": compact_line,
+		"selected_fireteam_line": selected_line,
+		"line_count": 1 if not compact_line.is_empty() else 0,
+		"max_line_length": compact_line.length(),
+		"line_char_limit": line_limit,
+		"line_within_limit": compact_line.length() <= line_limit,
+		"status": String(diagnostics.get("status", "")).strip_edges().to_lower(),
+		"reason": String(diagnostics.get("reason", "")).strip_edges().to_lower(),
+		"fire_event_id": String(first_fire_event.get("event_id", diagnostics.get("fire_event_id", ""))).strip_edges(),
+		"cover_text": _build_mission_combat_cover_token_text(cover_readout),
+		"contains_fire_state": _combat_hud_line_contains_any(compact_line, ["FIRE", "WAIT", "NO FIRE", "CONTACT"]),
+		"contains_cover_context": compact_line.contains("COV"),
+		"contains_los_context": compact_line.contains("LOS"),
+		"contains_range_context": compact_line.contains("RNG"),
+	}
+
+
+func _build_selected_fireteam_combat_hud_line() -> String:
+	var snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
+	return String(snapshot.get("selected_fireteam_line", "")).strip_edges()
+
+
+func _build_mission_combat_hud_compact_line(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary) -> String:
+	if diagnostics.is_empty():
+		return ""
+	var reason: String = String(diagnostics.get("reason", "")).strip_edges().to_lower()
+	var status: String = String(diagnostics.get("status", "")).strip_edges().to_lower()
+	var attacker_id: String = String(diagnostics.get("attacker_unit_id", fire_event.get("attacker_unit_id", ""))).strip_edges()
+	var target_id: String = String(diagnostics.get("target_unit_id", diagnostics.get("actual_target_id", fire_event.get("target_unit_id", "")))).strip_edges()
+	var pair_text: String = "%s>%s" % [_compact_unit_id_for_diagnostics(attacker_id), _compact_unit_id_for_diagnostics(target_id)]
+	var cover_tokens: String = _build_mission_combat_cover_token_text(cover_readout)
+	if reason == "fired" or status == "fired":
+		var weapon_id: String = String(diagnostics.get("weapon_id", fire_event.get("weapon_id", ""))).strip_edges().to_upper()
+		var outcome: String = String(fire_event.get("combat_outcome", "")).strip_edges().to_upper()
+		var fire_bits: PackedStringArray = PackedStringArray(["FIRE", pair_text])
+		if not weapon_id.is_empty():
+			fire_bits.append(weapon_id)
+		if not outcome.is_empty():
+			fire_bits.append(outcome)
+		return "%s | %s" % [" ".join(fire_bits), cover_tokens]
+	if reason == "cooldown" or status == "waiting":
+		return "WAIT %dt %s | %s" % [int(diagnostics.get("cooldown_ticks_remaining", 0)), pair_text, cover_tokens]
+	if reason == "no_contact_pair":
+		var candidate: Dictionary = Dictionary(diagnostics.get("candidate", {}))
+		var candidate_reason: String = String(candidate.get("candidate_reason", reason)).strip_edges().to_upper()
+		return "NO FIRE %s | F%d/E%d | %s" % [
+			candidate_reason,
+			int(diagnostics.get("active_friendly_count", 0)),
+			int(diagnostics.get("active_enemy_count", 0)),
+			cover_tokens,
+		]
+	if reason == "no_damage_effect" or reason == "invalid_contact_pair":
+		return "NO FIRE %s %s | %s" % [reason.to_upper(), pair_text, cover_tokens]
+	if not reason.is_empty():
+		return "CONTACT %s | F%d/E%d | %s" % [
+			reason.to_upper(),
+			int(diagnostics.get("active_friendly_count", 0)),
+			int(diagnostics.get("active_enemy_count", 0)),
+			cover_tokens,
+		]
+	return ""
+
+
+func _build_mission_combat_cover_token_text(cover_readout: Dictionary) -> String:
+	var primary: Dictionary = Dictionary(cover_readout.get("primary", cover_readout))
+	return "COV %s RNG %s LOS %s FLK %s" % [
+		_compact_cover_effectiveness_label(String(primary.get("cover_state", "unknown"))),
+		_compact_cover_effectiveness_label(String(primary.get("range_state", "unknown"))),
+		_compact_cover_effectiveness_label(String(primary.get("los_state", "unknown"))),
+		_compact_cover_effectiveness_label(String(primary.get("flank_state", "unknown"))),
+	]
+
+
+func _combat_hud_line_contains_any(line: String, tokens: Array) -> bool:
+	var normalized_line: String = line.strip_edges().to_upper()
+	for token_variant in tokens:
+		if normalized_line.contains(String(token_variant).to_upper()):
+			return true
+	return false
 
 
 func _build_meta_transfer_status_text() -> String:
@@ -12209,6 +12311,79 @@ func get_mission_fire_cover_visual_polish_snapshot() -> Dictionary:
 	}
 
 
+func get_mission_combat_feedback_hud_density_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
+	var compact_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
+	var mission_control_line: String = String(combat_hud_density.get("mission_control_line", "")).strip_edges()
+	var selected_fireteam_line: String = String(combat_hud_density.get("selected_fireteam_line", "")).strip_edges()
+	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	var selected_fireteam_status_text: String = String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges()
+	if not mission_control_line.is_empty() and not mission_control_status_text.contains(mission_control_line):
+		mission_control_status_text = _build_strategic_status_text()
+	if not selected_fireteam_line.is_empty() and not selected_fireteam_status_text.contains(selected_fireteam_line):
+		selected_fireteam_status_text = String(command_feedback.get("selected_status_text", _build_fireteam_status_text())).strip_edges()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"combat_hud_density_active",
+			bool(combat_hud_density.get("active", false)) and not compact_line.is_empty(),
+			"Combat HUD density snapshot exposes a compact fire/contact line."
+		),
+		_build_mission_first_move_readability_check(
+			"compact_line_within_limit",
+			bool(combat_hud_density.get("line_within_limit", false)),
+			"Compact combat line stays within the configured HUD character budget."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_state_visible",
+			bool(combat_hud_density.get("contains_fire_state", false)),
+			"Compact combat line names FIRE, WAIT, NO FIRE or CONTACT."
+		),
+		_build_mission_first_move_readability_check(
+			"cover_los_range_context_visible",
+			bool(combat_hud_density.get("contains_cover_context", false))
+				and bool(combat_hud_density.get("contains_los_context", false))
+				and bool(combat_hud_density.get("contains_range_context", false)),
+			"Compact combat line keeps cover, LOS and range context visible."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_uses_compact_line",
+			not mission_control_line.is_empty() and mission_control_status_text.contains(mission_control_line),
+			"Mission Control displays the compact combat line instead of a wider diagnostics paragraph."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_uses_compact_line",
+			not selected_fireteam_line.is_empty() and selected_fireteam_status_text.contains(selected_fireteam_line),
+			"Selected Fireteam panel displays the compact combat line under execution status."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(combat_hud_density.get("read_only", false)) and not bool(combat_hud_density.get("ui_sets_gameplay_truth", true)),
+			"HUD density snapshot reports existing combat data without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_546",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"combat_hud_density": combat_hud_density,
+		"compact_line": compact_line,
+		"mission_control_line": mission_control_line,
+		"selected_fireteam_line": selected_fireteam_line,
+		"mission_control_status_text": mission_control_status_text,
+		"selected_fireteam_status_text": selected_fireteam_status_text,
+		"command_feedback": command_feedback,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_deployed_selected_fireteam_unit_ids() -> Array:
 	var result: Array = []
 	var seen_unit_ids: Dictionary = {}
@@ -12594,6 +12769,7 @@ func _fire_cover_visual_has_status_badge_readability(primary_snapshot: Dictionar
 
 func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
+	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
@@ -12627,6 +12803,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"contact_density_heatmap": get_contact_density_heatmap_snapshot(),
 		"contact_decision_diagnostics": get_contact_decision_diagnostics_snapshot(),
 		"contact_decision_diagnostics_text": _build_mission_control_contact_diagnostics_text(),
+		"combat_hud_density": combat_hud_density,
+		"combat_hud_compact_line": String(combat_hud_density.get("compact_line", "")),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),
