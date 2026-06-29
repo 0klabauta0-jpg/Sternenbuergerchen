@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_602 - Core Loop Transition Pacing Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_602_core_loop_transition_pacing_polish.md`, `docs/tasks/TASK_601_core_loop_manual_fullhd_playtest_capture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `scripts/tests/task_602_core_loop_transition_pacing_polish.gd` erzeugt `tmp/core_loop_transition_pacing_polish.json` als read-only Budget-Manifest fuer sechs Core-Loop-Uebergaenge.
+- Stand: Die Budgets definieren Zielzeit, Toleranz, Schweregrad und `measurement_status = manual_open`, damit spaetere Pacing-Fixes nicht geraten werden.
+- Stand: Der laufende HTML-Zwischenbericht markiert TASK_602 als erledigt, exportiert Budget-/Review-Felder und empfiehlt TASK_603 als naechsten Mission-HUD-Dichte-Slice.
+- Risiken/offen: TASK_602 misst noch keine echten Nutzerzeiten und aendert keine Runtime-Timer. Echte Pacing-Fixes muessen aus Screenshot, Manifest oder HTML-Export belegt sein.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_602_core_loop_transition_pacing_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_601_core_loop_manual_fullhd_playtest_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_600_integrated_core_loop_flow_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_603 - Mission HUD Density Interaction Polish`, damit Pacing und Informationsdichte im Missionsteil zusammen bewertet werden.
+
 ### TASK_601 - Core Loop Manual FullHD Playtest Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_601_core_loop_manual_fullhd_playtest_capture.md`, `docs/tasks/TASK_600_integrated_core_loop_flow_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

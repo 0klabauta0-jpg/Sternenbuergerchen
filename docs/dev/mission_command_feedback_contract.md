@@ -269,6 +269,11 @@ TASK_601 erzeugt einen reproduzierbaren FullHD-Capture-Ort fuer den kompletten C
 
 Erwartete Struktur: Das Manifest enthaelt `schema = sternenbuergerchen.core_loop_manual_fullhd_playtest_capture.v1`, `task_id = TASK_601`, `source_task = TASK_600`, `route_stages`, `route_stage_count`, `manual_checks`, `manual_check_count`, `viewport_readback_available`, `generated_evidence_board`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_602 - Core Loop Transition Pacing Polish`. Erwartete Route-Stages sind Homebase, Briefing/Loadout, Dropship, Mission, Debrief und Homebase Progression.
 
+## Core-Loop-Transition-Pacing-Polish
+TASK_602 definiert kleine Zielbudgets fuer die wichtigsten Core-Loop-Uebergaenge und macht sie im laufenden HTML-Bericht exportierbar. Der Verifier darf `tmp/core_loop_transition_pacing_polish.json` schreiben. Das Manifest und der Bericht sind Pacing-Arbeitsnotizen, keine Runtime-Timer und keine Gameplay-Wahrheit.
+
+Erwartete Struktur: Das Manifest enthaelt `schema = sternenbuergerchen.core_loop_transition_pacing_polish.v1`, `task_id = TASK_602`, `source_task = TASK_601`, `transition_budgets`, `transition_budget_count`, `total_target_seconds`, `total_tolerance_seconds`, `budget_policy`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_603 - Mission HUD Density Interaction Polish`. Jedes Budget muss Zielzeit, Toleranz, Schweregrad und `measurement_status = manual_open` tragen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
