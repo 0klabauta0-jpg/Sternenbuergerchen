@@ -364,6 +364,11 @@ TASK_620 haelt den sichtbaren TASK_619-Badge im Zwei-Fenster-Capture als reprodu
 
 Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` enthaelt zusaetzlich `badge_recapture_task_id = TASK_620`, `badge_recapture_review_required = true`, `badge_recapture_review_done`, `badge_recapture_gate`, `host_expected_badge_text = HOST P1 ALPHA`, `client_expected_badge_text = CLIENT P2 BRAVO`, `badge_expected_style_id = host_client_role_peer_badge_v1`, `badge_expected_hud_path = MissionIdentityHeaderLabel`, `host_badge_crop_path`, `client_badge_crop_path` und `recommended_next_badge_review_task = TASK_620 - Host Client Badge Re-Capture Review`. Der Gate-Wert `review_ready` bedeutet nur, dass Screenshot und Crops geschrieben wurden und die erwarteten Badge-Texte aus dem Launchplan bekannt sind; die finale Lesbarkeit bleibt ein menschlicher Sichtentscheid.
 
+## Host-Client-Multiplayer-Feel-Review-Bundle
+TASK_621 buendelt die vorhandene Host-/Client-Evidence fuer den naechsten echten Zwei-Fenster-Spielgefuehltest. Das Bundle darf das TASK_620-Real-Run-Manifest lesen, erwartete Badge-Texte, Crop-Pfade, Badge-Gate, vorhandene Authority-/Sync-Smokes und offene manuelle Playtest-Checks zusammenfassen. Es ist Review-/Arbeitsberichtsdaten und darf keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit speichern.
+
+Erwartete Struktur: `tmp/host_client_multiplayer_feel_review.json` enthaelt `schema = sternenbuergerchen.host_client_multiplayer_feel_review.v1`, `task_id = TASK_621`, `source_real_run_manifest_path`, `source_manifest_present`, `badge_recapture_gate`, `host_crop_path`, `client_crop_path`, `host_expected_badge_text = HOST P1 ALPHA`, `client_expected_badge_text = CLIENT P2 BRAVO`, `badge_expected_style_id = host_client_role_peer_badge_v1`, `badge_expected_hud_path = MissionIdentityHeaderLabel`, `authority_evidence_tests`, `manual_checks`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_622 - Host Client Command Authority Live Interaction Review`. Der Gate-Wert `review_ready` bedeutet nur, dass die lokale Evidence fuer einen menschlichen Zwei-Fenster-Review vorbereitet ist.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

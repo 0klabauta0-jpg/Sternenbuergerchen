@@ -44,10 +44,10 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_620 - Host Client Badge Re-Capture Review (implementiert)"), "Roadmap marks TASK_620 implemented")
 	_assert(contract_text.contains("Host-Client-Badge-Re-Capture-Review"), "Mission feedback contract documents TASK_620")
 	_assert(report_text.contains("TASK_620 Host Client Badge Re-Capture Review"), "Rolling review workbench tracks TASK_620")
-	_assert(report_text.contains('latest_completed_task: "TASK_620 - Host Client Badge Re-Capture Review"'), "Rolling report marks TASK_620 as latest completed")
-	_assert(handbook_text.contains("TASK_620 - Host Client Badge Re-Capture Review"), "Status handbook tracks TASK_620")
-	_assert(handbook_text.contains('current_task: "TASK_620 - Host Client Badge Re-Capture Review"'), "Status handbook JSON metadata names TASK_620")
-	_assert(handbook_text.contains('latest_completed_task: "TASK_620 - Host Client Badge Re-Capture Review"'), "Status handbook JSON metadata advances latest task")
+	_assert(report_text.contains("TASK_621 - Host Client Multiplayer Feel Review Bundle"), "Rolling report advances to TASK_621 after TASK_620")
+	_assert(handbook_text.contains("TASK_620 Re-Capture-Evidence"), "Status handbook tracks TASK_620 evidence")
+	_assert(handbook_text.contains('current_task: "TASK_621 - Host Client Multiplayer Feel Review Bundle"'), "Status handbook JSON metadata advances current task")
+	_assert(handbook_text.contains('latest_completed_task: "TASK_621 - Host Client Multiplayer Feel Review Bundle"'), "Status handbook JSON metadata advances latest task")
 	_test_report_export_fields(report_text, handbook_text)
 
 
