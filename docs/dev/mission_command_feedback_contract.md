@@ -36,6 +36,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## First-Contact-Readability
 `get_mission_first_contact_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten taktisch relevanten Feindkontakt nach Bewegung. Der Snapshot darf nur bestehende Contact-, FireteamContact-, Command-Feedback-, Tactical-Communication-/Eventlog-, Cover-, Security-, LOS-/Heatmap- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Kontakte erzeugen oder Commands enqueuen. Erwartete Lesbarkeit: ausgewaehltes Fireteam hat mindestens einen Contact-Eintrag mit Detection-State, Position, Confidence und Report-Text; Overlay/Primary3D spiegelt Kontakte; und Feedback/Eventlog oder Security/Cover-Kontext zeigt, warum der Kontakt taktisch relevant ist.
 
+## First-Engagement-Feedback
+`get_mission_first_engagement_feedback_snapshot()` ist der Headless-Pruefpunkt fuer die erste Combat-Entscheidung nach dem ersten Kontakt. Der Snapshot darf nur bestehende FireEvent-, ContactDecision-, Cover-, Security-, Command-Feedback-, Tactical-Communication- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Damage-/Fire-Entscheidung selbst erzeugen. Erwartete Lesbarkeit: Bei `fired` sind Angreifer, Ziel, Waffe, FireEvent und Range-/LOS-/Cover-Kontext sichtbar; bei `waiting` oder `blocked` sind Cooldown, Blockgrund oder Kandidat sichtbar; Mission-Control-/Command-Feedback benennt die Entscheidung kurz.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
