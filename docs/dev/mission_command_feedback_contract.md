@@ -39,6 +39,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## First-Engagement-Feedback
 `get_mission_first_engagement_feedback_snapshot()` ist der Headless-Pruefpunkt fuer die erste Combat-Entscheidung nach dem ersten Kontakt. Der Snapshot darf nur bestehende FireEvent-, ContactDecision-, Cover-, Security-, Command-Feedback-, Tactical-Communication- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Damage-/Fire-Entscheidung selbst erzeugen. Erwartete Lesbarkeit: Bei `fired` sind Angreifer, Ziel, Waffe, FireEvent und Range-/LOS-/Cover-Kontext sichtbar; bei `waiting` oder `blocked` sind Cooldown, Blockgrund oder Kandidat sichtbar; Mission-Control-/Command-Feedback benennt die Entscheidung kurz.
 
+## Fire-/Cover-Visual-Polish
+`get_mission_fire_cover_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer die sichtbare Fire-/Cover-Lesbarkeit nach der ersten Combat-Entscheidung. Der Snapshot darf nur den bestehenden First-Engagement-Snapshot und `TerrainMap3DView.get_render_snapshot()` zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine FireEvents, Damage-Events oder Befehle erzeugen. Erwartete Lesbarkeit: FireTrace ist sichtbar und duenn, Impact hat Ziel-Fokus plus kurzes Statuslabel, Unit-Badges liefern Text/Farbe/Style, und Range-/LOS-/Cover-Kontext bleibt weiter erreichbar.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

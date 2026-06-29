@@ -172,7 +172,8 @@ git checkout -b batch/<batch-name>
 - TASK_541 - Mission First Move Execution Feedback Pass (implementiert)
 - TASK_542 - Mission First Contact Readability Pass (implementiert)
 - TASK_543 - Mission First Engagement Feedback Pass (implementiert)
-- TASK_544 - Mission Fire And Cover Visual Polish Pass
+- TASK_544 - Mission Fire And Cover Visual Polish Pass (implementiert)
+- TASK_545 - Mission Engagement F6 Visual Audit
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
