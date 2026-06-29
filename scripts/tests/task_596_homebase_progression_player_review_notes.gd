@@ -90,8 +90,8 @@ func _test_report_export_fields() -> void:
 	_assert(report_text.contains("task_596_homebase_progression_player_review_notes.gd"), "Report lists TASK_596 verifier")
 	_assert(report_text.contains('"TASK_596 - Homebase Progression Player Review Notes"'), "JSON payload lists TASK_596 as recently completed")
 	_assert(report_text.contains('"TASK_597 - Homebase Progression F6 Evidence Capture"'), "JSON payload keeps TASK_597 in completed chain")
-	_assert(report_text.contains('latest_completed_task: "TASK_613 - Host Client Two Window Visual Polish Findings"'), "JSON payload lists TASK_613 as latest completed task")
-	_assert(report_text.contains('current_focus: "TASK_614 - Host Client Two Window Real Run Review"'), "JSON payload sets current focus to TASK_614")
+	_assert(report_text.contains('latest_completed_task: "TASK_614 - Host Client Two Window Real Run Review"'), "JSON payload lists TASK_614 as latest completed task")
+	_assert(report_text.contains('current_focus: "TASK_615 - Host Client Real Run Findings"'), "JSON payload sets current focus to TASK_615")
 	_assert(not report_text.contains("TASK_596 Player-Review offen"), "Report no longer marks TASK_596 open in header")
 
 
