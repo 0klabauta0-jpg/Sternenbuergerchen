@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_545 - Mission Fire Cover Integrated Flow Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_545_mission_fire_cover_integrated_flow_smoke.md`, `docs/tasks/TASK_544_mission_fire_cover_visual_polish_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der integrierte Smoke startet den echten Homebase-zu-Mission-Pfad, boarded ein Fireteam, setzt LZ, deployed, plant/fuehrt die erste Move-Order aus, erzeugt Kontakt und stoesst die bestehende Combat-Entscheidung an.
+- Stand: Danach prueft der Smoke `get_mission_fire_cover_visual_polish_snapshot()` auf FireTrace, Ziel-Fokus, Fire-Label, Unit-Badge-Text/Farbe/Style, Cover-/LOS-/Range-Kontext und read-only Verhalten.
+- Stand: Der Rolling-HTML-Bericht ist auf TASK_545 aktualisiert und nennt den naechsten spielbaren Anschluss ohne behaupteten manuellen Sichttest.
+- Risiken/offen: Der Smoke ist bewusst lang und ersetzt keinen menschlichen Screenshot. Er beweist aber, dass die TASK_544-Visual-Politur durch den echten Flow bis in den Render-Snapshot gelangt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_545_mission_fire_cover_integrated_flow_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_544_mission_fire_cover_visual_polish_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_546 - Mission Combat Feedback HUD Density Polish`, damit die jetzt integrierte Combat-Lesbarkeit in den Panels kompakter und angenehmer scannbar wird.
+
 ### TASK_544 - Mission Fire And Cover Visual Polish Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_544_mission_fire_cover_visual_polish_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -19,7 +29,7 @@
 - Stand: Der Rolling-HTML-Bericht ist als laufender Zwischenbericht auf TASK_544 aktualisiert und nennt den naechsten Anschluss.
 - Risiken/offen: Der Task prueft Headless-Render-Snapshots und keinen menschlichen F6-/Screenshot-Sichttest. Die echte optische Wirkung im Godot-Fenster bleibt als naechste kurze Sichtpruefung sinnvoll.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_544_mission_fire_cover_visual_polish_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_543_mission_first_engagement_feedback_pass.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_545 - Mission Engagement F6 Visual Audit`, damit die Headless-Politur im echten Fenster mit Screenshot-/Notizstand abgeglichen wird.
+- Naechster Schritt: `TASK_545 - Mission Fire Cover Integrated Flow Smoke`, damit die Headless-Politur im echten Homebase-Dropship-Mission-Engagement-Pfad ankommt.
 
 ### TASK_543 - Mission First Engagement Feedback Pass
 - Status: implementiert im Arbeitsstand

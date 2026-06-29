@@ -173,7 +173,8 @@ git checkout -b batch/<batch-name>
 - TASK_542 - Mission First Contact Readability Pass (implementiert)
 - TASK_543 - Mission First Engagement Feedback Pass (implementiert)
 - TASK_544 - Mission Fire And Cover Visual Polish Pass (implementiert)
-- TASK_545 - Mission Engagement F6 Visual Audit
+- TASK_545 - Mission Fire Cover Integrated Flow Smoke (implementiert)
+- TASK_546 - Mission Combat Feedback HUD Density Polish
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
