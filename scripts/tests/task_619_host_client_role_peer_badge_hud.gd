@@ -43,7 +43,7 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_619 - Host Client Role Peer Badge HUD (implementiert)"), "Roadmap marks TASK_619 implemented")
 	_assert(contract_text.contains("Host-Client-Role-Peer-Badge-HUD"), "Mission feedback contract documents TASK_619")
 	_assert(report_text.contains("TASK_619 Host Client Role Peer Badge HUD"), "Rolling review workbench tracks TASK_619")
-	_assert(report_text.contains('latest_completed_task: "TASK_619 - Host Client Role Peer Badge HUD"'), "Rolling report marks TASK_619 as latest completed")
+	_assert(report_text.contains('latest_completed_task: "TASK_620 - Host Client Badge Re-Capture Review"'), "Rolling report marks TASK_620 as latest completed")
 	_assert(handbook_text.contains("SternenBuergerchen Ist-Stand und Handbuch"), "New status handbook report exists")
 	_assert(handbook_text.contains('data-report-schema="sternenbuergerchen.html_workbench.v1"'), "Status handbook uses HTML workbench schema")
 	_assert(handbook_text.contains("JSON exportieren"), "Status handbook exposes JSON export")
@@ -68,7 +68,7 @@ func _test_report_export_fields(report_text: String, handbook_text: String) -> v
 		_assert(report_text.contains('data-export-key="%s"' % export_key), "Rolling report exports %s" % export_key)
 	_assert(report_text.contains('data-note-key="notes.host_client_role_peer_badge"'), "Rolling report exports TASK_619 free note")
 	_assert(handbook_text.contains('data-export-key="status.task_619_done"'), "Status handbook exports TASK_619 status checkbox")
-	_assert(handbook_text.contains('current_task: "TASK_619 - Host Client Role Peer Badge HUD"'), "Status handbook JSON metadata names current task")
+	_assert(handbook_text.contains('current_task: "TASK_620 - Host Client Badge Re-Capture Review"'), "Status handbook JSON metadata names current task")
 
 
 func _test_controller_static_contract() -> void:

@@ -92,7 +92,7 @@ func _test_report_export_fields() -> void:
 	_assert(report_text.contains('"TASK_597 - Homebase Progression F6 Evidence Capture"'), "JSON payload keeps TASK_597 in completed chain")
 	_assert(report_text.contains('"TASK_615 - Host Client Real Run Findings"'), "JSON payload keeps TASK_615 in completed chain")
 	_assert(report_text.contains('"TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload keeps TASK_616 in completed chain")
-	_assert(report_text.contains('latest_completed_task: "TASK_619 - Host Client Role Peer Badge HUD"'), "JSON payload advances latest completed task to TASK_619")
+	_assert(report_text.contains('latest_completed_task: "TASK_620 - Host Client Badge Re-Capture Review"'), "JSON payload advances latest completed task to TASK_620")
 	_assert(not report_text.contains("TASK_596 Player-Review offen"), "Report no longer marks TASK_596 open in header")
 
 

@@ -80,8 +80,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-29</span>
-      <span class="pill">Branch: task/host-client-role-peer-badge-hud</span>
-      <span class="pill">Aktueller Slice: TASK_619</span>
+      <span class="pill">Branch: task/host-client-badge-recapture-review</span>
+      <span class="pill">Aktueller Slice: TASK_620</span>
     </div>
   </header>
 
@@ -105,7 +105,8 @@
           <h2>Arbeitsstatus</h2>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.core_loop_spine_present"> Core-Loop-Spine vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.host_client_capture_present"> Host/Client-Capture vorhanden</label>
-          <label class="checkline"><input type="checkbox" data-export-key="status.task_619_done"> TASK_619 final umgesetzt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_619_done"> TASK_619 final umgesetzt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.task_620_done"> TASK_620 Re-Capture final geprueft</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.more_manual_review_needed"> Manueller Spielgefuehltest offen</label>
         </article>
         <article class="card">
@@ -140,7 +141,7 @@
             <tbody>
               <tr><td>Mission Flow</td><td>Insertion, Fireteam-Auswahl, Move/Defend/Flank/Fire-Feedback und Objective/Cargo sind testbar.</td><td>Integrierter Flow muss weiter gegen stale Commands, UI-Verwechslung und Multi-Fireteam-Faelle geschuetzt bleiben.</td><td>Host/Client-Lesbarkeit und danach echter Spielgefuehltest.</td></tr>
               <tr><td>Combat / Taktik</td><td>LOS, Cover, ROE, Suppression, Threat Preview und AAR-Diagnose sind als V1-Spine vorhanden.</td><td>Noch kein endgueltiges Balancing, viele Werte sind bewusst Testdaten.</td><td>Kleine Szenarien statt grosse Systeme: Ambush, Bad Cover, Pinned But Alive.</td></tr>
-              <tr><td>Multiplayer</td><td>Host/Client-Snapshots, Authority-Gates, Zwei-Fenster-Launch und Capture-Pfade existieren.</td><td>Fenster sehen fuer Menschen noch zu aehnlich aus; echte Netzwerk-Langzeitlaeufe fehlen.</td><td>TASK_619 Role/Peer/Team-Badge, danach Re-Capture.</td></tr>
+              <tr><td>Multiplayer</td><td>Host/Client-Snapshots, Authority-Gates, Zwei-Fenster-Launch, Capture-Pfade und sichtbare Role/Peer/Team-Badges existieren.</td><td>Echte Netzwerk-Langzeitlaeufe und Bediengefuehltests fehlen.</td><td>TASK_620 Badge-Re-Capture, danach Multiplayer-Feel-Review.</td></tr>
               <tr><td>Performance</td><td>Hotpath-Guards, Large-Map-Smokes und UI-Refresh-Trennung wurden aufgebaut.</td><td>Grosse Maps und Editor-Assets koennen weiter Kosten verstecken.</td><td>Performance-Smoke nach jedem UI-/Map-Editor-Schub laufen lassen.</td></tr>
               <tr><td>Export</td><td>Godot 4.6.2 Export-Templates sind bekannt; Release-Export lief mit Warnung statt hartem Fehler.</td><td>Export packt noch zu viel Editor-/Testkram, wenn Presets nicht eng gepflegt werden.</td><td>Export-Hygiene separat halten, nicht mit Gameplay-Slices vermischen.</td></tr>
             </tbody>
@@ -236,17 +237,17 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Task / Thema</th><th>Warum</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>TASK_619 - Host Client Role Peer Badge HUD</td><td>Host/Client-Fenster muessen im Bild selbst unterscheidbar sein.</td></tr>
-              <tr><td>2</td><td>Host/Client Re-Capture</td><td>Nach TASK_619 erneut echte Crops erzeugen und visuell pruefen.</td></tr>
-              <tr><td>3</td><td>Manual Multiplayer Feel Review</td><td>Nicht nur Gates: einmal wirklich spielen, Bedienung und Lesbarkeit bewerten.</td></tr>
-              <tr><td>4</td><td>Mini-Szenario Ambush / Bad Cover</td><td>Spiel wird durch Entscheidungen lesbar, nicht durch mehr Systeme.</td></tr>
-              <tr><td>5</td><td>Editor UX Slice</td><td>Map-Bauen soll sich wie Werkzeug anfuehlen, nicht wie Debug-Arbeit.</td></tr>
+              <tr><td>1</td><td>TASK_620 - Host Client Badge Re-Capture Review</td><td>Nach TASK_619 echte Crops und Manifest mit Badge-Erwartung sichern.</td></tr>
+              <tr><td>2</td><td>Manual Multiplayer Feel Review</td><td>Nicht nur Gates: einmal wirklich spielen, Bedienung, Authority, Sync und Performance bewerten.</td></tr>
+              <tr><td>3</td><td>Mini-Szenario Ambush / Bad Cover</td><td>Spiel wird durch Entscheidungen lesbar, nicht durch mehr Systeme.</td></tr>
+              <tr><td>4</td><td>Editor UX Slice</td><td>Map-Bauen soll sich wie Werkzeug anfuehlen, nicht wie Debug-Arbeit.</td></tr>
+              <tr><td>5</td><td>Export-/Package-Hygiene</td><td>Release-Ausgaben sollen klein und frei von Editor-/Testkram bleiben.</td></tr>
             </tbody>
           </table>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
-          <label class="checkline"><input type="radio" name="next_path" value="host_client" checked data-export-key="roadmap.next_path"> Erst Host/Client fertig sichtbar machen</label>
+          <label class="checkline"><input type="radio" name="next_path" value="host_client" checked data-export-key="roadmap.next_path"> Erst Host/Client im echten Lauf fuehlbar pruefen</label>
           <label class="checkline"><input type="radio" name="next_path" value="scenario" data-export-key="roadmap.next_path"> Danach Mini-Szenario bauen</label>
           <label class="checkline"><input type="radio" name="next_path" value="editor" data-export-key="roadmap.next_path"> Danach Editor-UX verbessern</label>
         </article>
@@ -266,7 +267,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Arbeitslog</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Entscheidungen, Auffaelligkeiten...">2026-06-29: Neuer Ist-Stand-/Handbuch-Bericht erstellt. TASK_619 ist der laufende naechste Slice fuer sichtbare Host/Client-Rolle im Mission-HUD.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Entscheidungen, Auffaelligkeiten...">2026-06-29: Neuer Ist-Stand-/Handbuch-Bericht erstellt. TASK_619 macht Host/Client-Rolle im Mission-HUD sichtbar. 2026-06-30: TASK_620 haelt den Badge-Re-Capture als Manifest-/Crop-Evidence fest; naechster Schritt ist echter Multiplayer-Feel-Review.</div>
         </article>
         <article class="card">
           <h2>Review-Status</h2>
@@ -280,7 +281,7 @@
           </label>
           <div style="height: 12px;"></div>
           <label>Naechster Bericht
-            <input data-export-key="notes.next_report_hint" value="Nach TASK_619 Re-Capture und Crops in diesen Bericht uebertragen">
+            <input data-export-key="notes.next_report_hint" value="Nach TASK_620 echten Multiplayer-Feel-Review mit Authority, Sync und Performance eintragen">
           </label>
         </article>
         <article class="card full">
@@ -349,10 +350,10 @@
             checked_playtest_items: Array.from(document.querySelectorAll("[data-export-key^='playtest.'][type='checkbox']")).filter((element) => element.checked).length
           },
           metadata: {
-            branch: "task/host-client-role-peer-badge-hud",
-            current_task: "TASK_619 - Host Client Role Peer Badge HUD",
-            latest_completed_task: "TASK_618 - Host Client Standard Capture Crop Review",
-            recommended_next: "Host Client Badge Re-Capture Review"
+            branch: "task/host-client-badge-recapture-review",
+            current_task: "TASK_620 - Host Client Badge Re-Capture Review",
+            latest_completed_task: "TASK_620 - Host Client Badge Re-Capture Review",
+            recommended_next: "Host Client Multiplayer Feel Review"
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
