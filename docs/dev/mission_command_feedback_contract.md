@@ -159,6 +159,11 @@ TASK_578 wendet den belegten TASK_577-Folgepunkt an: Die `SUP AREA`-Preview muss
 
 Erwartete Struktur: Waypoint-Intent-Preview-Entries duerfen ein `suppress_preview`-Dictionary tragen, wenn `fire_rule = suppress` und ein Ziel existiert. `TerrainMap3DView.get_render_snapshot()` enthaelt `waypoint_intent_preview_suppress_area_count`; die passende Entry enthaelt `suppress_area.visible = true`, `visual_key = suppress_area_v1`, `target_position`, `radius_world`, `radius_3d`, `pressure_state` und `read_only = true`. TASK_579 bleibt fuer den menschlichen F6-Sichtreview zu Farbe, Alpha und Groesse.
 
+## Suppress-Fire-Manual-F6-Review
+TASK_579 macht den menschlichen SUP-Area-Sichtreview im laufenden HTML-Zwischenbericht exportierbar. Der Review darf Screenshotpfad, Viewport, Pflichtchecks, Farbe-/Alpha-Bewertung, Groesse-/Ueberdeckungsbewertung, Statussprache, naechste Prioritaet und Freitextnotizen sammeln. Er darf keine Gameplay-Wahrheit erzeugen, keine Preview bestaetigen, keinen `GO` ausfuehren und kein Suppression-/Ammo-/Combat-Verhalten behaupten.
+
+Erwartete Struktur: Der Bericht enthaelt Exportfelder unter `suppress_fire_manual.*`, mindestens `screenshot_done`, `sup_rule_selected`, `move_preview_visible`, `area_visible`, `no_go_committed`, `screenshot_path`, `viewport`, `visual_key`, `color_alpha_notes`, `size_overlap_notes`, `status_language_notes` und `followup`. Choice-Gruppen duerfen `area_color`, `area_size`, `status_clarity` und `next_priority` heissen. Die Freitextnotiz nutzt `notes.suppress_fire_manual_review`. TASK_580 bleibt fuer belegte Visual-Tuning-Findings reserviert.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

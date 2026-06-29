@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_579 - Suppress Fire Manual F6 Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_579_suppress_fire_manual_f6_review.md`, `docs/tasks/TASK_578_suppress_fire_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der laufende HTML-Zwischenbericht enthaelt jetzt einen exportierbaren SUP-Area-F6-Sichtreview fuer Screenshotpfad, Viewport, Pflichtchecks, Farbe/Alpha, Groesse/Ueberdeckung, Statussprache, naechste Prioritaet und Freitextnotizen.
+- Stand: Der Contract haelt fest, dass der Manual-Review read-only bleibt und keine Gameplay-Wahrheit, kein `GO`, keine Suppression-Wirkung und keinen Ammo-/Combat-State erzeugt.
+- Risiken/offen: Das visuelle Tuning selbst ist noch nicht angewendet; TASK_580 soll nur belegte Sichtbefunde aus Screenshot/Playtest umsetzen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_579_suppress_fire_manual_f6_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_578_suppress_fire_visual_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_580 - Suppress Fire Visual Tuning Findings`, wenn konkrete F6-Sichtnotizen aus dem Report vorliegen.
+
 ### TASK_578 - Suppress Fire Visual Polish Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_578_suppress_fire_visual_polish_findings.md`, `docs/tasks/TASK_577_suppress_fire_visual_evidence_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
