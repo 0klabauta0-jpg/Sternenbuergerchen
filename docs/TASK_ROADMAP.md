@@ -242,7 +242,8 @@ git checkout -b batch/<batch-name>
 - TASK_611 - Host Client Two Window Launch Helper (implementiert)
 - TASK_612 - Host Client Two Window Screenshot Review (implementiert)
 - TASK_613 - Host Client Two Window Visual Polish Findings (implementiert)
-- TASK_614 - Host Client Two Window Real Run Review
+- TASK_614 - Host Client Two Window Real Run Review (implementiert)
+- TASK_615 - Host Client Real Run Findings
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

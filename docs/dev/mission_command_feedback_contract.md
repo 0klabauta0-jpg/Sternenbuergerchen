@@ -329,6 +329,11 @@ TASK_613 wendet nur den belegten TASK_612-Board-Fund an: Das automatische Review
 
 Erwartete Struktur: `tmp/host_client_two_window_screenshot_review.json` bleibt ein TASK_612-Review-Manifest, meldet aber zusaetzlich `visual_polish_task_id = TASK_613`, `region_legend_present = true`, `callout_label_count >= 10`, `evidence_board_readability_gate = pass`, `visible_followup_candidate = host_client_two_window_window_run_review`, `read_only = true` und `ui_sets_gameplay_truth = false`. Der laufende HTML-Bericht darf diese Felder unter `host_client_two_window_screenshot.*` exportieren und TASK_614 als echten Fensterlauf-Review empfehlen.
 
+## Host-Client-Two-Window-Real-Run-Review
+TASK_614 stellt den echten Host-/Client-Zwei-Fenster-Lauf als reproduzierbaren Review-Helper bereit, ohne ihn in Verifiern automatisch zu erzwingen. `scripts/tools/capture_host_client_two_window_real_run.ps1` schreibt standardmaessig nur `tmp/host_client_two_window_real_run_review.json`; sichtbare Fenster, Desktop-Capture und Prozess-Cleanup passieren erst mit explizitem `-Launch` und optional `-CloseAfterCapture`. Der Helper, das Manifest und der HTML-Bericht sind read-only und duerfen keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit erzeugen.
+
+Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` enthaelt `schema = sternenbuergerchen.host_client_two_window_real_run_review.v1`, `task_id = TASK_614`, `source_plan_task_id = TASK_611`, `source_plan_path`, `tool_path`, `manifest_path`, `screenshot_path`, `launch_requested`, `real_run_done`, `capture_attempted`, `screenshot_written`, `close_after_capture`, Host-/Client-Prozessdaten, Host-/Client-Rollen, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false`, `review_checks` und `recommended_next_task = TASK_615 - Host Client Real Run Findings`. Der laufende HTML-Bericht darf diese Felder unter `host_client_two_window_real_run.*` exportieren und kommentierbar machen; ein Dry-Run darf den echten Sichttest nicht als erledigt markieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
