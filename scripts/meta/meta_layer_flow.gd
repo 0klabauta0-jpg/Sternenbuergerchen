@@ -1235,6 +1235,7 @@ func _apply_mission_progression_to_roster(mission_result: Dictionary) -> Diction
 	result["character_events"] = Array(progression_result.get("character_events", [])).duplicate(true)
 	result["progression_summary"] = Dictionary(progression_result.get("summary", {})).duplicate(true)
 	result["progression_unit_updates"] = Array(progression_result.get("unit_updates", [])).duplicate(true)
+	result["progression_award_summary"] = Dictionary(progression_result.get("award_summary", {})).duplicate(true)
 	result["fireteam_cohesion"] = Dictionary(progression_result.get("fireteam_cohesion", {})).duplicate(true)
 	var personnel_result: Dictionary = Dictionary(PERSONNEL_EVENT_RESOLVER_SCRIPT.call("evaluate_roster", updated_roster, {"mission_result": result}))
 	updated_roster = Dictionary(personnel_result.get("updated_roster", updated_roster)).duplicate(true)

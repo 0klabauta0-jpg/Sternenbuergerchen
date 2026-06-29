@@ -15,6 +15,7 @@ const MAX_SKILL_VALUE: float = 0.95
 const MAX_SKILL_GAIN_PER_MISSION: float = 0.018
 const MAX_FTL_TACTICAL_GAIN_PER_MISSION: float = 0.014
 const MAX_RELATIONSHIP_DRIFT_PER_MISSION: float = 0.035
+const AWARD_SUMMARY_SCHEMA: String = "sternenbuergerchen.skill_progress_award_summary.v1"
 
 
 static func apply_mission_result(roster: Dictionary, mission_result: Dictionary, options: Dictionary = {}) -> Dictionary:
@@ -88,19 +89,99 @@ static func apply_mission_result(roster: Dictionary, mission_result: Dictionary,
 	updated_roster["relationship_validation"] = relationship_validation
 
 	var debrief_events: Array = build_debrief_events(character_events, unit_updates)
+	var progression_summary: Dictionary = {
+		"mission_id": String(mission_context.get("mission_id", "")),
+		"mission_outcome": String(mission_context.get("mission_outcome", "")),
+		"updated_unit_count": unit_updates.size(),
+		"character_event_count": debrief_events.size(),
+		"progression_schema_version": PROGRESSION_SCHEMA_VERSION,
+	}
 	return {
 		"updated_roster": updated_roster,
 		"unit_updates": unit_updates,
 		"character_events": debrief_events,
 		"all_character_events": character_events,
 		"fireteam_cohesion": cohesion_by_fireteam,
-		"summary": {
-			"mission_id": String(mission_context.get("mission_id", "")),
-			"mission_outcome": String(mission_context.get("mission_outcome", "")),
-			"updated_unit_count": unit_updates.size(),
-			"character_event_count": debrief_events.size(),
-			"progression_schema_version": PROGRESSION_SCHEMA_VERSION,
-		},
+		"summary": progression_summary,
+		"award_summary": build_award_summary(unit_updates, progression_summary),
+	}
+
+
+static func build_award_summary(unit_updates: Array, progression_summary: Dictionary = {}) -> Dictionary:
+	var awards: Array = []
+	var total_xp_delta: int = 0
+	var skill_gain_count: int = 0
+	var ftl_tactical_gain_count: int = 0
+	var recovery_count: int = 0
+	var objective_award_count: int = 0
+	var morale_delta_total: float = 0.0
+	var frustration_delta_total: float = 0.0
+	for update_variant in unit_updates:
+		if typeof(update_variant) != TYPE_DICTIONARY:
+			continue
+		var update: Dictionary = Dictionary(update_variant)
+		var xp_delta: int = clampi(int(update.get("xp_delta", 0)), 0, MAX_XP_PER_MISSION)
+		var skill_gains: Dictionary = Dictionary(update.get("skill_gains", {}))
+		var skill_keys: PackedStringArray = PackedStringArray()
+		for skill_key_variant in skill_gains.keys():
+			var skill_key: String = String(skill_key_variant).strip_edges()
+			if skill_key.is_empty() or float(skill_gains.get(skill_key_variant, 0.0)) <= 0.0:
+				continue
+			skill_keys.append(skill_key)
+		var ftl_gain: float = clampf(float(update.get("ftl_tactical_gain", 0.0)), 0.0, MAX_FTL_TACTICAL_GAIN_PER_MISSION)
+		total_xp_delta += xp_delta
+		skill_gain_count += skill_keys.size()
+		if ftl_gain > 0.0:
+			ftl_tactical_gain_count += 1
+		if bool(update.get("downed", false)):
+			recovery_count += 1
+		if bool(update.get("objective_participation", false)):
+			objective_award_count += 1
+		morale_delta_total += float(update.get("morale_delta", 0.0))
+		frustration_delta_total += float(update.get("frustration_delta", 0.0))
+		if awards.size() < MAX_CHARACTER_EVENTS:
+			awards.append({
+				"unit_id": String(update.get("unit_id", "")).strip_edges(),
+				"display_name": String(update.get("display_name", update.get("unit_id", "Operator"))).strip_edges(),
+				"fireteam_id": String(update.get("fireteam_id", "")).strip_edges(),
+				"xp_delta": xp_delta,
+				"skill_keys": skill_keys,
+				"skill_gain_count": skill_keys.size(),
+				"ftl_tactical_gain": ftl_gain,
+				"downed": bool(update.get("downed", false)),
+				"objective_participation": bool(update.get("objective_participation", false)),
+				"read_only": true,
+			})
+	var award_text: String = "Awards: XP +%d | Skill %d | FTL %d | Recovery %d" % [
+		total_xp_delta,
+		skill_gain_count,
+		ftl_tactical_gain_count,
+		recovery_count,
+	]
+	return {
+		"schema": AWARD_SUMMARY_SCHEMA,
+		"authority": "MissionProgressionResolver",
+		"source": "progression_unit_updates",
+		"mission_id": String(progression_summary.get("mission_id", "")),
+		"mission_outcome": String(progression_summary.get("mission_outcome", "")),
+		"progression_schema_version": PROGRESSION_SCHEMA_VERSION,
+		"unit_award_count": unit_updates.size(),
+		"listed_awards": awards,
+		"listed_award_count": awards.size(),
+		"total_xp_delta": total_xp_delta,
+		"skill_gain_count": skill_gain_count,
+		"ftl_tactical_gain_count": ftl_tactical_gain_count,
+		"recovery_count": recovery_count,
+		"objective_award_count": objective_award_count,
+		"morale_delta_total": snappedf(morale_delta_total, 0.001),
+		"frustration_delta_total": snappedf(frustration_delta_total, 0.001),
+		"max_xp_per_unit": MAX_XP_PER_MISSION,
+		"max_skill_gain_per_mission": MAX_SKILL_GAIN_PER_MISSION,
+		"max_ftl_tactical_gain_per_mission": MAX_FTL_TACTICAL_GAIN_PER_MISSION,
+		"award_text": award_text,
+		"award_applied": true,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
 	}
 
 

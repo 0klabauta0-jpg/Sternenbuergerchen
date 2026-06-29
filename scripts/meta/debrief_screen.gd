@@ -17,6 +17,9 @@ const DEBRIEF_AAR_LAYOUT_STYLE_ID := "debrief_aar_layout_polish_v1"
 const DEBRIEF_SKILL_PREVIEW_MAX_CHARS := 160
 const DEBRIEF_SKILL_PREVIEW_TOKEN_COUNT_MIN := 2
 const DEBRIEF_SKILL_PREVIEW_STYLE_ID := "debrief_skill_preview_v1"
+const DEBRIEF_SKILL_AWARD_MAX_CHARS := 128
+const DEBRIEF_SKILL_AWARD_STYLE_ID := "debrief_skill_award_contract_v1"
+const SKILL_AWARD_SUMMARY_SCHEMA := "sternenbuergerchen.skill_progress_award_summary.v1"
 
 signal return_to_fob_requested()
 signal return_to_homebase_requested()
@@ -344,6 +347,58 @@ func get_debrief_skill_progress_preview_snapshot() -> Dictionary:
 	}
 
 
+func get_debrief_skill_award_contract_snapshot() -> Dictionary:
+	var preview_snapshot: Dictionary = get_debrief_skill_progress_preview_snapshot()
+	var award_label := get_node_or_null("Panel/Margin/VBox/SkillAwardSummaryLabel") as Label
+	var award_summary: Dictionary = Dictionary(_mission_result.get("progression_award_summary", {})).duplicate(true)
+	var text: String = award_label.text.strip_edges() if award_label != null else ""
+	var style_id: String = String(award_label.get_meta("debrief_skill_award_style_id", "")) if award_label != null else ""
+	var checks: Array = []
+	_append_visual_polish_check(checks, "award_summary_schema", String(award_summary.get("schema", "")) == SKILL_AWARD_SUMMARY_SCHEMA, "Award summary should use the stable resolver schema.")
+	_append_visual_polish_check(checks, "award_authority_resolver", String(award_summary.get("authority", "")) == "MissionProgressionResolver", "Award authority should stay in MissionProgressionResolver.")
+	_append_visual_polish_check(checks, "award_source_unit_updates", String(award_summary.get("source", "")) == "progression_unit_updates", "Award summary should be derived from progression unit updates.")
+	_append_visual_polish_check(checks, "award_applied", bool(award_summary.get("award_applied", false)), "Award summary should describe already applied progression.")
+	_append_visual_polish_check(checks, "award_label_visible", award_label != null and award_label.visible, "Debrief should show award summary when resolver data exists.")
+	_append_visual_polish_check(checks, "award_label_compact", text.length() <= DEBRIEF_SKILL_AWARD_MAX_CHARS and text.count("\n") == 0, "Award summary should stay one compact scan line.")
+	_append_visual_polish_check(checks, "award_label_named", text.begins_with("Skill Awards:"), "Award summary should be visibly distinct from preview.")
+	_append_visual_polish_check(checks, "award_has_xp", int(award_summary.get("total_xp_delta", 0)) > 0, "Award summary should include XP totals.")
+	_append_visual_polish_check(checks, "award_has_growth_token", int(award_summary.get("skill_gain_count", 0)) > 0 or int(award_summary.get("ftl_tactical_gain_count", 0)) > 0, "Award summary should include skill or FTL growth tokens.")
+	_append_visual_polish_check(checks, "award_style_applied", style_id == DEBRIEF_SKILL_AWARD_STYLE_ID, "Award summary style should be applied.")
+	_append_visual_polish_check(checks, "preview_still_green", String(preview_snapshot.get("gate", "")) == "pass", "Award contract should not regress the preview gate.")
+	_append_visual_polish_check(checks, "read_only", bool(award_summary.get("read_only", false)) and not bool(award_summary.get("ui_sets_gameplay_truth", true)), "Debrief reads resolver award data only.")
+	var failed_count: int = 0
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_count += 1
+	return {
+		"schema": "sternenbuergerchen.debrief_skill_award_contract.v1",
+		"task_id": "TASK_593",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"layout_key": DEBRIEF_SKILL_AWARD_STYLE_ID,
+		"award_text": text,
+		"award_length": text.length(),
+		"award_visible": award_label != null and award_label.visible,
+		"award_summary_schema": String(award_summary.get("schema", "")),
+		"award_authority": String(award_summary.get("authority", "")),
+		"award_source": String(award_summary.get("source", "")),
+		"total_xp_delta": int(award_summary.get("total_xp_delta", 0)),
+		"skill_gain_count": int(award_summary.get("skill_gain_count", 0)),
+		"ftl_tactical_gain_count": int(award_summary.get("ftl_tactical_gain_count", 0)),
+		"recovery_count": int(award_summary.get("recovery_count", 0)),
+		"unit_award_count": int(award_summary.get("unit_award_count", 0)),
+		"listed_award_count": int(award_summary.get("listed_award_count", 0)),
+		"style_id": style_id,
+		"preview_gate": String(preview_snapshot.get("gate", "")),
+		"visual_only": true,
+		"checks": checks,
+	}
+
+
 func get_background_catalog_snapshot() -> Dictionary:
 	var entry: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID))
 	var background := get_node_or_null("Background") as TextureRect
@@ -376,6 +431,7 @@ func _render_result() -> void:
 	var aar_rows_label: Label = _ensure_aar_rows_label()
 	var aar_limit_label: Label = _ensure_aar_limit_label()
 	var skill_preview_label: Label = _ensure_skill_progress_preview_label()
+	var skill_award_label: Label = _ensure_skill_award_summary_label()
 	var character_events_label: Label = _ensure_character_events_label()
 	var personnel_events_label: Label = _ensure_personnel_events_label()
 	_apply_help_id(character_events_label, "debrief.character_updates")
@@ -383,6 +439,7 @@ func _render_result() -> void:
 	_apply_help_id(ftl_feedback_label, "character_sheet.ftl_tactical_impact")
 	_apply_help_id(aar_summary_label, "debrief.mini_aar")
 	_apply_help_id(skill_preview_label, "debrief.skill_preview")
+	_apply_help_id(skill_award_label, "debrief.skill_awards")
 
 	if _mission_result.is_empty():
 		_render_summary_chips(summary_strip, [
@@ -398,6 +455,7 @@ func _render_result() -> void:
 		ftl_feedback_label.text = "FTL feedback: pending"
 		_render_aar_bridge({}, aar_summary_label, aar_chip_strip, aar_rows_label, aar_limit_label)
 		_render_skill_progress_preview(skill_preview_label, [])
+		_render_skill_award_summary(skill_award_label, {})
 		character_events_label.text = "Character updates: pending"
 		personnel_events_label.text = "Personnel updates: pending"
 		_apply_readability_style()
@@ -460,6 +518,7 @@ func _render_result() -> void:
 
 	_render_aar_bridge(_extract_debrief_aar_payload(), aar_summary_label, aar_chip_strip, aar_rows_label, aar_limit_label)
 	_render_skill_progress_preview(skill_preview_label, _build_skill_progress_preview_entries())
+	_render_skill_award_summary(skill_award_label, Dictionary(_mission_result.get("progression_award_summary", {})))
 
 	var character_event_lines: PackedStringArray = []
 	for event_variant in Array(_mission_result.get("character_events", [])):
@@ -565,6 +624,10 @@ func _ensure_skill_progress_preview_label() -> Label:
 	return _ensure_debrief_label_before_button_row("SkillProgressPreviewLabel")
 
 
+func _ensure_skill_award_summary_label() -> Label:
+	return _ensure_debrief_label_before_button_row("SkillAwardSummaryLabel")
+
+
 func _ensure_debrief_label_before_button_row(label_name: String) -> Label:
 	var vbox := get_node("Panel/Margin/VBox") as VBoxContainer
 	var existing := vbox.get_node_or_null(label_name) as Label
@@ -611,6 +674,7 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/FTLFeedbackLabel") as Control, "character_sheet.ftl_tactical_impact")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/AARSummaryLabel") as Control, "debrief.mini_aar")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/SkillProgressPreviewLabel") as Control, "debrief.skill_preview")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/SkillAwardSummaryLabel") as Control, "debrief.skill_awards")
 
 
 func _apply_readability_style() -> void:
@@ -636,6 +700,7 @@ func _apply_readability_style() -> void:
 		"Panel/Margin/VBox/AARRowsLabel",
 		"Panel/Margin/VBox/AARLimitLabel",
 		"Panel/Margin/VBox/SkillProgressPreviewLabel",
+		"Panel/Margin/VBox/SkillAwardSummaryLabel",
 		"Panel/Margin/VBox/CharacterEventsLabel",
 		"Panel/Margin/VBox/PersonnelEventsLabel",
 	]:
@@ -650,6 +715,7 @@ func _apply_readability_style() -> void:
 		aar_limit_label.add_theme_font_size_override("font_size", 12)
 	_apply_aar_layout_polish_style()
 	_apply_skill_progress_preview_style()
+	_apply_skill_award_summary_style()
 	_apply_aar_chip_style()
 
 	for path in [
@@ -892,6 +958,31 @@ func _render_skill_progress_preview(label: Label, entries: Array) -> void:
 	_apply_skill_progress_preview_style()
 
 
+func _render_skill_award_summary(label: Label, award_summary: Dictionary) -> void:
+	if label == null:
+		return
+	if String(award_summary.get("schema", "")) != SKILL_AWARD_SUMMARY_SCHEMA:
+		label.text = ""
+		label.visible = false
+		label.set_meta("debrief_skill_award_summary", {})
+		_apply_skill_award_summary_style()
+		return
+	var text: String = String(award_summary.get("award_text", "")).strip_edges()
+	if text.is_empty():
+		text = "Awards: XP +%d | Skill %d | FTL %d | Recovery %d" % [
+			int(award_summary.get("total_xp_delta", 0)),
+			int(award_summary.get("skill_gain_count", 0)),
+			int(award_summary.get("ftl_tactical_gain_count", 0)),
+			int(award_summary.get("recovery_count", 0)),
+		]
+	if text.begins_with("Awards:"):
+		text = text.substr(7).strip_edges()
+	label.text = "Skill Awards: %s" % text
+	label.visible = true
+	label.set_meta("debrief_skill_award_summary", award_summary.duplicate(true))
+	_apply_skill_award_summary_style()
+
+
 func _format_aar_summary_text(summary_text: String) -> String:
 	var normalized: String = summary_text.strip_edges()
 	if normalized.begins_with("AAR:"):
@@ -945,6 +1036,18 @@ func _apply_skill_progress_preview_style() -> void:
 	label.add_theme_color_override("font_color", Color("cfe7b5"))
 	label.add_theme_font_size_override("font_size", 12)
 	label.set_meta("debrief_skill_preview_style_id", DEBRIEF_SKILL_PREVIEW_STYLE_ID)
+
+
+func _apply_skill_award_summary_style() -> void:
+	var label := get_node_or_null("Panel/Margin/VBox/SkillAwardSummaryLabel") as Label
+	if label == null:
+		return
+	label.clip_text = true
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.add_theme_color_override("font_color", Color("f6df8f"))
+	label.add_theme_font_size_override("font_size", 12)
+	label.set_meta("debrief_skill_award_style_id", DEBRIEF_SKILL_AWARD_STYLE_ID)
 
 
 func _apply_aar_chip_style() -> void:

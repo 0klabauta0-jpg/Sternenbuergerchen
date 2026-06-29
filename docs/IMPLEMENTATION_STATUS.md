@@ -18,7 +18,17 @@
 - Stand: Die Preview ist bewusst nur ein Core-Loop-Anker fuer Skillentwicklung; keine XP-, Skilllevel-, Persistenz- oder MissionResult-Mutation.
 - Risiken/offen: Echte XP-/Skillvergabe, Balance und Persistenz bleiben Folgearbeit. Ohne echten `debrief_aar_manual`-Export wurden keine Player-Review-Findings behauptet.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_592_debrief_skill_progress_preview_shell.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_590_debrief_aar_layout_polish_findings.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_593 - Skill Progress Award Contract`, wenn aus der Preview ein echter, autoritativer Progressionspfad werden soll.
+- Naechster Schritt: durch `TASK_593 - Skill Progress Award Contract` erledigt; naechster Anschluss ist `TASK_594 - Post Mission Skill Delta Homebase Bridge`.
+
+### TASK_593 - Skill Progress Award Contract
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_593_skill_progress_award_contract.md`, `docs/tasks/TASK_592_debrief_skill_progress_preview_shell.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/fireteam_leader_tactical_progression.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MissionProgressionResolver.apply_mission_result()` liefert jetzt eine `award_summary` mit Schema, Authority, XP-/Skill-/FTL-/Recovery-Zaehlern und Kappungswerten aus den bereits angewendeten `unit_updates`.
+- Stand: `MetaLayerFlow` reicht diese Summary als `progression_award_summary` ins MissionResult weiter.
+- Stand: `DebriefTestScreen` zeigt bei vorhandener Resolver-Summary eine kompakte `Skill Awards`-Zeile und meldet `get_debrief_skill_award_contract_snapshot()` read-only.
+- Risiken/offen: Kein neues Balancing und keine Skill-Tree-UI. Der naechste sichtbare Core-Loop-Schritt ist, die Award-Deltas nach Rueckkehr in Homebase/Character-Sheet gezielt hervorzuheben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_593_skill_progress_award_contract.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_592_debrief_skill_progress_preview_shell.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_237_mission_progression_xp_morale_frustration.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_273_fireteam_leader_skill_tactical_progression.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_594 - Post Mission Skill Delta Homebase Bridge`, damit der Spieler die echten Award-Deltas nach dem Debrief in der Homebase wiederfindet.
 
 ### TASK_591 - Debrief AAR Player Review Notes Pass
 - Status: implementiert im Arbeitsstand
