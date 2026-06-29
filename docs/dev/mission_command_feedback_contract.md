@@ -139,6 +139,11 @@ TASK_574 erzeugt eine reproduzierbare Fire-Rule-/ROE-F6-Evidence fuer den besteh
 
 Erwartete Struktur: `tmp/fire_rule_f6_real_review.png`, `tmp/fire_rule_f6_real_review.json`, `readability_gate`, `selected_fire_rule_consensus`, Button-Labels, aktive Button-Regeln, `viewport_readback_available`, `manual_review_required = true` und `manual_review_done = false`. Der naechste Polish-Slice darf nur konkrete Befunde aus Screenshot, Manifest oder HTML-Workbench-Export anwenden.
 
+## Fire-Rule-Evidence-Polish-Findings
+TASK_575 wendet nur den belegten TASK_574-Folgepunkt an: Der aktive ROE-/Fire-Rule-Button muss staerker sichtbar sein als inaktive Buttons. Zulaessig sind visuelle Button-Affordance, Snapshot-Metadaten und Manifestfelder fuer Style-ID, aktive Affordance und Visual-Weight. Nicht zulaessig sind neue Fire-Rule-, Combat-, Movement-, Command-Queue- oder Gameplay-Wahrheit im HUD.
+
+Erwartete Struktur: Der aktive Button meldet `fire_rule_active_affordance_v1`, inaktive Buttons melden `fire_rule_inactive_affordance_v1`, `get_fire_rule_f6_readability_snapshot()` enthaelt `active_button_affordance_count`, `active_affordance_style_id`, `active_affordance_style_ids`, `active_button_visual_weight` und den Check `active_rule_affordance_stronger`. TASK_574 darf diese Werte im lokalen Manifest ausgeben, ohne den manuellen Review als erledigt zu markieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

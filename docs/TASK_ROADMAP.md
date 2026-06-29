@@ -203,7 +203,8 @@ git checkout -b batch/<batch-name>
 - TASK_572 - Fire Rule F6 Readability Smoke (implementiert)
 - TASK_573 - Fire Rule Manual Screenshot Notes Pass (implementiert)
 - TASK_574 - Fire Rule Real F6 Screenshot Review Pass (implementiert)
-- TASK_575 - Fire Rule Evidence Polish Findings
+- TASK_575 - Fire Rule Evidence Polish Findings (implementiert)
+- TASK_576 - Suppress Fire Preview Readability Spike
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

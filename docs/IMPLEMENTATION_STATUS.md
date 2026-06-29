@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_575 - Fire Rule Evidence Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_575_fire_rule_evidence_polish_findings.md`, `docs/tasks/TASK_574_fire_rule_real_f6_screenshot_review_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der belegte TASK_574-Folgepunkt ist umgesetzt: Der aktive ROE-/Fire-Rule-Button bekommt einen staerkeren, maschinell pruefbaren visuellen Affordance-State.
+- Stand: `get_fire_rule_f6_readability_snapshot()` meldet jetzt Affordance-Zaehler, aktive Style-ID und Visual-Weight; TASK_574 schreibt diese Daten in das lokale Manifest.
+- Stand: Der HTML-Zwischenbericht ist weiter als laufende Arbeits-Workbench aktualisiert und nennt TASK_576 als naechsten kleinen Anschluss.
+- Risiken/offen: Der echte menschliche F6-/Hover-Spielgefuehl-Test bleibt offen; `suppress` bleibt bis zu einem eigenen Slice ein Fire-Rule-/Diagnosezustand.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_575_fire_rule_evidence_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_572_fire_rule_f6_readability_smoke.gd`, `godot_console.exe --path . --script scripts/tests/task_574_fire_rule_real_f6_screenshot_review_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_576 - Suppress Fire Preview Readability Spike`, wenn der `suppress`-Button als naechstes nicht nur Regelzustand, sondern vor GO als lesbare Suppress-Area-Preview vorbereitet werden soll.
+
 ### TASK_574 - Fire Rule Real F6 Screenshot Review Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_574_fire_rule_real_f6_screenshot_review_pass.md`, `docs/tasks/TASK_573_fire_rule_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_572_fire_rule_f6_readability_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

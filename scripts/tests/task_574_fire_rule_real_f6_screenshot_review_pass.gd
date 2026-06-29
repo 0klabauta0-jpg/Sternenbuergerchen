@@ -111,6 +111,7 @@ func _test_capture_fire_rule_real_f6_review() -> void:
 	_assert(String(readability_snapshot.get("selected_fire_rule_consensus", "")) == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_HOLD, "Hold Fire is the visible active rule in review capture")
 	var button_labels: Array = Array(readability_snapshot.get("button_labels", []))
 	_assert(button_labels.size() >= 4 and button_labels.has("HF") and button_labels.has("RF") and button_labels.has("FW") and button_labels.has("SUP"), "Review capture sees all Fire-Rule controls")
+	_assert(bool(_find_check(readability_snapshot, "active_rule_affordance_stronger").get("passed", false)), "Review capture exposes stronger active Fire-Rule affordance")
 	_assert(not bool(readability_snapshot.get("ui_sets_gameplay_truth", true)), "Fire-Rule review snapshot remains read-only")
 
 	var image: Image = _capture_viewport_image_or_empty()
@@ -226,11 +227,24 @@ func _build_manifest(readability_snapshot: Dictionary, image: Image, viewport_re
 		"button_count": Array(readability_snapshot.get("button_labels", [])).size(),
 		"button_labels": Array(readability_snapshot.get("button_labels", [])),
 		"active_button_rules": Array(readability_snapshot.get("active_button_rules", [])),
+		"active_button_affordance_count": int(readability_snapshot.get("active_button_affordance_count", 0)),
+		"active_affordance_style_id": String(readability_snapshot.get("active_affordance_style_id", "")),
+		"active_affordance_style_ids": Array(readability_snapshot.get("active_affordance_style_ids", [])),
+		"active_button_visual_weight": float(readability_snapshot.get("active_button_visual_weight", 0.0)),
+		"active_rule_affordance_stronger": bool(_find_check(readability_snapshot, "active_rule_affordance_stronger").get("passed", false)),
 		"manual_review_required": true,
 		"manual_review_done": false,
-		"visible_followup_candidate": "active_rule_affordance",
-		"recommended_next_task": "TASK_575 - Fire Rule Evidence Polish Findings",
+		"visible_followup_candidate": "active_rule_affordance_resolved",
+		"recommended_next_task": "TASK_576 - Suppress Fire Preview Readability Spike",
 	}
+
+
+func _find_check(snapshot: Dictionary, check_id: String) -> Dictionary:
+	for check_variant in Array(snapshot.get("checks", [])):
+		var check: Dictionary = Dictionary(check_variant)
+		if String(check.get("id", "")) == check_id:
+			return check
+	return {}
 
 
 func _write_manifest(manifest: Dictionary) -> void:

@@ -100,6 +100,10 @@ const FIRE_RULE_HOLD_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleHoldBut
 const FIRE_RULE_RETURN_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleReturnButton"
 const FIRE_RULE_FREE_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleFreeButton"
 const FIRE_RULE_SUPPRESS_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleSuppressButton"
+const FIRE_RULE_ACTIVE_AFFORDANCE_STYLE_ID: String = "fire_rule_active_affordance_v1"
+const FIRE_RULE_INACTIVE_AFFORDANCE_STYLE_ID: String = "fire_rule_inactive_affordance_v1"
+const FIRE_RULE_ACTIVE_AFFORDANCE_WEIGHT: float = 2.0
+const FIRE_RULE_INACTIVE_AFFORDANCE_WEIGHT: float = 1.0
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
 const AREA_ORDER_PREVIEW_REFRESH_MSEC: int = 80
@@ -8435,6 +8439,32 @@ func _refresh_fire_rule_button_state() -> void:
 		button.set_meta("fire_rule_consensus", consensus_rule)
 		button.set_meta("command_hierarchy_disabled_reason", "" if enabled else "Requires selected local fireteam")
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, is_active)
+		_apply_fire_rule_active_affordance(button, is_active)
+
+
+func _apply_fire_rule_active_affordance(button: Button, is_active: bool) -> void:
+	if button == null:
+		return
+	button.set_meta(
+		"fire_rule_affordance_style_id",
+		FIRE_RULE_ACTIVE_AFFORDANCE_STYLE_ID if is_active else FIRE_RULE_INACTIVE_AFFORDANCE_STYLE_ID
+	)
+	button.set_meta("fire_rule_affordance_active", is_active)
+	button.set_meta(
+		"fire_rule_affordance_visual_weight",
+		FIRE_RULE_ACTIVE_AFFORDANCE_WEIGHT if is_active else FIRE_RULE_INACTIVE_AFFORDANCE_WEIGHT
+	)
+	if is_active:
+		button.self_modulate = Color(1.0, 0.88, 0.34, 1.0)
+		button.add_theme_color_override("font_color", Color(0.06, 0.055, 0.035, 1.0))
+		button.add_theme_color_override("font_pressed_color", Color(0.06, 0.055, 0.035, 1.0))
+		button.add_theme_color_override("font_hover_color", Color(0.02, 0.02, 0.015, 1.0))
+		button.add_theme_color_override("font_focus_color", Color(0.02, 0.02, 0.015, 1.0))
+		return
+	button.self_modulate = Color(1.0, 1.0, 1.0, 1.0)
+	for color_name in ["font_color", "font_pressed_color", "font_hover_color", "font_focus_color"]:
+		if button.has_theme_color_override(color_name):
+			button.remove_theme_color_override(color_name)
 
 
 func _get_selected_fire_rule_consensus() -> String:
@@ -8523,10 +8553,13 @@ func get_fire_rule_f6_readability_snapshot() -> Dictionary:
 	var button_tooltips: PackedStringArray = PackedStringArray()
 	var button_help_ids: PackedStringArray = PackedStringArray()
 	var active_button_rules: PackedStringArray = PackedStringArray()
+	var active_affordance_style_ids: PackedStringArray = PackedStringArray()
 	var all_buttons_visible: bool = true
 	var all_buttons_inside_command_panel: bool = true
 	var all_buttons_inside_viewport: bool = true
 	var all_tooltips_and_help_present: bool = true
+	var active_affordance_count: int = 0
+	var active_affordance_weight: float = 0.0
 	var max_label_length: int = 0
 	var min_button_y: float = INF
 	var max_button_y: float = -INF
@@ -8556,6 +8589,10 @@ func get_fire_rule_f6_readability_snapshot() -> Dictionary:
 			and help_id.contains("fire_rule")
 		if button != null and button.button_pressed:
 			active_button_rules.append(rule)
+		if button != null and bool(button.get_meta("fire_rule_affordance_active", false)):
+			active_affordance_count += 1
+			active_affordance_style_ids.append(String(button.get_meta("fire_rule_affordance_style_id", "")))
+			active_affordance_weight = maxf(active_affordance_weight, float(button.get_meta("fire_rule_affordance_visual_weight", 0.0)))
 		if button_rect.size != Vector2.ZERO:
 			min_button_y = minf(min_button_y, button_rect.position.y)
 			max_button_y = maxf(max_button_y, button_rect.position.y)
@@ -8615,6 +8652,14 @@ func get_fire_rule_f6_readability_snapshot() -> Dictionary:
 			"Selected Fire-Rule consensus maps to exactly one active compact button."
 		),
 		_build_mission_first_move_readability_check(
+			"active_rule_affordance_stronger",
+			active_affordance_count == expected_active_count
+				and (expected_active_count == 0
+					or (active_affordance_style_ids.has(FIRE_RULE_ACTIVE_AFFORDANCE_STYLE_ID)
+						and active_affordance_weight >= FIRE_RULE_ACTIVE_AFFORDANCE_WEIGHT)),
+			"The selected Fire-Rule has a stronger visual affordance than inactive ROE buttons."
+		),
+		_build_mission_first_move_readability_check(
 			"tooltips_and_help_explain_labels",
 			all_tooltips_and_help_present,
 			"Short HF/RF/FW/SUP labels keep their longer explanation in tooltip and help metadata."
@@ -8646,6 +8691,10 @@ func get_fire_rule_f6_readability_snapshot() -> Dictionary:
 		"selected_fireteam_ids": Array(controls_snapshot.get("selected_fireteam_ids", [])),
 		"selected_fire_rule_consensus": selected_consensus,
 		"active_button_rules": Array(active_button_rules),
+		"active_button_affordance_count": active_affordance_count,
+		"active_affordance_style_ids": Array(active_affordance_style_ids),
+		"active_button_visual_weight": active_affordance_weight,
+		"active_affordance_style_id": FIRE_RULE_ACTIVE_AFFORDANCE_STYLE_ID if active_affordance_count > 0 else "",
 		"button_labels": Array(button_labels),
 		"button_tooltips": Array(button_tooltips),
 		"button_help_ids": Array(button_help_ids),
@@ -8685,6 +8734,9 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 			"command_hierarchy_panel_role": "",
 			"command_hierarchy_disabled_reason": "missing button",
 			"command_hierarchy_requires_tile_selection": false,
+			"fire_rule_affordance_style_id": "",
+			"fire_rule_affordance_active": false,
+			"fire_rule_affordance_visual_weight": 0.0,
 			"pressed_signal_connection_count": 0,
 		}
 	var global_rect: Rect2 = button.get_global_rect() if button.is_inside_tree() else Rect2()
@@ -8706,6 +8758,9 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 		"command_hierarchy_context": str(button.get_meta("command_hierarchy_context", "")),
 		"command_hierarchy_requires_tile_selection": bool(button.get_meta("command_hierarchy_requires_tile_selection", false)),
 		"command_hierarchy_disabled_reason": str(button.get_meta("command_hierarchy_disabled_reason", "")),
+		"fire_rule_affordance_style_id": str(button.get_meta("fire_rule_affordance_style_id", "")),
+		"fire_rule_affordance_active": bool(button.get_meta("fire_rule_affordance_active", false)),
+		"fire_rule_affordance_visual_weight": float(button.get_meta("fire_rule_affordance_visual_weight", 0.0)),
 		"global_rect": global_rect,
 		"pressed_signal_connection_count": button.pressed.get_connections().size(),
 	}
