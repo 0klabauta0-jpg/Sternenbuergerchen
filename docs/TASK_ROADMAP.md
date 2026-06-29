@@ -201,7 +201,8 @@ git checkout -b batch/<batch-name>
 - TASK_570 - Hold Fire Discipline Mission Bridge (implementiert)
 - TASK_571 - Fire Rule Controls Readability Polish (implementiert)
 - TASK_572 - Fire Rule F6 Readability Smoke (implementiert)
-- TASK_573 - Fire Rule Manual Screenshot Notes Pass
+- TASK_573 - Fire Rule Manual Screenshot Notes Pass (implementiert)
+- TASK_574 - Fire Rule Real F6 Screenshot Review Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

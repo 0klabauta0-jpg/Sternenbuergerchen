@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_573 - Fire Rule Manual Screenshot Notes Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_573_fire_rule_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_572_fire_rule_f6_readability_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der laufende HTML-Zwischenbericht enthaelt jetzt einen exportierbaren Fire-Rule-/ROE-Screenshot-/Spielgefuehl-Notizblock.
+- Stand: Exportiert werden Screenshotpfad, Viewport, aktive Rule, Button-/Tooltip-/Command-Flow-/Threat-Preview-Checks, Ratings, konkrete Follow-up-Prioritaet und freie ROE-Notizen.
+- Stand: Der Bericht markiert den echten manuellen Screenshot bewusst nicht als erledigt; die Daten bleiben Playtest-/Arbeitsnotizen und keine Gameplay-Wahrheit.
+- Risiken/offen: Der echte F6-Fire-Rule-Screenshot-/Hover-Sichttest muss weiterhin manuell ausgefuehrt und exportiert werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_573_fire_rule_manual_screenshot_notes_pass.gd` (32 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_572_fire_rule_f6_readability_smoke.gd` (28 passed, 0 failed), `git diff --check` (Exit 0).
+- Naechster Schritt: `TASK_574 - Fire Rule Real F6 Screenshot Review Pass`, wenn echte ROE-Screenshot-/Spielgefuehl-Evidence aufgenommen und ausgewertet werden soll.
+
 ### TASK_572 - Fire Rule F6 Readability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_572_fire_rule_f6_readability_smoke.md`, `docs/tasks/TASK_571_fire_rule_controls_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

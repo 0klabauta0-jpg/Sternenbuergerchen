@@ -129,6 +129,11 @@ TASK_572 prueft die TASK_571-Controls im FullHD-F6-Kontext. `get_fire_rule_f6_re
 
 Erwartete Lesbarkeit: `HF`, `RF`, `FW` und `SUP` sind sichtbar, bleiben im #16 Command Matrix Panel, bleiben innerhalb FullHD, bilden eine kompakte ROE-Gruppe, ueberlappen nicht mit #17 Selected Fireteam oder #18 Mission Control, behalten Tooltip-/Help-Erklaerungen und zeigen bei eindeutiger Auswahl genau eine aktive Fire-Rule. Der Smoke ersetzt keinen menschlichen Screenshot-Test, macht aber offensichtliche Layout-/Panel-Kollisionen automatisiert sichtbar.
 
+## Fire-Rule-Manual-Screenshot-Notes
+TASK_573 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workbench fuer die Fire-Rule-/ROE-Buttons im F6-Missionsbild. Der Bericht darf Screenshotpfad, Viewport, aktive Rule, Button-Erkennbarkeit, Tooltip-/Hover-Eindruck, Command-Flow, Threat-Preview-Zusammenspiel, Panel-/Weltverdeckung, Ratings und Follow-up-Entscheidungen exportieren, aber keine Fire-Rule-, Combat-, Movement-, Command- oder Gameplay-Wahrheit speichern.
+
+Erwartete Struktur: exportierbare `fire_rule_manual.*` Controls, eine freie `notes.fire_rule_manual_review`-Notiz und eine klare Markierung, dass der echte manuelle Screenshot erst durch User/Playtest bestaetigt wird. Ein nachfolgender Polish-Task darf nur konkrete, exportierte Sichtbefunde anwenden.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
