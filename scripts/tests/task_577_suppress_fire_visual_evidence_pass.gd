@@ -105,6 +105,7 @@ func _test_capture_suppress_fire_visual_evidence() -> void:
 	_assert(String(suppress_snapshot.get("preview_text", "")).contains("SUP AREA"), "SUP AREA appears in capture snapshot")
 	_assert(int(render_snapshot.get("waypoint_intent_preview_path_line_count", 0)) > 0, "Primary3D reports path line for SUP visual evidence")
 	_assert(_has_preview_marker_or_ghost(render_snapshot), "Primary3D reports visual preview marker or ghost entry for SUP visual evidence")
+	_assert(int(render_snapshot.get("waypoint_intent_preview_suppress_area_count", 0)) > 0, "Primary3D reports SUP area visual evidence count")
 	_assert(not bool(suppress_snapshot.get("ui_sets_gameplay_truth", true)), "SUP visual evidence snapshot remains read-only")
 
 	var image: Image = _capture_viewport_image_or_empty()
@@ -214,6 +215,7 @@ func _build_manifest(suppress_snapshot: Dictionary, threat_snapshot: Dictionary,
 		"render_preview_visual_count": int(render_snapshot.get("waypoint_intent_preview_visual_count", 0)),
 		"render_preview_path_line_count": int(render_snapshot.get("waypoint_intent_preview_path_line_count", 0)),
 		"render_preview_threat_line_count": int(render_snapshot.get("waypoint_intent_preview_threat_line_count", 0)),
+		"render_preview_suppress_area_count": int(render_snapshot.get("waypoint_intent_preview_suppress_area_count", 0)),
 		"render_preview_risk_state_counts": Dictionary(render_snapshot.get("waypoint_intent_preview_risk_state_counts", {})),
 		"manual_review_required": true,
 		"manual_review_done": false,

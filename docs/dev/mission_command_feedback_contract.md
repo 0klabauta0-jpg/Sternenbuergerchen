@@ -154,6 +154,11 @@ TASK_577 erzeugt eine reproduzierbare lokale Visual-Evidence fuer die TASK_576-`
 
 Erwartete Struktur: Das Manifest unter `tmp/suppress_fire_visual_evidence.json` enthaelt `capture_type = suppress_fire_visual_evidence`, `read_only = true`, `ui_sets_gameplay_truth = false`, `suppress_preview_gate`, `threat_preview_gate`, `preview_text`, `fire_rule`, `pressure_state`, `radius_world`, `render_preview_visual_count`, `render_preview_path_line_count`, `viewport_readback_available`, `generated_evidence_board`, `manual_review_required = true` und `manual_review_done = false`. Der Capture darf keinen `GO` ausfuehren und keine Suppression-/Ammo-/Combat-Wirkung behaupten. TASK_578 ist nur fuer belegte Visual-Polish-Findings vorgesehen.
 
+## Suppress-Fire-Visual-Polish-Findings
+TASK_578 wendet den belegten TASK_577-Folgepunkt an: Die `SUP AREA`-Preview muss im Primary3D-/F6-Blick als eigene read-only Area sichtbar und im Render-Snapshot messbar sein. Zulaessig sind Preview-Entry-Metadaten, eine transparente Area-Markierung, Render-Zaehler und Report-/Manifestfelder. Nicht zulaessig sind neue Suppression-Wirkung, Ammo-Verbrauch, Combat-Mutation, Movement-Mutation oder ein GO-Commit aus der Preview.
+
+Erwartete Struktur: Waypoint-Intent-Preview-Entries duerfen ein `suppress_preview`-Dictionary tragen, wenn `fire_rule = suppress` und ein Ziel existiert. `TerrainMap3DView.get_render_snapshot()` enthaelt `waypoint_intent_preview_suppress_area_count`; die passende Entry enthaelt `suppress_area.visible = true`, `visual_key = suppress_area_v1`, `target_position`, `radius_world`, `radius_3d`, `pressure_state` und `read_only = true`. TASK_579 bleibt fuer den menschlichen F6-Sichtreview zu Farbe, Alpha und Groesse.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

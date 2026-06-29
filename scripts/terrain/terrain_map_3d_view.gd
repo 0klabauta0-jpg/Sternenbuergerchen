@@ -332,6 +332,7 @@ const WAYPOINT_PREVIEW_SUICIDAL_COLOR: Color = Color(1.0, 0.24, 0.18, 0.84)
 const WAYPOINT_PREVIEW_UNKNOWN_COLOR: Color = Color(0.62, 0.76, 1.0, 0.58)
 const WAYPOINT_PREVIEW_BLOCKED_LINE_COLOR: Color = Color(0.62, 0.66, 0.70, 0.42)
 const WAYPOINT_PREVIEW_FRIENDLY_FIRE_LINE_COLOR: Color = Color(1.0, 0.55, 0.08, 0.82)
+const WAYPOINT_PREVIEW_SUPPRESS_AREA_COLOR: Color = Color(1.0, 0.62, 0.10, 0.24)
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -569,6 +570,7 @@ var _mission_los_debug_entries: Array = []
 var _waypoint_intent_preview_visual_count: int = 0
 var _waypoint_intent_preview_path_line_count: int = 0
 var _waypoint_intent_preview_threat_line_count: int = 0
+var _waypoint_intent_preview_suppress_area_count: int = 0
 var _waypoint_intent_preview_risk_state_counts: Dictionary = {}
 var _waypoint_intent_preview_line_role_counts: Dictionary = {}
 var _waypoint_intent_preview_line_color_key_counts: Dictionary = {}
@@ -1574,6 +1576,7 @@ func get_render_snapshot() -> Dictionary:
 		"waypoint_intent_preview_visual_count": _waypoint_intent_preview_visual_count,
 		"waypoint_intent_preview_path_line_count": _waypoint_intent_preview_path_line_count,
 		"waypoint_intent_preview_threat_line_count": _waypoint_intent_preview_threat_line_count,
+		"waypoint_intent_preview_suppress_area_count": _waypoint_intent_preview_suppress_area_count,
 		"waypoint_intent_preview_risk_state_counts": _waypoint_intent_preview_risk_state_counts.duplicate(true),
 		"waypoint_intent_preview_line_role_counts": _waypoint_intent_preview_line_role_counts.duplicate(true),
 		"waypoint_intent_preview_line_color_key_counts": _waypoint_intent_preview_line_color_key_counts.duplicate(true),
@@ -5343,6 +5346,7 @@ func _reset_waypoint_intent_preview_counters() -> void:
 	_waypoint_intent_preview_visual_count = 0
 	_waypoint_intent_preview_path_line_count = 0
 	_waypoint_intent_preview_threat_line_count = 0
+	_waypoint_intent_preview_suppress_area_count = 0
 	_waypoint_intent_preview_risk_state_counts.clear()
 	_waypoint_intent_preview_line_role_counts.clear()
 	_waypoint_intent_preview_line_color_key_counts.clear()
@@ -5377,6 +5381,8 @@ func _add_waypoint_intent_preview_visuals() -> void:
 		var ghost_position: Vector2 = Vector2(preview.get("ghost_ftl_position", points[points.size() - 1]))
 		if _add_world_tile_marker(_order_root, ghost_position, preview_color, "WaypointIntentGhost_%d" % _waypoint_intent_preview_visual_count, 0.085, 0.72):
 			_waypoint_intent_preview_visual_count += 1
+		var suppress_preview: Dictionary = Dictionary(preview.get("suppress_preview", {}))
+		var suppress_area_entry: Dictionary = _add_waypoint_suppress_area_visual(ghost_position, suppress_preview)
 		for line_variant in Array(preview.get("line_of_fire_entries", [])):
 			if typeof(line_variant) != TYPE_DICTIONARY:
 				continue
@@ -5409,8 +5415,44 @@ func _add_waypoint_intent_preview_visuals() -> void:
 			"threat_line_count": Array(preview.get("line_of_fire_entries", [])).size(),
 			"threat_line_role_counts": entry_role_counts.duplicate(true),
 			"threat_line_color_key_counts": entry_color_counts.duplicate(true),
+			"suppress_area": suppress_area_entry,
+			"suppress_area_visible": not suppress_area_entry.is_empty(),
 			"read_only": true,
 		})
+
+
+func _add_waypoint_suppress_area_visual(ghost_position: Vector2, suppress_preview: Dictionary) -> Dictionary:
+	if not bool(suppress_preview.get("enabled", false)):
+		return {}
+	var radius_world: float = maxf(float(suppress_preview.get("radius_world", 0.0)), 0.0)
+	if radius_world <= 0.0:
+		return {}
+	var radius_3d: float = _world_radius_to_3d_radius(radius_world)
+	_add_marker3d(
+		_order_root,
+		ghost_position,
+		WAYPOINT_PREVIEW_SUPPRESS_AREA_COLOR,
+		"WaypointIntentSuppressArea_%d" % _waypoint_intent_preview_suppress_area_count,
+		radius_3d,
+		0.035,
+		32,
+		0.12
+	)
+	_waypoint_intent_preview_suppress_area_count += 1
+	return {
+		"visible": true,
+		"visual_key": "suppress_area_v1",
+		"target_position": ghost_position,
+		"radius_world": radius_world,
+		"radius_3d": radius_3d,
+		"pressure_state": String(suppress_preview.get("pressure_state", "")).strip_edges(),
+		"read_only": true,
+	}
+
+
+func _world_radius_to_3d_radius(radius_world: float) -> float:
+	var half_extent: float = maxf(maxf(_half_tile_width, _half_tile_height), 1.0)
+	return maxf((radius_world / half_extent) * _get_3d_cell_size(), 0.35)
 
 
 func _build_waypoint_preview_label(preview: Dictionary) -> String:

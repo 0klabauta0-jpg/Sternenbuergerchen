@@ -15731,7 +15731,7 @@ func _build_fireteam_anchor_visualization_entries() -> Array:
 func _build_waypoint_intent_preview_entries() -> Array:
 	if _waypoint_intent_preview_resolver == null:
 		return []
-	return Array(
+	var entries: Array = Array(
 		_waypoint_intent_preview_resolver.call(
 			"build_preview_entries",
 			_serialize_order_plans(),
@@ -15745,6 +15745,22 @@ func _build_waypoint_intent_preview_entries() -> Array:
 			}
 		)
 	).duplicate(true)
+	return _attach_suppress_fire_preview_to_waypoint_entries(entries)
+
+
+func _attach_suppress_fire_preview_to_waypoint_entries(entries: Array) -> Array:
+	var result: Array = []
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		var suppress_preview: Dictionary = _build_suppress_fire_preview_entry(fireteam_id, entry)
+		if bool(suppress_preview.get("enabled", false)):
+			entry["suppress_preview"] = suppress_preview
+			entry["suppress_preview_visual_key"] = "suppress_area_v1"
+		result.append(entry)
+	return result
 
 
 func _build_waypoint_preview_threat_context_by_fireteam() -> Dictionary:

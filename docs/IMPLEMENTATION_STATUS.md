@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_578 - Suppress Fire Visual Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_578_suppress_fire_visual_polish_findings.md`, `docs/tasks/TASK_577_suppress_fire_visual_evidence_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Die bestehende Waypoint-Intent-Preview traegt bei aktiver Fire-Rule `suppress` jetzt ein read-only `suppress_preview`-Dictionary in den Preview-Entries.
+- Stand: `TerrainMap3DView` zeichnet daraus eine flache orange Suppress-Area am Ghost-Ziel und meldet `waypoint_intent_preview_suppress_area_count` plus Entry-Metadaten mit `visual_key = suppress_area_v1`.
+- Stand: TASK_577 schreibt den neuen Suppress-Area-Count in das lokale Manifest; der HTML-Zwischenbericht nennt TASK_578 als erledigten belegten Polish.
+- Risiken/offen: Die Area ist nur Preview und keine echte Wirkzone. Farbe, Alpha und Groesse brauchen weiter einen menschlichen F6-Sichtreview.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_578_suppress_fire_visual_polish_findings.gd`, `godot_console.exe --path . --script scripts/tests/task_577_suppress_fire_visual_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_576_suppress_fire_preview_readability_spike.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_579 - Suppress Fire Manual F6 Review`, wenn Farbe, Alpha und Groesse im echten Spielbild bewertet werden sollen.
+
 ### TASK_577 - Suppress Fire Visual Evidence Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_577_suppress_fire_visual_evidence_pass.md`, `docs/tasks/TASK_576_suppress_fire_preview_readability_spike.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
