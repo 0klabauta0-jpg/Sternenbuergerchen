@@ -45,6 +45,10 @@ func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> D
 	var last_rejection: Dictionary = Dictionary(network_contract_snapshot.get("last_rejection", {})).duplicate(true)
 	var last_reason: String = String(last_rejection.get("reason", "")).strip_edges()
 	var last_peer_id: int = int(last_rejection.get("peer_id", 0))
+	var last_reject_label: String = _build_reject_reason_label(last_reason)
+	var last_reject_target: String = _build_reject_target_label(last_rejection)
+	var feedback_line: String = _build_authority_feedback_line(accepted_count, rejected_count, last_peer_id, last_reject_label)
+	var feedback_detail: String = _build_authority_feedback_detail(last_peer_id, last_reject_label, last_reject_target)
 	var visible: bool = accepted_count > 0 or rejected_count > 0 or not last_reason.is_empty()
 	var compact_text := ""
 	if visible:
@@ -52,19 +56,28 @@ func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> D
 	var tooltip_parts: PackedStringArray = PackedStringArray()
 	if visible:
 		tooltip_parts.append("Authority: %d accepted, %d rejected" % [accepted_count, rejected_count])
+		if not feedback_line.is_empty():
+			tooltip_parts.append(feedback_line)
+		if not feedback_detail.is_empty():
+			tooltip_parts.append(feedback_detail)
 		if not last_reason.is_empty():
 			var peer_text: String = "Peer %d" % last_peer_id if last_peer_id > 0 else "Peer ?"
 			tooltip_parts.append("Last reject: %s | %s" % [peer_text, last_reason])
 	return {
 		"schema": "sternenbuergerchen.host_client_authority_visual.v1",
-		"task_id": "TASK_623",
+		"task_id": "TASK_624",
 		"visible": visible,
 		"accepted_count": accepted_count,
 		"rejected_count": rejected_count,
 		"last_reject_reason": last_reason,
+		"last_reject_label": last_reject_label,
+		"last_reject_target": last_reject_target,
 		"last_reject_peer_id": last_peer_id,
 		"compact_text": compact_text,
+		"feedback_line": feedback_line,
+		"feedback_detail": feedback_detail,
 		"tooltip_text": "\n".join(tooltip_parts),
+		"input_feedback_ready": visible and (not feedback_line.is_empty() or not compact_text.is_empty()),
 		"tone": _build_authority_tone(accepted_count, rejected_count),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
@@ -79,6 +92,67 @@ func _build_authority_tone(accepted_count: int, rejected_count: int) -> String:
 	if accepted_count > 0:
 		return "accepted"
 	return "idle"
+
+
+func _build_authority_feedback_line(accepted_count: int, rejected_count: int, peer_id: int, reject_label: String) -> String:
+	if rejected_count > 0:
+		var peer_text: String = "P%d" % peer_id if peer_id > 0 else "P?"
+		var reason_text: String = reject_label.strip_edges()
+		if reason_text.is_empty():
+			reason_text = "command blocked"
+		return "AUTH BLOCKED %s: %s" % [peer_text, reason_text]
+	if accepted_count > 0:
+		return "AUTH ACCEPTED"
+	return ""
+
+
+func _build_authority_feedback_detail(peer_id: int, reject_label: String, target_label: String) -> String:
+	if reject_label.strip_edges().is_empty():
+		return ""
+	var peer_text: String = "Peer %d" % peer_id if peer_id > 0 else "Peer"
+	var target_text: String = target_label.strip_edges()
+	if target_text.is_empty():
+		return "%s command blocked by server authority." % peer_text
+	return "%s cannot command %s." % [peer_text, target_text]
+
+
+func _build_reject_reason_label(reason: String) -> String:
+	match reason.strip_edges().to_lower():
+		"peer_team_mismatch":
+			return "wrong team"
+		"unit_team_mismatch":
+			return "unit belongs to another team"
+		"fireteam_not_assigned_to_peer":
+			return "fireteam not assigned"
+		"fireteam_role_missing_fireteam":
+			return "fireteam missing"
+		"state_mutation_key:damage":
+			return "state change blocked"
+		"spectator_cannot_command":
+			return "spectator cannot command"
+		"host_required":
+			return "host command required"
+		"request_on_non_authority":
+			return "not the authority"
+		"peer_has_no_team":
+			return "peer has no team"
+		"":
+			return ""
+	return reason.strip_edges().replace("_", " ")
+
+
+func _build_reject_target_label(last_rejection: Dictionary) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	var team_id: String = String(last_rejection.get("team_id", "")).strip_edges()
+	var fireteam_id: String = String(last_rejection.get("fireteam_id", "")).strip_edges()
+	var unit_id: String = String(last_rejection.get("unit_id", "")).strip_edges()
+	if not team_id.is_empty():
+		parts.append(team_id)
+	if not fireteam_id.is_empty():
+		parts.append("FT %s" % fireteam_id)
+	if not unit_id.is_empty():
+		parts.append(unit_id)
+	return " / ".join(parts)
 
 
 func _build_chip_entry(entry: Dictionary) -> Dictionary:

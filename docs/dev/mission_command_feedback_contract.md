@@ -377,7 +377,12 @@ Erwartete Struktur: `tmp/host_client_command_authority_live_interaction_review.j
 ## Host-Client-Authority-Visual-Findings
 TASK_623 macht die bereits vorhandenen Network-Command-Accept-/Reject-Daten im Mission-Teamchip sichtbar. Der Presenter darf `SimulationRoot.get_network_command_contract_snapshot()` nur lesen und daraus einen kurzen `AUTH OK/RJ`-Hinweis plus Tooltip bauen. Diese Daten sind Review-/HUD-Lesbarkeit, keine neue Peer-, Team-, Command-, Movement-, Combat-, Session- oder Gameplay-Wahrheit.
 
-Erwartete Struktur: `MissionTeamChipPresenter.build_snapshot()` enthaelt `authority_visual` mit `schema = sternenbuergerchen.host_client_authority_visual.v1`, `task_id = TASK_623`, `visible`, `accepted_count`, `rejected_count`, `last_reject_reason`, `last_reject_peer_id`, `compact_text`, `tooltip_text`, `tone`, `read_only = true` und `ui_sets_gameplay_truth = false`. `get_command_feedback_snapshot()` und `get_core_loop_host_client_feel_snapshot()` exportieren denselben Snapshot als `authority_visual`; der sichtbare Teamchip darf bei vorhandener Aktivitaet `AUTH OKx/RJy` zeigen, waehrend der konkrete Reject-Grund im Tooltip bleibt.
+Erwartete Struktur: `MissionTeamChipPresenter.build_snapshot()` enthaelt `authority_visual` mit `schema = sternenbuergerchen.host_client_authority_visual.v1`, taskbezogenem `task_id`, `visible`, `accepted_count`, `rejected_count`, `last_reject_reason`, `last_reject_peer_id`, `compact_text`, `tooltip_text`, `tone`, `read_only = true` und `ui_sets_gameplay_truth = false`. `get_command_feedback_snapshot()` und `get_core_loop_host_client_feel_snapshot()` exportieren denselben Snapshot als `authority_visual`; der sichtbare Teamchip darf bei vorhandener Aktivitaet `AUTH OKx/RJy` zeigen, waehrend der konkrete Reject-Grund im Tooltip bleibt.
+
+## Host-Client-Live-Input-Feedback-Review
+TASK_624 erweitert denselben Authority-Visual-Snapshot um menschliche Eingabe-Erklaerung. Bekannte Server-Reasons wie `peer_team_mismatch`, `unit_team_mismatch` oder `fireteam_not_assigned_to_peer` werden als kurzer Spielertext und Detailzeile formuliert. Die rohen Reasons bleiben fuer Debugging erhalten; der sichtbare `AUTH OKx/RJy`-Status aus TASK_623 bleibt stabil.
+
+Erwartete Struktur: `authority_visual` enthaelt zusaetzlich `feedback_line`, `feedback_detail`, `last_reject_label`, `last_reject_target` und `input_feedback_ready`. `get_command_feedback_snapshot()` darf diese Werte auch als `authority_feedback_line` und `authority_feedback_detail` exportieren. Der Tooltip darf Feedbacksatz, Detail und `Last reject: Peer ... | raw_reason` enthalten, darf aber keine Runtime-, Peer-, Command-, Movement-, Combat- oder UI-Wahrheit setzen.
 
 ## Grenzen
 - Keine neue Area-Semantik.

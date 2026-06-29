@@ -252,6 +252,7 @@ git checkout -b batch/<batch-name>
 - TASK_621 - Host Client Multiplayer Feel Review Bundle (implementiert)
 - TASK_622 - Host Client Command Authority Live Interaction Review (implementiert)
 - TASK_623 - Host Client Authority Visual Findings (implementiert)
+- TASK_624 - Host Client Live Input Feedback Review (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
