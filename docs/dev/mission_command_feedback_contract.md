@@ -60,6 +60,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Combat-HUD-Manual-Screenshot-Notes
 TASK_550 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workbench fuer Combat-HUD-Tooltip und Panel-Lesbarkeit. Der Bericht darf Screenshotpfad, Viewport, Hover-Ergebnis, Stilnotizen und Follow-up-Entscheidungen exportieren, aber keine Runtime- oder Gameplay-Wahrheit speichern. Erwartete Struktur: exportierbare `combat_hud_manual.*` Controls, eine freie `notes.combat_hud_manual_review`-Notiz und eine klare Markierung, dass der manuelle Screenshot erst durch den User/Playtest bestaetigt wird.
 
+## Combat-HUD-Tooltip-Style
+TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dezente visuelle Hover-Affordance. #17 Selected Fireteam und #18 Mission Control muessen dieselbe `combat_hud_tooltip_style_id` tragen, hoverbar bleiben, Text clippen und ihre Style-Metadaten im `get_combat_hud_f6_visual_audit_snapshot()` read-only melden. Der Style darf nur vorhandene HUD-Labels markieren; er erzeugt kein neues Tooltip-System und keine Combat-/Contact-/Gameplay-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

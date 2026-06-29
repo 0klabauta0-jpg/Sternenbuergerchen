@@ -62,6 +62,9 @@ const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
 const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SW.png")
+const COMBAT_HUD_TOOLTIP_STYLE_ID: String = "combat_hud_tooltip_hint_v1"
+const COMBAT_HUD_TOOLTIP_FONT_SIZE: int = 10
+const COMBAT_HUD_TOOLTIP_OUTLINE_SIZE: int = 2
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
@@ -6012,10 +6015,16 @@ func _apply_combat_hud_detail_tooltip_label_contract(label: Label) -> void:
 		return
 	label.visible = true
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	label.mouse_default_cursor_shape = Control.CURSOR_HELP
 	label.clip_text = true
 	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_ACCENT)
+	label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.82))
+	label.add_theme_font_size_override("font_size", COMBAT_HUD_TOOLTIP_FONT_SIZE)
+	label.add_theme_constant_override("outline_size", COMBAT_HUD_TOOLTIP_OUTLINE_SIZE)
 	label.set_meta("combat_hud_detail_tooltip_label", true)
-	label.set_meta("combat_hud_detail_tooltip_task", "TASK_549")
+	label.set_meta("combat_hud_detail_tooltip_task", "TASK_551")
+	label.set_meta("combat_hud_tooltip_style_id", COMBAT_HUD_TOOLTIP_STYLE_ID)
 
 
 func _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary, compact_line: String) -> Dictionary:
@@ -12651,6 +12660,8 @@ func get_combat_hud_f6_visual_audit_snapshot() -> Dictionary:
 	var fireteam_tooltip_rect: Rect2 = _estimate_combat_hud_tooltip_preview_rect(fireteam_label_rect, tooltip_lines, viewport_size)
 	var mission_tooltip_rect: Rect2 = _estimate_combat_hud_tooltip_preview_rect(mission_label_rect, tooltip_lines, viewport_size)
 	var max_tooltip_line_length: int = _max_string_length(Array(tooltip_lines))
+	var fireteam_label_style: Dictionary = _get_combat_hud_tooltip_label_style_snapshot(fireteam_label)
+	var mission_label_style: Dictionary = _get_combat_hud_tooltip_label_style_snapshot(mission_label)
 	var checks: Array = [
 		_build_mission_first_move_readability_check(
 			"task_548_tooltip_gate_passes",
@@ -12713,6 +12724,13 @@ func get_combat_hud_f6_visual_audit_snapshot() -> Dictionary:
 			"Estimated native tooltip preview areas fit inside FullHD bounds."
 		),
 		_build_mission_first_move_readability_check(
+			"tooltip_labels_share_style_hint",
+			String(fireteam_label_style.get("style_id", "")) == COMBAT_HUD_TOOLTIP_STYLE_ID
+				and String(mission_label_style.get("style_id", "")) == COMBAT_HUD_TOOLTIP_STYLE_ID
+				and String(fireteam_label_style.get("font_color", "")) == String(mission_label_style.get("font_color", "")),
+			"Both Combat HUD labels expose the same hover style hint."
+		),
+		_build_mission_first_move_readability_check(
 			"read_only",
 			not bool(detail_snapshot.get("ui_sets_gameplay_truth", true)),
 			"F6 visual audit summarizes existing HUD state without mutating gameplay state."
@@ -12744,6 +12762,9 @@ func get_combat_hud_f6_visual_audit_snapshot() -> Dictionary:
 		"mission_control_label_visible": bool(mission_label.visible) if mission_label != null else false,
 		"selected_fireteam_label_tooltip_length": fireteam_label.tooltip_text.length() if fireteam_label != null else 0,
 		"mission_control_label_tooltip_length": mission_label.tooltip_text.length() if mission_label != null else 0,
+		"selected_fireteam_label_style": fireteam_label_style,
+		"mission_control_label_style": mission_label_style,
+		"tooltip_style_id": COMBAT_HUD_TOOLTIP_STYLE_ID,
 		"tooltip_line_count": tooltip_lines.size(),
 		"max_tooltip_line_length": max_tooltip_line_length,
 		"tooltip_text": tooltip_text,
@@ -12768,6 +12789,24 @@ func _get_control_global_rect_or_empty(control: Control) -> Rect2:
 	if control == null or not control.is_inside_tree():
 		return Rect2()
 	return control.get_global_rect()
+
+
+func _get_combat_hud_tooltip_label_style_snapshot(label: Label) -> Dictionary:
+	if label == null:
+		return {}
+	var font_color: Color = label.get_theme_color("font_color")
+	var outline_color: Color = label.get_theme_color("font_outline_color")
+	return {
+		"style_id": String(label.get_meta("combat_hud_tooltip_style_id", "")),
+		"task": String(label.get_meta("combat_hud_detail_tooltip_task", "")),
+		"font_color": font_color.to_html(true),
+		"font_size": label.get_theme_font_size("font_size"),
+		"outline_color": outline_color.to_html(true),
+		"outline_size": label.get_theme_constant("outline_size"),
+		"cursor_shape": int(label.mouse_default_cursor_shape),
+		"mouse_filter": int(label.mouse_filter),
+		"clip_text": bool(label.clip_text),
+	}
 
 
 func _estimate_combat_hud_tooltip_preview_rect(anchor_rect: Rect2, tooltip_lines: PackedStringArray, viewport_size: Vector2) -> Rect2:
