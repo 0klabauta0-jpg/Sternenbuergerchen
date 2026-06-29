@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_605 - Host Client F6 Visual Review Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_605_host_client_f6_visual_review_pass.md`, `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `scripts/tests/task_605_host_client_f6_visual_review_pass.gd` erzeugt `tmp/host_client_f6_visual_review.png` und `tmp/host_client_f6_visual_review.json` fuer den Host/Client-F6-Zustand.
+- Stand: Das Manifest prueft TASK_604-Gate, Host/Peer/Spawn-Kontext, ACT-Zeile, Objective/Cargo/ROE und Selected-Fireteam-Sichtbarkeit read-only.
+- Stand: Der laufende HTML-Zwischenbericht zeigt TASK_605-Artefaktfelder und manuelle Review-Checks und empfiehlt TASK_606 als Visual-Polish-Findings-Slice.
+- Risiken/offen: Headless-Evidence ersetzt keinen finalen menschlichen Spielgefuehlentscheid. Ein echter Fensterlauf oder User-Screenshot sollte TASK_606 mit konkreten UI-Findings fuettern.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_605_host_client_f6_visual_review_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_604_core_loop_host_client_feel_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_606 - Host Client F6 Visual Polish Findings`, damit belegte Teamchip-/ACT-/Selected-Fireteam-Reibung gezielt angewendet werden kann.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

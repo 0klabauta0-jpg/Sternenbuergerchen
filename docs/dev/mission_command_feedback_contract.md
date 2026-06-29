@@ -284,6 +284,11 @@ TASK_604 fasst vorhandene Multiplayer-F6-, Teamchip-/Ownership- und Mission-HUD-
 
 Erwartete Struktur: `get_core_loop_host_client_feel_snapshot()` enthaelt `task_id = TASK_604`, `mission_team_chip_context_text`, `mission_control_status_text`, `selected_fireteam_status_text`, `mission_hud_interaction_line`, `interaction_density`, `readability_snapshot`, `hud_density_snapshot`, `command_feedback`, `read_only = true` und `ui_sets_gameplay_truth = false`. Die Checks muessen mindestens `mp_f6_readability_gate_passes`, `mission_hud_density_gate_passes`, `host_client_team_context_visible`, `mission_control_keeps_act_line`, `objective_cargo_roe_context_visible`, `selected_fireteam_context_visible`, `command_feedback_exports_density` und `read_only` enthalten. TASK_604 darf nur bestehende Snapshots kombinieren und keine Commands enqueuen.
 
+## Host-Client-F6-Visual-Review-Pass
+TASK_605 macht den TASK_604-Host/Client-Zustand als lokales PNG/Manifest reviewbar. Ein Fensterlauf darf einen echten Viewport speichern; Headless erzeugt ein markiertes Evidence-Board. Das Manifest ist Diagnose/Arbeitsbericht und darf keine Runtime-Wahrheit setzen.
+
+Erwartete Struktur: `tmp/host_client_f6_visual_review.json` enthaelt `task_id = TASK_605`, `capture_type = host_client_f6_visual_review`, `task_604_gate`, `team_context`, `mission_hud_interaction_line`, `mission_control_status_text`, `selected_fireteam_status_text`, `host_client_context_visible`, `act_line_visible`, `objective_cargo_roe_visible`, `selected_fireteam_visible`, `viewport_readback_available`, `generated_evidence_board`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_606 - Host Client F6 Visual Polish Findings`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
