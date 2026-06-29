@@ -259,6 +259,11 @@ TASK_599 fasst vorhandene gruene Flow-Smokes als read-only Evidence-Manifest zus
 
 Erwartete Struktur: Das Manifest enthaelt `schema = sternenbuergerchen.integrated_core_loop_playtest_evidence.v1`, `task_id = TASK_599`, `flow_path`, `flow_steps`, `flow_step_count`, `passing_step_count`, `evidence_strength = composite_regression_manifest`, `manual_full_playtest_done = false`, `manual_review_required = true`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_600 - Integrated Core Loop Flow Polish Findings`. Erwartete Flow-Steps sind Homebase-Launch, Mission-Fire/Cover, Frontier-Probe-Objective/Cargo, Debrief-Return, Skill-Award-Contract und Homebase-Progression-Evidence.
 
+## Integrated-Core-Loop-Flow-Polish-Findings
+TASK_600 macht aus dem TASK_599-Evidence-Stand eine priorisierte read-only Flow-Polish-Queue. Der Verifier darf `tmp/integrated_core_loop_flow_polish_findings.json` schreiben und der HTML-Zwischenbericht darf diese Findings samt manueller Checkliste exportieren. Beides sind Arbeitsnotizen und duerfen keine Mission-, UI-, XP-, Skill-, Roster-, Multiplayer- oder Combat-Wahrheit erzeugen.
+
+Erwartete Struktur: Das Manifest enthaelt `schema = sternenbuergerchen.integrated_core_loop_flow_polish_findings.v1`, `task_id = TASK_600`, `source_task = TASK_599`, `source_evidence_strength = composite_regression_manifest`, `finding_count`, `actionable_followup_count`, `findings`, `recommended_next_task = TASK_601 - Core Loop Manual FullHD Playtest Capture`, `manual_full_playtest_done = false`, `manual_review_required = true`, `read_only = true` und `ui_sets_gameplay_truth = false`. Die Findings muessen konkrete Folge-Slices fuer FullHD-Capture, Pacing, HUD-Dichte und Host/Client-Gefuehl benennen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

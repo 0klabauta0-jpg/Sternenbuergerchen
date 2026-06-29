@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_600 - Integrated Core Loop Flow Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_600_integrated_core_loop_flow_polish_findings.md`, `docs/tasks/TASK_599_integrated_core_loop_playtest_evidence_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `scripts/tests/task_600_integrated_core_loop_flow_polish_findings.gd` erzeugt `tmp/integrated_core_loop_flow_polish_findings.json` als read-only Flow-Polish-Queue auf Basis des TASK_599-Composite-Evidence-Stands.
+- Stand: Die Queue priorisiert vier konkrete Anschlussfelder: echter FullHD-Gesamtfluss-Capture, Transition-/Pacing-Polish, Mission-HUD-Dichte im Gesamtfluss und Host/Client-Bediengefuehl.
+- Stand: Der laufende HTML-Zwischenbericht markiert TASK_600 als erledigt, exportiert Manifestpfad, Findings, manuelle Checkliste und empfiehlt TASK_601 als naechsten Core-Loop-FullHD-Capture.
+- Risiken/offen: TASK_600 ist eine priorisierte Findings-/Planungsartefakt-Schicht, kein vollzogener Sichttest und keine Runtime-Politur. Der echte Spielgefuehl-Beleg bleibt TASK_601.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_600_integrated_core_loop_flow_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_599_integrated_core_loop_playtest_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_601 - Core Loop Manual FullHD Playtest Capture`, damit die offenen Pacing-, HUD-Dichte- und Klickgefuehl-Fragen mit echter Fenster-/Screenshot-Evidence entschieden werden.
+
 ### TASK_599 - Integrated Core Loop Playtest Evidence Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_599_integrated_core_loop_playtest_evidence_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
