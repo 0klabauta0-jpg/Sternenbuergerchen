@@ -49,11 +49,13 @@ func _test_docs_and_wiring() -> void:
 	_assert(status_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture"), "Implementation status tracks TASK_562")
 	_assert(roadmap_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture (implementiert)"), "Roadmap marks TASK_562 implemented")
 	_assert(roadmap_text.contains("TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview (implementiert)"), "Roadmap tracks TASK_563 evidence preview")
-	_assert(roadmap_text.contains("TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"), "Roadmap names TASK_564 follow-up")
+	_assert(roadmap_text.contains("TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings (implementiert)"), "Roadmap tracks TASK_564 evidence polish")
+	_assert(roadmap_text.contains("TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass"), "Roadmap names TASK_565 follow-up")
 	_assert(contract_text.contains("Frontier-Probe-Multiplayer-F6-Visual-Evidence-Capture"), "Mission feedback contract documents TASK_562")
 	_assert(report_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture"), "Review workbench tracks TASK_562")
 	_assert(report_text.contains("TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview"), "Review workbench tracks TASK_563")
-	_assert(report_text.contains("TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"), "Review workbench names TASK_564 follow-up")
+	_assert(report_text.contains("TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"), "Review workbench tracks TASK_564")
+	_assert(report_text.contains("TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass"), "Review workbench names TASK_565 follow-up")
 	_assert(FileAccess.file_exists(TASK_557_TEST_PATH), "TASK_557 readability verifier remains available")
 	_assert(FileAccess.file_exists(TASK_560_TEST_PATH), "TASK_560 teamchip tooltip verifier remains available")
 	_assert(FileAccess.file_exists(TASK_561_TEST_PATH), "TASK_561 manual review guide verifier remains available")
@@ -131,6 +133,7 @@ func _test_capture_frontier_probe_mp_f6_visual_evidence() -> void:
 	_write_manifest(manifest)
 	_assert(FileAccess.file_exists(OUTPUT_MANIFEST_PATH), "Visual evidence manifest is written")
 	_assert(_read_text(OUTPUT_MANIFEST_PATH).contains("frontier_probe_mp_f6_visual_evidence.png"), "Manifest names visual evidence PNG")
+	_assert(int(manifest.get("evidence_board_region_count", 0)) >= 6, "Manifest names evidence board regions")
 	_assert(not bool(manifest.get("ui_sets_gameplay_truth", true)), "Visual evidence manifest remains read-only")
 
 	scene.queue_free()
@@ -152,18 +155,44 @@ func _capture_viewport_image_or_empty() -> Image:
 func _build_visual_evidence_board(readability_snapshot: Dictionary, tooltip_snapshot: Dictionary) -> Image:
 	var image: Image = Image.create(1920, 1080, false, Image.FORMAT_RGBA8)
 	image.fill(Color(0.035, 0.047, 0.052, 1.0))
+	var regions: Array = _build_evidence_board_regions()
 	_fill_rect(image, Rect2i(0, 0, 1920, 96), Color(0.02, 0.075, 0.09, 1.0))
 	_fill_rect(image, Rect2i(0, 984, 1920, 96), Color(0.02, 0.075, 0.09, 1.0))
-	_fill_rect(image, _rect_from_snapshot(readability_snapshot, "strategic_panel_rect"), Color(0.08, 0.16, 0.18, 1.0))
-	_fill_rect(image, _rect_from_snapshot(readability_snapshot, "fireteam_panel_rect"), Color(0.12, 0.16, 0.20, 1.0))
-	_fill_rect(image, _rect_from_snapshot(readability_snapshot, "mission_team_chip_rect"), Color(0.86, 0.70, 0.18, 1.0))
-	_fill_rect(image, _rect_from_snapshot(readability_snapshot, "mission_control_status_rect"), Color(0.18, 0.34, 0.38, 1.0))
-	_fill_rect(image, _rect_from_snapshot(readability_snapshot, "selected_fireteam_status_rect"), Color(0.20, 0.38, 0.54, 1.0))
+	_draw_evidence_grid(image, Rect2i(316, 120, 1288, 824), Color(0.07, 0.11, 0.12, 1.0))
+	_draw_evidence_swatch_strip(image, regions)
+	var strategic_rect: Rect2i = _rect_from_snapshot(readability_snapshot, "strategic_panel_rect")
+	var fireteam_rect: Rect2i = _rect_from_snapshot(readability_snapshot, "fireteam_panel_rect")
+	var teamchip_rect: Rect2i = _rect_from_snapshot(readability_snapshot, "mission_team_chip_rect")
+	var mission_control_rect: Rect2i = _rect_from_snapshot(readability_snapshot, "mission_control_status_rect")
+	var selected_fireteam_rect: Rect2i = _rect_from_snapshot(readability_snapshot, "selected_fireteam_status_rect")
+	_fill_rect(image, strategic_rect, Color(0.08, 0.16, 0.18, 1.0))
+	_draw_rect_outline(image, strategic_rect, Color(0.26, 0.67, 0.78, 1.0), 4)
+	_fill_rect(image, fireteam_rect, Color(0.12, 0.16, 0.20, 1.0))
+	_draw_rect_outline(image, fireteam_rect, Color(0.26, 0.47, 0.74, 1.0), 4)
+	_fill_rect(image, teamchip_rect, Color(0.86, 0.70, 0.18, 1.0))
+	_draw_rect_outline(image, teamchip_rect.grow(6), Color(1.0, 0.82, 0.24, 1.0), 3)
+	_fill_rect(image, mission_control_rect, Color(0.18, 0.34, 0.38, 1.0))
+	_draw_rect_outline(image, mission_control_rect.grow(4), Color(0.28, 0.66, 0.82, 1.0), 3)
+	_fill_rect(image, selected_fireteam_rect, Color(0.20, 0.38, 0.54, 1.0))
+	_draw_rect_outline(image, selected_fireteam_rect.grow(4), Color(0.44, 0.66, 0.96, 1.0), 3)
 	var tooltip_length: int = clampi(int(tooltip_snapshot.get("mission_team_chip_tooltip_length", 0)), 0, 180)
 	_fill_rect(image, Rect2i(48, 132, 18 + tooltip_length * 3, 28), Color(0.86, 0.70, 0.18, 1.0))
+	_draw_rect_outline(image, Rect2i(48, 132, 18 + tooltip_length * 3, 28), Color(1.0, 0.82, 0.24, 1.0), 2)
 	_fill_rect(image, Rect2i(48, 176, 420, 20), Color(0.28, 0.66, 0.82, 1.0))
 	_fill_rect(image, Rect2i(48, 208, 360, 20), Color(0.24, 0.74, 0.46, 1.0))
+	_draw_rect_outline(image, Rect2i(28, 112, 480, 140), Color(0.18, 0.34, 0.38, 1.0), 2)
 	return image
+
+
+func _build_evidence_board_regions() -> Array:
+	return [
+		{"id": "mission_team_chip", "label": "Mission Teamchip", "color": "#dbb32e"},
+		{"id": "mission_control", "label": "Mission Control", "color": "#48a8d1"},
+		{"id": "selected_fireteam", "label": "Selected Fireteam", "color": "#70a8f5"},
+		{"id": "strategic_panel", "label": "Strategic Panel", "color": "#42abbf"},
+		{"id": "fireteam_panel", "label": "Fireteam Panel", "color": "#4278bd"},
+		{"id": "tooltip_probe", "label": "Teamchip Tooltip Probe", "color": "#79c969"},
+	]
 
 
 func _rect_from_snapshot(snapshot: Dictionary, key: String) -> Rect2i:
@@ -174,6 +203,33 @@ func _rect_from_snapshot(snapshot: Dictionary, key: String) -> Rect2i:
 		maxi(1, roundi(float(rect_dict.get("width", 1.0)))),
 		maxi(1, roundi(float(rect_dict.get("height", 1.0))))
 	)
+
+
+func _draw_evidence_grid(image: Image, rect: Rect2i, color: Color) -> void:
+	_draw_rect_outline(image, rect, color, 2)
+	for x in range(rect.position.x + 96, rect.position.x + rect.size.x, 96):
+		_fill_rect(image, Rect2i(x, rect.position.y, 1, rect.size.y), color)
+	for y in range(rect.position.y + 96, rect.position.y + rect.size.y, 96):
+		_fill_rect(image, Rect2i(rect.position.x, y, rect.size.x, 1), color)
+
+
+func _draw_evidence_swatch_strip(image: Image, regions: Array) -> void:
+	var y: int = 300
+	for region_variant in regions:
+		var region: Dictionary = Dictionary(region_variant)
+		var color: Color = Color.html(String(region.get("color", "#ffffff")))
+		_fill_rect(image, Rect2i(48, y, 34, 24), color)
+		_fill_rect(image, Rect2i(96, y + 6, 220, 8), Color(color.r, color.g, color.b, 0.65))
+		_draw_rect_outline(image, Rect2i(48, y, 268, 24), Color(0.12, 0.20, 0.22, 1.0), 1)
+		y += 38
+
+
+func _draw_rect_outline(image: Image, rect: Rect2i, color: Color, thickness: int = 2) -> void:
+	var safe_thickness: int = maxi(1, thickness)
+	_fill_rect(image, Rect2i(rect.position.x, rect.position.y, rect.size.x, safe_thickness), color)
+	_fill_rect(image, Rect2i(rect.position.x, rect.position.y + rect.size.y - safe_thickness, rect.size.x, safe_thickness), color)
+	_fill_rect(image, Rect2i(rect.position.x, rect.position.y, safe_thickness, rect.size.y), color)
+	_fill_rect(image, Rect2i(rect.position.x + rect.size.x - safe_thickness, rect.position.y, safe_thickness, rect.size.y), color)
 
 
 func _fill_rect(image: Image, rect: Rect2i, color: Color) -> void:
@@ -187,6 +243,7 @@ func _fill_rect(image: Image, rect: Rect2i, color: Color) -> void:
 
 
 func _build_manifest(readability_snapshot: Dictionary, tooltip_snapshot: Dictionary, image: Image, viewport_readback_available: bool) -> Dictionary:
+	var evidence_board_regions: Array = _build_evidence_board_regions()
 	return {
 		"task_id": "TASK_562",
 		"capture_type": "frontier_probe_mp_f6_visual_evidence",
@@ -204,9 +261,11 @@ func _build_manifest(readability_snapshot: Dictionary, tooltip_snapshot: Diction
 		"mission_team_chip_text": String(tooltip_snapshot.get("mission_team_chip_text", "")),
 		"mission_team_chip_tooltip_length": int(tooltip_snapshot.get("mission_team_chip_tooltip_length", 0)),
 		"selected_fireteam_ids": Array(readability_snapshot.get("selected_fireteam_ids", [])),
+		"evidence_board_regions": evidence_board_regions,
+		"evidence_board_region_count": evidence_board_regions.size(),
 		"manual_review_required": true,
 		"manual_review_done": false,
-		"recommended_next_task": "TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings",
+		"recommended_next_task": "TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass",
 	}
 
 

@@ -11,7 +11,7 @@ Der Zwischenbericht soll als laufende Lagekarte dienen. Wenn eine visuelle Evide
 ## Umfang
 - TASK_562-PNG direkt im HTML-Zwischenbericht referenzieren.
 - Manifest-/PNG-Pfade, Viewport, Readability-Gate, Teamchip-Tooltip-Gate, Readback-Status und Evidence-Board-Status exportierbar machen.
-- Den Bericht auf TASK_563 als erledigt und TASK_564 als naechsten Visual-Polish-Slice aktualisieren.
+- Den Bericht auf TASK_563 als erledigt, TASK_564 als Evidence-Polish-Slice und TASK_565 als naechsten echten Sichtreview-Slice aktualisieren.
 - Einen statischen Verifier fuer Report-, Status-, Roadmap- und Contract-Anbindung ergaenzen.
 
 ## Nicht-Ziele
@@ -31,7 +31,7 @@ Der Zwischenbericht soll als laufende Lagekarte dienen. Wenn eine visuelle Evide
 - Der Bericht referenziert `../../tmp/frontier_probe_mp_f6_visual_evidence.png`.
 - Der Bericht exportiert PNG-Pfad, Manifest-Pfad, Viewport, Readability-/Tooltip-Gates und Headless-Evidence-Flags.
 - Der Bericht markiert den manuellen Review weiter als offen.
-- Status, Roadmap und Contract nennen TASK_563 und TASK_564 als naechsten Apply-Slice.
+- Status, Roadmap und Contract nennen TASK_563, TASK_564 und TASK_565 als naechsten echten Sichtreview-Slice.
 - TASK_562 bleibt als Capture-Smoke unveraendert read-only.
 
 ## Betroffene Dateien
@@ -55,4 +55,4 @@ Der Zwischenbericht soll als laufende Lagekarte dienen. Wenn eine visuelle Evide
 ## Risiken / offene Punkte
 - Die Preview zeigt nur lokale Artefakte. Wenn `tmp/` neu geloescht wurde, muss TASK_562 erneut laufen, bevor das Bild im Browser sichtbar ist.
 - Das Headless-Bild bleibt ein Evidence-Board und ersetzt nicht den echten menschlichen F6-/Hover-Sichttest.
-- Naechster sinnvoller Schritt ist `TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings`: konkrete Visual-Polish-Findings aus echter Sichtung oder Review-Export anwenden.
+- Naechster sinnvoller Schritt ist TASK_564 fuer die Evidence-Legende; danach `TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass`.

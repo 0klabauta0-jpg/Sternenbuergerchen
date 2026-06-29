@@ -119,6 +119,21 @@
       border-radius: 8px;
       margin-top: 12px;
     }
+    .swatch {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      margin-right: 8px;
+      vertical-align: -2px;
+      border: 1px solid rgba(255,255,255,0.28);
+    }
+    .swatch.teamchip { background: #dbb32e; }
+    .swatch.mission { background: #48a8d1; }
+    .swatch.selected { background: #70a8f5; }
+    .swatch.strategic { background: #42abbf; }
+    .swatch.fireteam { background: #4278bd; }
+    .swatch.tooltip { background: #79c969; }
     .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; min-width: 780px; }
     th, td { padding: 9px 10px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: top; }
@@ -220,7 +235,8 @@
       <span class="pill good">TASK_561 Review-Guide</span>
       <span class="pill good">TASK_562 Evidence-Capture</span>
       <span class="pill good">TASK_563 Evidence-Preview</span>
-      <span class="pill warn">TASK_564 MP-F6-Polish anwenden</span>
+      <span class="pill good">TASK_564 Evidence-Legende</span>
+      <span class="pill warn">TASK_565 echter F6-Sichttest</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -433,9 +449,9 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture und TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns ohne laengere sichtbare HUD-Zeile, und die lokale Bildbasis ist im Report auffindbar.</td><td>Naechster spielbarer Schritt ist TASK_564: Screenshot/Manifest oder echte MP-F6-Review-Notizen in gezielten Visual-Polish uebersetzen.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture, TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht und TASK_564 als lesbare Evidence-Board-Legende.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns ohne laengere sichtbare HUD-Zeile, und die lokale Bildbasis ist im Report auffindbar und erklaerbar.</td><td>Naechster spielbarer Schritt ist TASK_565: echter MP-F6-Screenshot-/Hover-Sichttest mit konkretem UI-Polish.</td></tr>
                 <tr><td>Asset-/Warn-Hygiene</td><td>TASK_559 registriert die deterministische Factory-Colormap-UID vor Factory-GLB-Loads und entfernt damit eine wiederkehrende Godot-Importwarnung aus F6-Smokes.</td><td>Test- und Exportausgaben werden leiser, damit neue echte Fehler schneller auffallen.</td><td>Weitere Warnquellen nur als eigene kleine Hygiene-Slices angehen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview und Exportdaten an.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview an; TASK_564 erklaert die Evidence-Regionen.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
               </tbody>
             </table>
           </div>
@@ -466,7 +482,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_561_done"> TASK_561 MP-F6-Review-Guide ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_562_done"> TASK_562 MP-F6-Visual-Evidence-Capture ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_563_done"> TASK_563 Evidence-Preview ist im HTML-Zwischenbericht eingebunden</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_564_selected_next"> TASK_564 MP-F6-Polish-Anwendung ist als naechster manueller Slice vorgeschlagen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_564_done"> TASK_564 Evidence-Board-Legende ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_565_selected_next"> TASK_565 echter MP-F6-Sichttest ist als naechster manueller Slice vorgeschlagen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_524_done"> TASK_524 Warn-Laerm-Bereinigung ist im Arbeitsstand implementiert</label>
@@ -496,9 +513,10 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Erledigt</td><td>TASK_562 erzeugt eine reproduzierbare MP-F6-Bildbasis unter <code>tmp/frontier_probe_mp_f6_visual_evidence.png</code> plus Manifest; im Headless-Dummy als Evidence-Board aus Snapshot-Rects.</td><td>Wenn TASK_564 aus PNG/Manifest oder echtem MP-F6-Export konkrete Visual-Polish-Aenderungen ableitet.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_562 erzeugt eine reproduzierbare MP-F6-Bildbasis unter <code>tmp/frontier_probe_mp_f6_visual_evidence.png</code> plus Manifest; im Headless-Dummy als Evidence-Board aus Snapshot-Rects.</td><td>Wenn TASK_565 aus echtem MP-F6-Export konkrete Gameplay-HUD-Polish-Aenderungen ableitet.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_563 macht diese lokale Evidence direkt im HTML-Zwischenbericht sichtbar und exportiert die Artefaktpfade sowie Readback-/Evidence-Board-Flags.</td><td>Wenn neue Capture-Artefakte, manuelle Sichtnotizen oder echte Host/Client-F6-Screenshots hinzukommen.</td></tr>
-                <tr><td>Jetzt dran</td><td>TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings. Ziel: Capture oder Review-Notizen in gezielte Panel-/Stil-/Lesbarkeitskorrekturen umsetzen.</td><td>Nach Sichtung von PNG/Manifest oder manuellem Host/Client-F6-Playtest mit JSON-Export.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_564 setzt den ersten belegbaren Visual-Polish um: Das Evidence-Board bekommt Region-Outlines, Raster, Swatches und eine Report-Legende.</td><td>Wenn die Capture-Evidence weitere konkrete UI-Reibung zeigt.</td></tr>
+                <tr><td>Jetzt dran</td><td>TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass. Ziel: echter F6-/Hover-Sichttest im Fenster und danach gezielter Gameplay-HUD-Polish.</td><td>Nach manuellem Host/Client-F6-Playtest mit Screenshot oder JSON-Export.</td></tr>
                 <tr><td>Offen</td><td>Der echte menschliche F6-/Sichttest wurde fuer die letzten Headless-Slices bewusst nicht behauptet. Die naechste manuelle Runde sollte sichtbare Bewegung, Panel-Feedback, Kontaktlinien und Drop-/Fireteam-Konsistenz pruefen.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -507,8 +525,16 @@
         </article>
         <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
-          <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. Im Headless-Dummy-Renderer ist das Bild ein Evidence-Board aus Snapshot-Rechtecken; ein echter manueller F6-/Hover-Sichttest bleibt offen.</p>
+          <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. Im Headless-Dummy-Renderer ist das Bild ein Evidence-Board aus Snapshot-Rechtecken; TASK_564 ergaenzt Region-Outlines und Legende. Ein echter manueller F6-/Hover-Sichttest bleibt offen.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
+          <div class="metric-row" style="margin-top:12px">
+            <div class="metric"><span><i class="swatch teamchip"></i>Mission Teamchip</span><strong>Owner/Spawn</strong></div>
+            <div class="metric"><span><i class="swatch mission"></i>Mission Control</span><strong>AA/COM/CARGO</strong></div>
+            <div class="metric"><span><i class="swatch selected"></i>Selected Fireteam</span><strong>Auswahlstatus</strong></div>
+            <div class="metric"><span><i class="swatch strategic"></i>Strategic Panel</span><strong>HUD-Bereich</strong></div>
+            <div class="metric"><span><i class="swatch fireteam"></i>Fireteam Panel</span><strong>Cards</strong></div>
+            <div class="metric"><span><i class="swatch tooltip"></i>Tooltip Probe</span><strong>Hover-Beleg</strong></div>
+          </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Artefakt / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
@@ -520,6 +546,8 @@
                 <tr><td>Teamchip Tooltip Gate</td><td><input readonly value="pass" data-export-key="mp_f6_evidence.teamchip_tooltip_gate"></td><td>TASK_560 bleibt im Capture gruen.</td></tr>
                 <tr><td>Viewport-Readback</td><td><input readonly value="false" data-export-key="mp_f6_evidence.viewport_readback_available"></td><td>Headless erzeugt hier kein echtes Fensterbild.</td></tr>
                 <tr><td>Evidence-Board</td><td><input readonly value="true" data-export-key="mp_f6_evidence.generated_evidence_board"></td><td>Fallback-Bild ist bewusst als Snapshot-Board markiert.</td></tr>
+                <tr><td>Region-Legende</td><td><input readonly value="true" data-export-key="mp_f6_evidence.region_legend_present"></td><td>Farben im Evidence-Board sind im Bericht erklaert.</td></tr>
+                <tr><td>Regionen</td><td><input readonly value="6" data-export-key="mp_f6_evidence.region_count"></td><td>Teamchip, Mission Control, Selected Fireteam, Strategic Panel, Fireteam Panel, Tooltip-Probe.</td></tr>
                 <tr><td>Manueller Review</td><td><input readonly value="offen" data-export-key="mp_f6_evidence.manual_review_status"></td><td>Noch keine Behauptung, dass ein Mensch Hover/Lesbarkeit final bestaetigt hat.</td></tr>
               </tbody>
             </table>
@@ -566,7 +594,8 @@
             <div class="finding good"><h3>Erledigt: MP-F6 Review Guide</h3><p>TASK_561 macht die naechste manuelle Sichtpruefung auswertbar: Detailchecks, Ratings und Prioritaet werden exportiert.</p></div>
             <div class="finding good"><h3>Erledigt: MP-F6 Visual Evidence Capture</h3><p>TASK_562 erzeugt einen reproduzierbaren Frontier-Probe-MP-F6-Screenshot und ein Manifest unter <code>tmp/</code>.</p></div>
             <div class="finding good"><h3>Erledigt: MP-F6 Evidence Report Preview</h3><p>TASK_563 macht PNG, Manifest und Gate-Flags direkt im laufenden HTML-Zwischenbericht sichtbar.</p></div>
-            <div class="finding medium"><h3>1. TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings</h3><p>Aus Screenshot/Manifest oder echtem MP-F6-Export sollte der naechste gezielte Panel-/Hover-/Stilpolish entstehen.</p></div>
+            <div class="finding good"><h3>Erledigt: MP-F6 Evidence Board Polish</h3><p>TASK_564 macht das Headless-Evidence-Board und seine Report-Legende besser lesbar.</p></div>
+            <div class="finding medium"><h3>1. TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass</h3><p>Ein echter Fenster-/Hover-Screenshot sollte jetzt die naechsten Gameplay-HUD-Korrekturen belegen.</p></div>
           </div>
         </article>
       </div>
@@ -625,7 +654,8 @@
             <div class="finding good"><h3>Erledigt: TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide</h3><p>Der MP-F6-Bericht fragt die wichtigsten sichtbaren Reibungspunkte jetzt strukturiert ab und exportiert Ratings plus naechste Prioritaet.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture</h3><p>Der MP-F6-Zustand kann jetzt als PNG/Manifest reproduzierbar erzeugt und fuer den naechsten Sichtpolish genutzt werden.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview</h3><p>Der laufende HTML-Zwischenbericht zeigt PNG/Manifest-Pfade, Gate-Flags und Headless-Evidence-Board-Status direkt an.</p></div>
-            <div class="finding medium"><h3>1. TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings</h3><p>Die Screenshot-/Manifest-Befunde oder exportierten MP-F6-Notizen in gezielte UI-/Lesbarkeitskorrekturen umsetzen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings</h3><p>Der erste belegte Polish macht Evidence-Board, Region-Outlines und Report-Legende lesbarer.</p></div>
+            <div class="finding medium"><h3>1. TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass</h3><p>Echten Fenster-/Hover-Sichttest mit Screenshot oder Export aufnehmen und daraus Gameplay-HUD-Polish ableiten.</p></div>
           </div>
         </article>
         <article class="card">
@@ -706,13 +736,14 @@
                 <tr><td><code>task_555_frontier_probe_multiplayer_objective_ownership_smoke.gd</code></td><td>25 passed, 0 failed</td><td>Headless-Smoke fuer Alpha/Bravo-/NPC-/Peer-Ownership im integrierten Frontier-Probe-Objective-Slice.</td></tr>
                 <tr><td><code>task_556_frontier_probe_host_client_objective_handoff_smoke.gd</code></td><td>25 passed, 0 failed</td><td>Headless-Smoke fuer Session-Assignments, serverseitige Bravo-Commands, Alpha-Ablehnung, State-Mutation-Guard und Client-Snapshot-Apply.</td></tr>
                 <tr><td><code>task_557_frontier_probe_multiplayer_f6_readability_pass.gd</code></td><td>25 passed, 0 failed</td><td>Headless-Smoke fuer MP-Ownership, Teamchip, Mission-Control-Zeilen, Selected-Fireteam-Kontext, FullHD-Bounds und kritische Panel-Ueberlappungen.</td></tr>
-                <tr><td><code>task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd</code></td><td>30 passed, 0 failed</td><td>Statischer Verifier fuer MP-F6-Screenshot-/Hover-Notizblock, Export-Keys, Contract, Status und aktuelle Follow-up-Kette.</td></tr>
+                <tr><td><code>task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd</code></td><td>31 passed, 0 failed</td><td>Statischer Verifier fuer MP-F6-Screenshot-/Hover-Notizblock, Export-Keys, Contract, Status und aktuelle Follow-up-Kette.</td></tr>
                 <tr><td><code>task_559_factory_colormap_uid_loader_guard.gd</code></td><td>15 passed, 0 failed</td><td>Verifier fuer deterministische Factory-Colormap-UID-Registrierung und die zuvor lauten Factory-GLB-Loads; TASK_557-Log zeigt keine alte Factory-UID-Warnung mehr.</td></tr>
                 <tr><td><code>task_560_frontier_probe_multiplayer_teamchip_tooltip_polish.gd</code></td><td>20 passed, 0 failed</td><td>Headless-Smoke fuer hoverbaren MP-Teamchip-Tooltip, Host/Peer-/Spawn-Kontext, kompakte sichtbare Zeile und weiter gruenes TASK_557-Gate.</td></tr>
-                <tr><td><code>task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd</code></td><td>37 passed, 0 failed</td><td>Statischer Verifier fuer gefuehrte MP-F6-Sichtpruefung, Ratings, Prioritaet, Contract, Status und aktuelle Follow-up-Kette.</td></tr>
-                <tr><td><code>task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd</code></td><td>26 passed, 0 failed</td><td>Capture-Smoke fuer MP-F6-PNG/Evidence-Board, Manifest, TASK_557-Gate, TASK_560-Gate und weiterhin offenen manuellen Review.</td></tr>
-                <tr><td><code>task_563_frontier_probe_multiplayer_f6_evidence_report_preview.gd</code></td><td>27 passed, 0 failed</td><td>Statischer Verifier fuer Evidence-Preview, Export-Keys, Contract, Status und TASK_564-Follow-up.</td></tr>
-                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_563 aktualisiert, zeigt die TASK_562-Evidence und nennt TASK_564 als naechsten Slice.</td></tr>
+                <tr><td><code>task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd</code></td><td>40 passed, 0 failed</td><td>Statischer Verifier fuer gefuehrte MP-F6-Sichtpruefung, Ratings, Prioritaet, Contract, Status und aktuelle Follow-up-Kette.</td></tr>
+                <tr><td><code>task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd</code></td><td>29 passed, 0 failed</td><td>Capture-Smoke fuer MP-F6-PNG/Evidence-Board, Manifest, TASK_557-Gate, TASK_560-Gate und weiterhin offenen manuellen Review.</td></tr>
+                <tr><td><code>task_563_frontier_probe_multiplayer_f6_evidence_report_preview.gd</code></td><td>35 passed, 0 failed</td><td>Statischer Verifier fuer Evidence-Preview, Export-Keys, Contract, Status und aktuelle Follow-up-Kette.</td></tr>
+                <tr><td><code>task_564_frontier_probe_multiplayer_apply_visual_polish_findings.gd</code></td><td>32 passed, 0 failed</td><td>Verifier fuer Evidence-Board-Regionen, Report-Legende, Manifest-Felder und TASK_565-Follow-up.</td></tr>
+                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_564 aktualisiert, zeigt die TASK_562-Evidence mit Legende und nennt TASK_565 als naechsten Slice.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -726,7 +757,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_562-Merge und Push. Arbeitsbranch: <code>task/frontier-probe-mp-f6-evidence-report-preview</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_563-Merge und Push. Arbeitsbranch: <code>task/frontier-probe-mp-f6-evidence-board-polish</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Region-Legende und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -864,8 +895,8 @@
           <label style="display:block;margin-top:12px;">Selected-Fireteam-/Dropship-Notizen
             <textarea data-export-key="mp_f6_manual.selected_fireteam_dropship_notes" placeholder="Sind Fireteam-Auswahl, Dropship-Cards, Payloads und Weltanker gleichzeitig verstaendlich?"></textarea>
           </label>
-          <label style="display:block;margin-top:12px;">Konkreter Follow-up fuer TASK_564
-            <textarea data-export-key="mp_f6_manual.followup" placeholder="Konkrete Aenderung fuer TASK_564, falls noetig."></textarea>
+          <label style="display:block;margin-top:12px;">Konkreter Follow-up fuer TASK_565
+            <textarea data-export-key="mp_f6_manual.followup" placeholder="Konkrete Aenderung fuer TASK_565, falls noetig."></textarea>
           </label>
           <div contenteditable="true" data-note-key="notes.mp_f6_manual_review" data-placeholder="Freie MP-F6-Screenshot-Review-Notiz..."></div>
         </article>
@@ -930,7 +961,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"
+              "TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -980,25 +1011,26 @@
               "TASK_560 - Frontier Probe Multiplayer Teamchip Tooltip Polish",
               "TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide",
               "TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture",
-              "TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview"
+              "TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview",
+              "TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Manueller FullHD-/F6-Sichttest bleibt trotz integrierter Headless-Smokes offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
-              "Der integrierte Objective-Pfad ist nach TASK_563 noch nicht mit echtem MP-F6-Screenshot-/Hover-Export ausgewertet."
+              "Der integrierte Objective-Pfad ist nach TASK_564 noch nicht mit echtem MP-F6-Screenshot-/Hover-Export ausgewertet."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
             runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status",
-            current_focus: "TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings",
-            latest_completed_task: "TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview"
+            current_focus: "TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass",
+            latest_completed_task: "TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings"
           },
           metadata: {
-            branch: "task/frontier-probe-mp-f6-evidence-report-preview",
-            integration_base: "integration/core-foundation after TASK_562",
-            head: "task/frontier-probe-mp-f6-evidence-report-preview",
+            branch: "task/frontier-probe-mp-f6-evidence-board-polish",
+            integration_base: "integration/core-foundation after TASK_563",
+            head: "task/frontier-probe-mp-f6-evidence-board-polish",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }
