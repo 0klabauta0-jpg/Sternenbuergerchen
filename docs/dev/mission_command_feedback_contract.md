@@ -359,6 +359,11 @@ TASK_619 macht die bereits vorhandenen Review-Launchdaten im Missions-HUD sichtb
 
 Erwartete Struktur: `MissionTacticalSandboxController.build_review_session_identity_snapshot()` liefert `active`, `style_id = host_client_role_peer_badge_v1`, `source`, `role`, `role_label`, `peer_id`, `peer_label`, `team_id`, `team_label`, `badge_text`, `read_only = true` und `ui_sets_gameplay_truth = false`. `get_mission_team_chip_snapshot()` meldet zusaetzlich `review_session`, `review_session_badge_text`, `review_session_badge_visible`, `review_session_badge_style_id`, `display_text` und `display_tooltip_text`. Der sichtbare Mission-Identity-Header darf denselben Badge vor dem Live-Tactical-Grid-Text anzeigen, damit Host/Client in Crops sofort unterscheidbar sind. `get_command_feedback_snapshot()` und `get_core_loop_host_client_feel_snapshot()` exportieren den Badge read-only fuer Verifier und HTML-Berichte. Ohne Review-Argumente bleibt der Badge leer und der bisherige Team-Chip-/Mission-Identity-Text unveraendert.
 
+## Host-Client-Badge-Re-Capture-Review
+TASK_620 haelt den sichtbaren TASK_619-Badge im Zwei-Fenster-Capture als reproduzierbare Review-Evidence fest. Der Capture-Helper darf aus dem vorhandenen Launchplan erwartete Badge-Texte ableiten und in das Manifest schreiben. Das ist Review-Kontext, keine OCR, keine Multiplayer-Sessionquelle und keine Runtime-Wahrheit.
+
+Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` enthaelt zusaetzlich `badge_recapture_task_id = TASK_620`, `badge_recapture_review_required = true`, `badge_recapture_review_done`, `badge_recapture_gate`, `host_expected_badge_text = HOST P1 ALPHA`, `client_expected_badge_text = CLIENT P2 BRAVO`, `badge_expected_style_id = host_client_role_peer_badge_v1`, `badge_expected_hud_path = MissionIdentityHeaderLabel`, `host_badge_crop_path`, `client_badge_crop_path` und `recommended_next_badge_review_task = TASK_620 - Host Client Badge Re-Capture Review`. Der Gate-Wert `review_ready` bedeutet nur, dass Screenshot und Crops geschrieben wurden und die erwarteten Badge-Texte aus dem Launchplan bekannt sind; die finale Lesbarkeit bleibt ein menschlicher Sichtentscheid.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -165,6 +165,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_619_host_client_role_peer_badge_hud.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_618_host_client_standard_capture_crop_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_617_host_client_standard_window_layout_hardening.gd`, `git diff --check`.
 - Naechster Schritt: Host-/Client-Re-Capture mit TASK_619-Badge und danach echter Multiplayer-Feel-Review.
 
+### TASK_620 - Host Client Badge Re-Capture Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_620_host_client_badge_recapture_review.md`, `docs/tasks/TASK_619_host_client_role_peer_badge_hud.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `capture_host_client_two_window_real_run.ps1` schreibt zusaetzlich Badge-Re-Capture-Felder ins Manifest: erwartete Host-/Client-Badge-Texte, Style-ID, HUD-Pfad, Crop-Pfade, Review-Gate und TASK_620-Follow-up.
+- Stand: Rolling Report und Ist-Stand-/Handbuch-Report nennen den Badge-Re-Capture als aktuellen Evidence-Anker fuer den naechsten echten Host/Client-Spielgefuehltest.
+- Risiken/offen: Das Manifest ersetzt keine OCR und keinen finalen menschlichen Sichtentscheid. Es beweist nur, dass erwartete Badge-Texte und lokale Crop-Artefakte fuer den Review bereitstehen.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_620_host_client_badge_recapture_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_619_host_client_role_peer_badge_hud.gd`, `git diff --check`.
+- Naechster Schritt: Echter Multiplayer-Feel-Review mit zwei sichtbaren Fenstern: Befehle, Authority, Snapshot-Sync, Performance und Bediengefuehl.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

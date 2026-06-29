@@ -28,6 +28,42 @@ function ConvertTo-ArgumentList {
     return $args.ToArray()
 }
 
+function ConvertTo-TeamBadgeLabel {
+    param([string]$TeamId)
+    $normalized = ([string]$TeamId).Trim().ToLowerInvariant()
+    switch ($normalized) {
+        "team_alpha" { return "ALPHA" }
+        "team_bravo" { return "BRAVO" }
+        default {
+            if ($normalized.StartsWith("team_")) {
+                $normalized = $normalized.Substring(5)
+            }
+            return $normalized.ToUpperInvariant()
+        }
+    }
+}
+
+function Build-ExpectedReviewBadgeText {
+    param([object]$Session)
+    if ($null -eq $Session) {
+        return ""
+    }
+    $tokens = New-Object System.Collections.Generic.List[string]
+    $role = ([string]$Session.role).Trim()
+    if (-not [string]::IsNullOrWhiteSpace($role)) {
+        $tokens.Add($role.ToUpperInvariant())
+    }
+    $peerId = 0
+    if ([int]::TryParse(([string]$Session.peer_id), [ref]$peerId) -and $peerId -gt 0) {
+        $tokens.Add(("P{0}" -f $peerId))
+    }
+    $teamLabel = ConvertTo-TeamBadgeLabel ([string]$Session.team)
+    if (-not [string]::IsNullOrWhiteSpace($teamLabel)) {
+        $tokens.Add($teamLabel)
+    }
+    return ($tokens -join " ")
+}
+
 function Resolve-VisibleGodotBinary {
     param([string]$PlannedPath)
     $result = [ordered]@{
@@ -273,6 +309,8 @@ $hostCropStatus = [ordered]@{}
 $clientCropStatus = [ordered]@{}
 $hostScreenshotWritten = $false
 $clientScreenshotWritten = $false
+$hostExpectedBadgeText = Build-ExpectedReviewBadgeText $plan.host
+$clientExpectedBadgeText = Build-ExpectedReviewBadgeText $plan.client
 
 if ($Launch) {
     if (-not [bool]$plan.godot_bin_found -or -not (Test-Path -LiteralPath ([string]$plan.godot_bin))) {
@@ -350,6 +388,16 @@ $manifest = [ordered]@{
     client_screenshot_written = [bool]$clientScreenshotWritten
     host_crop_status = $hostCropStatus
     client_crop_status = $clientCropStatus
+    badge_recapture_task_id = "TASK_620"
+    badge_recapture_review_required = $true
+    badge_recapture_review_done = [bool]($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten)
+    badge_recapture_gate = $(if ($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten -and -not [string]::IsNullOrWhiteSpace($hostExpectedBadgeText) -and -not [string]::IsNullOrWhiteSpace($clientExpectedBadgeText)) { "review_ready" } else { "manual_open" })
+    host_expected_badge_text = $hostExpectedBadgeText
+    client_expected_badge_text = $clientExpectedBadgeText
+    badge_expected_style_id = "host_client_role_peer_badge_v1"
+    badge_expected_hud_path = "MissionIdentityHeaderLabel"
+    host_badge_crop_path = "tmp/host_client_two_window_host_review.png"
+    client_badge_crop_path = "tmp/host_client_two_window_client_review.png"
     close_after_capture = [bool]$CloseAfterCapture
     wait_seconds = $WaitSeconds
     planned_godot_bin = $plannedGodotBin
@@ -385,6 +433,7 @@ $manifest = [ordered]@{
     recommended_next_task = "TASK_615 - Host Client Real Run Findings"
     recommended_next_visible_review_task = "TASK_616 - Host Client Visible UI Real Run Review"
     recommended_next_capture_task = "TASK_618 - Host Client Standard Capture Crop Review"
+    recommended_next_badge_review_task = "TASK_620 - Host Client Badge Re-Capture Review"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
