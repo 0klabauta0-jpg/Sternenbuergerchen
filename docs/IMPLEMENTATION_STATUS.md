@@ -174,6 +174,15 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_620_host_client_badge_recapture_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_619_host_client_role_peer_badge_hud.gd`, `git diff --check`.
 - Naechster Schritt: Echter Multiplayer-Feel-Review mit zwei sichtbaren Fenstern: Befehle, Authority, Snapshot-Sync, Performance und Bediengefuehl.
 
+### TASK_621 - Host Client Multiplayer Feel Review Bundle
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_621_host_client_multiplayer_feel_review_bundle.md`, `docs/tasks/TASK_620_host_client_badge_recapture_review.md`, `docs/tasks/TASK_610_host_client_two_window_playtest_notes.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `scripts/tests/task_621_host_client_multiplayer_feel_review_bundle.gd` schreibt `tmp/host_client_multiplayer_feel_review.json` als read-only Bundle aus dem lokalen Real-Run-Manifest, den TASK_620-Badge-/Crop-Feldern, vorhandenen Authority-/Sync-Smokes und offenen manuellen Playtest-Checks.
+- Stand: Rolling Report und Ist-Stand-/Handbuch-Report nennen TASK_621 als aktuellen Host/Client-Review-Anker und empfehlen TASK_622 fuer den echten Command-Authority-Live-Interaction-Review.
+- Risiken/offen: Das Bundle ist kein erledigter Playtest und startet keine GUI-Fenster. Es macht nur sichtbar, was im naechsten menschlichen Zwei-Fenster-Lauf geprueft werden muss.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_621_host_client_multiplayer_feel_review_bundle.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_620_host_client_badge_recapture_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_619_host_client_role_peer_badge_hud.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_622 - Host Client Command Authority Live Interaction Review`, damit Peer-2-Bravo-Befehl, Peer-2-Alpha-Reject, Snapshot-Sync, F6-Lesbarkeit und Performance im echten Zwei-Fenster-Lauf bewertet werden.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
