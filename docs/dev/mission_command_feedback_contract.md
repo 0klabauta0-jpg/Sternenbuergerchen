@@ -144,6 +144,11 @@ TASK_575 wendet nur den belegten TASK_574-Folgepunkt an: Der aktive ROE-/Fire-Ru
 
 Erwartete Struktur: Der aktive Button meldet `fire_rule_active_affordance_v1`, inaktive Buttons melden `fire_rule_inactive_affordance_v1`, `get_fire_rule_f6_readability_snapshot()` enthaelt `active_button_affordance_count`, `active_affordance_style_id`, `active_affordance_style_ids`, `active_button_visual_weight` und den Check `active_rule_affordance_stronger`. TASK_574 darf diese Werte im lokalen Manifest ausgeben, ohne den manuellen Review als erledigt zu markieren.
 
+## Suppress-Fire-Preview-Readability
+TASK_576 macht den vorhandenen `SUP`-Fire-Rule-Zustand vor `GO` lesbar. Die Preview darf nur aus bestehender Fireteam-Auswahl, gesetzter Fire-Rule und Waypoint-Intent-Preview abgeleitet werden. Sie darf keinen GO ausfuehren, keine Command-Queue beschreiben, keine Ammo-/Suppression-Wirkung simulieren und keine Combat- oder Movement-Wahrheit im HUD speichern.
+
+Erwartete Struktur: `get_suppress_fire_preview_readability_snapshot()` enthaelt `fire_rule = suppress`, `enabled`, `preview_text`, `pressure_state`, `radius_world`, `selected_order_text`, `first_waypoint_preview` und `ui_sets_gameplay_truth = false`. Der sichtbare Text im Selected-Fireteam-Ordertext darf knapp `SUP AREA ...` nennen. Ohne aktive `suppress`-Rule darf kein stale `SUP AREA` erscheinen. Der naechste Sicht-Slice ist TASK_577 fuer echte F6-/Visual-Evidence, nicht fuer ein grosses Suppression-/Ammo-System.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

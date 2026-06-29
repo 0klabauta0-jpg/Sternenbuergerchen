@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_576 - Suppress Fire Preview Readability Spike
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_576_suppress_fire_preview_readability_spike.md`, `docs/tasks/TASK_575_fire_rule_evidence_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/tactical_command_rules_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Bei aktiver Fire-Rule `suppress` und geplantem Move erzeugt der bestehende Waypoint-Intent-Preview-Pfad jetzt einen kompakten `SUP AREA`-Preview-Text im Selected-Fireteam-Ordertext.
+- Stand: `get_suppress_fire_preview_readability_snapshot()` meldet Fire-Rule, Zielbereich, Radius, Pressure-State, Preview-Text und Read-only-Grenze, ohne GO oder Command-Queue-Mutation.
+- Stand: Ohne `suppress` verschwindet der `SUP AREA`-Text wieder; `SUP` bleibt weiter ein kleiner Preview-/Regelzustand und kein grosses Ammo-/Suppression-System.
+- Risiken/offen: Echte Suppression-Wirkung, Ammo-Verbrauch, AAR-Messwerte und ein realer F6-Sichttest bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_576_suppress_fire_preview_readability_spike.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_567_frontier_probe_first_move_threat_preview_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_575_fire_rule_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_577 - Suppress Fire Visual Evidence Pass`, wenn `SUP AREA` im echten F6-/Visual-Blick geprueft werden soll.
+
 ### TASK_575 - Fire Rule Evidence Polish Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_575_fire_rule_evidence_polish_findings.md`, `docs/tasks/TASK_574_fire_rule_real_f6_screenshot_review_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

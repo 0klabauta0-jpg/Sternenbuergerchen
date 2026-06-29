@@ -104,6 +104,7 @@ const FIRE_RULE_ACTIVE_AFFORDANCE_STYLE_ID: String = "fire_rule_active_affordanc
 const FIRE_RULE_INACTIVE_AFFORDANCE_STYLE_ID: String = "fire_rule_inactive_affordance_v1"
 const FIRE_RULE_ACTIVE_AFFORDANCE_WEIGHT: float = 2.0
 const FIRE_RULE_INACTIVE_AFFORDANCE_WEIGHT: float = 1.0
+const SUPPRESS_FIRE_PREVIEW_RADIUS_WORLD: float = 148.0
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
 const AREA_ORDER_PREVIEW_REFRESH_MSEC: int = 80
@@ -5361,9 +5362,13 @@ func _build_waypoint_intent_preview_text(fireteam_id: String) -> String:
 			maxi(int(ceil(float(entry.get("eta_seconds_estimate", 0.0)))), 0),
 		]
 		var risk_text: String = _build_waypoint_intent_threat_preview_text(entry)
-		if risk_text.is_empty():
-			return distance_eta_text
-		return "%s | %s" % [distance_eta_text, risk_text]
+		var parts: PackedStringArray = PackedStringArray([distance_eta_text])
+		if not risk_text.is_empty():
+			parts.append(risk_text)
+		var suppress_preview_text: String = _build_waypoint_suppress_fire_preview_text(normalized_fireteam_id, entry)
+		if not suppress_preview_text.is_empty():
+			parts.append(suppress_preview_text)
+		return " | ".join(parts)
 	return ""
 
 
@@ -5423,6 +5428,66 @@ func _compact_waypoint_intent_cover_label(cover_state: String) -> String:
 			return "OPEN"
 		_:
 			return cover_state.to_upper()
+
+
+func _build_waypoint_suppress_fire_preview_text(fireteam_id: String, entry: Dictionary) -> String:
+	var preview: Dictionary = _build_suppress_fire_preview_entry(fireteam_id, entry)
+	if not bool(preview.get("enabled", false)):
+		return ""
+	return String(preview.get("preview_text", "")).strip_edges()
+
+
+func _build_suppress_fire_preview_entry(fireteam_id: String, entry: Dictionary) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var fire_rule: String = get_fireteam_fire_rule(normalized_fireteam_id)
+	var target_variant: Variant = entry.get("ghost_ftl_position", null)
+	var has_target: bool = typeof(target_variant) == TYPE_VECTOR2
+	var enabled: bool = fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS and has_target
+	var distance_world: float = float(entry.get("distance_world", 0.0))
+	var eta_seconds: float = float(entry.get("eta_seconds_estimate", 0.0))
+	var exposure_count: int = int(entry.get("enemy_exposure_count", 0))
+	var line_count: int = Array(entry.get("line_of_fire_entries", [])).size()
+	var pressure_state: String = "inactive"
+	var reason: String = "fire_rule_not_suppress"
+	if fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS and not has_target:
+		pressure_state = "blocked"
+		reason = "missing_preview_target"
+	elif enabled and exposure_count > 0:
+		pressure_state = "pressure_contact"
+		reason = "known_contact_in_preview_area"
+	elif enabled and line_count > 0:
+		pressure_state = "pressure_lanes"
+		reason = "known_lines_in_preview_area"
+	elif enabled:
+		pressure_state = "area_ready"
+		reason = "area_pressure_ready_no_known_contact"
+	var target_position: Vector2 = Vector2(target_variant) if has_target else Vector2.ZERO
+	var preview_text: String = ""
+	if enabled:
+		preview_text = "SUP AREA %dm | ETA~%ds | %s" % [
+			int(round(SUPPRESS_FIRE_PREVIEW_RADIUS_WORLD)),
+			maxi(int(ceil(eta_seconds)), 0),
+			pressure_state.to_upper(),
+		]
+	return {
+		"schema": "sternenbuergerchen.suppress_fire_preview.v1",
+		"source": "MissionTacticalSandboxController",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"fireteam_id": normalized_fireteam_id,
+		"fire_rule": fire_rule,
+		"enabled": enabled,
+		"has_target": has_target,
+		"target_position": target_position,
+		"radius_world": SUPPRESS_FIRE_PREVIEW_RADIUS_WORLD,
+		"distance_world": distance_world,
+		"eta_seconds_estimate": eta_seconds,
+		"enemy_exposure_count": exposure_count,
+		"line_of_fire_entry_count": line_count,
+		"pressure_state": pressure_state,
+		"reason": reason,
+		"preview_text": preview_text,
+	}
 
 
 func _build_fireteam_area_defense_info_text(fireteam_id: String) -> String:
@@ -12824,6 +12889,98 @@ func get_frontier_probe_first_move_threat_preview_readability_snapshot() -> Dict
 		"render_preview_path_line_count": render_path_line_count,
 		"render_preview_threat_line_count": render_threat_line_count,
 		"render_preview_entries": render_preview_entries,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_suppress_fire_preview_readability_snapshot() -> Dictionary:
+	var first_move_snapshot: Dictionary = get_mission_first_move_decision_readability_snapshot()
+	var threat_preview_snapshot: Dictionary = get_frontier_probe_first_move_threat_preview_readability_snapshot()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var selected_fireteam_ids: Array = Array(first_move_snapshot.get("selected_fireteam_ids", Array(_selected_fireteam_ids)))
+	var waypoint_preview: Array = get_waypoint_intent_preview_snapshot()
+	var first_preview: Dictionary = _find_first_waypoint_preview_for_fireteams(selected_fireteam_ids, waypoint_preview)
+	if first_preview.is_empty():
+		first_preview = Dictionary(first_move_snapshot.get("first_waypoint_preview", {})).duplicate(true)
+	var fireteam_id: String = ""
+	if not selected_fireteam_ids.is_empty():
+		fireteam_id = String(selected_fireteam_ids[0]).strip_edges().to_lower()
+	if fireteam_id.is_empty():
+		fireteam_id = String(first_preview.get("fireteam_id", "")).strip_edges().to_lower()
+	var suppress_preview: Dictionary = _build_suppress_fire_preview_entry(fireteam_id, first_preview)
+	var selected_order_text: String = String(command_feedback.get("selected_order_text", "")).strip_edges()
+	var command_queue_count_before_go: int = 0
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root != null:
+		var command_queue_variant: Variant = simulation_root.get("command_queue")
+		if typeof(command_queue_variant) == TYPE_ARRAY:
+			command_queue_count_before_go = Array(command_queue_variant).size()
+	var enabled: bool = bool(suppress_preview.get("enabled", false))
+	var preview_text: String = String(suppress_preview.get("preview_text", "")).strip_edges()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"first_move_gate_still_passes",
+			String(first_move_snapshot.get("gate", "")) == "pass",
+			"TASK_540 first-move gate stays green while SUP preview is read."
+		),
+		_build_mission_first_move_readability_check(
+			"threat_preview_gate_still_passes",
+			String(threat_preview_snapshot.get("gate", "")) == "pass",
+			"TASK_567 threat preview gate stays green while SUP preview is added."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_rule_selected",
+			String(suppress_preview.get("fire_rule", "")) == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS,
+			"Selected fireteam has suppress fire-rule."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_preview_enabled",
+			enabled and bool(suppress_preview.get("has_target", false)),
+			"Suppress preview is enabled only when SUP has a planned target."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_preview_text_visible",
+			not preview_text.is_empty() and selected_order_text.find("SUP AREA") >= 0,
+			"Selected Fireteam order text includes compact SUP AREA preview before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_preview_has_area_context",
+			float(suppress_preview.get("radius_world", 0.0)) > 0.0
+				and typeof(suppress_preview.get("target_position", null)) == TYPE_VECTOR2
+				and not String(suppress_preview.get("pressure_state", "")).strip_edges().is_empty(),
+			"Suppress preview exposes target position, radius and pressure state."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_preview_remains_read_only",
+			not bool(suppress_preview.get("ui_sets_gameplay_truth", true))
+				and bool(suppress_preview.get("read_only", false))
+				and not bool(first_move_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Suppress preview reads existing snapshots and does not create gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_576",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"first_move_snapshot": first_move_snapshot,
+		"threat_preview_snapshot": threat_preview_snapshot,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"selected_order_text": selected_order_text,
+		"first_waypoint_preview": first_preview,
+		"suppress_preview": suppress_preview,
+		"fire_rule": String(suppress_preview.get("fire_rule", "")),
+		"enabled": enabled,
+		"preview_text": preview_text,
+		"pressure_state": String(suppress_preview.get("pressure_state", "")),
+		"radius_world": float(suppress_preview.get("radius_world", 0.0)),
+		"command_queue_count_before_go": command_queue_count_before_go,
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
