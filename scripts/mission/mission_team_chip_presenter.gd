@@ -49,13 +49,17 @@ func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> D
 	var last_reject_target: String = _build_reject_target_label(last_rejection)
 	var feedback_line: String = _build_authority_feedback_line(accepted_count, rejected_count, last_peer_id, last_reject_label)
 	var feedback_detail: String = _build_authority_feedback_detail(last_peer_id, last_reject_label, last_reject_target)
+	var visible_feedback_text: String = _build_visible_feedback_text(rejected_count, last_peer_id, last_reject_label)
 	var visible: bool = accepted_count > 0 or rejected_count > 0 or not last_reason.is_empty()
 	var compact_text := ""
 	if visible:
 		compact_text = "AUTH OK%d/RJ%d" % [accepted_count, rejected_count]
+	var attention_tone: String = _build_authority_tone(accepted_count, rejected_count)
 	var tooltip_parts: PackedStringArray = PackedStringArray()
 	if visible:
 		tooltip_parts.append("Authority: %d accepted, %d rejected" % [accepted_count, rejected_count])
+		if not visible_feedback_text.is_empty():
+			tooltip_parts.append("Visible cue: %s" % visible_feedback_text)
 		if not feedback_line.is_empty():
 			tooltip_parts.append(feedback_line)
 		if not feedback_detail.is_empty():
@@ -65,7 +69,7 @@ func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> D
 			tooltip_parts.append("Last reject: %s | %s" % [peer_text, last_reason])
 	return {
 		"schema": "sternenbuergerchen.host_client_authority_visual.v1",
-		"task_id": "TASK_624",
+		"task_id": "TASK_625",
 		"visible": visible,
 		"accepted_count": accepted_count,
 		"rejected_count": rejected_count,
@@ -74,11 +78,14 @@ func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> D
 		"last_reject_target": last_reject_target,
 		"last_reject_peer_id": last_peer_id,
 		"compact_text": compact_text,
+		"visible_feedback_text": visible_feedback_text,
+		"visible_feedback_ready": not visible_feedback_text.is_empty(),
 		"feedback_line": feedback_line,
 		"feedback_detail": feedback_detail,
 		"tooltip_text": "\n".join(tooltip_parts),
 		"input_feedback_ready": visible and (not feedback_line.is_empty() or not compact_text.is_empty()),
-		"tone": _build_authority_tone(accepted_count, rejected_count),
+		"attention_tone": attention_tone,
+		"tone": attention_tone,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -104,6 +111,16 @@ func _build_authority_feedback_line(accepted_count: int, rejected_count: int, pe
 	if accepted_count > 0:
 		return "AUTH ACCEPTED"
 	return ""
+
+
+func _build_visible_feedback_text(rejected_count: int, peer_id: int, reject_label: String) -> String:
+	if rejected_count <= 0:
+		return ""
+	var peer_text: String = "P%d" % peer_id if peer_id > 0 else "P?"
+	var reason_text: String = reject_label.strip_edges()
+	if reason_text.is_empty():
+		reason_text = "command blocked"
+	return "BLOCK %s %s" % [peer_text, reason_text]
 
 
 func _build_authority_feedback_detail(peer_id: int, reject_label: String, target_label: String) -> String:

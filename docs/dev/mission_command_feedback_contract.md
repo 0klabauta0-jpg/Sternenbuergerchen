@@ -384,6 +384,11 @@ TASK_624 erweitert denselben Authority-Visual-Snapshot um menschliche Eingabe-Er
 
 Erwartete Struktur: `authority_visual` enthaelt zusaetzlich `feedback_line`, `feedback_detail`, `last_reject_label`, `last_reject_target` und `input_feedback_ready`. `get_command_feedback_snapshot()` darf diese Werte auch als `authority_feedback_line` und `authority_feedback_detail` exportieren. Der Tooltip darf Feedbacksatz, Detail und `Last reject: Peer ... | raw_reason` enthalten, darf aber keine Runtime-, Peer-, Command-, Movement-, Combat- oder UI-Wahrheit setzen.
 
+## Host-Client-Visible-Reject-Feedback-Polish
+TASK_625 macht den wichtigsten Reject-Grund auch ohne Tooltip im bestehenden Mission-Teamchip sichtbar. Der Presenter darf aus demselben read-only Authority-Snapshot einen kurzen `visible_feedback_text` wie `BLOCK P2 wrong team` bauen. Das ist ein HUD-Hinweis, keine neue Command-, Peer-, Team-, Session-, Movement-, Combat- oder Gameplay-Wahrheit.
+
+Erwartete Struktur: `authority_visual` enthaelt zusaetzlich `visible_feedback_text`, `visible_feedback_ready` und `attention_tone`. `_with_review_session_badge()` darf diesen kurzen Text neben `AUTH OKx/RJy` in `display_text` aufnehmen. `get_command_feedback_snapshot()` exportiert `authority_visible_feedback_text`. Tooltip und Detail behalten weiterhin `feedback_line`, `feedback_detail` und den rohen Reject-Grund.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

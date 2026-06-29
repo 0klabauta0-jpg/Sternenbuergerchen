@@ -253,6 +253,7 @@ git checkout -b batch/<batch-name>
 - TASK_622 - Host Client Command Authority Live Interaction Review (implementiert)
 - TASK_623 - Host Client Authority Visual Findings (implementiert)
 - TASK_624 - Host Client Live Input Feedback Review (implementiert)
+- TASK_625 - Host Client Visible Reject Feedback Polish (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

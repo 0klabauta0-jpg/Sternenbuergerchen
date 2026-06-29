@@ -212,6 +212,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_624_host_client_live_input_feedback_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_623_host_client_authority_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_622_host_client_command_authority_live_interaction_review.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_625 - Host Client Visible Reject Feedback Polish`, falls der echte Klicklauf einen auffaelligeren Toast/Bubble/Panel-Hinweis braucht.
 
+### TASK_625 - Host Client Visible Reject Feedback Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_625_host_client_visible_reject_feedback_polish.md`, `docs/tasks/TASK_624_host_client_live_input_feedback_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `MissionTeamChipPresenter.build_authority_visual_snapshot()` liefert zusaetzlich `visible_feedback_text`, `visible_feedback_ready` und `attention_tone`.
+- Stand: Der Mission-Teamchip zeigt bei Rejects neben `AUTH OK/RJ` einen kurzen sichtbaren Hinweis wie `BLOCK P2 wrong team`; Tooltip, Detail und Rohgrund bleiben erhalten.
+- Stand: `get_command_feedback_snapshot()` exportiert `authority_visible_feedback_text` read-only fuer Verifier und Berichte.
+- Risiken/offen: TASK_625 macht Rejects sichtbarer, ersetzt aber keinen echten Zwei-Fenster-Klicklauf mit Latenz, Fokuswechsel und Reaktionsbeobachtung.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_625_host_client_visible_reject_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_624_host_client_live_input_feedback_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_623_host_client_authority_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: Echter Host/Client-Klicklauf oder ein belegter Toast-/Bubble-/Panel-Polish-Slice, falls der sichtbare Teamchip-Hinweis im Spiel noch zu leise ist.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

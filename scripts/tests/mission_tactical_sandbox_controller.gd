@@ -7306,6 +7306,7 @@ func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
 	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
 	var authority_visual: Dictionary = Dictionary(result.get("authority_visual", {})).duplicate(true)
 	var authority_compact_text: String = String(authority_visual.get("compact_text", result.get("authority_compact_text", ""))).strip_edges()
+	var authority_visible_feedback_text: String = String(authority_visual.get("visible_feedback_text", result.get("authority_visible_feedback_text", ""))).strip_edges()
 	var authority_tooltip_text: String = String(authority_visual.get("tooltip_text", result.get("authority_tooltip_text", ""))).strip_edges()
 	var authority_visible: bool = bool(authority_visual.get("visible", result.get("authority_visible", false))) and not authority_compact_text.is_empty()
 	var base_text: String = String(result.get("compact_status_text", result.get("status_text", ""))).strip_edges()
@@ -7315,6 +7316,8 @@ func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
 		display_tokens.append(badge_text)
 	if authority_visible:
 		display_tokens.append(authority_compact_text)
+	if authority_visible and not authority_visible_feedback_text.is_empty():
+		display_tokens.append(authority_visible_feedback_text)
 	if not base_text.is_empty():
 		display_tokens.append(base_text)
 	if not display_tokens.is_empty():
@@ -7337,6 +7340,7 @@ func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
 	result["authority_visual"] = authority_visual
 	result["authority_visible"] = authority_visible
 	result["authority_compact_text"] = authority_compact_text
+	result["authority_visible_feedback_text"] = authority_visible_feedback_text
 	result["authority_tooltip_text"] = authority_tooltip_text
 	result["display_text"] = display_text
 	result["display_tooltip_text"] = display_tooltip
@@ -7408,9 +7412,10 @@ func _refresh_mission_team_chip_label() -> void:
 	label.set_meta("review_session_badge_text", String(snapshot.get("review_session_badge_text", "")))
 	label.set_meta("review_session_badge_visible", bool(snapshot.get("review_session_badge_visible", false)))
 	label.set_meta("review_session_badge_task", "TASK_619")
-	label.set_meta("authority_visual_task", "TASK_623")
+	label.set_meta("authority_visual_task", "TASK_625")
 	label.set_meta("authority_visual_visible", bool(snapshot.get("authority_visible", false)))
 	label.set_meta("authority_visual_text", String(snapshot.get("authority_compact_text", "")))
+	label.set_meta("authority_visible_feedback_text", String(snapshot.get("authority_visible_feedback_text", "")))
 
 
 func get_mission_team_chip_snapshot() -> Dictionary:
@@ -16261,6 +16266,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"authority_visual_tooltip_text": String(mission_team_chip_snapshot.get("authority_tooltip_text", "")),
 		"authority_feedback_line": String(Dictionary(mission_team_chip_snapshot.get("authority_visual", {})).get("feedback_line", "")),
 		"authority_feedback_detail": String(Dictionary(mission_team_chip_snapshot.get("authority_visual", {})).get("feedback_detail", "")),
+		"authority_visible_feedback_text": String(mission_team_chip_snapshot.get("authority_visible_feedback_text", Dictionary(mission_team_chip_snapshot.get("authority_visual", {})).get("visible_feedback_text", ""))),
 		"review_session_badge": Dictionary(mission_team_chip_snapshot.get("review_session", {})).duplicate(true),
 		"review_session_badge_text": String(mission_team_chip_snapshot.get("review_session_badge_text", "")),
 		"review_session_badge_visible": bool(mission_team_chip_snapshot.get("review_session_badge_visible", false)),
