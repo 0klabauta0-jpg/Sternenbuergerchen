@@ -334,6 +334,11 @@ TASK_614 stellt den echten Host-/Client-Zwei-Fenster-Lauf als reproduzierbaren R
 
 Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` enthaelt `schema = sternenbuergerchen.host_client_two_window_real_run_review.v1`, `task_id = TASK_614`, `source_plan_task_id = TASK_611`, `source_plan_path`, `tool_path`, `manifest_path`, `screenshot_path`, `launch_requested`, `real_run_done`, `capture_attempted`, `screenshot_written`, `close_after_capture`, Host-/Client-Prozessdaten, Host-/Client-Rollen, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false`, `review_checks` und `recommended_next_task = TASK_615 - Host Client Real Run Findings`. Der laufende HTML-Bericht darf diese Felder unter `host_client_two_window_real_run.*` exportieren und kommentierbar machen; ein Dry-Run darf den echten Sichttest nicht als erledigt markieren.
 
+## Host-Client-Real-Run-Findings
+TASK_615 wendet den belegten ersten TASK_614-Befund nur im Review-Tooling an: Ein sichtbarer Real-Run-Capture darf nicht durch `godot_console.exe`-Fenster als erledigt gelten, wenn dadurch keine Host-/Client-Spiel-Fenster lesbar werden. Neue Launchplaene sollen fuer sichtbare Reviews `godot.exe` bevorzugen; der Capture-Helper darf ein geplantes `godot_console.exe` durch ein benachbartes GUI-Binary ersetzen, ohne den Launchplan als Gameplay-State zu mutieren.
+
+Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` darf zusaetzlich `planned_godot_bin`, `visible_godot_bin`, `visible_godot_bin_source`, `console_binary_replaced`, `window_focus_attempted`, `window_position_attempted`, `host_window_status` und `client_window_status` melden. Diese Felder sind Review-Evidence und duerfen keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit erzeugen. Der laufende HTML-Bericht darf diese Felder unter `host_client_real_run_findings.*` exportieren und TASK_616 als naechsten sichtbaren UI-Befund empfehlen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

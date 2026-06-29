@@ -52,7 +52,7 @@ function Resolve-GodotCandidate {
         return $result
     }
 
-    foreach ($commandName in @("godot_console.exe", "godot.exe")) {
+    foreach ($commandName in @("godot.exe", "godot_console.exe")) {
         $command = Get-Command $commandName -ErrorAction SilentlyContinue
         if ($null -ne $command) {
             $result.path = $command.Source

@@ -26,6 +26,103 @@ function ConvertTo-ArgumentList {
     return $args.ToArray()
 }
 
+function Resolve-VisibleGodotBinary {
+    param([string]$PlannedPath)
+    $result = [ordered]@{
+        path = $PlannedPath
+        source = "planned"
+        console_replaced = $false
+        found = $false
+    }
+    if (-not [string]::IsNullOrWhiteSpace($PlannedPath) -and (Test-Path -LiteralPath $PlannedPath)) {
+        $result.found = $true
+        $fileName = [System.IO.Path]::GetFileName($PlannedPath)
+        if ($fileName -ieq "godot_console.exe") {
+            $sibling = Join-Path ([System.IO.Path]::GetDirectoryName($PlannedPath)) "godot.exe"
+            if (Test-Path -LiteralPath $sibling) {
+                $result.path = (Resolve-Path -LiteralPath $sibling).Path
+                $result.source = "sibling_gui_binary"
+                $result.console_replaced = $true
+                return $result
+            }
+        }
+        return $result
+    }
+    $guiCommand = Get-Command "godot.exe" -ErrorAction SilentlyContinue
+    if ($null -ne $guiCommand) {
+        $result.path = $guiCommand.Source
+        $result.source = "PATH:godot.exe"
+        $result.console_replaced = $true
+        $result.found = $true
+    }
+    return $result
+}
+
+function Ensure-User32Tools {
+    if ("Win32.Task615WindowTools" -as [type]) {
+        return
+    }
+    Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+namespace Win32 {
+    public static class Task615WindowTools {
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        [DllImport("user32.dll")]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+    }
+}
+"@
+}
+
+function Focus-ReviewWindow {
+    param(
+        [System.Diagnostics.Process]$Process,
+        [object]$Window
+    )
+    $result = [ordered]@{
+        focus_attempted = $false
+        focus_succeeded = $false
+        position_attempted = $false
+        position_succeeded = $false
+        main_window_handle = 0
+    }
+    if ($null -eq $Process) {
+        return $result
+    }
+    Ensure-User32Tools
+    for ($attempt = 0; $attempt -lt 30; $attempt++) {
+        Start-Sleep -Milliseconds 150
+        $Process.Refresh()
+        if ($Process.MainWindowHandle -ne 0) {
+            break
+        }
+    }
+    $handle = $Process.MainWindowHandle
+    $result.main_window_handle = [int64]$handle
+    if ($handle -eq 0) {
+        return $result
+    }
+    $result.focus_attempted = $true
+    [Win32.Task615WindowTools]::ShowWindow($handle, 5) | Out-Null
+    $result.focus_succeeded = [Win32.Task615WindowTools]::SetForegroundWindow($handle)
+    if ($null -ne $Window) {
+        $result.position_attempted = $true
+        $result.position_succeeded = [Win32.Task615WindowTools]::MoveWindow(
+            $handle,
+            [int]$Window.x,
+            [int]$Window.y,
+            [int]$Window.width,
+            [int]$Window.height,
+            $true
+        )
+    }
+    return $result
+}
+
 function Capture-Desktop {
     param([string]$Path)
     Add-Type -AssemblyName System.Drawing
@@ -64,12 +161,26 @@ $clientProcess = $null
 $captureAttempted = $false
 $screenshotWritten = $false
 $launchError = ""
+$plannedGodotBin = ""
+$visibleGodotBin = ""
+$visibleGodotBinSource = ""
+$consoleBinaryReplaced = $false
+$hostWindowStatus = [ordered]@{}
+$clientWindowStatus = [ordered]@{}
 
 if ($Launch) {
     if (-not [bool]$plan.godot_bin_found -or -not (Test-Path -LiteralPath ([string]$plan.godot_bin))) {
         throw "Godot executable was not found in the launch plan. Rebuild the plan with -GodotBin or GODOT_BIN."
     }
-    $godotBin = [string]$plan.godot_bin
+    $plannedGodotBin = [string]$plan.godot_bin
+    $visibleGodot = Resolve-VisibleGodotBinary $plannedGodotBin
+    if (-not [bool]$visibleGodot.found -or -not (Test-Path -LiteralPath ([string]$visibleGodot.path))) {
+        throw "Visible Godot executable was not found. Planned path: $plannedGodotBin."
+    }
+    $godotBin = [string]$visibleGodot.path
+    $visibleGodotBin = $godotBin
+    $visibleGodotBinSource = [string]$visibleGodot.source
+    $consoleBinaryReplaced = [bool]$visibleGodot.console_replaced
     $hostArgs = ConvertTo-ArgumentList $plan.host.command_args
     $clientArgs = ConvertTo-ArgumentList $plan.client.command_args
     Write-Host "Starting visible TASK_614 Host window."
@@ -78,6 +189,9 @@ if ($Launch) {
     Write-Host "Starting visible TASK_614 Client window."
     $clientProcess = Start-Process -FilePath $godotBin -ArgumentList $clientArgs -WorkingDirectory $resolvedProjectPath -PassThru
     Start-Sleep -Seconds ([Math]::Max(1, $WaitSeconds))
+    $hostWindowStatus = Focus-ReviewWindow -Process $hostProcess -Window $plan.host.window
+    $clientWindowStatus = Focus-ReviewWindow -Process $clientProcess -Window $plan.client.window
+    Start-Sleep -Milliseconds 350
     try {
         Capture-Desktop -Path $ScreenshotPath
         $captureAttempted = $true
@@ -95,6 +209,11 @@ if ($Launch) {
     }
 } else {
     Write-Host "TASK_614 dry run only. Add -Launch to start visible Host and Client windows."
+    $plannedGodotBin = [string]$plan.godot_bin
+    $visibleGodot = Resolve-VisibleGodotBinary $plannedGodotBin
+    $visibleGodotBin = [string]$visibleGodot.path
+    $visibleGodotBinSource = [string]$visibleGodot.source
+    $consoleBinaryReplaced = [bool]$visibleGodot.console_replaced
 }
 
 $manifest = [ordered]@{
@@ -111,6 +230,14 @@ $manifest = [ordered]@{
     screenshot_written = [bool]$screenshotWritten
     close_after_capture = [bool]$CloseAfterCapture
     wait_seconds = $WaitSeconds
+    planned_godot_bin = $plannedGodotBin
+    visible_godot_bin = $visibleGodotBin
+    visible_godot_bin_source = $visibleGodotBinSource
+    console_binary_replaced = [bool]$consoleBinaryReplaced
+    window_focus_attempted = [bool]($hostWindowStatus.focus_attempted -or $clientWindowStatus.focus_attempted)
+    window_position_attempted = [bool]($hostWindowStatus.position_attempted -or $clientWindowStatus.position_attempted)
+    host_window_status = $hostWindowStatus
+    client_window_status = $clientWindowStatus
     host_process_id = $(if ($null -ne $hostProcess) { $hostProcess.Id } else { $null })
     client_process_id = $(if ($null -ne $clientProcess) { $clientProcess.Id } else { $null })
     host_role = [string]$plan.host.role
@@ -131,6 +258,7 @@ $manifest = [ordered]@{
         "close_processes_after_capture"
     )
     recommended_next_task = "TASK_615 - Host Client Real Run Findings"
+    recommended_next_visible_review_task = "TASK_616 - Host Client Visible UI Real Run Review"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8

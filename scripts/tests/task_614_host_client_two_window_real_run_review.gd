@@ -76,8 +76,8 @@ func _test_report_export_fields(report_text: String) -> void:
 	for choice_group in required_choice_groups:
 		_assert(report_text.contains('data-choice-group="%s"' % choice_group), "Report exports choice group %s" % choice_group)
 	_assert(report_text.contains('data-note-key="notes.host_client_two_window_real_run_review"'), "Report exports free TASK_614 real-run review note")
-	_assert(report_text.contains('latest_completed_task: "TASK_614 - Host Client Two Window Real Run Review"'), "JSON payload lists TASK_614 as latest completed task")
-	_assert(report_text.contains('current_focus: "TASK_615 - Host Client Real Run Findings"'), "JSON payload sets current focus to TASK_615")
+	_assert(report_text.contains('latest_completed_task: "TASK_615 - Host Client Real Run Findings"'), "JSON payload lists TASK_615 as latest completed task")
+	_assert(report_text.contains('current_focus: "TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload sets current focus to TASK_616")
 
 
 func _test_capture_tool_script() -> void:
