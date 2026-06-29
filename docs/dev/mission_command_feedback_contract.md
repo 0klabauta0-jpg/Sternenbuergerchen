@@ -81,6 +81,9 @@ TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dez
 ## Frontier-Probe-Multiplayer-F6-Readability
 `get_frontier_probe_multiplayer_f6_readability_snapshot()` ist der Headless-Pruefpunkt fuer TASK_557. Der Snapshot darf nur TASK_555-Ownership, relevante TASK_549-F6-Layoutchecks, `get_command_feedback_snapshot()` und vorhandene Control-Bounds zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Peer-, Objective-, Cargo-, Combat-, Command- oder UI-State-Entscheidung ausloesen. Erwartete Lesbarkeit: Mission-Team-Chip ist sichtbar und nennt Host Peer 1, Peer 2, `spawn_alpha` und `spawn_bravo`; Mission Control zeigt AA/COM/OBJ/CARGO; Selected Fireteam zeigt den gewaehlten Fireteam-Kontext; und Teamchip, Mission Control sowie Selected Fireteam bleiben im FullHD-Missionslayout ohne kritische Ueberlappung lesbar.
 
+## Frontier-Probe-Multiplayer-Manual-Screenshot-Notes
+TASK_558 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workbench fuer den Frontier-Probe-MP-F6-Blick. Der Bericht darf Screenshotpfad, Viewport, Host/Client-Kontext, Teamchip-Lesbarkeit, Objective-/Cargo-Lesbarkeit, Selected-Fireteam-Kontext, Panel-Ueberlappung, Hover-/Stilnotizen und Follow-up-Entscheidungen exportieren, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat- oder Gameplay-Wahrheit speichern. Erwartete Struktur: exportierbare `mp_f6_manual.*` Controls, eine freie `notes.mp_f6_manual_review`-Notiz und eine klare Markierung, dass der manuelle Screenshot erst durch User/Playtest bestaetigt wird.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

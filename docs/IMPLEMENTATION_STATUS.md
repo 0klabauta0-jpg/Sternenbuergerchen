@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der Rolling-HTML-Bericht enthaelt jetzt einen exportierbaren TASK_558-Notizblock fuer den manuellen Frontier-Probe-MP-F6-Screenshot-/Hover-Check.
+- Stand: Exportiert werden Screenshotpfad, Viewport, Host/Client-Kontext, Teamchip-/Objective-/Cargo-/Selected-Fireteam-Lesbarkeit, Panel-Ueberlappung, Ergebnisentscheidung sowie Hover-, Stil- und Follow-up-Notizen.
+- Stand: Der Bericht markiert den manuellen Screenshot bewusst nicht als erledigt; die Daten bleiben Playtest-/Arbeitsnotizen und keine Gameplay-Wahrheit.
+- Risiken/offen: Der echte F6-MP-Screenshot-/Hover-Sichttest muss weiterhin manuell ausgefuehrt und exportiert werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_559 - Frontier Probe Multiplayer F6 Visual Polish Follow-up`, sobald aus dem manuellen TASK_558-Export konkrete Lesbarkeits-/Hover-/Panelnotizen vorliegen.
+
 ### TASK_557 - Frontier Probe Multiplayer F6 Readability Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_549_combat_hud_f6_visual_audit.md`, `docs/tasks/TASK_555_frontier_probe_multiplayer_objective_ownership_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/dev/mission_command_feedback_contract.md`
