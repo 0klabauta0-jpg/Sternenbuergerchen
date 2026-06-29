@@ -49,6 +49,7 @@ func _build_chip_entry(entry: Dictionary) -> Dictionary:
 		"icon_text": _team_icon_text(String(entry.get("team_id", ""))),
 		"spawn_icon_text": _spawn_icon_text(spawn_marker_id),
 		"compact_text": _build_compact_chip_text(String(entry.get("team_id", "")), short_label, ownership_label, spawn_marker_id),
+		"compact_owner_label": _compact_owner_label(ownership_label),
 		"icon_tooltip": _build_icon_tooltip(short_label, ownership_label, spawn_marker_id),
 		"visual_priority": _team_visual_priority(String(entry.get("team_id", ""))),
 		"ownership_label": ownership_label,
@@ -119,10 +120,24 @@ func _build_compact_chip_text(team_id: String, short_label: String, ownership_la
 	var label: String = short_label.strip_edges()
 	if label.is_empty():
 		label = "Team"
-	var owner: String = ownership_label.strip_edges()
+	var owner: String = _compact_owner_label(ownership_label)
 	if owner.is_empty():
 		owner = "?"
-	return "%s %s %s @ %s" % [_team_icon_text(team_id), label, owner, _spawn_icon_text(spawn_marker_id)]
+	return "%s %s %s %s" % [_team_icon_text(team_id), label, owner, _spawn_icon_text(spawn_marker_id)]
+
+
+func _compact_owner_label(ownership_label: String) -> String:
+	var owner: String = ownership_label.strip_edges()
+	if owner.is_empty():
+		return "?"
+	var lower_owner: String = owner.to_lower()
+	if lower_owner == "host peer 1":
+		return "Host"
+	if lower_owner.begins_with("peer "):
+		return "P%s" % owner.substr(5).strip_edges()
+	if lower_owner.contains("npc"):
+		return "NPC"
+	return owner
 
 
 func _build_icon_tooltip(short_label: String, ownership_label: String, spawn_marker_id: String) -> String:
