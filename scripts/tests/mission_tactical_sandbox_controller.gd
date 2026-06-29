@@ -67,6 +67,7 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const COMBAT_HUD_TOOLTIP_STYLE_ID: String = "combat_hud_tooltip_hint_v1"
 const COMBAT_HUD_TOOLTIP_FONT_SIZE: int = 10
 const COMBAT_HUD_TOOLTIP_OUTLINE_SIZE: int = 2
+const MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID: String = "mission_team_chip_tooltip_hint_v1"
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
@@ -6878,7 +6879,13 @@ func _ensure_mission_team_chip_label() -> void:
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", 10)
 	label.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0, 1.0))
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.add_theme_color_override("font_shadow_color", Color(0.02, 0.05, 0.07, 0.8))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	label.mouse_default_cursor_shape = Control.CURSOR_HELP
+	label.set_meta("mission_team_chip_tooltip_style_id", MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID)
+	label.set_meta("mission_team_chip_tooltip_task", "TASK_560")
 	strategic_vbox.add_child(label)
 
 
@@ -6888,6 +6895,11 @@ func _refresh_mission_team_chip_label() -> void:
 		return
 	var snapshot: Dictionary = get_mission_team_chip_snapshot()
 	label.text = String(snapshot.get("compact_status_text", snapshot.get("status_text", "Teams: not configured")))
+	label.tooltip_text = String(snapshot.get("tooltip_text", snapshot.get("status_text", ""))).strip_edges()
+	label.mouse_filter = Control.MOUSE_FILTER_STOP
+	label.mouse_default_cursor_shape = Control.CURSOR_HELP
+	label.set_meta("mission_team_chip_tooltip_style_id", MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID)
+	label.set_meta("mission_team_chip_tooltip_task", "TASK_560")
 
 
 func get_mission_team_chip_snapshot() -> Dictionary:
@@ -6902,6 +6914,7 @@ func get_mission_team_chip_snapshot() -> Dictionary:
 			"summary_text": "",
 			"status_text": "Teams: presenter unavailable",
 			"compact_status_text": "Teams: presenter unavailable",
+			"tooltip_text": "Mission Team Ownership\nTeams: presenter unavailable",
 		}
 	var simulation_root = get_node_or_null("../SimulationRoot")
 	var network_snapshot: Dictionary = {}
@@ -8396,6 +8409,13 @@ func _get_label_text(label_path: Variant) -> String:
 	if label == null:
 		return ""
 	return label.text
+
+
+func _get_label_tooltip_text(label_path: Variant) -> String:
+	var label := get_node_or_null(NodePath(String(label_path))) as Label
+	if label == null:
+		return ""
+	return label.tooltip_text
 
 
 func _refresh_world_overlays() -> void:
@@ -13203,6 +13223,92 @@ func get_frontier_probe_multiplayer_f6_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_frontier_probe_multiplayer_teamchip_tooltip_snapshot() -> Dictionary:
+	var readability_snapshot: Dictionary = get_frontier_probe_multiplayer_f6_readability_snapshot()
+	var command_snapshot: Dictionary = get_command_feedback_snapshot()
+	var team_chip_label := get_node_or_null(MISSION_TEAM_CHIP_LABEL_PATH) as Label
+	var team_chip_snapshot: Dictionary = Dictionary(command_snapshot.get("mission_team_chip", {}))
+	var compact_text: String = String(command_snapshot.get("mission_team_chip_text", "")).strip_edges()
+	var tooltip_text: String = String(command_snapshot.get("mission_team_chip_tooltip_text", "")).strip_edges()
+	var status_text: String = String(team_chip_snapshot.get("status_text", "")).strip_edges()
+	var style_id: String = ""
+	var task_id: String = ""
+	var mouse_filter: int = -1
+	var cursor_shape: int = -1
+	if team_chip_label != null:
+		style_id = String(team_chip_label.get_meta("mission_team_chip_tooltip_style_id", ""))
+		task_id = String(team_chip_label.get_meta("mission_team_chip_tooltip_task", ""))
+		mouse_filter = int(team_chip_label.mouse_filter)
+		cursor_shape = int(team_chip_label.mouse_default_cursor_shape)
+	var expected_owner_context: bool = tooltip_text.contains("Host Peer 1") \
+		and tooltip_text.contains("Peer 2") \
+		and tooltip_text.contains("spawn_alpha") \
+		and tooltip_text.contains("spawn_bravo")
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"f6_readability_gate_passes",
+			String(readability_snapshot.get("gate", "")) == "pass",
+			"TASK_557 F6 readability remains green before tooltip polish is evaluated."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_team_chip_tooltip_hoverable",
+			team_chip_label != null
+				and mouse_filter != int(Control.MOUSE_FILTER_IGNORE)
+				and cursor_shape == int(Control.CURSOR_HELP)
+				and not tooltip_text.is_empty(),
+			"Mission Team chip accepts hover and exposes a tooltip payload."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_team_chip_tooltip_names_multiplayer_context",
+			expected_owner_context,
+			"Mission Team chip tooltip names Host Peer 1, Peer 2, spawn_alpha and spawn_bravo."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_team_chip_visible_text_stays_compact",
+			not compact_text.is_empty()
+				and compact_text.length() <= 96
+				and tooltip_text.length() > compact_text.length()
+				and tooltip_text.length() <= 180,
+			"Visible chip text stays compact while the tooltip carries the longer owner/spawn detail."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_team_chip_tooltip_style_tagged",
+			style_id == MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID and task_id == "TASK_560",
+			"Mission Team chip carries a stable tooltip style/task marker for visual audits."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(readability_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(team_chip_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Tooltip polish reads presenter/HUD snapshots without moving gameplay truth into UI."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_560",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"mission_team_chip_text": compact_text,
+		"mission_team_chip_tooltip_text": tooltip_text,
+		"mission_team_chip_status_text": status_text,
+		"mission_team_chip_tooltip_length": tooltip_text.length(),
+		"mission_team_chip_text_length": compact_text.length(),
+		"mission_team_chip_label_mouse_filter": mouse_filter,
+		"mission_team_chip_label_cursor_shape": cursor_shape,
+		"mission_team_chip_tooltip_style_id": style_id,
+		"mission_team_chip_tooltip_task": task_id,
+		"readability_snapshot": readability_snapshot,
+		"command_feedback": command_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _snapshot_check_passed(snapshot: Dictionary, check_id: String) -> bool:
 	for check_variant in Array(snapshot.get("checks", [])):
 		var check: Dictionary = Dictionary(check_variant)
@@ -14043,6 +14149,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH),
 		"mission_team_chip_text": _get_label_text(MISSION_TEAM_CHIP_LABEL_PATH),
 		"mission_team_chip": get_mission_team_chip_snapshot(),
+		"mission_team_chip_tooltip_text": _get_label_tooltip_text(MISSION_TEAM_CHIP_LABEL_PATH),
 		"command_buttons": _build_command_control_snapshot(),
 		"command_hierarchy": get_command_hierarchy_snapshot(),
 		"planned_waypoint_count": _count_selected_phase_waypoints(),

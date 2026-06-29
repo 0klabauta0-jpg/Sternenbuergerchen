@@ -84,6 +84,9 @@ TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dez
 ## Frontier-Probe-Multiplayer-Manual-Screenshot-Notes
 TASK_558 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workbench fuer den Frontier-Probe-MP-F6-Blick. Der Bericht darf Screenshotpfad, Viewport, Host/Client-Kontext, Teamchip-Lesbarkeit, Objective-/Cargo-Lesbarkeit, Selected-Fireteam-Kontext, Panel-Ueberlappung, Hover-/Stilnotizen und Follow-up-Entscheidungen exportieren, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat- oder Gameplay-Wahrheit speichern. Erwartete Struktur: exportierbare `mp_f6_manual.*` Controls, eine freie `notes.mp_f6_manual_review`-Notiz und eine klare Markierung, dass der manuelle Screenshot erst durch User/Playtest bestaetigt wird.
 
+## Frontier-Probe-Multiplayer-Teamchip-Tooltip-Polish
+`get_frontier_probe_multiplayer_teamchip_tooltip_snapshot()` ist der Headless-Pruefpunkt fuer TASK_560. Der Snapshot darf nur den TASK_557-F6-Readability-Snapshot, `MissionTeamChipPresenter`, `get_command_feedback_snapshot()` und die vorhandenen Label-Metadaten zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Peer-, Team-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Entscheidung ausloesen. Erwartete Lesbarkeit: Der sichtbare Mission-Teamchip bleibt kurz, waehrend der Tooltip Host Peer 1, Peer 2, `spawn_alpha` und `spawn_bravo` nennt; das Label ist hoverbar, traegt eine stabile Tooltip-Style-ID und bleibt read-only.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
