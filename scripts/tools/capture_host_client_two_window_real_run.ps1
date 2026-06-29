@@ -4,7 +4,9 @@ param(
     [int]$WaitSeconds = 8,
     [string]$ProjectPath = "",
     [string]$PlanPath = "",
-    [string]$ScreenshotPath = ""
+    [string]$ScreenshotPath = "",
+    [string]$HostScreenshotPath = "",
+    [string]$ClientScreenshotPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -177,6 +179,60 @@ function Capture-Desktop {
     }
 }
 
+function Export-DesktopCrop {
+    param(
+        [string]$SourcePath,
+        [string]$DestinationPath,
+        [object]$Window
+    )
+    $result = [ordered]@{
+        attempted = $false
+        succeeded = $false
+        reason = ""
+        width = 0
+        height = 0
+    }
+    if ([string]::IsNullOrWhiteSpace($SourcePath) -or [string]::IsNullOrWhiteSpace($DestinationPath) -or $null -eq $Window) {
+        $result.reason = "missing_source_destination_or_window"
+        return $result
+    }
+    if (-not (Test-Path -LiteralPath $SourcePath)) {
+        $result.reason = "source_screenshot_missing"
+        return $result
+    }
+    Add-Type -AssemblyName System.Drawing
+    Add-Type -AssemblyName System.Windows.Forms
+    $result.attempted = $true
+    $screenBounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+    $left = [Math]::Max(0, [int]$Window.x - [int]$screenBounds.X)
+    $top = [Math]::Max(0, [int]$Window.y - [int]$screenBounds.Y)
+    $width = [Math]::Min([int]$Window.width, [int]$screenBounds.Width - $left)
+    $height = [Math]::Min([int]$Window.height, [int]$screenBounds.Height - $top)
+    if ($width -le 0 -or $height -le 0) {
+        $result.reason = "window_outside_primary_screen"
+        return $result
+    }
+    $source = [System.Drawing.Bitmap]::FromFile($SourcePath)
+    $crop = $null
+    try {
+        $rect = New-Object System.Drawing.Rectangle $left, $top, $width, $height
+        $crop = $source.Clone($rect, $source.PixelFormat)
+        $crop.Save($DestinationPath, [System.Drawing.Imaging.ImageFormat]::Png)
+        $result.succeeded = Test-Path -LiteralPath $DestinationPath
+        $result.width = $width
+        $result.height = $height
+        if (-not $result.succeeded) {
+            $result.reason = "crop_write_failed"
+        }
+    } finally {
+        if ($null -ne $crop) {
+            $crop.Dispose()
+        }
+        $source.Dispose()
+    }
+    return $result
+}
+
 $resolvedProjectPath = Resolve-ProjectPath $ProjectPath
 $tmpDir = Join-Path $resolvedProjectPath "tmp"
 New-Item -ItemType Directory -Force -Path $tmpDir | Out-Null
@@ -186,6 +242,12 @@ if ([string]::IsNullOrWhiteSpace($PlanPath)) {
 }
 if ([string]::IsNullOrWhiteSpace($ScreenshotPath)) {
     $ScreenshotPath = Join-Path $tmpDir "host_client_two_window_real_run_desktop.png"
+}
+if ([string]::IsNullOrWhiteSpace($HostScreenshotPath)) {
+    $HostScreenshotPath = Join-Path $tmpDir "host_client_two_window_host_review.png"
+}
+if ([string]::IsNullOrWhiteSpace($ClientScreenshotPath)) {
+    $ClientScreenshotPath = Join-Path $tmpDir "host_client_two_window_client_review.png"
 }
 $manifestPath = Join-Path $tmpDir "host_client_two_window_real_run_review.json"
 
@@ -207,6 +269,10 @@ $hostWindowStatus = [ordered]@{}
 $clientWindowStatus = [ordered]@{}
 $initialHostWindowStatus = [ordered]@{}
 $initialClientWindowStatus = [ordered]@{}
+$hostCropStatus = [ordered]@{}
+$clientCropStatus = [ordered]@{}
+$hostScreenshotWritten = $false
+$clientScreenshotWritten = $false
 
 if ($Launch) {
     if (-not [bool]$plan.godot_bin_found -or -not (Test-Path -LiteralPath ([string]$plan.godot_bin))) {
@@ -238,6 +304,12 @@ if ($Launch) {
         Capture-Desktop -Path $ScreenshotPath
         $captureAttempted = $true
         $screenshotWritten = Test-Path -LiteralPath $ScreenshotPath
+        if ($screenshotWritten) {
+            $hostCropStatus = Export-DesktopCrop -SourcePath $ScreenshotPath -DestinationPath $HostScreenshotPath -Window $plan.host.window
+            $clientCropStatus = Export-DesktopCrop -SourcePath $ScreenshotPath -DestinationPath $ClientScreenshotPath -Window $plan.client.window
+            $hostScreenshotWritten = Test-Path -LiteralPath $HostScreenshotPath
+            $clientScreenshotWritten = Test-Path -LiteralPath $ClientScreenshotPath
+        }
     } catch {
         $captureAttempted = $true
         $launchError = $_.Exception.Message
@@ -268,10 +340,16 @@ $manifest = [ordered]@{
     tool_path = "scripts/tools/capture_host_client_two_window_real_run.ps1"
     manifest_path = "tmp/host_client_two_window_real_run_review.json"
     screenshot_path = "tmp/host_client_two_window_real_run_desktop.png"
+    host_screenshot_path = "tmp/host_client_two_window_host_review.png"
+    client_screenshot_path = "tmp/host_client_two_window_client_review.png"
     launch_requested = [bool]$Launch
     real_run_done = [bool]($Launch -and $screenshotWritten)
     capture_attempted = [bool]$captureAttempted
     screenshot_written = [bool]$screenshotWritten
+    host_screenshot_written = [bool]$hostScreenshotWritten
+    client_screenshot_written = [bool]$clientScreenshotWritten
+    host_crop_status = $hostCropStatus
+    client_crop_status = $clientCropStatus
     close_after_capture = [bool]$CloseAfterCapture
     wait_seconds = $WaitSeconds
     planned_godot_bin = $plannedGodotBin
@@ -306,6 +384,7 @@ $manifest = [ordered]@{
     )
     recommended_next_task = "TASK_615 - Host Client Real Run Findings"
     recommended_next_visible_review_task = "TASK_616 - Host Client Visible UI Real Run Review"
+    recommended_next_capture_task = "TASK_618 - Host Client Standard Capture Crop Review"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8

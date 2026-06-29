@@ -145,6 +145,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_617_host_client_standard_window_layout_hardening.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_611_host_client_two_window_launch_helper.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_616_host_client_visible_ui_real_run_review.gd`, `git diff --check`.
 - Naechster Schritt: Standard-GUI-Real-Run mit Auto-Fit-Plan als echter Multiplayer-Feel-Review.
 
+### TASK_618 - Host Client Standard Capture Crop Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_618_host_client_standard_capture_crop_review.md`, `docs/tasks/TASK_617_host_client_standard_window_layout_hardening.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `capture_host_client_two_window_real_run.ps1` schneidet nach einem echten Standard-Desktop-Capture zusaetzlich Host- und Client-Fenster in `tmp/host_client_two_window_host_review.png` und `tmp/host_client_two_window_client_review.png` aus.
+- Stand: Das Real-Run-Manifest meldet `host_screenshot_path`, `client_screenshot_path`, `host_screenshot_written`, `client_screenshot_written`, `host_crop_status`, `client_crop_status` und `recommended_next_capture_task`.
+- Stand: Der echte Standardlauf schreibt beide Crop-PNGs; die Crops zeigen Host und Client mit sichtbarer Mission-Welt, aber noch ohne klaren Role-/Peer-/Team-Hinweis im eigentlichen Missionsfenster.
+- Risiken/offen: Crop-PNGs bleiben lokale `tmp/`-Artefakte. Naechster sinnvoller UI-Fix ist ein sichtbarer Host/Client-Role-Peer-Badge im Mission-HUD.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_618_host_client_standard_capture_crop_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_617_host_client_standard_window_layout_hardening.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_614_host_client_two_window_real_run_review.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_619 - Host Client Role Peer Badge HUD`, damit Host/Client-Fenster im Spielbild selbst unterscheidbar sind.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

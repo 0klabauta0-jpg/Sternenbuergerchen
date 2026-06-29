@@ -68,7 +68,7 @@ func _test_report_export_fields(report_text: String) -> void:
 	_assert(report_text.contains('data-note-key="notes.host_client_real_run_findings"'), "Report exports free TASK_615 findings note")
 	_assert(report_text.contains('"TASK_615 - Host Client Real Run Findings"'), "JSON payload keeps TASK_615 in completed tasks")
 	_assert(report_text.contains('"TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload keeps TASK_616 in completed chain")
-	_assert(report_text.contains('latest_completed_task: "TASK_617 - Host Client Standard Window Layout Hardening"'), "JSON payload advances latest completed task to TASK_617")
+	_assert(report_text.contains('latest_completed_task: "TASK_618 - Host Client Standard Capture Crop Review"'), "JSON payload advances latest completed task to TASK_618")
 
 
 func _test_tooling_guards() -> void:

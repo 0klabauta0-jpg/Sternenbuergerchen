@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_617 auf <code>task/host-client-standard-window-layout-hardening</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_618 auf <code>task/host-client-standard-capture-crop-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -287,6 +287,7 @@
       <span class="pill good">TASK_615 Real-Run-Findings</span>
       <span class="pill good">TASK_616 UI-Render-Guard</span>
       <span class="pill good">TASK_617 Fenster-Autofit</span>
+      <span class="pill good">TASK_618 Host/Client-Crops</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -538,13 +539,14 @@
             <div class="metric"><strong>TASK_615</strong><span>umgesetzt: GUI-Binary-/Fensterfokus-Fix fuer echte Real-Run-Captures</span></div>
             <div class="metric"><strong>TASK_616</strong><span>umgesetzt: Terrain-SubViewport-Redraw-Guard plus frueher Fensterfokus fuer sichtbare Client-Fenster</span></div>
             <div class="metric"><strong>TASK_617</strong><span>umgesetzt: Standard-Launchplan passt Host/Client-Fenster bei Bedarf an und Real-Run-Capture hebt sie sichtbar an</span></div>
+            <div class="metric"><strong>TASK_618</strong><span>umgesetzt: Standard-Capture schreibt getrennte Host-/Client-Fenster-Crops und benennt Role-/Peer-Badge als naechsten UI-Fund</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe, TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar, TASK_609 beschriftet das Board fuer menschliche Reviewbarkeit, TASK_610 bereitet echte Zwei-Fenster-Notizen im Bericht vor, TASK_611 macht den Fensterlauf als Dry-Run-Plan plus expliziten Launcher reproduzierbarer, TASK_612 sichert den Screenshot-Review als Board/Manifest/Workbench-Paket ab, TASK_613 macht dieses Board durch Labels/Legende lesbarer, TASK_614 stellt den echten Fensterlauf als expliziten Capture-Helper mit Dry-Run-Manifest bereit, TASK_615 korrigiert den belegten Console-Binary-/Fensterfokus-Fall, TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls plus fruehen Fensterfokus und TASK_617 macht den Standard-Launchplan monitorfest. Der Re-Capture zeigt jetzt Host und Client mit sichtbarer Mission-Welt.</td><td>Naechster Schritt: echter menschlicher Spielgefuehltest fuer Authority, Sync, Lesbarkeit und Performance mit dem Standardplan.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe, TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar, TASK_609 beschriftet das Board fuer menschliche Reviewbarkeit, TASK_610 bereitet echte Zwei-Fenster-Notizen im Bericht vor, TASK_611 macht den Fensterlauf als Dry-Run-Plan plus expliziten Launcher reproduzierbarer, TASK_612 sichert den Screenshot-Review als Board/Manifest/Workbench-Paket ab, TASK_613 macht dieses Board durch Labels/Legende lesbarer, TASK_614 stellt den echten Fensterlauf als expliziten Capture-Helper mit Dry-Run-Manifest bereit, TASK_615 korrigiert den belegten Console-Binary-/Fensterfokus-Fall, TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls plus fruehen Fensterfokus, TASK_617 macht den Standard-Launchplan monitorfest und TASK_618 erzeugt getrennte Host-/Client-Crops. Der Re-Capture zeigt jetzt beide Fenster mit sichtbarer Mission-Welt, aber die Rollen sind im Spielbild noch zu aehnlich.</td><td>Naechster Schritt: TASK_619 Role-/Peer-Badge im Mission-HUD, damit Host und Client nicht nur im Dateinamen unterscheidbar sind.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
                 <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_617 ist hier bewusst mitgepflegt, damit Standardplan, Auto-Fit und sichtbarer Host/Client-Anschluss nachvollziehbar bleiben.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
@@ -1487,6 +1489,36 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_618 Host Client Standard Capture Crop Review</h2>
+          <p>Der echte Standard-Capture zeigt Host und Client inzwischen stabil mit Mission-Welt, aber der Desktop-Screenshot enthaelt zu viel Fremdkontext. TASK_618 schneidet deshalb die geplanten Host-/Client-Fensterrechtecke als eigene PNGs aus. Der Review-Befund aus diesen Crops: Welt und UI sind sichtbar, aber Host und Client wirken im eigentlichen Spielbild noch zu gleich. Der naechste Gameplay-/UI-Slice sollte einen kleinen Role-/Peer-/Team-Badge im Mission-HUD zeigen.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Crop-Feld</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Tool</td><td><input readonly value="scripts/tools/capture_host_client_two_window_real_run.ps1" data-export-key="host_client_standard_capture_crop.tool_path"></td><td>Quelle fuer Desktop-Capture und Fenster-Crops.</td></tr>
+                <tr><td>Desktop-PNG</td><td><input readonly value="tmp/host_client_two_window_real_run_desktop.png" data-export-key="host_client_standard_capture_crop.desktop_screenshot_path"></td><td>Vollbildbeleg bleibt fuer Kontext erhalten.</td></tr>
+                <tr><td>Host-PNG</td><td><input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="host_client_standard_capture_crop.host_screenshot_path"></td><td>Sauberer Ausschnitt des Host-Fensters.</td></tr>
+                <tr><td>Client-PNG</td><td><input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="host_client_standard_capture_crop.client_screenshot_path"></td><td>Sauberer Ausschnitt des Client-Fensters.</td></tr>
+                <tr><td>Host Crop</td><td><input readonly value="manifest flag: host_screenshot_written" data-export-key="host_client_standard_capture_crop.host_screenshot_written"></td><td>True, wenn der echte Lauf den Host-Ausschnitt geschrieben hat.</td></tr>
+                <tr><td>Client Crop</td><td><input readonly value="manifest flag: client_screenshot_written" data-export-key="host_client_standard_capture_crop.client_screenshot_written"></td><td>True, wenn der echte Lauf den Client-Ausschnitt geschrieben hat.</td></tr>
+                <tr><td>Crop Status</td><td><input readonly value="host_crop_status + client_crop_status" data-export-key="host_client_standard_capture_crop.crop_status_fields"></td><td>Jeder Crop meldet attempted, succeeded, reason, width und height.</td></tr>
+                <tr><td>Standardlauf-Befund</td><td><input readonly value="world_visible_role_peer_badge_missing" data-export-key="host_client_standard_capture_crop.finding"></td><td>Host und Client zeigen Welt/UI, brauchen aber im Fenster klare Role-/Peer-/Team-Unterscheidung.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="host_client_standard_capture_crop.read_only"></td><td>Capture und Bericht setzen keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_619 - Host Client Role Peer Badge HUD" data-export-key="host_client_standard_capture_crop.recommended_next_task"></td><td>Belegter UI-Fund aus den sauberen Crops.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input type="checkbox" checked data-export-key="host_client_standard_capture_crop.real_run_crop_written"> echter Standardlauf hat Host-/Client-Crops geschrieben</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="host_client_standard_capture_crop.world_visible_checked"> beide Crops zeigen Mission-Welt plus HUD</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="host_client_standard_capture_crop.role_peer_gap_checked"> Role-/Peer-/Team-Hinweis im Fensterbild als Folgefund markiert</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="host_client_standard_capture_crop.no_gameplay_truth_checked"> Crop-/Reportpfad bleibt read-only</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_618 Crop-/Spielgefuehl-Notiz
+            <textarea data-note-key="notes.host_client_standard_capture_crop" data-export-key="host_client_standard_capture_crop.notes" placeholder="Was faellt im getrennten Host-/Client-Fensterausschnitt auf?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -1847,6 +1879,7 @@
                 <tr><td><code>task_615_host_client_real_run_findings.gd</code></td><td>PASS</td><td>Verifier fuer Console-Binary-Finding, GUI-Binary-Praeferenz, sichtbares Binary, Fenster-Fokus-/Positionierungsfelder und TASK_616-Follow-up.</td></tr>
                 <tr><td><code>task_616_host_client_visible_ui_real_run_review.gd</code></td><td>PASS</td><td>Verifier fuer Client-World-Blackout-Doku, begrenzten Terrain-SubViewport-Redraw-Guard, fruehen Fensterfokus, Contract und Report-Exportfelder.</td></tr>
                 <tr><td><code>task_617_host_client_standard_window_layout_hardening.gd</code></td><td>PASS</td><td>Verifier fuer Standardfenster-Autofit, Requested-/Effective-Layout, Fenster-Raise im Capture-Helper, Contract und Report-Exportfelder.</td></tr>
+                <tr><td><code>task_618_host_client_standard_capture_crop_review.gd</code></td><td>PASS</td><td>Verifier fuer Host-/Client-Fenster-Crops, Manifest-Felder, Contract, Bericht und TASK_619-Follow-up.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>Timeout nach Doku-Pruefung</td><td>Meta-Homebase-Flow haengt in diesem Arbeitslauf nach der Doku-Pruefung; TASK_567 nutzt die stabile Mission-Fixture, Meta-Flow-Testhygiene bleibt offen.</td></tr>
                 <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_570 aktualisiert, nennt die Fire-Rule-Mission-Bridge und TASK_571 als naechsten Slice.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
@@ -2338,8 +2371,8 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "Standard-Plan Host/Client Multiplayer Feel Review",
-              "Client-World-Init-Diagnostic nur falls die Welt spaeter wieder schwarz bleibt"
+              "TASK_619 - Host Client Role Peer Badge HUD",
+              "Standard-Plan Host/Client Multiplayer Feel Review nach sichtbarem Role-/Peer-Hinweis"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -2443,7 +2476,8 @@
               "TASK_614 - Host Client Two Window Real Run Review",
               "TASK_615 - Host Client Real Run Findings",
               "TASK_616 - Host Client Visible UI Real Run Review",
-              "TASK_617 - Host Client Standard Window Layout Hardening"
+              "TASK_617 - Host Client Standard Window Layout Hardening",
+              "TASK_618 - Host Client Standard Capture Crop Review"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -2469,7 +2503,8 @@
               "TASK_614 stellt den echten Host-/Client-Fensterlauf als expliziten Capture-Helper mit Dry-Run-Manifest bereit.",
               "TASK_615 behebt den belegten Console-Binary-/Konsolen-Capture-Fall im Review-Tooling.",
               "TASK_616 stabilisiert den sichtbaren Client-Terrain-Renderimpuls mit einem begrenzten SubViewport-Redraw-Guard und fruehem Fensterfokus; der Re-Capture zeigt Host und Client mit sichtbarer Mission-Welt.",
-              "TASK_617 haertet den Standard-Launchplan mit Requested-/Effective-Layout, Monitor-Autofit und Fenster-Raise im Capture-Helper; der echte Standardplan-Capture zeigt Host und Client mit sichtbarer Mission-Welt."
+              "TASK_617 haertet den Standard-Launchplan mit Requested-/Effective-Layout, Monitor-Autofit und Fenster-Raise im Capture-Helper; der echte Standardplan-Capture zeigt Host und Client mit sichtbarer Mission-Welt.",
+              "TASK_618 schneidet aus dem Standard-Desktop-Capture getrennte Host-/Client-Fenster-Crops und markiert den naechsten UI-Fund: Host und Client brauchen im Missionsfenster einen klaren Role-/Peer-/Team-Hinweis."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -2478,14 +2513,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_617",
-            current_focus: "Standard-Plan Host/Client Multiplayer Feel Review",
-            latest_completed_task: "TASK_617 - Host Client Standard Window Layout Hardening"
+            current_repo_base: "integration/core-foundation after TASK_618",
+            current_focus: "Host/Client Role Peer Badge HUD",
+            latest_completed_task: "TASK_618 - Host Client Standard Capture Crop Review"
           },
           metadata: {
-            branch: "task/host-client-standard-window-layout-hardening",
-            integration_base: "integration/core-foundation after TASK_616",
-            head: "task/host-client-standard-window-layout-hardening",
+            branch: "task/host-client-standard-capture-crop-review",
+            integration_base: "integration/core-foundation after TASK_617",
+            head: "task/host-client-standard-capture-crop-review",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }
