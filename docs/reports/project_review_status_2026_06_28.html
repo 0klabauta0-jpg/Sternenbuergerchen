@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_541 auf <code>task/mission-first-move-execution-feedback-pass</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_542 auf <code>task/mission-first-contact-readability-pass</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -189,7 +189,8 @@
       <span class="pill good">TASK_539 Insertion-Readability</span>
       <span class="pill good">TASK_540 First-Move</span>
       <span class="pill good">TASK_541 Execution-Feedback</span>
-      <span class="pill warn">TASK_542 als naechster Slice</span>
+      <span class="pill good">TASK_542 First-Contact</span>
+      <span class="pill warn">TASK_543 als naechster Slice</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -217,6 +218,7 @@
           <p>TASK_539 ist als aktueller Zwischenstand umgesetzt: Im Missionsbild gibt es jetzt einen read-only Insertion-/First-Order-Readability-Snapshot fuer Dropship-Payload, Card-Sichtbarkeit, LZ-Zustand, Drop-Blockade/-Bereitschaft, ausgewaehltes Fireteam und erste Order-Kontrollen. Der naechste Anschluss ist die erste echte Move-/GO-Entscheidung nach dem Deboarding.</p>
           <p>TASK_540 ist als aktueller Zwischenstand umgesetzt: Nach Deboarding gibt es jetzt einen read-only First-Move-Decision-Snapshot fuer deployed/aktive Fireteams, geplante Waypoints, Waypoint-Intent-Preview, visualisierte Waypoints und GO-Bereitschaft. Der naechste Anschluss ist die sichtbare GO-Ausfuehrung bis Bewegung/Ankunft.</p>
           <p>TASK_541 ist als aktueller Zwischenstand umgesetzt: Nach GO gibt es jetzt einen read-only First-Move-Execution-Feedback-Snapshot fuer angenommene GO-Ausfuehrung, aktive Phase-Execution, Movement-State, Ziel-/Progress-Daten und tracebaren OrderPlan/Waypoint. Der naechste Anschluss ist die erste Kontakt-/Threat-Lesbarkeit waehrend oder nach der Bewegung.</p>
+          <p>TASK_542 ist als aktueller Zwischenstand umgesetzt: Nach der ersten Bewegung gibt es jetzt einen read-only First-Contact-Readability-Snapshot fuer Fireteam-Kontakte, Detection-State, Last-Known-Position, Confidence/Report-Text, ContactMapOverlay-/Primary3D-Spiegelung, Tactical-Communication/Eventlog und Security-/Cover-/Contact-Diagnostics-Kontext. Der naechste Anschluss ist die erste echte Engagement-Lesbarkeit: Feuerstatus, Zielwahl, Deckungsreaktion und Blockgruende.</p>
           <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
@@ -390,17 +392,18 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot und TASK_541 als First-Move-Execution-Feedback.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zur ersten GO-Ausfuehrung lesbar.</td><td>Naechster spielbarer Schritt ist TASK_542: Kontakt, Threat und Feuer-/Deckungsfeedback nach der ersten Bewegung sichtbar machen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_541 plus TASK_542-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback und TASK_542 als First-Contact-Readability.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zum ersten Kontakt lesbar.</td><td>Naechster spielbarer Schritt ist TASK_543: Feuerstatus, Zielwahl, Deckungsreaktion und Blockgruende nach Kontakt sichtbar machen.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_542 plus TASK_543-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
           </div>
         </article>
         <article class="card">
           <h2>Aktuelle Lage</h2>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_540 sauber; TASK_541 laeuft auf eigenem Branch</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_541 sauber; TASK_542 laeuft auf eigenem Branch</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_selected_next"> TASK_542 ist als naechster spielbarer Slice ausgewaehlt</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_selected_next"> TASK_543 ist als naechster spielbarer Slice vorgeschlagen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_524_done"> TASK_524 Warn-Laerm-Bereinigung ist im Arbeitsstand implementiert</label>
@@ -430,8 +433,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Erledigt</td><td>TASK_541 sichert die erste GO-Ausfuehrung nach Deboarding: GO wird angenommen, Phase-Execution ist aktiv, Movement-State zeigt Ziel/Progress und der OrderPlan bleibt tracebar.</td><td>Wenn TASK_542 Kontakt-/Threat-Lesbarkeit nach der ersten Bewegung prueft.</td></tr>
-                <tr><td>Jetzt dran</td><td>TASK_542 - Mission First Contact Readability Pass. Ziel: Nach oder waehrend der ersten Bewegung muss klar sein, ob Gegner gesehen werden, welche Bedrohung gilt und warum Fireteam/Combat-Feedback reagiert.</td><td>Nach Testlauf/Commit mit konkreten Smoke-Ergebnissen.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_542 sichert die erste Kontaktlesbarkeit nach der ersten Bewegung: ausgewaehltes Fireteam, Detection-State, Last-Known-Position, Confidence/Report-Text, Overlay/Primary3D und Security-/Cover-Kontext bleiben tracebar.</td><td>Wenn TASK_543 Feuer-/Deckungsreaktion nach Kontakt prueft.</td></tr>
+                <tr><td>Jetzt dran</td><td>TASK_543 - Mission First Engagement Feedback Pass. Ziel: Nach dem ersten Kontakt muss klar sein, ob geschossen wird, welches Ziel priorisiert ist, welche Deckung greift und welcher Blockgrund ein Feuerereignis verhindert.</td><td>Nach Testlauf/Commit mit konkreten Smoke-Ergebnissen.</td></tr>
                 <tr><td>Offen</td><td>Der echte menschliche F6-/Sichttest wurde fuer die letzten Headless-Slices bewusst nicht behauptet. Die naechste manuelle Runde sollte sichtbare Bewegung, Panel-Feedback, Kontaktlinien und Drop-/Fireteam-Konsistenz pruefen.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -462,7 +465,8 @@
             <div class="finding good"><h3>Erledigt: Mission Insertion First Order Readability Pass</h3><p>TASK_539 prueft, dass Dropship-Payload, Card, LZ-Status, Drop-Bereitschaft, ausgewaehltes Fireteam und erste Order-Kontrollen im Missionsbild lesbar sind.</p></div>
             <div class="finding good"><h3>Erledigt: Mission First Move Decision Readability Pass</h3><p>TASK_540 prueft, dass nach Deboarding eine erste Move-Order Preview, visualisierten Waypoint und GO-Bereitschaft sichtbar macht.</p></div>
             <div class="finding good"><h3>Erledigt: Mission First Move Execution Feedback Pass</h3><p>TASK_541 prueft, dass nach GO aktive Execution, Movement-State, Ziel-/Progress-Daten und OrderPlan-/Waypoint-Trace sichtbar bleiben.</p></div>
-            <div class="finding medium"><h3>1. TASK_542 - Mission First Contact Readability Pass</h3><p>Nach der ersten Bewegung sollten Kontakt, Threat, Feuer-/Deckungsreaktion und Feindlesbarkeit direkt im Missionsbild nachvollziehbar sein.</p></div>
+            <div class="finding good"><h3>Erledigt: Mission First Contact Readability Pass</h3><p>TASK_542 prueft, dass nach der ersten Bewegung Contact, Detection-State, Position, Confidence, Report-Text, Overlay/Primary3D und Security-/Cover-Kontext lesbar bleiben.</p></div>
+            <div class="finding medium"><h3>1. TASK_543 - Mission First Engagement Feedback Pass</h3><p>Nach dem ersten Kontakt sollten Feuerstatus, Zielwahl, Deckungsreaktion und konkrete Blockgruende direkt im Missionsbild nachvollziehbar sein.</p></div>
           </div>
         </article>
       </div>
@@ -504,7 +508,8 @@
             <div class="finding good"><h3>Erledigt: TASK_539 - Mission Insertion First Order Readability Pass</h3><p>Die erste Missionsminute ist als read-only Snapshot pruefbar: Dropship-Karte, LZ-Status, Deploy-Bereitschaft, gewaehltes Fireteam und erste Order-Kontrollen.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_540 - Mission First Move Decision Readability Pass</h3><p>Die erste echte Move-/GO-Entscheidung nach Deboarding ist als read-only Snapshot pruefbar: Ziel, Preview, Fireteam-Bezug und GO-Status.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_541 - Mission First Move Execution Feedback Pass</h3><p>Die erste GO-Ausfuehrung ist als read-only Snapshot pruefbar: Execution-State, Movement-State, Ziel/Progress und OrderPlan-/Waypoint-Trace.</p></div>
-            <div class="finding medium"><h3>1. TASK_542 - Mission First Contact Readability Pass</h3><p>Kontakt-/Threat-/Feuerfeedback nach der ersten Bewegung sichtbar absichern.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_542 - Mission First Contact Readability Pass</h3><p>Der erste Kontakt nach Bewegung ist als read-only Snapshot pruefbar: Fireteam-Kontakt, Detection, Position, Confidence, Report-Text, Overlay/Primary3D und Security-/Cover-Kontext.</p></div>
+            <div class="finding medium"><h3>1. TASK_543 - Mission First Engagement Feedback Pass</h3><p>Feuerstatus, Zielwahl, Deckungsreaktion und konkrete Blockgruende nach dem ersten Kontakt sichtbar absichern.</p></div>
           </div>
         </article>
         <article class="card">
@@ -569,7 +574,8 @@
                 <tr><td><code>task_539_mission_insertion_first_order_readability_pass.gd</code></td><td>22 passed, 0 failed</td><td>Read-only Insertion-/First-Order-Snapshot fuer Dropship-Payload, Card, LZ, Drop-Bereitschaft, Fireteam und erste Controls; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>19 passed, 0 failed</td><td>Read-only First-Move-Decision-Snapshot fuer deployed Fireteam, geplanten Waypoint, Preview, Visualizer und GO-Bereitschaft; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
                 <tr><td><code>task_541_mission_first_move_execution_feedback_pass.gd</code></td><td>22 passed, 0 failed</td><td>Read-only First-Move-Execution-Snapshot fuer GO, aktive Execution, Movement-State und OrderPlan-/Waypoint-Trace; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
-                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_541 aktualisiert, nennt TASK_542 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
+                <tr><td><code>task_542_mission_first_contact_readability_pass.gd</code></td><td>22 passed, 0 failed</td><td>Read-only First-Contact-Snapshot fuer Fireteam-Kontakt, Detection, Position, Confidence, Report-Text, Overlay/Primary3D und Security-/Cover-Kontext; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
+                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_542 aktualisiert, nennt TASK_543 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -583,7 +589,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_540-Merge und Push. Arbeitsbranch: <code>task/mission-first-move-execution-feedback-pass</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_541-Merge und Push. Arbeitsbranch: <code>task/mission-first-contact-readability-pass</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -662,7 +668,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_542 - Mission First Contact Readability Pass"
+              "TASK_543 - Mission First Engagement Feedback Pass"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -690,25 +696,26 @@
               "TASK_538 - Homebase To Mission Launch Handoff Smoke",
               "TASK_539 - Mission Insertion First Order Readability Pass",
               "TASK_540 - Mission First Move Decision Readability Pass",
-              "TASK_541 - Mission First Move Execution Feedback Pass"
+              "TASK_541 - Mission First Move Execution Feedback Pass",
+              "TASK_542 - Mission First Contact Readability Pass"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Manueller FullHD-/F6-Sichttest bleibt trotz Visual-Audit-Snapshot offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
-              "TASK_542 muss noch pruefen, ob Kontakt, Threat, Feuer- und Deckungsfeedback nach der ersten Bewegung sichtbar konsistent bleiben."
+              "TASK_543 muss noch pruefen, ob Feuerstatus, Zielwahl, Deckungsreaktion und Blockgruende nach dem ersten Kontakt sichtbar konsistent bleiben."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status",
-            current_focus: "TASK_542 - Mission First Contact Readability Pass",
-            latest_completed_task: "TASK_541 - Mission First Move Execution Feedback Pass"
+            current_focus: "TASK_543 - Mission First Engagement Feedback Pass",
+            latest_completed_task: "TASK_542 - Mission First Contact Readability Pass"
           },
           metadata: {
-            branch: "task/mission-first-move-execution-feedback-pass",
-            integration_base: "integration/core-foundation after TASK_540",
-            head: "task/mission-first-move-execution-feedback-pass",
+            branch: "task/mission-first-contact-readability-pass",
+            integration_base: "integration/core-foundation after TASK_541",
+            head: "task/mission-first-contact-readability-pass",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

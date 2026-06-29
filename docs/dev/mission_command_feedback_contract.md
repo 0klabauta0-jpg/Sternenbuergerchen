@@ -33,6 +33,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## First-Move-Execution-Feedback
 `get_mission_first_move_execution_feedback_snapshot()` ist der Headless-Pruefpunkt fuer die erste laufende Move-Ausfuehrung nach GO. Der Snapshot darf nur bestehende Command-Feedback-, Phase-Execution-, Movement-, OrderPlan- und Visualizer-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: GO wurde ueber `execute_selected_fireteam_orders()` angenommen, das ausgewaehlte Fireteam hat einen aktiven Execution-State, der Movement-State zeigt Ziel/Progress-/Readability-Daten, und das sichtbare Feedback benennt laufende oder angenommene Ausfuehrung.
 
+## First-Contact-Readability
+`get_mission_first_contact_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten taktisch relevanten Feindkontakt nach Bewegung. Der Snapshot darf nur bestehende Contact-, FireteamContact-, Command-Feedback-, Tactical-Communication-/Eventlog-, Cover-, Security-, LOS-/Heatmap- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Kontakte erzeugen oder Commands enqueuen. Erwartete Lesbarkeit: ausgewaehltes Fireteam hat mindestens einen Contact-Eintrag mit Detection-State, Position, Confidence und Report-Text; Overlay/Primary3D spiegelt Kontakte; und Feedback/Eventlog oder Security/Cover-Kontext zeigt, warum der Kontakt taktisch relevant ist.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

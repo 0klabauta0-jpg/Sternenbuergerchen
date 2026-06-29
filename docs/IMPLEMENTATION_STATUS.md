@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_542 - Mission First Contact Readability Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_mission_first_contact_readability_snapshot()` fuer ausgewaehlte Fireteam-Kontakte, Detection-State, Last-Known-Position, Confidence/Report-Text, ContactMapOverlay-/Primary3D-Spiegelung, Tactical-Communication/Eventlog und Security-/Cover-/Contact-Diagnostics-Kontext.
+- Stand: Der Smoke startet eine Homebase-Direktmission, setzt LZ, dropped/deboarded das Fireteam, plant und fuehrt die erste Move-Order aus, positioniert einen Gegner reproduzierbar in Kontaktreichweite und prueft danach Contact-Readability.
+- Stand: Der Rolling-HTML-Bericht nennt TASK_542 als erledigten Zwischenstand und bleibt als laufender Arbeitsbericht mit erledigt/offen/naechster Schritt gepflegt.
+- Risiken/offen: Der Task prueft Headless-Snapshots und keinen menschlichen Pixel-Sichttest. Der naechste spielbare Reibungspunkt ist, ob aus dem ersten Kontakt auch Feuer-/Deckungsreaktion und Zielprioritaet klar lesbar werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_542_mission_first_contact_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_541_mission_first_move_execution_feedback_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_543 - Mission First Engagement Feedback Pass`, damit nach dem ersten Kontakt Feuerstatus, Zielwahl, Deckungsreaktion und Blockgruende nachvollziehbar werden.
+
 ### TASK_541 - Mission First Move Execution Feedback Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_540_mission_first_move_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
