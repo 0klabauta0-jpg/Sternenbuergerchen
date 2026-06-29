@@ -111,6 +111,9 @@ TASK_566 macht aus dem echten TASK_565-F6-Befund einen kleinen Hover-/Panel-Poli
 ## Frontier-Probe-Risky-Contact-Preview-Fixture
 TASK_568 belegt dieselbe First-Move-Threat-Preview mit echten ContactTracker-Daten aus der Frontier-Probe-Mission-Fixture. Die Fixture darf Gegnerpositionen und ContactTracking fuer den Testzustand vorbereiten, aber der Preview-Snapshot bleibt read-only: kein `GO`, keine Command-Queue-Mutation, kein UI-seitiges Gegnerwissen. Erwartete Lesbarkeit: Ein bekannter Kontakt erzeugt `risky` mit mindestens einer Exposure-/Threat-Line; drei bekannte klare Kontakte erzeugen `suicidal` mit mindestens drei Exposure-/Threat-Lines; HUD-/Order-Text und Primary3D-Zaehler spiegeln denselben Zustand.
 
+## Frontier-Probe-Threat-Preview-Visual-Review
+TASK_569 macht die TASK_568-Gefahrensprache im Visualpfad pruefbar. `TerrainMap3DView.get_render_snapshot()` muss Risk-State-Zaehler, Line-Role-Zaehler und Line-Color-Key-Zaehler fuer Waypoint-Intent-Preview-Linien liefern. Die Visuals bleiben read-only: kein `GO`, keine Contact-Erzeugung, keine Gameplay-Mutation. Erwartete Lesbarkeit: Risky-Linien werden gelb/risky getoent, Suicidal-Linien rot/suicidal, blockierte Linien grau, Friendly-Fire orange; die urspruenglichen Line-Rollen bleiben als Diagnose erhalten.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

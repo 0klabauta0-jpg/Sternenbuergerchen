@@ -54,7 +54,8 @@ func _test_docs_and_wiring() -> void:
 	_assert(roadmap_text.contains("TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass (implementiert)"), "Roadmap tracks TASK_566 hover/panel polish")
 	_assert(roadmap_text.contains("TASK_567 - Frontier Probe First Move Threat Preview Readability Pass (implementiert)"), "Roadmap marks TASK_567 implemented")
 	_assert(roadmap_text.contains("TASK_568 - Frontier Probe Risky Contact Preview Fixture"), "Roadmap tracks TASK_568")
-	_assert(roadmap_text.contains("TASK_569 - Frontier Probe Threat Preview Visual Review"), "Roadmap names TASK_569 follow-up")
+	_assert(roadmap_text.contains("TASK_569 - Frontier Probe Threat Preview Visual Review"), "Roadmap tracks TASK_569")
+	_assert(roadmap_text.contains("TASK_570 - Hold Fire Discipline Mission Bridge"), "Roadmap names TASK_570 follow-up")
 	_assert(contract_text.contains("Frontier-Probe-Multiplayer-F6-Visual-Evidence-Capture"), "Mission feedback contract documents TASK_562")
 	_assert(report_text.contains("TASK_562 - Frontier Probe Multiplayer F6 Visual Evidence Capture"), "Review workbench tracks TASK_562")
 	_assert(report_text.contains("TASK_563 - Frontier Probe Multiplayer F6 Evidence Report Preview"), "Review workbench tracks TASK_563")
@@ -62,7 +63,8 @@ func _test_docs_and_wiring() -> void:
 	_assert(report_text.contains("TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass"), "Review workbench tracks TASK_566")
 	_assert(report_text.contains("TASK_567 - Frontier Probe First Move Threat Preview Readability Pass"), "Review workbench tracks TASK_567")
 	_assert(report_text.contains("TASK_568 - Frontier Probe Risky Contact Preview Fixture"), "Review workbench tracks TASK_568")
-	_assert(report_text.contains("TASK_569 - Frontier Probe Threat Preview Visual Review"), "Review workbench names TASK_569 follow-up")
+	_assert(report_text.contains("TASK_569 - Frontier Probe Threat Preview Visual Review"), "Review workbench tracks TASK_569")
+	_assert(report_text.contains("TASK_570 - Hold Fire Discipline Mission Bridge"), "Review workbench names TASK_570 follow-up")
 	_assert(FileAccess.file_exists(TASK_557_TEST_PATH), "TASK_557 readability verifier remains available")
 	_assert(FileAccess.file_exists(TASK_560_TEST_PATH), "TASK_560 teamchip tooltip verifier remains available")
 	_assert(FileAccess.file_exists(TASK_561_TEST_PATH), "TASK_561 manual review guide verifier remains available")
@@ -272,7 +274,7 @@ func _build_manifest(readability_snapshot: Dictionary, tooltip_snapshot: Diction
 		"evidence_board_region_count": evidence_board_regions.size(),
 		"manual_review_required": true,
 		"manual_review_done": false,
-		"recommended_next_task": "TASK_569 - Frontier Probe Threat Preview Visual Review",
+		"recommended_next_task": "TASK_570 - Hold Fire Discipline Mission Bridge",
 	}
 
 

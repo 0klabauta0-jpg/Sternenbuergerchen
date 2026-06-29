@@ -374,7 +374,7 @@ func _draw_waypoint_intent_previews() -> void:
 			if typeof(line_variant) != TYPE_DICTIONARY:
 				continue
 			var line_entry: Dictionary = Dictionary(line_variant)
-			var line_color: Color = _get_preview_line_color(String(line_entry.get("visual_role", "")), bool(line_entry.get("blocked", false)))
+			var line_color: Color = _get_preview_line_color(String(line_entry.get("visual_role", "")), bool(line_entry.get("blocked", false)), String(entry.get("risk_state", "unknown")))
 			_draw_dashed_line(Vector2(line_entry.get("from_position", ghost_position)), Vector2(line_entry.get("to_position", ghost_position)), line_color, 1.35)
 		var heading_direction: Vector2 = Vector2(entry.get("heading_direction", Vector2.ZERO))
 		if heading_direction.length_squared() > 0.0001:
@@ -600,18 +600,40 @@ func _get_preview_risk_color(risk_state: String) -> Color:
 			return PREVIEW_UNKNOWN_COLOR
 
 
-func _get_preview_line_color(visual_role: String, blocked: bool) -> Color:
-	if blocked or visual_role == "blocked":
-		return PREVIEW_BLOCKED_LINE_COLOR
-	match visual_role.strip_edges().to_lower():
+func _get_preview_line_color(visual_role: String, blocked: bool, risk_state: String = "") -> Color:
+	var color_key: String = _get_preview_line_color_key(visual_role, blocked, risk_state)
+	match color_key:
+		"blocked":
+			return PREVIEW_BLOCKED_LINE_COLOR
 		"friendly_fire_risk":
 			return PREVIEW_FRIENDLY_FIRE_LINE_COLOR
-		"enemy_overwatch":
+		"suicidal":
 			return PREVIEW_SUICIDAL_COLOR
-		"clear_friendly_shot":
+		"risky":
+			return PREVIEW_RISKY_COLOR
+		"safe":
 			return PREVIEW_SAFE_COLOR
 		_:
 			return PREVIEW_RISKY_COLOR
+
+
+func _get_preview_line_color_key(visual_role: String, blocked: bool, risk_state: String = "") -> String:
+	var normalized_role: String = visual_role.strip_edges().to_lower()
+	if blocked or normalized_role == "blocked":
+		return "blocked"
+	match normalized_role:
+		"friendly_fire_risk":
+			return "friendly_fire_risk"
+		"enemy_overwatch":
+			return "suicidal"
+	var normalized_risk: String = risk_state.strip_edges().to_lower()
+	if normalized_risk == "suicidal":
+		return "suicidal"
+	if normalized_risk == "risky":
+		return "risky"
+	if normalized_role == "clear_friendly_shot":
+		return "safe"
+	return "risky"
 
 
 func _build_movement_map_label(movement_state: Dictionary) -> String:

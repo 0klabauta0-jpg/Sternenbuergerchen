@@ -569,6 +569,9 @@ var _mission_los_debug_entries: Array = []
 var _waypoint_intent_preview_visual_count: int = 0
 var _waypoint_intent_preview_path_line_count: int = 0
 var _waypoint_intent_preview_threat_line_count: int = 0
+var _waypoint_intent_preview_risk_state_counts: Dictionary = {}
+var _waypoint_intent_preview_line_role_counts: Dictionary = {}
+var _waypoint_intent_preview_line_color_key_counts: Dictionary = {}
 var _waypoint_intent_preview_entries: Array = []
 var _selected_unit_marker_count: int = 0
 var _selected_unit_marker_entries: Array = []
@@ -1571,6 +1574,9 @@ func get_render_snapshot() -> Dictionary:
 		"waypoint_intent_preview_visual_count": _waypoint_intent_preview_visual_count,
 		"waypoint_intent_preview_path_line_count": _waypoint_intent_preview_path_line_count,
 		"waypoint_intent_preview_threat_line_count": _waypoint_intent_preview_threat_line_count,
+		"waypoint_intent_preview_risk_state_counts": _waypoint_intent_preview_risk_state_counts.duplicate(true),
+		"waypoint_intent_preview_line_role_counts": _waypoint_intent_preview_line_role_counts.duplicate(true),
+		"waypoint_intent_preview_line_color_key_counts": _waypoint_intent_preview_line_color_key_counts.duplicate(true),
 		"waypoint_intent_preview_entries": _waypoint_intent_preview_entries.duplicate(true),
 		"selected_unit_marker_count": _selected_unit_marker_count,
 		"selected_unit_marker_entries": _selected_unit_marker_entries.duplicate(true),
@@ -5337,6 +5343,9 @@ func _reset_waypoint_intent_preview_counters() -> void:
 	_waypoint_intent_preview_visual_count = 0
 	_waypoint_intent_preview_path_line_count = 0
 	_waypoint_intent_preview_threat_line_count = 0
+	_waypoint_intent_preview_risk_state_counts.clear()
+	_waypoint_intent_preview_line_role_counts.clear()
+	_waypoint_intent_preview_line_color_key_counts.clear()
 	_waypoint_intent_preview_entries.clear()
 
 
@@ -5349,7 +5358,13 @@ func _add_waypoint_intent_preview_visuals() -> void:
 		if points.size() < 2:
 			continue
 		var risk_state: String = String(preview.get("risk_state", "unknown")).strip_edges().to_lower()
+		if risk_state.is_empty():
+			risk_state = "unknown"
+		var risk_color_key: String = _get_waypoint_preview_risk_color_key(risk_state)
+		_increment_count(_waypoint_intent_preview_risk_state_counts, risk_color_key)
 		var preview_color: Color = _get_waypoint_preview_risk_color(risk_state)
+		var entry_role_counts: Dictionary = {}
+		var entry_color_counts: Dictionary = {}
 		for index in range(1, points.size()):
 			_add_line3d(
 				_order_root,
@@ -5366,7 +5381,13 @@ func _add_waypoint_intent_preview_visuals() -> void:
 			if typeof(line_variant) != TYPE_DICTIONARY:
 				continue
 			var line_entry: Dictionary = Dictionary(line_variant)
-			var line_color: Color = _get_waypoint_preview_line_color(String(line_entry.get("visual_role", "")), bool(line_entry.get("blocked", false)))
+			var line_role_key: String = _get_waypoint_preview_line_role_key(String(line_entry.get("visual_role", "")), bool(line_entry.get("blocked", false)))
+			var line_color_key: String = _get_waypoint_preview_line_color_key(String(line_entry.get("visual_role", "")), bool(line_entry.get("blocked", false)), risk_state)
+			_increment_count(_waypoint_intent_preview_line_role_counts, line_role_key)
+			_increment_count(_waypoint_intent_preview_line_color_key_counts, line_color_key)
+			_increment_count(entry_role_counts, line_role_key)
+			_increment_count(entry_color_counts, line_color_key)
+			var line_color: Color = _get_waypoint_preview_line_color(String(line_entry.get("visual_role", "")), bool(line_entry.get("blocked", false)), risk_state)
 			_add_line3d(
 				_order_root,
 				_world_to_surface_3d_position(Vector2(line_entry.get("from_position", ghost_position)), 1.08),
@@ -5381,10 +5402,13 @@ func _add_waypoint_intent_preview_visuals() -> void:
 		_waypoint_intent_preview_entries.append({
 			"fireteam_id": String(preview.get("fireteam_id", "")).strip_edges().to_lower(),
 			"risk_state": risk_state,
+			"risk_color_key": risk_color_key,
 			"risk_reason": String(preview.get("risk_reason", "")).strip_edges(),
 			"ghost_ftl_position": ghost_position,
 			"path_line_count": maxi(points.size() - 1, 0),
 			"threat_line_count": Array(preview.get("line_of_fire_entries", [])).size(),
+			"threat_line_role_counts": entry_role_counts.duplicate(true),
+			"threat_line_color_key_counts": entry_color_counts.duplicate(true),
 			"read_only": true,
 		})
 
@@ -5401,7 +5425,7 @@ func _build_waypoint_preview_label(preview: Dictionary) -> String:
 
 
 func _get_waypoint_preview_risk_color(risk_state: String) -> Color:
-	match risk_state.strip_edges().to_lower():
+	match _get_waypoint_preview_risk_color_key(risk_state):
 		"safe":
 			return WAYPOINT_PREVIEW_SAFE_COLOR
 		"risky":
@@ -5412,18 +5436,64 @@ func _get_waypoint_preview_risk_color(risk_state: String) -> Color:
 			return WAYPOINT_PREVIEW_UNKNOWN_COLOR
 
 
-func _get_waypoint_preview_line_color(visual_role: String, blocked: bool) -> Color:
-	if blocked or visual_role.strip_edges().to_lower() == "blocked":
-		return WAYPOINT_PREVIEW_BLOCKED_LINE_COLOR
-	match visual_role.strip_edges().to_lower():
+func _get_waypoint_preview_risk_color_key(risk_state: String) -> String:
+	match risk_state.strip_edges().to_lower():
+		"safe", "risky", "suicidal":
+			return risk_state.strip_edges().to_lower()
+		_:
+			return "unknown"
+
+
+func _get_waypoint_preview_line_color(visual_role: String, blocked: bool, risk_state: String = "") -> Color:
+	var color_key: String = _get_waypoint_preview_line_color_key(visual_role, blocked, risk_state)
+	match color_key:
+		"blocked":
+			return WAYPOINT_PREVIEW_BLOCKED_LINE_COLOR
 		"friendly_fire_risk":
 			return WAYPOINT_PREVIEW_FRIENDLY_FIRE_LINE_COLOR
-		"enemy_overwatch":
+		"suicidal":
 			return WAYPOINT_PREVIEW_SUICIDAL_COLOR
-		"clear_friendly_shot":
+		"risky":
+			return WAYPOINT_PREVIEW_RISKY_COLOR
+		"safe":
 			return WAYPOINT_PREVIEW_SAFE_COLOR
 		_:
 			return WAYPOINT_PREVIEW_RISKY_COLOR
+
+
+func _get_waypoint_preview_line_color_key(visual_role: String, blocked: bool, risk_state: String = "") -> String:
+	var normalized_role: String = visual_role.strip_edges().to_lower()
+	if blocked or normalized_role == "blocked":
+		return "blocked"
+	match normalized_role:
+		"friendly_fire_risk":
+			return "friendly_fire_risk"
+		"enemy_overwatch":
+			return "suicidal"
+	var normalized_risk: String = risk_state.strip_edges().to_lower()
+	if normalized_risk == "suicidal":
+		return "suicidal"
+	if normalized_risk == "risky":
+		return "risky"
+	if normalized_role == "clear_friendly_shot":
+		return "safe"
+	return "risky"
+
+
+func _get_waypoint_preview_line_role_key(visual_role: String, blocked: bool) -> String:
+	var normalized_role: String = visual_role.strip_edges().to_lower()
+	if blocked or normalized_role == "blocked":
+		return "blocked"
+	if normalized_role.is_empty():
+		return "unknown"
+	return normalized_role
+
+
+func _increment_count(counts: Dictionary, key: String, amount: int = 1) -> void:
+	var normalized_key: String = key.strip_edges().to_lower()
+	if normalized_key.is_empty():
+		normalized_key = "unknown"
+	counts[normalized_key] = int(counts.get(normalized_key, 0)) + amount
 
 
 func _add_mission_los_debug_visuals() -> void:

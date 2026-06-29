@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_569 - Frontier Probe Threat Preview Visual Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_569_frontier_probe_threat_preview_visual_review.md`, `docs/tasks/TASK_568_frontier_probe_risky_contact_preview_fixture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Die Waypoint-Intent-Preview faerbt Threat-Linien in 2D und Primary3D jetzt nach Risk-State, ohne Blocked-/Friendly-Fire-/Overwatch-Rollen zu verlieren.
+- Stand: `TerrainMap3DView.get_render_snapshot()` liefert Risk-State-, Line-Role- und Line-Color-Key-Zaehler fuer die Preview.
+- Stand: Die Frontier-Probe-Fixture prueft `risky` als gelbe/risky Linie und `suicidal` als rote/suicidal Linien, waehrend die Line-Rollen weiter diagnostizierbar bleiben.
+- Risiken/offen: Die Messbarkeit ersetzt keinen finalen menschlichen FullHD-Spielgefuehl-Test fuer Kontrast, Linienlaenge und Labeldichte.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_569_frontier_probe_threat_preview_visual_review.gd` (31 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_568_frontier_probe_risky_contact_preview_fixture.gd` (30 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_506_tactical_decision_clarity_contract.gd` (24 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd` (34 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd` (49 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd` (38 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_563_frontier_probe_multiplayer_f6_evidence_report_preview.gd` (49 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_564_frontier_probe_multiplayer_apply_visual_polish_findings.gd` (46 passed, 0 failed), `git diff --check` (Exit 0).
+- Naechster Schritt: `TASK_570 - Hold Fire Discipline Mission Bridge`, wenn Feuerdisziplin als naechster spielbarer Taktikhebel an die lesbare Preview anschliessen soll.
+
 ### TASK_568 - Frontier Probe Risky Contact Preview Fixture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_568_frontier_probe_risky_contact_preview_fixture.md`, `docs/tasks/TASK_567_frontier_probe_first_move_threat_preview_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
