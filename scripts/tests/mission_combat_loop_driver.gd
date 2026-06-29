@@ -47,6 +47,7 @@ const SPOTTED_CONTACT_HIT_CHANCE_MALUS: float = -0.15
 const DISCIPLINE_BREAK_BASE_CHANCE: float = 0.08
 const DISCIPLINE_BREAK_COOLDOWN_TICKS: int = 10
 const DISCIPLINE_BREAK_EVENT_COLOR: Color = Color(1.0, 0.65, 0.3, 1.0)
+const RETURN_FIRE_WINDOW_TICKS: int = 18
 const MISIDENTIFICATION_BASE_CHANCE: float = 0.03
 const MISIDENTIFICATION_COOLDOWN_TICKS: int = 15
 const MISIDENTIFICATION_EVENT_COLOR: Color = Color(1.0, 0.4, 0.4, 1.0)
@@ -139,6 +140,7 @@ var _fireteam_acting_leads: Dictionary = {}
 var _fireteam_members: Dictionary = {}
 var _detection_progress: Dictionary = {}
 var _discipline_break_cooldown: Dictionary = {}
+var _recent_incoming_fire_tick_by_fireteam: Dictionary = {}
 var _misidentification_cooldown: Dictionary = {}
 var _medic_support_cooldown: Dictionary = {}
 var _medic_support_move_ready_tick: Dictionary = {}
@@ -931,6 +933,7 @@ func _on_tick_processed(tick: int) -> void:
 		profile_scopes["flank_vulnerability_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	_advance_discipline_cooldowns()
+	_advance_return_fire_windows()
 	_advance_misidentification_cooldowns()
 	_advance_medic_support_cooldowns()
 	if profile_enabled:
@@ -1145,6 +1148,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		damage_effect["fire_event_id"] = fire_event_id
 		_refresh_tactical_combat_visuals()
 	simulation_root.call("enqueue_effect", damage_effect)
+	_record_return_fire_window_if_needed(attacker, actual_target)
 	var flank_modifiers: Dictionary = Dictionary(decision.get("flank_modifiers", {}))
 	_maybe_publish_flank_event(flank_modifiers, attacker, actual_target)
 	if is_friendly_fire:
@@ -1222,6 +1226,9 @@ func _build_contact_pair_decision_diagnostic(contact_pair: Dictionary, decision:
 		"attacker_team_id": _get_unit_team_id_for_diagnostics(attacker),
 		"target_team_id": _get_unit_team_id_for_diagnostics(target),
 		"attacker_fireteam_id": _get_unit_fireteam_id(attacker),
+		"attacker_fire_status": String(attacker.call("get_fire_status")) if attacker != null and attacker.has_method("get_fire_status") else "",
+		"attacker_fire_rule": _get_unit_fire_rule_for_diagnostics(attacker),
+		"attacker_return_fire_window_active": _can_unit_return_fire(attacker),
 		"contact_state": contact_state,
 		"weapon_id": weapon_id,
 		"weapon_range_world": float(effect.get("weapon_range_world", readout.get("weapon_range_world", 0.0))),
@@ -2005,6 +2012,36 @@ func _check_discipline_break(unit) -> bool:
 	return true
 
 
+func _record_return_fire_window_if_needed(attacker, target) -> void:
+	if attacker == null or target == null:
+		return
+	if _get_unit_team_id_for_diagnostics(attacker) == friendly_team_id:
+		return
+	if _get_unit_team_id_for_diagnostics(target) != friendly_team_id:
+		return
+	var fireteam_id: String = _get_unit_fireteam_id(target)
+	if fireteam_id.is_empty():
+		return
+	_recent_incoming_fire_tick_by_fireteam[fireteam_id] = _current_tick
+
+
+func _can_unit_return_fire(unit) -> bool:
+	var fireteam_id: String = _get_unit_fireteam_id(unit)
+	if fireteam_id.is_empty() or not _recent_incoming_fire_tick_by_fireteam.has(fireteam_id):
+		return false
+	var last_incoming_tick: int = int(_recent_incoming_fire_tick_by_fireteam.get(fireteam_id, -RETURN_FIRE_WINDOW_TICKS - 1))
+	return _current_tick - last_incoming_tick <= RETURN_FIRE_WINDOW_TICKS
+
+
+func _get_unit_fire_rule_for_diagnostics(unit) -> String:
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return ""
+	var command = unit.call("get_current_unit_command")
+	if command == null or not command.has_method("get"):
+		return ""
+	return String(command.get("fire_rule")).strip_edges().to_lower()
+
+
 func _get_detection_delay_ticks(unit) -> int:
 	var unit_awareness: float = 0.5
 	if unit != null and unit.has_method("get_awareness"):
@@ -2106,6 +2143,20 @@ func _advance_discipline_cooldowns() -> void:
 
 func get_discipline_break_cooldown() -> Dictionary:
 	return _discipline_break_cooldown
+
+
+func _advance_return_fire_windows() -> void:
+	var keys_to_remove: Array = []
+	for key in _recent_incoming_fire_tick_by_fireteam.keys():
+		var last_tick: int = int(_recent_incoming_fire_tick_by_fireteam[key])
+		if _current_tick - last_tick > RETURN_FIRE_WINDOW_TICKS:
+			keys_to_remove.append(key)
+	for key in keys_to_remove:
+		_recent_incoming_fire_tick_by_fireteam.erase(key)
+
+
+func get_return_fire_window_snapshot() -> Dictionary:
+	return _recent_incoming_fire_tick_by_fireteam.duplicate(true)
 
 
 func _advance_misidentification_cooldowns() -> void:
@@ -2621,6 +2672,7 @@ func _build_fire_decision_context(extra: Dictionary = {}) -> Dictionary:
 		"los_system": _los_system,
 		"terrain_registry": _get_terrain_registry(),
 		"check_discipline_break": Callable(self, "_check_discipline_break"),
+		"can_return_fire": Callable(self, "_can_unit_return_fire"),
 		"start_detection": Callable(self, "_start_or_continue_detection"),
 		"is_detection_complete": Callable(self, "_is_detection_complete"),
 		"get_contact_state": Callable(self, "_get_fireteam_contact_state"),

@@ -199,10 +199,26 @@ static func can_unit_attack(unit, context: Dictionary = {}) -> bool:
 	if not _can_unit_seek_target(unit):
 		return false
 	if unit.has_method("get_fire_status") and String(unit.call("get_fire_status")) != "fire_at_will":
+		var fire_rule: String = _get_unit_fire_rule(unit)
+		if fire_rule == "return":
+			var can_return_fire: Callable = context.get("can_return_fire", Callable())
+			if can_return_fire.is_valid() and bool(can_return_fire.call(unit)):
+				return true
+		if fire_rule == "hold":
+			return false
 		var discipline_break: Callable = context.get("check_discipline_break", Callable())
 		if not discipline_break.is_valid() or not bool(discipline_break.call(unit)):
 			return false
 	return true
+
+
+static func _get_unit_fire_rule(unit) -> String:
+	if unit == null or not unit.has_method("get_current_unit_command"):
+		return ""
+	var command = unit.call("get_current_unit_command")
+	if command == null or not command.has_method("get"):
+		return ""
+	return String(command.get("fire_rule")).strip_edges().to_lower()
 
 
 static func _can_unit_seek_target(unit) -> bool:
@@ -274,6 +290,8 @@ static func is_engage_ready(unit) -> bool:
 static func _move_command_can_engage(command_state) -> bool:
 	if command_state == null or not command_state.has_method("get"):
 		return false
+	if String(command_state.get("fire_rule")).strip_edges().to_lower() == "return":
+		return true
 	if String(command_state.get("fire_status")) != "fire_at_will":
 		return false
 	var source_command_type: String = String(command_state.get("source_command_type")).strip_edges().to_lower()

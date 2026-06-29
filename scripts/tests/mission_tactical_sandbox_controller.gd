@@ -40,6 +40,7 @@ const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/are
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const FIRETEAM_COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_coordination_manager.gd")
 const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_stance_controller.gd")
+const TACTICAL_COMMAND_RULES_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_command_rules.gd")
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_movement_controller.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_map_overlay.gd")
@@ -353,6 +354,7 @@ var _area_order_menu_append_mode: bool = false
 var _order_visualizer_pending: bool = false
 var _phase_execution_by_fireteam: Dictionary = {}
 var _active_behavior_profiles_by_fireteam: Dictionary = {}
+var _fire_rule_by_fireteam: Dictionary = {}
 var _ad_hoc_order_controller = null
 var _area_order_resolver = null
 var _multi_fireteam_plan_resolver = null
@@ -978,6 +980,7 @@ func get_planning_state() -> Dictionary:
 		"deployed_unit_positions": _serialize_deployed_unit_positions(),
 		"selected_fireteam": _get_fireteam_name(),
 		"selected_fireteams": Array(_selected_fireteam_ids),
+		"fire_rules": _fire_rule_by_fireteam.duplicate(true),
 		"has_selected_tile": _has_selected_tile,
 		"selected_tile": _build_selected_tile_snapshot(),
 		"selected_tile_grid_position": _selected_tile_grid_position,
@@ -1540,6 +1543,53 @@ func apply_tactical_stance_sync_state(sync_state: Dictionary, should_emit_signal
 
 func set_selected_fireteams_tactical_stance(next_stance: String) -> bool:
 	return set_fireteams_tactical_stance(_selected_fireteam_ids, next_stance)
+
+
+func set_selected_fireteams_fire_rule(next_fire_rule: String) -> bool:
+	return set_fireteams_fire_rule(_selected_fireteam_ids, next_fire_rule)
+
+
+func set_fireteams_fire_rule(fireteam_ids: PackedStringArray, next_fire_rule: String) -> bool:
+	if fireteam_ids.is_empty():
+		return false
+	var normalized_rule: String = _normalize_fire_rule(next_fire_rule)
+	if normalized_rule.is_empty():
+		return false
+	var applied_count: int = 0
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		_fire_rule_by_fireteam[fireteam_id] = normalized_rule
+		_refresh_active_behavior_profile_fire_rule(fireteam_id)
+		applied_count += 1
+	if applied_count <= 0:
+		return false
+	_last_command_text = "FIRE %s (%d)" % [normalized_rule.to_upper(), applied_count]
+	_refresh_button_state()
+	_refresh_order_visuals()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
+
+
+func get_fireteam_fire_rule(fireteam_id: String) -> String:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return ""
+	return String(_fire_rule_by_fireteam.get(normalized_fireteam_id, TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_FREE)).strip_edges().to_lower()
+
+
+func get_fireteam_fire_rule_snapshot() -> Dictionary:
+	var result: Dictionary = {}
+	var fireteam_ids: Array = _get_available_fireteam_ids()
+	fireteam_ids.sort()
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		result[fireteam_id] = get_fireteam_fire_rule(fireteam_id)
+	return result
 
 
 func set_fireteams_tactical_stance(fireteam_ids: PackedStringArray, next_stance: String) -> bool:
@@ -16208,7 +16258,7 @@ func _resolve_fireteam_behavior_profile(fireteam_id: String, command_type: Strin
 	if normalized_fireteam_id.is_empty():
 		return null
 	var tactical_stance: String = get_requested_tactical_stance(normalized_fireteam_id)
-	return FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call(
+	var behavior_profile = FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call(
 		"resolve_profile",
 		normalized_fireteam_id,
 		_get_fireteam_units(normalized_fireteam_id, true),
@@ -16218,6 +16268,62 @@ func _resolve_fireteam_behavior_profile(fireteam_id: String, command_type: Strin
 		_get_terrain_registry(),
 		tactical_stance
 	)
+	_attach_fire_rule_to_behavior_profile(normalized_fireteam_id, behavior_profile)
+	return behavior_profile
+
+
+func _normalize_fire_rule(value: String) -> String:
+	var normalized_rule: String = value.strip_edges().to_lower()
+	if TACTICAL_COMMAND_RULES_SCRIPT.is_allowed_fire_rule(normalized_rule):
+		return normalized_rule
+	return ""
+
+
+func _attach_fire_rule_to_behavior_profile(fireteam_id: String, behavior_profile) -> void:
+	if behavior_profile == null:
+		return
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if not _fire_rule_by_fireteam.has(normalized_fireteam_id):
+		return
+	var normalized_rule: String = get_fireteam_fire_rule(normalized_fireteam_id)
+	if normalized_rule.is_empty():
+		return
+	var metadata: Dictionary = {}
+	if typeof(behavior_profile) == TYPE_DICTIONARY:
+		metadata = Dictionary(behavior_profile.get("metadata", {})).duplicate(true)
+	elif behavior_profile.has_method("to_dict"):
+		metadata = Dictionary(Dictionary(behavior_profile.to_dict()).get("metadata", {})).duplicate(true)
+	metadata["fire_rule"] = normalized_rule
+	metadata["fire_rule_source"] = "mission_fireteam_rule"
+	if typeof(behavior_profile) == TYPE_DICTIONARY:
+		behavior_profile["metadata"] = metadata
+	else:
+		behavior_profile.metadata = metadata
+
+
+func _refresh_active_behavior_profile_fire_rule(fireteam_id: String) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() or not _active_behavior_profiles_by_fireteam.has(normalized_fireteam_id):
+		return
+	var behavior_profile = _active_behavior_profiles_by_fireteam.get(normalized_fireteam_id, null)
+	_attach_fire_rule_to_behavior_profile(normalized_fireteam_id, behavior_profile)
+
+
+func _apply_explicit_fire_rule_to_unit_command(command, fireteam_id: String) -> void:
+	if command == null:
+		return
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if not _fire_rule_by_fireteam.has(normalized_fireteam_id):
+		return
+	var normalized_rule: String = get_fireteam_fire_rule(normalized_fireteam_id)
+	if normalized_rule.is_empty():
+		return
+	command.fire_rule = normalized_rule
+	match normalized_rule:
+		TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_HOLD, TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_RETURN:
+			command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
+		TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_FREE, TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS:
+			command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 
 
 func _set_active_behavior_profile(fireteam_id: String, behavior_profile) -> void:
@@ -16438,6 +16544,7 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 		command.source_command_type = "hold_position"
 		command.source_task_type = POST_DROP_SECURITY_ORIGIN
 		command.phase = phase_index
+		_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 		if not bool(command.call("is_valid")):
 			continue
 		if unit.has_method("assign_unit_command"):
@@ -16683,6 +16790,7 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		command.weapon_posture = String(modifiers.get("weapon_posture", UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED))
 		command.posture_policy_id = String(modifiers.get("posture_policy_id", ""))
 		command.sight_range_factor = float(modifiers.get("sight_range_factor", 1.0))
+		_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 		if not bool(command.call("is_valid")):
 			continue
 		if unit.has_method("assign_unit_command"):
@@ -17340,6 +17448,7 @@ func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionar
 	command.contact_initiative_seconds = float(modifiers.get("contact_initiative_seconds", 0.0))
 	command.aim_readiness_percent = float(modifiers.get("aim_readiness_percent", 0.0))
 	command.team_target_support_percent = float(modifiers.get("team_target_support_percent", 0.0))
+	_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 	if not bool(command.call("is_valid")):
 		return false
 	if unit.has_method("assign_unit_command"):
@@ -17523,6 +17632,7 @@ func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary
 	command.contact_initiative_seconds = float(modifiers.get("contact_initiative_seconds", 0.0))
 	command.aim_readiness_percent = float(modifiers.get("aim_readiness_percent", 0.0))
 	command.team_target_support_percent = float(modifiers.get("team_target_support_percent", 0.0))
+	_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 	if not bool(command.call("is_valid")):
 		return false
 	if unit.has_method("assign_unit_command"):

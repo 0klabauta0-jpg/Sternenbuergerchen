@@ -3,6 +3,7 @@ extends RefCounted
 
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const FIRETEAM_BEHAVIOR_PROFILE_SCRIPT: GDScript = preload("res://scripts/command/fireteam_behavior_profile.gd")
+const TACTICAL_COMMAND_RULES_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_command_rules.gd")
 
 const ADVANCE_STYLE_RUSH: String = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_RUSH
 const ADVANCE_STYLE_BOUNDING: String = FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.ADVANCE_STYLE_BOUNDING
@@ -215,6 +216,7 @@ func start_execution(
 	var cover_priority: float = _extract_cover_priority(behavior_profile)
 	var cohesion_threshold: float = _extract_cohesion_threshold(behavior_profile)
 	var execution_profile: Dictionary = _extract_execution_profile(behavior_profile)
+	var fire_rule: String = _extract_fire_rule(behavior_profile)
 	var leader_unit_id: String = _extract_leader_unit_id(leader, member_records)
 	var origin_anchor: Vector2 = _resolve_origin_anchor(member_records, leader)
 	var resolved_target_position: Vector2 = target_position
@@ -256,6 +258,7 @@ func start_execution(
 		"execution_label": String(execution_profile.get("execution_label", "STEADY")),
 		"execution_reason": String(execution_profile.get("execution_reason", "")),
 		"execution_hint": String(execution_profile.get("execution_hint", "")),
+		"fire_rule": fire_rule,
 		"formation_scatter_factor": formation_scatter_factor,
 		"formation_slot_spacing_world": _resolve_command_formation_slot_spacing(normalized_command_type, tactical_stance),
 		"formation_parallel_spacing_world": _resolve_command_parallel_spacing(normalized_command_type, tactical_stance),
@@ -1974,7 +1977,8 @@ func _enqueue_unit_command(
 	command.contact_initiative_seconds = float(behavior_modifiers.get("contact_initiative_seconds", 0.0))
 	command.aim_readiness_percent = float(behavior_modifiers.get("aim_readiness_percent", 0.0))
 	command.team_target_support_percent = float(behavior_modifiers.get("team_target_support_percent", 0.0))
-	command.fire_status = _resolve_unit_command_fire_status(command.command_type, command.source_command_type, command.weapon_posture)
+	command.fire_rule = _resolve_unit_command_fire_rule(behavior_modifiers, extra_fields)
+	command.fire_status = _resolve_unit_command_fire_status(command.command_type, command.source_command_type, command.weapon_posture, command.fire_rule)
 	if not bool(command.call("is_valid")):
 		return false
 	if unit != null and unit.has_method("assign_unit_command"):
@@ -2028,7 +2032,21 @@ func _should_enable_fireteam_local_avoidance(command_type: String, move_speed_fa
 	return normalized_command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION or normalized_command_type == UNIT_COMMAND_SCRIPT.TYPE_ENGAGE_AREA
 
 
-func _resolve_unit_command_fire_status(command_type: String, source_command_type: String, weapon_posture: String) -> String:
+func _resolve_unit_command_fire_rule(behavior_modifiers: Dictionary, extra_fields: Dictionary) -> String:
+	var raw_rule: String = String(extra_fields.get("fire_rule", behavior_modifiers.get("fire_rule", ""))).strip_edges().to_lower()
+	if raw_rule.is_empty():
+		return ""
+	if TACTICAL_COMMAND_RULES_SCRIPT.is_allowed_fire_rule(raw_rule):
+		return raw_rule
+	return ""
+
+
+func _resolve_unit_command_fire_status(command_type: String, source_command_type: String, weapon_posture: String, fire_rule: String = "") -> String:
+	var normalized_fire_rule: String = fire_rule.strip_edges().to_lower()
+	if normalized_fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_HOLD or normalized_fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_RETURN:
+		return UNIT_COMMAND_SCRIPT.FIRE_STATUS_HOLD_FIRE
+	if normalized_fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_FREE or normalized_fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS:
+		return UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 	var normalized_command_type: String = command_type.strip_edges().to_lower()
 	var normalized_source: String = source_command_type.strip_edges().to_lower()
 	var normalized_weapon_posture: String = weapon_posture.strip_edges().to_lower()
@@ -2101,7 +2119,11 @@ func _resolve_stage_attack_bonus(state: Dictionary, style: String, is_covering: 
 
 
 func _resolve_stage_behavior_modifiers(state: Dictionary) -> Dictionary:
-	return get_behavior_stance_modifiers(String(state.get("command_type", "")), String(state.get("tactical_stance", "")))
+	var modifiers: Dictionary = get_behavior_stance_modifiers(String(state.get("command_type", "")), String(state.get("tactical_stance", "")))
+	var fire_rule: String = String(state.get("fire_rule", "")).strip_edges().to_lower()
+	if TACTICAL_COMMAND_RULES_SCRIPT.is_allowed_fire_rule(fire_rule):
+		modifiers["fire_rule"] = fire_rule
+	return modifiers
 
 
 func _append_behavior_modifier_fields(command_dict: Dictionary, behavior_modifiers: Dictionary) -> void:
@@ -2117,6 +2139,8 @@ func _append_behavior_modifier_fields(command_dict: Dictionary, behavior_modifie
 	command_dict["behavior_weapon_posture"] = String(behavior_modifiers.get("weapon_posture", ""))
 	command_dict["behavior_cover_priority_percent"] = float(behavior_modifiers.get("cover_priority_percent", 0.0))
 	command_dict["behavior_aim_readiness_percent"] = float(behavior_modifiers.get("aim_readiness_percent", 0.0))
+	if behavior_modifiers.has("fire_rule"):
+		command_dict["fire_rule"] = String(behavior_modifiers.get("fire_rule", "")).strip_edges().to_lower()
 	command_dict["contact_initiative_seconds"] = float(behavior_modifiers.get("contact_initiative_seconds", 0.0))
 	command_dict["team_target_support_percent"] = float(behavior_modifiers.get("team_target_support_percent", 0.0))
 	var behavior_command_type: String = String(behavior_modifiers.get("command_type", "")).strip_edges().to_lower()
@@ -2427,6 +2451,21 @@ func _extract_execution_profile(behavior_profile) -> Dictionary:
 	}
 
 
+func _extract_fire_rule(behavior_profile) -> String:
+	if behavior_profile == null:
+		return ""
+	var source: Dictionary = {}
+	if typeof(behavior_profile) == TYPE_DICTIONARY:
+		source = Dictionary(behavior_profile)
+	else:
+		source = behavior_profile.to_dict() if behavior_profile.has_method("to_dict") else {}
+	var metadata: Dictionary = Dictionary(source.get("metadata", {}))
+	var fire_rule: String = String(metadata.get("fire_rule", source.get("fire_rule", ""))).strip_edges().to_lower()
+	if TACTICAL_COMMAND_RULES_SCRIPT.is_allowed_fire_rule(fire_rule):
+		return fire_rule
+	return ""
+
+
 func _apply_execution_target_offset(fireteam_id: String, origin_anchor: Vector2, target_position: Vector2, order_fidelity: float) -> Vector2:
 	var instability: float = clampf(1.0 - order_fidelity, 0.0, 1.0)
 	if instability <= 0.12:
@@ -2717,6 +2756,7 @@ func _build_public_state(state: Dictionary) -> Dictionary:
 		"execution_label": String(state.get("execution_label", "STEADY")),
 		"execution_reason": String(state.get("execution_reason", "")),
 		"execution_hint": String(state.get("execution_hint", "")),
+		"fire_rule": String(state.get("fire_rule", "")),
 		"formation_scatter_factor": float(state.get("formation_scatter_factor", 1.0)),
 		"formation_slot_spacing_world": _resolve_formation_slot_spacing(state),
 		"formation_parallel_spacing_world": _resolve_parallel_travel_spacing(state),

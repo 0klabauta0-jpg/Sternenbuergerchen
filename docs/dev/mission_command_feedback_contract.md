@@ -114,6 +114,11 @@ TASK_568 belegt dieselbe First-Move-Threat-Preview mit echten ContactTracker-Dat
 ## Frontier-Probe-Threat-Preview-Visual-Review
 TASK_569 macht die TASK_568-Gefahrensprache im Visualpfad pruefbar. `TerrainMap3DView.get_render_snapshot()` muss Risk-State-Zaehler, Line-Role-Zaehler und Line-Color-Key-Zaehler fuer Waypoint-Intent-Preview-Linien liefern. Die Visuals bleiben read-only: kein `GO`, keine Contact-Erzeugung, keine Gameplay-Mutation. Erwartete Lesbarkeit: Risky-Linien werden gelb/risky getoent, Suicidal-Linien rot/suicidal, blockierte Linien grau, Friendly-Fire orange; die urspruenglichen Line-Rollen bleiben als Diagnose erhalten.
 
+## Hold-Fire-Discipline-Mission-Bridge
+TASK_570 verbindet die bestehenden taktischen Fire-Rules mit dem Live-Missionspfad. Fire-Rules sind Mission-Command-Kontext pro Fireteam und werden nur bei expliziter Setzung in Behavior-Metadaten, Movement-State und `UnitCommand.fire_rule` geschrieben. UI/Preview duerfen diese Werte anzeigen, aber keine Unit- oder Combat-Wahrheit speichern. Der echte Befehl laeuft weiter ueber `SimulationRoot.enqueue_command()`.
+
+Erwartete Rule-Abbildung: `hold` und `return` setzen `UnitCommand.fire_status = hold_fire`; `free` und `suppress` setzen `fire_at_will`. `CombatFireDecisionResolver` blockiert `hold`, erlaubt `return` nur bei aktivem Incoming-Fire-Fenster des Fireteams und behandelt `free`/`suppress` als feuerbereit. `suppress` ist in TASK_570 noch kein vollstaendiges Suppression-/Ammo-System, sondern ein durchgereichter Fire-Rule-Zustand fuer den naechsten Gameplay-Slice. Contact-Decision-Diagnostik muss `attacker_fire_rule`, `attacker_fire_status` und `attacker_return_fire_window_active` sichtbar machen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

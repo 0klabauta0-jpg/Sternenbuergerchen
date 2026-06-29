@@ -8,6 +8,10 @@ const TYPE_RETREAT: String = "retreat"
 const TYPE_SEEK_COVER: String = "seek_cover"
 const FIRE_STATUS_FIRE_AT_WILL: String = "fire_at_will"
 const FIRE_STATUS_HOLD_FIRE: String = "hold_fire"
+const FIRE_RULE_HOLD: String = "hold"
+const FIRE_RULE_RETURN: String = "return"
+const FIRE_RULE_FREE: String = "free"
+const FIRE_RULE_SUPPRESS: String = "suppress"
 const MOVEMENT_POSTURE_IDLE: String = "idle"
 const MOVEMENT_POSTURE_TRAVEL: String = "travel"
 const MOVEMENT_POSTURE_TACTICAL: String = "tactical"
@@ -31,6 +35,12 @@ const ALLOWED_FIRE_STATUSES: PackedStringArray = [
 	FIRE_STATUS_FIRE_AT_WILL,
 	FIRE_STATUS_HOLD_FIRE,
 ]
+const ALLOWED_FIRE_RULES: PackedStringArray = [
+	FIRE_RULE_HOLD,
+	FIRE_RULE_RETURN,
+	FIRE_RULE_FREE,
+	FIRE_RULE_SUPPRESS,
+]
 const ALLOWED_MOVEMENT_POSTURES: PackedStringArray = [
 	MOVEMENT_POSTURE_IDLE,
 	MOVEMENT_POSTURE_TRAVEL,
@@ -53,6 +63,7 @@ var priority: int = 0
 var unit_id: String = ""
 var team_id: String = ""
 var fire_status: String = FIRE_STATUS_FIRE_AT_WILL
+var fire_rule: String = ""
 var source_command_type: String = ""
 var move_speed_factor: float = 1.0
 var sight_range_factor: float = 1.0
@@ -102,6 +113,9 @@ func is_valid() -> bool:
 	if not ALLOWED_FIRE_STATUSES.has(fire_status):
 		return false
 
+	if not fire_rule.is_empty() and not ALLOWED_FIRE_RULES.has(fire_rule):
+		return false
+
 	if not is_allowed_movement_posture(movement_posture):
 		return false
 
@@ -130,6 +144,7 @@ func to_dict() -> Dictionary:
 		"unit_id": unit_id,
 		"team_id": team_id,
 		"fire_status": fire_status,
+		"fire_rule": fire_rule,
 		"source_command_type": source_command_type,
 		"move_speed_factor": move_speed_factor,
 		"sight_range_factor": sight_range_factor,
@@ -182,6 +197,9 @@ func _apply_dict(data: Dictionary) -> void:
 
 	if data.has("fire_status"):
 		fire_status = String(data["fire_status"])
+
+	if data.has("fire_rule"):
+		fire_rule = String(data["fire_rule"]).strip_edges().to_lower()
 
 	if data.has("source_command_type"):
 		source_command_type = String(data["source_command_type"])

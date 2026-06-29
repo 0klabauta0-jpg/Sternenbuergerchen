@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_570 - Hold Fire Discipline Mission Bridge
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_570_hold_fire_discipline_mission_bridge.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_command_rules_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Fireteams koennen jetzt explizite Fire-Rules (`hold`, `return`, `free`, `suppress`) als Mission-Command-Kontext erhalten, ohne dass UI/Preview Gameplay-Wahrheit speichern.
+- Stand: Explizite Fire-Rules werden ueber Behavior-Metadaten und `FireteamMovementController` in `UnitCommand.fire_rule` und den Command-Dict geschrieben; ohne explizite Rule bleibt der alte Command-Pfad erhalten.
+- Stand: `CombatFireDecisionResolver` blockiert `hold`, erlaubt `return` nur ueber ein Incoming-Fire-Fenster und behandelt `free`/`suppress` als feuerbereit; die Contact-Diagnostik nennt Fire-Rule, Fire-Status und Return-Fire-Fenster.
+- Risiken/offen: Sichtbare Fire-Rule-Controls im Command-Panel sind Folgearbeit; `suppress` ist noch kein Ammo-/Suppression-System, sondern ein sauber durchgereichter Rule-Zustand.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_570_hold_fire_discipline_mission_bridge.gd` (46 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_569_frontier_probe_threat_preview_visual_review.gd` (31 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_568_frontier_probe_risky_contact_preview_fixture.gd` (30 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_567_frontier_probe_first_move_threat_preview_readability_pass.gd` (32 passed, 0 failed), `git diff --check` (Exit 0).
+- Naechster Schritt: `TASK_571 - Fire Rule Controls Readability Polish`, wenn die neuen Rules direkt im Missions-HUD bedienbar und lesbarer werden sollen.
+
 ### TASK_569 - Frontier Probe Threat Preview Visual Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_569_frontier_probe_threat_preview_visual_review.md`, `docs/tasks/TASK_568_frontier_probe_risky_contact_preview_fixture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
