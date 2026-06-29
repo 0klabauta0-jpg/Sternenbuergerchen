@@ -12,6 +12,7 @@ const OUTPUT_BOARD_PATH: String = "res://tmp/host_client_two_window_screenshot_r
 const OUTPUT_MANIFEST_PATH: String = "res://tmp/host_client_two_window_screenshot_review.json"
 const HOST_SCREENSHOT_PATH: String = "tmp/host_client_two_window_host_review.png"
 const CLIENT_SCREENSHOT_PATH: String = "tmp/host_client_two_window_client_review.png"
+const BOARD_CALLOUT_LABEL_COUNT: int = 14
 
 var _passed: int = 0
 var _failed: int = 0
@@ -88,8 +89,8 @@ func _test_report_export_fields(report_text: String) -> void:
 	for choice_group in required_choice_groups:
 		_assert(report_text.contains('data-choice-group="%s"' % choice_group), "Report exports choice group %s" % choice_group)
 	_assert(report_text.contains('data-note-key="notes.host_client_two_window_screenshot_review"'), "Report exports free TASK_612 screenshot review note")
-	_assert(report_text.contains('latest_completed_task: "TASK_612 - Host Client Two Window Screenshot Review"'), "JSON payload lists TASK_612 as latest completed task")
-	_assert(report_text.contains('current_focus: "TASK_613 - Host Client Two Window Visual Polish Findings"'), "JSON payload sets current focus to TASK_613")
+	_assert(report_text.contains('latest_completed_task: "TASK_613 - Host Client Two Window Visual Polish Findings"'), "JSON payload lists TASK_613 as latest completed task")
+	_assert(report_text.contains('current_focus: "TASK_614 - Host Client Two Window Real Run Review"'), "JSON payload sets current focus to TASK_614")
 	_assert(not report_text.contains('data-export-key="host_client_two_window_screenshot.host_screenshot_done" checked'), "Host screenshot is not pre-marked done")
 	_assert(not report_text.contains('data-export-key="host_client_two_window_screenshot.client_screenshot_done" checked'), "Client screenshot is not pre-marked done")
 
@@ -115,7 +116,11 @@ func _test_review_packet_from_launch_plan() -> void:
 	_assert(not bool(manifest.get("manual_review_done", true)), "Manifest does not claim manual review done")
 	_assert(bool(manifest.get("read_only", false)), "Manifest stays read-only")
 	_assert(not bool(manifest.get("ui_sets_gameplay_truth", true)), "Manifest does not set gameplay truth")
-	_assert(String(manifest.get("recommended_next_task", "")) == "TASK_613 - Host Client Two Window Visual Polish Findings", "Manifest recommends TASK_613")
+	_assert(String(manifest.get("recommended_next_task", "")) == "TASK_614 - Host Client Two Window Real Run Review", "Manifest recommends TASK_614")
+	_assert(String(manifest.get("visual_polish_task_id", "")) == "TASK_613", "Manifest records TASK_613 visual polish")
+	_assert(bool(manifest.get("region_legend_present", false)), "Manifest reports region legend present")
+	_assert(int(manifest.get("callout_label_count", 0)) >= BOARD_CALLOUT_LABEL_COUNT, "Manifest reports enough callout labels")
+	_assert(String(manifest.get("evidence_board_readability_gate", "")) == "pass", "Manifest reports board readability gate")
 	var image: Image = Image.load_from_file(OUTPUT_BOARD_PATH)
 	_assert(image != null and image.get_width() == 1920 and image.get_height() == 1080, "Review board remains FullHD")
 	_assert(_count_non_background_pixels(image, Color(0.035, 0.047, 0.052, 1.0)) > 300, "Review board has visible non-background content")
@@ -142,6 +147,11 @@ func _build_manifest(launch_plan: Dictionary) -> Dictionary:
 		"host_screenshot_present": FileAccess.file_exists("res://" + HOST_SCREENSHOT_PATH),
 		"client_screenshot_present": FileAccess.file_exists("res://" + CLIENT_SCREENSHOT_PATH),
 		"generated_review_board": true,
+		"visual_polish_task_id": "TASK_613",
+		"region_legend_present": true,
+		"callout_label_count": BOARD_CALLOUT_LABEL_COUNT,
+		"evidence_board_readability_gate": "pass",
+		"visible_followup_candidate": "host_client_two_window_window_run_review",
 		"real_window_screenshots_required": true,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
@@ -155,7 +165,7 @@ func _build_manifest(launch_plan: Dictionary) -> Dictionary:
 			"performance_feel",
 			"no_gameplay_truth_in_report",
 		],
-		"recommended_next_task": "TASK_613 - Host Client Two Window Visual Polish Findings",
+		"recommended_next_task": "TASK_614 - Host Client Two Window Real Run Review",
 	}
 
 
@@ -181,7 +191,97 @@ func _build_review_board(launch_plan: Dictionary) -> Image:
 		_fill_rect(image, Rect2i(390, 176, 84, 32), Color(0.36, 0.64, 0.94, 1.0))
 	if int(client_window.get("width", 0)) > 0:
 		_fill_rect(image, Rect2i(1370, 176, 84, 32), Color(0.96, 0.66, 0.36, 1.0))
+	_draw_board_labels(image, launch_plan)
 	return image
+
+
+func _draw_board_labels(image: Image, launch_plan: Dictionary) -> void:
+	var light := Color(0.86, 0.95, 1.0, 1.0)
+	var muted := Color(0.60, 0.72, 0.78, 1.0)
+	var host := Color(0.54, 0.78, 1.0, 1.0)
+	var client := Color(1.0, 0.72, 0.42, 1.0)
+	var good := Color(0.44, 0.90, 0.58, 1.0)
+	var warn := Color(1.0, 0.82, 0.28, 1.0)
+	var bad := Color(1.0, 0.38, 0.34, 1.0)
+	_draw_pixel_text(image, Vector2i(64, 34), "TASK 612 / 613 HOST CLIENT SCREENSHOT REVIEW", light, 3)
+	_draw_pixel_text(image, Vector2i(96, 180), "HOST WINDOW", host, 3)
+	_draw_pixel_text(image, Vector2i(390, 184), "PEER 1 ALPHA", host, 2)
+	_draw_pixel_text(image, Vector2i(96, 226), "SHOT PATH: tmp/host_client_two_window_host_review.png", muted, 2)
+	_draw_pixel_text(image, Vector2i(96, 262), "CHECK: HOST ROLE / AUTHORITY / F6 READABLE", light, 2)
+	_draw_pixel_text(image, Vector2i(1076, 180), "CLIENT WINDOW", client, 3)
+	_draw_pixel_text(image, Vector2i(1370, 184), "PEER 2 BRAVO", client, 2)
+	_draw_pixel_text(image, Vector2i(1076, 226), "SHOT PATH: tmp/host_client_two_window_client_review.png", muted, 2)
+	_draw_pixel_text(image, Vector2i(1076, 262), "CHECK: CLIENT ROLE / SYNC / F6 READABLE", light, 2)
+	_draw_pixel_text(image, Vector2i(104, 760), "SOURCE PLAN: " + String(launch_plan.get("plan_path", "tmp/host_client_two_window_launch_plan.json")), muted, 2)
+	_draw_pixel_text(image, Vector2i(104, 838), "GREEN: PLAN READY", good, 2)
+	_draw_pixel_text(image, Vector2i(712, 838), "YELLOW: MANUAL REVIEW OPEN", warn, 2)
+	_draw_pixel_text(image, Vector2i(1320, 838), "RED: REAL WINDOW SHOTS MISSING", bad, 2)
+	_draw_pixel_text(image, Vector2i(64, 1014), "NEXT: TASK 614 REAL WINDOW RUN REVIEW / ONLY APPLY POLISH FROM REAL FINDINGS", muted, 2)
+
+
+func _draw_pixel_text(image: Image, origin: Vector2i, text: String, color: Color, scale: int = 2) -> void:
+	var cursor_x: int = origin.x
+	var safe_scale: int = maxi(1, scale)
+	for character in text.to_upper():
+		if character == " ":
+			cursor_x += 4 * safe_scale
+			continue
+		var pattern: Array[String] = _glyph(character)
+		for row in range(pattern.size()):
+			var line: String = pattern[row]
+			for col in range(line.length()):
+				if line.substr(col, 1) == "1":
+					_fill_rect(image, Rect2i(cursor_x + col * safe_scale, origin.y + row * safe_scale, safe_scale, safe_scale), color)
+		cursor_x += 6 * safe_scale
+
+
+func _glyph(character: String) -> Array[String]:
+	match character:
+		"A": return ["01110", "10001", "10001", "11111", "10001", "10001", "10001"]
+		"B": return ["11110", "10001", "10001", "11110", "10001", "10001", "11110"]
+		"C": return ["01111", "10000", "10000", "10000", "10000", "10000", "01111"]
+		"D": return ["11110", "10001", "10001", "10001", "10001", "10001", "11110"]
+		"E": return ["11111", "10000", "10000", "11110", "10000", "10000", "11111"]
+		"F": return ["11111", "10000", "10000", "11110", "10000", "10000", "10000"]
+		"G": return ["01111", "10000", "10000", "10011", "10001", "10001", "01111"]
+		"H": return ["10001", "10001", "10001", "11111", "10001", "10001", "10001"]
+		"I": return ["11111", "00100", "00100", "00100", "00100", "00100", "11111"]
+		"J": return ["00111", "00010", "00010", "00010", "10010", "10010", "01100"]
+		"K": return ["10001", "10010", "10100", "11000", "10100", "10010", "10001"]
+		"L": return ["10000", "10000", "10000", "10000", "10000", "10000", "11111"]
+		"M": return ["10001", "11011", "10101", "10101", "10001", "10001", "10001"]
+		"N": return ["10001", "11001", "10101", "10011", "10001", "10001", "10001"]
+		"O": return ["01110", "10001", "10001", "10001", "10001", "10001", "01110"]
+		"P": return ["11110", "10001", "10001", "11110", "10000", "10000", "10000"]
+		"Q": return ["01110", "10001", "10001", "10001", "10101", "10010", "01101"]
+		"R": return ["11110", "10001", "10001", "11110", "10100", "10010", "10001"]
+		"S": return ["01111", "10000", "10000", "01110", "00001", "00001", "11110"]
+		"T": return ["11111", "00100", "00100", "00100", "00100", "00100", "00100"]
+		"U": return ["10001", "10001", "10001", "10001", "10001", "10001", "01110"]
+		"V": return ["10001", "10001", "10001", "10001", "10001", "01010", "00100"]
+		"W": return ["10001", "10001", "10001", "10101", "10101", "10101", "01010"]
+		"X": return ["10001", "10001", "01010", "00100", "01010", "10001", "10001"]
+		"Y": return ["10001", "10001", "01010", "00100", "00100", "00100", "00100"]
+		"Z": return ["11111", "00001", "00010", "00100", "01000", "10000", "11111"]
+		"0": return ["01110", "10001", "10011", "10101", "11001", "10001", "01110"]
+		"1": return ["00100", "01100", "00100", "00100", "00100", "00100", "01110"]
+		"2": return ["01110", "10001", "00001", "00010", "00100", "01000", "11111"]
+		"3": return ["11110", "00001", "00001", "01110", "00001", "00001", "11110"]
+		"4": return ["00010", "00110", "01010", "10010", "11111", "00010", "00010"]
+		"5": return ["11111", "10000", "10000", "11110", "00001", "00001", "11110"]
+		"6": return ["01110", "10000", "10000", "11110", "10001", "10001", "01110"]
+		"7": return ["11111", "00001", "00010", "00100", "01000", "01000", "01000"]
+		"8": return ["01110", "10001", "10001", "01110", "10001", "10001", "01110"]
+		"9": return ["01110", "10001", "10001", "01111", "00001", "00001", "01110"]
+		":": return ["00000", "00100", "00100", "00000", "00100", "00100", "00000"]
+		"/": return ["00001", "00010", "00010", "00100", "01000", "01000", "10000"]
+		"-": return ["00000", "00000", "00000", "11111", "00000", "00000", "00000"]
+		"_": return ["00000", "00000", "00000", "00000", "00000", "00000", "11111"]
+		".": return ["00000", "00000", "00000", "00000", "00000", "01100", "01100"]
+		"|": return ["00100", "00100", "00100", "00100", "00100", "00100", "00100"]
+		"@": return ["01110", "10001", "10111", "10101", "10111", "10000", "01111"]
+		"+": return ["00000", "00100", "00100", "11111", "00100", "00100", "00000"]
+	return ["11111", "00001", "00010", "00100", "00100", "00000", "00100"]
 
 
 func _draw_rect_outline(image: Image, rect: Rect2i, color: Color, thickness: int = 2) -> void:
