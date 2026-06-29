@@ -57,6 +57,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Combat-HUD-F6-Visual-Audit
 `get_combat_hud_f6_visual_audit_snapshot()` ist der Headless-Pruefpunkt fuer TASK_549. Der Snapshot darf nur den TASK_548-Tooltip-Snapshot, Control-/Label-Bounds und HUD-Layout-Metadaten zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Combat-, Damage-, Contact-, Movement- oder UI-State-Entscheidung erzeugen. Erwartete Lesbarkeit: #17 und #18 haben sichtbare, hover-faehige Combat-HUD-Labels, dieselbe Tooltip-Payload, FullHD-konforme Panel-/Tooltip-Bounds und keine Ueberlappung zwischen Selected-Fireteam- und Mission-Control-Panel. Ein manueller Screenshot bleibt als separater Sichttest markiert.
 
+## Combat-HUD-Manual-Screenshot-Notes
+TASK_550 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workbench fuer Combat-HUD-Tooltip und Panel-Lesbarkeit. Der Bericht darf Screenshotpfad, Viewport, Hover-Ergebnis, Stilnotizen und Follow-up-Entscheidungen exportieren, aber keine Runtime- oder Gameplay-Wahrheit speichern. Erwartete Struktur: exportierbare `combat_hud_manual.*` Controls, eine freie `notes.combat_hud_manual_review`-Notiz und eine klare Markierung, dass der manuelle Screenshot erst durch den User/Playtest bestaetigt wird.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -178,7 +178,8 @@ git checkout -b batch/<batch-name>
 - TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke (implementiert)
 - TASK_548 - Combat HUD Visual Detail Tooltip Pass (implementiert)
 - TASK_549 - Combat HUD F6 Visual Audit (implementiert)
-- TASK_550 - Combat HUD Manual Screenshot Notes Pass
+- TASK_550 - Combat HUD Manual Screenshot Notes Pass (implementiert)
+- TASK_551 - Combat HUD Tooltip Style Polish
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
