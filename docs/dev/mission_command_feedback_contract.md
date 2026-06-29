@@ -108,6 +108,9 @@ TASK_566 macht aus dem echten TASK_565-F6-Befund einen kleinen Hover-/Panel-Poli
 ## Frontier-Probe-First-Move-Threat-Preview-Readability
 `get_frontier_probe_first_move_threat_preview_readability_snapshot()` ist der Headless-Pruefpunkt fuer TASK_567. Der Snapshot darf nur den bestehenden TASK_540-First-Move-Snapshot, Waypoint-Intent-Preview, Command-Feedback und `TerrainMap3DView.get_render_snapshot()` zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Kontakte erzeugen, kein GO ausfuehren und keine Command-Queue mutieren. Erwartete Lesbarkeit: Vor `GO` ist ein Risk-State (`safe`, `risky`, `suicidal` oder `unknown`) sichtbar, der kurze HUD-/Order-Text nennt Risiko plus ETA/Distanz, `unknown` hat einen erklaerten Grund, und Primary3D meldet Ghost-/Path-Preview sowie vorhandene Threat-Line-Zaehler.
 
+## Frontier-Probe-Risky-Contact-Preview-Fixture
+TASK_568 belegt dieselbe First-Move-Threat-Preview mit echten ContactTracker-Daten aus der Frontier-Probe-Mission-Fixture. Die Fixture darf Gegnerpositionen und ContactTracking fuer den Testzustand vorbereiten, aber der Preview-Snapshot bleibt read-only: kein `GO`, keine Command-Queue-Mutation, kein UI-seitiges Gegnerwissen. Erwartete Lesbarkeit: Ein bekannter Kontakt erzeugt `risky` mit mindestens einer Exposure-/Threat-Line; drei bekannte klare Kontakte erzeugen `suicidal` mit mindestens drei Exposure-/Threat-Lines; HUD-/Order-Text und Primary3D-Zaehler spiegeln denselben Zustand.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_568 - Frontier Probe Risky Contact Preview Fixture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_568_frontier_probe_risky_contact_preview_fixture.md`, `docs/tasks/TASK_567_frontier_probe_first_move_threat_preview_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Die Frontier-Probe-Mission-Fixture setzt echte ContactTracker-Kontakte und prueft damit die bestehende First-Move-Threat-Preview gegen bekannte Feindpositionen.
+- Stand: Ein einzelner bekannter Kontakt muss vor `GO` `RISKY` im Order-Text, mindestens eine Exposure und passende Threat-Line-Zaehler liefern.
+- Stand: Drei bekannte klare Kontakte muessen vor `GO` `SUICIDAL`, mindestens drei Exposures und passende Threat-Line-Zaehler liefern.
+- Risiken/offen: Die Fixture belegt die Daten-/Preview-Kette, ersetzt aber keinen manuellen FullHD-Sichttest fuer Farben, Linienlaenge und HUD-Lesbarkeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_568_frontier_probe_risky_contact_preview_fixture.gd` (28 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_567_frontier_probe_first_move_threat_preview_readability_pass.gd` (32 passed, 0 failed), `godot_console.exe --headless --path . --script scripts/tests/task_506_tactical_decision_clarity_contract.gd` (24 passed, 0 failed), `git diff --check` (Exit 0).
+- Naechster Schritt: `TASK_569 - Frontier Probe Threat Preview Visual Review`, wenn die Threat-Linien/Risk-Labels im echten F6-/FullHD-Blick bewertet und ggf. poliert werden sollen.
+
 ### TASK_567 - Frontier Probe First Move Threat Preview Readability Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_567_frontier_probe_first_move_threat_preview_readability_pass.md`, `docs/tasks/TASK_540_mission_first_move_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
