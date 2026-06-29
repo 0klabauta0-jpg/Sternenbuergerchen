@@ -215,7 +215,8 @@ git checkout -b batch/<batch-name>
 - TASK_584 - Mini AAR Combat Metrics Shell (implementiert)
 - TASK_585 - Mini AAR Debrief Screen Stub (implementiert)
 - TASK_586 - Debrief Return To Homebase Handoff (implementiert)
-- TASK_587 - Debrief Visual Polish Pass
+- TASK_587 - Debrief Visual Polish Pass (implementiert)
+- TASK_588 - Debrief AAR Data Bridge
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

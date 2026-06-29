@@ -6,6 +6,8 @@ const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/ai
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const BACKGROUND_ID: String = "debrief_desert_explosion_base"
+const DEBRIEF_SUMMARY_CHIP_COUNT_MIN := 5
+const DEBRIEF_TEAM_STATUS_MAX_CHARS := 180
 
 signal return_to_fob_requested()
 signal return_to_homebase_requested()
@@ -37,6 +39,61 @@ func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
 
 
+func get_debrief_visual_polish_snapshot() -> Dictionary:
+	var summary_strip := get_node_or_null("Panel/Margin/VBox/SummaryStrip") as HBoxContainer
+	var result_label := get_node_or_null("Panel/Margin/VBox/ResultLabel") as Label
+	var team_state_label := get_node_or_null("Panel/Margin/VBox/TeamStateLabel") as Label
+	var homebase_button := get_node_or_null("Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton") as Button
+	var fob_button := get_node_or_null("Panel/Margin/VBox/ButtonRow/ReturnToFOBButton") as Button
+	var chips: Array = []
+	if summary_strip != null:
+		for child in summary_strip.get_children():
+			var chip_label := child as Label
+			if chip_label == null:
+				continue
+			chips.append({
+				"name": chip_label.name,
+				"text": chip_label.text,
+				"style_id": String(chip_label.get_meta("debrief_chip_style_id", "")),
+			})
+	var checks: Array = []
+	_append_visual_polish_check(checks, "summary_strip_visible", summary_strip != null and summary_strip.visible, "Summary strip should be visible.")
+	_append_visual_polish_check(checks, "summary_chips_visible", chips.size() >= DEBRIEF_SUMMARY_CHIP_COUNT_MIN, "Debrief should show compact outcome chips.")
+	_append_visual_polish_check(checks, "result_text_compact", result_label != null and result_label.text.length() <= 140 and result_label.text.count("\n") <= 1, "Result text should be short enough to scan.")
+	_append_visual_polish_check(checks, "team_status_compact", team_state_label != null and team_state_label.text.length() <= DEBRIEF_TEAM_STATUS_MAX_CHARS, "Team status should stay compact.")
+	_append_visual_polish_check(checks, "homebase_primary_action", homebase_button != null and String(homebase_button.get_meta("debrief_action_role", "")) == "primary_homebase", "Return to Homebase should read as the primary action.")
+	_append_visual_polish_check(checks, "fob_secondary_action", fob_button != null and String(fob_button.get_meta("debrief_action_role", "")) == "secondary_fob", "Return to FOB should remain secondary.")
+	_append_visual_polish_check(checks, "background_readability_policy", String(get_node_or_null("Panel").get_meta("background_readability_policy", "")) == "dimmed_catalog_background" if get_node_or_null("Panel") != null else false, "Dimmed background readability policy should remain active.")
+	_append_visual_polish_check(checks, "read_only", true, "Snapshot reads visual state only.")
+	var failed_count: int = 0
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_count += 1
+	return {
+		"schema": "sternenbuergerchen.debrief_visual_polish.v1",
+		"task_id": "TASK_587",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"layout_key": "debrief_visual_polish_v1",
+		"has_mission_result": not _mission_result.is_empty(),
+		"summary_chip_count": chips.size(),
+		"summary_chips": chips,
+		"result_text": result_label.text if result_label != null else "",
+		"result_text_length": result_label.text.length() if result_label != null else 0,
+		"result_line_count": result_label.get_line_count() if result_label != null else 0,
+		"team_status_text": team_state_label.text if team_state_label != null else "",
+		"team_status_length": team_state_label.text.length() if team_state_label != null else 0,
+		"primary_action_label": homebase_button.text if homebase_button != null else "",
+		"secondary_action_label": fob_button.text if fob_button != null else "",
+		"visual_only": true,
+		"checks": checks,
+	}
+
+
 func get_background_catalog_snapshot() -> Dictionary:
 	var entry: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID))
 	var background := get_node_or_null("Background") as TextureRect
@@ -61,6 +118,7 @@ func get_background_catalog_snapshot() -> Dictionary:
 func _render_result() -> void:
 	var result_label: Label = get_node("Panel/Margin/VBox/ResultLabel")
 	var team_state_label: Label = get_node("Panel/Margin/VBox/TeamStateLabel")
+	var summary_strip: HBoxContainer = _ensure_summary_strip()
 	var air_asset_label: Label = _ensure_air_asset_events_label()
 	var ftl_feedback_label: Label = _ensure_ftl_feedback_label()
 	var character_events_label: Label = _ensure_character_events_label()
@@ -70,8 +128,15 @@ func _render_result() -> void:
 	_apply_help_id(ftl_feedback_label, "character_sheet.ftl_tactical_impact")
 
 	if _mission_result.is_empty():
-		result_label.text = "Mission result: pending"
-		team_state_label.text = "Returned team state: unavailable"
+		_render_summary_chips(summary_strip, [
+			{"id": "result", "text": "PENDING"},
+			{"id": "winner", "text": "WIN -"},
+			{"id": "duration", "text": "TIME -"},
+			{"id": "condition", "text": "COND -"},
+			{"id": "objective", "text": "OBJ -"},
+		])
+		result_label.text = "Mission pending | Debrief data unavailable"
+		team_state_label.text = "Team: unavailable"
 		air_asset_label.text = "Air asset: pending"
 		ftl_feedback_label.text = "FTL feedback: pending"
 		character_events_label.text = "Character updates: pending"
@@ -90,26 +155,37 @@ func _render_result() -> void:
 	if winner_text.is_empty():
 		winner_text = "unknown"
 
-	result_label.text = "Mission %s\nResult: %s\nWinner: %s\nCondition: %s\nDuration: %.1fs\nObjective captured: %s" % [
+	_render_summary_chips(summary_strip, [
+		{"id": "result", "text": result.to_upper()},
+		{"id": "winner", "text": "WIN %s" % winner_text.to_upper()},
+		{"id": "duration", "text": "TIME %ss" % _format_debrief_seconds(duration_seconds)},
+		{"id": "condition", "text": "COND %s" % _format_compact_token(win_condition_type, "unknown")},
+		{"id": "objective", "text": "OBJ %s" % ("TAKEN" if objective_captured else "OPEN")},
+	])
+	result_label.text = "Mission %s | %s | Winner %s | %s" % [
 		mission_outcome,
 		result.to_upper(),
 		winner_text,
-		win_condition_type,
-		duration_seconds,
-		"yes" if objective_captured else "no",
+		_format_compact_token(win_condition_type, "condition unknown"),
 	]
 
-	var team_state_lines: PackedStringArray = []
+	var team_state_counts: Dictionary = {}
+	var team_state_tokens: PackedStringArray = []
 	for member_state in _mission_result.get("team_states", []):
 		var display_name: String = String(member_state.get("display_name", member_state.get("unit_id", "")))
 		var vital_state: String = String(member_state.get("vital_state", "unknown"))
 		var health_points: int = int(member_state.get("health_points", -1))
-		team_state_lines.append("%s: %s (%d HP)" % [display_name, vital_state, health_points])
+		team_state_counts[vital_state] = int(team_state_counts.get(vital_state, 0)) + 1
+		if team_state_tokens.size() < 4:
+			team_state_tokens.append("%s %s %dHP" % [display_name, vital_state.to_upper(), health_points])
 
-	if team_state_lines.is_empty():
-		team_state_label.text = "Returned team state: unavailable"
+	if team_state_tokens.is_empty():
+		team_state_label.text = "Team: unavailable"
 	else:
-		team_state_label.text = "Returned team state:\n%s" % "\n".join(team_state_lines)
+		team_state_label.text = "Team: %s | %s" % [
+			_format_team_state_counts(team_state_counts),
+			" | ".join(team_state_tokens),
+		]
 
 	var recovery_state: Dictionary = Dictionary(_mission_result.get("air_asset_recovery", {})).duplicate(true)
 	if recovery_state.is_empty():
@@ -226,6 +302,11 @@ func _apply_readability_style() -> void:
 		panel.set_meta("background_readability_policy", "dimmed_catalog_background")
 
 	META_UI_SKIN_SCRIPT.style_header_label(get_node_or_null("Panel/Margin/VBox/TitleLabel"), 18)
+	var title_label := get_node_or_null("Panel/Margin/VBox/TitleLabel") as Label
+	if title_label != null:
+		title_label.text = "Mission Debrief"
+		title_label.set_meta("debrief_title_style_id", "debrief_title_v1")
+	_apply_summary_chip_style()
 	for path in [
 		"Panel/Margin/VBox/ResultLabel",
 		"Panel/Margin/VBox/TeamStateLabel",
@@ -244,7 +325,15 @@ func _apply_readability_style() -> void:
 		"Panel/Margin/VBox/ButtonRow/ReturnToFOBButton",
 		"Panel/Margin/VBox/ButtonRow/ReturnToHomebaseButton",
 	]:
-		META_UI_SKIN_SCRIPT.style_secondary_button(get_node_or_null(path) as Button)
+		var button := get_node_or_null(path) as Button
+		if button == null:
+			continue
+		if button.name == "ReturnToHomebaseButton":
+			META_UI_SKIN_SCRIPT.style_primary_button(button)
+			button.set_meta("debrief_action_role", "primary_homebase")
+		else:
+			META_UI_SKIN_SCRIPT.style_secondary_button(button)
+			button.set_meta("debrief_action_role", "secondary_fob")
 
 
 func _apply_help_id(control: Control, help_id: String) -> void:
@@ -311,6 +400,117 @@ func _format_debrief_morale_bucket(morale: float, frustration: float) -> String:
 	if morale >= 0.64 and frustration <= 0.28:
 		return "stabil"
 	return "ruhig"
+
+
+func _ensure_summary_strip() -> HBoxContainer:
+	var vbox := get_node("Panel/Margin/VBox") as VBoxContainer
+	var existing := vbox.get_node_or_null("SummaryStrip") as HBoxContainer
+	if existing != null:
+		return existing
+	var strip := HBoxContainer.new()
+	strip.name = "SummaryStrip"
+	strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	strip.add_theme_constant_override("separation", 8)
+	vbox.add_child(strip)
+	var result_label := vbox.get_node_or_null("ResultLabel")
+	if result_label != null:
+		vbox.move_child(strip, result_label.get_index())
+	return strip
+
+
+func _render_summary_chips(strip: HBoxContainer, chips: Array) -> void:
+	if strip == null:
+		return
+	while strip.get_child_count() > chips.size():
+		var extra := strip.get_child(strip.get_child_count() - 1)
+		strip.remove_child(extra)
+		extra.queue_free()
+	for index in range(chips.size()):
+		var chip_data: Dictionary = Dictionary(chips[index])
+		var chip: Label = null
+		if index < strip.get_child_count():
+			chip = strip.get_child(index) as Label
+		if chip == null:
+			chip = Label.new()
+			strip.add_child(chip)
+		chip.name = "DebriefChip_%s" % String(chip_data.get("id", index)).strip_edges()
+		chip.text = String(chip_data.get("text", "")).strip_edges()
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		chip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		chip.clip_text = true
+		chip.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		chip.set_meta("debrief_chip_style_id", "debrief_summary_chip_v1")
+	_apply_summary_chip_style()
+
+
+func _apply_summary_chip_style() -> void:
+	var strip := get_node_or_null("Panel/Margin/VBox/SummaryStrip") as HBoxContainer
+	if strip == null:
+		return
+	for child in strip.get_children():
+		var chip := child as Label
+		if chip == null:
+			continue
+		chip.add_theme_color_override("font_color", Color("172026"))
+		chip.add_theme_font_size_override("font_size", 11)
+		chip.add_theme_stylebox_override("normal", _build_chip_stylebox())
+
+
+func _build_chip_stylebox() -> StyleBoxFlat:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color("d7e2e8")
+	stylebox.border_color = Color("94a6b0")
+	stylebox.border_width_left = 1
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 5
+	stylebox.corner_radius_top_right = 5
+	stylebox.corner_radius_bottom_left = 5
+	stylebox.corner_radius_bottom_right = 5
+	stylebox.content_margin_left = 8
+	stylebox.content_margin_top = 5
+	stylebox.content_margin_right = 8
+	stylebox.content_margin_bottom = 5
+	return stylebox
+
+
+func _format_debrief_seconds(seconds: float) -> String:
+	var total_seconds: int = maxi(int(round(seconds)), 0)
+	var minutes: int = total_seconds / 60
+	var remaining_seconds: int = total_seconds % 60
+	if minutes <= 0:
+		return "%d" % remaining_seconds
+	return "%d:%02d" % [minutes, remaining_seconds]
+
+
+func _format_compact_token(value: String, fallback: String) -> String:
+	var normalized: String = value.strip_edges()
+	if normalized.is_empty():
+		normalized = fallback
+	return normalized.replace("_", " ").to_upper()
+
+
+func _format_team_state_counts(counts: Dictionary) -> String:
+	var keys: Array = counts.keys()
+	keys.sort()
+	var parts: PackedStringArray = PackedStringArray()
+	for key_variant in keys:
+		var key: String = String(key_variant).strip_edges()
+		if key.is_empty():
+			continue
+		parts.append("%s %d" % [key.to_upper(), int(counts.get(key, 0))])
+	if parts.is_empty():
+		return "UNKNOWN"
+	return " / ".join(parts)
+
+
+func _append_visual_polish_check(checks: Array, check_id: String, passed: bool, message: String) -> void:
+	checks.append({
+		"id": check_id,
+		"passed": passed,
+		"message": message,
+	})
 
 
 func _apply_background_texture() -> void:

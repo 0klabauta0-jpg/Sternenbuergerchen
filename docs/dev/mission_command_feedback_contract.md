@@ -199,6 +199,11 @@ TASK_586 macht den vorhandenen Meta-Rueckweg vom Debrief in die Homebase pruefba
 
 Erwartete Struktur: `get_debrief_return_homebase_handoff_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_return_homebase_handoff.v1`, `current_meta_view`, `target_meta_view = homebase`, `return_action_available`, `return_signal_connected`, `homebase_visible`, `debrief_visible`, `navigation_visible`, `active_mission_released`, `last_mission_result`, `debrief_mission_result`, `mission_result_preserved`, `read_only = true` und `ui_sets_gameplay_truth = false`. Vor dem Return muss Debrief sichtbar und Homebase verborgen sein; nach dem Return muss Homebase sichtbar, Debrief verborgen und die Meta-Navigation wieder sichtbar sein. TASK_587 bleibt fuer sichtbaren Debrief-Polish vorgesehen.
 
+## Debrief-Visual-Polish
+TASK_587 verbessert nur die Lesbarkeit des vorhandenen Debrief-Screens. `DebriefTestScreen.get_debrief_visual_polish_snapshot()` darf Summary-Chips, kompakte Labeltexte, Button-Rollen und Hintergrund-/Panel-Lesbarkeit melden. Der Snapshot darf keine Navigation ausloesen, kein MissionResult veraendern und keine XP-, Skill-, Ammo-, Suppression- oder Combat-Wahrheit erzeugen.
+
+Erwartete Struktur: `get_debrief_visual_polish_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_visual_polish.v1`, `layout_key = debrief_visual_polish_v1`, `summary_chip_count`, `summary_chips`, `result_text`, `team_status_text`, `primary_action_label`, `secondary_action_label`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Lesbarkeit: mindestens fuenf Summary-Chips, kompakter Ergebnistext, kompakter Teamstatus, Homebase als primaere Aktion, FOB als sekundaere Aktion und weiterhin dimmed-background/readability policy. TASK_588 bleibt fuer die Bruecke von Mini-AAR-Kampfmetriken in den sichtbaren Meta-Debrief vorgesehen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

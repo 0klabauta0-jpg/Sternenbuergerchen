@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_586 auf <code>task/debrief-return-homebase-handoff</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_587 auf <code>task/debrief-visual-polish-pass</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -256,7 +256,8 @@
       <span class="pill good">TASK_584 Mini-AAR</span>
       <span class="pill good">TASK_585 Debrief-Stub</span>
       <span class="pill good">TASK_586 Debrief-Handoff</span>
-      <span class="pill warn">TASK_587 Debrief-Polish offen</span>
+      <span class="pill good">TASK_587 Debrief-Polish</span>
+      <span class="pill warn">TASK_588 AAR-Bruecke offen</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -478,7 +479,8 @@
             <div class="metric"><strong>TASK_584</strong><span>Basis: Mini-AAR-Schale fuer Fire, FF, SUP und Statusmetriken</span></div>
             <div class="metric"><strong>TASK_585</strong><span>Basis: kleine read-only Debrief-Screen-Schale</span></div>
             <div class="metric"><strong>TASK_586</strong><span>aktuell umgesetzt: Debrief-Return in den Homebase-/Meta-Loop pruefbar</span></div>
-            <div class="metric"><strong>TASK_587</strong><span>naechster sinnvoller Slice: sichtbaren Debrief angenehmer lesen und bedienen</span></div>
+            <div class="metric"><strong>TASK_587</strong><span>aktuell umgesetzt: sichtbarer Debrief mit Summary-Chips, kompakter Teamzeile und klarer Hauptaktion</span></div>
+            <div class="metric"><strong>TASK_588</strong><span>naechster sinnvoller Slice: vorhandene Mini-AAR-Kampfmetriken in den Meta-Debrief fuehren</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
@@ -500,7 +502,7 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture, TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht, TASK_564 als lesbare Evidence-Board-Legende, TASK_565 als echten F6-Screenshot-Fix fuer den Selected-Fireteam-Status, TASK_566 als kompakten Teamchip-/Hover-/Panel-Polish, TASK_567 als First-Move-Threat-Preview-Lesbarkeit, TASK_568 als reproduzierbares Risky-/Suicidal-Contact-Fixture, TASK_569 als messbare Threat-Line-Farbsprache, TASK_570 als Hold-/Return-/Free-/Suppress-Fire-Bridge, TASK_571 als sichtbare Fire-Rule-Controls, TASK_572 als FullHD-F6-Readability-Smoke, TASK_573 als exportierbaren ROE-Screenshot-/Spielgefuehl-Notizblock, TASK_574 als reproduzierbare ROE-F6-Evidence mit PNG/Manifest, TASK_575 als belegten Active-ROE-Affordance-Polish, TASK_576 als `SUP AREA`-Preview vor GO, TASK_577 als lokale SUP-F6-/Visual-Evidence, TASK_578 als eigene Suppress-Area-Visualisierung, TASK_579 als exportierbaren SUP-F6-Sichtreview, TASK_580 als getunte SUP-Area-Lesemarkierung, TASK_581 als SUP-Intent-/Outcome-Diagnose, TASK_582 als deduplizierten SUP-AAR-/Debug-Stub, TASK_583 als kompaktes SUP-AAR-Report-Panel, TASK_584 als gemeinsame Mini-AAR-Kampfmetriken-Schale, TASK_585 als kleinen Debrief-Screen-Stub und TASK_586 als Debrief->Homebase-Handoff.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns im Tooltip, waehrend die erste Move-Order vor GO Risiko/Ungewissheit, farbige Kontaktlinien und direkt bedienbare Feuerdisziplin kennt. `SUP` ist jetzt vor GO sichtbar, im Combat-Outcome als Druckabsicht lesbar, als kleiner AAR-/Debug-Wert zaehlbar, als Panel-Summary erklaert, mit Fire-/Friendly-Fire-/Statusmetriken in einer Mini-AAR-Schale zusammengefuehrt, als Debrief-Screen-Struktur lesbar und sauber zur Homebase zurueckgefuehrt, ohne echte Suppression-/Ammo-/XP-Wirkung zu behaupten.</td><td>Naechster spielbarer Anschluss ist TASK_587: Debrief Visual Polish Pass.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture, TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht, TASK_564 als lesbare Evidence-Board-Legende, TASK_565 als echten F6-Screenshot-Fix fuer den Selected-Fireteam-Status, TASK_566 als kompakten Teamchip-/Hover-/Panel-Polish, TASK_567 als First-Move-Threat-Preview-Lesbarkeit, TASK_568 als reproduzierbares Risky-/Suicidal-Contact-Fixture, TASK_569 als messbare Threat-Line-Farbsprache, TASK_570 als Hold-/Return-/Free-/Suppress-Fire-Bridge, TASK_571 als sichtbare Fire-Rule-Controls, TASK_572 als FullHD-F6-Readability-Smoke, TASK_573 als exportierbaren ROE-Screenshot-/Spielgefuehl-Notizblock, TASK_574 als reproduzierbare ROE-F6-Evidence mit PNG/Manifest, TASK_575 als belegten Active-ROE-Affordance-Polish, TASK_576 als `SUP AREA`-Preview vor GO, TASK_577 als lokale SUP-F6-/Visual-Evidence, TASK_578 als eigene Suppress-Area-Visualisierung, TASK_579 als exportierbaren SUP-F6-Sichtreview, TASK_580 als getunte SUP-Area-Lesemarkierung, TASK_581 als SUP-Intent-/Outcome-Diagnose, TASK_582 als deduplizierten SUP-AAR-/Debug-Stub, TASK_583 als kompaktes SUP-AAR-Report-Panel, TASK_584 als gemeinsame Mini-AAR-Kampfmetriken-Schale, TASK_585 als kleinen Debrief-Screen-Stub, TASK_586 als Debrief->Homebase-Handoff und TASK_587 als sichtbaren Debrief-Polish.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns im Tooltip, waehrend die erste Move-Order vor GO Risiko/Ungewissheit, farbige Kontaktlinien und direkt bedienbare Feuerdisziplin kennt. `SUP` ist jetzt vor GO sichtbar, im Combat-Outcome als Druckabsicht lesbar, als kleiner AAR-/Debug-Wert zaehlbar, als Panel-Summary erklaert, mit Fire-/Friendly-Fire-/Statusmetriken in einer Mini-AAR-Schale zusammengefuehrt, als Debrief-Screen-Struktur lesbar, sauber zur Homebase zurueckgefuehrt und im Meta-Debrief mit Summary-Chips/kompaktem Teamstatus schneller scanbar, ohne echte Suppression-/Ammo-/XP-Wirkung zu behaupten.</td><td>Naechster spielbarer Anschluss ist TASK_588: Debrief AAR Data Bridge.</td></tr>
                 <tr><td>Asset-/Warn-Hygiene</td><td>TASK_559 registriert die deterministische Factory-Colormap-UID vor Factory-GLB-Loads und entfernt damit eine wiederkehrende Godot-Importwarnung aus F6-Smokes.</td><td>Test- und Exportausgaben werden leiser, damit neue echte Fehler schneller auffallen.</td><td>Weitere Warnquellen nur als eigene kleine Hygiene-Slices angehen.</td></tr>
                 <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview an, TASK_564 erklaert die Evidence-Regionen, TASK_565 dokumentiert den echten F6-Befund, TASK_566 dokumentiert den kompakten Hover-/Panel-Polish, TASK_567 dokumentiert die First-Move-Threat-Preview, TASK_568 dokumentiert die Risky-/Suicidal-Fixture, TASK_569 dokumentiert die Threat-Line-Farbsprache, TASK_570 dokumentiert die Fire-Rule-Mission-Bridge, TASK_571/TASK_572 dokumentieren Bedienung und F6-Smoke, TASK_573 fuehrt die Berichtspflege als ROE-Screenshot-Workbench weiter, TASK_574 haengt die neue ROE-F6-Evidence an, TASK_575 dokumentiert den angewendeten Evidence-Polish, TASK_576 dokumentiert die SUP-Preview-Lesbarkeit, TASK_577 haengt die SUP-F6-/Visual-Evidence an, TASK_578 dokumentiert die eigene Suppress-Area-Visualisierung, TASK_579 macht den SUP-F6-Sichtreview exportierbar, TASK_580 dokumentiert das angewendete SUP-Area-Tuning, TASK_581 dokumentiert den SUP-Outcome-Smoke, TASK_582 dokumentiert den SUP-AAR-/Debug-Zaehler, TASK_583 dokumentiert das lesbare SUP-AAR-Panel, TASK_584 dokumentiert die Mini-AAR-Kampfmetriken-Schale, TASK_585 dokumentiert den Debrief-Screen-Stub und TASK_586 dokumentiert den Debrief->Homebase-Handoff.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
               </tbody>
@@ -586,8 +588,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Aktueller Stand</td><td>TASK_586 ist der letzte Arbeitsstand: Der vorhandene Debrief-Return fuehrt pruefbar in den Homebase-/Meta-Loop zurueck, erhaelt das MissionResult und laesst keine aktive Mission als laufenden State haengen.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
-                <tr><td>Naechster Schritt</td><td>TASK_587 sollte den sichtbaren Debrief polieren: bessere Lesbarkeit, klare AAR-Metriken, angenehme Button-/Panel-Hierarchie, weiterhin ohne XP-, Ammo- oder Suppression-Wahrheit.</td><td>Wenn der Debrief-Visual-Polish implementiert oder bewusst zurueckgestellt wird.</td></tr>
+                <tr><td>Aktueller Stand</td><td>TASK_587 ist der letzte Arbeitsstand: Der sichtbare Debrief hat Summary-Chips, kompakten Ergebnistext, kompakten Teamstatus und eine klare Homebase-Hauptaktion.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
+                <tr><td>Naechster Schritt</td><td>TASK_588 sollte die vorhandene Mini-AAR-Kampfmetriken-Schale in den sichtbaren Meta-Debrief fuehren, weiterhin ohne XP-, Ammo- oder Suppression-Wahrheit.</td><td>Wenn die Debrief-AAR-Datenbruecke implementiert oder bewusst zurueckgestellt wird.</td></tr>
                 <tr><td>Noch nicht bauen</td><td>Kein grosses Ammo-, Suppression- oder AAR-System, solange der kleine Intent-/Outcome-Pfad nicht sauber gelesen und getestet ist.</td><td>Wenn spaeter echte Suppression-Wirkung, Munitionsverbrauch oder AAR-Messwerte als eigener Task beginnen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_562 erzeugt eine reproduzierbare MP-F6-Bildbasis unter <code>tmp/frontier_probe_mp_f6_visual_evidence.png</code> plus Manifest; im Headless-Dummy als Evidence-Board aus Snapshot-Rects.</td><td>Wenn TASK_565 aus echtem MP-F6-Export konkrete Gameplay-HUD-Polish-Aenderungen ableitet.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_563 macht diese lokale Evidence direkt im HTML-Zwischenbericht sichtbar und exportiert die Artefaktpfade sowie Readback-/Evidence-Board-Flags.</td><td>Wenn neue Capture-Artefakte, manuelle Sichtnotizen oder echte Host/Client-F6-Screenshots hinzukommen.</td></tr>
@@ -614,7 +616,8 @@
                 <tr><td>Erledigt</td><td>TASK_584 - Mini AAR Combat Metrics Shell. FireEvents, Friendly-Fire-Risiko, SUP-Zaehler und Wounded/Down/Extracted-Felder sind in einer gemeinsamen read-only Mini-AAR-Schale gesammelt.</td><td>Wenn echte AAR-/Debriefing-UI oder Suppression-Messwerte starten.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_585 - Mini AAR Debrief Screen Stub. Die Mini-AAR-Schale hat jetzt eine kleine read-only Screen-Struktur mit Titel, Summary, Rows, Chips und Grenztext.</td><td>Wenn echte AAR-/Debriefing-UI oder Suppression-Messwerte starten.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_586 - Debrief Return To Homebase Handoff. Der vorhandene Debrief-Rueckweg in die Homebase ist als read-only Handoff mit Signalbindung, Result-Erhalt, Screen-Sichtbarkeit und aktivem Missionszustand pruefbar.</td><td>Wenn echte AAR-/Debriefing-UI oder Meta-Loop-Folgewerte starten.</td></tr>
-                <tr><td>Naechst</td><td>TASK_587 - Debrief Visual Polish Pass. Ziel: den sichtbaren Debrief angenehmer und schneller lesbar machen, ohne schon XP/Skill/Ammo zu bauen.</td><td>Wenn der naechste kleine AAR-Spielbarkeits-Slice gestartet wird.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_587 - Debrief Visual Polish Pass. Der sichtbare Debrief nutzt Summary-Chips, einen kompakten Ergebnistext, einen kompakten Teamstatus und eine klare Homebase-Hauptaktion.</td><td>Wenn echte AAR-/Debriefing-UI oder Meta-Loop-Folgewerte starten.</td></tr>
+                <tr><td>Naechst</td><td>TASK_588 - Debrief AAR Data Bridge. Ziel: die vorhandene Mini-AAR-Kampfmetriken-Schale in den sichtbaren Meta-Debrief fuehren, ohne schon XP/Skill/Ammo zu bauen.</td><td>Wenn der naechste kleine AAR-Spielbarkeits-Slice gestartet wird.</td></tr>
                 <tr><td>Offen</td><td>Der finale menschliche Spielgefuehl-Test bleibt offen. Die naechste manuelle Runde sollte pruefen, ob Teamchip-Hover, erste Move-Preview, Kontaktlinien und Paneldichte zusammen angenehm wirken.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -760,7 +763,8 @@
             <div class="finding good"><h3>Erledigt: TASK_584 - Mini AAR Combat Metrics Shell</h3><p>FireEvents, Friendly-Fire-Risiko, SUP-Zaehler und Fireteam-Statuswerte liegen jetzt in einer gemeinsamen read-only Mini-AAR-Schale.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_585 - Mini AAR Debrief Screen Stub</h3><p>Die Mini-AAR-Schale ist jetzt als kompakte read-only Debrief-Screen-Struktur mit Titel, Summary, Rows, Chips und Grenztext lesbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_586 - Debrief Return To Homebase Handoff</h3><p>Der vorhandene Debrief-Rueckweg ist als read-only Handoff pruefbar: Homebase-Ziel, Signalbindung, MissionResult-Erhalt, Screen-Sichtbarkeit und aktive Mission.</p></div>
-            <div class="finding medium"><h3>1. TASK_587 - Debrief Visual Polish Pass</h3><p>Als naechstes sollte der sichtbare Debrief angenehmer lesbar werden, ohne XP-, Ammo- oder Suppression-System vorzuziehen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_587 - Debrief Visual Polish Pass</h3><p>Der sichtbare Debrief nutzt jetzt Summary-Chips, eine kompakte Ergebniszeile, kurze Teamstatusdaten und Homebase als Hauptaktion.</p></div>
+            <div class="finding medium"><h3>1. TASK_588 - Debrief AAR Data Bridge</h3><p>Als naechstes sollten die vorhandenen Mini-AAR-Kampfmetriken in den sichtbaren Meta-Debrief kommen, ohne XP-, Ammo- oder Suppression-System vorzuziehen.</p></div>
           </div>
         </article>
       </div>
@@ -836,7 +840,8 @@
             <div class="finding good"><h3>Erledigt: TASK_584 - Mini AAR Combat Metrics Shell</h3><p>SUP, FireEvents, Friendly-Fire-Risiko und Wounded/Down/Extracted-Felder werden als gemeinsame Mini-AAR-Metriken lesbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_585 - Mini AAR Debrief Screen Stub</h3><p>Die vorhandenen Mini-AAR-Metriken haben jetzt eine kleine Debrief-Screen-Schale mit klarer No-XP-/No-Ammo-/No-Suppression-Grenze.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_586 - Debrief Return To Homebase Handoff</h3><p>Der Rueckweg vom Debrief in Homebase/Meta-Loop ist jetzt als Handoff-Snapshot plus Test-Helfer abgesichert.</p></div>
-            <div class="finding medium"><h3>1. TASK_587 - Debrief Visual Polish Pass</h3><p>Der naechste Spielbarkeitshebel ist ein sichtbarer Debrief, den man schnell versteht und gern liest.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_587 - Debrief Visual Polish Pass</h3><p>Der Meta-Debrief ist jetzt schneller scanbar und benennt Homebase klar als primaere Rueckkehraktion.</p></div>
+            <div class="finding medium"><h3>1. TASK_588 - Debrief AAR Data Bridge</h3><p>Der naechste Spielbarkeitshebel ist, die vorhandenen AAR-Kampfmetriken wirklich in diesen sichtbaren Debrief zu bringen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -1277,7 +1282,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_587 - Debrief Visual Polish Pass"
+              "TASK_588 - Debrief AAR Data Bridge"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -1350,7 +1355,8 @@
               "TASK_583 - Suppress Fire AAR Report Panel Readability",
               "TASK_584 - Mini AAR Combat Metrics Shell",
               "TASK_585 - Mini AAR Debrief Screen Stub",
-              "TASK_586 - Debrief Return To Homebase Handoff"
+              "TASK_586 - Debrief Return To Homebase Handoff",
+              "TASK_587 - Debrief Visual Polish Pass"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -1358,7 +1364,7 @@
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
               "Fire-Rule-Controls sind als TASK_572 automatisiert geprueft; TASK_573 stellt die exportierbare Notizflaeche; TASK_574 erzeugt lokale Evidence; TASK_575 poliert den aktiven ROE-Affordance-State, aber der finale menschliche Hover-/Spielgefuehl-Test bleibt offen.",
               "Suppress ist weiterhin ein Rule-/Preview-/Intent-Zustand; TASK_576 macht ihn vor GO lesbar, TASK_577 belegt ihn als lokale Visual-Evidence, TASK_578 zeichnet die Area sichtbar, TASK_579 sammelt den menschlichen F6-Befund, TASK_580 tuned die Area-Lesbarkeit, TASK_581 traegt den Intent durch Combat-Diagnostics, TASK_582 zaehlt ihn als kleinen AAR-/Debug-Anker, TASK_583 zeigt ihn als Report-Panel, TASK_584 sammelt ihn mit Fire-/Friendly-Fire-/Statusmetriken in einer Mini-AAR-Schale, TASK_585 macht daraus einen Debrief-Screen-Stub und TASK_586 fuehrt ihn pruefbar zur Homebase zurueck. Echte Suppression-Wirkung, Ammo-Verbrauch, XP und vollstaendige Debriefing-UI bleiben Folgearbeit.",
-              "TASK_586 beweist den Debrief->Homebase-Handoff, aber die sichtbare Debrief-Oberflaeche ist noch roh; TASK_587 sollte Lesbarkeit, Hierarchie und AAR-Scannbarkeit polieren."
+              "TASK_587 verbessert die sichtbare Debrief-Oberflaeche, aber die Mini-AAR-Kampfmetriken sind noch nicht in den Meta-Debrief gebrueckt; TASK_588 sollte diese Daten ohne XP-/Ammo-/Suppression-Wahrheit einbinden."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -1367,14 +1373,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_586",
-            current_focus: "TASK_587 - Debrief Visual Polish Pass",
-            latest_completed_task: "TASK_586 - Debrief Return To Homebase Handoff"
+            current_repo_base: "integration/core-foundation after TASK_587",
+            current_focus: "TASK_588 - Debrief AAR Data Bridge",
+            latest_completed_task: "TASK_587 - Debrief Visual Polish Pass"
           },
           metadata: {
-            branch: "task/debrief-return-homebase-handoff",
-            integration_base: "integration/core-foundation after TASK_585",
-            head: "task/debrief-return-homebase-handoff",
+            branch: "task/debrief-visual-polish-pass",
+            integration_base: "integration/core-foundation after TASK_586",
+            head: "task/debrief-visual-polish-pass",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }
