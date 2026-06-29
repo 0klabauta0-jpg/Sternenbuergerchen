@@ -225,7 +225,8 @@ git checkout -b batch/<batch-name>
 - TASK_594 - Post Mission Skill Delta Homebase Bridge (implementiert)
 - TASK_595 - Homebase Progression Visual Polish (implementiert)
 - TASK_596 - Homebase Progression Player Review Notes (implementiert)
-- TASK_597 - Homebase Progression F6 Evidence Capture
+- TASK_597 - Homebase Progression F6 Evidence Capture (implementiert)
+- TASK_598 - Homebase Progression Evidence Polish Findings
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

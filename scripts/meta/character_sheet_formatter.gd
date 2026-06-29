@@ -197,6 +197,7 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 			"role_loadout_rows": [],
 			"status_rows": [],
 			"relationship_rows": [],
+			"post_mission_rows": [],
 			"progress_rows": [],
 			"derived_rows": [
 				{"label": "Method Tags", "value_text": "n/a", "detail_text": "Setzt sich aus Kernwerten, Verhalten und Traits zusammen."},
@@ -224,6 +225,7 @@ static func build_sheet_view_model(profile, options: Dictionary = {}) -> Diction
 		"role_loadout_rows": _build_role_loadout_rows(profile, options),
 		"status_rows": _build_status_rows(profile, options),
 		"relationship_rows": _build_relationship_rows(profile, options),
+		"post_mission_rows": _build_post_mission_rows(options),
 		"progress_rows": _build_progress_rows(profile, options),
 		"derived_rows": _build_derived_rows(profile),
 		"behavior_rows": _build_value_rows(Dictionary(profile.behavior_axes), BEHAVIOR_ORDER, "behavior_axes", "character_sheet"),
@@ -324,17 +326,20 @@ static func _build_relationship_rows(profile, _options: Dictionary = {}) -> Arra
 
 static func _build_progress_rows(profile, options: Dictionary = {}) -> Array:
 	var progression: Dictionary = Dictionary(profile.progression)
-	var rows: Array = [
+	return [
 		{"label": "XP", "value_text": str(int(progression.get("xp", 0))), "help_id": "character_sheet.xp"},
 		{"label": "Missions", "value_text": str(int(progression.get("missions_completed", Array(profile.mission_history).size()))), "help_id": "character_sheet.missions"},
 		{"label": "FTL Impact", "value_text": _format_ftl_tactical_impact(profile), "help_id": "character_sheet.ftl_tactical_impact"},
 		{"label": "Last Mission", "value_text": _format_last_history(Array(profile.mission_history), "mission_id"), "help_id": "character_sheet.last_mission"},
 		{"label": "Fireteam History", "value_text": _format_last_history(Array(profile.fireteam_history), "fireteam_id"), "help_id": "character_sheet.fireteam_history"},
 	]
+
+
+static func _build_post_mission_rows(options: Dictionary = {}) -> Array:
 	var post_mission_row: Dictionary = _build_post_mission_skill_delta_row(options)
 	if not post_mission_row.is_empty():
-		rows.insert(1, post_mission_row)
-	return rows
+		return [post_mission_row]
+	return []
 
 
 static func _build_post_mission_skill_delta_row(options: Dictionary) -> Dictionary:

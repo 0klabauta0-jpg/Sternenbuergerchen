@@ -249,6 +249,11 @@ TASK_596 legt nur den manuellen Review-Ort im laufenden HTML-Bericht an. Exportf
 
 Erwartete Struktur: Der Bericht exportiert mindestens `screenshot_done`, `return_flow_checked`, `character_sheet_open_checked`, `mission_gain_badge_checked`, `xp_delta_checked`, `style_contrast_checked`, `read_only_source_checked`, `screenshot_path`, `viewport`, `highlighted_unit`, `style_id`, `badge_text`, `badge_notes`, `contrast_notes`, `placement_notes`, `return_flow_notes` und `followup`. Choice-Groups liefern Review-Ergebnis, Badge-, Kontrast-, Platzierungs-, Return-Flow- und naechste-Prioritaets-Einschaetzung.
 
+## Homebase-Progression-F6-Evidence
+TASK_597 macht die sichtbare Homebase-Progression im Character-Sheet reproduzierbar pruefbar. `HomebaseTestScreen.get_homebase_progression_f6_evidence_snapshot()` darf nur Layout- und Lesbarkeitsdaten der vorhandenen `MISSION GAIN`-Zeile melden: Popup-, Sheet-, Award-, Label- und Value-Rects, Badge/Text, Style-ID und Gate aus dem bestehenden Post-Mission-Skill-Delta-Snapshot. Der Snapshot darf keine Roster-, XP-, Skill-, Persistenz-, Mission- oder UI-Wahrheit erzeugen. Der zugehoerige Verifier darf PNG/Manifest unter `tmp/` schreiben; Headless-Evidence-Boards ersetzen keinen finalen menschlichen Sichtentscheid.
+
+Erwartete Struktur: `get_homebase_progression_f6_evidence_snapshot()` enthaelt `schema = sternenbuergerchen.homebase_progression_f6_evidence.v1`, `layout_key = homebase_progression_f6_evidence_v1`, `bridge_gate`, `source_schema`, `focused_unit_id`, `focused_delta_text`, `style_id`, `badge_text`, `popup_rect`, `sheet_content_rect`, `award_highlight_rect`, `award_value_row_rect`, `award_label_rect`, `award_value_rect`, `award_label_text`, `award_value_text`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Gates: Post-Mission-Delta-Gate gruen, Character-Sheet-Popup sichtbar, Award-Controls sichtbar und innerhalb des Popups, `MISSION GAIN`-Badge sichtbar, Style-ID gesetzt und Label/Value kompakt.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -20,6 +20,18 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_595_homebase_progression_visual_polish.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_597 - Homebase Progression F6 Evidence Capture`, damit die neue Review-Flaeche mit reproduzierbarer visueller Evidence gefuettert werden kann.
 
+### TASK_597 - Homebase Progression F6 Evidence Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_597_homebase_progression_f6_evidence_capture.md`, `docs/tasks/TASK_596_homebase_progression_player_review_notes.md`, `docs/tasks/TASK_595_homebase_progression_visual_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `HomebaseTestScreen.get_homebase_progression_f6_evidence_snapshot()` meldet read-only Popup-, Sheet-, Award-, Label- und Value-Rects fuer die sichtbare `MISSION GAIN`-Zeile im Character-Sheet.
+- Stand: Die `MISSION GAIN`-Zeile sitzt als Top-Alert direkt unter der Identitaet, und das Character-Sheet-Popup ist im Drop-Light-Layout breit genug fuer den 760px-Sheet-Inhalt plus Raender.
+- Stand: Der Snapshot prueft Bridge-Gate, Popup-Sichtbarkeit, Award-Control-Sichtbarkeit, Bounds, Style-ID `homebase_progression_delta_v1`, Badge `MISSION GAIN`, XP-Delta-Text, Kompaktheit und read-only-Grenze.
+- Stand: `scripts/tests/task_597_homebase_progression_f6_evidence_capture.gd` erzeugt `tmp/homebase_progression_f6_evidence.png` und `tmp/homebase_progression_f6_evidence.json`; Headless nutzt ein markiertes Evidence-Board, ein echter Viewport kann einen Screenshot-Readback liefern.
+- Stand: Der laufende HTML-Zwischenbericht nennt die neuen Artefaktpfade und fuehrt TASK_598 als naechste kleine Folgeempfehlung.
+- Risiken/offen: Der Headless-Capture ersetzt keinen finalen menschlichen Sichtentscheid. Falls die echte F6-/Fenster-Evidence Engstellen zeigt, sollte TASK_598 nur belegte Layout-/Kontrastbefunde anwenden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_597_homebase_progression_f6_evidence_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_595_homebase_progression_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_598 - Homebase Progression Evidence Polish Findings`, wenn die Evidence konkrete sichtbare Nacharbeit zeigt; sonst weiter mit dem naechsten Core-Loop-/Multiplayer-Polish.
+
 ### TASK_595 - Homebase Progression Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_595_homebase_progression_visual_polish.md`, `docs/tasks/TASK_594_post_mission_skill_delta_homebase_bridge.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

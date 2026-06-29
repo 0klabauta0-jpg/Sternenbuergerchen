@@ -74,7 +74,7 @@ static func get_homebase_layout() -> Dictionary:
 		"fireteams": Rect2i(560, 664, 456, 392),
 		"transfer_team": Rect2i(560, 664, 456, 392),
 		"flightdeck": Rect2i(1032, 664, 864, 392),
-		"character_popup": Rect2i(1136, 144, 720, 840),
+		"character_popup": Rect2i(1088, 144, 808, 840),
 	}
 
 

@@ -347,6 +347,96 @@ func get_post_mission_skill_delta_snapshot() -> Dictionary:
 	}
 
 
+func get_homebase_progression_f6_evidence_snapshot() -> Dictionary:
+	var bridge_snapshot: Dictionary = get_post_mission_skill_delta_snapshot()
+	var popup := get_node_or_null("CharacterSheetPopup") as Control
+	var sheet_content := get_node_or_null("CharacterSheetPopup/PopupPanel/PopupMargin/PopupVBox/PopupScroll/GeneratedSheetContent") as Control
+	var award_highlight: Control = null
+	var award_value_row: Control = null
+	var award_label: Label = null
+	var award_value: Label = null
+	if sheet_content != null:
+		award_highlight = sheet_content.find_child("PostMissionAwardHighlightRow", true, false) as Control
+		award_value_row = sheet_content.find_child("PostMissionAwardValueRow", true, false) as Control
+		award_label = sheet_content.find_child("PostMissionAwardLabel", true, false) as Label
+		award_value = sheet_content.find_child("PostMissionAwardValue", true, false) as Label
+	var popup_rect: Rect2 = _control_global_rect(popup)
+	var sheet_rect: Rect2 = _control_global_rect(sheet_content)
+	var highlight_rect: Rect2 = _control_global_rect(award_highlight)
+	var value_row_rect: Rect2 = _control_global_rect(award_value_row)
+	var label_rect: Rect2 = _control_global_rect(award_label)
+	var value_rect: Rect2 = _control_global_rect(award_value)
+	var award_label_text: String = award_label.text.strip_edges() if award_label != null else ""
+	var award_value_text: String = award_value.text.strip_edges() if award_value != null else ""
+	var bridge_gate: String = String(bridge_snapshot.get("gate", "")).strip_edges()
+	var style_id: String = String(bridge_snapshot.get("style_id", "")).strip_edges()
+	var badge_text: String = String(bridge_snapshot.get("badge_text", "")).strip_edges()
+	var checks: Array = []
+	_append_visual_audit_check(checks, "bridge_gate_pass", bridge_gate == "pass", "critical", "Post-mission skill delta gate should stay green.")
+	_append_visual_audit_check(checks, "popup_visible", _control_is_visible(popup), "critical", "Character Sheet popup should be visible.")
+	_append_visual_audit_check(checks, "sheet_content_visible", _control_is_visible(sheet_content), "critical", "Generated Character Sheet content should be visible.")
+	_append_visual_audit_check(checks, "award_controls_visible", _control_is_visible(award_highlight) and _control_is_visible(award_value_row) and _control_is_visible(award_label) and _control_is_visible(award_value), "critical", "MISSION GAIN controls should be visible.")
+	_append_visual_audit_check(checks, "award_inside_popup", _rect_inside(highlight_rect, popup_rect) and _rect_inside(label_rect, popup_rect) and _rect_inside(value_rect, popup_rect), "critical", "Award row should stay inside the Character Sheet popup.")
+	_append_visual_audit_check(checks, "award_inside_sheet_content", _rect_inside(highlight_rect, sheet_rect) and _rect_inside(label_rect, sheet_rect) and _rect_inside(value_rect, sheet_rect), "critical", "Award row should stay inside generated sheet content.")
+	_append_visual_audit_check(checks, "style_id_present", style_id == "homebase_progression_delta_v1", "critical", "Award row should keep the TASK_595 style id.")
+	_append_visual_audit_check(checks, "badge_visible", badge_text == "MISSION GAIN" and award_label_text.contains("MISSION GAIN"), "critical", "MISSION GAIN badge should be visible in the row label.")
+	_append_visual_audit_check(checks, "value_text_visible", award_value_text.contains("XP +"), "critical", "Award row value should include the visible XP delta.")
+	_append_visual_audit_check(checks, "label_text_compact", award_label_text.length() <= 48 and award_label_text.count("\n") == 0, "critical", "Award label should stay compact.")
+	_append_visual_audit_check(checks, "value_text_compact", award_value_text.length() <= 80 and award_value_text.count("\n") <= 1, "critical", "Award value should stay compact.")
+	_append_visual_audit_check(checks, "read_only", bool(bridge_snapshot.get("read_only", false)) and not bool(bridge_snapshot.get("ui_sets_gameplay_truth", true)), "critical", "Evidence snapshot should read existing state only.")
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.homebase_progression_f6_evidence.v1",
+		"task_id": "TASK_597",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"layout_key": "homebase_progression_f6_evidence_v1",
+		"bridge_gate": bridge_gate,
+		"source_schema": String(bridge_snapshot.get("schema", "")),
+		"focused_unit_id": String(bridge_snapshot.get("focused_unit_id", "")),
+		"focused_delta_text": String(bridge_snapshot.get("focused_delta_text", "")),
+		"style_id": style_id,
+		"badge_text": badge_text,
+		"popup_rect": _rect_to_dict(popup_rect),
+		"sheet_content_rect": _rect_to_dict(sheet_rect),
+		"award_highlight_rect": _rect_to_dict(highlight_rect),
+		"award_value_row_rect": _rect_to_dict(value_row_rect),
+		"award_label_rect": _rect_to_dict(label_rect),
+		"award_value_rect": _rect_to_dict(value_rect),
+		"award_label_text": award_label_text,
+		"award_value_text": award_value_text,
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"visual_only": true,
+		"checks": checks,
+	}
+
+
+func _control_is_visible(control: Control) -> bool:
+	return control != null and control.visible and (control.is_visible_in_tree() if control.is_inside_tree() else true)
+
+
+func _rect_inside(inner: Rect2, outer: Rect2) -> bool:
+	if inner.size.x <= 0.0 or inner.size.y <= 0.0 or outer.size.x <= 0.0 or outer.size.y <= 0.0:
+		return false
+	return inner.position.x >= outer.position.x - 0.5 \
+		and inner.position.y >= outer.position.y - 0.5 \
+		and inner.end.x <= outer.end.x + 0.5 \
+		and inner.end.y <= outer.end.y + 0.5
+
+
+func _rect_to_dict(rect: Rect2) -> Dictionary:
+	return {
+		"x": rect.position.x,
+		"y": rect.position.y,
+		"width": rect.size.x,
+		"height": rect.size.y,
+	}
+
+
 func _rebuild_post_mission_skill_delta_lookup() -> void:
 	_post_mission_skill_delta_by_unit_id = {}
 	if String(_post_mission_skill_delta_summary.get("schema", "")) != "sternenbuergerchen.skill_progress_award_summary.v1":

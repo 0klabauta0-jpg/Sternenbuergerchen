@@ -52,6 +52,7 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 	host.add_child(sheet_root)
 
 	_add_identity_block(sheet_root, model, profile, options)
+	_add_post_mission_award_alert(sheet_root, model, profile, options)
 	if two_column_layout:
 		var columns := HBoxContainer.new()
 		columns.name = "CharacterSheetTwoColumnBody"
@@ -108,6 +109,18 @@ static func render(host: VBoxContainer, profile, options: Dictionary = {}) -> vo
 		_add_value_section(sheet_root, "VERHALTENSPROFIL:", Array(model.get("behavior_rows", [])), profile, options)
 	if bool(options.get("move_last_loadout_to_bottom", false)) and not bool(options.get("hide_loadout_dropdowns", false)):
 		_add_loadout_dropdown_section(sheet_root, profile)
+
+
+static func _add_post_mission_award_alert(host: VBoxContainer, model: Dictionary, profile, options: Dictionary = {}) -> void:
+	var rows: Array = Array(model.get("post_mission_rows", []))
+	if rows.is_empty():
+		return
+	var alert_host := VBoxContainer.new()
+	alert_host.name = "PostMissionAwardTopAlert"
+	alert_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	alert_host.add_theme_constant_override("separation", 0)
+	host.add_child(alert_host)
+	_add_value_rows(alert_host, rows, profile, options)
 
 
 static func _clear_container(host: VBoxContainer) -> void:
