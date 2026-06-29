@@ -40,11 +40,11 @@ func _test_docs_and_report_wiring() -> void:
 	_assert(task_text.contains("Frontier Probe Multiplayer Manual Screenshot Notes Pass"), "TASK_558 task file names the task")
 	_assert(status_text.contains("TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass"), "Implementation status tracks TASK_558")
 	_assert(roadmap_text.contains("TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass (implementiert)"), "Roadmap marks TASK_558 implemented")
-	_assert(roadmap_text.contains("TASK_559 - Frontier Probe Multiplayer F6 Visual Polish Follow-up"), "Roadmap names TASK_559 follow-up")
+	_assert(roadmap_text.contains("TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide (implementiert)"), "Roadmap tracks TASK_561 review guide")
 	_assert(contract_text.contains("Frontier-Probe-Multiplayer-Manual-Screenshot-Notes"), "Mission feedback contract documents TASK_558")
 	_assert(html_contract_text.contains("JSON exportieren"), "HTML workbench contract still requires JSON export")
 	_assert(report_text.contains("TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass"), "Review workbench tracks TASK_558")
-	_assert(report_text.contains("TASK_559 - Frontier Probe Multiplayer F6 Visual Polish Follow-up"), "Review workbench names TASK_559 follow-up")
+	_assert(report_text.contains("TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings"), "Review workbench names TASK_562 follow-up")
 	_assert(FileAccess.file_exists(TASK_557_TEST_PATH), "TASK_557 F6 readability smoke remains available")
 
 
@@ -67,7 +67,7 @@ func _test_manual_review_export_fields() -> void:
 	_assert(report_text.contains("data-export-key=\"mp_f6_manual.followup\""), "Report exports concrete follow-up notes")
 	_assert(report_text.contains("data-note-key=\"notes.mp_f6_manual_review\""), "Report exports free-form MP-F6 review note")
 	_assert(report_text.contains("\"TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass\""), "JSON metadata lists TASK_558 as completed")
-	_assert(report_text.contains("current_focus: \"TASK_559 - Frontier Probe Multiplayer F6 Visual Polish Follow-up\""), "JSON metadata points current focus to TASK_559")
+	_assert(report_text.contains("current_focus: \"TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings\""), "JSON metadata points current focus to TASK_562")
 	_assert(not report_text.contains("data-export-key=\"mp_f6_manual.screenshot_done\" checked"), "Manual MP-F6 screenshot is not pre-marked as done")
 
 

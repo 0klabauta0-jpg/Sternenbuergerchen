@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_561_frontier_probe_multiplayer_manual_visual_review_guide.md`, `docs/tasks/TASK_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_560_frontier_probe_multiplayer_teamchip_tooltip_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der MP-F6-Reviewblock im Rolling-HTML-Bericht fuehrt die manuelle Sichtpruefung jetzt mit Detailchecks fuer Teamchip-Hover, Tooltip-Owner/Spawn, Objective/Cargo, Selected Fireteam, Dropship-Cards und Weltziel-Sichtbarkeit.
+- Stand: Der Bericht exportiert Ratings fuer Teamchip, Objective/Cargo, Selected Fireteam, Paneldichte, Weltverdeckung und eine explizite naechste Polish-Prioritaet.
+- Stand: Der bestehende TASK_558-Verifier wird auf die aktuelle TASK_562-Follow-up-Kette korrigiert; TASK_561 bekommt einen eigenen statischen Verifier.
+- Risiken/offen: Der Guide ersetzt keinen echten manuellen F6-Screenshot-/Hover-Sichttest und wertet noch keine User-Notizen aus.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings`, sobald ein exportierter MP-F6-Review konkrete Reibung nennt.
+
 ### TASK_560 - Frontier Probe Multiplayer Teamchip Tooltip Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_560_frontier_probe_multiplayer_teamchip_tooltip_polish.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `scripts/mission/mission_team_chip_presenter.gd`, `scripts/tests/mission_tactical_sandbox_controller.gd`
@@ -18,7 +28,7 @@
 - Stand: `get_frontier_probe_multiplayer_teamchip_tooltip_snapshot()` prueft den Tooltip read-only gegen den bestehenden TASK_557-F6-Readability-Snapshot.
 - Risiken/offen: Der Tooltip-Polish ersetzt weiterhin keinen echten manuellen MP-F6-Screenshot-/Hover-Sichttest.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_560_frontier_probe_multiplayer_teamchip_tooltip_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_561 - Frontier Probe Multiplayer Manual Visual Polish Follow-up`, sobald echte F6-Screenshot-/Hover-Notizen konkrete Panel-/Stilkorrekturen zeigen.
+- Naechster Schritt: `TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide`, damit der naechste echte MP-F6-Sichttest konkrete Ratings und Prioritaet exportiert.
 
 ### TASK_559 - Factory Colormap UID Loader Guard
 - Status: implementiert im Arbeitsstand

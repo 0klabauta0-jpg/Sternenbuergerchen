@@ -87,6 +87,9 @@ TASK_558 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workben
 ## Frontier-Probe-Multiplayer-Teamchip-Tooltip-Polish
 `get_frontier_probe_multiplayer_teamchip_tooltip_snapshot()` ist der Headless-Pruefpunkt fuer TASK_560. Der Snapshot darf nur den TASK_557-F6-Readability-Snapshot, `MissionTeamChipPresenter`, `get_command_feedback_snapshot()` und die vorhandenen Label-Metadaten zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Peer-, Team-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Entscheidung ausloesen. Erwartete Lesbarkeit: Der sichtbare Mission-Teamchip bleibt kurz, waehrend der Tooltip Host Peer 1, Peer 2, `spawn_alpha` und `spawn_bravo` nennt; das Label ist hoverbar, traegt eine stabile Tooltip-Style-ID und bleibt read-only.
 
+## Frontier-Probe-Multiplayer-Manual-Visual-Review-Guide
+TASK_561 erweitert den laufenden HTML-Zwischenbericht um eine gefuehrte MP-F6-Sichtpruefung. Der Bericht darf Detailchecks, Ratings und eine naechste Polish-Prioritaet fuer Teamchip-Hover, Objective/Cargo, Selected Fireteam, Dropship-/Panel-Dichte und Weltverdeckung exportieren, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern. Erwartete Struktur: exportierbare `mp_f6_manual.*` Detailfelder, `mp_f6_manual.next_polish_priority`, die freie `notes.mp_f6_manual_review`-Notiz und eine klare Markierung, dass der echte Screenshot-/Hover-Test erst durch User/Playtest bestaetigt wird.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
