@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_607 auf <code>task/two-instance-host-client-runtime-smoke</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_608 auf <code>task/host-client-runtime-visual-capture</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -277,7 +277,8 @@
       <span class="pill good">TASK_605 F6-Evidence</span>
       <span class="pill good">TASK_606 F6-Polish</span>
       <span class="pill good">TASK_607 Runtime-Smoke</span>
-      <span class="pill warn">TASK_608 Capture offen</span>
+      <span class="pill good">TASK_608 Runtime-Capture</span>
+      <span class="pill warn">TASK_609 Polish offen</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -519,17 +520,18 @@
             <div class="metric"><strong>TASK_605</strong><span>umgesetzt: Host/Client-F6-Evidence mit PNG/Manifest und Review-Feldern</span></div>
             <div class="metric"><strong>TASK_606</strong><span>umgesetzt: Host/Client-F6 ACT-Zeile kompakter und Selected-Fireteam-Status dedupliziert</span></div>
             <div class="metric"><strong>TASK_607</strong><span>umgesetzt: zwei Mission-Instanzen, lokale ENet-Probe, Authority-Command und Client-Snapshot-Apply</span></div>
-            <div class="metric"><strong>TASK_608</strong><span>naechster sinnvoller Slice: sichtbarer Host/Client-Runtime-Capture</span></div>
+            <div class="metric"><strong>TASK_608</strong><span>umgesetzt: sichtbarer Host/Client-Runtime-Capture mit PNG/Manifest</span></div>
+            <div class="metric"><strong>TASK_609</strong><span>naechster sinnvoller Slice: belegte Visual-Polish-Findings aus Capture/Export</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte und TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe.</td><td>Naechster Schritt: TASK_608 soll diesen Runtime-Pfad als sichtbaren Host/Client-Capture reviewbar machen.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment, TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke, TASK_605 macht ihn als F6-Evidence-PNG/Manifest reviewbar, TASK_606 poliert die belegte ACT-/Selected-Fireteam-Dichte, TASK_607 prueft Host/Client-Runtime mit zwei Mission-Instanzen plus ENet-Transportprobe und TASK_608 macht diesen Runtime-Pfad als PNG/Manifest sichtbar.</td><td>Naechster Schritt: TASK_609 soll nur belegte Capture-/Berichtsreibung als Visual-Polish-Findings anwenden.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
-                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_607 ist hier bewusst mitgepflegt, damit der Host/Client-Runtime-Smoke und der naechste visuelle Capture nicht nur im Verlauf stecken.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
+                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_608 ist hier bewusst mitgepflegt, damit der Host/Client-Runtime-Capture nicht nur im Testlog steckt.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
               </tbody>
             </table>
           </div>
@@ -577,6 +579,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_605_done"> TASK_605 Host-Client-F6-Visual-Review-Pass ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_606_done"> TASK_606 Host-Client-F6-Visual-Polish-Findings ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_607_done"> TASK_607 Two-Instance-Host-Client-Runtime-Smoke ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_608_done"> TASK_608 Host-Client-Runtime-Visual-Capture ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_586_done"> TASK_586 Debrief-Return-To-Homebase-Handoff ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -1071,6 +1074,42 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_608 Host Client Runtime Visual Capture</h2>
+          <p>TASK_608 macht den TASK_607-Runtime-Pfad als sichtbare Evidence reviewbar: Der Verifier wiederholt lokale ENet-Probe, Host-/Client-Mission-Instanzen, Authority-Command-Gates, Client-Snapshot-Apply und Host-/Client-F6-Gates und schreibt daraus PNG plus JSON-Manifest unter <code>tmp/</code>. Der Bericht exportiert diese Daten als Arbeitsstand, nicht als Gameplay-Wahrheit.</p>
+          <img class="evidence-preview" src="../../tmp/host_client_runtime_visual_capture.png" alt="TASK_608 Host Client Runtime Visual Capture">
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Capture Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>PNG</td><td><input readonly value="tmp/host_client_runtime_visual_capture.png" data-export-key="host_client_runtime_capture.png_path"></td><td>Lokales Bildartefakt; erscheint nach Lauf von TASK_608.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/host_client_runtime_visual_capture.json" data-export-key="host_client_runtime_capture.manifest_path"></td><td>Lokales JSON mit Transport-, Authority-, Snapshot- und F6-Gates.</td></tr>
+                <tr><td>Capture Type</td><td><input readonly value="host_client_runtime_visual_capture" data-export-key="host_client_runtime_capture.capture_type"></td><td>Stabiler Artefakt-Typ fuer Folgeauswertung.</td></tr>
+                <tr><td>Lokale ENet-Verbindung</td><td><input readonly value="connected" data-export-key="host_client_runtime_capture.local_enet_connected"></td><td>Transport-Probe bleibt Teil des sichtbaren Captures.</td></tr>
+                <tr><td>Host-Instanz</td><td><input readonly value="ready" data-export-key="host_client_runtime_capture.host_instance_ready"></td><td>Host-Mission wird fuer die Capture-Gates vorbereitet.</td></tr>
+                <tr><td>Client-Instanz</td><td><input readonly value="ready" data-export-key="host_client_runtime_capture.client_instance_ready"></td><td>Client-Mission wird getrennt vorbereitet.</td></tr>
+                <tr><td>Peer 2 Bravo Command</td><td><input readonly value="accepted" data-export-key="host_client_runtime_capture.peer2_bravo_command"></td><td>Peer 2 darf sein Bravo/red-Fireteam serverseitig kommandieren.</td></tr>
+                <tr><td>Peer 2 Alpha Command</td><td><input readonly value="rejected peer_team_mismatch" data-export-key="host_client_runtime_capture.peer2_alpha_rejected"></td><td>Peer 2 darf Alpha/blue nicht kommandieren.</td></tr>
+                <tr><td>State Mutation</td><td><input readonly value="rejected state_mutation_key" data-export-key="host_client_runtime_capture.state_mutation_rejected"></td><td>Client-Payload setzt keine autoritative Wahrheit.</td></tr>
+                <tr><td>Client Snapshot Apply</td><td><input readonly value="accepted" data-export-key="host_client_runtime_capture.client_snapshot_apply"></td><td>Client akzeptiert Host-State als Anzeigezustand.</td></tr>
+                <tr><td>Host F6 Gate</td><td><input readonly value="pass" data-export-key="host_client_runtime_capture.host_f6_gate"></td><td>Host-F6-Kontext bleibt kompakt, dedupliziert und read-only.</td></tr>
+                <tr><td>Client F6 Gate</td><td><input readonly value="pass" data-export-key="host_client_runtime_capture.client_f6_gate"></td><td>Client-F6-Kontext bleibt kompakt, dedupliziert und read-only.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="host_client_runtime_capture.read_only"></td><td>Capture und Bericht setzen keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Manueller Review</td><td><input readonly value="offen" data-export-key="host_client_runtime_capture.manual_review_status"></td><td>Das Headless-Evidence-Board ersetzt keinen finalen Zwei-Fenster-Sichttest.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_609 - Host Client Runtime Visual Polish Findings" data-export-key="host_client_runtime_capture.recommended_next_task"></td><td>Nur belegte Reibung aus Capture/Export anwenden.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="choice-row" data-choice-group="host_client_runtime_capture.next_priority">
+            <button class="choice active" type="button" data-choice-value="visual_polish_findings">TASK_609 Polish-Findings</button>
+            <button class="choice" type="button" data-choice-value="two_window_review">Zwei-Fenster-Sichttest</button>
+            <button class="choice" type="button" data-choice-value="latency_probe">Latency-Probe</button>
+            <button class="choice" type="button" data-choice-value="map_transfer">Map-Transfer</button>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_608 Capture-Notiz
+            <textarea data-note-key="notes.host_client_runtime_capture" data-export-key="host_client_runtime_capture.notes" placeholder="Welche sichtbare Host/Client-Runtime-Reibung zeigt der Capture oder ein spaeterer Fensterlauf?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -1421,6 +1460,7 @@
                 <tr><td><code>task_605_host_client_f6_visual_review_pass.gd</code></td><td>PASS</td><td>Host/Client-F6-Evidence-Capture mit PNG/Manifest, TASK_604-Gate, Teamchip/ACT/OBJ/CARGO/ROE/Selected-Fireteam-Gates plus TASK_606-Follow-up.</td></tr>
                 <tr><td><code>task_606_host_client_f6_visual_polish_findings.gd</code></td><td>PASS</td><td>Host/Client-F6-Polish-Smoke fuer kompakte ACT-Displayzeile, volle ACT-Quelle, deduplizierten Selected-Fireteam-Status und TASK_607-Follow-up.</td></tr>
                 <tr><td><code>task_607_two_instance_host_client_runtime_smoke.gd</code></td><td>PASS</td><td>Zwei-Instanz-Host/Client-Runtime-Smoke fuer lokale ENet-Verbindung, Peer-Authority-Commands, Client-Snapshot-Apply und F6-Gates plus TASK_608-Follow-up.</td></tr>
+                <tr><td><code>task_608_host_client_runtime_visual_capture.gd</code></td><td>PASS</td><td>Sichtbarer Host/Client-Runtime-Capture mit PNG/Manifest, Transport-/Authority-/Snapshot-/F6-Gates plus TASK_609-Follow-up.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>Timeout nach Doku-Pruefung</td><td>Meta-Homebase-Flow haengt in diesem Arbeitslauf nach der Doku-Pruefung; TASK_567 nutzt die stabile Mission-Fixture, Meta-Flow-Testhygiene bleibt offen.</td></tr>
                 <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_570 aktualisiert, nennt die Fire-Rule-Mission-Bridge und TASK_571 als naechsten Slice.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
@@ -1436,7 +1476,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_606-Merge und Push. Dieser Report-Refresh laeuft auf <code>task/two-instance-host-client-runtime-smoke</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Fire-Rule-/ROE-/SUP-/Debrief-AAR-/Skill-Award-/Homebase-Progression-/Host-Client-Notizen und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_607-Merge und Push. Dieser Report-Refresh laeuft auf <code>task/host-client-runtime-visual-capture</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Fire-Rule-/ROE-/SUP-/Debrief-AAR-/Skill-Award-/Homebase-Progression-/Host-Client-Notizen und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -1912,7 +1952,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_608 - Host Client Runtime Visual Capture"
+              "TASK_609 - Host Client Runtime Visual Polish Findings"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -2006,7 +2046,8 @@
               "TASK_604 - Core Loop Host Client Feel Smoke",
               "TASK_605 - Host Client F6 Visual Review Pass",
               "TASK_606 - Host Client F6 Visual Polish Findings",
-              "TASK_607 - Two Instance Host Client Runtime Smoke"
+              "TASK_607 - Two Instance Host Client Runtime Smoke",
+              "TASK_608 - Host Client Runtime Visual Capture"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -2023,7 +2064,8 @@
               "TASK_605 erzeugt Host/Client-F6-Evidence als PNG/Manifest; der finale menschliche Spielgefuehlentscheid bleibt offen.",
               "TASK_606 wendet belegte Host/Client-F6-Polish-Findings auf ACT-Zeile und Selected-Fireteam-Status an.",
               "TASK_607 prueft den Host/Client-Pfad als Zwei-Instanz-Runtime-Smoke mit ENet-Probe, Authority-Command und Client-Snapshot-Apply.",
-              "TASK_608 bleibt offen: Der neue Runtime-Pfad muss als sichtbarer Host/Client-Capture reviewbar werden."
+              "TASK_608 macht den Runtime-Pfad als sichtbaren Host/Client-Capture mit PNG/Manifest reviewbar.",
+              "TASK_609 bleibt offen: Nur belegte Capture-/Berichtsreibung soll als Visual-Polish-Findings angewendet werden."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -2032,14 +2074,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_607",
-            current_focus: "TASK_608 - Host Client Runtime Visual Capture",
-            latest_completed_task: "TASK_607 - Two Instance Host Client Runtime Smoke"
+            current_repo_base: "integration/core-foundation after TASK_608",
+            current_focus: "TASK_609 - Host Client Runtime Visual Polish Findings",
+            latest_completed_task: "TASK_608 - Host Client Runtime Visual Capture"
           },
           metadata: {
-            branch: "task/two-instance-host-client-runtime-smoke",
-            integration_base: "integration/core-foundation after TASK_606",
-            head: "task/two-instance-host-client-runtime-smoke",
+            branch: "task/host-client-runtime-visual-capture",
+            integration_base: "integration/core-foundation after TASK_607",
+            head: "task/host-client-runtime-visual-capture",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

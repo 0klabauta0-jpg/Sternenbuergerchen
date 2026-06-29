@@ -299,6 +299,11 @@ TASK_607 verbindet die vorhandenen Multiplayer-Bausteine in einem Runtime-Smoke:
 
 Erwartete Struktur: `task_607_two_instance_host_client_runtime_smoke.gd` prueft `local_enet_connected`, getrennte Host-/Client-Instanzen, Peer-Assignments `1 -> team_alpha/blue` und `2 -> team_bravo/red`, akzeptierten Bravo-Command, abgelehnten Alpha-Command, abgelehnte State-Mutation, Host-State-Snapshot, Client-Snapshot-Apply, Client-Server-State sowie gruenen `get_core_loop_host_client_feel_snapshot()` auf Host und Client. TASK_608 bleibt fuer einen sichtbaren Host/Client-Runtime-Capture vorgesehen.
 
+## Host-Client-Runtime-Visual-Capture
+TASK_608 macht den TASK_607-Runtime-Pfad als lokales PNG/Manifest reviewbar. Der Capture darf die bestehende lokale ENet-Probe, Host-/Client-Instanzen, Authority-Command-Ergebnisse, Client-Snapshot-Apply und Host-/Client-F6-Gates zusammenfassen. Er darf keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Movement-, Command- oder UI-Wahrheit speichern oder veraendern.
+
+Erwartete Struktur: `tmp/host_client_runtime_visual_capture.json` enthaelt `schema = sternenbuergerchen.host_client_runtime_visual_capture.v1`, `task_id = TASK_608`, `capture_type = host_client_runtime_visual_capture`, PNG-/Manifest-Pfade, `local_enet_connected`, `host_instance_ready`, `client_instance_ready`, `peer2_bravo_command_accepted`, `peer2_alpha_command_rejected`, `state_mutation_rejected`, `client_snapshot_apply_accepted`, `host_f6_gate`, `client_f6_gate`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_609 - Host Client Runtime Visual Polish Findings`. Der laufende HTML-Bericht darf diese Felder exportieren und kommentierbar machen, aber den menschlichen Sichttest nicht als erledigt markieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
