@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_550 - Combat HUD Manual Screenshot Notes Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_550_combat_hud_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_549_combat_hud_f6_visual_audit.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`
+- Stand: Der Rolling-HTML-Bericht enthaelt einen exportierbaren TASK_550-Block fuer Combat-HUD-Screenshot-/Hover-Review.
+- Stand: Erfasst werden Screenshotpfad, Viewport, Hover-Checks fuer #17/#18, Ergebnisentscheidung, Hover-Notizen, Stilnotizen, Follow-up und freie Review-Notiz.
+- Stand: Der Bericht markiert den manuellen Screenshot bewusst nicht als erledigt; die Daten sind Arbeitsnotizen und keine Runtime-Wahrheit.
+- Stand: Ein statischer Verifier prueft, dass TASK_550-Berichtsfelder, Contract, Status und TASK_551-Follow-up vorhanden bleiben.
+- Risiken/offen: Der Task fuehrt keinen echten F6-Screenshot aus. Die naechste sichtbare UI-Aenderung sollte aus exportierten Playtest-Notizen oder einem echten Screenshot abgeleitet werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_550_combat_hud_manual_screenshot_notes_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_551 - Combat HUD Tooltip Style Polish`, sobald Screenshot-/Hover-Notizen eine konkrete optische Korrektur nahelegen.
+
 ### TASK_549 - Combat HUD F6 Visual Audit
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_549_combat_hud_f6_visual_audit.md`, `docs/tasks/TASK_548_combat_hud_visual_detail_tooltip_pass.md`, `docs/dev/mission_command_feedback_contract.md`
