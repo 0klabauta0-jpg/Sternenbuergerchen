@@ -220,7 +220,8 @@ git checkout -b batch/<batch-name>
 - TASK_589 - Debrief AAR F6 Visual Evidence Pass (implementiert)
 - TASK_590 - Debrief AAR Layout Polish Findings (implementiert)
 - TASK_591 - Debrief AAR Player Review Notes Pass (implementiert)
-- TASK_592 - Debrief AAR Player Review Findings
+- TASK_592 - Debrief Skill Progress Preview Shell (implementiert)
+- TASK_593 - Skill Progress Award Contract
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

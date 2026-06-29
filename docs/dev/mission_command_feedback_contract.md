@@ -224,6 +224,11 @@ TASK_591 macht den echten Spielerblick auf den Debrief-AAR-Block im laufenden HT
 
 Erwartete Struktur: `docs/reports/project_review_status_2026_06_28.html` enthaelt einen sichtbaren `TASK_591 Debrief-AAR Player-Review`-Block mit Export-Keys unter `debrief_aar_manual.*`, darunter `screenshot_path`, `viewport`, `summary_prefix_checked`, `chips_checked`, `rows_checked`, `limit_checked`, `return_flow_checked`, `summary_notes`, `chip_notes`, `rows_limit_notes`, `return_flow_notes` und `followup`. Auswahlgruppen sollen `debrief_aar_manual.result`, `debrief_aar_manual.summary_rating`, `debrief_aar_manual.chip_rating`, `debrief_aar_manual.rows_limit_rating` und `debrief_aar_manual.next_polish_priority` exportieren. Ein Freitextfeld unter `notes.debrief_aar_manual_review` sammelt offene Spieler-/Reviewer-Notizen. TASK_592 bleibt fuer belegte Findings aus diesem Export vorgesehen.
 
+## Debrief-Skill-Progress-Preview
+TASK_592 macht den Core-Loop-Schritt Skillentwicklung im Debrief sichtbar, ohne echte XP- oder Skillvergabe vorzuziehen. `DebriefTestScreen` darf aus vorhandenen `team_states` und `fireteam_tactical_debrief` eine kompakte `Skill Preview`-Zeile bauen. Diese Zeile ist eine read-only Vorschau, keine Progressionswahrheit, und darf MissionResult, UnitSkills, XP, Skilllevel oder Persistenz nicht veraendern.
+
+Erwartete Struktur: `get_debrief_skill_progress_preview_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_skill_progress_preview.v1`, `layout_key = debrief_skill_preview_v1`, `preview_text`, `preview_entries`, `preview_token_count`, `style_id`, `aar_layout_gate`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Gates: Preview sichtbar, einzeilig und kompakt, beginnt mit `Skill Preview:`, enthaelt mehrere Tokens aus Unit-/Fireteam-Quellen, Style-ID ist gesetzt und TASK_590-AAR-Layout bleibt gruen. TASK_593 bleibt fuer echte Progressions-/Award-Vertraege vorgesehen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

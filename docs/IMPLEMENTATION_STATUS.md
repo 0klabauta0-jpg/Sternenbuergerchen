@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_592 - Debrief Skill Progress Preview Shell
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_592_debrief_skill_progress_preview_shell.md`, `docs/tasks/TASK_591_debrief_aar_player_review_notes_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `DebriefTestScreen` zeigt im sichtbaren Debrief eine kompakte `Skill Preview`-Zeile aus vorhandenen `team_states` und `fireteam_tactical_debrief`.
+- Stand: `get_debrief_skill_progress_preview_snapshot()` prueft Sichtbarkeit, Kompaktheit, Token-Zaehler, Style-ID, TASK_590-AAR-Gate und read-only-Grenze.
+- Stand: Die Preview ist bewusst nur ein Core-Loop-Anker fuer Skillentwicklung; keine XP-, Skilllevel-, Persistenz- oder MissionResult-Mutation.
+- Risiken/offen: Echte XP-/Skillvergabe, Balance und Persistenz bleiben Folgearbeit. Ohne echten `debrief_aar_manual`-Export wurden keine Player-Review-Findings behauptet.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_592_debrief_skill_progress_preview_shell.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_590_debrief_aar_layout_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_593 - Skill Progress Award Contract`, wenn aus der Preview ein echter, autoritativer Progressionspfad werden soll.
+
 ### TASK_591 - Debrief AAR Player Review Notes Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_591_debrief_aar_player_review_notes_pass.md`, `docs/tasks/TASK_590_debrief_aar_layout_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
 - Stand: Der laufende HTML-Zwischenbericht enthaelt einen eigenen TASK_591-Debrief-AAR-Player-Review-Block fuer Screenshotpfad, Viewport, Pflichtchecks, Ratings, Folgeprioritaet und freie Notizen.
 - Stand: Alle Review-Daten werden ueber `debrief_aar_manual.*` und `notes.debrief_aar_manual_review` exportierbar gemacht und bleiben Arbeitsnotizen, keine Runtime- oder Gameplay-Wahrheit.
 - Stand: `scripts/tests/task_591_debrief_aar_player_review_notes_pass.gd` prueft Task-Datei, Contract, Status, Roadmap, Report-Export-Keys, `JSON exportieren` und die TASK_592-Follow-up-Kette.
-- Risiken/offen: TASK_591 fuehrt keinen echten Sichttest aus. Belegte Player-Review-Findings muessen in TASK_592 gesondert angewendet werden.
+- Risiken/offen: TASK_591 fuehrt keinen echten Sichttest aus. Belegte Player-Review-Findings muessen spaeter gesondert angewendet werden; ohne Export/Screenshot wurde TASK_592 als Core-Loop-Skill-Preview-Slice umgesetzt.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_591_debrief_aar_player_review_notes_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_590_debrief_aar_layout_polish_findings.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_592 - Debrief AAR Player Review Findings`, wenn ein echter Export/Screenshot konkrete Reibungen zeigt.
+- Naechster Schritt: durch `TASK_592 - Debrief Skill Progress Preview Shell` erledigt; naechster Anschluss ist `TASK_593 - Skill Progress Award Contract`.
 
 ### TASK_590 - Debrief AAR Layout Polish Findings
 - Status: implementiert im Arbeitsstand
@@ -29,7 +39,7 @@
 - Stand: Der laufende HTML-Zwischenbericht ist auf TASK_590 aktualisiert und nennt TASK_591 als naechsten Debrief-AAR-Player-Review-Notes-Pass.
 - Risiken/offen: Der automatische Layout-Polish prueft den konkreten Evidence-Befund und Layout-Vertraege, ersetzt aber keinen echten Spieler-Sichtentscheid im Fenster. TASK_591 stellt dafuer den exportierbaren Notizblock bereit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_590_debrief_aar_layout_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_589_debrief_aar_f6_visual_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_588_debrief_aar_data_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_587_debrief_visual_polish_pass.gd`, `git diff --check`.
-- Naechster Schritt: durch `TASK_591 - Debrief AAR Player Review Notes Pass` erledigt; naechster Anschluss ist `TASK_592 - Debrief AAR Player Review Findings`.
+- Naechster Schritt: durch `TASK_591 - Debrief AAR Player Review Notes Pass` und `TASK_592 - Debrief Skill Progress Preview Shell` erledigt; naechster Anschluss ist `TASK_593 - Skill Progress Award Contract`.
 
 ### TASK_589 - Debrief AAR F6 Visual Evidence Pass
 - Status: implementiert im Arbeitsstand

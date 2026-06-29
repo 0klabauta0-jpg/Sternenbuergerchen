@@ -14,6 +14,9 @@ const DEBRIEF_AAR_SUMMARY_MAX_CHARS := 96
 const DEBRIEF_AAR_ROWS_MAX_CHARS := 180
 const DEBRIEF_AAR_LIMIT_MAX_CHARS := 120
 const DEBRIEF_AAR_LAYOUT_STYLE_ID := "debrief_aar_layout_polish_v1"
+const DEBRIEF_SKILL_PREVIEW_MAX_CHARS := 160
+const DEBRIEF_SKILL_PREVIEW_TOKEN_COUNT_MIN := 2
+const DEBRIEF_SKILL_PREVIEW_STYLE_ID := "debrief_skill_preview_v1"
 
 signal return_to_fob_requested()
 signal return_to_homebase_requested()
@@ -301,6 +304,46 @@ func get_debrief_aar_layout_polish_snapshot() -> Dictionary:
 	}
 
 
+func get_debrief_skill_progress_preview_snapshot() -> Dictionary:
+	var aar_snapshot: Dictionary = get_debrief_aar_layout_polish_snapshot()
+	var skill_label := get_node_or_null("Panel/Margin/VBox/SkillProgressPreviewLabel") as Label
+	var text: String = skill_label.text.strip_edges() if skill_label != null else ""
+	var entries: Array = Array(skill_label.get_meta("debrief_skill_preview_entries", [])) if skill_label != null else []
+	var style_id: String = String(skill_label.get_meta("debrief_skill_preview_style_id", "")) if skill_label != null else ""
+	var checks: Array = []
+	_append_visual_polish_check(checks, "skill_preview_visible", skill_label != null and skill_label.visible, "Skill preview should be visible when mission result data exists.")
+	_append_visual_polish_check(checks, "skill_preview_compact", text.length() <= DEBRIEF_SKILL_PREVIEW_MAX_CHARS and text.count("\n") == 0, "Skill preview should stay one compact scan line.")
+	_append_visual_polish_check(checks, "skill_preview_named", text.begins_with("Skill Preview:"), "Skill preview should be explicitly marked as preview.")
+	_append_visual_polish_check(checks, "skill_preview_has_tokens", entries.size() >= DEBRIEF_SKILL_PREVIEW_TOKEN_COUNT_MIN, "Skill preview should expose multiple progress tokens.")
+	_append_visual_polish_check(checks, "skill_preview_style_applied", style_id == DEBRIEF_SKILL_PREVIEW_STYLE_ID, "Skill preview style should be applied.")
+	_append_visual_polish_check(checks, "aar_layout_still_green", String(aar_snapshot.get("gate", "")) == "pass", "Skill preview should not regress the Debrief AAR layout gate.")
+	_append_visual_polish_check(checks, "read_only", true, "Snapshot reads skill preview state only.")
+	var failed_count: int = 0
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_count += 1
+	return {
+		"schema": "sternenbuergerchen.debrief_skill_progress_preview.v1",
+		"task_id": "TASK_592",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"layout_key": DEBRIEF_SKILL_PREVIEW_STYLE_ID,
+		"preview_text": text,
+		"preview_length": text.length(),
+		"preview_visible": skill_label != null and skill_label.visible,
+		"preview_entries": entries,
+		"preview_token_count": entries.size(),
+		"style_id": style_id,
+		"aar_layout_gate": String(aar_snapshot.get("gate", "")),
+		"visual_only": true,
+		"checks": checks,
+	}
+
+
 func get_background_catalog_snapshot() -> Dictionary:
 	var entry: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID))
 	var background := get_node_or_null("Background") as TextureRect
@@ -332,12 +375,14 @@ func _render_result() -> void:
 	var aar_chip_strip: HBoxContainer = _ensure_aar_chip_strip()
 	var aar_rows_label: Label = _ensure_aar_rows_label()
 	var aar_limit_label: Label = _ensure_aar_limit_label()
+	var skill_preview_label: Label = _ensure_skill_progress_preview_label()
 	var character_events_label: Label = _ensure_character_events_label()
 	var personnel_events_label: Label = _ensure_personnel_events_label()
 	_apply_help_id(character_events_label, "debrief.character_updates")
 	_apply_help_id(air_asset_label, "fob.flightdeck")
 	_apply_help_id(ftl_feedback_label, "character_sheet.ftl_tactical_impact")
 	_apply_help_id(aar_summary_label, "debrief.mini_aar")
+	_apply_help_id(skill_preview_label, "debrief.skill_preview")
 
 	if _mission_result.is_empty():
 		_render_summary_chips(summary_strip, [
@@ -352,6 +397,7 @@ func _render_result() -> void:
 		air_asset_label.text = "Air asset: pending"
 		ftl_feedback_label.text = "FTL feedback: pending"
 		_render_aar_bridge({}, aar_summary_label, aar_chip_strip, aar_rows_label, aar_limit_label)
+		_render_skill_progress_preview(skill_preview_label, [])
 		character_events_label.text = "Character updates: pending"
 		personnel_events_label.text = "Personnel updates: pending"
 		_apply_readability_style()
@@ -413,6 +459,7 @@ func _render_result() -> void:
 		ftl_feedback_label.text = "FTL feedback:\n%s" % "\n".join(ftl_feedback_lines)
 
 	_render_aar_bridge(_extract_debrief_aar_payload(), aar_summary_label, aar_chip_strip, aar_rows_label, aar_limit_label)
+	_render_skill_progress_preview(skill_preview_label, _build_skill_progress_preview_entries())
 
 	var character_event_lines: PackedStringArray = []
 	for event_variant in Array(_mission_result.get("character_events", [])):
@@ -514,6 +561,10 @@ func _ensure_aar_limit_label() -> Label:
 	return _ensure_debrief_label_before_button_row("AARLimitLabel")
 
 
+func _ensure_skill_progress_preview_label() -> Label:
+	return _ensure_debrief_label_before_button_row("SkillProgressPreviewLabel")
+
+
 func _ensure_debrief_label_before_button_row(label_name: String) -> Label:
 	var vbox := get_node("Panel/Margin/VBox") as VBoxContainer
 	var existing := vbox.get_node_or_null(label_name) as Label
@@ -559,6 +610,7 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/AirAssetEventsLabel") as Control, "fob.flightdeck")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/FTLFeedbackLabel") as Control, "character_sheet.ftl_tactical_impact")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/AARSummaryLabel") as Control, "debrief.mini_aar")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/SkillProgressPreviewLabel") as Control, "debrief.skill_preview")
 
 
 func _apply_readability_style() -> void:
@@ -583,6 +635,7 @@ func _apply_readability_style() -> void:
 		"Panel/Margin/VBox/AARSummaryLabel",
 		"Panel/Margin/VBox/AARRowsLabel",
 		"Panel/Margin/VBox/AARLimitLabel",
+		"Panel/Margin/VBox/SkillProgressPreviewLabel",
 		"Panel/Margin/VBox/CharacterEventsLabel",
 		"Panel/Margin/VBox/PersonnelEventsLabel",
 	]:
@@ -596,6 +649,7 @@ func _apply_readability_style() -> void:
 		aar_limit_label.add_theme_color_override("font_color", Color("a8b7c0"))
 		aar_limit_label.add_theme_font_size_override("font_size", 12)
 	_apply_aar_layout_polish_style()
+	_apply_skill_progress_preview_style()
 	_apply_aar_chip_style()
 
 	for path in [
@@ -743,6 +797,101 @@ func _render_aar_chips(strip: HBoxContainer, chips: Array) -> void:
 	_apply_aar_chip_style()
 
 
+func _build_skill_progress_preview_entries() -> Array:
+	var entries: Array = []
+	for member_state_variant in Array(_mission_result.get("team_states", [])):
+		if typeof(member_state_variant) != TYPE_DICTIONARY:
+			continue
+		var member_state: Dictionary = Dictionary(member_state_variant)
+		var display_name: String = String(member_state.get("display_name", member_state.get("unit_id", "Unit"))).strip_edges()
+		if display_name.is_empty():
+			display_name = "Unit"
+		var vital_state: String = String(member_state.get("vital_state", "unknown")).strip_edges().to_lower()
+		var progress_hint: String = _format_skill_preview_status_hint(vital_state)
+		entries.append({
+			"id": String(member_state.get("unit_id", display_name)).strip_edges(),
+			"kind": "unit",
+			"label": display_name,
+			"hint": progress_hint,
+			"source": "team_states",
+			"read_only": true,
+		})
+		if entries.size() >= 3:
+			break
+	for ftl_variant in Array(_mission_result.get("fireteam_tactical_debrief", [])):
+		if typeof(ftl_variant) != TYPE_DICTIONARY:
+			continue
+		var ftl_entry: Dictionary = Dictionary(ftl_variant)
+		var fireteam_id: String = String(ftl_entry.get("fireteam_id", "FT")).strip_edges().to_upper()
+		if fireteam_id.is_empty():
+			fireteam_id = "FT"
+		entries.append({
+			"id": fireteam_id.to_lower(),
+			"kind": "fireteam",
+			"label": fireteam_id,
+			"hint": _format_skill_preview_ftl_hint(ftl_entry),
+			"source": "fireteam_tactical_debrief",
+			"read_only": true,
+		})
+		break
+	return entries
+
+
+func _format_skill_preview_status_hint(vital_state: String) -> String:
+	match vital_state:
+		"fit":
+			return "field +"
+		"wounded":
+			return "recovery +"
+		"down":
+			return "medical review"
+		"dead":
+			return "loss review"
+		_:
+			return "field data"
+
+
+func _format_skill_preview_ftl_hint(entry: Dictionary) -> String:
+	var plan_quality: float = clampf(float(entry.get("plan_quality", 0.0)), 0.0, 1.0)
+	var report_quality: float = clampf(float(entry.get("contact_report_quality", 0.0)), 0.0, 1.0)
+	if plan_quality >= 0.66 and report_quality >= 0.66:
+		return "tactics +"
+	if plan_quality >= 0.66:
+		return "orders +"
+	if report_quality >= 0.66:
+		return "reports +"
+	return "lessons +"
+
+
+func _render_skill_progress_preview(label: Label, entries: Array) -> void:
+	if label == null:
+		return
+	if entries.is_empty():
+		label.text = ""
+		label.visible = false
+		label.set_meta("debrief_skill_preview_entries", [])
+		label.set_meta("debrief_skill_preview_token_count", 0)
+		_apply_skill_progress_preview_style()
+		return
+	var tokens: PackedStringArray = PackedStringArray()
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var label_text: String = String(entry.get("label", "Unit")).strip_edges()
+		var hint_text: String = String(entry.get("hint", "preview")).strip_edges()
+		if label_text.is_empty() or hint_text.is_empty():
+			continue
+		tokens.append("%s %s" % [label_text, hint_text])
+		if tokens.size() >= 4:
+			break
+	label.text = "Skill Preview: %s" % " | ".join(tokens)
+	label.visible = not tokens.is_empty()
+	label.set_meta("debrief_skill_preview_entries", entries)
+	label.set_meta("debrief_skill_preview_token_count", tokens.size())
+	_apply_skill_progress_preview_style()
+
+
 func _format_aar_summary_text(summary_text: String) -> String:
 	var normalized: String = summary_text.strip_edges()
 	if normalized.begins_with("AAR:"):
@@ -784,6 +933,18 @@ func _apply_aar_layout_polish_style() -> void:
 		limit_label.add_theme_font_size_override("font_size", 11)
 		limit_label.set_meta("debrief_aar_layout_style_id", DEBRIEF_AAR_LAYOUT_STYLE_ID)
 		limit_label.set_meta("debrief_aar_limit_style_id", "debrief_aar_limit_v2")
+
+
+func _apply_skill_progress_preview_style() -> void:
+	var label := get_node_or_null("Panel/Margin/VBox/SkillProgressPreviewLabel") as Label
+	if label == null:
+		return
+	label.clip_text = true
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.add_theme_color_override("font_color", Color("cfe7b5"))
+	label.add_theme_font_size_override("font_size", 12)
+	label.set_meta("debrief_skill_preview_style_id", DEBRIEF_SKILL_PREVIEW_STYLE_ID)
 
 
 func _apply_aar_chip_style() -> void:
