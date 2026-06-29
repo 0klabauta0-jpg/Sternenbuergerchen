@@ -52,6 +52,8 @@ const TERRAIN_3D_MAPPING_PATH: String = "res://data/terrain_3d_asset_mapping.jso
 const TERRAIN_SURFACE_VISUAL_THEME_CATALOG_PATH: String = "res://data/terrain_surface_visual_theme_catalog.json"
 const NPC_UNIT_VISUAL_MAPPING_PATH: String = "res://data/npc_unit_visual_mapping.json"
 const WEAPON_FIRE_VFX_CATALOG_PATH: String = "res://data/weapon_fire_vfx_catalog.json"
+const FACTORY_MODEL_ROOT: String = "res://Assets/curated/kenney/factory/models"
+const FACTORY_COLORMAP_TEXTURE_PATH: String = FACTORY_MODEL_ROOT + "/Textures/colormap.png"
 const TILE_SPACING: float = 1.0
 const TILE_THICKNESS: float = 0.035
 const HEIGHT_STEP: float = 0.5
@@ -9605,9 +9607,21 @@ func _get_asset_model_scene_by_path(model_path: String) -> PackedScene:
 	if not ResourceLoader.exists(model_path):
 		_model_scene_cache[model_path] = null
 		return null
+	_ensure_factory_colormap_uid_registered(model_path)
 	var packed_scene := load(model_path) as PackedScene
 	_model_scene_cache[model_path] = packed_scene
 	return packed_scene
+
+
+func _ensure_factory_colormap_uid_registered(model_path: String) -> void:
+	if not model_path.begins_with(FACTORY_MODEL_ROOT + "/"):
+		return
+	if not ResourceLoader.exists(FACTORY_COLORMAP_TEXTURE_PATH):
+		return
+	var colormap_id: int = ResourceUID.create_id_for_path(FACTORY_COLORMAP_TEXTURE_PATH)
+	if colormap_id == ResourceUID.INVALID_ID or ResourceUID.has_id(colormap_id):
+		return
+	ResourceUID.add_id(colormap_id, FACTORY_COLORMAP_TEXTURE_PATH)
 
 
 func _is_nature_kit_model_entry(entry: Dictionary) -> bool:
