@@ -208,7 +208,8 @@
       <span class="pill good">TASK_558 Screenshot-Notizen</span>
       <span class="pill good">TASK_559 Factory-UID-Guard</span>
       <span class="pill good">TASK_560 Teamchip-Tooltip</span>
-      <span class="pill warn">TASK_561 MP-F6-Sichtpolish</span>
+      <span class="pill good">TASK_561 Review-Guide</span>
+      <span class="pill warn">TASK_562 MP-F6-Polish anwenden</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -421,9 +422,9 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock und TASK_560 als hoverbarer Mission-Teamchip-Tooltip.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns ohne laengere sichtbare HUD-Zeile.</td><td>Naechster spielbarer Schritt ist TASK_561: echte MP-F6-Screenshot-/Hover-Notizen in gezielten Visual-Polish uebersetzen.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip und TASK_561 als gefuehrter MP-F6-Review-Guide.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns ohne laengere sichtbare HUD-Zeile, und der naechste Sichttest exportiert konkrete Ratings.</td><td>Naechster spielbarer Schritt ist TASK_562: echte MP-F6-Screenshot-/Hover-Notizen in gezielten Visual-Polish uebersetzen.</td></tr>
                 <tr><td>Asset-/Warn-Hygiene</td><td>TASK_559 registriert die deterministische Factory-Colormap-UID vor Factory-GLB-Loads und entfernt damit eine wiederkehrende Godot-Importwarnung aus F6-Smokes.</td><td>Test- und Exportausgaben werden leiser, damit neue echte Fehler schneller auffallen.</td><td>Weitere Warnquellen nur als eigene kleine Hygiene-Slices angehen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_560 plus TASK_561-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_561 plus TASK_562-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
           </div>
@@ -451,7 +452,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_558_done"> TASK_558 MP-F6-Screenshot-Notizen ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_559_done"> TASK_559 Factory-Colormap-UID-Guard ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_560_done"> TASK_560 Teamchip-Tooltip-Polish ist im Arbeitsstand implementiert</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_561_selected_next"> TASK_561 MP-F6-Sichtpolish ist als naechster manueller Slice vorgeschlagen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_561_done"> TASK_561 MP-F6-Review-Guide ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_562_selected_next"> TASK_562 MP-F6-Polish-Anwendung ist als naechster manueller Slice vorgeschlagen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_524_done"> TASK_524 Warn-Laerm-Bereinigung ist im Arbeitsstand implementiert</label>
@@ -481,8 +483,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Erledigt</td><td>TASK_560 macht den Mission-Teamchip hoverbar und erklaert Host Peer 1, Peer 2, <code>spawn_alpha</code> und <code>spawn_bravo</code> im Tooltip.</td><td>Wenn TASK_561 aus einem echten MP-F6-Export konkrete Visual-Polish-Aenderungen ableitet.</td></tr>
-                <tr><td>Jetzt dran</td><td>TASK_561 - Frontier Probe Multiplayer Manual Visual Polish Follow-up. Ziel: echte Screenshot-/Hover-Notizen in gezielte Panel-/Stil-/Lesbarkeitskorrekturen umsetzen.</td><td>Nach manuellem Host/Client- oder F6-Playtest.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_561 fuehrt die manuelle MP-F6-Sichtpruefung mit Detailchecks und Ratings fuer Teamchip-Hover, Objective/Cargo, Selected Fireteam, Paneldichte und Weltverdeckung.</td><td>Wenn TASK_562 aus einem echten MP-F6-Export konkrete Visual-Polish-Aenderungen ableitet.</td></tr>
+                <tr><td>Jetzt dran</td><td>TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings. Ziel: exportierte Review-Notizen in gezielte Panel-/Stil-/Lesbarkeitskorrekturen umsetzen.</td><td>Nach manuellem Host/Client- oder F6-Playtest mit JSON-Export.</td></tr>
                 <tr><td>Offen</td><td>Der echte menschliche F6-/Sichttest wurde fuer die letzten Headless-Slices bewusst nicht behauptet. Die naechste manuelle Runde sollte sichtbare Bewegung, Panel-Feedback, Kontaktlinien und Drop-/Fireteam-Konsistenz pruefen.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -527,7 +529,8 @@
             <div class="finding good"><h3>Erledigt: Frontier Probe Multiplayer Manual Screenshot Notes Pass</h3><p>TASK_558 macht den echten F6-MP-Blick als Screenshot-/Hover-/Panel-Notizblock im HTML-Bericht exportierbar.</p></div>
             <div class="finding good"><h3>Erledigt: Factory Colormap UID Loader Guard</h3><p>TASK_559 registriert die deterministische Factory-Colormap-UID vor Factory-GLB-Loads und reduziert wiederkehrenden Godot-Warnlaerm.</p></div>
             <div class="finding good"><h3>Erledigt: Teamchip Tooltip Polish</h3><p>TASK_560 macht den kompakten Mission-Teamchip im F6-Mission-Control-Bereich hoverbar und erklaert die MP-Owner-/Spawn-Zuordnung.</p></div>
-            <div class="finding medium"><h3>1. TASK_561 - Frontier Probe Multiplayer Manual Visual Polish Follow-up</h3><p>Aus dem echten MP-F6-Export sollte der naechste gezielte Panel-/Hover-/Stilpolish entstehen.</p></div>
+            <div class="finding good"><h3>Erledigt: MP-F6 Review Guide</h3><p>TASK_561 macht die naechste manuelle Sichtpruefung auswertbar: Detailchecks, Ratings und Prioritaet werden exportiert.</p></div>
+            <div class="finding medium"><h3>1. TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings</h3><p>Aus dem echten MP-F6-Export sollte der naechste gezielte Panel-/Hover-/Stilpolish entstehen.</p></div>
           </div>
         </article>
       </div>
@@ -583,7 +586,8 @@
             <div class="finding good"><h3>Erledigt: TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass</h3><p>Der echte MP-F6-Sichttest kann als Screenshot-/Hover-Notiz im Bericht exportiert werden.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_559 - Factory Colormap UID Loader Guard</h3><p>Der wiederkehrende Factory-Colormap-UID-Warnpfad ist im 3D-View-Loader abgesichert.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_560 - Frontier Probe Multiplayer Teamchip Tooltip Polish</h3><p>Der Mission-Teamchip bleibt kompakt und erhaelt eine hoverbare Owner-/Spawn-Erklaerung.</p></div>
-            <div class="finding medium"><h3>1. TASK_561 - Frontier Probe Multiplayer Manual Visual Polish Follow-up</h3><p>Die exportierten MP-F6-Notizen in gezielte UI-/Lesbarkeitskorrekturen umsetzen.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide</h3><p>Der MP-F6-Bericht fragt die wichtigsten sichtbaren Reibungspunkte jetzt strukturiert ab und exportiert Ratings plus naechste Prioritaet.</p></div>
+            <div class="finding medium"><h3>1. TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings</h3><p>Die exportierten MP-F6-Notizen in gezielte UI-/Lesbarkeitskorrekturen umsetzen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -664,10 +668,11 @@
                 <tr><td><code>task_555_frontier_probe_multiplayer_objective_ownership_smoke.gd</code></td><td>25 passed, 0 failed</td><td>Headless-Smoke fuer Alpha/Bravo-/NPC-/Peer-Ownership im integrierten Frontier-Probe-Objective-Slice.</td></tr>
                 <tr><td><code>task_556_frontier_probe_host_client_objective_handoff_smoke.gd</code></td><td>25 passed, 0 failed</td><td>Headless-Smoke fuer Session-Assignments, serverseitige Bravo-Commands, Alpha-Ablehnung, State-Mutation-Guard und Client-Snapshot-Apply.</td></tr>
                 <tr><td><code>task_557_frontier_probe_multiplayer_f6_readability_pass.gd</code></td><td>25 passed, 0 failed</td><td>Headless-Smoke fuer MP-Ownership, Teamchip, Mission-Control-Zeilen, Selected-Fireteam-Kontext, FullHD-Bounds und kritische Panel-Ueberlappungen.</td></tr>
-                <tr><td><code>task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd</code></td><td>29 passed, 0 failed</td><td>Statischer Verifier fuer MP-F6-Screenshot-/Hover-Notizblock, Export-Keys, Contract, Status und TASK_561-Follow-up.</td></tr>
+                <tr><td><code>task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd</code></td><td>29 passed, 0 failed</td><td>Statischer Verifier fuer MP-F6-Screenshot-/Hover-Notizblock, Export-Keys, Contract, Status und TASK_562-Follow-up.</td></tr>
                 <tr><td><code>task_559_factory_colormap_uid_loader_guard.gd</code></td><td>15 passed, 0 failed</td><td>Verifier fuer deterministische Factory-Colormap-UID-Registrierung und die zuvor lauten Factory-GLB-Loads; TASK_557-Log zeigt keine alte Factory-UID-Warnung mehr.</td></tr>
                 <tr><td><code>task_560_frontier_probe_multiplayer_teamchip_tooltip_polish.gd</code></td><td>20 passed, 0 failed</td><td>Headless-Smoke fuer hoverbaren MP-Teamchip-Tooltip, Host/Peer-/Spawn-Kontext, kompakte sichtbare Zeile und weiter gruenes TASK_557-Gate.</td></tr>
-                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_560 aktualisiert, nennt TASK_561 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
+                <tr><td><code>task_561_frontier_probe_multiplayer_manual_visual_review_guide.gd</code></td><td>29 passed, 0 failed</td><td>Statischer Verifier fuer gefuehrte MP-F6-Sichtpruefung, Ratings, Prioritaet, Contract, Status und TASK_562-Follow-up.</td></tr>
+                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_561 aktualisiert, nennt TASK_562 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -681,7 +686,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_559-Merge und Push. Arbeitsbranch: <code>task/frontier-probe-mp-teamchip-tooltip-polish</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_560-Merge und Push. Arbeitsbranch: <code>task/frontier-probe-mp-f6-manual-review-guide</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -734,9 +739,13 @@
           <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.screenshot_done"> MP-F6-Screenshot wurde manuell erstellt</label>
           <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.host_client_context_checked"> Host Peer 1 / Peer 2 Kontext wurde im Bild geprueft</label>
           <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.team_chip_checked"> Teamchip mit Alpha/Bravo und Spawn-Kontext wurde geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.team_chip_hover_checked"> Teamchip-Hover wurde geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.team_chip_tooltip_owner_spawn_checked"> Teamchip-Tooltip zeigt Host Peer 1, Peer 2, spawn_alpha und spawn_bravo</label>
           <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.objective_cargo_checked"> Objective-/Cargo-Zeilen in Mission Control wurden geprueft</label>
           <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.selected_fireteam_checked"> Selected-Fireteam-Kontext wurde geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.dropship_cards_checked"> Dropship-Karten und Fireteam-Payloads wurden geprueft</label>
           <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.panel_overlap_checked"> Panel-Ueberlappung / Weltverdeckung wurde geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mp_f6_manual.world_objective_visibility_checked"> Weltziel, Dropships und Objective-/Cargo-Anker bleiben sichtbar</label>
           <label style="display:block;margin-top:12px;">Screenshotpfad
             <input type="text" data-export-key="mp_f6_manual.screenshot_path" placeholder="z.B. C:\dev\SternenBuergerchen\tmp\mp_f6_frontier_probe.png">
           </label>
@@ -752,6 +761,57 @@
             <button class="choice" type="button" data-choice-value="needs_polish">Polish noetig</button>
             <button class="choice" type="button" data-choice-value="blocked">Blockiert</button>
           </div>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Pruefpunkt</th><th>Erwartung fuer TASK_561</th></tr></thead>
+              <tbody>
+                <tr><td>Teamchip-Hover</td><td>Kurze sichtbare Zeile; Tooltip erklaert Host Peer 1, Peer 2, <code>spawn_alpha</code>, <code>spawn_bravo</code>.</td></tr>
+                <tr><td>Mission Control</td><td>AA, COM, OBJ und CARGO sind ohne Suchen lesbar und beissen sich nicht mit Teamchip oder Dropships.</td></tr>
+                <tr><td>Selected Fireteam</td><td>Auswahl, Fireteam-Kontext, Cards und Order-Status bleiben zusammen lesbar.</td></tr>
+                <tr><td>Dropships / Welt</td><td>Dropship-Cards, Zielanker und Weltbewegung verdecken sich nicht so, dass der naechste Befehl unklar wird.</td></tr>
+                <tr><td>Prioritaet</td><td>Der Export benennt eine konkrete naechste Polish-Stelle statt nur allgemeines "sieht komisch aus".</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="button-row" style="margin-top:12px" data-choice-group="mp_f6_manual.team_chip_rating">
+            <button class="choice active" type="button" data-choice-value="pending">Teamchip offen</button>
+            <button class="choice" type="button" data-choice-value="good">Teamchip gut</button>
+            <button class="choice" type="button" data-choice-value="okay">Teamchip ok</button>
+            <button class="choice" type="button" data-choice-value="poor">Teamchip schlecht</button>
+          </div>
+          <div class="button-row" style="margin-top:8px" data-choice-group="mp_f6_manual.objective_cargo_rating">
+            <button class="choice active" type="button" data-choice-value="pending">Objective/Cargo offen</button>
+            <button class="choice" type="button" data-choice-value="good">Objective/Cargo gut</button>
+            <button class="choice" type="button" data-choice-value="okay">Objective/Cargo ok</button>
+            <button class="choice" type="button" data-choice-value="poor">Objective/Cargo schlecht</button>
+          </div>
+          <div class="button-row" style="margin-top:8px" data-choice-group="mp_f6_manual.selected_fireteam_rating">
+            <button class="choice active" type="button" data-choice-value="pending">Fireteam offen</button>
+            <button class="choice" type="button" data-choice-value="good">Fireteam gut</button>
+            <button class="choice" type="button" data-choice-value="okay">Fireteam ok</button>
+            <button class="choice" type="button" data-choice-value="poor">Fireteam schlecht</button>
+          </div>
+          <div class="button-row" style="margin-top:8px" data-choice-group="mp_f6_manual.panel_density_rating">
+            <button class="choice active" type="button" data-choice-value="pending">Paneldichte offen</button>
+            <button class="choice" type="button" data-choice-value="good">Paneldichte gut</button>
+            <button class="choice" type="button" data-choice-value="okay">Paneldichte ok</button>
+            <button class="choice" type="button" data-choice-value="poor">Paneldichte schlecht</button>
+          </div>
+          <div class="button-row" style="margin-top:8px" data-choice-group="mp_f6_manual.world_occlusion_rating">
+            <button class="choice active" type="button" data-choice-value="pending">Welt offen</button>
+            <button class="choice" type="button" data-choice-value="good">Welt gut</button>
+            <button class="choice" type="button" data-choice-value="okay">Welt ok</button>
+            <button class="choice" type="button" data-choice-value="poor">Welt schlecht</button>
+          </div>
+          <div class="button-row" style="margin-top:8px" data-choice-group="mp_f6_manual.next_polish_priority">
+            <button class="choice active" type="button" data-choice-value="pending">Prioritaet offen</button>
+            <button class="choice" type="button" data-choice-value="team_chip">Teamchip</button>
+            <button class="choice" type="button" data-choice-value="objective_cargo">Objective/Cargo</button>
+            <button class="choice" type="button" data-choice-value="selected_fireteam">Selected Fireteam</button>
+            <button class="choice" type="button" data-choice-value="dropship_panels">Dropship/Panels</button>
+            <button class="choice" type="button" data-choice-value="world_occlusion">Weltverdeckung</button>
+            <button class="choice" type="button" data-choice-value="none">Kein Polish noetig</button>
+          </div>
           <label style="display:block;margin-top:12px;">Teamchip-/Ownership-Notizen
             <textarea data-export-key="mp_f6_manual.team_chip_notes" placeholder="Ist Alpha/Bravo/Host/Peer/Spawn schnell erfassbar? Fehlt Farbe, Icon, Kurzlabel oder Tooltip?"></textarea>
           </label>
@@ -761,8 +821,11 @@
           <label style="display:block;margin-top:12px;">Panel-/Hover-/Weltverdeckungs-Notizen
             <textarea data-export-key="mp_f6_manual.panel_hover_notes" placeholder="Stoert ein Panel, verdeckt es Dropship, Weltziel, Teamchip oder Fireteam-Status? Fuehlt sich Hover klar an?"></textarea>
           </label>
-          <label style="display:block;margin-top:12px;">Konkreter Follow-up fuer TASK_561
-            <textarea data-export-key="mp_f6_manual.followup" placeholder="Konkrete Aenderung fuer TASK_561, falls noetig."></textarea>
+          <label style="display:block;margin-top:12px;">Selected-Fireteam-/Dropship-Notizen
+            <textarea data-export-key="mp_f6_manual.selected_fireteam_dropship_notes" placeholder="Sind Fireteam-Auswahl, Dropship-Cards, Payloads und Weltanker gleichzeitig verstaendlich?"></textarea>
+          </label>
+          <label style="display:block;margin-top:12px;">Konkreter Follow-up fuer TASK_562
+            <textarea data-export-key="mp_f6_manual.followup" placeholder="Konkrete Aenderung fuer TASK_562, falls noetig."></textarea>
           </label>
           <div contenteditable="true" data-note-key="notes.mp_f6_manual_review" data-placeholder="Freie MP-F6-Screenshot-Review-Notiz..."></div>
         </article>
@@ -827,7 +890,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_561 - Frontier Probe Multiplayer Manual Visual Polish Follow-up"
+              "TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -874,25 +937,26 @@
               "TASK_557 - Frontier Probe Multiplayer F6 Readability Pass",
               "TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass",
               "TASK_559 - Factory Colormap UID Loader Guard",
-              "TASK_560 - Frontier Probe Multiplayer Teamchip Tooltip Polish"
+              "TASK_560 - Frontier Probe Multiplayer Teamchip Tooltip Polish",
+              "TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Manueller FullHD-/F6-Sichttest bleibt trotz integrierter Headless-Smokes offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
-              "Der integrierte Objective-Pfad ist nach TASK_560 noch nicht mit echtem MP-F6-Screenshot-/Hover-Export ausgewertet."
+              "Der integrierte Objective-Pfad ist nach TASK_561 noch nicht mit echtem MP-F6-Screenshot-/Hover-Export ausgewertet."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
             runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status",
-            current_focus: "TASK_561 - Frontier Probe Multiplayer Manual Visual Polish Follow-up",
-            latest_completed_task: "TASK_560 - Frontier Probe Multiplayer Teamchip Tooltip Polish"
+            current_focus: "TASK_562 - Frontier Probe Multiplayer Apply Manual Visual Polish Findings",
+            latest_completed_task: "TASK_561 - Frontier Probe Multiplayer Manual Visual Review Guide"
           },
           metadata: {
-            branch: "task/frontier-probe-mp-teamchip-tooltip-polish",
-            integration_base: "integration/core-foundation after TASK_559",
-            head: "task/frontier-probe-mp-teamchip-tooltip-polish",
+            branch: "task/frontier-probe-mp-f6-manual-review-guide",
+            integration_base: "integration/core-foundation after TASK_560",
+            head: "task/frontier-probe-mp-f6-manual-review-guide",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }
