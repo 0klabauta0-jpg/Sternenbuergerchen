@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_599 - Integrated Core Loop Playtest Evidence Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_599_integrated_core_loop_playtest_evidence_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `scripts/tests/task_599_integrated_core_loop_playtest_evidence_pass.gd` erzeugt `tmp/integrated_core_loop_playtest_evidence.json` als read-only Composite-Evidence-Manifest fuer den Pfad Homebase -> Briefing/Loadout -> Dropship -> Mission -> Objective/Combat -> Debrief -> Homebase -> Progression.
+- Stand: Das Manifest referenziert die vorhandenen gruenen Flow-Smokes fuer Homebase-Launch, Mission-Fire/Cover, Frontier-Probe-Objective/Cargo, Debrief-Return, Skill-Awards und Homebase-Progression-Evidence.
+- Stand: Der laufende HTML-Zwischenbericht markiert TASK_599 als erledigt, exportiert den Manifestpfad und nennt TASK_600 als naechsten Anschluss fuer konkrete Flow-Polish-Findings.
+- Risiken/offen: TASK_599 ist ein Composite-Regression-Manifest, kein echter menschlicher FullHD-Durchspieltest. Pacing, Mausklick-Gefuehl, Ueberblicksdichte und Host/Client-Gefuehl bleiben manuell zu pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_599_integrated_core_loop_playtest_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_554_frontier_probe_integrated_objective_playthrough_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_586_debrief_return_homebase_handoff.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_597_homebase_progression_f6_evidence_capture.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_600 - Integrated Core Loop Flow Polish Findings`, falls der naechste echte Flow-Sichttest konkrete Reibungen zeigt.
+
 ### TASK_598 - Homebase Progression Evidence Polish Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_598_homebase_progression_evidence_polish_findings.md`, `docs/tasks/TASK_597_homebase_progression_f6_evidence_capture.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

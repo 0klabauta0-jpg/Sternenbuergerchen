@@ -254,6 +254,11 @@ TASK_597 macht die sichtbare Homebase-Progression im Character-Sheet reproduzier
 
 Erwartete Struktur: `get_homebase_progression_f6_evidence_snapshot()` enthaelt `schema = sternenbuergerchen.homebase_progression_f6_evidence.v1`, `layout_key = homebase_progression_f6_evidence_v1`, `bridge_gate`, `source_schema`, `focused_unit_id`, `focused_delta_text`, `style_id`, `badge_text`, `popup_rect`, `sheet_content_rect`, `award_highlight_rect`, `award_value_row_rect`, `award_label_rect`, `award_value_rect`, `award_label_text`, `award_value_text`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Gates: Post-Mission-Delta-Gate gruen, Character-Sheet-Popup sichtbar, Award-Controls sichtbar und innerhalb des Popups, `MISSION GAIN`-Badge sichtbar, Style-ID gesetzt und Label/Value kompakt.
 
+## Integrated-Core-Loop-Playtest-Evidence
+TASK_599 fasst vorhandene gruene Flow-Smokes als read-only Evidence-Manifest zusammen. Der Verifier darf `tmp/integrated_core_loop_playtest_evidence.json` schreiben, aber keine Mission, XP, Skill, Roster, Multiplayer- oder UI-Wahrheit erzeugen. Das Manifest ist ein Arbeits-/Review-Artefakt und ersetzt keinen echten menschlichen FullHD-Playtest.
+
+Erwartete Struktur: Das Manifest enthaelt `schema = sternenbuergerchen.integrated_core_loop_playtest_evidence.v1`, `task_id = TASK_599`, `flow_path`, `flow_steps`, `flow_step_count`, `passing_step_count`, `evidence_strength = composite_regression_manifest`, `manual_full_playtest_done = false`, `manual_review_required = true`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_600 - Integrated Core Loop Flow Polish Findings`. Erwartete Flow-Steps sind Homebase-Launch, Mission-Fire/Cover, Frontier-Probe-Objective/Cargo, Debrief-Return, Skill-Award-Contract und Homebase-Progression-Evidence.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
