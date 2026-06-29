@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_554_frontier_probe_integrated_objective_playthrough_smoke.md`, `docs/tasks/TASK_553_mission_cargo_extract_readability_pass.md`, `docs/tasks/TASK_552_mission_objective_interaction_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_frontier_probe_integrated_objective_playthrough_snapshot()` fuer den kompletten AA-/Computer-/Cargo-Abschlussblick.
+- Stand: Der Smoke prueft in der echten Mission-Testszene: Objective von Alpha, AA-Gate komplett, Computer-Gate komplett, Cargo ready noch nicht komplett, Cargo departed komplettiert alle Gates.
+- Stand: Mission Control muss AA/COM/OBJ und CARGO im selben finalen Statusbild zeigen; Primary3D behaelt Objective-Status sichtbar und entfernt aktive Cargo-Visuals nach Departure.
+- Stand: Der Rolling-HTML-Bericht ist auf TASK_554 aktualisiert und nennt TASK_555 als naechsten spielbaren Multiplayer-Anschluss.
+- Risiken/offen: Der Smoke setzt kontrollierte Scenario-Zustaende und ersetzt noch keinen menschlichen F6-Playtest oder echten Host/Client-Lauf.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_554_frontier_probe_integrated_objective_playthrough_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_553_mission_cargo_extract_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_552_mission_objective_interaction_readability_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke`, damit Alpha/Bravo-/NPC-/Peer-Besitz im integrierten Objective-Slice abgesichert wird.
+
 ### TASK_553 - Mission Cargo Extract Readability Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_553_mission_cargo_extract_readability_pass.md`, `docs/tasks/TASK_522_cargo_touchdown_visual_polish.md`, `docs/tasks/TASK_519_cargo_touchdown_runtime_bridge.md`, `docs/dev/mission_command_feedback_contract.md`

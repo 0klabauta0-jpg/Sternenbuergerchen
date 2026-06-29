@@ -69,6 +69,9 @@ TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dez
 ## Mission-Cargo-Extract-Readability
 `get_mission_cargo_extract_readability_snapshot()` ist der Headless-Pruefpunkt fuer TASK_553. Der Snapshot darf nur bestehende `MissionCargoTouchdownBridge`-, `MissionScenarioRuntimeGates`-, Command-Feedback- und `TerrainMap3DView`-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Cargo-, Objective-, Combat- oder Command-Entscheidung erzeugen. Erwartete Lesbarkeit: Mission Control zeigt eine kompakte `CARGO ...`-Zeile fuer blocked/inbound/hold/ready/departing/departed, der Cargo-Hold-Fortschritt bleibt vom Completion-State getrennt, Primary3D spiegelt den aktiven Cargo-Zustand, und `departed` komplettiert CargoBridge plus Scenario-Gate konsistent.
 
+## Frontier-Probe-Integrated-Objective-Playthrough
+`get_frontier_probe_integrated_objective_playthrough_snapshot()` ist der Headless-Pruefpunkt fuer TASK_554. Der Snapshot darf nur bestehende TASK_552-/TASK_553-Snapshots, `MissionScenarioRuntimeGates`, Command-Feedback und `TerrainMap3DView` zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Objective-, Cargo-, Combat-, Team- oder Command-Entscheidung erzeugen. Erwartete Lesbarkeit: AA, Computer und Cargo-Gates sind im finalen Zustand gemeinsam komplett; Mission Control zeigt AA/COM/OBJ und CARGO im selben Statusbild; Cargo `ready` komplettiert noch nicht, `departed` komplettiert CargoBridge plus Runtime-Gates; Primary3D behaelt Objective-Status sichtbar und entfernt aktive Cargo-Visuals nach Departure.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
