@@ -12843,6 +12843,96 @@ func get_mission_cargo_extract_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_frontier_probe_integrated_objective_playthrough_snapshot() -> Dictionary:
+	var objective_snapshot: Dictionary = get_mission_objective_interaction_readability_snapshot()
+	var cargo_snapshot: Dictionary = get_mission_cargo_extract_readability_snapshot()
+	var gate_snapshot: Dictionary = _get_mission_scenario_runtime_gate_snapshot_for_readability()
+	var gate_entries: Array = Array(gate_snapshot.get("gates", []))
+	var aa_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "air_defense_shutdown")
+	var computer_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "computer_hold")
+	var cargo_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "cargo_touchdown_extract")
+	var objective_line: String = String(objective_snapshot.get("objective_interaction_line", "")).strip_edges()
+	var cargo_line: String = String(cargo_snapshot.get("cargo_extract_line", "")).strip_edges()
+	var mission_control_status_text: String = String(cargo_snapshot.get("mission_control_status_text", objective_snapshot.get("mission_control_status_text", ""))).strip_edges()
+	if (not objective_line.is_empty() and not mission_control_status_text.contains(objective_line)) or (not cargo_line.is_empty() and not mission_control_status_text.contains(cargo_line)):
+		mission_control_status_text = _build_strategic_status_text()
+	var primary_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		primary_snapshot = Dictionary(primary_3d_view.call("get_render_snapshot")).duplicate(true)
+	var all_required_gates_complete: bool = bool(aa_gate.get("complete", false)) and bool(computer_gate.get("complete", false)) and bool(cargo_gate.get("complete", false)) and bool(gate_snapshot.get("all_gates_complete", false))
+	var cargo_runtime_snapshot: Dictionary = Dictionary(cargo_snapshot.get("cargo_snapshot", {}))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"objective_readability_gate_passes",
+			String(objective_snapshot.get("gate", "")) == "pass",
+			"TASK_552 objective interaction snapshot remains green inside the integrated playthrough."
+		),
+		_build_mission_first_move_readability_check(
+			"cargo_readability_gate_passes",
+			String(cargo_snapshot.get("gate", "")) == "pass",
+			"TASK_553 cargo extract snapshot remains green inside the integrated playthrough."
+		),
+		_build_mission_first_move_readability_check(
+			"frontier_probe_gates_complete",
+			all_required_gates_complete,
+			"AA, computer and cargo runtime gates are complete together."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_integrates_objective_and_cargo",
+			not objective_line.is_empty()
+				and not cargo_line.is_empty()
+				and mission_control_status_text.contains(objective_line)
+				and mission_control_status_text.contains(cargo_line),
+			"Mission Control shows AA/COM/OBJ and CARGO in the same final status readout."
+		),
+		_build_mission_first_move_readability_check(
+			"cargo_departed_completes_mission",
+			String(cargo_runtime_snapshot.get("cargo_state", "")) == "departed"
+				and bool(cargo_runtime_snapshot.get("complete", false))
+				and bool(cargo_gate.get("complete", false)),
+			"Cargo departed state completes both CargoBridge and runtime gate."
+		),
+		_build_mission_first_move_readability_check(
+			"primary_visuals_show_final_state",
+			bool(primary_snapshot.get("objective_status_visible", false))
+				and not bool(primary_snapshot.get("cargo_touchdown_visible", false))
+				and int(primary_snapshot.get("cargo_touchdown_visual_count", 0)) == 0,
+			"Primary3D keeps objective status visible and removes active cargo visuals after departure."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(objective_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(cargo_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(gate_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Integrated playthrough snapshot reads existing runtime truth without writing gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_554",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"objective_snapshot": objective_snapshot,
+		"cargo_snapshot": cargo_snapshot,
+		"scenario_gate_snapshot": gate_snapshot,
+		"aa_gate": aa_gate,
+		"computer_gate": computer_gate,
+		"cargo_gate": cargo_gate,
+		"objective_interaction_line": objective_line,
+		"cargo_extract_line": cargo_line,
+		"mission_control_status_text": mission_control_status_text,
+		"primary_3d": primary_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_mission_objective_state_snapshot() -> Dictionary:
 	var simulation_root := get_node_or_null("../SimulationRoot")
 	if simulation_root == null or not simulation_root.has_method("get_objective_status"):
