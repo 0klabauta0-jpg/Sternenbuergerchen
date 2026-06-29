@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_585 - Mini AAR Debrief Screen Stub
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_585_mini_aar_debrief_screen_stub.md`, `docs/tasks/TASK_584_mini_aar_combat_metrics_shell.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MissionTacticalSandboxController.get_mini_aar_debrief_screen_snapshot()` baut aus dem TASK_584-Mini-AAR-Snapshot eine kleine read-only Debrief-Screen-Struktur mit Titel, Untertitel, Summary, Metrik-Rows, Chips und Grenztext.
+- Stand: Der Grenztext benennt bewusst: keine XP, keine Ammo und keine echte Suppression. Der Stub mutiert weder MissionResult noch Combat-, Ammo-, XP- oder Skill-State.
+- Stand: Der laufende HTML-Zwischenbericht benennt TASK_585 als erledigten Arbeitsstand und TASK_586 als naechsten moeglichen Return-to-Homebase-Handoff.
+- Risiken/offen: Noch kein navigierbarer Debriefing-Screen und kein Ruecksprung in den Homebase-/Meta-Loop. Echte Mission-Result-Visualisierung, XP, Skillentwicklung, Ammo und Suppression-Wirkung bleiben eigene Tasks.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_585_mini_aar_debrief_screen_stub.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_584_mini_aar_combat_metrics_shell.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_583_suppress_fire_aar_report_panel_readability.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_586 - Debrief Return To Homebase Handoff`, wenn der Debrief-Stub nach Missionsende sauber in den Homebase-/Meta-Loop fuehren soll.
+
 ### TASK_584 - Mini AAR Combat Metrics Shell
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_584_mini_aar_combat_metrics_shell.md`, `docs/tasks/TASK_583_suppress_fire_aar_report_panel_readability.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
 - Stand: `MissionTacticalSandboxController.get_mini_aar_combat_metrics_snapshot()` sammelt vorhandene FireEvents, Hit-/Miss-Zaehler, Friendly-Fire-Event/Risk-Felder, TASK_583-SUP-Panel-Werte und Fireteam-Member-Status in einer kleinen read-only Mini-AAR-Schale.
 - Stand: Der Snapshot liefert kompakte Summary- und Row-Daten fuer eine spaetere Debriefing-Oberflaeche, ohne MissionResult, Combat, Ammo, Suppression, XP oder Skills zu mutieren.
 - Stand: Der laufende HTML-Zwischenbericht benennt TASK_584 als erledigten Arbeitsstand und TASK_585 als naechsten sinnvollen Debrief-Screen-Stub.
-- Risiken/offen: Noch kein vollstaendiger Debriefing-Screen; `extracted_count` bleibt 0, solange kein konkretes Extract-Result-Feld geliefert wird. Echte Suppression-Wirkung, Ammo-Verbrauch, XP und Skillentwicklung bleiben Folgearbeit.
+- Risiken/offen: Noch kein vollstaendiger Debriefing-Screen; TASK_585 stellt nur einen kleinen sichtbaren Stub bereit. `extracted_count` bleibt 0, solange kein konkretes Extract-Result-Feld geliefert wird. Echte Suppression-Wirkung, Ammo-Verbrauch, XP und Skillentwicklung bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_584_mini_aar_combat_metrics_shell.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_583_suppress_fire_aar_report_panel_readability.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_582_suppress_fire_outcome_aar_diagnostic_stub.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_585 - Mini AAR Debrief Screen Stub`, wenn die Mini-AAR-Schale in einer kleinen sichtbaren Debrief-UI gelesen werden soll.
+- Naechster Schritt: durch `TASK_585 - Mini AAR Debrief Screen Stub` erledigt; naechster Anschluss ist `TASK_586 - Debrief Return To Homebase Handoff`.
 
 ### TASK_583 - Suppress Fire AAR Report Panel Readability
 - Status: implementiert im Arbeitsstand

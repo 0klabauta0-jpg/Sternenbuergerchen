@@ -13468,6 +13468,146 @@ func _build_mini_aar_metric_rows(metrics: Dictionary, sup_panel: Dictionary) -> 
 	]
 
 
+func get_mini_aar_debrief_screen_snapshot() -> Dictionary:
+	var schema_id: String = "sternenbuergerchen.mini_aar_debrief_screen_stub.v1"
+	var mini_aar: Dictionary = get_mini_aar_combat_metrics_snapshot()
+	var metrics: Dictionary = Dictionary(mini_aar.get("metrics", {})).duplicate(true)
+	var rows: Array = _build_mini_aar_debrief_rows(Array(mini_aar.get("rows", [])))
+	var chips: Array = _build_mini_aar_debrief_chips(metrics)
+	var limit_text: String = _build_mini_aar_debrief_limit_text()
+	var summary_text: String = _build_mini_aar_debrief_summary(mini_aar, metrics)
+	var screen: Dictionary = {
+		"schema": "sternenbuergerchen.mini_aar_debrief_screen_stub.panel.v1",
+		"title_text": "MINI AAR",
+		"subtitle_text": "Combat metrics preview",
+		"summary_text": summary_text,
+		"rows": rows,
+		"chips": chips,
+		"limit_text": limit_text,
+		"layout_key": "mini_aar_debrief_compact_v1",
+		"primary_action_label": "Weiter",
+		"secondary_action_label": "Details spaeter",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"debrief_schema_available",
+			schema_id == "sternenbuergerchen.mini_aar_debrief_screen_stub.v1",
+			"Mini AAR debrief screen exposes a stable read-only schema."
+		),
+		_build_mission_first_move_readability_check(
+			"source_mini_aar_available",
+			String(mini_aar.get("schema", "")) == "sternenbuergerchen.mini_aar_combat_metrics.v1"
+				and String(mini_aar.get("gate", "")) == "pass",
+			"Mini AAR debrief screen reads the green TASK_584 metrics shell."
+		),
+		_build_mission_first_move_readability_check(
+			"debrief_title_visible",
+			String(screen.get("title_text", "")).strip_edges().length() > 0
+				and String(screen.get("subtitle_text", "")).strip_edges().length() > 0,
+			"Mini AAR debrief screen has visible title and subtitle text."
+		),
+		_build_mission_first_move_readability_check(
+			"debrief_rows_visible",
+			rows.size() >= 4
+				and summary_text.length() <= 120,
+			"Mini AAR debrief screen has compact metric rows."
+		),
+		_build_mission_first_move_readability_check(
+			"debrief_chips_visible",
+			chips.size() >= 5,
+			"Mini AAR debrief screen has short metric chips."
+		),
+		_build_mission_first_move_readability_check(
+			"debrief_limits_visible",
+			limit_text.contains("Keine XP")
+				and limit_text.contains("keine Ammo")
+				and limit_text.contains("keine echte Suppression"),
+			"Mini AAR debrief screen states what this stub does not resolve."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(mini_aar.get("read_only", false))
+				and not bool(mini_aar.get("ui_sets_gameplay_truth", true))
+				and bool(screen.get("read_only", false))
+				and not bool(screen.get("ui_sets_gameplay_truth", true)),
+			"Mini AAR debrief screen remains presentation-only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": schema_id,
+		"task_id": "TASK_585",
+		"source_schema": String(mini_aar.get("schema", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"screen": screen,
+		"summary_text": summary_text,
+		"rows": rows,
+		"chips": chips,
+		"limit_text": limit_text,
+		"mini_aar": mini_aar,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_mini_aar_debrief_summary(mini_aar: Dictionary, metrics: Dictionary) -> String:
+	var source_summary: String = String(mini_aar.get("summary_text", "")).strip_edges()
+	if not source_summary.is_empty() and source_summary.length() <= 96:
+		return source_summary
+	return "AAR | FIRE %d | FF %d/%d | SUP %d | WOUND %d | EXT %d" % [
+		int(metrics.get("shots_fired", 0)),
+		int(metrics.get("friendly_fire_event_count", 0)),
+		int(metrics.get("friendly_fire_risk_count", 0)),
+		int(metrics.get("suppress_fire_outcome_count", 0)),
+		int(metrics.get("wounded_count", 0)),
+		int(metrics.get("extracted_count", 0)),
+	]
+
+
+func _build_mini_aar_debrief_rows(source_rows: Array) -> Array:
+	var rows: Array = []
+	for row_variant in source_rows:
+		if typeof(row_variant) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = Dictionary(row_variant)
+		var label: String = String(row.get("label", row.get("id", ""))).strip_edges()
+		var value_text: String = String(row.get("value_text", "")).strip_edges()
+		if label.is_empty() or value_text.is_empty():
+			continue
+		rows.append({
+			"id": String(row.get("id", label.to_lower())).strip_edges(),
+			"label": label,
+			"value_text": value_text,
+			"style_key": "mini_aar_row_v1",
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+	return rows
+
+
+func _build_mini_aar_debrief_chips(metrics: Dictionary) -> Array:
+	return [
+		{"id": "shots", "label": "FIRE", "value_text": str(int(metrics.get("shots_fired", 0))), "style_key": "neutral", "read_only": true},
+		{"id": "hits", "label": "HIT", "value_text": str(int(metrics.get("hit_count", 0))), "style_key": "good", "read_only": true},
+		{"id": "ff", "label": "FF", "value_text": "%d/%d" % [int(metrics.get("friendly_fire_event_count", 0)), int(metrics.get("friendly_fire_risk_count", 0))], "style_key": "warn", "read_only": true},
+		{"id": "sup", "label": "SUP", "value_text": str(int(metrics.get("suppress_fire_outcome_count", 0))), "style_key": "accent", "read_only": true},
+		{"id": "wounded", "label": "WOUND", "value_text": str(int(metrics.get("wounded_count", 0))), "style_key": "warn", "read_only": true},
+		{"id": "extracted", "label": "EXT", "value_text": str(int(metrics.get("extracted_count", 0))), "style_key": "neutral", "read_only": true},
+	]
+
+
+func _build_mini_aar_debrief_limit_text() -> String:
+	return "Keine XP, keine Ammo, keine echte Suppression - nur Debrief-Vorschau aus vorhandenen Metriken."
+
+
 func _count_waypoint_intent_preview_ghost_entries(entries: Array) -> int:
 	var count: int = 0
 	for entry_variant in entries:

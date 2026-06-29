@@ -189,6 +189,11 @@ TASK_584 fuehrt SUP nicht als alleinstehenden Report-Wert weiter, sondern sammel
 
 Erwartete Struktur: `get_mini_aar_combat_metrics_snapshot()` enthaelt `schema = sternenbuergerchen.mini_aar_combat_metrics.v1`, `summary_text`, `metrics`, `rows`, `fire_events`, `sup_panel`, `status_metrics`, `mission_result`, `read_only = true` und `ui_sets_gameplay_truth = false`. `metrics` muss mindestens `shots_fired`, `hit_count`, `friendly_fire_event_count`, `friendly_fire_risk_count`, `suppress_fire_outcome_count`, `wounded_count`, `down_count` und `extracted_count` enthalten. Nicht zulaessig sind ein vollstaendiger Debriefing-Screen, MissionResult-Mutationen, XP-/Skill-Vergabe, Ammo-Verbrauch, echte Suppression-Wirkung oder eine zweite UI-seitige Combat-Wahrheit.
 
+## Mini-AAR-Debrief-Screen-Stub
+TASK_585 macht die TASK_584-Mini-AAR-Schale als kleine Debrief-Screen-Struktur lesbar. Der Mission-Controller darf aus `get_mini_aar_combat_metrics_snapshot()` eine kompakte Praesentationsstruktur mit Titel, Summary, Rows, Chips und Grenztext bauen. Der Stub ist nur eine UI-/Report-Vorstufe und darf keine Navigation, MissionResult-Mutation, XP-/Skill-Vergabe, Ammo- oder Suppression-Wahrheit erzeugen.
+
+Erwartete Struktur: `get_mini_aar_debrief_screen_snapshot()` enthaelt `schema = sternenbuergerchen.mini_aar_debrief_screen_stub.v1`, `source_schema = sternenbuergerchen.mini_aar_combat_metrics.v1`, `screen`, `summary_text`, `rows`, `chips`, `limit_text`, `mini_aar`, `read_only = true` und `ui_sets_gameplay_truth = false`. `screen` muss mindestens `title_text`, `subtitle_text`, `summary_text`, `rows`, `chips`, `limit_text`, `layout_key`, `primary_action_label` und `secondary_action_label` enthalten. Nicht zulaessig sind ein vollstaendiger Debriefing-Screen, Return-to-Homebase-Handoff, XP-/Skill-Vergabe, Ammo-Verbrauch, echte Suppression-Wirkung oder eine zweite UI-seitige Combat-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
