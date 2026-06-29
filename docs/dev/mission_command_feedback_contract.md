@@ -374,6 +374,11 @@ TASK_622 prueft die kritische Host/Client-Interaktion als engen Authority-Review
 
 Erwartete Struktur: `tmp/host_client_command_authority_live_interaction_review.json` enthaelt `schema = sternenbuergerchen.host_client_command_authority_live_interaction_review.v1`, `task_id = TASK_622`, `interaction_mode = headless_authority_review`, `peer_assignments`, `peer2_bravo_command_accepted = true`, `peer2_alpha_command_rejected = true`, `alpha_reject_reason = peer_team_mismatch`, `state_mutation_rejected = true`, `state_mutation_reject_reason`, Host-Queue-Zaehler, Netzwerk-Accept-/Reject-Zaehler, `server_snapshot_built = true`, `server_snapshot_has_bravo_unit = true`, `client_snapshot_apply_accepted = true`, `client_received_bravo_unit = true`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_623 - Host Client Authority Visual Findings`.
 
+## Host-Client-Authority-Visual-Findings
+TASK_623 macht die bereits vorhandenen Network-Command-Accept-/Reject-Daten im Mission-Teamchip sichtbar. Der Presenter darf `SimulationRoot.get_network_command_contract_snapshot()` nur lesen und daraus einen kurzen `AUTH OK/RJ`-Hinweis plus Tooltip bauen. Diese Daten sind Review-/HUD-Lesbarkeit, keine neue Peer-, Team-, Command-, Movement-, Combat-, Session- oder Gameplay-Wahrheit.
+
+Erwartete Struktur: `MissionTeamChipPresenter.build_snapshot()` enthaelt `authority_visual` mit `schema = sternenbuergerchen.host_client_authority_visual.v1`, `task_id = TASK_623`, `visible`, `accepted_count`, `rejected_count`, `last_reject_reason`, `last_reject_peer_id`, `compact_text`, `tooltip_text`, `tone`, `read_only = true` und `ui_sets_gameplay_truth = false`. `get_command_feedback_snapshot()` und `get_core_loop_host_client_feel_snapshot()` exportieren denselben Snapshot als `authority_visual`; der sichtbare Teamchip darf bei vorhandener Aktivitaet `AUTH OKx/RJy` zeigen, waehrend der konkrete Reject-Grund im Tooltip bleibt.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

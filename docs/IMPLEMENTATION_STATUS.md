@@ -192,6 +192,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_622_host_client_command_authority_live_interaction_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_621_host_client_multiplayer_feel_review_bundle.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_607_two_instance_host_client_runtime_smoke.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_623 - Host Client Authority Visual Findings`, falls der echte Zwei-Fenster-Sichttest konkrete UI-/Feedback-Reibung zeigt.
 
+### TASK_623 - Host Client Authority Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_623_host_client_authority_visual_findings.md`, `docs/tasks/TASK_622_host_client_command_authority_live_interaction_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/multiplayer_authority_command_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `MissionTeamChipPresenter.build_snapshot()` liefert einen read-only `authority_visual`-Snapshot mit Schema, Accept-/Reject-Zaehlern, letztem Reject-Grund, kurzem `AUTH OK/RJ`-Text und Tooltip-Text.
+- Stand: Der Mission-Teamchip fuegt den `AUTH`-Hinweis in den sichtbaren Displaytext ein, sobald Network-Command-Aktivitaet existiert; der ausfuehrliche Reject-Grund bleibt im Tooltip.
+- Stand: `get_command_feedback_snapshot()` und `get_core_loop_host_client_feel_snapshot()` exportieren dieselben Authority-Visual-Daten, ohne UI- oder Gameplay-Wahrheit zu setzen.
+- Risiken/offen: TASK_623 verbessert Lesbarkeit im bestehenden HUD, ersetzt aber keinen echten Host/Client-Bediengefuehltest mit Klicks, Latenz und laengerem Ablauf.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_623_host_client_authority_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_622_host_client_command_authority_live_interaction_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_621_host_client_multiplayer_feel_review_bundle.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_624 - Host Client Live Input Feedback Review`, wenn der sichtbare Lauf weiterhin unklar wirkt.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
