@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 nach TASK_580-Merge auf <code>integration/core-foundation</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_581 auf <code>task/suppress-fire-intent-outcome-smoke</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -250,7 +250,8 @@
       <span class="pill good">TASK_576 Suppress-Preview</span>
       <span class="pill good">TASK_577 SUP-Evidence</span>
       <span class="pill good">TASK_580 SUP-Tuning</span>
-      <span class="pill warn">TASK_581 SUP-Outcome offen</span>
+      <span class="pill good">TASK_581 SUP-Outcome</span>
+      <span class="pill warn">TASK_582 AAR-Diagnose offen</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -466,15 +467,15 @@
           <h2>Zwischenbericht</h2>
           <p>Dieser Bereich ist der schnelle Arbeitsstand fuer den laufenden Chat: Was wurde zuletzt integriert, was ist gerade in Arbeit, und was sollte als naechstes passieren, ohne dass wir uns im Klein-Klein verlieren.</p>
           <div class="metric-row" style="margin-top:14px">
-            <div class="metric"><strong>TASK_580</strong><span>zuletzt integriert: SUP-Area-Tuning, Merge und Push auf <code>integration/core-foundation</code></span></div>
-            <div class="metric"><strong>TASK_581</strong><span>naechster sinnvoller Slice: SUP als Intent/Outcome-Smoke durch Combat-/Resolver-Diagnostik tragen</span></div>
+            <div class="metric"><strong>TASK_581</strong><span>zuletzt umgesetzt: SUP als Intent/Outcome-Smoke durch Combat-/Resolver-Diagnostik getragen</span></div>
+            <div class="metric"><strong>TASK_582</strong><span>naechster sinnvoller Slice: SUP als kleiner AAR-/Debug-Messwert ohne Ammo-System</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-Feedback ist in kleinen Smokes abgesichert.</td><td>Der naechste Test soll nicht mehr nur Preview sein, sondern zeigen, ob `SUP` im Outcome/Resolver diagnostisch sauber bleibt.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert.</td><td>Der naechste Test sollte SUP nur als messbaren Debug-/AAR-Wert erfassen, nicht als grosses Ammo-System.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
                 <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
@@ -489,9 +490,9 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture, TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht, TASK_564 als lesbare Evidence-Board-Legende, TASK_565 als echten F6-Screenshot-Fix fuer den Selected-Fireteam-Status, TASK_566 als kompakten Teamchip-/Hover-/Panel-Polish, TASK_567 als First-Move-Threat-Preview-Lesbarkeit, TASK_568 als reproduzierbares Risky-/Suicidal-Contact-Fixture, TASK_569 als messbare Threat-Line-Farbsprache, TASK_570 als Hold-/Return-/Free-/Suppress-Fire-Bridge, TASK_571 als sichtbare Fire-Rule-Controls, TASK_572 als FullHD-F6-Readability-Smoke, TASK_573 als exportierbaren ROE-Screenshot-/Spielgefuehl-Notizblock, TASK_574 als reproduzierbare ROE-F6-Evidence mit PNG/Manifest, TASK_575 als belegten Active-ROE-Affordance-Polish, TASK_576 als `SUP AREA`-Preview vor GO, TASK_577 als lokale SUP-F6-/Visual-Evidence, TASK_578 als eigene Suppress-Area-Visualisierung, TASK_579 als exportierbaren SUP-F6-Sichtreview und TASK_580 als getunte SUP-Area-Lesemarkierung.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns im Tooltip, waehrend die erste Move-Order vor GO Risiko/Ungewissheit, farbige Kontaktlinien und direkt bedienbare Feuerdisziplin kennt. `SUP` ist jetzt vor GO als Zielbereich/Pressure-State sichtbar, als manueller Sichtbefund exportierbar und als Area mit Outline/Achsen besser lesbar, ohne bereits ein grosses Suppression-System zu behaupten.</td><td>Naechster spielbarer Anschluss ist TASK_581: `SUP` als Intent/Outcome-Smoke diagnostisch durch Combat/Resolver tragen, ohne Ammo-System zu bauen.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbaren Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes, TASK_549 als automatisierter F6-Visual-Audit, TASK_550 als exportierbarer Screenshot-/Hover-Notizblock, TASK_551 als Tooltip-Style-Affordance, TASK_552 als Objective-/Computer-Interaktionslesbarkeit, TASK_553 als Cargo-Extract-Lesbarkeit, TASK_554 als integrierter Objective-Playthrough, TASK_555 als MP-Objective-Ownership-Smoke, TASK_556 als Host/Client-Objective-Handoff, TASK_557 als FullHD-F6-MP-Readability-Smoke, TASK_558 als exportierbarer MP-F6-Screenshot-/Hover-Notizblock, TASK_560 als hoverbarer Mission-Teamchip-Tooltip, TASK_561 als gefuehrter MP-F6-Review-Guide, TASK_562 als reproduzierbarer MP-F6-Visual-Evidence-Capture, TASK_563 als direkte Evidence-Preview im HTML-Zwischenbericht, TASK_564 als lesbare Evidence-Board-Legende, TASK_565 als echten F6-Screenshot-Fix fuer den Selected-Fireteam-Status, TASK_566 als kompakten Teamchip-/Hover-/Panel-Polish, TASK_567 als First-Move-Threat-Preview-Lesbarkeit, TASK_568 als reproduzierbares Risky-/Suicidal-Contact-Fixture, TASK_569 als messbare Threat-Line-Farbsprache, TASK_570 als Hold-/Return-/Free-/Suppress-Fire-Bridge, TASK_571 als sichtbare Fire-Rule-Controls, TASK_572 als FullHD-F6-Readability-Smoke, TASK_573 als exportierbaren ROE-Screenshot-/Spielgefuehl-Notizblock, TASK_574 als reproduzierbare ROE-F6-Evidence mit PNG/Manifest, TASK_575 als belegten Active-ROE-Affordance-Polish, TASK_576 als `SUP AREA`-Preview vor GO, TASK_577 als lokale SUP-F6-/Visual-Evidence, TASK_578 als eigene Suppress-Area-Visualisierung, TASK_579 als exportierbaren SUP-F6-Sichtreview, TASK_580 als getunte SUP-Area-Lesemarkierung und TASK_581 als SUP-Intent-/Outcome-Diagnose.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag; der F6-Teamchip erklaert Host/Peer und Spawns im Tooltip, waehrend die erste Move-Order vor GO Risiko/Ungewissheit, farbige Kontaktlinien und direkt bedienbare Feuerdisziplin kennt. `SUP` ist jetzt vor GO sichtbar und im Combat-Outcome als Druckabsicht lesbar, ohne echte Suppression-/Ammo-Wirkung zu behaupten.</td><td>Naechster spielbarer Anschluss ist TASK_582: SUP als kleiner AAR-/Debug-Messwert erfassen, ohne grosses Ammo-System zu bauen.</td></tr>
                 <tr><td>Asset-/Warn-Hygiene</td><td>TASK_559 registriert die deterministische Factory-Colormap-UID vor Factory-GLB-Loads und entfernt damit eine wiederkehrende Godot-Importwarnung aus F6-Smokes.</td><td>Test- und Exportausgaben werden leiser, damit neue echte Fehler schneller auffallen.</td><td>Weitere Warnquellen nur als eigene kleine Hygiene-Slices angehen.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview an, TASK_564 erklaert die Evidence-Regionen, TASK_565 dokumentiert den echten F6-Befund, TASK_566 dokumentiert den kompakten Hover-/Panel-Polish, TASK_567 dokumentiert die First-Move-Threat-Preview, TASK_568 dokumentiert die Risky-/Suicidal-Fixture, TASK_569 dokumentiert die Threat-Line-Farbsprache, TASK_570 dokumentiert die Fire-Rule-Mission-Bridge, TASK_571/TASK_572 dokumentieren Bedienung und F6-Smoke, TASK_573 fuehrt die Berichtspflege als ROE-Screenshot-Workbench weiter, TASK_574 haengt die neue ROE-F6-Evidence an, TASK_575 dokumentiert den angewendeten Evidence-Polish, TASK_576 dokumentiert die SUP-Preview-Lesbarkeit, TASK_577 haengt die SUP-F6-/Visual-Evidence an, TASK_578 dokumentiert die eigene Suppress-Area-Visualisierung, TASK_579 macht den SUP-F6-Sichtreview exportierbar und TASK_580 dokumentiert das angewendete SUP-Area-Tuning.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. TASK_563 haengt die TASK_562-Evidence direkt als Preview an, TASK_564 erklaert die Evidence-Regionen, TASK_565 dokumentiert den echten F6-Befund, TASK_566 dokumentiert den kompakten Hover-/Panel-Polish, TASK_567 dokumentiert die First-Move-Threat-Preview, TASK_568 dokumentiert die Risky-/Suicidal-Fixture, TASK_569 dokumentiert die Threat-Line-Farbsprache, TASK_570 dokumentiert die Fire-Rule-Mission-Bridge, TASK_571/TASK_572 dokumentieren Bedienung und F6-Smoke, TASK_573 fuehrt die Berichtspflege als ROE-Screenshot-Workbench weiter, TASK_574 haengt die neue ROE-F6-Evidence an, TASK_575 dokumentiert den angewendeten Evidence-Polish, TASK_576 dokumentiert die SUP-Preview-Lesbarkeit, TASK_577 haengt die SUP-F6-/Visual-Evidence an, TASK_578 dokumentiert die eigene Suppress-Area-Visualisierung, TASK_579 macht den SUP-F6-Sichtreview exportierbar, TASK_580 dokumentiert das angewendete SUP-Area-Tuning und TASK_581 dokumentiert den SUP-Outcome-Smoke.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf oder <code>tmp/</code> rekonstruieren zu muessen.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren.</td></tr>
               </tbody>
             </table>
           </div>
@@ -501,7 +502,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> <code>integration/core-foundation</code> ist nach TASK_580 als aktuelle Arbeitsbasis vorgesehen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert und als laufende Workbench sichtbar</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_580_integrated"> TASK_580 Suppress-Fire-Visual-Tuning ist integriert, gepusht und als letzter erledigter Block dokumentiert</label>
-          <label class="checkline"><input type="checkbox" data-export-key="worklog.task_581_done"> TASK_581 Suppress-Fire-Intent-Outcome-Smoke ist noch offen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_581_done"> TASK_581 Suppress-Fire-Intent-Outcome-Smoke ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="worklog.task_582_done"> TASK_582 Suppress-Fire-Outcome-AAR-Diagnostic-Stub ist noch offen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_544_done"> TASK_544 Fire-/Cover-Visual-Polish ist im Arbeitsstand implementiert</label>
@@ -570,8 +572,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Aktueller Stand</td><td>TASK_580 ist der letzte integrierte Slice: Die SUP-Area ist als <code>suppress_area_v2</code> sichtbar getunt und bleibt read-only.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
-                <tr><td>Naechster Schritt</td><td>TASK_581 soll pruefen, ob <code>SUP</code> nicht nur vor <code>GO</code> sichtbar ist, sondern im Combat-/Resolver-Outcome diagnostisch sauber als Intent gefuehrt wird.</td><td>Wenn der Outcome-Smoke implementiert oder bewusst zurueckgestellt wird.</td></tr>
+                <tr><td>Aktueller Stand</td><td>TASK_581 ist der letzte Arbeitsstand: <code>SUP</code> wird im Combat-/Resolver-Outcome als <code>suppress_pressure_intent</code> diagnostisch sichtbar und bleibt ohne Ammo-/Suppression-Effect.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
+                <tr><td>Naechster Schritt</td><td>TASK_582 sollte <code>SUP</code> als kleinen AAR-/Debug-Messwert erfassen, damit spaeter Playtests zeigen, wie oft Druckabsicht genutzt wurde.</td><td>Wenn der AAR-/Debug-Stub implementiert oder bewusst zurueckgestellt wird.</td></tr>
                 <tr><td>Noch nicht bauen</td><td>Kein grosses Ammo-, Suppression- oder AAR-System, solange der kleine Intent-/Outcome-Pfad nicht sauber gelesen und getestet ist.</td><td>Wenn spaeter echte Suppression-Wirkung, Munitionsverbrauch oder AAR-Messwerte als eigener Task beginnen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_562 erzeugt eine reproduzierbare MP-F6-Bildbasis unter <code>tmp/frontier_probe_mp_f6_visual_evidence.png</code> plus Manifest; im Headless-Dummy als Evidence-Board aus Snapshot-Rects.</td><td>Wenn TASK_565 aus echtem MP-F6-Export konkrete Gameplay-HUD-Polish-Aenderungen ableitet.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_563 macht diese lokale Evidence direkt im HTML-Zwischenbericht sichtbar und exportiert die Artefaktpfade sowie Readback-/Evidence-Board-Flags.</td><td>Wenn neue Capture-Artefakte, manuelle Sichtnotizen oder echte Host/Client-F6-Screenshots hinzukommen.</td></tr>
@@ -592,7 +594,8 @@
                 <tr><td>Erledigt</td><td>TASK_578 - Suppress Fire Visual Polish Findings. Die `SUP AREA`-Preview hat eine eigene transparente Area und Render-Snapshot-Zaehler.</td><td>Wenn neue SUP-Capture-Artefakte, manuelle Sichtnotizen oder echte Screenshot-Befunde hinzukommen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_579 - Suppress Fire Manual F6 Review. Der Bericht exportiert jetzt Screenshotpfad, Viewport, Pflichtchecks, Farbe/Alpha, Groesse/Ueberdeckung, Statussprache und Follow-up-Notizen.</td><td>Wenn ein echter F6-Screenshot oder Playtest konkrete Tuning-Findings liefert.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_580 - Suppress Fire Visual Tuning Findings. Die SUP-Area nutzt jetzt <code>suppress_area_v2</code> mit transparenter Fuellung, Overlay-Hoehe, Outline-Ring, Achsenlinien, Boundary-Ticks und Snapshot-Metadaten.</td><td>Wenn ein echter Sichttest weitere Alpha-/Outline-/Hoehen-Kalibrierung verlangt.</td></tr>
-                <tr><td>Naechst</td><td>TASK_581 - Suppress Fire Intent Outcome Smoke. Ziel: `SUP` diagnostisch durch Fire-Rule/Combat-Outcome lesen, ohne echtes Ammo-System zu bauen.</td><td>Wenn der naechste kleine SUP-Spielbarkeits-Slice gestartet wird.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_581 - Suppress Fire Intent Outcome Smoke. <code>SUP</code> ist jetzt im Contact-Decision-Outcome als Druckabsicht sichtbar; No-Ammo-, No-Suppression-Effect- und No-Damage-Modifier-Guards sind pruefbar.</td><td>Wenn echte Suppression-Wirkung oder AAR-Werte spaeter als eigener Task starten.</td></tr>
+                <tr><td>Naechst</td><td>TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub. Ziel: SUP-Intent als kleinen Debug-/AAR-Zaehler sichtbar machen, ohne echtes Ammo-System zu bauen.</td><td>Wenn der naechste kleine SUP-Spielbarkeits-Slice gestartet wird.</td></tr>
                 <tr><td>Offen</td><td>Der finale menschliche Spielgefuehl-Test bleibt offen. Die naechste manuelle Runde sollte pruefen, ob Teamchip-Hover, erste Move-Preview, Kontaktlinien und Paneldichte zusammen angenehm wirken.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -732,7 +735,8 @@
             <div class="finding good"><h3>Erledigt: TASK_578 - Suppress Fire Visual Polish Findings</h3><p>Die SUP-Preview zeichnet eine eigene transparente Area und meldet sie im Render-Snapshot.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_579 - Suppress Fire Manual F6 Review</h3><p>Der Bericht macht den echten SUP-Area-F6-Sichtreview mit Screenshot-, Rating- und Follow-up-Feldern exportierbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_580 - Suppress Fire Visual Tuning Findings</h3><p>Die SUP-Area nutzt jetzt <code>suppress_area_v2</code> mit Overlay-Hoehe, Outline-Ring, Achsenlinien und Boundary-Ticks.</p></div>
-            <div class="finding medium"><h3>1. TASK_581 - Suppress Fire Intent Outcome Smoke</h3><p>Als naechstes sollte geprueft werden, ob `SUP` im Combat-/Resolver-Pfad als Druckabsicht diagnostisch sichtbar bleibt.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_581 - Suppress Fire Intent Outcome Smoke</h3><p><code>SUP</code> bleibt im Combat-/Resolver-Pfad als Druckabsicht diagnostisch sichtbar, ohne Ammo- oder Suppression-Effect-Wahrheit zu erzeugen.</p></div>
+            <div class="finding medium"><h3>1. TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub</h3><p>Als naechstes sollte SUP als kleiner Debug-/AAR-Zaehler messbar werden, damit Playtests spaeter die Nutzung der Druckabsicht zeigen.</p></div>
           </div>
         </article>
       </div>
@@ -802,7 +806,8 @@
             <div class="finding good"><h3>Erledigt: TASK_572 - Fire Rule F6 Readability Smoke</h3><p>Die neuen ROE-Buttons sind im automatisierten F6-Kontext auf Panelplatz, Kompaktheit und aktive Regel pruefbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_573 - Fire Rule Manual Screenshot Notes Pass</h3><p>Menschliches Sichtfeedback hat jetzt einen festen Platz im Bericht: ROE-Buttons, Kontrast, Tooltip, Command-Flow und Preview-Zusammenspiel sind exportierbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_574 - Fire Rule Real F6 Screenshot Review Pass</h3><p>Der Fire-Rule-F6-Capture schreibt PNG/Manifest und haelt den manuellen Review ehrlich offen.</p></div>
-            <div class="finding medium"><h3>1. TASK_581 - Suppress Fire Intent Outcome Smoke</h3><p>Der naechste Spielbarkeitshebel ist ein kleiner Smoke, der `SUP` nach der Preview als nachvollziehbare Feuerdisziplin-/Druckabsicht sichtbar macht.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_581 - Suppress Fire Intent Outcome Smoke</h3><p><code>SUP</code> ist nach der Preview als nachvollziehbare Feuerdisziplin-/Druckabsicht im Contact-Decision-Outcome sichtbar.</p></div>
+            <div class="finding medium"><h3>1. TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub</h3><p>Der naechste Spielbarkeitshebel ist ein kleiner AAR-/Debug-Stub, der SUP-Nutzung zaehlt, ohne ein grosses Ammo- oder Suppression-System vorzuziehen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -1243,7 +1248,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_581 - Suppress Fire Intent Outcome Smoke"
+              "TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -1310,14 +1315,15 @@
               "TASK_577 - Suppress Fire Visual Evidence Pass",
               "TASK_578 - Suppress Fire Visual Polish Findings",
               "TASK_579 - Suppress Fire Manual F6 Review",
-              "TASK_580 - Suppress Fire Visual Tuning Findings"
+              "TASK_580 - Suppress Fire Visual Tuning Findings",
+              "TASK_581 - Suppress Fire Intent Outcome Smoke"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Finaler manueller Hover-/Panel-/Threat-Preview-/Fire-Rule-Spielgefuehl-Test bleibt trotz TASK_570-Bridge offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
               "Fire-Rule-Controls sind als TASK_572 automatisiert geprueft; TASK_573 stellt die exportierbare Notizflaeche; TASK_574 erzeugt lokale Evidence; TASK_575 poliert den aktiven ROE-Affordance-State, aber der finale menschliche Hover-/Spielgefuehl-Test bleibt offen.",
-              "Suppress ist weiterhin ein Rule-/Preview-Zustand; TASK_576 macht ihn vor GO lesbar, TASK_577 belegt ihn als lokale Visual-Evidence, TASK_578 zeichnet die Area sichtbar, TASK_579 sammelt den menschlichen F6-Befund und TASK_580 tuned die Area-Lesbarkeit, aber echte Suppression-Wirkung, Ammo-Verbrauch und AAR-Messwerte bleiben Folgearbeit."
+              "Suppress ist weiterhin ein Rule-/Preview-/Intent-Zustand; TASK_576 macht ihn vor GO lesbar, TASK_577 belegt ihn als lokale Visual-Evidence, TASK_578 zeichnet die Area sichtbar, TASK_579 sammelt den menschlichen F6-Befund, TASK_580 tuned die Area-Lesbarkeit und TASK_581 traegt den Intent durch Combat-Diagnostics, aber echte Suppression-Wirkung, Ammo-Verbrauch und AAR-Messwerte bleiben Folgearbeit."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -1326,14 +1332,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_580",
-            current_focus: "TASK_581 - Suppress Fire Intent Outcome Smoke",
-            latest_completed_task: "TASK_580 - Suppress Fire Visual Tuning Findings"
+            current_repo_base: "integration/core-foundation after TASK_581",
+            current_focus: "TASK_582 - Suppress Fire Outcome AAR Diagnostic Stub",
+            latest_completed_task: "TASK_581 - Suppress Fire Intent Outcome Smoke"
           },
           metadata: {
-            branch: "task/rolling-html-report-status-refresh",
+            branch: "task/suppress-fire-intent-outcome-smoke",
             integration_base: "integration/core-foundation after TASK_580",
-            head: "task/rolling-html-report-status-refresh",
+            head: "task/suppress-fire-intent-outcome-smoke",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

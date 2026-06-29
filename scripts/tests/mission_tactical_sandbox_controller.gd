@@ -6212,10 +6212,12 @@ func _build_mission_control_contact_diagnostics_text() -> String:
 	var los_text: String = String(diagnostics.get("los_state", "")).strip_edges()
 	var range_text: String = String(diagnostics.get("range_state", "")).strip_edges()
 	var contact_state: String = String(diagnostics.get("contact_state", "")).strip_edges()
+	var fire_rule_token: String = " SUP" if bool(diagnostics.get("suppress_intent_active", false)) else ""
 	if reason == "fired":
-		return "CONTACT FIRE %s | %s | LOS %s | RNG %s" % [pair_text, contact_state.to_upper(), los_text.to_upper(), range_text.to_upper()]
+		var fire_text: String = "CONTACT FIRE%s" % fire_rule_token
+		return "%s %s | %s | LOS %s | RNG %s" % [fire_text, pair_text, contact_state.to_upper(), los_text.to_upper(), range_text.to_upper()]
 	if reason == "cooldown":
-		return "CONTACT WAIT %st | %s | LOS %s | RNG %s" % [int(diagnostics.get("cooldown_ticks_remaining", 0)), pair_text, los_text.to_upper(), range_text.to_upper()]
+		return "CONTACT WAIT%s %st | %s | LOS %s | RNG %s" % [fire_rule_token, int(diagnostics.get("cooldown_ticks_remaining", 0)), pair_text, los_text.to_upper(), range_text.to_upper()]
 	if reason == "no_contact_pair":
 		var candidate: Dictionary = Dictionary(diagnostics.get("candidate", {}))
 		var candidate_reason: String = String(candidate.get("candidate_reason", reason)).strip_edges()
@@ -6377,13 +6379,20 @@ func _build_mission_combat_hud_compact_line(diagnostics: Dictionary, cover_reado
 		var weapon_id: String = String(diagnostics.get("weapon_id", fire_event.get("weapon_id", ""))).strip_edges().to_upper()
 		var outcome: String = String(fire_event.get("combat_outcome", "")).strip_edges().to_upper()
 		var fire_bits: PackedStringArray = PackedStringArray(["FIRE", pair_text])
+		if bool(diagnostics.get("suppress_intent_active", false)):
+			fire_bits.append("SUP")
 		if not weapon_id.is_empty():
 			fire_bits.append(weapon_id)
 		if not outcome.is_empty():
 			fire_bits.append(outcome)
 		return "%s | %s" % [" ".join(fire_bits), cover_tokens]
 	if reason == "cooldown" or status == "waiting":
-		return "WAIT %dt %s | %s" % [int(diagnostics.get("cooldown_ticks_remaining", 0)), pair_text, cover_tokens]
+		var wait_bits: PackedStringArray = PackedStringArray(["WAIT"])
+		if bool(diagnostics.get("suppress_intent_active", false)):
+			wait_bits.append("SUP")
+		wait_bits.append("%dt" % int(diagnostics.get("cooldown_ticks_remaining", 0)))
+		wait_bits.append(pair_text)
+		return "%s | %s" % [" ".join(wait_bits), cover_tokens]
 	if reason == "no_contact_pair":
 		var candidate: Dictionary = Dictionary(diagnostics.get("candidate", {}))
 		var candidate_reason: String = String(candidate.get("candidate_reason", reason)).strip_edges().to_upper()
@@ -12981,6 +12990,94 @@ func get_suppress_fire_preview_readability_snapshot() -> Dictionary:
 		"pressure_state": String(suppress_preview.get("pressure_state", "")),
 		"radius_world": float(suppress_preview.get("radius_world", 0.0)),
 		"command_queue_count_before_go": command_queue_count_before_go,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_suppress_fire_intent_outcome_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var engagement_snapshot: Dictionary = get_mission_first_engagement_feedback_snapshot()
+	var contact_decision_diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
+	var fire_rule_outcome: Dictionary = Dictionary(contact_decision_diagnostics.get("fire_rule_outcome", {})).duplicate(true)
+	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
+	var selected_fireteam_ids: Array = Array(_selected_fireteam_ids)
+	var selected_fire_rule: String = _get_selected_fire_rule_consensus()
+	var attacker_fire_rule: String = String(contact_decision_diagnostics.get("attacker_fire_rule", "")).strip_edges().to_lower()
+	var outcome_label: String = String(fire_rule_outcome.get("outcome_label", contact_decision_diagnostics.get("attacker_fire_rule_outcome", ""))).strip_edges().to_lower()
+	var diagnostics_text: String = _build_mission_control_contact_diagnostics_text().strip_edges()
+	var compact_line: String = String(combat_hud_density.get("compact_line", command_feedback.get("combat_hud_compact_line", ""))).strip_edges()
+	var suppress_intent_active: bool = bool(contact_decision_diagnostics.get("suppress_intent_active", fire_rule_outcome.get("suppress_intent_active", false)))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"suppress_rule_reaches_combat_diagnostics",
+			selected_fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS or attacker_fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS,
+			"Selected or attacking fireteam carries suppress fire-rule into combat diagnostics."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_outcome_intent_visible",
+			suppress_intent_active and outcome_label == "suppress_pressure_intent",
+			"Combat outcome marks SUP as pressure intent."
+		),
+		_build_mission_first_move_readability_check(
+			"suppress_feedback_visible",
+			diagnostics_text.to_upper().contains("SUP") or compact_line.to_upper().contains("SUP"),
+			"Mission feedback exposes SUP in the compact combat text."
+		),
+		_build_mission_first_move_readability_check(
+			"engagement_decision_still_visible",
+			_engagement_decision_has_visible_status(contact_decision_diagnostics)
+				and String(engagement_snapshot.get("gate", "")) == "pass",
+			"Existing first-engagement readability remains green."
+		),
+		_build_mission_first_move_readability_check(
+			"no_suppression_effect_payload",
+			not bool(contact_decision_diagnostics.get("suppress_effect_applied", true))
+				and not bool(contact_decision_diagnostics.get("suppression_effect_payload_enqueued", true)),
+			"TASK_581 does not enqueue a suppression effect payload."
+		),
+		_build_mission_first_move_readability_check(
+			"no_ammo_consumption",
+			not bool(contact_decision_diagnostics.get("ammo_consumed", true)),
+			"TASK_581 does not consume ammo."
+		),
+		_build_mission_first_move_readability_check(
+			"no_suppress_damage_modifier",
+			not bool(contact_decision_diagnostics.get("suppress_damage_modifier_applied", true)),
+			"TASK_581 does not change damage through SUP."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(fire_rule_outcome.get("ui_sets_gameplay_truth", true))
+				and bool(fire_rule_outcome.get("read_only", false))
+				and not bool(engagement_snapshot.get("ui_sets_gameplay_truth", true)),
+			"SUP outcome smoke reads diagnostics and does not create gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_581",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"selected_fire_rule": selected_fire_rule,
+		"attacker_fire_rule": attacker_fire_rule,
+		"contact_decision_diagnostics": contact_decision_diagnostics,
+		"fire_rule_outcome": fire_rule_outcome,
+		"engagement_snapshot": engagement_snapshot,
+		"diagnostics_text": diagnostics_text,
+		"compact_combat_line": compact_line,
+		"outcome_label": outcome_label,
+		"suppress_intent_active": suppress_intent_active,
+		"suppress_effect_applied": bool(contact_decision_diagnostics.get("suppress_effect_applied", false)),
+		"suppression_effect_payload_enqueued": bool(contact_decision_diagnostics.get("suppression_effect_payload_enqueued", false)),
+		"ammo_consumed": bool(contact_decision_diagnostics.get("ammo_consumed", false)),
+		"suppress_damage_modifier_applied": bool(contact_decision_diagnostics.get("suppress_damage_modifier_applied", false)),
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",

@@ -1220,6 +1220,13 @@ func _build_contact_pair_decision_diagnostic(contact_pair: Dictionary, decision:
 		readout = build_cover_effectiveness_readout_for_units(attacker, target, contact_state)
 	var effect: Dictionary = Dictionary(decision.get("effect", {})).duplicate(true) if typeof(decision.get("effect", {})) == TYPE_DICTIONARY else {}
 	var weapon_id: String = String(effect.get("weapon_id", readout.get("weapon_id", _get_unit_active_weapon_id(attacker)))).strip_edges()
+	var fire_rule_outcome: Dictionary = Dictionary(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call(
+		"build_fire_rule_outcome_diagnostic",
+		attacker,
+		{
+			"can_attack": bool(COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call("can_unit_attack", attacker, _build_fire_decision_context())),
+		}
+	))
 	return {
 		"attacker_unit_id": String(contact_pair.get("attacker_id", _get_unit_id_for_diagnostics(attacker))).strip_edges(),
 		"target_unit_id": String(contact_pair.get("target_id", _get_unit_id_for_diagnostics(target))).strip_edges(),
@@ -1229,6 +1236,14 @@ func _build_contact_pair_decision_diagnostic(contact_pair: Dictionary, decision:
 		"attacker_fire_status": String(attacker.call("get_fire_status")) if attacker != null and attacker.has_method("get_fire_status") else "",
 		"attacker_fire_rule": _get_unit_fire_rule_for_diagnostics(attacker),
 		"attacker_return_fire_window_active": _can_unit_return_fire(attacker),
+		"fire_rule_outcome": fire_rule_outcome,
+		"attacker_fire_rule_outcome": String(fire_rule_outcome.get("outcome_label", "")).strip_edges(),
+		"suppress_intent_active": bool(fire_rule_outcome.get("suppress_intent_active", false)),
+		"suppress_pressure_intent_visible": bool(fire_rule_outcome.get("suppress_pressure_intent_visible", false)),
+		"suppress_effect_applied": bool(fire_rule_outcome.get("suppress_effect_applied", false)),
+		"suppression_effect_payload_enqueued": bool(fire_rule_outcome.get("suppression_effect_payload_enqueued", false)),
+		"ammo_consumed": bool(fire_rule_outcome.get("ammo_consumed", false)),
+		"suppress_damage_modifier_applied": bool(fire_rule_outcome.get("suppress_damage_modifier_applied", false)),
 		"contact_state": contact_state,
 		"weapon_id": weapon_id,
 		"weapon_range_world": float(effect.get("weapon_range_world", readout.get("weapon_range_world", 0.0))),

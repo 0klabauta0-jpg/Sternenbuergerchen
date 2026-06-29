@@ -169,6 +169,11 @@ TASK_580 wendet den belegten SUP-Area-Lesbarkeitsfund aus der lokalen F6-Evidenc
 
 Erwartete Struktur: `TerrainMap3DView.get_render_snapshot()` enthaelt weiter `waypoint_intent_preview_suppress_area_count`. Die passende Entry enthaelt `suppress_area.visible = true`, `visual_key = suppress_area_v2`, `fill_alpha`, `outline_alpha`, `surface_offset`, `outline_surface_offset`, `outline_visible = true`, `outline_segment_count`, `axis_line_count >= 2`, `boundary_marker_count >= 4`, `pressure_state`, `radius_world`, `radius_3d` und `read_only = true`.
 
+## Suppress-Fire-Intent-Outcome-Smoke
+TASK_581 traegt `SUP` nach der Preview als read-only Intent/Outcome-Diagnose durch den Combat-/Resolver-Pfad. `CombatFireDecisionResolver.build_fire_rule_outcome_diagnostic()` darf fuer `fire_rule = suppress` `outcome_label = suppress_pressure_intent` melden. `MissionCombatLoopDriver.get_contact_decision_diagnostics_snapshot()` darf diese Diagnose anhaengen und flache Keys wie `suppress_intent_active`, `suppress_pressure_intent_visible`, `suppress_effect_applied`, `suppression_effect_payload_enqueued`, `ammo_consumed` und `suppress_damage_modifier_applied` ausgeben.
+
+Erwartete Struktur: `get_suppress_fire_intent_outcome_snapshot()` enthaelt `fire_rule_outcome`, `contact_decision_diagnostics`, `diagnostics_text`, `compact_combat_line`, `outcome_label = suppress_pressure_intent`, `suppress_intent_active = true`, `suppress_effect_applied = false`, `suppression_effect_payload_enqueued = false`, `ammo_consumed = false`, `suppress_damage_modifier_applied = false`, `read_only = true` und `ui_sets_gameplay_truth = false`. Mission-Control oder die kompakte Combat-HUD-Zeile duerfen `SUP` nennen. Nicht zulaessig sind echte Suppression-Wirkung, Ammo-Verbrauch, Damage-Modifikation, AAR-Messwerte oder eine zweite UI-seitige Combat-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

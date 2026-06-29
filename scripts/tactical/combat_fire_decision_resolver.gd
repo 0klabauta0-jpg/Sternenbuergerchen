@@ -185,6 +185,34 @@ static func build_cover_effectiveness_readout(attacker, target, context: Diction
 	}
 
 
+static func build_fire_rule_outcome_diagnostic(unit, context: Dictionary = {}) -> Dictionary:
+	var fire_rule: String = _get_unit_fire_rule(unit)
+	var fire_status: String = ""
+	if unit != null and unit.has_method("get_fire_status"):
+		fire_status = String(unit.call("get_fire_status")).strip_edges().to_lower()
+	var is_suppress: bool = fire_rule == "suppress"
+	var can_attack: bool = bool(context.get("can_attack", false))
+	if not context.has("can_attack") and unit != null:
+		can_attack = can_unit_attack(unit, context)
+	return {
+		"schema": "sternenbuergerchen.fire_rule_outcome.v1",
+		"source": "CombatFireDecisionResolver",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"fire_rule": fire_rule,
+		"fire_status": fire_status,
+		"can_attack": can_attack,
+		"outcome_scope": "diagnostic_only",
+		"outcome_label": "suppress_pressure_intent" if is_suppress else _resolve_fire_rule_outcome_label(fire_rule, fire_status, can_attack),
+		"suppress_intent_active": is_suppress,
+		"suppress_pressure_intent_visible": is_suppress,
+		"suppress_effect_applied": false,
+		"suppression_effect_payload_enqueued": false,
+		"ammo_consumed": false,
+		"suppress_damage_modifier_applied": false,
+	}
+
+
 static func can_enemy_attack(unit) -> bool:
 	if unit == null:
 		return false
@@ -210,6 +238,20 @@ static func can_unit_attack(unit, context: Dictionary = {}) -> bool:
 		if not discipline_break.is_valid() or not bool(discipline_break.call(unit)):
 			return false
 	return true
+
+
+static func _resolve_fire_rule_outcome_label(fire_rule: String, fire_status: String, can_attack: bool) -> String:
+	if fire_rule == "hold":
+		return "hold_fire"
+	if fire_rule == "return":
+		return "return_fire_window" if can_attack else "return_fire_wait"
+	if fire_rule == "free":
+		return "free_fire"
+	if fire_status == "fire_at_will":
+		return "fire_ready"
+	if fire_status == "hold_fire":
+		return "fire_held"
+	return "unknown"
 
 
 static func _get_unit_fire_rule(unit) -> String:
