@@ -75,6 +75,9 @@ TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dez
 ## Frontier-Probe-Multiplayer-Objective-Ownership
 `get_frontier_probe_multiplayer_objective_ownership_snapshot()` ist der Headless-Pruefpunkt fuer TASK_555. Der Snapshot darf nur den integrierten TASK_554-Snapshot, `MissionMultiplayerTeamOwnershipContract`, `MissionTeamChipPresenter` und die Frontier-Probe-Scenario-Daten zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Peer-, Team-, Objective-, Cargo-, Combat- oder Command-Entscheidung erzeugen. Erwartete Lesbarkeit: Alpha bleibt player-assignable attacker auf `spawn_alpha`; Bravo bleibt solo/coop NPC-defender auf `spawn_bravo`, ist aber in PvP Peer 2 zuweisbar; Mission-Team-Chip nennt beide Owner und Spawnmarker; Computer- und Cargo-Gates gehoeren zum Alpha-Pfad; die Bravo-Air-Defense-Gruppe besitzt die AA-Bedrohung.
 
+## Frontier-Probe-Host-Client-Objective-Handoff
+`FrontierProbeHostClientHandoffContract.build_snapshot()` ist der Headless-Pruefpunkt fuer TASK_556. Der Contract darf nur bestehende `MultiplayerSession`-Assignments, `SimulationRoot`-Network-Command-Ergebnisse, TASK_555-Ownership und `MultiplayerSnapshotContract`-Apply-Daten bewerten. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Session, Peer-, Objective-, Cargo-, Combat- oder Command-Entscheidung ausloesen. Erwartete Lesbarkeit: Host Peer 1 bleibt Alpha, Peer 2 bleibt Bravo, Peer 2 darf Bravo-Befehle serverseitig einreichen, Peer 2 darf Alpha nicht kommandieren, State-Mutations bleiben abgelehnt, und der Client akzeptiert Objective-/MissionResult-Snapshotdaten aus dem Serverzustand.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
