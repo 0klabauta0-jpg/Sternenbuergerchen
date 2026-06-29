@@ -5917,6 +5917,9 @@ func _build_strategic_status_text() -> String:
 	var objective_interaction_line: String = _build_mission_objective_interaction_line()
 	if not objective_interaction_line.is_empty():
 		lines.append(objective_interaction_line)
+	var cargo_extract_line: String = _build_mission_cargo_extract_line()
+	if not cargo_extract_line.is_empty():
+		lines.append(cargo_extract_line)
 	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text()
 	var combat_hud_snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var combat_hud_line: String = String(combat_hud_snapshot.get("mission_control_line", "")).strip_edges()
@@ -5925,6 +5928,37 @@ func _build_strategic_status_text() -> String:
 	elif not contact_diagnostics_text.is_empty():
 		lines.append(contact_diagnostics_text)
 	return "\n".join(lines)
+
+
+func _build_mission_cargo_extract_line() -> String:
+	var cargo_snapshot: Dictionary = _get_mission_cargo_touchdown_snapshot_for_readability()
+	if cargo_snapshot.is_empty() or not bool(cargo_snapshot.get("configured", false)):
+		return ""
+	var cargo_state: String = String(cargo_snapshot.get("cargo_state", cargo_snapshot.get("state", ""))).strip_edges().to_lower()
+	if cargo_state.is_empty() or cargo_state == "unconfigured":
+		return ""
+	var gate_snapshot: Dictionary = _get_mission_scenario_runtime_gate_snapshot_for_readability()
+	var cargo_gate: Dictionary = _find_runtime_gate_by_objective_type(Array(gate_snapshot.get("gates", [])), "cargo_touchdown_extract")
+	var gate_status: String = _compact_runtime_gate_status(String(cargo_gate.get("status", "")))
+	if bool(cargo_snapshot.get("blocked", false)):
+		var blocker: String = String(cargo_snapshot.get("blocked_by_step_id", "")).strip_edges()
+		return "CARGO BLOCKED %s" % (blocker if not blocker.is_empty() else gate_status)
+	var hold_seconds: int = int(round(float(cargo_snapshot.get("hold_seconds", 0.0))))
+	var required_seconds: int = int(round(float(cargo_snapshot.get("required_hold_seconds", cargo_gate.get("hold_required_seconds", 0.0)))))
+	var progress_percent: int = int(round(clampf(float(cargo_snapshot.get("progress", 0.0)), 0.0, 1.0) * 100.0))
+	match cargo_state:
+		"inbound":
+			return "CARGO INBOUND %d%%" % progress_percent
+		"landed":
+			if bool(cargo_snapshot.get("ready_to_depart", false)):
+				return "CARGO READY %d/%ds" % [mini(hold_seconds, required_seconds), required_seconds]
+			return "CARGO HOLD %d/%ds" % [mini(hold_seconds, required_seconds), required_seconds]
+		"departing":
+			return "CARGO DEPARTING %d%%" % progress_percent
+		"departed":
+			return "CARGO DEPARTED %s" % gate_status
+		_:
+			return "CARGO %s %s" % [cargo_state.to_upper(), gate_status]
 
 
 func _build_mission_objective_interaction_line() -> String:
@@ -12709,6 +12743,106 @@ func get_mission_objective_interaction_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_mission_cargo_extract_readability_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var gate_snapshot: Dictionary = _get_mission_scenario_runtime_gate_snapshot_for_readability()
+	var gate_entries: Array = Array(gate_snapshot.get("gates", []))
+	var cargo_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "cargo_touchdown_extract")
+	var cargo_snapshot: Dictionary = _get_mission_cargo_touchdown_snapshot_for_readability()
+	var cargo_line: String = _build_mission_cargo_extract_line()
+	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	if not cargo_line.is_empty() and not mission_control_status_text.contains(cargo_line):
+		mission_control_status_text = _build_strategic_status_text()
+	var primary_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		primary_snapshot = Dictionary(primary_3d_view.call("get_render_snapshot")).duplicate(true)
+	var cargo_state: String = String(cargo_snapshot.get("cargo_state", cargo_snapshot.get("state", ""))).strip_edges().to_lower()
+	var cargo_progress: float = clampf(float(cargo_snapshot.get("progress", 0.0)), 0.0, 1.0)
+	var hold_seconds: float = maxf(float(cargo_snapshot.get("hold_seconds", 0.0)), 0.0)
+	var required_hold_seconds: float = maxf(float(cargo_snapshot.get("required_hold_seconds", cargo_gate.get("hold_required_seconds", 0.0))), 0.0)
+	var is_departed: bool = cargo_state == "departed"
+	var primary_cargo_state: String = String(primary_snapshot.get("cargo_touchdown_state", "")).strip_edges().to_lower()
+	var primary_visible: bool = bool(primary_snapshot.get("cargo_touchdown_visible", false))
+	var visual_matches_runtime: bool = false
+	if is_departed:
+		visual_matches_runtime = not primary_visible and int(primary_snapshot.get("cargo_touchdown_visual_count", 0)) == 0
+	else:
+		visual_matches_runtime = primary_cargo_state == cargo_state and primary_visible
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"cargo_bridge_configured",
+			not cargo_snapshot.is_empty()
+				and bool(cargo_snapshot.get("configured", false))
+				and String(cargo_snapshot.get("runtime_authority", "")) == "MissionCargoTouchdownBridge",
+			"Cargo bridge exposes a configured read-only runtime snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"cargo_gate_readable",
+			not cargo_gate.is_empty()
+				and String(cargo_gate.get("target_marker_id", "")) == "spawn_alpha"
+				and float(cargo_gate.get("hold_required_seconds", 0.0)) > 0.0,
+			"Cargo gate names spawn_alpha target and required hold seconds."
+		),
+		_build_mission_first_move_readability_check(
+			"cargo_state_readable",
+			not cargo_state.is_empty()
+				and cargo_state != "unconfigured"
+				and String(cargo_snapshot.get("target_marker_id", "")) == "spawn_alpha",
+			"Cargo snapshot exposes target marker and normalized cargo state."
+		),
+		_build_mission_first_move_readability_check(
+			"cargo_hold_progress_readable",
+			required_hold_seconds > 0.0
+				and cargo_progress >= 0.0
+				and cargo_progress <= 1.0
+				and (cargo_state != "landed" or hold_seconds <= required_hold_seconds + 0.01),
+			"Cargo hold/progress is normalized and bounded."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_names_cargo_extract",
+			not cargo_line.is_empty() and mission_control_status_text.contains(cargo_line),
+			"Mission Control names cargo state, progress or hold status in one compact line."
+		),
+		_build_mission_first_move_readability_check(
+			"primary_cargo_visual_matches_runtime",
+			visual_matches_runtime,
+			"Primary 3D cargo visual mirrors the cargo bridge state."
+		),
+		_build_mission_first_move_readability_check(
+			"cargo_completion_gate_consistent",
+			(is_departed and bool(cargo_snapshot.get("complete", false)) and bool(cargo_gate.get("complete", false)) and bool(gate_snapshot.get("all_gates_complete", false)))
+				or (not is_departed and not bool(cargo_snapshot.get("complete", false))),
+			"Cargo completion and scenario gate completion agree."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(cargo_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(gate_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Cargo extract snapshot reads CargoBridge and RuntimeGates without writing gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_553",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"cargo_extract_line": cargo_line,
+		"mission_control_status_text": mission_control_status_text,
+		"cargo_snapshot": cargo_snapshot,
+		"cargo_gate": cargo_gate,
+		"scenario_gate_snapshot": gate_snapshot,
+		"primary_3d": primary_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_mission_objective_state_snapshot() -> Dictionary:
 	var simulation_root := get_node_or_null("../SimulationRoot")
 	if simulation_root == null or not simulation_root.has_method("get_objective_status"):
@@ -12740,6 +12874,13 @@ func _get_mission_scenario_runtime_gate_snapshot_for_readability() -> Dictionary
 	if combat_driver == null or not combat_driver.has_method("get_mission_scenario_runtime_gate_snapshot"):
 		return {}
 	return Dictionary(combat_driver.call("get_mission_scenario_runtime_gate_snapshot")).duplicate(true)
+
+
+func _get_mission_cargo_touchdown_snapshot_for_readability() -> Dictionary:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_mission_cargo_touchdown_snapshot"):
+		return {}
+	return Dictionary(combat_driver.call("get_mission_cargo_touchdown_snapshot")).duplicate(true)
 
 
 func _find_runtime_gate_by_objective_type(gate_entries: Array, objective_type: String) -> Dictionary:

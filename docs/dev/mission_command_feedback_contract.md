@@ -66,6 +66,9 @@ TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dez
 ## Mission-Objective-Interaction-Readability
 `get_mission_objective_interaction_readability_snapshot()` ist der Headless-Pruefpunkt fuer TASK_552. Der Snapshot darf nur bestehende `ObjectiveStatus`-, `MissionScenarioRuntimeGates`-, Command-Feedback- und `TerrainMap3DView`-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Objective-, Cargo-, Combat- oder Command-Entscheidung erzeugen. Erwartete Lesbarkeit: Mission Control zeigt eine kompakte `AA | COM | OBJ`-Zeile, das ausgewaehlte Tile zeigt auf das Objective, der Take-Control-Anker bleibt sichtbar, der Computer-Hold nennt Status und Haltezeit, und der Primary-3D-Objective-Ring spiegelt denselben Capture-Fortschritt.
 
+## Mission-Cargo-Extract-Readability
+`get_mission_cargo_extract_readability_snapshot()` ist der Headless-Pruefpunkt fuer TASK_553. Der Snapshot darf nur bestehende `MissionCargoTouchdownBridge`-, `MissionScenarioRuntimeGates`-, Command-Feedback- und `TerrainMap3DView`-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Cargo-, Objective-, Combat- oder Command-Entscheidung erzeugen. Erwartete Lesbarkeit: Mission Control zeigt eine kompakte `CARGO ...`-Zeile fuer blocked/inbound/hold/ready/departing/departed, der Cargo-Hold-Fortschritt bleibt vom Completion-State getrennt, Primary3D spiegelt den aktiven Cargo-Zustand, und `departed` komplettiert CargoBridge plus Scenario-Gate konsistent.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
