@@ -154,6 +154,74 @@ func get_debrief_aar_data_bridge_snapshot() -> Dictionary:
 	}
 
 
+func get_debrief_aar_visual_evidence_snapshot() -> Dictionary:
+	var bridge_snapshot: Dictionary = get_debrief_aar_data_bridge_snapshot()
+	var panel := get_node_or_null("Panel") as Control
+	var summary_label := get_node_or_null("Panel/Margin/VBox/AARSummaryLabel") as Label
+	var chip_strip := get_node_or_null("Panel/Margin/VBox/AARChipStrip") as HBoxContainer
+	var rows_label := get_node_or_null("Panel/Margin/VBox/AARRowsLabel") as Label
+	var limit_label := get_node_or_null("Panel/Margin/VBox/AARLimitLabel") as Label
+	var button_row := get_node_or_null("Panel/Margin/VBox/ButtonRow") as HBoxContainer
+	var panel_rect: Rect2 = panel.get_global_rect() if panel != null else Rect2()
+	var summary_rect: Rect2 = summary_label.get_global_rect() if summary_label != null else Rect2()
+	var chip_rect: Rect2 = chip_strip.get_global_rect() if chip_strip != null else Rect2()
+	var rows_rect: Rect2 = rows_label.get_global_rect() if rows_label != null else Rect2()
+	var limit_rect: Rect2 = limit_label.get_global_rect() if limit_label != null else Rect2()
+	var button_rect: Rect2 = button_row.get_global_rect() if button_row != null else Rect2()
+	var aar_section_rect: Rect2 = _merge_rects([summary_rect, chip_rect, rows_rect, limit_rect])
+	var button_gap: float = button_rect.position.y - (limit_rect.position.y + limit_rect.size.y) if button_row != null and limit_label != null else -1.0
+	var summary_text: String = String(bridge_snapshot.get("aar_summary_text", "")).strip_edges()
+	var rows_text: String = String(bridge_snapshot.get("aar_rows_text", "")).strip_edges()
+	var limit_text: String = String(bridge_snapshot.get("aar_limit_text", "")).strip_edges()
+	var chips: Array = Array(bridge_snapshot.get("aar_chips", []))
+	var checks: Array = []
+	_append_visual_polish_check(checks, "bridge_gate_pass", String(bridge_snapshot.get("gate", "")) == "pass", "TASK_588 AAR bridge should stay green.")
+	_append_visual_polish_check(checks, "aar_controls_visible", summary_label != null and summary_label.visible and chip_strip != null and chip_strip.visible and rows_label != null and rows_label.visible and limit_label != null and limit_label.visible, "AAR controls should be visible in the Debrief viewport.")
+	_append_visual_polish_check(checks, "aar_controls_inside_panel", _rect_inside(summary_rect, panel_rect) and _rect_inside(chip_rect, panel_rect) and _rect_inside(rows_rect, panel_rect) and _rect_inside(limit_rect, panel_rect), "AAR controls should stay inside the Debrief panel.")
+	_append_visual_polish_check(checks, "aar_before_buttons", button_row != null and aar_section_rect.position.y + aar_section_rect.size.y <= button_rect.position.y + 1.0, "AAR section should sit before the return buttons.")
+	_append_visual_polish_check(checks, "aar_button_gap_visible", button_gap >= 0.0, "AAR section should not overlap the button row.")
+	_append_visual_polish_check(checks, "aar_section_height_compact", aar_section_rect.size.y > 0.0 and aar_section_rect.size.y <= 180.0, "AAR section should stay compact enough for the Debrief.")
+	_append_visual_polish_check(checks, "summary_text_compact", summary_text.length() <= 96 and summary_text.count("\n") == 0, "AAR summary should remain one compact scan line.")
+	_append_visual_polish_check(checks, "rows_text_compact", rows_text.length() <= 180 and rows_text.count("\n") == 0, "AAR rows should remain a compact detail line.")
+	_append_visual_polish_check(checks, "limit_text_compact", limit_text.length() <= 120 and limit_text.count("\n") == 0, "AAR limit text should remain compact.")
+	_append_visual_polish_check(checks, "chips_compact", chips.size() >= DEBRIEF_AAR_CHIP_COUNT_MIN and chip_rect.size.y <= 44.0, "AAR chips should fit into one compact strip.")
+	_append_visual_polish_check(checks, "read_only", true, "Snapshot reads visual evidence only.")
+	var failed_count: int = 0
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_count += 1
+	return {
+		"schema": "sternenbuergerchen.debrief_aar_visual_evidence.v1",
+		"task_id": "TASK_589",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"layout_key": "debrief_aar_visual_evidence_v1",
+		"bridge_gate": String(bridge_snapshot.get("gate", "")),
+		"source_schema": String(bridge_snapshot.get("source_schema", "")),
+		"panel_rect": _rect_to_dict(panel_rect),
+		"aar_section_rect": _rect_to_dict(aar_section_rect),
+		"aar_summary_rect": _rect_to_dict(summary_rect),
+		"aar_chip_strip_rect": _rect_to_dict(chip_rect),
+		"aar_rows_rect": _rect_to_dict(rows_rect),
+		"aar_limit_rect": _rect_to_dict(limit_rect),
+		"button_row_rect": _rect_to_dict(button_rect),
+		"button_gap": button_gap,
+		"aar_summary_text": summary_text,
+		"aar_rows_text": rows_text,
+		"aar_limit_text": limit_text,
+		"aar_chip_count": chips.size(),
+		"aar_row_count": int(bridge_snapshot.get("aar_row_count", 0)),
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"visual_only": true,
+		"checks": checks,
+	}
+
+
 func get_background_catalog_snapshot() -> Dictionary:
 	var entry: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID))
 	var background := get_node_or_null("Background") as TextureRect
@@ -760,6 +828,52 @@ func _append_visual_polish_check(checks: Array, check_id: String, passed: bool, 
 		"passed": passed,
 		"message": message,
 	})
+
+
+func _rect_to_dict(rect: Rect2) -> Dictionary:
+	return {
+		"x": rect.position.x,
+		"y": rect.position.y,
+		"width": rect.size.x,
+		"height": rect.size.y,
+		"right": rect.position.x + rect.size.x,
+		"bottom": rect.position.y + rect.size.y,
+	}
+
+
+func _rect_inside(inner: Rect2, outer: Rect2) -> bool:
+	if inner.size.x <= 0.0 or inner.size.y <= 0.0 or outer.size.x <= 0.0 or outer.size.y <= 0.0:
+		return false
+	return inner.position.x >= outer.position.x \
+		and inner.position.y >= outer.position.y \
+		and inner.position.x + inner.size.x <= outer.position.x + outer.size.x + 1.0 \
+		and inner.position.y + inner.size.y <= outer.position.y + outer.size.y + 1.0
+
+
+func _merge_rects(rects: Array) -> Rect2:
+	var has_rect: bool = false
+	var min_x: float = 0.0
+	var min_y: float = 0.0
+	var max_x: float = 0.0
+	var max_y: float = 0.0
+	for rect_variant in rects:
+		var rect: Rect2 = rect_variant
+		if rect.size.x <= 0.0 or rect.size.y <= 0.0:
+			continue
+		if not has_rect:
+			min_x = rect.position.x
+			min_y = rect.position.y
+			max_x = rect.position.x + rect.size.x
+			max_y = rect.position.y + rect.size.y
+			has_rect = true
+			continue
+		min_x = minf(min_x, rect.position.x)
+		min_y = minf(min_y, rect.position.y)
+		max_x = maxf(max_x, rect.position.x + rect.size.x)
+		max_y = maxf(max_y, rect.position.y + rect.size.y)
+	if not has_rect:
+		return Rect2()
+	return Rect2(min_x, min_y, max_x - min_x, max_y - min_y)
 
 
 func _apply_background_texture() -> void:

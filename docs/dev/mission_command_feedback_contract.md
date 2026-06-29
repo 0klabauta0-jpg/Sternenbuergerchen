@@ -209,6 +209,11 @@ TASK_588 fuehrt die vorhandene TASK_585-Mini-AAR-Debrief-Struktur in den sichtba
 
 Erwartete Struktur: `MetaLayerFlow._build_mission_result()` enthaelt bei vorhandenem Snapshot `mini_aar_debrief.schema = sternenbuergerchen.mini_aar_debrief_screen_stub.v1`, `read_only = true` und `ui_sets_gameplay_truth = false`. `DebriefTestScreen.get_debrief_aar_data_bridge_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_aar_data_bridge.v1`, `layout_key = debrief_aar_bridge_v1`, `source_schema`, `aar_summary_text`, `aar_chip_count`, `aar_row_count`, `aar_limit_text`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Lesbarkeit: Summary enthaelt FIRE und SUP, mindestens fuenf Chips, mindestens vier Rows, ehrlicher Grenztext mit Keine XP/keine Ammo/keine echte Suppression und kein Rueckfall im TASK_587-Visual-Polish-Gate.
 
+## Debrief-AAR-F6-Visual-Evidence
+TASK_589 macht die sichtbare TASK_588-AAR-Sektion reproduzierbar pruefbar. `DebriefTestScreen.get_debrief_aar_visual_evidence_snapshot()` darf nur Layout- und Lesbarkeitsdaten der Debrief-AAR-Sektion melden: Panel-, AAR-, Button-Rects, kompakte Textlaengen, Chip-/Row-Anzahl und Bridge-Gate. Der Snapshot darf keine Navigation ausloesen, keine MissionResult-Daten veraendern und keine XP-, Ammo-, Skill-, Combat- oder Suppression-Wahrheit erzeugen. Der zugehoerige Verifier darf PNG/Manifest unter `tmp/` schreiben; Headless-Evidence-Boards ersetzen keinen finalen menschlichen Sichtentscheid.
+
+Erwartete Struktur: `get_debrief_aar_visual_evidence_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_aar_visual_evidence.v1`, `layout_key = debrief_aar_visual_evidence_v1`, `bridge_gate`, `source_schema`, `panel_rect`, `aar_section_rect`, `aar_summary_rect`, `aar_chip_strip_rect`, `aar_rows_rect`, `aar_limit_rect`, `button_row_rect`, `button_gap`, `aar_summary_text`, `aar_chip_count`, `aar_row_count`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Gates: TASK_588-Bridge gruen, alle AAR-Controls im Panel, AAR vor ButtonRow, kein Button-Overlap, kompakte Summary/Rows/Limit und mindestens fuenf Chips.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

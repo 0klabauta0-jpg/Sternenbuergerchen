@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_589 - Debrief AAR F6 Visual Evidence Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_589_debrief_aar_f6_visual_evidence_pass.md`, `docs/tasks/TASK_588_debrief_aar_data_bridge.md`, `docs/tasks/TASK_587_debrief_visual_polish_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `DebriefTestScreen.get_debrief_aar_visual_evidence_snapshot()` meldet Panel-, AAR- und Button-Rects, kompakte Textlaengen, Chip-/Row-Zaehler und das TASK_588-Bridge-Gate read-only.
+- Stand: `scripts/tests/task_589_debrief_aar_f6_visual_evidence_pass.gd` erzeugt `tmp/debrief_aar_f6_visual_evidence.png` und `tmp/debrief_aar_f6_visual_evidence.json`. In Headless ist das PNG ein markiertes Evidence-Board; bei echtem Viewport kann ein Screenshot gelesen werden.
+- Stand: Der laufende HTML-Zwischenbericht ist auf TASK_589 aktualisiert und enthaelt die neuen Evidence-Pfade.
+- Risiken/offen: Der automatische Evidence-Pass ersetzt keinen finalen menschlichen Debrief-Sichttest. Falls die echte Fenster-Evidence eng wirkt, sollte TASK_590 gezielten AAR-Layout-Polish umsetzen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_589_debrief_aar_f6_visual_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_588_debrief_aar_data_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_587_debrief_visual_polish_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_590 - Debrief AAR Layout Polish Findings`, wenn die Evidence konkrete Layout-/Lesbarkeits-Findings zeigt oder ein echter Fensterlauf nachpoliert werden soll.
+
 ### TASK_588 - Debrief AAR Data Bridge
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_588_debrief_aar_data_bridge.md`, `docs/tasks/TASK_587_debrief_visual_polish_pass.md`, `docs/tasks/TASK_585_mini_aar_debrief_screen_stub.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
@@ -18,7 +28,7 @@
 - Stand: Der laufende HTML-Zwischenbericht ist auf TASK_588 aktualisiert und nennt TASK_589 als naechsten Sicht-/Evidence-Pass.
 - Risiken/offen: Der Debrief zeigt jetzt vorhandene Mini-AAR-Daten, aber echte XP, Skillentwicklung, Ammo, echte Suppression-Wirkung und ein menschlicher F6-Layoutcheck bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_588_debrief_aar_data_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_587_debrief_visual_polish_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_586_debrief_return_homebase_handoff.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_589 - Debrief AAR F6 Visual Evidence Pass`, um die neue AAR-Sektion im echten Debrief-Viewport auf Lesbarkeit/Platz zu pruefen.
+- Naechster Schritt: durch `TASK_589 - Debrief AAR F6 Visual Evidence Pass` erledigt; naechster Anschluss ist `TASK_590 - Debrief AAR Layout Polish Findings`.
 
 ### TASK_587 - Debrief Visual Polish Pass
 - Status: implementiert im Arbeitsstand
