@@ -238,7 +238,8 @@ git checkout -b batch/<batch-name>
 - TASK_607 - Two Instance Host Client Runtime Smoke (implementiert)
 - TASK_608 - Host Client Runtime Visual Capture (implementiert)
 - TASK_609 - Host Client Runtime Visual Polish Findings (implementiert)
-- TASK_610 - Host Client Two Window Playtest Notes
+- TASK_610 - Host Client Two Window Playtest Notes (implementiert)
+- TASK_611 - Host Client Two Window Launch Helper
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

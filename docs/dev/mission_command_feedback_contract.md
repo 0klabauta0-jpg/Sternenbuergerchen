@@ -309,6 +309,11 @@ TASK_609 wendet den belegten TASK_608-Befund an: Das Headless-Capture-Board war 
 
 Erwartete Struktur: `tmp/host_client_runtime_visual_capture.json` bleibt ein TASK_608-Capture, meldet aber zusaetzlich `evidence_polish_task_id = TASK_609`, `region_legend_present = true`, `callout_label_count >= 16`, `evidence_board_readability_gate = pass`, `visible_followup_candidate = host_client_two_window_playtest_notes` und `recommended_next_task = TASK_610 - Host Client Two Window Playtest Notes`. Der laufende HTML-Bericht darf diese Felder exportieren und kommentierbar machen, aber den echten Zwei-Fenster-/LAN-Test nicht als erledigt markieren.
 
+## Host-Client-Two-Window-Playtest-Notes
+TASK_610 nutzt den laufenden HTML-Zwischenbericht als manuelle Zwei-Fenster-Playtest-Workbench fuer Host/Client. Der Bericht darf Host-/Client-Screenshotpfade, Viewport, Verbindung, Host-Authority, Client-Read-only, Peer-Command-Grenzen, Snapshot-Sync, F6-Lesbarkeit, Performance-Eindruck, Ratings und Follow-up-Entscheidungen exportieren. Diese Daten sind Arbeitsnotizen und duerfen keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit erzeugen.
+
+Erwartete Struktur: Der Bericht enthaelt Exportfelder unter `host_client_two_window_manual.*`, mindestens `host_screenshot_done`, `client_screenshot_done`, `both_windows_visible_checked`, `local_connection_checked`, `host_authority_checked`, `client_read_only_checked`, `peer2_bravo_command_checked`, `peer2_alpha_reject_checked`, `snapshot_sync_checked`, `f6_readability_checked`, `performance_checked`, `host_screenshot_path`, `client_screenshot_path`, `viewport`, `connection_mode`, `scenario`, `host_identity_notes`, `client_identity_notes`, `command_authority_notes`, `snapshot_sync_notes`, `performance_notes`, `visual_readability_notes` und `followup`. Choice-Groups liefern `result`, `connection_rating`, `authority_rating`, `sync_rating`, `readability_rating`, `performance_rating` und `next_priority`. Die freie Notiz nutzt `notes.host_client_two_window_manual_review`. Host-/Client-Screenshot-Checkboxen muessen standardmaessig offen bleiben.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

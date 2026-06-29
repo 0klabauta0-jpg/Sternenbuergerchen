@@ -60,6 +60,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_608_host_client_runtime_visual_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_609_host_client_runtime_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_607_two_instance_host_client_runtime_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_610 - Host Client Two Window Playtest Notes`, damit ein echter Host/Client-Fensterlauf oder Screenshot-Review strukturiert dokumentiert werden kann.
 
+### TASK_610 - Host Client Two Window Playtest Notes
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_610_host_client_two_window_playtest_notes.md`, `docs/tasks/TASK_609_host_client_runtime_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der laufende HTML-Zwischenbericht enthaelt einen eigenen TASK_610-Block fuer Host-/Client-Screenshotpfade, zwei sichtbare Fenster, lokale Verbindung, Host-Authority, Client-Read-only, Peer-Command-Grenzen, Snapshot-Sync, F6-Lesbarkeit, Performance und Folgeprioritaet.
+- Stand: Alle Daten werden unter `host_client_two_window_manual.*` und `notes.host_client_two_window_manual_review` exportiert und bleiben manuelle Playtest-Arbeitsnotizen.
+- Stand: `scripts/tests/task_610_host_client_two_window_playtest_notes.gd` prueft Task-Datei, Contract, Status, Roadmap, Report-Export-Keys, Choice-Groups, JSON-Export-Metadaten und offene Screenshot-Checkboxen.
+- Risiken/offen: TASK_610 startet noch keine zwei Godot-Fenster und behauptet keinen erledigten LAN-/Host-/Client-Test. TASK_611 sollte einen kleinen Launch-/Run-Helper oder den echten Screenshot-Review vorbereiten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_610_host_client_two_window_playtest_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_609_host_client_runtime_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_611 - Host Client Two Window Launch Helper`, damit der echte Fensterlauf reproduzierbarer gestartet werden kann.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
