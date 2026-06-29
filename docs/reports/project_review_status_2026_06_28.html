@@ -153,7 +153,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_548 auf <code>task/combat-hud-detail-tooltip-pass</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_549 auf <code>task/combat-hud-f6-visual-audit</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -196,7 +196,8 @@
       <span class="pill good">TASK_546 HUD-Density</span>
       <span class="pill good">TASK_547 Multi-Fireteam-Smoke</span>
       <span class="pill good">TASK_548 Detail-Tooltip</span>
-      <span class="pill warn">TASK_549 F6-Visual-Audit</span>
+      <span class="pill good">TASK_549 F6-Visual-Audit</span>
+      <span class="pill warn">TASK_550 Screenshot-Notizen</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
     </div>
@@ -231,6 +232,7 @@
           <p>TASK_546 ist als aktueller Zwischenstand umgesetzt: Mission Control und Selected Fireteam bekommen eine kompakte Combat-HUD-Zeile aus ContactDecision-, Cover- und FireEvent-Snapshots. Der naechste Anschluss ist ein Multi-Fireteam-/Dropship-Smoke, damit diese Lesbarkeit auch bei parallelen Fireteams konsistent bleibt.</p>
           <p>TASK_547 ist als aktueller Zwischenstand umgesetzt: Mehrere Fireteams, mehrere Dropship-Cards und kompakte Combat-HUD-Zeile werden zusammen als read-only Snapshot geprueft. Der naechste Anschluss ist ein Detail-/Tooltip-Pass, damit die kurzen HUD-Codes bei Bedarf erklaerbar bleiben, ohne die Panels zu ueberladen.</p>
           <p>TASK_548 ist als aktueller Zwischenstand umgesetzt: Die kompakte Combat-HUD-Zeile bleibt kurz, aber #17 Selected Fireteam und #18 Mission Control bekommen denselben read-only Detail-Tooltip mit Fire-State, Cover, Range, LOS und Flank-Kontext. Der naechste Anschluss ist ein echter F6-/FullHD-Sichtaudit fuer Hover-/Panel-Lesbarkeit.</p>
+          <p>TASK_549 ist als aktueller Zwischenstand umgesetzt: Die Combat-HUD-Labels sind hover-faehig, clippen sichtbaren Headertext und ein read-only F6-Visual-Audit prueft Panel-Bounds, Nichtueberlappung, Tooltip-Kuerze und geschaetzte FullHD-Tooltip-Flaechen. Der naechste Anschluss ist ein echter manueller Screenshot-/Notizdurchlauf.</p>
           <p>Dieser Report ist jetzt bewusst als laufender Zwischenbericht gepflegt: Er nennt, was zuletzt umgesetzt wurde, welche Pruefungen dazu gruen sind und welche naechsten Schritte aus aktueller Sicht am meisten Spielbarkeit, Bedienbarkeit oder Multiplayer-Klarheit bringen.</p>
         </article>
         <article class="card">
@@ -404,15 +406,15 @@
                 <tr><td>Architecture Cleanup</td><td>TASK_512 bis TASK_515 schneiden Fireteam-Runtime-State, Mission-Resolution, Enemy-Behavior und Readability aus Legacy-Monolithen.</td><td>Der Spielpfad bleibt handhabbar, ohne Gameplay-Wahrheit ins UI zu verschieben.</td><td>Nur weitere kleine Boundary-Slices, wenn sie sichtbare Spielbarkeit oder Debugbarkeit verbessern.</td></tr>
                 <tr><td>Editor/Builder</td><td>TASK_516 bringt Palette-Suche, Recent/Favoriten, Scale-Presets und Network-Preview-Snapshot; TASK_521 rendert aktive Drag-Pfade als 3D-Preview-Linie.</td><td>Map-Bauen wird weniger muehsam, weil man die Pipe-/Wall-/Cliff-Kette vor dem Loslassen sieht.</td><td>Naechster Editor-Polish: Handles, Segmentnummern oder Asset-Palette-Icon-Sprache.</td></tr>
                 <tr><td>Scenario Slice</td><td>TASK_517 bis TASK_522 beschreiben AA/Computer/Cargo als Vertical Slice, Runtime-Gates und sichtbaren Cargo-Air-Visualpfad.</td><td>Das naechste echte Testszenario wird konkreter: Luftabwehr aus, Computer halten, Frachter landen/abfliegen lassen.</td><td>TASK_523 macht den PvP-/NPC-Besitz im Setup lesbar.</td></tr>
-                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz und TASK_548 als Detail-Tooltip fuer Combat-Codes.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zur ersten Combat-Entscheidung lesbar.</td><td>Naechster spielbarer Schritt ist TASK_549: echte F6-/FullHD-Sichtpruefung fuer Hover-/Panel-Lesbarkeit.</td></tr>
-                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_548 plus TASK_549-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
+                <tr><td>Multiplayer Readiness</td><td>TASK_520 klaert Team-Ownership fuer Alpha/Bravo, NPC-Teams und Peer-Zuweisung; TASK_523 zeigt Ownership als Text, TASK_525 als farbige Lobby-Badges, TASK_526 als Mission-HUD-Teamchips, TASK_527 als Briefing-Minimap-Spawn-Overlays, TASK_529 als kompakte Icon-/Kurzlabel-Felder, TASK_530 als sichtbarer Briefing-Panel-Snapshot, TASK_531 als sichtbare Minimap, TASK_532 als Bild-/Loadout-Karten-Polish, TASK_533 als bestaetigte Loadout-Bruecke, TASK_534 als Startbereitschafts-Checkliste, TASK_535 als FullHD-Startflow-Deck, TASK_536 als farbige Statuschip-Sprache, TASK_537 als Visual-Audit, TASK_538 als Launch-Handoff-Smoke, TASK_539 als Insertion-/First-Order-Readability-Snapshot, TASK_540 als First-Move-Decision-Snapshot, TASK_541 als First-Move-Execution-Feedback, TASK_542 als First-Contact-Readability, TASK_543 als First-Engagement-Feedback, TASK_544 als Fire-/Cover-Visual-Polish, TASK_545 als integrierter Fire-/Cover-Flow-Smoke, TASK_546 als kompakte Combat-HUD-Dichte, TASK_547 als Multi-Fireteam-/Dropship-HUD-Konsistenz, TASK_548 als Detail-Tooltip fuer Combat-Codes und TASK_549 als automatisierter F6-Visual-Audit.</td><td>Solo/Coop/PvP widersprechen sich nicht mehr schon im Datenvertrag und bleiben vom Briefing bis zur ersten Combat-Entscheidung lesbar.</td><td>Naechster spielbarer Schritt ist TASK_550: manueller Screenshot-/Notizabgleich fuer Hover-Gefuehl und Stil.</td></tr>
+                <tr><td>Arbeitsbericht</td><td>TASK_528 macht diesen HTML-Report wieder explizit zum laufenden Zwischenstand mit erledigten Blocks, offenen Risiken, naechsten Tasks und exportierbarer Notizflaeche. Der aktuelle Refresh zieht den Bericht auf TASK_549 plus TASK_550-Empfehlung.</td><td>Du kannst zwischendurch im Browser sehen, wo wir stehen, statt den Chatverlauf rekonstruieren zu muessen.</td><td>Nach jedem groesseren Slice kurz aktualisieren; danach wieder Gameplay-/UI-Fortschritt priorisieren.</td></tr>
               </tbody>
             </table>
           </div>
         </article>
         <article class="card">
           <h2>Aktuelle Lage</h2>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_547 sauber; TASK_548 laeuft auf eigenem Branch</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.integration_branch_clean"> Integration ist nach TASK_548 sauber; TASK_549 laeuft auf eigenem Branch</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.report_refresh_done"> HTML-Zwischenbericht ist aktualisiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -421,7 +423,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_546_done"> TASK_546 Combat-HUD-Density ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_547_done"> TASK_547 Multi-Fireteam-Smoke ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_548_done"> TASK_548 Detail-/Tooltip-Pass ist im Arbeitsstand implementiert</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_549_selected_next"> TASK_549 ist als naechster F6-/FullHD-Visual-Audit vorgeschlagen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_549_done"> TASK_549 F6-/FullHD-Visual-Audit ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_550_selected_next"> TASK_550 ist als naechster manueller Screenshot-/Notizdurchlauf vorgeschlagen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_522_done"> TASK_522 Cargo-Visuals sind im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_523_done"> TASK_523 PvP-Teamlesbarkeit ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_524_done"> TASK_524 Warn-Laerm-Bereinigung ist im Arbeitsstand implementiert</label>
@@ -451,8 +454,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Erledigt</td><td>TASK_548 erklaert die kurzen Combat-HUD-Codes ueber denselben read-only Detail-Tooltip in #17 Selected Fireteam und #18 Mission Control.</td><td>Wenn TASK_549 die Hover-/Panel-Lesbarkeit im echten FullHD-F6-Fenster sichtprueft.</td></tr>
-                <tr><td>Jetzt dran</td><td>TASK_549 - Combat HUD F6 Visual Audit. Ziel: Tooltip-/Panel-Wirkung, Ueberlagerungen und Lesbarkeit im echten Missionsfenster pruefen.</td><td>Nach manuellem F6-/Screenshot-Audit mit konkreten Notizen.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_549 prueft Combat-HUD-Tooltip, Label-Hover, Panel-Bounds und geschaetzte Tooltip-Flaechen im FullHD-Missionslayout.</td><td>Wenn TASK_550 den automatisierten Audit mit echtem Screenshot-/Notizfeedback abgleicht.</td></tr>
+                <tr><td>Jetzt dran</td><td>TASK_550 - Combat HUD Manual Screenshot Notes Pass. Ziel: echten F6-Screenshot, Hover-Gefuehl und optische Lesbarkeit dokumentieren.</td><td>Nach manuellem Screenshot-/Notiz-Audit mit konkreten UI-Korrekturen oder Freigabe.</td></tr>
                 <tr><td>Offen</td><td>Der echte menschliche F6-/Sichttest wurde fuer die letzten Headless-Slices bewusst nicht behauptet. Die naechste manuelle Runde sollte sichtbare Bewegung, Panel-Feedback, Kontaktlinien und Drop-/Fireteam-Konsistenz pruefen.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -488,7 +491,8 @@
             <div class="finding good"><h3>Erledigt: Mission Combat Feedback HUD Density Polish</h3><p>TASK_546 verdichtet Combat-Feedback, Cover, LOS und Range in Mission Control und Selected Fireteam zu einer kurzen HUD-Zeile.</p></div>
             <div class="finding good"><h3>Erledigt: Multi-Fireteam Combat HUD Consistency Smoke</h3><p>TASK_547 prueft kompakte Combat-Lesbarkeit bei mehreren Fireteams und Dropships gegeneinander.</p></div>
             <div class="finding good"><h3>Erledigt: Combat HUD Visual Detail Tooltip Pass</h3><p>TASK_548 erklaert die kompakten Combat-Codes als kurzen Tooltip/Detailtext, ohne die HUD-Zeile wieder aufzublaehen.</p></div>
-            <div class="finding medium"><h3>1. TASK_549 - Combat HUD F6 Visual Audit</h3><p>Die Tooltip-/Panel-Wirkung sollte im echten FullHD-Missionsfenster auf Lesbarkeit, Hover-Verhalten und Ueberlagerungen geprueft werden.</p></div>
+            <div class="finding good"><h3>Erledigt: Combat HUD F6 Visual Audit</h3><p>TASK_549 prueft die Tooltip-/Panel-Grundlage automatisiert: FullHD-Bounds, Nichtueberlappung, Hover-Faehigkeit und kurze Tooltip-Zeilen.</p></div>
+            <div class="finding medium"><h3>1. TASK_550 - Combat HUD Manual Screenshot Notes Pass</h3><p>Der automatisierte Audit sollte mit echtem F6-Screenshot, Hover-Gefuehl und kurzen Notizen zum optischen Eindruck abgeglichen werden.</p></div>
           </div>
         </article>
       </div>
@@ -535,7 +539,8 @@
             <div class="finding good"><h3>Erledigt: TASK_546 - Mission Combat Feedback HUD Density Polish</h3><p>Selected-Fireteam- und Mission-Control-Texte fuer Combat, Cover und FireEvents sind dichter und pruefbar scannbar.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke</h3><p>Mehrere Fireteams/Dropships bleiben im Combat-HUD konsistent: Selektion, Ship-State und Combat-Zeile laufen nicht auseinander.</p></div>
             <div class="finding good"><h3>Erledigt: TASK_548 - Combat HUD Visual Detail Tooltip Pass</h3><p>Detailgruende fuer Fire-State, Cover, LOS, Range und Flank sind als kurze HUD-Tooltip-Hilfe verfuegbar.</p></div>
-            <div class="finding medium"><h3>1. TASK_549 - Combat HUD F6 Visual Audit</h3><p>Tooltip-/Panel-Lesbarkeit im echten Missionsfenster pruefen und als Screenshot-/Notiz-Audit festhalten.</p></div>
+            <div class="finding good"><h3>Erledigt: TASK_549 - Combat HUD F6 Visual Audit</h3><p>Combat-HUD-Tooltip, Label-Hover, Panel-Bounds und geschaetzte Tooltip-Flaechen sind als read-only Audit pruefbar.</p></div>
+            <div class="finding medium"><h3>1. TASK_550 - Combat HUD Manual Screenshot Notes Pass</h3><p>Den automatisierten Audit mit echtem Screenshot-/Hover-Test und sichtbaren UI-Notizen abgleichen.</p></div>
           </div>
         </article>
         <article class="card">
@@ -607,7 +612,8 @@
                 <tr><td><code>task_546_mission_combat_feedback_hud_density_polish.gd</code></td><td>23 passed, 0 failed</td><td>Integrierter Homebase-Dropship-Mission-Engagement-Smoke fuer kompakte Combat-HUD-Zeile in Mission Control und Selected Fireteam; bekannte Factory-UID-Warnung bleibt nicht testbrechend.</td></tr>
                 <tr><td><code>task_547_multi_fireteam_combat_hud_consistency_smoke.gd</code></td><td>22 passed, 0 failed</td><td>Headless-Smoke fuer Multi-Fireteam-Auswahl, zwei Dropship-Cards und kompakte Combat-HUD-Zeile.</td></tr>
                 <tr><td><code>task_548_combat_hud_visual_detail_tooltip_pass.gd</code></td><td>29 passed, 0 failed</td><td>Headless-Smoke fuer kompakten Combat-HUD-Text plus identische Detail-Tooltips in Selected Fireteam und Mission Control.</td></tr>
-                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_548 aktualisiert, nennt TASK_549 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
+                <tr><td><code>task_549_combat_hud_f6_visual_audit.gd</code></td><td>29 passed, 0 failed</td><td>Automatisierter F6-Layout-Audit fuer Combat-HUD-Tooltip, hover-faehige Labels, Panel-Bounds und FullHD-Tooltip-Flaechen.</td></tr>
+                <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_549 aktualisiert, nennt TASK_550 als naechsten Slice und exportiert den laufenden Arbeitsstand.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
                 <tr><td>Windows Runtime Export</td><td>Exit 0</td><td><code>C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.pck</code> 194633380 Bytes; lokaler Export-Preset danach restauriert.</td></tr>
                 <tr><td><code>git diff --check</code></td><td>Exit 0</td><td>Keine Whitespace-/Patch-Check-Probleme im aktuellen Arbeitsstand.</td></tr>
@@ -621,7 +627,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_547-Merge und Push. Arbeitsbranch: <code>task/combat-hud-detail-tooltip-pass</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_548-Merge und Push. Arbeitsbranch: <code>task/combat-hud-f6-visual-audit</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -700,7 +706,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_549 - Combat HUD F6 Visual Audit"
+              "TASK_550 - Combat HUD Manual Screenshot Notes Pass"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -735,25 +741,26 @@
               "TASK_545 - Mission Fire Cover Integrated Flow Smoke",
               "TASK_546 - Mission Combat Feedback HUD Density Polish",
               "TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke",
-              "TASK_548 - Combat HUD Visual Detail Tooltip Pass"
+              "TASK_548 - Combat HUD Visual Detail Tooltip Pass",
+              "TASK_549 - Combat HUD F6 Visual Audit"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
               "Manueller FullHD-/F6-Sichttest bleibt trotz integrierter Headless-Smokes offen.",
               "Grosse Legacy-Skripte bleiben technische Reibung und sollten nur in kleinen nutzbaren Slices weiter geschnitten werden.",
-              "TASK_549 muss noch im echten FullHD-/F6-Fenster pruefen, ob Tooltip, Paneltext und Hover-Verhalten angenehm lesbar bleiben."
+              "TASK_550 muss den automatisierten FullHD-/F6-Audit noch mit echtem Screenshot-, Hover- und Stilfeedback abgleichen."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_scan_warning_remaining",
             runtime_pck_bytes: 194633380,
             report_mode: "rolling_interim_status",
-            current_focus: "TASK_549 - Combat HUD F6 Visual Audit",
-            latest_completed_task: "TASK_548 - Combat HUD Visual Detail Tooltip Pass"
+            current_focus: "TASK_550 - Combat HUD Manual Screenshot Notes Pass",
+            latest_completed_task: "TASK_549 - Combat HUD F6 Visual Audit"
           },
           metadata: {
-            branch: "task/combat-hud-detail-tooltip-pass",
-            integration_base: "integration/core-foundation after TASK_547",
-            head: "task/combat-hud-detail-tooltip-pass",
+            branch: "task/combat-hud-f6-visual-audit",
+            integration_base: "integration/core-foundation after TASK_548",
+            head: "task/combat-hud-f6-visual-audit",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_549 - Combat HUD F6 Visual Audit
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_549_combat_hud_f6_visual_audit.md`, `docs/tasks/TASK_548_combat_hud_visual_detail_tooltip_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_combat_hud_f6_visual_audit_snapshot()` fuer Combat-HUD-Tooltip-Lesbarkeit im 1920x1080-Missionslayout.
+- Stand: #17 Selected Fireteam und #18 Mission Control werden auf sichtbare, hover-faehige Labels, identische Tooltip-Payload, FullHD-Bounds und Panel-Nichtueberlappung geprueft.
+- Stand: Die Combat-HUD-Labels clippen sichtbaren Headertext und behalten den nativen Godot-Tooltip als Detailhilfe, ohne die kompakte HUD-Zeile aufzublaehen.
+- Stand: Der Rolling-HTML-Bericht ist als laufender Zwischenbericht auf TASK_549 aktualisiert und nennt den naechsten sinnvollen Anschluss.
+- Risiken/offen: Der Task prueft automatisierte Layout-/Tooltip-Bounds und behauptet keinen menschlichen Screenshot. Der echte Hover-/Stil-Eindruck im Godot-Fenster bleibt als manueller Sichttest sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_549_combat_hud_f6_visual_audit.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_548_combat_hud_visual_detail_tooltip_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_550 - Combat HUD Manual Screenshot Notes Pass`, damit der automatisierte Audit mit einem echten F6-Screenshot-/Notizdurchlauf fuer Stil, Hover-Gefuehl und Lesbarkeit abgeglichen wird.
+
 ### TASK_548 - Combat HUD Visual Detail Tooltip Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_548_combat_hud_visual_detail_tooltip_pass.md`, `docs/tasks/TASK_547_multi_fireteam_combat_hud_consistency_smoke.md`, `docs/dev/mission_command_feedback_contract.md`
