@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_552 - Mission Objective Interaction Readability Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_552_mission_objective_interaction_readability_pass.md`, `docs/tasks/TASK_518_mission_scenario_runtime_gates.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_mission_objective_interaction_readability_snapshot()` fuer die erste Objective-/Computer-/Gebaeude-Interaktion nach Insertion, Move, Contact und Combat.
+- Stand: Mission Control zeigt eine kompakte `AA | COM | OBJ`-Zeile aus bestehenden ObjectiveStatus- und ScenarioRuntimeGate-Daten.
+- Stand: Der Snapshot prueft Take-Control, Objective-Tile, ObjectiveState, Scenario-Gates, Computer-Hold und Primary-3D-Objective-Visual, ohne Gameplay-Wahrheit in der UI zu setzen.
+- Stand: Der Rolling-HTML-Bericht ist auf TASK_552 aktualisiert und nennt TASK_553 als naechsten spielbaren Anschluss.
+- Risiken/offen: TASK_552 macht die Computer-/Objective-Interaktion sichtbar, aber der Cargo-Touchdown-/Extract-Flow ist noch nicht als eigener Spielerblick abgesichert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_552_mission_objective_interaction_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_551_combat_hud_tooltip_style_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_553 - Mission Cargo Extract Readability Pass`, damit der Frachter-Anflug, Touchdown-Hold und Abflug nach AA/Computer ebenfalls als spielbarer Ablauf lesbar werden.
+
 ### TASK_551 - Combat HUD Tooltip Style Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_551_combat_hud_tooltip_style_polish.md`, `docs/tasks/TASK_550_combat_hud_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_549_combat_hud_f6_visual_audit.md`, `docs/dev/mission_command_feedback_contract.md`

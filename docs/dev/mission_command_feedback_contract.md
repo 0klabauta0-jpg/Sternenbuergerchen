@@ -63,6 +63,9 @@ TASK_550 nutzt den laufenden HTML-Zwischenbericht als manuelle Sichttest-Workben
 ## Combat-HUD-Tooltip-Style
 TASK_551 erweitert den bestehenden Combat-HUD-Tooltip-Label-Contract um eine dezente visuelle Hover-Affordance. #17 Selected Fireteam und #18 Mission Control muessen dieselbe `combat_hud_tooltip_style_id` tragen, hoverbar bleiben, Text clippen und ihre Style-Metadaten im `get_combat_hud_f6_visual_audit_snapshot()` read-only melden. Der Style darf nur vorhandene HUD-Labels markieren; er erzeugt kein neues Tooltip-System und keine Combat-/Contact-/Gameplay-Wahrheit.
 
+## Mission-Objective-Interaction-Readability
+`get_mission_objective_interaction_readability_snapshot()` ist der Headless-Pruefpunkt fuer TASK_552. Der Snapshot darf nur bestehende `ObjectiveStatus`-, `MissionScenarioRuntimeGates`-, Command-Feedback- und `TerrainMap3DView`-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Objective-, Cargo-, Combat- oder Command-Entscheidung erzeugen. Erwartete Lesbarkeit: Mission Control zeigt eine kompakte `AA | COM | OBJ`-Zeile, das ausgewaehlte Tile zeigt auf das Objective, der Take-Control-Anker bleibt sichtbar, der Computer-Hold nennt Status und Haltezeit, und der Primary-3D-Objective-Ring spiegelt denselben Capture-Fortschritt.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
