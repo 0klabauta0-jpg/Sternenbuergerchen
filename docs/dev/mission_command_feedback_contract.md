@@ -319,6 +319,11 @@ TASK_611 stellt den lokalen Host-/Client-Zwei-Fenster-Start als reproduzierbaren
 
 Erwartete Struktur: `tmp/host_client_two_window_launch_plan.json` enthaelt `schema = sternenbuergerchen.host_client_two_window_launch_helper.v1`, `task_id = TASK_611`, `launch_mode`, `launch_requested`, `read_only = true`, `ui_sets_gameplay_truth = false`, `project_path`, `scene`, `godot_bin`, `godot_bin_found`, `godot_bin_source`, `helper_path`, `plan_path`, `window_layout`, `host`, `client`, `launch_command` und `recommended_next_task = TASK_612 - Host Client Two Window Screenshot Review`. Der laufende HTML-Bericht darf Helper-, Plan-, Szene-, Fenster- und Launch-Command-Felder unter `host_client_two_window_launch.*` exportieren, darf aber den echten Screenshot-/Fensterreview nicht als erledigt markieren.
 
+## Host-Client-Two-Window-Screenshot-Review
+TASK_612 baut aus dem TASK_611-Launchplan ein lokales Screenshot-Review-Paket. Der Verifier darf `tmp/host_client_two_window_screenshot_review_board.png` und `tmp/host_client_two_window_screenshot_review.json` schreiben und der laufende HTML-Bericht darf Host-/Client-Screenshotpfade, Pflichtchecks, Ratings und Folgeentscheidungen exportieren. Diese Artefakte bleiben Review-/Notizdaten und duerfen keine Runtime-, Peer-, Command-, Objective-, Cargo-, Combat-, Movement- oder UI-Wahrheit erzeugen.
+
+Erwartete Struktur: `tmp/host_client_two_window_screenshot_review.json` enthaelt `schema = sternenbuergerchen.host_client_two_window_screenshot_review.v1`, `task_id = TASK_612`, `source_plan_task_id = TASK_611`, `source_plan_path`, `review_board_path`, `review_manifest_path`, `host_screenshot_path`, `client_screenshot_path`, Host-/Client-Rollen, `manual_review_required = true`, `manual_review_done = false`, `generated_review_board = true`, `real_window_screenshots_required = true`, `read_only = true`, `ui_sets_gameplay_truth = false`, `review_checks` und `recommended_next_task = TASK_613 - Host Client Two Window Visual Polish Findings`. Der HTML-Bericht nutzt Exportfelder unter `host_client_two_window_screenshot.*`; Host-/Client-Screenshot-Checkboxen bleiben standardmaessig offen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

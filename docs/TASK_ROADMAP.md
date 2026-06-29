@@ -240,7 +240,8 @@ git checkout -b batch/<batch-name>
 - TASK_609 - Host Client Runtime Visual Polish Findings (implementiert)
 - TASK_610 - Host Client Two Window Playtest Notes (implementiert)
 - TASK_611 - Host Client Two Window Launch Helper (implementiert)
-- TASK_612 - Host Client Two Window Screenshot Review
+- TASK_612 - Host Client Two Window Screenshot Review (implementiert)
+- TASK_613 - Host Client Two Window Visual Polish Findings
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
