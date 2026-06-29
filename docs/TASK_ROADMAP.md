@@ -216,7 +216,8 @@ git checkout -b batch/<batch-name>
 - TASK_585 - Mini AAR Debrief Screen Stub (implementiert)
 - TASK_586 - Debrief Return To Homebase Handoff (implementiert)
 - TASK_587 - Debrief Visual Polish Pass (implementiert)
-- TASK_588 - Debrief AAR Data Bridge
+- TASK_588 - Debrief AAR Data Bridge (implementiert)
+- TASK_589 - Debrief AAR F6 Visual Evidence Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

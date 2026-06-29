@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_588 - Debrief AAR Data Bridge
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_588_debrief_aar_data_bridge.md`, `docs/tasks/TASK_587_debrief_visual_polish_pass.md`, `docs/tasks/TASK_585_mini_aar_debrief_screen_stub.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MetaLayerFlow._build_mission_result()` uebernimmt einen vorhandenen `get_mini_aar_debrief_screen_snapshot()` als read-only `mini_aar_debrief`-Payload in das MissionResult.
+- Stand: `DebriefTestScreen` rendert daraus AAR-Summary, Chips, Rows und Grenztext. `get_debrief_aar_data_bridge_snapshot()` prueft Source-Schema, FIRE/SUP-Summary, Chip-/Row-Zaehler, ehrliche Grenzen und den weiterhin gruenen Visual-Polish-Snapshot.
+- Stand: Der laufende HTML-Zwischenbericht ist auf TASK_588 aktualisiert und nennt TASK_589 als naechsten Sicht-/Evidence-Pass.
+- Risiken/offen: Der Debrief zeigt jetzt vorhandene Mini-AAR-Daten, aber echte XP, Skillentwicklung, Ammo, echte Suppression-Wirkung und ein menschlicher F6-Layoutcheck bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_588_debrief_aar_data_bridge.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_587_debrief_visual_polish_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_586_debrief_return_homebase_handoff.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_589 - Debrief AAR F6 Visual Evidence Pass`, um die neue AAR-Sektion im echten Debrief-Viewport auf Lesbarkeit/Platz zu pruefen.
+
 ### TASK_587 - Debrief Visual Polish Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_587_debrief_visual_polish_pass.md`, `docs/tasks/TASK_586_debrief_return_homebase_handoff.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
 - Stand: `DebriefTestScreen` rendert Ergebnis, Gewinner, Dauer, Condition und Objective jetzt als kompakte Summary-Chips und ersetzt den alten langen Ergebnisblock durch eine kurze Scan-Zeile.
 - Stand: Der Teamstatus zeigt kompakte Statuszaehler plus maximal vier Member-Tokens. `Return to Homebase` ist als primaere Aktion markiert, `Return to FOB` bleibt sekundaer.
 - Stand: `get_debrief_visual_polish_snapshot()` prueft Summary-Chips, kompakte Texte, Aktionsrollen und Hintergrundlesbarkeit read-only; der laufende HTML-Zwischenbericht ist auf TASK_587 aktualisiert.
-- Risiken/offen: Der sichtbare Debrief ist lesbarer, aber echte Mini-AAR-Kampfmetriken, XP, Skillentwicklung, Ammo und Suppression-Wirkung sind noch nicht in den Meta-Debrief eingebunden.
+- Risiken/offen: Der sichtbare Debrief ist lesbarer, und die Mini-AAR-Kampfmetriken werden durch TASK_588 eingebunden; XP, Skillentwicklung, Ammo, echte Suppression-Wirkung und ein F6-Sichttest bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_587_debrief_visual_polish_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_586_debrief_return_homebase_handoff.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_debrief_background_and_main_menu_team_library.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_588 - Debrief AAR Data Bridge`, wenn die vorhandene Mini-AAR-Kampfmetriken-Schale in den sichtbaren Meta-Debrief gefuehrt werden soll.
+- Naechster Schritt: durch `TASK_588 - Debrief AAR Data Bridge` erledigt; naechster Anschluss ist `TASK_589 - Debrief AAR F6 Visual Evidence Pass`.
 
 ### TASK_586 - Debrief Return To Homebase Handoff
 - Status: implementiert im Arbeitsstand

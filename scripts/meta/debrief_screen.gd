@@ -8,6 +8,8 @@ const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/
 const BACKGROUND_ID: String = "debrief_desert_explosion_base"
 const DEBRIEF_SUMMARY_CHIP_COUNT_MIN := 5
 const DEBRIEF_TEAM_STATUS_MAX_CHARS := 180
+const DEBRIEF_AAR_CHIP_COUNT_MIN := 5
+const DEBRIEF_AAR_ROW_COUNT_MIN := 4
 
 signal return_to_fob_requested()
 signal return_to_homebase_requested()
@@ -94,6 +96,64 @@ func get_debrief_visual_polish_snapshot() -> Dictionary:
 	}
 
 
+func get_debrief_aar_data_bridge_snapshot() -> Dictionary:
+	var payload: Dictionary = _extract_debrief_aar_payload()
+	var summary_label := get_node_or_null("Panel/Margin/VBox/AARSummaryLabel") as Label
+	var chip_strip := get_node_or_null("Panel/Margin/VBox/AARChipStrip") as HBoxContainer
+	var rows_label := get_node_or_null("Panel/Margin/VBox/AARRowsLabel") as Label
+	var limit_label := get_node_or_null("Panel/Margin/VBox/AARLimitLabel") as Label
+	var chips: Array = []
+	if chip_strip != null:
+		for child in chip_strip.get_children():
+			var chip_label := child as Label
+			if chip_label == null:
+				continue
+			chips.append({
+				"name": chip_label.name,
+				"text": chip_label.text,
+				"style_id": String(chip_label.get_meta("debrief_aar_chip_style_id", "")),
+			})
+	var visual_snapshot: Dictionary = get_debrief_visual_polish_snapshot()
+	var row_count: int = int(rows_label.get_meta("debrief_aar_row_count", 0)) if rows_label != null else 0
+	var summary_text: String = summary_label.text if summary_label != null else ""
+	var limit_text: String = limit_label.text if limit_label != null else ""
+	var checks: Array = []
+	_append_visual_polish_check(checks, "source_schema_available", String(payload.get("schema", "")) == "sternenbuergerchen.mini_aar_debrief_screen_stub.v1", "Debrief should receive the mini AAR debrief snapshot.")
+	_append_visual_polish_check(checks, "aar_section_visible", summary_label != null and summary_label.visible and chip_strip != null and chip_strip.visible, "AAR section should be visible when data exists.")
+	_append_visual_polish_check(checks, "aar_summary_mentions_fire_and_sup", summary_text.contains("FIRE") and summary_text.contains("SUP"), "AAR summary should expose fire and suppress metrics.")
+	_append_visual_polish_check(checks, "aar_chips_visible", chips.size() >= DEBRIEF_AAR_CHIP_COUNT_MIN, "AAR chips should be compact and visible.")
+	_append_visual_polish_check(checks, "aar_rows_visible", row_count >= DEBRIEF_AAR_ROW_COUNT_MIN, "AAR rows should include the existing metrics.")
+	_append_visual_polish_check(checks, "aar_limits_honest", limit_text.contains("Keine XP") and limit_text.contains("keine Ammo") and limit_text.contains("keine echte Suppression"), "AAR bridge should keep limits honest.")
+	_append_visual_polish_check(checks, "visual_polish_still_green", String(visual_snapshot.get("gate", "")) == "pass", "AAR bridge should not regress the Debrief visual polish gate.")
+	_append_visual_polish_check(checks, "read_only", true, "Snapshot reads debrief AAR state only.")
+	var failed_count: int = 0
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_count += 1
+	return {
+		"schema": "sternenbuergerchen.debrief_aar_data_bridge.v1",
+		"task_id": "TASK_588",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"layout_key": "debrief_aar_bridge_v1",
+		"source_schema": String(payload.get("schema", "")),
+		"aar_section_visible": summary_label != null and summary_label.visible,
+		"aar_summary_text": summary_text,
+		"aar_chip_count": chips.size(),
+		"aar_chips": chips,
+		"aar_row_count": row_count,
+		"aar_rows_text": rows_label.text if rows_label != null else "",
+		"aar_limit_text": limit_text,
+		"visual_snapshot_gate": String(visual_snapshot.get("gate", "")),
+		"visual_only": true,
+		"checks": checks,
+	}
+
+
 func get_background_catalog_snapshot() -> Dictionary:
 	var entry: Dictionary = Dictionary(BACKGROUND_IMAGE_CATALOG_SCRIPT.call("get_entry", BACKGROUND_ID))
 	var background := get_node_or_null("Background") as TextureRect
@@ -121,11 +181,16 @@ func _render_result() -> void:
 	var summary_strip: HBoxContainer = _ensure_summary_strip()
 	var air_asset_label: Label = _ensure_air_asset_events_label()
 	var ftl_feedback_label: Label = _ensure_ftl_feedback_label()
+	var aar_summary_label: Label = _ensure_aar_summary_label()
+	var aar_chip_strip: HBoxContainer = _ensure_aar_chip_strip()
+	var aar_rows_label: Label = _ensure_aar_rows_label()
+	var aar_limit_label: Label = _ensure_aar_limit_label()
 	var character_events_label: Label = _ensure_character_events_label()
 	var personnel_events_label: Label = _ensure_personnel_events_label()
 	_apply_help_id(character_events_label, "debrief.character_updates")
 	_apply_help_id(air_asset_label, "fob.flightdeck")
 	_apply_help_id(ftl_feedback_label, "character_sheet.ftl_tactical_impact")
+	_apply_help_id(aar_summary_label, "debrief.mini_aar")
 
 	if _mission_result.is_empty():
 		_render_summary_chips(summary_strip, [
@@ -139,6 +204,7 @@ func _render_result() -> void:
 		team_state_label.text = "Team: unavailable"
 		air_asset_label.text = "Air asset: pending"
 		ftl_feedback_label.text = "FTL feedback: pending"
+		_render_aar_bridge({}, aar_summary_label, aar_chip_strip, aar_rows_label, aar_limit_label)
 		character_events_label.text = "Character updates: pending"
 		personnel_events_label.text = "Personnel updates: pending"
 		_apply_readability_style()
@@ -198,6 +264,8 @@ func _render_result() -> void:
 		ftl_feedback_label.text = "FTL feedback: unavailable"
 	else:
 		ftl_feedback_label.text = "FTL feedback:\n%s" % "\n".join(ftl_feedback_lines)
+
+	_render_aar_bridge(_extract_debrief_aar_payload(), aar_summary_label, aar_chip_strip, aar_rows_label, aar_limit_label)
 
 	var character_event_lines: PackedStringArray = []
 	for event_variant in Array(_mission_result.get("character_events", [])):
@@ -287,10 +355,63 @@ func _ensure_ftl_feedback_label() -> Label:
 	return label
 
 
+func _ensure_aar_summary_label() -> Label:
+	return _ensure_debrief_label_before_button_row("AARSummaryLabel")
+
+
+func _ensure_aar_rows_label() -> Label:
+	return _ensure_debrief_label_before_button_row("AARRowsLabel")
+
+
+func _ensure_aar_limit_label() -> Label:
+	return _ensure_debrief_label_before_button_row("AARLimitLabel")
+
+
+func _ensure_debrief_label_before_button_row(label_name: String) -> Label:
+	var vbox := get_node("Panel/Margin/VBox") as VBoxContainer
+	var existing := vbox.get_node_or_null(label_name) as Label
+	if existing != null:
+		return existing
+	var label := Label.new()
+	label.name = label_name
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var button_row := vbox.get_node_or_null("ButtonRow")
+	if button_row != null:
+		vbox.add_child(label)
+		vbox.move_child(label, button_row.get_index())
+	else:
+		vbox.add_child(label)
+	return label
+
+
+func _ensure_aar_chip_strip() -> HBoxContainer:
+	var vbox := get_node("Panel/Margin/VBox") as VBoxContainer
+	var existing := vbox.get_node_or_null("AARChipStrip") as HBoxContainer
+	if existing != null:
+		return existing
+	var strip := HBoxContainer.new()
+	strip.name = "AARChipStrip"
+	strip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	strip.add_theme_constant_override("separation", 8)
+	var rows_label := vbox.get_node_or_null("AARRowsLabel")
+	if rows_label != null:
+		vbox.add_child(strip)
+		vbox.move_child(strip, rows_label.get_index())
+	else:
+		var button_row := vbox.get_node_or_null("ButtonRow")
+		if button_row != null:
+			vbox.add_child(strip)
+			vbox.move_child(strip, button_row.get_index())
+		else:
+			vbox.add_child(strip)
+	return strip
+
+
 func _apply_contextual_help_ids() -> void:
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/CharacterEventsLabel") as Control, "debrief.character_updates")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/AirAssetEventsLabel") as Control, "fob.flightdeck")
 	_apply_help_id(get_node_or_null("Panel/Margin/VBox/FTLFeedbackLabel") as Control, "character_sheet.ftl_tactical_impact")
+	_apply_help_id(get_node_or_null("Panel/Margin/VBox/AARSummaryLabel") as Control, "debrief.mini_aar")
 
 
 func _apply_readability_style() -> void:
@@ -312,6 +433,9 @@ func _apply_readability_style() -> void:
 		"Panel/Margin/VBox/TeamStateLabel",
 		"Panel/Margin/VBox/AirAssetEventsLabel",
 		"Panel/Margin/VBox/FTLFeedbackLabel",
+		"Panel/Margin/VBox/AARSummaryLabel",
+		"Panel/Margin/VBox/AARRowsLabel",
+		"Panel/Margin/VBox/AARLimitLabel",
 		"Panel/Margin/VBox/CharacterEventsLabel",
 		"Panel/Margin/VBox/PersonnelEventsLabel",
 	]:
@@ -320,6 +444,11 @@ func _apply_readability_style() -> void:
 			continue
 		META_UI_SKIN_SCRIPT.style_body_label(label, 13)
 		label.add_theme_color_override("font_color", Color("d7e2e8"))
+	var aar_limit_label := get_node_or_null("Panel/Margin/VBox/AARLimitLabel") as Label
+	if aar_limit_label != null:
+		aar_limit_label.add_theme_color_override("font_color", Color("a8b7c0"))
+		aar_limit_label.add_theme_font_size_override("font_size", 12)
+	_apply_aar_chip_style()
 
 	for path in [
 		"Panel/Margin/VBox/ButtonRow/ReturnToFOBButton",
@@ -374,6 +503,126 @@ func _build_ftl_feedback_lines(entries: Array) -> PackedStringArray:
 		if lines.size() >= 4:
 			break
 	return lines
+
+
+func _extract_debrief_aar_payload() -> Dictionary:
+	if _mission_result.is_empty():
+		return {}
+	var payload: Dictionary = Dictionary(_mission_result.get("mini_aar_debrief", {})).duplicate(true)
+	if String(payload.get("schema", "")) == "sternenbuergerchen.mini_aar_debrief_screen_stub.v1":
+		return payload
+	var fallback: Dictionary = Dictionary(_mission_result.get("mini_aar", {})).duplicate(true)
+	if String(fallback.get("schema", "")) == "sternenbuergerchen.mini_aar_debrief_screen_stub.v1":
+		return fallback
+	return {}
+
+
+func _render_aar_bridge(payload: Dictionary, summary_label: Label, chip_strip: HBoxContainer, rows_label: Label, limit_label: Label) -> void:
+	var has_payload: bool = String(payload.get("schema", "")) == "sternenbuergerchen.mini_aar_debrief_screen_stub.v1"
+	if not has_payload:
+		if summary_label != null:
+			summary_label.text = "AAR: unavailable"
+			summary_label.visible = false
+		if chip_strip != null:
+			chip_strip.visible = false
+			_render_aar_chips(chip_strip, [])
+		if rows_label != null:
+			rows_label.text = ""
+			rows_label.visible = false
+			rows_label.set_meta("debrief_aar_row_count", 0)
+		if limit_label != null:
+			limit_label.text = ""
+			limit_label.visible = false
+		return
+	var summary_text: String = String(payload.get("summary_text", "")).strip_edges()
+	if summary_text.is_empty():
+		summary_text = String(Dictionary(payload.get("screen", {})).get("summary_text", "")).strip_edges()
+	if summary_label != null:
+		summary_label.text = "AAR: %s" % summary_text
+		summary_label.visible = true
+	if chip_strip != null:
+		chip_strip.visible = true
+		_render_aar_chips(chip_strip, Array(payload.get("chips", [])))
+	var row_lines: PackedStringArray = PackedStringArray()
+	for row_variant in Array(payload.get("rows", [])):
+		if typeof(row_variant) != TYPE_DICTIONARY:
+			continue
+		var row: Dictionary = Dictionary(row_variant)
+		var label_text: String = String(row.get("label", row.get("id", ""))).strip_edges()
+		var value_text: String = String(row.get("value_text", "")).strip_edges()
+		if label_text.is_empty() or value_text.is_empty():
+			continue
+		row_lines.append("%s: %s" % [label_text, value_text])
+		if row_lines.size() >= 4:
+			break
+	if rows_label != null:
+		rows_label.text = "AAR Details: %s" % " | ".join(row_lines)
+		rows_label.visible = not row_lines.is_empty()
+		rows_label.set_meta("debrief_aar_row_count", row_lines.size())
+	if limit_label != null:
+		limit_label.text = String(payload.get("limit_text", "")).strip_edges()
+		limit_label.visible = not limit_label.text.is_empty()
+
+
+func _render_aar_chips(strip: HBoxContainer, chips: Array) -> void:
+	if strip == null:
+		return
+	while strip.get_child_count() > chips.size():
+		var extra := strip.get_child(strip.get_child_count() - 1)
+		strip.remove_child(extra)
+		extra.queue_free()
+	for index in range(chips.size()):
+		var chip_data: Dictionary = Dictionary(chips[index])
+		var chip: Label = null
+		if index < strip.get_child_count():
+			chip = strip.get_child(index) as Label
+		if chip == null:
+			chip = Label.new()
+			strip.add_child(chip)
+		var chip_id: String = String(chip_data.get("id", index)).strip_edges()
+		var label_text: String = String(chip_data.get("label", chip_id)).strip_edges()
+		var value_text: String = String(chip_data.get("value_text", "")).strip_edges()
+		chip.name = "AARChip_%s" % chip_id
+		chip.text = "%s %s" % [label_text, value_text]
+		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		chip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		chip.clip_text = true
+		chip.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		chip.set_meta("debrief_aar_chip_style_id", "debrief_aar_chip_v1")
+		chip.set_meta("style_key", String(chip_data.get("style_key", "neutral")))
+	_apply_aar_chip_style()
+
+
+func _apply_aar_chip_style() -> void:
+	var strip := get_node_or_null("Panel/Margin/VBox/AARChipStrip") as HBoxContainer
+	if strip == null:
+		return
+	for child in strip.get_children():
+		var chip := child as Label
+		if chip == null:
+			continue
+		var style_key: String = String(chip.get_meta("style_key", "neutral"))
+		chip.add_theme_color_override("font_color", Color("10161b"))
+		chip.add_theme_font_size_override("font_size", 11)
+		chip.add_theme_stylebox_override("normal", _build_aar_chip_stylebox(style_key))
+
+
+func _build_aar_chip_stylebox(style_key: String) -> StyleBoxFlat:
+	var stylebox := _build_chip_stylebox()
+	match style_key:
+		"good":
+			stylebox.bg_color = Color("76d99a")
+			stylebox.border_color = Color("9be7b4")
+		"warn":
+			stylebox.bg_color = Color("ffd34d")
+			stylebox.border_color = Color("ffe07f")
+		"accent":
+			stylebox.bg_color = Color("62d4dd")
+			stylebox.border_color = Color("9ce8ed")
+		_:
+			stylebox.bg_color = Color("d7e2e8")
+			stylebox.border_color = Color("94a6b0")
+	return stylebox
 
 
 func _format_debrief_quality_bucket(value: float) -> String:

@@ -204,6 +204,11 @@ TASK_587 verbessert nur die Lesbarkeit des vorhandenen Debrief-Screens. `Debrief
 
 Erwartete Struktur: `get_debrief_visual_polish_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_visual_polish.v1`, `layout_key = debrief_visual_polish_v1`, `summary_chip_count`, `summary_chips`, `result_text`, `team_status_text`, `primary_action_label`, `secondary_action_label`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Lesbarkeit: mindestens fuenf Summary-Chips, kompakter Ergebnistext, kompakter Teamstatus, Homebase als primaere Aktion, FOB als sekundaere Aktion und weiterhin dimmed-background/readability policy. TASK_588 bleibt fuer die Bruecke von Mini-AAR-Kampfmetriken in den sichtbaren Meta-Debrief vorgesehen.
 
+## Debrief-AAR-Data-Bridge
+TASK_588 fuehrt die vorhandene TASK_585-Mini-AAR-Debrief-Struktur in den sichtbaren Meta-Debrief. `MetaLayerFlow` darf aus der aktiven Mission nur den read-only Snapshot `get_mini_aar_debrief_screen_snapshot()` uebernehmen und als `mini_aar_debrief` in das MissionResult kopieren. `DebriefTestScreen` darf diesen Payload als AAR-Summary, Chips, Rows und Grenztext anzeigen. Der Debrief bleibt Presenter und darf keine Mission-, Combat-, XP-, Ammo-, Skill- oder Suppression-Wahrheit erzeugen.
+
+Erwartete Struktur: `MetaLayerFlow._build_mission_result()` enthaelt bei vorhandenem Snapshot `mini_aar_debrief.schema = sternenbuergerchen.mini_aar_debrief_screen_stub.v1`, `read_only = true` und `ui_sets_gameplay_truth = false`. `DebriefTestScreen.get_debrief_aar_data_bridge_snapshot()` enthaelt `schema = sternenbuergerchen.debrief_aar_data_bridge.v1`, `layout_key = debrief_aar_bridge_v1`, `source_schema`, `aar_summary_text`, `aar_chip_count`, `aar_row_count`, `aar_limit_text`, `read_only = true` und `ui_sets_gameplay_truth = false`. Erwartete Lesbarkeit: Summary enthaelt FIRE und SUP, mindestens fuenf Chips, mindestens vier Rows, ehrlicher Grenztext mit Keine XP/keine Ammo/keine echte Suppression und kein Rueckfall im TASK_587-Visual-Polish-Gate.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

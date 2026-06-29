@@ -1145,7 +1145,24 @@ func _build_mission_result(mission_instance: Node, mission_result: Dictionary) -
 	var air_asset_status: Dictionary = _extract_air_asset_status_from_mission(mission_instance)
 	if not air_asset_status.is_empty():
 		merged_result["air_asset_status"] = air_asset_status
+	var mini_aar_debrief: Dictionary = _extract_mini_aar_debrief_from_mission(mission_instance)
+	if not mini_aar_debrief.is_empty():
+		merged_result["mini_aar_debrief"] = mini_aar_debrief
 	return merged_result
+
+
+func _extract_mini_aar_debrief_from_mission(mission_instance: Node) -> Dictionary:
+	if mission_instance == null:
+		return {}
+	var tactical_controller := mission_instance.get_node_or_null("TacticalController")
+	if tactical_controller == null or not tactical_controller.has_method("get_mini_aar_debrief_screen_snapshot"):
+		return {}
+	var snapshot: Dictionary = Dictionary(tactical_controller.call("get_mini_aar_debrief_screen_snapshot")).duplicate(true)
+	if String(snapshot.get("schema", "")) != "sternenbuergerchen.mini_aar_debrief_screen_stub.v1":
+		return {}
+	if not bool(snapshot.get("read_only", false)) or bool(snapshot.get("ui_sets_gameplay_truth", true)):
+		return {}
+	return snapshot
 
 
 func _extract_air_asset_status_from_mission(mission_instance: Node) -> Dictionary:
