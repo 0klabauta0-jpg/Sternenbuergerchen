@@ -250,6 +250,7 @@ git checkout -b batch/<batch-name>
 - TASK_619 - Host Client Role Peer Badge HUD (implementiert)
 - TASK_620 - Host Client Badge Re-Capture Review (implementiert)
 - TASK_621 - Host Client Multiplayer Feel Review Bundle (implementiert)
+- TASK_622 - Host Client Command Authority Live Interaction Review (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

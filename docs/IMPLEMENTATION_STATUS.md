@@ -183,6 +183,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_621_host_client_multiplayer_feel_review_bundle.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_620_host_client_badge_recapture_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_619_host_client_role_peer_badge_hud.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_622 - Host Client Command Authority Live Interaction Review`, damit Peer-2-Bravo-Befehl, Peer-2-Alpha-Reject, Snapshot-Sync, F6-Lesbarkeit und Performance im echten Zwei-Fenster-Lauf bewertet werden.
 
+### TASK_622 - Host Client Command Authority Live Interaction Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_622_host_client_command_authority_live_interaction_review.md`, `docs/tasks/TASK_621_host_client_multiplayer_feel_review_bundle.md`, `docs/tasks/TASK_607_two_instance_host_client_runtime_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/multiplayer_authority_command_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `scripts/tests/task_622_host_client_command_authority_live_interaction_review.gd` setzt einen minimalen Host-/Client-Authority-Review mit `SimulationRoot` auf und schreibt `tmp/host_client_command_authority_live_interaction_review.json`.
+- Stand: Das Manifest belegt Peer-2-Bravo-Accept, Peer-2-Alpha-Reject, State-Mutation-Reject, Host-Command-Queue, Host-Network-Zaehlungen, Server-Snapshot und Client-Snapshot-Apply read-only.
+- Risiken/offen: Der Review ist technisch enger als ein echter Fensterlauf. UI-Lesbarkeit, Input-Latenz und Performance-Gefuehl bleiben manuelle Zwei-Fenster-Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_622_host_client_command_authority_live_interaction_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_621_host_client_multiplayer_feel_review_bundle.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_607_two_instance_host_client_runtime_smoke.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_623 - Host Client Authority Visual Findings`, falls der echte Zwei-Fenster-Sichttest konkrete UI-/Feedback-Reibung zeigt.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
