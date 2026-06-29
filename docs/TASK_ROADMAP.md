@@ -187,7 +187,8 @@ git checkout -b batch/<batch-name>
 - TASK_556 - Frontier Probe Host Client Objective Handoff Smoke (implementiert)
 - TASK_557 - Frontier Probe Multiplayer F6 Readability Pass (implementiert)
 - TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass (implementiert)
-- TASK_559 - Frontier Probe Multiplayer F6 Visual Polish Follow-up
+- TASK_559 - Factory Colormap UID Loader Guard (implementiert)
+- TASK_560 - Frontier Probe Multiplayer F6 Visual Polish Follow-up
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_559 - Factory Colormap UID Loader Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_559_factory_colormap_uid_loader_guard.md`, `docs/tasks/TASK_524_export_warning_noise_cleanup.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `scripts/terrain/terrain_map_3d_view.gd`
+- Stand: `TerrainMap3DView` registriert vor Factory-GLB-Loads die deterministische ResourceUID fuer `res://Assets/curated/kenney/factory/models/Textures/colormap.png`, damit Godot nicht mehr bei jedem Load auf den Textpfad-Fallback warnen muss.
+- Stand: Der Guard greift nur fuer Modelle unter `res://Assets/curated/kenney/factory/models/` und veraendert keine Assetquellen, Katalogdaten, UI- oder Gameplay-Wahrheit.
+- Stand: Der Verifier prueft die UID-Registrierung und die zuvor lauten Factory-Modelle `detail-tank`, `building-a`, `chimney-medium` und `building-d`.
+- Risiken/offen: Weitere externe GLB-Texturen mit aehnlichen UID-Luecken waeren ein eigener Asset-Hygiene-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_559_factory_colormap_uid_loader_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_560 - Frontier Probe Multiplayer F6 Visual Polish Follow-up`, sobald aus dem manuellen TASK_558-Export konkrete Lesbarkeits-/Hover-/Panelnotizen vorliegen.
+
 ### TASK_558 - Frontier Probe Multiplayer Manual Screenshot Notes Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
@@ -18,7 +28,7 @@
 - Stand: Der Bericht markiert den manuellen Screenshot bewusst nicht als erledigt; die Daten bleiben Playtest-/Arbeitsnotizen und keine Gameplay-Wahrheit.
 - Risiken/offen: Der echte F6-MP-Screenshot-/Hover-Sichttest muss weiterhin manuell ausgefuehrt und exportiert werden.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_558_frontier_probe_multiplayer_manual_screenshot_notes_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_559 - Frontier Probe Multiplayer F6 Visual Polish Follow-up`, sobald aus dem manuellen TASK_558-Export konkrete Lesbarkeits-/Hover-/Panelnotizen vorliegen.
+- Naechster Schritt: `TASK_560 - Frontier Probe Multiplayer F6 Visual Polish Follow-up`, sobald aus dem manuellen TASK_558-Export konkrete Lesbarkeits-/Hover-/Panelnotizen vorliegen.
 
 ### TASK_557 - Frontier Probe Multiplayer F6 Readability Pass
 - Status: implementiert im Arbeitsstand
