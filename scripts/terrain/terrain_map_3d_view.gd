@@ -65,6 +65,7 @@ const CAMERA_ZOOM_STEP: float = 2.2
 const CAMERA_PAN_UNITS_PER_SECOND: float = 9.0
 const CAMERA_DRAG_PAN_FACTOR: float = 0.065
 const CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC: int = 220
+const CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC: int = 1200
 const UNIT_PROXY_SMOOTH_SPEED: float = 18.0
 const UNIT_PROXY_SNAP_DISTANCE: float = 2.4
 const MOVEMENT_STEP_SFX_RATE_LIMIT_MSEC: int = 420
@@ -645,7 +646,7 @@ func _ready() -> void:
 	_ensure_nodes()
 	_resize_subviewport()
 	_update_camera_transform()
-	_request_viewport_redraw()
+	_request_viewport_redraw(true, CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
 	set_process(true)
 
 
@@ -804,6 +805,7 @@ func render_map(terrain_map_data = null) -> void:
 	_rebuild_drop_visuals()
 	_sync_unit_proxies()
 	_update_camera_transform()
+	_request_viewport_redraw(true, CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
 	_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
 	_is_rendering_map = false
 
@@ -2036,7 +2038,7 @@ func _resize_subviewport() -> void:
 	var viewport_size: Vector2i = _get_viewport_size()
 	if _subviewport.size != viewport_size:
 		_subviewport.size = viewport_size
-		_request_viewport_redraw()
+		_request_viewport_redraw(true, CONTINUOUS_REDRAW_AFTER_BOOTSTRAP_MSEC)
 	_viewport_container.offset_left = 0.0
 	_viewport_container.offset_top = 0.0
 	_viewport_container.offset_right = 0.0
@@ -2048,11 +2050,11 @@ func _resize_subviewport() -> void:
 		_feedback_bubble_hud_root.offset_bottom = 0.0
 
 
-func _request_viewport_redraw(continuous: bool = false) -> void:
+func _request_viewport_redraw(continuous: bool = false, duration_msec: int = CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC) -> void:
 	if _subviewport == null:
 		return
 	if continuous:
-		_continuous_redraw_until_msec = Time.get_ticks_msec() + CONTINUOUS_REDRAW_AFTER_CAMERA_MSEC
+		_continuous_redraw_until_msec = maxi(_continuous_redraw_until_msec, Time.get_ticks_msec() + maxi(duration_msec, 1))
 		_subviewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		return
 	_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE

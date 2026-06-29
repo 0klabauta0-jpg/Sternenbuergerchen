@@ -167,6 +167,8 @@ $visibleGodotBinSource = ""
 $consoleBinaryReplaced = $false
 $hostWindowStatus = [ordered]@{}
 $clientWindowStatus = [ordered]@{}
+$initialHostWindowStatus = [ordered]@{}
+$initialClientWindowStatus = [ordered]@{}
 
 if ($Launch) {
     if (-not [bool]$plan.godot_bin_found -or -not (Test-Path -LiteralPath ([string]$plan.godot_bin))) {
@@ -185,9 +187,11 @@ if ($Launch) {
     $clientArgs = ConvertTo-ArgumentList $plan.client.command_args
     Write-Host "Starting visible TASK_614 Host window."
     $hostProcess = Start-Process -FilePath $godotBin -ArgumentList $hostArgs -WorkingDirectory $resolvedProjectPath -PassThru
-    Start-Sleep -Milliseconds 900
+    $initialHostWindowStatus = Focus-ReviewWindow -Process $hostProcess -Window $plan.host.window
+    Start-Sleep -Milliseconds 350
     Write-Host "Starting visible TASK_614 Client window."
     $clientProcess = Start-Process -FilePath $godotBin -ArgumentList $clientArgs -WorkingDirectory $resolvedProjectPath -PassThru
+    $initialClientWindowStatus = Focus-ReviewWindow -Process $clientProcess -Window $plan.client.window
     Start-Sleep -Seconds ([Math]::Max(1, $WaitSeconds))
     $hostWindowStatus = Focus-ReviewWindow -Process $hostProcess -Window $plan.host.window
     $clientWindowStatus = Focus-ReviewWindow -Process $clientProcess -Window $plan.client.window
@@ -236,6 +240,8 @@ $manifest = [ordered]@{
     console_binary_replaced = [bool]$consoleBinaryReplaced
     window_focus_attempted = [bool]($hostWindowStatus.focus_attempted -or $clientWindowStatus.focus_attempted)
     window_position_attempted = [bool]($hostWindowStatus.position_attempted -or $clientWindowStatus.position_attempted)
+    initial_host_window_status = $initialHostWindowStatus
+    initial_client_window_status = $initialClientWindowStatus
     host_window_status = $hostWindowStatus
     client_window_status = $clientWindowStatus
     host_process_id = $(if ($null -ne $hostProcess) { $hostProcess.Id } else { $null })
