@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_555 - Frontier Probe Multiplayer Objective Ownership Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_555_frontier_probe_multiplayer_objective_ownership_smoke.md`, `docs/tasks/TASK_554_frontier_probe_integrated_objective_playthrough_smoke.md`, `docs/tasks/TASK_520_multiplayer_team_ownership_smoke.md`, `docs/tasks/TASK_526_mission_hud_team_chip_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_frontier_probe_multiplayer_objective_ownership_snapshot()` fuer Alpha/Bravo-Ownership im integrierten Frontier-Probe-Objective-Slice.
+- Stand: Der Smoke kombiniert TASK_554, `MissionMultiplayerTeamOwnershipContract`, Mission-Team-Chip und Scenario-Daten, ohne UI- oder Test-Code zur Gameplay-Wahrheit zu machen.
+- Stand: Geprueft werden Alpha als player-assignable attacker, Bravo als solo NPC-defender und PvP-assignable Peer-Team, Mission-Team-Chip-Owner/Spawns, Alpha-Computer-/Cargo-Pfad und Bravo-AA-Threat.
+- Stand: Der Rolling-HTML-Bericht ist auf TASK_555 aktualisiert und nennt TASK_556 als naechsten echten Host/Client-Handoff-Smoke.
+- Risiken/offen: Der Smoke setzt Peer-Zuweisungen in einer Headless-Testszene; ein echter Zwei-Prozess-Host/Client-Lauf bleibt Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_555_frontier_probe_multiplayer_objective_ownership_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_554_frontier_probe_integrated_objective_playthrough_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_526_mission_hud_team_chip_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_556 - Frontier Probe Host Client Objective Handoff Smoke`, damit derselbe Slice in einem echten Host/Client-Setup geprueft wird.
+
 ### TASK_554 - Frontier Probe Integrated Objective Playthrough Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_554_frontier_probe_integrated_objective_playthrough_smoke.md`, `docs/tasks/TASK_553_mission_cargo_extract_readability_pass.md`, `docs/tasks/TASK_552_mission_objective_interaction_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`
