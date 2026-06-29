@@ -5298,11 +5298,73 @@ func _build_waypoint_intent_preview_text(fireteam_id: String) -> String:
 		var entry: Dictionary = Dictionary(entry_variant)
 		if String(entry.get("fireteam_id", "")).strip_edges().to_lower() != normalized_fireteam_id:
 			continue
-		return "Dist %dm | ETA~%ds" % [
+		var distance_eta_text: String = "Dist %dm | ETA~%ds" % [
 			int(round(float(entry.get("distance_world", 0.0)))),
 			maxi(int(ceil(float(entry.get("eta_seconds_estimate", 0.0)))), 0),
 		]
+		var risk_text: String = _build_waypoint_intent_threat_preview_text(entry)
+		if risk_text.is_empty():
+			return distance_eta_text
+		return "%s | %s" % [distance_eta_text, risk_text]
 	return ""
+
+
+func _build_waypoint_intent_threat_preview_text(entry: Dictionary) -> String:
+	var risk_state: String = String(entry.get("risk_state", "unknown")).strip_edges().to_lower()
+	var risk_label: String = _format_waypoint_intent_risk_label(risk_state)
+	if risk_label.is_empty():
+		return ""
+	var parts: PackedStringArray = PackedStringArray([risk_label])
+	var exposure_count: int = int(entry.get("enemy_exposure_count", 0))
+	var friendly_fire_count: int = int(entry.get("friendly_fire_risk_count", 0))
+	var cover_state: String = String(entry.get("cover_state", "unknown")).strip_edges().to_lower()
+	var risk_reason: String = String(entry.get("risk_reason", "")).strip_edges()
+	if risk_state == "unknown":
+		var reason_label: String = _compact_waypoint_intent_risk_reason(risk_reason)
+		if not reason_label.is_empty():
+			parts.append(reason_label)
+		return " ".join(parts)
+	parts.append("E%d" % exposure_count)
+	if friendly_fire_count > 0:
+		parts.append("FF%d" % friendly_fire_count)
+	if not cover_state.is_empty() and cover_state != "unknown":
+		parts.append("COV %s" % _compact_waypoint_intent_cover_label(cover_state))
+	return " ".join(parts)
+
+
+func _format_waypoint_intent_risk_label(risk_state: String) -> String:
+	match risk_state.strip_edges().to_lower():
+		"safe":
+			return "SAFE"
+		"risky":
+			return "RISKY"
+		"suicidal":
+			return "SUICIDAL"
+		_:
+			return "RISK ?"
+
+
+func _compact_waypoint_intent_risk_reason(reason: String) -> String:
+	match reason.strip_edges().to_lower():
+		"no_threat_context", "":
+			return "no intel"
+		"no_clear_enemy_los":
+			return "no LOS"
+		_:
+			var compact_reason: String = reason.replace("_", " ")
+			return compact_reason.substr(0, mini(compact_reason.length(), 24))
+
+
+func _compact_waypoint_intent_cover_label(cover_state: String) -> String:
+	match cover_state.strip_edges().to_lower():
+		"full":
+			return "FULL"
+		"partial":
+			return "PART"
+		"none":
+			return "OPEN"
+		_:
+			return cover_state.to_upper()
 
 
 func _build_fireteam_area_defense_info_text(fireteam_id: String) -> String:
@@ -12210,6 +12272,119 @@ func get_mission_first_move_decision_readability_snapshot() -> Dictionary:
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
 	}
+
+
+func get_frontier_probe_first_move_threat_preview_readability_snapshot() -> Dictionary:
+	var first_move_snapshot: Dictionary = get_mission_first_move_decision_readability_snapshot()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var selected_fireteam_ids: Array = Array(first_move_snapshot.get("selected_fireteam_ids", Array(_selected_fireteam_ids)))
+	var waypoint_preview: Array = get_waypoint_intent_preview_snapshot()
+	var first_preview: Dictionary = _find_first_waypoint_preview_for_fireteams(selected_fireteam_ids, waypoint_preview)
+	if first_preview.is_empty():
+		first_preview = Dictionary(first_move_snapshot.get("first_waypoint_preview", {})).duplicate(true)
+	var render_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		render_snapshot = Dictionary(primary_3d_view.call("get_render_snapshot"))
+	var render_preview_entries: Array = Array(render_snapshot.get("waypoint_intent_preview_entries", []))
+	var risk_state: String = String(first_preview.get("risk_state", "unknown")).strip_edges().to_lower()
+	if risk_state.is_empty():
+		risk_state = "unknown"
+	var risk_reason: String = String(first_preview.get("risk_reason", "")).strip_edges()
+	var risk_text: String = _build_waypoint_intent_threat_preview_text(first_preview)
+	var selected_order_text: String = String(command_feedback.get("selected_order_text", "")).strip_edges()
+	var line_entries: Array = Array(first_preview.get("line_of_fire_entries", []))
+	var render_threat_line_count: int = int(render_snapshot.get("waypoint_intent_preview_threat_line_count", 0))
+	var render_path_line_count: int = int(render_snapshot.get("waypoint_intent_preview_path_line_count", 0))
+	var render_visual_count: int = int(render_snapshot.get("waypoint_intent_preview_visual_count", 0))
+	var render_ghost_entry_count: int = _count_waypoint_intent_preview_ghost_entries(render_preview_entries)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"first_move_gate_still_passes",
+			String(first_move_snapshot.get("gate", "")) == "pass",
+			"TASK_540 first-move decision gate stays green."
+		),
+		_build_mission_first_move_readability_check(
+			"risk_state_visible_before_go",
+			["safe", "risky", "suicidal", "unknown"].has(risk_state) and not risk_text.is_empty(),
+			"Waypoint preview exposes a readable risk state before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"risk_reason_visible",
+			risk_state != "unknown" or risk_reason == "no_threat_context" or risk_text.find("no intel") >= 0,
+			"Unknown risk is explained as missing contact/threat context."
+		),
+		_build_mission_first_move_readability_check(
+			"hud_order_text_names_risk",
+			selected_order_text.find("SAFE") >= 0
+				or selected_order_text.find("RISKY") >= 0
+				or selected_order_text.find("SUICIDAL") >= 0
+				or selected_order_text.find("RISK ?") >= 0,
+			"Selected Fireteam order text includes the compact risk preview."
+		),
+		_build_mission_first_move_readability_check(
+			"primary_preview_ghost_and_path_visible",
+			(render_visual_count > 0 or render_ghost_entry_count > 0) and render_path_line_count > 0,
+			"Primary3D reports a waypoint preview ghost and path before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"threat_line_count_matches_context",
+			render_threat_line_count == line_entries.size(),
+			"Primary3D threat-line count mirrors the preview line-of-fire entries."
+		),
+		_build_mission_first_move_readability_check(
+			"preview_remains_read_only",
+			not bool(first_move_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(first_preview.get("ui_sets_gameplay_truth", true))
+				and bool(first_preview.get("read_only", false)),
+			"Threat preview reads existing snapshots and does not execute GO."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_567",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"first_move_snapshot": first_move_snapshot,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"selected_order_text": selected_order_text,
+		"first_waypoint_preview": first_preview,
+		"risk_state": risk_state,
+		"risk_reason": risk_reason,
+		"risk_preview_text": risk_text,
+		"enemy_exposure_count": int(first_preview.get("enemy_exposure_count", 0)),
+		"friendly_fire_risk_count": int(first_preview.get("friendly_fire_risk_count", 0)),
+		"line_of_fire_entry_count": line_entries.size(),
+		"render_preview_visual_count": render_visual_count,
+		"render_preview_ghost_entry_count": render_ghost_entry_count,
+		"render_preview_path_line_count": render_path_line_count,
+		"render_preview_threat_line_count": render_threat_line_count,
+		"render_preview_entries": render_preview_entries,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _count_waypoint_intent_preview_ghost_entries(entries: Array) -> int:
+	var count: int = 0
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var ghost_variant = entry.get("ghost_ftl_position", null)
+		var has_ghost_position: bool = false
+		if typeof(ghost_variant) == TYPE_VECTOR2:
+			has_ghost_position = true
+		elif typeof(ghost_variant) == TYPE_STRING:
+			has_ghost_position = not String(ghost_variant).strip_edges().is_empty()
+		if has_ghost_position:
+			count += 1
+	return count
 
 
 func get_mission_first_move_execution_feedback_snapshot() -> Dictionary:

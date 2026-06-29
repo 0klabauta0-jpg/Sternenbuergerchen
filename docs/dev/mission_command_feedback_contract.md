@@ -105,6 +105,9 @@ TASK_565 nutzt einen echten nicht-headless Viewport-Readback aus TASK_562 als be
 ## Frontier-Probe-Multiplayer-F6-Hover-Panel-Polish
 TASK_566 macht aus dem echten TASK_565-F6-Befund einen kleinen Hover-/Panel-Polish. Der sichtbare Mission-Teamchip darf nur kompakte Owner-/Spawn-Tokens zeigen, damit #18 Mission Control nicht unruhig umbricht; die vollstaendige Erklaerung muss im Tooltip und im read-only Snapshot bleiben. `get_frontier_probe_multiplayer_f6_hover_panel_polish_snapshot()` darf Teamchip-Hover, sichtbare Textlaenge, Tooltip-Volltext, Panel-Bounds und Bottom-HUD-Weltverdeckung pruefen, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern. Der naechste Lesbarkeitsschritt ist TASK_567 fuer First-Move-/Threat-Preview.
 
+## Frontier-Probe-First-Move-Threat-Preview-Readability
+`get_frontier_probe_first_move_threat_preview_readability_snapshot()` ist der Headless-Pruefpunkt fuer TASK_567. Der Snapshot darf nur den bestehenden TASK_540-First-Move-Snapshot, Waypoint-Intent-Preview, Command-Feedback und `TerrainMap3DView.get_render_snapshot()` zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Kontakte erzeugen, kein GO ausfuehren und keine Command-Queue mutieren. Erwartete Lesbarkeit: Vor `GO` ist ein Risk-State (`safe`, `risky`, `suicidal` oder `unknown`) sichtbar, der kurze HUD-/Order-Text nennt Risiko plus ETA/Distanz, `unknown` hat einen erklaerten Grund, und Primary3D meldet Ghost-/Path-Preview sowie vorhandene Threat-Line-Zaehler.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
