@@ -52,8 +52,8 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(report_text.contains("TASK_621 Host Client Multiplayer Feel Review Bundle"), "Rolling report tracks TASK_621")
 	_assert(report_text.contains("TASK_622 - Host Client Command Authority Live Interaction Review"), "Rolling report advances to TASK_622 after TASK_621")
 	_assert(handbook_text.contains("TASK_621 Review-Bundle"), "Status handbook tracks TASK_621 bundle")
-	_assert(handbook_text.contains('current_task: "TASK_624 - Host Client Live Input Feedback Review"'), "Status handbook current task advances beyond TASK_621")
-	_assert(handbook_text.contains('latest_completed_task: "TASK_624 - Host Client Live Input Feedback Review"'), "Status handbook latest task advances beyond TASK_621")
+	_assert(handbook_text.contains('current_task: "TASK_625 - Host Client Visible Reject Feedback Polish"'), "Status handbook current task advances beyond TASK_621")
+	_assert(handbook_text.contains('latest_completed_task: "TASK_625 - Host Client Visible Reject Feedback Polish"'), "Status handbook latest task advances beyond TASK_621")
 	_test_report_export_fields(report_text, handbook_text)
 
 
