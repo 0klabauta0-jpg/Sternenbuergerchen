@@ -112,11 +112,12 @@ func _test_mission_hud_renders_team_chip_label() -> void:
 		_assert(String(snapshot.get("status_text", "")).contains("spawn_bravo"), "Mission HUD status names Bravo spawn")
 	if controller != null and controller.has_method("get_command_feedback_snapshot"):
 		var command_snapshot: Dictionary = Dictionary(controller.call("get_command_feedback_snapshot"))
-		_assert(String(command_snapshot.get("mission_team_chip_text", "")).contains("Peer 2"), "Command snapshot exposes mission team chip label text")
+		_assert(String(command_snapshot.get("mission_team_chip_text", "")).contains("P2"), "Command snapshot exposes compact mission team chip label text")
 		_assert(Dictionary(command_snapshot.get("mission_team_chip", {})).has("chips"), "Command snapshot exposes mission team chip data")
 	if label != null:
 		_assert(label.text.contains("Alpha") and label.text.contains("Bravo"), "Mission HUD label text names both teams")
-		_assert(label.text.contains("Host Peer 1") and label.text.contains("Peer 2"), "Mission HUD label text names both owners")
+		_assert(label.text.contains("Host") and label.text.contains("P2"), "Mission HUD label text names compact owners")
+		_assert(not label.text.contains("Host Peer 1"), "Mission HUD label keeps the long owner text in tooltip/status")
 	mission.queue_free()
 	await process_frame
 

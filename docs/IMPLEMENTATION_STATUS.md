@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_566_frontier_probe_multiplayer_f6_hover_panel_polish_pass.md`, `docs/tasks/TASK_565_frontier_probe_multiplayer_real_f6_screenshot_review_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: Der sichtbare Mission-Teamchip nutzt nun kompakte Owner-/Spawn-Tokens (`Host`, `P2`, `A-LZ`, `B-LZ`), damit #18 Mission Control im echten F6-Fenster nicht mehr unruhig ueber mehrere Zeilen bricht.
+- Stand: Tooltip und `status_text` behalten die vollstaendigen Multiplayer-Daten (`Host Peer 1`, `Peer 2`, `spawn_alpha`, `spawn_bravo`); die UI verschiebt keine Gameplay-Wahrheit.
+- Stand: `get_frontier_probe_multiplayer_f6_hover_panel_polish_snapshot()` prueft Teamchip-Hover, sichtbare Textlaenge, Tooltip-Volltext, Einzeilen-Konfiguration, Panel-Bounds und Bottom-HUD-Weltverdeckung read-only.
+- Risiken/offen: Native Tooltip-Position bleibt engine-seitig; TASK_566 prueft Hoverbarkeit und geschätzte Panel-/Weltverdeckung, ersetzt aber keinen finalen Spielgefuehl-Test.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_566_frontier_probe_multiplayer_f6_hover_panel_polish_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_560_frontier_probe_multiplayer_teamchip_tooltip_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_565_frontier_probe_multiplayer_real_f6_screenshot_review_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_567 - Frontier Probe First Move Threat Preview Readability Pass`, damit die erste Bewegungsentscheidung wieder staerker in Richtung taktischer Entscheidungsklarheit geht.
+
 ### TASK_565 - Frontier Probe Multiplayer Real F6 Screenshot Review Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_565_frontier_probe_multiplayer_real_f6_screenshot_review_pass.md`, `docs/tasks/TASK_562_frontier_probe_multiplayer_f6_visual_evidence_capture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
@@ -18,7 +28,7 @@
 - Stand: `_build_fireteam_status_text()` nutzt nun denselben Fireteam-Unit-Fallback wie die sichtbaren Member-Cards, wenn die normale Selection-Liste leer laeuft.
 - Risiken/offen: Der echte Hover-Teil bleibt manuell; TASK_565 behebt den ersten belegten Screenshot-Widerspruch und behauptet keinen abgeschlossenen Hover-Test.
 - Lokale Pruefung: `godot_console.exe --path . --script scripts/tests/task_562_frontier_probe_multiplayer_f6_visual_evidence_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_565_frontier_probe_multiplayer_real_f6_screenshot_review_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_566 - Frontier Probe Multiplayer F6 Hover And Panel Polish Pass`, damit Teamchip-Hover, Paneldichte und Weltverdeckung aus dem echten Fensterlauf gezielt weiter poliert werden.
+- Naechster Schritt: TASK_566 ist umgesetzt; danach `TASK_567 - Frontier Probe First Move Threat Preview Readability Pass`.
 
 ### TASK_564 - Frontier Probe Multiplayer Apply Visual Polish Findings
 - Status: implementiert im Arbeitsstand

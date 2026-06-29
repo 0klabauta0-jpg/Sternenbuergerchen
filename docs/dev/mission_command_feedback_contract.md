@@ -102,6 +102,9 @@ TASK_564 darf nur belegte visuelle Reibung aus TASK_562/TASK_563 anwenden. Der a
 ## Frontier-Probe-Multiplayer-Real-F6-Screenshot-Review
 TASK_565 nutzt einen echten nicht-headless Viewport-Readback aus TASK_562 als belegbaren F6-Sichtbefund. Der Screenshot darf UI-Widersprueche, Paneldichte und Hover-Kandidaten fuer den laufenden HTML-Zwischenbericht markieren, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern. Der belegte Fix ist der #17-Selected-Fireteam-Widerspruch: Statuszeile und sichtbare Member-Cards muessen denselben read-only Fireteam-Unit-Fallback verwenden, damit bei sichtbaren Karten nicht `keine Einheiten aktiv` steht. Der echte Hover-/Panel-Polish bleibt ein eigener TASK_566-Follow-up und wird durch TASK_565 nicht als abgeschlossen behauptet.
 
+## Frontier-Probe-Multiplayer-F6-Hover-Panel-Polish
+TASK_566 macht aus dem echten TASK_565-F6-Befund einen kleinen Hover-/Panel-Polish. Der sichtbare Mission-Teamchip darf nur kompakte Owner-/Spawn-Tokens zeigen, damit #18 Mission Control nicht unruhig umbricht; die vollstaendige Erklaerung muss im Tooltip und im read-only Snapshot bleiben. `get_frontier_probe_multiplayer_f6_hover_panel_polish_snapshot()` darf Teamchip-Hover, sichtbare Textlaenge, Tooltip-Volltext, Panel-Bounds und Bottom-HUD-Weltverdeckung pruefen, aber keine Runtime-, Peer-, Objective-, Cargo-, Combat-, Command- oder Gameplay-Wahrheit speichern. Der naechste Lesbarkeitsschritt ist TASK_567 fuer First-Move-/Threat-Preview.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -6880,7 +6880,8 @@ func _ensure_mission_team_chip_label() -> void:
 		return
 	label = Label.new()
 	label.name = "MissionTeamChipLabel"
-	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = true
 	label.add_theme_font_size_override("font_size", 10)
 	label.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0, 1.0))
 	label.add_theme_color_override("font_shadow_color", Color(0.02, 0.05, 0.07, 0.8))
@@ -6890,6 +6891,7 @@ func _ensure_mission_team_chip_label() -> void:
 	label.mouse_default_cursor_shape = Control.CURSOR_HELP
 	label.set_meta("mission_team_chip_tooltip_style_id", MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID)
 	label.set_meta("mission_team_chip_tooltip_task", "TASK_560")
+	label.set_meta("mission_team_chip_panel_polish_task", "TASK_566")
 	strategic_vbox.add_child(label)
 
 
@@ -6899,11 +6901,14 @@ func _refresh_mission_team_chip_label() -> void:
 		return
 	var snapshot: Dictionary = get_mission_team_chip_snapshot()
 	label.text = String(snapshot.get("compact_status_text", snapshot.get("status_text", "Teams: not configured")))
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = true
 	label.tooltip_text = String(snapshot.get("tooltip_text", snapshot.get("status_text", ""))).strip_edges()
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
 	label.mouse_default_cursor_shape = Control.CURSOR_HELP
 	label.set_meta("mission_team_chip_tooltip_style_id", MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID)
 	label.set_meta("mission_team_chip_tooltip_task", "TASK_560")
+	label.set_meta("mission_team_chip_panel_polish_task", "TASK_566")
 
 
 func get_mission_team_chip_snapshot() -> Dictionary:
@@ -13311,6 +13316,144 @@ func get_frontier_probe_multiplayer_teamchip_tooltip_snapshot() -> Dictionary:
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
 	}
+
+
+func get_frontier_probe_multiplayer_f6_hover_panel_polish_snapshot() -> Dictionary:
+	var tooltip_snapshot: Dictionary = get_frontier_probe_multiplayer_teamchip_tooltip_snapshot()
+	var readability_snapshot: Dictionary = Dictionary(tooltip_snapshot.get("readability_snapshot", get_frontier_probe_multiplayer_f6_readability_snapshot()))
+	var command_snapshot: Dictionary = get_command_feedback_snapshot()
+	var team_chip_label := get_node_or_null(MISSION_TEAM_CHIP_LABEL_PATH) as Label
+	var command_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel") as Control
+	var fireteam_panel := get_node_or_null(FIRETEAM_PANEL_PATH) as Control
+	var strategic_panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control
+	var viewport_size: Vector2 = _get_current_viewport_size()
+	var viewport_rect: Rect2 = Rect2(Vector2.ZERO, viewport_size)
+	var team_chip_rect: Rect2 = _get_control_global_rect_or_empty(team_chip_label)
+	var command_panel_rect: Rect2 = _get_control_global_rect_or_empty(command_panel)
+	var fireteam_panel_rect: Rect2 = _get_control_global_rect_or_empty(fireteam_panel)
+	var strategic_panel_rect: Rect2 = _get_control_global_rect_or_empty(strategic_panel)
+	var bottom_hud_rect: Rect2 = _merge_non_empty_rects([command_panel_rect, fireteam_panel_rect, strategic_panel_rect])
+	var compact_text: String = String(command_snapshot.get("mission_team_chip_text", "")).strip_edges()
+	var tooltip_text: String = String(command_snapshot.get("mission_team_chip_tooltip_text", "")).strip_edges()
+	var estimated_text_width: float = float(compact_text.length() * 6 + 12)
+	var bottom_hud_occlusion_ratio: float = 0.0
+	if viewport_size.y > 0.0 and bottom_hud_rect.size.y > 0.0:
+		bottom_hud_occlusion_ratio = bottom_hud_rect.size.y / viewport_size.y
+	var panel_polish_task: String = ""
+	var autowrap_mode: int = -1
+	var clip_text: bool = false
+	if team_chip_label != null:
+		panel_polish_task = String(team_chip_label.get_meta("mission_team_chip_panel_polish_task", ""))
+		autowrap_mode = int(team_chip_label.autowrap_mode)
+		clip_text = bool(team_chip_label.clip_text)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"teamchip_tooltip_gate_passes",
+			String(tooltip_snapshot.get("gate", "")) == "pass",
+			"TASK_560 hover tooltip remains green before panel polish is evaluated."
+		),
+		_build_mission_first_move_readability_check(
+			"visible_teamchip_line_is_short",
+			not compact_text.is_empty()
+				and compact_text.length() <= 56
+				and compact_text.contains("[A]")
+				and compact_text.contains("[B]")
+				and compact_text.contains("Host")
+				and compact_text.contains("P2")
+				and compact_text.contains("A-LZ")
+				and compact_text.contains("B-LZ")
+				and not compact_text.contains("Host Peer 1"),
+			"Visible Teamchip line uses compact owner/spawn tokens instead of repeating the full tooltip text."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltip_keeps_full_multiplayer_context",
+			tooltip_text.contains("Host Peer 1")
+				and tooltip_text.contains("Peer 2")
+				and tooltip_text.contains("spawn_alpha")
+				and tooltip_text.contains("spawn_bravo")
+				and tooltip_text.length() > compact_text.length(),
+			"Tooltip keeps the full Host/Peer/spawn context hidden behind hover."
+		),
+		_build_mission_first_move_readability_check(
+			"teamchip_single_line_panel_fit",
+			team_chip_label != null
+				and autowrap_mode == int(TextServer.AUTOWRAP_OFF)
+				and clip_text
+				and strategic_panel_rect.size.x > 0.0
+				and estimated_text_width <= strategic_panel_rect.size.x * 0.92,
+			"Mission Teamchip is short enough for the #18 panel and configured as a one-line clipped hint."
+		),
+		_build_mission_first_move_readability_check(
+			"bottom_panels_leave_world_readable",
+			bottom_hud_rect.size.y > 0.0
+				and bottom_hud_occlusion_ratio <= 0.30
+				and bottom_hud_rect.position.y >= viewport_size.y * 0.68
+				and _rect_inside_rect_with_margin(viewport_rect, bottom_hud_rect, 0.0),
+			"Bottom HUD panels stay in the lower screen band and leave the tactical world readable."
+		),
+		_build_mission_first_move_readability_check(
+			"critical_panel_bounds_stay_green",
+			_snapshot_check_passed(readability_snapshot, "critical_panels_inside_fullhd_bounds")
+				and _snapshot_check_passed(readability_snapshot, "team_chip_not_overlapping_selected_fireteam_panel"),
+			"Existing F6 readability bounds stay green after the compact Teamchip polish."
+		),
+		_build_mission_first_move_readability_check(
+			"task566_style_tagged",
+			panel_polish_task == "TASK_566",
+			"Mission Teamchip label carries a stable TASK_566 marker for hover/panel polish audits."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(tooltip_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(readability_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Hover/panel polish reads existing HUD snapshots without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_566",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"mission_team_chip_text": compact_text,
+		"mission_team_chip_tooltip_text": tooltip_text,
+		"mission_team_chip_text_length": compact_text.length(),
+		"mission_team_chip_tooltip_length": tooltip_text.length(),
+		"mission_team_chip_estimated_text_width": estimated_text_width,
+		"mission_team_chip_autowrap_mode": autowrap_mode,
+		"mission_team_chip_clip_text": clip_text,
+		"mission_team_chip_panel_polish_task": panel_polish_task,
+		"mission_team_chip_rect": _rect_to_audit_dictionary(team_chip_rect),
+		"command_panel_rect": _rect_to_audit_dictionary(command_panel_rect),
+		"fireteam_panel_rect": _rect_to_audit_dictionary(fireteam_panel_rect),
+		"strategic_panel_rect": _rect_to_audit_dictionary(strategic_panel_rect),
+		"bottom_hud_rect": _rect_to_audit_dictionary(bottom_hud_rect),
+		"bottom_hud_occlusion_ratio": bottom_hud_occlusion_ratio,
+		"tooltip_snapshot": tooltip_snapshot,
+		"readability_snapshot": readability_snapshot,
+		"command_feedback": command_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _merge_non_empty_rects(rects: Array) -> Rect2:
+	var merged := Rect2()
+	var has_rect: bool = false
+	for rect_variant in rects:
+		var rect: Rect2 = rect_variant
+		if rect.size == Vector2.ZERO:
+			continue
+		if not has_rect:
+			merged = rect
+			has_rect = true
+		else:
+			merged = merged.merge(rect)
+	return merged
 
 
 func _snapshot_check_passed(snapshot: Dictionary, check_id: String) -> bool:
