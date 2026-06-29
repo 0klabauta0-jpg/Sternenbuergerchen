@@ -48,6 +48,9 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Combat-HUD-Density
 `get_mission_combat_feedback_hud_density_snapshot()` ist der Headless-Pruefpunkt fuer kompaktere Combat-Feedback-Zeilen in #17 Selected Fireteam und #18 Mission Control. Der Snapshot darf nur bestehende ContactDecision-, Cover- und FireEvent-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine FireEvents, Damage-Events, Befehle oder Kontaktentscheidungen erzeugen. Erwartete Lesbarkeit: Eine kurze Zeile benennt FIRE, WAIT, NO FIRE oder CONTACT und behaelt Cover, LOS und Range als kompakte Tokens sichtbar. Die Zeile muss in Mission Control und Selected Fireteam auftauchen und innerhalb des HUD-Zeichenbudgets bleiben.
 
+## Multi-Fireteam-Combat-HUD-Consistency
+`get_multi_fireteam_combat_hud_consistency_snapshot()` ist der Headless-Pruefpunkt fuer TASK_547. Der Snapshot darf nur den bestehenden Combat-HUD-Density-Snapshot, Fireteam-Statuskarten und Mission-Dropship-Cards zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Dropship-, Combat-, Damage- oder Selection-Entscheidung erzeugen. Erwartete Lesbarkeit: mindestens zwei Fireteams bleiben als Auswahl sichtbar, mindestens zwei Dropship-Cards bleiben eindeutig, die Dropship-Payload-Fireteams passen zur Auswahl, und die kompakte Combat-Zeile erscheint weiterhin in #17 und #18.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

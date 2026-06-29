@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_547 - Multi-Fireteam Combat HUD Consistency Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_547_multi_fireteam_combat_hud_consistency_smoke.md`, `docs/tasks/TASK_546_mission_combat_feedback_hud_density_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTacticalSandboxController` expose't einen read-only `get_multi_fireteam_combat_hud_consistency_snapshot()` fuer Multi-Fireteam-Auswahl, Mission-Dropship-Cards, Fireteam-Statuskarten und die kompakte Combat-HUD-Zeile.
+- Stand: Der Smoke baut eine kontrollierte Mission mit zwei Fireteams, zwei Dropship-Cards und einem reproduzierbaren Combat-Kontext.
+- Stand: Geprueft wird, dass Mission Control und Selected Fireteam dieselbe kompakte Combat-Zeile behalten, waehrend Dropship-Payload und Fireteam-Auswahl getrennt lesbar bleiben.
+- Stand: Der Rolling-HTML-Bericht ist als laufender Zwischenbericht auf TASK_547 aktualisiert und nennt den naechsten sinnvollen Anschluss.
+- Risiken/offen: Der Task prueft Headless-Snapshots, keinen echten Netzwerk-Peer und keinen manuellen F6-/Screenshot-Sichttest.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_547_multi_fireteam_combat_hud_consistency_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_546_mission_combat_feedback_hud_density_polish.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_548 - Combat HUD Visual Detail Tooltip Pass`, damit die verdichtete HUD-Zeile bei Bedarf wieder Detailgruende zeigen kann, ohne das Panel vollzuschreiben.
+
 ### TASK_546 - Mission Combat Feedback HUD Density Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_546_mission_combat_feedback_hud_density_polish.md`, `docs/tasks/TASK_545_mission_fire_cover_integrated_flow_smoke.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -12384,6 +12384,129 @@ func get_mission_combat_feedback_hud_density_snapshot() -> Dictionary:
 	}
 
 
+func get_multi_fireteam_combat_hud_consistency_snapshot() -> Dictionary:
+	var hud_snapshot: Dictionary = get_mission_combat_feedback_hud_density_snapshot()
+	var command_feedback: Dictionary = Dictionary(hud_snapshot.get("command_feedback", get_command_feedback_snapshot()))
+	var selected_fireteam_ids: Array = _unique_strings(Array(_selected_fireteam_ids))
+	var selected_label: String = String(command_feedback.get("selected_fireteam_label", "")).strip_edges()
+	var selected_status_text: String = String(hud_snapshot.get("selected_fireteam_status_text", command_feedback.get("selected_status_text", ""))).strip_edges()
+	var mission_control_status_text: String = String(hud_snapshot.get("mission_control_status_text", command_feedback.get("mission_control_status_text", ""))).strip_edges()
+	var compact_line: String = String(hud_snapshot.get("compact_line", "")).strip_edges()
+	var mission_drop_cards: Array = _build_mission_drop_cards_snapshot()
+	var craft_ids: Array = _extract_unique_ids_from_entries(mission_drop_cards, "craft_id")
+	var boarded_fireteam_ids: Array = _extract_unique_payload_ids_from_entries(mission_drop_cards, "boarded_fireteam_ids")
+	var fireteam_status_cards: Array = get_fireteam_status_card_snapshot()
+	var visible_card_fireteam_ids: Array = _extract_unique_ids_from_entries(fireteam_status_cards, "fireteam_id")
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"multi_fireteam_selection_visible",
+			selected_fireteam_ids.size() >= 2 and not selected_label.is_empty() and not selected_status_text.is_empty(),
+			"Selected Fireteam feedback stays visible for a multi-fireteam selection."
+		),
+		_build_mission_first_move_readability_check(
+			"multi_dropship_cards_distinct",
+			craft_ids.size() >= 2 and mission_drop_cards.size() >= 2,
+			"Mission keeps at least two distinct Dropship cards."
+		),
+		_build_mission_first_move_readability_check(
+			"dropship_payload_matches_selection",
+			_array_contains_all(boarded_fireteam_ids, selected_fireteam_ids),
+			"Dropship payload fireteam IDs still match the selected multi-fireteam context."
+		),
+		_build_mission_first_move_readability_check(
+			"fireteam_cards_cover_selection",
+			_array_contains_all(visible_card_fireteam_ids, selected_fireteam_ids),
+			"Left Fireteam cards still expose every selected fireteam."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_hud_density_gate_passes",
+			String(hud_snapshot.get("gate", "")) == "pass",
+			"Underlying TASK_546 combat HUD density snapshot remains green in multi-fireteam context."
+		),
+		_build_mission_first_move_readability_check(
+			"compact_line_in_both_panels",
+			not compact_line.is_empty() and mission_control_status_text.contains(compact_line) and selected_status_text.contains(compact_line),
+			"Mission Control and Selected Fireteam both keep the same compact combat line."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(hud_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Snapshot reports multi-fireteam combat HUD consistency without mutating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_547",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"selected_fireteam_label": selected_label,
+		"selected_fireteam_status_text": selected_status_text,
+		"mission_control_status_text": mission_control_status_text,
+		"compact_line": compact_line,
+		"mission_drop_card_count": mission_drop_cards.size(),
+		"mission_drop_cards": mission_drop_cards,
+		"craft_ids": craft_ids,
+		"boarded_fireteam_ids": boarded_fireteam_ids,
+		"fireteam_status_card_count": fireteam_status_cards.size(),
+		"fireteam_status_cards": fireteam_status_cards,
+		"visible_card_fireteam_ids": visible_card_fireteam_ids,
+		"combat_hud_density": hud_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _unique_strings(values: Array) -> Array:
+	var result: Array = []
+	for value_variant in values:
+		var value: String = String(value_variant).strip_edges().to_lower()
+		if value.is_empty() or result.has(value):
+			continue
+		result.append(value)
+	result.sort()
+	return result
+
+
+func _extract_unique_ids_from_entries(entries: Array, key: String) -> Array:
+	var result: Array = []
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var value: String = String(Dictionary(entry_variant).get(key, "")).strip_edges().to_lower()
+		if value.is_empty() or result.has(value):
+			continue
+		result.append(value)
+	result.sort()
+	return result
+
+
+func _extract_unique_payload_ids_from_entries(entries: Array, key: String) -> Array:
+	var result: Array = []
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		for value_variant in Array(Dictionary(entry_variant).get(key, [])):
+			var value: String = String(value_variant).strip_edges().to_lower()
+			if value.is_empty() or result.has(value):
+				continue
+			result.append(value)
+	result.sort()
+	return result
+
+
+func _array_contains_all(source: Array, expected_values: Array) -> bool:
+	for value_variant in expected_values:
+		if not source.has(String(value_variant).strip_edges().to_lower()):
+			return false
+	return not expected_values.is_empty()
+
+
 func _build_deployed_selected_fireteam_unit_ids() -> Array:
 	var result: Array = []
 	var seen_unit_ids: Dictionary = {}
