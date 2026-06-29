@@ -235,7 +235,8 @@ git checkout -b batch/<batch-name>
 - TASK_604 - Core Loop Host Client Feel Smoke (implementiert)
 - TASK_605 - Host Client F6 Visual Review Pass (implementiert)
 - TASK_606 - Host Client F6 Visual Polish Findings (implementiert)
-- TASK_607 - Two Instance Host Client Runtime Smoke
+- TASK_607 - Two Instance Host Client Runtime Smoke (implementiert)
+- TASK_608 - Host Client Runtime Visual Capture
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

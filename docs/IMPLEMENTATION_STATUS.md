@@ -30,6 +30,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_606_host_client_f6_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_605_host_client_f6_visual_review_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_604_core_loop_host_client_feel_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_607 - Two Instance Host Client Runtime Smoke`, damit die bisher kombinierten Host/Client-Snapshots gegen einen echten Mehrinstanz-Ablauf geprueft werden.
 
+### TASK_607 - Two Instance Host Client Runtime Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_607_two_instance_host_client_runtime_smoke.md`, `docs/tasks/TASK_606_host_client_f6_visual_polish_findings.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/multiplayer_authority_command_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `scripts/tests/task_607_two_instance_host_client_runtime_smoke.gd` baut lokale ENet-Server/Client-Peers und zwei getrennte Mission-Testinstanzen fuer Host und Client auf.
+- Stand: Peer 2 darf Bravo/red serverseitig kommandieren, darf Alpha/blue nicht kommandieren und darf keine State-Mutation einschleusen.
+- Stand: Der Host baut einen Multiplayer-State-Snapshot, der Client akzeptiert ihn und beide Instanzen behalten den TASK_606-F6-Kontext gruen und read-only.
+- Risiken/offen: Der Smoke ist ein Headless-Zwei-Instanz-Test in einem Prozess plus ENet-Transportprobe. Ein echter Zwei-Fenster-/LAN-Sichttest bleibt Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_607_two_instance_host_client_runtime_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_606_host_client_f6_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_556_frontier_probe_host_client_objective_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_608 - Host Client Runtime Visual Capture`, damit der neue Runtime-Smoke als sichtbarer Host/Client-Capture reviewbar wird.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
