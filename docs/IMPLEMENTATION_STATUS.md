@@ -155,6 +155,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_618_host_client_standard_capture_crop_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_617_host_client_standard_window_layout_hardening.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_614_host_client_two_window_real_run_review.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_619 - Host Client Role Peer Badge HUD`, damit Host/Client-Fenster im Spielbild selbst unterscheidbar sind.
 
+### TASK_619 - Host Client Role Peer Badge HUD
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_619_host_client_role_peer_badge_hud.md`, `docs/tasks/TASK_618_host_client_standard_capture_crop_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `MissionTacticalSandboxController.build_review_session_identity_snapshot()` liest `--review-role`, `--peer-id` und `--team` read-only aus Review-Launchargumenten und formt daraus einen kompakten Badge wie `HOST P1 ALPHA` oder `CLIENT P2 BRAVO`.
+- Stand: `get_mission_team_chip_snapshot()`, `get_command_feedback_snapshot()` und `get_core_loop_host_client_feel_snapshot()` exportieren den Badge als read-only Session-Kontext; der Mission-Team-Chip zeigt ihn vor dem vorhandenen Team-/Ownership-Text.
+- Stand: `docs/reports/project_status_handbook_2026_06_29.html` ist ein neuer Ist-Stand-/Handbuch-Report mit Playtest-Checkliste, Bedienhinweisen, Risiken, Roadmap und lokalem JSON-Export.
+- Risiken/offen: Der Badge nutzt vorerst Review-Launchargumente. Fuer spaetere echte Multiplayer-Sessions kann eine robuste Session-/Lobby-Quelle sinnvoll sein, darf aber ebenfalls keine UI-Wahrheit werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_619_host_client_role_peer_badge_hud.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_618_host_client_standard_capture_crop_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_617_host_client_standard_window_layout_hardening.gd`, `git diff --check`.
+- Naechster Schritt: Host-/Client-Re-Capture mit TASK_619-Badge und danach echter Multiplayer-Feel-Review.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

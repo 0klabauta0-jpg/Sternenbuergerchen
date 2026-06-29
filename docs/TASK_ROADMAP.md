@@ -247,6 +247,7 @@ git checkout -b batch/<batch-name>
 - TASK_616 - Host Client Visible UI Real Run Review (implementiert)
 - TASK_617 - Host Client Standard Window Layout Hardening (implementiert)
 - TASK_618 - Host Client Standard Capture Crop Review (implementiert)
+- TASK_619 - Host Client Role Peer Badge HUD (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

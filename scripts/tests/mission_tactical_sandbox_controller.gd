@@ -86,9 +86,12 @@ const FIRETEAM_MINI_PANEL_PATH: String = "../TacticalUI/FireteamMiniPanel"
 const FIRETEAM_MINI_HEADER_LABEL_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniHeaderLabel"
 const FIRETEAM_MINI_CARDS_VBOX_PATH: String = "../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox"
 const TACTICAL_EVENT_LOG_PANEL_PATH: String = "../TacticalUI/TacticalEventLogPanel"
+const MISSION_IDENTITY_HEADER_LABEL_PATH: String = "../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityHeaderLabel"
+const MISSION_IDENTITY_BODY_LABEL_PATH: String = "../TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox/MissionIdentityBodyLabel"
 const STRATEGIC_VBOX_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox"
 const STRATEGIC_STATUS_LABEL_PATH: String = STRATEGIC_VBOX_PATH + "/StrategicStatusLabel"
 const MISSION_TEAM_CHIP_LABEL_PATH: String = STRATEGIC_VBOX_PATH + "/MissionTeamChipLabel"
+const REVIEW_SESSION_BADGE_STYLE_ID: String = "host_client_role_peer_badge_v1"
 const FIRETEAM_MINI_PANEL_Z_INDEX: int = 38
 const FIRETEAM_MINI_CARD_Z_INDEX: int = 42
 const TACTICAL_EVENT_LOG_Z_INDEX: int = 8
@@ -2444,6 +2447,7 @@ func _update_ui() -> void:
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
 	_refresh_mission_nav_timer_label()
+	_refresh_mission_identity_session_badge()
 	_refresh_mission_team_chip_label()
 	_refresh_mission_dropship_panel()
 	_refresh_tactical_event_log_panel()
@@ -7236,6 +7240,109 @@ func _refresh_mission_nav_timer_label() -> void:
 	timer_label.text = "--:--"
 
 
+func build_review_session_identity_snapshot(args: Array = []) -> Dictionary:
+	var raw_args: Array = args.duplicate()
+	var source := "provided_args"
+	if raw_args.is_empty():
+		raw_args = OS.get_cmdline_user_args()
+		source = "OS.get_cmdline_user_args"
+	var role := ""
+	var team_id := ""
+	var peer_id := 0
+	for arg_variant in raw_args:
+		var arg := String(arg_variant).strip_edges()
+		if arg.begins_with("--review-role="):
+			role = arg.substr("--review-role=".length()).strip_edges().to_lower()
+		elif arg.begins_with("--peer-id="):
+			var peer_text := arg.substr("--peer-id=".length()).strip_edges()
+			if peer_text.is_valid_int():
+				peer_id = int(peer_text)
+		elif arg.begins_with("--team="):
+			team_id = arg.substr("--team=".length()).strip_edges().to_lower()
+	var team_label := _build_review_session_team_label(team_id)
+	var display_tokens := PackedStringArray()
+	if not role.is_empty():
+		display_tokens.append(role.to_upper())
+	if peer_id > 0:
+		display_tokens.append("P%d" % peer_id)
+	if not team_label.is_empty():
+		display_tokens.append(team_label)
+	var badge_text := " ".join(display_tokens)
+	return {
+		"active": not badge_text.is_empty(),
+		"style_id": REVIEW_SESSION_BADGE_STYLE_ID,
+		"source": source,
+		"role": role,
+		"role_label": role.to_upper(),
+		"peer_id": peer_id,
+		"peer_label": "P%d" % peer_id if peer_id > 0 else "",
+		"team_id": team_id,
+		"team_label": team_label,
+		"badge_text": badge_text,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _build_review_session_team_label(team_id: String) -> String:
+	var normalized_team := team_id.strip_edges().to_lower()
+	match normalized_team:
+		"team_alpha":
+			return "ALPHA"
+		"team_bravo":
+			return "BRAVO"
+	if normalized_team.begins_with("team_"):
+		normalized_team = normalized_team.substr("team_".length())
+	return normalized_team.to_upper()
+
+
+func _get_review_session_identity_snapshot() -> Dictionary:
+	return build_review_session_identity_snapshot().duplicate(true)
+
+
+func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
+	var result := team_chip_snapshot.duplicate(true)
+	var session_snapshot: Dictionary = _get_review_session_identity_snapshot()
+	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
+	var base_text: String = String(result.get("compact_status_text", result.get("status_text", ""))).strip_edges()
+	var display_text := base_text
+	if not badge_text.is_empty():
+		display_text = badge_text if base_text.is_empty() else "%s | %s" % [badge_text, base_text]
+	var base_tooltip: String = String(result.get("tooltip_text", result.get("status_text", ""))).strip_edges()
+	var display_tooltip := base_tooltip
+	if not badge_text.is_empty():
+		var session_tooltip := "Review Session: %s" % badge_text
+		display_tooltip = session_tooltip if base_tooltip.is_empty() else "%s\n%s" % [session_tooltip, base_tooltip]
+	result["review_session"] = session_snapshot
+	result["review_session_badge_text"] = badge_text
+	result["review_session_badge_visible"] = not badge_text.is_empty()
+	result["review_session_badge_style_id"] = REVIEW_SESSION_BADGE_STYLE_ID
+	result["display_text"] = display_text
+	result["display_tooltip_text"] = display_tooltip
+	result["read_only"] = true
+	result["ui_sets_gameplay_truth"] = false
+	return result
+
+
+func _refresh_mission_identity_session_badge() -> void:
+	var session_snapshot: Dictionary = _get_review_session_identity_snapshot()
+	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
+	var header_label := get_node_or_null(MISSION_IDENTITY_HEADER_LABEL_PATH) as Label
+	if header_label != null:
+		header_label.text = "#15 LIVE TACTICAL GRID" if badge_text.is_empty() else "#15 LIVE TACTICAL GRID | %s" % badge_text
+		header_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
+		header_label.set_meta("review_session_badge_text", badge_text)
+		header_label.set_meta("review_session_badge_visible", not badge_text.is_empty())
+		header_label.set_meta("review_session_badge_task", "TASK_619")
+	var body_label := get_node_or_null(MISSION_IDENTITY_BODY_LABEL_PATH) as Label
+	if body_label != null:
+		body_label.text = "Realtime insertion feed | live fireteam deployment" if badge_text.is_empty() else "%s | Realtime insertion feed" % badge_text
+		body_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
+		body_label.set_meta("review_session_badge_text", badge_text)
+		body_label.set_meta("review_session_badge_visible", not badge_text.is_empty())
+		body_label.set_meta("review_session_badge_task", "TASK_619")
+
+
 func _ensure_mission_team_chip_label() -> void:
 	var strategic_vbox := get_node_or_null(STRATEGIC_VBOX_PATH) as VBoxContainer
 	if strategic_vbox == null:
@@ -7257,6 +7364,8 @@ func _ensure_mission_team_chip_label() -> void:
 	label.set_meta("mission_team_chip_tooltip_style_id", MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID)
 	label.set_meta("mission_team_chip_tooltip_task", "TASK_560")
 	label.set_meta("mission_team_chip_panel_polish_task", "TASK_566")
+	label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
+	label.set_meta("review_session_badge_task", "TASK_619")
 	strategic_vbox.add_child(label)
 
 
@@ -7265,20 +7374,24 @@ func _refresh_mission_team_chip_label() -> void:
 	if label == null:
 		return
 	var snapshot: Dictionary = get_mission_team_chip_snapshot()
-	label.text = String(snapshot.get("compact_status_text", snapshot.get("status_text", "Teams: not configured")))
+	label.text = String(snapshot.get("display_text", snapshot.get("compact_status_text", snapshot.get("status_text", "Teams: not configured"))))
 	label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	label.clip_text = true
-	label.tooltip_text = String(snapshot.get("tooltip_text", snapshot.get("status_text", ""))).strip_edges()
+	label.tooltip_text = String(snapshot.get("display_tooltip_text", snapshot.get("tooltip_text", snapshot.get("status_text", "")))).strip_edges()
 	label.mouse_filter = Control.MOUSE_FILTER_STOP
 	label.mouse_default_cursor_shape = Control.CURSOR_HELP
 	label.set_meta("mission_team_chip_tooltip_style_id", MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID)
 	label.set_meta("mission_team_chip_tooltip_task", "TASK_560")
 	label.set_meta("mission_team_chip_panel_polish_task", "TASK_566")
+	label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
+	label.set_meta("review_session_badge_text", String(snapshot.get("review_session_badge_text", "")))
+	label.set_meta("review_session_badge_visible", bool(snapshot.get("review_session_badge_visible", false)))
+	label.set_meta("review_session_badge_task", "TASK_619")
 
 
 func get_mission_team_chip_snapshot() -> Dictionary:
 	if _mission_team_chip_presenter == null or not _mission_team_chip_presenter.has_method("build_snapshot"):
-		return {
+		return _with_review_session_badge({
 			"configured": false,
 			"valid": false,
 			"runtime_authority": "MissionTeamChipPresenter",
@@ -7289,12 +7402,12 @@ func get_mission_team_chip_snapshot() -> Dictionary:
 			"status_text": "Teams: presenter unavailable",
 			"compact_status_text": "Teams: presenter unavailable",
 			"tooltip_text": "Mission Team Ownership\nTeams: presenter unavailable",
-		}
+		})
 	var simulation_root = get_node_or_null("../SimulationRoot")
 	var network_snapshot: Dictionary = {}
 	if simulation_root != null and simulation_root.has_method("get_network_command_contract_snapshot"):
 		network_snapshot = Dictionary(simulation_root.call("get_network_command_contract_snapshot")).duplicate(true)
-	return Dictionary(_mission_team_chip_presenter.call("build_snapshot", network_snapshot)).duplicate(true)
+	return _with_review_session_badge(Dictionary(_mission_team_chip_presenter.call("build_snapshot", network_snapshot)).duplicate(true))
 
 
 func _ensure_mission_dropship_panel() -> void:
@@ -14903,6 +15016,7 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 	var readability_snapshot: Dictionary = get_frontier_probe_multiplayer_f6_readability_snapshot()
 	var hud_density_snapshot: Dictionary = get_mission_hud_density_interaction_polish_snapshot()
 	var command_snapshot: Dictionary = get_command_feedback_snapshot()
+	var review_session_badge: Dictionary = Dictionary(command_snapshot.get("review_session_badge", {})).duplicate(true)
 	var team_chip_context: String = String(readability_snapshot.get("mission_team_chip_context_text", "")).strip_edges()
 	var mission_control_text: String = String(command_snapshot.get("mission_control_status_text", "")).strip_edges()
 	var selected_fireteam_label: String = String(command_snapshot.get("selected_fireteam_label", "")).strip_edges()
@@ -14988,6 +15102,13 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 			"Command feedback exposes the same density snapshot used by the HUD."
 		),
 		_build_mission_first_move_readability_check(
+			"review_session_badge_read_only",
+			not review_session_badge.is_empty()
+				and bool(review_session_badge.get("read_only", false))
+				and not bool(review_session_badge.get("ui_sets_gameplay_truth", true)),
+			"Host/client review session badge is exported as read-only display context."
+		),
+		_build_mission_first_move_readability_check(
 			"read_only",
 			not bool(readability_snapshot.get("ui_sets_gameplay_truth", true))
 				and not bool(hud_density_snapshot.get("ui_sets_gameplay_truth", true))
@@ -15014,6 +15135,8 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 		"mission_hud_interaction_line_length": act_line.length(),
 		"selected_fireteam_status_line_count": _count_nonempty_status_lines(selected_fireteam_text),
 		"interaction_density": interaction_density,
+		"review_session_badge": review_session_badge,
+		"review_session_badge_text": String(command_snapshot.get("review_session_badge_text", "")),
 		"readability_snapshot": readability_snapshot,
 		"hud_density_snapshot": hud_density_snapshot,
 		"command_feedback": command_snapshot,
@@ -16070,6 +16193,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var mission_hud_interaction_density: Dictionary = _build_mission_hud_interaction_density_snapshot()
+	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
@@ -16086,9 +16210,15 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"command_feedback_text": _get_label_text(command_feedback_label_path),
 		"selected_fireteam_status_label_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
 		"mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH),
+		"mission_identity_header_text": _get_label_text(MISSION_IDENTITY_HEADER_LABEL_PATH),
+		"mission_identity_body_text": _get_label_text(MISSION_IDENTITY_BODY_LABEL_PATH),
 		"mission_team_chip_text": _get_label_text(MISSION_TEAM_CHIP_LABEL_PATH),
-		"mission_team_chip": get_mission_team_chip_snapshot(),
+		"mission_team_chip": mission_team_chip_snapshot,
 		"mission_team_chip_tooltip_text": _get_label_tooltip_text(MISSION_TEAM_CHIP_LABEL_PATH),
+		"review_session_badge": Dictionary(mission_team_chip_snapshot.get("review_session", {})).duplicate(true),
+		"review_session_badge_text": String(mission_team_chip_snapshot.get("review_session_badge_text", "")),
+		"review_session_badge_visible": bool(mission_team_chip_snapshot.get("review_session_badge_visible", false)),
+		"review_session_badge_style_id": String(mission_team_chip_snapshot.get("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)),
 		"command_buttons": _build_command_control_snapshot(),
 		"command_hierarchy": get_command_hierarchy_snapshot(),
 		"planned_waypoint_count": _count_selected_phase_waypoints(),
