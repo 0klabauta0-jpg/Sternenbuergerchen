@@ -232,7 +232,8 @@ git checkout -b batch/<batch-name>
 - TASK_601 - Core Loop Manual FullHD Playtest Capture (implementiert)
 - TASK_602 - Core Loop Transition Pacing Polish (implementiert)
 - TASK_603 - Mission HUD Density Interaction Polish (implementiert)
-- TASK_604 - Core Loop Host Client Feel Smoke
+- TASK_604 - Core Loop Host Client Feel Smoke (implementiert)
+- TASK_605 - Host Client F6 Visual Review Pass
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

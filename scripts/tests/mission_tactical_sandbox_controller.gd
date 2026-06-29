@@ -14795,6 +14795,105 @@ func get_frontier_probe_multiplayer_f6_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_core_loop_host_client_feel_snapshot() -> Dictionary:
+	var readability_snapshot: Dictionary = get_frontier_probe_multiplayer_f6_readability_snapshot()
+	var hud_density_snapshot: Dictionary = get_mission_hud_density_interaction_polish_snapshot()
+	var command_snapshot: Dictionary = get_command_feedback_snapshot()
+	var team_chip_context: String = String(readability_snapshot.get("mission_team_chip_context_text", "")).strip_edges()
+	var mission_control_text: String = String(command_snapshot.get("mission_control_status_text", "")).strip_edges()
+	var selected_fireteam_text: String = "%s\n%s\n%s" % [
+		String(command_snapshot.get("selected_fireteam_label", "")).strip_edges(),
+		String(command_snapshot.get("selected_fireteam_status_label_text", "")).strip_edges(),
+		String(command_snapshot.get("selected_status_text", "")).strip_edges(),
+	]
+	var interaction_density: Dictionary = Dictionary(command_snapshot.get("mission_hud_interaction_density", {}))
+	var act_line: String = String(command_snapshot.get("mission_hud_interaction_line", hud_density_snapshot.get("mission_control_line", ""))).strip_edges()
+	if not act_line.is_empty() and not mission_control_text.contains(act_line):
+		mission_control_text = String(hud_density_snapshot.get("mission_control_status_text", mission_control_text)).strip_edges()
+	var host_client_readability_context_passes: bool = String(readability_snapshot.get("gate", "")) == "pass" \
+		or (
+			not readability_snapshot.is_empty()
+			and team_chip_context.contains("Host Peer 1")
+			and team_chip_context.contains("Peer 2")
+			and _snapshot_check_passed(readability_snapshot, "selected_fireteam_context_visible")
+		)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"mp_f6_readability_gate_passes",
+			host_client_readability_context_passes,
+			"Existing Frontier Probe multiplayer F6 ownership, team chip, mission and selection context stay green in the combined host/client feel smoke."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_hud_density_gate_passes",
+			String(hud_density_snapshot.get("gate", "")) == "pass",
+			"Mission HUD interaction density stays green in the same host/client context."
+		),
+		_build_mission_first_move_readability_check(
+			"host_client_team_context_visible",
+			team_chip_context.contains("Host Peer 1")
+				and team_chip_context.contains("Peer 2")
+				and team_chip_context.contains("spawn_alpha")
+				and team_chip_context.contains("spawn_bravo"),
+			"Team chip context keeps host, client peer and Alpha/Bravo spawn markers visible."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_keeps_act_line",
+			not act_line.is_empty()
+				and act_line.begins_with("ACT ")
+				and mission_control_text.contains(act_line),
+			"Mission Control keeps the compact ACT line visible in the multiplayer feel smoke."
+		),
+		_build_mission_first_move_readability_check(
+			"objective_cargo_roe_context_visible",
+			mission_control_text.contains("OBJ")
+				and mission_control_text.contains("CARGO")
+				and mission_control_text.contains("ROE"),
+			"Mission Control still names objective, cargo and ROE context before real client visual testing."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_context_visible",
+			_snapshot_check_passed(readability_snapshot, "selected_fireteam_context_visible")
+				and not selected_fireteam_text.strip_edges().is_empty(),
+			"Selected Fireteam panel keeps the current fireteam context visible."
+		),
+		_build_mission_first_move_readability_check(
+			"command_feedback_exports_density",
+			not interaction_density.is_empty()
+				and String(interaction_density.get("source", "")) == "objective_cargo_contact_roe_combat_snapshots"
+				and not act_line.is_empty(),
+			"Command feedback exposes the same density snapshot used by the HUD."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(readability_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(hud_density_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(command_snapshot.get("ui_sets_gameplay_truth", false)),
+			"Combined smoke reads existing runtime and HUD snapshots without mutating gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_604",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"mission_team_chip_context_text": team_chip_context,
+		"mission_control_status_text": mission_control_text,
+		"selected_fireteam_status_text": selected_fireteam_text.strip_edges(),
+		"mission_hud_interaction_line": act_line,
+		"interaction_density": interaction_density,
+		"readability_snapshot": readability_snapshot,
+		"hud_density_snapshot": hud_density_snapshot,
+		"command_feedback": command_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func get_frontier_probe_multiplayer_teamchip_tooltip_snapshot() -> Dictionary:
 	var readability_snapshot: Dictionary = get_frontier_probe_multiplayer_f6_readability_snapshot()
 	var command_snapshot: Dictionary = get_command_feedback_snapshot()

@@ -279,6 +279,11 @@ TASK_603 verdichtet vorhandene Mission-Control-Interaktionsdaten in eine kompakt
 
 Erwartete Struktur: `get_mission_hud_density_interaction_polish_snapshot()` enthaelt `task_id = TASK_603`, `interaction_density`, `mission_control_line`, `mission_control_status_text`, `combat_hud_density`, `command_feedback`, `read_only = true` und `ui_sets_gameplay_truth = false`. `interaction_density` enthaelt `source = objective_cargo_contact_roe_combat_snapshots`, `mission_control_line`, `visible_line_count`, `max_visible_line_count`, `source_line_count`, `line_char_limit`, `line_within_limit`, `objective_line`, `cargo_line`, `combat_line`, `contact_line`, `fire_rule_text`, `contains_contact_or_combat`, `contains_roe`, `contains_suppress`, `contains_objective` und `contains_cargo`. `get_command_feedback_snapshot()` muss dieselben Daten unter `mission_hud_interaction_density` und `mission_hud_interaction_line` exportieren.
 
+## Core-Loop-Host-Client-Feel-Smoke
+TASK_604 fasst vorhandene Multiplayer-F6-, Teamchip-/Ownership- und Mission-HUD-Density-Daten zu einem read-only Host/Client-Gefuehl-Snapshot zusammen. Der Snapshot ist Diagnose und Berichtsfutter; echtes Networking, Objective-, Cargo-, Combat- oder UI-State bleiben bei den vorhandenen autoritativen Systemen.
+
+Erwartete Struktur: `get_core_loop_host_client_feel_snapshot()` enthaelt `task_id = TASK_604`, `mission_team_chip_context_text`, `mission_control_status_text`, `selected_fireteam_status_text`, `mission_hud_interaction_line`, `interaction_density`, `readability_snapshot`, `hud_density_snapshot`, `command_feedback`, `read_only = true` und `ui_sets_gameplay_truth = false`. Die Checks muessen mindestens `mp_f6_readability_gate_passes`, `mission_hud_density_gate_passes`, `host_client_team_context_visible`, `mission_control_keeps_act_line`, `objective_cargo_roe_context_visible`, `selected_fireteam_context_visible`, `command_feedback_exports_density` und `read_only` enthalten. TASK_604 darf nur bestehende Snapshots kombinieren und keine Commands enqueuen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_603 auf <code>task/mission-hud-density-interaction-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-29 mit TASK_604 auf <code>task/core-loop-host-client-feel-smoke</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -273,7 +273,8 @@
       <span class="pill good">TASK_601 FullHD-Capture</span>
       <span class="pill good">TASK_602 Pacing-Polish</span>
       <span class="pill good">TASK_603 HUD-Dichte</span>
-      <span class="pill warn">TASK_604 Host/Client offen</span>
+      <span class="pill good">TASK_604 Host/Client-Smoke</span>
+      <span class="pill warn">TASK_605 Sichttest offen</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -511,17 +512,18 @@
             <div class="metric"><strong>TASK_601</strong><span>umgesetzt: Core-Loop-FullHD-Capture mit PNG/Manifest und manueller Review-Flaeche</span></div>
             <div class="metric"><strong>TASK_602</strong><span>umgesetzt: Transition-Pacing-Budgets mit Zielzeit, Toleranz und Schweregrad</span></div>
             <div class="metric"><strong>TASK_603</strong><span>umgesetzt: Mission-Control-Interaction-Stack fuer Objective, Cargo, ROE und Contact/Combat</span></div>
-            <div class="metric"><strong>TASK_604</strong><span>naechster sinnvoller Slice: Core-Loop Host/Client Feel Smoke</span></div>
+            <div class="metric"><strong>TASK_604</strong><span>umgesetzt: Core-Loop Host/Client Feel Smoke als kombinierter Read-only-Snapshot</span></div>
+            <div class="metric"><strong>TASK_605</strong><span>naechster sinnvoller Slice: echter Host/Client-F6-Sichtreview</span></div>
             <div class="metric"><strong>Report</strong><span>wird als laufende HTML-Workbench gepflegt: sichtbar, exportierbar, ohne Runtime-Wahrheit</span></div>
           </div>
           <div class="table-wrap" style="margin-top:12px">
             <table>
               <thead><tr><th>Jetzt wichtig</th><th>Stand</th><th>Offen halten</th></tr></thead>
               <tbody>
-                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. SUP ist jetzt zusaetzlich als deduplizierter AAR-/Debug-Wert messbar, als kompaktes Report-Panel lesbar, in einer Mini-AAR-Schale mit Fire-/Friendly-Fire-/Statusmetriken zusammengefuehrt, als kleine Debrief-Screen-Struktur praesentierbar und per Debrief->Homebase-Handoff wieder in den Meta-Loop zurueckfuehrbar. TASK_590 bereinigt den sichtbaren Debrief-AAR-Praefix, TASK_591 macht den echten Spielerblick darauf exportierbar, TASK_592 zeigt Skillentwicklung als read-only Vorschau, TASK_593 zeigt echte Resolver-Awards als `Skill Awards` im Debrief, TASK_594 macht diese Deltas im Character-Sheet auffindbar, TASK_595 hebt sie dort als `MISSION GAIN`-Row hervor, TASK_596 macht den Spielerblick darauf exportierbar, TASK_597 erzeugt reproduzierbare Evidence dafuer, TASK_598 macht dieses Board direkt lesbar, TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets und TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment.</td><td>Naechster Schritt: TASK_604 soll Host/Client-Gefuehl ueber denselben Core Loop pruefen.</td></tr>
+                <tr><td>Spielbarer Kern</td><td>Homebase -> Briefing -> Dropship -> Insertion -> erste Bewegung -> Kontakt -> Fire-/Cover-/ROE-/SUP-Outcome-Feedback ist in kleinen Smokes abgesichert. SUP ist jetzt zusaetzlich als deduplizierter AAR-/Debug-Wert messbar, als kompaktes Report-Panel lesbar, in einer Mini-AAR-Schale mit Fire-/Friendly-Fire-/Statusmetriken zusammengefuehrt, als kleine Debrief-Screen-Struktur praesentierbar und per Debrief->Homebase-Handoff wieder in den Meta-Loop zurueckfuehrbar. TASK_599 fasst die Kette als Composite-Evidence-Manifest zusammen, TASK_600 priorisiert daraus Flow-Polish-Findings, TASK_601 stellt den FullHD-Capture-Ort bereit, TASK_602 definiert konkrete Transition-Budgets, TASK_603 verdichtet Objective/Cargo/ROE/Contact im Mission-Control-Interaktionsmoment und TASK_604 prueft denselben Kontext als Host/Client-Feel-Smoke.</td><td>Naechster Schritt: TASK_605 soll das kombinierte Host/Client-Gefuehl als echtes F6-Spielbild pruefen.</td></tr>
                 <tr><td>Technische Leitplanke</td><td>UI/HTML/Overlays bleiben read-only; Gameplay-Wahrheit bleibt bei Runtime, Contracts, Registries und `SimulationRoot`.</td><td>Keine zweite Combat-Wahrheit im Bericht, HUD oder Snapshot erzeugen.</td></tr>
                 <tr><td>Reibung</td><td>Legacy-Driver und grosse Test-/Mission-Skripte sind weiter vorhanden, aber die letzten Tasks schneiden gezielt kleine sichtbare Grenzen heraus.</td><td>Nur dann schneiden, wenn es Spielbarkeit, Debugbarkeit oder Performance konkret verbessert.</td></tr>
-                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_603 ist hier bewusst mitgepflegt, damit der Mission-HUD-Dichte-Schnitt und der naechste Host/Client-Anschluss nicht nur im Verlauf stecken.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
+                <tr><td>Berichtspflege</td><td>Diese Seite ist der Zwischenstand: erledigte Tasks, offene Risiken, lokale Checks, aktuelle Git-Basis und naechster Anschluss. TASK_604 ist hier bewusst mitgepflegt, damit der Host/Client-Schnitt und der naechste visuelle Review nicht nur im Verlauf stecken.</td><td>Nach jedem groesseren Gameplay-, UI-, Export-, Capture- oder Performance-Slice kurz aktualisieren und JSON-Export nutzbar halten.</td></tr>
               </tbody>
             </table>
           </div>
@@ -565,6 +567,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_601_done"> TASK_601 Core-Loop-Manual-FullHD-Playtest-Capture ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_602_done"> TASK_602 Core-Loop-Transition-Pacing-Polish ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_603_done"> TASK_603 Mission-HUD-Density-Interaction-Polish ist im Arbeitsstand implementiert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_604_done"> TASK_604 Core-Loop-Host-Client-Feel-Smoke ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_586_done"> TASK_586 Debrief-Return-To-Homebase-Handoff ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_542_done"> TASK_542 First-Contact-Readability ist im Arbeitsstand implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="worklog.task_543_done"> TASK_543 First-Engagement-Feedback ist im Arbeitsstand implementiert</label>
@@ -634,8 +637,8 @@
             <table>
               <thead><tr><th>Status</th><th>Inhalt</th><th>Wird fortgeschrieben bei</th></tr></thead>
               <tbody>
-                <tr><td>Aktueller Stand</td><td>TASK_603 ist der aktuelle Arbeitsstand: Mission Control verdichtet Objective, Cargo, ROE und Contact/Combat jetzt als kompakte <code>ACT</code>-Zeile.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
-                <tr><td>Naechster Schritt</td><td>TASK_604 sollte das Core-Loop-Host/Client-Gefuehl pruefen, damit die angenehme lokale HUD-Dichte auch im Multiplayer-Kontext belastbar bleibt.</td><td>Wenn der naechste Flow-Sichttest konkrete Nacharbeit zeigt.</td></tr>
+                <tr><td>Aktueller Stand</td><td>TASK_604 ist der aktuelle Arbeitsstand: Der Core Loop wird im Host/Client-Gefuehl als kombinierter read-only Snapshot aus MP-F6-Readability, Teamchip/Ownership und Mission-HUD-Dichte geprueft.</td><td>Nach jedem neuen Task, Merge, Exportcheck oder Playtestbefund.</td></tr>
+                <tr><td>Naechster Schritt</td><td>TASK_605 sollte das Host/Client-F6-Spielbild einmal echt visuell pruefen, damit Teamchip, ACT-Zeile, Selected Fireteam und Objective/Cargo nicht nur headless gruen sind.</td><td>Wenn der naechste Flow-Sichttest konkrete Nacharbeit zeigt.</td></tr>
                 <tr><td>Noch nicht bauen</td><td>Kein grosses Ammo-, Suppression- oder AAR-System, solange der kleine Intent-/Outcome-Pfad nicht sauber gelesen und getestet ist.</td><td>Wenn spaeter echte Suppression-Wirkung, Munitionsverbrauch oder AAR-Messwerte als eigener Task beginnen.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_562 erzeugt eine reproduzierbare MP-F6-Bildbasis unter <code>tmp/frontier_probe_mp_f6_visual_evidence.png</code> plus Manifest; im Headless-Dummy als Evidence-Board aus Snapshot-Rects.</td><td>Wenn TASK_565 aus echtem MP-F6-Export konkrete Gameplay-HUD-Polish-Aenderungen ableitet.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_563 macht diese lokale Evidence direkt im HTML-Zwischenbericht sichtbar und exportiert die Artefaktpfade sowie Readback-/Evidence-Board-Flags.</td><td>Wenn neue Capture-Artefakte, manuelle Sichtnotizen oder echte Host/Client-F6-Screenshots hinzukommen.</td></tr>
@@ -679,7 +682,8 @@
                 <tr><td>Erledigt</td><td>TASK_601 - Core Loop Manual FullHD Playtest Capture. Das Capture-Artefakt unter <code>tmp/core_loop_manual_fullhd_playtest_capture.png</code> plus Manifest haelt Route, Pflichtchecks und Manual-Review-Status fest.</td><td>Wenn echte Flow-Polish-Fixes aus TASK_601-Findings starten.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_602 - Core Loop Transition Pacing Polish. Das Manifest unter <code>tmp/core_loop_transition_pacing_polish.json</code> definiert Zielbudgets fuer sechs Core-Loop-Uebergaenge.</td><td>Wenn echte Flow-Polish-Fixes aus TASK_602-Findings starten.</td></tr>
                 <tr><td>Erledigt</td><td>TASK_603 - Mission HUD Density Interaction Polish. Mission Control zeigt Objective/Cargo/ROE/Contact jetzt kompakt als <code>ACT</code>-Stack.</td><td>Wenn echte F6-Findings weitere HUD-Laengen- oder Segment-Tuning verlangen.</td></tr>
-                <tr><td>Naechst</td><td>TASK_604 - Core Loop Host Client Feel Smoke. Ziel: denselben angenehmen Core-Loop im Host/Client-Kontext pruefen.</td><td>Wenn der naechste integrierte Flow-Test konkrete Nacharbeit zeigt.</td></tr>
+                <tr><td>Erledigt</td><td>TASK_604 - Core Loop Host Client Feel Smoke. Ziel: derselbe angenehme Core-Loop wird im Host/Client-Kontext als read-only Kombinationssnapshot geprueft.</td><td>Wenn der naechste integrierte Flow-Test konkrete Nacharbeit zeigt.</td></tr>
+                <tr><td>Naechst</td><td>TASK_605 - Host Client F6 Visual Review Pass. Ziel: echtes F6-Spielbild fuer Host/Client-Lesbarkeit, Teamchip, ACT-Zeile und Selected-Fireteam-Kontext pruefen.</td><td>Wenn der naechste sichtbare Multiplayer-Test konkrete Nacharbeit zeigt.</td></tr>
                 <tr><td>Offen</td><td>Der finale menschliche Spielgefuehl-Test bleibt offen. Die naechste manuelle Runde sollte pruefen, ob Teamchip-Hover, erste Move-Preview, Kontaktlinien und Paneldichte zusammen angenehm wirken.</td><td>Wenn ein manueller FullHD-Sichttest mit Screenshot oder Notizen gemacht wurde.</td></tr>
                 <tr><td>Berichtspflege</td><td>Dieser HTML-Report bleibt die laufende Lagekarte: erledigte Slices, naechste Tasks, Risiken, lokale Checks und freie Notizen gehen in den JSON-Export.</td><td>Nach jedem groesseren Gameplay-, UI-, Export- oder Performance-Slice.</td></tr>
               </tbody>
@@ -774,7 +778,8 @@
                 <tr><td>FullHD-Gesamtfluss nicht menschlich bestaetigt</td><td>P0</td><td>TASK_601 - Core Loop Manual FullHD Playtest Capture</td></tr>
                 <tr><td>Homebase-Dropship-Mission-Debrief-Pacing nur indirekt belegt</td><td>P1</td><td>TASK_602 - Core Loop Transition Pacing Polish</td></tr>
                 <tr><td>Mission-HUD-Dichte im Interaktionsmoment verdichtet</td><td>Done</td><td>TASK_603 - Mission HUD Density Interaction Polish</td></tr>
-                <tr><td>Host/Client-Gefuehl ueber den Core Loop offen</td><td>P2</td><td>TASK_604 - Core Loop Host Client Feel Smoke</td></tr>
+                <tr><td>Host/Client-Gefuehl ueber den Core Loop als Snapshot geprueft</td><td>Done</td><td>TASK_604 - Core Loop Host Client Feel Smoke</td></tr>
+                <tr><td>Echtes Host/Client-F6-Spielbild offen</td><td>P2</td><td>TASK_605 - Host Client F6 Visual Review Pass</td></tr>
               </tbody>
             </table>
           </div>
@@ -914,6 +919,45 @@
           </div>
           <label style="display:block;margin-top:14px;">HUD-Dichte-Notiz
             <textarea data-export-key="mission_hud_density_manual.notes" placeholder="Ist die ACT-Zeile im echten Missionsbild angenehm, zu lang oder noch zu kryptisch?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
+          <h2>TASK_604 Core-Loop Host Client Feel Smoke</h2>
+          <p>Dieser Block haelt fest, ob die lokalen Core-Loop-Verbesserungen im Host/Client-Gefuehl noch zusammenpassen: Teamchip/Ownership, Mission-Control-<code>ACT</code>-Zeile, Objective/Cargo/ROE und Selected Fireteam werden zusammen read-only geprueft.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Artefakt / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Snapshot</td><td><input readonly value="get_core_loop_host_client_feel_snapshot" data-export-key="host_client_feel.snapshot"></td><td>Read-only TASK_604-Gate im Mission-Controller.</td></tr>
+                <tr><td>Quellen</td><td><input readonly value="TASK_557 MP-F6, TASK_603 HUD-Dichte, CommandFeedback" data-export-key="host_client_feel.sources"></td><td>Nur bestehende Snapshots werden kombiniert.</td></tr>
+                <tr><td>Team-Kontext</td><td><input readonly value="Host Peer 1, Peer 2, spawn_alpha, spawn_bravo" data-export-key="host_client_feel.team_context"></td><td>Host/Client-Ownership bleibt sichtbar.</td></tr>
+                <tr><td>Mission-Control-Line</td><td><input readonly value="ACT + OBJ + CARGO + ROE" data-export-key="host_client_feel.line_shape"></td><td>Die kompakte TASK_603-Zeile bleibt im MP-Kontext erhalten.</td></tr>
+                <tr><td>Command Feedback</td><td><input readonly value="mission_hud_interaction_density" data-export-key="host_client_feel.command_feedback_key"></td><td>HUD-Dichte bleibt exportierbar.</td></tr>
+                <tr><td>Regressionen</td><td><input readonly value="TASK_556, TASK_557, TASK_603" data-export-key="host_client_feel.regression_tests"></td><td>Handoff, MP-F6-Lesbarkeit und HUD-Dichte bleiben angebunden.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_605 - Host Client F6 Visual Review Pass" data-export-key="host_client_feel.recommended_next_task"></td><td>Nach Headless-Smoke kommt der echte sichtbare Host/Client-F6-Blick.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Manual Check fuer TASK_605</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Teamchip nennt Host/Peer und ueberdeckt nichts Wichtiges</td><td><label class="checkline"><input type="checkbox" data-export-key="host_client_feel_manual.teamchip_checked"> geprueft</label></td></tr>
+                <tr><td>ACT-Zeile bleibt im Host/Client-Bild lesbar</td><td><label class="checkline"><input type="checkbox" data-export-key="host_client_feel_manual.act_line_checked"> geprueft</label></td></tr>
+                <tr><td>Selected Fireteam passt zu sichtbaren Cards/Einheiten</td><td><label class="checkline"><input type="checkbox" data-export-key="host_client_feel_manual.selected_fireteam_checked"> geprueft</label></td></tr>
+                <tr><td>Objective/Cargo/ROE sind ohne Suchen auffindbar</td><td><label class="checkline"><input type="checkbox" data-export-key="host_client_feel_manual.objective_cargo_roe_checked"> geprueft</label></td></tr>
+                <tr><td>Keine neue Gameplay-Wahrheit im HUD</td><td><label class="checkline"><input type="checkbox" data-export-key="host_client_feel_manual.read_only_checked"> geprueft</label></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="choice-row" data-choice-group="host_client_feel_manual.next_priority">
+            <button class="choice active" type="button" data-choice-value="visual_review">TASK_605 Sichttest</button>
+            <button class="choice" type="button" data-choice-value="teamchip">Teamchip</button>
+            <button class="choice" type="button" data-choice-value="act_line">ACT-Line</button>
+            <button class="choice" type="button" data-choice-value="selected_fireteam">Selected Fireteam</button>
+          </div>
+          <label style="display:block;margin-top:14px;">Host/Client-Notiz
+            <textarea data-export-key="host_client_feel_manual.notes" placeholder="Was wirkt im Host/Client-F6-Bild unklar, zu voll, widerspruechlich oder noch nicht spielbereit?"></textarea>
           </label>
         </article>
         <article class="card full">
@@ -1263,6 +1307,7 @@
                 <tr><td><code>task_601_core_loop_manual_fullhd_playtest_capture.gd</code></td><td>PASS</td><td>FullHD-Core-Loop-Capture mit PNG/Manifest, Route, Pflichtchecks und offenem Manual-Review-Status.</td></tr>
                 <tr><td><code>task_602_core_loop_transition_pacing_polish.gd</code></td><td>PASS</td><td>Read-only Transition-Pacing-Budgets fuer sechs Core-Loop-Uebergaenge plus TASK_603-Follow-up.</td></tr>
                 <tr><td><code>task_603_mission_hud_density_interaction_polish.gd</code></td><td>PASS</td><td>Mission-Control-<code>ACT</code>-Stack fuer Objective, Cargo, ROE und Contact/Combat plus TASK_604-Follow-up.</td></tr>
+                <tr><td><code>task_604_core_loop_host_client_feel_smoke.gd</code></td><td>PASS</td><td>Kombinierter Host/Client-Feel-Smoke fuer MP-F6-Readability, Teamchip/Ownership, ACT-Zeile und Selected-Fireteam-Kontext plus TASK_605-Follow-up.</td></tr>
                 <tr><td><code>task_540_mission_first_move_decision_readability_pass.gd</code></td><td>Timeout nach Doku-Pruefung</td><td>Meta-Homebase-Flow haengt in diesem Arbeitslauf nach der Doku-Pruefung; TASK_567 nutzt die stabile Mission-Fixture, Meta-Flow-Testhygiene bleibt offen.</td></tr>
                 <tr><td><code>TASK_528 Rolling-Report-Refresh</code></td><td>PASS</td><td>HTML-Zwischenbericht ist nach TASK_570 aktualisiert, nennt die Fire-Rule-Mission-Bridge und TASK_571 als naechsten Slice.</td></tr>
                 <tr><td><code>task_240_multiplayer_player_roster_ownership_contract.gd</code></td><td>35 passed, 0 failed</td><td>Roster-Ownership-Privacy und <code>host_roster</code>-Default sind gruen.</td></tr>
@@ -1278,7 +1323,7 @@
         </article>
         <article class="card half">
           <h2>Git-Stand</h2>
-          <p>Basis: <code>integration/core-foundation</code> nach TASK_596-Merge und Push. Dieser Report-Refresh laeuft auf <code>task/homebase-progression-f6-evidence-capture</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Fire-Rule-/ROE-/SUP-/Debrief-AAR-/Skill-Award-/Homebase-Progression-Notizen und priorisierte naechste Tasks.</p>
+          <p>Basis: <code>integration/core-foundation</code> nach TASK_603-Merge und Push. Dieser Report-Refresh laeuft auf <code>task/core-loop-host-client-feel-smoke</code>. Der Bericht nennt jetzt laufend erledigte Blocks, offene Reibungen, Pruefstand, lokale Evidence-Artefakte, Fire-Rule-/ROE-/SUP-/Debrief-AAR-/Skill-Award-/Homebase-Progression-/Host-Client-Notizen und priorisierte naechste Tasks.</p>
         </article>
       </div>
     </section>
@@ -1754,7 +1799,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_604 - Core Loop Host Client Feel Smoke"
+              "TASK_605 - Host Client F6 Visual Review Pass"
             ],
             recently_completed_tasks: [
               "TASK_516 - Editor Builder UX Pass",
@@ -1844,7 +1889,8 @@
               "TASK_600 - Integrated Core Loop Flow Polish Findings",
               "TASK_601 - Core Loop Manual FullHD Playtest Capture",
               "TASK_602 - Core Loop Transition Pacing Polish",
-              "TASK_603 - Mission HUD Density Interaction Polish"
+              "TASK_603 - Mission HUD Density Interaction Polish",
+              "TASK_604 - Core Loop Host Client Feel Smoke"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -1857,7 +1903,8 @@
               "TASK_601 liefert den FullHD-Capture-Ort; der echte menschliche Spielgefuehl-Entscheid bleibt ueber den HTML-Export offen.",
               "TASK_602 definiert Transition-/Pacing-Budgets read-only; echte Runtime-Aenderungen brauchen belegte Budgetueberschreitung.",
               "TASK_603 verdichtet Mission-Control-Interaktionsdaten als ACT-Zeile; der finale menschliche F6-Sichtentscheid bleibt offen.",
-              "TASK_604 bleibt offen: Host/Client-Gefuehl ueber den Core Loop muss als naechster Multiplayer-Slice geprueft werden."
+              "TASK_604 kombiniert MP-F6-Readability, Teamchip/Ownership und ACT-HUD-Dichte als read-only Host/Client-Feel-Smoke.",
+              "TASK_605 bleibt offen: Das echte Host/Client-F6-Spielbild muss mit Screenshot oder Viewport-Readback geprueft werden."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -1866,14 +1913,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-29",
-            current_repo_base: "integration/core-foundation after TASK_603",
-            current_focus: "TASK_604 - Core Loop Host Client Feel Smoke",
-            latest_completed_task: "TASK_603 - Mission HUD Density Interaction Polish"
+            current_repo_base: "integration/core-foundation after TASK_604",
+            current_focus: "TASK_605 - Host Client F6 Visual Review Pass",
+            latest_completed_task: "TASK_604 - Core Loop Host Client Feel Smoke"
           },
           metadata: {
-            branch: "task/mission-hud-density-interaction-polish",
-            integration_base: "integration/core-foundation after TASK_602",
-            head: "task/mission-hud-density-interaction-polish",
+            branch: "task/core-loop-host-client-feel-smoke",
+            integration_base: "integration/core-foundation after TASK_603",
+            head: "task/core-loop-host-client-feel-smoke",
             generated_on: "2026-06-29",
             source: "local_code_review"
           }

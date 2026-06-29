@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_604 - Core Loop Host Client Feel Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
+- Stand: `MissionTacticalSandboxController.get_core_loop_host_client_feel_snapshot()` kombiniert bestehende MP-F6-Readability-, Teamchip-/Ownership- und Mission-HUD-Density-Snapshots read-only.
+- Stand: `scripts/tests/task_604_core_loop_host_client_feel_smoke.gd` baut den Frontier-Probe-Kontext mit Host Peer 1, Peer 2, Objective/Cargo, SUP-ROE und Kontakt auf und prueft ACT-/OBJ-/CARGO-/ROE-Lesbarkeit.
+- Stand: Der laufende HTML-Zwischenbericht markiert TASK_604 als erledigt, exportiert Host/Client-Feel-Felder und empfiehlt TASK_605 als echten visuellen Host/Client-F6-Review.
+- Risiken/offen: TASK_604 ersetzt keinen echten Zwei-Fenster-/LAN-Playtest. Visuelle Ueberlappungen oder unklare Teamchip-/ACT-Laengen muessen in TASK_605 mit echtem Screenshot/Viewport belegt werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_604_core_loop_host_client_feel_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_603_mission_hud_density_interaction_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_557_frontier_probe_multiplayer_f6_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_556_frontier_probe_host_client_objective_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_596_homebase_progression_player_review_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_598_homebase_progression_evidence_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_605 - Host Client F6 Visual Review Pass`, damit der kombinierte Host/Client-Flow einmal als echtes F6-Spielbild bewertet wird.
+
 ### TASK_603 - Mission HUD Density Interaction Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/tasks/TASK_602_core_loop_transition_pacing_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
