@@ -201,6 +201,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Die HTML-Workbench `docs/reports/host_client_door_real_click_workbench_2026_06_30.html` exportiert lokale JSON-Arbeitsnotizen zu Host, Client, Reject, Door-Open, Timing und naechster Polish-Aktion.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht; der echte Command-Pfad bleibt Button/Shortcut -> Hook -> GO -> SimulationRoot/Runtime-Progress.
 
+## Host/Client Door Real Click Findings
+- `MissionHostClientDoorRealClickFindings` verdichtet TASK_699-Capture und TASK_700-Workbench-Snapshot zu einem read-only Findings-Snapshot.
+- Das Findings-Snapshot trennt `technical_path_gate` von `manual_click_findings_gate`, damit technische Door-Evidence nicht als menschlich bestandener Klicktest gelesen wird.
+- `confirmed_findings` duerfen Host-Accept/Open, Wrong-Team-Reject, State-Mutation-Reject und Door-Open-Producer nur aus Capture-/Workbench-Daten ableiten.
+- `open_manual_findings` bleiben Pflicht, solange Required-Checks in der Workbench nicht erledigt sind.
+- `manual_review_required = true`, `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+- Der empfohlene naechste Task darf aus den Findings abgeleitet werden, darf aber keine Door-, Terrain-, Mission- oder Multiplayer-Wahrheit setzen.
+
 ## Door Authority Feedback Polish
 - `MissionInteractionDoorMultiplayerAuthority.build_ui_feedback()` liefert zusaetzlich `compact_line`, `player_hint`, `next_action`, `severity` und `reject_reason_label`.
 - Diese Felder sind Anzeige-/Feedbackdaten fuer Button, Tooltip, Command-Panel, Reports und Verifier; sie setzen keine Door-, Terrain- oder Multiplayer-Wahrheit.
