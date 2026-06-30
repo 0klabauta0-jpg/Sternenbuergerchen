@@ -464,6 +464,14 @@ TASK_640 macht den Rueckkehrmoment nach dem Debrief auf der Homebase lesbar. `Me
 
 Erwartete Struktur: `HomebaseTestScreen.get_frontier_probe_post_debrief_homebase_readability_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_post_debrief_homebase_readability.v1`, `task_id = TASK_640`, `route_id = frontier_probe_aa_computer_cargo`, `scenario_id = frontier_probe_vertical_slice`, `summary_label_visible = true`, `summary_text`, `result_text`, `next_step_text`, `mission_result_preserved = true`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false` und `recommended_next_task = TASK_641 - Frontier Probe Homebase Next Sortie Readiness`. Erwartete Lesbarkeit: Die Summary nennt Debrief, Homebase, Frontier Probe und einen kurzen naechsten Schritt wie `review roster gains`.
 
+## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
+
+TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.
+
+Erwartete Struktur: `HomebaseTestScreen.get_frontier_probe_homebase_next_sortie_readiness_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_homebase_next_sortie_readiness.v1`, `task_id = TASK_641`, `source_task_ids = [TASK_640, TASK_534, TASK_594]`, `post_debrief_summary_gate = pass`, `frontier_probe_result_present = true`, `readiness_line`, `current_next_step_id`, `readiness_steps`, `pre_mission_readiness_state`, `can_request_mission_start`, `payload_fireteam_count`, `payload_operator_count`, `mission_result_preserved = true`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false` und `recommended_next_task = TASK_642 - Frontier Probe Homebase Visible Readiness Review`.
+
+Die erwarteten Readiness-Schritte sind `review_roster_gains`, `stage_fireteam`, `assign_loadout`, `prepare_transport` und `start_next_sortie`. Bei vorhandener `progression_award_summary` ist `review_roster_gains` der aktuelle naechste Schritt. Die sichtbare Zeile bleibt kompakt, z. B. `Next sortie: Review gains -> Stage fireteam -> Assign loadout -> Load dropship -> Start next sortie | now: Review gains`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
