@@ -105,6 +105,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Die 3D-Ansicht darf daraus Marker/Labels zeichnen und `get_render_snapshot()`-Zaehler exportieren, aber keine Scenario-Gates, Door-States, Cargo-States oder Runtime-Progress setzen.
 - Der Snapshot ist read-only, markiert `ui_sets_gameplay_truth = false` und nutzt `MissionInteractionRuntimeUseState`/`MissionInteractionObjectiveGate` als Quellen.
 
+## Object Reaction Snapshot
+- `MissionInteractionObjectReaction` leitet aus dem Visual-State-Snapshot kleine Objektreaktionsdaten ab.
+- `MissionTacticalSandboxController.get_mission_interaction_object_reaction_snapshot()` liefert `entries` mit Object-Kind, Reaction-State, Weltposition, Accent-Farbe, Open-Fraction und Aktiv-/Locked-Flags.
+- Object-Kinds sind `computer`, `aa`, `cargo`, `door` oder `interaction`.
+- Reaction-States sind Anzeigezustand: `ready`, `active`, `controlled`, `disabled`, `departed`, `open`, `locked`, `blocked`, `warning`, `idle` oder `unknown`.
+- `TerrainMap3DView` darf daraus lokale Proxy-Geometrie am Interaktionspunkt zeichnen: Terminalscreen, AA-Mast, Cargo-Beacon oder Door-Slabs.
+- Diese Proxies duerfen keine Tiles austauschen, keine Door-Kollision aendern, keine Scenario-Gates setzen und keine Runtime-Progress-Werte schreiben. Echte Asset-Swaps/Animationen bleiben ein eigener Slice.
+
 ## Editor Binding Inspector
 - `MapEditor.get_mission_interaction_binding_inspector_snapshot()` liest das aktuelle `MissionScenarioData.get_interaction_point_binding_snapshot()` zusammen mit der aktuellen `TerrainMapData`.
 - Der Snapshot nennt `binding_count`, `bound_marker_ids`, `missing_marker_ids`, Status-/Typ-Zaehler und die Bindings des selektierten Markers.

@@ -144,6 +144,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_684_done"> TASK_684 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_685_done"> TASK_685 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_686_done"> TASK_686 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_687_done"> TASK_687 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -679,6 +680,22 @@
           <textarea data-export-key="mission_interaction_visual_state.findings" placeholder="Beim echten Missionslauf notieren: Sind COM/AA/CARGO-Labels lesbar, stoeren sie die Karte, ist NEXT sofort klar?"></textarea>
           <div contenteditable="true" data-note-key="notes.mission_interaction_visual_state" data-placeholder="TASK_686-Notizen...">TASK_686 macht den Objective-Zustand direkt am Missionsobjekt lesbar. Es ersetzt noch keine echten Door-/Computer-Animationen; das ist der naechste visuelle Runtime-Schritt.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_687 - Mission Interaction Object Reaction</h2>
+          <p>Die Missionsobjekte bekommen jetzt kleine read-only Reaktions-Proxies: Terminalscreen fuer Computer, AA-Mast/Beacon, Cargo-Beacon und vorbereitete Door-Slabs mit Open-Fraction. Das ist noch kein Tile-Swap, aber der Objektzustand ist im Bild nicht mehr nur Text.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_object_reaction.snapshot"> Object-Reaction-Snapshot vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_object_reaction.computer_active"> Computer zeigt active/controlled</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_object_reaction.aa_disabled"> AA zeigt disabled nach Completion</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_object_reaction.cargo_ready"> Cargo-Beacon wird nach Computer sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_object_reaction.door_prepared"> Door-Open-Fraction ist vorbereitet</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_object_reaction.render_snapshot"> 3D-Render-Snapshot exportiert Object-Reactions</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_object_reaction.no_gameplay_truth"> Object-Reaction meldet `ui_sets_gameplay_truth = false`</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mission_interaction_object_reaction.manual_review_done"> Echter Missionsfenster-Sichtentscheid erledigt</label>
+          <input readonly value="tmp/mission_interaction_object_reaction.json" data-export-key="mission_interaction_object_reaction.manifest_path">
+          <input readonly value="TASK_687 - Mission Interaction Object Reaction" data-export-key="mission_interaction_object_reaction.completed_task">
+          <textarea data-export-key="mission_interaction_object_reaction.findings" placeholder="Beim echten Missionslauf notieren: Sind die Proxy-Objekte hilfreich, zu gross, zu klein oder verdecken sie Assets?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_object_reaction" data-placeholder="TASK_687-Notizen...">TASK_687 verbessert die Objektlesbarkeit, ohne Gameplay-Wahrheit im Visual zu speichern. Der naechste harte Schritt waere ein echter Door-/Asset-Swap mit Kollisions-/LOS-Regeln oder ein sichtbarer Fensterlauf.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -698,21 +715,21 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Echte Door-/Computer-Objektreaktion</strong> ist jetzt der beste autonome Anschluss: Die Objective-Gates sind zusammengefuehrt und die Missionsansicht hat read-only Visualstate-Labels. Nun sollten Stationselemente sichtbar auf `geschlossen`, `bedient`, `offen/aktiv` reagieren.</p>
-          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. Alternativ kann ein echter Zwei-Fenster-Klicklauf weiterhin die TASK_666-Notizen fuellen.</div>
+          <p><strong>Echter Missionsfenster-Sichtlauf oder Door-Asset-Swap</strong> ist jetzt der beste Anschluss: Die Objective-Gates sind zusammengefuehrt, Labels sind da, und die Objekte reagieren als Proxies. Nun muss entweder das Bild menschlich beurteilt werden oder Doors bekommen echte Asset-/Collision-Regeln.</p>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
-          <p>Falls du zuerst Content bauen willst: Der naechste praktische Hebel ist ein echter Missionsfenster-Sichtlauf, damit die neuen AA/COM/CARGO-Labels nicht nur im Snapshot, sondern auch im Bild gut funktionieren.</p>
+          <p>Falls du zuerst Content bauen willst: Der naechste praktische Hebel ist ein kleiner Door-Slice mit einem echten Open/Closed-Assetwechsel und klar dokumentierter LOS-/Walkability-Grenze.</p>
         </article>
         <article class="card full">
           <h2>Vorgeschlagene Reihenfolge</h2>
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Door-/Computer-Objektreaktion</td><td>Open/Closed/Active-Zustand an echte Stationselemente anbinden, ohne UI-Wahrheit zu erzeugen.</td></tr>
+              <tr><td>1</td><td>Missionsfenster-Sichtlauf</td><td>Pruefen, ob Labels und Objekt-Proxies im echten Bild angenehm, lesbar und nicht zu dominant sind.</td></tr>
               <tr><td>2</td><td>Echter Host/Client-Zwei-Fenster-Klicklauf</td><td>TASK_666-Notizen mit menschlichem Bedienbefund fuellen.</td></tr>
-              <tr><td>3</td><td>FullHD Sichtfeinschliff fuer Mission-Interactions</td><td>Nur falls die Objective-/Progress-Zeilen im echten Fenster zu dicht wirken.</td></tr>
+              <tr><td>3</td><td>Door-Asset-Swap</td><td>Open/Closed-Tueren mit Collision-/LOS-Regeln als echter Runtime-Slice.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
             </tbody>
           </table>

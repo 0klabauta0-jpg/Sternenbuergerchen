@@ -315,6 +315,7 @@ git checkout -b batch/<batch-name>
 - TASK_684 - Map Editor Interaction Focus Scroll (implementiert)
 - TASK_685 - Mission Interaction Objective Gate (implementiert)
 - TASK_686 - Mission Interaction Visual State (implementiert)
+- TASK_687 - Mission Interaction Object Reaction (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

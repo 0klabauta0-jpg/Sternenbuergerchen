@@ -131,6 +131,8 @@ const MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT_STEP: float = 0.10
 const MISSION_INTERACTION_VISUAL_STATE_MARKER_RADIUS: float = 0.38
 const MISSION_INTERACTION_VISUAL_STATE_MARKER_HEIGHT: float = 0.10
 const MISSION_INTERACTION_VISUAL_STATE_MARKER_SURFACE_OFFSET: float = 0.96
+const MISSION_INTERACTION_OBJECT_REACTION_STYLE_ID: String = "task_687_mission_interaction_object_reaction"
+const MISSION_INTERACTION_OBJECT_REACTION_SURFACE_OFFSET: float = 0.20
 const MISSION_RESULT_ROUTE_CALLOUT_OFFSET_WORLD: Vector2 = Vector2(0.0, -96.0)
 const MISSION_RESULT_ROUTE_CALLOUT_FONT_SIZE: int = 18
 const MOVEMENT_LABEL_HEIGHT: float = 1.06
@@ -443,6 +445,11 @@ var _route_callout_line_visual_count: int = 0
 var _mission_interaction_visual_state_entries: Array = []
 var _mission_interaction_visual_state_tone_counts: Dictionary = {}
 var _mission_interaction_visual_state_count: int = 0
+var _mission_interaction_object_reaction_entries: Array = []
+var _mission_interaction_object_reaction_kind_counts: Dictionary = {}
+var _mission_interaction_object_reaction_state_counts: Dictionary = {}
+var _mission_interaction_object_reaction_count: int = 0
+var _mission_interaction_object_reaction_visual_count: int = 0
 var _fog_of_war_state: Dictionary = {}
 var _fog_of_war_mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
 var _fog_of_war_team_id: String = ""
@@ -1703,6 +1710,14 @@ func get_render_snapshot() -> Dictionary:
 		"mission_interaction_visual_state_summary": String(_mission_status_payload.get("mission_interaction_visual_state_summary", "")),
 		"mission_interaction_visual_state_schema": String(_mission_status_payload.get("mission_interaction_visual_state_schema", "")),
 		"mission_interaction_visual_state_style_id": MISSION_INTERACTION_VISUAL_STATE_STYLE_ID,
+		"mission_interaction_object_reaction_count": _mission_interaction_object_reaction_count,
+		"mission_interaction_object_reaction_visual_count": _mission_interaction_object_reaction_visual_count,
+		"mission_interaction_object_reaction_entries": _mission_interaction_object_reaction_entries.duplicate(true),
+		"mission_interaction_object_reaction_kind_counts": _mission_interaction_object_reaction_kind_counts.duplicate(true),
+		"mission_interaction_object_reaction_state_counts": _mission_interaction_object_reaction_state_counts.duplicate(true),
+		"mission_interaction_object_reaction_summary": String(_mission_status_payload.get("mission_interaction_object_reaction_summary", "")),
+		"mission_interaction_object_reaction_schema": String(_mission_status_payload.get("mission_interaction_object_reaction_schema", "")),
+		"mission_interaction_object_reaction_style_id": MISSION_INTERACTION_OBJECT_REACTION_STYLE_ID,
 		"has_lz": bool(_drop_payload.get("has_lz_position", false)),
 		"show_lz_marker": bool(_drop_payload.get("show_lz_marker", bool(_drop_payload.get("has_lz_position", false)))),
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
@@ -7208,6 +7223,11 @@ func _rebuild_status_visuals() -> void:
 	_mission_interaction_visual_state_entries.clear()
 	_mission_interaction_visual_state_tone_counts.clear()
 	_mission_interaction_visual_state_count = 0
+	_mission_interaction_object_reaction_entries.clear()
+	_mission_interaction_object_reaction_kind_counts.clear()
+	_mission_interaction_object_reaction_state_counts.clear()
+	_mission_interaction_object_reaction_count = 0
+	_mission_interaction_object_reaction_visual_count = 0
 	if _status_root == null or _mission_status_payload.is_empty():
 		return
 	var objective_position_variant = _mission_status_payload.get("objective_position", null)
@@ -7216,6 +7236,7 @@ func _rebuild_status_visuals() -> void:
 	if bool(_mission_status_payload.get("mission_resolved", false)):
 		_add_mission_result_visual(Vector2(objective_position_variant) if typeof(objective_position_variant) == TYPE_VECTOR2 else _get_map_center_world_position())
 	_add_route_callout_visuals()
+	_add_mission_interaction_object_reaction_visuals()
 	_add_mission_interaction_visual_state_visuals()
 
 
@@ -7370,6 +7391,151 @@ func _get_valid_route_callout_dictionaries(route_callouts: Array) -> Array:
 			continue
 		result.append(callout)
 	return result
+
+
+func _add_mission_interaction_object_reaction_visuals() -> void:
+	var reactions: Array = Array(_mission_status_payload.get("mission_interaction_object_reactions", []))
+	for reaction_variant in reactions:
+		if typeof(reaction_variant) != TYPE_DICTIONARY:
+			continue
+		var reaction: Dictionary = Dictionary(reaction_variant)
+		if typeof(reaction.get("world_position", null)) != TYPE_VECTOR2:
+			continue
+		var reaction_id: String = String(reaction.get("id", reaction.get("interaction_id", "object_reaction_%d" % _mission_interaction_object_reaction_count))).strip_edges()
+		var object_kind: String = String(reaction.get("object_kind", "interaction")).strip_edges().to_lower()
+		var reaction_state: String = String(reaction.get("reaction_state", "unknown")).strip_edges().to_lower()
+		var world_position: Vector2 = Vector2(reaction.get("world_position", Vector2.ZERO))
+		var accent: Color = _get_mission_interaction_object_reaction_color(reaction)
+		var root := Node3D.new()
+		root.name = "MissionInteractionObjectReaction_%s" % _sanitize_node_name(reaction_id)
+		root.position = _world_to_surface_3d_position(world_position, MISSION_INTERACTION_OBJECT_REACTION_SURFACE_OFFSET)
+		root.set_meta("mission_interaction_object_reaction_style_id", MISSION_INTERACTION_OBJECT_REACTION_STYLE_ID)
+		root.set_meta("interaction_id", String(reaction.get("interaction_id", "")).strip_edges())
+		root.set_meta("object_kind", object_kind)
+		root.set_meta("reaction_state", reaction_state)
+		_status_root.add_child(root)
+		match object_kind:
+			"computer":
+				_add_mission_interaction_computer_reaction_proxy(root, accent, reaction)
+			"aa":
+				_add_mission_interaction_aa_reaction_proxy(root, accent, reaction)
+			"cargo":
+				_add_mission_interaction_cargo_reaction_proxy(root, accent, reaction)
+			"door":
+				_add_mission_interaction_door_reaction_proxy(root, accent, reaction)
+			_:
+				_add_mission_interaction_generic_reaction_proxy(root, accent, reaction)
+		_mission_interaction_object_reaction_count += 1
+		_mission_interaction_object_reaction_kind_counts[object_kind] = int(_mission_interaction_object_reaction_kind_counts.get(object_kind, 0)) + 1
+		_mission_interaction_object_reaction_state_counts[reaction_state] = int(_mission_interaction_object_reaction_state_counts.get(reaction_state, 0)) + 1
+		_mission_interaction_object_reaction_entries.append({
+			"id": reaction_id,
+			"interaction_id": String(reaction.get("interaction_id", "")).strip_edges(),
+			"interaction_type": String(reaction.get("interaction_type", "")).strip_edges(),
+			"step_id": String(reaction.get("step_id", "")).strip_edges(),
+			"marker_id": String(reaction.get("marker_id", "")).strip_edges(),
+			"asset_hint": String(reaction.get("asset_hint", "")).strip_edges(),
+			"object_kind": object_kind,
+			"reaction_state": reaction_state,
+			"status": String(reaction.get("status", "")).strip_edges(),
+			"world_position": world_position,
+			"open_fraction": float(reaction.get("open_fraction", 0.0)),
+			"screen_active": bool(reaction.get("screen_active", false)),
+			"beacon_active": bool(reaction.get("beacon_active", false)),
+			"locked": bool(reaction.get("locked", false)),
+			"is_next": bool(reaction.get("is_next", false)),
+			"accent_color_hex": accent.to_html(false),
+			"visual_style_id": MISSION_INTERACTION_OBJECT_REACTION_STYLE_ID,
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+
+
+func _add_mission_interaction_computer_reaction_proxy(parent: Node3D, accent: Color, reaction: Dictionary) -> void:
+	_add_local_box3d(parent, "TerminalBase", Vector3(0.86, 0.18, 0.52), Vector3(0.0, 0.09, 0.0), Color(0.18, 0.22, 0.27, 0.96))
+	_add_local_box3d(parent, "TerminalScreen", Vector3(0.68, 0.52, 0.08), Vector3(0.0, 0.48, -0.24), Color(accent.r, accent.g, accent.b, 0.88), true)
+	if bool(reaction.get("screen_active", false)):
+		_add_local_cylinder3d(parent, "TerminalGlow", 0.32, 0.045, Vector3(0.0, 0.72, -0.24), Color(accent.r, accent.g, accent.b, 0.52), 24, true)
+		_mission_interaction_object_reaction_visual_count += 1
+	_mission_interaction_object_reaction_visual_count += 2
+
+
+func _add_mission_interaction_aa_reaction_proxy(parent: Node3D, accent: Color, reaction: Dictionary) -> void:
+	_add_local_box3d(parent, "AABase", Vector3(0.72, 0.18, 0.72), Vector3(0.0, 0.09, 0.0), Color(0.22, 0.20, 0.18, 0.96))
+	var mast_height: float = 0.76
+	_add_local_box3d(parent, "AAMast", Vector3(0.12, mast_height, 0.12), Vector3(0.0, 0.18 + mast_height * 0.5, 0.0), Color(accent.r, accent.g, accent.b, 0.86), true)
+	if bool(reaction.get("beacon_active", false)):
+		_add_local_cylinder3d(parent, "AABeacon", 0.24, 0.05, Vector3(0.0, 1.06, 0.0), Color(accent.r, accent.g, accent.b, 0.48), 24, true)
+		_mission_interaction_object_reaction_visual_count += 1
+	_mission_interaction_object_reaction_visual_count += 2
+
+
+func _add_mission_interaction_cargo_reaction_proxy(parent: Node3D, accent: Color, reaction: Dictionary) -> void:
+	_add_local_box3d(parent, "CargoBeaconPad", Vector3(0.78, 0.08, 0.78), Vector3(0.0, 0.04, 0.0), Color(accent.r, accent.g, accent.b, 0.32), true)
+	_add_local_cylinder3d(parent, "CargoBeaconRing", 0.44, 0.045, Vector3(0.0, 0.14, 0.0), Color(accent.r, accent.g, accent.b, 0.42), 32, true)
+	if bool(reaction.get("beacon_active", false)):
+		_add_local_box3d(parent, "CargoBeaconPulse", Vector3(0.16, 0.62, 0.16), Vector3(0.0, 0.36, 0.0), Color(accent.r, accent.g, accent.b, 0.72), true)
+		_mission_interaction_object_reaction_visual_count += 1
+	_mission_interaction_object_reaction_visual_count += 2
+
+
+func _add_mission_interaction_door_reaction_proxy(parent: Node3D, accent: Color, reaction: Dictionary) -> void:
+	var open_fraction: float = clampf(float(reaction.get("open_fraction", 0.0)), 0.0, 1.0)
+	var leaf_offset: float = 0.18 + (open_fraction * 0.34)
+	_add_local_box3d(parent, "DoorFrame", Vector3(0.88, 0.92, 0.10), Vector3(0.0, 0.46, 0.0), Color(0.20, 0.22, 0.24, 0.78), true)
+	_add_local_box3d(parent, "DoorLeafLeft", Vector3(0.32, 0.78, 0.12), Vector3(-leaf_offset, 0.44, -0.02), Color(accent.r, accent.g, accent.b, 0.82), true)
+	_add_local_box3d(parent, "DoorLeafRight", Vector3(0.32, 0.78, 0.12), Vector3(leaf_offset, 0.44, -0.02), Color(accent.r, accent.g, accent.b, 0.82), true)
+	_mission_interaction_object_reaction_visual_count += 3
+
+
+func _add_mission_interaction_generic_reaction_proxy(parent: Node3D, accent: Color, _reaction: Dictionary) -> void:
+	_add_local_box3d(parent, "InteractionCore", Vector3(0.48, 0.32, 0.48), Vector3(0.0, 0.16, 0.0), Color(accent.r, accent.g, accent.b, 0.72), true)
+	_mission_interaction_object_reaction_visual_count += 1
+
+
+func _add_local_box3d(parent: Node3D, node_name: String, size: Vector3, local_position: Vector3, color: Color, transparent: bool = false) -> MeshInstance3D:
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = _make_box_mesh(size)
+	instance.material_override = _make_material(color, transparent)
+	instance.position = local_position
+	parent.add_child(instance)
+	return instance
+
+
+func _add_local_cylinder3d(parent: Node3D, node_name: String, radius: float, height: float, local_position: Vector3, color: Color, radial_segments: int = 24, transparent: bool = false) -> MeshInstance3D:
+	var mesh := CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = height
+	mesh.radial_segments = radial_segments
+	var instance := MeshInstance3D.new()
+	instance.name = node_name
+	instance.mesh = mesh
+	instance.material_override = _make_material(color, transparent)
+	instance.position = local_position
+	parent.add_child(instance)
+	return instance
+
+
+func _get_mission_interaction_object_reaction_color(reaction: Dictionary) -> Color:
+	var accent_variant: Variant = reaction.get("accent_color", null)
+	if typeof(accent_variant) == TYPE_COLOR:
+		return Color(accent_variant)
+	var state: String = String(reaction.get("reaction_state", "")).strip_edges().to_lower()
+	match state:
+		"controlled", "disabled", "departed", "open", "complete":
+			return Color(0.46, 0.96, 0.62, 1.0)
+		"active":
+			return Color(0.32, 0.78, 1.0, 1.0)
+		"ready":
+			return Color(0.94, 0.98, 1.0, 1.0)
+		"blocked", "locked":
+			return Color(1.0, 0.38, 0.30, 1.0)
+		"warning":
+			return Color(1.0, 0.68, 0.30, 1.0)
+		_:
+			return Color(0.86, 0.9, 0.94, 1.0)
 
 
 func _add_mission_interaction_visual_state_visuals() -> void:
