@@ -94,11 +94,11 @@ func _write_findings_manifest() -> void:
 			"does_preview_before_go_feel_deliberate",
 			"does_go_feedback_feel_immediate_enough",
 		],
-		"autonomous_next_candidate": "TASK_685 - Mission Interaction Progress FullHD Sight Pass",
+		"autonomous_next_candidate": "TASK_685 - Mission Interaction Objective Gate",
 		"manual_next_action": "Run the real two-window click drill and fill the TASK_666 report notes.",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
-		"recommended_next_task": "TASK_685 - Mission Interaction Progress FullHD Sight Pass",
+		"recommended_next_task": "TASK_685 - Mission Interaction Objective Gate",
 	}
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://tmp"))
 	var file := FileAccess.open(FINDINGS_PATH, FileAccess.WRITE)
@@ -135,7 +135,7 @@ func _test_findings_manifest() -> void:
 	_assert(confirmed_findings.has("next_aa_preview_before_go"), "Findings confirms NEXT AA preview")
 	_assert(confirmed_findings.has("go_execution_after_confirm"), "Findings confirms GO execution")
 	_assert(Array(manifest.get("open_manual_findings", [])).size() >= 6, "Findings keeps open manual observations")
-	_assert(String(manifest.get("autonomous_next_candidate", "")) == "TASK_685 - Mission Interaction Progress FullHD Sight Pass", "Findings recommends autonomous next candidate")
+	_assert(String(manifest.get("autonomous_next_candidate", "")) == "TASK_685 - Mission Interaction Objective Gate", "Findings recommends autonomous next candidate")
 	_assert(bool(manifest.get("read_only", false)), "Findings remains read-only")
 	_assert(not bool(manifest.get("ui_sets_gameplay_truth", true)), "Findings does not set gameplay truth")
 

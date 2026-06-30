@@ -55,6 +55,7 @@ const MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT: GDScript = preload("res:/
 const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
 const MISSION_INTERACTION_RUNTIME_USE_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_runtime_use_state.gd")
 const MISSION_INTERACTION_USE_FEEDBACK_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_use_feedback.gd")
+const MISSION_INTERACTION_OBJECTIVE_GATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_objective_gate.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
@@ -16743,6 +16744,25 @@ func get_mission_interaction_progress_readability_snapshot() -> Dictionary:
 	return _build_mission_interaction_progress_readability_snapshot(get_mission_interaction_use_feedback_snapshot())
 
 
+func get_mission_interaction_objective_gate_snapshot() -> Dictionary:
+	var binding_snapshot: Dictionary = get_mission_interaction_point_binding_snapshot()
+	var use_state_snapshot: Dictionary = get_mission_interaction_runtime_use_state_snapshot()
+	var use_feedback_snapshot: Dictionary = Dictionary(MISSION_INTERACTION_USE_FEEDBACK_SCRIPT.call(
+		"build_snapshot",
+		use_state_snapshot,
+		{"selected_fireteam_ids": Array(_selected_fireteam_ids)}
+	)).duplicate(true)
+	return Dictionary(MISSION_INTERACTION_OBJECTIVE_GATE_SCRIPT.call(
+		"build_snapshot",
+		binding_snapshot,
+		use_state_snapshot,
+		use_feedback_snapshot,
+		_get_mission_scenario_runtime_gate_snapshot_for_readability(),
+		_get_mission_cargo_touchdown_snapshot_for_readability(),
+		get_mission_interaction_use_intent_snapshot()
+	)).duplicate(true)
+
+
 func _build_mission_interaction_progress_readability_snapshot(use_feedback: Dictionary = {}) -> Dictionary:
 	var feedback: Dictionary = use_feedback
 	if feedback.is_empty():
@@ -17766,6 +17786,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
 	var mission_interaction_progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot(mission_interaction_use_feedback)
 	var mission_interaction_use_intent: Dictionary = get_mission_interaction_use_intent_snapshot()
+	var mission_interaction_objective_gate: Dictionary = get_mission_interaction_objective_gate_snapshot()
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -17836,6 +17857,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_use_intent": mission_interaction_use_intent,
 		"mission_interaction_use_intent_accepted": bool(mission_interaction_use_intent.get("accepted", false)),
 		"mission_interaction_use_intent_command_type": String(mission_interaction_use_intent.get("command_type", "")),
+		"mission_interaction_objective_gate": mission_interaction_objective_gate,
+		"mission_interaction_objective_next_line": String(mission_interaction_objective_gate.get("next_line", "")),
+		"mission_interaction_objective_next_step_id": String(mission_interaction_objective_gate.get("next_step_id", "")),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),
