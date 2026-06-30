@@ -492,6 +492,77 @@ func get_frontier_probe_homebase_visible_readiness_review_snapshot() -> Dictiona
 	}
 
 
+func get_homebase_missionpanel_density_playfeel_snapshot() -> Dictionary:
+	var visible_snapshot: Dictionary = get_frontier_probe_homebase_visible_readiness_review_snapshot()
+	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
+	var mission_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as Control
+	var briefing_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel") as Control
+	var readiness_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel") as Control
+	var followup_panel := _get_post_debrief_followup_panel()
+	var mission_rect: Rect2 = _control_global_rect(mission_panel)
+	var briefing_rect: Rect2 = _control_global_rect(briefing_panel)
+	var readiness_rect: Rect2 = _control_global_rect(readiness_panel)
+	var followup_rect: Rect2 = _control_global_rect(followup_panel)
+	var child_max_bottom: float = _visible_child_max_bottom(mission_panel)
+	var visible_sections: Array = _build_missionpanel_density_sections(mission_vbox, mission_rect)
+	var visible_section_count: int = visible_sections.size()
+	var total_text_length: int = _collect_visible_text_length(mission_vbox)
+	var vertical_fill_ratio: float = 0.0
+	if mission_rect.size.y > 0.0:
+		vertical_fill_ratio = maxf(0.0, child_max_bottom - mission_rect.position.y) / mission_rect.size.y
+	var order_ok: bool = _control_is_visible(briefing_panel) and _control_is_visible(readiness_panel) and _control_is_visible(followup_panel) \
+		and briefing_rect.position.y <= readiness_rect.position.y + 0.5 \
+		and readiness_rect.position.y <= followup_rect.position.y + 0.5
+	var checks: Array = []
+	_append_visual_audit_check(checks, "visible_readiness_gate_pass", String(visible_snapshot.get("gate", "")) == "pass", "critical", "MissionPanel density should build on the green visible-readiness gate.")
+	_append_visual_audit_check(checks, "mission_panel_visible", _control_is_visible(mission_panel), "critical", "MissionPanel should be visible.")
+	_append_visual_audit_check(checks, "key_sections_visible", _control_is_visible(briefing_panel) and _control_is_visible(readiness_panel) and _control_is_visible(followup_panel), "critical", "Briefing, readiness and follow-up sections should all be visible.")
+	_append_visual_audit_check(checks, "key_sections_inside_panel", _rect_inside(briefing_rect, mission_rect) and _rect_inside(readiness_rect, mission_rect) and _rect_inside(followup_rect, mission_rect), "critical", "Key MissionPanel sections should stay inside MissionPanel.")
+	_append_visual_audit_check(checks, "key_section_order", order_ok, "critical", "MissionPanel should scan as briefing -> readiness -> follow-up.")
+	_append_visual_audit_check(checks, "mission_panel_no_overflow", mission_panel != null and child_max_bottom <= mission_rect.end.y + 0.5, "critical", "MissionPanel content should not overflow.")
+	_append_visual_audit_check(checks, "visible_section_budget", visible_section_count >= 4 and visible_section_count <= 8, "critical", "MissionPanel should have a small number of direct visible chunks.")
+	_append_visual_audit_check(checks, "vertical_density_budget", vertical_fill_ratio <= 0.96, "warning", "MissionPanel is close to full height and should be checked in a real window.")
+	_append_visual_audit_check(checks, "text_density_budget", total_text_length <= 1200, "warning", "MissionPanel visible text is close to the scanability budget and should be checked in a real window.")
+	_append_visual_audit_check(checks, "followup_polish_present", String(visible_snapshot.get("followup_panel_style_id", "")) == HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID, "critical", "TASK_645 follow-up polish should remain present.")
+	_append_visual_audit_check(checks, "read_only", bool(visible_snapshot.get("read_only", false)) and not bool(visible_snapshot.get("ui_sets_gameplay_truth", true)), "critical", "Density review should read existing Homebase state only.")
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.homebase_missionpanel_density_playfeel.v1",
+		"task_id": "TASK_646",
+		"source_task_ids": ["TASK_645", "TASK_642"],
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"visible_readiness_gate": String(visible_snapshot.get("gate", "")),
+		"mission_panel_visible": _control_is_visible(mission_panel),
+		"mission_panel_rect": _rect_to_dict(mission_rect),
+		"mission_child_max_bottom": child_max_bottom,
+		"vertical_fill_ratio": vertical_fill_ratio,
+		"visible_section_count": visible_section_count,
+		"visible_sections": visible_sections,
+		"total_visible_text_length": total_text_length,
+		"briefing_panel_visible": _control_is_visible(briefing_panel),
+		"readiness_panel_visible": _control_is_visible(readiness_panel),
+		"followup_panel_visible": _control_is_visible(followup_panel),
+		"briefing_panel_rect": _rect_to_dict(briefing_rect),
+		"readiness_panel_rect": _rect_to_dict(readiness_rect),
+		"followup_panel_rect": _rect_to_dict(followup_rect),
+		"key_section_order": "briefing_readiness_followup" if order_ok else "needs_review",
+		"followup_panel_style_id": String(visible_snapshot.get("followup_panel_style_id", "")),
+		"post_summary_font_size": int(visible_snapshot.get("post_summary_font_size", 0)),
+		"next_sortie_font_size": int(visible_snapshot.get("next_sortie_font_size", 0)),
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"visual_only": true,
+		"checks": checks,
+		"recommended_next_task": "TASK_647 - Homebase MissionPanel Density Findings only if real-window friction or warning pressure remains",
+	}
+
+
 func get_post_mission_skill_delta_snapshot() -> Dictionary:
 	var focused_delta: Dictionary = _get_post_mission_skill_delta_for_unit(_focused_unit_id)
 	var focused_text: String = _format_post_mission_skill_delta_text(focused_delta)
@@ -3092,6 +3163,43 @@ func _build_post_debrief_followup_panel_style() -> StyleBoxFlat:
 	stylebox.content_margin_top = 4
 	stylebox.content_margin_bottom = 4
 	return stylebox
+
+
+func _build_missionpanel_density_sections(mission_vbox: Control, mission_rect: Rect2) -> Array:
+	var sections: Array = []
+	if mission_vbox == null:
+		return sections
+	for child in mission_vbox.get_children():
+		var control := child as Control
+		if control == null or not _control_is_visible(control):
+			continue
+		var rect: Rect2 = _control_global_rect(control)
+		sections.append({
+			"name": control.name,
+			"rect": _rect_to_dict(rect),
+			"inside_mission_panel": _rect_inside(rect, mission_rect),
+			"text_length": _collect_visible_text_length(control),
+			"child_count": control.get_child_count(),
+		})
+	return sections
+
+
+func _collect_visible_text_length(root_node: Node) -> int:
+	if root_node == null:
+		return 0
+	var total: int = 0
+	var root_control := root_node as Control
+	if root_control != null and not _control_is_visible(root_control):
+		return 0
+	if root_node is Label:
+		total += (root_node as Label).text.strip_edges().length()
+	elif root_node is Button:
+		total += (root_node as Button).text.strip_edges().length()
+	elif root_node is LineEdit:
+		total += (root_node as LineEdit).text.strip_edges().length()
+	for child in root_node.get_children():
+		total += _collect_visible_text_length(child)
+	return total
 
 
 func _build_post_debrief_homebase_summary_text() -> String:

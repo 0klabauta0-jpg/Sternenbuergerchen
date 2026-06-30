@@ -498,6 +498,12 @@ TASK_645 wendet den belegten TASK_644-Fensterbefund an: Post-Debrief-Summary und
 
 Erwartete Struktur: `HomebaseTestScreen.get_frontier_probe_homebase_visible_readiness_review_snapshot()` enthaelt zusaetzlich `followup_panel_visible = true`, `followup_panel_style_id = task_645_homebase_followup_panel_v1`, `followup_panel_rect`, `followup_panel_min_height >= 70`, `post_summary_font_size >= 12`, `next_sortie_font_size >= 12`, `post_summary_emphasis = true`, `next_sortie_emphasis = true` und Checks fuer `followup_panel_visible`, `followup_panel_inside_mission_panel`, `labels_inside_followup_panel`, `followup_panel_emphasis_style` und `followup_label_emphasis`. `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false` bleiben Pflicht.
 
+## Homebase-MissionPanel-Density-Playfeel-Review (TASK_646)
+
+TASK_646 macht nach TASK_645 die Dichte des gesamten Homebase-`MissionPanel` pruefbar. Der Snapshot darf nur vorhandene Control-Rects, sichtbare Sektionen und Textlaengen lesen. Er darf keine Homebase-Navigation, keinen Start-Commit, keine Progression, kein Staging, kein MissionResult und keine Gameplay-Wahrheit setzen.
+
+Erwartete Struktur: `HomebaseTestScreen.get_homebase_missionpanel_density_playfeel_snapshot()` liefert `schema = sternenbuergerchen.homebase_missionpanel_density_playfeel.v1`, `task_id = TASK_646`, `source_task_ids = [TASK_645, TASK_642]`, `gate`, `visible_readiness_gate = pass`, `mission_panel_rect`, `mission_child_max_bottom`, `vertical_fill_ratio`, `visible_section_count`, `visible_sections`, `total_visible_text_length`, `briefing_panel_visible = true`, `readiness_panel_visible = true`, `followup_panel_visible = true`, `key_section_order = briefing_readiness_followup`, `followup_panel_style_id = task_645_homebase_followup_panel_v1`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`. Das lokale Manifest `tmp/homebase_missionpanel_density_playfeel_review.json` darf diese Werte fuer HTML-/Playtest-Notizen exportieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

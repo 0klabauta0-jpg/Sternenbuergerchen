@@ -47,9 +47,9 @@ func _test_docs_and_reports() -> void:
 	_assert(contract_text.contains("Frontier-Probe-Meta-Debrief-Route-Smoke"), "Mission feedback contract documents TASK_639")
 	_assert(meta_layer_text.contains("get_frontier_probe_meta_debrief_route_smoke_snapshot"), "MetaLayerFlow exposes TASK_639 snapshot")
 	_assert(report_text.contains("TASK_639 Frontier Probe Meta Debrief Route Smoke"), "Rolling report tracks TASK_639")
-	_assert(report_text.contains('latest_completed_task: "TASK_644 - Frontier Probe Homebase Real Window Review"'), "Rolling report advances latest completed beyond TASK_639")
+	_assert(report_text.contains('latest_completed_task: "TASK_646 - Homebase MissionPanel Density Playfeel Review"'), "Rolling report advances latest completed beyond TASK_639")
 	_assert(handbook_text.contains("TASK_639 - Frontier Probe Meta Debrief Route Smoke"), "Status handbook tracks TASK_639")
-	_assert(handbook_text.contains('current_task: "TASK_644 - Frontier Probe Homebase Real Window Review"'), "Status handbook current task advances beyond TASK_639")
+	_assert(handbook_text.contains('current_task: "TASK_646 - Homebase MissionPanel Density Playfeel Review"'), "Status handbook current task advances beyond TASK_639")
 	for key in [
 		"frontier_probe_meta_debrief_route_smoke.task_id",
 		"frontier_probe_meta_debrief_route_smoke.manifest_path",
