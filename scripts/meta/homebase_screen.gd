@@ -52,6 +52,9 @@ const HOMEBASE_ROSTER_SORT_PILOT_DESC := "pilot_desc"
 const HOMEBASE_ROSTER_SORT_PILOT_ASC := "pilot_asc"
 const HOMEBASE_ROSTER_SORT_XP_DESC := "xp_desc"
 const HOMEBASE_ROSTER_SORT_NAME_ASC := "name_asc"
+const HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID := "task_645_homebase_followup_panel_v1"
+const HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE := 12
+const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 70.0
 const HOMEBASE_ROSTER_SORT_OPTIONS: Array = [
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_DESC, "label": "Leader high"},
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_ASC, "label": "Leader low"},
@@ -416,20 +419,30 @@ func get_frontier_probe_homebase_visible_readiness_review_snapshot() -> Dictiona
 	var readiness_snapshot: Dictionary = get_frontier_probe_homebase_next_sortie_readiness_snapshot()
 	var post_label := _get_post_debrief_homebase_summary_label()
 	var readiness_label := _get_next_sortie_readiness_label()
+	var followup_panel := _get_post_debrief_followup_panel()
 	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
 	var mission_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as Control
 	var post_rect: Rect2 = _control_global_rect(post_label)
 	var readiness_rect: Rect2 = _control_global_rect(readiness_label)
+	var followup_rect: Rect2 = _control_global_rect(followup_panel)
 	var mission_rect: Rect2 = _control_global_rect(mission_panel)
 	var mission_child_max_bottom: float = _visible_child_max_bottom(mission_panel)
 	var readiness_line: String = String(readiness_snapshot.get("readiness_line", "")).strip_edges()
 	var rendered_line: String = readiness_label.text.strip_edges() if readiness_label != null else ""
+	var summary_font_size: int = post_label.get_theme_font_size("font_size") if post_label != null else 0
+	var readiness_font_size: int = readiness_label.get_theme_font_size("font_size") if readiness_label != null else 0
+	var followup_style_id: String = String(followup_panel.get_meta("homebase_followup_style_id", "")) if followup_panel != null else ""
 	var checks: Array = []
 	_append_visual_audit_check(checks, "readiness_gate_pass", String(readiness_snapshot.get("gate", "")) == "pass", "critical", "TASK_641 readiness gate should be green before visual review.")
 	_append_visual_audit_check(checks, "post_summary_visible", _control_is_visible(post_label), "critical", "Post-Debrief Homebase summary should remain visible.")
 	_append_visual_audit_check(checks, "next_sortie_visible", _control_is_visible(readiness_label), "critical", "Next-sortie readiness line should be visible.")
 	_append_visual_audit_check(checks, "line_matches_snapshot", not readiness_line.is_empty() and rendered_line == readiness_line, "critical", "Rendered line should match TASK_641 snapshot text.")
 	_append_visual_audit_check(checks, "labels_inside_mission_panel", _rect_inside(post_rect, mission_rect) and _rect_inside(readiness_rect, mission_rect), "critical", "Post-Debrief and Next-Sortie lines should stay inside MissionPanel.")
+	_append_visual_audit_check(checks, "followup_panel_visible", _control_is_visible(followup_panel), "critical", "Post-Debrief follow-up panel should be visible.")
+	_append_visual_audit_check(checks, "followup_panel_inside_mission_panel", _rect_inside(followup_rect, mission_rect), "critical", "Follow-up panel should stay inside MissionPanel.")
+	_append_visual_audit_check(checks, "labels_inside_followup_panel", _rect_inside(post_rect, followup_rect) and _rect_inside(readiness_rect, followup_rect), "critical", "Summary and next-sortie labels should be grouped inside the follow-up panel.")
+	_append_visual_audit_check(checks, "followup_panel_emphasis_style", followup_style_id == HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID, "critical", "Follow-up panel should expose the TASK_645 emphasis style.")
+	_append_visual_audit_check(checks, "followup_label_emphasis", summary_font_size >= HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE and readiness_font_size >= HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE, "critical", "Follow-up labels should be visibly larger than the old compact labels.")
 	_append_visual_audit_check(checks, "next_sortie_below_post_summary", readiness_rect.position.y >= post_rect.end.y - 1.0, "critical", "Next-Sortie line should sit below the Debrief return summary.")
 	_append_visual_audit_check(checks, "labels_do_not_overlap", not _rects_overlap(post_rect, readiness_rect) or readiness_rect.position.y >= post_rect.end.y - 1.0, "critical", "Return and next-sortie lines should not visually overlap.")
 	_append_visual_audit_check(checks, "mission_panel_no_overflow", mission_panel != null and mission_child_max_bottom <= mission_rect.end.y + 0.5, "critical", "MissionPanel content should not overflow after adding readiness lines.")
@@ -453,10 +466,18 @@ func get_frontier_probe_homebase_visible_readiness_review_snapshot() -> Dictiona
 		"post_summary_text": post_label.text.strip_edges() if post_label != null else "",
 		"post_summary_visible": _control_is_visible(post_label),
 		"next_sortie_visible": _control_is_visible(readiness_label),
+		"followup_panel_visible": _control_is_visible(followup_panel),
+		"followup_panel_style_id": followup_style_id,
+		"followup_panel_min_height": followup_panel.custom_minimum_size.y if followup_panel != null else 0.0,
+		"post_summary_font_size": summary_font_size,
+		"next_sortie_font_size": readiness_font_size,
+		"post_summary_emphasis": bool(post_label.get_meta("homebase_followup_emphasis", false)) if post_label != null else false,
+		"next_sortie_emphasis": bool(readiness_label.get_meta("homebase_followup_emphasis", false)) if readiness_label != null else false,
 		"mission_panel_visible": _control_is_visible(mission_panel),
 		"mission_vbox_visible": _control_is_visible(mission_vbox),
 		"post_summary_rect": _rect_to_dict(post_rect),
 		"next_sortie_rect": _rect_to_dict(readiness_rect),
+		"followup_panel_rect": _rect_to_dict(followup_rect),
 		"mission_panel_rect": _rect_to_dict(mission_rect),
 		"mission_child_max_bottom": mission_child_max_bottom,
 		"manual_review_required": true,
@@ -2911,6 +2932,7 @@ func _update_post_debrief_homebase_summary() -> void:
 	if summary_text.is_empty():
 		label.visible = false
 		label.text = ""
+		_sync_post_debrief_followup_panel_visibility()
 		return
 	label.visible = true
 	label.text = summary_text
@@ -2919,6 +2941,9 @@ func _update_post_debrief_homebase_summary() -> void:
 	label.set_meta("frontier_probe_result_present", _is_frontier_probe_last_result())
 	label.set_meta("post_debrief_homebase_result_text", _build_post_debrief_homebase_result_text())
 	label.set_meta("post_debrief_homebase_next_step_text", _build_post_debrief_homebase_next_step_text())
+	label.set_meta("homebase_followup_emphasis", true)
+	label.set_meta("homebase_followup_style_id", HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID)
+	_sync_post_debrief_followup_panel_visibility()
 
 
 func _update_next_sortie_readiness_summary() -> void:
@@ -2931,6 +2956,7 @@ func _update_next_sortie_readiness_summary() -> void:
 	if line.is_empty():
 		label.visible = false
 		label.text = ""
+		_sync_post_debrief_followup_panel_visibility()
 		return
 	label.visible = true
 	label.text = line
@@ -2939,59 +2965,133 @@ func _update_next_sortie_readiness_summary() -> void:
 	label.set_meta("current_next_step_id", current_step_id)
 	label.set_meta("readiness_step_count", steps.size())
 	label.set_meta("readiness_line", line)
+	label.set_meta("homebase_followup_emphasis", true)
+	label.set_meta("homebase_followup_style_id", HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID)
+	_sync_post_debrief_followup_panel_visibility()
+
+
+func _ensure_post_debrief_followup_panel() -> PanelContainer:
+	var mission_vbox := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
+	var existing := mission_vbox.get_node_or_null("PostDebriefFollowupPanel") as PanelContainer
+	if existing != null:
+		return existing
+	var panel := PanelContainer.new()
+	panel.name = "PostDebriefFollowupPanel"
+	panel.custom_minimum_size = Vector2(0.0, HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.visible = false
+	panel.add_theme_stylebox_override("panel", _build_post_debrief_followup_panel_style())
+	panel.set_meta("homebase_followup_style_id", HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID)
+	panel.set_meta("read_only", true)
+	panel.set_meta("ui_sets_gameplay_truth", false)
+	var margin := MarginContainer.new()
+	margin.name = "FollowupMargin"
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 7)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_bottom", 7)
+	panel.add_child(margin)
+	var vbox := VBoxContainer.new()
+	vbox.name = "FollowupVBox"
+	vbox.add_theme_constant_override("separation", 4)
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	margin.add_child(vbox)
+	mission_vbox.add_child(panel)
+	var readiness_panel := mission_vbox.get_node_or_null("PreMissionReadinessPanel")
+	if readiness_panel != null:
+		mission_vbox.move_child(panel, readiness_panel.get_index() + 1)
+	else:
+		var briefing_panel := mission_vbox.get_node_or_null("MissionBriefingPanel")
+		if briefing_panel != null:
+			mission_vbox.move_child(panel, briefing_panel.get_index() + 1)
+	return panel
 
 
 func _ensure_post_debrief_homebase_summary_label() -> Label:
-	var mission_vbox := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
-	var existing := mission_vbox.get_node_or_null("PostDebriefHomebaseSummaryLabel") as Label
+	var vbox := _get_post_debrief_followup_vbox()
+	var existing := vbox.get_node_or_null("PostDebriefHomebaseSummaryLabel") as Label
 	if existing != null:
 		return existing
 	var label := Label.new()
 	label.name = "PostDebriefHomebaseSummaryLabel"
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size", 9)
-	META_UI_SKIN_SCRIPT.style_body_label(label, 9)
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.custom_minimum_size = Vector2(0.0, 20.0)
+	label.add_theme_font_size_override("font_size", HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE)
+	META_UI_SKIN_SCRIPT.style_body_label(label, HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE)
 	label.add_theme_color_override("font_color", Color("c7f2df"))
-	mission_vbox.add_child(label)
-	var personnel_label := mission_vbox.get_node_or_null("PersonnelEventsLabel")
-	var summary_label := mission_vbox.get_node_or_null("MissionSummaryLabel")
-	if personnel_label != null:
-		mission_vbox.move_child(label, personnel_label.get_index() + 1)
-	elif summary_label != null:
-		mission_vbox.move_child(label, summary_label.get_index() + 1)
+	label.set_meta("homebase_followup_emphasis", true)
+	label.set_meta("homebase_followup_style_id", HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID)
+	vbox.add_child(label)
 	return label
 
 
 func _ensure_next_sortie_readiness_label() -> Label:
-	var mission_vbox := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
-	var existing := mission_vbox.get_node_or_null("NextSortieReadinessLabel") as Label
+	var vbox := _get_post_debrief_followup_vbox()
+	var existing := vbox.get_node_or_null("NextSortieReadinessLabel") as Label
 	if existing != null:
 		return existing
 	var label := Label.new()
 	label.name = "NextSortieReadinessLabel"
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.add_theme_font_size_override("font_size", 9)
-	META_UI_SKIN_SCRIPT.style_body_label(label, 9)
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.custom_minimum_size = Vector2(0.0, 20.0)
+	label.add_theme_font_size_override("font_size", HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE)
+	META_UI_SKIN_SCRIPT.style_body_label(label, HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE)
 	label.add_theme_color_override("font_color", Color("d6e9ff"))
-	mission_vbox.add_child(label)
-	var post_label := mission_vbox.get_node_or_null("PostDebriefHomebaseSummaryLabel")
-	var personnel_label := mission_vbox.get_node_or_null("PersonnelEventsLabel")
-	var summary_label := mission_vbox.get_node_or_null("MissionSummaryLabel")
-	if post_label != null:
-		mission_vbox.move_child(label, post_label.get_index() + 1)
-	elif personnel_label != null:
-		mission_vbox.move_child(label, personnel_label.get_index() + 1)
-	elif summary_label != null:
-		mission_vbox.move_child(label, summary_label.get_index() + 1)
+	label.set_meta("homebase_followup_emphasis", true)
+	label.set_meta("homebase_followup_style_id", HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID)
+	vbox.add_child(label)
 	return label
 
 
 func _get_post_debrief_homebase_summary_label() -> Label:
-	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefHomebaseSummaryLabel") as Label
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/PostDebriefHomebaseSummaryLabel") as Label
 
 
 func _get_next_sortie_readiness_label() -> Label:
-	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/NextSortieReadinessLabel") as Label
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/NextSortieReadinessLabel") as Label
+
+
+func _get_post_debrief_followup_panel() -> PanelContainer:
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel") as PanelContainer
+
+
+func _get_post_debrief_followup_vbox() -> VBoxContainer:
+	var panel := _ensure_post_debrief_followup_panel()
+	return panel.get_node("FollowupMargin/FollowupVBox") as VBoxContainer
+
+
+func _sync_post_debrief_followup_panel_visibility() -> void:
+	var panel := _get_post_debrief_followup_panel()
+	if panel == null:
+		return
+	var post_label := _get_post_debrief_homebase_summary_label()
+	var readiness_label := _get_next_sortie_readiness_label()
+	var post_intends_visible: bool = post_label != null and post_label.visible and not post_label.text.strip_edges().is_empty()
+	var readiness_intends_visible: bool = readiness_label != null and readiness_label.visible and not readiness_label.text.strip_edges().is_empty()
+	panel.visible = post_intends_visible or readiness_intends_visible
+
+
+func _build_post_debrief_followup_panel_style() -> StyleBoxFlat:
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.045, 0.085, 0.095, 0.96)
+	stylebox.border_color = Color(0.32, 0.72, 0.72, 0.84)
+	stylebox.border_width_left = 3
+	stylebox.border_width_top = 1
+	stylebox.border_width_right = 1
+	stylebox.border_width_bottom = 1
+	stylebox.corner_radius_top_left = 5
+	stylebox.corner_radius_top_right = 5
+	stylebox.corner_radius_bottom_left = 5
+	stylebox.corner_radius_bottom_right = 5
+	stylebox.content_margin_left = 4
+	stylebox.content_margin_right = 4
+	stylebox.content_margin_top = 4
+	stylebox.content_margin_bottom = 4
+	return stylebox
 
 
 func _build_post_debrief_homebase_summary_text() -> String:
