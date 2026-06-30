@@ -76,7 +76,7 @@
 <body data-report-id="project_current_state_handbook_refresh_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch Refresh</h1>
-    <p>Kompakter Zwischenbericht nach TASK_705 bis TASK_708: Was spielbar ist, wie man es bedient, wo es reibt und was als naechstes sinnvoll ist.</p>
+    <p>Kompakter Zwischenbericht nach TASK_705 bis TASK_709: Was spielbar ist, wie man es bedient, wo es reibt und was als naechstes sinnvoll ist.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-07-01</span>
@@ -85,6 +85,7 @@
       <span class="pill good">TASK_706 Door Layout/Visual Polish</span>
       <span class="pill good">TASK_707 Door/Computer/Cargo Smoke</span>
       <span class="pill good">TASK_708 Station Route Visual Evidence</span>
+      <span class="pill good">TASK_709 Window Playtest Notes</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -104,7 +105,7 @@
         <article class="card wide">
           <h2>Kurzer Stand</h2>
           <p>Der spielbare Kern ist nicht mehr nur Idee: Homebase, Readiness, Dropship/Insertion, Mission-HUD, Fireteam-Orders, Objective-Route, Debrief und Homebase-Return sind als Review-Spine vorhanden. Die aktuelle Spitze ist die Door-/Station-Interaktion, weil sie Singleplayer-Lesbarkeit und Host/Client-Authority zusammenbringt.</p>
-          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket.</div>
+          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -117,6 +118,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_706_done"> TASK_706 Door Visual Polish vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_707_done"> TASK_707 Door/Computer/Cargo Smoke vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_708_done"> TASK_708 Station Route Visual Evidence vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_709_done"> TASK_709 Window Playtest Notes vorhanden</label>
         </article>
         <article class="card full">
           <h2>Systemkarte</h2>
@@ -201,6 +203,7 @@
           <label class="checkline"><input type="checkbox" data-export-key="playtest.door_open_visible"> Door closed/opening/open ist im Missionsbild lesbar</label>
           <label class="checkline"><input type="checkbox" data-export-key="playtest.door_computer_cargo_smoke"> Door -> Computer -> Cargo funktioniert als kurzer Stations-Smoke</label>
           <label class="checkline"><input type="checkbox" data-export-key="playtest.station_route_visual_evidence"> Station-Route-Evidence PNG/Manifest ist geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.station_route_window_notes_exported"> Station-Route-Fensterbefund ist als JSON exportiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="playtest.host_client_reject_clear"> Wrong-Team-Reject ist im Host/Client-Lauf verstaendlich</label>
           <label class="checkline"><input type="checkbox" data-export-key="playtest.debrief_return"> Debrief/Return fuehlt sich wie ein Loop an, nicht wie ein Abbruch</label>
         </article>
@@ -223,14 +226,13 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster Griff</h2>
-          <p>Aktuell sinnvoll: TASK_708 fertigziehen, also aus Door, Computer und Cargo ein sichtbares Evidence-Paket schreiben. Danach entweder TASK_709 als Fenster-Playtest-Notizen oder echter TASK_700-Workbench-Export.</p>
+          <p>Aktuell sinnvoll: TASK_709 im echten Fenster ausfuellen. Danach entscheidet der Befund: Entweder kleine Visual-Polish-Runde fuer Door/Computer/Cargo oder echter TASK_700-Host/Client-Workbench-Export.</p>
           <div class="callout warning">Nicht jetzt: grosses neues Missionssystem, Ammo-Runner, tiefe Economy oder Editor-Umbau. Erst muss die kleine Station-Interaktion angenehm, sichtbar und im Host/Client-Pfad glaubwuerdig sein.</div>
         </article>
         <article class="card">
           <h2>Empfehlung</h2>
           <select data-export-key="next.recommended_path">
-            <option value="finish_task_708">TASK_708 Evidence abschliessen</option>
-            <option value="station_window_notes">TASK_709 Fenster-Playtest-Notizen</option>
+            <option value="station_window_notes">TASK_709 Fenster-Playtest-Notizen ausfuellen</option>
             <option value="real_host_client_run">Echten Host/Client Door Run machen</option>
             <option value="mini_scenario_playtest">Mini-Szenario Playtest</option>
           </select>
@@ -242,7 +244,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30/07-01: Neuer kompakter Ist-Stand-/Handbuch-Refresh angelegt. TASK_705 ist letzter Door-Manual-Run-Stand. TASK_706 machte Door-Layout-/Visual-Polish read-only sichtbar. TASK_707 pruefte Door -> Computer -> Cargo als integrierten Stations-Smoke. TASK_708 schreibt daraus ein PNG-/JSON-Evidence-Paket, ohne neue Gameplay-Wahrheit zu erzeugen.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30/07-01: Neuer kompakter Ist-Stand-/Handbuch-Refresh angelegt. TASK_705 ist letzter Door-Manual-Run-Stand. TASK_706 machte Door-Layout-/Visual-Polish read-only sichtbar. TASK_707 pruefte Door -> Computer -> Cargo als integrierten Stations-Smoke. TASK_708 schreibt daraus ein PNG-/JSON-Evidence-Paket. TASK_709 stellt die ausfuellbare Fenster-Playtest-Workbench bereit, ohne neue Gameplay-Wahrheit zu erzeugen.</div>
         </article>
         <article class="card full">
           <h2>TASK_708 Evidence</h2>
@@ -252,6 +254,15 @@
           <input readonly value="tmp/station_route_visual_evidence.png" data-export-key="station_route_visual_evidence.png_path">
           <input readonly value="tmp/station_route_visual_evidence.json" data-export-key="station_route_visual_evidence.manifest_path">
           <textarea data-export-key="station_route_visual_evidence.notes" placeholder="Nach dem echten Fensterblick: Ist Door/Computer/Cargo ohne Suche lesbar?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_709 Window Notes</h2>
+          <p>Diese Workbench ist der aktuelle Platz fuer den echten Fensterblick. Sie exportiert lokale Arbeitsnotizen, schreibt aber keine Projektdateien und setzt keine Gameplay-Wahrheit.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_window_playtest_notes.workbench_written"> Workbench-Pfad vorbereitet</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_window_playtest_notes.manifest_contract_written"> Manifest-Contract vorbereitet</label>
+          <input readonly value="docs/reports/station_route_window_playtest_notes_2026_07_01.html" data-export-key="station_route_window_playtest_notes.workbench_path">
+          <input readonly value="tmp/station_route_window_playtest_notes.json" data-export-key="station_route_window_playtest_notes.manifest_path">
+          <textarea data-export-key="station_route_window_playtest_notes.notes" placeholder="Nach dem echten Fensterblick: Was muss fuer Door/Computer/Cargo noch poliert werden?"></textarea>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -313,7 +324,8 @@
             latest_completed_visual_task: "TASK_706 - Mission Door Layout/Visual Polish",
             latest_completed_flow_task: "TASK_707 - Mission Door/Computer/Cargo Smoke",
             latest_completed_evidence_task: "TASK_708 - Station Route Visual Evidence",
-            recommended_next_task: "TASK_709 - Station Route Window Playtest Notes oder echter TASK_700-Workbench-Export",
+            latest_completed_review_task: "TASK_709 - Station Route Window Playtest Notes",
+            recommended_next_task: "TASK_709 im echten Fenster ausfuellen, danach TASK_710 Visual Polish oder Host/Client-Akzeptanz",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },

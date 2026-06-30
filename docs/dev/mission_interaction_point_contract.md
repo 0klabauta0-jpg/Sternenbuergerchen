@@ -260,6 +260,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Evidence darf Door-/Computer-/Cargo-Lesbarkeit, PNG-/Manifest-Pfade und offene manuelle Checks festhalten, aber keine Runtime-Interaction dauerhaft starten und keine Gameplay-Wahrheit schreiben.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Window Playtest Notes
+- `StationRouteWindowPlaytestNotes` erzeugt eine read-only Notizschale fuer den echten Fensterblick auf Door -> Computer -> Cargo.
+- Der Snapshot nennt TASK_708-Evidence-Quellen, Required-Checks, Notizfelder, Reportpfad, Manifestpfad und `recommended_next_task`.
+- Required-Checks betreffen echte Fensteransicht, Door-Lesbarkeit, Computer-/Cargo-Lesbarkeit, HUD-Overlap, Kamera/Zoom, Performance-Gefuehl und den bewusst gesetzten menschlichen Sichtentscheid.
+- `manual_window_review_done` bleibt false, bis ein Mensch die Workbench ausfuellt und den Sichtentscheid bewusst markiert.
+- Die HTML-Workbench `docs/reports/station_route_window_playtest_notes_2026_07_01.html` darf lokale JSON-Arbeitsnotizen exportieren, aber keine Projektdateien schreiben und keine Gameplay-Wahrheit setzen.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

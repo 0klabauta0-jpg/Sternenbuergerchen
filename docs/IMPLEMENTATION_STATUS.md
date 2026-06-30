@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_709 - Station Route Window Playtest Notes
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_709_station_route_window_playtest_notes.md`, `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/station_route_window_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: Die neue HTML-Workbench sammelt echte Fenster-Checks zu Door -> Computer -> Cargo, HUD-Overlap, Kamera und Performance-Gefuehl.
+- Stand: `StationRouteWindowPlaytestNotes` baut daraus ein read-only Snapshot-/Manifest-Format und behauptet keinen abgeschlossenen Sichtentscheid.
+- Stand: Der aktuelle Ist-Stand-/Handbuch-Refresh verweist auf TASK_709 und die Manifest-/Workbench-Pfade.
+- Risiken/offen: Der echte menschliche Fensterblick ist weiterhin offen; TASK_709 macht ihn nur sauber dokumentierbar.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_709_station_route_window_playtest_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_708_station_route_visual_evidence.gd`, `git diff --check`.
+- Naechster Schritt: Workbench im echten Godot-Fenster ausfuellen oder danach TASK_710 fuer Visual-Polish/Host-Client-Akzeptanz ableiten.
+
 ### TASK_708 - Station Route Visual Evidence
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/tasks/TASK_707_mission_door_computer_cargo_smoke.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
