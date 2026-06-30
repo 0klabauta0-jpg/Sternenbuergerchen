@@ -146,6 +146,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_686_done"> TASK_686 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_687_done"> TASK_687 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_688_done"> TASK_688 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_689_done"> TASK_689 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -713,6 +714,19 @@
           <textarea data-export-key="mission_interaction_fullhd_evidence.findings" placeholder="Beim echten Fensterlauf notieren: Sind Labels/Proxies gut sichtbar, zu dominant, verdeckt etwas die Karte?"></textarea>
           <div contenteditable="true" data-note-key="notes.mission_interaction_fullhd_evidence" data-placeholder="TASK_688-Notizen...">TASK_688 beweist Snapshot-, PNG- und Budgetpfad. Headless-Evidence bleibt ein Review-Board; der echte Fenster-Sichtentscheid ist weiter offen.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_689 - Mission Interaction Visual Polish Findings</h2>
+          <p>Die FullHD-Evidence wird jetzt in maschinenlesbare Polish-Findings uebersetzt. Der Snapshot trennt technische Blocker, Warnungen und offene manuelle Sichtentscheidungen. Aktuell ist der technische Pfad gruen; der echte Fenster-Sichtlauf bleibt offen.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_polish_findings.snapshot"> Polish-Findings-Snapshot vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_polish_findings.no_blockers"> Keine technischen Visual-Blocker</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_polish_findings.visual_budget"> Visualbudget innerhalb Limit</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_polish_findings.manual_open"> Manueller Sichtlauf bleibt offen markiert</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_polish_findings.no_gameplay_truth"> Findings melden `ui_sets_gameplay_truth = false`</label>
+          <input readonly value="tmp/mission_interaction_visual_polish_findings.json" data-export-key="mission_interaction_visual_polish_findings.manifest_path">
+          <input readonly value="TASK_689 - Mission Interaction Visual Polish Findings" data-export-key="mission_interaction_visual_polish_findings.completed_task">
+          <textarea data-export-key="mission_interaction_visual_polish_findings.findings" placeholder="Nach echtem Fensterlauf: Welche Label-/Proxy-Groessen stoeren oder helfen?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_visual_polish_findings" data-placeholder="TASK_689-Notizen...">TASK_689 gibt eine technische Polish-Ampel. Sie ersetzt keine Sichtabnahme, verhindert aber, dass technische Visual-Regressions als Geschmackssache durchrutschen.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -732,8 +746,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Mission-Visual-Polish oder Door-Asset-Swap</strong> ist jetzt der beste Anschluss: Die Objective-Gates sind zusammengefuehrt, Labels und Objekt-Proxies sind da, und TASK_688 schreibt FullHD-Evidence. Nun kann man entweder am echten Bild polieren oder Doors mit echten Asset-/Collision-Regeln angehen.</p>
-          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence.</div>
+          <p><strong>Mission Interaction Manual Sight Notes</strong> ist jetzt der beste Anschluss: Der technische Visualpfad ist gruen, Evidence und Polish-Findings sind da. Jetzt braucht es echte Fensterbeobachtung oder danach gezielten Label-/Proxy-Polish.</p>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence. TASK_689 bewertet technische Polish-Findings.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>

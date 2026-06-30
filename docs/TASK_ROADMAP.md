@@ -317,6 +317,7 @@ git checkout -b batch/<batch-name>
 - TASK_686 - Mission Interaction Visual State (implementiert)
 - TASK_687 - Mission Interaction Object Reaction (implementiert)
 - TASK_688 - Mission Interaction FullHD Evidence (implementiert)
+- TASK_689 - Mission Interaction Visual Polish Findings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
