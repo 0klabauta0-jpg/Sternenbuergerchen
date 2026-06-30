@@ -736,6 +736,17 @@
 - Lokale Pruefung: `task_677_mission_interaction_use_intent.gd`, `task_676_mission_interaction_use_feedback.gd`, `git diff --check`.
 - Naechster Schritt: Runtime-Fortschrittsproducer fuer Computer-/Hold-Zonen oder FullHD-Sichtlauf fuer Interaction-Labels.
 
+### TASK_678 - Mission Interaction Runtime Progress
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_678_mission_interaction_runtime_progress.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/tasks/TASK_677_mission_interaction_use_intent.md`, `docs/tasks/TASK_675_mission_interaction_runtime_use_state.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Use-Intent-Waypoints uebernehmen `duration_seconds`, `step_id`, `required_state`, Interaction-Typ und Team aus dem Feedback und setzen die Waypoint-Hold-Dauer.
+- Stand: Laufende Interaction-Waypoints melden `holding`/`operating`, Hold-Zeit, Progress und Completion an `MissionCombatLoopDriver.update_mission_interaction_runtime_progress()`.
+- Stand: Der Driver exportiert `get_mission_interaction_runtime_states()` und `get_mission_interaction_runtime_state_snapshot()`; der bestehende Use-State liest daraus `in_progress` und `complete`.
+- Stand: Completion setzt den Scenario-Step-State; Cargo-Hold synchronisiert zusaetzlich den Cargo-Touchdown-State.
+- Risiken/offen: Noch kein Door-State-/Animationssystem und kein finaler FullHD-Sichtlauf der Fortschrittszeile.
+- Lokale Pruefung: `task_678_mission_interaction_runtime_progress.gd`, `task_677_mission_interaction_use_intent.gd`, `task_676_mission_interaction_use_feedback.gd`, `git diff --check`.
+- Naechster Schritt: FullHD-Sichtlauf fuer Interaction-Labels oder Editor-Inspector fuer Interaction-Point-Bindings.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

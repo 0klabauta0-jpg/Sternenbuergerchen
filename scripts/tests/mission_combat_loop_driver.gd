@@ -193,6 +193,7 @@ var _mission_scenario_cargo_state: String = ""
 var _mission_scenario_cargo_hold_seconds: float = 0.0
 var _mission_cargo_touchdown_bridge = MISSION_CARGO_TOUCHDOWN_BRIDGE_SCRIPT.new()
 var _mission_cargo_touchdown_snapshot: Dictionary = {}
+var _mission_interaction_runtime_states: Dictionary = {}
 var _readability_presenter = COMBAT_READABILITY_PRESENTER_SCRIPT.new()
 var _audio_event_bus = null
 
@@ -301,6 +302,7 @@ func get_mission_result() -> Dictionary:
 func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false
+	_mission_interaction_runtime_states.clear()
 	_mission_scenario_runtime_gates.call("configure_from_file", path)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
 	if _mission_cargo_touchdown_bridge != null:
@@ -312,6 +314,7 @@ func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 func configure_scenario_runtime_gates(slice: Dictionary) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false
+	_mission_interaction_runtime_states.clear()
 	_mission_scenario_runtime_gates.call("configure_from_slice", slice)
 	_mission_scenario_runtime_gate_snapshot = Dictionary(_mission_scenario_runtime_gates.call("get_snapshot")).duplicate(true)
 	if _mission_cargo_touchdown_bridge != null:
@@ -337,6 +340,77 @@ func configure_mission_cargo_touchdown_bridge(config: Dictionary) -> bool:
 func get_mission_cargo_touchdown_snapshot() -> Dictionary:
 	_update_mission_scenario_runtime_gates()
 	return _mission_cargo_touchdown_snapshot.duplicate(true)
+
+
+func get_mission_interaction_runtime_states() -> Dictionary:
+	return _mission_interaction_runtime_states.duplicate(true)
+
+
+func get_mission_interaction_runtime_state_snapshot() -> Dictionary:
+	var states: Dictionary = _mission_interaction_runtime_states.duplicate(true)
+	var complete_count: int = 0
+	var in_progress_count: int = 0
+	for state_variant in states.values():
+		var state: Dictionary = Dictionary(state_variant)
+		if bool(state.get("complete", false)):
+			complete_count += 1
+		elif ["active", "holding", "operating", "in_progress"].has(String(state.get("state", "")).strip_edges().to_lower()):
+			in_progress_count += 1
+	return {
+		"schema": "sternenbuergerchen.mission_interaction_runtime_progress.v1",
+		"runtime_authority": "MissionCombatLoopDriver",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"interaction_count": states.size(),
+		"in_progress_count": in_progress_count,
+		"complete_count": complete_count,
+		"interaction_states": states,
+	}
+
+
+func update_mission_interaction_runtime_progress(payload: Dictionary) -> Dictionary:
+	var interaction_id: String = String(payload.get("interaction_id", "")).strip_edges()
+	if interaction_id.is_empty():
+		return {}
+	var duration_seconds: float = maxf(float(payload.get("duration_seconds", 0.0)), 0.0)
+	var hold_seconds: float = clampf(maxf(float(payload.get("hold_seconds", 0.0)), 0.0), 0.0, duration_seconds if duration_seconds > 0.0 else INF)
+	var complete: bool = bool(payload.get("complete", false)) or (duration_seconds <= 0.0 and bool(payload.get("can_complete_zero_duration", false))) or (duration_seconds > 0.0 and hold_seconds + 0.001 >= duration_seconds)
+	var progress: float = 1.0 if complete else clampf(float(payload.get("progress", 0.0)), 0.0, 1.0)
+	if duration_seconds > 0.0:
+		progress = 1.0 if complete else clampf(hold_seconds / duration_seconds, 0.0, 1.0)
+	var state_name: String = String(payload.get("state", "active")).strip_edges().to_lower()
+	if complete:
+		state_name = "complete"
+	var state: Dictionary = {
+		"state": state_name,
+		"complete": complete,
+		"hold_seconds": hold_seconds,
+		"duration_seconds": duration_seconds,
+		"progress": progress,
+		"fireteam_id": String(payload.get("fireteam_id", "")).strip_edges().to_lower(),
+		"team_id": String(payload.get("team_id", friendly_team_id)).strip_edges().to_lower(),
+		"active_team_id": String(payload.get("team_id", friendly_team_id)).strip_edges().to_lower(),
+		"step_id": String(payload.get("step_id", "")).strip_edges(),
+		"gate_id": String(payload.get("gate_id", payload.get("step_id", ""))).strip_edges(),
+		"required_state": String(payload.get("required_state", "")).strip_edges(),
+		"interaction_type": String(payload.get("interaction_type", "")).strip_edges().to_lower(),
+		"command_type": String(payload.get("command_type", "")).strip_edges().to_lower(),
+		"updated_msec": Time.get_ticks_msec(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	var previous_state: Dictionary = Dictionary(_mission_interaction_runtime_states.get(interaction_id, {}))
+	var previous_progress_bucket: int = int(round(float(previous_state.get("progress", -1.0)) * 100.0))
+	var next_progress_bucket: int = int(round(progress * 100.0))
+	var previous_hold_bucket: int = int(round(float(previous_state.get("hold_seconds", -1.0)) * 10.0))
+	var next_hold_bucket: int = int(round(hold_seconds * 10.0))
+	var state_changed: bool = String(previous_state.get("state", "")) != state_name or bool(previous_state.get("complete", false)) != complete or previous_progress_bucket != next_progress_bucket or previous_hold_bucket != next_hold_bucket
+	_mission_interaction_runtime_states[interaction_id] = state.duplicate(true)
+	if complete:
+		_apply_completed_mission_interaction_state(state)
+	elif state_changed:
+		_apply_in_progress_mission_interaction_state(state)
+	return state.duplicate(true)
 
 
 func set_mission_scenario_runtime_step_state(step_id: String, state: String) -> void:
@@ -365,6 +439,24 @@ func set_mission_cargo_touchdown_state(state: String, hold_seconds: float = 0.0,
 	if _mission_cargo_touchdown_bridge != null and bool(_mission_cargo_touchdown_bridge.call("is_configured")):
 		_mission_cargo_touchdown_bridge.call("set_runtime_state", _mission_scenario_cargo_state, _mission_scenario_cargo_hold_seconds, progress)
 	_update_mission_scenario_runtime_gates()
+
+
+func _apply_in_progress_mission_interaction_state(state: Dictionary) -> void:
+	if String(state.get("interaction_type", "")).strip_edges().to_lower() != "hold_zone":
+		return
+	var step_id: String = String(state.get("step_id", "")).strip_edges()
+	if step_id != "cargo_touchdown_extract":
+		return
+	set_mission_cargo_touchdown_state("landed", float(state.get("hold_seconds", 0.0)), float(state.get("progress", 0.0)))
+
+
+func _apply_completed_mission_interaction_state(state: Dictionary) -> void:
+	var step_id: String = String(state.get("step_id", "")).strip_edges()
+	var required_state: String = String(state.get("required_state", "complete")).strip_edges()
+	if step_id == "cargo_touchdown_extract":
+		set_mission_cargo_touchdown_state(required_state if not required_state.is_empty() else "cargo_departed", float(state.get("hold_seconds", 0.0)), 1.0)
+	if not step_id.is_empty():
+		set_mission_scenario_runtime_step_state(step_id, required_state if not required_state.is_empty() else "complete")
 
 
 func get_playability_snapshot() -> Dictionary:

@@ -74,6 +74,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `get_mission_interaction_use_intent_snapshot()` und `get_command_feedback_snapshot().mission_interaction_use_intent` exportieren den letzten Intent samt `accepted`, `blocked_reason`, `command_type`, `waypoint_id` und `requires_go`.
 - Blockierte oder ausser Reichweite liegende Interactions duerfen keinen Waypoint erzeugen.
 
+## Runtime Progress
+- Use-Intent-Waypoints tragen `duration_seconds`, `step_id`, `gate_id`, `required_state`, `interaction_type` und `required_team` als Metadaten und setzen `hold_duration_seconds`.
+- Laufende Interaction-Waypoints melden ihren Fortschritt ueber `MissionCombatLoopDriver.update_mission_interaction_runtime_progress(payload)`.
+- Der Driver exportiert `get_mission_interaction_runtime_states()` und `get_mission_interaction_runtime_state_snapshot()` fuer Binding-/Use-State-Snapshots.
+- `holding`/`operating` und Completion kommen aus der laufenden Runtime-Ausfuehrung, nicht aus HUD-Text.
+- Bei Completion setzt der Driver den passenden Scenario-Step-State; Cargo-Hold aktualisiert zusaetzlich den Cargo-Touchdown-State.
+- UI liest diesen Zustand weiter ueber `get_mission_interaction_runtime_use_state_snapshot()` und setzt keine Gameplay-Wahrheit.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.
@@ -83,5 +91,4 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 
 ## Naechste Slices
 - Editor-Inspector fuer Interaction-Point-Bindings.
-- Runtime-Fortschrittsproducer fuer Computer-/Hold-Zonen.
 - FullHD-Readability-Pass fuer Interaction-Labels im Missionsbild.
