@@ -284,6 +284,7 @@ git checkout -b batch/<batch-name>
 - TASK_653 - Frontier Probe One-Screen Playability Pass (implementiert)
 - TASK_654 - Frontier Probe One-Screen F6 Playtest Notes (implementiert)
 - TASK_655 - Frontier Probe One-Screen Visual Tuning Findings (implementiert)
+- TASK_656 - Frontier Probe Real F6 Visual Review (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
