@@ -307,6 +307,7 @@ git checkout -b batch/<batch-name>
 - TASK_676 - Mission Interaction Use Feedback (implementiert)
 - TASK_677 - Mission Interaction Use Intent (implementiert)
 - TASK_678 - Mission Interaction Runtime Progress (implementiert)
+- TASK_679 - Mission Interaction Progress Readability (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

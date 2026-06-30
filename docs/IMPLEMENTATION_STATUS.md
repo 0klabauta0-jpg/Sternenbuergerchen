@@ -747,6 +747,17 @@
 - Lokale Pruefung: `task_678_mission_interaction_runtime_progress.gd`, `task_677_mission_interaction_use_intent.gd`, `task_676_mission_interaction_use_feedback.gd`, `git diff --check`.
 - Naechster Schritt: FullHD-Sichtlauf fuer Interaction-Labels oder Editor-Inspector fuer Interaction-Point-Bindings.
 
+### TASK_679 - Mission Interaction Progress Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_679_mission_interaction_progress_readability.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/tasks/TASK_678_mission_interaction_runtime_progress.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `get_mission_interaction_progress_readability_snapshot()` erzeugt aus dem bestehenden Use-Feedback eine kompakte, read-only Progress-Zeile wie `COM 50% 9/18s FT1`.
+- Stand: `get_command_feedback_snapshot()` exportiert den Readability-Snapshot, `mission_interaction_progress_line` und das Zeichenbudget.
+- Stand: Die Mission-Control-ACT-Zeile nimmt aktiven COM-/CARGO-Progress auf, ohne Scenario-Gates oder Runtime-Stati zu setzen.
+- Stand: Der Headless-Verifier schreibt `tmp/mission_interaction_progress_readability.json` als Beleg und markiert den echten manuellen FullHD-Sichtlauf weiter als offen.
+- Risiken/offen: Echter Fenster-Sichttest, Door-State-/Animation und Editor-Inspector fuer Interaction-Bindings bleiben Folgearbeit.
+- Lokale Pruefung: `task_679_mission_interaction_progress_readability.gd`, `task_678_mission_interaction_runtime_progress.gd`, `git diff --check`.
+- Naechster Schritt: Editor-Inspector fuer Interaction-Point-Bindings oder echter FullHD-Fenster-Sichtlauf fuer COM-/CARGO-Progress.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

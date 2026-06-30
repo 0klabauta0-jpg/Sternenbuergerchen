@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_678: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_679: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_678</span>
-      <span class="pill">Naechster Kandidat: FullHD-Sichtlauf oder Editor-Inspector</span>
+      <span class="pill">Letzter Stand: TASK_679</span>
+      <span class="pill">Naechster Kandidat: Editor-Inspector oder echter FullHD-Sichtlauf</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_678 - Mission Interaction Runtime Progress ist der aktuelle Abschlussstand: Use-Intent-Waypoints tragen jetzt Hold-Dauer und Runtime-Bindings, laufende Computer-/Hold-Zonen melden `operating`/`holding` samt Progress und Completion setzt die passenden Scenario-Gates. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
+          <div class="callout">TASK_679 - Mission Interaction Progress Readability ist der aktuelle Abschlussstand: laufender COM-/CARGO-Progress wird jetzt als kurze read-only Zeile in Command-Feedback und Mission-Control-ACT exportiert. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -135,6 +135,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_676_done"> TASK_676 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_677_done"> TASK_677 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_678_done"> TASK_678 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_679_done"> TASK_679 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -229,7 +230,7 @@
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
               <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>TASK_665 prueft die technische Kette; TASK_666 braucht den echten Klickbefund.</td></tr>
-              <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_678 macht die ersten Interactions als laufenden Runtime-Fortschritt nutzbar; als naechstes fehlen Editor-Inspector, echter FullHD-Sichtfeinschliff und geteilte Profile.</td></tr>
+              <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_679 macht laufende Interactions im HUD knapp lesbar; als naechstes fehlen Editor-Inspector, echter FullHD-Sichtfeinschliff und geteilte Profile.</td></tr>
             </tbody>
           </table>
         </article>
@@ -550,6 +551,18 @@
           <textarea data-export-key="mission_interaction_runtime_progress.findings" placeholder="Naechster Sichttest: Sind COM/CARGO-Fortschrittszeilen im echten Fenster schnell genug lesbar?"></textarea>
           <div contenteditable="true" data-note-key="notes.mission_interaction_runtime_progress" data-placeholder="TASK_678-Notizen...">TASK_678 schliesst die erste Bedienbruecke: Der Spieler plant Use, drueckt GO, und die Runtime kann daraus `in_progress` und `complete` ableiten. Offen bleibt vor allem, wie gut diese Fortschrittszeile im echten FullHD-Spielbild sitzt.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_679 - Mission Interaction Progress Readability</h2>
+          <p>Laufende Computer- und Cargo-Interactions haben jetzt einen expliziten Lesbarkeits-Snapshot. Die kurze Zeile enthaelt Token, Prozent, Hold-Zeit und Fireteam, zum Beispiel `COM 50% 9/18s FT1`, und wird im Command-Feedback sowie in der Mission-Control-ACT-Zeile exportiert.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_progress_readability.snapshot"> Readability-Snapshot vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_progress_readability.command_export"> Command-Feedback exportiert Progress-Zeile</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_progress_readability.act_line"> Mission-Control-ACT-Zeile enthaelt aktiven Progress</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_progress_readability.line_budget"> COM-/CARGO-Zeilen bleiben im Zeichenbudget</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mission_interaction_progress_readability.manual_fullhd_done"> Echter manueller FullHD-Sichttest erledigt</label>
+          <input readonly value="TASK_679 - Mission Interaction Progress Readability" data-export-key="mission_interaction_progress_readability.completed_task">
+          <textarea data-export-key="mission_interaction_progress_readability.findings" placeholder="Beim echten Fensterlauf notieren: Ist die ACT-Zeile im Gefecht schnell genug erfassbar?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_progress_readability" data-placeholder="TASK_679-Notizen...">TASK_679 beweist headless, dass COM-/CARGO-Fortschritt kurz und exportiert bleibt. Der Bericht behauptet bewusst keinen echten Augen-Test; der naechste sichtbare Schritt ist entweder dieser Fenster-Sichtlauf oder ein Editor-Inspector fuer Interaction-Bindings.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -569,8 +582,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>FullHD-Sichtlauf fuer Interaction-Labels und Progress</strong> ist jetzt der beste spielbare Anschluss, wenn wir das Gefuehl absichern wollen. <strong>Editor-Binding-Inspector</strong> ist der beste Content-Anschluss, wenn du mehr Maps bauen willst.</p>
-          <div class="callout">TASK_678 hat Runtime-Fortschritt erledigt. Offen sind Sicht-Feinjustierung, Editor-Inspector, geteilte Profile und der echte TASK_666-Host/Client-Fensterklick.</div>
+          <p><strong>Editor-Binding-Inspector</strong> ist jetzt der beste Content-Anschluss, wenn du mehr Maps bauen willst. <strong>Echter FullHD-Sichtlauf fuer Interaction-Progress</strong> ist der beste spielbare Anschluss, wenn wir das Gefuehl absichern wollen.</p>
+          <div class="callout">TASK_679 hat den headless Readability-Vertrag erledigt. Offen sind echter Fenster-Sichttest, Editor-Inspector, geteilte Profile und der echte TASK_666-Host/Client-Fensterklick.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -595,7 +608,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_678. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset, liefert Builder-Drag-Handles, Auto-Snap-Piece-Aufloesung, zeigt diese Preview-Daten als `Label3D`-Overlays und hat jetzt Door-/Computer-/Hold-Marker plus Frontier-Probe-Bindings, Runtime-Use-State, Use-Feedback, geplante Use-Intents und Runtime-Progress. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; ohne Sichttest ist der naechste Content-Hebel der Editor-Binding-Inspector.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_679. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset, liefert Builder-Drag-Handles, Auto-Snap-Piece-Aufloesung, zeigt diese Preview-Daten als `Label3D`-Overlays und hat jetzt Door-/Computer-/Hold-Marker plus Frontier-Probe-Bindings, Runtime-Use-State, Use-Feedback, geplante Use-Intents, Runtime-Progress und einen headless geprueften Interaction-Progress-Readability-Snapshot. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; ohne Sichttest ist der naechste Content-Hebel der Editor-Binding-Inspector.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -652,15 +665,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_678 - Mission Interaction Runtime Progress",
-            recommended_next_task: "FullHD Sichtfeinschliff fuer Interaction-Progress oder Editor-Binding-Inspector",
+            latest_completed_task: "TASK_679 - Mission Interaction Progress Readability",
+            recommended_next_task: "Editor-Binding-Inspector oder echter FullHD Sichtlauf fuer Interaction-Progress",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_678 - Mission Interaction Runtime Progress",
+            updated_for_task: "TASK_679 - Mission Interaction Progress Readability",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };
