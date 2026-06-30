@@ -1871,17 +1871,7 @@ func _apply_network_path(kind: String, path: Array[Vector2i]) -> bool:
 	var normalized_kind: String = kind.strip_edges().to_lower()
 	if path.is_empty() or not _network_tool_kind_is_valid(normalized_kind) or _terrain_map_data == null:
 		return false
-	var candidate_lookup: Dictionary = {}
-	for path_grid in path:
-		var grid_position := Vector2i(path_grid)
-		if _terrain_map_data.call("get_tile_at_grid", grid_position) == null:
-			continue
-		candidate_lookup[grid_position] = true
-		for offset in _get_network_neighbor_offsets():
-			var neighbor_grid: Vector2i = grid_position + offset
-			var neighbor_tile = _terrain_map_data.call("get_tile_at_grid", neighbor_grid)
-			if _tile_matches_network_kind(neighbor_tile, normalized_kind):
-				candidate_lookup[neighbor_grid] = true
+	var candidate_lookup: Dictionary = _build_network_candidate_lookup(normalized_kind, path)
 	var candidate_grids: Array[Vector2i] = _sort_grid_lookup_keys(candidate_lookup)
 	if candidate_grids.is_empty():
 		return false
@@ -1937,6 +1927,24 @@ func _apply_network_piece_to_tile(tile_data, piece: Dictionary) -> bool:
 	if _network_piece_uses_object_scale(type_id):
 		tile_data.object_scale = next_scale
 	return true
+
+
+func _build_network_candidate_lookup(kind: String, path: Array[Vector2i]) -> Dictionary:
+	var candidate_lookup: Dictionary = {}
+	if _terrain_map_data == null:
+		return candidate_lookup
+	var normalized_kind: String = kind.strip_edges().to_lower()
+	for path_grid in path:
+		var grid_position := Vector2i(path_grid)
+		if _terrain_map_data.call("get_tile_at_grid", grid_position) == null:
+			continue
+		candidate_lookup[grid_position] = true
+		for offset in _get_network_neighbor_offsets():
+			var neighbor_grid: Vector2i = grid_position + offset
+			var neighbor_tile = _terrain_map_data.call("get_tile_at_grid", neighbor_grid)
+			if _tile_matches_network_kind(neighbor_tile, normalized_kind):
+				candidate_lookup[neighbor_grid] = true
+	return candidate_lookup
 
 
 func _build_network_connection_mask(grid_position: Vector2i, kind: String, candidate_lookup: Dictionary) -> int:
@@ -2130,6 +2138,33 @@ func _network_direction_rotation_degrees(direction: int) -> float:
 	return 0.0
 
 
+func _build_network_piece_snapshots(kind: String, grids: Array[Vector2i], candidate_lookup: Dictionary) -> Array:
+	var pieces: Array = []
+	var normalized_kind: String = kind.strip_edges().to_lower()
+	for grid_position in grids:
+		var connection_mask: int = _build_network_connection_mask(grid_position, normalized_kind, candidate_lookup)
+		var piece: Dictionary = _resolve_network_piece_for_mask(normalized_kind, connection_mask)
+		pieces.append({
+			"grid": grid_position,
+			"kind": normalized_kind,
+			"connection_mask": connection_mask,
+			"connections": _network_mask_to_direction_labels(connection_mask),
+			"piece_key": String(piece.get("piece_key", "")),
+			"type_id": String(piece.get("type_id", "")),
+			"rotation_degrees": fposmod(float(piece.get("rotation_degrees", 0.0)), 360.0),
+			"ui_sets_gameplay_truth": false,
+		})
+	return pieces
+
+
+func _network_mask_to_direction_labels(mask: int) -> PackedStringArray:
+	var labels := PackedStringArray()
+	for entry in [[NETWORK_DIR_N, "N"], [NETWORK_DIR_E, "E"], [NETWORK_DIR_S, "S"], [NETWORK_DIR_W, "W"]]:
+		if (mask & int(entry[0])) != 0:
+			labels.append(String(entry[1]))
+	return labels
+
+
 func _build_network_drag_tool_snapshot() -> Dictionary:
 	var definitions: Dictionary = {}
 	for kind in [NETWORK_KIND_ROAD, NETWORK_KIND_RAIL, NETWORK_KIND_PIPE, NETWORK_KIND_WALL, NETWORK_KIND_CLIFF]:
@@ -2162,6 +2197,7 @@ func _build_network_drag_tool_snapshot() -> Dictionary:
 
 func _build_network_drag_preview_summary() -> Dictionary:
 	var visual_preview: Dictionary = _build_network_drag_visual_preview_snapshot()
+	var path_piece_snapshots: Array = Array(visual_preview.get("path_pieces", []))
 	return {
 		"active": _network_drag_tool_enabled,
 		"dragging": _is_network_dragging,
@@ -2177,6 +2213,13 @@ func _build_network_drag_preview_summary() -> Dictionary:
 		"segment_label_count": int(visual_preview.get("segment_label_count", 0)),
 		"handles": Array(visual_preview.get("handles", [])).duplicate(true),
 		"segment_labels": Array(visual_preview.get("segment_labels", [])).duplicate(true),
+		"auto_snapping": {
+			"enabled": path_piece_snapshots.size() > 0,
+			"kind": _network_tool_kind,
+			"piece_count": path_piece_snapshots.size(),
+			"path_pieces": path_piece_snapshots.duplicate(true),
+			"ui_sets_gameplay_truth": false,
+		},
 		"ui_sets_gameplay_truth": false,
 		"label": "%s line: %d tiles" % [_network_tool_kind.capitalize(), _network_drag_preview_path.size()],
 	}
@@ -2187,8 +2230,10 @@ func _build_network_drag_visual_preview_snapshot() -> Dictionary:
 	var segments: Array = []
 	var handles: Array = []
 	var segment_labels: Array = []
+	var path_grids: Array[Vector2i] = []
 	for grid_variant in _network_drag_preview_path:
 		var grid_position := Vector2i(grid_variant)
+		path_grids.append(grid_position)
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position) if _terrain_map_data != null else null
 		var world_position: Vector2 = Vector2(tile_data.world_position) if tile_data != null else Vector2.ZERO
 		path.append({
@@ -2210,6 +2255,8 @@ func _build_network_drag_visual_preview_snapshot() -> Dictionary:
 			"to_world": to_world,
 		})
 		segment_labels.append(_build_network_drag_preview_segment_label(index, from_grid, to_grid, from_world, to_world))
+	var candidate_lookup: Dictionary = _build_network_candidate_lookup(_network_tool_kind, path_grids)
+	var path_pieces: Array = _build_network_piece_snapshots(_network_tool_kind, path_grids, candidate_lookup)
 	return {
 		"active": _network_drag_tool_enabled and path.size() > 0,
 		"dragging": _is_network_dragging,
@@ -2222,9 +2269,12 @@ func _build_network_drag_visual_preview_snapshot() -> Dictionary:
 		"handle_count": handles.size(),
 		"segment_labels": segment_labels,
 		"segment_label_count": segment_labels.size(),
+		"path_pieces": path_pieces,
+		"path_piece_count": path_pieces.size(),
 		"readability": {
 			"handles_available": handles.size() > 0,
 			"segment_labels_available": segment_labels.size() > 0,
+			"auto_snapping_available": path_pieces.size() > 0,
 			"label_mode": "start_target_and_segment_numbers",
 		},
 		"start_grid": _network_drag_start_grid,
@@ -2336,6 +2386,11 @@ func _build_station_door_state_family_snapshot(state_type_ids: Dictionary) -> Di
 
 
 func _build_network_apply_snapshot(kind: String, path: Array[Vector2i], changed_grids: Array[Vector2i], candidate_grids: Array[Vector2i]) -> Dictionary:
+	var candidate_lookup: Dictionary = {}
+	for grid_position in candidate_grids:
+		candidate_lookup[Vector2i(grid_position)] = true
+	var candidate_pieces: Array = _build_network_piece_snapshots(kind, candidate_grids, candidate_lookup)
+	var changed_pieces: Array = _build_network_piece_snapshots(kind, changed_grids, candidate_lookup)
 	return {
 		"kind": kind,
 		"path": path.duplicate(),
@@ -2344,6 +2399,14 @@ func _build_network_apply_snapshot(kind: String, path: Array[Vector2i], changed_
 		"changed_count": changed_grids.size(),
 		"candidate_grids": candidate_grids.duplicate(),
 		"candidate_count": candidate_grids.size(),
+		"candidate_pieces": candidate_pieces,
+		"changed_pieces": changed_pieces,
+		"auto_snapping": {
+			"enabled": candidate_pieces.size() > 0,
+			"piece_count": candidate_pieces.size(),
+			"ui_sets_gameplay_truth": false,
+		},
+		"ui_sets_gameplay_truth": false,
 	}
 
 

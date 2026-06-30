@@ -666,6 +666,16 @@
 - Lokale Pruefung: `task_670_builder_drag_preview_handles.gd`, `task_521_builder_drag_preview_visual_polish.gd`, `git diff --check`.
 - Naechster Schritt: Auto-Rotation/Snapping fuer Builder-Ketten oder sichtbare FullHD-Art-Direction fuer Handles/Labels.
 
+### TASK_671 - Builder Chain Auto Snapping
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_671_builder_chain_auto_snapping.md`, `docs/tasks/TASK_670_builder_drag_preview_handles.md`, `docs/tasks/TASK_492_map_editor_network_drag_snap_tools.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Preview und Apply nutzen jetzt denselben Network-Candidate-Lookup fuer Auto-Snapping und exportieren read-only Piece-Snapshots mit Grid, Connection-Mask, Richtungsliste, Piece-Key, Type-ID und Rotation.
+- Stand: `network_drag_preview.auto_snapping.path_pieces` zeigt vor Apply, welche End-/Straight-/Corner-/Split-/Cross-Aufloesung der Stroke erzeugt; `network.last_apply.candidate_pieces` und `changed_pieces` dokumentieren die Apply-Aufloesung.
+- Stand: `task_671_builder_chain_auto_snapping.gd` prueft Wall-Elbow-Preview, 90-Grad-Rotation und einen zweiten Pipe-Stroke, der ein bestehendes Pipe-Netz zum Cross-Piece aktualisiert.
+- Risiken/offen: Finale FullHD-Text-/Icon-Art-Direction fuer diese Daten und Door-/Computer-Runtime-Interaktion bleiben Folgearbeit.
+- Lokale Pruefung: `task_671_builder_chain_auto_snapping.gd`, `task_670_builder_drag_preview_handles.gd`, `task_492_map_editor_network_drag_snap_tools.gd`, `git diff --check`.
+- Naechster Schritt: FullHD Drag Preview Art Direction oder Door-/Computer-Interaction-Contract.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

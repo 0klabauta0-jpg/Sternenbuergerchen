@@ -76,6 +76,7 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Road- und Rail-Line bleiben vorbereitete/Legacy-Backend-Pfade fuer Tests oder spaetere Karten, sind aber kein sichtbarer Hauptworkflow fuer den aktuellen Builder.
 - Ein Drag-Stroke baut einen orthogonalen Pfad aus Start- und End-Tile und ist ein Undo-Schritt.
 - Varianten werden aus lokalen Verbindungen abgeleitet: End, Straight, Corner, Split und Cross, soweit die Asset-Familie diese Teile besitzt.
+- Auto-Snapping muss dieselbe Piece-Aufloesung fuer Preview und Apply verwenden: Grid, Connection-Mask, Piece-Key, Type-ID und Rotation werden als read-only Snapshot ausgegeben.
 - Der Grundstrassensatz nutzt `spacekit_terrain_road_straight`, `spacekit_terrain_road_corner`, `spacekit_terrain_road_end`, `spacekit_terrain_road_split` und `spacekit_terrain_road_cross`.
 - Rails nutzen `spacekit_rail*`, Pipes nutzen `spacekit_pipe*`; beide bleiben Object-Layer-Assets und duerfen vorhandene Ground-/Road-/Water-Surfaces nicht ueberschreiben.
 - Factory-, SpaceKit-, StationSet-, Modular-, Wall- und Cliff-Prefixe duerfen den Placement-Scale nutzen, damit zu grosse Kit-Teile lokal korrigierbar bleiben.

@@ -69,6 +69,7 @@ func _test_runtime_network_drag_tools() -> void:
 	_assert(bool(editor.call("apply_runtime_network_path_for_authoring", "road", Vector2i(2, 0), Vector2i(2, 2))), "Second road stroke applies")
 	_assert(_tile_type_id(map_data, Vector2i(2, 1)) == "spacekit_terrain_road_cross", "Existing road neighbor updates to a cross piece")
 
+	editor.call("set_object_placement_scale", 1.0)
 	_assert(bool(editor.call("set_object_placement_scale", 1.6)), "Editor accepts corrected network placement scale")
 	_assert(bool(editor.call("activate_runtime_builder_tool", "pipe_line")), "Pipe line tool activates")
 	_assert(bool(editor.call("apply_runtime_network_path_for_authoring", "pipe", Vector2i(0, 4), Vector2i(2, 5))), "Pipe elbow path applies")
