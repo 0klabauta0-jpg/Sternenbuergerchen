@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_638 auf <code>task/frontier-probe-debrief-handoff-feel</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_639 auf <code>task/frontier-probe-meta-debrief-route-smoke</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -302,6 +302,7 @@
       <span class="pill good">TASK_636 F6-Re-Capture</span>
       <span class="pill good">TASK_637 Next Interaction</span>
       <span class="pill good">TASK_638 Debrief-Handoff</span>
+      <span class="pill good">TASK_639 Meta-Debrief-Smoke</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2163,6 +2164,35 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_639 Frontier Probe Meta Debrief Route Smoke</h2>
+          <p>Der echte Meta-Weg ist jetzt als Smoke belegbar: Frontier-Probe-Resultat im Debrief, bestehender Return-to-Homebase-Handler, danach Homebase sichtbar und MissionResult erhalten. Der Snapshot liest den TASK_586-Handoff, erzeugt aber keine neue Navigation.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Meta-Debrief / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_639 - Frontier Probe Meta Debrief Route Smoke" data-export-key="frontier_probe_meta_debrief_route_smoke.task_id"></td><td>Aktueller Meta-Route-Smoke.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_meta_debrief_route_smoke.json" data-export-key="frontier_probe_meta_debrief_route_smoke.manifest_path"></td><td>Lokales Vor-/Nach-Return-Manifest.</td></tr>
+                <tr><td>Route</td><td><input readonly value="frontier_probe_aa_computer_cargo" data-export-key="frontier_probe_meta_debrief_route_smoke.route_id"></td><td>Frontier-Probe-Slice wird im Resultat erkannt.</td></tr>
+                <tr><td>Debrief vor Return</td><td><input readonly value="true" data-export-key="frontier_probe_meta_debrief_route_smoke.debrief_visible_before_return"></td><td>Debrief ist sichtbar, Homebase noch verborgen.</td></tr>
+                <tr><td>Return verfuegbar</td><td><input readonly value="true" data-export-key="frontier_probe_meta_debrief_route_smoke.return_action_available"></td><td>Der bestehende Return-to-Homebase-Handler ist verbunden.</td></tr>
+                <tr><td>Homebase nach Return</td><td><input readonly value="true" data-export-key="frontier_probe_meta_debrief_route_smoke.homebase_visible_after_return"></td><td>Rueckkehr landet sichtbar auf Homebase.</td></tr>
+                <tr><td>MissionResult</td><td><input readonly value="true" data-export-key="frontier_probe_meta_debrief_route_smoke.mission_result_preserved"></td><td>MetaLayerFlow und Debrief tragen dasselbe Ergebnis.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_meta_debrief_route_smoke.read_only"></td><td>Smoke liest nur Zustand und nutzt keinen zweiten Flow.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_640 - Frontier Probe Post Debrief Homebase Readability" data-export-key="frontier_probe_meta_debrief_route_smoke.recommended_next_task"></td><td>Danach Rueckkehrzustand spielerisch lesbarer machen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_meta_debrief_route_smoke.debrief_route_checked"> Debrief-vor-Return geprueft</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_meta_debrief_route_smoke.homebase_return_checked"> Homebase-nach-Return geprueft</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_meta_debrief_route_smoke.no_second_navigation_path"> Kein zweiter Navigationspfad</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_meta_debrief_route_smoke.manual_visible_debrief_checked"> Echten sichtbaren Debrief-/Homebase-Blick geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_639 Meta-Debrief-Notiz
+            <textarea data-note-key="notes.frontier_probe_meta_debrief_route_smoke" data-export-key="frontier_probe_meta_debrief_route_smoke.notes" placeholder="Beim Spielen notieren: Ist Debrief -> Homebase als Abschluss der Frontier Probe klar genug?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3025,7 +3055,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_639 - Frontier Probe Meta Debrief Route Smoke",
+              "TASK_640 - Frontier Probe Post Debrief Homebase Readability",
               "Echten Zwei-Fenster-Klicklauf mit TASK_629-Packet ausfuehren, falls Host/Client-UI-Reibung priorisiert werden soll"
             ],
             recently_completed_tasks: [
@@ -3151,7 +3181,8 @@
               "TASK_635 - Frontier Probe Callout Sight Findings",
               "TASK_636 - Frontier Probe Real F6 Re-Capture",
               "TASK_637 - Frontier Probe Playfeel Next Interaction",
-              "TASK_638 - Frontier Probe Debrief Handoff Feel"
+              "TASK_638 - Frontier Probe Debrief Handoff Feel",
+              "TASK_639 - Frontier Probe Meta Debrief Route Smoke"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3198,7 +3229,8 @@
               "TASK_635 wendet den echten Sichtbefund an: Route-Callouts sind kontrastreicher, hoeher, verbunden und das Result-Label weicht bei aktiver Route aus.",
               "TASK_636 erzeugt den Re-Capture nach TASK_635 als PNG/Manifest und belegt Style, Route-Linien, Font, Outline und getrennte LZ/CARGO-Labels read-only.",
               "TASK_637 zeigt den naechsten Frontier-Probe-Schritt als kompakte read-only NEXT-Zeile in #18 Mission Control; der echte Debrief-/Homebase-Handoff bleibt Folgearbeit.",
-              "TASK_638 markiert den abgeschlossenen Frontier-Probe-Missionsmoment als HANDOFF Debrief bereit | danach Homebase; der echte Meta-Debrief-Lauf bleibt TASK_639."
+              "TASK_638 markiert den abgeschlossenen Frontier-Probe-Missionsmoment als HANDOFF Debrief bereit | danach Homebase.",
+              "TASK_639 prueft den vorhandenen Meta-Weg mit Frontier-Probe-Resultat: Debrief sichtbar, Return verfuegbar, Homebase nach Return sichtbar und MissionResult erhalten."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3207,14 +3239,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_638",
-            current_focus: "Frontier Probe Debrief Handoff Feel",
-            latest_completed_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"
+            current_repo_base: "integration/core-foundation after TASK_639",
+            current_focus: "Frontier Probe Meta Debrief Route Smoke",
+            latest_completed_task: "TASK_639 - Frontier Probe Meta Debrief Route Smoke"
           },
           metadata: {
-            branch: "task/frontier-probe-debrief-handoff-feel",
-            integration_base: "integration/core-foundation after TASK_637",
-            head: "task/frontier-probe-debrief-handoff-feel",
+            branch: "task/frontier-probe-meta-debrief-route-smoke",
+            integration_base: "integration/core-foundation after TASK_638",
+            head: "task/frontier-probe-meta-debrief-route-smoke",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }

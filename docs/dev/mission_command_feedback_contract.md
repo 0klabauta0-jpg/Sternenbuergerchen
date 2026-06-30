@@ -454,6 +454,11 @@ TASK_638 macht den Abschluss der Frontier-Probe-Route als Loop-Uebergang lesbar.
 
 Erwartete Struktur: `get_frontier_probe_debrief_handoff_feel_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_debrief_handoff_feel.v1`, `task_id = TASK_638`, `handoff.source_next_interaction_id = open_debrief`, `handoff.handoff_ready = true`, `handoff.handoff_line = HANDOFF Debrief bereit | danach Homebase`, `handoff.handoff_chain` mit `mission_complete`, `debrief_review` und `return_homebase`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_639 - Frontier Probe Meta Debrief Route Smoke`. `get_command_feedback_snapshot()` exportiert dieselbe Zeile unter `frontier_probe_debrief_handoff_line`. Nicht zulaessig sind ein neuer Debrief-Button im Missions-HUD, automatische Navigation, Command-Enqueueing oder neue Meta-/MissionResult-Wahrheit.
 
+## Frontier-Probe-Meta-Debrief-Route-Smoke
+TASK_639 prueft den echten vorhandenen Meta-Weg fuer ein Frontier-Probe-Ergebnis: Debrief sichtbar, Return-to-Homebase verfuegbar, Rueckkehr zur Homebase sichtbar und MissionResult erhalten. Der Snapshot darf nur den bestehenden TASK_586-Handoff lesen und mit Frontier-Probe-Resultatdaten zusammenfassen. Der Testhelper bleibt `request_debrief_return_homebase_for_test()` und nutzt damit den bestehenden Return-Handler.
+
+Erwartete Struktur: `get_frontier_probe_meta_debrief_route_smoke_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_meta_debrief_route_smoke.v1`, `task_id = TASK_639`, `source_task_ids = [TASK_638, TASK_586]`, `route_id = frontier_probe_aa_computer_cargo`, `scenario_id = frontier_probe_vertical_slice`, `current_stage`, `before_return_ready`, `after_return_ready`, `frontier_probe_result_present`, `return_action_available`, `mission_result_preserved`, `active_mission_released`, `debrief_handoff_gate`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_640 - Frontier Probe Post Debrief Homebase Readability`. Nicht zulaessig sind ein neuer Meta-Navigationspfad, automatische Mission-Commands, XP-/Skill-Vergabe, Combat-Mutationen oder UI-seitige MissionResult-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
