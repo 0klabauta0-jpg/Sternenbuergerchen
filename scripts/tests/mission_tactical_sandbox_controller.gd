@@ -16770,12 +16770,19 @@ func create_selected_mission_interaction_use_intent(interaction_id: String = "")
 	if waypoint == null:
 		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "waypoint_ref_failed", {"interaction_feedback": interaction_feedback, "fireteam_id": fireteam_id, "waypoint_target": waypoint_target}))
 	waypoint.command_type = command_type
+	waypoint.hold_duration_seconds = maxf(float(interaction_feedback.get("duration_seconds", 0.0)), 0.0)
 	var metadata: Dictionary = Dictionary(waypoint.metadata).duplicate(true)
 	metadata.merge({
 		"source": "mission_interaction_use_intent",
 		"interaction_id": String(interaction_feedback.get("interaction_id", "")).strip_edges(),
 		"feedback_line": String(interaction_feedback.get("feedback_line", "")).strip_edges(),
 		"required_order": String(interaction_feedback.get("required_order", "")).strip_edges().to_lower(),
+		"duration_seconds": maxf(float(interaction_feedback.get("duration_seconds", 0.0)), 0.0),
+		"step_id": String(interaction_feedback.get("step_id", "")).strip_edges(),
+		"gate_id": String(interaction_feedback.get("gate_id", interaction_feedback.get("step_id", ""))).strip_edges(),
+		"required_state": String(interaction_feedback.get("required_state", "")).strip_edges(),
+		"interaction_type": String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower(),
+		"required_team": String(interaction_feedback.get("required_team", "")).strip_edges().to_lower(),
 	}, true)
 	waypoint.metadata = metadata
 	_last_command_text = "USE %s -> %s" % [String(interaction_feedback.get("display_token", "INTERACTION")).strip_edges(), command_type.to_upper()]
@@ -20918,6 +20925,8 @@ func _update_active_phase_execution(delta: float) -> void:
 			continue
 		execution_state["hold_elapsed"] = float(execution_state.get("hold_elapsed", 0.0)) + delta
 		var required_hold: float = maxf(float(waypoint.hold_duration_seconds), 0.0)
+		var interaction_progress_complete: bool = required_hold <= 0.0 or float(execution_state.get("hold_elapsed", 0.0)) + 0.001 >= required_hold
+		_publish_mission_interaction_runtime_progress_for_waypoint(String(fireteam_id), waypoint, execution_state, interaction_progress_complete)
 		if float(execution_state.get("hold_elapsed", 0.0)) + 0.001 < required_hold:
 			_phase_execution_by_fireteam[fireteam_id] = execution_state
 			continue
@@ -20946,6 +20955,50 @@ func _update_active_phase_execution(delta: float) -> void:
 	_refresh_order_visuals()
 	_update_ui()
 	_emit_planning_state_changed()
+
+
+func _publish_mission_interaction_runtime_progress_for_waypoint(fireteam_id: String, waypoint, execution_state: Dictionary, complete: bool) -> void:
+	if waypoint == null:
+		return
+	var metadata: Dictionary = Dictionary(waypoint.metadata)
+	if String(metadata.get("source", "")).strip_edges() != "mission_interaction_use_intent":
+		return
+	var interaction_id: String = String(metadata.get("interaction_id", "")).strip_edges()
+	if interaction_id.is_empty():
+		return
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("update_mission_interaction_runtime_progress"):
+		return
+	var duration_seconds: float = maxf(float(metadata.get("duration_seconds", waypoint.hold_duration_seconds)), 0.0)
+	var hold_seconds: float = maxf(float(execution_state.get("hold_elapsed", 0.0)), 0.0)
+	if complete and duration_seconds > 0.0:
+		hold_seconds = maxf(hold_seconds, duration_seconds)
+	var command_type: String = String(waypoint.command_type).strip_edges().to_lower()
+	var interaction_type: String = String(metadata.get("interaction_type", "")).strip_edges().to_lower()
+	var state_name: String = "active"
+	if complete:
+		state_name = "complete"
+	elif command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND or interaction_type == "hold_zone":
+		state_name = "holding"
+	elif command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE or interaction_type == "computer":
+		state_name = "operating"
+	var progress: float = 1.0 if complete else (0.0 if duration_seconds <= 0.0 else clampf(hold_seconds / duration_seconds, 0.0, 1.0))
+	combat_driver.call("update_mission_interaction_runtime_progress", {
+		"interaction_id": interaction_id,
+		"state": state_name,
+		"complete": complete,
+		"hold_seconds": hold_seconds,
+		"duration_seconds": duration_seconds,
+		"progress": progress,
+		"fireteam_id": fireteam_id.strip_edges().to_lower(),
+		"team_id": FRIENDLY_TEAM_ID,
+		"step_id": String(metadata.get("step_id", "")).strip_edges(),
+		"gate_id": String(metadata.get("gate_id", metadata.get("step_id", ""))).strip_edges(),
+		"required_state": String(metadata.get("required_state", "")).strip_edges(),
+		"interaction_type": interaction_type,
+		"command_type": command_type,
+		"can_complete_zero_duration": duration_seconds <= 0.0,
+	})
 
 
 func _update_ad_hoc_execution(delta: float) -> void:
