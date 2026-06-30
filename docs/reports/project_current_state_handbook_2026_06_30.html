@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_651: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_653: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_651</span>
-      <span class="pill">Naechster Kandidat: TASK_653</span>
+      <span class="pill">Letzter Stand: TASK_653</span>
+      <span class="pill">Naechster Kandidat: TASK_654</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -101,16 +101,16 @@
       <div class="grid">
         <article class="card wide">
           <h2>Wo wir stehen</h2>
-          <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat jetzt auch einen pruefbaren Follow-up-Cue.</p>
-          <div class="callout">TASK_651 - Host Client Click Followup Evidence ist der aktuelle Abschlussstand: `BLOCK P2 wrong team` und `USE BRAVO` werden im Capture-Manifest und Playtest-Packet als Pflichtbeobachtung gefuehrt, ohne Gameplay-Wahrheit im HUD zu speichern.</div>
+          <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe hat jetzt eine kompakte One-Screen-Planzeile.</p>
+          <div class="callout">TASK_653 - Frontier Probe One-Screen Playability Pass ist der aktuelle Abschlussstand: Mission Control kann `PLAN LZ -> AA -> COM 18s -> CARGO | NEXT ...` anzeigen und der Snapshot prueft Planoptionen, naechste Aktion, Debrief-Handoff und Read-only-Grenzen.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.core_loop_spine"> Core-Loop-Spine vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.frontier_probe_route"> Frontier-Probe-Route vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.host_client_scaffolding"> Host/Client-Smokes vorhanden</label>
-          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_651_done"> TASK_651 erledigt</label>
-          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_651 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_653_done"> TASK_653 erledigt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_653 erledigt</label>
         </article>
         <article class="card half">
           <h2>Technischer Zustand</h2>
@@ -135,7 +135,7 @@
           <table>
             <thead><tr><th>Bereich</th><th>Traegt bereits</th><th>Reibt noch</th><th>Naechster guter Griff</th></tr></thead>
             <tbody>
-              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte Fensterblick nach TASK_651 ist noch nicht menschlich bewertet.</td><td>Kurzer Fenstercheck oder direkt One-Screen-Frontier-Probe-Spielbarkeit.</td></tr>
+              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte Fensterblick nach TASK_653 ist noch nicht menschlich bewertet.</td><td>TASK_654: One-Screen-F6-Playtest-Notizen.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
               <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Echte Klicklaeufe koennen trotz Headless-Gruen noch unklar wirken.</td><td>Echter Host/Client-Klicklauf oder Mini-Szenario-Spielbarkeit.</td></tr>
               <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow und Builder-Spikes sind vorhanden.</td><td>Der Mapbau fuehlt sich noch nicht wie ein angenehmes Werkzeug an.</td><td>Nach dem Gameplay-Fenster wieder UX-Slice fuer Builder-Toolbar/Assets.</td></tr>
@@ -203,7 +203,7 @@
             <tbody>
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
-              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Nach TASK_651 ist der naechste Beleg ein echter Klicklauf oder ein spielbares Mini-Szenario.</td></tr>
+              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Nach TASK_653 ist der naechste Multiplayer-Beleg weiter der echte Klicklauf; fuer Spielgefuehl ist TASK_654 sinnvoller.</td></tr>
               <tr><td>Editor bleibt sperrig</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>Nach Core-Loop-/Multiplayer-Sichtbarkeit wieder Editor-UX priorisieren.</td></tr>
             </tbody>
           </table>
@@ -254,8 +254,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>TASK_653 - Frontier Probe One-Screen Playability Pass</strong> ist aus meiner Sicht der beste Anschluss: Nach viel Host/Client-Evidence sollte wieder ein kleines spielbares Szenario beweisen, dass Bewegung, Objective, Cargo/Computer und Kampfentscheidung als Spiel funktionieren.</p>
-          <div class="callout">Ziel: Eine kompakte Mission mit wenigen Einheiten, klarer LZ, AA/Computer/Cargo-Entscheidung und Debrief-Return so pruefen, dass sie auch ohne Debug-Wissen spielbar und schnell lesbar wirkt.</div>
+          <p><strong>TASK_654 - Frontier Probe One-Screen F6 Playtest Notes</strong> ist aus meiner Sicht der beste Anschluss: Die neue `PLAN ... | NEXT ...`-Zeile muss jetzt im echten F6-Bild gegen Lesbarkeit, Dichte und Tempo bewertet werden.</p>
+          <div class="callout">Ziel: Eine kompakte Mission mit wenigen Einheiten, klarer LZ, AA/Computer/Cargo-Entscheidung und Debrief-Return im Fensterbild pruefen, ohne dabei neue Gameplay-Wahrheit im HUD zu bauen.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -266,7 +266,7 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>TASK_653 - Frontier Probe One-Screen Playability Pass</td><td>Der Mission-Flow wird als echtes kleines Spiel spuerbarer.</td></tr>
+              <tr><td>1</td><td>TASK_654 - Frontier Probe One-Screen F6 Playtest Notes</td><td>Der neue One-Screen-Readout wird im echten Fensterbild bewertet.</td></tr>
               <tr><td>2</td><td>Echter Host/Client-Klicklauf mit `USE BRAVO`</td><td>Multiplayer-Bedienung wird mit Bild statt nur Manifest bewertet.</td></tr>
               <tr><td>3</td><td>Editor Builder UX Slice</td><td>Mapbau wird angenehmer und Content entsteht schneller.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
@@ -280,7 +280,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_651. Host/Client-Follow-up-Evidence ist pruefbar; naechster empfohlener Gameplay-Slice ist TASK_653 Frontier Probe One-Screen Playability Pass.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_653. Frontier Probe hat eine kompakte One-Screen-Planzeile; naechster empfohlener Slice ist TASK_654 Frontier Probe One-Screen F6 Playtest Notes.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -337,15 +337,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_651 - Host Client Click Followup Evidence",
-            recommended_next_task: "TASK_653 - Frontier Probe One-Screen Playability Pass",
+            latest_completed_task: "TASK_653 - Frontier Probe One-Screen Playability Pass",
+            recommended_next_task: "TASK_654 - Frontier Probe One-Screen F6 Playtest Notes",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_652 - Current State Handbook Refresh",
+            updated_for_task: "TASK_653 - Frontier Probe One-Screen Playability Pass",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };

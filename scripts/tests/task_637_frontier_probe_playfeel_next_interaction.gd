@@ -50,9 +50,9 @@ func _test_docs_and_reports() -> void:
 	_assert(contract_text.contains("Frontier-Probe-Playfeel-Next-Interaction"), "Mission feedback contract documents TASK_637")
 	_assert(controller_text.contains("get_frontier_probe_playfeel_next_interaction_snapshot"), "Controller exposes TASK_637 snapshot")
 	_assert(report_text.contains("TASK_637 Frontier Probe Playfeel Next Interaction"), "Rolling report tracks TASK_637")
-	_assert(report_text.contains('latest_completed_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Rolling report marks TASK_638 latest completed")
+	_assert(report_text.contains("latest_completed_task:") and not report_text.contains('latest_completed_task: "TASK_637'), "Rolling report advances latest completed beyond TASK_637")
 	_assert(handbook_text.contains("TASK_637 - Frontier Probe Playfeel Next Interaction"), "Status handbook tracks TASK_637")
-	_assert(handbook_text.contains('current_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Status handbook current task is TASK_638")
+	_assert(handbook_text.contains("current_task:") and not handbook_text.contains('current_task: "TASK_637'), "Status handbook current task advances beyond TASK_637")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_playfeel_next_interaction.task_id",
 		"frontier_probe_playfeel_next_interaction.manifest_path",
