@@ -389,6 +389,11 @@ TASK_625 macht den wichtigsten Reject-Grund auch ohne Tooltip im bestehenden Mis
 
 Erwartete Struktur: `authority_visual` enthaelt zusaetzlich `visible_feedback_text`, `visible_feedback_ready` und `attention_tone`. `_with_review_session_badge()` darf diesen kurzen Text neben `AUTH OKx/RJy` in `display_text` aufnehmen. `get_command_feedback_snapshot()` exportiert `authority_visible_feedback_text`. Tooltip und Detail behalten weiterhin `feedback_line`, `feedback_detail` und den rohen Reject-Grund.
 
+## Host-Client-Real-Click-Review-Evidence
+TASK_626 macht den naechsten echten Zwei-Fenster-Klicklauf als Evidence-Pfad konkreter. Der Capture-Helper darf erwartete sichtbare Reject-Felder und manuelle Review-Checks ins lokale Manifest schreiben, aber keine Klicks ausloesen, keine Authority-Entscheidung treffen und keine Runtime- oder Gameplay-Wahrheit speichern.
+
+Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` enthaelt `real_click_review_task_id = TASK_626`, `visible_reject_expected_text = BLOCK P2 wrong team`, `visible_reject_expected_authority_text = AUTH OK1/RJ2`, `visible_reject_expected_feedback_line = AUTH BLOCKED P2: wrong team`, `visible_reject_expected_raw_reason = peer_team_mismatch`, `visible_reject_expected_hud_path = MissionTeamChipLabel`, `visible_reject_review_required = true`, `visible_reject_review_done = false`, `visible_reject_review_gate`, `visible_reject_manual_checks`, `read_only = true` und `ui_sets_gameplay_truth = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
