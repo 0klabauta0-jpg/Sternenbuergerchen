@@ -21,11 +21,17 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 
 ## Palette Search, Favorites and Presets
 - Palette-Suche ist ein reiner UI-/Authoring-Filter auf Katalog-Displayname, Type-ID und Gruppe.
-- Favoriten und Recent-Assets sind session-lokale Editor-Hilfen. Sie duerfen keine Tile-, Terrain- oder Gameplay-Wahrheit speichern.
+- Favoriten und Recent-Assets sind Editor-Hilfen. Sie duerfen keine Tile-, Terrain- oder Gameplay-Wahrheit speichern.
 - Der Favoritenfilter zeigt Favoriten und zuletzt genutzte Assets, damit haeufige Station-/Factory-/Pipe-/Wall-Teile ohne Kategoriejagd erreichbar bleiben.
 - Scale-Presets nutzen denselben Placement-Scale-Pfad wie die Spinbox. Der gespeicherte Tile-Wert bleibt `object_scale`.
 - 1.6 bleibt als wichtiger Korrekturwert sichtbar, weil einige Kit-Teile bewusst ueber den Authoring-Scale angepasst werden muessen.
 - Der Usability-Snapshot nennt Suchbegriff, Favoriten, Recent, Trefferzahl, Preview-Groessen und Scale-Presets.
+
+## Persistent Palette Authoring Preferences
+- Palette-Favoriten, Recent-Assets und Placement-Scale duerfen als lokale Arbeitspräferenz unter `user://map_editor_builder_preferences.json` persistiert werden.
+- Diese Datei ist kein Map-Format, kein Terrain-Format und keine Gameplay-Wahrheit. Sie speichert nur Editor-Komfort fuer den lokalen Autor.
+- Der Map-Editor laedt die Praeferenz beim Start und speichert sie bei Favoriten-, Recent- oder Placement-Scale-Aenderungen.
+- Der Usability-Snapshot nennt Pfad, Schema, Lade-/Speicherstatus und `ui_sets_gameplay_truth = false`.
 
 ## Save As
 - Der Map-`Save As`-Dialog ist ein JSON-`FILE_MODE_SAVE_FILE`-Dialog im Projektressourcenbereich.
@@ -83,4 +89,4 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Weitere Politur der sichtbaren Drag-Preview fuer Pipe-, Wand- und Cliff-Linien: Handles, Segmentnummern und finale FullHD-Art-Direction.
 - Auto-Rotation/Snapping fuer Ketten von Waenden, Tueren und Cliffs.
 - Door-/Computer-Interaction-Contract fuer Runtime-Naehe und Bedienzeit.
-- Palette-Suche, Favoriten und gespeicherte Asset-Override-Presets.
+- Gespeicherte Asset-Override-Presets pro Asset oder Teamprofil.
