@@ -556,6 +556,16 @@
 - Lokale Pruefung: `task_658_frontier_probe_one_screen_player_decision_drill.gd`, `task_657_frontier_probe_f6_visual_polish_findings.gd`, `task_567_frontier_probe_first_move_threat_preview_readability_pass.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_659 - Frontier Probe Decision Drill F6 Evidence`, wenn dieser Drill noch einmal als sichtbares Fenster-/Evidence-Paket beurteilt werden soll.
 
+### TASK_659 - Frontier Probe Decision Drill F6 Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_659_frontier_probe_decision_drill_f6_evidence.md`, `docs/tasks/TASK_658_frontier_probe_one_screen_player_decision_drill.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `task_659_frontier_probe_decision_drill_f6_evidence.gd` nutzt denselben TASK_658-Mini-Zug und erzeugt `tmp/frontier_probe_decision_drill_f6_evidence.png` plus `.json`.
+- Stand: Das Manifest trennt Preview vor GO und Execution nach GO, enthaelt NEXT AA, GO-Readiness, Execution-Feedback-Gate und manuelle Review-Checks.
+- Stand: Headless-Laeufe erzeugen ein markiertes Evidence-Board; echte Fensterlaeufe koennen einen Viewport-Readback speichern.
+- Risiken/offen: TASK_659 ist ein Review-/Evidence-Paket und kein menschlicher Sichtentscheid. Der Drill-Verifier ist relativ schwergewichtig.
+- Lokale Pruefung: `task_659_frontier_probe_decision_drill_f6_evidence.gd`, `task_658_frontier_probe_one_screen_player_decision_drill.gd`, `task_657_frontier_probe_f6_visual_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_660 - Decision Drill Snapshot Performance Budget`, damit der neue sichtbare Drill nicht als langsamer Regressionstest/Hotpath-Klotz weiterwaechst.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

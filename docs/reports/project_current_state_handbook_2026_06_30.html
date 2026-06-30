@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_658: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_659: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_658</span>
-      <span class="pill">Naechster Kandidat: TASK_659</span>
+      <span class="pill">Letzter Stand: TASK_659</span>
+      <span class="pill">Naechster Kandidat: TASK_660</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -102,7 +102,7 @@
         <article class="card wide">
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
-          <div class="callout">TASK_658 - Frontier Probe One-Screen Player Decision Drill ist der aktuelle Abschlussstand: Die Historie bleibt sichtbar mit TASK_653 - Frontier Probe One-Screen Playability Pass, TASK_654 - Frontier Probe One-Screen F6 Playtest Notes, TASK_655 - Frontier Probe One-Screen Visual Tuning Findings, TASK_656 - Frontier Probe Real F6 Visual Review und TASK_657 - Frontier Probe F6 Visual Polish Findings. Der neue Drill liest `NEXT AA`, plant einen Move Richtung AA, prueft Risk/Path/GO-Readiness und bestaetigt GO ueber den bestehenden Ausfuehrungspfad. Das ist der erste kleine Schritt weg von reiner Anzeige hin zu einem echten spielbaren Entscheidungsloop.</div>
+          <div class="callout">TASK_659 - Frontier Probe Decision Drill F6 Evidence ist der aktuelle Abschlussstand: Die Historie bleibt sichtbar mit TASK_653 - Frontier Probe One-Screen Playability Pass, TASK_654 - Frontier Probe One-Screen F6 Playtest Notes, TASK_655 - Frontier Probe One-Screen Visual Tuning Findings, TASK_656 - Frontier Probe Real F6 Visual Review, TASK_657 - Frontier Probe F6 Visual Polish Findings und TASK_658 - Frontier Probe One-Screen Player Decision Drill. Der neue Evidence-Slice faehrt denselben Mini-Zug, schreibt PNG/JSON und trennt Preview vor GO von Execution nach GO. Das ist kein neues Gameplay, aber endlich ein sichtbarer Pruefstand fuer den kleinen Entscheidungsloop.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -115,7 +115,8 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_656_done"> TASK_656 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_657_done"> TASK_657 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_658_done"> TASK_658 erledigt</label>
-          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_658 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_659_done"> TASK_659 erledigt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_659 erledigt</label>
         </article>
         <article class="card half">
           <h2>Technischer Zustand</h2>
@@ -140,7 +141,7 @@
           <table>
             <thead><tr><th>Bereich</th><th>Traegt bereits</th><th>Reibt noch</th><th>Naechster guter Griff</th></tr></thead>
             <tbody>
-              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Fensterentscheid nach TASK_658 ist weiter offen.</td><td>TASK_659: Decision-Drill als sichtbares F6-Evidence-Paket oder echter Host/Client-Klicklauf.</td></tr>
+              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Fensterentscheid nach TASK_659 ist weiter offen.</td><td>TASK_660: Decision-Drill-Performance budgetieren oder echter Host/Client-Klicklauf.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
               <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Echte Klicklaeufe koennen trotz Headless-Gruen noch unklar wirken.</td><td>Echter Host/Client-Klicklauf oder Mini-Szenario-Spielbarkeit.</td></tr>
               <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow und Builder-Spikes sind vorhanden.</td><td>Der Mapbau fuehlt sich noch nicht wie ein angenehmes Werkzeug an.</td><td>Nach dem Gameplay-Fenster wieder UX-Slice fuer Builder-Toolbar/Assets.</td></tr>
@@ -208,7 +209,7 @@
             <tbody>
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
-              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Nach TASK_658 ist der naechste Multiplayer-Beleg weiter der echte Klicklauf; wenn wir beim Drill bleiben, sollte TASK_659 ihn sichtbar belegen.</td></tr>
+              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Nach TASK_659 ist der naechste Multiplayer-Beleg weiter der echte Klicklauf; vorher lohnt ein kleines Performance-Budget fuer den schweren Decision-Drill.</td></tr>
               <tr><td>Editor bleibt sperrig</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>Nach Core-Loop-/Multiplayer-Sichtbarkeit wieder Editor-UX priorisieren.</td></tr>
             </tbody>
           </table>
@@ -299,6 +300,20 @@
           <textarea data-export-key="decision_drill.findings" placeholder="Was beim echten Mini-Zug auffaellt: AA-Ziel, GO-Gefuehl, Risiko, Tempo, Panel-Dichte..."></textarea>
           <div contenteditable="true" data-note-key="notes.decision_drill" data-placeholder="TASK_658-Notizen...">TASK_658 fuehrt einen kleinen Spielerzug aus: NEXT AA lesen, Move Richtung AA planen, Risiko/Path/GO lesen, GO bestaetigen und Execution-Feedback pruefen. Der Snapshot bleibt read-only; der Verifier nutzt den bestehenden Command-Pfad.</div>
         </article>
+        <article class="card full">
+          <h2>Decision-Drill-F6-Evidence</h2>
+          <label class="checkline"><input checked type="checkbox" data-export-key="decision_drill_f6_evidence.png_written"> Evidence-PNG ist geschrieben</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="decision_drill_f6_evidence.manifest_written"> Evidence-JSON ist geschrieben</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="decision_drill_f6_evidence.preview_stage_recorded"> Preview vor GO ist im Manifest belegt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="decision_drill_f6_evidence.execution_stage_recorded"> Execution nach GO ist im Manifest belegt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="decision_drill_f6_evidence.next_aa_recorded"> NEXT AA ist im Evidence-Paket belegt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="decision_drill_f6_evidence.read_only"> Evidence bleibt read-only</label>
+          <label class="checkline"><input type="checkbox" data-export-key="decision_drill_f6_evidence.real_window_review_done"> Menschlicher F6-Fensterentscheid erledigt</label>
+          <input readonly value="tmp/frontier_probe_decision_drill_f6_evidence.png" data-export-key="decision_drill_f6_evidence.png_path">
+          <input readonly value="tmp/frontier_probe_decision_drill_f6_evidence.json" data-export-key="decision_drill_f6_evidence.manifest_path">
+          <textarea data-export-key="decision_drill_f6_evidence.findings" placeholder="Sichtbefund: Ist der Mini-Zug verstaendlich, schnell, ruhig genug, gut genug fuer Multiplayer-Klicklauf?"></textarea>
+          <div contenteditable="true" data-note-key="notes.decision_drill_f6_evidence" data-placeholder="TASK_659-Notizen...">TASK_659 macht den TASK_658-Mini-Zug als PNG/JSON pruefbar. Headless-Evidence ist ein Arbeitsartefakt; ein echter Fensterblick bleibt offen. Der naechste technische Griff sollte die Laufzeit dieses schweren Drill-Verifiers budgetieren, bevor noch mehr Evidence oben drauf kommt.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -318,7 +333,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>TASK_659 - Frontier Probe Decision Drill F6 Evidence</strong> ist aus meiner Sicht der beste direkte Anschluss, wenn wir beim Mini-Loop bleiben: denselben TASK_658-Spielzug als sichtbares F6-/PNG-/JSON-Paket belegen und danach entscheiden, ob UI-Dichte oder Host/Client-Klicklauf wichtiger ist.</p>
+          <p><strong>TASK_660 - Decision Drill Snapshot Performance Budget</strong> ist aus meiner Sicht der beste direkte Anschluss: TASK_658/659 sind nuetzlich, aber der Szenen-/GO-Drill ist relativ schwer. Bevor wir weitere Playtest-Evidence aufstapeln, sollte der Test ein klares Laufzeitbudget und eine leichtere Snapshot-Pruefung bekommen.</p>
           <div class="callout">Alternative mit mehr Multiplayer-Nutzen: den echten Host/Client-Klicklauf wieder aufnehmen und den Decision-Drill-Gedanken dort anwenden.</div>
         </article>
         <article class="card">
@@ -330,7 +345,7 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>TASK_659 - Frontier Probe Decision Drill F6 Evidence</td><td>Der kleine Spielerzug wird als sichtbares F6-Artefakt bewertet.</td></tr>
+              <tr><td>1</td><td>TASK_660 - Decision Drill Snapshot Performance Budget</td><td>Der neue Mini-Loop bleibt als Regression bezahlbar und bremst nicht jeden Folgeschritt.</td></tr>
               <tr><td>2</td><td>Echter Host/Client-Klicklauf mit `USE BRAVO`</td><td>Multiplayer-Bedienung wird mit Bild statt nur Manifest bewertet.</td></tr>
               <tr><td>3</td><td>Editor Builder UX Slice</td><td>Mapbau wird angenehmer und Content entsteht schneller.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
@@ -344,7 +359,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_658. Frontier Probe hat jetzt einen kleinen One-Screen-Player-Decision-Drill: NEXT AA lesen, Move Richtung AA planen, GO ausfuehren und Execution-Feedback pruefen. Naechster Kandidat ist TASK_659 Decision Drill F6 Evidence oder ein echter Host/Client-Klicklauf.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_659. Frontier Probe hat jetzt einen sichtbaren Decision-Drill-Evidence-Stand: derselbe Mini-Zug aus TASK_658 wird als PNG/JSON belegt. Naechster Kandidat ist TASK_660 Decision Drill Snapshot Performance Budget oder danach ein echter Host/Client-Klicklauf.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -401,15 +416,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_658 - Frontier Probe One-Screen Player Decision Drill",
-            recommended_next_task: "TASK_659 - Frontier Probe Decision Drill F6 Evidence",
+            latest_completed_task: "TASK_659 - Frontier Probe Decision Drill F6 Evidence",
+            recommended_next_task: "TASK_660 - Decision Drill Snapshot Performance Budget",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_658 - Frontier Probe One-Screen Player Decision Drill",
+            updated_for_task: "TASK_659 - Frontier Probe Decision Drill F6 Evidence",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };
