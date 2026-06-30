@@ -586,6 +586,16 @@
 - Lokale Pruefung: `task_661_host_client_decision_drill_click_evidence.gd`, `task_660_decision_drill_snapshot_performance_budget.gd`, `task_651_host_client_click_followup_evidence.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_662 - Host Client Decision Drill Real Window Capture`, um die Packet-Erwartung als echtes Bild/Fensterreview zu pruefen.
 
+### TASK_662 - Host Client Decision Drill Real Window Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_662_host_client_decision_drill_real_window_capture.md`, `docs/tasks/TASK_661_host_client_decision_drill_click_evidence.md`, `docs/tasks/TASK_626_host_client_real_click_review_evidence.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `scripts/tools/capture_host_client_two_window_real_run.ps1` schreibt jetzt Decision-Drill-Felder in `tmp/host_client_two_window_real_run_review.json` und referenziert das TASK_661-Packet als Quelle.
+- Stand: Das Capture-Manifest erwartet `BLOCK P2 wrong team`, `USE BRAVO`, Bravo-Kontext, `NEXT AA`, `aa_first_push`, Preview vor GO und sichtbares GO-Feedback als manuelle Pflichtchecks.
+- Stand: Der HTML-Handbuchbericht markiert TASK_662, exportiert Capture-Felder und empfiehlt danach `TASK_663 - Host Client Decision Drill Visual Findings`.
+- Risiken/offen: TASK_662 macht den echten Fenster-Capture reviewbereit, ersetzt aber keinen menschlichen Sichtentscheid und keinen automatischen Klickbot.
+- Lokale Pruefung: `capture_host_client_two_window_real_run.ps1` als Dry-Run, `task_662_host_client_decision_drill_real_window_capture.gd`, `task_661_host_client_decision_drill_click_evidence.gd`, `task_626_host_client_real_click_review_evidence.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_663 - Host Client Decision Drill Visual Findings`, wenn aus einem echten Zwei-Fenster-Bild konkrete Lesbarkeitsbefunde angewendet werden sollen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
