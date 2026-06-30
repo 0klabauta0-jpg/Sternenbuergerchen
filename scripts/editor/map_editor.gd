@@ -254,11 +254,13 @@ var _active_palette_group_id: String = ""
 var _palette_preview_textures: Dictionary = {}
 var _palette_preview_sources: Dictionary = {}
 var _placement_object_scale: float = OBJECT_SCALE_DEFAULT
+var _placement_object_rotation_degrees: float = 0.0
 var _palette_search_query: String = ""
 var _palette_favorite_type_ids: PackedStringArray = PackedStringArray()
 var _palette_recent_type_ids: PackedStringArray = PackedStringArray()
 var _palette_favorites_filter_enabled: bool = false
 var _palette_asset_scale_overrides: Dictionary = {}
+var _palette_asset_rotation_overrides: Dictionary = {}
 var _palette_preferences_loaded: bool = false
 var _palette_preferences_saved: bool = false
 var _palette_preferences_last_error: String = ""
@@ -1051,6 +1053,8 @@ func _apply_brush_at_world_position(world_position: Vector2) -> void:
 				if _tile_catalog.apply_type_to_tile(target_tile, _selected_type_id):
 					if _palette_type_uses_object_scale(_selected_type_id):
 						target_tile.object_scale = _placement_object_scale
+					if _palette_type_uses_object_rotation(_selected_type_id):
+						target_tile.object_rotation_degrees = _placement_object_rotation_degrees
 					any_changed = true
 					changed_grids.append(target_grid)
 					_refresh_tile_visual(target_tile, false)
@@ -2402,6 +2406,7 @@ func _ensure_palette_workflow_controls() -> void:
 		return
 	if palette_parent.get_node_or_null("PaletteSelectedPreviewRow") != null:
 		_ensure_palette_scale_preset_buttons(palette_parent.get_node_or_null("PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow") as HBoxContainer)
+		_ensure_palette_rotation_row(palette_parent.get_node_or_null("PaletteSelectedPreviewRow/PaletteSelectedInfoBox") as VBoxContainer)
 		_refresh_palette_workflow_controls()
 		return
 	var row := HBoxContainer.new()
@@ -2448,12 +2453,40 @@ func _ensure_palette_workflow_controls() -> void:
 	scale_row.add_child(reset_button)
 	_ensure_palette_scale_preset_buttons(scale_row)
 	info_box.add_child(scale_row)
+	var rotation_row := HBoxContainer.new()
+	rotation_row.name = "PalettePlacementRotationRow"
+	var rotation_label := Label.new()
+	rotation_label.name = "PalettePlacementRotationLabel"
+	rotation_label.text = "Rot"
+	rotation_label.custom_minimum_size = Vector2(44.0, 0.0)
+	rotation_row.add_child(rotation_label)
+	_ensure_palette_rotation_buttons(rotation_row)
+	info_box.add_child(rotation_row)
 	row.add_child(info_box)
 	palette_parent.add_child(row)
 	var insert_after := palette_parent.get_node_or_null("PaletteTitle")
 	if insert_after != null:
 		palette_parent.move_child(row, insert_after.get_index() + 1)
 	_refresh_palette_workflow_controls()
+
+
+func _ensure_palette_rotation_row(info_box: VBoxContainer) -> void:
+	if info_box == null:
+		return
+	var rotation_row := info_box.get_node_or_null("PalettePlacementRotationRow") as HBoxContainer
+	if rotation_row == null:
+		rotation_row = HBoxContainer.new()
+		rotation_row.name = "PalettePlacementRotationRow"
+		var rotation_label := Label.new()
+		rotation_label.name = "PalettePlacementRotationLabel"
+		rotation_label.text = "Rot"
+		rotation_label.custom_minimum_size = Vector2(44.0, 0.0)
+		rotation_row.add_child(rotation_label)
+		info_box.add_child(rotation_row)
+		var scale_row := info_box.get_node_or_null("PalettePlacementScaleRow")
+		if scale_row != null:
+			info_box.move_child(rotation_row, scale_row.get_index() + 1)
+	_ensure_palette_rotation_buttons(rotation_row)
 
 
 func _ensure_palette_scale_preset_buttons(scale_row: HBoxContainer) -> void:
@@ -2498,6 +2531,51 @@ func _ensure_palette_scale_override_buttons(scale_row: HBoxContainer) -> void:
 		scale_row.add_child(clear_button)
 	if not clear_button.pressed.is_connected(clear_palette_scale_override_for_authoring):
 		clear_button.pressed.connect(clear_palette_scale_override_for_authoring)
+
+
+func _ensure_palette_rotation_buttons(rotation_row: HBoxContainer) -> void:
+	if rotation_row == null:
+		return
+	var rotate_left := rotation_row.get_node_or_null("PaletteRotatePlacementLeftButton") as Button
+	if rotate_left == null:
+		rotate_left = Button.new()
+		rotate_left.name = "PaletteRotatePlacementLeftButton"
+		rotate_left.text = "-90"
+		rotate_left.tooltip_text = "Dreht den Placement-Default fuer neue Assets um 90 Grad nach links."
+		rotate_left.custom_minimum_size = Vector2(42.0, 0.0)
+		rotation_row.add_child(rotate_left)
+	if not rotate_left.pressed.is_connected(rotate_object_placement_rotation_left_for_authoring):
+		rotate_left.pressed.connect(rotate_object_placement_rotation_left_for_authoring)
+	var rotate_right := rotation_row.get_node_or_null("PaletteRotatePlacementRightButton") as Button
+	if rotate_right == null:
+		rotate_right = Button.new()
+		rotate_right.name = "PaletteRotatePlacementRightButton"
+		rotate_right.text = "+90"
+		rotate_right.tooltip_text = "Dreht den Placement-Default fuer neue Assets um 90 Grad nach rechts."
+		rotate_right.custom_minimum_size = Vector2(42.0, 0.0)
+		rotation_row.add_child(rotate_right)
+	if not rotate_right.pressed.is_connected(rotate_object_placement_rotation_right_for_authoring):
+		rotate_right.pressed.connect(rotate_object_placement_rotation_right_for_authoring)
+	var save_button := rotation_row.get_node_or_null("PaletteSaveRotationOverrideButton") as Button
+	if save_button == null:
+		save_button = Button.new()
+		save_button.name = "PaletteSaveRotationOverrideButton"
+		save_button.text = "Save"
+		save_button.tooltip_text = "Merkt die aktuelle Placement-Rotation fuer dieses Asset."
+		save_button.custom_minimum_size = Vector2(44.0, 0.0)
+		rotation_row.add_child(save_button)
+	if not save_button.pressed.is_connected(save_palette_rotation_override_for_authoring):
+		save_button.pressed.connect(save_palette_rotation_override_for_authoring)
+	var clear_button := rotation_row.get_node_or_null("PaletteClearRotationOverrideButton") as Button
+	if clear_button == null:
+		clear_button = Button.new()
+		clear_button.name = "PaletteClearRotationOverrideButton"
+		clear_button.text = "Clr"
+		clear_button.tooltip_text = "Entfernt die gemerkte Rotation fuer dieses Asset."
+		clear_button.custom_minimum_size = Vector2(34.0, 0.0)
+		rotation_row.add_child(clear_button)
+	if not clear_button.pressed.is_connected(clear_palette_rotation_override_for_authoring):
+		clear_button.pressed.connect(clear_palette_rotation_override_for_authoring)
 
 
 func _ensure_palette_quick_filter_controls() -> void:
@@ -4330,6 +4408,10 @@ func _build_palette_snapshot() -> Dictionary:
 		"asset_scale_override_count": _palette_asset_scale_overrides.size(),
 		"selected_has_scale_override": _palette_has_scale_override(_selected_type_id),
 		"selected_scale_override": _get_palette_scale_override(_selected_type_id),
+		"asset_rotation_overrides": _palette_asset_rotation_overrides.duplicate(true),
+		"asset_rotation_override_count": _palette_asset_rotation_overrides.size(),
+		"selected_has_rotation_override": _palette_has_rotation_override(_selected_type_id),
+		"selected_rotation_override_degrees": _get_palette_rotation_override(_selected_type_id),
 		"preview_icon_count": preview_icon_count,
 		"catalog_preview_icon_count": catalog_preview_icon_count,
 		"generated_preview_icon_count": generated_preview_icon_count,
@@ -4348,6 +4430,7 @@ func _build_palette_snapshot() -> Dictionary:
 		"asset_list_min_size": asset_list_min_size,
 		"selected_preview_size": selected_preview_rect.custom_minimum_size if selected_preview_rect != null else Vector2.ZERO,
 		"placement_scale": _placement_object_scale,
+		"placement_rotation_degrees": _placement_object_rotation_degrees,
 		"scale_presets": scale_presets,
 		"scale_min": OBJECT_SCALE_MIN,
 		"scale_max": OBJECT_SCALE_MAX,
@@ -5648,6 +5731,10 @@ func _palette_type_uses_object_scale(type_id: String) -> bool:
 	)
 
 
+func _palette_type_uses_object_rotation(type_id: String) -> bool:
+	return _palette_type_uses_object_scale(type_id)
+
+
 func _get_tile_object_rotation_degrees(tile_data) -> float:
 	if tile_data == null:
 		return 0.0
@@ -5664,6 +5751,12 @@ func _normalize_object_scale(value: float) -> float:
 	if is_nan(value) or is_inf(value):
 		return OBJECT_SCALE_DEFAULT
 	return snappedf(clampf(value, OBJECT_SCALE_MIN, OBJECT_SCALE_MAX), 0.001)
+
+
+func _normalize_object_rotation_degrees(value: float) -> float:
+	if is_nan(value) or is_inf(value):
+		return 0.0
+	return fposmod(snappedf(value, 90.0), 360.0)
 
 
 func _rotate_selected_object(delta_degrees: float) -> bool:
@@ -5725,6 +5818,32 @@ func get_object_placement_scale() -> float:
 	return _placement_object_scale
 
 
+func set_object_placement_rotation_degrees(value: float) -> bool:
+	return _set_object_placement_rotation_internal(value, true)
+
+
+func _set_object_placement_rotation_internal(value: float, persist_preferences: bool) -> bool:
+	var normalized_rotation: float = _normalize_object_rotation_degrees(value)
+	var changed: bool = not is_equal_approx(_placement_object_rotation_degrees, normalized_rotation)
+	_placement_object_rotation_degrees = normalized_rotation
+	_refresh_palette_workflow_controls()
+	if changed and persist_preferences:
+		_save_palette_authoring_preferences()
+	return changed
+
+
+func rotate_object_placement_rotation_left_for_authoring() -> bool:
+	return set_object_placement_rotation_degrees(_placement_object_rotation_degrees - 90.0)
+
+
+func rotate_object_placement_rotation_right_for_authoring() -> bool:
+	return set_object_placement_rotation_degrees(_placement_object_rotation_degrees + 90.0)
+
+
+func get_object_placement_rotation_degrees() -> float:
+	return _placement_object_rotation_degrees
+
+
 func save_palette_authoring_preferences_for_test() -> bool:
 	return _save_palette_authoring_preferences()
 
@@ -5760,7 +5879,9 @@ func clear_palette_authoring_preferences_for_test() -> bool:
 	_palette_favorite_type_ids = PackedStringArray()
 	_palette_recent_type_ids = PackedStringArray()
 	_palette_asset_scale_overrides = {}
+	_palette_asset_rotation_overrides = {}
 	_placement_object_scale = OBJECT_SCALE_DEFAULT
+	_placement_object_rotation_degrees = 0.0
 	_palette_preferences_loaded = false
 	_palette_preferences_saved = false
 	_palette_preferences_last_error = ""
@@ -5794,8 +5915,11 @@ func _load_palette_authoring_preferences() -> bool:
 	_palette_favorite_type_ids = _normalize_palette_preference_type_ids(preferences.get("favorite_type_ids", []), -1)
 	_palette_recent_type_ids = _normalize_palette_preference_type_ids(preferences.get("recent_type_ids", []), PALETTE_RECENT_MAX_COUNT)
 	_palette_asset_scale_overrides = _normalize_palette_scale_overrides(preferences.get("asset_scale_overrides", {}))
+	_palette_asset_rotation_overrides = _normalize_palette_rotation_overrides(preferences.get("asset_rotation_overrides", {}))
 	if preferences.has("placement_scale"):
 		_set_object_placement_scale_internal(float(preferences.get("placement_scale", OBJECT_SCALE_DEFAULT)), false)
+	if preferences.has("placement_rotation_degrees"):
+		_set_object_placement_rotation_internal(float(preferences.get("placement_rotation_degrees", 0.0)), false)
 	_palette_preferences_loaded = true
 	_palette_preferences_load_count += 1
 	return true
@@ -5808,7 +5932,9 @@ func _save_palette_authoring_preferences() -> bool:
 		"favorite_type_ids": Array(_palette_favorite_type_ids),
 		"recent_type_ids": Array(_palette_recent_type_ids),
 		"placement_scale": _placement_object_scale,
+		"placement_rotation_degrees": _placement_object_rotation_degrees,
 		"asset_scale_overrides": _palette_asset_scale_overrides.duplicate(true),
+		"asset_rotation_overrides": _palette_asset_rotation_overrides.duplicate(true),
 		"stores_gameplay_truth": false,
 	}
 	var file := FileAccess.open(_get_palette_authoring_preferences_path(), FileAccess.WRITE)
@@ -5859,6 +5985,21 @@ func _normalize_palette_scale_overrides(value) -> Dictionary:
 	return result
 
 
+func _normalize_palette_rotation_overrides(value) -> Dictionary:
+	var result: Dictionary = {}
+	if typeof(value) != TYPE_DICTIONARY:
+		return result
+	var source: Dictionary = Dictionary(value)
+	for key in source.keys():
+		var type_id: String = String(key).strip_edges().to_lower()
+		if type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(type_id):
+			continue
+		if not _palette_type_uses_object_rotation(type_id):
+			continue
+		result[type_id] = _normalize_object_rotation_degrees(float(source.get(key, 0.0)))
+	return result
+
+
 func _palette_has_scale_override(type_id: String) -> bool:
 	return _palette_asset_scale_overrides.has(type_id.strip_edges().to_lower())
 
@@ -5904,6 +6045,55 @@ func clear_palette_scale_override_for_authoring(type_id: String = "") -> bool:
 		_refresh_palette_workflow_controls()
 		return false
 	_palette_asset_scale_overrides.erase(normalized_type_id)
+	_refresh_palette_workflow_controls()
+	return _save_palette_authoring_preferences()
+
+
+func _palette_has_rotation_override(type_id: String) -> bool:
+	return _palette_asset_rotation_overrides.has(type_id.strip_edges().to_lower())
+
+
+func _get_palette_rotation_override(type_id: String) -> float:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if not _palette_asset_rotation_overrides.has(normalized_type_id):
+		return 0.0
+	return _normalize_object_rotation_degrees(float(_palette_asset_rotation_overrides.get(normalized_type_id, 0.0)))
+
+
+func _apply_palette_rotation_override_for_type(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or not _palette_has_rotation_override(normalized_type_id):
+		return false
+	if not _palette_type_uses_object_rotation(normalized_type_id):
+		return false
+	return _set_object_placement_rotation_internal(_get_palette_rotation_override(normalized_type_id), false)
+
+
+func save_palette_rotation_override_for_authoring(type_id: String = "") -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		normalized_type_id = _selected_type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
+		return false
+	if not _palette_type_uses_object_rotation(normalized_type_id):
+		return false
+	var normalized_rotation: float = _normalize_object_rotation_degrees(_placement_object_rotation_degrees)
+	if _palette_asset_rotation_overrides.has(normalized_type_id) and is_equal_approx(float(_palette_asset_rotation_overrides.get(normalized_type_id)), normalized_rotation):
+		_refresh_palette_workflow_controls()
+		return false
+	_palette_asset_rotation_overrides[normalized_type_id] = normalized_rotation
+	_refresh_palette_workflow_controls()
+	return _save_palette_authoring_preferences()
+
+
+func clear_palette_rotation_override_for_authoring(type_id: String = "") -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		normalized_type_id = _selected_type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or not _palette_asset_rotation_overrides.has(normalized_type_id):
+		_refresh_palette_workflow_controls()
+		return false
+	_palette_asset_rotation_overrides.erase(normalized_type_id)
 	_refresh_palette_workflow_controls()
 	return _save_palette_authoring_preferences()
 
@@ -7585,6 +7775,7 @@ func _on_tile_type_selected(index: int) -> void:
 		_selected_type_id = type_ids[index]
 	_remember_palette_recent_type_id(_selected_type_id)
 	_apply_palette_scale_override_for_type(_selected_type_id)
+	_apply_palette_rotation_override_for_type(_selected_type_id)
 
 	# Auto-enable brush when a type is selected
 	_clear_height_tool()
@@ -7615,6 +7806,7 @@ func set_palette_type_for_authoring(type_id: String) -> bool:
 	_selected_type_id = normalized_type_id
 	_remember_palette_recent_type_id(normalized_type_id)
 	_apply_palette_scale_override_for_type(normalized_type_id)
+	_apply_palette_rotation_override_for_type(normalized_type_id)
 	var type_group: String = _get_palette_group_for_type(normalized_type_id)
 	if not type_group.is_empty() and _active_palette_group_id != type_group:
 		_active_palette_group_id = type_group
@@ -8168,17 +8360,33 @@ func _refresh_palette_workflow_controls() -> void:
 	var placement_scale_spinbox := _get_placement_object_scale_spinbox()
 	var save_override_button := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow/PaletteSaveScaleOverrideButton") as Button
 	var clear_override_button := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow/PaletteClearScaleOverrideButton") as Button
+	var rotate_left_button := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementRotationRow/PaletteRotatePlacementLeftButton") as Button
+	var rotate_right_button := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementRotationRow/PaletteRotatePlacementRightButton") as Button
+	var save_rotation_override_button := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementRotationRow/PaletteSaveRotationOverrideButton") as Button
+	var clear_rotation_override_button := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementRotationRow/PaletteClearRotationOverrideButton") as Button
 	if placement_scale_spinbox != null and not is_equal_approx(float(placement_scale_spinbox.value), _placement_object_scale):
 		placement_scale_spinbox.value = _placement_object_scale
 	var has_selected_type: bool = not _selected_type_id.is_empty()
 	var selected_type_uses_scale: bool = has_selected_type and _palette_type_uses_object_scale(_selected_type_id)
 	var selected_has_override: bool = has_selected_type and _palette_has_scale_override(_selected_type_id)
+	var selected_type_uses_rotation: bool = has_selected_type and _palette_type_uses_object_rotation(_selected_type_id)
+	var selected_has_rotation_override: bool = has_selected_type and _palette_has_rotation_override(_selected_type_id)
 	if save_override_button != null:
 		save_override_button.disabled = not selected_type_uses_scale
 		save_override_button.tooltip_text = "Merkt Scale %.2f fuer %s." % [_placement_object_scale, _get_palette_type_display_name(_selected_type_id)] if selected_type_uses_scale else "Dieses Asset nutzt keinen Placement-Scale."
 	if clear_override_button != null:
 		clear_override_button.disabled = not selected_has_override
 		clear_override_button.tooltip_text = "Entfernt den gemerkten Scale fuer dieses Asset." if selected_has_override else "Fuer dieses Asset ist kein Scale gemerkt."
+	if rotate_left_button != null:
+		rotate_left_button.disabled = not selected_type_uses_rotation
+	if rotate_right_button != null:
+		rotate_right_button.disabled = not selected_type_uses_rotation
+	if save_rotation_override_button != null:
+		save_rotation_override_button.disabled = not selected_type_uses_rotation
+		save_rotation_override_button.tooltip_text = "Merkt Rotation %d deg fuer %s." % [int(round(_placement_object_rotation_degrees)), _get_palette_type_display_name(_selected_type_id)] if selected_type_uses_rotation else "Dieses Asset nutzt keine Placement-Rotation."
+	if clear_rotation_override_button != null:
+		clear_rotation_override_button.disabled = not selected_has_rotation_override
+		clear_rotation_override_button.tooltip_text = "Entfernt die gemerkte Rotation fuer dieses Asset." if selected_has_rotation_override else "Fuer dieses Asset ist keine Rotation gemerkt."
 	if preview_rect == null and info_label == null:
 		return
 	if _selected_type_id.is_empty():
@@ -8193,10 +8401,12 @@ func _refresh_palette_workflow_controls() -> void:
 		preview_rect.texture = _get_palette_preview_texture(_selected_type_id)
 	if info_label != null:
 		var scale_status: String = "Scale %.2f%s" % [_placement_object_scale, " gemerkt" if selected_has_override else ""]
-		info_label.text = "%s\n%s\n%s" % [
+		var rotation_status: String = "Rot %d%s" % [int(round(_placement_object_rotation_degrees)), " gemerkt" if selected_has_rotation_override else ""]
+		info_label.text = "%s\n%s\n%s | %s" % [
 			type_display_name,
 			group_display_name if not group_display_name.is_empty() else "Palette",
 			scale_status,
+			rotation_status,
 		]
 
 
