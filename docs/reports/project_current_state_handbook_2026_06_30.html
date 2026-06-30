@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_664: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_665: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_664</span>
-      <span class="pill">Naechster Kandidat: TASK_665</span>
+      <span class="pill">Letzter Stand: TASK_665</span>
+      <span class="pill">Naechster Kandidat: TASK_666</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_664 - Host Client Decision Drill Real Click Recheck ist der aktuelle Abschlussstand: Das Recheck-Paket verbindet Click-Evidence, Real-Capture und das neue `P1 ALPHA`/`P2 BRAVO`-Fireteamkarten-Badge. Der echte menschliche Klickbefund bleibt bewusst offen und soll als TASK_665 festgehalten werden.</div>
+          <div class="callout">TASK_665 - Host Client Decision Drill Technical Click Guard ist der aktuelle Abschlussstand: Der technische Kern des Multiplayer-Decision-Drills ist headless belegt. Peer 2 darf Bravo kommandieren, Alpha wird korrekt geblockt, `USE BRAVO` bleibt lesbar, `P2 BRAVO` sitzt im Fireteamkarten-Kontext, und `NEXT AA` mit Preview/GO fuehrt in Execution. Der echte Fensterklick bleibt bewusst TASK_666.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -122,6 +122,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_662_done"> TASK_662 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_663_done"> TASK_663 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_664_done"> TASK_664 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_665_done"> TASK_665 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -147,9 +148,9 @@
           <table>
             <thead><tr><th>Bereich</th><th>Traegt bereits</th><th>Reibt noch</th><th>Naechster guter Griff</th></tr></thead>
             <tbody>
-              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Klick-Recheck nach TASK_663 ist weiter offen.</td><td>TASK_665: Klickbefund nach TASK_664 festhalten.</td></tr>
+              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Klick-Recheck nach TASK_663 ist weiter offen.</td><td>TASK_666: echten Fensterbefund festhalten.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
-              <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Das neue Fireteamkarten-Badge muss noch im echten Klicklauf beweisen, dass Peer 2 schneller zum Bravo-Kontext findet.</td><td>TASK_665: echte Klick-Findings auswerten.</td></tr>
+              <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Das neue Fireteamkarten-Badge muss noch im echten Klicklauf beweisen, dass Peer 2 schneller zum Bravo-Kontext findet.</td><td>TASK_666: echte Klick-Findings auswerten.</td></tr>
               <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow und Builder-Spikes sind vorhanden.</td><td>Der Mapbau fuehlt sich noch nicht wie ein angenehmes Werkzeug an.</td><td>Nach dem Gameplay-Fenster wieder UX-Slice fuer Builder-Toolbar/Assets.</td></tr>
               <tr><td>Performance/Export</td><td>Large-Map-, Hotpath- und Export-Hygiene wurden mehrfach geprueft.</td><td>Neue UI-Listen, Reports und Map-Assets koennen wieder verdeckte Kosten erzeugen.</td><td>Nach jedem groesseren UI-/Map-Schub Smoke + Export-Check laufen lassen.</td></tr>
             </tbody>
@@ -215,7 +216,7 @@
             <tbody>
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
-              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>TASK_664 liefert den Recheck-Ablauf; TASK_665 braucht den echten Klickbefund.</td></tr>
+              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>TASK_665 prueft die technische Kette; TASK_666 braucht den echten Klickbefund.</td></tr>
               <tr><td>Editor bleibt sperrig</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>Nach Core-Loop-/Multiplayer-Sichtbarkeit wieder Editor-UX priorisieren.</td></tr>
             </tbody>
           </table>
@@ -383,9 +384,22 @@
           <label class="checkline"><input type="checkbox" data-export-key="host_client_decision_drill_real_click_recheck.manual_review_done"> Menschlicher Klick-Recheck erledigt</label>
           <input readonly value="tmp/host_client_decision_drill_real_click_recheck.json" data-export-key="host_client_decision_drill_real_click_recheck.manifest_path">
           <input readonly value="host_client_fireteam_context_badge_v1" data-export-key="host_client_decision_drill_real_click_recheck.style_id">
-          <input readonly value="TASK_665 - Host Client Decision Drill Click Findings" data-export-key="host_client_decision_drill_real_click_recheck.recommended_next_task">
+          <input readonly value="TASK_665 - Host Client Decision Drill Technical Click Guard" data-export-key="host_client_decision_drill_real_click_recheck.recommended_next_task">
           <textarea data-export-key="host_client_decision_drill_real_click_recheck.findings" placeholder="Nach echtem Recheck notieren: Hat Peer 2 den Bravo-Kontext schneller gefunden? War `NEXT AA` klar? War GO bewusst genug?"></textarea>
           <div contenteditable="true" data-note-key="notes.host_client_decision_drill_real_click_recheck" data-placeholder="TASK_664-Notizen...">TASK_664 schreibt ein read-only Recheck-Paket. Es verbindet Click-Evidence, Real-Capture und das TASK_663-Kartenbadge, markiert aber den menschlichen Klickentscheid weiter als offen.</div>
+        </article>
+        <article class="card full">
+          <h2>Host-Client-Technical-Guard</h2>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_technical_guard.peer2_bravo_accepted"> Peer 2 / Bravo wird serverseitig akzeptiert</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_technical_guard.peer2_alpha_rejected"> Peer 2 / Alpha wird mit `peer_team_mismatch` geblockt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_technical_guard.use_bravo_visible"> `USE BRAVO` bleibt aus dem Teamchip-Snapshot ableitbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_technical_guard.card_context_p2_bravo"> Fireteamkarten-Kontext bleibt `P2 BRAVO`</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_technical_guard.preview_go_execution"> `NEXT AA` -> Preview -> `GO` -> Execution ist technisch belegt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="host_client_decision_drill_technical_guard.manual_window_review_done"> Echter Fensterklick danach erledigt</label>
+          <input readonly value="tmp/host_client_decision_drill_technical_click_guard.json" data-export-key="host_client_decision_drill_technical_guard.manifest_path">
+          <input readonly value="TASK_666 - Host Client Decision Drill Real Click Findings" data-export-key="host_client_decision_drill_technical_guard.recommended_next_task">
+          <textarea data-export-key="host_client_decision_drill_technical_guard.findings" placeholder="Nach echtem Fensterlauf notieren: Was war trotz technischem Guard noch verwirrend?"></textarea>
+          <div contenteditable="true" data-note-key="notes.host_client_decision_drill_technical_guard" data-placeholder="TASK_665-Notizen...">TASK_665 beweist den technischen Host/Client-Decision-Drill ohne Klickbot: Authority, `USE BRAVO`, `P2 BRAVO`, `NEXT AA`, Preview und GO/Execution bleiben zusammen konsistent. Bediengefuehl bleibt TASK_666.</div>
         </article>
         <article class="card half">
           <h2>Bewertung</h2>
@@ -406,7 +420,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>TASK_665 - Host Client Decision Drill Click Findings</strong> ist aus meiner Sicht der beste direkte Anschluss: Nach TASK_664 muss der echte Klicklauf beobachtet und als Befund festgehalten werden. Erst danach lohnt sich weiterer Multiplayer-Polish oder der Ruecksprung in den Builder.</p>
+          <p><strong>TASK_666 - Host Client Decision Drill Real Click Findings</strong> ist aus meiner Sicht der beste direkte Anschluss: Nach TASK_665 ist die technische Kette belegt; jetzt muss der echte Fensterlauf zeigen, ob das im Spiel auch angenehm und eindeutig bedienbar ist.</p>
           <div class="callout">Alternative mit mehr Editor-Nutzen: Builder-/Map-UX wieder aufnehmen. Fuer Multiplayer-Spielbarkeit ist aber der Recheck des gerade verbesserten Decision-Drills direkter.</div>
         </article>
         <article class="card">
@@ -418,7 +432,7 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>TASK_664 - Host Client Decision Drill Real Click Recheck</td><td>Pruefen, ob `P2 BRAVO` den kompletten Host/Client-Decision-Drill im Fenster verbessert.</td></tr>
+              <tr><td>1</td><td>TASK_666 - Host Client Decision Drill Real Click Findings</td><td>Pruefen, ob `P2 BRAVO` den kompletten Host/Client-Decision-Drill im Fenster verbessert.</td></tr>
               <tr><td>2</td><td>Echter Fensterblick auf TASK_659/TASK_660</td><td>Der Mini-Loop wird menschlich gegen HUD-Dichte und Tempo geprueft.</td></tr>
               <tr><td>3</td><td>Editor Builder UX Slice</td><td>Mapbau wird angenehmer und Content entsteht schneller.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
@@ -432,7 +446,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_664. Das Recheck-Paket fuer den echten Host/Client-Decision-Drill ist bereit und erwartet jetzt im Klicklauf das neue `P1 ALPHA`/`P2 BRAVO`-Fireteamkarten-Badge, `USE BRAVO`, `NEXT AA`, Preview vor `GO` und sichtbares GO-Feedback. Naechster Kandidat ist TASK_665 Host Client Decision Drill Click Findings.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_665. Der technische Guard belegt Authority, `USE BRAVO`, `P2 BRAVO`, `NEXT AA`, Preview und GO/Execution in einem Headless-Pfad. Naechster Kandidat ist TASK_666 Host Client Decision Drill Real Click Findings.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -489,15 +503,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_664 - Host Client Decision Drill Real Click Recheck",
-            recommended_next_task: "TASK_665 - Host Client Decision Drill Click Findings",
+            latest_completed_task: "TASK_665 - Host Client Decision Drill Technical Click Guard",
+            recommended_next_task: "TASK_666 - Host Client Decision Drill Real Click Findings",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_664 - Host Client Decision Drill Real Click Recheck",
+            updated_for_task: "TASK_665 - Host Client Decision Drill Technical Click Guard",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };

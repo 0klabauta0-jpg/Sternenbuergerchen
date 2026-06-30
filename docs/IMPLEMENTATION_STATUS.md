@@ -611,10 +611,20 @@
 - Relevante Docs/Contracts: `docs/tasks/TASK_664_host_client_decision_drill_real_click_recheck.md`, `docs/tasks/TASK_661_host_client_decision_drill_click_evidence.md`, `docs/tasks/TASK_662_host_client_decision_drill_real_window_capture.md`, `docs/tasks/TASK_663_host_client_decision_drill_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
 - Stand: `task_664_host_client_decision_drill_real_click_recheck.gd` schreibt `tmp/host_client_decision_drill_real_click_recheck.json` als read-only Recheck-Paket fuer den echten Host/Client-Klicklauf nach dem TASK_663-Badge-Fix.
 - Stand: Das Paket verknuepft TASK_661-Click-Evidence, TASK_662-Real-Capture und TASK_663-Fireteamkarten-Kontext. Erwartet werden `P1 ALPHA`/`P2 BRAVO`, `BLOCK P2 wrong team`, `USE BRAVO`, Bravo-Kontext, `NEXT AA`, Preview vor `GO` und sichtbares GO-Feedback.
-- Stand: Der HTML-Handbuchbericht markiert TASK_664 und empfiehlt danach `TASK_665 - Host Client Decision Drill Click Findings`.
-- Risiken/offen: TASK_664 fuehrt keinen Klickbot aus und markiert den menschlichen Sichtentscheid nicht als erledigt. TASK_665 sollte den echten Klickbefund festhalten.
+- Stand: Der HTML-Handbuchbericht markiert TASK_664 und empfiehlt danach `TASK_665 - Host Client Decision Drill Technical Click Guard`.
+- Risiken/offen: TASK_664 fuehrt keinen Klickbot aus und markiert den menschlichen Sichtentscheid nicht als erledigt. TASK_665 prueft zuerst den technischen Klickpfad.
 - Lokale Pruefung: `task_664_host_client_decision_drill_real_click_recheck.gd`, `task_663_host_client_decision_drill_visual_findings.gd`, `task_662_host_client_decision_drill_real_window_capture.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_665 - Host Client Decision Drill Click Findings`, sobald der manuelle Zwei-Fenster-Klicklauf nach dem Recheck-Paket beobachtet wurde.
+- Naechster Schritt: `TASK_665 - Host Client Decision Drill Technical Click Guard`, um Authority, Feedback, Kartenkontext und Preview/GO maschinell zusammen abzusichern.
+
+### TASK_665 - Host Client Decision Drill Technical Click Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_665_host_client_decision_drill_technical_click_guard.md`, `docs/tasks/TASK_664_host_client_decision_drill_real_click_recheck.md`, `docs/tasks/TASK_622_host_client_command_authority_live_interaction_review.md`, `docs/tasks/TASK_650_host_client_click_feedback_followup.md`, `docs/tasks/TASK_658_frontier_probe_one_screen_player_decision_drill.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `task_665_host_client_decision_drill_technical_click_guard.gd` prueft den technischen Host/Client-Decision-Drill headless ueber vorhandene Pfade.
+- Stand: Peer 2 / Bravo wird akzeptiert, Peer 2 / Alpha wird mit `peer_team_mismatch` abgewiesen, der Teamchip leitet `BLOCK P2 wrong team` und `USE BRAVO` ab, die Fireteamkarte liefert `P2 BRAVO`, und der Frontier-Probe-Decision-Drill bleibt `NEXT AA` mit Preview vor `GO` und Execution nach `GO`.
+- Stand: `tmp/host_client_decision_drill_technical_click_guard.json` schreibt diese Kette als read-only Manifest.
+- Risiken/offen: TASK_665 ist kein echter Fensterklick und kein Bediengefuehl-Beweis. Der echte Zwei-Fenster-Klickbefund bleibt als TASK_666 offen.
+- Lokale Pruefung: `task_665_host_client_decision_drill_technical_click_guard.gd`, `task_664_host_client_decision_drill_real_click_recheck.gd`, `task_650_host_client_click_feedback_followup.gd`, `task_658_frontier_probe_one_screen_player_decision_drill.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_666 - Host Client Decision Drill Real Click Findings`, wenn der echte Zwei-Fenster-Klicklauf beobachtet wird.
 
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand

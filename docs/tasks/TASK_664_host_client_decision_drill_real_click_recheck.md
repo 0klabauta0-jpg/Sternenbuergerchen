@@ -32,7 +32,7 @@ TASK_662 machte den Zwei-Fensterlauf capture-ready, TASK_663 verbesserte die Les
 - Host- und Client-Erwartungen enthalten `P1 ALPHA` und `P2 BRAVO`.
 - Der Recheck enthaelt die erwarteten Pflichtbeobachtungen fuer `USE BRAVO`, Bravo-Kontext, `NEXT AA`, Preview vor `GO` und sichtbares GO-Feedback.
 - `manual_review_required = true`, `manual_review_done = false`, `read_only = true` und `ui_sets_gameplay_truth = false`.
-- Bericht, Roadmap, Status und Contract nennen TASK_664 und empfehlen danach den echten Klickbefund als TASK_665.
+- Bericht, Roadmap, Status und Contract nennen TASK_664 und empfehlen danach den technischen Klickpfad-Guard als TASK_665.
 
 ## Betroffene Dateien
 - `scripts/tests/task_664_host_client_decision_drill_real_click_recheck.gd`
@@ -49,4 +49,4 @@ TASK_662 machte den Zwei-Fensterlauf capture-ready, TASK_663 verbesserte die Les
 - `git diff --check`
 
 ## Risiken / offene Punkte
-TASK_664 ist ein Recheck-Anker, kein fertiger Klickbefund. Der eigentliche menschliche Zwei-Fenster-Klicklauf bleibt offen und sollte als TASK_665 mit konkreten Beobachtungen nachgezogen werden.
+TASK_664 ist ein Recheck-Anker, kein fertiger Klickbefund. Der technische Klickpfad sollte als TASK_665 maschinell geprueft werden; der eigentliche menschliche Zwei-Fenster-Klicklauf bleibt danach als eigener Befund offen.

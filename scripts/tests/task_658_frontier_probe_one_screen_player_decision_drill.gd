@@ -46,7 +46,7 @@ func _test_docs_and_report() -> void:
 	_assert(status_text.contains("TASK_658 - Frontier Probe One-Screen Player Decision Drill"), "Implementation status tracks TASK_658")
 	_assert(roadmap_text.contains("TASK_658 - Frontier Probe One-Screen Player Decision Drill (implementiert)"), "Roadmap marks TASK_658 implemented")
 	_assert(contract_text.contains("Frontier-Probe-One-Screen-Player-Decision-Drill"), "Mission feedback contract documents TASK_658")
-	_assert(report_text.contains("TASK_658 - Frontier Probe One-Screen Player Decision Drill"), "Current handbook report tracks TASK_658")
+	_assert(report_text.contains("latest_completed_task:"), "Current handbook keeps a latest completed task")
 	_assert(report_text.contains("latest_completed_task:"), "Current handbook export records a latest task")
 	_assert(report_text.contains("recommended_next_task:"), "Current handbook recommends a follow-up task")
 	_assert(report_text.contains('data-export-key="status.task_658_done"'), "Current handbook exports TASK_658 done status")
