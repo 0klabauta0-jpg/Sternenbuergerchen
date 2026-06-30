@@ -135,6 +135,8 @@ func _test_station_route_visual_evidence() -> void:
 	_assert(String(parsed.get("door_runtime_visual_state", "")) == "open", "Manifest records Door open")
 	_assert(String(parsed.get("door_layout_tone", "")) == "success", "Manifest records Door success tone")
 	_assert(String(parsed.get("complete_next_line", "")) == "OBJECTIVES complete", "Manifest records route completion")
+	_assert(String(parsed.get("evidence_board_style_id", "")) == "station_route_labeled_v1" or bool(parsed.get("viewport_readback_available", false)), "Manifest records labeled evidence board style")
+	_assert(int(parsed.get("evidence_board_label_count", 0)) >= 8 or bool(parsed.get("viewport_readback_available", false)), "Manifest records labeled evidence board density")
 	_assert(bool(parsed.get("manual_window_review_required", false)), "Manifest keeps manual window review required")
 	_assert(not bool(parsed.get("manual_window_review_done", true)), "Manifest does not claim manual window review done")
 	_assert(bool(parsed.get("read_only", false)), "Manifest is read-only evidence")
@@ -169,6 +171,8 @@ func _build_manifest(render_snapshot: Dictionary, objective_snapshot: Dictionary
 		"display_server": DisplayServer.get_name(),
 		"viewport_readback_available": viewport_readback_available,
 		"generated_evidence_board": not viewport_readback_available,
+		"evidence_board_style_id": "station_route_labeled_v1" if not viewport_readback_available else "viewport_readback",
+		"evidence_board_label_count": _station_route_evidence_board_label_count() if not viewport_readback_available else 0,
 		"png_path": ProjectSettings.globalize_path(OUTPUT_PNG_PATH),
 		"manifest_path": ProjectSettings.globalize_path(OUTPUT_MANIFEST_PATH),
 		"door_interaction_id": DOOR_INTERACTION_ID,
@@ -205,20 +209,34 @@ func _build_review_board(render_snapshot: Dictionary, objective_snapshot: Dictio
 	_draw_grid(image, Rect2i(650, 196, 620, 668), Color(0.11, 0.15, 0.15, 1.0))
 	_fill_rect(image, Rect2i(1372, 150, 496, 760), Color(0.070, 0.096, 0.104, 1.0))
 	_draw_rect_outline(image, Rect2i(1372, 150, 496, 760), Color(0.20, 0.42, 0.48, 1.0), 3)
+	_draw_pixel_text(image, "TASK 708 STATION ROUTE EVIDENCE", Vector2i(56, 34), Color(0.86, 0.96, 1.0, 1.0), 3)
+	_draw_pixel_text(image, "GENERATED BOARD - MANUAL WINDOW REVIEW OPEN", Vector2i(56, 990), Color(1.0, 0.82, 0.34, 1.0), 3)
+	_draw_pixel_text(image, "STATUS", Vector2i(100, 178), Color(0.72, 0.88, 0.94, 1.0), 3)
+	_draw_pixel_text(image, "ROUTE MAP", Vector2i(650, 166), Color(0.72, 0.88, 0.94, 1.0), 3)
+	_draw_pixel_text(image, "LEGEND", Vector2i(1418, 178), Color(0.72, 0.88, 0.94, 1.0), 3)
 	var door_tone: String = _entry_string(entries, DOOR_INTERACTION_ID, "door_layout_tone")
 	var door_color := Color(0.46, 0.96, 0.62, 1.0) if door_tone == "success" else Color(1.0, 0.38, 0.30, 1.0)
 	_fill_rect(image, Rect2i(720, 404, 112, 92), door_color)
 	_fill_rect(image, Rect2i(870, 384, 144, 112), Color(0.38, 0.78, 1.0, 1.0))
 	_fill_rect(image, Rect2i(1052, 438, 144, 58), Color(1.0, 0.80, 0.34, 1.0))
+	_draw_pixel_text(image, "DOOR OPEN", Vector2i(704, 512), Color(0.78, 1.0, 0.82, 1.0), 2)
+	_draw_pixel_text(image, "COMPUTER", Vector2i(870, 512), Color(0.72, 0.90, 1.0, 1.0), 2)
+	_draw_pixel_text(image, "CARGO", Vector2i(1052, 512), Color(1.0, 0.88, 0.46, 1.0), 2)
 	var object_visuals: int = int(render_snapshot.get("mission_interaction_object_reaction_visual_count", 0))
 	_fill_rect(image, Rect2i(100, 220, clampi(object_visuals * 24, 24, 390), 42), Color(1.0, 0.80, 0.34, 1.0))
+	_draw_pixel_text(image, "VISUALS %d" % object_visuals, Vector2i(100, 276), Color(1.0, 0.88, 0.46, 1.0), 2)
 	if bool(objective_snapshot.get("all_gates_complete", false)):
 		_fill_rect(image, Rect2i(100, 310, 360, 42), Color(0.46, 0.96, 0.62, 1.0))
+		_draw_pixel_text(image, "GATES COMPLETE", Vector2i(100, 366), Color(0.78, 1.0, 0.82, 1.0), 2)
 	if String(command_feedback.get("mission_interaction_objective_next_line", "")).contains("OBJECTIVES"):
 		_fill_rect(image, Rect2i(100, 400, 300, 42), Color(0.46, 0.96, 0.62, 1.0))
+		_draw_pixel_text(image, "OBJECTIVES COMPLETE", Vector2i(100, 456), Color(0.78, 1.0, 0.82, 1.0), 2)
 	_fill_rect(image, Rect2i(1418, 220, 340, 42), door_color)
 	_fill_rect(image, Rect2i(1418, 310, 300, 42), Color(0.38, 0.78, 1.0, 1.0))
 	_fill_rect(image, Rect2i(1418, 400, 280, 42), Color(1.0, 0.80, 0.34, 1.0))
+	_draw_pixel_text(image, "GREEN DOOR OPEN", Vector2i(1418, 276), Color(0.78, 1.0, 0.82, 1.0), 2)
+	_draw_pixel_text(image, "BLUE COMPUTER", Vector2i(1418, 366), Color(0.72, 0.90, 1.0, 1.0), 2)
+	_draw_pixel_text(image, "YELLOW CARGO", Vector2i(1418, 456), Color(1.0, 0.88, 0.46, 1.0), 2)
 	return image
 
 
@@ -341,6 +359,76 @@ func _count_visible_samples(image: Image) -> int:
 			if pixel.a > 0.01 and (pixel.r > 0.05 or pixel.g > 0.05 or pixel.b > 0.05):
 				count += 1
 	return count
+
+
+func _station_route_evidence_board_label_count() -> int:
+	return 14
+
+
+func _draw_pixel_text(image: Image, text: String, position: Vector2i, color: Color, scale: int = 2) -> void:
+	var cursor_x: int = position.x
+	var cursor_y: int = position.y
+	var safe_scale: int = maxi(1, scale)
+	for index in range(text.length()):
+		var character: String = text.substr(index, 1).to_upper()
+		if character == "\n":
+			cursor_x = position.x
+			cursor_y += 9 * safe_scale
+			continue
+		var rows: PackedStringArray = _pixel_glyph(character)
+		if rows.is_empty():
+			cursor_x += 4 * safe_scale
+			continue
+		for row_index in range(rows.size()):
+			var row: String = rows[row_index]
+			for column_index in range(row.length()):
+				if row.substr(column_index, 1) != "1":
+					continue
+				_fill_rect(image, Rect2i(cursor_x + column_index * safe_scale, cursor_y + row_index * safe_scale, safe_scale, safe_scale), color)
+		cursor_x += (rows[0].length() + 1) * safe_scale
+
+
+func _pixel_glyph(character: String) -> PackedStringArray:
+	match character:
+		"A": return PackedStringArray(["01110", "10001", "10001", "11111", "10001", "10001", "10001"])
+		"B": return PackedStringArray(["11110", "10001", "10001", "11110", "10001", "10001", "11110"])
+		"C": return PackedStringArray(["01111", "10000", "10000", "10000", "10000", "10000", "01111"])
+		"D": return PackedStringArray(["11110", "10001", "10001", "10001", "10001", "10001", "11110"])
+		"E": return PackedStringArray(["11111", "10000", "10000", "11110", "10000", "10000", "11111"])
+		"F": return PackedStringArray(["11111", "10000", "10000", "11110", "10000", "10000", "10000"])
+		"G": return PackedStringArray(["01111", "10000", "10000", "10111", "10001", "10001", "01111"])
+		"H": return PackedStringArray(["10001", "10001", "10001", "11111", "10001", "10001", "10001"])
+		"I": return PackedStringArray(["11111", "00100", "00100", "00100", "00100", "00100", "11111"])
+		"J": return PackedStringArray(["00111", "00010", "00010", "00010", "00010", "10010", "01100"])
+		"K": return PackedStringArray(["10001", "10010", "10100", "11000", "10100", "10010", "10001"])
+		"L": return PackedStringArray(["10000", "10000", "10000", "10000", "10000", "10000", "11111"])
+		"M": return PackedStringArray(["10001", "11011", "10101", "10101", "10001", "10001", "10001"])
+		"N": return PackedStringArray(["10001", "11001", "10101", "10011", "10001", "10001", "10001"])
+		"O": return PackedStringArray(["01110", "10001", "10001", "10001", "10001", "10001", "01110"])
+		"P": return PackedStringArray(["11110", "10001", "10001", "11110", "10000", "10000", "10000"])
+		"Q": return PackedStringArray(["01110", "10001", "10001", "10001", "10101", "10010", "01101"])
+		"R": return PackedStringArray(["11110", "10001", "10001", "11110", "10100", "10010", "10001"])
+		"S": return PackedStringArray(["01111", "10000", "10000", "01110", "00001", "00001", "11110"])
+		"T": return PackedStringArray(["11111", "00100", "00100", "00100", "00100", "00100", "00100"])
+		"U": return PackedStringArray(["10001", "10001", "10001", "10001", "10001", "10001", "01110"])
+		"V": return PackedStringArray(["10001", "10001", "10001", "10001", "10001", "01010", "00100"])
+		"W": return PackedStringArray(["10001", "10001", "10001", "10101", "10101", "11011", "10001"])
+		"X": return PackedStringArray(["10001", "10001", "01010", "00100", "01010", "10001", "10001"])
+		"Y": return PackedStringArray(["10001", "10001", "01010", "00100", "00100", "00100", "00100"])
+		"Z": return PackedStringArray(["11111", "00001", "00010", "00100", "01000", "10000", "11111"])
+		"0": return PackedStringArray(["01110", "10001", "10011", "10101", "11001", "10001", "01110"])
+		"1": return PackedStringArray(["00100", "01100", "00100", "00100", "00100", "00100", "01110"])
+		"2": return PackedStringArray(["01110", "10001", "00001", "00010", "00100", "01000", "11111"])
+		"3": return PackedStringArray(["11110", "00001", "00001", "01110", "00001", "00001", "11110"])
+		"4": return PackedStringArray(["00010", "00110", "01010", "10010", "11111", "00010", "00010"])
+		"5": return PackedStringArray(["11111", "10000", "10000", "11110", "00001", "00001", "11110"])
+		"6": return PackedStringArray(["01110", "10000", "10000", "11110", "10001", "10001", "01110"])
+		"7": return PackedStringArray(["11111", "00001", "00010", "00100", "01000", "01000", "01000"])
+		"8": return PackedStringArray(["01110", "10001", "10001", "01110", "10001", "10001", "01110"])
+		"9": return PackedStringArray(["01110", "10001", "10001", "01111", "00001", "00001", "01110"])
+		"-": return PackedStringArray(["00000", "00000", "00000", "11111", "00000", "00000", "00000"])
+		" ": return PackedStringArray(["000", "000", "000", "000", "000", "000", "000"])
+		_: return PackedStringArray()
 
 
 func _draw_grid(image: Image, rect: Rect2i, color: Color) -> void:

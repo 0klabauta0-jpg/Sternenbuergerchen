@@ -108,6 +108,8 @@ func _fake_evidence() -> Dictionary:
 		"door_layout_tone": "success",
 		"all_gates_complete": true,
 		"render_object_reaction_visual_count": 17,
+		"evidence_board_style_id": "station_route_labeled_v1",
+		"evidence_board_label_count": 14,
 	}
 
 

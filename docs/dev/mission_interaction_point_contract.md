@@ -273,8 +273,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Snapshot trennt technische Blocker, Polish-Warnungen und offene manuelle Sichtentscheidungen.
 - Fehlende Evidence, falsches Schema, UI-Truth-Verletzungen, unvollstaendige Objective-Gates oder nicht sichtbares Door-Open sind technische Blocker.
 - Generiertes Review-Board, fehlender Viewport-Readback und offene Fenster-Checks sind manuelle Hinweise, keine technischen Blocker.
+- Ein generiertes Station-Route-Board soll `evidence_board_style_id = station_route_labeled_v1` und mindestens acht Labels liefern; sonst meldet der Readiness-Snapshot eine Polish-Warnung.
 - `visual_polish_ready` darf true werden, wenn die technischen Blocker fehlen; `host_client_acceptance_ready` darf erst true werden, wenn der echte Fensterentscheid erledigt ist und keine Polish-Warnung offen ist.
 - Findings duerfen `recommended_next_task` nennen, aber keine Visuals aendern, keine Runtime-Interaction starten und keine Gameplay-Wahrheit setzen.
+
+## Station Route Evidence Board Visual Polish
+- Das TASK_708-Headless-Review-Board darf pixelbasierte Labels, Legende und Statuszeilen zeichnen, um Door, Computer, Cargo und Review-Status lesbar zu machen.
+- Der Board-Polish ist ein Evidence-/Review-Artefakt und darf keine Runtime-Interaction starten, keine Objective-Gates setzen und keine Gameplay-Wahrheit schreiben.
+- Das Manifest nennt `evidence_board_style_id`, `evidence_board_label_count`, `read_only` und `ui_sets_gameplay_truth`.
+- `station_route_labeled_v1` ist der aktuelle Mindeststandard fuer generierte Station-Route-Evidence, solange echte Viewport-Pixel im Headless-Lauf nicht verfuegbar sind.
 
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
