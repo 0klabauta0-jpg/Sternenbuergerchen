@@ -557,6 +557,8 @@ var _editor_network_drag_preview_kind: String = ""
 var _editor_network_drag_preview_path_count: int = 0
 var _editor_network_drag_preview_segment_count: int = 0
 var _editor_network_drag_preview_marker_count: int = 0
+var _editor_network_drag_preview_handle_count: int = 0
+var _editor_network_drag_preview_segment_label_count: int = 0
 var _editor_network_drag_preview_active: bool = false
 var _editor_network_drag_preview_start_grid: Vector2i = Vector2i(-1, -1)
 var _editor_network_drag_preview_current_grid: Vector2i = Vector2i(-1, -1)
@@ -1547,6 +1549,8 @@ func get_render_snapshot() -> Dictionary:
 		"editor_network_drag_preview_path_count": _editor_network_drag_preview_path_count,
 		"editor_network_drag_preview_segment_count": _editor_network_drag_preview_segment_count,
 		"editor_network_drag_preview_marker_count": _editor_network_drag_preview_marker_count,
+		"editor_network_drag_preview_handle_count": _editor_network_drag_preview_handle_count,
+		"editor_network_drag_preview_segment_label_count": _editor_network_drag_preview_segment_label_count,
 		"editor_network_drag_preview_start_grid": _editor_network_drag_preview_start_grid,
 		"editor_network_drag_preview_current_grid": _editor_network_drag_preview_current_grid,
 		"selected_grid_count": _selected_grid_positions.size(),
@@ -3934,6 +3938,8 @@ func _reset_editor_network_drag_preview_counters(clear_snapshot: bool = true) ->
 	_editor_network_drag_preview_path_count = 0
 	_editor_network_drag_preview_segment_count = 0
 	_editor_network_drag_preview_marker_count = 0
+	_editor_network_drag_preview_handle_count = 0
+	_editor_network_drag_preview_segment_label_count = 0
 	_editor_network_drag_preview_active = false
 	_editor_network_drag_preview_start_grid = Vector2i(-1, -1)
 	_editor_network_drag_preview_current_grid = Vector2i(-1, -1)
@@ -3949,8 +3955,12 @@ func _rebuild_network_drag_preview_visuals() -> void:
 		return
 	var segments: Array = Array(visual_preview.get("segments", []))
 	var path: Array = Array(visual_preview.get("path", []))
+	var handles: Array = Array(visual_preview.get("handles", []))
+	var segment_labels: Array = Array(visual_preview.get("segment_labels", []))
 	_editor_network_drag_preview_kind = String(visual_preview.get("kind", _editor_network_drag_preview_snapshot.get("kind", ""))).strip_edges().to_lower()
 	_editor_network_drag_preview_path_count = int(visual_preview.get("path_count", path.size()))
+	_editor_network_drag_preview_handle_count = int(visual_preview.get("handle_count", handles.size()))
+	_editor_network_drag_preview_segment_label_count = int(visual_preview.get("segment_label_count", segment_labels.size()))
 	_editor_network_drag_preview_start_grid = Vector2i(visual_preview.get("start_grid", Vector2i(-1, -1)))
 	_editor_network_drag_preview_current_grid = Vector2i(visual_preview.get("current_grid", Vector2i(-1, -1)))
 	_editor_network_drag_preview_active = _editor_network_drag_preview_path_count > 0

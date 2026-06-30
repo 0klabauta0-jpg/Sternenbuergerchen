@@ -81,6 +81,7 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Factory-, SpaceKit-, StationSet-, Modular-, Wall- und Cliff-Prefixe duerfen den Placement-Scale nutzen, damit zu grosse Kit-Teile lokal korrigierbar bleiben.
 - Logistik-Bedeutung wie Energie, Oel, Rohstoffe oder Abwasser wird nur vorbereitet. Die echte Ressourcen-/Pipeline-Simulation gehoert in einen spaeteren Gameplay-Contract.
 - Aktive Network-Tools liefern einen kompakten Drag-Preview-Snapshot mit Art, Start, Ziel, Pfadlaenge, Segmenten, lesbarem Label und `ui_sets_gameplay_truth = false`.
+- Der Drag-Preview-Snapshot liefert zusaetzlich Handles fuer Start, Zwischenpunkte und Target sowie Segmentnummern mit Orientierung. Diese Daten sind nur Lesbarkeitshilfen und duerfen keine Tile- oder Gameplay-Wahrheit setzen.
 - Sichtbare Drag-Preview-Linien fuer Pipe, Wall und Cliff lesen ausschliesslich diesen Snapshot. Apply/Cancel/Toolwechsel muessen die Preview loeschen; echte Tile-Aenderungen passieren erst ueber den bestehenden Network-Apply-Pfad.
 
 ## Station Doors
