@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_703 - Door Authority Button Affordance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_703_door_authority_button_affordance.md`, `docs/tasks/TASK_702_door_authority_compact_hud_surface.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Der Door-Breach-Button nutzt `door_authority_ui_severity` fuer eine kleine visuelle Status-Affordance.
+- Stand: Button-Snapshots exportieren `door_authority_affordance_style_id`, `door_authority_affordance_tone` und `door_authority_affordance_visual_weight`.
+- Stand: Ready/Open/Blocked koennen als `action`, `success` oder `warning` sichtbar unterschieden werden; Pending bleibt neutral.
+- Risiken/offen: Der echte FullHD-/Host-Client-Sichtentscheid bleibt offen; dieser Task macht den Status nur sichtbarer und testbar.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_703_door_authority_button_affordance.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_702_door_authority_compact_hud_surface.gd`, `git diff --check`.
+- Naechster Schritt: TASK_704 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
+
 ### TASK_702 - Door Authority Compact HUD Surface
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_702_door_authority_compact_hud_surface.md`, `docs/tasks/TASK_701_door_authority_feedback_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
