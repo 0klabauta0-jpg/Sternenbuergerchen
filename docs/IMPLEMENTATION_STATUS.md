@@ -546,6 +546,16 @@
 - Lokale Pruefung: `task_657_frontier_probe_f6_visual_polish_findings.gd`, `task_656_frontier_probe_real_f6_visual_review.gd`, `task_655_frontier_probe_one_screen_visual_tuning_findings.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_658 - Frontier Probe One-Screen Player Decision Drill`, um mit dem lesbaren F6-Zustand einen echten kleinen Move/Decision-Loop zu pruefen.
 
+### TASK_658 - Frontier Probe One-Screen Player Decision Drill
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_658_frontier_probe_one_screen_player_decision_drill.md`, `docs/tasks/TASK_657_frontier_probe_f6_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/fireteam_runtime_execution_path_contract.md`
+- Stand: `get_frontier_probe_one_screen_player_decision_drill_snapshot()` kombiniert F6-Polish, First-Move-Readability, Threat-Preview und Execution-Feedback read-only.
+- Stand: `task_658_frontier_probe_one_screen_player_decision_drill.gd` plant einen Move Richtung AA, prueft `NEXT AA`, Risk/Path/GO-Readiness, fuehrt GO ueber `execute_selected_fireteam_orders()` aus und prueft danach den bestehenden Execution-Feedback-Snapshot.
+- Stand: Das Manifest `tmp/frontier_probe_one_screen_player_decision_drill.json` trennt Vor-GO-Readability und Nach-GO-Ausfuehrung.
+- Risiken/offen: TASK_658 ist ein kurzer Entscheidungsdrill, kein vollstaendiges Szenariobalancing und kein echter Sichtbeweis im Fenster.
+- Lokale Pruefung: `task_658_frontier_probe_one_screen_player_decision_drill.gd`, `task_657_frontier_probe_f6_visual_polish_findings.gd`, `task_567_frontier_probe_first_move_threat_preview_readability_pass.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_659 - Frontier Probe Decision Drill F6 Evidence`, wenn dieser Drill noch einmal als sichtbares Fenster-/Evidence-Paket beurteilt werden soll.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

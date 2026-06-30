@@ -15707,6 +15707,143 @@ func get_frontier_probe_f6_visual_polish_findings_snapshot() -> Dictionary:
 	}
 
 
+func get_frontier_probe_one_screen_player_decision_drill_snapshot() -> Dictionary:
+	var polish_snapshot: Dictionary = get_frontier_probe_f6_visual_polish_findings_snapshot()
+	var visual_tuning: Dictionary = Dictionary(polish_snapshot.get("visual_tuning", {}))
+	var one_screen: Dictionary = Dictionary(visual_tuning.get("one_screen", {}))
+	var readout: Dictionary = Dictionary(one_screen.get("readout", {}))
+	var execution_feedback: Dictionary = get_mission_first_move_execution_feedback_snapshot()
+	var execution_active: bool = String(execution_feedback.get("gate", "")) == "pass" \
+		or int(execution_feedback.get("active_execution_count", 0)) > 0 \
+		or int(execution_feedback.get("movement_state_count", 0)) > 0
+	var first_move: Dictionary = {}
+	var threat_preview: Dictionary = {}
+	if not execution_active:
+		first_move = get_mission_first_move_decision_readability_snapshot()
+		threat_preview = get_frontier_probe_first_move_threat_preview_readability_snapshot()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var next_token: String = String(readout.get("next_token", polish_snapshot.get("next_token", ""))).strip_edges()
+	var selected_order_text: String = String(command_feedback.get("selected_order_text", "")).strip_edges()
+	var last_command_text: String = String(command_feedback.get("last_command_text", "")).strip_edges()
+	var go_ready: bool = bool(first_move.get("go_ready", false))
+	var decision_stage: String = "execution" if execution_active else "preview"
+	var recommended_plan: Dictionary = _build_frontier_probe_player_decision_recommendation(next_token, one_screen)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"one_screen_route_readable",
+			String(polish_snapshot.get("gate", "")) == "pass"
+				and bool(visual_tuning.get("one_screen_line_visible", false)),
+			"Mission Control keeps the compact route/NEXT line readable for the player drill."
+		),
+		_build_mission_first_move_readability_check(
+			"next_aa_decision_cue_visible",
+			next_token == "AA" and String(recommended_plan.get("id", "")) == "aa_first_push",
+			"The drill exposes AA as the immediate next player decision."
+		),
+		_build_mission_first_move_readability_check(
+			"plan_has_actionable_steps",
+			Array(recommended_plan.get("steps", [])).size() >= 4
+				and String(recommended_plan.get("confirm_control", "")).strip_edges() == "GO",
+			"The recommended plan is a short actionable sequence ending in GO."
+		),
+		_build_mission_first_move_readability_check(
+			"move_preview_before_go_readable",
+			execution_active
+				or (String(first_move.get("gate", "")) == "pass"
+					and String(threat_preview.get("gate", "")) == "pass"
+					and go_ready),
+			"Before GO, move preview, threat preview and GO readiness are all readable."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_order_names_risk_or_execution",
+			selected_order_text.contains("RISK")
+				or selected_order_text.to_upper().contains("MOVE")
+				or selected_order_text.to_upper().contains("WEGPUNKT")
+				or execution_active,
+			"Selected Fireteam panel names the preview risk or the accepted execution."
+		),
+		_build_mission_first_move_readability_check(
+			"execution_feedback_visible_after_go",
+			not execution_active or String(execution_feedback.get("gate", "")) == "pass",
+			"If GO was pressed, execution feedback is visible through the existing first-move execution snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(polish_snapshot.get("read_only", false))
+				and (execution_active or bool(first_move.get("read_only", false)))
+				and (execution_active or bool(threat_preview.get("read_only", false)))
+				and bool(execution_feedback.get("read_only", false))
+				and not bool(polish_snapshot.get("ui_sets_gameplay_truth", true))
+				and (execution_active or not bool(first_move.get("ui_sets_gameplay_truth", true)))
+				and (execution_active or not bool(threat_preview.get("ui_sets_gameplay_truth", true)))
+				and not bool(execution_feedback.get("ui_sets_gameplay_truth", true)),
+			"Decision drill snapshot only reads existing UI/runtime contracts."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_one_screen_player_decision_drill.v1",
+		"task_id": "TASK_658",
+		"source_task_ids": PackedStringArray(["TASK_540", "TASK_541", "TASK_567", "TASK_657"]),
+		"decision_stage": decision_stage,
+		"next_token": next_token,
+		"recommended_plan": recommended_plan,
+		"go_ready": go_ready,
+		"execution_active": execution_active,
+		"last_command_text": last_command_text,
+		"selected_order_text": selected_order_text,
+		"polish_snapshot": polish_snapshot,
+		"first_move_snapshot": first_move,
+		"threat_preview_snapshot": threat_preview,
+		"execution_feedback_snapshot": execution_feedback,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"recommended_next_task": "TASK_659 - Frontier Probe Decision Drill F6 Evidence",
+	}
+
+
+func _build_frontier_probe_player_decision_recommendation(next_token: String, one_screen: Dictionary) -> Dictionary:
+	var normalized_next: String = next_token.strip_edges().to_upper()
+	var plan_options: Array = Array(one_screen.get("plan_options", []))
+	var fallback_option: Dictionary = {}
+	for option_variant in plan_options:
+		var option: Dictionary = Dictionary(option_variant)
+		if String(option.get("id", "")).strip_edges() == "aa_first_push":
+			fallback_option = option
+			break
+	if fallback_option.is_empty() and not plan_options.is_empty():
+		fallback_option = Dictionary(plan_options[0])
+	var plan_id: String = String(fallback_option.get("id", "aa_first_push")).strip_edges()
+	var label: String = String(fallback_option.get("label", "Plan A: AA zuerst")).strip_edges()
+	var detail: String = String(fallback_option.get("detail", "Luftabwehr ausschalten, dann COM halten und Cargo freigeben.")).strip_edges()
+	var steps: Array = [
+		{"id": "read_next", "label": "NEXT %s lesen" % (normalized_next if not normalized_next.is_empty() else "?")},
+		{"id": "select_fireteam", "label": "Fireteam blue aktiv halten"},
+		{"id": "preview_move", "label": "Move Richtung AA vorplanen"},
+		{"id": "check_risk", "label": "Risk/LOS/Path im Preview pruefen"},
+		{"id": "confirm_go", "label": "GO druecken"},
+	]
+	return {
+		"id": plan_id,
+		"label": label,
+		"detail": detail,
+		"next_token": normalized_next,
+		"steps": steps,
+		"confirm_control": "GO",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
 func _build_frontier_probe_one_screen_polish_label_snapshot(label: Label) -> Dictionary:
 	if label == null:
 		return {
