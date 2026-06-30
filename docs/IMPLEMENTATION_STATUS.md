@@ -596,6 +596,16 @@
 - Lokale Pruefung: `capture_host_client_two_window_real_run.ps1` als Dry-Run, `task_662_host_client_decision_drill_real_window_capture.gd`, `task_661_host_client_decision_drill_click_evidence.gd`, `task_626_host_client_real_click_review_evidence.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_663 - Host Client Decision Drill Visual Findings`, wenn aus einem echten Zwei-Fenster-Bild konkrete Lesbarkeitsbefunde angewendet werden sollen.
 
+### TASK_663 - Host Client Decision Drill Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_663_host_client_decision_drill_visual_findings.md`, `docs/tasks/TASK_662_host_client_decision_drill_real_window_capture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Der echte TASK_662-Capture wurde mit `-Launch -CloseAfterCapture` erzeugt und zeigt Host/Client-Rollen im Header, aber keinen Peer-/Team-Kontext in den Fireteam-Mini-Cards.
+- Stand: Fireteam-Statuskarten liefern jetzt `review_session_context_text`, `review_session_context_visible` und `review_session_context_style_id = host_client_fireteam_context_badge_v1`.
+- Stand: Die Mini-Card-Statuszeile zeigt den kurzen Peer-/Team-Kontext wie `P2 BRAVO` vor `SUPP/MV/POS`, bleibt read-only und erzeugt keine Peer-/Team- oder Command-Wahrheit.
+- Risiken/offen: Der vollstaendige manuelle Host/Client-Klicklauf bleibt offen; nach dem Badge-Fix sollte ein echter Zwei-Fenster-Recheck zeigen, ob `USE BRAVO` nun intuitiv genug ist.
+- Lokale Pruefung: `capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 8`, `task_663_host_client_decision_drill_visual_findings.gd`, `task_662_host_client_decision_drill_real_window_capture.gd`, `task_650_host_client_click_feedback_followup.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_664 - Host Client Decision Drill Real Click Recheck`, um den kompletten Klicklauf nach dem Karten-Badge erneut im Fenster zu pruefen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
