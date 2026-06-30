@@ -338,6 +338,7 @@ git checkout -b batch/<batch-name>
 - TASK_707 - Mission Door/Computer/Cargo Smoke (implementiert)
 - TASK_708 - Station Route Visual Evidence (implementiert)
 - TASK_709 - Station Route Window Playtest Notes (implementiert)
+- TASK_710 - Station Route Polish Readiness Findings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
