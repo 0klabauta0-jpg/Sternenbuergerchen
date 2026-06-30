@@ -292,7 +292,8 @@ git checkout -b batch/<batch-name>
 - TASK_661 - Host Client Decision Drill Click Evidence (implementiert)
 - TASK_662 - Host Client Decision Drill Real Window Capture (implementiert)
 - TASK_663 - Host Client Decision Drill Visual Findings (implementiert)
-- TASK_664 - Host Client Decision Drill Real Click Recheck (geplant)
+- TASK_664 - Host Client Decision Drill Real Click Recheck (implementiert)
+- TASK_665 - Host Client Decision Drill Click Findings (geplant)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
