@@ -258,6 +258,7 @@ var _palette_search_query: String = ""
 var _palette_favorite_type_ids: PackedStringArray = PackedStringArray()
 var _palette_recent_type_ids: PackedStringArray = PackedStringArray()
 var _palette_favorites_filter_enabled: bool = false
+var _palette_asset_scale_overrides: Dictionary = {}
 var _palette_preferences_loaded: bool = false
 var _palette_preferences_saved: bool = false
 var _palette_preferences_last_error: String = ""
@@ -2471,6 +2472,32 @@ func _ensure_palette_scale_preset_buttons(scale_row: HBoxContainer) -> void:
 			scale_row.add_child(button)
 		if not button.pressed.is_connected(set_object_placement_scale_preset.bind(preset_value)):
 			button.pressed.connect(set_object_placement_scale_preset.bind(preset_value))
+	_ensure_palette_scale_override_buttons(scale_row)
+
+
+func _ensure_palette_scale_override_buttons(scale_row: HBoxContainer) -> void:
+	if scale_row == null:
+		return
+	var save_button := scale_row.get_node_or_null("PaletteSaveScaleOverrideButton") as Button
+	if save_button == null:
+		save_button = Button.new()
+		save_button.name = "PaletteSaveScaleOverrideButton"
+		save_button.text = "Save"
+		save_button.tooltip_text = "Merkt den aktuellen Placement-Scale fuer dieses Asset."
+		save_button.custom_minimum_size = Vector2(44.0, 0.0)
+		scale_row.add_child(save_button)
+	if not save_button.pressed.is_connected(save_palette_scale_override_for_authoring):
+		save_button.pressed.connect(save_palette_scale_override_for_authoring)
+	var clear_button := scale_row.get_node_or_null("PaletteClearScaleOverrideButton") as Button
+	if clear_button == null:
+		clear_button = Button.new()
+		clear_button.name = "PaletteClearScaleOverrideButton"
+		clear_button.text = "Clr"
+		clear_button.tooltip_text = "Entfernt den gemerkten Scale fuer dieses Asset."
+		clear_button.custom_minimum_size = Vector2(34.0, 0.0)
+		scale_row.add_child(clear_button)
+	if not clear_button.pressed.is_connected(clear_palette_scale_override_for_authoring):
+		clear_button.pressed.connect(clear_palette_scale_override_for_authoring)
 
 
 func _ensure_palette_quick_filter_controls() -> void:
@@ -4299,6 +4326,10 @@ func _build_palette_snapshot() -> Dictionary:
 		"recent_type_ids": _palette_recent_type_ids.duplicate(),
 		"recent_count": _palette_recent_type_ids.size(),
 		"selected_is_favorite": _palette_type_is_favorite(_selected_type_id),
+		"asset_scale_overrides": _palette_asset_scale_overrides.duplicate(true),
+		"asset_scale_override_count": _palette_asset_scale_overrides.size(),
+		"selected_has_scale_override": _palette_has_scale_override(_selected_type_id),
+		"selected_scale_override": _get_palette_scale_override(_selected_type_id),
 		"preview_icon_count": preview_icon_count,
 		"catalog_preview_icon_count": catalog_preview_icon_count,
 		"generated_preview_icon_count": generated_preview_icon_count,
@@ -5670,6 +5701,10 @@ func set_selected_object_scale(value: float) -> bool:
 
 
 func set_object_placement_scale(value: float) -> bool:
+	return _set_object_placement_scale_internal(value, true)
+
+
+func _set_object_placement_scale_internal(value: float, persist_preferences: bool) -> bool:
 	var normalized_scale: float = _normalize_object_scale(value)
 	var changed: bool = not is_equal_approx(_placement_object_scale, normalized_scale)
 	_placement_object_scale = normalized_scale
@@ -5677,7 +5712,7 @@ func set_object_placement_scale(value: float) -> bool:
 	if placement_scale_spinbox != null and not is_equal_approx(float(placement_scale_spinbox.value), _placement_object_scale):
 		placement_scale_spinbox.value = _placement_object_scale
 	_refresh_palette_workflow_controls()
-	if changed:
+	if changed and persist_preferences:
 		_save_palette_authoring_preferences()
 	return changed
 
@@ -5724,6 +5759,7 @@ func clear_palette_authoring_preferences_for_test() -> bool:
 			return false
 	_palette_favorite_type_ids = PackedStringArray()
 	_palette_recent_type_ids = PackedStringArray()
+	_palette_asset_scale_overrides = {}
 	_placement_object_scale = OBJECT_SCALE_DEFAULT
 	_palette_preferences_loaded = false
 	_palette_preferences_saved = false
@@ -5757,11 +5793,9 @@ func _load_palette_authoring_preferences() -> bool:
 		return false
 	_palette_favorite_type_ids = _normalize_palette_preference_type_ids(preferences.get("favorite_type_ids", []), -1)
 	_palette_recent_type_ids = _normalize_palette_preference_type_ids(preferences.get("recent_type_ids", []), PALETTE_RECENT_MAX_COUNT)
+	_palette_asset_scale_overrides = _normalize_palette_scale_overrides(preferences.get("asset_scale_overrides", {}))
 	if preferences.has("placement_scale"):
-		_placement_object_scale = _normalize_object_scale(float(preferences.get("placement_scale", OBJECT_SCALE_DEFAULT)))
-		var placement_scale_spinbox := _get_placement_object_scale_spinbox()
-		if placement_scale_spinbox != null:
-			placement_scale_spinbox.value = _placement_object_scale
+		_set_object_placement_scale_internal(float(preferences.get("placement_scale", OBJECT_SCALE_DEFAULT)), false)
 	_palette_preferences_loaded = true
 	_palette_preferences_load_count += 1
 	return true
@@ -5774,6 +5808,7 @@ func _save_palette_authoring_preferences() -> bool:
 		"favorite_type_ids": Array(_palette_favorite_type_ids),
 		"recent_type_ids": Array(_palette_recent_type_ids),
 		"placement_scale": _placement_object_scale,
+		"asset_scale_overrides": _palette_asset_scale_overrides.duplicate(true),
 		"stores_gameplay_truth": false,
 	}
 	var file := FileAccess.open(_get_palette_authoring_preferences_path(), FileAccess.WRITE)
@@ -5807,6 +5842,70 @@ func _normalize_palette_preference_type_ids(value, max_count: int = -1) -> Packe
 		if max_count > 0 and result.size() >= max_count:
 			break
 	return result
+
+
+func _normalize_palette_scale_overrides(value) -> Dictionary:
+	var result: Dictionary = {}
+	if typeof(value) != TYPE_DICTIONARY:
+		return result
+	var source: Dictionary = Dictionary(value)
+	for key in source.keys():
+		var type_id: String = String(key).strip_edges().to_lower()
+		if type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(type_id):
+			continue
+		if not _palette_type_uses_object_scale(type_id):
+			continue
+		result[type_id] = _normalize_object_scale(float(source.get(key, OBJECT_SCALE_DEFAULT)))
+	return result
+
+
+func _palette_has_scale_override(type_id: String) -> bool:
+	return _palette_asset_scale_overrides.has(type_id.strip_edges().to_lower())
+
+
+func _get_palette_scale_override(type_id: String) -> float:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if not _palette_asset_scale_overrides.has(normalized_type_id):
+		return OBJECT_SCALE_DEFAULT
+	return _normalize_object_scale(float(_palette_asset_scale_overrides.get(normalized_type_id, OBJECT_SCALE_DEFAULT)))
+
+
+func _apply_palette_scale_override_for_type(type_id: String) -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or not _palette_has_scale_override(normalized_type_id):
+		return false
+	if not _palette_type_uses_object_scale(normalized_type_id):
+		return false
+	return _set_object_placement_scale_internal(_get_palette_scale_override(normalized_type_id), false)
+
+
+func save_palette_scale_override_for_authoring(type_id: String = "") -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		normalized_type_id = _selected_type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or _tile_catalog == null or not _tile_catalog.has_type(normalized_type_id):
+		return false
+	if not _palette_type_uses_object_scale(normalized_type_id):
+		return false
+	var normalized_scale: float = _normalize_object_scale(_placement_object_scale)
+	if _palette_asset_scale_overrides.has(normalized_type_id) and is_equal_approx(float(_palette_asset_scale_overrides.get(normalized_type_id)), normalized_scale):
+		_refresh_palette_workflow_controls()
+		return false
+	_palette_asset_scale_overrides[normalized_type_id] = normalized_scale
+	_refresh_palette_workflow_controls()
+	return _save_palette_authoring_preferences()
+
+
+func clear_palette_scale_override_for_authoring(type_id: String = "") -> bool:
+	var normalized_type_id: String = type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty():
+		normalized_type_id = _selected_type_id.strip_edges().to_lower()
+	if normalized_type_id.is_empty() or not _palette_asset_scale_overrides.has(normalized_type_id):
+		_refresh_palette_workflow_controls()
+		return false
+	_palette_asset_scale_overrides.erase(normalized_type_id)
+	_refresh_palette_workflow_controls()
+	return _save_palette_authoring_preferences()
 
 
 func set_palette_search_query_for_authoring(query: String) -> bool:
@@ -7485,6 +7584,7 @@ func _on_tile_type_selected(index: int) -> void:
 			return
 		_selected_type_id = type_ids[index]
 	_remember_palette_recent_type_id(_selected_type_id)
+	_apply_palette_scale_override_for_type(_selected_type_id)
 
 	# Auto-enable brush when a type is selected
 	_clear_height_tool()
@@ -7514,6 +7614,7 @@ func set_palette_type_for_authoring(type_id: String) -> bool:
 		return false
 	_selected_type_id = normalized_type_id
 	_remember_palette_recent_type_id(normalized_type_id)
+	_apply_palette_scale_override_for_type(normalized_type_id)
 	var type_group: String = _get_palette_group_for_type(normalized_type_id)
 	if not type_group.is_empty() and _active_palette_group_id != type_group:
 		_active_palette_group_id = type_group
@@ -8065,8 +8166,19 @@ func _refresh_palette_workflow_controls() -> void:
 	var preview_rect := _get_palette_selected_preview_texture_rect()
 	var info_label := _get_palette_selected_info_label()
 	var placement_scale_spinbox := _get_placement_object_scale_spinbox()
+	var save_override_button := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow/PaletteSaveScaleOverrideButton") as Button
+	var clear_override_button := get_node_or_null("UI/PalettePanel/Margin/VBox/PaletteSelectedPreviewRow/PaletteSelectedInfoBox/PalettePlacementScaleRow/PaletteClearScaleOverrideButton") as Button
 	if placement_scale_spinbox != null and not is_equal_approx(float(placement_scale_spinbox.value), _placement_object_scale):
 		placement_scale_spinbox.value = _placement_object_scale
+	var has_selected_type: bool = not _selected_type_id.is_empty()
+	var selected_type_uses_scale: bool = has_selected_type and _palette_type_uses_object_scale(_selected_type_id)
+	var selected_has_override: bool = has_selected_type and _palette_has_scale_override(_selected_type_id)
+	if save_override_button != null:
+		save_override_button.disabled = not selected_type_uses_scale
+		save_override_button.tooltip_text = "Merkt Scale %.2f fuer %s." % [_placement_object_scale, _get_palette_type_display_name(_selected_type_id)] if selected_type_uses_scale else "Dieses Asset nutzt keinen Placement-Scale."
+	if clear_override_button != null:
+		clear_override_button.disabled = not selected_has_override
+		clear_override_button.tooltip_text = "Entfernt den gemerkten Scale fuer dieses Asset." if selected_has_override else "Fuer dieses Asset ist kein Scale gemerkt."
 	if preview_rect == null and info_label == null:
 		return
 	if _selected_type_id.is_empty():
@@ -8080,10 +8192,11 @@ func _refresh_palette_workflow_controls() -> void:
 	if preview_rect != null:
 		preview_rect.texture = _get_palette_preview_texture(_selected_type_id)
 	if info_label != null:
-		info_label.text = "%s\n%s\nScale %.2f" % [
+		var scale_status: String = "Scale %.2f%s" % [_placement_object_scale, " gemerkt" if selected_has_override else ""]
+		info_label.text = "%s\n%s\n%s" % [
 			type_display_name,
 			group_display_name if not group_display_name.is_empty() else "Palette",
-			_placement_object_scale,
+			scale_status,
 		]
 
 

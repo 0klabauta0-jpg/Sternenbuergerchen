@@ -33,6 +33,13 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Der Map-Editor laedt die Praeferenz beim Start und speichert sie bei Favoriten-, Recent- oder Placement-Scale-Aenderungen.
 - Der Usability-Snapshot nennt Pfad, Schema, Lade-/Speicherstatus und `ui_sets_gameplay_truth = false`.
 
+## Asset Scale Override Presets
+- Pro Palette-`type_id` darf ein lokaler `asset_scale_override` gespeichert werden, damit haeufig korrigierte Kit-Teile beim Auswaehlen automatisch ihren Placement-Scale setzen.
+- Scale-Overrides leben in derselben `user://`-Authoring-Praeferenz wie Favoriten und Recent-Assets. Sie werden nicht in Map-JSON geschrieben und sind keine Gameplay-Wahrheit.
+- Das Setzen eines Overrides speichert nur den Placement-Default fuer zukuenftige Pinselstriche; bereits gesetzte Tiles behalten ihren eigenen `object_scale`.
+- Der Usability-Snapshot nennt Override-Liste, Count, Selected-Override und weiter `ui_sets_gameplay_truth = false`.
+- Rotation-Defaults und geteilte Team-/Projektprofile brauchen einen separaten Vertrag.
+
 ## Save As
 - Der Map-`Save As`-Dialog ist ein JSON-`FILE_MODE_SAVE_FILE`-Dialog im Projektressourcenbereich.
 - Er startet bei `res://maps`, ist nicht per `root_subfolder` auf einen Sonderpfad eingeschraenkt und behaelt den JSON-Filter.
@@ -89,4 +96,4 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Weitere Politur der sichtbaren Drag-Preview fuer Pipe-, Wand- und Cliff-Linien: Handles, Segmentnummern und finale FullHD-Art-Direction.
 - Auto-Rotation/Snapping fuer Ketten von Waenden, Tueren und Cliffs.
 - Door-/Computer-Interaction-Contract fuer Runtime-Naehe und Bedienzeit.
-- Gespeicherte Asset-Override-Presets pro Asset oder Teamprofil.
+- Rotation-Defaults und geteilte Asset-Override-Profile pro Team oder Projekt.
