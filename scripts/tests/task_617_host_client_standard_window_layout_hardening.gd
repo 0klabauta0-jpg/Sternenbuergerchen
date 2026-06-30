@@ -45,7 +45,7 @@ func _test_docs_report_and_contract() -> void:
 	_assert(report_text.contains("TASK_617 Host Client Standard Window Layout Hardening"), "Review workbench tracks TASK_617")
 	_assert(report_text.contains('data-export-key="host_client_standard_window_layout.auto_fit_applied"'), "Report exports TASK_617 auto-fit field")
 	_assert(report_text.contains('"TASK_617 - Host Client Standard Window Layout Hardening"'), "JSON payload keeps TASK_617 in completed chain")
-	_assert(report_text.contains('latest_completed_task: "TASK_620 - Host Client Badge Re-Capture Review"'), "JSON payload advances latest completed task to TASK_620")
+	_assert(report_text.contains('latest_completed_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "JSON payload advances latest completed task beyond TASK_617")
 
 
 func _test_launch_helper_layout_autofit_script() -> void:

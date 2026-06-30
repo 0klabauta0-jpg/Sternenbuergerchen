@@ -394,6 +394,11 @@ TASK_626 macht den naechsten echten Zwei-Fenster-Klicklauf als Evidence-Pfad kon
 
 Erwartete Struktur: `tmp/host_client_two_window_real_run_review.json` enthaelt `real_click_review_task_id = TASK_626`, `visible_reject_expected_text = BLOCK P2 wrong team`, `visible_reject_expected_authority_text = AUTH OK1/RJ2`, `visible_reject_expected_feedback_line = AUTH BLOCKED P2: wrong team`, `visible_reject_expected_raw_reason = peer_team_mismatch`, `visible_reject_expected_hud_path = MissionTeamChipLabel`, `visible_reject_review_required = true`, `visible_reject_review_done = false`, `visible_reject_review_gate`, `visible_reject_manual_checks`, `read_only = true` und `ui_sets_gameplay_truth = false`.
 
+## Host-Client-Fireteam-Eventlog-Overlap-Polish
+TASK_627 behebt einen belegten echten Host/Client-Capture-Fund: `#19 EVENT LOG` darf nicht in die linke Fireteam-Mini-Kartenliste hineinragen. Der Drop-Light-Mission-HUD-Layout-Contract bleibt die Quelle fuer beide Rechtecke, und der Mission-Controller wendet jetzt auch den Eventlog-Rect aus diesem Contract an.
+
+Erwartete Struktur: `DropLightLayoutContract.get_mission_hud_layout()` enthaelt `fireteam_mini = Rect2i(24, 128, 280, 360)` und `event_log = Rect2i(24, 504, 280, 184)`. `MissionTacticalSandboxController._enforce_drop_light_fixed_hud_layout()` ruft `_apply_fixed_hud_window_contract(TACTICAL_EVENT_LOG_PANEL_PATH, layout.get("event_log"))` auf. Fireteam-Mini-Panel und Eventlog duerfen sich im Runtime-Rect nicht schneiden. Keine Eventlog-Daten, TacticalCommunication-Eintraege, Commands, Peer-, Combat- oder Gameplay-Wahrheit werden geaendert.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

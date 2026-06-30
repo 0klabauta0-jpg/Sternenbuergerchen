@@ -255,6 +255,7 @@ git checkout -b batch/<batch-name>
 - TASK_624 - Host Client Live Input Feedback Review (implementiert)
 - TASK_625 - Host Client Visible Reject Feedback Polish (implementiert)
 - TASK_626 - Host Client Real Click Review Evidence (implementiert)
+- TASK_627 - Host Client Fireteam Eventlog Overlap Polish (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

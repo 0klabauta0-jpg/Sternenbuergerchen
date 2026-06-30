@@ -10026,6 +10026,7 @@ func _enforce_drop_light_fixed_hud_layout() -> void:
 	_apply_fixed_hud_window_contract("../TacticalUI/MissionIdentityPanel", layout.get("mission_identity"))
 	_apply_fixed_hud_window_contract("../TacticalUI/TopNavPanel", layout.get("top_nav"))
 	_apply_fixed_hud_window_contract(FIRETEAM_MINI_PANEL_PATH, layout.get("fireteam_mini"))
+	_apply_fixed_hud_window_contract(TACTICAL_EVENT_LOG_PANEL_PATH, layout.get("event_log"))
 	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock", layout.get("bottom_dock"))
 	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel", layout.get("command_matrix"))
 	_apply_fixed_hud_window_contract(FIRETEAM_PANEL_PATH, layout.get("selected_fireteam"))
