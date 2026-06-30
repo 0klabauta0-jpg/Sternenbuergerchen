@@ -504,6 +504,12 @@ TASK_660 ist der schnelle Budget-Guard fuer den schweren Decision-Drill. Der Ver
 
 Erwartete Manifest-Struktur: `tmp/decision_drill_snapshot_performance_budget.json` enthaelt `schema = sternenbuergerchen.decision_drill_snapshot_performance_budget.v1`, `task_id = TASK_660`, `source_task_id = TASK_659`, `budget_type = fast_contract_guard_for_heavy_decision_drill`, `fast_verifier_elapsed_msec`, `fast_verifier_target_ms`, `fast_gate`, `full_drill_recapture_budget_ms`, `full_drill_policy`, `recapture_policy`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_661 - Host Client Decision Drill Click Evidence`.
 
+### Host-Client-Decision-Drill-Click-Evidence
+
+TASK_661 verbindet die vorhandene Host/Client-Click-Evidence aus TASK_629/TASK_650/TASK_651 mit dem Decision-Drill aus TASK_658 bis TASK_660. Das Packet darf eine konkrete manuelle Zwei-Fenster-Klickfolge beschreiben, aber keine Klicks ausloesen, keine Authority-Entscheidung treffen und keine Runtime-, Peer-, Movement-, Combat- oder Gameplay-Wahrheit speichern.
+
+Erwartete Struktur: `tmp/host_client_decision_drill_click_evidence.json` enthaelt `schema = sternenbuergerchen.host_client_decision_drill_click_evidence.v1`, `task_id = TASK_661`, `source_task_ids`, `host_client_context`, `wrong_context_feedback.raw_reason = peer_team_mismatch`, `wrong_context_feedback.block_text = BLOCK P2 wrong team`, `wrong_context_feedback.action_text = USE BRAVO`, `decision_drill_context.next_token = AA`, `decision_drill_context.recommended_plan_id = aa_first_push`, `decision_drill_context.correct_fireteam = bravo`, `decision_drill_context.confirm_control = GO`, `click_sequence`, `manual_observations`, `readiness_gate = ready_for_manual_two_window_run`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_662 - Host Client Decision Drill Real Window Capture`.
+
 ## Frontier-Probe-Meta-Debrief-Route-Smoke
 TASK_639 prueft den echten vorhandenen Meta-Weg fuer ein Frontier-Probe-Ergebnis: Debrief sichtbar, Return-to-Homebase verfuegbar, Rueckkehr zur Homebase sichtbar und MissionResult erhalten. Der Snapshot darf nur den bestehenden TASK_586-Handoff lesen und mit Frontier-Probe-Resultatdaten zusammenfassen. Der Testhelper bleibt `request_debrief_return_homebase_for_test()` und nutzt damit den bestehenden Return-Handler.
 

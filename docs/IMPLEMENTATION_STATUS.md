@@ -576,6 +576,16 @@
 - Lokale Pruefung: `task_660_decision_drill_snapshot_performance_budget.gd`, `task_659_frontier_probe_decision_drill_f6_evidence.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_661 - Host Client Decision Drill Click Evidence`, um denselben Entscheidungsfokus in einem echten Host/Client-Klicklauf zu pruefen.
 
+### TASK_661 - Host Client Decision Drill Click Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_661_host_client_decision_drill_click_evidence.md`, `docs/tasks/TASK_629_host_client_real_click_playtest_evidence_pass.md`, `docs/tasks/TASK_650_host_client_click_feedback_followup.md`, `docs/tasks/TASK_651_host_client_click_followup_evidence.md`, `docs/tasks/TASK_660_decision_drill_snapshot_performance_budget.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `task_661_host_client_decision_drill_click_evidence.gd` schreibt `tmp/host_client_decision_drill_click_evidence.json` als read-only Zwei-Fenster-Klickpacket.
+- Stand: Das Packet verbindet Peer-2-Alpha-Reject, `BLOCK P2 wrong team`, `USE BRAVO`, Bravo-Kontextwechsel, `NEXT AA`, Preview/Risk und GO zu einem manuellen Decision-Drill.
+- Stand: Der HTML-Handbuchbericht markiert TASK_661 und empfiehlt danach `TASK_662 - Host Client Decision Drill Real Window Capture`.
+- Risiken/offen: TASK_661 fuehrt keinen echten Fensterklick aus. Der naechste Beweis muss ein echter Host/Client-Fenster-Capture oder ein Sicht-Polish sein.
+- Lokale Pruefung: `task_661_host_client_decision_drill_click_evidence.gd`, `task_660_decision_drill_snapshot_performance_budget.gd`, `task_651_host_client_click_followup_evidence.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_662 - Host Client Decision Drill Real Window Capture`, um die Packet-Erwartung als echtes Bild/Fensterreview zu pruefen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
