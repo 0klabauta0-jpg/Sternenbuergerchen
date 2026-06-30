@@ -274,6 +274,7 @@ var _npc_thought_peek_active_last_frame: bool = false
 var _npc_thought_bubble_refresh_msec: int = 0
 var _last_command_text: String = "AWAITING INPUT"
 var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
+var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
 var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
 var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
 var _last_target_position: Vector2 = Vector2.ZERO
@@ -16951,6 +16952,46 @@ func get_mission_interaction_use_intent_snapshot() -> Dictionary:
 	return _last_mission_interaction_use_intent_snapshot.duplicate(true)
 
 
+func get_mission_interaction_door_use_breach_command_hook_snapshot() -> Dictionary:
+	if _last_mission_interaction_door_use_breach_hook_snapshot.is_empty():
+		return _build_mission_interaction_door_use_breach_hook_result(false, "no_hook_created")
+	return _last_mission_interaction_door_use_breach_hook_snapshot.duplicate(true)
+
+
+func create_selected_mission_interaction_door_use_breach_command_hook(interaction_id: String = "") -> Dictionary:
+	var feedback_snapshot: Dictionary = get_mission_interaction_use_feedback_snapshot()
+	var interaction_feedback: Dictionary = _resolve_mission_interaction_feedback_for_intent(feedback_snapshot, interaction_id)
+	if interaction_feedback.is_empty():
+		return _store_mission_interaction_door_use_breach_hook_result(_build_mission_interaction_door_use_breach_hook_result(false, "no_interaction_feedback", {"feedback": feedback_snapshot}))
+	var interaction_type: String = String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower()
+	if interaction_type != "door":
+		return _store_mission_interaction_door_use_breach_hook_result(_build_mission_interaction_door_use_breach_hook_result(false, "not_door_interaction", {"interaction_feedback": interaction_feedback}))
+	var required_order: String = String(interaction_feedback.get("required_order", interaction_feedback.get("action_label", ""))).strip_edges().to_lower()
+	if required_order == "use":
+		required_order = "breach"
+	if not ["breach", "operate", "take"].has(required_order):
+		return _store_mission_interaction_door_use_breach_hook_result(_build_mission_interaction_door_use_breach_hook_result(false, "unsupported_door_order", {"interaction_feedback": interaction_feedback}))
+	var intent: Dictionary = create_selected_mission_interaction_use_intent(String(interaction_feedback.get("interaction_id", interaction_id)).strip_edges())
+	if not bool(intent.get("accepted", false)):
+		return _store_mission_interaction_door_use_breach_hook_result(_build_mission_interaction_door_use_breach_hook_result(false, String(intent.get("blocked_reason", "intent_blocked")), {
+			"interaction_feedback": interaction_feedback,
+			"use_intent": intent,
+		}))
+	_last_command_text = "BREACH %s -> GO" % String(interaction_feedback.get("display_token", "DOOR")).strip_edges().to_upper()
+	var result: Dictionary = _build_mission_interaction_door_use_breach_hook_result(true, "", {
+		"interaction_feedback": interaction_feedback,
+		"use_intent": intent,
+		"fireteam_id": String(intent.get("fireteam_id", "")).strip_edges().to_lower(),
+		"command_type": String(intent.get("command_type", "")).strip_edges().to_lower(),
+		"waypoint_id": String(intent.get("waypoint_id", "")).strip_edges(),
+		"phase": int(intent.get("phase", -1)),
+		"last_command_text": _last_command_text,
+	})
+	_store_mission_interaction_door_use_breach_hook_result(result)
+	_update_ui()
+	return result
+
+
 func create_selected_mission_interaction_use_intent(interaction_id: String = "") -> Dictionary:
 	if not _can_issue_local_commands():
 		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "observer_mode"))
@@ -16998,6 +17039,9 @@ func create_selected_mission_interaction_use_intent(interaction_id: String = "")
 		"required_state": String(interaction_feedback.get("required_state", "")).strip_edges(),
 		"interaction_type": String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower(),
 		"required_team": String(interaction_feedback.get("required_team", "")).strip_edges().to_lower(),
+		"door_runtime_hook": String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower() == "door",
+		"door_runtime_state_target": String(interaction_feedback.get("required_state", "door_open")).strip_edges(),
+		"door_runtime_producer": "MissionInteractionDoorRuntimeCollisionLOS" if String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower() == "door" else "",
 	}, true)
 	waypoint.metadata = metadata
 	_last_command_text = "USE %s -> %s" % [String(interaction_feedback.get("display_token", "INTERACTION")).strip_edges(), command_type.to_upper()]
@@ -17009,6 +17053,9 @@ func create_selected_mission_interaction_use_intent(interaction_id: String = "")
 		"waypoint_id": String(waypoint.waypoint_id),
 		"phase": phase_index,
 		"last_command_text": _last_command_text,
+		"interaction_type": String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower(),
+		"required_order": String(interaction_feedback.get("required_order", "")).strip_edges().to_lower(),
+		"duration_seconds": maxf(float(interaction_feedback.get("duration_seconds", 0.0)), 0.0),
 	}))
 	_refresh_order_visuals()
 	_update_ui()
@@ -17068,6 +17115,9 @@ func _build_mission_interaction_use_intent_result(accepted: bool, blocked_reason
 		"action_label": String(interaction_feedback.get("action_label", "")).strip_edges(),
 		"fireteam_id": String(extra.get("fireteam_id", "")).strip_edges().to_lower(),
 		"command_type": String(extra.get("command_type", "")).strip_edges().to_lower(),
+		"interaction_type": String(extra.get("interaction_type", interaction_feedback.get("interaction_type", ""))).strip_edges().to_lower(),
+		"required_order": String(extra.get("required_order", interaction_feedback.get("required_order", ""))).strip_edges().to_lower(),
+		"duration_seconds": maxf(float(extra.get("duration_seconds", interaction_feedback.get("duration_seconds", 0.0))), 0.0),
 		"target_position": extra.get("target_position", null),
 		"waypoint_id": String(extra.get("waypoint_id", "")).strip_edges(),
 		"phase": int(extra.get("phase", -1)),
@@ -17091,6 +17141,51 @@ func _store_mission_interaction_use_intent_result(result: Dictionary) -> Diction
 		return _last_mission_interaction_use_intent_snapshot.duplicate(true)
 	_update_ui()
 	return _last_mission_interaction_use_intent_snapshot.duplicate(true)
+
+
+func _build_mission_interaction_door_use_breach_hook_result(accepted: bool, blocked_reason: String = "", extra: Dictionary = {}) -> Dictionary:
+	var interaction_feedback: Dictionary = Dictionary(extra.get("interaction_feedback", {}))
+	var use_intent: Dictionary = Dictionary(extra.get("use_intent", {}))
+	var required_state: String = String(interaction_feedback.get("required_state", "door_open")).strip_edges()
+	if required_state.is_empty():
+		required_state = "door_open"
+	return {
+		"schema": "sternenbuergerchen.mission_interaction_door_use_breach_command_hook.v1",
+		"runtime_authority": "SimulationRoot via MissionTacticalSandboxController GO path",
+		"accepted": accepted,
+		"blocked_reason": blocked_reason,
+		"uses_existing_use_intent": not use_intent.is_empty(),
+		"requires_go": accepted,
+		"creates_order_intent": accepted,
+		"door_runtime_state_target": required_state,
+		"door_runtime_producer": "MissionInteractionDoorRuntimeCollisionLOS",
+		"door_runtime_producer_ready": _get_terrain_registry() != null,
+		"ui_sets_gameplay_truth": false,
+		"interaction_id": String(interaction_feedback.get("interaction_id", use_intent.get("interaction_id", ""))).strip_edges(),
+		"display_token": String(interaction_feedback.get("display_token", "DOOR")).strip_edges(),
+		"action_label": "BREACH",
+		"required_order": String(interaction_feedback.get("required_order", use_intent.get("required_order", "breach"))).strip_edges().to_lower(),
+		"interaction_type": String(interaction_feedback.get("interaction_type", "door")).strip_edges().to_lower(),
+		"fireteam_id": String(extra.get("fireteam_id", use_intent.get("fireteam_id", ""))).strip_edges().to_lower(),
+		"command_type": String(extra.get("command_type", use_intent.get("command_type", ""))).strip_edges().to_lower(),
+		"duration_seconds": maxf(float(interaction_feedback.get("duration_seconds", use_intent.get("duration_seconds", 0.0))), 0.0),
+		"waypoint_id": String(extra.get("waypoint_id", use_intent.get("waypoint_id", ""))).strip_edges(),
+		"phase": int(extra.get("phase", use_intent.get("phase", -1))),
+		"last_command_text": String(extra.get("last_command_text", _last_command_text)).strip_edges(),
+		"use_intent": use_intent.duplicate(true),
+	}
+
+
+func _store_mission_interaction_door_use_breach_hook_result(result: Dictionary) -> Dictionary:
+	var snapshot: Dictionary = result.duplicate(true)
+	if not bool(snapshot.get("accepted", false)):
+		var blocked_reason: String = String(snapshot.get("blocked_reason", "blocked")).strip_edges().to_upper()
+		_last_command_text = "BREACH BLOCKED %s" % blocked_reason
+		snapshot["last_command_text"] = _last_command_text
+	_last_mission_interaction_door_use_breach_hook_snapshot = snapshot.duplicate(true)
+	if not bool(snapshot.get("accepted", false)):
+		_update_ui()
+	return _last_mission_interaction_door_use_breach_hook_snapshot.duplicate(true)
 
 
 func _build_mission_interaction_runtime_use_context_for_readability() -> Dictionary:
@@ -17893,6 +17988,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
 	var mission_interaction_progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot(mission_interaction_use_feedback)
 	var mission_interaction_use_intent: Dictionary = get_mission_interaction_use_intent_snapshot()
+	var mission_interaction_door_use_breach_hook: Dictionary = get_mission_interaction_door_use_breach_command_hook_snapshot()
 	var mission_interaction_objective_gate: Dictionary = get_mission_interaction_objective_gate_snapshot()
 	var mission_interaction_visual_state: Dictionary = Dictionary(MISSION_INTERACTION_VISUAL_STATE_SCRIPT.call(
 		"build_snapshot",
@@ -17973,6 +18069,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_use_intent": mission_interaction_use_intent,
 		"mission_interaction_use_intent_accepted": bool(mission_interaction_use_intent.get("accepted", false)),
 		"mission_interaction_use_intent_command_type": String(mission_interaction_use_intent.get("command_type", "")),
+		"mission_interaction_door_use_breach_command_hook": mission_interaction_door_use_breach_hook,
+		"mission_interaction_door_use_breach_command_hook_accepted": bool(mission_interaction_door_use_breach_hook.get("accepted", false)),
+		"mission_interaction_door_use_breach_command_hook_line": String(mission_interaction_door_use_breach_hook.get("last_command_text", "")),
 		"mission_interaction_objective_gate": mission_interaction_objective_gate,
 		"mission_interaction_objective_next_line": String(mission_interaction_objective_gate.get("next_line", "")),
 		"mission_interaction_objective_next_step_id": String(mission_interaction_objective_gate.get("next_step_id", "")),
