@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_644 auf <code>task/frontier-probe-homebase-real-window-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_645 auf <code>task/frontier-probe-homebase-summary-next-sortie-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -307,7 +307,7 @@
       <span class="pill good">TASK_641 Next-Sortie</span>
       <span class="pill good">TASK_642 Homebase-Review</span>
       <span class="pill good">TASK_643 Evidence-Labels</span>
-      <span class="pill good">TASK_644 Real-Window</span>
+      <span class="pill good">TASK_645 Homebase Polish</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2345,6 +2345,33 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_645 Frontier Probe Homebase Summary Next Sortie Polish</h2>
+          <p>Der echte TASK_644-Fensterblick hatte recht: Ergebnis-Summary und Next-Sortie-Readiness waren korrekt, aber zu leise. TASK_645 gruppiert beide Zeilen in einem kleinen Follow-up-Panel, hebt Schrift und Kontrast an und prueft weiter read-only, dass keine Navigation, kein Command und keine Gameplay-Wahrheit gesetzt wird.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Runtime UI Polish / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.task_id"></td><td>Aktueller Runtime-UI-Polish fuer den Homebase-Return-Blick.</td></tr>
+                <tr><td>Follow-up Panel</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.followup_panel_visible"></td><td>Summary und Next-Sortie sind in einem sichtbaren Panel gruppiert.</td></tr>
+                <tr><td>Style-ID</td><td><input readonly value="task_645_homebase_followup_panel_v1" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.followup_panel_style_id"></td><td>Stabile Snapshot-/Verifier-ID fuer den neuen Block.</td></tr>
+                <tr><td>Summary Font</td><td><input readonly value="12+" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.post_summary_font_size"></td><td>Groesser als die alte kompakte 9px-Zeile.</td></tr>
+                <tr><td>Next-Sortie Font</td><td><input readonly value="12+" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.next_sortie_font_size"></td><td>Next-Sortie bleibt unter der Summary, aber besser lesbar.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.read_only"></td><td>Keine Navigation, kein Command, keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="Echten Homebase-Fensterblick nach TASK_645 ansehen; dann nur bei echter Dichte-Reibung weiter polieren" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.recommended_next_task"></td><td>Naechster Schritt bleibt ein Sicht-/Spielgefuehlentscheid.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.panel_created"> Follow-up-Panel erzeugt</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.snapshot_gate_checked"> Snapshot-Gates erweitert</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.read_only_checked"> Read-only-Grenze erhalten</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.real_window_review_done"> Echten Fensterblick nach Polish bewertet</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_645 Homebase-Polish-Notiz
+            <textarea data-note-key="notes.frontier_probe_homebase_summary_next_sortie_polish" data-export-key="frontier_probe_homebase_summary_next_sortie_polish.notes" placeholder="Beim Fensterbild notieren: Fuehlt sich der Return-Block jetzt klar genug an oder ist das MissionPanel insgesamt zu dicht?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3339,7 +3366,8 @@
               "TASK_641 - Frontier Probe Homebase Next Sortie Readiness",
               "TASK_642 - Frontier Probe Homebase Visible Readiness Review",
               "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings",
-              "TASK_644 - Frontier Probe Homebase Real Window Review"
+              "TASK_644 - Frontier Probe Homebase Real Window Review",
+              "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3392,7 +3420,8 @@
               "TASK_641 verbindet diese Homebase-Summary mit Pre-Mission-Readiness und Direct-Staging zu einer kompakten Next-Sortie-Zeile.",
               "TASK_642 macht den daraus entstehenden Homebase-Blick als PNG/Manifest-Review belegbar und prueft Zeilenreihenfolge, Bounds und Overflow.",
               "TASK_643 beschriftet das TASK_642-Headless-Evidence-Board mit Pixel-Labels und Readability-Gate, damit der naechste Homebase-Entscheid weniger Interpretationsrauschen hat.",
-              "TASK_644 erzeugt ein echtes Homebase-Fenster-Review-Paket mit Viewport-Readback, wenn ohne Headless gestartet, und laesst den menschlichen Sichtentscheid sonst als manual_open."
+              "TASK_644 erzeugt ein echtes Homebase-Fenster-Review-Paket mit Viewport-Readback, wenn ohne Headless gestartet, und laesst den menschlichen Sichtentscheid sonst als manual_open.",
+              "TASK_645 hebt die Post-Debrief-Summary und Next-Sortie-Zeile in einen lesbareren Follow-up-Panelblock, bleibt aber read-only und wartet weiter auf den echten Geschmackstest."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3401,14 +3430,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_643",
-            current_focus: "Frontier Probe Homebase Real Window Review",
-            latest_completed_task: "TASK_644 - Frontier Probe Homebase Real Window Review"
+            current_repo_base: "integration/core-foundation after TASK_644",
+            current_focus: "Frontier Probe Homebase Summary Next Sortie Polish",
+            latest_completed_task: "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish"
           },
           metadata: {
-            branch: "task/frontier-probe-homebase-real-window-review",
-            integration_base: "integration/core-foundation after TASK_643",
-            head: "task/frontier-probe-homebase-real-window-review",
+            branch: "task/frontier-probe-homebase-summary-next-sortie-polish",
+            integration_base: "integration/core-foundation after TASK_644",
+            head: "task/frontier-probe-homebase-summary-next-sortie-polish",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }

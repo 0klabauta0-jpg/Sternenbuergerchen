@@ -413,6 +413,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_642_frontier_probe_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_644_frontier_probe_homebase_real_window_review.gd`, optional `godot_console.exe --path . --script scripts/tests/task_644_frontier_probe_homebase_real_window_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_643_frontier_probe_homebase_readiness_visual_polish_findings.gd`, `git diff --check`.
 - Naechster Schritt: Echten PNG-/Fensterbefund ansehen; nur bei sichtbarer Reibung einen kleinen Homebase-Runtime-UI-Polish schneiden.
 
+### TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_645_frontier_probe_homebase_summary_next_sortie_polish.md`, `docs/tasks/TASK_644_frontier_probe_homebase_real_window_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`, `docs/reports/project_state_handbook_2026_06_30.html`
+- Stand: `HomebaseTestScreen` gruppiert Post-Debrief-Summary und Next-Sortie-Readiness jetzt in `PostDebriefFollowupPanel` mit stabiler TASK_645-Style-ID, groesserer Schrift, Mindesthoehe und Emphasis-Metadaten.
+- Stand: Der vorhandene Visible-Readiness-Snapshot bleibt read-only und exportiert zusaetzlich Follow-up-Panel-Rect, Style-ID, Fontgroessen und Emphasis-Gates.
+- Stand: `scripts/tests/task_645_frontier_probe_homebase_summary_next_sortie_polish.gd` prueft Docs, Reports, Panel-Sichtbarkeit, Style, Label-Gruppierung, Overflow und Read-only-Grenzen.
+- Risiken/offen: Der Polish verbessert den belegten TASK_644-Fensterbefund, ersetzt aber keinen abschliessenden menschlichen Geschmackstest. Wenn der Homebase-Blick weiter zu dicht wirkt, sollte ein eigener MissionPanel-Density-Pass folgen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_645_frontier_probe_homebase_summary_next_sortie_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_644_frontier_probe_homebase_real_window_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_642_frontier_probe_homebase_visible_readiness_review.gd`, `git diff --check`.
+- Naechster Schritt: Echten Homebase-Fensterblick nach TASK_645 ansehen; bei Bedarf einen schmalen Homebase-MissionPanel-Density- oder Playfeel-Pass schneiden.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

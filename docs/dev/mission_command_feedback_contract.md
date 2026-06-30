@@ -492,6 +492,12 @@ TASK_644 macht den echten Homebase-Fensterblick nach Frontier-Probe-Debrief-Retu
 
 Erwartete Struktur: `tmp/frontier_probe_homebase_real_window_review.json` enthaelt `schema = sternenbuergerchen.frontier_probe_homebase_real_window_review.v1`, `task_id = TASK_644`, `source_task_ids = [TASK_642, TASK_643]`, `gate = pass`, `real_window_review_gate = review_ready|manual_open`, `visible_window_readback_available`, `generated_evidence_board`, `post_summary_visible`, `next_sortie_visible`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`. Der laufende HTML-Bericht darf diese Werte exportieren und kommentierbar machen, aber keinen menschlichen Fensterentscheid als erledigt markieren.
 
+## Frontier-Probe-Homebase-Summary-Next-Sortie-Polish (TASK_645)
+
+TASK_645 wendet den belegten TASK_644-Fensterbefund an: Post-Debrief-Summary und Next-Sortie-Readiness sind korrekt, aber zu leise. Die Homebase darf beide read-only Zeilen in einem kleinen `PostDebriefFollowupPanel` gruppieren, Schrift und Kontrast anheben und diese Lesbarkeit im bestehenden Visible-Readiness-Snapshot melden. Das bleibt Runtime-UI-Polish, keine neue Homebase-, MissionResult-, Progression-, Staging-, Navigation- oder Command-Wahrheit.
+
+Erwartete Struktur: `HomebaseTestScreen.get_frontier_probe_homebase_visible_readiness_review_snapshot()` enthaelt zusaetzlich `followup_panel_visible = true`, `followup_panel_style_id = task_645_homebase_followup_panel_v1`, `followup_panel_rect`, `followup_panel_min_height >= 70`, `post_summary_font_size >= 12`, `next_sortie_font_size >= 12`, `post_summary_emphasis = true`, `next_sortie_emphasis = true` und Checks fuer `followup_panel_visible`, `followup_panel_inside_mission_panel`, `labels_inside_followup_panel`, `followup_panel_emphasis_style` und `followup_label_emphasis`. `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false` bleiben Pflicht.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
