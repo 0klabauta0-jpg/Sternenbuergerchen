@@ -9268,7 +9268,12 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 			"door_interaction_shortcut": "",
 			"door_authority_ui_status": "",
 			"door_authority_ui_summary_line": "",
+			"door_authority_ui_compact_line": "",
 			"door_authority_ui_detail_line": "",
+			"door_authority_ui_player_hint": "",
+			"door_authority_ui_next_action": "",
+			"door_authority_ui_severity": "",
+			"door_authority_ui_reject_reason_label": "",
 			"door_authority_ui_requires_go": false,
 			"door_authority_ui_read_only": false,
 			"pressed_signal_connection_count": 0,
@@ -9301,7 +9306,12 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 		"door_interaction_shortcut": str(button.get_meta("door_interaction_shortcut", "")),
 		"door_authority_ui_status": str(button.get_meta("door_authority_ui_status", "")),
 		"door_authority_ui_summary_line": str(button.get_meta("door_authority_ui_summary_line", "")),
+		"door_authority_ui_compact_line": str(button.get_meta("door_authority_ui_compact_line", "")),
 		"door_authority_ui_detail_line": str(button.get_meta("door_authority_ui_detail_line", "")),
+		"door_authority_ui_player_hint": str(button.get_meta("door_authority_ui_player_hint", "")),
+		"door_authority_ui_next_action": str(button.get_meta("door_authority_ui_next_action", "")),
+		"door_authority_ui_severity": str(button.get_meta("door_authority_ui_severity", "")),
+		"door_authority_ui_reject_reason_label": str(button.get_meta("door_authority_ui_reject_reason_label", "")),
 		"door_authority_ui_requires_go": bool(button.get_meta("door_authority_ui_requires_go", false)),
 		"door_authority_ui_read_only": bool(button.get_meta("door_authority_ui_read_only", false)),
 		"global_rect": global_rect,
@@ -10673,7 +10683,12 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 	button.set_meta("door_interaction_display_token", display_token)
 	button.set_meta("door_authority_ui_status", String(authority_ui_feedback.get("status", "")).strip_edges())
 	button.set_meta("door_authority_ui_summary_line", String(authority_ui_feedback.get("summary_line", "")).strip_edges())
+	button.set_meta("door_authority_ui_compact_line", String(authority_ui_feedback.get("compact_line", "")).strip_edges())
 	button.set_meta("door_authority_ui_detail_line", String(authority_ui_feedback.get("detail_line", "")).strip_edges())
+	button.set_meta("door_authority_ui_player_hint", String(authority_ui_feedback.get("player_hint", "")).strip_edges())
+	button.set_meta("door_authority_ui_next_action", String(authority_ui_feedback.get("next_action", "")).strip_edges())
+	button.set_meta("door_authority_ui_severity", String(authority_ui_feedback.get("severity", "")).strip_edges())
+	button.set_meta("door_authority_ui_reject_reason_label", String(authority_ui_feedback.get("reject_reason_label", "")).strip_edges())
 	button.set_meta("door_authority_ui_requires_go", bool(authority_ui_feedback.get("requires_go", false)))
 	button.set_meta("door_authority_ui_read_only", bool(authority_ui_feedback.get("read_only", false)))
 	button.set_meta("command_hierarchy_disabled_reason", "" if enabled else _resolve_door_interaction_button_disabled_reason(has_usable_door))
@@ -18318,6 +18333,11 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_door_authority_ui_feedback": mission_interaction_door_authority_ui_feedback,
 		"mission_interaction_door_authority_ui_status": String(mission_interaction_door_authority_ui_feedback.get("status", "")),
 		"mission_interaction_door_authority_ui_line": String(mission_interaction_door_authority_ui_feedback.get("summary_line", "")),
+		"mission_interaction_door_authority_ui_compact_line": String(mission_interaction_door_authority_ui_feedback.get("compact_line", "")),
+		"mission_interaction_door_authority_ui_player_hint": String(mission_interaction_door_authority_ui_feedback.get("player_hint", "")),
+		"mission_interaction_door_authority_ui_next_action": String(mission_interaction_door_authority_ui_feedback.get("next_action", "")),
+		"mission_interaction_door_authority_ui_severity": String(mission_interaction_door_authority_ui_feedback.get("severity", "")),
+		"mission_interaction_door_authority_ui_reject_reason_label": String(mission_interaction_door_authority_ui_feedback.get("reject_reason_label", "")),
 		"mission_interaction_door_authority_ui_tooltip": String(mission_interaction_door_authority_ui_feedback.get("tooltip_text", "")),
 		"mission_interaction_multiplayer_door_feedback_capture": mission_interaction_multiplayer_door_feedback_capture,
 		"mission_interaction_multiplayer_door_feedback_capture_gate": String(mission_interaction_multiplayer_door_feedback_capture.get("gate", "")),

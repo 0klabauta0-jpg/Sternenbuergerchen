@@ -18,9 +18,9 @@ static func build_snapshot(capture_context: Dictionary = {}) -> Dictionary:
 		_check("host_feedback_present", not host_feedback.is_empty(), "Host Door feedback is captured."),
 		_check("host_accept_visible", _status_is_one_of(host_feedback, PackedStringArray(["accepted", "open"])) and bool(host_authority.get("host_command_accepted", false)), "Host readout exposes accepted/open Own-Team command."),
 		_check("wrong_team_blocked", String(wrong_team_feedback.get("status", "")).strip_edges().to_lower() == "blocked" and bool(wrong_team_authority.get("foreign_team_rejected", false)), "Wrong-team client readout is blocked."),
-		_check("wrong_team_reason_visible", String(wrong_team_feedback.get("detail_line", "")).contains(String(wrong_team_authority.get("foreign_team_reject_reason", ""))), "Wrong-team reject reason is visible."),
+		_check("wrong_team_reason_visible", _feedback_exposes_reason(wrong_team_feedback, String(wrong_team_authority.get("foreign_team_reject_reason", "")), "falsches Team"), "Wrong-team reject reason is visible."),
 		_check("state_mutation_blocked", String(state_mutation_feedback.get("status", "")).strip_edges().to_lower() == "blocked" and bool(state_mutation_authority.get("state_mutation_rejected", false)), "State-mutation client payload is blocked."),
-		_check("state_mutation_reason_visible", String(state_mutation_feedback.get("detail_line", "")).contains("state_mutation_key"), "State-mutation reject reason is visible."),
+		_check("state_mutation_reason_visible", _feedback_exposes_reason(state_mutation_feedback, "state_mutation_key", "Runtime-State"), "State-mutation reject reason is visible."),
 		_check("open_feedback_producer_bound", String(open_feedback.get("status", "")).strip_edges().to_lower() == "open" and bool(open_authority.get("door_runtime_open_override", false)), "Open readout is bound to Door Runtime producer."),
 		_check("read_only", _all_read_only([host_feedback, wrong_team_feedback, state_mutation_feedback, open_feedback, host_authority, wrong_team_authority, state_mutation_authority, open_authority]), "Capture reads snapshots and does not set gameplay truth."),
 	]
@@ -57,6 +57,23 @@ static func build_snapshot(capture_context: Dictionary = {}) -> Dictionary:
 
 static func _status_is_one_of(feedback: Dictionary, allowed: PackedStringArray) -> bool:
 	return allowed.has(String(feedback.get("status", "")).strip_edges().to_lower())
+
+
+static func _feedback_exposes_reason(feedback: Dictionary, raw_reason: String, player_reason_token: String) -> bool:
+	var reason_fields: PackedStringArray = PackedStringArray([
+		String(feedback.get("detail_line", "")),
+		String(feedback.get("player_hint", "")),
+		String(feedback.get("reject_reason_label", "")),
+		String(feedback.get("tooltip_text", "")),
+	])
+	var raw: String = raw_reason.strip_edges()
+	var player_token: String = player_reason_token.strip_edges()
+	for field in reason_fields:
+		if not raw.is_empty() and field.contains(raw):
+			return true
+		if not player_token.is_empty() and field.contains(player_token):
+			return true
+	return false
 
 
 static func _all_read_only(snapshots: Array) -> bool:

@@ -66,7 +66,7 @@ func _test_snapshot_contract() -> void:
 	_assert(String(snapshot.get("source_capture_schema", "")) == "sternenbuergerchen.mission_multiplayer_door_feedback_capture.v1", "Snapshot keeps source capture schema")
 	_assert(String(snapshot.get("source_capture_gate", "")) == "pass", "Snapshot keeps source capture gate")
 	_assert(String(snapshot.get("report_path", "")) == "docs/reports/host_client_door_real_click_workbench_2026_06_30.html", "Snapshot exposes report path")
-	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_701"), "Snapshot recommends next findings task")
+	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_702"), "Snapshot recommends next findings task")
 
 
 func _test_manifest_write() -> void:

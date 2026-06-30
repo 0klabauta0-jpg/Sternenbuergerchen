@@ -329,6 +329,7 @@ git checkout -b batch/<batch-name>
 - TASK_698 - Door Authority UI Feedback (implementiert)
 - TASK_699 - Multiplayer Door Feedback Capture (implementiert)
 - TASK_700 - Host/Client Door Real Click Workbench (implementiert)
+- TASK_701 - Door Authority Feedback Polish (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
