@@ -636,6 +636,16 @@
 - Lokale Pruefung: `task_667_map_editor_persistent_palette_presets.gd`, `task_516_editor_builder_ux_pass.gd`, `git diff --check`.
 - Naechster Schritt: Fuer den Editor waere ein kleiner Slice fuer gespeicherte Asset-Override-Presets pro Asset sinnvoll; fuer Multiplayer bleibt TASK_666 der ehrliche sichtbare Recheck.
 
+### TASK_668 - Map Editor Asset Scale Override Presets
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_668_map_editor_asset_scale_override_presets.md`, `docs/tasks/TASK_667_map_editor_persistent_palette_presets.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Der Map-Editor kann fuer den aktuellen Palette-`type_id` den aktuellen Placement-Scale als lokalen `asset_scale_override` speichern und wieder loeschen.
+- Stand: Beim erneuten Auswaehlen eines Assets mit Override wird der Placement-Scale automatisch gesetzt. Bereits gesetzte Tiles behalten ihren eigenen `object_scale`.
+- Stand: Der Palette-Snapshot nennt Override-Dictionary, Count, Selected-Override und weiter `ui_sets_gameplay_truth = false`.
+- Risiken/offen: Rotation-Defaults, geteilte Projektprofile und finale FullHD-Button-Politur bleiben Folgearbeit. TASK_666 bleibt als echter Host/Client-Fensterklickbefund offen.
+- Lokale Pruefung: `task_668_map_editor_asset_scale_override_presets.gd`, `task_667_map_editor_persistent_palette_presets.gd`, `task_516_editor_builder_ux_pass.gd`, `git diff --check`.
+- Naechster Schritt: Fuer den Editor waeren Rotation-Defaults oder sichtbare Builder-Handles sinnvoll; fuer Multiplayer bleibt TASK_666 der ehrliche sichtbare Recheck.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

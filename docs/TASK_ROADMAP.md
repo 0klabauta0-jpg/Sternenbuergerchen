@@ -296,6 +296,7 @@ git checkout -b batch/<batch-name>
 - TASK_665 - Host Client Decision Drill Technical Click Guard (implementiert)
 - TASK_666 - Host Client Decision Drill Real Click Findings (geplant)
 - TASK_667 - Map Editor Persistent Palette Presets (implementiert)
+- TASK_668 - Map Editor Asset Scale Override Presets (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
