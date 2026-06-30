@@ -222,6 +222,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_625_host_client_visible_reject_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_624_host_client_live_input_feedback_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_623_host_client_authority_visual_findings.gd`, `git diff --check`.
 - Naechster Schritt: Echter Host/Client-Klicklauf oder ein belegter Toast-/Bubble-/Panel-Polish-Slice, falls der sichtbare Teamchip-Hinweis im Spiel noch zu leise ist.
 
+### TASK_626 - Host Client Real Click Review Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_626_host_client_real_click_review_evidence.md`, `docs/tasks/TASK_625_host_client_visible_reject_feedback_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `scripts/tools/capture_host_client_two_window_real_run.ps1` schreibt erwartete sichtbare Reject-Evidence ins lokale Real-Run-Manifest: `BLOCK P2 wrong team`, `AUTH OK1/RJ2`, `AUTH BLOCKED P2: wrong team`, `peer_team_mismatch` und `MissionTeamChipLabel`.
+- Stand: Das Manifest exportiert manuelle Checks fuer Peer-2-Alpha-Reject, sichtbaren Blocker, Authority-Status, Tooltip-Rohgrund, Input-Latenz, Snapshot-Sync und Fokuswechsel.
+- Stand: Rolling Report und Ist-Stand-/Handbuch-Report nennen TASK_626 als aktuellen Evidence-Anker, ohne den echten Zwei-Fenster-Klicklauf als erledigt zu markieren.
+- Risiken/offen: TASK_626 ist ein Review-/Evidence-Guard, kein automatisierter Klicktest. Der echte Host/Client-Lauf mit menschlicher Reaktions- und Latenzbewertung bleibt offen.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_626_host_client_real_click_review_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_625_host_client_visible_reject_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_620_host_client_badge_recapture_review.gd`, `git diff --check`.
+- Naechster Schritt: Echten Zwei-Fenster-Klicklauf mit `-Launch -CloseAfterCapture` pruefen; falls der Blocker zu leise ist, nur belegte UI-Reibung in einem kleinen Follow-up polieren.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

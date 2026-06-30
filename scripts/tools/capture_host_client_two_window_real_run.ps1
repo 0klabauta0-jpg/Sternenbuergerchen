@@ -370,6 +370,8 @@ if ($Launch) {
     $consoleBinaryReplaced = [bool]$visibleGodot.console_replaced
 }
 
+$visibleRejectReviewReady = [bool]($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten)
+
 $manifest = [ordered]@{
     schema = "sternenbuergerchen.host_client_two_window_real_run_review.v1"
     task_id = "TASK_614"
@@ -398,6 +400,24 @@ $manifest = [ordered]@{
     badge_expected_hud_path = "MissionIdentityHeaderLabel"
     host_badge_crop_path = "tmp/host_client_two_window_host_review.png"
     client_badge_crop_path = "tmp/host_client_two_window_client_review.png"
+    real_click_review_task_id = "TASK_626"
+    visible_reject_expected_text = "BLOCK P2 wrong team"
+    visible_reject_expected_authority_text = "AUTH OK1/RJ2"
+    visible_reject_expected_feedback_line = "AUTH BLOCKED P2: wrong team"
+    visible_reject_expected_raw_reason = "peer_team_mismatch"
+    visible_reject_expected_hud_path = "MissionTeamChipLabel"
+    visible_reject_review_required = $true
+    visible_reject_review_done = $false
+    visible_reject_review_gate = $(if ($visibleRejectReviewReady) { "review_ready" } else { "manual_open" })
+    visible_reject_manual_checks = @(
+        "peer2_alpha_reject_clicked",
+        "block_cue_visible",
+        "authority_status_visible",
+        "raw_reason_in_tooltip",
+        "input_latency_noted",
+        "snapshot_sync_after_reject",
+        "host_client_focus_recovered"
+    )
     close_after_capture = [bool]$CloseAfterCapture
     wait_seconds = $WaitSeconds
     planned_godot_bin = $plannedGodotBin
@@ -426,6 +446,9 @@ $manifest = [ordered]@{
         "client_role_readable",
         "authority_feedback_readable",
         "snapshot_sync_readable",
+        "visible_reject_feedback_readable",
+        "peer2_alpha_reject_click_review",
+        "input_latency_after_reject",
         "f6_readability",
         "performance_feel",
         "close_processes_after_capture"
@@ -434,6 +457,7 @@ $manifest = [ordered]@{
     recommended_next_visible_review_task = "TASK_616 - Host Client Visible UI Real Run Review"
     recommended_next_capture_task = "TASK_618 - Host Client Standard Capture Crop Review"
     recommended_next_badge_review_task = "TASK_620 - Host Client Badge Re-Capture Review"
+    recommended_next_real_click_review_task = "TASK_626 - Host Client Real Click Review Evidence"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8

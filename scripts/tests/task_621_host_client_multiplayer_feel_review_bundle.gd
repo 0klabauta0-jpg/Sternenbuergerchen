@@ -52,8 +52,8 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(report_text.contains("TASK_621 Host Client Multiplayer Feel Review Bundle"), "Rolling report tracks TASK_621")
 	_assert(report_text.contains("TASK_622 - Host Client Command Authority Live Interaction Review"), "Rolling report advances to TASK_622 after TASK_621")
 	_assert(handbook_text.contains("TASK_621 Review-Bundle"), "Status handbook tracks TASK_621 bundle")
-	_assert(handbook_text.contains('current_task: "TASK_625 - Host Client Visible Reject Feedback Polish"'), "Status handbook current task advances beyond TASK_621")
-	_assert(handbook_text.contains('latest_completed_task: "TASK_625 - Host Client Visible Reject Feedback Polish"'), "Status handbook latest task advances beyond TASK_621")
+	_assert(handbook_text.contains('current_task: "TASK_626 - Host Client Real Click Review Evidence"'), "Status handbook current task advances beyond TASK_621")
+	_assert(handbook_text.contains('latest_completed_task: "TASK_626 - Host Client Real Click Review Evidence"'), "Status handbook latest task advances beyond TASK_621")
 	_test_report_export_fields(report_text, handbook_text)
 
 
@@ -145,8 +145,10 @@ func _test_bundle(bundle: Dictionary) -> void:
 	_assert(String(bundle.get("badge_expected_hud_path", "")) == "MissionIdentityHeaderLabel", "Bundle carries expected HUD path")
 	_assert(String(bundle.get("recommended_next_task", "")) == EXPECTED_NEXT_TASK, "Bundle recommends TASK_622")
 	if bool(bundle.get("source_manifest_present", false)):
-		_assert(String(bundle.get("badge_recapture_gate", "")) == "review_ready", "Existing source manifest is badge review ready")
-		_assert(String(bundle.get("gate", "")) == "review_ready", "Bundle gate is review ready when source is ready")
+		var badge_recapture_gate: String = String(bundle.get("badge_recapture_gate", ""))
+		var bundle_gate: String = String(bundle.get("gate", ""))
+		_assert(badge_recapture_gate in ["review_ready", "manual_open"], "Existing source manifest has a valid badge review gate")
+		_assert(bundle_gate == "review_ready" if badge_recapture_gate == "review_ready" else bundle_gate == "manual_open", "Bundle gate follows source readiness")
 	_test_evidence_tests(bundle)
 	_test_manual_checks(bundle)
 

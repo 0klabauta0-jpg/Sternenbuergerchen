@@ -68,7 +68,7 @@ func _test_report_export_fields(report_text: String, handbook_text: String) -> v
 		_assert(report_text.contains('data-export-key="%s"' % export_key), "Rolling report exports %s" % export_key)
 	_assert(report_text.contains('data-note-key="notes.host_client_role_peer_badge"'), "Rolling report exports TASK_619 free note")
 	_assert(handbook_text.contains('data-export-key="status.task_619_done"'), "Status handbook exports TASK_619 status checkbox")
-	_assert(handbook_text.contains('current_task: "TASK_625 - Host Client Visible Reject Feedback Polish"'), "Status handbook JSON metadata advances beyond TASK_619")
+	_assert(handbook_text.contains('current_task: "TASK_626 - Host Client Real Click Review Evidence"'), "Status handbook JSON metadata advances beyond TASK_619")
 
 
 func _test_controller_static_contract() -> void:
