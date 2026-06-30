@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_688 - Mission Interaction FullHD Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_688_mission_interaction_fullhd_evidence.md`, `docs/tasks/TASK_687_mission_interaction_object_reaction.md`, `docs/tasks/TASK_686_mission_interaction_visual_state.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `scripts/tests/task_688_mission_interaction_fullhd_evidence.gd` instanziiert die Mission bei `1920 x 1080`, bringt den Flow in den aktiven Computer-Schritt und synchronisiert die 3D-Missionsvisuals.
+- Stand: Der Verifier schreibt `tmp/mission_interaction_fullhd_evidence.png` und `tmp/mission_interaction_fullhd_evidence.json` aus Render-Snapshot, Visualstate, Object-Reaction und Command-Feedback.
+- Stand: Das Manifest haelt `manual_fullhd_review_required = true`, `manual_fullhd_review_done = false`, `ui_sets_gameplay_truth = false` und ein kleines Visualbudget fest.
+- Risiken/offen: Headless erzeugt ein Review-Board statt echter Fensteransicht. Der menschliche Sichtentscheid bleibt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_688_mission_interaction_fullhd_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_687_mission_interaction_object_reaction.gd`, `git diff --check`.
+- Naechster Schritt: Echten Missionsfenster-Sichtlauf eintragen oder gezielten TASK_689-Polish fuer Label-/Proxy-Groessen.
+
 ### TASK_687 - Mission Interaction Object Reaction
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_687_mission_interaction_object_reaction.md`, `docs/tasks/TASK_686_mission_interaction_visual_state.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`

@@ -145,6 +145,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_685_done"> TASK_685 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_686_done"> TASK_686 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_687_done"> TASK_687 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_688_done"> TASK_688 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -696,6 +697,22 @@
           <textarea data-export-key="mission_interaction_object_reaction.findings" placeholder="Beim echten Missionslauf notieren: Sind die Proxy-Objekte hilfreich, zu gross, zu klein oder verdecken sie Assets?"></textarea>
           <div contenteditable="true" data-note-key="notes.mission_interaction_object_reaction" data-placeholder="TASK_687-Notizen...">TASK_687 verbessert die Objektlesbarkeit, ohne Gameplay-Wahrheit im Visual zu speichern. Der naechste harte Schritt waere ein echter Door-/Asset-Swap mit Kollisions-/LOS-Regeln oder ein sichtbarer Fensterlauf.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_688 - Mission Interaction FullHD Evidence</h2>
+          <p>Die Mission-Interaction-Visuals schreiben jetzt ein reproduzierbares FullHD-Evidence-Paket. Im GUI-Lauf kann das ein echter Viewport-Readback sein; im Headless-Lauf entsteht ein Review-Board aus denselben Render-Snapshot-Daten. Das ersetzt keinen menschlichen Sichtentscheid, macht aber den Stand belegbar.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_fullhd_evidence.png_written"> PNG-Evidenz wird geschrieben</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_fullhd_evidence.manifest_written"> JSON-Manifest wird geschrieben</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_fullhd_evidence.visual_state_count"> Visualstate-Zaehler im Render-Snapshot vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_fullhd_evidence.object_reaction_count"> Object-Reaction-Zaehler im Render-Snapshot vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_fullhd_evidence.visual_budget"> Visualbudget bleibt konservativ</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_fullhd_evidence.no_gameplay_truth"> Evidence meldet `ui_sets_gameplay_truth = false`</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mission_interaction_fullhd_evidence.manual_review_done"> Echter Missionsfenster-Sichtentscheid erledigt</label>
+          <input readonly value="tmp/mission_interaction_fullhd_evidence.png" data-export-key="mission_interaction_fullhd_evidence.png_path">
+          <input readonly value="tmp/mission_interaction_fullhd_evidence.json" data-export-key="mission_interaction_fullhd_evidence.manifest_path">
+          <input readonly value="TASK_688 - Mission Interaction FullHD Evidence" data-export-key="mission_interaction_fullhd_evidence.completed_task">
+          <textarea data-export-key="mission_interaction_fullhd_evidence.findings" placeholder="Beim echten Fensterlauf notieren: Sind Labels/Proxies gut sichtbar, zu dominant, verdeckt etwas die Karte?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_fullhd_evidence" data-placeholder="TASK_688-Notizen...">TASK_688 beweist Snapshot-, PNG- und Budgetpfad. Headless-Evidence bleibt ein Review-Board; der echte Fenster-Sichtentscheid ist weiter offen.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -715,8 +732,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Echter Missionsfenster-Sichtlauf oder Door-Asset-Swap</strong> ist jetzt der beste Anschluss: Die Objective-Gates sind zusammengefuehrt, Labels sind da, und die Objekte reagieren als Proxies. Nun muss entweder das Bild menschlich beurteilt werden oder Doors bekommen echte Asset-/Collision-Regeln.</p>
-          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren.</div>
+          <p><strong>Mission-Visual-Polish oder Door-Asset-Swap</strong> ist jetzt der beste Anschluss: Die Objective-Gates sind zusammengefuehrt, Labels und Objekt-Proxies sind da, und TASK_688 schreibt FullHD-Evidence. Nun kann man entweder am echten Bild polieren oder Doors mit echten Asset-/Collision-Regeln angehen.</p>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -727,7 +744,7 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Missionsfenster-Sichtlauf</td><td>Pruefen, ob Labels und Objekt-Proxies im echten Bild angenehm, lesbar und nicht zu dominant sind.</td></tr>
+              <tr><td>1</td><td>Mission-Visual-Polish Findings</td><td>Mit dem Evidence-Paket pruefen, ob Labels und Objekt-Proxies im echten Bild angenehm, lesbar und nicht zu dominant sind.</td></tr>
               <tr><td>2</td><td>Echter Host/Client-Zwei-Fenster-Klicklauf</td><td>TASK_666-Notizen mit menschlichem Bedienbefund fuellen.</td></tr>
               <tr><td>3</td><td>Door-Asset-Swap</td><td>Open/Closed-Tueren mit Collision-/LOS-Regeln als echter Runtime-Slice.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
