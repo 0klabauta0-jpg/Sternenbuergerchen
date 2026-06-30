@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 
@@ -52,9 +52,9 @@ func _test_docs_and_reports() -> void:
 	_assert(terrain_text.contains("ROUTE_CALLOUT_LABEL_VISUAL_STYLE_ID"), "Terrain view exposes route callout style id")
 	_assert(terrain_text.contains("MISSION_RESULT_ROUTE_CALLOUT_OFFSET_WORLD"), "Terrain view offsets mission result with callouts")
 	_assert(report_text.contains("TASK_635 Frontier Probe Callout Sight Findings"), "Rolling report tracks TASK_635")
-	_assert(report_text.contains('latest_completed_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Rolling report marks TASK_635 latest completed")
+	_assert(report_text.contains('latest_completed_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Rolling report advances latest completed beyond TASK_635")
 	_assert(handbook_text.contains("TASK_635 - Frontier Probe Callout Sight Findings"), "Status handbook tracks TASK_635")
-	_assert(handbook_text.contains('current_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Status handbook current task is TASK_635")
+	_assert(handbook_text.contains('current_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Status handbook current task is TASK_636")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_callout_sight_findings.task_id",
 		"frontier_probe_callout_sight_findings.manifest_path",

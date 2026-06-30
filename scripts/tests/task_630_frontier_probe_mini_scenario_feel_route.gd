@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 
@@ -49,9 +49,9 @@ func _test_docs_and_reports() -> void:
 	_assert(contract_text.contains("Frontier-Probe-Mini-Scenario-Feel-Route"), "Mission feedback contract documents TASK_630")
 	_assert(controller_text.contains("get_frontier_probe_mini_scenario_feel_route_snapshot"), "Tactical controller exposes TASK_630 snapshot")
 	_assert(report_text.contains("TASK_630 Frontier Probe Mini Scenario Feel Route"), "Rolling report tracks TASK_630")
-	_assert(report_text.contains('latest_completed_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Rolling report advances latest completed beyond TASK_630")
+	_assert(report_text.contains('latest_completed_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Rolling report advances latest completed beyond TASK_630")
 	_assert(handbook_text.contains("TASK_630 - Frontier Probe Mini Scenario Feel Route"), "Status handbook tracks TASK_630")
-	_assert(handbook_text.contains('current_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Status handbook current task advances beyond TASK_630")
+	_assert(handbook_text.contains('current_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Status handbook current task advances beyond TASK_630")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_mini_scenario_feel_route.task_id",
 		"frontier_probe_mini_scenario_feel_route.manifest_path",

@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_635 auf <code>task/frontier-probe-callout-sight-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_636 auf <code>task/frontier-probe-real-f6-recapture</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -299,6 +299,7 @@
       <span class="pill good">TASK_631 Route-Callouts</span>
       <span class="pill good">TASK_632 F6-Review-Paket</span>
       <span class="pill good">TASK_635 Callout-Sicht-Findings</span>
+      <span class="pill good">TASK_636 F6-Re-Capture</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2066,6 +2067,44 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_636 Frontier Probe Real F6 Re-Capture</h2>
+          <p>Der Re-Capture prueft den echten F6-/Viewport-Pfad nach TASK_635: High-Contrast-Labels, Route-Linien, staerkeres Outline und weiter getrennte LZ/CARGO-Labels muessen als PNG/Manifest belegbar bleiben. Der menschliche Spielgefuehlentscheid bleibt bewusst offen.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Re-Capture / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_636 - Frontier Probe Real F6 Re-Capture" data-export-key="frontier_probe_real_f6_recapture.task_id"></td><td>Aktueller Re-Capture-Slice.</td></tr>
+                <tr><td>PNG</td><td><input readonly value="tmp/frontier_probe_real_f6_recapture.png" data-export-key="frontier_probe_real_f6_recapture.png_path"></td><td>Lokales Bildartefakt: echter Viewport oder Headless-Board.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_real_f6_recapture.json" data-export-key="frontier_probe_real_f6_recapture.manifest_path"></td><td>Lokales JSON mit Post-Polish-Gates.</td></tr>
+                <tr><td>Viewport Readback</td><td><input readonly value="false in headless / true im Fensterlauf" data-export-key="frontier_probe_real_f6_recapture.viewport_readback_available"></td><td>Unterscheidet echtes Bild vom Evidence-Board.</td></tr>
+                <tr><td>Evidence Board</td><td><input readonly value="true in headless" data-export-key="frontier_probe_real_f6_recapture.generated_evidence_board"></td><td>Headless wird nicht als echter Sichttest verkauft.</td></tr>
+                <tr><td>Style</td><td><input readonly value="task_635_high_contrast_route_callouts" data-export-key="frontier_probe_real_f6_recapture.post_polish_style_id"></td><td>TASK_635-Style kommt im Re-Capture an.</td></tr>
+                <tr><td>Route-Linien</td><td><input readonly value=">=3" data-export-key="frontier_probe_real_f6_recapture.route_line_count"></td><td>Route-Beats sind als Sequenz verbunden.</td></tr>
+                <tr><td>Font</td><td><input readonly value="18" data-export-key="frontier_probe_real_f6_recapture.label_font_size"></td><td>Callout-Text bleibt im Nachtest gross genug.</td></tr>
+                <tr><td>Outline</td><td><input readonly value="7" data-export-key="frontier_probe_real_f6_recapture.label_outline_size"></td><td>Outline bleibt stark genug gegen helle Assets.</td></tr>
+                <tr><td>Overlap Gate</td><td><input readonly value="pass" data-export-key="frontier_probe_real_f6_recapture.label_overlap_polish_gate"></td><td>LZ/CARGO-Staffelung bleibt gruen.</td></tr>
+                <tr><td>Shared Marker</td><td><input readonly value="true" data-export-key="frontier_probe_real_f6_recapture.lz_cargo_shared_marker"></td><td>LZ/CARGO teilen weiter `spawn_alpha`.</td></tr>
+                <tr><td>Label getrennt</td><td><input readonly value="true" data-export-key="frontier_probe_real_f6_recapture.lz_cargo_label_separated"></td><td>Labelanker bleiben getrennt.</td></tr>
+                <tr><td>Manual Required</td><td><input readonly value="true" data-export-key="frontier_probe_real_f6_recapture.manual_review_required"></td><td>Echter Sichtentscheid bleibt Pflicht.</td></tr>
+                <tr><td>Manual Done</td><td><input readonly value="false" data-export-key="frontier_probe_real_f6_recapture.manual_review_done"></td><td>Nicht als finaler Sichttest behauptet.</td></tr>
+                <tr><td>Real Window Done</td><td><input readonly value="false" data-export-key="frontier_probe_real_f6_recapture.real_window_review_done"></td><td>Fensterlauf muss bewusst betrachtet werden.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_real_f6_recapture.read_only"></td><td>Review setzt keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_637 - Frontier Probe Playfeel Next Interaction" data-export-key="frontier_probe_real_f6_recapture.recommended_next_task"></td><td>Nur bei konkreter Reibung aus dem Re-Capture.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_real_f6_recapture.real_window_launched"> F6-Fensterlauf nach TASK_635 gestartet</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_real_f6_recapture.labels_readable"> Labels im echten Bild lesbar</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_real_f6_recapture.route_lines_not_too_loud"> Route-Linien helfen, ohne zu laut zu sein</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_real_f6_recapture.result_label_not_competing"> Result-Label konkurriert nicht mehr</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_real_f6_recapture.callout_noise_ok"> Callout-Lautstaerke angenehm</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_636 Re-Capture-Notiz
+            <textarea data-note-key="notes.frontier_probe_real_f6_recapture" data-export-key="frontier_probe_real_f6_recapture.notes" placeholder="Beim Re-Capture notieren: Was ist jetzt lesbar, was stoert noch, und lohnt TASK_637?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -2928,7 +2967,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_634 - Frontier Probe Real F6 Callout Sight Review",
+              "TASK_637 - Frontier Probe Playfeel Next Interaction",
               "Echten Zwei-Fenster-Klicklauf mit TASK_629-Packet ausfuehren, falls Host/Client-UI-Reibung priorisiert werden soll"
             ],
             recently_completed_tasks: [
@@ -3051,7 +3090,8 @@
               "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review",
               "TASK_633 - Frontier Probe Callout Layout Polish",
               "TASK_634 - Frontier Probe Real F6 Callout Sight Review",
-              "TASK_635 - Frontier Probe Callout Sight Findings"
+              "TASK_635 - Frontier Probe Callout Sight Findings",
+              "TASK_636 - Frontier Probe Real F6 Re-Capture"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3095,7 +3135,8 @@
               "TASK_632 macht den F6-Sichtentscheid als PNG/Manifest-Paket reviewbar; finaler menschlicher Fensterblick und konkrete Callout-Layout-Findings bleiben offen.",
               "TASK_633 staffelt LZ/CARGO-Labels am gemeinsamen spawn_alpha-Marker im Primary3D-Visualpfad; echter Fensterblick auf Zoom/Occlusion bleibt offen.",
               "TASK_634 erzeugt PNG/Manifest fuer den echten F6-Callout-Sichtreview, markiert Headless sauber als Evidence-Board und laesst den menschlichen Fensterblick offen.",
-              "TASK_635 wendet den echten Sichtbefund an: Route-Callouts sind kontrastreicher, hoeher, verbunden und das Result-Label weicht bei aktiver Route aus."
+              "TASK_635 wendet den echten Sichtbefund an: Route-Callouts sind kontrastreicher, hoeher, verbunden und das Result-Label weicht bei aktiver Route aus.",
+              "TASK_636 erzeugt den Re-Capture nach TASK_635 als PNG/Manifest und belegt Style, Route-Linien, Font, Outline und getrennte LZ/CARGO-Labels read-only."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3104,14 +3145,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_635",
-            current_focus: "Frontier Probe Callout Sight Findings",
-            latest_completed_task: "TASK_635 - Frontier Probe Callout Sight Findings"
+            current_repo_base: "integration/core-foundation after TASK_636",
+            current_focus: "Frontier Probe Real F6 Re-Capture",
+            latest_completed_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"
           },
           metadata: {
-            branch: "task/frontier-probe-callout-sight-findings",
-            integration_base: "integration/core-foundation after TASK_634",
-            head: "task/frontier-probe-callout-sight-findings",
+            branch: "task/frontier-probe-real-f6-recapture",
+            integration_base: "integration/core-foundation after TASK_635",
+            head: "task/frontier-probe-real-f6-recapture",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }
