@@ -51,9 +51,9 @@ func _test_docs_and_reports() -> void:
 	_assert(terrain_text.contains("label_offset_world"), "Primary3D exposes label offset data")
 	_assert(terrain_text.contains("overlap_group_count"), "Primary3D exposes overlap group data")
 	_assert(report_text.contains("TASK_633 Frontier Probe Callout Layout Polish"), "Rolling report tracks TASK_633")
-	_assert(report_text.contains('latest_completed_task: "TASK_633 - Frontier Probe Callout Layout Polish"'), "Rolling report marks TASK_633 latest completed")
+	_assert(report_text.contains('latest_completed_task: "TASK_634 - Frontier Probe Real F6 Callout Sight Review"'), "Rolling report advances latest completed beyond TASK_633")
 	_assert(handbook_text.contains("TASK_633 - Frontier Probe Callout Layout Polish"), "Status handbook tracks TASK_633")
-	_assert(handbook_text.contains('current_task: "TASK_633 - Frontier Probe Callout Layout Polish"'), "Status handbook current task is TASK_633")
+	_assert(handbook_text.contains('current_task: "TASK_634 - Frontier Probe Real F6 Callout Sight Review"'), "Status handbook current task advances beyond TASK_633")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_callout_layout_polish.task_id",
 		"frontier_probe_callout_layout_polish.manifest_path",

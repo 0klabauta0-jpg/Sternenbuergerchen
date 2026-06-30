@@ -302,6 +302,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_633_frontier_probe_callout_layout_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_632_frontier_probe_mini_scenario_f6_visual_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_631_frontier_probe_mini_scenario_visual_feel_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_630_frontier_probe_mini_scenario_feel_route.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_634 - Frontier Probe Real F6 Callout Sight Review`, wenn der echte Fensterblick weitere Platzierungs- oder Occlusion-Probleme zeigt.
 
+### TASK_634 - Frontier Probe Real F6 Callout Sight Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_634_frontier_probe_real_f6_callout_sight_review.md`, `docs/tasks/TASK_633_frontier_probe_callout_layout_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `scripts/tests/task_634_frontier_probe_real_f6_callout_sight_review.gd` baut den abgeschlossenen Frontier-Probe-Zustand auf und schreibt `tmp/frontier_probe_real_f6_callout_sight_review.png` plus `tmp/frontier_probe_real_f6_callout_sight_review.json`.
+- Stand: Das Manifest unterscheidet echten Viewport-Readback von Headless-Evidence-Board, haelt LZ/CARGO-Shared-Marker plus getrennte Labelanker fest und exportiert offene Pflichtchecks fuer Kamera, Zoom, Occlusion und Callout-Lautstaerke.
+- Stand: Der laufende HTML-Zwischenbericht und das Ist-Stand-/Handbuch-HTML markieren TASK_634 als aktuellen Review-Anker, ohne den menschlichen Fensterblick als erledigt zu behaupten.
+- Risiken/offen: TASK_634 macht den echten F6-Sichttest reproduzierbar, ersetzt ihn aber nicht. Konkrete Occlusion-/Zoom-Findings gehoeren in TASK_635.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_634_frontier_probe_real_f6_callout_sight_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_633_frontier_probe_callout_layout_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_632_frontier_probe_mini_scenario_f6_visual_review.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_635 - Frontier Probe Callout Sight Findings`, aber nur wenn der echte Fensterblick konkrete Reibung zeigt.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
