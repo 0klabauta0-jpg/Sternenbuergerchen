@@ -21,6 +21,13 @@ const APPROACH_BUTTON_PATHS := [
 	"TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/SEButton",
 ]
 
+const FIRE_RULE_BUTTONS := [
+	{"name": "FireRuleHoldButton", "slot": 11, "text": "HF"},
+	{"name": "FireRuleReturnButton", "slot": 12, "text": "RF"},
+	{"name": "FireRuleFreeButton", "slot": 13, "text": "FW"},
+	{"name": "FireRuleSuppressButton", "slot": 14, "text": "SUP"},
+]
+
 var _passed: int = 0
 var _failed: int = 0
 
@@ -90,12 +97,24 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 
 	var command_grid := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid") as GridContainer
 	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 command matrix uses five equal command columns")
-	_assert(command_grid.get_child_count() >= 20 and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 10, "#16 command matrix exposes reserved same-size command slots")
+	_assert(command_grid.get_child_count() >= 20 and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 6, "#16 command matrix exposes reserved same-size command slots")
 	for slot_index in range(7, 21):
-		if [7, 10, 15, 20].has(slot_index):
+		if [7, 10, 11, 12, 13, 14, 15, 20].has(slot_index):
 			continue
 		var slot := command_grid.get_node_or_null("CommandSlot%02d" % slot_index) as Button
 		_assert(slot != null and _button_is_square(slot) and bool(slot.get_meta("drop_light_command_placeholder", false)) and slot.disabled, "CommandSlot%02d is a disabled same-size reserve button" % slot_index)
+	for fire_rule_variant in FIRE_RULE_BUTTONS:
+		var fire_rule_spec: Dictionary = Dictionary(fire_rule_variant)
+		var fire_rule_button := command_grid.get_node_or_null(String(fire_rule_spec.get("name", ""))) as Button
+		var expected_index: int = int(fire_rule_spec.get("slot", 0)) - 1
+		_assert(
+			fire_rule_button != null
+			and fire_rule_button.get_index() == expected_index
+			and _button_is_square(fire_rule_button)
+			and bool(fire_rule_button.get_meta("fire_rule_control", false))
+			and String(fire_rule_button.text) == String(fire_rule_spec.get("text", "")),
+			"%s lives in #%s as an active fire-rule command button" % [String(fire_rule_spec.get("name", "")), str(fire_rule_spec.get("slot", ""))]
+		)
 	var delete_button := command_grid.get_node_or_null("DeleteOrderButton") as Button
 	var sort_button := command_grid.get_node_or_null("SortCommandMatrixButton") as Button
 	var go_button := command_grid.get_node_or_null("GoCommandMatrixButton") as Button

@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const TASK_PATH: String = "res://docs/tasks/TASK_619_host_client_role_peer_badge_hud.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -68,7 +68,7 @@ func _test_report_export_fields(report_text: String, handbook_text: String) -> v
 		_assert(report_text.contains('data-export-key="%s"' % export_key), "Rolling report exports %s" % export_key)
 	_assert(report_text.contains('data-note-key="notes.host_client_role_peer_badge"'), "Rolling report exports TASK_619 free note")
 	_assert(handbook_text.contains('data-export-key="status.task_619_done"'), "Status handbook exports TASK_619 status checkbox")
-	_assert(handbook_text.contains('current_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "Status handbook JSON metadata advances beyond TASK_619")
+	_assert(handbook_text.contains('current_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "Status handbook JSON metadata advances beyond TASK_619")
 
 
 func _test_controller_static_contract() -> void:

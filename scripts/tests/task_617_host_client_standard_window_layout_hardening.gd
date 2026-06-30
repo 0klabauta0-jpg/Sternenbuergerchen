@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const TASK_PATH: String = "res://docs/tasks/TASK_617_host_client_standard_window_layout_hardening.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -45,7 +45,7 @@ func _test_docs_report_and_contract() -> void:
 	_assert(report_text.contains("TASK_617 Host Client Standard Window Layout Hardening"), "Review workbench tracks TASK_617")
 	_assert(report_text.contains('data-export-key="host_client_standard_window_layout.auto_fit_applied"'), "Report exports TASK_617 auto-fit field")
 	_assert(report_text.contains('"TASK_617 - Host Client Standard Window Layout Hardening"'), "JSON payload keeps TASK_617 in completed chain")
-	_assert(report_text.contains('latest_completed_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "JSON payload advances latest completed task beyond TASK_617")
+	_assert(report_text.contains('latest_completed_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "JSON payload advances latest completed task beyond TASK_617")
 
 
 func _test_launch_helper_layout_autofit_script() -> void:

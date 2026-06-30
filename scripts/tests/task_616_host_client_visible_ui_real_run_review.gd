@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const TASK_PATH: String = "res://docs/tasks/TASK_616_host_client_visible_ui_real_run_review.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -47,7 +47,7 @@ func _test_docs_report_and_contract() -> void:
 	_assert(report_text.contains('data-export-key="host_client_visible_ui_real_run.finding"'), "Report exports TASK_616 finding")
 	_assert(report_text.contains('data-export-key="host_client_visible_ui_real_run.terrain_redraw_guard"'), "Report exports TASK_616 redraw guard")
 	_assert(report_text.contains('"TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload keeps TASK_616 in completed chain")
-	_assert(report_text.contains('latest_completed_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "JSON payload advances latest completed task beyond TASK_616")
+	_assert(report_text.contains('latest_completed_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "JSON payload advances latest completed task beyond TASK_616")
 
 
 func _test_terrain_view_bootstrap_redraw_guard() -> void:

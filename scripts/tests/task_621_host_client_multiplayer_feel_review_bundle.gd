@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const TASK_PATH: String = "res://docs/tasks/TASK_621_host_client_multiplayer_feel_review_bundle.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -52,8 +52,8 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(report_text.contains("TASK_621 Host Client Multiplayer Feel Review Bundle"), "Rolling report tracks TASK_621")
 	_assert(report_text.contains("TASK_622 - Host Client Command Authority Live Interaction Review"), "Rolling report advances to TASK_622 after TASK_621")
 	_assert(handbook_text.contains("TASK_621 Review-Bundle"), "Status handbook tracks TASK_621 bundle")
-	_assert(handbook_text.contains('current_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "Status handbook current task advances beyond TASK_621")
-	_assert(handbook_text.contains('latest_completed_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "Status handbook latest task advances beyond TASK_621")
+	_assert(handbook_text.contains('current_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "Status handbook current task advances beyond TASK_621")
+	_assert(handbook_text.contains('latest_completed_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "Status handbook latest task advances beyond TASK_621")
 	_test_report_export_fields(report_text, handbook_text)
 
 
