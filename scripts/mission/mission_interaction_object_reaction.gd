@@ -67,6 +67,7 @@ static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
 		"progress": progress,
 		"open_fraction": _open_fraction_for_reaction(object_kind, reaction_state, progress),
 		"runtime_visual_state": runtime_visual_state,
+		"visual_swap_state": _visual_swap_state_for_reaction(object_kind, runtime_visual_state),
 		"visual_asset_family": _visual_asset_family_for_kind(object_kind),
 		"visual_asset_type_id": visual_asset_type_id,
 		"visual_model_path": _visual_model_path_for_type_id(visual_asset_type_id),
@@ -74,7 +75,13 @@ static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
 		"visual_state_label": _visual_state_label_for_reaction(object_kind, runtime_visual_state),
 		"computer_panel_text": _computer_panel_text_for_state(runtime_visual_state) if object_kind == "computer" else "",
 		"door_walkability_hint": _door_walkability_hint(runtime_visual_state) if object_kind == "door" else "",
-		"door_los_hint": "unchanged_by_visual_state" if object_kind == "door" else "",
+		"door_los_hint": _door_los_hint(runtime_visual_state) if object_kind == "door" else "",
+		"door_animation_phase": _door_animation_phase_for_state(runtime_visual_state, progress) if object_kind == "door" else "",
+		"door_asset_swap_state": _door_asset_swap_state_for_state(runtime_visual_state) if object_kind == "door" else "",
+		"door_leaf_gap_fraction": _door_leaf_gap_fraction_for_state(runtime_visual_state, progress) if object_kind == "door" else 0.0,
+		"door_threshold_visible": object_kind == "door" and runtime_visual_state == "open",
+		"door_runtime_collision_source": "MissionInteractionDoorRuntimeCollisionLOS" if object_kind == "door" else "",
+		"door_visual_sets_gameplay_truth": false,
 		"screen_active": object_kind == "computer" and ["active", "controlled", "ready"].has(reaction_state),
 		"beacon_active": ["aa", "cargo"].has(object_kind) and reaction_state != "idle",
 		"locked": reaction_state == "locked" or reaction_state == "blocked",
@@ -223,7 +230,13 @@ static func _visual_preview_path_for_type_id(type_id: String) -> String:
 
 static func _visual_state_label_for_reaction(object_kind: String, runtime_visual_state: String) -> String:
 	if object_kind == "door":
-		return "DOOR %s" % runtime_visual_state.to_upper()
+		match runtime_visual_state:
+			"open":
+				return "DOOR OPEN"
+			"half":
+				return "DOOR OPENING"
+			_:
+				return "DOOR CLOSED"
 	if object_kind == "computer":
 		return "COM %s" % runtime_visual_state.to_upper()
 	return runtime_visual_state.to_upper()
@@ -241,8 +254,50 @@ static func _computer_panel_text_for_state(runtime_visual_state: String) -> Stri
 
 static func _door_walkability_hint(runtime_visual_state: String) -> String:
 	if runtime_visual_state == "open":
-		return "visual_open_only_collision_unchanged"
-	return "visual_closed_only_collision_unchanged"
+		return "effective_open_via_door_runtime_producer"
+	return "effective_blocked_until_door_runtime_producer_opens"
+
+
+static func _door_los_hint(runtime_visual_state: String) -> String:
+	if runtime_visual_state == "open":
+		return "effective_clear_via_door_runtime_producer"
+	return "effective_blocked_until_door_runtime_producer_opens"
+
+
+static func _visual_swap_state_for_reaction(object_kind: String, runtime_visual_state: String) -> String:
+	if object_kind != "door":
+		return runtime_visual_state
+	return _door_asset_swap_state_for_state(runtime_visual_state)
+
+
+static func _door_asset_swap_state_for_state(runtime_visual_state: String) -> String:
+	match runtime_visual_state:
+		"open":
+			return "door_open_asset"
+		"half":
+			return "door_half_open_asset"
+		_:
+			return "door_closed_asset"
+
+
+static func _door_animation_phase_for_state(runtime_visual_state: String, progress: float) -> String:
+	match runtime_visual_state:
+		"open":
+			return "open"
+		"half":
+			return "opening_%d_percent" % roundi(clampf(progress, 0.0, 1.0) * 100.0)
+		_:
+			return "closed_idle"
+
+
+static func _door_leaf_gap_fraction_for_state(runtime_visual_state: String, progress: float) -> float:
+	match runtime_visual_state:
+		"open":
+			return 1.0
+		"half":
+			return clampf(maxf(progress, 0.35), 0.35, 0.84)
+		_:
+			return 0.0
 
 
 static func _open_fraction_for_reaction(object_kind: String, reaction_state: String, progress: float) -> float:
@@ -254,7 +309,7 @@ static func _open_fraction_for_reaction(object_kind: String, reaction_state: Str
 		"active":
 			return clampf(maxf(progress, 0.35), 0.0, 1.0)
 		"ready":
-			return 0.12
+			return 0.0
 		_:
 			return 0.0
 

@@ -7415,6 +7415,8 @@ func _add_mission_interaction_object_reaction_visuals() -> void:
 		root.set_meta("reaction_state", reaction_state)
 		root.set_meta("runtime_visual_state", String(reaction.get("runtime_visual_state", "")).strip_edges())
 		root.set_meta("visual_asset_type_id", String(reaction.get("visual_asset_type_id", "")).strip_edges())
+		root.set_meta("visual_swap_state", String(reaction.get("visual_swap_state", "")).strip_edges())
+		root.set_meta("door_animation_phase", String(reaction.get("door_animation_phase", "")).strip_edges())
 		_status_root.add_child(root)
 		match object_kind:
 			"computer":
@@ -7443,6 +7445,7 @@ func _add_mission_interaction_object_reaction_visuals() -> void:
 			"world_position": world_position,
 			"open_fraction": float(reaction.get("open_fraction", 0.0)),
 			"runtime_visual_state": String(reaction.get("runtime_visual_state", "")).strip_edges(),
+			"visual_swap_state": String(reaction.get("visual_swap_state", "")).strip_edges(),
 			"visual_asset_family": String(reaction.get("visual_asset_family", "")).strip_edges(),
 			"visual_asset_type_id": String(reaction.get("visual_asset_type_id", "")).strip_edges(),
 			"visual_model_path": String(reaction.get("visual_model_path", "")).strip_edges(),
@@ -7451,6 +7454,12 @@ func _add_mission_interaction_object_reaction_visuals() -> void:
 			"computer_panel_text": String(reaction.get("computer_panel_text", "")).strip_edges(),
 			"door_walkability_hint": String(reaction.get("door_walkability_hint", "")).strip_edges(),
 			"door_los_hint": String(reaction.get("door_los_hint", "")).strip_edges(),
+			"door_animation_phase": String(reaction.get("door_animation_phase", "")).strip_edges(),
+			"door_asset_swap_state": String(reaction.get("door_asset_swap_state", "")).strip_edges(),
+			"door_leaf_gap_fraction": float(reaction.get("door_leaf_gap_fraction", 0.0)),
+			"door_threshold_visible": bool(reaction.get("door_threshold_visible", false)),
+			"door_runtime_collision_source": String(reaction.get("door_runtime_collision_source", "")).strip_edges(),
+			"door_visual_sets_gameplay_truth": bool(reaction.get("door_visual_sets_gameplay_truth", false)),
 			"screen_active": bool(reaction.get("screen_active", false)),
 			"beacon_active": bool(reaction.get("beacon_active", false)),
 			"locked": bool(reaction.get("locked", false)),
@@ -7499,12 +7508,21 @@ func _add_mission_interaction_cargo_reaction_proxy(parent: Node3D, accent: Color
 
 
 func _add_mission_interaction_door_reaction_proxy(parent: Node3D, accent: Color, reaction: Dictionary) -> void:
+	var runtime_state: String = String(reaction.get("runtime_visual_state", "")).strip_edges().to_lower()
 	var open_fraction: float = clampf(float(reaction.get("open_fraction", 0.0)), 0.0, 1.0)
+	var leaf_gap_fraction: float = clampf(float(reaction.get("door_leaf_gap_fraction", open_fraction)), 0.0, 1.0)
 	var leaf_offset: float = 0.18 + (open_fraction * 0.34)
 	_add_local_box3d(parent, "DoorFrame", Vector3(0.88, 0.92, 0.10), Vector3(0.0, 0.46, 0.0), Color(0.20, 0.22, 0.24, 0.78), true)
 	_add_local_box3d(parent, "DoorLeafLeft", Vector3(0.32, 0.78, 0.12), Vector3(-leaf_offset, 0.44, -0.02), Color(accent.r, accent.g, accent.b, 0.82), true)
 	_add_local_box3d(parent, "DoorLeafRight", Vector3(0.32, 0.78, 0.12), Vector3(leaf_offset, 0.44, -0.02), Color(accent.r, accent.g, accent.b, 0.82), true)
-	if open_fraction >= 0.85:
+	if runtime_state == "closed":
+		_add_local_box3d(parent, "DoorClosedSeal", Vector3(0.08, 0.82, 0.16), Vector3(0.0, 0.45, -0.075), Color(1.0, 0.38, 0.30, 0.66), true)
+		_mission_interaction_object_reaction_visual_count += 1
+	elif runtime_state == "half":
+		_add_local_box3d(parent, "DoorOpeningTrack", Vector3(maxf(0.08, 0.72 * leaf_gap_fraction), 0.035, 0.16), Vector3(0.0, 0.92, -0.075), Color(0.86, 0.96, 1.0, 0.74), true)
+		_add_local_cylinder3d(parent, "DoorOpeningPulse", 0.22, 0.04, Vector3(0.0, 0.18, -0.08), Color(accent.r, accent.g, accent.b, 0.44), 24, true)
+		_mission_interaction_object_reaction_visual_count += 2
+	if bool(reaction.get("door_threshold_visible", open_fraction >= 0.85)):
 		_add_local_box3d(parent, "DoorOpenThreshold", Vector3(0.64, 0.04, 0.16), Vector3(0.0, 0.08, -0.08), Color(0.46, 0.96, 0.62, 0.56), true)
 		_mission_interaction_object_reaction_visual_count += 1
 	_mission_interaction_object_reaction_visual_count += 3

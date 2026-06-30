@@ -324,6 +324,7 @@ git checkout -b batch/<batch-name>
 - TASK_693 - Door Runtime State Producer (implementiert)
 - TASK_694 - Door Use/Breach Command Hook (implementiert)
 - TASK_695 - Door Interaction HUD Button/Shortcut (implementiert)
+- TASK_696 - Door Runtime Visual Animation/Asset Swap (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -155,6 +155,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Command-Control- und Command-Hierarchy-Snapshots muessen `breach_door`, Slot, Tooltip, Shortcut und Door-ID exportieren.
 - `requires_go = true` bleibt Pflicht; echter Runtime-State entsteht erst ueber Waypoint-Ausfuehrung, Runtime-Progress und Door Runtime State Producer.
 
+## Door Runtime Visual Animation/Asset Swap
+- Door-Object-Reactions exportieren `door_animation_phase`, `door_asset_swap_state`, `door_leaf_gap_fraction`, `door_threshold_visible` und `door_runtime_collision_source`.
+- Die zulaessigen Door-Visualphasen sind `closed_idle`, `opening_*_percent` und `open`; sie bilden nur den sichtbaren Runtime-Status ab.
+- Der Asset-Swap-State trennt `door_closed_asset`, `door_half_open_asset` und `door_open_asset`, ohne direkt TerrainMapData, Walkability oder LOS zu mutieren.
+- `TerrainMap3DView` darf Door-Proxies fuer closed/half/open unterschiedlich zeichnen: Seal bei closed, Opening-/Progress-Indikator bei half, Threshold bei open.
+- Effektive Collision/LOS-Wahrheit bleibt beim Door Runtime State Producer und den `TerrainRegistry`-Overrides.
+- Render-Snapshots duerfen Door-Visualfelder fuer Tests, Reports und Playtestnotizen exportieren; `door_visual_sets_gameplay_truth = false` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+- Ein echter FullHD-Sichtentscheid fuer Groesse, Lesbarkeit und HUD-Overlap bleibt ein separater manueller Review-Slice.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
