@@ -472,6 +472,14 @@ Erwartete Struktur: `HomebaseTestScreen.get_frontier_probe_homebase_next_sortie_
 
 Die erwarteten Readiness-Schritte sind `review_roster_gains`, `stage_fireteam`, `assign_loadout`, `prepare_transport` und `start_next_sortie`. Bei vorhandener `progression_award_summary` ist `review_roster_gains` der aktuelle naechste Schritt. Die sichtbare Zeile bleibt kompakt, z. B. `Next sortie: Review gains -> Stage fireteam -> Assign loadout -> Load dropship -> Start next sortie | now: Review gains`.
 
+## Frontier-Probe-Homebase-Visible-Readiness-Review (TASK_642)
+
+TASK_642 ist ein sichtbarer Review-Anker fuer den Homebase-Zustand nach TASK_641. Die Homebase darf dafuer Control-Rects, Sichtbarkeit, Reihenfolge, Overflow und Snapshot-Texte exportieren. Der Review ist visuell/read-only: Er darf keine Homebase-Navigation, keinen Startbutton-Commit, keine Progression und keine MissionResult-Mutation erzeugen.
+
+Erwartete Struktur: `HomebaseTestScreen.get_frontier_probe_homebase_visible_readiness_review_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_homebase_visible_readiness_review.v1`, `task_id = TASK_642`, `source_task_ids = [TASK_641, TASK_640]`, `readiness_gate = pass`, `post_summary_visible = true`, `next_sortie_visible = true`, `post_summary_rect`, `next_sortie_rect`, `mission_panel_rect`, `current_next_step_id`, `readiness_line`, `rendered_readiness_line`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false` und `recommended_next_task = TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings`.
+
+Die Review-Gates pruefen mindestens: beide Zeilen liegen im MissionPanel, Next-Sortie sitzt unter der Debrief-Summary, beide Zeilen ueberlappen nicht, MissionPanel laeuft nicht ueber und die Next-Sortie-Zeile bleibt kompakt.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_641 auf <code>task/frontier-probe-homebase-next-sortie-readiness</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_642 auf <code>task/frontier-probe-homebase-visible-readiness-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -305,6 +305,7 @@
       <span class="pill good">TASK_639 Meta-Debrief-Smoke</span>
       <span class="pill good">TASK_640 Homebase-Return</span>
       <span class="pill good">TASK_641 Next-Sortie</span>
+      <span class="pill good">TASK_642 Homebase-Review</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2251,6 +2252,37 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_642 Frontier Probe Homebase Visible Readiness Review</h2>
+          <p>Der Homebase-Zustand nach TASK_641 ist jetzt als sichtbares Review-Paket belegbar. Der Verifier schreibt PNG und Manifest, prueft Post-Debrief-Zeile, Next-Sortie-Zeile, Reihenfolge, MissionPanel-Bounds und Overflow, ohne eine manuelle Schoenheitsentscheidung vorwegzunehmen.</p>
+          <img class="evidence-preview" src="../../tmp/frontier_probe_homebase_visible_readiness_review.png" alt="TASK_642 Frontier Probe Homebase Visible Readiness Review">
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Visible Readiness / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_642 - Frontier Probe Homebase Visible Readiness Review" data-export-key="frontier_probe_homebase_visible_readiness_review.task_id"></td><td>Aktueller sichtbarer Homebase-Review-Slice.</td></tr>
+                <tr><td>PNG</td><td><input readonly value="tmp/frontier_probe_homebase_visible_readiness_review.png" data-export-key="frontier_probe_homebase_visible_readiness_review.png_path"></td><td>Lokales Evidence-Bild oder echter Viewport-Readback.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_homebase_visible_readiness_review.json" data-export-key="frontier_probe_homebase_visible_readiness_review.manifest_path"></td><td>Lokales JSON mit Rects und Gates.</td></tr>
+                <tr><td>Readiness Gate</td><td><input readonly value="pass" data-export-key="frontier_probe_homebase_visible_readiness_review.readiness_gate"></td><td>TASK_641-Snapshot bleibt gruen.</td></tr>
+                <tr><td>Post-Summary</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_visible_readiness_review.post_summary_visible"></td><td>Debrief-Return-Zeile sichtbar.</td></tr>
+                <tr><td>Next-Sortie</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_visible_readiness_review.next_sortie_visible"></td><td>Naechste Vorbereitung sichtbar.</td></tr>
+                <tr><td>Aktueller Schritt</td><td><input readonly value="review_roster_gains" data-export-key="frontier_probe_homebase_visible_readiness_review.current_next_step_id"></td><td>Roster-Gains zuerst, wenn Awards vorhanden sind.</td></tr>
+                <tr><td>Manueller Review</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_visible_readiness_review.manual_review_required"></td><td>Fensterblick/Schoenheit bleibt als menschlicher Check offen.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_visible_readiness_review.read_only"></td><td>Keine Navigation, kein Command, keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings" data-export-key="frontier_probe_homebase_visible_readiness_review.recommended_next_task"></td><td>Nur falls der sichtbare Befund konkrete Reibung zeigt.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_visible_readiness_review.bounds_checked"> Zeilen im MissionPanel</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_visible_readiness_review.no_overlap_checked"> Keine Zeilenueberlappung</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_visible_readiness_review.no_overflow_checked"> Kein MissionPanel-Overflow</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_homebase_visible_readiness_review.manual_visible_homebase_checked"> Echten Homebase-Fensterblick geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_642 Homebase-Visible-Review-Notiz
+            <textarea data-note-key="notes.frontier_probe_homebase_visible_readiness_review" data-export-key="frontier_probe_homebase_visible_readiness_review.notes" placeholder="Beim Spielen notieren: Ist die Next-Sortie-Zeile im Homebase-Fenster auffaellig genug und schoen genug?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3242,7 +3274,8 @@
               "TASK_638 - Frontier Probe Debrief Handoff Feel",
               "TASK_639 - Frontier Probe Meta Debrief Route Smoke",
               "TASK_640 - Frontier Probe Post Debrief Homebase Readability",
-              "TASK_641 - Frontier Probe Homebase Next Sortie Readiness"
+              "TASK_641 - Frontier Probe Homebase Next Sortie Readiness",
+              "TASK_642 - Frontier Probe Homebase Visible Readiness Review"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3292,7 +3325,8 @@
               "TASK_638 markiert den abgeschlossenen Frontier-Probe-Missionsmoment als HANDOFF Debrief bereit | danach Homebase.",
               "TASK_639 prueft den vorhandenen Meta-Weg mit Frontier-Probe-Resultat: Debrief sichtbar, Return verfuegbar, Homebase nach Return sichtbar und MissionResult erhalten.",
               "TASK_640 zeigt nach dem Debrief-Return eine kompakte Homebase-Summary aus dem Frontier-Probe-Ergebnis und nennt den naechsten Homebase-Schritt.",
-              "TASK_641 verbindet diese Homebase-Summary mit Pre-Mission-Readiness und Direct-Staging zu einer kompakten Next-Sortie-Zeile."
+              "TASK_641 verbindet diese Homebase-Summary mit Pre-Mission-Readiness und Direct-Staging zu einer kompakten Next-Sortie-Zeile.",
+              "TASK_642 macht den daraus entstehenden Homebase-Blick als PNG/Manifest-Review belegbar und prueft Zeilenreihenfolge, Bounds und Overflow."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3301,14 +3335,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_641",
-            current_focus: "Frontier Probe Homebase Next Sortie Readiness",
-            latest_completed_task: "TASK_641 - Frontier Probe Homebase Next Sortie Readiness"
+            current_repo_base: "integration/core-foundation after TASK_642",
+            current_focus: "Frontier Probe Homebase Visible Readiness Review",
+            latest_completed_task: "TASK_642 - Frontier Probe Homebase Visible Readiness Review"
           },
           metadata: {
-            branch: "task/frontier-probe-homebase-next-sortie-readiness",
-            integration_base: "integration/core-foundation after TASK_640",
-            head: "task/frontier-probe-homebase-next-sortie-readiness",
+            branch: "task/frontier-probe-homebase-visible-readiness-review",
+            integration_base: "integration/core-foundation after TASK_641",
+            head: "task/frontier-probe-homebase-visible-readiness-review",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }

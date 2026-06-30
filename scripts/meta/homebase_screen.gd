@@ -412,6 +412,65 @@ func get_frontier_probe_homebase_next_sortie_readiness_snapshot() -> Dictionary:
 	}
 
 
+func get_frontier_probe_homebase_visible_readiness_review_snapshot() -> Dictionary:
+	var readiness_snapshot: Dictionary = get_frontier_probe_homebase_next_sortie_readiness_snapshot()
+	var post_label := _get_post_debrief_homebase_summary_label()
+	var readiness_label := _get_next_sortie_readiness_label()
+	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
+	var mission_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as Control
+	var post_rect: Rect2 = _control_global_rect(post_label)
+	var readiness_rect: Rect2 = _control_global_rect(readiness_label)
+	var mission_rect: Rect2 = _control_global_rect(mission_panel)
+	var mission_child_max_bottom: float = _visible_child_max_bottom(mission_panel)
+	var readiness_line: String = String(readiness_snapshot.get("readiness_line", "")).strip_edges()
+	var rendered_line: String = readiness_label.text.strip_edges() if readiness_label != null else ""
+	var checks: Array = []
+	_append_visual_audit_check(checks, "readiness_gate_pass", String(readiness_snapshot.get("gate", "")) == "pass", "critical", "TASK_641 readiness gate should be green before visual review.")
+	_append_visual_audit_check(checks, "post_summary_visible", _control_is_visible(post_label), "critical", "Post-Debrief Homebase summary should remain visible.")
+	_append_visual_audit_check(checks, "next_sortie_visible", _control_is_visible(readiness_label), "critical", "Next-sortie readiness line should be visible.")
+	_append_visual_audit_check(checks, "line_matches_snapshot", not readiness_line.is_empty() and rendered_line == readiness_line, "critical", "Rendered line should match TASK_641 snapshot text.")
+	_append_visual_audit_check(checks, "labels_inside_mission_panel", _rect_inside(post_rect, mission_rect) and _rect_inside(readiness_rect, mission_rect), "critical", "Post-Debrief and Next-Sortie lines should stay inside MissionPanel.")
+	_append_visual_audit_check(checks, "next_sortie_below_post_summary", readiness_rect.position.y >= post_rect.end.y - 1.0, "critical", "Next-Sortie line should sit below the Debrief return summary.")
+	_append_visual_audit_check(checks, "labels_do_not_overlap", not _rects_overlap(post_rect, readiness_rect) or readiness_rect.position.y >= post_rect.end.y - 1.0, "critical", "Return and next-sortie lines should not visually overlap.")
+	_append_visual_audit_check(checks, "mission_panel_no_overflow", mission_panel != null and mission_child_max_bottom <= mission_rect.end.y + 0.5, "critical", "MissionPanel content should not overflow after adding readiness lines.")
+	_append_visual_audit_check(checks, "readiness_line_compact", rendered_line.length() <= 190 and rendered_line.count("\n") == 0, "critical", "Next-sortie line should remain compact enough for the Homebase mission panel.")
+	_append_visual_audit_check(checks, "mission_vbox_visible", _control_is_visible(mission_vbox), "critical", "MissionVBox should be visible for the review capture.")
+	_append_visual_audit_check(checks, "read_only", bool(readiness_snapshot.get("read_only", false)) and not bool(readiness_snapshot.get("ui_sets_gameplay_truth", true)), "critical", "Visible review should read existing Homebase state only.")
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_homebase_visible_readiness_review.v1",
+		"task_id": "TASK_642",
+		"source_task_ids": ["TASK_641", "TASK_640"],
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"readiness_gate": String(readiness_snapshot.get("gate", "")),
+		"route_id": String(readiness_snapshot.get("route_id", "")),
+		"scenario_id": String(readiness_snapshot.get("scenario_id", "")),
+		"current_next_step_id": String(readiness_snapshot.get("current_next_step_id", "")),
+		"readiness_line": readiness_line,
+		"rendered_readiness_line": rendered_line,
+		"post_summary_text": post_label.text.strip_edges() if post_label != null else "",
+		"post_summary_visible": _control_is_visible(post_label),
+		"next_sortie_visible": _control_is_visible(readiness_label),
+		"mission_panel_visible": _control_is_visible(mission_panel),
+		"mission_vbox_visible": _control_is_visible(mission_vbox),
+		"post_summary_rect": _rect_to_dict(post_rect),
+		"next_sortie_rect": _rect_to_dict(readiness_rect),
+		"mission_panel_rect": _rect_to_dict(mission_rect),
+		"mission_child_max_bottom": mission_child_max_bottom,
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"visual_only": true,
+		"checks": checks,
+		"recommended_next_task": "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings",
+	}
+
+
 func get_post_mission_skill_delta_snapshot() -> Dictionary:
 	var focused_delta: Dictionary = _get_post_mission_skill_delta_for_unit(_focused_unit_id)
 	var focused_text: String = _format_post_mission_skill_delta_text(focused_delta)
