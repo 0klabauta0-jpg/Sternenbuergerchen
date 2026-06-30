@@ -322,6 +322,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_635_frontier_probe_callout_sight_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_634_frontier_probe_real_f6_callout_sight_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_633_frontier_probe_callout_layout_polish.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_636 - Frontier Probe Real F6 Re-Capture`, damit der echte Fensterblick nach dem Polish neu bewertet wird.
 
+### TASK_636 - Frontier Probe Real F6 Re-Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_636_frontier_probe_real_f6_recapture.md`, `docs/tasks/TASK_635_frontier_probe_callout_sight_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `scripts/tests/task_636_frontier_probe_real_f6_recapture.gd` baut den abgeschlossenen Frontier-Probe-Zustand erneut auf und schreibt `tmp/frontier_probe_real_f6_recapture.png` plus `tmp/frontier_probe_real_f6_recapture.json`.
+- Stand: Das Manifest belegt den TASK_635-Post-Polish-Pfad mit `task_635_high_contrast_route_callouts`, Route-Linien, groesserem Font, staerkerem Outline, weiter getrennten LZ/CARGO-Labels und read-only-Grenze.
+- Stand: Rolling Report und Ist-Stand-/Handbuch-HTML markieren TASK_636 als aktuellen Re-Capture-Anker und halten den menschlichen Spielgefuehlentscheid bewusst offen.
+- Risiken/offen: Der Re-Capture belegt Daten und Bildartefakt, ersetzt aber keinen laengeren Spielgefuehltest. Wenn das echte Bild noch zu laut, zu leise oder verdeckt wirkt, sollte TASK_637 als kleiner Findings-Slice folgen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_636_frontier_probe_real_f6_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_635_frontier_probe_callout_sight_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_634_frontier_probe_real_f6_callout_sight_review.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_637 - Frontier Probe Playfeel Next Interaction`, wenn der Re-Capture im echten Fensterbild eine konkrete Interaktions- oder Lesbarkeitsreibung zeigt.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

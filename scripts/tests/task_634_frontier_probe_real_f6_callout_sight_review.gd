@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 
@@ -48,9 +48,9 @@ func _test_docs_and_reports() -> void:
 	_assert(roadmap_text.contains("TASK_634 - Frontier Probe Real F6 Callout Sight Review (implementiert)"), "Roadmap marks TASK_634 implemented")
 	_assert(contract_text.contains("Frontier-Probe-Real-F6-Callout-Sight-Review"), "Mission feedback contract documents TASK_634")
 	_assert(report_text.contains("TASK_634 Frontier Probe Real F6 Callout Sight Review"), "Rolling report tracks TASK_634")
-	_assert(report_text.contains('latest_completed_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Rolling report advances latest completed beyond TASK_634")
+	_assert(report_text.contains('latest_completed_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Rolling report advances latest completed beyond TASK_634")
 	_assert(handbook_text.contains("TASK_634 - Frontier Probe Real F6 Callout Sight Review"), "Status handbook tracks TASK_634")
-	_assert(handbook_text.contains('current_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Status handbook current task advances beyond TASK_634")
+	_assert(handbook_text.contains('current_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Status handbook current task advances beyond TASK_634")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_real_f6_callout_sight_review.task_id",
 		"frontier_probe_real_f6_callout_sight_review.png_path",

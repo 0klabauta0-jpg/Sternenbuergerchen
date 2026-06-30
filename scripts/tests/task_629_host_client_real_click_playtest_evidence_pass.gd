@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const TASK_PATH: String = "res://docs/tasks/TASK_629_host_client_real_click_playtest_evidence_pass.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -45,9 +45,9 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_629 - Host Client Real Click Playtest Evidence Pass (implementiert)"), "Roadmap marks TASK_629 implemented")
 	_assert(contract_text.contains("Host-Client-Real-Click-Playtest-Evidence-Pass"), "Mission feedback contract documents TASK_629")
 	_assert(report_text.contains("TASK_629 Host Client Real Click Playtest Evidence Pass"), "Rolling report tracks TASK_629")
-	_assert(report_text.contains('latest_completed_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Rolling report advances latest completed beyond TASK_629")
+	_assert(report_text.contains('latest_completed_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Rolling report advances latest completed beyond TASK_629")
 	_assert(handbook_text.contains("TASK_629 - Host Client Real Click Playtest Evidence Pass"), "Status handbook tracks TASK_629")
-	_assert(handbook_text.contains('current_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Status handbook current task advances beyond TASK_629")
+	_assert(handbook_text.contains('current_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Status handbook current task advances beyond TASK_629")
 	_test_report_export_fields(report_text, handbook_text)
 
 

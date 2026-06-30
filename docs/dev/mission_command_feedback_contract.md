@@ -439,6 +439,11 @@ TASK_635 wendet den belegten Sichtbefund aus dem echten TASK_634-Fensterlauf an:
 
 Erwartete Render-Snapshot-Struktur: `primary_3d.route_callout_label_visual_style_id = task_635_high_contrast_route_callouts`, `primary_3d.route_callout_label_font_size >= 18`, `primary_3d.route_callout_label_outline_size >= 7`, `primary_3d.route_callout_line_visual_count >= 3` und alle `primary_3d.route_callout_entries` enthalten `label_visual_style_id`, `label_font_size`, `label_pixel_size`, `label_outline_size`, `label_height`, `read_only = true` und `ui_sets_gameplay_truth = false`. LZ/CARGO behalten denselben `world_position`-Marker, aber getrennte `label_world_position`-Werte. Das TASK_635-Manifest meldet `schema = sternenbuergerchen.frontier_probe_callout_sight_findings.v1`, `task_id = TASK_635`, `source_task_id = TASK_634`, `finding = real_f6_callouts_too_quiet_result_label_competes`, `route_line_count`, `label_visual_style_id`, `mission_result_offset_applied = true`, `read_only = true` und `ui_sets_gameplay_truth = false`.
 
+## Frontier-Probe-Real-F6-Re-Capture
+TASK_636 macht den echten F6-/Viewport-Blick nach dem TASK_635-Polish wieder reproduzierbar. Der Re-Capture darf den abgeschlossenen Frontier-Probe-Zustand herstellen, den vorhandenen Primary3D-/Route-Snapshot lesen und lokale PNG-/JSON-Artefakte schreiben. Er darf keine weitere Visual-Aenderung anwenden und keine Mission-, Cargo-, Objective-, Command-, Movement-, Combat-, Peer- oder Gameplay-Wahrheit setzen.
+
+Erwartete Manifest-Struktur: `schema = sternenbuergerchen.frontier_probe_real_f6_recapture.v1`, `task_id = TASK_636`, `source_task_id = TASK_635`, `capture_type = frontier_probe_real_f6_recapture`, `png_path`, `manifest_path`, `display_server`, `viewport_readback_available`, `generated_evidence_board`, `post_polish_style_id = task_635_high_contrast_route_callouts`, `route_line_count >= 3`, `label_font_size >= 18`, `label_outline_size >= 7`, `primary_3d_route_callout_entries`, `label_overlap_polish_gate = pass`, `lz_cargo_shared_marker = true`, `lz_cargo_label_separated = true`, `manual_checks`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_637 - Frontier Probe Playfeel Next Interaction`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
