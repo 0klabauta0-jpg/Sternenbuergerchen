@@ -67,6 +67,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `MissionTacticalSandboxController.get_mission_interaction_use_feedback_snapshot()` und `get_command_feedback_snapshot().mission_interaction_use_feedback` exportieren denselben read-only Snapshot.
 - Der Presenter darf keine Interaktion starten und keine Scenario-Gates setzen. Echte Use-Commands bleiben ein separater Slice.
 
+## Use Intent
+- `MissionTacticalSandboxController.create_selected_mission_interaction_use_intent(interaction_id = "")` erzeugt aus einer nutzbaren Interaction einen geplanten Fireteam-Waypoint.
+- Der Intent nutzt das gebundene `required_order`: `take`, `defend`, `move`, `flank`; `hold` wird zu `defend`, `operate`/`breach` zu `take`.
+- Der Intent setzt keine Scenario-Gates, keinen Door-State und keinen Objective-Erfolg. Er erzeugt nur einen Command-Intent, der weiterhin GO und den bestehenden Mission-Tactical-Pfad braucht.
+- `get_mission_interaction_use_intent_snapshot()` und `get_command_feedback_snapshot().mission_interaction_use_intent` exportieren den letzten Intent samt `accepted`, `blocked_reason`, `command_type`, `waypoint_id` und `requires_go`.
+- Blockierte oder ausser Reichweite liegende Interactions duerfen keinen Waypoint erzeugen.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.
@@ -76,5 +83,5 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 
 ## Naechste Slices
 - Editor-Inspector fuer Interaction-Point-Bindings.
-- Echter Use-Command oder Runtime-Fortschrittsproducer fuer Computer-/Hold-Zonen.
+- Runtime-Fortschrittsproducer fuer Computer-/Hold-Zonen.
 - FullHD-Readability-Pass fuer Interaction-Labels im Missionsbild.
