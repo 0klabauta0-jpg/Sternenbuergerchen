@@ -263,6 +263,7 @@ git checkout -b batch/<batch-name>
 - TASK_632 - Frontier Probe Mini Scenario F6 Visual Review (implementiert)
 - TASK_633 - Frontier Probe Callout Layout Polish (implementiert)
 - TASK_634 - Frontier Probe Real F6 Callout Sight Review (implementiert)
+- TASK_635 - Frontier Probe Callout Sight Findings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -52,9 +52,9 @@ func _test_docs_and_reports() -> void:
 	_assert(controller_text.contains("get_frontier_probe_mini_scenario_visual_feel_polish_snapshot"), "Controller exposes TASK_631 snapshot")
 	_assert(terrain_view_text.contains("route_callout_visual_count"), "Primary3D exposes route callout counters")
 	_assert(report_text.contains("TASK_631 Frontier Probe Mini Scenario Visual Feel Polish"), "Rolling report tracks TASK_631")
-	_assert(report_text.contains('latest_completed_task: "TASK_634 - Frontier Probe Real F6 Callout Sight Review"'), "Rolling report advances latest completed beyond TASK_631")
+	_assert(report_text.contains('latest_completed_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Rolling report advances latest completed beyond TASK_631")
 	_assert(handbook_text.contains("TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"), "Status handbook tracks TASK_631")
-	_assert(handbook_text.contains('current_task: "TASK_634 - Frontier Probe Real F6 Callout Sight Review"'), "Status handbook current task advances beyond TASK_631")
+	_assert(handbook_text.contains('current_task: "TASK_635 - Frontier Probe Callout Sight Findings"'), "Status handbook current task advances beyond TASK_631")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_mini_scenario_visual_feel_polish.task_id",
 		"frontier_probe_mini_scenario_visual_feel_polish.manifest_path",

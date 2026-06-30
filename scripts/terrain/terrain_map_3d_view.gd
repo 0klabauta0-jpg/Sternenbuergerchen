@@ -111,6 +111,19 @@ const DROPSHIP_TEXTURE_PIXEL_SIZE: float = 0.0152
 const STATUS_LABEL_PIXEL_SIZE: float = 0.018
 const STATUS_LABEL_HEIGHT: float = 1.16
 const ROUTE_CALLOUT_LABEL_BASE_OFFSET_WORLD: Vector2 = Vector2(0.0, -22.0)
+const ROUTE_CALLOUT_LABEL_VISUAL_STYLE_ID: String = "task_635_high_contrast_route_callouts"
+const ROUTE_CALLOUT_LABEL_FONT_SIZE: int = 18
+const ROUTE_CALLOUT_LABEL_PIXEL_SIZE: float = 0.023
+const ROUTE_CALLOUT_LABEL_OUTLINE_SIZE: int = 7
+const ROUTE_CALLOUT_LABEL_HEIGHT: float = 2.28
+const ROUTE_CALLOUT_LABEL_HEIGHT_STEP: float = 0.12
+const ROUTE_CALLOUT_MARKER_RADIUS: float = 0.46
+const ROUTE_CALLOUT_MARKER_HEIGHT: float = 0.12
+const ROUTE_CALLOUT_MARKER_SURFACE_OFFSET: float = 0.82
+const ROUTE_CALLOUT_ROUTE_LINE_WIDTH: float = 0.18
+const ROUTE_CALLOUT_ROUTE_LINE_HEIGHT: float = 0.92
+const MISSION_RESULT_ROUTE_CALLOUT_OFFSET_WORLD: Vector2 = Vector2(0.0, -96.0)
+const MISSION_RESULT_ROUTE_CALLOUT_FONT_SIZE: int = 18
 const MOVEMENT_LABEL_HEIGHT: float = 1.06
 const FIXED_CARD_YAW_DEGREES: float = 45.0
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
@@ -417,6 +430,7 @@ var _mission_status_payload: Dictionary = {}
 var _route_callout_entries: Array = []
 var _route_callout_tone_counts: Dictionary = {}
 var _route_callout_visual_count: int = 0
+var _route_callout_line_visual_count: int = 0
 var _fog_of_war_state: Dictionary = {}
 var _fog_of_war_mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
 var _fog_of_war_team_id: String = ""
@@ -1654,9 +1668,13 @@ func get_render_snapshot() -> Dictionary:
 		"mission_result_visible": _mission_result_visible,
 		"mission_result": String(_mission_status_payload.get("result", "")),
 		"route_callout_visual_count": _route_callout_visual_count,
+		"route_callout_line_visual_count": _route_callout_line_visual_count,
 		"route_callout_entries": _route_callout_entries.duplicate(true),
 		"route_callout_tone_counts": _route_callout_tone_counts.duplicate(true),
 		"route_callout_summary": String(_mission_status_payload.get("route_callout_summary", "")),
+		"route_callout_label_visual_style_id": ROUTE_CALLOUT_LABEL_VISUAL_STYLE_ID,
+		"route_callout_label_font_size": ROUTE_CALLOUT_LABEL_FONT_SIZE,
+		"route_callout_label_outline_size": ROUTE_CALLOUT_LABEL_OUTLINE_SIZE,
 		"has_lz": bool(_drop_payload.get("has_lz_position", false)),
 		"show_lz_marker": bool(_drop_payload.get("show_lz_marker", bool(_drop_payload.get("has_lz_position", false)))),
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
@@ -7061,6 +7079,7 @@ func _rebuild_status_visuals() -> void:
 	_route_callout_entries.clear()
 	_route_callout_tone_counts.clear()
 	_route_callout_visual_count = 0
+	_route_callout_line_visual_count = 0
 	if _status_root == null or _mission_status_payload.is_empty():
 		return
 	var objective_position_variant = _mission_status_payload.get("objective_position", null)
@@ -7117,7 +7136,15 @@ func _add_mission_result_visual(anchor_world_position: Vector2) -> void:
 		lines.append("Winner %s" % winning_team)
 	if not condition.is_empty():
 		lines.append(condition)
-	_add_label3d(_status_root, "\n".join(lines), _world_to_surface_3d_position(anchor_world_position, STATUS_LABEL_HEIGHT + 0.74), "MissionResultLabel3D", color, 22)
+	var label_world_position: Vector2 = anchor_world_position
+	var label_font_size: int = 22
+	var label_height: float = STATUS_LABEL_HEIGHT + 0.74
+	if not Array(_mission_status_payload.get("route_callouts", [])).is_empty():
+		label_world_position += MISSION_RESULT_ROUTE_CALLOUT_OFFSET_WORLD
+		label_font_size = MISSION_RESULT_ROUTE_CALLOUT_FONT_SIZE
+		label_height = STATUS_LABEL_HEIGHT + 1.36
+	var label: Label3D = _add_label3d(_status_root, "\n".join(lines), _world_to_surface_3d_position(label_world_position, label_height), "MissionResultLabel3D", color, label_font_size)
+	label.set_meta("route_callout_offset_applied", label_world_position != anchor_world_position)
 	_mission_result_visible = true
 
 
@@ -7153,14 +7180,12 @@ func _get_objective_status_color() -> Color:
 
 func _add_route_callout_visuals() -> void:
 	var route_callouts: Array = Array(_mission_status_payload.get("route_callouts", []))
+	var valid_callouts: Array = _get_valid_route_callout_dictionaries(route_callouts)
+	_add_route_callout_connection_visuals(valid_callouts)
 	var overlap_counts: Dictionary = _build_route_callout_overlap_counts(route_callouts)
 	var overlap_seen: Dictionary = {}
-	for callout_variant in route_callouts:
-		if typeof(callout_variant) != TYPE_DICTIONARY:
-			continue
+	for callout_variant in valid_callouts:
 		var callout: Dictionary = Dictionary(callout_variant)
-		if typeof(callout.get("world_position", null)) != TYPE_VECTOR2:
-			continue
 		var world_position: Vector2 = Vector2(callout.get("world_position", Vector2.ZERO))
 		var overlap_key: String = _build_route_callout_overlap_key(world_position)
 		var overlap_count: int = int(overlap_counts.get(overlap_key, 1))
@@ -7174,11 +7199,12 @@ func _add_route_callout_visuals() -> void:
 		var short_label: String = String(callout.get("short_label", "")).strip_edges()
 		if short_label.is_empty():
 			short_label = String(callout.get("label", callout_id)).strip_edges()
-		_add_marker3d(_status_root, world_position, Color(color.r, color.g, color.b, 0.66), "RouteCalloutMarker_%s" % _sanitize_node_name(callout_id), 0.34, 0.08, 24, 0.38)
+		_add_marker3d(_status_root, world_position, Color(color.r, color.g, color.b, 0.74), "RouteCalloutMarker_%s" % _sanitize_node_name(callout_id), ROUTE_CALLOUT_MARKER_RADIUS, ROUTE_CALLOUT_MARKER_HEIGHT, 28, ROUTE_CALLOUT_MARKER_SURFACE_OFFSET)
 		var label_offset_world: Vector2 = _get_route_callout_label_offset_world(overlap_index, overlap_count)
 		var label_world_position: Vector2 = world_position + label_offset_world
-		var label_height: float = STATUS_LABEL_HEIGHT + 0.34 + (float(overlap_index) * 0.045)
-		_add_label3d(_status_root, short_label, _world_to_surface_3d_position(label_world_position, label_height), "RouteCalloutLabel_%s" % _sanitize_node_name(callout_id), color, 14)
+		var label_height: float = ROUTE_CALLOUT_LABEL_HEIGHT + (float(overlap_index) * ROUTE_CALLOUT_LABEL_HEIGHT_STEP)
+		var label: Label3D = _add_label3d(_status_root, short_label, _world_to_surface_3d_position(label_world_position, label_height), "RouteCalloutLabel_%s" % _sanitize_node_name(callout_id), color.lightened(0.12), ROUTE_CALLOUT_LABEL_FONT_SIZE)
+		_apply_route_callout_label_style(label)
 		_route_callout_visual_count += 1
 		_route_callout_tone_counts[tone] = int(_route_callout_tone_counts.get(tone, 0)) + 1
 		_route_callout_entries.append({
@@ -7195,10 +7221,58 @@ func _add_route_callout_visuals() -> void:
 			"overlap_group_key": overlap_key,
 			"overlap_group_count": overlap_count,
 			"overlap_index": overlap_index,
+			"label_visual_style_id": ROUTE_CALLOUT_LABEL_VISUAL_STYLE_ID,
+			"label_font_size": ROUTE_CALLOUT_LABEL_FONT_SIZE,
+			"label_pixel_size": ROUTE_CALLOUT_LABEL_PIXEL_SIZE,
+			"label_outline_size": ROUTE_CALLOUT_LABEL_OUTLINE_SIZE,
 			"visual_priority": int(callout.get("visual_priority", _route_callout_visual_count)),
 			"read_only": true,
 			"ui_sets_gameplay_truth": false,
 		})
+
+
+func _get_valid_route_callout_dictionaries(route_callouts: Array) -> Array:
+	var result: Array = []
+	for callout_variant in route_callouts:
+		if typeof(callout_variant) != TYPE_DICTIONARY:
+			continue
+		var callout: Dictionary = Dictionary(callout_variant).duplicate(true)
+		if typeof(callout.get("world_position", null)) != TYPE_VECTOR2:
+			continue
+		result.append(callout)
+	return result
+
+
+func _add_route_callout_connection_visuals(route_callouts: Array) -> void:
+	if route_callouts.size() < 2:
+		return
+	for index in range(1, route_callouts.size()):
+		var previous_callout: Dictionary = Dictionary(route_callouts[index - 1])
+		var current_callout: Dictionary = Dictionary(route_callouts[index])
+		var start_world: Vector2 = Vector2(previous_callout.get("world_position", Vector2.ZERO))
+		var end_world: Vector2 = Vector2(current_callout.get("world_position", Vector2.ZERO))
+		if start_world.distance_squared_to(end_world) <= 1.0:
+			continue
+		var color: Color = _get_route_callout_color(String(current_callout.get("tone", "unknown")))
+		var line_color := Color(color.r, color.g, color.b, 0.58)
+		_add_wide_line3d(
+			_status_root,
+			_world_to_surface_3d_position(start_world, ROUTE_CALLOUT_ROUTE_LINE_HEIGHT),
+			_world_to_surface_3d_position(end_world, ROUTE_CALLOUT_ROUTE_LINE_HEIGHT),
+			line_color,
+			"RouteCalloutRouteLine_%d" % index,
+			ROUTE_CALLOUT_ROUTE_LINE_WIDTH
+		)
+		_route_callout_line_visual_count += 1
+
+
+func _apply_route_callout_label_style(label: Label3D) -> void:
+	if label == null:
+		return
+	label.pixel_size = ROUTE_CALLOUT_LABEL_PIXEL_SIZE
+	label.outline_size = ROUTE_CALLOUT_LABEL_OUTLINE_SIZE
+	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.98)
+	label.set_meta("route_callout_label_visual_style_id", ROUTE_CALLOUT_LABEL_VISUAL_STYLE_ID)
 
 
 func _build_route_callout_overlap_counts(route_callouts: Array) -> Dictionary:

@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_634 auf <code>task/frontier-probe-real-f6-callout-sight-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_635 auf <code>task/frontier-probe-callout-sight-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -298,7 +298,7 @@
       <span class="pill good">TASK_630 Mini-Szenario-Route</span>
       <span class="pill good">TASK_631 Route-Callouts</span>
       <span class="pill good">TASK_632 F6-Review-Paket</span>
-      <span class="pill good">TASK_634 Real-F6-Callout-Review</span>
+      <span class="pill good">TASK_635 Callout-Sicht-Findings</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2035,6 +2035,37 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_635 Frontier Probe Callout Sight Findings</h2>
+          <p>Der echte TASK_634-Viewport war der Beleg: Callouts waren technisch korrekt, aber im Missionsbild zu leise und mit dem Result-Label im Wettbewerb. TASK_635 macht die Route lesbarer: staerkere Labels, Verbindungslinien und ausweichender Result-Text.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Finding / Fix</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_635 - Frontier Probe Callout Sight Findings" data-export-key="frontier_probe_callout_sight_findings.task_id"></td><td>Aktueller Sicht-Polish-Slice.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_callout_sight_findings.json" data-export-key="frontier_probe_callout_sight_findings.manifest_path"></td><td>Lokales Verifier-Manifest.</td></tr>
+                <tr><td>Finding</td><td><input readonly value="real_f6_callouts_too_quiet_result_label_competes" data-export-key="frontier_probe_callout_sight_findings.finding"></td><td>Belegt aus echtem TASK_634-Viewport.</td></tr>
+                <tr><td>Style</td><td><input readonly value="task_635_high_contrast_route_callouts" data-export-key="frontier_probe_callout_sight_findings.label_visual_style_id"></td><td>High-Contrast-Route-Callout-Stil.</td></tr>
+                <tr><td>Route-Linien</td><td><input readonly value=">=3" data-export-key="frontier_probe_callout_sight_findings.route_line_count"></td><td>Route-Beats sind als Sequenz verbunden.</td></tr>
+                <tr><td>Font</td><td><input readonly value="18" data-export-key="frontier_probe_callout_sight_findings.label_font_size"></td><td>Groesser als bisheriger Callout-Text.</td></tr>
+                <tr><td>Outline</td><td><input readonly value="7" data-export-key="frontier_probe_callout_sight_findings.label_outline_size"></td><td>Staerker gegen helle Stationselemente.</td></tr>
+                <tr><td>Result Offset</td><td><input readonly value="true" data-export-key="frontier_probe_callout_sight_findings.mission_result_offset_applied"></td><td>Mission-Result weicht bei aktiver Route aus.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_callout_sight_findings.read_only"></td><td>Nur Visualpfad, keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_636 - Frontier Probe Real F6 Re-Capture" data-export-key="frontier_probe_callout_sight_findings.recommended_next_task"></td><td>Nachpolish im echten Fensterbild pruefen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_callout_sight_findings.high_contrast_labels"> High-Contrast-Labels aktiv</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_callout_sight_findings.route_lines_visible"> Route-Linien werden gezaehlt</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_callout_sight_findings.result_label_offset"> Result-Label weicht bei Route aus</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_callout_sight_findings.lz_cargo_still_separated"> LZ/CARGO bleiben getrennt</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_callout_sight_findings.real_recapture_done"> Echten Re-Capture nach Polish geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_635 Sicht-Finding-Notiz
+            <textarea data-note-key="notes.frontier_probe_callout_sight_findings" data-export-key="frontier_probe_callout_sight_findings.notes" placeholder="Beim Re-Capture notieren: Sind Linien/Labels jetzt lesbar, zu laut, verdeckt oder angenehm?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3019,7 +3050,8 @@
               "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish",
               "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review",
               "TASK_633 - Frontier Probe Callout Layout Polish",
-              "TASK_634 - Frontier Probe Real F6 Callout Sight Review"
+              "TASK_634 - Frontier Probe Real F6 Callout Sight Review",
+              "TASK_635 - Frontier Probe Callout Sight Findings"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3062,7 +3094,8 @@
               "TASK_631 macht LZ/AA/COM/CARGO als read-only Primary3D-Callouts sichtbar; echter F6-Sichtentscheid bleibt offen.",
               "TASK_632 macht den F6-Sichtentscheid als PNG/Manifest-Paket reviewbar; finaler menschlicher Fensterblick und konkrete Callout-Layout-Findings bleiben offen.",
               "TASK_633 staffelt LZ/CARGO-Labels am gemeinsamen spawn_alpha-Marker im Primary3D-Visualpfad; echter Fensterblick auf Zoom/Occlusion bleibt offen.",
-              "TASK_634 erzeugt PNG/Manifest fuer den echten F6-Callout-Sichtreview, markiert Headless sauber als Evidence-Board und laesst den menschlichen Fensterblick offen."
+              "TASK_634 erzeugt PNG/Manifest fuer den echten F6-Callout-Sichtreview, markiert Headless sauber als Evidence-Board und laesst den menschlichen Fensterblick offen.",
+              "TASK_635 wendet den echten Sichtbefund an: Route-Callouts sind kontrastreicher, hoeher, verbunden und das Result-Label weicht bei aktiver Route aus."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3071,14 +3104,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_634",
-            current_focus: "Frontier Probe Real F6 Callout Sight Review",
-            latest_completed_task: "TASK_634 - Frontier Probe Real F6 Callout Sight Review"
+            current_repo_base: "integration/core-foundation after TASK_635",
+            current_focus: "Frontier Probe Callout Sight Findings",
+            latest_completed_task: "TASK_635 - Frontier Probe Callout Sight Findings"
           },
           metadata: {
-            branch: "task/frontier-probe-real-f6-callout-sight-review",
-            integration_base: "integration/core-foundation after TASK_633",
-            head: "task/frontier-probe-real-f6-callout-sight-review",
+            branch: "task/frontier-probe-callout-sight-findings",
+            integration_base: "integration/core-foundation after TASK_634",
+            head: "task/frontier-probe-callout-sight-findings",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }
