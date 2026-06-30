@@ -4,6 +4,7 @@ extends RefCounted
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
+const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
 
 const CONTRACT_VERSION: int = 1
 const DEFAULT_CAPTURE_RADIUS: float = 80.0
@@ -62,6 +63,7 @@ var wave_config: Dictionary = {}
 var patrol_bindings: Array = []
 var tactical_authoring: Dictionary = {}
 var briefing: Dictionary = {}
+var vertical_slice: Dictionary = {}
 var notes: PackedStringArray = PackedStringArray()
 
 var _load_issues: PackedStringArray = PackedStringArray()
@@ -157,6 +159,8 @@ func to_dict() -> Dictionary:
 	var serialized_briefing: Dictionary = _serialize_briefing()
 	if _briefing_has_content(serialized_briefing):
 		data["briefing"] = serialized_briefing
+	if not vertical_slice.is_empty():
+		data["vertical_slice"] = vertical_slice.duplicate(true)
 	if not notes.is_empty():
 		data["notes"] = Array(notes)
 	return data
@@ -190,6 +194,7 @@ func validate() -> Dictionary:
 	_validate_patrol_bindings(terrain_map_data, enemy_ids, errors)
 	_validate_tactical_authoring(terrain_map_data, errors)
 	_validate_briefing(errors)
+	_validate_interaction_points(terrain_map_data, errors)
 
 	return {
 		"valid": errors.is_empty(),
@@ -255,6 +260,18 @@ func get_briefing() -> Dictionary:
 
 func get_briefing_recommended_loadout() -> Array:
 	return Array(get_briefing().get("recommended_loadout", [])).duplicate(true)
+
+
+func get_vertical_slice() -> Dictionary:
+	return vertical_slice.duplicate(true)
+
+
+func get_interaction_points() -> Array:
+	return Array(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("normalize_scenario_bindings", to_dict())).duplicate(true)
+
+
+func get_interaction_point_binding_snapshot(terrain_map_data = null, runtime_context: Dictionary = {}) -> Dictionary:
+	return Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("build_snapshot", to_dict(), terrain_map_data, runtime_context)).duplicate(true)
 
 
 func get_enemy_air_asset_threats(terrain_map_data = null) -> Array:
@@ -325,6 +342,7 @@ func _apply_dict(data: Dictionary) -> void:
 	patrol_bindings = _coerce_patrol_bindings(data.get("patrol_bindings", []))
 	tactical_authoring = _coerce_tactical_authoring(Dictionary(data.get("tactical_authoring", data.get("tactical_profile", {}))))
 	briefing = _coerce_briefing(data.get("briefing", data.get("mission_briefing", {})))
+	vertical_slice = _coerce_vertical_slice(data.get("vertical_slice", {}))
 	notes = _coerce_notes(data.get("notes", []))
 
 
@@ -426,6 +444,15 @@ func _validate_briefing(errors: PackedStringArray) -> void:
 			var weapon_id: String = String(weapon_id_variant).strip_edges()
 			if not bool(WEAPON_DATA_SCRIPT.call("is_valid_weapon_id", weapon_id)):
 				errors.append("briefing.recommended_loadout[%d].weapon_ids contains unknown weapon id: %s" % [loadout_index, weapon_id])
+
+
+func _validate_interaction_points(terrain_map_data, errors: PackedStringArray) -> void:
+	var bindings: Array = get_interaction_points()
+	if bindings.is_empty():
+		return
+	var validation: Dictionary = Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("validate_bindings", bindings, terrain_map_data))
+	for error_variant in PackedStringArray(validation.get("errors", PackedStringArray())):
+		errors.append("interaction_points.%s" % String(error_variant))
 
 
 func _validate_wave_config(errors: PackedStringArray) -> void:
@@ -611,6 +638,12 @@ func _coerce_briefing(value: Variant) -> Dictionary:
 	if _briefing_has_content(result) or _briefing_has_minimap_authoring(raw):
 		result["minimap_mode"] = minimap_mode
 	return result
+
+
+func _coerce_vertical_slice(value: Variant) -> Dictionary:
+	if typeof(value) != TYPE_DICTIONARY:
+		return {}
+	return Dictionary(value).duplicate(true)
 
 
 func _coerce_briefing_text_entries(value: Variant) -> Array:

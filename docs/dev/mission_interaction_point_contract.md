@@ -39,6 +39,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Computer-/Hold-Fortschritt muss aus der Mission-Runtime kommen und darf im HUD nur read-only angezeigt werden.
 - Multiplayer muss Host-/Server-Autoritaet behalten: Client-UI darf Interactions vorschlagen, aber nicht selbst committen.
 
+## Scenario Binding
+- Scenario-Dateien duerfen `vertical_slice.interaction_points` nutzen, um Marker, Step/Gate und Bedienart explizit zu verbinden.
+- `MissionInteractionPointBinding` normalisiert diese Bindings und kann bei fehlenden expliziten Bindings aus bekannten `vertical_slice.flow_steps` eine read-only Ableitung bauen.
+- Frontier Probe nutzt drei explizite Bindings: AA-Shutdown-Zone, Station-Computer und Cargo-Landing-Hold.
+- Der Binding-Snapshot liefert `available`, `blocked`, `in_progress` oder `complete` anhand vorhandener Runtime-Gates und optionaler Interaction-Runtime-Stati.
+- Der Snapshot darf fuer Debug, HUD-Preview und Verifier gelesen werden, setzt aber keinen Gate-, Door-, Computer- oder Objective-State.
+
 ## Preview und Lesbarkeit
 - Der Editor darf Door-/Computer-/Hold-Marker mit Symbol, Farbe und Label zeigen.
 - Die Mission darf Interactions als Objective-/Next-Interaction-Hinweis anzeigen.
@@ -54,6 +61,5 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 
 ## Naechste Slices
 - Editor-Inspector fuer Interaction-Point-Bindings.
-- Scenario-JSON-Binding fuer Door/Computer/Hold-Gates.
-- Mission-Runtime-Snapshot fuer nahe/bedienbar/in-progress/complete.
+- Runtime-Use-State fuer Naehe, Bedienzeit, Unterbrechung und Abschluss.
 - FullHD-Readability-Pass fuer Interaction-Labels im Missionsbild.

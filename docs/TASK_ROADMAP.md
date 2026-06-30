@@ -302,6 +302,7 @@ git checkout -b batch/<batch-name>
 - TASK_671 - Builder Chain Auto Snapping (implementiert)
 - TASK_672 - FullHD Drag Preview Art Direction (implementiert)
 - TASK_673 - Mission Interaction Point Contract (implementiert)
+- TASK_674 - Mission Interaction Point Bindings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

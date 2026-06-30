@@ -225,6 +225,51 @@
 				"requires_step_id": "disable_air_defense"
 			}
 		],
+		"interaction_points": [
+			{
+				"interaction_id": "aa_shutdown_zone",
+				"display_name": "AA Shutdown Zone",
+				"interaction_type": "hold_zone",
+				"marker_id": "factory_danger_zone",
+				"required_order": "take",
+				"duration_seconds": 0.0,
+				"radius_world": 160.0,
+				"required_team": "team_alpha",
+				"step_id": "disable_air_defense",
+				"gate_id": "disable_air_defense",
+				"required_state": "aa_disabled",
+				"asset_hint": "bravo_air_defense"
+			},
+			{
+				"interaction_id": "station_computer",
+				"display_name": "Station Computer",
+				"interaction_type": "computer",
+				"marker_id": "objective_point",
+				"required_order": "take",
+				"duration_seconds": 18.0,
+				"radius_world": 96.0,
+				"required_team": "team_alpha",
+				"step_id": "occupy_station_computer",
+				"gate_id": "occupy_station_computer",
+				"required_state": "computer_controlled",
+				"asset_hint": "station_computer_terminal"
+			},
+			{
+				"interaction_id": "cargo_landing_hold",
+				"display_name": "Cargo Landing Hold",
+				"interaction_type": "hold_zone",
+				"marker_id": "spawn_alpha",
+				"required_order": "defend",
+				"duration_seconds": 12.0,
+				"radius_world": 128.0,
+				"required_team": "team_alpha",
+				"step_id": "cargo_touchdown_extract",
+				"gate_id": "cargo_touchdown_extract",
+				"required_state": "cargo_departed",
+				"requires_step_id": "disable_air_defense",
+				"asset_hint": "frontier_cargo_freighter"
+			}
+		],
 		"runtime_gate_notes": [
 			"Slice ist Daten-/Contract-Vorbereitung; echte Runtime-Gates folgen separat.",
 			"Keine Spieler-LZ wird im Szenario gespeichert; der Frachtkorridor nutzt Map-Marker."
