@@ -504,6 +504,12 @@ TASK_646 macht nach TASK_645 die Dichte des gesamten Homebase-`MissionPanel` pru
 
 Erwartete Struktur: `HomebaseTestScreen.get_homebase_missionpanel_density_playfeel_snapshot()` liefert `schema = sternenbuergerchen.homebase_missionpanel_density_playfeel.v1`, `task_id = TASK_646`, `source_task_ids = [TASK_645, TASK_642]`, `gate`, `visible_readiness_gate = pass`, `mission_panel_rect`, `mission_child_max_bottom`, `vertical_fill_ratio`, `visible_section_count`, `visible_sections`, `total_visible_text_length`, `briefing_panel_visible = true`, `readiness_panel_visible = true`, `followup_panel_visible = true`, `key_section_order = briefing_readiness_followup`, `followup_panel_style_id = task_645_homebase_followup_panel_v1`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`. Das lokale Manifest `tmp/homebase_missionpanel_density_playfeel_review.json` darf diese Werte fuer HTML-/Playtest-Notizen exportieren.
 
+## Homebase-MissionPanel-Density-Findings (TASK_647)
+
+TASK_647 wendet die belegte Dichte-Reibung aus TASK_646 schmal an: Wenn nach Frontier-Probe-Debrief der neue `PostDebriefFollowupPanel` sichtbar ist, darf die alte `MissionSummaryLabel` als Legacy-Zeile kollabiert werden. Der Follow-up-Block ist dann die sichtbare Rueckkehr-Erzaehlung. Ausserhalb dieses Post-Debrief-Follow-up-Zustands bleibt die MissionSummary normal sichtbar.
+
+Erwartete Struktur: Der bestehende Snapshot `get_homebase_missionpanel_density_playfeel_snapshot()` bleibt stabil und ergaenzt `mission_summary_visible`, `mission_summary_collapsed`, `density_findings_style_id = task_647_homebase_density_findings_v1` und das Gate `density_warning_reduced`. Der Task reduziert sichtbare Direktsektionen und Textmenge, setzt aber weiterhin keine Navigation, keinen Start-Commit, kein Staging, kein MissionResult und keine Gameplay-Wahrheit. Die vertikale Fuellung bleibt ein Review-Warnwert fuer den echten Fensterblick.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

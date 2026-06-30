@@ -53,6 +53,7 @@ const HOMEBASE_ROSTER_SORT_PILOT_ASC := "pilot_asc"
 const HOMEBASE_ROSTER_SORT_XP_DESC := "xp_desc"
 const HOMEBASE_ROSTER_SORT_NAME_ASC := "name_asc"
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID := "task_645_homebase_followup_panel_v1"
+const HOMEBASE_POST_DEBRIEF_DENSITY_FINDINGS_STYLE_ID := "task_647_homebase_density_findings_v1"
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE := 12
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 70.0
 const HOMEBASE_ROSTER_SORT_OPTIONS: Array = [
@@ -496,6 +497,7 @@ func get_homebase_missionpanel_density_playfeel_snapshot() -> Dictionary:
 	var visible_snapshot: Dictionary = get_frontier_probe_homebase_visible_readiness_review_snapshot()
 	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
 	var mission_vbox := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as Control
+	var mission_summary_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel") as Label
 	var briefing_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel") as Control
 	var readiness_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel") as Control
 	var followup_panel := _get_post_debrief_followup_panel()
@@ -507,6 +509,10 @@ func get_homebase_missionpanel_density_playfeel_snapshot() -> Dictionary:
 	var visible_sections: Array = _build_missionpanel_density_sections(mission_vbox, mission_rect)
 	var visible_section_count: int = visible_sections.size()
 	var total_text_length: int = _collect_visible_text_length(mission_vbox)
+	var mission_summary_collapsed: bool = mission_summary_label != null and bool(mission_summary_label.get_meta("homebase_density_summary_collapsed", false))
+	var density_findings_style_id: String = ""
+	if mission_summary_label != null:
+		density_findings_style_id = String(mission_summary_label.get_meta("homebase_density_findings_style_id", ""))
 	var vertical_fill_ratio: float = 0.0
 	if mission_rect.size.y > 0.0:
 		vertical_fill_ratio = maxf(0.0, child_max_bottom - mission_rect.position.y) / mission_rect.size.y
@@ -524,6 +530,8 @@ func get_homebase_missionpanel_density_playfeel_snapshot() -> Dictionary:
 	_append_visual_audit_check(checks, "vertical_density_budget", vertical_fill_ratio <= 0.96, "warning", "MissionPanel is close to full height and should be checked in a real window.")
 	_append_visual_audit_check(checks, "text_density_budget", total_text_length <= 1200, "warning", "MissionPanel visible text is close to the scanability budget and should be checked in a real window.")
 	_append_visual_audit_check(checks, "followup_polish_present", String(visible_snapshot.get("followup_panel_style_id", "")) == HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID, "critical", "TASK_645 follow-up polish should remain present.")
+	_append_visual_audit_check(checks, "density_findings_applied", mission_summary_collapsed and density_findings_style_id == HOMEBASE_POST_DEBRIEF_DENSITY_FINDINGS_STYLE_ID, "critical", "Post-Debrief Homebase should collapse the legacy MissionSummary line when the follow-up panel is active.")
+	_append_visual_audit_check(checks, "density_warning_reduced", mission_summary_collapsed and visible_section_count <= 6 and total_text_length <= 1200, "critical", "TASK_647 should reduce scan pressure by collapsing duplicate text and one visible section.")
 	_append_visual_audit_check(checks, "read_only", bool(visible_snapshot.get("read_only", false)) and not bool(visible_snapshot.get("ui_sets_gameplay_truth", true)), "critical", "Density review should read existing Homebase state only.")
 	var failed_count: int = _count_visual_audit_failures(checks, "critical")
 	return {
@@ -544,6 +552,9 @@ func get_homebase_missionpanel_density_playfeel_snapshot() -> Dictionary:
 		"briefing_panel_visible": _control_is_visible(briefing_panel),
 		"readiness_panel_visible": _control_is_visible(readiness_panel),
 		"followup_panel_visible": _control_is_visible(followup_panel),
+		"mission_summary_visible": _control_is_visible(mission_summary_label),
+		"mission_summary_collapsed": mission_summary_collapsed,
+		"density_findings_style_id": density_findings_style_id,
 		"briefing_panel_rect": _rect_to_dict(briefing_rect),
 		"readiness_panel_rect": _rect_to_dict(readiness_rect),
 		"followup_panel_rect": _rect_to_dict(followup_rect),
@@ -559,7 +570,7 @@ func get_homebase_missionpanel_density_playfeel_snapshot() -> Dictionary:
 		"creates_command": false,
 		"visual_only": true,
 		"checks": checks,
-		"recommended_next_task": "TASK_647 - Homebase MissionPanel Density Findings only if real-window friction or warning pressure remains",
+		"recommended_next_task": "TASK_648 - Continue Homebase/Core-Loop Playfeel only after real-window review confirms the panel reads cleanly",
 	}
 
 
@@ -2967,6 +2978,7 @@ func _update_mission_info() -> void:
 	_update_mission_briefing_panel()
 	_update_pre_mission_readiness_panel()
 	_update_next_sortie_readiness_summary()
+	_apply_post_debrief_density_findings()
 
 
 func _update_personnel_notifications() -> void:
@@ -3144,6 +3156,22 @@ func _sync_post_debrief_followup_panel_visibility() -> void:
 	var post_intends_visible: bool = post_label != null and post_label.visible and not post_label.text.strip_edges().is_empty()
 	var readiness_intends_visible: bool = readiness_label != null and readiness_label.visible and not readiness_label.text.strip_edges().is_empty()
 	panel.visible = post_intends_visible or readiness_intends_visible
+	_apply_post_debrief_density_findings()
+
+
+func _apply_post_debrief_density_findings() -> void:
+	var summary_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel") as Label
+	if summary_label == null:
+		return
+	var followup_panel := _get_post_debrief_followup_panel()
+	var should_collapse: bool = _is_frontier_probe_last_result() and _control_is_visible(followup_panel)
+	summary_label.set_meta("homebase_density_summary_collapsed", should_collapse)
+	summary_label.set_meta("homebase_density_findings_style_id", HOMEBASE_POST_DEBRIEF_DENSITY_FINDINGS_STYLE_ID if should_collapse else "")
+	if should_collapse:
+		summary_label.visible = false
+		summary_label.tooltip_text = "Collapsed while the post-Debrief follow-up panel carries the result and next sortie."
+		return
+	summary_label.visible = true
 
 
 func _build_post_debrief_followup_panel_style() -> StyleBoxFlat:

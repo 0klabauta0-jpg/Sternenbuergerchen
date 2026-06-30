@@ -275,6 +275,7 @@ git checkout -b batch/<batch-name>
 - TASK_644 - Frontier Probe Homebase Real Window Review (implementiert)
 - TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish (implementiert)
 - TASK_646 - Homebase MissionPanel Density Playfeel Review (implementiert)
+- TASK_647 - Homebase MissionPanel Density Findings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

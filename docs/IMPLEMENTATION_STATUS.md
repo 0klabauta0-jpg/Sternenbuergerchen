@@ -433,6 +433,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_646_homebase_missionpanel_density_playfeel_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_645_frontier_probe_homebase_summary_next_sortie_polish.gd`, `git diff --check`.
 - Naechster Schritt: Echten Homebase-Fensterblick mit TASK_646-Manifest gegenpruefen; nur bei sichtbarer Dichte-Reibung TASK_647 als Layout-Findings-Slice schneiden.
 
+### TASK_647 - Homebase MissionPanel Density Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_647_homebase_missionpanel_density_findings.md`, `docs/tasks/TASK_646_homebase_missionpanel_density_playfeel_review.md`, `docs/tasks/TASK_645_frontier_probe_homebase_summary_next_sortie_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`, `docs/reports/project_state_handbook_2026_06_30.html`
+- Stand: Der Post-Debrief-Follow-up-Block bleibt die sichtbare Rueckkehr-Erzaehlung; die alte `MissionSummaryLabel` wird nur in diesem Zustand als Legacy-Zeile kollabiert.
+- Stand: `HomebaseTestScreen.get_homebase_missionpanel_density_playfeel_snapshot()` exportiert zusaetzlich `mission_summary_collapsed`, `density_findings_style_id` und das Gate `density_warning_reduced`.
+- Stand: `scripts/tests/task_647_homebase_missionpanel_density_findings.gd` erzeugt `tmp/homebase_missionpanel_density_findings.json` mit 6 sichtbaren Direktsektionen, 971 sichtbaren Textzeichen und read-only-Grenzen.
+- Risiken/offen: Die vertikale Panel-Fuellung bleibt wegen Container-Bottom nahe voll und wird weiter als Review-Wert protokolliert; der echte Fensterblick entscheidet, ob daran noch layoutseitig gearbeitet werden muss.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_647_homebase_missionpanel_density_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_646_homebase_missionpanel_density_playfeel_review.gd`, `git diff --check`.
+- Naechster Schritt: Echten Homebase-Fensterblick mit TASK_647-Manifest ansehen; danach wieder breiter auf Core-Loop-/Playfeel-Fortschritt gehen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
