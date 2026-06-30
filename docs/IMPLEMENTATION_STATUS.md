@@ -484,6 +484,16 @@
 - Lokale Pruefung: `launch_host_client_two_window_review.ps1`, `capture_host_client_two_window_real_run.ps1`, `task_651_host_client_click_followup_evidence.gd`, `task_626_host_client_real_click_review_evidence.gd`, `task_629_host_client_real_click_playtest_evidence_pass.gd`, `git diff --check`.
 - Naechster Schritt: Echten Host/Client-Klicklauf mit `USE BRAVO` ansehen oder wieder auf Frontier-Probe-/Mini-Szenario-Spielbarkeit wechseln.
 
+### TASK_652 - Current State Handbook Refresh
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_652_current_state_handbook_refresh.md`, `docs/tasks/TASK_651_host_client_click_followup_evidence.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Der aktuelle Iststand-/Handbuchreport nennt TASK_651 als letzten Stand und fuehrt `USE BRAVO`-Follow-up-Evidence als erledigten Multiplayer-Arbeitsstand.
+- Stand: Der Bericht empfiehlt `TASK_653 - Frontier Probe One-Screen Playability Pass`, damit der naechste Schritt wieder ein kleines spielbares Szenario statt weiterer reiner Evidence ist.
+- Stand: Der JSON-Export enthaelt `updated_for_task = TASK_652` und bleibt ein read-only Workbench-Export.
+- Risiken/offen: TASK_652 aendert keinen Gameplay-Code. TASK_653 ist eine Empfehlung und muss als eigener Gameplay-Slice angelegt werden, wenn wir damit weitermachen.
+- Lokale Pruefung: `task_652_current_state_handbook_refresh.gd`, `task_649_current_state_handbook_report.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_653 - Frontier Probe One-Screen Playability Pass` als kleiner echter Spielbarkeitsdurchlauf.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
