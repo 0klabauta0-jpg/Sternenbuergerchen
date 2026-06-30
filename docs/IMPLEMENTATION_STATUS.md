@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_702 - Door Authority Compact HUD Surface
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_702_door_authority_compact_hud_surface.md`, `docs/tasks/TASK_701_door_authority_feedback_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Die sichtbare Mission-Command-Feedback-Zeile bevorzugt jetzt `compact_line` und faellt auf `summary_line` zurueck.
+- Stand: `get_command_feedback_snapshot()` exportiert `mission_interaction_door_authority_visible_line` fuer Tests, Reports und spaetere UI-Sichtentscheide.
+- Stand: Der Verifier prueft die kompakte Ready-Zeile im echten Mission-Scene-Command-Feedback.
+- Risiken/offen: Der echte Host/Client-Fensterklicktest bleibt offen; diese Surface-Aenderung reduziert nur Leselast und Overlap-Risiko.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_702_door_authority_compact_hud_surface.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_701_door_authority_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_698_door_authority_ui_feedback.gd`, `git diff --check`.
+- Naechster Schritt: TASK_703 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
+
 ### TASK_701 - Door Authority Feedback Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_701_door_authority_feedback_polish.md`, `docs/tasks/TASK_700_host_client_door_real_click_workbench.md`, `docs/tasks/TASK_698_door_authority_ui_feedback.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
@@ -18,7 +28,7 @@
 - Stand: Der TacticalController reicht die neuen Felder an Button-Snapshots und Command-Feedback weiter.
 - Risiken/offen: Der echte Host/Client-Klicklauf bleibt manuell offen; TASK_701 verbessert die erwartete Lesbarkeit vor dem Sichtentscheid.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_701_door_authority_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_698_door_authority_ui_feedback.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_699_multiplayer_door_feedback_capture.gd`, `git diff --check`.
-- Naechster Schritt: TASK_702 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
+- Naechster Schritt: TASK_703 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
 
 ### TASK_700 - Host/Client Door Real Click Workbench
 - Status: implementiert im Arbeitsstand
@@ -28,7 +38,7 @@
 - Stand: Die Workbench exportiert lokale JSON-Notizen zu Host, Client, Reject, Door-Open, Timing und naechster Polish-Aktion.
 - Risiken/offen: Der echte Zwei-Fenster-Klicklauf ist weiterhin manuell offen; TASK_700 macht ihn reproduzierbar notierbar, behauptet ihn aber nicht.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_700_host_client_door_real_click_workbench.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_699_multiplayer_door_feedback_capture.gd`, `git diff --check`.
-- Naechster Schritt: TASK_702 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
+- Naechster Schritt: TASK_703 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
 
 ### TASK_699 - Multiplayer Door Feedback Capture
 - Status: implementiert im Arbeitsstand

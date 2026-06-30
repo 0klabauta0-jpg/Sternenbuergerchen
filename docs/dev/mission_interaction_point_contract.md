@@ -209,6 +209,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Ready/Accepted/Open muessen kurz bleiben: Ready nennt Shortcut plus GO, Accepted nennt Host/Runtime-Progress, Open nennt Runtime-Override.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Door Authority Compact HUD Surface
+- Die sichtbare Mission-Command-Feedback-Zeile darf `mission_interaction_door_authority_ui_feedback.compact_line` bevorzugen.
+- Wenn `compact_line` fehlt, muss sie auf `summary_line` zurueckfallen, damit alte Snapshots lesbar bleiben.
+- Pending ohne nutzbare Door bleibt im Command-Feedback unsichtbar, um HUD-Rauschen zu vermeiden.
+- `get_command_feedback_snapshot()` exportiert die tatsaechlich sichtbare Door-Zeile als `mission_interaction_door_authority_visible_line`.
+- Diese Surface-Zeile bleibt Anzeige und darf keine Door-, Terrain-, Command- oder Multiplayer-Wahrheit setzen.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

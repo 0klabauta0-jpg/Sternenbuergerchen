@@ -17175,6 +17175,9 @@ func _build_visible_door_authority_command_line() -> String:
 	var status: String = String(feedback.get("status", "")).strip_edges().to_lower()
 	if status == "pending" and not bool(feedback.get("has_usable_door", false)):
 		return ""
+	var compact_line: String = String(feedback.get("compact_line", "")).strip_edges()
+	if not compact_line.is_empty():
+		return compact_line
 	return String(feedback.get("summary_line", "")).strip_edges()
 
 
@@ -18334,6 +18337,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_door_authority_ui_status": String(mission_interaction_door_authority_ui_feedback.get("status", "")),
 		"mission_interaction_door_authority_ui_line": String(mission_interaction_door_authority_ui_feedback.get("summary_line", "")),
 		"mission_interaction_door_authority_ui_compact_line": String(mission_interaction_door_authority_ui_feedback.get("compact_line", "")),
+		"mission_interaction_door_authority_visible_line": _build_visible_door_authority_command_line(),
 		"mission_interaction_door_authority_ui_player_hint": String(mission_interaction_door_authority_ui_feedback.get("player_hint", "")),
 		"mission_interaction_door_authority_ui_next_action": String(mission_interaction_door_authority_ui_feedback.get("next_action", "")),
 		"mission_interaction_door_authority_ui_severity": String(mission_interaction_door_authority_ui_feedback.get("severity", "")),
