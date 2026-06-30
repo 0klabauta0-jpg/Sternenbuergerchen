@@ -277,6 +277,7 @@ git checkout -b batch/<batch-name>
 - TASK_646 - Homebase MissionPanel Density Playfeel Review (implementiert)
 - TASK_647 - Homebase MissionPanel Density Findings (implementiert)
 - TASK_648 - Homebase Next Sortie Action Cue (implementiert)
+- TASK_649 - Current State Handbook Report (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
