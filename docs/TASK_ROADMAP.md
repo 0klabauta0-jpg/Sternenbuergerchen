@@ -323,6 +323,7 @@ git checkout -b batch/<batch-name>
 - TASK_692 - Door Runtime Collision/LOS Contract (implementiert)
 - TASK_693 - Door Runtime State Producer (implementiert)
 - TASK_694 - Door Use/Breach Command Hook (implementiert)
+- TASK_695 - Door Interaction HUD Button/Shortcut (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
