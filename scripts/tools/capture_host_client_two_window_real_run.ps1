@@ -475,6 +475,46 @@ $manifest = [ordered]@{
         "hud_feedback_readable",
         "workbench_notes_exported"
     )
+    station_route_host_client_acceptance_task_id = "TASK_712"
+    station_route_source_visual_evidence_task_id = "TASK_708"
+    station_route_source_window_notes_task_id = "TASK_709"
+    station_route_source_readiness_task_id = "TASK_710"
+    station_route_visual_evidence_manifest_path = "tmp/station_route_visual_evidence.json"
+    station_route_window_notes_workbench_path = "docs/reports/station_route_window_playtest_notes_2026_07_01.html"
+    station_route_window_notes_manifest_path = "tmp/station_route_window_playtest_notes.json"
+    station_route_readiness_manifest_path = "tmp/station_route_polish_readiness_findings.json"
+    station_route_expected_sequence = @(
+        "door_open",
+        "computer_controlled",
+        "cargo_departed"
+    )
+    station_route_expected_door_line = "DOOR DOOR OPEN"
+    station_route_expected_computer_line = "COMPUTER CONTROLLED"
+    station_route_expected_cargo_line = "CARGO DEPARTED"
+    station_route_expected_wrong_team_reason = "peer_team_mismatch"
+    station_route_expected_snapshot_sync = "client_snapshot_apply_accepted"
+    station_route_expected_hud_surfaces = @(
+        "mission_interaction_door_authority_visible_line",
+        "mission_interaction_objective_next_line",
+        "mission_interaction_command_feedback_line"
+    )
+    station_route_host_client_acceptance_review_required = $true
+    station_route_host_client_acceptance_review_done = $false
+    station_route_host_client_acceptance_gate = $(if ($visibleRejectReviewReady) { "review_ready" } else { "manual_open" })
+    station_route_host_client_manual_checks = @(
+        "host_window_launched",
+        "client_window_launched",
+        "host_station_route_visible",
+        "client_station_route_visible",
+        "door_open_visible_on_host",
+        "door_open_visible_on_client",
+        "computer_control_visible_after_door",
+        "cargo_departed_visible_after_computer",
+        "wrong_team_reject_visible",
+        "snapshot_sync_after_each_step",
+        "hud_feedback_readable",
+        "window_notes_exported"
+    )
     close_after_capture = [bool]$CloseAfterCapture
     wait_seconds = $WaitSeconds
     planned_godot_bin = $plannedGodotBin
@@ -518,6 +558,14 @@ $manifest = [ordered]@{
         "door_real_click_wrong_team_reject",
         "door_real_click_open_visible_host_client",
         "door_real_click_hud_readable",
+        "station_route_host_window_visible",
+        "station_route_client_window_visible",
+        "station_route_door_open_host_client",
+        "station_route_computer_control_visible",
+        "station_route_cargo_departed_visible",
+        "station_route_wrong_team_reject",
+        "station_route_snapshot_sync",
+        "station_route_window_notes_exported",
         "input_latency_after_reject",
         "f6_readability",
         "performance_feel",
@@ -531,6 +579,8 @@ $manifest = [ordered]@{
     recommended_next_decision_drill_capture_task = "TASK_663 - Host Client Decision Drill Visual Findings"
     recommended_next_door_real_click_manual_run_task = "TASK_705 - Host/Client Door Real Click Manual Run Packet"
     recommended_next_door_real_click_after_manual_task = "TASK_706 - Mission Door Layout/Visual Polish"
+    recommended_next_station_route_host_client_acceptance_task = "TASK_712 - Station Route Host/Client Acceptance Packet"
+    recommended_next_station_route_after_acceptance_task = "TASK_713 - Station Route Host/Client Findings"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8

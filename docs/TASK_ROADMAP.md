@@ -340,6 +340,7 @@ git checkout -b batch/<batch-name>
 - TASK_709 - Station Route Window Playtest Notes (implementiert)
 - TASK_710 - Station Route Polish Readiness Findings (implementiert)
 - TASK_711 - Station Route Evidence Board Visual Polish (implementiert)
+- TASK_712 - Station Route Host/Client Acceptance Packet (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
