@@ -164,6 +164,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Render-Snapshots duerfen Door-Visualfelder fuer Tests, Reports und Playtestnotizen exportieren; `door_visual_sets_gameplay_truth = false` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 - Ein echter FullHD-Sichtentscheid fuer Groesse, Lesbarkeit und HUD-Overlap bleibt ein separater manueller Review-Slice.
 
+## Door Interaction Multiplayer Authority Check
+- Der Door-Breach-Hook darf fuer Netzwerkpruefung in einen `commander_command` mit `command_type = take` projiziert werden.
+- Der Command darf `interaction_id`, `interaction_type`, `required_order`, `door_runtime_hook`, `door_runtime_state_target`, `door_runtime_producer` und `requires_go` als Metadaten tragen.
+- Der Command darf keine verbotenen State-Mutationsfelder wie `runtime_state`, `runtime_status`, `position`, `global_position`, `visible` oder direkte Door-/Terrain-Wahrheit enthalten.
+- `SimulationRoot.submit_network_command_for_peer()` und `MultiplayerCommandContract` bleiben die Autoritaet fuer Own-Team-Accept, Wrong-Team-Reject und State-Mutation-Reject.
+- Clients/Button/Shortcut/GO duerfen nur Commands anstossen; die Door wird erst durch Runtime-Progress plus `MissionInteractionDoorRuntimeCollisionLOS` effektiv walkable und LOS-offen.
+- `get_mission_interaction_door_multiplayer_authority_snapshot()` und `get_command_feedback_snapshot()` duerfen den technischen Authority-Status read-only exportieren.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht; der Snapshot ist Beweis-/Reportdaten, kein Gameplay-Mutator.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

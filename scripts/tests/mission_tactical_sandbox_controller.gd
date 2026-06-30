@@ -59,6 +59,7 @@ const MISSION_INTERACTION_OBJECTIVE_GATE_SCRIPT: GDScript = preload("res://scrip
 const MISSION_INTERACTION_VISUAL_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_visual_state.gd")
 const MISSION_INTERACTION_OBJECT_REACTION_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_object_reaction.gd")
 const MISSION_INTERACTION_DOOR_RUNTIME_COLLISION_LOS_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_runtime_collision_los.gd")
+const MISSION_INTERACTION_DOOR_MULTIPLAYER_AUTHORITY_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_multiplayer_authority.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
@@ -17069,6 +17070,33 @@ func get_mission_interaction_door_use_breach_command_hook_snapshot() -> Dictiona
 	return _last_mission_interaction_door_use_breach_hook_snapshot.duplicate(true)
 
 
+func build_mission_interaction_door_multiplayer_network_command(unit_id: String = "", team_id: String = FRIENDLY_TEAM_ID, target_position: Variant = null) -> Dictionary:
+	return Dictionary(MISSION_INTERACTION_DOOR_MULTIPLAYER_AUTHORITY_SCRIPT.call(
+		"build_network_command_from_hook",
+		get_mission_interaction_door_use_breach_command_hook_snapshot(),
+		unit_id,
+		team_id,
+		target_position
+	)).duplicate(true)
+
+
+func get_mission_interaction_door_multiplayer_authority_snapshot(authority_results: Dictionary = {}) -> Dictionary:
+	var network_snapshot: Dictionary = {}
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("get_network_command_contract_snapshot"):
+		network_snapshot = Dictionary(simulation_root.call("get_network_command_contract_snapshot")).duplicate(true)
+	var door_runtime_snapshot: Dictionary = get_last_mission_interaction_door_runtime_collision_los_snapshot()
+	if door_runtime_snapshot.is_empty():
+		door_runtime_snapshot = get_mission_interaction_door_runtime_collision_los_snapshot()
+	return Dictionary(MISSION_INTERACTION_DOOR_MULTIPLAYER_AUTHORITY_SCRIPT.call(
+		"build_snapshot",
+		get_mission_interaction_door_use_breach_command_hook_snapshot(),
+		network_snapshot,
+		door_runtime_snapshot,
+		authority_results
+	)).duplicate(true)
+
+
 func create_selected_mission_interaction_door_use_breach_command_hook(interaction_id: String = "") -> Dictionary:
 	var feedback_snapshot: Dictionary = get_mission_interaction_use_feedback_snapshot()
 	var interaction_feedback: Dictionary = _resolve_mission_interaction_feedback_for_intent(feedback_snapshot, interaction_id)
@@ -18132,6 +18160,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var mission_interaction_progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot(mission_interaction_use_feedback)
 	var mission_interaction_use_intent: Dictionary = get_mission_interaction_use_intent_snapshot()
 	var mission_interaction_door_use_breach_hook: Dictionary = get_mission_interaction_door_use_breach_command_hook_snapshot()
+	var mission_interaction_door_multiplayer_authority: Dictionary = get_mission_interaction_door_multiplayer_authority_snapshot()
 	var mission_interaction_objective_gate: Dictionary = get_mission_interaction_objective_gate_snapshot()
 	var mission_interaction_visual_state: Dictionary = Dictionary(MISSION_INTERACTION_VISUAL_STATE_SCRIPT.call(
 		"build_snapshot",
@@ -18215,6 +18244,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_door_use_breach_command_hook": mission_interaction_door_use_breach_hook,
 		"mission_interaction_door_use_breach_command_hook_accepted": bool(mission_interaction_door_use_breach_hook.get("accepted", false)),
 		"mission_interaction_door_use_breach_command_hook_line": String(mission_interaction_door_use_breach_hook.get("last_command_text", "")),
+		"mission_interaction_door_multiplayer_authority": mission_interaction_door_multiplayer_authority,
+		"mission_interaction_door_multiplayer_authority_gate": String(mission_interaction_door_multiplayer_authority.get("gate", "")),
+		"mission_interaction_door_multiplayer_authority_summary": String(mission_interaction_door_multiplayer_authority.get("summary", "")),
 		"mission_interaction_objective_gate": mission_interaction_objective_gate,
 		"mission_interaction_objective_next_line": String(mission_interaction_objective_gate.get("next_line", "")),
 		"mission_interaction_objective_next_step_id": String(mission_interaction_objective_gate.get("next_step_id", "")),
