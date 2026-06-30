@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_666 - Host Client Decision Drill Real Click Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_666_host_client_decision_drill_real_click_findings.md`, `docs/tasks/TASK_665_host_client_decision_drill_technical_click_guard.md`, `docs/tasks/TASK_664_host_client_decision_drill_real_click_recheck.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `scripts/tests/task_666_host_client_decision_drill_real_click_findings.gd` schreibt `tmp/host_client_decision_drill_real_click_findings.json` als read-only Findings-Gate.
+- Stand: Das Findings-Manifest trennt belegte technische Fakten (`peer2_bravo`, `peer_team_mismatch`, `USE BRAVO`, `P2 BRAVO`, `NEXT AA`, Preview, GO/Execution) von offenen menschlichen Klickbeobachtungen.
+- Stand: `manual_click_findings_gate = manual_still_open` bleibt bewusst gesetzt, solange kein echter menschlicher Zwei-Fenster-Klickbefund eingetragen ist.
+- Risiken/offen: TASK_666 ist kein bestandener Multiplayer-Playtest. Der echte Fensterklick bleibt offen; autonome Folgearbeit kann sinnvoll bei Mission-Interaction-Progress-Sichtbarkeit weitermachen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_666_host_client_decision_drill_real_click_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_665_host_client_decision_drill_technical_click_guard.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_685 - Mission Interaction Progress FullHD Sight Pass` oder ein echter menschlicher Zwei-Fenster-Klicklauf mit ausgefuellten TASK_666-Notizen.
+
 ### TASK_684 - Map Editor Interaction Focus Scroll
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_684_map_editor_interaction_focus_scroll.md`, `docs/tasks/TASK_683_map_editor_interaction_fullhd_sight_pass.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`

@@ -294,7 +294,7 @@ git checkout -b batch/<batch-name>
 - TASK_663 - Host Client Decision Drill Visual Findings (implementiert)
 - TASK_664 - Host Client Decision Drill Real Click Recheck (implementiert)
 - TASK_665 - Host Client Decision Drill Technical Click Guard (implementiert)
-- TASK_666 - Host Client Decision Drill Real Click Findings (geplant)
+- TASK_666 - Host Client Decision Drill Real Click Findings (implementiert)
 - TASK_667 - Map Editor Persistent Palette Presets (implementiert)
 - TASK_668 - Map Editor Asset Scale Override Presets (implementiert)
 - TASK_669 - Map Editor Placement Rotation Overrides (implementiert)
@@ -313,6 +313,7 @@ git checkout -b batch/<batch-name>
 - TASK_682 - Mission Interaction Binding Presets (implementiert)
 - TASK_683 - Map Editor Interaction FullHD Sight Pass (implementiert)
 - TASK_684 - Map Editor Interaction Focus Scroll (implementiert)
+- TASK_685 - Mission Interaction Progress FullHD Sight Pass (geplant)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
