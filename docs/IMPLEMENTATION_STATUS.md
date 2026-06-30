@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_690 - Mission Interaction Manual Sight Notes
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_690_mission_interaction_manual_sight_notes.md`, `docs/tasks/TASK_689_mission_interaction_visual_polish_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/mission_interaction_manual_sight_notes_2026_06_30.html`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionManualSightNotes` erzeugt einen read-only Snapshot fuer den offenen echten FullHD-Sichtlauf und haelt Required-Checks, Notizfelder, Quellen und naechste Task-Empfehlung fest.
+- Stand: Der TASK_690-Verifier schreibt `tmp/mission_interaction_manual_sight_notes.json` und prueft Task, Contract, Roadmap, Handbuch und interaktive HTML-Workbench.
+- Stand: Die Workbench sammelt echte Fensterbeobachtung zu Labels, Objekt-Proxies, HUD-Overlap, Groessenwirkung und naechster Polish-Aktion mit lokalem `JSON exportieren`.
+- Risiken/offen: Der manuelle Sichtlauf ist damit erfassbar, aber weiterhin nicht erledigt. `manual_review_done` bleibt bewusst false.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_690_mission_interaction_manual_sight_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_689_mission_interaction_visual_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_691 - Mission Interaction Manual Sight Review oder gezielter Visual-Polish, sobald echte Fensterbeobachtung exportiert wurde.
+
 ### TASK_689 - Mission Interaction Visual Polish Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_689_mission_interaction_visual_polish_findings.md`, `docs/tasks/TASK_688_mission_interaction_fullhd_evidence.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
