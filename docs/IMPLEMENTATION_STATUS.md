@@ -505,6 +505,16 @@
 - Lokale Pruefung: `task_653_frontier_probe_one_screen_playability_pass.gd`, `task_630_frontier_probe_mini_scenario_feel_route.gd`, `task_637_frontier_probe_playfeel_next_interaction.gd`, `task_638_frontier_probe_debrief_handoff_feel.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_654 - Frontier Probe One-Screen F6 Playtest Notes`, um die neue Zeile im echten Fensterbild zu bewerten.
 
+### TASK_654 - Frontier Probe One-Screen F6 Playtest Notes
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_654_frontier_probe_one_screen_f6_playtest_notes.md`, `docs/tasks/TASK_653_frontier_probe_one_screen_playability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `task_654_frontier_probe_one_screen_f6_playtest_notes.gd` baut den Frontier-Probe-F6-Kontext, liest den TASK_653-One-Screen-Snapshot und erzeugt `tmp/frontier_probe_one_screen_f6_playtest_notes.json` plus `.png`.
+- Stand: Das Manifest haelt Planzeile, Mission-Control-/Command-Feedback-Konsistenz, Planoptionen, Viewport-/Evidence-Board-Status und eine manuelle Sichtcheckliste fest.
+- Stand: `project_current_state_handbook_2026_06_30.html` nennt TASK_654 als letzten Stand und exportiert neue One-Screen-F6-Review-Felder.
+- Risiken/offen: Der Headless-Lauf erzeugt ein Evidence-Board und ersetzt keinen echten menschlichen F6-Fensterblick. Konkrete visuelle Befunde gehoeren in TASK_655.
+- Lokale Pruefung: `task_654_frontier_probe_one_screen_f6_playtest_notes.gd`, `task_653_frontier_probe_one_screen_playability_pass.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_655 - Frontier Probe One-Screen Visual Tuning Findings`, falls der echte F6-Blick Lesbarkeits- oder Dichteprobleme zeigt.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
