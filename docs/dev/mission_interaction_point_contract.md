@@ -60,6 +60,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Snapshot bleibt read-only: `SimulationRoot`/Scenario-Gates entscheiden weiterhin ueber echten Fortschritt, Abschluss und Fehlschlag.
 - `MissionTacticalSandboxController.get_mission_interaction_runtime_use_state_snapshot()` ist eine on-demand Fassade fuer Verifier, Debug und spaetere UI-Preview, kein neuer HUD-Hotpath.
 
+## Use Feedback
+- `MissionInteractionUseFeedback` uebersetzt den Runtime-Use-State in eine kurze Spieler-/Verifier-Zeile.
+- Feedback-Prioritaet ist `in_progress`, `usable`, `blocked`, `interrupted`, `out_of_range`, `complete`, `unknown`.
+- Der Presenter liefert `feedback_line`, `detail_text`, `action_label`, `severity`, `can_prompt_use` und `primary_interaction_id`.
+- `MissionTacticalSandboxController.get_mission_interaction_use_feedback_snapshot()` und `get_command_feedback_snapshot().mission_interaction_use_feedback` exportieren denselben read-only Snapshot.
+- Der Presenter darf keine Interaktion starten und keine Scenario-Gates setzen. Echte Use-Commands bleiben ein separater Slice.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.
@@ -69,5 +76,5 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 
 ## Naechste Slices
 - Editor-Inspector fuer Interaction-Point-Bindings.
-- Runtime-Use-State fuer Naehe, Bedienzeit, Unterbrechung und Abschluss.
+- Echter Use-Command oder Runtime-Fortschrittsproducer fuer Computer-/Hold-Zonen.
 - FullHD-Readability-Pass fuer Interaction-Labels im Missionsbild.

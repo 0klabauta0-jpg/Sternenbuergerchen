@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_675: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_676: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_675</span>
-      <span class="pill">Naechster Kandidat: Use-Feedback/Command oder TASK_666</span>
+      <span class="pill">Letzter Stand: TASK_676</span>
+      <span class="pill">Naechster Kandidat: Use-Command oder TASK_666</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_675 - Mission Interaction Runtime Use State ist der aktuelle Abschlussstand: Frontier Probe leitet jetzt read-only ab, welche AA-/Computer-/Cargo-Interaction nahe, bedienbar, blockiert, in Arbeit oder komplett ist. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
+          <div class="callout">TASK_676 - Mission Interaction Use Feedback ist der aktuelle Abschlussstand: Frontier Probe kann jetzt eine kompakte Spielerzeile fuer AA-/Computer-/Cargo-Interactions liefern, inklusive bereit, blockiert, laeuft und erforderlichem Befehl. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -132,6 +132,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_673_done"> TASK_673 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_674_done"> TASK_674 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_675_done"> TASK_675 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_676_done"> TASK_676 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -160,7 +161,7 @@
               <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Klick-Recheck nach TASK_663 ist weiter offen.</td><td>TASK_666: echten Fensterbefund festhalten.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
               <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Das neue Fireteamkarten-Badge muss noch im echten Klicklauf beweisen, dass Peer 2 schneller zum Bravo-Kontext findet.</td><td>TASK_666: echte Klick-Findings auswerten.</td></tr>
-              <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow, Builder-Spikes, persistente Palette-Hilfen, Scale-/Rotation-Overrides, Drag-Preview-Handles, Auto-Snapping, FullHD-Preview-Labels, Interaction-Point-Marker, Frontier-Probe-Bindings und Runtime-Use-State sind vorhanden.</td><td>Der Mapbau braucht noch Editor-Inspector-Felder, echte Use-Aktion, Sicht-Feinjustierung und spaeter geteilte Projektprofile.</td><td>Use-Feedback/Command fuer Door/Computer/Hold oder Editor-Binding-Inspector.</td></tr>
+              <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow, Builder-Spikes, persistente Palette-Hilfen, Scale-/Rotation-Overrides, Drag-Preview-Handles, Auto-Snapping, FullHD-Preview-Labels, Interaction-Point-Marker, Frontier-Probe-Bindings, Runtime-Use-State und Use-Feedback sind vorhanden.</td><td>Der Mapbau braucht noch Editor-Inspector-Felder, echte Use-Aktion, Sicht-Feinjustierung und spaeter geteilte Projektprofile.</td><td>Use-Command fuer Door/Computer/Hold oder Editor-Binding-Inspector.</td></tr>
               <tr><td>Performance/Export</td><td>Large-Map-, Hotpath- und Export-Hygiene wurden mehrfach geprueft.</td><td>Neue UI-Listen, Reports und Map-Assets koennen wieder verdeckte Kosten erzeugen.</td><td>Nach jedem groesseren UI-/Map-Schub Smoke + Export-Check laufen lassen.</td></tr>
             </tbody>
           </table>
@@ -226,7 +227,7 @@
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
               <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>TASK_665 prueft die technische Kette; TASK_666 braucht den echten Klickbefund.</td></tr>
-              <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_675 macht die ersten Interactions runtime-lesbar; als naechstes fehlen Use-Feedback/Command, Editor-Inspector, echter FullHD-Sichtfeinschliff und geteilte Profile.</td></tr>
+              <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_676 macht die ersten Interactions als Spielerfeedback lesbar; als naechstes fehlen Use-Command, Editor-Inspector, echter FullHD-Sichtfeinschliff und geteilte Profile.</td></tr>
             </tbody>
           </table>
         </article>
@@ -512,7 +513,18 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_runtime_use_state.read_only"> Snapshot bleibt read-only</label>
           <input readonly value="TASK_675 - Mission Interaction Runtime Use State" data-export-key="mission_interaction_runtime_use_state.completed_task">
           <textarea data-export-key="mission_interaction_runtime_use_state.findings" placeholder="Naechster Test: Soll der Spieler einen Use-Befehl sehen, oder reicht zunaechst Kontextfeedback?"></textarea>
-          <div contenteditable="true" data-note-key="notes.mission_interaction_runtime_use_state" data-placeholder="TASK_675-Notizen...">TASK_675 macht den naechsten kleinen Schritt vom gesetzten Marker zum spielbaren Missionsbeat: Man kann jetzt pruefen, ob ein Fireteam an einem Punkt steht und ob dieser Punkt bedienbar, blockiert, in Arbeit oder fertig ist. Offen bleibt die echte Bedienaktion.</div>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_runtime_use_state" data-placeholder="TASK_675-Notizen...">TASK_675 macht den naechsten kleinen Schritt vom gesetzten Marker zum spielbaren Missionsbeat: Man kann jetzt pruefen, ob ein Fireteam an einem Punkt steht und ob dieser Punkt bedienbar, blockiert, in Arbeit oder fertig ist. TASK_676 uebersetzt das in Spielerfeedback; offen bleibt die echte Bedienaktion.</div>
+        </article>
+        <article class="card full">
+          <h2>TASK_676 - Mission Interaction Use Feedback</h2>
+          <p>Der Runtime-Use-State wird jetzt in eine kompakte Spielerzeile uebersetzt. `CARGO bereit`, `CARGO blockiert`, `COM laeuft` und die passende Action werden als read-only Snapshot in den bestehenden Command-Feedback-Pfad exportiert.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_use_feedback.presenter"> Use-Feedback-Presenter vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_use_feedback.command_export"> Command-Feedback exportiert denselben Snapshot</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_use_feedback.blocked_line"> Blockierte Interactions nennen den Blocker</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_use_feedback.progress_line"> Laufende Interactions zeigen kompakten Fortschritt</label>
+          <input readonly value="TASK_676 - Mission Interaction Use Feedback" data-export-key="mission_interaction_use_feedback.completed_task">
+          <textarea data-export-key="mission_interaction_use_feedback.findings" placeholder="Naechster Test: Welche Taste/Button soll spaeter Use ausloesen?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_use_feedback" data-placeholder="TASK_676-Notizen...">TASK_676 macht aus dem Rohzustand endlich eine lesbare Ansage fuer den Spieler. Der naechste Schritt ist ein echter Interaction-Intent/Use-Command ueber den bestehenden autoritativen Command-Pfad.</div>
         </article>
         <article class="card half">
           <h2>Bewertung</h2>
@@ -533,8 +545,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Use-Feedback/Command fuer Door/Computer/Hold</strong> ist jetzt der beste spielbare Content-Anschluss, wenn wir ohne Sichttest weiterbauen. <strong>TASK_666 - Host Client Decision Drill Real Click Findings</strong> bleibt der ehrlichste Multiplayer-Anschluss, sobald ein echter Fensterlauf beobachtet werden soll.</p>
-          <div class="callout">TASK_675 hat Naehe, Bedienbarkeit, Blocker, Progress und Abschluss als Snapshot erledigt. Offen sind echte Bedienaktion, Editor-Inspector, geteilte Profile und echte Sicht-Feinjustierung.</div>
+          <p><strong>Use-Command fuer Door/Computer/Hold</strong> ist jetzt der beste spielbare Content-Anschluss, wenn wir ohne Sichttest weiterbauen. <strong>TASK_666 - Host Client Decision Drill Real Click Findings</strong> bleibt der ehrlichste Multiplayer-Anschluss, sobald ein echter Fensterlauf beobachtet werden soll.</p>
+          <div class="callout">TASK_676 hat das Feedback erledigt. Offen sind echte Bedienaktion, Editor-Inspector, geteilte Profile und echte Sicht-Feinjustierung.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -545,7 +557,7 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Use-Feedback/Command fuer Door/Computer/Hold</td><td>Aus dem TASK_675-Snapshot eine klare Spieleraktion bauen, ohne UI-Wahrheit zu erzeugen.</td></tr>
+              <tr><td>1</td><td>Use-Command fuer Door/Computer/Hold</td><td>Aus dem TASK_676-Feedback eine echte Spieleraktion ueber den autoritativen Command-Pfad bauen.</td></tr>
               <tr><td>2</td><td>TASK_666 - Host Client Decision Drill Real Click Findings</td><td>Pruefen, ob `P2 BRAVO` den kompletten Host/Client-Decision-Drill im Fenster verbessert.</td></tr>
               <tr><td>3</td><td>FullHD Sichtfeinschliff</td><td>Preview-Labels im echten Fenster auf Lesbarkeit, Ueberdeckung und Lautstaerke pruefen.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
@@ -559,7 +571,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_675. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset, liefert Builder-Drag-Handles, Auto-Snap-Piece-Aufloesung, zeigt diese Preview-Daten als `Label3D`-Overlays und hat jetzt Door-/Computer-/Hold-Marker plus Frontier-Probe-Bindings und Runtime-Use-State. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; ohne Sichttest ist der naechste Content-Hebel eine echte Use-Aktion.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_676. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset, liefert Builder-Drag-Handles, Auto-Snap-Piece-Aufloesung, zeigt diese Preview-Daten als `Label3D`-Overlays und hat jetzt Door-/Computer-/Hold-Marker plus Frontier-Probe-Bindings, Runtime-Use-State und Use-Feedback. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; ohne Sichttest ist der naechste Content-Hebel eine echte Use-Aktion.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -616,15 +628,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_675 - Mission Interaction Runtime Use State",
-            recommended_next_task: "Use-Feedback/Command fuer Door/Computer/Hold oder TASK_666 - Host Client Decision Drill Real Click Findings",
+            latest_completed_task: "TASK_676 - Mission Interaction Use Feedback",
+            recommended_next_task: "Use-Command fuer Door/Computer/Hold oder TASK_666 - Host Client Decision Drill Real Click Findings",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_675 - Mission Interaction Runtime Use State",
+            updated_for_task: "TASK_676 - Mission Interaction Use Feedback",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };

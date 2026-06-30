@@ -716,6 +716,16 @@
 - Lokale Pruefung: `task_675_mission_interaction_runtime_use_state.gd`, `task_674_mission_interaction_point_bindings.gd`, `git diff --check`.
 - Naechster Schritt: Kleines Interaction-Feedback/Use-Command oder Runtime-Fortschrittsproducer fuer Computer-/Hold-Zonen.
 
+### TASK_676 - Mission Interaction Use Feedback
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_676_mission_interaction_use_feedback.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/tasks/TASK_675_mission_interaction_runtime_use_state.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionUseFeedback` uebersetzt den TASK_675-Use-State in `feedback_line`, `detail_text`, `action_label`, `severity` und `can_prompt_use`.
+- Stand: Feedback priorisiert laufende, bedienbare und blockierte Interactions und macht Cargo-/Computer-/AA-Zustand als kompakten Spielerhinweis lesbar.
+- Stand: `MissionTacticalSandboxController.get_mission_interaction_use_feedback_snapshot()` und `get_command_feedback_snapshot().mission_interaction_use_feedback` exportieren denselben read-only Snapshot.
+- Risiken/offen: Es gibt weiterhin keinen echten Use-Button und keinen Runtime-Fortschrittsproducer. Das Feedback ist die saubere Bruecke fuer den naechsten Slice.
+- Lokale Pruefung: `task_676_mission_interaction_use_feedback.gd`, `task_675_mission_interaction_runtime_use_state.gd`, `git diff --check`.
+- Naechster Schritt: Kleiner Use-Command/Interaction-Intent, der ueber den autoritativen Command-/SimulationRoot-Pfad laeuft.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

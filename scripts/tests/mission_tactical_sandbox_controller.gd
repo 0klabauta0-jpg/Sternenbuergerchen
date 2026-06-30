@@ -54,6 +54,7 @@ const TACTICAL_BREAKOUT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tacti
 const MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_vertical_slice_contract.gd")
 const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
 const MISSION_INTERACTION_RUNTIME_USE_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_runtime_use_state.gd")
+const MISSION_INTERACTION_USE_FEEDBACK_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_use_feedback.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
@@ -16720,6 +16721,14 @@ func get_mission_interaction_runtime_use_state_snapshot() -> Dictionary:
 	return Dictionary(MISSION_INTERACTION_RUNTIME_USE_STATE_SCRIPT.call("build_snapshot", binding_snapshot, terrain_map_data, runtime_context)).duplicate(true)
 
 
+func get_mission_interaction_use_feedback_snapshot() -> Dictionary:
+	var use_state_snapshot: Dictionary = get_mission_interaction_runtime_use_state_snapshot()
+	var feedback_context: Dictionary = {
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+	}
+	return Dictionary(MISSION_INTERACTION_USE_FEEDBACK_SCRIPT.call("build_snapshot", use_state_snapshot, feedback_context)).duplicate(true)
+
+
 func _build_mission_interaction_runtime_use_context_for_readability() -> Dictionary:
 	return {
 		"current_team_id": FRIENDLY_TEAM_ID,
@@ -17517,6 +17526,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
+	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -17578,6 +17588,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
 		"frontier_probe_debrief_handoff_line": String(frontier_probe_debrief_handoff.get("handoff_line", "")),
+		"mission_interaction_use_feedback": mission_interaction_use_feedback,
+		"mission_interaction_use_feedback_line": String(mission_interaction_use_feedback.get("feedback_line", "")),
+		"mission_interaction_use_feedback_action": String(mission_interaction_use_feedback.get("action_label", "")),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),
