@@ -9,7 +9,7 @@ const SOURCE_CLICK_PACKET_PATH: String = "res://tmp/host_client_decision_drill_c
 const SOURCE_CAPTURE_MANIFEST_PATH: String = "res://tmp/host_client_two_window_real_run_review.json"
 const RECHECK_PATH: String = "res://tmp/host_client_decision_drill_real_click_recheck.json"
 const EXPECTED_STYLE_ID: String = "host_client_fireteam_context_badge_v1"
-const EXPECTED_NEXT_TASK: String = "TASK_665 - Host Client Decision Drill Click Findings"
+const EXPECTED_NEXT_TASK: String = "TASK_665 - Host Client Decision Drill Technical Click Guard"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -43,10 +43,11 @@ func _test_docs_report_and_contract() -> void:
 	_assert(task_text.contains("Host Client Decision Drill Real Click Recheck"), "TASK_664 task names real click recheck")
 	_assert(status_text.contains("TASK_664 - Host Client Decision Drill Real Click Recheck"), "Implementation status tracks TASK_664")
 	_assert(roadmap_text.contains("TASK_664 - Host Client Decision Drill Real Click Recheck (implementiert)"), "Roadmap marks TASK_664 implemented")
-	_assert(roadmap_text.contains("TASK_665 - Host Client Decision Drill Click Findings (geplant)"), "Roadmap plans TASK_665 follow-up")
+	_assert(roadmap_text.contains("TASK_665 - Host Client Decision Drill Technical Click Guard (implementiert)"), "Roadmap tracks TASK_665 follow-up")
 	_assert(contract_text.contains("Host-Client-Decision-Drill-Real-Click-Recheck"), "Mission feedback contract documents TASK_664")
 	_assert(report_text.contains("TASK_664 - Host Client Decision Drill Real Click Recheck"), "Current handbook report tracks TASK_664")
-	_assert(report_text.contains('latest_completed_task: "TASK_664 - Host Client Decision Drill Real Click Recheck"'), "Current handbook export records TASK_664 latest")
+	_assert(report_text.contains("latest_completed_task:"), "Current handbook exports a latest completed task")
+	_assert(report_text.contains("TASK_664 - Host Client Decision Drill Real Click Recheck"), "Current handbook preserves TASK_664 context after later tasks")
 	_assert(report_text.contains('data-export-key="host_client_decision_drill_real_click_recheck.ready"'), "Current handbook exports TASK_664 ready check")
 	_assert(report_text.contains('data-note-key="notes.host_client_decision_drill_real_click_recheck"'), "Current handbook exports TASK_664 notes")
 	_assert(report_text.contains(EXPECTED_NEXT_TASK), "Current handbook recommends TASK_665")
@@ -160,7 +161,7 @@ func _test_recheck_manifest() -> void:
 	_assert(not bool(manifest.get("manual_review_done", true)), "Manifest does not claim manual review done")
 	_assert(bool(manifest.get("read_only", false)), "Manifest remains read-only")
 	_assert(not bool(manifest.get("ui_sets_gameplay_truth", true)), "Manifest does not set gameplay truth")
-	_assert(String(manifest.get("recommended_next_task", "")) == EXPECTED_NEXT_TASK, "Manifest recommends TASK_665 findings")
+	_assert(String(manifest.get("recommended_next_task", "")) == EXPECTED_NEXT_TASK, "Manifest recommends TASK_665 technical guard")
 
 
 func _read_json(path: String) -> Dictionary:
