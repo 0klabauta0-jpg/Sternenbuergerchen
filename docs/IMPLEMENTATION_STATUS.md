@@ -273,6 +273,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_630_frontier_probe_mini_scenario_feel_route.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_629_host_client_real_click_playtest_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_554_frontier_probe_integrated_objective_playthrough_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_555_frontier_probe_multiplayer_objective_ownership_smoke.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish`, solange kein echter Host/Client-Klicklauf vorher konkretes UI-Feedback-Follow-up erzwingt.
 
+### TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_631_frontier_probe_mini_scenario_visual_feel_polish.md`, `docs/tasks/TASK_630_frontier_probe_mini_scenario_feel_route.md`, `docs/dev/mission_command_feedback_contract.md`, `scripts/tests/mission_tactical_sandbox_controller.gd`, `scripts/terrain/terrain_map_3d_view.gd`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `MissionTacticalSandboxController.get_frontier_probe_mini_scenario_visual_feel_polish_snapshot()` leitet aus der TASK_630-Route vier read-only Callouts ab: `LZ`, `AA`, `COM 18s` und `CARGO`.
+- Stand: `TerrainMap3DView` rendert diese Callouts ueber den bestehenden Mission-Status-Payload als kleine Marker/Labels und spiegelt Count, Tone-Counts, Eintraege und Route-Summary im Render-Snapshot.
+- Stand: `scripts/tests/task_631_frontier_probe_mini_scenario_visual_feel_polish.gd` schreibt `tmp/frontier_probe_mini_scenario_visual_feel_polish.json` als lokales Evidence-Manifest.
+- Risiken/offen: TASK_631 macht die Route sichtbar pruefbar, ersetzt aber keinen echten F6-/Host-Client-Sichttest. Ob Labels angenehm positioniert sind, bleibt TASK_632 oder manueller Review.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_631_frontier_probe_mini_scenario_visual_feel_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_630_frontier_probe_mini_scenario_feel_route.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_632 - Frontier Probe Mini Scenario F6 Visual Review`, damit die Callouts im echten Fensterbild bewertet werden.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
