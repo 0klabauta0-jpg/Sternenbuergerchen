@@ -268,6 +268,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Die HTML-Workbench `docs/reports/station_route_window_playtest_notes_2026_07_01.html` darf lokale JSON-Arbeitsnotizen exportieren, aber keine Projektdateien schreiben und keine Gameplay-Wahrheit setzen.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Polish Readiness Findings
+- `StationRoutePolishReadinessFindings` bewertet TASK_708-Evidence und TASK_709-Fensternotizen read-only.
+- Der Snapshot trennt technische Blocker, Polish-Warnungen und offene manuelle Sichtentscheidungen.
+- Fehlende Evidence, falsches Schema, UI-Truth-Verletzungen, unvollstaendige Objective-Gates oder nicht sichtbares Door-Open sind technische Blocker.
+- Generiertes Review-Board, fehlender Viewport-Readback und offene Fenster-Checks sind manuelle Hinweise, keine technischen Blocker.
+- `visual_polish_ready` darf true werden, wenn die technischen Blocker fehlen; `host_client_acceptance_ready` darf erst true werden, wenn der echte Fensterentscheid erledigt ist und keine Polish-Warnung offen ist.
+- Findings duerfen `recommended_next_task` nennen, aber keine Visuals aendern, keine Runtime-Interaction starten und keine Gameplay-Wahrheit setzen.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_710 - Station Route Polish Readiness Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_710_station_route_polish_readiness_findings.md`, `docs/tasks/TASK_709_station_route_window_playtest_notes.md`, `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: `StationRoutePolishReadinessFindings` bewertet TASK_708-Evidence und TASK_709-Notizen read-only.
+- Stand: Technische Blocker, Polish-Warnungen und offene manuelle Sichtentscheidungen werden getrennt.
+- Stand: Der Snapshot nennt `visual_polish_ready`, `host_client_acceptance_ready`, Status und naechsten empfohlenen Task.
+- Risiken/offen: Ohne echten Fensterbefund bleibt der Status erwartbar `needs_window_review`; TASK_710 ersetzt den Sichtlauf nicht.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_710_station_route_polish_readiness_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_709_station_route_window_playtest_notes.gd`, `git diff --check`.
+- Naechster Schritt: TASK_709 im echten Fenster ausfuellen oder bei `needs_visual_polish` TASK_711 - Station Route Visual Polish starten.
+
 ### TASK_709 - Station Route Window Playtest Notes
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_709_station_route_window_playtest_notes.md`, `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/station_route_window_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
