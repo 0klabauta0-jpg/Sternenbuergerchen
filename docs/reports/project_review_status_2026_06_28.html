@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_643 auf <code>task/frontier-probe-homebase-readiness-visual-polish-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_644 auf <code>task/frontier-probe-homebase-real-window-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -307,6 +307,7 @@
       <span class="pill good">TASK_641 Next-Sortie</span>
       <span class="pill good">TASK_642 Homebase-Review</span>
       <span class="pill good">TASK_643 Evidence-Labels</span>
+      <span class="pill good">TASK_644 Real-Window</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2312,6 +2313,38 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_644 Frontier Probe Homebase Real Window Review</h2>
+          <p>Der Homebase-Readiness-Zustand bekommt jetzt ein eigenes echtes Fenster-Review-Paket. Ohne <code>--headless</code> kann der Verifier den realen Homebase-Viewport nach Debrief-Return speichern; Headless laeuft weiter als pruefbarer Fallback und markiert den echten Sichtentscheid bewusst als offen.</p>
+          <img class="evidence-preview" src="../../tmp/frontier_probe_homebase_real_window_review.png" alt="TASK_644 Frontier Probe Homebase Real Window Review">
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Real Window Review / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_644 - Frontier Probe Homebase Real Window Review" data-export-key="frontier_probe_homebase_real_window_review.task_id"></td><td>Aktueller Review-Paket-Slice fuer den echten Homebase-Fensterblick.</td></tr>
+                <tr><td>PNG</td><td><input readonly value="tmp/frontier_probe_homebase_real_window_review.png" data-export-key="frontier_probe_homebase_real_window_review.png_path"></td><td>Real-Viewport ohne Headless oder beschrifteter Fallback.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_homebase_real_window_review.json" data-export-key="frontier_probe_homebase_real_window_review.manifest_path"></td><td>Review-Gates und Read-only-Grenzen.</td></tr>
+                <tr><td>Window Gate</td><td><input readonly value="review_ready_or_manual_open" data-export-key="frontier_probe_homebase_real_window_review.real_window_review_gate"></td><td><code>review_ready</code> nur bei echtem Viewport-Readback; sonst <code>manual_open</code>.</td></tr>
+                <tr><td>Viewport Readback</td><td><input readonly value="runtime dependent" data-export-key="frontier_probe_homebase_real_window_review.visible_window_readback_available"></td><td>Wird im Manifest aus der aktuellen Godot-Ausfuehrung geschrieben.</td></tr>
+                <tr><td>Evidence Board</td><td><input readonly value="runtime dependent" data-export-key="frontier_probe_homebase_real_window_review.generated_evidence_board"></td><td>True im Headless-Fallback.</td></tr>
+                <tr><td>Post-Summary</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_real_window_review.post_summary_visible"></td><td>Homebase-Summary bleibt sichtbar.</td></tr>
+                <tr><td>Next-Sortie</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_real_window_review.next_sortie_visible"></td><td>Next-Sortie-Zeile bleibt sichtbar.</td></tr>
+                <tr><td>Manueller Review</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_real_window_review.manual_review_required"></td><td>Geschmack und Auffaelligkeit bleiben menschliche Entscheidung.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_real_window_review.read_only"></td><td>Keine Navigation, kein Command, keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="Runtime Homebase UI polish only if real-window friction is visible" data-export-key="frontier_probe_homebase_real_window_review.recommended_next_task"></td><td>Nur belegte Reibung schneiden.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_real_window_review.packet_created"> Review-Paket erzeugbar</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_real_window_review.read_only_checked"> Read-only-Grenze erhalten</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_homebase_real_window_review.real_window_review_done"> Echten Fensterblick menschlich bewertet</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_homebase_real_window_review.runtime_polish_needed"> Runtime-UI-Polish wirklich noetig</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_644 Real-Window-Review-Notiz
+            <textarea data-note-key="notes.frontier_probe_homebase_real_window_review" data-export-key="frontier_probe_homebase_real_window_review.notes" placeholder="Beim Fensterbild notieren: Ist Summary/Next-Sortie auffaellig, schoen und schnell genug lesbar?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3305,7 +3338,8 @@
               "TASK_640 - Frontier Probe Post Debrief Homebase Readability",
               "TASK_641 - Frontier Probe Homebase Next Sortie Readiness",
               "TASK_642 - Frontier Probe Homebase Visible Readiness Review",
-              "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings"
+              "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings",
+              "TASK_644 - Frontier Probe Homebase Real Window Review"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3357,7 +3391,8 @@
               "TASK_640 zeigt nach dem Debrief-Return eine kompakte Homebase-Summary aus dem Frontier-Probe-Ergebnis und nennt den naechsten Homebase-Schritt.",
               "TASK_641 verbindet diese Homebase-Summary mit Pre-Mission-Readiness und Direct-Staging zu einer kompakten Next-Sortie-Zeile.",
               "TASK_642 macht den daraus entstehenden Homebase-Blick als PNG/Manifest-Review belegbar und prueft Zeilenreihenfolge, Bounds und Overflow.",
-              "TASK_643 beschriftet das TASK_642-Headless-Evidence-Board mit Pixel-Labels und Readability-Gate, damit der naechste Homebase-Entscheid weniger Interpretationsrauschen hat."
+              "TASK_643 beschriftet das TASK_642-Headless-Evidence-Board mit Pixel-Labels und Readability-Gate, damit der naechste Homebase-Entscheid weniger Interpretationsrauschen hat.",
+              "TASK_644 erzeugt ein echtes Homebase-Fenster-Review-Paket mit Viewport-Readback, wenn ohne Headless gestartet, und laesst den menschlichen Sichtentscheid sonst als manual_open."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3366,14 +3401,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_642",
-            current_focus: "Frontier Probe Homebase Readiness Visual Polish Findings",
-            latest_completed_task: "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings"
+            current_repo_base: "integration/core-foundation after TASK_643",
+            current_focus: "Frontier Probe Homebase Real Window Review",
+            latest_completed_task: "TASK_644 - Frontier Probe Homebase Real Window Review"
           },
           metadata: {
-            branch: "task/frontier-probe-homebase-readiness-visual-polish-findings",
-            integration_base: "integration/core-foundation after TASK_642",
-            head: "task/frontier-probe-homebase-readiness-visual-polish-findings",
+            branch: "task/frontier-probe-homebase-real-window-review",
+            integration_base: "integration/core-foundation after TASK_643",
+            head: "task/frontier-probe-homebase-real-window-review",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }
