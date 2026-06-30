@@ -6120,6 +6120,10 @@ func _build_strategic_status_text() -> String:
 	var interaction_line: String = String(interaction_density.get("mission_control_line", "")).strip_edges()
 	if not interaction_line.is_empty():
 		lines.append(interaction_line)
+	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
+	var frontier_probe_one_screen_line: String = String(frontier_probe_one_screen.get("one_screen_line", "")).strip_edges()
+	if bool(frontier_probe_one_screen.get("active", false)) and not frontier_probe_one_screen_line.is_empty():
+		lines.append(frontier_probe_one_screen_line)
 	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var next_interaction_line: String = String(next_interaction.get("next_interaction_line", "")).strip_edges()
 	if bool(next_interaction.get("active", false)) and not next_interaction_line.is_empty():
@@ -15351,6 +15355,187 @@ func get_frontier_probe_debrief_handoff_feel_snapshot() -> Dictionary:
 	}
 
 
+func _build_frontier_probe_one_screen_playability_readout() -> Dictionary:
+	var scenario_active: bool = _should_sync_frontier_probe_route_callouts()
+	var route_tokens: PackedStringArray = PackedStringArray(["LZ", "AA", "COM 18s", "CARGO"])
+	var route_text: String = " -> ".join(Array(route_tokens))
+	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
+	var handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
+	var next_token: String = _get_frontier_probe_one_screen_next_token(next_interaction, handoff)
+	var one_screen_line: String = ""
+	if scenario_active and not route_text.is_empty():
+		if bool(handoff.get("handoff_ready", false)):
+			one_screen_line = "PLAN %s | Debrief ready" % route_text
+		elif not next_token.is_empty():
+			one_screen_line = "PLAN %s | NEXT %s" % [route_text, next_token]
+		else:
+			one_screen_line = "PLAN %s" % route_text
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_one_screen_playability_readout.v1",
+		"task_id": "TASK_653",
+		"active": scenario_active,
+		"route_tokens": route_tokens,
+		"route_text": route_text,
+		"next_token": next_token,
+		"next_interaction_id": String(next_interaction.get("next_interaction_id", "")),
+		"one_screen_line": one_screen_line,
+		"line_char_limit": 96,
+		"line_within_limit": one_screen_line.length() <= 96,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _get_frontier_probe_one_screen_next_token(next_interaction: Dictionary, handoff: Dictionary) -> String:
+	if bool(handoff.get("handoff_ready", false)):
+		return "DEBRIEF"
+	var next_id: String = String(next_interaction.get("next_interaction_id", "")).strip_edges().to_lower()
+	match next_id:
+		"disable_air_defense":
+			return "AA"
+		"hold_station_computer":
+			return "COM 18s"
+		"secure_cargo_touchdown":
+			return "CARGO"
+		"open_debrief":
+			return "DEBRIEF"
+		_:
+			return ""
+
+
+func _build_frontier_probe_one_screen_plan_options(next_interaction: Dictionary, handoff: Dictionary) -> Array:
+	var next_id: String = String(next_interaction.get("next_interaction_id", "")).strip_edges()
+	var handoff_ready: bool = bool(handoff.get("handoff_ready", false))
+	return [
+		{
+			"id": "aa_first_push",
+			"label": "Plan A: AA zuerst",
+			"detail": "Luftabwehr ausschalten, dann COM halten und Cargo freigeben.",
+			"valid": not handoff_ready,
+			"recommended_when": "Cargo ist blockiert oder AA-Team deckt den Korridor.",
+		},
+		{
+			"id": "station_control_first",
+			"label": "Plan B: Station sichern",
+			"detail": "COM/Deckung zuerst stabilisieren, danach AA und Cargo ausloesen.",
+			"valid": not handoff_ready and next_id != "secure_cargo_touchdown",
+			"recommended_when": "Alpha braucht einen ruhigeren Aufbau oder mehr Deckung.",
+		},
+		{
+			"id": "lz_fallback",
+			"label": "Fallback: LZ halten",
+			"detail": "Bei schlechtem Kontakt zur LZ zurueckziehen und Cargo spaeter sichern.",
+			"valid": not handoff_ready,
+			"recommended_when": "Kontaktbild ist unklar oder Fireteam ist angeschlagen.",
+		},
+		{
+			"id": "debrief_handoff",
+			"label": "Abschluss: Debrief",
+			"detail": "Route ist fertig; Ergebnis pruefen und danach Homebase.",
+			"valid": handoff_ready,
+			"recommended_when": "AA, COM und Cargo sind erledigt.",
+		},
+	]
+
+
+func get_frontier_probe_one_screen_playability_snapshot() -> Dictionary:
+	var readout: Dictionary = _build_frontier_probe_one_screen_playability_readout()
+	var route_snapshot: Dictionary = get_frontier_probe_mini_scenario_feel_route_snapshot()
+	var visual_snapshot: Dictionary = get_frontier_probe_mini_scenario_visual_feel_polish_snapshot()
+	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
+	var handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
+	var plan_options: Array = _build_frontier_probe_one_screen_plan_options(next_interaction, handoff)
+	var mission_control_text: String = _get_label_text(STRATEGIC_STATUS_LABEL_PATH).strip_edges()
+	var one_screen_line: String = String(readout.get("one_screen_line", "")).strip_edges()
+	if bool(readout.get("active", false)) and not one_screen_line.is_empty() and not mission_control_text.contains(one_screen_line):
+		mission_control_text = _build_strategic_status_text()
+	var route_callouts: Array = Array(route_snapshot.get("route_callouts", []))
+	var valid_plan_count: int = 0
+	for option_variant in plan_options:
+		var option: Dictionary = Dictionary(option_variant)
+		if bool(option.get("valid", false)):
+			valid_plan_count += 1
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"frontier_probe_context_active",
+			bool(readout.get("active", false)),
+			"Frontier Probe context is active for one-screen playability."
+		),
+		_build_mission_first_move_readability_check(
+			"route_is_one_screen_readable",
+			int(route_snapshot.get("route_beat_count", 0)) >= 4
+				and int(route_snapshot.get("route_callout_count", 0)) >= 4,
+			"Existing route beats and callouts expose LZ, AA, COM and Cargo."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_plan_line_visible",
+			not one_screen_line.is_empty()
+				and bool(readout.get("line_within_limit", false))
+				and mission_control_text.contains(one_screen_line),
+			"Mission Control shows the compact PLAN/NEXT one-screen line."
+		),
+		_build_mission_first_move_readability_check(
+			"two_valid_plans_available",
+			valid_plan_count >= 2 or bool(handoff.get("handoff_ready", false)),
+			"Player can read at least two sensible plans before committing, or a clear Debrief handoff after completion."
+		),
+		_build_mission_first_move_readability_check(
+			"next_action_is_player_readable",
+			String(readout.get("next_token", "")).strip_edges() in ["AA", "COM 18s", "CARGO", "DEBRIEF"],
+			"One-screen readout exposes the current next action as a compact token."
+		),
+		_build_mission_first_move_readability_check(
+			"visual_callouts_still_green",
+			String(visual_snapshot.get("gate", "")) == "pass"
+				and _has_route_callout_label(route_callouts, "AA")
+				and _has_route_callout_label(route_callouts, "COM 18s")
+				and _has_route_callout_label(route_callouts, "CARGO"),
+			"Visual route callouts still distinguish AA, computer and cargo."
+		),
+		_build_mission_first_move_readability_check(
+			"complete_route_points_to_debrief",
+			not bool(handoff.get("route_complete", false))
+				or (bool(handoff.get("handoff_ready", false)) and String(readout.get("next_token", "")) == "DEBRIEF"),
+			"Completed route points to Debrief/Homebase instead of another combat loop."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(readout.get("read_only", false))
+				and bool(route_snapshot.get("read_only", false))
+				and not bool(readout.get("ui_sets_gameplay_truth", true))
+				and not bool(route_snapshot.get("ui_sets_gameplay_truth", true)),
+			"One-screen playability reads existing state and does not write gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_one_screen_playability.v1",
+		"task_id": "TASK_653",
+		"readout": readout,
+		"one_screen_line": one_screen_line,
+		"mission_control_status_text": mission_control_text,
+		"route_snapshot": route_snapshot,
+		"visual_snapshot": visual_snapshot,
+		"next_interaction": next_interaction,
+		"handoff": handoff,
+		"plan_options": plan_options,
+		"valid_plan_count": valid_plan_count,
+		"route_callouts": route_callouts,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"recommended_next_task": "TASK_654 - Frontier Probe One-Screen F6 Playtest Notes",
+	}
+
+
 func _has_route_callout_label(route_callouts: Array, expected_label: String) -> bool:
 	for callout_variant in route_callouts:
 		var callout: Dictionary = Dictionary(callout_variant)
@@ -16824,6 +17009,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var mission_hud_interaction_density: Dictionary = _build_mission_hud_interaction_density_snapshot()
+	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
@@ -16881,6 +17067,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"combat_hud_compact_line": String(combat_hud_density.get("compact_line", "")),
 		"mission_hud_interaction_density": mission_hud_interaction_density,
 		"mission_hud_interaction_line": String(mission_hud_interaction_density.get("mission_control_line", "")),
+		"frontier_probe_one_screen_playability": frontier_probe_one_screen,
+		"frontier_probe_one_screen_line": String(frontier_probe_one_screen.get("one_screen_line", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

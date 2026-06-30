@@ -281,6 +281,7 @@ git checkout -b batch/<batch-name>
 - TASK_650 - Host Client Click Feedback Followup (implementiert)
 - TASK_651 - Host Client Click Followup Evidence (implementiert)
 - TASK_652 - Current State Handbook Refresh (implementiert)
+- TASK_653 - Frontier Probe One-Screen Playability Pass (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
