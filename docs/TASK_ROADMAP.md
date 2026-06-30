@@ -280,6 +280,7 @@ git checkout -b batch/<batch-name>
 - TASK_649 - Current State Handbook Report (implementiert)
 - TASK_650 - Host Client Click Feedback Followup (implementiert)
 - TASK_651 - Host Client Click Followup Evidence (implementiert)
+- TASK_652 - Current State Handbook Refresh (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
