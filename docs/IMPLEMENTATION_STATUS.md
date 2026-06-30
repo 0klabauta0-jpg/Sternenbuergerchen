@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_699 - Multiplayer Door Feedback Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_699_multiplayer_door_feedback_capture.md`, `docs/tasks/TASK_698_door_authority_ui_feedback.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionMultiplayerDoorFeedbackCapture` vergleicht Host-, Wrong-Team-, State-Mutation- und Open-Readouts als read-only Evidence-Paket.
+- Stand: Der Verifier erzeugt Host-Accept, Peer-Team-Reject, `runtime_state`-Reject und Runtime-Producer-Open in derselben Door-Fixture.
+- Stand: `get_command_feedback_snapshot()` exportiert `mission_interaction_multiplayer_door_feedback_capture` fuer Reports/Verifier.
+- Risiken/offen: Das Capture ersetzt keinen echten Zwei-Fenster-Klicklauf und keine menschliche Sichtabnahme.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_699_multiplayer_door_feedback_capture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_698_door_authority_ui_feedback.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_697_door_interaction_multiplayer_authority_check.gd`, `git diff --check`.
+- Naechster Schritt: TASK_700 - Host/Client Door Real Click Workbench oder Mission Door Feedback Polish.
+
 ### TASK_698 - Door Authority UI Feedback
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_698_door_authority_ui_feedback.md`, `docs/tasks/TASK_697_door_interaction_multiplayer_authority_check.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
@@ -18,7 +28,7 @@
 - Stand: `get_command_feedback_snapshot()` exportiert `mission_interaction_door_authority_ui_feedback`, Status, Zeile und Tooltip fuer Reports/Verifier.
 - Risiken/offen: Der echte Zwei-Fenster-Host/Client-Klicklauf bleibt offen; TASK_698 verbessert die Lesbarkeit, ersetzt aber keinen echten Bedien-Sichttest.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_698_door_authority_ui_feedback.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_697_door_interaction_multiplayer_authority_check.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_695_door_interaction_hud_button_shortcut.gd`, `git diff --check`.
-- Naechster Schritt: TASK_699 - Host/Client Door Real Click Recheck oder Multiplayer Door Feedback Capture.
+- Naechster Schritt: TASK_699 - Multiplayer Door Feedback Capture.
 
 ### TASK_697 - Door Interaction Multiplayer Authority Check
 - Status: implementiert im Arbeitsstand
@@ -48,7 +58,7 @@
 - Stand: Command-Control- und Hierarchy-Snapshots exportieren `breach_door` inklusive Buttonzustand, Shortcut, Door-ID und Slot.
 - Risiken/offen: Der echte FullHD-Sichtlauf bleibt separat offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_695_door_interaction_hud_button_shortcut.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_694_door_use_breach_command_hook.gd`, `git diff --check`.
-- Naechster Schritt: TASK_699 - Host/Client Door Real Click Recheck oder Multiplayer Door Feedback Capture.
+- Naechster Schritt: TASK_700 - Host/Client Door Real Click Workbench oder Mission Door Feedback Polish.
 
 ### TASK_694 - Door Use/Breach Command Hook
 - Status: implementiert im Arbeitsstand
@@ -58,7 +68,7 @@
 - Stand: `get_command_feedback_snapshot()` exportiert den Hook fuer UI/Verifier.
 - Risiken/offen: Door-Animation und Asset-Swap bleiben Folgearbeit; der Hook ist der sichere Runtime-/Command-Pfad.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_694_door_use_breach_command_hook.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_693_door_runtime_state_producer.gd`, `git diff --check`.
-- Naechster Schritt: TASK_699 - Host/Client Door Real Click Recheck oder Multiplayer Door Feedback Capture.
+- Naechster Schritt: TASK_700 - Host/Client Door Real Click Workbench oder Mission Door Feedback Polish.
 
 ### TASK_693 - Door Runtime State Producer
 - Status: implementiert im Arbeitsstand
@@ -68,7 +78,7 @@
 - Stand: Der 3D-Missionsstatus-Payload exportiert Door-Override-Diagnosewerte, ohne UI-Wahrheit zu setzen.
 - Risiken/offen: Sichtbarer Breach-/Use-Button und Door-Animation bleiben Folgearbeit. Der FullHD-Sichtlauf bleibt separat offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_693_door_runtime_state_producer.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_692_door_runtime_collision_los_contract.gd`, `git diff --check`.
-- Naechster Schritt: TASK_699 - Host/Client Door Real Click Recheck oder Multiplayer Door Feedback Capture.
+- Naechster Schritt: TASK_700 - Host/Client Door Real Click Workbench oder Mission Door Feedback Polish.
 
 ### TASK_692 - Door Runtime Collision/LOS Contract
 - Status: implementiert im Arbeitsstand
@@ -78,7 +88,7 @@
 - Stand: `TerrainPathfinder` und `LineOfSightSystem` lesen die effektiven Registry-Werte, sodass eine offene Runtime-Door Pfad und LOS freigeben kann, ohne statische Tile-Daten zu mutieren.
 - Risiken/offen: Der Door-State wird ueber den Hook-Pfad vorbereitet, aber sichtbare HUD-Bedienung und Animation bleiben separat offen. Der echte Fenster-Sichtlauf bleibt separat offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_692_door_runtime_collision_los_contract.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_691_mission_interaction_runtime_visual_assets.gd`, `git diff --check`.
-- Naechster Schritt: TASK_699 - Host/Client Door Real Click Recheck oder Multiplayer Door Feedback Capture.
+- Naechster Schritt: TASK_700 - Host/Client Door Real Click Workbench oder Mission Door Feedback Polish.
 
 ### TASK_690 - Mission Interaction Manual Sight Notes
 - Status: implementiert im Arbeitsstand

@@ -183,6 +183,16 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der `DoorBreachButton` darf Tooltip und Metadaten aus diesem Readout zeigen; `get_command_feedback_snapshot()` darf dieselben Daten exportieren.
 - Das Feedback bleibt `read_only = true` und `ui_sets_gameplay_truth = false`.
 
+## Multiplayer Door Feedback Capture
+- `MissionMultiplayerDoorFeedbackCapture` vergleicht Host-, Wrong-Team-, State-Mutation- und Open-Readouts als read-only Evidence-Paket.
+- Host-Feedback muss `accepted` oder `open` melden, wenn der Own-Team-Command akzeptiert wurde.
+- Wrong-Team-Feedback muss `blocked` melden und den Reject-Grund aus `MultiplayerCommandContract` sichtbar machen.
+- State-Mutation-Feedback muss `blocked` melden und einen `state_mutation_key:*`-Grund sichtbar machen.
+- Open-Feedback darf nur `open` melden, wenn der Door Runtime Collision/LOS Producer einen offenen Runtime-Override liefert.
+- `get_command_feedback_snapshot()` darf den Capture-Snapshot exportieren, aber ohne eingespeisten Capture-Kontext bleibt er ein Review-/Diagnosefeld.
+- Das Capture ersetzt keinen echten Zwei-Fenster-Test; es bereitet ihn mit vergleichbaren Host-/Client-Daten vor.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
