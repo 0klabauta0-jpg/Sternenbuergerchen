@@ -336,6 +336,7 @@ git checkout -b batch/<batch-name>
 - TASK_705 - Host/Client Door Real Click Manual Run Packet (implementiert)
 - TASK_706 - Mission Door Layout/Visual Polish (implementiert)
 - TASK_707 - Mission Door/Computer/Cargo Smoke (implementiert)
+- TASK_708 - Station Route Visual Evidence (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

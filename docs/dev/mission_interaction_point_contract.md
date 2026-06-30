@@ -253,6 +253,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Cargo-Departed schliesst den Objective-Gate-Snapshot erst nach Computer-Control ab.
 - Das Smoke-Manifest bleibt Arbeits-/Test-Evidence mit `read_only = true` und `ui_sets_gameplay_truth = false`.
 
+## Station Route Visual Evidence
+- Die Stationsroute darf als FullHD-Evidence-Paket aus Mission-Testszene, Render-Snapshot, Objective-Gate-Snapshot und Command-Feedback geschrieben werden.
+- Wenn ein echter Viewport-Readback im Headless-Lauf nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Snapshots geschrieben werden.
+- Das Manifest muss `manual_window_review_required = true` und `manual_window_review_done = false` setzen, bis ein Mensch die echte Fensteransicht beurteilt.
+- Evidence darf Door-/Computer-/Cargo-Lesbarkeit, PNG-/Manifest-Pfade und offene manuelle Checks festhalten, aber keine Runtime-Interaction dauerhaft starten und keine Gameplay-Wahrheit schreiben.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
