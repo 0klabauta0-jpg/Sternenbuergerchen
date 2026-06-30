@@ -298,6 +298,7 @@ git checkout -b batch/<batch-name>
 - TASK_667 - Map Editor Persistent Palette Presets (implementiert)
 - TASK_668 - Map Editor Asset Scale Override Presets (implementiert)
 - TASK_669 - Map Editor Placement Rotation Overrides (implementiert)
+- TASK_670 - Builder Drag Preview Handles (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

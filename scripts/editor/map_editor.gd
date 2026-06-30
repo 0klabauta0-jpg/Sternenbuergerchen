@@ -2173,6 +2173,10 @@ func _build_network_drag_preview_summary() -> Dictionary:
 		"visual_preview": visual_preview,
 		"visual_active": bool(visual_preview.get("active", false)),
 		"visual_segment_count": int(visual_preview.get("segment_count", 0)),
+		"handle_count": int(visual_preview.get("handle_count", 0)),
+		"segment_label_count": int(visual_preview.get("segment_label_count", 0)),
+		"handles": Array(visual_preview.get("handles", [])).duplicate(true),
+		"segment_labels": Array(visual_preview.get("segment_labels", [])).duplicate(true),
 		"ui_sets_gameplay_truth": false,
 		"label": "%s line: %d tiles" % [_network_tool_kind.capitalize(), _network_drag_preview_path.size()],
 	}
@@ -2181,6 +2185,8 @@ func _build_network_drag_preview_summary() -> Dictionary:
 func _build_network_drag_visual_preview_snapshot() -> Dictionary:
 	var path: Array = []
 	var segments: Array = []
+	var handles: Array = []
+	var segment_labels: Array = []
 	for grid_variant in _network_drag_preview_path:
 		var grid_position := Vector2i(grid_variant)
 		var tile_data = _terrain_map_data.call("get_tile_at_grid", grid_position) if _terrain_map_data != null else null
@@ -2189,15 +2195,21 @@ func _build_network_drag_visual_preview_snapshot() -> Dictionary:
 			"grid": grid_position,
 			"world_position": world_position,
 		})
+	handles = _build_network_drag_preview_handles(path)
 	for index in range(1, path.size()):
 		var previous: Dictionary = Dictionary(path[index - 1])
 		var current: Dictionary = Dictionary(path[index])
+		var from_grid := Vector2i(previous.get("grid", Vector2i.ZERO))
+		var to_grid := Vector2i(current.get("grid", Vector2i.ZERO))
+		var from_world := Vector2(previous.get("world_position", Vector2.ZERO))
+		var to_world := Vector2(current.get("world_position", Vector2.ZERO))
 		segments.append({
-			"from_grid": Vector2i(previous.get("grid", Vector2i.ZERO)),
-			"to_grid": Vector2i(current.get("grid", Vector2i.ZERO)),
-			"from_world": Vector2(previous.get("world_position", Vector2.ZERO)),
-			"to_world": Vector2(current.get("world_position", Vector2.ZERO)),
+			"from_grid": from_grid,
+			"to_grid": to_grid,
+			"from_world": from_world,
+			"to_world": to_world,
 		})
+		segment_labels.append(_build_network_drag_preview_segment_label(index, from_grid, to_grid, from_world, to_world))
 	return {
 		"active": _network_drag_tool_enabled and path.size() > 0,
 		"dragging": _is_network_dragging,
@@ -2206,12 +2218,62 @@ func _build_network_drag_visual_preview_snapshot() -> Dictionary:
 		"path_count": path.size(),
 		"segments": segments,
 		"segment_count": segments.size(),
+		"handles": handles,
+		"handle_count": handles.size(),
+		"segment_labels": segment_labels,
+		"segment_label_count": segment_labels.size(),
+		"readability": {
+			"handles_available": handles.size() > 0,
+			"segment_labels_available": segment_labels.size() > 0,
+			"label_mode": "start_target_and_segment_numbers",
+		},
 		"start_grid": _network_drag_start_grid,
 		"current_grid": _network_drag_current_grid,
 		"color": _get_network_drag_preview_color(_network_tool_kind),
 		"line_width": 0.12,
 		"surface_offset": 0.44,
 		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _build_network_drag_preview_handles(path: Array) -> Array:
+	var handles: Array = []
+	for index in range(path.size()):
+		var entry: Dictionary = Dictionary(path[index])
+		var role := "segment"
+		var label := "#%d" % (index + 1)
+		if path.size() == 1:
+			role = "single"
+			label = "S"
+		elif index == 0:
+			role = "start"
+			label = "S"
+		elif index == path.size() - 1:
+			role = "target"
+			label = "T"
+		handles.append({
+			"index": index,
+			"role": role,
+			"label": label,
+			"grid": Vector2i(entry.get("grid", Vector2i.ZERO)),
+			"world_position": Vector2(entry.get("world_position", Vector2.ZERO)),
+		})
+	return handles
+
+
+func _build_network_drag_preview_segment_label(index: int, from_grid: Vector2i, to_grid: Vector2i, from_world: Vector2, to_world: Vector2) -> Dictionary:
+	var orientation := "point"
+	if from_grid.x != to_grid.x:
+		orientation = "horizontal"
+	elif from_grid.y != to_grid.y:
+		orientation = "vertical"
+	return {
+		"index": index - 1,
+		"label": "%02d" % index,
+		"from_grid": from_grid,
+		"to_grid": to_grid,
+		"mid_world": (from_world + to_world) * 0.5,
+		"orientation": orientation,
 	}
 
 
