@@ -50,9 +50,9 @@ func _test_docs_and_reports() -> void:
 	_assert(homebase_text.contains("get_frontier_probe_post_debrief_homebase_readability_snapshot"), "Homebase exposes TASK_640 snapshot")
 	_assert(meta_layer_text.contains("set_last_mission_result_summary"), "MetaLayerFlow forwards last mission result to Homebase")
 	_assert(report_text.contains("TASK_640 Frontier Probe Post Debrief Homebase Readability"), "Rolling report tracks TASK_640")
-	_assert(report_text.contains('latest_completed_task: "TASK_642 - Frontier Probe Homebase Visible Readiness Review"'), "Rolling report advances latest completed beyond TASK_640")
+	_assert(report_text.contains('latest_completed_task: "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings"'), "Rolling report advances latest completed beyond TASK_640")
 	_assert(handbook_text.contains("TASK_640 - Frontier Probe Post Debrief Homebase Readability"), "Status handbook tracks TASK_640")
-	_assert(handbook_text.contains('current_task: "TASK_642 - Frontier Probe Homebase Visible Readiness Review"'), "Status handbook current task advances beyond TASK_640")
+	_assert(handbook_text.contains('current_task: "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings"'), "Status handbook current task advances beyond TASK_640")
 	for key in [
 		"frontier_probe_post_debrief_homebase_readability.task_id",
 		"frontier_probe_post_debrief_homebase_readability.manifest_path",

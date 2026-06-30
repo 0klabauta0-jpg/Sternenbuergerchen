@@ -271,6 +271,7 @@ git checkout -b batch/<batch-name>
 - TASK_640 - Frontier Probe Post Debrief Homebase Readability (implementiert)
 - TASK_641 - Frontier Probe Homebase Next Sortie Readiness (implementiert)
 - TASK_642 - Frontier Probe Homebase Visible Readiness Review (implementiert)
+- TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -49,9 +49,9 @@ func _test_docs_and_reports() -> void:
 	_assert(contract_text.contains("Frontier-Probe-Debrief-Handoff-Feel"), "Mission feedback contract documents TASK_638")
 	_assert(controller_text.contains("get_frontier_probe_debrief_handoff_feel_snapshot"), "Controller exposes TASK_638 snapshot")
 	_assert(report_text.contains("TASK_638 Frontier Probe Debrief Handoff Feel"), "Rolling report tracks TASK_638")
-	_assert(report_text.contains('latest_completed_task: "TASK_642 - Frontier Probe Homebase Visible Readiness Review"'), "Rolling report advances latest completed beyond TASK_638")
+	_assert(report_text.contains('latest_completed_task: "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings"'), "Rolling report advances latest completed beyond TASK_638")
 	_assert(handbook_text.contains("TASK_638 - Frontier Probe Debrief Handoff Feel"), "Status handbook tracks TASK_638")
-	_assert(handbook_text.contains('current_task: "TASK_642 - Frontier Probe Homebase Visible Readiness Review"'), "Status handbook current task advances beyond TASK_638")
+	_assert(handbook_text.contains('current_task: "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings"'), "Status handbook current task advances beyond TASK_638")
 	for key in [
 		"frontier_probe_debrief_handoff_feel.task_id",
 		"frontier_probe_debrief_handoff_feel.manifest_path",
