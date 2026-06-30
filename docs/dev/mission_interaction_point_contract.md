@@ -209,6 +209,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `manual_review_required = true`, `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 - Der empfohlene naechste Task darf aus den Findings abgeleitet werden, darf aber keine Door-, Terrain-, Mission- oder Multiplayer-Wahrheit setzen.
 
+## Host/Client Door Real Click Manual Run Packet
+- `capture_host_client_two_window_real_run.ps1` darf Door-spezifische Manual-Run-Felder in `tmp/host_client_two_window_real_run_review.json` schreiben.
+- Das Packet nennt Workbench-Pfad, Findings-Manifest, erwartete Door-Button-/Shortcut-/GO-/Reject-/Open-/HUD-Felder und offene Manual-Checks.
+- `door_real_click_manual_run_gate` darf nur `manual_open` oder `review_ready` melden; `door_real_click_manual_review_done` bleibt false, bis die Workbench bewusst ausgefuellt wurde.
+- Das Packet ist Review-/Runbook-Evidence und darf keine Door-, Terrain-, Mission- oder Multiplayer-Wahrheit setzen.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Door Authority Feedback Polish
 - `MissionInteractionDoorMultiplayerAuthority.build_ui_feedback()` liefert zusaetzlich `compact_line`, `player_hint`, `next_action`, `severity` und `reject_reason_label`.
 - Diese Felder sind Anzeige-/Feedbackdaten fuer Button, Tooltip, Command-Panel, Reports und Verifier; sie setzen keine Door-, Terrain- oder Multiplayer-Wahrheit.

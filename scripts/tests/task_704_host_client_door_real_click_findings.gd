@@ -76,7 +76,7 @@ func _test_open_findings_snapshot() -> void:
 	_assert(confirmed.has("door_open_feedback_bound_to_runtime_producer"), "Findings confirms Door open producer feedback")
 	_assert(Array(findings.get("open_manual_findings", [])).has("host_window_launched"), "Findings keeps host window manual check open")
 	_assert(Array(findings.get("open_manual_findings", [])).has("hud_feedback_readable"), "Findings keeps HUD readability manual check open")
-	_assert(String(findings.get("recommended_next_task", "")) == "TASK_705 - Host/Client Door Real Click Manual Run", "Open findings recommend manual run")
+	_assert(String(findings.get("recommended_next_task", "")) == "TASK_705 - Host/Client Door Real Click Manual Run Packet", "Open findings recommend manual run packet")
 
 
 func _test_manual_negative_findings_snapshot() -> void:
@@ -105,7 +105,7 @@ func _test_manual_negative_findings_snapshot() -> void:
 	_assert(String(findings.get("manual_click_findings_gate", "")) == "manual_done", "Manual notes can close manual gate")
 	_assert(bool(findings.get("manual_review_done", false)), "Manual notes mark review done")
 	_assert(bool(findings.get("negative_note_detected", false)), "Findings detect negative note")
-	_assert(String(findings.get("recommended_next_task", "")) == "TASK_705 - Mission Door Layout/Visual Polish", "Negative notes recommend Door polish")
+	_assert(String(findings.get("recommended_next_task", "")) == "TASK_706 - Mission Door Layout/Visual Polish", "Negative notes recommend Door polish")
 	_assert(int(findings.get("completed_check_count", 0)) >= 10, "Completed manual notes propagate check count")
 
 

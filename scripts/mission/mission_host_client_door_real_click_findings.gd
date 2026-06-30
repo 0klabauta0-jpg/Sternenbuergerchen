@@ -89,10 +89,10 @@ static func _build_open_manual_findings(workbench_snapshot: Dictionary) -> Array
 
 static func _recommended_next_task(manual_review_done: bool, negative_note_detected: bool) -> String:
 	if not manual_review_done:
-		return "TASK_705 - Host/Client Door Real Click Manual Run"
+		return "TASK_705 - Host/Client Door Real Click Manual Run Packet"
 	if negative_note_detected:
-		return "TASK_705 - Mission Door Layout/Visual Polish"
-	return "TASK_705 - Host/Client Door Flow Acceptance"
+		return "TASK_706 - Mission Door Layout/Visual Polish"
+	return "TASK_706 - Host/Client Door Flow Acceptance"
 
 
 static func _build_summary(technical_path_gate: String, manual_click_findings_gate: String, completed_check_count: int, required_check_count: int) -> String:

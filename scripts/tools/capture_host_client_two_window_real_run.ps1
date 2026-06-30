@@ -446,6 +446,35 @@ $manifest = [ordered]@{
         "move_preview_readable_before_go",
         "go_feedback_visible_after_confirm"
     )
+    door_real_click_manual_run_task_id = "TASK_705"
+    door_real_click_source_findings_task_id = "TASK_704"
+    door_real_click_source_workbench_task_id = "TASK_700"
+    door_real_click_workbench_path = "docs/reports/host_client_door_real_click_workbench_2026_06_30.html"
+    door_real_click_findings_manifest_path = "tmp/host_client_door_real_click_findings.json"
+    door_real_click_workbench_manifest_path = "tmp/host_client_door_real_click_workbench.json"
+    door_real_click_expected_button = "DoorBreachButton"
+    door_real_click_expected_shortcut = "B"
+    door_real_click_expected_go_control = "GO"
+    door_real_click_expected_ready_line = "DOOR DOOR B->GO"
+    door_real_click_expected_wrong_team_reason = "peer_team_mismatch"
+    door_real_click_expected_open_line = "DOOR DOOR OPEN"
+    door_real_click_expected_hud_surface = "mission_interaction_door_authority_visible_line"
+    door_real_click_manual_review_required = $true
+    door_real_click_manual_review_done = $false
+    door_real_click_manual_run_gate = $(if ($visibleRejectReviewReady) { "review_ready" } else { "manual_open" })
+    door_real_click_manual_checks = @(
+        "host_window_launched",
+        "client_window_launched",
+        "host_door_button_visible",
+        "client_door_button_visible",
+        "shortcut_b_triggers_hook",
+        "go_required_visible",
+        "wrong_team_reject_visible",
+        "door_open_visible_on_host",
+        "door_open_visible_on_client",
+        "hud_feedback_readable",
+        "workbench_notes_exported"
+    )
     close_after_capture = [bool]$CloseAfterCapture
     wait_seconds = $WaitSeconds
     planned_godot_bin = $plannedGodotBin
@@ -482,6 +511,13 @@ $manifest = [ordered]@{
         "decision_drill_next_aa_visible",
         "decision_drill_preview_before_go",
         "decision_drill_go_feedback_visible",
+        "door_real_click_host_button_visible",
+        "door_real_click_client_button_visible",
+        "door_real_click_shortcut_b",
+        "door_real_click_go_required",
+        "door_real_click_wrong_team_reject",
+        "door_real_click_open_visible_host_client",
+        "door_real_click_hud_readable",
         "input_latency_after_reject",
         "f6_readability",
         "performance_feel",
@@ -493,6 +529,8 @@ $manifest = [ordered]@{
     recommended_next_badge_review_task = "TASK_620 - Host Client Badge Re-Capture Review"
     recommended_next_real_click_review_task = "TASK_626 - Host Client Real Click Review Evidence"
     recommended_next_decision_drill_capture_task = "TASK_663 - Host Client Decision Drill Visual Findings"
+    recommended_next_door_real_click_manual_run_task = "TASK_705 - Host/Client Door Real Click Manual Run Packet"
+    recommended_next_door_real_click_after_manual_task = "TASK_706 - Mission Door Layout/Visual Polish"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
