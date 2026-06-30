@@ -79,8 +79,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
-      <span class="pill">Branch: task/homebase-missionpanel-density-findings</span>
-      <span class="pill">Aktueller Slice: TASK_647</span>
+      <span class="pill">Branch: task/homebase-next-sortie-action-cue</span>
+      <span class="pill">Aktueller Slice: TASK_648</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -99,7 +99,7 @@
         <article class="card wide">
           <h2>Wo wir sind</h2>
           <p>Der spielbare Kern ist als Test- und Review-Spine vorhanden: Homebase, Briefing/Readiness, Dropship/Insertion, Mission-HUD, Fireteam-Befehle, Frontier-Probe-Route, Debrief-Return und Homebase-Next-Sortie sind miteinander verdrahtet.</p>
-          <div class="callout">TASK_647 reduziert den nach TASK_646 belegten Scan-Druck: die alte MissionSummary klappt nur im Post-Debrief-Follow-up-Zustand weg, waehrend Follow-up, Briefing und Readiness sichtbar bleiben.</div>
+          <div class="callout">TASK_648 macht den Homebase-Re-Entry handelbarer: Review-Gains bleiben sichtbar, aber die Next-Sortie-Zeile zeigt wieder die erste echte Vorbereitungsluecke, z.B. `now: Stage fireteam`.</div>
         </article>
         <article class="card">
           <h2>Status</h2>
@@ -111,6 +111,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_645"> TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_646"> TASK_646 - Homebase MissionPanel Density Playfeel Review vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_647"> TASK_647 - Homebase MissionPanel Density Findings vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_648"> TASK_648 - Homebase Next Sortie Action Cue vorhanden</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.real_homebase_window_review"> Echter Homebase-Fensterlauf erledigt</label>
         </article>
         <article class="card">
@@ -126,7 +127,7 @@
           <table>
             <thead><tr><th>Bereich</th><th>Stand</th><th>Reibung</th><th>Guter naechster Griff</th></tr></thead>
             <tbody>
-              <tr><td>Spiel-Flow</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegbar; TASK_644 erzeugt das passende Real-Window-Review-Paket, TASK_645 macht den Return-/Next-Sortie-Block sichtbarer, TASK_646 misst danach die MissionPanel-Dichte und TASK_647 nimmt die doppelte Legacy-Summary im Follow-up-Zustand raus.</td><td>Das echte Bediengefuehl im Fenster ist erst entschieden, wenn der neue Follow-up-Block plus TASK_647-Manifest angesehen wurde.</td><td>Homebase-Fensterblick nach TASK_647 ansehen und danach wieder breiter Core-Loop/Playfeel priorisieren.</td></tr>
+              <tr><td>Spiel-Flow</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegbar; TASK_644 erzeugt das passende Real-Window-Review-Paket, TASK_645 macht den Return-/Next-Sortie-Block sichtbarer, TASK_646 misst danach die MissionPanel-Dichte, TASK_647 nimmt die doppelte Legacy-Summary im Follow-up-Zustand raus und TASK_648 fuehrt den aktuellen Next-Sortie-Schritt zur ersten echten Vorbereitungsluecke.</td><td>Das echte Bediengefuehl im Fenster ist erst entschieden, wenn der Follow-up-Block plus Action-Cue angesehen wurde.</td><td>Homebase-Fensterblick nach TASK_648 ansehen oder Host/Client-Klickgefuehl und Mini-Szenario-Spielbarkeit priorisieren.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move/Defend/Flank, ROE, Suppression, LOS/Threat-Preview und AAR-Schale sind vorbereitet.</td><td>Viele Werte bleiben Testdaten; echte Balance braucht kleine Szenarien.</td><td>One-Screen-Szenario statt grosser Combat-Rewrite.</td></tr>
               <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Team-/Peer-Badges und Reject-Feedback existieren.</td><td>Langzeit- und echte Zwei-Fenster-Klicklaeufe fehlen.</td><td>Gezielter Host/Client-Klicktest nach sichtbarer UI-Politur.</td></tr>
               <tr><td>Editor</td><td>Terrain-/Asset-Workflow wurde verbessert, bleibt aber als Bedienwerkzeug noch schwerfaellig.</td><td>Asset-Erkennung, Rotation, Snap-Logik und Baufluss brauchen weiter echte UX-Slices.</td><td>Nach Core-Loop-Fensterlauf wieder Editor-Workflow testen.</td></tr>
@@ -173,7 +174,7 @@
             <tbody>
               <tr><td>Laufender Review</td><td><code>docs/reports/project_review_status_2026_06_28.html</code></td><td>Grosses Arbeitsprotokoll mit Exportfeldern.</td></tr>
               <tr><td>Status-Handbuch</td><td><code>docs/reports/project_status_handbook_2026_06_29.html</code></td><td>Bestehender Handbuch-/Statusbericht, jetzt bis TASK_643 nachgezogen.</td></tr>
-              <tr><td>Dieser Bericht</td><td><code>docs/reports/project_state_handbook_2026_06_30.html</code></td><td>Frischer kompakter Ist-Stand mit Handbuch und Playtest-Notizen bis TASK_647.</td></tr>
+              <tr><td>Dieser Bericht</td><td><code>docs/reports/project_state_handbook_2026_06_30.html</code></td><td>Frischer kompakter Ist-Stand mit Handbuch und Playtest-Notizen bis TASK_648.</td></tr>
               <tr><td>TASK_644 Real Window</td><td><code>tmp/frontier_probe_homebase_real_window_review.png</code></td><td>Echter Homebase-Viewport ohne Headless oder ehrlicher Headless-Fallback.</td></tr>
               <tr><td>TASK_642/643 Evidence</td><td><code>tmp/frontier_probe_homebase_visible_readiness_review.png</code></td><td>Beschriftetes Homebase-Readiness-Review-Board.</td></tr>
             </tbody>
@@ -189,7 +190,7 @@
           <table>
             <thead><tr><th>Reibung</th><th>Warum wichtig</th><th>Umgang</th></tr></thead>
             <tbody>
-              <tr><td>Echter Homebase-Fensterblick nach Density-Finding offen</td><td>TASK_647 reduziert Text-/Sektionsdruck strukturell, aber der menschliche Geschmackstest bleibt getrennt.</td><td>Fensterbefund gegen Manifest ansehen; nur bei echter Layout-Reibung weiter polieren.</td></tr>
+              <tr><td>Echter Homebase-Fensterblick nach Action-Cue offen</td><td>TASK_648 klaert den naechsten Handlungsschritt strukturell, aber der menschliche Geschmackstest bleibt getrennt.</td><td>Fensterbefund gegen Manifest ansehen; nur bei echter Reibung weiter polieren.</td></tr>
               <tr><td>Viele kleine Review-Artefakte</td><td>Sie geben Sicherheit, koennen aber das echte Spielgefuehl verdecken.</td><td>Nach jedem Evidence-Slice einen echten Blick erzwingen.</td></tr>
               <tr><td>Legacy-Testdriver</td><td>Teile des historischen Spielkerns liegen noch unter <code>scripts/tests</code>.</td><td>Nur in kleinen, spielbaren Extraction-Slices anfassen.</td></tr>
               <tr><td>Editor-Bedienung</td><td>Mapbau soll Spass machen, ist aber noch kein fertiges Bauwerkzeug.</td><td>Nach dem spielbaren Flow erneut UX-Slice planen.</td></tr>
@@ -242,7 +243,7 @@
         <article class="card wide">
           <h2>Empfohlene naechste Schritte</h2>
           <ol>
-            <li>TASK_647-Homebase-Fensterblick gegen das Dichte-Findings-Manifest ansehen und den Follow-up-Block visuell bewerten.</li>
+            <li>TASK_648-Homebase-Fensterblick gegen das Action-Cue-Manifest ansehen und pruefen, ob der naechste Schritt wirklich klar wirkt.</li>
             <li>Falls konkret stoerend: kleiner Runtime-UI-Polish fuer Homebase-Readiness-Zeile.</li>
             <li>Danach wieder Richtung spielbares Szenario: kurze Frontier-Probe-Runde mit klarer Entscheidung, nicht nur Evidence.</li>
             <li>Wenn der Spielpfad sitzt: Editor-UX erneut von aussen testen.</li>
@@ -321,8 +322,8 @@
           },
           metadata: {
             branch: "task/frontier-probe-homebase-real-window-review",
-            current_task: "TASK_647 - Homebase MissionPanel Density Findings",
-            latest_completed_task: "TASK_647 - Homebase MissionPanel Density Findings",
+            current_task: "TASK_648 - Homebase Next Sortie Action Cue",
+            latest_completed_task: "TASK_648 - Homebase Next Sortie Action Cue",
             recommended_next: "Runtime Homebase UI polish only if real-window friction is visible"
           }
         };

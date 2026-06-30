@@ -443,6 +443,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_647_homebase_missionpanel_density_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_646_homebase_missionpanel_density_playfeel_review.gd`, `git diff --check`.
 - Naechster Schritt: Echten Homebase-Fensterblick mit TASK_647-Manifest ansehen; danach wieder breiter auf Core-Loop-/Playfeel-Fortschritt gehen.
 
+### TASK_648 - Homebase Next Sortie Action Cue
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_648_homebase_next_sortie_action_cue.md`, `docs/tasks/TASK_647_homebase_missionpanel_density_findings.md`, `docs/tasks/TASK_641_frontier_probe_homebase_next_sortie_readiness.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`, `docs/reports/project_state_handbook_2026_06_30.html`
+- Stand: `Review gains` bleibt nach Debrief-Return sichtbar, blockiert aber nicht mehr den naechsten handelbaren Sortie-Schritt.
+- Stand: `get_frontier_probe_homebase_next_sortie_readiness_snapshot()` exportiert `review_gains_non_blocking`; im Award-/No-Payload-Fixture zeigt `current_next_step_id = stage_fireteam` und die Zeile `now: Stage fireteam`.
+- Stand: `scripts/tests/task_648_homebase_next_sortie_action_cue.gd` erzeugt `tmp/homebase_next_sortie_action_cue.json` als read-only Manifest fuer diesen Re-Entry-Cue.
+- Risiken/offen: Es gibt weiterhin keinen echten interaktiven Progression-Review-Dialog oder Acknowledge-State. Wenn dieser spaeter gebaut wird, kann `Review gains` wieder eine echte Aktion werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_648_homebase_next_sortie_action_cue.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_641_frontier_probe_homebase_next_sortie_readiness.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_647_homebase_missionpanel_density_findings.gd`, `git diff --check`.
+- Naechster Schritt: Entweder echten Homebase-Fensterblick nach TASK_648 ansehen oder wieder Richtung Host/Client-Klickgefuehl und Mini-Szenario-Spielbarkeit gehen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

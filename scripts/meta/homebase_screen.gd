@@ -381,6 +381,7 @@ func get_frontier_probe_homebase_next_sortie_readiness_snapshot() -> Dictionary:
 	_append_visual_audit_check(checks, "readiness_line_matches_label", not readiness_line.is_empty() and label_text == readiness_line, "critical", "Rendered readiness line should match the snapshot.")
 	_append_visual_audit_check(checks, "current_next_step_present", _next_sortie_steps_contain(steps, current_step_id), "critical", "Readiness should point to one concrete current next step.")
 	_append_visual_audit_check(checks, "readiness_steps_complete", _next_sortie_steps_contain(steps, "review_roster_gains") and _next_sortie_steps_contain(steps, "stage_fireteam") and _next_sortie_steps_contain(steps, "assign_loadout") and _next_sortie_steps_contain(steps, "prepare_transport") and _next_sortie_steps_contain(steps, "start_next_sortie"), "critical", "Readiness should cover roster review, staging, loadout, transport and launch.")
+	_append_visual_audit_check(checks, "review_gains_non_blocking", not _has_last_result_progression_awards() or current_step_id != "review_roster_gains", "critical", "Roster gains should remain visible without hiding the next actionable sortie step.")
 	_append_visual_audit_check(checks, "read_only", true, "critical", "Snapshot reads existing Homebase state only.")
 	var failed_count: int = _count_visual_audit_failures(checks, "critical")
 	return {
@@ -400,6 +401,7 @@ func get_frontier_probe_homebase_next_sortie_readiness_snapshot() -> Dictionary:
 		"rendered_readiness_line": label_text,
 		"current_next_step_id": current_step_id,
 		"readiness_steps": steps,
+		"review_gains_non_blocking": not _has_last_result_progression_awards() or current_step_id != "review_roster_gains",
 		"pre_mission_readiness_state": String(readiness.get("overall_state", "")).strip_edges(),
 		"pre_mission_readiness_summary": String(readiness.get("summary_text", "")).strip_edges(),
 		"can_request_mission_start": can_request_mission_start(),
@@ -3292,8 +3294,6 @@ func _make_next_sortie_step(id: String, label: String, ready: bool, current_step
 func _resolve_next_sortie_current_step_id(readiness: Dictionary, staging: Dictionary) -> String:
 	if not _is_frontier_probe_last_result():
 		return ""
-	if _has_last_result_progression_awards():
-		return "review_roster_gains"
 	if int(staging.get("payload_operator_count", 0)) <= 0:
 		return "stage_fireteam"
 	if not _readiness_item_is_ready(readiness, "loadout"):

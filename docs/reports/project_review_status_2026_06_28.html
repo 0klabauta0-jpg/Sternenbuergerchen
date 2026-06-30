@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_647 auf <code>task/homebase-missionpanel-density-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_648 auf <code>task/homebase-next-sortie-action-cue</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -309,6 +309,7 @@
       <span class="pill good">TASK_643 Evidence-Labels</span>
       <span class="pill good">TASK_646 Density Review</span>
       <span class="pill good">TASK_647 Density Findings</span>
+      <span class="pill good">TASK_648 Action Cue</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2431,6 +2432,26 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_648 Homebase Next Sortie Action Cue</h2>
+          <p>TASK_648 macht den Homebase-Re-Entry nach Debrief spielbarer: XP-/Skill-Gains bleiben in der Next-Sortie-Kette sichtbar, blockieren aber nicht mehr den naechsten handelbaren Schritt. Ohne gestagte Payload zeigt die Zeile jetzt <code>now: Stage fireteam</code>.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Action Cue</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_648 - Homebase Next Sortie Action Cue" data-export-key="homebase_next_sortie_action_cue.task_id"></td><td>Core-Loop-Re-Entry statt weiterem reinen Layout-Polish.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/homebase_next_sortie_action_cue.json" data-export-key="homebase_next_sortie_action_cue.manifest_path"></td><td>Lokaler JSON-Anker fuer den naechsten handelbaren Homebase-Schritt.</td></tr>
+                <tr><td>Aktueller Schritt</td><td><input readonly value="stage_fireteam" data-export-key="homebase_next_sortie_action_cue.current_next_step_id"></td><td>Bei Awards ohne Payload fuehrt die UI zur naechsten echten Vorbereitungsluecke.</td></tr>
+                <tr><td>Readiness-Zeile</td><td><input readonly value="now: Stage fireteam" data-export-key="homebase_next_sortie_action_cue.readiness_line"></td><td>Der Spieler sieht, was als naechstes zu tun ist.</td></tr>
+                <tr><td>Review gains</td><td><input readonly value="non_blocking" data-export-key="homebase_next_sortie_action_cue.review_gains_non_blocking"></td><td>Gains bleiben sichtbar, aber nicht als dauerhafter Blocker.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="homebase_next_sortie_action_cue.read_only"></td><td>Keine Navigation, kein Command, keine Gameplay-Wahrheit.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_648 Action-Cue-Notiz
+            <textarea data-note-key="notes.homebase_next_sortie_action_cue" data-export-key="homebase_next_sortie_action_cue.notes" placeholder="Beim Playtest notieren: Fuehrt die Homebase nach Debrief klar genug zum naechsten Fireteam-/Dropship-Schritt?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3428,7 +3449,8 @@
               "TASK_644 - Frontier Probe Homebase Real Window Review",
               "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish",
               "TASK_646 - Homebase MissionPanel Density Playfeel Review",
-              "TASK_647 - Homebase MissionPanel Density Findings"
+              "TASK_647 - Homebase MissionPanel Density Findings",
+              "TASK_648 - Homebase Next Sortie Action Cue"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3484,7 +3506,8 @@
               "TASK_644 erzeugt ein echtes Homebase-Fenster-Review-Paket mit Viewport-Readback, wenn ohne Headless gestartet, und laesst den menschlichen Sichtentscheid sonst als manual_open.",
               "TASK_645 hebt die Post-Debrief-Summary und Next-Sortie-Zeile in einen lesbareren Follow-up-Panelblock, bleibt aber read-only und wartet weiter auf den echten Geschmackstest.",
               "TASK_646 macht die MissionPanel-Dichte nach TASK_645 als read-only Snapshot und Manifest pruefbar.",
-              "TASK_647 kollabiert die alte MissionSummary nur im Post-Debrief-Follow-up-Zustand und reduziert dadurch Text- und Sektionsdruck."
+              "TASK_647 kollabiert die alte MissionSummary nur im Post-Debrief-Follow-up-Zustand und reduziert dadurch Text- und Sektionsdruck.",
+              "TASK_648 laesst Review gains sichtbar, fuehrt den aktuellen Next-Sortie-Schritt aber zur ersten echten Vorbereitungsluecke weiter."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3493,14 +3516,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_646",
-            current_focus: "Homebase MissionPanel Density Findings",
-            latest_completed_task: "TASK_647 - Homebase MissionPanel Density Findings"
+            current_repo_base: "integration/core-foundation after TASK_647",
+            current_focus: "Homebase Next Sortie Action Cue",
+            latest_completed_task: "TASK_648 - Homebase Next Sortie Action Cue"
           },
           metadata: {
-            branch: "task/homebase-missionpanel-density-findings",
-            integration_base: "integration/core-foundation after TASK_646",
-            head: "task/homebase-missionpanel-density-findings",
+            branch: "task/homebase-next-sortie-action-cue",
+            integration_base: "integration/core-foundation after TASK_647",
+            head: "task/homebase-next-sortie-action-cue",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }

@@ -276,6 +276,7 @@ git checkout -b batch/<batch-name>
 - TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish (implementiert)
 - TASK_646 - Homebase MissionPanel Density Playfeel Review (implementiert)
 - TASK_647 - Homebase MissionPanel Density Findings (implementiert)
+- TASK_648 - Homebase Next Sortie Action Cue (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

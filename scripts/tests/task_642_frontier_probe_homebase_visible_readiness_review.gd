@@ -50,9 +50,9 @@ func _test_docs_and_reports() -> void:
 	_assert(contract_text.contains("Frontier-Probe-Homebase-Visible-Readiness-Review"), "Mission feedback contract documents TASK_642")
 	_assert(homebase_text.contains("get_frontier_probe_homebase_visible_readiness_review_snapshot"), "Homebase exposes TASK_642 snapshot")
 	_assert(report_text.contains("TASK_642 Frontier Probe Homebase Visible Readiness Review"), "Rolling report tracks TASK_642")
-	_assert(report_text.contains('latest_completed_task: "TASK_647 - Homebase MissionPanel Density Findings"'), "Rolling report advances latest completed beyond TASK_642")
+	_assert(report_text.contains('latest_completed_task: "TASK_648 - Homebase Next Sortie Action Cue"'), "Rolling report advances latest completed beyond TASK_642")
 	_assert(handbook_text.contains("TASK_642 - Frontier Probe Homebase Visible Readiness Review"), "Status handbook tracks TASK_642")
-	_assert(handbook_text.contains('current_task: "TASK_647 - Homebase MissionPanel Density Findings"'), "Status handbook current task advances beyond TASK_642")
+	_assert(handbook_text.contains('current_task: "TASK_648 - Homebase Next Sortie Action Cue"'), "Status handbook current task advances beyond TASK_642")
 	for key in [
 		"frontier_probe_homebase_visible_readiness_review.task_id",
 		"frontier_probe_homebase_visible_readiness_review.png_path",
@@ -100,7 +100,7 @@ func _test_visible_readiness_review() -> void:
 	_assert(String(snapshot.get("readiness_gate", "")) == "pass", "TASK_642 builds on green TASK_641 readiness")
 	_assert(bool(snapshot.get("post_summary_visible", false)), "Post-Debrief summary is visible")
 	_assert(bool(snapshot.get("next_sortie_visible", false)), "Next-sortie readiness line is visible")
-	_assert(String(snapshot.get("current_next_step_id", "")) == "review_roster_gains", "Visible review preserves current next step")
+	_assert(String(snapshot.get("current_next_step_id", "")) == "stage_fireteam", "Visible review preserves the current actionable next step")
 	_assert(String(snapshot.get("readiness_line", "")).begins_with("Next sortie:"), "Visible review carries next-sortie line")
 	_assert(String(snapshot.get("rendered_readiness_line", "")) == String(snapshot.get("readiness_line", "")), "Rendered readiness line matches snapshot")
 	_assert(_check_passed(snapshot, "labels_inside_mission_panel"), "Readiness labels stay inside MissionPanel")

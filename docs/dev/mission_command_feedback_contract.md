@@ -510,6 +510,12 @@ TASK_647 wendet die belegte Dichte-Reibung aus TASK_646 schmal an: Wenn nach Fro
 
 Erwartete Struktur: Der bestehende Snapshot `get_homebase_missionpanel_density_playfeel_snapshot()` bleibt stabil und ergaenzt `mission_summary_visible`, `mission_summary_collapsed`, `density_findings_style_id = task_647_homebase_density_findings_v1` und das Gate `density_warning_reduced`. Der Task reduziert sichtbare Direktsektionen und Textmenge, setzt aber weiterhin keine Navigation, keinen Start-Commit, kein Staging, kein MissionResult und keine Gameplay-Wahrheit. Die vertikale Fuellung bleibt ein Review-Warnwert fuer den echten Fensterblick.
 
+## Homebase-Next-Sortie-Action-Cue (TASK_648)
+
+TASK_648 schaerft den Homebase-Re-Entry nach einem Frontier-Probe-Debrief: `Review gains` bleibt in der Next-Sortie-Kette sichtbar, darf aber nicht den naechsten wirklich handelbaren Schritt verdecken. Solange keine Payload gestaged ist, muss `current_next_step_id = stage_fireteam` sein und die gerenderte Zeile `now: Stage fireteam` nennen.
+
+Erwartete Struktur: `get_frontier_probe_homebase_next_sortie_readiness_snapshot()` behaelt `schema = sternenbuergerchen.frontier_probe_homebase_next_sortie_readiness.v1`, nennt weiterhin alle Schritte inklusive `review_roster_gains`, exportiert aber zusaetzlich `review_gains_non_blocking = true`, wenn Awards vorhanden sind und der aktuelle Schritt trotzdem auf die naechste Vorbereitungsluecke zeigt. Der Snapshot bleibt read-only und erzeugt keine Navigation, keinen Command und keine Gameplay-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
