@@ -136,7 +136,16 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Producer liest Runtime-Wahrheit aus dem vorhandenen Interaction-State-Pfad und schreibt nur Registry-Overrides; `TerrainMapData` und statische `TerrainTileData` bleiben unveraendert.
 - Gleiche Override-Sets werden per Fingerprint uebersprungen, damit der Sync-Pfad nicht bei jedem Status-Refresh unnoetig dirty setzt.
 - Der Mission-Status-Payload darf Diagnosefelder wie Override-Count, Apply-Reason und Summary exportieren. Diese Werte bleiben Feedback/Debug, nicht Gameplay-Wahrheit.
-- Echte Breach-/Use-Bedienung und Door-Animationen bleiben eigene Slices.
+- Sichtbare Breach-/Use-Bedienung und Door-Animationen bleiben eigene Slices.
+
+## Door Use/Breach Command Hook
+- `MissionTacticalSandboxController.create_selected_mission_interaction_door_use_breach_command_hook()` ist der door-spezifische Bedien-Hook fuer nutzbare Door-Interactions.
+- Der Hook nutzt den bestehenden `create_selected_mission_interaction_use_intent()`-Pfad und erzeugt keine zweite Door-, Mission- oder UI-Wahrheit.
+- Der Hook bleibt read-only bis zur GO-Bestaetigung: `requires_go = true`; echte Ausfuehrung laeuft weiter ueber Waypoint, Runtime-Progress und Door Runtime State Producer.
+- Door-Waypoints muessen `door_runtime_hook`, `door_runtime_state_target` und `door_runtime_producer` tragen, damit Runtime-Progress die effektiven TerrainRegistry-Overrides speisen kann.
+- `get_command_feedback_snapshot()` darf Hook-Status und lesbare BREACH/GO-Zeile exportieren. Diese Werte sind Bedienfeedback, keine Gameplay-Wahrheit.
+- Der Hook darf blockieren, wenn keine Door-Interaction, kein nutzbarer Use-Intent oder ein nicht unterstuetzter Door-Order-Typ vorliegt.
+- Ein sichtbarer HUD-Button/Shortcut, Animationen und Asset-Swaps bleiben Folge-Slices.
 
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.

@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_694 - Door Use/Breach Command Hook
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_694_door_use_breach_command_hook.md`, `docs/tasks/TASK_693_door_runtime_state_producer.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionTacticalSandboxController.create_selected_mission_interaction_door_use_breach_command_hook()` erzeugt aus einer nutzbaren Door-Interaction einen lesbaren BREACH/GO-Hook auf Basis des bestehenden Use-Intent-Pfads.
+- Stand: Door-Waypoints tragen `door_runtime_hook`, `door_runtime_state_target` und `door_runtime_producer`, sodass Runtime-Progress den Door-State-Producer speisen kann.
+- Stand: `get_command_feedback_snapshot()` exportiert den Hook fuer UI/Verifier.
+- Risiken/offen: Noch kein sichtbarer eigener HUD-Button/Shortcut und keine Door-Animation; der Hook ist der sichere Runtime-/Command-Pfad.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_694_door_use_breach_command_hook.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_693_door_runtime_state_producer.gd`, `git diff --check`.
+- Naechster Schritt: TASK_695 - Door Interaction HUD Button/Shortcut oder echter Manual-Sight-Review.
+
 ### TASK_693 - Door Runtime State Producer
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_693_door_runtime_state_producer.md`, `docs/tasks/TASK_692_door_runtime_collision_los_contract.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
 - Stand: `MissionTacticalSandboxController.get_mission_interaction_door_runtime_collision_los_snapshot()` baut aus dem bestehenden Object-Reaction-Pfad und der `TerrainRegistry` den Door-Runtime-Override-Snapshot.
 - Stand: `apply_mission_interaction_door_runtime_collision_los_snapshot()` wendet diese Overrides auf die `TerrainRegistry` an und ueberspringt unveraenderte Overrides per Fingerprint.
 - Stand: Der 3D-Missionsstatus-Payload exportiert Door-Override-Diagnosewerte, ohne UI-Wahrheit zu setzen.
-- Risiken/offen: Echte Breach-/Use-Bedienung und Door-Animation bleiben Folgearbeit. Der FullHD-Sichtlauf bleibt separat offen.
+- Risiken/offen: Sichtbarer Breach-/Use-Button und Door-Animation bleiben Folgearbeit. Der FullHD-Sichtlauf bleibt separat offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_693_door_runtime_state_producer.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_692_door_runtime_collision_los_contract.gd`, `git diff --check`.
-- Naechster Schritt: TASK_694 - Door Use/Breach Command Hook oder echter Manual-Sight-Review.
+- Naechster Schritt: TASK_695 - Door Interaction HUD Button/Shortcut oder echter Manual-Sight-Review.
 
 ### TASK_692 - Door Runtime Collision/LOS Contract
 - Status: implementiert im Arbeitsstand
@@ -26,9 +36,9 @@
 - Stand: `MissionInteractionDoorRuntimeCollisionLOS` uebersetzt Door-Reaction-States in read-only Runtime-Tile-Overrides fuer Walkability, LOS-Blocker, Object-Height und Cover.
 - Stand: `TerrainRegistry` haelt diese Overrides getrennt von `TerrainMapData` und liefert effektive Werte ueber `is_walkable()`, `blocks_los_at_grid()`, `get_object_height_at_grid()` und `get_cover_at()`.
 - Stand: `TerrainPathfinder` und `LineOfSightSystem` lesen die effektiven Registry-Werte, sodass eine offene Runtime-Door Pfad und LOS freigeben kann, ohne statische Tile-Daten zu mutieren.
-- Risiken/offen: Der Door-State wird noch nicht automatisch aus einem echten Use-/Breach-Command in die Mission eingespielt. Der echte Fenster-Sichtlauf bleibt separat offen.
+- Risiken/offen: Der Door-State wird ueber den Hook-Pfad vorbereitet, aber sichtbare HUD-Bedienung und Animation bleiben separat offen. Der echte Fenster-Sichtlauf bleibt separat offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_692_door_runtime_collision_los_contract.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_691_mission_interaction_runtime_visual_assets.gd`, `git diff --check`.
-- Naechster Schritt: TASK_694 - Door Use/Breach Command Hook oder echter Manual-Sight-Review.
+- Naechster Schritt: TASK_695 - Door Interaction HUD Button/Shortcut oder echter Manual-Sight-Review.
 
 ### TASK_690 - Mission Interaction Manual Sight Notes
 - Status: implementiert im Arbeitsstand
