@@ -6161,12 +6161,16 @@ func _build_strategic_status_text() -> String:
 func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 	var objective_line: String = _build_mission_objective_interaction_line().strip_edges()
 	var cargo_line: String = _build_mission_cargo_extract_line().strip_edges()
+	var interaction_progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot()
+	var interaction_progress_line: String = String(interaction_progress_readability.get("compact_line", "")).strip_edges()
 	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text().strip_edges()
 	var combat_hud_snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var combat_hud_line: String = String(combat_hud_snapshot.get("mission_control_line", "")).strip_edges()
 	var combat_or_contact_line: String = combat_hud_line if not combat_hud_line.is_empty() else contact_diagnostics_text
 	var fire_rule_text: String = _compact_fire_rule_for_hud(_get_selected_fire_rule_consensus())
 	var source_lines: PackedStringArray = PackedStringArray()
+	if not interaction_progress_line.is_empty():
+		source_lines.append(interaction_progress_line)
 	if not objective_line.is_empty():
 		source_lines.append(objective_line)
 	if not cargo_line.is_empty():
@@ -6174,6 +6178,8 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 	if not combat_or_contact_line.is_empty():
 		source_lines.append(combat_or_contact_line)
 	var compact_parts: PackedStringArray = PackedStringArray()
+	if not interaction_progress_line.is_empty():
+		compact_parts.append(interaction_progress_line)
 	if not objective_line.is_empty():
 		compact_parts.append(objective_line)
 	if not cargo_line.is_empty():
@@ -6205,6 +6211,8 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 		"line_within_limit": _max_string_length(Array(visible_lines)) <= line_limit,
 		"objective_line": objective_line,
 		"cargo_line": cargo_line,
+		"interaction_progress_line": interaction_progress_line,
+		"interaction_progress_readability": interaction_progress_readability,
 		"combat_line": combat_hud_line,
 		"contact_line": contact_diagnostics_text,
 		"fire_rule": _get_selected_fire_rule_consensus(),
@@ -6213,6 +6221,7 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 		"contains_contact_or_combat": not combat_or_contact_line.is_empty(),
 		"contains_roe": not fire_rule_text.is_empty(),
 		"contains_suppress": fire_rule_text == "SUP" or mission_control_line.to_upper().contains("SUP"),
+		"contains_interaction_progress": not interaction_progress_line.is_empty() and mission_control_line.contains(interaction_progress_line),
 		"contains_objective": not objective_line.is_empty() and mission_control_line.contains(objective_line),
 		"contains_cargo": not cargo_line.is_empty() and mission_control_line.contains(cargo_line),
 	}
@@ -16730,6 +16739,85 @@ func get_mission_interaction_use_feedback_snapshot() -> Dictionary:
 	return Dictionary(MISSION_INTERACTION_USE_FEEDBACK_SCRIPT.call("build_snapshot", use_state_snapshot, feedback_context)).duplicate(true)
 
 
+func get_mission_interaction_progress_readability_snapshot() -> Dictionary:
+	return _build_mission_interaction_progress_readability_snapshot(get_mission_interaction_use_feedback_snapshot())
+
+
+func _build_mission_interaction_progress_readability_snapshot(use_feedback: Dictionary = {}) -> Dictionary:
+	var feedback: Dictionary = use_feedback
+	if feedback.is_empty():
+		feedback = get_mission_interaction_use_feedback_snapshot()
+	var primary: Dictionary = Dictionary(feedback.get("primary_feedback", {}))
+	var status: String = String(primary.get("status", feedback.get("primary_status", ""))).strip_edges().to_lower()
+	var feedback_line: String = String(primary.get("feedback_line", feedback.get("feedback_line", ""))).strip_edges()
+	var compact_line: String = _build_compact_mission_interaction_progress_line(primary, feedback_line)
+	var display_line: String = compact_line if not compact_line.is_empty() else feedback_line
+	var line_limit: int = 72
+	var active: bool = not display_line.is_empty() and (status == "in_progress" or status == "usable" or status == "blocked" or status == "interrupted")
+	return {
+		"schema": "sternenbuergerchen.mission_interaction_progress_readability.v1",
+		"source_schema": String(feedback.get("schema", "")).strip_edges(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"evidence_level": "headless_contract",
+		"manual_fullhd_review_required": true,
+		"manual_fullhd_review_done": false,
+		"active": active,
+		"status": status,
+		"interaction_id": String(primary.get("interaction_id", feedback.get("primary_interaction_id", ""))).strip_edges(),
+		"interaction_type": String(primary.get("interaction_type", "")).strip_edges(),
+		"display_token": String(primary.get("display_token", "")).strip_edges(),
+		"fireteam_token": _normalize_mission_interaction_fireteam_token(String(primary.get("nearest_fireteam_id", "")).strip_edges()),
+		"feedback_line": feedback_line,
+		"compact_line": compact_line,
+		"display_line": display_line,
+		"action_label": String(primary.get("action_label", feedback.get("action_label", ""))).strip_edges(),
+		"progress": clampf(float(primary.get("progress", 0.0)), 0.0, 1.0),
+		"hold_seconds": maxf(float(primary.get("hold_seconds", 0.0)), 0.0),
+		"duration_seconds": maxf(float(primary.get("duration_seconds", 0.0)), 0.0),
+		"line_char_limit": line_limit,
+		"line_length": display_line.length(),
+		"line_within_limit": display_line.length() <= line_limit,
+		"contains_progress_percent": display_line.contains("%"),
+		"contains_hold_time": display_line.contains("/") and display_line.contains("s"),
+		"contains_action_token": not String(primary.get("display_token", "")).strip_edges().is_empty() and display_line.contains(String(primary.get("display_token", "")).strip_edges()),
+		"contains_fireteam_token": display_line.contains(_normalize_mission_interaction_fireteam_token(String(primary.get("nearest_fireteam_id", "")).strip_edges())),
+		"recommended_surface": "mission_control_status",
+		"reason": "compact_progress_line" if active else "no_active_interaction_progress",
+	}
+
+
+func _build_compact_mission_interaction_progress_line(primary_feedback: Dictionary, fallback_line: String) -> String:
+	var status: String = String(primary_feedback.get("status", "")).strip_edges().to_lower()
+	var display_token: String = String(primary_feedback.get("display_token", "")).strip_edges().to_upper()
+	if display_token.is_empty():
+		display_token = "INTERACTION"
+	var fireteam_token: String = _normalize_mission_interaction_fireteam_token(String(primary_feedback.get("nearest_fireteam_id", "")).strip_edges())
+	var progress: float = clampf(float(primary_feedback.get("progress", 0.0)), 0.0, 1.0)
+	var hold_seconds: float = maxf(float(primary_feedback.get("hold_seconds", 0.0)), 0.0)
+	var duration_seconds: float = maxf(float(primary_feedback.get("duration_seconds", 0.0)), 0.0)
+	match status:
+		"in_progress":
+			if duration_seconds > 0.0:
+				return "%s %d%% %.0f/%.0fs %s" % [display_token, int(round(progress * 100.0)), hold_seconds, duration_seconds, fireteam_token]
+			return "%s %d%% %s" % [display_token, int(round(progress * 100.0)), fireteam_token]
+		"usable":
+			var action_label: String = String(primary_feedback.get("action_label", "")).strip_edges().to_upper()
+			return "%s bereit %s %s" % [display_token, action_label if not action_label.is_empty() else "USE", fireteam_token]
+		"blocked":
+			return "%s blockiert" % display_token
+		"interrupted":
+			return "%s neu starten" % display_token
+	if fallback_line.length() <= 72:
+		return fallback_line
+	return fallback_line.substr(0, 69).strip_edges() + "..."
+
+
+func _normalize_mission_interaction_fireteam_token(raw_fireteam_id: String) -> String:
+	var fireteam_id: String = raw_fireteam_id.strip_edges().to_upper()
+	return fireteam_id if not fireteam_id.is_empty() else "FT?"
+
+
 func get_mission_interaction_use_intent_snapshot() -> Dictionary:
 	if _last_mission_interaction_use_intent_snapshot.is_empty():
 		return _build_mission_interaction_use_intent_result(false, "no_intent_created")
@@ -17676,6 +17764,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
+	var mission_interaction_progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot(mission_interaction_use_feedback)
 	var mission_interaction_use_intent: Dictionary = get_mission_interaction_use_intent_snapshot()
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
@@ -17741,6 +17830,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_use_feedback": mission_interaction_use_feedback,
 		"mission_interaction_use_feedback_line": String(mission_interaction_use_feedback.get("feedback_line", "")),
 		"mission_interaction_use_feedback_action": String(mission_interaction_use_feedback.get("action_label", "")),
+		"mission_interaction_progress_readability": mission_interaction_progress_readability,
+		"mission_interaction_progress_line": String(mission_interaction_progress_readability.get("display_line", "")),
+		"mission_interaction_progress_line_within_limit": bool(mission_interaction_progress_readability.get("line_within_limit", false)),
 		"mission_interaction_use_intent": mission_interaction_use_intent,
 		"mission_interaction_use_intent_accepted": bool(mission_interaction_use_intent.get("accepted", false)),
 		"mission_interaction_use_intent_command_type": String(mission_interaction_use_intent.get("command_type", "")),

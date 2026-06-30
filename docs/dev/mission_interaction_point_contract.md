@@ -82,6 +82,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Bei Completion setzt der Driver den passenden Scenario-Step-State; Cargo-Hold aktualisiert zusaetzlich den Cargo-Touchdown-State.
 - UI liest diesen Zustand weiter ueber `get_mission_interaction_runtime_use_state_snapshot()` und setzt keine Gameplay-Wahrheit.
 
+## Progress Readability
+- `MissionTacticalSandboxController.get_mission_interaction_progress_readability_snapshot()` uebersetzt den primaeren Use-Feedback-Eintrag in eine kurze Anzeigezeile.
+- Die Anzeigezeile enthaelt Interaction-Token, Fortschritt, Hold-Zeit und Fireteam-Token, zum Beispiel `COM 50% 9/18s FT1`.
+- `get_command_feedback_snapshot()` exportiert den Readability-Snapshot und die aktuelle `mission_interaction_progress_line`.
+- Die Mission-Control-ACT-Zeile darf diese kompakte Progress-Zeile aufnehmen, bleibt aber ein Anzeige-/Feedbackpfad.
+- Der Snapshot ist read-only, markiert `ui_sets_gameplay_truth = false` und veraendert weder Scenario-Gates noch Runtime-Stati.
+- Headless-Verifier duerfen Zeichenbudget und Exportform pruefen; der echte manuelle FullHD-Sichtlauf bleibt separat zu bestaetigen.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.
@@ -91,4 +99,4 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 
 ## Naechste Slices
 - Editor-Inspector fuer Interaction-Point-Bindings.
-- FullHD-Readability-Pass fuer Interaction-Labels im Missionsbild.
+- Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Missionsbild.
