@@ -45,9 +45,9 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_629 - Host Client Real Click Playtest Evidence Pass (implementiert)"), "Roadmap marks TASK_629 implemented")
 	_assert(contract_text.contains("Host-Client-Real-Click-Playtest-Evidence-Pass"), "Mission feedback contract documents TASK_629")
 	_assert(report_text.contains("TASK_629 Host Client Real Click Playtest Evidence Pass"), "Rolling report tracks TASK_629")
-	_assert(report_text.contains('latest_completed_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Rolling report advances latest completed beyond TASK_629")
+	_assert(report_text.contains("latest_completed_task:") and not report_text.contains('latest_completed_task: "TASK_629'), "Rolling report advances latest completed beyond TASK_629")
 	_assert(handbook_text.contains("TASK_629 - Host Client Real Click Playtest Evidence Pass"), "Status handbook tracks TASK_629")
-	_assert(handbook_text.contains('current_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Status handbook current task advances beyond TASK_629")
+	_assert(handbook_text.contains("current_task:") and not handbook_text.contains('current_task: "TASK_629'), "Status handbook current task advances beyond TASK_629")
 	_test_report_export_fields(report_text, handbook_text)
 
 
@@ -103,12 +103,15 @@ func _write_playtest_packet() -> void:
 		"click_sequence": [
 			{"step": 1, "action": "open_host_client_windows", "expect": "host and client badges remain readable"},
 			{"step": 2, "action": "client_peer2_attempts_alpha_command", "expect": "server rejects with peer_team_mismatch"},
-			{"step": 3, "action": "read_visible_teamchip_feedback", "expect": "BLOCK P2 wrong team visible next to AUTH OK1/RJ2"},
+			{"step": 3, "action": "read_visible_teamchip_feedback", "expect": "BLOCK P2 wrong team and USE BRAVO visible next to AUTH OK1/RJ2"},
 			{"step": 4, "action": "hover_or_inspect_teamchip", "expect": "tooltip/detail keeps raw peer_team_mismatch"},
 			{"step": 5, "action": "resume_valid_bravo_context", "expect": "focus and snapshot sync remain stable"},
 		],
 		"expected_visible_feedback": {
 			"block_text": "BLOCK P2 wrong team",
+			"action_text": "USE BRAVO",
+			"next_action_text": "Use BRAVO fireteam.",
+			"next_action_detail": "Peer 2 should command the BRAVO fireteam instead of this target.",
 			"authority_text": "AUTH OK1/RJ2",
 			"feedback_line": "AUTH BLOCKED P2: wrong team",
 			"raw_reason": "peer_team_mismatch",
@@ -117,6 +120,7 @@ func _write_playtest_packet() -> void:
 		"manual_observations": [
 			"peer2_alpha_reject_clicked",
 			"block_cue_visible",
+			"action_cue_visible",
 			"tooltip_raw_reason_checked",
 			"input_latency_under_budget",
 			"snapshot_sync_checked",
@@ -152,7 +156,11 @@ func _test_playtest_packet() -> void:
 	_assert(Array(packet.get("manual_observations", [])).size() >= 6, "Packet has manual observation list")
 	var feedback: Dictionary = Dictionary(packet.get("expected_visible_feedback", {}))
 	_assert(String(feedback.get("block_text", "")) == "BLOCK P2 wrong team", "Packet expects visible block text")
+	_assert(String(feedback.get("action_text", "")) == "USE BRAVO", "Packet expects visible action cue")
+	_assert(String(feedback.get("next_action_text", "")) == "Use BRAVO fireteam.", "Packet expects next action text")
+	_assert(String(feedback.get("next_action_detail", "")).contains("Peer 2 should command the BRAVO fireteam"), "Packet expects next action detail")
 	_assert(String(feedback.get("raw_reason", "")) == "peer_team_mismatch", "Packet expects raw reject reason")
+	_assert(_array_contains(packet.get("manual_observations", []), "action_cue_visible"), "Packet requires action cue observation")
 	_assert(bool(packet.get("manual_review_required", false)), "Packet requires manual review")
 	_assert(not bool(packet.get("manual_review_done", true)), "Packet does not claim manual review done")
 	_assert(bool(packet.get("read_only", false)), "Packet remains read-only")
@@ -174,6 +182,15 @@ func _read_text(path: String) -> String:
 	if not FileAccess.file_exists(path):
 		return ""
 	return FileAccess.get_file_as_string(path)
+
+
+func _array_contains(value: Variant, needle: String) -> bool:
+	if typeof(value) != TYPE_ARRAY:
+		return false
+	for item in Array(value):
+		if String(item) == needle:
+			return true
+	return false
 
 
 func _assert(condition: bool, message: String) -> void:

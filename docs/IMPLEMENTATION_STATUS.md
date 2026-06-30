@@ -474,6 +474,16 @@
 - Lokale Pruefung: `task_650_host_client_click_feedback_followup.gd`, `task_625_host_client_visible_reject_feedback_polish.gd`, `git diff --check`.
 - Naechster Schritt: Echten Host/Client-Klicklauf ansehen; wenn der Cue reicht, wieder Richtung Mini-Szenario-Spielbarkeit gehen.
 
+### TASK_651 - Host Client Click Followup Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_651_host_client_click_followup_evidence.md`, `docs/tasks/TASK_650_host_client_click_feedback_followup.md`, `docs/tasks/TASK_629_host_client_real_click_playtest_evidence_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_host_client_two_window_real_run.ps1` schreibt `visible_reject_expected_action_text = USE BRAVO`, Next-Action-Text/Detail und `action_cue_visible` in das Real-Click-Review-Manifest.
+- Stand: `task_629_host_client_real_click_playtest_evidence_pass.gd` schreibt denselben Cue in das Playtest-Packet, damit der naechste manuelle Zwei-Fenster-Lauf nicht nur den Blocker, sondern auch die Spieler-Handlung prueft.
+- Stand: `scripts/tests/task_651_host_client_click_followup_evidence.gd` prueft Task, Roadmap, Contract, Capture-Tool, Manifest, Packet und read-only-Grenzen.
+- Risiken/offen: TASK_651 macht keinen echten Klick und bestaetigt nicht, dass der Cue visuell stark genug ist. Der echte Host/Client-Fensterlauf bleibt offen.
+- Lokale Pruefung: `launch_host_client_two_window_review.ps1`, `capture_host_client_two_window_real_run.ps1`, `task_651_host_client_click_followup_evidence.gd`, `task_626_host_client_real_click_review_evidence.gd`, `task_629_host_client_real_click_playtest_evidence_pass.gd`, `git diff --check`.
+- Naechster Schritt: Echten Host/Client-Klicklauf mit `USE BRAVO` ansehen oder wieder auf Frontier-Probe-/Mini-Szenario-Spielbarkeit wechseln.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
