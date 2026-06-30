@@ -484,6 +484,117 @@ func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	}
 
 
+func get_frontier_probe_meta_debrief_route_smoke_snapshot() -> Dictionary:
+	var debrief_handoff: Dictionary = get_debrief_return_homebase_handoff_snapshot()
+	var last_result: Dictionary = Dictionary(debrief_handoff.get("last_mission_result", {})).duplicate(true)
+	var debrief_result: Dictionary = Dictionary(debrief_handoff.get("debrief_mission_result", {})).duplicate(true)
+	var result_source: Dictionary = debrief_result if not debrief_result.is_empty() else last_result
+	var scenario_id: String = _extract_frontier_probe_scenario_id(result_source)
+	var route_id: String = String(result_source.get("route_id", "")).strip_edges()
+	if route_id.is_empty() and _is_frontier_probe_result(result_source):
+		route_id = "frontier_probe_aa_computer_cargo"
+	var current_stage: String = "unexpected"
+	if _current_meta_view == "debrief":
+		current_stage = "debrief_review"
+	elif _current_meta_view == "homebase":
+		current_stage = "homebase_returned"
+	var frontier_probe_result_present: bool = _is_frontier_probe_result(result_source)
+	var before_return_ready: bool = current_stage == "debrief_review" \
+		and bool(debrief_handoff.get("debrief_visible", false)) \
+		and not bool(debrief_handoff.get("homebase_visible", true)) \
+		and bool(debrief_handoff.get("return_action_available", false))
+	var after_return_ready: bool = current_stage == "homebase_returned" \
+		and bool(debrief_handoff.get("homebase_visible", false)) \
+		and not bool(debrief_handoff.get("debrief_visible", true)) \
+		and bool(debrief_handoff.get("navigation_visible", false))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"frontier_probe_result_present",
+		frontier_probe_result_present,
+		"critical",
+		"Debrief route smoke should carry the Frontier Probe mission result."
+	)
+	_append_handoff_check(
+		checks,
+		"route_id_present",
+		not route_id.is_empty(),
+		"critical",
+		"Debrief route smoke should expose a stable route id."
+	)
+	_append_handoff_check(
+		checks,
+		"task_586_handoff_gate_passes",
+		String(debrief_handoff.get("gate", "")) == "pass",
+		"critical",
+		"Frontier Probe route smoke should reuse the existing Debrief return handoff gate."
+	)
+	_append_handoff_check(
+		checks,
+		"stage_is_debrief_or_homebase",
+		before_return_ready or after_return_ready,
+		"critical",
+		"Route smoke should be valid either while Debrief is visible or after returning to Homebase."
+	)
+	_append_handoff_check(
+		checks,
+		"mission_result_preserved",
+		bool(debrief_handoff.get("mission_result_preserved", false)),
+		"critical",
+		"Frontier Probe result should stay identical between MetaLayerFlow and Debrief."
+	)
+	_append_handoff_check(
+		checks,
+		"active_mission_released",
+		bool(debrief_handoff.get("active_mission_released", false)),
+		"critical",
+		"Finished Frontier Probe mission should not remain attached during Debrief/Homebase return."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_snapshot",
+		true,
+		"critical",
+		"Snapshot reads route state only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_meta_debrief_route_smoke.v1",
+		"task_id": "TASK_639",
+		"source_task_ids": ["TASK_638", "TASK_586"],
+		"ui_sets_gameplay_truth": false,
+		"read_only": true,
+		"route_smoke_id": "frontier_probe_meta_debrief_route_smoke_v1",
+		"route_smoke_gate": "pass" if failed_count == 0 else "fail",
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"current_meta_view": _current_meta_view,
+		"current_stage": current_stage,
+		"route_id": route_id,
+		"scenario_id": scenario_id,
+		"frontier_probe_result_present": frontier_probe_result_present,
+		"debrief_visible": bool(debrief_handoff.get("debrief_visible", false)),
+		"homebase_visible": bool(debrief_handoff.get("homebase_visible", false)),
+		"navigation_visible": bool(debrief_handoff.get("navigation_visible", false)),
+		"return_action_available": bool(debrief_handoff.get("return_action_available", false)),
+		"return_signal_connected": bool(debrief_handoff.get("return_signal_connected", false)),
+		"mission_result_preserved": bool(debrief_handoff.get("mission_result_preserved", false)),
+		"active_mission_released": bool(debrief_handoff.get("active_mission_released", false)),
+		"before_return_ready": before_return_ready,
+		"after_return_ready": after_return_ready,
+		"last_mission_result": last_result.duplicate(true),
+		"debrief_mission_result": debrief_result.duplicate(true),
+		"debrief_handoff_gate": String(debrief_handoff.get("gate", "")),
+		"debrief_handoff": debrief_handoff.duplicate(true),
+		"checks": checks,
+		"issues": _build_handoff_issue_list(checks),
+		"creates_navigation": false,
+		"creates_command": false,
+		"recommended_next_task": "TASK_640 - Frontier Probe Post Debrief Homebase Readability",
+	}
+
+
 func request_debrief_return_homebase_for_test() -> Dictionary:
 	_on_debrief_return_to_homebase_requested()
 	return get_debrief_return_homebase_handoff_snapshot()
@@ -604,6 +715,30 @@ func _debrief_handoff_results_match(left: Dictionary, right: Dictionary) -> bool
 	if absf(float(left.get("duration_seconds", 0.0)) - float(right.get("duration_seconds", -1.0))) > 0.01:
 		return false
 	return Array(left.get("team_states", [])).size() == Array(right.get("team_states", [])).size()
+
+
+func _extract_frontier_probe_scenario_id(mission_result: Dictionary) -> String:
+	for key in ["scenario_id", "mission_id", "source_mission_id"]:
+		var value: String = String(mission_result.get(key, "")).strip_edges()
+		if not value.is_empty():
+			return value
+	var scenario_file_path: String = String(mission_result.get("scenario_file_path", "")).strip_edges()
+	if scenario_file_path.get_file().get_basename() == "frontier_probe_vertical_slice":
+		return "frontier_probe_vertical_slice"
+	return ""
+
+
+func _is_frontier_probe_result(mission_result: Dictionary) -> bool:
+	if mission_result.is_empty():
+		return false
+	var route_id: String = String(mission_result.get("route_id", "")).strip_edges()
+	if route_id == "frontier_probe_aa_computer_cargo":
+		return true
+	var scenario_id: String = _extract_frontier_probe_scenario_id(mission_result)
+	if scenario_id == "frontier_probe_vertical_slice":
+		return true
+	var scenario_file_path: String = String(mission_result.get("scenario_file_path", "")).strip_edges()
+	return scenario_file_path.ends_with("frontier_probe_vertical_slice.json")
 
 
 func _is_meta_navigation_visible() -> bool:

@@ -267,6 +267,7 @@ git checkout -b batch/<batch-name>
 - TASK_636 - Frontier Probe Real F6 Re-Capture (implementiert)
 - TASK_637 - Frontier Probe Playfeel Next Interaction (implementiert)
 - TASK_638 - Frontier Probe Debrief Handoff Feel (implementiert)
+- TASK_639 - Frontier Probe Meta Debrief Route Smoke (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
