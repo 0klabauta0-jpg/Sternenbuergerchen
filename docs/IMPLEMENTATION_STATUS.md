@@ -686,6 +686,16 @@
 - Lokale Pruefung: `task_672_fullhd_drag_preview_art_direction.gd`, `task_671_builder_chain_auto_snapping.gd`, `task_670_builder_drag_preview_handles.gd`, `git diff --check`.
 - Naechster Schritt: Door-/Computer-Interaction-Contract oder echter FullHD-Sichtlauf fuer Label-Feinschliff.
 
+### TASK_673 - Mission Interaction Point Contract
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_673_mission_interaction_point_contract.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/tasks/TASK_552_mission_objective_interaction_readability_pass.md`, `docs/tasks/TASK_637_frontier_probe_playfeel_next_interaction.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `TerrainMarkerCatalog` bietet `interaction_door`, `interaction_computer` und `interaction_hold_zone` als editor-only Authoring-Marker fuer spaetere Scenario-Bindings an.
+- Stand: Der neue Contract trennt Marker-/Asset-Authoring von Runtime-Wahrheit: Door-State, Computer-Fortschritt und Hold-/Capture-Erfolg bleiben bei `SimulationRoot`/Scenario-Gates.
+- Stand: `task_673_mission_interaction_point_contract.gd` prueft Doku, Contract, Marker-Kontext, Mehrfachplatzierung und Roadmap-/Handbuch-Anker.
+- Risiken/offen: Scenario-JSON-Binding und Runtime-Snapshot fuer nahe, bedienbar, in-progress und complete bleiben Folgearbeit.
+- Lokale Pruefung: `task_673_mission_interaction_point_contract.gd`, `task_672_fullhd_drag_preview_art_direction.gd`, `git diff --check`.
+- Naechster Schritt: Interaction-Point-Binding im Editor/Scenario-JSON oder ein kleiner Mission-Runtime-Snapshot fuer Door/Computer/Hold.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

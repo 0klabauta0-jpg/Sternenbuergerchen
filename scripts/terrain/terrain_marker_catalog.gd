@@ -13,12 +13,18 @@ const SYMBOL_FLAG: String = "flag"
 const SYMBOL_CHEVRON: String = "chevron"
 
 const TYPE_CUSTOM: String = "custom"
+const TYPE_INTERACTION_DOOR: String = "interaction_door"
+const TYPE_INTERACTION_COMPUTER: String = "interaction_computer"
+const TYPE_INTERACTION_HOLD_ZONE: String = "interaction_hold_zone"
 
 const _TYPE_ORDER: PackedStringArray = [
 	TYPE_CUSTOM,
 	"spawn_alpha",
 	"spawn_bravo",
 	"objective_point",
+	TYPE_INTERACTION_DOOR,
+	TYPE_INTERACTION_COMPUTER,
+	TYPE_INTERACTION_HOLD_ZONE,
 	"rally_point",
 	"danger_zone",
 	"loot_cache",
@@ -67,6 +73,33 @@ const _TYPE_DEFINITIONS: Dictionary = {
 		"symbol": SYMBOL_FLAG,
 		"placement_context": CONTEXT_EDITOR_ONLY,
 		"single_instance": true,
+	},
+	TYPE_INTERACTION_DOOR: {
+		"display_name": "Door Interaction",
+		"default_name": "Door Control",
+		"tooltip": "Authoring marker for a runtime door interaction. It does not open or close the door by itself.",
+		"color": Color(0.36, 0.82, 1.0, 0.98),
+		"symbol": SYMBOL_CHEVRON,
+		"placement_context": CONTEXT_EDITOR_ONLY,
+		"single_instance": false,
+	},
+	TYPE_INTERACTION_COMPUTER: {
+		"display_name": "Computer Interaction",
+		"default_name": "Computer Terminal",
+		"tooltip": "Authoring marker for operate, hack, disable or hold-at-terminal mission beats.",
+		"color": Color(0.42, 1.0, 0.74, 0.98),
+		"symbol": SYMBOL_SQUARE,
+		"placement_context": CONTEXT_EDITOR_ONLY,
+		"single_instance": false,
+	},
+	TYPE_INTERACTION_HOLD_ZONE: {
+		"display_name": "Hold Zone",
+		"default_name": "Hold Zone",
+		"tooltip": "Authoring marker for a timed hold or capture area around a point.",
+		"color": Color(1.0, 0.72, 0.28, 0.98),
+		"symbol": SYMBOL_FLAG,
+		"placement_context": CONTEXT_EDITOR_ONLY,
+		"single_instance": false,
 	},
 	"rally_point": {
 		"display_name": "Rally Point",
