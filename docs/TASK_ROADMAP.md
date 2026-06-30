@@ -309,6 +309,7 @@ git checkout -b batch/<batch-name>
 - TASK_678 - Mission Interaction Runtime Progress (implementiert)
 - TASK_679 - Mission Interaction Progress Readability (implementiert)
 - TASK_680 - Mission Interaction Binding Inspector (implementiert)
+- TASK_681 - Mission Interaction Binding Editor (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

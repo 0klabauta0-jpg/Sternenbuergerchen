@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_681 - Mission Interaction Binding Editor
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_681_mission_interaction_binding_editor.md`, `docs/tasks/TASK_680_mission_interaction_binding_inspector.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Das Map-Editor-Markerpanel besitzt nun einen kleinen Interaction-Binding-Editor fuer den selektierten Marker.
+- Stand: Apply/Remove schreiben ausschliesslich `MissionScenarioData.vertical_slice.interaction_points`, markieren das Scenario dirty und aktualisieren danach den read-only Binding-Inspector.
+- Stand: `get_mission_interaction_binding_editor_snapshot()` und `get_map_editor_usability_snapshot().interaction_binding_editor` exportieren den Authoring-Zustand fuer Verifier und Reports.
+- Risiken/offen: Presets je Asset-/Markerfamilie sind konservativ; echter FullHD-Bedienkomfort im rechten Panel bleibt ein separater Sichtpass.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_681_mission_interaction_binding_editor.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_680_mission_interaction_binding_inspector.gd`, `git diff --check`.
+- Naechster Schritt: Bessere Interaction-Binding-Presets oder ein echter FullHD-Sichtlauf im Map-Editor.
+
 ### TASK_605 - Host Client F6 Visual Review Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_605_host_client_f6_visual_review_pass.md`, `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
