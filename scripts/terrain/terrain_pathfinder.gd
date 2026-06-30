@@ -188,7 +188,10 @@ func _is_grid_step_walkable(current_grid: Vector2i, neighbor_grid: Vector2i, reg
 	if current_tile == null or neighbor_tile == null:
 		return false
 
-	if not bool(neighbor_tile.walkable):
+	if registry.has_method("is_walkable"):
+		if not bool(registry.call("is_walkable", neighbor_grid)):
+			return false
+	elif not bool(neighbor_tile.walkable):
 		return false
 
 	var height_difference: int = abs(int(neighbor_tile.height_level) - int(current_tile.height_level))
@@ -247,6 +250,8 @@ func _get_cover_score(grid_position: Vector2i, registry, options: Dictionary = {
 	var tile_data = registry.call("get_tile_at_grid", grid_position)
 	if tile_data == null:
 		return 0.0
+	if registry.has_method("get_cover_at"):
+		return clampf(float(registry.call("get_cover_at", grid_position)) / 100.0, 0.0, 1.0)
 	return clampf(float(tile_data.cover_value) / 100.0, 0.0, 1.0)
 
 
@@ -297,9 +302,11 @@ func _get_blocker_clearance_penalty(grid_position: Vector2i, registry, options: 
 			if tile_data == null:
 				blocker_score += 1.0
 				continue
-			if not bool(tile_data.walkable):
+			var probe_walkable: bool = bool(registry.call("is_walkable", probe_grid)) if registry.has_method("is_walkable") else bool(tile_data.walkable)
+			var probe_blocks_los: bool = bool(registry.call("blocks_los_at_grid", probe_grid)) if registry.has_method("blocks_los_at_grid") else bool(tile_data.blocks_los)
+			if not probe_walkable:
 				blocker_score += 1.0
-			elif bool(tile_data.blocks_los):
+			elif probe_blocks_los:
 				blocker_score += 0.45
 	if sample_count <= 0:
 		return 0.0
@@ -344,9 +351,17 @@ func _has_grid_line_of_sight(source_grid: Vector2i, target_grid: Vector2i, regis
 			roundi(lerpf(float(source_grid.y), float(target_grid.y), t))
 		)
 		var tile_data = registry.call("get_tile_at_grid", stepped_grid)
-		if tile_data == null or not bool(tile_data.blocks_los):
+		if tile_data == null:
 			continue
-		var blocker_height: int = int(tile_data.height_level) + int(tile_data.object_height)
+		var blocks_los: bool = bool(tile_data.blocks_los)
+		if registry.has_method("blocks_los_at_grid"):
+			blocks_los = bool(registry.call("blocks_los_at_grid", stepped_grid))
+		if not blocks_los:
+			continue
+		var object_height: int = int(tile_data.object_height)
+		if registry.has_method("get_object_height_at_grid"):
+			object_height = int(registry.call("get_object_height_at_grid", stepped_grid))
+		var blocker_height: int = int(tile_data.height_level) + object_height
 		if blocker_height >= source_height and blocker_height >= target_height:
 			return false
 	return true

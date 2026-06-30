@@ -63,6 +63,7 @@ static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
 		"status": status,
 		"reaction_state": reaction_state,
 		"world_position": Vector2(visual_entry.get("world_position", Vector2.ZERO)),
+		"grid_position": Vector2i(visual_entry.get("grid_position", Vector2i.ZERO)) if typeof(visual_entry.get("grid_position", null)) == TYPE_VECTOR2I or typeof(visual_entry.get("grid_position", null)) == TYPE_VECTOR2 else null,
 		"progress": progress,
 		"open_fraction": _open_fraction_for_reaction(object_kind, reaction_state, progress),
 		"runtime_visual_state": runtime_visual_state,

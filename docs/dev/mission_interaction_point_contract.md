@@ -120,6 +120,16 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `TerrainMap3DView` darf daraus bessere lokale Lesbarkeits-Proxies zeichnen, z. B. Computer-Fortschrittsbalken oder Door-Open-Schwelle.
 - Diese Runtime-Visual-Assets bleiben read-only: sie aendern keine `TerrainMapData`, keine Collision, keine Walkability, keine LOS-Blocker und keine Scenario-Gates.
 
+## Door Runtime Collision/LOS
+- `MissionInteractionDoorRuntimeCollisionLOS` uebersetzt Door-Reaction-Eintraege in effektive Runtime-Tile-Overrides.
+- Die Quelle bleibt der Runtime-/Interaction-Pfad: `SimulationRoot` -> Interaction-Runtime-State -> Visual-State -> Object-Reaction. UI und Render-Proxies setzen keine Gameplay-Wahrheit.
+- Offene Door-States liefern `walkable_override = true`, `blocks_los_override = false`, `object_height_override = 0` und `collision_state = open`.
+- Halbe und geschlossene Door-States bleiben fuer Bewegung und LOS blockierend.
+- `TerrainRegistry` speichert diese Overrides getrennt von `TerrainMapData` und markiert betroffene Gridpositionen dirty.
+- `TerrainPathfinder` und `LineOfSightSystem` muessen effektive Registry-Getter nutzen, wenn sie vorhanden sind.
+- Der Contract mutiert keine gespeicherte Karte: `terrain_map_data_mutated = false`, `read_only = true`, `ui_sets_gameplay_truth = false`.
+- Echte Door-Use-/Breach-Commands, Asset-Swaps und Animationen bleiben eigene Slices.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
