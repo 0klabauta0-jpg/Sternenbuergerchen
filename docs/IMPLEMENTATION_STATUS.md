@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_705 - Host/Client Door Real Click Manual Run Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_705_host_client_door_real_click_manual_run_packet.md`, `docs/tasks/TASK_704_host_client_door_real_click_findings.md`, `docs/tasks/TASK_700_host_client_door_real_click_workbench.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `capture_host_client_two_window_real_run.ps1` schreibt Door-spezifische Manual-Run-Felder in `tmp/host_client_two_window_real_run_review.json`.
+- Stand: Das Manifest nennt Workbench, Findings, erwartete Door-Button-/Shortcut-/GO-/Reject-/Open-/HUD-Felder und offene Manual-Checks.
+- Stand: Der Dry-Run bleibt read-only und setzt `door_real_click_manual_review_done = false`.
+- Risiken/offen: Der echte Zwei-Fenster-Klicklauf bleibt menschliche Folgearbeit; TASK_705 macht ihn nur konkreter ausfuehrbar.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_705_host_client_door_real_click_manual_run_packet.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_704_host_client_door_real_click_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_706 - Mission Door Layout/Visual Polish oder echter TASK_700-Workbench-Export aus dem Zwei-Fenster-Lauf.
+
 ### TASK_704 - Host/Client Door Real Click Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_704_host_client_door_real_click_findings.md`, `docs/tasks/TASK_700_host_client_door_real_click_workbench.md`, `docs/tasks/TASK_703_door_authority_button_affordance.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
