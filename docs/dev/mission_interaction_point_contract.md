@@ -113,6 +113,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `TerrainMap3DView` darf daraus lokale Proxy-Geometrie am Interaktionspunkt zeichnen: Terminalscreen, AA-Mast, Cargo-Beacon oder Door-Slabs.
 - Diese Proxies duerfen keine Tiles austauschen, keine Door-Kollision aendern, keine Scenario-Gates setzen und keine Runtime-Progress-Werte schreiben. Echte Asset-Swaps/Animationen bleiben ein eigener Slice.
 
+## Mission FullHD Evidence
+- Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
+- Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
+- Das Manifest muss `manual_fullhd_review_required = true` und `manual_fullhd_review_done = false` setzen, bis ein Mensch die echte Fensteransicht beurteilt.
+- Evidence darf Sichtbarkeit, Snapshot-Zaehler, Visualbudget, Pfade und offene manuelle Checks festhalten, aber keine Runtime-Interaction starten und keine Gameplay-Wahrheit schreiben.
+- `ui_sets_gameplay_truth = false` bleibt Pflicht.
+
 ## Editor Binding Inspector
 - `MapEditor.get_mission_interaction_binding_inspector_snapshot()` liest das aktuelle `MissionScenarioData.get_interaction_point_binding_snapshot()` zusammen mit der aktuellen `TerrainMapData`.
 - Der Snapshot nennt `binding_count`, `bound_marker_ids`, `missing_marker_ids`, Status-/Typ-Zaehler und die Bindings des selektierten Markers.
