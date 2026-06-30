@@ -626,6 +626,16 @@
 - Lokale Pruefung: `task_665_host_client_decision_drill_technical_click_guard.gd`, `task_664_host_client_decision_drill_real_click_recheck.gd`, `task_650_host_client_click_feedback_followup.gd`, `task_658_frontier_probe_one_screen_player_decision_drill.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_666 - Host Client Decision Drill Real Click Findings`, wenn der echte Zwei-Fenster-Klicklauf beobachtet wird.
 
+### TASK_667 - Map Editor Persistent Palette Presets
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_667_map_editor_persistent_palette_presets.md`, `docs/tasks/TASK_516_editor_builder_ux_pass.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `map_editor.tscn` laedt lokale Palette-Arbeitspräferenzen aus `user://map_editor_builder_preferences.json` und speichert Favoriten, Recent-Assets sowie Placement-Scale bei Aenderungen.
+- Stand: Der Palette-Snapshot nennt Pfad, Schema, Lade-/Speicherstatus, Zaehler und `ui_sets_gameplay_truth = false`, damit die Grenze zwischen Editor-Komfort und Gameplay-/Map-Wahrheit sichtbar bleibt.
+- Stand: `task_667_map_editor_persistent_palette_presets.gd` beweist mit zwei Editor-Instanzen, dass `factory_building_a`, `station_set_door_single` und Scale `1.6` persistent bleiben und der Favoritenfilter nach Neustart weiter funktioniert.
+- Risiken/offen: TASK_667 speichert noch keine Asset-Override-Presets pro Asset oder geteilte Team-/Projektprofile. TASK_666 bleibt als echter Host/Client-Fensterklickbefund offen.
+- Lokale Pruefung: `task_667_map_editor_persistent_palette_presets.gd`, `task_516_editor_builder_ux_pass.gd`, `git diff --check`.
+- Naechster Schritt: Fuer den Editor waere ein kleiner Slice fuer gespeicherte Asset-Override-Presets pro Asset sinnvoll; fuer Multiplayer bleibt TASK_666 der ehrliche sichtbare Recheck.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

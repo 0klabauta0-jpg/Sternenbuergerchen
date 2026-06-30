@@ -118,6 +118,8 @@ const PALETTE_ASSET_LIST_MIN_HEIGHT: float = 560.0
 const PALETTE_ASSET_COLUMN_WIDTH: int = 190
 const PALETTE_RECENT_MAX_COUNT: int = 8
 const PALETTE_SCALE_PRESETS: Array = [0.5, 1.0, 1.6, 2.0]
+const PALETTE_AUTHORING_PREFERENCES_PATH: String = "user://map_editor_builder_preferences.json"
+const PALETTE_AUTHORING_PREFERENCES_SCHEMA: String = "sternenbuergerchen.map_editor.palette_preferences.v1"
 const RUNTIME_BUILDER_RAIL_NAME: String = "RuntimeBuilderToolRail"
 const RUNTIME_BUILDER_RAIL_WIDTH: float = 58.0
 const RUNTIME_BUILDER_RAIL_GAP: float = 6.0
@@ -256,6 +258,12 @@ var _palette_search_query: String = ""
 var _palette_favorite_type_ids: PackedStringArray = PackedStringArray()
 var _palette_recent_type_ids: PackedStringArray = PackedStringArray()
 var _palette_favorites_filter_enabled: bool = false
+var _palette_preferences_loaded: bool = false
+var _palette_preferences_saved: bool = false
+var _palette_preferences_last_error: String = ""
+var _palette_preferences_load_count: int = 0
+var _palette_preferences_save_count: int = 0
+var _palette_authoring_preferences_path: String = PALETTE_AUTHORING_PREFERENCES_PATH
 var _last_dirty_neighborhood_snapshot: Dictionary = {}
 var _right_mouse_pressed: bool = false
 var _right_mouse_dragged: bool = false
@@ -293,6 +301,7 @@ func _ready() -> void:
 	_ensure_runtime_builder_workbench_controls()
 	_ensure_terrain_truth_inspector_controls()
 	_ensure_editor_context_menu()
+	_load_palette_authoring_preferences()
 	_populate_tile_palette()
 	_connect_ui_signals()
 	_add_height_tool_controls()
@@ -4311,6 +4320,16 @@ func _build_palette_snapshot() -> Dictionary:
 		"scale_presets": scale_presets,
 		"scale_min": OBJECT_SCALE_MIN,
 		"scale_max": OBJECT_SCALE_MAX,
+		"preferences_persistent": true,
+		"preferences_schema": PALETTE_AUTHORING_PREFERENCES_SCHEMA,
+		"preferences_path": _get_palette_authoring_preferences_path(),
+		"preferences_file_exists": FileAccess.file_exists(_get_palette_authoring_preferences_path()),
+		"preferences_loaded": _palette_preferences_loaded,
+		"preferences_saved": _palette_preferences_saved,
+		"preferences_load_count": _palette_preferences_load_count,
+		"preferences_save_count": _palette_preferences_save_count,
+		"preferences_last_error": _palette_preferences_last_error,
+		"ui_sets_gameplay_truth": false,
 	}
 
 
@@ -5658,6 +5677,8 @@ func set_object_placement_scale(value: float) -> bool:
 	if placement_scale_spinbox != null and not is_equal_approx(float(placement_scale_spinbox.value), _placement_object_scale):
 		placement_scale_spinbox.value = _placement_object_scale
 	_refresh_palette_workflow_controls()
+	if changed:
+		_save_palette_authoring_preferences()
 	return changed
 
 
@@ -5667,6 +5688,125 @@ func set_object_placement_scale_preset(value: float) -> bool:
 
 func get_object_placement_scale() -> float:
 	return _placement_object_scale
+
+
+func save_palette_authoring_preferences_for_test() -> bool:
+	return _save_palette_authoring_preferences()
+
+
+func set_palette_authoring_preferences_path_for_test(path: String) -> bool:
+	var normalized_path: String = path.strip_edges()
+	if normalized_path.is_empty() or not normalized_path.begins_with("user://"):
+		return false
+	_palette_authoring_preferences_path = normalized_path
+	_palette_preferences_loaded = false
+	_palette_preferences_saved = false
+	_palette_preferences_last_error = ""
+	return true
+
+
+func load_palette_authoring_preferences_for_test() -> bool:
+	var loaded: bool = _load_palette_authoring_preferences()
+	_populate_tile_palette()
+	_refresh_palette_filter_controls()
+	_refresh_palette_workflow_controls()
+	_refresh_runtime_builder_workbench_controls()
+	return loaded
+
+
+func clear_palette_authoring_preferences_for_test() -> bool:
+	var preferences_path: String = _get_palette_authoring_preferences_path()
+	if FileAccess.file_exists(preferences_path):
+		var absolute_path: String = ProjectSettings.globalize_path(preferences_path)
+		var remove_error: Error = DirAccess.remove_absolute(absolute_path)
+		if remove_error != OK:
+			_palette_preferences_last_error = "remove_failed:%s" % error_string(remove_error)
+			return false
+	_palette_favorite_type_ids = PackedStringArray()
+	_palette_recent_type_ids = PackedStringArray()
+	_placement_object_scale = OBJECT_SCALE_DEFAULT
+	_palette_preferences_loaded = false
+	_palette_preferences_saved = false
+	_palette_preferences_last_error = ""
+	return true
+
+
+func _load_palette_authoring_preferences() -> bool:
+	_palette_preferences_last_error = ""
+	var preferences_path: String = _get_palette_authoring_preferences_path()
+	if not FileAccess.file_exists(preferences_path):
+		_palette_preferences_loaded = false
+		return false
+	var file := FileAccess.open(preferences_path, FileAccess.READ)
+	if file == null:
+		_palette_preferences_last_error = "open_read_failed:%s" % error_string(FileAccess.get_open_error())
+		_palette_preferences_loaded = false
+		return false
+	var text: String = file.get_as_text()
+	file.close()
+	var parsed = JSON.parse_string(text)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		_palette_preferences_last_error = "parse_failed"
+		_palette_preferences_loaded = false
+		return false
+	var preferences: Dictionary = Dictionary(parsed)
+	var schema: String = String(preferences.get("schema", "")).strip_edges()
+	if not schema.is_empty() and schema != PALETTE_AUTHORING_PREFERENCES_SCHEMA:
+		_palette_preferences_last_error = "schema_mismatch:%s" % schema
+		_palette_preferences_loaded = false
+		return false
+	_palette_favorite_type_ids = _normalize_palette_preference_type_ids(preferences.get("favorite_type_ids", []), -1)
+	_palette_recent_type_ids = _normalize_palette_preference_type_ids(preferences.get("recent_type_ids", []), PALETTE_RECENT_MAX_COUNT)
+	if preferences.has("placement_scale"):
+		_placement_object_scale = _normalize_object_scale(float(preferences.get("placement_scale", OBJECT_SCALE_DEFAULT)))
+		var placement_scale_spinbox := _get_placement_object_scale_spinbox()
+		if placement_scale_spinbox != null:
+			placement_scale_spinbox.value = _placement_object_scale
+	_palette_preferences_loaded = true
+	_palette_preferences_load_count += 1
+	return true
+
+
+func _save_palette_authoring_preferences() -> bool:
+	_palette_preferences_last_error = ""
+	var preferences: Dictionary = {
+		"schema": PALETTE_AUTHORING_PREFERENCES_SCHEMA,
+		"favorite_type_ids": Array(_palette_favorite_type_ids),
+		"recent_type_ids": Array(_palette_recent_type_ids),
+		"placement_scale": _placement_object_scale,
+		"stores_gameplay_truth": false,
+	}
+	var file := FileAccess.open(_get_palette_authoring_preferences_path(), FileAccess.WRITE)
+	if file == null:
+		_palette_preferences_last_error = "open_write_failed:%s" % error_string(FileAccess.get_open_error())
+		_palette_preferences_saved = false
+		return false
+	file.store_string(JSON.stringify(preferences, "\t"))
+	file.close()
+	_palette_preferences_saved = true
+	_palette_preferences_save_count += 1
+	return true
+
+
+func _get_palette_authoring_preferences_path() -> String:
+	var path: String = _palette_authoring_preferences_path.strip_edges()
+	return path if not path.is_empty() else PALETTE_AUTHORING_PREFERENCES_PATH
+
+
+func _normalize_palette_preference_type_ids(value, max_count: int = -1) -> PackedStringArray:
+	var result: PackedStringArray = PackedStringArray()
+	if typeof(value) != TYPE_ARRAY and typeof(value) != TYPE_PACKED_STRING_ARRAY:
+		return result
+	for entry in value:
+		var type_id: String = String(entry).strip_edges().to_lower()
+		if type_id.is_empty() or result.has(type_id):
+			continue
+		if _tile_catalog != null and not _tile_catalog.has_type(type_id):
+			continue
+		result.append(type_id)
+		if max_count > 0 and result.size() >= max_count:
+			break
+	return result
 
 
 func set_palette_search_query_for_authoring(query: String) -> bool:
@@ -5720,6 +5860,7 @@ func toggle_palette_favorite_for_authoring(type_id: String = "") -> bool:
 		_refresh_palette_selection_visual()
 	_refresh_palette_filter_controls()
 	_refresh_palette_workflow_controls()
+	_save_palette_authoring_preferences()
 	return true
 
 
@@ -5740,6 +5881,7 @@ func _remember_palette_recent_type_id(type_id: String) -> void:
 		if next_recent.size() >= PALETTE_RECENT_MAX_COUNT:
 			break
 	_palette_recent_type_ids = next_recent
+	_save_palette_authoring_preferences()
 
 
 func _palette_type_is_favorite(type_id: String) -> bool:

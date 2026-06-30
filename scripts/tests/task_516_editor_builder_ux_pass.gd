@@ -7,6 +7,7 @@ const WORKFLOW_CONTRACT_PATH: String = "res://docs/dev/map_editor_asset_workflow
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
 const ROADMAP_PATH: String = "res://docs/TASK_ROADMAP.md"
 const REPORT_PATH: String = "res://docs/reports/project_review_status_2026_06_28.html"
+const TEST_PREFERENCES_PATH: String = "user://task_516_map_editor_builder_preferences.json"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -41,8 +42,10 @@ func _test_docs() -> void:
 
 func _test_palette_search_favorites_recent_and_scale_presets() -> void:
 	var editor = MAP_EDITOR_SCENE.instantiate()
+	_assert(bool(editor.call("set_palette_authoring_preferences_path_for_test", TEST_PREFERENCES_PATH)), "Palette test uses an isolated preference path")
 	root.add_child(editor)
 	await _wait_frames(14)
+	_assert(bool(editor.call("clear_palette_authoring_preferences_for_test")), "Palette test starts with clean preferences")
 
 	var snapshot: Dictionary = Dictionary(editor.call("get_map_editor_usability_snapshot", false))
 	var palette: Dictionary = Dictionary(snapshot.get("palette", {}))
@@ -80,12 +83,14 @@ func _test_palette_search_favorites_recent_and_scale_presets() -> void:
 	snapshot = Dictionary(editor.call("get_map_editor_usability_snapshot", false))
 	palette = Dictionary(snapshot.get("palette", {}))
 	_assert(is_equal_approx(float(palette.get("placement_scale", 0.0)), 1.6), "Scale preset updates placement scale")
+	_assert(bool(editor.call("clear_palette_authoring_preferences_for_test")), "Palette test cleans isolated preferences")
 	editor.queue_free()
 	await _wait_frames(2)
 
 
 func _test_builder_drag_preview_snapshot() -> void:
 	var editor = MAP_EDITOR_SCENE.instantiate()
+	_assert(bool(editor.call("set_palette_authoring_preferences_path_for_test", TEST_PREFERENCES_PATH)), "Builder preview test uses an isolated preference path")
 	root.add_child(editor)
 	await _wait_frames(14)
 	_assert(bool(editor.call("activate_runtime_builder_tool", "pipe_line")), "Pipe line activates")
@@ -98,6 +103,7 @@ func _test_builder_drag_preview_snapshot() -> void:
 	_assert(bool(preview.get("active", false)), "Builder snapshot exposes active network preview")
 	_assert(String(preview.get("kind", "")) == "pipe", "Builder preview summary keeps network kind")
 	_assert(String(preview.get("label", "")).contains("Pipe"), "Builder preview summary has a readable label")
+	_assert(bool(editor.call("clear_palette_authoring_preferences_for_test")), "Builder preview test cleans isolated preferences")
 	editor.queue_free()
 	await _wait_frames(2)
 
