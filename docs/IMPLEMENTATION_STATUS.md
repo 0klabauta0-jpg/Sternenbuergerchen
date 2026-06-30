@@ -606,6 +606,16 @@
 - Lokale Pruefung: `capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 8`, `task_663_host_client_decision_drill_visual_findings.gd`, `task_662_host_client_decision_drill_real_window_capture.gd`, `task_650_host_client_click_feedback_followup.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_664 - Host Client Decision Drill Real Click Recheck`, um den kompletten Klicklauf nach dem Karten-Badge erneut im Fenster zu pruefen.
 
+### TASK_664 - Host Client Decision Drill Real Click Recheck
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_664_host_client_decision_drill_real_click_recheck.md`, `docs/tasks/TASK_661_host_client_decision_drill_click_evidence.md`, `docs/tasks/TASK_662_host_client_decision_drill_real_window_capture.md`, `docs/tasks/TASK_663_host_client_decision_drill_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `task_664_host_client_decision_drill_real_click_recheck.gd` schreibt `tmp/host_client_decision_drill_real_click_recheck.json` als read-only Recheck-Paket fuer den echten Host/Client-Klicklauf nach dem TASK_663-Badge-Fix.
+- Stand: Das Paket verknuepft TASK_661-Click-Evidence, TASK_662-Real-Capture und TASK_663-Fireteamkarten-Kontext. Erwartet werden `P1 ALPHA`/`P2 BRAVO`, `BLOCK P2 wrong team`, `USE BRAVO`, Bravo-Kontext, `NEXT AA`, Preview vor `GO` und sichtbares GO-Feedback.
+- Stand: Der HTML-Handbuchbericht markiert TASK_664 und empfiehlt danach `TASK_665 - Host Client Decision Drill Click Findings`.
+- Risiken/offen: TASK_664 fuehrt keinen Klickbot aus und markiert den menschlichen Sichtentscheid nicht als erledigt. TASK_665 sollte den echten Klickbefund festhalten.
+- Lokale Pruefung: `task_664_host_client_decision_drill_real_click_recheck.gd`, `task_663_host_client_decision_drill_visual_findings.gd`, `task_662_host_client_decision_drill_real_window_capture.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_665 - Host Client Decision Drill Click Findings`, sobald der manuelle Zwei-Fenster-Klicklauf nach dem Recheck-Paket beobachtet wurde.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
