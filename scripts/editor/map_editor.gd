@@ -3408,12 +3408,126 @@ func _ensure_marker_editor_controls() -> void:
 		existing_interaction_binding_label.add_theme_color_override("font_color", Color(0.76, 0.92, 0.98, 0.96))
 		marker_panel.add_child(existing_interaction_binding_label)
 
+	_ensure_interaction_binding_editor_controls(marker_panel)
+
 	var marker_tool_button := _get_marker_tool_button()
 	if marker_tool_button != null:
 		_configure_tool_button(marker_tool_button, "M", "Marker: place selected map markers or drag existing markers on the grid.")
 	_populate_marker_type_options()
 	_connect_marker_editor_signals()
 	_refresh_marker_editor_controls()
+
+
+func _ensure_interaction_binding_editor_controls(marker_panel: VBoxContainer) -> void:
+	if marker_panel == null:
+		return
+	var editor_panel := marker_panel.get_node_or_null("InteractionBindingEditorPanel") as VBoxContainer
+	if editor_panel != null:
+		_populate_interaction_binding_editor_static_options()
+		return
+
+	var separator := HSeparator.new()
+	separator.name = "InteractionBindingEditorSeparator"
+	marker_panel.add_child(separator)
+
+	editor_panel = VBoxContainer.new()
+	editor_panel.name = "InteractionBindingEditorPanel"
+	editor_panel.add_theme_constant_override("separation", 4)
+	marker_panel.add_child(editor_panel)
+
+	var title_label := Label.new()
+	title_label.name = "InteractionBindingEditorTitle"
+	title_label.text = "Interaction Binding"
+	editor_panel.add_child(title_label)
+
+	var id_row := HBoxContainer.new()
+	id_row.name = "InteractionBindingIdRow"
+	id_row.add_theme_constant_override("separation", 4)
+	editor_panel.add_child(id_row)
+	var id_label := Label.new()
+	id_label.text = "ID:"
+	id_row.add_child(id_label)
+	var id_line_edit := LineEdit.new()
+	id_line_edit.name = "InteractionBindingIdLineEdit"
+	id_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	id_line_edit.tooltip_text = "Stable scenario interaction_id for the selected marker."
+	id_row.add_child(id_line_edit)
+
+	var type_order_row := HBoxContainer.new()
+	type_order_row.name = "InteractionBindingTypeOrderRow"
+	type_order_row.add_theme_constant_override("separation", 4)
+	editor_panel.add_child(type_order_row)
+	var type_option := OptionButton.new()
+	type_option.name = "InteractionBindingTypeOption"
+	type_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	type_option.tooltip_text = "Interaction type stored in scenario vertical_slice.interaction_points."
+	type_order_row.add_child(type_option)
+	var order_option := OptionButton.new()
+	order_option.name = "InteractionBindingOrderOption"
+	order_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	order_option.tooltip_text = "Commander order needed to use this interaction."
+	type_order_row.add_child(order_option)
+
+	var timing_row := HBoxContainer.new()
+	timing_row.name = "InteractionBindingTimingRow"
+	timing_row.add_theme_constant_override("separation", 4)
+	editor_panel.add_child(timing_row)
+	var duration_spinbox := SpinBox.new()
+	duration_spinbox.name = "InteractionBindingDurationSpinBox"
+	duration_spinbox.min_value = 0.0
+	duration_spinbox.max_value = 300.0
+	duration_spinbox.step = 1.0
+	duration_spinbox.tooltip_text = "Hold/operate duration in seconds."
+	duration_spinbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	timing_row.add_child(duration_spinbox)
+	var radius_spinbox := SpinBox.new()
+	radius_spinbox.name = "InteractionBindingRadiusSpinBox"
+	radius_spinbox.min_value = 1.0
+	radius_spinbox.max_value = 1000.0
+	radius_spinbox.step = 1.0
+	radius_spinbox.tooltip_text = "Use radius in world units."
+	radius_spinbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	timing_row.add_child(radius_spinbox)
+
+	var gate_row := HBoxContainer.new()
+	gate_row.name = "InteractionBindingGateRow"
+	gate_row.add_theme_constant_override("separation", 4)
+	editor_panel.add_child(gate_row)
+	var team_line_edit := LineEdit.new()
+	team_line_edit.name = "InteractionBindingTeamLineEdit"
+	team_line_edit.placeholder_text = "team_alpha"
+	team_line_edit.tooltip_text = "Optional required_team. Empty means no team restriction."
+	team_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gate_row.add_child(team_line_edit)
+	var step_line_edit := LineEdit.new()
+	step_line_edit.name = "InteractionBindingStepLineEdit"
+	step_line_edit.placeholder_text = "step/gate"
+	step_line_edit.tooltip_text = "Optional step_id/gate_id linked to scenario runtime gates."
+	step_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gate_row.add_child(step_line_edit)
+
+	var action_row := HBoxContainer.new()
+	action_row.name = "InteractionBindingActionRow"
+	action_row.add_theme_constant_override("separation", 4)
+	editor_panel.add_child(action_row)
+	var apply_button := Button.new()
+	apply_button.name = "InteractionBindingApplyButton"
+	apply_button.text = "Apply"
+	apply_button.tooltip_text = "Create or update a scenario interaction binding for the selected marker."
+	action_row.add_child(apply_button)
+	var remove_button := Button.new()
+	remove_button.name = "InteractionBindingRemoveButton"
+	remove_button.text = "Remove"
+	remove_button.tooltip_text = "Remove the selected marker's scenario interaction binding."
+	action_row.add_child(remove_button)
+
+	var status_label := Label.new()
+	status_label.name = "InteractionBindingEditorStatusLabel"
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status_label.add_theme_font_size_override("font_size", 10)
+	status_label.add_theme_color_override("font_color", Color(0.92, 0.88, 0.72, 0.95))
+	editor_panel.add_child(status_label)
+	_populate_interaction_binding_editor_static_options()
 
 
 func _ensure_mission_scenario_panel_controller():
@@ -3737,6 +3851,7 @@ func _connect_mission_authoring_signals() -> void:
 func _refresh_mission_authoring_controls() -> void:
 	_ensure_mission_scenario_panel_controller().call("refresh")
 	_refresh_interaction_binding_inspector_controls()
+	_refresh_interaction_binding_editor_controls()
 
 
 func _ensure_mission_scenario():
@@ -4397,6 +4512,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 		"network_drag_tool": _build_network_drag_tool_snapshot(),
 		"station_door_authoring": _build_station_door_authoring_snapshot(),
 		"interaction_binding_inspector": get_mission_interaction_binding_inspector_snapshot(false),
+		"interaction_binding_editor": get_mission_interaction_binding_editor_snapshot(false),
 		"patrol_route_preview": get_patrol_route_preview_snapshot(),
 		"tile_property_overlay": get_tile_property_overlay_debug_snapshot(),
 		"adjacency_debug_overlay": get_adjacency_debug_overlay_snapshot(),
@@ -4621,6 +4737,8 @@ func _build_inspector_snapshot() -> Dictionary:
 		"selected_tile_terrain_truth": get_selected_tile_truth_debug_snapshot(),
 		"interaction_binding_inspector_visible": get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingInspectorLabel") != null,
 		"interaction_binding_inspector": get_mission_interaction_binding_inspector_snapshot(false),
+		"interaction_binding_editor_visible": get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel") != null,
+		"interaction_binding_editor": get_mission_interaction_binding_editor_snapshot(false),
 	}
 
 
@@ -5178,6 +5296,39 @@ func _populate_marker_type_options() -> void:
 			option_button.select(selected_index)
 
 
+func _populate_interaction_binding_editor_static_options() -> void:
+	var type_option := _get_interaction_binding_type_option()
+	if type_option != null:
+		var previous_type: String = _get_option_selected_metadata(type_option)
+		type_option.clear()
+		for interaction_type in MISSION_INTERACTION_POINT_BINDING_SCRIPT.ALLOWED_TYPES:
+			var type_text: String = String(interaction_type)
+			type_option.add_item(_format_option_label(type_text))
+			type_option.set_item_metadata(type_option.item_count - 1, type_text)
+		_select_option_by_metadata(type_option, previous_type if not previous_type.is_empty() else MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_HOLD_ZONE)
+	var order_option := _get_interaction_binding_order_option()
+	if order_option != null:
+		var previous_order: String = _get_option_selected_metadata(order_option)
+		order_option.clear()
+		for order_id in MISSION_INTERACTION_POINT_BINDING_SCRIPT.ALLOWED_ORDERS:
+			var order_text: String = String(order_id)
+			order_option.add_item(_format_option_label(order_text))
+			order_option.set_item_metadata(order_option.item_count - 1, order_text)
+		_select_option_by_metadata(order_option, previous_order if not previous_order.is_empty() else "take")
+
+
+func _select_option_by_metadata(option_button: OptionButton, metadata_value: String) -> void:
+	if option_button == null:
+		return
+	var normalized_value: String = metadata_value.strip_edges().to_lower()
+	for index in range(option_button.item_count):
+		if String(option_button.get_item_metadata(index)).strip_edges().to_lower() == normalized_value:
+			option_button.select(index)
+			return
+	if option_button.item_count > 0:
+		option_button.select(0)
+
+
 func _get_option_selected_metadata(option_button: OptionButton) -> String:
 	if option_button == null or option_button.selected < 0 or option_button.selected >= option_button.item_count:
 		return ""
@@ -5221,6 +5372,12 @@ func _connect_marker_editor_signals() -> void:
 	var marker_color_button := _get_marker_color_button()
 	if marker_color_button != null and not marker_color_button.color_changed.is_connected(_on_marker_color_changed):
 		marker_color_button.color_changed.connect(_on_marker_color_changed)
+	var binding_apply_button := _get_interaction_binding_apply_button()
+	if binding_apply_button != null and not binding_apply_button.pressed.is_connected(_on_interaction_binding_apply_pressed):
+		binding_apply_button.pressed.connect(_on_interaction_binding_apply_pressed)
+	var binding_remove_button := _get_interaction_binding_remove_button()
+	if binding_remove_button != null and not binding_remove_button.pressed.is_connected(_on_interaction_binding_remove_pressed):
+		binding_remove_button.pressed.connect(_on_interaction_binding_remove_pressed)
 
 
 func _refresh_marker_editor_controls() -> void:
@@ -5266,6 +5423,7 @@ func _refresh_marker_editor_controls() -> void:
 		marker_info_label.tooltip_text = add_marker_tooltip
 		_is_refreshing_marker_controls = false
 		_refresh_interaction_binding_inspector_controls()
+		_refresh_interaction_binding_editor_controls()
 		_refresh_authoring_status_controls()
 		_apply_inspector_section_visibility()
 		return
@@ -5283,6 +5441,7 @@ func _refresh_marker_editor_controls() -> void:
 	marker_info_label.tooltip_text = selected_marker_tooltip
 	_is_refreshing_marker_controls = false
 	_refresh_interaction_binding_inspector_controls()
+	_refresh_interaction_binding_editor_controls()
 	_refresh_authoring_status_controls()
 	_apply_inspector_section_visibility()
 
@@ -5436,6 +5595,271 @@ func _refresh_interaction_binding_inspector_controls() -> void:
 		int(snapshot.get("binding_count", 0)),
 		", ".join(PackedStringArray(snapshot.get("missing_marker_ids", PackedStringArray()))),
 	]
+
+
+func get_mission_interaction_binding_editor_snapshot(sync_from_controls: bool = true) -> Dictionary:
+	if sync_from_controls and not _is_refreshing_scenario_controls:
+		_sync_mission_scenario_from_controls()
+	var inspector: Dictionary = get_mission_interaction_binding_inspector_snapshot(false)
+	var selected_bindings: Array = Array(inspector.get("selected_marker_bindings", []))
+	var current_binding: Dictionary = Dictionary(selected_bindings[0]) if not selected_bindings.is_empty() else {}
+	return {
+		"schema": "sternenbuergerchen.map_editor_interaction_binding_editor.v1",
+		"write_scope": "MissionScenarioData.vertical_slice.interaction_points",
+		"runtime_authority": "SimulationRoot",
+		"read_only": false,
+		"ui_sets_gameplay_truth": false,
+		"selected_marker_id": _selected_marker_id,
+		"has_selected_marker": not _selected_marker_id.is_empty(),
+		"has_existing_binding": not current_binding.is_empty(),
+		"current_binding": current_binding.duplicate(true),
+		"control_paths": {
+			"panel": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel",
+			"apply_button": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingActionRow/InteractionBindingApplyButton",
+			"remove_button": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingActionRow/InteractionBindingRemoveButton",
+		},
+		"allowed_types": MISSION_INTERACTION_POINT_BINDING_SCRIPT.ALLOWED_TYPES,
+		"allowed_orders": MISSION_INTERACTION_POINT_BINDING_SCRIPT.ALLOWED_ORDERS,
+		"scenario_dirty": _scenario_dirty,
+	}
+
+
+func apply_selected_marker_interaction_binding_from_editor(fields: Dictionary = {}) -> bool:
+	if _selected_marker_id.is_empty():
+		_set_marker_feedback("Select a marker before applying an interaction binding.")
+		_refresh_interaction_binding_editor_controls()
+		return false
+	_sync_mission_scenario_from_controls()
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return false
+	var normalized_fields: Dictionary = _normalize_interaction_binding_editor_fields(fields)
+	var vertical_slice: Dictionary = Dictionary(scenario.get("vertical_slice")).duplicate(true)
+	if vertical_slice.is_empty():
+		vertical_slice["contract_version"] = 1
+	var interaction_points: Array = Array(vertical_slice.get("interaction_points", [])).duplicate(true)
+	var interaction_id: String = String(normalized_fields.get("interaction_id", "")).strip_edges()
+	var replaced: bool = false
+	for index in range(interaction_points.size()):
+		var existing: Dictionary = Dictionary(interaction_points[index]).duplicate(true)
+		var existing_marker_id: String = String(existing.get("marker_id", "")).strip_edges()
+		var existing_interaction_id: String = String(existing.get("interaction_id", "")).strip_edges()
+		if existing_marker_id == _selected_marker_id or (not interaction_id.is_empty() and existing_interaction_id == interaction_id):
+			interaction_points[index] = _build_interaction_binding_authoring_record(existing, normalized_fields)
+			replaced = true
+			break
+	if not replaced:
+		interaction_points.append(_build_interaction_binding_authoring_record({}, normalized_fields))
+	vertical_slice["interaction_points"] = interaction_points
+	scenario.set("vertical_slice", vertical_slice)
+	_scenario_feedback_text = "Interaction binding updated."
+	_set_marker_feedback("Interaction binding updated for %s." % _selected_marker_id)
+	_mark_scenario_dirty(true)
+	_refresh_marker_editor_controls()
+	_refresh_mission_authoring_controls()
+	return true
+
+
+func remove_selected_marker_interaction_binding_from_editor(interaction_id: String = "") -> bool:
+	if _selected_marker_id.is_empty():
+		_set_marker_feedback("Select a marker before removing an interaction binding.")
+		_refresh_interaction_binding_editor_controls()
+		return false
+	_sync_mission_scenario_from_controls()
+	var scenario = _ensure_mission_scenario()
+	if scenario == null:
+		return false
+	var vertical_slice: Dictionary = Dictionary(scenario.get("vertical_slice")).duplicate(true)
+	var interaction_points: Array = Array(vertical_slice.get("interaction_points", []))
+	var kept: Array = []
+	var removed_count: int = 0
+	var normalized_interaction_id: String = interaction_id.strip_edges()
+	for binding_variant in interaction_points:
+		var binding: Dictionary = Dictionary(binding_variant)
+		var binding_marker_id: String = String(binding.get("marker_id", "")).strip_edges()
+		var binding_interaction_id: String = String(binding.get("interaction_id", "")).strip_edges()
+		var remove_binding: bool = binding_marker_id == _selected_marker_id
+		if not normalized_interaction_id.is_empty():
+			remove_binding = remove_binding and binding_interaction_id == normalized_interaction_id
+		if remove_binding:
+			removed_count += 1
+			continue
+		kept.append(binding.duplicate(true))
+	if removed_count <= 0:
+		_set_marker_feedback("No interaction binding found for %s." % _selected_marker_id)
+		_refresh_interaction_binding_editor_controls()
+		return false
+	vertical_slice["interaction_points"] = kept
+	scenario.set("vertical_slice", vertical_slice)
+	_scenario_feedback_text = "Interaction binding removed."
+	_set_marker_feedback("Interaction binding removed for %s." % _selected_marker_id)
+	_mark_scenario_dirty(true)
+	_refresh_marker_editor_controls()
+	_refresh_mission_authoring_controls()
+	return true
+
+
+func _refresh_interaction_binding_editor_controls() -> void:
+	var editor_panel := _get_interaction_binding_editor_panel()
+	if editor_panel == null:
+		return
+	_populate_interaction_binding_editor_static_options()
+	var id_line_edit := _get_interaction_binding_id_line_edit()
+	var type_option := _get_interaction_binding_type_option()
+	var order_option := _get_interaction_binding_order_option()
+	var duration_spinbox := _get_interaction_binding_duration_spinbox()
+	var radius_spinbox := _get_interaction_binding_radius_spinbox()
+	var team_line_edit := _get_interaction_binding_team_line_edit()
+	var step_line_edit := _get_interaction_binding_step_line_edit()
+	var apply_button := _get_interaction_binding_apply_button()
+	var remove_button := _get_interaction_binding_remove_button()
+	var status_label := _get_interaction_binding_status_label()
+	var has_marker: bool = not _selected_marker_id.is_empty()
+	var inspector: Dictionary = get_mission_interaction_binding_inspector_snapshot(false)
+	var selected_bindings: Array = Array(inspector.get("selected_marker_bindings", []))
+	var binding: Dictionary = Dictionary(selected_bindings[0]) if not selected_bindings.is_empty() else {}
+	var defaults: Dictionary = _build_default_interaction_binding_fields_for_marker(_selected_marker_id)
+	var source: Dictionary = binding if not binding.is_empty() else defaults
+	if id_line_edit != null:
+		id_line_edit.editable = has_marker
+		id_line_edit.text = String(source.get("interaction_id", ""))
+	if type_option != null:
+		type_option.disabled = not has_marker
+		_select_option_by_metadata(type_option, String(source.get("interaction_type", defaults.get("interaction_type", MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_HOLD_ZONE))))
+	if order_option != null:
+		order_option.disabled = not has_marker
+		_select_option_by_metadata(order_option, String(source.get("required_order", defaults.get("required_order", "take"))))
+	if duration_spinbox != null:
+		duration_spinbox.editable = has_marker
+		duration_spinbox.value = maxf(float(source.get("duration_seconds", defaults.get("duration_seconds", 0.0))), 0.0)
+	if radius_spinbox != null:
+		radius_spinbox.editable = has_marker
+		radius_spinbox.value = maxf(float(source.get("radius_world", defaults.get("radius_world", 128.0))), 1.0)
+	if team_line_edit != null:
+		team_line_edit.editable = has_marker
+		team_line_edit.text = String(source.get("required_team", defaults.get("required_team", "team_alpha")))
+	if step_line_edit != null:
+		step_line_edit.editable = has_marker
+		step_line_edit.text = String(source.get("step_id", defaults.get("step_id", "")))
+	if apply_button != null:
+		apply_button.disabled = not has_marker
+	if remove_button != null:
+		remove_button.disabled = not has_marker or binding.is_empty()
+	if status_label != null:
+		if not has_marker:
+			status_label.text = "Select marker to bind an interaction."
+		elif binding.is_empty():
+			status_label.text = "New binding will write scenario authoring data only."
+		else:
+			status_label.text = "Editing existing binding: %s" % String(binding.get("interaction_id", ""))
+
+
+func _normalize_interaction_binding_editor_fields(fields: Dictionary) -> Dictionary:
+	var control_fields: Dictionary = _collect_interaction_binding_editor_fields()
+	var merged: Dictionary = control_fields.duplicate(true)
+	for key_variant in fields.keys():
+		merged[key_variant] = fields.get(key_variant)
+	var interaction_type: String = String(merged.get("interaction_type", MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_HOLD_ZONE)).strip_edges().to_lower()
+	if not MISSION_INTERACTION_POINT_BINDING_SCRIPT.ALLOWED_TYPES.has(interaction_type):
+		interaction_type = MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_HOLD_ZONE
+	var required_order: String = String(merged.get("required_order", "take")).strip_edges().to_lower()
+	if not MISSION_INTERACTION_POINT_BINDING_SCRIPT.ALLOWED_ORDERS.has(required_order):
+		required_order = "take"
+	var default_fields: Dictionary = _build_default_interaction_binding_fields_for_marker(_selected_marker_id, interaction_type)
+	var interaction_id: String = _normalize_interaction_binding_id(String(merged.get("interaction_id", "")), String(default_fields.get("interaction_id", "")))
+	return {
+		"interaction_id": interaction_id,
+		"display_name": String(merged.get("display_name", interaction_id.replace("_", " ").capitalize())).strip_edges(),
+		"interaction_type": interaction_type,
+		"marker_id": _selected_marker_id,
+		"required_order": required_order,
+		"duration_seconds": maxf(float(merged.get("duration_seconds", default_fields.get("duration_seconds", 0.0))), 0.0),
+		"radius_world": maxf(float(merged.get("radius_world", default_fields.get("radius_world", 128.0))), 1.0),
+		"required_team": String(merged.get("required_team", default_fields.get("required_team", "team_alpha"))).strip_edges(),
+		"step_id": String(merged.get("step_id", "")).strip_edges(),
+		"gate_id": String(merged.get("gate_id", merged.get("step_id", ""))).strip_edges(),
+		"required_state": String(merged.get("required_state", "")).strip_edges(),
+		"requires_step_id": String(merged.get("requires_step_id", "")).strip_edges(),
+		"asset_hint": String(merged.get("asset_hint", "")).strip_edges(),
+	}
+
+
+func _collect_interaction_binding_editor_fields() -> Dictionary:
+	return {
+		"interaction_id": _get_interaction_binding_id_line_edit().text if _get_interaction_binding_id_line_edit() != null else "",
+		"interaction_type": _get_option_selected_metadata(_get_interaction_binding_type_option()),
+		"required_order": _get_option_selected_metadata(_get_interaction_binding_order_option()),
+		"duration_seconds": _get_interaction_binding_duration_spinbox().value if _get_interaction_binding_duration_spinbox() != null else 0.0,
+		"radius_world": _get_interaction_binding_radius_spinbox().value if _get_interaction_binding_radius_spinbox() != null else 128.0,
+		"required_team": _get_interaction_binding_team_line_edit().text if _get_interaction_binding_team_line_edit() != null else "",
+		"step_id": _get_interaction_binding_step_line_edit().text if _get_interaction_binding_step_line_edit() != null else "",
+	}
+
+
+func _build_interaction_binding_authoring_record(existing: Dictionary, fields: Dictionary) -> Dictionary:
+	var result: Dictionary = existing.duplicate(true)
+	for key_variant in fields.keys():
+		var key: String = String(key_variant)
+		var value: Variant = fields.get(key_variant)
+		if value is String and String(value).strip_edges().is_empty() and ["required_team", "step_id", "gate_id", "required_state", "requires_step_id", "asset_hint"].has(key):
+			result.erase(key)
+		else:
+			result[key] = value
+	return result
+
+
+func _build_default_interaction_binding_fields_for_marker(marker_id: String, forced_type: String = "") -> Dictionary:
+	var interaction_type: String = forced_type.strip_edges().to_lower()
+	if interaction_type.is_empty():
+		interaction_type = _infer_interaction_type_for_marker(marker_id)
+	var required_order: String = "operate" if interaction_type == MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_COMPUTER else "take"
+	if interaction_type == MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_DOOR:
+		required_order = "breach"
+	return {
+		"interaction_id": _normalize_interaction_binding_id("%s_%s" % [marker_id, interaction_type], "interaction_point"),
+		"interaction_type": interaction_type,
+		"required_order": required_order,
+		"duration_seconds": 8.0 if interaction_type == MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_COMPUTER else 0.0,
+		"radius_world": _default_interaction_binding_radius(interaction_type),
+		"required_team": "team_alpha",
+		"step_id": "",
+	}
+
+
+func _infer_interaction_type_for_marker(marker_id: String) -> String:
+	var marker_type_id: String = ""
+	if _terrain_map_data != null and not marker_id.is_empty() and bool(_terrain_map_data.call("has_marker", marker_id)):
+		marker_type_id = String(_terrain_map_data.call("get_marker_type_id", marker_id)).strip_edges().to_lower()
+	if marker_type_id.contains("door"):
+		return MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_DOOR
+	if marker_type_id.contains("computer") or marker_type_id.contains("console"):
+		return MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_COMPUTER
+	return MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_HOLD_ZONE
+
+
+func _default_interaction_binding_radius(interaction_type: String) -> float:
+	match interaction_type.strip_edges().to_lower():
+		MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_DOOR:
+			return 72.0
+		MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_COMPUTER:
+			return 96.0
+		_:
+			return 128.0
+
+
+func _normalize_interaction_binding_id(raw_value: String, fallback: String) -> String:
+	var normalized: String = raw_value.strip_edges().to_lower().replace(" ", "_").replace("-", "_")
+	if normalized.is_empty():
+		normalized = fallback.strip_edges().to_lower()
+	return normalized
+
+
+func _on_interaction_binding_apply_pressed() -> void:
+	apply_selected_marker_interaction_binding_from_editor()
+
+
+func _on_interaction_binding_remove_pressed() -> void:
+	remove_selected_marker_interaction_binding_from_editor(String(_collect_interaction_binding_editor_fields().get("interaction_id", "")))
 
 
 func _set_marker_feedback(feedback_text: String) -> void:
@@ -8356,6 +8780,50 @@ func _get_marker_info_label() -> Label:
 
 func _get_interaction_binding_inspector_label() -> Label:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingInspectorLabel") as Label
+
+
+func _get_interaction_binding_editor_panel() -> VBoxContainer:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel") as VBoxContainer
+
+
+func _get_interaction_binding_id_line_edit() -> LineEdit:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingIdRow/InteractionBindingIdLineEdit") as LineEdit
+
+
+func _get_interaction_binding_type_option() -> OptionButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingTypeOrderRow/InteractionBindingTypeOption") as OptionButton
+
+
+func _get_interaction_binding_order_option() -> OptionButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingTypeOrderRow/InteractionBindingOrderOption") as OptionButton
+
+
+func _get_interaction_binding_duration_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingTimingRow/InteractionBindingDurationSpinBox") as SpinBox
+
+
+func _get_interaction_binding_radius_spinbox() -> SpinBox:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingTimingRow/InteractionBindingRadiusSpinBox") as SpinBox
+
+
+func _get_interaction_binding_team_line_edit() -> LineEdit:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingGateRow/InteractionBindingTeamLineEdit") as LineEdit
+
+
+func _get_interaction_binding_step_line_edit() -> LineEdit:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingGateRow/InteractionBindingStepLineEdit") as LineEdit
+
+
+func _get_interaction_binding_apply_button() -> Button:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingActionRow/InteractionBindingApplyButton") as Button
+
+
+func _get_interaction_binding_remove_button() -> Button:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingActionRow/InteractionBindingRemoveButton") as Button
+
+
+func _get_interaction_binding_status_label() -> Label:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingEditorStatusLabel") as Label
 
 
 func _get_edge_type_option_button() -> OptionButton:

@@ -97,6 +97,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Inspector darf fehlende Marker sichtbar machen, aber nicht automatisch reparieren, keine Gates setzen und keine Runtime-Interaktion starten.
 - `get_map_editor_usability_snapshot().interaction_binding_inspector` exportiert denselben read-only Zustand fuer Verifier und HTML-Reports.
 
+## Editor Binding Editor
+- `MapEditor.get_mission_interaction_binding_editor_snapshot()` beschreibt den kleinen Authoring-Editor im Markerpanel.
+- Apply/Remove wirken nur auf den aktuell selektierten Marker und schreiben `MissionScenarioData.vertical_slice.interaction_points`.
+- Neue Bindings bekommen `interaction_id`, `interaction_type`, `required_order`, `duration_seconds`, `radius_world`, `required_team` und optionale Step-/Gate-Felder.
+- Der Editor markiert das Scenario dirty und aktualisiert danach den read-only Binding-Inspector.
+- Der Editor startet keine Interaktion, setzt keine Gates, veraendert keinen Runtime-State und meldet `ui_sets_gameplay_truth = false`.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.
@@ -105,5 +112,5 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Keine neue UI-Parallelwahrheit fuer Missionsfortschritt.
 
 ## Naechste Slices
-- Editor-UI zum Bearbeiten von Interaction-Point-Bindings.
+- Bessere Presets je Marker-/Asset-Typ fuer Interaction-Point-Bindings.
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Missionsbild.
