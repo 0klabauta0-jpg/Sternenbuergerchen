@@ -47,9 +47,9 @@ func _test_docs_and_reports() -> void:
 	_assert(contract_text.contains("Frontier-Probe-Homebase-Next-Sortie-Readiness"), "Mission feedback contract documents TASK_641")
 	_assert(homebase_text.contains("get_frontier_probe_homebase_next_sortie_readiness_snapshot"), "Homebase exposes TASK_641 snapshot")
 	_assert(report_text.contains("TASK_641 Frontier Probe Homebase Next Sortie Readiness"), "Rolling report tracks TASK_641")
-	_assert(report_text.contains('latest_completed_task: "TASK_647 - Homebase MissionPanel Density Findings"'), "Rolling report advances latest completed beyond TASK_641")
+	_assert(report_text.contains('latest_completed_task: "TASK_648 - Homebase Next Sortie Action Cue"'), "Rolling report advances latest completed beyond TASK_641")
 	_assert(handbook_text.contains("TASK_641 - Frontier Probe Homebase Next Sortie Readiness"), "Status handbook tracks TASK_641")
-	_assert(handbook_text.contains('current_task: "TASK_647 - Homebase MissionPanel Density Findings"'), "Status handbook current task advances beyond TASK_641")
+	_assert(handbook_text.contains('current_task: "TASK_648 - Homebase Next Sortie Action Cue"'), "Status handbook current task advances beyond TASK_641")
 	for key in [
 		"frontier_probe_homebase_next_sortie_readiness.task_id",
 		"frontier_probe_homebase_next_sortie_readiness.manifest_path",
@@ -98,7 +98,8 @@ func _test_next_sortie_readiness() -> void:
 	_assert(bool(snapshot.get("readiness_label_visible", false)), "Next-sortie readiness line is visible")
 	_assert(String(snapshot.get("readiness_line", "")).begins_with("Next sortie:"), "Readiness line names next sortie")
 	_assert(String(snapshot.get("rendered_readiness_line", "")) == String(snapshot.get("readiness_line", "")), "Rendered readiness line matches snapshot")
-	_assert(String(snapshot.get("current_next_step_id", "")) == "review_roster_gains", "Current next step points to roster gains when awards exist")
+	_assert(String(snapshot.get("current_next_step_id", "")) == "stage_fireteam", "Current next step points to staging when awards exist but no payload is staged")
+	_assert(bool(snapshot.get("review_gains_non_blocking", false)), "Roster gains stay visible without blocking the next actionable sortie step")
 	_assert(_step_exists(snapshot, "review_roster_gains"), "Readiness steps include roster gains")
 	_assert(_step_exists(snapshot, "stage_fireteam"), "Readiness steps include fireteam staging")
 	_assert(_step_exists(snapshot, "assign_loadout"), "Readiness steps include loadout assignment")
@@ -113,7 +114,7 @@ func _test_next_sortie_readiness() -> void:
 	var manifest: Dictionary = _build_manifest(snapshot)
 	_write_manifest(manifest)
 	_assert(FileAccess.file_exists(OUTPUT_MANIFEST_PATH), "TASK_641 manifest is written")
-	_assert(String(manifest.get("current_next_step_id", "")) == "review_roster_gains", "Manifest records current next step")
+	_assert(String(manifest.get("current_next_step_id", "")) == "stage_fireteam", "Manifest records current actionable next step")
 
 	scene.queue_free()
 	await _wait_frames(2)
@@ -166,6 +167,7 @@ func _build_manifest(snapshot: Dictionary) -> Dictionary:
 		"readiness_line": String(snapshot.get("readiness_line", "")),
 		"current_next_step_id": String(snapshot.get("current_next_step_id", "")),
 		"readiness_steps": Array(snapshot.get("readiness_steps", [])).duplicate(true),
+		"review_gains_non_blocking": bool(snapshot.get("review_gains_non_blocking", false)),
 		"pre_mission_readiness_state": String(snapshot.get("pre_mission_readiness_state", "")),
 		"can_request_mission_start": bool(snapshot.get("can_request_mission_start", false)),
 		"mission_result_preserved": bool(snapshot.get("mission_result_preserved", false)),

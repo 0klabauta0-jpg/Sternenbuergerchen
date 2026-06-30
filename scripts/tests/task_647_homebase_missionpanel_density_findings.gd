@@ -49,15 +49,15 @@ func _test_docs_and_reports() -> void:
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_647 task file exists")
 	_assert(task_text.contains("Homebase MissionPanel Density Findings"), "TASK_647 task names density findings")
 	_assert(task_646_text.contains("separater Layout-Polish"), "TASK_647 follows TASK_646 warning path")
-	_assert(status_text.contains("TASK_647 - Homebase MissionPanel Density Findings"), "Implementation status tracks TASK_647")
-	_assert(roadmap_text.contains("TASK_647 - Homebase MissionPanel Density Findings (implementiert)"), "Roadmap marks TASK_647 implemented")
+	_assert(status_text.contains("TASK_648 - Homebase Next Sortie Action Cue"), "Implementation status tracks TASK_647")
+	_assert(roadmap_text.contains("TASK_648 - Homebase Next Sortie Action Cue (implementiert)"), "Roadmap marks TASK_647 implemented")
 	_assert(contract_text.contains("Homebase-MissionPanel-Density-Findings"), "Mission feedback contract documents TASK_647")
 	_assert(homebase_text.contains("HOMEBASE_POST_DEBRIEF_DENSITY_FINDINGS_STYLE_ID"), "Homebase exposes TASK_647 style id")
 	_assert(report_text.contains("TASK_647 Homebase MissionPanel Density Findings"), "Rolling report tracks TASK_647")
-	_assert(report_text.contains('latest_completed_task: "TASK_647 - Homebase MissionPanel Density Findings"'), "Rolling report marks TASK_647 latest completed")
-	_assert(handbook_text.contains("TASK_647 - Homebase MissionPanel Density Findings"), "Status handbook tracks TASK_647")
-	_assert(handbook_text.contains('current_task: "TASK_647 - Homebase MissionPanel Density Findings"'), "Status handbook current task is TASK_647")
-	_assert(state_handbook_text.contains("TASK_647 - Homebase MissionPanel Density Findings"), "State handbook tracks TASK_647")
+	_assert(report_text.contains('latest_completed_task: "TASK_648 - Homebase Next Sortie Action Cue"'), "Rolling report marks TASK_647 latest completed")
+	_assert(handbook_text.contains("TASK_648 - Homebase Next Sortie Action Cue"), "Status handbook tracks TASK_647")
+	_assert(handbook_text.contains('current_task: "TASK_648 - Homebase Next Sortie Action Cue"'), "Status handbook current task is TASK_647")
+	_assert(state_handbook_text.contains("TASK_648 - Homebase Next Sortie Action Cue"), "State handbook tracks TASK_647")
 	for key in [
 		"homebase_missionpanel_density_findings.task_id",
 		"homebase_missionpanel_density_findings.manifest_path",
