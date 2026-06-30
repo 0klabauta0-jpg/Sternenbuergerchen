@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_639 auf <code>task/frontier-probe-meta-debrief-route-smoke</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_640 auf <code>task/frontier-probe-post-debrief-homebase-readability</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -303,6 +303,7 @@
       <span class="pill good">TASK_637 Next Interaction</span>
       <span class="pill good">TASK_638 Debrief-Handoff</span>
       <span class="pill good">TASK_639 Meta-Debrief-Smoke</span>
+      <span class="pill good">TASK_640 Homebase-Return</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2193,6 +2194,34 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_640 Frontier Probe Post Debrief Homebase Readability</h2>
+          <p>Nach dem Debrief-Return zeigt die Homebase jetzt eine kompakte read-only Rueckkehrzeile im MissionPanel: Debrief abgeschlossen, Frontier-Probe-Ergebnis erhalten und naechster Homebase-Schritt sichtbar. Die Zeile nutzt das vorhandene MissionResult und erzeugt keine Navigation oder Commands.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Homebase Return / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_640 - Frontier Probe Post Debrief Homebase Readability" data-export-key="frontier_probe_post_debrief_homebase_readability.task_id"></td><td>Aktueller Homebase-Return-Lesbarkeitsslice.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_post_debrief_homebase_readability.json" data-export-key="frontier_probe_post_debrief_homebase_readability.manifest_path"></td><td>Lokales Summary-Manifest.</td></tr>
+                <tr><td>Route</td><td><input readonly value="frontier_probe_aa_computer_cargo" data-export-key="frontier_probe_post_debrief_homebase_readability.route_id"></td><td>Frontier-Probe-Ergebnis bleibt auf Homebase lesbar.</td></tr>
+                <tr><td>Summary</td><td><input readonly value="Debrief complete -> Homebase | Frontier Probe / VICTORY / frontier_probe_cargo_extract / 312s | Next: review roster gains" data-export-key="frontier_probe_post_debrief_homebase_readability.summary_text"></td><td>Kompakte Rueckkehrzeile im MissionPanel.</td></tr>
+                <tr><td>Naechster Schritt</td><td><input readonly value="review roster gains" data-export-key="frontier_probe_post_debrief_homebase_readability.next_step_text"></td><td>Fuehrt den Spieler nach dem Debrief zur Homebase-Arbeit.</td></tr>
+                <tr><td>MissionResult</td><td><input readonly value="true" data-export-key="frontier_probe_post_debrief_homebase_readability.mission_result_preserved"></td><td>Die Summary kommt aus dem bestehenden Ergebnis.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_post_debrief_homebase_readability.read_only"></td><td>Keine neue Progression, Navigation oder Command-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_641 - Frontier Probe Homebase Next Sortie Readiness" data-export-key="frontier_probe_post_debrief_homebase_readability.recommended_next_task"></td><td>Danach den naechsten Homebase-Vorbereitungsschritt lesbarer machen.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_post_debrief_homebase_readability.summary_visible"> Summary-Zeile sichtbar</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_post_debrief_homebase_readability.result_preserved_checked"> MissionResult erhalten</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_post_debrief_homebase_readability.no_command_or_navigation"> Kein Command-/Navigation-Commit</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_post_debrief_homebase_readability.manual_visible_homebase_checked"> Echten Homebase-Fensterblick geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_640 Homebase-Return-Notiz
+            <textarea data-note-key="notes.frontier_probe_post_debrief_homebase_readability" data-export-key="frontier_probe_post_debrief_homebase_readability.notes" placeholder="Beim Spielen notieren: Reicht die Rueckkehrzeile, oder braucht der naechste Homebase-Schritt mehr Fuehrung?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3055,7 +3084,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_640 - Frontier Probe Post Debrief Homebase Readability",
+              "TASK_641 - Frontier Probe Homebase Next Sortie Readiness",
               "Echten Zwei-Fenster-Klicklauf mit TASK_629-Packet ausfuehren, falls Host/Client-UI-Reibung priorisiert werden soll"
             ],
             recently_completed_tasks: [
@@ -3182,7 +3211,8 @@
               "TASK_636 - Frontier Probe Real F6 Re-Capture",
               "TASK_637 - Frontier Probe Playfeel Next Interaction",
               "TASK_638 - Frontier Probe Debrief Handoff Feel",
-              "TASK_639 - Frontier Probe Meta Debrief Route Smoke"
+              "TASK_639 - Frontier Probe Meta Debrief Route Smoke",
+              "TASK_640 - Frontier Probe Post Debrief Homebase Readability"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3230,7 +3260,8 @@
               "TASK_636 erzeugt den Re-Capture nach TASK_635 als PNG/Manifest und belegt Style, Route-Linien, Font, Outline und getrennte LZ/CARGO-Labels read-only.",
               "TASK_637 zeigt den naechsten Frontier-Probe-Schritt als kompakte read-only NEXT-Zeile in #18 Mission Control; der echte Debrief-/Homebase-Handoff bleibt Folgearbeit.",
               "TASK_638 markiert den abgeschlossenen Frontier-Probe-Missionsmoment als HANDOFF Debrief bereit | danach Homebase.",
-              "TASK_639 prueft den vorhandenen Meta-Weg mit Frontier-Probe-Resultat: Debrief sichtbar, Return verfuegbar, Homebase nach Return sichtbar und MissionResult erhalten."
+              "TASK_639 prueft den vorhandenen Meta-Weg mit Frontier-Probe-Resultat: Debrief sichtbar, Return verfuegbar, Homebase nach Return sichtbar und MissionResult erhalten.",
+              "TASK_640 zeigt nach dem Debrief-Return eine kompakte Homebase-Summary aus dem Frontier-Probe-Ergebnis und nennt den naechsten Homebase-Schritt."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3239,14 +3270,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_639",
-            current_focus: "Frontier Probe Meta Debrief Route Smoke",
-            latest_completed_task: "TASK_639 - Frontier Probe Meta Debrief Route Smoke"
+            current_repo_base: "integration/core-foundation after TASK_640",
+            current_focus: "Frontier Probe Post Debrief Homebase Readability",
+            latest_completed_task: "TASK_640 - Frontier Probe Post Debrief Homebase Readability"
           },
           metadata: {
-            branch: "task/frontier-probe-meta-debrief-route-smoke",
-            integration_base: "integration/core-foundation after TASK_638",
-            head: "task/frontier-probe-meta-debrief-route-smoke",
+            branch: "task/frontier-probe-post-debrief-homebase-readability",
+            integration_base: "integration/core-foundation after TASK_639",
+            head: "task/frontier-probe-post-debrief-homebase-readability",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }
