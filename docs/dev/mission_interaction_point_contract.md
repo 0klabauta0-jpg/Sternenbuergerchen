@@ -104,6 +104,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Editor markiert das Scenario dirty und aktualisiert danach den read-only Binding-Inspector.
 - Der Editor startet keine Interaktion, setzt keine Gates, veraendert keinen Runtime-State und meldet `ui_sets_gameplay_truth = false`.
 
+## Editor Binding Presets
+- Der Binding-Editor bietet Presets fuer Auto, Door/Breach, Computer/18s, Hold-Zone/12s, AA-Shutdown und Cargo-Landing-Hold.
+- Presets fuellen nur sichtbare Authoring-Felder und werden erst mit Apply in `MissionScenarioData.vertical_slice.interaction_points` geschrieben.
+- Presets duerfen `step_id`, `gate_id`, `required_state`, `requires_step_id`, Dauer, Radius und Team vorbelegen.
+- Cargo-Landing-Hold setzt `requires_step_id = disable_air_defense`, damit die bestehende AA-vor-Cargo-Regel ohne JSON-Handarbeit authorbar bleibt.
+- `get_mission_interaction_binding_editor_snapshot()` exportiert `available_presets`, `selected_preset_id` und `preset_preview`, bleibt aber weiter `ui_sets_gameplay_truth = false`.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.
@@ -112,5 +119,4 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Keine neue UI-Parallelwahrheit fuer Missionsfortschritt.
 
 ## Naechste Slices
-- Bessere Presets je Marker-/Asset-Typ fuer Interaction-Point-Bindings.
-- Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Missionsbild.
+- Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild.

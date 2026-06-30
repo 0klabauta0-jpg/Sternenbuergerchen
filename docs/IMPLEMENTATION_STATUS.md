@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_682 - Mission Interaction Binding Presets
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_682_mission_interaction_binding_presets.md`, `docs/tasks/TASK_681_mission_interaction_binding_editor.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Der Map-Editor-Binding-Editor bietet Presets fuer Auto, Door/Breach, Computer/18s, Hold-Zone/12s, AA-Shutdown und Cargo-Landing-Hold.
+- Stand: Presets fuellen sichtbare Authoring-Felder fuer Typ, Order, Dauer, Radius, Team, Step, Required-State und Requires-Step; Apply schreibt danach weiter nur Scenario-Interaction-Points.
+- Stand: `get_mission_interaction_binding_editor_snapshot()` exportiert Presetliste, aktive Preset-ID und Preset-Vorschau ohne Gameplay-Wahrheit zu setzen.
+- Risiken/offen: Die Presets sind bewusst allgemeine Startwerte. Ein echter FullHD-Sichtlauf muss noch pruefen, ob der rechte Editorbereich trotz Zusatzfeldern angenehm bleibt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_682_mission_interaction_binding_presets.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_681_mission_interaction_binding_editor.gd`, `git diff --check`.
+- Naechster Schritt: Echter FullHD-Sichtlauf fuer Editor-Interaction-Labels und Mission-Interaction-Progress.
+
 ### TASK_681 - Mission Interaction Binding Editor
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_681_mission_interaction_binding_editor.md`, `docs/tasks/TASK_680_mission_interaction_binding_inspector.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`

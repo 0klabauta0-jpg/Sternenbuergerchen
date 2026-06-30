@@ -3440,6 +3440,19 @@ func _ensure_interaction_binding_editor_controls(marker_panel: VBoxContainer) ->
 	title_label.text = "Interaction Binding"
 	editor_panel.add_child(title_label)
 
+	var preset_row := HBoxContainer.new()
+	preset_row.name = "InteractionBindingPresetRow"
+	preset_row.add_theme_constant_override("separation", 4)
+	editor_panel.add_child(preset_row)
+	var preset_label := Label.new()
+	preset_label.text = "Preset:"
+	preset_row.add_child(preset_label)
+	var preset_option := OptionButton.new()
+	preset_option.name = "InteractionBindingPresetOption"
+	preset_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	preset_option.tooltip_text = "Fill binding fields from common scenario interaction presets."
+	preset_row.add_child(preset_option)
+
 	var id_row := HBoxContainer.new()
 	id_row.name = "InteractionBindingIdRow"
 	id_row.add_theme_constant_override("separation", 4)
@@ -3505,6 +3518,23 @@ func _ensure_interaction_binding_editor_controls(marker_panel: VBoxContainer) ->
 	step_line_edit.tooltip_text = "Optional step_id/gate_id linked to scenario runtime gates."
 	step_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	gate_row.add_child(step_line_edit)
+
+	var state_row := HBoxContainer.new()
+	state_row.name = "InteractionBindingStateRow"
+	state_row.add_theme_constant_override("separation", 4)
+	editor_panel.add_child(state_row)
+	var state_line_edit := LineEdit.new()
+	state_line_edit.name = "InteractionBindingStateLineEdit"
+	state_line_edit.placeholder_text = "required_state"
+	state_line_edit.tooltip_text = "Optional state written when this scenario step completes."
+	state_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	state_row.add_child(state_line_edit)
+	var requires_line_edit := LineEdit.new()
+	requires_line_edit.name = "InteractionBindingRequiresLineEdit"
+	requires_line_edit.placeholder_text = "requires_step"
+	requires_line_edit.tooltip_text = "Optional prerequisite step that blocks this interaction until complete."
+	requires_line_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	state_row.add_child(requires_line_edit)
 
 	var action_row := HBoxContainer.new()
 	action_row.name = "InteractionBindingActionRow"
@@ -5297,6 +5327,15 @@ func _populate_marker_type_options() -> void:
 
 
 func _populate_interaction_binding_editor_static_options() -> void:
+	var preset_option := _get_interaction_binding_preset_option()
+	if preset_option != null:
+		var previous_preset: String = _get_option_selected_metadata(preset_option)
+		preset_option.clear()
+		for preset in _get_interaction_binding_presets():
+			var preset_id: String = String(Dictionary(preset).get("preset_id", "")).strip_edges()
+			preset_option.add_item(String(Dictionary(preset).get("label", preset_id)))
+			preset_option.set_item_metadata(preset_option.item_count - 1, preset_id)
+		_select_option_by_metadata(preset_option, previous_preset if not previous_preset.is_empty() else "auto")
 	var type_option := _get_interaction_binding_type_option()
 	if type_option != null:
 		var previous_type: String = _get_option_selected_metadata(type_option)
@@ -5378,6 +5417,9 @@ func _connect_marker_editor_signals() -> void:
 	var binding_remove_button := _get_interaction_binding_remove_button()
 	if binding_remove_button != null and not binding_remove_button.pressed.is_connected(_on_interaction_binding_remove_pressed):
 		binding_remove_button.pressed.connect(_on_interaction_binding_remove_pressed)
+	var preset_option := _get_interaction_binding_preset_option()
+	if preset_option != null and not preset_option.item_selected.is_connected(_on_interaction_binding_preset_selected):
+		preset_option.item_selected.connect(_on_interaction_binding_preset_selected)
 
 
 func _refresh_marker_editor_controls() -> void:
@@ -5603,6 +5645,8 @@ func get_mission_interaction_binding_editor_snapshot(sync_from_controls: bool = 
 	var inspector: Dictionary = get_mission_interaction_binding_inspector_snapshot(false)
 	var selected_bindings: Array = Array(inspector.get("selected_marker_bindings", []))
 	var current_binding: Dictionary = Dictionary(selected_bindings[0]) if not selected_bindings.is_empty() else {}
+	var selected_preset_id: String = _get_option_selected_metadata(_get_interaction_binding_preset_option())
+	var preset_preview: Dictionary = _build_interaction_binding_preset_fields(selected_preset_id, _selected_marker_id)
 	return {
 		"schema": "sternenbuergerchen.map_editor_interaction_binding_editor.v1",
 		"write_scope": "MissionScenarioData.vertical_slice.interaction_points",
@@ -5613,8 +5657,13 @@ func get_mission_interaction_binding_editor_snapshot(sync_from_controls: bool = 
 		"has_selected_marker": not _selected_marker_id.is_empty(),
 		"has_existing_binding": not current_binding.is_empty(),
 		"current_binding": current_binding.duplicate(true),
+		"selected_preset_id": selected_preset_id,
+		"preset_preview": preset_preview,
+		"preset_count": _get_interaction_binding_presets().size(),
+		"available_presets": _get_interaction_binding_presets(),
 		"control_paths": {
 			"panel": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel",
+			"preset_option": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingPresetRow/InteractionBindingPresetOption",
 			"apply_button": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingActionRow/InteractionBindingApplyButton",
 			"remove_button": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingActionRow/InteractionBindingRemoveButton",
 		},
@@ -5704,6 +5753,7 @@ func _refresh_interaction_binding_editor_controls() -> void:
 	if editor_panel == null:
 		return
 	_populate_interaction_binding_editor_static_options()
+	var preset_option := _get_interaction_binding_preset_option()
 	var id_line_edit := _get_interaction_binding_id_line_edit()
 	var type_option := _get_interaction_binding_type_option()
 	var order_option := _get_interaction_binding_order_option()
@@ -5711,6 +5761,8 @@ func _refresh_interaction_binding_editor_controls() -> void:
 	var radius_spinbox := _get_interaction_binding_radius_spinbox()
 	var team_line_edit := _get_interaction_binding_team_line_edit()
 	var step_line_edit := _get_interaction_binding_step_line_edit()
+	var state_line_edit := _get_interaction_binding_state_line_edit()
+	var requires_line_edit := _get_interaction_binding_requires_line_edit()
 	var apply_button := _get_interaction_binding_apply_button()
 	var remove_button := _get_interaction_binding_remove_button()
 	var status_label := _get_interaction_binding_status_label()
@@ -5720,6 +5772,11 @@ func _refresh_interaction_binding_editor_controls() -> void:
 	var binding: Dictionary = Dictionary(selected_bindings[0]) if not selected_bindings.is_empty() else {}
 	var defaults: Dictionary = _build_default_interaction_binding_fields_for_marker(_selected_marker_id)
 	var source: Dictionary = binding if not binding.is_empty() else defaults
+	if preset_option != null:
+		preset_option.disabled = not has_marker
+		var selected_preset_id: String = _get_option_selected_metadata(preset_option)
+		if selected_preset_id.is_empty():
+			_select_option_by_metadata(preset_option, "auto")
 	if id_line_edit != null:
 		id_line_edit.editable = has_marker
 		id_line_edit.text = String(source.get("interaction_id", ""))
@@ -5741,6 +5798,12 @@ func _refresh_interaction_binding_editor_controls() -> void:
 	if step_line_edit != null:
 		step_line_edit.editable = has_marker
 		step_line_edit.text = String(source.get("step_id", defaults.get("step_id", "")))
+	if state_line_edit != null:
+		state_line_edit.editable = has_marker
+		state_line_edit.text = String(source.get("required_state", defaults.get("required_state", "")))
+	if requires_line_edit != null:
+		requires_line_edit.editable = has_marker
+		requires_line_edit.text = String(source.get("requires_step_id", defaults.get("requires_step_id", "")))
 	if apply_button != null:
 		apply_button.disabled = not has_marker
 	if remove_button != null:
@@ -5778,8 +5841,8 @@ func _normalize_interaction_binding_editor_fields(fields: Dictionary) -> Diction
 		"required_team": String(merged.get("required_team", default_fields.get("required_team", "team_alpha"))).strip_edges(),
 		"step_id": String(merged.get("step_id", "")).strip_edges(),
 		"gate_id": String(merged.get("gate_id", merged.get("step_id", ""))).strip_edges(),
-		"required_state": String(merged.get("required_state", "")).strip_edges(),
-		"requires_step_id": String(merged.get("requires_step_id", "")).strip_edges(),
+		"required_state": String(merged.get("required_state", default_fields.get("required_state", ""))).strip_edges(),
+		"requires_step_id": String(merged.get("requires_step_id", default_fields.get("requires_step_id", ""))).strip_edges(),
 		"asset_hint": String(merged.get("asset_hint", "")).strip_edges(),
 	}
 
@@ -5793,6 +5856,8 @@ func _collect_interaction_binding_editor_fields() -> Dictionary:
 		"radius_world": _get_interaction_binding_radius_spinbox().value if _get_interaction_binding_radius_spinbox() != null else 128.0,
 		"required_team": _get_interaction_binding_team_line_edit().text if _get_interaction_binding_team_line_edit() != null else "",
 		"step_id": _get_interaction_binding_step_line_edit().text if _get_interaction_binding_step_line_edit() != null else "",
+		"required_state": _get_interaction_binding_state_line_edit().text if _get_interaction_binding_state_line_edit() != null else "",
+		"requires_step_id": _get_interaction_binding_requires_line_edit().text if _get_interaction_binding_requires_line_edit() != null else "",
 	}
 
 
@@ -5823,7 +5888,169 @@ func _build_default_interaction_binding_fields_for_marker(marker_id: String, for
 		"radius_world": _default_interaction_binding_radius(interaction_type),
 		"required_team": "team_alpha",
 		"step_id": "",
+		"required_state": "",
+		"requires_step_id": "",
 	}
+
+
+func get_mission_interaction_binding_preset_catalog() -> Array:
+	return _get_interaction_binding_presets().duplicate(true)
+
+
+func apply_interaction_binding_preset_to_editor(preset_id: String) -> bool:
+	if _selected_marker_id.is_empty():
+		_set_marker_feedback("Select a marker before applying an interaction preset.")
+		_refresh_interaction_binding_editor_controls()
+		return false
+	var preset_fields: Dictionary = _build_interaction_binding_preset_fields(preset_id, _selected_marker_id)
+	if preset_fields.is_empty():
+		_set_marker_feedback("Unknown interaction preset: %s" % preset_id)
+		_refresh_interaction_binding_editor_controls()
+		return false
+	var preset_option := _get_interaction_binding_preset_option()
+	if preset_option != null:
+		_select_option_by_metadata(preset_option, String(preset_fields.get("preset_id", preset_id)))
+	_apply_interaction_binding_fields_to_controls(preset_fields)
+	_set_marker_feedback("Preset applied: %s." % String(preset_fields.get("label", preset_id)))
+	return true
+
+
+func _get_interaction_binding_presets() -> Array:
+	return [
+		{
+			"preset_id": "auto",
+			"label": "Auto",
+			"description": "Infer Door, Computer or Hold-Zone from the selected marker type.",
+		},
+		{
+			"preset_id": "door_breach",
+			"label": "Door / Breach",
+			"interaction_type": MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_DOOR,
+			"required_order": "breach",
+			"duration_seconds": 0.0,
+			"radius_world": 72.0,
+			"required_state_suffix": "opened",
+		},
+		{
+			"preset_id": "computer_operate",
+			"label": "Computer / 18s",
+			"interaction_type": MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_COMPUTER,
+			"required_order": "operate",
+			"duration_seconds": 18.0,
+			"radius_world": 96.0,
+			"required_state_suffix": "controlled",
+		},
+		{
+			"preset_id": "hold_zone_secure",
+			"label": "Hold Zone / 12s",
+			"interaction_type": MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_HOLD_ZONE,
+			"required_order": "defend",
+			"duration_seconds": 12.0,
+			"radius_world": 128.0,
+			"required_state_suffix": "secured",
+		},
+		{
+			"preset_id": "aa_shutdown",
+			"label": "AA Shutdown",
+			"interaction_id": "aa_shutdown_zone",
+			"display_name": "AA Shutdown Zone",
+			"interaction_type": MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_HOLD_ZONE,
+			"required_order": "take",
+			"duration_seconds": 0.0,
+			"radius_world": 160.0,
+			"required_team": "team_alpha",
+			"step_id": "disable_air_defense",
+			"gate_id": "disable_air_defense",
+			"required_state": "aa_disabled",
+			"asset_hint": "air_defense",
+		},
+		{
+			"preset_id": "cargo_landing_hold",
+			"label": "Cargo Landing Hold",
+			"interaction_id": "cargo_landing_hold",
+			"display_name": "Cargo Landing Hold",
+			"interaction_type": MISSION_INTERACTION_POINT_BINDING_SCRIPT.TYPE_HOLD_ZONE,
+			"required_order": "defend",
+			"duration_seconds": 12.0,
+			"radius_world": 128.0,
+			"required_team": "team_alpha",
+			"step_id": "cargo_touchdown_extract",
+			"gate_id": "cargo_touchdown_extract",
+			"required_state": "cargo_departed",
+			"requires_step_id": "disable_air_defense",
+			"asset_hint": "cargo_landing_zone",
+		},
+	]
+
+
+func _build_interaction_binding_preset_fields(preset_id: String, marker_id: String) -> Dictionary:
+	var normalized_preset_id: String = preset_id.strip_edges().to_lower()
+	if normalized_preset_id.is_empty():
+		normalized_preset_id = "auto"
+	var preset: Dictionary = {}
+	for preset_variant in _get_interaction_binding_presets():
+		var candidate: Dictionary = Dictionary(preset_variant)
+		if String(candidate.get("preset_id", "")).strip_edges().to_lower() == normalized_preset_id:
+			preset = candidate
+			break
+	if preset.is_empty():
+		return {}
+	var selected_marker_id: String = marker_id.strip_edges()
+	var interaction_type: String = String(preset.get("interaction_type", "")).strip_edges().to_lower()
+	if normalized_preset_id == "auto" or interaction_type.is_empty():
+		interaction_type = _infer_interaction_type_for_marker(selected_marker_id)
+	var defaults: Dictionary = _build_default_interaction_binding_fields_for_marker(selected_marker_id, interaction_type)
+	var fields: Dictionary = defaults.duplicate(true)
+	for key_variant in preset.keys():
+		var key: String = String(key_variant)
+		if ["preset_id", "label", "description", "required_state_suffix"].has(key):
+			continue
+		fields[key] = preset.get(key_variant)
+	var fallback_id: String = "%s_%s" % [selected_marker_id, interaction_type]
+	fields["preset_id"] = normalized_preset_id
+	fields["label"] = String(preset.get("label", normalized_preset_id))
+	fields["marker_id"] = selected_marker_id
+	fields["interaction_id"] = _normalize_interaction_binding_id(String(fields.get("interaction_id", "")), fallback_id)
+	fields["interaction_type"] = interaction_type
+	fields["display_name"] = String(fields.get("display_name", String(fields.get("interaction_id", "")).replace("_", " ").capitalize())).strip_edges()
+	fields["required_team"] = String(fields.get("required_team", "team_alpha")).strip_edges()
+	if String(fields.get("step_id", "")).strip_edges().is_empty() and normalized_preset_id != "auto":
+		fields["step_id"] = String(fields.get("interaction_id", ""))
+	if String(fields.get("gate_id", "")).strip_edges().is_empty():
+		fields["gate_id"] = String(fields.get("step_id", ""))
+	if String(fields.get("required_state", "")).strip_edges().is_empty() and preset.has("required_state_suffix"):
+		fields["required_state"] = _normalize_interaction_binding_id("%s_%s" % [selected_marker_id, String(preset.get("required_state_suffix", ""))], "")
+	return fields
+
+
+func _apply_interaction_binding_fields_to_controls(fields: Dictionary) -> void:
+	var id_line_edit := _get_interaction_binding_id_line_edit()
+	if id_line_edit != null:
+		id_line_edit.text = String(fields.get("interaction_id", ""))
+	var type_option := _get_interaction_binding_type_option()
+	if type_option != null:
+		_select_option_by_metadata(type_option, String(fields.get("interaction_type", "")))
+	var order_option := _get_interaction_binding_order_option()
+	if order_option != null:
+		_select_option_by_metadata(order_option, String(fields.get("required_order", "")))
+	var duration_spinbox := _get_interaction_binding_duration_spinbox()
+	if duration_spinbox != null:
+		duration_spinbox.value = maxf(float(fields.get("duration_seconds", 0.0)), 0.0)
+	var radius_spinbox := _get_interaction_binding_radius_spinbox()
+	if radius_spinbox != null:
+		radius_spinbox.value = maxf(float(fields.get("radius_world", 128.0)), 1.0)
+	var team_line_edit := _get_interaction_binding_team_line_edit()
+	if team_line_edit != null:
+		team_line_edit.text = String(fields.get("required_team", ""))
+	var step_line_edit := _get_interaction_binding_step_line_edit()
+	if step_line_edit != null:
+		step_line_edit.text = String(fields.get("step_id", ""))
+	var state_line_edit := _get_interaction_binding_state_line_edit()
+	if state_line_edit != null:
+		state_line_edit.text = String(fields.get("required_state", ""))
+	var requires_line_edit := _get_interaction_binding_requires_line_edit()
+	if requires_line_edit != null:
+		requires_line_edit.text = String(fields.get("requires_step_id", ""))
 
 
 func _infer_interaction_type_for_marker(marker_id: String) -> String:
@@ -5860,6 +6087,10 @@ func _on_interaction_binding_apply_pressed() -> void:
 
 func _on_interaction_binding_remove_pressed() -> void:
 	remove_selected_marker_interaction_binding_from_editor(String(_collect_interaction_binding_editor_fields().get("interaction_id", "")))
+
+
+func _on_interaction_binding_preset_selected(_index: int) -> void:
+	apply_interaction_binding_preset_to_editor(_get_option_selected_metadata(_get_interaction_binding_preset_option()))
 
 
 func _set_marker_feedback(feedback_text: String) -> void:
@@ -8790,6 +9021,10 @@ func _get_interaction_binding_id_line_edit() -> LineEdit:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingIdRow/InteractionBindingIdLineEdit") as LineEdit
 
 
+func _get_interaction_binding_preset_option() -> OptionButton:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingPresetRow/InteractionBindingPresetOption") as OptionButton
+
+
 func _get_interaction_binding_type_option() -> OptionButton:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingTypeOrderRow/InteractionBindingTypeOption") as OptionButton
 
@@ -8812,6 +9047,14 @@ func _get_interaction_binding_team_line_edit() -> LineEdit:
 
 func _get_interaction_binding_step_line_edit() -> LineEdit:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingGateRow/InteractionBindingStepLineEdit") as LineEdit
+
+
+func _get_interaction_binding_state_line_edit() -> LineEdit:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingStateRow/InteractionBindingStateLineEdit") as LineEdit
+
+
+func _get_interaction_binding_requires_line_edit() -> LineEdit:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingStateRow/InteractionBindingRequiresLineEdit") as LineEdit
 
 
 func _get_interaction_binding_apply_button() -> Button:
