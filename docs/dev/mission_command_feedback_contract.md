@@ -409,6 +409,11 @@ TASK_629 buendelt nach TASK_628 den naechsten echten Zwei-Fenster-Klicklauf als 
 
 Erwartete Struktur: `tmp/host_client_real_click_playtest_packet.json` enthaelt `schema = sternenbuergerchen.host_client_real_click_playtest_packet.v1`, `task_id = TASK_629`, `source_real_run_manifest_path = tmp/host_client_two_window_real_run_review.json`, `packet_path`, `source_manifest_present`, `source_visible_reject_review_gate`, `readiness_gate`, `preconditions`, `click_sequence`, `expected_visible_feedback`, `manual_observations`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_630 - Host Client Real Click Findings Or Mini Scenario Feel`.
 
+## Host-Client-Click-Feedback-Followup
+TASK_650 erweitert denselben read-only Authority-Visual-Pfad um einen kurzen naechsten Handlungshinweis. Der bestehende `AUTH OKx/RJy`-Status und `BLOCK P2 wrong team` bleiben erhalten; zusaetzlich darf der Teamchip einen knappen Cue wie `USE BRAVO` anzeigen, wenn der Peer durch `peer_team_mismatch` gerade das falsche Team kommandiert hat. Dieser Cue ist Bedienfeedback, keine neue Peer-, Team-, Command-, Movement-, Combat- oder Gameplay-Wahrheit.
+
+Erwartete Struktur: `authority_visual` enthaelt zusaetzlich `visible_action_text`, `next_action_text`, `next_action_detail`, `next_action_ready` und `action_followup_task_id = TASK_650`. `_with_review_session_badge()` darf `visible_action_text` in `display_text` aufnehmen und exportiert `authority_visible_action_text`, `authority_next_action_text` und `authority_next_action_detail`. `get_command_feedback_snapshot()` exportiert dieselben Felder read-only. Tooltip und Detail behalten weiterhin `feedback_line`, `feedback_detail` und den rohen Reject-Grund.
+
 ## Frontier-Probe-Mini-Scenario-Feel-Route
 TASK_630 macht die vorhandene Frontier-Probe-Vertical-Slice-Mission als kleine spielerische Route pruefbar. `get_frontier_probe_mini_scenario_feel_route_snapshot()` darf Scenario-Daten, Vertical-Slice-Flow, Ownership, AA-/Computer-/Cargo-Gates und Mission-Control-Lesbarkeit zusammenfassen, aber keine Runtime-, Peer-, Command-, Movement-, Combat-, Cargo-, Objective- oder Gameplay-Wahrheit speichern.
 

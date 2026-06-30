@@ -463,6 +463,17 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_649_current_state_handbook_report.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_650 - Host Client Click Feedback Followup`, damit geblockte Client-Klicks als konkrete Spielerhinweise lesbarer werden.
 
+### TASK_650 - Host Client Click Feedback Followup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_650_host_client_click_feedback_followup.md`, `docs/tasks/TASK_625_host_client_visible_reject_feedback_polish.md`, `docs/tasks/TASK_629_host_client_real_click_playtest_evidence_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTeamChipPresenter.build_authority_visual_snapshot()` erzeugt fuer `peer_team_mismatch` einen read-only Follow-up-Cue wie `USE BRAVO`, plus `next_action_text` und `next_action_detail` fuer Tooltip/Command-Snapshot.
+- Stand: `_with_review_session_badge()` zeigt den kurzen Follow-up-Cue neben `AUTH OK/RJ` und `BLOCK P2 wrong team`, ohne neue Authority- oder Gameplay-Wahrheit zu setzen.
+- Stand: `get_command_feedback_snapshot()` exportiert `authority_visible_action_text`, `authority_next_action_text` und `authority_next_action_detail`.
+- Stand: `MissionCommandInputGuard.can_issue_local_commands()` nutzt fuer `is_server_authoritative` keinen ungueltigen `bool(...)`-Konstruktor mehr, damit Snapshot-/Controller-Setup keine Script-Errors ausgibt.
+- Risiken/offen: TASK_650 ersetzt keinen echten Zwei-Fenster-Klicktest. Wenn `USE BRAVO` im echten Bild zu leise oder zu lang ist, braucht es einen belegten Visual-Polish-Slice.
+- Lokale Pruefung: `task_650_host_client_click_feedback_followup.gd`, `task_625_host_client_visible_reject_feedback_polish.gd`, `git diff --check`.
+- Naechster Schritt: Echten Host/Client-Klicklauf ansehen; wenn der Cue reicht, wieder Richtung Mini-Szenario-Spielbarkeit gehen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
