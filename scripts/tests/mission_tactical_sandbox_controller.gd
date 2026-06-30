@@ -53,6 +53,7 @@ const FIRETEAM_RUNTIME_EXECUTION_PATH_CONTRACT_SCRIPT: GDScript = preload("res:/
 const TACTICAL_BREAKOUT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_breakout_resolver.gd")
 const MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_vertical_slice_contract.gd")
 const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
+const MISSION_INTERACTION_RUNTIME_USE_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_runtime_use_state.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
@@ -16710,6 +16711,52 @@ func get_mission_interaction_point_binding_snapshot() -> Dictionary:
 		"scenario_gate_snapshot": _get_mission_scenario_runtime_gate_snapshot_for_readability(),
 	}
 	return Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("load_snapshot_from_file", scenario_path, terrain_map_data, runtime_context)).duplicate(true)
+
+
+func get_mission_interaction_runtime_use_state_snapshot() -> Dictionary:
+	var terrain_map_data = _get_active_mission_terrain_map_data_for_readability()
+	var binding_snapshot: Dictionary = get_mission_interaction_point_binding_snapshot()
+	var runtime_context: Dictionary = _build_mission_interaction_runtime_use_context_for_readability()
+	return Dictionary(MISSION_INTERACTION_RUNTIME_USE_STATE_SCRIPT.call("build_snapshot", binding_snapshot, terrain_map_data, runtime_context)).duplicate(true)
+
+
+func _build_mission_interaction_runtime_use_context_for_readability() -> Dictionary:
+	return {
+		"current_team_id": FRIENDLY_TEAM_ID,
+		"fireteam_positions": _build_mission_interaction_fireteam_positions_for_readability(),
+		"interaction_states": _get_mission_interaction_states_for_readability(),
+	}
+
+
+func _build_mission_interaction_fireteam_positions_for_readability() -> Array:
+	var entries: Array = []
+	for fireteam_id_variant in _get_available_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
+			continue
+		var anchor_position: Variant = _resolve_fireteam_visual_anchor_position(fireteam_id)
+		if typeof(anchor_position) != TYPE_VECTOR2:
+			continue
+		entries.append({
+			"fireteam_id": fireteam_id,
+			"team_id": FRIENDLY_TEAM_ID,
+			"position": Vector2(anchor_position),
+			"active": true,
+			"selected": _selected_fireteam_ids.has(fireteam_id),
+		})
+	return entries
+
+
+func _get_mission_interaction_states_for_readability() -> Dictionary:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null:
+		return {}
+	if combat_driver.has_method("get_mission_interaction_runtime_states"):
+		return Dictionary(combat_driver.call("get_mission_interaction_runtime_states")).duplicate(true)
+	if combat_driver.has_method("get_mission_interaction_runtime_state_snapshot"):
+		var snapshot: Dictionary = Dictionary(combat_driver.call("get_mission_interaction_runtime_state_snapshot")).duplicate(true)
+		return Dictionary(snapshot.get("interaction_states", snapshot))
+	return {}
 
 
 func _get_active_mission_scenario_path_for_readability() -> String:

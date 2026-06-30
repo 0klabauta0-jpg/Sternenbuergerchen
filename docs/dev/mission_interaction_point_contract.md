@@ -52,6 +52,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Preview- und HUD-Texte muessen `ui_sets_gameplay_truth = false` einhalten.
 - Performance-Regel: Markerlisten duerfen gecacht oder dirty aktualisiert werden, aber nicht als per-frame SceneTree-Vollscan wachsen.
 
+## Runtime Use State
+- `MissionInteractionRuntimeUseState` verbindet den Binding-Snapshot mit Terrain-Markerpositionen, aktiven Fireteam-Ankern und optionalen Interaction-Runtime-Stati.
+- Der Snapshot liefert `usable`, `out_of_range`, `blocked`, `in_progress`, `interrupted`, `complete` oder `unknown`.
+- Naehe wird aus `radius_world` und dem naechsten erlaubten Fireteam abgeleitet.
+- `required_team` begrenzt, welches Team eine Interaction bedienen darf; `any` oder leer erlaubt jedes Team.
+- Der Snapshot bleibt read-only: `SimulationRoot`/Scenario-Gates entscheiden weiterhin ueber echten Fortschritt, Abschluss und Fehlschlag.
+- `MissionTacticalSandboxController.get_mission_interaction_runtime_use_state_snapshot()` ist eine on-demand Fassade fuer Verifier, Debug und spaetere UI-Preview, kein neuer HUD-Hotpath.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.

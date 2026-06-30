@@ -706,6 +706,16 @@
 - Lokale Pruefung: `task_674_mission_interaction_point_bindings.gd`, `task_673_mission_interaction_point_contract.gd`, `task_517_mission_scenario_vertical_slice.gd`, `git diff --check`.
 - Naechster Schritt: Editor-Inspector fuer Interaction-Point-Bindings oder Runtime-Use-State fuer Naehe/Bedienzeit.
 
+### TASK_675 - Mission Interaction Runtime Use State
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_675_mission_interaction_runtime_use_state.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/tasks/TASK_674_mission_interaction_point_bindings.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionRuntimeUseState` verbindet Binding-Snapshot, Terrain-Markerpositionen, aktive Fireteam-Anker und optionale Interaction-Runtime-Stati zu einem read-only Use-State.
+- Stand: Der Snapshot liefert `usable`, `out_of_range`, `blocked`, `in_progress`, `interrupted`, `complete` oder `unknown` und nennt naechstes Fireteam, Distanz, Radius, Progress und Grund.
+- Stand: `MissionTacticalSandboxController.get_mission_interaction_runtime_use_state_snapshot()` bietet den Zustand on-demand fuer Debug/Verifier/spaetere UI-Preview an, ohne Gameplay-State im HUD zu setzen.
+- Risiken/offen: Noch kein Use-Button, keine Door-Animation und kein echter Runtime-Produzent fuer Hold-/Operate-Fortschritt ausser optionalen State-Snapshots.
+- Lokale Pruefung: `task_675_mission_interaction_runtime_use_state.gd`, `task_674_mission_interaction_point_bindings.gd`, `git diff --check`.
+- Naechster Schritt: Kleines Interaction-Feedback/Use-Command oder Runtime-Fortschrittsproducer fuer Computer-/Hold-Zonen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
