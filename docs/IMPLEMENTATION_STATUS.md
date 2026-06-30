@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_707 - Mission Door/Computer/Cargo Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_707_mission_door_computer_cargo_smoke.md`, `docs/tasks/TASK_706_mission_door_layout_visual_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: Der Verifier erzeugt eine temporaere Frontier-Probe-Scenario-Variante mit Door am Stationsmarker.
+- Stand: Door-Open, Computer-Control und Cargo-Departed laufen in einem Mission-Testszene-Smoke.
+- Stand: Door-Open bleibt Visual-/Runtime-Evidence und ersetzt nicht den Computer-Objective-Gate.
+- Risiken/offen: Kein echter Host/Client-Fensterklick; das ist ein integrierter technischer Smoke fuer die kleine Stationsroute.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_707_mission_door_computer_cargo_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_706_mission_door_layout_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: Echten TASK_700-Workbench-Export oder Mini-Szenario-Fensterplaytest.
+
 ### TASK_706 - Mission Door Layout/Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_706_mission_door_layout_visual_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`, `docs/tasks/TASK_705_host_client_door_real_click_manual_run_packet.md`
