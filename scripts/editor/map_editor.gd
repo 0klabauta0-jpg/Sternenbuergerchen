@@ -8,6 +8,7 @@ const TERRAIN_MAP_RENDERER_SCRIPT: GDScript = preload("res://scripts/terrain/ter
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
 const TERRAIN_TEXTURE_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_texture_catalog.gd")
 const MISSION_SCENARIO_DATA_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_data.gd")
+const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const MAP_EDITOR_PRIMARY_VIEW_ADAPTER_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_primary_view_adapter.gd")
 const MAP_EDITOR_HEIGHT_TOOL_SCRIPT: GDScript = preload("res://scripts/editor/map_editor_height_tool.gd")
@@ -3387,6 +3388,26 @@ func _ensure_marker_editor_controls() -> void:
 		marker_info_label.text = "Select a marker to edit it."
 		marker_panel.add_child(marker_info_label)
 
+		var interaction_binding_label := Label.new()
+		interaction_binding_label.name = "InteractionBindingInspectorLabel"
+		interaction_binding_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		interaction_binding_label.text = "Bindings: -"
+		interaction_binding_label.tooltip_text = "Read-only Scenario-Bindings fuer Door/Computer/Hold-Zonen. Der Editor zeigt nur, welche Marker gebunden sind."
+		interaction_binding_label.add_theme_font_size_override("font_size", 10)
+		interaction_binding_label.add_theme_color_override("font_color", Color(0.76, 0.92, 0.98, 0.96))
+		marker_panel.add_child(interaction_binding_label)
+
+	var existing_interaction_binding_label := marker_panel.get_node_or_null("InteractionBindingInspectorLabel") as Label
+	if existing_interaction_binding_label == null:
+		existing_interaction_binding_label = Label.new()
+		existing_interaction_binding_label.name = "InteractionBindingInspectorLabel"
+		existing_interaction_binding_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		existing_interaction_binding_label.text = "Bindings: -"
+		existing_interaction_binding_label.tooltip_text = "Read-only Scenario-Bindings fuer Door/Computer/Hold-Zonen. Der Editor zeigt nur, welche Marker gebunden sind."
+		existing_interaction_binding_label.add_theme_font_size_override("font_size", 10)
+		existing_interaction_binding_label.add_theme_color_override("font_color", Color(0.76, 0.92, 0.98, 0.96))
+		marker_panel.add_child(existing_interaction_binding_label)
+
 	var marker_tool_button := _get_marker_tool_button()
 	if marker_tool_button != null:
 		_configure_tool_button(marker_tool_button, "M", "Marker: place selected map markers or drag existing markers on the grid.")
@@ -3715,6 +3736,7 @@ func _connect_mission_authoring_signals() -> void:
 
 func _refresh_mission_authoring_controls() -> void:
 	_ensure_mission_scenario_panel_controller().call("refresh")
+	_refresh_interaction_binding_inspector_controls()
 
 
 func _ensure_mission_scenario():
@@ -4374,6 +4396,7 @@ func get_map_editor_usability_snapshot(sync_from_controls: bool = true) -> Dicti
 		},
 		"network_drag_tool": _build_network_drag_tool_snapshot(),
 		"station_door_authoring": _build_station_door_authoring_snapshot(),
+		"interaction_binding_inspector": get_mission_interaction_binding_inspector_snapshot(false),
 		"patrol_route_preview": get_patrol_route_preview_snapshot(),
 		"tile_property_overlay": get_tile_property_overlay_debug_snapshot(),
 		"adjacency_debug_overlay": get_adjacency_debug_overlay_snapshot(),
@@ -4596,6 +4619,8 @@ func _build_inspector_snapshot() -> Dictionary:
 		"mission_scenario_visible": _is_inspector_section_visible(INSPECTOR_SECTION_MISSION_SCENARIO),
 		"terrain_truth_visible": get_node_or_null("UI/PropertyPanel/Margin/VBox/TerrainTruthInspectorLabel") != null,
 		"selected_tile_terrain_truth": get_selected_tile_truth_debug_snapshot(),
+		"interaction_binding_inspector_visible": get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingInspectorLabel") != null,
+		"interaction_binding_inspector": get_mission_interaction_binding_inspector_snapshot(false),
 	}
 
 
@@ -5240,6 +5265,7 @@ func _refresh_marker_editor_controls() -> void:
 		marker_info_label.text = _marker_feedback_text if not _marker_feedback_text.is_empty() else "Create a marker from the list above and place it directly on the map."
 		marker_info_label.tooltip_text = add_marker_tooltip
 		_is_refreshing_marker_controls = false
+		_refresh_interaction_binding_inspector_controls()
 		_refresh_authoring_status_controls()
 		_apply_inspector_section_visibility()
 		return
@@ -5256,6 +5282,7 @@ func _refresh_marker_editor_controls() -> void:
 	selected_type_option.tooltip_text = "Selected marker type.\n%s" % selected_marker_tooltip if not selected_marker_tooltip.is_empty() else "Selected marker type."
 	marker_info_label.tooltip_text = selected_marker_tooltip
 	_is_refreshing_marker_controls = false
+	_refresh_interaction_binding_inspector_controls()
 	_refresh_authoring_status_controls()
 	_apply_inspector_section_visibility()
 
@@ -5302,6 +5329,113 @@ func _build_marker_info_text(marker_record: Dictionary) -> String:
 	if _marker_feedback_text.is_empty():
 		return base_text
 	return "%s\n%s" % [_marker_feedback_text, base_text]
+
+
+func get_mission_interaction_binding_inspector_snapshot(sync_from_controls: bool = true) -> Dictionary:
+	if sync_from_controls and not _is_refreshing_scenario_controls:
+		_sync_mission_scenario_from_controls()
+	var scenario = _ensure_mission_scenario()
+	var binding_snapshot: Dictionary = {}
+	if scenario != null and scenario.has_method("get_interaction_point_binding_snapshot"):
+		binding_snapshot = Dictionary(scenario.call("get_interaction_point_binding_snapshot", _terrain_map_data, {}))
+	else:
+		binding_snapshot = Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("build_snapshot", {}, _terrain_map_data, {}))
+	var entries: Array = Array(binding_snapshot.get("bindings", []))
+	var bound_marker_ids := PackedStringArray()
+	var missing_marker_ids := PackedStringArray()
+	var selected_marker_bindings: Array = []
+	var type_counts: Dictionary = {}
+	for entry_variant in entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var marker_id: String = String(entry.get("marker_id", "")).strip_edges()
+		if marker_id.is_empty():
+			continue
+		if not bound_marker_ids.has(marker_id):
+			bound_marker_ids.append(marker_id)
+		var interaction_type: String = String(entry.get("interaction_type", "unknown")).strip_edges().to_lower()
+		type_counts[interaction_type] = int(type_counts.get(interaction_type, 0)) + 1
+		if _terrain_map_data == null or not _terrain_map_data.has_method("has_marker") or not bool(_terrain_map_data.call("has_marker", marker_id)):
+			missing_marker_ids.append(marker_id)
+		if not _selected_marker_id.is_empty() and marker_id == _selected_marker_id:
+			selected_marker_bindings.append(_build_interaction_binding_inspector_entry(entry))
+	var label_text: String = _build_interaction_binding_inspector_text(binding_snapshot, selected_marker_bindings, missing_marker_ids)
+	return {
+		"schema": "sternenbuergerchen.map_editor_interaction_binding_inspector.v1",
+		"source_schema": String(binding_snapshot.get("schema", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"scenario_id": String(binding_snapshot.get("scenario_id", "")),
+		"scenario_path": _current_scenario_path,
+		"selected_marker_id": _selected_marker_id,
+		"binding_count": int(binding_snapshot.get("binding_count", entries.size())),
+		"valid": bool(binding_snapshot.get("valid", false)),
+		"errors": PackedStringArray(binding_snapshot.get("errors", PackedStringArray())),
+		"status_counts": Dictionary(binding_snapshot.get("status_counts", {})).duplicate(true),
+		"type_counts": type_counts,
+		"bound_marker_ids": bound_marker_ids,
+		"missing_marker_ids": missing_marker_ids,
+		"selected_marker_binding_count": selected_marker_bindings.size(),
+		"selected_marker_bindings": selected_marker_bindings,
+		"label_text": label_text,
+		"line_char_limit": 160,
+		"line_within_limit": label_text.length() <= 160,
+		"marker_panel_label_path": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingInspectorLabel",
+	}
+
+
+func _build_interaction_binding_inspector_entry(entry: Dictionary) -> Dictionary:
+	return {
+		"interaction_id": String(entry.get("interaction_id", "")),
+		"display_name": String(entry.get("display_name", entry.get("interaction_id", ""))),
+		"interaction_type": String(entry.get("interaction_type", "")),
+		"required_order": String(entry.get("required_order", "")),
+		"duration_seconds": maxf(float(entry.get("duration_seconds", 0.0)), 0.0),
+		"radius_world": maxf(float(entry.get("radius_world", 0.0)), 0.0),
+		"step_id": String(entry.get("step_id", "")),
+		"required_state": String(entry.get("required_state", "")),
+		"requires_step_id": String(entry.get("requires_step_id", "")),
+		"status": String(entry.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _build_interaction_binding_inspector_text(binding_snapshot: Dictionary, selected_marker_bindings: Array, missing_marker_ids: PackedStringArray) -> String:
+	var binding_count: int = int(binding_snapshot.get("binding_count", Array(binding_snapshot.get("bindings", [])).size()))
+	if binding_count <= 0:
+		return "Bindings: keine Scenario-Interaction-Points"
+	if not missing_marker_ids.is_empty():
+		return "Bindings: %d | Marker fehlt: %s" % [binding_count, ", ".join(missing_marker_ids)]
+	if selected_marker_bindings.is_empty():
+		var counts: Dictionary = Dictionary(binding_snapshot.get("status_counts", {}))
+		return "Bindings: %d | frei %d | blockiert %d | fertig %d" % [
+			binding_count,
+			int(counts.get("available", 0)),
+			int(counts.get("blocked", 0)),
+			int(counts.get("complete", 0)),
+		]
+	var selected_parts := PackedStringArray()
+	for binding_variant in selected_marker_bindings:
+		var binding: Dictionary = Dictionary(binding_variant)
+		var token: String = String(binding.get("interaction_type", "")).strip_edges().to_upper()
+		var interaction_id: String = String(binding.get("interaction_id", "")).strip_edges()
+		var order: String = String(binding.get("required_order", "")).strip_edges().to_upper()
+		var duration_seconds: int = int(round(float(binding.get("duration_seconds", 0.0))))
+		var duration_text: String = " %ds" % duration_seconds if duration_seconds > 0 else ""
+		selected_parts.append("%s %s %s%s" % [token, interaction_id, order, duration_text])
+	return "Bindings: %s" % " | ".join(selected_parts)
+
+
+func _refresh_interaction_binding_inspector_controls() -> void:
+	var label := _get_interaction_binding_inspector_label()
+	if label == null:
+		return
+	var snapshot: Dictionary = get_mission_interaction_binding_inspector_snapshot(false)
+	label.text = String(snapshot.get("label_text", "Bindings: -"))
+	label.tooltip_text = "Read-only Scenario-Bindings. Binding Count: %d. Fehlende Marker: %s" % [
+		int(snapshot.get("binding_count", 0)),
+		", ".join(PackedStringArray(snapshot.get("missing_marker_ids", PackedStringArray()))),
+	]
 
 
 func _set_marker_feedback(feedback_text: String) -> void:
@@ -8218,6 +8352,10 @@ func _get_marker_color_button() -> ColorPickerButton:
 
 func _get_marker_info_label() -> Label:
 	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/MarkerInfoLabel") as Label
+
+
+func _get_interaction_binding_inspector_label() -> Label:
+	return get_node_or_null("UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingInspectorLabel") as Label
 
 
 func _get_edge_type_option_button() -> OptionButton:

@@ -90,6 +90,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Snapshot ist read-only, markiert `ui_sets_gameplay_truth = false` und veraendert weder Scenario-Gates noch Runtime-Stati.
 - Headless-Verifier duerfen Zeichenbudget und Exportform pruefen; der echte manuelle FullHD-Sichtlauf bleibt separat zu bestaetigen.
 
+## Editor Binding Inspector
+- `MapEditor.get_mission_interaction_binding_inspector_snapshot()` liest das aktuelle `MissionScenarioData.get_interaction_point_binding_snapshot()` zusammen mit der aktuellen `TerrainMapData`.
+- Der Snapshot nennt `binding_count`, `bound_marker_ids`, `missing_marker_ids`, Status-/Typ-Zaehler und die Bindings des selektierten Markers.
+- Das Markerpanel zeigt diese Daten read-only ueber `InteractionBindingInspectorLabel`, damit Authoring sofort sieht, ob ein Marker AA, Computer, Cargo, Door oder Hold-Zone traegt.
+- Der Inspector darf fehlende Marker sichtbar machen, aber nicht automatisch reparieren, keine Gates setzen und keine Runtime-Interaktion starten.
+- `get_map_editor_usability_snapshot().interaction_binding_inspector` exportiert denselben read-only Zustand fuer Verifier und HTML-Reports.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.
@@ -98,5 +105,5 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Keine neue UI-Parallelwahrheit fuer Missionsfortschritt.
 
 ## Naechste Slices
-- Editor-Inspector fuer Interaction-Point-Bindings.
+- Editor-UI zum Bearbeiten von Interaction-Point-Bindings.
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Missionsbild.

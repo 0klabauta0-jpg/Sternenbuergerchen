@@ -758,6 +758,16 @@
 - Lokale Pruefung: `task_679_mission_interaction_progress_readability.gd`, `task_678_mission_interaction_runtime_progress.gd`, `git diff --check`.
 - Naechster Schritt: Editor-Inspector fuer Interaction-Point-Bindings oder echter FullHD-Fenster-Sichtlauf fuer COM-/CARGO-Progress.
 
+### TASK_680 - Mission Interaction Binding Inspector
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_680_mission_interaction_binding_inspector.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/tasks/TASK_674_mission_interaction_point_bindings.md`, `docs/tasks/TASK_679_mission_interaction_progress_readability.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MapEditor.get_mission_interaction_binding_inspector_snapshot()` liest aktuelle Scenario-Bindings und Terrain-Marker als read-only Authoring-Snapshot.
+- Stand: Das Markerpanel ergaenzt `InteractionBindingInspectorLabel` und zeigt beim selektierten Marker die gebundene Interaction, z. B. `COMPUTER station_computer TAKE 18s` oder `HOLD_ZONE cargo_landing_hold DEFEND 12s`.
+- Stand: Der Snapshot exportiert `bound_marker_ids`, `missing_marker_ids`, Status-/Typ-Zaehler und die selektierten Marker-Bindings auch ueber `get_map_editor_usability_snapshot()`.
+- Risiken/offen: Der Inspector bearbeitet Interactions noch nicht; Door-State-/Animation und echter FullHD-Fenster-Sichtlauf bleiben Folgearbeit.
+- Lokale Pruefung: `task_680_mission_interaction_binding_inspector.gd`, `task_674_mission_interaction_point_bindings.gd`, `git diff --check`.
+- Naechster Schritt: Editor-UI zum Bearbeiten von Interaction-Point-Bindings oder echter FullHD-Sichtlauf.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
