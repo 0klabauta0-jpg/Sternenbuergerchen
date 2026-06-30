@@ -429,6 +429,11 @@ TASK_633 behebt den belegten Label-Overlap-Fall aus TASK_632: Route-Callouts due
 
 Erwartete Render-Snapshot-Struktur: Jeder Eintrag in `primary_3d.route_callout_entries` enthaelt weiter `world_position` als Markerposition und zusaetzlich `label_world_position`, `label_offset_world`, `label_height`, `overlap_group_key`, `overlap_group_count` und `overlap_index`. Fuer `LZ` und `CARGO` muss `world_position` identisch bleiben, aber `label_world_position` und `label_offset_world` muessen unterschiedlich sein. Das TASK_633-Manifest meldet `schema = sternenbuergerchen.frontier_probe_callout_layout_polish.v1`, `task_id = TASK_633`, `label_overlap_polish_gate = pass`, `shared_marker_pair = LZ+CARGO@spawn_alpha`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true` und `ui_sets_gameplay_truth = false`.
 
+## Frontier-Probe-Real-F6-Callout-Sight-Review
+TASK_634 macht den echten F6-Fensterblick auf die TASK_633-Callouts reproduzierbar. Der Review-Verifier darf den abgeschlossenen Frontier-Probe-Zustand herstellen, den vorhandenen Primary3D-/Route-Snapshot lesen und lokale PNG-/JSON-Artefakte schreiben. Wenn kein echter Viewport-Readback verfuegbar ist, muss das PNG als Headless-Evidence-Board gelten. Der Review bleibt read-only und darf keine Mission-, Cargo-, Objective-, Command-, Movement-, Combat-, Peer- oder Gameplay-Wahrheit setzen.
+
+Erwartete Manifest-Struktur: `schema = sternenbuergerchen.frontier_probe_real_f6_callout_sight_review.v1`, `task_id = TASK_634`, `source_task_id = TASK_633`, `capture_type = frontier_probe_real_f6_callout_sight_review`, `png_path`, `manifest_path`, `display_server`, `viewport_readback_available`, `generated_evidence_board`, `source_gate`, `route_callout_count`, `route_callout_summary`, `primary_3d_route_callout_count`, `primary_3d_route_callout_entries`, `label_overlap_polish_gate = pass`, `lz_cargo_shared_marker = true`, `lz_cargo_label_separated = true`, `manual_checks`, `manual_review_required = true`, `manual_review_done = false`, `real_window_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_635 - Frontier Probe Callout Sight Findings`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
