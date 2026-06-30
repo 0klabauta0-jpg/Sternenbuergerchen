@@ -238,6 +238,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Affordance-Farben und Gewicht duerfen den Button hervorheben, aber keine Commands ausloesen und keine Door-, Terrain- oder Multiplayer-Wahrheit setzen.
 - Der allgemeine Tactical-Button-Skin bleibt Basis; die Door-Affordance ist eine kleine Statusschicht darueber.
 
+## Mission Door Layout/Visual Polish
+- Door-Object-Reactions duerfen rein visuelle Layout-Felder exportieren: `door_visual_polish_style_id`, `door_layout_readout`, `door_layout_tone` und `door_layout_visual_weight`.
+- Erlaubte Door-Layout-Tones sind `blocked`, `action` und `success`; sie stehen fuer closed, opening und open.
+- `door_layout_readout` ist Spieler-/Report-Text und darf keine neue Runtime-Wahrheit erzeugen.
+- `TerrainMap3DView` darf die Felder fuer Proxy-Footprint, Status-Header und Open-Clearance-Halo verwenden.
+- Walkability, LOS, Cover und Object-Height bleiben beim Door Runtime Collision/LOS Producer und der effektiven `TerrainRegistry`.
+- `read_only = true`, `ui_sets_gameplay_truth = false` und `door_visual_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

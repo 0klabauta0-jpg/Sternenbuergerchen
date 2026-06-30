@@ -80,6 +80,10 @@ static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
 		"door_asset_swap_state": _door_asset_swap_state_for_state(runtime_visual_state) if object_kind == "door" else "",
 		"door_leaf_gap_fraction": _door_leaf_gap_fraction_for_state(runtime_visual_state, progress) if object_kind == "door" else 0.0,
 		"door_threshold_visible": object_kind == "door" and runtime_visual_state == "open",
+		"door_visual_polish_style_id": _door_visual_polish_style_id(runtime_visual_state) if object_kind == "door" else "",
+		"door_layout_readout": _door_layout_readout(runtime_visual_state) if object_kind == "door" else "",
+		"door_layout_tone": _door_layout_tone(runtime_visual_state) if object_kind == "door" else "",
+		"door_layout_visual_weight": _door_layout_visual_weight(runtime_visual_state) if object_kind == "door" else 0.0,
 		"door_runtime_collision_source": "MissionInteractionDoorRuntimeCollisionLOS" if object_kind == "door" else "",
 		"door_visual_sets_gameplay_truth": false,
 		"screen_active": object_kind == "computer" and ["active", "controlled", "ready"].has(reaction_state),
@@ -298,6 +302,46 @@ static func _door_leaf_gap_fraction_for_state(runtime_visual_state: String, prog
 			return clampf(maxf(progress, 0.35), 0.35, 0.84)
 		_:
 			return 0.0
+
+
+static func _door_visual_polish_style_id(runtime_visual_state: String) -> String:
+	match runtime_visual_state:
+		"open":
+			return "task_706_door_open_clearance_v1"
+		"half":
+			return "task_706_door_opening_motion_v1"
+		_:
+			return "task_706_door_closed_blocker_v1"
+
+
+static func _door_layout_readout(runtime_visual_state: String) -> String:
+	match runtime_visual_state:
+		"open":
+			return "OPEN | path clear"
+		"half":
+			return "OPENING | wait for clearance"
+		_:
+			return "CLOSED | blocks path and LOS"
+
+
+static func _door_layout_tone(runtime_visual_state: String) -> String:
+	match runtime_visual_state:
+		"open":
+			return "success"
+		"half":
+			return "action"
+		_:
+			return "blocked"
+
+
+static func _door_layout_visual_weight(runtime_visual_state: String) -> float:
+	match runtime_visual_state:
+		"open":
+			return 0.7
+		"half":
+			return 0.9
+		_:
+			return 1.0
 
 
 static func _open_fraction_for_reaction(object_kind: String, reaction_state: String, progress: float) -> float:
