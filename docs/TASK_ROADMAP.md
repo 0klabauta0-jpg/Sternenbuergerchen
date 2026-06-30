@@ -304,6 +304,7 @@ git checkout -b batch/<batch-name>
 - TASK_673 - Mission Interaction Point Contract (implementiert)
 - TASK_674 - Mission Interaction Point Bindings (implementiert)
 - TASK_675 - Mission Interaction Runtime Use State (implementiert)
+- TASK_676 - Mission Interaction Use Feedback (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
