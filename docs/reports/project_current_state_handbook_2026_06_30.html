@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_655: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_656: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_655</span>
-      <span class="pill">Naechster Kandidat: TASK_656</span>
+      <span class="pill">Letzter Stand: TASK_656</span>
+      <span class="pill">Naechster Kandidat: TASK_657</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -101,8 +101,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Wo wir stehen</h2>
-          <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe hat jetzt eine kompakte One-Screen-Planzeile.</p>
-          <div class="callout">TASK_655 - Frontier Probe One-Screen Visual Tuning Findings ist der aktuelle Abschlussstand: Die Zeile aus TASK_653 - Frontier Probe One-Screen Playability Pass bleibt sichtbar, das Paket aus TASK_654 - Frontier Probe One-Screen F6 Playtest Notes bleibt die Review-Grundlage, und die alte redundante NEXT-Detailzeile wird im Mission-Control-Panel unterdrueckt. Der detaillierte NEXT-Export bleibt fuer Tests und Reports erhalten.</div>
+          <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
+          <div class="callout">TASK_656 - Frontier Probe Real F6 Visual Review ist der aktuelle Abschlussstand: Die Historie bleibt sichtbar mit TASK_653 - Frontier Probe One-Screen Playability Pass, TASK_654 - Frontier Probe One-Screen F6 Playtest Notes und TASK_655 - Frontier Probe One-Screen Visual Tuning Findings. Fuer die TASK_655-Verdichtung wird jetzt ein PNG-/JSON-Reviewpaket erzeugt. Es prueft die sichtbare One-Screen-Zeile, die unterdrueckte NEXT-Dopplung und markiert klar, ob ein echter Viewport-Readback oder ein Headless-Evidence-Board vorliegt.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -112,7 +112,8 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_653_done"> TASK_653 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_654_done"> TASK_654 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_655_done"> TASK_655 erledigt</label>
-          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_655 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_656_done"> TASK_656 erledigt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_656 erledigt</label>
         </article>
         <article class="card half">
           <h2>Technischer Zustand</h2>
@@ -137,7 +138,7 @@
           <table>
             <thead><tr><th>Bereich</th><th>Traegt bereits</th><th>Reibt noch</th><th>Naechster guter Griff</th></tr></thead>
             <tbody>
-              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte Fensterblick nach TASK_655 ist noch nicht menschlich bewertet.</td><td>TASK_656: realer F6-Visual-Review der verdichteten Anzeige.</td></tr>
+              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Fensterentscheid nach TASK_656 ist weiter offen.</td><td>TASK_657: belegte F6-Visual-Polish-Findings anwenden.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
               <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Echte Klicklaeufe koennen trotz Headless-Gruen noch unklar wirken.</td><td>Echter Host/Client-Klicklauf oder Mini-Szenario-Spielbarkeit.</td></tr>
               <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow und Builder-Spikes sind vorhanden.</td><td>Der Mapbau fuehlt sich noch nicht wie ein angenehmes Werkzeug an.</td><td>Nach dem Gameplay-Fenster wieder UX-Slice fuer Builder-Toolbar/Assets.</td></tr>
@@ -205,7 +206,7 @@
             <tbody>
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
-              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Nach TASK_655 ist der naechste Multiplayer-Beleg weiter der echte Klicklauf; fuer Spielgefuehl ist TASK_656 sinnvoller, weil die verdichtete Anzeige jetzt wirklich angeschaut werden sollte.</td></tr>
+              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Nach TASK_656 ist der naechste Multiplayer-Beleg weiter der echte Klicklauf; fuer Spielgefuehl ist TASK_657 sinnvoll, wenn der F6-Review konkrete optische Reibung zeigt.</td></tr>
               <tr><td>Editor bleibt sperrig</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>Nach Core-Loop-/Multiplayer-Sichtbarkeit wieder Editor-UX priorisieren.</td></tr>
             </tbody>
           </table>
@@ -244,8 +245,8 @@
           <label class="checkline"><input type="checkbox" data-export-key="one_screen_f6.next_action_clear"> NEXT AA fuehrt zur naechsten Handlung</label>
           <label class="checkline"><input type="checkbox" data-export-key="one_screen_f6.hud_density_ok"> HUD-Dichte bleibt ruhig genug</label>
           <label class="checkline"><input type="checkbox" data-export-key="one_screen_f6.no_runtime_truth"> Review bleibt read-only, kein GO/Command wird erzeugt</label>
-          <textarea data-export-key="one_screen_f6.findings" placeholder="Konkreter Sichtbefund fuer TASK_656: zu klein, falsch platziert, zu lang, unklar, gut genug..."></textarea>
-          <div contenteditable="true" data-note-key="notes.one_screen_f6_playtest" data-placeholder="F6-Sichtnotizen...">TASK_654 erzeugt PNG/JSON unter tmp/. TASK_655 hat die erste belegte Dichtekorrektur angewendet; der echte Fensterblick bleibt fuer TASK_656 offen.</div>
+          <textarea data-export-key="one_screen_f6.findings" placeholder="Konkreter Sichtbefund fuer TASK_657: zu klein, falsch platziert, zu lang, unklar, gut genug..."></textarea>
+          <div contenteditable="true" data-note-key="notes.one_screen_f6_playtest" data-placeholder="F6-Sichtnotizen...">TASK_654 erzeugt PNG/JSON unter tmp/. TASK_655 hat die erste belegte Dichtekorrektur angewendet; TASK_656 erzeugt das Reviewpaket fuer den echten Fensterblick.</div>
         </article>
         <article class="card full">
           <h2>One-Screen-Visual-Tuning</h2>
@@ -254,8 +255,21 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="one_screen_visual_tuning.next_export_preserved"> Detaillierter NEXT-Export bleibt fuer Contracts erhalten</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="one_screen_visual_tuning.line_budget_corrected"> TASK_654-Zeichenbudget kommt aus dem Readout</label>
           <label class="checkline"><input type="checkbox" data-export-key="one_screen_visual_tuning.real_window_confirmed"> Echte F6-Fensterwirkung bestaetigt</label>
-          <textarea data-export-key="one_screen_visual_tuning.findings" placeholder="Konkreter Sichtbefund fuer TASK_656: Zeile gut, zu unauffaellig, Panel zu dicht, Tooltip noetig..."></textarea>
+          <textarea data-export-key="one_screen_visual_tuning.findings" placeholder="Konkreter Sichtbefund fuer TASK_657: Zeile gut, zu unauffaellig, Panel zu dicht, Tooltip noetig..."></textarea>
           <div contenteditable="true" data-note-key="notes.one_screen_visual_tuning" data-placeholder="Visual-Tuning-Notizen...">TASK_655 reduziert die sichtbare NEXT-Dopplung. Der detaillierte NEXT-Text bleibt im Command-Feedback-Snapshot und soll im echten F6-Blick als naechstes beurteilt werden.</div>
+        </article>
+        <article class="card full">
+          <h2>Real-F6-Visual-Review</h2>
+          <label class="checkline"><input type="checkbox" data-export-key="real_f6_visual.viewport_readback_available"> Echter Viewport-Readback liegt vor</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="real_f6_visual.generated_evidence_board"> Headless-Evidence-Board liegt vor</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="real_f6_visual.one_screen_line_visible"> One-Screen-Zeile bleibt sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="real_f6_visual.duplicate_next_suppressed"> Redundante NEXT-Zeile bleibt unterdrueckt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="real_f6_visual.next_contract_preserved"> Detaillierter NEXT-Contract bleibt exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="real_f6_visual.manual_review_done"> Menschlicher Fensterentscheid erledigt</label>
+          <input data-export-key="real_f6_visual.png_path" placeholder="tmp/frontier_probe_real_f6_visual_review.png">
+          <input data-export-key="real_f6_visual.manifest_path" placeholder="tmp/frontier_probe_real_f6_visual_review.json">
+          <textarea data-export-key="real_f6_visual.findings" placeholder="Konkreter Sichtbefund fuer TASK_657: Platzierung, Kontrast, Dichte, Tempo..."></textarea>
+          <div contenteditable="true" data-note-key="notes.real_f6_visual_review" data-placeholder="Real-F6-Review-Notizen...">TASK_656 erzeugt ein lokales PNG/JSON-Paket fuer die verdichtete Frontier-Probe-Mission-Control-Zeile. Headless bleibt nur Evidence, der echte Fensterentscheid bleibt offen.</div>
         </article>
         <article class="card half">
           <h2>Bewertung</h2>
@@ -276,8 +290,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>TASK_656 - Frontier Probe Real F6 Visual Review</strong> ist aus meiner Sicht der beste Anschluss: Die verdichtete Mission-Control-Anzeige muss jetzt im echten Fensterbild gegen Lesbarkeit, Dichte und Tempo bewertet werden.</p>
-          <div class="callout">Ziel: Den One-Screen-Readout im Fensterbild wirklich anfassen: ist `PLAN ... | NEXT ...` schnell genug lesbar, fehlt die unterdrueckte Detailzeile nicht, und bleibt das HUD ruhig genug?</div>
+          <p><strong>TASK_657 - Frontier Probe F6 Visual Polish Findings</strong> ist aus meiner Sicht der beste Anschluss, sobald der TASK_656-Fensterblick einen konkreten Befund liefert: Platzierung, Kontrast oder Dichte gezielt korrigieren, ohne neue Gameplay-Wahrheit zu bauen.</p>
+          <div class="callout">Ziel: Nur belegte F6-Befunde anwenden. Wenn der echte Blick gut ist, danach lieber zur Host/Client-Klickrunde oder Editor-UX wechseln.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -288,7 +302,7 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>TASK_656 - Frontier Probe Real F6 Visual Review</td><td>Die verdichtete One-Screen-Zeile wird im echten Fensterbild bewertet.</td></tr>
+              <tr><td>1</td><td>TASK_657 - Frontier Probe F6 Visual Polish Findings</td><td>Konkrete F6-Sichtbefunde aus TASK_656 werden angewendet.</td></tr>
               <tr><td>2</td><td>Echter Host/Client-Klicklauf mit `USE BRAVO`</td><td>Multiplayer-Bedienung wird mit Bild statt nur Manifest bewertet.</td></tr>
               <tr><td>3</td><td>Editor Builder UX Slice</td><td>Mapbau wird angenehmer und Content entsteht schneller.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
@@ -302,7 +316,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_655. Frontier Probe zeigt die kompakte One-Screen-Planzeile ohne redundante NEXT-Detailzeile; naechster empfohlener Slice ist TASK_656 Frontier Probe Real F6 Visual Review.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_656. Frontier Probe erzeugt ein lokales Real-F6-Reviewpaket fuer die kompakte Mission-Control-Zeile; naechster empfohlener Slice ist TASK_657 Frontier Probe F6 Visual Polish Findings, falls der echte Blick Reibung zeigt.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -359,15 +373,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_655 - Frontier Probe One-Screen Visual Tuning Findings",
-            recommended_next_task: "TASK_656 - Frontier Probe Real F6 Visual Review",
+            latest_completed_task: "TASK_656 - Frontier Probe Real F6 Visual Review",
+            recommended_next_task: "TASK_657 - Frontier Probe F6 Visual Polish Findings",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_655 - Frontier Probe One-Screen Visual Tuning Findings",
+            updated_for_task: "TASK_656 - Frontier Probe Real F6 Visual Review",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };
