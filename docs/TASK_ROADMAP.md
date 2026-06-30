@@ -261,6 +261,7 @@ git checkout -b batch/<batch-name>
 - TASK_630 - Frontier Probe Mini Scenario Feel Route (implementiert)
 - TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish (implementiert)
 - TASK_632 - Frontier Probe Mini Scenario F6 Visual Review (implementiert)
+- TASK_633 - Frontier Probe Callout Layout Polish (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

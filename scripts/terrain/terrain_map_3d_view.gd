@@ -110,6 +110,7 @@ const UNIT_TEXTURE_PIXEL_SIZE: float = 0.0150
 const DROPSHIP_TEXTURE_PIXEL_SIZE: float = 0.0152
 const STATUS_LABEL_PIXEL_SIZE: float = 0.018
 const STATUS_LABEL_HEIGHT: float = 1.16
+const ROUTE_CALLOUT_LABEL_BASE_OFFSET_WORLD: Vector2 = Vector2(0.0, -22.0)
 const MOVEMENT_LABEL_HEIGHT: float = 1.06
 const FIXED_CARD_YAW_DEGREES: float = 45.0
 const KENNEY_DIAMOND_CENTER := Vector2(256.0, 315.0)
@@ -7151,13 +7152,20 @@ func _get_objective_status_color() -> Color:
 
 
 func _add_route_callout_visuals() -> void:
-	for callout_variant in Array(_mission_status_payload.get("route_callouts", [])):
+	var route_callouts: Array = Array(_mission_status_payload.get("route_callouts", []))
+	var overlap_counts: Dictionary = _build_route_callout_overlap_counts(route_callouts)
+	var overlap_seen: Dictionary = {}
+	for callout_variant in route_callouts:
 		if typeof(callout_variant) != TYPE_DICTIONARY:
 			continue
 		var callout: Dictionary = Dictionary(callout_variant)
 		if typeof(callout.get("world_position", null)) != TYPE_VECTOR2:
 			continue
 		var world_position: Vector2 = Vector2(callout.get("world_position", Vector2.ZERO))
+		var overlap_key: String = _build_route_callout_overlap_key(world_position)
+		var overlap_count: int = int(overlap_counts.get(overlap_key, 1))
+		var overlap_index: int = int(overlap_seen.get(overlap_key, 0))
+		overlap_seen[overlap_key] = overlap_index + 1
 		var tone: String = String(callout.get("tone", callout.get("color_key", "unknown"))).strip_edges().to_lower()
 		if tone.is_empty():
 			tone = "unknown"
@@ -7167,7 +7175,10 @@ func _add_route_callout_visuals() -> void:
 		if short_label.is_empty():
 			short_label = String(callout.get("label", callout_id)).strip_edges()
 		_add_marker3d(_status_root, world_position, Color(color.r, color.g, color.b, 0.66), "RouteCalloutMarker_%s" % _sanitize_node_name(callout_id), 0.34, 0.08, 24, 0.38)
-		_add_label3d(_status_root, short_label, _world_to_surface_3d_position(world_position + Vector2(0.0, -20.0), STATUS_LABEL_HEIGHT + 0.34), "RouteCalloutLabel_%s" % _sanitize_node_name(callout_id), color, 14)
+		var label_offset_world: Vector2 = _get_route_callout_label_offset_world(overlap_index, overlap_count)
+		var label_world_position: Vector2 = world_position + label_offset_world
+		var label_height: float = STATUS_LABEL_HEIGHT + 0.34 + (float(overlap_index) * 0.045)
+		_add_label3d(_status_root, short_label, _world_to_surface_3d_position(label_world_position, label_height), "RouteCalloutLabel_%s" % _sanitize_node_name(callout_id), color, 14)
 		_route_callout_visual_count += 1
 		_route_callout_tone_counts[tone] = int(_route_callout_tone_counts.get(tone, 0)) + 1
 		_route_callout_entries.append({
@@ -7178,10 +7189,48 @@ func _add_route_callout_visuals() -> void:
 			"tone": tone,
 			"target_marker_id": String(callout.get("target_marker_id", "")).strip_edges(),
 			"world_position": world_position,
+			"label_world_position": label_world_position,
+			"label_offset_world": label_offset_world,
+			"label_height": label_height,
+			"overlap_group_key": overlap_key,
+			"overlap_group_count": overlap_count,
+			"overlap_index": overlap_index,
 			"visual_priority": int(callout.get("visual_priority", _route_callout_visual_count)),
 			"read_only": true,
 			"ui_sets_gameplay_truth": false,
 		})
+
+
+func _build_route_callout_overlap_counts(route_callouts: Array) -> Dictionary:
+	var counts: Dictionary = {}
+	for callout_variant in route_callouts:
+		if typeof(callout_variant) != TYPE_DICTIONARY:
+			continue
+		var callout: Dictionary = Dictionary(callout_variant)
+		if typeof(callout.get("world_position", null)) != TYPE_VECTOR2:
+			continue
+		var overlap_key: String = _build_route_callout_overlap_key(Vector2(callout.get("world_position", Vector2.ZERO)))
+		counts[overlap_key] = int(counts.get(overlap_key, 0)) + 1
+	return counts
+
+
+func _build_route_callout_overlap_key(world_position: Vector2) -> String:
+	return "%d:%d" % [roundi(world_position.x / 4.0), roundi(world_position.y / 4.0)]
+
+
+func _get_route_callout_label_offset_world(overlap_index: int, overlap_count: int) -> Vector2:
+	if overlap_count <= 1:
+		return ROUTE_CALLOUT_LABEL_BASE_OFFSET_WORLD
+	var stagger_offsets: Array[Vector2] = [
+		Vector2(-36.0, -28.0),
+		Vector2(40.0, 24.0),
+		Vector2(-44.0, 36.0),
+		Vector2(48.0, -38.0),
+	]
+	if overlap_index >= 0 and overlap_index < stagger_offsets.size():
+		return stagger_offsets[overlap_index]
+	var ring: float = float(overlap_index - stagger_offsets.size() + 1)
+	return ROUTE_CALLOUT_LABEL_BASE_OFFSET_WORLD + Vector2(24.0 * ring, 18.0 * ring)
 
 
 func _get_route_callout_color(tone: String) -> Color:
