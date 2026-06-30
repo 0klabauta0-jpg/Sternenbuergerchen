@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_645 auf <code>task/frontier-probe-homebase-summary-next-sortie-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_646 auf <code>task/homebase-missionpanel-density-playfeel-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -307,7 +307,7 @@
       <span class="pill good">TASK_641 Next-Sortie</span>
       <span class="pill good">TASK_642 Homebase-Review</span>
       <span class="pill good">TASK_643 Evidence-Labels</span>
-      <span class="pill good">TASK_645 Homebase Polish</span>
+      <span class="pill good">TASK_646 Density Review</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2372,6 +2372,35 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_646 Homebase MissionPanel Density Playfeel Review</h2>
+          <p>TASK_646 prueft den Homebase-Blick nach TASK_645 als Dichte- und Scanbarkeits-Snapshot: Briefing, Pre-Mission-Readiness und Follow-up-Panel muessen sichtbar, in Reihenfolge, im MissionPanel und ohne Overflow bleiben. Das Manifest ist ein Review-Anker, kein Layout-Commit.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Density / Playfeel Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_646 - Homebase MissionPanel Density Playfeel Review" data-export-key="homebase_missionpanel_density_playfeel.task_id"></td><td>Aktueller Review-Slice fuer Homebase-MissionPanel-Dichte.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/homebase_missionpanel_density_playfeel_review.json" data-export-key="homebase_missionpanel_density_playfeel.manifest_path"></td><td>Lokaler JSON-Anker fuer Snapshot-Gates und Notizen.</td></tr>
+                <tr><td>Gate</td><td><input readonly value="pass" data-export-key="homebase_missionpanel_density_playfeel.gate"></td><td>Struktureller Dichte-Snapshot bleibt gruen.</td></tr>
+                <tr><td>Sektionen</td><td><input readonly value="4-8" data-export-key="homebase_missionpanel_density_playfeel.visible_section_count"></td><td>MissionPanel bleibt in wenige sichtbare Bloecke zerlegt.</td></tr>
+                <tr><td>Vertikale Fuellung</td><td><input readonly value="&lt;= 0.96" data-export-key="homebase_missionpanel_density_playfeel.vertical_fill_ratio"></td><td>Kein Overflow und etwas Luft im Panel.</td></tr>
+                <tr><td>Textbudget</td><td><input readonly value="&lt;= 1200" data-export-key="homebase_missionpanel_density_playfeel.total_visible_text_length"></td><td>Scanbarkeit wird nicht durch Textmasse erschlagen.</td></tr>
+                <tr><td>Reihenfolge</td><td><input readonly value="briefing_readiness_followup" data-export-key="homebase_missionpanel_density_playfeel.key_section_order"></td><td>Spieler liest: Briefing, Bereitschaft, Rueckkehr/Next-Sortie.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="homebase_missionpanel_density_playfeel.read_only"></td><td>Keine Navigation, kein Command, keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_647 nur bei echter Fenster-Dichte-Reibung" data-export-key="homebase_missionpanel_density_playfeel.recommended_next_task"></td><td>Kein Layout-Fix ohne belegten Sichtbefund.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="homebase_missionpanel_density_playfeel.snapshot_created"> Density-Snapshot vorhanden</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="homebase_missionpanel_density_playfeel.manifest_created"> Manifest erzeugbar</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="homebase_missionpanel_density_playfeel.read_only_checked"> Read-only-Grenze erhalten</label>
+            <label class="checkline"><input type="checkbox" data-export-key="homebase_missionpanel_density_playfeel.real_window_review_done"> Echten Fensterblick gegen Manifest bewertet</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_646 Density-Review-Notiz
+            <textarea data-note-key="notes.homebase_missionpanel_density_playfeel" data-export-key="homebase_missionpanel_density_playfeel.notes" placeholder="Beim Fensterbild notieren: Ist das MissionPanel angenehm scanbar oder braucht TASK_647 einen konkreten Layout-Fix?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3367,7 +3396,8 @@
               "TASK_642 - Frontier Probe Homebase Visible Readiness Review",
               "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings",
               "TASK_644 - Frontier Probe Homebase Real Window Review",
-              "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish"
+              "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish",
+              "TASK_646 - Homebase MissionPanel Density Playfeel Review"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3421,7 +3451,8 @@
               "TASK_642 macht den daraus entstehenden Homebase-Blick als PNG/Manifest-Review belegbar und prueft Zeilenreihenfolge, Bounds und Overflow.",
               "TASK_643 beschriftet das TASK_642-Headless-Evidence-Board mit Pixel-Labels und Readability-Gate, damit der naechste Homebase-Entscheid weniger Interpretationsrauschen hat.",
               "TASK_644 erzeugt ein echtes Homebase-Fenster-Review-Paket mit Viewport-Readback, wenn ohne Headless gestartet, und laesst den menschlichen Sichtentscheid sonst als manual_open.",
-              "TASK_645 hebt die Post-Debrief-Summary und Next-Sortie-Zeile in einen lesbareren Follow-up-Panelblock, bleibt aber read-only und wartet weiter auf den echten Geschmackstest."
+              "TASK_645 hebt die Post-Debrief-Summary und Next-Sortie-Zeile in einen lesbareren Follow-up-Panelblock, bleibt aber read-only und wartet weiter auf den echten Geschmackstest.",
+              "TASK_646 macht die MissionPanel-Dichte nach TASK_645 als read-only Snapshot und Manifest pruefbar."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3430,14 +3461,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_644",
-            current_focus: "Frontier Probe Homebase Summary Next Sortie Polish",
-            latest_completed_task: "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish"
+            current_repo_base: "integration/core-foundation after TASK_645",
+            current_focus: "Homebase MissionPanel Density Playfeel Review",
+            latest_completed_task: "TASK_646 - Homebase MissionPanel Density Playfeel Review"
           },
           metadata: {
-            branch: "task/frontier-probe-homebase-summary-next-sortie-polish",
-            integration_base: "integration/core-foundation after TASK_644",
-            head: "task/frontier-probe-homebase-summary-next-sortie-polish",
+            branch: "task/homebase-missionpanel-density-playfeel-review",
+            integration_base: "integration/core-foundation after TASK_645",
+            head: "task/homebase-missionpanel-density-playfeel-review",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }

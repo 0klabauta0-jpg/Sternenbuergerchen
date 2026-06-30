@@ -423,6 +423,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_645_frontier_probe_homebase_summary_next_sortie_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_644_frontier_probe_homebase_real_window_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_642_frontier_probe_homebase_visible_readiness_review.gd`, `git diff --check`.
 - Naechster Schritt: Echten Homebase-Fensterblick nach TASK_645 ansehen; bei Bedarf einen schmalen Homebase-MissionPanel-Density- oder Playfeel-Pass schneiden.
 
+### TASK_646 - Homebase MissionPanel Density Playfeel Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_646_homebase_missionpanel_density_playfeel_review.md`, `docs/tasks/TASK_645_frontier_probe_homebase_summary_next_sortie_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`, `docs/reports/project_state_handbook_2026_06_30.html`
+- Stand: `HomebaseTestScreen.get_homebase_missionpanel_density_playfeel_snapshot()` prueft MissionPanel-Dichte read-only: sichtbare Sektionen, Briefing/Readiness/Follow-up-Reihenfolge, Bounds, Overflow, Textbudget und vertikale Fuellung.
+- Stand: `scripts/tests/task_646_homebase_missionpanel_density_playfeel_review.gd` erzeugt `tmp/homebase_missionpanel_density_playfeel_review.json` als lokales Review-Manifest.
+- Stand: Der laufende HTML-Bericht und die Handbuchberichte exportieren TASK_646-Gates und Notizen fuer den naechsten echten Fensterblick.
+- Risiken/offen: TASK_646 misst Dichte strukturell, ersetzt aber keinen menschlichen Geschmackstest im echten Homebase-Fenster. Ein Layout-Fix sollte erst folgen, wenn dieser Blick weiter Reibung zeigt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_646_homebase_missionpanel_density_playfeel_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_645_frontier_probe_homebase_summary_next_sortie_polish.gd`, `git diff --check`.
+- Naechster Schritt: Echten Homebase-Fensterblick mit TASK_646-Manifest gegenpruefen; nur bei sichtbarer Dichte-Reibung TASK_647 als Layout-Findings-Slice schneiden.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

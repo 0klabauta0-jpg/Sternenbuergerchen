@@ -52,9 +52,9 @@ func _test_docs_and_reports() -> void:
 	_assert(homebase_text.contains("PostDebriefFollowupPanel"), "Homebase creates the follow-up panel")
 	_assert(homebase_text.contains("HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID"), "Homebase exposes stable TASK_645 style id")
 	_assert(report_text.contains("TASK_645 Frontier Probe Homebase Summary Next Sortie Polish"), "Rolling report tracks TASK_645")
-	_assert(report_text.contains('latest_completed_task: "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish"'), "Rolling report marks TASK_645 latest completed")
+	_assert(report_text.contains('latest_completed_task: "TASK_646 - Homebase MissionPanel Density Playfeel Review"'), "Rolling report advances latest completed beyond TASK_645")
 	_assert(handbook_text.contains("TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish"), "Status handbook tracks TASK_645")
-	_assert(handbook_text.contains('current_task: "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish"'), "Status handbook current task is TASK_645")
+	_assert(handbook_text.contains('current_task: "TASK_646 - Homebase MissionPanel Density Playfeel Review"'), "Status handbook current task advances beyond TASK_645")
 	_assert(state_handbook_text.contains("TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish"), "State handbook tracks TASK_645")
 	for key in [
 		"frontier_probe_homebase_summary_next_sortie_polish.task_id",
