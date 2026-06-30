@@ -130,6 +130,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Contract mutiert keine gespeicherte Karte: `terrain_map_data_mutated = false`, `read_only = true`, `ui_sets_gameplay_truth = false`.
 - Echte Door-Use-/Breach-Commands, Asset-Swaps und Animationen bleiben eigene Slices.
 
+## Door Runtime State Producer
+- `MissionTacticalSandboxController.get_mission_interaction_door_runtime_collision_los_snapshot()` baut den Door-Runtime-Override-Snapshot aus Object-Reaction und `TerrainRegistry`.
+- `apply_mission_interaction_door_runtime_collision_los_snapshot()` wendet die effektiven Door-Overrides auf die `TerrainRegistry` an.
+- Der Producer liest Runtime-Wahrheit aus dem vorhandenen Interaction-State-Pfad und schreibt nur Registry-Overrides; `TerrainMapData` und statische `TerrainTileData` bleiben unveraendert.
+- Gleiche Override-Sets werden per Fingerprint uebersprungen, damit der Sync-Pfad nicht bei jedem Status-Refresh unnoetig dirty setzt.
+- Der Mission-Status-Payload darf Diagnosefelder wie Override-Count, Apply-Reason und Summary exportieren. Diese Werte bleiben Feedback/Debug, nicht Gameplay-Wahrheit.
+- Echte Breach-/Use-Bedienung und Door-Animationen bleiben eigene Slices.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
