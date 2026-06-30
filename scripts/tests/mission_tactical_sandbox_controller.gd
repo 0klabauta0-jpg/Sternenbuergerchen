@@ -14780,6 +14780,166 @@ func get_frontier_probe_integrated_objective_playthrough_snapshot() -> Dictionar
 	}
 
 
+func get_frontier_probe_mini_scenario_feel_route_snapshot() -> Dictionary:
+	var scenario: Dictionary = _load_frontier_probe_scenario_snapshot()
+	var vertical_slice: Dictionary = Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("load_slice_from_file", "res://data/mission_scenarios/frontier_probe_vertical_slice.json"))
+	var integrated_snapshot: Dictionary = get_frontier_probe_integrated_objective_playthrough_snapshot()
+	var ownership_snapshot: Dictionary = get_frontier_probe_multiplayer_objective_ownership_snapshot()
+	var alpha_slot: Dictionary = _find_team_slot_in_slice(vertical_slice, "team_alpha")
+	var bravo_slot: Dictionary = _find_team_slot_in_slice(vertical_slice, "team_bravo")
+	var aa_step: Dictionary = Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("get_step_by_type", vertical_slice, "air_defense_shutdown"))
+	var computer_step: Dictionary = Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("get_step_by_type", vertical_slice, "computer_hold"))
+	var cargo_step: Dictionary = Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("get_step_by_type", vertical_slice, "cargo_touchdown_extract"))
+	var aa_group: Dictionary = _find_scenario_enemy_group(scenario, String(aa_step.get("enemy_group_id", "bravo_air_defense")))
+	var aa_tactics: Dictionary = Dictionary(aa_group.get("tactics", {}))
+	var play_modes: PackedStringArray = PackedStringArray(vertical_slice.get("play_modes", PackedStringArray()))
+	var route_beats: Array = [
+		{
+			"id": "approach_alpha_lz",
+			"label": "Start/LZ",
+			"target_marker_id": String(alpha_slot.get("spawn_marker_id", "spawn_alpha")),
+			"team_id": "team_alpha",
+			"player_decision": "Choose approach, read threat preview, keep fireteam context visible.",
+		},
+		{
+			"id": String(aa_step.get("step_id", "disable_air_defense")),
+			"label": "AA ausschalten",
+			"objective_type": String(aa_step.get("objective_type", "air_defense_shutdown")),
+			"target_marker_id": String(aa_step.get("target_marker_id", "")),
+			"enemy_group_id": String(aa_step.get("enemy_group_id", "")),
+			"blocks_cargo_until_complete": bool(aa_step.get("blocks_cargo_until_complete", false)),
+			"expected_state": String(aa_step.get("required_state", "")),
+		},
+		{
+			"id": String(computer_step.get("step_id", "occupy_station_computer")),
+			"label": "Computer halten",
+			"objective_type": String(computer_step.get("objective_type", "computer_hold")),
+			"target_marker_id": String(computer_step.get("target_marker_id", "")),
+			"hold_seconds": float(computer_step.get("min_hold_seconds", 0.0)),
+			"operator_team_id": String(computer_step.get("operator_team_id", "")),
+			"expected_state": String(computer_step.get("required_state", "")),
+		},
+		{
+			"id": String(cargo_step.get("step_id", "cargo_touchdown_extract")),
+			"label": "Cargo Touch-and-Go",
+			"objective_type": String(cargo_step.get("objective_type", "cargo_touchdown_extract")),
+			"target_marker_id": String(cargo_step.get("target_marker_id", "")),
+			"requires_step_id": String(cargo_step.get("requires_step_id", "")),
+			"hold_seconds": float(cargo_step.get("min_hold_seconds", 0.0)),
+			"expected_state": String(cargo_step.get("required_state", "")),
+		},
+	]
+	var mission_status: String = String(integrated_snapshot.get("mission_control_status_text", "")).strip_edges()
+	var objective_line: String = String(integrated_snapshot.get("objective_interaction_line", "")).strip_edges()
+	var cargo_line: String = String(integrated_snapshot.get("cargo_extract_line", "")).strip_edges()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"scenario_data_present",
+			not scenario.is_empty()
+				and String(scenario.get("scenario_id", "")) == "frontier_probe_vertical_slice"
+				and String(scenario.get("display_name", "")).strip_edges().length() > 0,
+			"Frontier Probe scenario data is available for the mini scenario route."
+		),
+		_build_mission_first_move_readability_check(
+			"play_modes_cover_solo_coop_pvp",
+			play_modes.has("singleplayer") and play_modes.has("coop") and play_modes.has("multiplayer_pvp"),
+			"Scenario route advertises solo, coop and PvP-ready play modes."
+		),
+		_build_mission_first_move_readability_check(
+			"route_beats_cover_mission_loop",
+			route_beats.size() >= 4
+				and not aa_step.is_empty()
+				and not computer_step.is_empty()
+				and not cargo_step.is_empty(),
+			"Route exposes approach, AA shutdown, computer hold and cargo touch-and-go as readable beats."
+		),
+		_build_mission_first_move_readability_check(
+			"alpha_bravo_roles_readable",
+			String(alpha_slot.get("role", "")) == "attacker"
+				and String(alpha_slot.get("spawn_marker_id", "")) == "spawn_alpha"
+				and String(bravo_slot.get("role", "")) == "defender"
+				and String(bravo_slot.get("spawn_marker_id", "")) == "spawn_bravo"
+				and _snapshot_check_passed(ownership_snapshot, "pvp_assigns_alpha_host_and_bravo_peer")
+				and _snapshot_check_passed(ownership_snapshot, "singleplayer_keeps_bravo_npc"),
+			"Alpha and Bravo roles stay readable for solo, coop and PvP review."
+		),
+		_build_mission_first_move_readability_check(
+			"aa_threat_blocks_cargo",
+			bool(aa_step.get("blocks_cargo_until_complete", false))
+				and String(cargo_step.get("requires_step_id", "")) == String(aa_step.get("step_id", ""))
+				and String(aa_tactics.get("weapon_id", "")) == "rocket_launcher"
+				and bool(aa_tactics.get("anti_armor_threat", false)),
+			"AA is a visible anti-armor threat and blocks Cargo until solved."
+		),
+		_build_mission_first_move_readability_check(
+			"computer_hold_has_playable_timer",
+			String(computer_step.get("operator_team_id", "")) == "team_alpha"
+				and is_equal_approx(float(computer_step.get("min_hold_seconds", 0.0)), 18.0),
+			"Computer objective requires Alpha to hold a short, readable 18 second interaction."
+		),
+		_build_mission_first_move_readability_check(
+			"cargo_returns_to_alpha_lz",
+			String(cargo_step.get("target_marker_id", "")) == "spawn_alpha"
+				and String(cargo_step.get("required_state", "")) == "cargo_departed"
+				and float(cargo_step.get("min_hold_seconds", 0.0)) >= 12.0,
+			"Cargo touch-and-go is anchored to Alpha's LZ and has a short defendable hold."
+		),
+		_build_mission_first_move_readability_check(
+			"integrated_objective_and_cargo_green",
+			String(integrated_snapshot.get("gate", "")) == "pass"
+				and _snapshot_check_passed(integrated_snapshot, "frontier_probe_gates_complete")
+				and _snapshot_check_passed(integrated_snapshot, "mission_control_integrates_objective_and_cargo"),
+			"Existing integrated Objective/Cargo playthrough stays green under the route snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_names_route_outcome",
+			not mission_status.is_empty()
+				and not objective_line.is_empty()
+				and not cargo_line.is_empty()
+				and mission_status.contains(objective_line)
+				and mission_status.contains(cargo_line),
+			"Mission Control can explain the current route outcome without a tutorial window."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(integrated_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(ownership_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Mini scenario route reads existing state and does not write gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_630",
+		"schema": "sternenbuergerchen.frontier_probe_mini_scenario_feel_route.v1",
+		"scenario_id": String(scenario.get("scenario_id", "")),
+		"display_name": String(scenario.get("display_name", "")),
+		"route_id": "frontier_probe_aa_computer_cargo",
+		"route_beats": route_beats,
+		"route_beat_count": route_beats.size(),
+		"play_modes": play_modes,
+		"alpha_slot": alpha_slot,
+		"bravo_slot": bravo_slot,
+		"aa_group": aa_group,
+		"objective_line": objective_line,
+		"cargo_line": cargo_line,
+		"mission_control_status_text": mission_status,
+		"integrated_snapshot": integrated_snapshot,
+		"ownership_snapshot": ownership_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"recommended_next_task": "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish",
+	}
+
+
 func get_frontier_probe_multiplayer_objective_ownership_snapshot() -> Dictionary:
 	var integrated_snapshot: Dictionary = get_frontier_probe_integrated_objective_playthrough_snapshot()
 	var scenario: Dictionary = _load_frontier_probe_scenario_snapshot()
