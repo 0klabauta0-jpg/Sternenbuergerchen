@@ -6120,6 +6120,10 @@ func _build_strategic_status_text() -> String:
 	var interaction_line: String = String(interaction_density.get("mission_control_line", "")).strip_edges()
 	if not interaction_line.is_empty():
 		lines.append(interaction_line)
+	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
+	var next_interaction_line: String = String(next_interaction.get("next_interaction_line", "")).strip_edges()
+	if bool(next_interaction.get("active", false)) and not next_interaction_line.is_empty():
+		lines.append(next_interaction_line)
 	return "\n".join(lines)
 
 
@@ -15127,6 +15131,118 @@ func get_frontier_probe_mini_scenario_visual_feel_polish_snapshot() -> Dictionar
 	}
 
 
+func _build_frontier_probe_playfeel_next_interaction_snapshot() -> Dictionary:
+	var gate_snapshot: Dictionary = _get_mission_scenario_runtime_gate_snapshot_for_readability()
+	var cargo_snapshot: Dictionary = _get_mission_cargo_touchdown_snapshot_for_readability()
+	var scenario_active: bool = _should_sync_frontier_probe_route_callouts()
+	var gate_entries: Array = Array(gate_snapshot.get("gates", []))
+	var aa_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "air_defense_shutdown")
+	var computer_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "computer_hold")
+	var cargo_gate: Dictionary = _find_runtime_gate_by_objective_type(gate_entries, "cargo_touchdown_extract")
+	var cargo_state: String = String(cargo_snapshot.get("cargo_state", cargo_snapshot.get("state", ""))).strip_edges().to_lower()
+	var next_id: String = "inactive"
+	var next_label: String = ""
+	var next_line: String = ""
+	var complete: bool = false
+	if scenario_active:
+		if not bool(aa_gate.get("complete", false)):
+			next_id = "disable_air_defense"
+			next_label = "AA ausschalten"
+			next_line = "NEXT AA ausschalten | Cargo blockiert"
+		elif not bool(computer_gate.get("complete", false)):
+			next_id = "hold_station_computer"
+			next_label = "Computer halten"
+			var hold_seconds: int = int(round(float(computer_gate.get("hold_required_seconds", 0.0))))
+			next_line = "NEXT COM halten %ds | Station sichern" % hold_seconds if hold_seconds > 0 else "NEXT COM halten | Station sichern"
+		elif not bool(cargo_gate.get("complete", false)) or cargo_state != "departed":
+			next_id = "secure_cargo_touchdown"
+			next_label = "Cargo sichern"
+			next_line = "NEXT CARGO sichern | LZ halten"
+		else:
+			next_id = "open_debrief"
+			next_label = "Debrief"
+			next_line = "NEXT Debrief | Ergebnis pruefen | Homebase"
+			complete = true
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_playfeel_next_interaction.v1",
+		"task_id": "TASK_637",
+		"active": scenario_active,
+		"scenario_active": scenario_active,
+		"next_interaction_id": next_id,
+		"next_interaction_label": next_label,
+		"next_interaction_line": next_line,
+		"line_char_limit": 72,
+		"line_within_limit": next_line.length() <= 72,
+		"route_complete": bool(gate_snapshot.get("all_gates_complete", false)) and cargo_state == "departed",
+		"playfeel_complete": complete,
+		"aa_complete": bool(aa_gate.get("complete", false)),
+		"computer_complete": bool(computer_gate.get("complete", false)),
+		"cargo_complete": bool(cargo_gate.get("complete", false)),
+		"cargo_state": cargo_state,
+		"gate_snapshot": gate_snapshot,
+		"cargo_snapshot": cargo_snapshot,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"recommended_next_task": "TASK_638 - Frontier Probe Debrief Handoff Feel",
+	}
+
+
+func get_frontier_probe_playfeel_next_interaction_snapshot() -> Dictionary:
+	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
+	var command_snapshot: Dictionary = get_command_feedback_snapshot()
+	var mission_control_text: String = String(command_snapshot.get("mission_control_status_text", "")).strip_edges()
+	if bool(next_interaction.get("active", false)) and not mission_control_text.contains(String(next_interaction.get("next_interaction_line", "")).strip_edges()):
+		mission_control_text = _build_strategic_status_text()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"frontier_probe_context_active",
+			bool(next_interaction.get("scenario_active", false)),
+			"Frontier Probe scenario context is active for the next-interaction readout."
+		),
+		_build_mission_first_move_readability_check(
+			"next_interaction_line_visible",
+			not String(next_interaction.get("next_interaction_line", "")).strip_edges().is_empty()
+				and mission_control_text.contains(String(next_interaction.get("next_interaction_line", "")).strip_edges()),
+			"Mission Control shows the next interaction after the route state."
+		),
+		_build_mission_first_move_readability_check(
+			"completed_route_points_to_debrief",
+			not bool(next_interaction.get("route_complete", false))
+				or String(next_interaction.get("next_interaction_id", "")) == "open_debrief",
+			"Completed Frontier Probe route points the player toward Debrief/Homebase instead of another combat loop."
+		),
+		_build_mission_first_move_readability_check(
+			"next_line_is_compact",
+			bool(next_interaction.get("line_within_limit", false)),
+			"Next-interaction line stays compact enough for Mission Control."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(next_interaction.get("read_only", false)) and not bool(next_interaction.get("ui_sets_gameplay_truth", true)),
+			"Next-interaction readout only reads Scenario/Cargo state and does not write gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_playfeel_next_interaction.v1",
+		"task_id": "TASK_637",
+		"next_interaction": next_interaction,
+		"mission_control_status_text": mission_control_text,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"recommended_next_task": "TASK_638 - Frontier Probe Debrief Handoff Feel",
+	}
+
+
 func _has_route_callout_label(route_callouts: Array, expected_label: String) -> bool:
 	for callout_variant in route_callouts:
 		var callout: Dictionary = Dictionary(callout_variant)
@@ -16600,6 +16716,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var mission_hud_interaction_density: Dictionary = _build_mission_hud_interaction_density_snapshot()
+	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -16652,6 +16769,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"combat_hud_compact_line": String(combat_hud_density.get("compact_line", "")),
 		"mission_hud_interaction_density": mission_hud_interaction_density,
 		"mission_hud_interaction_line": String(mission_hud_interaction_density.get("mission_control_line", "")),
+		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
+		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),

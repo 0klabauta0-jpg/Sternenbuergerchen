@@ -49,9 +49,9 @@ func _test_docs_and_reports() -> void:
 	_assert(roadmap_text.contains("TASK_636 - Frontier Probe Real F6 Re-Capture (implementiert)"), "Roadmap marks TASK_636 implemented")
 	_assert(contract_text.contains("Frontier-Probe-Real-F6-Re-Capture"), "Mission feedback contract documents TASK_636")
 	_assert(report_text.contains("TASK_636 Frontier Probe Real F6 Re-Capture"), "Rolling report tracks TASK_636")
-	_assert(report_text.contains('latest_completed_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Rolling report marks TASK_636 latest completed")
+	_assert(report_text.contains('latest_completed_task: "TASK_637 - Frontier Probe Playfeel Next Interaction"'), "Rolling report marks TASK_637 latest completed")
 	_assert(handbook_text.contains("TASK_636 - Frontier Probe Real F6 Re-Capture"), "Status handbook tracks TASK_636")
-	_assert(handbook_text.contains('current_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"'), "Status handbook current task is TASK_636")
+	_assert(handbook_text.contains('current_task: "TASK_637 - Frontier Probe Playfeel Next Interaction"'), "Status handbook current task is TASK_637")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_real_f6_recapture.task_id",
 		"frontier_probe_real_f6_recapture.png_path",
@@ -495,5 +495,3 @@ func _assert(condition: bool, message: String) -> void:
 	else:
 		_failed += 1
 		push_error("FAIL: %s" % message)
-
-

@@ -80,8 +80,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
-      <span class="pill">Branch: task/frontier-probe-real-f6-recapture</span>
-      <span class="pill">Aktueller Slice: TASK_636</span>
+      <span class="pill">Branch: task/frontier-probe-playfeel-next-interaction</span>
+      <span class="pill">Aktueller Slice: TASK_637</span>
     </div>
   </header>
 
@@ -123,6 +123,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_634_done"> TASK_634 - Frontier Probe Real F6 Callout Sight Review bereit</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_635_done"> TASK_635 - Frontier Probe Callout Sight Findings bereit</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_636_done"> TASK_636 - Frontier Probe Real F6 Re-Capture bereit</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_637_done"> TASK_637 - Frontier Probe Playfeel Next Interaction bereit</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.more_manual_review_needed"> Manueller Spielgefuehltest offen</label>
         </article>
         <article class="card">
@@ -155,9 +156,9 @@
           <table>
             <thead><tr><th>Bereich</th><th>Was funktioniert</th><th>Reibung / Risiko</th><th>Naechster sinnvoller Griff</th></tr></thead>
             <tbody>
-              <tr><td>Mission Flow</td><td>Insertion, Fireteam-Auswahl, Move/Defend/Flank/Fire-Feedback, Objective/Cargo, die Frontier-Probe-Route aus Alpha-LZ, AA, Computer und Cargo sowie TASK_633-LZ/CARGO-Callout-Staffelung sind testbar. TASK_634 lieferte den echten F6-Callout-Sichtreview; TASK_635 macht die Route durch kontraststaerkere Labels, Verbindungslinien und ausweichendes Result-Label lesbarer; TASK_636 haelt den Re-Capture nach diesem Polish als PNG/Manifest bereit.</td><td>Integrierter Flow muss weiter gegen stale Commands, UI-Verwechslung und Multi-Fireteam-Faelle geschuetzt bleiben. Der laengere Spielgefuehltest nach dem Re-Capture ist noch offen.</td><td>Frontier-Probe-Re-Capture ansehen und daraus nur konkrete TASK_637-Findings ableiten.</td></tr>
+              <tr><td>Mission Flow</td><td>Insertion, Fireteam-Auswahl, Move/Defend/Flank/Fire-Feedback, Objective/Cargo, die Frontier-Probe-Route aus Alpha-LZ, AA, Computer und Cargo sowie TASK_633-LZ/CARGO-Callout-Staffelung sind testbar. TASK_634 lieferte den echten F6-Callout-Sichtreview; TASK_635 macht die Route durch kontraststaerkere Labels, Verbindungslinien und ausweichendes Result-Label lesbarer; TASK_636 haelt den Re-Capture nach diesem Polish als PNG/Manifest bereit; TASK_637 fuegt die kompakte NEXT-Zeile in #18 Mission Control hinzu.</td><td>Integrierter Flow muss weiter gegen stale Commands, UI-Verwechslung und Multi-Fireteam-Faelle geschuetzt bleiben. Der echte Debrief-/Homebase-Handoff nach der NEXT-Zeile ist noch offen.</td><td>TASK_638 als Debrief-/Homebase-Handoff-Feel schneiden.</td></tr>
               <tr><td>Combat / Taktik</td><td>LOS, Cover, ROE, Suppression, Threat Preview und AAR-Diagnose sind als V1-Spine vorhanden.</td><td>Noch kein endgueltiges Balancing, viele Werte sind bewusst Testdaten.</td><td>Kleine Szenarien statt grosse Systeme: Ambush, Bad Cover, Pinned But Alive.</td></tr>
-              <tr><td>Multiplayer</td><td>Host/Client-Snapshots, Authority-Gates, Zwei-Fenster-Launch, Capture-Pfade, sichtbare Role/Peer/Team-Badges, TASK_621-Review-Bundle, TASK_622-Authority-Manifest, TASK_623-AUTH-Teamchip-Hinweis, TASK_624-Reject-Erklaerung, TASK_625-sichtbarer-Blocker, TASK_626-Real-Click-Evidence, TASK_627-linker-HUD-Overlap-Fix, TASK_628-HUD-Vertragsrefresh, TASK_629-Playtest-Packet, TASK_630-Mini-Szenario-Route, TASK_631-Route-Callouts, TASK_632-F6-Review-Artefakt, TASK_633-Layout-Polish, TASK_634-Real-F6-Callout-Review-Paket, TASK_635-Sicht-Findings und TASK_636-Re-Capture existieren.</td><td>Echte Netzwerk-Langzeitlaeufe und sichtbare Bediengefuehltests fehlen.</td><td>Echten Zwei-Fenster-Klicklauf ausfuehren, wenn Host/Client-Reibung priorisiert wird.</td></tr>
+              <tr><td>Multiplayer</td><td>Host/Client-Snapshots, Authority-Gates, Zwei-Fenster-Launch, Capture-Pfade, sichtbare Role/Peer/Team-Badges, TASK_621-Review-Bundle, TASK_622-Authority-Manifest, TASK_623-AUTH-Teamchip-Hinweis, TASK_624-Reject-Erklaerung, TASK_625-sichtbarer-Blocker, TASK_626-Real-Click-Evidence, TASK_627-linker-HUD-Overlap-Fix, TASK_628-HUD-Vertragsrefresh, TASK_629-Playtest-Packet, TASK_630-Mini-Szenario-Route, TASK_631-Route-Callouts, TASK_632-F6-Review-Artefakt, TASK_633-Layout-Polish, TASK_634-Real-F6-Callout-Review-Paket, TASK_635-Sicht-Findings, TASK_636-Re-Capture und TASK_637-NEXT-Orientierung existieren.</td><td>Echte Netzwerk-Langzeitlaeufe und sichtbare Bediengefuehltests fehlen.</td><td>Echten Zwei-Fenster-Klicklauf ausfuehren, wenn Host/Client-Reibung priorisiert wird.</td></tr>
               <tr><td>Performance</td><td>Hotpath-Guards, Large-Map-Smokes und UI-Refresh-Trennung wurden aufgebaut.</td><td>Grosse Maps und Editor-Assets koennen weiter Kosten verstecken.</td><td>Performance-Smoke nach jedem UI-/Map-Editor-Schub laufen lassen.</td></tr>
               <tr><td>Export</td><td>Godot 4.6.2 Export-Templates sind bekannt; Release-Export lief mit Warnung statt hartem Fehler.</td><td>Export packt noch zu viel Editor-/Testkram, wenn Presets nicht eng gepflegt werden.</td><td>Export-Hygiene separat halten, nicht mit Gameplay-Slices vermischen.</td></tr>
             </tbody>
@@ -283,7 +284,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Arbeitslog</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Entscheidungen, Auffaelligkeiten...">2026-06-29: Neuer Ist-Stand-/Handbuch-Bericht erstellt. TASK_619 macht Host/Client-Rolle im Mission-HUD sichtbar. 2026-06-30: TASK_620 haelt den Badge-Re-Capture als Manifest-/Crop-Evidence fest. TASK_621 buendelt Badge-/Crop-Evidence, Authority-/Sync-Smokes und offene manuelle Checks. TASK_622 belegt Peer-2-Bravo-Accept, Alpha-Reject, State-Mutation-Reject und Client-Snapshot-Apply im Headless-Authority-Review. TASK_623 macht Accept-/Reject-Zaehler als AUTH-Hinweis im Mission-Teamchip sichtbar. TASK_624 erklaert rohe Reject-Codes als kurze Spielertexte und Tooltip-Details. TASK_625 zeigt den wichtigsten Reject-Grund als kurzen BLOCK-Hinweis direkt im Teamchip. TASK_626 macht den erwarteten Real-Click-Review mit Manifestfeldern und manuellen Klick-Gates pruefbar. TASK_627 verschiebt #19 EVENT LOG unter die Fireteam-Mini-Karten, nachdem der echte Host/Client-Crop den alten Overlap gezeigt hat. TASK_628 aktualisiert den alten Drop-Light-HUD-Vertrag: Fire-Rule-Slots 11-14 sind echt, und #17 zeigt Inbound-Fireteam-Member-Cards deaktiviert weiter an. TASK_629 buendelt den naechsten echten Host/Client-Klicklauf als Playtest-Packet mit Vorbedingungen, Klickfolge und offenen Beobachtungen. TASK_630 macht Frontier Probe als kleine Alpha-LZ/AA/Computer/Cargo-Spielroute pruefbar. TASK_631 macht diese Route als LZ/AA/COM/CARGO-Callouts im Primary3D-Mission-Status-Pfad sichtbar. TASK_632 erzeugt daraus ein F6-Review-Paket als PNG/Manifest und markiert Headless sauber als Evidence-Board. TASK_633 staffelt LZ/CARGO-Labels am gemeinsamen spawn_alpha-Marker, damit die Mini-Route im Bild nicht an der Landestelle kollidiert. TASK_634 erzeugt das echte F6-Callout-Sichtreview-Paket als PNG/Manifest und haelt den menschlichen Fensterblick offen. TASK_635 macht die belegten Sicht-Findings lesbarer: High-Contrast-Labels, Route-Linien und ausweichendes Result-Label. TASK_636 erzeugt den Re-Capture nach TASK_635 als PNG/Manifest und belegt Style, Linien, Font, Outline und LZ/CARGO-Staffelung read-only.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Entscheidungen, Auffaelligkeiten...">2026-06-29: Neuer Ist-Stand-/Handbuch-Bericht erstellt. TASK_619 macht Host/Client-Rolle im Mission-HUD sichtbar. 2026-06-30: TASK_620 haelt den Badge-Re-Capture als Manifest-/Crop-Evidence fest. TASK_621 buendelt Badge-/Crop-Evidence, Authority-/Sync-Smokes und offene manuelle Checks. TASK_622 belegt Peer-2-Bravo-Accept, Alpha-Reject und Client-Snapshot-Apply im Headless-Authority-Review. TASK_623 macht Accept-/Reject-Zaehler als AUTH-Hinweis im Mission-Teamchip sichtbar. TASK_624 erklaert rohe Reject-Codes als kurze Spielertexte. TASK_625 zeigt den wichtigsten Reject-Grund direkt im Teamchip. TASK_626 macht Real-Click-Review-Gates pruefbar. TASK_627 verschiebt #19 EVENT LOG unter die Fireteam-Mini-Karten. TASK_628 aktualisiert den alten Drop-Light-HUD-Vertrag. TASK_629 buendelt den naechsten Host/Client-Klicklauf als Playtest-Packet. TASK_630 macht Frontier Probe als kleine Alpha-LZ/AA/Computer/Cargo-Spielroute pruefbar. TASK_631 macht diese Route als LZ/AA/COM/CARGO-Callouts sichtbar. TASK_632 erzeugt daraus ein F6-Review-Paket. TASK_633 staffelt LZ/CARGO-Labels am gemeinsamen spawn_alpha-Marker. TASK_634 erzeugt das echte F6-Callout-Sichtreview-Paket. TASK_635 macht die Sicht-Findings lesbarer: High-Contrast-Labels, Route-Linien und ausweichendes Result-Label. TASK_636 erzeugt den Re-Capture nach TASK_635 als PNG/Manifest. TASK_637 zeigt den naechsten Frontier-Probe-Schritt als read-only NEXT-Zeile in #18 Mission Control.</div>
         </article>
         <article class="card">
           <h2>Review-Status</h2>
@@ -297,7 +298,7 @@
           </label>
           <div style="height: 12px;"></div>
           <label>Naechster Bericht
-            <input data-export-key="notes.next_report_hint" value="Nach TASK_636 den Re-Capture ansehen und nur konkrete Playfeel-/Interaktions-Findings als TASK_637 schneiden.">
+            <input data-export-key="notes.next_report_hint" value="Nach TASK_637 Debrief-/Homebase-Handoff als TASK_638 pruefen.">
           </label>
         </article>
         <article class="card full">
@@ -366,10 +367,10 @@
             checked_playtest_items: Array.from(document.querySelectorAll("[data-export-key^='playtest.'][type='checkbox']")).filter((element) => element.checked).length
           },
           metadata: {
-            branch: "task/frontier-probe-real-f6-recapture",
-            current_task: "TASK_636 - Frontier Probe Real F6 Re-Capture",
-            latest_completed_task: "TASK_636 - Frontier Probe Real F6 Re-Capture",
-            recommended_next: "TASK_637 - Frontier Probe Playfeel Next Interaction"
+            branch: "task/frontier-probe-playfeel-next-interaction",
+            current_task: "TASK_637 - Frontier Probe Playfeel Next Interaction",
+            latest_completed_task: "TASK_637 - Frontier Probe Playfeel Next Interaction",
+            recommended_next: "TASK_638 - Frontier Probe Debrief Handoff Feel"
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
