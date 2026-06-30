@@ -92,6 +92,7 @@ const STRATEGIC_VBOX_PATH: String = "../TacticalUI/BottomDock/BottomMargin/Botto
 const STRATEGIC_STATUS_LABEL_PATH: String = STRATEGIC_VBOX_PATH + "/StrategicStatusLabel"
 const MISSION_TEAM_CHIP_LABEL_PATH: String = STRATEGIC_VBOX_PATH + "/MissionTeamChipLabel"
 const REVIEW_SESSION_BADGE_STYLE_ID: String = "host_client_role_peer_badge_v1"
+const REVIEW_SESSION_FIRETEAM_CARD_STYLE_ID: String = "host_client_fireteam_context_badge_v1"
 const FIRETEAM_MINI_PANEL_Z_INDEX: int = 38
 const FIRETEAM_MINI_CARD_Z_INDEX: int = 42
 const TACTICAL_EVENT_LOG_Z_INDEX: int = 8
@@ -3190,6 +3191,9 @@ func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Diction
 		stage_label.visible = not stage_label.text.is_empty()
 		stage_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		stage_label.set_meta("mission_fireteam_status_secondary", true)
+		stage_label.set_meta("review_session_fireteam_context_text", String(status_snapshot.get("review_session_context_text", "")))
+		stage_label.set_meta("review_session_fireteam_context_visible", bool(status_snapshot.get("review_session_context_visible", false)))
+		stage_label.set_meta("review_session_fireteam_context_style_id", String(status_snapshot.get("review_session_context_style_id", "")))
 	if member_label != null:
 		var primary_text: String = String(status_snapshot.get("primary_text", "")).strip_edges()
 		var lead_summary: String = String(card.get_meta("mission_fireteam_lead_summary", "")).strip_edges()
@@ -3995,6 +3999,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 	var movement_state: Dictionary = get_fireteam_movement_state(normalized_fireteam_id)
 	var movement_text: String = _compact_fireteam_movement_text(movement_state, resolved_profile)
 	var position_context: Dictionary = _build_fireteam_position_status_context(normalized_fireteam_id)
+	var review_session_context: Dictionary = _build_fireteam_review_session_card_context()
 	var execution_text: String = _format_execution_quality_text(resolved_profile)
 	var contact_count: int = maxi(int(resolved_contact.get("count", 0)), 0)
 	var contact_state: String = String(resolved_contact.get("state", "clear")).strip_edges().to_lower()
@@ -4008,11 +4013,16 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		String(health_context.get("text", "HP 0/0")),
 	]
 	var secondary_parts: PackedStringArray = PackedStringArray()
+	if bool(review_session_context.get("visible", false)):
+		secondary_parts.append(String(review_session_context.get("text", "")).strip_edges())
 	secondary_parts.append("SUPP %d%%" % int(suppression_context.get("percent", 0)))
 	secondary_parts.append("MV %s" % movement_text)
 	secondary_parts.append("POS %s" % String(position_context.get("text", "--")))
 	var secondary_text: String = " | ".join(secondary_parts)
 	var tooltip_parts: PackedStringArray = PackedStringArray()
+	var review_session_tooltip: String = String(review_session_context.get("tooltip_text", "")).strip_edges()
+	if not review_session_tooltip.is_empty():
+		tooltip_parts.append(review_session_tooltip)
 	tooltip_parts.append("Execution: %s" % execution_text)
 	tooltip_parts.append("Readiness: %s" % String(readiness_context.get("label", "N/A")))
 	tooltip_parts.append("Suppression: %s (%d%%)" % [String(suppression_context.get("label", "READY")), int(suppression_context.get("percent", 0))])
@@ -4026,6 +4036,10 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		"primary_text": primary_text,
 		"secondary_text": secondary_text,
 		"tooltip_text": "\n".join(tooltip_parts),
+		"review_session_context": review_session_context.duplicate(true),
+		"review_session_context_text": String(review_session_context.get("text", "")),
+		"review_session_context_visible": bool(review_session_context.get("visible", false)),
+		"review_session_context_style_id": String(review_session_context.get("style_id", "")),
 		"execution_text": execution_text,
 		"execution_label": String(resolved_profile.get("execution_label", "STEADY")).strip_edges().to_upper(),
 		"readiness_state": String(readiness_context.get("state", "unavailable")),
@@ -4050,6 +4064,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		"member_count": resolved_units.size(),
 		"loadout_id": loadout_id.to_lower(),
 		"read_only": true,
+		"ui_sets_gameplay_truth": false,
 	}
 
 
@@ -7336,6 +7351,39 @@ func _build_review_session_team_label(team_id: String) -> String:
 
 func _get_review_session_identity_snapshot() -> Dictionary:
 	return build_review_session_identity_snapshot().duplicate(true)
+
+
+func _build_fireteam_review_session_card_context(session_snapshot: Dictionary = {}) -> Dictionary:
+	var resolved_session: Dictionary = session_snapshot.duplicate(true) if not session_snapshot.is_empty() else _get_review_session_identity_snapshot()
+	var peer_label: String = String(resolved_session.get("peer_label", "")).strip_edges()
+	var team_label: String = String(resolved_session.get("team_label", "")).strip_edges()
+	var role_label: String = String(resolved_session.get("role_label", "")).strip_edges()
+	var short_tokens: PackedStringArray = PackedStringArray()
+	if not peer_label.is_empty():
+		short_tokens.append(peer_label)
+	if not team_label.is_empty():
+		short_tokens.append(team_label)
+	var text: String = " ".join(short_tokens).strip_edges()
+	var full_tokens: PackedStringArray = PackedStringArray()
+	if not role_label.is_empty():
+		full_tokens.append(role_label)
+	if not peer_label.is_empty():
+		full_tokens.append(peer_label)
+	if not team_label.is_empty():
+		full_tokens.append(team_label)
+	var full_text: String = " ".join(full_tokens).strip_edges()
+	if text.is_empty():
+		text = full_text
+	return {
+		"visible": not text.is_empty(),
+		"text": text,
+		"full_text": full_text if not full_text.is_empty() else text,
+		"style_id": REVIEW_SESSION_FIRETEAM_CARD_STYLE_ID,
+		"source_style_id": REVIEW_SESSION_BADGE_STYLE_ID,
+		"tooltip_text": "Review Session: %s" % (full_text if not full_text.is_empty() else text) if not text.is_empty() else "",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
 
 
 func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
