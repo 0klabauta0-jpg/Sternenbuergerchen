@@ -52,9 +52,9 @@ func _test_docs_and_reports() -> void:
 	_assert(FileAccess.file_exists(TASK_631_TEST_PATH), "TASK_631 regression verifier remains available")
 	_assert(FileAccess.file_exists(TASK_630_TEST_PATH), "TASK_630 regression verifier remains available")
 	_assert(report_text.contains("TASK_632 Frontier Probe Mini Scenario F6 Visual Review"), "Rolling report tracks TASK_632")
-	_assert(report_text.contains('latest_completed_task: "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"'), "Rolling report marks TASK_632 latest completed")
+	_assert(report_text.contains('latest_completed_task: "TASK_633 - Frontier Probe Callout Layout Polish"'), "Rolling report advances latest completed beyond TASK_632")
 	_assert(handbook_text.contains("TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"), "Status handbook tracks TASK_632")
-	_assert(handbook_text.contains('current_task: "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"'), "Status handbook current task is TASK_632")
+	_assert(handbook_text.contains('current_task: "TASK_633 - Frontier Probe Callout Layout Polish"'), "Status handbook current task advances beyond TASK_632")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_mini_scenario_f6_visual_review.task_id",
 		"frontier_probe_mini_scenario_f6_visual_review.png_path",
@@ -114,6 +114,7 @@ func _test_f6_visual_review_capture() -> void:
 	_assert(_has_callout(visual_snapshot, "CARGO", "cargo", "spawn_alpha"), "F6 review sees CARGO callout")
 	_assert(int(primary_3d.get("route_callout_visual_count", 0)) >= 4, "Primary3D render snapshot counts route callouts")
 	_assert(String(primary_3d.get("route_callout_summary", "")).contains("LZ -> AA -> COM 18s -> CARGO"), "Primary3D route summary is visible to review")
+	_assert(_check_label_overlap_polished(Array(primary_3d.get("route_callout_entries", []))), "Primary3D staggers LZ and CARGO labels at shared LZ")
 	_assert(image.get_width() == 1920 and image.get_height() == 1080, "F6 visual review image has FullHD dimensions")
 	_assert(_count_visible_samples(image) > 0, "F6 visual review image has visible pixels")
 	var save_error: Error = image.save_png(OUTPUT_PNG_PATH)
@@ -127,6 +128,8 @@ func _test_f6_visual_review_capture() -> void:
 	_assert(int(manifest.get("primary_3d_route_callout_count", 0)) >= 4, "Manifest records Primary3D callout count")
 	_assert(String(manifest.get("route_callout_summary", "")).contains("LZ -> AA -> COM 18s -> CARGO"), "Manifest records route summary")
 	_assert(String(manifest.get("evidence_board_readability_gate", "")) == "pass", "Manifest reports evidence board readability gate")
+	_assert(String(manifest.get("callout_layout_polish_task_id", "")) == "TASK_633", "Manifest records TASK_633 layout polish")
+	_assert(String(manifest.get("label_overlap_polish_gate", "")) == "pass", "Manifest reports label overlap polish gate")
 	_assert(bool(manifest.get("read_only", false)), "Manifest is read-only")
 	_assert(not bool(manifest.get("ui_sets_gameplay_truth", true)), "Manifest does not set gameplay truth")
 
@@ -241,15 +244,42 @@ func _build_manifest(visual_snapshot: Dictionary, primary_3d: Dictionary, image:
 		"route_callout_summary": String(visual_snapshot.get("route_callout_summary", "")),
 		"mission_control_route_line": String(visual_snapshot.get("mission_control_route_line", "")),
 		"primary_3d_route_callout_count": int(primary_3d.get("route_callout_visual_count", 0)),
+		"primary_3d_route_callout_entries": Array(primary_3d.get("route_callout_entries", [])),
 		"primary_3d_route_callout_summary": String(primary_3d.get("route_callout_summary", "")),
 		"primary_3d_tone_counts": Dictionary(primary_3d.get("route_callout_tone_counts", {})),
+		"callout_layout_polish_task_id": "TASK_633",
+		"label_overlap_polish_gate": "pass" if _check_label_overlap_polished(Array(primary_3d.get("route_callout_entries", []))) else "fail",
 		"evidence_board_regions": evidence_board_regions,
 		"evidence_board_region_count": evidence_board_regions.size(),
 		"evidence_board_readability_gate": "pass",
 		"manual_review_required": true,
 		"manual_review_done": false,
-		"recommended_next_task": "TASK_633 - Frontier Probe Mini Scenario Callout Layout Findings",
+		"recommended_next_task": "TASK_633 - Frontier Probe Callout Layout Polish",
 	}
+
+
+func _check_label_overlap_polished(route_callout_entries: Array) -> bool:
+	var lz_entry: Dictionary = {}
+	var cargo_entry: Dictionary = {}
+	for entry_variant in route_callout_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var short_label: String = String(entry.get("short_label", "")).strip_edges()
+		if short_label == "LZ":
+			lz_entry = entry
+		elif short_label == "CARGO":
+			cargo_entry = entry
+	if lz_entry.is_empty() or cargo_entry.is_empty():
+		return false
+	var lz_world: Vector2 = Vector2(lz_entry.get("world_position", Vector2.ZERO))
+	var cargo_world: Vector2 = Vector2(cargo_entry.get("world_position", Vector2.ZERO))
+	if lz_world.distance_squared_to(cargo_world) > 1.0:
+		return false
+	var lz_label: Vector2 = Vector2(lz_entry.get("label_world_position", lz_world))
+	var cargo_label: Vector2 = Vector2(cargo_entry.get("label_world_position", cargo_world))
+	return lz_label.distance_squared_to(cargo_label) >= 900.0 \
+		and int(lz_entry.get("overlap_group_count", 0)) >= 2 \
+		and int(cargo_entry.get("overlap_group_count", 0)) >= 2 \
+		and int(lz_entry.get("overlap_index", -1)) != int(cargo_entry.get("overlap_index", -1))
 
 
 func _capture_viewport_image_or_empty() -> Image:

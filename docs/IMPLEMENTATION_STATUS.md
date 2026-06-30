@@ -290,7 +290,17 @@
 - Stand: Das Manifest belegt TASK_631-Gate, vier Route-Callouts, Tone-Counts, Primary3D-Callout-Count, Route-Summary und den Headless-Fallback als markiertes Evidence-Board.
 - Risiken/offen: TASK_632 macht den F6-Sichtentscheid reviewbar, ersetzt aber keinen finalen menschlichen Fensterblick. Der naechste konkrete Griff ist ein Callout-Layout-Finding/Polish oder ein echter Host/Client-Klicklauf, falls dort Reibung brennt.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_632_frontier_probe_mini_scenario_f6_visual_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_631_frontier_probe_mini_scenario_visual_feel_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_630_frontier_probe_mini_scenario_feel_route.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_633 - Frontier Probe Mini Scenario Callout Layout Findings`, wenn das Evidence-Bild konkrete Platzierungs- oder Lesbarkeitsreibung zeigt.
+- Naechster Schritt: `TASK_633 - Frontier Probe Callout Layout Polish`, wenn das Evidence-Bild konkrete Platzierungs- oder Lesbarkeitsreibung zeigt.
+
+### TASK_633 - Frontier Probe Callout Layout Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_633_frontier_probe_callout_layout_polish.md`, `docs/tasks/TASK_632_frontier_probe_mini_scenario_f6_visual_review.md`, `docs/dev/mission_command_feedback_contract.md`, `scripts/terrain/terrain_map_3d_view.gd`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `TerrainMap3DView` staffelt Route-Callout-Labels mit gleicher Weltposition, damit `LZ` und `CARGO` am gemeinsamen `spawn_alpha`-Marker nicht mehr uebereinander liegen.
+- Stand: Der Primary3D-Render-Snapshot meldet `label_world_position`, `label_offset_world`, `overlap_group_key`, `overlap_group_count` und `overlap_index` pro Route-Callout.
+- Stand: `scripts/tests/task_633_frontier_probe_callout_layout_polish.gd` schreibt `tmp/frontier_probe_callout_layout_polish.json` und prueft, dass LZ/CARGO dieselbe Markerposition behalten, aber getrennte Labelpositionen haben.
+- Risiken/offen: Der Fix loest den belegten LZ/CARGO-Overlap, ersetzt aber keinen echten menschlichen Fensterblick auf Kamera, Zoom und Occlusion.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_633_frontier_probe_callout_layout_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_632_frontier_probe_mini_scenario_f6_visual_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_631_frontier_probe_mini_scenario_visual_feel_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_630_frontier_probe_mini_scenario_feel_route.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_634 - Frontier Probe Real F6 Callout Sight Review`, wenn der echte Fensterblick weitere Platzierungs- oder Occlusion-Probleme zeigt.
 
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand

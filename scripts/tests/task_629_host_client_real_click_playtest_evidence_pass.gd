@@ -45,9 +45,9 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_629 - Host Client Real Click Playtest Evidence Pass (implementiert)"), "Roadmap marks TASK_629 implemented")
 	_assert(contract_text.contains("Host-Client-Real-Click-Playtest-Evidence-Pass"), "Mission feedback contract documents TASK_629")
 	_assert(report_text.contains("TASK_629 Host Client Real Click Playtest Evidence Pass"), "Rolling report tracks TASK_629")
-	_assert(report_text.contains('latest_completed_task: "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"'), "Rolling report advances latest completed beyond TASK_629")
+	_assert(report_text.contains('latest_completed_task: "TASK_633 - Frontier Probe Callout Layout Polish"'), "Rolling report advances latest completed beyond TASK_629")
 	_assert(handbook_text.contains("TASK_629 - Host Client Real Click Playtest Evidence Pass"), "Status handbook tracks TASK_629")
-	_assert(handbook_text.contains('current_task: "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"'), "Status handbook current task advances beyond TASK_629")
+	_assert(handbook_text.contains('current_task: "TASK_633 - Frontier Probe Callout Layout Polish"'), "Status handbook current task advances beyond TASK_629")
 	_test_report_export_fields(report_text, handbook_text)
 
 
