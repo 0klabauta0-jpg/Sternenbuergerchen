@@ -2452,12 +2452,16 @@ func _update_ui() -> void:
 		if not _last_planning_state_issue.is_empty():
 			command_feedback_label.text = "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen."
 		else:
+			var door_authority_line: String = _build_visible_door_authority_command_line()
+			var last_line: String = "%s\nDEC %s" % [_last_command_text, _build_selected_decision_status_text()]
+			if not door_authority_line.is_empty():
+				last_line = "%s\n%s" % [door_authority_line, last_line]
 			command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s\n%s\nLAST %s" % [
 				_get_fireteam_name(),
 				_get_phase_name(),
 				_build_target_text(),
 				_build_selected_waypoint_info_text(),
-				"%s\nDEC %s" % [_last_command_text, _build_selected_decision_status_text()],
+				last_line,
 			]
 
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
@@ -9261,6 +9265,11 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 			"door_interaction_button_enabled": false,
 			"door_interaction_id": "",
 			"door_interaction_shortcut": "",
+			"door_authority_ui_status": "",
+			"door_authority_ui_summary_line": "",
+			"door_authority_ui_detail_line": "",
+			"door_authority_ui_requires_go": false,
+			"door_authority_ui_read_only": false,
 			"pressed_signal_connection_count": 0,
 		}
 	var global_rect: Rect2 = button.get_global_rect() if button.is_inside_tree() else Rect2()
@@ -9289,6 +9298,11 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 		"door_interaction_button_enabled": bool(button.get_meta("door_interaction_button_enabled", false)),
 		"door_interaction_id": str(button.get_meta("door_interaction_id", "")),
 		"door_interaction_shortcut": str(button.get_meta("door_interaction_shortcut", "")),
+		"door_authority_ui_status": str(button.get_meta("door_authority_ui_status", "")),
+		"door_authority_ui_summary_line": str(button.get_meta("door_authority_ui_summary_line", "")),
+		"door_authority_ui_detail_line": str(button.get_meta("door_authority_ui_detail_line", "")),
+		"door_authority_ui_requires_go": bool(button.get_meta("door_authority_ui_requires_go", false)),
+		"door_authority_ui_read_only": bool(button.get_meta("door_authority_ui_read_only", false)),
 		"global_rect": global_rect,
 		"pressed_signal_connection_count": button.pressed.get_connections().size(),
 	}
@@ -10649,12 +10663,40 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 	button.visible = true
 	button.disabled = not enabled
 	button.text = "Breach"
-	button.tooltip_text = "Breach %s [B] -> GO" % display_token if enabled else _build_door_interaction_button_disabled_tooltip(has_usable_door)
+	var authority_ui_feedback: Dictionary = build_mission_interaction_door_authority_ui_feedback({}, _build_door_authority_button_context(feedback, door_feedback))
+	button.tooltip_text = String(authority_ui_feedback.get("tooltip_text", "")).strip_edges()
+	if button.tooltip_text.is_empty():
+		button.tooltip_text = "Breach %s [B] -> GO" % display_token if enabled else _build_door_interaction_button_disabled_tooltip(has_usable_door)
 	button.set_meta("door_interaction_button_enabled", enabled)
 	button.set_meta("door_interaction_id", String(door_feedback.get("interaction_id", "")).strip_edges())
 	button.set_meta("door_interaction_display_token", display_token)
+	button.set_meta("door_authority_ui_status", String(authority_ui_feedback.get("status", "")).strip_edges())
+	button.set_meta("door_authority_ui_summary_line", String(authority_ui_feedback.get("summary_line", "")).strip_edges())
+	button.set_meta("door_authority_ui_detail_line", String(authority_ui_feedback.get("detail_line", "")).strip_edges())
+	button.set_meta("door_authority_ui_requires_go", bool(authority_ui_feedback.get("requires_go", false)))
+	button.set_meta("door_authority_ui_read_only", bool(authority_ui_feedback.get("read_only", false)))
 	button.set_meta("command_hierarchy_disabled_reason", "" if enabled else _resolve_door_interaction_button_disabled_reason(has_usable_door))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, enabled)
+
+
+func _build_door_authority_button_context(feedback_snapshot: Dictionary = {}, door_feedback: Dictionary = {}) -> Dictionary:
+	var feedback: Dictionary = feedback_snapshot
+	if feedback.is_empty():
+		feedback = get_mission_interaction_use_feedback_snapshot()
+	var resolved_door_feedback: Dictionary = door_feedback
+	if resolved_door_feedback.is_empty():
+		resolved_door_feedback = _resolve_usable_door_interaction_feedback(feedback)
+	var has_usable_door: bool = not resolved_door_feedback.is_empty()
+	var enabled: bool = not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty() and has_usable_door
+	var display_token: String = String(resolved_door_feedback.get("display_token", "DOOR")).strip_edges().to_upper()
+	if display_token.is_empty():
+		display_token = "DOOR"
+	return {
+		"button_enabled": enabled,
+		"has_usable_door": has_usable_door,
+		"display_token": display_token,
+		"shortcut": "B",
+	}
 
 
 func _build_door_interaction_button_disabled_tooltip(has_usable_door: bool) -> String:
@@ -17097,6 +17139,25 @@ func get_mission_interaction_door_multiplayer_authority_snapshot(authority_resul
 	)).duplicate(true)
 
 
+func build_mission_interaction_door_authority_ui_feedback(authority_results: Dictionary = {}, button_context: Dictionary = {}) -> Dictionary:
+	var context: Dictionary = button_context.duplicate(true)
+	if context.is_empty():
+		context = _build_door_authority_button_context(get_mission_interaction_use_feedback_snapshot(), {})
+	return Dictionary(MISSION_INTERACTION_DOOR_MULTIPLAYER_AUTHORITY_SCRIPT.call(
+		"build_ui_feedback",
+		get_mission_interaction_door_multiplayer_authority_snapshot(authority_results),
+		context
+	)).duplicate(true)
+
+
+func _build_visible_door_authority_command_line() -> String:
+	var feedback: Dictionary = build_mission_interaction_door_authority_ui_feedback()
+	var status: String = String(feedback.get("status", "")).strip_edges().to_lower()
+	if status == "pending" and not bool(feedback.get("has_usable_door", false)):
+		return ""
+	return String(feedback.get("summary_line", "")).strip_edges()
+
+
 func create_selected_mission_interaction_door_use_breach_command_hook(interaction_id: String = "") -> Dictionary:
 	var feedback_snapshot: Dictionary = get_mission_interaction_use_feedback_snapshot()
 	var interaction_feedback: Dictionary = _resolve_mission_interaction_feedback_for_intent(feedback_snapshot, interaction_id)
@@ -18161,6 +18222,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var mission_interaction_use_intent: Dictionary = get_mission_interaction_use_intent_snapshot()
 	var mission_interaction_door_use_breach_hook: Dictionary = get_mission_interaction_door_use_breach_command_hook_snapshot()
 	var mission_interaction_door_multiplayer_authority: Dictionary = get_mission_interaction_door_multiplayer_authority_snapshot()
+	var mission_interaction_door_authority_ui_feedback: Dictionary = build_mission_interaction_door_authority_ui_feedback()
 	var mission_interaction_objective_gate: Dictionary = get_mission_interaction_objective_gate_snapshot()
 	var mission_interaction_visual_state: Dictionary = Dictionary(MISSION_INTERACTION_VISUAL_STATE_SCRIPT.call(
 		"build_snapshot",
@@ -18247,6 +18309,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_door_multiplayer_authority": mission_interaction_door_multiplayer_authority,
 		"mission_interaction_door_multiplayer_authority_gate": String(mission_interaction_door_multiplayer_authority.get("gate", "")),
 		"mission_interaction_door_multiplayer_authority_summary": String(mission_interaction_door_multiplayer_authority.get("summary", "")),
+		"mission_interaction_door_authority_ui_feedback": mission_interaction_door_authority_ui_feedback,
+		"mission_interaction_door_authority_ui_status": String(mission_interaction_door_authority_ui_feedback.get("status", "")),
+		"mission_interaction_door_authority_ui_line": String(mission_interaction_door_authority_ui_feedback.get("summary_line", "")),
+		"mission_interaction_door_authority_ui_tooltip": String(mission_interaction_door_authority_ui_feedback.get("tooltip_text", "")),
 		"mission_interaction_objective_gate": mission_interaction_objective_gate,
 		"mission_interaction_objective_next_line": String(mission_interaction_objective_gate.get("next_line", "")),
 		"mission_interaction_objective_next_step_id": String(mission_interaction_objective_gate.get("next_step_id", "")),

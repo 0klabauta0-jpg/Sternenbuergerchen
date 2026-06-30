@@ -326,6 +326,7 @@ git checkout -b batch/<batch-name>
 - TASK_695 - Door Interaction HUD Button/Shortcut (implementiert)
 - TASK_696 - Door Runtime Visual Animation/Asset Swap (implementiert)
 - TASK_697 - Door Interaction Multiplayer Authority Check (implementiert)
+- TASK_698 - Door Authority UI Feedback (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
