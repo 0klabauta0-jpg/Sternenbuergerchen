@@ -58,6 +58,7 @@ const MISSION_INTERACTION_USE_FEEDBACK_SCRIPT: GDScript = preload("res://scripts
 const MISSION_INTERACTION_OBJECTIVE_GATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_objective_gate.gd")
 const MISSION_INTERACTION_VISUAL_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_visual_state.gd")
 const MISSION_INTERACTION_OBJECT_REACTION_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_object_reaction.gd")
+const MISSION_INTERACTION_DOOR_RUNTIME_COLLISION_LOS_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_runtime_collision_los.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
@@ -273,6 +274,8 @@ var _npc_thought_peek_active_last_frame: bool = false
 var _npc_thought_bubble_refresh_msec: int = 0
 var _last_command_text: String = "AWAITING INPUT"
 var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
+var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
+var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
 var _last_target_position: Vector2 = Vector2.ZERO
 var _lz_position: Vector2 = Vector2.ZERO
 var _has_lz_position: bool = false
@@ -9852,6 +9855,13 @@ func _sync_primary_3d_mission_status_visuals() -> void:
 		payload["mission_interaction_object_reaction_summary"] = String(interaction_object_reaction.get("summary", ""))
 		payload["mission_interaction_object_reaction_kind_counts"] = Dictionary(interaction_object_reaction.get("kind_counts", {})).duplicate(true)
 		payload["mission_interaction_object_reaction_state_counts"] = Dictionary(interaction_object_reaction.get("state_counts", {})).duplicate(true)
+	var door_runtime_collision_los: Dictionary = apply_mission_interaction_door_runtime_collision_los_snapshot()
+	if not door_runtime_collision_los.is_empty():
+		payload["mission_interaction_door_runtime_collision_los_schema"] = String(door_runtime_collision_los.get("schema", ""))
+		payload["mission_interaction_door_runtime_collision_los_override_count"] = int(door_runtime_collision_los.get("override_count", 0))
+		payload["mission_interaction_door_runtime_collision_los_applied"] = bool(door_runtime_collision_los.get("producer_applied", false))
+		payload["mission_interaction_door_runtime_collision_los_apply_reason"] = String(door_runtime_collision_los.get("producer_apply_reason", ""))
+		payload["mission_interaction_door_runtime_collision_los_summary"] = String(door_runtime_collision_los.get("summary", ""))
 	_primary_view_bridge.call("sync_mission_status_payload", get_parent(), payload)
 
 
@@ -16794,6 +16804,70 @@ func get_mission_interaction_object_reaction_snapshot() -> Dictionary:
 		"build_snapshot",
 		visual_state_snapshot
 	)).duplicate(true)
+
+
+func get_mission_interaction_door_runtime_collision_los_snapshot() -> Dictionary:
+	var object_reaction_snapshot: Dictionary = get_mission_interaction_object_reaction_snapshot()
+	var terrain_registry = _get_terrain_registry()
+	return Dictionary(MISSION_INTERACTION_DOOR_RUNTIME_COLLISION_LOS_SCRIPT.call(
+		"build_snapshot",
+		object_reaction_snapshot,
+		terrain_registry
+	)).duplicate(true)
+
+
+func apply_mission_interaction_door_runtime_collision_los_snapshot() -> Dictionary:
+	var snapshot: Dictionary = get_mission_interaction_door_runtime_collision_los_snapshot()
+	var terrain_registry = _get_terrain_registry()
+	var result: Dictionary = snapshot.duplicate(true)
+	result["producer_schema"] = "sternenbuergerchen.mission_interaction_door_runtime_state_producer.v1"
+	result["producer_source"] = "MissionTacticalSandboxController"
+	result["producer_applied"] = false
+	result["producer_apply_reason"] = "terrain_registry_unavailable"
+	result["producer_reads_runtime_truth"] = true
+	result["ui_sets_gameplay_truth"] = false
+	if terrain_registry == null or not terrain_registry.has_method("set_runtime_tile_overrides"):
+		_last_mission_interaction_door_runtime_snapshot = result.duplicate(true)
+		return result
+	var overrides: Array = Array(snapshot.get("overrides", []))
+	var fingerprint: String = _build_mission_interaction_door_runtime_override_fingerprint(overrides)
+	if fingerprint == _last_mission_interaction_door_runtime_override_fingerprint:
+		result["producer_apply_reason"] = "unchanged"
+		result["terrain_registry_revision"] = int(terrain_registry.call("get_revision")) if terrain_registry.has_method("get_revision") else -1
+		_last_mission_interaction_door_runtime_snapshot = result.duplicate(true)
+		return result
+	terrain_registry.call("set_runtime_tile_overrides", overrides)
+	_last_mission_interaction_door_runtime_override_fingerprint = fingerprint
+	result["producer_applied"] = true
+	result["producer_apply_reason"] = "override_changed"
+	result["terrain_registry_revision"] = int(terrain_registry.call("get_revision")) if terrain_registry.has_method("get_revision") else -1
+	_last_mission_interaction_door_runtime_snapshot = result.duplicate(true)
+	return result
+
+
+func get_last_mission_interaction_door_runtime_collision_los_snapshot() -> Dictionary:
+	return _last_mission_interaction_door_runtime_snapshot.duplicate(true)
+
+
+func _build_mission_interaction_door_runtime_override_fingerprint(overrides: Array) -> String:
+	var parts: PackedStringArray = PackedStringArray()
+	for override_variant in overrides:
+		if typeof(override_variant) != TYPE_DICTIONARY:
+			continue
+		var override: Dictionary = Dictionary(override_variant)
+		var grid: Vector2i = Vector2i(override.get("grid_position", Vector2i.ZERO))
+		parts.append("%d,%d:%s:%s:%d:%d:%s:%s" % [
+			grid.x,
+			grid.y,
+			str(bool(override.get("walkable_override", false))),
+			str(bool(override.get("blocks_los_override", false))),
+			int(override.get("object_height_override", 0)),
+			int(override.get("cover_value_override", 0)),
+			String(override.get("source_interaction_id", "")).strip_edges(),
+			String(override.get("source_runtime_visual_state", "")).strip_edges(),
+		])
+	parts.sort()
+	return "|".join(parts)
 
 
 func _build_mission_interaction_progress_readability_snapshot(use_feedback: Dictionary = {}) -> Dictionary:

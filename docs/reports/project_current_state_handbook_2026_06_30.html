@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_692: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_693: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_692</span>
-      <span class="pill">Naechster Kandidat: Door Runtime State Producer oder Manual-Sight-Review</span>
+      <span class="pill">Letzter Stand: TASK_693</span>
+      <span class="pill">Naechster Kandidat: Door Use/Breach Command Hook oder Manual-Sight-Review</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_692 - Door Runtime Collision/LOS Contract ist der aktuelle Abschlussstand: Door-Reaktionen koennen jetzt effektive Runtime-Overrides fuer Walkability und LOS liefern. Die gespeicherte Karte bleibt unveraendert, der echte Door-Use-/Breach-Producer ist noch Folgearbeit.</div>
+          <div class="callout">TASK_693 - Door Runtime State Producer ist der aktuelle Abschlussstand: der bestehende Mission-Interaction-Runtime-State kann Door-Overrides jetzt auf die TerrainRegistry anwenden. Der echte Use-/Breach-Button und Animation bleiben der naechste Spielbarkeits-Slice.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -150,6 +150,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_690_done"> TASK_690 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_691_done"> TASK_691 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_692_done"> TASK_692 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_693_done"> TASK_693 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -772,6 +773,20 @@
           <textarea data-export-key="mission_interaction_door_runtime_collision_los.findings" placeholder="Notiz: Welche Door-Use-/Breach-Regel soll spaeter den Runtime-State wirklich setzen?"></textarea>
           <div contenteditable="true" data-note-key="notes.mission_interaction_door_runtime_collision_los" data-placeholder="TASK_692-Notizen...">TASK_692 ist der technische Contract. Naechster Slice: den echten Mission-Use-/Breach-Command so anbinden, dass er diese Door-Overrides aus Runtime-State erzeugt.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_693 - Door Runtime State Producer</h2>
+          <p>Der Mission-Controller kann den vorhandenen Door-Runtime-State jetzt auf die `TerrainRegistry` anwenden. Halbe Door bleibt blockierend, complete/open Door wird effektiv walkable und LOS-clear. Ein Fingerprint verhindert doppelte Applys ohne State-Aenderung.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_runtime_state_producer.snapshot"> Controller-Snapshot fuer Door Runtime State vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_runtime_state_producer.apply"> Apply-Pfad auf TerrainRegistry vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_runtime_state_producer.fingerprint"> Fingerprint vermeidet unveraenderte Re-Applys</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_runtime_state_producer.payload_diagnostics"> Mission-Status-Payload exportiert Diagnosefelder</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_runtime_state_producer.no_terrain_mutation"> Statische Tile-Daten bleiben unveraendert</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_runtime_state_producer.no_ui_truth"> Snapshot meldet `ui_sets_gameplay_truth = false`</label>
+          <input readonly value="tmp/door_runtime_state_producer.json" data-export-key="mission_interaction_door_runtime_state_producer.manifest_path">
+          <input readonly value="TASK_693 - Door Runtime State Producer" data-export-key="mission_interaction_door_runtime_state_producer.completed_task">
+          <textarea data-export-key="mission_interaction_door_runtime_state_producer.findings" placeholder="Notiz: Wie soll die Bedienung im HUD aussehen: USE DOOR, BREACH, Auto-Open im Radius?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_door_runtime_state_producer" data-placeholder="TASK_693-Notizen...">TASK_693 produziert die Runtime-Overrides. Naechster Slice: eine klare Door-Use-/Breach-Bedienung, die diesen Runtime-State spielbar ausloest.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -791,8 +806,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Door Runtime State Producer</strong> ist jetzt der beste technische Anschluss: Der Contract ist da, aber ein echter Use-/Breach-Command muss noch den Door-State in der Mission setzen.</p>
-          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence. TASK_689 bewertet technische Polish-Findings. TASK_690 macht den offenen Sichtlauf als Workbench bearbeitbar. TASK_691 gibt Door/Computer einen Runtime-Visualstate. TASK_692 macht Door-Walkability und LOS als effektive Runtime-Wahrheit lesbar.</div>
+          <p><strong>Door Use/Breach Command Hook</strong> ist jetzt der beste technische Anschluss: Der Producer ist da, aber der Spieler braucht noch eine klare Bedienung, die Door-State im Missionsflow ausloest.</p>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence. TASK_689 bewertet technische Polish-Findings. TASK_690 macht den offenen Sichtlauf als Workbench bearbeitbar. TASK_691 gibt Door/Computer einen Runtime-Visualstate. TASK_692 macht Door-Walkability und LOS als effektive Runtime-Wahrheit lesbar. TASK_693 wendet diesen State per Controller auf die TerrainRegistry an.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -803,7 +818,7 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Door Runtime State Producer</td><td>Echten Use-/Breach-Command an Runtime-Door-State anbinden, der die vorhandenen Overrides speist.</td></tr>
+              <tr><td>1</td><td>Door Use/Breach Command Hook</td><td>Spielerischen Bedienpfad schaffen, der den vorhandenen Door-Runtime-State wirklich ausloest.</td></tr>
               <tr><td>2</td><td>Mission-Interaction Manual Sight Review</td><td>Workbench im echten Fensterlauf ausfuellen und exportieren: Labels, Proxies, HUD-Overlap und naechste Polish-Aktion.</td></tr>
               <tr><td>3</td><td>Echter Host/Client-Zwei-Fenster-Klicklauf</td><td>TASK_666-Notizen mit menschlichem Bedienbefund fuellen.</td></tr>
               <tr><td>4</td><td>Gezielter Visual-Polish</td><td>Nur die im Sichttest gefundenen Label-/Proxy-/Overlap-Punkte korrigieren.</td></tr>
@@ -817,7 +832,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_692. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Mission: Objective-Gate-Snapshot, Visualstate, Object-Reaction, FullHD-Evidence, Polish-Findings, Manual-Sight-Workbench, Runtime-Visual-Assets und Door Runtime Collision/LOS fuehren AA, COM, CARGO und Door weiter zusammen. Autonom naechster guter Griff: Door Runtime State Producer oder echter Manual-Sight-Review.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_693. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Mission: Objective-Gate-Snapshot, Visualstate, Object-Reaction, FullHD-Evidence, Polish-Findings, Manual-Sight-Workbench, Runtime-Visual-Assets, Door Runtime Collision/LOS und Door Runtime State Producer fuehren AA, COM, CARGO und Door weiter zusammen. Autonom naechster guter Griff: Door Use/Breach Command Hook oder echter Manual-Sight-Review.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -874,15 +889,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_692 - Door Runtime Collision/LOS Contract",
-            recommended_next_task: "TASK_693 - Door Runtime State Producer",
+            latest_completed_task: "TASK_693 - Door Runtime State Producer",
+            recommended_next_task: "TASK_694 - Door Use/Breach Command Hook",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_692 - Door Runtime Collision/LOS Contract",
+            updated_for_task: "TASK_693 - Door Runtime State Producer",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };

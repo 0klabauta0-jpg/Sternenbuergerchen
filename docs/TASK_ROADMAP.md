@@ -321,6 +321,7 @@ git checkout -b batch/<batch-name>
 - TASK_690 - Mission Interaction Manual Sight Notes (implementiert)
 - TASK_691 - Mission Interaction Runtime Visual Assets (implementiert)
 - TASK_692 - Door Runtime Collision/LOS Contract (implementiert)
+- TASK_693 - Door Runtime State Producer (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
