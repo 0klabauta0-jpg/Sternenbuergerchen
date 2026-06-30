@@ -93,6 +93,13 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Der Editor speichert weiterhin nur Tile-Typ, Rotation und Scale; er erzeugt keine zweite Runtime-Tuer-Wahrheit.
 - Spaetere Runtime-Animation darf aus Closed/Half/Open-Assetfamilien ableiten, muss aber einen eigenen Door-/Computer-Interaction-Contract bekommen.
 
+## Mission Interaction Points
+- Door-, Computer- und Hold-/Capture-Punkte werden als Marker-Authoring vorbereitet, nicht als Editor-Gameplay.
+- `interaction_door`, `interaction_computer` und `interaction_hold_zone` sind platzierbare Editor-Marker fuer spaetere Scenario-Bindings.
+- Der zugehoerige Runtime-Contract lebt in `docs/dev/mission_interaction_point_contract.md`.
+- Markerposition, Tile-Asset und Scenario-Gate duerfen verbunden werden; Door-State, Computer-Fortschritt und Capture-Erfolg bleiben Runtime-/`SimulationRoot`-Wahrheit.
+- Der Editor darf diese Punkte sichtbar labeln und validieren, aber keine Mission als abgeschlossen, geoeffnet oder gehalten markieren.
+
 ## Scale
 - Neue Objekt-/Struktur-Assets koennen mit einem Platzierungs-Scale gepinselt werden.
 - Der gespeicherte Tile-Wert ist `object_scale`.
@@ -105,5 +112,5 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 ## Naechste Editor-Slices
 - Weitere Politur der sichtbaren Drag-Preview fuer Pipe-, Wand- und Cliff-Linien: Handles, Segmentnummern und finale FullHD-Art-Direction.
 - Auto-Rotation/Snapping fuer Ketten von Waenden, Tueren und Cliffs.
-- Door-/Computer-Interaction-Contract fuer Runtime-Naehe und Bedienzeit.
+- Scenario-Binding und Runtime-Snapshot fuer Door-/Computer-/Hold-Interactions.
 - Geteilte Asset-Override-Profile pro Team oder Projekt.

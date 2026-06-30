@@ -301,6 +301,7 @@ git checkout -b batch/<batch-name>
 - TASK_670 - Builder Drag Preview Handles (implementiert)
 - TASK_671 - Builder Chain Auto Snapping (implementiert)
 - TASK_672 - FullHD Drag Preview Art Direction (implementiert)
+- TASK_673 - Mission Interaction Point Contract (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

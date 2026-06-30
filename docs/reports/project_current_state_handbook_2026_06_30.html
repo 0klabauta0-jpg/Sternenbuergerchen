@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_672: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_673: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_672</span>
-      <span class="pill">Naechster Kandidat: TASK_666 oder Door/Computer-Contract</span>
+      <span class="pill">Letzter Stand: TASK_673</span>
+      <span class="pill">Naechster Kandidat: Interaction Binding oder TASK_666</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_672 - FullHD Drag Preview Art Direction ist der aktuelle Abschlussstand: Der Map-Editor zeigt Handle-, Segment- und Auto-Snap-Piece-Daten jetzt als echte `Label3D`-Overlays im Primary3DView. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
+          <div class="callout">TASK_673 - Mission Interaction Point Contract ist der aktuelle Abschlussstand: Door-, Computer- und Hold-Zonen sind jetzt als Editor-Marker und Runtime-Contract vorbereitet, ohne Editor- oder HUD-Gameplay-Wahrheit zu erzeugen. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -129,6 +129,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_670_done"> TASK_670 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_671_done"> TASK_671 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_672_done"> TASK_672 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_673_done"> TASK_673 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -157,7 +158,7 @@
               <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Klick-Recheck nach TASK_663 ist weiter offen.</td><td>TASK_666: echten Fensterbefund festhalten.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
               <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Das neue Fireteamkarten-Badge muss noch im echten Klicklauf beweisen, dass Peer 2 schneller zum Bravo-Kontext findet.</td><td>TASK_666: echte Klick-Findings auswerten.</td></tr>
-              <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow, Builder-Spikes, persistente Palette-Hilfen, Scale-/Rotation-Overrides, Drag-Preview-Handles, Auto-Snapping und FullHD-Preview-Labels sind vorhanden.</td><td>Der Mapbau braucht noch Door-/Computer-Interaktion, echte Sicht-Feinjustierung und spaeter geteilte Projektprofile.</td><td>Kleiner Contract-Slice fuer Door-/Computer-Interaktion oder echter FullHD-Sichtlauf.</td></tr>
+              <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow, Builder-Spikes, persistente Palette-Hilfen, Scale-/Rotation-Overrides, Drag-Preview-Handles, Auto-Snapping, FullHD-Preview-Labels und Interaction-Point-Marker sind vorhanden.</td><td>Der Mapbau braucht noch Scenario-Binding, Runtime-Snapshot, echte Sicht-Feinjustierung und spaeter geteilte Projektprofile.</td><td>Interaction-Point-Binding fuer Door/Computer/Hold oder echter FullHD-Sichtlauf.</td></tr>
               <tr><td>Performance/Export</td><td>Large-Map-, Hotpath- und Export-Hygiene wurden mehrfach geprueft.</td><td>Neue UI-Listen, Reports und Map-Assets koennen wieder verdeckte Kosten erzeugen.</td><td>Nach jedem groesseren UI-/Map-Schub Smoke + Export-Check laufen lassen.</td></tr>
             </tbody>
           </table>
@@ -223,7 +224,7 @@
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
               <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>TASK_665 prueft die technische Kette; TASK_666 braucht den echten Klickbefund.</td></tr>
-              <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_672 macht Preview-Labels sichtbar; als naechstes fehlen Door-Interaktion, echter FullHD-Sichtfeinschliff und geteilte Profile.</td></tr>
+              <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_673 vorbereitet Door/Computer/Hold als Authoring-Contract; als naechstes fehlen Scenario-Binding, echter FullHD-Sichtfeinschliff und geteilte Profile.</td></tr>
             </tbody>
           </table>
         </article>
@@ -478,6 +479,17 @@
           <textarea data-export-key="map_editor_drag_preview_art_direction.findings" placeholder="Beim echten FullHD-Sichtlauf notieren: Sind Labels zu laut, verdecken sie Assets, sind Farben/Groessen gut?"></textarea>
           <div contenteditable="true" data-note-key="notes.map_editor_drag_preview_art_direction" data-placeholder="TASK_672-Notizen...">TASK_672 macht die Preview-Daten endlich sichtbar im Builder. Offen bleibt echte Sicht-Feinjustierung im Fenster und danach Door-/Computer-Interaktion als spielerischer Content-Slice.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_673 - Mission Interaction Point Contract</h2>
+          <p>Door-, Computer- und Hold-/Capture-Punkte sind jetzt als Editor-Marker und Contract vorbereitet. Die Marker duerfen Karten lesbar machen und spaeter Scenario-Bindings tragen, setzen aber selbst keinen Door-State, Computer-Fortschritt oder Objective-Erfolg.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_point_contract.door_marker"> `interaction_door` im Marker-Katalog</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_point_contract.computer_marker"> `interaction_computer` im Marker-Katalog</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_point_contract.hold_zone_marker"> `interaction_hold_zone` im Marker-Katalog</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_point_contract.runtime_truth_guard"> Runtime-Wahrheit bleibt bei SimulationRoot/Scenario-Gates</label>
+          <input readonly value="TASK_673 - Mission Interaction Point Contract" data-export-key="mission_interaction_point_contract.completed_task">
+          <textarea data-export-key="mission_interaction_point_contract.findings" placeholder="Beim naechsten Editor-/Mission-Slice notieren: Welche Interactions braucht die 64x64-Map zuerst? Door, Computer, Hold-Zone?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_point_contract" data-placeholder="TASK_673-Notizen...">TASK_673 macht aus Door-/Computer-Interaktion einen sauberen Authoring- und Runtime-Contract. Der naechste technische Schritt ist Binding: Marker im Editor mit Scenario-Gates und einem read-only Runtime-Snapshot verbinden.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -497,8 +509,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>TASK_666 - Host Client Decision Drill Real Click Findings</strong> bleibt der ehrlichste Multiplayer-Anschluss, sobald ein echter Fensterlauf beobachtet werden soll. Wenn wir weiter ohne Sichttest Fortschritt machen, ist der beste Editor-/Content-Anschluss jetzt der Door-/Computer-Interaction-Contract.</p>
-          <div class="callout">TASK_672 hat FullHD-Preview-Labels erledigt. Offen sind geteilte Profile, echte Sicht-Feinjustierung und Runtime-Regeln fuer Tueren/Computer.</div>
+          <p><strong>Interaction-Point-Binding fuer Door/Computer/Hold</strong> ist jetzt der beste Editor-/Content-Anschluss, wenn wir ohne Sichttest weiterbauen. <strong>TASK_666 - Host Client Decision Drill Real Click Findings</strong> bleibt der ehrlichste Multiplayer-Anschluss, sobald ein echter Fensterlauf beobachtet werden soll.</p>
+          <div class="callout">TASK_673 hat den Contract und die Marker erledigt. Offen sind Scenario-Binding, Runtime-Snapshot, geteilte Profile und echte Sicht-Feinjustierung.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -509,8 +521,8 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>TASK_666 - Host Client Decision Drill Real Click Findings</td><td>Pruefen, ob `P2 BRAVO` den kompletten Host/Client-Decision-Drill im Fenster verbessert.</td></tr>
-              <tr><td>2</td><td>Door-/Computer-Interaction-Contract</td><td>Stationstueren und Computer mit Naehe, Bedienzeit und Runtime-State sauber anbinden.</td></tr>
+              <tr><td>1</td><td>Interaction-Point-Binding fuer Door/Computer/Hold</td><td>Editor-Marker mit Scenario-Gates und einem Runtime-Snapshot fuer nahe, bedienbar, in-progress und complete verbinden.</td></tr>
+              <tr><td>2</td><td>TASK_666 - Host Client Decision Drill Real Click Findings</td><td>Pruefen, ob `P2 BRAVO` den kompletten Host/Client-Decision-Drill im Fenster verbessert.</td></tr>
               <tr><td>3</td><td>FullHD Sichtfeinschliff</td><td>Preview-Labels im echten Fenster auf Lesbarkeit, Ueberdeckung und Lautstaerke pruefen.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
             </tbody>
@@ -523,7 +535,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_672. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset, liefert Builder-Drag-Handles, Auto-Snap-Piece-Aufloesung und zeigt diese Preview-Daten jetzt als `Label3D`-Overlays. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; ohne Sichttest ist der naechste Content-Hebel Door-/Computer-Interaction.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_673. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset, liefert Builder-Drag-Handles, Auto-Snap-Piece-Aufloesung, zeigt diese Preview-Daten als `Label3D`-Overlays und hat jetzt Door-/Computer-/Hold-Marker plus Runtime-Contract. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; ohne Sichttest ist der naechste Content-Hebel Interaction-Point-Binding.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -580,15 +592,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_672 - FullHD Drag Preview Art Direction",
-            recommended_next_task: "TASK_666 - Host Client Decision Drill Real Click Findings oder Door-/Computer-Interaction-Contract",
+            latest_completed_task: "TASK_673 - Mission Interaction Point Contract",
+            recommended_next_task: "Interaction-Point-Binding fuer Door/Computer/Hold oder TASK_666 - Host Client Decision Drill Real Click Findings",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_672 - FullHD Drag Preview Art Direction",
+            updated_for_task: "TASK_673 - Mission Interaction Point Contract",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };
