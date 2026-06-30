@@ -246,6 +246,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Walkability, LOS, Cover und Object-Height bleiben beim Door Runtime Collision/LOS Producer und der effektiven `TerrainRegistry`.
 - `read_only = true`, `ui_sets_gameplay_truth = false` und `door_visual_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Door/Computer/Cargo Smoke
+- Der integrierte Stations-Smoke darf eine temporare Scenario-Variante mit Door, Computer und Cargo-Interaction schreiben.
+- Door-Open darf als Object-Reaction und Render-Snapshot sichtbar werden, aber kein Objective-Gate ersetzen oder ueberspringen.
+- Der Computer-Schritt bleibt das naechste Objective-Gate nach deaktivierter AA, auch wenn die Door vorher sichtbar geoeffnet wurde.
+- Cargo-Departed schliesst den Objective-Gate-Snapshot erst nach Computer-Control ab.
+- Das Smoke-Manifest bleibt Arbeits-/Test-Evidence mit `read_only = true` und `ui_sets_gameplay_truth = false`.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
