@@ -492,6 +492,12 @@ TASK_658 prueft, ob aus der lesbaren Frontier-Probe-F6-Anzeige ein echter kleine
 
 Erwartete Struktur: `get_frontier_probe_one_screen_player_decision_drill_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_one_screen_player_decision_drill.v1`, `task_id = TASK_658`, `source_task_ids = [TASK_540, TASK_541, TASK_567, TASK_657]`, `next_token = AA`, `recommended_plan.id = aa_first_push`, `recommended_plan.confirm_control = GO`, `go_ready`, `execution_active`, `decision_stage = preview|execution`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_659 - Frontier Probe Decision Drill F6 Evidence`. Nicht zulaessig sind neue Movement-, Combat-, Objective-, Cargo- oder Multiplayer-Regeln.
 
+### Frontier-Probe-Decision-Drill-F6-Evidence
+
+TASK_659 macht den TASK_658-Drill als sichtbares Evidence-Paket reviewbar. Der Verifier darf denselben Mini-Zug ausfuehren, aber das Paket selbst bleibt ein read-only Arbeitsartefakt: Es beschreibt Preview, GO und Execution-Feedback, erzeugt keine neue Bewegung, keine neue Zielerkennung und keine neue UI-seitige Wahrheit.
+
+Erwartete Manifest-Struktur: `tmp/frontier_probe_decision_drill_f6_evidence.json` enthaelt `schema = sternenbuergerchen.frontier_probe_decision_drill_f6_evidence.v1`, `task_id = TASK_659`, `source_task_id = TASK_658`, `capture_type = frontier_probe_decision_drill_f6_evidence`, `png_path`, `manifest_path`, `display_server`, `viewport_readback_available`, `generated_evidence_board`, `before_go_stage = preview`, `after_go_stage = execution`, `next_token = AA`, `before_go_ready = true`, `after_go_execution_active = true`, `execution_feedback_gate = pass`, `manual_checks`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_660 - Decision Drill Snapshot Performance Budget`. Ein Headless-Evidence-Board ersetzt keinen menschlichen Fensterentscheid.
+
 ## Frontier-Probe-Meta-Debrief-Route-Smoke
 TASK_639 prueft den echten vorhandenen Meta-Weg fuer ein Frontier-Probe-Ergebnis: Debrief sichtbar, Return-to-Homebase verfuegbar, Rueckkehr zur Homebase sichtbar und MissionResult erhalten. Der Snapshot darf nur den bestehenden TASK_586-Handoff lesen und mit Frontier-Probe-Resultatdaten zusammenfassen. Der Testhelper bleibt `request_debrief_return_homebase_for_test()` und nutzt damit den bestehenden Return-Handler.
 
