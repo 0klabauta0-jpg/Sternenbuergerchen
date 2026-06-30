@@ -60,6 +60,7 @@ const MISSION_INTERACTION_VISUAL_STATE_SCRIPT: GDScript = preload("res://scripts
 const MISSION_INTERACTION_OBJECT_REACTION_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_object_reaction.gd")
 const MISSION_INTERACTION_DOOR_RUNTIME_COLLISION_LOS_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_runtime_collision_los.gd")
 const MISSION_INTERACTION_DOOR_MULTIPLAYER_AUTHORITY_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_multiplayer_authority.gd")
+const MISSION_MULTIPLAYER_DOOR_FEEDBACK_CAPTURE_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_door_feedback_capture.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
@@ -17150,6 +17151,10 @@ func build_mission_interaction_door_authority_ui_feedback(authority_results: Dic
 	)).duplicate(true)
 
 
+func get_mission_interaction_multiplayer_door_feedback_capture_snapshot(capture_context: Dictionary = {}) -> Dictionary:
+	return Dictionary(MISSION_MULTIPLAYER_DOOR_FEEDBACK_CAPTURE_SCRIPT.call("build_snapshot", capture_context)).duplicate(true)
+
+
 func _build_visible_door_authority_command_line() -> String:
 	var feedback: Dictionary = build_mission_interaction_door_authority_ui_feedback()
 	var status: String = String(feedback.get("status", "")).strip_edges().to_lower()
@@ -18223,6 +18228,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var mission_interaction_door_use_breach_hook: Dictionary = get_mission_interaction_door_use_breach_command_hook_snapshot()
 	var mission_interaction_door_multiplayer_authority: Dictionary = get_mission_interaction_door_multiplayer_authority_snapshot()
 	var mission_interaction_door_authority_ui_feedback: Dictionary = build_mission_interaction_door_authority_ui_feedback()
+	var mission_interaction_multiplayer_door_feedback_capture: Dictionary = get_mission_interaction_multiplayer_door_feedback_capture_snapshot()
 	var mission_interaction_objective_gate: Dictionary = get_mission_interaction_objective_gate_snapshot()
 	var mission_interaction_visual_state: Dictionary = Dictionary(MISSION_INTERACTION_VISUAL_STATE_SCRIPT.call(
 		"build_snapshot",
@@ -18313,6 +18319,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_door_authority_ui_status": String(mission_interaction_door_authority_ui_feedback.get("status", "")),
 		"mission_interaction_door_authority_ui_line": String(mission_interaction_door_authority_ui_feedback.get("summary_line", "")),
 		"mission_interaction_door_authority_ui_tooltip": String(mission_interaction_door_authority_ui_feedback.get("tooltip_text", "")),
+		"mission_interaction_multiplayer_door_feedback_capture": mission_interaction_multiplayer_door_feedback_capture,
+		"mission_interaction_multiplayer_door_feedback_capture_gate": String(mission_interaction_multiplayer_door_feedback_capture.get("gate", "")),
+		"mission_interaction_multiplayer_door_feedback_capture_summary": String(mission_interaction_multiplayer_door_feedback_capture.get("summary", "")),
 		"mission_interaction_objective_gate": mission_interaction_objective_gate,
 		"mission_interaction_objective_next_line": String(mission_interaction_objective_gate.get("next_line", "")),
 		"mission_interaction_objective_next_step_id": String(mission_interaction_objective_gate.get("next_step_id", "")),

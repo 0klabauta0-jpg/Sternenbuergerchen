@@ -327,6 +327,7 @@ git checkout -b batch/<batch-name>
 - TASK_696 - Door Runtime Visual Animation/Asset Swap (implementiert)
 - TASK_697 - Door Interaction Multiplayer Authority Check (implementiert)
 - TASK_698 - Door Authority UI Feedback (implementiert)
+- TASK_699 - Multiplayer Door Feedback Capture (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
