@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_706 - Mission Door Layout/Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_706_mission_door_layout_visual_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`, `docs/tasks/TASK_705_host_client_door_real_click_manual_run_packet.md`
+- Stand: Neuer kompakter Ist-Stand-/Handbuch-Refresh existiert als HTML-Workbench mit lokalem JSON-Export.
+- Stand: Door-Object-Reactions exportieren `door_visual_polish_style_id`, `door_layout_readout`, `door_layout_tone` und `door_layout_visual_weight` read-only.
+- Stand: `TerrainMap3DView` reicht die Door-Layout-Felder in den Render-Snapshot weiter und nutzt sie fuer Footprint, Status-Header und Open-Clearance-Halo.
+- Risiken/offen: Der echte Host/Client-/FullHD-Sichtentscheid bleibt menschliche Folgearbeit; TASK_706 macht nur die technische Lesbarkeit robuster.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_706_mission_door_layout_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_696_door_runtime_visual_animation_asset_swap.gd`, `git diff --check`.
+- Naechster Schritt: Echten TASK_700-Workbench-Export aus dem Zwei-Fenster-Lauf oder Mini-Szenario-Playtest mit Door/Computer/Cargo.
+
 ### TASK_705 - Host/Client Door Real Click Manual Run Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_705_host_client_door_real_click_manual_run_packet.md`, `docs/tasks/TASK_704_host_client_door_real_click_findings.md`, `docs/tasks/TASK_700_host_client_door_real_click_workbench.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`

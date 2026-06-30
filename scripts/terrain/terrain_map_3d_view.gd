@@ -7417,6 +7417,10 @@ func _add_mission_interaction_object_reaction_visuals() -> void:
 		root.set_meta("visual_asset_type_id", String(reaction.get("visual_asset_type_id", "")).strip_edges())
 		root.set_meta("visual_swap_state", String(reaction.get("visual_swap_state", "")).strip_edges())
 		root.set_meta("door_animation_phase", String(reaction.get("door_animation_phase", "")).strip_edges())
+		root.set_meta("door_visual_polish_style_id", String(reaction.get("door_visual_polish_style_id", "")).strip_edges())
+		root.set_meta("door_layout_readout", String(reaction.get("door_layout_readout", "")).strip_edges())
+		root.set_meta("door_layout_tone", String(reaction.get("door_layout_tone", "")).strip_edges())
+		root.set_meta("door_layout_visual_weight", float(reaction.get("door_layout_visual_weight", 0.0)))
 		_status_root.add_child(root)
 		match object_kind:
 			"computer":
@@ -7458,6 +7462,10 @@ func _add_mission_interaction_object_reaction_visuals() -> void:
 			"door_asset_swap_state": String(reaction.get("door_asset_swap_state", "")).strip_edges(),
 			"door_leaf_gap_fraction": float(reaction.get("door_leaf_gap_fraction", 0.0)),
 			"door_threshold_visible": bool(reaction.get("door_threshold_visible", false)),
+			"door_visual_polish_style_id": String(reaction.get("door_visual_polish_style_id", "")).strip_edges(),
+			"door_layout_readout": String(reaction.get("door_layout_readout", "")).strip_edges(),
+			"door_layout_tone": String(reaction.get("door_layout_tone", "")).strip_edges(),
+			"door_layout_visual_weight": float(reaction.get("door_layout_visual_weight", 0.0)),
 			"door_runtime_collision_source": String(reaction.get("door_runtime_collision_source", "")).strip_edges(),
 			"door_visual_sets_gameplay_truth": bool(reaction.get("door_visual_sets_gameplay_truth", false)),
 			"screen_active": bool(reaction.get("screen_active", false)),
@@ -7512,7 +7520,12 @@ func _add_mission_interaction_door_reaction_proxy(parent: Node3D, accent: Color,
 	var open_fraction: float = clampf(float(reaction.get("open_fraction", 0.0)), 0.0, 1.0)
 	var leaf_gap_fraction: float = clampf(float(reaction.get("door_leaf_gap_fraction", open_fraction)), 0.0, 1.0)
 	var leaf_offset: float = 0.18 + (open_fraction * 0.34)
-	_add_local_box3d(parent, "DoorFrame", Vector3(0.88, 0.92, 0.10), Vector3(0.0, 0.46, 0.0), Color(0.20, 0.22, 0.24, 0.78), true)
+	var layout_tone: String = String(reaction.get("door_layout_tone", "")).strip_edges().to_lower()
+	var visual_weight: float = clampf(float(reaction.get("door_layout_visual_weight", 0.78)), 0.4, 1.0)
+	var tone_color: Color = _door_layout_tone_color(layout_tone, accent)
+	_add_local_box3d(parent, "DoorFloorFootprint", Vector3(0.96, 0.035, 0.36), Vector3(0.0, 0.025, -0.08), Color(tone_color.r, tone_color.g, tone_color.b, 0.18 + 0.22 * visual_weight), true)
+	_add_local_box3d(parent, "DoorStatusHeader", Vector3(0.92, 0.08, 0.14), Vector3(0.0, 0.96, -0.075), Color(tone_color.r, tone_color.g, tone_color.b, 0.54 + 0.24 * visual_weight), true)
+	_add_local_box3d(parent, "DoorFrame", Vector3(0.88, 0.92, 0.10), Vector3(0.0, 0.46, 0.0), Color(0.20, 0.22, 0.24, 0.82), true)
 	_add_local_box3d(parent, "DoorLeafLeft", Vector3(0.32, 0.78, 0.12), Vector3(-leaf_offset, 0.44, -0.02), Color(accent.r, accent.g, accent.b, 0.82), true)
 	_add_local_box3d(parent, "DoorLeafRight", Vector3(0.32, 0.78, 0.12), Vector3(leaf_offset, 0.44, -0.02), Color(accent.r, accent.g, accent.b, 0.82), true)
 	if runtime_state == "closed":
@@ -7523,9 +7536,23 @@ func _add_mission_interaction_door_reaction_proxy(parent: Node3D, accent: Color,
 		_add_local_cylinder3d(parent, "DoorOpeningPulse", 0.22, 0.04, Vector3(0.0, 0.18, -0.08), Color(accent.r, accent.g, accent.b, 0.44), 24, true)
 		_mission_interaction_object_reaction_visual_count += 2
 	if bool(reaction.get("door_threshold_visible", open_fraction >= 0.85)):
-		_add_local_box3d(parent, "DoorOpenThreshold", Vector3(0.64, 0.04, 0.16), Vector3(0.0, 0.08, -0.08), Color(0.46, 0.96, 0.62, 0.56), true)
+		_add_local_box3d(parent, "DoorOpenThreshold", Vector3(0.72, 0.055, 0.20), Vector3(0.0, 0.08, -0.08), Color(0.46, 0.96, 0.62, 0.68), true)
+		_add_local_cylinder3d(parent, "DoorClearanceHalo", 0.38, 0.035, Vector3(0.0, 0.105, -0.08), Color(0.46, 0.96, 0.62, 0.22), 28, true)
 		_mission_interaction_object_reaction_visual_count += 1
-	_mission_interaction_object_reaction_visual_count += 3
+		_mission_interaction_object_reaction_visual_count += 1
+	_mission_interaction_object_reaction_visual_count += 5
+
+
+func _door_layout_tone_color(layout_tone: String, accent: Color) -> Color:
+	match layout_tone:
+		"success":
+			return Color(0.46, 0.96, 0.62, 1.0)
+		"action":
+			return Color(0.32, 0.78, 1.0, 1.0)
+		"blocked":
+			return Color(1.0, 0.38, 0.30, 1.0)
+		_:
+			return accent
 
 
 func _add_mission_interaction_generic_reaction_proxy(parent: Node3D, accent: Color, _reaction: Dictionary) -> void:
