@@ -372,6 +372,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_640_frontier_probe_post_debrief_homebase_readability.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_639_frontier_probe_meta_debrief_route_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_586_debrief_return_homebase_handoff.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_641 - Frontier Probe Homebase Next Sortie Readiness`, wenn der Homebase-Rueckkehrzustand in eine klare naechste Vorbereitung fuehren soll.
 
+### TASK_641 - Frontier Probe Homebase Next Sortie Readiness
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_641_frontier_probe_homebase_next_sortie_readiness.md`, `docs/tasks/TASK_640_frontier_probe_post_debrief_homebase_readability.md`, `docs/tasks/TASK_534_pre_mission_readiness_checklist.md`, `docs/tasks/TASK_594_post_mission_skill_delta_homebase_bridge.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `HomebaseTestScreen.get_frontier_probe_homebase_next_sortie_readiness_snapshot()` verbindet TASK_640-Post-Debrief-Summary, Pre-Mission-Readiness und Homebase-Direct-Staging zu einem read-only Next-Sortie-Snapshot.
+- Stand: Die Homebase zeigt nach Frontier-Probe-Debrief-Return eine kompakte Zeile `Next sortie: Review gains -> Stage fireteam -> Assign loadout -> Load dropship -> Start next sortie | now: ...`.
+- Stand: Der Snapshot nennt den aktuellen naechsten Schritt, Readiness-Steps, Payload-/Boarding-Kontext, MissionResult-Erhalt und read-only-Grenzen ohne Navigation oder Command-Erzeugung.
+- Risiken/offen: TASK_641 fuehrt nur lesend. Ein echter Homebase-Fensterblick muss noch bewerten, ob die Zeile visuell ausreicht oder ein dezenter Highlight-/Button-Polish noetig wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_641_frontier_probe_homebase_next_sortie_readiness.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_640_frontier_probe_post_debrief_homebase_readability.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_586_debrief_return_homebase_handoff.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_642 - Frontier Probe Homebase Visible Readiness Review`, wenn der echte Homebase-Blick nach TASK_641 visuell bewertet werden soll.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
