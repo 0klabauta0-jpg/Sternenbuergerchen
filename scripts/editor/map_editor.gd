@@ -5661,6 +5661,7 @@ func get_mission_interaction_binding_editor_snapshot(sync_from_controls: bool = 
 		"preset_preview": preset_preview,
 		"preset_count": _get_interaction_binding_presets().size(),
 		"available_presets": _get_interaction_binding_presets(),
+		"focus_scroll": _build_interaction_binding_focus_scroll_snapshot(),
 		"control_paths": {
 			"panel": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel",
 			"preset_option": "UI/PropertyPanel/Margin/VBox/MarkerEditorPanel/InteractionBindingEditorPanel/InteractionBindingPresetRow/InteractionBindingPresetOption",
@@ -5706,6 +5707,7 @@ func apply_selected_marker_interaction_binding_from_editor(fields: Dictionary = 
 	_mark_scenario_dirty(true)
 	_refresh_marker_editor_controls()
 	_refresh_mission_authoring_controls()
+	_focus_interaction_binding_editor_controls(false)
 	return true
 
 
@@ -5745,6 +5747,7 @@ func remove_selected_marker_interaction_binding_from_editor(interaction_id: Stri
 	_mark_scenario_dirty(true)
 	_refresh_marker_editor_controls()
 	_refresh_mission_authoring_controls()
+	_focus_interaction_binding_editor_controls(false)
 	return true
 
 
@@ -5912,6 +5915,7 @@ func apply_interaction_binding_preset_to_editor(preset_id: String) -> bool:
 		_select_option_by_metadata(preset_option, String(preset_fields.get("preset_id", preset_id)))
 	_apply_interaction_binding_fields_to_controls(preset_fields)
 	_set_marker_feedback("Preset applied: %s." % String(preset_fields.get("label", preset_id)))
+	_focus_interaction_binding_editor_controls(true)
 	return true
 
 
@@ -6322,6 +6326,7 @@ func _select_marker(marker_id: String) -> void:
 	_queue_editor_ui_refresh(EDITOR_UI_REFRESH_SELECTION)
 	_refresh_marker_overlay()
 	_refresh_marker_editor_controls()
+	_focus_interaction_binding_editor_controls(false)
 
 
 func _handle_marker_left_press(mouse_button_event: InputEventMouseButton) -> bool:
@@ -6557,6 +6562,52 @@ func _focus_marker_name_editor(grab_focus: bool = true) -> void:
 		marker_name_line_edit.select_all()
 	else:
 		marker_name_line_edit.release_focus()
+
+
+func _focus_interaction_binding_editor_controls(grab_preset_focus: bool = false) -> void:
+	if _selected_marker_id.is_empty():
+		return
+	call_deferred("_apply_interaction_binding_editor_focus_scroll", grab_preset_focus)
+
+
+func _apply_interaction_binding_editor_focus_scroll(grab_preset_focus: bool = false) -> void:
+	var property_scroll := get_node_or_null("UI/PropertyPanel/Margin") as ScrollContainer
+	var editor_panel := _get_interaction_binding_editor_panel()
+	if property_scroll == null or editor_panel == null:
+		return
+	var scrollbar := property_scroll.get_v_scroll_bar()
+	var scroll_rect: Rect2 = property_scroll.get_global_rect()
+	var editor_rect: Rect2 = editor_panel.get_global_rect()
+	var padding: float = 18.0
+	var target_scroll: int = property_scroll.scroll_vertical
+	if editor_rect.position.y < scroll_rect.position.y + padding:
+		target_scroll += floori(editor_rect.position.y - scroll_rect.position.y - padding)
+	elif editor_rect.end.y > scroll_rect.end.y - padding:
+		target_scroll += ceili(editor_rect.end.y - scroll_rect.end.y + padding)
+	if scrollbar != null:
+		target_scroll = clampi(target_scroll, 0, int(ceil(scrollbar.max_value)))
+	property_scroll.scroll_vertical = target_scroll
+	if grab_preset_focus:
+		var preset_option := _get_interaction_binding_preset_option()
+		if preset_option != null and preset_option.is_visible_in_tree():
+			preset_option.grab_focus()
+
+
+func _build_interaction_binding_focus_scroll_snapshot() -> Dictionary:
+	var property_scroll := get_node_or_null("UI/PropertyPanel/Margin") as ScrollContainer
+	var editor_panel := _get_interaction_binding_editor_panel()
+	var preset_option := _get_interaction_binding_preset_option()
+	var scroll_rect: Rect2 = property_scroll.get_global_rect() if property_scroll != null else Rect2()
+	var editor_rect: Rect2 = editor_panel.get_global_rect() if editor_panel != null else Rect2()
+	var visible: bool = property_scroll != null and editor_panel != null and property_scroll.is_visible_in_tree() and editor_panel.is_visible_in_tree() and scroll_rect.intersects(editor_rect)
+	return {
+		"schema": "sternenbuergerchen.map_editor_interaction_binding_focus_scroll.v1",
+		"property_panel_scrollable": property_scroll != null and int(property_scroll.vertical_scroll_mode) != int(ScrollContainer.SCROLL_MODE_DISABLED),
+		"scroll_vertical": property_scroll.scroll_vertical if property_scroll != null else 0,
+		"editor_visible_footprint": visible and editor_rect.size.x > 2.0 and editor_rect.size.y > 2.0,
+		"preset_has_focus": preset_option != null and preset_option.has_focus(),
+		"ui_sets_gameplay_truth": false,
+	}
 
 
 func _set_property_controls_enabled(is_enabled: bool) -> void:

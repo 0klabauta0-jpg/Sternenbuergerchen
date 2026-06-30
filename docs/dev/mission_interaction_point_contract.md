@@ -117,6 +117,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Das Evidenzpaket darf Bedienbarkeit, Sichtbarkeit, Scroll-Erreichbarkeit und Preset-Dichte bewerten, aber keine Runtime-Interaction starten und keine Gameplay-Wahrheit setzen.
 - `manual_fullhd_review_required = true` bleibt gesetzt, bis ein echter sichtbarer Fensterlauf mit menschlichem Sichtentscheid vorliegt.
 
+## Editor Binding Focus Scroll
+- Wenn ein Marker selektiert wird, darf der Map-Editor den vorhandenen Property-Panel-ScrollContainer auf den Interaction-Binding-Editor ausrichten.
+- Preset-Apply, Binding-Apply und Binding-Remove duerfen denselben Fokus erneut setzen, damit Authoring-Aktionen sichtbares Feedback behalten.
+- Der Fokus-Scroll wirkt nur auf Editor-Controls und schreibt keinen Scenario- oder Runtime-State.
+- `get_mission_interaction_binding_editor_snapshot().focus_scroll` exportiert Scrollbarkeit, sichtbaren Editor-Footprint und `ui_sets_gameplay_truth = false` fuer Verifier.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.

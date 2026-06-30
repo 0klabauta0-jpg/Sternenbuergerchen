@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_684 - Map Editor Interaction Focus Scroll
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_684_map_editor_interaction_focus_scroll.md`, `docs/tasks/TASK_683_map_editor_interaction_fullhd_sight_pass.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Der Map-Editor fokussiert beim Selektieren eines Markers, beim Preset-Apply sowie nach Binding-Apply/Remove den Interaction-Binding-Editor im rechten Property-Panel.
+- Stand: `get_mission_interaction_binding_editor_snapshot().focus_scroll` exportiert Property-Scrollbarkeit, Scrollposition, sichtbaren Editor-Footprint und `ui_sets_gameplay_truth = false`.
+- Stand: Der TASK_684-Verifier setzt den Property-Scroll absichtlich auf oben und prueft danach, dass der Binding-Bereich ohne manuelles Testscrollen sichtbar wird.
+- Risiken/offen: Das verbessert den Bedienfluss, ersetzt aber keinen echten Fenster-Sichtentscheid. Falls das Panel trotz Fokus zu dicht wirkt, braucht es spaeter Layout-Polish.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_684_map_editor_interaction_focus_scroll.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_683_map_editor_interaction_fullhd_sight_pass.gd`, `git diff --check`.
+- Naechster Schritt: Echter sichtbarer Editor-Fensterlauf oder, falls dabei keine Reibung entsteht, zur Mission-Interaction-Progress-Sichtbarkeit bzw. Host/Client-Klick-Findings wechseln.
+
 ### TASK_683 - Map Editor Interaction FullHD Sight Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_683_map_editor_interaction_fullhd_sight_pass.md`, `docs/tasks/TASK_682_mission_interaction_binding_presets.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
