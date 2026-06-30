@@ -342,6 +342,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_637_frontier_probe_playfeel_next_interaction.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_636_frontier_probe_real_f6_recapture.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_638 - Frontier Probe Debrief Handoff Feel`, damit die sichtbare NEXT-Debrief-Orientierung an den bestehenden Meta-Rueckweg anschliesst.
 
+### TASK_638 - Frontier Probe Debrief Handoff Feel
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_638_frontier_probe_debrief_handoff_feel.md`, `docs/tasks/TASK_637_frontier_probe_playfeel_next_interaction.md`, `docs/tasks/TASK_586_debrief_return_homebase_handoff.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `MissionTacticalSandboxController.get_frontier_probe_debrief_handoff_feel_snapshot()` liest den TASK_637-Endzustand read-only und markiert `open_debrief` als Handoff zu Debrief und anschliessender Homebase-Rueckkehr.
+- Stand: #18 Mission Control zeigt bei abgeschlossener Frontier-Probe-Route die kompakte Zeile `HANDOFF Debrief bereit | danach Homebase`; `get_command_feedback_snapshot()` exportiert dieselbe Zeile.
+- Stand: `scripts/tests/task_638_frontier_probe_debrief_handoff_feel.gd` prueft Handoff-Ready, Mission-Control-Zeile, Handoff-Kette `mission_complete -> debrief_review -> return_homebase` und schreibt `tmp/frontier_probe_debrief_handoff_feel.json`.
+- Risiken/offen: TASK_638 erzeugt keinen Debrief-Button und startet keine Navigation. Der echte Meta-Debrief-Lauf mit Frontier-Probe-Resultat bleibt Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_638_frontier_probe_debrief_handoff_feel.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_637_frontier_probe_playfeel_next_interaction.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_586_debrief_return_homebase_handoff.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_639 - Frontier Probe Meta Debrief Route Smoke`, damit der echte Meta-Debrief-/Homebase-Rueckweg mit Frontier-Probe-Resultat geprueft wird.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

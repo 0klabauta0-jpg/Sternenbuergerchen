@@ -52,9 +52,9 @@ func _test_docs_and_reports() -> void:
 	_assert(FileAccess.file_exists(TASK_631_TEST_PATH), "TASK_631 regression verifier remains available")
 	_assert(FileAccess.file_exists(TASK_630_TEST_PATH), "TASK_630 regression verifier remains available")
 	_assert(report_text.contains("TASK_632 Frontier Probe Mini Scenario F6 Visual Review"), "Rolling report tracks TASK_632")
-	_assert(report_text.contains('latest_completed_task: "TASK_637 - Frontier Probe Playfeel Next Interaction"'), "Rolling report advances latest completed beyond TASK_632")
+	_assert(report_text.contains('latest_completed_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Rolling report advances latest completed beyond TASK_632")
 	_assert(handbook_text.contains("TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"), "Status handbook tracks TASK_632")
-	_assert(handbook_text.contains('current_task: "TASK_637 - Frontier Probe Playfeel Next Interaction"'), "Status handbook current task advances beyond TASK_632")
+	_assert(handbook_text.contains('current_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Status handbook current task advances beyond TASK_632")
 	var required_export_keys: Array[String] = [
 		"frontier_probe_mini_scenario_f6_visual_review.task_id",
 		"frontier_probe_mini_scenario_f6_visual_review.png_path",

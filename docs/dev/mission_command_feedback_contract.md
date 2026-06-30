@@ -449,6 +449,11 @@ TASK_637 macht den naechsten sinnvollen Frontier-Probe-Schritt in #18 Mission Co
 
 Erwartete Struktur: `get_frontier_probe_playfeel_next_interaction_snapshot()` enthaelt `schema = sternenbuergerchen.frontier_probe_playfeel_next_interaction.v1`, `task_id = TASK_637`, `next_interaction`, `mission_control_status_text`, `gate`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true` und `ui_sets_gameplay_truth = false`. `next_interaction.next_interaction_id` muss die Route als `disable_air_defense -> hold_station_computer -> secure_cargo_touchdown -> open_debrief` abbilden koennen. #18 Mission Control muss die kompakte Zeile wie `NEXT Debrief | Ergebnis pruefen | Homebase` enthalten, ohne Debrief oder Homebase zu oeffnen.
 
+## Frontier-Probe-Debrief-Handoff-Feel
+TASK_638 macht den Abschluss der Frontier-Probe-Route als Loop-Uebergang lesbar. Der Mission-Controller darf aus dem TASK_637-Next-Interaction-Snapshot eine kompakte `HANDOFF ...`-Zeile bauen, wenn der Endzustand `open_debrief` erreicht ist. Diese Zeile zeigt nur: Missionsteil fertig, Debrief pruefen, danach Homebase. Der echte Debrief-/Homebase-Rueckweg bleibt der Meta-Layer-Handoff aus TASK_586.
+
+Erwartete Struktur: `get_frontier_probe_debrief_handoff_feel_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_debrief_handoff_feel.v1`, `task_id = TASK_638`, `handoff.source_next_interaction_id = open_debrief`, `handoff.handoff_ready = true`, `handoff.handoff_line = HANDOFF Debrief bereit | danach Homebase`, `handoff.handoff_chain` mit `mission_complete`, `debrief_review` und `return_homebase`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_639 - Frontier Probe Meta Debrief Route Smoke`. `get_command_feedback_snapshot()` exportiert dieselbe Zeile unter `frontier_probe_debrief_handoff_line`. Nicht zulaessig sind ein neuer Debrief-Button im Missions-HUD, automatische Navigation, Command-Enqueueing oder neue Meta-/MissionResult-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

@@ -6124,6 +6124,10 @@ func _build_strategic_status_text() -> String:
 	var next_interaction_line: String = String(next_interaction.get("next_interaction_line", "")).strip_edges()
 	if bool(next_interaction.get("active", false)) and not next_interaction_line.is_empty():
 		lines.append(next_interaction_line)
+	var debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
+	var debrief_handoff_line: String = String(debrief_handoff.get("handoff_line", "")).strip_edges()
+	if bool(debrief_handoff.get("handoff_ready", false)) and not debrief_handoff_line.is_empty():
+		lines.append(debrief_handoff_line)
 	return "\n".join(lines)
 
 
@@ -15243,6 +15247,102 @@ func get_frontier_probe_playfeel_next_interaction_snapshot() -> Dictionary:
 	}
 
 
+func _build_frontier_probe_debrief_handoff_feel_snapshot() -> Dictionary:
+	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
+	var scenario_active: bool = bool(next_interaction.get("scenario_active", false))
+	var next_id: String = String(next_interaction.get("next_interaction_id", "")).strip_edges()
+	var route_complete: bool = bool(next_interaction.get("route_complete", false))
+	var handoff_ready: bool = scenario_active and route_complete and next_id == "open_debrief"
+	var handoff_line: String = "HANDOFF Debrief bereit | danach Homebase" if handoff_ready else ""
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_debrief_handoff_feel.v1",
+		"task_id": "TASK_638",
+		"active": scenario_active,
+		"scenario_active": scenario_active,
+		"source_schema": String(next_interaction.get("schema", "")),
+		"source_task_id": String(next_interaction.get("task_id", "")),
+		"source_next_interaction_id": next_id,
+		"handoff_ready": handoff_ready,
+		"handoff_line": handoff_line,
+		"handoff_line_char_limit": 72,
+		"handoff_line_within_limit": handoff_line.length() <= 72,
+		"handoff_chain": PackedStringArray(["mission_complete", "debrief_review", "return_homebase"]) if handoff_ready else PackedStringArray(),
+		"debrief_action_label": "Debrief pruefen" if handoff_ready else "",
+		"homebase_followup_label": "Danach Homebase" if handoff_ready else "",
+		"mission_complete": route_complete,
+		"route_complete": route_complete,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"recommended_next_task": "TASK_639 - Frontier Probe Meta Debrief Route Smoke",
+	}
+
+
+func get_frontier_probe_debrief_handoff_feel_snapshot() -> Dictionary:
+	var handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
+	var command_snapshot: Dictionary = get_command_feedback_snapshot()
+	var mission_control_text: String = String(command_snapshot.get("mission_control_status_text", "")).strip_edges()
+	if bool(handoff.get("handoff_ready", false)) and not mission_control_text.contains(String(handoff.get("handoff_line", "")).strip_edges()):
+		mission_control_text = _build_strategic_status_text()
+	var handoff_chain: PackedStringArray = PackedStringArray(Array(handoff.get("handoff_chain", [])))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"frontier_probe_context_active",
+			bool(handoff.get("scenario_active", false)),
+			"Frontier Probe scenario context is active for the debrief handoff readout."
+		),
+		_build_mission_first_move_readability_check(
+			"source_points_to_debrief",
+			String(handoff.get("source_next_interaction_id", "")) == "open_debrief",
+			"TASK_637 source state should point to Debrief before the handoff line appears."
+		),
+		_build_mission_first_move_readability_check(
+			"handoff_line_visible",
+			bool(handoff.get("handoff_ready", false))
+				and mission_control_text.contains(String(handoff.get("handoff_line", "")).strip_edges()),
+			"Mission Control shows the Debrief/Homebase handoff line."
+		),
+		_build_mission_first_move_readability_check(
+			"handoff_chain_complete",
+			handoff_chain.has("mission_complete") and handoff_chain.has("debrief_review") and handoff_chain.has("return_homebase"),
+			"Handoff chain names Mission complete, Debrief review and Return Homebase."
+		),
+		_build_mission_first_move_readability_check(
+			"handoff_line_compact",
+			bool(handoff.get("handoff_line_within_limit", false)),
+			"Handoff line stays compact enough for Mission Control."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(handoff.get("read_only", false))
+				and not bool(handoff.get("ui_sets_gameplay_truth", true))
+				and not bool(handoff.get("creates_navigation", true))
+				and not bool(handoff.get("creates_command", true)),
+			"Debrief handoff readout does not write gameplay truth, create navigation or enqueue commands."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_debrief_handoff_feel.v1",
+		"task_id": "TASK_638",
+		"handoff": handoff,
+		"mission_control_status_text": mission_control_text,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"recommended_next_task": "TASK_639 - Frontier Probe Meta Debrief Route Smoke",
+	}
+
+
 func _has_route_callout_label(route_callouts: Array, expected_label: String) -> bool:
 	for callout_variant in route_callouts:
 		var callout: Dictionary = Dictionary(callout_variant)
@@ -16717,6 +16817,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var mission_hud_interaction_density: Dictionary = _build_mission_hud_interaction_density_snapshot()
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
+	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -16771,6 +16872,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_hud_interaction_line": String(mission_hud_interaction_density.get("mission_control_line", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
+		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
+		"frontier_probe_debrief_handoff_line": String(frontier_probe_debrief_handoff.get("handoff_line", "")),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),
