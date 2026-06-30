@@ -306,6 +306,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Peer 1/Team Alpha darf den Door-Command fuer die Station-Route absenden; Peer 2/Team Bravo muss fuer denselben Alpha-Command abgewiesen werden.
 - Runtime-State-Mutation im Netzwerkcommand bleibt verboten; Door-Walkability/LOS darf nur ueber den Door-Runtime-Producer oeffnen.
 - Door-Open darf den Computer-Gate nicht ueberspringen; Computer-Control muss Cargo freischalten; Cargo-Departed muss `all_gates_complete` setzen.
+
+## Station Route Empty Event Log Polish
+- Das `TacticalEventLogPanel` darf im leeren Zustand visuell einklappen, damit es im echten Host/Client-Fenster keine Kartenflaeche verdeckt.
+- Der eingeklappte Empty-State muss `empty_state_collapsed = true`, `visibility_mode = collapsed_empty`, `visible = false` und `mouse_filter = MOUSE_FILTER_IGNORE` im Snapshot melden.
+- Sobald gefilterte Event-Eintraege existieren, muss das Panel wieder sichtbar werden und den bestehenden Scroll-/Filterpfad benutzen.
+- Das Einklappen ist reines UI-Feedback. Es darf keine Tactical-Event-Wahrheit, keinen Mission-State, keinen Multiplayer-State und keine SimulationRoot-Daten mutieren.
 - Der Guard darf Server-/Client-Snapshot-Annahme pruefen, aber keine echte Fenster-Sichtbarkeit, keine Bedienqualitaet und keinen abgeschlossenen Host/Client-Playtest behaupten.
 - Das Manifest bleibt read-only, fordert weiter manuelle Review und setzt keine Gameplay-Wahrheit.
 
