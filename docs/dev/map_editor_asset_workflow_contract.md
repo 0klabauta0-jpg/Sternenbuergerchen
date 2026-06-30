@@ -38,7 +38,14 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Scale-Overrides leben in derselben `user://`-Authoring-Praeferenz wie Favoriten und Recent-Assets. Sie werden nicht in Map-JSON geschrieben und sind keine Gameplay-Wahrheit.
 - Das Setzen eines Overrides speichert nur den Placement-Default fuer zukuenftige Pinselstriche; bereits gesetzte Tiles behalten ihren eigenen `object_scale`.
 - Der Usability-Snapshot nennt Override-Liste, Count, Selected-Override und weiter `ui_sets_gameplay_truth = false`.
-- Rotation-Defaults und geteilte Team-/Projektprofile brauchen einen separaten Vertrag.
+
+## Asset Rotation Override Presets
+- Placement-Rotation ist ein lokaler Authoring-Default in 90-Grad-Schritten fuer neue Brush-Platzierungen.
+- Pro Palette-`type_id` darf ein lokaler `asset_rotation_override` gespeichert werden, damit haeufig ausgerichtete Door-, Wall-, Factory- oder Station-Teile beim Auswaehlen automatisch ihre Placement-Rotation setzen.
+- Rotation-Overrides leben in derselben `user://`-Authoring-Praeferenz wie Favoriten, Recent und Scale-Overrides. Sie werden nicht in Map-JSON geschrieben und sind keine Gameplay-Wahrheit.
+- Neue Brush-Platzierungen schreiben den aktuellen Placement-Default nach `object_rotation_degrees`; bereits gesetzte Tiles bleiben unveraendert.
+- Der Usability-Snapshot nennt Placement-Rotation, Override-Liste, Count, Selected-Override und weiter `ui_sets_gameplay_truth = false`.
+- Auto-Rotation/Snapping fuer Drag-Ketten und geteilte Team-/Projektprofile brauchen separate Vertraege.
 
 ## Save As
 - Der Map-`Save As`-Dialog ist ein JSON-`FILE_MODE_SAVE_FILE`-Dialog im Projektressourcenbereich.
@@ -96,4 +103,4 @@ Dieser Contract beschreibt den ersten stabilen Asset-Authoring-Workflow fuer den
 - Weitere Politur der sichtbaren Drag-Preview fuer Pipe-, Wand- und Cliff-Linien: Handles, Segmentnummern und finale FullHD-Art-Direction.
 - Auto-Rotation/Snapping fuer Ketten von Waenden, Tueren und Cliffs.
 - Door-/Computer-Interaction-Contract fuer Runtime-Naehe und Bedienzeit.
-- Rotation-Defaults und geteilte Asset-Override-Profile pro Team oder Projekt.
+- Geteilte Asset-Override-Profile pro Team oder Projekt.

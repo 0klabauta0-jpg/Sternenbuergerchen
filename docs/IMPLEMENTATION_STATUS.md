@@ -646,6 +646,16 @@
 - Lokale Pruefung: `task_668_map_editor_asset_scale_override_presets.gd`, `task_667_map_editor_persistent_palette_presets.gd`, `task_516_editor_builder_ux_pass.gd`, `git diff --check`.
 - Naechster Schritt: Fuer den Editor waeren Rotation-Defaults oder sichtbare Builder-Handles sinnvoll; fuer Multiplayer bleibt TASK_666 der ehrliche sichtbare Recheck.
 
+### TASK_669 - Map Editor Placement Rotation Overrides
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_669_map_editor_placement_rotation_overrides.md`, `docs/tasks/TASK_668_map_editor_asset_scale_override_presets.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: Der Map-Editor hat jetzt einen lokalen Placement-Rotationsdefault in 90-Grad-Schritten und kann pro Palette-`type_id` `asset_rotation_overrides` speichern oder loeschen.
+- Stand: Beim erneuten Auswaehlen eines Assets mit Rotation-Override wird der Placement-Rotationsdefault automatisch gesetzt; neue Brush-Platzierungen schreiben ihn nach `object_rotation_degrees`.
+- Stand: Der Palette-Snapshot nennt Placement-Rotation, Rotation-Override-Dictionary, Count, Selected-Override und weiter `ui_sets_gameplay_truth = false`.
+- Risiken/offen: Auto-Rotation/Snapping fuer Drag-Ketten, geteilte Projektprofile und finale FullHD-Button-Politur bleiben Folgearbeit. TASK_666 bleibt als echter Host/Client-Fensterklickbefund offen.
+- Lokale Pruefung: `task_669_map_editor_placement_rotation_overrides.gd`, `task_668_map_editor_asset_scale_override_presets.gd`, `task_667_map_editor_persistent_palette_presets.gd`, `task_516_editor_builder_ux_pass.gd`, `git diff --check`.
+- Naechster Schritt: Sichtbare Builder-Handles oder Auto-Rotation/Snapping fuer Wall-/Door-/Cliff-Ketten.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
