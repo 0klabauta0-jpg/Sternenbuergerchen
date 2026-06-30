@@ -409,6 +409,11 @@ TASK_629 buendelt nach TASK_628 den naechsten echten Zwei-Fenster-Klicklauf als 
 
 Erwartete Struktur: `tmp/host_client_real_click_playtest_packet.json` enthaelt `schema = sternenbuergerchen.host_client_real_click_playtest_packet.v1`, `task_id = TASK_629`, `source_real_run_manifest_path = tmp/host_client_two_window_real_run_review.json`, `packet_path`, `source_manifest_present`, `source_visible_reject_review_gate`, `readiness_gate`, `preconditions`, `click_sequence`, `expected_visible_feedback`, `manual_observations`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_630 - Host Client Real Click Findings Or Mini Scenario Feel`.
 
+## Frontier-Probe-Mini-Scenario-Feel-Route
+TASK_630 macht die vorhandene Frontier-Probe-Vertical-Slice-Mission als kleine spielerische Route pruefbar. `get_frontier_probe_mini_scenario_feel_route_snapshot()` darf Scenario-Daten, Vertical-Slice-Flow, Ownership, AA-/Computer-/Cargo-Gates und Mission-Control-Lesbarkeit zusammenfassen, aber keine Runtime-, Peer-, Command-, Movement-, Combat-, Cargo-, Objective- oder Gameplay-Wahrheit speichern.
+
+Erwartete Struktur: Der Snapshot enthaelt `schema = sternenbuergerchen.frontier_probe_mini_scenario_feel_route.v1`, `task_id = TASK_630`, `route_id = frontier_probe_aa_computer_cargo`, `route_beats`, `route_beat_count`, `play_modes`, Alpha-/Bravo-Slots, AA-Gruppe, Objective-/Cargo-/Mission-Control-Zeilen, integrierten Objective/Cargo-Snapshot, Ownership-Snapshot, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish`. Erwartete Beats: Alpha-LZ/Approach, AA ausschalten, Computer 18 Sekunden halten, Cargo Touch-and-Go an `spawn_alpha`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
