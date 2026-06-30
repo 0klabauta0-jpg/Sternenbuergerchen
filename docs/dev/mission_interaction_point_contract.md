@@ -120,6 +120,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Evidence darf Sichtbarkeit, Snapshot-Zaehler, Visualbudget, Pfade und offene manuelle Checks festhalten, aber keine Runtime-Interaction starten und keine Gameplay-Wahrheit schreiben.
 - `ui_sets_gameplay_truth = false` bleibt Pflicht.
 
+## Visual Polish Findings
+- `MissionInteractionVisualPolishFindings` bewertet Render-Snapshot und Evidence-Manifest read-only.
+- Der Snapshot trennt technische Blocker, Warnungen und offene manuelle Sichtentscheidungen.
+- Fehlende Visualstates, fehlende Object-Reactions, leeres Visualbudget oder UI-Truth-Verletzungen sind technische Blocker.
+- Ein offener echter FullHD-Sichtlauf ist ein manueller Hinweis und darf nicht als bestandene Sichtabnahme ausgegeben werden.
+- Findings duerfen `recommended_next_task` nennen, aber keine Visuals aendern und keine Runtime-/Gameplay-Wahrheit setzen.
+
 ## Editor Binding Inspector
 - `MapEditor.get_mission_interaction_binding_inspector_snapshot()` liest das aktuelle `MissionScenarioData.get_interaction_point_binding_snapshot()` zusammen mit der aktuellen `TerrainMapData`.
 - Der Snapshot nennt `binding_count`, `bound_marker_ids`, `missing_marker_ids`, Status-/Typ-Zaehler und die Bindings des selektierten Markers.

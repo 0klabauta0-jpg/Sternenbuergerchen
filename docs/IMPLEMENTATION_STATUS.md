@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_689 - Mission Interaction Visual Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_689_mission_interaction_visual_polish_findings.md`, `docs/tasks/TASK_688_mission_interaction_fullhd_evidence.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionVisualPolishFindings` bewertet Render-Snapshot und Evidence-Manifest read-only und trennt technische Blocker, Warnungen und offene manuelle Sichtentscheidungen.
+- Stand: Der TASK_689-Verifier bringt die Mission in den aktiven Computer-Schritt, synchronisiert die 3D-Visuals und schreibt `tmp/mission_interaction_visual_polish_findings.json`.
+- Stand: Aktuell sind keine technischen Visual-Blocker belegt; der echte manuelle FullHD-Sichtlauf bleibt bewusst offen.
+- Risiken/offen: Das ist eine technische Findings-Fassade, keine menschliche Sichtabnahme und kein optischer Freispruch.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_689_mission_interaction_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_688_mission_interaction_fullhd_evidence.gd`, `git diff --check`.
+- Naechster Schritt: TASK_690 - Mission Interaction Manual Sight Notes oder gezielter Visual-Polish, sobald echte Fensterbeobachtung vorliegt.
+
 ### TASK_688 - Mission Interaction FullHD Evidence
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_688_mission_interaction_fullhd_evidence.md`, `docs/tasks/TASK_687_mission_interaction_object_reaction.md`, `docs/tasks/TASK_686_mission_interaction_visual_state.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
