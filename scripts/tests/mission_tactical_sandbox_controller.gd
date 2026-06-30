@@ -56,6 +56,7 @@ const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://script
 const MISSION_INTERACTION_RUNTIME_USE_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_runtime_use_state.gd")
 const MISSION_INTERACTION_USE_FEEDBACK_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_use_feedback.gd")
 const MISSION_INTERACTION_OBJECTIVE_GATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_objective_gate.gd")
+const MISSION_INTERACTION_VISUAL_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_visual_state.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
@@ -9837,6 +9838,12 @@ func _sync_primary_3d_mission_status_visuals() -> void:
 			payload["route_callouts"] = route_callouts
 			payload["route_callout_summary"] = _build_frontier_probe_route_callout_summary(route_callouts)
 			payload["route_callout_schema"] = "sternenbuergerchen.frontier_probe_route_callouts.v1"
+	var interaction_visual_state: Dictionary = get_mission_interaction_visual_state_snapshot()
+	if not interaction_visual_state.is_empty():
+		payload["mission_interaction_visual_states"] = Array(interaction_visual_state.get("entries", [])).duplicate(true)
+		payload["mission_interaction_visual_state_schema"] = String(interaction_visual_state.get("schema", ""))
+		payload["mission_interaction_visual_state_summary"] = String(interaction_visual_state.get("summary", ""))
+		payload["mission_interaction_visual_state_tone_counts"] = Dictionary(interaction_visual_state.get("tone_counts", {})).duplicate(true)
 	_primary_view_bridge.call("sync_mission_status_payload", get_parent(), payload)
 
 
@@ -16763,6 +16770,16 @@ func get_mission_interaction_objective_gate_snapshot() -> Dictionary:
 	)).duplicate(true)
 
 
+func get_mission_interaction_visual_state_snapshot() -> Dictionary:
+	var use_state_snapshot: Dictionary = get_mission_interaction_runtime_use_state_snapshot()
+	var objective_gate_snapshot: Dictionary = get_mission_interaction_objective_gate_snapshot()
+	return Dictionary(MISSION_INTERACTION_VISUAL_STATE_SCRIPT.call(
+		"build_snapshot",
+		use_state_snapshot,
+		objective_gate_snapshot
+	)).duplicate(true)
+
+
 func _build_mission_interaction_progress_readability_snapshot(use_feedback: Dictionary = {}) -> Dictionary:
 	var feedback: Dictionary = use_feedback
 	if feedback.is_empty():
@@ -17787,6 +17804,11 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var mission_interaction_progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot(mission_interaction_use_feedback)
 	var mission_interaction_use_intent: Dictionary = get_mission_interaction_use_intent_snapshot()
 	var mission_interaction_objective_gate: Dictionary = get_mission_interaction_objective_gate_snapshot()
+	var mission_interaction_visual_state: Dictionary = Dictionary(MISSION_INTERACTION_VISUAL_STATE_SCRIPT.call(
+		"build_snapshot",
+		get_mission_interaction_runtime_use_state_snapshot(),
+		mission_interaction_objective_gate
+	)).duplicate(true)
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -17860,6 +17882,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_objective_gate": mission_interaction_objective_gate,
 		"mission_interaction_objective_next_line": String(mission_interaction_objective_gate.get("next_line", "")),
 		"mission_interaction_objective_next_step_id": String(mission_interaction_objective_gate.get("next_step_id", "")),
+		"mission_interaction_visual_state": mission_interaction_visual_state,
+		"mission_interaction_visual_state_count": int(mission_interaction_visual_state.get("visual_state_count", 0)),
+		"mission_interaction_visual_state_summary": String(mission_interaction_visual_state.get("summary", "")),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),

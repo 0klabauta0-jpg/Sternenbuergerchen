@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_686 - Mission Interaction Visual State
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_686_mission_interaction_visual_state.md`, `docs/tasks/TASK_685_mission_interaction_objective_gate.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionVisualState` uebersetzt bestehende Interaction-Use-State- und Objective-Gate-Snapshots in read-only Objektlabels fuer AA, COM, CARGO und spaetere DOOR-Interactions.
+- Stand: `get_mission_interaction_visual_state_snapshot()` und `get_command_feedback_snapshot()` exportieren Visualstate-Eintraege, Tones und Summary ohne Gameplay-Wahrheit im UI zu setzen.
+- Stand: `TerrainMap3DView` zeichnet Marker/Labels aus dem Mission-Status-Payload und exportiert Render-Snapshot-Zaehler fuer Verifier.
+- Risiken/offen: Kein echtes Door-Open/Closed-Modell und kein menschlicher FullHD-Sichttest. Die Labels sind Contract-/Render-Snapshot-belegt, aber noch nicht visuell abgenommen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_686_mission_interaction_visual_state.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_685_mission_interaction_objective_gate.gd`, `git diff --check`.
+- Naechster Schritt: Echte Door-/Computer-Objektreaktion oder menschlicher FullHD-Fensterlauf fuer die neuen Marker.
+
 ### TASK_685 - Mission Interaction Objective Gate
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_685_mission_interaction_objective_gate.md`, `docs/tasks/TASK_678_mission_interaction_runtime_progress.md`, `docs/tasks/TASK_679_mission_interaction_progress_readability.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
