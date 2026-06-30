@@ -50,6 +50,10 @@ func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> D
 	var feedback_line: String = _build_authority_feedback_line(accepted_count, rejected_count, last_peer_id, last_reject_label)
 	var feedback_detail: String = _build_authority_feedback_detail(last_peer_id, last_reject_label, last_reject_target)
 	var visible_feedback_text: String = _build_visible_feedback_text(rejected_count, last_peer_id, last_reject_label)
+	var action_hint: Dictionary = _build_reject_action_hint(last_reason, last_peer_id, last_rejection, network_contract_snapshot)
+	var visible_action_text: String = String(action_hint.get("visible_action_text", "")).strip_edges()
+	var next_action_text: String = String(action_hint.get("next_action_text", "")).strip_edges()
+	var next_action_detail: String = String(action_hint.get("next_action_detail", "")).strip_edges()
 	var visible: bool = accepted_count > 0 or rejected_count > 0 or not last_reason.is_empty()
 	var compact_text := ""
 	if visible:
@@ -64,6 +68,8 @@ func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> D
 			tooltip_parts.append(feedback_line)
 		if not feedback_detail.is_empty():
 			tooltip_parts.append(feedback_detail)
+		if not next_action_detail.is_empty():
+			tooltip_parts.append("Next: %s" % next_action_detail)
 		if not last_reason.is_empty():
 			var peer_text: String = "Peer %d" % last_peer_id if last_peer_id > 0 else "Peer ?"
 			tooltip_parts.append("Last reject: %s | %s" % [peer_text, last_reason])
@@ -80,6 +86,11 @@ func build_authority_visual_snapshot(network_contract_snapshot: Dictionary) -> D
 		"compact_text": compact_text,
 		"visible_feedback_text": visible_feedback_text,
 		"visible_feedback_ready": not visible_feedback_text.is_empty(),
+		"visible_action_text": visible_action_text,
+		"next_action_text": next_action_text,
+		"next_action_detail": next_action_detail,
+		"next_action_ready": not next_action_text.is_empty() or not next_action_detail.is_empty(),
+		"action_followup_task_id": "TASK_650",
 		"feedback_line": feedback_line,
 		"feedback_detail": feedback_detail,
 		"tooltip_text": "\n".join(tooltip_parts),
@@ -131,6 +142,84 @@ func _build_authority_feedback_detail(peer_id: int, reject_label: String, target
 	if target_text.is_empty():
 		return "%s command blocked by server authority." % peer_text
 	return "%s cannot command %s." % [peer_text, target_text]
+
+
+func _build_reject_action_hint(reason: String, peer_id: int, last_rejection: Dictionary, network_contract_snapshot: Dictionary) -> Dictionary:
+	var normalized_reason: String = reason.strip_edges().to_lower()
+	if normalized_reason.is_empty():
+		return {}
+	var owned_team_id: String = _resolve_peer_team_id(peer_id, network_contract_snapshot)
+	var owned_team_label: String = _build_reject_action_team_label(owned_team_id)
+	match normalized_reason:
+		"peer_team_mismatch":
+			if owned_team_label.is_empty():
+				return {
+					"visible_action_text": "USE OWN TEAM",
+					"next_action_text": "Use your assigned team.",
+					"next_action_detail": "Use the fireteam assigned to this peer before issuing the command.",
+				}
+			return {
+				"visible_action_text": "USE %s" % owned_team_label,
+				"next_action_text": "Use %s fireteam." % owned_team_label,
+				"next_action_detail": "Peer %d should command the %s fireteam instead of this target." % [peer_id, owned_team_label],
+			}
+		"unit_team_mismatch":
+			return {
+				"visible_action_text": "USE OWN UNIT",
+				"next_action_text": "Select a unit from your team.",
+				"next_action_detail": "The selected unit belongs to another team; pick one of your assigned units.",
+			}
+		"fireteam_not_assigned_to_peer":
+			return {
+				"visible_action_text": "PICK ASSIGNED FT",
+				"next_action_text": "Pick an assigned fireteam.",
+				"next_action_detail": "This peer can only command fireteams assigned to its team.",
+			}
+		"peer_has_no_team":
+			return {
+				"visible_action_text": "JOIN TEAM",
+				"next_action_text": "Join or assign a team first.",
+				"next_action_detail": "This peer has no team assignment for command authority.",
+			}
+		"spectator_cannot_command":
+			return {
+				"visible_action_text": "SPECTATE ONLY",
+				"next_action_text": "Switch from spectator to a team slot.",
+				"next_action_detail": "Spectator peers cannot issue gameplay commands.",
+			}
+	if last_rejection.has("team_id") or last_rejection.has("fireteam_id"):
+		return {
+			"visible_action_text": "CHECK TEAM",
+			"next_action_text": "Check team assignment.",
+			"next_action_detail": "Review the peer/team/fireteam assignment before retrying.",
+		}
+	return {}
+
+
+func _resolve_peer_team_id(peer_id: int, network_contract_snapshot: Dictionary) -> String:
+	if peer_id <= 0:
+		return ""
+	var peer_teams: Dictionary = Dictionary(network_contract_snapshot.get("peer_teams", {}))
+	if peer_teams.has(peer_id):
+		return String(peer_teams.get(peer_id, "")).strip_edges()
+	var peer_id_text: String = str(peer_id)
+	if peer_teams.has(peer_id_text):
+		return String(peer_teams.get(peer_id_text, "")).strip_edges()
+	return ""
+
+
+func _build_reject_action_team_label(team_id: String) -> String:
+	match team_id.strip_edges().to_lower():
+		"team_alpha":
+			return "ALPHA"
+		"team_bravo":
+			return "BRAVO"
+		"":
+			return ""
+	var normalized: String = team_id.strip_edges()
+	if normalized.to_lower().begins_with("team_"):
+		normalized = normalized.substr("team_".length())
+	return normalized.to_upper()
 
 
 func _build_reject_reason_label(reason: String) -> String:

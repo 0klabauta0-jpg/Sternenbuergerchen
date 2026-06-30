@@ -5,7 +5,7 @@ extends RefCounted
 func can_issue_local_commands(simulation_root: Node, multiplayer_api: MultiplayerAPI) -> bool:
 	if simulation_root == null:
 		return true
-	if not bool(simulation_root.get("is_server_authoritative")):
+	if simulation_root.get("is_server_authoritative") != true:
 		return true
 	if multiplayer_api == null:
 		return true
