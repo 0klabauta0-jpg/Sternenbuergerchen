@@ -232,6 +232,17 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_626_host_client_real_click_review_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_625_host_client_visible_reject_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_620_host_client_badge_recapture_review.gd`, `git diff --check`.
 - Naechster Schritt: Echten Zwei-Fenster-Klicklauf mit `-Launch -CloseAfterCapture` pruefen; falls der Blocker zu leise ist, nur belegte UI-Reibung in einem kleinen Follow-up polieren.
 
+### TASK_627 - Host Client Fireteam Eventlog Overlap Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_627_host_client_fireteam_eventlog_overlap_polish.md`, `docs/tasks/TASK_626_host_client_real_click_review_evidence.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: Der frische echte Host/Client-Capture zeigte `#19 EVENT LOG` zwischen den linken Fireteam-Mini-Cards.
+- Stand: `DropLightLayoutContract.get_mission_hud_layout()` verschiebt `event_log` unter `fireteam_mini` auf `Rect2i(24, 504, 280, 184)`.
+- Stand: `MissionTacticalSandboxController._enforce_drop_light_fixed_hud_layout()` wendet den Eventlog-Rect nun ebenfalls aus dem Contract an; die Mission-Testszene besitzt denselben Default.
+- Stand: Frischer Host/Client-Capture nach TASK_627 zeigt das Eventlog unter den Fireteam-Mini-Cards in Host und Client.
+- Risiken/offen: Das Eventlog verdeckt weiterhin linke Weltflaeche, aber nicht mehr die Fireteam-Karten. `task_180_mission_drop_light_fixed_hud_layout_verifier.gd` faellt aktuell an unrelated Command-Matrix-/Selected-Fireteam-Erwartungen und bleibt Folgearbeit, falls dieser alte Vertrag wieder als Release-Gate genutzt werden soll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_627_host_client_fireteam_eventlog_overlap_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_626_host_client_real_click_review_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_620_host_client_badge_recapture_review.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `git diff --check`.
+- Naechster Schritt: Echten Zwei-Fenster-Klicklauf mit sichtbarem Reject-/Authority-Feedback oder wieder Gameplay-Feel/Mini-Szenario-Slice weiterziehen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
