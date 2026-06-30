@@ -269,6 +269,7 @@ var _npc_thought_bubbles: Array = []
 var _npc_thought_peek_active_last_frame: bool = false
 var _npc_thought_bubble_refresh_msec: int = 0
 var _last_command_text: String = "AWAITING INPUT"
+var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
 var _last_target_position: Vector2 = Vector2.ZERO
 var _lz_position: Vector2 = Vector2.ZERO
 var _has_lz_position: bool = false
@@ -16729,6 +16730,147 @@ func get_mission_interaction_use_feedback_snapshot() -> Dictionary:
 	return Dictionary(MISSION_INTERACTION_USE_FEEDBACK_SCRIPT.call("build_snapshot", use_state_snapshot, feedback_context)).duplicate(true)
 
 
+func get_mission_interaction_use_intent_snapshot() -> Dictionary:
+	if _last_mission_interaction_use_intent_snapshot.is_empty():
+		return _build_mission_interaction_use_intent_result(false, "no_intent_created")
+	return _last_mission_interaction_use_intent_snapshot.duplicate(true)
+
+
+func create_selected_mission_interaction_use_intent(interaction_id: String = "") -> Dictionary:
+	if not _can_issue_local_commands():
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "observer_mode"))
+	if preview_mode:
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "preview_mode"))
+	if _selected_fireteam_ids.is_empty():
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "no_selected_fireteam"))
+	var feedback_snapshot: Dictionary = get_mission_interaction_use_feedback_snapshot()
+	var interaction_feedback: Dictionary = _resolve_mission_interaction_feedback_for_intent(feedback_snapshot, interaction_id)
+	if interaction_feedback.is_empty():
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "no_interaction_feedback", {"feedback": feedback_snapshot}))
+	if not bool(interaction_feedback.get("can_prompt_use", false)) or String(interaction_feedback.get("status", "")).strip_edges().to_lower() != "usable":
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "interaction_not_usable", {"interaction_feedback": interaction_feedback}))
+	if not bool(interaction_feedback.get("has_marker_position", false)) or typeof(interaction_feedback.get("marker_position", null)) != TYPE_VECTOR2:
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "missing_marker_position", {"interaction_feedback": interaction_feedback}))
+	var fireteam_id: String = _resolve_fireteam_id_for_mission_interaction_intent(interaction_feedback)
+	if fireteam_id.is_empty():
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "no_matching_selected_fireteam", {"interaction_feedback": interaction_feedback}))
+	if not _is_fireteam_runtime_active(fireteam_id):
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "fireteam_not_runtime_active", {"interaction_feedback": interaction_feedback, "fireteam_id": fireteam_id}))
+	var command_type: String = _normalize_mission_interaction_required_order(String(interaction_feedback.get("required_order", interaction_feedback.get("action_label", ""))))
+	if command_type.is_empty():
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "unsupported_required_order", {"interaction_feedback": interaction_feedback}))
+	var target_position: Vector2 = Vector2(interaction_feedback.get("marker_position", Vector2.ZERO))
+	var fireteam_ids := PackedStringArray([fireteam_id])
+	var phase_index: int = _get_live_order_phase_index()
+	_replace_next_orders_for_fireteams(fireteam_ids, phase_index)
+	var waypoint_target: Dictionary = _append_waypoint_to_plan(fireteam_id, phase_index, target_position)
+	if waypoint_target.is_empty():
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "waypoint_create_failed", {"interaction_feedback": interaction_feedback, "fireteam_id": fireteam_id}))
+	var waypoint = _get_waypoint_from_ref(waypoint_target)
+	if waypoint == null:
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "waypoint_ref_failed", {"interaction_feedback": interaction_feedback, "fireteam_id": fireteam_id, "waypoint_target": waypoint_target}))
+	waypoint.command_type = command_type
+	var metadata: Dictionary = Dictionary(waypoint.metadata).duplicate(true)
+	metadata.merge({
+		"source": "mission_interaction_use_intent",
+		"interaction_id": String(interaction_feedback.get("interaction_id", "")).strip_edges(),
+		"feedback_line": String(interaction_feedback.get("feedback_line", "")).strip_edges(),
+		"required_order": String(interaction_feedback.get("required_order", "")).strip_edges().to_lower(),
+	}, true)
+	waypoint.metadata = metadata
+	_last_command_text = "USE %s -> %s" % [String(interaction_feedback.get("display_token", "INTERACTION")).strip_edges(), command_type.to_upper()]
+	var accepted_result: Dictionary = _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(true, "", {
+		"interaction_feedback": interaction_feedback,
+		"fireteam_id": fireteam_id,
+		"command_type": command_type,
+		"target_position": target_position,
+		"waypoint_id": String(waypoint.waypoint_id),
+		"phase": phase_index,
+		"last_command_text": _last_command_text,
+	}))
+	_refresh_order_visuals()
+	_update_ui()
+	_emit_planning_state_changed()
+	return accepted_result
+
+
+func _resolve_mission_interaction_feedback_for_intent(feedback_snapshot: Dictionary, interaction_id: String) -> Dictionary:
+	var normalized_interaction_id: String = interaction_id.strip_edges()
+	if normalized_interaction_id.is_empty():
+		return Dictionary(feedback_snapshot.get("primary_feedback", {})).duplicate(true)
+	for entry_variant in Array(feedback_snapshot.get("feedback_entries", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("interaction_id", "")).strip_edges() == normalized_interaction_id:
+			return entry.duplicate(true)
+	return {}
+
+
+func _resolve_fireteam_id_for_mission_interaction_intent(interaction_feedback: Dictionary) -> String:
+	var nearest_fireteam_id: String = String(interaction_feedback.get("nearest_fireteam_id", "")).strip_edges().to_lower()
+	if not nearest_fireteam_id.is_empty() and _selected_fireteam_ids.has(nearest_fireteam_id):
+		return nearest_fireteam_id
+	if _selected_fireteam_ids.size() == 1:
+		return String(_selected_fireteam_ids[0]).strip_edges().to_lower()
+	return ""
+
+
+func _normalize_mission_interaction_required_order(required_order: String) -> String:
+	match required_order.strip_edges().to_lower():
+		"move":
+			return FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_MOVE
+		"defend", "hold":
+			return FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND
+		"take", "operate", "breach":
+			return FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_TAKE
+		"flank":
+			return FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK
+		_:
+			return ""
+
+
+func _build_mission_interaction_use_intent_result(accepted: bool, blocked_reason: String = "", extra: Dictionary = {}) -> Dictionary:
+	var interaction_feedback: Dictionary = Dictionary(extra.get("interaction_feedback", {}))
+	var result: Dictionary = {
+		"schema": "sternenbuergerchen.mission_interaction_use_intent.v1",
+		"runtime_authority": "SimulationRoot via MissionTacticalSandboxController GO path",
+		"accepted": accepted,
+		"blocked_reason": blocked_reason,
+		"creates_order_intent": accepted,
+		"requires_go": accepted,
+		"scenario_truth_read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"interaction_id": String(interaction_feedback.get("interaction_id", extra.get("interaction_id", ""))).strip_edges(),
+		"feedback_line": String(interaction_feedback.get("feedback_line", "")).strip_edges(),
+		"action_label": String(interaction_feedback.get("action_label", "")).strip_edges(),
+		"fireteam_id": String(extra.get("fireteam_id", "")).strip_edges().to_lower(),
+		"command_type": String(extra.get("command_type", "")).strip_edges().to_lower(),
+		"target_position": extra.get("target_position", null),
+		"waypoint_id": String(extra.get("waypoint_id", "")).strip_edges(),
+		"phase": int(extra.get("phase", -1)),
+		"last_command_text": String(extra.get("last_command_text", _last_command_text)).strip_edges(),
+	}
+	if extra.has("waypoint_target"):
+		result["waypoint_target"] = Dictionary(extra.get("waypoint_target", {})).duplicate(true)
+	if extra.has("feedback"):
+		result["feedback"] = Dictionary(extra.get("feedback", {})).duplicate(true)
+	return result
+
+
+func _store_mission_interaction_use_intent_result(result: Dictionary) -> Dictionary:
+	var snapshot: Dictionary = result.duplicate(true)
+	if not bool(snapshot.get("accepted", false)):
+		var blocked_reason: String = String(snapshot.get("blocked_reason", "blocked")).strip_edges().to_upper()
+		_last_command_text = "USE BLOCKED %s" % blocked_reason
+		snapshot["last_command_text"] = _last_command_text
+	_last_mission_interaction_use_intent_snapshot = snapshot.duplicate(true)
+	if bool(snapshot.get("accepted", false)):
+		return _last_mission_interaction_use_intent_snapshot.duplicate(true)
+	_update_ui()
+	return _last_mission_interaction_use_intent_snapshot.duplicate(true)
+
+
 func _build_mission_interaction_runtime_use_context_for_readability() -> Dictionary:
 	return {
 		"current_team_id": FRIENDLY_TEAM_ID,
@@ -17527,6 +17669,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
+	var mission_interaction_use_intent: Dictionary = get_mission_interaction_use_intent_snapshot()
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -17591,6 +17734,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_use_feedback": mission_interaction_use_feedback,
 		"mission_interaction_use_feedback_line": String(mission_interaction_use_feedback.get("feedback_line", "")),
 		"mission_interaction_use_feedback_action": String(mission_interaction_use_feedback.get("action_label", "")),
+		"mission_interaction_use_intent": mission_interaction_use_intent,
+		"mission_interaction_use_intent_accepted": bool(mission_interaction_use_intent.get("accepted", false)),
+		"mission_interaction_use_intent_command_type": String(mission_interaction_use_intent.get("command_type", "")),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),

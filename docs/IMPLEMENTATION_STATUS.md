@@ -726,6 +726,16 @@
 - Lokale Pruefung: `task_676_mission_interaction_use_feedback.gd`, `task_675_mission_interaction_runtime_use_state.gd`, `git diff --check`.
 - Naechster Schritt: Kleiner Use-Command/Interaction-Intent, der ueber den autoritativen Command-/SimulationRoot-Pfad laeuft.
 
+### TASK_677 - Mission Interaction Use Intent
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_677_mission_interaction_use_intent.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/tasks/TASK_676_mission_interaction_use_feedback.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `create_selected_mission_interaction_use_intent()` erzeugt aus nutzbarem Interaction-Feedback einen geplanten `take`-/`defend`-Waypoint fuer das passende Fireteam.
+- Stand: Cargo-Hold erzeugt `defend`, Station-Computer erzeugt `take`; blockierte oder nicht nutzbare Interactions erzeugen keinen Waypoint und liefern `blocked_reason`.
+- Stand: Der letzte Intent wird ueber `get_mission_interaction_use_intent_snapshot()` und `get_command_feedback_snapshot().mission_interaction_use_intent` exportiert; Scenario-/Objective-Wahrheit bleibt unveraendert.
+- Risiken/offen: Noch kein Runtime-Fortschrittsproducer und kein Gate-Abschluss aus Hold-/Operate-State.
+- Lokale Pruefung: `task_677_mission_interaction_use_intent.gd`, `task_676_mission_interaction_use_feedback.gd`, `git diff --check`.
+- Naechster Schritt: Runtime-Fortschrittsproducer fuer Computer-/Hold-Zonen oder FullHD-Sichtlauf fuer Interaction-Labels.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

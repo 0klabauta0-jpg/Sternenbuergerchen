@@ -90,6 +90,7 @@ static func _build_feedback_entry(interaction: Dictionary, selected_fireteam_ids
 		"feedback_line": line,
 		"detail_text": _build_detail_text(status, interaction, distance_world, radius_world, hold_seconds, duration_seconds),
 		"action_label": _build_action_label(status, required_order),
+		"required_order": required_order.to_lower(),
 		"severity": _severity_for_status(status),
 		"priority": int(STATUS_PRIORITY.get(status, STATUS_PRIORITY.get(STATUS_UNKNOWN, 99))),
 		"can_prompt_use": status == STATUS_USABLE or status == STATUS_IN_PROGRESS,
@@ -100,6 +101,8 @@ static func _build_feedback_entry(interaction: Dictionary, selected_fireteam_ids
 		"progress": progress,
 		"hold_seconds": hold_seconds,
 		"duration_seconds": duration_seconds,
+		"marker_position": interaction.get("marker_position", Vector2.ZERO),
+		"has_marker_position": bool(interaction.get("has_marker_position", false)),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
