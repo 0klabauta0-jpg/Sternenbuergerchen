@@ -332,6 +332,7 @@ git checkout -b batch/<batch-name>
 - TASK_701 - Door Authority Feedback Polish (implementiert)
 - TASK_702 - Door Authority Compact HUD Surface (implementiert)
 - TASK_703 - Door Authority Button Affordance (implementiert)
+- TASK_704 - Host/Client Door Real Click Findings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

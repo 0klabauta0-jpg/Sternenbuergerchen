@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_704 - Host/Client Door Real Click Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_704_host_client_door_real_click_findings.md`, `docs/tasks/TASK_700_host_client_door_real_click_workbench.md`, `docs/tasks/TASK_703_door_authority_button_affordance.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionHostClientDoorRealClickFindings` trennt technische Door-Capture-Evidence von offenen menschlichen Host/Client-Klickbeobachtungen.
+- Stand: Das Findings-Snapshot exportiert `technical_path_gate`, `manual_click_findings_gate`, `confirmed_findings`, `open_manual_findings` und `recommended_next_task`.
+- Stand: Die TASK_700-Workbench empfiehlt jetzt TASK_704 als Findings-Folgepfad statt der alten 703-Nummer.
+- Risiken/offen: Der echte Zwei-Fenster-Klicklauf bleibt manuell offen; TASK_704 macht diese Luecke sichtbar und leitet TASK_705 ab.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_704_host_client_door_real_click_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_703_door_authority_button_affordance.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_700_host_client_door_real_click_workbench.gd`, `git diff --check`.
+- Naechster Schritt: TASK_705 - Host/Client Door Real Click Manual Run oder Mission Door Layout/Visual Polish nach echten Notizen.
+
 ### TASK_703 - Door Authority Button Affordance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_703_door_authority_button_affordance.md`, `docs/tasks/TASK_702_door_authority_compact_hud_surface.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
@@ -28,7 +38,7 @@
 - Stand: Der Verifier prueft die kompakte Ready-Zeile im echten Mission-Scene-Command-Feedback.
 - Risiken/offen: Der echte Host/Client-Fensterklicktest bleibt offen; diese Surface-Aenderung reduziert nur Leselast und Overlap-Risiko.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_702_door_authority_compact_hud_surface.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_701_door_authority_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_698_door_authority_ui_feedback.gd`, `git diff --check`.
-- Naechster Schritt: TASK_703 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
+- Naechster Schritt: TASK_704 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
 
 ### TASK_701 - Door Authority Feedback Polish
 - Status: implementiert im Arbeitsstand
@@ -38,7 +48,7 @@
 - Stand: Der TacticalController reicht die neuen Felder an Button-Snapshots und Command-Feedback weiter.
 - Risiken/offen: Der echte Host/Client-Klicklauf bleibt manuell offen; TASK_701 verbessert die erwartete Lesbarkeit vor dem Sichtentscheid.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_701_door_authority_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_698_door_authority_ui_feedback.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_699_multiplayer_door_feedback_capture.gd`, `git diff --check`.
-- Naechster Schritt: TASK_703 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
+- Naechster Schritt: TASK_704 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
 
 ### TASK_700 - Host/Client Door Real Click Workbench
 - Status: implementiert im Arbeitsstand
@@ -48,7 +58,7 @@
 - Stand: Die Workbench exportiert lokale JSON-Notizen zu Host, Client, Reject, Door-Open, Timing und naechster Polish-Aktion.
 - Risiken/offen: Der echte Zwei-Fenster-Klicklauf ist weiterhin manuell offen; TASK_700 macht ihn reproduzierbar notierbar, behauptet ihn aber nicht.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_700_host_client_door_real_click_workbench.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_699_multiplayer_door_feedback_capture.gd`, `git diff --check`.
-- Naechster Schritt: TASK_703 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
+- Naechster Schritt: TASK_704 - Host/Client Door Real Click Findings oder Mission Door Layout/Visual Polish.
 
 ### TASK_699 - Multiplayer Door Feedback Capture
 - Status: implementiert im Arbeitsstand

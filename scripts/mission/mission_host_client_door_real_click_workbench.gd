@@ -99,10 +99,10 @@ static func _count_completed_checks(required_checks: Array) -> int:
 
 static func _recommended_next_task(manual_review_done: bool, existing_notes: Dictionary) -> String:
 	if not manual_review_done:
-		return "TASK_703 - Host/Client Door Real Click Findings"
+		return "TASK_704 - Host/Client Door Real Click Findings"
 	if _has_negative_note(existing_notes):
-		return "TASK_703 - Mission Door Layout/Visual Polish"
-	return "TASK_703 - Host/Client Door Flow Acceptance"
+		return "TASK_704 - Mission Door Layout/Visual Polish"
+	return "TASK_704 - Host/Client Door Flow Acceptance"
 
 
 static func _has_negative_note(existing_notes: Dictionary) -> bool:
