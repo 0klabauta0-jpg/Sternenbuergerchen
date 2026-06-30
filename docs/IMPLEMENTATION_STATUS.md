@@ -283,6 +283,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_631_frontier_probe_mini_scenario_visual_feel_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_630_frontier_probe_mini_scenario_feel_route.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_632 - Frontier Probe Mini Scenario F6 Visual Review`, damit die Callouts im echten Fensterbild bewertet werden.
 
+### TASK_632 - Frontier Probe Mini Scenario F6 Visual Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_632_frontier_probe_mini_scenario_f6_visual_review.md`, `docs/tasks/TASK_631_frontier_probe_mini_scenario_visual_feel_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `scripts/tests/task_632_frontier_probe_mini_scenario_f6_visual_review.gd` baut den Frontier-Probe-Abschlusszustand aus TASK_631 auf und schreibt `tmp/frontier_probe_mini_scenario_f6_visual_review.png` plus `tmp/frontier_probe_mini_scenario_f6_visual_review.json`.
+- Stand: Das Manifest belegt TASK_631-Gate, vier Route-Callouts, Tone-Counts, Primary3D-Callout-Count, Route-Summary und den Headless-Fallback als markiertes Evidence-Board.
+- Risiken/offen: TASK_632 macht den F6-Sichtentscheid reviewbar, ersetzt aber keinen finalen menschlichen Fensterblick. Der naechste konkrete Griff ist ein Callout-Layout-Finding/Polish oder ein echter Host/Client-Klicklauf, falls dort Reibung brennt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_632_frontier_probe_mini_scenario_f6_visual_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_631_frontier_probe_mini_scenario_visual_feel_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_630_frontier_probe_mini_scenario_feel_route.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_633 - Frontier Probe Mini Scenario Callout Layout Findings`, wenn das Evidence-Bild konkrete Platzierungs- oder Lesbarkeitsreibung zeigt.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

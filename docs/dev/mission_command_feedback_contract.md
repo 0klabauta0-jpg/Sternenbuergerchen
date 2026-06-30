@@ -419,6 +419,11 @@ TASK_631 macht die TASK_630-Route im vorhandenen Primary3D-/Mission-Status-Pfad 
 
 Erwartete Struktur: `get_frontier_probe_mini_scenario_visual_feel_polish_snapshot()` enthaelt `schema = sternenbuergerchen.frontier_probe_mini_scenario_visual_feel_polish.v1`, `task_id = TASK_631`, `route_id = frontier_probe_aa_computer_cargo`, `route_callouts`, `route_callout_count`, `route_callout_tone_counts`, `route_callout_summary`, `mission_control_route_line`, `primary_3d`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_632 - Frontier Probe Mini Scenario F6 Visual Review`. Erwartete Callouts: `LZ`/safe an `spawn_alpha`, `AA`/danger an `factory_danger_zone`, `COM 18s`/objective an `objective_point` und `CARGO`/cargo an `spawn_alpha`.
 
+## Frontier-Probe-Mini-Scenario-F6-Visual-Review
+TASK_632 erzeugt aus dem TASK_631-Route-Callout-Zustand ein lokales F6-Review-Paket. Der Verifier darf den Missionszustand fuer den Review vorbereiten, den vorhandenen TASK_631-Snapshot lesen und ein PNG/JSON-Artefakt unter `tmp/` schreiben. Wenn im Headless-Lauf kein echter Viewport-Readback verfuegbar ist, muss das PNG klar als Evidence-Board markiert sein. Das Paket bleibt read-only: Es darf keine Objective-, Cargo-, Command-, Combat-, Movement-, Peer- oder Gameplay-Wahrheit setzen.
+
+Erwartete Manifest-Struktur: `schema = sternenbuergerchen.frontier_probe_mini_scenario_f6_visual_review.v1`, `task_id = TASK_632`, `source_task_id = TASK_631`, `capture_type = frontier_probe_mini_scenario_f6_visual_review`, `png_path`, `manifest_path`, `viewport_readback_available`, `generated_evidence_board`, `source_gate`, `route_callouts`, `route_callout_count`, `route_callout_tone_counts`, `route_callout_summary`, `mission_control_route_line`, `primary_3d_route_callout_count`, `primary_3d_route_callout_summary`, `evidence_board_regions`, `evidence_board_readability_gate = pass`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_633 - Frontier Probe Mini Scenario Callout Layout Findings`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

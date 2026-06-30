@@ -48,8 +48,8 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_627 - Host Client Fireteam Eventlog Overlap Polish (implementiert)"), "Roadmap marks TASK_627 implemented")
 	_assert(contract_text.contains("Host-Client-Fireteam-Eventlog-Overlap-Polish"), "Mission feedback contract documents TASK_627")
 	_assert(report_text.contains("TASK_627 Host Client Fireteam Eventlog Overlap Polish"), "Rolling report tracks TASK_627")
-	_assert(report_text.contains('latest_completed_task: "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"'), "Rolling report advances latest completed beyond TASK_627")
-	_assert(handbook_text.contains('current_task: "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"'), "Status handbook current task advances beyond TASK_627")
+	_assert(report_text.contains('latest_completed_task: "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"'), "Rolling report advances latest completed beyond TASK_627")
+	_assert(handbook_text.contains('current_task: "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"'), "Status handbook current task advances beyond TASK_627")
 	_assert(controller_text.contains("_apply_fixed_hud_window_contract(TACTICAL_EVENT_LOG_PANEL_PATH, layout.get(\"event_log\"))"), "Controller applies event log from layout contract")
 	_assert(scene_text.contains("offset_top = 504.0") and scene_text.contains("offset_bottom = 688.0"), "Mission scene default event log is below mini cards")
 
