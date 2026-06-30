@@ -111,6 +111,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Cargo-Landing-Hold setzt `requires_step_id = disable_air_defense`, damit die bestehende AA-vor-Cargo-Regel ohne JSON-Handarbeit authorbar bleibt.
 - `get_mission_interaction_binding_editor_snapshot()` exportiert `available_presets`, `selected_preset_id` und `preset_preview`, bleibt aber weiter `ui_sets_gameplay_truth = false`.
 
+## Editor FullHD Sight Evidence
+- Der FullHD-Sichtpass fuer Interaction-Bindings erzeugt ein read-only Evidenzpaket aus Map-Editor-Snapshot, Inspector-Snapshot, Binding-Editor-Snapshot und sichtbaren Control-Pfaden.
+- Der Verifier darf den Editor bei `1920 x 1080` instanziieren, einen Marker selektieren, ein Preset in die sichtbaren Felder laden und daraus PNG/JSON unter `tmp/` schreiben.
+- Das Evidenzpaket darf Bedienbarkeit, Sichtbarkeit, Scroll-Erreichbarkeit und Preset-Dichte bewerten, aber keine Runtime-Interaction starten und keine Gameplay-Wahrheit setzen.
+- `manual_fullhd_review_required = true` bleibt gesetzt, bis ein echter sichtbarer Fensterlauf mit menschlichem Sichtentscheid vorliegt.
+
 ## Nicht-Ziele
 - Kein neues Door-State-System.
 - Kein Computer-Hack-Minispiel.
@@ -119,4 +125,4 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Keine neue UI-Parallelwahrheit fuer Missionsfortschritt.
 
 ## Naechste Slices
-- Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild.
+- Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

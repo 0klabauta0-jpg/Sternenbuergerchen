@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_683 - Map Editor Interaction FullHD Sight Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_683_map_editor_interaction_fullhd_sight_pass.md`, `docs/tasks/TASK_682_mission_interaction_binding_presets.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `scripts/tests/task_683_map_editor_interaction_fullhd_sight_pass.gd` erzeugt ein FullHD-Evidenzpaket fuer den Map-Editor-Interaction-Binding-Bereich.
+- Stand: Das Manifest nennt Viewport, aktiven Marker, Presetkatalog, Preset-Vorschau, Inspector-/Editor-Snapshots und sichtbare UI-Pfade fuer Property-Panel, Markerpanel, Inspector, Editor, Preset, Apply und Remove.
+- Stand: Das PNG unter `tmp/map_editor_interaction_fullhd_sight_pass.png` ist im GUI-Lauf ein Viewport-Readback und im Headless-Lauf ein generiertes Review-Board aus denselben Daten.
+- Risiken/offen: Der echte menschliche FullHD-Sichtentscheid bleibt offen; dieser Slice beweist Struktur, Sichtpfade und Read-only-Grenze, aber nicht finalen Bedienkomfort.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_683_map_editor_interaction_fullhd_sight_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_682_mission_interaction_binding_presets.gd`, `git diff --check`.
+- Naechster Schritt: Echter sichtbarer Fensterlauf oder gezielter Layout-Polish, falls das TASK_683-Paket zu dichte Marker-/Binding-Bereiche zeigt.
+
 ### TASK_682 - Mission Interaction Binding Presets
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_682_mission_interaction_binding_presets.md`, `docs/tasks/TASK_681_mission_interaction_binding_editor.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
