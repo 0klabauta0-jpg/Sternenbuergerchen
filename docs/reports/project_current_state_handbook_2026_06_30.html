@@ -143,6 +143,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_683_done"> TASK_683 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_684_done"> TASK_684 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_685_done"> TASK_685 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_686_done"> TASK_686 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -664,6 +665,20 @@
           <textarea data-export-key="mission_interaction_objective_gate.findings" placeholder="Naechster Test: Fuehlt sich die Objective-Reihenfolge im echten Missionslauf klar an?"></textarea>
           <div contenteditable="true" data-note-key="notes.mission_interaction_objective_gate" data-placeholder="TASK_685-Notizen...">TASK_685 ersetzt keinen Sichttest. Es macht aber den Spielablauf robuster: UI, Tests und spaetere Multiplayer-Reviews koennen jetzt aus einem Snapshot lesen, ob AA, COM oder CARGO als naechstes dran ist.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_686 - Mission Interaction Visual State</h2>
+          <p>AA, Station-Computer und Cargo-Hold bekommen jetzt read-only Visualstate-Eintraege fuer die 3D-Missionsansicht. Der Controller liefert Labels wie `NEXT AA`, `COM 9/18s` oder `CARGO APPROACH`; die Terrainansicht zeichnet nur Marker/Labels und exportiert Render-Snapshot-Zaehler.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_state.snapshot"> Visualstate-Snapshot vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_state.next_label"> Naechster Objective-Schritt wird als NEXT markiert</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_state.com_progress"> Computer-Fortschritt wird als COM-Fortschritt lesbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_state.render_snapshot"> 3D-Render-Snapshot exportiert Eintraege und Tones</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_visual_state.no_gameplay_truth"> Visualstate meldet `ui_sets_gameplay_truth = false`</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mission_interaction_visual_state.manual_review_done"> Echter Missionsfenster-Sichtentscheid erledigt</label>
+          <input readonly value="tmp/mission_interaction_visual_state.json" data-export-key="mission_interaction_visual_state.manifest_path">
+          <input readonly value="TASK_686 - Mission Interaction Visual State" data-export-key="mission_interaction_visual_state.completed_task">
+          <textarea data-export-key="mission_interaction_visual_state.findings" placeholder="Beim echten Missionslauf notieren: Sind COM/AA/CARGO-Labels lesbar, stoeren sie die Karte, ist NEXT sofort klar?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_visual_state" data-placeholder="TASK_686-Notizen...">TASK_686 macht den Objective-Zustand direkt am Missionsobjekt lesbar. Es ersetzt noch keine echten Door-/Computer-Animationen; das ist der naechste visuelle Runtime-Schritt.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -683,19 +698,19 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Door-/Computer-Visualstate</strong> ist jetzt der beste autonome Anschluss: Die Objective-Gates sind zusammengefuehrt, nun sollten Stationselemente sichtbar auf `geschlossen`, `bedient`, `offen/aktiv` reagieren.</p>
-          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. Alternativ kann ein echter Zwei-Fenster-Klicklauf weiterhin die TASK_666-Notizen fuellen.</div>
+          <p><strong>Echte Door-/Computer-Objektreaktion</strong> ist jetzt der beste autonome Anschluss: Die Objective-Gates sind zusammengefuehrt und die Missionsansicht hat read-only Visualstate-Labels. Nun sollten Stationselemente sichtbar auf `geschlossen`, `bedient`, `offen/aktiv` reagieren.</p>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. Alternativ kann ein echter Zwei-Fenster-Klicklauf weiterhin die TASK_666-Notizen fuellen.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
-          <p>Falls du zuerst Content bauen willst: Der naechste praktische Hebel ist Door-/Computer-Interaktion, damit Stationsteile nicht nur schoen gesetzt werden, sondern im Mission-Flow auch spielerisch etwas bedeuten.</p>
+          <p>Falls du zuerst Content bauen willst: Der naechste praktische Hebel ist ein echter Missionsfenster-Sichtlauf, damit die neuen AA/COM/CARGO-Labels nicht nur im Snapshot, sondern auch im Bild gut funktionieren.</p>
         </article>
         <article class="card full">
           <h2>Vorgeschlagene Reihenfolge</h2>
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Door-/Computer-Visualstate</td><td>Runtime-Gates sichtbar an Stationselemente anbinden, ohne Tile-Wahrheit zu mutieren.</td></tr>
+              <tr><td>1</td><td>Door-/Computer-Objektreaktion</td><td>Open/Closed/Active-Zustand an echte Stationselemente anbinden, ohne UI-Wahrheit zu erzeugen.</td></tr>
               <tr><td>2</td><td>Echter Host/Client-Zwei-Fenster-Klicklauf</td><td>TASK_666-Notizen mit menschlichem Bedienbefund fuellen.</td></tr>
               <tr><td>3</td><td>FullHD Sichtfeinschliff fuer Mission-Interactions</td><td>Nur falls die Objective-/Progress-Zeilen im echten Fenster zu dicht wirken.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>

@@ -97,6 +97,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Die Sequenz bleibt datengetrieben aus Scenario-Gates: `disable_air_defense`, `occupy_station_computer`, `cargo_touchdown_extract`.
 - Der Snapshot darf keine Gates setzen, keine Interaktion starten und keine UI-Wahrheit speichern. Completion kommt weiter aus `MissionScenarioRuntimeGates` und Interaction-Runtime-Progress.
 
+## Visual State Snapshot
+- `MissionInteractionVisualState` uebersetzt bestehende Runtime-Use-State- und Objective-Gate-Snapshots in kurze Objektlabels fuer die Missionsansicht.
+- `MissionTacticalSandboxController.get_mission_interaction_visual_state_snapshot()` liefert `entries` mit Interaction-ID, Typ, Step, Marker, Weltposition, Token, Status, Tone, Label und `is_next`.
+- Tokens sind bewusst kurz: `AA`, `COM`, `CARGO`, `DOOR`, sonst `INT`.
+- Statuslabels sind Anzeigezustand: `OK`, `READY`, `APPROACH`, `BLOCKED`, `INTERRUPTED` oder Fortschritt wie `9/18s`.
+- Die 3D-Ansicht darf daraus Marker/Labels zeichnen und `get_render_snapshot()`-Zaehler exportieren, aber keine Scenario-Gates, Door-States, Cargo-States oder Runtime-Progress setzen.
+- Der Snapshot ist read-only, markiert `ui_sets_gameplay_truth = false` und nutzt `MissionInteractionRuntimeUseState`/`MissionInteractionObjectiveGate` als Quellen.
+
 ## Editor Binding Inspector
 - `MapEditor.get_mission_interaction_binding_inspector_snapshot()` liest das aktuelle `MissionScenarioData.get_interaction_point_binding_snapshot()` zusammen mit der aktuellen `TerrainMapData`.
 - Der Snapshot nennt `binding_count`, `bound_marker_ids`, `missing_marker_ids`, Status-/Typ-Zaehler und die Bindings des selektierten Markers.
