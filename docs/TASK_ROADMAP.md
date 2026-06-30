@@ -337,6 +337,7 @@ git checkout -b batch/<batch-name>
 - TASK_706 - Mission Door Layout/Visual Polish (implementiert)
 - TASK_707 - Mission Door/Computer/Cargo Smoke (implementiert)
 - TASK_708 - Station Route Visual Evidence (implementiert)
+- TASK_709 - Station Route Window Playtest Notes (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
