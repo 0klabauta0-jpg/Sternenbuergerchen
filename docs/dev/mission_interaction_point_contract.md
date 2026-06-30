@@ -193,6 +193,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Das Capture ersetzt keinen echten Zwei-Fenster-Test; es bereitet ihn mit vergleichbaren Host-/Client-Daten vor.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Host/Client Door Real Click Workbench
+- `MissionHostClientDoorRealClickWorkbench` erzeugt eine read-only Notizschale fuer den echten Host-/Client-Door-Klicklauf.
+- Der Snapshot darf TASK_699-Capture-Daten als Quelle nennen, aber keine Door-, Terrain-, Multiplayer- oder Mission-Wahrheit setzen.
+- Required-Checks betreffen Host-Fenster, Client-Fenster, Door-Breach-Button, Shortcut `B`, GO-Pflicht, Wrong-Team-Reject, Door-Open auf Host/Client und HUD-Lesbarkeit.
+- `manual_review_done` bleibt false, bis ein Mensch die Workbench bewusst ausfuellt und den Door-Klickentscheid markiert.
+- Die HTML-Workbench `docs/reports/host_client_door_real_click_workbench_2026_06_30.html` exportiert lokale JSON-Arbeitsnotizen zu Host, Client, Reject, Door-Open, Timing und naechster Polish-Aktion.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht; der echte Command-Pfad bleibt Button/Shortcut -> Hook -> GO -> SimulationRoot/Runtime-Progress.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
