@@ -371,6 +371,8 @@ if ($Launch) {
 }
 
 $visibleRejectReviewReady = [bool]($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten)
+$decisionDrillPacketPath = Join-Path $tmpDir "host_client_decision_drill_click_evidence.json"
+$decisionDrillPacketPresent = Test-Path -LiteralPath $decisionDrillPacketPath
 
 $manifest = [ordered]@{
     schema = "sternenbuergerchen.host_client_two_window_real_run_review.v1"
@@ -422,6 +424,28 @@ $manifest = [ordered]@{
         "snapshot_sync_after_reject",
         "host_client_focus_recovered"
     )
+    decision_drill_capture_task_id = "TASK_662"
+    decision_drill_source_packet_task_id = "TASK_661"
+    decision_drill_source_packet_path = "tmp/host_client_decision_drill_click_evidence.json"
+    decision_drill_source_packet_present = [bool]$decisionDrillPacketPresent
+    decision_drill_expected_wrong_context_reason = "peer_team_mismatch"
+    decision_drill_expected_block_text = "BLOCK P2 wrong team"
+    decision_drill_expected_action_text = "USE BRAVO"
+    decision_drill_expected_next_token = "AA"
+    decision_drill_expected_recommended_plan_id = "aa_first_push"
+    decision_drill_expected_correct_fireteam = "bravo"
+    decision_drill_expected_confirm_control = "GO"
+    decision_drill_review_required = $true
+    decision_drill_review_done = $false
+    decision_drill_review_gate = $(if ($visibleRejectReviewReady -and $decisionDrillPacketPresent) { "review_ready" } else { "manual_open" })
+    decision_drill_manual_checks = @(
+        "peer2_alpha_reject_clicked",
+        "use_bravo_visible",
+        "bravo_context_selected",
+        "next_aa_visible_after_context_switch",
+        "move_preview_readable_before_go",
+        "go_feedback_visible_after_confirm"
+    )
     close_after_capture = [bool]$CloseAfterCapture
     wait_seconds = $WaitSeconds
     planned_godot_bin = $plannedGodotBin
@@ -453,6 +477,11 @@ $manifest = [ordered]@{
         "visible_reject_feedback_readable",
         "visible_reject_action_cue_readable",
         "peer2_alpha_reject_click_review",
+        "decision_drill_use_bravo_visible",
+        "decision_drill_bravo_context_selected",
+        "decision_drill_next_aa_visible",
+        "decision_drill_preview_before_go",
+        "decision_drill_go_feedback_visible",
         "input_latency_after_reject",
         "f6_readability",
         "performance_feel",
@@ -463,6 +492,7 @@ $manifest = [ordered]@{
     recommended_next_capture_task = "TASK_618 - Host Client Standard Capture Crop Review"
     recommended_next_badge_review_task = "TASK_620 - Host Client Badge Re-Capture Review"
     recommended_next_real_click_review_task = "TASK_626 - Host Client Real Click Review Evidence"
+    recommended_next_decision_drill_capture_task = "TASK_663 - Host Client Decision Drill Visual Findings"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
