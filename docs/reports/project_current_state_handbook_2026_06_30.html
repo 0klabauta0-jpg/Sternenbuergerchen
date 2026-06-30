@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_684: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_666: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_684</span>
-      <span class="pill">Naechster Kandidat: echter Editor-Fensterlauf oder Host/Client-Klick</span>
+      <span class="pill">Letzter Stand: TASK_666</span>
+      <span class="pill">Naechster Kandidat: Mission-Interaction-Progress oder echter Host/Client-Klick</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_684 - Map Editor Interaction Focus Scroll ist der aktuelle Abschlussstand: Markerauswahl, Preset-Apply sowie Binding-Apply/Remove holen den Interaction-Binding-Bereich im rechten Panel in den Blick. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
+          <div class="callout">TASK_666 - Host Client Decision Drill Real Click Findings ist der aktuelle Abschlussstand: Der technische Multiplayer-Decision-Drill ist gruen, das echte Capture ist review-ready, aber der menschliche Zwei-Fenster-Klickbefund bleibt offen und wird nicht behauptet.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -123,6 +123,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_663_done"> TASK_663 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_664_done"> TASK_664 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_665_done"> TASK_665 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_666_done"> TASK_666 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_667_done"> TASK_667 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_668_done"> TASK_668 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_669_done"> TASK_669 erledigt</label>
@@ -166,9 +167,9 @@
           <table>
             <thead><tr><th>Bereich</th><th>Traegt bereits</th><th>Reibt noch</th><th>Naechster guter Griff</th></tr></thead>
             <tbody>
-              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Klick-Recheck nach TASK_663 ist weiter offen.</td><td>TASK_666: echten Fensterbefund festhalten.</td></tr>
+              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Klick-Recheck bleibt offen, ist aber nun als TASK_666-Findings-Gate klar getrennt.</td><td>Mission-Interaction-Progress sichtbar pruefen.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
-              <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Das neue Fireteamkarten-Badge muss noch im echten Klicklauf beweisen, dass Peer 2 schneller zum Bravo-Kontext findet.</td><td>TASK_666: echte Klick-Findings auswerten.</td></tr>
+              <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete, `USE BRAVO`-Follow-up und TASK_666-Findings-Gate existieren.</td><td>Ob Peer 2 im echten Bedienlauf schneller zu Bravo findet, bleibt menschlicher Fensterbefund.</td><td>Echten Klicklauf ausfuellen oder autonom Mission-Lesbarkeit weiterbauen.</td></tr>
               <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow, Builder-Spikes, persistente Palette-Hilfen, Scale-/Rotation-Overrides, Drag-Preview-Handles, Auto-Snapping, FullHD-Preview-Labels, Interaction-Point-Marker, Frontier-Probe-Bindings, Runtime-Use-State, Use-Feedback, Use-Intent, Runtime-Progress, Binding-Inspector, Binding-Editor, Binding-Presets, FullHD-Evidenzpaket und Binding-Fokus-Scroll sind vorhanden.</td><td>Der Mapbau braucht noch echten Fenster-Sichtentscheid, Sicht-Feinjustierung und spaeter geteilte Projektprofile.</td><td>Echter FullHD-Fensterlauf oder naechster Mission-Sichtpass.</td></tr>
               <tr><td>Performance/Export</td><td>Large-Map-, Hotpath- und Export-Hygiene wurden mehrfach geprueft.</td><td>Neue UI-Listen, Reports und Map-Assets koennen wieder verdeckte Kosten erzeugen.</td><td>Nach jedem groesseren UI-/Map-Schub Smoke + Export-Check laufen lassen.</td></tr>
             </tbody>
@@ -234,7 +235,7 @@
             <tbody>
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
-              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>TASK_665 prueft die technische Kette; TASK_666 braucht den echten Klickbefund.</td></tr>
+              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>TASK_666 trennt Technik-gruen von offenem menschlichem Bedienbefund; der echte Klicklauf bleibt auszufuellen.</td></tr>
               <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_684 nimmt das erste konkrete Scroll-Gefuehl-Problem raus; als naechstes fehlen echter Fenster-Sichtentscheid, ggf. gezielter Polish und geteilte Profile.</td></tr>
             </tbody>
           </table>
@@ -418,6 +419,22 @@
           <input readonly value="TASK_666 - Host Client Decision Drill Real Click Findings" data-export-key="host_client_decision_drill_technical_guard.recommended_next_task">
           <textarea data-export-key="host_client_decision_drill_technical_guard.findings" placeholder="Nach echtem Fensterlauf notieren: Was war trotz technischem Guard noch verwirrend?"></textarea>
           <div contenteditable="true" data-note-key="notes.host_client_decision_drill_technical_guard" data-placeholder="TASK_665-Notizen...">TASK_665 beweist den technischen Host/Client-Decision-Drill ohne Klickbot: Authority, `USE BRAVO`, `P2 BRAVO`, `NEXT AA`, Preview und GO/Execution bleiben zusammen konsistent. Bediengefuehl bleibt TASK_666.</div>
+        </article>
+        <article class="card full">
+          <h2>TASK_666 - Host Client Decision Drill Real Click Findings</h2>
+          <p>Das Findings-Gate fasst die Beweislage zusammen: Der technische Pfad ist gruen, das echte Capture ist review-ready, aber ein menschlicher Zwei-Fenster-Klickbefund ist noch nicht eingetragen.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_real_click_findings.technical_path_gate"> Technischer Pfad: pass</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_real_click_findings.real_capture_ready"> Real-Capture: review-ready</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_real_click_findings.recheck_ready"> Recheck-Paket: ready</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_real_click_findings.manual_still_open"> Menschlicher Klickbefund bleibt offen</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="host_client_decision_drill_real_click_findings.no_gameplay_truth"> Findings setzen keine Gameplay-Wahrheit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="host_client_decision_drill_real_click_findings.manual_review_done"> Echter Zwei-Fenster-Klickbefund erledigt</label>
+          <input readonly value="tmp/host_client_decision_drill_real_click_findings.json" data-export-key="host_client_decision_drill_real_click_findings.manifest_path">
+          <input readonly value="pass" data-export-key="host_client_decision_drill_real_click_findings.technical_path_gate_value">
+          <input readonly value="manual_still_open" data-export-key="host_client_decision_drill_real_click_findings.manual_click_findings_gate">
+          <input readonly value="TASK_685 - Mission Interaction Progress FullHD Sight Pass" data-export-key="host_client_decision_drill_real_click_findings.recommended_next_task">
+          <textarea data-export-key="host_client_decision_drill_real_click_findings.findings" placeholder="Wenn du den echten Zwei-Fenster-Klicklauf machst: Was war verstaendlich, zu klein, zu langsam oder verwirrend?"></textarea>
+          <div contenteditable="true" data-note-key="notes.host_client_decision_drill_real_click_findings" data-placeholder="TASK_666-Notizen...">TASK_666 behauptet keinen bestandenen Klicktest. Es bestaetigt nur: Technik gruen, Capture ready, manuelle Beobachtung offen. Autonom weiter sinnvoll: Mission-Interaction-Progress in FullHD sichtbar pruefen.</div>
         </article>
         <article class="card full">
           <h2>TASK_667 - Editor Palette Persistence</h2>
@@ -652,7 +669,7 @@
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
           <p><strong>Echter FullHD-Fensterlauf im Editor</strong> ist jetzt der beste Anschluss: Die Struktur ist belegt und der erste Scroll-Friction-Fix ist drin, jetzt muss der Bedienkomfort im sichtbaren Fenster beurteilt werden.</p>
-          <div class="callout">TASK_684 hat den Binding-Fokus-Scroll erledigt. Offen sind echter Fenster-Sichttest, ggf. Layout-Polish, geteilte Profile und der echte TASK_666-Host/Client-Fensterklick.</div>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. Autonom ist als naechstes Mission-Interaction-Progress-Sichtbarkeit sinnvoll; alternativ kann ein echter Zwei-Fenster-Klicklauf die TASK_666-Notizen fuellen.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -663,9 +680,9 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>FullHD Sichtfeinschliff fuer Editor-Interactions</td><td>Pruefen, ob Presets, State/Requires und Binding-Zeile im rechten Panel angenehm bedienbar bleiben.</td></tr>
-              <tr><td>2</td><td>FullHD Sichtfeinschliff fuer Interaction-Progress</td><td>Pruefen, ob `COM laeuft`, `CARGO haelt` und Completion im echten Fenster schnell genug lesbar sind.</td></tr>
-              <tr><td>3</td><td>TASK_666 - Host Client Decision Drill Real Click Findings</td><td>Pruefen, ob `P2 BRAVO` den kompletten Host/Client-Decision-Drill im Fenster verbessert.</td></tr>
+              <tr><td>1</td><td>TASK_685 - Mission Interaction Progress FullHD Sight Pass</td><td>Pruefen, ob `COM laeuft`, `CARGO haelt` und Completion im echten Fenster schnell genug lesbar sind.</td></tr>
+              <tr><td>2</td><td>Echter Host/Client-Zwei-Fenster-Klicklauf</td><td>TASK_666-Notizen mit menschlichem Bedienbefund fuellen.</td></tr>
+              <tr><td>3</td><td>FullHD Sichtfeinschliff fuer Editor-Interactions</td><td>Nur falls der automatische Fokus-Scroll im echten Fenster zu aggressiv oder zu dicht wirkt.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
             </tbody>
           </table>
@@ -677,7 +694,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_684. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset, liefert Builder-Drag-Handles, Auto-Snap-Piece-Aufloesung, zeigt diese Preview-Daten als `Label3D`-Overlays und hat jetzt Door-/Computer-/Hold-Marker plus Frontier-Probe-Bindings, Runtime-Use-State, Use-Feedback, geplante Use-Intents, Runtime-Progress, Interaction-Progress-Readability, read-only Binding-Inspector, Apply-/Remove-Binding-Editor, Presets fuer Door/Computer/Hold/AA/Cargo im Markerpanel, ein FullHD-Evidenzpaket und automatischen Binding-Fokus-Scroll. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; der naechste Editor-Slice sollte nur echte Fenster-Reibung polieren.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_666. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Autonom naechster guter Griff: Mission-Interaction-Progress in FullHD sichtbar pruefen.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -734,15 +751,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_684 - Map Editor Interaction Focus Scroll",
-            recommended_next_task: "Echter FullHD-Editor-Fensterlauf oder Host/Client-Klick",
+            latest_completed_task: "TASK_666 - Host Client Decision Drill Real Click Findings",
+            recommended_next_task: "TASK_685 - Mission Interaction Progress FullHD Sight Pass",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_684 - Map Editor Interaction Focus Scroll",
+            updated_for_task: "TASK_666 - Host Client Decision Drill Real Click Findings",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };
