@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SternenBuergerchen Aktueller Stand + Handbuch 2026-06-30</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10161a;
+      --panel: #182129;
+      --line: #3b4d5c;
+      --text: #edf5f8;
+      --muted: #9fb0bb;
+      --accent: #ffd34d;
+      --cyan: #55d6dc;
+      --green: #70db9d;
+      --red: #ff8f8f;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+    header { padding: 30px clamp(18px, 4vw, 54px) 20px; border-bottom: 1px solid var(--line); background: #141d24; }
+    main { width: min(1360px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 96px; }
+    h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: 0; }
+    h1 { font-size: clamp(28px, 3vw, 44px); }
+    h2 { font-size: 22px; }
+    h3 { color: var(--cyan); font-size: 16px; }
+    p { margin: 8px 0 0; color: var(--muted); }
+    code { background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 4px; }
+    ul, ol { margin: 10px 0 0; padding-left: 22px; color: var(--muted); }
+    li { margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border-bottom: 1px solid rgba(255,255,255,0.08); padding: 10px; text-align: left; vertical-align: top; }
+    th { color: var(--cyan); background: rgba(255,255,255,0.03); font-size: 13px; }
+    button, input, textarea { font: inherit; }
+    button { border: 1px solid var(--line); background: #dce5ef; color: #10161a; border-radius: 6px; min-height: 38px; padding: 8px 12px; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--text); }
+    button.choice.active { border-color: var(--accent); background: var(--accent); color: #16120a; }
+    textarea, [contenteditable="true"] {
+      width: 100%; min-height: 36px; border: 1px solid var(--line); border-radius: 6px;
+      background: #0d1318; color: var(--text); padding: 8px 10px;
+    }
+    textarea { min-height: 118px; resize: vertical; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #74848e; }
+    .meta-row, .tabbar, .button-row, .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .meta-row { margin-top: 14px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--muted); background: rgba(255,255,255,0.03); font-size: 13px; }
+    .pill.good { color: var(--green); border-color: rgba(112,219,157,0.5); }
+    .pill.warn { color: var(--accent); border-color: rgba(255,211,77,0.55); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 18px; }
+    .card { grid-column: span 4; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+    .wide { grid-column: span 8; }
+    .half { grid-column: span 6; }
+    .full { grid-column: 1 / -1; }
+    .callout { margin-top: 12px; padding: 12px; border: 1px solid rgba(85,216,220,0.35); background: rgba(85,216,220,0.07); border-radius: 6px; color: var(--text); }
+    .warning { border-color: rgba(255,211,77,0.42); background: rgba(255,211,77,0.08); }
+    .danger { border-color: rgba(255,143,143,0.42); background: rgba(255,143,143,0.07); }
+    .checkline { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; color: var(--text); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .checkline:last-child { border-bottom: 0; }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; }
+    .tabbar { margin-top: 22px; border-bottom: 1px solid var(--line); }
+    .tab { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: transparent; color: var(--muted); border-bottom: 0; }
+    .tab.active { background: var(--panel); color: var(--text); border-color: var(--line); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .toolbar { position: sticky; bottom: 0; z-index: 5; justify-content: space-between; background: rgba(16,22,26,0.96); border-top: 1px solid var(--line); padding: 12px clamp(18px, 4vw, 52px); backdrop-filter: blur(8px); }
+    .toolbar textarea { min-height: 74px; max-height: 180px; flex: 1 1 420px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-status[data-tone="good"] { color: var(--green); }
+    .export-status[data-tone="warn"] { color: var(--accent); }
+    @media (max-width: 960px) { .card, .wide, .half { grid-column: 1 / -1; } .toolbar { position: static; } }
+  </style>
+</head>
+<body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
+    <p>Frischer Arbeitsbericht nach TASK_648: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <div class="meta-row">
+      <span class="pill good">Schema v1</span>
+      <span class="pill warn">Stand: 2026-06-30</span>
+      <span class="pill">Branchbasis: integration/core-foundation</span>
+      <span class="pill">Letzter Stand: TASK_648</span>
+      <span class="pill">Naechster Kandidat: TASK_650</span>
+      <span class="pill good">Read-only Report</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabbar" aria-label="Reportbereiche">
+      <button class="tab active" type="button" data-tab-target="overview">Ist-Stand</button>
+      <button class="tab" type="button" data-tab-target="handbook">Handbuch</button>
+      <button class="tab" type="button" data-tab-target="friction">Reibung</button>
+      <button class="tab" type="button" data-tab-target="playtest">Playtest</button>
+      <button class="tab" type="button" data-tab-target="next">Naechstes</button>
+      <button class="tab" type="button" data-tab-target="notes">Notizen</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Wo wir stehen</h2>
+          <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet.</p>
+          <div class="callout">TASK_648 - Homebase Next Sortie Action Cue ist der aktuelle Abschlussstand: Nach dem Debrief-Return bleiben Gains sichtbar, aber die Next-Sortie-Zeile fuehrt zur ersten echten Vorbereitungsluecke weiter, zum Beispiel <code>now: Stage fireteam</code>.</div>
+        </article>
+        <article class="card">
+          <h2>Arbeitsstatus</h2>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.core_loop_spine"> Core-Loop-Spine vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.frontier_probe_route"> Frontier-Probe-Route vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.host_client_scaffolding"> Host/Client-Smokes vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_648_done"> TASK_648 erledigt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_648 erledigt</label>
+        </article>
+        <article class="card half">
+          <h2>Technischer Zustand</h2>
+          <ul>
+            <li><code>SimulationRoot</code> bleibt autoritativ fuer Gameplay-Mutationen.</li>
+            <li>Mission-/Tactical-Contracts liefern Snapshots fuer HUD und Tests.</li>
+            <li>Reports, Evidence-PNGs und Review-JSONs sind Arbeitsnotizen, keine Runtime-Wahrheit.</li>
+            <li>Hotpath-Arbeit nutzt Dirty Flags, Snapshot-Gates und gezielte Verifier statt Voll-Rebuilds.</li>
+          </ul>
+        </article>
+        <article class="card half">
+          <h2>Spielgefuehl</h2>
+          <ul>
+            <li>Die taktische Entscheidung ist lesbarer: Preview, LOS, ROE, Suppression und AAR sind angelegt.</li>
+            <li>Homebase/Return hat jetzt eine erkennbare Folgehandlung.</li>
+            <li>Multiplayer ist technisch vorbereitet, braucht aber weiter echte Zwei-Fenster-Klicklaeufe.</li>
+            <li>Editor und Asset-Bauen bleiben der groesste Bedien-Reibungspunkt ausserhalb des Missionsflows.</li>
+          </ul>
+        </article>
+        <article class="card full">
+          <h2>Bereichsuebersicht</h2>
+          <table>
+            <thead><tr><th>Bereich</th><th>Traegt bereits</th><th>Reibt noch</th><th>Naechster guter Griff</th></tr></thead>
+            <tbody>
+              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte Fensterblick nach TASK_648 ist noch nicht menschlich bewertet.</td><td>Kurzer Fenstercheck oder direkt Host/Client-Klickgefuehl.</td></tr>
+              <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
+              <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools und Review-Pakete existieren.</td><td>Echte Klicklaeufe koennen trotz Headless-Gruen noch unklar wirken.</td><td>TASK_650 - Host Client Click Feedback Followup.</td></tr>
+              <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow und Builder-Spikes sind vorhanden.</td><td>Der Mapbau fuehlt sich noch nicht wie ein angenehmes Werkzeug an.</td><td>Nach dem Gameplay-Fenster wieder UX-Slice fuer Builder-Toolbar/Assets.</td></tr>
+              <tr><td>Performance/Export</td><td>Large-Map-, Hotpath- und Export-Hygiene wurden mehrfach geprueft.</td><td>Neue UI-Listen, Reports und Map-Assets koennen wieder verdeckte Kosten erzeugen.</td><td>Nach jedem groesseren UI-/Map-Schub Smoke + Export-Check laufen lassen.</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="handbook" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>So pruefst du den aktuellen Stand</h2>
+          <ol>
+            <li>Godot 4.6.2 starten und <code>C:\dev\SternenBuergerchen</code> oeffnen.</li>
+            <li>Homebase- oder Mission-Testscene per F6 starten.</li>
+            <li>Frontier-Probe-Pfad lesen: Start, LZ, AA/Computer/Cargo, Result, Debrief, Return.</li>
+            <li>Nach Return die Homebase-Summary und Next-Sortie-Zeile pruefen.</li>
+            <li>Bei Multiplayer-Fragen den Host/Client-Launchhelper nutzen und Rolle, Peer, Team und Reject-Text lesen.</li>
+            <li>Beobachtungen hier notieren und mit <strong>JSON exportieren</strong> sichern.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h2>Spielerblick</h2>
+          <ul>
+            <li>Welches Fireteam ist aktiv?</li>
+            <li>Was ist der naechste sinnvolle Schritt?</li>
+            <li>Warum ist ein Befehl erlaubt oder blockiert?</li>
+            <li>Ist die Anzeige schnell genug erfassbar?</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Entwicklerblick</h2>
+          <ul>
+            <li>Ist das Runtime-Wahrheit oder nur Anzeige?</li>
+            <li>Kommt ein echter Befehl nur ueber den autoritativen Pfad?</li>
+            <li>Wird im Hotpath etwas voll neu gebaut?</li>
+            <li>Kann ein Verifier das Verhalten festhalten?</li>
+          </ul>
+        </article>
+        <article class="card full">
+          <h2>Wichtige lokale Artefakte</h2>
+          <table>
+            <thead><tr><th>Artefakt</th><th>Pfad</th><th>Wofuer</th></tr></thead>
+            <tbody>
+              <tr><td>Grosser laufender Review</td><td><code>docs/reports/project_review_status_2026_06_28.html</code></td><td>Langlaufende Gesamt-Workbench mit TASK-Historie.</td></tr>
+              <tr><td>Status-Handbuch</td><td><code>docs/reports/project_status_handbook_2026_06_29.html</code></td><td>Bisheriges Handbuch mit Host/Client- und Frontier-Probe-Historie.</td></tr>
+              <tr><td>State-Handbuch</td><td><code>docs/reports/project_state_handbook_2026_06_30.html</code></td><td>Kompakter Report bis TASK_648.</td></tr>
+              <tr><td>Dieser Report</td><td><code>docs/reports/project_current_state_handbook_2026_06_30.html</code></td><td>Aktuelle Mischung aus Iststand, Handbuch und Arbeitsnotizen.</td></tr>
+              <tr><td>Launchhelper</td><td><code>scripts/tools/launch_host_client_two_window_review.ps1</code></td><td>Dry-run oder Start fuer Host/Client-Fensterlauf.</td></tr>
+              <tr><td>Real-run Capture</td><td><code>scripts/tools/capture_host_client_two_window_real_run.ps1</code></td><td>Host/Client-Screenshots und Manifest fuer Sichtreview.</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="friction" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Reibungen und Spannungen</h2>
+          <table>
+            <thead><tr><th>Reibung</th><th>Warum sie zaehlt</th><th>Wie wir sie behandeln</th></tr></thead>
+            <tbody>
+              <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
+              <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
+              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Naechster Gameplay-Slice: Host/Client Click Feedback Followup.</td></tr>
+              <tr><td>Editor bleibt sperrig</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>Nach Core-Loop-/Multiplayer-Sichtbarkeit wieder Editor-UX priorisieren.</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="card">
+          <h2>Risiko-Wahl</h2>
+          <div class="button-row" data-choice-group="friction.risk_level">
+            <button class="choice active" type="button" data-choice-value="manageable">Handhabbar</button>
+            <button class="choice" type="button" data-choice-value="watch">Beobachten</button>
+            <button class="choice" type="button" data-choice-value="critical">Kritisch</button>
+          </div>
+          <div class="callout warning">Mein Eindruck: handhabbar, solange wir weiter in kleinen, sichtbaren Slices arbeiten und nicht aus UI-Komfort heimlich Runtime-Wahrheit bauen.</div>
+        </article>
+        <article class="card">
+          <h2>Vorgaben-Konflikt</h2>
+          <div class="callout danger">Der groesste Zielkonflikt ist Tempo gegen Sauberkeit: schnell spielbar machen, aber keine zweite Autoritaet im HUD. Der Kompromiss bleibt: sichtbare Mini-Schritte plus Verifier.</div>
+        </article>
+      </div>
+    </section>
+
+    <section id="playtest" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Playtest-Checkliste</h2>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.homebase_summary_readable"> Homebase-Summary ist nach Debrief lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.next_sortie_action_clear"> Next-Sortie-Aktion ist sofort klar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.fireteam_identity_clear"> Fireteam-Identitaet links und im HUD bleibt konsistent</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.dropship_assignment_clear"> Dropship/Fireteam-Zuordnung ist nicht widerspruechlich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.host_client_reject_clear"> Client-Reject ist als Spielerhinweis verstaendlich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.performance_feels_fast"> Bedienung fuehlt sich schnell an</label>
+        </article>
+        <article class="card half">
+          <h2>Bewertung</h2>
+          <div class="button-row" data-choice-group="playtest.rating">
+            <button class="choice active" type="button" data-choice-value="good">Gut genug fuer naechsten Slice</button>
+            <button class="choice" type="button" data-choice-value="unclear">Unklar</button>
+            <button class="choice" type="button" data-choice-value="blocked">Blockiert</button>
+          </div>
+        </article>
+        <article class="card half">
+          <h2>Was hat gestoert?</h2>
+          <textarea data-export-key="playtest.friction_notes" placeholder="Kurz notieren: Was war unklar, langsam, widerspruechlich oder haesslich?"></textarea>
+        </article>
+      </div>
+    </section>
+
+    <section id="next" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Naechster sinnvoller Schritt</h2>
+          <p><strong>TASK_650 - Host Client Click Feedback Followup</strong> ist aus meiner Sicht der beste Anschluss: Nicht noch mehr Bericht, sondern ein kleiner sichtbarer Multiplayer-Spielbarkeitsgriff.</p>
+          <div class="callout">Ziel: Wenn ein Client falsch klickt oder eine falsche Team-/Authority-Grenze trifft, soll nicht nur ein interner Reject zaehlen. Der Spieler soll direkt sehen: was wurde geblockt, warum, und was ist die naechste sinnvolle Aktion.</div>
+        </article>
+        <article class="card">
+          <h2>Alternative</h2>
+          <p>Falls du lieber erst Spielgefuehl statt Multiplayer nimmst: ein One-Screen-Frontier-Probe-Mini-Szenario mit kurzer AA/Computer/Cargo-Entscheidung waere der zweite sehr gute Kandidat.</p>
+        </article>
+        <article class="card full">
+          <h2>Vorgeschlagene Reihenfolge</h2>
+          <table>
+            <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>TASK_650 - Host Client Click Feedback Followup</td><td>Multiplayer-Bedienung wird weniger technisch und besser spielbar.</td></tr>
+              <tr><td>2</td><td>One-Screen Frontier Probe Playtest</td><td>Der Mission-Flow wird als echtes kleines Spiel spuerbarer.</td></tr>
+              <tr><td>3</td><td>Editor Builder UX Slice</td><td>Mapbau wird angenehmer und Content entsteht schneller.</td></tr>
+              <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="notes" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Arbeitsnotizen</h2>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Neuer aktueller Iststand-/Handbuch-Report erstellt. TASK_648 ist der letzte abgeschlossene Stand; naechster empfohlener Gameplay-Slice ist TASK_650 Host Client Click Feedback Followup.</div>
+        </article>
+        <article class="card half">
+          <h2>Entscheidung</h2>
+          <label class="checkline"><input type="radio" name="next_path" value="host_client" data-export-key="decision.next_path" checked> Host/Client-Klickfeedback als naechstes</label>
+          <label class="checkline"><input type="radio" name="next_path" value="scenario" data-export-key="decision.next_path"> Mini-Szenario zuerst</label>
+          <label class="checkline"><input type="radio" name="next_path" value="editor" data-export-key="decision.next_path"> Editor-UX zuerst</label>
+        </article>
+        <article class="card half">
+          <h2>Freitext</h2>
+          <textarea data-export-key="notes.free_text" placeholder="Alles, was beim Lesen oder Testen auffaellt..."></textarea>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="toolbar">
+    <div class="export-actions">
+      <button id="exportJsonButton" type="button">JSON exportieren</button>
+      <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+      <span id="exportStatus" class="export-status">Export: lokal per file:// als Download oder Kopie.</span>
+    </div>
+    <textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea>
+  </footer>
+
+  <script>
+    (function () {
+      const reportId = document.body.dataset.reportId || "project_current_state_handbook";
+      const schema = document.body.dataset.reportSchema || "sternenbuergerchen.html_workbench.v1";
+      const output = document.getElementById("jsonOutput");
+      const exportStatus = document.getElementById("exportStatus");
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+      function readValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        return element.value;
+      }
+      function collectExport() {
+        const data = {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: new Date().toISOString(),
+          controls: {},
+          notes: {},
+          active_choices: {},
+          computed: {
+            latest_completed_task: "TASK_648 - Homebase Next Sortie Action Cue",
+            recommended_next_task: "TASK_650 - Host Client Click Feedback Followup",
+            runtime_truth: "SimulationRoot/Runtime/Contracts",
+            report_is_gameplay_truth: false
+          },
+          metadata: {
+            branch_basis: "integration/core-foundation",
+            created_for_task: "TASK_649 - Current State Handbook Report",
+            local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
+          }
+        };
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = readValue(element);
+          if (typeof value !== "undefined") setPath(data.controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          setPath(data.notes, element.dataset.noteKey, element.textContent.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const active = group.querySelector(".choice.active");
+          if (active) setPath(data.active_choices, group.dataset.choiceGroup, active.dataset.choiceValue || active.textContent.trim());
+        });
+        return data;
+      }
+      function buildExportText() {
+        const text = JSON.stringify(collectExport(), null, 2);
+        if (output) output.value = text;
+        return text;
+      }
+      function download(text) {
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${reportId}_${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        if (exportStatus) {
+          exportStatus.textContent = "Export bereit: JSON wurde als Download erzeugt.";
+          exportStatus.dataset.tone = "good";
+        }
+      }
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.tabTarget;
+          document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
+          document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        });
+      });
+      document.querySelectorAll(".choice").forEach((button) => {
+        button.addEventListener("click", () => {
+          const group = button.closest("[data-choice-group]");
+          if (!group) return;
+          group.querySelectorAll(".choice").forEach((choice) => choice.classList.toggle("active", choice === button));
+        });
+      });
+      document.getElementById("exportJsonButton").addEventListener("click", () => download(buildExportText()));
+      document.getElementById("copyJsonButton").addEventListener("click", async () => {
+        const text = buildExportText();
+        try {
+          await navigator.clipboard.writeText(text);
+          if (exportStatus) {
+            exportStatus.textContent = "JSON in die Zwischenablage kopiert.";
+            exportStatus.dataset.tone = "good";
+          }
+        } catch (error) {
+          if (exportStatus) {
+            exportStatus.textContent = "Kopieren nicht erlaubt; JSON steht im Textfeld.";
+            exportStatus.dataset.tone = "warn";
+          }
+        }
+      });
+    }());
+  </script>
+</body>
+</html>

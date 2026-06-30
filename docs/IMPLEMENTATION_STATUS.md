@@ -453,6 +453,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_648_homebase_next_sortie_action_cue.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_641_frontier_probe_homebase_next_sortie_readiness.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_647_homebase_missionpanel_density_findings.gd`, `git diff --check`.
 - Naechster Schritt: Entweder echten Homebase-Fensterblick nach TASK_648 ansehen oder wieder Richtung Host/Client-Klickgefuehl und Mini-Szenario-Spielbarkeit gehen.
 
+### TASK_649 - Current State Handbook Report
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_649_current_state_handbook_report.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/_html_workbench_template.html`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`, `docs/reports/project_state_handbook_2026_06_30.html`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `docs/reports/project_current_state_handbook_2026_06_30.html` ist ein neuer exportierbarer Iststand-/Handbuch-Report mit Tabs fuer Ist-Stand, Handbuch, Reibung, Playtest, Naechstes und Notizen.
+- Stand: Der Bericht benennt TASK_648 als letzten Abschlussstand, haelt die Read-only-/SimulationRoot-Grenze sichtbar und empfiehlt `TASK_650 - Host Client Click Feedback Followup` als naechsten Gameplay-Slice.
+- Stand: `scripts/tests/task_649_current_state_handbook_report.gd` prueft Task-Datei, Report-Existenz, Workbench-Schema, JSON-Export, Pflichtbereiche, Playtest-Felder und Roadmap-/Status-Eintraege.
+- Risiken/offen: Der Bericht ist Orientierung und Arbeitsnotiz, keine Runtime-Wahrheit. Der naechste Schritt soll wieder ein spielbarer Host/Client- oder Mini-Szenario-Slice sein.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_649_current_state_handbook_report.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_650 - Host Client Click Feedback Followup`, damit geblockte Client-Klicks als konkrete Spielerhinweise lesbarer werden.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
