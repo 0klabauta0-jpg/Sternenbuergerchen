@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_636 auf <code>task/frontier-probe-real-f6-recapture</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_637 auf <code>task/frontier-probe-playfeel-next-interaction</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -300,6 +300,7 @@
       <span class="pill good">TASK_632 F6-Review-Paket</span>
       <span class="pill good">TASK_635 Callout-Sicht-Findings</span>
       <span class="pill good">TASK_636 F6-Re-Capture</span>
+      <span class="pill good">TASK_637 Next Interaction</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2105,6 +2106,34 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_637 Frontier Probe Playfeel Next Interaction</h2>
+          <p>Nach Route und Re-Capture zeigt #18 Mission Control jetzt den naechsten sinnvollen Schritt als kompakte read-only NEXT-Zeile. Die Anzeige liest nur Scenario-Gates und Cargo-Bridge, damit sie Orientierung gibt, ohne Gameplay-Wahrheit oder Commands zu setzen.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Next Interaction / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_637 - Frontier Probe Playfeel Next Interaction" data-export-key="frontier_probe_playfeel_next_interaction.task_id"></td><td>Aktueller Playfeel-Slice.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_playfeel_next_interaction.json" data-export-key="frontier_probe_playfeel_next_interaction.manifest_path"></td><td>Lokales Sequenz-Manifest.</td></tr>
+                <tr><td>Next Line</td><td><input readonly value="NEXT Debrief | Ergebnis pruefen | Homebase" data-export-key="frontier_probe_playfeel_next_interaction.next_interaction_line"></td><td>#18 zeigt den naechsten Schritt.</td></tr>
+                <tr><td>Next ID</td><td><input readonly value="open_debrief" data-export-key="frontier_probe_playfeel_next_interaction.next_interaction_id"></td><td>Endzustand fuehrt zum Debrief-Hinweis.</td></tr>
+                <tr><td>Mission Control</td><td><input readonly value="true" data-export-key="frontier_probe_playfeel_next_interaction.mission_control_contains_next"></td><td>Die NEXT-Zeile ist im #18-Status enthalten.</td></tr>
+                <tr><td>Sequenz</td><td><input readonly value="disable_air_defense -> hold_station_computer -> secure_cargo_touchdown -> open_debrief" data-export-key="frontier_probe_playfeel_next_interaction.sequence_ids"></td><td>Route fuehrt ueber AA, COM, Cargo, Debrief.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_playfeel_next_interaction.read_only"></td><td>Nur Anzeige aus Scenario/Cargo-Snapshots.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_638 - Frontier Probe Debrief Handoff Feel" data-export-key="frontier_probe_playfeel_next_interaction.recommended_next_task"></td><td>Anschluss an echten Debrief-/Homebase-Rueckweg.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_playfeel_next_interaction.sequence_checked"> AA/COM/CARGO/Debrief-Sequenz geprueft</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_playfeel_next_interaction.mission_control_line_visible"> NEXT-Zeile in #18 sichtbar</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_playfeel_next_interaction.no_command_commit"> Kein Command/Navigation-Commit</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_playfeel_next_interaction.manual_fullhd_checked"> Echten FullHD-Blick auf Dichte geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_637 Playfeel-Notiz
+            <textarea data-note-key="notes.frontier_probe_playfeel_next_interaction" data-export-key="frontier_probe_playfeel_next_interaction.notes" placeholder="Beim Spielen notieren: Hilft die NEXT-Zeile, stoert sie die Dichte, und passt Debrief als Folge?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -2967,7 +2996,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_637 - Frontier Probe Playfeel Next Interaction",
+              "TASK_638 - Frontier Probe Debrief Handoff Feel",
               "Echten Zwei-Fenster-Klicklauf mit TASK_629-Packet ausfuehren, falls Host/Client-UI-Reibung priorisiert werden soll"
             ],
             recently_completed_tasks: [
@@ -3091,7 +3120,8 @@
               "TASK_633 - Frontier Probe Callout Layout Polish",
               "TASK_634 - Frontier Probe Real F6 Callout Sight Review",
               "TASK_635 - Frontier Probe Callout Sight Findings",
-              "TASK_636 - Frontier Probe Real F6 Re-Capture"
+              "TASK_636 - Frontier Probe Real F6 Re-Capture",
+              "TASK_637 - Frontier Probe Playfeel Next Interaction"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3136,7 +3166,8 @@
               "TASK_633 staffelt LZ/CARGO-Labels am gemeinsamen spawn_alpha-Marker im Primary3D-Visualpfad; echter Fensterblick auf Zoom/Occlusion bleibt offen.",
               "TASK_634 erzeugt PNG/Manifest fuer den echten F6-Callout-Sichtreview, markiert Headless sauber als Evidence-Board und laesst den menschlichen Fensterblick offen.",
               "TASK_635 wendet den echten Sichtbefund an: Route-Callouts sind kontrastreicher, hoeher, verbunden und das Result-Label weicht bei aktiver Route aus.",
-              "TASK_636 erzeugt den Re-Capture nach TASK_635 als PNG/Manifest und belegt Style, Route-Linien, Font, Outline und getrennte LZ/CARGO-Labels read-only."
+              "TASK_636 erzeugt den Re-Capture nach TASK_635 als PNG/Manifest und belegt Style, Route-Linien, Font, Outline und getrennte LZ/CARGO-Labels read-only.",
+              "TASK_637 zeigt den naechsten Frontier-Probe-Schritt als kompakte read-only NEXT-Zeile in #18 Mission Control; der echte Debrief-/Homebase-Handoff bleibt Folgearbeit."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3145,14 +3176,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_636",
-            current_focus: "Frontier Probe Real F6 Re-Capture",
-            latest_completed_task: "TASK_636 - Frontier Probe Real F6 Re-Capture"
+            current_repo_base: "integration/core-foundation after TASK_637",
+            current_focus: "Frontier Probe Playfeel Next Interaction",
+            latest_completed_task: "TASK_637 - Frontier Probe Playfeel Next Interaction"
           },
           metadata: {
-            branch: "task/frontier-probe-real-f6-recapture",
-            integration_base: "integration/core-foundation after TASK_635",
-            head: "task/frontier-probe-real-f6-recapture",
+            branch: "task/frontier-probe-playfeel-next-interaction",
+            integration_base: "integration/core-foundation after TASK_636",
+            head: "task/frontier-probe-playfeel-next-interaction",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }

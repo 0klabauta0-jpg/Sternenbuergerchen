@@ -444,6 +444,11 @@ TASK_636 macht den echten F6-/Viewport-Blick nach dem TASK_635-Polish wieder rep
 
 Erwartete Manifest-Struktur: `schema = sternenbuergerchen.frontier_probe_real_f6_recapture.v1`, `task_id = TASK_636`, `source_task_id = TASK_635`, `capture_type = frontier_probe_real_f6_recapture`, `png_path`, `manifest_path`, `display_server`, `viewport_readback_available`, `generated_evidence_board`, `post_polish_style_id = task_635_high_contrast_route_callouts`, `route_line_count >= 3`, `label_font_size >= 18`, `label_outline_size >= 7`, `primary_3d_route_callout_entries`, `label_overlap_polish_gate = pass`, `lz_cargo_shared_marker = true`, `lz_cargo_label_separated = true`, `manual_checks`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_637 - Frontier Probe Playfeel Next Interaction`.
 
+## Frontier-Probe-Playfeel-Next-Interaction
+TASK_637 macht den naechsten sinnvollen Frontier-Probe-Schritt in #18 Mission Control sichtbar. Die Ableitung darf nur bestehende Scenario-Gates und CargoBridge-Snapshots lesen. Die `NEXT ...`-Zeile ist Orientierung fuer den Spieler, kein Button, keine Navigation und kein Command-Commit.
+
+Erwartete Struktur: `get_frontier_probe_playfeel_next_interaction_snapshot()` enthaelt `schema = sternenbuergerchen.frontier_probe_playfeel_next_interaction.v1`, `task_id = TASK_637`, `next_interaction`, `mission_control_status_text`, `gate`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true` und `ui_sets_gameplay_truth = false`. `next_interaction.next_interaction_id` muss die Route als `disable_air_defense -> hold_station_computer -> secure_cargo_touchdown -> open_debrief` abbilden koennen. #18 Mission Control muss die kompakte Zeile wie `NEXT Debrief | Ergebnis pruefen | Homebase` enthalten, ohne Debrief oder Homebase zu oeffnen.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

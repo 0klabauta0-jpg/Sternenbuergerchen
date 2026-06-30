@@ -332,6 +332,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_636_frontier_probe_real_f6_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_635_frontier_probe_callout_sight_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_634_frontier_probe_real_f6_callout_sight_review.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_637 - Frontier Probe Playfeel Next Interaction`, wenn der Re-Capture im echten Fensterbild eine konkrete Interaktions- oder Lesbarkeitsreibung zeigt.
 
+### TASK_637 - Frontier Probe Playfeel Next Interaction
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_637_frontier_probe_playfeel_next_interaction.md`, `docs/tasks/TASK_636_frontier_probe_real_f6_recapture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `MissionTacticalSandboxController.get_frontier_probe_playfeel_next_interaction_snapshot()` liest Scenario-Gates und CargoBridge read-only und leitet die naechste Spielerorientierung ab.
+- Stand: #18 Mission Control zeigt eine kompakte `NEXT ...`-Zeile fuer AA, Computer-Hold, Cargo-Sicherung oder Debrief-Endzustand; `get_command_feedback_snapshot()` exportiert dieselbe Zeile.
+- Stand: `scripts/tests/task_637_frontier_probe_playfeel_next_interaction.gd` prueft die Sequenz `disable_air_defense -> hold_station_computer -> secure_cargo_touchdown -> open_debrief` und schreibt `tmp/frontier_probe_playfeel_next_interaction.json`.
+- Risiken/offen: TASK_637 oeffnet noch keinen Debrief und startet keine Navigation. Der naechste sinnvolle Anschluss ist ein Debrief-/Homebase-Handoff-Feel-Slice, wenn die Route abgeschlossen ist.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_637_frontier_probe_playfeel_next_interaction.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_636_frontier_probe_real_f6_recapture.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_638 - Frontier Probe Debrief Handoff Feel`, damit die sichtbare NEXT-Debrief-Orientierung an den bestehenden Meta-Rueckweg anschliesst.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
