@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_711 - Station Route Evidence Board Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_711_station_route_evidence_board_visual_polish.md`, `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/tasks/TASK_710_station_route_polish_readiness_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: Das generierte Station-Route-Evidence-Board traegt jetzt Titel, Statuszeile, Door-/Computer-/Cargo-Labels und Legende.
+- Stand: TASK_708 exportiert `evidence_board_style_id = station_route_labeled_v1` und `evidence_board_label_count`.
+- Stand: TASK_710 wertet unlabeled/zu duenne Generated Boards als Polish-Warnung.
+- Risiken/offen: Der echte Fensterblick bleibt offen; TASK_711 poliert das Headless-/Review-Artefakt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_711_station_route_evidence_board_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_708_station_route_visual_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_710_station_route_polish_readiness_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_709 im echten Fenster ausfuellen oder Host/Client-Station-Route-Akzeptanz vorbereiten, wenn der Fensterbefund gut genug ist.
+
 ### TASK_710 - Station Route Polish Readiness Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_710_station_route_polish_readiness_findings.md`, `docs/tasks/TASK_709_station_route_window_playtest_notes.md`, `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`

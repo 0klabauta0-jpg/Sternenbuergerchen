@@ -4,16 +4,19 @@ extends RefCounted
 const SNAPSHOT_SCHEMA: String = "sternenbuergerchen.station_route_polish_readiness_findings.v1"
 const EXPECTED_EVIDENCE_SCHEMA: String = "sternenbuergerchen.station_route_visual_evidence.v1"
 const EXPECTED_NOTES_SCHEMA: String = "sternenbuergerchen.station_route_window_playtest_notes.v1"
+const EXPECTED_EVIDENCE_BOARD_STYLE: String = "station_route_labeled_v1"
 const DEFAULT_OBJECT_REACTION_VISUAL_MINIMUM: int = 4
+const DEFAULT_EVIDENCE_BOARD_LABEL_MINIMUM: int = 8
 const DEFAULT_REPORT_PATH: String = "docs/reports/project_current_state_handbook_refresh_2026_06_30.html"
 const DEFAULT_MANIFEST_PATH: String = "tmp/station_route_polish_readiness_findings.json"
 
 
 static func build_snapshot(evidence_manifest: Dictionary = {}, window_notes: Dictionary = {}, limits: Dictionary = {}) -> Dictionary:
 	var object_reaction_visual_minimum: int = maxi(1, int(limits.get("object_reaction_visual_minimum", DEFAULT_OBJECT_REACTION_VISUAL_MINIMUM)))
+	var evidence_board_label_minimum: int = maxi(1, int(limits.get("evidence_board_label_minimum", DEFAULT_EVIDENCE_BOARD_LABEL_MINIMUM)))
 	var findings: Array = []
 	var manual_done: bool = _manual_review_done(evidence_manifest, window_notes)
-	_add_evidence_findings(findings, evidence_manifest, object_reaction_visual_minimum, manual_done)
+	_add_evidence_findings(findings, evidence_manifest, object_reaction_visual_minimum, evidence_board_label_minimum, manual_done)
 	_add_notes_findings(findings, window_notes)
 	var blocking_count: int = _count_findings_by_severity(findings, "blocker")
 	var warning_count: int = _count_findings_by_severity(findings, "warning")
@@ -44,6 +47,9 @@ static func build_snapshot(evidence_manifest: Dictionary = {}, window_notes: Dic
 		"rating": rating,
 		"object_reaction_visual_count": int(evidence_manifest.get("render_object_reaction_visual_count", 0)),
 		"object_reaction_visual_minimum": object_reaction_visual_minimum,
+		"evidence_board_style_id": String(evidence_manifest.get("evidence_board_style_id", "")),
+		"evidence_board_label_count": int(evidence_manifest.get("evidence_board_label_count", 0)),
+		"evidence_board_label_minimum": evidence_board_label_minimum,
 		"blocking_issue_count": blocking_count,
 		"warning_count": warning_count,
 		"manual_note_count": manual_count,
@@ -58,7 +64,7 @@ static func build_snapshot(evidence_manifest: Dictionary = {}, window_notes: Dic
 	}
 
 
-static func _add_evidence_findings(findings: Array, evidence_manifest: Dictionary, object_reaction_visual_minimum: int, manual_done: bool) -> void:
+static func _add_evidence_findings(findings: Array, evidence_manifest: Dictionary, object_reaction_visual_minimum: int, evidence_board_label_minimum: int, manual_done: bool) -> void:
 	if evidence_manifest.is_empty():
 		findings.append(_finding("missing_station_route_evidence", "blocker", "TASK_708-Evidence-Manifest fehlt.", "TASK_708 - Station Route Visual Evidence"))
 		return
@@ -75,6 +81,13 @@ static func _add_evidence_findings(findings: Array, evidence_manifest: Dictionar
 	var visual_count: int = int(evidence_manifest.get("render_object_reaction_visual_count", 0))
 	if visual_count < object_reaction_visual_minimum:
 		findings.append(_finding("low_object_reaction_visual_count", "warning", "Wenige Object-Reaction-Visuals koennen Door/Computer/Cargo zu leise machen.", "TASK_711 - Station Route Visual Polish"))
+	if bool(evidence_manifest.get("generated_evidence_board", false)):
+		var board_style_id: String = String(evidence_manifest.get("evidence_board_style_id", ""))
+		var label_count: int = int(evidence_manifest.get("evidence_board_label_count", 0))
+		if board_style_id != EXPECTED_EVIDENCE_BOARD_STYLE:
+			findings.append(_finding("evidence_board_unlabeled", "warning", "Generiertes Station-Route-Board nutzt keinen labeled Style.", "TASK_711 - Station Route Evidence Board Visual Polish"))
+		if label_count < evidence_board_label_minimum:
+			findings.append(_finding("evidence_board_label_count_low", "warning", "Generiertes Station-Route-Board hat zu wenige lesbare Labels.", "TASK_711 - Station Route Evidence Board Visual Polish"))
 	if bool(evidence_manifest.get("generated_evidence_board", false)) and not manual_done:
 		findings.append(_finding("generated_board_only", "manual", "Evidence ist ein generiertes Review-Board statt echter Fensterpixel.", "TASK_709 - Station Route Window Playtest Notes"))
 	if not bool(evidence_manifest.get("viewport_readback_available", false)) and not manual_done:
