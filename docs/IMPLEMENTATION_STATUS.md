@@ -18,7 +18,17 @@
 - Stand: Die Workbench sammelt echte Fensterbeobachtung zu Labels, Objekt-Proxies, HUD-Overlap, Groessenwirkung und naechster Polish-Aktion mit lokalem `JSON exportieren`.
 - Risiken/offen: Der manuelle Sichtlauf ist damit erfassbar, aber weiterhin nicht erledigt. `manual_review_done` bleibt bewusst false.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_690_mission_interaction_manual_sight_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_689_mission_interaction_visual_polish_findings.gd`, `git diff --check`.
-- Naechster Schritt: TASK_691 - Mission Interaction Manual Sight Review oder gezielter Visual-Polish, sobald echte Fensterbeobachtung exportiert wurde.
+- Naechster Schritt: TASK_692 - Door Runtime Collision/LOS Contract oder echter Manual-Sight-Review, sobald Fensterbeobachtung exportiert wurde.
+
+### TASK_691 - Mission Interaction Runtime Visual Assets
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_691_mission_interaction_runtime_visual_assets.md`, `docs/tasks/TASK_687_mission_interaction_object_reaction.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionObjectReaction` exportiert Runtime-Visual-State, Asset-Familie, Asset-Type-ID, Modell-/Preview-Hinweise und State-Labels fuer Door- und Computer-Reaktionen.
+- Stand: Door-Reaktionen werden read-only auf `closed`, `half` oder `open` gemappt; Computer-Reaktionen auf `idle`, `active` oder `controlled`.
+- Stand: `TerrainMap3DView` uebernimmt die Felder in den Render-Snapshot und zeichnet aktive Computer mit Progress-/Kontrollanzeige sowie offene Door-Proxies mit Schwellenhinweis.
+- Risiken/offen: Keine echte Collision-, Walkability-, LOS- oder Tile-Aenderung. Das ist Visualstate, kein autoritativer Door-State.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_691_mission_interaction_runtime_visual_assets.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_687_mission_interaction_object_reaction.gd`, `git diff --check`.
+- Naechster Schritt: TASK_692 - Door Runtime Collision/LOS Contract oder echter Manual-Sight-Review, wenn die Visuals im Fenster beurteilt werden sollen.
 
 ### TASK_689 - Mission Interaction Visual Polish Findings
 - Status: implementiert im Arbeitsstand
@@ -28,7 +38,7 @@
 - Stand: Aktuell sind keine technischen Visual-Blocker belegt; der echte manuelle FullHD-Sichtlauf bleibt bewusst offen.
 - Risiken/offen: Das ist eine technische Findings-Fassade, keine menschliche Sichtabnahme und kein optischer Freispruch.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_689_mission_interaction_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_688_mission_interaction_fullhd_evidence.gd`, `git diff --check`.
-- Naechster Schritt: TASK_690 - Mission Interaction Manual Sight Notes oder gezielter Visual-Polish, sobald echte Fensterbeobachtung vorliegt.
+- Naechster Schritt: TASK_691 - Mission Interaction Runtime Visual Assets oder gezielter Visual-Polish, sobald echte Fensterbeobachtung vorliegt.
 
 ### TASK_688 - Mission Interaction FullHD Evidence
 - Status: implementiert im Arbeitsstand

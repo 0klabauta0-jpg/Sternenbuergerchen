@@ -319,6 +319,7 @@ git checkout -b batch/<batch-name>
 - TASK_688 - Mission Interaction FullHD Evidence (implementiert)
 - TASK_689 - Mission Interaction Visual Polish Findings (implementiert)
 - TASK_690 - Mission Interaction Manual Sight Notes (implementiert)
+- TASK_691 - Mission Interaction Runtime Visual Assets (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

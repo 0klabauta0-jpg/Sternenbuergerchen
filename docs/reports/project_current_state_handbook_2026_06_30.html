@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_690: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_691: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_690</span>
-      <span class="pill">Naechster Kandidat: echter Manual-Sight-Review oder Visual-Polish</span>
+      <span class="pill">Letzter Stand: TASK_691</span>
+      <span class="pill">Naechster Kandidat: Door Collision/LOS Contract oder Manual-Sight-Review</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_690 - Mission Interaction Manual Sight Notes ist der aktuelle Abschlussstand: AA, Computer und Cargo sind technisch sichtbar vorbereitet, und der offene echte Fenster-Sichtlauf ist jetzt als Workbench/Manifest sauber erfassbar. Der menschliche Zwei-Fenster-Klickbefund aus TASK_666 bleibt weiter offen und wird nicht behauptet.</div>
+          <div class="callout">TASK_691 - Mission Interaction Runtime Visual Assets ist der aktuelle Abschlussstand: Door- und Computer-Reaktionen exportieren jetzt Runtime-Visual-State und Asset-Familienhinweise, ohne Terrain, LOS oder Collision zu mutieren. Der menschliche Zwei-Fenster-Klickbefund aus TASK_666 bleibt weiter offen und wird nicht behauptet.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -148,6 +148,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_688_done"> TASK_688 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_689_done"> TASK_689 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_690_done"> TASK_690 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_691_done"> TASK_691 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -742,6 +743,20 @@
           <textarea data-export-key="mission_interaction_manual_sight_notes.findings" placeholder="Nach Workbench-Export eintragen: Welche Sichtnotizen wurden bestaetigt und welcher Polish folgt?"></textarea>
           <div contenteditable="true" data-note-key="notes.mission_interaction_manual_sight_notes" data-placeholder="TASK_690-Notizen...">TASK_690 macht den manuellen Sichtentscheid bearbeitbar, behauptet ihn aber nicht. Naechster Schritt ist entweder echte Fensterbeobachtung in der Workbench oder gezielter Visual-Polish aus exportierten Notizen.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_691 - Mission Interaction Runtime Visual Assets</h2>
+          <p>Door- und Computer-Reaktionen tragen jetzt konkrete Runtime-Visualstates und Asset-Familienhinweise. Eine Door wird als closed/half/open-Familie exportiert, ein Computer als idle/active/controlled mit Panel-State. Die 3D-Ansicht zeichnet daraus bessere Proxies, ohne Tile-, Collision-, Walkability- oder LOS-Wahrheit zu veraendern.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_runtime_visual_assets.snapshot"> Runtime-Visual-Asset-Felder vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_runtime_visual_assets.door_family"> Door-Familie closed/half/open gemappt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_runtime_visual_assets.computer_state"> Computer idle/active/controlled gemappt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_runtime_visual_assets.render_snapshot"> Render-Snapshot exportiert Runtime-Visual-Felder</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_runtime_visual_assets.no_gameplay_truth"> Snapshot meldet `ui_sets_gameplay_truth = false`</label>
+          <label class="checkline"><input type="checkbox" data-export-key="mission_interaction_runtime_visual_assets.manual_done"> Echter Fenster-Sichtentscheid erledigt</label>
+          <input readonly value="tmp/mission_interaction_runtime_visual_assets.json" data-export-key="mission_interaction_runtime_visual_assets.manifest_path">
+          <input readonly value="TASK_691 - Mission Interaction Runtime Visual Assets" data-export-key="mission_interaction_runtime_visual_assets.completed_task">
+          <textarea data-export-key="mission_interaction_runtime_visual_assets.findings" placeholder="Sichtnotiz: Wirken Computer-Panel, Door-Schwelle und Asset-State im Fenster sofort verstaendlich?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_runtime_visual_assets" data-placeholder="TASK_691-Notizen...">TASK_691 ist ein visueller Runtime-State-Slice. Der naechste technische Schnitt waere ein expliziter Door-Collision-/LOS-Contract, bevor offene Tueren wirklich begehbar oder LOS-durchlaessig werden.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -761,8 +776,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Mission Interaction Manual Sight Review</strong> ist jetzt der beste Anschluss: Der technische Visualpfad ist gruen, Evidence, Polish-Findings und Workbench sind da. Jetzt braucht es echte Fensterbeobachtung oder danach gezielten Label-/Proxy-Polish.</p>
-          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence. TASK_689 bewertet technische Polish-Findings. TASK_690 macht den offenen Sichtlauf als Workbench bearbeitbar.</div>
+          <p><strong>Door Collision/LOS Contract</strong> ist jetzt der beste technische Anschluss: Door-Visuals koennen closed/half/open zeigen, aber die Karte muss noch sauber wissen, wann eine Door wirklich begehbar ist oder Sicht blockt.</p>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence. TASK_689 bewertet technische Polish-Findings. TASK_690 macht den offenen Sichtlauf als Workbench bearbeitbar. TASK_691 gibt Door/Computer einen Runtime-Visualstate.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -773,10 +788,10 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>Mission-Interaction Manual Sight Review</td><td>Workbench im echten Fensterlauf ausfuellen und exportieren: Labels, Proxies, HUD-Overlap und naechste Polish-Aktion.</td></tr>
-              <tr><td>2</td><td>Echter Host/Client-Zwei-Fenster-Klicklauf</td><td>TASK_666-Notizen mit menschlichem Bedienbefund fuellen.</td></tr>
-              <tr><td>3</td><td>Gezielter Visual-Polish</td><td>Nur die im Sichttest gefundenen Label-/Proxy-/Overlap-Punkte korrigieren.</td></tr>
-              <tr><td>4</td><td>Door-Asset-Swap</td><td>Open/Closed-Tueren mit Collision-/LOS-Regeln als echter Runtime-Slice.</td></tr>
+              <tr><td>1</td><td>Door Collision/LOS Contract</td><td>Festlegen, ob und wann open/closed Door-Visuals Gameplay-Walkability und Sichtlinien veraendern duerfen.</td></tr>
+              <tr><td>2</td><td>Mission-Interaction Manual Sight Review</td><td>Workbench im echten Fensterlauf ausfuellen und exportieren: Labels, Proxies, HUD-Overlap und naechste Polish-Aktion.</td></tr>
+              <tr><td>3</td><td>Echter Host/Client-Zwei-Fenster-Klicklauf</td><td>TASK_666-Notizen mit menschlichem Bedienbefund fuellen.</td></tr>
+              <tr><td>4</td><td>Gezielter Visual-Polish</td><td>Nur die im Sichttest gefundenen Label-/Proxy-/Overlap-Punkte korrigieren.</td></tr>
             </tbody>
           </table>
         </article>
@@ -787,7 +802,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_690. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Mission: Objective-Gate-Snapshot, Visualstate, Object-Reaction, FullHD-Evidence, Polish-Findings und Manual-Sight-Workbench fuehren AA, COM und CARGO zusammen. Autonom naechster guter Griff: echten Manual-Sight-Review ausfuellen oder danach gezielten Visual-Polish umsetzen.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_691. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Mission: Objective-Gate-Snapshot, Visualstate, Object-Reaction, FullHD-Evidence, Polish-Findings, Manual-Sight-Workbench und Runtime-Visual-Assets fuehren AA, COM und CARGO zusammen. Autonom naechster guter Griff: Door-Collision-/LOS-Contract oder echter Manual-Sight-Review.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -844,15 +859,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_690 - Mission Interaction Manual Sight Notes",
-            recommended_next_task: "TASK_691 - Mission Interaction Manual Sight Review",
+            latest_completed_task: "TASK_691 - Mission Interaction Runtime Visual Assets",
+            recommended_next_task: "TASK_692 - Door Runtime Collision/LOS Contract",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_690 - Mission Interaction Manual Sight Notes",
+            updated_for_task: "TASK_691 - Mission Interaction Runtime Visual Assets",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };

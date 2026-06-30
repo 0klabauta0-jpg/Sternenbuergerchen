@@ -7413,6 +7413,8 @@ func _add_mission_interaction_object_reaction_visuals() -> void:
 		root.set_meta("interaction_id", String(reaction.get("interaction_id", "")).strip_edges())
 		root.set_meta("object_kind", object_kind)
 		root.set_meta("reaction_state", reaction_state)
+		root.set_meta("runtime_visual_state", String(reaction.get("runtime_visual_state", "")).strip_edges())
+		root.set_meta("visual_asset_type_id", String(reaction.get("visual_asset_type_id", "")).strip_edges())
 		_status_root.add_child(root)
 		match object_kind:
 			"computer":
@@ -7440,6 +7442,15 @@ func _add_mission_interaction_object_reaction_visuals() -> void:
 			"status": String(reaction.get("status", "")).strip_edges(),
 			"world_position": world_position,
 			"open_fraction": float(reaction.get("open_fraction", 0.0)),
+			"runtime_visual_state": String(reaction.get("runtime_visual_state", "")).strip_edges(),
+			"visual_asset_family": String(reaction.get("visual_asset_family", "")).strip_edges(),
+			"visual_asset_type_id": String(reaction.get("visual_asset_type_id", "")).strip_edges(),
+			"visual_model_path": String(reaction.get("visual_model_path", "")).strip_edges(),
+			"visual_preview_path": String(reaction.get("visual_preview_path", "")).strip_edges(),
+			"visual_state_label": String(reaction.get("visual_state_label", "")).strip_edges(),
+			"computer_panel_text": String(reaction.get("computer_panel_text", "")).strip_edges(),
+			"door_walkability_hint": String(reaction.get("door_walkability_hint", "")).strip_edges(),
+			"door_los_hint": String(reaction.get("door_los_hint", "")).strip_edges(),
 			"screen_active": bool(reaction.get("screen_active", false)),
 			"beacon_active": bool(reaction.get("beacon_active", false)),
 			"locked": bool(reaction.get("locked", false)),
@@ -7452,8 +7463,16 @@ func _add_mission_interaction_object_reaction_visuals() -> void:
 
 
 func _add_mission_interaction_computer_reaction_proxy(parent: Node3D, accent: Color, reaction: Dictionary) -> void:
+	var runtime_state: String = String(reaction.get("runtime_visual_state", "")).strip_edges().to_lower()
+	var progress: float = clampf(float(reaction.get("progress", 0.0)), 0.0, 1.0)
 	_add_local_box3d(parent, "TerminalBase", Vector3(0.86, 0.18, 0.52), Vector3(0.0, 0.09, 0.0), Color(0.18, 0.22, 0.27, 0.96))
 	_add_local_box3d(parent, "TerminalScreen", Vector3(0.68, 0.52, 0.08), Vector3(0.0, 0.48, -0.24), Color(accent.r, accent.g, accent.b, 0.88), true)
+	if runtime_state == "active":
+		_add_local_box3d(parent, "TerminalProgressBar", Vector3(maxf(0.08, 0.62 * progress), 0.035, 0.09), Vector3(-0.31 + (0.31 * progress), 0.78, -0.24), Color(0.95, 0.98, 1.0, 0.86), true)
+		_mission_interaction_object_reaction_visual_count += 1
+	elif runtime_state == "controlled":
+		_add_local_box3d(parent, "TerminalControlBadge", Vector3(0.28, 0.08, 0.10), Vector3(0.0, 0.78, -0.24), Color(0.46, 0.96, 0.62, 0.9), true)
+		_mission_interaction_object_reaction_visual_count += 1
 	if bool(reaction.get("screen_active", false)):
 		_add_local_cylinder3d(parent, "TerminalGlow", 0.32, 0.045, Vector3(0.0, 0.72, -0.24), Color(accent.r, accent.g, accent.b, 0.52), 24, true)
 		_mission_interaction_object_reaction_visual_count += 1
@@ -7485,6 +7504,9 @@ func _add_mission_interaction_door_reaction_proxy(parent: Node3D, accent: Color,
 	_add_local_box3d(parent, "DoorFrame", Vector3(0.88, 0.92, 0.10), Vector3(0.0, 0.46, 0.0), Color(0.20, 0.22, 0.24, 0.78), true)
 	_add_local_box3d(parent, "DoorLeafLeft", Vector3(0.32, 0.78, 0.12), Vector3(-leaf_offset, 0.44, -0.02), Color(accent.r, accent.g, accent.b, 0.82), true)
 	_add_local_box3d(parent, "DoorLeafRight", Vector3(0.32, 0.78, 0.12), Vector3(leaf_offset, 0.44, -0.02), Color(accent.r, accent.g, accent.b, 0.82), true)
+	if open_fraction >= 0.85:
+		_add_local_box3d(parent, "DoorOpenThreshold", Vector3(0.64, 0.04, 0.16), Vector3(0.0, 0.08, -0.08), Color(0.46, 0.96, 0.62, 0.56), true)
+		_mission_interaction_object_reaction_visual_count += 1
 	_mission_interaction_object_reaction_visual_count += 3
 
 
