@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_656: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_657: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_656</span>
-      <span class="pill">Naechster Kandidat: TASK_657</span>
+      <span class="pill">Letzter Stand: TASK_657</span>
+      <span class="pill">Naechster Kandidat: TASK_658</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -102,7 +102,7 @@
         <article class="card wide">
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
-          <div class="callout">TASK_656 - Frontier Probe Real F6 Visual Review ist der aktuelle Abschlussstand: Die Historie bleibt sichtbar mit TASK_653 - Frontier Probe One-Screen Playability Pass, TASK_654 - Frontier Probe One-Screen F6 Playtest Notes und TASK_655 - Frontier Probe One-Screen Visual Tuning Findings. Fuer die TASK_655-Verdichtung wird jetzt ein PNG-/JSON-Reviewpaket erzeugt. Es prueft die sichtbare One-Screen-Zeile, die unterdrueckte NEXT-Dopplung und markiert klar, ob ein echter Viewport-Readback oder ein Headless-Evidence-Board vorliegt.</div>
+          <div class="callout">TASK_657 - Frontier Probe F6 Visual Polish Findings ist der aktuelle Abschlussstand: Die Historie bleibt sichtbar mit TASK_653 - Frontier Probe One-Screen Playability Pass, TASK_654 - Frontier Probe One-Screen F6 Playtest Notes, TASK_655 - Frontier Probe One-Screen Visual Tuning Findings und TASK_656 - Frontier Probe Real F6 Visual Review. Die kompakte Mission-Control-Zeile bleibt kompatibel, bekommt aber jetzt einen pruefbaren One-Screen-Polish-Anker mit Route-Badges, NEXT-Badge, Zeichenbudget und Label-Guards. Headless-Evidence ersetzt weiter keinen menschlichen Fensterblick.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -113,7 +113,8 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_654_done"> TASK_654 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_655_done"> TASK_655 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_656_done"> TASK_656 erledigt</label>
-          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_656 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_657_done"> TASK_657 erledigt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Fensterblick nach TASK_657 erledigt</label>
         </article>
         <article class="card half">
           <h2>Technischer Zustand</h2>
@@ -138,7 +139,7 @@
           <table>
             <thead><tr><th>Bereich</th><th>Traegt bereits</th><th>Reibt noch</th><th>Naechster guter Griff</th></tr></thead>
             <tbody>
-              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Fensterentscheid nach TASK_656 ist weiter offen.</td><td>TASK_657: belegte F6-Visual-Polish-Findings anwenden.</td></tr>
+              <tr><td>Core Loop</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Frontier-Probe-Spine belegt.</td><td>Der echte menschliche Fensterentscheid nach TASK_657 ist weiter offen.</td><td>TASK_658: kurzer Spieler-Entscheidungsdrill mit dem lesbaren F6-Zustand.</td></tr>
               <tr><td>Mission/Taktik</td><td>Move, Defend, Flank, ROE, Contact, Suppression, Threat Preview und AAR-Schale existieren.</td><td>Balance und Szenariodesign sind noch eher Teststrecke als Spiel.</td><td>Kleines, wiederholbares One-Screen-Szenario.</td></tr>
               <tr><td>Multiplayer</td><td>Peer/Team-Gates, Reject-Feedback, Teamchip, Capture-Tools, Review-Pakete und `USE BRAVO`-Follow-up-Evidence existieren.</td><td>Echte Klicklaeufe koennen trotz Headless-Gruen noch unklar wirken.</td><td>Echter Host/Client-Klicklauf oder Mini-Szenario-Spielbarkeit.</td></tr>
               <tr><td>Editor/Map</td><td>Map-Editor, Asset-Workflow und Builder-Spikes sind vorhanden.</td><td>Der Mapbau fuehlt sich noch nicht wie ein angenehmes Werkzeug an.</td><td>Nach dem Gameplay-Fenster wieder UX-Slice fuer Builder-Toolbar/Assets.</td></tr>
@@ -206,7 +207,7 @@
             <tbody>
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
-              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Nach TASK_656 ist der naechste Multiplayer-Beleg weiter der echte Klicklauf; fuer Spielgefuehl ist TASK_657 sinnvoll, wenn der F6-Review konkrete optische Reibung zeigt.</td></tr>
+              <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>Nach TASK_657 ist der naechste Multiplayer-Beleg weiter der echte Klicklauf; fuer Spielgefuehl ist TASK_658 sinnvoll, wenn wir erst den kleinen Entscheidungsloop pruefen wollen.</td></tr>
               <tr><td>Editor bleibt sperrig</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>Nach Core-Loop-/Multiplayer-Sichtbarkeit wieder Editor-UX priorisieren.</td></tr>
             </tbody>
           </table>
@@ -271,6 +272,19 @@
           <textarea data-export-key="real_f6_visual.findings" placeholder="Konkreter Sichtbefund fuer TASK_657: Platzierung, Kontrast, Dichte, Tempo..."></textarea>
           <div contenteditable="true" data-note-key="notes.real_f6_visual_review" data-placeholder="Real-F6-Review-Notizen...">TASK_656 erzeugt ein lokales PNG/JSON-Paket fuer die verdichtete Frontier-Probe-Mission-Control-Zeile. Headless bleibt nur Evidence, der echte Fensterentscheid bleibt offen.</div>
         </article>
+        <article class="card full">
+          <h2>F6-Visual-Polish-Findings</h2>
+          <label class="checkline"><input checked type="checkbox" data-export-key="f6_visual_polish.one_screen_line_visible"> One-Screen-Zeile bleibt sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="f6_visual_polish.duplicate_next_suppressed"> Redundante NEXT-Zeile bleibt unterdrueckt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="f6_visual_polish.route_badges_exported"> Route-Badges fuer LZ, AA, COM und CARGO sind exportiert</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="f6_visual_polish.next_badge_exported"> NEXT-Badge ist exportiert</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="f6_visual_polish.label_polish_marker_present"> Mission-Control-Label traegt TASK_657-Polish-Marker</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="f6_visual_polish.read_only"> Snapshot bleibt read-only</label>
+          <input readonly value="task_657_mission_control_one_screen_anchor" data-export-key="f6_visual_polish.style_id">
+          <input readonly value="tmp/frontier_probe_f6_visual_polish_findings.json" data-export-key="f6_visual_polish.manifest_path">
+          <textarea data-export-key="f6_visual_polish.findings" placeholder="Weitere konkrete Polishing-Notizen: Badge-Reihenfolge, Naechstes, Kontrast, Panel-Dichte..."></textarea>
+          <div contenteditable="true" data-note-key="notes.f6_visual_polish_findings" data-placeholder="TASK_657-Notizen...">TASK_657 macht den F6-Zustand als kleinen Polish-Contract pruefbar: bestehende Zeile bleibt kompatibel, Route/NEXT werden als Badge-Daten exportiert, und das Mission-Control-Label bekommt einen sichtbaren Contract-Anker ohne neue Gameplay-Wahrheit.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -290,8 +304,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>TASK_657 - Frontier Probe F6 Visual Polish Findings</strong> ist aus meiner Sicht der beste Anschluss, sobald der TASK_656-Fensterblick einen konkreten Befund liefert: Platzierung, Kontrast oder Dichte gezielt korrigieren, ohne neue Gameplay-Wahrheit zu bauen.</p>
-          <div class="callout">Ziel: Nur belegte F6-Befunde anwenden. Wenn der echte Blick gut ist, danach lieber zur Host/Client-Klickrunde oder Editor-UX wechseln.</div>
+          <p><strong>TASK_658 - Frontier Probe One-Screen Player Decision Drill</strong> ist aus meiner Sicht der beste Anschluss: Mit der lesbaren F6-Anzeige sollte der Spieler jetzt einen kleinen echten Entscheidungsloop lesen und ausfuehren koennen, statt dass wir weiter nur Evidence stapeln.</p>
+          <div class="callout">Ziel: Ein kurzer, wiederholbarer Zug: LZ lesen, AA als NEXT erkennen, Bewegung/Defend/ROE setzen und ohne Tutorialfenster verstehen, warum das der naechste Schritt ist.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -302,7 +316,7 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>TASK_657 - Frontier Probe F6 Visual Polish Findings</td><td>Konkrete F6-Sichtbefunde aus TASK_656 werden angewendet.</td></tr>
+              <tr><td>1</td><td>TASK_658 - Frontier Probe One-Screen Player Decision Drill</td><td>Der lesbare F6-Zustand wird in einem echten kleinen Spielerzug geprueft.</td></tr>
               <tr><td>2</td><td>Echter Host/Client-Klicklauf mit `USE BRAVO`</td><td>Multiplayer-Bedienung wird mit Bild statt nur Manifest bewertet.</td></tr>
               <tr><td>3</td><td>Editor Builder UX Slice</td><td>Mapbau wird angenehmer und Content entsteht schneller.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
@@ -316,7 +330,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_656. Frontier Probe erzeugt ein lokales Real-F6-Reviewpaket fuer die kompakte Mission-Control-Zeile; naechster empfohlener Slice ist TASK_657 Frontier Probe F6 Visual Polish Findings, falls der echte Blick Reibung zeigt.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_657. Frontier Probe hat jetzt einen kleinen F6-Visual-Polish-Contract fuer die kompakte Mission-Control-Zeile; naechster empfohlener Slice ist TASK_658 Frontier Probe One-Screen Player Decision Drill.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -373,15 +387,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_656 - Frontier Probe Real F6 Visual Review",
-            recommended_next_task: "TASK_657 - Frontier Probe F6 Visual Polish Findings",
+            latest_completed_task: "TASK_657 - Frontier Probe F6 Visual Polish Findings",
+            recommended_next_task: "TASK_658 - Frontier Probe One-Screen Player Decision Drill",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_656 - Frontier Probe Real F6 Visual Review",
+            updated_for_task: "TASK_657 - Frontier Probe F6 Visual Polish Findings",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };

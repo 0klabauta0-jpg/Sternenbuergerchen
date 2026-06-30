@@ -2458,6 +2458,7 @@ func _update_ui() -> void:
 		strategic_status_label.text = _build_strategic_status_text()
 		strategic_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
+		_apply_frontier_probe_one_screen_visual_polish_label_contract(strategic_status_label)
 
 	var phase_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseStatusLabel") as Label
 	if phase_status_label != null:
@@ -6500,6 +6501,22 @@ func _apply_combat_hud_detail_tooltip_label_contract(label: Label) -> void:
 	label.set_meta("combat_hud_detail_tooltip_label", true)
 	label.set_meta("combat_hud_detail_tooltip_task", "TASK_551")
 	label.set_meta("combat_hud_tooltip_style_id", COMBAT_HUD_TOOLTIP_STYLE_ID)
+
+
+func _apply_frontier_probe_one_screen_visual_polish_label_contract(label: Label) -> void:
+	if label == null:
+		return
+	var readout: Dictionary = _build_frontier_probe_one_screen_playability_readout()
+	var one_screen_line: String = String(readout.get("one_screen_line", "")).strip_edges()
+	if not bool(readout.get("active", false)) or one_screen_line.is_empty():
+		return
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.set_meta("frontier_probe_one_screen_polish_task", "TASK_657")
+	label.set_meta("frontier_probe_one_screen_polish_style_id", "task_657_mission_control_one_screen_anchor")
+	label.set_meta("frontier_probe_one_screen_line", one_screen_line)
+	label.set_meta("frontier_probe_one_screen_next_token", String(readout.get("next_token", "")).strip_edges())
 
 
 func _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary, compact_line: String) -> Dictionary:
@@ -15610,6 +15627,160 @@ func get_frontier_probe_one_screen_visual_tuning_snapshot() -> Dictionary:
 		"ui_sets_gameplay_truth": false,
 		"recommended_next_task": "TASK_656 - Frontier Probe Real F6 Visual Review",
 	}
+
+
+func get_frontier_probe_f6_visual_polish_findings_snapshot() -> Dictionary:
+	var visual_tuning: Dictionary = get_frontier_probe_one_screen_visual_tuning_snapshot()
+	var one_screen: Dictionary = Dictionary(visual_tuning.get("one_screen", {}))
+	var readout: Dictionary = Dictionary(one_screen.get("readout", {}))
+	var route_tokens: Array = Array(readout.get("route_tokens", []))
+	var next_token: String = String(readout.get("next_token", "")).strip_edges()
+	var one_screen_line: String = String(visual_tuning.get("one_screen_line", "")).strip_edges()
+	var line_char_limit: int = maxi(1, int(visual_tuning.get("line_char_limit", 0)))
+	var line_char_count: int = int(visual_tuning.get("line_char_count", one_screen_line.length()))
+	var line_char_margin: int = line_char_limit - line_char_count
+	var strategic_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	var label_snapshot: Dictionary = _build_frontier_probe_one_screen_polish_label_snapshot(strategic_label)
+	var token_badges: Array = _build_frontier_probe_one_screen_visual_token_badges(route_tokens, next_token)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"one_screen_line_visible",
+			bool(visual_tuning.get("one_screen_line_visible", false)),
+			"Mission Control keeps the compact PLAN/NEXT line visible."
+		),
+		_build_mission_first_move_readability_check(
+			"duplicate_next_suppressed",
+			bool(visual_tuning.get("duplicate_next_line_suppressed", false)),
+			"Mission Control keeps the old detailed NEXT line out of the visible panel."
+		),
+		_build_mission_first_move_readability_check(
+			"route_badges_exported",
+			token_badges.size() >= 4 and not next_token.is_empty(),
+			"Route and NEXT tokens are available as small visual badges for the F6 review surface."
+		),
+		_build_mission_first_move_readability_check(
+			"line_has_breathing_room",
+			line_char_margin >= 24,
+			"One-screen line leaves enough character margin for FullHD Mission Control."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_label_polished",
+			bool(label_snapshot.get("polish_meta_present", false))
+				and bool(label_snapshot.get("autowrap_enabled", false))
+				and bool(label_snapshot.get("clip_text", false))
+				and int(label_snapshot.get("outline_size", 0)) >= COMBAT_HUD_TOOLTIP_OUTLINE_SIZE,
+			"Mission Control label carries the Frontier Probe polish marker and keeps readable label guards."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(visual_tuning.get("read_only", false)) and not bool(visual_tuning.get("ui_sets_gameplay_truth", true)),
+			"Polish findings read existing UI/runtime snapshots and do not write gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_f6_visual_polish_findings.v1",
+		"task_id": "TASK_657",
+		"source_task_ids": PackedStringArray(["TASK_655", "TASK_656"]),
+		"style_id": "task_657_mission_control_one_screen_anchor",
+		"visual_tuning": visual_tuning,
+		"one_screen_line": one_screen_line,
+		"route_token_badges": token_badges,
+		"next_token": next_token,
+		"next_badge": _build_frontier_probe_one_screen_next_badge(next_token),
+		"line_char_count": line_char_count,
+		"line_char_limit": line_char_limit,
+		"line_char_margin": line_char_margin,
+		"mission_control_label": label_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"recommended_next_task": "TASK_658 - Frontier Probe One-Screen Player Decision Drill",
+	}
+
+
+func _build_frontier_probe_one_screen_polish_label_snapshot(label: Label) -> Dictionary:
+	if label == null:
+		return {
+			"exists": false,
+			"polish_meta_present": false,
+			"autowrap_enabled": false,
+			"clip_text": false,
+			"outline_size": 0,
+			"font_size": 0,
+			"text": "",
+		}
+	var style_id: String = String(label.get_meta("frontier_probe_one_screen_polish_style_id", "")).strip_edges()
+	return {
+		"exists": true,
+		"text": String(label.text).strip_edges(),
+		"polish_task": String(label.get_meta("frontier_probe_one_screen_polish_task", "")).strip_edges(),
+		"polish_style_id": style_id,
+		"polish_meta_present": style_id == "task_657_mission_control_one_screen_anchor",
+		"autowrap_mode": int(label.autowrap_mode),
+		"autowrap_enabled": int(label.autowrap_mode) != int(TextServer.AUTOWRAP_OFF),
+		"clip_text": bool(label.clip_text),
+		"text_overrun_behavior": int(label.text_overrun_behavior),
+		"outline_size": label.get_theme_constant("outline_size"),
+		"font_size": label.get_theme_font_size("font_size"),
+		"frontier_probe_one_screen_line": String(label.get_meta("frontier_probe_one_screen_line", "")).strip_edges(),
+		"frontier_probe_one_screen_next_token": String(label.get_meta("frontier_probe_one_screen_next_token", "")).strip_edges(),
+	}
+
+
+func _build_frontier_probe_one_screen_visual_token_badges(route_tokens: Array, next_token: String) -> Array:
+	var badges: Array = []
+	for index in range(route_tokens.size()):
+		var token: String = String(route_tokens[index]).strip_edges()
+		if token.is_empty():
+			continue
+		badges.append({
+			"id": "route_%d_%s" % [index, token.to_lower().replace(" ", "_")],
+			"label": token,
+			"role": "route_step",
+			"tone": _get_frontier_probe_one_screen_badge_tone(token, next_token),
+			"order": index,
+		})
+	return badges
+
+
+func _build_frontier_probe_one_screen_next_badge(next_token: String) -> Dictionary:
+	var normalized: String = next_token.strip_edges()
+	return {
+		"id": "next_%s" % normalized.to_lower().replace(" ", "_"),
+		"label": "NEXT %s" % normalized if not normalized.is_empty() else "NEXT",
+		"role": "next_action",
+		"tone": _get_frontier_probe_one_screen_badge_tone(normalized, normalized),
+		"visible": not normalized.is_empty(),
+	}
+
+
+func _get_frontier_probe_one_screen_badge_tone(token: String, next_token: String) -> String:
+	var normalized_token: String = token.strip_edges().to_upper()
+	var normalized_next: String = next_token.strip_edges().to_upper()
+	if not normalized_next.is_empty() and normalized_token == normalized_next:
+		return "accent_next"
+	match normalized_token:
+		"LZ":
+			return "safe_start"
+		"AA":
+			return "threat_gate"
+		"COM 18S":
+			return "timed_hold"
+		"CARGO":
+			return "objective_extract"
+		"DEBRIEF":
+			return "handoff"
+		_:
+			return "neutral"
 
 
 func _has_route_callout_label(route_callouts: Array, expected_label: String) -> bool:
