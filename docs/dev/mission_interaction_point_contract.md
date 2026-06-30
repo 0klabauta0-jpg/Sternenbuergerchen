@@ -113,6 +113,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `TerrainMap3DView` darf daraus lokale Proxy-Geometrie am Interaktionspunkt zeichnen: Terminalscreen, AA-Mast, Cargo-Beacon oder Door-Slabs.
 - Diese Proxies duerfen keine Tiles austauschen, keine Door-Kollision aendern, keine Scenario-Gates setzen und keine Runtime-Progress-Werte schreiben. Echte Asset-Swaps/Animationen bleiben ein eigener Slice.
 
+## Runtime Visual Assets
+- Object-Reaction-Eintraege duerfen zusaetzlich `runtime_visual_state`, `visual_asset_family`, `visual_asset_type_id`, `visual_model_path`, `visual_preview_path` und `visual_state_label` exportieren.
+- Door-Visualstates sind `closed`, `half` und `open`; sie mappen auf die vorhandene Space-Station-Familie `station_set_door_single_closed`, `station_set_door_single_half` und `station_set_door_single`.
+- Computer-Visualstates sind `idle`, `active` und `controlled`; sie mappen auf `station_computer` plus Screen-/Panel-Hinweise wie `IDLE`, `LINK` oder `CTRL`.
+- `TerrainMap3DView` darf daraus bessere lokale Lesbarkeits-Proxies zeichnen, z. B. Computer-Fortschrittsbalken oder Door-Open-Schwelle.
+- Diese Runtime-Visual-Assets bleiben read-only: sie aendern keine `TerrainMapData`, keine Collision, keine Walkability, keine LOS-Blocker und keine Scenario-Gates.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

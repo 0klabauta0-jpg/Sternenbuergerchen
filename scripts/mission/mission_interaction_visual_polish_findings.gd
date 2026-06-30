@@ -122,4 +122,4 @@ static func _recommended_next_task(blocking_count: int, warning_count: int, manu
 		return "TASK_690 - Mission Interaction Visual Polish"
 	if manual_review_open:
 		return "TASK_690 - Mission Interaction Manual Sight Notes"
-	return "TASK_690 - Door Asset Swap Contract"
+	return "TASK_691 - Mission Interaction Runtime Visual Assets"

@@ -47,6 +47,8 @@ static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
 	if status == "complete":
 		progress = 1.0
 	var accent: Color = _accent_color_for_reaction(object_kind, reaction_state)
+	var runtime_visual_state: String = _runtime_visual_state_for_reaction(object_kind, reaction_state, progress)
+	var visual_asset_type_id: String = _visual_asset_type_id_for_state(object_kind, runtime_visual_state)
 	return {
 		"id": "interaction_object_reaction_%s" % interaction_id,
 		"index": index,
@@ -63,6 +65,15 @@ static func _build_entry(visual_entry: Dictionary, index: int) -> Dictionary:
 		"world_position": Vector2(visual_entry.get("world_position", Vector2.ZERO)),
 		"progress": progress,
 		"open_fraction": _open_fraction_for_reaction(object_kind, reaction_state, progress),
+		"runtime_visual_state": runtime_visual_state,
+		"visual_asset_family": _visual_asset_family_for_kind(object_kind),
+		"visual_asset_type_id": visual_asset_type_id,
+		"visual_model_path": _visual_model_path_for_type_id(visual_asset_type_id),
+		"visual_preview_path": _visual_preview_path_for_type_id(visual_asset_type_id),
+		"visual_state_label": _visual_state_label_for_reaction(object_kind, runtime_visual_state),
+		"computer_panel_text": _computer_panel_text_for_state(runtime_visual_state) if object_kind == "computer" else "",
+		"door_walkability_hint": _door_walkability_hint(runtime_visual_state) if object_kind == "door" else "",
+		"door_los_hint": "unchanged_by_visual_state" if object_kind == "door" else "",
 		"screen_active": object_kind == "computer" and ["active", "controlled", "ready"].has(reaction_state),
 		"beacon_active": ["aa", "cargo"].has(object_kind) and reaction_state != "idle",
 		"locked": reaction_state == "locked" or reaction_state == "blocked",
@@ -121,6 +132,116 @@ static func _resolve_reaction_state(object_kind: String, status: String, is_next
 			return "warning"
 		_:
 			return "unknown"
+
+
+static func _runtime_visual_state_for_reaction(object_kind: String, reaction_state: String, progress: float) -> String:
+	match object_kind:
+		"door":
+			match reaction_state:
+				"open":
+					return "open"
+				"active":
+					return "open" if progress >= 0.85 else "half"
+				"ready":
+					return "closed"
+				"locked", "blocked":
+					return "closed"
+				_:
+					return "closed"
+		"computer":
+			match reaction_state:
+				"controlled", "complete":
+					return "controlled"
+				"active":
+					return "active"
+				"ready":
+					return "idle"
+				_:
+					return "idle"
+		_:
+			return reaction_state
+
+
+static func _visual_asset_family_for_kind(object_kind: String) -> String:
+	match object_kind:
+		"door":
+			return "space_station_single_door_runtime_visual"
+		"computer":
+			return "space_station_computer_runtime_visual"
+		"aa":
+			return "mission_aa_reaction_proxy"
+		"cargo":
+			return "mission_cargo_reaction_proxy"
+		_:
+			return "mission_interaction_reaction_proxy"
+
+
+static func _visual_asset_type_id_for_state(object_kind: String, runtime_visual_state: String) -> String:
+	match object_kind:
+		"door":
+			match runtime_visual_state:
+				"open":
+					return "station_set_door_single"
+				"half":
+					return "station_set_door_single_half"
+				_:
+					return "station_set_door_single_closed"
+		"computer":
+			return "station_computer"
+		_:
+			return ""
+
+
+static func _visual_model_path_for_type_id(type_id: String) -> String:
+	match type_id:
+		"station_set_door_single":
+			return "res://Assets/curated/kenney/space_station/models_all/door-single.glb"
+		"station_set_door_single_half":
+			return "res://Assets/curated/kenney/space_station/models_all/door-single-half.glb"
+		"station_set_door_single_closed":
+			return "res://Assets/curated/kenney/space_station/models_all/door-single-closed.glb"
+		"station_computer":
+			return "res://Assets/curated/kenney/space_station/models/computer.glb"
+		_:
+			return ""
+
+
+static func _visual_preview_path_for_type_id(type_id: String) -> String:
+	match type_id:
+		"station_set_door_single":
+			return "res://Assets/curated/kenney/space_station/previews_all/door-single.png"
+		"station_set_door_single_half":
+			return "res://Assets/curated/kenney/space_station/previews_all/door-single-half.png"
+		"station_set_door_single_closed":
+			return "res://Assets/curated/kenney/space_station/previews_all/door-single-closed.png"
+		"station_computer":
+			return "res://Assets/curated/kenney/space_station/previews_all/computer.png"
+		_:
+			return ""
+
+
+static func _visual_state_label_for_reaction(object_kind: String, runtime_visual_state: String) -> String:
+	if object_kind == "door":
+		return "DOOR %s" % runtime_visual_state.to_upper()
+	if object_kind == "computer":
+		return "COM %s" % runtime_visual_state.to_upper()
+	return runtime_visual_state.to_upper()
+
+
+static func _computer_panel_text_for_state(runtime_visual_state: String) -> String:
+	match runtime_visual_state:
+		"controlled":
+			return "CTRL"
+		"active":
+			return "LINK"
+		_:
+			return "IDLE"
+
+
+static func _door_walkability_hint(runtime_visual_state: String) -> String:
+	if runtime_visual_state == "open":
+		return "visual_open_only_collision_unchanged"
+	return "visual_closed_only_collision_unchanged"
 
 
 static func _open_fraction_for_reaction(object_kind: String, reaction_state: String, progress: float) -> float:
