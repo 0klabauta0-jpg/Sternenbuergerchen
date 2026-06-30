@@ -2,6 +2,7 @@ class_name MissionInteractionDoorMultiplayerAuthority
 extends RefCounted
 
 const SNAPSHOT_SCHEMA: String = "sternenbuergerchen.mission_interaction_door_multiplayer_authority.v1"
+const UI_FEEDBACK_SCHEMA: String = "sternenbuergerchen.mission_interaction_door_authority_ui_feedback.v1"
 const COMMAND_SOURCE_CONTEXT: String = "mission_interaction_door_breach_command"
 
 
@@ -90,6 +91,48 @@ static func build_snapshot(hook_snapshot: Dictionary, network_contract_snapshot:
 	}
 
 
+static func build_ui_feedback(authority_snapshot: Dictionary, button_context: Dictionary = {}) -> Dictionary:
+	var gate: String = String(authority_snapshot.get("gate", "")).strip_edges().to_lower()
+	var enabled: bool = bool(button_context.get("button_enabled", false))
+	var has_usable_door: bool = bool(button_context.get("has_usable_door", false))
+	var display_token: String = String(button_context.get("display_token", authority_snapshot.get("interaction_id", "DOOR"))).strip_edges().to_upper()
+	if display_token.is_empty():
+		display_token = "DOOR"
+	var shortcut: String = String(button_context.get("shortcut", "B")).strip_edges().to_upper()
+	if shortcut.is_empty():
+		shortcut = "B"
+	var status: String = _resolve_ui_status(authority_snapshot, enabled, has_usable_door)
+	var summary_line: String = _build_ui_summary_line(status, display_token, shortcut, authority_snapshot)
+	var tooltip_lines: PackedStringArray = PackedStringArray([
+		summary_line,
+		"Bestaetigung: GO erforderlich.",
+	])
+	var detail_line: String = _build_ui_detail_line(status, authority_snapshot, has_usable_door)
+	if not detail_line.is_empty():
+		tooltip_lines.append(detail_line)
+	tooltip_lines.append("Quelle: SimulationRoot / MultiplayerCommandContract.")
+	return {
+		"schema": UI_FEEDBACK_SCHEMA,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"status": status,
+		"display_token": display_token,
+		"shortcut": shortcut,
+		"summary_line": summary_line,
+		"detail_line": detail_line,
+		"tooltip_text": "\n".join(Array(tooltip_lines)),
+		"button_enabled": enabled,
+		"has_usable_door": has_usable_door,
+		"requires_go": bool(authority_snapshot.get("requires_go", false)) or enabled,
+		"authority_gate": gate,
+		"authority_summary": String(authority_snapshot.get("summary", "")).strip_edges(),
+		"host_command_accepted": bool(authority_snapshot.get("host_command_accepted", false)),
+		"foreign_team_rejected": bool(authority_snapshot.get("foreign_team_rejected", false)),
+		"state_mutation_rejected": bool(authority_snapshot.get("state_mutation_rejected", false)),
+		"door_runtime_open_override": bool(authority_snapshot.get("door_runtime_open_override", false)),
+	}
+
+
 static func _door_runtime_snapshot_has_open_override(snapshot: Dictionary) -> bool:
 	for entry_variant in Array(snapshot.get("entries", [])):
 		if typeof(entry_variant) != TYPE_DICTIONARY:
@@ -124,3 +167,51 @@ static func _build_summary(host_submission: Dictionary, foreign_submission: Dict
 	if bool(host_submission.get("accepted", false)) and not bool(foreign_submission.get("accepted", true)) and not bool(state_mutation_submission.get("accepted", true)) and _door_runtime_snapshot_has_open_override(door_runtime_snapshot):
 		return "Door authority OK: host command accepted, wrong-team/state payloads rejected, producer opens Door."
 	return "Door authority pending/review: check host accept, rejects and runtime producer."
+
+
+static func _resolve_ui_status(authority_snapshot: Dictionary, enabled: bool, has_usable_door: bool) -> String:
+	if bool(authority_snapshot.get("door_runtime_open_override", false)):
+		return "open"
+	if bool(authority_snapshot.get("host_command_accepted", false)):
+		return "accepted"
+	if bool(authority_snapshot.get("foreign_team_rejected", false)) or bool(authority_snapshot.get("state_mutation_rejected", false)):
+		return "blocked"
+	if enabled and has_usable_door:
+		return "ready"
+	return "pending"
+
+
+static func _build_ui_summary_line(status: String, display_token: String, shortcut: String, authority_snapshot: Dictionary) -> String:
+	match status:
+		"open":
+			return "DOOR %s offen | Runtime frei" % display_token
+		"accepted":
+			return "DOOR %s akzeptiert | GO laeuft ueber Host" % display_token
+		"blocked":
+			return "DOOR %s blockiert | Authority pruefen" % display_token
+		"ready":
+			return "DOOR %s bereit | %s dann GO" % [display_token, shortcut]
+		_:
+			if not bool(authority_snapshot.get("hook_accepted", false)):
+				return "DOOR %s wartet | keine nutzbare Door" % display_token
+			return "DOOR %s wartet | Authority offen" % display_token
+
+
+static func _build_ui_detail_line(status: String, authority_snapshot: Dictionary, has_usable_door: bool) -> String:
+	match status:
+		"open":
+			return "Walkability/LOS kommen vom Door Runtime Producer."
+		"accepted":
+			return "Own-Team Command akzeptiert; Runtime-State wird nicht im UI gesetzt."
+		"blocked":
+			var foreign_reason: String = String(authority_snapshot.get("foreign_team_reject_reason", "")).strip_edges()
+			var mutation_reason: String = String(authority_snapshot.get("state_mutation_reject_reason", "")).strip_edges()
+			if not foreign_reason.is_empty():
+				return "Reject: %s." % foreign_reason
+			if not mutation_reason.is_empty():
+				return "Reject: %s." % mutation_reason
+			return "Reject kommt aus dem MultiplayerCommandContract."
+		"ready":
+			return "Bereitet nur den Door-Breach-Command vor; GO bestaetigt."
+		_:
+			return "Door in Reichweite fehlt." if not has_usable_door else "Authority-Snapshot wartet auf Command-Ergebnis."

@@ -173,6 +173,16 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `get_mission_interaction_door_multiplayer_authority_snapshot()` und `get_command_feedback_snapshot()` duerfen den technischen Authority-Status read-only exportieren.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht; der Snapshot ist Beweis-/Reportdaten, kein Gameplay-Mutator.
 
+## Door Authority UI Feedback
+- `MissionInteractionDoorMultiplayerAuthority.build_ui_feedback()` uebersetzt den read-only Authority-Snapshot in eine kurze HUD-Zeile und einen Button-Tooltip.
+- Zulaessige UI-Readout-Statuswerte sind `pending`, `ready`, `accepted`, `blocked` und `open`.
+- `ready` bedeutet nur: Door-Breach kann als Command vorbereitet werden und braucht weiter GO.
+- `accepted` bedeutet: der Host/Authority-Pfad hat den Own-Team-Command akzeptiert; Runtime-State wird dadurch nicht im UI gesetzt.
+- `blocked` muss den Reject-Grund aus `MultiplayerCommandContract` lesbar machen, zum Beispiel `peer_team_mismatch` oder `state_mutation_key:runtime_state`.
+- `open` darf nur erscheinen, wenn der Door Runtime Collision/LOS Producer einen offenen Runtime-Override meldet.
+- Der `DoorBreachButton` darf Tooltip und Metadaten aus diesem Readout zeigen; `get_command_feedback_snapshot()` darf dieselben Daten exportieren.
+- Das Feedback bleibt `read_only = true` und `ui_sets_gameplay_truth = false`.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

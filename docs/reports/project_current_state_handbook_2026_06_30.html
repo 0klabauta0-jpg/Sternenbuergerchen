@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_697: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_698: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_697</span>
-      <span class="pill">Naechster Kandidat: Host/Client Door Real Click Recheck oder Door Authority UI Polish</span>
+      <span class="pill">Letzter Stand: TASK_698</span>
+      <span class="pill">Naechster Kandidat: Host/Client Door Real Click Recheck oder Multiplayer Door Feedback Capture</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_697 - Door Interaction Multiplayer Authority Check ist der aktuelle Abschlussstand: Door-Breach wird als netzwerkvertraeglicher Commander-Command pruefbar, Own-Team-Commands werden akzeptiert, Wrong-Team- und Runtime-State-Mutationspayloads werden abgelehnt, und die Door oeffnet weiter nur ueber Runtime-Progress plus Door Runtime Collision/LOS Producer.</div>
+          <div class="callout">TASK_698 - Door Authority UI Feedback ist der aktuelle Abschlussstand: Door-Breach zeigt jetzt eine kurze Authority-Zeile und einen Tooltip mit GO-Pflicht, Authority-Quelle und lesbarem ready/accepted/blocked/open-Status. Die Anzeige bleibt read-only; Door-/Terrain-Wahrheit kommt weiter aus Runtime und Producer.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -155,6 +155,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_695_done"> TASK_695 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_696_done"> TASK_696 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_697_done"> TASK_697 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_698_done"> TASK_698 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -848,6 +849,20 @@
           <textarea data-export-key="mission_interaction_door_multiplayer_authority.findings" placeholder="Naechster Recheck: Stimmen Button/Shortcut/GO im echten Host/Client-Fensterlauf?"></textarea>
           <div contenteditable="true" data-note-key="notes.mission_interaction_door_multiplayer_authority" data-placeholder="TASK_697-Notizen...">TASK_697 beweist den technischen Authority-Pfad. Offen bleibt der echte Zwei-Fenster-Klicklauf: Kommt der Door-Befehl von Client/Host sichtbar gleich an und bleibt die Anzeige konsistent?</div>
         </article>
+        <article class="card full">
+          <h2>TASK_698 - Door Authority UI Feedback</h2>
+          <p>Der Door-Breach-Button und der Command-Feedback-Snapshot zeigen jetzt eine kurze, spielbare Authority-Zeile. Der Spieler bekommt GO-Pflicht, Host-/Authority-Quelle und den Status `ready`, `accepted`, `blocked`, `pending` oder `open`, ohne dass das HUD Door- oder Terrain-State setzt.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_authority_ui_feedback.ready_status"> `ready` fuer nutzbare Door sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_authority_ui_feedback.accepted_status"> `accepted` fuer Host-Accept abbildbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_authority_ui_feedback.blocked_status"> `blocked` nennt Reject-Grund</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_authority_ui_feedback.open_status"> `open` bleibt an Runtime Producer gebunden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_authority_ui_feedback.tooltip_mentions_go"> Tooltip nennt GO-Pflicht</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_door_authority_ui_feedback.no_ui_truth"> UI-Feedback setzt keine Door-/Terrain-Wahrheit</label>
+          <input readonly value="tmp/door_authority_ui_feedback.json" data-export-key="mission_interaction_door_authority_ui_feedback.manifest_path">
+          <input readonly value="TASK_698 - Door Authority UI Feedback" data-export-key="mission_interaction_door_authority_ui_feedback.completed_task">
+          <textarea data-export-key="mission_interaction_door_authority_ui_feedback.findings" placeholder="Naechster Recheck: Ist die Door-Authority-Zeile im echten Host/Client-Fenster schnell genug lesbar?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_door_authority_ui_feedback" data-placeholder="TASK_698-Notizen...">TASK_698 macht den Door-Authority-Pfad im HUD lesbarer. Offen bleibt der echte Zwei-Fenster-Klicklauf mit sichtbarem Client-/Host-Feedback.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -867,12 +882,12 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Host/Client Door Real Click Recheck</strong> ist jetzt der beste Anschluss: Der technische Authority-Pfad ist pruefbar, aber der echte Zwei-Fenster-Lauf muss noch zeigen, ob Button, Shortcut, GO, Client-Rejects und Door-Anzeige fuer Menschen sauber zusammenspielen.</p>
-          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence. TASK_689 bewertet technische Polish-Findings. TASK_690 macht den offenen Sichtlauf als Workbench bearbeitbar. TASK_691 gibt Door/Computer einen Runtime-Visualstate. TASK_692 macht Door-Walkability und LOS als effektive Runtime-Wahrheit lesbar. TASK_693 wendet diesen State per Controller auf die TerrainRegistry an. TASK_694 erzeugt den sicheren BREACH/GO-Command-Hook. TASK_695 macht ihn im HUD per Button und Shortcut bedienbar. TASK_696 macht Closed/Opening/Open als Door-Visualphase und Asset-Swap-State pruefbar. TASK_697 beweist Host-Accept, Wrong-Team-Reject, State-Mutation-Reject und Door-Producer-Open technisch.</div>
+          <p><strong>Host/Client Door Real Click Recheck</strong> ist jetzt der beste Anschluss: Der technische Authority-Pfad und das HUD-Feedback sind pruefbar, aber der echte Zwei-Fenster-Lauf muss noch zeigen, ob Button, Shortcut, GO, Client-Rejects und Door-Anzeige fuer Menschen sauber zusammenspielen.</p>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. TASK_686 macht diese Gates in der 3D-Missionsansicht lesbar. TASK_687 laesst die Missionsobjekte selbst reagieren. TASK_688 schreibt Review-Evidence. TASK_689 bewertet technische Polish-Findings. TASK_690 macht den offenen Sichtlauf als Workbench bearbeitbar. TASK_691 gibt Door/Computer einen Runtime-Visualstate. TASK_692 macht Door-Walkability und LOS als effektive Runtime-Wahrheit lesbar. TASK_693 wendet diesen State per Controller auf die TerrainRegistry an. TASK_694 erzeugt den sicheren BREACH/GO-Command-Hook. TASK_695 macht ihn im HUD per Button und Shortcut bedienbar. TASK_696 macht Closed/Opening/Open als Door-Visualphase und Asset-Swap-State pruefbar. TASK_697 beweist Host-Accept, Wrong-Team-Reject, State-Mutation-Reject und Door-Producer-Open technisch. TASK_698 macht diesen Authority-Pfad fuer Button, Tooltip und Command-Feedback lesbar.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
-          <p>Falls du den echten Fensterlauf weiter ueberspringen willst: Der alternative Hebel ist Door Authority UI Polish, also eine kleine, lesbare Anzeige warum ein Door-Command akzeptiert oder blockiert wurde.</p>
+          <p>Falls du den echten Fensterlauf weiter ueberspringen willst: Der alternative Hebel ist Multiplayer Door Feedback Capture, also ein technisches Evidence-Paket fuer Host-/Client-Snapshots und sichtbare Feedbacktexte.</p>
         </article>
         <article class="card full">
           <h2>Vorgeschlagene Reihenfolge</h2>
@@ -880,7 +895,7 @@
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
               <tr><td>1</td><td>Host/Client Door Real Click Recheck</td><td>Button, Shortcut, GO, Reject-Feedback und Door-State im echten Zwei-Fenster-Lauf pruefen.</td></tr>
-              <tr><td>2</td><td>Door Authority UI Polish</td><td>Akzeptiert/blockiert/anderes Team als kompakte Command-Panel-Zeile sichtbar machen.</td></tr>
+              <tr><td>2</td><td>Multiplayer Door Feedback Capture</td><td>Host-/Client-Snapshots und sichtbare Door-Authority-Zeilen als Evidence-Paket sichern.</td></tr>
               <tr><td>3</td><td>Door Visual FullHD Sight Review</td><td>Closed/Opening/Open im echten Missionsfenster auf Groesse, Kontrast und HUD-Overlap beurteilen.</td></tr>
               <tr><td>4</td><td>Gezielter Visual-Polish</td><td>Nur die im Sichttest gefundenen Label-/Proxy-/Overlap-Punkte korrigieren.</td></tr>
             </tbody>
@@ -893,7 +908,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_697. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Mission: Objective-Gate-Snapshot, Visualstate, Object-Reaction, FullHD-Evidence, Polish-Findings, Manual-Sight-Workbench, Runtime-Visual-Assets, Door Runtime Collision/LOS, Door Runtime State Producer, Door Use/Breach Command Hook, Door HUD Button/Shortcut, Door Runtime Visual Animation/Asset Swap und Door Interaction Multiplayer Authority Check fuehren AA, COM, CARGO und Door weiter zusammen. Autonom naechster guter Griff: Host/Client Door Real Click Recheck oder Door Authority UI Polish.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_698. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Mission: Objective-Gate-Snapshot, Visualstate, Object-Reaction, FullHD-Evidence, Polish-Findings, Manual-Sight-Workbench, Runtime-Visual-Assets, Door Runtime Collision/LOS, Door Runtime State Producer, Door Use/Breach Command Hook, Door HUD Button/Shortcut, Door Runtime Visual Animation/Asset Swap, Door Interaction Multiplayer Authority Check und Door Authority UI Feedback fuehren AA, COM, CARGO und Door weiter zusammen. Autonom naechster guter Griff: Host/Client Door Real Click Recheck oder Multiplayer Door Feedback Capture.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -950,15 +965,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_697 - Door Interaction Multiplayer Authority Check",
-            recommended_next_task: "TASK_698 - Host/Client Door Real Click Recheck",
+            latest_completed_task: "TASK_698 - Door Authority UI Feedback",
+            recommended_next_task: "TASK_699 - Host/Client Door Real Click Recheck",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_697 - Door Interaction Multiplayer Authority Check",
+            updated_for_task: "TASK_698 - Door Authority UI Feedback",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };
