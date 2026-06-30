@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_670: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_671: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_670</span>
-      <span class="pill">Naechster Kandidat: TASK_666 oder Auto-Snapping</span>
+      <span class="pill">Letzter Stand: TASK_671</span>
+      <span class="pill">Naechster Kandidat: TASK_666 oder FullHD Preview-Polish</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_670 - Builder Drag Preview Handles ist der aktuelle Abschlussstand: Der Map-Editor liefert beim Ziehen von Pipe-, Wall- und Cliff-Linien read-only Handles und Segmentnummern, damit klarer ist, welche Tiles nach Apply gebaut werden. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
+          <div class="callout">TASK_671 - Builder Chain Auto Snapping ist der aktuelle Abschlussstand: Der Map-Editor zeigt in Preview und Last-Apply-Snapshot, welche Piece-Variante und Rotation der Network-Solver fuer Pipe-, Wall- und Cliff-Ketten waehlt. TASK_665 bleibt der technische Multiplayer-Guard; der echte Fensterklick bleibt bewusst TASK_666.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -127,6 +127,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_668_done"> TASK_668 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_669_done"> TASK_669 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_670_done"> TASK_670 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_671_done"> TASK_671 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -221,7 +222,7 @@
               <tr><td>Viele gruene Verifier, wenig menschlicher Blick</td><td>Headless-Gruen beweist Vertraege, aber nicht Bediengefuehl.</td><td>Nach jedem Evidence-Slice ein kurzer Fensterblick oder Screenshot-Befund.</td></tr>
               <tr><td>UI darf hilfreich sein, aber nicht wahr werden</td><td>Der Spieler braucht klare Hinweise, aber Gameplay-Wahrheit darf nicht im HUD landen.</td><td>Snapshots/Contracts erweitern, UI nur lesen lassen.</td></tr>
               <tr><td>Multiplayer-Authority ist korrekt, kann aber trocken wirken</td><td>Ein geblockter Client-Klick muss als Spielerfeedback verstaendlich sein.</td><td>TASK_665 prueft die technische Kette; TASK_666 braucht den echten Klickbefund.</td></tr>
-              <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_670 macht Drag-Strokes lesbarer; als naechstes fehlen Auto-Snapping, finale Handle-Art-Direction und geteilte Profile.</td></tr>
+              <tr><td>Editor bleibt der Content-Hebel</td><td>Ohne angenehmen Mapbau entstehen keine guten Szenarien.</td><td>TASK_671 macht Auto-Snapping pruefbar; als naechstes fehlen finale Handle-/Piece-Art-Direction, Door-Interaktion und geteilte Profile.</td></tr>
             </tbody>
           </table>
         </article>
@@ -452,7 +453,18 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="map_editor_drag_preview_handles.no_gameplay_truth"> Preview meldet weiter `ui_sets_gameplay_truth = false`</label>
           <input readonly value="TASK_670 - Builder Drag Preview Handles" data-export-key="map_editor_drag_preview_handles.completed_task">
           <textarea data-export-key="map_editor_drag_preview_handles.findings" placeholder="Beim naechsten Mapbau notieren: Sind Start, Ziel und Segmentfolge schon klar genug sichtbar?"></textarea>
-          <div contenteditable="true" data-note-key="notes.map_editor_drag_preview_handles" data-placeholder="TASK_670-Notizen...">TASK_670 macht Drag-Strokes besser pruefbar und vorbereitet fuer echte FullHD-Labels. Offen bleiben Auto-Rotation/Snapping und finale Icon-/Text-Art-Direction fuer laengere Builder-Ketten.</div>
+          <div contenteditable="true" data-note-key="notes.map_editor_drag_preview_handles" data-placeholder="TASK_670-Notizen...">TASK_670 macht Drag-Strokes besser pruefbar und vorbereitet fuer echte FullHD-Labels. TASK_671 ergaenzt darauf die Auto-Snap-Piece-Aufloesung; offen bleibt finale Icon-/Text-Art-Direction fuer laengere Builder-Ketten.</div>
+        </article>
+        <article class="card full">
+          <h2>TASK_671 - Builder Chain Auto Snapping</h2>
+          <p>Preview und Apply-Snapshot nutzen jetzt dieselbe Auto-Snap-Aufloesung fuer Network-Ketten. Der Snapshot nennt pro Tile Connection-Mask, Richtungsliste, Piece-Key, Type-ID und Rotation, ohne vor Apply Tile- oder Gameplay-Wahrheit zu setzen.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="map_editor_chain_auto_snapping.preview_pieces"> Preview exportiert `auto_snapping.path_pieces`</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="map_editor_chain_auto_snapping.apply_pieces"> Last-Apply exportiert Candidate- und Changed-Pieces</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="map_editor_chain_auto_snapping.rotation_snap"> Piece-Rotation bleibt in 90-Grad-Schritten</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="map_editor_chain_auto_snapping.no_gameplay_truth"> Auto-Snapping-Snapshots melden `ui_sets_gameplay_truth = false`</label>
+          <input readonly value="TASK_671 - Builder Chain Auto Snapping" data-export-key="map_editor_chain_auto_snapping.completed_task">
+          <textarea data-export-key="map_editor_chain_auto_snapping.findings" placeholder="Beim naechsten Mapbau notieren: Sind die automatisch gewaehlten Ecken, Enden und Kreuzungen nachvollziehbar?"></textarea>
+          <div contenteditable="true" data-note-key="notes.map_editor_chain_auto_snapping" data-placeholder="TASK_671-Notizen...">TASK_671 macht den vorhandenen Network-Solver sichtbar: End, Straight, Corner, Split und Cross sind jetzt vor und nach Apply pruefbar. Offen bleibt die schoene FullHD-Darstellung dieser Piece-Daten im Editor.</div>
         </article>
         <article class="card half">
           <h2>Bewertung</h2>
@@ -473,12 +485,12 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>TASK_666 - Host Client Decision Drill Real Click Findings</strong> bleibt der ehrlichste Multiplayer-Anschluss, sobald ein echter Fensterlauf beobachtet werden soll. Wenn wir weiter ohne Sichttest Fortschritt machen, ist der beste Editor-Anschluss jetzt Auto-Rotation/Snapping fuer Ketten oder finale FullHD-Art-Direction fuer Drag-Preview-Labels.</p>
-          <div class="callout">TASK_670 hat Builder-Handles und Segmentlabel-Daten erledigt. Offen sind Auto-Snapping, geteilte Profile und echte Text-/Icon-Politur fuer lange Wall-, Pipe- und Cliff-Strokes.</div>
+          <p><strong>TASK_666 - Host Client Decision Drill Real Click Findings</strong> bleibt der ehrlichste Multiplayer-Anschluss, sobald ein echter Fensterlauf beobachtet werden soll. Wenn wir weiter ohne Sichttest Fortschritt machen, ist der beste Editor-Anschluss jetzt finale FullHD-Art-Direction fuer Drag-Preview-Labels oder der Door-/Computer-Interaction-Contract.</p>
+          <div class="callout">TASK_671 hat Auto-Snapping-Daten fuer Preview und Apply erledigt. Offen sind geteilte Profile, echte Text-/Icon-Politur fuer lange Wall-, Pipe- und Cliff-Strokes sowie Runtime-Regeln fuer Tueren/Computer.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
-          <p>Falls du zuerst Content bauen willst: Map-Builder-UX kann weiter verbessert werden. Der naechste praktische Editor-Hebel ist Auto-Rotation/Snapping fuer Wall-, Door- und Cliff-Ketten, damit laengere Stationsteile weniger Nacharbeit brauchen.</p>
+          <p>Falls du zuerst Content bauen willst: Map-Builder-UX kann weiter verbessert werden. Der naechste praktische Editor-Hebel ist, die Auto-Snap-Daten als sichtbare FullHD-Labels/Icons zu polieren, damit laengere Stationsteile auf Anhieb lesbar sind.</p>
         </article>
         <article class="card full">
           <h2>Vorgeschlagene Reihenfolge</h2>
@@ -486,8 +498,8 @@
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
               <tr><td>1</td><td>TASK_666 - Host Client Decision Drill Real Click Findings</td><td>Pruefen, ob `P2 BRAVO` den kompletten Host/Client-Decision-Drill im Fenster verbessert.</td></tr>
-              <tr><td>2</td><td>Auto-Rotation/Snapping fuer Ketten</td><td>Door-/Wall-/Station-Ketten beim Ziehen automatisch passend ausrichten.</td></tr>
-              <tr><td>3</td><td>FullHD Drag Preview Art Direction</td><td>Handle- und Segmentlabel-Daten aus TASK_670 als schoene, gut lesbare Editor-Visuals polieren.</td></tr>
+              <tr><td>2</td><td>FullHD Drag Preview Art Direction</td><td>Handle-, Segment- und Auto-Snap-Daten aus TASK_670/TASK_671 als schoene, gut lesbare Editor-Visuals polieren.</td></tr>
+              <tr><td>3</td><td>Door-/Computer-Interaction-Contract</td><td>Stationstueren und Computer spaeter mit Naehe, Bedienzeit und Runtime-State sauber anbinden.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
             </tbody>
           </table>
@@ -499,7 +511,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_670. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset und liefert fuer Builder-Drag-Strokes jetzt Handles plus Segmentlabels, ohne Map- oder Gameplay-Wahrheit zu werden. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; ohne Sichttest ist der naechste Editor-Hebel Auto-Rotation/Snapping.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_671. Der Editor speichert lokale Placement-Rotation und Rotation-Overrides pro Palette-Asset, liefert fuer Builder-Drag-Strokes Handles plus Segmentlabels und zeigt jetzt die Auto-Snap-Piece-Aufloesung fuer Preview und Apply. TASK_666 bleibt offen fuer den echten Host/Client-Fensterklick; ohne Sichttest ist der naechste Editor-Hebel FullHD-Preview-Polish oder Door-/Computer-Interaction.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -556,15 +568,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_670 - Builder Drag Preview Handles",
-            recommended_next_task: "TASK_666 - Host Client Decision Drill Real Click Findings oder Auto-Rotation/Snapping",
+            latest_completed_task: "TASK_671 - Builder Chain Auto Snapping",
+            recommended_next_task: "TASK_666 - Host Client Decision Drill Real Click Findings oder FullHD Drag Preview Art Direction",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_670 - Builder Drag Preview Handles",
+            updated_for_task: "TASK_671 - Builder Chain Auto Snapping",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };
