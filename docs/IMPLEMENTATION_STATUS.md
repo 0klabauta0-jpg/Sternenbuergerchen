@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_713 - Station Route Host/Client Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_713_station_route_host_client_findings.md`, `docs/tasks/TASK_712_station_route_host_client_acceptance_packet.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: `StationRouteHostClientFindings` bewertet das TASK_712-Host/Client-Acceptance-Manifest read-only.
+- Stand: Technische Paket-Blocker, Paket-Warnungen und offene manuelle Host/Client-Findings werden getrennt.
+- Stand: `manual_open` bleibt `needs_real_run`; `review_ready` mit Run-/Screenshot-Evidence wird `ready_for_findings_review`.
+- Risiken/offen: Der echte Zwei-Fenster-Lauf bleibt offen; TASK_713 behauptet keinen bestandenen Multiplayer-Playtest.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_713_station_route_host_client_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_712_station_route_host_client_acceptance_packet.gd`, `git diff --check`.
+- Naechster Schritt: Echten Station-Route-Zwei-Fenster-Lauf ausfuehren oder bei `ready_for_findings_review` TASK_714 - Station Route Multiplayer Polish/Scenario ableiten.
+
 ### TASK_712 - Station Route Host/Client Acceptance Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_712_station_route_host_client_acceptance_packet.md`, `docs/tasks/TASK_705_host_client_door_real_click_manual_run_packet.md`, `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/tasks/TASK_709_station_route_window_playtest_notes.md`, `docs/tasks/TASK_710_station_route_polish_readiness_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`

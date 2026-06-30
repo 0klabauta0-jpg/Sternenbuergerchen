@@ -76,12 +76,12 @@
 <body data-report-id="project_current_state_handbook_refresh_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch Refresh</h1>
-    <p>Kompakter Zwischenbericht nach TASK_705 bis TASK_712: Was spielbar ist, wie man es bedient, wo es reibt und was als naechstes sinnvoll ist.</p>
+    <p>Kompakter Zwischenbericht nach TASK_705 bis TASK_713: Was spielbar ist, wie man es bedient, wo es reibt und was als naechstes sinnvoll ist.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-07-01</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Abschluss: TASK_705</span>
+      <span class="pill">Letzter Abschluss: TASK_713</span>
       <span class="pill good">TASK_706 Door Layout/Visual Polish</span>
       <span class="pill good">TASK_707 Door/Computer/Cargo Smoke</span>
       <span class="pill good">TASK_708 Station Route Visual Evidence</span>
@@ -89,6 +89,7 @@
       <span class="pill good">TASK_710 Polish Readiness</span>
       <span class="pill good">TASK_711 Evidence Board Polish</span>
       <span class="pill good">TASK_712 Host/Client Acceptance Packet</span>
+      <span class="pill good">TASK_713 Host/Client Findings</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -108,7 +109,7 @@
         <article class="card wide">
           <h2>Kurzer Stand</h2>
           <p>Der spielbare Kern ist nicht mehr nur Idee: Homebase, Readiness, Dropship/Insertion, Mission-HUD, Fireteam-Orders, Objective-Route, Debrief und Homebase-Return sind als Review-Spine vorhanden. Die aktuelle Spitze ist die Door-/Station-Interaktion, weil sie Singleplayer-Lesbarkeit und Host/Client-Authority zusammenbringt.</p>
-          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run.</div>
+          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -125,6 +126,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_710_done"> TASK_710 Polish Readiness Findings vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_711_done"> TASK_711 Evidence Board Polish vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_712_done"> TASK_712 Host/Client Acceptance Packet vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_713_done"> TASK_713 Host/Client Findings vorhanden</label>
         </article>
         <article class="card full">
           <h2>Systemkarte</h2>
@@ -133,7 +135,7 @@
             <tbody>
               <tr><td>Spiel-Flow</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Spine pruefbar.</td><td>Der echte Spielerblick muss weiter in kleinen Fenster-/Playtest-Paketen belegt werden.</td><td>Mini-Szenario mit wenigen klaren Interaktionen erneut spielen.</td></tr>
               <tr><td>Mission</td><td>Fireteam-Auswahl, Move/Defend/Fire, Threat-Preview, Contacts, Objective-Gates und Door-Hook sind verbunden.</td><td>Station-/Door-Objekte muessen optisch noch eindeutiger werden.</td><td>TASK_706 Door Layout/Visual Polish.</td></tr>
-              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures und Door-Manual-Packet existieren.</td><td>Der echte Zwei-Fenster-Klickbefund bleibt menschlich offen.</td><td>TASK_700-Workbench im echten Run exportieren.</td></tr>
+              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet und Findings-Auswertung existieren.</td><td>Der echte Zwei-Fenster-Klickbefund bleibt menschlich offen.</td><td>TASK_712-Run ausfuehren und TASK_713-Status bewerten.</td></tr>
               <tr><td>Editor</td><td>Map-Editor und Builder-Workbench haben Paletten, Snapping, Presets und Interaction-Bindings.</td><td>Bediengefuehl und Asset-Auswahl bleiben langfristig ein eigener UX-Block.</td><td>Erst nach spielbarer Mission weiterpolieren.</td></tr>
               <tr><td>Export</td><td>Export-Templates und Package-Hygiene sind geprueft.</td><td>Warnungen koennen wiederkommen, sobald Assets/Plugins wachsen.</td><td>Bei Release-Kandidat erneut Export-Smoke laufen lassen.</td></tr>
             </tbody>
@@ -232,7 +234,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster Griff</h2>
-          <p>Aktuell sinnvoll: den echten Zwei-Fenster-Run mit TASK_712-Checkliste durchspielen. Danach kann TASK_713 die Host/Client-Findings ehrlich als pass, polish oder blocked auswerten.</p>
+          <p>Aktuell sinnvoll: den echten Zwei-Fenster-Run mit TASK_712-Checkliste durchspielen. TASK_713 liegt bereit, um den Befund ehrlich als blocked, needs_real_run, ready_for_findings_review oder accepted auszuwerten.</p>
           <div class="callout warning">Nicht jetzt: grosses neues Missionssystem, Ammo-Runner, tiefe Economy oder Editor-Umbau. Erst muss die kleine Station-Interaktion angenehm, sichtbar und im Host/Client-Pfad glaubwuerdig sein.</div>
         </article>
         <article class="card">
@@ -242,6 +244,7 @@
             <option value="station_polish_readiness">TASK_710 Polish Readiness pruefen</option>
             <option value="station_board_polish">TASK_711 Evidence-Board-Polish pruefen</option>
             <option value="station_host_client_acceptance">TASK_712 Host/Client Acceptance Run</option>
+            <option value="station_host_client_findings">TASK_713 Host/Client Findings auswerten</option>
             <option value="real_host_client_run">Echten Host/Client Door Run machen</option>
             <option value="mini_scenario_playtest">Mini-Szenario Playtest</option>
           </select>
@@ -253,7 +256,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30/07-01: Neuer kompakter Ist-Stand-/Handbuch-Refresh angelegt. TASK_705 ist letzter Door-Manual-Run-Stand. TASK_706 machte Door-Layout-/Visual-Polish read-only sichtbar. TASK_707 pruefte Door -> Computer -> Cargo als integrierten Stations-Smoke. TASK_708 schreibt daraus ein PNG-/JSON-Evidence-Paket. TASK_709 stellt die ausfuellbare Fenster-Playtest-Workbench bereit. TASK_710 bewertet Evidence und Notizen als Polish-/Akzeptanzbereitschaft. TASK_711 beschriftet das generierte Evidence-Board. TASK_712 buendelt den Host/Client-Acceptance-Run, ohne neue Gameplay-Wahrheit zu erzeugen.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30/07-01: Neuer kompakter Ist-Stand-/Handbuch-Refresh angelegt. TASK_705 ist letzter Door-Manual-Run-Stand. TASK_706 machte Door-Layout-/Visual-Polish read-only sichtbar. TASK_707 pruefte Door -> Computer -> Cargo als integrierten Stations-Smoke. TASK_708 schreibt daraus ein PNG-/JSON-Evidence-Paket. TASK_709 stellt die ausfuellbare Fenster-Playtest-Workbench bereit. TASK_710 bewertet Evidence und Notizen als Polish-/Akzeptanzbereitschaft. TASK_711 beschriftet das generierte Evidence-Board. TASK_712 buendelt den Host/Client-Acceptance-Run, ohne neue Gameplay-Wahrheit zu erzeugen. TASK_713 wertet das Acceptance-Paket read-only als Multiplayer-Findings-Status.</div>
         </article>
         <article class="card full">
           <h2>TASK_708 Evidence</h2>
@@ -298,6 +301,15 @@
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="station_route_host_client_acceptance.manifest_path">
           <input readonly value="manual_open" data-export-key="station_route_host_client_acceptance.expected_initial_gate">
           <textarea data-export-key="station_route_host_client_acceptance.notes" placeholder="Nach dem echten Run: Door/Computer/Cargo auf Host und Client sichtbar? Reject und Sync klar?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_713 Host/Client Findings</h2>
+          <p>Der Findings-Snapshot liest das TASK_712-Paket read-only und trennt Paket-Blocker, offenen echten Run und review-bereite Host/Client-Artefakte.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_host_client_findings.analyzer_written"> Findings-Analyzer vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_host_client_findings.manifest_contract_written"> Manifest-Contract vorbereitet</label>
+          <input readonly value="tmp/station_route_host_client_findings.json" data-export-key="station_route_host_client_findings.manifest_path">
+          <input readonly value="needs_real_run" data-export-key="station_route_host_client_findings.expected_initial_status">
+          <textarea data-export-key="station_route_host_client_findings.notes" placeholder="Nach TASK_713: blocked, needs_real_run, ready_for_findings_review oder accepted..."></textarea>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -363,7 +375,8 @@
             latest_completed_readiness_task: "TASK_710 - Station Route Polish Readiness Findings",
             latest_completed_visual_artifact_task: "TASK_711 - Station Route Evidence Board Visual Polish",
             latest_completed_multiplayer_packet_task: "TASK_712 - Station Route Host/Client Acceptance Packet",
-            recommended_next_task: "Echten TASK_712-Zwei-Fenster-Run ausfuehren, danach TASK_713 Host/Client Findings",
+            latest_completed_multiplayer_findings_task: "TASK_713 - Station Route Host/Client Findings",
+            recommended_next_task: "Echten TASK_712-Zwei-Fenster-Run ausfuehren, danach TASK_713-Status bewerten und TASK_714 ableiten",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },

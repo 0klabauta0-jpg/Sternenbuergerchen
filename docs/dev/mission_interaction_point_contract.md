@@ -291,6 +291,16 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Das Paket ist eine Run-/Review-Anleitung und darf keine Runtime-Interaction starten, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Host/Client Findings
+- `StationRouteHostClientFindings` bewertet das TASK_712-Acceptance-Manifest read-only.
+- Der Snapshot trennt technische Paket-Blocker, Paket-Warnungen und offene manuelle Host/Client-Findings.
+- Fehlendes Manifest, falsches Schema, falsche TASK_712-ID, read-only/UI-Truth-Verletzung, fehlende Door/Computer/Cargo-Sequenz oder fehlende Manual-/Review-Checks sind technische Blocker.
+- `manual_open` bleibt `needs_real_run`; daraus darf kein bestandener Multiplayerbefund abgeleitet werden.
+- `review_ready` mit Run-/Screenshot-Evidence wird `ready_for_findings_review`, bis ein Mensch den Befund bewusst bewertet.
+- `review_done` ohne Real-Run-/Screenshot-Evidence blockiert.
+- Findings duerfen `recommended_next_task` nennen, aber keine Fenster starten, keine Runtime-Interaction ausloesen, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
