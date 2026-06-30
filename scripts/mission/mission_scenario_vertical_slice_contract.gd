@@ -1,6 +1,8 @@
 class_name MissionScenarioVerticalSliceContract
 extends RefCounted
 
+const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
+
 const SLICE_KEY: String = "vertical_slice"
 const CONTRACT_VERSION: int = 1
 const REQUIRED_PLAY_MODES: PackedStringArray = [
@@ -33,6 +35,7 @@ static func normalize_slice(value: Variant) -> Dictionary:
 		"play_modes": _normalize_string_array(raw.get("play_modes", [])),
 		"team_slots": _normalize_team_slots(raw.get("team_slots", [])),
 		"flow_steps": _normalize_flow_steps(raw.get("flow_steps", [])),
+		"interaction_points": MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("normalize_scenario_bindings", {SLICE_KEY: raw}),
 		"runtime_gate_notes": _normalize_string_array(raw.get("runtime_gate_notes", [])),
 	}
 	return result
@@ -80,6 +83,10 @@ static func validate_slice(slice: Dictionary, terrain_map_data = null) -> Dictio
 	for required_type in REQUIRED_OBJECTIVE_TYPES:
 		if not objective_types.has(required_type):
 			errors.append("vertical_slice.flow_steps missing %s" % required_type)
+
+	var interaction_validation: Dictionary = Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("validate_bindings", Array(slice.get("interaction_points", [])), terrain_map_data))
+	for error_variant in PackedStringArray(interaction_validation.get("errors", PackedStringArray())):
+		errors.append("vertical_slice.%s" % String(error_variant))
 
 	return {
 		"valid": errors.is_empty(),

@@ -52,6 +52,7 @@ const FTL_READINESS_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/
 const FIRETEAM_RUNTIME_EXECUTION_PATH_CONTRACT_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_runtime_execution_path_contract.gd")
 const TACTICAL_BREAKOUT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_breakout_resolver.gd")
 const MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_scenario_vertical_slice_contract.gd")
+const MISSION_INTERACTION_POINT_BINDING_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_point_binding.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
@@ -16700,6 +16701,31 @@ func _get_mission_cargo_touchdown_snapshot_for_readability() -> Dictionary:
 	if combat_driver == null or not combat_driver.has_method("get_mission_cargo_touchdown_snapshot"):
 		return {}
 	return Dictionary(combat_driver.call("get_mission_cargo_touchdown_snapshot")).duplicate(true)
+
+
+func get_mission_interaction_point_binding_snapshot() -> Dictionary:
+	var scenario_path: String = _get_active_mission_scenario_path_for_readability()
+	var terrain_map_data = _get_active_mission_terrain_map_data_for_readability()
+	var runtime_context: Dictionary = {
+		"scenario_gate_snapshot": _get_mission_scenario_runtime_gate_snapshot_for_readability(),
+	}
+	return Dictionary(MISSION_INTERACTION_POINT_BINDING_SCRIPT.call("load_snapshot_from_file", scenario_path, terrain_map_data, runtime_context)).duplicate(true)
+
+
+func _get_active_mission_scenario_path_for_readability() -> String:
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	if mission_setup != null:
+		var scenario_path: String = String(mission_setup.get("scenario_file_path")).strip_edges()
+		if not scenario_path.is_empty():
+			return scenario_path
+	return "res://data/mission_scenarios/frontier_probe_vertical_slice.json" if _should_sync_frontier_probe_route_callouts() else ""
+
+
+func _get_active_mission_terrain_map_data_for_readability():
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	if mission_setup == null:
+		return null
+	return mission_setup.get("_loaded_terrain_map_data")
 
 
 func _find_runtime_gate_by_objective_type(gate_entries: Array, objective_type: String) -> Dictionary:

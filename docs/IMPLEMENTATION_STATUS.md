@@ -696,6 +696,16 @@
 - Lokale Pruefung: `task_673_mission_interaction_point_contract.gd`, `task_672_fullhd_drag_preview_art_direction.gd`, `git diff --check`.
 - Naechster Schritt: Interaction-Point-Binding im Editor/Scenario-JSON oder ein kleiner Mission-Runtime-Snapshot fuer Door/Computer/Hold.
 
+### TASK_674 - Mission Interaction Point Bindings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_674_mission_interaction_point_bindings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/tasks/TASK_673_mission_interaction_point_contract.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionPointBinding` normalisiert und validiert `vertical_slice.interaction_points` fuer Door/Computer/Hold-Bindings und kann daraus read-only Runtime-Snapshots bauen.
+- Stand: `frontier_probe_vertical_slice.json` hat explizite Bindings fuer AA-Shutdown-Zone, Station-Computer und Cargo-Landing-Hold; Cargo bleibt ueber `requires_step_id = disable_air_defense` geblockt.
+- Stand: `MissionScenarioData` bewahrt `vertical_slice`, `MissionScenarioVerticalSliceContract` validiert Interaction-Points, und `MissionTacticalSandboxController.get_mission_interaction_point_binding_snapshot()` liest den aktiven Szenario-/Gate-Zustand ohne HUD-Hotpath-Zwang.
+- Risiken/offen: Es gibt noch keine Door-Animation, keinen Use-Button und keine Editor-Inspector-Felder fuer Binding-Details. Naechster spielbarer Schritt ist Runtime-Use-State oder Editor-Binding-UI.
+- Lokale Pruefung: `task_674_mission_interaction_point_bindings.gd`, `task_673_mission_interaction_point_contract.gd`, `task_517_mission_scenario_vertical_slice.gd`, `git diff --check`.
+- Naechster Schritt: Editor-Inspector fuer Interaction-Point-Bindings oder Runtime-Use-State fuer Naehe/Bedienzeit.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
