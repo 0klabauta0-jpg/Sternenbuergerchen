@@ -216,6 +216,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `get_command_feedback_snapshot()` exportiert die tatsaechlich sichtbare Door-Zeile als `mission_interaction_door_authority_visible_line`.
 - Diese Surface-Zeile bleibt Anzeige und darf keine Door-, Terrain-, Command- oder Multiplayer-Wahrheit setzen.
 
+## Door Authority Button Affordance
+- Der Door-Breach-Button darf `door_authority_ui_severity` als rein visuelle Affordance nutzen.
+- Erlaubte Affordance-Tones sind `action`, `success`, `warning` und `neutral`.
+- Der Button-Snapshot exportiert `door_authority_affordance_style_id`, `door_authority_affordance_tone` und `door_authority_affordance_visual_weight`.
+- Affordance-Farben und Gewicht duerfen den Button hervorheben, aber keine Commands ausloesen und keine Door-, Terrain- oder Multiplayer-Wahrheit setzen.
+- Der allgemeine Tactical-Button-Skin bleibt Basis; die Door-Affordance ist eine kleine Statusschicht darueber.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

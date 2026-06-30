@@ -118,6 +118,10 @@ const FIRE_RULE_ACTIVE_AFFORDANCE_STYLE_ID: String = "fire_rule_active_affordanc
 const FIRE_RULE_INACTIVE_AFFORDANCE_STYLE_ID: String = "fire_rule_inactive_affordance_v1"
 const FIRE_RULE_ACTIVE_AFFORDANCE_WEIGHT: float = 2.0
 const FIRE_RULE_INACTIVE_AFFORDANCE_WEIGHT: float = 1.0
+const DOOR_AUTHORITY_READY_AFFORDANCE_STYLE_ID: String = "door_authority_ready_action_v1"
+const DOOR_AUTHORITY_OPEN_AFFORDANCE_STYLE_ID: String = "door_authority_open_success_v1"
+const DOOR_AUTHORITY_BLOCKED_AFFORDANCE_STYLE_ID: String = "door_authority_blocked_warning_v1"
+const DOOR_AUTHORITY_NEUTRAL_AFFORDANCE_STYLE_ID: String = "door_authority_neutral_v1"
 const SUPPRESS_FIRE_PREVIEW_RADIUS_WORLD: float = 148.0
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
@@ -9274,6 +9278,9 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 			"door_authority_ui_next_action": "",
 			"door_authority_ui_severity": "",
 			"door_authority_ui_reject_reason_label": "",
+			"door_authority_affordance_style_id": "",
+			"door_authority_affordance_tone": "",
+			"door_authority_affordance_visual_weight": 0.0,
 			"door_authority_ui_requires_go": false,
 			"door_authority_ui_read_only": false,
 			"pressed_signal_connection_count": 0,
@@ -9312,6 +9319,9 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 		"door_authority_ui_next_action": str(button.get_meta("door_authority_ui_next_action", "")),
 		"door_authority_ui_severity": str(button.get_meta("door_authority_ui_severity", "")),
 		"door_authority_ui_reject_reason_label": str(button.get_meta("door_authority_ui_reject_reason_label", "")),
+		"door_authority_affordance_style_id": str(button.get_meta("door_authority_affordance_style_id", "")),
+		"door_authority_affordance_tone": str(button.get_meta("door_authority_affordance_tone", "")),
+		"door_authority_affordance_visual_weight": float(button.get_meta("door_authority_affordance_visual_weight", 0.0)),
 		"door_authority_ui_requires_go": bool(button.get_meta("door_authority_ui_requires_go", false)),
 		"door_authority_ui_read_only": bool(button.get_meta("door_authority_ui_read_only", false)),
 		"global_rect": global_rect,
@@ -10693,6 +10703,49 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 	button.set_meta("door_authority_ui_read_only", bool(authority_ui_feedback.get("read_only", false)))
 	button.set_meta("command_hierarchy_disabled_reason", "" if enabled else _resolve_door_interaction_button_disabled_reason(has_usable_door))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, enabled)
+	_apply_door_authority_button_affordance(button, String(authority_ui_feedback.get("severity", "")).strip_edges())
+
+
+func _apply_door_authority_button_affordance(button: Button, severity: String) -> void:
+	if button == null:
+		return
+	var normalized_severity: String = severity.strip_edges().to_lower()
+	var style_id: String = DOOR_AUTHORITY_NEUTRAL_AFFORDANCE_STYLE_ID
+	var tone: String = "neutral"
+	var visual_weight: float = 0.0
+	var modulate_color: Color = Color(1.0, 1.0, 1.0, 1.0)
+	var font_color: Color = Color(0.0, 0.0, 0.0, 1.0)
+	var use_font_override: bool = true
+	match normalized_severity:
+		"action":
+			style_id = DOOR_AUTHORITY_READY_AFFORDANCE_STYLE_ID
+			tone = "action"
+			visual_weight = 1.2
+			modulate_color = Color(0.72, 0.95, 1.0, 1.0)
+			font_color = Color(0.04, 0.07, 0.08, 1.0)
+		"success":
+			style_id = DOOR_AUTHORITY_OPEN_AFFORDANCE_STYLE_ID
+			tone = "success"
+			visual_weight = 1.35
+			modulate_color = Color(0.70, 1.0, 0.82, 1.0)
+			font_color = Color(0.03, 0.08, 0.045, 1.0)
+		"warning":
+			style_id = DOOR_AUTHORITY_BLOCKED_AFFORDANCE_STYLE_ID
+			tone = "warning"
+			visual_weight = 1.15
+			modulate_color = Color(1.0, 0.84, 0.42, 1.0)
+			font_color = Color(0.10, 0.07, 0.02, 1.0)
+		_:
+			use_font_override = false
+	button.set_meta("door_authority_affordance_style_id", style_id)
+	button.set_meta("door_authority_affordance_tone", tone)
+	button.set_meta("door_authority_affordance_visual_weight", visual_weight)
+	button.self_modulate = modulate_color
+	if use_font_override:
+		button.add_theme_color_override("font_color", font_color)
+		button.add_theme_color_override("font_pressed_color", font_color)
+		button.add_theme_color_override("font_hover_color", font_color)
+		button.add_theme_color_override("font_focus_color", font_color)
 
 
 func _build_door_authority_button_context(feedback_snapshot: Dictionary = {}, door_feedback: Dictionary = {}) -> Dictionary:
@@ -10864,6 +10917,8 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(SORT_COMMAND_BUTTON_PATH) as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
 	var door_breach_button := get_node_or_null(DOOR_BREACH_BUTTON_PATH) as Button
 	META_UI_SKIN_SCRIPT.style_tactical_button(door_breach_button, door_breach_button != null and bool(door_breach_button.get_meta("door_interaction_button_enabled", false)))
+	if door_breach_button != null:
+		_apply_door_authority_button_affordance(door_breach_button, String(door_breach_button.get_meta("door_authority_ui_severity", "")).strip_edges())
 	_refresh_fire_rule_button_state()
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and _has_selected_fireteam_orders_to_execute())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
