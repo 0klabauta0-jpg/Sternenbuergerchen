@@ -342,6 +342,7 @@ git checkout -b batch/<batch-name>
 - TASK_711 - Station Route Evidence Board Visual Polish (implementiert)
 - TASK_712 - Station Route Host/Client Acceptance Packet (implementiert)
 - TASK_713 - Station Route Host/Client Findings (implementiert)
+- TASK_714 - Station Route Multiplayer Scenario Guard (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
