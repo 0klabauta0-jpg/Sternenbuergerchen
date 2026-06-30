@@ -67,7 +67,7 @@ func _test_readout_statuses() -> void:
 
 	var blocked: Dictionary = _ui_feedback(_authority_snapshot({"foreign_team_rejected": true, "foreign_team_reject_reason": "peer_team_mismatch"}), {"button_enabled": true, "has_usable_door": true, "display_token": "DOOR", "shortcut": "B"})
 	_assert(String(blocked.get("status", "")) == "blocked", "Readout shows blocked for wrong-team reject")
-	_assert(String(blocked.get("detail_line", "")).contains("peer_team_mismatch"), "Blocked readout names reject reason")
+	_assert(String(blocked.get("detail_line", "")).contains("falsches Team"), "Blocked readout names player-facing reject reason")
 
 	var open: Dictionary = _ui_feedback(_authority_snapshot({"door_runtime_open_override": true}), {"button_enabled": true, "has_usable_door": true, "display_token": "DOOR", "shortcut": "B"})
 	_assert(String(open.get("status", "")) == "open", "Readout shows open after runtime producer")

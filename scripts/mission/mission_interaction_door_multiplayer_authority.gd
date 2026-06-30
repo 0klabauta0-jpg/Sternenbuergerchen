@@ -102,12 +102,17 @@ static func build_ui_feedback(authority_snapshot: Dictionary, button_context: Di
 	if shortcut.is_empty():
 		shortcut = "B"
 	var status: String = _resolve_ui_status(authority_snapshot, enabled, has_usable_door)
+	var reject_reason_label: String = _build_reject_reason_label(authority_snapshot)
 	var summary_line: String = _build_ui_summary_line(status, display_token, shortcut, authority_snapshot)
+	var next_action: String = _build_ui_next_action(status, shortcut, has_usable_door)
+	var player_hint: String = _build_ui_player_hint(status, reject_reason_label)
+	var compact_line: String = _build_ui_compact_line(status, display_token, shortcut, reject_reason_label)
+	var severity: String = _build_ui_severity(status)
 	var tooltip_lines: PackedStringArray = PackedStringArray([
 		summary_line,
-		"Bestaetigung: GO erforderlich.",
+		next_action,
 	])
-	var detail_line: String = _build_ui_detail_line(status, authority_snapshot, has_usable_door)
+	var detail_line: String = _build_ui_detail_line(status, authority_snapshot, has_usable_door, reject_reason_label)
 	if not detail_line.is_empty():
 		tooltip_lines.append(detail_line)
 	tooltip_lines.append("Quelle: SimulationRoot / MultiplayerCommandContract.")
@@ -119,7 +124,12 @@ static func build_ui_feedback(authority_snapshot: Dictionary, button_context: Di
 		"display_token": display_token,
 		"shortcut": shortcut,
 		"summary_line": summary_line,
+		"compact_line": compact_line,
 		"detail_line": detail_line,
+		"player_hint": player_hint,
+		"next_action": next_action,
+		"severity": severity,
+		"reject_reason_label": reject_reason_label,
 		"tooltip_text": "\n".join(Array(tooltip_lines)),
 		"button_enabled": enabled,
 		"has_usable_door": has_usable_door,
@@ -197,21 +207,92 @@ static func _build_ui_summary_line(status: String, display_token: String, shortc
 			return "DOOR %s wartet | Authority offen" % display_token
 
 
-static func _build_ui_detail_line(status: String, authority_snapshot: Dictionary, has_usable_door: bool) -> String:
+static func _build_ui_detail_line(status: String, authority_snapshot: Dictionary, has_usable_door: bool, reject_reason_label: String = "") -> String:
 	match status:
 		"open":
 			return "Walkability/LOS kommen vom Door Runtime Producer."
 		"accepted":
 			return "Own-Team Command akzeptiert; Runtime-State wird nicht im UI gesetzt."
 		"blocked":
-			var foreign_reason: String = String(authority_snapshot.get("foreign_team_reject_reason", "")).strip_edges()
-			var mutation_reason: String = String(authority_snapshot.get("state_mutation_reject_reason", "")).strip_edges()
-			if not foreign_reason.is_empty():
-				return "Reject: %s." % foreign_reason
-			if not mutation_reason.is_empty():
-				return "Reject: %s." % mutation_reason
-			return "Reject kommt aus dem MultiplayerCommandContract."
+			if not reject_reason_label.is_empty():
+				return "Blockiert: %s." % reject_reason_label
+			return "Blockiert durch MultiplayerCommandContract."
 		"ready":
 			return "Bereitet nur den Door-Breach-Command vor; GO bestaetigt."
 		_:
 			return "Door in Reichweite fehlt." if not has_usable_door else "Authority-Snapshot wartet auf Command-Ergebnis."
+
+
+static func _build_reject_reason_label(authority_snapshot: Dictionary) -> String:
+	var foreign_reason: String = String(authority_snapshot.get("foreign_team_reject_reason", "")).strip_edges()
+	var mutation_reason: String = String(authority_snapshot.get("state_mutation_reject_reason", "")).strip_edges()
+	if not foreign_reason.is_empty():
+		match foreign_reason:
+			"peer_team_mismatch":
+				return "falsches Team / Peer darf diese Door nicht bedienen"
+			"unit_team_mismatch":
+				return "ausgewaehlte Einheit gehoert nicht zum erlaubten Team"
+			_:
+				return "Authority-Reject: %s" % foreign_reason
+	if not mutation_reason.is_empty():
+		if mutation_reason.begins_with("state_mutation_key:"):
+			var key: String = mutation_reason.substr("state_mutation_key:".length())
+			return "Client darf Runtime-State `%s` nicht direkt setzen" % key
+		return "State-Mutation-Reject: %s" % mutation_reason
+	return ""
+
+
+static func _build_ui_next_action(status: String, shortcut: String, has_usable_door: bool) -> String:
+	match status:
+		"open":
+			return "Naechster Schritt: Fireteam kann durch die Door."
+		"accepted":
+			return "Naechster Schritt: Runtime-Progress abwarten."
+		"blocked":
+			return "Naechster Schritt: Team/Peer oder Payload korrigieren."
+		"ready":
+			return "Naechster Schritt: %s druecken, dann GO bestaetigen." % shortcut
+		_:
+			return "Naechster Schritt: Door in Reichweite bringen." if not has_usable_door else "Naechster Schritt: Authority-Ergebnis abwarten."
+
+
+static func _build_ui_player_hint(status: String, reject_reason_label: String) -> String:
+	match status:
+		"open":
+			return "Door ist offen; Bewegung und Sichtlinie nutzen Runtime-Overrides."
+		"accepted":
+			return "Host hat den Door-Befehl akzeptiert; die Door oeffnet erst ueber Runtime-Progress."
+		"blocked":
+			return reject_reason_label if not reject_reason_label.is_empty() else "Door-Befehl wurde durch Authority blockiert."
+		"ready":
+			return "Door-Breach ist vorbereitet, aber noch nicht ausgefuehrt."
+		_:
+			return "Keine nutzbare Door fuer die aktuelle Auswahl."
+
+
+static func _build_ui_compact_line(status: String, display_token: String, shortcut: String, reject_reason_label: String) -> String:
+	match status:
+		"open":
+			return "DOOR %s OPEN" % display_token
+		"accepted":
+			return "DOOR %s HOST OK" % display_token
+		"blocked":
+			return "DOOR %s BLOCKED %s" % [display_token, reject_reason_label] if not reject_reason_label.is_empty() else "DOOR %s BLOCKED" % display_token
+		"ready":
+			return "DOOR %s %s->GO" % [display_token, shortcut]
+		_:
+			return "DOOR %s WAIT" % display_token
+
+
+static func _build_ui_severity(status: String) -> String:
+	match status:
+		"open":
+			return "success"
+		"accepted":
+			return "info"
+		"blocked":
+			return "warning"
+		"ready":
+			return "action"
+		_:
+			return "muted"

@@ -201,6 +201,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Die HTML-Workbench `docs/reports/host_client_door_real_click_workbench_2026_06_30.html` exportiert lokale JSON-Arbeitsnotizen zu Host, Client, Reject, Door-Open, Timing und naechster Polish-Aktion.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht; der echte Command-Pfad bleibt Button/Shortcut -> Hook -> GO -> SimulationRoot/Runtime-Progress.
 
+## Door Authority Feedback Polish
+- `MissionInteractionDoorMultiplayerAuthority.build_ui_feedback()` liefert zusaetzlich `compact_line`, `player_hint`, `next_action`, `severity` und `reject_reason_label`.
+- Diese Felder sind Anzeige-/Feedbackdaten fuer Button, Tooltip, Command-Panel, Reports und Verifier; sie setzen keine Door-, Terrain- oder Multiplayer-Wahrheit.
+- Wrong-Team-Rejects muessen spielbar als Team-/Berechtigungsproblem lesbar sein, statt nur rohe Contract-Keys zu zeigen.
+- State-Mutation-Rejects muessen als Client-/Runtime-State-Blocker lesbar sein.
+- Ready/Accepted/Open muessen kurz bleiben: Ready nennt Shortcut plus GO, Accepted nennt Host/Runtime-Progress, Open nennt Runtime-Override.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
