@@ -566,6 +566,16 @@
 - Lokale Pruefung: `task_659_frontier_probe_decision_drill_f6_evidence.gd`, `task_658_frontier_probe_one_screen_player_decision_drill.gd`, `task_657_frontier_probe_f6_visual_polish_findings.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_660 - Decision Drill Snapshot Performance Budget`, damit der neue sichtbare Drill nicht als langsamer Regressionstest/Hotpath-Klotz weiterwaechst.
 
+### TASK_660 - Decision Drill Snapshot Performance Budget
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_660_decision_drill_snapshot_performance_budget.md`, `docs/tasks/TASK_659_frontier_probe_decision_drill_f6_evidence.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: TASK_659 schreibt jetzt Performance-Budget-Metadaten in sein Evidence-Manifest, inklusive Full-Drill-Recapture-Budget und Fast-Regression-Verweis.
+- Stand: `task_660_decision_drill_snapshot_performance_budget.gd` ist ein schneller Contract-/Budget-Guard ohne Mission-Testscene und schreibt `tmp/decision_drill_snapshot_performance_budget.json`.
+- Stand: Der HTML-Handbuchbericht markiert TASK_660 und empfiehlt danach `TASK_661 - Host Client Decision Drill Click Evidence`.
+- Risiken/offen: TASK_660 ist kein echter Profiler und ersetzt keinen Fenster-/FPS-Playtest. Der volle TASK_659-Recapture bleibt bei visuellen oder Command-Pfad-Aenderungen noetig.
+- Lokale Pruefung: `task_660_decision_drill_snapshot_performance_budget.gd`, `task_659_frontier_probe_decision_drill_f6_evidence.gd`, `task_652_current_state_handbook_refresh.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_661 - Host Client Decision Drill Click Evidence`, um denselben Entscheidungsfokus in einem echten Host/Client-Klicklauf zu pruefen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
