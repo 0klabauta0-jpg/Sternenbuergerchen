@@ -70,10 +70,18 @@ func has_line_of_sight_with_terrain(
 			continue
 
 		var tile_data = terrain_registry.call("get_tile_at_grid", stepped_grid)
-		if tile_data == null or not bool(tile_data.blocks_los):
+		if tile_data == null:
+			continue
+		var blocks_los: bool = bool(tile_data.blocks_los)
+		if terrain_registry.has_method("blocks_los_at_grid"):
+			blocks_los = bool(terrain_registry.call("blocks_los_at_grid", stepped_grid))
+		if not blocks_los:
 			continue
 
-		var blocker_height: int = int(tile_data.height_level) + int(tile_data.object_height)
+		var object_height: int = int(tile_data.object_height)
+		if terrain_registry.has_method("get_object_height_at_grid"):
+			object_height = int(terrain_registry.call("get_object_height_at_grid", stepped_grid))
+		var blocker_height: int = int(tile_data.height_level) + object_height
 		if blocker_height >= source_height and blocker_height >= target_height:
 			if _tile_uses_wall_segment_los(tile_data):
 				var crosses_wall_segment: bool = bool(TERRAIN_TRUTH_AUDIT_SCRIPT.call(

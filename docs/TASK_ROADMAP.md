@@ -320,6 +320,7 @@ git checkout -b batch/<batch-name>
 - TASK_689 - Mission Interaction Visual Polish Findings (implementiert)
 - TASK_690 - Mission Interaction Manual Sight Notes (implementiert)
 - TASK_691 - Mission Interaction Runtime Visual Assets (implementiert)
+- TASK_692 - Door Runtime Collision/LOS Contract (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

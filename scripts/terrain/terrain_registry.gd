@@ -9,6 +9,7 @@ var _sorted_tiles_cache: Array = []
 var _sorted_tiles_cache_dirty: bool = true
 var _revision: int = 0
 var _dirty_grid_lookup: Dictionary = {}
+var _runtime_tile_overrides: Dictionary = {}
 var _grid_origin_world: Vector2 = Vector2.ZERO
 var _half_tile_width: float = 64.0
 var _half_tile_height: float = 32.0
@@ -26,6 +27,7 @@ func clear_tiles() -> void:
 	_sorted_tiles_cache.clear()
 	_sorted_tiles_cache_dirty = true
 	_dirty_grid_lookup.clear()
+	_runtime_tile_overrides.clear()
 	_bump_revision()
 
 
@@ -78,6 +80,43 @@ func get_tile_at_grid(grid_pos: Vector2i):
 		return null
 
 	return _tiles[grid_pos]
+
+
+func set_runtime_tile_overrides(overrides: Array) -> void:
+	var next_overrides: Dictionary = {}
+	for override_variant in overrides:
+		if typeof(override_variant) != TYPE_DICTIONARY:
+			continue
+		var sanitized: Dictionary = _sanitize_runtime_tile_override(Dictionary(override_variant))
+		if sanitized.is_empty():
+			continue
+		next_overrides[Vector2i(sanitized.get("grid_position", Vector2i.ZERO))] = sanitized
+
+	for grid_variant in _runtime_tile_overrides.keys():
+		_mark_dirty_grid(Vector2i(grid_variant))
+	for grid_variant in next_overrides.keys():
+		_mark_dirty_grid(Vector2i(grid_variant))
+	_runtime_tile_overrides = next_overrides
+	_bump_revision()
+
+
+func clear_runtime_tile_overrides() -> void:
+	if _runtime_tile_overrides.is_empty():
+		return
+	for grid_variant in _runtime_tile_overrides.keys():
+		_mark_dirty_grid(Vector2i(grid_variant))
+	_runtime_tile_overrides.clear()
+	_bump_revision()
+
+
+func has_runtime_tile_override(grid_pos: Vector2i) -> bool:
+	return _runtime_tile_overrides.has(grid_pos)
+
+
+func get_runtime_tile_override(grid_pos: Vector2i) -> Dictionary:
+	if not _runtime_tile_overrides.has(grid_pos):
+		return {}
+	return Dictionary(_runtime_tile_overrides.get(grid_pos, {})).duplicate(true)
 
 
 func get_tile_by_id(tile_id: String):
@@ -142,17 +181,42 @@ func is_walkable(grid_pos: Vector2i) -> bool:
 	if tile_data == null:
 		return false
 
+	var override: Dictionary = _runtime_tile_overrides.get(grid_pos, {})
+	if override.has("walkable_override"):
+		return bool(override.get("walkable_override", false))
 	return bool(tile_data.walkable)
+
+
+func blocks_los_at_grid(grid_pos: Vector2i) -> bool:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return false
+
+	var override: Dictionary = _runtime_tile_overrides.get(grid_pos, {})
+	if override.has("blocks_los_override"):
+		return bool(override.get("blocks_los_override", false))
+	return bool(tile_data.blocks_los)
+
+
+func get_object_height_at_grid(grid_pos: Vector2i) -> int:
+	var tile_data = get_tile_at_grid(grid_pos)
+	if tile_data == null:
+		return 0
+
+	var override: Dictionary = _runtime_tile_overrides.get(grid_pos, {})
+	if override.has("object_height_override"):
+		return int(override.get("object_height_override", 0))
+	return int(tile_data.object_height)
 
 
 func get_nearest_walkable_grid(world_pos: Vector2) -> Variant:
 	var nearest_grid: Variant = null
 	var nearest_distance: float = INF
 	for tile_data in _tiles.values():
-		if not bool(tile_data.walkable):
+		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+		if not is_walkable(grid_position):
 			continue
 		var distance_to_tile: float = world_pos.distance_squared_to(tile_data.world_position)
-		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
 		if not _is_nearest_candidate_better(distance_to_tile, grid_position, nearest_distance, nearest_grid):
 			continue
 
@@ -165,7 +229,7 @@ func get_nearest_walkable_grid(world_pos: Vector2) -> Variant:
 func resolve_walkable_target(world_pos: Vector2) -> Dictionary:
 	var target_grid: Vector2i = world_to_grid(world_pos)
 	var target_tile = get_tile_at_grid(target_grid)
-	if target_tile != null and bool(target_tile.walkable):
+	if target_tile != null and is_walkable(target_grid):
 		return {
 			"original_position": world_pos,
 			"original_grid": target_grid,
@@ -205,6 +269,9 @@ func get_cover_at(grid_pos: Vector2i) -> int:
 	if tile_data == null:
 		return 0
 
+	var override: Dictionary = _runtime_tile_overrides.get(grid_pos, {})
+	if override.has("cover_value_override"):
+		return int(override.get("cover_value_override", 0))
 	return int(tile_data.cover_value)
 
 
@@ -213,7 +280,7 @@ func get_cover_at_world(world_pos: Vector2) -> int:
 	if tile_data == null:
 		return 0
 
-	return int(tile_data.cover_value)
+	return get_cover_at(Vector2i(tile_data.grid_position))
 
 
 func get_height_at(grid_pos: Vector2i) -> int:
@@ -248,9 +315,10 @@ func get_walkable_cover_tiles_in_radius(world_center: Vector2, radius: float) ->
 	var radius_sq: float = radius * radius
 	var result: Array = []
 	for tile_data in _tiles.values():
-		if not bool(tile_data.walkable):
+		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+		if not is_walkable(grid_position):
 			continue
-		if int(tile_data.cover_value) <= 0:
+		if get_cover_at(grid_position) <= 0:
 			continue
 		if world_center.distance_squared_to(tile_data.world_position) > radius_sq:
 			continue
@@ -312,6 +380,30 @@ func _mark_dirty_grid(grid_position: Vector2i) -> void:
 
 func _normalize_tile_id(value: String) -> String:
 	return value.strip_edges()
+
+
+func _sanitize_runtime_tile_override(data: Dictionary) -> Dictionary:
+	var grid_position: Variant = data.get("grid_position", null)
+	if typeof(grid_position) != TYPE_VECTOR2I and typeof(grid_position) != TYPE_VECTOR2:
+		return {}
+	var normalized_grid: Vector2i = Vector2i(grid_position)
+	if not _tiles.has(normalized_grid):
+		return {}
+
+	var sanitized: Dictionary = {
+		"grid_position": normalized_grid,
+	}
+	if data.has("walkable_override"):
+		sanitized["walkable_override"] = bool(data.get("walkable_override", false))
+	if data.has("blocks_los_override"):
+		sanitized["blocks_los_override"] = bool(data.get("blocks_los_override", false))
+	if data.has("object_height_override"):
+		sanitized["object_height_override"] = clampi(int(data.get("object_height_override", 0)), 0, 3)
+	if data.has("cover_value_override"):
+		sanitized["cover_value_override"] = clampi(int(data.get("cover_value_override", 0)), 0, 100)
+	sanitized["source_interaction_id"] = String(data.get("source_interaction_id", "")).strip_edges()
+	sanitized["source_runtime_visual_state"] = String(data.get("source_runtime_visual_state", "")).strip_edges().to_lower()
+	return sanitized
 
 
 func _is_grid_before(a: Vector2i, b: Vector2i) -> bool:

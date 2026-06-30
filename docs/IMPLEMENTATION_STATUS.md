@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_692 - Door Runtime Collision/LOS Contract
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_692_door_runtime_collision_los_contract.md`, `docs/tasks/TASK_691_mission_interaction_runtime_visual_assets.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionDoorRuntimeCollisionLOS` uebersetzt Door-Reaction-States in read-only Runtime-Tile-Overrides fuer Walkability, LOS-Blocker, Object-Height und Cover.
+- Stand: `TerrainRegistry` haelt diese Overrides getrennt von `TerrainMapData` und liefert effektive Werte ueber `is_walkable()`, `blocks_los_at_grid()`, `get_object_height_at_grid()` und `get_cover_at()`.
+- Stand: `TerrainPathfinder` und `LineOfSightSystem` lesen die effektiven Registry-Werte, sodass eine offene Runtime-Door Pfad und LOS freigeben kann, ohne statische Tile-Daten zu mutieren.
+- Risiken/offen: Der Door-State wird noch nicht automatisch aus einem echten Use-/Breach-Command in die Mission eingespielt. Der echte Fenster-Sichtlauf bleibt separat offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_692_door_runtime_collision_los_contract.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_691_mission_interaction_runtime_visual_assets.gd`, `git diff --check`.
+- Naechster Schritt: TASK_693 - Door Runtime State Producer oder echter Manual-Sight-Review.
+
 ### TASK_690 - Mission Interaction Manual Sight Notes
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_690_mission_interaction_manual_sight_notes.md`, `docs/tasks/TASK_689_mission_interaction_visual_polish_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/mission_interaction_manual_sight_notes_2026_06_30.html`, `docs/reports/project_current_state_handbook_2026_06_30.html`
