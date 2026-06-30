@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_712 - Station Route Host/Client Acceptance Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_712_station_route_host_client_acceptance_packet.md`, `docs/tasks/TASK_705_host_client_door_real_click_manual_run_packet.md`, `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/tasks/TASK_709_station_route_window_playtest_notes.md`, `docs/tasks/TASK_710_station_route_polish_readiness_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: Das vorhandene Host/Client-Zwei-Fenster-Capture-Manifest enthaelt jetzt Station-Route-Acceptance-Felder.
+- Stand: Door -> Computer -> Cargo, Wrong-Team-Reject, Snapshot-Sync, HUD-Lesbarkeit und Workbench-Export sind als Manual-Checks gebuendelt.
+- Stand: Der Dry-Run bleibt read-only und behauptet keinen abgeschlossenen Host/Client-Playtest.
+- Risiken/offen: Der echte Zwei-Fenster-Klick-/Sichtlauf bleibt offen; TASK_712 macht ihn nur konkret ausfuehrbar und auswertbar.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_712_station_route_host_client_acceptance_packet.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_705_host_client_door_real_click_manual_run_packet.gd`, `git diff --check`.
+- Naechster Schritt: Echten Zwei-Fenster-Run mit Station-Route durchspielen und danach TASK_713 - Station Route Host/Client Findings ableiten.
+
 ### TASK_711 - Station Route Evidence Board Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_711_station_route_evidence_board_visual_polish.md`, `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/tasks/TASK_710_station_route_polish_readiness_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`

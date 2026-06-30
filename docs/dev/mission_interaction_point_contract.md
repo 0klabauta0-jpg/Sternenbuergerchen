@@ -283,6 +283,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Das Manifest nennt `evidence_board_style_id`, `evidence_board_label_count`, `read_only` und `ui_sets_gameplay_truth`.
 - `station_route_labeled_v1` ist der aktuelle Mindeststandard fuer generierte Station-Route-Evidence, solange echte Viewport-Pixel im Headless-Lauf nicht verfuegbar sind.
 
+## Station Route Host/Client Acceptance Packet
+- Der vorhandene Zwei-Fenster-Capture `capture_host_client_two_window_real_run.ps1` darf das read-only Manifest um Station-Route-Acceptance-Felder erweitern.
+- Das Manifest nennt Quellen aus TASK_708, TASK_709 und TASK_710, erwartete Sequenz `door_open -> computer_controlled -> cargo_departed`, Host-/Client-Pfade, Wrong-Team-Reject, Snapshot-Sync und HUD-Surfaces.
+- `station_route_host_client_acceptance_review_required` bleibt true und `station_route_host_client_acceptance_review_done` bleibt false, bis ein Mensch den echten Host/Client-Lauf bewertet.
+- `station_route_host_client_acceptance_gate` darf nur `manual_open` oder `review_ready` sein.
+- Das Paket ist eine Run-/Review-Anleitung und darf keine Runtime-Interaction starten, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
