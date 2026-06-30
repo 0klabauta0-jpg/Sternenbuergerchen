@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_631 auf <code>task/frontier-probe-mini-scenario-visual-feel-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_632 auf <code>task/frontier-probe-mini-scenario-f6-visual-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -297,6 +297,7 @@
       <span class="pill good">TASK_627 Eventlog-Overlap</span>
       <span class="pill good">TASK_630 Mini-Szenario-Route</span>
       <span class="pill good">TASK_631 Route-Callouts</span>
+      <span class="pill good">TASK_632 F6-Review-Paket</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -1931,6 +1932,42 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_632 Frontier Probe Mini Scenario F6 Visual Review</h2>
+          <p>Der F6-Review erzeugt ein lokales Bild-/Manifest-Paket fuer die TASK_631-Route-Callouts. Im Headless-Lauf ist das PNG ein bewusst markiertes Evidence-Board; ein echter Fensterblick bleibt als manueller Sichtentscheid offen.</p>
+          <img class="evidence-preview" src="../../tmp/frontier_probe_mini_scenario_f6_visual_review.png" alt="TASK_632 Frontier Probe Mini Scenario F6 Visual Review">
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Review-Feld</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_632 - Frontier Probe Mini Scenario F6 Visual Review" data-export-key="frontier_probe_mini_scenario_f6_visual_review.task_id"></td><td>Aktueller F6-Visual-Review-Slice.</td></tr>
+                <tr><td>PNG</td><td><input readonly value="tmp/frontier_probe_mini_scenario_f6_visual_review.png" data-export-key="frontier_probe_mini_scenario_f6_visual_review.png_path"></td><td>Lokales Bildartefakt aus dem Verifier.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_mini_scenario_f6_visual_review.json" data-export-key="frontier_probe_mini_scenario_f6_visual_review.manifest_path"></td><td>Lokales JSON mit Snapshot-/Review-Daten.</td></tr>
+                <tr><td>Capture Type</td><td><input readonly value="frontier_probe_mini_scenario_f6_visual_review" data-export-key="frontier_probe_mini_scenario_f6_visual_review.capture_type"></td><td>Stabiler Typ fuer Auswertung/Archiv.</td></tr>
+                <tr><td>Viewport Readback</td><td><input readonly value="false" data-export-key="frontier_probe_mini_scenario_f6_visual_review.viewport_readback_available"></td><td>Headless erzeugt kein echtes Fensterbild.</td></tr>
+                <tr><td>Evidence Board</td><td><input readonly value="true" data-export-key="frontier_probe_mini_scenario_f6_visual_review.generated_evidence_board"></td><td>Fallback ist sichtbar als Board markiert.</td></tr>
+                <tr><td>Callouts</td><td><input readonly value="LZ safe @ spawn_alpha | AA danger @ factory_danger_zone | COM 18s objective @ objective_point | CARGO cargo @ spawn_alpha" data-export-key="frontier_probe_mini_scenario_f6_visual_review.route_callouts"></td><td>Vier sichtbare Route-Beats.</td></tr>
+                <tr><td>Route Summary</td><td><input readonly value="LZ -> AA -> COM 18s -> CARGO" data-export-key="frontier_probe_mini_scenario_f6_visual_review.route_summary"></td><td>Kompakter Review-Pfad.</td></tr>
+                <tr><td>Primary3D Count</td><td><input readonly value="4" data-export-key="frontier_probe_mini_scenario_f6_visual_review.primary_3d_count"></td><td>Render-Snapshot zaehlt die Callouts.</td></tr>
+                <tr><td>Tone Counts</td><td><input readonly value="safe=1, danger=1, objective=1, cargo=1" data-export-key="frontier_probe_mini_scenario_f6_visual_review.tone_counts"></td><td>Farbsprache bleibt unterscheidbar.</td></tr>
+                <tr><td>Readability Gate</td><td><input readonly value="pass" data-export-key="frontier_probe_mini_scenario_f6_visual_review.evidence_board_readability_gate"></td><td>Board ist als Review-Artefakt nutzbar.</td></tr>
+                <tr><td>Manual Required</td><td><input readonly value="true" data-export-key="frontier_probe_mini_scenario_f6_visual_review.manual_review_required"></td><td>Ein Mensch muss das echte Fensterbild bewerten.</td></tr>
+                <tr><td>Manual Done</td><td><input readonly value="false" data-export-key="frontier_probe_mini_scenario_f6_visual_review.manual_review_done"></td><td>Nicht als finaler Sichttest behauptet.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_mini_scenario_f6_visual_review.read_only"></td><td>Review-Paket setzt keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_633 - Frontier Probe Mini Scenario Callout Layout Findings" data-export-key="frontier_probe_mini_scenario_f6_visual_review.recommended_next_task"></td><td>Wenn das Bild Reibung zeigt, folgt gezielter Layout-Polish.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input type="checkbox" checked data-export-key="frontier_probe_mini_scenario_f6_visual_review.source_gate_pass"> TASK_631-Gate im Review gruen</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="frontier_probe_mini_scenario_f6_visual_review.png_manifest_written"> PNG und Manifest werden geschrieben</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="frontier_probe_mini_scenario_f6_visual_review.headless_board_marked"> Headless-Board ist als Evidence markiert</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_mini_scenario_f6_visual_review.real_f6_review_done"> Echte F6-Lesbarkeit menschlich geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_632 F6-Review-Notiz
+            <textarea data-note-key="notes.frontier_probe_mini_scenario_f6_visual_review" data-export-key="frontier_probe_mini_scenario_f6_visual_review.notes" placeholder="Beim Review notieren: Sind Callouts im Missionsbild hilfreich, verdeckt, zu laut oder gut positioniert?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -2793,7 +2830,7 @@
           active_choices: {},
           computed: {
             recommended_next_tasks: [
-              "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish",
+              "TASK_633 - Frontier Probe Mini Scenario Callout Layout Findings",
               "Echten Zwei-Fenster-Klicklauf mit TASK_629-Packet ausfuehren, falls Host/Client-UI-Reibung priorisiert werden soll"
             ],
             recently_completed_tasks: [
@@ -2912,7 +2949,8 @@
               "TASK_628 - Mission HUD Legacy Contract Refresh",
               "TASK_629 - Host Client Real Click Playtest Evidence Pass",
               "TASK_630 - Frontier Probe Mini Scenario Feel Route",
-              "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"
+              "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish",
+              "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -2952,7 +2990,8 @@
               "TASK_628 zieht den alten Drop-Light-HUD-Vertrag auf Fire-Rule-Slots und Inbound-Member-Cards nach.",
               "TASK_629 buendelt den naechsten echten Host/Client-Klicklauf als read-only Playtest-Packet mit Vorbedingungen, Klickfolge und offenen Beobachtungen.",
               "TASK_630 macht Frontier Probe als kleine Alpha-LZ/AA/Computer/Cargo-Route pruefbar; finaler Visual-/Spielgefuehl-Polish bleibt offen.",
-              "TASK_631 macht LZ/AA/COM/CARGO als read-only Primary3D-Callouts sichtbar; echter F6-Sichtentscheid bleibt offen."
+              "TASK_631 macht LZ/AA/COM/CARGO als read-only Primary3D-Callouts sichtbar; echter F6-Sichtentscheid bleibt offen.",
+              "TASK_632 macht den F6-Sichtentscheid als PNG/Manifest-Paket reviewbar; finaler menschlicher Fensterblick und konkrete Callout-Layout-Findings bleiben offen."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -2961,14 +3000,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_631",
-            current_focus: "Frontier Probe Mini Scenario Visual Feel Polish",
-            latest_completed_task: "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"
+            current_repo_base: "integration/core-foundation after TASK_632",
+            current_focus: "Frontier Probe Mini Scenario F6 Visual Review",
+            latest_completed_task: "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review"
           },
           metadata: {
-            branch: "task/frontier-probe-mini-scenario-visual-feel-polish",
-            integration_base: "integration/core-foundation after TASK_630",
-            head: "task/frontier-probe-mini-scenario-visual-feel-polish",
+            branch: "task/frontier-probe-mini-scenario-f6-visual-review",
+            integration_base: "integration/core-foundation after TASK_631",
+            head: "task/frontier-probe-mini-scenario-f6-visual-review",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }
