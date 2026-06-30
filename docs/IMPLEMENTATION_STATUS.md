@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_687 - Mission Interaction Object Reaction
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_687_mission_interaction_object_reaction.md`, `docs/tasks/TASK_686_mission_interaction_visual_state.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionObjectReaction` leitet aus dem bestehenden Visualstate read-only Objektreaktionen fuer Computer, AA, Cargo und Door-Familien ab.
+- Stand: `get_mission_interaction_object_reaction_snapshot()` und `get_command_feedback_snapshot()` exportieren Object-Kind, Reaction-State, Open-Fraction, Accent-Farbe und Statuszaehler.
+- Stand: `TerrainMap3DView` zeichnet kleine lokale Proxies am Interaktionspunkt: Terminalscreen, AA-Mast, Cargo-Beacon oder Door-Slabs.
+- Risiken/offen: Noch kein echter Tile-/Asset-Swap und kein menschlicher FullHD-Sichtentscheid. Die Proxies sind bewusst Lesbarkeitsobjekte.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_687_mission_interaction_object_reaction.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_686_mission_interaction_visual_state.gd`, `git diff --check`.
+- Naechster Schritt: Menschlicher Missionsfenster-Sichtlauf oder echter Door-Asset-Swap mit Kollisions-/LOS-Contract.
+
 ### TASK_686 - Mission Interaction Visual State
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_686_mission_interaction_visual_state.md`, `docs/tasks/TASK_685_mission_interaction_objective_gate.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
