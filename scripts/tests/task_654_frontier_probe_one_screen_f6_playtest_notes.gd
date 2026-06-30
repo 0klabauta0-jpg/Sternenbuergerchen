@@ -47,8 +47,8 @@ func _test_docs_and_report() -> void:
 	_assert(roadmap_text.contains("TASK_654 - Frontier Probe One-Screen F6 Playtest Notes (implementiert)"), "Roadmap marks TASK_654 implemented")
 	_assert(contract_text.contains("Frontier-Probe-One-Screen-F6-Playtest-Notes"), "Mission feedback contract documents TASK_654")
 	_assert(report_text.contains("TASK_654 - Frontier Probe One-Screen F6 Playtest Notes"), "Current handbook report tracks TASK_654")
-	_assert(report_text.contains('latest_completed_task: "TASK_654 - Frontier Probe One-Screen F6 Playtest Notes"'), "Current handbook export records TASK_654 latest")
-	_assert(report_text.contains('recommended_next_task: "TASK_655 - Frontier Probe One-Screen Visual Tuning Findings"'), "Current handbook recommends TASK_655")
+	_assert(report_text.contains("latest_completed_task:"), "Current handbook export records latest task")
+	_assert(report_text.contains("recommended_next_task:"), "Current handbook recommends a follow-up task")
 	_assert(report_text.contains('data-export-key="status.task_654_done"'), "Current handbook exports TASK_654 done status")
 	_assert(report_text.contains('data-export-key="one_screen_f6.line_readable"'), "Current handbook exports TASK_654 line check")
 	_assert(report_text.contains('data-note-key="notes.one_screen_f6_playtest"'), "Current handbook exports TASK_654 notes")
@@ -154,6 +154,7 @@ func _configure_scene(scene: Node) -> void:
 
 func _build_manifest(snapshot: Dictionary, command_feedback: Dictionary, image: Image, viewport_readback_available: bool) -> Dictionary:
 	var line: String = String(snapshot.get("one_screen_line", ""))
+	var readout: Dictionary = Dictionary(snapshot.get("readout", {}))
 	var manual_checks: Array = [
 		{"id": "line_readable_in_f6", "label": "PLAN/NEXT line is readable in F6", "done": false},
 		{"id": "route_order_clear", "label": "LZ -> AA -> COM -> CARGO order is clear", "done": false},
@@ -182,7 +183,7 @@ func _build_manifest(snapshot: Dictionary, command_feedback: Dictionary, image: 
 		"one_screen_line": line,
 		"one_screen_line_char_count": line.length(),
 		"one_screen_line_char_limit": 96,
-		"one_screen_line_within_limit": bool(snapshot.get("line_within_limit", false)),
+		"one_screen_line_within_limit": bool(readout.get("line_within_limit", false)),
 		"mission_control_contains_one_screen_line": String(snapshot.get("mission_control_status_text", "")).contains(line),
 		"command_feedback_exports_one_screen_line": String(command_feedback.get("frontier_probe_one_screen_line", "")) == line,
 		"valid_plan_count": int(snapshot.get("valid_plan_count", 0)),

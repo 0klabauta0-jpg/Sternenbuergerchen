@@ -6126,7 +6126,10 @@ func _build_strategic_status_text() -> String:
 		lines.append(frontier_probe_one_screen_line)
 	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var next_interaction_line: String = String(next_interaction.get("next_interaction_line", "")).strip_edges()
-	if bool(next_interaction.get("active", false)) and not next_interaction_line.is_empty():
+	var one_screen_covers_next: bool = bool(frontier_probe_one_screen.get("active", false)) \
+		and not frontier_probe_one_screen_line.is_empty() \
+		and String(frontier_probe_one_screen.get("next_token", "")).strip_edges().to_upper() != "DEBRIEF"
+	if bool(next_interaction.get("active", false)) and not next_interaction_line.is_empty() and not one_screen_covers_next:
 		lines.append(next_interaction_line)
 	var debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var debrief_handoff_line: String = String(debrief_handoff.get("handoff_line", "")).strip_edges()
@@ -15533,6 +15536,79 @@ func get_frontier_probe_one_screen_playability_snapshot() -> Dictionary:
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"recommended_next_task": "TASK_654 - Frontier Probe One-Screen F6 Playtest Notes",
+	}
+
+
+func get_frontier_probe_one_screen_visual_tuning_snapshot() -> Dictionary:
+	var one_screen: Dictionary = get_frontier_probe_one_screen_playability_snapshot()
+	var readout: Dictionary = Dictionary(one_screen.get("readout", {}))
+	var next_interaction: Dictionary = Dictionary(one_screen.get("next_interaction", {}))
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var mission_control_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	var one_screen_line: String = String(one_screen.get("one_screen_line", "")).strip_edges()
+	var next_interaction_line: String = String(next_interaction.get("next_interaction_line", "")).strip_edges()
+	var next_token: String = String(readout.get("next_token", "")).strip_edges().to_upper()
+	var duplicate_next_should_be_suppressed: bool = not one_screen_line.is_empty() and not next_token.is_empty() and next_token != "DEBRIEF"
+	var duplicate_next_line_visible: bool = not next_interaction_line.is_empty() and mission_control_text.contains(next_interaction_line)
+	var one_screen_line_visible: bool = not one_screen_line.is_empty() and mission_control_text.contains(one_screen_line)
+	var line_within_limit: bool = bool(readout.get("line_within_limit", false))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"one_screen_line_visible",
+			one_screen_line_visible,
+			"Mission Control keeps the compact PLAN/NEXT line visible."
+		),
+		_build_mission_first_move_readability_check(
+			"duplicate_next_line_suppressed",
+			not duplicate_next_should_be_suppressed or not duplicate_next_line_visible,
+			"Mission Control does not show a second NEXT detail line while the one-screen line already carries the next token."
+		),
+		_build_mission_first_move_readability_check(
+			"command_feedback_keeps_next_contract",
+			not next_interaction_line.is_empty()
+				and String(command_feedback.get("frontier_probe_next_interaction_line", "")) == next_interaction_line,
+			"Command feedback still exports the detailed NEXT line for older contracts."
+		),
+		_build_mission_first_move_readability_check(
+			"line_budget_is_consistent",
+			line_within_limit and int(readout.get("line_char_limit", 0)) >= one_screen_line.length(),
+			"One-screen line budget is read from the readout level and stays consistent with the visible line."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(one_screen.get("read_only", false)) and not bool(one_screen.get("ui_sets_gameplay_truth", true)),
+			"Visual tuning snapshot reads existing Mission Control text and does not write gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_one_screen_visual_tuning.v1",
+		"task_id": "TASK_655",
+		"source_task_ids": PackedStringArray(["TASK_653", "TASK_654"]),
+		"one_screen": one_screen,
+		"one_screen_line": one_screen_line,
+		"next_interaction_line": next_interaction_line,
+		"mission_control_status_text": mission_control_text,
+		"one_screen_line_visible": one_screen_line_visible,
+		"duplicate_next_should_be_suppressed": duplicate_next_should_be_suppressed,
+		"duplicate_next_line_visible": duplicate_next_line_visible,
+		"duplicate_next_line_suppressed": not duplicate_next_should_be_suppressed or not duplicate_next_line_visible,
+		"command_feedback_keeps_next_contract": String(command_feedback.get("frontier_probe_next_interaction_line", "")) == next_interaction_line,
+		"line_within_limit": line_within_limit,
+		"line_char_count": one_screen_line.length(),
+		"line_char_limit": int(readout.get("line_char_limit", 0)),
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"recommended_next_task": "TASK_656 - Frontier Probe Real F6 Visual Review",
 	}
 
 

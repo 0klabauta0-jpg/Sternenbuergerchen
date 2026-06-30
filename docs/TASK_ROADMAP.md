@@ -283,6 +283,7 @@ git checkout -b batch/<batch-name>
 - TASK_652 - Current State Handbook Refresh (implementiert)
 - TASK_653 - Frontier Probe One-Screen Playability Pass (implementiert)
 - TASK_654 - Frontier Probe One-Screen F6 Playtest Notes (implementiert)
+- TASK_655 - Frontier Probe One-Screen Visual Tuning Findings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
