@@ -402,6 +402,9 @@ $manifest = [ordered]@{
     client_badge_crop_path = "tmp/host_client_two_window_client_review.png"
     real_click_review_task_id = "TASK_626"
     visible_reject_expected_text = "BLOCK P2 wrong team"
+    visible_reject_expected_action_text = "USE BRAVO"
+    visible_reject_expected_next_action_text = "Use BRAVO fireteam."
+    visible_reject_expected_next_action_detail = "Peer 2 should command the BRAVO fireteam instead of this target."
     visible_reject_expected_authority_text = "AUTH OK1/RJ2"
     visible_reject_expected_feedback_line = "AUTH BLOCKED P2: wrong team"
     visible_reject_expected_raw_reason = "peer_team_mismatch"
@@ -412,6 +415,7 @@ $manifest = [ordered]@{
     visible_reject_manual_checks = @(
         "peer2_alpha_reject_clicked",
         "block_cue_visible",
+        "action_cue_visible",
         "authority_status_visible",
         "raw_reason_in_tooltip",
         "input_latency_noted",
@@ -447,6 +451,7 @@ $manifest = [ordered]@{
         "authority_feedback_readable",
         "snapshot_sync_readable",
         "visible_reject_feedback_readable",
+        "visible_reject_action_cue_readable",
         "peer2_alpha_reject_click_review",
         "input_latency_after_reject",
         "f6_readability",

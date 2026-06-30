@@ -44,9 +44,9 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_626 - Host Client Real Click Review Evidence (implementiert)"), "Roadmap marks TASK_626 implemented")
 	_assert(contract_text.contains("Host-Client-Real-Click-Review-Evidence"), "Mission feedback contract documents TASK_626")
 	_assert(report_text.contains("TASK_626 Host Client Real Click Review Evidence"), "Rolling report tracks TASK_626")
-	_assert(report_text.contains('latest_completed_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Rolling report advances latest completed beyond TASK_626")
+	_assert(report_text.contains("latest_completed_task:") and not report_text.contains('latest_completed_task: "TASK_626'), "Rolling report advances latest completed beyond TASK_626")
 	_assert(handbook_text.contains("TASK_626 - Host Client Real Click Review Evidence"), "Status handbook tracks TASK_626")
-	_assert(handbook_text.contains('current_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Status handbook current task advances beyond TASK_626")
+	_assert(handbook_text.contains("current_task:") and not handbook_text.contains('current_task: "TASK_626'), "Status handbook current task advances beyond TASK_626")
 	_test_report_export_fields(report_text, handbook_text)
 
 
@@ -83,6 +83,9 @@ func _test_capture_tool_contract() -> void:
 	var required_terms: Array[String] = [
 		"real_click_review_task_id",
 		"visible_reject_expected_text",
+		"visible_reject_expected_action_text",
+		"visible_reject_expected_next_action_text",
+		"visible_reject_expected_next_action_detail",
 		"visible_reject_expected_authority_text",
 		"visible_reject_expected_feedback_line",
 		"visible_reject_expected_raw_reason",
@@ -93,6 +96,7 @@ func _test_capture_tool_contract() -> void:
 		"visible_reject_manual_checks",
 		"peer2_alpha_reject_clicked",
 		"block_cue_visible",
+		"action_cue_visible",
 		"raw_reason_in_tooltip",
 		"input_latency_noted",
 		"snapshot_sync_after_reject",
@@ -111,6 +115,9 @@ func _test_manifest_fields() -> void:
 	_assert(String(manifest.get("schema", "")) == "sternenbuergerchen.host_client_two_window_real_run_review.v1", "Manifest schema remains stable")
 	_assert(String(manifest.get("real_click_review_task_id", "")) == "TASK_626", "Manifest records TASK_626 real click task")
 	_assert(String(manifest.get("visible_reject_expected_text", "")) == "BLOCK P2 wrong team", "Manifest records expected visible reject text")
+	_assert(String(manifest.get("visible_reject_expected_action_text", "")) == "USE BRAVO", "Manifest records expected action cue")
+	_assert(String(manifest.get("visible_reject_expected_next_action_text", "")) == "Use BRAVO fireteam.", "Manifest records expected next action text")
+	_assert(String(manifest.get("visible_reject_expected_next_action_detail", "")).contains("Peer 2 should command the BRAVO fireteam"), "Manifest records expected next action detail")
 	_assert(String(manifest.get("visible_reject_expected_authority_text", "")) == "AUTH OK1/RJ2", "Manifest records expected AUTH text")
 	_assert(String(manifest.get("visible_reject_expected_feedback_line", "")) == "AUTH BLOCKED P2: wrong team", "Manifest records expected feedback line")
 	_assert(String(manifest.get("visible_reject_expected_raw_reason", "")) == "peer_team_mismatch", "Manifest records expected raw reject reason")
@@ -119,8 +126,10 @@ func _test_manifest_fields() -> void:
 	_assert(not bool(manifest.get("visible_reject_review_done", true)), "Manifest does not claim manual click review done")
 	_assert(String(manifest.get("visible_reject_review_gate", "")) in ["manual_open", "review_ready"], "Manifest records valid review gate")
 	_assert(_array_contains(manifest.get("visible_reject_manual_checks", []), "peer2_alpha_reject_clicked"), "Manifest requires Peer 2 Alpha reject click check")
+	_assert(_array_contains(manifest.get("visible_reject_manual_checks", []), "action_cue_visible"), "Manifest requires action cue visibility check")
 	_assert(_array_contains(manifest.get("visible_reject_manual_checks", []), "raw_reason_in_tooltip"), "Manifest requires raw reason tooltip check")
 	_assert(_array_contains(manifest.get("review_checks", []), "visible_reject_feedback_readable"), "Manifest review checks include visible reject readability")
+	_assert(_array_contains(manifest.get("review_checks", []), "visible_reject_action_cue_readable"), "Manifest review checks include action cue readability")
 	_assert(String(manifest.get("recommended_next_real_click_review_task", "")) == "TASK_626 - Host Client Real Click Review Evidence", "Manifest records TASK_626 follow-up field")
 	_assert(bool(manifest.get("read_only", false)), "Manifest remains read-only")
 	_assert(not bool(manifest.get("ui_sets_gameplay_truth", true)), "Manifest does not set gameplay truth")
