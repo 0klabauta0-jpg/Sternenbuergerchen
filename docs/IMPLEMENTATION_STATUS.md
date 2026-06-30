@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_708 - Station Route Visual Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_708_station_route_visual_evidence.md`, `docs/tasks/TASK_707_mission_door_computer_cargo_smoke.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: Der Verifier schreibt `tmp/station_route_visual_evidence.png` und `tmp/station_route_visual_evidence.json`.
+- Stand: Door-Open, Computer-Control und Cargo-Complete werden als FullHD-Evidence-Paket aus Render-/Objective-/Command-Snapshots belegt.
+- Stand: Headless-Fallback schreibt ein Review-Board und markiert den echten Fensterentscheid weiterhin als offen.
+- Risiken/offen: Kein echter menschlicher Fensterblick und kein Host/Client-Klick; das Manifest fordert diese Review-Arbeit explizit weiter.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_708_station_route_visual_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_707_mission_door_computer_cargo_smoke.gd`, `git diff --check`.
+- Naechster Schritt: TASK_709 - Station Route Window Playtest Notes oder echter TASK_700-Host/Client-Door-Workbench-Export.
+
 ### TASK_707 - Mission Door/Computer/Cargo Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_707_mission_door_computer_cargo_smoke.md`, `docs/tasks/TASK_706_mission_door_layout_visual_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
