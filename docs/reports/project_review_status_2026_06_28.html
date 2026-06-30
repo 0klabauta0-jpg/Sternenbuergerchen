@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_642 auf <code>task/frontier-probe-homebase-visible-readiness-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_643 auf <code>task/frontier-probe-homebase-readiness-visual-polish-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -306,6 +306,7 @@
       <span class="pill good">TASK_640 Homebase-Return</span>
       <span class="pill good">TASK_641 Next-Sortie</span>
       <span class="pill good">TASK_642 Homebase-Review</span>
+      <span class="pill good">TASK_643 Evidence-Labels</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2283,6 +2284,34 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_643 Frontier Probe Homebase Readiness Visual Polish Findings</h2>
+          <p>Der erste TASK_642-Befund war ein schwaches Review-Artefakt: Das Headless-Evidence-Board zeigte zwar die relevanten Regionen, erklaerte sie aber kaum. TASK_643 beschriftet das Board direkt im PNG mit Titel, Legende, MissionPanel, Post-Debrief-Summary, Next-Sortie-Readiness, Reviewstatus, aktuellem Schritt und Follow-up.</p>
+          <img class="evidence-preview" src="../../tmp/frontier_probe_homebase_visible_readiness_review.png" alt="TASK_643 beschriftetes Frontier Probe Homebase Readiness Evidence Board">
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Visual Polish / Gate</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings" data-export-key="frontier_probe_homebase_readiness_visual_polish.task_id"></td><td>Aktueller Evidence-/Review-Polish-Slice.</td></tr>
+                <tr><td>Quelle</td><td><input readonly value="TASK_642 - Frontier Probe Homebase Visible Readiness Review" data-export-key="frontier_probe_homebase_readiness_visual_polish.source_task_id"></td><td>Das PNG/Manifest bleiben der TASK_642-Review-Anker.</td></tr>
+                <tr><td>Visual Polish ID</td><td><input readonly value="TASK_643" data-export-key="frontier_probe_homebase_readiness_visual_polish.visual_polish_task_id"></td><td>Manifest-Feld fuer den angewendeten Polish.</td></tr>
+                <tr><td>Callout Labels</td><td><input readonly value="8+" data-export-key="frontier_probe_homebase_readiness_visual_polish.callout_label_count"></td><td>Mindestens acht Pixel-Textlabels direkt im Evidence-Board.</td></tr>
+                <tr><td>Readability Gate</td><td><input readonly value="pass" data-export-key="frontier_probe_homebase_readiness_visual_polish.evidence_board_readability_gate"></td><td>Das Board ist als Arbeitsartefakt nicht mehr nur Rect-Geometrie.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_homebase_readiness_visual_polish.read_only"></td><td>Keine Navigation, kein Command, keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="Echter sichtbarer Homebase-Fensterlauf oder kleiner Runtime-UI-Polish bei konkreter Reibung" data-export-key="frontier_probe_homebase_readiness_visual_polish.recommended_next_task"></td><td>Naechster Entscheidungsanker nach dem Artefakt-Polish.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_readiness_visual_polish.labels_present"> Evidence-Board beschriftet</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_readiness_visual_polish.manifest_gate_checked"> Manifest-Gate pruefbar</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="frontier_probe_homebase_readiness_visual_polish.read_only_checked"> Read-only-Grenze erhalten</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_homebase_readiness_visual_polish.real_homebase_window_checked"> Echten Homebase-Fensterblick geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_643 Visual-Polish-Notiz
+            <textarea data-note-key="notes.frontier_probe_homebase_readiness_visual_polish" data-export-key="frontier_probe_homebase_readiness_visual_polish.notes" placeholder="Beim Spielen notieren: Reicht das beschriftete Board fuer den naechsten Homebase-Entscheid oder braucht die Runtime-Zeile selbst Politur?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3275,7 +3304,8 @@
               "TASK_639 - Frontier Probe Meta Debrief Route Smoke",
               "TASK_640 - Frontier Probe Post Debrief Homebase Readability",
               "TASK_641 - Frontier Probe Homebase Next Sortie Readiness",
-              "TASK_642 - Frontier Probe Homebase Visible Readiness Review"
+              "TASK_642 - Frontier Probe Homebase Visible Readiness Review",
+              "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3326,7 +3356,8 @@
               "TASK_639 prueft den vorhandenen Meta-Weg mit Frontier-Probe-Resultat: Debrief sichtbar, Return verfuegbar, Homebase nach Return sichtbar und MissionResult erhalten.",
               "TASK_640 zeigt nach dem Debrief-Return eine kompakte Homebase-Summary aus dem Frontier-Probe-Ergebnis und nennt den naechsten Homebase-Schritt.",
               "TASK_641 verbindet diese Homebase-Summary mit Pre-Mission-Readiness und Direct-Staging zu einer kompakten Next-Sortie-Zeile.",
-              "TASK_642 macht den daraus entstehenden Homebase-Blick als PNG/Manifest-Review belegbar und prueft Zeilenreihenfolge, Bounds und Overflow."
+              "TASK_642 macht den daraus entstehenden Homebase-Blick als PNG/Manifest-Review belegbar und prueft Zeilenreihenfolge, Bounds und Overflow.",
+              "TASK_643 beschriftet das TASK_642-Headless-Evidence-Board mit Pixel-Labels und Readability-Gate, damit der naechste Homebase-Entscheid weniger Interpretationsrauschen hat."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3336,13 +3367,13 @@
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
             current_repo_base: "integration/core-foundation after TASK_642",
-            current_focus: "Frontier Probe Homebase Visible Readiness Review",
-            latest_completed_task: "TASK_642 - Frontier Probe Homebase Visible Readiness Review"
+            current_focus: "Frontier Probe Homebase Readiness Visual Polish Findings",
+            latest_completed_task: "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings"
           },
           metadata: {
-            branch: "task/frontier-probe-homebase-visible-readiness-review",
-            integration_base: "integration/core-foundation after TASK_641",
-            head: "task/frontier-probe-homebase-visible-readiness-review",
+            branch: "task/frontier-probe-homebase-readiness-visual-polish-findings",
+            integration_base: "integration/core-foundation after TASK_642",
+            head: "task/frontier-probe-homebase-readiness-visual-polish-findings",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }

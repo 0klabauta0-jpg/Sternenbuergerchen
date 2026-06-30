@@ -392,6 +392,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_642_frontier_probe_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_641_frontier_probe_homebase_next_sortie_readiness.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_640_frontier_probe_post_debrief_homebase_readability.gd`, `git diff --check`.
 - Naechster Schritt: `TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings`, falls PNG/Manifest oder echter Fensterblick konkrete Reibung zeigen.
 
+### TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_643_frontier_probe_homebase_readiness_visual_polish_findings.md`, `docs/tasks/TASK_642_frontier_probe_homebase_visible_readiness_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`, `docs/reports/project_state_handbook_2026_06_30.html`
+- Stand: Das TASK_642-Headless-Evidence-Board zeichnet jetzt Pixel-Textlabels fuer Titel, MissionPanel, Post-Debrief-Summary, Next-Sortie-Readiness, Status, aktuellen Schritt und Follow-up.
+- Stand: Das TASK_642-Manifest meldet `visual_polish_task_id = TASK_643`, `callout_label_count` und `evidence_board_readability_gate = pass`.
+- Stand: `scripts/tests/task_643_frontier_probe_homebase_readiness_visual_polish_findings.gd` prueft Task, Contract, Status, Reports, den neuen Ist-Stand-/Handbuch-Bericht, TASK_642-Manifestfelder und das FullHD-PNG.
+- Risiken/offen: TASK_643 poliert das Review-Artefakt, nicht die echte Homebase-UI. Der echte sichtbare Homebase-Fensterblick bleibt der naechste bessere Entscheidungsanker.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_642_frontier_probe_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_643_frontier_probe_homebase_readiness_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_641_frontier_probe_homebase_next_sortie_readiness.gd`, `git diff --check`.
+- Naechster Schritt: Echten sichtbaren Homebase-Fensterlauf pruefen; nur bei konkreter Reibung einen kleinen Runtime-UI-Polish fuer die Next-Sortie-Zeile schneiden.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

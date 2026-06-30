@@ -480,6 +480,12 @@ Erwartete Struktur: `HomebaseTestScreen.get_frontier_probe_homebase_visible_read
 
 Die Review-Gates pruefen mindestens: beide Zeilen liegen im MissionPanel, Next-Sortie sitzt unter der Debrief-Summary, beide Zeilen ueberlappen nicht, MissionPanel laeuft nicht ueber und die Next-Sortie-Zeile bleibt kompakt.
 
+## Frontier-Probe-Homebase-Readiness-Visual-Polish-Findings (TASK_643)
+
+TASK_643 wendet den ersten konkreten TASK_642-Befund auf das Review-Artefakt an: Das Headless-Evidence-Board darf nicht nur farbige Rechtecke zeigen, sondern muss Titel, Legende, Callouts und Follow-up direkt im PNG lesbar machen. Das bleibt ein Evidence-/Review-Polish und setzt keine Runtime-Gameplay-Wahrheit.
+
+Erwartete Struktur: Das TASK_642-Manifest enthaelt `visual_polish_task_id = TASK_643`, `callout_label_count >= 8`, `evidence_board_readability_gate = pass`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`. Das PNG zeigt mindestens Callouts fuer MissionPanel, Post-Debrief-Summary, Next-Sortie-Readiness, Review-Status, aktuellen Schritt und Follow-up.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
