@@ -268,6 +268,7 @@ git checkout -b batch/<batch-name>
 - TASK_637 - Frontier Probe Playfeel Next Interaction (implementiert)
 - TASK_638 - Frontier Probe Debrief Handoff Feel (implementiert)
 - TASK_639 - Frontier Probe Meta Debrief Route Smoke (implementiert)
+- TASK_640 - Frontier Probe Post Debrief Homebase Readability (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

@@ -459,6 +459,11 @@ TASK_639 prueft den echten vorhandenen Meta-Weg fuer ein Frontier-Probe-Ergebnis
 
 Erwartete Struktur: `get_frontier_probe_meta_debrief_route_smoke_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_meta_debrief_route_smoke.v1`, `task_id = TASK_639`, `source_task_ids = [TASK_638, TASK_586]`, `route_id = frontier_probe_aa_computer_cargo`, `scenario_id = frontier_probe_vertical_slice`, `current_stage`, `before_return_ready`, `after_return_ready`, `frontier_probe_result_present`, `return_action_available`, `mission_result_preserved`, `active_mission_released`, `debrief_handoff_gate`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_640 - Frontier Probe Post Debrief Homebase Readability`. Nicht zulaessig sind ein neuer Meta-Navigationspfad, automatische Mission-Commands, XP-/Skill-Vergabe, Combat-Mutationen oder UI-seitige MissionResult-Wahrheit.
 
+## Frontier-Probe-Post-Debrief-Homebase-Readability
+TASK_640 macht den Rueckkehrmoment nach dem Debrief auf der Homebase lesbar. `MetaLayerFlow` darf das vorhandene `_last_mission_result` als read-only Summary-Payload an `HomebaseTestScreen` uebergeben. Die Homebase darf daraus eine kompakte Post-Debrief-Zeile im MissionPanel bauen, aber keine Progression berechnen, kein MissionResult veraendern, keine Navigation ausloesen und keine Commands erzeugen.
+
+Erwartete Struktur: `HomebaseTestScreen.get_frontier_probe_post_debrief_homebase_readability_snapshot()` liefert `schema = sternenbuergerchen.frontier_probe_post_debrief_homebase_readability.v1`, `task_id = TASK_640`, `route_id = frontier_probe_aa_computer_cargo`, `scenario_id = frontier_probe_vertical_slice`, `summary_label_visible = true`, `summary_text`, `result_text`, `next_step_text`, `mission_result_preserved = true`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false` und `recommended_next_task = TASK_641 - Frontier Probe Homebase Next Sortie Readiness`. Erwartete Lesbarkeit: Die Summary nennt Debrief, Homebase, Frontier Probe und einen kurzen naechsten Schritt wie `review roster gains`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

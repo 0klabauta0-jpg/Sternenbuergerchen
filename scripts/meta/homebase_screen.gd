@@ -124,6 +124,7 @@ var _pre_mission_readiness_snapshot: Dictionary = {}
 var _aircraft_manager = AIRCRAFT_MANAGER_SCRIPT.new()
 var _team_transfer_entries: Array = []
 var _personnel_events: Array = []
+var _last_mission_result_summary: Dictionary = {}
 var _post_mission_skill_delta_summary: Dictionary = {}
 var _post_mission_skill_delta_by_unit_id: Dictionary = {}
 
@@ -301,11 +302,60 @@ func set_personnel_events(personnel_events: Array) -> void:
 		_update_personnel_notifications()
 
 
+func set_last_mission_result_summary(mission_result: Dictionary) -> void:
+	_last_mission_result_summary = mission_result.duplicate(true)
+	if is_inside_tree():
+		_update_post_debrief_homebase_summary()
+
+
 func set_post_mission_skill_delta_summary(summary: Dictionary) -> void:
 	_post_mission_skill_delta_summary = summary.duplicate(true)
 	_rebuild_post_mission_skill_delta_lookup()
 	if is_inside_tree() and _character_sheet_open:
 		_update_character_sheet()
+
+
+func get_frontier_probe_post_debrief_homebase_readability_snapshot() -> Dictionary:
+	var label := _get_post_debrief_homebase_summary_label()
+	var label_visible: bool = _control_is_visible(label)
+	var label_text: String = label.text.strip_edges() if label != null else ""
+	var route_id: String = _get_last_result_route_id()
+	var scenario_id: String = _get_last_result_scenario_id()
+	var is_frontier_probe: bool = _is_frontier_probe_last_result()
+	var result_text: String = _build_post_debrief_homebase_result_text()
+	var next_step_text: String = _build_post_debrief_homebase_next_step_text()
+	var checks: Array = []
+	_append_visual_audit_check(checks, "frontier_probe_result_present", is_frontier_probe, "critical", "Homebase return summary should carry the Frontier Probe result.")
+	_append_visual_audit_check(checks, "summary_label_visible", label_visible, "critical", "Homebase should show a compact post-Debrief summary.")
+	_append_visual_audit_check(checks, "summary_mentions_debrief", label_text.contains("Debrief"), "critical", "Summary should explain that the Debrief was reviewed.")
+	_append_visual_audit_check(checks, "summary_mentions_homebase", label_text.contains("Homebase"), "critical", "Summary should make the return target clear.")
+	_append_visual_audit_check(checks, "summary_mentions_next_step", not next_step_text.is_empty() and label_text.contains(next_step_text), "critical", "Summary should name the next useful Homebase action.")
+	_append_visual_audit_check(checks, "summary_compact", label_text.length() <= 180 and label_text.count("\n") == 0, "critical", "Summary should stay compact in the MissionPanel.")
+	_append_visual_audit_check(checks, "result_preserved", not result_text.is_empty(), "critical", "Mission result should remain readable after return.")
+	_append_visual_audit_check(checks, "read_only", true, "critical", "Snapshot reads Homebase result display only.")
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.frontier_probe_post_debrief_homebase_readability.v1",
+		"task_id": "TASK_640",
+		"source_task_ids": ["TASK_639", "TASK_594"],
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"route_id": route_id,
+		"scenario_id": scenario_id,
+		"frontier_probe_result_present": is_frontier_probe,
+		"summary_label_visible": label_visible,
+		"summary_text": label_text,
+		"result_text": result_text,
+		"next_step_text": next_step_text,
+		"mission_result_preserved": not _last_mission_result_summary.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"checks": checks,
+		"recommended_next_task": "TASK_641 - Frontier Probe Homebase Next Sortie Readiness",
+	}
 
 
 func get_post_mission_skill_delta_snapshot() -> Dictionary:
@@ -1699,6 +1749,7 @@ func _apply_mission_brief_contrast_policy() -> void:
 		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionTransferLabel",
 		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel",
 		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PersonnelEventsLabel",
+		"Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefHomebaseSummaryLabel",
 	]:
 		var label := get_node_or_null(path) as Label
 		if label == null:
@@ -2707,6 +2758,7 @@ func _update_mission_info() -> void:
 	mission_summary_label.set_meta("homebase_direct_payload_fireteam_count", direct_payload_fireteam_count)
 	mission_summary_label.set_meta("homebase_direct_payload_status_text", direct_payload_status_text)
 	_update_personnel_notifications()
+	_update_post_debrief_homebase_summary()
 	_update_mission_briefing_panel()
 	_update_pre_mission_readiness_panel()
 
@@ -2737,6 +2789,111 @@ func _ensure_personnel_notifications_label() -> Label:
 	if summary_label != null:
 		mission_vbox.move_child(label, summary_label.get_index() + 1)
 	return label
+
+
+func _update_post_debrief_homebase_summary() -> void:
+	var label := _ensure_post_debrief_homebase_summary_label()
+	var summary_text: String = _build_post_debrief_homebase_summary_text()
+	if summary_text.is_empty():
+		label.visible = false
+		label.text = ""
+		return
+	label.visible = true
+	label.text = summary_text
+	label.tooltip_text = "Read-only summary of the last mission result carried back from Debrief."
+	label.set_meta("frontier_probe_post_debrief_homebase_summary", true)
+	label.set_meta("frontier_probe_result_present", _is_frontier_probe_last_result())
+	label.set_meta("post_debrief_homebase_result_text", _build_post_debrief_homebase_result_text())
+	label.set_meta("post_debrief_homebase_next_step_text", _build_post_debrief_homebase_next_step_text())
+
+
+func _ensure_post_debrief_homebase_summary_label() -> Label:
+	var mission_vbox := get_node("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox") as VBoxContainer
+	var existing := mission_vbox.get_node_or_null("PostDebriefHomebaseSummaryLabel") as Label
+	if existing != null:
+		return existing
+	var label := Label.new()
+	label.name = "PostDebriefHomebaseSummaryLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.add_theme_font_size_override("font_size", 9)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 9)
+	label.add_theme_color_override("font_color", Color("c7f2df"))
+	mission_vbox.add_child(label)
+	var personnel_label := mission_vbox.get_node_or_null("PersonnelEventsLabel")
+	var summary_label := mission_vbox.get_node_or_null("MissionSummaryLabel")
+	if personnel_label != null:
+		mission_vbox.move_child(label, personnel_label.get_index() + 1)
+	elif summary_label != null:
+		mission_vbox.move_child(label, summary_label.get_index() + 1)
+	return label
+
+
+func _get_post_debrief_homebase_summary_label() -> Label:
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefHomebaseSummaryLabel") as Label
+
+
+func _build_post_debrief_homebase_summary_text() -> String:
+	if _last_mission_result_summary.is_empty():
+		return ""
+	if not _is_frontier_probe_last_result():
+		return ""
+	var result_text: String = _build_post_debrief_homebase_result_text()
+	var next_step_text: String = _build_post_debrief_homebase_next_step_text()
+	if result_text.is_empty() or next_step_text.is_empty():
+		return ""
+	return "Debrief complete -> Homebase | %s | Next: %s" % [result_text, next_step_text]
+
+
+func _build_post_debrief_homebase_result_text() -> String:
+	if _last_mission_result_summary.is_empty():
+		return ""
+	var outcome: String = String(_last_mission_result_summary.get("result", "ended")).strip_edges()
+	if outcome.is_empty():
+		outcome = String(_last_mission_result_summary.get("mission_outcome", "ended")).strip_edges()
+	var route_label: String = "Frontier Probe"
+	var win_condition: String = String(_last_mission_result_summary.get("win_condition_type", "")).strip_edges()
+	var duration_seconds: int = int(round(float(_last_mission_result_summary.get("duration_seconds", 0.0))))
+	var parts: PackedStringArray = PackedStringArray([route_label, outcome.to_upper()])
+	if not win_condition.is_empty():
+		parts.append(win_condition)
+	if duration_seconds > 0:
+		parts.append("%ds" % duration_seconds)
+	return " / ".join(Array(parts))
+
+
+func _build_post_debrief_homebase_next_step_text() -> String:
+	var award_summary: Dictionary = Dictionary(_last_mission_result_summary.get("progression_award_summary", {}))
+	if int(award_summary.get("total_xp_delta", 0)) > 0 or Array(award_summary.get("listed_awards", [])).size() > 0:
+		return "review roster gains"
+	return "prep next sortie"
+
+
+func _get_last_result_route_id() -> String:
+	var route_id: String = String(_last_mission_result_summary.get("route_id", "")).strip_edges()
+	if route_id.is_empty() and _is_frontier_probe_last_result():
+		return "frontier_probe_aa_computer_cargo"
+	return route_id
+
+
+func _get_last_result_scenario_id() -> String:
+	for key in ["scenario_id", "mission_id", "source_mission_id"]:
+		var value: String = String(_last_mission_result_summary.get(key, "")).strip_edges()
+		if not value.is_empty():
+			return value
+	var scenario_file_path: String = String(_last_mission_result_summary.get("scenario_file_path", "")).strip_edges()
+	if scenario_file_path.get_file().get_basename() == "frontier_probe_vertical_slice":
+		return "frontier_probe_vertical_slice"
+	return ""
+
+
+func _is_frontier_probe_last_result() -> bool:
+	if _last_mission_result_summary.is_empty():
+		return false
+	if String(_last_mission_result_summary.get("route_id", "")).strip_edges() == "frontier_probe_aa_computer_cargo":
+		return true
+	if _get_last_result_scenario_id() == "frontier_probe_vertical_slice":
+		return true
+	return String(_last_mission_result_summary.get("scenario_file_path", "")).strip_edges().ends_with("frontier_probe_vertical_slice.json")
 
 
 func _update_mission_briefing_panel() -> void:
