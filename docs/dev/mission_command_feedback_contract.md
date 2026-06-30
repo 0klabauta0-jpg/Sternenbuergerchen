@@ -414,6 +414,11 @@ TASK_630 macht die vorhandene Frontier-Probe-Vertical-Slice-Mission als kleine s
 
 Erwartete Struktur: Der Snapshot enthaelt `schema = sternenbuergerchen.frontier_probe_mini_scenario_feel_route.v1`, `task_id = TASK_630`, `route_id = frontier_probe_aa_computer_cargo`, `route_beats`, `route_beat_count`, `play_modes`, Alpha-/Bravo-Slots, AA-Gruppe, Objective-/Cargo-/Mission-Control-Zeilen, integrierten Objective/Cargo-Snapshot, Ownership-Snapshot, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish`. Erwartete Beats: Alpha-LZ/Approach, AA ausschalten, Computer 18 Sekunden halten, Cargo Touch-and-Go an `spawn_alpha`.
 
+## Frontier-Probe-Mini-Scenario-Visual-Feel-Polish
+TASK_631 macht die TASK_630-Route im vorhandenen Primary3D-/Mission-Status-Pfad sichtbar lesbarer. Der Controller darf aus den bestehenden Route-Beats read-only `route_callouts` fuer LZ, AA, Computer-Hold und Cargo ableiten und an `Primary3DView.set_mission_status_payload()` weiterreichen. `TerrainMap3DView` darf diese Callouts als Marker/Labels rendern und im Render-Snapshot zaehlen. Keine Callout-Daten duerfen Objective-, Cargo-, Command-, Combat-, Movement-, Peer- oder Gameplay-Wahrheit setzen.
+
+Erwartete Struktur: `get_frontier_probe_mini_scenario_visual_feel_polish_snapshot()` enthaelt `schema = sternenbuergerchen.frontier_probe_mini_scenario_visual_feel_polish.v1`, `task_id = TASK_631`, `route_id = frontier_probe_aa_computer_cargo`, `route_callouts`, `route_callout_count`, `route_callout_tone_counts`, `route_callout_summary`, `mission_control_route_line`, `primary_3d`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_632 - Frontier Probe Mini Scenario F6 Visual Review`. Erwartete Callouts: `LZ`/safe an `spawn_alpha`, `AA`/danger an `factory_danger_zone`, `COM 18s`/objective an `objective_point` und `CARGO`/cargo an `spawn_alpha`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

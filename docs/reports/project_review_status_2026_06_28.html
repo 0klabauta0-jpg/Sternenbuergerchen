@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_630 auf <code>task/frontier-probe-mini-scenario-feel-route</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_631 auf <code>task/frontier-probe-mini-scenario-visual-feel-polish</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -296,6 +296,7 @@
       <span class="pill good">TASK_626 Real-Click-Evidence</span>
       <span class="pill good">TASK_627 Eventlog-Overlap</span>
       <span class="pill good">TASK_630 Mini-Szenario-Route</span>
+      <span class="pill good">TASK_631 Route-Callouts</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -1899,6 +1900,37 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_631 Frontier Probe Mini Scenario Visual Feel Polish</h2>
+          <p>Die TASK_630-Route wird jetzt als kleine visuelle Callout-Schicht im vorhandenen Primary3D-Mission-Status-Payload lesbar: LZ, AA, Computer-Hold und Cargo haben stabile Labels, Tones und Render-Snapshot-Counter. Die Callouts sind read-only und setzen keine Gameplay-Wahrheit.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Visual-Feld</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.task_id"></td><td>Aktueller Visual-/Feel-Slice.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/frontier_probe_mini_scenario_visual_feel_polish.json" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.manifest_path"></td><td>Lokales Evidence-Manifest aus dem Verifier.</td></tr>
+                <tr><td>Callouts</td><td><input readonly value="LZ safe @ spawn_alpha | AA danger @ factory_danger_zone | COM 18s objective @ objective_point | CARGO cargo @ spawn_alpha" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.route_callouts"></td><td>Vier sichtbare Beats der Mini-Mission.</td></tr>
+                <tr><td>Route Summary</td><td><input readonly value="ROUTE LZ -> AA -> COM 18s -> CARGO" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.route_summary"></td><td>Kompakte Mission-Control-Zusammenfassung.</td></tr>
+                <tr><td>Primary3D Count</td><td><input readonly value="4" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.primary_3d_count"></td><td>Render-Snapshot zaehlt die Callout-Visuals.</td></tr>
+                <tr><td>Tone Counts</td><td><input readonly value="safe=1, danger=1, objective=1, cargo=1" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.tone_counts"></td><td>Farbsprache ist nicht einfarbig.</td></tr>
+                <tr><td>Mission Control</td><td><input readonly value="ROUTE LZ -> AA -> COM 18s -> CARGO | AA/COM/OBJ and CARGO line integrated" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.mission_control_line"></td><td>Route und Outcome passen in eine kompakte Leselinie.</td></tr>
+                <tr><td>Manual Required</td><td><input readonly value="true" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.manual_review_required"></td><td>Fensterbild bleibt menschlicher Sichtentscheid.</td></tr>
+                <tr><td>Manual Done</td><td><input readonly value="false" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.manual_review_done"></td><td>Nicht als finaler F6-Review behauptet.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.read_only"></td><td>Snapshot/Visuals setzen keine Gameplay-Wahrheit.</td></tr>
+                <tr><td>Naechster Task</td><td><input readonly value="TASK_632 - Frontier Probe Mini Scenario F6 Visual Review" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.recommended_next_task"></td><td>Echter Fenster-/Sichtentscheid fuer Callout-Platzierung.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input type="checkbox" checked data-export-key="frontier_probe_mini_scenario_visual_feel_polish.callouts_cover_route"> Alle vier Route-Beats haben Callouts</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="frontier_probe_mini_scenario_visual_feel_polish.primary_3d_receives_callouts"> Primary3D bekommt die Callouts ueber den Status-Payload</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="frontier_probe_mini_scenario_visual_feel_polish.mission_control_summary_compact"> Mission-Control-Route ist kompakt</label>
+            <label class="checkline"><input type="checkbox" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.real_f6_review_done"> Echte F6-Lesbarkeit menschlich geprueft</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_631 Visual-Feel-Notiz
+            <textarea data-note-key="notes.frontier_probe_mini_scenario_visual_feel_polish" data-export-key="frontier_probe_mini_scenario_visual_feel_polish.notes" placeholder="Beim F6-Blick notieren: Sind LZ/AA/COM/CARGO im Bild hilfreich, zu laut, verdeckt oder gut?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -2879,7 +2911,8 @@
               "TASK_627 - Host Client Fireteam Eventlog Overlap Polish",
               "TASK_628 - Mission HUD Legacy Contract Refresh",
               "TASK_629 - Host Client Real Click Playtest Evidence Pass",
-              "TASK_630 - Frontier Probe Mini Scenario Feel Route"
+              "TASK_630 - Frontier Probe Mini Scenario Feel Route",
+              "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -2918,7 +2951,8 @@
               "TASK_627 verschiebt das Eventlog unter die Fireteam-Mini-Karten, weil ein echter Host/Client-Crop den alten Overlap gezeigt hat.",
               "TASK_628 zieht den alten Drop-Light-HUD-Vertrag auf Fire-Rule-Slots und Inbound-Member-Cards nach.",
               "TASK_629 buendelt den naechsten echten Host/Client-Klicklauf als read-only Playtest-Packet mit Vorbedingungen, Klickfolge und offenen Beobachtungen.",
-              "TASK_630 macht Frontier Probe als kleine Alpha-LZ/AA/Computer/Cargo-Route pruefbar; finaler Visual-/Spielgefuehl-Polish bleibt offen."
+              "TASK_630 macht Frontier Probe als kleine Alpha-LZ/AA/Computer/Cargo-Route pruefbar; finaler Visual-/Spielgefuehl-Polish bleibt offen.",
+              "TASK_631 macht LZ/AA/COM/CARGO als read-only Primary3D-Callouts sichtbar; echter F6-Sichtentscheid bleibt offen."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -2927,14 +2961,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_630",
-            current_focus: "Frontier Probe Mini Scenario Feel Route",
-            latest_completed_task: "TASK_630 - Frontier Probe Mini Scenario Feel Route"
+            current_repo_base: "integration/core-foundation after TASK_631",
+            current_focus: "Frontier Probe Mini Scenario Visual Feel Polish",
+            latest_completed_task: "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"
           },
           metadata: {
-            branch: "task/frontier-probe-mini-scenario-feel-route",
-            integration_base: "integration/core-foundation after TASK_629",
-            head: "task/frontier-probe-mini-scenario-feel-route",
+            branch: "task/frontier-probe-mini-scenario-visual-feel-polish",
+            integration_base: "integration/core-foundation after TASK_630",
+            head: "task/frontier-probe-mini-scenario-visual-feel-polish",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }

@@ -55,8 +55,8 @@ func _test_docs_track_task() -> void:
 	_assert(roadmap_text.contains("TASK_628 - Mission HUD Legacy Contract Refresh (implementiert)"), "Roadmap marks TASK_628 implemented")
 	_assert(contract_text.contains("Mission-HUD-Legacy-Contract-Refresh"), "Mission command feedback contract documents TASK_628")
 	_assert(report_text.contains("TASK_628 Mission HUD Legacy Contract Refresh"), "Rolling report tracks TASK_628")
-	_assert(report_text.contains('latest_completed_task: "TASK_630 - Frontier Probe Mini Scenario Feel Route"'), "Rolling report advances latest completed beyond TASK_628")
-	_assert(handbook_text.contains('current_task: "TASK_630 - Frontier Probe Mini Scenario Feel Route"'), "Status handbook current task advances beyond TASK_628")
+	_assert(report_text.contains('latest_completed_task: "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"'), "Rolling report advances latest completed beyond TASK_628")
+	_assert(handbook_text.contains('current_task: "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish"'), "Status handbook current task advances beyond TASK_628")
 
 
 func _test_command_matrix_fire_rule_slots() -> void:

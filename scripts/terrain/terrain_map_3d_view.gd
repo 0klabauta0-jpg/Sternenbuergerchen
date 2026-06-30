@@ -413,6 +413,9 @@ var _contact_entries: Array = []
 var _contact_selected_fireteam_ids: PackedStringArray = PackedStringArray()
 var _drop_payload: Dictionary = {}
 var _mission_status_payload: Dictionary = {}
+var _route_callout_entries: Array = []
+var _route_callout_tone_counts: Dictionary = {}
+var _route_callout_visual_count: int = 0
 var _fog_of_war_state: Dictionary = {}
 var _fog_of_war_mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
 var _fog_of_war_team_id: String = ""
@@ -1649,6 +1652,10 @@ func get_render_snapshot() -> Dictionary:
 		"objective_capture_progress": float(_mission_status_payload.get("objective_capture_progress", 0.0)),
 		"mission_result_visible": _mission_result_visible,
 		"mission_result": String(_mission_status_payload.get("result", "")),
+		"route_callout_visual_count": _route_callout_visual_count,
+		"route_callout_entries": _route_callout_entries.duplicate(true),
+		"route_callout_tone_counts": _route_callout_tone_counts.duplicate(true),
+		"route_callout_summary": String(_mission_status_payload.get("route_callout_summary", "")),
 		"has_lz": bool(_drop_payload.get("has_lz_position", false)),
 		"show_lz_marker": bool(_drop_payload.get("show_lz_marker", bool(_drop_payload.get("has_lz_position", false)))),
 		"dropship_visible": bool(_drop_payload.get("dropship_visible", false)),
@@ -7050,6 +7057,9 @@ func _rebuild_status_visuals() -> void:
 	_clear_children(_status_root)
 	_objective_status_visible = false
 	_mission_result_visible = false
+	_route_callout_entries.clear()
+	_route_callout_tone_counts.clear()
+	_route_callout_visual_count = 0
 	if _status_root == null or _mission_status_payload.is_empty():
 		return
 	var objective_position_variant = _mission_status_payload.get("objective_position", null)
@@ -7057,6 +7067,7 @@ func _rebuild_status_visuals() -> void:
 		_add_objective_status_visual(Vector2(objective_position_variant))
 	if bool(_mission_status_payload.get("mission_resolved", false)):
 		_add_mission_result_visual(Vector2(objective_position_variant) if typeof(objective_position_variant) == TYPE_VECTOR2 else _get_map_center_world_position())
+	_add_route_callout_visuals()
 
 
 func _add_objective_status_visual(world_position: Vector2) -> void:
@@ -7137,6 +7148,54 @@ func _get_objective_status_color() -> Color:
 			return Color(1.0, 0.52, 0.46, 1.0)
 		_:
 			return Color(0.86, 0.9, 0.94, 1.0)
+
+
+func _add_route_callout_visuals() -> void:
+	for callout_variant in Array(_mission_status_payload.get("route_callouts", [])):
+		if typeof(callout_variant) != TYPE_DICTIONARY:
+			continue
+		var callout: Dictionary = Dictionary(callout_variant)
+		if typeof(callout.get("world_position", null)) != TYPE_VECTOR2:
+			continue
+		var world_position: Vector2 = Vector2(callout.get("world_position", Vector2.ZERO))
+		var tone: String = String(callout.get("tone", callout.get("color_key", "unknown"))).strip_edges().to_lower()
+		if tone.is_empty():
+			tone = "unknown"
+		var color: Color = _get_route_callout_color(tone)
+		var callout_id: String = String(callout.get("id", "route_callout_%d" % _route_callout_visual_count)).strip_edges()
+		var short_label: String = String(callout.get("short_label", "")).strip_edges()
+		if short_label.is_empty():
+			short_label = String(callout.get("label", callout_id)).strip_edges()
+		_add_marker3d(_status_root, world_position, Color(color.r, color.g, color.b, 0.66), "RouteCalloutMarker_%s" % _sanitize_node_name(callout_id), 0.34, 0.08, 24, 0.38)
+		_add_label3d(_status_root, short_label, _world_to_surface_3d_position(world_position + Vector2(0.0, -20.0), STATUS_LABEL_HEIGHT + 0.34), "RouteCalloutLabel_%s" % _sanitize_node_name(callout_id), color, 14)
+		_route_callout_visual_count += 1
+		_route_callout_tone_counts[tone] = int(_route_callout_tone_counts.get(tone, 0)) + 1
+		_route_callout_entries.append({
+			"id": callout_id,
+			"short_label": short_label,
+			"label": String(callout.get("label", "")).strip_edges(),
+			"detail": String(callout.get("detail", "")).strip_edges(),
+			"tone": tone,
+			"target_marker_id": String(callout.get("target_marker_id", "")).strip_edges(),
+			"world_position": world_position,
+			"visual_priority": int(callout.get("visual_priority", _route_callout_visual_count)),
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+
+
+func _get_route_callout_color(tone: String) -> Color:
+	match tone.strip_edges().to_lower():
+		"safe":
+			return Color(0.48, 0.96, 0.66, 0.98)
+		"danger":
+			return Color(1.0, 0.42, 0.32, 0.98)
+		"objective":
+			return Color(0.38, 0.76, 1.0, 0.98)
+		"cargo":
+			return Color(1.0, 0.80, 0.32, 0.98)
+		_:
+			return Color(0.86, 0.9, 0.94, 0.96)
 
 
 func _add_label3d(parent: Node3D, text: String, position: Vector3, node_name: String, color: Color, font_size: int = 18) -> Label3D:

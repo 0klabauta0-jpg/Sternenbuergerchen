@@ -259,6 +259,7 @@ git checkout -b batch/<batch-name>
 - TASK_628 - Mission HUD Legacy Contract Refresh (implementiert)
 - TASK_629 - Host Client Real Click Playtest Evidence Pass (implementiert)
 - TASK_630 - Frontier Probe Mini Scenario Feel Route (implementiert)
+- TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

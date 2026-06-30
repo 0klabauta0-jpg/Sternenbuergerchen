@@ -9729,6 +9729,12 @@ func _sync_primary_3d_mission_status_visuals() -> void:
 			payload["objective_contested"] = bool(objective_status.call("is_contested"))
 	if payload.is_empty():
 		return
+	if _should_sync_frontier_probe_route_callouts():
+		var route_callouts: Array = _build_frontier_probe_mini_scenario_route_callouts(_build_frontier_probe_mini_scenario_route_beats())
+		if not route_callouts.is_empty():
+			payload["route_callouts"] = route_callouts
+			payload["route_callout_summary"] = _build_frontier_probe_route_callout_summary(route_callouts)
+			payload["route_callout_schema"] = "sternenbuergerchen.frontier_probe_route_callouts.v1"
 	_primary_view_bridge.call("sync_mission_status_payload", get_parent(), payload)
 
 
@@ -14793,42 +14799,8 @@ func get_frontier_probe_mini_scenario_feel_route_snapshot() -> Dictionary:
 	var aa_group: Dictionary = _find_scenario_enemy_group(scenario, String(aa_step.get("enemy_group_id", "bravo_air_defense")))
 	var aa_tactics: Dictionary = Dictionary(aa_group.get("tactics", {}))
 	var play_modes: PackedStringArray = PackedStringArray(vertical_slice.get("play_modes", PackedStringArray()))
-	var route_beats: Array = [
-		{
-			"id": "approach_alpha_lz",
-			"label": "Start/LZ",
-			"target_marker_id": String(alpha_slot.get("spawn_marker_id", "spawn_alpha")),
-			"team_id": "team_alpha",
-			"player_decision": "Choose approach, read threat preview, keep fireteam context visible.",
-		},
-		{
-			"id": String(aa_step.get("step_id", "disable_air_defense")),
-			"label": "AA ausschalten",
-			"objective_type": String(aa_step.get("objective_type", "air_defense_shutdown")),
-			"target_marker_id": String(aa_step.get("target_marker_id", "")),
-			"enemy_group_id": String(aa_step.get("enemy_group_id", "")),
-			"blocks_cargo_until_complete": bool(aa_step.get("blocks_cargo_until_complete", false)),
-			"expected_state": String(aa_step.get("required_state", "")),
-		},
-		{
-			"id": String(computer_step.get("step_id", "occupy_station_computer")),
-			"label": "Computer halten",
-			"objective_type": String(computer_step.get("objective_type", "computer_hold")),
-			"target_marker_id": String(computer_step.get("target_marker_id", "")),
-			"hold_seconds": float(computer_step.get("min_hold_seconds", 0.0)),
-			"operator_team_id": String(computer_step.get("operator_team_id", "")),
-			"expected_state": String(computer_step.get("required_state", "")),
-		},
-		{
-			"id": String(cargo_step.get("step_id", "cargo_touchdown_extract")),
-			"label": "Cargo Touch-and-Go",
-			"objective_type": String(cargo_step.get("objective_type", "cargo_touchdown_extract")),
-			"target_marker_id": String(cargo_step.get("target_marker_id", "")),
-			"requires_step_id": String(cargo_step.get("requires_step_id", "")),
-			"hold_seconds": float(cargo_step.get("min_hold_seconds", 0.0)),
-			"expected_state": String(cargo_step.get("required_state", "")),
-		},
-	]
+	var route_beats: Array = _build_frontier_probe_mini_scenario_route_beats(vertical_slice, alpha_slot, aa_step, computer_step, cargo_step)
+	var route_callouts: Array = _build_frontier_probe_mini_scenario_route_callouts(route_beats)
 	var mission_status: String = String(integrated_snapshot.get("mission_control_status_text", "")).strip_edges()
 	var objective_line: String = String(integrated_snapshot.get("objective_interaction_line", "")).strip_edges()
 	var cargo_line: String = String(integrated_snapshot.get("cargo_extract_line", "")).strip_edges()
@@ -14920,6 +14892,9 @@ func get_frontier_probe_mini_scenario_feel_route_snapshot() -> Dictionary:
 		"route_id": "frontier_probe_aa_computer_cargo",
 		"route_beats": route_beats,
 		"route_beat_count": route_beats.size(),
+		"route_callouts": route_callouts,
+		"route_callout_count": route_callouts.size(),
+		"route_callout_summary": _build_frontier_probe_route_callout_summary(route_callouts),
 		"play_modes": play_modes,
 		"alpha_slot": alpha_slot,
 		"bravo_slot": bravo_slot,
@@ -14938,6 +14913,226 @@ func get_frontier_probe_mini_scenario_feel_route_snapshot() -> Dictionary:
 		"ui_sets_gameplay_truth": false,
 		"recommended_next_task": "TASK_631 - Frontier Probe Mini Scenario Visual Feel Polish",
 	}
+
+
+func _build_frontier_probe_mini_scenario_route_beats(vertical_slice: Dictionary = {}, alpha_slot: Dictionary = {}, aa_step: Dictionary = {}, computer_step: Dictionary = {}, cargo_step: Dictionary = {}) -> Array:
+	var slice: Dictionary = vertical_slice
+	if slice.is_empty():
+		slice = Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("load_slice_from_file", "res://data/mission_scenarios/frontier_probe_vertical_slice.json"))
+	var alpha: Dictionary = alpha_slot if not alpha_slot.is_empty() else _find_team_slot_in_slice(slice, "team_alpha")
+	var aa: Dictionary = aa_step if not aa_step.is_empty() else Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("get_step_by_type", slice, "air_defense_shutdown"))
+	var computer: Dictionary = computer_step if not computer_step.is_empty() else Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("get_step_by_type", slice, "computer_hold"))
+	var cargo: Dictionary = cargo_step if not cargo_step.is_empty() else Dictionary(MISSION_SCENARIO_VERTICAL_SLICE_CONTRACT_SCRIPT.call("get_step_by_type", slice, "cargo_touchdown_extract"))
+	return [
+		{
+			"id": "approach_alpha_lz",
+			"label": "Start/LZ",
+			"target_marker_id": String(alpha.get("spawn_marker_id", "spawn_alpha")),
+			"team_id": "team_alpha",
+			"player_decision": "Choose approach, read threat preview, keep fireteam context visible.",
+		},
+		{
+			"id": String(aa.get("step_id", "disable_air_defense")),
+			"label": "AA ausschalten",
+			"objective_type": String(aa.get("objective_type", "air_defense_shutdown")),
+			"target_marker_id": String(aa.get("target_marker_id", "")),
+			"enemy_group_id": String(aa.get("enemy_group_id", "")),
+			"blocks_cargo_until_complete": bool(aa.get("blocks_cargo_until_complete", false)),
+			"expected_state": String(aa.get("required_state", "")),
+		},
+		{
+			"id": String(computer.get("step_id", "occupy_station_computer")),
+			"label": "Computer halten",
+			"objective_type": String(computer.get("objective_type", "computer_hold")),
+			"target_marker_id": String(computer.get("target_marker_id", "")),
+			"hold_seconds": float(computer.get("min_hold_seconds", 0.0)),
+			"operator_team_id": String(computer.get("operator_team_id", "")),
+			"expected_state": String(computer.get("required_state", "")),
+		},
+		{
+			"id": String(cargo.get("step_id", "cargo_touchdown_extract")),
+			"label": "Cargo Touch-and-Go",
+			"objective_type": String(cargo.get("objective_type", "cargo_touchdown_extract")),
+			"target_marker_id": String(cargo.get("target_marker_id", "")),
+			"requires_step_id": String(cargo.get("requires_step_id", "")),
+			"hold_seconds": float(cargo.get("min_hold_seconds", 0.0)),
+			"expected_state": String(cargo.get("required_state", "")),
+		},
+	]
+
+
+func _should_sync_frontier_probe_route_callouts() -> bool:
+	var gate_snapshot: Dictionary = _get_mission_scenario_runtime_gate_snapshot_for_readability()
+	if not gate_snapshot.is_empty():
+		var scenario_id: String = String(gate_snapshot.get("scenario_id", gate_snapshot.get("slice_id", ""))).strip_edges().to_lower()
+		if scenario_id == "frontier_probe_vertical_slice":
+			return true
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	if mission_setup == null:
+		return false
+	var scenario_path: String = String(mission_setup.get("scenario_file_path")).strip_edges().replace("\\", "/").to_lower()
+	return scenario_path.ends_with("frontier_probe_vertical_slice.json")
+
+
+func _build_frontier_probe_mini_scenario_route_callouts(route_beats: Array) -> Array:
+	var callouts: Array = []
+	for index in range(route_beats.size()):
+		var beat: Dictionary = Dictionary(route_beats[index])
+		var beat_id: String = String(beat.get("id", "")).strip_edges()
+		var marker_id: String = String(beat.get("target_marker_id", "")).strip_edges()
+		var position: Vector2 = _get_mission_marker_world_position(marker_id, _get_target_position())
+		var tone: String = _get_frontier_probe_route_callout_tone(beat)
+		var short_label: String = _get_frontier_probe_route_callout_short_label(beat)
+		var detail: String = _get_frontier_probe_route_callout_detail(beat)
+		callouts.append({
+			"id": beat_id if not beat_id.is_empty() else "route_beat_%d" % index,
+			"index": index,
+			"label": String(beat.get("label", short_label)).strip_edges(),
+			"short_label": short_label,
+			"detail": detail,
+			"tone": tone,
+			"color_key": tone,
+			"target_marker_id": marker_id,
+			"world_position": position,
+			"visual_priority": index + 1,
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+	return callouts
+
+
+func _get_frontier_probe_route_callout_tone(beat: Dictionary) -> String:
+	var objective_type: String = String(beat.get("objective_type", "")).strip_edges().to_lower()
+	if objective_type == "air_defense_shutdown":
+		return "danger"
+	if objective_type == "computer_hold":
+		return "objective"
+	if objective_type == "cargo_touchdown_extract":
+		return "cargo"
+	return "safe"
+
+
+func _get_frontier_probe_route_callout_short_label(beat: Dictionary) -> String:
+	var objective_type: String = String(beat.get("objective_type", "")).strip_edges().to_lower()
+	if objective_type == "air_defense_shutdown":
+		return "AA"
+	if objective_type == "computer_hold":
+		var hold_seconds: int = int(round(float(beat.get("hold_seconds", 0.0))))
+		return "COM %ds" % hold_seconds if hold_seconds > 0 else "COM"
+	if objective_type == "cargo_touchdown_extract":
+		return "CARGO"
+	return "LZ"
+
+
+func _get_frontier_probe_route_callout_detail(beat: Dictionary) -> String:
+	var objective_type: String = String(beat.get("objective_type", "")).strip_edges().to_lower()
+	if objective_type == "air_defense_shutdown":
+		return "AA threat blocks cargo until disabled."
+	if objective_type == "computer_hold":
+		return "Hold station computer for %.0fs." % float(beat.get("hold_seconds", 0.0))
+	if objective_type == "cargo_touchdown_extract":
+		return "Cargo lands at Alpha LZ and departs after the hold."
+	return "Alpha insertion and first route decision."
+
+
+func _build_frontier_probe_route_callout_summary(route_callouts: Array) -> String:
+	var labels: PackedStringArray = PackedStringArray()
+	for callout_variant in route_callouts:
+		var callout: Dictionary = Dictionary(callout_variant)
+		var label: String = String(callout.get("short_label", "")).strip_edges()
+		if not label.is_empty():
+			labels.append(label)
+	return "ROUTE %s" % " -> ".join(labels)
+
+
+func get_frontier_probe_mini_scenario_visual_feel_polish_snapshot() -> Dictionary:
+	var route_snapshot: Dictionary = get_frontier_probe_mini_scenario_feel_route_snapshot()
+	var route_callouts: Array = Array(route_snapshot.get("route_callouts", []))
+	_sync_primary_3d_mission_status_visuals()
+	var primary_snapshot: Dictionary = {}
+	var primary_view: Node = _get_primary_3d_view()
+	if primary_view != null and primary_view.has_method("get_render_snapshot"):
+		primary_snapshot = Dictionary(primary_view.call("get_render_snapshot"))
+	var mission_control_line: String = String(route_snapshot.get("mission_control_status_text", "")).strip_edges()
+	var route_summary: String = String(route_snapshot.get("route_callout_summary", "")).strip_edges()
+	if not route_summary.is_empty() and not mission_control_line.contains(route_summary):
+		mission_control_line = "%s | %s" % [route_summary, mission_control_line]
+	var tone_counts: Dictionary = {}
+	for callout_variant in route_callouts:
+		var callout: Dictionary = Dictionary(callout_variant)
+		var tone: String = String(callout.get("tone", "")).strip_edges()
+		if tone.is_empty():
+			tone = "unknown"
+		tone_counts[tone] = int(tone_counts.get(tone, 0)) + 1
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"route_callouts_cover_all_beats",
+			route_callouts.size() >= 4
+				and _has_route_callout_label(route_callouts, "LZ")
+				and _has_route_callout_label(route_callouts, "AA")
+				and _has_route_callout_label(route_callouts, "COM 18s")
+				and _has_route_callout_label(route_callouts, "CARGO"),
+			"Route callouts cover LZ, AA, computer hold and cargo touch-and-go."
+		),
+		_build_mission_first_move_readability_check(
+			"callout_tones_are_distinct",
+			int(tone_counts.get("safe", 0)) >= 1
+				and int(tone_counts.get("danger", 0)) >= 1
+				and int(tone_counts.get("objective", 0)) >= 1
+				and int(tone_counts.get("cargo", 0)) >= 1,
+			"Visual tones distinguish safe route, danger, objective and cargo."
+		),
+		_build_mission_first_move_readability_check(
+			"primary_3d_receives_route_callouts",
+			int(primary_snapshot.get("route_callout_visual_count", 0)) >= route_callouts.size()
+				and int(Dictionary(primary_snapshot.get("route_callout_tone_counts", {})).get("danger", 0)) >= 1,
+			"Primary3D receives the route callouts through the existing mission-status payload."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_route_summary_is_compact",
+			mission_control_line.contains("ROUTE LZ -> AA -> COM 18s -> CARGO")
+				and mission_control_line.length() < 420,
+			"Mission Control can summarize the playable route in one compact line."
+		),
+		_build_mission_first_move_readability_check(
+			"visual_polish_read_only",
+			bool(route_snapshot.get("read_only", false))
+				and not bool(route_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Visual feel polish stays read-only and does not write gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_631",
+		"schema": "sternenbuergerchen.frontier_probe_mini_scenario_visual_feel_polish.v1",
+		"route_id": String(route_snapshot.get("route_id", "")),
+		"route_callouts": route_callouts,
+		"route_callout_count": route_callouts.size(),
+		"route_callout_tone_counts": tone_counts,
+		"route_callout_summary": route_summary,
+		"mission_control_route_line": mission_control_line,
+		"primary_3d": primary_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"recommended_next_task": "TASK_632 - Frontier Probe Mini Scenario F6 Visual Review",
+	}
+
+
+func _has_route_callout_label(route_callouts: Array, expected_label: String) -> bool:
+	for callout_variant in route_callouts:
+		var callout: Dictionary = Dictionary(callout_variant)
+		if String(callout.get("short_label", "")).strip_edges() == expected_label:
+			return true
+	return false
 
 
 func get_frontier_probe_multiplayer_objective_ownership_snapshot() -> Dictionary:
