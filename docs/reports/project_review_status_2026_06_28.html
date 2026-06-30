@@ -177,7 +177,7 @@
 <body data-report-id="project_review_status_2026_06_28" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Gesamt-Review</h1>
-    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_646 auf <code>task/homebase-missionpanel-density-playfeel-review</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
+    <p>Standbericht zu Spiel-Flow, Codezustand, technischen Reibungen, Vorgaben-Konflikten und naechsten sinnvollen Schritten. Aktualisiert am 2026-06-30 mit TASK_647 auf <code>task/homebase-missionpanel-density-findings</code>; diese Datei dient als laufender Zwischenbericht und Arbeitsnotiz.</p>
     <div class="meta-row">
       <span class="pill good">Mission-Smokes gruen</span>
       <span class="pill good">Windows-Export gefiltert</span>
@@ -308,6 +308,7 @@
       <span class="pill good">TASK_642 Homebase-Review</span>
       <span class="pill good">TASK_643 Evidence-Labels</span>
       <span class="pill good">TASK_646 Density Review</span>
+      <span class="pill good">TASK_647 Density Findings</span>
       <span class="pill warn">Report wird fortgeschrieben</span>
       <span class="pill warn">Zwischenbericht aktiv</span>
       <span class="pill warn">Scanwarnung Referenzprojekt</span>
@@ -2401,6 +2402,35 @@
           </label>
         </article>
         <article class="card full">
+          <h2>TASK_647 Homebase MissionPanel Density Findings</h2>
+          <p>TASK_647 wendet den Dichte-Befund schmal an: Wenn der Post-Debrief-Follow-up-Block sichtbar ist, wird die alte MissionSummary als Legacy-Zeile kollabiert. Ergebnis und naechster Schritt stehen dadurch nur noch im Follow-up-Block, ohne neue Gameplay-Wahrheit zu setzen.</p>
+          <div class="table-wrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Density Finding</th><th>Wert</th><th>Bedeutung</th></tr></thead>
+              <tbody>
+                <tr><td>Task</td><td><input readonly value="TASK_647 - Homebase MissionPanel Density Findings" data-export-key="homebase_missionpanel_density_findings.task_id"></td><td>Runtime-Finding aus TASK_646, bewusst enger Layout-Slice.</td></tr>
+                <tr><td>Manifest</td><td><input readonly value="tmp/homebase_missionpanel_density_findings.json" data-export-key="homebase_missionpanel_density_findings.manifest_path"></td><td>Lokaler JSON-Anker fuer reduzierte Text-/Sektionsdichte.</td></tr>
+                <tr><td>Gate</td><td><input readonly value="pass" data-export-key="homebase_missionpanel_density_findings.gate"></td><td>Scan-Druck sinkt ohne Commands oder State-Mutation.</td></tr>
+                <tr><td>MissionSummary</td><td><input readonly value="collapsed" data-export-key="homebase_missionpanel_density_findings.mission_summary_collapsed"></td><td>Nur im Post-Debrief-Follow-up-Zustand kollabiert.</td></tr>
+                <tr><td>Sektionen</td><td><input readonly value="6" data-export-key="homebase_missionpanel_density_findings.visible_section_count"></td><td>Ein direkter MissionPanel-Block weniger als im TASK_646-Befund.</td></tr>
+                <tr><td>Vertikale Fuellung</td><td><input readonly value="0.982 hard-bounds ok" data-export-key="homebase_missionpanel_density_findings.vertical_fill_ratio"></td><td>Bleibt als Review-Warnwert sichtbar; kein Overflow.</td></tr>
+                <tr><td>Textbudget</td><td><input readonly value="971" data-export-key="homebase_missionpanel_density_findings.total_visible_text_length"></td><td>Unter dem Scanbarkeitsbudget von 1200 Zeichen.</td></tr>
+                <tr><td>Style-ID</td><td><input readonly value="task_647_homebase_density_findings_v1" data-export-key="homebase_missionpanel_density_findings.density_findings_style_id"></td><td>Stabiler Marker fuer Verifier und spaetere Reviews.</td></tr>
+                <tr><td>Read-only</td><td><input readonly value="true" data-export-key="homebase_missionpanel_density_findings.read_only"></td><td>Keine Navigation, kein Command, keine Gameplay-Wahrheit.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="check-grid" style="margin-top:12px">
+            <label class="checkline"><input checked type="checkbox" data-export-key="homebase_missionpanel_density_findings.legacy_summary_collapsed"> Legacy-Summary im Follow-up-Zustand kollabiert</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="homebase_missionpanel_density_findings.followup_still_visible"> Follow-up, Briefing und Readiness bleiben sichtbar</label>
+            <label class="checkline"><input checked type="checkbox" data-export-key="homebase_missionpanel_density_findings.read_only_checked"> Read-only-Grenze erhalten</label>
+            <label class="checkline"><input type="checkbox" data-export-key="homebase_missionpanel_density_findings.real_window_review_done"> Echten Fensterblick nach TASK_647 bewertet</label>
+          </div>
+          <label style="display:block;margin-top:14px;">TASK_647 Density-Findings-Notiz
+            <textarea data-note-key="notes.homebase_missionpanel_density_findings" data-export-key="homebase_missionpanel_density_findings.notes" placeholder="Beim Fensterbild notieren: Liest sich der Follow-up-Block jetzt ruhig genug oder muss die vertikale MissionPanel-Fuellung noch layoutseitig angefasst werden?"></textarea>
+          </label>
+        </article>
+        <article class="card full">
           <h2>TASK_562 Frontier-Probe MP-F6 Evidence Preview</h2>
           <p>Diese Vorschau zeigt die lokalen Capture-Artefakte aus TASK_562. TASK_565 wurde ohne <code>--headless</code> ausgefuehrt und hat in dieser Umgebung ein echtes Fensterbild statt des Dummy-Evidence-Boards erzeugt; daraus wurde der #17-Selected-Fireteam-Status/Card-Widerspruch behoben. TASK_566 macht den Teamchip-Hover-/Panel-Pfad kompakter und messbar.</p>
           <img class="evidence-preview" src="../../tmp/frontier_probe_mp_f6_visual_evidence.png" alt="TASK_562 Frontier Probe MP-F6 Visual Evidence">
@@ -3397,7 +3427,8 @@
               "TASK_643 - Frontier Probe Homebase Readiness Visual Polish Findings",
               "TASK_644 - Frontier Probe Homebase Real Window Review",
               "TASK_645 - Frontier Probe Homebase Summary Next Sortie Polish",
-              "TASK_646 - Homebase MissionPanel Density Playfeel Review"
+              "TASK_646 - Homebase MissionPanel Density Playfeel Review",
+              "TASK_647 - Homebase MissionPanel Density Findings"
             ],
             open_risks: [
               "Cargo-Pflichten sind in der Readiness-Liste aktuell optional lesbar; missionsspezifische Cargo-Gates brauchen spaeter Szenario-Daten.",
@@ -3452,7 +3483,8 @@
               "TASK_643 beschriftet das TASK_642-Headless-Evidence-Board mit Pixel-Labels und Readability-Gate, damit der naechste Homebase-Entscheid weniger Interpretationsrauschen hat.",
               "TASK_644 erzeugt ein echtes Homebase-Fenster-Review-Paket mit Viewport-Readback, wenn ohne Headless gestartet, und laesst den menschlichen Sichtentscheid sonst als manual_open.",
               "TASK_645 hebt die Post-Debrief-Summary und Next-Sortie-Zeile in einen lesbareren Follow-up-Panelblock, bleibt aber read-only und wartet weiter auf den echten Geschmackstest.",
-              "TASK_646 macht die MissionPanel-Dichte nach TASK_645 als read-only Snapshot und Manifest pruefbar."
+              "TASK_646 macht die MissionPanel-Dichte nach TASK_645 als read-only Snapshot und Manifest pruefbar.",
+              "TASK_647 kollabiert die alte MissionSummary nur im Post-Debrief-Follow-up-Zustand und reduziert dadurch Text- und Sektionsdruck."
             ],
             smoke_status: "green",
             export_status: "filtered_runtime_export_green_factory_uid_guarded",
@@ -3461,14 +3493,14 @@
             report_update_policy: "after every larger gameplay, ui, export, capture, or performance slice",
             interim_report_visible: true,
             interim_report_last_refresh: "2026-06-30",
-            current_repo_base: "integration/core-foundation after TASK_645",
-            current_focus: "Homebase MissionPanel Density Playfeel Review",
-            latest_completed_task: "TASK_646 - Homebase MissionPanel Density Playfeel Review"
+            current_repo_base: "integration/core-foundation after TASK_646",
+            current_focus: "Homebase MissionPanel Density Findings",
+            latest_completed_task: "TASK_647 - Homebase MissionPanel Density Findings"
           },
           metadata: {
-            branch: "task/homebase-missionpanel-density-playfeel-review",
-            integration_base: "integration/core-foundation after TASK_645",
-            head: "task/homebase-missionpanel-density-playfeel-review",
+            branch: "task/homebase-missionpanel-density-findings",
+            integration_base: "integration/core-foundation after TASK_646",
+            head: "task/homebase-missionpanel-density-findings",
             generated_on: "2026-06-30",
             source: "local_code_review"
           }
