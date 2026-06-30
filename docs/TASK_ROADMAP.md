@@ -313,7 +313,7 @@ git checkout -b batch/<batch-name>
 - TASK_682 - Mission Interaction Binding Presets (implementiert)
 - TASK_683 - Map Editor Interaction FullHD Sight Pass (implementiert)
 - TASK_684 - Map Editor Interaction Focus Scroll (implementiert)
-- TASK_685 - Mission Interaction Progress FullHD Sight Pass (geplant)
+- TASK_685 - Mission Interaction Objective Gate (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

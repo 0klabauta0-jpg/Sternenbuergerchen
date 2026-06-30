@@ -76,13 +76,13 @@
 <body data-report-id="project_current_state_handbook_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Aktueller Stand + Handbuch</h1>
-    <p>Frischer Arbeitsbericht nach TASK_666: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
+    <p>Frischer Arbeitsbericht nach TASK_685: Was gerade traegt, wie du es pruefst, wo es reibt und welcher naechste Slice das Spiel weiter in Richtung angenehm, spielbar, schoen und multiplayerfaehig bringt.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-06-30</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Stand: TASK_666</span>
-      <span class="pill">Naechster Kandidat: Mission-Interaction-Progress oder echter Host/Client-Klick</span>
+      <span class="pill">Letzter Stand: TASK_685</span>
+      <span class="pill">Naechster Kandidat: Door-/Computer-Visualstate oder echter Host/Client-Klick</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -103,7 +103,7 @@
           <h2>Wo wir stehen</h2>
           <p>Der Core Loop ist als spielbarer Review-Spine vorhanden: Homebase, Briefing/Readiness, FOB-/Dropship-Staging, Mission, Fireteam-Befehle, Objective/Cargo, Debrief, Skill-/AAR-Bruecke und Homebase-Return sind verdrahtet. Der Host/Client-Authority-Pfad hat einen pruefbaren Follow-up-Cue, und Frontier Probe One-Screen hat jetzt eine kompakte Planzeile.</p>
           <p>Verlauf: TASK_653 - Frontier Probe One-Screen Playability Pass bleibt der aktuelle Playability-Anker; TASK_662 - Host Client Decision Drill Real Window Capture lieferte den echten Zwei-Fenster-Capture fuer den aktuellen Multiplayer-Befund.</p>
-          <div class="callout">TASK_666 - Host Client Decision Drill Real Click Findings ist der aktuelle Abschlussstand: Der technische Multiplayer-Decision-Drill ist gruen, das echte Capture ist review-ready, aber der menschliche Zwei-Fenster-Klickbefund bleibt offen und wird nicht behauptet.</div>
+          <div class="callout">TASK_685 - Mission Interaction Objective Gate ist der aktuelle Abschlussstand: AA, Computer und Cargo werden als read-only Objective-Gate-Sequenz aus bestehenden Runtime-Snapshots zusammengefuehrt. Der menschliche Zwei-Fenster-Klickbefund aus TASK_666 bleibt weiter offen und wird nicht behauptet.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -142,6 +142,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_682_done"> TASK_682 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_683_done"> TASK_683 erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_684_done"> TASK_684 erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_685_done"> TASK_685 erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_window_rechecked"> Echter Klick-Recheck nach TASK_663 erledigt</label>
         </article>
         <article class="card half">
@@ -432,9 +433,9 @@
           <input readonly value="tmp/host_client_decision_drill_real_click_findings.json" data-export-key="host_client_decision_drill_real_click_findings.manifest_path">
           <input readonly value="pass" data-export-key="host_client_decision_drill_real_click_findings.technical_path_gate_value">
           <input readonly value="manual_still_open" data-export-key="host_client_decision_drill_real_click_findings.manual_click_findings_gate">
-          <input readonly value="TASK_685 - Mission Interaction Progress FullHD Sight Pass" data-export-key="host_client_decision_drill_real_click_findings.recommended_next_task">
+          <input readonly value="TASK_685 - Mission Interaction Objective Gate" data-export-key="host_client_decision_drill_real_click_findings.recommended_next_task">
           <textarea data-export-key="host_client_decision_drill_real_click_findings.findings" placeholder="Wenn du den echten Zwei-Fenster-Klicklauf machst: Was war verstaendlich, zu klein, zu langsam oder verwirrend?"></textarea>
-          <div contenteditable="true" data-note-key="notes.host_client_decision_drill_real_click_findings" data-placeholder="TASK_666-Notizen...">TASK_666 behauptet keinen bestandenen Klicktest. Es bestaetigt nur: Technik gruen, Capture ready, manuelle Beobachtung offen. Autonom weiter sinnvoll: Mission-Interaction-Progress in FullHD sichtbar pruefen.</div>
+          <div contenteditable="true" data-note-key="notes.host_client_decision_drill_real_click_findings" data-placeholder="TASK_666-Notizen...">TASK_666 behauptet keinen bestandenen Klicktest. Es bestaetigt nur: Technik gruen, Capture ready, manuelle Beobachtung offen. Autonom weiter sinnvoll: Mission-Interaction-Gates als spielbare Objective-Sequenz zusammenfuehren.</div>
         </article>
         <article class="card full">
           <h2>TASK_667 - Editor Palette Persistence</h2>
@@ -649,6 +650,20 @@
           <textarea data-export-key="map_editor_interaction_focus_scroll.findings" placeholder="Beim echten Fensterlauf notieren: Fuehlt sich der automatische Sprung hilfreich an oder zu aggressiv?"></textarea>
           <div contenteditable="true" data-note-key="notes.map_editor_interaction_focus_scroll" data-placeholder="TASK_684-Notizen...">TASK_684 fokussiert den Binding-Bereich automatisch, ohne Scenario- oder Runtime-Wahrheit zu setzen. Wenn der Sprung im echten Fenster nervt, braucht der naechste Slice eher Feinjustierung als neue Features.</div>
         </article>
+        <article class="card full">
+          <h2>TASK_685 - Mission Interaction Objective Gate</h2>
+          <p>AA, Station-Computer und Cargo-Hold sind jetzt als zusammenhaengende Objective-Gate-Sequenz aus bestehenden Runtime-Snapshots lesbar. Der Snapshot zeigt den naechsten Schritt, die passende Interaction, Blocker und Completion, ohne selbst Gates zu setzen.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_objective_gate.snapshot"> Objective-Gate-Snapshot vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_objective_gate.next_aa"> Startzustand meldet NEXT AA</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_objective_gate.next_com"> Nach AA meldet der Snapshot NEXT COM</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_objective_gate.next_cargo"> Nach Computer meldet der Snapshot NEXT CARGO</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_objective_gate.complete"> Cargo-Completion meldet OBJECTIVES complete</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="mission_interaction_objective_gate.no_gameplay_truth"> Snapshot meldet `ui_sets_gameplay_truth = false`</label>
+          <input readonly value="tmp/mission_interaction_objective_gate.json" data-export-key="mission_interaction_objective_gate.manifest_path">
+          <input readonly value="TASK_685 - Mission Interaction Objective Gate" data-export-key="mission_interaction_objective_gate.completed_task">
+          <textarea data-export-key="mission_interaction_objective_gate.findings" placeholder="Naechster Test: Fuehlt sich die Objective-Reihenfolge im echten Missionslauf klar an?"></textarea>
+          <div contenteditable="true" data-note-key="notes.mission_interaction_objective_gate" data-placeholder="TASK_685-Notizen...">TASK_685 ersetzt keinen Sichttest. Es macht aber den Spielablauf robuster: UI, Tests und spaetere Multiplayer-Reviews koennen jetzt aus einem Snapshot lesen, ob AA, COM oder CARGO als naechstes dran ist.</div>
+        </article>
         <article class="card half">
           <h2>Bewertung</h2>
           <div class="button-row" data-choice-group="playtest.rating">
@@ -668,8 +683,8 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster sinnvoller Schritt</h2>
-          <p><strong>Echter FullHD-Fensterlauf im Editor</strong> ist jetzt der beste Anschluss: Die Struktur ist belegt und der erste Scroll-Friction-Fix ist drin, jetzt muss der Bedienkomfort im sichtbaren Fenster beurteilt werden.</p>
-          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. Autonom ist als naechstes Mission-Interaction-Progress-Sichtbarkeit sinnvoll; alternativ kann ein echter Zwei-Fenster-Klicklauf die TASK_666-Notizen fuellen.</div>
+          <p><strong>Door-/Computer-Visualstate</strong> ist jetzt der beste autonome Anschluss: Die Objective-Gates sind zusammengefuehrt, nun sollten Stationselemente sichtbar auf `geschlossen`, `bedient`, `offen/aktiv` reagieren.</p>
+          <div class="callout">TASK_666 hat den Multiplayer-Befund ehrlich getrennt: Technik gruen, menschlicher Klick offen. TASK_685 fuehrt die Mission-Interaction-Gates zusammen. Alternativ kann ein echter Zwei-Fenster-Klicklauf weiterhin die TASK_666-Notizen fuellen.</div>
         </article>
         <article class="card">
           <h2>Alternative</h2>
@@ -680,9 +695,9 @@
           <table>
             <thead><tr><th>Prioritaet</th><th>Slice</th><th>Nutzen</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>TASK_685 - Mission Interaction Progress FullHD Sight Pass</td><td>Pruefen, ob `COM laeuft`, `CARGO haelt` und Completion im echten Fenster schnell genug lesbar sind.</td></tr>
+              <tr><td>1</td><td>Door-/Computer-Visualstate</td><td>Runtime-Gates sichtbar an Stationselemente anbinden, ohne Tile-Wahrheit zu mutieren.</td></tr>
               <tr><td>2</td><td>Echter Host/Client-Zwei-Fenster-Klicklauf</td><td>TASK_666-Notizen mit menschlichem Bedienbefund fuellen.</td></tr>
-              <tr><td>3</td><td>FullHD Sichtfeinschliff fuer Editor-Interactions</td><td>Nur falls der automatische Fokus-Scroll im echten Fenster zu aggressiv oder zu dicht wirkt.</td></tr>
+              <tr><td>3</td><td>FullHD Sichtfeinschliff fuer Mission-Interactions</td><td>Nur falls die Objective-/Progress-Zeilen im echten Fenster zu dicht wirken.</td></tr>
               <tr><td>4</td><td>Large-Map + Export Regression</td><td>Performance und Release-Hygiene bleiben ehrlich.</td></tr>
             </tbody>
           </table>
@@ -694,7 +709,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_666. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Autonom naechster guter Griff: Mission-Interaction-Progress in FullHD sichtbar pruefen.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30: Report aktualisiert nach TASK_685. Multiplayer-Decision-Drill: technischer Pfad ist gruen, Real-Capture und Recheck sind bereit, aber der echte menschliche Klickbefund bleibt offen. Editor: lokale Placement-Rotation, Rotation-Overrides, Builder-Handles, Auto-Snap, FullHD-Labels, Interaction-Bindings, Presets, FullHD-Evidenz und Binding-Fokus-Scroll sind vorhanden. Mission: Objective-Gate-Snapshot fuehrt AA, COM und CARGO zusammen. Autonom naechster guter Griff: Door-/Computer-Visualstate.</div>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -751,15 +766,15 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_666 - Host Client Decision Drill Real Click Findings",
-            recommended_next_task: "TASK_685 - Mission Interaction Progress FullHD Sight Pass",
+            latest_completed_task: "TASK_685 - Mission Interaction Objective Gate",
+            recommended_next_task: "Door-/Computer-Visualstate",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
           metadata: {
             branch_basis: "integration/core-foundation",
             created_for_task: "TASK_649 - Current State Handbook Report",
-            updated_for_task: "TASK_666 - Host Client Decision Drill Real Click Findings",
+            updated_for_task: "TASK_685 - Mission Interaction Objective Gate",
             local_path: "docs/reports/project_current_state_handbook_2026_06_30.html"
           }
         };

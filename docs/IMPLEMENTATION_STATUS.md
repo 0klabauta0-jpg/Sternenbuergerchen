@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_685 - Mission Interaction Objective Gate
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_685_mission_interaction_objective_gate.md`, `docs/tasks/TASK_678_mission_interaction_runtime_progress.md`, `docs/tasks/TASK_679_mission_interaction_progress_readability.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionInteractionObjectiveGate` fasst Binding-, Use-State-, Feedback-, Scenario-Gate-, Cargo- und Intent-Snapshots read-only zusammen.
+- Stand: `get_mission_interaction_objective_gate_snapshot()` liefert `NEXT AA`, `NEXT COM`, `NEXT CARGO` und `OBJECTIVES complete` aus bestehenden Runtime-Gates.
+- Stand: `get_command_feedback_snapshot()` exportiert Objective-Gate-Snapshot, Next-Line und Next-Step ohne Gameplay-Wahrheit im UI zu setzen.
+- Risiken/offen: Kein FullHD-Sichttest und keine Door-/Computer-Animation. Der echte menschliche Host/Client-Klickbefund bleibt weiterhin TASK_666-offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_685_mission_interaction_objective_gate.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_678_mission_interaction_runtime_progress.gd`, `git diff --check`.
+- Naechster Schritt: Mission-Interaction-Progress in echter Mission bedienen oder Door-/Computer-Visualstate als kleiner Runtime-Slice.
+
 ### TASK_666 - Host Client Decision Drill Real Click Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_666_host_client_decision_drill_real_click_findings.md`, `docs/tasks/TASK_665_host_client_decision_drill_technical_click_guard.md`, `docs/tasks/TASK_664_host_client_decision_drill_real_click_recheck.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
 - Stand: `scripts/tests/task_666_host_client_decision_drill_real_click_findings.gd` schreibt `tmp/host_client_decision_drill_real_click_findings.json` als read-only Findings-Gate.
 - Stand: Das Findings-Manifest trennt belegte technische Fakten (`peer2_bravo`, `peer_team_mismatch`, `USE BRAVO`, `P2 BRAVO`, `NEXT AA`, Preview, GO/Execution) von offenen menschlichen Klickbeobachtungen.
 - Stand: `manual_click_findings_gate = manual_still_open` bleibt bewusst gesetzt, solange kein echter menschlicher Zwei-Fenster-Klickbefund eingetragen ist.
-- Risiken/offen: TASK_666 ist kein bestandener Multiplayer-Playtest. Der echte Fensterklick bleibt offen; autonome Folgearbeit kann sinnvoll bei Mission-Interaction-Progress-Sichtbarkeit weitermachen.
+- Risiken/offen: TASK_666 ist kein bestandener Multiplayer-Playtest. Der echte Fensterklick bleibt offen; autonome Folgearbeit kann sinnvoll bei Mission-Interaction-Objective-Gates weitermachen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_666_host_client_decision_drill_real_click_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_665_host_client_decision_drill_technical_click_guard.gd`, `git diff --check`.
-- Naechster Schritt: `TASK_685 - Mission Interaction Progress FullHD Sight Pass` oder ein echter menschlicher Zwei-Fenster-Klicklauf mit ausgefuellten TASK_666-Notizen.
+- Naechster Schritt: Echter menschlicher Zwei-Fenster-Klicklauf mit ausgefuellten TASK_666-Notizen oder Mission-Interaction-Visualstate.
 
 ### TASK_684 - Map Editor Interaction Focus Scroll
 - Status: implementiert im Arbeitsstand

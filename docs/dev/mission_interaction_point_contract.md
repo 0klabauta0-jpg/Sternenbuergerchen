@@ -90,6 +90,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Snapshot ist read-only, markiert `ui_sets_gameplay_truth = false` und veraendert weder Scenario-Gates noch Runtime-Stati.
 - Headless-Verifier duerfen Zeichenbudget und Exportform pruefen; der echte manuelle FullHD-Sichtlauf bleibt separat zu bestaetigen.
 
+## Objective Gate Snapshot
+- `MissionInteractionObjectiveGate` verbindet Binding-, Use-State-, Feedback-, Scenario-Gate-, Cargo- und Intent-Snapshots zu einer read-only Objective-Fassade.
+- `MissionTacticalSandboxController.get_mission_interaction_objective_gate_snapshot()` liefert den naechsten unvollstaendigen Gate-Schritt, die passende Interaction, Blocker, Cargo-Blocker und eine kurze `next_line`.
+- `get_command_feedback_snapshot()` exportiert `mission_interaction_objective_gate`, `mission_interaction_objective_next_line` und `mission_interaction_objective_next_step_id`.
+- Die Sequenz bleibt datengetrieben aus Scenario-Gates: `disable_air_defense`, `occupy_station_computer`, `cargo_touchdown_extract`.
+- Der Snapshot darf keine Gates setzen, keine Interaktion starten und keine UI-Wahrheit speichern. Completion kommt weiter aus `MissionScenarioRuntimeGates` und Interaction-Runtime-Progress.
+
 ## Editor Binding Inspector
 - `MapEditor.get_mission_interaction_binding_inspector_snapshot()` liest das aktuelle `MissionScenarioData.get_interaction_point_binding_snapshot()` zusammen mit der aktuellen `TerrainMapData`.
 - Der Snapshot nennt `binding_count`, `bound_marker_ids`, `missing_marker_ids`, Status-/Typ-Zaehler und die Bindings des selektierten Markers.
