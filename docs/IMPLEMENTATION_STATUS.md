@@ -402,6 +402,17 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_642_frontier_probe_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_643_frontier_probe_homebase_readiness_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_641_frontier_probe_homebase_next_sortie_readiness.gd`, `git diff --check`.
 - Naechster Schritt: Echten sichtbaren Homebase-Fensterlauf pruefen; nur bei konkreter Reibung einen kleinen Runtime-UI-Polish fuer die Next-Sortie-Zeile schneiden.
 
+### TASK_644 - Frontier Probe Homebase Real Window Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_644_frontier_probe_homebase_real_window_review.md`, `docs/tasks/TASK_643_frontier_probe_homebase_readiness_visual_polish_findings.md`, `docs/tasks/TASK_642_frontier_probe_homebase_visible_readiness_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`, `docs/reports/project_state_handbook_2026_06_30.html`
+- Stand: `scripts/tests/task_644_frontier_probe_homebase_real_window_review.gd` erzeugt `tmp/frontier_probe_homebase_real_window_review.png` und `tmp/frontier_probe_homebase_real_window_review.json`.
+- Stand: Ohne `--headless` kann der Verifier den echten Homebase-Viewport nach Debrief-Return speichern; im Headless-Fall nutzt er das beschriftete TASK_642/TASK_643-Board und markiert `real_window_review_gate = manual_open`.
+- Stand: Der lokale nicht-headless Lauf erzeugte `visible_window_readback_available = true`, `generated_evidence_board = false` und `real_window_review_gate = review_ready`.
+- Stand: Das Manifest trennt `visible_window_readback_available`, `generated_evidence_board`, `manual_review_required`, `manual_review_done`, Read-only-Grenzen und den naechsten Runtime-Polish nur bei belegter Reibung.
+- Risiken/offen: Ein Headless-Fallback ersetzt keinen menschlichen Geschmackstest. Nur ein echter Fensterlauf mit Screenshot oder User-Blick darf konkrete Runtime-UI-Politur ausloesen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_642_frontier_probe_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_644_frontier_probe_homebase_real_window_review.gd`, optional `godot_console.exe --path . --script scripts/tests/task_644_frontier_probe_homebase_real_window_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_643_frontier_probe_homebase_readiness_visual_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: Echten PNG-/Fensterbefund ansehen; nur bei sichtbarer Reibung einen kleinen Homebase-Runtime-UI-Polish schneiden.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

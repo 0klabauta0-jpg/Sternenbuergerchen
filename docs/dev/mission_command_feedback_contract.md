@@ -486,6 +486,12 @@ TASK_643 wendet den ersten konkreten TASK_642-Befund auf das Review-Artefakt an:
 
 Erwartete Struktur: Das TASK_642-Manifest enthaelt `visual_polish_task_id = TASK_643`, `callout_label_count >= 8`, `evidence_board_readability_gate = pass`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`. Das PNG zeigt mindestens Callouts fuer MissionPanel, Post-Debrief-Summary, Next-Sortie-Readiness, Review-Status, aktuellen Schritt und Follow-up.
 
+## Frontier-Probe-Homebase-Real-Window-Review (TASK_644)
+
+TASK_644 macht den echten Homebase-Fensterblick nach Frontier-Probe-Debrief-Return als eigenes Review-Paket reproduzierbar. Ohne `--headless` darf der Verifier den Viewport-Readback speichern; im Headless-Fall muss das Manifest klar zeigen, dass nur ein Evidence-Board erzeugt wurde und der echte Sichtentscheid offen bleibt.
+
+Erwartete Struktur: `tmp/frontier_probe_homebase_real_window_review.json` enthaelt `schema = sternenbuergerchen.frontier_probe_homebase_real_window_review.v1`, `task_id = TASK_644`, `source_task_ids = [TASK_642, TASK_643]`, `gate = pass`, `real_window_review_gate = review_ready|manual_open`, `visible_window_readback_available`, `generated_evidence_board`, `post_summary_visible`, `next_sortie_visible`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`. Der laufende HTML-Bericht darf diese Werte exportieren und kommentierbar machen, aber keinen menschlichen Fensterentscheid als erledigt markieren.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
