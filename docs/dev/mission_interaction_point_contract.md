@@ -145,7 +145,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Door-Waypoints muessen `door_runtime_hook`, `door_runtime_state_target` und `door_runtime_producer` tragen, damit Runtime-Progress die effektiven TerrainRegistry-Overrides speisen kann.
 - `get_command_feedback_snapshot()` darf Hook-Status und lesbare BREACH/GO-Zeile exportieren. Diese Werte sind Bedienfeedback, keine Gameplay-Wahrheit.
 - Der Hook darf blockieren, wenn keine Door-Interaction, kein nutzbarer Use-Intent oder ein nicht unterstuetzter Door-Order-Typ vorliegt.
-- Ein sichtbarer HUD-Button/Shortcut, Animationen und Asset-Swaps bleiben Folge-Slices.
+- Animationen und Asset-Swaps bleiben Folge-Slices.
+
+## Door Interaction HUD Button/Shortcut
+- Der sichtbare Door-Bedienpfad ist `DoorBreachButton` im CommandGrid-Slot `16.8` plus Shortcut `B`.
+- Button und Shortcut duerfen keine Door-, Terrain- oder Mission-Wahrheit setzen; sie rufen nur `create_selected_mission_interaction_door_use_breach_command_hook()` auf.
+- Der Button ist aktiv, wenn `get_mission_interaction_use_feedback_snapshot()` eine `usable` Door mit unterstuetztem Required-Order-Typ fuer die aktuelle Auswahl meldet.
+- Der Button muss auch blockiert sichtbar bleiben, damit der Spieler erkennt, dass Door-Breach existiert, aber gerade keine nutzbare Door in Reichweite ist.
+- Command-Control- und Command-Hierarchy-Snapshots muessen `breach_door`, Slot, Tooltip, Shortcut und Door-ID exportieren.
+- `requires_go = true` bleibt Pflicht; echter Runtime-State entsteht erst ueber Waypoint-Ausfuehrung, Runtime-Progress und Door Runtime State Producer.
 
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.

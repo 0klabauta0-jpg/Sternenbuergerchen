@@ -79,7 +79,7 @@ const MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID: String = "mission_team_chip_tooltip_hi
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
-const HOTKEY_LEGEND: String = "LMB Select | Fireteam Card Center | RMB Order | RMB Drag Area | Shift+RMB Append | CTRL+LMB Add | C Fire Arc | L LOS | DEL Order | T Sort | G GO"
+const HOTKEY_LEGEND: String = "LMB Select | Fireteam Card Center | RMB Order | RMB Drag Area | Shift+RMB Append | CTRL+LMB Add | B Breach Door | C Fire Arc | L LOS | DEL Order | T Sort | G GO"
 const LIVE_ORDER_PHASE_INDEX: int = 1
 const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -105,6 +105,7 @@ const FIRETEAM_MINI_CARD_Z_INDEX: int = 42
 const TACTICAL_EVENT_LOG_Z_INDEX: int = 8
 const COMMAND_GRID_PATH: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"
 const DELETE_ORDER_BUTTON_PATH: String = COMMAND_GRID_PATH + "/DeleteOrderButton"
+const DOOR_BREACH_BUTTON_PATH: String = COMMAND_GRID_PATH + "/DoorBreachButton"
 const WAYPOINT_ERASE_BUTTON_PATH: String = COMMAND_GRID_PATH + "/WaypointEraseButton"
 const SORT_COMMAND_BUTTON_PATH: String = COMMAND_GRID_PATH + "/SortCommandMatrixButton"
 const FIRE_RULE_HOLD_BUTTON_PATH: String = COMMAND_GRID_PATH + "/FireRuleHoldButton"
@@ -653,6 +654,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		KEY_4:
 			issue_take()
 			get_viewport().set_input_as_handled()
+		KEY_B:
+			if issue_breach_door_interaction():
+				get_viewport().set_input_as_handled()
 		KEY_Q:
 			_change_fireteam(-1)
 			get_viewport().set_input_as_handled()
@@ -754,6 +758,17 @@ func issue_take() -> bool:
 		_update_ui()
 		return false
 	return _issue_command("take", "TAKE / ENGAGE")
+
+
+func issue_breach_door_interaction() -> bool:
+	if preview_mode:
+		_last_command_text = "PREVIEW MODE"
+		_update_ui()
+		return false
+	var door_feedback: Dictionary = _resolve_usable_door_interaction_feedback(get_mission_interaction_use_feedback_snapshot())
+	var interaction_id: String = String(door_feedback.get("interaction_id", "")).strip_edges()
+	var result: Dictionary = create_selected_mission_interaction_door_use_breach_command_hook(interaction_id)
+	return bool(result.get("accepted", false))
 
 
 func issue_ad_hoc_order(order_type: String, target_position: Variant = null) -> bool:
@@ -8698,6 +8713,7 @@ func _apply_contextual_help_ids() -> void:
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton", "mission.command.defend")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton", "mission.command.flank")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton", "mission.command.take")
+	_apply_help_id(DOOR_BREACH_BUTTON_PATH, "mission.command.breach_door")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton", "mission.command.attack_area")
 	_apply_help_id("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton", "mission.command.clear_target")
 	_apply_help_id(DELETE_ORDER_BUTTON_PATH, "mission.command.clear_target")
@@ -8887,6 +8903,7 @@ func _refresh_button_state() -> void:
 	var sort_button := get_node_or_null(SORT_COMMAND_BUTTON_PATH) as BaseButton
 	if sort_button != null:
 		sort_button.disabled = preview_mode or not _can_issue_local_commands() or _selected_fireteam_ids.is_empty()
+	_refresh_door_interaction_button_state()
 	_refresh_fire_rule_button_state()
 
 	for path in [
@@ -8990,6 +9007,7 @@ func _build_command_control_snapshot() -> Dictionary:
 		"defend": _build_button_snapshot(defend_button_path),
 		"flank": _build_button_snapshot(flank_button_path),
 		"take": _build_button_snapshot(take_button_path),
+		"breach_door": _build_button_snapshot(NodePath(DOOR_BREACH_BUTTON_PATH)),
 		"target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_TARGET")))),
 		"clear_target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CLEAR_TARGET")))),
 		"delete_order": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_DELETE_ORDER")))),
@@ -9238,6 +9256,10 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 			"fire_rule_affordance_style_id": "",
 			"fire_rule_affordance_active": false,
 			"fire_rule_affordance_visual_weight": 0.0,
+			"command_matrix_slot_id": "",
+			"door_interaction_button_enabled": false,
+			"door_interaction_id": "",
+			"door_interaction_shortcut": "",
 			"pressed_signal_connection_count": 0,
 		}
 	var global_rect: Rect2 = button.get_global_rect() if button.is_inside_tree() else Rect2()
@@ -9262,6 +9284,10 @@ func _build_button_snapshot(button_path: NodePath) -> Dictionary:
 		"fire_rule_affordance_style_id": str(button.get_meta("fire_rule_affordance_style_id", "")),
 		"fire_rule_affordance_active": bool(button.get_meta("fire_rule_affordance_active", false)),
 		"fire_rule_affordance_visual_weight": float(button.get_meta("fire_rule_affordance_visual_weight", 0.0)),
+		"command_matrix_slot_id": str(button.get_meta("command_matrix_slot_id", "")),
+		"door_interaction_button_enabled": bool(button.get_meta("door_interaction_button_enabled", false)),
+		"door_interaction_id": str(button.get_meta("door_interaction_id", "")),
+		"door_interaction_shortcut": str(button.get_meta("door_interaction_shortcut", "")),
 		"global_rect": global_rect,
 		"pressed_signal_connection_count": button.pressed.get_connections().size(),
 	}
@@ -9307,6 +9333,7 @@ func _build_command_hierarchy_context() -> Dictionary:
 		"has_multi_fireteam_plan": not _find_multi_fireteam_plan_for_selected_fireteams().is_empty(),
 		"has_target": get_node_or_null(target_marker_path) != null,
 		"has_lz": _has_lz_position,
+		"has_usable_door_interaction": _has_usable_door_interaction_for_selected_fireteams(),
 		"has_selected_tile": _has_selected_tile,
 		"requires_tile_selection": _has_primary_grid_for_command_selection(),
 		"selected_tile_grid_position": _selected_tile_grid_position,
@@ -10224,6 +10251,7 @@ func _apply_command_button_markers() -> void:
 	var marker_by_path: Dictionary = {
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton": "16.1",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "16.2",
+		DOOR_BREACH_BUTTON_PATH: "16.8",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton": "16.3",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "16.4",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "16.5",
@@ -10272,6 +10300,7 @@ func _apply_drop_light_hud_button_labels() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton": "Hold",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "Flank",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "Take",
+		DOOR_BREACH_BUTTON_PATH: "Breach",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "Pick" if _is_target_placement_armed else "Target",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "Clear",
 		DELETE_ORDER_BUTTON_PATH: "Del",
@@ -10384,6 +10413,7 @@ func _apply_compact_mission_control_layout() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
+		DOOR_BREACH_BUTTON_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
 		DELETE_ORDER_BUTTON_PATH,
@@ -10491,7 +10521,7 @@ func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:
 		if child == null:
 			continue
 		command_grid.move_child(child, index)
-	command_grid.set_meta("command_hierarchy_order", PackedStringArray(["move", "take", "defend", "flank", "engage", "clear_target", "delete_order", "sort_fireteam", "fire_rule_hold", "fire_rule_return", "fire_rule_free", "fire_rule_suppress", "go", "waypoint_erase"]))
+	command_grid.set_meta("command_hierarchy_order", PackedStringArray(["move", "take", "defend", "flank", "engage", "clear_target", "delete_order", "breach_door", "sort_fireteam", "fire_rule_hold", "fire_rule_return", "fire_rule_free", "fire_rule_suppress", "go", "waypoint_erase"]))
 	command_grid.set_meta("command_hierarchy_columns", command_grid.columns)
 
 
@@ -10502,6 +10532,9 @@ func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> vo
 	for slot_index in range(7, 21):
 		if slot_index == 7:
 			_ensure_command_grid_action_button(command_grid, "DeleteOrderButton", "Del", "Delete selected waypoint or area order", Callable(self, "_on_delete_order_pressed"), slot_index)
+			continue
+		if slot_index == 8:
+			_ensure_door_interaction_command_button(command_grid, slot_index)
 			continue
 		if slot_index == 10:
 			_ensure_command_grid_action_button(command_grid, "SortCommandMatrixButton", "Sort", "Center and sort selected fireteam", Callable(self, "_on_sort_fireteam_pressed"), slot_index)
@@ -10562,6 +10595,81 @@ func _ensure_command_grid_action_button(command_grid: GridContainer, button_name
 	_configure_square_hud_button(button, DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE"))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
 	command_grid.move_child(button, slot_index - 1)
+
+
+func _ensure_door_interaction_command_button(command_grid: GridContainer, slot_index: int = 8) -> void:
+	if command_grid == null:
+		return
+	var stale_placeholder := command_grid.get_node_or_null("CommandSlot%02d" % slot_index) as Button
+	if stale_placeholder != null:
+		command_grid.remove_child(stale_placeholder)
+		stale_placeholder.queue_free()
+	var button := command_grid.get_node_or_null("DoorBreachButton") as Button
+	if button == null:
+		button = Button.new()
+		button.name = "DoorBreachButton"
+		button.focus_mode = Control.FOCUS_ALL
+		command_grid.add_child(button)
+	button.text = "Breach"
+	button.tooltip_text = "Breach usable door [B]"
+	button.mouse_filter = Control.MOUSE_FILTER_STOP
+	button.set_meta("drop_light_command_placeholder", false)
+	button.set_meta("command_matrix_slot_id", "16.%d" % slot_index)
+	var callback := Callable(self, "_on_door_breach_button_pressed")
+	if not bool(button.get_meta("door_breach_button_connected", false)):
+		button.pressed.connect(callback)
+		button.set_meta("door_breach_button_connected", true)
+	button.set_meta("door_interaction_command_button", true)
+	button.set_meta("door_interaction_shortcut", "B")
+	button.set_meta("ui_sets_gameplay_truth", false)
+	_configure_square_hud_button(button, DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE"), 7)
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
+	command_grid.move_child(button, slot_index - 1)
+	_refresh_door_interaction_button_state()
+
+
+func _on_door_breach_button_pressed() -> void:
+	issue_breach_door_interaction()
+
+
+func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) -> void:
+	var button := get_node_or_null(DOOR_BREACH_BUTTON_PATH) as Button
+	if button == null:
+		return
+	var feedback: Dictionary = feedback_snapshot
+	if feedback.is_empty():
+		feedback = get_mission_interaction_use_feedback_snapshot()
+	var door_feedback: Dictionary = _resolve_usable_door_interaction_feedback(feedback)
+	var has_usable_door: bool = not door_feedback.is_empty()
+	var enabled: bool = not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty() and has_usable_door
+	var display_token: String = String(door_feedback.get("display_token", "DOOR")).strip_edges().to_upper()
+	if display_token.is_empty():
+		display_token = "DOOR"
+	button.visible = true
+	button.disabled = not enabled
+	button.text = "Breach"
+	button.tooltip_text = "Breach %s [B] -> GO" % display_token if enabled else _build_door_interaction_button_disabled_tooltip(has_usable_door)
+	button.set_meta("door_interaction_button_enabled", enabled)
+	button.set_meta("door_interaction_id", String(door_feedback.get("interaction_id", "")).strip_edges())
+	button.set_meta("door_interaction_display_token", display_token)
+	button.set_meta("command_hierarchy_disabled_reason", "" if enabled else _resolve_door_interaction_button_disabled_reason(has_usable_door))
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, enabled)
+
+
+func _build_door_interaction_button_disabled_tooltip(has_usable_door: bool) -> String:
+	return "Breach door [B]: %s" % _resolve_door_interaction_button_disabled_reason(has_usable_door)
+
+
+func _resolve_door_interaction_button_disabled_reason(has_usable_door: bool) -> String:
+	if preview_mode:
+		return "preview mode"
+	if not _can_issue_local_commands():
+		return "host controls mission commands"
+	if _selected_fireteam_ids.is_empty():
+		return "select fireteam"
+	if not has_usable_door:
+		return "no usable door nearby"
+	return ""
 
 
 func _find_fire_rule_button_spec_for_slot(slot_index: int) -> Dictionary:
@@ -10663,6 +10771,7 @@ func _refresh_dynamic_button_styles() -> void:
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton",
+		DOOR_BREACH_BUTTON_PATH,
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton",
 		DELETE_ORDER_BUTTON_PATH,
@@ -10694,6 +10803,8 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(DELETE_ORDER_BUTTON_PATH) as Button, _has_deletable_order_focus())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(WAYPOINT_ERASE_BUTTON_PATH) as Button, _has_deletable_order_focus())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null(SORT_COMMAND_BUTTON_PATH) as Button, not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty())
+	var door_breach_button := get_node_or_null(DOOR_BREACH_BUTTON_PATH) as Button
+	META_UI_SKIN_SCRIPT.style_tactical_button(door_breach_button, door_breach_button != null and bool(door_breach_button.get_meta("door_interaction_button_enabled", false)))
 	_refresh_fire_rule_button_state()
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton") as Button, not preview_mode and _can_issue_local_commands() and _has_selected_fireteam_orders_to_execute())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button, _is_lz_placement_armed)
@@ -17074,6 +17185,38 @@ func _resolve_mission_interaction_feedback_for_intent(feedback_snapshot: Diction
 		if String(entry.get("interaction_id", "")).strip_edges() == normalized_interaction_id:
 			return entry.duplicate(true)
 	return {}
+
+
+func _has_usable_door_interaction_for_selected_fireteams() -> bool:
+	return not _resolve_usable_door_interaction_feedback(get_mission_interaction_use_feedback_snapshot()).is_empty()
+
+
+func _resolve_usable_door_interaction_feedback(feedback_snapshot: Dictionary) -> Dictionary:
+	var primary: Dictionary = Dictionary(feedback_snapshot.get("primary_feedback", {}))
+	if _is_usable_door_interaction_feedback(primary):
+		return primary.duplicate(true)
+	for entry_variant in Array(feedback_snapshot.get("feedback_entries", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if _is_usable_door_interaction_feedback(entry):
+			return entry.duplicate(true)
+	return {}
+
+
+func _is_usable_door_interaction_feedback(interaction_feedback: Dictionary) -> bool:
+	if interaction_feedback.is_empty():
+		return false
+	if String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower() != "door":
+		return false
+	if String(interaction_feedback.get("status", "")).strip_edges().to_lower() != "usable":
+		return false
+	if not bool(interaction_feedback.get("can_prompt_use", false)):
+		return false
+	var required_order: String = String(interaction_feedback.get("required_order", interaction_feedback.get("action_label", ""))).strip_edges().to_lower()
+	if required_order == "use":
+		required_order = "breach"
+	return ["breach", "operate", "take"].has(required_order)
 
 
 func _resolve_fireteam_id_for_mission_interaction_intent(interaction_feedback: Dictionary) -> String:

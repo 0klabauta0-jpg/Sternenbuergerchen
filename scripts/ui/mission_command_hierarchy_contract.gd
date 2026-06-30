@@ -19,6 +19,7 @@ const BUTTON_PATH_MOVE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRo
 const BUTTON_PATH_HOLD: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton"
 const BUTTON_PATH_FLANK: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton"
 const BUTTON_PATH_TAKE: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton"
+const BUTTON_PATH_BREACH_DOOR: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/DoorBreachButton"
 const BUTTON_PATH_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton"
 const BUTTON_PATH_CLEAR_TARGET: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton"
 const BUTTON_PATH_DELETE_ORDER: String = "../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/DeleteOrderButton"
@@ -79,6 +80,7 @@ static func get_action_catalog() -> Array:
 		_action_catalog_cache = [
 		_action("move", "Move", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.move", BUTTON_PATH_MOVE, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("take", "Take", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.take", BUTTON_PATH_TAKE, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
+		_action("breach_door", "Breach", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.breach_door", BUTTON_PATH_BREACH_DOOR, {"requires_selection": true, "requires_local_command": true, "requires_usable_door_interaction": true, "implemented": true, "context": "door_interaction", "tooltip_hint": "Creates a BREACH -> GO door interaction intent through the existing Use path."}),
 		_action("defend", "Defend", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.defend", BUTTON_PATH_HOLD, {"requires_selection": true, "requires_tile_selection": true, "requires_local_command": true, "implemented": true, "context": "single_or_multi"}),
 		_action("engage", "Engage", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.attack_area", BUTTON_PATH_TARGET, {"requires_planning": true, "implemented": true, "context": "area"}),
 		_action("secure", "Secure", GROUP_GOAL, PANEL_COMMAND_MATRIX, "mission.command.defend_area", "", {"requires_selection": true, "requires_planning": true, "status_only": true, "context": "area"}),
@@ -240,6 +242,8 @@ static func resolve_disabled_reason(action: Dictionary, context: Dictionary, but
 		return "select a map tile"
 	if bool(action.get("requires_local_command", false)) and not bool(context.get("can_issue_local_commands", true)):
 		return "host controls mission commands"
+	if bool(action.get("requires_usable_door_interaction", false)) and not bool(context.get("has_usable_door_interaction", false)):
+		return "no usable door"
 	if bool(action.get("requires_planning", false)) and not bool(context.get("can_edit_planning", true)):
 		return "planning locked in this mode"
 	if bool(action.get("requires_drop_available", false)) and not bool(context.get("drop_available", true)):
@@ -290,6 +294,7 @@ static func _action(action_id: String, label: String, group_id: String, panel_ro
 		"requires_tile_selection": bool(options.get("requires_tile_selection", false)),
 		"requires_multi_selection": bool(options.get("requires_multi_selection", false)),
 		"requires_local_command": bool(options.get("requires_local_command", false)),
+		"requires_usable_door_interaction": bool(options.get("requires_usable_door_interaction", false)),
 		"requires_planning": bool(options.get("requires_planning", false)),
 		"requires_phase_planning": bool(options.get("requires_phase_planning", false)),
 		"requires_drop_available": bool(options.get("requires_drop_available", false)),
