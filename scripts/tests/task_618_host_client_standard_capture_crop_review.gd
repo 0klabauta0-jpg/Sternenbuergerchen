@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const TASK_PATH: String = "res://docs/tasks/TASK_618_host_client_standard_capture_crop_review.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -42,7 +42,7 @@ func _test_docs_report_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_618 - Host Client Standard Capture Crop Review (implementiert)"), "Roadmap marks TASK_618 implemented")
 	_assert(contract_text.contains("Host-Client-Standard-Capture-Crop-Review"), "Mission feedback contract documents TASK_618")
 	_assert(report_text.contains("TASK_618 Host Client Standard Capture Crop Review"), "Review workbench tracks TASK_618")
-	_assert(report_text.contains('latest_completed_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "JSON payload advances latest completed task beyond TASK_618")
+	_assert(report_text.contains('latest_completed_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "JSON payload advances latest completed task beyond TASK_618")
 	_assert(report_text.contains("TASK_619 - Host Client Role Peer Badge HUD"), "Report recommends TASK_619 role/peer HUD follow-up")
 	_test_report_export_fields(report_text)
 

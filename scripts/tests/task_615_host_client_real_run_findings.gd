@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const TASK_PATH: String = "res://docs/tasks/TASK_615_host_client_real_run_findings.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -68,7 +68,7 @@ func _test_report_export_fields(report_text: String) -> void:
 	_assert(report_text.contains('data-note-key="notes.host_client_real_run_findings"'), "Report exports free TASK_615 findings note")
 	_assert(report_text.contains('"TASK_615 - Host Client Real Run Findings"'), "JSON payload keeps TASK_615 in completed tasks")
 	_assert(report_text.contains('"TASK_616 - Host Client Visible UI Real Run Review"'), "JSON payload keeps TASK_616 in completed chain")
-	_assert(report_text.contains('latest_completed_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "JSON payload advances latest completed task beyond TASK_615")
+	_assert(report_text.contains('latest_completed_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "JSON payload advances latest completed task beyond TASK_615")
 
 
 func _test_tooling_guards() -> void:

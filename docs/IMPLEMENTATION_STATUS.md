@@ -243,6 +243,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_627_host_client_fireteam_eventlog_overlap_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_626_host_client_real_click_review_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_620_host_client_badge_recapture_review.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `git diff --check`.
 - Naechster Schritt: Echten Zwei-Fenster-Klicklauf mit sichtbarem Reject-/Authority-Feedback oder wieder Gameplay-Feel/Mini-Szenario-Slice weiterziehen.
 
+### TASK_628 - Mission HUD Legacy Contract Refresh
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_628_mission_hud_legacy_contract_refresh.md`, `docs/tasks/TASK_627_host_client_fireteam_eventlog_overlap_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: Der alte TASK_180-Verifier akzeptiert nun Fire-Rule-Controls in #16.11-#16.14 statt dort Reserve-Slots zu erwarten.
+- Stand: #17 Selected Fireteam zeigt fuer ein einzelnes ausgewaehltes Fireteam im Dropship wieder Member-Cards, aber deaktiviert/read-only, damit der Spieler vor dem Drop die Besatzung sieht.
+- Stand: Die Member-Card-Lane nutzt weiter denselben Selected-Fireteam-Card-Presenter und setzt nur Lesbarkeits-Metadaten; keine Dropship-, Unit- oder Gameplay-Wahrheit wird in UI-Code verschoben.
+- Risiken/offen: Wenn spaeter direkte Dropship-Aktionen aus #17 entstehen, brauchen sie eigene Command-/Authority-Gates. TASK_628 macht nur Anzeige und alten Vertrag konsistent.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_180_mission_drop_light_fixed_hud_layout_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_627_host_client_fireteam_eventlog_overlap_polish.gd`, `git diff --check`.
+- Naechster Schritt: Echten Zwei-Fenster-Klicklauf mit sichtbarem Reject-/Authority-Feedback oder wieder Gameplay-Feel/Mini-Szenario-Slice weiterziehen.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

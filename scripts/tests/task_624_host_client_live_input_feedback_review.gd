@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 
 const TASK_PATH: String = "res://docs/tasks/TASK_624_host_client_live_input_feedback_review.md"
 const STATUS_PATH: String = "res://docs/IMPLEMENTATION_STATUS.md"
@@ -46,9 +46,9 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_624 - Host Client Live Input Feedback Review (implementiert)"), "Roadmap marks TASK_624 implemented")
 	_assert(contract_text.contains("Host-Client-Live-Input-Feedback-Review"), "Mission feedback contract documents TASK_624")
 	_assert(report_text.contains("TASK_624 Host Client Live Input Feedback Review"), "Rolling report tracks TASK_624")
-	_assert(report_text.contains('latest_completed_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "Rolling report advances latest completed beyond TASK_624")
+	_assert(report_text.contains('latest_completed_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "Rolling report advances latest completed beyond TASK_624")
 	_assert(handbook_text.contains("TASK_624 - Host Client Live Input Feedback Review"), "Status handbook tracks TASK_624")
-	_assert(handbook_text.contains('current_task: "TASK_627 - Host Client Fireteam Eventlog Overlap Polish"'), "Status handbook current task advances beyond TASK_624")
+	_assert(handbook_text.contains('current_task: "TASK_628 - Mission HUD Legacy Contract Refresh"'), "Status handbook current task advances beyond TASK_624")
 	_assert(presenter_text.contains("_build_reject_reason_label"), "Presenter contains reject reason label builder")
 	_assert(controller_text.contains("authority_feedback_line"), "Controller exports authority feedback line")
 	_test_report_export_fields(report_text, handbook_text)

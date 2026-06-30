@@ -2902,9 +2902,11 @@ func _refresh_selected_fireteam_cards() -> void:
 	var units: Array = []
 	if not selected_cards_fireteam_id.is_empty():
 		units = _get_fireteam_units(selected_cards_fireteam_id, true)
+		if not _fireteam_has_embarked_payload(selected_cards_fireteam_id):
+			units = _filter_ground_fireteam_card_units(units)
 	else:
 		units = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
-	units = _filter_ground_fireteam_card_units(units)
+		units = _filter_ground_fireteam_card_units(units)
 	card_row.set_meta("selected_member_cards_fireteam_id", selected_cards_fireteam_id)
 	if units.is_empty():
 		var empty_label := Label.new()
@@ -2942,6 +2944,8 @@ func _refresh_selected_fireteam_cards() -> void:
 				"compact_text_min_width": 76.0,
 			}
 		)
+		card.set_meta("mission_selected_fireteam_member_in_drop_transit", in_drop_transit)
+		card.set_meta("mission_selected_fireteam_member_fireteam_id", selected_cards_fireteam_id)
 		if not card.card_open_requested.is_connected(_on_fireteam_card_open_requested):
 			card.card_open_requested.connect(_on_fireteam_card_open_requested)
 		card_row.add_child(card)
@@ -3088,6 +3092,8 @@ func _get_selected_member_cards_fireteam_id() -> String:
 	if selected_fireteam_id.is_empty():
 		return ""
 	if _is_fireteam_runtime_active(selected_fireteam_id) or not _filter_ground_fireteam_card_units(_get_fireteam_units(selected_fireteam_id, true)).is_empty():
+		return selected_fireteam_id
+	if _fireteam_has_embarked_payload(selected_fireteam_id):
 		return selected_fireteam_id
 	return ""
 

@@ -399,6 +399,11 @@ TASK_627 behebt einen belegten echten Host/Client-Capture-Fund: `#19 EVENT LOG` 
 
 Erwartete Struktur: `DropLightLayoutContract.get_mission_hud_layout()` enthaelt `fireteam_mini = Rect2i(24, 128, 280, 360)` und `event_log = Rect2i(24, 504, 280, 184)`. `MissionTacticalSandboxController._enforce_drop_light_fixed_hud_layout()` ruft `_apply_fixed_hud_window_contract(TACTICAL_EVENT_LOG_PANEL_PATH, layout.get("event_log"))` auf. Fireteam-Mini-Panel und Eventlog duerfen sich im Runtime-Rect nicht schneiden. Keine Eventlog-Daten, TacticalCommunication-Eintraege, Commands, Peer-, Combat- oder Gameplay-Wahrheit werden geaendert.
 
+## Mission-HUD-Legacy-Contract-Refresh
+TASK_628 zieht den alten TASK_180-Drop-Light-Verifier auf die aktuelle #16/#17-HUD-Wahrheit nach. #16.11-#16.14 sind keine Reserve-Slots mehr, sondern die Fire-Rule-Controls `HF`, `RF`, `FW` und `SUP`. #17 muss fuer ein einzelnes ausgewaehltes Fireteam im Dropship die Member-Cards weiter zeigen, aber deaktiviert, damit der Spieler Besatzung und Fireteam-Zugehoerigkeit vor dem Drop lesen kann.
+
+Erwartete Struktur: Fire-Rule-Buttons tragen `fire_rule_control = true`, `command_matrix_slot_id = 16.11..16.14` und mutieren nur ueber den bestehenden Fire-Rule-Command-Pfad. `FireteamCardsRow.selected_member_cards_fireteam_id` darf fuer ein ausgewaehltes Inbound-Fireteam gesetzt sein, wenn das Fireteam embarked payload hat. Die Karten nutzen denselben Selected-Fireteam-Member-Card-Presenter und werden ueber `disabled = true` als nicht deployed markiert; sie erzeugen keine zweite Dropship-, Unit- oder Gameplay-Wahrheit.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
