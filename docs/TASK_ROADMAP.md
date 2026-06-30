@@ -300,6 +300,7 @@ git checkout -b batch/<batch-name>
 - TASK_669 - Map Editor Placement Rotation Overrides (implementiert)
 - TASK_670 - Builder Drag Preview Handles (implementiert)
 - TASK_671 - Builder Chain Auto Snapping (implementiert)
+- TASK_672 - FullHD Drag Preview Art Direction (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

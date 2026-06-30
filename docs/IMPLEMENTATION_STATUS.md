@@ -676,6 +676,16 @@
 - Lokale Pruefung: `task_671_builder_chain_auto_snapping.gd`, `task_670_builder_drag_preview_handles.gd`, `task_492_map_editor_network_drag_snap_tools.gd`, `git diff --check`.
 - Naechster Schritt: FullHD Drag Preview Art Direction oder Door-/Computer-Interaction-Contract.
 
+### TASK_672 - FullHD Drag Preview Art Direction
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_672_fullhd_drag_preview_art_direction.md`, `docs/tasks/TASK_671_builder_chain_auto_snapping.md`, `docs/tasks/TASK_670_builder_drag_preview_handles.md`, `docs/dev/map_editor_asset_workflow_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `Primary3DView` rendert fuer aktive Network-Drag-Previews jetzt `Label3D`-Overlays fuer Handle-Labels, Segmentnummern und kompakte Auto-Snap-Piece/Rotationslabels wie `COR 90`.
+- Stand: Der Render-Snapshot meldet `editor_network_drag_preview_handle_label_count`, `editor_network_drag_preview_piece_label_count` und `editor_network_drag_preview_art_direction_ready`.
+- Stand: `task_672_fullhd_drag_preview_art_direction.gd` prueft echte Label-Nodes fuer Start, Target, Segment und Corner-Piece sowie Clear-Verhalten.
+- Risiken/offen: Finale Feineinstellung von Farben, Fontgroessen und Ueberdeckung braucht einen echten FullHD-Sichtlauf. Door-/Computer-Interaction-Contract bleibt naechster Runtime-/Content-Slice.
+- Lokale Pruefung: `task_672_fullhd_drag_preview_art_direction.gd`, `task_671_builder_chain_auto_snapping.gd`, `task_670_builder_drag_preview_handles.gd`, `git diff --check`.
+- Naechster Schritt: Door-/Computer-Interaction-Contract oder echter FullHD-Sichtlauf fuer Label-Feinschliff.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`
