@@ -253,6 +253,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_180_mission_drop_light_fixed_hud_layout_verifier.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_627_host_client_fireteam_eventlog_overlap_polish.gd`, `git diff --check`.
 - Naechster Schritt: Echten Zwei-Fenster-Klicklauf mit sichtbarem Reject-/Authority-Feedback oder wieder Gameplay-Feel/Mini-Szenario-Slice weiterziehen.
 
+### TASK_629 - Host Client Real Click Playtest Evidence Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_629_host_client_real_click_playtest_evidence_pass.md`, `docs/tasks/TASK_626_host_client_real_click_review_evidence.md`, `docs/tasks/TASK_627_host_client_fireteam_eventlog_overlap_polish.md`, `docs/tasks/TASK_628_mission_hud_legacy_contract_refresh.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`, `docs/reports/project_status_handbook_2026_06_29.html`
+- Stand: `scripts/tests/task_629_host_client_real_click_playtest_evidence_pass.gd` schreibt `tmp/host_client_real_click_playtest_packet.json` als read-only Playtest-Packet fuer den naechsten echten Host/Client-Klicklauf.
+- Stand: Das Packet fasst Vorbedingungen, Klickfolge, erwartete sichtbare Reject-Hinweise und offene manuelle Beobachtungen zusammen: Role/Peer/Team-Badges, Host-/Client-Crops, Eventlog-Fix, #16-Fire-Rule-Slots, #17-Inbound-Karten, `BLOCK P2 wrong team`, `AUTH OK1/RJ2` und `peer_team_mismatch`.
+- Stand: Rolling Report und Ist-Stand-/Handbuch-Bericht nennen TASK_629 als aktuellen Stand, ohne den menschlichen Klicklauf als erledigt zu behaupten.
+- Risiken/offen: TASK_629 ist ein Playtest-Packet, kein automatischer UI-Klicktest. Der echte Zwei-Fenster-Lauf muss weiterhin bewusst ausgefuehrt und bewertet werden.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_629_host_client_real_click_playtest_evidence_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_628_mission_hud_legacy_contract_refresh.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_626_host_client_real_click_review_evidence.gd`, `git diff --check`.
+- Naechster Schritt: `TASK_630 - Host Client Real Click Findings Or Mini Scenario Feel`, je nachdem ob der echte Lauf konkrete UI-Reibung zeigt oder der Pfad fuer spielerischen Mini-Szenario-Feel frei ist.
+
 ### TASK_604 - Core Loop Host Client Feel Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_604_core_loop_host_client_feel_smoke.md`, `docs/tasks/TASK_556_frontier_probe_host_client_objective_handoff_smoke.md`, `docs/tasks/TASK_557_frontier_probe_multiplayer_f6_readability_pass.md`, `docs/tasks/TASK_603_mission_hud_density_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_review_status_2026_06_28.html`

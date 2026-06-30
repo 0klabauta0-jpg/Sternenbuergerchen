@@ -404,6 +404,11 @@ TASK_628 zieht den alten TASK_180-Drop-Light-Verifier auf die aktuelle #16/#17-H
 
 Erwartete Struktur: Fire-Rule-Buttons tragen `fire_rule_control = true`, `command_matrix_slot_id = 16.11..16.14` und mutieren nur ueber den bestehenden Fire-Rule-Command-Pfad. `FireteamCardsRow.selected_member_cards_fireteam_id` darf fuer ein ausgewaehltes Inbound-Fireteam gesetzt sein, wenn das Fireteam embarked payload hat. Die Karten nutzen denselben Selected-Fireteam-Member-Card-Presenter und werden ueber `disabled = true` als nicht deployed markiert; sie erzeugen keine zweite Dropship-, Unit- oder Gameplay-Wahrheit.
 
+## Host-Client-Real-Click-Playtest-Evidence-Pass
+TASK_629 buendelt nach TASK_628 den naechsten echten Zwei-Fenster-Klicklauf als konkretes read-only Playtest-Packet. Das Packet darf das lokale Real-Run-Manifest, die Badge-/Crop-/Eventlog-/HUD-Vertragsgates und die erwartete Reject-Evidence zusammenfassen, aber keine Klicks ausloesen, keine Authority-Entscheidung treffen und keine Runtime-, Peer-, Command-, Movement-, Combat- oder Gameplay-Wahrheit speichern.
+
+Erwartete Struktur: `tmp/host_client_real_click_playtest_packet.json` enthaelt `schema = sternenbuergerchen.host_client_real_click_playtest_packet.v1`, `task_id = TASK_629`, `source_real_run_manifest_path = tmp/host_client_two_window_real_run_review.json`, `packet_path`, `source_manifest_present`, `source_visible_reject_review_gate`, `readiness_gate`, `preconditions`, `click_sequence`, `expected_visible_feedback`, `manual_observations`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `recommended_next_task = TASK_630 - Host Client Real Click Findings Or Mini Scenario Feel`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
