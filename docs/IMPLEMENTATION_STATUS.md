@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_700 - Host/Client Door Real Click Workbench
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_700_host_client_door_real_click_workbench.md`, `docs/tasks/TASK_699_multiplayer_door_feedback_capture.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/html_report_workbench_contract.md`, `docs/reports/host_client_door_real_click_workbench_2026_06_30.html`, `docs/reports/project_current_state_handbook_2026_06_30.html`
+- Stand: `MissionHostClientDoorRealClickWorkbench` erzeugt einen read-only Snapshot fuer den echten Host-/Client-Door-Klicklauf.
+- Stand: Die HTML-Workbench fuehrt Host-/Client-Fenster, Door-Button, Shortcut `B`, GO-Pflicht, Wrong-Team-Reject, Door-Open und HUD-Lesbarkeit als Pflichtchecks.
+- Stand: Die Workbench exportiert lokale JSON-Notizen zu Host, Client, Reject, Door-Open, Timing und naechster Polish-Aktion.
+- Risiken/offen: Der echte Zwei-Fenster-Klicklauf ist weiterhin manuell offen; TASK_700 macht ihn reproduzierbar notierbar, behauptet ihn aber nicht.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_700_host_client_door_real_click_workbench.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_699_multiplayer_door_feedback_capture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_701 - Host/Client Door Real Click Findings oder Mission Door Feedback Polish.
+
 ### TASK_699 - Multiplayer Door Feedback Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_699_multiplayer_door_feedback_capture.md`, `docs/tasks/TASK_698_door_authority_ui_feedback.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_06_30.html`

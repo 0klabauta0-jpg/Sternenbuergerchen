@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Host/Client Door Real Click Workbench 2026-06-30</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10161a;
+      --panel: #182129;
+      --line: #3b4d5c;
+      --text: #edf5f8;
+      --muted: #9fb0bb;
+      --accent: #ffd34d;
+      --cyan: #55d6dc;
+      --green: #70db9d;
+      --red: #ff8f8f;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+    header { padding: 30px clamp(18px, 4vw, 54px) 20px; border-bottom: 1px solid var(--line); background: #141d24; }
+    main { width: min(1280px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 96px; }
+    h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: 0; }
+    h1 { font-size: clamp(28px, 3vw, 42px); }
+    h2 { font-size: 22px; }
+    h3 { color: var(--cyan); font-size: 16px; }
+    p { margin: 8px 0 0; color: var(--muted); }
+    code { background: rgba(255,255,255,0.06); padding: 1px 5px; border-radius: 4px; }
+    button, input, textarea { font: inherit; }
+    input, textarea, [contenteditable="true"] {
+      width: 100%; border: 1px solid var(--line); border-radius: 6px;
+      background: #0d1318; color: var(--text); padding: 8px 10px;
+    }
+    textarea { min-height: 118px; resize: vertical; margin-top: 10px; }
+    [contenteditable="true"] { min-height: 48px; margin-top: 10px; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #74848e; }
+    button { border: 1px solid var(--line); background: #dce5ef; color: #10161a; border-radius: 6px; min-height: 38px; padding: 8px 12px; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--text); }
+    button.choice.active { border-color: var(--accent); background: var(--accent); color: #16120a; }
+    .meta-row, .tabbar, .button-row, .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .meta-row { margin-top: 14px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--muted); background: rgba(255,255,255,0.03); font-size: 13px; }
+    .pill.good { color: var(--green); border-color: rgba(112,219,157,0.5); }
+    .pill.warn { color: var(--accent); border-color: rgba(255,211,77,0.55); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 18px; }
+    .card { grid-column: span 4; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+    .wide { grid-column: span 8; }
+    .half { grid-column: span 6; }
+    .full { grid-column: 1 / -1; }
+    .callout { margin-top: 12px; padding: 12px; border: 1px solid rgba(85,216,220,0.35); background: rgba(85,216,220,0.07); border-radius: 6px; color: var(--text); }
+    .warning { border-color: rgba(255,211,77,0.42); background: rgba(255,211,77,0.08); }
+    .checkline { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; color: var(--text); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; }
+    .tabbar { margin-top: 22px; border-bottom: 1px solid var(--line); }
+    .tab { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: transparent; color: var(--muted); border-bottom: 0; }
+    .tab.active { background: var(--panel); color: var(--text); border-color: var(--line); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .toolbar { position: sticky; bottom: 0; z-index: 5; justify-content: space-between; background: rgba(16,22,26,0.96); border-top: 1px solid var(--line); padding: 12px clamp(18px, 4vw, 52px); backdrop-filter: blur(8px); }
+    .toolbar textarea { min-height: 74px; max-height: 180px; flex: 1 1 420px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-status[data-tone="good"] { color: var(--green); }
+    .export-status[data-tone="warn"] { color: var(--accent); }
+    @media (max-width: 960px) { .card, .wide, .half { grid-column: 1 / -1; } .toolbar { position: static; } }
+  </style>
+</head>
+<body data-report-id="host_client_door_real_click_workbench_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>Host/Client Door Real Click Workbench</h1>
+    <p>TASK_700: Arbeitsflaeche fuer den echten Zwei-Fenster-Klicklauf der Door-Breach-Interaktion. Diese Seite notiert Beobachtungen, setzt aber keine Mission-, Door- oder Multiplayer-Wahrheit.</p>
+    <div class="meta-row">
+      <span class="pill good">Read-only</span>
+      <span class="pill warn">Manueller Test offen</span>
+      <span class="pill">Quelle: TASK_699 Capture</span>
+      <span class="pill">Naechster Task: TASK_701 Findings</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabbar" aria-label="Workbenchbereiche">
+      <button class="tab active" type="button" data-tab-target="overview">Ueberblick</button>
+      <button class="tab" type="button" data-tab-target="runbook">Runbook</button>
+      <button class="tab" type="button" data-tab-target="checklist">Checks</button>
+      <button class="tab" type="button" data-tab-target="notes">Notizen</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was hier entschieden wird</h2>
+          <p>Geprueft wird, ob ein Mensch im Host- und Client-Fenster Door-Breach versteht: Button, Shortcut, GO-Pflicht, falsches Team, akzeptierter Host-Befehl und sichtbarer Open-State muessen ohne Logsuche lesbar sein.</p>
+          <div class="callout">TASK_699 liefert technische Evidence. Diese Workbench ist der menschliche Real-Click-Befund dazu.</div>
+        </article>
+        <article class="card">
+          <h2>Quellen</h2>
+          <input readonly value="tmp/multiplayer_door_feedback_capture.json" data-export-key="sources.capture_manifest_path">
+          <input readonly value="tmp/host_client_door_real_click_workbench.json" data-export-key="sources.real_click_manifest_path">
+          <input readonly value="docs/reports/host_client_door_real_click_workbench_2026_06_30.html" data-export-key="sources.report_path">
+        </article>
+      </div>
+    </section>
+
+    <section id="runbook" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Klicklauf</h2>
+          <ol>
+            <li>Host-Fenster und Client-Fenster starten.</li>
+            <li>Mission mit Door-Interaction laden und je ein Fireteam sichtbar machen.</li>
+            <li>Mit dem erlaubten Team Door-Breach per Button und per Shortcut <code>B</code> vorbereiten.</li>
+            <li>Pruefen, dass weiter <code>GO</code> noetig ist und die Door nicht durch UI-Preview aufgeht.</li>
+            <li>Mit falschem Team/Peer denselben Weg versuchen und Reject-Text lesen.</li>
+            <li>GO bestaetigen, Runtime abwarten und Door-Open im Host und Client beurteilen.</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+    <section id="checklist" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Required Checks</h2>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.host_window_launched"> Host-Fenster gestartet und Mission geladen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.client_window_launched"> Client-Fenster verbunden und Mission geladen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.host_door_button_visible"> Host sieht Door-Breach-Button und Tooltip</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.client_door_button_visible"> Client sieht Door-Breach-Button und Tooltip</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.shortcut_b_triggers_hook"> Shortcut B triggert denselben Door-Hook wie der Button</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.go_required_visible"> GO-Pflicht bleibt sichtbar, kein Sofort-Commit im UI</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.wrong_team_reject_visible"> Falsches Team bekommt lesbares Reject-Feedback</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.door_open_visible_on_host"> Door-Open ist im Host-Fenster sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.door_open_visible_on_client"> Door-Open ist im Client-Fenster sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.hud_feedback_readable"> HUD-Feedback ist ohne Log-Suche lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="door_real_click.manual_review_done"> Manueller Door-Klickentscheid wirklich erledigt</label>
+        </article>
+        <article class="card half">
+          <h3>Bewertung</h3>
+          <div class="button-row" data-choice-group="door_real_click.rating">
+            <button class="choice active" type="button" data-choice-value="open">Offen</button>
+            <button class="choice" type="button" data-choice-value="good_enough">Gut genug</button>
+            <button class="choice" type="button" data-choice-value="needs_polish">Polish noetig</button>
+            <button class="choice" type="button" data-choice-value="blocked">Blockiert</button>
+          </div>
+        </article>
+        <article class="card half">
+          <h3>Naechster Task</h3>
+          <input value="TASK_701 - Host/Client Door Real Click Findings" data-export-key="door_real_click.recommended_next_task">
+        </article>
+      </div>
+    </section>
+
+    <section id="notes" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Beobachtungen</h2>
+          <textarea data-export-key="door_real_click.host_observation" placeholder="Host-Beobachtung: Button, Tooltip, GO, Door-Open, Timing..."></textarea>
+          <textarea data-export-key="door_real_click.client_observation" placeholder="Client-Beobachtung: sieht der Client dasselbe klar genug?"></textarea>
+          <textarea data-export-key="door_real_click.reject_feedback_notes" placeholder="Reject-Feedback: falsches Team, falscher Peer, verbotene Mutation..."></textarea>
+          <textarea data-export-key="door_real_click.door_open_notes" placeholder="Door-Open: sichtbar, eindeutig, synchron, nicht irrefuehrend..."></textarea>
+          <textarea data-export-key="door_real_click.timing_notes" placeholder="Timing: fuehlt sich etwas zu langsam, zu abrupt oder unklar an?"></textarea>
+          <textarea data-export-key="door_real_click.next_polish_action" placeholder="Naechste konkrete Polish-Aktion, falls noetig..."></textarea>
+          <div contenteditable="true" data-note-key="door_real_click.free_notes" data-placeholder="Freie Door-Real-Click-Notizen..."></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="toolbar">
+    <div class="export-actions">
+      <button id="exportJsonButton" type="button">JSON exportieren</button>
+      <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+      <span id="exportStatus" class="export-status">Export: lokal per file:// als Download oder Kopie.</span>
+    </div>
+    <textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea>
+  </footer>
+
+  <script>
+    (function () {
+      const reportId = document.body.dataset.reportId || "host_client_door_real_click_workbench";
+      const schema = document.body.dataset.reportSchema || "sternenbuergerchen.html_workbench.v1";
+      const output = document.getElementById("jsonOutput");
+      const exportStatus = document.getElementById("exportStatus");
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+      function readValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "number" || element.type === "range") return Number(element.value);
+        return element.value;
+      }
+      function collectExport() {
+        const data = {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: new Date().toISOString(),
+          controls: {},
+          notes: {},
+          active_choices: {},
+          computed: {
+            report_is_gameplay_truth: false,
+            runtime_truth: "SimulationRoot/Runtime/Contracts",
+            manual_review_required: true
+          },
+          metadata: {
+            task_id: "TASK_700",
+            local_path: "docs/reports/host_client_door_real_click_workbench_2026_06_30.html"
+          }
+        };
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          setPath(data.controls, element.dataset.exportKey, readValue(element));
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          setPath(data.notes, element.dataset.noteKey, element.textContent.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const active = group.querySelector(".choice.active");
+          if (active) setPath(data.active_choices, group.dataset.choiceGroup, active.dataset.choiceValue || active.textContent.trim());
+        });
+        return data;
+      }
+      function buildExportText() {
+        const text = JSON.stringify(collectExport(), null, 2);
+        if (output) output.value = text;
+        return text;
+      }
+      function download(text) {
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${reportId}_${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        if (exportStatus) {
+          exportStatus.textContent = "Export bereit: JSON wurde als Download erzeugt.";
+          exportStatus.dataset.tone = "good";
+        }
+      }
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.tabTarget;
+          document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
+          document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        });
+      });
+      document.querySelectorAll(".choice").forEach((button) => {
+        button.addEventListener("click", () => {
+          const group = button.closest("[data-choice-group]");
+          if (group) group.querySelectorAll(".choice").forEach((choice) => choice.classList.toggle("active", choice === button));
+        });
+      });
+      document.getElementById("exportJsonButton").addEventListener("click", () => download(buildExportText()));
+      document.getElementById("copyJsonButton").addEventListener("click", async () => {
+        const text = buildExportText();
+        try {
+          await navigator.clipboard.writeText(text);
+          if (exportStatus) {
+            exportStatus.textContent = "JSON wurde in die Zwischenablage kopiert.";
+            exportStatus.dataset.tone = "good";
+          }
+        } catch (error) {
+          if (exportStatus) {
+            exportStatus.textContent = "Kopieren nicht erlaubt; JSON steht im Textfeld.";
+            exportStatus.dataset.tone = "warn";
+          }
+        }
+      });
+      buildExportText();
+    })();
+  </script>
+</body>
+</html>
