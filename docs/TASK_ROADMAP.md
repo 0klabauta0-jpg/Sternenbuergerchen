@@ -343,6 +343,7 @@ git checkout -b batch/<batch-name>
 - TASK_712 - Station Route Host/Client Acceptance Packet (implementiert)
 - TASK_713 - Station Route Host/Client Findings (implementiert)
 - TASK_714 - Station Route Multiplayer Scenario Guard (implementiert)
+- TASK_715 - Station Route Empty Event Log Polish (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

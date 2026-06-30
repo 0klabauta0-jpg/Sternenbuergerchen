@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_715 - Station Route Empty Event Log Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_715_station_route_empty_eventlog_polish.md`, `docs/tasks/TASK_714_station_route_multiplayer_scenario_guard.md`, `docs/tasks/TASK_366_tactical_event_log_hud_panel.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: Der echte Zwei-Fenster-Capture nach TASK_714 zeigte ein leeres Event-Log als grosse dunkle Flaeche auf der Karte.
+- Stand: `TacticalEventLogPanel` klappt im leeren Zustand jetzt visuell ein, wird input-passiv und bleibt ueber Snapshot-Felder diagnostizierbar.
+- Stand: Sobald Events vorhanden sind, klappt das Panel wieder auf und nutzt den bestehenden Render-/Scroll-/Filterpfad.
+- Risiken/offen: Der echte Door/Computer/Cargo-Klicklauf bleibt Folgearbeit; TASK_715 poliert den initialen Fensterblick.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_715_station_route_empty_eventlog_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_366_tactical_event_log_hud_panel.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_714_station_route_multiplayer_scenario_guard.gd`, `git diff --check`.
+- Naechster Schritt: TASK_716 - echter Station-Route-Door/Computer/Cargo-Klicklauf oder naechster sichtbarer Host/Client-Polish aus dem Fensterbefund.
+
 ### TASK_714 - Station Route Multiplayer Scenario Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_714_station_route_multiplayer_scenario_guard.md`, `docs/tasks/TASK_707_mission_door_computer_cargo_smoke.md`, `docs/tasks/TASK_697_door_interaction_multiplayer_authority_check.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`

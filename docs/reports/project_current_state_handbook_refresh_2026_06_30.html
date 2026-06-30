@@ -76,12 +76,12 @@
 <body data-report-id="project_current_state_handbook_refresh_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch Refresh</h1>
-    <p>Kompakter Zwischenbericht nach TASK_705 bis TASK_714: Was spielbar ist, wie man es bedient, wo es reibt und was als naechstes sinnvoll ist.</p>
+    <p>Kompakter Zwischenbericht nach TASK_705 bis TASK_715: Was spielbar ist, wie man es bedient, wo es reibt und was als naechstes sinnvoll ist.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-07-01</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Abschluss: TASK_714</span>
+      <span class="pill">Letzter Abschluss: TASK_715</span>
       <span class="pill good">TASK_706 Door Layout/Visual Polish</span>
       <span class="pill good">TASK_707 Door/Computer/Cargo Smoke</span>
       <span class="pill good">TASK_708 Station Route Visual Evidence</span>
@@ -91,6 +91,7 @@
       <span class="pill good">TASK_712 Host/Client Acceptance Packet</span>
       <span class="pill good">TASK_713 Host/Client Findings</span>
       <span class="pill good">TASK_714 Multiplayer Scenario Guard</span>
+      <span class="pill good">TASK_715 Empty Event Log Polish</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -110,7 +111,7 @@
         <article class="card wide">
           <h2>Kurzer Stand</h2>
           <p>Der spielbare Kern ist nicht mehr nur Idee: Homebase, Readiness, Dropship/Insertion, Mission-HUD, Fireteam-Orders, Objective-Route, Debrief und Homebase-Return sind als Review-Spine vorhanden. Die aktuelle Spitze ist die Door-/Station-Interaktion, weil sie Singleplayer-Lesbarkeit und Host/Client-Authority zusammenbringt.</p>
-          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync.</div>
+          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync. TASK_715 entfernt den leeren Event-Log-Klotz aus dem initialen Fensterblick, ohne Event- oder Gameplay-Wahrheit zu verschieben.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -129,6 +130,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_712_done"> TASK_712 Host/Client Acceptance Packet vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_713_done"> TASK_713 Host/Client Findings vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_714_done"> TASK_714 Multiplayer Scenario Guard vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_715_done"> TASK_715 Empty Event Log Polish vorhanden</label>
         </article>
         <article class="card full">
           <h2>Systemkarte</h2>
@@ -136,8 +138,8 @@
             <thead><tr><th>Bereich</th><th>Was traegt</th><th>Was noch reibt</th><th>Guter Griff</th></tr></thead>
             <tbody>
               <tr><td>Spiel-Flow</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Spine pruefbar.</td><td>Der echte Spielerblick muss weiter in kleinen Fenster-/Playtest-Paketen belegt werden.</td><td>Mini-Szenario mit wenigen klaren Interaktionen erneut spielen.</td></tr>
-              <tr><td>Mission</td><td>Fireteam-Auswahl, Move/Defend/Fire, Threat-Preview, Contacts, Objective-Gates und Door-Hook sind verbunden.</td><td>Station-/Door-Objekte muessen optisch noch eindeutiger werden.</td><td>TASK_706 Door Layout/Visual Polish.</td></tr>
-              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung und technischer Scenario-Guard existieren.</td><td>Der echte Zwei-Fenster-Klickbefund bleibt menschlich offen.</td><td>TASK_715 echter Zwei-Fenster-Run oder sichtbarer Polish.</td></tr>
+              <tr><td>Mission</td><td>Fireteam-Auswahl, Move/Defend/Fire, Threat-Preview, Contacts, Objective-Gates, Door-Hook und ein ruhigerer Empty-Event-Log-Start sind verbunden.</td><td>Station-/Door-Objekte muessen optisch noch eindeutiger werden.</td><td>Echter Door/Computer/Cargo-Klicklauf.</td></tr>
+              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung, technischer Scenario-Guard und initialer UI-Polish existieren.</td><td>Der echte Zwei-Fenster-Klickbefund bleibt menschlich offen.</td><td>TASK_716 echter Host/Client-Klicklauf oder naechster sichtbarer Polish.</td></tr>
               <tr><td>Editor</td><td>Map-Editor und Builder-Workbench haben Paletten, Snapping, Presets und Interaction-Bindings.</td><td>Bediengefuehl und Asset-Auswahl bleiben langfristig ein eigener UX-Block.</td><td>Erst nach spielbarer Mission weiterpolieren.</td></tr>
               <tr><td>Export</td><td>Export-Templates und Package-Hygiene sind geprueft.</td><td>Warnungen koennen wiederkommen, sobald Assets/Plugins wachsen.</td><td>Bei Release-Kandidat erneut Export-Smoke laufen lassen.</td></tr>
             </tbody>
@@ -236,7 +238,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster Griff</h2>
-          <p>Aktuell sinnvoll: den echten Zwei-Fenster-Run mit TASK_712-Checkliste durchspielen. TASK_714 hat den technischen Headless-Pfad fuer Authority, Door/Computer/Cargo und Snapshot-Sync abgesichert; jetzt fehlt der echte Spielerblick.</p>
+          <p>Aktuell sinnvoll: den echten Zwei-Fenster-Run mit TASK_712-Checkliste durchspielen und dabei gezielt schauen, ob Door, Computer, Cargo und HUD im Fenster ohne Suchen funktionieren. TASK_715 hat den ersten sichtbaren Reibungspunkt aus dem Fensterblick entfernt: ein leeres Event-Log verdeckt die Karte nicht mehr.</p>
           <div class="callout warning">Nicht jetzt: grosses neues Missionssystem, Ammo-Runner, tiefe Economy oder Editor-Umbau. Erst muss die kleine Station-Interaktion angenehm, sichtbar und im Host/Client-Pfad glaubwuerdig sein.</div>
         </article>
         <article class="card">
@@ -248,6 +250,7 @@
             <option value="station_host_client_acceptance">TASK_712 Host/Client Acceptance Run</option>
             <option value="station_host_client_findings">TASK_713 Host/Client Findings auswerten</option>
             <option value="station_multiplayer_guard">TASK_714 Multiplayer Scenario Guard pruefen</option>
+            <option value="station_empty_eventlog_polish">TASK_715 Empty Event Log Polish pruefen</option>
             <option value="real_host_client_run">Echten Host/Client Door Run machen</option>
             <option value="mini_scenario_playtest">Mini-Szenario Playtest</option>
           </select>
@@ -259,7 +262,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30/07-01: Neuer kompakter Ist-Stand-/Handbuch-Refresh angelegt. TASK_705 ist letzter Door-Manual-Run-Stand. TASK_706 machte Door-Layout-/Visual-Polish read-only sichtbar. TASK_707 pruefte Door -> Computer -> Cargo als integrierten Stations-Smoke. TASK_708 schreibt daraus ein PNG-/JSON-Evidence-Paket. TASK_709 stellt die ausfuellbare Fenster-Playtest-Workbench bereit. TASK_710 bewertet Evidence und Notizen als Polish-/Akzeptanzbereitschaft. TASK_711 beschriftet das generierte Evidence-Board. TASK_712 buendelt den Host/Client-Acceptance-Run, ohne neue Gameplay-Wahrheit zu erzeugen. TASK_713 wertet das Acceptance-Paket read-only als Multiplayer-Findings-Status. TASK_714 sichert den technischen Multiplayer-Scenario-Pfad fuer Door/Computer/Cargo und Snapshot-Sync ab.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30/07-01: Neuer kompakter Ist-Stand-/Handbuch-Refresh angelegt. TASK_705 ist letzter Door-Manual-Run-Stand. TASK_706 machte Door-Layout-/Visual-Polish read-only sichtbar. TASK_707 pruefte Door -> Computer -> Cargo als integrierten Stations-Smoke. TASK_708 schreibt daraus ein PNG-/JSON-Evidence-Paket. TASK_709 stellt die ausfuellbare Fenster-Playtest-Workbench bereit. TASK_710 bewertet Evidence und Notizen als Polish-/Akzeptanzbereitschaft. TASK_711 beschriftet das generierte Evidence-Board. TASK_712 buendelt den Host/Client-Acceptance-Run, ohne neue Gameplay-Wahrheit zu erzeugen. TASK_713 wertet das Acceptance-Paket read-only als Multiplayer-Findings-Status. TASK_714 sichert den technischen Multiplayer-Scenario-Pfad fuer Door/Computer/Cargo und Snapshot-Sync ab. TASK_715 klappt ein leeres Event-Log im Missionsstart ein, damit die Karte im echten Host/Client-Fenster nicht von einem nutzlosen Panel verdeckt wird.</div>
         </article>
         <article class="card full">
           <h2>TASK_708 Evidence</h2>
@@ -323,6 +326,16 @@
           <input readonly value="TASK_715 - Station Route Real Two-Window Playtest or Visual Polish" data-export-key="station_route_multiplayer_scenario_guard.recommended_next_task">
           <textarea data-export-key="station_route_multiplayer_scenario_guard.notes" placeholder="Nach TASK_714: Sind technische Blocker weg? Was soll der echte Fensterlauf gezielt anschauen?"></textarea>
         </article>
+        <article class="card full">
+          <h2>TASK_715 - Station Route Empty Event Log Polish</h2>
+          <p>Der echte Zwei-Fenster-Blick zeigte ein leeres Event-Log als grosse dunkle Flaeche auf der Karte. Das Panel klappt jetzt im Empty-State ein, bleibt per Snapshot pruefbar und klappt bei echten Events wieder auf.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_empty_eventlog_polish.empty_collapsed"> Leerer Event-Log-Start klappt ein</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_empty_eventlog_polish.input_passthrough"> Empty-State ist fuer Mausinput durchlaessig</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_empty_eventlog_polish.expands_with_events"> Panel klappt bei Events wieder auf</label>
+          <input readonly value="collapsed_empty" data-export-key="station_route_empty_eventlog_polish.visibility_mode">
+          <input readonly value="scripts/tests/task_715_station_route_empty_eventlog_polish.gd" data-export-key="station_route_empty_eventlog_polish.verifier_path">
+          <textarea data-export-key="station_route_empty_eventlog_polish.notes" placeholder="Nach dem echten Fensterlauf: verdeckt unten links noch etwas die Karte oder fuehlt sich der HUD-Start ruhiger an?"></textarea>
+        </article>
         <article class="card half">
           <h2>Entscheidung</h2>
           <label class="checkline"><input type="radio" name="next_path" value="door_polish" data-export-key="decision.next_path" checked> Door Polish zuerst</label>
@@ -379,7 +392,7 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_714 - Station Route Multiplayer Scenario Guard",
+            latest_completed_task: "TASK_715 - Station Route Empty Event Log Polish",
             latest_completed_visual_task: "TASK_706 - Mission Door Layout/Visual Polish",
             latest_completed_flow_task: "TASK_707 - Mission Door/Computer/Cargo Smoke",
             latest_completed_evidence_task: "TASK_708 - Station Route Visual Evidence",
@@ -389,7 +402,8 @@
             latest_completed_multiplayer_packet_task: "TASK_712 - Station Route Host/Client Acceptance Packet",
             latest_completed_multiplayer_findings_task: "TASK_713 - Station Route Host/Client Findings",
             latest_completed_multiplayer_guard_task: "TASK_714 - Station Route Multiplayer Scenario Guard",
-            recommended_next_task: "TASK_715 - echten Station-Route-Zwei-Fenster-Run oder sichtbaren Polish ableiten",
+            latest_completed_visible_polish_task: "TASK_715 - Station Route Empty Event Log Polish",
+            recommended_next_task: "TASK_716 - echten Station-Route-Door/Computer/Cargo-Klicklauf oder naechsten sichtbaren Host/Client-Polish ableiten",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },

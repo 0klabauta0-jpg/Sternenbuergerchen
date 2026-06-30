@@ -6,11 +6,13 @@ const ROW_MIN_HEIGHT: float = 22.0
 
 @export var max_visible_events: int = DEFAULT_MAX_VISIBLE_EVENTS
 @export var selected_only: bool = false
+@export var collapse_when_empty: bool = true
 
 var _event_entries: Array = []
 var _selected_fireteam_ids: PackedStringArray = PackedStringArray()
 var _rendered_entries: Array = []
 var _last_render_signature: String = ""
+var _empty_state_collapsed: bool = false
 
 var _header_label: Label = null
 var _count_label: Label = null
@@ -74,6 +76,11 @@ func get_panel_snapshot() -> Dictionary:
 		"scrollable_overflow": _rendered_entries.size() > max_visible_events,
 		"severity_counts": severity_counts,
 		"global_rect": get_global_rect(),
+		"collapse_when_empty": collapse_when_empty,
+		"empty_state_collapsed": _empty_state_collapsed,
+		"visible": visible,
+		"mouse_filter": mouse_filter,
+		"visibility_mode": "collapsed_empty" if _empty_state_collapsed else "expanded",
 	}
 
 
@@ -165,6 +172,7 @@ func _refresh_display(force: bool = false) -> void:
 		_selected_filter_button.set_pressed_no_signal(selected_only)
 	if _count_label != null:
 		_count_label.text = "%d" % filtered_entries.size()
+	_apply_empty_state_layout(filtered_entries.is_empty())
 	if filtered_entries.is_empty():
 		_add_empty_row()
 		return
@@ -235,6 +243,12 @@ func _add_empty_row() -> void:
 	label.add_theme_font_size_override("font_size", 9)
 	label.add_theme_color_override("font_color", Color(0.62, 0.70, 0.74, 0.86))
 	_entry_list.add_child(label)
+
+
+func _apply_empty_state_layout(is_empty: bool) -> void:
+	_empty_state_collapsed = collapse_when_empty and is_empty
+	visible = not _empty_state_collapsed
+	mouse_filter = Control.MOUSE_FILTER_IGNORE if _empty_state_collapsed else Control.MOUSE_FILTER_STOP
 
 
 func _clear_entry_list() -> void:
