@@ -13,6 +13,7 @@ const LARGE_MAP_PATH: String = "res://maps/station_outpost_192x192.json"
 const OUTPUT_DIR: String = "res://tmp"
 const OUTPUT_PNG_PATH: String = "res://tmp/frontier_probe_decision_drill_f6_evidence.png"
 const OUTPUT_MANIFEST_PATH: String = "res://tmp/frontier_probe_decision_drill_f6_evidence.json"
+const FULL_DRILL_RECAPTURE_BUDGET_MS: int = 150000
 
 var _passed: int = 0
 var _failed: int = 0
@@ -48,8 +49,8 @@ func _test_docs_and_report() -> void:
 	_assert(roadmap_text.contains("TASK_659 - Frontier Probe Decision Drill F6 Evidence (implementiert)"), "Roadmap marks TASK_659 implemented")
 	_assert(contract_text.contains("Frontier-Probe-Decision-Drill-F6-Evidence"), "Mission feedback contract documents TASK_659")
 	_assert(report_text.contains("TASK_659 - Frontier Probe Decision Drill F6 Evidence"), "Current handbook report tracks TASK_659")
-	_assert(report_text.contains('latest_completed_task: "TASK_659 - Frontier Probe Decision Drill F6 Evidence"'), "Current handbook export records TASK_659 latest")
-	_assert(report_text.contains('recommended_next_task: "TASK_660 - Decision Drill Snapshot Performance Budget"'), "Current handbook recommends TASK_660")
+	_assert(report_text.contains("latest_completed_task:"), "Current handbook export records a latest task")
+	_assert(report_text.contains("recommended_next_task:"), "Current handbook recommends a follow-up task")
 	_assert(report_text.contains('data-export-key="status.task_659_done"'), "Current handbook exports TASK_659 done status")
 	_assert(report_text.contains('data-export-key="decision_drill_f6_evidence.png_written"'), "Current handbook exports TASK_659 PNG status")
 	_assert(report_text.contains('data-note-key="notes.decision_drill_f6_evidence"'), "Current handbook exports TASK_659 notes")
@@ -58,6 +59,7 @@ func _test_docs_and_report() -> void:
 
 func _test_decision_drill_f6_evidence_packet() -> void:
 	_ensure_output_dir()
+	var recapture_started_msec: int = Time.get_ticks_msec()
 	root.size = Vector2i(1920, 1080)
 	var scene: Node = MISSION_TEST_SCENE.instantiate()
 	_configure_scene(scene)
@@ -126,7 +128,8 @@ func _test_decision_drill_f6_evidence_packet() -> void:
 	_assert(_count_visible_samples(image) > 0, "TASK_659 evidence image has visible pixels")
 	var save_error: Error = image.save_png(OUTPUT_PNG_PATH)
 	_assert(save_error == OK and FileAccess.file_exists(OUTPUT_PNG_PATH), "TASK_659 PNG is written")
-	var manifest: Dictionary = _build_manifest(before_go, after_go, image, viewport_readback_available)
+	var elapsed_msec: int = maxi(1, Time.get_ticks_msec() - recapture_started_msec)
+	var manifest: Dictionary = _build_manifest(before_go, after_go, image, viewport_readback_available, elapsed_msec)
 	_write_manifest(manifest)
 	_assert(FileAccess.file_exists(OUTPUT_MANIFEST_PATH), "TASK_659 manifest is written")
 	_assert(String(manifest.get("schema", "")) == "sternenbuergerchen.frontier_probe_decision_drill_f6_evidence.v1", "Manifest uses TASK_659 schema")
@@ -136,6 +139,7 @@ func _test_decision_drill_f6_evidence_packet() -> void:
 	_assert(not bool(manifest.get("ui_sets_gameplay_truth", true)), "Manifest does not set gameplay truth")
 	_assert(bool(manifest.get("manual_review_required", false)), "Manifest requires manual review")
 	_assert(not bool(manifest.get("manual_review_done", true)), "Manifest does not claim manual review done")
+	_assert(Dictionary(manifest.get("performance_budget", {})).has("full_drill_recapture_budget_ms"), "Manifest records performance budget")
 	if DisplayServer.get_name().strip_edges().to_lower() != "headless":
 		_assert(viewport_readback_available, "Non-headless run captured a real viewport readback")
 
@@ -143,7 +147,7 @@ func _test_decision_drill_f6_evidence_packet() -> void:
 	await _wait_frames(2)
 
 
-func _build_manifest(before_go: Dictionary, after_go: Dictionary, image: Image, viewport_readback_available: bool) -> Dictionary:
+func _build_manifest(before_go: Dictionary, after_go: Dictionary, image: Image, viewport_readback_available: bool, elapsed_msec: int) -> Dictionary:
 	var manual_checks: Array = [
 		{"id": "real_f6_window_reviewed", "label": "Real F6 window reviewed", "done": false},
 		{"id": "preview_is_readable", "label": "Preview path, risk and GO readiness are readable", "done": false},
@@ -180,6 +184,14 @@ func _build_manifest(before_go: Dictionary, after_go: Dictionary, image: Image, 
 		"manual_review_required": true,
 		"manual_review_done": false,
 		"real_window_review_done": false,
+		"performance_budget": {
+			"elapsed_msec": elapsed_msec,
+			"full_drill_recapture_budget_ms": FULL_DRILL_RECAPTURE_BUDGET_MS,
+			"budget_gate": "pass" if elapsed_msec <= FULL_DRILL_RECAPTURE_BUDGET_MS else "warn",
+			"fast_regression_available": true,
+			"fast_regression_task_id": "TASK_660",
+		},
+		"recapture_policy": "Run this full drill when visual evidence or command-path recapture is required; use TASK_660 for fast budget guard.",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"recommended_next_task": "TASK_660 - Decision Drill Snapshot Performance Budget",

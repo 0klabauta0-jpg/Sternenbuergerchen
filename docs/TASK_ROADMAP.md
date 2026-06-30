@@ -288,6 +288,7 @@ git checkout -b batch/<batch-name>
 - TASK_657 - Frontier Probe F6 Visual Polish Findings (implementiert)
 - TASK_658 - Frontier Probe One-Screen Player Decision Drill (implementiert)
 - TASK_659 - Frontier Probe Decision Drill F6 Evidence (implementiert)
+- TASK_660 - Decision Drill Snapshot Performance Budget (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

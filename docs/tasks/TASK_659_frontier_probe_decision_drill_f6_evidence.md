@@ -11,6 +11,7 @@ Der Spielpfad ist nur dann wirklich hilfreich, wenn man ihn sehen und diskutiere
 - Der Verifier nutzt den bestehenden TASK_658-Drillpfad mit `issue_right_click_command_for_test()` und `execute_selected_fireteam_orders()`.
 - Das Manifest trennt Vor-GO-Preview und Nach-GO-Execution.
 - Headless-Laeufe erzeugen ein markiertes Evidence-Board; nicht-headless Laeufe duerfen einen echten Viewport-Readback speichern.
+- Das Manifest enthaelt ab TASK_660 Performance-Budget-Metadaten und eine Recapture-Policy.
 - Der aktuelle HTML-Handbuchbericht wird auf TASK_659 aktualisiert.
 
 ## Nicht-Ziele
@@ -50,5 +51,6 @@ Der Spielpfad ist nur dann wirklich hilfreich, wenn man ihn sehen und diskutiere
 
 ## Risiken / offene Punkte
 - Der Verifier ist wegen Szenenstart und GO-Ausfuehrung relativ schwergewichtig.
+- Fuer Standard-Regressionen soll ab TASK_660 der schnelle Budget-Guard reichen; TASK_659 bleibt fuer visuellen/Command-Pfad-Recapture.
 - Der menschliche F6-Fensterblick ist weiterhin nicht automatisch erledigt.
 - Der naechste sinnvolle Schritt ist ein kleines Performance-Budget fuer den Decision-Drill oder ein echter Host/Client-Klicklauf mit demselben sichtbaren Entscheidungsfokus.
