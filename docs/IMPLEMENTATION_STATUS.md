@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_714 - Station Route Multiplayer Scenario Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_714_station_route_multiplayer_scenario_guard.md`, `docs/tasks/TASK_707_mission_door_computer_cargo_smoke.md`, `docs/tasks/TASK_697_door_interaction_multiplayer_authority_check.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: Neuer Guard-Verifier kombiniert Station-Route-Gates mit Door-Multiplayer-Authority und Client-Snapshot-Sync.
+- Stand: Peer 1/Alpha-Command wird akzeptiert, Peer 2/Bravo fuer denselben Alpha-Door-Command abgewiesen und Runtime-State-Mutation blockiert.
+- Stand: Door-Open, Computer-Control, Cargo-Departed und Client-Snapshot-Apply werden in einem Manifest unter `tmp/station_route_multiplayer_scenario_guard.json` belegt.
+- Risiken/offen: Der echte Zwei-Fenster-Sichtlauf und das Bediengefuehl bleiben menschliche Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_714_station_route_multiplayer_scenario_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_713_station_route_host_client_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_707_mission_door_computer_cargo_smoke.gd`, `git diff --check`.
+- Naechster Schritt: TASK_715 - echter Station-Route-Zwei-Fenster-Playtest oder sichtbarer Polish, je nach Fensterbefund.
+
 ### TASK_713 - Station Route Host/Client Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_713_station_route_host_client_findings.md`, `docs/tasks/TASK_712_station_route_host_client_acceptance_packet.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`

@@ -301,6 +301,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Findings duerfen `recommended_next_task` nennen, aber keine Fenster starten, keine Runtime-Interaction ausloesen, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Multiplayer Scenario Guard
+- Der TASK_714-Guard kombiniert die bestehende Mission-Testszene mit Station-Route-Gates, Door-Multiplayer-Authority und Multiplayer-Snapshot-Sync.
+- Peer 1/Team Alpha darf den Door-Command fuer die Station-Route absenden; Peer 2/Team Bravo muss fuer denselben Alpha-Command abgewiesen werden.
+- Runtime-State-Mutation im Netzwerkcommand bleibt verboten; Door-Walkability/LOS darf nur ueber den Door-Runtime-Producer oeffnen.
+- Door-Open darf den Computer-Gate nicht ueberspringen; Computer-Control muss Cargo freischalten; Cargo-Departed muss `all_gates_complete` setzen.
+- Der Guard darf Server-/Client-Snapshot-Annahme pruefen, aber keine echte Fenster-Sichtbarkeit, keine Bedienqualitaet und keinen abgeschlossenen Host/Client-Playtest behaupten.
+- Das Manifest bleibt read-only, fordert weiter manuelle Review und setzt keine Gameplay-Wahrheit.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
