@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_750 - Station Homebase Host/Client Recapture Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_750_station_homebase_host_client_recapture_packet.md`, `docs/tasks/TASK_749_station_homebase_followup_microcopy_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `scripts/tools/prepare_station_homebase_host_client_recapture.ps1` schreibt `tmp/station_homebase_host_client_recapture_packet.json` mit Launch-/Capture-Kommandos, Workbench-URI, erwarteter TASK_749-Homebase-Zeile und Pflichtchecks fuer Cargo-Ende, Debrief, Return-Homebase, HUD, Host/Client-Kontext und Performance.
+- Stand: `scripts/tests/task_750_station_homebase_host_client_recapture_packet.gd` prueft Tool, Packet, Report-Felder, Contract und read-only-Grenzen.
+- Risiken/offen: Das Paket ersetzt keinen echten Sichtentscheid. Nach dem Lauf muss die Workbench exportiert und als Findings oder kleiner Visual-Polish ausgewertet werden.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/prepare_station_homebase_host_client_recapture.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_747_station_scenario_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_749_station_homebase_followup_microcopy_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_750_station_homebase_host_client_recapture_packet.gd`, `git diff --check`.
+- Naechster Schritt: echten Host/Client-Homebase-Recapture ausfuehren und Findings ableiten.
+
 ### TASK_749 - Station Homebase Follow-up Microcopy Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_749_station_homebase_followup_microcopy_polish.md`, `docs/tasks/TASK_748_station_scenario_homebase_readiness_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
