@@ -42,6 +42,11 @@ git checkout -b batch/<batch-name>
 - Gameplay-Wahrheit bleibt bei Simulation/Runtime/Contracts/Registries; UI-Tasks duerfen keine zweite Wahrheit einfuehren.
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
+## Aktueller Station-Route-Abnahmeblock
+- TASK_721 - Station Route Two-Window Visual Findings (implementiert)
+- TASK_722 - Station Route HUD Visual Polish (implementiert)
+- TASK_723 - Station Route Host/Client Recapture Review (naechster sinnvoller Schritt)
+
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
 - TASK_415 - Fireteam Runtime Execution Path Switch

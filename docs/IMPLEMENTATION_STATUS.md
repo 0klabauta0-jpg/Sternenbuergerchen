@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_722 - Station Route HUD Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_722_station_route_hud_visual_polish.md`, `docs/tasks/TASK_721_station_route_two_window_visual_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Die linke Mission-Fireteam-Spalte nutzt im `DropLightLayoutContract` jetzt `Rect2i(24, 128, 240, 288)` statt des schwereren 280x360-Blocks; Eventlog und Szenen-Defaults folgen dem kleineren linken HUD-Band.
+- Stand: `FOBFireteamCard` besitzt fuer `mission_mini` eine kompaktere Dichte, und der Mission-Controller exportiert `get_station_route_hud_visual_polish_snapshot()` als read-only Gate `ready_for_recapture`.
+- Stand: Station-Route-/Interaction-Labels im 3D-View melden groessere Font-/Pixel-/Outline-Werte, groessere Stagger-Abstaende und Backplate-Style-IDs fuer Door-/Route-Lesbarkeit.
+- Risiken/offen: TASK_722 ersetzt keinen echten Host/Client-Recapture. Der naechste sinnvolle Schritt ist ein erneuter Zwei-Fenster-Sichtlauf gegen die kompaktere HUD-/Label-Darstellung.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_722_station_route_hud_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_721_station_route_two_window_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_627_host_client_fireteam_eventlog_overlap_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_723 - Station Route Host/Client Recapture Review.
+
 ### TASK_721 - Station Route Two-Window Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_721_station_route_two_window_visual_findings.md`, `docs/tasks/TASK_720_station_route_capture_recheck_handbook.md`, `docs/tasks/TASK_719_station_route_post_polish_recheck.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

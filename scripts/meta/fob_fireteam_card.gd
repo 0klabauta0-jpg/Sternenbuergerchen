@@ -202,14 +202,19 @@ func _apply_density(
 		return
 
 	size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	custom_minimum_size = REFERENCE_CARD_MIN_SIZE
+	if _source_context == "mission_mini":
+		custom_minimum_size = Vector2(232.0, 88.0)
+		set_meta("mission_mini_density", "compact")
+		set_meta("mission_mini_card_max_height", 88.0)
+	else:
+		custom_minimum_size = REFERENCE_CARD_MIN_SIZE
 	clip_contents = true
 	margin.add_theme_constant_override("margin_left", 4)
 	margin.add_theme_constant_override("margin_top", 4)
 	margin.add_theme_constant_override("margin_right", 4)
 	margin.add_theme_constant_override("margin_bottom", 4)
 	vbox.add_theme_constant_override("separation", 1)
-	title_edit.custom_minimum_size = Vector2(0.0, 22.0)
+	title_edit.custom_minimum_size = Vector2(0.0, 18.0 if _source_context == "mission_mini" else 22.0)
 	stage_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	member_label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	teamfit_label.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -224,6 +229,10 @@ func _apply_density(
 	drop_hint_label.clip_text = true
 	teamfit_label.visible = false
 	drop_hint_label.visible = false
+	if _source_context == "mission_mini":
+		stage_label.add_theme_font_size_override("font_size", 8)
+		member_label.add_theme_font_size_override("font_size", 8)
+		title_edit.add_theme_font_size_override("font_size", 10)
 	set_meta("fob_fireteam_reference_card", true)
 
 

@@ -3076,6 +3076,8 @@ func _refresh_fireteam_mini_cards() -> void:
 			"mission_mini"
 		)
 		card.set_meta("mission_fireteam_lead_summary", lead_summary)
+		card.set_meta("station_route_hud_visual_polish_task", "TASK_722")
+		card.set_meta("station_route_hud_compact_mini_card", true)
 		_apply_fireteam_mini_card_status_context(card, normalized_fireteam_id, units)
 		_apply_fireteam_mini_card_leader_portrait(card, lead)
 		card.modulate = Color(1.0, 1.0, 1.0, 0.58) if runtime_inactive else Color.WHITE
@@ -7466,9 +7468,12 @@ func _ensure_mission_nav_timer_label() -> void:
 	if timer_label == null:
 		timer_label = Label.new()
 		timer_label.name = "MissionTimerLabel"
-		timer_label.custom_minimum_size = Vector2(44.0, 0.0)
+		timer_label.custom_minimum_size = Vector2(56.0, 0.0)
 		timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		timer_label.add_theme_font_size_override("font_size", 8)
+		timer_label.clip_text = true
+		timer_label.tooltip_text = "Mission runtime timer"
+		timer_label.set_meta("station_route_nav_placeholder_removed", true)
 		nav_row.add_child(timer_label)
 
 
@@ -7482,8 +7487,12 @@ func _refresh_mission_nav_timer_label() -> void:
 		if remaining_seconds >= 0.0:
 			var total_seconds: int = maxi(int(round(remaining_seconds)), 0)
 			timer_label.text = "%02d:%02d" % [floori(float(total_seconds) / 60.0), total_seconds % 60]
+			timer_label.visible = true
+			timer_label.set_meta("station_route_nav_timer_state", "runtime")
 			return
-	timer_label.text = "--:--"
+	timer_label.text = ""
+	timer_label.visible = false
+	timer_label.set_meta("station_route_nav_timer_state", "hidden_until_runtime")
 
 
 func build_review_session_identity_snapshot(args: Array = []) -> Dictionary:
@@ -10564,7 +10573,9 @@ func _apply_compact_mission_control_layout() -> void:
 		nav_button.add_theme_font_size_override("font_size", 8)
 	var nav_timer_label := get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionTimerLabel") as Label
 	if nav_timer_label != null:
-		nav_timer_label.custom_minimum_size = Vector2(40.0, 0.0)
+		nav_timer_label.custom_minimum_size = Vector2(56.0, 0.0)
+		nav_timer_label.clip_text = true
+		nav_timer_label.set_meta("station_route_nav_placeholder_removed", true)
 	var bottom_dock := get_node_or_null("../TacticalUI/BottomDock") as Control
 	if bottom_dock != null:
 		bottom_dock.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -10667,6 +10678,7 @@ func _apply_compact_mission_control_layout() -> void:
 	var fireteam_mini_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
 	if fireteam_mini_panel != null:
 		fireteam_mini_panel.clip_contents = false
+		fireteam_mini_panel.set_meta("station_route_hud_visual_polish_task", "TASK_722")
 		_apply_fireteam_mini_overlay_style()
 	_apply_fireteam_panel_action_button_contract()
 	_apply_card_bound_mission_control_layout()
@@ -11159,6 +11171,8 @@ func _apply_fireteam_mini_overlay_style() -> void:
 	panel.z_index = FIRETEAM_MINI_PANEL_Z_INDEX
 	panel.set_meta("mission_fireteam_mini_backgroundless", true)
 	panel.set_meta("mission_fireteam_mini_panel_z_index", FIRETEAM_MINI_PANEL_Z_INDEX)
+	panel.set_meta("station_route_hud_visual_polish_task", "TASK_722")
+	panel.set_meta("station_route_hud_map_safe_margin_enabled", true)
 	var event_log_panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
 	if event_log_panel != null:
 		event_log_panel.z_as_relative = false
@@ -11172,6 +11186,78 @@ func _apply_fireteam_mini_overlay_style() -> void:
 		var passive_control := get_node_or_null(path) as Control
 		if passive_control != null:
 			passive_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+
+func get_station_route_hud_visual_polish_snapshot() -> Dictionary:
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
+	var viewport_rect: Rect2i = layout.get("viewport", Rect2i())
+	var mini_rect: Rect2i = layout.get("fireteam_mini", Rect2i())
+	var event_rect: Rect2i = layout.get("event_log", Rect2i())
+	var top_nav_rect: Rect2i = layout.get("top_nav", Rect2i())
+	var mini_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
+	var mini_scroll := get_node_or_null("../TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll") as ScrollContainer
+	var timer_label := get_node_or_null("../TacticalUI/TopNavPanel/NavMargin/NavRow/MissionTimerLabel") as Label
+	var primary_3d_view = _get_primary_3d_view()
+	var render_snapshot: Dictionary = {}
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		render_snapshot = Dictionary(primary_3d_view.call("get_render_snapshot"))
+	var prior_fireteam_area: float = 280.0 * 360.0
+	var fireteam_area: float = float(mini_rect.size.x * mini_rect.size.y)
+	var map_safe_margin_enabled: bool = (
+		mini_rect.size.x <= 240
+		and mini_rect.size.y <= 288
+		and fireteam_area <= prior_fireteam_area * 0.70
+		and mini_panel != null
+		and bool(mini_panel.get_meta("station_route_hud_map_safe_margin_enabled", false))
+	)
+	var station_label_readable: bool = (
+		int(render_snapshot.get("mission_interaction_visual_state_label_font_size", 0)) >= 18
+		and float(render_snapshot.get("mission_interaction_visual_state_label_pixel_size", 0.0)) >= 0.024
+		and int(render_snapshot.get("mission_interaction_visual_state_label_outline_size", 0)) >= 8
+		and not String(render_snapshot.get("mission_interaction_visual_state_label_backplate_style_id", "")).strip_edges().is_empty()
+	)
+	var route_labels_uncrowded: bool = (
+		float(render_snapshot.get("route_callout_label_pixel_size", 0.0)) >= 0.023
+		and int(render_snapshot.get("route_callout_label_outline_size", 0)) >= 7
+		and not String(render_snapshot.get("route_callout_label_backplate_style_id", "")).strip_edges().is_empty()
+	)
+	var nav_placeholder_removed: bool = timer_label == null or bool(timer_label.get_meta("station_route_nav_placeholder_removed", false))
+	var checks: Array = [
+		_build_mission_first_move_readability_check("fireteam_cards_map_safe_margin", map_safe_margin_enabled, "Left Fireteam cards use the smaller TASK_722 map-safe contract."),
+		_build_mission_first_move_readability_check("fireteam_mini_scroll_preserved", mini_scroll != null and mini_scroll.vertical_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED, "Compact Fireteam mini panel keeps scrolling for more teams."),
+		_build_mission_first_move_readability_check("station_labels_readable", station_label_readable, "Station interaction labels have larger text, outline and backplate metadata."),
+		_build_mission_first_move_readability_check("route_labels_uncrowded", route_labels_uncrowded, "Route/Door callouts expose backplate and high-contrast label metadata."),
+		_build_mission_first_move_readability_check("nav_placeholder_removed", nav_placeholder_removed, "Top nav timer hides empty placeholder state instead of showing filler."),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.station_route_hud_visual_polish.v1",
+		"task_id": "TASK_722",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"viewport_rect": _rect_to_audit_dictionary(Rect2(viewport_rect.position, viewport_rect.size)),
+		"fireteam_mini_rect": _rect_to_audit_dictionary(Rect2(mini_rect.position, mini_rect.size)),
+		"event_log_rect": _rect_to_audit_dictionary(Rect2(event_rect.position, event_rect.size)),
+		"top_nav_rect": _rect_to_audit_dictionary(Rect2(top_nav_rect.position, top_nav_rect.size)),
+		"fireteam_mini_area_ratio_vs_task627": fireteam_area / prior_fireteam_area,
+		"fireteam_mini_map_safe_margin_enabled": map_safe_margin_enabled,
+		"fireteam_mini_scroll_preserved": mini_scroll != null and mini_scroll.vertical_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED,
+		"station_label_readable": station_label_readable,
+		"route_labels_uncrowded": route_labels_uncrowded,
+		"nav_placeholder_removed": nav_placeholder_removed,
+		"mission_interaction_visual_state_label_font_size": int(render_snapshot.get("mission_interaction_visual_state_label_font_size", 0)),
+		"mission_interaction_visual_state_label_pixel_size": float(render_snapshot.get("mission_interaction_visual_state_label_pixel_size", 0.0)),
+		"mission_interaction_visual_state_label_outline_size": int(render_snapshot.get("mission_interaction_visual_state_label_outline_size", 0)),
+		"mission_interaction_visual_state_label_backplate_style_id": String(render_snapshot.get("mission_interaction_visual_state_label_backplate_style_id", "")),
+		"route_callout_label_backplate_style_id": String(render_snapshot.get("route_callout_label_backplate_style_id", "")),
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "ready_for_recapture" if failed_checks.is_empty() else "review",
+	}
 
 
 func _can_issue_local_commands() -> bool:

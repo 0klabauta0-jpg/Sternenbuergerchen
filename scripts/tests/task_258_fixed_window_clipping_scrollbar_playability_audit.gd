@@ -172,7 +172,7 @@ func _test_mission_hud_fixed_windows_and_scrolls() -> void:
 	_assert(_node_rect_matches_actual(mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel") as Control, layout.get("selected_fireteam")), "Mission selected fireteam window remains fixed")
 	_assert(_node_rect_matches_actual(mission.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control, layout.get("mission_control")), "Mission control window remains fixed")
 	_assert(_scroll_container_is_usable(mission, "TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll", true), "Mission mini cards have a usable ScrollContainer")
-	_assert(_scroll_container_is_usable(mission, "TacticalUI/TacticalEventLogPanel/EventLogMargin/EventLogVBox/EventLogScroll", true), "Mission tactical event log has a usable ScrollContainer")
+	_assert(_scroll_container_is_usable(mission, "TacticalUI/TacticalEventLogPanel/EventLogMargin/EventLogVBox/EventLogScroll", false), "Mission tactical event log keeps scroll content even when empty-collapsed")
 	_assert(_scroll_container_is_usable(mission, "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll", true), "Mission command matrix has a usable ScrollContainer")
 	_assert(_scroll_container_is_usable(mission, "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll", true), "Mission selected fireteam info has a usable ScrollContainer")
 	_assert(_scroll_container_is_usable(mission, "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll", true), "Mission fireteam cards have a usable ScrollContainer")
