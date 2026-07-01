@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_780 - Station Reentry Firefight Interaction Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_780_station_reentry_firefight_interaction_polish.md`, `docs/tasks/TASK_779_station_reentry_firefight_visual_findings.md`, `docs/tasks/TASK_777_station_reentry_firefight_tension_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightInteractionPolish` verbindet TASK_779-Findings und TASK_777-Tension zu einer kompakten read-only Firefight-Folgezeile.
+- Stand: Der Snapshot liefert primaeren Folgegriff, Quick-Actions fuer bestehende Oberflaechen, Zeilenbudget, Gates und klare No-Command-/No-Gameplay-Mutation-Grenzen.
+- Risiken/offen: Noch kein echter sichtbarer Command-Surface-Recapture; TASK_780 beschreibt und prueft den Presenter/Contract.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_780_station_reentry_firefight_interaction_polish.gd`, TASK_779/TASK_778/TASK_777 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_781 - Station Reentry Firefight Command Surface Recapture.
+
 ### TASK_779 - Station Reentry Firefight Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_779_station_reentry_firefight_visual_findings.md`, `docs/tasks/TASK_778_station_reentry_firefight_visual_playtest_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Firefight-Review, unvollstaendige Pflichtchecks, konkrete Visual-/HUD-/Metrik-/Performance-/Host-Client-Follow-ups und eine saubere naechste Firefight-Iteration.
 - Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Fensterlauf bleibt `needs_visible_firefight_review` korrekt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_779_station_reentry_firefight_visual_findings.gd`, TASK_778/TASK_777 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_780 - Station Reentry Firefight Interaction Polish.
+- Naechster Schritt: TASK_780 - Station Reentry Firefight Interaction Polish (implementiert); danach TASK_781 - Station Reentry Firefight Command Surface Recapture.
 
 ### TASK_778 - Station Reentry Firefight Visual Playtest Packet
 - Status: implementiert im Arbeitsstand
