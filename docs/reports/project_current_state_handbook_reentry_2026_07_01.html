@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_767</span>
-      <span class="pill warn">Aktueller Griff: TASK_769</span>
+      <span class="pill good">Letzter Abschluss: TASK_769</span>
+      <span class="pill warn">Aktueller Griff: TASK_770</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -152,12 +152,16 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_769 prueft jetzt den ersten Station-Reentry-Missionsentscheid auf Reaktionsgefuehl: TASK_768-Preview bleibt gruen, Textbudgets bleiben kompakt, Route/Cue bleiben sichtbar und wiederholte Snapshot-Messproben bleiben im breiten Projektbudget.</p>
-          <div class="callout warning">Danach ist TASK_770 sinnvoll: Host/Client muessen denselben naechsten Auftrag im Reentry-Fenster sehen. Alternativ kann vorher ein echter Workbench-Export aus dem sichtbaren Playtest ausgewertet werden.</div>
-          <input readonly value="TASK_769 - Station Reentry Performance Feel Pass" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_770 - Station Reentry Host Client Next Order Sync oder sichtbaren Reentry-Playtest exportieren" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_770 prueft jetzt den Host/Client-Gleichstand des ersten Station-Reentry-Missionsentscheids: Beide Fenster muessen denselben Next-Order-Text, dieselbe Station-Route und denselben Cue lesen, waehrend Peer- und Team-Kontext getrennt bleiben.</p>
+          <p>Quelle bleibt der TASK_768-Preview-Contract plus TASK_769-Fast-Gate: Preview vor GO, kompakte Route/Cue und read-only Snapshot-Bewertung.</p>
+          <div class="callout warning">Danach ist TASK_771 sinnvoll: ein echter sichtbarer Host/Client-Reentry-Export, der diesen Contract mit zwei Fenstern bestaetigt oder konkrete Reibung fuer den naechsten Polish liefert.</div>
+          <input readonly value="TASK_770 - Station Reentry Host Client Next Order Sync" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_771 - Station Reentry Visible Host Client Playtest Export" data-export-key="reentry_handbook.recommended_next_task">
           <label class="checkline"><input type="checkbox" data-export-key="reentry_performance.fast_gate_pass"> TASK_769 Fast-Gate gruen</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_performance.manual_profiler_done"> Godot-Profiler manuell geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client.same_next_order"> Host/Client sehen denselben naechsten Auftrag</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client.route_cue_same"> Host/Client sehen dieselbe Route und Cue</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client.peer_team_context_distinct"> Peer-/Team-Kontext bleibt getrennt</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -247,10 +251,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_770 - Station Reentry Host Client Next Order Sync or visible Reentry playtest export"
+            recommended_next_task: "TASK_771 - Station Reentry Visible Host Client Playtest Export"
           },
           metadata: {
-            generated_for_task: "TASK_769",
+            generated_for_task: "TASK_770",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

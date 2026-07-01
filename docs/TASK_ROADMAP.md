@@ -92,7 +92,8 @@ git checkout -b batch/<batch-name>
 - TASK_767 - Station Reentry Visible Playtest Review Gate (implementiert)
 - TASK_768 - Station Reentry First Mission Preview Polish (implementiert)
 - TASK_769 - Station Reentry Performance Feel Pass (implementiert)
-- Naechster Schritt: TASK_770 - Station Reentry Host Client Next Order Sync oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+- TASK_770 - Station Reentry Host Client Next Order Sync (implementiert)
+- Naechster Schritt: TASK_771 - Station Reentry Visible Host Client Playtest Export.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

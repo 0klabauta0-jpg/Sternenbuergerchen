@@ -684,6 +684,11 @@ TASK_769 prueft den ersten Station-Reentry-Missionsentscheid auf strukturelles R
 
 Erwartete Struktur: `get_station_reentry_performance_feel_pass_snapshot()` liefert `schema = sternenbuergerchen.station_reentry_performance_feel_pass.v1`, `task_id = TASK_769`, `source_task_id = TASK_768`, `source_gate`, `performance_gate`, `ready_for_visible_playtest`, `preview_gate_ok`, `preview_text_ok`, `selected_order_budget_ok`, `station_context_ok`, `route_cue_budget_ok`, `repeated_snapshot_budget_ok`, `sample_count`, `avg_usec`, `max_usec`, `budget_avg_usec`, `budget_max_usec`, `manual_profiler_required = true`, `manual_profiler_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`.
 
+## Station-Reentry-Host-Client-Next-Order-Sync (TASK_770)
+TASK_770 prueft vor dem echten Zwei-Fenster-Lauf, ob Host und Client im Station-Reentry denselben naechsten Auftrag lesen. Der Snapshot darf nur vorhandene Reentry-Preview-/Performance-Daten und Peer-/Team-Kontext vergleichen. Er darf keinen `GO` ausfuehren, keine Command-Queue schreiben, keine Multiplayer-Authority aendern und keine Gameplay-Wahrheit in UI oder Workbench speichern.
+
+Erwartete Struktur: `get_station_reentry_host_client_next_order_sync_snapshot()` liefert `schema = sternenbuergerchen.station_reentry_host_client_next_order_sync.v1`, `task_id = TASK_770`, `source_task_id = TASK_769`, `host_view`, `client_view`, `host_next_order_text`, `client_next_order_text`, `station_route_line`, `station_cue_line`, `same_next_order`, `same_route_line`, `same_cue_line`, `peer_context_distinct`, `team_context_present`, `text_budget_ok`, `source_ready`, `read_only_sources`, `sync_gate`, `ready_for_visible_host_client_playtest`, `manual_two_window_review_required = true`, `manual_two_window_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.

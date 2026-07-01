@@ -65,6 +65,7 @@ const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("re
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const STATION_SCENARIO_ROUTE_CUE_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/station_scenario_route_cue_polish.gd")
 const STATION_REENTRY_PERFORMANCE_FEEL_PASS_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_performance_feel_pass.gd")
+const STATION_REENTRY_HOST_CLIENT_NEXT_ORDER_SYNC_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_host_client_next_order_sync.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -14342,6 +14343,34 @@ func get_station_reentry_performance_feel_pass_snapshot(performance_sample: Dict
 		"build_snapshot",
 		get_station_reentry_first_mission_preview_polish_snapshot(),
 		performance_sample,
+		{}
+	)).duplicate(true)
+
+
+func get_station_reentry_host_client_next_order_sync_snapshot(host_context: Dictionary = {}, client_context: Dictionary = {}) -> Dictionary:
+	var base_snapshot: Dictionary = get_station_reentry_performance_feel_pass_snapshot()
+	var host_snapshot: Dictionary = base_snapshot.duplicate(true)
+	var client_snapshot: Dictionary = base_snapshot.duplicate(true)
+	host_snapshot["peer_role"] = "host"
+	host_snapshot["peer_id"] = int(host_context.get("peer_id", 1))
+	host_snapshot["team_id"] = String(host_context.get("team_id", "team_alpha"))
+	host_snapshot["next_order_text"] = String(host_context.get("next_order_text", base_snapshot.get("selected_order_text", "")))
+	if host_context.has("station_route_line"):
+		host_snapshot["station_route_line"] = String(host_context.get("station_route_line", ""))
+	if host_context.has("station_cue_line"):
+		host_snapshot["station_cue_line"] = String(host_context.get("station_cue_line", ""))
+	client_snapshot["peer_role"] = "client"
+	client_snapshot["peer_id"] = int(client_context.get("peer_id", 2))
+	client_snapshot["team_id"] = String(client_context.get("team_id", "team_bravo"))
+	client_snapshot["next_order_text"] = String(client_context.get("next_order_text", base_snapshot.get("selected_order_text", "")))
+	if client_context.has("station_route_line"):
+		client_snapshot["station_route_line"] = String(client_context.get("station_route_line", ""))
+	if client_context.has("station_cue_line"):
+		client_snapshot["station_cue_line"] = String(client_context.get("station_cue_line", ""))
+	return Dictionary(STATION_REENTRY_HOST_CLIENT_NEXT_ORDER_SYNC_SCRIPT.call(
+		"build_snapshot",
+		host_snapshot,
+		client_snapshot,
 		{}
 	)).duplicate(true)
 
