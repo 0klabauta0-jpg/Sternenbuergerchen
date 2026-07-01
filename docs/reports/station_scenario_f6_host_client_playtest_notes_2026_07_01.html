@@ -89,6 +89,7 @@
       <span class="pill good">Polish: TASK_762</span>
       <span class="pill good">Staging: TASK_763</span>
       <span class="pill good">Loadout: TASK_764</span>
+      <span class="pill good">Boarding: TASK_765</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -267,6 +268,15 @@
           <textarea data-export-key="station_scenario_playtest.notes.station_reentry_loadout_bridge" placeholder="Reentry-Loadout: Ist klar, ob Loadout nur geprueft oder angewendet werden muss?"></textarea>
         </article>
         <article class="card full">
+          <h2>Station Reentry Dropship Boarding</h2>
+          <p>Das Return-Panel nennt nach TASK_765 Dropship- und Boarding-Stand aus Pre-Mission-Readiness und Homebase-Direct-Staging.</p>
+          <input readonly value="TASK_765" data-export-key="station_scenario_playtest.reentry_boarding.task_id">
+          <input readonly value="task_765_station_reentry_dropship_boarding_v1" data-export-key="station_scenario_playtest.reentry_boarding.style_id">
+          <input readonly value="Dropship/Boarding: aus Pre-Mission-Readiness und Homebase-Direct-Staging" data-export-key="station_scenario_playtest.reentry_boarding.boarding_line">
+          <input readonly value="tmp/station_reentry_dropship_boarding_bridge_polish.json" data-export-key="station_scenario_playtest.reentry_boarding.manifest_path">
+          <textarea data-export-key="station_scenario_playtest.notes.station_reentry_dropship_boarding" placeholder="Reentry-Boarding: Ist klar, ob Dropship und Fireteam wirklich startbereit sind?"></textarea>
+        </article>
+        <article class="card full">
           <h2>Route</h2>
           <table>
             <thead><tr><th>Schritt</th><th>Spieler-Erwartung</th><th>Was notieren?</th></tr></thead>
@@ -324,7 +334,7 @@
         </article>
         <article class="card half">
           <h3>Naechster Task</h3>
-          <input value="TASK_765 - Station Reentry Dropship Boarding Bridge Polish oder echter Reentry-Playtest" data-export-key="station_scenario_playtest.recommended_next_task">
+          <input value="TASK_766 - Station Reentry Start Permission Bridge Polish oder echter Reentry-Playtest" data-export-key="station_scenario_playtest.recommended_next_task">
         </article>
       </div>
     </section>
@@ -415,7 +425,7 @@
             findings_task_id: "TASK_754",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_764 - Station Reentry Loadout Bridge Polish",
+            latest_completed_task: "TASK_765 - Station Reentry Dropship Boarding Bridge Polish",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
@@ -427,7 +437,8 @@
             latest_station_reentry_targeted_polish_task: "TASK_762 - Station Reentry Targeted Polish",
             latest_station_reentry_fireteam_staging_polish_task: "TASK_763 - Station Reentry Fireteam Staging Polish",
             latest_station_reentry_loadout_bridge_polish_task: "TASK_764 - Station Reentry Loadout Bridge Polish",
-            recommended_next_task: "TASK_765 - Station Reentry Dropship Boarding Bridge Polish oder echter Reentry-Playtest",
+            latest_station_reentry_dropship_boarding_bridge_polish_task: "TASK_765 - Station Reentry Dropship Boarding Bridge Polish",
+            recommended_next_task: "TASK_766 - Station Reentry Start Permission Bridge Polish oder echter Reentry-Playtest",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             manual_review_required: true

@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_765 - Station Reentry Dropship Boarding Bridge Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_765_station_reentry_dropship_boarding_bridge_polish.md`, `docs/tasks/TASK_764_station_reentry_loadout_bridge_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Das Station-Return-Panel zeigt zusaetzlich eine kompakte Dropship-/Boarding-Zeile aus `get_pre_mission_readiness_snapshot()` und `get_homebase_direct_staging_snapshot()`.
+- Stand: `get_station_homebase_return_panel_polish_snapshot()` exportiert Dropship-/Boarding-Text, erwarteten Text, States, Details, Payload-/Boarding-Zahlen, Style-ID, Sichtbarkeit, Bounds und Read-only-Status.
+- Risiken/offen: Der sichtbare Zwei-Fenster-Reentry-Playtest bleibt offen; TASK_765 poliert nur die Dropship-/Boarding-Lesbarkeit im Homebase-Return-Panel.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_765_station_reentry_dropship_boarding_bridge_polish.gd`, TASK_764/TASK_763/TASK_755 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_766 - Station Reentry Start Permission Bridge Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+
 ### TASK_764 - Station Reentry Loadout Bridge Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_764_station_reentry_loadout_bridge_polish.md`, `docs/tasks/TASK_763_station_reentry_fireteam_staging_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/mission_briefing_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: `get_station_homebase_return_panel_polish_snapshot()` exportiert Loadout-Bridge-Text, erwarteten Text, State, Detail, Style-ID, Sichtbarkeit, Bounds und Read-only-Status.
 - Risiken/offen: Der sichtbare Zwei-Fenster-Reentry-Playtest bleibt offen; TASK_764 poliert nur die Loadout-Lesbarkeit im Homebase-Return-Panel.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_764_station_reentry_loadout_bridge_polish.gd`, TASK_763/TASK_762/TASK_755 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_765 - Station Reentry Dropship Boarding Bridge Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+- Naechster Schritt: TASK_765 ist umgesetzt; danach TASK_766 - Station Reentry Start Permission Bridge Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
 
 ### TASK_763 - Station Reentry Fireteam Staging Polish
 - Status: implementiert im Arbeitsstand
