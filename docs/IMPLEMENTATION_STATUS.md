@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_757 - Station Homebase Recapture Findings Refresh
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_757_station_homebase_recapture_findings_refresh.md`, `docs/tasks/TASK_756_station_homebase_real_window_recapture.md`, `docs/tasks/TASK_754_station_homebase_recapture_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioF6HostClientPlaytestNotes` exportiert jetzt zusaetzlich `homebase_recapture_findings_refresh` fuer den Stand nach TASK_755/TASK_756.
+- Stand: Der Refresh blockiert ohne echten TASK_756-Workbench-Export, meldet fehlende Panel-/Homebase-Checks und routet vollstaendige Reviews zu Acceptance statt zur erledigten TASK_755-Panel-Arbeit.
+- Stand: Playtest-Workbench und aktueller HTML-Handbuchbericht enthalten TASK_757-Exportfelder und verweisen als naechsten engen Schritt auf TASK_758 oder echten Export.
+- Risiken/offen: TASK_757 ersetzt keinen menschlichen Fensterblick; er macht nur das Follow-up-Routing wieder ehrlich und aktuell.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_757_station_homebase_recapture_findings_refresh.gd`, TASK_754/TASK_756 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_758 - Station Homebase Return Acceptance Review oder echten Workbench-Export auswerten.
+
 ### TASK_756 - Station Homebase Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_756_station_homebase_real_window_recapture.md`, `docs/tasks/TASK_755_station_homebase_return_panel_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`

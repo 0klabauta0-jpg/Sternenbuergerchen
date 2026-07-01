@@ -79,7 +79,8 @@ git checkout -b batch/<batch-name>
 - TASK_754 - Station Homebase Recapture Findings (implementiert)
 - TASK_755 - Station Homebase Return Panel Polish (implementiert)
 - TASK_756 - Station Homebase Real Window Recapture (implementiert)
-- Naechster Schritt: TASK_757 - Station Homebase Recapture Findings Refresh oder echten Workbench-Export auswerten.
+- TASK_757 - Station Homebase Recapture Findings Refresh (implementiert)
+- Naechster Schritt: TASK_758 - Station Homebase Return Acceptance Review oder echten Workbench-Export auswerten.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
