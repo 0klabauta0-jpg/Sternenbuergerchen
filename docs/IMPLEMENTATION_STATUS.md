@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_783 - Station Reentry Firefight Command Surface Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_783_station_reentry_firefight_command_surface_polish.md`, `docs/tasks/TASK_782_station_reentry_firefight_command_surface_findings.md`, `docs/tasks/TASK_780_station_reentry_firefight_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightCommandSurfacePolish` fasst TASK_782-Findings und TASK_780-Interaction-Polish zu einer stabilen read-only Surface-Struktur zusammen.
+- Stand: Der Snapshot liefert Interaction-Line, Primary-Action, Quick-Action-Rail, Guard-Line, Style-ID, Summary-Line und klare Routen fuer externe Findings.
+- Risiken/offen: Kein automatischer Sichtentscheid und kein neues Command-UI-System; echte Fensterwirkung bleibt Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_783_station_reentry_firefight_command_surface_polish.gd`, TASK_782/TASK_781/TASK_780 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_784 - Station Reentry Firefight Command Surface Playtest Packet Refresh.
+
 ### TASK_782 - Station Reentry Firefight Command Surface Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_782_station_reentry_firefight_command_surface_findings.md`, `docs/tasks/TASK_781_station_reentry_firefight_command_surface_recapture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Command-Surface-Review, unvollstaendige Pflichtchecks, konkrete Command-Surface-/Host-Client-/Performance-Follow-ups und eine saubere naechste Firefight-Iteration.
 - Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Fensterlauf bleibt `needs_visible_command_surface_review` korrekt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_782_station_reentry_firefight_command_surface_findings.gd`, TASK_781/TASK_780/TASK_779 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_783 - Station Reentry Firefight Command Surface Polish oder echter sichtbarer Command-Surface-Review.
+- Naechster Schritt: TASK_783 - Station Reentry Firefight Command Surface Polish (implementiert).
 
 ### TASK_781 - Station Reentry Firefight Command Surface Recapture
 - Status: implementiert im Arbeitsstand
