@@ -51,6 +51,7 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 	var recapture_evidence: Dictionary = _build_recapture_evidence(recapture_findings, options)
 	var homebase_recapture_review: Dictionary = _build_homebase_recapture_review(recapture_evidence, existing_notes)
 	var homebase_recapture_findings: Dictionary = _build_homebase_recapture_findings(homebase_recapture_review)
+	var homebase_recapture_findings_refresh: Dictionary = _build_homebase_recapture_findings_refresh(homebase_recapture_review, recapture_evidence)
 	var required_checks: Array = _build_required_checks(existing_notes)
 	var issue_flags: Array = _build_issue_flags(existing_notes)
 	var completed_check_count: int = _count_completed_checks(required_checks)
@@ -82,6 +83,8 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 		"homebase_recapture_review_status": String(homebase_recapture_review.get("status", "")),
 		"homebase_recapture_findings": homebase_recapture_findings,
 		"homebase_recapture_findings_status": String(homebase_recapture_findings.get("status", "")),
+		"homebase_recapture_findings_refresh": homebase_recapture_findings_refresh,
+		"homebase_recapture_findings_refresh_status": String(homebase_recapture_findings_refresh.get("status", "")),
 		"report_path": String(options.get("report_path", DEFAULT_REPORT_PATH)),
 		"manifest_path": String(options.get("manifest_path", DEFAULT_MANIFEST_PATH)),
 		"required_checks": required_checks,
@@ -265,6 +268,47 @@ static func _build_homebase_recapture_findings(homebase_review: Dictionary) -> D
 		"findings": findings,
 		"recommended_next_task": recommended_next,
 		"ready_for_runtime_polish": status == "ready_for_homebase_panel_polish",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+	}
+
+
+static func _build_homebase_recapture_findings_refresh(homebase_review: Dictionary, recapture_evidence: Dictionary) -> Dictionary:
+	var review_status: String = String(homebase_review.get("status", ""))
+	var missing_check_ids: Array = _array_from_variant(homebase_review.get("missing_check_ids", []))
+	var task_756_ready: bool = String(recapture_evidence.get("homebase_return_panel_polish_task_id", "")) == "TASK_755" and bool(recapture_evidence.get("homebase_return_panel_evidence_ready", false))
+	var status: String = "blocked_missing_task_756_window_review"
+	var summary: String = "TASK_756-Homebase-Fensterreview ist noch offen; der Panel-Polish darf nicht als sichtbar abgenommen gelten."
+	var recommended_next: String = "TASK_757 - run updated Homebase Recapture Workbench export"
+	var findings: Array = []
+	if review_status == "needs_homebase_recapture_completion":
+		status = "needs_task_756_panel_check_completion"
+		summary = "TASK_756-Review ist angefangen, aber Pflichtchecks zum Return-Panel oder Homebase-Abschluss fehlen."
+		recommended_next = "TASK_757 - complete TASK_756 Homebase panel checks"
+		findings.append(_finding("task_756_panel_checks_incomplete", "blocker", "Fehlende TASK_756-Checks: %s" % ", ".join(PackedStringArray(missing_check_ids)), recommended_next))
+	elif review_status == "ready_for_homebase_findings":
+		status = "ready_for_homebase_acceptance_review"
+		summary = "TASK_756-Review ist vollstaendig; naechster sinnvoller Schritt ist Acceptance statt weiterer Panel-Polish."
+		recommended_next = "TASK_758 - Station Homebase Return Acceptance Review"
+		findings.append(_finding("task_756_ready_for_acceptance_review", "followup", "Cargo -> Debrief -> Homebase inklusive TASK_755-Return-Panel ist geprueft; jetzt eng akzeptieren oder echte Restreibung schneiden.", recommended_next))
+	else:
+		findings.append(_finding("task_756_real_window_review_missing", "blocker", "Der aktualisierte TASK_756-Fensterlauf wurde noch nicht als echter Workbench-Export abgeschlossen.", recommended_next))
+	return {
+		"schema": "sternenbuergerchen.station_homebase_recapture_findings_refresh.v1",
+		"task_id": "TASK_757",
+		"source_task_id": "TASK_756",
+		"source_findings_task_id": "TASK_754",
+		"source_panel_task_id": String(recapture_evidence.get("homebase_return_panel_polish_task_id", "")),
+		"source_review_status": review_status,
+		"task_756_evidence_ready": task_756_ready,
+		"status": status,
+		"summary": summary,
+		"missing_check_ids": missing_check_ids,
+		"finding_count": findings.size(),
+		"findings": findings,
+		"recommended_next_task": recommended_next,
+		"ready_for_acceptance_review": status == "ready_for_homebase_acceptance_review",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
