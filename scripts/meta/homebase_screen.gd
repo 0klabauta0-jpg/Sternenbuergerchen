@@ -363,6 +363,50 @@ func get_frontier_probe_post_debrief_homebase_readability_snapshot() -> Dictiona
 	}
 
 
+func get_station_scenario_post_debrief_homebase_readability_snapshot() -> Dictionary:
+	var label := _get_post_debrief_homebase_summary_label()
+	var label_visible: bool = _control_is_visible(label)
+	var label_text: String = label.text.strip_edges() if label != null else ""
+	var route_id: String = _get_last_result_route_id()
+	var scenario_id: String = _get_last_result_scenario_id()
+	var is_station_result: bool = _is_station_scenario_last_result()
+	var result_text: String = _build_post_debrief_homebase_result_text()
+	var next_step_text: String = _build_post_debrief_homebase_next_step_text()
+	var checks: Array = []
+	_append_visual_audit_check(checks, "station_result_present", is_station_result, "critical", "Homebase return summary should carry the Station Scenario result.")
+	_append_visual_audit_check(checks, "summary_label_visible", label_visible, "critical", "Homebase should show a compact Station post-Debrief summary.")
+	_append_visual_audit_check(checks, "summary_mentions_debrief", label_text.contains("Debrief"), "critical", "Summary should explain that the Debrief was reviewed.")
+	_append_visual_audit_check(checks, "summary_mentions_homebase", label_text.contains("Homebase"), "critical", "Summary should make the return target clear.")
+	_append_visual_audit_check(checks, "summary_mentions_station", label_text.contains("Station Drill"), "critical", "Summary should name the Station Drill result.")
+	_append_visual_audit_check(checks, "summary_mentions_next_step", not next_step_text.is_empty() and label_text.contains(next_step_text), "critical", "Summary should name the next useful Homebase action.")
+	_append_visual_audit_check(checks, "summary_compact", label_text.length() <= 180 and label_text.count("\n") == 0, "critical", "Summary should stay compact in the MissionPanel.")
+	_append_visual_audit_check(checks, "result_preserved", not result_text.is_empty(), "critical", "Mission result should remain readable after Station return.")
+	_append_visual_audit_check(checks, "read_only", true, "critical", "Snapshot reads Homebase result display only.")
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_scenario_post_debrief_homebase_readability.v1",
+		"task_id": "TASK_745",
+		"source_task_ids": ["TASK_744", "TASK_640"],
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"route_id": route_id,
+		"scenario_id": scenario_id,
+		"station_result_present": is_station_result,
+		"summary_label_visible": label_visible,
+		"summary_text": label_text,
+		"result_text": result_text,
+		"next_step_text": next_step_text,
+		"mission_result_preserved": not _last_mission_result_summary.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"checks": checks,
+		"recommended_next_task": "TASK_746 - Station Scenario Homebase Next Sortie Readiness",
+	}
+
+
 func get_frontier_probe_homebase_next_sortie_readiness_snapshot() -> Dictionary:
 	var post_snapshot: Dictionary = get_frontier_probe_post_debrief_homebase_readability_snapshot()
 	var readiness: Dictionary = get_pre_mission_readiness_snapshot()
@@ -3024,6 +3068,8 @@ func _update_post_debrief_homebase_summary() -> void:
 	label.tooltip_text = "Read-only summary of the last mission result carried back from Debrief."
 	label.set_meta("frontier_probe_post_debrief_homebase_summary", true)
 	label.set_meta("frontier_probe_result_present", _is_frontier_probe_last_result())
+	label.set_meta("station_scenario_post_debrief_homebase_summary", _is_station_scenario_last_result())
+	label.set_meta("station_result_present", _is_station_scenario_last_result())
 	label.set_meta("post_debrief_homebase_result_text", _build_post_debrief_homebase_result_text())
 	label.set_meta("post_debrief_homebase_next_step_text", _build_post_debrief_homebase_next_step_text())
 	label.set_meta("homebase_followup_emphasis", true)
@@ -3166,7 +3212,7 @@ func _apply_post_debrief_density_findings() -> void:
 	if summary_label == null:
 		return
 	var followup_panel := _get_post_debrief_followup_panel()
-	var should_collapse: bool = _is_frontier_probe_last_result() and _control_is_visible(followup_panel)
+	var should_collapse: bool = (_is_frontier_probe_last_result() or _is_station_scenario_last_result()) and _control_is_visible(followup_panel)
 	summary_label.set_meta("homebase_density_summary_collapsed", should_collapse)
 	summary_label.set_meta("homebase_density_findings_style_id", HOMEBASE_POST_DEBRIEF_DENSITY_FINDINGS_STYLE_ID if should_collapse else "")
 	if should_collapse:
@@ -3235,7 +3281,7 @@ func _collect_visible_text_length(root_node: Node) -> int:
 func _build_post_debrief_homebase_summary_text() -> String:
 	if _last_mission_result_summary.is_empty():
 		return ""
-	if not _is_frontier_probe_last_result():
+	if not _is_frontier_probe_last_result() and not _is_station_scenario_last_result():
 		return ""
 	var result_text: String = _build_post_debrief_homebase_result_text()
 	var next_step_text: String = _build_post_debrief_homebase_next_step_text()
@@ -3250,7 +3296,7 @@ func _build_post_debrief_homebase_result_text() -> String:
 	var outcome: String = String(_last_mission_result_summary.get("result", "ended")).strip_edges()
 	if outcome.is_empty():
 		outcome = String(_last_mission_result_summary.get("mission_outcome", "ended")).strip_edges()
-	var route_label: String = "Frontier Probe"
+	var route_label: String = "Station Drill" if _is_station_scenario_last_result() else "Frontier Probe"
 	var win_condition: String = String(_last_mission_result_summary.get("win_condition_type", "")).strip_edges()
 	var duration_seconds: int = int(round(float(_last_mission_result_summary.get("duration_seconds", 0.0))))
 	var parts: PackedStringArray = PackedStringArray([route_label, outcome.to_upper()])
@@ -3345,6 +3391,8 @@ func _get_last_result_route_id() -> String:
 	var route_id: String = String(_last_mission_result_summary.get("route_id", "")).strip_edges()
 	if route_id.is_empty() and _is_frontier_probe_last_result():
 		return "frontier_probe_aa_computer_cargo"
+	if route_id.is_empty() and _is_station_scenario_last_result():
+		return "station_route_aa_door_computer_cargo"
 	return route_id
 
 
@@ -3356,6 +3404,8 @@ func _get_last_result_scenario_id() -> String:
 	var scenario_file_path: String = String(_last_mission_result_summary.get("scenario_file_path", "")).strip_edges()
 	if scenario_file_path.get_file().get_basename() == "frontier_probe_vertical_slice":
 		return "frontier_probe_vertical_slice"
+	if scenario_file_path.get_file().get_basename() == "station_route_one_screen_multiplayer_drill":
+		return "station_route_one_screen_multiplayer_drill"
 	return ""
 
 
@@ -3367,6 +3417,16 @@ func _is_frontier_probe_last_result() -> bool:
 	if _get_last_result_scenario_id() == "frontier_probe_vertical_slice":
 		return true
 	return String(_last_mission_result_summary.get("scenario_file_path", "")).strip_edges().ends_with("frontier_probe_vertical_slice.json")
+
+
+func _is_station_scenario_last_result() -> bool:
+	if _last_mission_result_summary.is_empty():
+		return false
+	if String(_last_mission_result_summary.get("route_id", "")).strip_edges() == "station_route_aa_door_computer_cargo":
+		return true
+	if _get_last_result_scenario_id() == "station_route_one_screen_multiplayer_drill":
+		return true
+	return String(_last_mission_result_summary.get("scenario_file_path", "")).strip_edges().ends_with("station_route_one_screen_multiplayer_drill.json")
 
 
 func _update_mission_briefing_panel() -> void:

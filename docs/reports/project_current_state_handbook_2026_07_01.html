@@ -81,8 +81,8 @@
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-07-01</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Abschluss: TASK_744</span>
-      <span class="pill warn">Naechster Fokus: Station Post-Debrief Homebase-Lesbarkeit</span>
+      <span class="pill">Letzter Abschluss: TASK_745</span>
+      <span class="pill warn">Naechster Fokus: Station Next-Sortie-Readiness oder Host/Client-Recapture</span>
       <span class="pill good">TASK_706 Door Layout/Visual Polish</span>
       <span class="pill good">TASK_707 Door/Computer/Cargo Smoke</span>
       <span class="pill good">TASK_708 Station Route Visual Evidence</span>
@@ -121,6 +121,7 @@
       <span class="pill good">TASK_742 Cargo Endgame Cue</span>
       <span class="pill good">TASK_743 Debrief Handoff Cue</span>
       <span class="pill good">TASK_744 Meta Debrief Smoke</span>
+      <span class="pill good">TASK_745 Homebase Return Summary</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -188,6 +189,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_742_done"> TASK_742 Cargo Endgame Cue Polish vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_743_done"> TASK_743 Debrief Handoff Cue vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_744_done"> TASK_744 Meta Debrief Route Smoke vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_745_done"> TASK_745 Post Debrief Homebase Readability vorhanden</label>
         </article>
         <article class="card full">
           <h2>Systemkarte</h2>
@@ -196,7 +198,7 @@
             <tbody>
               <tr><td>Spiel-Flow</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Spine pruefbar.</td><td>Der echte Spielerblick muss weiter in kleinen Fenster-/Playtest-Paketen belegt werden.</td><td>Mini-Szenario mit wenigen klaren Interaktionen erneut spielen.</td></tr>
               <tr><td>Mission</td><td>Fireteam-Auswahl, Move/Defend/Fire, Threat-Preview, Contacts, Objective-Gates, Door-Hook, Empty-Event-Log-Polish und Route-Readout sind verbunden.</td><td>Station-/Door-Objekte muessen optisch noch eindeutiger werden.</td><td>Echter Door/Computer/Cargo-Klicklauf.</td></tr>
-              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung, technischer Scenario-Guard, HUD-Route-Line, Two-Window-Visual-Findings, TASK_722-HUD-Polish, TASK_723-Recapture-Gate, TASK_724-Folgepolish, TASK_725-Acceptance-Gate, TASK_726-Szenario-Drill, TASK_727-Playtest-Workbench, TASK_728-Findings-Gate, TASK_729-Run-Packet, TASK_730-Header-Route-Polish, TASK_731-Export-Review, TASK_732-Route-Cue, TASK_733-HUD-Entdichtung, TASK_734-Performance-Feel-Gate, TASK_735-Report-Sync-Guard, TASK_736-Command-Feedback-Polish, TASK_737-Run-Packet-Refresh, TASK_738-Identity-Cue-Polish, TASK_739-Recapture-Findings, TASK_741-Workbench-Prefill, TASK_742-Cargo-Endgame-Cue, TASK_743-Debrief-Handoff und TASK_744-Meta-Debrief-Smoke existieren.</td><td>Der Drill ist runtime-pruefbar, startbar und sagt den naechsten Auftrag ohne doppelte Route in der ACT-Zeile. Der erste Blick oben links zeigt zuerst die Cue und danach eine neutrale Route; der finale Cargo-Moment liest als Halten/Abflug/Debrief und der Abschluss fuehrt jetzt auch im Meta-Layer ueber Debrief zur Homebase.</td><td>Station-Homebase-Rueckkehr nach Debrief lesbarer machen oder echten Host/Client-Fensterlauf recapturen.</td></tr>
+              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung, technischer Scenario-Guard, HUD-Route-Line, Two-Window-Visual-Findings, TASK_722-HUD-Polish, TASK_723-Recapture-Gate, TASK_724-Folgepolish, TASK_725-Acceptance-Gate, TASK_726-Szenario-Drill, TASK_727-Playtest-Workbench, TASK_728-Findings-Gate, TASK_729-Run-Packet, TASK_730-Header-Route-Polish, TASK_731-Export-Review, TASK_732-Route-Cue, TASK_733-HUD-Entdichtung, TASK_734-Performance-Feel-Gate, TASK_735-Report-Sync-Guard, TASK_736-Command-Feedback-Polish, TASK_737-Run-Packet-Refresh, TASK_738-Identity-Cue-Polish, TASK_739-Recapture-Findings, TASK_741-Workbench-Prefill, TASK_742-Cargo-Endgame-Cue, TASK_743-Debrief-Handoff, TASK_744-Meta-Debrief-Smoke und TASK_745-Homebase-Return-Summary existieren.</td><td>Der Drill ist runtime-pruefbar, startbar und sagt den naechsten Auftrag ohne doppelte Route in der ACT-Zeile. Der erste Blick oben links zeigt zuerst die Cue und danach eine neutrale Route; der finale Cargo-Moment liest als Halten/Abflug/Debrief, der Abschluss fuehrt im Meta-Layer ueber Debrief zur Homebase und die Homebase nennt den Station Drill wieder als Ergebnis.</td><td>Station-Next-Sortie-Readiness bauen oder echten Host/Client-Fensterlauf recapturen.</td></tr>
               <tr><td>Editor</td><td>Map-Editor und Builder-Workbench haben Paletten, Snapping, Presets und Interaction-Bindings.</td><td>Bediengefuehl und Asset-Auswahl bleiben langfristig ein eigener UX-Block.</td><td>Erst nach spielbarer Mission weiterpolieren.</td></tr>
               <tr><td>Export</td><td>Export-Templates und Package-Hygiene sind geprueft.</td><td>Warnungen koennen wiederkommen, sobald Assets/Plugins wachsen.</td><td>Bei Release-Kandidat erneut Export-Smoke laufen lassen.</td></tr>
             </tbody>
@@ -295,7 +297,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster Griff</h2>
-          <p>Aktuell sinnvoll: Nach TASK_744 ist der Station-Abschluss nicht nur im HUD, sondern auch als Meta-Debrief-Route-Smoke pruefbar. Der naechste kleine Griff sollte die Homebase-Rueckkehr nach diesem Debrief lesbarer machen oder den echten Host/Client-Fensterlauf mit Cargo-Ende und Debrief-Handoff recapturen.</p>
+          <p>Aktuell sinnvoll: Nach TASK_745 ist der Station-Abschluss bis zur Homebase lesbar. Der naechste kleine Griff sollte die Station-Next-Sortie-Readiness bauen oder den echten Host/Client-Fensterlauf mit Cargo-Ende, Debrief-Handoff und Homebase-Return recapturen.</p>
           <div class="callout warning">Nicht jetzt: grosses neues Missionssystem, Ammo-Runner, tiefe Economy oder Editor-Umbau. Erst muss der kompakte AA/DOOR/COM/CARGO-Drill in der echten Fensteransicht tragen und als JSON-Notiz exportiert werden.</div>
         </article>
         <article class="card">
@@ -326,6 +328,7 @@
             <option value="station_scenario_cargo_endgame_cue_polish">TASK_742 Station Scenario Cargo Endgame Cue Polish</option>
             <option value="station_scenario_debrief_handoff_cue">TASK_743 Station Scenario Debrief Handoff Cue</option>
             <option value="station_scenario_meta_debrief_route_smoke">TASK_744 Station Scenario Meta Debrief Route Smoke</option>
+            <option value="station_scenario_post_debrief_homebase_readability">TASK_745 Station Scenario Post Debrief Homebase Readability</option>
             <option value="real_host_client_run">Echten Host/Client Door Run machen</option>
             <option value="mini_scenario_playtest">Mini-Szenario Playtest</option>
           </select>
@@ -337,7 +340,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-07-01: Neuer Ist-Stand-/Handbuch-Bericht angelegt. Der spielbare Schwerpunkt liegt weiter auf dem kleinen Stationslauf: Door nutzen, Computer sichern, Cargo landen lassen, alles mit Host/Client-Authority und lesbarem HUD. TASK_718 hat die sichtbare Door-Sprache auf DOOR B-&gt;GO und DOOR OPEN gekuerzt. TASK_719 erkennt stale Capture-Erwartungen. TASK_720 hat den Host/Client-Capture erneut geschrieben und TASK_719/TASK_717/TASK_718 danach gruen ausgefuehrt. TASK_721 hat Host-/Client-Crops sichtbar bewertet: Der Pfad ist technisch bereit, aber vor Akzeptanz braucht er HUD-Visual-Polish. TASK_722 hat diese konkreten HUD-Reibungen poliert. TASK_723 hat den Nach-TASK_722-Recapture als `needs_visual_review` festgehalten. TASK_724 hat daraus einen kleinen Folge-Polish gemacht und meldet wieder `ready_for_recapture`. TASK_725 hat den frischen Recapture als `accepted_for_next_slice` festgehalten: gut genug fuer den naechsten kleinen Stations-Playtest, aber keine Gesamtspiel-Abnahme. TASK_726 hat daraus ein konkretes One-Screen-Szenario gebaut: AA -> Door -> Computer -> Cargo, Alpha/Bravo-ready und runtime-geprueft. TASK_727 hat die sichtbare F6-/Host-Client-Playtest-Workbench ergaenzt. TASK_728 verdichtet diese Notizen als Findings-Gate. TASK_729 schreibt ein sichtbares Run-Packet mit Scenario-Arg, Workbench-URI, Manifeststatus und Startkommandos. TASK_730 hat den echten Host/Client-Capture gegen dieses Szenario genutzt und den ersten HUD-Blick verbessert: Die Route wird im Mission-Identity-Body sichtbar. TASK_731 prueft den Workbench-Exportstatus und routet echte Follow-up-Flags auf neue TASK_732+ Slices. TASK_732 setzt den ersten dieser Slices um: Die Station-Route hat jetzt eine eigene `CUE ...`-Zeile fuer Annaehern, BREACH + GO, Halten oder Debrief, read-only aus den bestehenden Gate-/Interaction-Snapshots. TASK_733 reduziert HUD-Dopplung: Die volle Route bleibt oben im Mission-Identity-Body, die ACT-Zeile priorisiert nur die konkrete Cue. TASK_734 fuegt ein Headless-Performance-Feel-Gate hinzu: wiederholte Command-Feedback-Snapshots, Zeilenbudget, sichtbare Zeilen, Cue/Route-Dedupe und Read-only-Grenze werden zusammen als Manifest pruefbar. TASK_735 rebased die alten TASK_707-/TASK_714-Guards auf diesen aktuellen Report, damit Door/Computer/Cargo- und Multiplayer-Sync-Evidence nicht gegen stale Handbuchanker weiterlaufen. TASK_736 poliert die Command-Sprache: Out-of-Range liest jetzt `BLUE naeher ran | 3.9km`, Usable liest `FT1 BREACH + GO`, jeweils read-only aus demselben Cue-Presenter. TASK_737 aktualisiert das sichtbare Run-Packet nach diesem Polish. TASK_738 nutzt den echten Capture-Befund: oben links stand noch zu frueh `CARGO BLOCK | NEXT AA`; jetzt zeigt der Identity-Body zuerst die Cue und danach `ROUTE AA > DOOR > COM > CARGO | NEXT AA`, ohne die volle Source-Route zu verlieren. TASK_739 schreibt daraus ein read-only Recapture-Findings-Manifest und empfiehlt bewusst weiter die TASK_727-Workbench. TASK_741 fuellt diese Workbench mit Recapture-Pfaden, Cue-Erwartung und neutraler Route vor, laesst den sichtbaren Playtest aber offen. TASK_742 poliert den Cargo-Endmoment: Hold, Abflug und Abschluss lesen sich jetzt als Halten bis Abflug, Abflug laeuft und Cargo weg/Debrief. TASK_743 haertet den Abschluss als read-only Handoff: Route fertig, Debrief bereit, danach Homebase. TASK_744 prueft denselben Abschluss im Meta-Layer: Station-Ergebnis im Debrief, Return-to-Homebase, erhaltenes MissionResult und Mini-AAR-Payload.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-07-01: Neuer Ist-Stand-/Handbuch-Bericht angelegt. Der spielbare Schwerpunkt liegt weiter auf dem kleinen Stationslauf: Door nutzen, Computer sichern, Cargo landen lassen, alles mit Host/Client-Authority und lesbarem HUD. TASK_718 hat die sichtbare Door-Sprache auf DOOR B-&gt;GO und DOOR OPEN gekuerzt. TASK_719 erkennt stale Capture-Erwartungen. TASK_720 hat den Host/Client-Capture erneut geschrieben und TASK_719/TASK_717/TASK_718 danach gruen ausgefuehrt. TASK_721 hat Host-/Client-Crops sichtbar bewertet: Der Pfad ist technisch bereit, aber vor Akzeptanz braucht er HUD-Visual-Polish. TASK_722 hat diese konkreten HUD-Reibungen poliert. TASK_723 hat den Nach-TASK_722-Recapture als `needs_visual_review` festgehalten. TASK_724 hat daraus einen kleinen Folge-Polish gemacht und meldet wieder `ready_for_recapture`. TASK_725 hat den frischen Recapture als `accepted_for_next_slice` festgehalten: gut genug fuer den naechsten kleinen Stations-Playtest, aber keine Gesamtspiel-Abnahme. TASK_726 hat daraus ein konkretes One-Screen-Szenario gebaut: AA -> Door -> Computer -> Cargo, Alpha/Bravo-ready und runtime-geprueft. TASK_727 hat die sichtbare F6-/Host-Client-Playtest-Workbench ergaenzt. TASK_728 verdichtet diese Notizen als Findings-Gate. TASK_729 schreibt ein sichtbares Run-Packet mit Scenario-Arg, Workbench-URI, Manifeststatus und Startkommandos. TASK_730 hat den echten Host/Client-Capture gegen dieses Szenario genutzt und den ersten HUD-Blick verbessert: Die Route wird im Mission-Identity-Body sichtbar. TASK_731 prueft den Workbench-Exportstatus und routet echte Follow-up-Flags auf neue TASK_732+ Slices. TASK_732 setzt den ersten dieser Slices um: Die Station-Route hat jetzt eine eigene `CUE ...`-Zeile fuer Annaehern, BREACH + GO, Halten oder Debrief, read-only aus den bestehenden Gate-/Interaction-Snapshots. TASK_733 reduziert HUD-Dopplung: Die volle Route bleibt oben im Mission-Identity-Body, die ACT-Zeile priorisiert nur die konkrete Cue. TASK_734 fuegt ein Headless-Performance-Feel-Gate hinzu: wiederholte Command-Feedback-Snapshots, Zeilenbudget, sichtbare Zeilen, Cue/Route-Dedupe und Read-only-Grenze werden zusammen als Manifest pruefbar. TASK_735 rebased die alten TASK_707-/TASK_714-Guards auf diesen aktuellen Report, damit Door/Computer/Cargo- und Multiplayer-Sync-Evidence nicht gegen stale Handbuchanker weiterlaufen. TASK_736 poliert die Command-Sprache: Out-of-Range liest jetzt `BLUE naeher ran | 3.9km`, Usable liest `FT1 BREACH + GO`, jeweils read-only aus demselben Cue-Presenter. TASK_737 aktualisiert das sichtbare Run-Packet nach diesem Polish. TASK_738 nutzt den echten Capture-Befund: oben links stand noch zu frueh `CARGO BLOCK | NEXT AA`; jetzt zeigt der Identity-Body zuerst die Cue und danach `ROUTE AA > DOOR > COM > CARGO | NEXT AA`, ohne die volle Source-Route zu verlieren. TASK_739 schreibt daraus ein read-only Recapture-Findings-Manifest und empfiehlt bewusst weiter die TASK_727-Workbench. TASK_741 fuellt diese Workbench mit Recapture-Pfaden, Cue-Erwartung und neutraler Route vor, laesst den sichtbaren Playtest aber offen. TASK_742 poliert den Cargo-Endmoment: Hold, Abflug und Abschluss lesen sich jetzt als Halten bis Abflug, Abflug laeuft und Cargo weg/Debrief. TASK_743 haertet den Abschluss als read-only Handoff: Route fertig, Debrief bereit, danach Homebase. TASK_744 prueft denselben Abschluss im Meta-Layer: Station-Ergebnis im Debrief, Return-to-Homebase, erhaltenes MissionResult und Mini-AAR-Payload. TASK_745 macht die Homebase-Rueckkehr lesbar: Debrief complete -> Homebase, Station Drill, Ergebnis und naechster Schritt.</div>
         </article>
         <article class="card full">
           <h2>TASK_708 Evidence</h2>
@@ -740,8 +743,24 @@
           <input readonly value="station_route_aa_door_computer_cargo" data-export-key="station_scenario_meta_debrief_route_smoke.route_id">
           <input readonly value="station_route_one_screen_multiplayer_drill" data-export-key="station_scenario_meta_debrief_route_smoke.scenario_id">
           <input readonly value="scripts/tests/task_744_station_scenario_meta_debrief_route_smoke.gd" data-export-key="station_scenario_meta_debrief_route_smoke.verifier_path">
-          <input readonly value="TASK_745 - Station Scenario Post Debrief Homebase Readability" data-export-key="station_scenario_meta_debrief_route_smoke.recommended_next_task">
+          <input readonly value="TASK_746 - Station Scenario Homebase Next Sortie Readiness" data-export-key="station_scenario_meta_debrief_route_smoke.recommended_next_task">
           <textarea data-export-key="station_scenario_meta_debrief_route_smoke.notes" placeholder="Naechster Check: fuehlt sich die Homebase nach Station-Debrief wie ein klarer neuer Sortie-Start an?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_745 - Station Scenario Post Debrief Homebase Readability</h2>
+          <p>Die Homebase zeigt nach dem Station-Debrief wieder einen klaren Rueckkehrzustand: Station Drill, Ergebnis, Route und naechster Schritt.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_post_debrief_homebase_readability.summary_label_visible"> Homebase-Summary sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_post_debrief_homebase_readability.station_result_present"> Station-Ergebnis erkannt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_post_debrief_homebase_readability.mission_result_preserved"> MissionResult bleibt erhalten</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_post_debrief_homebase_readability.read_only"> Keine Navigation, kein Command, keine Gameplay-Wahrheit</label>
+          <input readonly value="TASK_745" data-export-key="station_scenario_post_debrief_homebase_readability.task_id">
+          <input readonly value="tmp/station_scenario_post_debrief_homebase_readability.json" data-export-key="station_scenario_post_debrief_homebase_readability.manifest_path">
+          <input readonly value="station_route_aa_door_computer_cargo" data-export-key="station_scenario_post_debrief_homebase_readability.route_id">
+          <input readonly value="Debrief complete -> Homebase | Station Drill / VICTORY / station_route_cargo_extract / 386s | Next: prep next sortie" data-export-key="station_scenario_post_debrief_homebase_readability.summary_text">
+          <input readonly value="prep next sortie" data-export-key="station_scenario_post_debrief_homebase_readability.next_step_text">
+          <input readonly value="TASK_746 - Station Scenario Homebase Next Sortie Readiness" data-export-key="station_scenario_post_debrief_homebase_readability.recommended_next_task">
+          <input readonly value="scripts/tests/task_745_station_scenario_post_debrief_homebase_readability.gd" data-export-key="station_scenario_post_debrief_homebase_readability.verifier_path">
+          <textarea data-export-key="station_scenario_post_debrief_homebase_readability.notes" placeholder="Naechster Griff: Station-spezifische Next-Sortie-Readiness oder echter Host/Client-Recapture."></textarea>
         </article>
         <article class="card half">
           <h2>Entscheidung</h2>
@@ -799,7 +818,7 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_744 - Station Scenario Meta Debrief Route Smoke",
+            latest_completed_task: "TASK_745 - Station Scenario Post Debrief Homebase Readability",
             latest_completed_visual_task: "TASK_706 - Mission Door Layout/Visual Polish",
             latest_completed_flow_task: "TASK_707 - Mission Door/Computer/Cargo Smoke",
             latest_completed_evidence_task: "TASK_708 - Station Route Visual Evidence",
@@ -838,7 +857,8 @@
             latest_completed_station_scenario_cargo_endgame_cue_polish_task: "TASK_742 - Station Scenario Cargo Endgame Cue Polish",
             latest_completed_station_scenario_debrief_handoff_cue_task: "TASK_743 - Station Scenario Debrief Handoff Cue",
             latest_completed_station_scenario_meta_debrief_route_smoke_task: "TASK_744 - Station Scenario Meta Debrief Route Smoke",
-            recommended_next_task: "TASK_745 Station Scenario Post Debrief Homebase Readability oder Host/Client-Fenster-Recapture",
+            latest_completed_station_scenario_post_debrief_homebase_readability_task: "TASK_745 - Station Scenario Post Debrief Homebase Readability",
+            recommended_next_task: "TASK_746 Station Scenario Homebase Next Sortie Readiness oder Host/Client-Fenster-Recapture",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
