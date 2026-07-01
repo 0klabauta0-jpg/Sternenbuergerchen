@@ -8,6 +8,8 @@ const HANDBOOK_PATH: String = "res://docs/reports/project_current_state_handbook
 const CAPTURE_SCRIPT_PATH: String = "res://scripts/tools/capture_host_client_two_window_real_run.ps1"
 const CAPTURE_MANIFEST_PATH: String = "res://tmp/host_client_two_window_real_run_review.json"
 const EXPECTED_LINE: String = "Naechste Sortie: Fireteam bereitstellen | danach: Loadout pruefen, Dropship beladen, Start freigeben"
+const EXPECTED_TITLE: String = "Rueckkehr abgeschlossen"
+const EXPECTED_ACTION: String = "Naechster Auftrag: Fireteam bereitstellen"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -48,6 +50,11 @@ func _test_docs_contract_report_and_script() -> void:
 		"station_homebase_host_client_recapture_task_id",
 		"station_homebase_host_client_recapture_packet_path",
 		"station_homebase_expected_readiness_line",
+		"station_homebase_real_window_recapture_task_id",
+		"station_homebase_return_panel_polish_task_id",
+		"station_homebase_expected_return_panel_title",
+		"station_homebase_expected_return_panel_action",
+		"station_homebase_expected_return_panel_step_labels",
 		"station_homebase_forbidden_debug_fragments",
 		"station_homebase_recapture_manual_checks",
 		"station_homebase_next_sortie_line_matches_task_749",
@@ -70,8 +77,13 @@ func _test_capture_manifest_metadata() -> void:
 	var manifest: Dictionary = _read_json(CAPTURE_MANIFEST_PATH)
 	_assert(String(manifest.get("schema", "")) == "sternenbuergerchen.host_client_two_window_real_run_review.v1", "Capture manifest schema is stable")
 	_assert(String(manifest.get("station_homebase_host_client_recapture_task_id", "")) == "TASK_750", "Capture manifest points to TASK_750")
+	_assert(String(manifest.get("station_homebase_real_window_recapture_task_id", "")) == "TASK_756", "Capture manifest points to TASK_756")
 	_assert(String(manifest.get("station_homebase_host_client_recapture_packet_path", "")) == "tmp/station_homebase_host_client_recapture_packet.json", "Capture manifest records TASK_750 packet path")
 	_assert(String(manifest.get("station_homebase_expected_readiness_line", "")) == EXPECTED_LINE, "Capture manifest records TASK_749 Homebase line")
+	_assert(String(manifest.get("station_homebase_return_panel_polish_task_id", "")) == "TASK_755", "Capture manifest records TASK_755 return panel source")
+	_assert(String(manifest.get("station_homebase_expected_return_panel_title", "")) == EXPECTED_TITLE, "Capture manifest records TASK_755 return panel title")
+	_assert(String(manifest.get("station_homebase_expected_return_panel_action", "")) == EXPECTED_ACTION, "Capture manifest records TASK_755 return panel action")
+	_assert(int(manifest.get("station_homebase_expected_return_panel_chip_count", 0)) >= 5, "Capture manifest records TASK_755 chip count")
 	_assert(bool(manifest.get("station_homebase_recapture_review_required", false)), "Capture manifest requires Homebase recapture review")
 	_assert(not bool(manifest.get("station_homebase_recapture_review_done", true)), "Capture manifest does not claim Homebase review done")
 	_assert(bool(manifest.get("manual_review_required", false)), "Capture manifest keeps manual review required")
@@ -84,6 +96,10 @@ func _test_capture_manifest_metadata() -> void:
 		"debrief_visible_after_cargo",
 		"return_homebase_clicked",
 		"homebase_summary_mentions_station_drill",
+		"homebase_return_panel_title_visible",
+		"homebase_return_panel_action_visible",
+		"homebase_return_panel_chips_visible",
+		"homebase_return_panel_matches_task_755",
 		"homebase_next_sortie_line_matches_task_749",
 		"old_debug_next_sortie_markers_absent",
 		"performance_feels_fast",
@@ -91,6 +107,7 @@ func _test_capture_manifest_metadata() -> void:
 	]:
 		_assert(checks.has(check_id), "Capture manifest requires Homebase check %s" % check_id)
 	var review_checks: Array = Array(manifest.get("review_checks", []))
+	_assert(review_checks.has("station_homebase_return_panel_matches_task_755"), "General review checks include TASK_755 panel match")
 	_assert(review_checks.has("station_homebase_next_sortie_line_matches_task_749"), "General review checks include Homebase line match")
 	_assert(review_checks.has("station_homebase_workbench_notes_exported"), "General review checks include Homebase workbench export")
 	var forbidden: Array = Array(manifest.get("station_homebase_forbidden_debug_fragments", []))

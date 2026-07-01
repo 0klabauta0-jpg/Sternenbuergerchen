@@ -33,6 +33,10 @@ const HOMEBASE_RECAPTURE_CHECKS: Array[Dictionary] = [
 	{"id": "debrief_visible_after_cargo", "label": "Debrief nach Cargo sichtbar"},
 	{"id": "return_homebase_clicked", "label": "Return-to-Homebase ausgefuehrt"},
 	{"id": "homebase_summary_mentions_station_drill", "label": "Homebase-Summary nennt Station Drill"},
+	{"id": "homebase_return_panel_title_visible", "label": "Return-Panel-Titel ist sichtbar"},
+	{"id": "homebase_return_panel_action_visible", "label": "Return-Panel-Aktionszeile ist sichtbar"},
+	{"id": "homebase_return_panel_chips_visible", "label": "Return-Panel-Step-Chips sind sichtbar"},
+	{"id": "homebase_return_panel_matches_task_755", "label": "Return-Panel entspricht TASK_755"},
 	{"id": "homebase_next_sortie_line_matches_task_749", "label": "Next-Sortie-Zeile entspricht TASK_749"},
 	{"id": "old_debug_next_sortie_markers_absent", "label": "Alte englische Debug-Marker fehlen"},
 	{"id": "performance_feels_fast", "label": "Homebase-Return fuehlt sich performant an"},
@@ -105,11 +109,18 @@ static func _build_recapture_evidence(recapture_findings: Dictionary, options: D
 	var homebase_packet_path: String = String(recapture_findings.get("station_homebase_host_client_recapture_packet_path", ""))
 	var homebase_expected_line: String = String(recapture_findings.get("station_homebase_expected_readiness_line", ""))
 	var homebase_summary_fragment: String = String(recapture_findings.get("station_homebase_expected_summary_fragment", ""))
+	var homebase_return_panel_task_id: String = String(recapture_findings.get("station_homebase_return_panel_polish_task_id", ""))
+	var homebase_return_panel_style_id: String = String(recapture_findings.get("station_homebase_expected_return_panel_style_id", ""))
+	var homebase_return_panel_title: String = String(recapture_findings.get("station_homebase_expected_return_panel_title", ""))
+	var homebase_return_panel_action: String = String(recapture_findings.get("station_homebase_expected_return_panel_action", ""))
+	var homebase_return_panel_chip_count: int = int(recapture_findings.get("station_homebase_expected_return_panel_chip_count", 0))
+	var homebase_return_panel_step_labels: Array = _array_from_variant(recapture_findings.get("station_homebase_expected_return_panel_step_labels", []))
 	var homebase_forbidden_markers: Array = _array_from_variant(recapture_findings.get("station_homebase_forbidden_debug_fragments", []))
 	var homebase_manual_checks: Array = _array_from_variant(recapture_findings.get("station_homebase_recapture_manual_checks", []))
 	var homebase_review_required: bool = bool(recapture_findings.get("station_homebase_recapture_review_required", false))
 	var homebase_review_done: bool = bool(recapture_findings.get("station_homebase_recapture_review_done", false))
-	var homebase_ready_for_workbench: bool = not homebase_task_id.is_empty() and not homebase_packet_path.is_empty() and not homebase_expected_line.is_empty() and not homebase_summary_fragment.is_empty() and not homebase_forbidden_markers.is_empty() and not homebase_manual_checks.is_empty() and homebase_review_required and not homebase_review_done
+	var return_panel_evidence_ready: bool = homebase_return_panel_task_id == "TASK_755" and not homebase_return_panel_style_id.is_empty() and not homebase_return_panel_title.is_empty() and not homebase_return_panel_action.is_empty() and homebase_return_panel_chip_count >= 5 and not homebase_return_panel_step_labels.is_empty()
+	var homebase_ready_for_workbench: bool = not homebase_task_id.is_empty() and not homebase_packet_path.is_empty() and not homebase_expected_line.is_empty() and not homebase_summary_fragment.is_empty() and return_panel_evidence_ready and not homebase_forbidden_markers.is_empty() and not homebase_manual_checks.is_empty() and homebase_review_required and not homebase_review_done
 	return {
 		"schema": String(recapture_findings.get("schema", "")),
 		"task_id": String(recapture_findings.get("task_id", "")),
@@ -129,6 +140,13 @@ static func _build_recapture_evidence(recapture_findings: Dictionary, options: D
 		"homebase_recapture_packet_path": homebase_packet_path,
 		"homebase_expected_summary_fragment": homebase_summary_fragment,
 		"homebase_expected_readiness_line": homebase_expected_line,
+		"homebase_return_panel_polish_task_id": homebase_return_panel_task_id,
+		"homebase_return_panel_style_id": homebase_return_panel_style_id,
+		"homebase_return_panel_title": homebase_return_panel_title,
+		"homebase_return_panel_action": homebase_return_panel_action,
+		"homebase_return_panel_chip_count": homebase_return_panel_chip_count,
+		"homebase_return_panel_step_labels": homebase_return_panel_step_labels,
+		"homebase_return_panel_evidence_ready": return_panel_evidence_ready,
 		"homebase_forbidden_debug_fragments": homebase_forbidden_markers,
 		"homebase_recapture_manual_checks": homebase_manual_checks,
 		"homebase_recapture_review_required": homebase_review_required,

@@ -537,9 +537,22 @@ $manifest = [ordered]@{
         "window_notes_exported"
     )
     station_homebase_host_client_recapture_task_id = "TASK_750"
+    station_homebase_real_window_recapture_task_id = "TASK_756"
     station_homebase_host_client_recapture_packet_path = "tmp/station_homebase_host_client_recapture_packet.json"
     station_homebase_expected_summary_fragment = "Station Drill"
     station_homebase_expected_readiness_line = "Naechste Sortie: Fireteam bereitstellen | danach: Loadout pruefen, Dropship beladen, Start freigeben"
+    station_homebase_return_panel_polish_task_id = "TASK_755"
+    station_homebase_expected_return_panel_style_id = "task_755_station_homebase_return_panel_v1"
+    station_homebase_expected_return_panel_title = "Rueckkehr abgeschlossen"
+    station_homebase_expected_return_panel_action = "Naechster Auftrag: Fireteam bereitstellen"
+    station_homebase_expected_return_panel_chip_count = 5
+    station_homebase_expected_return_panel_step_labels = @(
+        "Auswertung ansehen",
+        "Fireteam bereitstellen",
+        "Loadout pruefen",
+        "Dropship beladen",
+        "Start freigeben"
+    )
     station_homebase_forbidden_debug_fragments = @(
         "Next sortie",
         "Review gains",
@@ -558,6 +571,10 @@ $manifest = [ordered]@{
         "debrief_visible_after_cargo",
         "return_homebase_clicked",
         "homebase_summary_mentions_station_drill",
+        "homebase_return_panel_title_visible",
+        "homebase_return_panel_action_visible",
+        "homebase_return_panel_chips_visible",
+        "homebase_return_panel_matches_task_755",
         "homebase_next_sortie_line_visible",
         "homebase_next_sortie_line_matches_task_749",
         "old_debug_next_sortie_markers_absent",
@@ -630,6 +647,10 @@ $manifest = [ordered]@{
         "station_homebase_debrief_visible_after_cargo",
         "station_homebase_return_homebase_clicked",
         "station_homebase_summary_mentions_station_drill",
+        "station_homebase_return_panel_title_visible",
+        "station_homebase_return_panel_action_visible",
+        "station_homebase_return_panel_chips_visible",
+        "station_homebase_return_panel_matches_task_755",
         "station_homebase_next_sortie_line_matches_task_749",
         "station_homebase_old_debug_markers_absent",
         "station_homebase_workbench_notes_exported",
@@ -651,7 +672,7 @@ $manifest = [ordered]@{
     recommended_next_station_route_hud_polish_recapture_task = "TASK_723 - Station Route Host/Client Recapture Review"
     recommended_next_station_route_visual_followup_acceptance_task = "TASK_725 - Station Route Host/Client Recapture Acceptance Review"
     recommended_next_station_homebase_recapture_task = "TASK_750 - Station Homebase Host/Client Recapture Packet"
-    recommended_next_station_homebase_after_recapture_task = "Station Host/Client Homebase Recapture Findings"
+    recommended_next_station_homebase_after_recapture_task = "TASK_756 - Station Homebase Real Window Recapture"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
