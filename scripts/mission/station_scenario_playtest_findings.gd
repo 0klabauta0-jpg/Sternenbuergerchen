@@ -9,12 +9,12 @@ const DEFAULT_MANIFEST_PATH: String = "tmp/station_scenario_playtest_findings.js
 const DEFAULT_REPORT_PATH: String = "docs/reports/project_current_state_handbook_2026_07_01.html"
 
 const ISSUE_TO_ACTION: Dictionary = {
-	"needs_route_readability_polish": "TASK_729 - Station Scenario Route Readability Polish",
-	"needs_hud_overlap_polish": "TASK_729 - Station Scenario HUD Overlap Polish",
-	"needs_performance_pass": "TASK_729 - Station Scenario Performance Pass",
-	"needs_host_client_sync_fix": "TASK_729 - Station Scenario Host Client Sync Fix",
-	"needs_command_feedback_polish": "TASK_729 - Station Scenario Command Feedback Polish",
-	"needs_old_harness_modernization": "TASK_730 - Scenario Harness Modernization",
+	"needs_route_readability_polish": "TASK_732 - Station Scenario Route Cue Polish",
+	"needs_hud_overlap_polish": "TASK_733 - Station Scenario HUD Overlap Pass",
+	"needs_performance_pass": "TASK_734 - Station Scenario Performance Feel Pass",
+	"needs_host_client_sync_fix": "TASK_735 - Station Scenario Host Client Sync Polish",
+	"needs_command_feedback_polish": "TASK_736 - Station Scenario Command Feedback Polish",
+	"needs_old_harness_modernization": "TASK_737 - Scenario Harness Modernization",
 }
 
 
@@ -91,7 +91,7 @@ static func _add_issue_flag_findings(findings: Array, action_items: Array, issue
 		active_issue_found = true
 		var id: String = String(flag.get("id", ""))
 		var label: String = String(flag.get("label", id))
-		var next_task: String = String(ISSUE_TO_ACTION.get(id, "TASK_729 - Station Scenario Targeted Playtest Polish"))
+		var next_task: String = String(ISSUE_TO_ACTION.get(id, "TASK_732 - Station Scenario Targeted Polish"))
 		findings.append(_finding("playtest_issue_%s" % id, "polish", label, next_task))
 		action_items.append({
 			"id": id,
@@ -101,11 +101,11 @@ static func _add_issue_flag_findings(findings: Array, action_items: Array, issue
 			"ui_sets_gameplay_truth": false,
 		})
 	if source_status == "needs_followup_polish" and not active_issue_found:
-		findings.append(_finding("playtest_polish_without_flag", "polish", "TASK_727 meldet Follow-up-Polish ohne einzelnes Flag.", "TASK_729 - Station Scenario Targeted Playtest Polish"))
+		findings.append(_finding("playtest_polish_without_flag", "polish", "TASK_727 meldet Follow-up-Polish ohne einzelnes Flag.", "TASK_732 - Station Scenario Targeted Polish"))
 		action_items.append({
 			"id": "generic_playtest_polish",
 			"label": "Generischer Playtest-Polish aus TASK_727",
-			"recommended_task": "TASK_729 - Station Scenario Targeted Playtest Polish",
+			"recommended_task": "TASK_732 - Station Scenario Targeted Polish",
 			"read_only": true,
 			"ui_sets_gameplay_truth": false,
 		})
@@ -140,9 +140,9 @@ static func _recommended_next_task(status: String, action_items: Array) -> Strin
 		return "TASK_727 - run visible F6/Host Client station playtest"
 	if status == "needs_targeted_polish":
 		if not action_items.is_empty() and typeof(action_items[0]) == TYPE_DICTIONARY:
-			return String(Dictionary(action_items[0]).get("recommended_task", "TASK_729 - Station Scenario Targeted Playtest Polish"))
-		return "TASK_729 - Station Scenario Targeted Playtest Polish"
-	return "TASK_729 - Next playable Station Scenario slice"
+			return String(Dictionary(action_items[0]).get("recommended_task", "TASK_732 - Station Scenario Targeted Polish"))
+		return "TASK_732 - Station Scenario Targeted Polish"
+	return "TASK_732 - Next playable Station Scenario slice"
 
 
 static func _finding(id: String, severity: String, message: String, suggested_next: String) -> Dictionary:

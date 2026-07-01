@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_731 - Station Scenario Workbench Export Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_731_station_scenario_workbench_export_review.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_728_station_scenario_playtest_findings.md`, `docs/tasks/TASK_730_station_scenario_targeted_playtest_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioWorkbenchExportReview` bewertet TASK_727-Workbench-Export und TASK_728-Findings read-only und unterscheidet `blocked`, `needs_workbench_export`, `needs_followup_task_selection` und `ready_for_next_playable_slice`.
+- Stand: TASK_728-Follow-up-Routing zeigt nicht mehr auf erledigte TASK_729/TASK_730-Ziele, sondern auf neue Post-TASK_730-Vorschlaege TASK_732 bis TASK_737.
+- Risiken/offen: Der echte menschliche TASK_727-Export bleibt weiterhin offen; TASK_731 macht diesen offenen Zustand nur eindeutiger und verhindert stale Folgeaufgaben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_731_station_scenario_workbench_export_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_728_station_scenario_playtest_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench wirklich ausfuellen; danach TASK_732 - naechster spielbarer Stations-Slice oder konkreter Route-Cue-Polish aus exportierten Notizen.
+
 ### TASK_730 - Station Scenario Targeted Playtest Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_730_station_scenario_targeted_playtest_polish.md`, `docs/tasks/TASK_729_station_scenario_visible_playtest_run_packet.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
