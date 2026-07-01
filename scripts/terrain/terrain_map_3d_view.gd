@@ -115,19 +115,21 @@ const ROUTE_CALLOUT_LABEL_VISUAL_STYLE_ID: String = "task_635_high_contrast_rout
 const ROUTE_CALLOUT_LABEL_FONT_SIZE: int = 18
 const ROUTE_CALLOUT_LABEL_PIXEL_SIZE: float = 0.023
 const ROUTE_CALLOUT_LABEL_OUTLINE_SIZE: int = 7
+const ROUTE_CALLOUT_LABEL_BACKPLATE_STYLE_ID: String = "task_722_station_route_callout_backplate"
 const ROUTE_CALLOUT_LABEL_HEIGHT: float = 2.28
-const ROUTE_CALLOUT_LABEL_HEIGHT_STEP: float = 0.12
+const ROUTE_CALLOUT_LABEL_HEIGHT_STEP: float = 0.18
 const ROUTE_CALLOUT_MARKER_RADIUS: float = 0.46
 const ROUTE_CALLOUT_MARKER_HEIGHT: float = 0.12
 const ROUTE_CALLOUT_MARKER_SURFACE_OFFSET: float = 0.82
 const ROUTE_CALLOUT_ROUTE_LINE_WIDTH: float = 0.18
 const ROUTE_CALLOUT_ROUTE_LINE_HEIGHT: float = 0.92
 const MISSION_INTERACTION_VISUAL_STATE_STYLE_ID: String = "task_686_mission_interaction_visual_state"
-const MISSION_INTERACTION_VISUAL_STATE_LABEL_FONT_SIZE: int = 16
-const MISSION_INTERACTION_VISUAL_STATE_LABEL_PIXEL_SIZE: float = 0.021
-const MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE: int = 6
-const MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT: float = 2.08
-const MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT_STEP: float = 0.10
+const MISSION_INTERACTION_VISUAL_STATE_LABEL_FONT_SIZE: int = 18
+const MISSION_INTERACTION_VISUAL_STATE_LABEL_PIXEL_SIZE: float = 0.024
+const MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE: int = 8
+const MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID: String = "task_722_station_route_label_backplate"
+const MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT: float = 2.36
+const MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT_STEP: float = 0.18
 const MISSION_INTERACTION_VISUAL_STATE_MARKER_RADIUS: float = 0.38
 const MISSION_INTERACTION_VISUAL_STATE_MARKER_HEIGHT: float = 0.10
 const MISSION_INTERACTION_VISUAL_STATE_MARKER_SURFACE_OFFSET: float = 0.96
@@ -442,9 +444,11 @@ var _route_callout_entries: Array = []
 var _route_callout_tone_counts: Dictionary = {}
 var _route_callout_visual_count: int = 0
 var _route_callout_line_visual_count: int = 0
+var _route_callout_label_backplate_count: int = 0
 var _mission_interaction_visual_state_entries: Array = []
 var _mission_interaction_visual_state_tone_counts: Dictionary = {}
 var _mission_interaction_visual_state_count: int = 0
+var _mission_interaction_visual_state_label_backplate_count: int = 0
 var _mission_interaction_object_reaction_entries: Array = []
 var _mission_interaction_object_reaction_kind_counts: Dictionary = {}
 var _mission_interaction_object_reaction_state_counts: Dictionary = {}
@@ -1703,13 +1707,21 @@ func get_render_snapshot() -> Dictionary:
 		"route_callout_summary": String(_mission_status_payload.get("route_callout_summary", "")),
 		"route_callout_label_visual_style_id": ROUTE_CALLOUT_LABEL_VISUAL_STYLE_ID,
 		"route_callout_label_font_size": ROUTE_CALLOUT_LABEL_FONT_SIZE,
+		"route_callout_label_pixel_size": ROUTE_CALLOUT_LABEL_PIXEL_SIZE,
 		"route_callout_label_outline_size": ROUTE_CALLOUT_LABEL_OUTLINE_SIZE,
+		"route_callout_label_backplate_style_id": ROUTE_CALLOUT_LABEL_BACKPLATE_STYLE_ID,
+		"route_callout_label_backplate_count": _route_callout_label_backplate_count,
 		"mission_interaction_visual_state_count": _mission_interaction_visual_state_count,
 		"mission_interaction_visual_state_entries": _mission_interaction_visual_state_entries.duplicate(true),
 		"mission_interaction_visual_state_tone_counts": _mission_interaction_visual_state_tone_counts.duplicate(true),
 		"mission_interaction_visual_state_summary": String(_mission_status_payload.get("mission_interaction_visual_state_summary", "")),
 		"mission_interaction_visual_state_schema": String(_mission_status_payload.get("mission_interaction_visual_state_schema", "")),
 		"mission_interaction_visual_state_style_id": MISSION_INTERACTION_VISUAL_STATE_STYLE_ID,
+		"mission_interaction_visual_state_label_font_size": MISSION_INTERACTION_VISUAL_STATE_LABEL_FONT_SIZE,
+		"mission_interaction_visual_state_label_pixel_size": MISSION_INTERACTION_VISUAL_STATE_LABEL_PIXEL_SIZE,
+		"mission_interaction_visual_state_label_outline_size": MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE,
+		"mission_interaction_visual_state_label_backplate_style_id": MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID,
+		"mission_interaction_visual_state_label_backplate_count": _mission_interaction_visual_state_label_backplate_count,
 		"mission_interaction_object_reaction_count": _mission_interaction_object_reaction_count,
 		"mission_interaction_object_reaction_visual_count": _mission_interaction_object_reaction_visual_count,
 		"mission_interaction_object_reaction_entries": _mission_interaction_object_reaction_entries.duplicate(true),
@@ -7220,9 +7232,11 @@ func _rebuild_status_visuals() -> void:
 	_route_callout_tone_counts.clear()
 	_route_callout_visual_count = 0
 	_route_callout_line_visual_count = 0
+	_route_callout_label_backplate_count = 0
 	_mission_interaction_visual_state_entries.clear()
 	_mission_interaction_visual_state_tone_counts.clear()
 	_mission_interaction_visual_state_count = 0
+	_mission_interaction_visual_state_label_backplate_count = 0
 	_mission_interaction_object_reaction_entries.clear()
 	_mission_interaction_object_reaction_kind_counts.clear()
 	_mission_interaction_object_reaction_state_counts.clear()
@@ -7353,6 +7367,8 @@ func _add_route_callout_visuals() -> void:
 		var label_offset_world: Vector2 = _get_route_callout_label_offset_world(overlap_index, overlap_count)
 		var label_world_position: Vector2 = world_position + label_offset_world
 		var label_height: float = ROUTE_CALLOUT_LABEL_HEIGHT + (float(overlap_index) * ROUTE_CALLOUT_LABEL_HEIGHT_STEP)
+		_add_station_route_label_backplate(_status_root, label_world_position, "RouteCalloutLabelBackplate_%s" % _sanitize_node_name(callout_id), ROUTE_CALLOUT_LABEL_BACKPLATE_STYLE_ID, 0.72)
+		_route_callout_label_backplate_count += 1
 		var label: Label3D = _add_label3d(_status_root, short_label, _world_to_surface_3d_position(label_world_position, label_height), "RouteCalloutLabel_%s" % _sanitize_node_name(callout_id), color.lightened(0.12), ROUTE_CALLOUT_LABEL_FONT_SIZE)
 		_apply_route_callout_label_style(label)
 		_route_callout_visual_count += 1
@@ -7375,6 +7391,8 @@ func _add_route_callout_visuals() -> void:
 			"label_font_size": ROUTE_CALLOUT_LABEL_FONT_SIZE,
 			"label_pixel_size": ROUTE_CALLOUT_LABEL_PIXEL_SIZE,
 			"label_outline_size": ROUTE_CALLOUT_LABEL_OUTLINE_SIZE,
+			"label_backplate_style_id": ROUTE_CALLOUT_LABEL_BACKPLATE_STYLE_ID,
+			"label_backplate_visible": true,
 			"visual_priority": int(callout.get("visual_priority", _route_callout_visual_count)),
 			"read_only": true,
 			"ui_sets_gameplay_truth": false,
@@ -7638,6 +7656,8 @@ func _add_mission_interaction_visual_state_visuals() -> void:
 		var label_offset_world: Vector2 = _get_mission_interaction_visual_state_label_offset_world(overlap_index, overlap_count)
 		var label_world_position: Vector2 = world_position + label_offset_world
 		var label_height: float = MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT + (float(overlap_index) * MISSION_INTERACTION_VISUAL_STATE_LABEL_HEIGHT_STEP)
+		_add_station_route_label_backplate(_status_root, label_world_position, "MissionInteractionStateLabelBackplate_%s" % _sanitize_node_name(state_id), MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID, 0.68)
+		_mission_interaction_visual_state_label_backplate_count += 1
 		var label: Label3D = _add_label3d(
 			_status_root,
 			short_label,
@@ -7672,6 +7692,8 @@ func _add_mission_interaction_visual_state_visuals() -> void:
 			"label_font_size": MISSION_INTERACTION_VISUAL_STATE_LABEL_FONT_SIZE,
 			"label_pixel_size": MISSION_INTERACTION_VISUAL_STATE_LABEL_PIXEL_SIZE,
 			"label_outline_size": MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE,
+			"label_backplate_style_id": MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID,
+			"label_backplate_visible": true,
 			"read_only": true,
 			"ui_sets_gameplay_truth": false,
 		})
@@ -7703,19 +7725,19 @@ func _build_mission_interaction_visual_state_overlap_counts(visual_states: Array
 
 
 func _get_mission_interaction_visual_state_label_offset_world(overlap_index: int, overlap_count: int) -> Vector2:
-	var base_offset: Vector2 = Vector2(0.0, 22.0)
+	var base_offset: Vector2 = Vector2(0.0, 30.0)
 	if overlap_count <= 1:
 		return base_offset
 	var stagger_offsets: Array[Vector2] = [
-		Vector2(28.0, 28.0),
-		Vector2(-30.0, 30.0),
-		Vector2(34.0, -24.0),
-		Vector2(-36.0, -28.0),
+		Vector2(36.0, 34.0),
+		Vector2(-42.0, 36.0),
+		Vector2(46.0, -34.0),
+		Vector2(-50.0, -38.0),
 	]
 	if overlap_index >= 0 and overlap_index < stagger_offsets.size():
 		return stagger_offsets[overlap_index]
 	var ring: float = float(overlap_index - stagger_offsets.size() + 1)
-	return base_offset + Vector2(18.0 * ring, 16.0 * ring)
+	return base_offset + Vector2(28.0 * ring, 22.0 * ring)
 
 
 func _apply_mission_interaction_visual_state_label_style(label: Label3D) -> void:
@@ -7725,6 +7747,7 @@ func _apply_mission_interaction_visual_state_label_style(label: Label3D) -> void
 	label.outline_size = MISSION_INTERACTION_VISUAL_STATE_LABEL_OUTLINE_SIZE
 	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.96)
 	label.set_meta("mission_interaction_visual_state_style_id", MISSION_INTERACTION_VISUAL_STATE_STYLE_ID)
+	label.set_meta("mission_interaction_visual_state_backplate_style_id", MISSION_INTERACTION_VISUAL_STATE_LABEL_BACKPLATE_STYLE_ID)
 
 
 func _get_mission_interaction_visual_state_color(tone: String) -> Color:
@@ -7777,6 +7800,15 @@ func _apply_route_callout_label_style(label: Label3D) -> void:
 	label.outline_size = ROUTE_CALLOUT_LABEL_OUTLINE_SIZE
 	label.outline_modulate = Color(0.0, 0.0, 0.0, 0.98)
 	label.set_meta("route_callout_label_visual_style_id", ROUTE_CALLOUT_LABEL_VISUAL_STYLE_ID)
+	label.set_meta("route_callout_label_backplate_style_id", ROUTE_CALLOUT_LABEL_BACKPLATE_STYLE_ID)
+
+
+func _add_station_route_label_backplate(parent: Node3D, label_world_position: Vector2, node_name: String, style_id: String, radius: float) -> void:
+	_add_marker3d(parent, label_world_position, Color(0.02, 0.025, 0.03, 0.72), node_name, radius, 0.045, 28, 1.08)
+	var marker := parent.get_node_or_null(node_name) as MeshInstance3D
+	if marker != null:
+		marker.set_meta("station_route_label_backplate_style_id", style_id)
+		marker.set_meta("station_route_label_backplate_visible", true)
 
 
 func _build_route_callout_overlap_counts(route_callouts: Array) -> Dictionary:
@@ -7800,15 +7832,15 @@ func _get_route_callout_label_offset_world(overlap_index: int, overlap_count: in
 	if overlap_count <= 1:
 		return ROUTE_CALLOUT_LABEL_BASE_OFFSET_WORLD
 	var stagger_offsets: Array[Vector2] = [
-		Vector2(-36.0, -28.0),
-		Vector2(40.0, 24.0),
-		Vector2(-44.0, 36.0),
-		Vector2(48.0, -38.0),
+		Vector2(-48.0, -36.0),
+		Vector2(52.0, 34.0),
+		Vector2(-58.0, 48.0),
+		Vector2(62.0, -50.0),
 	]
 	if overlap_index >= 0 and overlap_index < stagger_offsets.size():
 		return stagger_offsets[overlap_index]
 	var ring: float = float(overlap_index - stagger_offsets.size() + 1)
-	return ROUTE_CALLOUT_LABEL_BASE_OFFSET_WORLD + Vector2(24.0 * ring, 18.0 * ring)
+	return ROUTE_CALLOUT_LABEL_BASE_OFFSET_WORLD + Vector2(34.0 * ring, 26.0 * ring)
 
 
 func _get_route_callout_color(tone: String) -> Color:

@@ -99,7 +99,7 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 	_assert(command_grid != null and int(command_grid.columns) == 5, "#16 command matrix uses five equal command columns")
 	_assert(command_grid.get_child_count() >= 20 and int(command_grid.get_meta("command_placeholder_slots", 0)) >= 6, "#16 command matrix exposes reserved same-size command slots")
 	for slot_index in range(7, 21):
-		if [7, 10, 11, 12, 13, 14, 15, 20].has(slot_index):
+		if [7, 8, 10, 11, 12, 13, 14, 15, 20].has(slot_index):
 			continue
 		var slot := command_grid.get_node_or_null("CommandSlot%02d" % slot_index) as Button
 		_assert(slot != null and _button_is_square(slot) and bool(slot.get_meta("drop_light_command_placeholder", false)) and slot.disabled, "CommandSlot%02d is a disabled same-size reserve button" % slot_index)
@@ -116,11 +116,13 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 			"%s lives in #%s as an active fire-rule command button" % [String(fire_rule_spec.get("name", "")), str(fire_rule_spec.get("slot", ""))]
 		)
 	var delete_button := command_grid.get_node_or_null("DeleteOrderButton") as Button
+	var door_button := command_grid.get_node_or_null("DoorBreachButton") as Button
 	var sort_button := command_grid.get_node_or_null("SortCommandMatrixButton") as Button
 	var go_button := command_grid.get_node_or_null("GoCommandMatrixButton") as Button
 	var waypoint_erase_button := command_grid.get_node_or_null("WaypointEraseButton") as Button
 	var plan_button := command_grid.get_node_or_null("PlanCommandMatrixButton") as Button
 	_assert(delete_button != null and delete_button.get_index() == 6 and _button_is_square(delete_button) and delete_button.pressed.get_connections().size() > 0, "Del lives in #16.7 as an active command matrix button")
+	_assert(door_button != null and door_button.get_index() == 7 and _button_is_square(door_button) and door_button.pressed.get_connections().size() > 0, "Door/Breach lives in #16.8 as an active command matrix button")
 	_assert(sort_button != null and sort_button.get_index() == 9 and _button_is_square(sort_button) and sort_button.pressed.get_connections().size() > 0, "Sort lives in #16.10 as an active command matrix button")
 	_assert(go_button != null and go_button.get_index() == 14 and _button_is_square(go_button) and go_button.pressed.get_connections().size() > 0, "GO lives in #16.15 as an active command matrix button")
 	_assert(waypoint_erase_button != null and waypoint_erase_button.get_index() == 19 and _button_is_square(waypoint_erase_button) and waypoint_erase_button.pressed.get_connections().size() > 0, "WP- lives in #16.20 as an active command matrix button")

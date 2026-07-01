@@ -48,10 +48,10 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(roadmap_text.contains("TASK_627 - Host Client Fireteam Eventlog Overlap Polish (implementiert)"), "Roadmap marks TASK_627 implemented")
 	_assert(contract_text.contains("Host-Client-Fireteam-Eventlog-Overlap-Polish"), "Mission feedback contract documents TASK_627")
 	_assert(report_text.contains("TASK_627 Host Client Fireteam Eventlog Overlap Polish"), "Rolling report tracks TASK_627")
-	_assert(report_text.contains('latest_completed_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Rolling report advances latest completed beyond TASK_627")
-	_assert(handbook_text.contains('current_task: "TASK_638 - Frontier Probe Debrief Handoff Feel"'), "Status handbook current task advances beyond TASK_627")
+	_assert(status_text.contains("TASK_722 - Station Route HUD Visual Polish"), "Implementation status advances beyond TASK_627")
+	_assert(roadmap_text.contains("TASK_722 - Station Route HUD Visual Polish"), "Roadmap advances beyond TASK_627")
 	_assert(controller_text.contains("_apply_fixed_hud_window_contract(TACTICAL_EVENT_LOG_PANEL_PATH, layout.get(\"event_log\"))"), "Controller applies event log from layout contract")
-	_assert(scene_text.contains("offset_top = 504.0") and scene_text.contains("offset_bottom = 688.0"), "Mission scene default event log is below mini cards")
+	_assert(scene_text.contains("offset_top = 432.0") and scene_text.contains("offset_bottom = 616.0"), "Mission scene default event log follows the compact TASK_722 left-HUD contract")
 
 
 func _test_mission_left_hud_regions_do_not_overlap() -> void:

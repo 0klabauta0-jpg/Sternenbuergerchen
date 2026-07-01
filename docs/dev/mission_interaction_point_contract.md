@@ -356,6 +356,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Findings duerfen `recommended_next_task` nennen, aber keine Fenster starten, keine Runtime-Interaction ausloesen, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route HUD Visual Polish
+- TASK_722 darf den Mission-HUD-Layout-Contract, Mini-Fireteam-Karten-Dichte, Top-Nav-Placeholder-Verhalten und 3D-Label-Darstellung polieren.
+- `DropLightLayoutContract.get_mission_hud_layout()` ist die Quelle fuer die kompaktere linke HUD-Spalte; Runtime-Code darf die neuen Rechtecke anwenden, aber keine Mission-, Door-, Objective- oder Multiplayer-Wahrheit daraus ableiten.
+- `get_station_route_hud_visual_polish_snapshot()` fasst Fireteam-Mini-Rect, Scroll-Erhalt, Station-Label-Style, Route-Label-Backplates und Top-Nav-Placeholder read-only zusammen.
+- Der Gate-Wert `ready_for_recapture` bedeutet nur: Die TASK_721-Visual-Reibungen wurden technisch adressiert und muessen im echten Host/Client-Fenster erneut beurteilt werden.
+- Label-Backplates, Outline, Font-Groesse und Stagger-Abstaende sind reine Darstellung im `TerrainMap3DView`; sie duerfen keine Interactions starten, keine Objective-Gates setzen und keine Collision-/LOS-Wahrheit mutieren.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

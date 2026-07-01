@@ -81,8 +81,8 @@
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-07-01</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Abschluss: TASK_721</span>
-      <span class="pill warn">Naechster Fokus: Station-Route HUD Visual Polish</span>
+      <span class="pill">Letzter Abschluss: TASK_722</span>
+      <span class="pill warn">Naechster Fokus: Station-Route Host/Client Recapture</span>
       <span class="pill good">TASK_706 Door Layout/Visual Polish</span>
       <span class="pill good">TASK_707 Door/Computer/Cargo Smoke</span>
       <span class="pill good">TASK_708 Station Route Visual Evidence</span>
@@ -99,6 +99,7 @@
       <span class="pill good">TASK_719 Post-Polish Recheck</span>
       <span class="pill good">TASK_720 Capture Recheck + Handbuch</span>
       <span class="pill good">TASK_721 Two-Window Visual Findings</span>
+      <span class="pill good">TASK_722 HUD Visual Polish</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -118,7 +119,7 @@
         <article class="card wide">
           <h2>Kurzer Stand</h2>
           <p>Der spielbare Kern ist nicht mehr nur Idee: Homebase, Readiness, Dropship/Insertion, Mission-HUD, Fireteam-Orders, Objective-Route, Debrief und Homebase-Return sind als Review-Spine vorhanden. Die aktuelle Spitze ist die Door-/Station-Interaktion, weil sie Singleplayer-Lesbarkeit und Host/Client-Authority zusammenbringt.</p>
-          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync. TASK_715 entfernt den leeren Event-Log-Klotz aus dem initialen Fensterblick. TASK_716 fasst AA, Door, Computer, Cargo und NEXT als kurze Route-Line im HUD zusammen. TASK_717 fuehrt echten Capture-Stand und Route-Line zu einem read-only Klickbefund zusammen. TASK_718 glaettet Door/GO/Reject-Sprache und Buttontext fuer den echten Fensterblick. TASK_719 verhindert, dass stale Capture-Erwartungen nach dem Text-Polish als aktueller Fensterbefund gelesen werden. TASK_720 hat den echten Capture erneut geschrieben. TASK_721 wertet die frischen Host-/Client-Crops als Sichtbefund aus und meldet `needs_visual_polish`.</div>
+          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync. TASK_715 entfernt den leeren Event-Log-Klotz aus dem initialen Fensterblick. TASK_716 fasst AA, Door, Computer, Cargo und NEXT als kurze Route-Line im HUD zusammen. TASK_717 fuehrt echten Capture-Stand und Route-Line zu einem read-only Klickbefund zusammen. TASK_718 glaettet Door/GO/Reject-Sprache und Buttontext fuer den echten Fensterblick. TASK_719 verhindert, dass stale Capture-Erwartungen nach dem Text-Polish als aktueller Fensterbefund gelesen werden. TASK_720 hat den echten Capture erneut geschrieben. TASK_721 wertet die frischen Host-/Client-Crops als Sichtbefund aus und meldet `needs_visual_polish`. TASK_722 poliert die konkreten HUD-Reibungen: kleinere Fireteam-Mini-Spalte, kompaktere Karten, versteckter leerer Nav-Timer und besser lesbare Station-/Route-Labels mit Backplates.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -144,6 +145,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_719_done"> TASK_719 Post-Polish Recheck Guard vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_720_done"> TASK_720 Capture Recheck + Handbuch vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_721_done"> TASK_721 Two-Window Visual Findings vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_722_done"> TASK_722 HUD Visual Polish vorhanden</label>
         </article>
         <article class="card full">
           <h2>Systemkarte</h2>
@@ -152,7 +154,7 @@
             <tbody>
               <tr><td>Spiel-Flow</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Spine pruefbar.</td><td>Der echte Spielerblick muss weiter in kleinen Fenster-/Playtest-Paketen belegt werden.</td><td>Mini-Szenario mit wenigen klaren Interaktionen erneut spielen.</td></tr>
               <tr><td>Mission</td><td>Fireteam-Auswahl, Move/Defend/Fire, Threat-Preview, Contacts, Objective-Gates, Door-Hook, Empty-Event-Log-Polish und Route-Readout sind verbunden.</td><td>Station-/Door-Objekte muessen optisch noch eindeutiger werden.</td><td>Echter Door/Computer/Cargo-Klicklauf.</td></tr>
-              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung, technischer Scenario-Guard, HUD-Route-Line und Two-Window-Visual-Findings existieren.</td><td>Der Sichtbefund zeigt jetzt konkrete UI-Reibung: Fireteam-Karten ueber Karte, kleine Station-Labels, gedrungene Door-/Route-Texte und leerer Header-Placeholder.</td><td>TASK_722: Station-Route HUD Visual Polish.</td></tr>
+              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung, technischer Scenario-Guard, HUD-Route-Line, Two-Window-Visual-Findings und TASK_722-HUD-Polish existieren.</td><td>Der Sichtbefund muss nach dem Polish erneut im echten Host/Client-Fenster bewertet werden.</td><td>TASK_723: Station-Route Host/Client Recapture Review.</td></tr>
               <tr><td>Editor</td><td>Map-Editor und Builder-Workbench haben Paletten, Snapping, Presets und Interaction-Bindings.</td><td>Bediengefuehl und Asset-Auswahl bleiben langfristig ein eigener UX-Block.</td><td>Erst nach spielbarer Mission weiterpolieren.</td></tr>
               <tr><td>Export</td><td>Export-Templates und Package-Hygiene sind geprueft.</td><td>Warnungen koennen wiederkommen, sobald Assets/Plugins wachsen.</td><td>Bei Release-Kandidat erneut Export-Smoke laufen lassen.</td></tr>
             </tbody>
@@ -414,6 +416,18 @@
           <input readonly value="scripts/tests/task_721_station_route_two_window_visual_findings.gd" data-export-key="station_route_two_window_visual_findings.verifier_path">
           <textarea data-export-key="station_route_two_window_visual_findings.notes" placeholder="Naechster Griff: TASK_722 HUD Visual Polish fuer Kartenfreiheit, Label-Lesbarkeit und Header-Platzhalter."></textarea>
         </article>
+        <article class="card full">
+          <h2>TASK_722 - Station Route HUD Visual Polish</h2>
+          <p>Der sichtbare Polish adressiert die TASK_721-Reibungen, ohne Gameplay-Wahrheit ins HUD zu ziehen: kleinere linke Fireteam-Spalte, kompaktere Mission-Mini-Cards, kein leerer Timer-Placeholder und staerkere Station-/Route-Labels mit Backplates.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_hud_visual_polish.fireteam_mini_compact"> Linke Fireteam-Spalte ist kompakter und scrollbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_hud_visual_polish.station_labels_readable"> Station-Labels haben groessere Schrift/Outline/Backplate</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_hud_visual_polish.route_labels_uncrowded"> Door-/Route-Labels haben Backplate und groessere Stagger-Abstaende</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_hud_visual_polish.nav_placeholder_removed"> Leerer Top-Nav-Timer wird versteckt</label>
+          <input readonly value="ready_for_recapture" data-export-key="station_route_hud_visual_polish.current_gate">
+          <input readonly value="tmp/station_route_hud_visual_polish.json" data-export-key="station_route_hud_visual_polish.manifest_path">
+          <input readonly value="scripts/tests/task_722_station_route_hud_visual_polish.gd" data-export-key="station_route_hud_visual_polish.verifier_path">
+          <textarea data-export-key="station_route_hud_visual_polish.notes" placeholder="Naechster Griff: echten Host/Client-Capture nach TASK_722 erneut ansehen."></textarea>
+        </article>
         <article class="card half">
           <h2>Entscheidung</h2>
           <label class="checkline"><input type="radio" name="next_path" value="door_polish" data-export-key="decision.next_path"> Door Polish zuerst</label>
@@ -470,7 +484,7 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_721 - Station Route Two-Window Visual Findings",
+            latest_completed_task: "TASK_722 - Station Route HUD Visual Polish",
             latest_completed_visual_task: "TASK_706 - Mission Door Layout/Visual Polish",
             latest_completed_flow_task: "TASK_707 - Mission Door/Computer/Cargo Smoke",
             latest_completed_evidence_task: "TASK_708 - Station Route Visual Evidence",
@@ -487,7 +501,8 @@
             latest_completed_post_polish_recheck_task: "TASK_719 - Station Route Post-Polish Recheck Guard",
             latest_completed_capture_recheck_task: "TASK_720 - Station Route Capture Recheck + Handbuch",
             latest_completed_two_window_visual_findings_task: "TASK_721 - Station Route Two-Window Visual Findings",
-            recommended_next_task: "TASK_722 - Station Route HUD Visual Polish",
+            latest_completed_hud_visual_polish_task: "TASK_722 - Station Route HUD Visual Polish",
+            recommended_next_task: "TASK_723 - Station Route Host/Client Recapture Review",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
