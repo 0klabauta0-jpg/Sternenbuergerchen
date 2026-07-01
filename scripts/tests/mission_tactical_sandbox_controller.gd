@@ -63,6 +63,7 @@ const MISSION_INTERACTION_DOOR_MULTIPLAYER_AUTHORITY_SCRIPT: GDScript = preload(
 const MISSION_MULTIPLAYER_DOOR_FEEDBACK_CAPTURE_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_door_feedback_capture.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
+const STATION_SCENARIO_ROUTE_CUE_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/station_scenario_route_cue_polish.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -6195,12 +6196,14 @@ func _build_strategic_status_text() -> String:
 	return "\n".join(lines)
 
 
-func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
-	var station_route_readout: Dictionary = _build_station_route_run_readout_snapshot()
+func _build_mission_hud_interaction_density_snapshot(station_route_readout_override: Dictionary = {}, station_route_cue_override: Dictionary = {}, interaction_progress_readability_override: Dictionary = {}) -> Dictionary:
+	var station_route_readout: Dictionary = station_route_readout_override.duplicate(true) if not station_route_readout_override.is_empty() else _build_station_route_run_readout_snapshot()
 	var station_route_line: String = String(station_route_readout.get("compact_line", "")).strip_edges()
+	var station_route_cue: Dictionary = station_route_cue_override.duplicate(true) if not station_route_cue_override.is_empty() else get_station_scenario_route_cue_polish_snapshot()
+	var station_route_cue_line: String = String(station_route_cue.get("cue_line", "")).strip_edges()
 	var objective_line: String = _build_mission_objective_interaction_line().strip_edges()
 	var cargo_line: String = _build_mission_cargo_extract_line().strip_edges()
-	var interaction_progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot()
+	var interaction_progress_readability: Dictionary = interaction_progress_readability_override.duplicate(true) if not interaction_progress_readability_override.is_empty() else _build_mission_interaction_progress_readability_snapshot()
 	var interaction_progress_line: String = String(interaction_progress_readability.get("compact_line", "")).strip_edges()
 	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text().strip_edges()
 	var combat_hud_snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
@@ -6210,6 +6213,8 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 	var source_lines: PackedStringArray = PackedStringArray()
 	if not station_route_line.is_empty():
 		source_lines.append(station_route_line)
+	if not station_route_cue_line.is_empty():
+		source_lines.append(station_route_cue_line)
 	if not interaction_progress_line.is_empty():
 		source_lines.append(interaction_progress_line)
 	if not objective_line.is_empty():
@@ -6221,6 +6226,8 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 	var compact_parts: PackedStringArray = PackedStringArray()
 	if not station_route_line.is_empty():
 		compact_parts.append(station_route_line)
+	if not station_route_cue_line.is_empty():
+		compact_parts.append(station_route_cue_line)
 	if not interaction_progress_line.is_empty():
 		compact_parts.append(interaction_progress_line)
 	if not objective_line.is_empty():
@@ -6256,6 +6263,8 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 		"cargo_line": cargo_line,
 		"station_route_line": station_route_line,
 		"station_route_run_readout": station_route_readout,
+		"station_route_cue_line": station_route_cue_line,
+		"station_scenario_route_cue_polish": station_route_cue,
 		"interaction_progress_line": interaction_progress_line,
 		"interaction_progress_readability": interaction_progress_readability,
 		"combat_line": combat_hud_line,
@@ -6270,6 +6279,7 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 		"contains_objective": not objective_line.is_empty() and mission_control_line.contains(objective_line),
 		"contains_cargo": not cargo_line.is_empty() and mission_control_line.contains(cargo_line),
 		"contains_station_route": not station_route_line.is_empty() and mission_control_line.contains(station_route_line),
+		"contains_station_route_cue": not station_route_cue_line.is_empty() and mission_control_line.contains(station_route_cue_line),
 	}
 
 
@@ -6310,6 +6320,33 @@ func _build_station_route_run_readout_snapshot(objective_gate: Dictionary = {}, 
 		"all_gates_complete": bool(gate_snapshot.get("all_gates_complete", false)),
 		"object_reaction_count": int(reaction_snapshot.get("object_reaction_count", entries.size())),
 	}
+
+
+func get_station_scenario_route_cue_polish_snapshot() -> Dictionary:
+	var objective_gate: Dictionary = get_mission_interaction_objective_gate_snapshot()
+	var use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
+	var progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot(use_feedback)
+	var visual_state: Dictionary = Dictionary(MISSION_INTERACTION_VISUAL_STATE_SCRIPT.call(
+		"build_snapshot",
+		get_mission_interaction_runtime_use_state_snapshot(),
+		objective_gate
+	)).duplicate(true)
+	var object_reaction: Dictionary = Dictionary(MISSION_INTERACTION_OBJECT_REACTION_SCRIPT.call(
+		"build_snapshot",
+		visual_state
+	)).duplicate(true)
+	var route_readout: Dictionary = _build_station_route_run_readout_snapshot(objective_gate, object_reaction)
+	return _build_station_scenario_route_cue_polish_snapshot(route_readout, objective_gate, use_feedback, progress_readability)
+
+
+func _build_station_scenario_route_cue_polish_snapshot(route_readout: Dictionary, objective_gate: Dictionary, use_feedback: Dictionary, progress_readability: Dictionary) -> Dictionary:
+	return Dictionary(STATION_SCENARIO_ROUTE_CUE_POLISH_SCRIPT.call(
+		"build_snapshot",
+		route_readout,
+		objective_gate,
+		use_feedback,
+		progress_readability
+	)).duplicate(true)
 
 
 func _station_route_token_for_kind(entries: Array, object_kind: String) -> String:
@@ -18650,7 +18687,6 @@ func _fire_cover_visual_has_status_badge_readability(primary_snapshot: Dictionar
 func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
-	var mission_hud_interaction_density: Dictionary = _build_mission_hud_interaction_density_snapshot()
 	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
@@ -18672,6 +18708,17 @@ func get_command_feedback_snapshot() -> Dictionary:
 		mission_interaction_visual_state
 	)).duplicate(true)
 	var station_route_run_readout: Dictionary = _build_station_route_run_readout_snapshot(mission_interaction_objective_gate, mission_interaction_object_reaction)
+	var station_scenario_route_cue_polish: Dictionary = _build_station_scenario_route_cue_polish_snapshot(
+		station_route_run_readout,
+		mission_interaction_objective_gate,
+		mission_interaction_use_feedback,
+		mission_interaction_progress_readability
+	)
+	var mission_hud_interaction_density: Dictionary = _build_mission_hud_interaction_density_snapshot(
+		station_route_run_readout,
+		station_scenario_route_cue_polish,
+		mission_interaction_progress_readability
+	)
 	var station_scenario_identity_body: Dictionary = build_station_scenario_identity_body_snapshot(station_route_run_readout)
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
@@ -18778,6 +18825,11 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"station_route_run_line": String(station_route_run_readout.get("compact_line", "")),
 		"station_route_run_next_token": String(station_route_run_readout.get("next_token", "")),
 		"station_route_run_line_within_limit": bool(station_route_run_readout.get("line_within_limit", false)),
+		"station_scenario_route_cue_polish": station_scenario_route_cue_polish,
+		"station_scenario_route_cue_line": String(station_scenario_route_cue_polish.get("cue_line", "")),
+		"station_scenario_route_cue_detail": String(station_scenario_route_cue_polish.get("detail_line", "")),
+		"station_scenario_route_cue_next_token": String(station_scenario_route_cue_polish.get("next_token", "")),
+		"station_scenario_route_cue_line_within_limit": bool(station_scenario_route_cue_polish.get("line_within_limit", false)),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),

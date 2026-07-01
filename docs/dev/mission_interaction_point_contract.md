@@ -438,6 +438,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `ready_for_next_playable_slice` ist nur zulaessig, wenn TASK_727 erledigte, issue-freie Notizen und TASK_728 passende Findings liefern.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Route Cue Polish
+- `StationScenarioRouteCuePolish` uebersetzt den bestehenden Station-Route-Readout, Objective-Gate, Use-Feedback und Progress-Readability in eine kurze `CUE ...`-Zeile.
+- Die Route-Line bleibt der Ablaufstatus (`ROUTE AA > DOOR > COM > CARGO | NEXT ...`); die Cue-Line beschreibt die naechste Spielerhandlung wie Annaehern, `BREACH + GO`, Halten oder Debrief pruefen.
+- `MissionTacticalSandboxController.get_command_feedback_snapshot()` exportiert `station_scenario_route_cue_line`, Detail, Next-Token und Line-Limit.
+- Der Mission-HUD-Density-Snapshot darf dieselbe Cue-Zeile in der ACT-Flaeche zeigen, aber keine Scenario-Gates, Door-States, Cargo-States oder Commands setzen.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht; Completion kommt weiter aus Runtime-Gates und Interaction-Progress.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

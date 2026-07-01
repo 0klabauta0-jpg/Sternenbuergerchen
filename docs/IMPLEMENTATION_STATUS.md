@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_732 - Station Scenario Route Cue Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_732_station_scenario_route_cue_polish.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_731_station_scenario_workbench_export_review.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioRouteCuePolish` baut aus Station-Route-Readout, Objective-Gate, Use-Feedback und Progress-Readability eine kurze read-only `CUE ...`-Zeile fuer den naechsten AA/Door/Computer/Cargo-Schritt.
+- Stand: `MissionTacticalSandboxController.get_command_feedback_snapshot()` exportiert `station_scenario_route_cue_line`, Detail, Next-Token und Line-Limit; der Mission-HUD-Density-Snapshot spiegelt dieselbe Cue-Zeile in der ACT-Flaeche.
+- Risiken/offen: Der Cue ersetzt keinen echten TASK_727-F6-/Host-Client-Export. Wenn der sichtbare Lauf weiter hakelig ist, sollten TASK_733/TASK_736 aus echten Workbench-Notizen folgen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_732_station_scenario_route_cue_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_730_station_scenario_targeted_playtest_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_731_station_scenario_workbench_export_review.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench mit dem verbesserten Cue wirklich ausfuellen oder TASK_733 - Station Scenario HUD Overlap Pass, wenn der echte Fensterblick weiter stoert.
+
 ### TASK_731 - Station Scenario Workbench Export Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_731_station_scenario_workbench_export_review.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_728_station_scenario_playtest_findings.md`, `docs/tasks/TASK_730_station_scenario_targeted_playtest_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
