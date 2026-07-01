@@ -88,6 +88,7 @@
       <span class="pill warn">Findings: TASK_761</span>
       <span class="pill good">Polish: TASK_762</span>
       <span class="pill good">Staging: TASK_763</span>
+      <span class="pill good">Loadout: TASK_764</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -257,6 +258,15 @@
           <textarea data-export-key="station_scenario_playtest.notes.station_reentry_fireteam_staging" placeholder="Reentry-Staging: Ist klar, welches Fireteam bereitsteht oder ins Dropship muss?"></textarea>
         </article>
         <article class="card full">
+          <h2>Station Reentry Loadout Bridge</h2>
+          <p>Das Return-Panel nennt nach TASK_764 den Loadout-Check aus der Pre-Mission-Readiness.</p>
+          <input readonly value="TASK_764" data-export-key="station_scenario_playtest.reentry_loadout.task_id">
+          <input readonly value="task_764_station_reentry_loadout_bridge_v1" data-export-key="station_scenario_playtest.reentry_loadout.style_id">
+          <input readonly value="Loadout-Check: aus Pre-Mission-Readiness" data-export-key="station_scenario_playtest.reentry_loadout.loadout_line">
+          <input readonly value="tmp/station_reentry_loadout_bridge_polish.json" data-export-key="station_scenario_playtest.reentry_loadout.manifest_path">
+          <textarea data-export-key="station_scenario_playtest.notes.station_reentry_loadout_bridge" placeholder="Reentry-Loadout: Ist klar, ob Loadout nur geprueft oder angewendet werden muss?"></textarea>
+        </article>
+        <article class="card full">
           <h2>Route</h2>
           <table>
             <thead><tr><th>Schritt</th><th>Spieler-Erwartung</th><th>Was notieren?</th></tr></thead>
@@ -314,7 +324,7 @@
         </article>
         <article class="card half">
           <h3>Naechster Task</h3>
-          <input value="TASK_764 - Station Reentry Loadout Bridge Polish oder echter Reentry-Playtest" data-export-key="station_scenario_playtest.recommended_next_task">
+          <input value="TASK_765 - Station Reentry Dropship Boarding Bridge Polish oder echter Reentry-Playtest" data-export-key="station_scenario_playtest.recommended_next_task">
         </article>
       </div>
     </section>
@@ -405,7 +415,7 @@
             findings_task_id: "TASK_754",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_763 - Station Reentry Fireteam Staging Polish",
+            latest_completed_task: "TASK_764 - Station Reentry Loadout Bridge Polish",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
@@ -416,7 +426,8 @@
             latest_station_reentry_findings_task: "TASK_761 - Station Reentry Visible Playtest Findings",
             latest_station_reentry_targeted_polish_task: "TASK_762 - Station Reentry Targeted Polish",
             latest_station_reentry_fireteam_staging_polish_task: "TASK_763 - Station Reentry Fireteam Staging Polish",
-            recommended_next_task: "TASK_764 - Station Reentry Loadout Bridge Polish oder echter Reentry-Playtest",
+            latest_station_reentry_loadout_bridge_polish_task: "TASK_764 - Station Reentry Loadout Bridge Polish",
+            recommended_next_task: "TASK_765 - Station Reentry Dropship Boarding Bridge Polish oder echter Reentry-Playtest",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             manual_review_required: true
