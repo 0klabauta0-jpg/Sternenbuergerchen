@@ -53,7 +53,8 @@ git checkout -b batch/<batch-name>
 - TASK_728 - Station Scenario Playtest Findings (implementiert)
 - TASK_729 - Station Scenario Visible Playtest Run Packet (implementiert)
 - TASK_730 - Station Scenario Targeted Playtest Polish (implementiert)
-- TASK_731 - Station Scenario Workbench Export Review (naechster sinnvoller Schritt: echten TASK_727-Notizexport ausfuellen oder daraus Polish ableiten)
+- TASK_731 - Station Scenario Workbench Export Review (implementiert)
+- TASK_732 - Next playable Station Scenario slice oder Route Cue Polish (naechster sinnvoller Schritt nach echtem TASK_727-Export)
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

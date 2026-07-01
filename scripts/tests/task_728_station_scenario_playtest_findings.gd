@@ -74,7 +74,7 @@ func _test_issue_notes_create_action_items() -> void:
 	_assert(String(snapshot.get("status", "")) == "needs_targeted_polish", "Issue notes request targeted polish")
 	_assert(int(snapshot.get("polish_issue_count", 0)) >= 2, "Issue notes count polish findings")
 	_assert(int(snapshot.get("action_item_count", 0)) >= 2, "Issue notes create action items")
-	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_729"), "Issue notes recommend TASK_729")
+	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_733"), "Issue notes recommend post-TASK_730 HUD task")
 
 
 func _test_clean_notes_ready_for_next_slice() -> void:
@@ -82,7 +82,7 @@ func _test_clean_notes_ready_for_next_slice() -> void:
 	_assert(_snapshot_is_read_only(snapshot), "Clean-notes findings snapshot remains read-only")
 	_assert(String(snapshot.get("status", "")) == "ready_for_next_playable_slice", "Clean notes are ready for next playable slice")
 	_assert(int(snapshot.get("polish_issue_count", -1)) == 0, "Clean notes have no polish findings")
-	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_729"), "Clean notes recommend next playable slice")
+	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_732"), "Clean notes recommend next playable slice")
 
 
 func _test_actual_manifest_write() -> void:

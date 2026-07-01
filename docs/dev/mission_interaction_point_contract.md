@@ -430,6 +430,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Capture-Befund aus TASK_729 kann daraus TASK_730-Polish ableiten, bleibt aber weiterhin keine bestandene menschliche TASK_727-Workbench-Abnahme.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Workbench Export Review
+- `StationScenarioWorkbenchExportReview` bewertet nur exportierte TASK_727-Notizen und TASK_728-Findings; er startet keinen Playtest und fuellt keine Workbench automatisch aus.
+- Fehlender oder offener Workbench-Export bleibt `needs_workbench_export`, selbst wenn technische Captures und TASK_730-Polish gruen sind.
+- Ungueltige Schemas, falsche Task-IDs oder read-only/UI-Truth-Verletzungen blockieren.
+- Aktive Issue-Flags werden auf Post-TASK_730-Folge-Slices geroutet: Route Cue, HUD Overlap, Performance Feel, Host/Client Sync, Command Feedback oder Harness Modernization.
+- `ready_for_next_playable_slice` ist nur zulaessig, wenn TASK_727 erledigte, issue-freie Notizen und TASK_728 passende Findings liefern.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
