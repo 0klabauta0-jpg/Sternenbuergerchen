@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_781</span>
-      <span class="pill warn">Aktueller Griff: TASK_782</span>
+      <span class="pill good">Letzter Abschluss: TASK_782</span>
+      <span class="pill warn">Aktueller Griff: TASK_783</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -145,7 +145,7 @@
           <li><strong>Interaction Feel:</strong> AA, Door, Computer und Cargo sind als Griff mit klaren Cues und Commands lesbar.</li>
           <li><strong>Contact Pressure:</strong> Kontaktmeldung, Risk-/LOS-Grund und Combat-HUD-Druck bleiben als erster Druckmoment zusammen lesbar.</li>
           <li><strong>Firefight Tension:</strong> Schuss, Outcome, Visual, Metrik und naechster Spielergriff sind als erster Feuerwechsel zusammengefuehrt.</li>
-          <li><strong>Command Surface Findings:</strong> Der sichtbare Fensterlauf wird jetzt als Findings-Set ausgewertet: offen, unvollstaendig, konkrete Reibung oder sauberer naechster Firefight-Schritt.</li>
+          <li><strong>Command Surface Polish:</strong> Der Firefight-Folgegriff hat jetzt eine stabile Surface-Reihenfolge aus Folgezeile, Primary, Quick-Actions und Guard-Line.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -156,11 +156,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_782 wertet den Firefight-Folgegriff aus dem TASK_781-Recapture-Paket aus: Folgezeile, primaere Aktion, Quick-Actions, HOLD/FLANK/SUP, HOLD FIRE und No-Auto-Command-Grenze werden als Review-Haken und Issue-Flags greifbar.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780 und TASK_781: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781 und TASK_782.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_783 poliert nur belegte Command-Surface-Reibung aus den TASK_782-Findings.</div>
-          <input readonly value="TASK_782 - Station Reentry Firefight Command Surface Findings" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_783 - Station Reentry Firefight Command Surface Polish" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_783 macht den Firefight-Folgegriff als stabile Command-Surface lesbar: Interaction-Line, Primary-Action, Quick-Action-Rail und Guard-Line stehen in einer festen Reihenfolge.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781 und TASK_782: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782 und TASK_783.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_784 aktualisiert das sichtbare Playtest-/Recapture-Paket auf die polierte Command-Surface.</div>
+          <input readonly value="TASK_783 - Station Reentry Firefight Command Surface Polish" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_784 - Station Reentry Firefight Command Surface Playtest Packet Refresh" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -168,6 +168,7 @@
           <input readonly value="tmp/station_reentry_firefight_interaction_polish.json" data-export-key="reentry_firefight_interaction.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_command_surface_recapture.json" data-export-key="reentry_firefight_command_surface.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_command_surface_findings.json" data-export-key="reentry_firefight_command_surface_findings.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_command_surface_polish.json" data-export-key="reentry_firefight_command_surface_polish.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -290,6 +291,13 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_findings.issues.host_client_surface_mismatch"> Issue: Host/Client-Surface weicht ab</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_findings.issues.surface_too_dense"> Issue: Command-Surface zu dicht</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_findings.issues.performance_stutter_visible"> Issue: sichtbarer Stutter</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_command_surface_polish.style_ready"> TASK_783 Surface-Style bereit</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_command_surface_polish.primary_lane_stable"> Primary-Action eigene Zeile</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_command_surface_polish.quick_action_rail_stable"> Quick-Action-Rail stabil</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_command_surface_polish.guard_line_visible"> Guard-Line mit No-Auto-Command sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_command_surface_polish.read_only"> Surface-Polish bleibt read-only</label>
+          <input readonly value="task_783_firefight_command_surface_v1" data-export-key="reentry_firefight_command_surface_polish.style_id">
+          <input readonly value="interaction_line, primary_action, quick_action_rail, guard_line" data-export-key="reentry_firefight_command_surface_polish.priority_order">
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -379,10 +387,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_783 - Station Reentry Firefight Command Surface Polish"
+            recommended_next_task: "TASK_784 - Station Reentry Firefight Command Surface Playtest Packet Refresh"
           },
           metadata: {
-            generated_for_task: "TASK_782",
+            generated_for_task: "TASK_783",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
