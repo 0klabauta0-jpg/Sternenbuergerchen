@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_748 - Station Scenario Homebase Readiness Visual Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_748_station_scenario_homebase_readiness_visual_polish_findings.md`, `docs/tasks/TASK_747_station_scenario_homebase_visible_readiness_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `scripts/tests/task_748_station_scenario_homebase_readiness_visual_polish_findings.gd` wertet den aktuellen TASK_747-Station-Homebase-Snapshot und das TASK_747-Manifest aus.
+- Stand: Das neue Manifest `tmp/station_scenario_homebase_readiness_visual_polish_findings.json` bestaetigt Geometry/Read-only gruen, haelt aber den echten sichtbaren Review offen.
+- Stand: Der konkrete Follow-up-Befund ist die lange/englisch-lastige Next-Sortie-Microcopy; empfohlen wird `TASK_749 - Station Homebase Follow-up Microcopy Polish`.
+- Risiken/offen: TASK_748 verbessert noch keine Runtime-UI. Der naechste Griff sollte die Homebase-Follow-up-Zeile spielnah kuerzen oder danach einen echten Host/Client-Fensterlauf recapturen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_747_station_scenario_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_748_station_scenario_homebase_readiness_visual_polish_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_749 - Station Homebase Follow-up Microcopy Polish.
+
 ### TASK_747 - Station Scenario Homebase Visible Readiness Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_747_station_scenario_homebase_visible_readiness_review.md`, `docs/tasks/TASK_746_station_scenario_homebase_next_sortie_readiness.md`, `docs/tasks/TASK_745_station_scenario_post_debrief_homebase_readability.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

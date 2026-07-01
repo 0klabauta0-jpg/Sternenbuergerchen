@@ -70,7 +70,8 @@ git checkout -b batch/<batch-name>
 - TASK_745 - Station Scenario Post Debrief Homebase Readability (implementiert)
 - TASK_746 - Station Scenario Homebase Next Sortie Readiness (implementiert)
 - TASK_747 - Station Scenario Homebase Visible Readiness Review (implementiert)
-- Naechster Schritt: Station-Homebase-Readiness-Visual-Polish-Findings oder echter Host/Client-Fenster-Recapture mit dem neuen Abschluss.
+- TASK_748 - Station Scenario Homebase Readiness Visual Polish Findings (implementiert)
+- Naechster Schritt: TASK_749 - Station Homebase Follow-up Microcopy Polish oder echter Host/Client-Fenster-Recapture mit dem neuen Abschluss.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

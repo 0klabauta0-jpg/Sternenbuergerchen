@@ -572,6 +572,13 @@ Erwartete Struktur: `HomebaseTestScreen.get_station_scenario_homebase_visible_re
 
 Die Review-Gates pruefen mindestens: beide Zeilen liegen im MissionPanel und FollowupPanel, Next-Sortie sitzt unter der Debrief-Summary, beide Zeilen ueberlappen nicht, MissionPanel laeuft nicht ueber und die Next-Sortie-Zeile bleibt kompakt.
 
+## Station-Scenario-Homebase-Readiness-Visual-Polish-Findings (TASK_748)
+TASK_748 wertet den TASK_747-Review aus und macht daraus konkrete Visual-Polish-Findings. Der Findings-Slice bleibt read-only und darf keine neue Homebase-Navigation, keinen Startbutton-Commit, keine Progression, keine Staging- und keine MissionResult-Mutation erzeugen.
+
+Erwartete Struktur: `tmp/station_scenario_homebase_readiness_visual_polish_findings.json` liefert `schema = sternenbuergerchen.station_scenario_homebase_readiness_visual_polish_findings.v1`, `task_id = TASK_748`, `source_task_id = TASK_747`, `source_gate = pass`, `snapshot_gate = pass`, `geometry_gate = pass`, `manual_review_required = true`, `manual_review_done = false`, `generated_evidence_board`, `viewport_readback_available`, `microcopy_followup_needed = true`, `actionable_followup_count >= 1`, `findings`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false` und `recommended_next_task = TASK_749 - Station Homebase Follow-up Microcopy Polish`.
+
+Der wichtigste akzeptierte Befund ist aktuell: Die Station-Homebase-Geometrie ist gruen, aber die Next-Sortie-Zeile ist als Spielertext noch zu lang und englisch-lastig fuer einen wirklich guten Homebase-Follow-up-Moment.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.
