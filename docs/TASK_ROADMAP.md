@@ -49,7 +49,8 @@ git checkout -b batch/<batch-name>
 - TASK_724 - Station Route Recapture Visual Followup (implementiert)
 - TASK_725 - Station Route Host/Client Recapture Acceptance Review (implementiert)
 - TASK_726 - One-Screen Multiplayer Station Scenario Drill (implementiert)
-- TASK_727 - Station Scenario F6/Host Client Playtest Notes (naechster sinnvoller Schritt)
+- TASK_727 - Station Scenario F6/Host Client Playtest Notes (implementiert)
+- TASK_728 - Station Scenario Playtest Findings (naechster sinnvoller Schritt)
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
