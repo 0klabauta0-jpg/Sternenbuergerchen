@@ -77,7 +77,7 @@
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
       <span class="pill good">Letzter Abschluss: TASK_767</span>
-      <span class="pill warn">Aktueller Griff: TASK_768</span>
+      <span class="pill warn">Aktueller Griff: TASK_769</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -152,10 +152,12 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_768 sichert jetzt den ersten Station-Reentry-Missionsentscheid: Preview sichtbar, Risiko lesbar, Ghost/Pfad im Primary3D-Snapshot, Station-Cue weiterhin da, kein GO-Commit im Preview-Snapshot.</p>
-          <div class="callout warning">Danach ist TASK_769 sinnvoll: Performance-Feel-Pass fuer denselben Reentry-Lauf, oder ein echter Workbench-Export aus dem sichtbaren Host/Client-Playtest, falls du vorher manuell reinschaust.</div>
-          <input readonly value="TASK_768 - Station Reentry First Mission Preview Polish" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_769 - Station Reentry Performance Feel Pass oder sichtbaren Reentry-Playtest exportieren" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_769 prueft jetzt den ersten Station-Reentry-Missionsentscheid auf Reaktionsgefuehl: TASK_768-Preview bleibt gruen, Textbudgets bleiben kompakt, Route/Cue bleiben sichtbar und wiederholte Snapshot-Messproben bleiben im breiten Projektbudget.</p>
+          <div class="callout warning">Danach ist TASK_770 sinnvoll: Host/Client muessen denselben naechsten Auftrag im Reentry-Fenster sehen. Alternativ kann vorher ein echter Workbench-Export aus dem sichtbaren Playtest ausgewertet werden.</div>
+          <input readonly value="TASK_769 - Station Reentry Performance Feel Pass" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_770 - Station Reentry Host Client Next Order Sync oder sichtbaren Reentry-Playtest exportieren" data-export-key="reentry_handbook.recommended_next_task">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_performance.fast_gate_pass"> TASK_769 Fast-Gate gruen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_performance.manual_profiler_done"> Godot-Profiler manuell geprueft</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -245,10 +247,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_769 - Station Reentry Performance Feel Pass or visible Reentry playtest export"
+            recommended_next_task: "TASK_770 - Station Reentry Host Client Next Order Sync or visible Reentry playtest export"
           },
           metadata: {
-            generated_for_task: "TASK_768",
+            generated_for_task: "TASK_769",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

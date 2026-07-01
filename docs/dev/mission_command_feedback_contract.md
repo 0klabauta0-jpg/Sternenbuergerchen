@@ -679,6 +679,11 @@ TASK_768 macht den ersten Station-Reentry-Missionsentscheid vor `GO` eindeutig l
 
 Erwartete Struktur: `get_station_reentry_first_mission_preview_polish_snapshot()` liefert `schema = sternenbuergerchen.station_reentry_first_mission_preview_polish.v1`, `task_id = TASK_768`, `source_task_ids = [TASK_540, TASK_567, TASK_767]`, `station_context_active`, `selected_order_text`, `station_route_line`, `station_cue_line`, `risk_state`, `risk_preview_text`, `distance_world`, `eta_seconds_estimate`, `first_waypoint_preview`, `threat_preview_snapshot`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`.
 
+## Station-Reentry-Performance-Feel-Pass (TASK_769)
+TASK_769 prueft den ersten Station-Reentry-Missionsentscheid auf strukturelles Reaktionsgefuehl, ohne einen echten Profilerlauf zu ersetzen. Der Snapshot darf nur TASK_768-Preview-Daten, kompakte Route-/Cue-Texte und eine uebergebene Snapshot-Messprobe bewerten. Er darf keinen `GO` ausfuehren, keine Command-Queue schreiben, keine HUD-Baeume neu bauen und keine Gameplay-Wahrheit speichern.
+
+Erwartete Struktur: `get_station_reentry_performance_feel_pass_snapshot()` liefert `schema = sternenbuergerchen.station_reentry_performance_feel_pass.v1`, `task_id = TASK_769`, `source_task_id = TASK_768`, `source_gate`, `performance_gate`, `ready_for_visible_playtest`, `preview_gate_ok`, `preview_text_ok`, `selected_order_budget_ok`, `station_context_ok`, `route_cue_budget_ok`, `repeated_snapshot_budget_ok`, `sample_count`, `avg_usec`, `max_usec`, `budget_avg_usec`, `budget_max_usec`, `manual_profiler_required = true`, `manual_profiler_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.
