@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_729 - Station Scenario Visible Playtest Run Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_729_station_scenario_visible_playtest_run_packet.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_728_station_scenario_playtest_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `MissionTestSetup` akzeptiert `--scenario-file=` und `--mission-scenario=` als sichtbaren Scenario-Override, damit Launcher den Station-Drill reproduzierbar setzen koennen.
+- Stand: `launch_host_client_two_window_review.ps1` nimmt `-ScenarioPath` an und schreibt den Scenario-Arg in Host-/Client-Command-Args sowie den Launch-Plan.
+- Stand: `prepare_station_scenario_visible_playtest_run.ps1` schreibt `tmp/station_scenario_visible_playtest_run_packet.json` mit Workbench-URI, TASK_726/727/728-Status, Required-Checks und Start-/Capture-Kommandos.
+- Risiken/offen: TASK_729 startet und dokumentiert den sichtbaren Lauf reproduzierbar, ersetzt aber keine menschliche Sichtentscheidung. Der Workbench-Export bleibt der naechste echte Spielgefuehl-Schritt.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/prepare_station_scenario_visible_playtest_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_729_station_scenario_visible_playtest_run_packet.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_728_station_scenario_playtest_findings.gd`, `git diff --check`.
+- Naechster Schritt: Sichtbaren TASK_727-Workbench-Lauf ausfuellen; danach gezielten TASK_730-Polish nur aus echten Findings schneiden.
+
 ### TASK_728 - Station Scenario Playtest Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_728_station_scenario_playtest_findings.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -18,7 +28,7 @@
 - Stand: Das aktuelle lokale Manifest `tmp/station_scenario_playtest_findings.json` bleibt erwartbar `needs_visible_playtest`, weil TASK_727 noch keinen echten menschlichen Workbench-Export enthaelt.
 - Risiken/offen: TASK_728 ersetzt weder den sichtbaren F6-/Host-Client-Lauf noch daraus folgenden Code-Polish. Er verhindert nur, dass offene oder issue-lastige Notizen als Abnahme gelesen werden.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_728_station_scenario_playtest_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd`, `git diff --check`.
-- Naechster Schritt: TASK_729 - Station Scenario Targeted Playtest Polish oder den TASK_727-Workbench-Export im echten Fenster ausfuellen.
+- Naechster Schritt: TASK_729 - Station Scenario Visible Playtest Run Packet.
 
 ### TASK_727 - Station Scenario F6/Host Client Playtest Notes
 - Status: implementiert im Arbeitsstand

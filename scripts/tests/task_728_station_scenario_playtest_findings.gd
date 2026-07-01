@@ -47,7 +47,7 @@ func _test_docs() -> void:
 	_assert(contract_text.contains("Station Scenario Playtest Findings"), "Interaction contract documents TASK_728")
 	_assert(status_text.contains("TASK_728 - Station Scenario Playtest Findings"), "Implementation status tracks TASK_728")
 	_assert(roadmap_text.contains("TASK_728 - Station Scenario Playtest Findings (implementiert)"), "Roadmap marks TASK_728 implemented")
-	_assert(roadmap_text.contains("TASK_729 - Station Scenario Targeted Playtest Polish"), "Roadmap names TASK_729 followup")
+	_assert(roadmap_text.contains("TASK_729 - Station Scenario Visible Playtest Run Packet"), "Roadmap names TASK_729 followup")
 	_assert(handbook_text.contains("TASK_728 - Station Scenario Playtest Findings"), "Current handbook references TASK_728")
 	_assert(handbook_text.contains('data-export-key="station_scenario_playtest_findings.manifest_path"'), "Current handbook exports TASK_728 manifest path")
 

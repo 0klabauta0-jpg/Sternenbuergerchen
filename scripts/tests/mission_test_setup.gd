@@ -115,11 +115,38 @@ func _ready() -> void:
 		push_warning("MissionTestSetup requires direct references to RuntimeLeader, UnitRegistry, FTLRegistry and SimulationRoot.")
 		return
 
+	apply_cmdline_scenario_override()
 	_load_mission_scenario_if_available()
 	if _should_defer_runtime_enemy_slot_creation():
 		call_deferred("_finish_ready_after_scenario_loaded", runtime_leader, unit_registry, ftl_registry, simulation_root)
 		return
 	_finish_ready_after_scenario_loaded(runtime_leader, unit_registry, ftl_registry, simulation_root)
+
+
+func apply_cmdline_scenario_override(args: Array = []) -> Dictionary:
+	var raw_args: Array = args.duplicate()
+	var source := "provided_args"
+	if raw_args.is_empty():
+		raw_args = OS.get_cmdline_user_args()
+		source = "OS.get_cmdline_user_args"
+	var previous_path: String = scenario_file_path
+	var override_path := ""
+	for arg_variant in raw_args:
+		var arg := String(arg_variant).strip_edges()
+		if arg.begins_with("--scenario-file="):
+			override_path = arg.substr("--scenario-file=".length()).strip_edges()
+		elif arg.begins_with("--mission-scenario="):
+			override_path = arg.substr("--mission-scenario=".length()).strip_edges()
+	if not override_path.is_empty():
+		scenario_file_path = override_path.replace("\\", "/")
+	return {
+		"source": source,
+		"previous_scenario_file_path": previous_path,
+		"scenario_file_path": scenario_file_path,
+		"override_applied": not override_path.is_empty(),
+		"read_only": false,
+		"ui_sets_gameplay_truth": false,
+	}
 
 
 func _finish_ready_after_scenario_loaded(runtime_leader: Node, unit_registry: Node, ftl_registry: Node, simulation_root: Node) -> void:
