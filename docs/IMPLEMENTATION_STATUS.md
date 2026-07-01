@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_776 - Station Reentry Contact Pressure Feel Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_776_station_reentry_contact_pressure_feel_pass.md`, `docs/tasks/TASK_775_station_reentry_mission_interaction_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryContactPressureFeelPass` bewertet TASK_775-Interaction-Feel, Contact-Report, Threat-/Risk-Preview, Pressure-/Engagement-Feedback und kompakte Combat-HUD-Zeile als read-only Contact-Pressure-Gate.
+- Stand: Bei sichtbarer Kontaktmeldung, Risk-/LOS-Grund, Fire/Wait/No-Fire-Druck und Contact/Risk/LOS/Cover-HUD meldet der Snapshot `ready_for_contact_pressure_playtest`; einzelne Luecken routen gezielt zu Contact-, Threat-, Pressure- oder HUD-Polish.
+- Risiken/offen: Der Pass beweist Lesbarkeit des ersten Druckmoments, aber noch keine Qualitaet der eigentlichen Kampfauflösung oder echte Spannung ueber mehrere Feuerwechsel.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_776_station_reentry_contact_pressure_feel_pass.gd`, TASK_775 Regression, `git diff --check`.
+- Naechster Schritt: TASK_777 - Station Reentry Firefight Tension Feel Pass.
+
 ### TASK_775 - Station Reentry Mission Interaction Feel Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_775_station_reentry_mission_interaction_feel_pass.md`, `docs/tasks/TASK_774_station_reentry_next_playable_slice_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Bei gruener Route, Cues und Move/Take/Breach/Defend/GO meldet der Snapshot `ready_for_mission_interaction_playtest`; fehlende Cues oder Commands routen zu gezieltem Polish.
 - Risiken/offen: Der Pass beweist Interaktionslesbarkeit, aber noch keine Kampfspannung oder laengeren Host/Client-Playtest.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_775_station_reentry_mission_interaction_feel_pass.gd`, TASK_774 Regression, `git diff --check`.
-- Naechster Schritt: TASK_776 - Station Reentry Contact Pressure Feel Pass.
+- Naechster Schritt: TASK_776 - Station Reentry Contact Pressure Feel Pass (implementiert); danach TASK_777 - Station Reentry Firefight Tension Feel Pass.
 
 ### TASK_774 - Station Reentry Next Playable Slice Acceptance
 - Status: implementiert im Arbeitsstand
