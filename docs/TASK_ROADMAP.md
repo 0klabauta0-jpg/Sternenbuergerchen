@@ -86,7 +86,8 @@ git checkout -b batch/<batch-name>
 - TASK_761 - Station Reentry Visible Playtest Findings (implementiert)
 - TASK_762 - Station Reentry Targeted Polish (implementiert)
 - TASK_763 - Station Reentry Fireteam Staging Polish (implementiert)
-- Naechster Schritt: TASK_764 - Station Reentry Loadout Bridge Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+- TASK_764 - Station Reentry Loadout Bridge Polish (implementiert)
+- Naechster Schritt: TASK_765 - Station Reentry Dropship Boarding Bridge Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
