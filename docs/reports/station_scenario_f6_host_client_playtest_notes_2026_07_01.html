@@ -79,6 +79,7 @@
       <span class="pill warn">Task: TASK_727</span>
       <span class="pill good">Prefill: TASK_741</span>
       <span class="pill good">Prefill: TASK_752</span>
+      <span class="pill warn">Gate: TASK_753</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -139,6 +140,20 @@
           <input readonly value="false" data-export-key="station_scenario_playtest.prefill.homebase_recapture_review_done">
         </article>
         <article class="card full">
+          <h2>Homebase Recapture Review</h2>
+          <p>Diese Haken sind der eigentliche TASK_753-Export. Erst wenn sie im echten Lauf gesetzt sind, kann daraus ein Findings-Task werden.</p>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.manual_review_done"> Homebase-Recapture bewusst abgeschlossen und exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.cargo_end_reached"> Cargo-Ende erreicht</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.debrief_visible_after_cargo"> Debrief nach Cargo sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.return_homebase_clicked"> Return-to-Homebase ausgefuehrt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.homebase_summary_mentions_station_drill"> Homebase-Summary nennt Station Drill</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.homebase_next_sortie_line_matches_task_749"> Next-Sortie-Zeile entspricht TASK_749</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.old_debug_next_sortie_markers_absent"> Alte englische Debug-Marker fehlen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.performance_feels_fast"> Homebase-Return fuehlt sich performant an</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.workbench_notes_exported"> Workbench-Notizen exportiert</label>
+          <textarea data-export-key="station_scenario_playtest.notes.homebase_recapture" placeholder="Homebase-Recapture: Was war nach Debrief/Return sofort klar, was nicht?"></textarea>
+        </article>
+        <article class="card full">
           <h2>Route</h2>
           <table>
             <thead><tr><th>Schritt</th><th>Spieler-Erwartung</th><th>Was notieren?</th></tr></thead>
@@ -196,7 +211,7 @@
         </article>
         <article class="card half">
           <h3>Naechster Task</h3>
-          <input value="TASK_728 - Station Scenario Playtest Findings" data-export-key="station_scenario_playtest.recommended_next_task">
+          <input value="TASK_754 - Station Homebase Recapture Findings" data-export-key="station_scenario_playtest.recommended_next_task">
         </article>
       </div>
     </section>
@@ -273,12 +288,14 @@
           computed: {
             task_id: "TASK_727",
             prefill_task_id: "TASK_752",
+            review_gate_task_id: "TASK_753",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
+            latest_completed_task: "TASK_753 - Station Homebase Recapture Review Gate",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
-            recommended_next_task: "TASK_728 - Station Scenario Playtest Findings",
+            latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
+            recommended_next_task: "TASK_754 - Station Homebase Recapture Findings",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             manual_review_required: true

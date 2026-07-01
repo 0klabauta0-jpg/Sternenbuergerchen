@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_753 - Station Homebase Recapture Review Gate
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_753_station_homebase_recapture_review_gate.md`, `docs/tasks/TASK_752_station_homebase_recapture_workbench_prefill.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioF6HostClientPlaytestNotes` baut aus TASK_752-Prefill und Workbench-Export ein read-only `homebase_recapture_review`.
+- Stand: Die TASK_727-Workbench exportiert jetzt einzelne Homebase-Recapture-Checks fuer Cargo-Ende, Debrief, Return-Homebase, Summary, Next-Sortie-Zeile, alte Debug-Marker, Performance und Notizexport.
+- Stand: Der Review-Status unterscheidet `needs_homebase_recapture_review`, `needs_homebase_recapture_completion` und `ready_for_homebase_findings`.
+- Risiken/offen: Der echte sichtbare Host/Client-Homebase-Recapture muss weiterhin ausgefuehrt werden; TASK_753 macht nur den Export und die Auswertung eindeutig.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_753_station_homebase_recapture_review_gate.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_752_station_homebase_recapture_workbench_prefill.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd`, `git diff --check`.
+- Naechster Schritt: echten Workbench-gestuetzten Homebase-Recapture ausfuehren und TASK_754 - Station Homebase Recapture Findings schneiden.
+
 ### TASK_752 - Station Homebase Recapture Workbench Prefill
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_752_station_homebase_recapture_workbench_prefill.md`, `docs/tasks/TASK_750_station_homebase_host_client_recapture_packet.md`, `docs/tasks/TASK_751_station_homebase_capture_metadata_hook.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`

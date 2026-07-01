@@ -28,12 +28,24 @@ const ISSUE_FLAG_IDS: Array[String] = [
 	"needs_old_harness_modernization",
 ]
 
+const HOMEBASE_RECAPTURE_CHECKS: Array[Dictionary] = [
+	{"id": "cargo_end_reached", "label": "Cargo-Ende erreicht"},
+	{"id": "debrief_visible_after_cargo", "label": "Debrief nach Cargo sichtbar"},
+	{"id": "return_homebase_clicked", "label": "Return-to-Homebase ausgefuehrt"},
+	{"id": "homebase_summary_mentions_station_drill", "label": "Homebase-Summary nennt Station Drill"},
+	{"id": "homebase_next_sortie_line_matches_task_749", "label": "Next-Sortie-Zeile entspricht TASK_749"},
+	{"id": "old_debug_next_sortie_markers_absent", "label": "Alte englische Debug-Marker fehlen"},
+	{"id": "performance_feels_fast", "label": "Homebase-Return fuehlt sich performant an"},
+	{"id": "workbench_notes_exported", "label": "Workbench-Notizen exportiert"},
+]
+
 
 static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
 	var findings: Array = []
 	_add_drill_findings(findings, drill_manifest)
 	var recapture_findings: Dictionary = Dictionary(options.get("recapture_findings", {}))
 	var recapture_evidence: Dictionary = _build_recapture_evidence(recapture_findings, options)
+	var homebase_recapture_review: Dictionary = _build_homebase_recapture_review(recapture_evidence, existing_notes)
 	var required_checks: Array = _build_required_checks(existing_notes)
 	var issue_flags: Array = _build_issue_flags(existing_notes)
 	var completed_check_count: int = _count_completed_checks(required_checks)
@@ -61,6 +73,8 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 		"recapture_evidence": recapture_evidence,
 		"recapture_ready_for_workbench": bool(recapture_evidence.get("ready_for_workbench", false)),
 		"source_recapture_manifest_path": String(recapture_evidence.get("manifest_path", "")),
+		"homebase_recapture_review": homebase_recapture_review,
+		"homebase_recapture_review_status": String(homebase_recapture_review.get("status", "")),
 		"report_path": String(options.get("report_path", DEFAULT_REPORT_PATH)),
 		"manifest_path": String(options.get("manifest_path", DEFAULT_MANIFEST_PATH)),
 		"required_checks": required_checks,
@@ -143,6 +157,60 @@ static func _array_from_variant(value: Variant) -> Array:
 				result.append(trimmed)
 		return result
 	return []
+
+
+static func _build_homebase_recapture_review(recapture_evidence: Dictionary, existing_notes: Dictionary) -> Dictionary:
+	var evidence_ready: bool = bool(recapture_evidence.get("homebase_recapture_ready_for_workbench", false))
+	var manual_done: bool = _read_bool(existing_notes, "station_scenario_playtest.homebase_recapture.manual_review_done")
+	var checks: Array = []
+	var missing_check_ids: Array[String] = []
+	for check_def in HOMEBASE_RECAPTURE_CHECKS:
+		var check: Dictionary = Dictionary(check_def)
+		var id: String = String(check.get("id", ""))
+		var checked: bool = _read_bool(existing_notes, "station_scenario_playtest.homebase_recapture.%s" % id)
+		checks.append({
+			"id": id,
+			"label": String(check.get("label", id)),
+			"checked": checked,
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+		if not checked:
+			missing_check_ids.append(id)
+	var status: String = "missing_homebase_recapture_prefill"
+	if evidence_ready and not manual_done:
+		status = "needs_homebase_recapture_review"
+	elif evidence_ready and manual_done and not missing_check_ids.is_empty():
+		status = "needs_homebase_recapture_completion"
+	elif evidence_ready and manual_done and missing_check_ids.is_empty():
+		status = "ready_for_homebase_findings"
+	return {
+		"schema": "sternenbuergerchen.station_homebase_recapture_review_gate.v1",
+		"task_id": "TASK_753",
+		"source_task_id": "TASK_752",
+		"status": status,
+		"evidence_ready": evidence_ready,
+		"manual_review_required": true,
+		"manual_review_done": manual_done,
+		"required_checks": checks,
+		"required_check_count": checks.size(),
+		"completed_check_count": checks.size() - missing_check_ids.size(),
+		"missing_check_ids": missing_check_ids,
+		"ready_for_findings": status == "ready_for_homebase_findings",
+		"recommended_next_task": _recommended_homebase_recapture_next_task(status),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+static func _recommended_homebase_recapture_next_task(status: String) -> String:
+	if status == "missing_homebase_recapture_prefill":
+		return "TASK_752 - rerun Station Homebase Recapture Workbench Prefill"
+	if status == "needs_homebase_recapture_review":
+		return "TASK_753 - run Station Homebase Recapture Workbench review"
+	if status == "needs_homebase_recapture_completion":
+		return "TASK_753 - complete missing Homebase recapture checks"
+	return "TASK_754 - Station Homebase Recapture Findings"
 
 
 static func _add_drill_findings(findings: Array, drill_manifest: Dictionary) -> void:
