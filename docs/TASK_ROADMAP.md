@@ -348,6 +348,7 @@ git checkout -b batch/<batch-name>
 - TASK_717 - Station Route Real Host/Client Click Findings (implementiert)
 - TASK_718 - Station Route Door/GO/Reject Visual Polish (implementiert)
 - TASK_719 - Station Route Post-Polish Recheck Guard (implementiert)
+- TASK_720 - Station Route Capture Recheck + Handbuch (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup
