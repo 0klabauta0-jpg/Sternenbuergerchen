@@ -59,11 +59,11 @@ func _test_docs() -> void:
 
 func _test_unit_surface_fallbacks() -> void:
 	var ready: Dictionary = _ui_feedback(_authority_snapshot({}), _button_context())
-	_assert(String(ready.get("compact_line", "")) == "DOOR DOOR B->GO", "Ready compact line remains short")
+	_assert(String(ready.get("compact_line", "")) == "DOOR B->GO", "Ready compact line remains short")
 	var open: Dictionary = _ui_feedback(_authority_snapshot({"door_runtime_open_override": true}), _button_context())
-	_assert(String(open.get("compact_line", "")) == "DOOR DOOR OPEN", "Open compact line remains short")
+	_assert(String(open.get("compact_line", "")) == "DOOR OPEN", "Open compact line remains short")
 	var blocked: Dictionary = _ui_feedback(_authority_snapshot({"foreign_team_rejected": true, "foreign_team_reject_reason": "peer_team_mismatch"}), _button_context())
-	_assert(String(blocked.get("compact_line", "")).begins_with("DOOR DOOR BLOCKED"), "Blocked compact line remains short")
+	_assert(String(blocked.get("compact_line", "")).begins_with("DOOR BLOCKED"), "Blocked compact line remains short")
 
 
 func _test_mission_command_surface() -> void:
@@ -103,6 +103,7 @@ func _test_mission_command_surface() -> void:
 	_assert(label_text.contains(compact_line), "Command feedback label contains compact Door line")
 	_assert(not label_text.contains("bereit |"), "Command feedback label avoids long ready summary")
 	_assert(String(button_snapshot.get("door_authority_ui_compact_line", "")) == compact_line, "Door button snapshot carries same compact line")
+	_assert(String(button_snapshot.get("text", "")) == "B->GO", "Door button names B to GO directly")
 	_assert(bool(button_snapshot.get("door_authority_ui_read_only", false)), "Door button compact surface remains read-only")
 
 	_write_manifest({

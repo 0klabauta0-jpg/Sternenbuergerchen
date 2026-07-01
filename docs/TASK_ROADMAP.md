@@ -346,6 +346,7 @@ git checkout -b batch/<batch-name>
 - TASK_715 - Station Route Empty Event Log Polish (implementiert)
 - TASK_716 - Station Route Run Readout Polish (implementiert)
 - TASK_717 - Station Route Real Host/Client Click Findings (implementiert)
+- TASK_718 - Station Route Door/GO/Reject Visual Polish (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

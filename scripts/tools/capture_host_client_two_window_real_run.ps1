@@ -455,9 +455,9 @@ $manifest = [ordered]@{
     door_real_click_expected_button = "DoorBreachButton"
     door_real_click_expected_shortcut = "B"
     door_real_click_expected_go_control = "GO"
-    door_real_click_expected_ready_line = "DOOR DOOR B->GO"
+    door_real_click_expected_ready_line = "DOOR B->GO"
     door_real_click_expected_wrong_team_reason = "peer_team_mismatch"
-    door_real_click_expected_open_line = "DOOR DOOR OPEN"
+    door_real_click_expected_open_line = "DOOR OPEN"
     door_real_click_expected_hud_surface = "mission_interaction_door_authority_visible_line"
     door_real_click_manual_review_required = $true
     door_real_click_manual_review_done = $false
@@ -488,7 +488,7 @@ $manifest = [ordered]@{
         "computer_controlled",
         "cargo_departed"
     )
-    station_route_expected_door_line = "DOOR DOOR OPEN"
+    station_route_expected_door_line = "DOOR OPEN"
     station_route_expected_computer_line = "COMPUTER CONTROLLED"
     station_route_expected_cargo_line = "CARGO DEPARTED"
     station_route_expected_wrong_team_reason = "peer_team_mismatch"

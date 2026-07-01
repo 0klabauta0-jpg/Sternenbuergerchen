@@ -88,9 +88,9 @@ func _test_manifest_fields() -> void:
 	_assert(String(manifest.get("door_real_click_expected_button", "")) == "DoorBreachButton", "Manifest records Door button")
 	_assert(String(manifest.get("door_real_click_expected_shortcut", "")) == "B", "Manifest records shortcut B")
 	_assert(String(manifest.get("door_real_click_expected_go_control", "")) == "GO", "Manifest records GO control")
-	_assert(String(manifest.get("door_real_click_expected_ready_line", "")) == "DOOR DOOR B->GO", "Manifest records ready Door line")
+	_assert(_line_is_current_or_legacy(String(manifest.get("door_real_click_expected_ready_line", "")), "DOOR B->GO", "DOOR DOOR B->GO"), "Manifest records ready Door line")
 	_assert(String(manifest.get("door_real_click_expected_wrong_team_reason", "")) == "peer_team_mismatch", "Manifest records wrong-team reason")
-	_assert(String(manifest.get("door_real_click_expected_open_line", "")) == "DOOR DOOR OPEN", "Manifest records open Door line")
+	_assert(_line_is_current_or_legacy(String(manifest.get("door_real_click_expected_open_line", "")), "DOOR OPEN", "DOOR DOOR OPEN"), "Manifest records open Door line")
 	_assert(String(manifest.get("door_real_click_expected_hud_surface", "")) == "mission_interaction_door_authority_visible_line", "Manifest records Door HUD surface field")
 	_assert(bool(manifest.get("door_real_click_manual_review_required", false)), "Manifest requires Door manual review")
 	_assert(not bool(manifest.get("door_real_click_manual_review_done", true)), "Manifest does not claim Door manual review done")
@@ -119,6 +119,10 @@ func _array_contains(value: Variant, needle: String) -> bool:
 		if String(item) == needle:
 			return true
 	return false
+
+
+func _line_is_current_or_legacy(line: String, current_line: String, legacy_line: String) -> bool:
+	return line == current_line or line == legacy_line
 
 
 func _read_json(path: String) -> Dictionary:
