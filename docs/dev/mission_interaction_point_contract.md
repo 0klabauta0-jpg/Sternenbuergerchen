@@ -414,6 +414,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Das Manifest `tmp/station_scenario_playtest_findings.json` darf naechste Tasks empfehlen, setzt aber keine Runtime-, Door-, Objective-, Team- oder Multiplayer-Wahrheit.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Visible Playtest Run Packet
+- `MissionTestSetup.apply_cmdline_scenario_override()` darf `--scenario-file=` und `--mission-scenario=` aus sichtbaren Launch-Args in `scenario_file_path` uebernehmen.
+- Dieser Override ist nur ein Setup-/Authoring-Einstieg fuer die Szene; echte Runtime-Gates, Door-State, Objective-Progress und Multiplayer-Authority bleiben bei den bestehenden Runtime-Systemen.
+- `launch_host_client_two_window_review.ps1 -ScenarioPath ...` muss den Scenario-Pfad als `--scenario-file=...` in Host- und Client-Fenster weiterreichen und im Launch-Plan dokumentieren.
+- `prepare_station_scenario_visible_playtest_run.ps1` erzeugt ein read-only Packet mit Szenario, Workbench-URI, TASK_726/727/728-Status, Required-Checks und Start-/Capture-Kommandos.
+- Der Packet-Status `ready_to_run_visible_playtest` bedeutet nur: alles ist vorbereitet, um den sichtbaren Lauf auszufuehren. Er ist keine menschliche Abnahme.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

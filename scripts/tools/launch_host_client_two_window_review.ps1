@@ -8,6 +8,7 @@ param(
     [int]$HostX = 40,
     [int]$ClientX = 1380,
     [int]$Y = 80,
+    [string]$ScenarioPath = "",
     [switch]$DisableAutoFitLayout
 )
 
@@ -151,7 +152,7 @@ function Build-Args {
         [string]$Team,
         [int]$X
     )
-    return @(
+    $args = @(
         "--path", $resolvedProjectPath,
         "--resolution", ("{0}x{1}" -f $WindowWidth, $WindowHeight),
         "--position", ("{0},{1}" -f $X, $Y),
@@ -162,6 +163,10 @@ function Build-Args {
         "--team=$Team",
         "--task-id=TASK_611"
     )
+    if (-not [string]::IsNullOrWhiteSpace($ScenarioPath)) {
+        $args += "--scenario-file=$ScenarioPath"
+    }
+    return $args
 }
 
 $resolvedProjectPath = Resolve-ProjectPath $ProjectPath
@@ -187,6 +192,8 @@ $plan = [ordered]@{
     ui_sets_gameplay_truth = $false
     project_path = $resolvedProjectPath
     scene = $Scene
+    scenario_path = $ScenarioPath
+    scenario_arg_included = -not [string]::IsNullOrWhiteSpace($ScenarioPath)
     godot_bin = $godot.path
     godot_bin_found = $godot.found
     godot_bin_source = $godot.source
@@ -221,7 +228,7 @@ $plan = [ordered]@{
         command_args = $clientArgs
         window = [ordered]@{ width = $WindowWidth; height = $WindowHeight; x = $ClientX; y = $Y }
     }
-    launch_command = "powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1 -Launch"
+    launch_command = $(if ([string]::IsNullOrWhiteSpace($ScenarioPath)) { "powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1 -Launch" } else { "powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1 -Launch -ScenarioPath `"$ScenarioPath`"" })
     recommended_next_task = "TASK_612 - Host Client Two Window Screenshot Review"
 }
 
