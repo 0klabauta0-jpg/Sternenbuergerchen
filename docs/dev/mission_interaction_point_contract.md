@@ -445,6 +445,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Mission-HUD-Density-Snapshot darf dieselbe Cue-Zeile in der ACT-Flaeche zeigen, aber keine Scenario-Gates, Door-States, Cargo-States oder Commands setzen.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht; Completion kommt weiter aus Runtime-Gates und Interaction-Progress.
 
+## Station Scenario HUD Overlap Pass
+- Wenn die volle Station-Route bereits im Mission-Identity-Body sichtbar ist, soll die knappe Mission-Control-/ACT-Flaeche die `CUE ...`-Handlungszeile priorisieren.
+- Der Density-Snapshot behaelt die volle Route als Source-Feld, markiert aber `station_route_line_deferred_to_identity = true`, wenn Route und Cue beide aktiv sind.
+- Die ACT-Line darf dann die Cue-Line enthalten, soll aber nicht gleichzeitig die komplette Route-Line wiederholen.
+- `get_station_scenario_hud_overlap_pass_snapshot()` exportiert Route-in-Identity, Cue-in-ACT, Linebudget und sichtbaren Linecount fuer Verifier/Reports.
+- Diese Entdichtung bleibt Anzeigeverhalten: keine Scenario-Gates, keine Door-/Cargo-States, keine Commands und keine Gameplay-Wahrheit werden gesetzt.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

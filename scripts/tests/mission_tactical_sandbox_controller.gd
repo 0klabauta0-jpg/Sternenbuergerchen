@@ -6201,6 +6201,8 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 	var station_route_line: String = String(station_route_readout.get("compact_line", "")).strip_edges()
 	var station_route_cue: Dictionary = station_route_cue_override.duplicate(true) if not station_route_cue_override.is_empty() else get_station_scenario_route_cue_polish_snapshot()
 	var station_route_cue_line: String = String(station_route_cue.get("cue_line", "")).strip_edges()
+	var station_route_line_deferred_to_identity: bool = not station_route_line.is_empty() and not station_route_cue_line.is_empty()
+	var objective_cargo_deferred_to_route_cue: bool = not station_route_cue_line.is_empty()
 	var objective_line: String = _build_mission_objective_interaction_line().strip_edges()
 	var cargo_line: String = _build_mission_cargo_extract_line().strip_edges()
 	var interaction_progress_readability: Dictionary = interaction_progress_readability_override.duplicate(true) if not interaction_progress_readability_override.is_empty() else _build_mission_interaction_progress_readability_snapshot()
@@ -6224,15 +6226,15 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 	if not combat_or_contact_line.is_empty():
 		source_lines.append(combat_or_contact_line)
 	var compact_parts: PackedStringArray = PackedStringArray()
-	if not station_route_line.is_empty():
+	if not station_route_line.is_empty() and not station_route_line_deferred_to_identity:
 		compact_parts.append(station_route_line)
 	if not station_route_cue_line.is_empty():
 		compact_parts.append(station_route_cue_line)
 	if not interaction_progress_line.is_empty():
 		compact_parts.append(interaction_progress_line)
-	if not objective_line.is_empty():
+	if not objective_line.is_empty() and not objective_cargo_deferred_to_route_cue:
 		compact_parts.append(objective_line)
-	if not cargo_line.is_empty():
+	if not cargo_line.is_empty() and not objective_cargo_deferred_to_route_cue:
 		compact_parts.append(cargo_line)
 	if not fire_rule_text.is_empty():
 		compact_parts.append("ROE %s" % fire_rule_text)
@@ -6265,6 +6267,10 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 		"station_route_run_readout": station_route_readout,
 		"station_route_cue_line": station_route_cue_line,
 		"station_scenario_route_cue_polish": station_route_cue,
+		"station_route_line_deferred_to_identity": station_route_line_deferred_to_identity,
+		"objective_cargo_deferred_to_route_cue": objective_cargo_deferred_to_route_cue,
+		"station_route_density_policy_id": "station_route_identity_body_act_cue_v1",
+		"station_route_cue_prioritized": station_route_line_deferred_to_identity,
 		"interaction_progress_line": interaction_progress_line,
 		"interaction_progress_readability": interaction_progress_readability,
 		"combat_line": combat_hud_line,
@@ -6279,6 +6285,7 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 		"contains_objective": not objective_line.is_empty() and mission_control_line.contains(objective_line),
 		"contains_cargo": not cargo_line.is_empty() and mission_control_line.contains(cargo_line),
 		"contains_station_route": not station_route_line.is_empty() and mission_control_line.contains(station_route_line),
+		"station_route_source_available": not station_route_line.is_empty(),
 		"contains_station_route_cue": not station_route_cue_line.is_empty() and mission_control_line.contains(station_route_cue_line),
 	}
 
@@ -6337,6 +6344,42 @@ func get_station_scenario_route_cue_polish_snapshot() -> Dictionary:
 	)).duplicate(true)
 	var route_readout: Dictionary = _build_station_route_run_readout_snapshot(objective_gate, object_reaction)
 	return _build_station_scenario_route_cue_polish_snapshot(route_readout, objective_gate, use_feedback, progress_readability)
+
+
+func get_station_scenario_hud_overlap_pass_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var density: Dictionary = Dictionary(command_feedback.get("mission_hud_interaction_density", {})).duplicate(true)
+	var identity_body: Dictionary = Dictionary(command_feedback.get("station_scenario_identity_body", {})).duplicate(true)
+	var route_line: String = String(density.get("station_route_line", command_feedback.get("station_route_run_line", ""))).strip_edges()
+	var cue_line: String = String(density.get("station_route_cue_line", command_feedback.get("station_scenario_route_cue_line", ""))).strip_edges()
+	var mission_control_line: String = String(density.get("mission_control_line", command_feedback.get("mission_hud_interaction_line", ""))).strip_edges()
+	var route_in_identity: bool = bool(identity_body.get("active", false)) and String(identity_body.get("route_line", "")).strip_edges() == route_line
+	var route_deferred: bool = bool(density.get("station_route_line_deferred_to_identity", false))
+	var cue_prioritized: bool = bool(density.get("station_route_cue_prioritized", false))
+	var line_limit: int = int(density.get("line_char_limit", 180))
+	return {
+		"schema": "sternenbuergerchen.station_scenario_hud_overlap_pass.v1",
+		"task_id": "TASK_733",
+		"active": route_deferred and cue_prioritized and not cue_line.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"source": "command_feedback_mission_hud_interaction_density",
+		"density_policy_id": String(density.get("station_route_density_policy_id", "")),
+		"route_line": route_line,
+		"cue_line": cue_line,
+		"mission_control_line": mission_control_line,
+		"route_in_identity_body": route_in_identity,
+		"route_line_deferred_to_identity": route_deferred,
+		"objective_cargo_deferred_to_route_cue": bool(density.get("objective_cargo_deferred_to_route_cue", false)),
+		"cue_prioritized_in_act_line": cue_prioritized,
+		"mission_control_contains_route": not route_line.is_empty() and mission_control_line.contains(route_line),
+		"mission_control_contains_cue": not cue_line.is_empty() and mission_control_line.contains(cue_line),
+		"line_char_limit": line_limit,
+		"line_length": mission_control_line.length(),
+		"line_within_limit": mission_control_line.length() <= line_limit,
+		"visible_line_count": int(density.get("visible_line_count", 0)),
+		"max_visible_line_count": int(density.get("max_visible_line_count", 1)),
+	}
 
 
 func _build_station_scenario_route_cue_polish_snapshot(route_readout: Dictionary, objective_gate: Dictionary, use_feedback: Dictionary, progress_readability: Dictionary) -> Dictionary:
