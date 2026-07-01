@@ -48,7 +48,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(status_text.contains("TASK_771 - Station Reentry Visible Host Client Playtest Export"), "Implementation status tracks TASK_771")
 	_assert(roadmap_text.contains("TASK_771 - Station Reentry Visible Host Client Playtest Export (implementiert)"), "Roadmap marks TASK_771 implemented")
 	_assert(contract_text.contains("Station-Reentry-Visible-Host-Client-Playtest-Export"), "Mission command feedback contract documents TASK_771")
-	_assert(report_text.contains("TASK_771") and report_text.contains("Aktueller Griff: TASK_787"), "Reentry handbook preserves TASK_771 context and current TASK_787 follow-up")
+	_assert(report_text.contains("TASK_771") and report_text.contains("Aktueller Griff: TASK_788"), "Reentry handbook preserves TASK_771 context and current TASK_788 follow-up")
 	_assert(report_text.contains('data-export-key="reentry_host_client_export.ready_to_capture"'), "Reentry handbook exports TASK_771 ready check")
 	_assert(report_text.contains("station_reentry_visible_host_client_playtest_export.json"), "Reentry handbook names TASK_771 export manifest")
 
