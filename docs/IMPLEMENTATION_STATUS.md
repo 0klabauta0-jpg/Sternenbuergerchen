@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_786 - Station Reentry Firefight Host Client Polished Surface Check
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_786_station_reentry_firefight_host_client_polished_surface_check.md`, `docs/tasks/TASK_785_station_reentry_firefight_command_surface_visible_findings_refresh.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightHostClientPolishedSurfaceCheck` vergleicht zwei TASK_785-Snapshots als Host-/Client-Views read-only.
+- Stand: Der Snapshot prueft Style-ID, Surface-Reihenfolge, Interaction-Line, Primary-Lane, Quick-Action-Rail, Guard-Line, Summary-Line, No-Auto-Command/Existing-Buttons, Peer-/Team-Kontext, Textbudget und read-only Quellen.
+- Risiken/offen: Kein echter Netzwerktransport und kein automatischer Sichtentscheid; ohne bereite TASK_785-Findings bleibt `blocked_until_task_785_visible_findings_ready` korrekt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_786_station_reentry_firefight_host_client_polished_surface_check.gd`, TASK_785/TASK_784/TASK_770 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_787 - Station Reentry Firefight Player Decision Readability Pass.
+
 ### TASK_785 - Station Reentry Firefight Command Surface Visible Findings Refresh
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_785_station_reentry_firefight_command_surface_visible_findings_refresh.md`, `docs/tasks/TASK_784_station_reentry_firefight_command_surface_playtest_packet_refresh.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Review der polierten Surface, unvollstaendige Pflichtchecks, konkrete Polish-/Host-Client-/Performance-Follow-ups und einen sauberen naechsten Station-Firefight-Schritt.
 - Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Fensterlauf bleibt `needs_visible_polished_command_surface_review` korrekt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_785_station_reentry_firefight_command_surface_visible_findings_refresh.gd`, TASK_784/TASK_783/TASK_782 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_786 - Station Reentry Firefight Host Client Polished Surface Check.
+- Naechster Schritt: TASK_786 - Station Reentry Firefight Host Client Polished Surface Check (implementiert).
 
 ### TASK_784 - Station Reentry Firefight Command Surface Playtest Packet Refresh
 - Status: implementiert im Arbeitsstand
