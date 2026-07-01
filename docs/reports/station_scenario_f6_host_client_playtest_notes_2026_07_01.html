@@ -83,6 +83,7 @@
       <span class="pill warn">Findings: TASK_754</span>
       <span class="pill warn">Refresh: TASK_757</span>
       <span class="pill warn">Acceptance: TASK_758</span>
+      <span class="pill warn">Next Target: TASK_759</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -189,6 +190,20 @@
           <textarea data-export-key="station_scenario_playtest.notes.homebase_return_acceptance" placeholder="Acceptance-Notiz: akzeptiert fuer naechsten Slice oder welche echte Reibung bleibt?"></textarea>
         </article>
         <article class="card full">
+          <h2>Station Next Playtest Target</h2>
+          <p>Dieser Block legt den naechsten kleinen spielbaren Ziel-Slice fest: aus der Homebase wieder in die Station-Sortie und die erste Missionsentscheidung pruefen.</p>
+          <input readonly value="TASK_759" data-export-key="station_scenario_playtest.next_target.task_id">
+          <input readonly value="sternenbuergerchen.station_slice_next_playtest_target.v1" data-export-key="station_scenario_playtest.next_target.schema">
+          <input readonly value="station_reentry_playtest" data-export-key="station_scenario_playtest.next_target.target_id">
+          <input readonly value="Homebase -> naechste Station-Sortie" data-export-key="station_scenario_playtest.next_target.target_title">
+          <input readonly value="data/mission_scenarios/station_route_one_screen_multiplayer_drill.json" data-export-key="station_scenario_playtest.next_target.scenario_path">
+          <input readonly value="Homebase-Reentry, Fireteam/Loadout/Dropship, erster Missionsentscheid" data-export-key="station_scenario_playtest.next_target.focus">
+          <input readonly value="Homebase-Return-Panel lesen, Fireteam bereitstellen, Loadout pruefen, Dropship beladen, Start freigeben, erste Mission-Entscheidung mit Preview treffen" data-export-key="station_scenario_playtest.next_target.runbook_steps">
+          <input readonly value="Host und Client sehen denselben naechsten Auftrag, Fireteam-Zuordnung bleibt im Dropship konsistent, Startfreigabe erzeugt keine zweite UI-Wahrheit, erste Mission-Cue ist fuer beide Fenster lesbar" data-export-key="station_scenario_playtest.next_target.multiplayer_checks">
+          <input readonly value="TASK_760 - Station Reentry Playtest Run Packet" data-export-key="station_scenario_playtest.next_target.ready_next_task">
+          <textarea data-export-key="station_scenario_playtest.notes.station_next_playtest_target" placeholder="Naechster Ziel-Slice: Was soll im Reentry-Fenster besonders beobachtet werden?"></textarea>
+        </article>
+        <article class="card full">
           <h2>Route</h2>
           <table>
             <thead><tr><th>Schritt</th><th>Spieler-Erwartung</th><th>Was notieren?</th></tr></thead>
@@ -246,7 +261,7 @@
         </article>
         <article class="card half">
           <h3>Naechster Task</h3>
-          <input value="TASK_758 - Station Homebase Return Acceptance Review" data-export-key="station_scenario_playtest.recommended_next_task">
+          <input value="TASK_759 - Station Slice Next Playtest Target" data-export-key="station_scenario_playtest.recommended_next_task">
         </article>
       </div>
     </section>
@@ -327,12 +342,13 @@
             findings_task_id: "TASK_754",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_758 - Station Homebase Return Acceptance Review",
+            latest_completed_task: "TASK_759 - Station Slice Next Playtest Target",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
             latest_homebase_findings_task: "TASK_757 - Station Homebase Recapture Findings Refresh",
             latest_homebase_acceptance_task: "TASK_758 - Station Homebase Return Acceptance Review",
+            latest_station_next_playtest_target_task: "TASK_759 - Station Slice Next Playtest Target",
             recommended_next_task: "TASK_755 - Station Homebase Return Panel Polish",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
