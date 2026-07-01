@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_728 - Station Scenario Playtest Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_728_station_scenario_playtest_findings.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioPlaytestFindings` konsumiert TASK_727-Playtestnotizen read-only und unterscheidet `blocked`, `needs_visible_playtest`, `needs_targeted_polish` und `ready_for_next_playable_slice`.
+- Stand: Aktive TASK_727-Issue-Flags werden in konkrete Action Items fuer Route-, HUD-, Performance-, Host/Client-Sync-, Command-Feedback- oder Harness-Follow-ups uebersetzt.
+- Stand: Das aktuelle lokale Manifest `tmp/station_scenario_playtest_findings.json` bleibt erwartbar `needs_visible_playtest`, weil TASK_727 noch keinen echten menschlichen Workbench-Export enthaelt.
+- Risiken/offen: TASK_728 ersetzt weder den sichtbaren F6-/Host-Client-Lauf noch daraus folgenden Code-Polish. Er verhindert nur, dass offene oder issue-lastige Notizen als Abnahme gelesen werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_728_station_scenario_playtest_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd`, `git diff --check`.
+- Naechster Schritt: TASK_729 - Station Scenario Targeted Playtest Polish oder den TASK_727-Workbench-Export im echten Fenster ausfuellen.
+
 ### TASK_727 - Station Scenario F6/Host Client Playtest Notes
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_726_one_screen_multiplayer_station_scenario_drill.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`

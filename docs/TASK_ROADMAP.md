@@ -50,7 +50,8 @@ git checkout -b batch/<batch-name>
 - TASK_725 - Station Route Host/Client Recapture Acceptance Review (implementiert)
 - TASK_726 - One-Screen Multiplayer Station Scenario Drill (implementiert)
 - TASK_727 - Station Scenario F6/Host Client Playtest Notes (implementiert)
-- TASK_728 - Station Scenario Playtest Findings (naechster sinnvoller Schritt)
+- TASK_728 - Station Scenario Playtest Findings (implementiert)
+- TASK_729 - Station Scenario Targeted Playtest Polish (naechster sinnvoller Schritt nach echtem Notiz-Export)
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
