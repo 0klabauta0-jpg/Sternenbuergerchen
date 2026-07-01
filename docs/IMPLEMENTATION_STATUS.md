@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_741 - Station Scenario Workbench Recapture Prefill
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_741_station_scenario_workbench_recapture_prefill.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_739_station_scenario_identity_cue_recapture_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Die TASK_727-Workbench zeigt jetzt die TASK_739-Recapture-Basis direkt an: Recapture-Manifest, Host-/Client-Crops, erwartete Cue und neutrale Route.
+- Stand: `StationScenarioF6HostClientPlaytestNotes` uebernimmt optionale Recapture-Findings read-only in den Snapshot und laesst `manual_review_done` unveraendert vom echten Playtest-Export abhaengen.
+- Stand: `task_741_station_scenario_workbench_recapture_prefill.gd` prueft Workbench, Analyzer-Snapshot und Report-/Roadmap-/Contract-Anker.
+- Risiken/offen: TASK_741 erleichtert den menschlichen Review, ersetzt ihn aber nicht. `station_scenario_playtest.playtest_done` bleibt offen, bis die Workbench wirklich sichtbar ausgefuellt und exportiert wurde.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_741_station_scenario_workbench_recapture_prefill.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_739_station_scenario_identity_cue_recapture_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen und JSON exportieren; TASK_740 nur bei belegtem Harness-Problem.
+
 ### TASK_739 - Station Scenario Identity Cue Recapture Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_739_station_scenario_identity_cue_recapture_findings.md`, `docs/tasks/TASK_738_station_scenario_identity_cue_visibility_polish.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

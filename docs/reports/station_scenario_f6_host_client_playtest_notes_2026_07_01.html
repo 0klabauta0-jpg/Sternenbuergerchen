@@ -77,6 +77,7 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Task: TASK_727</span>
+      <span class="pill good">Prefill: TASK_741</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -96,13 +97,28 @@
         <article class="card wide">
           <h2>Was hier entschieden wird</h2>
           <p>Diese Seite beantwortet nur die Spielerfrage: Traegt der kompakte Stationslauf im echten Fenster? Sie ist kein Headless-Test und kein Runtime-Mutator.</p>
-          <div class="callout">TASK_726 meldet `ready_for_f6_host_client_playtest`. TASK_727 sammelt den menschlichen Blick: Lesbarkeit, Tempo, Command-Gefuehl, Host/Client-Sync und Teamkontext.</div>
+          <div class="callout">TASK_726 meldet `ready_for_f6_host_client_playtest`. TASK_739 liefert den aktuellen Recapture-Kontext: Cue zuerst, neutrale Route danach, Host-/Client-Crops vorhanden. TASK_727 sammelt trotzdem erst den menschlichen Blick: Lesbarkeit, Tempo, Command-Gefuehl, Host/Client-Sync und Teamkontext.</div>
         </article>
         <article class="card">
           <h2>Quellen</h2>
           <input readonly value="data/mission_scenarios/station_route_one_screen_multiplayer_drill.json" data-export-key="station_scenario_playtest.scenario_path">
           <input readonly value="tmp/station_route_one_screen_multiplayer_drill.json" data-export-key="station_scenario_playtest.source_drill_manifest_path">
+          <input readonly value="tmp/station_scenario_identity_cue_recapture_findings.json" data-export-key="station_scenario_playtest.prefill.source_recapture_manifest_path">
           <input readonly value="tmp/station_scenario_f6_host_client_playtest_notes.json" data-export-key="station_scenario_playtest.manifest_path">
+        </article>
+        <article class="card full">
+          <h2>Aktuelle Recapture Evidence</h2>
+          <p>Diese Werte sind Vorbefuellung fuer den Review. Sie helfen beim Vergleichen, setzen aber keine Playtest-Abnahme.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_playtest.prefill.real_run_done"> Echter Host-/Client-Capture liegt vor</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_playtest.prefill.host_crop_ready"> Host-Crop bereit</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_playtest.prefill.client_crop_ready"> Client-Crop bereit</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_playtest.prefill.identity_cue_ready"> Identity-Cue und neutrale Route im Snapshot bereit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.prefill.manual_acceptance_done"> Menschliche TASK_727-Abnahme erfolgt</label>
+          <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="station_scenario_playtest.prefill.host_crop_path">
+          <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="station_scenario_playtest.prefill.client_crop_path">
+          <input readonly value="CUE AA: BLUE naeher ran | 3.9km" data-export-key="station_scenario_playtest.prefill.expected_cue_line">
+          <input readonly value="ROUTE AA > DOOR > COM > CARGO | NEXT AA" data-export-key="station_scenario_playtest.prefill.display_route_line">
+          <input readonly value="ready_for_task_727_workbench_export" data-export-key="station_scenario_playtest.prefill.recapture_status">
         </article>
         <article class="card full">
           <h2>Route</h2>
@@ -127,6 +143,7 @@
             <li>Godot mit der MapBuilder-/Mission-F6-Szene sichtbar starten.</li>
             <li>Station-Route-One-Screen-Szenario laden oder den aktuellen Drill-Pfad verwenden.</li>
             <li>Host-Fenster und Client-Fenster nebeneinander pruefen, falls Multiplayer-Kontext getestet wird.</li>
+            <li>Mit den Recapture-Crops vergleichen: oben links soll zuerst `CUE AA: BLUE naeher ran | 3.9km` und danach `ROUTE AA &gt; DOOR &gt; COM &gt; CARGO | NEXT AA` stehen.</li>
             <li>AA, Door, Computer und Cargo der Reihe nach ansehen und bedienen.</li>
             <li>Fireteam-Orders auf Tempo, GO-Verstaendnis und Rueckmeldung pruefen.</li>
             <li>HUD-Ueberdeckung, Teamkontext, Wrong-Team-/Bravo-Hinweise und Performance notieren.</li>
@@ -237,8 +254,10 @@
           active_choices: {},
           computed: {
             task_id: "TASK_727",
+            prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
+            latest_completed_task: "TASK_741 - Station Scenario Workbench Recapture Prefill",
+            latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             recommended_next_task: "TASK_728 - Station Scenario Playtest Findings",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
@@ -247,7 +266,8 @@
           metadata: {
             local_path: "docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html",
             manifest_path: "tmp/station_scenario_f6_host_client_playtest_notes.json",
-            source_drill_manifest_path: "tmp/station_route_one_screen_multiplayer_drill.json"
+            source_drill_manifest_path: "tmp/station_route_one_screen_multiplayer_drill.json",
+            source_recapture_manifest_path: "tmp/station_scenario_identity_cue_recapture_findings.json"
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
