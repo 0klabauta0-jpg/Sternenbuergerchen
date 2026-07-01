@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_752 - Station Homebase Recapture Workbench Prefill
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_752_station_homebase_recapture_workbench_prefill.md`, `docs/tasks/TASK_750_station_homebase_host_client_recapture_packet.md`, `docs/tasks/TASK_751_station_homebase_capture_metadata_hook.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioF6HostClientPlaytestNotes` uebernimmt Homebase-Recapture-Felder aus dem TASK_751-Capture-Manifest read-only in `recapture_evidence`.
+- Stand: Die TASK_727-Workbench zeigt jetzt TASK_750/TASK_751-Prefill-Daten direkt an: Packet-Pfad, Capture-Manifest, erwartete TASK_749-Homebase-Zeile, verbotene alte Debug-Marker und Pflichtchecks.
+- Stand: `scripts/tests/task_752_station_homebase_recapture_workbench_prefill.gd` prueft Analyzer-Snapshot, Workbench-Exportfelder, aktuellen HTML-Bericht, Contract, Status und Roadmap.
+- Risiken/offen: Der echte sichtbare Host/Client-Homebase-Recapture und die Findings-Auswertung bleiben weiterhin offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_752_station_homebase_recapture_workbench_prefill.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_751_station_homebase_capture_metadata_hook.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd`, `git diff --check`.
+- Naechster Schritt: echten Host/Client-Homebase-Recapture in der Workbench ausfuehren/exportieren und daraus Findings oder kleinen Panel-Polish schneiden.
+
 ### TASK_751 - Station Homebase Capture Metadata Hook
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_751_station_homebase_capture_metadata_hook.md`, `docs/tasks/TASK_750_station_homebase_host_client_recapture_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
