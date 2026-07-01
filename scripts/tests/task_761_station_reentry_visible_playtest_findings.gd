@@ -71,7 +71,7 @@ func _test_open_reentry_needs_visible_playtest() -> void:
 	_assert(_snapshot_is_read_only(snapshot), "Open Reentry findings remain read-only")
 	_assert(String(snapshot.get("status", "")) == "needs_visible_reentry_playtest", "Open Reentry notes require visible playtest")
 	_assert(not bool(snapshot.get("manual_review_done", true)), "Open Reentry does not claim manual done")
-	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_761"), "Open Reentry routes to TASK_761")
+	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_767"), "Open Reentry routes to TASK_767")
 
 
 func _test_incomplete_reentry_checks() -> void:
@@ -96,7 +96,7 @@ func _test_clean_reentry_ready_for_next_iteration() -> void:
 	_assert(_snapshot_is_read_only(snapshot), "Clean Reentry findings remain read-only")
 	_assert(String(snapshot.get("status", "")) == "ready_for_next_station_iteration", "Clean notes are ready for next iteration")
 	_assert(int(snapshot.get("missing_check_ids", []).size()) == 0, "Clean notes have no missing checks")
-	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_762"), "Clean notes route to TASK_762")
+	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_768"), "Clean notes route beyond TASK_767")
 
 
 func _test_actual_manifest_write() -> void:

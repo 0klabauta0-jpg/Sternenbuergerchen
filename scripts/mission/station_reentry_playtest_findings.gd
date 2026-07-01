@@ -26,9 +26,9 @@ const ISSUE_TO_ACTION: Dictionary = {
 	"needs_fireteam_staging_polish": "TASK_763 - Station Reentry Fireteam Staging Polish",
 	"needs_loadout_bridge_polish": "TASK_764 - Station Reentry Loadout Bridge Polish",
 	"needs_dropship_payload_sync_fix": "TASK_765 - Station Reentry Dropship Payload Sync Fix",
-	"needs_first_order_preview_polish": "TASK_766 - Station Reentry First Order Preview Polish",
-	"needs_reentry_performance_pass": "TASK_767 - Station Reentry Performance Feel Pass",
-	"needs_host_client_next_order_sync": "TASK_768 - Station Reentry Host Client Next Order Sync",
+	"needs_first_order_preview_polish": "TASK_768 - Station Reentry First Mission Preview Polish",
+	"needs_reentry_performance_pass": "TASK_769 - Station Reentry Performance Feel Pass",
+	"needs_host_client_next_order_sync": "TASK_770 - Station Reentry Host Client Next Order Sync",
 }
 
 const ISSUE_FLAG_IDS: Array[String] = [
@@ -56,9 +56,9 @@ static func build_snapshot(packet: Dictionary = {}, existing_notes: Dictionary =
 	var playtest_done: bool = _read_bool(existing_notes, "station_scenario_playtest.reentry.playtest_done")
 	var status: String = _build_status(blocker_count, manual_done, playtest_done, missing_check_ids, active_issue_count)
 	if status == "needs_visible_reentry_playtest":
-		findings.append(_finding("visible_reentry_playtest_open", "manual", "Station-Reentry wurde noch nicht sichtbar als eigener Lauf bewertet.", "TASK_761 - run Station Reentry visible playtest"))
+		findings.append(_finding("visible_reentry_playtest_open", "manual", "Station-Reentry wurde noch nicht sichtbar als eigener Lauf bewertet.", "TASK_767 - Station Reentry Visible Playtest Execute/Review"))
 	elif status == "needs_reentry_completion":
-		findings.append(_finding("reentry_required_checks_missing", "manual", "Reentry-Review ist angefangen, aber Pflichtchecks fehlen: %s" % ", ".join(PackedStringArray(missing_check_ids)), "TASK_761 - complete missing Reentry checks"))
+		findings.append(_finding("reentry_required_checks_missing", "manual", "Reentry-Review ist angefangen, aber Pflichtchecks fehlen: %s" % ", ".join(PackedStringArray(missing_check_ids)), "TASK_767 - complete missing Reentry checks"))
 	return {
 		"schema": SNAPSHOT_SCHEMA,
 		"task_id": "TASK_761",
@@ -210,14 +210,14 @@ static func _recommended_next_task(status: String, action_items: Array) -> Strin
 	if status == "blocked":
 		return "TASK_760 - rerun Station Reentry Playtest Run Packet"
 	if status == "needs_visible_reentry_playtest":
-		return "TASK_761 - run Station Reentry visible playtest"
+		return "TASK_767 - Station Reentry Visible Playtest Execute/Review"
 	if status == "needs_reentry_completion":
-		return "TASK_761 - complete missing Reentry checks"
+		return "TASK_767 - complete missing Reentry checks"
 	if status == "needs_targeted_reentry_polish":
 		if not action_items.is_empty() and typeof(action_items[0]) == TYPE_DICTIONARY:
 			return String(Dictionary(action_items[0]).get("recommended_task", "TASK_762 - Station Reentry Targeted Polish"))
 		return "TASK_762 - Station Reentry Targeted Polish"
-	return "TASK_762 - Station Reentry Next Playable Iteration"
+	return "TASK_768 - Station Reentry First Mission Decision Polish"
 
 
 static func _missing_check_ids(required_checks: Array) -> Array[String]:
