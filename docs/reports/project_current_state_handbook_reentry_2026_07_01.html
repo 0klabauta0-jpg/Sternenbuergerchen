@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_774</span>
-      <span class="pill warn">Aktueller Griff: TASK_775</span>
+      <span class="pill good">Letzter Abschluss: TASK_775</span>
+      <span class="pill warn">Aktueller Griff: TASK_776</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -142,7 +142,8 @@
             <li><strong>Sichttest offen:</strong> Headless-Verifier sind gruen, aber der echte Zwei-Fenster-Blick ist noch nicht abgenommen.</li>
             <li><strong>Preview-Sprache:</strong> Ohne klares Wort <code>PREVIEW</code> kann ein geplanter Move wie ein laufender Move wirken.</li>
           <li><strong>Host/Client:</strong> Beide Fenster sehen denselben naechsten Auftrag; die Fireteam-Karten-Relation ist jetzt als OWN/VIEW/FT ? lesbar.</li>
-          <li><strong>Interaction Feel:</strong> Der naechste Missionsgriff muss AA, Door, Computer und Cargo mit klaren Cues und Commands lesbar machen.</li>
+          <li><strong>Interaction Feel:</strong> AA, Door, Computer und Cargo sind als Griff mit klaren Cues und Commands lesbar.</li>
+          <li><strong>Contact Pressure:</strong> Der naechste offene Punkt ist, dass Kontaktmeldung, Risk-/LOS-Grund und Combat-HUD-Druck im selben Moment knapp lesbar bleiben.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -153,11 +154,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_775 geht nach der Acceptance wieder in den Missionsgriff: Der Spieler soll AA, Door, Computer und Cargo als Route lesen, dazu je eine kurze Cue sehen und die passenden Commands erkennen.</p>
-          <p>Quelle bleibt der TASK_774-Acceptance-Snapshot plus die bestehende Station-Route-Cue-Logik: keine neue Gameplay-Wahrheit, nur Lesbarkeit und Bediengefuehl fuer den naechsten Befehl. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773 und TASK_774.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_776 als Contact-/Combat-Pressure-Feel-Pass, damit die Station nicht nur bedienbar, sondern taktisch spannend wird.</div>
-          <input readonly value="TASK_775 - Station Reentry Mission Interaction Feel Pass" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_776 - Station Reentry Contact Pressure Feel Pass" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_776 geht nach dem lesbaren Missionsgriff in den ersten taktischen Druckmoment: Der Spieler soll Kontaktmeldung, Risk-/LOS-Grund, Pressure-/Engagement-Feedback und Combat-HUD-Zeile zusammen lesen koennen.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_775, First-Contact, First-Engagement, Threat-Preview und Combat-HUD-Density: keine neue Gameplay-Wahrheit, nur Lesbarkeit fuer den naechsten Kampfmoment. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775 und TASK_776.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_777 als Firefight-/Combat-Resolution-Feel-Pass, damit nicht nur Kontakt, sondern der erste Feuerwechsel gut spielbar wirkt.</div>
+          <input readonly value="TASK_776 - Station Reentry Contact Pressure Feel Pass" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_777 - Station Reentry Firefight Tension Feel Pass" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
@@ -196,6 +197,11 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_interaction_feel.all_interaction_cues_readable"> AA/Door/Computer/Cargo-Cues lesbar</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_interaction_feel.command_affordances_present"> Move/Take/Breach/Defend/GO sichtbar</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_interaction_feel.ready_for_mission_interaction_playtest"> Bereit fuer Mission-Interaction-Playtest</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_contact_pressure.contact_report_visible"> Kontaktmeldung mit Text/Position/Confidence/Alter sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_contact_pressure.threat_reason_visible"> Risk-/LOS-/Exposure-Grund sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_contact_pressure.pressure_feedback_visible"> Fire/Wait/No-Fire-Druck erklaert</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_contact_pressure.combat_hud_compact"> Contact/Risk/LOS/Cover kompakt im HUD</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_contact_pressure.ready_for_contact_pressure_playtest"> Bereit fuer Contact-Pressure-Playtest</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -285,10 +291,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_776 - Station Reentry Contact Pressure Feel Pass"
+            recommended_next_task: "TASK_777 - Station Reentry Firefight Tension Feel Pass"
           },
           metadata: {
-            generated_for_task: "TASK_775",
+            generated_for_task: "TASK_776",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
