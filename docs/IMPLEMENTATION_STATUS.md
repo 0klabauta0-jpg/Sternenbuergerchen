@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_755 - Station Homebase Return Panel Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_755_station_homebase_return_panel_polish.md`, `docs/tasks/TASK_754_station_homebase_recapture_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `HomebaseTestScreen` zeigt im bestehenden `PostDebriefFollowupPanel` jetzt einen klaren Station-Return-Kopf `Rueckkehr abgeschlossen`.
+- Stand: Das Panel nennt den aktuellen naechsten Homebase-Schritt als `Naechster Auftrag` und spiegelt die fuenf Station-Readiness-Schritte als kompakte deutsche Chips.
+- Stand: `get_station_homebase_return_panel_polish_snapshot()` prueft Titel, Aktion, Chips, Bounds und Read-only-Grenzen, ohne Navigation oder Commands zu erzeugen.
+- Risiken/offen: Der echte Host/Client-Fenster-Recapture bleibt ein separater manueller Sichttest; TASK_755 behauptet nur den Runtime-/Headless-Polish.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_755_station_homebase_return_panel_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_749_station_homebase_followup_microcopy_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_747_station_scenario_homebase_visible_readiness_review.gd`, `git diff --check`.
+- Naechster Schritt: TASK_756 - Station Homebase Real Window Recapture.
+
 ### TASK_754 - Station Homebase Recapture Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_754_station_homebase_recapture_findings.md`, `docs/tasks/TASK_753_station_homebase_recapture_review_gate.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`

@@ -54,8 +54,9 @@ const HOMEBASE_ROSTER_SORT_XP_DESC := "xp_desc"
 const HOMEBASE_ROSTER_SORT_NAME_ASC := "name_asc"
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID := "task_645_homebase_followup_panel_v1"
 const HOMEBASE_POST_DEBRIEF_DENSITY_FINDINGS_STYLE_ID := "task_647_homebase_density_findings_v1"
+const HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID := "task_755_station_homebase_return_panel_v1"
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE := 12
-const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 70.0
+const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 108.0
 const HOMEBASE_ROSTER_SORT_OPTIONS: Array = [
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_DESC, "label": "Leader high"},
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_ASC, "label": "Leader low"},
@@ -591,6 +592,77 @@ func get_station_scenario_homebase_visible_readiness_review_snapshot() -> Dictio
 		"visual_only": true,
 		"checks": checks,
 		"recommended_next_task": "TASK_748 - Station Scenario Homebase Readiness Visual Polish Findings",
+	}
+
+
+func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
+	var visible_snapshot: Dictionary = get_station_scenario_homebase_visible_readiness_review_snapshot()
+	var readiness_snapshot: Dictionary = get_station_scenario_homebase_next_sortie_readiness_snapshot()
+	var followup_panel := _get_post_debrief_followup_panel()
+	var title_label := _get_post_debrief_followup_title_label()
+	var action_label := _get_post_debrief_followup_action_label()
+	var chip_row := _get_post_debrief_followup_step_chip_row()
+	var post_label := _get_post_debrief_homebase_summary_label()
+	var readiness_label := _get_next_sortie_readiness_label()
+	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
+	var panel_rect: Rect2 = _control_global_rect(followup_panel)
+	var title_rect: Rect2 = _control_global_rect(title_label)
+	var action_rect: Rect2 = _control_global_rect(action_label)
+	var chip_row_rect: Rect2 = _control_global_rect(chip_row)
+	var post_rect: Rect2 = _control_global_rect(post_label)
+	var readiness_rect: Rect2 = _control_global_rect(readiness_label)
+	var mission_rect: Rect2 = _control_global_rect(mission_panel)
+	var steps: Array = Array(readiness_snapshot.get("readiness_steps", [])).duplicate(true)
+	var chips: Array = _build_station_return_panel_step_chip_snapshot(steps)
+	var title_text: String = title_label.text.strip_edges() if title_label != null else ""
+	var action_text: String = action_label.text.strip_edges() if action_label != null else ""
+	var chip_count: int = chips.size()
+	var current_step_id: String = String(readiness_snapshot.get("current_next_step_id", "")).strip_edges()
+	var checks: Array = []
+	_append_visual_audit_check(checks, "visible_readiness_gate_pass", String(visible_snapshot.get("gate", "")) == "pass", "critical", "Return-panel polish builds on green station visible-readiness gate.")
+	_append_visual_audit_check(checks, "panel_visible", _control_is_visible(followup_panel), "critical", "Station Homebase return panel should be visible.")
+	_append_visual_audit_check(checks, "panel_style_id", String(followup_panel.get_meta("homebase_return_panel_style_id", "")) == HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID if followup_panel != null else false, "critical", "Return panel should expose TASK_755 style metadata.")
+	_append_visual_audit_check(checks, "title_visible", _control_is_visible(title_label) and title_text == "Rueckkehr abgeschlossen", "critical", "Return panel title should make the completed return obvious.")
+	_append_visual_audit_check(checks, "action_visible", _control_is_visible(action_label) and action_text.contains("Naechster Auftrag") and action_text.contains(_station_next_sortie_step_label(current_step_id)), "critical", "Return panel action line should name the current next Homebase action.")
+	_append_visual_audit_check(checks, "chips_visible", _control_is_visible(chip_row) and chip_count >= 5, "critical", "Return panel should show all next-sortie steps as compact chips.")
+	_append_visual_audit_check(checks, "current_chip_present", _station_return_panel_chip_state_exists(chips, current_step_id, "current"), "critical", "Return panel chips should mark the current next step.")
+	_append_visual_audit_check(checks, "chip_labels_german", _station_return_panel_chips_have_german_labels(chips), "critical", "Return panel chips should use the same German station step labels.")
+	_append_visual_audit_check(checks, "inside_followup_panel", _rect_inside(title_rect, panel_rect) and _rect_inside(action_rect, panel_rect) and _rect_inside(chip_row_rect, panel_rect) and _rect_inside(post_rect, panel_rect) and _rect_inside(readiness_rect, panel_rect), "critical", "Return title, action, chips and legacy lines should stay inside the follow-up panel.")
+	_append_visual_audit_check(checks, "inside_mission_panel", _rect_inside(panel_rect, mission_rect), "critical", "Return panel should stay inside the MissionPanel.")
+	_append_visual_audit_check(checks, "read_only", bool(visible_snapshot.get("read_only", false)) and bool(readiness_snapshot.get("read_only", false)), "critical", "Return panel polish should read existing Homebase state only.")
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_homebase_return_panel_polish.v1",
+		"task_id": "TASK_755",
+		"source_task_ids": ["TASK_754", "TASK_749", "TASK_747", "TASK_746"],
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"return_panel_style_id": String(followup_panel.get_meta("homebase_return_panel_style_id", "")) if followup_panel != null else "",
+		"return_panel_title_text": title_text,
+		"return_panel_action_text": action_text,
+		"return_panel_chip_count": chip_count,
+		"return_panel_step_chips": chips,
+		"return_panel_primary_step_id": current_step_id,
+		"readiness_line": String(readiness_snapshot.get("readiness_line", "")),
+		"rendered_readiness_line": readiness_label.text.strip_edges() if readiness_label != null else "",
+		"post_summary_text": post_label.text.strip_edges() if post_label != null else "",
+		"panel_rect": _rect_to_dict(panel_rect),
+		"title_rect": _rect_to_dict(title_rect),
+		"action_rect": _rect_to_dict(action_rect),
+		"chip_row_rect": _rect_to_dict(chip_row_rect),
+		"post_summary_rect": _rect_to_dict(post_rect),
+		"next_sortie_rect": _rect_to_dict(readiness_rect),
+		"return_panel_polish_ready": failed_count == 0,
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"visual_only": true,
+		"checks": checks,
+		"recommended_next_task": "TASK_756 - Station Homebase Real Window Recapture",
 	}
 
 
@@ -3188,6 +3260,7 @@ func _ensure_personnel_notifications_label() -> Label:
 
 
 func _update_post_debrief_homebase_summary() -> void:
+	_ensure_post_debrief_followup_title_label()
 	var label := _ensure_post_debrief_homebase_summary_label()
 	var summary_text: String = _build_post_debrief_homebase_summary_text()
 	if summary_text.is_empty():
@@ -3231,6 +3304,7 @@ func _update_next_sortie_readiness_summary() -> void:
 	label.set_meta("readiness_line", line)
 	label.set_meta("homebase_followup_emphasis", true)
 	label.set_meta("homebase_followup_style_id", HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID)
+	_update_station_return_panel_polish(steps, current_step_id)
 	_sync_post_debrief_followup_panel_visibility()
 
 
@@ -3246,6 +3320,7 @@ func _ensure_post_debrief_followup_panel() -> PanelContainer:
 	panel.visible = false
 	panel.add_theme_stylebox_override("panel", _build_post_debrief_followup_panel_style())
 	panel.set_meta("homebase_followup_style_id", HOMEBASE_POST_DEBRIEF_FOLLOWUP_STYLE_ID)
+	panel.set_meta("homebase_return_panel_style_id", HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID)
 	panel.set_meta("read_only", true)
 	panel.set_meta("ui_sets_gameplay_truth", false)
 	var margin := MarginContainer.new()
@@ -3269,6 +3344,65 @@ func _ensure_post_debrief_followup_panel() -> PanelContainer:
 		if briefing_panel != null:
 			mission_vbox.move_child(panel, briefing_panel.get_index() + 1)
 	return panel
+
+
+func _ensure_post_debrief_followup_title_label() -> Label:
+	var vbox := _get_post_debrief_followup_vbox()
+	var existing := vbox.get_node_or_null("ReturnPanelTitleLabel") as Label
+	if existing != null:
+		return existing
+	var label := Label.new()
+	label.name = "ReturnPanelTitleLabel"
+	label.text = "Rueckkehr abgeschlossen"
+	label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.custom_minimum_size = Vector2(0.0, 18.0)
+	label.add_theme_font_size_override("font_size", 13)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 13)
+	label.add_theme_color_override("font_color", Color("f2d88f"))
+	label.set_meta("homebase_return_panel_style_id", HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID)
+	label.set_meta("read_only", true)
+	vbox.add_child(label)
+	vbox.move_child(label, 0)
+	return label
+
+
+func _ensure_post_debrief_followup_action_label() -> Label:
+	var vbox := _get_post_debrief_followup_vbox()
+	var existing := vbox.get_node_or_null("ReturnPanelActionLabel") as Label
+	if existing != null:
+		return existing
+	var label := Label.new()
+	label.name = "ReturnPanelActionLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.custom_minimum_size = Vector2(0.0, 18.0)
+	label.add_theme_font_size_override("font_size", HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE)
+	META_UI_SKIN_SCRIPT.style_body_label(label, HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE)
+	label.add_theme_color_override("font_color", Color("e8f2ff"))
+	label.set_meta("homebase_return_panel_style_id", HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID)
+	label.set_meta("read_only", true)
+	vbox.add_child(label)
+	vbox.move_child(label, 1)
+	return label
+
+
+func _ensure_post_debrief_followup_step_chip_row() -> HBoxContainer:
+	var vbox := _get_post_debrief_followup_vbox()
+	var existing := vbox.get_node_or_null("ReturnPanelStepChipRow") as HBoxContainer
+	if existing != null:
+		return existing
+	var row := HBoxContainer.new()
+	row.name = "ReturnPanelStepChipRow"
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_theme_constant_override("separation", 4)
+	row.set_meta("homebase_return_panel_style_id", HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID)
+	row.set_meta("read_only", true)
+	vbox.add_child(row)
+	vbox.move_child(row, 2)
+	return row
 
 
 func _ensure_post_debrief_homebase_summary_label() -> Label:
@@ -3319,6 +3453,18 @@ func _get_next_sortie_readiness_label() -> Label:
 	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/NextSortieReadinessLabel") as Label
 
 
+func _get_post_debrief_followup_title_label() -> Label:
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/ReturnPanelTitleLabel") as Label
+
+
+func _get_post_debrief_followup_action_label() -> Label:
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/ReturnPanelActionLabel") as Label
+
+
+func _get_post_debrief_followup_step_chip_row() -> HBoxContainer:
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/ReturnPanelStepChipRow") as HBoxContainer
+
+
 func _get_post_debrief_followup_panel() -> PanelContainer:
 	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel") as PanelContainer
 
@@ -3337,6 +3483,15 @@ func _sync_post_debrief_followup_panel_visibility() -> void:
 	var post_intends_visible: bool = post_label != null and post_label.visible and not post_label.text.strip_edges().is_empty()
 	var readiness_intends_visible: bool = readiness_label != null and readiness_label.visible and not readiness_label.text.strip_edges().is_empty()
 	panel.visible = post_intends_visible or readiness_intends_visible
+	var title_label := _get_post_debrief_followup_title_label()
+	if title_label != null:
+		title_label.visible = panel.visible and _is_station_scenario_last_result()
+	var action_label := _get_post_debrief_followup_action_label()
+	if action_label != null:
+		action_label.visible = panel.visible and _is_station_scenario_last_result()
+	var chip_row := _get_post_debrief_followup_step_chip_row()
+	if chip_row != null:
+		chip_row.visible = panel.visible and _is_station_scenario_last_result()
 	_apply_post_debrief_density_findings()
 
 
@@ -3372,6 +3527,110 @@ func _build_post_debrief_followup_panel_style() -> StyleBoxFlat:
 	stylebox.content_margin_top = 4
 	stylebox.content_margin_bottom = 4
 	return stylebox
+
+
+func _update_station_return_panel_polish(steps: Array, current_step_id: String) -> void:
+	var title_label := _ensure_post_debrief_followup_title_label()
+	var action_label := _ensure_post_debrief_followup_action_label()
+	var chip_row := _ensure_post_debrief_followup_step_chip_row()
+	var station_result: bool = _is_station_scenario_last_result()
+	title_label.visible = station_result
+	action_label.visible = station_result
+	chip_row.visible = station_result
+	if not station_result:
+		action_label.text = ""
+		_clear_return_panel_step_chips(chip_row)
+		return
+	var current_label: String = _station_next_sortie_step_label(current_step_id)
+	action_label.text = "Naechster Auftrag: %s" % current_label
+	action_label.tooltip_text = "Read-only: aktueller Homebase-Schritt aus Readiness- und Staging-Snapshot."
+	_refresh_return_panel_step_chips(chip_row, steps, current_step_id)
+
+
+func _refresh_return_panel_step_chips(row: HBoxContainer, steps: Array, current_step_id: String) -> void:
+	_clear_return_panel_step_chips(row)
+	for step_variant in steps:
+		var step: Dictionary = Dictionary(step_variant)
+		var step_id: String = String(step.get("id", "")).strip_edges()
+		if step_id.is_empty():
+			continue
+		var label := Label.new()
+		label.name = "StepChip_%s" % step_id
+		label.text = _station_next_sortie_step_label(step_id)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.clip_text = true
+		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		label.custom_minimum_size = Vector2(78.0, 18.0)
+		label.add_theme_font_size_override("font_size", 9)
+		META_UI_SKIN_SCRIPT.style_body_label(label, 9)
+		var state: String = String(step.get("state", "pending")).strip_edges()
+		if step_id == current_step_id:
+			state = "current"
+		label.add_theme_color_override("font_color", _return_panel_chip_text_color(state))
+		label.set_meta("homebase_return_panel_style_id", HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID)
+		label.set_meta("step_id", step_id)
+		label.set_meta("step_state", state)
+		label.set_meta("read_only", true)
+		row.add_child(label)
+
+
+func _clear_return_panel_step_chips(row: HBoxContainer) -> void:
+	for child in row.get_children():
+		row.remove_child(child)
+		child.queue_free()
+
+
+func _return_panel_chip_text_color(state: String) -> Color:
+	match state:
+		"ready":
+			return Color("93d8a5")
+		"current":
+			return Color("f2d88f")
+		_:
+			return Color("9fb1bd")
+
+
+func _build_station_return_panel_step_chip_snapshot(steps: Array) -> Array:
+	var chips: Array = []
+	var row := _get_post_debrief_followup_step_chip_row()
+	for step_variant in steps:
+		var step: Dictionary = Dictionary(step_variant)
+		var step_id: String = String(step.get("id", "")).strip_edges()
+		if step_id.is_empty():
+			continue
+		var node: Label = null
+		if row != null:
+			node = row.get_node_or_null("StepChip_%s" % step_id) as Label
+		chips.append({
+			"id": step_id,
+			"label": node.text.strip_edges() if node != null else _station_next_sortie_step_label(step_id),
+			"state": String(node.get_meta("step_state", step.get("state", ""))) if node != null else String(step.get("state", "")),
+			"visible": _control_is_visible(node),
+			"read_only": bool(node.get_meta("read_only", false)) if node != null else false,
+		})
+	return chips
+
+
+func _station_return_panel_chip_state_exists(chips: Array, step_id: String, expected_state: String) -> bool:
+	for chip_variant in chips:
+		var chip: Dictionary = Dictionary(chip_variant)
+		if String(chip.get("id", "")) == step_id and String(chip.get("state", "")) == expected_state:
+			return true
+	return false
+
+
+func _station_return_panel_chips_have_german_labels(chips: Array) -> bool:
+	var expected: PackedStringArray = PackedStringArray(["Auswertung ansehen", "Fireteam bereitstellen", "Loadout pruefen", "Dropship beladen", "Start freigeben"])
+	for expected_label in expected:
+		var found: bool = false
+		for chip_variant in chips:
+			if String(Dictionary(chip_variant).get("label", "")) == expected_label:
+				found = true
+				break
+		if not found:
+			return false
+	return true
 
 
 func _build_missionpanel_density_sections(mission_vbox: Control, mission_rect: Rect2) -> Array:

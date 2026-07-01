@@ -609,6 +609,11 @@ TASK_754 uebersetzt das TASK_753-Gate in konkrete naechste Arbeit. Der Findings-
 
 Erwartete Struktur: `homebase_recapture_findings` enthaelt `schema = sternenbuergerchen.station_homebase_recapture_findings.v1`, `task_id = TASK_754`, `source_task_id = TASK_753`, `status`, `source_review_status`, `summary`, `missing_check_ids`, `finding_count`, `findings`, `recommended_next_task`, `ready_for_runtime_polish`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`. Statuswerte: `blocked_missing_real_homebase_review`, `needs_review_completion`, `ready_for_homebase_panel_polish`.
 
+## Station-Homebase-Return-Panel-Polish (TASK_755)
+TASK_755 poliert den sichtbaren Station-Homebase-Rueckkehrzustand im bestehenden `PostDebriefFollowupPanel`. Das Panel darf Titel, Aktionszeile und Step-Chips anzeigen, liest dafuer aber nur bestehende Post-Debrief-, Readiness- und Staging-Snapshots. Es darf keine Homebase-Navigation, keinen Startbutton-Commit, keine Progression, keine Staging- und keine MissionResult-Mutation erzeugen.
+
+Erwartete Struktur: `HomebaseTestScreen.get_station_homebase_return_panel_polish_snapshot()` liefert `schema = sternenbuergerchen.station_homebase_return_panel_polish.v1`, `task_id = TASK_755`, `return_panel_style_id = task_755_station_homebase_return_panel_v1`, `return_panel_title_text = Rueckkehr abgeschlossen`, `return_panel_action_text`, `return_panel_step_chips`, `return_panel_chip_count >= 5`, `return_panel_primary_step_id`, `return_panel_polish_ready`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false` und `recommended_next_task = TASK_756 - Station Homebase Real Window Recapture`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.
