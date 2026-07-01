@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_781 - Station Reentry Firefight Command Surface Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_781_station_reentry_firefight_command_surface_recapture.md`, `docs/tasks/TASK_780_station_reentry_firefight_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `prepare_station_reentry_firefight_command_surface_recapture.ps1` schreibt ein read-only Recapture-Paket fuer die sichtbare Firefight-Command-Surface.
+- Stand: Das Manifest nennt TASK_780-Interaction-Line, primaere Aktion, Quick-Action-Labels, No-Auto-Command-Grenze, manuelle Checks sowie Launch-/Capture-/Verifier-Kommandos.
+- Risiken/offen: Kein automatischer Sichtentscheid; Screenshot, Workbench-JSON und echte Command-Surface-Findings bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_781_station_reentry_firefight_command_surface_recapture.gd`, TASK_780/TASK_779 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_782 - Station Reentry Firefight Command Surface Findings.
+
 ### TASK_780 - Station Reentry Firefight Interaction Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_780_station_reentry_firefight_interaction_polish.md`, `docs/tasks/TASK_779_station_reentry_firefight_visual_findings.md`, `docs/tasks/TASK_777_station_reentry_firefight_tension_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Snapshot liefert primaeren Folgegriff, Quick-Actions fuer bestehende Oberflaechen, Zeilenbudget, Gates und klare No-Command-/No-Gameplay-Mutation-Grenzen.
 - Risiken/offen: Noch kein echter sichtbarer Command-Surface-Recapture; TASK_780 beschreibt und prueft den Presenter/Contract.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_780_station_reentry_firefight_interaction_polish.gd`, TASK_779/TASK_778/TASK_777 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_781 - Station Reentry Firefight Command Surface Recapture.
+- Naechster Schritt: TASK_781 - Station Reentry Firefight Command Surface Recapture (implementiert); danach TASK_782 - Station Reentry Firefight Command Surface Findings.
 
 ### TASK_779 - Station Reentry Firefight Visual Findings
 - Status: implementiert im Arbeitsstand

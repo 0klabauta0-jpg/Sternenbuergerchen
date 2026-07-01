@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_779</span>
-      <span class="pill warn">Aktueller Griff: TASK_780</span>
+      <span class="pill good">Letzter Abschluss: TASK_780</span>
+      <span class="pill warn">Aktueller Griff: TASK_781</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -145,7 +145,7 @@
           <li><strong>Interaction Feel:</strong> AA, Door, Computer und Cargo sind als Griff mit klaren Cues und Commands lesbar.</li>
           <li><strong>Contact Pressure:</strong> Kontaktmeldung, Risk-/LOS-Grund und Combat-HUD-Druck bleiben als erster Druckmoment zusammen lesbar.</li>
           <li><strong>Firefight Tension:</strong> Schuss, Outcome, Visual, Metrik und naechster Spielergriff sind als erster Feuerwechsel zusammengefuehrt.</li>
-          <li><strong>Firefight Interaction:</strong> Nach dem ersten Feuerwechsel entsteht eine kurze Folgegriff-Zeile mit primaerer Aktion und bestehenden Quick-Actions, ohne Commands automatisch auszufuehren.</li>
+          <li><strong>Command Surface Recapture:</strong> Der naechste sichtbare Fensterlauf prueft, ob Folgezeile, primaere Aktion und Quick-Actions wirklich im HUD/Command-Bereich auffindbar sind.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -156,16 +156,17 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_780 macht aus Firefight-Tension und Visual-Findings eine spielbare Anschlussentscheidung: kurze Folgezeile, primaerer Griff und Quick-Actions fuer bestehende Command-Surfaces.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, Combat-HUD-Density und Fire-Rule-Kontext: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779 und TASK_780.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_781 prueft die sichtbare Command-Surface im Fenster, damit die Folgegriffe nicht nur im Snapshot gut aussehen.</div>
-          <input readonly value="TASK_780 - Station Reentry Firefight Interaction Polish" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_781 - Station Reentry Firefight Command Surface Recapture" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_781 macht den Firefight-Folgegriff als sichtbares Recapture-Paket greifbar: Szenario, Workbench, TASK_780-Manifest, erwartete Zeile, Quick-Actions und manuelle Checks liegen in einem Manifest zusammen.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779 und TASK_780: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780 und TASK_781.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_782 wertet echte Command-Surface-Findings aus Screenshot und Workbench-JSON aus.</div>
+          <input readonly value="TASK_781 - Station Reentry Firefight Command Surface Recapture" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_782 - Station Reentry Firefight Command Surface Findings" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_findings.json" data-export-key="reentry_firefight_visual_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_interaction_polish.json" data-export-key="reentry_firefight_interaction.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_command_surface_recapture.json" data-export-key="reentry_firefight_command_surface.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -251,6 +252,19 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_interaction.no_auto_command_commit"> Kein Auto-Command durch die Anzeige</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_interaction.quick_actions_visible"> Quick-Actions sichtbar</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_interaction.line_within_limit"> Folgezeile bleibt unter 96 Zeichen</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_firefight_command_surface.ready_to_capture"> TASK_781 Command-Surface-Paket bereit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.f6_window_open"> F6-Fenster fuer Command-Surface offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.interaction_line_visible"> Folgezeile im HUD sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.primary_action_visible"> Primaerer Griff sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.quick_actions_visible"> Quick-Actions sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.hold_flank_sup_visible"> HOLD/FLANK/SUP auffindbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.hold_fire_visible_when_ff_risk"> HOLD FIRE bei FF-Risiko auffindbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.no_auto_command_commit_visible"> No-Auto-Command-Grenze erkennbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.selected_fireteam_panel_consistent"> Selected-Fireteam-Panel bleibt konsistent</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.command_matrix_buttons_reachable"> Command-Matrix-Buttons erreichbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.host_client_same_surface_visible"> Host/Client sehen dieselbe Surface</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.screenshot_saved"> Command-Surface-Screenshot gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface.workbench_json_exported"> Command-Surface-Workbench-JSON exportiert</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -340,10 +354,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_781 - Station Reentry Firefight Command Surface Recapture"
+            recommended_next_task: "TASK_782 - Station Reentry Firefight Command Surface Findings"
           },
           metadata: {
-            generated_for_task: "TASK_780",
+            generated_for_task: "TASK_781",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

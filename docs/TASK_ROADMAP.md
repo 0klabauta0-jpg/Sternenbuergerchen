@@ -103,7 +103,8 @@ git checkout -b batch/<batch-name>
 - TASK_778 - Station Reentry Firefight Visual Playtest Packet (implementiert)
 - TASK_779 - Station Reentry Firefight Visual Findings (implementiert)
 - TASK_780 - Station Reentry Firefight Interaction Polish (implementiert)
-- Naechster Schritt: TASK_781 - Station Reentry Firefight Command Surface Recapture.
+- TASK_781 - Station Reentry Firefight Command Surface Recapture (implementiert)
+- Naechster Schritt: TASK_782 - Station Reentry Firefight Command Surface Findings.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

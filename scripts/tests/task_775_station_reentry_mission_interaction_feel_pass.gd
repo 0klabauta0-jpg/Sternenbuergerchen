@@ -44,7 +44,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(status_text.contains("TASK_775 - Station Reentry Mission Interaction Feel Pass"), "Implementation status tracks TASK_775")
 	_assert(roadmap_text.contains("TASK_775 - Station Reentry Mission Interaction Feel Pass (implementiert)"), "Roadmap marks TASK_775 implemented")
 	_assert(contract_text.contains("Station-Reentry-Mission-Interaction-Feel-Pass"), "Mission command feedback contract documents TASK_775")
-	_assert(report_text.contains("Aktueller Griff: TASK_780"), "Reentry handbook advances to TASK_780 current")
+	_assert(report_text.contains("Aktueller Griff: TASK_781"), "Reentry handbook advances to TASK_781 current")
 	_assert(report_text.contains('data-export-key="reentry_interaction_feel.ready_for_mission_interaction_playtest"'), "Reentry handbook exports TASK_775 feel gate")
 
 
