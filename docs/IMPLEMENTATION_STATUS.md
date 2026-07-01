@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_754 - Station Homebase Recapture Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_754_station_homebase_recapture_findings.md`, `docs/tasks/TASK_753_station_homebase_recapture_review_gate.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioF6HostClientPlaytestNotes` baut aus `homebase_recapture_review` ein read-only `homebase_recapture_findings`.
+- Stand: Die Findings unterscheiden fehlenden echten Review, unvollstaendige Review-Checks und `ready_for_homebase_panel_polish`.
+- Stand: Die Workbench und der aktuelle HTML-Bericht zeigen TASK_754-Findings-Status und routen bei vollstaendigem Review auf `TASK_755 - Station Homebase Return Panel Polish`.
+- Risiken/offen: Ohne echten Workbench-Export bleibt der Findings-Status bewusst blockierend. Der naechste Runtime-/Visual-Polish muss als separater Task erfolgen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_754_station_homebase_recapture_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_753_station_homebase_recapture_review_gate.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd`, `git diff --check`.
+- Naechster Schritt: TASK_755 - Station Homebase Return Panel Polish oder echten Workbench-Export nachholen, falls die Findings weiter blockieren.
+
 ### TASK_753 - Station Homebase Recapture Review Gate
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_753_station_homebase_recapture_review_gate.md`, `docs/tasks/TASK_752_station_homebase_recapture_workbench_prefill.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`

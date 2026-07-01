@@ -80,6 +80,7 @@
       <span class="pill good">Prefill: TASK_741</span>
       <span class="pill good">Prefill: TASK_752</span>
       <span class="pill warn">Gate: TASK_753</span>
+      <span class="pill warn">Findings: TASK_754</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -152,6 +153,15 @@
           <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.performance_feels_fast"> Homebase-Return fuehlt sich performant an</label>
           <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.homebase_recapture.workbench_notes_exported"> Workbench-Notizen exportiert</label>
           <textarea data-export-key="station_scenario_playtest.notes.homebase_recapture" placeholder="Homebase-Recapture: Was war nach Debrief/Return sofort klar, was nicht?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>Homebase Recapture Findings</h2>
+          <p>Dieser Block fasst den TASK_753-Export in naechste Arbeit um. Ohne echten Review bleibt er blockierend.</p>
+          <input readonly value="TASK_754" data-export-key="station_scenario_playtest.findings.homebase_recapture_task_id">
+          <input readonly value="blocked_missing_real_homebase_review" data-export-key="station_scenario_playtest.findings.homebase_recapture_default_status">
+          <input readonly value="blocked_missing_real_homebase_review, needs_review_completion, ready_for_homebase_panel_polish" data-export-key="station_scenario_playtest.findings.homebase_recapture_status_values">
+          <input readonly value="TASK_755 - Station Homebase Return Panel Polish" data-export-key="station_scenario_playtest.findings.homebase_recapture_ready_next_task">
+          <textarea data-export-key="station_scenario_playtest.notes.homebase_recapture_findings" placeholder="Findings nach Export: Welcher konkrete Homebase-Polish ist belegt?"></textarea>
         </article>
         <article class="card full">
           <h2>Route</h2>
@@ -289,13 +299,15 @@
             task_id: "TASK_727",
             prefill_task_id: "TASK_752",
             review_gate_task_id: "TASK_753",
+            findings_task_id: "TASK_754",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_753 - Station Homebase Recapture Review Gate",
+            latest_completed_task: "TASK_754 - Station Homebase Recapture Findings",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
-            recommended_next_task: "TASK_754 - Station Homebase Recapture Findings",
+            latest_homebase_findings_task: "TASK_754 - Station Homebase Recapture Findings",
+            recommended_next_task: "TASK_755 - Station Homebase Return Panel Polish",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             manual_review_required: true

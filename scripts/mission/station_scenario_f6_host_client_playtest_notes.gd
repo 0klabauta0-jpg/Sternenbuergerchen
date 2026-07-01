@@ -46,6 +46,7 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 	var recapture_findings: Dictionary = Dictionary(options.get("recapture_findings", {}))
 	var recapture_evidence: Dictionary = _build_recapture_evidence(recapture_findings, options)
 	var homebase_recapture_review: Dictionary = _build_homebase_recapture_review(recapture_evidence, existing_notes)
+	var homebase_recapture_findings: Dictionary = _build_homebase_recapture_findings(homebase_recapture_review)
 	var required_checks: Array = _build_required_checks(existing_notes)
 	var issue_flags: Array = _build_issue_flags(existing_notes)
 	var completed_check_count: int = _count_completed_checks(required_checks)
@@ -75,6 +76,8 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 		"source_recapture_manifest_path": String(recapture_evidence.get("manifest_path", "")),
 		"homebase_recapture_review": homebase_recapture_review,
 		"homebase_recapture_review_status": String(homebase_recapture_review.get("status", "")),
+		"homebase_recapture_findings": homebase_recapture_findings,
+		"homebase_recapture_findings_status": String(homebase_recapture_findings.get("status", "")),
 		"report_path": String(options.get("report_path", DEFAULT_REPORT_PATH)),
 		"manifest_path": String(options.get("manifest_path", DEFAULT_MANIFEST_PATH)),
 		"required_checks": required_checks,
@@ -211,6 +214,43 @@ static func _recommended_homebase_recapture_next_task(status: String) -> String:
 	if status == "needs_homebase_recapture_completion":
 		return "TASK_753 - complete missing Homebase recapture checks"
 	return "TASK_754 - Station Homebase Recapture Findings"
+
+
+static func _build_homebase_recapture_findings(homebase_review: Dictionary) -> Dictionary:
+	var review_status: String = String(homebase_review.get("status", ""))
+	var missing_check_ids: Array = _array_from_variant(homebase_review.get("missing_check_ids", []))
+	var status: String = "blocked_missing_real_homebase_review"
+	var summary: String = "Echter Homebase-Recapture-Review ist noch offen."
+	var recommended_next: String = "TASK_753 - run Station Homebase Recapture Workbench review"
+	var findings: Array = []
+	if review_status == "needs_homebase_recapture_completion":
+		status = "needs_review_completion"
+		summary = "Homebase-Recapture-Review ist angefangen, aber Pflichtchecks fehlen."
+		recommended_next = "TASK_753 - complete missing Homebase recapture checks"
+		findings.append(_finding("missing_homebase_recapture_checks", "blocker", "Homebase-Recapture-Review ist unvollstaendig: %s" % ", ".join(PackedStringArray(missing_check_ids)), recommended_next))
+	elif review_status == "ready_for_homebase_findings":
+		status = "ready_for_homebase_panel_polish"
+		summary = "Homebase-Recapture ist vollstaendig geprueft; naechster sinnvoller Griff ist sichtbarer Panel-Polish."
+		recommended_next = "TASK_755 - Station Homebase Return Panel Polish"
+		findings.append(_finding("homebase_return_panel_polish_ready", "followup", "Cargo -> Debrief -> Homebase ist reviewbar; naechster Polish soll den Return-Moment sichtbarer und spielbarer machen.", recommended_next))
+	else:
+		findings.append(_finding("real_homebase_recapture_review_missing", "blocker", "Ohne echten Workbench-Export darf kein Homebase-Recapture-Polish als belegt gelten.", recommended_next))
+	return {
+		"schema": "sternenbuergerchen.station_homebase_recapture_findings.v1",
+		"task_id": "TASK_754",
+		"source_task_id": "TASK_753",
+		"status": status,
+		"source_review_status": review_status,
+		"summary": summary,
+		"missing_check_ids": missing_check_ids,
+		"finding_count": findings.size(),
+		"findings": findings,
+		"recommended_next_task": recommended_next,
+		"ready_for_runtime_polish": status == "ready_for_homebase_panel_polish",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+	}
 
 
 static func _add_drill_findings(findings: Array, drill_manifest: Dictionary) -> void:
