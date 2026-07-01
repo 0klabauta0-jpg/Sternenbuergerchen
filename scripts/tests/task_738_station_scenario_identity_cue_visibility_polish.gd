@@ -48,7 +48,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(contract_text.contains("Station Scenario Identity Cue Visibility Polish"), "Interaction contract documents TASK_738")
 	_assert(status_text.contains("TASK_738 - Station Scenario Identity Cue Visibility Polish"), "Implementation status tracks TASK_738")
 	_assert(roadmap_text.contains("TASK_738 - Station Scenario Identity Cue Visibility Polish (implementiert)"), "Roadmap marks TASK_738 implemented")
-	_assert(roadmap_text.contains("TASK_739 - Scenario Harness Modernization"), "Roadmap keeps harness modernization as conditional follow-up")
+	_assert(roadmap_text.contains("TASK_740 - Scenario Harness Modernization"), "Roadmap keeps harness modernization as conditional follow-up")
 	_assert(report_text.contains("TASK_738 - Station Scenario Identity Cue Visibility Polish"), "Current handbook references TASK_738")
 	_assert(report_text.contains("station_scenario_identity_cue_visibility_polish"), "Current handbook exports TASK_738 fields")
 	_assert(controller_text.contains("station_scenario_identity_route_body_v2"), "Controller exposes identity body v2 style")

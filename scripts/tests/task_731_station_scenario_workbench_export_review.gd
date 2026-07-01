@@ -50,7 +50,7 @@ func _test_docs_and_static_routing() -> void:
 	_assert(handbook_text.contains("TASK_731 - Station Scenario Workbench Export Review"), "Current handbook references TASK_731")
 	_assert(handbook_text.contains('data-export-key="station_scenario_workbench_export_review.manifest_path"'), "Current handbook exports TASK_731 manifest path")
 	_assert(findings_text.contains("TASK_732 - Station Scenario Route Cue Polish"), "TASK_728 route findings no longer point to TASK_729")
-	_assert(findings_text.contains("TASK_739 - Scenario Harness Modernization"), "TASK_728 harness findings route beyond TASK_738")
+	_assert(findings_text.contains("TASK_740 - Scenario Harness Modernization"), "TASK_728 harness findings route beyond TASK_739")
 
 
 func _test_open_export_status() -> void:

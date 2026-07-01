@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_739 - Station Scenario Identity Cue Recapture Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_739_station_scenario_identity_cue_recapture_findings.md`, `docs/tasks/TASK_738_station_scenario_identity_cue_visibility_polish.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Der Nach-TASK_738-Host-/Client-Recapture schreibt weiterhin `tmp/host_client_two_window_real_run_review.json` sowie Host-/Client-Crops und zeigt oben links die polierte Cue vor der neutralen Route.
+- Stand: `task_739_station_scenario_identity_cue_recapture_findings.gd` prueft Capture-Manifest, Crop-Dateien und aktuellen Identity-Body-Snapshot und schreibt `tmp/station_scenario_identity_cue_recapture_findings.json` read-only.
+- Stand: Das Findings-Manifest meldet `ready_for_task_727_workbench_export`, behaelt `manual_review_done = false` und empfiehlt die TASK_727-Workbench statt Harness-Modernisierung.
+- Risiken/offen: TASK_739 ist Recapture-/Evidence-Pflege und ersetzt weiterhin keinen menschlichen TASK_727-Fensterlauf mit JSON-Export.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_739_station_scenario_identity_cue_recapture_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_738_station_scenario_identity_cue_visibility_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench sichtbar mit dem Nach-TASK_738-Capture ausfuellen; TASK_740 - Scenario Harness Modernization nur bei belegten Harness-Problemen.
+
 ### TASK_738 - Station Scenario Identity Cue Visibility Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_738_station_scenario_identity_cue_visibility_polish.md`, `docs/tasks/TASK_737_station_scenario_visible_cue_run_packet_refresh.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -18,7 +28,7 @@
 - Stand: Label-Metadaten und Command-Feedback exportieren Cue-Sichtbarkeit, neutrale Display-Route und `future_blocker_hidden_in_display`.
 - Risiken/offen: TASK_738 ersetzt keinen menschlichen TASK_727-Fensterlauf. Nach dem HUD-Polish bleibt ein erneuter sichtbarer Capture sinnvoll, um Lesbarkeit im echten 1280x720-Fenster zu pruefen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_738_station_scenario_identity_cue_visibility_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_736_station_scenario_command_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_733_station_scenario_hud_overlap_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_730_station_scenario_targeted_playtest_polish.gd`, `git diff --check`.
-- Naechster Schritt: Sichtbaren Host-/Client-Capture erneut ausfuehren und TASK_727-Workbench mit dem polierten Identity-Body ausfuellen; TASK_739 - Scenario Harness Modernization nur bei belegten Harness-Problemen.
+- Naechster Schritt: TASK_739 - Station Scenario Identity Cue Recapture Findings, damit der Nach-TASK_738-Capture nicht nur im Chat steht.
 
 ### TASK_737 - Station Scenario Visible Cue Run Packet Refresh
 - Status: implementiert im Arbeitsstand

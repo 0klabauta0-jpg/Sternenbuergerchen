@@ -15,7 +15,7 @@ const ISSUE_TO_NEXT_TASK: Dictionary = {
 	"needs_performance_pass": "TASK_734 - Station Scenario Performance Feel Pass",
 	"needs_host_client_sync_fix": "TASK_735 - Station Scenario Host Client Sync Polish",
 	"needs_command_feedback_polish": "TASK_736 - Station Scenario Command Feedback Polish",
-	"needs_old_harness_modernization": "TASK_737 - Scenario Harness Modernization",
+	"needs_old_harness_modernization": "TASK_740 - Scenario Harness Modernization",
 }
 
 
