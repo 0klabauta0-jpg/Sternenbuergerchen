@@ -75,11 +75,16 @@ func _test_analyzer_homebase_recapture_prefill_snapshot() -> void:
 	_assert(String(evidence.get("homebase_recapture_packet_path", "")) == EXPECTED_PACKET_PATH, "Snapshot records TASK_750 packet path")
 	_assert(String(evidence.get("homebase_expected_readiness_line", "")) == EXPECTED_HOMEBASE_LINE, "Snapshot records expected homebase readiness line")
 	_assert(String(evidence.get("homebase_expected_summary_fragment", "")) == "Station Drill", "Snapshot records expected summary fragment")
+	_assert(String(evidence.get("homebase_return_panel_polish_task_id", "")) == "TASK_755", "Snapshot records TASK_755 panel source")
+	_assert(String(evidence.get("homebase_return_panel_title", "")) == "Rueckkehr abgeschlossen", "Snapshot records TASK_755 panel title")
+	_assert(String(evidence.get("homebase_return_panel_action", "")) == "Naechster Auftrag: Fireteam bereitstellen", "Snapshot records TASK_755 panel action")
+	_assert(bool(evidence.get("homebase_return_panel_evidence_ready", false)), "Snapshot marks TASK_755 panel evidence ready")
 	_assert(bool(evidence.get("homebase_recapture_review_required", false)), "Snapshot records review-required flag")
 	_assert(not bool(evidence.get("homebase_recapture_review_done", true)), "Snapshot records review-done as false")
 	_assert(bool(evidence.get("homebase_recapture_ready_for_workbench", false)), "Snapshot marks homebase recapture ready for workbench")
 	_assert(_array_contains(Dictionary(evidence).get("homebase_forbidden_debug_fragments", []), "Next sortie"), "Snapshot records forbidden old English debug marker")
 	_assert(_array_contains(Dictionary(evidence).get("homebase_recapture_manual_checks", []), "homebase_next_sortie_line_matches_task_749"), "Snapshot records manual TASK_749 line check")
+	_assert(_array_contains(Dictionary(evidence).get("homebase_recapture_manual_checks", []), "homebase_return_panel_matches_task_755"), "Snapshot records manual TASK_755 panel check")
 	_assert(_array_contains(Dictionary(evidence).get("homebase_recapture_manual_checks", []), "old_debug_next_sortie_markers_absent"), "Snapshot records old-debug absence check")
 
 
@@ -122,13 +127,20 @@ func _fake_task_751_capture_manifest() -> Dictionary:
 		"display_route_line": "ROUTE AA > DOOR > COM > CARGO | NEXT AA",
 		"future_blocker_hidden_in_display": true,
 		"station_homebase_host_client_recapture_task_id": "TASK_750",
+		"station_homebase_real_window_recapture_task_id": "TASK_756",
 		"station_homebase_host_client_recapture_packet_path": EXPECTED_PACKET_PATH,
 		"station_homebase_expected_summary_fragment": "Station Drill",
 		"station_homebase_expected_readiness_line": EXPECTED_HOMEBASE_LINE,
+		"station_homebase_return_panel_polish_task_id": "TASK_755",
+		"station_homebase_expected_return_panel_style_id": "task_755_station_homebase_return_panel_v1",
+		"station_homebase_expected_return_panel_title": "Rueckkehr abgeschlossen",
+		"station_homebase_expected_return_panel_action": "Naechster Auftrag: Fireteam bereitstellen",
+		"station_homebase_expected_return_panel_chip_count": 5,
+		"station_homebase_expected_return_panel_step_labels": ["Auswertung ansehen", "Fireteam bereitstellen", "Loadout pruefen", "Dropship beladen", "Start freigeben"],
 		"station_homebase_forbidden_debug_fragments": ["Next sortie", "Review gains", "Stage fireteam", "Assign loadout", "Load dropship", "Start next sortie"],
 		"station_homebase_recapture_review_required": true,
 		"station_homebase_recapture_review_done": false,
-		"station_homebase_recapture_manual_checks": ["cargo_end_reached", "debrief_visible_after_cargo", "return_homebase_clicked", "homebase_summary_mentions_station_drill", "homebase_next_sortie_line_matches_task_749", "old_debug_next_sortie_markers_absent", "performance_feels_fast", "workbench_notes_exported"],
+		"station_homebase_recapture_manual_checks": ["cargo_end_reached", "debrief_visible_after_cargo", "return_homebase_clicked", "homebase_summary_mentions_station_drill", "homebase_return_panel_title_visible", "homebase_return_panel_action_visible", "homebase_return_panel_chips_visible", "homebase_return_panel_matches_task_755", "homebase_next_sortie_line_matches_task_749", "old_debug_next_sortie_markers_absent", "performance_feels_fast", "workbench_notes_exported"],
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"manual_review_required": true,

@@ -17,6 +17,10 @@ const HOMEBASE_CHECK_IDS: Array[String] = [
 	"debrief_visible_after_cargo",
 	"return_homebase_clicked",
 	"homebase_summary_mentions_station_drill",
+	"homebase_return_panel_title_visible",
+	"homebase_return_panel_action_visible",
+	"homebase_return_panel_chips_visible",
+	"homebase_return_panel_matches_task_755",
 	"homebase_next_sortie_line_matches_task_749",
 	"old_debug_next_sortie_markers_absent",
 	"performance_feels_fast",
@@ -93,6 +97,7 @@ func _test_incomplete_homebase_review_gate() -> void:
 	_assert(bool(review.get("manual_review_done", false)), "Incomplete review records manual review done")
 	_assert(int(review.get("completed_check_count", -1)) == 2, "Incomplete review counts completed checks")
 	_assert(_array_contains(review.get("missing_check_ids", []), "return_homebase_clicked"), "Incomplete review lists missing return-homebase check")
+	_assert(_array_contains(review.get("missing_check_ids", []), "homebase_return_panel_matches_task_755"), "Incomplete review lists missing TASK_755 panel check")
 	_assert(_array_contains(review.get("missing_check_ids", []), "homebase_next_sortie_line_matches_task_749"), "Incomplete review lists missing TASK_749 line check")
 	_assert(not bool(review.get("ready_for_findings", true)), "Incomplete review is not ready for findings")
 	_assert(String(review.get("recommended_next_task", "")) == "TASK_753 - complete missing Homebase recapture checks", "Incomplete review recommends completing checks")
@@ -144,9 +149,16 @@ func _fake_task_751_capture_manifest() -> Dictionary:
 		"display_route_line": "ROUTE AA > DOOR > COM > CARGO | NEXT AA",
 		"future_blocker_hidden_in_display": true,
 		"station_homebase_host_client_recapture_task_id": "TASK_750",
+		"station_homebase_real_window_recapture_task_id": "TASK_756",
 		"station_homebase_host_client_recapture_packet_path": EXPECTED_PACKET_PATH,
 		"station_homebase_expected_summary_fragment": "Station Drill",
 		"station_homebase_expected_readiness_line": EXPECTED_HOMEBASE_LINE,
+		"station_homebase_return_panel_polish_task_id": "TASK_755",
+		"station_homebase_expected_return_panel_style_id": "task_755_station_homebase_return_panel_v1",
+		"station_homebase_expected_return_panel_title": "Rueckkehr abgeschlossen",
+		"station_homebase_expected_return_panel_action": "Naechster Auftrag: Fireteam bereitstellen",
+		"station_homebase_expected_return_panel_chip_count": 5,
+		"station_homebase_expected_return_panel_step_labels": ["Auswertung ansehen", "Fireteam bereitstellen", "Loadout pruefen", "Dropship beladen", "Start freigeben"],
 		"station_homebase_forbidden_debug_fragments": ["Next sortie", "Review gains", "Stage fireteam", "Assign loadout", "Load dropship", "Start next sortie"],
 		"station_homebase_recapture_review_required": true,
 		"station_homebase_recapture_review_done": false,

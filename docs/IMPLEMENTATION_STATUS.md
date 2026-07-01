@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_756 - Station Homebase Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_756_station_homebase_real_window_recapture.md`, `docs/tasks/TASK_755_station_homebase_return_panel_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Homebase-Recapture-Paket und Capture-Metadaten referenzieren jetzt TASK_755/TASK_756 und erwarten Titel, Aktionszeile, Style-ID, Chip-Anzahl und Step-Chip-Labels.
+- Stand: Die TASK_727-Workbench exportiert neue Haken fuer Return-Panel-Titel, Aktionszeile, Chips und TASK_755-Abgleich.
+- Stand: `StationScenarioF6HostClientPlaytestNotes` nimmt die Return-Panel-Felder als read-only Evidence auf und verlangt die neuen Checks im Homebase-Review-Gate.
+- Risiken/offen: Der echte menschliche Fensterlauf bleibt offen; TASK_756 macht ihn aktuell pruefbar, behauptet aber keine Sichtabnahme.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/prepare_station_homebase_host_client_recapture.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_756_station_homebase_real_window_recapture.gd`, TASK_750-755 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_757 - Station Homebase Recapture Findings Refresh oder echten Workbench-Export auswerten.
+
 ### TASK_755 - Station Homebase Return Panel Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_755_station_homebase_return_panel_polish.md`, `docs/tasks/TASK_754_station_homebase_recapture_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

@@ -8,6 +8,8 @@ const HANDBOOK_PATH: String = "res://docs/reports/project_current_state_handbook
 const TOOL_PATH: String = "res://scripts/tools/prepare_station_homebase_host_client_recapture.ps1"
 const PACKET_PATH: String = "res://tmp/station_homebase_host_client_recapture_packet.json"
 const EXPECTED_LINE: String = "Naechste Sortie: Fireteam bereitstellen | danach: Loadout pruefen, Dropship beladen, Start freigeben"
+const EXPECTED_TITLE: String = "Rueckkehr abgeschlossen"
+const EXPECTED_ACTION: String = "Naechster Auftrag: Fireteam bereitstellen"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -61,6 +63,10 @@ func _test_tool_and_packet() -> void:
 	_assert(tool_text.contains("sternenbuergerchen.station_homebase_host_client_recapture_packet.v1"), "Tool writes TASK_750 schema")
 	_assert(tool_text.contains("TASK_750"), "Tool records TASK_750")
 	_assert(tool_text.contains(EXPECTED_LINE), "Tool records expected TASK_749 Homebase line")
+	_assert(tool_text.contains("TASK_756"), "Tool records TASK_756 refresh")
+	_assert(tool_text.contains("TASK_755"), "Tool records TASK_755 return panel source")
+	_assert(tool_text.contains(EXPECTED_TITLE), "Tool records TASK_755 return panel title")
+	_assert(tool_text.contains(EXPECTED_ACTION), "Tool records TASK_755 return panel action")
 	_assert(tool_text.contains("launch_host_client_two_window_review.ps1"), "Tool points to existing launch helper")
 	_assert(tool_text.contains("capture_host_client_two_window_real_run.ps1"), "Tool points to existing capture helper")
 	_assert(tool_text.contains("station_route_one_screen_multiplayer_drill.json"), "Tool points to Station scenario")
@@ -71,9 +77,14 @@ func _test_tool_and_packet() -> void:
 	var packet: Dictionary = _read_json(PACKET_PATH)
 	_assert(String(packet.get("schema", "")) == "sternenbuergerchen.station_homebase_host_client_recapture_packet.v1", "Packet schema is stable")
 	_assert(String(packet.get("task_id", "")) == "TASK_750", "Packet records TASK_750")
-	_assert(String(packet.get("source_task_id", "")) == "TASK_749", "Packet points to TASK_749")
+	_assert(String(packet.get("refresh_task_id", "")) == "TASK_756", "Packet records TASK_756 refresh")
+	_assert(String(packet.get("source_task_id", "")) == "TASK_755", "Packet points to TASK_755")
+	_assert(String(packet.get("source_microcopy_task_id", "")) == "TASK_749", "Packet keeps TASK_749 source")
 	_assert(String(packet.get("status", "")) == "ready_to_run_homebase_recapture", "Packet is ready for Homebase recapture")
 	_assert(String(packet.get("expected_homebase_readiness_line", "")) == EXPECTED_LINE, "Packet preserves expected Homebase line")
+	_assert(String(packet.get("expected_homebase_return_panel_title", "")) == EXPECTED_TITLE, "Packet preserves expected return panel title")
+	_assert(String(packet.get("expected_homebase_return_panel_action", "")) == EXPECTED_ACTION, "Packet preserves expected return panel action")
+	_assert(int(packet.get("expected_homebase_return_panel_chip_count", 0)) >= 5, "Packet preserves expected return panel chip count")
 	_assert(bool(packet.get("manual_review_required", false)), "Packet requires manual review")
 	_assert(not bool(packet.get("manual_review_done", true)), "Packet does not claim manual review done")
 	_assert(bool(packet.get("read_only", false)), "Packet is read-only")
@@ -89,6 +100,10 @@ func _test_tool_and_packet() -> void:
 		"debrief_visible_after_cargo",
 		"return_homebase_clicked",
 		"homebase_summary_mentions_station_drill",
+		"homebase_return_panel_title_visible",
+		"homebase_return_panel_action_visible",
+		"homebase_return_panel_chips_visible",
+		"homebase_return_panel_matches_task_755",
 		"homebase_next_sortie_line_matches_task_749",
 		"old_debug_next_sortie_markers_absent",
 		"performance_feels_fast",
