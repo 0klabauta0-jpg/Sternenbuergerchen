@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_717 - Station Route Real Host/Client Click Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_717_station_route_real_click_findings.md`, `docs/tasks/TASK_712_station_route_host_client_acceptance_packet.md`, `docs/tasks/TASK_713_station_route_host_client_findings.md`, `docs/tasks/TASK_716_station_route_run_readout_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: `StationRouteRealClickFindings` bewertet das echte Host/Client-Capture-Manifest zusammen mit dem TASK_716-Route-Readout-Manifest read-only.
+- Stand: Der Snapshot trennt technische Blocker, Route-/Capture-Bereitschaft und offene manuelle Klickbefunde.
+- Stand: Der aktuelle Pfad kann `ready_for_click_findings_review` melden, ohne einen bestandenen menschlichen Host/Client-Playtest zu behaupten.
+- Risiken/offen: Door/GO/Reject, Computer, Cargo und Route-Line muessen im echten Fenster weiter bewusst bewertet oder poliert werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_717_station_route_real_click_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_713_station_route_host_client_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_716_station_route_run_readout_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_718 - Station Route Door/GO/Reject Visual Polish.
+
 ### TASK_716 - Station Route Run Readout Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_716_station_route_run_readout_polish.md`, `docs/tasks/TASK_712_station_route_host_client_acceptance_packet.md`, `docs/tasks/TASK_714_station_route_multiplayer_scenario_guard.md`, `docs/tasks/TASK_715_station_route_empty_eventlog_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
