@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_744 - Station Scenario Meta Debrief Route Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_744_station_scenario_meta_debrief_route_smoke.md`, `docs/tasks/TASK_743_station_scenario_debrief_handoff_cue.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `MetaLayerFlow.get_station_scenario_meta_debrief_route_smoke_snapshot()` prueft den vorhandenen Debrief-/Homebase-Rueckweg fuer das Station-Szenario `station_route_one_screen_multiplayer_drill`.
+- Stand: Der Snapshot erkennt `station_route_aa_door_computer_cargo`, prueft Debrief sichtbar vor Return, Homebase sichtbar nach Return, erhaltenes MissionResult und vorhandenen Mini-AAR-Debrief-Payload.
+- Stand: Der Test nutzt weiterhin nur den bestehenden `request_debrief_return_homebase_for_test()`-/Return-Handler; der Snapshot bleibt read-only und erzeugt keine Navigation/Commands.
+- Risiken/offen: TASK_744 ist ein Headless-Meta-Smoke, kein finaler sichtbarer Debrief-/Homebase-Polish.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_744_station_scenario_meta_debrief_route_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_743_station_scenario_debrief_handoff_cue.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_639_frontier_probe_meta_debrief_route_smoke.gd`, `git diff --check`.
+- Naechster Schritt: Station-spezifische Homebase-Rueckkehr nach Debrief lesbarer machen oder den Host/Client-Fensterlauf mit TASK_744-Abschluss recapturen.
+
 ### TASK_743 - Station Scenario Debrief Handoff Cue
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_743_station_scenario_debrief_handoff_cue.md`, `docs/tasks/TASK_742_station_scenario_cargo_endgame_cue_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

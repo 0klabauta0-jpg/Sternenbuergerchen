@@ -66,7 +66,8 @@ git checkout -b batch/<batch-name>
 - TASK_741 - Station Scenario Workbench Recapture Prefill (implementiert)
 - TASK_742 - Station Scenario Cargo Endgame Cue Polish (implementiert)
 - TASK_743 - Station Scenario Debrief Handoff Cue (implementiert)
-- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen und JSON exportieren; danach nur echte Sicht-/Sync-/Performance-Findings schneiden.
+- TASK_744 - Station Scenario Meta Debrief Route Smoke (implementiert)
+- Naechster Schritt: Station-spezifische Post-Debrief-Homebase-Lesbarkeit oder echter Host/Client-Fenster-Recapture mit dem neuen Abschluss.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
