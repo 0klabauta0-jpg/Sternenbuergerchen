@@ -1,0 +1,284 @@
+{
+	"version": 1,
+	"scenario_id": "station_route_one_screen_multiplayer_drill",
+	"display_name": "Station Route: One-Screen Multiplayer Drill",
+	"map_file_path": "res://maps/station_outpost_192x192.json",
+	"time_limit_seconds": 900.0,
+	"mission_slot_count_override": 8,
+	"win_condition": "objective_capture",
+	"objective": {
+		"marker_id": "objective_point",
+		"capture_radius": 128.0
+	},
+	"enemy_groups": [
+		{
+			"group_id": "bravo_station_guard",
+			"display_name": "Bravo Station Guard",
+			"team_id": "team_bravo",
+			"spawn_marker_id": "spawn_bravo",
+			"enemy_ids": ["bravo_guard_01", "bravo_guard_02", "bravo_guard_03", "bravo_guard_04"],
+			"tactics": {
+				"profile_id": "defensive_cover",
+				"stance": "defend",
+				"cover_behavior": "hold_best_cover",
+				"security_mode": "cover_arc",
+				"facing": "west",
+				"advance_style": "hold",
+				"allowed_weapon_roles": ["rifle", "smg", "heavy"],
+				"sight_behavior": "cover_arc",
+				"contact_behavior": "suppress_from_cover",
+				"weapon_profile": "defensive_mid",
+				"visual_archetype": "enemy_space_suit_orange",
+				"movement_posture_policy": "hold_ready",
+				"ready_distance_world": 760.0,
+				"travel_speed_factor": 0.35,
+				"ready_speed_factor": 0.24,
+				"aim_move_speed_factor": 0.18,
+				"heavy_weapon_role": "none",
+				"anti_armor_threat": false,
+				"air_asset_risk_profile": "none",
+				"communication_intensity": "normal"
+			}
+		},
+		{
+			"group_id": "bravo_air_defense",
+			"display_name": "Bravo AA Watch",
+			"team_id": "team_bravo",
+			"spawn_marker_id": "spawn_bravo",
+			"enemy_ids": ["bravo_aa_01", "bravo_aa_02", "bravo_aa_03", "bravo_aa_04"],
+			"tactics": {
+				"profile_id": "sniper_watch",
+				"stance": "overwatch",
+				"cover_behavior": "hold_high_cover",
+				"security_mode": "overwatch",
+				"facing": "south_west",
+				"advance_style": "hold",
+				"allowed_weapon_roles": ["marksman", "rifle"],
+				"sight_behavior": "long_lane",
+				"contact_behavior": "prioritize_exposed_targets",
+				"weapon_profile": "anti_armor",
+				"weapon_id": "rocket_launcher",
+				"visual_archetype": "enemy_space_suit_orange",
+				"movement_posture_policy": "hold_ready",
+				"ready_distance_world": 920.0,
+				"travel_speed_factor": 0.3,
+				"ready_speed_factor": 0.2,
+				"aim_move_speed_factor": 0.12,
+				"heavy_weapon_role": "anti_armor",
+				"anti_armor_threat": true,
+				"air_asset_risk_profile": "watch_warning",
+				"lz_threat_zone_id": "factory_danger_zone",
+				"communication_intensity": "normal"
+			}
+		}
+	],
+	"wave_config": {
+		"wave_count": 1,
+		"units_per_wave": 8,
+		"first_wave_delay_seconds": 0.0,
+		"wave_delay_seconds": 120.0
+	},
+	"patrol_bindings": [
+		{
+			"binding_id": "bravo_guard_station_loop",
+			"target_id": "spawn_bravo",
+			"patrol_path_id": "station_loop_route",
+			"mode": "pre_contact"
+		},
+		{
+			"binding_id": "bravo_aa_factory_watch",
+			"target_id": "bravo_aa_01",
+			"patrol_path_id": "factory_watch_route",
+			"mode": "pre_contact"
+		}
+	],
+	"tactical_authoring": {
+		"communication_intensity": "normal",
+		"fireteam_defaults": {
+			"advance_style": "bounding",
+			"security_mode": "360"
+		},
+		"air_asset_risk": {
+			"profile_id": "watch_warning",
+			"enemy_group_id": "bravo_air_defense",
+			"lz_threat_zone_id": "factory_danger_zone",
+			"warning_required_before_damage": true,
+			"loss_consequence": "abort_cargo_run"
+		}
+	},
+	"briefing": {
+		"title": "Station Route Drill",
+		"summary": "Alpha schaltet AA aus, oeffnet die Station, haelt den Computer und deckt den kurzen Cargo-Abflug. Bravo verteidigt als NPC-Team oder PvP-Team.",
+		"background_image_path": "res://Assets/used/npc/weapon_pack/previews/rocketlauncherModern.png",
+		"minimap_mode": "terrain_only",
+		"objectives": [
+			{"text": "AA ausschalten", "target_id": "factory_danger_zone"},
+			{"text": "Stationstuer oeffnen", "target_id": "objective_point"},
+			{"text": "Computer 18 Sekunden halten", "target_id": "objective_point"},
+			{"text": "Cargo-Abflug 12 Sekunden decken", "target_id": "spawn_alpha"}
+		],
+		"threats": [
+			"Bravo-Wache haelt die Station",
+			"AA-Team sperrt den Cargo-Korridor",
+			"PvP-ready: Bravo kann von einem zweiten Spieler statt NPCs gefuehrt werden"
+		],
+		"recommended_loadout": [
+			{
+				"label": "Alpha Assault",
+				"role_id": "fireteam_assault",
+				"weapon_ids": ["rifle", "rail_gun", "medictool"],
+				"armor_id": "heavy",
+				"count": 4,
+				"reason": "Gebaeude halten, Door/Computer bedienen und Cargo decken."
+			},
+			{
+				"label": "Bravo Defense",
+				"role_id": "station_defense",
+				"weapon_ids": ["rifle", "marksman", "rocket_launcher"],
+				"armor_id": "medium",
+				"count": 4,
+				"reason": "Station halten, lange Linie decken und Cargo-Korridor bedrohen."
+			}
+		],
+		"annotations": [
+			{"kind": "danger", "text": "AA", "target_id": "factory_danger_zone", "radius": 160.0},
+			{"kind": "objective", "text": "DOOR/COM", "target_id": "objective_point", "radius": 112.0},
+			{"kind": "route", "text": "CARGO", "target_id": "spawn_alpha", "radius": 128.0}
+		]
+	},
+	"vertical_slice": {
+		"contract_version": 1,
+		"play_modes": ["singleplayer", "coop", "multiplayer_pvp"],
+		"team_slots": [
+			{
+				"team_id": "team_alpha",
+				"role": "attacker",
+				"spawn_marker_id": "spawn_alpha",
+				"npc_owned": false,
+				"player_assignable_modes": ["singleplayer", "coop", "multiplayer_pvp"]
+			},
+			{
+				"team_id": "team_bravo",
+				"role": "defender",
+				"spawn_marker_id": "spawn_bravo",
+				"npc_owned": true,
+				"player_assignable_modes": ["multiplayer_pvp"]
+			}
+		],
+		"flow_steps": [
+			{
+				"step_id": "disable_air_defense",
+				"objective_type": "air_defense_shutdown",
+				"target_marker_id": "factory_danger_zone",
+				"enemy_group_id": "bravo_air_defense",
+				"required_state": "aa_disabled",
+				"min_hold_seconds": 0.0,
+				"blocks_cargo_until_complete": true
+			},
+			{
+				"step_id": "open_station_door",
+				"objective_type": "door_open",
+				"target_marker_id": "objective_point",
+				"required_state": "door_open",
+				"min_hold_seconds": 2.0,
+				"operator_team_id": "team_alpha"
+			},
+			{
+				"step_id": "occupy_station_computer",
+				"objective_type": "computer_hold",
+				"target_marker_id": "objective_point",
+				"required_state": "computer_controlled",
+				"min_hold_seconds": 18.0,
+				"operator_team_id": "team_alpha"
+			},
+			{
+				"step_id": "cargo_touchdown_extract",
+				"objective_type": "cargo_touchdown_extract",
+				"target_marker_id": "spawn_alpha",
+				"required_state": "cargo_departed",
+				"min_hold_seconds": 12.0,
+				"requires_step_id": "disable_air_defense"
+			}
+		],
+		"interaction_points": [
+			{
+				"interaction_id": "aa_shutdown_zone",
+				"display_name": "AA Shutdown Zone",
+				"interaction_type": "hold_zone",
+				"marker_id": "factory_danger_zone",
+				"required_order": "take",
+				"duration_seconds": 0.0,
+				"radius_world": 160.0,
+				"required_team": "team_alpha",
+				"step_id": "disable_air_defense",
+				"gate_id": "disable_air_defense",
+				"required_state": "aa_disabled",
+				"asset_hint": "bravo_air_defense"
+			},
+			{
+				"interaction_id": "station_route_drill_door",
+				"display_name": "Station Door",
+				"interaction_type": "door",
+				"marker_id": "objective_point",
+				"required_order": "breach",
+				"duration_seconds": 2.0,
+				"radius_world": 128.0,
+				"required_team": "team_alpha",
+				"step_id": "open_station_door",
+				"gate_id": "open_station_door",
+				"required_state": "door_open",
+				"asset_hint": "station_set_door_single_closed"
+			},
+			{
+				"interaction_id": "station_computer",
+				"display_name": "Station Computer",
+				"interaction_type": "computer",
+				"marker_id": "objective_point",
+				"required_order": "take",
+				"duration_seconds": 18.0,
+				"radius_world": 96.0,
+				"required_team": "team_alpha",
+				"step_id": "occupy_station_computer",
+				"gate_id": "occupy_station_computer",
+				"required_state": "computer_controlled",
+				"asset_hint": "station_computer_terminal"
+			},
+			{
+				"interaction_id": "cargo_landing_hold",
+				"display_name": "Cargo Landing Hold",
+				"interaction_type": "hold_zone",
+				"marker_id": "spawn_alpha",
+				"required_order": "defend",
+				"duration_seconds": 12.0,
+				"radius_world": 128.0,
+				"required_team": "team_alpha",
+				"step_id": "cargo_touchdown_extract",
+				"gate_id": "cargo_touchdown_extract",
+				"required_state": "cargo_departed",
+				"requires_step_id": "disable_air_defense",
+				"asset_hint": "frontier_cargo_freighter"
+			}
+		],
+		"runtime_gate_notes": [
+			"TASK_726 makes the Door an explicit route step for the playtest drill.",
+			"Bravo remains NPC-owned in singleplayer and PvP-assignable in multiplayer_pvp."
+		]
+	},
+	"scenario_drill": {
+		"schema": "sternenbuergerchen.station_route_one_screen_multiplayer_drill.v1",
+		"one_screen": true,
+		"recommended_viewport": {"width": 1920, "height": 1080},
+		"route_tokens": ["AA", "DOOR", "COM", "CARGO"],
+		"minimum_valid_plans": 2,
+		"friendly_fire_relevant": true,
+		"host_client_required": true,
+		"npc_pressure_required": true,
+		"success_condition": "cargo_departed",
+		"abort_conditions": ["cargo_run_aborted", "alpha_no_active_fireteam", "time_limit_expired"],
+		"recommended_next_task": "TASK_727 - Station Scenario F6/Host Client Playtest Notes"
+	},
+	"notes": [
+		"TASK_726 one-screen multiplayer station scenario drill.",
+		"Runtime truth remains SimulationRoot and mission runtime gates; this file is scenario data."
+	]
+}

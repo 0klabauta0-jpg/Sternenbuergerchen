@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_726 - One-Screen Multiplayer Station Scenario Drill
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_726_one_screen_multiplayer_station_scenario_drill.md`, `docs/tasks/TASK_725_station_route_host_client_recapture_acceptance_review.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Neues Szenario `data/mission_scenarios/station_route_one_screen_multiplayer_drill.json` fuehrt den akzeptierten Station-Route-Slice als spielbaren Drill zusammen: Alpha greift an, Bravo verteidigt als NPC-/PvP-ready-Team, Route ist AA -> Door -> Computer -> Cargo.
+- Stand: `StationRouteOneScreenScenarioDrill` prueft Szenario, TASK_725-Akzeptanz und Runtime-Gate-Lauf read-only; das Manifest `tmp/station_route_one_screen_multiplayer_drill.json` meldet bei erfolgreichem Lauf `ready_for_f6_host_client_playtest`.
+- Risiken/offen: TASK_726 ist Daten-/Runtime-Spielbarkeit, noch kein Balancing und kein echter menschlicher F6/Host-Client-Playtest. Der naechste Schritt sollte sichtbare Playtest-Notizen mit Performance, Lesbarkeit und Entscheidungsgefuehl sammeln. Separat offen: alte Pre-Boot-Szenario-Harnesses wie TASK_707/TASK_714 bleiben empfindlich und sollten ohne Verlust ihrer Controller-Bindings modernisiert werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_726_one_screen_multiplayer_station_scenario_drill.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_725_station_route_host_client_recapture_acceptance_review.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727 - Station Scenario F6/Host Client Playtest Notes.
+
 ### TASK_725 - Station Route Host/Client Recapture Acceptance Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_725_station_route_host_client_recapture_acceptance_review.md`, `docs/tasks/TASK_724_station_route_recapture_visual_followup.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

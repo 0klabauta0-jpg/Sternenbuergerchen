@@ -388,6 +388,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Folge-Polish-Flags duerfen TASK_726-Polish empfehlen; ein sauberer Sichtentscheid empfiehlt den naechsten kompakten Scenario-Drill.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## One-Screen Multiplayer Station Scenario Drill
+- TASK_726 definiert `station_route_one_screen_multiplayer_drill` als konkreten Szenario-Datensatz fuer AA -> Door -> Computer -> Cargo.
+- `StationRouteOneScreenScenarioDrill` bewertet Szenario, TASK_725-Akzeptanz und Runtime-Gate-Lauf read-only.
+- Das Szenario muss Singleplayer, Coop und `multiplayer_pvp` nennen, Alpha/Bravo-Team-Slots haben und Bravo als NPC-Verteidigung mit PvP-Option tragen.
+- Die Route-Tokens muessen `AA`, `DOOR`, `COM`, `CARGO` bleiben; der Runtime-Verifier muss zeigen, dass Door nicht Computer oder Cargo ueberspringt.
+- `ready_for_f6_host_client_playtest` bedeutet nur: Daten-/Runtime-Kette ist bereit fuer einen sichtbaren F6/Host-Client-Playtest. Es ist kein Balancing- oder Release-Gate.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
