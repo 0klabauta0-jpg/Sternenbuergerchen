@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_730 - Station Scenario Targeted Playtest Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_730_station_scenario_targeted_playtest_polish.md`, `docs/tasks/TASK_729_station_scenario_visible_playtest_run_packet.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Der echte Zwei-Fenster-Capture gegen `station_route_one_screen_multiplayer_drill.json` schreibt Host-/Client-Crops und zeigt den Stationslauf mit Review-Badges. Aus dem sichtbaren Befund folgt ein gezielter HUD-Polish: Der Mission-Identity-Body spiegelt jetzt die bestehende `station_route_run_readout`-Zeile, damit `ROUTE AA > DOOR > COM > CARGO | NEXT ...` direkt im ersten Blick sichtbar ist.
+- Stand: `MissionTacticalSandboxController.build_station_scenario_identity_body_snapshot()` buendelt Badge, Route-Line und Next-Token read-only; `get_command_feedback_snapshot()` exportiert denselben Body-Snapshot fuer Verifier und Reports.
+- Risiken/offen: TASK_730 ersetzt den menschlichen TASK_727-Workbench-Export nicht. Er beseitigt nur die konkrete Reibung aus dem Capture, dass die Szenariofolge oben links zu generisch blieb.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1 -ScenarioPath "res://data/mission_scenarios/station_route_one_screen_multiplayer_drill.json"`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `godot_console.exe --headless --path . --script scripts/tests/task_730_station_scenario_targeted_playtest_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_716_station_route_run_readout_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_731 - Station Scenario Workbench Export Review oder direkt den TASK_727-HTML-Export menschlich ausfuellen.
+
 ### TASK_729 - Station Scenario Visible Playtest Run Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_729_station_scenario_visible_playtest_run_packet.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_728_station_scenario_playtest_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

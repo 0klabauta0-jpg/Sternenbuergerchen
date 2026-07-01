@@ -52,7 +52,8 @@ git checkout -b batch/<batch-name>
 - TASK_727 - Station Scenario F6/Host Client Playtest Notes (implementiert)
 - TASK_728 - Station Scenario Playtest Findings (implementiert)
 - TASK_729 - Station Scenario Visible Playtest Run Packet (implementiert)
-- TASK_730 - Station Scenario Targeted Playtest Polish (naechster sinnvoller Schritt nach echtem Notiz-Export)
+- TASK_730 - Station Scenario Targeted Playtest Polish (implementiert)
+- TASK_731 - Station Scenario Workbench Export Review (naechster sinnvoller Schritt: echten TASK_727-Notizexport ausfuellen oder daraus Polish ableiten)
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
