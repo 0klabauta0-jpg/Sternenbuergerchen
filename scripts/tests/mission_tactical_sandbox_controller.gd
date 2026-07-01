@@ -6193,6 +6193,10 @@ func _build_strategic_status_text() -> String:
 	var debrief_handoff_line: String = String(debrief_handoff.get("handoff_line", "")).strip_edges()
 	if bool(debrief_handoff.get("handoff_ready", false)) and not debrief_handoff_line.is_empty():
 		lines.append(debrief_handoff_line)
+	var station_debrief_handoff: Dictionary = _build_station_scenario_debrief_handoff_cue_snapshot()
+	var station_debrief_handoff_line: String = String(station_debrief_handoff.get("handoff_line", "")).strip_edges()
+	if bool(station_debrief_handoff.get("handoff_ready", false)) and not station_debrief_handoff_line.is_empty() and not lines.has(station_debrief_handoff_line):
+		lines.append(station_debrief_handoff_line)
 	return "\n".join(lines)
 
 
@@ -6347,6 +6351,126 @@ func get_station_scenario_route_cue_polish_snapshot() -> Dictionary:
 	)).duplicate(true)
 	var route_readout: Dictionary = _build_station_route_run_readout_snapshot(objective_gate, object_reaction)
 	return _build_station_scenario_route_cue_polish_snapshot(route_readout, objective_gate, use_feedback, progress_readability)
+
+
+func _build_station_scenario_debrief_handoff_cue_snapshot(route_readout: Dictionary = {}, station_route_cue: Dictionary = {}, identity_body: Dictionary = {}, interaction_density: Dictionary = {}) -> Dictionary:
+	var resolved_route_readout: Dictionary = route_readout.duplicate(true)
+	if resolved_route_readout.is_empty():
+		resolved_route_readout = _build_station_route_run_readout_snapshot()
+	var resolved_station_route_cue: Dictionary = station_route_cue.duplicate(true)
+	if resolved_station_route_cue.is_empty():
+		resolved_station_route_cue = get_station_scenario_route_cue_polish_snapshot()
+	var resolved_identity_body: Dictionary = identity_body.duplicate(true)
+	if resolved_identity_body.is_empty():
+		resolved_identity_body = build_station_scenario_identity_body_snapshot(resolved_route_readout, [], resolved_station_route_cue)
+	var resolved_density: Dictionary = interaction_density.duplicate(true)
+	if resolved_density.is_empty():
+		resolved_density = _build_mission_hud_interaction_density_snapshot(resolved_route_readout, resolved_station_route_cue)
+	var route_line: String = String(resolved_route_readout.get("compact_line", "")).strip_edges()
+	var display_route_line: String = String(resolved_identity_body.get("display_route_line", "")).strip_edges()
+	var cue_line: String = String(resolved_station_route_cue.get("cue_line", "")).strip_edges()
+	var mission_control_line: String = String(resolved_density.get("mission_control_line", "")).strip_edges()
+	var route_complete: bool = bool(resolved_route_readout.get("all_gates_complete", false)) and String(resolved_route_readout.get("next_token", "")).strip_edges().to_upper() == "DONE"
+	var cue_points_to_debrief: bool = cue_line.contains("Debrief")
+	var handoff_ready: bool = bool(resolved_route_readout.get("active", false)) and route_complete and cue_points_to_debrief
+	var handoff_line: String = "HANDOFF Debrief bereit | danach Homebase" if handoff_ready else ""
+	var chain: PackedStringArray = PackedStringArray(["station_route_complete", "debrief_review", "return_homebase"]) if handoff_ready else PackedStringArray()
+	return {
+		"schema": "sternenbuergerchen.station_scenario_debrief_handoff_cue.v1",
+		"task_id": "TASK_743",
+		"active": bool(resolved_route_readout.get("active", false)),
+		"style_id": "station_scenario_debrief_handoff_cue_v1",
+		"source": "station_route_readout_route_cue_identity_body_density",
+		"route_complete": route_complete,
+		"handoff_ready": handoff_ready,
+		"handoff_line": handoff_line,
+		"handoff_line_char_limit": 72,
+		"handoff_line_within_limit": handoff_line.length() <= 72,
+		"handoff_chain": chain,
+		"debrief_action_label": "Debrief pruefen" if handoff_ready else "",
+		"homebase_followup_label": "Danach Homebase" if handoff_ready else "",
+		"route_line": route_line,
+		"display_route_line": display_route_line,
+		"cue_line": cue_line,
+		"mission_control_line": mission_control_line,
+		"identity_body_text": String(resolved_identity_body.get("text", "")),
+		"cue_points_to_debrief": cue_points_to_debrief,
+		"creates_navigation": false,
+		"creates_command": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"recommended_next_task": "TASK_727 - Station Scenario F6/Host Client Playtest Notes",
+	}
+
+
+func get_station_scenario_debrief_handoff_cue_snapshot() -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var handoff: Dictionary = Dictionary(command_feedback.get("station_scenario_debrief_handoff_cue", {})).duplicate(true)
+	var mission_control_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	var handoff_line: String = String(handoff.get("handoff_line", "")).strip_edges()
+	if bool(handoff.get("handoff_ready", false)) and not handoff_line.is_empty() and not mission_control_text.contains(handoff_line):
+		mission_control_text = _build_strategic_status_text()
+	var chain: PackedStringArray = PackedStringArray(Array(handoff.get("handoff_chain", [])))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"station_route_complete",
+			bool(handoff.get("route_complete", false)),
+			"Station route is complete before the Debrief handoff appears."
+		),
+		_build_mission_first_move_readability_check(
+			"cue_points_to_debrief",
+			bool(handoff.get("cue_points_to_debrief", false)) and String(handoff.get("cue_line", "")).contains("Debrief"),
+			"Station cue points to Debrief after Cargo is gone."
+		),
+		_build_mission_first_move_readability_check(
+			"handoff_line_visible",
+			bool(handoff.get("handoff_ready", false)) and not handoff_line.is_empty() and mission_control_text.contains(handoff_line),
+			"Mission Control shows the Station Debrief/Homebase handoff line."
+		),
+		_build_mission_first_move_readability_check(
+			"handoff_chain_complete",
+			chain.has("station_route_complete") and chain.has("debrief_review") and chain.has("return_homebase"),
+			"Handoff chain names station route completion, Debrief review and Homebase return."
+		),
+		_build_mission_first_move_readability_check(
+			"identity_body_keeps_route_context",
+			String(handoff.get("display_route_line", "")).contains("AA > DOOR > COM > CARGO") and String(handoff.get("identity_body_text", "")).contains(String(handoff.get("cue_line", ""))),
+			"Identity body keeps the station route and final cue visible together."
+		),
+		_build_mission_first_move_readability_check(
+			"handoff_line_compact",
+			bool(handoff.get("handoff_line_within_limit", false)),
+			"Station handoff line stays compact enough for Mission Control."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(handoff.get("read_only", false))
+				and not bool(handoff.get("ui_sets_gameplay_truth", true))
+				and not bool(handoff.get("creates_navigation", true))
+				and not bool(handoff.get("creates_command", true)),
+			"Station handoff cue reads existing state and does not navigate or enqueue commands."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.station_scenario_debrief_handoff_cue.v1",
+		"task_id": "TASK_743",
+		"handoff": handoff,
+		"handoff_line": handoff_line,
+		"mission_control_status_text": mission_control_text,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"recommended_next_task": "TASK_727 - Station Scenario F6/Host Client Playtest Notes",
+	}
 
 
 func get_station_scenario_hud_overlap_pass_snapshot() -> Dictionary:
@@ -18872,6 +18996,12 @@ func get_command_feedback_snapshot() -> Dictionary:
 		mission_interaction_progress_readability
 	)
 	var station_scenario_identity_body: Dictionary = build_station_scenario_identity_body_snapshot(station_route_run_readout, [], station_scenario_route_cue_polish)
+	var station_scenario_debrief_handoff_cue: Dictionary = _build_station_scenario_debrief_handoff_cue_snapshot(
+		station_route_run_readout,
+		station_scenario_route_cue_polish,
+		station_scenario_identity_body,
+		mission_hud_interaction_density
+	)
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -18939,6 +19069,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
 		"frontier_probe_debrief_handoff_line": String(frontier_probe_debrief_handoff.get("handoff_line", "")),
+		"station_scenario_debrief_handoff_cue": station_scenario_debrief_handoff_cue,
+		"station_scenario_debrief_handoff_line": String(station_scenario_debrief_handoff_cue.get("handoff_line", "")),
+		"station_scenario_debrief_handoff_ready": bool(station_scenario_debrief_handoff_cue.get("handoff_ready", false)),
 		"mission_interaction_use_feedback": mission_interaction_use_feedback,
 		"mission_interaction_use_feedback_line": String(mission_interaction_use_feedback.get("feedback_line", "")),
 		"mission_interaction_use_feedback_action": String(mission_interaction_use_feedback.get("action_label", "")),

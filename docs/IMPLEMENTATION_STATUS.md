@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_743 - Station Scenario Debrief Handoff Cue
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_743_station_scenario_debrief_handoff_cue.md`, `docs/tasks/TASK_742_station_scenario_cargo_endgame_cue_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `get_station_scenario_debrief_handoff_cue_snapshot()` fasst den fertigen Station-Pfad `AA > DOOR > COM > CARGO` als Abschluss-Handoff zusammen.
+- Stand: Command-Feedback exportiert `station_scenario_debrief_handoff_cue`, `station_scenario_debrief_handoff_line` und `station_scenario_debrief_handoff_ready`; Mission Control fuehrt die Zeile `HANDOFF Debrief bereit | danach Homebase`.
+- Stand: Der Snapshot verbindet `CUE DONE: Cargo weg | Debrief` mit der Handoff-Kette `station_route_complete -> debrief_review -> return_homebase`, bleibt aber read-only und erzeugt keine Navigation/Commands.
+- Risiken/offen: TASK_743 darf keine echte Debrief-Navigation erzeugen und ersetzt keinen TASK_727-Fensterlauf.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_743_station_scenario_debrief_handoff_cue.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_742_station_scenario_cargo_endgame_cue_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_638_frontier_probe_debrief_handoff_feel.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen und JSON exportieren; danach echte Sicht-/Sync-/Performance-Findings schneiden.
+
 ### TASK_742 - Station Scenario Cargo Endgame Cue Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_742_station_scenario_cargo_endgame_cue_polish.md`, `docs/tasks/TASK_736_station_scenario_command_feedback_polish.md`, `docs/tasks/TASK_741_station_scenario_workbench_recapture_prefill.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

@@ -511,6 +511,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - AA-/Door-/Computer-Cues bleiben kompatibel mit der bisherigen `station_route_player_action_cue_v2`-Sprache.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Debrief Handoff Cue
+- Der Station-Handoff-Snapshot darf Route-Readout, Route-Cue, Identity-Body und HUD-Density lesen, um den fertigen Pfad `AA > DOOR > COM > CARGO` zum Debrief zusammenzufassen.
+- Erwartete Abschlusszeilen sind `CUE DONE: Cargo weg | Debrief` und `HANDOFF Debrief bereit | danach Homebase`.
+- Die Handoff-Kette darf `station_route_complete`, `debrief_review` und `return_homebase` nennen, aber keine Navigation starten, keine Commands erzeugen und keine MissionResult-/Homebase-Wahrheit schreiben.
+- Mission Control darf die Handoff-Zeile sichtbar fuehren, solange Source-/Snapshotdaten read-only bleiben.
+- `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
