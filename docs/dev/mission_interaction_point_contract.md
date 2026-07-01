@@ -465,6 +465,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Das Manifest `tmp/station_scenario_current_report_sync_guard.json` darf Reportpfade, Anker und Rebase-Status exportieren, aber keine Runtime starten und keine Gameplay-Wahrheit setzen.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Command Feedback Polish
+- `StationScenarioRouteCuePolish` bleibt der einzige Presenter fuer die Stations-Cue-Zeile; TASK_736 erweitert nur Sprache und Lesbarkeitsmetadaten.
+- Out-of-Range-Cues sollen Fireteam, Handlung und formatierte Distanz nennen, z. B. `CUE AA: BLUE naeher ran | 3.9km`.
+- Usable-Cues sollen das Fireteam vor der Aktion nennen, z. B. `CUE DOOR: FT1 BREACH + GO`.
+- Der Snapshot exportiert `distance_text`, `feedback_style_id`, `contains_distance_text` und `uses_player_action_language`, darf aber keine Objective-Gates, Door-/Cargo-States oder Commands setzen.
+- Die Mission-HUD-Density darf `interaction_progress_line` als Source behalten, soll sie aber aus der knappen ACT-Zeile entfernen, wenn eine Station-Cue aktiv ist und nicht selbst `in_progress` meldet. So steht bei `CUE AA` keine Future-Cargo-Blockade direkt daneben.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

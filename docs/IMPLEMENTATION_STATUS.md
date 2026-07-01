@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_736 - Station Scenario Command Feedback Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_736_station_scenario_command_feedback_polish.md`, `docs/tasks/TASK_732_station_scenario_route_cue_polish.md`, `docs/tasks/TASK_734_station_scenario_performance_feel_pass.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioRouteCuePolish` formuliert die naechste Stationshandlung jetzt spielernaeher: Out-of-Range-Cues nennen Fireteam, `naeher ran` und formatierte Distanz (`220m`, `3.9km`); Usable-Cues nennen Fireteam vor Aktion und `GO`.
+- Stand: Der Cue-Snapshot exportiert `distance_text`, `feedback_style_id = station_route_player_action_cue_v2`, `contains_distance_text` und `uses_player_action_language`.
+- Stand: Die Mission-HUD-Density entdichtet Future-Progress-Zeilen wie `CARGO blockiert` aus der ACT-Zeile, solange eine fruehere Station-Cue aktiv ist; Source-Daten bleiben im Snapshot.
+- Risiken/offen: TASK_736 poliert Headless-Command-Sprache, ersetzt aber keinen echten TASK_727-Fensterlauf. Ob der Text im FullHD-Bild wirklich angenehm wirkt, bleibt sichtbar zu pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_736_station_scenario_command_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_734_station_scenario_performance_feel_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_733_station_scenario_hud_overlap_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_732_station_scenario_route_cue_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen; falls weitere technische Reibung ohne Sichttest bearbeitet werden soll, TASK_737 - Scenario Harness Modernization nur fuer belegte Harness-Probleme.
+
 ### TASK_735 - Station Scenario Current Report Sync Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_735_station_scenario_current_report_sync_guard.md`, `docs/tasks/TASK_707_mission_door_computer_cargo_smoke.md`, `docs/tasks/TASK_714_station_route_multiplayer_scenario_guard.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -17,7 +27,7 @@
 - Stand: `task_735_station_scenario_current_report_sync_guard.gd` prueft die Report-Rebase, TASK_707-/TASK_714-Exportanker und schreibt `tmp/station_scenario_current_report_sync_guard.json` read-only.
 - Risiken/offen: TASK_735 ist Report-/Evidence-Kettenpflege. Der echte TASK_727-Fensterlauf und menschliche Host/Client-Spielgefuehlentscheid bleiben offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_735_station_scenario_current_report_sync_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_714_station_route_multiplayer_scenario_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_707_mission_door_computer_cargo_smoke.gd`, `git diff --check`.
-- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen oder TASK_736 - Station Scenario Command Feedback Polish, falls echte Notizen die Befehlsrueckmeldung weiter als Reibung markieren.
+- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen oder TASK_736 - Station Scenario Command Feedback Polish, falls die aktuelle Cue-Sprache weiter zu technisch wirkt.
 
 ### TASK_734 - Station Scenario Performance Feel Pass
 - Status: implementiert im Arbeitsstand
