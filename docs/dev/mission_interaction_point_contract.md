@@ -405,6 +405,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `needs_followup_polish` und `ready_for_findings` empfehlen TASK_728, damit echte Notizen zuerst als Findings verdichtet werden, bevor Code-Polish daraus entsteht.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Playtest Findings
+- `StationScenarioPlaytestFindings` verdichtet TASK_727-Playtestnotizen read-only zu einem Findings-Gate.
+- Fehlende, blockierte oder nicht-read-only TASK_727-Notizen blockieren TASK_728.
+- Offene menschliche Notizen bleiben `needs_visible_playtest`; TASK_728 darf daraus keine bestandene Sichtabnahme machen.
+- Aktive Follow-up-Flags werden zu Action Items fuer Route Readability, HUD Overlap, Performance, Host/Client Sync, Command Feedback oder Harness-Modernisierung.
+- Saubere erledigte Notizen ohne aktive Issue-Flags duerfen `ready_for_next_playable_slice` melden, bleiben aber Review-Evidence und keine Gameplay-Wahrheit.
+- Das Manifest `tmp/station_scenario_playtest_findings.json` darf naechste Tasks empfehlen, setzt aber keine Runtime-, Door-, Objective-, Team- oder Multiplayer-Wahrheit.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
