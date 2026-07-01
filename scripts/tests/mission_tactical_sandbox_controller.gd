@@ -11260,6 +11260,74 @@ func get_station_route_hud_visual_polish_snapshot() -> Dictionary:
 	}
 
 
+func get_station_route_recapture_visual_followup_snapshot() -> Dictionary:
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
+	var viewport_rect: Rect2i = layout.get("viewport", Rect2i())
+	var mini_rect: Rect2i = layout.get("fireteam_mini", Rect2i())
+	var event_rect: Rect2i = layout.get("event_log", Rect2i())
+	var top_nav_rect: Rect2i = layout.get("top_nav", Rect2i())
+	var primary_3d_view = _get_primary_3d_view()
+	var render_snapshot: Dictionary = {}
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		render_snapshot = Dictionary(primary_3d_view.call("get_render_snapshot"))
+	var prior_task722_top_nav_width: int = 480
+	var prior_task722_fireteam_height: int = 288
+	var top_nav_tighter: bool = top_nav_rect.size.x <= 384 and top_nav_rect.size.y <= 56
+	var fireteam_mini_tighter: bool = mini_rect.size.x <= 240 and mini_rect.size.y <= 248
+	var eventlog_tracks_mini: bool = event_rect.position.y >= mini_rect.end.y + 16 and event_rect.size.x == mini_rect.size.x
+	var station_labels_more_spaced: bool = (
+		int(render_snapshot.get("mission_interaction_visual_state_label_font_size", 0)) >= 19
+		and float(render_snapshot.get("mission_interaction_visual_state_label_pixel_size", 0.0)) >= 0.026
+		and float(render_snapshot.get("mission_interaction_visual_state_label_height_step", 0.0)) >= 0.26
+	)
+	var route_labels_more_spaced: bool = (
+		int(render_snapshot.get("route_callout_label_font_size", 0)) >= 19
+		and float(render_snapshot.get("route_callout_label_pixel_size", 0.0)) >= 0.025
+		and int(render_snapshot.get("route_callout_label_outline_size", 0)) >= 8
+		and float(render_snapshot.get("route_callout_label_height_step", 0.0)) >= 0.26
+	)
+	var checks: Array = [
+		_build_mission_first_move_readability_check("top_nav_tighter", top_nav_tighter, "Top navigation is narrower than the TASK_723 recapture bar while staying on the fixed HUD grid."),
+		_build_mission_first_move_readability_check("fireteam_mini_tighter", fireteam_mini_tighter, "Left Fireteam mini panel keeps less map covered."),
+		_build_mission_first_move_readability_check("eventlog_tracks_mini", eventlog_tracks_mini, "Event log remains below the tighter Fireteam mini panel."),
+		_build_mission_first_move_readability_check("station_labels_more_spaced", station_labels_more_spaced, "Station labels gain size and vertical spacing for the next recapture."),
+		_build_mission_first_move_readability_check("route_labels_more_spaced", route_labels_more_spaced, "Route labels gain size, outline and spacing for the next recapture."),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.station_route_recapture_visual_followup.v1",
+		"task_id": "TASK_724",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"viewport_rect": _rect_to_audit_dictionary(Rect2(viewport_rect.position, viewport_rect.size)),
+		"fireteam_mini_rect": _rect_to_audit_dictionary(Rect2(mini_rect.position, mini_rect.size)),
+		"event_log_rect": _rect_to_audit_dictionary(Rect2(event_rect.position, event_rect.size)),
+		"top_nav_rect": _rect_to_audit_dictionary(Rect2(top_nav_rect.position, top_nav_rect.size)),
+		"top_nav_width_delta_vs_task722": top_nav_rect.size.x - prior_task722_top_nav_width,
+		"fireteam_mini_height_delta_vs_task722": mini_rect.size.y - prior_task722_fireteam_height,
+		"top_nav_tighter": top_nav_tighter,
+		"fireteam_mini_tighter": fireteam_mini_tighter,
+		"eventlog_tracks_mini": eventlog_tracks_mini,
+		"station_labels_more_spaced": station_labels_more_spaced,
+		"route_labels_more_spaced": route_labels_more_spaced,
+		"mission_interaction_visual_state_label_font_size": int(render_snapshot.get("mission_interaction_visual_state_label_font_size", 0)),
+		"mission_interaction_visual_state_label_pixel_size": float(render_snapshot.get("mission_interaction_visual_state_label_pixel_size", 0.0)),
+		"mission_interaction_visual_state_label_height_step": float(render_snapshot.get("mission_interaction_visual_state_label_height_step", 0.0)),
+		"route_callout_label_font_size": int(render_snapshot.get("route_callout_label_font_size", 0)),
+		"route_callout_label_pixel_size": float(render_snapshot.get("route_callout_label_pixel_size", 0.0)),
+		"route_callout_label_outline_size": int(render_snapshot.get("route_callout_label_outline_size", 0)),
+		"route_callout_label_height_step": float(render_snapshot.get("route_callout_label_height_step", 0.0)),
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "ready_for_recapture" if failed_checks.is_empty() else "review",
+		"recommended_next_task": "TASK_725 - Station Route Host/Client Recapture Acceptance Review",
+	}
+
+
 func _can_issue_local_commands() -> bool:
 	return bool(_command_input_guard.call("can_issue_local_commands", get_node_or_null("../SimulationRoot"), multiplayer))
 

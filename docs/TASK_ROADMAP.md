@@ -46,7 +46,8 @@ git checkout -b batch/<batch-name>
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
 - TASK_722 - Station Route HUD Visual Polish (implementiert)
 - TASK_723 - Station Route Host/Client Recapture Review (implementiert)
-- TASK_724 - Station Route Sichtentscheid oder Folge-Polish (naechster sinnvoller Schritt)
+- TASK_724 - Station Route Recapture Visual Followup (implementiert)
+- TASK_725 - Station Route Host/Client Recapture Acceptance Review (naechster sinnvoller Schritt)
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
@@ -358,6 +359,7 @@ git checkout -b batch/<batch-name>
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
 - TASK_722 - Station Route HUD Visual Polish (implementiert)
 - TASK_723 - Station Route Host/Client Recapture Review (implementiert)
+- TASK_724 - Station Route Recapture Visual Followup (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

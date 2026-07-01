@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_724 - Station Route Recapture Visual Followup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_724_station_route_recapture_visual_followup.md`, `docs/tasks/TASK_723_station_route_host_client_recapture_review.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Der TASK_723-Recapture-Screenshot wurde als nicht kaputt, aber noch nicht akzeptanzreif bewertet: Fireteam-Mini-Spalte nimmt Kartenrand, Station-/Route-Labels brauchen mehr Luft, TopNav wirkt zu breit.
+- Stand: `DropLightLayoutContract.get_mission_hud_layout()` reduziert die Mission-TopNav auf `384x56`, die Fireteam-Mini-Spalte auf `240x248` und zieht das Eventlog darunter nach.
+- Stand: `TerrainMap3DView` meldet groessere Station-/Route-Labelwerte und groessere Hoehen-/Stagger-Abstaende im Render-Snapshot; `MissionTacticalSandboxController.get_station_route_recapture_visual_followup_snapshot()` fasst den Zustand read-only als `ready_for_recapture` zusammen.
+- Risiken/offen: TASK_724 ist erneut UI-/Visual-Polish. Nach diesem Slice braucht es einen frischen Host/Client-Capture, bevor der Multiplayer-Stationslauf akzeptiert werden kann.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_724_station_route_recapture_visual_followup.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_723_station_route_host_client_recapture_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_722_station_route_hud_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_725 - Station Route Host/Client Recapture Acceptance Review.
+
 ### TASK_723 - Station Route Host/Client Recapture Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_723_station_route_host_client_recapture_review.md`, `docs/tasks/TASK_722_station_route_hud_visual_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
