@@ -211,7 +211,7 @@ static func _recommended_next_task(status: String, action_items: Array) -> Strin
 		if not action_items.is_empty() and typeof(action_items[0]) == TYPE_DICTIONARY:
 			return String(Dictionary(action_items[0]).get("recommended_task", "TASK_773 - Station Reentry Host Client Visual Polish"))
 		return "TASK_773 - Station Reentry Host Client Visual Polish"
-	return "TASK_773 - Station Reentry Next Playable Slice Acceptance"
+	return "TASK_774 - Station Reentry Next Playable Slice Acceptance"
 
 
 static func _missing_check_ids(required_checks: Array) -> Array[String]:
