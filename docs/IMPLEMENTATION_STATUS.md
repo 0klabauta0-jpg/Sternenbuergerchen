@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_745 - Station Scenario Post Debrief Homebase Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_745_station_scenario_post_debrief_homebase_readability.md`, `docs/tasks/TASK_744_station_scenario_meta_debrief_route_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `HomebaseTestScreen.get_station_scenario_post_debrief_homebase_readability_snapshot()` prueft die Station-spezifische Homebase-Rueckkehr nach Debrief.
+- Stand: Die bestehende Post-Debrief-Followup-Zeile erkennt jetzt `station_route_one_screen_multiplayer_drill` / `station_route_aa_door_computer_cargo` und formuliert `Station Drill / VICTORY / ... | Next: ...`.
+- Stand: Die Summary nutzt den bestehenden Homebase-Followup-Pfad, bleibt read-only und erzeugt keine Navigation/Commands.
+- Risiken/offen: TASK_745 ist Homebase-Lesbarkeit, kein sichtbarer Host/Client-Recapture und keine Next-Sortie-Readiness-Kette fuer Station.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_745_station_scenario_post_debrief_homebase_readability.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_744_station_scenario_meta_debrief_route_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_640_frontier_probe_post_debrief_homebase_readability.gd`, `git diff --check`.
+- Naechster Schritt: TASK_746 - Station Scenario Homebase Next Sortie Readiness oder Host/Client-Fenster-Recapture des kompletten Station-Abschlusses.
+
 ### TASK_744 - Station Scenario Meta Debrief Route Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_744_station_scenario_meta_debrief_route_smoke.md`, `docs/tasks/TASK_743_station_scenario_debrief_handoff_cue.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

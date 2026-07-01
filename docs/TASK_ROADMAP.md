@@ -67,7 +67,8 @@ git checkout -b batch/<batch-name>
 - TASK_742 - Station Scenario Cargo Endgame Cue Polish (implementiert)
 - TASK_743 - Station Scenario Debrief Handoff Cue (implementiert)
 - TASK_744 - Station Scenario Meta Debrief Route Smoke (implementiert)
-- Naechster Schritt: Station-spezifische Post-Debrief-Homebase-Lesbarkeit oder echter Host/Client-Fenster-Recapture mit dem neuen Abschluss.
+- TASK_745 - Station Scenario Post Debrief Homebase Readability (implementiert)
+- Naechster Schritt: Station-spezifische Next-Sortie-Readiness oder echter Host/Client-Fenster-Recapture mit dem neuen Abschluss.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
