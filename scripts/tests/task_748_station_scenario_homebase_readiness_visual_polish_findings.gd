@@ -104,7 +104,7 @@ func _test_visual_polish_findings() -> void:
 	_assert(String(manifest.get("source_task_id", "")) == "TASK_747", "TASK_748 points to TASK_747")
 	_assert(String(manifest.get("source_gate", "")) == "pass", "TASK_748 source gate passes")
 	_assert(String(manifest.get("geometry_gate", "")) == "pass", "TASK_748 geometry gate passes")
-	_assert(bool(manifest.get("microcopy_followup_needed", false)), "TASK_748 flags microcopy follow-up")
+	_assert(bool(manifest.get("microcopy_followup_needed", false)) or String(manifest.get("resolved_by_task_id", "")) == "TASK_749", "TASK_748 flags microcopy follow-up or records TASK_749 resolution")
 	_assert(int(manifest.get("actionable_followup_count", 0)) >= 1, "TASK_748 records actionable follow-up")
 	_assert(String(manifest.get("recommended_next_task", "")) == "TASK_749 - Station Homebase Follow-up Microcopy Polish", "TASK_748 recommends TASK_749")
 	_assert(bool(manifest.get("read_only", false)), "TASK_748 manifest remains read-only")
@@ -117,7 +117,7 @@ func _test_visual_polish_findings() -> void:
 
 
 func _build_findings_manifest(snapshot: Dictionary, source_manifest: Dictionary) -> Dictionary:
-	var readiness_line: String = String(snapshot.get("readiness_line", "")).strip_edges()
+	var readiness_line: String = String(source_manifest.get("readiness_line", snapshot.get("readiness_line", ""))).strip_edges()
 	var english_marker_count: int = 0
 	for marker in ["Next sortie", "Review gains", "Stage fireteam", "Assign loadout", "Load dropship", "Start next sortie"]:
 		if readiness_line.contains(marker):
@@ -164,6 +164,7 @@ func _build_findings_manifest(snapshot: Dictionary, source_manifest: Dictionary)
 		"generated_evidence_board": bool(source_manifest.get("generated_evidence_board", false)),
 		"viewport_readback_available": bool(source_manifest.get("viewport_readback_available", true)),
 		"microcopy_followup_needed": readiness_line.length() >= 96 or english_marker_count >= 3,
+		"resolved_by_task_id": "TASK_749" if readiness_line.begins_with("Naechste Sortie:") else "",
 		"actionable_followup_count": 1,
 		"findings": findings,
 		"read_only": true,

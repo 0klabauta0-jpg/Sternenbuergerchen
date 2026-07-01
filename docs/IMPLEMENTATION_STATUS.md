@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_749 - Station Homebase Follow-up Microcopy Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_749_station_homebase_followup_microcopy_polish.md`, `docs/tasks/TASK_748_station_scenario_homebase_readiness_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Die Station-Homebase-Next-Sortie-Zeile nutzt jetzt kompakte deutsche Microcopy aus denselben Readiness-Steps: `Naechste Sortie: Fireteam bereitstellen | danach: Loadout pruefen, Dropship beladen, Start freigeben`.
+- Stand: Frontier-/Altpfade bleiben auf der bisherigen Contract-Sprache; die Station-Step-IDs bleiben vollstaendig erhalten.
+- Stand: `scripts/tests/task_749_station_homebase_followup_microcopy_polish.gd` prueft Microcopy, alte Debug-Marker, Step-Erhalt, Snapshot/Label-Gleichheit und Read-only-Grenzen.
+- Risiken/offen: Es fehlt noch ein echter Host/Client-Fenster-Recapture nach diesem Polish.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_746_station_scenario_homebase_next_sortie_readiness.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_747_station_scenario_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_748_station_scenario_homebase_readiness_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_749_station_homebase_followup_microcopy_polish.gd`, `git diff --check`.
+- Naechster Schritt: echter Station Host/Client Homebase Recapture oder kleiner Panel-Visual-Polish, falls der Fensterblick noch zu technisch wirkt.
+
 ### TASK_748 - Station Scenario Homebase Readiness Visual Polish Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_748_station_scenario_homebase_readiness_visual_polish_findings.md`, `docs/tasks/TASK_747_station_scenario_homebase_visible_readiness_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

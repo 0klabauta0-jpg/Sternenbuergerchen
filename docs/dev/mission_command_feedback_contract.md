@@ -579,6 +579,11 @@ Erwartete Struktur: `tmp/station_scenario_homebase_readiness_visual_polish_findi
 
 Der wichtigste akzeptierte Befund ist aktuell: Die Station-Homebase-Geometrie ist gruen, aber die Next-Sortie-Zeile ist als Spielertext noch zu lang und englisch-lastig fuer einen wirklich guten Homebase-Follow-up-Moment.
 
+## Station-Homebase-Follow-up-Microcopy-Polish (TASK_749)
+TASK_749 loest den TASK_748-Microcopy-Befund fuer die Station-Homebase auf. Der sichtbare Station-Text wird aus denselben Readiness-Steps gebaut, nennt den aktuellen Schritt zuerst und laesst die Step-IDs unveraendert. Frontier-/Altpfade duerfen ihre bisherige Contract-Zeile behalten.
+
+Erwartete Station-Zeile: `Naechste Sortie: Fireteam bereitstellen | danach: Loadout pruefen, Dropship beladen, Start freigeben`. Erwartete Struktur: Der Station-Readiness-Snapshot bleibt `schema = sternenbuergerchen.station_scenario_homebase_next_sortie_readiness.v1`, `readiness_line` und `rendered_readiness_line` stimmen ueberein, `current_next_step_id = stage_fireteam`, alle Step-IDs aus TASK_746 bleiben erhalten, alte sichtbare Debug-Marker wie `Next sortie`, `Review gains`, `Stage fireteam`, `Assign loadout`, `Load dropship`, `Start next sortie` erscheinen nicht in der Station-Zeile, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.

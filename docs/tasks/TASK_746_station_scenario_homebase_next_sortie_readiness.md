@@ -31,7 +31,7 @@ Der Frontier-Probe-Pfad hat seit TASK_641 eine read-only Next-Sortie-Readiness-Z
 - `docs/reports/project_current_state_handbook_2026_07_01.html`
 
 ## Akzeptanzkriterien
-- Die Homebase zeigt nach dem Station-Debrief-Return unter der Summary eine kompakte Zeile wie `Next sortie: Review gains -> Stage fireteam -> Assign loadout -> Load dropship -> Start next sortie | now: Stage fireteam`.
+- Die Homebase zeigt nach dem Station-Debrief-Return unter der Summary eine kompakte Zeile wie `Naechste Sortie: Fireteam bereitstellen | danach: Loadout pruefen, Dropship beladen, Start freigeben`.
 - Der Snapshot liefert `schema = sternenbuergerchen.station_scenario_homebase_next_sortie_readiness.v1`.
 - `route_id = station_route_aa_door_computer_cargo` und `scenario_id = station_route_one_screen_multiplayer_drill` bleiben lesbar.
 - `post_debrief_summary_gate = pass`, `station_result_present = true`, `readiness_label_visible = true`.
