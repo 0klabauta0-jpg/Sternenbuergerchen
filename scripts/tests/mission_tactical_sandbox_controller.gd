@@ -2458,13 +2458,16 @@ func _update_ui() -> void:
 			command_feedback_label.text = "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen."
 		else:
 			var door_authority_line: String = _build_visible_door_authority_command_line()
+			var station_route_line: String = String(_build_station_route_run_readout_snapshot().get("compact_line", "")).strip_edges()
 			var last_line: String = "%s\nDEC %s" % [_last_command_text, _build_selected_decision_status_text()]
 			if not door_authority_line.is_empty():
 				last_line = "%s\n%s" % [door_authority_line, last_line]
-			command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s\n%s\nLAST %s" % [
+			var route_block: String = "\n%s" % station_route_line if not station_route_line.is_empty() else ""
+			command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s%s\n%s\nLAST %s" % [
 				_get_fireteam_name(),
 				_get_phase_name(),
 				_build_target_text(),
+				route_block,
 				_build_selected_waypoint_info_text(),
 				last_line,
 			]
@@ -6191,6 +6194,8 @@ func _build_strategic_status_text() -> String:
 
 
 func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
+	var station_route_readout: Dictionary = _build_station_route_run_readout_snapshot()
+	var station_route_line: String = String(station_route_readout.get("compact_line", "")).strip_edges()
 	var objective_line: String = _build_mission_objective_interaction_line().strip_edges()
 	var cargo_line: String = _build_mission_cargo_extract_line().strip_edges()
 	var interaction_progress_readability: Dictionary = _build_mission_interaction_progress_readability_snapshot()
@@ -6201,6 +6206,8 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 	var combat_or_contact_line: String = combat_hud_line if not combat_hud_line.is_empty() else contact_diagnostics_text
 	var fire_rule_text: String = _compact_fire_rule_for_hud(_get_selected_fire_rule_consensus())
 	var source_lines: PackedStringArray = PackedStringArray()
+	if not station_route_line.is_empty():
+		source_lines.append(station_route_line)
 	if not interaction_progress_line.is_empty():
 		source_lines.append(interaction_progress_line)
 	if not objective_line.is_empty():
@@ -6210,6 +6217,8 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 	if not combat_or_contact_line.is_empty():
 		source_lines.append(combat_or_contact_line)
 	var compact_parts: PackedStringArray = PackedStringArray()
+	if not station_route_line.is_empty():
+		compact_parts.append(station_route_line)
 	if not interaction_progress_line.is_empty():
 		compact_parts.append(interaction_progress_line)
 	if not objective_line.is_empty():
@@ -6243,6 +6252,8 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 		"line_within_limit": _max_string_length(Array(visible_lines)) <= line_limit,
 		"objective_line": objective_line,
 		"cargo_line": cargo_line,
+		"station_route_line": station_route_line,
+		"station_route_run_readout": station_route_readout,
 		"interaction_progress_line": interaction_progress_line,
 		"interaction_progress_readability": interaction_progress_readability,
 		"combat_line": combat_hud_line,
@@ -6256,7 +6267,144 @@ func _build_mission_hud_interaction_density_snapshot() -> Dictionary:
 		"contains_interaction_progress": not interaction_progress_line.is_empty() and mission_control_line.contains(interaction_progress_line),
 		"contains_objective": not objective_line.is_empty() and mission_control_line.contains(objective_line),
 		"contains_cargo": not cargo_line.is_empty() and mission_control_line.contains(cargo_line),
+		"contains_station_route": not station_route_line.is_empty() and mission_control_line.contains(station_route_line),
 	}
+
+
+func _build_station_route_run_readout_snapshot(objective_gate: Dictionary = {}, object_reaction: Dictionary = {}) -> Dictionary:
+	var gate_snapshot: Dictionary = objective_gate if not objective_gate.is_empty() else get_mission_interaction_objective_gate_snapshot()
+	var reaction_snapshot: Dictionary = object_reaction if not object_reaction.is_empty() else get_mission_interaction_object_reaction_snapshot()
+	var entries: Array = Array(reaction_snapshot.get("entries", []))
+	var aa_token: String = _station_route_token_for_kind(entries, "aa")
+	var door_token: String = _station_route_token_for_kind(entries, "door")
+	var computer_token: String = _station_route_token_for_kind(entries, "computer")
+	var cargo_token: String = _station_route_token_for_kind(entries, "cargo")
+	var route_has_content: bool = door_token != "DOOR -"
+	var next_token: String = _station_route_next_token(gate_snapshot)
+	var compact_line: String = ""
+	if route_has_content:
+		compact_line = "ROUTE %s > %s > %s > %s | NEXT %s" % [aa_token, door_token, computer_token, cargo_token, next_token]
+	var line_limit: int = 120
+	return {
+		"schema": "sternenbuergerchen.station_route_run_readout.v1",
+		"active": route_has_content,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"source": "mission_interaction_objective_gate_and_object_reaction",
+		"compact_line": compact_line,
+		"visible_lines": [compact_line] if not compact_line.is_empty() else [],
+		"visible_line_count": 1 if not compact_line.is_empty() else 0,
+		"max_visible_line_count": 1,
+		"line_char_limit": line_limit,
+		"line_length": compact_line.length(),
+		"line_within_limit": compact_line.length() <= line_limit,
+		"aa_token": aa_token,
+		"door_token": door_token,
+		"computer_token": computer_token,
+		"cargo_token": cargo_token,
+		"next_token": next_token,
+		"next_step_id": String(gate_snapshot.get("next_step_id", "")),
+		"next_interaction_id": String(gate_snapshot.get("next_interaction_id", "")),
+		"all_gates_complete": bool(gate_snapshot.get("all_gates_complete", false)),
+		"object_reaction_count": int(reaction_snapshot.get("object_reaction_count", entries.size())),
+	}
+
+
+func _station_route_token_for_kind(entries: Array, object_kind: String) -> String:
+	var normalized_kind: String = object_kind.strip_edges().to_lower()
+	var prefix: String = _station_route_prefix_for_kind(normalized_kind)
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("object_kind", "")).strip_edges().to_lower() != normalized_kind:
+			continue
+		return "%s %s" % [prefix, _station_route_state_token(normalized_kind, entry)]
+	return "%s -" % prefix
+
+
+func _station_route_prefix_for_kind(object_kind: String) -> String:
+	match object_kind:
+		"computer":
+			return "COM"
+		_:
+			return object_kind.strip_edges().to_upper()
+
+
+func _station_route_state_token(object_kind: String, entry: Dictionary) -> String:
+	var reaction_state: String = String(entry.get("reaction_state", "")).strip_edges().to_lower()
+	var runtime_visual_state: String = String(entry.get("runtime_visual_state", "")).strip_edges().to_lower()
+	var is_next: bool = bool(entry.get("is_next", false))
+	match object_kind:
+		"door":
+			if runtime_visual_state == "open" or reaction_state == "open":
+				return "OPEN"
+			if runtime_visual_state == "half" or reaction_state == "active":
+				return "OPENING"
+			if ["locked", "blocked"].has(reaction_state):
+				return "LOCK"
+			if reaction_state == "ready" or is_next:
+				return "READY"
+			return "CLOSED"
+		"computer":
+			if runtime_visual_state == "controlled" or reaction_state == "controlled":
+				return "CTRL"
+			if runtime_visual_state == "active" or reaction_state == "active":
+				return "LINK"
+			if ["locked", "blocked"].has(reaction_state):
+				return "BLOCK"
+			if reaction_state == "ready" or is_next:
+				return "READY"
+			return "WAIT"
+		"cargo":
+			if reaction_state == "departed":
+				return "DEPARTED"
+			if reaction_state == "active":
+				return "HOLD"
+			if ["locked", "blocked"].has(reaction_state):
+				return "BLOCK"
+			if reaction_state == "ready" or is_next:
+				return "READY"
+			return "WAIT"
+		"aa":
+			if reaction_state == "disabled":
+				return "OK"
+			if reaction_state == "active":
+				return "ACTIVE"
+			if ["locked", "blocked"].has(reaction_state):
+				return "BLOCK"
+			if reaction_state == "ready" or is_next:
+				return "READY"
+			return "WAIT"
+		_:
+			if reaction_state.is_empty():
+				return "WAIT"
+			return reaction_state.to_upper()
+
+
+func _station_route_next_token(gate_snapshot: Dictionary) -> String:
+	if bool(gate_snapshot.get("all_gates_complete", false)):
+		return "DONE"
+	var step_id: String = String(gate_snapshot.get("next_step_id", "")).strip_edges().to_lower()
+	match step_id:
+		"disable_air_defense":
+			return "AA"
+		"open_station_door":
+			return "DOOR"
+		"occupy_station_computer":
+			return "COM"
+		"cargo_touchdown_extract":
+			return "CARGO"
+		_:
+			if step_id.contains("door"):
+				return "DOOR"
+			if step_id.contains("computer"):
+				return "COM"
+			if step_id.contains("cargo"):
+				return "CARGO"
+			if step_id.contains("air") or step_id.contains("aa"):
+				return "AA"
+			return "WAIT"
 
 
 func _build_host_client_f6_compact_act_line(interaction_density: Dictionary, fallback_line: String) -> String:
@@ -18312,6 +18460,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"build_snapshot",
 		mission_interaction_visual_state
 	)).duplicate(true)
+	var station_route_run_readout: Dictionary = _build_station_route_run_readout_snapshot(mission_interaction_objective_gate, mission_interaction_object_reaction)
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -18410,6 +18559,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_interaction_object_reaction": mission_interaction_object_reaction,
 		"mission_interaction_object_reaction_count": int(mission_interaction_object_reaction.get("object_reaction_count", 0)),
 		"mission_interaction_object_reaction_summary": String(mission_interaction_object_reaction.get("summary", "")),
+		"station_route_run_readout": station_route_run_readout,
+		"station_route_run_line": String(station_route_run_readout.get("compact_line", "")),
+		"station_route_run_next_token": String(station_route_run_readout.get("next_token", "")),
+		"station_route_run_line_within_limit": bool(station_route_run_readout.get("line_within_limit", false)),
 		"cover_effectiveness_readout": cover_effectiveness_readout,
 		"cover_effectiveness_text": String(cover_effectiveness_readout.get("readout_text", "")),
 		"enemy_limbo_behavior": get_enemy_limbo_behavior_snapshot(),

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_716 - Station Route Run Readout Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_716_station_route_run_readout_polish.md`, `docs/tasks/TASK_712_station_route_host_client_acceptance_packet.md`, `docs/tasks/TASK_714_station_route_multiplayer_scenario_guard.md`, `docs/tasks/TASK_715_station_route_empty_eventlog_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: `get_command_feedback_snapshot()` exportiert einen neuen read-only `station_route_run_readout` aus Objective-Gate- und Object-Reaction-Snapshots.
+- Stand: Die sichtbare Route-Line fasst AA, Door, Computer, Cargo und `NEXT` in einer kompakten HUD-Spur zusammen.
+- Stand: Command-Feedback-Label und Mission-Control-Density-Line koennen die Route-Line anzeigen, ohne Gameplay- oder Multiplayer-Wahrheit zu setzen.
+- Risiken/offen: Der echte Host/Client-Klicklauf bleibt offen; TASK_716 macht die Route nur besser lesbar und testbar.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_716_station_route_run_readout_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_714_station_route_multiplayer_scenario_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_715_station_route_empty_eventlog_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_717 - Station Route Real Host/Client Click Findings oder sichtbarer Door/GO/Reject-Polish aus dem echten Fensterlauf.
+
 ### TASK_715 - Station Route Empty Event Log Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_715_station_route_empty_eventlog_polish.md`, `docs/tasks/TASK_714_station_route_multiplayer_scenario_guard.md`, `docs/tasks/TASK_366_tactical_event_log_hud_panel.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`

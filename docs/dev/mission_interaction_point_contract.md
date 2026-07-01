@@ -312,6 +312,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der eingeklappte Empty-State muss `empty_state_collapsed = true`, `visibility_mode = collapsed_empty`, `visible = false` und `mouse_filter = MOUSE_FILTER_IGNORE` im Snapshot melden.
 - Sobald gefilterte Event-Eintraege existieren, muss das Panel wieder sichtbar werden und den bestehenden Scroll-/Filterpfad benutzen.
 - Das Einklappen ist reines UI-Feedback. Es darf keine Tactical-Event-Wahrheit, keinen Mission-State, keinen Multiplayer-State und keine SimulationRoot-Daten mutieren.
+
+## Station Route Run Readout Polish
+- `get_command_feedback_snapshot()` darf eine kompakte `station_route_run_readout`-Fassade exportieren, die Objective-Gate- und Object-Reaction-Snapshots nur read-only zusammenfasst.
+- Die Route-Line muss AA, Door, Computer, Cargo und ein `NEXT`-Token nennen, damit der Commander die Stationssequenz im HUD als eine Kette lesen kann.
+- Door-, Computer- und Cargo-Status duerfen nur aus bestehenden Runtime-/Interaction-Snapshots abgeleitet werden; die Readout-Line darf keine Gates setzen, keine Interactions starten und keine Multiplayer-Wahrheit schreiben.
+- Die sichtbare Command-Feedback-Zeile und die Mission-Control-Density-Line duerfen diese Route-Line anzeigen, solange `read_only = true` und `ui_sets_gameplay_truth = false` erhalten bleiben.
 - Der Guard darf Server-/Client-Snapshot-Annahme pruefen, aber keine echte Fenster-Sichtbarkeit, keine Bedienqualitaet und keinen abgeschlossenen Host/Client-Playtest behaupten.
 - Das Manifest bleibt read-only, fordert weiter manuelle Review und setzt keine Gameplay-Wahrheit.
 
