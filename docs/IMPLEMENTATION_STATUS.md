@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_733 - Station Scenario HUD Overlap Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_733_station_scenario_hud_overlap_pass.md`, `docs/tasks/TASK_732_station_scenario_route_cue_polish.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Die Mission-HUD-Density priorisiert die `CUE ...`-Zeile in der ACT-Flaeche, waehrend die volle Route im Mission-Identity-Body bleibt und als Source im Snapshot erhalten ist.
+- Stand: `get_station_scenario_hud_overlap_pass_snapshot()` exportiert read-only, ob Route-in-Identity, Cue-in-ACT, Zeichenbudget und sichtbarer Linecount eingehalten werden.
+- Risiken/offen: Der Pass reduziert Textdichte, ersetzt aber keinen echten TASK_727-F6-/Host-Client-Workbench-Export.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_733_station_scenario_hud_overlap_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_732_station_scenario_route_cue_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_730_station_scenario_targeted_playtest_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench mit entdichteter ACT-Zeile wirklich ausfuellen; danach TASK_734 - Station Scenario Performance Feel Pass, falls echte Notizen Performance/Reaktionszeit markieren.
+
 ### TASK_732 - Station Scenario Route Cue Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_732_station_scenario_route_cue_polish.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_731_station_scenario_workbench_export_review.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

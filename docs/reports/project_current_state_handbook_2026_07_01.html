@@ -81,8 +81,8 @@
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-07-01</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Abschluss: TASK_732</span>
-      <span class="pill warn">Naechster Fokus: TASK_727 mit Route-Cue im echten Fenster ausfuellen</span>
+      <span class="pill">Letzter Abschluss: TASK_733</span>
+      <span class="pill warn">Naechster Fokus: TASK_727 mit entdichteter ACT-Zeile ausfuellen</span>
       <span class="pill good">TASK_706 Door Layout/Visual Polish</span>
       <span class="pill good">TASK_707 Door/Computer/Cargo Smoke</span>
       <span class="pill good">TASK_708 Station Route Visual Evidence</span>
@@ -110,6 +110,7 @@
       <span class="pill good">TASK_730 Header Route Polish</span>
       <span class="pill good">TASK_731 Export Review</span>
       <span class="pill good">TASK_732 Route Cue Polish</span>
+      <span class="pill good">TASK_733 HUD Overlap Pass</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -129,7 +130,7 @@
         <article class="card wide">
           <h2>Kurzer Stand</h2>
           <p>Der spielbare Kern ist nicht mehr nur Idee: Homebase, Readiness, Dropship/Insertion, Mission-HUD, Fireteam-Orders, Objective-Route, Debrief und Homebase-Return sind als Review-Spine vorhanden. Die aktuelle Spitze ist die Door-/Station-Interaktion, weil sie Singleplayer-Lesbarkeit und Host/Client-Authority zusammenbringt.</p>
-          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync. TASK_715 entfernt den leeren Event-Log-Klotz aus dem initialen Fensterblick. TASK_716 fasst AA, Door, Computer, Cargo und NEXT als kurze Route-Line im HUD zusammen. TASK_717 fuehrt echten Capture-Stand und Route-Line zu einem read-only Klickbefund zusammen. TASK_718 glaettet Door/GO/Reject-Sprache und Buttontext fuer den echten Fensterblick. TASK_719 verhindert, dass stale Capture-Erwartungen nach dem Text-Polish als aktueller Fensterbefund gelesen werden. TASK_720 hat den echten Capture erneut geschrieben. TASK_721 wertet die frischen Host-/Client-Crops als Sichtbefund aus und meldet `needs_visual_polish`. TASK_722 poliert die konkreten HUD-Reibungen: kleinere Fireteam-Mini-Spalte, kompaktere Karten, versteckter leerer Nav-Timer und besser lesbare Station-/Route-Labels mit Backplates. TASK_723 schreibt den Nach-TASK_722-Recapture als Review-Gate fest und meldet bewusst `needs_visual_review`, bis der neue Fensterblick menschlich abgenommen ist. TASK_724 setzt daraus kleinen Folge-Polish um: schmalere TopNav, niedrigere Fireteam-Mini-Spalte und mehr Label-Abstand. TASK_725 bewertet den frischen Nach-TASK_724-Capture und akzeptiert den kleinen Station-Route-Multiplayer-Slice eng fuer den naechsten Playtest-Slice. TASK_726 macht daraus wieder Spiel: ein One-Screen-Szenario mit AA, Door, Computer und Cargo als pruefbarer Runtime-Drill. TASK_727 stellt dafuer die sichtbare F6-/Host-Client-Playtest-Workbench bereit. TASK_728 verdichtet diese Notizen als Findings-Gate. TASK_729 macht den sichtbaren Lauf reproduzierbar startbar. TASK_730 spiegelt die Route im Mission-Identity-Header. TASK_731 verhindert stale Follow-up-Routing. TASK_732 ergaenzt die fehlende Spielerhandlung: `CUE ...` sagt direkt, ob Annaehern, BREACH + GO, Halten oder Debrief dran ist.</div>
+          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync. TASK_715 entfernt den leeren Event-Log-Klotz aus dem initialen Fensterblick. TASK_716 fasst AA, Door, Computer, Cargo und NEXT als kurze Route-Line im HUD zusammen. TASK_717 fuehrt echten Capture-Stand und Route-Line zu einem read-only Klickbefund zusammen. TASK_718 glaettet Door/GO/Reject-Sprache und Buttontext fuer den echten Fensterblick. TASK_719 verhindert, dass stale Capture-Erwartungen nach dem Text-Polish als aktueller Fensterbefund gelesen werden. TASK_720 hat den echten Capture erneut geschrieben. TASK_721 wertet die frischen Host-/Client-Crops als Sichtbefund aus und meldet `needs_visual_polish`. TASK_722 poliert die konkreten HUD-Reibungen: kleinere Fireteam-Mini-Spalte, kompaktere Karten, versteckter leerer Nav-Timer und besser lesbare Station-/Route-Labels mit Backplates. TASK_723 schreibt den Nach-TASK_722-Recapture als Review-Gate fest und meldet bewusst `needs_visual_review`, bis der neue Fensterblick menschlich abgenommen ist. TASK_724 setzt daraus kleinen Folge-Polish um: schmalere TopNav, niedrigere Fireteam-Mini-Spalte und mehr Label-Abstand. TASK_725 bewertet den frischen Nach-TASK_724-Capture und akzeptiert den kleinen Station-Route-Multiplayer-Slice eng fuer den naechsten Playtest-Slice. TASK_726 macht daraus wieder Spiel: ein One-Screen-Szenario mit AA, Door, Computer und Cargo als pruefbarer Runtime-Drill. TASK_727 stellt dafuer die sichtbare F6-/Host-Client-Playtest-Workbench bereit. TASK_728 verdichtet diese Notizen als Findings-Gate. TASK_729 macht den sichtbaren Lauf reproduzierbar startbar. TASK_730 spiegelt die Route im Mission-Identity-Header. TASK_731 verhindert stale Follow-up-Routing. TASK_732 ergaenzt die fehlende Spielerhandlung: `CUE ...` sagt direkt, ob Annaehern, BREACH + GO, Halten oder Debrief dran ist. TASK_733 entdichtet die ACT-Zeile: volle Route oben, konkrete Cue unten.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -166,6 +167,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_730_done"> TASK_730 Header Route Polish vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_731_done"> TASK_731 Workbench Export Review vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_732_done"> TASK_732 Route Cue Polish vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_733_done"> TASK_733 HUD Overlap Pass vorhanden</label>
         </article>
         <article class="card full">
           <h2>Systemkarte</h2>
@@ -174,7 +176,7 @@
             <tbody>
               <tr><td>Spiel-Flow</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Spine pruefbar.</td><td>Der echte Spielerblick muss weiter in kleinen Fenster-/Playtest-Paketen belegt werden.</td><td>Mini-Szenario mit wenigen klaren Interaktionen erneut spielen.</td></tr>
               <tr><td>Mission</td><td>Fireteam-Auswahl, Move/Defend/Fire, Threat-Preview, Contacts, Objective-Gates, Door-Hook, Empty-Event-Log-Polish und Route-Readout sind verbunden.</td><td>Station-/Door-Objekte muessen optisch noch eindeutiger werden.</td><td>Echter Door/Computer/Cargo-Klicklauf.</td></tr>
-              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung, technischer Scenario-Guard, HUD-Route-Line, Two-Window-Visual-Findings, TASK_722-HUD-Polish, TASK_723-Recapture-Gate, TASK_724-Folgepolish, TASK_725-Acceptance-Gate, TASK_726-Szenario-Drill, TASK_727-Playtest-Workbench, TASK_728-Findings-Gate, TASK_729-Run-Packet, TASK_730-Header-Route-Polish, TASK_731-Export-Review und TASK_732-Route-Cue existieren.</td><td>Der Drill ist runtime-pruefbar, startbar und sagt den naechsten Auftrag, aber noch nicht per menschlichem Workbench-Export abgenommen.</td><td>TASK_727-Workbench mit verbessertem Cue ausfuellen; danach TASK_733 oder konkreten Polish aus echten Notizen schneiden.</td></tr>
+              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung, technischer Scenario-Guard, HUD-Route-Line, Two-Window-Visual-Findings, TASK_722-HUD-Polish, TASK_723-Recapture-Gate, TASK_724-Folgepolish, TASK_725-Acceptance-Gate, TASK_726-Szenario-Drill, TASK_727-Playtest-Workbench, TASK_728-Findings-Gate, TASK_729-Run-Packet, TASK_730-Header-Route-Polish, TASK_731-Export-Review, TASK_732-Route-Cue und TASK_733-HUD-Entdichtung existieren.</td><td>Der Drill ist runtime-pruefbar, startbar und sagt den naechsten Auftrag ohne doppelte Route in der ACT-Zeile, aber noch nicht per menschlichem Workbench-Export abgenommen.</td><td>TASK_727-Workbench mit entdichteter ACT-Zeile ausfuellen; danach Performance oder Command-Feedback aus echten Notizen schneiden.</td></tr>
               <tr><td>Editor</td><td>Map-Editor und Builder-Workbench haben Paletten, Snapping, Presets und Interaction-Bindings.</td><td>Bediengefuehl und Asset-Auswahl bleiben langfristig ein eigener UX-Block.</td><td>Erst nach spielbarer Mission weiterpolieren.</td></tr>
               <tr><td>Export</td><td>Export-Templates und Package-Hygiene sind geprueft.</td><td>Warnungen koennen wiederkommen, sobald Assets/Plugins wachsen.</td><td>Bei Release-Kandidat erneut Export-Smoke laufen lassen.</td></tr>
             </tbody>
@@ -273,7 +275,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster Griff</h2>
-          <p>Aktuell sinnvoll: TASK_727-Workbench oeffnen, den sichtbaren Host/Client-Lauf mit dem Station-Scenario-Arg wirklich spielen und den JSON-Export ausfuellen. TASK_732 macht den naechsten Auftrag im Fenster lesbarer; TASK_731 prueft danach weiter, ob daraus TASK_733+ Polish oder ein naechster spielbarer Slice folgt.</p>
+          <p>Aktuell sinnvoll: TASK_727-Workbench oeffnen, den sichtbaren Host/Client-Lauf mit dem Station-Scenario-Arg wirklich spielen und den JSON-Export ausfuellen. TASK_733 reduziert die Textdichte im ACT-Bereich; TASK_731 prueft danach weiter, ob daraus TASK_734+ Polish oder ein naechster spielbarer Slice folgt.</p>
           <div class="callout warning">Nicht jetzt: grosses neues Missionssystem, Ammo-Runner, tiefe Economy oder Editor-Umbau. Erst muss der kompakte AA/DOOR/COM/CARGO-Drill in der echten Fensteransicht tragen und als JSON-Notiz exportiert werden.</div>
         </article>
         <article class="card">
@@ -308,7 +310,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-07-01: Neuer Ist-Stand-/Handbuch-Bericht angelegt. Der spielbare Schwerpunkt liegt weiter auf dem kleinen Stationslauf: Door nutzen, Computer sichern, Cargo landen lassen, alles mit Host/Client-Authority und lesbarem HUD. TASK_718 hat die sichtbare Door-Sprache auf DOOR B-&gt;GO und DOOR OPEN gekuerzt. TASK_719 erkennt stale Capture-Erwartungen. TASK_720 hat den Host/Client-Capture erneut geschrieben und TASK_719/TASK_717/TASK_718 danach gruen ausgefuehrt. TASK_721 hat Host-/Client-Crops sichtbar bewertet: Der Pfad ist technisch bereit, aber vor Akzeptanz braucht er HUD-Visual-Polish. TASK_722 hat diese konkreten HUD-Reibungen poliert. TASK_723 hat den Nach-TASK_722-Recapture als `needs_visual_review` festgehalten. TASK_724 hat daraus einen kleinen Folge-Polish gemacht und meldet wieder `ready_for_recapture`. TASK_725 hat den frischen Recapture als `accepted_for_next_slice` festgehalten: gut genug fuer den naechsten kleinen Stations-Playtest, aber keine Gesamtspiel-Abnahme. TASK_726 hat daraus ein konkretes One-Screen-Szenario gebaut: AA -> Door -> Computer -> Cargo, Alpha/Bravo-ready und runtime-geprueft. TASK_727 hat die sichtbare F6-/Host-Client-Playtest-Workbench ergaenzt. TASK_728 verdichtet diese Notizen als Findings-Gate. TASK_729 schreibt ein sichtbares Run-Packet mit Scenario-Arg, Workbench-URI, Manifeststatus und Startkommandos. TASK_730 hat den echten Host/Client-Capture gegen dieses Szenario genutzt und den ersten HUD-Blick verbessert: Die Route wird im Mission-Identity-Body sichtbar. TASK_731 prueft den Workbench-Exportstatus und routet echte Follow-up-Flags auf neue TASK_732+ Slices. TASK_732 setzt den ersten dieser Slices um: Die Station-Route hat jetzt eine eigene `CUE ...`-Zeile fuer Annaehern, BREACH + GO, Halten oder Debrief, read-only aus den bestehenden Gate-/Interaction-Snapshots.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-07-01: Neuer Ist-Stand-/Handbuch-Bericht angelegt. Der spielbare Schwerpunkt liegt weiter auf dem kleinen Stationslauf: Door nutzen, Computer sichern, Cargo landen lassen, alles mit Host/Client-Authority und lesbarem HUD. TASK_718 hat die sichtbare Door-Sprache auf DOOR B-&gt;GO und DOOR OPEN gekuerzt. TASK_719 erkennt stale Capture-Erwartungen. TASK_720 hat den Host/Client-Capture erneut geschrieben und TASK_719/TASK_717/TASK_718 danach gruen ausgefuehrt. TASK_721 hat Host-/Client-Crops sichtbar bewertet: Der Pfad ist technisch bereit, aber vor Akzeptanz braucht er HUD-Visual-Polish. TASK_722 hat diese konkreten HUD-Reibungen poliert. TASK_723 hat den Nach-TASK_722-Recapture als `needs_visual_review` festgehalten. TASK_724 hat daraus einen kleinen Folge-Polish gemacht und meldet wieder `ready_for_recapture`. TASK_725 hat den frischen Recapture als `accepted_for_next_slice` festgehalten: gut genug fuer den naechsten kleinen Stations-Playtest, aber keine Gesamtspiel-Abnahme. TASK_726 hat daraus ein konkretes One-Screen-Szenario gebaut: AA -> Door -> Computer -> Cargo, Alpha/Bravo-ready und runtime-geprueft. TASK_727 hat die sichtbare F6-/Host-Client-Playtest-Workbench ergaenzt. TASK_728 verdichtet diese Notizen als Findings-Gate. TASK_729 schreibt ein sichtbares Run-Packet mit Scenario-Arg, Workbench-URI, Manifeststatus und Startkommandos. TASK_730 hat den echten Host/Client-Capture gegen dieses Szenario genutzt und den ersten HUD-Blick verbessert: Die Route wird im Mission-Identity-Body sichtbar. TASK_731 prueft den Workbench-Exportstatus und routet echte Follow-up-Flags auf neue TASK_732+ Slices. TASK_732 setzt den ersten dieser Slices um: Die Station-Route hat jetzt eine eigene `CUE ...`-Zeile fuer Annaehern, BREACH + GO, Halten oder Debrief, read-only aus den bestehenden Gate-/Interaction-Snapshots. TASK_733 reduziert HUD-Dopplung: Die volle Route bleibt oben im Mission-Identity-Body, die ACT-Zeile priorisiert nur die konkrete Cue.</div>
         </article>
         <article class="card full">
           <h2>TASK_708 Evidence</h2>
@@ -571,6 +573,17 @@
           <input readonly value="scripts/tests/task_732_station_scenario_route_cue_polish.gd" data-export-key="station_scenario_route_cue_polish.verifier_path">
           <textarea data-export-key="station_scenario_route_cue_polish.notes" placeholder="Beim echten TASK_727-Lauf pruefen: versteht man die Cue-Line sofort?"></textarea>
         </article>
+        <article class="card full">
+          <h2>TASK_733 - Station Scenario HUD Overlap Pass</h2>
+          <p>Der HUD-Overlap-Pass vermeidet doppelte Routentexte: Die komplette Route bleibt im Identity-Body, die knappe ACT-Zeile zeigt die konkrete Cue.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_hud_overlap_pass.route_in_identity_body"> Volle Route bleibt im Identity-Body</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_hud_overlap_pass.cue_in_act_line"> Cue-Line steht in der ACT-Flaeche</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_hud_overlap_pass.route_deferred_to_identity"> Route-Line wird aus ACT entdoppelt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_hud_overlap_pass.read_only"> Snapshot bleibt read-only</label>
+          <input readonly value="station_route_identity_body_act_cue_v1" data-export-key="station_scenario_hud_overlap_pass.density_policy_id">
+          <input readonly value="scripts/tests/task_733_station_scenario_hud_overlap_pass.gd" data-export-key="station_scenario_hud_overlap_pass.verifier_path">
+          <textarea data-export-key="station_scenario_hud_overlap_pass.notes" placeholder="Beim echten TASK_727-Lauf pruefen: wirkt die ACT-Zeile jetzt ruhig genug?"></textarea>
+        </article>
         <article class="card half">
           <h2>Entscheidung</h2>
           <label class="checkline"><input type="radio" name="next_path" value="door_polish" data-export-key="decision.next_path"> Door Polish zuerst</label>
@@ -627,7 +640,7 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_732 - Station Scenario Route Cue Polish",
+            latest_completed_task: "TASK_733 - Station Scenario HUD Overlap Pass",
             latest_completed_visual_task: "TASK_706 - Mission Door Layout/Visual Polish",
             latest_completed_flow_task: "TASK_707 - Mission Door/Computer/Cargo Smoke",
             latest_completed_evidence_task: "TASK_708 - Station Route Visual Evidence",
@@ -655,7 +668,8 @@
             latest_completed_station_scenario_targeted_polish_task: "TASK_730 - Station Scenario Targeted Playtest Polish",
             latest_completed_station_scenario_workbench_export_review_task: "TASK_731 - Station Scenario Workbench Export Review",
             latest_completed_station_scenario_route_cue_polish_task: "TASK_732 - Station Scenario Route Cue Polish",
-            recommended_next_task: "TASK_727 visible playtest export with route cue, then TASK_733 HUD overlap or TASK_736 command feedback polish from real notes",
+            latest_completed_station_scenario_hud_overlap_pass_task: "TASK_733 - Station Scenario HUD Overlap Pass",
+            recommended_next_task: "TASK_727 visible playtest export with deduped ACT cue, then TASK_734 performance feel or TASK_736 command feedback polish from real notes",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
