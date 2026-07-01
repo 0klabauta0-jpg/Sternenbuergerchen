@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_770 - Station Reentry Host Client Next Order Sync
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_770_station_reentry_host_client_next_order_sync.md`, `docs/tasks/TASK_769_station_reentry_performance_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryHostClientNextOrderSync` vergleicht Host- und Client-Views auf denselben sichtbaren Next-Order-Text, dieselbe Station-Route und denselben Cue.
+- Stand: `get_station_reentry_host_client_next_order_sync_snapshot()` haengt den Contract an den bestehenden Reentry-Performance-Snapshot, ohne GO oder Commands auszufuehren.
+- Risiken/offen: Kein Ersatz fuer echten Zwei-Fenster-Playtest; TASK_770 beweist den Contract-Gleichstand vor dem sichtbaren Export.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_770_station_reentry_host_client_next_order_sync.gd`, TASK_769 Regression, `git diff --check`.
+- Naechster Schritt: TASK_771 - Station Reentry Visible Host Client Playtest Export.
+
 ### TASK_769 - Station Reentry Performance Feel Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_769_station_reentry_performance_feel_pass.md`, `docs/tasks/TASK_768_station_reentry_first_mission_preview_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/performance/performance_regression_gate.md`, `data/performance_budget_contract.json`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
