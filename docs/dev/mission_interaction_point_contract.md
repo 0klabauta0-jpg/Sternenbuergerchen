@@ -396,6 +396,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `ready_for_f6_host_client_playtest` bedeutet nur: Daten-/Runtime-Kette ist bereit fuer einen sichtbaren F6/Host-Client-Playtest. Es ist kein Balancing- oder Release-Gate.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario F6/Host Client Playtest Notes
+- `StationScenarioF6HostClientPlaytestNotes` bewertet das TASK_726-Drillmanifest zusammen mit einem optionalen menschlichen Workbench-Export read-only.
+- Ohne gueltiges TASK_726-Manifest blockiert der Snapshot. Ohne bewussten Workbench-Export bleibt er `needs_visible_playtest`.
+- Required-Checks betreffen echtes F6-Fenster, Host/Client-Zwei-Fenster-Lauf, AA -> Door -> Computer -> Cargo-Lesbarkeit, Fireteam-Order-Tempo, Performance, HUD-Overlap und Wrong-Team-/Bravo-Kontext.
+- Follow-up-Flags duerfen Route-/HUD-/Performance-/Sync-/Command-Feedback-Polish oder alte Harness-Modernisierung empfehlen, setzen aber keine Runtime-, Door-, Objective- oder Multiplayer-Wahrheit.
+- Die HTML-Workbench `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html` exportiert lokale JSON-Arbeitsnotizen; diese Notizen sind Review-Evidence, keine Projektdateien und keine Gameplay-Wahrheit.
+- `needs_followup_polish` und `ready_for_findings` empfehlen TASK_728, damit echte Notizen zuerst als Findings verdichtet werden, bevor Code-Polish daraus entsteht.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

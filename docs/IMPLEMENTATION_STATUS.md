@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_727 - Station Scenario F6/Host Client Playtest Notes
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_726_one_screen_multiplayer_station_scenario_drill.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioF6HostClientPlaytestNotes` konsumiert das TASK_726-Drillmanifest read-only und unterscheidet `blocked`, `needs_visible_playtest`, `needs_followup_polish` und `ready_for_findings`.
+- Stand: Neue HTML-Workbench `station_scenario_f6_host_client_playtest_notes_2026_07_01.html` sammelt Required-Checks, Follow-up-Flags und Notizen fuer sichtbaren F6-/Host-Client-Lauf, Route, HUD, Performance, Command-Feedback und Teamkontext.
+- Stand: Das Manifest `tmp/station_scenario_f6_host_client_playtest_notes.json` meldet bewusst `needs_visible_playtest`, solange kein menschlicher Workbench-Export den Lauf als erledigt markiert.
+- Risiken/offen: TASK_727 ist kein echter Playtest und keine Balancing-Abnahme. Separat offen bleiben die alten Pre-Boot-Harnesses TASK_707/TASK_714, die ohne Verlust ihrer Controller-Bindings modernisiert werden sollten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_726_one_screen_multiplayer_station_scenario_drill.gd`, `git diff --check`.
+- Naechster Schritt: TASK_728 - Station Scenario Playtest Findings.
+
 ### TASK_726 - One-Screen Multiplayer Station Scenario Drill
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_726_one_screen_multiplayer_station_scenario_drill.md`, `docs/tasks/TASK_725_station_route_host_client_recapture_acceptance_review.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
