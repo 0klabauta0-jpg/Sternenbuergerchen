@@ -75,7 +75,8 @@ git checkout -b batch/<batch-name>
 - TASK_750 - Station Homebase Host/Client Recapture Packet (implementiert)
 - TASK_751 - Station Homebase Capture Metadata Hook (implementiert)
 - TASK_752 - Station Homebase Recapture Workbench Prefill (implementiert)
-- Naechster Schritt: echten Host/Client-Fenster-Recapture mit dem neuen Homebase-Abschluss in der Workbench ausfuehren/exportieren und Findings oder kleinen Panel-Visual-Polish daraus ableiten.
+- TASK_753 - Station Homebase Recapture Review Gate (implementiert)
+- Naechster Schritt: echten Host/Client-Fenster-Recapture mit dem neuen Homebase-Abschluss in der Workbench ausfuehren/exportieren und TASK_754 - Station Homebase Recapture Findings oder kleinen Panel-Visual-Polish daraus ableiten.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
