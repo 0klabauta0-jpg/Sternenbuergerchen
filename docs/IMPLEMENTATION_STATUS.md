@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_767 - Station Reentry Visible Playtest Review Gate
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_767_station_reentry_visible_playtest_review_gate.md`, `docs/tasks/TASK_761_station_reentry_visible_playtest_findings.md`, `docs/tasks/TASK_766_station_reentry_start_permission_bridge_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`
+- Stand: `StationReentryPlaytestFindings` routet offene sichtbare Reentry-Reviews jetzt auf TASK_767 statt zurueck auf TASK_761.
+- Stand: First-Order-/Performance-/Host-Client-Folgeflags routen auf TASK_768/TASK_769/TASK_770, damit erledigte Brueckenpolishes nicht erneut als naechster Schritt erscheinen.
+- Risiken/offen: Der echte Zwei-Fenster-Reentry-Playtest bleibt offen; TASK_767 macht das Review-Gate aktuell und verhindert stale Folgerouten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_767_station_reentry_visible_playtest_review_gate.gd`, TASK_761/TASK_760/TASK_766 Regressionen, `git diff --check`.
+- Naechster Schritt: Sichtbaren Reentry-Playtest ausfuehren/exportieren oder TASK_768 - Station Reentry First Mission Preview Polish aus konkreten Befunden schneiden.
+
 ### TASK_766 - Station Reentry Start Permission Bridge Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_766_station_reentry_start_permission_bridge_polish.md`, `docs/tasks/TASK_765_station_reentry_dropship_boarding_bridge_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: `get_station_homebase_return_panel_polish_snapshot()` exportiert Startfreigabe-Text, erwarteten Text, Start-State, Detail, `can_start`, Startbutton-Text/-Disabled-State, Style-ID, Sichtbarkeit, Bounds und Read-only-Status.
 - Risiken/offen: Der sichtbare Zwei-Fenster-Reentry-Playtest bleibt offen; TASK_766 poliert nur die Startfreigabe-Lesbarkeit im Homebase-Return-Panel.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_766_station_reentry_start_permission_bridge_polish.gd`, TASK_765/TASK_764/TASK_763/TASK_755 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_767 - Station Reentry Visible Playtest Execute/Review oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+- Naechster Schritt: TASK_767 ist umgesetzt; danach sichtbaren Reentry-Playtest ausfuehren/exportieren oder TASK_768 - Station Reentry First Mission Preview Polish aus konkreten Befunden schneiden.
 
 ### TASK_765 - Station Reentry Dropship Boarding Bridge Polish
 - Status: implementiert im Arbeitsstand
