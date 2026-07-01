@@ -634,6 +634,11 @@ TASK_759 legt nach akzeptiertem Homebase-Return den naechsten kleinen spielbaren
 
 Erwartete Struktur: `station_next_playtest_target` enthaelt `schema = sternenbuergerchen.station_slice_next_playtest_target.v1`, `task_id = TASK_759`, `source_task_id = TASK_758`, `source_acceptance_status`, `status`, `summary`, `target_id = station_reentry_playtest`, `target_title`, `scenario_path`, `focus`, `runbook_steps`, `multiplayer_checks`, `non_goals`, `ready_for_run_packet`, `recommended_next_task`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`. Statuswerte: `blocked_until_homebase_return_accepted`, `ready_for_station_reentry_playtest`.
 
+## Station-Reentry-Playtest-Run-Packet (TASK_760)
+TASK_760 macht den TASK_759-Ziel-Slice reproduzierbar startbar. Das Packet darf Szenario, Workbench, Start-/Capture-Kommandos, Runbook-Schritte, Multiplayer-Checks und Required-Manual-Checks nennen. Es darf keinen sichtbaren Playtest als erledigt markieren und keine Runtime-UI, Navigation, Commands oder Gameplay-Wahrheit erzeugen.
+
+Erwartete Struktur: `tmp/station_reentry_playtest_run_packet.json` enthaelt `schema = sternenbuergerchen.station_reentry_playtest_run_packet.v1`, `task_id = TASK_760`, `source_task_id = TASK_759`, `target_id = station_reentry_playtest`, `target_title`, `status`, `scenario_path`, `scenario_arg`, `workbench_path`, `workbench_file_uri`, `focus`, `runbook_steps`, `multiplayer_checks`, `required_manual_checks`, `commands.launch_windows`, `commands.capture_windows`, `commands.open_workbench`, `manual_review_required = true`, `manual_review_done = false`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`. Statuswerte: `ready_to_run_station_reentry_playtest`, `blocked`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.

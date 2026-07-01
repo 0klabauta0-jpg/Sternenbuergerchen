@@ -84,6 +84,7 @@
       <span class="pill warn">Refresh: TASK_757</span>
       <span class="pill warn">Acceptance: TASK_758</span>
       <span class="pill warn">Next Target: TASK_759</span>
+      <span class="pill warn">Run Packet: TASK_760</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -204,6 +205,19 @@
           <textarea data-export-key="station_scenario_playtest.notes.station_next_playtest_target" placeholder="Naechster Ziel-Slice: Was soll im Reentry-Fenster besonders beobachtet werden?"></textarea>
         </article>
         <article class="card full">
+          <h2>Station Reentry Run Packet</h2>
+          <p>Dieses Packet macht den Reentry-Ziel-Slice startbar: Host/Client-Fenster, Capture, Workbench und Pflichtchecks.</p>
+          <input readonly value="TASK_760" data-export-key="station_scenario_playtest.reentry_packet.task_id">
+          <input readonly value="sternenbuergerchen.station_reentry_playtest_run_packet.v1" data-export-key="station_scenario_playtest.reentry_packet.schema">
+          <input readonly value="tmp/station_reentry_playtest_run_packet.json" data-export-key="station_scenario_playtest.reentry_packet.packet_path">
+          <input readonly value="station_reentry_playtest" data-export-key="station_scenario_playtest.reentry_packet.target_id">
+          <input readonly value="ready_to_run_station_reentry_playtest" data-export-key="station_scenario_playtest.reentry_packet.ready_status">
+          <input readonly value="powershell -ExecutionPolicy Bypass -File scripts/tools/prepare_station_reentry_playtest_run.ps1" data-export-key="station_scenario_playtest.reentry_packet.prepare_command">
+          <input readonly value="powershell -ExecutionPolicy Bypass -File scripts/tools/prepare_station_reentry_playtest_run.ps1 -LaunchWindows -OpenWorkbench" data-export-key="station_scenario_playtest.reentry_packet.launch_command">
+          <input readonly value="TASK_761 - Station Reentry Visible Playtest Findings" data-export-key="station_scenario_playtest.reentry_packet.ready_next_task">
+          <textarea data-export-key="station_scenario_playtest.notes.station_reentry_packet" placeholder="Reentry-Packet: Start/Capture/Workbench-Hinweise..."></textarea>
+        </article>
+        <article class="card full">
           <h2>Route</h2>
           <table>
             <thead><tr><th>Schritt</th><th>Spieler-Erwartung</th><th>Was notieren?</th></tr></thead>
@@ -261,7 +275,7 @@
         </article>
         <article class="card half">
           <h3>Naechster Task</h3>
-          <input value="TASK_759 - Station Slice Next Playtest Target" data-export-key="station_scenario_playtest.recommended_next_task">
+          <input value="TASK_760 - Station Reentry Playtest Run Packet" data-export-key="station_scenario_playtest.recommended_next_task">
         </article>
       </div>
     </section>
@@ -342,13 +356,14 @@
             findings_task_id: "TASK_754",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_759 - Station Slice Next Playtest Target",
+            latest_completed_task: "TASK_760 - Station Reentry Playtest Run Packet",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
             latest_homebase_findings_task: "TASK_757 - Station Homebase Recapture Findings Refresh",
             latest_homebase_acceptance_task: "TASK_758 - Station Homebase Return Acceptance Review",
             latest_station_next_playtest_target_task: "TASK_759 - Station Slice Next Playtest Target",
+            latest_station_reentry_run_packet_task: "TASK_760 - Station Reentry Playtest Run Packet",
             recommended_next_task: "TASK_755 - Station Homebase Return Panel Polish",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",

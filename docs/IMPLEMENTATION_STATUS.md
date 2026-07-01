@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_760 - Station Reentry Playtest Run Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_760_station_reentry_playtest_run_packet.md`, `docs/tasks/TASK_759_station_slice_next_playtest_target.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `scripts/tools/prepare_station_reentry_playtest_run.ps1` schreibt `tmp/station_reentry_playtest_run_packet.json` fuer den Ziel-Slice `station_reentry_playtest`.
+- Stand: Das Packet enthaelt Szenario, Workbench, Start-/Capture-Kommandos, Runbook-Schritte, Multiplayer-Checks und Required-Manual-Checks.
+- Stand: Workbench und aktueller HTML-Handbuchbericht enthalten TASK_760-Packet-Pfade und Startbefehle.
+- Risiken/offen: Das Packet startet nur auf explizites Flag und ersetzt keinen sichtbaren Playtest.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/prepare_station_reentry_playtest_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_760_station_reentry_playtest_run_packet.gd`, TASK_759/TASK_758 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_761 - Station Reentry Visible Playtest Findings.
+
 ### TASK_759 - Station Slice Next Playtest Target
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_759_station_slice_next_playtest_target.md`, `docs/tasks/TASK_758_station_homebase_return_acceptance_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
