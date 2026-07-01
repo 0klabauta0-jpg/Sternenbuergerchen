@@ -48,7 +48,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(status_text.contains("TASK_786 - Station Reentry Firefight Host Client Polished Surface Check"), "Implementation status tracks TASK_786")
 	_assert(roadmap_text.contains("TASK_786 - Station Reentry Firefight Host Client Polished Surface Check (implementiert)"), "Roadmap marks TASK_786 implemented")
 	_assert(contract_text.contains("Station-Reentry-Firefight-Host-Client-Polished-Surface-Check"), "Mission command feedback contract documents TASK_786")
-	_assert(report_text.contains("Aktueller Griff: TASK_786"), "Reentry handbook marks TASK_786 current")
+	_assert(report_text.contains("Aktueller Griff: TASK_787"), "Reentry handbook marks TASK_787 current")
 	_assert(report_text.contains("station_reentry_firefight_host_client_polished_surface_check.json"), "Reentry handbook names TASK_786 manifest")
 	_assert(report_text.contains('data-export-key="reentry_firefight_host_client_polished_surface.same_quick_action_labels"'), "Reentry handbook exports TASK_786 quick-action sync")
 	_assert(report_text.contains('data-export-key="reentry_firefight_host_client_polished_surface.peer_context_distinct"'), "Reentry handbook exports TASK_786 peer context")
