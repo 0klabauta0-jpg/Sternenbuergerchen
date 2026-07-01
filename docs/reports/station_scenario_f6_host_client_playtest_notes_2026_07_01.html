@@ -78,6 +78,7 @@
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Task: TASK_727</span>
       <span class="pill good">Prefill: TASK_741</span>
+      <span class="pill good">Prefill: TASK_752</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -97,13 +98,15 @@
         <article class="card wide">
           <h2>Was hier entschieden wird</h2>
           <p>Diese Seite beantwortet nur die Spielerfrage: Traegt der kompakte Stationslauf im echten Fenster? Sie ist kein Headless-Test und kein Runtime-Mutator.</p>
-          <div class="callout">TASK_726 meldet `ready_for_f6_host_client_playtest`. TASK_739 liefert den aktuellen Recapture-Kontext: Cue zuerst, neutrale Route danach, Host-/Client-Crops vorhanden. TASK_727 sammelt trotzdem erst den menschlichen Blick: Lesbarkeit, Tempo, Command-Gefuehl, Host/Client-Sync und Teamkontext.</div>
+          <div class="callout">TASK_726 meldet `ready_for_f6_host_client_playtest`. TASK_739 liefert den aktuellen Recapture-Kontext: Cue zuerst, neutrale Route danach, Host-/Client-Crops vorhanden. TASK_752 ergaenzt die Homebase-Recapture-Erwartungen aus TASK_750/TASK_751. TASK_727 sammelt trotzdem erst den menschlichen Blick: Lesbarkeit, Tempo, Command-Gefuehl, Host/Client-Sync, Teamkontext und Homebase-Return.</div>
         </article>
         <article class="card">
           <h2>Quellen</h2>
           <input readonly value="data/mission_scenarios/station_route_one_screen_multiplayer_drill.json" data-export-key="station_scenario_playtest.scenario_path">
           <input readonly value="tmp/station_route_one_screen_multiplayer_drill.json" data-export-key="station_scenario_playtest.source_drill_manifest_path">
           <input readonly value="tmp/station_scenario_identity_cue_recapture_findings.json" data-export-key="station_scenario_playtest.prefill.source_recapture_manifest_path">
+          <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="station_scenario_playtest.prefill.capture_manifest_path">
+          <input readonly value="tmp/station_homebase_host_client_recapture_packet.json" data-export-key="station_scenario_playtest.prefill.homebase_recapture_packet_path">
           <input readonly value="tmp/station_scenario_f6_host_client_playtest_notes.json" data-export-key="station_scenario_playtest.manifest_path">
         </article>
         <article class="card full">
@@ -119,6 +122,21 @@
           <input readonly value="CUE AA: BLUE naeher ran | 3.9km" data-export-key="station_scenario_playtest.prefill.expected_cue_line">
           <input readonly value="ROUTE AA > DOOR > COM > CARGO | NEXT AA" data-export-key="station_scenario_playtest.prefill.display_route_line">
           <input readonly value="ready_for_task_727_workbench_export" data-export-key="station_scenario_playtest.prefill.recapture_status">
+        </article>
+        <article class="card full">
+          <h2>Homebase Recapture Evidence</h2>
+          <p>Diese TASK_750/TASK_751-Werte sagen, was nach Cargo, Debrief und Homebase-Return sichtbar sein muss. Sie sind nur Review-Prefill und keine Abnahme.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_scenario_playtest.prefill.homebase_recapture_metadata_ready"> Homebase-Recapture-Metadaten liegen im Capture-Manifest</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.prefill.homebase_manual_acceptance_done"> Menschlicher Homebase-Recapture in dieser Workbench abgenommen</label>
+          <input readonly value="TASK_750" data-export-key="station_scenario_playtest.prefill.homebase_recapture_task_id">
+          <input readonly value="tmp/station_homebase_host_client_recapture_packet.json" data-export-key="station_scenario_playtest.prefill.homebase_recapture_packet_path">
+          <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="station_scenario_playtest.prefill.capture_manifest_path">
+          <input readonly value="Station Drill" data-export-key="station_scenario_playtest.prefill.expected_homebase_summary_fragment">
+          <input readonly value="Naechste Sortie: Fireteam bereitstellen | danach: Loadout pruefen, Dropship beladen, Start freigeben" data-export-key="station_scenario_playtest.prefill.expected_homebase_readiness_line">
+          <input readonly value="Next sortie, Review gains, Stage fireteam, Assign loadout, Load dropship, Start next sortie" data-export-key="station_scenario_playtest.prefill.forbidden_homebase_debug_markers">
+          <input readonly value="cargo_end_reached, debrief_visible_after_cargo, return_homebase_clicked, homebase_summary_mentions_station_drill, homebase_next_sortie_line_matches_task_749, old_debug_next_sortie_markers_absent, performance_feels_fast, workbench_notes_exported" data-export-key="station_scenario_playtest.prefill.homebase_recapture_manual_checks">
+          <input readonly value="true" data-export-key="station_scenario_playtest.prefill.homebase_recapture_review_required">
+          <input readonly value="false" data-export-key="station_scenario_playtest.prefill.homebase_recapture_review_done">
         </article>
         <article class="card full">
           <h2>Route</h2>
@@ -254,10 +272,12 @@
           active_choices: {},
           computed: {
             task_id: "TASK_727",
-            prefill_task_id: "TASK_741",
+            prefill_task_id: "TASK_752",
+            previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_741 - Station Scenario Workbench Recapture Prefill",
+            latest_completed_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
+            latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             recommended_next_task: "TASK_728 - Station Scenario Playtest Findings",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
@@ -267,7 +287,9 @@
             local_path: "docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html",
             manifest_path: "tmp/station_scenario_f6_host_client_playtest_notes.json",
             source_drill_manifest_path: "tmp/station_route_one_screen_multiplayer_drill.json",
-            source_recapture_manifest_path: "tmp/station_scenario_identity_cue_recapture_findings.json"
+            source_recapture_manifest_path: "tmp/station_scenario_identity_cue_recapture_findings.json",
+            homebase_capture_manifest_path: "tmp/host_client_two_window_real_run_review.json",
+            homebase_recapture_packet_path: "tmp/station_homebase_host_client_recapture_packet.json"
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {

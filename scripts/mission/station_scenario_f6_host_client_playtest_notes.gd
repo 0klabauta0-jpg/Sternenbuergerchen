@@ -84,6 +84,15 @@ static func _build_recapture_evidence(recapture_findings: Dictionary, options: D
 	var cue_visible: bool = bool(recapture_findings.get("cue_visible", false))
 	var future_blocker_hidden: bool = bool(recapture_findings.get("future_blocker_hidden_in_display", false))
 	var ready_for_workbench: bool = real_run_done and host_crop_ready and client_crop_ready and cue_visible and future_blocker_hidden
+	var homebase_task_id: String = String(recapture_findings.get("station_homebase_host_client_recapture_task_id", ""))
+	var homebase_packet_path: String = String(recapture_findings.get("station_homebase_host_client_recapture_packet_path", ""))
+	var homebase_expected_line: String = String(recapture_findings.get("station_homebase_expected_readiness_line", ""))
+	var homebase_summary_fragment: String = String(recapture_findings.get("station_homebase_expected_summary_fragment", ""))
+	var homebase_forbidden_markers: Array = _array_from_variant(recapture_findings.get("station_homebase_forbidden_debug_fragments", []))
+	var homebase_manual_checks: Array = _array_from_variant(recapture_findings.get("station_homebase_recapture_manual_checks", []))
+	var homebase_review_required: bool = bool(recapture_findings.get("station_homebase_recapture_review_required", false))
+	var homebase_review_done: bool = bool(recapture_findings.get("station_homebase_recapture_review_done", false))
+	var homebase_ready_for_workbench: bool = not homebase_task_id.is_empty() and not homebase_packet_path.is_empty() and not homebase_expected_line.is_empty() and not homebase_summary_fragment.is_empty() and not homebase_forbidden_markers.is_empty() and not homebase_manual_checks.is_empty() and homebase_review_required and not homebase_review_done
 	return {
 		"schema": String(recapture_findings.get("schema", "")),
 		"task_id": String(recapture_findings.get("task_id", "")),
@@ -99,10 +108,41 @@ static func _build_recapture_evidence(recapture_findings: Dictionary, options: D
 		"display_route_line": String(recapture_findings.get("display_route_line", "")),
 		"future_blocker_hidden_in_display": future_blocker_hidden,
 		"ready_for_workbench": ready_for_workbench,
+		"homebase_recapture_task_id": homebase_task_id,
+		"homebase_recapture_packet_path": homebase_packet_path,
+		"homebase_expected_summary_fragment": homebase_summary_fragment,
+		"homebase_expected_readiness_line": homebase_expected_line,
+		"homebase_forbidden_debug_fragments": homebase_forbidden_markers,
+		"homebase_recapture_manual_checks": homebase_manual_checks,
+		"homebase_recapture_review_required": homebase_review_required,
+		"homebase_recapture_review_done": homebase_review_done,
+		"homebase_recapture_ready_for_workbench": homebase_ready_for_workbench,
 		"manual_review_done": false,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
+
+
+static func _array_from_variant(value: Variant) -> Array:
+	if typeof(value) == TYPE_ARRAY:
+		return Array(value).duplicate()
+	if typeof(value) == TYPE_PACKED_STRING_ARRAY:
+		var result: Array = []
+		for entry in PackedStringArray(value):
+			result.append(entry)
+		return result
+	if typeof(value) == TYPE_STRING:
+		var text: String = String(value)
+		if text.is_empty():
+			return []
+		var parts: PackedStringArray = text.split(",", false)
+		var result: Array = []
+		for part in parts:
+			var trimmed: String = String(part).strip_edges()
+			if not trimmed.is_empty():
+				result.append(trimmed)
+		return result
+	return []
 
 
 static func _add_drill_findings(findings: Array, drill_manifest: Dictionary) -> void:
