@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_789 - Station Reentry Firefight Decision Evidence Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_789_station_reentry_firefight_decision_evidence_findings.md`, `docs/tasks/TASK_788_station_reentry_firefight_decision_evidence_packet.md`, `docs/tasks/TASK_787_station_reentry_firefight_player_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightDecisionEvidenceFindings` wertet das TASK_788-Paket plus optionale HTML-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Review der Decision-Card, unvollstaendige Pflichtchecks, konkrete Decision-/Command-/Host-Client-/Performance-Follow-ups und einen sauberen Acceptance-Schritt.
+- Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Fensterlauf bleibt `needs_visible_decision_evidence_review` korrekt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_789_station_reentry_firefight_decision_evidence_findings.gd`, TASK_788/TASK_787 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_790 - Station Reentry Firefight Decision Polish Acceptance.
+
 ### TASK_788 - Station Reentry Firefight Decision Evidence Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_788_station_reentry_firefight_decision_evidence_packet.md`, `docs/tasks/TASK_787_station_reentry_firefight_player_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Das Manifest nennt Scenario, Workbench, Decision-Line, Primary, Quick-Actions, Reason-Line, Guard-Line, Confirm-Control, No-Auto-Command-/Existing-Buttons-Grenze, manuelle Checks sowie Launch-/Capture-/Verifier-Kommandos.
 - Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; Workbench-JSON, Screenshot und echte Findings werden durch den naechsten Task ausgewertet.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_788_station_reentry_firefight_decision_evidence_packet.gd`, TASK_787/TASK_786 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_789 - Station Reentry Firefight Decision Evidence Findings.
+- Naechster Schritt: TASK_789 - Station Reentry Firefight Decision Evidence Findings (implementiert).
 
 ### TASK_787 - Station Reentry Firefight Player Decision Readability Pass
 - Status: implementiert im Arbeitsstand

@@ -111,7 +111,8 @@ git checkout -b batch/<batch-name>
 - TASK_786 - Station Reentry Firefight Host Client Polished Surface Check (implementiert)
 - TASK_787 - Station Reentry Firefight Player Decision Readability Pass (implementiert)
 - TASK_788 - Station Reentry Firefight Decision Evidence Packet (implementiert)
-- Naechster Schritt: TASK_789 - Station Reentry Firefight Decision Evidence Findings.
+- TASK_789 - Station Reentry Firefight Decision Evidence Findings (implementiert)
+- Naechster Schritt: TASK_790 - Station Reentry Firefight Decision Polish Acceptance.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
