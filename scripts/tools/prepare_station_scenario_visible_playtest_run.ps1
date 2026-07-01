@@ -69,10 +69,19 @@ $status = if ($scenarioReady -and $notesReady -and $findingsReady -and (Test-Pat
 $launchCommand = "powershell -ExecutionPolicy Bypass -File scripts/tools/launch_host_client_two_window_review.ps1 -Launch -ScenarioPath `"$ScenarioPath`" -WindowWidth $WindowWidth -WindowHeight $WindowHeight"
 $captureCommand = "powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10"
 $workbenchUri = if (Test-Path -LiteralPath $workbenchDiskPath) { Convert-PathToFileUri $workbenchDiskPath } else { "" }
+$expectedPolishedCueLine = "CUE AA: BLUE naeher ran | 3.9km"
+$expectedFeedbackStyleId = "station_route_player_action_cue_v2"
+$forbiddenCueFragments = @(
+    "BLUE 3859m",
+    "3859m",
+    "CARGO blockiert"
+)
 
 $packet = [ordered]@{
     schema = "sternenbuergerchen.station_scenario_visible_playtest_run_packet.v1"
     task_id = "TASK_729"
+    refresh_task_id = "TASK_737"
+    latest_feedback_task_id = "TASK_736"
     read_only = $true
     ui_sets_gameplay_truth = $false
     status = $status
@@ -100,14 +109,33 @@ $packet = [ordered]@{
         "performance_feels_fast",
         "no_hud_overlap_blocks_map",
         "wrong_team_or_bravo_context_clear",
+        "polished_aa_cue_reads_blue_naeher_ran_3_9km",
+        "raw_long_meter_distance_hidden",
+        "future_cargo_blocker_not_in_act_line",
         "playtest_done"
     )
+    visible_feedback_expectations = [ordered]@{
+        source_task_id = "TASK_736"
+        cue_line_example = $expectedPolishedCueLine
+        expected_feedback_style_id = $expectedFeedbackStyleId
+        expected_distance_text = "3.9km"
+        required_visible_fragments = @(
+            "CUE AA",
+            "BLUE naeher ran",
+            "3.9km"
+        )
+        forbidden_visible_fragments = $forbiddenCueFragments
+        expected_act_behavior = "ACT shows the current cue, not the future cargo blocker, while AA is still the active station step."
+        manual_review_note = "This packet only names visible expectations; TASK_727 remains unfinished until the workbench JSON is exported by a human reviewer."
+    }
     commands = [ordered]@{
         launch_windows = $launchCommand
         capture_windows = $captureCommand
         open_workbench = $workbenchUri
         rerun_notes_verifier = "godot_console.exe --headless --path . --script scripts/tests/task_727_station_scenario_f6_host_client_playtest_notes.gd"
         rerun_findings_verifier = "godot_console.exe --headless --path . --script scripts/tests/task_728_station_scenario_playtest_findings.gd"
+        rerun_command_feedback_verifier = "godot_console.exe --headless --path . --script scripts/tests/task_736_station_scenario_command_feedback_polish.gd"
+        rerun_packet_refresh_verifier = "godot_console.exe --headless --path . --script scripts/tests/task_737_station_scenario_visible_cue_run_packet_refresh.gd"
     }
     launch_windows_requested = [bool]$LaunchWindows
     open_workbench_requested = [bool]$OpenWorkbench

@@ -59,7 +59,8 @@ git checkout -b batch/<batch-name>
 - TASK_734 - Station Scenario Performance Feel Pass (implementiert)
 - TASK_735 - Station Scenario Current Report Sync Guard (implementiert)
 - TASK_736 - Station Scenario Command Feedback Polish (implementiert)
-- TASK_737 - Scenario Harness Modernization (naechster technischer Schritt nur bei belegten Harness-Problemen; sonst TASK_727 sichtbar ausfuellen)
+- TASK_737 - Station Scenario Visible Cue Run Packet Refresh (implementiert)
+- TASK_738 - Scenario Harness Modernization (naechster technischer Schritt nur bei belegten Harness-Problemen; sonst TASK_727 sichtbar ausfuellen)
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_737 - Station Scenario Visible Cue Run Packet Refresh
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_737_station_scenario_visible_cue_run_packet_refresh.md`, `docs/tasks/TASK_729_station_scenario_visible_playtest_run_packet.md`, `docs/tasks/TASK_736_station_scenario_command_feedback_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `prepare_station_scenario_visible_playtest_run.ps1` schreibt jetzt `refresh_task_id = TASK_737` und `latest_feedback_task_id = TASK_736` in das sichtbare Playtest-Packet.
+- Stand: Das Packet fuehrt die konkrete TASK_736-Sichtpruefung mit: erwartete Cue `CUE AA: BLUE naeher ran | 3.9km`, Style `station_route_player_action_cue_v2`, Required-Checks fuer polierte Cue, versteckte Rohdistanz und aus der knappen ACT-Zeile entfernten Future-Cargo-Blocker.
+- Stand: `task_737_station_scenario_visible_cue_run_packet_refresh.gd` prueft Script, frisch erzeugtes Packet, Roadmap, Status, Contract und Handbuchbericht read-only.
+- Risiken/offen: TASK_737 ist Evidence-/Run-Packet-Pflege und ersetzt keinen menschlichen TASK_727-Fensterlauf. Scenario-Harness-Modernisierung bleibt nur bei belegtem Harness-Fehler sinnvoll.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/prepare_station_scenario_visible_playtest_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_737_station_scenario_visible_cue_run_packet_refresh.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_736_station_scenario_command_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_729_station_scenario_visible_playtest_run_packet.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench sichtbar mit dem aktualisierten Packet ausfuellen; TASK_738 - Scenario Harness Modernization nur bei belegten Start-/Capture-/Sync-Harness-Problemen.
+
 ### TASK_736 - Station Scenario Command Feedback Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_736_station_scenario_command_feedback_polish.md`, `docs/tasks/TASK_732_station_scenario_route_cue_polish.md`, `docs/tasks/TASK_734_station_scenario_performance_feel_pass.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -18,7 +28,7 @@
 - Stand: Die Mission-HUD-Density entdichtet Future-Progress-Zeilen wie `CARGO blockiert` aus der ACT-Zeile, solange eine fruehere Station-Cue aktiv ist; Source-Daten bleiben im Snapshot.
 - Risiken/offen: TASK_736 poliert Headless-Command-Sprache, ersetzt aber keinen echten TASK_727-Fensterlauf. Ob der Text im FullHD-Bild wirklich angenehm wirkt, bleibt sichtbar zu pruefen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_736_station_scenario_command_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_734_station_scenario_performance_feel_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_733_station_scenario_hud_overlap_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_732_station_scenario_route_cue_polish.gd`, `git diff --check`.
-- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen; falls weitere technische Reibung ohne Sichttest bearbeitet werden soll, TASK_737 - Scenario Harness Modernization nur fuer belegte Harness-Probleme.
+- Naechster Schritt: TASK_737 - Station Scenario Visible Cue Run Packet Refresh, damit der sichtbare TASK_727-Lauf die TASK_736-Cue-Erwartungen explizit mitfuehrt.
 
 ### TASK_735 - Station Scenario Current Report Sync Guard
 - Status: implementiert im Arbeitsstand
