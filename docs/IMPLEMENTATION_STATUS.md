@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_761 - Station Reentry Visible Playtest Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_761_station_reentry_visible_playtest_findings.md`, `docs/tasks/TASK_760_station_reentry_playtest_run_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationReentryPlaytestFindings` verdichtet das TASK_760-Run-Packet und optionale Reentry-Workbench-Notizen zu einem read-only Findings-Snapshot.
+- Stand: Der Snapshot unterscheidet fehlendes Packet, offenen sichtbaren Reentry-Playtest, unvollstaendige Checks, konkrete Reentry-Polish-Flags und saubere naechste Iteration.
+- Stand: Die Workbench exportiert eigene Reentry-Sichtchecks und Reentry-Issue-Flags, getrennt von den alten AA/Door/Computer/Cargo-Route-Checks.
+- Risiken/offen: Ohne echten Workbench-Export bleibt `needs_visible_reentry_playtest` korrekt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_761_station_reentry_visible_playtest_findings.gd`, TASK_760/TASK_759 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_762 - Station Reentry Targeted Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+
 ### TASK_760 - Station Reentry Playtest Run Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_760_station_reentry_playtest_run_packet.md`, `docs/tasks/TASK_759_station_slice_next_playtest_target.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -18,7 +28,7 @@
 - Stand: Workbench und aktueller HTML-Handbuchbericht enthalten TASK_760-Packet-Pfade und Startbefehle.
 - Risiken/offen: Das Packet startet nur auf explizites Flag und ersetzt keinen sichtbaren Playtest.
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/prepare_station_reentry_playtest_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_760_station_reentry_playtest_run_packet.gd`, TASK_759/TASK_758 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_761 - Station Reentry Visible Playtest Findings.
+- Naechster Schritt: TASK_761 ist umgesetzt; danach TASK_762 - Station Reentry Targeted Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
 
 ### TASK_759 - Station Slice Next Playtest Target
 - Status: implementiert im Arbeitsstand

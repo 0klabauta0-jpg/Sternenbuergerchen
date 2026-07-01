@@ -85,6 +85,7 @@
       <span class="pill warn">Acceptance: TASK_758</span>
       <span class="pill warn">Next Target: TASK_759</span>
       <span class="pill warn">Run Packet: TASK_760</span>
+      <span class="pill warn">Findings: TASK_761</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -218,6 +219,24 @@
           <textarea data-export-key="station_scenario_playtest.notes.station_reentry_packet" placeholder="Reentry-Packet: Start/Capture/Workbench-Hinweise..."></textarea>
         </article>
         <article class="card full">
+          <h2>Station Reentry Sichtchecks</h2>
+          <p>Eigene Checks fuer den naechsten Sortie-Start: Homebase lesen, Fireteam/Loadout/Dropship pruefen, starten und die erste Missionsentscheidung vor GO verstehen.</p>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.playtest_done"> Reentry-Playtest bewusst abgeschlossen und exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.manual_review_done"> Manueller Reentry-Review ist wirklich erfolgt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.homebase_return_panel_readable"> Homebase-Return-Panel ist im Reentry-Kontext lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.fireteam_staging_readable"> Fireteam bereitstellen ist ohne Raten verstaendlich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.loadout_check_readable"> Loadout-Pruefung ist sichtbar und wirkt verbindlich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.dropship_payload_consistent"> Fireteam bleibt im Dropship konsistent sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.start_release_visible"> Startfreigabe ist klar und nicht versteckt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.host_client_same_next_order"> Host und Client sehen denselben naechsten Auftrag</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.first_mission_preview_visible"> Erste Missionsentscheidung zeigt Preview/Gefahr vor GO</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.first_mission_cue_readable"> Erste Missions-Cue ist fuer beide Fenster lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.performance_feels_fast"> Reentry fuehlt sich schnell genug an</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.workbench_notes_exported"> Workbench-Notizen wurden exportiert</label>
+          <input readonly value="tmp/station_reentry_visible_playtest_findings.json" data-export-key="station_scenario_playtest.reentry.findings_manifest_path">
+          <textarea data-export-key="station_scenario_playtest.notes.station_reentry_visible_findings" placeholder="Reentry-Findings: Was klemmt beim neuen Sortie-Start wirklich?"></textarea>
+        </article>
+        <article class="card full">
           <h2>Route</h2>
           <table>
             <thead><tr><th>Schritt</th><th>Spieler-Erwartung</th><th>Was notieren?</th></tr></thead>
@@ -275,7 +294,7 @@
         </article>
         <article class="card half">
           <h3>Naechster Task</h3>
-          <input value="TASK_760 - Station Reentry Playtest Run Packet" data-export-key="station_scenario_playtest.recommended_next_task">
+          <input value="TASK_761 - Station Reentry Visible Playtest Findings" data-export-key="station_scenario_playtest.recommended_next_task">
         </article>
       </div>
     </section>
@@ -290,6 +309,16 @@
           <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.issues.needs_host_client_sync_fix"> Host/Client-Sync oder Authority-Cues brauchen Fix</label>
           <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.issues.needs_command_feedback_polish"> Command-/GO-/Door-Feedback braucht Polish</label>
           <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.issues.needs_old_harness_modernization"> Alte Pre-Boot-Harnesses sollen modernisiert werden</label>
+        </article>
+        <article class="card full">
+          <h2>Reentry-Follow-up Flags</h2>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.issues.needs_homebase_reentry_copy_polish"> Homebase-Reentry-Text braucht Polish</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.issues.needs_fireteam_staging_polish"> Fireteam-Staging ist noch nicht angenehm lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.issues.needs_loadout_bridge_polish"> Loadout-Bruecke wirkt unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.issues.needs_dropship_payload_sync_fix"> Dropship/Fireteam-Anzeige oder Sync wirkt inkonsistent</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.issues.needs_first_order_preview_polish"> Erste Move-/Preview-Entscheidung ist noch nicht klar genug</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.issues.needs_reentry_performance_pass"> Reentry fuehlt sich nicht schnell genug an</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_scenario_playtest.reentry.issues.needs_host_client_next_order_sync"> Host/Client sehen den naechsten Auftrag nicht eindeutig gleich</label>
         </article>
       </div>
     </section>
@@ -356,7 +385,7 @@
             findings_task_id: "TASK_754",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_760 - Station Reentry Playtest Run Packet",
+            latest_completed_task: "TASK_761 - Station Reentry Visible Playtest Findings",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
@@ -364,7 +393,8 @@
             latest_homebase_acceptance_task: "TASK_758 - Station Homebase Return Acceptance Review",
             latest_station_next_playtest_target_task: "TASK_759 - Station Slice Next Playtest Target",
             latest_station_reentry_run_packet_task: "TASK_760 - Station Reentry Playtest Run Packet",
-            recommended_next_task: "TASK_755 - Station Homebase Return Panel Polish",
+            latest_station_reentry_findings_task: "TASK_761 - Station Reentry Visible Playtest Findings",
+            recommended_next_task: "TASK_762 - Station Reentry Targeted Polish",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             manual_review_required: true
