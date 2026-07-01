@@ -48,7 +48,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(status_text.contains("TASK_770 - Station Reentry Host Client Next Order Sync"), "Implementation status tracks TASK_770")
 	_assert(roadmap_text.contains("TASK_770 - Station Reentry Host Client Next Order Sync (implementiert)"), "Roadmap marks TASK_770 implemented")
 	_assert(contract_text.contains("Station-Reentry-Host-Client-Next-Order-Sync"), "Mission command feedback contract documents TASK_770")
-	_assert(report_text.contains("TASK_770") and report_text.contains("Aktueller Griff: TASK_786"), "Reentry handbook preserves TASK_770 context and current TASK_786 follow-up")
+	_assert(report_text.contains("TASK_770") and report_text.contains("Aktueller Griff: TASK_787"), "Reentry handbook preserves TASK_770 context and current TASK_787 follow-up")
 	_assert(report_text.contains('data-export-key="reentry_host_client.same_next_order"'), "Reentry handbook exports TASK_770 sync check")
 	_assert(controller_text.contains("STATION_REENTRY_HOST_CLIENT_NEXT_ORDER_SYNC_SCRIPT"), "Controller preloads TASK_770 contract")
 	_assert(controller_text.contains("get_station_reentry_host_client_next_order_sync_snapshot"), "Controller exposes TASK_770 snapshot")

@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_787 - Station Reentry Firefight Player Decision Readability Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_787_station_reentry_firefight_player_decision_readability_pass.md`, `docs/tasks/TASK_786_station_reentry_firefight_host_client_polished_surface_check.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightPlayerDecisionReadabilityPass` verdichtet die synchrone TASK_786-Firefight-Surface zu einer read-only Decision-Card.
+- Stand: Der Snapshot liefert Primary, Quick-Actions, Warum-Zeile, Guard-Line, Confirm-Control, Textbudgets und klare No-Command-/No-Gameplay-Mutation-Grenzen.
+- Risiken/offen: Keine sichtbare Evidence und keine Befehlsausfuehrung; ohne bereite TASK_786-Surface bleibt `blocked_until_host_client_surface_ready` korrekt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_787_station_reentry_firefight_player_decision_readability_pass.gd`, TASK_786/TASK_785/TASK_783 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_788 - Station Reentry Firefight Decision Evidence Packet.
+
 ### TASK_786 - Station Reentry Firefight Host Client Polished Surface Check
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_786_station_reentry_firefight_host_client_polished_surface_check.md`, `docs/tasks/TASK_785_station_reentry_firefight_command_surface_visible_findings_refresh.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Snapshot prueft Style-ID, Surface-Reihenfolge, Interaction-Line, Primary-Lane, Quick-Action-Rail, Guard-Line, Summary-Line, No-Auto-Command/Existing-Buttons, Peer-/Team-Kontext, Textbudget und read-only Quellen.
 - Risiken/offen: Kein echter Netzwerktransport und kein automatischer Sichtentscheid; ohne bereite TASK_785-Findings bleibt `blocked_until_task_785_visible_findings_ready` korrekt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_786_station_reentry_firefight_host_client_polished_surface_check.gd`, TASK_785/TASK_784/TASK_770 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_787 - Station Reentry Firefight Player Decision Readability Pass.
+- Naechster Schritt: TASK_787 - Station Reentry Firefight Player Decision Readability Pass (implementiert).
 
 ### TASK_785 - Station Reentry Firefight Command Surface Visible Findings Refresh
 - Status: implementiert im Arbeitsstand

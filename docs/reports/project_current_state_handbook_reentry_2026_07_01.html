@@ -77,7 +77,7 @@
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
       <span class="pill good">Letzter Abschluss: TASK_785</span>
-      <span class="pill warn">Aktueller Griff: TASK_786</span>
+      <span class="pill warn">Aktueller Griff: TASK_787</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -146,6 +146,7 @@
           <li><strong>Contact Pressure:</strong> Kontaktmeldung, Risk-/LOS-Grund und Combat-HUD-Druck bleiben als erster Druckmoment zusammen lesbar.</li>
           <li><strong>Firefight Tension:</strong> Schuss, Outcome, Visual, Metrik und naechster Spielergriff sind als erster Feuerwechsel zusammengefuehrt.</li>
           <li><strong>Command Surface Host/Client:</strong> Der neue Abgleich prueft, ob beide Fenster dieselbe polierte Surface tragen, ohne Peer-/Team-Kontext zu vermischen.</li>
+          <li><strong>Player Decision:</strong> TASK_787 verdichtet die synchronisierte Surface zu einer kleinen Decision-Card mit naechstem Griff, Alternativen, Warum-Zeile und Guard.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -156,11 +157,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_786 prueft den Multiplayer-Abgleich der polierten Command-Surface: Host und Client muessen Style-ID, Reihenfolge, Interaction-Line, Primary, Quick-Actions, Guard-Line, Summary und No-Auto-Command gleich lesen.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784 und TASK_785: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785 und TASK_786.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_787 verdichtet die naechste Spielerentscheidung nach der synchronen Firefight-Surface.</div>
-          <input readonly value="TASK_786 - Station Reentry Firefight Host Client Polished Surface Check" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_787 - Station Reentry Firefight Player Decision Readability Pass" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_787 verdichtet die synchrone TASK_786-Firefight-Surface zu einer kleinen Spielerentscheidungs-Karte: Primary, Quick-Actions, Warum-Zeile, Guard und GO/Confirm bleiben auf einen Blick lesbar.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785 und TASK_786: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786 und TASK_787.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_788 macht die Decision-Card als sichtbares Evidence-Paket pruefbar.</div>
+          <input readonly value="TASK_787 - Station Reentry Firefight Player Decision Readability Pass" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_788 - Station Reentry Firefight Decision Evidence Packet" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -172,6 +173,7 @@
           <input readonly value="tmp/station_reentry_firefight_command_surface_playtest_packet_refresh.json" data-export-key="reentry_firefight_command_surface_playtest_packet.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_command_surface_visible_findings_refresh.json" data-export-key="reentry_firefight_command_surface_visible_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_host_client_polished_surface_check.json" data-export-key="reentry_firefight_host_client_polished_surface.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_player_decision_readability_pass.json" data-export-key="reentry_firefight_player_decision.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -352,6 +354,16 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_host_client_polished_surface.team_context_present"> Team-Kontext vorhanden</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_host_client_polished_surface.text_budget_ok"> Textbudget bleibt kompakt</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_host_client_polished_surface.read_only_sources"> Quellen bleiben read-only</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.source_ready"> TASK_787 Quelle aus TASK_786 bereit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.decision_line_visible"> Decision-Line sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.primary_action_visible"> Primaerer Griff sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.quick_actions_visible"> Quick-Actions sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.reason_visible"> Warum-Zeile sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.guard_visible"> Guard-Line sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.no_auto_command_commit"> Kein Auto-Command durch Decision-Card</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.existing_commands_only"> Nur bestehende Command-Buttons</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.text_budget_ok"> Textbudget bleibt kompakt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.host_client_context_visible"> Host/Client-Kontext bleibt lesbar</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -441,10 +453,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_787 - Station Reentry Firefight Player Decision Readability Pass"
+            recommended_next_task: "TASK_788 - Station Reentry Firefight Decision Evidence Packet"
           },
           metadata: {
-            generated_for_task: "TASK_786",
+            generated_for_task: "TASK_787",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
