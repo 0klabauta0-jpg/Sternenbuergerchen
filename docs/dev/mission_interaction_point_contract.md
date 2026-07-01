@@ -473,6 +473,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Die Mission-HUD-Density darf `interaction_progress_line` als Source behalten, soll sie aber aus der knappen ACT-Zeile entfernen, wenn eine Station-Cue aktiv ist und nicht selbst `in_progress` meldet. So steht bei `CUE AA` keine Future-Cargo-Blockade direkt daneben.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Visible Cue Run Packet Refresh
+- Das sichtbare TASK_729-Run-Packet darf nach TASK_736 zusaetzliche Review-Erwartungen fuer die polierte Cue-Sprache tragen, bleibt aber Besitzer des urspruenglichen Run-Packets.
+- `refresh_task_id = TASK_737` und `latest_feedback_task_id = TASK_736` markieren, dass der sichtbare Lauf mit aktueller Command-Feedback-Sprache geprueft werden soll.
+- `visible_feedback_expectations` darf erwartete Fragmente wie `CUE AA`, `BLUE naeher ran` und `3.9km` sowie verbotene Altfragmente wie `BLUE 3859m`, `3859m` und `CARGO blockiert` fuer die knappe Cue-/ACT-Pruefung nennen.
+- Required-Checks fuer polierte Cue, versteckte Rohdistanz und ausgeblendeten Future-Cargo-Blocker sind Arbeitsnotizen fuer den menschlichen TASK_727-Lauf, keine bestandene Sichtabnahme.
+- `manual_review_done` bleibt false, bis ein Mensch die TASK_727-Workbench wirklich ausfuellt und JSON exportiert.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
