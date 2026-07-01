@@ -82,9 +82,9 @@ static func get_mission_hud_layout() -> Dictionary:
 	return {
 		"viewport": Rect2i(Vector2i.ZERO, TARGET_VIEWPORT),
 		"mission_identity": Rect2i(24, 24, 360, 80),
-		"top_nav": Rect2i(720, 24, 480, 56),
-		"fireteam_mini": Rect2i(24, 128, 240, 288),
-		"event_log": Rect2i(24, 432, 240, 184),
+		"top_nav": Rect2i(768, 24, 384, 56),
+		"fireteam_mini": Rect2i(24, 128, 240, 248),
+		"event_log": Rect2i(24, 392, 240, 184),
 		"bottom_dock": Rect2i(0, 800, 1920, 280),
 		"command_matrix": Rect2i(24, 808, 304, 248),
 		"selected_fireteam": Rect2i(344, 808, 1192, 248),

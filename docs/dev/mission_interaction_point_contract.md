@@ -372,6 +372,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Folge-Polish-Flags duerfen TASK_724 empfehlen, aber keine Runtime-, Door-, Objective- oder Multiplayer-Wahrheit setzen.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Recapture Visual Followup
+- TASK_724 darf nur die sichtbaren Recapture-Reibungen polieren: TopNav-Breite, Fireteam-Mini-HUD-Footprint, Eventlog-Anschluss und Station-/Route-Label-Abstaende.
+- `DropLightLayoutContract.get_mission_hud_layout()` bleibt die Quelle fuer die festen Mission-HUD-Rechtecke; Runtime-Code darf daraus keine Mission- oder Multiplayer-Wahrheit ableiten.
+- `get_station_route_recapture_visual_followup_snapshot()` meldet Layout-Deltas, Label-Abstandsparameter und `ready_for_recapture` read-only.
+- Label-Font, Pixel-Size, Outline, Height-Step und Stagger-Offsets sind reine Darstellung im `TerrainMap3DView`.
+- Der Gate-Wert `ready_for_recapture` bedeutet nur: Der sichtbare Folge-Polish ist technisch angewendet und braucht einen frischen Host/Client-Capture.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

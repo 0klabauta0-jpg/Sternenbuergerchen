@@ -82,7 +82,7 @@ func _test_runtime_hud_polish_snapshot() -> void:
 	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
 	var mini_rect: Rect2i = layout.get("fireteam_mini")
 	var event_rect: Rect2i = layout.get("event_log")
-	_assert(mini_rect.size == Vector2i(240, 288), "Fireteam mini contract is compact")
+	_assert(mini_rect.size.x <= 240 and mini_rect.size.y <= 288, "Fireteam mini contract is compact")
 	_assert(event_rect.position.y >= mini_rect.end.y + 16, "Event log remains below compact Fireteam mini panel")
 	_assert(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("is_rect_inside_viewport", mini_rect), "Fireteam mini rect stays inside viewport")
 	_assert(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("is_rect_on_base_grid", mini_rect), "Fireteam mini rect stays on base grid")
