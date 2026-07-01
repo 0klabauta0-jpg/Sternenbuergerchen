@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_793_station_reentry_firefight_multiplayer_decision_acceptance.md`, `docs/tasks/TASK_792_station_reentry_firefight_decision_host_client_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightMultiplayerDecisionAcceptance` wertet TASK_792-Findings read-only aus und entscheidet eng, ob der kleine Multiplayer-Firefight-Decision-Slice akzeptiert ist.
+- Stand: Der Snapshot prueft valide/read-only Quelle, sichtbaren Zwei-Fenster-Review, vollstaendige Pflichtchecks, keine aktiven Issues, synchronen Decision-Kern, unterscheidbare Host-/Client-Rollen, No-Auto-Command-Grenze und Host/Client-Kontext.
+- Risiken/offen: Kein automatischer Sichtentscheid, kein echter langer Multiplayer-Playtest und kein Netzwerk-Authority-Lasttest; Folgearbeit ist ein Playtest-Paket fuer den akzeptierten Decision-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_793_station_reentry_firefight_multiplayer_decision_acceptance.gd`, TASK_792/TASK_791/TASK_790 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_794 - Station Reentry Firefight Multiplayer Decision Playtest Packet.
+
 ### TASK_792 - Station Reentry Firefight Decision Host Client Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_792_station_reentry_firefight_decision_host_client_findings.md`, `docs/tasks/TASK_791_station_reentry_firefight_decision_host_client_recapture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Zwei-Fenster-Review, unvollstaendige Pflichtchecks, konkrete Host/Client-/Peer-Kontext-/Decision-Card-Follow-ups und einen sauberen Multiplayer-Decision-Acceptance-Schritt.
 - Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Zwei-Fenster-Lauf bleibt `needs_visible_decision_host_client_review` korrekt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_792_station_reentry_firefight_decision_host_client_findings.gd`, TASK_791/TASK_790/TASK_789 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance.
+- Naechster Schritt: TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance (implementiert).
 
 ### TASK_791 - Station Reentry Firefight Decision Host Client Recapture
 - Status: implementiert im Arbeitsstand
