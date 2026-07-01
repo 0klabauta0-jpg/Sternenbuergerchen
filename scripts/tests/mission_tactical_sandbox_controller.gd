@@ -6382,6 +6382,52 @@ func get_station_scenario_hud_overlap_pass_snapshot() -> Dictionary:
 	}
 
 
+func get_station_scenario_performance_feel_pass_snapshot(performance_sample: Dictionary = {}) -> Dictionary:
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var density: Dictionary = Dictionary(command_feedback.get("mission_hud_interaction_density", {})).duplicate(true)
+	var overlap: Dictionary = get_station_scenario_hud_overlap_pass_snapshot()
+	var cue: Dictionary = Dictionary(command_feedback.get("station_scenario_route_cue_polish", {})).duplicate(true)
+	var sample_count: int = int(performance_sample.get("sample_count", 0))
+	var total_usec: int = int(performance_sample.get("total_usec", 0))
+	var max_usec: int = int(performance_sample.get("max_usec", 0))
+	var avg_usec: int = int(performance_sample.get("avg_usec", 0))
+	var budget_avg_usec: int = int(performance_sample.get("budget_avg_usec", 2000000))
+	var budget_max_usec: int = int(performance_sample.get("budget_max_usec", 2000000))
+	var repeated_snapshot_budget_ok: bool = sample_count <= 0 or (avg_usec <= budget_avg_usec and max_usec <= budget_max_usec)
+	var density_ok: bool = bool(density.get("line_within_limit", false)) and int(density.get("visible_line_count", 0)) <= int(density.get("max_visible_line_count", 1))
+	var route_overlap_ok: bool = bool(overlap.get("route_line_deferred_to_identity", false)) and bool(overlap.get("mission_control_contains_cue", false)) and not bool(overlap.get("mission_control_contains_route", true))
+	var cue_ok: bool = bool(cue.get("active", false)) and bool(cue.get("line_within_limit", false))
+	return {
+		"schema": "sternenbuergerchen.station_scenario_performance_feel_pass.v1",
+		"task_id": "TASK_734",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"source": "command_feedback_density_overlap_and_repeated_snapshot_sample",
+		"active": density_ok and route_overlap_ok and cue_ok,
+		"performance_gate": "pass" if repeated_snapshot_budget_ok else "warn",
+		"ready_for_visible_playtest": repeated_snapshot_budget_ok and density_ok and route_overlap_ok and cue_ok,
+		"sample_count": sample_count,
+		"total_usec": total_usec,
+		"avg_usec": avg_usec,
+		"max_usec": max_usec,
+		"budget_avg_usec": budget_avg_usec,
+		"budget_max_usec": budget_max_usec,
+		"repeated_snapshot_budget_ok": repeated_snapshot_budget_ok,
+		"density_ok": density_ok,
+		"route_overlap_ok": route_overlap_ok,
+		"cue_ok": cue_ok,
+		"line_within_limit": bool(density.get("line_within_limit", false)),
+		"visible_line_count": int(density.get("visible_line_count", 0)),
+		"max_visible_line_count": int(density.get("max_visible_line_count", 1)),
+		"mission_control_line": String(density.get("mission_control_line", "")),
+		"cue_line": String(command_feedback.get("station_scenario_route_cue_line", "")),
+		"route_line": String(command_feedback.get("station_route_run_line", "")),
+		"station_route_density_policy_id": String(density.get("station_route_density_policy_id", "")),
+		"manual_profiler_required": true,
+		"manual_profiler_done": false,
+	}
+
+
 func _build_station_scenario_route_cue_polish_snapshot(route_readout: Dictionary, objective_gate: Dictionary, use_feedback: Dictionary, progress_readability: Dictionary) -> Dictionary:
 	return Dictionary(STATION_SCENARIO_ROUTE_CUE_POLISH_SCRIPT.call(
 		"build_snapshot",
