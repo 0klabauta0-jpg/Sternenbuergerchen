@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_787</span>
-      <span class="pill warn">Aktueller Griff: TASK_788</span>
+      <span class="pill good">Letzter Abschluss: TASK_788</span>
+      <span class="pill warn">Aktueller Griff: TASK_789</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -148,6 +148,7 @@
           <li><strong>Command Surface Host/Client:</strong> Der neue Abgleich prueft, ob beide Fenster dieselbe polierte Surface tragen, ohne Peer-/Team-Kontext zu vermischen.</li>
           <li><strong>Player Decision:</strong> TASK_787 verdichtet die synchronisierte Surface zu einer kleinen Decision-Card mit naechstem Griff, Alternativen, Warum-Zeile und Guard.</li>
           <li><strong>Decision Evidence:</strong> TASK_788 bereitet Screenshot, Workbench-Export und manuelle Checks fuer diese Decision-Card vor, ohne den Sichttest als erledigt zu behaupten.</li>
+          <li><strong>Decision Findings:</strong> TASK_789 wertet offene Reviews, fehlende Haken und konkrete Decision-Card-Issues in eine naechste Arbeit um.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -158,11 +159,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_788 macht die TASK_787-Decision-Card als sichtbares Evidence-Paket pruefbar: F6-Fenster, Decision-Card, Decision-Line, Primary, Quick-Actions, Reason, Guard, Confirm und Host/Client-Kontext werden als manuelle Checks gesammelt.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786 und TASK_787: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787 und TASK_788.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_789 wertet Screenshot-/Workbench-Notizen als Decision-Evidence-Findings aus.</div>
-          <input readonly value="TASK_788 - Station Reentry Firefight Decision Evidence Packet" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_789 - Station Reentry Firefight Decision Evidence Findings" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_789 wertet das TASK_788-Decision-Evidence-Paket plus Workbench-Haken aus: offen, unvollstaendig, konkrete Decision-Card-Probleme oder bereit fuer Acceptance.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787 und TASK_788: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788 und TASK_789.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_790 entscheidet, ob die Decision-Card klein akzeptiert wird oder gezielter Polish noetig ist.</div>
+          <input readonly value="TASK_789 - Station Reentry Firefight Decision Evidence Findings" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_790 - Station Reentry Firefight Decision Polish Acceptance" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -176,6 +177,7 @@
           <input readonly value="tmp/station_reentry_firefight_host_client_polished_surface_check.json" data-export-key="reentry_firefight_host_client_polished_surface.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_player_decision_readability_pass.json" data-export-key="reentry_firefight_player_decision.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_decision_evidence_packet.json" data-export-key="reentry_firefight_decision_evidence.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_decision_evidence_findings.json" data-export-key="reentry_firefight_decision_evidence_findings.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -379,6 +381,30 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.host_client_context_visible"> Host/Client-Kontext sichtbar</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.screenshot_saved"> Decision-Evidence-Screenshot gespeichert</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.workbench_json_exported"> Decision-Evidence-Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.manual_review_done"> TASK_789 Review bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.visible_review_done"> Sichtbarer Decision-Review wirklich ausgefuehrt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.f6_window_open"> Findings: F6-Fenster offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.decision_card_visible"> Findings: Decision-Card sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.decision_line_visible"> Findings: Decision-Line sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.primary_action_visible"> Findings: primaerer Griff sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.quick_actions_visible"> Findings: Quick-Actions sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.reason_line_visible"> Findings: Warum-Zeile sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.guard_line_visible"> Findings: Guard-Line sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.confirm_control_visible"> Findings: GO/Confirm sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.no_auto_command_commit_visible"> Findings: No-Auto-Command sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.host_client_context_visible"> Findings: Host/Client-Kontext sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.screenshot_saved"> Findings: Screenshot gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.workbench_json_exported"> Findings: Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.decision_card_missing"> Issue: Decision-Card fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.decision_line_unclear"> Issue: Decision-Line unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.primary_action_unclear"> Issue: primaerer Griff unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.quick_actions_hidden"> Issue: Quick-Actions versteckt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.reason_line_missing"> Issue: Warum-Zeile fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.guard_line_missing"> Issue: Guard-Line fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.confirm_control_unclear"> Issue: GO/Confirm unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.auto_command_commit_confusing"> Issue: Auto-Command-Grenze unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.host_client_context_mismatch"> Issue: Host/Client-Kontext widerspricht</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence_findings.issues.performance_stutter_visible"> Issue: sichtbarer Stutter</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -468,10 +494,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_789 - Station Reentry Firefight Decision Evidence Findings"
+            recommended_next_task: "TASK_790 - Station Reentry Firefight Decision Polish Acceptance"
           },
           metadata: {
-            generated_for_task: "TASK_788",
+            generated_for_task: "TASK_789",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
