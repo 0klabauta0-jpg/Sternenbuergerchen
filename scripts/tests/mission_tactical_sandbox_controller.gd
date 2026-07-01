@@ -6207,6 +6207,8 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 	var cargo_line: String = _build_mission_cargo_extract_line().strip_edges()
 	var interaction_progress_readability: Dictionary = interaction_progress_readability_override.duplicate(true) if not interaction_progress_readability_override.is_empty() else _build_mission_interaction_progress_readability_snapshot()
 	var interaction_progress_line: String = String(interaction_progress_readability.get("compact_line", "")).strip_edges()
+	var station_route_cue_runtime_status: String = String(station_route_cue.get("runtime_status", "")).strip_edges().to_lower()
+	var interaction_progress_deferred_to_route_cue: bool = not station_route_cue_line.is_empty() and station_route_cue_runtime_status != "in_progress"
 	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text().strip_edges()
 	var combat_hud_snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var combat_hud_line: String = String(combat_hud_snapshot.get("mission_control_line", "")).strip_edges()
@@ -6230,7 +6232,7 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 		compact_parts.append(station_route_line)
 	if not station_route_cue_line.is_empty():
 		compact_parts.append(station_route_cue_line)
-	if not interaction_progress_line.is_empty():
+	if not interaction_progress_line.is_empty() and not interaction_progress_deferred_to_route_cue:
 		compact_parts.append(interaction_progress_line)
 	if not objective_line.is_empty() and not objective_cargo_deferred_to_route_cue:
 		compact_parts.append(objective_line)
@@ -6269,6 +6271,7 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 		"station_scenario_route_cue_polish": station_route_cue,
 		"station_route_line_deferred_to_identity": station_route_line_deferred_to_identity,
 		"objective_cargo_deferred_to_route_cue": objective_cargo_deferred_to_route_cue,
+		"interaction_progress_deferred_to_route_cue": interaction_progress_deferred_to_route_cue,
 		"station_route_density_policy_id": "station_route_identity_body_act_cue_v1",
 		"station_route_cue_prioritized": station_route_line_deferred_to_identity,
 		"interaction_progress_line": interaction_progress_line,
