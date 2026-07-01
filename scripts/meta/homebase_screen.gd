@@ -57,8 +57,9 @@ const HOMEBASE_POST_DEBRIEF_DENSITY_FINDINGS_STYLE_ID := "task_647_homebase_dens
 const HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID := "task_755_station_homebase_return_panel_v1"
 const HOMEBASE_REENTRY_PLAN_STYLE_ID := "task_762_station_reentry_plan_v1"
 const HOMEBASE_REENTRY_PLAN_LINE := "Reentry-Plan: Fireteam -> Loadout -> Dropship -> Start -> Preview vor GO"
+const HOMEBASE_REENTRY_FIRETEAM_STAGING_STYLE_ID := "task_763_station_reentry_fireteam_staging_v1"
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE := 12
-const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 126.0
+const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 144.0
 const HOMEBASE_ROSTER_SORT_OPTIONS: Array = [
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_DESC, "label": "Leader high"},
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_ASC, "label": "Leader low"},
@@ -605,6 +606,7 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	var action_label := _get_post_debrief_followup_action_label()
 	var chip_row := _get_post_debrief_followup_step_chip_row()
 	var reentry_label := _get_station_reentry_plan_label()
+	var reentry_staging_label := _get_station_reentry_fireteam_staging_label()
 	var post_label := _get_post_debrief_homebase_summary_label()
 	var readiness_label := _get_next_sortie_readiness_label()
 	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
@@ -613,15 +615,26 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	var action_rect: Rect2 = _control_global_rect(action_label)
 	var chip_row_rect: Rect2 = _control_global_rect(chip_row)
 	var reentry_rect: Rect2 = _control_global_rect(reentry_label)
+	var reentry_staging_rect: Rect2 = _control_global_rect(reentry_staging_label)
 	var post_rect: Rect2 = _control_global_rect(post_label)
 	var readiness_rect: Rect2 = _control_global_rect(readiness_label)
 	var mission_rect: Rect2 = _control_global_rect(mission_panel)
+	var staging_snapshot: Dictionary = get_homebase_direct_staging_snapshot()
 	var steps: Array = Array(readiness_snapshot.get("readiness_steps", [])).duplicate(true)
 	var chips: Array = _build_station_return_panel_step_chip_snapshot(steps)
 	var title_text: String = title_label.text.strip_edges() if title_label != null else ""
 	var action_text: String = action_label.text.strip_edges() if action_label != null else ""
 	var reentry_text: String = reentry_label.text.strip_edges() if reentry_label != null else ""
 	var reentry_style_id: String = String(reentry_label.get_meta("station_reentry_plan_style_id", "")) if reentry_label != null else ""
+	var reentry_staging_text: String = reentry_staging_label.text.strip_edges() if reentry_staging_label != null else ""
+	var reentry_staging_expected_text: String = _build_station_reentry_fireteam_staging_line(staging_snapshot)
+	var reentry_staging_style_id: String = String(reentry_staging_label.get_meta("station_reentry_fireteam_staging_style_id", "")) if reentry_staging_label != null else ""
+	var reentry_selected_fireteam_count: int = _count_unique_nonempty_strings(Array(staging_snapshot.get("selected_fireteam_ids", [])))
+	var reentry_selected_operator_count: int = Array(staging_snapshot.get("selected_unit_ids", [])).size()
+	var reentry_payload_fireteam_count: int = Array(staging_snapshot.get("payload_fireteam_ids", [])).size()
+	var reentry_payload_operator_count: int = int(staging_snapshot.get("payload_operator_count", 0))
+	var reentry_boarded_operator_count: int = int(staging_snapshot.get("boarded_operator_count", 0))
+	var reentry_staging_read_only: bool = bool(reentry_staging_label.get_meta("read_only", false)) if reentry_staging_label != null else false
 	var chip_count: int = chips.size()
 	var current_step_id: String = String(readiness_snapshot.get("current_next_step_id", "")).strip_edges()
 	var checks: Array = []
@@ -634,17 +647,22 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	_append_visual_audit_check(checks, "reentry_plan_visible", _control_is_visible(reentry_label) and reentry_text == HOMEBASE_REENTRY_PLAN_LINE, "critical", "Return panel should show the full Reentry plan before the next sortie.")
 	_append_visual_audit_check(checks, "reentry_plan_style_id", reentry_style_id == HOMEBASE_REENTRY_PLAN_STYLE_ID, "critical", "Reentry plan should expose TASK_762 style metadata.")
 	_append_visual_audit_check(checks, "reentry_plan_compact", reentry_text.length() <= 82 and reentry_text.count("\n") == 0, "critical", "Reentry plan should stay compact and one-line.")
+	_append_visual_audit_check(checks, "reentry_fireteam_staging_visible", _control_is_visible(reentry_staging_label) and reentry_staging_text == reentry_staging_expected_text, "critical", "Return panel should show Fireteam staging from the existing Homebase staging snapshot.")
+	_append_visual_audit_check(checks, "reentry_fireteam_staging_style_id", reentry_staging_style_id == HOMEBASE_REENTRY_FIRETEAM_STAGING_STYLE_ID, "critical", "Fireteam staging line should expose TASK_763 style metadata.")
+	_append_visual_audit_check(checks, "reentry_fireteam_staging_mentions_fireteam", reentry_staging_text.contains("Fireteam") and reentry_staging_text.contains("Operatoren"), "critical", "Fireteam staging line should name fireteam and operator context.")
+	_append_visual_audit_check(checks, "reentry_fireteam_staging_compact", reentry_staging_text.length() <= 98 and reentry_staging_text.count("\n") == 0, "critical", "Fireteam staging line should stay compact and one-line.")
 	_append_visual_audit_check(checks, "current_chip_present", _station_return_panel_chip_state_exists(chips, current_step_id, "current"), "critical", "Return panel chips should mark the current next step.")
 	_append_visual_audit_check(checks, "chip_labels_german", _station_return_panel_chips_have_german_labels(chips), "critical", "Return panel chips should use the same German station step labels.")
-	_append_visual_audit_check(checks, "inside_followup_panel", _rect_inside(title_rect, panel_rect) and _rect_inside(action_rect, panel_rect) and _rect_inside(chip_row_rect, panel_rect) and _rect_inside(reentry_rect, panel_rect) and _rect_inside(post_rect, panel_rect) and _rect_inside(readiness_rect, panel_rect), "critical", "Return title, action, chips, Reentry plan and legacy lines should stay inside the follow-up panel.")
+	_append_visual_audit_check(checks, "inside_followup_panel", _rect_inside(title_rect, panel_rect) and _rect_inside(action_rect, panel_rect) and _rect_inside(chip_row_rect, panel_rect) and _rect_inside(reentry_rect, panel_rect) and _rect_inside(reentry_staging_rect, panel_rect) and _rect_inside(post_rect, panel_rect) and _rect_inside(readiness_rect, panel_rect), "critical", "Return title, action, chips, Reentry plan, Fireteam staging and legacy lines should stay inside the follow-up panel.")
 	_append_visual_audit_check(checks, "reentry_plan_inside_followup_panel", _rect_inside(reentry_rect, panel_rect), "critical", "Reentry plan should stay grouped in the follow-up panel.")
+	_append_visual_audit_check(checks, "reentry_fireteam_staging_inside_followup_panel", _rect_inside(reentry_staging_rect, panel_rect), "critical", "Fireteam staging line should stay grouped in the follow-up panel.")
 	_append_visual_audit_check(checks, "inside_mission_panel", _rect_inside(panel_rect, mission_rect), "critical", "Return panel should stay inside the MissionPanel.")
-	_append_visual_audit_check(checks, "read_only", bool(visible_snapshot.get("read_only", false)) and bool(readiness_snapshot.get("read_only", false)), "critical", "Return panel polish should read existing Homebase state only.")
+	_append_visual_audit_check(checks, "read_only", bool(visible_snapshot.get("read_only", false)) and bool(readiness_snapshot.get("read_only", false)) and reentry_staging_read_only, "critical", "Return panel polish should read existing Homebase state only.")
 	var failed_count: int = _count_visual_audit_failures(checks, "critical")
 	return {
 		"schema": "sternenbuergerchen.station_homebase_return_panel_polish.v1",
 		"task_id": "TASK_755",
-		"source_task_ids": ["TASK_754", "TASK_749", "TASK_747", "TASK_746"],
+		"source_task_ids": ["TASK_754", "TASK_749", "TASK_747", "TASK_746", "TASK_762", "TASK_763"],
 		"gate": "pass" if failed_count == 0 else "fail",
 		"failed_count": failed_count,
 		"check_count": checks.size(),
@@ -657,6 +675,16 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 		"reentry_plan_style_id": reentry_style_id,
 		"reentry_plan_text": reentry_text,
 		"reentry_plan_visible": _control_is_visible(reentry_label),
+		"reentry_fireteam_staging_style_id": reentry_staging_style_id,
+		"reentry_fireteam_staging_text": reentry_staging_text,
+		"reentry_fireteam_staging_expected_text": reentry_staging_expected_text,
+		"reentry_fireteam_staging_visible": _control_is_visible(reentry_staging_label),
+		"reentry_fireteam_staging_read_only": reentry_staging_read_only,
+		"reentry_selected_fireteam_count": reentry_selected_fireteam_count,
+		"reentry_selected_operator_count": reentry_selected_operator_count,
+		"reentry_payload_fireteam_count": reentry_payload_fireteam_count,
+		"reentry_payload_operator_count": reentry_payload_operator_count,
+		"reentry_boarded_operator_count": reentry_boarded_operator_count,
 		"readiness_line": String(readiness_snapshot.get("readiness_line", "")),
 		"rendered_readiness_line": readiness_label.text.strip_edges() if readiness_label != null else "",
 		"post_summary_text": post_label.text.strip_edges() if post_label != null else "",
@@ -665,6 +693,7 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 		"action_rect": _rect_to_dict(action_rect),
 		"chip_row_rect": _rect_to_dict(chip_row_rect),
 		"reentry_plan_rect": _rect_to_dict(reentry_rect),
+		"reentry_fireteam_staging_rect": _rect_to_dict(reentry_staging_rect),
 		"post_summary_rect": _rect_to_dict(post_rect),
 		"next_sortie_rect": _rect_to_dict(readiness_rect),
 		"return_panel_polish_ready": failed_count == 0,
@@ -3442,6 +3471,29 @@ func _ensure_station_reentry_plan_label() -> Label:
 	return label
 
 
+func _ensure_station_reentry_fireteam_staging_label() -> Label:
+	var vbox := _get_post_debrief_followup_vbox()
+	var existing := vbox.get_node_or_null("StationReentryFireteamStagingLabel") as Label
+	if existing != null:
+		return existing
+	var label := Label.new()
+	label.name = "StationReentryFireteamStagingLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.custom_minimum_size = Vector2(0.0, 18.0)
+	label.add_theme_font_size_override("font_size", 11)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 11)
+	label.add_theme_color_override("font_color", Color("d3f4c7"))
+	label.set_meta("station_reentry_fireteam_staging_style_id", HOMEBASE_REENTRY_FIRETEAM_STAGING_STYLE_ID)
+	label.set_meta("homebase_return_panel_style_id", HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID)
+	label.set_meta("read_only", true)
+	label.set_meta("ui_sets_gameplay_truth", false)
+	vbox.add_child(label)
+	vbox.move_child(label, mini(4, vbox.get_child_count() - 1))
+	return label
+
+
 func _ensure_post_debrief_homebase_summary_label() -> Label:
 	var vbox := _get_post_debrief_followup_vbox()
 	var existing := vbox.get_node_or_null("PostDebriefHomebaseSummaryLabel") as Label
@@ -3506,6 +3558,10 @@ func _get_station_reentry_plan_label() -> Label:
 	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/StationReentryPlanLabel") as Label
 
 
+func _get_station_reentry_fireteam_staging_label() -> Label:
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/StationReentryFireteamStagingLabel") as Label
+
+
 func _get_post_debrief_followup_panel() -> PanelContainer:
 	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel") as PanelContainer
 
@@ -3536,6 +3592,9 @@ func _sync_post_debrief_followup_panel_visibility() -> void:
 	var reentry_label := _get_station_reentry_plan_label()
 	if reentry_label != null:
 		reentry_label.visible = panel.visible and _is_station_scenario_last_result()
+	var reentry_staging_label := _get_station_reentry_fireteam_staging_label()
+	if reentry_staging_label != null:
+		reentry_staging_label.visible = panel.visible and _is_station_scenario_last_result()
 	_apply_post_debrief_density_findings()
 
 
@@ -3578,14 +3637,17 @@ func _update_station_return_panel_polish(steps: Array, current_step_id: String) 
 	var action_label := _ensure_post_debrief_followup_action_label()
 	var chip_row := _ensure_post_debrief_followup_step_chip_row()
 	var reentry_label := _ensure_station_reentry_plan_label()
+	var reentry_staging_label := _ensure_station_reentry_fireteam_staging_label()
 	var station_result: bool = _is_station_scenario_last_result()
 	title_label.visible = station_result
 	action_label.visible = station_result
 	chip_row.visible = station_result
 	reentry_label.visible = station_result
+	reentry_staging_label.visible = station_result
 	if not station_result:
 		action_label.text = ""
 		reentry_label.text = ""
+		reentry_staging_label.text = ""
 		_clear_return_panel_step_chips(chip_row)
 		return
 	var current_label: String = _station_next_sortie_step_label(current_step_id)
@@ -3593,7 +3655,41 @@ func _update_station_return_panel_polish(steps: Array, current_step_id: String) 
 	action_label.tooltip_text = "Read-only: aktueller Homebase-Schritt aus Readiness- und Staging-Snapshot."
 	reentry_label.text = HOMEBASE_REENTRY_PLAN_LINE
 	reentry_label.tooltip_text = "Read-only: Reentry-Orientierung aus dem Station-Return-Panel; Start und GO bleiben separate bestaetigte Schritte."
+	var staging: Dictionary = get_homebase_direct_staging_snapshot()
+	reentry_staging_label.text = _build_station_reentry_fireteam_staging_line(staging)
+	reentry_staging_label.tooltip_text = "Read-only: Fireteam-Staging aus Homebase-Direct-Staging-Snapshot; Drop und Start bleiben bestaetigte Aktionen."
+	reentry_staging_label.set_meta("station_reentry_fireteam_staging_text", reentry_staging_label.text)
+	reentry_staging_label.set_meta("station_reentry_fireteam_staging_style_id", HOMEBASE_REENTRY_FIRETEAM_STAGING_STYLE_ID)
+	reentry_staging_label.set_meta("selected_fireteam_count", _count_unique_nonempty_strings(Array(staging.get("selected_fireteam_ids", []))))
+	reentry_staging_label.set_meta("selected_operator_count", Array(staging.get("selected_unit_ids", [])).size())
+	reentry_staging_label.set_meta("payload_fireteam_count", Array(staging.get("payload_fireteam_ids", [])).size())
+	reentry_staging_label.set_meta("payload_operator_count", int(staging.get("payload_operator_count", 0)))
+	reentry_staging_label.set_meta("boarded_operator_count", int(staging.get("boarded_operator_count", 0)))
 	_refresh_return_panel_step_chips(chip_row, steps, current_step_id)
+
+
+func _build_station_reentry_fireteam_staging_line(staging: Dictionary) -> String:
+	var selected_fireteam_count: int = _count_unique_nonempty_strings(Array(staging.get("selected_fireteam_ids", [])))
+	var selected_operator_count: int = Array(staging.get("selected_unit_ids", [])).size()
+	var payload_fireteam_count: int = Array(staging.get("payload_fireteam_ids", [])).size()
+	var payload_operator_count: int = int(staging.get("payload_operator_count", 0))
+	var boarded_operator_count: int = int(staging.get("boarded_operator_count", 0))
+	if payload_fireteam_count > 0:
+		var expected_operator_count: int = maxi(payload_operator_count, selected_operator_count)
+		return "Fireteam-Staging: %d FT im Dropship | %d/%d Operatoren an Bord | Start nach Boarding" % [payload_fireteam_count, boarded_operator_count, expected_operator_count]
+	if selected_fireteam_count > 0 or selected_operator_count > 0:
+		return "Fireteam-Staging: %d FT bereit | %d Operatoren | Dropship beladen" % [selected_fireteam_count, selected_operator_count]
+	return "Fireteam-Staging: 0 FT bereit | 0 Operatoren | Fireteam bereitstellen"
+
+
+func _count_unique_nonempty_strings(values: Array) -> int:
+	var seen: Dictionary = {}
+	for value_variant in values:
+		var value: String = String(value_variant).strip_edges().to_lower()
+		if value.is_empty():
+			continue
+		seen[value] = true
+	return seen.size()
 
 
 func _refresh_return_panel_step_chips(row: HBoxContainer, steps: Array, current_step_id: String) -> void:

@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_763 - Station Reentry Fireteam Staging Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_763_station_reentry_fireteam_staging_polish.md`, `docs/tasks/TASK_762_station_reentry_targeted_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Das Station-Return-Panel zeigt zusaetzlich zur Reentry-Plan-Zeile eine kompakte Fireteam-Staging-Zeile aus `get_homebase_direct_staging_snapshot()`.
+- Stand: `get_station_homebase_return_panel_polish_snapshot()` exportiert Fireteam-Staging-Text, Style-ID, Fireteam-/Operator-Zahlen, Sichtbarkeit, Bounds und Read-only-Status.
+- Risiken/offen: Der sichtbare Zwei-Fenster-Reentry-Playtest bleibt offen; TASK_763 poliert nur die Homebase-Orientierung fuer den ersten Handgriff.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_763_station_reentry_fireteam_staging_polish.gd`, TASK_762/TASK_755 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_764 - Station Reentry Loadout Bridge Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+
 ### TASK_762 - Station Reentry Targeted Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_762_station_reentry_targeted_polish.md`, `docs/tasks/TASK_761_station_reentry_visible_playtest_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: `get_station_homebase_return_panel_polish_snapshot()` exportiert Reentry-Plan-Text, Style-ID, Sichtbarkeit und Bounds read-only.
 - Risiken/offen: Der Polish ersetzt keinen echten Zwei-Fenster-Reentry-Playtest; er reduziert nur die Orientierungsreibung im Homebase-Return-Panel.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_762_station_reentry_targeted_polish.gd`, TASK_761/TASK_755/TASK_749 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_763 - Station Reentry Fireteam Staging Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+- Naechster Schritt: TASK_763 ist umgesetzt; danach TASK_764 - Station Reentry Loadout Bridge Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
 
 ### TASK_761 - Station Reentry Visible Playtest Findings
 - Status: implementiert im Arbeitsstand
