@@ -69,7 +69,8 @@ git checkout -b batch/<batch-name>
 - TASK_744 - Station Scenario Meta Debrief Route Smoke (implementiert)
 - TASK_745 - Station Scenario Post Debrief Homebase Readability (implementiert)
 - TASK_746 - Station Scenario Homebase Next Sortie Readiness (implementiert)
-- Naechster Schritt: Station-Homebase-Visible-Readiness-Review oder echter Host/Client-Fenster-Recapture mit dem neuen Abschluss.
+- TASK_747 - Station Scenario Homebase Visible Readiness Review (implementiert)
+- Naechster Schritt: Station-Homebase-Readiness-Visual-Polish-Findings oder echter Host/Client-Fenster-Recapture mit dem neuen Abschluss.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
