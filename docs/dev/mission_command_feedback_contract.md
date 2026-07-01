@@ -604,6 +604,11 @@ TASK_753 macht aus dem TASK_752-Prefill ein auswertbares Workbench-Gate. Die TAS
 
 Erwartete Struktur: `homebase_recapture_review` enthaelt `schema = sternenbuergerchen.station_homebase_recapture_review_gate.v1`, `task_id = TASK_753`, `source_task_id = TASK_752`, `status`, `evidence_ready`, `manual_review_required = true`, `manual_review_done`, `required_checks`, `required_check_count`, `completed_check_count`, `missing_check_ids`, `ready_for_findings`, `recommended_next_task`, `read_only = true` und `ui_sets_gameplay_truth = false`. Statuswerte: `missing_homebase_recapture_prefill`, `needs_homebase_recapture_review`, `needs_homebase_recapture_completion`, `ready_for_homebase_findings`.
 
+## Station-Homebase-Recapture-Findings (TASK_754)
+TASK_754 uebersetzt das TASK_753-Gate in konkrete naechste Arbeit. Der Findings-Snapshot darf blockieren, wenn kein echter Workbench-Export vorliegt, fehlende Checks benennen oder bei vollstaendigem Review den naechsten sichtbaren Homebase-Panel-Polish empfehlen. Er bleibt read-only und darf keine Runtime-UI, Navigation oder Commands erzeugen.
+
+Erwartete Struktur: `homebase_recapture_findings` enthaelt `schema = sternenbuergerchen.station_homebase_recapture_findings.v1`, `task_id = TASK_754`, `source_task_id = TASK_753`, `status`, `source_review_status`, `summary`, `missing_check_ids`, `finding_count`, `findings`, `recommended_next_task`, `ready_for_runtime_polish`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`. Statuswerte: `blocked_missing_real_homebase_review`, `needs_review_completion`, `ready_for_homebase_panel_polish`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.

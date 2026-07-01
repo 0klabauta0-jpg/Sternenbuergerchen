@@ -76,7 +76,8 @@ git checkout -b batch/<batch-name>
 - TASK_751 - Station Homebase Capture Metadata Hook (implementiert)
 - TASK_752 - Station Homebase Recapture Workbench Prefill (implementiert)
 - TASK_753 - Station Homebase Recapture Review Gate (implementiert)
-- Naechster Schritt: echten Host/Client-Fenster-Recapture mit dem neuen Homebase-Abschluss in der Workbench ausfuehren/exportieren und TASK_754 - Station Homebase Recapture Findings oder kleinen Panel-Visual-Polish daraus ableiten.
+- TASK_754 - Station Homebase Recapture Findings (implementiert)
+- Naechster Schritt: TASK_755 - Station Homebase Return Panel Polish oder echten Workbench-Export nachholen, falls TASK_754 weiter `blocked_missing_real_homebase_review` meldet.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
