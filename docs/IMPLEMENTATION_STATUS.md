@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_742 - Station Scenario Cargo Endgame Cue Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_742_station_scenario_cargo_endgame_cue_polish.md`, `docs/tasks/TASK_736_station_scenario_command_feedback_polish.md`, `docs/tasks/TASK_741_station_scenario_workbench_recapture_prefill.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioRouteCuePolish` formuliert Cargo-Hold, Cargo-Abflug und Cargo-Done jetzt als finale Spieleranweisung: halten bis Abflug, Abflug laeuft, Cargo weg/Debrief.
+- Stand: Der Presenter extrahiert kurze Fortschrittswerte aus vorhandenen Cargo-Progress-Zeilen und bleibt read-only.
+- Stand: `task_742_station_scenario_cargo_endgame_cue_polish.gd` prueft Cargo-Endgame-Cues und sichert bestehende AA-/Door-Cues gegen Regression. Die Objective-/Cargo-Readability-Snapshots fuehren ihre alten Diagnosezeilen weiter, auch wenn die sichtbare ACT-Zeile sie zugunsten der Route-Cue verdichtet.
+- Risiken/offen: TASK_742 verbessert die finale Cue-Sprache, ersetzt aber weiterhin keinen echten TASK_727-Fensterlauf und keinen Workbench-Export.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_742_station_scenario_cargo_endgame_cue_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_736_station_scenario_command_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_552_mission_objective_interaction_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_553_mission_cargo_extract_readability_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_554_frontier_probe_integrated_objective_playthrough_smoke.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen und JSON exportieren; danach Cargo-/Sicht-/Sync-Findings schneiden oder den naechsten spielbaren Slice bauen.
+
 ### TASK_741 - Station Scenario Workbench Recapture Prefill
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_741_station_scenario_workbench_recapture_prefill.md`, `docs/tasks/TASK_727_station_scenario_f6_host_client_playtest_notes.md`, `docs/tasks/TASK_739_station_scenario_identity_cue_recapture_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`

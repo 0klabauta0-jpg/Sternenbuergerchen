@@ -64,6 +64,7 @@ git checkout -b batch/<batch-name>
 - TASK_739 - Station Scenario Identity Cue Recapture Findings (implementiert)
 - TASK_740 - Scenario Harness Modernization (geparkt; nur bei belegten Harness-Problemen)
 - TASK_741 - Station Scenario Workbench Recapture Prefill (implementiert)
+- TASK_742 - Station Scenario Cargo Endgame Cue Polish (implementiert)
 - Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen und JSON exportieren; danach nur echte Sicht-/Sync-/Performance-Findings schneiden.
 
 ## Aktueller Fireteam-Arbeitsblock

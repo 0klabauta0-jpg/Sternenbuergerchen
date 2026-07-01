@@ -504,6 +504,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Ein offener Workbench-Export bleibt `needs_visible_playtest`, auch wenn Recapture-Evidence vollstaendig ist.
 - Die naechste echte Entscheidung bleibt der menschliche TASK_727-Export; TASK_740 bleibt nur bei belegtem Harness-Problem vorgesehen.
 
+## Station Scenario Cargo Endgame Cue Polish
+- Der Route-Cue-Presenter darf fuer `CARGO` eigene Endgame-Sprache erzeugen, solange er nur vorhandene Objective-/Use-/Progress-Snapshots liest.
+- Erwartete Cargo-Cues sind: `halten bis Abflug` fuer laufenden Cargo-Hold, `Abflug laeuft` fuer den Abflug und `Cargo weg | Debrief` fuer Abschluss/Done.
+- Der Presenter darf kurze Zeit-/Prozentfragmente aus vorhandenen Progress-Zeilen uebernehmen, aber keine Cargo-, Gate-, Mission-Result- oder Debrief-Wahrheit setzen.
+- AA-/Door-/Computer-Cues bleiben kompatibel mit der bisherigen `station_route_player_action_cue_v2`-Sprache.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
