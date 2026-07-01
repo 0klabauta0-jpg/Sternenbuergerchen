@@ -481,6 +481,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `manual_review_done` bleibt false, bis ein Mensch die TASK_727-Workbench wirklich ausfuellt und JSON exportiert.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Identity Cue Visibility Polish
+- Der Mission-Identity-Body darf die aktuelle Station-Cue vor die Route setzen, damit der erste Blick die naechste Spielerhandlung liest.
+- Die sichtbare Route im Identity-Body soll als neutrale Sequenz erscheinen, z. B. `ROUTE AA > DOOR > COM > CARGO | NEXT AA`, solange ein frueherer Schritt aktiv ist.
+- Die volle `route_line` mit Gate-/Cargo-Status bleibt als Source im Snapshot erhalten; nur `display_route_line` wird fuer die sichtbare, ruhigere Anzeige genutzt.
+- Future-Blocker wie `CARGO BLOCK`, `CARGO BLOCKED` oder `CARGO blockiert` duerfen in der sichtbaren Identity-Display-Zeile nicht mit der aktiven AA-Cue konkurrieren.
+- Label-Metadaten und Command-Feedback duerfen `cue_visible`, `display_route_line` und `future_blocker_hidden_in_display` exportieren, setzen aber keine Runtime-Gates, Door-/Cargo-States oder Commands.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
