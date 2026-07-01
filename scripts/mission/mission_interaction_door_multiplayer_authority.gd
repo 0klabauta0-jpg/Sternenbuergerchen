@@ -192,19 +192,20 @@ static func _resolve_ui_status(authority_snapshot: Dictionary, enabled: bool, ha
 
 
 static func _build_ui_summary_line(status: String, display_token: String, shortcut: String, authority_snapshot: Dictionary) -> String:
+	var subject: String = _build_ui_subject(display_token)
 	match status:
 		"open":
-			return "DOOR %s offen | Runtime frei" % display_token
+			return "%s offen | Runtime frei" % subject
 		"accepted":
-			return "DOOR %s akzeptiert | GO laeuft ueber Host" % display_token
+			return "%s akzeptiert | GO laeuft ueber Host" % subject
 		"blocked":
-			return "DOOR %s blockiert | Authority pruefen" % display_token
+			return "%s blockiert | Authority pruefen" % subject
 		"ready":
-			return "DOOR %s bereit | %s dann GO" % [display_token, shortcut]
+			return "%s bereit | %s dann GO" % [subject, shortcut]
 		_:
 			if not bool(authority_snapshot.get("hook_accepted", false)):
-				return "DOOR %s wartet | keine nutzbare Door" % display_token
-			return "DOOR %s wartet | Authority offen" % display_token
+				return "%s wartet | keine nutzbare Door" % subject
+			return "%s wartet | Authority offen" % subject
 
 
 static func _build_ui_detail_line(status: String, authority_snapshot: Dictionary, has_usable_door: bool, reject_reason_label: String = "") -> String:
@@ -271,17 +272,25 @@ static func _build_ui_player_hint(status: String, reject_reason_label: String) -
 
 
 static func _build_ui_compact_line(status: String, display_token: String, shortcut: String, reject_reason_label: String) -> String:
+	var subject: String = _build_ui_subject(display_token)
 	match status:
 		"open":
-			return "DOOR %s OPEN" % display_token
+			return "%s OPEN" % subject
 		"accepted":
-			return "DOOR %s HOST OK" % display_token
+			return "%s HOST OK" % subject
 		"blocked":
-			return "DOOR %s BLOCKED %s" % [display_token, reject_reason_label] if not reject_reason_label.is_empty() else "DOOR %s BLOCKED" % display_token
+			return "%s BLOCKED %s" % [subject, reject_reason_label] if not reject_reason_label.is_empty() else "%s BLOCKED" % subject
 		"ready":
-			return "DOOR %s %s->GO" % [display_token, shortcut]
+			return "%s %s->GO" % [subject, shortcut]
 		_:
-			return "DOOR %s WAIT" % display_token
+			return "%s WAIT" % subject
+
+
+static func _build_ui_subject(display_token: String) -> String:
+	var token: String = display_token.strip_edges().to_upper()
+	if token.is_empty() or token == "DOOR":
+		return "DOOR"
+	return "DOOR %s" % token
 
 
 static func _build_ui_severity(status: String) -> String:

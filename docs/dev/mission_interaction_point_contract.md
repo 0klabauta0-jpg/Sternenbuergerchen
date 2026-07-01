@@ -330,6 +330,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Findings duerfen `recommended_next_task` nennen, aber keine Fenster starten, keine Runtime-Interaction ausloesen, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Door/GO/Reject Visual Polish
+- Door-Authority-UI-Feedback darf Standard-Door-Token nicht doppelt ausgeben: `DOOR B->GO` statt `DOOR DOOR B->GO`.
+- Benannte Door-Tokens bleiben erlaubt, zum Beispiel `DOOR A1 B->GO`.
+- Die sichtbare Ready-Zeile muss die GO-Pflicht kurz nennen; der `DoorBreachButton` darf dazu im Ready-Zustand `B->GO` anzeigen.
+- Open-, Host- und Blocked-Zeilen bleiben kompakt: `DOOR OPEN`, `DOOR HOST OK`, `DOOR BLOCKED ...`.
+- Wrong-Team- und State-Mutation-Rejects behalten ihre lesbaren Spielergruende aus dem Door-Authority-Feedback.
+- Der Polish ist reine Anzeige. Buttontext, Compact-Line, Tooltip und Capture-Erwartungen duerfen keine Commands ausloesen, keine Runtime-Interaction starten, keine Objective-Gates setzen und keine Gameplay-Wahrheit mutieren.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

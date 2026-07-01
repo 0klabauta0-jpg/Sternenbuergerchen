@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_718 - Station Route Door/GO/Reject Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_718_station_route_door_go_reject_visual_polish.md`, `docs/tasks/TASK_717_station_route_real_click_findings.md`, `docs/tasks/TASK_702_door_authority_compact_hud_surface.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: Door-Authority-Compact-Lines entfernen doppelte Standard-Door-Token und zeigen `DOOR B->GO`, `DOOR OPEN`, `DOOR HOST OK` oder `DOOR BLOCKED ...`.
+- Stand: Der nutzbare `DoorBreachButton` zeigt im Ready-Zustand `B->GO`, damit die GO-Pflicht im Fenster schneller lesbar wird.
+- Stand: Capture-Runbook-Erwartungen wurden auf die neue sichtbare Door-Zeile aktualisiert, ohne alte lokale Manifestdaten hart zu brechen.
+- Risiken/offen: Der echte menschliche Host/Client-Klickbefund bleibt offen; TASK_718 glaettet nur Text/Button-Lesbarkeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_718_station_route_door_go_reject_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_702_door_authority_compact_hud_surface.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_701_door_authority_feedback_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_717_station_route_real_click_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_719 - echter Station-Route-Fensterklickbefund oder weiterer Layout-Polish.
+
 ### TASK_717 - Station Route Real Host/Client Click Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_717_station_route_real_click_findings.md`, `docs/tasks/TASK_712_station_route_host_client_acceptance_packet.md`, `docs/tasks/TASK_713_station_route_host_client_findings.md`, `docs/tasks/TASK_716_station_route_run_readout_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`

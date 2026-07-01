@@ -52,7 +52,7 @@ func _test_docs() -> void:
 func _test_readout_polish_fields() -> void:
 	var ready: Dictionary = _ui_feedback(_authority_snapshot({}), _button_context())
 	_assert(String(ready.get("status", "")) == "ready", "Ready status remains stable")
-	_assert(String(ready.get("compact_line", "")) == "DOOR DOOR B->GO", "Ready compact line is short")
+	_assert(String(ready.get("compact_line", "")) == "DOOR B->GO", "Ready compact line is short")
 	_assert(String(ready.get("next_action", "")).contains("GO"), "Ready next action mentions GO")
 	_assert(String(ready.get("player_hint", "")).contains("vorbereitet"), "Ready player hint explains preview state")
 	_assert(String(ready.get("severity", "")) == "action", "Ready severity is action")
@@ -78,12 +78,12 @@ func _test_readout_polish_fields() -> void:
 
 	var accepted: Dictionary = _ui_feedback(_authority_snapshot({"host_command_accepted": true}), _button_context())
 	_assert(String(accepted.get("status", "")) == "accepted", "Accepted status remains stable")
-	_assert(String(accepted.get("compact_line", "")) == "DOOR DOOR HOST OK", "Accepted compact line names host")
+	_assert(String(accepted.get("compact_line", "")) == "DOOR HOST OK", "Accepted compact line names host")
 	_assert(String(accepted.get("next_action", "")).contains("Runtime-Progress"), "Accepted next action waits for runtime progress")
 
 	var open: Dictionary = _ui_feedback(_authority_snapshot({"door_runtime_open_override": true}), _button_context())
 	_assert(String(open.get("status", "")) == "open", "Open status remains stable")
-	_assert(String(open.get("compact_line", "")) == "DOOR DOOR OPEN", "Open compact line names open state")
+	_assert(String(open.get("compact_line", "")) == "DOOR OPEN", "Open compact line names open state")
 	_assert(String(open.get("player_hint", "")).contains("Runtime-Overrides"), "Open hint names runtime overrides")
 	_assert(String(open.get("severity", "")) == "success", "Open severity is success")
 

@@ -10831,8 +10831,8 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 		display_token = "DOOR"
 	button.visible = true
 	button.disabled = not enabled
-	button.text = "Breach"
 	var authority_ui_feedback: Dictionary = build_mission_interaction_door_authority_ui_feedback({}, _build_door_authority_button_context(feedback, door_feedback))
+	button.text = _build_door_interaction_button_text(String(authority_ui_feedback.get("status", "")).strip_edges(), enabled)
 	button.tooltip_text = String(authority_ui_feedback.get("tooltip_text", "")).strip_edges()
 	if button.tooltip_text.is_empty():
 		button.tooltip_text = "Breach %s [B] -> GO" % display_token if enabled else _build_door_interaction_button_disabled_tooltip(has_usable_door)
@@ -10852,6 +10852,20 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 	button.set_meta("command_hierarchy_disabled_reason", "" if enabled else _resolve_door_interaction_button_disabled_reason(has_usable_door))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, enabled)
 	_apply_door_authority_button_affordance(button, String(authority_ui_feedback.get("severity", "")).strip_edges())
+
+
+func _build_door_interaction_button_text(status: String, enabled: bool) -> String:
+	match status.strip_edges().to_lower():
+		"ready":
+			return "B->GO" if enabled else "Door"
+		"accepted":
+			return "Host"
+		"open":
+			return "Open"
+		"blocked":
+			return "Block"
+		_:
+			return "Door"
 
 
 func _apply_door_authority_button_affordance(button: Button, severity: String) -> void:
