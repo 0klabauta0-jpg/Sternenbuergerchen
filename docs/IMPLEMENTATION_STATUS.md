@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_771 - Station Reentry Visible Host Client Playtest Export
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_771_station_reentry_visible_host_client_playtest_export.md`, `docs/tasks/TASK_770_station_reentry_host_client_next_order_sync.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `prepare_station_reentry_host_client_playtest_export.ps1` schreibt ein read-only Exportpaket fuer den sichtbaren Host/Client-Reentry-Lauf.
+- Stand: Das Paket liest das TASK_770-Sync-Manifest, exportiert erwartete Next-Order-/Route-/Cue-Texte, manuelle Checks und Start-/Capture-Kommandos.
+- Risiken/offen: Kein automatischer Sichtentscheid; der echte Zwei-Fenster-Export muss weiterhin manuell ausgefuehrt und danach ausgewertet werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_771_station_reentry_visible_host_client_playtest_export.gd`, TASK_770 Regression, `git diff --check`.
+- Naechster Schritt: TASK_772 - Station Reentry Host Client Export Findings.
+
 ### TASK_770 - Station Reentry Host Client Next Order Sync
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_770_station_reentry_host_client_next_order_sync.md`, `docs/tasks/TASK_769_station_reentry_performance_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
