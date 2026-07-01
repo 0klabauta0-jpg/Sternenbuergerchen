@@ -32,6 +32,8 @@ const ISSUE_FLAG_IDS: Array[String] = [
 static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
 	var findings: Array = []
 	_add_drill_findings(findings, drill_manifest)
+	var recapture_findings: Dictionary = Dictionary(options.get("recapture_findings", {}))
+	var recapture_evidence: Dictionary = _build_recapture_evidence(recapture_findings, options)
 	var required_checks: Array = _build_required_checks(existing_notes)
 	var issue_flags: Array = _build_issue_flags(existing_notes)
 	var completed_check_count: int = _count_completed_checks(required_checks)
@@ -56,6 +58,9 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 		"source_drill_task_id": String(drill_manifest.get("task_id", "")),
 		"source_drill_scenario_path": String(drill_manifest.get("scenario_path", "data/mission_scenarios/station_route_one_screen_multiplayer_drill.json")),
 		"source_drill_manifest_path": String(options.get("drill_manifest_path", DEFAULT_DRILL_MANIFEST_PATH)),
+		"recapture_evidence": recapture_evidence,
+		"recapture_ready_for_workbench": bool(recapture_evidence.get("ready_for_workbench", false)),
+		"source_recapture_manifest_path": String(recapture_evidence.get("manifest_path", "")),
 		"report_path": String(options.get("report_path", DEFAULT_REPORT_PATH)),
 		"manifest_path": String(options.get("manifest_path", DEFAULT_MANIFEST_PATH)),
 		"required_checks": required_checks,
@@ -67,6 +72,36 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 		"blocking_issue_count": blocker_count,
 		"summary": _build_summary(status, completed_check_count, required_checks.size(), active_issue_count),
 		"recommended_next_task": _recommended_next_task(status),
+	}
+
+
+static func _build_recapture_evidence(recapture_findings: Dictionary, options: Dictionary) -> Dictionary:
+	var manifest_path: String = String(options.get("recapture_manifest_path", "tmp/station_scenario_identity_cue_recapture_findings.json"))
+	var status: String = String(recapture_findings.get("status", ""))
+	var real_run_done: bool = bool(recapture_findings.get("real_run_done", false))
+	var host_crop_ready: bool = bool(recapture_findings.get("host_crop_ready", false))
+	var client_crop_ready: bool = bool(recapture_findings.get("client_crop_ready", false))
+	var cue_visible: bool = bool(recapture_findings.get("cue_visible", false))
+	var future_blocker_hidden: bool = bool(recapture_findings.get("future_blocker_hidden_in_display", false))
+	var ready_for_workbench: bool = real_run_done and host_crop_ready and client_crop_ready and cue_visible and future_blocker_hidden
+	return {
+		"schema": String(recapture_findings.get("schema", "")),
+		"task_id": String(recapture_findings.get("task_id", "")),
+		"manifest_path": manifest_path,
+		"status": status,
+		"real_run_done": real_run_done,
+		"host_crop_ready": host_crop_ready,
+		"client_crop_ready": client_crop_ready,
+		"host_crop_path": String(recapture_findings.get("host_crop_path", "tmp/host_client_two_window_host_review.png")),
+		"client_crop_path": String(recapture_findings.get("client_crop_path", "tmp/host_client_two_window_client_review.png")),
+		"cue_visible": cue_visible,
+		"identity_text": String(recapture_findings.get("identity_text", "")),
+		"display_route_line": String(recapture_findings.get("display_route_line", "")),
+		"future_blocker_hidden_in_display": future_blocker_hidden,
+		"ready_for_workbench": ready_for_workbench,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
 	}
 
 

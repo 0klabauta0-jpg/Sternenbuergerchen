@@ -497,6 +497,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `recommended_next_task` soll zur TASK_727-Workbench fuehren; Harness-Modernisierung bleibt nur fuer belegte Start-/Capture-/Sync-Probleme.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Workbench Recapture Prefill
+- Die TASK_727-Workbench darf Recapture-Felder aus TASK_739 vorbefuellen: Manifestpfad, Host-/Client-Crops, erwartete Cue, neutrale Display-Route und Recapture-Status.
+- Diese Prefill-Daten sind Vergleichs- und Review-Hilfe. Sie duerfen `station_scenario_playtest.playtest_done`, `manual_review_done`, Route-Gates, Cargo-Gates, Door-State, Commands oder Peer-State nicht setzen.
+- `StationScenarioF6HostClientPlaytestNotes` darf optionale Recapture-Findings im Snapshot unter `recapture_evidence` exportieren, solange `read_only = true` und `ui_sets_gameplay_truth = false` erhalten bleiben.
+- Ein offener Workbench-Export bleibt `needs_visible_playtest`, auch wenn Recapture-Evidence vollstaendig ist.
+- Die naechste echte Entscheidung bleibt der menschliche TASK_727-Export; TASK_740 bleibt nur bei belegtem Harness-Problem vorgesehen.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
