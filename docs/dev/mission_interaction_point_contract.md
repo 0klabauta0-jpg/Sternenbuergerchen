@@ -459,6 +459,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Das Budget kommt aus `data/performance_budget_contract.json`; maschinenabhaengige FPS/GPU-/Netzwerkstutter bleiben Godot-Profiler- und TASK_727-Fensterarbeit.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Current Report Sync Guard
+- TASK_707 und TASK_714 muessen ihre Report-Anker gegen `docs/reports/project_current_state_handbook_2026_07_01.html` pruefen, solange dieser Bericht der aktuelle Iststand-/Handbuch-Report ist.
+- Der Guard prueft nur Evidence-/Report-Konsistenz: TASK_707-Playtest-Anker, TASK_714-Manifest-Anker, Statusfelder und stale Reportpfade.
+- Das Manifest `tmp/station_scenario_current_report_sync_guard.json` darf Reportpfade, Anker und Rebase-Status exportieren, aber keine Runtime starten und keine Gameplay-Wahrheit setzen.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

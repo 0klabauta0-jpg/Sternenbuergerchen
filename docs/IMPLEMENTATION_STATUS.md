@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_735 - Station Scenario Current Report Sync Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_735_station_scenario_current_report_sync_guard.md`, `docs/tasks/TASK_707_mission_door_computer_cargo_smoke.md`, `docs/tasks/TASK_714_station_route_multiplayer_scenario_guard.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: TASK_707 und TASK_714 referenzieren wieder den aktuellen Iststand-/Handbuch-Report statt des alten `project_current_state_handbook_refresh_2026_06_30.html`.
+- Stand: `task_735_station_scenario_current_report_sync_guard.gd` prueft die Report-Rebase, TASK_707-/TASK_714-Exportanker und schreibt `tmp/station_scenario_current_report_sync_guard.json` read-only.
+- Risiken/offen: TASK_735 ist Report-/Evidence-Kettenpflege. Der echte TASK_727-Fensterlauf und menschliche Host/Client-Spielgefuehlentscheid bleiben offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_735_station_scenario_current_report_sync_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_714_station_route_multiplayer_scenario_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_707_mission_door_computer_cargo_smoke.gd`, `git diff --check`.
+- Naechster Schritt: TASK_727-Workbench sichtbar ausfuellen oder TASK_736 - Station Scenario Command Feedback Polish, falls echte Notizen die Befehlsrueckmeldung weiter als Reibung markieren.
+
 ### TASK_734 - Station Scenario Performance Feel Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_734_station_scenario_performance_feel_pass.md`, `docs/tasks/TASK_733_station_scenario_hud_overlap_pass.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/performance/performance_regression_gate.md`, `data/performance_budget_contract.json`, `docs/reports/project_current_state_handbook_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Verifier misst wiederholte `get_command_feedback_snapshot()`-Abrufe in der Station-Testszene, schreibt `tmp/station_scenario_performance_feel_pass.json` und prueft Budget, Linecount, Zeichenbudget und Route/Cue-Entdopplung.
 - Risiken/offen: TASK_734 ersetzt keinen echten Godot-Profiler und keinen menschlichen TASK_727-Fensterlauf; echte FPS/GPU/Netzwerkstutter bleiben manuell.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_734_station_scenario_performance_feel_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_733_station_scenario_hud_overlap_pass.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_732_station_scenario_route_cue_polish.gd`, `git diff --check`.
-- Naechster Schritt: TASK_727-Workbench wirklich ausfuellen oder TASK_735 - Station Scenario Host Client Sync Polish, falls der echte Zwei-Fenster-Lauf Sync-Reibungen zeigt.
+- Naechster Schritt: TASK_727-Workbench wirklich ausfuellen oder TASK_735 - Station Scenario Current Report Sync Guard, falls die technische Evidence-Kette weiter gegen stale Reports laufen kann.
 
 ### TASK_733 - Station Scenario HUD Overlap Pass
 - Status: implementiert im Arbeitsstand
