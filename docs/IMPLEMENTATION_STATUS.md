@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_768 - Station Reentry First Mission Preview Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_768_station_reentry_first_mission_preview_polish.md`, `docs/tasks/TASK_767_station_reentry_visible_playtest_review_gate.md`, `docs/tasks/TASK_567_frontier_probe_first_move_threat_preview_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: Waypoint-Intent-Text nennt den geplanten Zustand jetzt explizit als `PREVIEW`, bevor GO ausgefuehrt wird.
+- Stand: `get_station_reentry_first_mission_preview_polish_snapshot()` verbindet Station-Kontext, bestehenden First-Move-Threat-Preview-Snapshot, Ghost/Pfad, Distanz/ETA, Risiko und Station-Route/Cue read-only.
+- Risiken/offen: Der echte sichtbare Host/Client-Reentry-Playtest bleibt offen; TASK_768 beweist den technischen ersten Station-Missionsentscheid und macht die Sprache im HUD klarer.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_768_station_reentry_first_mission_preview_polish.gd`, TASK_567/TASK_767 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_769 - Station Reentry Performance Feel Pass oder sichtbaren Reentry-Playtest mit Workbench-Export ausfuehren.
+
 ### TASK_767 - Station Reentry Visible Playtest Review Gate
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_767_station_reentry_visible_playtest_review_gate.md`, `docs/tasks/TASK_761_station_reentry_visible_playtest_findings.md`, `docs/tasks/TASK_766_station_reentry_start_permission_bridge_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`

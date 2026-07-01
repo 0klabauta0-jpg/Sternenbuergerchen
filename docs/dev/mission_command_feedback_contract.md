@@ -674,6 +674,11 @@ TASK_767 aktualisiert das Reentry-Findings-Routing nach den sichtbaren Brueckenp
 
 Erwartete Struktur: `StationReentryPlaytestFindings.build_snapshot()` behaelt `schema = sternenbuergerchen.station_reentry_visible_playtest_findings.v1`, `task_id = TASK_761`, `source_task_id = TASK_760`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_command = false`. Bei offenen Notizen bleibt `status = needs_visible_reentry_playtest`, aber `recommended_next_task = TASK_767 - Station Reentry Visible Playtest Execute/Review`. `needs_first_order_preview_polish`, `needs_reentry_performance_pass` und `needs_host_client_next_order_sync` routen auf TASK_768, TASK_769 und TASK_770.
 
+## Station-Reentry-First-Mission-Preview-Polish (TASK_768)
+TASK_768 macht den ersten Station-Reentry-Missionsentscheid vor `GO` eindeutig lesbar. Der Waypoint-Intent-Text muss den geplanten Zustand als `PREVIEW` benennen; Distanz/ETA, Risiko, Ghost/Pfad und Station-Route oder Cue bleiben sichtbar. Der Polish darf keinen `GO` ausfuehren, keine Command-Queue schreiben und keine neue Gameplay-Wahrheit im HUD speichern.
+
+Erwartete Struktur: `get_station_reentry_first_mission_preview_polish_snapshot()` liefert `schema = sternenbuergerchen.station_reentry_first_mission_preview_polish.v1`, `task_id = TASK_768`, `source_task_ids = [TASK_540, TASK_567, TASK_767]`, `station_context_active`, `selected_order_text`, `station_route_line`, `station_cue_line`, `risk_state`, `risk_preview_text`, `distance_world`, `eta_seconds_estimate`, `first_waypoint_preview`, `threat_preview_snapshot`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.
