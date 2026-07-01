@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_719 - Station Route Post-Polish Recheck Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_719_station_route_post_polish_recheck.md`, `docs/tasks/TASK_718_station_route_door_go_reject_visual_polish.md`, `docs/tasks/TASK_717_station_route_real_click_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
+- Stand: `StationRoutePostPolishRecheck` bewertet TASK_718-Polish-Evidence und Host/Client-Capture-Erwartungen read-only.
+- Stand: Alte Capture-Erwartungen wie `DOOR DOOR B->GO` oder `DOOR DOOR OPEN` werden als `needs_capture_refresh` erkannt.
+- Stand: Frische Capture-Erwartungen mit offenem menschlichem Befund werden als `ready_for_real_window_recheck` ausgewiesen.
+- Risiken/offen: Der Guard startet keinen neuen Fensterlauf; wenn der aktuelle `tmp`-Capture stale ist, bleibt der echte Host/Client-Recheck Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_719_station_route_post_polish_recheck.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_718_station_route_door_go_reject_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_717_station_route_real_click_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_720 - echten Station-Route-Fensterrecheck ausfuehren oder naechsten Layout-Polish ableiten.
+
 ### TASK_718 - Station Route Door/GO/Reject Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_718_station_route_door_go_reject_visual_polish.md`, `docs/tasks/TASK_717_station_route_real_click_findings.md`, `docs/tasks/TASK_702_door_authority_compact_hud_surface.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`

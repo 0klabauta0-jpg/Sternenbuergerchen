@@ -339,6 +339,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Polish ist reine Anzeige. Buttontext, Compact-Line, Tooltip und Capture-Erwartungen duerfen keine Commands ausloesen, keine Runtime-Interaction starten, keine Objective-Gates setzen und keine Gameplay-Wahrheit mutieren.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Post-Polish Recheck Guard
+- `StationRoutePostPolishRecheck` bewertet TASK_718-Polish-Evidence zusammen mit dem Host/Client-Capture-Manifest read-only.
+- Der Guard erkennt stale Capture-Erwartungen, wenn ein Manifest nach TASK_718 noch `DOOR DOOR B->GO` oder `DOOR DOOR OPEN` erwartet.
+- `needs_capture_refresh` bedeutet: Code-/Polish-Evidence ist aktuell, aber der echte Fensterbefund muss nach dem sichtbaren Textwechsel erneuert werden.
+- `ready_for_real_window_recheck` bedeutet: Capture-Erwartungen sind frisch und der menschliche Fensterentscheid bleibt offen.
+- Der Guard darf keine Fenster starten, keine Runtime-Interaction ausloesen, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

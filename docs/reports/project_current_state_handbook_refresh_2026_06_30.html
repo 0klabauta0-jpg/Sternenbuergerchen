@@ -76,12 +76,12 @@
 <body data-report-id="project_current_state_handbook_refresh_2026_06_30" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch Refresh</h1>
-    <p>Kompakter Zwischenbericht nach TASK_705 bis TASK_718: Was spielbar ist, wie man es bedient, wo es reibt und was als naechstes sinnvoll ist.</p>
+    <p>Kompakter Zwischenbericht nach TASK_705 bis TASK_719: Was spielbar ist, wie man es bedient, wo es reibt und was als naechstes sinnvoll ist.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Stand: 2026-07-01</span>
       <span class="pill">Branchbasis: integration/core-foundation</span>
-      <span class="pill">Letzter Abschluss: TASK_718</span>
+      <span class="pill">Letzter Abschluss: TASK_719</span>
       <span class="pill good">TASK_706 Door Layout/Visual Polish</span>
       <span class="pill good">TASK_707 Door/Computer/Cargo Smoke</span>
       <span class="pill good">TASK_708 Station Route Visual Evidence</span>
@@ -95,6 +95,7 @@
       <span class="pill good">TASK_716 Route Readout Polish</span>
       <span class="pill good">TASK_717 Click Findings</span>
       <span class="pill good">TASK_718 Door/GO/Reject Polish</span>
+      <span class="pill good">TASK_719 Post-Polish Recheck</span>
       <span class="pill good">Read-only Report</span>
     </div>
   </header>
@@ -114,7 +115,7 @@
         <article class="card wide">
           <h2>Kurzer Stand</h2>
           <p>Der spielbare Kern ist nicht mehr nur Idee: Homebase, Readiness, Dropship/Insertion, Mission-HUD, Fireteam-Orders, Objective-Route, Debrief und Homebase-Return sind als Review-Spine vorhanden. Die aktuelle Spitze ist die Door-/Station-Interaktion, weil sie Singleplayer-Lesbarkeit und Host/Client-Authority zusammenbringt.</p>
-          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync. TASK_715 entfernt den leeren Event-Log-Klotz aus dem initialen Fensterblick. TASK_716 fasst AA, Door, Computer, Cargo und NEXT als kurze Route-Line im HUD zusammen. TASK_717 fuehrt echten Capture-Stand und Route-Line zu einem read-only Klickbefund zusammen. TASK_718 glaettet Door/GO/Reject-Sprache und Buttontext fuer den echten Fensterblick.</div>
+          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync. TASK_715 entfernt den leeren Event-Log-Klotz aus dem initialen Fensterblick. TASK_716 fasst AA, Door, Computer, Cargo und NEXT als kurze Route-Line im HUD zusammen. TASK_717 fuehrt echten Capture-Stand und Route-Line zu einem read-only Klickbefund zusammen. TASK_718 glaettet Door/GO/Reject-Sprache und Buttontext fuer den echten Fensterblick. TASK_719 verhindert, dass stale Capture-Erwartungen nach dem Text-Polish als aktueller Fensterbefund gelesen werden.</div>
         </article>
         <article class="card">
           <h2>Arbeitsstatus</h2>
@@ -137,6 +138,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_716_done"> TASK_716 Station Route Run Readout vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_717_done"> TASK_717 Real Host/Client Click Findings vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.task_718_done"> TASK_718 Door/GO/Reject Visual Polish vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_719_done"> TASK_719 Post-Polish Recheck Guard vorhanden</label>
         </article>
         <article class="card full">
           <h2>Systemkarte</h2>
@@ -244,7 +246,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechster Griff</h2>
-          <p>Aktuell sinnvoll: den geglaetteten TASK_718-Stand im echten Fenster pruefen. Door muss jetzt als `DOOR B->GO`, Wrong-Team als klarer Reject und Open als `DOOR OPEN` lesbar sein; danach kann entschieden werden, ob ein weiterer Layout-Polish noetig ist oder der kleine Stationslauf spielbar genug wirkt.</p>
+          <p>Aktuell sinnvoll: TASK_719 ansehen und danach den echten Host/Client-Capture nach dem TASK_718-Textwechsel auffrischen. Wenn der Recheck `needs_capture_refresh` meldet, ist der naechste Griff kein neuer Code, sondern ein echter Fensterlauf mit den aktuellen Door-Zeilen.</p>
           <div class="callout warning">Nicht jetzt: grosses neues Missionssystem, Ammo-Runner, tiefe Economy oder Editor-Umbau. Erst muss die kleine Station-Interaktion angenehm, sichtbar und im Host/Client-Pfad glaubwuerdig sein.</div>
         </article>
         <article class="card">
@@ -260,6 +262,7 @@
             <option value="station_route_run_readout">TASK_716 Route Readout pruefen</option>
             <option value="station_route_real_click_findings">TASK_717 Real Click Findings pruefen</option>
             <option value="station_route_door_go_reject_polish">TASK_718 Door/GO/Reject Polish pruefen</option>
+            <option value="station_route_post_polish_recheck">TASK_719 Post-Polish Recheck pruefen</option>
             <option value="real_host_client_run">Echten Host/Client Door Run machen</option>
             <option value="mini_scenario_playtest">Mini-Szenario Playtest</option>
           </select>
@@ -271,7 +274,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Arbeitsnotizen</h2>
-          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30/07-01: Neuer kompakter Ist-Stand-/Handbuch-Refresh angelegt. TASK_705 ist letzter Door-Manual-Run-Stand. TASK_706 machte Door-Layout-/Visual-Polish read-only sichtbar. TASK_707 pruefte Door -> Computer -> Cargo als integrierten Stations-Smoke. TASK_708 schreibt daraus ein PNG-/JSON-Evidence-Paket. TASK_709 stellt die ausfuellbare Fenster-Playtest-Workbench bereit. TASK_710 bewertet Evidence und Notizen als Polish-/Akzeptanzbereitschaft. TASK_711 beschriftet das generierte Evidence-Board. TASK_712 buendelt den Host/Client-Acceptance-Run, ohne neue Gameplay-Wahrheit zu erzeugen. TASK_713 wertet das Acceptance-Paket read-only als Multiplayer-Findings-Status. TASK_714 sichert den technischen Multiplayer-Scenario-Pfad fuer Door/Computer/Cargo und Snapshot-Sync ab. TASK_715 klappt ein leeres Event-Log im Missionsstart ein. TASK_716 zeigt die Stationsroute als HUD-Kette mit AA, Door, Computer, Cargo und NEXT. TASK_717 wertet echten Capture-Stand plus Route-Line als read-only Klickbefund aus. TASK_718 entfernt doppelte Door-Token und zeigt am Button direkt B-&gt;GO.</div>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-06-30/07-01: Neuer kompakter Ist-Stand-/Handbuch-Refresh angelegt. TASK_705 ist letzter Door-Manual-Run-Stand. TASK_706 machte Door-Layout-/Visual-Polish read-only sichtbar. TASK_707 pruefte Door -> Computer -> Cargo als integrierten Stations-Smoke. TASK_708 schreibt daraus ein PNG-/JSON-Evidence-Paket. TASK_709 stellt die ausfuellbare Fenster-Playtest-Workbench bereit. TASK_710 bewertet Evidence und Notizen als Polish-/Akzeptanzbereitschaft. TASK_711 beschriftet das generierte Evidence-Board. TASK_712 buendelt den Host/Client-Acceptance-Run, ohne neue Gameplay-Wahrheit zu erzeugen. TASK_713 wertet das Acceptance-Paket read-only als Multiplayer-Findings-Status. TASK_714 sichert den technischen Multiplayer-Scenario-Pfad fuer Door/Computer/Cargo und Snapshot-Sync ab. TASK_715 klappt ein leeres Event-Log im Missionsstart ein. TASK_716 zeigt die Stationsroute als HUD-Kette mit AA, Door, Computer, Cargo und NEXT. TASK_717 wertet echten Capture-Stand plus Route-Line als read-only Klickbefund aus. TASK_718 entfernt doppelte Door-Token und zeigt am Button direkt B-&gt;GO. TASK_719 erkennt stale Capture-Erwartungen nach diesem Textwechsel.</div>
         </article>
         <article class="card full">
           <h2>TASK_708 Evidence</h2>
@@ -379,6 +382,17 @@
           <input readonly value="scripts/tests/task_718_station_route_door_go_reject_visual_polish.gd" data-export-key="station_route_door_go_reject_visual_polish.verifier_path">
           <textarea data-export-key="station_route_door_go_reject_visual_polish.notes" placeholder="Nach dem echten Fensterlauf: Ist B->GO klar genug, oder braucht der Button/Icon noch Layout-Polish?"></textarea>
         </article>
+        <article class="card full">
+          <h2>TASK_719 - Station Route Post-Polish Recheck Guard</h2>
+          <p>Der Recheck vergleicht TASK_718-Polish-Evidence mit dem Host/Client-Capture. Wenn das Capture noch alte Door-Zeilen erwartet, wird `needs_capture_refresh` gemeldet, statt stale Fenster-Evidence als aktuell zu lesen.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_post_polish_recheck.guard_read_only"> Recheck ist read-only</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_post_polish_recheck.detects_stale_capture"> Stale Capture-Erwartungen werden erkannt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_post_polish_recheck.requires_current_door_lines"> Aktuelle Door-Zeilen sind DOOR B-&gt;GO und DOOR OPEN</label>
+          <input readonly value="needs_capture_refresh" data-export-key="station_route_post_polish_recheck.expected_stale_status">
+          <input readonly value="tmp/station_route_post_polish_recheck.json" data-export-key="station_route_post_polish_recheck.manifest_path">
+          <input readonly value="scripts/tests/task_719_station_route_post_polish_recheck.gd" data-export-key="station_route_post_polish_recheck.verifier_path">
+          <textarea data-export-key="station_route_post_polish_recheck.notes" placeholder="Nach Capture-Refresh: Status sollte ready_for_real_window_recheck oder accepted werden."></textarea>
+        </article>
         <article class="card half">
           <h2>Entscheidung</h2>
           <label class="checkline"><input type="radio" name="next_path" value="door_polish" data-export-key="decision.next_path" checked> Door Polish zuerst</label>
@@ -435,7 +449,7 @@
           notes: {},
           active_choices: {},
           computed: {
-            latest_completed_task: "TASK_718 - Station Route Door/GO/Reject Visual Polish",
+            latest_completed_task: "TASK_719 - Station Route Post-Polish Recheck Guard",
             latest_completed_visual_task: "TASK_706 - Mission Door Layout/Visual Polish",
             latest_completed_flow_task: "TASK_707 - Mission Door/Computer/Cargo Smoke",
             latest_completed_evidence_task: "TASK_708 - Station Route Visual Evidence",
@@ -449,7 +463,8 @@
             latest_completed_route_readout_task: "TASK_716 - Station Route Run Readout Polish",
             latest_completed_click_findings_task: "TASK_717 - Station Route Real Host/Client Click Findings",
             latest_completed_door_go_reject_polish_task: "TASK_718 - Station Route Door/GO/Reject Visual Polish",
-            recommended_next_task: "TASK_719 - Station Route real window click review or layout polish",
+            latest_completed_post_polish_recheck_task: "TASK_719 - Station Route Post-Polish Recheck Guard",
+            recommended_next_task: "TASK_720 - refresh real Host/Client capture or continue layout polish from recheck",
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             report_is_gameplay_truth: false
           },
