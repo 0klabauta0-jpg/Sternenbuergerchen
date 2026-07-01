@@ -407,6 +407,61 @@ func get_station_scenario_post_debrief_homebase_readability_snapshot() -> Dictio
 	}
 
 
+func get_station_scenario_homebase_next_sortie_readiness_snapshot() -> Dictionary:
+	var post_snapshot: Dictionary = get_station_scenario_post_debrief_homebase_readability_snapshot()
+	var readiness: Dictionary = get_pre_mission_readiness_snapshot()
+	var staging: Dictionary = get_homebase_direct_staging_snapshot()
+	var label := _get_next_sortie_readiness_label()
+	var label_visible: bool = _control_is_visible(label)
+	var label_text: String = label.text.strip_edges() if label != null else ""
+	var steps: Array = _build_next_sortie_readiness_steps(readiness, staging)
+	var current_step_id: String = _resolve_next_sortie_current_step_id(readiness, staging)
+	var readiness_line: String = _build_next_sortie_readiness_line(steps, current_step_id)
+	var post_gate: String = String(post_snapshot.get("gate", "")).strip_edges()
+	var checks: Array = []
+	_append_visual_audit_check(checks, "station_result_present", bool(post_snapshot.get("station_result_present", false)), "critical", "Next-sortie readiness should only appear for a carried Station Scenario result.")
+	_append_visual_audit_check(checks, "post_debrief_summary_gate", post_gate == "pass", "critical", "Readiness should build on the green Station post-Debrief Homebase summary.")
+	_append_visual_audit_check(checks, "readiness_label_visible", label_visible, "critical", "Homebase should show a compact station next-sortie readiness line.")
+	_append_visual_audit_check(checks, "readiness_line_matches_label", not readiness_line.is_empty() and label_text == readiness_line, "critical", "Rendered station readiness line should match the snapshot.")
+	_append_visual_audit_check(checks, "current_next_step_present", _next_sortie_steps_contain(steps, current_step_id), "critical", "Station readiness should point to one concrete current next step.")
+	_append_visual_audit_check(checks, "readiness_steps_complete", _next_sortie_steps_contain(steps, "review_roster_gains") and _next_sortie_steps_contain(steps, "stage_fireteam") and _next_sortie_steps_contain(steps, "assign_loadout") and _next_sortie_steps_contain(steps, "prepare_transport") and _next_sortie_steps_contain(steps, "start_next_sortie"), "critical", "Station readiness should cover roster review, staging, loadout, transport and launch.")
+	_append_visual_audit_check(checks, "review_gains_non_blocking", not _has_last_result_progression_awards() or current_step_id != "review_roster_gains", "critical", "Roster gains should remain visible without hiding the next actionable station sortie step.")
+	_append_visual_audit_check(checks, "read_only", true, "critical", "Snapshot reads existing Homebase state only.")
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_scenario_homebase_next_sortie_readiness.v1",
+		"task_id": "TASK_746",
+		"source_task_ids": ["TASK_745", "TASK_534", "TASK_594"],
+		"gate": "pass" if failed_count == 0 else "fail",
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"route_id": String(post_snapshot.get("route_id", "")),
+		"scenario_id": String(post_snapshot.get("scenario_id", "")),
+		"station_result_present": bool(post_snapshot.get("station_result_present", false)),
+		"post_debrief_summary_gate": post_gate,
+		"post_debrief_summary_text": String(post_snapshot.get("summary_text", "")),
+		"readiness_label_visible": label_visible,
+		"readiness_line": readiness_line,
+		"rendered_readiness_line": label_text,
+		"current_next_step_id": current_step_id,
+		"readiness_steps": steps,
+		"review_gains_non_blocking": not _has_last_result_progression_awards() or current_step_id != "review_roster_gains",
+		"pre_mission_readiness_state": String(readiness.get("overall_state", "")).strip_edges(),
+		"pre_mission_readiness_summary": String(readiness.get("summary_text", "")).strip_edges(),
+		"can_request_mission_start": can_request_mission_start(),
+		"payload_fireteam_count": Array(staging.get("payload_fireteam_ids", [])).size(),
+		"payload_operator_count": int(staging.get("payload_operator_count", 0)),
+		"boarding_progress_ratio": float(staging.get("boarding_progress_ratio", 0.0)),
+		"mission_result_preserved": not _last_mission_result_summary.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"checks": checks,
+		"recommended_next_task": "TASK_747 - Station Scenario Homebase Visible Readiness Review",
+	}
+
+
 func get_frontier_probe_homebase_next_sortie_readiness_snapshot() -> Dictionary:
 	var post_snapshot: Dictionary = get_frontier_probe_post_debrief_homebase_readability_snapshot()
 	var readiness: Dictionary = get_pre_mission_readiness_snapshot()
@@ -3066,7 +3121,7 @@ func _update_post_debrief_homebase_summary() -> void:
 	label.visible = true
 	label.text = summary_text
 	label.tooltip_text = "Read-only summary of the last mission result carried back from Debrief."
-	label.set_meta("frontier_probe_post_debrief_homebase_summary", true)
+	label.set_meta("frontier_probe_post_debrief_homebase_summary", _is_frontier_probe_last_result())
 	label.set_meta("frontier_probe_result_present", _is_frontier_probe_last_result())
 	label.set_meta("station_scenario_post_debrief_homebase_summary", _is_station_scenario_last_result())
 	label.set_meta("station_result_present", _is_station_scenario_last_result())
@@ -3092,7 +3147,8 @@ func _update_next_sortie_readiness_summary() -> void:
 	label.visible = true
 	label.text = line
 	label.tooltip_text = "Read-only next-sortie readiness built from Homebase staging and readiness snapshots."
-	label.set_meta("frontier_probe_homebase_next_sortie_readiness", true)
+	label.set_meta("frontier_probe_homebase_next_sortie_readiness", _is_frontier_probe_last_result())
+	label.set_meta("station_scenario_homebase_next_sortie_readiness", _is_station_scenario_last_result())
 	label.set_meta("current_next_step_id", current_step_id)
 	label.set_meta("readiness_step_count", steps.size())
 	label.set_meta("readiness_line", line)
@@ -3315,7 +3371,7 @@ func _build_post_debrief_homebase_next_step_text() -> String:
 
 
 func _build_next_sortie_readiness_steps(readiness: Dictionary, staging: Dictionary) -> Array:
-	if not _is_frontier_probe_last_result():
+	if not _supports_next_sortie_readiness_last_result():
 		return []
 	var current_step_id: String = _resolve_next_sortie_current_step_id(readiness, staging)
 	return [
@@ -3338,7 +3394,7 @@ func _make_next_sortie_step(id: String, label: String, ready: bool, current_step
 
 
 func _resolve_next_sortie_current_step_id(readiness: Dictionary, staging: Dictionary) -> String:
-	if not _is_frontier_probe_last_result():
+	if not _supports_next_sortie_readiness_last_result():
 		return ""
 	if int(staging.get("payload_operator_count", 0)) <= 0:
 		return "stage_fireteam"
@@ -3380,6 +3436,10 @@ func _next_sortie_steps_contain(steps: Array, step_id: String) -> bool:
 		if String(step.get("id", "")).strip_edges() == step_id:
 			return true
 	return false
+
+
+func _supports_next_sortie_readiness_last_result() -> bool:
+	return _is_frontier_probe_last_result() or _is_station_scenario_last_result()
 
 
 func _has_last_result_progression_awards() -> bool:
