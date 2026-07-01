@@ -60,8 +60,9 @@ const HOMEBASE_REENTRY_PLAN_LINE := "Reentry-Plan: Fireteam -> Loadout -> Dropsh
 const HOMEBASE_REENTRY_FIRETEAM_STAGING_STYLE_ID := "task_763_station_reentry_fireteam_staging_v1"
 const HOMEBASE_REENTRY_LOADOUT_BRIDGE_STYLE_ID := "task_764_station_reentry_loadout_bridge_v1"
 const HOMEBASE_REENTRY_DROPSHIP_BOARDING_STYLE_ID := "task_765_station_reentry_dropship_boarding_v1"
+const HOMEBASE_REENTRY_START_PERMISSION_STYLE_ID := "task_766_station_reentry_start_permission_v1"
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE := 12
-const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 180.0
+const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 198.0
 const HOMEBASE_ROSTER_SORT_OPTIONS: Array = [
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_DESC, "label": "Leader high"},
 	{"id": HOMEBASE_ROSTER_SORT_LEADER_ASC, "label": "Leader low"},
@@ -612,8 +613,10 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	var reentry_staging_label := _get_station_reentry_fireteam_staging_label()
 	var reentry_loadout_label := _get_station_reentry_loadout_bridge_label()
 	var reentry_boarding_label := _get_station_reentry_dropship_boarding_label()
+	var reentry_start_label := _get_station_reentry_start_permission_label()
 	var post_label := _get_post_debrief_homebase_summary_label()
 	var readiness_label := _get_next_sortie_readiness_label()
+	var start_button := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
 	var mission_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel") as Control
 	var panel_rect: Rect2 = _control_global_rect(followup_panel)
 	var title_rect: Rect2 = _control_global_rect(title_label)
@@ -623,6 +626,7 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	var reentry_staging_rect: Rect2 = _control_global_rect(reentry_staging_label)
 	var reentry_loadout_rect: Rect2 = _control_global_rect(reentry_loadout_label)
 	var reentry_boarding_rect: Rect2 = _control_global_rect(reentry_boarding_label)
+	var reentry_start_rect: Rect2 = _control_global_rect(reentry_start_label)
 	var post_rect: Rect2 = _control_global_rect(post_label)
 	var readiness_rect: Rect2 = _control_global_rect(readiness_label)
 	var mission_rect: Rect2 = _control_global_rect(mission_panel)
@@ -630,6 +634,7 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	var loadout_readiness_item: Dictionary = _find_readiness_item(Array(pre_mission_readiness_snapshot.get("items", [])), "loadout")
 	var dropship_readiness_item: Dictionary = _find_readiness_item(Array(pre_mission_readiness_snapshot.get("items", [])), "dropship")
 	var boarding_readiness_item: Dictionary = _find_readiness_item(Array(pre_mission_readiness_snapshot.get("items", [])), "boarding")
+	var start_readiness_item: Dictionary = _find_readiness_item(Array(pre_mission_readiness_snapshot.get("items", [])), "start")
 	var steps: Array = Array(readiness_snapshot.get("readiness_steps", [])).duplicate(true)
 	var chips: Array = _build_station_return_panel_step_chip_snapshot(steps)
 	var title_text: String = title_label.text.strip_edges() if title_label != null else ""
@@ -651,6 +656,14 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	var reentry_boarding_state: String = String(boarding_readiness_item.get("state", "")).strip_edges()
 	var reentry_dropship_detail: String = String(dropship_readiness_item.get("detail", "")).strip_edges()
 	var reentry_boarding_detail: String = String(boarding_readiness_item.get("detail", "")).strip_edges()
+	var reentry_start_text: String = reentry_start_label.text.strip_edges() if reentry_start_label != null else ""
+	var reentry_start_expected_text: String = _build_station_reentry_start_permission_line(start_readiness_item, pre_mission_readiness_snapshot)
+	var reentry_start_style_id: String = String(reentry_start_label.get_meta("station_reentry_start_permission_style_id", "")) if reentry_start_label != null else ""
+	var reentry_start_state: String = String(start_readiness_item.get("state", "")).strip_edges()
+	var reentry_start_detail: String = String(start_readiness_item.get("detail", "")).strip_edges()
+	var reentry_can_start: bool = bool(pre_mission_readiness_snapshot.get("can_start", false))
+	var reentry_start_button_text: String = start_button.text.strip_edges() if start_button != null else ""
+	var reentry_start_button_disabled: bool = start_button.disabled if start_button != null else true
 	var reentry_selected_fireteam_count: int = _count_unique_nonempty_strings(Array(staging_snapshot.get("selected_fireteam_ids", [])))
 	var reentry_selected_operator_count: int = Array(staging_snapshot.get("selected_unit_ids", [])).size()
 	var reentry_payload_fireteam_count: int = Array(staging_snapshot.get("payload_fireteam_ids", [])).size()
@@ -659,6 +672,7 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	var reentry_staging_read_only: bool = bool(reentry_staging_label.get_meta("read_only", false)) if reentry_staging_label != null else false
 	var reentry_loadout_read_only: bool = bool(reentry_loadout_label.get_meta("read_only", false)) if reentry_loadout_label != null else false
 	var reentry_boarding_read_only: bool = bool(reentry_boarding_label.get_meta("read_only", false)) if reentry_boarding_label != null else false
+	var reentry_start_read_only: bool = bool(reentry_start_label.get_meta("read_only", false)) if reentry_start_label != null else false
 	var chip_count: int = chips.size()
 	var current_step_id: String = String(readiness_snapshot.get("current_next_step_id", "")).strip_edges()
 	var checks: Array = []
@@ -683,20 +697,26 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 	_append_visual_audit_check(checks, "reentry_dropship_boarding_style_id", reentry_boarding_style_id == HOMEBASE_REENTRY_DROPSHIP_BOARDING_STYLE_ID, "critical", "Dropship boarding line should expose TASK_765 style metadata.")
 	_append_visual_audit_check(checks, "reentry_dropship_boarding_mentions_dropship", reentry_boarding_text.contains("Dropship") and reentry_boarding_text.contains("Boarding"), "critical", "Dropship boarding line should name Dropship and Boarding.")
 	_append_visual_audit_check(checks, "reentry_dropship_boarding_compact", reentry_boarding_text.length() <= 104 and reentry_boarding_text.count("\n") == 0, "critical", "Dropship boarding line should stay compact and one-line.")
+	_append_visual_audit_check(checks, "reentry_start_permission_visible", _control_is_visible(reentry_start_label) and reentry_start_text == reentry_start_expected_text, "critical", "Return panel should show Start permission from existing readiness/startbutton snapshots.")
+	_append_visual_audit_check(checks, "reentry_start_permission_style_id", reentry_start_style_id == HOMEBASE_REENTRY_START_PERMISSION_STYLE_ID, "critical", "Start permission line should expose TASK_766 style metadata.")
+	_append_visual_audit_check(checks, "reentry_start_permission_mentions_start", reentry_start_text.contains("Startfreigabe") and not reentry_start_state.is_empty(), "critical", "Start permission line should name the release state.")
+	_append_visual_audit_check(checks, "reentry_start_permission_matches_button", (reentry_can_start and not reentry_start_button_disabled) or (not reentry_can_start and reentry_start_button_disabled), "critical", "Start permission line should agree with the existing Start button state.")
+	_append_visual_audit_check(checks, "reentry_start_permission_compact", reentry_start_text.length() <= 112 and reentry_start_text.count("\n") == 0, "critical", "Start permission line should stay compact and one-line.")
 	_append_visual_audit_check(checks, "current_chip_present", _station_return_panel_chip_state_exists(chips, current_step_id, "current"), "critical", "Return panel chips should mark the current next step.")
 	_append_visual_audit_check(checks, "chip_labels_german", _station_return_panel_chips_have_german_labels(chips), "critical", "Return panel chips should use the same German station step labels.")
-	_append_visual_audit_check(checks, "inside_followup_panel", _rect_inside(title_rect, panel_rect) and _rect_inside(action_rect, panel_rect) and _rect_inside(chip_row_rect, panel_rect) and _rect_inside(reentry_rect, panel_rect) and _rect_inside(reentry_staging_rect, panel_rect) and _rect_inside(reentry_loadout_rect, panel_rect) and _rect_inside(reentry_boarding_rect, panel_rect) and _rect_inside(post_rect, panel_rect) and _rect_inside(readiness_rect, panel_rect), "critical", "Return title, action, chips, Reentry plan, Fireteam staging, Loadout bridge, Dropship boarding and legacy lines should stay inside the follow-up panel.")
+	_append_visual_audit_check(checks, "inside_followup_panel", _rect_inside(title_rect, panel_rect) and _rect_inside(action_rect, panel_rect) and _rect_inside(chip_row_rect, panel_rect) and _rect_inside(reentry_rect, panel_rect) and _rect_inside(reentry_staging_rect, panel_rect) and _rect_inside(reentry_loadout_rect, panel_rect) and _rect_inside(reentry_boarding_rect, panel_rect) and _rect_inside(reentry_start_rect, panel_rect) and _rect_inside(post_rect, panel_rect) and _rect_inside(readiness_rect, panel_rect), "critical", "Return title, action, chips, Reentry plan, Fireteam staging, Loadout bridge, Dropship boarding, Start permission and legacy lines should stay inside the follow-up panel.")
 	_append_visual_audit_check(checks, "reentry_plan_inside_followup_panel", _rect_inside(reentry_rect, panel_rect), "critical", "Reentry plan should stay grouped in the follow-up panel.")
 	_append_visual_audit_check(checks, "reentry_fireteam_staging_inside_followup_panel", _rect_inside(reentry_staging_rect, panel_rect), "critical", "Fireteam staging line should stay grouped in the follow-up panel.")
 	_append_visual_audit_check(checks, "reentry_loadout_bridge_inside_followup_panel", _rect_inside(reentry_loadout_rect, panel_rect), "critical", "Loadout bridge line should stay grouped in the follow-up panel.")
 	_append_visual_audit_check(checks, "reentry_dropship_boarding_inside_followup_panel", _rect_inside(reentry_boarding_rect, panel_rect), "critical", "Dropship boarding line should stay grouped in the follow-up panel.")
+	_append_visual_audit_check(checks, "reentry_start_permission_inside_followup_panel", _rect_inside(reentry_start_rect, panel_rect), "critical", "Start permission line should stay grouped in the follow-up panel.")
 	_append_visual_audit_check(checks, "inside_mission_panel", _rect_inside(panel_rect, mission_rect), "critical", "Return panel should stay inside the MissionPanel.")
-	_append_visual_audit_check(checks, "read_only", bool(visible_snapshot.get("read_only", false)) and bool(readiness_snapshot.get("read_only", false)) and reentry_staging_read_only and reentry_loadout_read_only and reentry_boarding_read_only, "critical", "Return panel polish should read existing Homebase state only.")
+	_append_visual_audit_check(checks, "read_only", bool(visible_snapshot.get("read_only", false)) and bool(readiness_snapshot.get("read_only", false)) and reentry_staging_read_only and reentry_loadout_read_only and reentry_boarding_read_only and reentry_start_read_only, "critical", "Return panel polish should read existing Homebase state only.")
 	var failed_count: int = _count_visual_audit_failures(checks, "critical")
 	return {
 		"schema": "sternenbuergerchen.station_homebase_return_panel_polish.v1",
 		"task_id": "TASK_755",
-		"source_task_ids": ["TASK_754", "TASK_749", "TASK_747", "TASK_746", "TASK_762", "TASK_763", "TASK_764", "TASK_765"],
+		"source_task_ids": ["TASK_754", "TASK_749", "TASK_747", "TASK_746", "TASK_762", "TASK_763", "TASK_764", "TASK_765", "TASK_766"],
 		"gate": "pass" if failed_count == 0 else "fail",
 		"failed_count": failed_count,
 		"check_count": checks.size(),
@@ -738,6 +758,17 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 		"reentry_boarding_detail": reentry_boarding_detail,
 		"reentry_dropship_item_present": not dropship_readiness_item.is_empty(),
 		"reentry_boarding_item_present": not boarding_readiness_item.is_empty(),
+		"reentry_start_permission_style_id": reentry_start_style_id,
+		"reentry_start_permission_text": reentry_start_text,
+		"reentry_start_permission_expected_text": reentry_start_expected_text,
+		"reentry_start_permission_visible": _control_is_visible(reentry_start_label),
+		"reentry_start_permission_read_only": reentry_start_read_only,
+		"reentry_start_state": reentry_start_state,
+		"reentry_start_detail": reentry_start_detail,
+		"reentry_start_item_present": not start_readiness_item.is_empty(),
+		"reentry_can_start": reentry_can_start,
+		"reentry_start_button_text": reentry_start_button_text,
+		"reentry_start_button_disabled": reentry_start_button_disabled,
 		"readiness_line": String(readiness_snapshot.get("readiness_line", "")),
 		"rendered_readiness_line": readiness_label.text.strip_edges() if readiness_label != null else "",
 		"post_summary_text": post_label.text.strip_edges() if post_label != null else "",
@@ -749,6 +780,7 @@ func get_station_homebase_return_panel_polish_snapshot() -> Dictionary:
 		"reentry_fireteam_staging_rect": _rect_to_dict(reentry_staging_rect),
 		"reentry_loadout_bridge_rect": _rect_to_dict(reentry_loadout_rect),
 		"reentry_dropship_boarding_rect": _rect_to_dict(reentry_boarding_rect),
+		"reentry_start_permission_rect": _rect_to_dict(reentry_start_rect),
 		"post_summary_rect": _rect_to_dict(post_rect),
 		"next_sortie_rect": _rect_to_dict(readiness_rect),
 		"return_panel_polish_ready": failed_count == 0,
@@ -3595,6 +3627,29 @@ func _ensure_station_reentry_dropship_boarding_label() -> Label:
 	return label
 
 
+func _ensure_station_reentry_start_permission_label() -> Label:
+	var vbox := _get_post_debrief_followup_vbox()
+	var existing := vbox.get_node_or_null("StationReentryStartPermissionLabel") as Label
+	if existing != null:
+		return existing
+	var label := Label.new()
+	label.name = "StationReentryStartPermissionLabel"
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.custom_minimum_size = Vector2(0.0, 18.0)
+	label.add_theme_font_size_override("font_size", 11)
+	META_UI_SKIN_SCRIPT.style_body_label(label, 11)
+	label.add_theme_color_override("font_color", Color("f5e6a8"))
+	label.set_meta("station_reentry_start_permission_style_id", HOMEBASE_REENTRY_START_PERMISSION_STYLE_ID)
+	label.set_meta("homebase_return_panel_style_id", HOMEBASE_RETURN_PANEL_POLISH_STYLE_ID)
+	label.set_meta("read_only", true)
+	label.set_meta("ui_sets_gameplay_truth", false)
+	vbox.add_child(label)
+	vbox.move_child(label, mini(7, vbox.get_child_count() - 1))
+	return label
+
+
 func _ensure_post_debrief_homebase_summary_label() -> Label:
 	var vbox := _get_post_debrief_followup_vbox()
 	var existing := vbox.get_node_or_null("PostDebriefHomebaseSummaryLabel") as Label
@@ -3671,6 +3726,10 @@ func _get_station_reentry_dropship_boarding_label() -> Label:
 	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/StationReentryDropshipBoardingLabel") as Label
 
 
+func _get_station_reentry_start_permission_label() -> Label:
+	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel/FollowupMargin/FollowupVBox/StationReentryStartPermissionLabel") as Label
+
+
 func _get_post_debrief_followup_panel() -> PanelContainer:
 	return get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PostDebriefFollowupPanel") as PanelContainer
 
@@ -3710,6 +3769,9 @@ func _sync_post_debrief_followup_panel_visibility() -> void:
 	var reentry_boarding_label := _get_station_reentry_dropship_boarding_label()
 	if reentry_boarding_label != null:
 		reentry_boarding_label.visible = panel.visible and _is_station_scenario_last_result()
+	var reentry_start_label := _get_station_reentry_start_permission_label()
+	if reentry_start_label != null:
+		reentry_start_label.visible = panel.visible and _is_station_scenario_last_result()
 	_apply_post_debrief_density_findings()
 
 
@@ -3755,6 +3817,7 @@ func _update_station_return_panel_polish(steps: Array, current_step_id: String) 
 	var reentry_staging_label := _ensure_station_reentry_fireteam_staging_label()
 	var reentry_loadout_label := _ensure_station_reentry_loadout_bridge_label()
 	var reentry_boarding_label := _ensure_station_reentry_dropship_boarding_label()
+	var reentry_start_label := _ensure_station_reentry_start_permission_label()
 	var station_result: bool = _is_station_scenario_last_result()
 	title_label.visible = station_result
 	action_label.visible = station_result
@@ -3763,12 +3826,14 @@ func _update_station_return_panel_polish(steps: Array, current_step_id: String) 
 	reentry_staging_label.visible = station_result
 	reentry_loadout_label.visible = station_result
 	reentry_boarding_label.visible = station_result
+	reentry_start_label.visible = station_result
 	if not station_result:
 		action_label.text = ""
 		reentry_label.text = ""
 		reentry_staging_label.text = ""
 		reentry_loadout_label.text = ""
 		reentry_boarding_label.text = ""
+		reentry_start_label.text = ""
 		_clear_return_panel_step_chips(chip_row)
 		return
 	var current_label: String = _station_next_sortie_step_label(current_step_id)
@@ -3804,6 +3869,13 @@ func _update_station_return_panel_polish(steps: Array, current_step_id: String) 
 	reentry_boarding_label.set_meta("boarding_state", String(boarding_item.get("state", "")).strip_edges())
 	reentry_boarding_label.set_meta("payload_operator_count", int(staging.get("payload_operator_count", 0)))
 	reentry_boarding_label.set_meta("boarded_operator_count", int(staging.get("boarded_operator_count", 0)))
+	var start_item: Dictionary = _find_readiness_item(Array(readiness.get("items", [])), "start")
+	reentry_start_label.text = _build_station_reentry_start_permission_line(start_item, readiness)
+	reentry_start_label.tooltip_text = "Read-only: Startfreigabe aus PreMissionReadiness und bestehendem Startbutton."
+	reentry_start_label.set_meta("station_reentry_start_permission_text", reentry_start_label.text)
+	reentry_start_label.set_meta("station_reentry_start_permission_style_id", HOMEBASE_REENTRY_START_PERMISSION_STYLE_ID)
+	reentry_start_label.set_meta("start_state", String(start_item.get("state", "")).strip_edges())
+	reentry_start_label.set_meta("can_start", bool(readiness.get("can_start", false)))
 	_refresh_return_panel_step_chips(chip_row, steps, current_step_id)
 
 
@@ -3875,6 +3947,22 @@ func _build_station_reentry_dropship_boarding_line(dropship_item: Dictionary, bo
 	if payload_count > 0:
 		return "Dropship: %s | Boarding: %s %d/%d Operatoren" % [dropship_badge, boarding_badge, boarded_count, payload_count]
 	return "Dropship: %s | Boarding: %s | Payload fehlt" % [dropship_badge, boarding_badge]
+
+
+func _build_station_reentry_start_permission_line(start_item: Dictionary, readiness: Dictionary) -> String:
+	var start_state: String = String(start_item.get("state", "blocked")).strip_edges()
+	var detail: String = String(start_item.get("detail", "")).strip_edges()
+	var can_start: bool = bool(readiness.get("can_start", false))
+	var badge: String = "OK" if can_start and start_state == "ready" else "Blockiert" if start_state == "blocked" else "Hinweis"
+	if detail.is_empty():
+		detail = "Startbutton darf Mission ausloesen." if can_start else "Startbutton bleibt blockiert."
+	return "Startfreigabe: %s | %s" % [badge, _compact_station_reentry_start_detail(detail)]
+
+
+func _compact_station_reentry_start_detail(detail: String) -> String:
+	if detail.length() <= 74:
+		return detail
+	return "%s..." % detail.substr(0, 71).strip_edges()
 
 
 func _refresh_return_panel_step_chips(row: HBoxContainer, steps: Array, current_step_id: String) -> void:
