@@ -54,7 +54,8 @@ git checkout -b batch/<batch-name>
 - TASK_729 - Station Scenario Visible Playtest Run Packet (implementiert)
 - TASK_730 - Station Scenario Targeted Playtest Polish (implementiert)
 - TASK_731 - Station Scenario Workbench Export Review (implementiert)
-- TASK_732 - Next playable Station Scenario slice oder Route Cue Polish (naechster sinnvoller Schritt nach echtem TASK_727-Export)
+- TASK_732 - Station Scenario Route Cue Polish (implementiert)
+- TASK_733 - Station Scenario HUD Overlap Pass (naechster sinnvoller Schritt nach echtem TASK_727-Export, falls HUD weiter stoert)
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
