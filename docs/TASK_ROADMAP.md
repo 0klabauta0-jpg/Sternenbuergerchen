@@ -91,7 +91,8 @@ git checkout -b batch/<batch-name>
 - TASK_766 - Station Reentry Start Permission Bridge Polish (implementiert)
 - TASK_767 - Station Reentry Visible Playtest Review Gate (implementiert)
 - TASK_768 - Station Reentry First Mission Preview Polish (implementiert)
-- Naechster Schritt: TASK_769 - Station Reentry Performance Feel Pass oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+- TASK_769 - Station Reentry Performance Feel Pass (implementiert)
+- Naechster Schritt: TASK_770 - Station Reentry Host Client Next Order Sync oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

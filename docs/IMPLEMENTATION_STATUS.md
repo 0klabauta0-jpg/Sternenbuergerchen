@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_769 - Station Reentry Performance Feel Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_769_station_reentry_performance_feel_pass.md`, `docs/tasks/TASK_768_station_reentry_first_mission_preview_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/performance/performance_regression_gate.md`, `data/performance_budget_contract.json`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryPerformanceFeelPass` bewertet TASK_768-Preview, Textbudgets, Station-Route/Cue und wiederholte Snapshot-Messproben read-only.
+- Stand: `get_station_reentry_performance_feel_pass_snapshot()` haengt den Contract an den bestehenden MissionTacticalSandboxController-Pfad, ohne GO oder Commands auszufuehren.
+- Risiken/offen: Kein Ersatz fuer echten Godot-Profiler oder Host/Client-Fensterlauf; Netzwerk-Stutter und subjektives Spielgefuehl bleiben manuell zu pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_769_station_reentry_performance_feel_pass.gd`, TASK_768 Regression, `git diff --check`.
+- Naechster Schritt: TASK_770 - Station Reentry Host Client Next Order Sync oder sichtbaren Reentry-Playtest mit Workbench-Export ausfuehren.
+
 ### TASK_768 - Station Reentry First Mission Preview Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_768_station_reentry_first_mission_preview_polish.md`, `docs/tasks/TASK_767_station_reentry_visible_playtest_review_gate.md`, `docs/tasks/TASK_567_frontier_probe_first_move_threat_preview_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`

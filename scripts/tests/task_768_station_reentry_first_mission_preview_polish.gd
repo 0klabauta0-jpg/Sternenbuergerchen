@@ -48,7 +48,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(controller_text.contains("PREVIEW Dist"), "Waypoint intent text explicitly names PREVIEW")
 	_assert(FileAccess.file_exists(HANDBOOK_PATH), "TASK_768 handbook report exists")
 	_assert(handbook_text.contains("JSON exportieren"), "TASK_768 handbook exposes JSON export")
-	_assert(handbook_text.contains("TASK_768 - Station Reentry First Mission Preview Polish"), "TASK_768 handbook names current task")
+	_assert(handbook_text.contains("TASK_768") and handbook_text.contains("TASK_769"), "Reentry handbook preserves TASK_768 context and current follow-up")
 	_assert(handbook_text.contains("data-export-key=\"manual.first_preview_visible\""), "TASK_768 handbook exports manual preview check")
 
 

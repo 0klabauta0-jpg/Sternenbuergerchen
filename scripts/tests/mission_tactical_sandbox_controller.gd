@@ -64,6 +64,7 @@ const MISSION_MULTIPLAYER_DOOR_FEEDBACK_CAPTURE_SCRIPT: GDScript = preload("res:
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
 const STATION_SCENARIO_ROUTE_CUE_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/station_scenario_route_cue_polish.gd")
+const STATION_REENTRY_PERFORMANCE_FEEL_PASS_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_performance_feel_pass.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -14334,6 +14335,15 @@ func get_station_reentry_first_mission_preview_polish_snapshot() -> Dictionary:
 		"creates_command": false,
 		"recommended_next_task": "TASK_769 - Station Reentry Performance Feel Pass or visible Reentry playtest export",
 	}
+
+
+func get_station_reentry_performance_feel_pass_snapshot(performance_sample: Dictionary = {}) -> Dictionary:
+	return Dictionary(STATION_REENTRY_PERFORMANCE_FEEL_PASS_SCRIPT.call(
+		"build_snapshot",
+		get_station_reentry_first_mission_preview_polish_snapshot(),
+		performance_sample,
+		{}
+	)).duplicate(true)
 
 
 func get_suppress_fire_preview_readability_snapshot() -> Dictionary:
