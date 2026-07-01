@@ -10,14 +10,23 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_782 - Station Reentry Firefight Command Surface Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_782_station_reentry_firefight_command_surface_findings.md`, `docs/tasks/TASK_781_station_reentry_firefight_command_surface_recapture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightCommandSurfaceFindings` wertet das TASK_781-Recapture-Paket plus optionale HTML-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Command-Surface-Review, unvollstaendige Pflichtchecks, konkrete Command-Surface-/Host-Client-/Performance-Follow-ups und eine saubere naechste Firefight-Iteration.
+- Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Fensterlauf bleibt `needs_visible_command_surface_review` korrekt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_782_station_reentry_firefight_command_surface_findings.gd`, TASK_781/TASK_780/TASK_779 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_783 - Station Reentry Firefight Command Surface Polish oder echter sichtbarer Command-Surface-Review.
+
 ### TASK_781 - Station Reentry Firefight Command Surface Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_781_station_reentry_firefight_command_surface_recapture.md`, `docs/tasks/TASK_780_station_reentry_firefight_interaction_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
 - Stand: `prepare_station_reentry_firefight_command_surface_recapture.ps1` schreibt ein read-only Recapture-Paket fuer die sichtbare Firefight-Command-Surface.
 - Stand: Das Manifest nennt TASK_780-Interaction-Line, primaere Aktion, Quick-Action-Labels, No-Auto-Command-Grenze, manuelle Checks sowie Launch-/Capture-/Verifier-Kommandos.
-- Risiken/offen: Kein automatischer Sichtentscheid; Screenshot, Workbench-JSON und echte Command-Surface-Findings bleiben Folgearbeit.
+- Risiken/offen: Kein automatischer Sichtentscheid; Screenshot, Workbench-JSON und echte Command-Surface-Findings werden jetzt durch TASK_782 ausgewertet.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_781_station_reentry_firefight_command_surface_recapture.gd`, TASK_780/TASK_779 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_782 - Station Reentry Firefight Command Surface Findings.
+- Naechster Schritt: TASK_782 - Station Reentry Firefight Command Surface Findings (implementiert).
 
 ### TASK_780 - Station Reentry Firefight Interaction Polish
 - Status: implementiert im Arbeitsstand
