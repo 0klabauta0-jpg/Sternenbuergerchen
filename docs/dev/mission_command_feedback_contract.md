@@ -644,6 +644,11 @@ TASK_761 wertet das TASK_760-Run-Packet und optionale Workbench-Notizen fuer den
 
 Erwartete Struktur: `tmp/station_reentry_visible_playtest_findings.json` enthaelt `schema = sternenbuergerchen.station_reentry_visible_playtest_findings.v1`, `task_id = TASK_761`, `source_task_id = TASK_760`, `source_packet_schema`, `source_packet_status`, `target_id = station_reentry_playtest`, `manual_review_required = true`, `manual_review_done`, `playtest_done`, `required_checks`, `missing_check_ids`, `issue_flags`, `findings`, `action_items`, `status`, `recommended_next_task`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`. Statuswerte: `blocked`, `needs_visible_reentry_playtest`, `needs_reentry_completion`, `needs_targeted_reentry_polish`, `ready_for_next_station_iteration`.
 
+## Station-Reentry-Targeted-Polish (TASK_762)
+TASK_762 verbessert den sichtbaren Homebase-Reentry-Moment, ohne neue Staging-, Loadout-, Dropship- oder Start-Wahrheit einzufuehren. Das bestehende Station-Return-Panel darf eine kompakte Orientierung fuer den naechsten Handgriff anzeigen: Fireteam, Loadout, Dropship, Start, Preview vor GO.
+
+Erwartete Struktur: `HomebaseTestScreen.get_station_homebase_return_panel_polish_snapshot()` behaelt `schema = sternenbuergerchen.station_homebase_return_panel_polish.v1` und enthaelt zusaetzlich `reentry_plan_style_id = task_762_station_reentry_plan_v1`, `reentry_plan_text = Reentry-Plan: Fireteam -> Loadout -> Dropship -> Start -> Preview vor GO`, `reentry_plan_visible = true`, `reentry_plan_rect`, Checks `reentry_plan_visible`, `reentry_plan_style_id`, `reentry_plan_compact`, `reentry_plan_inside_followup_panel`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false` und `creates_command = false`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.

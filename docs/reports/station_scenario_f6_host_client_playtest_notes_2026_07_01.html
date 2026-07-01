@@ -86,6 +86,7 @@
       <span class="pill warn">Next Target: TASK_759</span>
       <span class="pill warn">Run Packet: TASK_760</span>
       <span class="pill warn">Findings: TASK_761</span>
+      <span class="pill good">Polish: TASK_762</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -237,6 +238,15 @@
           <textarea data-export-key="station_scenario_playtest.notes.station_reentry_visible_findings" placeholder="Reentry-Findings: Was klemmt beim neuen Sortie-Start wirklich?"></textarea>
         </article>
         <article class="card full">
+          <h2>Station Reentry Plan Polish</h2>
+          <p>Das Return-Panel nennt nach TASK_762 den kompletten naechsten Handgriff bis zur ersten Entscheidung.</p>
+          <input readonly value="TASK_762" data-export-key="station_scenario_playtest.reentry_polish.task_id">
+          <input readonly value="task_762_station_reentry_plan_v1" data-export-key="station_scenario_playtest.reentry_polish.style_id">
+          <input readonly value="Reentry-Plan: Fireteam -> Loadout -> Dropship -> Start -> Preview vor GO" data-export-key="station_scenario_playtest.reentry_polish.reentry_plan_line">
+          <input readonly value="tmp/station_reentry_targeted_polish.json" data-export-key="station_scenario_playtest.reentry_polish.manifest_path">
+          <textarea data-export-key="station_scenario_playtest.notes.station_reentry_targeted_polish" placeholder="Reentry-Plan-Polish: Was bleibt nach sichtbarem Lauf unklar?"></textarea>
+        </article>
+        <article class="card full">
           <h2>Route</h2>
           <table>
             <thead><tr><th>Schritt</th><th>Spieler-Erwartung</th><th>Was notieren?</th></tr></thead>
@@ -294,7 +304,7 @@
         </article>
         <article class="card half">
           <h3>Naechster Task</h3>
-          <input value="TASK_761 - Station Reentry Visible Playtest Findings" data-export-key="station_scenario_playtest.recommended_next_task">
+          <input value="TASK_763 - Station Reentry Fireteam Staging Polish oder echter Reentry-Playtest" data-export-key="station_scenario_playtest.recommended_next_task">
         </article>
       </div>
     </section>
@@ -385,7 +395,7 @@
             findings_task_id: "TASK_754",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_761 - Station Reentry Visible Playtest Findings",
+            latest_completed_task: "TASK_762 - Station Reentry Targeted Polish",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
@@ -394,7 +404,8 @@
             latest_station_next_playtest_target_task: "TASK_759 - Station Slice Next Playtest Target",
             latest_station_reentry_run_packet_task: "TASK_760 - Station Reentry Playtest Run Packet",
             latest_station_reentry_findings_task: "TASK_761 - Station Reentry Visible Playtest Findings",
-            recommended_next_task: "TASK_762 - Station Reentry Targeted Polish",
+            latest_station_reentry_targeted_polish_task: "TASK_762 - Station Reentry Targeted Polish",
+            recommended_next_task: "TASK_763 - Station Reentry Fireteam Staging Polish oder echter Reentry-Playtest",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
             manual_review_required: true

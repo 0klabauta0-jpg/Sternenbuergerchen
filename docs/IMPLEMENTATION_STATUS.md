@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_762 - Station Reentry Targeted Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_762_station_reentry_targeted_polish.md`, `docs/tasks/TASK_761_station_reentry_visible_playtest_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Das bestehende Station-Return-Panel zeigt jetzt eine kompakte Reentry-Plan-Zeile: `Reentry-Plan: Fireteam -> Loadout -> Dropship -> Start -> Preview vor GO`.
+- Stand: `get_station_homebase_return_panel_polish_snapshot()` exportiert Reentry-Plan-Text, Style-ID, Sichtbarkeit und Bounds read-only.
+- Risiken/offen: Der Polish ersetzt keinen echten Zwei-Fenster-Reentry-Playtest; er reduziert nur die Orientierungsreibung im Homebase-Return-Panel.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_762_station_reentry_targeted_polish.gd`, TASK_761/TASK_755/TASK_749 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_763 - Station Reentry Fireteam Staging Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
+
 ### TASK_761 - Station Reentry Visible Playtest Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_761_station_reentry_visible_playtest_findings.md`, `docs/tasks/TASK_760_station_reentry_playtest_run_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
