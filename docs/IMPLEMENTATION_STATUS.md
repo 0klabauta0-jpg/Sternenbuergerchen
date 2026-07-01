@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_746 - Station Scenario Homebase Next Sortie Readiness
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_746_station_scenario_homebase_next_sortie_readiness.md`, `docs/tasks/TASK_745_station_scenario_post_debrief_homebase_readability.md`, `docs/tasks/TASK_641_frontier_probe_homebase_next_sortie_readiness.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `HomebaseTestScreen.get_station_scenario_homebase_next_sortie_readiness_snapshot()` verbindet TASK_745-Post-Debrief-Summary, Pre-Mission-Readiness und Homebase-Direct-Staging zu einem read-only Station-Next-Sortie-Snapshot.
+- Stand: Die bestehende Next-Sortie-Zeile erscheint jetzt auch fuer `station_route_aa_door_computer_cargo` / `station_route_one_screen_multiplayer_drill` und fuehrt von Review gains ueber Stage fireteam, Assign loadout und Load dropship zu Start next sortie.
+- Stand: Der Snapshot bleibt lesend, erzeugt keine Navigation/Commands und setzt keine neue MissionResult- oder Staging-Wahrheit.
+- Risiken/offen: TASK_746 ist ein Headless-Readiness-Gate, kein sichtbarer Host/Client-Recapture und kein finales Homebase-Layout-Review.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_746_station_scenario_homebase_next_sortie_readiness.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_745_station_scenario_post_debrief_homebase_readability.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_641_frontier_probe_homebase_next_sortie_readiness.gd`, `git diff --check`.
+- Naechster Schritt: TASK_747 - Station Scenario Homebase Visible Readiness Review oder Host/Client-Fenster-Recapture des kompletten Station-Abschlusses.
+
 ### TASK_745 - Station Scenario Post Debrief Homebase Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_745_station_scenario_post_debrief_homebase_readability.md`, `docs/tasks/TASK_744_station_scenario_meta_debrief_route_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
