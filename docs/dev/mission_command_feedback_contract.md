@@ -629,6 +629,11 @@ TASK_758 macht aus dem TASK_757-Refresh eine enge Acceptance-Entscheidung fuer d
 
 Erwartete Struktur: `homebase_return_acceptance_review` enthaelt `schema = sternenbuergerchen.station_homebase_return_acceptance_review.v1`, `task_id = TASK_758`, `source_task_id = TASK_757`, `source_recapture_task_id`, `source_panel_task_id`, `source_refresh_status`, `status`, `summary`, `accepted_scope = homebase_return_slice_only`, `accepted_for_next_station_slice`, `not_full_game_acceptance = true`, `missing_check_ids`, `findings`, `recommended_next_task`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`. Statuswerte: `blocked_missing_homebase_return_review`, `needs_task_756_completion`, `accepted_for_next_station_slice`.
 
+## Station-Slice-Next-Playtest-Target (TASK_759)
+TASK_759 legt nach akzeptiertem Homebase-Return den naechsten kleinen spielbaren Ziel-Slice fest. Der Ziel-Slice ist `station_reentry_playtest`: Homebase-Return-Panel lesen, Fireteam bereitstellen, Loadout pruefen, Dropship beladen, Start freigeben und die erste Mission-Entscheidung mit Preview treffen. Der Snapshot ist ein Runbook-/Review-Ziel, kein Gameplay-State und darf keine Runtime-UI, Navigation, Commands oder Gameplay-Wahrheit erzeugen.
+
+Erwartete Struktur: `station_next_playtest_target` enthaelt `schema = sternenbuergerchen.station_slice_next_playtest_target.v1`, `task_id = TASK_759`, `source_task_id = TASK_758`, `source_acceptance_status`, `status`, `summary`, `target_id = station_reentry_playtest`, `target_title`, `scenario_path`, `focus`, `runbook_steps`, `multiplayer_checks`, `non_goals`, `ready_for_run_packet`, `recommended_next_task`, `read_only = true`, `ui_sets_gameplay_truth = false` und `creates_command = false`. Statuswerte: `blocked_until_homebase_return_accepted`, `ready_for_station_reentry_playtest`.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.

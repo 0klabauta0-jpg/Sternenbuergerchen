@@ -53,6 +53,7 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 	var homebase_recapture_findings: Dictionary = _build_homebase_recapture_findings(homebase_recapture_review)
 	var homebase_recapture_findings_refresh: Dictionary = _build_homebase_recapture_findings_refresh(homebase_recapture_review, recapture_evidence)
 	var homebase_return_acceptance_review: Dictionary = _build_homebase_return_acceptance_review(homebase_recapture_findings_refresh)
+	var station_next_playtest_target: Dictionary = _build_station_next_playtest_target(homebase_return_acceptance_review)
 	var required_checks: Array = _build_required_checks(existing_notes)
 	var issue_flags: Array = _build_issue_flags(existing_notes)
 	var completed_check_count: int = _count_completed_checks(required_checks)
@@ -88,6 +89,8 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 		"homebase_recapture_findings_refresh_status": String(homebase_recapture_findings_refresh.get("status", "")),
 		"homebase_return_acceptance_review": homebase_return_acceptance_review,
 		"homebase_return_acceptance_status": String(homebase_return_acceptance_review.get("status", "")),
+		"station_next_playtest_target": station_next_playtest_target,
+		"station_next_playtest_target_status": String(station_next_playtest_target.get("status", "")),
 		"report_path": String(options.get("report_path", DEFAULT_REPORT_PATH)),
 		"manifest_path": String(options.get("manifest_path", DEFAULT_MANIFEST_PATH)),
 		"required_checks": required_checks,
@@ -354,6 +357,52 @@ static func _build_homebase_return_acceptance_review(findings_refresh: Dictionar
 		"missing_check_ids": missing_check_ids,
 		"finding_count": findings.size(),
 		"findings": findings,
+		"recommended_next_task": recommended_next,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+	}
+
+
+static func _build_station_next_playtest_target(homebase_acceptance: Dictionary) -> Dictionary:
+	var acceptance_status: String = String(homebase_acceptance.get("status", ""))
+	var accepted: bool = bool(homebase_acceptance.get("accepted_for_next_station_slice", false))
+	var status: String = "blocked_until_homebase_return_accepted"
+	var summary: String = "Naechster Station-Playtest bleibt blockiert, bis der Homebase-Return-Slice akzeptiert ist."
+	var recommended_next: String = String(homebase_acceptance.get("recommended_next_task", "TASK_758 - Station Homebase Return Acceptance Review"))
+	var runbook_steps: Array[String] = [
+		"Homebase-Return-Panel lesen",
+		"Fireteam bereitstellen",
+		"Loadout pruefen",
+		"Dropship beladen",
+		"Start freigeben",
+		"erste Mission-Entscheidung mit Preview treffen",
+	]
+	var multiplayer_checks: Array[String] = [
+		"Host und Client sehen denselben naechsten Auftrag",
+		"Fireteam-Zuordnung bleibt im Dropship konsistent",
+		"Startfreigabe erzeugt keine zweite UI-Wahrheit",
+		"erste Mission-Cue ist fuer beide Fenster lesbar",
+	]
+	if accepted:
+		status = "ready_for_station_reentry_playtest"
+		summary = "Naechster Ziel-Slice ist bereit: aus Homebase wieder in eine Station-Sortie starten und die erste Missionsentscheidung pruefen."
+		recommended_next = "TASK_760 - Station Reentry Playtest Run Packet"
+	return {
+		"schema": "sternenbuergerchen.station_slice_next_playtest_target.v1",
+		"task_id": "TASK_759",
+		"source_task_id": "TASK_758",
+		"source_acceptance_status": acceptance_status,
+		"status": status,
+		"summary": summary,
+		"target_id": "station_reentry_playtest",
+		"target_title": "Homebase -> naechste Station-Sortie",
+		"scenario_path": "data/mission_scenarios/station_route_one_screen_multiplayer_drill.json",
+		"focus": "Homebase-Reentry, Fireteam/Loadout/Dropship, erster Missionsentscheid",
+		"runbook_steps": runbook_steps,
+		"multiplayer_checks": multiplayer_checks,
+		"non_goals": ["keine neue Mission", "kein Combat-Rewrite", "keine Gesamtspiel-Abnahme"],
+		"ready_for_run_packet": status == "ready_for_station_reentry_playtest",
 		"recommended_next_task": recommended_next,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,

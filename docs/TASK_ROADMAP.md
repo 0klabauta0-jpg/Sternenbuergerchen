@@ -81,7 +81,8 @@ git checkout -b batch/<batch-name>
 - TASK_756 - Station Homebase Real Window Recapture (implementiert)
 - TASK_757 - Station Homebase Recapture Findings Refresh (implementiert)
 - TASK_758 - Station Homebase Return Acceptance Review (implementiert)
-- Naechster Schritt: TASK_759 - Station Slice Next Playtest Target.
+- TASK_759 - Station Slice Next Playtest Target (implementiert)
+- Naechster Schritt: TASK_760 - Station Reentry Playtest Run Packet.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
