@@ -61,7 +61,8 @@ git checkout -b batch/<batch-name>
 - TASK_736 - Station Scenario Command Feedback Polish (implementiert)
 - TASK_737 - Station Scenario Visible Cue Run Packet Refresh (implementiert)
 - TASK_738 - Station Scenario Identity Cue Visibility Polish (implementiert)
-- TASK_739 - Scenario Harness Modernization (naechster technischer Schritt nur bei belegten Harness-Problemen; sonst TASK_727 sichtbar ausfuellen)
+- TASK_739 - Station Scenario Identity Cue Recapture Findings (implementiert)
+- TASK_740 - Scenario Harness Modernization (naechster technischer Schritt nur bei belegten Harness-Problemen; sonst TASK_727 sichtbar ausfuellen)
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

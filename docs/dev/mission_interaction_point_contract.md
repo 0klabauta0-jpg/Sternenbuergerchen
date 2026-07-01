@@ -489,6 +489,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Label-Metadaten und Command-Feedback duerfen `cue_visible`, `display_route_line` und `future_blocker_hidden_in_display` exportieren, setzen aber keine Runtime-Gates, Door-/Cargo-States oder Commands.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Identity Cue Recapture Findings
+- Der Nach-TASK_738-Recapture darf als read-only Findings-Manifest zusammengefuehrt werden, wenn `tmp/host_client_two_window_real_run_review.json` realen Lauf und Host-/Client-Crops meldet.
+- Das Findings-Manifest darf aktuelle Identity-Body-Snapshotdaten wie `cue_visible`, `display_route_line` und `future_blocker_hidden_in_display` aufnehmen.
+- Der Status `ready_for_task_727_workbench_export` bedeutet nur: Die technische und sichtbare Evidence ist vorbereitet. Er ist keine menschliche TASK_727-Abnahme.
+- `manual_review_done` bleibt false, bis die TASK_727-Workbench wirklich exportiert wurde.
+- `recommended_next_task` soll zur TASK_727-Workbench fuehren; Harness-Modernisierung bleibt nur fuer belegte Start-/Capture-/Sync-Probleme.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
