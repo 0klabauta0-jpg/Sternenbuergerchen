@@ -71,8 +71,10 @@ static func build_snapshot(route_readout: Dictionary, objective_gate: Dictionary
 
 static func _build_cue_line(next_token: String, action_label: String, runtime_status: String, fireteam_token: String, distance_world: float, progress_line: String, all_complete: bool) -> String:
 	if all_complete:
-		return "CUE DONE: Extraktion/Debrief pruefen"
+		return "CUE DONE: Cargo weg | Debrief"
 	var label: String = String(TOKEN_LABELS.get(next_token, TOKEN_LABELS.get("WAIT", "Route pruefen")))
+	if next_token == "CARGO":
+		return _build_cargo_cue_line(action_label, runtime_status, fireteam_token, distance_world, progress_line)
 	match runtime_status:
 		"in_progress":
 			return "CUE %s: %s" % [next_token, progress_line if not progress_line.is_empty() else "halten"]
@@ -90,10 +92,35 @@ static func _build_cue_line(next_token: String, action_label: String, runtime_st
 			return "CUE %s: %s" % [next_token if not next_token.is_empty() else "WAIT", label]
 
 
+static func _build_cargo_cue_line(action_label: String, runtime_status: String, fireteam_token: String, distance_world: float, progress_line: String) -> String:
+	var progress_text: String = _cargo_progress_text(progress_line)
+	match runtime_status:
+		"in_progress":
+			return "CUE CARGO: %s halten bis Abflug%s" % [fireteam_token, _suffix(progress_text)]
+		"usable":
+			return "CUE CARGO: %s decken + GO" % fireteam_token
+		"out_of_range":
+			return "CUE CARGO: %s zur LZ | %s" % [fireteam_token, _format_distance(distance_world)]
+		"blocked":
+			return "CUE CARGO: blockiert | AA zuerst sichern"
+		"interrupted":
+			return "CUE CARGO: LZ neu sichern | %s" % fireteam_token
+		"departing":
+			return "CUE CARGO: Abflug laeuft%s" % _suffix(progress_text)
+		"departed", "complete":
+			return "CUE CARGO: Cargo weg | Debrief"
+		_:
+			if not action_label.is_empty() and action_label != "DEFEND":
+				return "CUE CARGO: %s %s + GO" % [fireteam_token, action_label]
+			return "CUE CARGO: LZ decken"
+
+
 static func _build_detail_line(next_token: String, runtime_status: String, action_label: String, fireteam_token: String, distance_world: float, objective_gate: Dictionary) -> String:
 	var blocker: String = String(objective_gate.get("blocked_by_step_id", "")).strip_edges()
 	if not blocker.is_empty():
 		return "Naechstes Ziel %s wartet auf %s." % [next_token, blocker]
+	if next_token == "CARGO":
+		return _build_cargo_detail_line(runtime_status, action_label, fireteam_token, distance_world)
 	if runtime_status == "usable":
 		return "%s ist in Reichweite: %s vorbereiten und mit GO bestaetigen." % [next_token, action_label]
 	if runtime_status == "out_of_range":
@@ -103,6 +130,22 @@ static func _build_detail_line(next_token: String, runtime_status: String, actio
 	if runtime_status == "complete":
 		return "%s ist erledigt; Route liest den naechsten offenen Gate-Schritt." % next_token
 	return "%s aus Objective-Gate-Snapshot lesen; kein UI-State wird gesetzt." % (next_token if not next_token.is_empty() else "Route")
+
+
+static func _build_cargo_detail_line(runtime_status: String, action_label: String, fireteam_token: String, distance_world: float) -> String:
+	if runtime_status == "usable":
+		return "Cargo-LZ ist in Reichweite: %s decken und GO bestaetigen." % fireteam_token
+	if runtime_status == "out_of_range":
+		return "Cargo-LZ braucht Naehe: %s ist %s entfernt." % [fireteam_token, _format_distance(distance_world)]
+	if runtime_status == "in_progress":
+		return "Cargo-Hold laeuft; Fireteam im Lande-/Abflugradius halten."
+	if runtime_status == "departing":
+		return "Cargo hebt ab; LZ bis zum Abschluss sichern."
+	if runtime_status == "departed" or runtime_status == "complete":
+		return "Cargo ist weg; Debrief/Extraktion pruefen."
+	if runtime_status == "blocked":
+		return "Cargo ist blockiert, bis der vorherige Gate-Schritt geloest ist."
+	return "Cargo-Ziel aus Objective-/Cargo-Snapshots lesen; kein UI-State wird gesetzt."
 
 
 static func _token_from_gate(objective_gate: Dictionary) -> String:
@@ -145,6 +188,24 @@ static func _format_distance(distance_world: float) -> String:
 	return "%.0fm" % distance_world
 
 
+static func _cargo_progress_text(progress_line: String) -> String:
+	var text: String = progress_line.strip_edges()
+	if text.is_empty():
+		return ""
+	var upper: String = text.to_upper()
+	if upper.begins_with("CARGO "):
+		text = text.substr(6).strip_edges()
+		upper = text.to_upper()
+	for prefix in ["HOLD ", "READY ", "DEPARTING ", "INBOUND "]:
+		if upper.begins_with(prefix):
+			return text.substr(prefix.length()).strip_edges()
+	return text
+
+
+static func _suffix(text: String) -> String:
+	return "" if text.strip_edges().is_empty() else " | %s" % text.strip_edges()
+
+
 static func _uses_player_action_language(cue_line: String) -> bool:
 	var normalized: String = cue_line.strip_edges().to_lower()
-	return normalized.contains("naeher ran") or normalized.contains("+ go") or normalized.contains("halten") or normalized.contains("debrief")
+	return normalized.contains("naeher ran") or normalized.contains("+ go") or normalized.contains("halten") or normalized.contains("abflug") or normalized.contains("cargo weg") or normalized.contains("debrief")

@@ -15397,6 +15397,8 @@ func get_mission_objective_interaction_readability_snapshot() -> Dictionary:
 	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
 	if not objective_line.is_empty() and not mission_control_status_text.contains(objective_line):
 		mission_control_status_text = _build_strategic_status_text()
+	if not objective_line.is_empty() and not mission_control_status_text.contains(objective_line):
+		mission_control_status_text = _append_snapshot_diagnostic_line(mission_control_status_text, objective_line)
 	var primary_snapshot: Dictionary = {}
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
@@ -15489,6 +15491,8 @@ func get_mission_cargo_extract_readability_snapshot() -> Dictionary:
 	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
 	if not cargo_line.is_empty() and not mission_control_status_text.contains(cargo_line):
 		mission_control_status_text = _build_strategic_status_text()
+	if not cargo_line.is_empty() and not mission_control_status_text.contains(cargo_line):
+		mission_control_status_text = _append_snapshot_diagnostic_line(mission_control_status_text, cargo_line)
 	var primary_snapshot: Dictionary = {}
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
@@ -15592,6 +15596,10 @@ func get_frontier_probe_integrated_objective_playthrough_snapshot() -> Dictionar
 	var mission_control_status_text: String = String(cargo_snapshot.get("mission_control_status_text", objective_snapshot.get("mission_control_status_text", ""))).strip_edges()
 	if (not objective_line.is_empty() and not mission_control_status_text.contains(objective_line)) or (not cargo_line.is_empty() and not mission_control_status_text.contains(cargo_line)):
 		mission_control_status_text = _build_strategic_status_text()
+	if not objective_line.is_empty() and not mission_control_status_text.contains(objective_line):
+		mission_control_status_text = _append_snapshot_diagnostic_line(mission_control_status_text, objective_line)
+	if not cargo_line.is_empty() and not mission_control_status_text.contains(cargo_line):
+		mission_control_status_text = _append_snapshot_diagnostic_line(mission_control_status_text, cargo_line)
 	var primary_snapshot: Dictionary = {}
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
@@ -15667,6 +15675,16 @@ func get_frontier_probe_integrated_objective_playthrough_snapshot() -> Dictionar
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
 	}
+
+
+func _append_snapshot_diagnostic_line(status_text: String, diagnostic_line: String) -> String:
+	var normalized_status: String = status_text.strip_edges()
+	var normalized_diagnostic: String = diagnostic_line.strip_edges()
+	if normalized_diagnostic.is_empty() or normalized_status.contains(normalized_diagnostic):
+		return normalized_status
+	if normalized_status.is_empty():
+		return normalized_diagnostic
+	return "%s\n%s" % [normalized_status, normalized_diagnostic]
 
 
 func get_frontier_probe_mini_scenario_feel_route_snapshot() -> Dictionary:
