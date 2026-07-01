@@ -41,7 +41,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(task_text.contains("Station Scenario Visible Cue Run Packet Refresh"), "Task documents visible cue packet refresh")
 	_assert(status_text.contains("TASK_737 - Station Scenario Visible Cue Run Packet Refresh"), "Implementation status tracks TASK_737")
 	_assert(roadmap_text.contains("TASK_737 - Station Scenario Visible Cue Run Packet Refresh (implementiert)"), "Roadmap marks TASK_737 implemented")
-	_assert(roadmap_text.contains("TASK_738 - Scenario Harness Modernization"), "Roadmap keeps harness modernization as conditional follow-up")
+	_assert(roadmap_text.contains("TASK_739 - Scenario Harness Modernization"), "Roadmap keeps harness modernization as conditional follow-up")
 	_assert(contract_text.contains("Station Scenario Visible Cue Run Packet Refresh"), "Interaction contract documents TASK_737")
 	_assert(report_text.contains("TASK_737 - Station Scenario Visible Cue Run Packet Refresh"), "Current handbook references TASK_737")
 	_assert(report_text.contains("station_scenario_visible_cue_run_packet_refresh"), "Current handbook exports TASK_737 fields")
