@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_721 - Station Route Two-Window Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_721_station_route_two_window_visual_findings.md`, `docs/tasks/TASK_720_station_route_capture_recheck_handbook.md`, `docs/tasks/TASK_719_station_route_post_polish_recheck.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationRouteTwoWindowVisualFindings` kombiniert frischen Host/Client-Capture, TASK_719-Recheck und expliziten Sichtbefund read-only.
+- Stand: Der aktuelle Sichtbefund meldet `needs_visual_polish`: linke Fireteam-Karten verdecken Kartenflaeche, Station-/Door-Labels sind klein/gedraengt, oben rechts ist ein leer wirkender Header-Placeholder sichtbar.
+- Stand: Das Manifest `tmp/station_route_two_window_visual_findings.json` empfiehlt TASK_722 fuer Station-Route-HUD-Visual-Polish, ohne Runtime-, Door-, Objective- oder Multiplayer-Wahrheit zu setzen.
+- Risiken/offen: TASK_721 behebt die UI-Reibungen noch nicht. Der naechste Slice muss sichtbaren HUD-Polish umsetzen und danach erneut per Host/Client-Capture beurteilt werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_721_station_route_two_window_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_719_station_route_post_polish_recheck.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_717_station_route_real_click_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_722 - Station Route HUD Visual Polish.
+
 ### TASK_720 - Station Route Capture Recheck + Handbuch
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_720_station_route_capture_recheck_handbook.md`, `docs/tasks/TASK_719_station_route_post_polish_recheck.md`, `docs/tasks/TASK_718_station_route_door_go_reject_visual_polish.md`, `docs/tasks/TASK_717_station_route_real_click_findings.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
