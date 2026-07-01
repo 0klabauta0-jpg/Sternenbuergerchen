@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_783</span>
-      <span class="pill warn">Aktueller Griff: TASK_784</span>
+      <span class="pill good">Letzter Abschluss: TASK_784</span>
+      <span class="pill warn">Aktueller Griff: TASK_785</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -145,7 +145,7 @@
           <li><strong>Interaction Feel:</strong> AA, Door, Computer und Cargo sind als Griff mit klaren Cues und Commands lesbar.</li>
           <li><strong>Contact Pressure:</strong> Kontaktmeldung, Risk-/LOS-Grund und Combat-HUD-Druck bleiben als erster Druckmoment zusammen lesbar.</li>
           <li><strong>Firefight Tension:</strong> Schuss, Outcome, Visual, Metrik und naechster Spielergriff sind als erster Feuerwechsel zusammengefuehrt.</li>
-          <li><strong>Command Surface Playtest:</strong> Das neue Paket prueft die polierte Surface gezielt: Folgezeile, Primary, Quick-Actions, Guard-Line und No-Auto-Command.</li>
+          <li><strong>Command Surface Findings:</strong> Der neue Findings-Refresh wertet die polierte Surface gezielt aus: Folgezeile, Primary, Quick-Actions, Guard-Line, No-Auto-Command, Existing-Buttons und Host/Client-Gleichstand.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -156,11 +156,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_784 aktualisiert den sichtbaren Review-Lauf auf die polierte TASK_783-Command-Surface: Style-ID, Reihenfolge, Interaction-Line, Primary, Quick-Actions, Guard-Line und Summary-Line liegen in einem Paket.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782 und TASK_783: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783 und TASK_784.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_785 wertet echte sichtbare Findings zur polierten Surface aus.</div>
-          <input readonly value="TASK_784 - Station Reentry Firefight Command Surface Playtest Packet Refresh" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_785 - Station Reentry Firefight Command Surface Visible Findings Refresh" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_785 wertet den sichtbaren Review-Lauf der polierten TASK_783/TASK_784-Command-Surface aus: Interaction-Line, Primary-Lane, Quick-Action-Rail, Guard-Line, No-Auto-Command, Existing-Buttons, Selected-Fireteam und Host/Client-Gleichstand werden als Findings gesammelt.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783 und TASK_784: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784 und TASK_785.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_786 prueft die polierte Surface im Host/Client-Fensterlauf.</div>
+          <input readonly value="TASK_785 - Station Reentry Firefight Command Surface Visible Findings Refresh" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_786 - Station Reentry Firefight Host Client Polished Surface Check" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -170,6 +170,7 @@
           <input readonly value="tmp/station_reentry_firefight_command_surface_findings.json" data-export-key="reentry_firefight_command_surface_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_command_surface_polish.json" data-export-key="reentry_firefight_command_surface_polish.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_command_surface_playtest_packet_refresh.json" data-export-key="reentry_firefight_command_surface_playtest_packet.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_command_surface_visible_findings_refresh.json" data-export-key="reentry_firefight_command_surface_visible_findings.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -312,6 +313,30 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_playtest_packet.host_client_same_surface_visible"> Host/Client sehen dieselbe polierte Surface</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_playtest_packet.screenshot_saved"> Polished-Surface-Screenshot gespeichert</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_playtest_packet.workbench_json_exported"> Polished-Surface-Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.manual_review_done"> TASK_785 Review bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.visible_playtest_done"> Sichtbarer Polished-Surface-Lauf wirklich ausgefuehrt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.f6_window_open"> Findings: F6-Fenster fuer polierte Surface offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.polished_surface_visible"> Findings: polierte Command-Surface sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.interaction_line_visible"> Findings: Interaction-Line sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.primary_action_lane_visible"> Findings: Primary-Lane sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.quick_action_rail_visible"> Findings: Quick-Action-Rail sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.guard_line_visible"> Findings: Guard-Line sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.no_auto_command_commit_visible"> Findings: No-Auto-Command sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.existing_buttons_visible"> Findings: Existing-Buttons-Grenze sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.selected_fireteam_panel_consistent"> Findings: Selected-Fireteam-Panel konsistent</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.host_client_same_surface_visible"> Findings: Host/Client sehen dieselbe polierte Surface</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.screenshot_saved"> Findings: Screenshot gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.workbench_json_exported"> Findings: Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.polished_surface_missing"> Issue: polierte Surface fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.interaction_line_unclear"> Issue: Interaction-Line unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.primary_lane_unclear"> Issue: Primary-Lane unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.quick_action_rail_hidden"> Issue: Quick-Action-Rail versteckt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.guard_line_missing"> Issue: Guard-Line fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.no_auto_command_unclear"> Issue: No-Auto-Command unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.existing_buttons_unclear"> Issue: Existing-Buttons-Grenze unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.selected_fireteam_panel_mismatch"> Issue: Selected-Fireteam widerspricht Kontext</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.host_client_surface_mismatch"> Issue: Host/Client-Surface weicht ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_command_surface_visible_findings.issues.performance_stutter_visible"> Issue: sichtbarer Stutter</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -401,10 +426,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_785 - Station Reentry Firefight Command Surface Visible Findings Refresh"
+            recommended_next_task: "TASK_786 - Station Reentry Firefight Host Client Polished Surface Check"
           },
           metadata: {
-            generated_for_task: "TASK_784",
+            generated_for_task: "TASK_785",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
