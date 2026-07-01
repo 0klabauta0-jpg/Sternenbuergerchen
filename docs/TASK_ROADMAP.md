@@ -83,7 +83,8 @@ git checkout -b batch/<batch-name>
 - TASK_758 - Station Homebase Return Acceptance Review (implementiert)
 - TASK_759 - Station Slice Next Playtest Target (implementiert)
 - TASK_760 - Station Reentry Playtest Run Packet (implementiert)
-- Naechster Schritt: TASK_761 - Station Reentry Visible Playtest Findings.
+- TASK_761 - Station Reentry Visible Playtest Findings (implementiert)
+- Naechster Schritt: TASK_762 - Station Reentry Targeted Polish oder sichtbaren Reentry-Playtest ausfuehren/exportieren.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
