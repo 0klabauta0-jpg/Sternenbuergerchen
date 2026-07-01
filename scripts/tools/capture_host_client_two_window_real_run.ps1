@@ -487,6 +487,10 @@ $manifest = [ordered]@{
     station_route_hud_visual_polish_manifest_path = "tmp/station_route_hud_visual_polish.json"
     station_route_host_client_recapture_review_task_id = "TASK_723"
     station_route_host_client_recapture_review_manifest_path = "tmp/station_route_host_client_recapture_review.json"
+    station_route_recapture_visual_followup_task_id = "TASK_724"
+    station_route_recapture_visual_followup_manifest_path = "tmp/station_route_recapture_visual_followup.json"
+    station_route_recapture_acceptance_review_task_id = "TASK_725"
+    station_route_recapture_acceptance_review_manifest_path = "tmp/station_route_recapture_acceptance_review.json"
     station_route_expected_sequence = @(
         "door_open",
         "computer_controlled",
@@ -508,6 +512,9 @@ $manifest = [ordered]@{
     station_route_hud_polish_recapture_required = $true
     station_route_hud_polish_recapture_done = [bool]($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten)
     station_route_hud_polish_recapture_gate = $(if ($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten) { "review_ready" } else { "manual_open" })
+    station_route_visual_followup_recapture_required = $true
+    station_route_visual_followup_recapture_done = [bool]($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten)
+    station_route_visual_followup_recapture_gate = $(if ($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten) { "review_ready" } else { "manual_open" })
     station_route_host_client_manual_checks = @(
         "host_window_launched",
         "client_window_launched",
@@ -516,6 +523,10 @@ $manifest = [ordered]@{
         "fireteam_mini_cards_no_longer_cover_map",
         "station_route_labels_backplate_readable",
         "top_nav_placeholder_hidden",
+        "top_nav_no_longer_blocks_read",
+        "fireteam_mini_no_longer_blocks_primary_route",
+        "station_route_labels_readable_enough",
+        "small_multiplayer_slice_accepted_for_next_step",
         "door_open_visible_on_host",
         "door_open_visible_on_client",
         "computer_control_visible_after_door",
@@ -579,6 +590,11 @@ $manifest = [ordered]@{
         "station_route_fireteam_mini_map_safe_margin",
         "station_route_label_backplates_readable",
         "station_route_nav_placeholder_hidden",
+        "station_route_visual_followup_acceptance_review",
+        "station_route_top_nav_narrower",
+        "station_route_fireteam_mini_lower",
+        "station_route_labels_more_spaced",
+        "station_route_small_multiplayer_slice_acceptance",
         "station_route_window_notes_exported",
         "input_latency_after_reject",
         "f6_readability",
@@ -596,6 +612,7 @@ $manifest = [ordered]@{
     recommended_next_station_route_host_client_acceptance_task = "TASK_712 - Station Route Host/Client Acceptance Packet"
     recommended_next_station_route_after_acceptance_task = "TASK_713 - Station Route Host/Client Findings"
     recommended_next_station_route_hud_polish_recapture_task = "TASK_723 - Station Route Host/Client Recapture Review"
+    recommended_next_station_route_visual_followup_acceptance_task = "TASK_725 - Station Route Host/Client Recapture Acceptance Review"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8

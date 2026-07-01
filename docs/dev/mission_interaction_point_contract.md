@@ -380,6 +380,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Gate-Wert `ready_for_recapture` bedeutet nur: Der sichtbare Folge-Polish ist technisch angewendet und braucht einen frischen Host/Client-Capture.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Host/Client Recapture Acceptance Review
+- `StationRouteRecaptureAcceptanceReview` bewertet den Nach-TASK_724-Host/Client-Capture zusammen mit dem TASK_724-Followup-Manifest read-only.
+- Das Capture-Manifest muss TASK_724 und TASK_725 explizit referenzieren, `station_route_visual_followup_recapture_done = true` melden und Review-Checks fuer TopNav, Fireteam-Mini, Label-Abstand und kleinen Multiplayer-Slice enthalten.
+- Der Snapshot unterscheidet technische Blocker, fehlenden Recapture, offenen menschlichen Sichtentscheid, Folge-Polish, fehlende Akzeptanzentscheidung und `accepted_for_next_slice`.
+- `accepted_for_next_slice` gilt nur fuer den kleinen Station-Route-Multiplayer-Slice. Es ist keine Gesamtspiel-, Mission-Editor- oder Release-Abnahme.
+- Folge-Polish-Flags duerfen TASK_726-Polish empfehlen; ein sauberer Sichtentscheid empfiehlt den naechsten kompakten Scenario-Drill.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
