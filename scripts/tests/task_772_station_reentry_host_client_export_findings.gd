@@ -47,7 +47,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(status_text.contains("TASK_772 - Station Reentry Host Client Export Findings"), "Implementation status tracks TASK_772")
 	_assert(roadmap_text.contains("TASK_772 - Station Reentry Host Client Export Findings (implementiert)"), "Roadmap marks TASK_772 implemented")
 	_assert(contract_text.contains("Station-Reentry-Host-Client-Export-Findings"), "Mission command feedback contract documents TASK_772")
-	_assert(report_text.contains("Aktueller Griff: TASK_773"), "Reentry handbook advances to TASK_773 current")
+	_assert(report_text.contains("Aktueller Griff: TASK_774"), "Reentry handbook advances to TASK_774 current")
 	_assert(report_text.contains('data-export-key="reentry_host_client_findings.manual_review_done"'), "Reentry handbook exports TASK_772 manual review check")
 	_assert(report_text.contains("station_reentry_host_client_export_findings.json"), "Reentry handbook names TASK_772 findings manifest")
 
@@ -65,7 +65,7 @@ func _test_missing_manual_export_routes_back_to_task_771() -> void:
 func _test_complete_export_routes_to_task_773() -> void:
 	var snapshot: Dictionary = Dictionary(FINDINGS_SCRIPT.call("build_snapshot", _build_export_packet(), _build_complete_notes(), {}))
 	_assert(String(snapshot.get("status", "")) == "ready_for_next_station_iteration", "Complete notes route to next station iteration")
-	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_773"), "Complete notes recommend TASK_773")
+	_assert(String(snapshot.get("recommended_next_task", "")).contains("TASK_774"), "Complete notes recommend TASK_774")
 	_assert(int(snapshot.get("completed_check_count", 0)) == int(snapshot.get("required_check_count", -1)), "All checks are complete")
 	_assert(Array(snapshot.get("missing_check_ids", [])).is_empty(), "No missing checks remain")
 	_assert(_snapshot_is_read_only(snapshot), "Complete findings snapshot remains read-only")

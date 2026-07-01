@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_774 - Station Reentry Next Playable Slice Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_774_station_reentry_next_playable_slice_acceptance.md`, `docs/tasks/TASK_773_station_reentry_host_client_identity_cue_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryNextPlayableSliceAcceptance` bewertet Preview, Performance, Host/Client-Sync, Export-Findings, Identity-Cue und echten Re-Capture als engen read-only Acceptance-Snapshot.
+- Stand: Bei vollstaendigen Gates meldet der Snapshot `accepted_for_next_playable_slice`; fehlender Re-Capture, Identity-Cue- oder Host/Client-Gates routen zu konkretem Folgepolish.
+- Risiken/offen: Keine Gesamtspiel-Abnahme und kein Langzeit-Playtest; der Slice ist nur fuer den naechsten spielbaren Schritt akzeptiert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_774_station_reentry_next_playable_slice_acceptance.gd`, TASK_773 Regression, `git diff --check`.
+- Naechster Schritt: TASK_775 - Station Reentry Mission Interaction Feel Pass.
+
 ### TASK_773 - Station Reentry Host Client Identity Cue Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_773_station_reentry_host_client_identity_cue_polish.md`, `docs/tasks/TASK_772_station_reentry_host_client_export_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Die Fireteam-Mini-Cards nutzen den Presenter ueber den bestehenden Statuskartenpfad; Tooltip und Snapshot bleiben read-only und mutieren keine Multiplayer-Authority.
 - Risiken/offen: Der echte Zwei-Fenster-Sichtentscheid bleibt als menschlicher Polish-Review sinnvoll; der technische Befund aus dem Capture ist umgesetzt.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_773_station_reentry_host_client_identity_cue_polish.gd`, TASK_772 Regression, `git diff --check`.
-- Naechster Schritt: Sichtbaren Host/Client-Reentry-Lauf erneut kurz ansehen oder TASK_774 - Station Reentry Next Playable Slice Acceptance schneiden.
+- Naechster Schritt: TASK_774 - Station Reentry Next Playable Slice Acceptance.
 
 ### TASK_772 - Station Reentry Host Client Export Findings
 - Status: implementiert im Arbeitsstand
@@ -26,7 +35,7 @@
 - Stand: Der Snapshot blockiert fehlende/ungueltige Pakete, routet offene sichtbare Exporte zurueck auf TASK_771 und erzeugt konkrete Action Items fuer belegte Host/Client-Reibung.
 - Risiken/offen: Kein automatischer Sichtentscheid; ohne echten Export bleibt der Status bewusst `needs_visible_host_client_export`.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_772_station_reentry_host_client_export_findings.gd`, TASK_771 Regression, `git diff --check`.
-- Naechster Schritt: TASK_773 - Station Reentry Next Playable Slice Acceptance oder gezielter Host/Client-Polish aus echten Export-Findings.
+- Naechster Schritt: TASK_774 - Station Reentry Next Playable Slice Acceptance oder gezielter Host/Client-Polish aus echten Export-Findings.
 
 ### TASK_771 - Station Reentry Visible Host Client Playtest Export
 - Status: implementiert im Arbeitsstand
