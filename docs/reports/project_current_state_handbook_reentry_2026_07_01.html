@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_785</span>
-      <span class="pill warn">Aktueller Griff: TASK_787</span>
+      <span class="pill good">Letzter Abschluss: TASK_787</span>
+      <span class="pill warn">Aktueller Griff: TASK_788</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -147,6 +147,7 @@
           <li><strong>Firefight Tension:</strong> Schuss, Outcome, Visual, Metrik und naechster Spielergriff sind als erster Feuerwechsel zusammengefuehrt.</li>
           <li><strong>Command Surface Host/Client:</strong> Der neue Abgleich prueft, ob beide Fenster dieselbe polierte Surface tragen, ohne Peer-/Team-Kontext zu vermischen.</li>
           <li><strong>Player Decision:</strong> TASK_787 verdichtet die synchronisierte Surface zu einer kleinen Decision-Card mit naechstem Griff, Alternativen, Warum-Zeile und Guard.</li>
+          <li><strong>Decision Evidence:</strong> TASK_788 bereitet Screenshot, Workbench-Export und manuelle Checks fuer diese Decision-Card vor, ohne den Sichttest als erledigt zu behaupten.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -157,11 +158,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_787 verdichtet die synchrone TASK_786-Firefight-Surface zu einer kleinen Spielerentscheidungs-Karte: Primary, Quick-Actions, Warum-Zeile, Guard und GO/Confirm bleiben auf einen Blick lesbar.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785 und TASK_786: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786 und TASK_787.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_788 macht die Decision-Card als sichtbares Evidence-Paket pruefbar.</div>
-          <input readonly value="TASK_787 - Station Reentry Firefight Player Decision Readability Pass" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_788 - Station Reentry Firefight Decision Evidence Packet" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_788 macht die TASK_787-Decision-Card als sichtbares Evidence-Paket pruefbar: F6-Fenster, Decision-Card, Decision-Line, Primary, Quick-Actions, Reason, Guard, Confirm und Host/Client-Kontext werden als manuelle Checks gesammelt.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786 und TASK_787: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787 und TASK_788.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_789 wertet Screenshot-/Workbench-Notizen als Decision-Evidence-Findings aus.</div>
+          <input readonly value="TASK_788 - Station Reentry Firefight Decision Evidence Packet" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_789 - Station Reentry Firefight Decision Evidence Findings" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -174,6 +175,7 @@
           <input readonly value="tmp/station_reentry_firefight_command_surface_visible_findings_refresh.json" data-export-key="reentry_firefight_command_surface_visible_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_host_client_polished_surface_check.json" data-export-key="reentry_firefight_host_client_polished_surface.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_player_decision_readability_pass.json" data-export-key="reentry_firefight_player_decision.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_decision_evidence_packet.json" data-export-key="reentry_firefight_decision_evidence.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -364,6 +366,19 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.existing_commands_only"> Nur bestehende Command-Buttons</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.text_budget_ok"> Textbudget bleibt kompakt</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_player_decision.host_client_context_visible"> Host/Client-Kontext bleibt lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.ready_to_capture"> TASK_788 Decision-Evidence-Paket bereit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.f6_window_open"> F6-Fenster fuer Decision-Card offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.decision_card_visible"> Decision-Card sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.decision_line_visible"> Decision-Line sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.primary_action_visible"> Primaerer Griff sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.quick_actions_visible"> Quick-Actions sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.reason_line_visible"> Warum-Zeile sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.guard_line_visible"> Guard-Line sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.confirm_control_visible"> GO/Confirm sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.no_auto_command_commit_visible"> No-Auto-Command-Grenze sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.host_client_context_visible"> Host/Client-Kontext sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.screenshot_saved"> Decision-Evidence-Screenshot gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_evidence.workbench_json_exported"> Decision-Evidence-Workbench-JSON exportiert</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -453,10 +468,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_788 - Station Reentry Firefight Decision Evidence Packet"
+            recommended_next_task: "TASK_789 - Station Reentry Firefight Decision Evidence Findings"
           },
           metadata: {
-            generated_for_task: "TASK_787",
+            generated_for_task: "TASK_788",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

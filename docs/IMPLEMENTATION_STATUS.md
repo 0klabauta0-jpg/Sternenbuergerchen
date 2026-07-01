@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_788 - Station Reentry Firefight Decision Evidence Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_788_station_reentry_firefight_decision_evidence_packet.md`, `docs/tasks/TASK_787_station_reentry_firefight_player_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `prepare_station_reentry_firefight_decision_evidence_packet.ps1` schreibt ein read-only Paket fuer den sichtbaren Review der TASK_787-Decision-Card.
+- Stand: Das Manifest nennt Scenario, Workbench, Decision-Line, Primary, Quick-Actions, Reason-Line, Guard-Line, Confirm-Control, No-Auto-Command-/Existing-Buttons-Grenze, manuelle Checks sowie Launch-/Capture-/Verifier-Kommandos.
+- Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; Workbench-JSON, Screenshot und echte Findings werden durch den naechsten Task ausgewertet.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_788_station_reentry_firefight_decision_evidence_packet.gd`, TASK_787/TASK_786 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_789 - Station Reentry Firefight Decision Evidence Findings.
+
 ### TASK_787 - Station Reentry Firefight Player Decision Readability Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_787_station_reentry_firefight_player_decision_readability_pass.md`, `docs/tasks/TASK_786_station_reentry_firefight_host_client_polished_surface_check.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Snapshot liefert Primary, Quick-Actions, Warum-Zeile, Guard-Line, Confirm-Control, Textbudgets und klare No-Command-/No-Gameplay-Mutation-Grenzen.
 - Risiken/offen: Keine sichtbare Evidence und keine Befehlsausfuehrung; ohne bereite TASK_786-Surface bleibt `blocked_until_host_client_surface_ready` korrekt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_787_station_reentry_firefight_player_decision_readability_pass.gd`, TASK_786/TASK_785/TASK_783 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_788 - Station Reentry Firefight Decision Evidence Packet.
+- Naechster Schritt: TASK_788 - Station Reentry Firefight Decision Evidence Packet (implementiert).
 
 ### TASK_786 - Station Reentry Firefight Host Client Polished Surface Check
 - Status: implementiert im Arbeitsstand
