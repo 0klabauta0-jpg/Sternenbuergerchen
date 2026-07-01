@@ -5425,7 +5425,7 @@ func _build_waypoint_intent_preview_text(fireteam_id: String) -> String:
 		var entry: Dictionary = Dictionary(entry_variant)
 		if String(entry.get("fireteam_id", "")).strip_edges().to_lower() != normalized_fireteam_id:
 			continue
-		var distance_eta_text: String = "Dist %dm | ETA~%ds" % [
+		var distance_eta_text: String = "PREVIEW Dist %dm | ETA~%ds" % [
 			int(round(float(entry.get("distance_world", 0.0)))),
 			maxi(int(ceil(float(entry.get("eta_seconds_estimate", 0.0)))), 0),
 		]
@@ -14234,6 +14234,105 @@ func get_frontier_probe_first_move_threat_preview_readability_snapshot() -> Dict
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_station_reentry_first_mission_preview_polish_snapshot() -> Dictionary:
+	var threat_preview: Dictionary = get_frontier_probe_first_move_threat_preview_readability_snapshot()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var first_preview: Dictionary = Dictionary(threat_preview.get("first_waypoint_preview", {})).duplicate(true)
+	var selected_order_text: String = String(command_feedback.get("selected_order_text", "")).strip_edges()
+	var mission_control_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	var route_line: String = String(command_feedback.get("station_route_run_line", "")).strip_edges()
+	var cue_line: String = String(command_feedback.get("station_scenario_route_cue_line", "")).strip_edges()
+	var scenario_path: String = _get_active_mission_scenario_path_for_readability().replace("\\", "/").to_lower()
+	var station_context_active: bool = scenario_path.ends_with("station_route_one_screen_multiplayer_drill.json") \
+		or not route_line.is_empty() \
+		or not cue_line.is_empty()
+	var risk_state: String = String(threat_preview.get("risk_state", "unknown")).strip_edges().to_lower()
+	var preview_text: String = String(threat_preview.get("risk_preview_text", "")).strip_edges()
+	var eta_seconds: float = float(first_preview.get("eta_seconds_estimate", -1.0))
+	var distance_world: float = float(first_preview.get("distance_world", -1.0))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"station_reentry_context_active",
+			station_context_active,
+			"Station-Reentry preview is checked inside the Station route/scenario context."
+		),
+		_build_mission_first_move_readability_check(
+			"first_move_threat_preview_gate_passes",
+			String(threat_preview.get("gate", "")) == "pass",
+			"Existing first-move threat preview remains green before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"visible_preview_word_present",
+			selected_order_text.contains("PREVIEW"),
+			"Selected Fireteam order text names the planned state as PREVIEW."
+		),
+		_build_mission_first_move_readability_check(
+			"risk_distance_eta_visible",
+			["safe", "risky", "suicidal", "unknown"].has(risk_state)
+				and not preview_text.is_empty()
+				and distance_world >= 0.0
+				and eta_seconds >= 0.0,
+			"Preview exposes risk, distance and ETA before confirmation."
+		),
+		_build_mission_first_move_readability_check(
+			"ghost_and_path_visible",
+			int(threat_preview.get("render_preview_path_line_count", 0)) > 0
+				and (
+					int(threat_preview.get("render_preview_visual_count", 0)) > 0
+					or int(threat_preview.get("render_preview_ghost_entry_count", 0)) > 0
+				),
+			"Primary3D reports the ghost/path preview before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"station_cue_or_route_visible",
+			not cue_line.is_empty()
+				or not route_line.is_empty()
+				or mission_control_text.contains("AA")
+				or mission_control_text.contains("NEXT"),
+			"Station route/cue context stays visible while the first move preview is planned."
+		),
+		_build_mission_first_move_readability_check(
+			"preview_stays_read_only",
+			bool(threat_preview.get("read_only", false))
+				and not bool(threat_preview.get("ui_sets_gameplay_truth", true))
+				and bool(first_preview.get("read_only", false))
+				and not bool(first_preview.get("ui_sets_gameplay_truth", true)),
+			"Station-Reentry first mission preview only reads existing snapshots and does not execute GO."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.station_reentry_first_mission_preview_polish.v1",
+		"task_id": "TASK_768",
+		"source_task_ids": PackedStringArray(["TASK_540", "TASK_567", "TASK_767"]),
+		"scenario_path": scenario_path,
+		"station_context_active": station_context_active,
+		"selected_order_text": selected_order_text,
+		"mission_control_status_text": mission_control_text,
+		"station_route_line": route_line,
+		"station_cue_line": cue_line,
+		"risk_state": risk_state,
+		"risk_preview_text": preview_text,
+		"distance_world": distance_world,
+		"eta_seconds_estimate": eta_seconds,
+		"first_waypoint_preview": first_preview,
+		"threat_preview_snapshot": threat_preview,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"recommended_next_task": "TASK_769 - Station Reentry Performance Feel Pass or visible Reentry playtest export",
 	}
 
 
