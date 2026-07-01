@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_779 - Station Reentry Firefight Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_779_station_reentry_firefight_visual_findings.md`, `docs/tasks/TASK_778_station_reentry_firefight_visual_playtest_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightVisualFindings` wertet das TASK_778-Paket plus optionale HTML-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Firefight-Review, unvollstaendige Pflichtchecks, konkrete Visual-/HUD-/Metrik-/Performance-/Host-Client-Follow-ups und eine saubere naechste Firefight-Iteration.
+- Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Fensterlauf bleibt `needs_visible_firefight_review` korrekt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_779_station_reentry_firefight_visual_findings.gd`, TASK_778/TASK_777 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_780 - Station Reentry Firefight Interaction Polish.
+
 ### TASK_778 - Station Reentry Firefight Visual Playtest Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_778_station_reentry_firefight_visual_playtest_packet.md`, `docs/tasks/TASK_777_station_reentry_firefight_tension_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Das Manifest nennt Scenario/Workbench, Firefight-Erwartungen, manuelle Checks fuer Trace/Impact/Badge/HUD/Metriken, Start-/Capture-Kommandos sowie TASK_777-/TASK_778-Verifier.
 - Risiken/offen: Kein automatischer Sichtentscheid; Screenshot, Workbench-JSON und echte Findings bleiben Folgearbeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_778_station_reentry_firefight_visual_playtest_packet.gd`, TASK_777 Regression, `git diff --check`.
-- Naechster Schritt: TASK_779 - Station Reentry Firefight Visual Findings.
+- Naechster Schritt: TASK_779 - Station Reentry Firefight Visual Findings (implementiert); danach TASK_780 - Station Reentry Firefight Interaction Polish.
 
 ### TASK_777 - Station Reentry Firefight Tension Feel Pass
 - Status: implementiert im Arbeitsstand
