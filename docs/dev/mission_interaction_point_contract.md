@@ -452,6 +452,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `get_station_scenario_hud_overlap_pass_snapshot()` exportiert Route-in-Identity, Cue-in-ACT, Linebudget und sichtbaren Linecount fuer Verifier/Reports.
 - Diese Entdichtung bleibt Anzeigeverhalten: keine Scenario-Gates, keine Door-/Cargo-States, keine Commands und keine Gameplay-Wahrheit werden gesetzt.
 
+## Station Scenario Performance Feel Pass
+- `get_station_scenario_performance_feel_pass_snapshot()` kombiniert einen wiederholten Command-Feedback-Snapshot-Sample mit HUD-Density-, Route-Overlap- und Cue-Gates.
+- Das Headless-Gate prueft strukturelles Reaktionsgefuehl: Snapshot-Budget, Zeichenbudget, sichtbarer Linecount, Route-in-Identity und Cue-in-ACT.
+- Der Snapshot darf `performance_gate`, `ready_for_visible_playtest`, Samplezeiten und Budgetwerte exportieren, aber keine Runtime- oder UI-Wahrheit setzen.
+- Das Budget kommt aus `data/performance_budget_contract.json`; maschinenabhaengige FPS/GPU-/Netzwerkstutter bleiben Godot-Profiler- und TASK_727-Fensterarbeit.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
