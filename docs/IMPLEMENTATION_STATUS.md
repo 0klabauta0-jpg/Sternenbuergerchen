@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_791 - Station Reentry Firefight Decision Host Client Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_791_station_reentry_firefight_decision_host_client_recapture.md`, `docs/tasks/TASK_790_station_reentry_firefight_decision_polish_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `prepare_station_reentry_firefight_decision_host_client_recapture.ps1` schreibt ein read-only Host/Client-Recapture-Paket fuer die akzeptierte TASK_790-Decision-Card.
+- Stand: Das Manifest traegt Decision-Line, Primary, Quick-Actions, Reason, Guard, Confirm, No-Auto-Command, Existing-Buttons-Grenze, Host-/Client-Rollen, manuelle Checks und Start-/Capture-Kommandos weiter.
+- Risiken/offen: Kein automatischer Sichtentscheid und kein echter Zwei-Fenster-Run im Headless-Test; Findings aus Screenshot/Workbench-Export bleiben TASK_792.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_791_station_reentry_firefight_decision_host_client_recapture.gd`, TASK_790/TASK_789/TASK_788 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_792 - Station Reentry Firefight Decision Host Client Findings.
+
 ### TASK_790 - Station Reentry Firefight Decision Polish Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_790_station_reentry_firefight_decision_polish_acceptance.md`, `docs/tasks/TASK_789_station_reentry_firefight_decision_evidence_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Ein sauberer Snapshot setzt `accepted_for_next_firefight_decision_slice` und routet zu einem Host/Client-Recapture der akzeptierten Decision-Card.
 - Risiken/offen: Kein automatischer Sichtentscheid und kein echter Host/Client-Recapture; ohne erledigten Fensterlauf bleibt die Kette korrekt bei TASK_788/TASK_789 offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_790_station_reentry_firefight_decision_polish_acceptance.gd`, TASK_789/TASK_788/TASK_787 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_791 - Station Reentry Firefight Decision Host Client Recapture.
+- Naechster Schritt: TASK_791 - Station Reentry Firefight Decision Host Client Recapture (implementiert).
 
 ### TASK_789 - Station Reentry Firefight Decision Evidence Findings
 - Status: implementiert im Arbeitsstand
