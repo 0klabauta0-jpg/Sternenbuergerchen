@@ -107,7 +107,8 @@ git checkout -b batch/<batch-name>
 - TASK_782 - Station Reentry Firefight Command Surface Findings (implementiert)
 - TASK_783 - Station Reentry Firefight Command Surface Polish (implementiert)
 - TASK_784 - Station Reentry Firefight Command Surface Playtest Packet Refresh (implementiert)
-- Naechster Schritt: TASK_785 - Station Reentry Firefight Command Surface Visible Findings Refresh.
+- TASK_785 - Station Reentry Firefight Command Surface Visible Findings Refresh (implementiert)
+- Naechster Schritt: TASK_786 - Station Reentry Firefight Host Client Polished Surface Check.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
