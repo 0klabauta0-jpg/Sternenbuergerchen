@@ -416,7 +416,7 @@ func get_station_scenario_homebase_next_sortie_readiness_snapshot() -> Dictionar
 	var label_text: String = label.text.strip_edges() if label != null else ""
 	var steps: Array = _build_next_sortie_readiness_steps(readiness, staging)
 	var current_step_id: String = _resolve_next_sortie_current_step_id(readiness, staging)
-	var readiness_line: String = _build_next_sortie_readiness_line(steps, current_step_id)
+	var readiness_line: String = _build_next_sortie_readiness_line(steps, current_step_id, true)
 	var post_gate: String = String(post_snapshot.get("gate", "")).strip_edges()
 	var checks: Array = []
 	_append_visual_audit_check(checks, "station_result_present", bool(post_snapshot.get("station_result_present", false)), "critical", "Next-sortie readiness should only appear for a carried Station Scenario result.")
@@ -3215,7 +3215,7 @@ func _update_next_sortie_readiness_summary() -> void:
 	var staging: Dictionary = get_homebase_direct_staging_snapshot()
 	var steps: Array = _build_next_sortie_readiness_steps(readiness, staging)
 	var current_step_id: String = _resolve_next_sortie_current_step_id(readiness, staging)
-	var line: String = _build_next_sortie_readiness_line(steps, current_step_id)
+	var line: String = _build_next_sortie_readiness_line(steps, current_step_id, _is_station_scenario_last_result())
 	if line.is_empty():
 		label.visible = false
 		label.text = ""
@@ -3482,9 +3482,11 @@ func _resolve_next_sortie_current_step_id(readiness: Dictionary, staging: Dictio
 	return "start_next_sortie"
 
 
-func _build_next_sortie_readiness_line(steps: Array, current_step_id: String) -> String:
+func _build_next_sortie_readiness_line(steps: Array, current_step_id: String, station_microcopy: bool = false) -> String:
 	if steps.is_empty() or current_step_id.is_empty():
 		return ""
+	if station_microcopy:
+		return _build_station_next_sortie_readiness_line(steps, current_step_id)
 	var labels: PackedStringArray = PackedStringArray()
 	var current_label: String = current_step_id
 	for step_variant in steps:
@@ -3495,6 +3497,42 @@ func _build_next_sortie_readiness_line(steps: Array, current_step_id: String) ->
 		if String(step.get("id", "")).strip_edges() == current_step_id:
 			current_label = label
 	return "Next sortie: %s | now: %s" % [" -> ".join(Array(labels)), current_label]
+
+
+func _build_station_next_sortie_readiness_line(steps: Array, current_step_id: String) -> String:
+	var current_label: String = _station_next_sortie_step_label(current_step_id)
+	var next_labels: PackedStringArray = PackedStringArray()
+	var found_current: bool = false
+	for step_variant in steps:
+		var step: Dictionary = Dictionary(step_variant)
+		var step_id: String = String(step.get("id", "")).strip_edges()
+		if step_id == current_step_id:
+			found_current = true
+			continue
+		if not found_current:
+			continue
+		var label: String = _station_next_sortie_step_label(step_id)
+		if not label.is_empty():
+			next_labels.append(label)
+	if next_labels.is_empty():
+		return "Naechste Sortie: %s" % current_label
+	return "Naechste Sortie: %s | danach: %s" % [current_label, ", ".join(Array(next_labels))]
+
+
+func _station_next_sortie_step_label(step_id: String) -> String:
+	match step_id:
+		"review_roster_gains":
+			return "Auswertung ansehen"
+		"stage_fireteam":
+			return "Fireteam bereitstellen"
+		"assign_loadout":
+			return "Loadout pruefen"
+		"prepare_transport":
+			return "Dropship beladen"
+		"start_next_sortie":
+			return "Start freigeben"
+		_:
+			return step_id.capitalize()
 
 
 func _readiness_item_is_ready(readiness: Dictionary, item_id: String) -> bool:
