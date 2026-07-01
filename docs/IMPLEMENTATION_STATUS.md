@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_747 - Station Scenario Homebase Visible Readiness Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_747_station_scenario_homebase_visible_readiness_review.md`, `docs/tasks/TASK_746_station_scenario_homebase_next_sortie_readiness.md`, `docs/tasks/TASK_745_station_scenario_post_debrief_homebase_readability.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `HomebaseTestScreen.get_station_scenario_homebase_visible_readiness_review_snapshot()` prueft den sichtbaren Station-Homebase-Zustand nach Debrief-Return: TASK_746-Gate, Summary, Next-Sortie-Zeile, FollowupPanel, Bounds, Reihenfolge, Overflow und read-only-Grenzen.
+- Stand: `scripts/tests/task_747_station_scenario_homebase_visible_readiness_review.gd` erzeugt `tmp/station_scenario_homebase_visible_readiness_review.png` und `tmp/station_scenario_homebase_visible_readiness_review.json`.
+- Stand: Der Review bleibt visuell/read-only und markiert `manual_review_required = true`, ohne einen echten Host/Client-Fensterblick als erledigt zu behaupten.
+- Risiken/offen: TASK_747 ist Headless-/Evidence-Review. Ein echter sichtbarer Host/Client-Recapture oder ein daraus abgeleiteter Visual-Polish-Findings-Slice bleibt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_747_station_scenario_homebase_visible_readiness_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_746_station_scenario_homebase_next_sortie_readiness.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_642_frontier_probe_homebase_visible_readiness_review.gd`, `git diff --check`.
+- Naechster Schritt: TASK_748 - Station Scenario Homebase Readiness Visual Polish Findings oder echter Host/Client-Fenster-Recapture des kompletten Station-Abschlusses.
+
 ### TASK_746 - Station Scenario Homebase Next Sortie Readiness
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_746_station_scenario_homebase_next_sortie_readiness.md`, `docs/tasks/TASK_745_station_scenario_post_debrief_homebase_readability.md`, `docs/tasks/TASK_641_frontier_probe_homebase_next_sortie_readiness.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
