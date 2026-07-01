@@ -347,6 +347,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Guard darf keine Fenster starten, keine Runtime-Interaction ausloesen, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Two-Window Visual Findings
+- `StationRouteTwoWindowVisualFindings` bewertet den frischen Host/Client-Capture und den TASK_719-Recheck zusammen mit einem expliziten Sichtbefund read-only.
+- Der Snapshot unterscheidet technische Blocker, offene Sichtpruefung und konkrete Visual-Polish-Punkte.
+- Fehlende Capture-/Screenshot-/Recheck-Evidence blockiert, damit ein veralteter oder unvollstaendiger Fensterlauf nicht als spielbarer Befund gelesen wird.
+- `needs_visual_review` bedeutet: Capture und Recheck sind bereit, aber der Host-/Client-Screenshot wurde noch nicht bewusst bewertet.
+- `needs_visual_polish` bedeutet: Der Sichtbefund ist gemacht und konkrete UI-Reibungen wie Kartenueberdeckung, kleine Station-Labels, gedrungene Door-/Route-Texte oder leer wirkende Header-Platzhalter sollen vor Akzeptanz poliert werden.
+- Findings duerfen `recommended_next_task` nennen, aber keine Fenster starten, keine Runtime-Interaction ausloesen, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
