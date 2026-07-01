@@ -77,7 +77,8 @@ git checkout -b batch/<batch-name>
 - TASK_752 - Station Homebase Recapture Workbench Prefill (implementiert)
 - TASK_753 - Station Homebase Recapture Review Gate (implementiert)
 - TASK_754 - Station Homebase Recapture Findings (implementiert)
-- Naechster Schritt: TASK_755 - Station Homebase Return Panel Polish oder echten Workbench-Export nachholen, falls TASK_754 weiter `blocked_missing_real_homebase_review` meldet.
+- TASK_755 - Station Homebase Return Panel Polish (implementiert)
+- Naechster Schritt: TASK_756 - Station Homebase Real Window Recapture.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
