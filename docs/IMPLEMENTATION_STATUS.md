@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_758 - Station Homebase Return Acceptance Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_758_station_homebase_return_acceptance_review.md`, `docs/tasks/TASK_757_station_homebase_recapture_findings_refresh.md`, `docs/tasks/TASK_756_station_homebase_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `StationScenarioF6HostClientPlaytestNotes` exportiert jetzt `homebase_return_acceptance_review` als enge Slice-Acceptance fuer Cargo -> Debrief -> Homebase inklusive TASK_755-Return-Panel.
+- Stand: Die Acceptance blockiert ohne echten TASK_756-Review, leitet fehlende Checks weiter und meldet nur bei vollstaendigem TASK_757-Refresh `accepted_for_next_station_slice`.
+- Stand: Workbench und aktueller HTML-Handbuchbericht enthalten TASK_758-Felder und grenzen die Acceptance explizit gegen eine Gesamtspiel-Abnahme ab.
+- Risiken/offen: TASK_758 akzeptiert nur den Homebase-Return-Slice. Der naechste echte Griff muss wieder Spiel- und Fenstergefuehl pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_758_station_homebase_return_acceptance_review.gd`, TASK_757/TASK_756 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_759 - Station Slice Next Playtest Target.
+
 ### TASK_757 - Station Homebase Recapture Findings Refresh
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_757_station_homebase_recapture_findings_refresh.md`, `docs/tasks/TASK_756_station_homebase_real_window_recapture.md`, `docs/tasks/TASK_754_station_homebase_recapture_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/station_scenario_f6_host_client_playtest_notes_2026_07_01.html`, `docs/reports/project_current_state_handbook_2026_07_01.html`

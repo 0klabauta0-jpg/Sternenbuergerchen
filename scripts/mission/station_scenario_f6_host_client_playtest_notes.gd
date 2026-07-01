@@ -52,6 +52,7 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 	var homebase_recapture_review: Dictionary = _build_homebase_recapture_review(recapture_evidence, existing_notes)
 	var homebase_recapture_findings: Dictionary = _build_homebase_recapture_findings(homebase_recapture_review)
 	var homebase_recapture_findings_refresh: Dictionary = _build_homebase_recapture_findings_refresh(homebase_recapture_review, recapture_evidence)
+	var homebase_return_acceptance_review: Dictionary = _build_homebase_return_acceptance_review(homebase_recapture_findings_refresh)
 	var required_checks: Array = _build_required_checks(existing_notes)
 	var issue_flags: Array = _build_issue_flags(existing_notes)
 	var completed_check_count: int = _count_completed_checks(required_checks)
@@ -85,6 +86,8 @@ static func build_snapshot(drill_manifest: Dictionary = {}, existing_notes: Dict
 		"homebase_recapture_findings_status": String(homebase_recapture_findings.get("status", "")),
 		"homebase_recapture_findings_refresh": homebase_recapture_findings_refresh,
 		"homebase_recapture_findings_refresh_status": String(homebase_recapture_findings_refresh.get("status", "")),
+		"homebase_return_acceptance_review": homebase_return_acceptance_review,
+		"homebase_return_acceptance_status": String(homebase_return_acceptance_review.get("status", "")),
 		"report_path": String(options.get("report_path", DEFAULT_REPORT_PATH)),
 		"manifest_path": String(options.get("manifest_path", DEFAULT_MANIFEST_PATH)),
 		"required_checks": required_checks,
@@ -309,6 +312,49 @@ static func _build_homebase_recapture_findings_refresh(homebase_review: Dictiona
 		"findings": findings,
 		"recommended_next_task": recommended_next,
 		"ready_for_acceptance_review": status == "ready_for_homebase_acceptance_review",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+	}
+
+
+static func _build_homebase_return_acceptance_review(findings_refresh: Dictionary) -> Dictionary:
+	var refresh_status: String = String(findings_refresh.get("status", ""))
+	var missing_check_ids: Array = _array_from_variant(findings_refresh.get("missing_check_ids", []))
+	var status: String = "blocked_missing_homebase_return_review"
+	var summary: String = "Homebase-Return-Acceptance ist blockiert, weil der echte TASK_756-Fensterreview noch fehlt."
+	var recommended_next: String = "TASK_758 - run Homebase Return acceptance from real Workbench export"
+	var accepted_for_next_station_slice: bool = false
+	var findings: Array = []
+	if refresh_status == "needs_task_756_panel_check_completion":
+		status = "needs_task_756_completion"
+		summary = "Homebase-Return-Acceptance wartet auf fehlende TASK_756-Panel-/Reviewchecks."
+		recommended_next = "TASK_758 - complete TASK_756 checks before acceptance"
+		findings.append(_finding("homebase_return_acceptance_missing_checks", "blocker", "Acceptance nicht moeglich; fehlende Checks: %s" % ", ".join(PackedStringArray(missing_check_ids)), recommended_next))
+	elif refresh_status == "ready_for_homebase_acceptance_review":
+		status = "accepted_for_next_station_slice"
+		summary = "Homebase-Return ist eng genug fuer den naechsten Station-Slice akzeptiert; das ist keine Gesamtspiel-Abnahme."
+		recommended_next = "TASK_759 - Station Slice Next Playtest Target"
+		accepted_for_next_station_slice = true
+		findings.append(_finding("homebase_return_slice_accepted", "accepted", "Cargo -> Debrief -> Homebase inklusive Return-Panel ist fuer den naechsten kleinen Station-Slice akzeptiert.", recommended_next))
+	else:
+		findings.append(_finding("homebase_return_acceptance_review_missing", "blocker", "Acceptance braucht zuerst einen echten TASK_756-Workbench-Export oder vollstaendige Review-Evidence.", recommended_next))
+	return {
+		"schema": "sternenbuergerchen.station_homebase_return_acceptance_review.v1",
+		"task_id": "TASK_758",
+		"source_task_id": "TASK_757",
+		"source_recapture_task_id": String(findings_refresh.get("source_task_id", "")),
+		"source_panel_task_id": String(findings_refresh.get("source_panel_task_id", "")),
+		"source_refresh_status": refresh_status,
+		"status": status,
+		"summary": summary,
+		"accepted_scope": "homebase_return_slice_only",
+		"accepted_for_next_station_slice": accepted_for_next_station_slice,
+		"not_full_game_acceptance": true,
+		"missing_check_ids": missing_check_ids,
+		"finding_count": findings.size(),
+		"findings": findings,
+		"recommended_next_task": recommended_next,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,

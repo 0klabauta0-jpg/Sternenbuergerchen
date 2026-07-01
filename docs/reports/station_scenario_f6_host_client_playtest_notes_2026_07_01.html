@@ -82,6 +82,7 @@
       <span class="pill warn">Gate: TASK_753</span>
       <span class="pill warn">Findings: TASK_754</span>
       <span class="pill warn">Refresh: TASK_757</span>
+      <span class="pill warn">Acceptance: TASK_758</span>
       <span class="pill bad">Sichtbarer Playtest offen</span>
       <span class="pill good">Read-only Review</span>
     </div>
@@ -178,6 +179,16 @@
           <textarea data-export-key="station_scenario_playtest.notes.homebase_recapture_findings" placeholder="Findings nach Export: Welcher konkrete Homebase-Polish ist belegt?"></textarea>
         </article>
         <article class="card full">
+          <h2>Homebase Return Acceptance</h2>
+          <p>Dieser Block akzeptiert nur den kleinen Homebase-Return-Slice fuer die naechste Arbeit. Er ist keine Gesamtspiel-Abnahme.</p>
+          <input readonly value="TASK_758" data-export-key="station_scenario_playtest.acceptance.homebase_return_task_id">
+          <input readonly value="sternenbuergerchen.station_homebase_return_acceptance_review.v1" data-export-key="station_scenario_playtest.acceptance.schema">
+          <input readonly value="blocked_missing_homebase_return_review, needs_task_756_completion, accepted_for_next_station_slice" data-export-key="station_scenario_playtest.acceptance.status_values">
+          <input readonly value="homebase_return_slice_only" data-export-key="station_scenario_playtest.acceptance.accepted_scope">
+          <input readonly value="TASK_759 - Station Slice Next Playtest Target" data-export-key="station_scenario_playtest.acceptance.ready_next_task">
+          <textarea data-export-key="station_scenario_playtest.notes.homebase_return_acceptance" placeholder="Acceptance-Notiz: akzeptiert fuer naechsten Slice oder welche echte Reibung bleibt?"></textarea>
+        </article>
+        <article class="card full">
           <h2>Route</h2>
           <table>
             <thead><tr><th>Schritt</th><th>Spieler-Erwartung</th><th>Was notieren?</th></tr></thead>
@@ -235,7 +246,7 @@
         </article>
         <article class="card half">
           <h3>Naechster Task</h3>
-          <input value="TASK_757 - Station Homebase Recapture Findings Refresh" data-export-key="station_scenario_playtest.recommended_next_task">
+          <input value="TASK_758 - Station Homebase Return Acceptance Review" data-export-key="station_scenario_playtest.recommended_next_task">
         </article>
       </div>
     </section>
@@ -316,11 +327,12 @@
             findings_task_id: "TASK_754",
             previous_prefill_task_id: "TASK_741",
             source_task: "TASK_726 - One-Screen Multiplayer Station Scenario Drill",
-            latest_completed_task: "TASK_757 - Station Homebase Recapture Findings Refresh",
+            latest_completed_task: "TASK_758 - Station Homebase Return Acceptance Review",
             latest_recapture_task: "TASK_739 - Station Scenario Identity Cue Recapture Findings",
             latest_homebase_recapture_task: "TASK_752 - Station Homebase Recapture Workbench Prefill",
             latest_homebase_review_gate_task: "TASK_753 - Station Homebase Recapture Review Gate",
             latest_homebase_findings_task: "TASK_757 - Station Homebase Recapture Findings Refresh",
+            latest_homebase_acceptance_task: "TASK_758 - Station Homebase Return Acceptance Review",
             recommended_next_task: "TASK_755 - Station Homebase Return Panel Polish",
             report_is_gameplay_truth: false,
             runtime_truth: "SimulationRoot/Runtime/Contracts",
