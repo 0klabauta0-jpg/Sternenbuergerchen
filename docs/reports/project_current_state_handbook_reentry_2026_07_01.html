@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_770</span>
-      <span class="pill warn">Aktueller Griff: TASK_771</span>
+      <span class="pill good">Letzter Abschluss: TASK_771</span>
+      <span class="pill warn">Aktueller Griff: TASK_772</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -152,12 +152,13 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_771 macht den sichtbaren Host/Client-Reentry-Lauf exportierbar: Das Paket nimmt den TASK_770-Sync-Gleichstand, nennt die erwarteten Next-Order-/Route-/Cue-Texte und gibt Start-/Capture-Kommandos plus manuelle Checks aus.</p>
-          <p>Quelle bleibt der TASK_768-Preview-Contract plus TASK_769-Fast-Gate und TASK_770-Sync-Gate: Preview vor GO, kompakte Route/Cue, gleicher Next-Order-Text und read-only Snapshot-Bewertung.</p>
-          <div class="callout warning">Danach ist TASK_772 sinnvoll: echten Export auswerten und nur dann konkrete Reibung schneiden, wenn die zwei Fenster wirklich abweichen.</div>
-          <input readonly value="TASK_771 - Station Reentry Visible Host Client Playtest Export" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_772 - Station Reentry Host Client Export Findings" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_772 wertet den sichtbaren Host/Client-Reentry-Export aus: Fehlt der echte Export, bleiben wir bei TASK_771; sind Checks unvollstaendig, werden sie benannt; echte Abweichungen werden als konkrete Folgearbeit geschnitten.</p>
+          <p>Quelle bleibt der TASK_768-Preview-Contract plus TASK_769-Fast-Gate, TASK_770-Sync-Gate und TASK_771-Exportpaket: Preview vor GO, kompakte Route/Cue, gleicher Next-Order-Text und read-only Snapshot-Bewertung.</p>
+          <div class="callout warning">Naechster Schritt nach einem echten Export: TASK_773 als Acceptance/naechster spielbarer Slice oder ein gezielter Polish aus belegter Host/Client-Reibung.</div>
+          <input readonly value="TASK_772 - Station Reentry Host Client Export Findings" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_773 - Station Reentry Next Playable Slice Acceptance oder gezielter Host/Client-Polish" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
+          <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <label class="checkline"><input type="checkbox" data-export-key="reentry_performance.fast_gate_pass"> TASK_769 Fast-Gate gruen</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_performance.manual_profiler_done"> Godot-Profiler manuell geprueft</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client.same_next_order"> Host/Client sehen denselben naechsten Auftrag</label>
@@ -165,6 +166,18 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client.peer_team_context_distinct"> Peer-/Team-Kontext bleibt getrennt</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_export.ready_to_capture"> TASK_771 Exportpaket bereit</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_export.export_json_saved"> Sichtbarer Host/Client-Export gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.manual_review_done"> TASK_772 Review bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.visible_export_done"> Sichtbarer Host/Client-Lauf wirklich ausgefuehrt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.host_window_open"> Host-Fenster sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.client_window_open"> Client-Fenster sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.host_client_same_next_order_visible"> Next-Order in beiden Fenstern gleich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.host_client_route_cue_same_visible"> Route/Cue in beiden Fenstern gleich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.peer_team_context_distinct_visible"> Peer-/Team-Kontext unterscheidbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.first_mission_preview_visible_before_go"> Erste Preview vor GO sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.export_json_saved"> Findings-Export gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.issues.host_client_next_order_mismatch"> Issue: Next-Order weicht ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.issues.host_client_route_cue_mismatch"> Issue: Route/Cue weicht ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.issues.peer_team_context_confusing"> Issue: Peer-/Team-Kontext unklar</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -254,10 +267,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_772 - Station Reentry Host Client Export Findings"
+            recommended_next_task: "TASK_773 - Station Reentry Next Playable Slice Acceptance or targeted Host/Client polish"
           },
           metadata: {
-            generated_for_task: "TASK_771",
+            generated_for_task: "TASK_772",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

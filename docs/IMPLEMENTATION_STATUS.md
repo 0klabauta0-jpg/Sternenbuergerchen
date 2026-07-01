@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_772 - Station Reentry Host Client Export Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_772_station_reentry_host_client_export_findings.md`, `docs/tasks/TASK_771_station_reentry_visible_host_client_playtest_export.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryHostClientExportFindings` wertet das TASK_771-Exportpaket plus optionale HTML-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot blockiert fehlende/ungueltige Pakete, routet offene sichtbare Exporte zurueck auf TASK_771 und erzeugt konkrete Action Items fuer belegte Host/Client-Reibung.
+- Risiken/offen: Kein automatischer Sichtentscheid; ohne echten Export bleibt der Status bewusst `needs_visible_host_client_export`.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_772_station_reentry_host_client_export_findings.gd`, TASK_771 Regression, `git diff --check`.
+- Naechster Schritt: TASK_773 - Station Reentry Next Playable Slice Acceptance oder gezielter Host/Client-Polish aus echten Export-Findings.
+
 ### TASK_771 - Station Reentry Visible Host Client Playtest Export
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_771_station_reentry_visible_host_client_playtest_export.md`, `docs/tasks/TASK_770_station_reentry_host_client_next_order_sync.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
