@@ -7555,6 +7555,44 @@ func _get_review_session_identity_snapshot() -> Dictionary:
 	return build_review_session_identity_snapshot().duplicate(true)
 
 
+func build_station_scenario_identity_body_snapshot(route_readout: Dictionary = {}, args: Array = []) -> Dictionary:
+	var session_snapshot: Dictionary = build_review_session_identity_snapshot(args) if not args.is_empty() else _get_review_session_identity_snapshot()
+	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
+	var resolved_route_readout: Dictionary = route_readout.duplicate(true)
+	if resolved_route_readout.is_empty():
+		resolved_route_readout = _build_station_route_run_readout_snapshot()
+	var route_line: String = String(resolved_route_readout.get("compact_line", "")).strip_edges()
+	var route_active: bool = bool(resolved_route_readout.get("active", false)) and not route_line.is_empty()
+	var base_text: String = "Realtime insertion feed"
+	var text := base_text
+	var tokens: PackedStringArray = PackedStringArray()
+	if not badge_text.is_empty():
+		tokens.append(badge_text)
+	if route_active:
+		tokens.append(route_line)
+	elif badge_text.is_empty():
+		tokens.append("live fireteam deployment")
+	else:
+		tokens.append(base_text)
+	if not tokens.is_empty():
+		text = " | ".join(tokens)
+	return {
+		"schema": "sternenbuergerchen.station_scenario_identity_body.v1",
+		"active": route_active,
+		"style_id": "station_scenario_identity_route_body_v1",
+		"text": text,
+		"badge_text": badge_text,
+		"route_line": route_line,
+		"route_next_token": String(resolved_route_readout.get("next_token", "")),
+		"line_length": text.length(),
+		"line_char_limit": 120,
+		"line_within_limit": text.length() <= 120,
+		"source": "review_session_and_station_route_run_readout",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
 func _build_fireteam_review_session_card_context(session_snapshot: Dictionary = {}) -> Dictionary:
 	var resolved_session: Dictionary = session_snapshot.duplicate(true) if not session_snapshot.is_empty() else _get_review_session_identity_snapshot()
 	var peer_label: String = String(resolved_session.get("peer_label", "")).strip_edges()
@@ -7655,11 +7693,16 @@ func _refresh_mission_identity_session_badge() -> void:
 		header_label.set_meta("review_session_badge_task", "TASK_619")
 	var body_label := get_node_or_null(MISSION_IDENTITY_BODY_LABEL_PATH) as Label
 	if body_label != null:
-		body_label.text = "Realtime insertion feed | live fireteam deployment" if badge_text.is_empty() else "%s | Realtime insertion feed" % badge_text
+		var identity_body: Dictionary = build_station_scenario_identity_body_snapshot()
+		body_label.text = String(identity_body.get("text", "Realtime insertion feed | live fireteam deployment"))
 		body_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
 		body_label.set_meta("review_session_badge_text", badge_text)
 		body_label.set_meta("review_session_badge_visible", not badge_text.is_empty())
 		body_label.set_meta("review_session_badge_task", "TASK_619")
+		body_label.set_meta("station_scenario_identity_body_style_id", String(identity_body.get("style_id", "")))
+		body_label.set_meta("station_scenario_route_visible", bool(identity_body.get("active", false)))
+		body_label.set_meta("station_scenario_route_line", String(identity_body.get("route_line", "")))
+		body_label.set_meta("station_scenario_identity_task", "TASK_730")
 
 
 func _ensure_mission_team_chip_label() -> void:
@@ -18629,6 +18672,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		mission_interaction_visual_state
 	)).duplicate(true)
 	var station_route_run_readout: Dictionary = _build_station_route_run_readout_snapshot(mission_interaction_objective_gate, mission_interaction_object_reaction)
+	var station_scenario_identity_body: Dictionary = build_station_scenario_identity_body_snapshot(station_route_run_readout)
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -18648,6 +18692,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH),
 		"mission_identity_header_text": _get_label_text(MISSION_IDENTITY_HEADER_LABEL_PATH),
 		"mission_identity_body_text": _get_label_text(MISSION_IDENTITY_BODY_LABEL_PATH),
+		"station_scenario_identity_body": station_scenario_identity_body,
+		"station_scenario_identity_body_line": String(station_scenario_identity_body.get("text", "")),
+		"station_scenario_identity_body_route_visible": bool(station_scenario_identity_body.get("active", false)),
 		"mission_team_chip_text": _get_label_text(MISSION_TEAM_CHIP_LABEL_PATH),
 		"mission_team_chip": mission_team_chip_snapshot,
 		"mission_team_chip_tooltip_text": _get_label_tooltip_text(MISSION_TEAM_CHIP_LABEL_PATH),

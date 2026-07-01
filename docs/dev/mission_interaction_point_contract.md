@@ -422,6 +422,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Packet-Status `ready_to_run_visible_playtest` bedeutet nur: alles ist vorbereitet, um den sichtbaren Lauf auszufuehren. Er ist keine menschliche Abnahme.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Scenario Targeted Playtest Polish
+- Der Mission-Identity-Body darf die bestehende `station_route_run_readout`-Zeile prominent anzeigen, wenn der Station-Route-Drill aktiv ist.
+- Diese Zeile muss aus Objective-Gate- und Object-Reaction-Snapshots stammen; der Header darf keine Gates, Door-States, Cargo-States, Teams oder Commands setzen.
+- `build_station_scenario_identity_body_snapshot()` liefert Badge, Route-Line, Next-Token, Style-ID und Zeichenbudget als read-only Review-/HUD-Daten.
+- Host/Client-Review-Badges wie `HOST P1 ALPHA` oder `CLIENT P2 BRAVO` bleiben im Header erhalten und werden nur mit der Route kombiniert.
+- Der Capture-Befund aus TASK_729 kann daraus TASK_730-Polish ableiten, bleibt aber weiterhin keine bestandene menschliche TASK_727-Workbench-Abnahme.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
