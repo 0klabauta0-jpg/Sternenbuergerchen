@@ -44,7 +44,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(status_text.contains("TASK_778 - Station Reentry Firefight Visual Playtest Packet"), "Implementation status tracks TASK_778")
 	_assert(roadmap_text.contains("TASK_778 - Station Reentry Firefight Visual Playtest Packet (implementiert)"), "Roadmap marks TASK_778 implemented")
 	_assert(contract_text.contains("Station-Reentry-Firefight-Visual-Playtest-Packet"), "Mission command feedback contract documents TASK_778")
-	_assert(report_text.contains("Aktueller Griff: TASK_778"), "Reentry handbook marks TASK_778 current")
+	_assert(report_text.contains("Aktueller Griff: TASK_779"), "Reentry handbook marks TASK_779 current")
 	_assert(report_text.contains("station_reentry_firefight_visual_playtest_packet.json"), "Reentry handbook names TASK_778 manifest")
 	_assert(report_text.contains('data-export-key="reentry_firefight_visual_packet.ready_to_capture"'), "Reentry handbook exports TASK_778 ready check")
 

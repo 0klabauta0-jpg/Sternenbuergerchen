@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_777</span>
-      <span class="pill warn">Aktueller Griff: TASK_778</span>
+      <span class="pill good">Letzter Abschluss: TASK_778</span>
+      <span class="pill warn">Aktueller Griff: TASK_779</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -145,7 +145,7 @@
           <li><strong>Interaction Feel:</strong> AA, Door, Computer und Cargo sind als Griff mit klaren Cues und Commands lesbar.</li>
           <li><strong>Contact Pressure:</strong> Kontaktmeldung, Risk-/LOS-Grund und Combat-HUD-Druck bleiben als erster Druckmoment zusammen lesbar.</li>
           <li><strong>Firefight Tension:</strong> Schuss, Outcome, Visual, Metrik und naechster Spielergriff sind als erster Feuerwechsel zusammengefuehrt.</li>
-          <li><strong>Visual Packet:</strong> Der naechste offene Punkt ist der echte Fensterblick: Trace, Impact, Unit-Badge, HUD und Metriken muessen im Screenshot/Workbench-Export bestaetigt werden.</li>
+          <li><strong>Visual Findings:</strong> Der echte Fensterblick wird jetzt als auswertbarer Befund gefasst: Trace, Impact, Unit-Badge, HUD, Metriken und Friendly-Fire-Risiko muessen entweder bestaetigt oder als konkretes Follow-up markiert werden.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -156,14 +156,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_778 macht den ersten Feuerwechsel als sichtbares Playtest-Paket greifbar: Szenario, Workbench, erwartete Firefight-Fragmente, manuelle Sichtchecks und Verifier liegen in einem Manifest zusammen.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, First-Engagement, Fire-/Cover-Visuals, Combat-HUD-Density und Mini-AAR-Metriken: keine neue Gameplay-Wahrheit, nur ein reproduzierbarer Sichtreview. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777 und TASK_778.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_779 wertet echte Firefight-Visual-Findings aus Screenshot und Workbench-JSON aus.</div>
-          <input readonly value="TASK_778 - Station Reentry Firefight Visual Playtest Packet" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_779 - Station Reentry Firefight Visual Findings" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_779 wertet den ersten Feuerwechsel als sichtbaren Befund aus: offener Fensterlauf, fehlende Pflichtchecks und konkrete Visual-/HUD-/Metrik-/Performance-/Host-Client-Probleme werden getrennt.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777 und TASK_778: keine neue Gameplay-Wahrheit, sondern ein read-only Findings-Snapshot ueber Paket, Screenshot-/Workbench-Haken und Issue-Flags. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778 und TASK_779.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_780 poliert den ersten Firefight-Interaktionsgriff nur dort, wo TASK_779 echte Reibung markiert.</div>
+          <input readonly value="TASK_779 - Station Reentry Firefight Visual Findings" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_780 - Station Reentry Firefight Interaction Polish" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_visual_findings.json" data-export-key="reentry_firefight_visual_findings.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -221,6 +222,26 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_packet.combat_metrics_match_hud"> Metriken passen zur HUD-Lage</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_packet.screenshot_saved"> Screenshot gespeichert</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_packet.workbench_json_exported"> Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.manual_review_done"> TASK_779 Review bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.visible_playtest_done"> Sichtbarer Firefight-Lauf wirklich ausgefuehrt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.f6_window_open"> Findings: F6-Fenster offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.firefight_triggered"> Findings: erster Feuerwechsel ausgeloest</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.fire_trace_visible"> Findings: FireTrace lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.impact_focus_visible"> Findings: Impact/Fokus lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.unit_badge_visible"> Findings: Unit-Badge lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.combat_hud_next_decision_visible"> Findings: HUD naechster Griff lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.combat_metrics_match_hud"> Findings: Metriken passen zum HUD</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.friendly_fire_risk_readable"> Findings: Friendly-Fire-Risiko lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.screenshot_saved"> Findings: Screenshot gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.workbench_json_exported"> Findings: Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.issues.trace_too_subtle"> Issue: FireTrace zu schwach</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.issues.impact_focus_unclear"> Issue: Impact/Fokus unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.issues.unit_badge_too_small"> Issue: Unit-Badge zu klein</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.issues.combat_hud_too_dense"> Issue: Combat-HUD zu dicht</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.issues.metrics_mismatch"> Issue: Metriken widersprechen HUD</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.issues.friendly_fire_risk_unclear"> Issue: Friendly-Fire-Risiko unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.issues.performance_stutter_visible"> Issue: sichtbarer Stutter</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_visual_findings.issues.host_client_firefight_mismatch"> Issue: Host/Client-Firefight weicht ab</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -310,10 +331,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_779 - Station Reentry Firefight Visual Findings"
+            recommended_next_task: "TASK_780 - Station Reentry Firefight Interaction Polish"
           },
           metadata: {
-            generated_for_task: "TASK_778",
+            generated_for_task: "TASK_779",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
