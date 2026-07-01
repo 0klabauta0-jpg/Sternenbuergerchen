@@ -345,6 +345,7 @@ git checkout -b batch/<batch-name>
 - TASK_714 - Station Route Multiplayer Scenario Guard (implementiert)
 - TASK_715 - Station Route Empty Event Log Polish (implementiert)
 - TASK_716 - Station Route Run Readout Polish (implementiert)
+- TASK_717 - Station Route Real Host/Client Click Findings (implementiert)
 
 Phase 0 – Fundament (abgeschlossen)
 TASK_006 Workflow Setup

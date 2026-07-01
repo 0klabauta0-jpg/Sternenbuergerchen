@@ -321,6 +321,15 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Guard darf Server-/Client-Snapshot-Annahme pruefen, aber keine echte Fenster-Sichtbarkeit, keine Bedienqualitaet und keinen abgeschlossenen Host/Client-Playtest behaupten.
 - Das Manifest bleibt read-only, fordert weiter manuelle Review und setzt keine Gameplay-Wahrheit.
 
+## Station Route Real Host/Client Click Findings
+- `StationRouteRealClickFindings` bewertet das echte TASK_712-Capture-Manifest und das TASK_716-Route-Readout-Manifest read-only.
+- Der Snapshot trennt technische Blocker, Warnungen und offene manuelle Klickbefunde.
+- Fehlendes Capture, fehlende Screenshots, falsche Schemas, falsche Task-IDs, fehlende Review-Checks oder read-only/UI-Truth-Verletzungen blockieren.
+- Eine valide Route-Line muss AA, Door, Computer, Cargo und `NEXT DONE` enthalten, damit der echte Fensterlauf nicht ohne HUD-Route bewertet wird.
+- `ready_for_click_findings_review` bedeutet nur: Capture und Route-Line sind auswertbar; der menschliche Klick-/Sichtbefund ist weiter offen.
+- Findings duerfen `recommended_next_task` nennen, aber keine Fenster starten, keine Runtime-Interaction ausloesen, keine Objective-Gates setzen, keine Peer-Wahrheit schreiben und keine Gameplay-Wahrheit mutieren.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.
