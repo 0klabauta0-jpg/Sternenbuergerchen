@@ -536,6 +536,36 @@ $manifest = [ordered]@{
         "hud_feedback_readable",
         "window_notes_exported"
     )
+    station_homebase_host_client_recapture_task_id = "TASK_750"
+    station_homebase_host_client_recapture_packet_path = "tmp/station_homebase_host_client_recapture_packet.json"
+    station_homebase_expected_summary_fragment = "Station Drill"
+    station_homebase_expected_readiness_line = "Naechste Sortie: Fireteam bereitstellen | danach: Loadout pruefen, Dropship beladen, Start freigeben"
+    station_homebase_forbidden_debug_fragments = @(
+        "Next sortie",
+        "Review gains",
+        "Stage fireteam",
+        "Assign loadout",
+        "Load dropship",
+        "Start next sortie"
+    )
+    station_homebase_recapture_review_required = $true
+    station_homebase_recapture_review_done = $false
+    station_homebase_recapture_gate = $(if ($visibleRejectReviewReady) { "review_ready" } else { "manual_open" })
+    station_homebase_recapture_manual_checks = @(
+        "host_window_launched",
+        "client_window_launched",
+        "cargo_end_reached",
+        "debrief_visible_after_cargo",
+        "return_homebase_clicked",
+        "homebase_summary_mentions_station_drill",
+        "homebase_next_sortie_line_visible",
+        "homebase_next_sortie_line_matches_task_749",
+        "old_debug_next_sortie_markers_absent",
+        "host_client_context_still_readable",
+        "hud_does_not_block_homebase_followup",
+        "performance_feels_fast",
+        "workbench_notes_exported"
+    )
     close_after_capture = [bool]$CloseAfterCapture
     wait_seconds = $WaitSeconds
     planned_godot_bin = $plannedGodotBin
@@ -596,6 +626,13 @@ $manifest = [ordered]@{
         "station_route_labels_more_spaced",
         "station_route_small_multiplayer_slice_acceptance",
         "station_route_window_notes_exported",
+        "station_homebase_cargo_end_reached",
+        "station_homebase_debrief_visible_after_cargo",
+        "station_homebase_return_homebase_clicked",
+        "station_homebase_summary_mentions_station_drill",
+        "station_homebase_next_sortie_line_matches_task_749",
+        "station_homebase_old_debug_markers_absent",
+        "station_homebase_workbench_notes_exported",
         "input_latency_after_reject",
         "f6_readability",
         "performance_feel",
@@ -613,6 +650,8 @@ $manifest = [ordered]@{
     recommended_next_station_route_after_acceptance_task = "TASK_713 - Station Route Host/Client Findings"
     recommended_next_station_route_hud_polish_recapture_task = "TASK_723 - Station Route Host/Client Recapture Review"
     recommended_next_station_route_visual_followup_acceptance_task = "TASK_725 - Station Route Host/Client Recapture Acceptance Review"
+    recommended_next_station_homebase_recapture_task = "TASK_750 - Station Homebase Host/Client Recapture Packet"
+    recommended_next_station_homebase_after_recapture_task = "Station Host/Client Homebase Recapture Findings"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
