@@ -57,4 +57,4 @@ Die Review-Probleme drehen sich nicht nur um technische Gates, sondern um Lesbar
 - [x] `git diff --check`
 
 ## Risiken / offene Punkte
-TASK_747 ist ein Headless-/Evidence-Review. Er sagt, dass die Homebase-Controls geometrisch und textlich plausibel sind, ersetzt aber keinen echten Host/Client-Fensterblick. Der naechste sinnvolle Schritt ist danach entweder ein Station-Homebase-Visual-Polish-Findings-Slice oder der echte Host/Client-Recapture.
+TASK_747 ist ein Headless-/Evidence-Review. Er sagt, dass die Homebase-Controls geometrisch und textlich plausibel sind, ersetzt aber keinen echten Host/Client-Fensterblick. Der naechste sinnvolle Schritt ist danach entweder TASK_748 - Station Scenario Homebase Readiness Visual Polish Findings oder der echte Host/Client-Recapture.
