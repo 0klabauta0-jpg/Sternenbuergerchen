@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_751 - Station Homebase Capture Metadata Hook
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_751_station_homebase_capture_metadata_hook.md`, `docs/tasks/TASK_750_station_homebase_host_client_recapture_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `scripts/tools/capture_host_client_two_window_real_run.ps1` schreibt jetzt TASK_750-spezifische Homebase-Recapture-Metadaten in `tmp/host_client_two_window_real_run_review.json`.
+- Stand: Das Capture-Manifest nennt erwartete Homebase-Zeile, verbotene alte Debug-Marker, Pflichtchecks und Folgeaufgabe fuer Findings.
+- Stand: `scripts/tests/task_751_station_homebase_capture_metadata_hook.gd` prueft Script, Manifest, Report-Felder, Contract und read-only-Grenzen.
+- Risiken/offen: Der echte sichtbare Host/Client-Recapture und die Findings-Auswertung bleiben weiterhin offen.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_751_station_homebase_capture_metadata_hook.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_750_station_homebase_host_client_recapture_packet.gd`, `git diff --check`.
+- Naechster Schritt: echten Host/Client-Homebase-Recapture starten und exportierte Workbench-Findings verdichten.
+
 ### TASK_750 - Station Homebase Host/Client Recapture Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_750_station_homebase_host_client_recapture_packet.md`, `docs/tasks/TASK_749_station_homebase_followup_microcopy_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
