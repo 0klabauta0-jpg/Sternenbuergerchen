@@ -364,6 +364,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Label-Backplates, Outline, Font-Groesse und Stagger-Abstaende sind reine Darstellung im `TerrainMap3DView`; sie duerfen keine Interactions starten, keine Objective-Gates setzen und keine Collision-/LOS-Wahrheit mutieren.
 - `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
 
+## Station Route Host/Client Recapture Review
+- `StationRouteHostClientRecaptureReview` bewertet den Nach-TASK_722-Host/Client-Capture zusammen mit dem TASK_722-HUD-Polish-Manifest read-only.
+- Das Capture-Manifest muss TASK_722 und TASK_723 explizit referenzieren, `station_route_hud_polish_recapture_done = true` melden und die neuen Review-Checks fuer Fireteam-Mini-Safe-Margin, Label-Backplates und versteckten Nav-Placeholder enthalten.
+- Der Snapshot unterscheidet technische Blocker, fehlenden Recapture, offenen menschlichen Sichtentscheid, Folge-Polish und Akzeptanzbereitschaft.
+- Ohne expliziten `visual_review_done` bleibt der Status `needs_visual_review`; TASK_723 darf keinen bestandenen Sichttest aus technischer Evidence ableiten.
+- Folge-Polish-Flags duerfen TASK_724 empfehlen, aber keine Runtime-, Door-, Objective- oder Multiplayer-Wahrheit setzen.
+- `read_only = true` und `ui_sets_gameplay_truth = false` bleiben Pflicht.
+
 ## Mission FullHD Evidence
 - Mission-Interaction-FullHD-Evidence darf aus Mission-Szene, Render-Snapshot, Visual-State-Snapshot, Object-Reaction-Snapshot und Command-Feedback ein PNG/JSON-Paket unter `tmp/` schreiben.
 - Wenn ein echter Viewport-Readback nicht verfuegbar ist, darf ein generiertes Review-Board aus denselben Daten geschrieben werden.

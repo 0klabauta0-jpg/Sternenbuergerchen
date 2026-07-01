@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_723 - Station Route Host/Client Recapture Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_723_station_route_host_client_recapture_review.md`, `docs/tasks/TASK_722_station_route_hud_visual_polish.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: `capture_host_client_two_window_real_run.ps1` markiert Nach-TASK_722-Recaptures jetzt mit TASK_722-/TASK_723-Metadaten, Recapture-Gate und Review-Checks fuer Fireteam-Mini-Map-Safe-Margin, Label-Backplates und versteckten Nav-Placeholder.
+- Stand: `StationRouteHostClientRecaptureReview` kombiniert Host/Client-Capture und TASK_722-HUD-Polish-Manifest read-only und unterscheidet `blocked`, `needs_recapture`, `needs_visual_review`, `needs_followup_polish` und `ready_for_acceptance_decision`.
+- Stand: Das lokale Manifest `tmp/station_route_host_client_recapture_review.json` meldet nach frischem Recapture bewusst `needs_visual_review`, weil die menschliche Sichtabnahme noch offen bleibt.
+- Risiken/offen: TASK_723 ersetzt keine menschliche Host/Client-Sichtentscheidung. Wenn der neue Fensterblick noch stoert, folgt ein kleiner TASK_724-Polish statt Runtime-Umbau.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `godot_console.exe --headless --path . --script scripts/tests/task_723_station_route_host_client_recapture_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_722_station_route_hud_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_721_station_route_two_window_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_724 - Station Route Sichtentscheid oder Folge-Polish aus dem Recapture.
+
 ### TASK_722 - Station Route HUD Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_722_station_route_hud_visual_polish.md`, `docs/tasks/TASK_721_station_route_two_window_visual_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`

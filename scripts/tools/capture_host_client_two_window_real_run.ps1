@@ -483,6 +483,10 @@ $manifest = [ordered]@{
     station_route_window_notes_workbench_path = "docs/reports/station_route_window_playtest_notes_2026_07_01.html"
     station_route_window_notes_manifest_path = "tmp/station_route_window_playtest_notes.json"
     station_route_readiness_manifest_path = "tmp/station_route_polish_readiness_findings.json"
+    station_route_hud_visual_polish_task_id = "TASK_722"
+    station_route_hud_visual_polish_manifest_path = "tmp/station_route_hud_visual_polish.json"
+    station_route_host_client_recapture_review_task_id = "TASK_723"
+    station_route_host_client_recapture_review_manifest_path = "tmp/station_route_host_client_recapture_review.json"
     station_route_expected_sequence = @(
         "door_open",
         "computer_controlled",
@@ -501,11 +505,17 @@ $manifest = [ordered]@{
     station_route_host_client_acceptance_review_required = $true
     station_route_host_client_acceptance_review_done = $false
     station_route_host_client_acceptance_gate = $(if ($visibleRejectReviewReady) { "review_ready" } else { "manual_open" })
+    station_route_hud_polish_recapture_required = $true
+    station_route_hud_polish_recapture_done = [bool]($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten)
+    station_route_hud_polish_recapture_gate = $(if ($Launch -and $screenshotWritten -and $hostScreenshotWritten -and $clientScreenshotWritten) { "review_ready" } else { "manual_open" })
     station_route_host_client_manual_checks = @(
         "host_window_launched",
         "client_window_launched",
         "host_station_route_visible",
         "client_station_route_visible",
+        "fireteam_mini_cards_no_longer_cover_map",
+        "station_route_labels_backplate_readable",
+        "top_nav_placeholder_hidden",
         "door_open_visible_on_host",
         "door_open_visible_on_client",
         "computer_control_visible_after_door",
@@ -565,6 +575,10 @@ $manifest = [ordered]@{
         "station_route_cargo_departed_visible",
         "station_route_wrong_team_reject",
         "station_route_snapshot_sync",
+        "station_route_hud_polish_recapture_review",
+        "station_route_fireteam_mini_map_safe_margin",
+        "station_route_label_backplates_readable",
+        "station_route_nav_placeholder_hidden",
         "station_route_window_notes_exported",
         "input_latency_after_reject",
         "f6_readability",
@@ -581,6 +595,7 @@ $manifest = [ordered]@{
     recommended_next_door_real_click_after_manual_task = "TASK_706 - Mission Door Layout/Visual Polish"
     recommended_next_station_route_host_client_acceptance_task = "TASK_712 - Station Route Host/Client Acceptance Packet"
     recommended_next_station_route_after_acceptance_task = "TASK_713 - Station Route Host/Client Findings"
+    recommended_next_station_route_hud_polish_recapture_task = "TASK_723 - Station Route Host/Client Recapture Review"
 }
 
 $manifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
