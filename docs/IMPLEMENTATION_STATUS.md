@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_790 - Station Reentry Firefight Decision Polish Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_790_station_reentry_firefight_decision_polish_acceptance.md`, `docs/tasks/TASK_789_station_reentry_firefight_decision_evidence_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightDecisionPolishAcceptance` wertet TASK_789-Findings read-only aus und entscheidet zwischen offenem Sichtreview, fehlenden Checks, gezieltem Polish oder engem Acceptance-Pass.
+- Stand: Ein sauberer Snapshot setzt `accepted_for_next_firefight_decision_slice` und routet zu einem Host/Client-Recapture der akzeptierten Decision-Card.
+- Risiken/offen: Kein automatischer Sichtentscheid und kein echter Host/Client-Recapture; ohne erledigten Fensterlauf bleibt die Kette korrekt bei TASK_788/TASK_789 offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_790_station_reentry_firefight_decision_polish_acceptance.gd`, TASK_789/TASK_788/TASK_787 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_791 - Station Reentry Firefight Decision Host Client Recapture.
+
 ### TASK_789 - Station Reentry Firefight Decision Evidence Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_789_station_reentry_firefight_decision_evidence_findings.md`, `docs/tasks/TASK_788_station_reentry_firefight_decision_evidence_packet.md`, `docs/tasks/TASK_787_station_reentry_firefight_player_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Review der Decision-Card, unvollstaendige Pflichtchecks, konkrete Decision-/Command-/Host-Client-/Performance-Follow-ups und einen sauberen Acceptance-Schritt.
 - Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Fensterlauf bleibt `needs_visible_decision_evidence_review` korrekt offen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_789_station_reentry_firefight_decision_evidence_findings.gd`, TASK_788/TASK_787 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_790 - Station Reentry Firefight Decision Polish Acceptance.
+- Naechster Schritt: TASK_790 - Station Reentry Firefight Decision Polish Acceptance (implementiert).
 
 ### TASK_788 - Station Reentry Firefight Decision Evidence Packet
 - Status: implementiert im Arbeitsstand
