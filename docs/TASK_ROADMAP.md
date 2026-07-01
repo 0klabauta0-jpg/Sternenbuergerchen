@@ -97,7 +97,8 @@ git checkout -b batch/<batch-name>
 - TASK_772 - Station Reentry Host Client Export Findings (implementiert)
 - TASK_773 - Station Reentry Host Client Identity Cue Polish (implementiert)
 - TASK_774 - Station Reentry Next Playable Slice Acceptance (implementiert)
-- Naechster Schritt: TASK_775 - Station Reentry Mission Interaction Feel Pass.
+- TASK_775 - Station Reentry Mission Interaction Feel Pass (implementiert)
+- Naechster Schritt: TASK_776 - Station Reentry Contact Pressure Feel Pass.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

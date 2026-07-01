@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_773</span>
-      <span class="pill warn">Aktueller Griff: TASK_774</span>
+      <span class="pill good">Letzter Abschluss: TASK_774</span>
+      <span class="pill warn">Aktueller Griff: TASK_775</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -142,7 +142,7 @@
             <li><strong>Sichttest offen:</strong> Headless-Verifier sind gruen, aber der echte Zwei-Fenster-Blick ist noch nicht abgenommen.</li>
             <li><strong>Preview-Sprache:</strong> Ohne klares Wort <code>PREVIEW</code> kann ein geplanter Move wie ein laufender Move wirken.</li>
           <li><strong>Host/Client:</strong> Beide Fenster sehen denselben naechsten Auftrag; die Fireteam-Karten-Relation ist jetzt als OWN/VIEW/FT ? lesbar.</li>
-          <li><strong>Acceptance:</strong> Der Reentry-Slice wird nur eng fuer den naechsten spielbaren Schritt bewertet, nicht als Gesamtspiel-Abnahme.</li>
+          <li><strong>Interaction Feel:</strong> Der naechste Missionsgriff muss AA, Door, Computer und Cargo mit klaren Cues und Commands lesbar machen.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -153,11 +153,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_774 macht aus den letzten Reentry-Gates eine enge Spielbarkeitsentscheidung: Preview, Performance, Host/Client-Sync, Findings, Identity-Cue und echter Re-Capture muessen gemeinsam gruen sein.</p>
-          <p>Quelle bleibt der TASK_768-Preview-Contract plus TASK_769-Fast-Gate, TASK_770-Sync-Gate, TASK_771-Exportpaket, TASK_772-Findings und TASK_773-Identity-Cue: Preview vor GO, kompakte Route/Cue, gleicher Next-Order-Text, klare Fireteam-Relation und read-only Snapshot-Bewertung.</p>
-          <div class="callout warning">Naechster Schritt nach Acceptance: TASK_775 als Mission-Interaction-Feel-Pass, also wieder echtes Spielgefuehl statt weiterer Meta-Bericht.</div>
-          <input readonly value="TASK_774 - Station Reentry Next Playable Slice Acceptance" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_775 - Station Reentry Mission Interaction Feel Pass" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_775 geht nach der Acceptance wieder in den Missionsgriff: Der Spieler soll AA, Door, Computer und Cargo als Route lesen, dazu je eine kurze Cue sehen und die passenden Commands erkennen.</p>
+          <p>Quelle bleibt der TASK_774-Acceptance-Snapshot plus die bestehende Station-Route-Cue-Logik: keine neue Gameplay-Wahrheit, nur Lesbarkeit und Bediengefuehl fuer den naechsten Befehl. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773 und TASK_774.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_776 als Contact-/Combat-Pressure-Feel-Pass, damit die Station nicht nur bedienbar, sondern taktisch spannend wird.</div>
+          <input readonly value="TASK_775 - Station Reentry Mission Interaction Feel Pass" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_776 - Station Reentry Contact Pressure Feel Pass" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
@@ -192,6 +192,10 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_acceptance.identity_cue_pass"> Identity-Cue gruen</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_acceptance.real_capture_written"> Re-Capture geschrieben</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="reentry_acceptance.accepted_for_next_playable_slice"> Eng akzeptiert fuer naechsten spielbaren Slice</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_interaction_feel.route_sequence_readable"> Route AA &gt; DOOR &gt; COM &gt; CARGO lesbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_interaction_feel.all_interaction_cues_readable"> AA/Door/Computer/Cargo-Cues lesbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_interaction_feel.command_affordances_present"> Move/Take/Breach/Defend/GO sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_interaction_feel.ready_for_mission_interaction_playtest"> Bereit fuer Mission-Interaction-Playtest</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -281,10 +285,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_775 - Station Reentry Mission Interaction Feel Pass"
+            recommended_next_task: "TASK_776 - Station Reentry Contact Pressure Feel Pass"
           },
           metadata: {
-            generated_for_task: "TASK_774",
+            generated_for_task: "TASK_775",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
