@@ -44,7 +44,7 @@ func _test_docs_contract_report_and_controller_integration() -> void:
 	_assert(status_text.contains("TASK_773 - Station Reentry Host Client Identity Cue Polish"), "Implementation status tracks TASK_773")
 	_assert(roadmap_text.contains("TASK_773 - Station Reentry Host Client Identity Cue Polish (implementiert)"), "Roadmap marks TASK_773 implemented")
 	_assert(contract_text.contains("Station-Reentry-Host-Client-Identity-Cue-Polish"), "Mission command feedback contract documents TASK_773")
-	_assert(report_text.contains("Aktueller Griff: TASK_783"), "Reentry handbook advances to TASK_783 current")
+	_assert(report_text.contains("Aktueller Griff: TASK_784"), "Reentry handbook advances to TASK_784 current")
 	_assert(report_text.contains('data-export-key="reentry_identity_cue.fireteam_card_relation_visible"'), "Reentry handbook exports identity cue check")
 	_assert(controller_text.contains("STATION_REENTRY_HOST_CLIENT_FIRETEAM_CARD_CONTEXT_SCRIPT"), "Controller preloads identity cue presenter")
 	_assert(controller_text.contains("_resolve_fireteam_team_id_from_units"), "Controller resolves fireteam team from units")
