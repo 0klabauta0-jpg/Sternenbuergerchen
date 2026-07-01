@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_777 - Station Reentry Firefight Tension Feel Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_777_station_reentry_firefight_tension_feel_pass.md`, `docs/tasks/TASK_776_station_reentry_contact_pressure_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightTensionFeelPass` bewertet TASK_776-Contact-Pressure, ersten FireEvent/Outcome, Fire-/Cover-Visuals, Mini-AAR-/Combat-Metriken, Tension-Sprache und kompakten naechsten Spielergriff als read-only Firefight-Gate.
+- Stand: Bei sichtbarem Attacker/Target/Weapon/Outcome, Trace/Impact/Badge, Shots/Hits/Wounded/Down/FF-Risk und Next-Decision-Text meldet der Snapshot `ready_for_firefight_tension_playtest`; einzelne Luecken routen gezielt zu Engagement-, Visual-, Metrics-, Tension- oder Next-Decision-Polish.
+- Risiken/offen: Der Pass beweist Lesbarkeit des ersten Feuerwechsels, aber noch keine Balance, keine echte Suppression/Morale und keinen sichtbaren Langzeit-F6-Playtest.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_777_station_reentry_firefight_tension_feel_pass.gd`, TASK_776 Regression, `git diff --check`.
+- Naechster Schritt: TASK_778 - Station Reentry Firefight Visual Playtest Packet.
+
 ### TASK_776 - Station Reentry Contact Pressure Feel Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_776_station_reentry_contact_pressure_feel_pass.md`, `docs/tasks/TASK_775_station_reentry_mission_interaction_feel_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Bei sichtbarer Kontaktmeldung, Risk-/LOS-Grund, Fire/Wait/No-Fire-Druck und Contact/Risk/LOS/Cover-HUD meldet der Snapshot `ready_for_contact_pressure_playtest`; einzelne Luecken routen gezielt zu Contact-, Threat-, Pressure- oder HUD-Polish.
 - Risiken/offen: Der Pass beweist Lesbarkeit des ersten Druckmoments, aber noch keine Qualitaet der eigentlichen Kampfauflösung oder echte Spannung ueber mehrere Feuerwechsel.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_776_station_reentry_contact_pressure_feel_pass.gd`, TASK_775 Regression, `git diff --check`.
-- Naechster Schritt: TASK_777 - Station Reentry Firefight Tension Feel Pass.
+- Naechster Schritt: TASK_777 - Station Reentry Firefight Tension Feel Pass (implementiert); danach TASK_778 - Station Reentry Firefight Visual Playtest Packet.
 
 ### TASK_775 - Station Reentry Mission Interaction Feel Pass
 - Status: implementiert im Arbeitsstand

@@ -99,7 +99,8 @@ git checkout -b batch/<batch-name>
 - TASK_774 - Station Reentry Next Playable Slice Acceptance (implementiert)
 - TASK_775 - Station Reentry Mission Interaction Feel Pass (implementiert)
 - TASK_776 - Station Reentry Contact Pressure Feel Pass (implementiert)
-- Naechster Schritt: TASK_777 - Station Reentry Firefight Tension Feel Pass.
+- TASK_777 - Station Reentry Firefight Tension Feel Pass (implementiert)
+- Naechster Schritt: TASK_778 - Station Reentry Firefight Visual Playtest Packet.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
