@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SternenBuergerchen Ist-Stand + Handbuch 2026-07-01</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10161a;
+      --panel: #182129;
+      --panel-2: #202b35;
+      --line: #3b4d5c;
+      --text: #edf5f8;
+      --muted: #9fb0bb;
+      --accent: #ffd34d;
+      --cyan: #55d6dc;
+      --green: #70db9d;
+      --red: #ff8f8f;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+    header { padding: 30px clamp(18px, 4vw, 54px) 20px; border-bottom: 1px solid var(--line); background: #141d24; }
+    main { width: min(1320px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 96px; }
+    h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: 0; }
+    h1 { font-size: clamp(28px, 3vw, 44px); }
+    h2 { font-size: 22px; }
+    h3 { color: var(--cyan); font-size: 16px; }
+    p { margin: 8px 0 0; color: var(--muted); }
+    ul, ol { margin: 10px 0 0; padding-left: 22px; color: var(--muted); }
+    li { margin: 5px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border-bottom: 1px solid rgba(255,255,255,0.08); padding: 10px; text-align: left; vertical-align: top; }
+    th { color: var(--cyan); background: rgba(255,255,255,0.03); font-size: 13px; }
+    button, input, select, textarea { font: inherit; }
+    button { border: 1px solid var(--line); background: #dce5ef; color: #10161a; border-radius: 6px; min-height: 38px; padding: 8px 12px; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--text); }
+    button.choice.active { border-color: var(--accent); background: var(--accent); color: #16120a; }
+    input, select, textarea, [contenteditable="true"] {
+      width: 100%; min-height: 36px; border: 1px solid var(--line); border-radius: 6px;
+      background: #0d1318; color: var(--text); padding: 8px 10px;
+    }
+    textarea { min-height: 118px; resize: vertical; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #74848e; }
+    .meta-row, .tabbar, .button-row, .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .meta-row { margin-top: 14px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--muted); background: rgba(255,255,255,0.03); font-size: 13px; }
+    .pill.good { color: var(--green); border-color: rgba(112,219,157,0.5); }
+    .pill.warn { color: var(--accent); border-color: rgba(255,211,77,0.55); }
+    .pill.danger { color: var(--red); border-color: rgba(255,143,143,0.5); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 18px; }
+    .card { grid-column: span 4; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+    .wide { grid-column: span 8; }
+    .half { grid-column: span 6; }
+    .full { grid-column: 1 / -1; }
+    .callout { margin-top: 12px; padding: 12px; border: 1px solid rgba(85,216,220,0.35); background: rgba(85,216,220,0.07); border-radius: 6px; color: var(--text); }
+    .warning { border-color: rgba(255,211,77,0.42); background: rgba(255,211,77,0.08); }
+    .checkline { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; color: var(--text); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .checkline:last-child { border-bottom: 0; }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; }
+    .tabbar { margin-top: 22px; border-bottom: 1px solid var(--line); }
+    .tab { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: transparent; color: var(--muted); border-bottom: 0; }
+    .tab.active { background: var(--panel); color: var(--text); border-color: var(--line); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .toolbar { position: sticky; bottom: 0; z-index: 5; justify-content: space-between; background: rgba(16,22,26,0.96); border-top: 1px solid var(--line); padding: 12px clamp(18px, 4vw, 52px); backdrop-filter: blur(8px); }
+    .toolbar textarea { min-height: 74px; max-height: 180px; flex: 1 1 420px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-status[data-tone="good"] { color: var(--green); }
+    .export-status[data-tone="warn"] { color: var(--accent); }
+    @media (max-width: 960px) { .card, .wide, .half { grid-column: 1 / -1; } .toolbar { position: static; } }
+  </style>
+</head>
+<body data-report-id="project_current_state_handbook_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
+    <p>Neuer Zwischenbericht vom 2026-07-01: Was spielbar ist, wie man es bedient, wo es reibt und welcher naechste Schritt den Spielzustand wirklich vorwaerts bringt.</p>
+    <div class="meta-row">
+      <span class="pill good">Schema v1</span>
+      <span class="pill warn">Stand: 2026-07-01</span>
+      <span class="pill">Branchbasis: integration/core-foundation</span>
+      <span class="pill">Letzter Abschluss: TASK_720</span>
+      <span class="pill good">Frische Host/Client-Capture-Evidence</span>
+      <span class="pill good">TASK_706 Door Layout/Visual Polish</span>
+      <span class="pill good">TASK_707 Door/Computer/Cargo Smoke</span>
+      <span class="pill good">TASK_708 Station Route Visual Evidence</span>
+      <span class="pill good">TASK_709 Window Playtest Notes</span>
+      <span class="pill good">TASK_710 Polish Readiness</span>
+      <span class="pill good">TASK_711 Evidence Board Polish</span>
+      <span class="pill good">TASK_712 Host/Client Acceptance Packet</span>
+      <span class="pill good">TASK_713 Host/Client Findings</span>
+      <span class="pill good">TASK_714 Multiplayer Scenario Guard</span>
+      <span class="pill good">TASK_715 Empty Event Log Polish</span>
+      <span class="pill good">TASK_716 Route Readout Polish</span>
+      <span class="pill good">TASK_717 Click Findings</span>
+      <span class="pill good">TASK_718 Door/GO/Reject Polish</span>
+      <span class="pill good">TASK_719 Post-Polish Recheck</span>
+      <span class="pill good">TASK_720 Capture Recheck + Handbuch</span>
+      <span class="pill good">Read-only Report</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabbar" aria-label="Reportbereiche">
+      <button class="tab active" type="button" data-tab-target="overview">Ist-Stand</button>
+      <button class="tab" type="button" data-tab-target="handbook">Handbuch</button>
+      <button class="tab" type="button" data-tab-target="friction">Reibung</button>
+      <button class="tab" type="button" data-tab-target="playtest">Playtest</button>
+      <button class="tab" type="button" data-tab-target="next">Naechstes</button>
+      <button class="tab" type="button" data-tab-target="notes">Notizen</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Kurzer Stand</h2>
+          <p>Der spielbare Kern ist nicht mehr nur Idee: Homebase, Readiness, Dropship/Insertion, Mission-HUD, Fireteam-Orders, Objective-Route, Debrief und Homebase-Return sind als Review-Spine vorhanden. Die aktuelle Spitze ist die Door-/Station-Interaktion, weil sie Singleplayer-Lesbarkeit und Host/Client-Authority zusammenbringt.</p>
+          <div class="callout">TASK_705 hat den Door-Zwei-Fenster-Lauf als Manual-Run-Packet konkret gemacht. TASK_706 machte den sichtbaren Door-Zustand robuster. TASK_707 pruefte Door -> Computer -> Cargo als kleinen Stations-Smoke. TASK_708 schreibt daraus ein FullHD-Evidence-Paket. TASK_709 macht den echten Fensterbefund als Workbench notierbar. TASK_710 uebersetzt Evidence und Notizen in Polish-/Akzeptanzbereitschaft. TASK_711 macht das generierte Evidence-Board selbst lesbarer. TASK_712 buendelt die komplette Station-Route fuer den Host/Client-Acceptance-Run. TASK_713 wertet dieses Paket read-only als blocked, needs_real_run, ready_for_findings_review oder accepted. TASK_714 belegt die technische Multiplayer-Kette fuer Door/Computer/Cargo plus Snapshot-Sync. TASK_715 entfernt den leeren Event-Log-Klotz aus dem initialen Fensterblick. TASK_716 fasst AA, Door, Computer, Cargo und NEXT als kurze Route-Line im HUD zusammen. TASK_717 fuehrt echten Capture-Stand und Route-Line zu einem read-only Klickbefund zusammen. TASK_718 glaettet Door/GO/Reject-Sprache und Buttontext fuer den echten Fensterblick. TASK_719 verhindert, dass stale Capture-Erwartungen nach dem Text-Polish als aktueller Fensterbefund gelesen werden. TASK_720 hat den echten Capture erneut geschrieben: DOOR B-&gt;GO, DOOR OPEN und Station-Route-DOOR OPEN sind jetzt frisch belegt.</div>
+        </article>
+        <article class="card">
+          <h2>Arbeitsstatus</h2>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.core_loop_spine"> Core-Loop-Spine vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.tactical_preview"> Tactical-Preview/LOS vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.fire_discipline"> Fire-Discipline-Grundlage vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.mini_aar"> Mini-AAR/Debrief-Grundlage vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.host_client_packet"> Host/Client-Packet vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.door_runtime"> Door Runtime Collision/LOS vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_706_done"> TASK_706 Door Visual Polish vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_707_done"> TASK_707 Door/Computer/Cargo Smoke vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_708_done"> TASK_708 Station Route Visual Evidence vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_709_done"> TASK_709 Window Playtest Notes vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_710_done"> TASK_710 Polish Readiness Findings vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_711_done"> TASK_711 Evidence Board Polish vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_712_done"> TASK_712 Host/Client Acceptance Packet vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_713_done"> TASK_713 Host/Client Findings vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_714_done"> TASK_714 Multiplayer Scenario Guard vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_715_done"> TASK_715 Empty Event Log Polish vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_716_done"> TASK_716 Station Route Run Readout vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_717_done"> TASK_717 Real Host/Client Click Findings vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_718_done"> TASK_718 Door/GO/Reject Visual Polish vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_719_done"> TASK_719 Post-Polish Recheck Guard vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.task_720_done"> TASK_720 Capture Recheck + Handbuch vorhanden</label>
+        </article>
+        <article class="card full">
+          <h2>Systemkarte</h2>
+          <table>
+            <thead><tr><th>Bereich</th><th>Was traegt</th><th>Was noch reibt</th><th>Guter Griff</th></tr></thead>
+            <tbody>
+              <tr><td>Spiel-Flow</td><td>Homebase -> Mission -> Debrief -> Homebase ist als Spine pruefbar.</td><td>Der echte Spielerblick muss weiter in kleinen Fenster-/Playtest-Paketen belegt werden.</td><td>Mini-Szenario mit wenigen klaren Interaktionen erneut spielen.</td></tr>
+              <tr><td>Mission</td><td>Fireteam-Auswahl, Move/Defend/Fire, Threat-Preview, Contacts, Objective-Gates, Door-Hook, Empty-Event-Log-Polish und Route-Readout sind verbunden.</td><td>Station-/Door-Objekte muessen optisch noch eindeutiger werden.</td><td>Echter Door/Computer/Cargo-Klicklauf.</td></tr>
+              <tr><td>Multiplayer</td><td>Authority-Smokes, Host/Client-Captures, Station-Route-Acceptance-Packet, Findings-Auswertung, technischer Scenario-Guard, HUD-Route-Line und realer Click-Findings-Snapshot existieren.</td><td>Der echte Zwei-Fenster-Klickbefund bleibt menschlich offen; die Capture-Erwartungen sind jetzt nach TASK_718 wieder frisch.</td><td>Im echten Fenster Door/GO/Reject, Computer, Cargo und Route-Line beurteilen.</td></tr>
+              <tr><td>Editor</td><td>Map-Editor und Builder-Workbench haben Paletten, Snapping, Presets und Interaction-Bindings.</td><td>Bediengefuehl und Asset-Auswahl bleiben langfristig ein eigener UX-Block.</td><td>Erst nach spielbarer Mission weiterpolieren.</td></tr>
+              <tr><td>Export</td><td>Export-Templates und Package-Hygiene sind geprueft.</td><td>Warnungen koennen wiederkommen, sobald Assets/Plugins wachsen.</td><td>Bei Release-Kandidat erneut Export-Smoke laufen lassen.</td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="handbook" class="tab-panel">
+      <div class="grid">
+        <article class="card half">
+          <h2>Spieler-Handbuch: Mission</h2>
+          <ol>
+            <li>Homebase oeffnen und Fireteam/Loadout vorbereiten.</li>
+            <li>Briefing/Readiness lesen: Ziel, Team, Drop und offene Blocker pruefen.</li>
+            <li>Mission starten, Dropship/LZ beobachten und Fireteam aussteigen lassen.</li>
+            <li>Fireteam links waehlen, Move/Defend/Fire/Take/Door ueber Command Matrix setzen.</li>
+            <li>Vor GO Preview lesen: Pfad, Ghost, Threat, LOS, Contact-Hinweise.</li>
+            <li>GO druecken, Ergebnis im Mission Control Panel und Mini-AAR verfolgen.</li>
+            <li>Nach Objective/Debrief zur Homebase zurueck und Next-Sortie-Cue pruefen.</li>
+          </ol>
+        </article>
+        <article class="card half">
+          <h2>Entwickler-Handbuch: Wahrheit</h2>
+          <ul>
+            <li>`SimulationRoot`, Runtime-Komponenten und Datenmodelle bleiben autoritativ.</li>
+            <li>UI/HTML/Reports zeigen State, senden Commands und speichern Notizen.</li>
+            <li>Registries sind Lookup-Wahrheit, keine versteckten Gameplay-Mutatoren.</li>
+            <li>Door-Visuals duerfen State anzeigen, aber Walkability/LOS kommt aus Runtime/TerrainRegistry.</li>
+            <li>Performance-Hotpaths brauchen Dirty-Flags, Caches und kleine Snapshots.</li>
+          </ul>
+        </article>
+        <article class="card full">
+          <h2>Door-Interaktion kurz erklaert</h2>
+          <p>Der Spieler sieht eine nutzbare Door, waehlt den Breach/Use-Hook per Button oder `B`, bestaetigt mit GO und sieht danach Authority-/Runtime-Feedback. Im Hintergrund prueft der Host die Berechtigung, Runtime-Progress oeffnet die Door und der Door Runtime Collision/LOS Producer macht die effektive TerrainRegistry frei. TASK_706 verbessert nur die Lesbarkeit dieser Zustandskette.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="friction" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Aktuelle Reibungen</h2>
+          <table>
+            <thead><tr><th>Reibung</th><th>Risiko</th><th>Umgang</th></tr></thead>
+            <tbody>
+              <tr><td>Door-Open im echten Fenster noch nicht menschlich bestaetigt.</td><td>UI kann technisch gruen sein, aber visuell zu leise wirken.</td><td>Manual-Run-Packet nutzen oder Visual-Polish zuerst absichern.</td></tr>
+              <tr><td>Viele kleine Review-Pakete statt langer echter Playtest-Session.</td><td>Einzelteile koennen stimmen, waehrend Spielgefuehl rau bleibt.</td><td>Immer wieder Mini-Szenario als Spieler laufen.</td></tr>
+              <tr><td>Editor-Wunsch und Mission-Spielbarkeit konkurrieren.</td><td>Zu viel Tooling kann Gameplay-Fortschritt bremsen.</td><td>Editor nur so weit, wie fuer spielbare Szenarien noetig.</td></tr>
+              <tr><td>Report/HTML-Artefakte koennen altern.</td><td>Alte naechste Schritte verwirren.</td><td>Diesen Refresh als aktuellen Einstieg nehmen und JSON-Notizen exportieren.</td></tr>
+            </tbody>
+          </table>
+        </article>
+        <article class="card">
+          <h2>Pruefstatus</h2>
+          <label class="checkline"><input type="checkbox" data-export-key="friction.real_window_checked"> Echten Fensterblick geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="friction.host_client_checked"> Host/Client Door Run geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="friction.door_visual_readable"> Door-Zustand gut lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="friction.no_overlap"> Keine HUD-/Proxy-Ueberlagerung</label>
+        </article>
+      </div>
+    </section>
+
+    <section id="playtest" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Playtest-Checkliste</h2>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.start_homebase"> Homebase Start sichtbar und Next-Sortie-Cue verstaendlich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.launch_mission"> Mission startet ohne Pfad-/Export-/Scene-Fehler</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.fireteam_order"> Fireteam kann Move/Defend setzen und GO ausfuehren</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.preview_readable"> Preview erklaert sicheren/riskanten Zug vor GO</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.door_button_visible"> Door-Button/Shortcut ist sichtbar und nicht mit GO verwechselt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.door_open_visible"> Door closed/opening/open ist im Missionsbild lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.door_computer_cargo_smoke"> Door -> Computer -> Cargo funktioniert als kurzer Stations-Smoke</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.station_route_visual_evidence"> Station-Route-Evidence PNG/Manifest ist geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.station_route_window_notes_exported"> Station-Route-Fensterbefund ist als JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.host_client_reject_clear"> Wrong-Team-Reject ist im Host/Client-Lauf verstaendlich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.debrief_return"> Debrief/Return fuehlt sich wie ein Loop an, nicht wie ein Abbruch</label>
+        </article>
+        <article class="card half">
+          <h2>Bewertung</h2>
+          <div class="button-row" data-choice-group="playtest.rating">
+            <button class="choice active" type="button" data-choice-value="next_slice_ok">Naechster Slice OK</button>
+            <button class="choice" type="button" data-choice-value="needs_polish">Polish vorher</button>
+            <button class="choice" type="button" data-choice-value="blocked">Blockiert</button>
+          </div>
+        </article>
+        <article class="card half">
+          <h2>Beobachtung</h2>
+          <textarea data-export-key="playtest.observation" placeholder="Was hast du im Fenster gesehen? Was war unklar, langsam oder haesslich?"></textarea>
+        </article>
+      </div>
+    </section>
+
+    <section id="next" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Naechster Griff</h2>
+          <p>Aktuell sinnvoll: den menschlichen Zwei-Fenster-Klickbefund nachziehen. Der technische Capture-Recheck meldet `ready_for_real_window_recheck`; jetzt muss im echten Fenster bewertet werden, ob Door/GO/Reject, Computer, Cargo, Route-Line und Snapshot-Sync fuer den Spieler lesbar genug sind.</p>
+          <div class="callout warning">Nicht jetzt: grosses neues Missionssystem, Ammo-Runner, tiefe Economy oder Editor-Umbau. Erst muss die kleine Station-Interaktion angenehm, sichtbar und im Host/Client-Pfad glaubwuerdig sein.</div>
+        </article>
+        <article class="card">
+          <h2>Empfehlung</h2>
+          <select data-export-key="next.recommended_path">
+            <option value="station_window_notes">TASK_709 Fenster-Playtest-Notizen ausfuellen</option>
+            <option value="station_polish_readiness">TASK_710 Polish Readiness pruefen</option>
+            <option value="station_board_polish">TASK_711 Evidence-Board-Polish pruefen</option>
+            <option value="station_host_client_acceptance">TASK_712 Host/Client Acceptance Run</option>
+            <option value="station_host_client_findings">TASK_713 Host/Client Findings auswerten</option>
+            <option value="station_multiplayer_guard">TASK_714 Multiplayer Scenario Guard pruefen</option>
+            <option value="station_empty_eventlog_polish">TASK_715 Empty Event Log Polish pruefen</option>
+            <option value="station_route_run_readout">TASK_716 Route Readout pruefen</option>
+            <option value="station_route_real_click_findings">TASK_717 Real Click Findings pruefen</option>
+            <option value="station_route_door_go_reject_polish">TASK_718 Door/GO/Reject Polish pruefen</option>
+            <option value="station_route_post_polish_recheck">TASK_719 Post-Polish Recheck pruefen</option>
+            <option value="station_route_capture_refresh">Host/Client-Capture aktualisieren</option>
+            <option value="real_host_client_run">Echten Host/Client Door Run machen</option>
+            <option value="mini_scenario_playtest">Mini-Szenario Playtest</option>
+          </select>
+        </article>
+      </div>
+    </section>
+
+    <section id="notes" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Arbeitsnotizen</h2>
+          <div contenteditable="true" data-note-key="notes.worklog" data-placeholder="Zwischenstand, Sichtbefund, Entscheidung...">2026-07-01: Neuer Ist-Stand-/Handbuch-Bericht angelegt. Der spielbare Schwerpunkt liegt weiter auf dem kleinen Stationslauf: Door nutzen, Computer sichern, Cargo landen lassen, alles mit Host/Client-Authority und lesbarem HUD. TASK_718 hat die sichtbare Door-Sprache auf DOOR B-&gt;GO und DOOR OPEN gekuerzt. TASK_719 erkennt stale Capture-Erwartungen. TASK_720 hat den Host/Client-Capture erneut geschrieben und TASK_719/TASK_717/TASK_718 danach gruen ausgefuehrt. Der naechste praktische Schritt ist der echte menschliche Zwei-Fenster-Befund, nicht ein weiterer Runtime-Umbau.</div>
+        </article>
+        <article class="card full">
+          <h2>TASK_708 Evidence</h2>
+          <p>Dieses Paket ist ein technischer Sichtanker fuer die Stationsroute. Headless darf ein Review-Board statt echter Fensterpixel erzeugen; der echte menschliche Fensterentscheid bleibt offen.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_visual_evidence.png_written"> PNG-Pfad vorbereitet</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_visual_evidence.manifest_written"> Manifest-Pfad vorbereitet</label>
+          <input readonly value="tmp/station_route_visual_evidence.png" data-export-key="station_route_visual_evidence.png_path">
+          <input readonly value="tmp/station_route_visual_evidence.json" data-export-key="station_route_visual_evidence.manifest_path">
+          <textarea data-export-key="station_route_visual_evidence.notes" placeholder="Nach dem echten Fensterblick: Ist Door/Computer/Cargo ohne Suche lesbar?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_709 Window Notes</h2>
+          <p>Diese Workbench ist der aktuelle Platz fuer den echten Fensterblick. Sie exportiert lokale Arbeitsnotizen, schreibt aber keine Projektdateien und setzt keine Gameplay-Wahrheit.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_window_playtest_notes.workbench_written"> Workbench-Pfad vorbereitet</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_window_playtest_notes.manifest_contract_written"> Manifest-Contract vorbereitet</label>
+          <input readonly value="docs/reports/station_route_window_playtest_notes_2026_07_01.html" data-export-key="station_route_window_playtest_notes.workbench_path">
+          <input readonly value="tmp/station_route_window_playtest_notes.json" data-export-key="station_route_window_playtest_notes.manifest_path">
+          <textarea data-export-key="station_route_window_playtest_notes.notes" placeholder="Nach dem echten Fensterblick: Was muss fuer Door/Computer/Cargo noch poliert werden?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_710 Polish Readiness</h2>
+          <p>Dieses Manifest entscheidet read-only, ob technische Evidence blockiert, Fensterreview offen ist, Visual-Polish noetig wird oder Host/Client-Akzeptanz als naechstes dran ist.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_polish_readiness_findings.analyzer_written"> Analyzer vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_polish_readiness_findings.manifest_contract_written"> Manifest-Contract vorbereitet</label>
+          <input readonly value="tmp/station_route_polish_readiness_findings.json" data-export-key="station_route_polish_readiness_findings.manifest_path">
+          <textarea data-export-key="station_route_polish_readiness_findings.notes" placeholder="Befund aus TASK_710: needs_window_review, needs_visual_polish oder host_client_acceptance_ready..."></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_711 Evidence Board Polish</h2>
+          <p>Das generierte Station-Route-Board hat jetzt Titel, Statuszeile, Objektlabels und Legende. Das verbessert nur das Review-Artefakt, nicht die Runtime-Wahrheit.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_evidence_board_visual_polish.labeled_board"> Labeled Board Style vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_evidence_board_visual_polish.pixel_text_labels"> Pixeltext-Labels vorhanden</label>
+          <input readonly value="station_route_labeled_v1" data-export-key="station_route_evidence_board_visual_polish.style_id">
+          <input readonly value="14" data-export-key="station_route_evidence_board_visual_polish.label_count">
+          <textarea data-export-key="station_route_evidence_board_visual_polish.notes" placeholder="Nach TASK_708-Regeneration: Ist das Board sofort verstaendlich?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_712 Host/Client Acceptance</h2>
+          <p>Das Zwei-Fenster-Capture-Manifest enthaelt jetzt die komplette Station-Route: Door, Computer, Cargo, Wrong-Team-Reject, Snapshot-Sync, HUD-Lesbarkeit und Exportpflicht.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_host_client_acceptance.packet_written"> Acceptance-Packet im Capture-Manifest vorbereitet</label>
+          <label class="checkline"><input type="checkbox" data-export-key="station_route_host_client_acceptance.real_run_done"> Echter Zwei-Fenster-Run erledigt</label>
+          <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="station_route_host_client_acceptance.manifest_path">
+          <input readonly value="manual_open" data-export-key="station_route_host_client_acceptance.expected_initial_gate">
+          <textarea data-export-key="station_route_host_client_acceptance.notes" placeholder="Nach dem echten Run: Door/Computer/Cargo auf Host und Client sichtbar? Reject und Sync klar?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_713 Host/Client Findings</h2>
+          <p>Der Findings-Snapshot liest das TASK_712-Paket read-only und trennt Paket-Blocker, offenen echten Run und review-bereite Host/Client-Artefakte.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_host_client_findings.analyzer_written"> Findings-Analyzer vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_host_client_findings.manifest_contract_written"> Manifest-Contract vorbereitet</label>
+          <input readonly value="tmp/station_route_host_client_findings.json" data-export-key="station_route_host_client_findings.manifest_path">
+          <input readonly value="needs_real_run" data-export-key="station_route_host_client_findings.expected_initial_status">
+          <textarea data-export-key="station_route_host_client_findings.notes" placeholder="Nach TASK_713: blocked, needs_real_run, ready_for_findings_review oder accepted..."></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_714 Multiplayer Scenario Guard</h2>
+          <p>Der Guard prueft die Station-Route technisch im Multiplayer-Kontext: Alpha-Door-Command, Bravo-Reject, Door-Runtime-Producer, Computer, Cargo und Client-Snapshot-Apply.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_multiplayer_scenario_guard.verifier_written"> Guard-Verifier vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_multiplayer_scenario_guard.manifest_contract_written"> Manifest-Contract vorbereitet</label>
+          <input readonly value="tmp/station_route_multiplayer_scenario_guard.json" data-export-key="station_route_multiplayer_scenario_guard.manifest_path">
+          <input readonly value="TASK_715 - Station Route Real Two-Window Playtest or Visual Polish" data-export-key="station_route_multiplayer_scenario_guard.recommended_next_task">
+          <textarea data-export-key="station_route_multiplayer_scenario_guard.notes" placeholder="Nach TASK_714: Sind technische Blocker weg? Was soll der echte Fensterlauf gezielt anschauen?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_715 - Station Route Empty Event Log Polish</h2>
+          <p>Der echte Zwei-Fenster-Blick zeigte ein leeres Event-Log als grosse dunkle Flaeche auf der Karte. Das Panel klappt jetzt im Empty-State ein, bleibt per Snapshot pruefbar und klappt bei echten Events wieder auf.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_empty_eventlog_polish.empty_collapsed"> Leerer Event-Log-Start klappt ein</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_empty_eventlog_polish.input_passthrough"> Empty-State ist fuer Mausinput durchlaessig</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_empty_eventlog_polish.expands_with_events"> Panel klappt bei Events wieder auf</label>
+          <input readonly value="collapsed_empty" data-export-key="station_route_empty_eventlog_polish.visibility_mode">
+          <input readonly value="scripts/tests/task_715_station_route_empty_eventlog_polish.gd" data-export-key="station_route_empty_eventlog_polish.verifier_path">
+          <textarea data-export-key="station_route_empty_eventlog_polish.notes" placeholder="Nach dem echten Fensterlauf: verdeckt unten links noch etwas die Karte oder fuehlt sich der HUD-Start ruhiger an?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_716 - Station Route Run Readout Polish</h2>
+          <p>Die Stationsroute wird jetzt als kompakte HUD-Kette lesbar: AA, Door, Computer, Cargo und NEXT. Der Readout liest nur Objective-Gate- und Object-Reaction-Snapshots und setzt keine Runtime-Wahrheit.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_run_readout_polish.snapshot_read_only"> Snapshot ist read-only</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_run_readout_polish.visible_in_command_feedback"> Route-Line im Command-Feedback sichtbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_run_readout_polish.visible_in_mission_control"> Route-Line in Mission-Control-Density sichtbar</label>
+          <input readonly value="ROUTE AA OK > DOOR OPEN > COM CTRL > CARGO DEPARTED | NEXT DONE" data-export-key="station_route_run_readout_polish.route_line">
+          <input readonly value="tmp/station_route_run_readout_polish.json" data-export-key="station_route_run_readout_polish.manifest_path">
+          <input readonly value="scripts/tests/task_716_station_route_run_readout_polish.gd" data-export-key="station_route_run_readout_polish.verifier_path">
+          <textarea data-export-key="station_route_run_readout_polish.notes" placeholder="Nach dem echten Fensterlauf: Ist die Route-Line hilfreich oder nimmt sie im HUD zu viel Raum?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_717 - Station Route Real Host/Client Click Findings</h2>
+          <p>Der aktuelle echte Capture-Stand und die TASK_716-Route-Line werden zusammen read-only ausgewertet. Das Ergebnis darf `ready_for_click_findings_review` melden, behauptet aber keinen bestandenen menschlichen Klicktest.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_real_click_findings.capture_manifest_present"> Host/Client-Capture-Manifest ist vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_real_click_findings.capture_current_after_task_718"> Capture ist nach TASK_718 bereits frisch</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_real_click_findings.route_readout_ready"> Route-Readout ist auswertbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_real_click_findings.manual_review_open"> Manueller Klickbefund bleibt offen</label>
+          <input readonly value="ready_for_click_findings_review" data-export-key="station_route_real_click_findings.status">
+          <input readonly value="tmp/station_route_real_click_findings.json" data-export-key="station_route_real_click_findings.manifest_path">
+          <input readonly value="scripts/tests/task_717_station_route_real_click_findings.gd" data-export-key="station_route_real_click_findings.verifier_path">
+          <textarea data-export-key="station_route_real_click_findings.notes" placeholder="Naechster Blick: Door/GO/Reject, Computer, Cargo und Route-Line im echten Fenster abnehmen."></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_718 - Station Route Door/GO/Reject Visual Polish</h2>
+          <p>Die sichtbare Door-Sprache ist gekuerzt: Standard-Door gibt keine Doppelung mehr aus, der Ready-Zustand liest sich als `DOOR B-&gt;GO`, der Button zeigt `B-&gt;GO`, Open als `DOOR OPEN` und Reject bleibt als Berechtigungsproblem lesbar.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_door_go_reject_visual_polish.compact_ready_clean"> Ready-Line ist DOOR B-&gt;GO</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_door_go_reject_visual_polish.button_go_visible"> Door-Button zeigt B-&gt;GO</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_door_go_reject_visual_polish.reject_reason_readable"> Reject-Grund bleibt spielbar lesbar</label>
+          <input readonly value="DOOR B->GO" data-export-key="station_route_door_go_reject_visual_polish.ready_line">
+          <input readonly value="DOOR OPEN" data-export-key="station_route_door_go_reject_visual_polish.open_line">
+          <input readonly value="tmp/station_route_door_go_reject_visual_polish.json" data-export-key="station_route_door_go_reject_visual_polish.manifest_path">
+          <input readonly value="scripts/tests/task_718_station_route_door_go_reject_visual_polish.gd" data-export-key="station_route_door_go_reject_visual_polish.verifier_path">
+          <textarea data-export-key="station_route_door_go_reject_visual_polish.notes" placeholder="Nach dem echten Fensterlauf: Ist B->GO klar genug, oder braucht der Button/Icon noch Layout-Polish?"></textarea>
+        </article>
+        <article class="card full">
+          <h2>TASK_719 - Station Route Post-Polish Recheck Guard</h2>
+          <p>Der Recheck vergleicht TASK_718-Polish-Evidence mit dem Host/Client-Capture. Wenn das Capture noch alte Door-Zeilen erwartet, wird `needs_capture_refresh` gemeldet, statt stale Fenster-Evidence als aktuell zu lesen.</p>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_post_polish_recheck.guard_read_only"> Recheck ist read-only</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_post_polish_recheck.detects_stale_capture"> Stale Capture-Erwartungen werden erkannt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="station_route_post_polish_recheck.requires_current_door_lines"> Aktuelle Door-Zeilen sind DOOR B-&gt;GO und DOOR OPEN</label>
+          <input readonly value="ready_for_real_window_recheck" data-export-key="station_route_post_polish_recheck.current_status">
+          <input readonly value="tmp/station_route_post_polish_recheck.json" data-export-key="station_route_post_polish_recheck.manifest_path">
+          <input readonly value="scripts/tests/task_719_station_route_post_polish_recheck.gd" data-export-key="station_route_post_polish_recheck.verifier_path">
+          <textarea data-export-key="station_route_post_polish_recheck.notes" placeholder="Status ist nach Capture-Refresh ready_for_real_window_recheck; jetzt echten Fensterbefund abnehmen."></textarea>
+        </article>
+        <article class="card half">
+          <h2>Entscheidung</h2>
+          <label class="checkline"><input type="radio" name="next_path" value="door_polish" data-export-key="decision.next_path"> Door Polish zuerst</label>
+          <label class="checkline"><input type="radio" name="next_path" value="host_client" data-export-key="decision.next_path" checked> Host/Client-Klicklauf zuerst</label>
+          <label class="checkline"><input type="radio" name="next_path" value="scenario" data-export-key="decision.next_path"> Mini-Szenario zuerst</label>
+        </article>
+        <article class="card half">
+          <h2>Freitext</h2>
+          <textarea data-export-key="notes.free_text" placeholder="Alles, was beim Lesen oder Testen auffaellt..."></textarea>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="toolbar">
+    <div class="export-actions">
+      <button id="exportJsonButton" type="button">JSON exportieren</button>
+      <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+      <span id="exportStatus" class="export-status">Export: lokal per file:// als Download oder Kopie.</span>
+    </div>
+    <textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea>
+  </footer>
+
+  <script>
+    (function () {
+      const reportId = document.body.dataset.reportId || "project_current_state_handbook_refresh";
+      const schema = document.body.dataset.reportSchema || "sternenbuergerchen.html_workbench.v1";
+      const output = document.getElementById("jsonOutput");
+      const exportStatus = document.getElementById("exportStatus");
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+      function readValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        if (element.type === "number" || element.type === "range") return Number(element.value);
+        return element.value;
+      }
+      function collectExport() {
+        const data = {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: new Date().toISOString(),
+          controls: {},
+          notes: {},
+          active_choices: {},
+          computed: {
+            latest_completed_task: "TASK_720 - Station Route Capture Recheck + Handbuch",
+            latest_completed_visual_task: "TASK_706 - Mission Door Layout/Visual Polish",
+            latest_completed_flow_task: "TASK_707 - Mission Door/Computer/Cargo Smoke",
+            latest_completed_evidence_task: "TASK_708 - Station Route Visual Evidence",
+            latest_completed_review_task: "TASK_709 - Station Route Window Playtest Notes",
+            latest_completed_readiness_task: "TASK_710 - Station Route Polish Readiness Findings",
+            latest_completed_visual_artifact_task: "TASK_711 - Station Route Evidence Board Visual Polish",
+            latest_completed_multiplayer_packet_task: "TASK_712 - Station Route Host/Client Acceptance Packet",
+            latest_completed_multiplayer_findings_task: "TASK_713 - Station Route Host/Client Findings",
+            latest_completed_multiplayer_guard_task: "TASK_714 - Station Route Multiplayer Scenario Guard",
+            latest_completed_visible_polish_task: "TASK_715 - Station Route Empty Event Log Polish",
+            latest_completed_route_readout_task: "TASK_716 - Station Route Run Readout Polish",
+            latest_completed_click_findings_task: "TASK_717 - Station Route Real Host/Client Click Findings",
+            latest_completed_door_go_reject_polish_task: "TASK_718 - Station Route Door/GO/Reject Visual Polish",
+            latest_completed_post_polish_recheck_task: "TASK_719 - Station Route Post-Polish Recheck Guard",
+            latest_completed_capture_recheck_task: "TASK_720 - Station Route Capture Recheck + Handbuch",
+            recommended_next_task: "TASK_721 - real two-window station route playtest decision",
+            runtime_truth: "SimulationRoot/Runtime/Contracts",
+            report_is_gameplay_truth: false
+          },
+          metadata: {
+            branch_basis: "integration/core-foundation",
+            created_for_task: "current_state_handbook_refresh",
+            local_path: "docs/reports/project_current_state_handbook_2026_07_01.html"
+          }
+        };
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = readValue(element);
+          if (typeof value !== "undefined") setPath(data.controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          setPath(data.notes, element.dataset.noteKey, element.textContent.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const active = group.querySelector(".choice.active");
+          if (active) setPath(data.active_choices, group.dataset.choiceGroup, active.dataset.choiceValue || active.textContent.trim());
+        });
+        return data;
+      }
+      function buildExportText() {
+        const text = JSON.stringify(collectExport(), null, 2);
+        if (output) output.value = text;
+        return text;
+      }
+      function download(text) {
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${reportId}_${stamp}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        if (exportStatus) {
+          exportStatus.textContent = "Export bereit: JSON wurde als Download erzeugt.";
+          exportStatus.dataset.tone = "good";
+        }
+      }
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.tabTarget;
+          document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
+          document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        });
+      });
+      document.querySelectorAll(".choice").forEach((button) => {
+        button.addEventListener("click", () => {
+          const group = button.closest("[data-choice-group]");
+          if (!group) return;
+          group.querySelectorAll(".choice").forEach((choice) => choice.classList.toggle("active", choice === button));
+          buildExportText();
+        });
+      });
+      document.querySelectorAll("[data-export-key], [data-note-key]").forEach((element) => {
+        element.addEventListener("change", buildExportText);
+        element.addEventListener("input", buildExportText);
+      });
+      document.getElementById("exportJsonButton").addEventListener("click", () => download(buildExportText()));
+      document.getElementById("copyJsonButton").addEventListener("click", async () => {
+        const text = buildExportText();
+        try {
+          await navigator.clipboard.writeText(text);
+          if (exportStatus) {
+            exportStatus.textContent = "JSON wurde in die Zwischenablage kopiert.";
+            exportStatus.dataset.tone = "good";
+          }
+        } catch (_error) {
+          if (exportStatus) {
+            exportStatus.textContent = "Kopieren nicht erlaubt; JSON steht rechts im Textfeld.";
+            exportStatus.dataset.tone = "warn";
+          }
+        }
+      });
+      buildExportText();
+    }());
+  </script>
+</body>
+</html>

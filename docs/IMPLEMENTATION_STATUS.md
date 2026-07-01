@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_720 - Station Route Capture Recheck + Handbuch
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_720_station_route_capture_recheck_handbook.md`, `docs/tasks/TASK_719_station_route_post_polish_recheck.md`, `docs/tasks/TASK_718_station_route_door_go_reject_visual_polish.md`, `docs/tasks/TASK_717_station_route_real_click_findings.md`, `docs/dev/html_report_workbench_contract.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_2026_07_01.html`
+- Stand: Neuer HTML-Ist-Stand-/Handbuch-Bericht fasst Spielstand, Bedienhandbuch, Reibungen, Playtest-Checks und naechste Entscheidung als exportierbare Workbench zusammen.
+- Stand: Der echte Host/Client-Capture wurde nach TASK_718 erneut geschrieben; die erwarteten Door-Zeilen sind jetzt `DOOR B->GO`, `DOOR OPEN` und Station-Route `DOOR OPEN`.
+- Stand: TASK_719 meldet dadurch `ready_for_real_window_recheck`; der technische stale-Capture-Blocker ist weg, der menschliche Zwei-Fenster-Befund bleibt bewusst offen.
+- Risiken/offen: TASK_720 ersetzt keinen menschlichen Host/Client-Playtest. Door/GO/Reject, Computer, Cargo, Route-Line, Snapshot-Sync und Bediengefuehl muessen im sichtbaren Fenster entschieden werden.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_host_client_two_window_real_run.ps1 -Launch -CloseAfterCapture -WaitSeconds 10`, `godot_console.exe --headless --path . --script scripts/tests/task_719_station_route_post_polish_recheck.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_717_station_route_real_click_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_718_station_route_door_go_reject_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_721 - echter Station-Route-Zwei-Fenster-Playtestentscheid oder daraus abgeleiteter Layout-/Bedienpolish.
+
 ### TASK_719 - Station Route Post-Polish Recheck Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_719_station_route_post_polish_recheck.md`, `docs/tasks/TASK_718_station_route_door_go_reject_visual_polish.md`, `docs/tasks/TASK_717_station_route_real_click_findings.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/reports/project_current_state_handbook_refresh_2026_06_30.html`
