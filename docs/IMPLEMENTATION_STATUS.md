@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_792 - Station Reentry Firefight Decision Host Client Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_792_station_reentry_firefight_decision_host_client_findings.md`, `docs/tasks/TASK_791_station_reentry_firefight_decision_host_client_recapture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightDecisionHostClientFindings` wertet das TASK_791-Paket plus optionale HTML-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot unterscheidet fehlendes/ungueltiges Paket, offenen sichtbaren Zwei-Fenster-Review, unvollstaendige Pflichtchecks, konkrete Host/Client-/Peer-Kontext-/Decision-Card-Follow-ups und einen sauberen Multiplayer-Decision-Acceptance-Schritt.
+- Risiken/offen: Kein automatischer Sichtentscheid und kein Screenshot-Parsing; ohne echten Zwei-Fenster-Lauf bleibt `needs_visible_decision_host_client_review` korrekt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_792_station_reentry_firefight_decision_host_client_findings.gd`, TASK_791/TASK_790/TASK_789 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance.
+
 ### TASK_791 - Station Reentry Firefight Decision Host Client Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_791_station_reentry_firefight_decision_host_client_recapture.md`, `docs/tasks/TASK_790_station_reentry_firefight_decision_polish_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +26,7 @@
 - Stand: Das Manifest traegt Decision-Line, Primary, Quick-Actions, Reason, Guard, Confirm, No-Auto-Command, Existing-Buttons-Grenze, Host-/Client-Rollen, manuelle Checks und Start-/Capture-Kommandos weiter.
 - Risiken/offen: Kein automatischer Sichtentscheid und kein echter Zwei-Fenster-Run im Headless-Test; Findings aus Screenshot/Workbench-Export bleiben TASK_792.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_791_station_reentry_firefight_decision_host_client_recapture.gd`, TASK_790/TASK_789/TASK_788 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_792 - Station Reentry Firefight Decision Host Client Findings.
+- Naechster Schritt: TASK_792 - Station Reentry Firefight Decision Host Client Findings (implementiert).
 
 ### TASK_790 - Station Reentry Firefight Decision Polish Acceptance
 - Status: implementiert im Arbeitsstand

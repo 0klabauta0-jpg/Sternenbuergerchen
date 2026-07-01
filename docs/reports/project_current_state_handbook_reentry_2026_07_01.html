@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_790</span>
-      <span class="pill warn">Aktueller Griff: TASK_791</span>
+      <span class="pill good">Letzter Abschluss: TASK_791</span>
+      <span class="pill warn">Aktueller Griff: TASK_792</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -151,6 +151,7 @@
           <li><strong>Decision Findings:</strong> TASK_789 wertet offene Reviews, fehlende Haken und konkrete Decision-Card-Issues in eine naechste Arbeit um.</li>
           <li><strong>Decision Acceptance:</strong> TASK_790 entscheidet read-only, ob die Decision-Card eng akzeptiert ist oder gezielt zurueck in Review, Completion oder Polish muss.</li>
           <li><strong>Decision Host/Client:</strong> TASK_791 bereitet den Zwei-Fenster-Recapture der akzeptierten Decision-Card vor.</li>
+          <li><strong>Host/Client Findings:</strong> TASK_792 wertet aus, ob Host und Client dieselbe Decision-Card wirklich lesbar zeigen.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -161,11 +162,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_791 bereitet den Host/Client-Recapture der akzeptierten TASK_790-Decision-Card vor: beide Fenster sollen denselben naechsten Griff, dieselben Alternativen und dieselbe Guard-Grenze zeigen.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789 und TASK_790: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790 und TASK_791.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_792 wertet den sichtbaren Host/Client-Recapture aus.</div>
-          <input readonly value="TASK_791 - Station Reentry Firefight Decision Host Client Recapture" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_792 - Station Reentry Firefight Decision Host Client Findings" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_792 wertet das TASK_791-Recapture-Paket plus Workbench-Haken aus: offen, unvollstaendig, konkrete Host/Client-Abweichung oder bereit fuer Multiplayer-Decision-Acceptance.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790 und TASK_791: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790, TASK_791 und TASK_792.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_793 entscheidet, ob der kleine Multiplayer-Decision-Slice akzeptiert ist.</div>
+          <input readonly value="TASK_792 - Station Reentry Firefight Decision Host Client Findings" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -182,6 +183,7 @@
           <input readonly value="tmp/station_reentry_firefight_decision_evidence_findings.json" data-export-key="reentry_firefight_decision_evidence_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_decision_polish_acceptance.json" data-export-key="reentry_firefight_decision_acceptance.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_decision_host_client_recapture.json" data-export-key="reentry_firefight_decision_host_client_recapture.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_decision_host_client_findings.json" data-export-key="reentry_firefight_decision_host_client_findings.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -429,6 +431,34 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_recapture.host_client_same_guard_line"> Host/Client: Guard-Line gleich</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_recapture.peer_team_context_distinct"> Peer-/Team-Kontext bleibt getrennt</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_recapture.workbench_json_exported"> TASK_791 Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.manual_review_done"> TASK_792 Review bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.visible_review_done"> Sichtbarer Host/Client-Decision-Review wirklich ausgefuehrt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.host_window_open"> Findings: Host-Fenster offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.client_window_open"> Findings: Client-Fenster offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.host_decision_card_visible"> Findings: Host-Decision sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.client_decision_card_visible"> Findings: Client-Decision sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.host_client_same_decision_line"> Findings: Decision-Line gleich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.host_client_same_primary_action"> Findings: Primary gleich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.host_client_same_quick_actions"> Findings: Quick-Actions gleich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.host_client_same_reason_line"> Findings: Reason-Line gleich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.host_client_same_guard_line"> Findings: Guard-Line gleich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.host_client_same_confirm_control"> Findings: Confirm-Control gleich</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.no_auto_command_commit_visible"> Findings: No-Auto-Command sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.existing_buttons_visible"> Findings: Existing-Buttons sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.peer_team_context_distinct"> Findings: Peer-/Team-Kontext getrennt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.screenshot_saved"> Findings: Screenshot gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.workbench_json_exported"> Findings: Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.host_decision_card_missing"> Issue: Host-Decision fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.client_decision_card_missing"> Issue: Client-Decision fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.decision_line_mismatch"> Issue: Decision-Line weicht ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.primary_action_mismatch"> Issue: Primary weicht ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.quick_actions_mismatch"> Issue: Quick-Actions weichen ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.reason_line_mismatch"> Issue: Reason-Line weicht ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.guard_line_mismatch"> Issue: Guard-Line weicht ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.confirm_control_mismatch"> Issue: Confirm-Control weicht ab</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.no_auto_command_confusing"> Issue: Auto-Command-Grenze unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.peer_team_context_mixed"> Issue: Peer-/Team-Kontext vermischt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.performance_stutter_visible"> Issue: sichtbarer Stutter</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -518,10 +548,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_792 - Station Reentry Firefight Decision Host Client Findings"
+            recommended_next_task: "TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance"
           },
           metadata: {
-            generated_for_task: "TASK_791",
+            generated_for_task: "TASK_792",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
