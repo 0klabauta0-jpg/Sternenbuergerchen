@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_791</span>
-      <span class="pill warn">Aktueller Griff: TASK_792</span>
+      <span class="pill good">Letzter Abschluss: TASK_792</span>
+      <span class="pill warn">Aktueller Griff: TASK_793</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -152,6 +152,7 @@
           <li><strong>Decision Acceptance:</strong> TASK_790 entscheidet read-only, ob die Decision-Card eng akzeptiert ist oder gezielt zurueck in Review, Completion oder Polish muss.</li>
           <li><strong>Decision Host/Client:</strong> TASK_791 bereitet den Zwei-Fenster-Recapture der akzeptierten Decision-Card vor.</li>
           <li><strong>Host/Client Findings:</strong> TASK_792 wertet aus, ob Host und Client dieselbe Decision-Card wirklich lesbar zeigen.</li>
+          <li><strong>Multiplayer Decision Acceptance:</strong> TASK_793 entscheidet eng, ob der kleine Host/Client-Firefight-Decision-Slice akzeptiert ist.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -162,11 +163,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_792 wertet das TASK_791-Recapture-Paket plus Workbench-Haken aus: offen, unvollstaendig, konkrete Host/Client-Abweichung oder bereit fuer Multiplayer-Decision-Acceptance.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790 und TASK_791: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790, TASK_791 und TASK_792.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_793 entscheidet, ob der kleine Multiplayer-Decision-Slice akzeptiert ist.</div>
-          <input readonly value="TASK_792 - Station Reentry Firefight Decision Host Client Findings" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_793 wertet die TASK_792-Findings aus: offen, unvollstaendig, konkrete Host/Client-Abweichung oder akzeptiert fuer den kleinen Multiplayer-Firefight-Decision-Slice.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790, TASK_791 und TASK_792: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Evidence-Kette bleibt sichtbar ueber TASK_768, TASK_769, TASK_770, TASK_771, TASK_772, TASK_773, TASK_774, TASK_775, TASK_776, TASK_777, TASK_778, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790, TASK_791, TASK_792 und TASK_793.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_794 erzeugt ein Playtest-Paket fuer den akzeptierten Multiplayer-Decision-Slice.</div>
+          <input readonly value="TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_794 - Station Reentry Firefight Multiplayer Decision Playtest Packet" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -184,6 +185,7 @@
           <input readonly value="tmp/station_reentry_firefight_decision_polish_acceptance.json" data-export-key="reentry_firefight_decision_acceptance.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_decision_host_client_recapture.json" data-export-key="reentry_firefight_decision_host_client_recapture.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_decision_host_client_findings.json" data-export-key="reentry_firefight_decision_host_client_findings.manifest_path">
+          <input readonly value="tmp/station_reentry_firefight_multiplayer_decision_acceptance.json" data-export-key="reentry_firefight_multiplayer_decision_acceptance.manifest_path">
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -459,6 +461,12 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.no_auto_command_confusing"> Issue: Auto-Command-Grenze unklar</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.peer_team_context_mixed"> Issue: Peer-/Team-Kontext vermischt</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_decision_host_client_findings.issues.performance_stutter_visible"> Issue: sichtbarer Stutter</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_acceptance.findings_ready"> TASK_792 Findings bereit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_acceptance.no_missing_checks"> Keine Host/Client-Decision-Haken offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_acceptance.no_active_issues"> Keine aktiven Host/Client-Decision-Issues</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_acceptance.decision_core_synced"> Decision-Kern synchron</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_acceptance.host_client_roles_distinct"> Host-/Client-Rollen unterscheidbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_acceptance.accepted_for_multiplayer_slice"> Multiplayer-Decision-Slice akzeptiert</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -548,10 +556,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance"
+            recommended_next_task: "TASK_794 - Station Reentry Firefight Multiplayer Decision Playtest Packet"
           },
           metadata: {
-            generated_for_task: "TASK_792",
+            generated_for_task: "TASK_793",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
