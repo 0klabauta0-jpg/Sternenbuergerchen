@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_773 - Station Reentry Host Client Identity Cue Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_773_station_reentry_host_client_identity_cue_polish.md`, `docs/tasks/TASK_772_station_reentry_host_client_export_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryHostClientFireteamCardContext` trennt die sichtbare Session-Identitaet von der Fireteam-Team-Relation und liefert kompakte `OWN`/`VIEW`/`FT ?`-Cues.
+- Stand: Die Fireteam-Mini-Cards nutzen den Presenter ueber den bestehenden Statuskartenpfad; Tooltip und Snapshot bleiben read-only und mutieren keine Multiplayer-Authority.
+- Risiken/offen: Der echte Zwei-Fenster-Sichtentscheid bleibt als menschlicher Polish-Review sinnvoll; der technische Befund aus dem Capture ist umgesetzt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_773_station_reentry_host_client_identity_cue_polish.gd`, TASK_772 Regression, `git diff --check`.
+- Naechster Schritt: Sichtbaren Host/Client-Reentry-Lauf erneut kurz ansehen oder TASK_774 - Station Reentry Next Playable Slice Acceptance schneiden.
+
 ### TASK_772 - Station Reentry Host Client Export Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_772_station_reentry_host_client_export_findings.md`, `docs/tasks/TASK_771_station_reentry_visible_host_client_playtest_export.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`

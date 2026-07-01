@@ -66,6 +66,7 @@ const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/miss
 const STATION_SCENARIO_ROUTE_CUE_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/station_scenario_route_cue_polish.gd")
 const STATION_REENTRY_PERFORMANCE_FEEL_PASS_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_performance_feel_pass.gd")
 const STATION_REENTRY_HOST_CLIENT_NEXT_ORDER_SYNC_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_host_client_next_order_sync.gd")
+const STATION_REENTRY_HOST_CLIENT_FIRETEAM_CARD_CONTEXT_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_host_client_fireteam_card_context.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -4043,7 +4044,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 	var movement_state: Dictionary = get_fireteam_movement_state(normalized_fireteam_id)
 	var movement_text: String = _compact_fireteam_movement_text(movement_state, resolved_profile)
 	var position_context: Dictionary = _build_fireteam_position_status_context(normalized_fireteam_id)
-	var review_session_context: Dictionary = _build_fireteam_review_session_card_context()
+	var review_session_context: Dictionary = _build_fireteam_review_session_card_context(normalized_fireteam_id, _resolve_fireteam_team_id_from_units(resolved_units))
 	var execution_text: String = _format_execution_quality_text(resolved_profile)
 	var contact_count: int = maxi(int(resolved_contact.get("count", 0)), 0)
 	var contact_state: String = String(resolved_contact.get("state", "clear")).strip_edges().to_lower()
@@ -7885,37 +7886,13 @@ func _build_station_route_sequence_display_line(route_readout: Dictionary) -> St
 	return "ROUTE %s%s" % [" > ".join(tokens), next_suffix]
 
 
-func _build_fireteam_review_session_card_context(session_snapshot: Dictionary = {}) -> Dictionary:
+func _build_fireteam_review_session_card_context(fireteam_id: String = "", fireteam_team_id: String = "", session_snapshot: Dictionary = {}) -> Dictionary:
 	var resolved_session: Dictionary = session_snapshot.duplicate(true) if not session_snapshot.is_empty() else _get_review_session_identity_snapshot()
-	var peer_label: String = String(resolved_session.get("peer_label", "")).strip_edges()
-	var team_label: String = String(resolved_session.get("team_label", "")).strip_edges()
-	var role_label: String = String(resolved_session.get("role_label", "")).strip_edges()
-	var short_tokens: PackedStringArray = PackedStringArray()
-	if not peer_label.is_empty():
-		short_tokens.append(peer_label)
-	if not team_label.is_empty():
-		short_tokens.append(team_label)
-	var text: String = " ".join(short_tokens).strip_edges()
-	var full_tokens: PackedStringArray = PackedStringArray()
-	if not role_label.is_empty():
-		full_tokens.append(role_label)
-	if not peer_label.is_empty():
-		full_tokens.append(peer_label)
-	if not team_label.is_empty():
-		full_tokens.append(team_label)
-	var full_text: String = " ".join(full_tokens).strip_edges()
-	if text.is_empty():
-		text = full_text
-	return {
-		"visible": not text.is_empty(),
-		"text": text,
-		"full_text": full_text if not full_text.is_empty() else text,
-		"style_id": REVIEW_SESSION_FIRETEAM_CARD_STYLE_ID,
-		"source_style_id": REVIEW_SESSION_BADGE_STYLE_ID,
-		"tooltip_text": "Review Session: %s" % (full_text if not full_text.is_empty() else text) if not text.is_empty() else "",
-		"read_only": true,
-		"ui_sets_gameplay_truth": false,
-	}
+	return Dictionary(STATION_REENTRY_HOST_CLIENT_FIRETEAM_CARD_CONTEXT_SCRIPT.call("build_context", resolved_session, {
+		"fireteam_id": fireteam_id.strip_edges().to_lower(),
+		"fireteam_team_id": fireteam_team_id.strip_edges().to_lower(),
+		"fireteam_team_label": _build_review_session_team_label(fireteam_team_id),
+	}))
 
 
 func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
@@ -12941,6 +12918,45 @@ func _get_fireteam_units(fireteam_id: String, include_hidden: bool = true) -> Ar
 			continue
 		result.append(unit)
 	return result
+
+
+func _resolve_fireteam_team_id_from_units(units: Array) -> String:
+	var counts: Dictionary = {}
+	for unit_variant in units:
+		if unit_variant == null:
+			continue
+		var team_id: String = ""
+		if unit_variant is Dictionary:
+			team_id = String(Dictionary(unit_variant).get("team_id", "")).strip_edges().to_lower()
+		elif unit_variant is Object:
+			var unit_object: Object = unit_variant
+			if unit_object.has_method("get_team_id"):
+				team_id = String(unit_object.call("get_team_id")).strip_edges().to_lower()
+			elif unit_object.has_meta("team_id"):
+				team_id = String(unit_object.get_meta("team_id")).strip_edges().to_lower()
+			elif _object_has_property(unit_object, "team_id"):
+				team_id = String(unit_object.get("team_id")).strip_edges().to_lower()
+		if team_id.is_empty():
+			continue
+		counts[team_id] = int(counts.get(team_id, 0)) + 1
+	var best_team_id: String = ""
+	var best_count: int = 0
+	for team_id_variant in counts.keys():
+		var candidate: String = String(team_id_variant)
+		var candidate_count: int = int(counts.get(candidate, 0))
+		if candidate_count > best_count:
+			best_team_id = candidate
+			best_count = candidate_count
+	return best_team_id
+
+
+func _object_has_property(object: Object, property_name: String) -> bool:
+	for property_variant in object.get_property_list():
+		if typeof(property_variant) != TYPE_DICTIONARY:
+			continue
+		if String(Dictionary(property_variant).get("name", "")) == property_name:
+			return true
+	return false
 
 
 func _resolve_fireteam_leader_for_behavior(fireteam_id: String):

@@ -95,7 +95,8 @@ git checkout -b batch/<batch-name>
 - TASK_770 - Station Reentry Host Client Next Order Sync (implementiert)
 - TASK_771 - Station Reentry Visible Host Client Playtest Export (implementiert)
 - TASK_772 - Station Reentry Host Client Export Findings (implementiert)
-- Naechster Schritt: TASK_773 - Station Reentry Next Playable Slice Acceptance oder gezielter Host/Client-Polish aus echten Export-Findings.
+- TASK_773 - Station Reentry Host Client Identity Cue Polish (implementiert)
+- Naechster Schritt: TASK_774 - Station Reentry Next Playable Slice Acceptance oder erneuter kurzer Host/Client-Sichtreview.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

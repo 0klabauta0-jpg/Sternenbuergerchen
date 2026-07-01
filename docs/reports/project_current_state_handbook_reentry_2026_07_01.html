@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_771</span>
-      <span class="pill warn">Aktueller Griff: TASK_772</span>
+      <span class="pill good">Letzter Abschluss: TASK_772</span>
+      <span class="pill warn">Aktueller Griff: TASK_773</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -141,7 +141,7 @@
           <ul>
             <li><strong>Sichttest offen:</strong> Headless-Verifier sind gruen, aber der echte Zwei-Fenster-Blick ist noch nicht abgenommen.</li>
             <li><strong>Preview-Sprache:</strong> Ohne klares Wort <code>PREVIEW</code> kann ein geplanter Move wie ein laufender Move wirken.</li>
-            <li><strong>Host/Client:</strong> Beide Fenster muessen denselben naechsten Auftrag sehen, besonders nach Reentry.</li>
+            <li><strong>Host/Client:</strong> Beide Fenster sehen denselben naechsten Auftrag; die aktuelle Reibung war die Fireteam-Karten-Relation zwischen Session-Team und Fireteam-Team.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -152,13 +152,16 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_772 wertet den sichtbaren Host/Client-Reentry-Export aus: Fehlt der echte Export, bleiben wir bei TASK_771; sind Checks unvollstaendig, werden sie benannt; echte Abweichungen werden als konkrete Folgearbeit geschnitten.</p>
-          <p>Quelle bleibt der TASK_768-Preview-Contract plus TASK_769-Fast-Gate, TASK_770-Sync-Gate und TASK_771-Exportpaket: Preview vor GO, kompakte Route/Cue, gleicher Next-Order-Text und read-only Snapshot-Bewertung.</p>
-          <div class="callout warning">Naechster Schritt nach einem echten Export: TASK_773 als Acceptance/naechster spielbarer Slice oder ein gezielter Polish aus belegter Host/Client-Reibung.</div>
-          <input readonly value="TASK_772 - Station Reentry Host Client Export Findings" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_773 - Station Reentry Next Playable Slice Acceptance oder gezielter Host/Client-Polish" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_773 wendet den ersten echten Host/Client-Capture-Fund an: Fireteam-Mini-Cards sollen nicht nur `P2 BRAVO` zeigen, sondern klar sagen, ob der Spieler das eigene Fireteam sieht oder ein fremdes Team betrachtet.</p>
+          <p>Quelle bleibt der TASK_768-Preview-Contract plus TASK_769-Fast-Gate, TASK_770-Sync-Gate, TASK_771-Exportpaket und TASK_772-Findings: Preview vor GO, kompakte Route/Cue, gleicher Next-Order-Text und read-only Snapshot-Bewertung.</p>
+          <div class="callout warning">Naechster Schritt nach dem Identity-Cue-Polish: kurzer Host/Client-Recheck oder TASK_774 als naechste spielbare Slice-Acceptance.</div>
+          <input readonly value="TASK_773 - Station Reentry Host Client Identity Cue Polish" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_774 - Station Reentry Next Playable Slice Acceptance oder kurzer Host/Client-Recheck" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
+          <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
+          <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
+          <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
           <label class="checkline"><input type="checkbox" data-export-key="reentry_performance.fast_gate_pass"> TASK_769 Fast-Gate gruen</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_performance.manual_profiler_done"> Godot-Profiler manuell geprueft</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client.same_next_order"> Host/Client sehen denselben naechsten Auftrag</label>
@@ -178,6 +181,10 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.issues.host_client_next_order_mismatch"> Issue: Next-Order weicht ab</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.issues.host_client_route_cue_mismatch"> Issue: Route/Cue weicht ab</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_host_client_findings.issues.peer_team_context_confusing"> Issue: Peer-/Team-Kontext unklar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_identity_cue.fireteam_card_relation_visible"> Fireteam-Karte zeigt OWN/VIEW/FT ?</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_identity_cue.tooltip_explains_session_and_fireteam"> Tooltip erklaert Session-Team und Fireteam-Team</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_identity_cue.no_authority_mutation"> Cue ist read-only und aendert keine Authority</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="reentry_identity_cue.real_capture_rerun_done"> Re-Capture nach TASK_773 geschrieben</label>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
@@ -267,10 +274,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_773 - Station Reentry Next Playable Slice Acceptance or targeted Host/Client polish"
+            recommended_next_task: "TASK_774 - Station Reentry Next Playable Slice Acceptance or short Host/Client recheck"
           },
           metadata: {
-            generated_for_task: "TASK_772",
+            generated_for_task: "TASK_773",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
