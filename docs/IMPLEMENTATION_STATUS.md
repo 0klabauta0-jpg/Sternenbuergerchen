@@ -19,6 +19,15 @@
 - Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
 - Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
 
+### TASK_801 - Station Reentry Firefight Release Candidate Playtest Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_801_station_reentry_firefight_release_candidate_playtest_findings.md`, `docs/tasks/TASK_800_station_reentry_firefight_multiplayer_release_candidate_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightReleaseCandidatePlaytestFindings` wertet ein TASK_800-Release-Candidate-Paket plus optionale Workbench-/Playtest-Notizen read-only aus.
+- Stand: Der Snapshot zaehlt Pflichtchecks, exportiert fehlende Checks, erkennt konkrete Issue-Flags und routet zwischen offenem sichtbarem Playtest, unvollstaendigen Checks, gezieltem Polish und Acceptance-Bereitschaft.
+- Risiken/offen: Kein automatisches Screenshot-Parsing und kein Netzwerk-Lasttest. Ein sauberer Findings-Snapshot beweist nur die dokumentierte Review-Auswertung.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_801_station_reentry_firefight_release_candidate_playtest_findings.gd`, TASK_800/TASK_799/TASK_798 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_802 - Station Reentry Firefight Release Candidate Acceptance.
+
 ### TASK_800 - Station Reentry Firefight Multiplayer Release Candidate Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_800_station_reentry_firefight_multiplayer_release_candidate_packet.md`, `docs/tasks/TASK_799_station_reentry_firefight_multiplayer_playable_candidate_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `data/export_runtime_package_contract.json`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
