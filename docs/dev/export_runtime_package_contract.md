@@ -38,6 +38,14 @@ Der Startcheck ist kein Launcher und keine Taskleisten-Reparatur. Er liest `data
 
 Fehlende Pflichtdateien sind ein hartes Fail-Gate. Laufende Prozesse oder `~RF*.TMP`-Dateien erzeugen ein Review-Gate, weil Codex sie ohne explizite Freigabe nicht beendet oder entfernt.
 
+## Gepruefter Release-Start
+`scripts/tools/start_release_runtime_checked.ps1` ist der explizite Playtest-Startgriff fuer den geprueften Runtime-Ordner. Ohne Schalter fuehrt er nur Vor- und Nachcheck aus. Mit bewussten Schaltern darf er:
+- `-StopRunningReleaseProcess`: nur Prozesse beenden, deren Pfad exakt aus dem Release-Startcheck kommt.
+- `-CleanTempFiles`: nur die vom Startcheck gemeldeten `~RF*.TMP`-Dateien entfernen.
+- `-Launch`: die EXE aus `runtime_export_path` mit dem Release-Ordner als Working Directory starten.
+
+Der Helfer schreibt `tmp/release_runtime_checked_launcher.json` und ersetzt keinen menschlichen Sichttest.
+
 ## Regeln
 - Keine privaten Codesigning- oder User-Pfade in getrackte Dateien schreiben.
 - Exclude-Pattern nur ueber `data/export_runtime_package_contract.json` erweitern.
@@ -45,3 +53,4 @@ Fehlende Pflichtdateien sind ein hartes Fail-Gate. Laufende Prozesse oder `~RF*.
 - Ein echter Release-Export soll das Pack-Log stichprobenartig gegen ausgeschlossene Pfade pruefen.
 - Eine Godot-Scanwarnung fuer ein zweites `project.godot` in einem ausgeschlossenen Referenzprojekt ist kein Export-Abbruch; der Script-Exit haengt am nativen Godot-Exitcode.
 - Der Startcheck darf keine Prozesse starten, keine laufenden EXEs beenden und keine Shortcuts veraendern.
+- Der gepruefte Launcher darf Prozesse nur mit explizitem Schalter und nur aus dem vertraglichen Release-Pfad beenden.

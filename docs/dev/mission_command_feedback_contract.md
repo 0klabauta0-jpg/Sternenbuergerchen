@@ -929,6 +929,11 @@ TASK_818 macht den Release-Startpfad fuer den echten EXE-Fensterblick pruefbar. 
 
 Erwartete Struktur: `tmp/release_runtime_start_check.json` liefert `schema = sternenbuergerchen.release_runtime_start_check.v1`, `task_id = TASK_818`, `gate = pass|review|fail`, `repo_root`, `branch`, `git_head`, `contract_path`, `release_directory`, `exe_path`, `pck_path`, `console_exe_path`, `max_age_hours`, `pck_fresh_enough`, `required_files`, `running_processes`, `temp_files`, `warnings`, `hard_failures`, `start_command`, `read_only = true`, `kills_processes = false`, `starts_processes = false` und `updates_shortcuts = false`. Fehlende Pflichtdateien sind `fail`; laufende Release-Prozesse oder `~RF*.TMP`-Dateien sind `review`.
 
+## Release-Runtime-Checked-Launcher (TASK_819)
+TASK_819 ist der bewusste Startgriff nach TASK_818. Der Helfer darf den Release-Check vor und nach optionalen Aktionen ausfuehren. Ohne Schalter muss er nicht-mutierend bleiben. Mit expliziten Schaltern darf er nur Prozesse aus dem vertraglichen Release-Pfad beenden, nur die vom Check gemeldeten `~RF*.TMP`-Dateien entfernen und nur die EXE aus `runtime_export_path` starten. Er setzt keine Gameplay-, UI-, Mission- oder Multiplayer-Wahrheit und veraendert keine Shortcuts.
+
+Erwartete Struktur: `tmp/release_runtime_checked_launcher.json` liefert `schema = sternenbuergerchen.release_runtime_checked_launcher.v1`, `task_id = TASK_819`, `gate = pass|review|fail`, `repo_root`, `requested_actions`, `precheck_gate`, `postcheck_gate`, `exe_path`, `release_directory`, `stopped_processes`, `removed_temp_files`, `launched_process`, `action_failures`, `postcheck_warnings`, `read_only_default = true`, `mutates_processes_only_with_switch = true` und `updates_shortcuts = false`.
+
 ## Singleplayer-Release-Homebase-Partial-Save-Actionability (BUGFIX)
 Der Singleplayer-Release-Bootstrap muss auch teilgueltige lokale Saves reparieren duerfen, wenn diese den Spieler in der Homebase sichtbar blockieren: Roster/Fireteam teilweise vorhanden, aber Pilot, Dropship oder Homebase-direct-Payload fehlen. Die Reparatur gehoert in die Meta-Flow-Schicht, darf vorhandene User-Operatoren nicht ueberschreiben und darf keine UI-Wahrheit erzeugen.
 

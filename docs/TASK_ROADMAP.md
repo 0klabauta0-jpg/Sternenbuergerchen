@@ -48,6 +48,7 @@ git checkout -b batch/<batch-name>
 - BUGFIX - Player Roster Corrupt Save Quiet Recovery (implementiert): leere oder kaputte lokale Roster-Saves werden diagnostiziert und vom Bootstrap reparierbar gehalten, statt beim Singleplayer-Start Godot-JSON-Errors auszugeben.
 - BUGFIX - Singleplayer Release EXE Actionability And Firefight Decision Guard (implementiert): stale Flightdeck-Seed-Handoffs fallen auf das sichtbare Homebase-Fireteam zurueck, und die Firefight-Decision-Line laeuft nicht mehr in Snapshot-Rekursion.
 - TASK_818 - Station Reentry Release Candidate Playable Build Acceptance (implementiert): Release-Startcheck prueft den vertraglichen Spieleordner, Pflichtdateien, laufende EXE-Prozesse und `~RF*.TMP`-Dateien, ohne Prozesse oder Shortcuts zu veraendern.
+- TASK_819 - Release Runtime Checked Launcher (implementiert): bewusster Playtest-Startgriff fuer den geprueften Release-Ordner, optional mit Stop alter Release-EXE, Temp-Datei-Cleanup und Launch.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
