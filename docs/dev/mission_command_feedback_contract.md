@@ -934,6 +934,11 @@ TASK_819 ist der bewusste Startgriff nach TASK_818. Der Helfer darf den Release-
 
 Erwartete Struktur: `tmp/release_runtime_checked_launcher.json` liefert `schema = sternenbuergerchen.release_runtime_checked_launcher.v1`, `task_id = TASK_819`, `gate = pass|review|fail`, `repo_root`, `requested_actions`, `precheck_gate`, `postcheck_gate`, `exe_path`, `release_directory`, `stopped_processes`, `removed_temp_files`, `launched_process`, `action_failures`, `postcheck_warnings`, `read_only_default = true`, `mutates_processes_only_with_switch = true` und `updates_shortcuts = false`.
 
+## Release-Runtime-Launch-Acceptance-Gate (TASK_820)
+TASK_820 praezisiert den TASK_819-Nachcheck: Ein bewusst gestarteter Release-Prozess darf als erwarteter Playtest-Lauf gelten, wenn seine Prozess-ID im Nachcheck wiedergefunden wird. `release_process_already_running` wird dann nicht als Action-Warnung gewertet. Weitere laufende Release-Prozesse bleiben als `unexpected_running_processes` sichtbar und fuehren zu `review`. Der Task bleibt ausserhalb der Gameplay-Wahrheit; er beweist nur den sauberen Release-Startgriff, nicht den menschlichen Sichttest.
+
+Erwartete Struktur: `tmp/release_runtime_checked_launcher.json` ergaenzt `launch_acceptance_task_id = TASK_820`, `expected_launched_process_running`, `unexpected_running_processes` und `action_warnings`. Ein Lauf mit `-StopRunningReleaseProcess -CleanTempFiles -Launch` darf `gate = pass` melden, wenn keine Action-Failures, keine Action-Warnings und ein erwarteter gestarteter Prozess vorhanden sind.
+
 ## Singleplayer-Release-Homebase-Partial-Save-Actionability (BUGFIX)
 Der Singleplayer-Release-Bootstrap muss auch teilgueltige lokale Saves reparieren duerfen, wenn diese den Spieler in der Homebase sichtbar blockieren: Roster/Fireteam teilweise vorhanden, aber Pilot, Dropship oder Homebase-direct-Payload fehlen. Die Reparatur gehoert in die Meta-Flow-Schicht, darf vorhandene User-Operatoren nicht ueberschreiben und darf keine UI-Wahrheit erzeugen.
 
