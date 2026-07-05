@@ -133,7 +133,8 @@ git checkout -b batch/<batch-name>
 - TASK_805 - Station Reentry Firefight Release Candidate Delivery Review (implementiert)
 - TASK_806 - Station Reentry Firefight Release Candidate Handoff Packet (implementiert)
 - TASK_807 - Station Reentry Firefight Release Candidate Tester Run (implementiert)
-- Naechster Schritt: TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance.
+- TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance (implementiert)
+- Naechster Schritt: TASK_809 - Station Reentry Release Candidate Playability Polish Backlog.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
