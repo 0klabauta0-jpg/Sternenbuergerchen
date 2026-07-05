@@ -879,6 +879,76 @@ func get_release_candidate_visible_firefight_findings_snapshot(real_window_revie
 	return VISIBLE_FIREFIGHT_FINDINGS_SCRIPT.build_snapshot(source, findings_notes, options)
 
 
+func get_release_candidate_targeted_firefight_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var findings: Dictionary = get_release_candidate_visible_firefight_findings_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_polish: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_candidate_targeted_firefight_polish_snapshot"):
+		tactical_polish = Dictionary(tactical_controller.call("get_release_candidate_targeted_firefight_polish_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"tactical_polish_snapshot_present",
+		not tactical_polish.is_empty(),
+		"critical",
+		"Active mission should expose targeted firefight polish."
+	)
+	_append_handoff_check(
+		checks,
+		"decision_line_visible",
+		String(tactical_polish.get("gate", "")) == "pass"
+			and not String(tactical_polish.get("decision_line", "")).strip_edges().is_empty(),
+		"critical",
+		"Targeted firefight polish should expose a visible NEXT/WHY decision line."
+	)
+	_append_handoff_check(
+		checks,
+		"findings_source_read_only",
+		bool(findings.get("read_only", false)) and not bool(findings.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"TASK_817 reads TASK_816 findings without mutating gameplay truth."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_polish.get("read_only", false))
+			and not bool(tactical_polish.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_polish.get("creates_command", true))
+			and not bool(tactical_polish.get("creates_fire_event", true))
+			and not bool(tactical_polish.get("creates_damage_event", true))
+			and not bool(tactical_polish.get("sets_multiplayer_truth", true)),
+		"critical",
+		"Targeted firefight polish reads existing mission/HUD state only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_reentry_release_candidate_targeted_firefight_polish.v1",
+		"task_id": "TASK_817",
+		"source_task_id": "TASK_816",
+		"source_status": String(findings.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"findings": findings,
+		"tactical_polish": tactical_polish,
+		"decision_line": String(tactical_polish.get("decision_line", "")),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_818 - Station Reentry Release Candidate Playable Build Acceptance",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()

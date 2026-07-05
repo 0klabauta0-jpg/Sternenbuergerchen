@@ -49,6 +49,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_816_station_reentry_release_candidate_visible_firefight_findings.gd`, TASK_815 Regression, `git diff --check`.
 - Naechster Schritt: TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish oder Playable Build Acceptance je nach Findings.
 
+### TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_817_station_reentry_release_candidate_targeted_firefight_polish.md`, `docs/tasks/TASK_816_station_reentry_release_candidate_visible_firefight_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: Der erste Firefight zeigt jetzt aus bestehenden Combat-/Engagementdaten eine kurze `NEXT ... | WHY ...`-Decision-Zeile.
+- Stand: #17 Selected Fireteam und #18 Mission Control fuehren dieselbe Decision-Zeile, ohne neue Commands, FireEvents oder Gameplay-Wahrheit zu erzeugen.
+- Stand: `get_release_candidate_targeted_firefight_polish_snapshot()` und der MetaLayer-Snapshot pruefen Sichtbarkeit, Laenge und read-only-Grenzen.
+- Risiken/offen: Die Zeile ist bewusst klein. Falls der echte Fensterblick mehr visuelle Fuehrung braucht, folgt ein eigener HUD-Style-/Layout-Task.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_817_station_reentry_release_candidate_targeted_firefight_polish.gd`, TASK_814 Regression, `git diff --check`.
+- Naechster Schritt: TASK_818 - Station Reentry Release Candidate Playable Build Acceptance oder gezielter HUD-Style-Polish nach Fensterbefund.
+
 ### BUGFIX - Player Roster Corrupt Save Quiet Recovery
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_player_roster_corrupt_save_quiet_recovery.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`

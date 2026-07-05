@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_816</span>
-      <span class="pill warn">Aktueller Griff: TASK_816</span>
+      <span class="pill good">Letzter Abschluss: TASK_817</span>
+      <span class="pill warn">Aktueller Griff: TASK_817</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
       <span class="pill">Report ist read-only</span>
@@ -188,11 +188,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_816 uebersetzt den echten Firefight-Fensterbefund in konkrete Folgearbeit: Shortcut/Export, Homebase/Start, LZ/Drop/GO, HUD-Lesbarkeit, Performance, Host/Client und sichtbarer Polish.</p>
-          <p>Quelle bleiben TASK_815-Fensterreview und Findings-Notizen. Der Snapshot selbst bleibt read-only.</p>
-          <div class="callout warning">Naechster Schritt danach: je nach Findings gezielter TASK_817-Polish oder Release-Candidate-Acceptance.</div>
-          <input readonly value="TASK_816 - Station Reentry Release Candidate Visible Firefight Findings" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish oder Playable Build Acceptance" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_817 macht den ersten Feuerwechsel im HUD handlungsfaehiger: dieselbe kurze <code>NEXT ... | WHY ...</code>-Zeile erscheint in Mission Control und Selected Fireteam.</p>
+          <p>Quelle bleiben TASK_814/TASK_816 und bestehende Firefight-/Combat-HUD-Daten. Der Snapshot selbst bleibt read-only.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_818 Playable-Build-Acceptance oder gezielter HUD-Style-Polish nach echtem Fensterbefund.</div>
+          <input readonly value="TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_818 - Station Reentry Release Candidate Playable Build Acceptance" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="BUGFIX - Player Roster Corrupt Save Quiet Recovery" data-export-key="reentry_handbook.latest_hotfix">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
@@ -450,6 +450,10 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_visible_firefight_findings.issues.firefight_hud_unreadable"> Issue: Firefight-HUD unlesbar</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_visible_firefight_findings.issues.performance_stutter_visible"> Issue: Firefight stottert sichtbar</label>
           <input readonly value="TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish" data-export-key="reentry_release_candidate_visible_firefight_findings.recommended_polish_task">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_targeted_firefight_polish.decision_line_visible"> TASK_817 NEXT/WHY-Zeile sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_targeted_firefight_polish.same_line_in_both_huds"> Mission Control und Selected Fireteam zeigen dieselbe Zeile</label>
+          <input readonly value="NEXT HIT LESEN / DEFEND | WHY FEUER" data-export-key="reentry_release_candidate_targeted_firefight_polish.example_decision_line">
+          <input readonly value="TASK_818 - Station Reentry Release Candidate Playable Build Acceptance" data-export-key="reentry_release_candidate_targeted_firefight_polish.recommended_next_task">
           <textarea data-export-key="reentry_release_candidate_playability_polish.cta_visual_note" placeholder="CTA-Fensterblick / TASK_810-Notiz"></textarea>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
@@ -821,10 +825,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish oder Playable Build Acceptance"
+            recommended_next_task: "TASK_818 - Station Reentry Release Candidate Playable Build Acceptance"
           },
           metadata: {
-            generated_for_task: "TASK_816",
+            generated_for_task: "TASK_817",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

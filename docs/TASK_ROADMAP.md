@@ -144,7 +144,8 @@ git checkout -b batch/<batch-name>
 - TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review (implementiert)
 - TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review (implementiert)
 - TASK_816 - Station Reentry Release Candidate Visible Firefight Findings (implementiert)
-- Naechster Schritt: TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish oder Playable Build Acceptance je nach Findings.
+- TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish (implementiert)
+- Naechster Schritt: TASK_818 - Station Reentry Release Candidate Playable Build Acceptance oder gezielter HUD-Style-Polish nach Fensterbefund.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
