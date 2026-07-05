@@ -47,7 +47,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(roadmap_text.contains("TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke (implementiert)"), "Roadmap marks TASK_811 implemented")
 	_assert(roadmap_text.contains("TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke"), "Roadmap advances to TASK_812")
 	_assert(contract_text.contains("Station-Reentry-Release-Candidate-Mission-Launch-Actionability-Smoke"), "Mission command feedback contract documents TASK_811")
-	_assert(report_text.contains("Aktueller Griff: TASK_811"), "Reentry handbook marks TASK_811 current")
+	_assert(report_text.contains("TASK_811"), "Reentry handbook preserves TASK_811 context")
 	_assert(report_text.contains('data-export-key="reentry_release_candidate_mission_launch_actionability.status"'), "Reentry handbook exports TASK_811 status")
 	_assert(meta_text.contains("get_release_candidate_mission_launch_actionability_snapshot"), "MetaLayer exposes TASK_811 snapshot")
 

@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_811_station_reentry_release_candidate_mission_launch_actionability_smoke.md`, `docs/tasks/TASK_539_mission_insertion_first_order_readability_pass.md`, `docs/tasks/TASK_540_mission_first_move_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `MetaLayerFlow.get_release_candidate_lz_drop_preview_actionability_snapshot()` buendelt Handoff, Insertion-Readability und First-Move-Readability fuer den ersten LZ-/Drop-/Preview-Spielmoment.
+- Stand: Der Main-Menu-`Einzelspieler`-Verifier klickt `Start Mission`, setzt eine LZ, loest Drop aus, deboardet das Fireteam ueber vorhandene Testhelfer und plant eine Move-Preview, ohne `GO` auszufuehren.
+- Risiken/offen: Der Smoke stoppt vor `GO`. TASK_813 sollte den ersten `GO` plus erste Firefight-/Kontaktreaktion absichern.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.gd`, TASK_811/TASK_540 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke.
+
 ### TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_811_station_reentry_release_candidate_mission_launch_actionability_smoke.md`, `docs/tasks/TASK_810_station_reentry_release_candidate_first_mission_cta_visual_smoke.md`, `docs/tasks/TASK_539_mission_insertion_first_order_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
