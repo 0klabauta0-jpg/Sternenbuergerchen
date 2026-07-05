@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_805</span>
-      <span class="pill warn">Aktueller Griff: TASK_806</span>
+      <span class="pill good">Letzter Abschluss: TASK_806</span>
+      <span class="pill warn">Aktueller Griff: TASK_807</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -166,6 +166,7 @@
           <li><strong>Visible Ship Smoke:</strong> TASK_804 prueft per Workbench-/Smoke-Notizen, ob frische EXE, Einzelspieler, Homebase, Dropship, Missionsstart, Host/Client-Fenster und Rollen wirklich sichtbar abgenommen wurden.</li>
           <li><strong>Delivery Review:</strong> TASK_805 fasst Paket, sichtbaren Smoke, Start-/Host-Client-Hinweise, Restrisiken und naechsten Handoff-Schritt zusammen.</li>
           <li><strong>Handoff Packet:</strong> TASK_806 buendelt EXE/PCK, Startschritte, Rollen, Fresh-Link-Warnung, Gates, Risiken und naechste Tester-Aktion.</li>
+          <li><strong>Tester Run:</strong> TASK_807 prueft das Handoff gegen den echten Spielergriff von EXE-Start bis erstem Firefight und Exit/Debrief.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -176,11 +177,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_806 nimmt die TASK_805-Delivery-Review als Quelle und baut daraus ein weitergabefaehiges Handoff-Packet fuer den aktuellen Release-Candidate.</p>
-          <p>Quelle bleibt TASK_805. Das Handoff-Packet ist nur gruen, wenn Release-Dateien, Einzelspieler-/Host-Client-Startschritte, Rollen, Fresh-Link-Warnung, Gate-Zusammenfassung, Restrisiken, Report und naechste Tester-Aktion benannt sind.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_807 prueft dieses Handoff-Packet gegen einen echten Tester-Run.</div>
-          <input readonly value="TASK_806 - Station Reentry Firefight Release Candidate Handoff Packet" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_807 - Station Reentry Firefight Release Candidate Tester Run" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_807 nimmt das TASK_806-Handoff-Packet als Quelle und wertet den echten Tester-Run gegen diesen Stand aus.</p>
+          <p>Quelle bleibt TASK_806. Der Tester-Run ist nur gruen, wenn frische EXE, Einzelspieler, Homebase, Dropship, Missionstart, Host/Client, Rollen, Preview, GO/Firefight, Exit/Debrief, Performance, HUD und Notizexport zusammen passen.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_808 akzeptiert den Tester-Run oder routet gezielt in den naechsten Polish.</div>
+          <input readonly value="TASK_807 - Station Reentry Firefight Release Candidate Tester Run" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -357,6 +358,39 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.report_missing"> Issue: Report fehlt</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.risks_unaccepted"> Issue: Restrisiken nicht akzeptiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.visible_polish_needed"> Issue: sichtbarer Polish-Bedarf</label>
+          <input readonly value="tmp/station_reentry_firefight_release_candidate_tester_run.json" data-export-key="reentry_firefight_release_candidate_tester_run.manifest_path">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.tester_run_done"> TASK_807 Tester-Run bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.tester_run_reviewed"> Tester-Run geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.handoff_packet_used"> Handoff-Packet benutzt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.fresh_release_exe_started"> Frische Release-EXE gestartet</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.singleplayer_homebase_actionable"> Einzelspieler/Homebase handlungsfaehig</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.dropship_payload_visible"> Dropship-Payload sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.mission_start_reachable"> Missionsstart erreichbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.host_client_started"> Host/Client gestartet</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.host_client_roles_readable"> Host/Client-Rollen lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.first_preview_readable"> Erste Preview lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.first_go_firefight_reacts"> Erster GO/Firefight reagiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.exit_or_debrief_visible"> Exit/Debrief sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.performance_feels_fast"> Performance schnell genug</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.hud_does_not_block"> HUD blockiert nicht</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.tester_notes_exported"> Tester-Notizen exportiert</label>
+          <textarea data-export-key="reentry_firefight_release_candidate_tester_run.tester_summary" placeholder="Kurzfazit des Tester-Runs"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_tester_run.singleplayer_note" placeholder="Einzelspieler/Homebase-Notiz"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_tester_run.host_client_note" placeholder="Host/Client-Notiz"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_tester_run.mission_note" placeholder="Mission/Preview/Firefight-Notiz"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_tester_run.performance_note" placeholder="Performance-/HUD-Notiz"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_tester_run.next_note" placeholder="Naechste Entscheidung / TASK_808"></textarea>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.stale_handoff_or_exe"> Issue: Handoff/EXE stale</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.singleplayer_homebase_blocked"> Issue: Singleplayer/Homebase blockiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.dropship_payload_wrong"> Issue: Dropship-Payload falsch</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.mission_start_blocked"> Issue: Missionsstart blockiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.host_client_not_working"> Issue: Host/Client funktioniert nicht</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.roles_confusing"> Issue: Rollen verwirrend</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.preview_unclear"> Issue: Preview unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.firefight_not_reacting"> Issue: Firefight reagiert nicht</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.exit_or_debrief_missing"> Issue: Exit/Debrief fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.performance_slow"> Issue: Performance langsam</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run.issues.hud_blocks_action"> Issue: HUD blockiert Aktion</label>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -727,10 +761,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_807 - Station Reentry Firefight Release Candidate Tester Run"
+            recommended_next_task: "TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance"
           },
           metadata: {
-            generated_for_task: "TASK_806",
+            generated_for_task: "TASK_807",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

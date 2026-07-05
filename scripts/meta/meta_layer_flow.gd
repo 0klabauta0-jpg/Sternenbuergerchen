@@ -205,6 +205,7 @@ func _ready() -> void:
 		_selected_fireteam_ids = _build_unassigned_fireteam_selection(_selected_unit_ids)
 	_refresh_homebase_screen()
 	_seed_singleplayer_bootstrap_homebase_payload()
+	_refresh_homebase_screen()
 	_refresh_fob_screen()
 	fob_screen.set_last_mission_result(_last_mission_result)
 	_refresh_map_screen()

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_807 - Station Reentry Firefight Release Candidate Tester Run
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_807_station_reentry_firefight_release_candidate_tester_run.md`, `docs/tasks/TASK_806_station_reentry_firefight_release_candidate_handoff_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightReleaseCandidateTesterRun` wertet TASK_806-Handoff-Packet plus optionale Tester-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot prueft Handoff-Nutzung, frische EXE, Einzelspieler/Homebase, Dropship-Payload, Missionsstart, Host/Client, Rollen, erste Preview, erster GO/Firefight, Exit/Debrief, Performance-Gefuehl, HUD-Blockaden und exportierte Tester-Notizen.
+- Stand: Issue-Flags routen stale Handoff/EXE, Singleplayer-Blocker, Dropship-/Missionstart-Fehler, Host/Client-/Rollenprobleme, Preview-/Firefight-/Debrief-/Performance-/HUD-Polish auf konkrete Folgearbeit.
+- Risiken/offen: TASK_807 wertet Notizen und Gate-Daten aus; er ersetzt keinen echten menschlichen Blick auf Schoenheit, Timing und Spielgefuehl.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_807_station_reentry_firefight_release_candidate_tester_run.gd`, TASK_806/TASK_805 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance.
+
 ### TASK_806 - Station Reentry Firefight Release Candidate Handoff Packet
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_806_station_reentry_firefight_release_candidate_handoff_packet.md`, `docs/tasks/TASK_805_station_reentry_firefight_release_candidate_delivery_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -54,7 +64,8 @@
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/ARCHITECTURE.md`
 - Stand: Der lokale Singleplayer-Start seedet bei leerem/unvollstaendigem Startzustand Default-Roster, ALPHA-Fireteam, Dropship, Pilot und fertiges Homebase-direct Boarding, damit der Release nicht in `STOP Team/Dropship/Pilot/Boarding/Start` haengen bleibt.
 - Stand: Die Meta-Flow-Schicht erzeugt den spielbaren Startzustand; `HomebaseScreen` erhaelt nur einen expliziten Seed-Pfad fuer die vorhandene Direct-Launch-Payload.
-- Stand: Der Verifier prueft jetzt auch den echten Main-Menu-Klickpfad `Einzelspieler -> MetaLayerTest -> Homebase`, inklusive Payload-Fireteam, Operatoren an Bord und Startfreigabe.
+- Stand: Der Meta-Flow refreshed die Homebase nach dem Seed erneut, damit Startbutton, Readiness-Chips und Flightdeck nicht mit dem vorherigen leeren/blockierten Screen stehen bleiben.
+- Stand: Der Verifier prueft jetzt auch den echten Main-Menu-Klickpfad `Einzelspieler -> MetaLayerTest -> Homebase`, inklusive Payload-Fireteam, Operatoren an Bord, sichtbarer Startfreigabe, sichtbarer Shipcard und ohne `STOP Team/Dropship/Pilot/Boarding`.
 - Risiken/offen: Das ist ein Playability-Hotfix fuer den Release-Erststart. Kampagnen-Briefing, bewusstes Team-Picking und ein schoener Onboarding-Flow bleiben Folgearbeit.
 - Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
 - Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
