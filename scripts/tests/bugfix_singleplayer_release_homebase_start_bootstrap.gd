@@ -17,6 +17,7 @@ func _run_tests() -> void:
 	_test_task_doc_exists()
 	await _test_singleplayer_homebase_starts_with_playable_payload()
 	await _test_main_menu_singleplayer_route_starts_with_playable_payload()
+	await _test_visible_homebase_deadend_is_repaired()
 	await _test_partial_saved_start_state_is_repaired()
 	await _test_stale_payload_seed_uses_visible_fireteam_fallback()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -119,6 +120,65 @@ func _test_main_menu_singleplayer_route_starts_with_playable_payload() -> void:
 
 	scene.queue_free()
 	current_scene = null
+	await _wait_frames(2)
+
+
+func _test_visible_homebase_deadend_is_repaired() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	await _wait_frames(8)
+
+	var homebase_screen := scene.get_node_or_null("HomebaseScreen") as Control
+	_assert(homebase_screen != null, "Visible dead-end repair exposes HomebaseScreen")
+	_assert(scene.has_method("_ensure_singleplayer_visible_homebase_actionability"), "Meta layer exposes visible Homebase actionability guard")
+	if homebase_screen == null or not scene.has_method("_ensure_singleplayer_visible_homebase_actionability"):
+		scene.queue_free()
+		await _wait_frames(2)
+		return
+
+	scene.set("_homebase_staged_unit_ids", PackedStringArray())
+	scene.set("_homebase_staged_fireteam_ids", PackedStringArray())
+	scene.set("_selected_unit_ids", PackedStringArray())
+	scene.set("_selected_fireteam_ids", PackedStringArray())
+	scene.set("_homebase_aircraft_definitions", [])
+	scene.set("_assigned_aircraft_pilot_by_craft", {})
+	scene.set("_aircraft_location_by_craft", {})
+	scene.set_meta("singleplayer_visible_homebase_deadend_repaired", false)
+	scene.set_meta("singleplayer_visible_homebase_deadend_repair_mode", "")
+	homebase_screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", {})
+	homebase_screen.set("_homebase_dropship_staged_fireteam_ids", PackedStringArray())
+	homebase_screen.set("_homebase_dropship_payload_craft_id", "")
+	homebase_screen.set("_homebase_direct_boarding_state_by_fireteam_id", {})
+	scene.call("_refresh_homebase_screen")
+	await _wait_frames(4)
+
+	var blocked_staging: Dictionary = Dictionary(homebase_screen.call("get_homebase_direct_staging_snapshot"))
+	var blocked_readiness: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+	_assert(int(blocked_staging.get("payload_operator_count", 0)) == 0, "Visible dead-end fixture starts with empty payload")
+	_assert(String(blocked_readiness.get("overall_state", "")) != "ready", "Visible dead-end fixture starts blocked")
+
+	scene.call("_ensure_singleplayer_visible_homebase_actionability")
+	await _wait_frames(8)
+
+	var bootstrap: Dictionary = Dictionary(scene.call("get_singleplayer_start_bootstrap_snapshot"))
+	var staging: Dictionary = Dictionary(homebase_screen.call("get_homebase_direct_staging_snapshot"))
+	var readiness: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+	var startflow: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_startflow_visual_snapshot"))
+	var aircraft: Dictionary = Dictionary(homebase_screen.call("get_aircraft_panel_snapshot"))
+	var craft_id: String = String(bootstrap.get("craft_id", "")).strip_edges()
+	_assert(bool(bootstrap.get("visible_homebase_deadend_repaired", false)), "Visible Homebase dead-end guard records repair")
+	_assert(String(bootstrap.get("visible_homebase_deadend_repair_mode", "")) == "preserve_existing" or String(bootstrap.get("visible_homebase_deadend_repair_mode", "")) == "force_default", "Visible Homebase dead-end repair mode is named")
+	_assert(not craft_id.is_empty(), "Visible dead-end repair creates a Dropship")
+	_assert(not String(bootstrap.get("pilot_unit_id", "")).strip_edges().is_empty(), "Visible dead-end repair assigns a pilot")
+	_assert(Array(aircraft.get("visible_aircraft_definitions", [])).size() >= 1, "Visible dead-end repair shows a Flightdeck shipcard")
+	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Visible dead-end repair restores payload operators")
+	_assert(int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)), "Visible dead-end repair boards payload")
+	_assert(String(readiness.get("overall_state", "")) == "ready", "Visible dead-end repair makes readiness ready")
+	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Visible dead-end repair restores Start Mission text")
+	_assert(not bool(startflow.get("start_button_disabled", true)), "Visible dead-end repair enables Start Mission")
+	_assert(bool(homebase_screen.call("can_request_mission_start", craft_id)), "Visible dead-end repair can request mission start")
+
+	scene.queue_free()
 	await _wait_frames(2)
 
 
