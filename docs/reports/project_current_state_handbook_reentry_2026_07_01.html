@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_798</span>
-      <span class="pill warn">Aktueller Griff: TASK_799</span>
+      <span class="pill good">Letzter Abschluss: TASK_799</span>
+      <span class="pill warn">Aktueller Griff: TASK_800</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -159,6 +159,7 @@
           <li><strong>Playable Candidate:</strong> TASK_797 buendelt den akzeptierten Slice zu einem echten Host/Client-Spielpfad.</li>
           <li><strong>Playable Real-Run Findings:</strong> TASK_798 sammelt die echten Spielerfluss-Findings des Kandidaten.</li>
           <li><strong>Playable Candidate Acceptance:</strong> TASK_799 akzeptiert oder stoppt den Multiplayer-Playable-Candidate mit engen Gates.</li>
+          <li><strong>Release Candidate Packet:</strong> TASK_800 buendelt akzeptierte Quelle, frischen Export, EXE/PCK/DLLs und Playtest-Haken.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -169,11 +170,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_799 akzeptiert oder stoppt die TASK_798-Findings als enger Gate-Schritt fuer den spielbaren Multiplayer-Kandidaten.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777 bis TASK_798: keine neue Gameplay-Wahrheit, keine Auto-Commands. Ohne gruenen Real-Run, ohne Pflichtchecks und ohne aktive Issues bleibt die Acceptance offen.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_800 verpackt den akzeptierten Kandidaten als Release-Candidate-Paket.</div>
-          <input readonly value="TASK_799 - Station Reentry Firefight Multiplayer Playable Candidate Acceptance" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_800 - Station Reentry Firefight Multiplayer Release Candidate Packet" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_800 verpackt den akzeptierten Multiplayer-Playable-Candidate als konkretes Release-Candidate-Paket.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777 bis TASK_799: keine neue Gameplay-Wahrheit, keine Auto-Commands. Das Paket nennt den Release-Ordner, EXE/PCK/DLLs, Export-Workflow, Host/Client-Kommandos und die Pflichtchecks fuer den naechsten sichtbaren Lauf.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_801 sammelt die echten Release-Candidate-Playtest-Findings.</div>
+          <input readonly value="TASK_800 - Station Reentry Firefight Multiplayer Release Candidate Packet" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_801 - Station Reentry Firefight Release Candidate Playtest Findings" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -243,6 +244,11 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.issues.hud_overlap_blocks_action"> Issue: HUD blockiert Aktion</label>
           <input readonly value="tmp/station_reentry_firefight_multiplayer_playable_candidate_acceptance.json" data-export-key="reentry_firefight_multiplayer_playable_candidate_acceptance.manifest_path">
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_acceptance.accepted_for_multiplayer_candidate"> TASK_799 Acceptance gruen</label>
+          <input readonly value="tmp/station_reentry_firefight_multiplayer_release_candidate_packet.json" data-export-key="reentry_firefight_multiplayer_release_candidate_packet.manifest_path">
+          <input readonly value="C:/dev/Sternenbuergerchen_rel/Sternenbuergerchen_rel.exe" data-export-key="reentry_firefight_multiplayer_release_candidate_packet.exe_path">
+          <input readonly value="C:/dev/Sternenbuergerchen_rel/Sternenbuergerchen_rel.pck" data-export-key="reentry_firefight_multiplayer_release_candidate_packet.pck_path">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_release_candidate_packet.release_candidate_packet_ready"> TASK_800 Release-Candidate-Paket bereit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_release_candidate_packet.runtime_export_is_fresh"> Frischer Runtime-Export getestet</label>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -613,10 +619,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_800 - Station Reentry Firefight Multiplayer Release Candidate Packet"
+            recommended_next_task: "TASK_801 - Station Reentry Firefight Release Candidate Playtest Findings"
           },
           metadata: {
-            generated_for_task: "TASK_799",
+            generated_for_task: "TASK_800",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
