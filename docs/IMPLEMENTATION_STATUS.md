@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_806 - Station Reentry Firefight Release Candidate Handoff Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_806_station_reentry_firefight_release_candidate_handoff_packet.md`, `docs/tasks/TASK_805_station_reentry_firefight_release_candidate_delivery_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightReleaseCandidateHandoffPacket` wertet TASK_805-Delivery-Review plus optionale Handoff-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot buendelt Release-Ordner, EXE, PCK, Einzelspieler-Startschritt, Host/Client-Startschritt, Rollenhinweise, Fresh-EXE-/Shortcut-Warnung, Smoke-/Review-Gates, Restrisiken, Workbench/Report und naechste Tester-Aktion.
+- Stand: Issue-Flags routen fehlende Delivery-Review, stale Handoff-Paket, unklare Startschritte, unklare Rollen, fehlenden Report, nicht akzeptierte Risiken und sichtbaren Polish-Bedarf auf konkrete Folgearbeit.
+- Risiken/offen: TASK_806 fuehrt keinen echten Tester-Lauf aus und baut kein physisches Paket; der naechste Schritt muss das Handoff-Packet sichtbar gegen einen Test-Run pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_806_station_reentry_firefight_release_candidate_handoff_packet.gd`, TASK_805/TASK_804 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_807 - Station Reentry Firefight Release Candidate Tester Run.
+
 ### TASK_805 - Station Reentry Firefight Release Candidate Delivery Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_805_station_reentry_firefight_release_candidate_delivery_review.md`, `docs/tasks/TASK_804_station_reentry_firefight_release_candidate_visible_ship_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
