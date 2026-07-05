@@ -141,7 +141,8 @@ git checkout -b batch/<batch-name>
 - TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke (implementiert)
 - TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke (implementiert)
 - TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke (implementiert)
-- Naechster Schritt: TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review.
+- TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review (implementiert)
+- Naechster Schritt: TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

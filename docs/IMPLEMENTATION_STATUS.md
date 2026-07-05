@@ -19,6 +19,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.gd`, TASK_812/TASK_543 Regressionen, `git diff --check`.
 - Naechster Schritt: TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review.
 
+### TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_814_station_reentry_release_candidate_firefight_feel_hud_polish_review.md`, `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: Mission Control zeigt den bestehenden kompakten Combat-HUD-Readout, wenn Kontakt-/Feuerentscheidungsdaten aktiv sind.
+- Stand: `TacticalController.get_release_candidate_firefight_feel_hud_polish_snapshot()` buendelt First-Engagement, Combat-HUD-Dichte, Tooltip-Detail und F6-Bounds in einen read-only Firefight-Feel-Snapshot.
+- Stand: `MetaLayerFlow.get_release_candidate_firefight_feel_hud_polish_review_snapshot()` fuehrt den Release-Pfad bis zum ersten Firefight-HUD-Readout zusammen und exportiert den naechsten Spielergriff.
+- Risiken/offen: Der Snapshot prueft automatische HUD-/Bounds-/Tooltip-Lesbarkeit. Ein echter Fenster-Sichttest fuer Timing, Drama und Schoenheit bleibt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_814_station_reentry_release_candidate_firefight_feel_hud_polish_review.gd`, TASK_813 Regression, `git diff --check`.
+- Naechster Schritt: TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review.
+
 ### BUGFIX - Player Roster Corrupt Save Quiet Recovery
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_player_roster_corrupt_save_quiet_recovery.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`
