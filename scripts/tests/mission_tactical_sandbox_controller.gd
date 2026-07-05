@@ -6192,6 +6192,12 @@ func _build_strategic_status_text() -> String:
 		and String(frontier_probe_one_screen.get("next_token", "")).strip_edges().to_upper() != "DEBRIEF"
 	if bool(next_interaction.get("active", false)) and not next_interaction_line.is_empty() and not one_screen_covers_next:
 		lines.append(next_interaction_line)
+	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
+	var combat_hud_line: String = String(combat_hud_density.get("mission_control_line", "")).strip_edges()
+	if bool(combat_hud_density.get("active", false)) and not combat_hud_line.is_empty():
+		var combat_status_line: String = "Kampf %s" % combat_hud_line
+		if not lines.has(combat_status_line):
+			lines.append(combat_status_line)
 	var debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var debrief_handoff_line: String = String(debrief_handoff.get("handoff_line", "")).strip_edges()
 	if bool(debrief_handoff.get("handoff_ready", false)) and not debrief_handoff_line.is_empty():
@@ -15496,6 +15502,135 @@ func get_mission_combat_feedback_hud_density_snapshot() -> Dictionary:
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_release_candidate_firefight_feel_hud_polish_snapshot() -> Dictionary:
+	var engagement_snapshot: Dictionary = get_mission_first_engagement_feedback_snapshot()
+	var hud_snapshot: Dictionary = get_mission_combat_feedback_hud_density_snapshot()
+	var tooltip_snapshot: Dictionary = get_combat_hud_visual_detail_tooltip_snapshot()
+	var f6_audit_snapshot: Dictionary = get_combat_hud_f6_visual_audit_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(hud_snapshot.get("combat_hud_density", {})).duplicate(true)
+	var compact_line: String = String(hud_snapshot.get("compact_line", "")).strip_edges()
+	var mission_control_status_text: String = String(hud_snapshot.get("mission_control_status_text", "")).strip_edges()
+	var selected_fireteam_status_text: String = String(hud_snapshot.get("selected_fireteam_status_text", "")).strip_edges()
+	var player_action: Dictionary = _build_release_candidate_firefight_player_action_snapshot(engagement_snapshot, combat_hud_density)
+	var tooltip_text: String = String(tooltip_snapshot.get("tooltip_text", "")).strip_edges()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"task_813_engagement_gate_available",
+			String(engagement_snapshot.get("gate", "")) == "pass",
+			"Firefight feel review builds on a green first-engagement feedback snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"compact_combat_readout_active",
+			String(hud_snapshot.get("gate", "")) == "pass"
+				and bool(combat_hud_density.get("active", false))
+				and not compact_line.is_empty()
+				and bool(combat_hud_density.get("line_within_limit", false)),
+			"Compact combat HUD readout is active and remains inside the text budget."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_readout_visible_in_both_huds",
+			not compact_line.is_empty()
+				and mission_control_status_text.contains(compact_line)
+				and selected_fireteam_status_text.contains(compact_line),
+			"Mission Control and Selected Fireteam expose the same compact combat readout."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_context_tokens_visible",
+			bool(combat_hud_density.get("contains_fire_state", false))
+				and bool(combat_hud_density.get("contains_cover_context", false))
+				and bool(combat_hud_density.get("contains_range_context", false))
+				and bool(combat_hud_density.get("contains_los_context", false)),
+			"Combat readout names fire/wait/no-fire plus cover, range and LOS context."
+		),
+		_build_mission_first_move_readability_check(
+			"tooltip_detail_available",
+			String(tooltip_snapshot.get("gate", "")) == "pass"
+				and not tooltip_text.is_empty()
+				and bool(Dictionary(tooltip_snapshot.get("detail_tooltip", {})).get("tooltip_within_limit", false)),
+			"Combat HUD tooltip gives scannable detail without lengthening the compact HUD line."
+		),
+		_build_mission_first_move_readability_check(
+			"fullhd_hud_bounds_pass",
+			String(f6_audit_snapshot.get("automated_visual_gate", "")) == "pass",
+			"FullHD HUD audit keeps panels, labels and tooltip preview within safe bounds."
+		),
+		_build_mission_first_move_readability_check(
+			"next_player_action_clear",
+			bool(player_action.get("active", false))
+				and String(player_action.get("next_action_line", "")).begins_with("Naechster Griff:")
+				and not String(player_action.get("why_line", "")).strip_edges().is_empty(),
+			"Firefight readout tells the player what to do next and why."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(engagement_snapshot.get("read_only", false))
+				and not bool(engagement_snapshot.get("ui_sets_gameplay_truth", true))
+				and bool(hud_snapshot.get("read_only", false))
+				and not bool(hud_snapshot.get("ui_sets_gameplay_truth", true))
+				and bool(tooltip_snapshot.get("read_only", false))
+				and not bool(tooltip_snapshot.get("ui_sets_gameplay_truth", true))
+				and bool(f6_audit_snapshot.get("read_only", false))
+				and not bool(f6_audit_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Firefight feel review reads existing HUD and combat snapshots only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_814",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"engagement": engagement_snapshot,
+		"combat_hud": hud_snapshot,
+		"tooltip": tooltip_snapshot,
+		"f6_visual_audit": f6_audit_snapshot,
+		"player_action": player_action,
+		"compact_line": compact_line,
+		"mission_control_status_text": mission_control_status_text,
+		"selected_fireteam_status_text": selected_fireteam_status_text,
+		"tooltip_text": tooltip_text,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_release_candidate_firefight_player_action_snapshot(engagement_snapshot: Dictionary, combat_hud_density: Dictionary) -> Dictionary:
+	var diagnostics: Dictionary = Dictionary(engagement_snapshot.get("contact_decision_diagnostics", {})).duplicate(true)
+	var status: String = String(engagement_snapshot.get("engagement_status", diagnostics.get("status", ""))).strip_edges().to_lower()
+	var reason: String = String(engagement_snapshot.get("engagement_reason", diagnostics.get("reason", ""))).strip_edges().to_lower()
+	var compact_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
+	var next_action: String = "Naechster Griff: Feuerstatus lesen | Position halten oder neuen Move/Defend/Flank waehlen"
+	var why_line: String = "Warum: Combat-HUD zeigt Feuerstatus, Zielpaar, Cover, Range und LOS."
+	if reason == "fired" or status == "fired":
+		next_action = "Naechster Griff: Trefferwirkung lesen | bei Risiko Defend, Flank oder neuen Move planen"
+		why_line = "Warum: Es wurde geschossen; Ziel, Waffe und Kontext stehen im Kampf-Readout."
+	elif reason == "cooldown" or status == "waiting":
+		next_action = "Naechster Griff: kurz warten oder Deckung/Flanke verbessern"
+		why_line = "Warum: Einheit ist im Feuer-Cooldown; Kontext zeigt, ob Position und Sichtlinie gut sind."
+	elif reason == "no_contact_pair" or reason == "no_damage_effect" or reason == "invalid_contact_pair" or status == "blocked":
+		next_action = "Naechster Griff: Sichtlinie, Reichweite oder Zielposition korrigieren"
+		why_line = "Warum: Kein sauberer Schuss; Blockgrund und Kandidat stehen im Kontakt-Readout."
+	return {
+		"active": not compact_line.is_empty() or not diagnostics.is_empty(),
+		"status": status,
+		"reason": reason,
+		"compact_line": compact_line,
+		"next_action_line": next_action,
+		"why_line": why_line,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
 	}
 
 

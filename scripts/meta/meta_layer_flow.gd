@@ -770,6 +770,103 @@ func get_release_candidate_first_go_firefight_actionability_snapshot() -> Dictio
 	}
 
 
+func get_release_candidate_firefight_feel_hud_polish_review_snapshot() -> Dictionary:
+	var source: Dictionary = get_release_candidate_first_go_firefight_actionability_snapshot()
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var hud_polish: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_candidate_firefight_feel_hud_polish_snapshot"):
+		hud_polish = Dictionary(tactical_controller.call("get_release_candidate_firefight_feel_hud_polish_snapshot"))
+	var player_action: Dictionary = Dictionary(hud_polish.get("player_action", {}))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_first_go_firefight_passed",
+		String(source.get("status", "")) == "pass",
+		"critical",
+		"Firefight HUD polish review should build on a green first-GO/firefight smoke.",
+		{"source_status": String(source.get("status", ""))}
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_hud_polish_snapshot_present",
+		tactical_controller != null and not hud_polish.is_empty(),
+		"critical",
+		"Active mission should expose the tactical firefight HUD polish snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"firefight_hud_polish_gate_passes",
+		String(hud_polish.get("gate", "")) == "pass",
+		"critical",
+		"Firefight HUD polish should pass compact readout, tooltip and bounds checks.",
+		{
+			"hud_gate": String(hud_polish.get("gate", "")),
+			"compact_line": String(hud_polish.get("compact_line", "")),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"player_next_action_visible",
+		bool(player_action.get("active", false))
+			and String(player_action.get("next_action_line", "")).begins_with("Naechster Griff:"),
+		"critical",
+		"Firefight readout should tell the player the next tactical action."
+	)
+	_append_handoff_check(
+		checks,
+		"hud_text_shared_between_surfaces",
+		_insertion_check_passed(hud_polish, "combat_readout_visible_in_both_huds"),
+		"critical",
+		"Mission Control and Selected Fireteam should share the same compact combat readout."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(source.get("read_only", false))
+			and not bool(source.get("ui_sets_gameplay_truth", true))
+			and bool(hud_polish.get("read_only", false))
+			and not bool(hud_polish.get("ui_sets_gameplay_truth", true))
+			and not bool(hud_polish.get("creates_command", true))
+			and not bool(hud_polish.get("creates_fire_event", true))
+			and not bool(hud_polish.get("creates_damage_event", true))
+			and not bool(hud_polish.get("sets_multiplayer_truth", true)),
+		"critical",
+		"Firefight HUD polish review reads existing mission state only."
+	)
+
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_reentry_release_candidate_firefight_feel_hud_polish_review.v1",
+		"task_id": "TASK_814",
+		"source_task_id": "TASK_813",
+		"singleplayer_path_expected": "MainMenu -> Einzelspieler -> Homebase -> Start Mission -> LZ -> Drop -> Move Preview -> GO -> First Contact -> First Engagement -> Firefight HUD Readout",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"hud_polish": hud_polish,
+		"source_status": String(source.get("status", "")),
+		"hud_polish_gate": String(hud_polish.get("gate", "")),
+		"compact_line": String(hud_polish.get("compact_line", "")),
+		"player_next_action_line": String(player_action.get("next_action_line", "")),
+		"player_why_line": String(player_action.get("why_line", "")),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "fail",
+		"recommended_next_task": "TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
