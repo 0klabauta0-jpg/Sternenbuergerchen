@@ -504,6 +504,139 @@ func get_release_candidate_mission_launch_actionability_snapshot() -> Dictionary
 	}
 
 
+func get_release_candidate_lz_drop_preview_actionability_snapshot() -> Dictionary:
+	var handoff: Dictionary = get_homebase_to_mission_handoff_snapshot()
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var insertion: Dictionary = {}
+	var first_move: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_mission_insertion_first_order_readability_snapshot"):
+		insertion = Dictionary(tactical_controller.call("get_mission_insertion_first_order_readability_snapshot"))
+	if tactical_controller != null and tactical_controller.has_method("get_mission_first_move_decision_readability_snapshot"):
+		first_move = Dictionary(tactical_controller.call("get_mission_first_move_decision_readability_snapshot"))
+	var launch_handoff_reached: bool = String(handoff.get("handoff_gate", "")) == "pass" and int(handoff.get("failed_count", -1)) == 0
+	if not launch_handoff_reached:
+		launch_handoff_reached = active_mission != null \
+			and _current_meta_view == "mission" \
+			and _is_mission_host_visible_for_current_view() \
+			and not insertion.is_empty() \
+			and not first_move.is_empty()
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"handoff_gate_pass",
+		launch_handoff_reached,
+		"critical",
+		"LZ/Drop/Preview smoke should build on a reached Homebase-to-Mission handoff."
+	)
+	_append_handoff_check(
+		checks,
+		"mission_view_visible",
+		_current_meta_view == "mission" and _is_mission_host_visible_for_current_view(),
+		"critical",
+		"LZ/Drop/Preview smoke should run while the Mission view is visible."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_controller_present",
+		tactical_controller != null and not insertion.is_empty() and not first_move.is_empty(),
+		"critical",
+		"Active mission should expose insertion and first-move readability snapshots."
+	)
+	_append_handoff_check(
+		checks,
+		"lz_was_set",
+		bool(insertion.get("selected_card_has_lz", false)) or int(insertion.get("lz_marker_count", 0)) > 0,
+		"critical",
+		"Selected dropship should have an LZ before the drop/preview phase.",
+		{
+			"selected_card_has_lz": bool(insertion.get("selected_card_has_lz", false)),
+			"lz_marker_count": int(insertion.get("lz_marker_count", 0)),
+			"dropship_lz_label_count": int(insertion.get("dropship_lz_label_count", 0)),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"selected_fireteam_deployed",
+		_insertion_check_passed(first_move, "selected_fireteam_deployed") \
+			and Array(first_move.get("deployed_selected_unit_ids", [])).size() > 0,
+		"critical",
+		"Drop should deploy the selected Fireteam before the first move preview."
+	)
+	_append_handoff_check(
+		checks,
+		"first_move_preview_gate_pass",
+		String(first_move.get("gate", "")) == "pass" and not bool(first_move.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"First move decision snapshot should pass after planning and remain read-only.",
+		{"gate": String(first_move.get("gate", ""))}
+	)
+	_append_handoff_check(
+		checks,
+		"preview_before_go_visible",
+		_insertion_check_passed(first_move, "planned_waypoint_present") \
+			and _insertion_check_passed(first_move, "waypoint_preview_visible") \
+			and _insertion_check_passed(first_move, "waypoint_visualized"),
+		"critical",
+		"Move preview, path/ghost visualization and planned waypoint should be visible before GO."
+	)
+	_append_handoff_check(
+		checks,
+		"go_ready_not_executed",
+		_insertion_check_passed(first_move, "go_ready") and int(first_move.get("planned_waypoint_count", 0)) > 0,
+		"critical",
+		"GO should be ready for the planned move, while the snapshot still represents the pre-GO preview state."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		not bool(handoff.get("ui_sets_gameplay_truth", true)) \
+			and bool(insertion.get("read_only", false)) \
+			and not bool(insertion.get("ui_sets_gameplay_truth", true)) \
+			and bool(first_move.get("read_only", false)) \
+			and not bool(first_move.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"LZ/Drop/Preview actionability snapshot reads existing mission state only."
+	)
+
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_reentry_release_candidate_lz_drop_preview_actionability_smoke.v1",
+		"task_id": "TASK_812",
+		"source_task_id": "TASK_811",
+		"singleplayer_path_expected": "MainMenu -> Einzelspieler -> Homebase -> Start Mission -> LZ -> Drop -> Move Preview",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"handoff": handoff,
+		"insertion": insertion,
+		"first_move": first_move,
+		"insertion_gate": String(insertion.get("gate", "")),
+		"first_move_gate": String(first_move.get("gate", "")),
+		"mission_drop_craft_id": String(insertion.get("mission_drop_craft_id", first_move.get("mission_drop_craft_id", ""))),
+		"selected_card_has_lz": bool(insertion.get("selected_card_has_lz", false)),
+		"selected_payload_count": int(insertion.get("selected_payload_count", 0)),
+		"deployed_selected_unit_count": Array(first_move.get("deployed_selected_unit_ids", [])).size(),
+		"planned_waypoint_count": int(first_move.get("planned_waypoint_count", 0)),
+		"waypoint_intent_preview_count": int(first_move.get("waypoint_intent_preview_count", 0)),
+		"visualized_waypoint_count": int(first_move.get("visualized_waypoint_count", 0)),
+		"go_ready": bool(first_move.get("go_ready", false)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "fail",
+		"recommended_next_task": "TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
