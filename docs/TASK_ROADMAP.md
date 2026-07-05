@@ -44,6 +44,7 @@ git checkout -b batch/<batch-name>
 
 ## Aktueller Release-Hotfix
 - BUGFIX - Singleplayer Release Homebase Start Bootstrap (implementiert): EXE-Startpfad seedet Roster, ALPHA-Fireteam, Dropship, Pilot und fertiges Boarding, damit `Einzelspieler` nicht in einer blockierten Homebase-Readiness haengen bleibt.
+- BUGFIX - Singleplayer Release Homebase Partial Save Actionability (implementiert): halbvolle lokale Saves werden beim Release-Start additiv repariert, damit vorhandenes Fireteam plus fehlender Pilot/Flightdeck-Payload nicht wieder in `Start blockiert` endet.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)

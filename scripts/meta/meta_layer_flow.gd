@@ -1877,17 +1877,15 @@ func _load_persistent_player_roster() -> void:
 
 
 func _ensure_singleplayer_release_start_bootstrap() -> void:
-	if _all_team_units.is_empty() or _available_team_units.is_empty():
-		var fallback_roster: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
-		_all_team_units = fallback_roster.duplicate(true)
-		_available_team_units = fallback_roster.duplicate(true)
-		set_meta("singleplayer_bootstrap_roster_source", "unit_roster_presets")
-
-	if _homebase_staged_unit_ids.is_empty() and _selected_unit_ids.is_empty():
+	_ensure_singleplayer_bootstrap_roster_floor()
+	_homebase_staged_unit_ids = _filter_known_unit_ids(_homebase_staged_unit_ids)
+	_selected_unit_ids = _filter_known_unit_ids(_selected_unit_ids)
+	if _homebase_staged_unit_ids.size() < mini(SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE, 2) or _selected_unit_ids.size() < mini(SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE, 2):
 		_homebase_staged_unit_ids = _pick_singleplayer_bootstrap_fireteam_unit_ids()
 		_homebase_staged_fireteam_ids = _build_singleplayer_bootstrap_fireteam_ids(_homebase_staged_unit_ids)
 		_selected_unit_ids = _homebase_staged_unit_ids.duplicate()
 		_selected_fireteam_ids = _homebase_staged_fireteam_ids.duplicate()
+		set_meta("singleplayer_bootstrap_selection_repaired", true)
 
 	var bootstrap_craft_id: String = _ensure_singleplayer_bootstrap_dropship()
 	if bootstrap_craft_id.is_empty():
@@ -1896,9 +1894,10 @@ func _ensure_singleplayer_release_start_bootstrap() -> void:
 		var pilot_unit_id: String = _pick_singleplayer_bootstrap_pilot_unit_id(_homebase_staged_unit_ids)
 		if not pilot_unit_id.is_empty():
 			_assigned_aircraft_pilot_by_craft[bootstrap_craft_id] = pilot_unit_id
+			set_meta("singleplayer_bootstrap_pilot_repaired", true)
 	_aircraft_location_by_craft[bootstrap_craft_id] = "homebase"
 	set_meta("singleplayer_bootstrap_craft_id", bootstrap_craft_id)
-	set_meta("singleplayer_bootstrap_fireteam_id", SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID)
+	set_meta("singleplayer_bootstrap_fireteam_id", _get_singleplayer_bootstrap_payload_fireteam_id())
 	set_meta("singleplayer_bootstrap_enabled", true)
 
 
@@ -1909,10 +1908,13 @@ func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 	var bootstrap_craft_id: String = String(get_meta("singleplayer_bootstrap_craft_id", "")).strip_edges()
 	if bootstrap_craft_id.is_empty():
 		return
+	var payload_fireteam_id: String = _get_singleplayer_bootstrap_payload_fireteam_id()
+	if payload_fireteam_id.is_empty():
+		return
 	homebase_screen.call(
 		"seed_homebase_direct_launch_payload",
 		bootstrap_craft_id,
-		PackedStringArray([SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID]),
+		PackedStringArray([payload_fireteam_id]),
 		true
 	)
 	set_meta("singleplayer_bootstrap_payload_seeded", true)
@@ -1931,7 +1933,92 @@ func get_singleplayer_start_bootstrap_snapshot() -> Dictionary:
 		"craft_count": _homebase_aircraft_definitions.size(),
 		"pilot_unit_id": String(_assigned_aircraft_pilot_by_craft.get(craft_id, "")).strip_edges(),
 		"craft_location": String(_aircraft_location_by_craft.get(craft_id, "")).strip_edges(),
+		"roster_source": String(get_meta("player_roster_source", "")).strip_edges(),
+		"roster_repaired": bool(get_meta("singleplayer_bootstrap_roster_repaired", false)),
+		"selection_repaired": bool(get_meta("singleplayer_bootstrap_selection_repaired", false)),
+		"pilot_repaired": bool(get_meta("singleplayer_bootstrap_pilot_repaired", false)),
+		"available_unit_count": _available_team_units.size(),
+		"all_unit_count": _all_team_units.size(),
+		"has_pilot_candidate": _has_singleplayer_bootstrap_pilot_candidate(),
 	}
+
+
+func _ensure_singleplayer_bootstrap_roster_floor() -> void:
+	var fallback_roster: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
+	if _all_team_units.is_empty() or _available_team_units.is_empty():
+		_all_team_units = fallback_roster.duplicate(true)
+		_available_team_units = fallback_roster.duplicate(true)
+		set_meta("singleplayer_bootstrap_roster_source", "unit_roster_presets")
+		return
+	var needs_repair: bool = _count_non_pilot_units(_available_team_units) < mini(SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE, 2) or not _has_singleplayer_bootstrap_pilot_candidate()
+	if not needs_repair:
+		return
+	_all_team_units = _merge_missing_units_by_id(_all_team_units, fallback_roster)
+	_available_team_units = _merge_missing_units_by_id(_available_team_units, fallback_roster)
+	set_meta("singleplayer_bootstrap_roster_repaired", true)
+
+
+func _merge_missing_units_by_id(base_units: Array, fallback_units: Array) -> Array:
+	var result: Array = []
+	var known_ids: Dictionary = {}
+	for unit_variant in base_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant).duplicate(true)
+		var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or known_ids.has(unit_id):
+			continue
+		known_ids[unit_id] = true
+		result.append(unit)
+	for unit_variant in fallback_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var fallback_unit: Dictionary = Dictionary(unit_variant).duplicate(true)
+		var fallback_id: String = String(fallback_unit.get("unit_id", "")).strip_edges()
+		if fallback_id.is_empty() or known_ids.has(fallback_id):
+			continue
+		known_ids[fallback_id] = true
+		result.append(fallback_unit)
+	return result
+
+
+func _filter_known_unit_ids(unit_ids: PackedStringArray) -> PackedStringArray:
+	var known_ids: Dictionary = {}
+	for unit_variant in _all_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_id: String = String(Dictionary(unit_variant).get("unit_id", "")).strip_edges()
+		if not unit_id.is_empty():
+			known_ids[unit_id] = true
+	var result: PackedStringArray = PackedStringArray()
+	for unit_id_variant in unit_ids:
+		var unit_id: String = String(unit_id_variant).strip_edges()
+		if unit_id.is_empty() or result.has(unit_id) or not known_ids.has(unit_id):
+			continue
+		result.append(unit_id)
+	return result
+
+
+func _count_non_pilot_units(units: Array) -> int:
+	var count: int = 0
+	for unit_variant in units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		if not _is_singleplayer_pilot_candidate(Dictionary(unit_variant)):
+			count += 1
+	return count
+
+
+func _has_singleplayer_bootstrap_pilot_candidate() -> bool:
+	return not _pick_singleplayer_bootstrap_pilot_unit_id(_homebase_staged_unit_ids).is_empty()
+
+
+func _get_singleplayer_bootstrap_payload_fireteam_id() -> String:
+	for fireteam_id_variant in _homebase_staged_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges()
+		if not fireteam_id.is_empty():
+			return fireteam_id
+	return SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID
 
 
 func _pick_singleplayer_bootstrap_fireteam_unit_ids() -> PackedStringArray:

@@ -78,6 +78,7 @@
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
       <span class="pill good">Letzter Abschluss: TASK_808</span>
       <span class="pill warn">Aktueller Griff: TASK_809</span>
+      <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -169,6 +170,7 @@
           <li><strong>Tester Run:</strong> TASK_807 prueft das Handoff gegen den echten Spielergriff von EXE-Start bis erstem Firefight und Exit/Debrief.</li>
           <li><strong>Tester Run Acceptance:</strong> TASK_808 akzeptiert diesen Lauf nur, wenn der frische EXE-Griff komplett, reviewed, issue-frei und read-only belegt ist.</li>
           <li><strong>Playability Cue:</strong> TASK_809 zeigt nach `Einzelspieler` die erste Handlungskette direkt in der Homebase: Start Mission, LZ, Drop, Preview, GO.</li>
+          <li><strong>Release-Start-Hotfix:</strong> Halbvolle lokale Saves werden beim Einzelspieler-Start additiv repariert, damit vorhandenes Fireteam plus fehlender Pilot/Flightdeck-Payload nicht mehr in `Start blockiert` endet.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -400,6 +402,8 @@
           <textarea data-export-key="reentry_firefight_release_candidate_tester_run_acceptance.acceptance_note" placeholder="Acceptance-Notiz / Route zu TASK_809"></textarea>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_playability_polish.release_candidate_action_cue_ready"> TASK_809 Ready-Cue sichtbar</label>
           <input readonly value="Naechster Griff: Start Mission -> LZ waehlen -> Drop -> Preview lesen -> GO" data-export-key="reentry_release_candidate_playability_polish.expected_ready_cue">
+          <label class="checkline"><input type="checkbox" data-export-key="singleplayer_release_homebase_partial_save_actionability.partial_save_guard_verified"> Partial-Save-Startguard verifiziert</label>
+          <input readonly value="BUGFIX - Singleplayer Release Homebase Partial Save Actionability" data-export-key="singleplayer_release_homebase_partial_save_actionability.hotfix_task">
           <textarea data-export-key="reentry_release_candidate_playability_polish.cta_visual_note" placeholder="CTA-Fensterblick / TASK_810-Notiz"></textarea>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">

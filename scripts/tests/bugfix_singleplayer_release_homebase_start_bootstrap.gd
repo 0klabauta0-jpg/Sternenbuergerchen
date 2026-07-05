@@ -17,6 +17,7 @@ func _run_tests() -> void:
 	_test_task_doc_exists()
 	await _test_singleplayer_homebase_starts_with_playable_payload()
 	await _test_main_menu_singleplayer_route_starts_with_playable_payload()
+	await _test_partial_saved_start_state_is_repaired()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("BUGFIX_singleplayer_release_homebase_start_bootstrap: FAILED")
@@ -117,6 +118,82 @@ func _test_main_menu_singleplayer_route_starts_with_playable_payload() -> void:
 
 	scene.queue_free()
 	current_scene = null
+	await _wait_frames(2)
+
+
+func _test_partial_saved_start_state_is_repaired() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	await _wait_frames(8)
+
+	var homebase_screen := scene.get_node_or_null("HomebaseScreen") as Control
+	_assert(homebase_screen != null, "Partial saved state exposes HomebaseScreen")
+	_assert(scene.has_method("get_singleplayer_start_bootstrap_snapshot"), "Partial saved state exposes bootstrap snapshot")
+	if homebase_screen == null or not scene.has_method("get_singleplayer_start_bootstrap_snapshot"):
+		scene.queue_free()
+		await _wait_frames(2)
+		return
+
+	var partial_roster: Array = [
+		{
+			"unit_id": "partial_rifle_1",
+			"display_name": "Partial Rifle 1",
+			"role_name": "Rifleman",
+			"callsign": "P1",
+		},
+		{
+			"unit_id": "partial_rifle_2",
+			"display_name": "Partial Rifle 2",
+			"role_name": "Rifleman",
+			"callsign": "P2",
+		},
+	]
+	scene.set("_all_team_units", partial_roster.duplicate(true))
+	scene.set("_available_team_units", partial_roster.duplicate(true))
+	scene.set("_homebase_staged_unit_ids", PackedStringArray(["partial_rifle_1", "partial_rifle_2"]))
+	scene.set("_homebase_staged_fireteam_ids", PackedStringArray(["custom_ft", "custom_ft"]))
+	scene.set("_selected_unit_ids", PackedStringArray(["partial_rifle_1", "partial_rifle_2"]))
+	scene.set("_selected_fireteam_ids", PackedStringArray(["custom_ft", "custom_ft"]))
+	scene.set("_homebase_aircraft_definitions", [])
+	scene.set("_assigned_aircraft_pilot_by_craft", {})
+	scene.set("_aircraft_location_by_craft", {})
+	scene.set_meta("singleplayer_bootstrap_roster_repaired", false)
+	scene.set_meta("singleplayer_bootstrap_selection_repaired", false)
+	scene.set_meta("singleplayer_bootstrap_pilot_repaired", false)
+	homebase_screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", {})
+	homebase_screen.set("_homebase_dropship_staged_fireteam_ids", PackedStringArray())
+	homebase_screen.set("_homebase_dropship_payload_craft_id", "")
+	homebase_screen.set("_homebase_direct_boarding_state_by_fireteam_id", {})
+	scene.call("_ensure_singleplayer_release_start_bootstrap")
+	scene.call("_refresh_homebase_screen")
+	scene.call("_seed_singleplayer_bootstrap_homebase_payload")
+	scene.call("_refresh_homebase_screen")
+	await _wait_frames(8)
+
+	var bootstrap: Dictionary = Dictionary(scene.call("get_singleplayer_start_bootstrap_snapshot"))
+	var staging: Dictionary = Dictionary(homebase_screen.call("get_homebase_direct_staging_snapshot"))
+	var readiness: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+	var startflow: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_startflow_visual_snapshot"))
+	var aircraft: Dictionary = Dictionary(homebase_screen.call("get_aircraft_panel_snapshot"))
+	var craft_id: String = String(bootstrap.get("craft_id", "")).strip_edges()
+	_assert(bool(bootstrap.get("enabled", false)), "Partial saved state keeps bootstrap enabled")
+	_assert(bool(bootstrap.get("roster_repaired", false)), "Partial saved state repairs missing roster floor")
+	_assert(bool(bootstrap.get("pilot_repaired", false)), "Partial saved state assigns a repaired pilot")
+	_assert(bool(bootstrap.get("has_pilot_candidate", false)), "Partial saved state has a pilot candidate after repair")
+	_assert(bool(bootstrap.get("payload_seeded", false)), "Partial saved state seeds payload")
+	_assert(String(bootstrap.get("pilot_unit_id", "")).strip_edges() != "", "Partial saved state exposes pilot id")
+	_assert(String(bootstrap.get("craft_location", "")) == "homebase", "Partial saved state craft is parked at Homebase")
+	_assert(Array(staging.get("payload_fireteam_ids", [])).has("custom_ft"), "Partial saved state seeds actual staged Fireteam id")
+	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Partial saved state has payload operators")
+	_assert(int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)), "Partial saved state starts boarded")
+	_assert(String(readiness.get("overall_state", "")) == "ready", "Partial saved state readiness is ready")
+	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Partial saved state keeps Start Mission button")
+	_assert(not bool(startflow.get("start_button_disabled", true)), "Partial saved state start button is enabled")
+	_assert(Array(aircraft.get("visible_aircraft_definitions", [])).size() >= 1, "Partial saved state visible Flightdeck has a shipcard")
+	_assert(not String(aircraft.get("selected_status_text", "")).contains("Flight deck empty"), "Partial saved state Flightdeck does not render empty blocker")
+	_assert(bool(homebase_screen.call("can_request_mission_start", craft_id)), "Partial saved state can request mission start")
+
+	scene.queue_free()
 	await _wait_frames(2)
 
 
