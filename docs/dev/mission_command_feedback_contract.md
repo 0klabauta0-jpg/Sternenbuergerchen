@@ -939,6 +939,11 @@ TASK_820 praezisiert den TASK_819-Nachcheck: Ein bewusst gestarteter Release-Pro
 
 Erwartete Struktur: `tmp/release_runtime_checked_launcher.json` ergaenzt `launch_acceptance_task_id = TASK_820`, `expected_launched_process_running`, `unexpected_running_processes` und `action_warnings`. Ein Lauf mit `-StopRunningReleaseProcess -CleanTempFiles -Launch` darf `gate = pass` melden, wenn keine Action-Failures, keine Action-Warnings und ein erwarteter gestarteter Prozess vorhanden sind.
 
+## Release-First-Homebase-CTA-Emphasis (TASK_821)
+TASK_821 macht den ersten Singleplayer-Homebase-Griff sichtbarer, ohne neue Startlogik einzufuehren. Der Pre-Mission-Readiness-Cue bleibt read-only, bekommt aber einen dedizierten Emphasis-Style und der `Start Mission`-Button traegt denselben Next-Step-Hinweis. Das ist UI-Polish auf vorhandenen Snapshot-/Readiness-Daten, keine zweite Mission- oder Launch-Wahrheit.
+
+Erwartete Struktur: `HomebaseTestScreen.get_release_candidate_first_homebase_cta_emphasis_snapshot()` liefert `schema = sternenbuergerchen.station_reentry_release_candidate_first_homebase_cta_emphasis.v1`, `task_id = TASK_821`, `source_task_id = TASK_810`, `singleplayer_path_expected = MainMenu -> Einzelspieler -> Homebase`, `source_status`, `release_candidate_action_cue_text`, `release_candidate_action_cue_style_id = task_821_release_first_homebase_cta_v1`, `release_candidate_action_cue_priority = primary`, `release_candidate_action_cue_font_size`, `release_candidate_action_cue_min_height`, `start_button_release_candidate_action_cue_text`, `start_button_release_candidate_primary_cta`, `checks`, `failed_count`, `status`, `recommended_next_task`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false` und `sets_multiplayer_truth = false`.
+
 ## Singleplayer-Release-Homebase-Partial-Save-Actionability (BUGFIX)
 Der Singleplayer-Release-Bootstrap muss auch teilgueltige lokale Saves reparieren duerfen, wenn diese den Spieler in der Homebase sichtbar blockieren: Roster/Fireteam teilweise vorhanden, aber Pilot, Dropship oder Homebase-direct-Payload fehlen. Die Reparatur gehoert in die Meta-Flow-Schicht, darf vorhandene User-Operatoren nicht ueberschreiben und darf keine UI-Wahrheit erzeugen.
 
