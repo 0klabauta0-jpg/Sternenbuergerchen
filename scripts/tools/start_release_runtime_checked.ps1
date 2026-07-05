@@ -87,6 +87,60 @@ function Remove-ReleaseTempFiles {
 	return @($removed)
 }
 
+function Get-UnexpectedRunningProcesses {
+	param(
+		[array]$Processes,
+		[object]$ExpectedProcess
+	)
+	$unexpected = @()
+	$expectedProcessId = 0
+	if ($ExpectedProcess -ne $null) {
+		$expectedProcessId = [int]$ExpectedProcess.process_id
+	}
+	foreach ($processInfo in $Processes) {
+		$processId = [int]$processInfo.process_id
+		if ($expectedProcessId -gt 0 -and $processId -eq $expectedProcessId) {
+			continue
+		}
+		$unexpected += $processInfo
+	}
+	return @($unexpected)
+}
+
+function Test-ExpectedLaunchRunning {
+	param(
+		[array]$Processes,
+		[object]$ExpectedProcess
+	)
+	if ($ExpectedProcess -eq $null) {
+		return $false
+	}
+	$expectedProcessId = [int]$ExpectedProcess.process_id
+	foreach ($processInfo in $Processes) {
+		if ([int]$processInfo.process_id -eq $expectedProcessId) {
+			return $true
+		}
+	}
+	return $false
+}
+
+function Get-ActionWarnings {
+	param(
+		[array]$Warnings,
+		[bool]$ExpectedLaunchRunning,
+		[array]$UnexpectedRunningProcesses
+	)
+	$remaining = @()
+	foreach ($warning in $Warnings) {
+		$warningText = [string]$warning
+		if ($warningText -eq "release_process_already_running" -and $ExpectedLaunchRunning -and $UnexpectedRunningProcesses.Count -eq 0) {
+			continue
+		}
+		$remaining += $warningText
+	}
+	return @($remaining)
+}
+
 $repoRoot = Resolve-RepoRoot
 $checkScript = Join-Path $repoRoot "scripts\tools\release_runtime_start_check.ps1"
 if (-not (Test-Path -LiteralPath $checkScript -PathType Leaf)) {
@@ -135,14 +189,24 @@ foreach ($entry in $removedTempFiles) {
 	}
 }
 
+$postcheckRunningProcesses = @($postcheck.running_processes)
+$unexpectedRunningProcesses = Get-UnexpectedRunningProcesses -Processes $postcheckRunningProcesses -ExpectedProcess $launchedProcess
+$expectedLaunchRunning = Test-ExpectedLaunchRunning -Processes $postcheckRunningProcesses -ExpectedProcess $launchedProcess
+$actionWarnings = Get-ActionWarnings -Warnings @($postcheck.warnings) -ExpectedLaunchRunning $expectedLaunchRunning -UnexpectedRunningProcesses $unexpectedRunningProcesses
+
 $gate = [string]$postcheck.gate
-if ($hardActionFailures.Count -gt 0) {
+if ($hardActionFailures.Count -gt 0 -or [string]$postcheck.gate -eq "fail") {
 	$gate = "fail"
+} elseif ($Launch -and $expectedLaunchRunning -and $actionWarnings.Count -eq 0) {
+	$gate = "pass"
+} elseif ($actionWarnings.Count -gt 0) {
+	$gate = "review"
 }
 
 $manifest = [ordered]@{
 	schema = "sternenbuergerchen.release_runtime_checked_launcher.v1"
 	task_id = "TASK_819"
+	launch_acceptance_task_id = "TASK_820"
 	gate = $gate
 	repo_root = $repoRoot
 	requested_actions = [ordered]@{
@@ -157,8 +221,11 @@ $manifest = [ordered]@{
 	stopped_processes = @($stoppedProcesses)
 	removed_temp_files = @($removedTempFiles)
 	launched_process = $launchedProcess
+	expected_launched_process_running = $expectedLaunchRunning
+	unexpected_running_processes = @($unexpectedRunningProcesses)
 	action_failures = @($hardActionFailures)
 	postcheck_warnings = @($postcheck.warnings)
+	action_warnings = @($actionWarnings)
 	read_only_default = $true
 	mutates_processes_only_with_switch = $true
 	updates_shortcuts = $false
@@ -183,8 +250,12 @@ if ($removedTempFiles.Count -gt 0) {
 }
 if ($launchedProcess -ne $null) {
 	Write-Host "Launched process id: $($launchedProcess.process_id)"
+	Write-Host "Expected launch running: $expectedLaunchRunning"
 } elseif (-not $Launch) {
 	Write-Host "Launch skipped. Add -Launch to start the checked EXE."
+}
+if ($actionWarnings.Count -gt 0) {
+	Write-Host "Action warnings: $($actionWarnings -join ', ')"
 }
 
 if ($gate -eq "fail") {

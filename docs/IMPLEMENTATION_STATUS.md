@@ -39,6 +39,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/start_release_runtime_checked.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/release_runtime_start_check.ps1`, `git diff --check`.
 - Naechster Schritt: Bei geschlossenem/gewollt beendbarem Release-Fenster `scripts/tools/start_release_runtime_checked.ps1 -StopRunningReleaseProcess -CleanTempFiles -Launch` ausfuehren und den Homebase-zu-Mission-Pfad sichtbar pruefen.
 
+### TASK_820 - Release Runtime Launch Acceptance Gate
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_820_release_runtime_launch_acceptance_gate.md`, `docs/tasks/TASK_819_release_runtime_checked_launcher.md`, `docs/dev/export_runtime_package_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der checked Launcher unterscheidet im Nachcheck den erwarteten neu gestarteten Release-Prozess von unerwarteten Altprozessen.
+- Stand: `release_process_already_running` wird nach `-Launch` nur dann nicht als Action-Warnung gewertet, wenn ausschliesslich der gestartete Prozess aus dem geprueften Release-Pfad laeuft.
+- Stand: Das Manifest meldet `launch_acceptance_task_id`, `expected_launched_process_running`, `unexpected_running_processes` und `action_warnings`.
+- Risiken/offen: Der erfolgreiche Launch beweist noch keinen visuellen Singleplayer-Sichttest.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/start_release_runtime_checked.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/start_release_runtime_checked.ps1 -StopRunningReleaseProcess -CleanTempFiles -Launch`, `powershell -ExecutionPolicy Bypass -File scripts/tools/release_runtime_start_check.ps1`, `git diff --check`.
+- Naechster Schritt: Im gestarteten Release-Fenster `Einzelspieler -> Start Mission -> LZ/Drop/Preview/GO` sichtbar durchgehen und Befunde als HUD-/Flow-Polish schneiden.
+
 ### TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`

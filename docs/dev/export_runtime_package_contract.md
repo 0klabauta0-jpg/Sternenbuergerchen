@@ -46,6 +46,8 @@ Fehlende Pflichtdateien sind ein hartes Fail-Gate. Laufende Prozesse oder `~RF*.
 
 Der Helfer schreibt `tmp/release_runtime_checked_launcher.json` und ersetzt keinen menschlichen Sichttest.
 
+Wenn `-Launch` gesetzt ist, darf der Nachcheck den dadurch gestarteten Prozess als erwarteten Lauf behandeln. Weitere laufende Release-Prozesse bleiben Warnungen, damit ein Altfenster nicht als erfolgreicher Neustart durchrutscht.
+
 ## Regeln
 - Keine privaten Codesigning- oder User-Pfade in getrackte Dateien schreiben.
 - Exclude-Pattern nur ueber `data/export_runtime_package_contract.json` erweitern.
@@ -54,3 +56,4 @@ Der Helfer schreibt `tmp/release_runtime_checked_launcher.json` und ersetzt kein
 - Eine Godot-Scanwarnung fuer ein zweites `project.godot` in einem ausgeschlossenen Referenzprojekt ist kein Export-Abbruch; der Script-Exit haengt am nativen Godot-Exitcode.
 - Der Startcheck darf keine Prozesse starten, keine laufenden EXEs beenden und keine Shortcuts veraendern.
 - Der gepruefte Launcher darf Prozesse nur mit explizitem Schalter und nur aus dem vertraglichen Release-Pfad beenden.
+- Der gepruefte Launcher darf einen gestarteten Release-Prozess nur dann als Erfolg werten, wenn seine Prozess-ID im Nachcheck wiedergefunden wird und keine weiteren unerwarteten Release-Prozesse laufen.
