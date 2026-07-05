@@ -97,6 +97,9 @@ const MISSION_PREVIEW_ENABLED: bool = false
 const MISSION_DROP_SOURCE_FOB := "fob"
 const MISSION_DROP_SOURCE_HOMEBASE_DIRECT := "homebase_direct"
 const MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB := "homebase_direct_then_fob"
+const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID := "ft1"
+const SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE := "dropship"
+const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE := 3
 const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"has_lz_position": false,
 	"lz_position": Vector2.ZERO,
@@ -151,6 +154,7 @@ func _ready() -> void:
 		return
 
 	_load_persistent_player_roster()
+	_ensure_singleplayer_release_start_bootstrap()
 	META_UI_SKIN_SCRIPT.apply_meta_navigation(self)
 	_connect_navigation_buttons()
 	_ensure_homebase_aircraft_locations()
@@ -197,8 +201,10 @@ func _ready() -> void:
 	if transport_timer != null and not transport_timer.timeout.is_connected(_on_homebase_transport_timer_timeout):
 		transport_timer.timeout.connect(_on_homebase_transport_timer_timeout)
 
-	_selected_fireteam_ids = _build_unassigned_fireteam_selection(_selected_unit_ids)
+	if _selected_fireteam_ids.size() != _selected_unit_ids.size():
+		_selected_fireteam_ids = _build_unassigned_fireteam_selection(_selected_unit_ids)
 	_refresh_homebase_screen()
+	_seed_singleplayer_bootstrap_homebase_payload()
 	_refresh_fob_screen()
 	fob_screen.set_last_mission_result(_last_mission_result)
 	_refresh_map_screen()
@@ -1867,6 +1873,142 @@ func _load_persistent_player_roster() -> void:
 	set_meta("player_roster_source", "user_save")
 	set_meta("player_roster_profile_id", String(load_result.get("profile_id", PLAYER_ROSTER_STORE_SCRIPT.DEFAULT_PROFILE_ID)))
 	set_meta("player_roster_store_path", String(load_result.get("path", "")))
+
+
+func _ensure_singleplayer_release_start_bootstrap() -> void:
+	if _all_team_units.is_empty() or _available_team_units.is_empty():
+		var fallback_roster: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
+		_all_team_units = fallback_roster.duplicate(true)
+		_available_team_units = fallback_roster.duplicate(true)
+		set_meta("singleplayer_bootstrap_roster_source", "unit_roster_presets")
+
+	if _homebase_staged_unit_ids.is_empty() and _selected_unit_ids.is_empty():
+		_homebase_staged_unit_ids = _pick_singleplayer_bootstrap_fireteam_unit_ids()
+		_homebase_staged_fireteam_ids = _build_singleplayer_bootstrap_fireteam_ids(_homebase_staged_unit_ids)
+		_selected_unit_ids = _homebase_staged_unit_ids.duplicate()
+		_selected_fireteam_ids = _homebase_staged_fireteam_ids.duplicate()
+
+	var bootstrap_craft_id: String = _ensure_singleplayer_bootstrap_dropship()
+	if bootstrap_craft_id.is_empty():
+		return
+	if String(_assigned_aircraft_pilot_by_craft.get(bootstrap_craft_id, "")).strip_edges().is_empty():
+		var pilot_unit_id: String = _pick_singleplayer_bootstrap_pilot_unit_id(_homebase_staged_unit_ids)
+		if not pilot_unit_id.is_empty():
+			_assigned_aircraft_pilot_by_craft[bootstrap_craft_id] = pilot_unit_id
+	_aircraft_location_by_craft[bootstrap_craft_id] = "homebase"
+	set_meta("singleplayer_bootstrap_craft_id", bootstrap_craft_id)
+	set_meta("singleplayer_bootstrap_fireteam_id", SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID)
+	set_meta("singleplayer_bootstrap_enabled", true)
+
+
+func _seed_singleplayer_bootstrap_homebase_payload() -> void:
+	var homebase_screen = _get_homebase_screen()
+	if homebase_screen == null or not homebase_screen.has_method("seed_homebase_direct_launch_payload"):
+		return
+	var bootstrap_craft_id: String = String(get_meta("singleplayer_bootstrap_craft_id", "")).strip_edges()
+	if bootstrap_craft_id.is_empty():
+		return
+	homebase_screen.call(
+		"seed_homebase_direct_launch_payload",
+		bootstrap_craft_id,
+		PackedStringArray([SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID]),
+		true
+	)
+	set_meta("singleplayer_bootstrap_payload_seeded", true)
+
+
+func get_singleplayer_start_bootstrap_snapshot() -> Dictionary:
+	var craft_id: String = String(get_meta("singleplayer_bootstrap_craft_id", "")).strip_edges()
+	return {
+		"enabled": bool(get_meta("singleplayer_bootstrap_enabled", false)),
+		"payload_seeded": bool(get_meta("singleplayer_bootstrap_payload_seeded", false)),
+		"selected_unit_ids": Array(_selected_unit_ids),
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"homebase_staged_unit_ids": Array(_homebase_staged_unit_ids),
+		"homebase_staged_fireteam_ids": Array(_homebase_staged_fireteam_ids),
+		"craft_id": craft_id,
+		"craft_count": _homebase_aircraft_definitions.size(),
+		"pilot_unit_id": String(_assigned_aircraft_pilot_by_craft.get(craft_id, "")).strip_edges(),
+		"craft_location": String(_aircraft_location_by_craft.get(craft_id, "")).strip_edges(),
+	}
+
+
+func _pick_singleplayer_bootstrap_fireteam_unit_ids() -> PackedStringArray:
+	var picked: PackedStringArray = PackedStringArray()
+	for unit_variant in _available_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant)
+		if _is_singleplayer_pilot_candidate(unit):
+			continue
+		var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or picked.has(unit_id):
+			continue
+		picked.append(unit_id)
+		if picked.size() >= SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE:
+			return picked
+	for unit_variant in _available_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_id: String = String(Dictionary(unit_variant).get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or picked.has(unit_id):
+			continue
+		picked.append(unit_id)
+		if picked.size() >= SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE:
+			return picked
+	return picked
+
+
+func _build_singleplayer_bootstrap_fireteam_ids(unit_ids: PackedStringArray) -> PackedStringArray:
+	var fireteam_ids: PackedStringArray = PackedStringArray()
+	for _unit_id in unit_ids:
+		fireteam_ids.append(SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID)
+	return fireteam_ids
+
+
+func _ensure_singleplayer_bootstrap_dropship() -> String:
+	for craft_variant in _homebase_aircraft_definitions:
+		if typeof(craft_variant) != TYPE_DICTIONARY:
+			continue
+		var craft_def: Dictionary = Dictionary(craft_variant)
+		var craft_id: String = String(craft_def.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty():
+			continue
+		if String(craft_def.get("craft_type", "")).strip_edges() == SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE:
+			return craft_id
+	var aircraft_definition := _build_homebase_aircraft_definition(SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE, _get_next_homebase_aircraft_index(SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE))
+	_homebase_aircraft_definitions.append(aircraft_definition)
+	return String(aircraft_definition.get("craft_id", "")).strip_edges()
+
+
+func _pick_singleplayer_bootstrap_pilot_unit_id(excluded_unit_ids: PackedStringArray) -> String:
+	for unit_variant in _available_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit: Dictionary = Dictionary(unit_variant)
+		var unit_id: String = String(unit.get("unit_id", "")).strip_edges()
+		if unit_id.is_empty() or excluded_unit_ids.has(unit_id):
+			continue
+		if _is_singleplayer_pilot_candidate(unit):
+			return unit_id
+	for unit_variant in _available_team_units:
+		if typeof(unit_variant) != TYPE_DICTIONARY:
+			continue
+		var unit_id: String = String(Dictionary(unit_variant).get("unit_id", "")).strip_edges()
+		if not unit_id.is_empty() and not excluded_unit_ids.has(unit_id):
+			return unit_id
+	return ""
+
+
+func _is_singleplayer_pilot_candidate(unit: Dictionary) -> bool:
+	var role_category: String = String(unit.get("roster_role_category", "")).strip_edges().to_lower()
+	var role_name: String = String(unit.get("role_name", "")).strip_edges().to_lower()
+	if role_category.contains("pilot") or role_name.contains("pilot"):
+		return true
+	for key in ["dropship_piloting", "freighter_piloting", "fighter_piloting"]:
+		if float(unit.get(key, 0.0)) > 0.0:
+			return true
+	return false
 
 
 func _refresh_fob_screen() -> void:

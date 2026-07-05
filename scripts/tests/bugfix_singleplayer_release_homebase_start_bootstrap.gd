@@ -1,0 +1,75 @@
+extends SceneTree
+
+const META_LAYER_TEST_SCENE: PackedScene = preload("res://scenes/meta/meta_layer_test.tscn")
+const TASK_PATH := "res://docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md"
+
+var _passed: int = 0
+var _failed: int = 0
+
+
+func _init() -> void:
+	call_deferred("_run_tests")
+
+
+func _run_tests() -> void:
+	print("=== BUGFIX Singleplayer Release Homebase Start Bootstrap ===")
+	_test_task_doc_exists()
+	await _test_singleplayer_homebase_starts_with_playable_payload()
+	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
+	if _failed > 0:
+		print("BUGFIX_singleplayer_release_homebase_start_bootstrap: FAILED")
+		quit(1)
+		return
+	print("BUGFIX_singleplayer_release_homebase_start_bootstrap: ALL PASSED")
+	quit(0)
+
+
+func _test_task_doc_exists() -> void:
+	_assert(FileAccess.file_exists(TASK_PATH), "Bugfix task file exists")
+
+
+func _test_singleplayer_homebase_starts_with_playable_payload() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	await _wait_frames(8)
+
+	var homebase_screen := scene.get_node_or_null("HomebaseScreen") as Control
+	_assert(homebase_screen != null, "Meta layer exposes HomebaseScreen")
+	_assert(scene.has_method("get_singleplayer_start_bootstrap_snapshot"), "Meta layer exposes bootstrap snapshot")
+
+	var bootstrap: Dictionary = Dictionary(scene.call("get_singleplayer_start_bootstrap_snapshot"))
+	var craft_id: String = String(bootstrap.get("craft_id", "")).strip_edges()
+	_assert(bool(bootstrap.get("enabled", false)), "Singleplayer bootstrap is enabled")
+	_assert(bool(bootstrap.get("payload_seeded", false)), "Singleplayer bootstrap seeds Homebase payload")
+	_assert(Array(bootstrap.get("selected_unit_ids", [])).size() >= 2, "Bootstrap selects a playable fireteam")
+	_assert(Array(bootstrap.get("selected_fireteam_ids", [])).size() == Array(bootstrap.get("selected_unit_ids", [])).size(), "Bootstrap preserves one Fireteam id per selected operator")
+	_assert(not craft_id.is_empty(), "Bootstrap creates or reuses a Dropship")
+	_assert(not String(bootstrap.get("pilot_unit_id", "")).strip_edges().is_empty(), "Bootstrap assigns a pilot")
+	_assert(String(bootstrap.get("craft_location", "")).strip_edges() == "homebase", "Bootstrap craft starts at Homebase")
+
+	var readiness: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+	_assert(String(readiness.get("overall_state", "")) == "ready", "Homebase readiness is ready on first Singleplayer screen")
+	_assert(bool(homebase_screen.call("can_request_mission_start", craft_id)), "Homebase can request mission start for bootstrap Dropship")
+
+	homebase_screen.call("request_mission_start", craft_id)
+	await _wait_frames(8)
+	var handoff: Dictionary = Dictionary(scene.call("get_homebase_to_mission_handoff_snapshot"))
+	_assert(String(handoff.get("handoff_gate", "")) == "pass", "Bootstrap launch passes Homebase-to-Mission handoff")
+	_assert(int(handoff.get("failed_count", -1)) == 0, "Bootstrap launch has no critical handoff failures")
+
+	scene.queue_free()
+	await _wait_frames(2)
+
+
+func _wait_frames(count: int) -> void:
+	for _index in range(count):
+		await process_frame
+
+
+func _assert(condition: bool, message: String) -> void:
+	if condition:
+		_passed += 1
+		print("[PASS] %s" % message)
+	else:
+		_failed += 1
+		push_error("[FAIL] %s" % message)

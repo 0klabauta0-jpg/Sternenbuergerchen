@@ -10,6 +10,24 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### BUGFIX - Singleplayer Release Homebase Start Bootstrap
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/ARCHITECTURE.md`
+- Stand: Der lokale Singleplayer-Start seedet bei leerem/unvollstaendigem Startzustand Default-Roster, ALPHA-Fireteam, Dropship, Pilot und fertiges Homebase-direct Boarding, damit der Release nicht in `STOP Team/Dropship/Pilot/Boarding/Start` haengen bleibt.
+- Stand: Die Meta-Flow-Schicht erzeugt den spielbaren Startzustand; `HomebaseScreen` erhaelt nur einen expliziten Seed-Pfad fuer die vorhandene Direct-Launch-Payload.
+- Risiken/offen: Das ist ein Playability-Hotfix fuer den Release-Erststart. Kampagnen-Briefing, bewusstes Team-Picking und ein schoener Onboarding-Flow bleiben Folgearbeit.
+- Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
+- Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
+
+### TASK_794 - Station Reentry Firefight Multiplayer Decision Playtest Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_794_station_reentry_firefight_multiplayer_decision_playtest_packet.md`, `docs/tasks/TASK_793_station_reentry_firefight_multiplayer_decision_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `prepare_station_reentry_firefight_multiplayer_decision_playtest_packet.ps1` schreibt ein read-only Playtest-Paket fuer den akzeptierten TASK_793-Multiplayer-Decision-Slice.
+- Stand: Das Manifest traegt Szenario, Workbench, TASK_793-Acceptance, Decision-Line, Primary, Quick-Actions, Reason, Guard, Confirm, No-Auto-Command, Existing-Buttons, Host-/Client-Rollen, manuelle Spieltestchecks und Start-/Capture-Kommandos weiter.
+- Risiken/offen: Kein automatischer Sichtentscheid und keine Playtest-Auswertung; der echte Zwei-Fenster-Lauf und seine Findings bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_794_station_reentry_firefight_multiplayer_decision_playtest_packet.gd`, TASK_793/TASK_792/TASK_791 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_795 - Station Reentry Firefight Multiplayer Decision Playtest Findings.
+
 ### TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_793_station_reentry_firefight_multiplayer_decision_acceptance.md`, `docs/tasks/TASK_792_station_reentry_firefight_decision_host_client_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -17,7 +35,7 @@
 - Stand: Der Snapshot prueft valide/read-only Quelle, sichtbaren Zwei-Fenster-Review, vollstaendige Pflichtchecks, keine aktiven Issues, synchronen Decision-Kern, unterscheidbare Host-/Client-Rollen, No-Auto-Command-Grenze und Host/Client-Kontext.
 - Risiken/offen: Kein automatischer Sichtentscheid, kein echter langer Multiplayer-Playtest und kein Netzwerk-Authority-Lasttest; Folgearbeit ist ein Playtest-Paket fuer den akzeptierten Decision-Slice.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_793_station_reentry_firefight_multiplayer_decision_acceptance.gd`, TASK_792/TASK_791/TASK_790 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_794 - Station Reentry Firefight Multiplayer Decision Playtest Packet.
+- Naechster Schritt: TASK_794 - Station Reentry Firefight Multiplayer Decision Playtest Packet (implementiert).
 
 ### TASK_792 - Station Reentry Firefight Decision Host Client Findings
 - Status: implementiert im Arbeitsstand
