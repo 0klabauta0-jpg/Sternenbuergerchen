@@ -52,7 +52,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(status_text.contains("TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review"), "Implementation status tracks TASK_815")
 	_assert(roadmap_text.contains("TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review (implementiert)"), "Roadmap marks TASK_815 implemented")
 	_assert(contract_text.contains("Station-Reentry-Release-Candidate-Real-Window-Firefight-Sight-Review"), "Mission command feedback contract documents TASK_815")
-	_assert(report_text.contains("Aktueller Griff: TASK_815"), "Reentry handbook marks TASK_815 current")
+	_assert(report_text.contains("TASK_815 Fensterblick bewusst abgeschlossen"), "Reentry handbook keeps TASK_815 review controls")
 	_assert(report_text.contains('data-export-key="reentry_release_candidate_real_window_firefight_sight_review.manual_review_done"'), "Reentry handbook exports TASK_815 review status")
 	_assert(meta_text.contains("get_release_candidate_real_window_firefight_sight_review_snapshot"), "MetaLayer exposes TASK_815 snapshot")
 	_assert(helper_text.contains("ui_sets_gameplay_truth\": false"), "TASK_815 helper explicitly remains read-only")

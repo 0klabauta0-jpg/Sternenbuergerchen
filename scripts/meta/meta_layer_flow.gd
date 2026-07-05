@@ -10,6 +10,7 @@ const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/ai
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const REAL_WINDOW_FIREFIGHT_SIGHT_REVIEW_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_release_candidate_real_window_firefight_sight_review.gd")
+const VISIBLE_FIREFIGHT_FINDINGS_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_release_candidate_visible_firefight_findings.gd")
 const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitCharlie", "UnitDelta", "UnitEcho", "UnitFoxtrot", "UnitGolf", "UnitHotel"]
 const DEFAULT_META_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
 const DEFAULT_META_SCENARIO_PATH: String = "res://data/mission_scenarios/ground_mission01_default.json"
@@ -871,6 +872,11 @@ func get_release_candidate_firefight_feel_hud_polish_review_snapshot() -> Dictio
 func get_release_candidate_real_window_firefight_sight_review_snapshot(review_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
 	var source: Dictionary = get_release_candidate_firefight_feel_hud_polish_review_snapshot()
 	return REAL_WINDOW_FIREFIGHT_SIGHT_REVIEW_SCRIPT.build_snapshot(source, review_notes, options)
+
+
+func get_release_candidate_visible_firefight_findings_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_candidate_real_window_firefight_sight_review_snapshot(real_window_review_notes, options)
+	return VISIBLE_FIREFIGHT_FINDINGS_SCRIPT.build_snapshot(source, findings_notes, options)
 
 
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:

@@ -39,6 +39,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_815_station_reentry_release_candidate_real_window_firefight_sight_review.gd`, TASK_814 Regression, `git diff --check`.
 - Naechster Schritt: TASK_816 - Station Reentry Release Candidate Visible Firefight Findings.
 
+### TASK_816 - Station Reentry Release Candidate Visible Firefight Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_816_station_reentry_release_candidate_visible_firefight_findings.md`, `docs/tasks/TASK_815_station_reentry_release_candidate_real_window_firefight_sight_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryReleaseCandidateVisibleFirefightFindings` uebersetzt TASK_815-Fensterbefunde und optionale Findings-Notizen read-only in Findings und Action Items.
+- Stand: `MetaLayerFlow.get_release_candidate_visible_firefight_findings_snapshot(...)` baut auf dem TASK_815-Snapshot auf und routet offene Fensterlaeufe, unvollstaendige Triage, gezielten Polish oder Acceptance.
+- Stand: Shortcut-/Export-, Homebase-/Start-, LZ/Drop/GO-, Firefight-HUD-, Next-Action-, Panel-, Performance-, Host/Client- und Visual-Polish-Befunde bekommen konkrete Folgeziele.
+- Risiken/offen: TASK_816 behebt die Befunde noch nicht; er macht nur die naechste Politur priorisierbar.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_816_station_reentry_release_candidate_visible_firefight_findings.gd`, TASK_815 Regression, `git diff --check`.
+- Naechster Schritt: TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish oder Playable Build Acceptance je nach Findings.
+
 ### BUGFIX - Player Roster Corrupt Save Quiet Recovery
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_player_roster_corrupt_save_quiet_recovery.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`
