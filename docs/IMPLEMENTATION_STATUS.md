@@ -29,6 +29,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_814_station_reentry_release_candidate_firefight_feel_hud_polish_review.gd`, TASK_813 Regression, `git diff --check`.
 - Naechster Schritt: TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review.
 
+### TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_815_station_reentry_release_candidate_real_window_firefight_sight_review.md`, `docs/tasks/TASK_814_station_reentry_release_candidate_firefight_feel_hud_polish_review.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryReleaseCandidateRealWindowFirefightSightReview` wertet TASK_814, Release-EXE/PCK, Taskleisten-Ziel und echte Fenster-Review-Notizen read-only aus.
+- Stand: `MetaLayerFlow.get_release_candidate_real_window_firefight_sight_review_snapshot()` macht den Review-Gate fuer Workbench und Verifier abrufbar.
+- Stand: Der Snapshot unterscheidet frischen Export, Shortcut-Fehler, fehlenden Fensterblick, unvollstaendige Pflichtchecks und aktive sichtbare Firefight-Findings.
+- Risiken/offen: Der Task ersetzt keinen menschlichen Sichttest; er verhindert, dass Shortcut-/Release-/Fenster-Findings wieder nur im Chat stehen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_815_station_reentry_release_candidate_real_window_firefight_sight_review.gd`, TASK_814 Regression, `git diff --check`.
+- Naechster Schritt: TASK_816 - Station Reentry Release Candidate Visible Firefight Findings.
+
 ### BUGFIX - Player Roster Corrupt Save Quiet Recovery
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_player_roster_corrupt_save_quiet_recovery.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_814</span>
-      <span class="pill warn">Aktueller Griff: TASK_814</span>
+      <span class="pill good">Letzter Abschluss: TASK_815</span>
+      <span class="pill warn">Aktueller Griff: TASK_815</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
       <span class="pill">Report ist read-only</span>
@@ -188,11 +188,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_814 macht den ersten Feuerwechsel als HUD-Griff lesbar: Combat-Readout in Mission Control und Fireteam-Panel, Tooltip-Details, FullHD-Bounds und naechste Spieleraktion.</p>
-          <p>Quelle bleiben TASK_813-First-GO/Firefight, Combat-HUD-Dichte, Tooltip-Audit und F6-Bounds. Der Snapshot selbst bleibt read-only.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_815 sollte den echten Firefight-Fensterblick mit Screenshot/Notizen pruefen.</div>
-          <input readonly value="TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_815 macht den echten Release-Fensterblick nachvollziehbar: frische EXE/PCK, Taskleisten-Ziel, Einzelspieler, Homebase, Start Mission, LZ/Drop/Preview/GO und erster Firefight-HUD-Blick.</p>
+          <p>Quelle bleiben TASK_814-Firefight-HUD-Polish und manuelle Fenster-Notizen. Der Snapshot selbst bleibt read-only.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_816 sollte sichtbare Firefight-Findings aus dem echten Fensterlauf in konkrete Arbeit uebersetzen.</div>
+          <input readonly value="TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_816 - Station Reentry Release Candidate Visible Firefight Findings" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="BUGFIX - Player Roster Corrupt Save Quiet Recovery" data-export-key="reentry_handbook.latest_hotfix">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
@@ -437,6 +437,12 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_firefight_feel_hud_polish.tooltip_detail_available"> Tooltip erklaert Feuer/Cover/LOS/Range</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_firefight_feel_hud_polish.next_action_visible"> Naechster Spielergriff sichtbar</label>
           <input readonly value="TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review" data-export-key="reentry_release_candidate_firefight_feel_hud_polish.recommended_next_task">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_real_window_firefight_sight_review.manual_review_done"> TASK_815 Fensterblick bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_real_window_firefight_sight_review.taskbar_shortcut_target_verified"> Taskleisten-Ziel zeigt auf aktuelle Release-EXE</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_real_window_firefight_sight_review.singleplayer_homebase_actionable"> Einzelspieler/Homebase bedienbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_real_window_firefight_sight_review.lz_drop_preview_go_reached"> LZ, Drop, Preview und GO erreicht</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_real_window_firefight_sight_review.first_firefight_hud_readable"> Erster Firefight-HUD-Blick lesbar</label>
+          <input readonly value="TASK_816 - Station Reentry Release Candidate Visible Firefight Findings" data-export-key="reentry_release_candidate_real_window_firefight_sight_review.recommended_next_task">
           <textarea data-export-key="reentry_release_candidate_playability_polish.cta_visual_note" placeholder="CTA-Fensterblick / TASK_810-Notiz"></textarea>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
@@ -808,10 +814,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_815 - Station Reentry Release Candidate Real Window Firefight Sight Review"
+            recommended_next_task: "TASK_816 - Station Reentry Release Candidate Visible Firefight Findings"
           },
           metadata: {
-            generated_for_task: "TASK_814",
+            generated_for_task: "TASK_815",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
