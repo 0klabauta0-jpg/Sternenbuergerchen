@@ -929,6 +929,11 @@ Der Singleplayer-Release-Bootstrap muss auch teilgueltige lokale Saves repariere
 
 Erwartete Struktur: `MetaLayerFlow.get_singleplayer_start_bootstrap_snapshot()` liefert weiterhin `enabled`, `payload_seeded`, `selected_unit_ids`, `selected_fireteam_ids`, `homebase_staged_unit_ids`, `homebase_staged_fireteam_ids`, `craft_id`, `craft_count`, `pilot_unit_id` und `craft_location` und ergaenzt `roster_source`, `roster_repaired`, `selection_repaired`, `pilot_repaired`, `available_unit_count`, `all_unit_count` und `has_pilot_candidate`. Ein halbvoller Release-Start muss nach Bootstrap ein sichtbares Dropship, einen Piloten, mindestens einen Payload-Fireteam, geboardete Operatoren und `Start Mission` als aktiven Button liefern.
 
+## Singleplayer-Release-EXE-Actionability-And-Firefight-Decision-Guard (BUGFIX)
+Der sichtbare Release-EXE-Start darf nicht blockiert bleiben, wenn ein Fireteam sichtbar ist, aber das MetaLayer-Seed-Handoff eine stale Fireteam-ID an das Flightdeck uebergibt. `HomebaseTestScreen.seed_homebase_direct_launch_payload()` darf in diesem engen Reparaturfall auf das erste sichtbare Fireteam mit Mitgliedern zurueckfallen und meldet dies im Staging-Snapshot ueber `payload_fallback_seeded = true`. Dieser Fallback ist nur ein Handoff-Repair fuer den expliziten Seed-Aufruf; er ersetzt keine Save-Migration und erzeugt keine neue Missionswahrheit.
+
+Der Firefight-Decision-Readout bleibt read-only. `TacticalInputController._build_release_candidate_firefight_decision_line_snapshot()` muss rekursive Status-/CommandFeedback-Abfragen mit einem Guard abbrechen und dann einen inaktiven, read-only Snapshot mit `guard_reason = recursive_readout_guard` liefern, statt die EXE per Stack Overflow zu blockieren.
+
 ## Frontier-Probe-Homebase-Next-Sortie-Readiness (TASK_641)
 
 TASK_641 macht nach dem Frontier-Probe-Debrief-Return sichtbar, wie der Spieler von der Rueckkehr in die naechste Sortie kommt. Die Homebase darf die vorhandene TASK_640-Summary, `PreMissionReadinessPresenter`-Daten und Homebase-Direct-Staging-Snapshots zusammen anzeigen. Sie darf daraus aber keine neue Startlogik, keine neue Navigation, keine Progression und keine MissionResult-Wahrheit ableiten.
