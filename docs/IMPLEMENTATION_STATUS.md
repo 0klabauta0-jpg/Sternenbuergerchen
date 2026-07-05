@@ -29,6 +29,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/release_runtime_start_check.ps1`, `git diff --check`.
 - Naechster Schritt: Release-Fenster aus `C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.exe` neu starten und den Singleplayer-Sichttest wiederholen.
 
+### TASK_819 - Release Runtime Checked Launcher
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_819_release_runtime_checked_launcher.md`, `docs/tasks/TASK_818_station_reentry_release_candidate_playable_build_acceptance.md`, `docs/dev/export_runtime_package_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `scripts/tools/start_release_runtime_checked.ps1` nutzt den TASK_818-Startcheck als Vor- und Nachpruefung.
+- Stand: Ohne Schalter bleibt der Helfer nicht-mutierend; mit expliziten Schaltern kann er nur Release-Prozesse aus dem vertraglichen Pfad beenden, `~RF*.TMP`-Dateien entfernen und die gepruefte EXE starten.
+- Stand: Das Manifest `tmp/release_runtime_checked_launcher.json` trennt angeforderte Aktionen, ausgefuehrte Aktionen, Vorcheck, Nachcheck und Gate.
+- Risiken/offen: Der echte Sichttest bleibt offen, bis das Release-Fenster bewusst neu gestartet und der Singleplayer-Pfad angeschaut wurde.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/start_release_runtime_checked.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/release_runtime_start_check.ps1`, `git diff --check`.
+- Naechster Schritt: Bei geschlossenem/gewollt beendbarem Release-Fenster `scripts/tools/start_release_runtime_checked.ps1 -StopRunningReleaseProcess -CleanTempFiles -Launch` ausfuehren und den Homebase-zu-Mission-Pfad sichtbar pruefen.
+
 ### TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
