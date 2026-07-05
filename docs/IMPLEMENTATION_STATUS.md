@@ -19,6 +19,15 @@
 - Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
 - Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
 
+### TASK_797 - Station Reentry Firefight Multiplayer Playable Slice Candidate
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_797_station_reentry_firefight_multiplayer_playable_slice_candidate.md`, `docs/tasks/TASK_796_station_reentry_firefight_multiplayer_decision_playtest_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightMultiplayerPlayableSliceCandidate` buendelt eine akzeptierte TASK_796-Quelle zu einem konkreten Host/Client-Playable-Slice-Kandidaten.
+- Stand: Der Snapshot enthaelt Szenario, Workbench, Launch-/Capture-/Verifier-/Runtime-Export-Kommandos und Spieler-Checkpoints fuer Homebase, Fireteam/Dropship, Mission, Preview, Decision, Firefight und Exit/Debrief.
+- Risiken/offen: Der Candidate ist noch kein sichtbarer Real-Run-Beweis; TASK_798 muss den echten Lauf und seine Findings sammeln.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_797_station_reentry_firefight_multiplayer_playable_slice_candidate.gd`, TASK_796/TASK_795/TASK_794 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings.
+
 ### TASK_796 - Station Reentry Firefight Multiplayer Decision Playtest Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_796_station_reentry_firefight_multiplayer_decision_playtest_acceptance.md`, `docs/tasks/TASK_795_station_reentry_firefight_multiplayer_decision_playtest_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -26,7 +35,7 @@
 - Stand: Der Snapshot prueft valide/read-only Quelle, sichtbaren Zwei-Fenster-Playtest, vollstaendige Pflichtchecks, keine aktiven Issues, Decision-Kern, unterscheidbare Host-/Client-Rollen, Playtest-Kontext, No-Auto-Command-Grenze und Paket-Disziplin.
 - Risiken/offen: Kein Screenshot-Parsing und kein Netzwerk-Authority-Lasttest; ein gesetzter Acceptance-Snapshot beweist nur die Findings, nicht die ganze Multiplayer-Spielbarkeit.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_796_station_reentry_firefight_multiplayer_decision_playtest_acceptance.gd`, TASK_795/TASK_794/TASK_793 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_797 - Station Reentry Firefight Multiplayer Playable Slice Candidate.
+- Naechster Schritt: TASK_797 - Station Reentry Firefight Multiplayer Playable Slice Candidate (implementiert).
 
 ### TASK_795 - Station Reentry Firefight Multiplayer Decision Playtest Findings
 - Status: implementiert im Arbeitsstand
