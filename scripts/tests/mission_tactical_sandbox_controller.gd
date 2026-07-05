@@ -5210,6 +5210,7 @@ func _build_fireteam_status_text() -> String:
 	var decision_text: String = _build_selected_decision_status_text()
 	var command_text: String = "kein aktiver Befehl" if decision_text == "-" else _format_selected_status_segment(decision_text)
 	var combat_hud_line: String = _build_selected_fireteam_combat_hud_line()
+	var firefight_decision_line: String = _build_release_candidate_firefight_decision_line()
 	var first_line: String = "%s%s | Karten %d | Wegpunkte %d | Gebiete %d | Stance %s | Ausfuehrung %s" % [
 		mode_text,
 		_get_fireteam_name(),
@@ -5227,6 +5228,8 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text,
 	]
 	if not combat_hud_line.is_empty():
+		if not firefight_decision_line.is_empty():
+			return "%s\n%s\n%s\n%s" % [first_line, second_line, combat_hud_line, firefight_decision_line]
 		return "%s\n%s\n%s" % [first_line, second_line, combat_hud_line]
 	return "%s\n%s" % [first_line, second_line]
 
@@ -6198,6 +6201,9 @@ func _build_strategic_status_text() -> String:
 		var combat_status_line: String = "Kampf %s" % combat_hud_line
 		if not lines.has(combat_status_line):
 			lines.append(combat_status_line)
+		var firefight_decision_line: String = _build_release_candidate_firefight_decision_line()
+		if not firefight_decision_line.is_empty() and not lines.has(firefight_decision_line):
+			lines.append(firefight_decision_line)
 	var debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var debrief_handoff_line: String = String(debrief_handoff.get("handoff_line", "")).strip_edges()
 	if bool(debrief_handoff.get("handoff_ready", false)) and not debrief_handoff_line.is_empty():
@@ -6946,6 +6952,73 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 		"contains_los_context": compact_line.contains("LOS"),
 		"contains_range_context": compact_line.contains("RNG"),
 	}
+
+
+func _build_release_candidate_firefight_decision_line() -> String:
+	var snapshot: Dictionary = _build_release_candidate_firefight_decision_line_snapshot()
+	return String(snapshot.get("decision_line", "")).strip_edges()
+
+
+func _build_release_candidate_firefight_decision_line_snapshot() -> Dictionary:
+	var diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
+	var engagement_snapshot: Dictionary = {
+		"contact_decision_diagnostics": diagnostics,
+		"engagement_status": String(diagnostics.get("status", "")),
+		"engagement_reason": String(diagnostics.get("reason", "")),
+	}
+	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
+	var player_action: Dictionary = _build_release_candidate_firefight_player_action_snapshot(engagement_snapshot, combat_hud_density)
+	var active: bool = bool(player_action.get("active", false)) and bool(combat_hud_density.get("active", false))
+	var next_token: String = _release_candidate_firefight_next_token(player_action)
+	var why_token: String = _release_candidate_firefight_why_token(player_action, combat_hud_density)
+	var decision_line: String = "NEXT %s | WHY %s" % [next_token, why_token] if active else ""
+	var line_limit: int = 72
+	return {
+		"active": active and not decision_line.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"decision_line": decision_line,
+		"next_token": next_token,
+		"why_token": why_token,
+		"line_length": decision_line.length(),
+		"line_char_limit": line_limit,
+		"line_within_limit": decision_line.length() <= line_limit,
+		"player_action": player_action,
+		"combat_hud_density": combat_hud_density,
+	}
+
+
+func _release_candidate_firefight_next_token(player_action: Dictionary) -> String:
+	var reason: String = String(player_action.get("reason", "")).strip_edges().to_lower()
+	var status: String = String(player_action.get("status", "")).strip_edges().to_lower()
+	if reason == "fired" or status == "fired":
+		return "HIT LESEN / DEFEND"
+	if reason == "cooldown" or status == "waiting":
+		return "HALTEN / FLANKE"
+	if reason == "no_contact_pair" or reason == "no_damage_effect" or reason == "invalid_contact_pair" or status == "blocked":
+		return "LOS/RANGE KORRIGIEREN"
+	return "HALTEN ODER NEU PLANEN"
+
+
+func _release_candidate_firefight_why_token(player_action: Dictionary, combat_hud_density: Dictionary) -> String:
+	var reason: String = String(player_action.get("reason", "")).strip_edges().to_lower()
+	if reason == "fired":
+		return "FEUER"
+	if reason == "cooldown":
+		return "COOLDOWN"
+	if reason == "no_contact_pair":
+		return "KEIN ZIEL"
+	if reason == "no_damage_effect":
+		return "KEIN HIT"
+	if reason == "invalid_contact_pair":
+		return "ZIEL BLOCK"
+	var status: String = String(combat_hud_density.get("status", "")).strip_edges().to_upper()
+	return status if not status.is_empty() else "KONTAKT"
 
 
 func _build_selected_fireteam_combat_hud_line() -> String:
@@ -15600,6 +15673,77 @@ func get_release_candidate_firefight_feel_hud_polish_snapshot() -> Dictionary:
 		"mission_control_status_text": mission_control_status_text,
 		"selected_fireteam_status_text": selected_fireteam_status_text,
 		"tooltip_text": tooltip_text,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_release_candidate_targeted_firefight_polish_snapshot() -> Dictionary:
+	var source_snapshot: Dictionary = get_release_candidate_firefight_feel_hud_polish_snapshot()
+	var decision_snapshot: Dictionary = _build_release_candidate_firefight_decision_line_snapshot()
+	var decision_line: String = String(decision_snapshot.get("decision_line", "")).strip_edges()
+	var mission_control_status_text: String = _build_strategic_status_text()
+	var selected_fireteam_status_text: String = _build_fireteam_status_text()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_firefight_hud_polish_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"Targeted polish builds on a green TASK_814 Firefight HUD polish snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"decision_line_active",
+			bool(decision_snapshot.get("active", false)) and not decision_line.is_empty(),
+			"Firefight decision line is active when combat HUD data is active."
+		),
+		_build_mission_first_move_readability_check(
+			"decision_line_compact",
+			bool(decision_snapshot.get("line_within_limit", false)) and decision_line.begins_with("NEXT "),
+			"Firefight decision line stays compact and starts with NEXT."
+		),
+		_build_mission_first_move_readability_check(
+			"decision_line_visible_in_mission_control",
+			not decision_line.is_empty() and mission_control_status_text.contains(decision_line),
+			"Mission Control exposes the same NEXT/WHY firefight decision line."
+		),
+		_build_mission_first_move_readability_check(
+			"decision_line_visible_in_selected_fireteam",
+			not decision_line.is_empty() and selected_fireteam_status_text.contains(decision_line),
+			"Selected Fireteam exposes the same NEXT/WHY firefight decision line."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(source_snapshot.get("read_only", false))
+				and bool(decision_snapshot.get("read_only", false))
+				and not bool(decision_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(decision_snapshot.get("creates_command", true))
+				and not bool(decision_snapshot.get("creates_fire_event", true))
+				and not bool(decision_snapshot.get("creates_damage_event", true))
+				and not bool(decision_snapshot.get("sets_multiplayer_truth", true)),
+			"Targeted firefight polish reads existing combat/HUD state only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_817",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"source_task_id": "TASK_814",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"source": source_snapshot,
+		"decision": decision_snapshot,
+		"decision_line": decision_line,
+		"mission_control_status_text": mission_control_status_text,
+		"selected_fireteam_status_text": selected_fireteam_status_text,
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
