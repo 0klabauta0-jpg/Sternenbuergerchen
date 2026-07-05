@@ -136,7 +136,8 @@ git checkout -b batch/<batch-name>
 - TASK_807 - Station Reentry Firefight Release Candidate Tester Run (implementiert)
 - TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance (implementiert)
 - TASK_809 - Station Reentry Release Candidate Playability Polish Backlog (implementiert)
-- Naechster Schritt: TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke.
+- TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke (implementiert)
+- Naechster Schritt: TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

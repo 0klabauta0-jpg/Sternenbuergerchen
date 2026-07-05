@@ -1217,6 +1217,8 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 	var roster_rect: Rect2 = _control_global_rect(roster_panel)
 	var fireteam_rect: Rect2 = _control_global_rect(fireteam_panel)
 	var flightdeck_rect: Rect2 = _control_global_rect(flightdeck_panel)
+	var action_cue_rect: Rect2 = _control_global_rect(action_cue_panel)
+	var action_cue_label_rect: Rect2 = _control_global_rect(action_cue_label)
 	var child_bottom: float = _visible_child_max_bottom(mission_panel)
 	return {
 		"ui_sets_gameplay_truth": false,
@@ -1230,6 +1232,8 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 		"roster_rect": roster_rect,
 		"fireteam_rect": fireteam_rect,
 		"flightdeck_rect": flightdeck_rect,
+		"release_candidate_action_cue_rect": action_cue_rect,
+		"release_candidate_action_cue_label_rect": action_cue_label_rect,
 		"briefing_min_height": briefing_panel.custom_minimum_size.y if briefing_panel != null else 0.0,
 		"readiness_min_height": readiness_panel.custom_minimum_size.y if readiness_panel != null else 0.0,
 		"mission_child_max_bottom": child_bottom,
@@ -1278,6 +1282,147 @@ func get_release_candidate_playability_polish_snapshot() -> Dictionary:
 		"release_candidate_action_cue_ready": readiness_state == "ready" and cue_text == expected_ready_text,
 		"rendered_readiness_item_text": String(readiness.get("rendered_item_text", "")).strip_edges(),
 		"recommended_next_task": "TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke",
+	}
+
+
+func get_release_candidate_first_mission_cta_visual_smoke_snapshot() -> Dictionary:
+	var startflow: Dictionary = get_pre_mission_startflow_visual_snapshot()
+	var readiness: Dictionary = get_pre_mission_readiness_snapshot()
+	var polish: Dictionary = get_release_candidate_playability_polish_snapshot()
+	var aircraft: Dictionary = get_aircraft_panel_snapshot()
+	var staging: Dictionary = get_homebase_direct_staging_snapshot()
+	var checks: Array = []
+	var readiness_text: String = String(readiness.get("rendered_item_text", "")).strip_edges()
+	var selected_status_text: String = String(aircraft.get("selected_status_text", "")).strip_edges()
+	var cue_text: String = String(polish.get("release_candidate_action_cue_text", "")).strip_edges()
+	var expected_ready_text: String = String(polish.get("release_candidate_action_cue_expected_ready_text", "")).strip_edges()
+	var cue_rect: Rect2 = startflow.get("release_candidate_action_cue_rect", Rect2())
+	var cue_label_rect: Rect2 = startflow.get("release_candidate_action_cue_label_rect", Rect2())
+	var mission_rect: Rect2 = startflow.get("mission_rect", Rect2())
+	var payload_operator_count: int = int(staging.get("payload_operator_count", 0))
+	var boarded_operator_count: int = int(staging.get("boarded_operator_count", 0))
+
+	_append_visual_audit_check(
+		checks,
+		"read_only_boundaries",
+		_snapshot_boundary_is_read_only(polish) and not bool(startflow.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"CTA visual smoke must read existing Homebase state only."
+	)
+	_append_visual_audit_check(
+		checks,
+		"singleplayer_cta_ready",
+		String(polish.get("readiness_overall_state", "")) == "ready" \
+			and bool(polish.get("release_candidate_action_cue_ready", false)) \
+			and cue_text == expected_ready_text,
+		"critical",
+		"Singleplayer Homebase should show the exact ready action chain before the first mission.",
+		{"cue_text": cue_text, "expected_ready_text": expected_ready_text}
+	)
+	_append_visual_audit_check(
+		checks,
+		"start_button_actionable",
+		String(polish.get("start_button_text", "")).strip_edges() == "Start Mission" \
+			and not bool(polish.get("start_button_disabled", true)),
+		"critical",
+		"The visible Start Mission button should be enabled for the release start path."
+	)
+	_append_visual_audit_check(
+		checks,
+		"visible_readiness_has_no_stop_blocker",
+		readiness_text.find("STOP Team") < 0 \
+			and readiness_text.find("STOP Dropship") < 0 \
+			and readiness_text.find("STOP Pilot") < 0 \
+			and readiness_text.find("STOP Boarding") < 0,
+		"critical",
+		"Visible readiness chips should not contradict the ready CTA with STOP blockers.",
+		{"rendered_readiness_item_text": readiness_text}
+	)
+	_append_visual_audit_check(
+		checks,
+		"flightdeck_has_shipcard",
+		Array(aircraft.get("visible_aircraft_definitions", [])).size() >= 1 \
+			and not selected_status_text.contains("Flight deck empty"),
+		"critical",
+		"Flightdeck should show a usable shipcard instead of the empty blocker.",
+		{"selected_status_text": selected_status_text}
+	)
+	_append_visual_audit_check(
+		checks,
+		"payload_boarded",
+		payload_operator_count > 0 and boarded_operator_count >= payload_operator_count,
+		"critical",
+		"Dropship payload should carry a boarded Fireteam for the first mission.",
+		{
+			"payload_operator_count": payload_operator_count,
+			"boarded_operator_count": boarded_operator_count,
+		}
+	)
+	_append_visual_audit_check(
+		checks,
+		"cta_inside_mission_panel",
+		_rect_inside(cue_rect, mission_rect) and _rect_inside(cue_label_rect, mission_rect),
+		"critical",
+		"The CTA panel and label should stay inside the MissionPanel.",
+		{
+			"cue_rect": cue_rect,
+			"cue_label_rect": cue_label_rect,
+			"mission_rect": mission_rect,
+		}
+	)
+	_append_visual_audit_check(
+		checks,
+		"cta_label_has_readable_bounds",
+		cue_label_rect.size.x >= 180.0 and cue_label_rect.size.y >= 8.0,
+		"critical",
+		"The CTA label should have enough visible bounds to be readable in the release window.",
+		{"cue_label_rect": cue_label_rect}
+	)
+	_append_visual_audit_check(
+		checks,
+		"mission_panel_no_overflow",
+		not bool(startflow.get("mission_child_overflows", true)),
+		"critical",
+		"The first-mission CTA should not push MissionPanel content out of bounds."
+	)
+
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_reentry_release_candidate_first_mission_cta_visual_smoke.v1",
+		"task_id": "TASK_810",
+		"source_task_id": "TASK_809",
+		"singleplayer_path_expected": "MainMenu -> Einzelspieler -> Homebase",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"release_candidate_action_cue_text": cue_text,
+		"release_candidate_action_cue_expected_ready_text": expected_ready_text,
+		"release_candidate_action_cue_ready": bool(polish.get("release_candidate_action_cue_ready", false)),
+		"release_candidate_action_cue_visible": bool(polish.get("release_candidate_action_cue_visible", false)),
+		"release_candidate_action_cue_step_count": int(polish.get("release_candidate_action_cue_step_count", 0)),
+		"readiness_overall_state": String(polish.get("readiness_overall_state", "")).strip_edges(),
+		"start_button_text": String(polish.get("start_button_text", "")).strip_edges(),
+		"start_button_disabled": bool(polish.get("start_button_disabled", true)),
+		"rendered_readiness_item_text": readiness_text,
+		"flightdeck_selected_status_text": selected_status_text,
+		"visible_aircraft_count": Array(aircraft.get("visible_aircraft_definitions", [])).size(),
+		"payload_operator_count": payload_operator_count,
+		"boarded_operator_count": boarded_operator_count,
+		"cue_rect": cue_rect,
+		"cue_label_rect": cue_label_rect,
+		"mission_rect": mission_rect,
+		"check_count": checks.size(),
+		"failed_count": failed_count,
+		"checks": checks,
+		"issues": _build_visual_audit_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "fail",
+		"manual_screenshot_required": true,
+		"manual_screenshot_done": false,
+		"recommended_next_task": "TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings",
 	}
 
 
@@ -4794,6 +4939,16 @@ func _build_visual_audit_issue_list(checks: Array) -> Array:
 				"message": String(check.get("message", "")),
 			})
 	return issues
+
+
+func _snapshot_boundary_is_read_only(snapshot: Dictionary) -> bool:
+	return bool(snapshot.get("read_only", false)) \
+		and not bool(snapshot.get("ui_sets_gameplay_truth", true)) \
+		and not bool(snapshot.get("creates_navigation", true)) \
+		and not bool(snapshot.get("creates_command", true)) \
+		and not bool(snapshot.get("creates_fire_event", true)) \
+		and not bool(snapshot.get("creates_damage_event", true)) \
+		and not bool(snapshot.get("sets_multiplayer_truth", true))
 
 
 func _calculate_readiness_chip_contrast(chips: Array) -> Dictionary:

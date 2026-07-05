@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_808</span>
-      <span class="pill warn">Aktueller Griff: TASK_809</span>
+      <span class="pill good">Letzter Abschluss: TASK_810</span>
+      <span class="pill warn">Aktueller Griff: TASK_810</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -170,6 +170,7 @@
           <li><strong>Tester Run:</strong> TASK_807 prueft das Handoff gegen den echten Spielergriff von EXE-Start bis erstem Firefight und Exit/Debrief.</li>
           <li><strong>Tester Run Acceptance:</strong> TASK_808 akzeptiert diesen Lauf nur, wenn der frische EXE-Griff komplett, reviewed, issue-frei und read-only belegt ist.</li>
           <li><strong>Playability Cue:</strong> TASK_809 zeigt nach `Einzelspieler` die erste Handlungskette direkt in der Homebase: Start Mission, LZ, Drop, Preview, GO.</li>
+          <li><strong>CTA Visual Smoke:</strong> TASK_810 prueft diesen ersten Homebase-Griff automatisiert gegen CTA, Startbutton, Flightdeck, Payload und sichtbare STOP-Widersprueche.</li>
           <li><strong>Release-Start-Hotfix:</strong> Halbvolle lokale Saves werden beim Einzelspieler-Start additiv repariert, damit vorhandenes Fireteam plus fehlender Pilot/Flightdeck-Payload nicht mehr in `Start blockiert` endet.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
@@ -181,11 +182,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_809 macht den ersten Griff nach `Einzelspieler` lesbarer: Wenn die Homebase bereit ist, zeigt sie die Kette `Start Mission -> LZ waehlen -> Drop -> Preview lesen -> GO`.</p>
-          <p>Quelle bleibt der vorhandene Readiness-/Startflow-Zustand. Die Cue ist Anzeige und darf keine Navigation, keinen Start und keine Gameplay-Wahrheit setzen.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_810 prueft die echte Fensterlesbarkeit dieser CTA im Release-Startpfad.</div>
-          <input readonly value="TASK_809 - Station Reentry Release Candidate Playability Polish Backlog" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_810 prueft den ersten Griff nach `Einzelspieler` als Control-/Snapshot-Smoke: Homebase bereit, CTA sichtbar, Startbutton aktiv, Flightdeck nicht leer, Payload geboardet und keine sichtbaren STOP-Widersprueche.</p>
+          <p>Quelle bleibt der vorhandene Readiness-/Startflow-/Flightdeck-/Staging-Zustand. Der Smoke ist Anzeige-/Verifier-Arbeit und darf keine Navigation, keinen Start und keine Gameplay-Wahrheit setzen.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_811 sammelt echte Live-Window-Polish-Findings, falls der menschliche Fensterblick trotz gruenem Smoke noch Reibung zeigt.</div>
+          <input readonly value="TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -404,6 +405,10 @@
           <input readonly value="Naechster Griff: Start Mission -> LZ waehlen -> Drop -> Preview lesen -> GO" data-export-key="reentry_release_candidate_playability_polish.expected_ready_cue">
           <label class="checkline"><input type="checkbox" data-export-key="singleplayer_release_homebase_partial_save_actionability.partial_save_guard_verified"> Partial-Save-Startguard verifiziert</label>
           <input readonly value="BUGFIX - Singleplayer Release Homebase Partial Save Actionability" data-export-key="singleplayer_release_homebase_partial_save_actionability.hotfix_task">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_cta_visual_smoke.status"> TASK_810 CTA-Smoke gruen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_cta_visual_smoke.no_stop_blockers"> Keine sichtbaren STOP-Widersprueche</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_cta_visual_smoke.payload_boarded"> Payload geboardet</label>
+          <input readonly value="TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings" data-export-key="reentry_release_candidate_cta_visual_smoke.recommended_next_task">
           <textarea data-export-key="reentry_release_candidate_playability_polish.cta_visual_note" placeholder="CTA-Fensterblick / TASK_810-Notiz"></textarea>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
@@ -775,10 +780,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke"
+            recommended_next_task: "TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings"
           },
           metadata: {
-            generated_for_task: "TASK_809",
+            generated_for_task: "TASK_810",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
