@@ -50,6 +50,7 @@ git checkout -b batch/<batch-name>
 - TASK_818 - Station Reentry Release Candidate Playable Build Acceptance (implementiert): Release-Startcheck prueft den vertraglichen Spieleordner, Pflichtdateien, laufende EXE-Prozesse und `~RF*.TMP`-Dateien, ohne Prozesse oder Shortcuts zu veraendern.
 - TASK_819 - Release Runtime Checked Launcher (implementiert): bewusster Playtest-Startgriff fuer den geprueften Release-Ordner, optional mit Stop alter Release-EXE, Temp-Datei-Cleanup und Launch.
 - TASK_820 - Release Runtime Launch Acceptance Gate (implementiert): nach bewusstem Launch zaehlt der erwartete neue Release-Prozess als Start-Erfolg, waehrend unerwartete Altprozesse Review-Warnungen bleiben.
+- TASK_821 - Release First Homebase CTA Emphasis (implementiert): der erste Singleplayer-Homebase-Cue ist visuell priorisiert und am `Start Mission`-Button gespiegelt.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)

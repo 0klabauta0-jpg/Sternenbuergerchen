@@ -61,6 +61,9 @@ const HOMEBASE_REENTRY_FIRETEAM_STAGING_STYLE_ID := "task_763_station_reentry_fi
 const HOMEBASE_REENTRY_LOADOUT_BRIDGE_STYLE_ID := "task_764_station_reentry_loadout_bridge_v1"
 const HOMEBASE_REENTRY_DROPSHIP_BOARDING_STYLE_ID := "task_765_station_reentry_dropship_boarding_v1"
 const HOMEBASE_REENTRY_START_PERMISSION_STYLE_ID := "task_766_station_reentry_start_permission_v1"
+const HOMEBASE_RELEASE_CTA_EMPHASIS_STYLE_ID := "task_821_release_first_homebase_cta_v1"
+const HOMEBASE_RELEASE_CTA_FONT_SIZE := 10
+const HOMEBASE_RELEASE_CTA_MIN_HEIGHT := 88.0
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_FONT_SIZE := 12
 const HOMEBASE_POST_DEBRIEF_FOLLOWUP_MIN_HEIGHT := 198.0
 const HOMEBASE_ROSTER_SORT_OPTIONS: Array = [
@@ -1249,6 +1252,12 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 		"release_candidate_action_cue_text": String(action_cue_label.get_meta("release_candidate_action_cue_text", action_cue_label.text)).strip_edges() if action_cue_label != null else "",
 		"release_candidate_action_cue_tooltip": action_cue_panel.tooltip_text if action_cue_panel != null else "",
 		"release_candidate_action_cue_step_count": int(action_cue_panel.get_meta("release_candidate_action_cue_step_count", 0)) if action_cue_panel != null else 0,
+		"release_candidate_action_cue_style_id": String(action_cue_panel.get_meta("release_candidate_action_cue_style_id", "")) if action_cue_panel != null else "",
+		"release_candidate_action_cue_priority": String(action_cue_panel.get_meta("release_candidate_action_cue_priority", "")) if action_cue_panel != null else "",
+		"release_candidate_action_cue_min_height": action_cue_panel.custom_minimum_size.y if action_cue_panel != null else 0.0,
+		"release_candidate_action_cue_font_size": int(action_cue_label.get_meta("release_candidate_action_cue_font_size", 0)) if action_cue_label != null else 0,
+		"start_button_release_candidate_action_cue_text": String(start_button.get_meta("release_candidate_action_cue_text", "")).strip_edges() if start_button != null else "",
+		"start_button_release_candidate_primary_cta": bool(start_button.get_meta("release_candidate_primary_cta_button", false)) if start_button != null else false,
 	}
 
 
@@ -1423,6 +1432,83 @@ func get_release_candidate_first_mission_cta_visual_smoke_snapshot() -> Dictiona
 		"manual_screenshot_required": true,
 		"manual_screenshot_done": false,
 		"recommended_next_task": "TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings",
+	}
+
+
+func get_release_candidate_first_homebase_cta_emphasis_snapshot() -> Dictionary:
+	var smoke: Dictionary = get_release_candidate_first_mission_cta_visual_smoke_snapshot()
+	var startflow: Dictionary = get_pre_mission_startflow_visual_snapshot()
+	var cue_text: String = String(smoke.get("release_candidate_action_cue_text", "")).strip_edges()
+	var checks: Array = []
+	_append_visual_audit_check(
+		checks,
+		"source_cta_smoke_pass",
+		String(smoke.get("status", "")) == "pass" and int(smoke.get("failed_count", -1)) == 0,
+		"critical",
+		"CTA emphasis builds on the green first-mission CTA smoke."
+	)
+	_append_visual_audit_check(
+		checks,
+		"cta_style_applied",
+		String(startflow.get("release_candidate_action_cue_style_id", "")) == HOMEBASE_RELEASE_CTA_EMPHASIS_STYLE_ID \
+			and String(startflow.get("release_candidate_action_cue_priority", "")) == "primary",
+		"critical",
+		"The first Homebase action cue should have a dedicated primary emphasis style."
+	)
+	_append_visual_audit_check(
+		checks,
+		"cta_font_and_height_emphasized",
+		int(startflow.get("release_candidate_action_cue_font_size", 0)) >= HOMEBASE_RELEASE_CTA_FONT_SIZE \
+			and float(startflow.get("release_candidate_action_cue_min_height", 0.0)) >= HOMEBASE_RELEASE_CTA_MIN_HEIGHT,
+		"critical",
+		"The first Homebase action cue should be larger than the old compact readout.",
+		{
+			"font_size": int(startflow.get("release_candidate_action_cue_font_size", 0)),
+			"min_height": float(startflow.get("release_candidate_action_cue_min_height", 0.0)),
+		}
+	)
+	_append_visual_audit_check(
+		checks,
+		"start_button_carries_same_cue",
+		bool(startflow.get("start_button_release_candidate_primary_cta", false)) \
+			and String(startflow.get("start_button_release_candidate_action_cue_text", "")).strip_edges() == cue_text,
+		"critical",
+		"The Start Mission button should carry the same next-action cue as the readiness panel."
+	)
+	_append_visual_audit_check(
+		checks,
+		"read_only_boundaries",
+		_snapshot_boundary_is_read_only(smoke) and not bool(startflow.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"CTA emphasis must remain a visual/read-only projection."
+	)
+	var failed_count: int = _count_visual_audit_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_reentry_release_candidate_first_homebase_cta_emphasis.v1",
+		"task_id": "TASK_821",
+		"source_task_id": "TASK_810",
+		"singleplayer_path_expected": "MainMenu -> Einzelspieler -> Homebase",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"source_status": String(smoke.get("status", "")),
+		"release_candidate_action_cue_text": cue_text,
+		"release_candidate_action_cue_style_id": String(startflow.get("release_candidate_action_cue_style_id", "")),
+		"release_candidate_action_cue_priority": String(startflow.get("release_candidate_action_cue_priority", "")),
+		"release_candidate_action_cue_font_size": int(startflow.get("release_candidate_action_cue_font_size", 0)),
+		"release_candidate_action_cue_min_height": float(startflow.get("release_candidate_action_cue_min_height", 0.0)),
+		"start_button_release_candidate_action_cue_text": String(startflow.get("start_button_release_candidate_action_cue_text", "")).strip_edges(),
+		"start_button_release_candidate_primary_cta": bool(startflow.get("start_button_release_candidate_primary_cta", false)),
+		"check_count": checks.size(),
+		"failed_count": failed_count,
+		"checks": checks,
+		"issues": _build_visual_audit_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "fail",
+		"recommended_next_task": "TASK_822 - Release Singleplayer Visible Window Findings",
 	}
 
 
@@ -4684,25 +4770,42 @@ func _ensure_pre_mission_readiness_panel() -> PanelContainer:
 func _update_release_candidate_action_cue_panel() -> void:
 	var panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel") as Control
 	var label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessSummaryLabel") as Label
+	var start_button := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
 	if panel == null or label == null:
 		return
 	var readiness_state: String = String(_pre_mission_readiness_snapshot.get("overall_state", "")).strip_edges()
 	var cue_text: String = _build_release_candidate_action_cue_text(readiness_state)
 	var tooltip_text: String = _build_release_candidate_action_cue_tooltip(readiness_state)
 	var summary_text: String = String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges()
+	var is_ready: bool = readiness_state == "ready"
 	panel.visible = true
 	panel.tooltip_text = tooltip_text
+	panel.custom_minimum_size.y = max(panel.custom_minimum_size.y, HOMEBASE_RELEASE_CTA_MIN_HEIGHT)
+	var panel_container := panel as PanelContainer
+	if panel_container != null:
+		META_UI_SKIN_SCRIPT.style_tactical_panel(panel_container, "header" if is_ready else "thin_frame")
 	panel.set_meta("release_candidate_action_cue_text", cue_text)
 	panel.set_meta("release_candidate_action_cue_step_count", _release_candidate_action_cue_step_count(readiness_state))
+	panel.set_meta("release_candidate_action_cue_style_id", HOMEBASE_RELEASE_CTA_EMPHASIS_STYLE_ID)
+	panel.set_meta("release_candidate_action_cue_priority", "primary" if is_ready else "blocking")
 	panel.set_meta("readiness_overall_state", readiness_state)
 	panel.set_meta("read_only", true)
 	panel.set_meta("ui_sets_gameplay_truth", false)
 	label.text = cue_text if summary_text.is_empty() else "%s | %s" % [cue_text, summary_text]
 	label.tooltip_text = tooltip_text
+	META_UI_SKIN_SCRIPT.style_body_label(label, HOMEBASE_RELEASE_CTA_FONT_SIZE)
+	label.add_theme_color_override("font_color", Color("f7e7aa") if is_ready else Color("f4c1c1"))
 	label.set_meta("release_candidate_action_cue_text", cue_text)
 	label.set_meta("release_candidate_action_cue_step_count", _release_candidate_action_cue_step_count(readiness_state))
+	label.set_meta("release_candidate_action_cue_font_size", HOMEBASE_RELEASE_CTA_FONT_SIZE)
+	label.set_meta("release_candidate_action_cue_style_id", HOMEBASE_RELEASE_CTA_EMPHASIS_STYLE_ID)
 	label.set_meta("read_only", true)
 	label.set_meta("ui_sets_gameplay_truth", false)
+	if start_button != null:
+		start_button.tooltip_text = tooltip_text
+		start_button.set_meta("release_candidate_action_cue_text", cue_text)
+		start_button.set_meta("release_candidate_primary_cta_button", is_ready)
+		start_button.set_meta("release_candidate_action_cue_style_id", HOMEBASE_RELEASE_CTA_EMPHASIS_STYLE_ID)
 
 
 func _build_release_candidate_action_cue_text(readiness_state: String) -> String:
