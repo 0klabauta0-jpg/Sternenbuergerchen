@@ -19,6 +19,15 @@
 - Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
 - Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
 
+### TASK_799 - Station Reentry Firefight Multiplayer Playable Candidate Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_799_station_reentry_firefight_multiplayer_playable_candidate_acceptance.md`, `docs/tasks/TASK_798_station_reentry_firefight_multiplayer_playable_candidate_real_run_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightMultiplayerPlayableCandidateAcceptance` wertet TASK_798-Findings read-only aus und entscheidet eng zwischen offenem Real-Run, fehlenden Checks, gezieltem Polish, offenen Gates und akzeptiertem Multiplayer-Playable-Candidate.
+- Stand: Der Snapshot prueft valide/read-only Quelle, Real-Run, Pflichtchecks, aktive Issues, Szenario-/Workbench-Kontext, Host-/Client-Rollen, Decision-Kontext und Launch-/Capture-/Runtime-Export-Kommandos.
+- Risiken/offen: TASK_799 akzeptiert nur die Findings-Kette; ein Release-Candidate-Paket mit konkreter Auslieferungs-/Playtest-Buendelung bleibt TASK_800.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_799_station_reentry_firefight_multiplayer_playable_candidate_acceptance.gd`, TASK_798/TASK_797/TASK_796 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_800 - Station Reentry Firefight Multiplayer Release Candidate Packet.
+
 ### TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_798_station_reentry_firefight_multiplayer_playable_candidate_real_run_findings.md`, `docs/tasks/TASK_797_station_reentry_firefight_multiplayer_playable_slice_candidate.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
