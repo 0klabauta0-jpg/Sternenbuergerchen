@@ -19,6 +19,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_817_station_reentry_release_candidate_targeted_firefight_polish.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release-Export bauen und Taskleisten-/EXE-Pfad gegen den neuen Spieleordner pruefen.
 
+### BUGFIX - Singleplayer Release Visible Homebase Deadend Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_visible_homebase_deadend_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MetaLayerFlow` prueft nach dem Singleplayer-Bootstrap den sichtbaren Homebase-Startzustand auf Flightdeck, Payload, Boarding, Readiness und `can_request_mission_start`.
+- Stand: Wenn die sichtbare Homebase trotz internem Bootstrap leer/blockiert bleibt, stellt der Guard die Default-Sortie aus Roster, Dropship, Pilot und geboardetem Fireteam erneut her.
+- Stand: Der Bootstrap-Verifier enthaelt jetzt einen Screenshot-aehnlichen Dead-End-Fall mit leerem Payload/Flightdeck und erwartet danach wieder `Start Mission`.
+- Risiken/offen: Der Guard ersetzt keinen echten Fenster-Sichttest im exportierten Build; nach Export bitte `Einzelspieler` sichtbar erneut pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_821_release_first_homebase_cta_emphasis.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release-Export bauen und die EXE neu starten.
+
 ### TASK_818 - Station Reentry Release Candidate Playable Build Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_818_station_reentry_release_candidate_playable_build_acceptance.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`, `docs/dev/mission_command_feedback_contract.md`

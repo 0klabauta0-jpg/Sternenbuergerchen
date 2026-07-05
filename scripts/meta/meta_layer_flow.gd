@@ -208,6 +208,7 @@ func _ready() -> void:
 	_refresh_homebase_screen()
 	_seed_singleplayer_bootstrap_homebase_payload()
 	_refresh_homebase_screen()
+	_ensure_singleplayer_visible_homebase_actionability()
 	_refresh_fob_screen()
 	fob_screen.set_last_mission_result(_last_mission_result)
 	_refresh_map_screen()
@@ -2491,11 +2492,91 @@ func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 	set_meta("singleplayer_bootstrap_payload_seeded", true)
 
 
+func _ensure_singleplayer_visible_homebase_actionability() -> void:
+	if not bool(get_meta("singleplayer_bootstrap_enabled", false)):
+		return
+	var homebase_screen = _get_homebase_screen()
+	if homebase_screen == null:
+		return
+	if _is_singleplayer_visible_homebase_actionable(homebase_screen):
+		set_meta("singleplayer_visible_homebase_deadend_repaired", false)
+		return
+
+	_repair_singleplayer_bootstrap_start_state(false)
+	_refresh_homebase_screen()
+	_seed_singleplayer_bootstrap_homebase_payload()
+	_refresh_homebase_screen()
+	if _is_singleplayer_visible_homebase_actionable(homebase_screen):
+		set_meta("singleplayer_visible_homebase_deadend_repaired", true)
+		set_meta("singleplayer_visible_homebase_deadend_repair_mode", "preserve_existing")
+		return
+
+	_repair_singleplayer_bootstrap_start_state(true)
+	_refresh_homebase_screen()
+	_seed_singleplayer_bootstrap_homebase_payload()
+	_refresh_homebase_screen()
+	set_meta("singleplayer_visible_homebase_deadend_repaired", _is_singleplayer_visible_homebase_actionable(homebase_screen))
+	set_meta("singleplayer_visible_homebase_deadend_repair_mode", "force_default")
+
+
+func _is_singleplayer_visible_homebase_actionable(homebase_screen: Node) -> bool:
+	if homebase_screen == null or not homebase_screen.has_method("get_homebase_direct_staging_snapshot"):
+		return false
+	var craft_id: String = String(get_meta("singleplayer_bootstrap_craft_id", "")).strip_edges()
+	var staging: Dictionary = Dictionary(homebase_screen.call("get_homebase_direct_staging_snapshot"))
+	var payload_operator_count: int = int(staging.get("payload_operator_count", 0))
+	var boarded_operator_count: int = int(staging.get("boarded_operator_count", 0))
+	var has_payload: bool = payload_operator_count >= mini(SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE, 2)
+	var has_boarding: bool = boarded_operator_count >= payload_operator_count and payload_operator_count > 0
+	var has_craft_payload: bool = not craft_id.is_empty() and bool(homebase_screen.call("can_request_mission_start", craft_id))
+	var can_start_any: bool = bool(homebase_screen.call("can_request_mission_start"))
+	var visible_aircraft_count: int = Array(staging.get("visible_aircraft_definitions", [])).size()
+	if visible_aircraft_count <= 0 and homebase_screen.has_method("get_aircraft_panel_snapshot"):
+		var aircraft: Dictionary = Dictionary(homebase_screen.call("get_aircraft_panel_snapshot"))
+		visible_aircraft_count = Array(aircraft.get("visible_aircraft_definitions", [])).size()
+	var readiness_ready: bool = true
+	if homebase_screen.has_method("get_pre_mission_readiness_snapshot"):
+		var readiness: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+		readiness_ready = String(readiness.get("overall_state", "")).strip_edges() == "ready"
+	return visible_aircraft_count > 0 and has_payload and has_boarding and readiness_ready and (has_craft_payload or can_start_any)
+
+
+func _repair_singleplayer_bootstrap_start_state(force_default_selection: bool) -> void:
+	_ensure_singleplayer_bootstrap_roster_floor()
+	_homebase_staged_unit_ids = _filter_known_unit_ids(_homebase_staged_unit_ids)
+	_selected_unit_ids = _filter_known_unit_ids(_selected_unit_ids)
+	if force_default_selection or _homebase_staged_unit_ids.size() < mini(SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE, 2):
+		_homebase_staged_unit_ids = _pick_singleplayer_bootstrap_fireteam_unit_ids()
+		_homebase_staged_fireteam_ids = _build_singleplayer_bootstrap_fireteam_ids(_homebase_staged_unit_ids)
+	else:
+		_homebase_staged_fireteam_ids = _normalize_homebase_fireteam_selection(_homebase_staged_unit_ids, _homebase_staged_fireteam_ids)
+	if force_default_selection or _selected_unit_ids.size() < mini(SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE, 2):
+		_selected_unit_ids = _homebase_staged_unit_ids.duplicate()
+		_selected_fireteam_ids = _homebase_staged_fireteam_ids.duplicate()
+	else:
+		_selected_fireteam_ids = _normalize_homebase_fireteam_selection(_selected_unit_ids, _selected_fireteam_ids)
+
+	var bootstrap_craft_id: String = _ensure_singleplayer_bootstrap_dropship()
+	if bootstrap_craft_id.is_empty():
+		return
+	if String(_assigned_aircraft_pilot_by_craft.get(bootstrap_craft_id, "")).strip_edges().is_empty():
+		var pilot_unit_id: String = _pick_singleplayer_bootstrap_pilot_unit_id(_homebase_staged_unit_ids)
+		if not pilot_unit_id.is_empty():
+			_assigned_aircraft_pilot_by_craft[bootstrap_craft_id] = pilot_unit_id
+			set_meta("singleplayer_bootstrap_pilot_repaired", true)
+	_aircraft_location_by_craft[bootstrap_craft_id] = "homebase"
+	set_meta("singleplayer_bootstrap_craft_id", bootstrap_craft_id)
+	set_meta("singleplayer_bootstrap_fireteam_id", _get_singleplayer_bootstrap_payload_fireteam_id())
+	set_meta("singleplayer_bootstrap_enabled", true)
+
+
 func get_singleplayer_start_bootstrap_snapshot() -> Dictionary:
 	var craft_id: String = String(get_meta("singleplayer_bootstrap_craft_id", "")).strip_edges()
 	return {
 		"enabled": bool(get_meta("singleplayer_bootstrap_enabled", false)),
 		"payload_seeded": bool(get_meta("singleplayer_bootstrap_payload_seeded", false)),
+		"visible_homebase_deadend_repaired": bool(get_meta("singleplayer_visible_homebase_deadend_repaired", false)),
+		"visible_homebase_deadend_repair_mode": String(get_meta("singleplayer_visible_homebase_deadend_repair_mode", "")).strip_edges(),
 		"selected_unit_ids": Array(_selected_unit_ids),
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"homebase_staged_unit_ids": Array(_homebase_staged_unit_ids),
