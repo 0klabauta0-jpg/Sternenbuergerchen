@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_808_station_reentry_firefight_release_candidate_tester_run_acceptance.md`, `docs/tasks/TASK_807_station_reentry_firefight_release_candidate_tester_run.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightReleaseCandidateTesterRunAcceptance` wertet TASK_807-Tester-Run read-only aus und akzeptiert ihn nur bei vollstaendigem, reviewed, frischem und issue-freiem Tester-Run.
+- Stand: Der Snapshot prueft Tester-Run-ready, bewusst abgeschlossen, reviewed, frische EXE, fehlende Checks, aktive Issues, Release-Kontext, Host/Client-Rollen, Start-/Export-/Host-Client-Kommandos und read-only-Grenzen.
+- Stand: Offene Tester-Runs, fehlende Checks und aktive Issues routen gezielt zurueck zu TASK_807 beziehungsweise zum ersten Action Item; ein sauberer Lauf empfiehlt TASK_809 als echten Playability-/Polish-Backlog.
+- Risiken/offen: TASK_808 ist eine enge Acceptance ueber Tester-Run-Daten; der naechste Schritt muss sichtbaren Spielbarkeits-Polish umsetzen statt weitere reine Gates zu stapeln.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_808_station_reentry_firefight_release_candidate_tester_run_acceptance.gd`, TASK_807 und Singleplayer-Release-Start-Bootstrap Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_809 - Station Reentry Release Candidate Playability Polish Backlog.
+
 ### TASK_807 - Station Reentry Firefight Release Candidate Tester Run
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_807_station_reentry_firefight_release_candidate_tester_run.md`, `docs/tasks/TASK_806_station_reentry_firefight_release_candidate_handoff_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
