@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_805 - Station Reentry Firefight Release Candidate Delivery Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_805_station_reentry_firefight_release_candidate_delivery_review.md`, `docs/tasks/TASK_804_station_reentry_firefight_release_candidate_visible_ship_smoke.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightReleaseCandidateDeliveryReview` wertet TASK_804-Visible-Ship-Smoke plus optionale Delivery-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot prueft sichtbaren Smoke, benannte Release-Dateien, Start- und Host/Client-Hinweise, bekannte Restrisiken, Report-Export, stale-Link-Hinweis und naechste Handoff-Entscheidung.
+- Stand: Issue-Flags routen stale Paket, fehlende Release-Dateien, unklare Start-/Host-Client-Anleitung, nicht akzeptierte Risiken, fehlenden Report-Export und sichtbaren Polish-Bedarf auf konkrete Folgearbeit.
+- Risiken/offen: TASK_805 ist eine Delivery-Entscheidung fuer den aktuellen Release-Candidate, keine allgemeine Produktfreigabe und kein Ersatz fuer echte Spielgefuehl-/Polish-Playtests.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_805_station_reentry_firefight_release_candidate_delivery_review.gd`, TASK_804/TASK_803 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_806 - Station Reentry Firefight Release Candidate Handoff Packet.
+
 ### TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_804_station_reentry_firefight_release_candidate_visible_ship_smoke.md`, `docs/tasks/TASK_803_station_reentry_firefight_release_candidate_ship_readiness.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
