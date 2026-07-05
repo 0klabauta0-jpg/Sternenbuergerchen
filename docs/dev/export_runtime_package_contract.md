@@ -25,6 +25,18 @@ Nicht ausgeschlossen werden Runtime-Addons und GDExtensions, die im Spielpfad ge
 3. Es ersetzt nur den `exclude_filter` fuer den Exportlauf.
 4. Es ruft Godot mit dem gewaehlten Preset auf und schreibt Godot-stdout/stderr als normales Export-Log.
 5. Es stellt den lokalen Preset wieder her, ausser `-KeepPatchedPreset` ist explizit gesetzt.
+6. Nach dem Export kann `scripts/tools/release_runtime_start_check.ps1` den vertraglichen Spieleordner read-only pruefen und ein Manifest unter `tmp/release_runtime_start_check.json` schreiben.
+
+## Release-Startcheck
+Der Startcheck ist kein Launcher und keine Taskleisten-Reparatur. Er liest `data/export_runtime_package_contract.json`, loest `runtime_export_path` auf und prueft:
+- Release-EXE
+- Console-EXE
+- PCK
+- erlaubte Runtime-GDExtension-DLLs
+- laufende Prozesse aus genau diesem Release-Pfad
+- Windows-Temporaerdateien nach ueberschriebenen/gesperrten Runtime-Dateien
+
+Fehlende Pflichtdateien sind ein hartes Fail-Gate. Laufende Prozesse oder `~RF*.TMP`-Dateien erzeugen ein Review-Gate, weil Codex sie ohne explizite Freigabe nicht beendet oder entfernt.
 
 ## Regeln
 - Keine privaten Codesigning- oder User-Pfade in getrackte Dateien schreiben.
@@ -32,3 +44,4 @@ Nicht ausgeschlossen werden Runtime-Addons und GDExtensions, die im Spielpfad ge
 - Nach Export-Hygiene-Aenderungen mindestens den TASK_511-Verifier und `git diff --check` ausfuehren.
 - Ein echter Release-Export soll das Pack-Log stichprobenartig gegen ausgeschlossene Pfade pruefen.
 - Eine Godot-Scanwarnung fuer ein zweites `project.godot` in einem ausgeschlossenen Referenzprojekt ist kein Export-Abbruch; der Script-Exit haengt am nativen Godot-Exitcode.
+- Der Startcheck darf keine Prozesse starten, keine laufenden EXEs beenden und keine Shortcuts veraendern.

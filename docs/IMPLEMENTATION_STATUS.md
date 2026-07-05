@@ -19,6 +19,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_817_station_reentry_release_candidate_targeted_firefight_polish.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release-Export bauen und Taskleisten-/EXE-Pfad gegen den neuen Spieleordner pruefen.
 
+### TASK_818 - Station Reentry Release Candidate Playable Build Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_818_station_reentry_release_candidate_playable_build_acceptance.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `scripts/tools/release_runtime_start_check.ps1` liest den Runtime-Export-Vertrag, loest den echten Spieleordner auf und prueft EXE, Console-EXE, PCK sowie benoetigte Runtime-DLLs.
+- Stand: Der Check meldet laufende Release-Prozesse und `~RF*.TMP`-Dateien als Review-Warnung und schreibt `tmp/release_runtime_start_check.json`.
+- Stand: Das Manifest bleibt read-only und bestaetigt, dass der Check keine Prozesse startet, beendet oder Taskleisten-Verknuepfungen veraendert.
+- Risiken/offen: Ein laufendes Release-Fenster muss weiterhin bewusst geschlossen und danach neu aus dem geprueften Pfad gestartet werden.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/release_runtime_start_check.ps1`, `git diff --check`.
+- Naechster Schritt: Release-Fenster aus `C:\dev\Sternenbuergerchen_rel\Sternenbuergerchen_rel.exe` neu starten und den Singleplayer-Sichttest wiederholen.
+
 ### TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
