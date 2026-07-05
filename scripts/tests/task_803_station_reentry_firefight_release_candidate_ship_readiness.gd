@@ -49,7 +49,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(roadmap_text.contains("TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness (implementiert)"), "Roadmap marks TASK_803 implemented")
 	_assert(roadmap_text.contains("TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke"), "Roadmap advances to TASK_804")
 	_assert(contract_text.contains("Station-Reentry-Firefight-Release-Candidate-Ship-Readiness"), "Mission command feedback contract documents TASK_803")
-	_assert(report_text.contains("Aktueller Griff: TASK_803"), "Reentry handbook marks TASK_803 current")
+	_assert(report_text.contains("Aktueller Griff: TASK_"), "Reentry handbook keeps a current task marker")
 	_assert(report_text.contains("station_reentry_firefight_release_candidate_ship_readiness.json"), "Reentry handbook names TASK_803 manifest")
 	_assert(report_text.contains('data-export-key="reentry_firefight_release_candidate_ship_readiness.ship_readiness_ready"'), "Reentry handbook exports TASK_803 ready check")
 

@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_802</span>
-      <span class="pill warn">Aktueller Griff: TASK_803</span>
+      <span class="pill good">Letzter Abschluss: TASK_803</span>
+      <span class="pill warn">Aktueller Griff: TASK_804</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -163,6 +163,7 @@
           <li><strong>Release Candidate Findings:</strong> TASK_801 wertet den echten RC-Playtest aus und erzeugt konkrete Follow-ups.</li>
           <li><strong>Release Candidate Acceptance:</strong> TASK_802 akzeptiert oder stoppt den RC anhand enger Playtest-Gates.</li>
           <li><strong>Ship Readiness:</strong> TASK_803 buendelt EXE/PCK/DLLs, Kommandos, Workbench, Restrisiken und naechste Bedienanweisung fuer den sichtbaren Smoke.</li>
+          <li><strong>Visible Ship Smoke:</strong> TASK_804 prueft per Workbench-/Smoke-Notizen, ob frische EXE, Einzelspieler, Homebase, Dropship, Missionsstart, Host/Client-Fenster und Rollen wirklich sichtbar abgenommen wurden.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -173,11 +174,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_803 macht aus der akzeptierten TASK_802-Quelle einen konkreten Ship-Readiness-Snapshot fuer den naechsten sichtbaren Release-Smoke.</p>
-          <p>Quelle bleibt TASK_802. Ship-Readiness ist nur gruen, wenn EXE/PCK/DLLs, Start-/Export-/Host-Client-Kommandos, Workbench, Manifeste, Restrisiken und naechste Bedienanweisung vorhanden sind.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_804 startet den sichtbaren EXE-/Host-Client-Smoke gegen genau dieses Paket.</div>
-          <input readonly value="TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_804 nimmt den TASK_803-Ship-Readiness-Stand als Quelle und macht den sichtbaren EXE-/Host-Client-Smoke als exportierbare Notiz pruefbar.</p>
+          <p>Quelle bleibt TASK_803. Der sichtbare Ship-Smoke ist nur gruen, wenn frischer Spieleordner, EXE-Start, Einzelspieler, Homebase, Dropship-Payload, Missionsstart, Host/Client-Fenster, Rollen-Unterscheidung, stale-Link-Ausschluss und Smoke-Notizen vorhanden sind.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_805 macht daraus eine kleine Delivery-Review, bevor der Stand weitergegeben wird.</div>
+          <input readonly value="TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_805 - Station Reentry Firefight Release Candidate Delivery Review" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -281,6 +282,26 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_ship_readiness.release_pck_present"> Release-PCK neben EXE</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_ship_readiness.runtime_dlls_present"> Runtime-DLLs neben EXE</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_ship_readiness.next_operator_instruction_present"> Naechste Bedienanweisung vorhanden</label>
+          <input readonly value="tmp/station_reentry_firefight_release_candidate_visible_ship_smoke.json" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.manifest_path">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.manual_smoke_done"> TASK_804 Smoke bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.visible_ship_smoke_done"> Sichtbarer EXE-/Host-Client-Smoke erledigt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.fresh_release_folder_used"> Frischer Spieleordner benutzt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.release_exe_started"> Release-EXE sichtbar gestartet</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.singleplayer_clicked"> Einzelspieler geklickt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.homebase_not_blocked"> Homebase danach handlungsfaehig</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.dropship_payload_ready"> Dropship-Payload bereit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.mission_start_reachable"> Missionsstart erreichbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.host_client_windows_open"> Host/Client-Fenster sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.host_client_roles_distinct"> Host/Client-Rollen unterscheidbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.no_stale_taskbar_link"> Keine alte Taskleisten-/Shortcut-EXE benutzt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.smoke_notes_exported"> Smoke-Notizen exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.issues.stale_export_or_link"> Issue: alter Export/Link benutzt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.issues.singleplayer_homebase_blocked"> Issue: Singleplayer/Homebase blockiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.issues.dropship_payload_missing"> Issue: Dropship-Payload fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.issues.mission_start_unreachable"> Issue: Missionsstart nicht erreichbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.issues.host_client_not_visible"> Issue: Host/Client nicht sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.issues.roles_confusing"> Issue: Rollen verwirrend</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_visible_ship_smoke.issues.runtime_error_on_start"> Issue: Runtime-Startfehler</label>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -651,10 +672,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke"
+            recommended_next_task: "TASK_805 - Station Reentry Firefight Release Candidate Delivery Review"
           },
           metadata: {
-            generated_for_task: "TASK_803",
+            generated_for_task: "TASK_804",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
