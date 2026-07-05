@@ -47,7 +47,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(roadmap_text.contains("TASK_809 - Station Reentry Release Candidate Playability Polish Backlog (implementiert)"), "Roadmap marks TASK_809 implemented")
 	_assert(roadmap_text.contains("TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke"), "Roadmap advances to TASK_810")
 	_assert(contract_text.contains("Station-Reentry-Release-Candidate-Playability-Polish-Backlog"), "Mission command feedback contract documents TASK_809")
-	_assert(report_text.contains("Aktueller Griff: TASK_809"), "Reentry handbook marks TASK_809 current")
+	_assert(report_text.contains("TASK_809 Ready-Cue sichtbar"), "Reentry handbook keeps TASK_809 cue check")
 	_assert(report_text.contains('data-export-key="reentry_release_candidate_playability_polish.release_candidate_action_cue_ready"'), "Reentry handbook exports TASK_809 cue check")
 	_assert(homebase_text.contains("get_release_candidate_playability_polish_snapshot"), "Homebase exposes TASK_809 snapshot")
 
