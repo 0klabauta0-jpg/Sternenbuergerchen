@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_803_station_reentry_firefight_release_candidate_ship_readiness.md`, `docs/tasks/TASK_802_station_reentry_firefight_release_candidate_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightReleaseCandidateShipReadiness` buendelt eine akzeptierte TASK_802-Quelle zu einem read-only Ship-Readiness-Snapshot.
+- Stand: Der Snapshot nennt Release-Ordner, EXE, PCK, Workbench, Host-/Client-Rollen, Decision-/Guard-Line, Start-/Export-/Host-Client-Kommandos, Ship-Readiness-Items, fehlende Items, offene Risiken und die naechste Bedienanweisung.
+- Risiken/offen: TASK_803 startet keine EXE und beweist keinen echten Fensterblick. Der frische lokale Build-Ordner bleibt untracked; TASK_804 muss den sichtbaren EXE-/Host-Client-Smoke pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_803_station_reentry_firefight_release_candidate_ship_readiness.gd`, TASK_802/TASK_801/TASK_800 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke.
+
 ### BUGFIX - Singleplayer Release Homebase Start Bootstrap
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/ARCHITECTURE.md`

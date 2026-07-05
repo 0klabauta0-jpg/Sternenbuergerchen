@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_801</span>
-      <span class="pill warn">Aktueller Griff: TASK_802</span>
+      <span class="pill good">Letzter Abschluss: TASK_802</span>
+      <span class="pill warn">Aktueller Griff: TASK_803</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -162,6 +162,7 @@
           <li><strong>Release Candidate Packet:</strong> TASK_800 buendelt akzeptierte Quelle, frischen Export, EXE/PCK/DLLs und Playtest-Haken.</li>
           <li><strong>Release Candidate Findings:</strong> TASK_801 wertet den echten RC-Playtest aus und erzeugt konkrete Follow-ups.</li>
           <li><strong>Release Candidate Acceptance:</strong> TASK_802 akzeptiert oder stoppt den RC anhand enger Playtest-Gates.</li>
+          <li><strong>Ship Readiness:</strong> TASK_803 buendelt EXE/PCK/DLLs, Kommandos, Workbench, Restrisiken und naechste Bedienanweisung fuer den sichtbaren Smoke.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -172,11 +173,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_802 akzeptiert oder stoppt die TASK_801-Findings als enger Gate-Schritt fuer den Release-Candidate.</p>
-          <p>Quelle bleibt TASK_801. Acceptance ist nur gruen, wenn der sichtbare Playtest erledigt ist, Release-EXE und Host/Client gestartet wurden, keine Pflichtchecks fehlen und keine aktiven Issues offen sind.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_803 verpackt den akzeptierten Kandidaten fuer Ship-/Weitergabe-Readiness.</div>
-          <input readonly value="TASK_802 - Station Reentry Firefight Release Candidate Acceptance" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_803 macht aus der akzeptierten TASK_802-Quelle einen konkreten Ship-Readiness-Snapshot fuer den naechsten sichtbaren Release-Smoke.</p>
+          <p>Quelle bleibt TASK_802. Ship-Readiness ist nur gruen, wenn EXE/PCK/DLLs, Start-/Export-/Host-Client-Kommandos, Workbench, Manifeste, Restrisiken und naechste Bedienanweisung vorhanden sind.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_804 startet den sichtbaren EXE-/Host-Client-Smoke gegen genau dieses Paket.</div>
+          <input readonly value="TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -274,6 +275,12 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_findings.issues.stale_runtime_export_used"> Issue: alter Export benutzt</label>
           <input readonly value="tmp/station_reentry_firefight_release_candidate_acceptance.json" data-export-key="reentry_firefight_release_candidate_acceptance.manifest_path">
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_acceptance.accepted_for_release_candidate"> TASK_802 Release-Candidate Acceptance gruen</label>
+          <input readonly value="tmp/station_reentry_firefight_release_candidate_ship_readiness.json" data-export-key="reentry_firefight_release_candidate_ship_readiness.manifest_path">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_ship_readiness.ship_readiness_ready"> TASK_803 Ship-Readiness gruen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_ship_readiness.release_exe_present"> Release-EXE im Spieleordner</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_ship_readiness.release_pck_present"> Release-PCK neben EXE</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_ship_readiness.runtime_dlls_present"> Runtime-DLLs neben EXE</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_ship_readiness.next_operator_instruction_present"> Naechste Bedienanweisung vorhanden</label>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -644,10 +651,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness"
+            recommended_next_task: "TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke"
           },
           metadata: {
-            generated_for_task: "TASK_802",
+            generated_for_task: "TASK_803",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
