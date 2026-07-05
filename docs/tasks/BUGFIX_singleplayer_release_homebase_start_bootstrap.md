@@ -19,6 +19,7 @@ Der Testpfad setzt Roster, Fireteam, Dropship und Pilot in den Verifiern explizi
 
 ## Akzeptanzkriterien
 - `meta_layer_test.tscn` startet im Singleplayer mit Roster, Fireteam, Dropship und Pilot.
+- Der echte Main-Menu-Klickpfad `Einzelspieler -> MetaLayerTest -> Homebase` landet ebenfalls in einem spielbaren Payload-Zustand.
 - `HomebaseScreen.can_request_mission_start(craft_id)` ist fuer das Bootstrap-Dropship wahr.
 - Der bestehende Homebase-to-Mission-Handoff bleibt gruen.
 

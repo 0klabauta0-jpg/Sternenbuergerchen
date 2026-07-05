@@ -24,6 +24,7 @@
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/ARCHITECTURE.md`
 - Stand: Der lokale Singleplayer-Start seedet bei leerem/unvollstaendigem Startzustand Default-Roster, ALPHA-Fireteam, Dropship, Pilot und fertiges Homebase-direct Boarding, damit der Release nicht in `STOP Team/Dropship/Pilot/Boarding/Start` haengen bleibt.
 - Stand: Die Meta-Flow-Schicht erzeugt den spielbaren Startzustand; `HomebaseScreen` erhaelt nur einen expliziten Seed-Pfad fuer die vorhandene Direct-Launch-Payload.
+- Stand: Der Verifier prueft jetzt auch den echten Main-Menu-Klickpfad `Einzelspieler -> MetaLayerTest -> Homebase`, inklusive Payload-Fireteam, Operatoren an Bord und Startfreigabe.
 - Risiken/offen: Das ist ein Playability-Hotfix fuer den Release-Erststart. Kampagnen-Briefing, bewusstes Team-Picking und ein schoener Onboarding-Flow bleiben Folgearbeit.
 - Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
 - Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
