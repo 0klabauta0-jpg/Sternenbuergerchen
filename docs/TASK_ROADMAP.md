@@ -129,7 +129,8 @@ git checkout -b batch/<batch-name>
 - TASK_801 - Station Reentry Firefight Release Candidate Playtest Findings (implementiert)
 - TASK_802 - Station Reentry Firefight Release Candidate Acceptance (implementiert)
 - TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness (implementiert)
-- Naechster Schritt: TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke.
+- TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke (implementiert)
+- Naechster Schritt: TASK_805 - Station Reentry Firefight Release Candidate Delivery Review.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

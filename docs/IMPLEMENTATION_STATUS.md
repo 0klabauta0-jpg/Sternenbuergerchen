@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_804 - Station Reentry Firefight Release Candidate Visible Ship Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_804_station_reentry_firefight_release_candidate_visible_ship_smoke.md`, `docs/tasks/TASK_803_station_reentry_firefight_release_candidate_ship_readiness.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightReleaseCandidateVisibleShipSmoke` wertet TASK_803-Ship-Readiness plus optionale Workbench-/Smoke-Notizen read-only aus.
+- Stand: Der Snapshot prueft frischen Spieleordner, EXE-Start, Einzelspieler, Homebase-Handlungsfaehigkeit, Dropship-Payload, Missionsstart, Host/Client-Fenster, Rollen-Unterscheidung, stale Taskleisten-/Shortcut-Risiko und gespeicherte Smoke-Notizen.
+- Stand: Issue-Flags routen stale Export/Link, Singleplayer-Blocker, Dropship-Payload, Mission-Start, Host/Client-Sichtbarkeit, Rollen-Verwechslung und Runtime-Startfehler auf konkrete Folgearbeit.
+- Risiken/offen: TASK_804 liest Notizen und Gate-Daten, analysiert aber keine Screenshots. Der echte Fensterblick bleibt manuell, bis ein robuster Capture-/Review-Pfad gebaut wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_804_station_reentry_firefight_release_candidate_visible_ship_smoke.gd`, TASK_803/TASK_802 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_805 - Station Reentry Firefight Release Candidate Delivery Review.
+
 ### TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_803_station_reentry_firefight_release_candidate_ship_readiness.md`, `docs/tasks/TASK_802_station_reentry_firefight_release_candidate_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
