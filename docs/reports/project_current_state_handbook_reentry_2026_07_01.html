@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_796</span>
-      <span class="pill warn">Aktueller Griff: TASK_797</span>
+      <span class="pill good">Letzter Abschluss: TASK_797</span>
+      <span class="pill warn">Aktueller Griff: TASK_798</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -157,6 +157,7 @@
           <li><strong>Multiplayer Decision Findings:</strong> TASK_795 wertet den sichtbaren Playtest als read-only Findings aus.</li>
           <li><strong>Multiplayer Decision Playtest Acceptance:</strong> TASK_796 akzeptiert oder stoppt diese Findings mit engen Gates.</li>
           <li><strong>Playable Candidate:</strong> TASK_797 buendelt den akzeptierten Slice zu einem echten Host/Client-Spielpfad.</li>
+          <li><strong>Playable Real-Run Findings:</strong> TASK_798 sammelt die echten Spielerfluss-Findings des Kandidaten.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -167,11 +168,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_797 macht aus der akzeptierten TASK_796-Quelle einen konkreten Host/Client-Spielkandidaten mit Startpfad, Capturepfad und Spieler-Checkpoints.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777 bis TASK_796: keine neue Gameplay-Wahrheit, keine Auto-Commands. Der Candidate startet nichts selbst, sondern macht den sichtbaren Real-Run reproduzierbar.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_798 sammelt die echten Real-Run-Findings des spielbaren Kandidaten.</div>
-          <input readonly value="TASK_797 - Station Reentry Firefight Multiplayer Playable Slice Candidate" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_798 wertet den echten Zwei-Fenster-Lauf des TASK_797-Kandidaten aus und sortiert Probleme in konkrete Folgearbeit.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777 bis TASK_797: keine neue Gameplay-Wahrheit, keine Auto-Commands. Ohne bewusst gesetzten Real-Run bleibt der Status offen.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_799 akzeptiert oder stoppt den spielbaren Multiplayer-Kandidaten.</div>
+          <input readonly value="TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_799 - Station Reentry Firefight Multiplayer Playable Candidate Acceptance" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -219,6 +220,26 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_playtest_acceptance.accepted_for_multiplayer_playtest_slice"> TASK_796 Acceptance gruen</label>
           <input readonly value="tmp/station_reentry_firefight_multiplayer_playable_slice_candidate.json" data-export-key="reentry_firefight_multiplayer_playable_slice_candidate.manifest_path">
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_slice_candidate.candidate_ready"> TASK_797 Kandidat bereit</label>
+          <input readonly value="tmp/station_reentry_firefight_multiplayer_playable_candidate_real_run_findings.json" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.manifest_path">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.manual_review_done"> TASK_798 Review bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.real_run_done"> Real-Run sichtbar geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.singleplayer_homebase_not_blocked"> Homebase nicht blockiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.host_client_windows_open"> Host/Client-Fenster offen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.fireteams_visible_and_distinct"> Fireteams unterscheidbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.dropship_payload_not_mixed"> Dropship-Payload nicht vermischt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.mission_insertion_visible"> Mission/Drop/Ausstieg sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.move_preview_before_go"> Preview vor GO lesbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.decision_card_actionable"> Decision-Card handlungsfaehig</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.first_firefight_response_fast"> Feuerwechsel schnell genug</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.no_auto_command_commit"> Kein Auto-Command-Commit</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.exit_or_debrief_path_visible"> Exit/Debrief sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.no_hud_overlap_blocker"> Kein HUD-Blocker</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.screenshots_saved"> Screenshots gespeichert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.workbench_json_exported"> Workbench-JSON exportiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.issues.dropship_payload_mixed"> Issue: Dropship-Payload vermischt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.issues.preview_missing_or_unclear"> Issue: Preview unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.issues.firefight_response_stutter"> Issue: Feuerwechsel stottert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_playable_candidate_findings.issues.hud_overlap_blocks_action"> Issue: HUD blockiert Aktion</label>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -589,10 +610,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings"
+            recommended_next_task: "TASK_799 - Station Reentry Firefight Multiplayer Playable Candidate Acceptance"
           },
           metadata: {
-            generated_for_task: "TASK_797",
+            generated_for_task: "TASK_798",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

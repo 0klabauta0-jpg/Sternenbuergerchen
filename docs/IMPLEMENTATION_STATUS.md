@@ -19,6 +19,15 @@
 - Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
 - Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
 
+### TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_798_station_reentry_firefight_multiplayer_playable_candidate_real_run_findings.md`, `docs/tasks/TASK_797_station_reentry_firefight_multiplayer_playable_slice_candidate.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightMultiplayerPlayableCandidateRealRunFindings` wertet den TASK_797-Kandidaten plus optionale Real-Run-/Workbench-Notizen read-only aus.
+- Stand: Der Snapshot prueft Spielerfluss-Checks fuer Homebase, Host/Client, Fireteams, Dropship, Mission-Insertion, Preview, Decision, Firefight, HUD, Exit/Debrief sowie Screenshot-/Workbench-Evidence.
+- Risiken/offen: Kein automatisches Screenshot-Parsing; ohne echten Fensterlauf bleibt `needs_visible_multiplayer_playable_candidate_real_run` korrekt offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_798_station_reentry_firefight_multiplayer_playable_candidate_real_run_findings.gd`, TASK_797/TASK_796/TASK_795 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_799 - Station Reentry Firefight Multiplayer Playable Candidate Acceptance.
+
 ### TASK_797 - Station Reentry Firefight Multiplayer Playable Slice Candidate
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_797_station_reentry_firefight_multiplayer_playable_slice_candidate.md`, `docs/tasks/TASK_796_station_reentry_firefight_multiplayer_decision_playtest_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
@@ -26,7 +35,7 @@
 - Stand: Der Snapshot enthaelt Szenario, Workbench, Launch-/Capture-/Verifier-/Runtime-Export-Kommandos und Spieler-Checkpoints fuer Homebase, Fireteam/Dropship, Mission, Preview, Decision, Firefight und Exit/Debrief.
 - Risiken/offen: Der Candidate ist noch kein sichtbarer Real-Run-Beweis; TASK_798 muss den echten Lauf und seine Findings sammeln.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_797_station_reentry_firefight_multiplayer_playable_slice_candidate.gd`, TASK_796/TASK_795/TASK_794 Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings.
+- Naechster Schritt: TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings (implementiert).
 
 ### TASK_796 - Station Reentry Firefight Multiplayer Decision Playtest Acceptance
 - Status: implementiert im Arbeitsstand
