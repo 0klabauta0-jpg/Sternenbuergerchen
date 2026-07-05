@@ -42,6 +42,9 @@ git checkout -b batch/<batch-name>
 - Gameplay-Wahrheit bleibt bei Simulation/Runtime/Contracts/Registries; UI-Tasks duerfen keine zweite Wahrheit einfuehren.
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
+## Aktueller Release-Hotfix
+- BUGFIX - Singleplayer Release Homebase Start Bootstrap (implementiert): EXE-Startpfad seedet Roster, ALPHA-Fireteam, Dropship, Pilot und fertiges Boarding, damit `Einzelspieler` nicht in einer blockierten Homebase-Readiness haengen bleibt.
+
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
 - TASK_722 - Station Route HUD Visual Polish (implementiert)
@@ -116,7 +119,8 @@ git checkout -b batch/<batch-name>
 - TASK_791 - Station Reentry Firefight Decision Host Client Recapture (implementiert)
 - TASK_792 - Station Reentry Firefight Decision Host Client Findings (implementiert)
 - TASK_793 - Station Reentry Firefight Multiplayer Decision Acceptance (implementiert)
-- Naechster Schritt: TASK_794 - Station Reentry Firefight Multiplayer Decision Playtest Packet.
+- TASK_794 - Station Reentry Firefight Multiplayer Decision Playtest Packet (implementiert)
+- Naechster Schritt: TASK_795 - Station Reentry Firefight Multiplayer Decision Playtest Findings.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

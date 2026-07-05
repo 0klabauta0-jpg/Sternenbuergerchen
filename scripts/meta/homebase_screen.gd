@@ -1485,6 +1485,25 @@ func build_homebase_direct_drop_state_for_craft(craft_id: String) -> Dictionary:
 	}
 
 
+func seed_homebase_direct_launch_payload(craft_id: String, fireteam_ids: PackedStringArray, complete_boarding: bool = false) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_sanitize_homebase_direct_staging_state()
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
+		if fireteam_id.is_empty() or _get_fireteam_definition(fireteam_id).is_empty():
+			continue
+		_add_homebase_direct_payload_fireteam_to_craft(fireteam_id, normalized_craft_id)
+		if complete_boarding:
+			var state: Dictionary = _ensure_homebase_direct_boarding_state(fireteam_id, normalized_craft_id)
+			state["elapsed_seconds"] = _get_homebase_fireteam_boarding_total_seconds(fireteam_id)
+			state["craft_id"] = normalized_craft_id
+			_homebase_direct_boarding_state_by_fireteam_id[fireteam_id] = state
+	if is_inside_tree():
+		_refresh_homebase_direct_boarding_ui()
+
+
 func get_homebase_direct_staging_snapshot() -> Dictionary:
 	var drop_state: Dictionary = build_homebase_direct_drop_state()
 	var craft_gate: Dictionary = _get_homebase_direct_staging_craft_gate()
