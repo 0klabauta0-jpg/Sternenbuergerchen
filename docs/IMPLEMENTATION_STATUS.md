@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_809 - Station Reentry Release Candidate Playability Polish Backlog
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_809_station_reentry_release_candidate_playability_polish_backlog.md`, `docs/tasks/TASK_808_station_reentry_firefight_release_candidate_tester_run_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `HomebaseTestScreen` zeigt unter der Pre-Mission-Readiness eine kleine Release-Candidate-Action-Cue, damit der erste Griff nach `Einzelspieler` sichtbar von `Start Mission` bis `GO` fuehrt.
+- Stand: `get_release_candidate_playability_polish_snapshot()` exportiert Cue-Text, Ready-/Blocked-Zustand, Startbutton, Step-Count und read-only-Grenzen.
+- Stand: Blocked-Zustaende verweisen auf STOP-Chips; Ready-Zustaende nennen `Start Mission -> LZ waehlen -> Drop -> Preview lesen -> GO`.
+- Risiken/offen: Die Cue ist ein kleiner Playability-Polish, kein vollstaendiger Sichttest. TASK_810 sollte die echte Fensterlesbarkeit der CTA pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_809_station_reentry_release_candidate_playability_polish_backlog.gd`, TASK_808 und Singleplayer-Release-Start-Bootstrap Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke.
+
 ### TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_808_station_reentry_firefight_release_candidate_tester_run_acceptance.md`, `docs/tasks/TASK_807_station_reentry_firefight_release_candidate_tester_run.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
