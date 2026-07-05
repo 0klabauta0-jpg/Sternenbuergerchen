@@ -1,6 +1,7 @@
 extends SceneTree
 
 const META_LAYER_TEST_SCENE: PackedScene = preload("res://scenes/meta/meta_layer_test.tscn")
+const MAIN_MENU_SCENE: PackedScene = preload("res://scenes/ui/main_menu.tscn")
 const TASK_PATH := "res://docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md"
 
 var _passed: int = 0
@@ -15,6 +16,7 @@ func _run_tests() -> void:
 	print("=== BUGFIX Singleplayer Release Homebase Start Bootstrap ===")
 	_test_task_doc_exists()
 	await _test_singleplayer_homebase_starts_with_playable_payload()
+	await _test_main_menu_singleplayer_route_starts_with_playable_payload()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("BUGFIX_singleplayer_release_homebase_start_bootstrap: FAILED")
@@ -58,6 +60,53 @@ func _test_singleplayer_homebase_starts_with_playable_payload() -> void:
 	_assert(int(handoff.get("failed_count", -1)) == 0, "Bootstrap launch has no critical handoff failures")
 
 	scene.queue_free()
+	await _wait_frames(2)
+
+
+func _test_main_menu_singleplayer_route_starts_with_playable_payload() -> void:
+	var menu: Control = MAIN_MENU_SCENE.instantiate()
+	root.add_child(menu)
+	current_scene = menu
+	await _wait_frames(4)
+
+	var singleplayer_button := menu.get_node_or_null("MenuRail/MenuMargin/MenuVBox/MenuButtons/SingleplayerButton") as Button
+	_assert(singleplayer_button != null, "Main menu exposes Singleplayer button")
+	if singleplayer_button == null:
+		menu.queue_free()
+		await _wait_frames(2)
+		return
+
+	singleplayer_button.pressed.emit()
+	await _wait_frames(12)
+
+	var scene: Node = current_scene
+	_assert(scene != null and scene.name == "MetaLayerTest", "Singleplayer button routes to MetaLayer scene")
+	if scene == null or scene.name != "MetaLayerTest":
+		return
+
+	var homebase_screen := scene.get_node_or_null("HomebaseScreen") as Control
+	_assert(homebase_screen != null, "Menu-launched MetaLayer exposes HomebaseScreen")
+	_assert(scene.has_method("get_singleplayer_start_bootstrap_snapshot"), "Menu-launched MetaLayer exposes bootstrap snapshot")
+	if homebase_screen == null or not scene.has_method("get_singleplayer_start_bootstrap_snapshot"):
+		scene.queue_free()
+		await _wait_frames(2)
+		return
+
+	var bootstrap: Dictionary = Dictionary(scene.call("get_singleplayer_start_bootstrap_snapshot"))
+	var staging: Dictionary = Dictionary(homebase_screen.call("get_homebase_direct_staging_snapshot"))
+	var readiness: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+	var craft_id: String = String(bootstrap.get("craft_id", "")).strip_edges()
+	_assert(bool(bootstrap.get("enabled", false)), "Menu-launched bootstrap is enabled")
+	_assert(bool(bootstrap.get("payload_seeded", false)), "Menu-launched bootstrap seeds payload")
+	_assert(Array(bootstrap.get("selected_unit_ids", [])).size() >= 2, "Menu-launched bootstrap selects operators")
+	_assert(Array(staging.get("payload_fireteam_ids", [])).size() >= 1, "Menu-launched Homebase has payload Fireteam")
+	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Menu-launched Homebase payload has operators")
+	_assert(int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)), "Menu-launched payload starts boarded")
+	_assert(String(readiness.get("overall_state", "")) == "ready", "Menu-launched Homebase readiness is ready")
+	_assert(bool(homebase_screen.call("can_request_mission_start", craft_id)), "Menu-launched Homebase can request mission start")
+
+	scene.queue_free()
+	current_scene = null
 	await _wait_frames(2)
 
 
