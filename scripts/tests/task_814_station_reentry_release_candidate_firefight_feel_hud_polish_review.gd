@@ -46,7 +46,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(status_text.contains("TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review"), "Implementation status tracks TASK_814")
 	_assert(roadmap_text.contains("TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review (implementiert)"), "Roadmap marks TASK_814 implemented")
 	_assert(contract_text.contains("Station-Reentry-Release-Candidate-Firefight-Feel-And-HUD-Polish-Review"), "Mission command feedback contract documents TASK_814")
-	_assert(report_text.contains("Aktueller Griff: TASK_814"), "Reentry handbook marks TASK_814 current")
+	_assert(report_text.contains("TASK_814 Firefight-HUD-Polish gruen"), "Reentry handbook keeps TASK_814 review controls")
 	_assert(report_text.contains('data-export-key="reentry_release_candidate_firefight_feel_hud_polish.status"'), "Reentry handbook exports TASK_814 status")
 	_assert(meta_text.contains("get_release_candidate_firefight_feel_hud_polish_review_snapshot"), "MetaLayer exposes TASK_814 snapshot")
 	_assert(controller_text.contains("get_release_candidate_firefight_feel_hud_polish_snapshot"), "TacticalController exposes TASK_814 tactical snapshot")
