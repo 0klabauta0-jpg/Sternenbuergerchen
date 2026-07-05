@@ -105,6 +105,9 @@ static func load_roster(profile_id: String = DEFAULT_PROFILE_ID, save_path: Stri
 	var payload: Dictionary = _load_json(path)
 	var validation: Dictionary = validate_payload(payload)
 	if not bool(validation.get("valid", false)):
+		var diagnostics: PackedStringArray = PackedStringArray(validation.get("errors", PackedStringArray()))
+		for load_diagnostic in PackedStringArray(payload.get("_load_diagnostics", PackedStringArray())):
+			diagnostics.append(String(load_diagnostic))
 		return {
 			"ok": false,
 			"exists": true,
@@ -112,7 +115,7 @@ static func load_roster(profile_id: String = DEFAULT_PROFILE_ID, save_path: Stri
 			"profile_id": _sanitize_profile_id(profile_id),
 			"payload": payload,
 			"roster": {},
-			"diagnostics": PackedStringArray(validation.get("errors", PackedStringArray())),
+			"diagnostics": diagnostics,
 		}
 	var roster: Dictionary = Dictionary(payload.get("roster", {})).duplicate(true)
 	roster = TEAM_NAME_GENERATOR_SCRIPT.call("apply_team_name", roster, String(roster.get("team_name", "")), String(roster.get("seed", "")), int(Dictionary(roster.get("team_identity", {})).get("name_generation_index", 0)))
@@ -414,7 +417,7 @@ static func _build_roster_entry(path: String, profile_id: String, active: bool, 
 	var payload: Dictionary = Dictionary(load_result.get("payload", {}))
 	var identity: Dictionary = Dictionary(TEAM_NAME_GENERATOR_SCRIPT.call("build_team_identity_snapshot", roster))
 	var team_name: String = String(identity.get("team_name", "")).strip_edges()
-	if team_name.is_empty() and not bool(load_result.get("ok", false)):
+	if not bool(load_result.get("ok", false)):
 		team_name = "Ungueltiger Team-Save"
 	return {
 		"entry_id": path,
@@ -508,13 +511,27 @@ static func _merge_diagnostics(first: Dictionary, second: Dictionary) -> PackedS
 
 static func _load_json(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
-		return {}
+		return {"_load_diagnostics": PackedStringArray(["load_missing:%s" % path])}
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
-		return {}
+		return {"_load_diagnostics": PackedStringArray(["load_open_failed:%s:%d" % [path, FileAccess.get_open_error()]])}
+	var length: int = file.get_length()
+	if length <= 0:
+		file.close()
+		return {"_load_diagnostics": PackedStringArray(["load_empty:%s" % path])}
 	var text: String = file.get_as_text()
 	file.close()
-	var parsed: Variant = JSON.parse_string(text)
+	if text.strip_edges().is_empty():
+		return {"_load_diagnostics": PackedStringArray(["load_empty:%s" % path])}
+	var json := JSON.new()
+	var parse_error: Error = json.parse(text)
+	if parse_error != OK:
+		return {
+			"_load_diagnostics": PackedStringArray([
+				"load_parse_failed:%s:%d:%s" % [path, int(json.get_error_line()), json.get_error_message()]
+			])
+		}
+	var parsed: Variant = json.data
 	if typeof(parsed) != TYPE_DICTIONARY:
-		return {}
+		return {"_load_diagnostics": PackedStringArray(["load_not_dictionary:%s" % path])}
 	return Dictionary(parsed)

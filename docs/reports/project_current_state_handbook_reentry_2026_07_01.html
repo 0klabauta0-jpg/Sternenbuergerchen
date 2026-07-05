@@ -76,9 +76,10 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_812</span>
-      <span class="pill warn">Aktueller Griff: TASK_812</span>
+      <span class="pill good">Letzter Abschluss: TASK_813</span>
+      <span class="pill warn">Aktueller Griff: TASK_813</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
+      <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -173,7 +174,9 @@
           <li><strong>CTA Visual Smoke:</strong> TASK_810 prueft diesen ersten Homebase-Griff automatisiert gegen CTA, Startbutton, Flightdeck, Payload und sichtbare STOP-Widersprueche.</li>
           <li><strong>Mission Launch Smoke:</strong> TASK_811 drueckt danach `Start Mission` und prueft, ob die Mission sichtbar mit LZ-/Drop-/Order-Griff startet.</li>
           <li><strong>LZ/Drop/Preview Smoke:</strong> TASK_812 setzt eine LZ, loest Drop aus und prueft die erste Move-Preview vor GO.</li>
+          <li><strong>First GO/Firefight Smoke:</strong> TASK_813 fuehrt GO aus und prueft Bewegung, ersten Kontakt und erste Engagement-Rueckmeldung.</li>
           <li><strong>Release-Start-Hotfix:</strong> Halbvolle lokale Saves werden beim Einzelspieler-Start additiv repariert, damit vorhandenes Fireteam plus fehlender Pilot/Flightdeck-Payload nicht mehr in `Start blockiert` endet.</li>
+          <li><strong>Roster-Save-Guard:</strong> Leere oder kaputte lokale Roster-Saves werden jetzt diagnostiziert und reparierbar gehalten, statt beim Einzelspieler-Start JSON-Errors auszuloesen.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -184,11 +187,12 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_812 prueft den ersten echten Missionsgriff: LZ setzen, Drop ausloesen, Fireteam deboarden, Move planen und Preview vor `GO` lesen.</p>
-          <p>Quelle bleiben Handoff-, TASK_539-Insertion- und TASK_540-First-Move-Snapshots. Der Smoke fuehrt kein `GO` aus und setzt keine neue Missions- oder UI-Wahrheit.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_813 prueft den ersten `GO` plus erste Firefight-/Kontaktreaktion.</div>
-          <input readonly value="TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_813 prueft den ersten live ausgefuehrten Missionsgriff: GO annehmen, Bewegung sichtbar machen, Kontakt lesen und Engagement-Entscheidung rueckmelden.</p>
+          <p>Quelle bleiben TASK_812-Pre-GO, TASK_541-Execution, TASK_542-Contact und TASK_543-Engagement. Der Snapshot selbst bleibt read-only.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_814 sollte den echten Firefight-Fensterblick, HUD-Dichte, Timing und Spielgefuehl bewerten.</div>
+          <input readonly value="TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="BUGFIX - Player Roster Corrupt Save Quiet Recovery" data-export-key="reentry_handbook.latest_hotfix">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -421,6 +425,12 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_lz_drop_preview_actionability.fireteam_deployed"> Fireteam deployed</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_lz_drop_preview_actionability.preview_before_go_visible"> Preview vor GO sichtbar</label>
           <input readonly value="TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke" data-export-key="reentry_release_candidate_lz_drop_preview_actionability.recommended_next_task">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_first_go_firefight_actionability.status"> TASK_813 First-GO/Firefight-Smoke gruen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_first_go_firefight_actionability.go_executed"> GO angenommen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_first_go_firefight_actionability.movement_visible"> Bewegung sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_first_go_firefight_actionability.contact_visible"> Erster Kontakt sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_first_go_firefight_actionability.engagement_visible"> Erste Engagement-Entscheidung sichtbar</label>
+          <input readonly value="TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review" data-export-key="reentry_release_candidate_first_go_firefight_actionability.recommended_next_task">
           <textarea data-export-key="reentry_release_candidate_playability_polish.cta_visual_note" placeholder="CTA-Fensterblick / TASK_810-Notiz"></textarea>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
@@ -792,10 +802,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke"
+            recommended_next_task: "TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review"
           },
           metadata: {
-            generated_for_task: "TASK_812",
+            generated_for_task: "TASK_813",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
