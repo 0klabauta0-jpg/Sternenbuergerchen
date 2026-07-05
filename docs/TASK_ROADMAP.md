@@ -124,7 +124,8 @@ git checkout -b batch/<batch-name>
 - TASK_796 - Station Reentry Firefight Multiplayer Decision Playtest Acceptance (implementiert)
 - TASK_797 - Station Reentry Firefight Multiplayer Playable Slice Candidate (implementiert)
 - TASK_798 - Station Reentry Firefight Multiplayer Playable Candidate Real Run Findings (implementiert)
-- Naechster Schritt: TASK_799 - Station Reentry Firefight Multiplayer Playable Candidate Acceptance.
+- TASK_799 - Station Reentry Firefight Multiplayer Playable Candidate Acceptance (implementiert)
+- Naechster Schritt: TASK_800 - Station Reentry Firefight Multiplayer Release Candidate Packet.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML
