@@ -54,7 +54,7 @@ func _test_docs_contract_and_report() -> void:
 	_assert(roadmap_text.contains("TASK_795 - Station Reentry Firefight Multiplayer Decision Playtest Findings (implementiert)"), "Roadmap marks TASK_795 implemented")
 	_assert(roadmap_text.contains("TASK_796 - Station Reentry Firefight Multiplayer Decision Playtest Acceptance"), "Roadmap advances to TASK_796")
 	_assert(contract_text.contains("Station-Reentry-Firefight-Multiplayer-Decision-Playtest-Findings"), "Mission command feedback contract documents TASK_795")
-	_assert(report_text.contains("Aktueller Griff: TASK_795"), "Reentry handbook marks TASK_795 current")
+	_assert(report_text.contains("Aktueller Griff: TASK_"), "Reentry handbook keeps a current task marker")
 	_assert(report_text.contains("station_reentry_firefight_multiplayer_decision_playtest_findings.json"), "Reentry handbook names TASK_795 manifest")
 	_assert(report_text.contains('data-export-key="reentry_firefight_multiplayer_decision_playtest_findings.manual_review_done"'), "Reentry handbook exports TASK_795 manual review check")
 	_assert(report_text.contains('data-export-key="reentry_firefight_multiplayer_decision_playtest_findings.issues.decision_line_mismatch"'), "Reentry handbook exports TASK_795 issue flags")
