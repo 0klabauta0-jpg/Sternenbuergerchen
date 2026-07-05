@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_804</span>
-      <span class="pill warn">Aktueller Griff: TASK_805</span>
+      <span class="pill good">Letzter Abschluss: TASK_805</span>
+      <span class="pill warn">Aktueller Griff: TASK_806</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -165,6 +165,7 @@
           <li><strong>Ship Readiness:</strong> TASK_803 buendelt EXE/PCK/DLLs, Kommandos, Workbench, Restrisiken und naechste Bedienanweisung fuer den sichtbaren Smoke.</li>
           <li><strong>Visible Ship Smoke:</strong> TASK_804 prueft per Workbench-/Smoke-Notizen, ob frische EXE, Einzelspieler, Homebase, Dropship, Missionsstart, Host/Client-Fenster und Rollen wirklich sichtbar abgenommen wurden.</li>
           <li><strong>Delivery Review:</strong> TASK_805 fasst Paket, sichtbaren Smoke, Start-/Host-Client-Hinweise, Restrisiken und naechsten Handoff-Schritt zusammen.</li>
+          <li><strong>Handoff Packet:</strong> TASK_806 buendelt EXE/PCK, Startschritte, Rollen, Fresh-Link-Warnung, Gates, Risiken und naechste Tester-Aktion.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -175,11 +176,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_805 nimmt den TASK_804-Visible-Ship-Smoke als Quelle und macht daraus eine Delivery-Entscheidung fuer den aktuellen Release-Candidate.</p>
-          <p>Quelle bleibt TASK_804. Die Delivery-Review ist nur gruen, wenn Paket, sichtbarer Smoke, Start-/Host-Client-Hinweise, Restrisiken, Report-Export, stale-Link-Hinweis und naechster Handoff-Schritt zusammenpassen.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_806 baut daraus ein Handoff-Packet fuer Tester/Spielstart, ohne neue Gameplay-Wahrheit zu erfinden.</div>
-          <input readonly value="TASK_805 - Station Reentry Firefight Release Candidate Delivery Review" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_806 - Station Reentry Firefight Release Candidate Handoff Packet" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_806 nimmt die TASK_805-Delivery-Review als Quelle und baut daraus ein weitergabefaehiges Handoff-Packet fuer den aktuellen Release-Candidate.</p>
+          <p>Quelle bleibt TASK_805. Das Handoff-Packet ist nur gruen, wenn Release-Dateien, Einzelspieler-/Host-Client-Startschritte, Rollen, Fresh-Link-Warnung, Gate-Zusammenfassung, Restrisiken, Report und naechste Tester-Aktion benannt sind.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_807 prueft dieses Handoff-Packet gegen einen echten Tester-Run.</div>
+          <input readonly value="TASK_806 - Station Reentry Firefight Release Candidate Handoff Packet" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_807 - Station Reentry Firefight Release Candidate Tester Run" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -327,6 +328,35 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_delivery_review.issues.risks_not_accepted"> Issue: Restrisiken nicht akzeptiert</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_delivery_review.issues.report_export_missing"> Issue: Report-Export fehlt</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_delivery_review.issues.visible_polish_needed"> Issue: sichtbarer Polish-Bedarf</label>
+          <input readonly value="tmp/station_reentry_firefight_release_candidate_handoff_packet.json" data-export-key="reentry_firefight_release_candidate_handoff_packet.manifest_path">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.handoff_packet_done"> TASK_806 Handoff-Packet bewusst abgeschlossen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.handoff_reviewed"> Handoff geprueft</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.delivery_review_ready"> TASK_805 Delivery-Review gruen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.release_dir_named"> Spieleordner benannt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.release_exe_named"> Release-EXE benannt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.release_pck_named"> Release-PCK benannt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.singleplayer_start_step_written"> Einzelspieler-Startschritt beschrieben</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.host_client_start_step_written"> Host/Client-Startschritt beschrieben</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.role_expectations_written"> Rollen beschrieben</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.fresh_shortcut_warning_written"> Fresh-Link-Warnung beschrieben</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.smoke_gate_summary_written"> Smoke-/Review-Gates zusammengefasst</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.risk_summary_written"> Restrisiken zusammengefasst</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.workbench_report_named"> Workbench/Report benannt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.next_tester_action_written"> Naechste Tester-Aktion beschrieben</label>
+          <textarea data-export-key="reentry_firefight_release_candidate_handoff_packet.singleplayer_start_step" placeholder="Einzelspieler-Startschritt"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_handoff_packet.host_client_start_step" placeholder="Host/Client-Startschritt"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_handoff_packet.role_expectations" placeholder="Host/Client-Rollen"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_handoff_packet.shortcut_warning" placeholder="Fresh-EXE-/Shortcut-Warnung"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_handoff_packet.smoke_gate_summary" placeholder="Smoke-/Review-Gate-Zusammenfassung"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_handoff_packet.risk_summary" placeholder="Restrisiken"></textarea>
+          <textarea data-export-key="reentry_firefight_release_candidate_handoff_packet.next_tester_action" placeholder="Naechste Tester-Aktion"></textarea>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.delivery_review_missing"> Issue: Delivery-Review fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.stale_handoff_package"> Issue: Handoff-Paket stale</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.start_steps_unclear"> Issue: Startschritte unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.roles_unclear"> Issue: Rollen unklar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.report_missing"> Issue: Report fehlt</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.risks_unaccepted"> Issue: Restrisiken nicht akzeptiert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_handoff_packet.issues.visible_polish_needed"> Issue: sichtbarer Polish-Bedarf</label>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -697,10 +727,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_806 - Station Reentry Firefight Release Candidate Handoff Packet"
+            recommended_next_task: "TASK_807 - Station Reentry Firefight Release Candidate Tester Run"
           },
           metadata: {
-            generated_for_task: "TASK_805",
+            generated_for_task: "TASK_806",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
