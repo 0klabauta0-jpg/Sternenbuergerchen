@@ -45,9 +45,9 @@ func _test_docs_contract_and_report() -> void:
 	_assert(task_text.contains("First Mission CTA Visual Smoke"), "TASK_810 task names CTA visual smoke")
 	_assert(status_text.contains("TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke"), "Implementation status tracks TASK_810")
 	_assert(roadmap_text.contains("TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke (implementiert)"), "Roadmap marks TASK_810 implemented")
-	_assert(roadmap_text.contains("TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings"), "Roadmap advances to TASK_811")
+	_assert(roadmap_text.contains("TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke (implementiert)"), "Roadmap preserves TASK_811 follow-up")
 	_assert(contract_text.contains("Station-Reentry-Release-Candidate-First-Mission-CTA-Visual-Smoke"), "Mission command feedback contract documents TASK_810")
-	_assert(report_text.contains("Aktueller Griff: TASK_810"), "Reentry handbook marks TASK_810 current")
+	_assert(report_text.contains("TASK_810 CTA-Smoke gruen"), "Reentry handbook keeps TASK_810 smoke check")
 	_assert(report_text.contains('data-export-key="reentry_release_candidate_cta_visual_smoke.status"'), "Reentry handbook exports TASK_810 status")
 	_assert(homebase_text.contains("get_release_candidate_first_mission_cta_visual_smoke_snapshot"), "Homebase exposes TASK_810 snapshot")
 

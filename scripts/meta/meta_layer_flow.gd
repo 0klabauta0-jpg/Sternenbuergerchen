@@ -386,6 +386,124 @@ func get_homebase_to_mission_handoff_snapshot() -> Dictionary:
 	}
 
 
+func get_release_candidate_mission_launch_actionability_snapshot() -> Dictionary:
+	var handoff: Dictionary = get_homebase_to_mission_handoff_snapshot()
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var insertion: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_mission_insertion_first_order_readability_snapshot"):
+		insertion = Dictionary(tactical_controller.call("get_mission_insertion_first_order_readability_snapshot"))
+	var card_ui: Dictionary = Dictionary(insertion.get("card_ui", {}))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"handoff_gate_pass",
+		String(handoff.get("handoff_gate", "")) == "pass" and int(handoff.get("failed_count", -1)) == 0,
+		"critical",
+		"Homebase Start Mission should preserve selected team, loadout, dropship and planning data.",
+		{"handoff_gate": String(handoff.get("handoff_gate", "")), "failed_count": int(handoff.get("failed_count", -1))}
+	)
+	_append_handoff_check(
+		checks,
+		"mission_view_visible",
+		_current_meta_view == "mission" and _is_mission_host_visible_for_current_view(),
+		"critical",
+		"After the Homebase Start Mission button the player should see the Mission view.",
+		{"current_meta_view": _current_meta_view, "mission_host_visible_for_current_view": _is_mission_host_visible_for_current_view()}
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_controller_present",
+		tactical_controller != null and not insertion.is_empty(),
+		"critical",
+		"Active mission should expose the TacticalController insertion readability snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"insertion_gate_pass",
+		String(insertion.get("gate", "")) == "pass" and not bool(insertion.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"First mission insertion snapshot should be readable and read-only before the player chooses an LZ.",
+		{"gate": String(insertion.get("gate", ""))}
+	)
+	_append_handoff_check(
+		checks,
+		"lz_next_step_visible",
+		bool(card_ui.get("set_lz_button_present", false)) \
+			or String(insertion.get("mission_control_status_text", "")).find("LZ") >= 0,
+		"critical",
+		"Mission view should expose LZ as the next step after launch.",
+		{
+			"set_lz_button_present": bool(card_ui.get("set_lz_button_present", false)),
+			"mission_control_status_text": String(insertion.get("mission_control_status_text", "")),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"drop_waits_for_lz",
+		not bool(insertion.get("selected_card_has_lz", true)) \
+			and bool(card_ui.get("drop_button_present", false)) \
+			and bool(card_ui.get("drop_button_disabled", true)),
+		"critical",
+		"Drop should be visible but disabled until the player has placed an LZ.",
+		{
+			"selected_card_has_lz": bool(insertion.get("selected_card_has_lz", true)),
+			"drop_button_present": bool(card_ui.get("drop_button_present", false)),
+			"drop_button_disabled": bool(card_ui.get("drop_button_disabled", true)),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"selected_fireteam_and_order_controls_visible",
+		_insertion_check_passed(insertion, "selected_fireteam_visible") \
+			and _insertion_check_passed(insertion, "first_order_controls_visible"),
+		"critical",
+		"Mission view should keep the selected Fireteam plus Move/Defend/GO controls readable."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		not bool(handoff.get("ui_sets_gameplay_truth", true)) \
+			and bool(insertion.get("read_only", false)) \
+			and not bool(insertion.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"Launch actionability snapshot reads handoff and mission insertion data only."
+	)
+
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_reentry_release_candidate_mission_launch_actionability_smoke.v1",
+		"task_id": "TASK_811",
+		"source_task_id": "TASK_810",
+		"singleplayer_path_expected": "MainMenu -> Einzelspieler -> Homebase -> Start Mission -> Mission",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"handoff": handoff,
+		"insertion": insertion,
+		"insertion_gate": String(insertion.get("gate", "")),
+		"mission_drop_craft_id": String(insertion.get("mission_drop_craft_id", "")),
+		"selected_payload_count": int(insertion.get("selected_payload_count", 0)),
+		"selected_card_has_lz": bool(insertion.get("selected_card_has_lz", false)),
+		"set_lz_button_present": bool(card_ui.get("set_lz_button_present", false)),
+		"drop_button_present": bool(card_ui.get("drop_button_present", false)),
+		"drop_button_disabled": bool(card_ui.get("drop_button_disabled", true)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "fail",
+		"recommended_next_task": "TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
@@ -807,6 +925,14 @@ func _build_handoff_issue_list(checks: Array) -> Array:
 				"message": String(check.get("message", "")),
 			})
 	return issues
+
+
+func _insertion_check_passed(snapshot: Dictionary, check_id: String) -> bool:
+	for check_variant in Array(snapshot.get("checks", [])):
+		var check: Dictionary = Dictionary(check_variant)
+		if String(check.get("id", "")) == check_id:
+			return bool(check.get("passed", false))
+	return false
 
 
 func _arrays_match_ordered(left: Array, right: Array) -> bool:
