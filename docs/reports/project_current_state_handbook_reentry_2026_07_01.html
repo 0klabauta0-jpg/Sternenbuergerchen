@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_794</span>
-      <span class="pill warn">Aktueller Griff: TASK_795</span>
+      <span class="pill good">Letzter Abschluss: TASK_795</span>
+      <span class="pill warn">Aktueller Griff: TASK_796</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -155,6 +155,7 @@
           <li><strong>Multiplayer Decision Acceptance:</strong> TASK_793 entscheidet eng, ob der kleine Host/Client-Firefight-Decision-Slice akzeptiert ist.</li>
           <li><strong>Multiplayer Decision Playtest Packet:</strong> TASK_794 verpackt den akzeptierten Slice fuer den sichtbaren Zwei-Fenster-Playtest.</li>
           <li><strong>Multiplayer Decision Findings:</strong> TASK_795 wertet den sichtbaren Playtest als read-only Findings aus.</li>
+          <li><strong>Multiplayer Decision Playtest Acceptance:</strong> TASK_796 akzeptiert oder stoppt diese Findings mit engen Gates.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -165,11 +166,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_795 wertet aus, ob der sichtbare Multiplayer-Decision-Playtest aus TASK_794 wirklich lesbar, synchron und schnell genug war.</p>
-          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790, TASK_791, TASK_792, TASK_793 und TASK_794: keine neue Gameplay-Wahrheit, keine Auto-Commands. Die Findings markieren nur bewusst gesetzte Workbench-Checks als erledigt.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_796 akzeptiert oder stoppt die Multiplayer-Decision-Playtest-Findings.</div>
-          <input readonly value="TASK_795 - Station Reentry Firefight Multiplayer Decision Playtest Findings" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_796 - Station Reentry Firefight Multiplayer Decision Playtest Acceptance" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_796 entscheidet, ob die TASK_795-Findings als kleiner Multiplayer-Decision-Playtest-Slice akzeptiert werden duerfen.</p>
+          <p>Quelle bleibt die bestehende Kette aus TASK_777, TASK_779, TASK_780, TASK_781, TASK_782, TASK_783, TASK_784, TASK_785, TASK_786, TASK_787, TASK_788, TASK_789, TASK_790, TASK_791, TASK_792, TASK_793, TASK_794 und TASK_795: keine neue Gameplay-Wahrheit, keine Auto-Commands. Acceptance ist nur ein Gate ueber vorhandene Findings.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_797 macht aus dem akzeptierten Slice einen spielbaren Multiplayer-Kandidaten.</div>
+          <input readonly value="TASK_796 - Station Reentry Firefight Multiplayer Decision Playtest Acceptance" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_797 - Station Reentry Firefight Multiplayer Playable Slice Candidate" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -213,6 +214,8 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_playtest_findings.issues.decision_line_mismatch"> Issue: Decision-Line-Mismatch</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_playtest_findings.issues.peer_team_context_mixed"> Issue: Peer-/Team-Kontext vermischt</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_playtest_findings.issues.firefight_response_stutter_visible"> Issue: Firefight-Response stottert</label>
+          <input readonly value="tmp/station_reentry_firefight_multiplayer_decision_playtest_acceptance.json" data-export-key="reentry_firefight_multiplayer_decision_playtest_acceptance.manifest_path">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_multiplayer_decision_playtest_acceptance.accepted_for_multiplayer_playtest_slice"> TASK_796 Acceptance gruen</label>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -583,10 +586,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_796 - Station Reentry Firefight Multiplayer Decision Playtest Acceptance"
+            recommended_next_task: "TASK_797 - Station Reentry Firefight Multiplayer Playable Slice Candidate"
           },
           metadata: {
-            generated_for_task: "TASK_795",
+            generated_for_task: "TASK_796",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
