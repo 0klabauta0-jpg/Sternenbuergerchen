@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### BUGFIX - Singleplayer Release Homebase Partial Save Actionability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Singleplayer-Release-Bootstrap repariert jetzt auch halbvolle lokale Saves, bei denen schon ein Fireteam/Roster existiert, aber Pilot, Dropship oder Homebase-direct-Payload fehlen.
+- Stand: Fehlende Preset-Operatoren werden additiv ergaenzt, vorhandene User-Operatoren bleiben unangetastet, und der Payload wird mit der tatsaechlich gestagten Fireteam-ID statt blind mit `ft1` geseedet.
+- Stand: Der Bootstrap-Snapshot exportiert Diagnosefelder fuer Roster-, Selection- und Pilot-Reparatur, damit der EXE-Startzustand nicht wieder unsichtbar halb blockiert bleibt.
+- Risiken/offen: Der Fix ist ein Release-Start-Guard, keine langfristige Save-Migration. Ein spaeterer Kampagnenmodus sollte Saves bewusst versionieren und migrieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release-Export bauen und per EXE-Sichtsmoke pruefen; danach TASK_810 nur noch als CTA-/Fensterlesbarkeits-Smoke.
+
 ### TASK_809 - Station Reentry Release Candidate Playability Polish Backlog
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_809_station_reentry_release_candidate_playability_polish_backlog.md`, `docs/tasks/TASK_808_station_reentry_firefight_release_candidate_tester_run_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
