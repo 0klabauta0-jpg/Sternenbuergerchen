@@ -19,6 +19,15 @@
 - Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
 - Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
 
+### TASK_802 - Station Reentry Firefight Release Candidate Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_802_station_reentry_firefight_release_candidate_acceptance.md`, `docs/tasks/TASK_801_station_reentry_firefight_release_candidate_playtest_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightReleaseCandidateAcceptance` wertet TASK_801-Findings read-only aus und entscheidet eng zwischen offenem Playtest, fehlenden Checks, gezieltem Polish, offenen Gates und akzeptiertem Release-Candidate.
+- Stand: Der Snapshot prueft valide/read-only Quelle, sichtbaren Playtest, Release-EXE, Host/Client, Pflichtchecks, aktive Issues, Release-Kontext, Host-/Client-Rollen und vorhandene Kommandos.
+- Risiken/offen: TASK_802 akzeptiert nur die Findings-Kette; Ship-/Weitergabe-Readiness bleibt TASK_803.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_802_station_reentry_firefight_release_candidate_acceptance.gd`, TASK_801/TASK_800/TASK_799 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_803 - Station Reentry Firefight Release Candidate Ship Readiness.
+
 ### TASK_801 - Station Reentry Firefight Release Candidate Playtest Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_801_station_reentry_firefight_release_candidate_playtest_findings.md`, `docs/tasks/TASK_800_station_reentry_firefight_multiplayer_release_candidate_packet.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
