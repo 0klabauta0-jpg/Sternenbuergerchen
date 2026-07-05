@@ -10,6 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `MetaLayerFlow.get_release_candidate_first_go_firefight_actionability_snapshot()` buendelt Pre-GO, Execution, First-Contact und First-Engagement-Snapshots fuer den ersten echten `GO`-Moment.
+- Stand: Der Main-Menu-`Einzelspieler`-Verifier klickt `Start Mission`, setzt LZ, loest Drop aus, plant Move-Preview, fuehrt `GO` aus und prueft danach Bewegung, Kontaktmeldung und Engagement-Feedback.
+- Risiken/offen: Der Smoke erzwingt einen reproduzierbaren Kontakt, ersetzt aber keinen echten Fenster-Playtest fuer Kampfgefuehl, HUD-Dichte und Timing.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.gd`, TASK_812/TASK_543 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review.
+
+### BUGFIX - Player Roster Corrupt Save Quiet Recovery
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_player_roster_corrupt_save_quiet_recovery.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `PlayerRosterStore._load_json()` behandelt leere, unlesbare und syntaktisch kaputte lokale Roster-Saves jetzt als Diagnose-Payload statt als harte JSON-Parse-Ausgabe.
+- Stand: `load_roster()` reicht `load_empty`, `load_parse_failed` und verwandte Diagnosen weiter; `list_roster_entries()` zeigt kaputte aktive Saves als `Ungueltiger Team-Save`.
+- Stand: `ensure_roster()` bleibt der Reparaturpfad und kann nach kaputtem Save wieder einen frischen Start-Roster speichern.
+- Risiken/offen: Defekte Saves werden nicht automatisch geloescht oder archiviert. Das ist absichtlich konservativ, kann aber spaeter als echte Save-Migration nachgezogen werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_player_roster_corrupt_save_quiet_recovery.gd`, TASK_810, TASK_812, TASK_813, `git diff --check`.
+- Naechster Schritt: Frischen Release-Export bauen und im Fenster pruefen, ob `Einzelspieler` ohne lokalen Save-Schmutz bei einer spielbaren Homebase landet.
+
 ### TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_811_station_reentry_release_candidate_mission_launch_actionability_smoke.md`, `docs/tasks/TASK_539_mission_insertion_first_order_readability_pass.md`, `docs/tasks/TASK_540_mission_first_move_decision_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`

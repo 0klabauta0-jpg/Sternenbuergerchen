@@ -45,6 +45,7 @@ git checkout -b batch/<batch-name>
 ## Aktueller Release-Hotfix
 - BUGFIX - Singleplayer Release Homebase Start Bootstrap (implementiert): EXE-Startpfad seedet Roster, ALPHA-Fireteam, Dropship, Pilot und fertiges Boarding, damit `Einzelspieler` nicht in einer blockierten Homebase-Readiness haengen bleibt.
 - BUGFIX - Singleplayer Release Homebase Partial Save Actionability (implementiert): halbvolle lokale Saves werden beim Release-Start additiv repariert, damit vorhandenes Fireteam plus fehlender Pilot/Flightdeck-Payload nicht wieder in `Start blockiert` endet.
+- BUGFIX - Player Roster Corrupt Save Quiet Recovery (implementiert): leere oder kaputte lokale Roster-Saves werden diagnostiziert und vom Bootstrap reparierbar gehalten, statt beim Singleplayer-Start Godot-JSON-Errors auszugeben.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
@@ -139,7 +140,8 @@ git checkout -b batch/<batch-name>
 - TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke (implementiert)
 - TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke (implementiert)
 - TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke (implementiert)
-- Naechster Schritt: TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke.
+- TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke (implementiert)
+- Naechster Schritt: TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review.
 
 ## Aktueller Fireteam-Arbeitsblock
 - TASK_414 - Fireteam Overview HTML

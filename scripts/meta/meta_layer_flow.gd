@@ -637,6 +637,139 @@ func get_release_candidate_lz_drop_preview_actionability_snapshot() -> Dictionar
 	}
 
 
+func get_release_candidate_first_go_firefight_actionability_snapshot() -> Dictionary:
+	var pre_go: Dictionary = get_release_candidate_lz_drop_preview_actionability_snapshot()
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var execution: Dictionary = {}
+	var contact: Dictionary = {}
+	var engagement: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_mission_first_move_execution_feedback_snapshot"):
+		execution = Dictionary(tactical_controller.call("get_mission_first_move_execution_feedback_snapshot"))
+	if tactical_controller != null and tactical_controller.has_method("get_mission_first_contact_readability_snapshot"):
+		contact = Dictionary(tactical_controller.call("get_mission_first_contact_readability_snapshot"))
+	if tactical_controller != null and tactical_controller.has_method("get_mission_first_engagement_feedback_snapshot"):
+		engagement = Dictionary(tactical_controller.call("get_mission_first_engagement_feedback_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"pre_go_chain_was_actionable",
+		String(pre_go.get("status", "")) == "pass" or (
+			bool(pre_go.get("selected_card_has_lz", false)) \
+				and int(pre_go.get("deployed_selected_unit_count", 0)) > 0 \
+				and int(pre_go.get("planned_waypoint_count", 0)) > 0
+		),
+		"critical",
+		"First GO/Firefight smoke should build on a readable LZ/Drop/Preview chain."
+	)
+	_append_handoff_check(
+		checks,
+		"mission_view_visible",
+		_current_meta_view == "mission" and _is_mission_host_visible_for_current_view(),
+		"critical",
+		"First GO/Firefight smoke should run while the Mission view is visible."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_controller_present",
+		tactical_controller != null and not execution.is_empty() and not contact.is_empty() and not engagement.is_empty(),
+		"critical",
+		"Active mission should expose execution, contact and engagement readability snapshots."
+	)
+	_append_handoff_check(
+		checks,
+		"go_execution_visible",
+		String(execution.get("gate", "")) == "pass" \
+			and _insertion_check_passed(execution, "go_feedback_visible") \
+			and _insertion_check_passed(execution, "movement_state_visible"),
+		"critical",
+		"GO should create readable execution and movement feedback for the selected Fireteam.",
+		{
+			"execution_gate": String(execution.get("gate", "")),
+			"movement_state_count": int(execution.get("movement_state_count", 0)),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"first_contact_visible",
+		String(contact.get("gate", "")) == "pass" \
+			and _insertion_check_passed(contact, "selected_fireteam_has_contact") \
+			and _insertion_check_passed(contact, "contact_report_text_visible"),
+		"critical",
+		"First contact should be readable as contact entry, report text and tactical feedback.",
+		{
+			"contact_gate": String(contact.get("gate", "")),
+			"selected_contact_count": int(contact.get("selected_contact_count", 0)),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"first_engagement_feedback_visible",
+		String(engagement.get("gate", "")) == "pass" \
+			and _insertion_check_passed(engagement, "engagement_decision_visible") \
+			and _insertion_check_passed(engagement, "target_or_block_reason_visible") \
+			and _insertion_check_passed(engagement, "feedback_text_visible"),
+		"critical",
+		"First engagement should expose fired/waiting/blocked status plus target or block reason.",
+		{
+			"engagement_gate": String(engagement.get("gate", "")),
+			"engagement_status": String(engagement.get("engagement_status", "")),
+			"fire_event_count": int(engagement.get("fire_event_count", 0)),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(pre_go.get("read_only", false)) \
+			and not bool(pre_go.get("ui_sets_gameplay_truth", true)) \
+			and bool(execution.get("read_only", false)) \
+			and not bool(execution.get("ui_sets_gameplay_truth", true)) \
+			and bool(contact.get("read_only", false)) \
+			and not bool(contact.get("ui_sets_gameplay_truth", true)) \
+			and bool(engagement.get("read_only", false)) \
+			and not bool(engagement.get("ui_sets_gameplay_truth", true)),
+		"critical",
+		"First GO/Firefight actionability snapshot reads existing mission state only."
+	)
+
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.station_reentry_release_candidate_first_go_firefight_actionability_smoke.v1",
+		"task_id": "TASK_813",
+		"source_task_id": "TASK_812",
+		"singleplayer_path_expected": "MainMenu -> Einzelspieler -> Homebase -> Start Mission -> LZ -> Drop -> Move Preview -> GO -> First Contact -> First Engagement",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"pre_go": pre_go,
+		"execution": execution,
+		"contact": contact,
+		"engagement": engagement,
+		"pre_go_status": String(pre_go.get("status", "")),
+		"execution_gate": String(execution.get("gate", "")),
+		"contact_gate": String(contact.get("gate", "")),
+		"engagement_gate": String(engagement.get("gate", "")),
+		"go_executed": _insertion_check_passed(execution, "go_feedback_visible"),
+		"movement_state_count": int(execution.get("movement_state_count", 0)),
+		"selected_contact_count": int(contact.get("selected_contact_count", 0)),
+		"engagement_status": String(engagement.get("engagement_status", "")),
+		"fire_event_count": int(engagement.get("fire_event_count", 0)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "fail",
+		"recommended_next_task": "TASK_814 - Station Reentry Release Candidate Firefight Feel And HUD Polish Review",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
