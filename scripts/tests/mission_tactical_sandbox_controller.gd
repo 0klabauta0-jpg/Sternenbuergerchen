@@ -288,6 +288,7 @@ var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
 var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
 var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
 var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
+var _release_candidate_firefight_decision_line_build_depth: int = 0
 var _last_target_position: Vector2 = Vector2.ZERO
 var _lz_position: Vector2 = Vector2.ZERO
 var _has_lz_position: bool = false
@@ -6960,6 +6961,9 @@ func _build_release_candidate_firefight_decision_line() -> String:
 
 
 func _build_release_candidate_firefight_decision_line_snapshot() -> Dictionary:
+	if _release_candidate_firefight_decision_line_build_depth > 0:
+		return _build_empty_release_candidate_firefight_decision_line_snapshot("recursive_readout_guard")
+	_release_candidate_firefight_decision_line_build_depth += 1
 	var diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
 	var engagement_snapshot: Dictionary = {
 		"contact_decision_diagnostics": diagnostics,
@@ -6973,7 +6977,7 @@ func _build_release_candidate_firefight_decision_line_snapshot() -> Dictionary:
 	var why_token: String = _release_candidate_firefight_why_token(player_action, combat_hud_density)
 	var decision_line: String = "NEXT %s | WHY %s" % [next_token, why_token] if active else ""
 	var line_limit: int = 72
-	return {
+	var snapshot: Dictionary = {
 		"active": active and not decision_line.is_empty(),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
@@ -6990,6 +6994,30 @@ func _build_release_candidate_firefight_decision_line_snapshot() -> Dictionary:
 		"line_within_limit": decision_line.length() <= line_limit,
 		"player_action": player_action,
 		"combat_hud_density": combat_hud_density,
+	}
+	_release_candidate_firefight_decision_line_build_depth = maxi(_release_candidate_firefight_decision_line_build_depth - 1, 0)
+	return snapshot
+
+
+func _build_empty_release_candidate_firefight_decision_line_snapshot(reason: String = "") -> Dictionary:
+	return {
+		"active": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"decision_line": "",
+		"next_token": "",
+		"why_token": "",
+		"line_length": 0,
+		"line_char_limit": 72,
+		"line_within_limit": true,
+		"player_action": {},
+		"combat_hud_density": {},
+		"guard_reason": reason.strip_edges(),
 	}
 
 

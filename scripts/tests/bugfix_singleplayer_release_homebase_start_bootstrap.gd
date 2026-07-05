@@ -18,6 +18,7 @@ func _run_tests() -> void:
 	await _test_singleplayer_homebase_starts_with_playable_payload()
 	await _test_main_menu_singleplayer_route_starts_with_playable_payload()
 	await _test_partial_saved_start_state_is_repaired()
+	await _test_stale_payload_seed_uses_visible_fireteam_fallback()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("BUGFIX_singleplayer_release_homebase_start_bootstrap: FAILED")
@@ -192,6 +193,44 @@ func _test_partial_saved_start_state_is_repaired() -> void:
 	_assert(Array(aircraft.get("visible_aircraft_definitions", [])).size() >= 1, "Partial saved state visible Flightdeck has a shipcard")
 	_assert(not String(aircraft.get("selected_status_text", "")).contains("Flight deck empty"), "Partial saved state Flightdeck does not render empty blocker")
 	_assert(bool(homebase_screen.call("can_request_mission_start", craft_id)), "Partial saved state can request mission start")
+
+	scene.queue_free()
+	await _wait_frames(2)
+
+
+func _test_stale_payload_seed_uses_visible_fireteam_fallback() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	await _wait_frames(8)
+
+	var homebase_screen := scene.get_node_or_null("HomebaseScreen") as Control
+	_assert(homebase_screen != null, "Stale payload seed exposes HomebaseScreen")
+	_assert(scene.has_method("get_singleplayer_start_bootstrap_snapshot"), "Stale payload seed exposes bootstrap snapshot")
+	if homebase_screen == null or not scene.has_method("get_singleplayer_start_bootstrap_snapshot"):
+		scene.queue_free()
+		await _wait_frames(2)
+		return
+
+	var bootstrap: Dictionary = Dictionary(scene.call("get_singleplayer_start_bootstrap_snapshot"))
+	var craft_id: String = String(bootstrap.get("craft_id", "")).strip_edges()
+	_assert(not craft_id.is_empty(), "Stale payload seed has bootstrap craft")
+	homebase_screen.set("_homebase_dropship_staged_fireteam_ids_by_craft", {})
+	homebase_screen.set("_homebase_dropship_staged_fireteam_ids", PackedStringArray())
+	homebase_screen.set("_homebase_dropship_payload_craft_id", "")
+	homebase_screen.set("_homebase_direct_boarding_state_by_fireteam_id", {})
+	homebase_screen.call("seed_homebase_direct_launch_payload", craft_id, PackedStringArray(["stale_removed_fireteam"]), true)
+	await _wait_frames(4)
+
+	var staging: Dictionary = Dictionary(homebase_screen.call("get_homebase_direct_staging_snapshot"))
+	var readiness: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+	var startflow: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_startflow_visual_snapshot"))
+	_assert(bool(staging.get("payload_fallback_seeded", false)), "Stale payload seed records visible fireteam fallback")
+	_assert(Array(staging.get("payload_fireteam_ids", [])).size() >= 1, "Stale payload seed restores a visible payload Fireteam")
+	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Stale payload seed restores payload operators")
+	_assert(int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)), "Stale payload seed boards restored payload")
+	_assert(String(readiness.get("overall_state", "")) == "ready", "Stale payload seed readiness becomes ready")
+	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Stale payload seed keeps Start Mission visible")
+	_assert(not bool(startflow.get("start_button_disabled", true)), "Stale payload seed enables Start Mission")
 
 	scene.queue_free()
 	await _wait_frames(2)

@@ -1674,6 +1674,7 @@ func seed_homebase_direct_launch_payload(craft_id: String, fireteam_ids: PackedS
 	if normalized_craft_id.is_empty():
 		return
 	_sanitize_homebase_direct_staging_state()
+	var seeded_count: int = 0
 	for fireteam_id_variant in fireteam_ids:
 		var fireteam_id: String = _normalize_fireteam_id(String(fireteam_id_variant))
 		if fireteam_id.is_empty() or _get_fireteam_definition(fireteam_id).is_empty():
@@ -1684,8 +1685,31 @@ func seed_homebase_direct_launch_payload(craft_id: String, fireteam_ids: PackedS
 			state["elapsed_seconds"] = _get_homebase_fireteam_boarding_total_seconds(fireteam_id)
 			state["craft_id"] = normalized_craft_id
 			_homebase_direct_boarding_state_by_fireteam_id[fireteam_id] = state
+		seeded_count += 1
+	if seeded_count <= 0:
+		var fallback_fireteam_id: String = _get_first_seedable_homebase_fireteam_id()
+		if not fallback_fireteam_id.is_empty():
+			_add_homebase_direct_payload_fireteam_to_craft(fallback_fireteam_id, normalized_craft_id)
+			if complete_boarding:
+				var fallback_state: Dictionary = _ensure_homebase_direct_boarding_state(fallback_fireteam_id, normalized_craft_id)
+				fallback_state["elapsed_seconds"] = _get_homebase_fireteam_boarding_total_seconds(fallback_fireteam_id)
+				fallback_state["craft_id"] = normalized_craft_id
+				_homebase_direct_boarding_state_by_fireteam_id[fallback_fireteam_id] = fallback_state
+			set_meta("homebase_direct_launch_payload_fallback_seeded", true)
 	if is_inside_tree():
 		_refresh_homebase_direct_boarding_ui()
+
+
+func _get_first_seedable_homebase_fireteam_id() -> String:
+	for definition_variant in _fireteam_definitions:
+		if typeof(definition_variant) != TYPE_DICTIONARY:
+			continue
+		var fireteam_id: String = _normalize_fireteam_id(String(Dictionary(definition_variant).get("id", "")))
+		if fireteam_id.is_empty():
+			continue
+		if not _get_member_unit_ids_for_fireteam(fireteam_id).is_empty():
+			return fireteam_id
+	return ""
 
 
 func get_homebase_direct_staging_snapshot() -> Dictionary:
@@ -1724,6 +1748,7 @@ func get_homebase_direct_staging_snapshot() -> Dictionary:
 		"homebase_direct_craft_block_text": String(craft_gate.get("block_text", "")).strip_edges(),
 		"mission_drop_pilot_unit_id": String(drop_state.get("mission_drop_pilot_unit_id", "")).strip_edges(),
 		"mission_drop_pilot_display_name": String(drop_state.get("mission_drop_pilot_display_name", "")).strip_edges(),
+		"payload_fallback_seeded": bool(get_meta("homebase_direct_launch_payload_fallback_seeded", false)),
 		"can_request_mission_start": can_request_mission_start(),
 		"uses_fob_drop_panel_contract": bool(get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel").get_meta("homebase_uses_fob_drop_panel_contract", false)) if get_node_or_null("Panel/Margin/VBox/ContentRow/HomebaseFireteamPanel") != null else false,
 	}

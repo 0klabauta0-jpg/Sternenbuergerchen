@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### BUGFIX - Singleplayer Release EXE Actionability And Firefight Decision Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_exe_actionability_and_firefight_decision_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `HomebaseTestScreen.seed_homebase_direct_launch_payload()` faellt bei stale Fireteam-ID-Handoff auf das erste sichtbare Fireteam mit Mitgliedern zurueck und markiert `payload_fallback_seeded`.
+- Stand: Die Firefight-`NEXT/WHY`-Decision-Line hat einen Rekursionsguard, damit CommandFeedback-/Status-Snapshots keinen Stack Overflow mehr erzeugen.
+- Risiken/offen: Der frische Export muss im echten Fenster erneut gestartet werden; alte Taskleisten-/EXE-Pfade koennen weiterhin einen alten Build zeigen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_817_station_reentry_release_candidate_targeted_firefight_polish.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release-Export bauen und Taskleisten-/EXE-Pfad gegen den neuen Spieleordner pruefen.
+
 ### TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
