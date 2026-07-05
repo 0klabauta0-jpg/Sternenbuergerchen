@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_807</span>
-      <span class="pill warn">Aktueller Griff: TASK_808</span>
+      <span class="pill good">Letzter Abschluss: TASK_808</span>
+      <span class="pill warn">Aktueller Griff: TASK_809</span>
       <span class="pill">Report ist read-only</span>
     </div>
   </header>
@@ -168,6 +168,7 @@
           <li><strong>Handoff Packet:</strong> TASK_806 buendelt EXE/PCK, Startschritte, Rollen, Fresh-Link-Warnung, Gates, Risiken und naechste Tester-Aktion.</li>
           <li><strong>Tester Run:</strong> TASK_807 prueft das Handoff gegen den echten Spielergriff von EXE-Start bis erstem Firefight und Exit/Debrief.</li>
           <li><strong>Tester Run Acceptance:</strong> TASK_808 akzeptiert diesen Lauf nur, wenn der frische EXE-Griff komplett, reviewed, issue-frei und read-only belegt ist.</li>
+          <li><strong>Playability Cue:</strong> TASK_809 zeigt nach `Einzelspieler` die erste Handlungskette direkt in der Homebase: Start Mission, LZ, Drop, Preview, GO.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
         </article>
@@ -178,11 +179,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_808 nimmt den TASK_807-Tester-Run als Quelle und akzeptiert ihn nur, wenn der Spielergriff vom frischen EXE-Start bis Exit/Debrief vollstaendig und issue-frei belegt ist.</p>
-          <p>Quelle bleibt TASK_807. Die Acceptance ist nur gruen, wenn frische EXE, Einzelspieler, Homebase, Dropship, Missionstart, Host/Client, Rollen, Preview, GO/Firefight, Exit/Debrief, Performance, HUD und Notizexport zusammen passen.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_809 muss die beobachteten Reibungen in echten Playability-/Polish-Arbeiten aufloesen.</div>
-          <input readonly value="TASK_808 - Station Reentry Firefight Release Candidate Tester Run Acceptance" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_809 - Station Reentry Release Candidate Playability Polish Backlog" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_809 macht den ersten Griff nach `Einzelspieler` lesbarer: Wenn die Homebase bereit ist, zeigt sie die Kette `Start Mission -> LZ waehlen -> Drop -> Preview lesen -> GO`.</p>
+          <p>Quelle bleibt der vorhandene Readiness-/Startflow-Zustand. Die Cue ist Anzeige und darf keine Navigation, keinen Start und keine Gameplay-Wahrheit setzen.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_810 prueft die echte Fensterlesbarkeit dieser CTA im Release-Startpfad.</div>
+          <input readonly value="TASK_809 - Station Reentry Release Candidate Playability Polish Backlog" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -397,6 +398,9 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run_acceptance.no_missing_checks"> Keine TASK_807-Checks offen</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_firefight_release_candidate_tester_run_acceptance.no_active_issues"> Keine aktiven Tester-Run-Issues</label>
           <textarea data-export-key="reentry_firefight_release_candidate_tester_run_acceptance.acceptance_note" placeholder="Acceptance-Notiz / Route zu TASK_809"></textarea>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_playability_polish.release_candidate_action_cue_ready"> TASK_809 Ready-Cue sichtbar</label>
+          <input readonly value="Naechster Griff: Start Mission -> LZ waehlen -> Drop -> Preview lesen -> GO" data-export-key="reentry_release_candidate_playability_polish.expected_ready_cue">
+          <textarea data-export-key="reentry_release_candidate_playability_polish.cta_visual_note" placeholder="CTA-Fensterblick / TASK_810-Notiz"></textarea>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
           <input readonly value="tmp/host_client_two_window_client_review.png" data-export-key="reentry_identity_cue.client_screenshot_path">
@@ -767,10 +771,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_809 - Station Reentry Release Candidate Playability Polish Backlog"
+            recommended_next_task: "TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke"
           },
           metadata: {
-            generated_for_task: "TASK_808",
+            generated_for_task: "TASK_809",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

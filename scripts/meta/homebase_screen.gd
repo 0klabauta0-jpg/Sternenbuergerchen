@@ -1210,6 +1210,8 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 	var flightdeck_panel := get_node_or_null("Panel/Margin/VBox/ContentRow/AircraftPanel") as Control
 	var briefing_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionBriefingPanel") as Control
 	var readiness_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel") as Control
+	var action_cue_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel") as Control
+	var action_cue_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessSummaryLabel") as Label
 	var start_button := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
 	var mission_rect: Rect2 = _control_global_rect(mission_panel)
 	var roster_rect: Rect2 = _control_global_rect(roster_panel)
@@ -1239,6 +1241,43 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 		"start_button_readiness_color": String(start_button.get_meta("pre_mission_readiness_color_hex", "")) if start_button != null else "",
 		"readiness_summary": String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges(),
 		"readiness_overall_state": String(_pre_mission_readiness_snapshot.get("overall_state", "")).strip_edges(),
+		"release_candidate_action_cue_visible": action_cue_panel != null and action_cue_panel.visible,
+		"release_candidate_action_cue_text": String(action_cue_label.get_meta("release_candidate_action_cue_text", action_cue_label.text)).strip_edges() if action_cue_label != null else "",
+		"release_candidate_action_cue_tooltip": action_cue_panel.tooltip_text if action_cue_panel != null else "",
+		"release_candidate_action_cue_step_count": int(action_cue_panel.get_meta("release_candidate_action_cue_step_count", 0)) if action_cue_panel != null else 0,
+	}
+
+
+func get_release_candidate_playability_polish_snapshot() -> Dictionary:
+	var startflow: Dictionary = get_pre_mission_startflow_visual_snapshot()
+	var readiness: Dictionary = get_pre_mission_readiness_snapshot()
+	var cue_text: String = String(startflow.get("release_candidate_action_cue_text", "")).strip_edges()
+	var expected_ready_text: String = _build_release_candidate_action_cue_text("ready")
+	var readiness_state: String = String(startflow.get("readiness_overall_state", "")).strip_edges()
+	var cue_matches_state: bool = cue_text == _build_release_candidate_action_cue_text(readiness_state)
+	return {
+		"schema": "sternenbuergerchen.station_reentry_release_candidate_playability_polish.v1",
+		"task_id": "TASK_809",
+		"source_task_id": "TASK_808",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"readiness_overall_state": readiness_state,
+		"start_button_text": String(startflow.get("start_button_text", "")).strip_edges(),
+		"start_button_disabled": bool(startflow.get("start_button_disabled", true)),
+		"release_candidate_action_cue_visible": bool(startflow.get("release_candidate_action_cue_visible", false)),
+		"release_candidate_action_cue_text": cue_text,
+		"release_candidate_action_cue_expected_ready_text": expected_ready_text,
+		"release_candidate_action_cue_tooltip": String(startflow.get("release_candidate_action_cue_tooltip", "")).strip_edges(),
+		"release_candidate_action_cue_step_count": int(startflow.get("release_candidate_action_cue_step_count", 0)),
+		"release_candidate_action_cue_matches_state": cue_matches_state,
+		"release_candidate_action_cue_ready": readiness_state == "ready" and cue_text == expected_ready_text,
+		"rendered_readiness_item_text": String(readiness.get("rendered_item_text", "")).strip_edges(),
+		"recommended_next_task": "TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke",
 	}
 
 
@@ -4341,6 +4380,7 @@ func _update_pre_mission_readiness_panel() -> void:
 	_set_pre_mission_readiness_summary(String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges())
 	_set_pre_mission_readiness_items(Array(_pre_mission_readiness_snapshot.get("items", [])))
 	_sync_start_button_with_readiness_snapshot()
+	_update_release_candidate_action_cue_panel()
 
 
 func _ensure_mission_briefing_panel() -> PanelContainer:
@@ -4469,6 +4509,55 @@ func _ensure_pre_mission_readiness_panel() -> PanelContainer:
 	if briefing_panel != null:
 		mission_vbox.move_child(panel, briefing_panel.get_index() + 1)
 	return panel
+
+
+func _update_release_candidate_action_cue_panel() -> void:
+	var panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel") as Control
+	var label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessSummaryLabel") as Label
+	if panel == null or label == null:
+		return
+	var readiness_state: String = String(_pre_mission_readiness_snapshot.get("overall_state", "")).strip_edges()
+	var cue_text: String = _build_release_candidate_action_cue_text(readiness_state)
+	var tooltip_text: String = _build_release_candidate_action_cue_tooltip(readiness_state)
+	var summary_text: String = String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges()
+	panel.visible = true
+	panel.tooltip_text = tooltip_text
+	panel.set_meta("release_candidate_action_cue_text", cue_text)
+	panel.set_meta("release_candidate_action_cue_step_count", _release_candidate_action_cue_step_count(readiness_state))
+	panel.set_meta("readiness_overall_state", readiness_state)
+	panel.set_meta("read_only", true)
+	panel.set_meta("ui_sets_gameplay_truth", false)
+	label.text = cue_text if summary_text.is_empty() else "%s | %s" % [cue_text, summary_text]
+	label.tooltip_text = tooltip_text
+	label.set_meta("release_candidate_action_cue_text", cue_text)
+	label.set_meta("release_candidate_action_cue_step_count", _release_candidate_action_cue_step_count(readiness_state))
+	label.set_meta("read_only", true)
+	label.set_meta("ui_sets_gameplay_truth", false)
+
+
+func _build_release_candidate_action_cue_text(readiness_state: String) -> String:
+	match readiness_state.strip_edges().to_lower():
+		"ready":
+			return "Naechster Griff: Start Mission -> LZ waehlen -> Drop -> Preview lesen -> GO"
+		"warn":
+			return "Naechster Griff: Start pruefen -> WARN-Chips lesen -> bewusst Start Mission"
+	return "Naechster Griff: STOP-Chips loesen -> Dropship/Pilot/Boarding pruefen"
+
+
+func _build_release_candidate_action_cue_tooltip(readiness_state: String) -> String:
+	var summary: String = String(_pre_mission_readiness_snapshot.get("summary_text", "")).strip_edges()
+	if summary.is_empty():
+		summary = "Pre-Mission-Readiness lesen."
+	return "%s\n%s" % [_build_release_candidate_action_cue_text(readiness_state), summary]
+
+
+func _release_candidate_action_cue_step_count(readiness_state: String) -> int:
+	match readiness_state.strip_edges().to_lower():
+		"ready":
+			return 5
+		"warn":
+			return 3
+	return 2
 
 
 func _set_mission_briefing_label(label_name: String, text: String) -> void:
