@@ -19,6 +19,15 @@
 - Lokale Pruefung: `godot --headless --script res://scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot --headless --script res://scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`.
 - Naechster Schritt: Release-Export neu bauen und per EXE-Smoke pruefen.
 
+### TASK_800 - Station Reentry Firefight Multiplayer Release Candidate Packet
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_800_station_reentry_firefight_multiplayer_release_candidate_packet.md`, `docs/tasks/TASK_799_station_reentry_firefight_multiplayer_playable_candidate_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`, `data/export_runtime_package_contract.json`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `StationReentryFirefightMultiplayerReleaseCandidatePacket` buendelt eine akzeptierte TASK_799-Quelle zu einem read-only Release-Candidate-Paket.
+- Stand: Der Snapshot nennt Release-Ordner, EXE, PCK, Runtime-DLLs, Export-Workflow, Host/Client-/Capture-/Workbench-Kommandos und konkrete Playtest-Checks fuer Singleplayer-Start, Host/Client, Fireteams/Dropships, Mission, Preview/Decision, Firefight, Exit/Debrief, HUD und Performance-Gefuehl.
+- Risiken/offen: TASK_800 beweist die Paketstruktur, nicht den echten menschlichen Release-Playtest. Sichtbare Findings bleiben TASK_801.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_800_station_reentry_firefight_multiplayer_release_candidate_packet.gd`, TASK_799/TASK_798/TASK_797 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_801 - Station Reentry Firefight Release Candidate Playtest Findings.
+
 ### TASK_799 - Station Reentry Firefight Multiplayer Playable Candidate Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_799_station_reentry_firefight_multiplayer_playable_candidate_acceptance.md`, `docs/tasks/TASK_798_station_reentry_firefight_multiplayer_playable_candidate_real_run_findings.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
