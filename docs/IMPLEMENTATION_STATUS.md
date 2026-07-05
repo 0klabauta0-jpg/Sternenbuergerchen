@@ -10,15 +10,24 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_811_station_reentry_release_candidate_mission_launch_actionability_smoke.md`, `docs/tasks/TASK_810_station_reentry_release_candidate_first_mission_cta_visual_smoke.md`, `docs/tasks/TASK_539_mission_insertion_first_order_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
+- Stand: `MetaLayerFlow.get_release_candidate_mission_launch_actionability_snapshot()` buendelt den Homebase-to-Mission-Handoff mit dem bestehenden TASK_539-Insertion-Readability-Snapshot.
+- Stand: Der Main-Menu-`Einzelspieler`-Verifier klickt den sichtbaren `Start Mission`-Button und prueft danach `current_meta_view = mission`, sichtbaren MissionHost, gruenen Handoff, LZ-Naechstschritt, deaktivierten Drop vor LZ, Fireteam-Status und erste Order-Kontrollen.
+- Risiken/offen: Der Smoke stoppt bewusst vor LZ-Setzung und Drop. TASK_812 sollte als naechster Griff LZ setzen, Drop ausloesen und den Preview-/GO-Moment absichern.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_811_station_reentry_release_candidate_mission_launch_actionability_smoke.gd`, TASK_810/TASK_539 Regressionen, `git diff --check`.
+- Naechster Schritt: TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke.
+
 ### TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_810_station_reentry_release_candidate_first_mission_cta_visual_smoke.md`, `docs/tasks/TASK_809_station_reentry_release_candidate_playability_polish_backlog.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
 - Stand: `HomebaseTestScreen.get_release_candidate_first_mission_cta_visual_smoke_snapshot()` buendelt CTA, Startbutton, sichtbare Readiness-Chips, Flightdeck, Dropship-Payload und CTA-Bounds fuer den ersten `Einzelspieler`-Homebase-Griff.
 - Stand: Der Smoke prueft, dass die Ready-Cue exakt `Naechster Griff: Start Mission -> LZ waehlen -> Drop -> Preview lesen -> GO` lautet, `Start Mission` aktiv ist, keine STOP-Chips widersprechen, ein Shipcard sichtbar ist und Payload-Operatoren geboardet sind.
 - Stand: Der Main-Menu-`Einzelspieler`-Verifier fuehrt den echten Release-Startpfad bis zur Homebase aus und liest den Snapshot read-only aus.
-- Risiken/offen: Der Smoke ist eine Control-/Snapshot-Pruefung, kein Pixel-/Screenshot-Test. Wenn der echte Fensterblick trotzdem unschoen ist, folgt gezielter TASK_811-Polish.
+- Risiken/offen: Der Smoke ist eine Control-/Snapshot-Pruefung, kein Pixel-/Screenshot-Test. Der echte LZ-/Drop-/Preview-Griff folgt in TASK_812.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_810_station_reentry_release_candidate_first_mission_cta_visual_smoke.gd`, TASK_809 und Singleplayer-Release-Start-Bootstrap Regressionen, `git diff --check`.
-- Naechster Schritt: TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings.
+- Naechster Schritt: TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke.
 
 ### BUGFIX - Singleplayer Release Homebase Partial Save Actionability
 - Status: implementiert im Arbeitsstand

@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_810</span>
-      <span class="pill warn">Aktueller Griff: TASK_810</span>
+      <span class="pill good">Letzter Abschluss: TASK_811</span>
+      <span class="pill warn">Aktueller Griff: TASK_811</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -171,6 +171,7 @@
           <li><strong>Tester Run Acceptance:</strong> TASK_808 akzeptiert diesen Lauf nur, wenn der frische EXE-Griff komplett, reviewed, issue-frei und read-only belegt ist.</li>
           <li><strong>Playability Cue:</strong> TASK_809 zeigt nach `Einzelspieler` die erste Handlungskette direkt in der Homebase: Start Mission, LZ, Drop, Preview, GO.</li>
           <li><strong>CTA Visual Smoke:</strong> TASK_810 prueft diesen ersten Homebase-Griff automatisiert gegen CTA, Startbutton, Flightdeck, Payload und sichtbare STOP-Widersprueche.</li>
+          <li><strong>Mission Launch Smoke:</strong> TASK_811 drueckt danach `Start Mission` und prueft, ob die Mission sichtbar mit LZ-/Drop-/Order-Griff startet.</li>
           <li><strong>Release-Start-Hotfix:</strong> Halbvolle lokale Saves werden beim Einzelspieler-Start additiv repariert, damit vorhandenes Fireteam plus fehlender Pilot/Flightdeck-Payload nicht mehr in `Start blockiert` endet.</li>
             <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           </ul>
@@ -182,11 +183,11 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_810 prueft den ersten Griff nach `Einzelspieler` als Control-/Snapshot-Smoke: Homebase bereit, CTA sichtbar, Startbutton aktiv, Flightdeck nicht leer, Payload geboardet und keine sichtbaren STOP-Widersprueche.</p>
-          <p>Quelle bleibt der vorhandene Readiness-/Startflow-/Flightdeck-/Staging-Zustand. Der Smoke ist Anzeige-/Verifier-Arbeit und darf keine Navigation, keinen Start und keine Gameplay-Wahrheit setzen.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_811 sammelt echte Live-Window-Polish-Findings, falls der menschliche Fensterblick trotz gruenem Smoke noch Reibung zeigt.</div>
-          <input readonly value="TASK_810 - Station Reentry Release Candidate First Mission CTA Visual Smoke" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings" data-export-key="reentry_handbook.recommended_next_task">
+          <p>TASK_811 prueft den Release-Startpfad nach dem Homebase-CTA: `Start Mission` wird aus dem echten `Einzelspieler`-Pfad gedrueckt und muss danach eine sichtbare Mission mit LZ-Naechstschritt, Drop-Blockade bis LZ, Fireteam und Order-Kontrollen liefern.</p>
+          <p>Quelle bleiben der vorhandene Handoff-Snapshot und der TASK_539-Insertion-Snapshot. Der Smoke ist read-only und setzt keine neue Missions- oder UI-Wahrheit.</p>
+          <div class="callout warning">Naechster Schritt danach: TASK_812 setzt eine LZ, loest Drop aus und prueft den Preview-/GO-Moment.</div>
+          <input readonly value="TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
           <input readonly value="tmp/station_reentry_firefight_visual_playtest_packet.json" data-export-key="reentry_firefight_visual_packet.manifest_path">
@@ -408,7 +409,12 @@
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_cta_visual_smoke.status"> TASK_810 CTA-Smoke gruen</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_cta_visual_smoke.no_stop_blockers"> Keine sichtbaren STOP-Widersprueche</label>
           <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_cta_visual_smoke.payload_boarded"> Payload geboardet</label>
-          <input readonly value="TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings" data-export-key="reentry_release_candidate_cta_visual_smoke.recommended_next_task">
+          <input readonly value="TASK_811 - Station Reentry Release Candidate Mission Launch Actionability Smoke" data-export-key="reentry_release_candidate_cta_visual_smoke.recommended_next_task">
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_mission_launch_actionability.status"> TASK_811 Mission-Launch-Smoke gruen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_mission_launch_actionability.mission_visible"> Mission nach Start sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_mission_launch_actionability.lz_next_step_visible"> LZ als naechster Schritt sichtbar</label>
+          <label class="checkline"><input type="checkbox" data-export-key="reentry_release_candidate_mission_launch_actionability.drop_waits_for_lz"> Drop wartet sichtbar auf LZ</label>
+          <input readonly value="TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke" data-export-key="reentry_release_candidate_mission_launch_actionability.recommended_next_task">
           <textarea data-export-key="reentry_release_candidate_playability_polish.cta_visual_note" placeholder="CTA-Fensterblick / TASK_810-Notiz"></textarea>
           <input readonly value="tmp/host_client_two_window_real_run_review.json" data-export-key="reentry_identity_cue.real_run_manifest_path">
           <input readonly value="tmp/host_client_two_window_host_review.png" data-export-key="reentry_identity_cue.host_screenshot_path">
@@ -780,10 +786,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_811 - Station Reentry Release Candidate First Mission Live Window Polish Findings"
+            recommended_next_task: "TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke"
           },
           metadata: {
-            generated_for_task: "TASK_810",
+            generated_for_task: "TASK_811",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
