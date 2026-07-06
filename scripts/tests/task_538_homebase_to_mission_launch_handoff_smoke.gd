@@ -54,6 +54,10 @@ func _test_homebase_direct_launch_handoff_reaches_active_mission() -> void:
 	var fireteam_definitions: Array = [_build_fireteam_definition("ft1", "ALPHA", selected_unit_ids)]
 	scene.set("_available_team_units", roster.duplicate(true))
 	scene.set("_all_team_units", roster.duplicate(true))
+	scene.set("_selected_unit_ids", selected_unit_ids)
+	scene.set("_selected_fireteam_ids", selected_fireteam_ids)
+	scene.set("_homebase_staged_unit_ids", selected_unit_ids)
+	scene.set("_homebase_staged_fireteam_ids", selected_fireteam_ids)
 	scene.set("_homebase_aircraft_definitions", [_build_dropship_definition("dropship_alpha", "Dropship Alpha")])
 	scene.set("_assigned_aircraft_pilot_by_craft", {"dropship_alpha": "unit_delta"})
 	scene.set("_aircraft_location_by_craft", {"dropship_alpha": "homebase"})

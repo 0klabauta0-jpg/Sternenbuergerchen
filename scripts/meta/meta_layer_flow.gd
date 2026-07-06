@@ -99,6 +99,7 @@ const MISSION_PREVIEW_ENABLED: bool = false
 const MISSION_DROP_SOURCE_FOB := "fob"
 const MISSION_DROP_SOURCE_HOMEBASE_DIRECT := "homebase_direct"
 const MISSION_DROP_SOURCE_HOMEBASE_DIRECT_THEN_FOB := "homebase_direct_then_fob"
+const SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID := "grid_sweep"
 const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID := "ft1"
 const SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE := "dropship"
 const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE := 3
@@ -113,6 +114,7 @@ const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"selected_phase_index": 1,
 	"active_phase_index": 0,
 	"phase_count": 2,
+	"mission_drop_source": MISSION_DROP_SOURCE_HOMEBASE_DIRECT,
 }
 
 var _available_team_units: Array = UNIT_ROSTER_PRESETS_SCRIPT.get_homebase_roster()
@@ -125,7 +127,7 @@ var _active_mission = null
 var _last_mission_result: Dictionary = {}
 var _current_meta_view: String = "homebase"
 var _mission_catalog: Array = HOMEBASE_MISSION_CATALOG.duplicate(true)
-var _selected_mission_id: String = "fob_transfer"
+var _selected_mission_id: String = SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID
 var _selected_mission_map_path: String = DEFAULT_META_MAP_PATH
 var _homebase_aircraft_definitions: Array = []
 var _assigned_aircraft_pilot_by_craft: Dictionary = {}
@@ -2522,6 +2524,8 @@ func _ensure_singleplayer_visible_homebase_actionability() -> void:
 func _schedule_singleplayer_visible_homebase_actionability_guard() -> void:
 	if not bool(get_meta("singleplayer_bootstrap_enabled", false)):
 		return
+	if _active_mission != null or _active_mission_started_at_msec > 0:
+		return
 	if bool(get_meta("singleplayer_visible_homebase_post_show_guard_pending", false)):
 		return
 	set_meta("singleplayer_visible_homebase_post_show_guard_pending", true)
@@ -2532,6 +2536,9 @@ func _run_singleplayer_visible_homebase_actionability_post_show_guard() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	set_meta("singleplayer_visible_homebase_post_show_guard_pending", false)
+	if _active_mission != null or _active_mission_started_at_msec > 0:
+		set_meta("singleplayer_visible_homebase_post_show_guard_skipped_view", "active_mission")
+		return
 	if _current_meta_view != "homebase":
 		set_meta("singleplayer_visible_homebase_post_show_guard_skipped_view", _current_meta_view)
 		return
@@ -3557,6 +3564,13 @@ func _sync_fob_dropship_state_into_mission_planning(clear_deployed_unit_ids: boo
 	drop_state = _merge_existing_mission_drop_card_planning_fields(drop_state)
 	if applied_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
 		drop_state = _apply_homebase_direct_setup_selection_from_drop_cards(drop_state)
+		var direct_unit_ids := PackedStringArray(Array(drop_state.get("selected_unit_ids", [])))
+		var direct_fireteam_ids := PackedStringArray(Array(drop_state.get("selected_fireteam_ids", [])))
+		if not direct_unit_ids.is_empty():
+			_selected_unit_ids = direct_unit_ids.duplicate()
+			_selected_fireteam_ids = _normalize_homebase_fireteam_selection(_selected_unit_ids, direct_fireteam_ids)
+			_homebase_staged_unit_ids = _selected_unit_ids.duplicate()
+			_homebase_staged_fireteam_ids = _selected_fireteam_ids.duplicate()
 	if applied_source != MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
 		drop_state = _apply_selected_mission_drop_card_override(drop_state)
 	_mission_planning_state["embarked_unit_ids"] = Array(PackedStringArray(Array(drop_state.get("embarked_unit_ids", []))))
