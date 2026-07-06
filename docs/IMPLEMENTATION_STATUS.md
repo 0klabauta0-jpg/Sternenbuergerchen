@@ -49,6 +49,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release exportieren, starten, `Einzelspieler` klicken und sichtbaren Homebase-Zustand erneut capturen.
 
+### BUGFIX - Singleplayer Release Mission Selection Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_mission_selection_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_direct_sortie_default.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
+- Stand: Der Singleplayer-Bootstrap repariert leere, unbekannte oder alte `fob_transfer`-Auswahlzustaende zur kleinen `grid_sweep`-Direktsortie.
+- Stand: Der sichtbare Homebase-Actionability-Guard prueft jetzt vor Payload/Readiness auch die Release-Default-Mission, damit ein spaeter MissionSelector-/Save-Override nicht wieder den blockierten FOB-Transfer rendert.
+- Stand: Der Bootstrap-Verifier bildet den Screenshot-nahen Fall nach: Homebase ist eigentlich startbar vorbereitet, aber die sichtbare Mission steht wieder auf `fob_transfer`.
+- Risiken/offen: Spaetere Kampagnen-Saves brauchen eine explizite Trennung zwischen gespeicherter Missionswahl und Release-Default-Fallback.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`.
+- Naechster Schritt: Frischen Release exportieren, starten, `Einzelspieler` klicken und sichtbaren Homebase-Zustand erneut capturen.
+
 ### TASK_818 - Station Reentry Release Candidate Playable Build Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_818_station_reentry_release_candidate_playable_build_acceptance.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`, `docs/dev/mission_command_feedback_contract.md`

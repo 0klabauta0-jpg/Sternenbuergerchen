@@ -18,6 +18,7 @@ func _run_tests() -> void:
 	await _test_singleplayer_homebase_starts_with_playable_payload()
 	await _test_main_menu_singleplayer_route_starts_with_playable_payload()
 	await _test_visible_homebase_deadend_is_repaired()
+	await _test_visible_homebase_fob_transfer_selection_is_repaired()
 	await _test_post_show_visible_homebase_deadend_is_repaired()
 	await _test_partial_saved_start_state_is_repaired()
 	await _test_stale_payload_seed_uses_visible_fireteam_fallback()
@@ -109,6 +110,7 @@ func _test_main_menu_singleplayer_route_starts_with_playable_payload() -> void:
 	_assert(bool(bootstrap.get("payload_seeded", false)), "Menu-launched bootstrap seeds payload")
 	_assert(bool(bootstrap.get("visible_homebase_post_show_guard_ran", false)), "Menu-launched post-show guard runs after Homebase becomes visible")
 	_assert(bool(bootstrap.get("visible_homebase_post_show_guard_after_actionable", false)), "Menu-launched post-show guard leaves Homebase actionable")
+	_assert(String(bootstrap.get("selected_mission_id", "")) == "grid_sweep", "Menu-launched Homebase keeps the small direct-sortie mission")
 	_assert(Array(bootstrap.get("selected_unit_ids", [])).size() >= 2, "Menu-launched bootstrap selects operators")
 	_assert(Array(staging.get("payload_fireteam_ids", [])).size() >= 1, "Menu-launched Homebase has payload Fireteam")
 	_assert(int(staging.get("payload_operator_count", 0)) >= 2, "Menu-launched Homebase payload has operators")
@@ -183,6 +185,44 @@ func _test_visible_homebase_deadend_is_repaired() -> void:
 	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Visible dead-end repair restores Start Mission text")
 	_assert(not bool(startflow.get("start_button_disabled", true)), "Visible dead-end repair enables Start Mission")
 	_assert(bool(homebase_screen.call("can_request_mission_start", craft_id)), "Visible dead-end repair can request mission start")
+
+	scene.queue_free()
+	await _wait_frames(2)
+
+
+func _test_visible_homebase_fob_transfer_selection_is_repaired() -> void:
+	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	root.add_child(scene)
+	await _wait_frames(8)
+
+	var homebase_screen := scene.get_node_or_null("HomebaseScreen") as Control
+	_assert(homebase_screen != null, "FOB-transfer selection repair exposes HomebaseScreen")
+	_assert(scene.has_method("_ensure_singleplayer_visible_homebase_actionability"), "Meta layer exposes visible Homebase actionability guard for selection repair")
+	if homebase_screen == null or not scene.has_method("_ensure_singleplayer_visible_homebase_actionability"):
+		scene.queue_free()
+		await _wait_frames(2)
+		return
+
+	scene.set("_selected_mission_id", "fob_transfer")
+	scene.set("_selected_mission_map_path", "res://maps/Ground_Mission01_32x32.json")
+	scene.set_meta("singleplayer_bootstrap_mission_selection_repaired", false)
+	scene.call("_refresh_homebase_screen")
+	await _wait_frames(4)
+
+	var blocked_bootstrap: Dictionary = Dictionary(scene.call("get_singleplayer_start_bootstrap_snapshot"))
+	_assert(String(blocked_bootstrap.get("selected_mission_id", "")) == "fob_transfer", "FOB-transfer selection fixture starts on the old blocked workflow")
+
+	scene.call("_ensure_singleplayer_visible_homebase_actionability")
+	await _wait_frames(8)
+
+	var bootstrap: Dictionary = Dictionary(scene.call("get_singleplayer_start_bootstrap_snapshot"))
+	var startflow: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_startflow_visual_snapshot"))
+	var readiness: Dictionary = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+	_assert(String(bootstrap.get("selected_mission_id", "")) == "grid_sweep", "Visible Homebase guard restores the small direct-sortie mission")
+	_assert(bool(bootstrap.get("mission_selection_repaired", false)), "Visible Homebase guard records mission-selection repair")
+	_assert(String(readiness.get("overall_state", "")) == "ready", "Mission-selection repair leaves readiness ready")
+	_assert(String(startflow.get("start_button_text", "")) == "Start Mission", "Mission-selection repair keeps Start Mission text")
+	_assert(not bool(startflow.get("start_button_disabled", true)), "Mission-selection repair keeps Start Mission enabled")
 
 	scene.queue_free()
 	await _wait_frames(2)
