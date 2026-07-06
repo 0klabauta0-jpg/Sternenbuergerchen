@@ -47,6 +47,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_829_release_singleplayer_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release mit `--release-singleplayer` starten und Homebase-Sichtzustand capturen.
 
+### TASK_830 - Release Start Mission Deep-Link Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_830_release_start_mission_deeplink_evidence.md`, `docs/tasks/TASK_829_release_singleplayer_deeplink_evidence.md`, `docs/tasks/TASK_811_station_reentry_release_candidate_mission_launch_actionability_smoke.md`
+- Stand: Das Main Menu behandelt `--release-singleplayer-start-mission` als Singleplayer-Route.
+- Stand: Der MetaLayer wartet auf die Homebase-Actionability-Guards und loest danach denselben `request_mission_start()`-Pfad aus wie der sichtbare Start-Mission-Button.
+- Risiken/offen: Der Deep-Link ist nur QA-Evidenz; der normale Spielerpfad bleibt bewusst zweistufig.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_830_release_start_mission_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_811_station_reentry_release_candidate_mission_launch_actionability_smoke.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release mit `--release-singleplayer-start-mission` starten und Mission/LZ-Sichtzustand capturen.
+
 ### BUGFIX - Singleplayer Release Visible Homebase Deadend Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_visible_homebase_deadend_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`

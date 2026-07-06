@@ -103,6 +103,7 @@ const SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID := "grid_sweep"
 const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID := "ft1"
 const SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE := "dropship"
 const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE := 3
+const RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG := "--release-singleplayer-start-mission"
 const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"has_lz_position": false,
 	"lz_position": Vector2.ZERO,
@@ -146,6 +147,10 @@ var _mission_planning_state: Dictionary = DEFAULT_MISSION_PLANNING_STATE.duplica
 var _active_mission_started_at_msec: int = 0
 var _active_mission_time_limit_seconds: float = 0.0
 var _last_meta_timer_text: String = ""
+var _release_start_mission_deeplink_requested: bool = false
+var _release_start_mission_deeplink_applied: bool = false
+var _release_start_mission_deeplink_status: String = "idle"
+var _release_start_mission_deeplink_reason: String = ""
 
 
 func _ready() -> void:
@@ -217,6 +222,7 @@ func _ready() -> void:
 	_ensure_transport_timer_state()
 	_show_homebase()
 	call_deferred("_sync_mission_host_visibility")
+	call_deferred("_apply_release_start_mission_deeplink")
 
 
 func _process(_delta: float) -> void:
@@ -528,6 +534,86 @@ func get_release_candidate_mission_launch_actionability_snapshot() -> Dictionary
 		"status": "pass" if failed_count == 0 else "fail",
 		"recommended_next_task": "TASK_812 - Station Reentry Release Candidate LZ Drop Preview Actionability Smoke",
 	}
+
+
+func get_release_start_mission_deeplink_snapshot(user_args: PackedStringArray = PackedStringArray()) -> Dictionary:
+	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
+	var requested: bool = _has_release_start_mission_deeplink_arg(args)
+	var actionability: Dictionary = get_release_candidate_mission_launch_actionability_snapshot() if _active_mission != null else {}
+	return {
+		"schema": "sternenbuergerchen.release_start_mission_deeplink_evidence.v1",
+		"task_id": "TASK_830",
+		"arg": RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG,
+		"args": Array(args),
+		"requested": requested,
+		"applied": _release_start_mission_deeplink_applied,
+		"status": _release_start_mission_deeplink_status,
+		"reason": _release_start_mission_deeplink_reason,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": _active_mission != null,
+		"actionability_status": String(actionability.get("status", "")),
+		"insertion_gate": String(actionability.get("insertion_gate", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _get_release_cmdline_args() -> PackedStringArray:
+	var normalized := PackedStringArray()
+	for arg in OS.get_cmdline_args():
+		var text: String = String(arg).strip_edges()
+		if not text.is_empty() and not normalized.has(text):
+			normalized.append(text)
+	for arg in OS.get_cmdline_user_args():
+		var text: String = String(arg).strip_edges()
+		if not text.is_empty() and not normalized.has(text):
+			normalized.append(text)
+	return normalized
+
+
+func _has_release_start_mission_deeplink_arg(args: PackedStringArray) -> bool:
+	for arg in args:
+		if String(arg).strip_edges() == RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG:
+			return true
+	return false
+
+
+func _apply_release_start_mission_deeplink(user_args: PackedStringArray = PackedStringArray()) -> void:
+	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
+	if not _has_release_start_mission_deeplink_arg(args):
+		return
+	_release_start_mission_deeplink_requested = true
+	_release_start_mission_deeplink_status = "requested"
+	_release_start_mission_deeplink_reason = ""
+	set_meta("release_start_mission_deeplink_requested", true)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	if _current_meta_view != "homebase":
+		_release_start_mission_deeplink_status = "skipped"
+		_release_start_mission_deeplink_reason = "current_view_not_homebase"
+		return
+
+	var homebase_screen = _get_homebase_screen()
+	_ensure_singleplayer_visible_homebase_actionability()
+	if homebase_screen == null or not homebase_screen.has_method("request_mission_start"):
+		_release_start_mission_deeplink_status = "blocked"
+		_release_start_mission_deeplink_reason = "homebase_missing"
+		return
+	if not _is_singleplayer_visible_homebase_actionable(homebase_screen):
+		_release_start_mission_deeplink_status = "blocked"
+		_release_start_mission_deeplink_reason = "homebase_not_actionable"
+		return
+
+	homebase_screen.call("request_mission_start")
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_release_start_mission_deeplink_applied = _current_meta_view == "mission" and _active_mission != null
+	_release_start_mission_deeplink_status = "applied" if _release_start_mission_deeplink_applied else "blocked"
+	_release_start_mission_deeplink_reason = "" if _release_start_mission_deeplink_applied else "mission_view_not_visible"
+	set_meta("release_start_mission_deeplink_applied", _release_start_mission_deeplink_applied)
 
 
 func get_release_candidate_lz_drop_preview_actionability_snapshot() -> Dictionary:
