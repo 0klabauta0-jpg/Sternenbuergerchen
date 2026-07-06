@@ -38,6 +38,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_828_release_ultrawide_canvas_stretch.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_199_main_menu_shell_background_image_verifier.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release exportieren/starten und den Singleplayer-Pfad auf Ultrawide sichtbar recapturen.
 
+### TASK_829 - Release Singleplayer Deep-Link Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_829_release_singleplayer_deeplink_evidence.md`, `docs/tasks/TASK_827_release_homebase_save_override_guard.md`, `docs/tasks/TASK_828_release_ultrawide_canvas_stretch.md`
+- Stand: Das Main Menu akzeptiert den expliziten QA-Parameter `--release-singleplayer` und routet deferred ueber denselben Singleplayer-Handler wie der sichtbare Button.
+- Stand: Der checked Release-Launcher kann optionale `-LaunchArguments` an die EXE weitergeben und schreibt sie ins Manifest.
+- Risiken/offen: Der Deep-Link ersetzt nicht den echten Spieler-Button-Test; er dient nur als stabile Release-Evidenz und Capture-Hilfe.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_829_release_singleplayer_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release mit `--release-singleplayer` starten und Homebase-Sichtzustand capturen.
+
 ### BUGFIX - Singleplayer Release Visible Homebase Deadend Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_visible_homebase_deadend_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`

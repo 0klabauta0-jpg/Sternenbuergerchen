@@ -3,7 +3,8 @@ param(
 	[int]$MaxAgeHours = 48,
 	[switch]$StopRunningReleaseProcess,
 	[switch]$CleanTempFiles,
-	[switch]$Launch
+	[switch]$Launch,
+	[string[]]$LaunchArguments = @()
 )
 
 $ErrorActionPreference = "Stop"
@@ -166,11 +167,20 @@ if ($Launch) {
 	if ([string]$postcheck.gate -eq "fail") {
 		throw "Refusing to launch because release check gate is fail."
 	}
-	$started = Start-Process -FilePath ([string]$postcheck.exe_path) -WorkingDirectory ([string]$postcheck.release_directory) -PassThru
+	$startParams = @{
+		FilePath = [string]$postcheck.exe_path
+		WorkingDirectory = [string]$postcheck.release_directory
+		PassThru = $true
+	}
+	if (@($LaunchArguments).Count -gt 0) {
+		$startParams.ArgumentList = @($LaunchArguments)
+	}
+	$started = Start-Process @startParams
 	$launchedProcess = [ordered]@{
 		process_id = [int]$started.Id
 		path = [string]$postcheck.exe_path
 		working_directory = [string]$postcheck.release_directory
+		arguments = @($LaunchArguments)
 		status = "started"
 	}
 	Start-Sleep -Milliseconds 500
@@ -213,6 +223,7 @@ $manifest = [ordered]@{
 		stop_running_release_process = [bool]$StopRunningReleaseProcess
 		clean_temp_files = [bool]$CleanTempFiles
 		launch = [bool]$Launch
+		launch_arguments = @($LaunchArguments)
 	}
 	precheck_gate = [string]$precheck.gate
 	postcheck_gate = [string]$postcheck.gate
