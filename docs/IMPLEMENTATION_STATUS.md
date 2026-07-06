@@ -29,6 +29,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_827_release_homebase_save_override_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release exportieren, Taskleisten-EXE starten und `Einzelspieler` sichtbar erneut pruefen.
 
+### TASK_828 - Release Ultrawide Canvas Stretch
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_828_release_ultrawide_canvas_stretch.md`, `docs/tasks/TASK_822_release_singleplayer_visible_window_findings.md`, `docs/tasks/TASK_827_release_homebase_save_override_guard.md`
+- Stand: `project.godot` nutzt jetzt `window/stretch/mode = canvas_items` und `window/stretch/aspect = expand`, damit die FullHD-Basiskomposition auf breiteren Fenstern eine erweiterte Canvas-Flaeche bekommt statt rechts tote Flaeche zu lassen.
+- Stand: Der Verifier prueft Projektsetting, FullHD-Basisviewport und fullscreen-geankerte Main-Menu-/Homebase-Control-Roots.
+- Risiken/offen: Der echte Ultrawide-Fensterblick auf dem Zielmonitor bleibt wichtig; einzelne Panels koennen danach noch gezielten Layout-Polish brauchen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_828_release_ultrawide_canvas_stretch.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_199_main_menu_shell_background_image_verifier.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release exportieren/starten und den Singleplayer-Pfad auf Ultrawide sichtbar recapturen.
+
 ### BUGFIX - Singleplayer Release Visible Homebase Deadend Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_visible_homebase_deadend_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`
