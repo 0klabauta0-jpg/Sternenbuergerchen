@@ -52,6 +52,7 @@ git checkout -b batch/<batch-name>
 - TASK_819 - Release Runtime Checked Launcher (implementiert): bewusster Playtest-Startgriff fuer den geprueften Release-Ordner, optional mit Stop alter Release-EXE, Temp-Datei-Cleanup und Launch.
 - TASK_820 - Release Runtime Launch Acceptance Gate (implementiert): nach bewusstem Launch zaehlt der erwartete neue Release-Prozess als Start-Erfolg, waehrend unerwartete Altprozesse Review-Warnungen bleiben.
 - TASK_821 - Release First Homebase CTA Emphasis (implementiert): der erste Singleplayer-Homebase-Cue ist visuell priorisiert und am `Start Mission`-Button gespiegelt.
+- TASK_822 - Release Singleplayer Visible Window Findings (implementiert): der laufende Release-Build erzeugt ein read-only Screenshot-/Manifest-Paket fuer den sichtbaren Singleplayer-Pfad.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
