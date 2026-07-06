@@ -2519,6 +2519,33 @@ func _ensure_singleplayer_visible_homebase_actionability() -> void:
 	set_meta("singleplayer_visible_homebase_deadend_repair_mode", "force_default")
 
 
+func _schedule_singleplayer_visible_homebase_actionability_guard() -> void:
+	if not bool(get_meta("singleplayer_bootstrap_enabled", false)):
+		return
+	if bool(get_meta("singleplayer_visible_homebase_post_show_guard_pending", false)):
+		return
+	set_meta("singleplayer_visible_homebase_post_show_guard_pending", true)
+	call_deferred("_run_singleplayer_visible_homebase_actionability_post_show_guard")
+
+
+func _run_singleplayer_visible_homebase_actionability_post_show_guard() -> void:
+	await get_tree().process_frame
+	await get_tree().process_frame
+	set_meta("singleplayer_visible_homebase_post_show_guard_pending", false)
+	if _current_meta_view != "homebase":
+		set_meta("singleplayer_visible_homebase_post_show_guard_skipped_view", _current_meta_view)
+		return
+
+	var homebase_screen = _get_homebase_screen()
+	var before_actionable: bool = _is_singleplayer_visible_homebase_actionable(homebase_screen)
+	set_meta("singleplayer_visible_homebase_post_show_guard_ran", true)
+	set_meta("singleplayer_visible_homebase_post_show_guard_before_actionable", before_actionable)
+	_ensure_singleplayer_visible_homebase_actionability()
+	var after_actionable: bool = _is_singleplayer_visible_homebase_actionable(homebase_screen)
+	set_meta("singleplayer_visible_homebase_post_show_guard_after_actionable", after_actionable)
+	set_meta("singleplayer_visible_homebase_post_show_guard_repaired", not before_actionable and after_actionable)
+
+
 func _is_singleplayer_visible_homebase_actionable(homebase_screen: Node) -> bool:
 	if homebase_screen == null or not homebase_screen.has_method("get_homebase_direct_staging_snapshot"):
 		return false
@@ -2577,6 +2604,10 @@ func get_singleplayer_start_bootstrap_snapshot() -> Dictionary:
 		"payload_seeded": bool(get_meta("singleplayer_bootstrap_payload_seeded", false)),
 		"visible_homebase_deadend_repaired": bool(get_meta("singleplayer_visible_homebase_deadend_repaired", false)),
 		"visible_homebase_deadend_repair_mode": String(get_meta("singleplayer_visible_homebase_deadend_repair_mode", "")).strip_edges(),
+		"visible_homebase_post_show_guard_ran": bool(get_meta("singleplayer_visible_homebase_post_show_guard_ran", false)),
+		"visible_homebase_post_show_guard_before_actionable": bool(get_meta("singleplayer_visible_homebase_post_show_guard_before_actionable", false)),
+		"visible_homebase_post_show_guard_after_actionable": bool(get_meta("singleplayer_visible_homebase_post_show_guard_after_actionable", false)),
+		"visible_homebase_post_show_guard_repaired": bool(get_meta("singleplayer_visible_homebase_post_show_guard_repaired", false)),
 		"selected_unit_ids": Array(_selected_unit_ids),
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"homebase_staged_unit_ids": Array(_homebase_staged_unit_ids),
@@ -3226,6 +3257,7 @@ func _show_homebase() -> void:
 	if homebase_screen != null:
 		homebase_screen.visible = true
 		_refresh_homebase_screen()
+		_schedule_singleplayer_visible_homebase_actionability_guard()
 	if fob_screen != null:
 		fob_screen.visible = false
 	if debrief_screen != null:
