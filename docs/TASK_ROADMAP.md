@@ -62,6 +62,7 @@ git checkout -b batch/<batch-name>
 - TASK_824 - Release Capture Tmp Import Guard (implementiert): lokale Capture-PNGs aus `tmp/` werden von Godot nicht mehr als Projektassets importiert und bleiben aus dem Runtime-Paket heraus.
 - TASK_826 - Release Mission LZ Drop Next Step Cue (implementiert): nach `Start Mission` erklaert die Selected-Fireteam-Anzeige den Dropship-Zwischenzustand als `Naechster Griff: LZ ... danach Drop`, statt nur `keine Einheiten aktiv` zu melden.
 - TASK_827 - Release Homebase Save Override Guard (implementiert): alte lokale Save-Fragmente mit `FOB Transfer`/`mission_drop_source = fob` werden beim sichtbaren Singleplayer-Release-Start zur `grid_sweep`-Homebase-Direct-Sortie normalisiert.
+- TASK_828 - Release Ultrawide Canvas Stretch (implementiert): der Release nutzt `canvas_items` + `expand`, damit UI-Screens auf breiteren Fenstern nicht als 1920px-Insel links oben mit leerer rechter Flaeche wirken.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
