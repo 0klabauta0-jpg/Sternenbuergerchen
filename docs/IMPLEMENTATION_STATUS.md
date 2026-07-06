@@ -19,6 +19,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_817_station_reentry_release_candidate_targeted_firefight_polish.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release-Export bauen und Taskleisten-/EXE-Pfad gegen den neuen Spieleordner pruefen.
 
+### TASK_827 - Release Homebase Save Override Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_827_release_homebase_save_override_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/tasks/BUGFIX_singleplayer_release_mission_selection_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
+- Stand: Der Singleplayer-Release-Bootstrap normalisiert die Startmission und die Drop-Quelle gemeinsam auf `grid_sweep` + `homebase_direct`.
+- Stand: Der sichtbare Homebase-Actionability-Guard repariert alte lokale Save-Fragmente mit `mission_drop_source = fob`, bevor Payload, Boarding und Readiness bewertet werden.
+- Stand: Der Bootstrap-Snapshot nennt jetzt `mission_drop_source`, `drop_source_repaired` und die vorherige Drop-Quelle fuer Release-Diagnosen.
+- Risiken/offen: Der echte EXE-Fensterlauf bleibt Pflicht, weil lokale Godot-Userdaten, Altprozesse und Taskleistenpfade ausserhalb der Headless-Fixture liegen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_827_release_homebase_save_override_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release exportieren, Taskleisten-EXE starten und `Einzelspieler` sichtbar erneut pruefen.
+
 ### BUGFIX - Singleplayer Release Visible Homebase Deadend Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_visible_homebase_deadend_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`

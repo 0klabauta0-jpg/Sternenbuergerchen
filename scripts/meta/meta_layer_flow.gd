@@ -2473,6 +2473,7 @@ func _load_persistent_player_roster() -> void:
 
 func _ensure_singleplayer_release_start_bootstrap() -> void:
 	_ensure_singleplayer_release_default_mission_selection()
+	_ensure_singleplayer_release_homebase_direct_drop_source()
 	_ensure_singleplayer_bootstrap_roster_floor()
 	_homebase_staged_unit_ids = _filter_known_unit_ids(_homebase_staged_unit_ids)
 	_selected_unit_ids = _filter_known_unit_ids(_selected_unit_ids)
@@ -2519,6 +2520,18 @@ func _ensure_singleplayer_release_default_mission_selection() -> bool:
 	return true
 
 
+func _ensure_singleplayer_release_homebase_direct_drop_source() -> bool:
+	var current_source: String = _get_mission_drop_source()
+	if current_source == MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
+		return false
+	_mission_planning_state["mission_drop_source"] = MISSION_DROP_SOURCE_HOMEBASE_DIRECT
+	_mission_planning_state["drop_ship_requested"] = false
+	_mission_planning_state["drop_ship_staged"] = false
+	set_meta("singleplayer_bootstrap_drop_source_repaired", true)
+	set_meta("singleplayer_bootstrap_drop_source_previous", current_source)
+	return true
+
+
 func _seed_singleplayer_bootstrap_homebase_payload() -> void:
 	var homebase_screen = _get_homebase_screen()
 	if homebase_screen == null or not homebase_screen.has_method("seed_homebase_direct_launch_payload"):
@@ -2545,7 +2558,8 @@ func _ensure_singleplayer_visible_homebase_actionability() -> void:
 	if homebase_screen == null:
 		return
 	var mission_selection_repaired: bool = _ensure_singleplayer_release_default_mission_selection()
-	if mission_selection_repaired:
+	var drop_source_repaired: bool = _ensure_singleplayer_release_homebase_direct_drop_source()
+	if mission_selection_repaired or drop_source_repaired:
 		_refresh_homebase_screen()
 	if _is_singleplayer_visible_homebase_actionable(homebase_screen):
 		set_meta("singleplayer_visible_homebase_deadend_repaired", false)
@@ -2666,7 +2680,10 @@ func get_singleplayer_start_bootstrap_snapshot() -> Dictionary:
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_mission_id": _selected_mission_id,
 		"selected_mission_map_path": _selected_mission_map_path,
+		"mission_drop_source": _get_mission_drop_source(),
 		"mission_selection_repaired": bool(get_meta("singleplayer_bootstrap_mission_selection_repaired", false)),
+		"drop_source_repaired": bool(get_meta("singleplayer_bootstrap_drop_source_repaired", false)),
+		"drop_source_previous": String(get_meta("singleplayer_bootstrap_drop_source_previous", "")).strip_edges(),
 		"homebase_staged_unit_ids": Array(_homebase_staged_unit_ids),
 		"homebase_staged_fireteam_ids": Array(_homebase_staged_fireteam_ids),
 		"craft_id": craft_id,

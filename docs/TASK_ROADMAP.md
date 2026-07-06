@@ -61,6 +61,7 @@ git checkout -b batch/<batch-name>
 - TASK_823 - Release Singleplayer Visible Findings Polish (implementiert): der erste Main-Menu-Singleplayer-Griff ist als primaerer Release-CTA sichtbar priorisiert, waehrend sekundaere Werkzeuge ruhiger markiert bleiben.
 - TASK_824 - Release Capture Tmp Import Guard (implementiert): lokale Capture-PNGs aus `tmp/` werden von Godot nicht mehr als Projektassets importiert und bleiben aus dem Runtime-Paket heraus.
 - TASK_826 - Release Mission LZ Drop Next Step Cue (implementiert): nach `Start Mission` erklaert die Selected-Fireteam-Anzeige den Dropship-Zwischenzustand als `Naechster Griff: LZ ... danach Drop`, statt nur `keine Einheiten aktiv` zu melden.
+- TASK_827 - Release Homebase Save Override Guard (implementiert): alte lokale Save-Fragmente mit `FOB Transfer`/`mission_drop_source = fob` werden beim sichtbaren Singleplayer-Release-Start zur `grid_sweep`-Homebase-Direct-Sortie normalisiert.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
