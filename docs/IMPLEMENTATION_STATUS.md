@@ -56,6 +56,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_830_release_start_mission_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_811_station_reentry_release_candidate_mission_launch_actionability_smoke.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release mit `--release-singleplayer-start-mission` starten und Mission/LZ-Sichtzustand capturen.
 
+### TASK_831 - Release LZ Drop Preview Deep-Link Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_831_release_lz_drop_preview_deeplink_evidence.md`, `docs/tasks/TASK_830_release_start_mission_deeplink_evidence.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`
+- Stand: Das Main Menu behandelt `--release-singleplayer-lz-drop-preview` als Singleplayer-Route.
+- Stand: Der MetaLayer startet die Mission, schliesst den Dropship-Transit ab, setzt ueber den bestehenden Dropship-Card-Pfad eine LZ, loest Drop aus und plant vor `GO` eine Move-Preview.
+- Stand: Der frische Release-Capture mit `--release-singleplayer` zeigt wieder `Operation: Grid Sweep`, aktives `Start Mission`, sichtbares Dropship, Pilot und geboardetes Payload statt dem alten `FOB Transfer`-Dead-End.
+- Risiken/offen: Der Deep-Link ist QA-Evidenz und nutzt schnelle Test-Hilfswege fuer Deboarding; der manuelle Timing-/Feel-Playtest bleibt danach sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_831_release_lz_drop_preview_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_830_release_start_mission_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `git diff --check`.
+- Naechster Schritt: Frischen Release mit `--release-singleplayer-lz-drop-preview` starten und den Pre-GO-Move-Preview-Zustand capturen.
+
 ### BUGFIX - Singleplayer Release Visible Homebase Deadend Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_visible_homebase_deadend_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`

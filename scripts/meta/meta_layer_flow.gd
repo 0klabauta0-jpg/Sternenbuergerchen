@@ -104,6 +104,7 @@ const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_ID := "ft1"
 const SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE := "dropship"
 const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE := 3
 const RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG := "--release-singleplayer-start-mission"
+const RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG := "--release-singleplayer-lz-drop-preview"
 const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"has_lz_position": false,
 	"lz_position": Vector2.ZERO,
@@ -151,6 +152,10 @@ var _release_start_mission_deeplink_requested: bool = false
 var _release_start_mission_deeplink_applied: bool = false
 var _release_start_mission_deeplink_status: String = "idle"
 var _release_start_mission_deeplink_reason: String = ""
+var _release_lz_drop_preview_deeplink_requested: bool = false
+var _release_lz_drop_preview_deeplink_applied: bool = false
+var _release_lz_drop_preview_deeplink_status: String = "idle"
+var _release_lz_drop_preview_deeplink_reason: String = ""
 
 
 func _ready() -> void:
@@ -223,6 +228,7 @@ func _ready() -> void:
 	_show_homebase()
 	call_deferred("_sync_mission_host_visibility")
 	call_deferred("_apply_release_start_mission_deeplink")
+	call_deferred("_apply_release_lz_drop_preview_deeplink")
 
 
 func _process(_delta: float) -> void:
@@ -614,6 +620,141 @@ func _apply_release_start_mission_deeplink(user_args: PackedStringArray = Packed
 	_release_start_mission_deeplink_status = "applied" if _release_start_mission_deeplink_applied else "blocked"
 	_release_start_mission_deeplink_reason = "" if _release_start_mission_deeplink_applied else "mission_view_not_visible"
 	set_meta("release_start_mission_deeplink_applied", _release_start_mission_deeplink_applied)
+
+
+func get_release_lz_drop_preview_deeplink_snapshot(user_args: PackedStringArray = PackedStringArray()) -> Dictionary:
+	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
+	var requested: bool = _has_release_lz_drop_preview_deeplink_arg(args)
+	var preview: Dictionary = get_release_candidate_lz_drop_preview_actionability_snapshot() if _active_mission != null else {}
+	return {
+		"schema": "sternenbuergerchen.release_lz_drop_preview_deeplink_evidence.v1",
+		"task_id": "TASK_831",
+		"arg": RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG,
+		"args": Array(args),
+		"requested": requested,
+		"applied": _release_lz_drop_preview_deeplink_applied,
+		"status": _release_lz_drop_preview_deeplink_status,
+		"reason": _release_lz_drop_preview_deeplink_reason,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": _active_mission != null,
+		"preview_status": String(preview.get("status", "")),
+		"first_move_gate": String(preview.get("first_move_gate", "")),
+		"selected_card_has_lz": bool(preview.get("selected_card_has_lz", false)),
+		"deployed_selected_unit_count": int(preview.get("deployed_selected_unit_count", 0)),
+		"planned_waypoint_count": int(preview.get("planned_waypoint_count", 0)),
+		"waypoint_intent_preview_count": int(preview.get("waypoint_intent_preview_count", 0)),
+		"visualized_waypoint_count": int(preview.get("visualized_waypoint_count", 0)),
+		"go_ready": bool(preview.get("go_ready", false)),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _has_release_lz_drop_preview_deeplink_arg(args: PackedStringArray) -> bool:
+	for arg in args:
+		if String(arg).strip_edges() == RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG:
+			return true
+	return false
+
+
+func _apply_release_lz_drop_preview_deeplink(user_args: PackedStringArray = PackedStringArray()) -> void:
+	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
+	if not _has_release_lz_drop_preview_deeplink_arg(args):
+		return
+	_release_lz_drop_preview_deeplink_requested = true
+	_release_lz_drop_preview_deeplink_status = "requested"
+	_release_lz_drop_preview_deeplink_reason = ""
+	set_meta("release_lz_drop_preview_deeplink_requested", true)
+	await _wait_release_deeplink_frames(3)
+
+	if _active_mission == null:
+		var started: bool = await _request_release_start_mission_from_homebase_for_deeplink()
+		if not started:
+			_release_lz_drop_preview_deeplink_status = "blocked"
+			_release_lz_drop_preview_deeplink_reason = "start_mission_failed"
+			return
+	await _wait_release_deeplink_frames(8)
+
+	var handoff: Dictionary = get_homebase_to_mission_handoff_snapshot()
+	var planning: Dictionary = Dictionary(handoff.get("planning", {}))
+	var craft_id: String = String(planning.get("mission_drop_craft_id", "")).strip_edges()
+	if craft_id.is_empty():
+		_release_lz_drop_preview_deeplink_status = "blocked"
+		_release_lz_drop_preview_deeplink_reason = "missing_mission_drop_craft_id"
+		return
+	_complete_release_lz_drop_preview_craft_arrival(craft_id)
+	await _wait_release_deeplink_frames(8)
+
+	var active_mission: Node = _active_mission
+	var controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var primary_view: Node = active_mission.get_node_or_null("Primary3DView") if active_mission != null else null
+	if controller == null or primary_view == null:
+		_release_lz_drop_preview_deeplink_status = "blocked"
+		_release_lz_drop_preview_deeplink_reason = "mission_controller_or_view_missing"
+		return
+
+	var lz_world := Vector2(384.0, 224.0)
+	controller.call("_on_mission_dropship_card_set_lz_pressed", craft_id)
+	if not bool(controller.call("_place_lz_from_screen_position", primary_view.call("world_to_screen_position", lz_world))):
+		_release_lz_drop_preview_deeplink_status = "blocked"
+		_release_lz_drop_preview_deeplink_reason = "lz_placement_failed"
+		return
+	controller.call("_on_mission_dropship_card_drop_pressed", craft_id)
+	await _wait_release_deeplink_frames(4)
+	controller.call("_complete_drop_sequence_deployment")
+	controller.call("_advance_primary_drop_sequence_unloading", 999.0)
+	controller.call("_flush_pending_drop_runtime_phase_starts")
+	controller.call("_refresh_world_overlays")
+	controller.call("_update_ui")
+	await _wait_release_deeplink_frames(10)
+
+	var move_target := Vector2(544.0, 288.0)
+	if not bool(controller.call("issue_right_click_command_for_test", move_target, "move", false)):
+		_release_lz_drop_preview_deeplink_status = "blocked"
+		_release_lz_drop_preview_deeplink_reason = "move_preview_failed"
+		return
+	controller.call("_refresh_world_overlays")
+	controller.call("_refresh_button_state")
+	controller.call("_update_ui")
+	await _wait_release_deeplink_frames(10)
+
+	var snapshot: Dictionary = get_release_lz_drop_preview_deeplink_snapshot(PackedStringArray([RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG]))
+	_release_lz_drop_preview_deeplink_applied = String(snapshot.get("preview_status", "")) == "pass" \
+		and String(snapshot.get("first_move_gate", "")) == "pass" \
+		and int(snapshot.get("planned_waypoint_count", 0)) > 0
+	_release_lz_drop_preview_deeplink_status = "applied" if _release_lz_drop_preview_deeplink_applied else "blocked"
+	_release_lz_drop_preview_deeplink_reason = "" if _release_lz_drop_preview_deeplink_applied else "preview_snapshot_not_pass"
+	set_meta("release_lz_drop_preview_deeplink_applied", _release_lz_drop_preview_deeplink_applied)
+
+
+func _request_release_start_mission_from_homebase_for_deeplink() -> bool:
+	await _wait_release_deeplink_frames(3)
+	if _current_meta_view != "homebase":
+		return _current_meta_view == "mission" and _active_mission != null
+	var homebase_screen = _get_homebase_screen()
+	_ensure_singleplayer_visible_homebase_actionability()
+	if homebase_screen == null or not homebase_screen.has_method("request_mission_start"):
+		return false
+	if not _is_singleplayer_visible_homebase_actionable(homebase_screen):
+		return false
+	homebase_screen.call("request_mission_start")
+	await _wait_release_deeplink_frames(8)
+	return _current_meta_view == "mission" and _active_mission != null
+
+
+func _complete_release_lz_drop_preview_craft_arrival(craft_id: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return
+	_remove_pending_mission_craft_transfer(normalized_craft_id)
+	_complete_mission_craft_transfer({"craft_id": normalized_craft_id, "phase": "to_mission"})
+	_sync_homebase_direct_mission_drop_transport_fields()
+	_start_or_update_active_mission()
+
+
+func _wait_release_deeplink_frames(count: int) -> void:
+	for _index in range(count):
+		await get_tree().process_frame
 
 
 func get_release_candidate_lz_drop_preview_actionability_snapshot() -> Dictionary:
