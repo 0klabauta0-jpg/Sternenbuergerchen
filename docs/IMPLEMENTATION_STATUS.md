@@ -87,7 +87,16 @@
 - Stand: `get_release_singleplayer_visible_findings_polish_snapshot()` prueft CTA-Prioritaet, Route, read-only-Grenzen und Sekundaer-Markierungen.
 - Risiken/offen: Nach Export ist ein neuer sichtbarer Release-Capture sinnvoll, um die Wirkung im echten Fenster zu bestaetigen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_199_main_menu_shell_background_image_verifier.gd`, `git diff --check`.
-- Naechster Schritt: TASK_824 - Release Singleplayer Homebase Visible Recapture.
+- Naechster Schritt: TASK_824 - Release Capture Tmp Import Guard.
+
+### TASK_824 - Release Capture Tmp Import Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_824_release_capture_tmp_import_guard.md`, `docs/tasks/TASK_822_release_singleplayer_visible_window_findings.md`, `data/export_runtime_package_contract.json`
+- Stand: `tmp/.gdignore` verhindert, dass lokale Screenshot-/Capture-Artefakte aus `tmp/` beim Godot-Scan als Assets importiert werden.
+- Stand: Der bestehende Runtime-Export-Contract behaelt `tmp/**` im Exclude-Filter, und der Capture schreibt seine Evidence weiterhin in den Arbeitsordner.
+- Risiken/offen: Bereits erzeugte lokale `.import`-/`.godot/imported`-Reste muessen einmalig entfernt und danach der Release-Export neu gebaut werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_824_release_capture_tmp_import_guard.gd`, `git diff --check`.
+- Naechster Schritt: TASK_825 - Release Singleplayer Homebase Visible Recapture.
 
 ### TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke
 - Status: implementiert im Arbeitsstand
