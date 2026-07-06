@@ -2451,6 +2451,7 @@ func _load_persistent_player_roster() -> void:
 
 
 func _ensure_singleplayer_release_start_bootstrap() -> void:
+	_ensure_singleplayer_release_default_mission_selection()
 	_ensure_singleplayer_bootstrap_roster_floor()
 	_homebase_staged_unit_ids = _filter_known_unit_ids(_homebase_staged_unit_ids)
 	_selected_unit_ids = _filter_known_unit_ids(_selected_unit_ids)
@@ -2473,6 +2474,28 @@ func _ensure_singleplayer_release_start_bootstrap() -> void:
 	set_meta("singleplayer_bootstrap_craft_id", bootstrap_craft_id)
 	set_meta("singleplayer_bootstrap_fireteam_id", _get_singleplayer_bootstrap_payload_fireteam_id())
 	set_meta("singleplayer_bootstrap_enabled", true)
+
+
+func _ensure_singleplayer_release_default_mission_selection() -> bool:
+	var normalized_mission_id: String = _selected_mission_id.strip_edges()
+	if normalized_mission_id == SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID and _is_known_mission_id(normalized_mission_id):
+		var current_definition: Dictionary = _get_mission_definition_by_id(normalized_mission_id)
+		var current_map_path: String = String(current_definition.get("map_file_path", _selected_mission_map_path)).strip_edges()
+		if not current_map_path.is_empty() and current_map_path != _selected_mission_map_path:
+			_selected_mission_map_path = current_map_path
+			set_meta("singleplayer_bootstrap_mission_selection_repaired", true)
+			return true
+		return false
+	if not normalized_mission_id.is_empty() and normalized_mission_id != "fob_transfer" and _is_known_mission_id(normalized_mission_id):
+		return false
+
+	var default_definition: Dictionary = _get_mission_definition_by_id(SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID)
+	if default_definition.is_empty():
+		return false
+	_selected_mission_id = SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID
+	_selected_mission_map_path = String(default_definition.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges()
+	set_meta("singleplayer_bootstrap_mission_selection_repaired", true)
+	return true
 
 
 func _seed_singleplayer_bootstrap_homebase_payload() -> void:
@@ -2500,6 +2523,9 @@ func _ensure_singleplayer_visible_homebase_actionability() -> void:
 	var homebase_screen = _get_homebase_screen()
 	if homebase_screen == null:
 		return
+	var mission_selection_repaired: bool = _ensure_singleplayer_release_default_mission_selection()
+	if mission_selection_repaired:
+		_refresh_homebase_screen()
 	if _is_singleplayer_visible_homebase_actionable(homebase_screen):
 		set_meta("singleplayer_visible_homebase_deadend_repaired", false)
 		return
@@ -2617,6 +2643,9 @@ func get_singleplayer_start_bootstrap_snapshot() -> Dictionary:
 		"visible_homebase_post_show_guard_repaired": bool(get_meta("singleplayer_visible_homebase_post_show_guard_repaired", false)),
 		"selected_unit_ids": Array(_selected_unit_ids),
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"selected_mission_id": _selected_mission_id,
+		"selected_mission_map_path": _selected_mission_map_path,
+		"mission_selection_repaired": bool(get_meta("singleplayer_bootstrap_mission_selection_repaired", false)),
 		"homebase_staged_unit_ids": Array(_homebase_staged_unit_ids),
 		"homebase_staged_fireteam_ids": Array(_homebase_staged_fireteam_ids),
 		"craft_id": craft_id,
@@ -4582,6 +4611,17 @@ func _is_known_mission_id(mission_id: String) -> bool:
 		if String(mission_definition.get("mission_id", "")).strip_edges() == mission_id:
 			return true
 	return false
+
+
+func _get_mission_definition_by_id(mission_id: String) -> Dictionary:
+	var normalized_mission_id: String = mission_id.strip_edges()
+	if normalized_mission_id.is_empty():
+		return {}
+	for mission_variant in _mission_catalog:
+		var mission_definition: Dictionary = Dictionary(mission_variant)
+		if String(mission_definition.get("mission_id", "")).strip_edges() == normalized_mission_id:
+			return _build_resolved_mission_definition(mission_definition)
+	return {}
 
 
 func _resolve_mission_slot_count(mission_definition: Dictionary) -> int:
