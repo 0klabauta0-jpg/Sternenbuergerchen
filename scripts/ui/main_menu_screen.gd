@@ -24,6 +24,7 @@ const BACKGROUND_ID: String = "main_menu_shell"
 const GLOBAL_ESCAPE_MENU_NODE_PATH: String = "/root/GlobalEscapeMenu"
 const RELEASE_FIRST_PLAY_STYLE_ID: String = "task_823_release_singleplayer_first_play_cta_v1"
 const RELEASE_SINGLEPLAYER_DEEPLINK_ARG: String = "--release-singleplayer"
+const RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG: String = "--release-singleplayer-start-mission"
 const TEAM_EDITOR_POINT_DELTA: int = 1
 const TEAM_EDITOR_VIEW_SIX: String = "six"
 const TEAM_EDITOR_VIEW_NINE: String = "nine"
@@ -219,6 +220,7 @@ func get_release_singleplayer_deeplink_snapshot(user_args: PackedStringArray = P
 		"schema": "sternenbuergerchen.release_singleplayer_deeplink_evidence.v1",
 		"task_id": "TASK_829",
 		"arg": RELEASE_SINGLEPLAYER_DEEPLINK_ARG,
+		"start_mission_arg": RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG,
 		"args": Array(args),
 		"requested": requested,
 		"applied": _release_singleplayer_deeplink_applied,
@@ -244,7 +246,8 @@ func _get_release_cmdline_user_args() -> PackedStringArray:
 
 func _has_release_singleplayer_deeplink_arg(args: PackedStringArray) -> bool:
 	for arg in args:
-		if String(arg).strip_edges() == RELEASE_SINGLEPLAYER_DEEPLINK_ARG:
+		var normalized_arg: String = String(arg).strip_edges()
+		if normalized_arg == RELEASE_SINGLEPLAYER_DEEPLINK_ARG or normalized_arg == RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG:
 			return true
 	return false
 
