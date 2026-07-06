@@ -60,6 +60,7 @@ git checkout -b batch/<batch-name>
 - TASK_822 - Release Singleplayer Visible Window Findings (implementiert): der laufende Release-Build erzeugt ein read-only Screenshot-/Manifest-Paket fuer den sichtbaren Singleplayer-Pfad.
 - TASK_823 - Release Singleplayer Visible Findings Polish (implementiert): der erste Main-Menu-Singleplayer-Griff ist als primaerer Release-CTA sichtbar priorisiert, waehrend sekundaere Werkzeuge ruhiger markiert bleiben.
 - TASK_824 - Release Capture Tmp Import Guard (implementiert): lokale Capture-PNGs aus `tmp/` werden von Godot nicht mehr als Projektassets importiert und bleiben aus dem Runtime-Paket heraus.
+- TASK_826 - Release Mission LZ Drop Next Step Cue (implementiert): nach `Start Mission` erklaert die Selected-Fireteam-Anzeige den Dropship-Zwischenzustand als `Naechster Griff: LZ ... danach Drop`, statt nur `keine Einheiten aktiv` zu melden.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)

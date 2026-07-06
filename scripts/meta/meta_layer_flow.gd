@@ -399,6 +399,7 @@ func get_release_candidate_mission_launch_actionability_snapshot() -> Dictionary
 	if tactical_controller != null and tactical_controller.has_method("get_mission_insertion_first_order_readability_snapshot"):
 		insertion = Dictionary(tactical_controller.call("get_mission_insertion_first_order_readability_snapshot"))
 	var card_ui: Dictionary = Dictionary(insertion.get("card_ui", {}))
+	var insertion_next_step: Dictionary = Dictionary(insertion.get("insertion_next_step", {}))
 	var checks: Array = []
 	_append_handoff_check(
 		checks,
@@ -435,12 +436,28 @@ func get_release_candidate_mission_launch_actionability_snapshot() -> Dictionary
 		checks,
 		"lz_next_step_visible",
 		bool(card_ui.get("set_lz_button_present", false)) \
-			or String(insertion.get("mission_control_status_text", "")).find("LZ") >= 0,
+			or String(insertion.get("mission_control_status_text", "")).find("LZ") >= 0 \
+			or String(insertion_next_step.get("next_step_text", "")).find("LZ") >= 0,
 		"critical",
 		"Mission view should expose LZ as the next step after launch.",
 		{
 			"set_lz_button_present": bool(card_ui.get("set_lz_button_present", false)),
 			"mission_control_status_text": String(insertion.get("mission_control_status_text", "")),
+			"insertion_next_step_text": String(insertion_next_step.get("next_step_text", "")),
+		}
+	)
+	_append_handoff_check(
+		checks,
+		"selected_panel_next_step_cue_visible",
+		String(insertion_next_step.get("next_step_id", "")) == "set_lz" \
+			and String(insertion_next_step.get("next_step_text", "")).find("LZ") >= 0 \
+			and String(insertion.get("selected_fireteam_status_text", "")).find("Naechster Griff") >= 0,
+		"critical",
+		"The selected Fireteam panel should explain LZ/Drop before any units are on the ground.",
+		{
+			"next_step_id": String(insertion_next_step.get("next_step_id", "")),
+			"next_step_text": String(insertion_next_step.get("next_step_text", "")),
+			"selected_fireteam_status_text": String(insertion.get("selected_fireteam_status_text", "")),
 		}
 	)
 	_append_handoff_check(
@@ -500,6 +517,10 @@ func get_release_candidate_mission_launch_actionability_snapshot() -> Dictionary
 		"set_lz_button_present": bool(card_ui.get("set_lz_button_present", false)),
 		"drop_button_present": bool(card_ui.get("drop_button_present", false)),
 		"drop_button_disabled": bool(card_ui.get("drop_button_disabled", true)),
+		"insertion_next_step": insertion_next_step,
+		"insertion_next_step_id": String(insertion_next_step.get("next_step_id", "")),
+		"insertion_next_step_text": String(insertion_next_step.get("next_step_text", "")),
+		"selected_fireteam_status_text": String(insertion.get("selected_fireteam_status_text", "")),
 		"checks": checks,
 		"failed_count": failed_count,
 		"check_count": checks.size(),

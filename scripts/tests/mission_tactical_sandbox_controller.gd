@@ -5188,6 +5188,10 @@ func _build_fireteam_status_text() -> String:
 	var planned_waypoint_count: int = _count_selected_phase_waypoints()
 	var planned_area_count: int = _count_selected_area_orders()
 	if units.is_empty():
+		var insertion_cue: Dictionary = _build_mission_insertion_next_step_cue_snapshot()
+		var cue_line: String = String(insertion_cue.get("status_line", "")).strip_edges()
+		if not cue_line.is_empty():
+			return "%s | %d Wegpunkte | %d Gebiete\n%s" % [_get_fireteam_name(), planned_waypoint_count, planned_area_count, cue_line]
 		return "%s | %d Wegpunkte | %d Gebiete | keine Einheiten aktiv" % [_get_fireteam_name(), planned_waypoint_count, planned_area_count]
 
 	var lead_name: String = "-"
@@ -5234,6 +5238,75 @@ func _build_fireteam_status_text() -> String:
 			return "%s\n%s\n%s\n%s" % [first_line, second_line, combat_hud_line, firefight_decision_line]
 		return "%s\n%s\n%s" % [first_line, second_line, combat_hud_line]
 	return "%s\n%s" % [first_line, second_line]
+
+
+func _build_mission_insertion_next_step_cue_snapshot(selected_card: Dictionary = {}, card_ui: Dictionary = {}) -> Dictionary:
+	var resolved_card: Dictionary = selected_card.duplicate(true)
+	var selected_craft_id: String = String(resolved_card.get("craft_id", _mission_drop_craft_id)).strip_edges()
+	if resolved_card.is_empty():
+		resolved_card = _find_mission_dropship_card_entry(selected_craft_id)
+		if resolved_card.is_empty() and _mission_drop_cards.size() == 1:
+			resolved_card = Dictionary(_mission_drop_cards[0]).duplicate(true)
+	if selected_craft_id.is_empty():
+		selected_craft_id = String(resolved_card.get("craft_id", _mission_drop_craft_id)).strip_edges()
+	var has_lz: bool = bool(resolved_card.get("has_lz_position", _has_lz_position))
+	var payload_ids: Array = _sanitize_drop_payload_ids(Array(resolved_card.get("embarked_unit_ids", [])))
+	var payload_count: int = maxi(payload_ids.size(), int(resolved_card.get("passenger_count", _mission_drop_passenger_count)))
+	var deployed_selected_ids: Array = _build_deployed_selected_fireteam_unit_ids()
+	var has_selected_embarked_payload: bool = _selected_fireteams_have_embarked_payload()
+	var has_insertion_context: bool = payload_count > 0 \
+		or has_selected_embarked_payload \
+		or _drop_ship_requested \
+		or _is_drop_sequence_active()
+	var next_step_id: String = ""
+	var next_step_text: String = ""
+	var blocker_reason: String = ""
+	if not deployed_selected_ids.is_empty():
+		next_step_id = "plan_move"
+		next_step_text = "Naechster Griff: Move-Ziel setzen | Preview lesen | danach GO"
+	elif has_insertion_context and not has_lz:
+		next_step_id = "set_lz"
+		next_step_text = "Naechster Griff: LZ auf der Karte setzen | danach Drop"
+		blocker_reason = "fireteam_in_dropship_until_lz"
+	elif _drop_sequence_phase == DROP_SEQUENCE_INBOUND or _mission_drop_state == "to_mission":
+		next_step_id = "wait_arrival"
+		next_step_text = "Naechster Griff: Dropship ankommen lassen | danach aussteigen"
+		blocker_reason = "dropship_inbound"
+	elif _drop_sequence_phase == DROP_SEQUENCE_LANDED or _drop_sequence_phase == DROP_SEQUENCE_UNLOADING:
+		next_step_id = "wait_deboarding"
+		next_step_text = "Naechster Griff: Deboarding abwarten | Fireteam wird aktiv"
+		blocker_reason = "deboarding"
+	elif has_insertion_context and has_lz and _drop_ship_cooldown_remaining > 0.0 and _drop_sequence_phase.is_empty():
+		next_step_id = "wait_drop_ready"
+		next_step_text = "Naechster Griff: Drop bereit in %.1fs" % _drop_ship_cooldown_remaining
+		blocker_reason = "drop_cooldown"
+	elif has_insertion_context and has_lz:
+		next_step_id = "drop_fireteam"
+		next_step_text = "Naechster Griff: Drop ausloesen | Fireteam aussteigen lassen"
+		blocker_reason = "fireteam_in_dropship_until_drop"
+	var card_commands: Dictionary = Dictionary(card_ui.get("commands", {}))
+	return {
+		"schema": "sternenbuergerchen.mission_insertion_next_step_cue.v1",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"source": "mission_dropship_card_and_selected_fireteam_state",
+		"craft_id": selected_craft_id,
+		"active": not next_step_id.is_empty(),
+		"next_step_id": next_step_id,
+		"next_step_text": next_step_text,
+		"status_line": next_step_text,
+		"command_matrix_blocked_reason": blocker_reason,
+		"has_lz": has_lz,
+		"payload_count": payload_count,
+		"payload_ids": payload_ids,
+		"selected_embarked_payload": has_selected_embarked_payload,
+		"deployed_selected_unit_ids": deployed_selected_ids,
+		"drop_button_present": bool(card_ui.get("drop_button_present", false)),
+		"drop_button_disabled": bool(card_ui.get("drop_button_disabled", true)),
+		"set_lz_button_present": bool(card_ui.get("set_lz_button_present", false)),
+		"set_lz_command": Dictionary(card_commands.get("set_lz", {})).duplicate(true),
+		"drop_command": Dictionary(card_commands.get("drop", {})).duplicate(true),
+	}
 
 
 func _format_selected_status_segment(text: String) -> String:
@@ -14029,6 +14102,9 @@ func get_mission_insertion_first_order_readability_snapshot() -> Dictionary:
 	var go_button: Dictionary = Dictionary(command_buttons.get("go_plan", {}))
 	var mission_control_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
 	var selected_status_text: String = String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges()
+	var insertion_next_step: Dictionary = _build_mission_insertion_next_step_cue_snapshot(selected_card, card_ui)
+	var insertion_next_step_id: String = String(insertion_next_step.get("next_step_id", "")).strip_edges()
+	var insertion_next_step_text: String = String(insertion_next_step.get("next_step_text", "")).strip_edges()
 	var render_snapshot: Dictionary = {}
 	var primary_3d_view = _get_primary_3d_view()
 	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
@@ -14060,6 +14136,11 @@ func get_mission_insertion_first_order_readability_snapshot() -> Dictionary:
 			"selected_fireteam_visible",
 			not _selected_fireteam_ids.is_empty() and not selected_status_text.is_empty(),
 			"Selected fireteam status remains readable during insertion planning."
+		),
+		_build_mission_insertion_readability_check(
+			"insertion_next_step_cue_visible",
+			selected_has_lz or (insertion_next_step_id == "set_lz" and insertion_next_step_text.find("LZ") >= 0 and selected_status_text.find("Naechster Griff") >= 0),
+			"Before LZ placement, the selected fireteam readout explains the next human action."
 		),
 		_build_mission_insertion_readability_check(
 			"first_order_controls_visible",
@@ -14104,6 +14185,9 @@ func get_mission_insertion_first_order_readability_snapshot() -> Dictionary:
 		"mission_control_status_text": mission_control_text,
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_status_text": selected_status_text,
+		"insertion_next_step": insertion_next_step,
+		"insertion_next_step_id": insertion_next_step_id,
+		"insertion_next_step_text": insertion_next_step_text,
 		"first_order_controls": {
 			"move": move_button,
 			"defend": defend_button,

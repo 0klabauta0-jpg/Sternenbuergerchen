@@ -69,6 +69,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_release_export_mission_runtime_dependencies.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`.
 - Naechster Schritt: Frischen Export und sichtbaren EXE-Klick erneut ausfuehren.
 
+### TASK_826 - Release Mission LZ Drop Next Step Cue
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_826_release_mission_lz_drop_next_step_cue.md`, `docs/tasks/TASK_811_station_reentry_release_candidate_mission_launch_actionability_smoke.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Selected-Fireteam-Status zeigt vor LZ/Drop einen kompakten `Naechster Griff: LZ auf der Karte setzen | danach Drop`-Cue, statt den Dropship-Zwischenzustand nur als `keine Einheiten aktiv` zu melden.
+- Stand: Der Mission-Insertion-Snapshot exportiert `insertion_next_step_id`, `insertion_next_step_text` und den read-only Dropship-/Fireteam-Cue fuer den MetaLayer-Release-Smoke.
+- Stand: Der MetaLayer-Mission-Launch-Smoke prueft, dass der Cue direkt nach `Einzelspieler -> Start Mission` im Selected-Fireteam-Panel sichtbar ist.
+- Risiken/offen: Der echte Fenster-Run bis LZ/Drop/Preview/GO bleibt wichtig, weil dieser Task nur die Zwischenanzeige vor dem Drop haertet.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_826_release_mission_lz_drop_next_step_cue.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_811_station_reentry_release_candidate_mission_launch_actionability_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release exportieren/starten und `Einzelspieler -> Start Mission -> LZ -> Drop` sichtbar recapturen.
+
 ### TASK_825 - Release First GO Recent Movement Trace
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_825_release_first_go_recent_movement_trace.md`, `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`
