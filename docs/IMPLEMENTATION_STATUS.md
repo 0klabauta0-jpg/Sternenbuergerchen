@@ -39,6 +39,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release exportieren, starten, `Einzelspieler` klicken und Homebase erneut capturen.
 
+### BUGFIX - Singleplayer Release Direct Sortie Default
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_direct_sortie_default.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_post_show_actionability_guard.md`, `docs/tasks/TASK_517_mission_scenario_vertical_slice.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
+- Stand: Der MetaLayer startet `Einzelspieler` standardmaessig mit der kleinen spielbaren `grid_sweep`-Sortie statt dem alten `fob_transfer`.
+- Stand: Der Default-Planning-State setzt `mission_drop_source = homebase_direct`, damit der erste Release-Griff eine Homebase-Direkt-Sortie und kein FOB-Transfer-Arbeitsformular ist.
+- Stand: Der Bootstrap-Verifier prueft nun kleines spielbares Direct-Sortie-Briefing und Homebase-direct Handoff.
+- Risiken/offen: FOB-Transfer bleibt als Workflow erhalten, ist aber nicht mehr der Default fuer den ersten Singleplayer-Release-Start.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release exportieren, starten, `Einzelspieler` klicken und sichtbaren Homebase-Zustand erneut capturen.
+
 ### TASK_818 - Station Reentry Release Candidate Playable Build Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_818_station_reentry_release_candidate_playable_build_acceptance.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`, `docs/dev/mission_command_feedback_contract.md`

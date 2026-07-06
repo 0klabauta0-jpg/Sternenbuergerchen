@@ -60,8 +60,11 @@ func _test_singleplayer_homebase_starts_with_playable_payload() -> void:
 	homebase_screen.call("request_mission_start", craft_id)
 	await _wait_frames(8)
 	var handoff: Dictionary = Dictionary(scene.call("get_homebase_to_mission_handoff_snapshot"))
+	var planning: Dictionary = Dictionary(handoff.get("planning", {}))
 	_assert(String(handoff.get("handoff_gate", "")) == "pass", "Bootstrap launch passes Homebase-to-Mission handoff")
 	_assert(int(handoff.get("failed_count", -1)) == 0, "Bootstrap launch has no critical handoff failures")
+	_assert(String(handoff.get("selected_mission_id", "")) == "grid_sweep", "Bootstrap launch keeps the small playable default mission")
+	_assert(String(planning.get("mission_drop_source", "")) == "homebase_direct", "Bootstrap launch records Homebase Direct as mission drop source")
 
 	scene.queue_free()
 	await _wait_frames(2)
