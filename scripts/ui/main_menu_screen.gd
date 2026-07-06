@@ -22,6 +22,7 @@ const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_even
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
 const BACKGROUND_ID: String = "main_menu_shell"
 const GLOBAL_ESCAPE_MENU_NODE_PATH: String = "/root/GlobalEscapeMenu"
+const RELEASE_FIRST_PLAY_STYLE_ID: String = "task_823_release_singleplayer_first_play_cta_v1"
 const TEAM_EDITOR_POINT_DELTA: int = 1
 const TEAM_EDITOR_VIEW_SIX: String = "six"
 const TEAM_EDITOR_VIEW_NINE: String = "nine"
@@ -139,6 +140,7 @@ func _ready() -> void:
 	_ensure_settings_screen_nodes()
 	_ensure_start_roster_button()
 	_ensure_mission_save_load_buttons()
+	_apply_release_first_play_polish()
 	_ensure_contextual_help_ui()
 	ensure_start_roster_exists()
 	HOVER_SCROLL_BEHAVIOR_SCRIPT.call("install", self)
@@ -172,6 +174,36 @@ func get_route_snapshot() -> Dictionary:
 		"mission_save": "global_shell_slot",
 		"mission_load": "global_shell_slot",
 		"multiplayer_lobby": true,
+		"release_first_play_primary": true,
+	}
+
+
+func get_release_singleplayer_visible_findings_polish_snapshot() -> Dictionary:
+	var singleplayer_font_size: int = int(_singleplayer_button.get_theme_font_size("font_size")) if _singleplayer_button != null else 0
+	var multiplayer_font_size: int = int(_multiplayer_button.get_theme_font_size("font_size")) if _multiplayer_button != null else 0
+	return {
+		"schema": "sternenbuergerchen.release_singleplayer_visible_findings_polish.v1",
+		"task_id": "TASK_823",
+		"style_id": RELEASE_FIRST_PLAY_STYLE_ID,
+		"singleplayer_text": _singleplayer_button.text if _singleplayer_button != null else "",
+		"singleplayer_min_height": _singleplayer_button.custom_minimum_size.y if _singleplayer_button != null else 0.0,
+		"singleplayer_font_size": singleplayer_font_size,
+		"singleplayer_tooltip": _singleplayer_button.tooltip_text if _singleplayer_button != null else "",
+		"singleplayer_action_hint": String(_singleplayer_button.get_meta("release_action_hint", "")) if _singleplayer_button != null else "",
+		"singleplayer_priority": String(_singleplayer_button.get_meta("release_priority", "")) if _singleplayer_button != null else "",
+		"singleplayer_style_id": String(_singleplayer_button.get_meta("release_first_play_style_id", "")) if _singleplayer_button != null else "",
+		"singleplayer_route": String(_singleplayer_button.get_meta("route", "")) if _singleplayer_button != null else "",
+		"secondary_font_size": multiplayer_font_size,
+		"multiplayer_priority": String(_multiplayer_button.get_meta("release_priority", "")) if _multiplayer_button != null else "",
+		"editor_priority": String(_editor_button.get_meta("release_priority", "")) if _editor_button != null else "",
+		"settings_priority": String(_settings_button.get_meta("release_priority", "")) if _settings_button != null else "",
+		"mission_save_priority": String(_mission_save_button.get_meta("release_priority", "")) if _mission_save_button != null else "",
+		"mission_load_priority": String(_mission_load_button.get_meta("release_priority", "")) if _mission_load_button != null else "",
+		"singleplayer_focus_mode": _singleplayer_button.focus_mode if _singleplayer_button != null else Control.FOCUS_NONE,
+		"main_menu_shell": bool(get_meta("main_menu_shell", false)),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_simulation_root": find_child("SimulationRoot", true, false) != null,
 	}
 
 
@@ -880,6 +912,66 @@ func _ensure_mission_save_load_buttons() -> void:
 		_mission_load_button.focus_mode = Control.FOCUS_ALL
 		row.add_child(_mission_load_button)
 	_refresh_mission_save_load_buttons()
+
+
+func _apply_release_first_play_polish() -> void:
+	if _singleplayer_button == null:
+		return
+	_singleplayer_button.custom_minimum_size = Vector2(360.0, 76.0)
+	_singleplayer_button.focus_mode = Control.FOCUS_ALL
+	_singleplayer_button.tooltip_text = "Startet die vorbereitete Singleplayer-Sortie."
+	_singleplayer_button.set_meta("release_first_play_style_id", RELEASE_FIRST_PLAY_STYLE_ID)
+	_singleplayer_button.set_meta("release_priority", "primary")
+	_singleplayer_button.set_meta("release_action_hint", "Startet die vorbereitete Singleplayer-Sortie.")
+	_singleplayer_button.add_theme_font_size_override("font_size", 20)
+	_singleplayer_button.add_theme_color_override("font_color", Color(0.98, 0.98, 0.94, 1.0))
+	_singleplayer_button.add_theme_color_override("font_hover_color", Color(1.0, 0.96, 0.76, 1.0))
+	_singleplayer_button.add_theme_stylebox_override("normal", _build_release_first_play_button_style(Color(0.08, 0.20, 0.23, 0.96), Color(0.90, 0.70, 0.22, 1.0), 2))
+	_singleplayer_button.add_theme_stylebox_override("hover", _build_release_first_play_button_style(Color(0.12, 0.30, 0.34, 0.98), Color(1.0, 0.80, 0.28, 1.0), 2))
+	_singleplayer_button.add_theme_stylebox_override("pressed", _build_release_first_play_button_style(Color(0.06, 0.15, 0.18, 0.98), Color(0.78, 0.60, 0.18, 1.0), 2))
+	_singleplayer_button.add_theme_stylebox_override("focus", _build_release_first_play_button_style(Color(0.0, 0.0, 0.0, 0.0), Color(1.0, 0.86, 0.34, 1.0), 3))
+	_singleplayer_button.call_deferred("grab_focus")
+	_apply_release_secondary_button_polish(_multiplayer_button, "secondary", "Host/Join-Lobby fuer Testteams.")
+	_apply_release_secondary_button_polish(_editor_button, "secondary", "Map-Editor oeffnen.")
+	_apply_release_secondary_button_polish(_settings_button, "secondary", "Anzeige, Audio und Eingabe anpassen.")
+	_apply_release_secondary_button_polish(_new_roster_button, "support", "Optional: neues Startteam erzeugen.")
+	_apply_release_secondary_button_polish(_team_editor_toggle_button, "support", "Optional: aktives Team bearbeiten.")
+	_apply_release_secondary_button_polish(_mission_save_button, "support", "Optionaler Mission-Slot, wenn eine Shell-Mission aktiv ist.")
+	_apply_release_secondary_button_polish(_mission_load_button, "support", "Optionaler Mission-Slot, wenn ein Save vorhanden ist.")
+
+
+func _apply_release_secondary_button_polish(button: Button, priority: String, tooltip: String) -> void:
+	if button == null:
+		return
+	button.set_meta("release_priority", priority)
+	if button.tooltip_text.strip_edges().is_empty():
+		button.tooltip_text = tooltip
+	button.add_theme_font_size_override("font_size", 15 if priority == "secondary" else 13)
+	if priority == "secondary":
+		button.custom_minimum_size = Vector2(maxf(button.custom_minimum_size.x, 360.0), 50.0)
+	else:
+		button.custom_minimum_size = Vector2(button.custom_minimum_size.x, minf(button.custom_minimum_size.y, 44.0))
+	button.add_theme_color_override("font_color", Color(0.82, 0.88, 0.88, 0.94))
+	button.add_theme_color_override("font_hover_color", Color(0.96, 0.98, 0.98, 1.0))
+
+
+func _build_release_first_play_button_style(background: Color, border: Color, border_width: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = background
+	style.border_color = border
+	style.border_width_left = border_width
+	style.border_width_top = border_width
+	style.border_width_right = border_width
+	style.border_width_bottom = border_width
+	style.corner_radius_top_left = 6
+	style.corner_radius_top_right = 6
+	style.corner_radius_bottom_right = 6
+	style.corner_radius_bottom_left = 6
+	style.content_margin_left = 16.0
+	style.content_margin_right = 16.0
+	style.content_margin_top = 10.0
+	style.content_margin_bottom = 10.0
+	return style
 
 
 func _refresh_mission_save_load_buttons() -> void:

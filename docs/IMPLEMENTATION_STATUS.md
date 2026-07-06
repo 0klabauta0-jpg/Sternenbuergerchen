@@ -79,6 +79,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_singleplayer_visible_window.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_822_release_singleplayer_visible_window_findings.gd`, `git diff --check`.
 - Naechster Schritt: TASK_823 - Release Singleplayer Visible Findings Polish.
 
+### TASK_823 - Release Singleplayer Visible Findings Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_823_release_singleplayer_visible_findings_polish.md`, `docs/tasks/TASK_822_release_singleplayer_visible_window_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Main-Menu-`Einzelspieler`-Button ist als primaerer Release-CTA mit `task_823_release_singleplayer_first_play_cta_v1`, groesserer Mindesthoehe, groesserer Schrift und Fokus-Hervorhebung markiert.
+- Stand: Multiplayer, Editor, Settings und Mission-Slot-Buttons bleiben erreichbar, sind aber als secondary/support markiert und konkurrieren visuell weniger mit dem ersten Singleplayer-Griff.
+- Stand: `get_release_singleplayer_visible_findings_polish_snapshot()` prueft CTA-Prioritaet, Route, read-only-Grenzen und Sekundaer-Markierungen.
+- Risiken/offen: Nach Export ist ein neuer sichtbarer Release-Capture sinnvoll, um die Wirkung im echten Fenster zu bestaetigen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_199_main_menu_shell_background_image_verifier.gd`, `git diff --check`.
+- Naechster Schritt: TASK_824 - Release Singleplayer Homebase Visible Recapture.
+
 ### TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
