@@ -47,7 +47,7 @@ func _test_first_move_execution_feedback_after_go() -> void:
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(scene)
 	await _wait_frames(5)
-	scene.call("_on_homebase_mission_selection_changed", "frontier_probe_vertical_slice")
+	scene.call("_on_homebase_mission_selection_changed", "grid_sweep")
 	await _wait_frames(2)
 
 	var homebase_screen := scene.get_node("HomebaseScreen") as Control

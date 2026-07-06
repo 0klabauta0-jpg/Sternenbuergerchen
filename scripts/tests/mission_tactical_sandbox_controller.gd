@@ -405,6 +405,7 @@ var _suppression_near_miss_ready_at_msec_by_fireteam: Dictionary = {}
 var _tracked_health_by_unit_id: Dictionary = {}
 var _coordination_manager = null
 var _fireteam_movement_controller = null
+var _recent_movement_trace_by_fireteam: Dictionary = {}
 var _fireteam_security_controller = null
 var _waypoint_intent_preview_resolver = WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT.new()
 var _tactical_decision_threat_analyzer = TACTICAL_DECISION_THREAT_ANALYZER_SCRIPT.new()
@@ -15224,7 +15225,10 @@ func get_mission_first_move_execution_feedback_snapshot() -> Dictionary:
 	var selected_fireteam_ids: Array = Array(_selected_fireteam_ids)
 	var deployed_selected_unit_ids: Array = _build_deployed_selected_fireteam_unit_ids()
 	var active_execution: Dictionary = _find_first_phase_execution_for_fireteams(selected_fireteam_ids)
-	var movement_state: Dictionary = _find_first_movement_state_for_fireteams(selected_fireteam_ids, get_fireteam_movement_snapshot())
+	var movement_snapshot: Array = get_fireteam_movement_snapshot()
+	var movement_state: Dictionary = _find_first_movement_state_for_fireteams(selected_fireteam_ids, movement_snapshot)
+	if movement_state.is_empty():
+		movement_state = _find_first_recent_movement_trace_for_fireteams(selected_fireteam_ids)
 	var order_plan: Dictionary = _find_first_order_plan_for_fireteams(selected_fireteam_ids, get_order_plans_snapshot())
 	var visualized_waypoint: Dictionary = _find_first_visualized_waypoint_for_fireteams(selected_fireteam_ids, get_visualized_waypoints_snapshot())
 	var last_command_text: String = String(command_feedback.get("last_command_text", "")).strip_edges()
@@ -15292,7 +15296,7 @@ func get_mission_first_move_execution_feedback_snapshot() -> Dictionary:
 		"active_execution": active_execution,
 		"active_execution_count": _phase_execution_by_fireteam.size(),
 		"movement_state": movement_state,
-		"movement_state_count": get_fireteam_movement_snapshot().size(),
+		"movement_state_count": movement_snapshot.size() if movement_state.is_empty() else maxi(movement_snapshot.size(), 1),
 		"order_plan": order_plan,
 		"visualized_waypoint": visualized_waypoint,
 		"runtime_execution_path": get_fireteam_runtime_execution_path_snapshot(),
@@ -19111,6 +19115,19 @@ func _find_first_movement_state_for_fireteams(fireteam_ids: Array, entries: Arra
 	return {}
 
 
+func _find_first_recent_movement_trace_for_fireteams(fireteam_ids: Array) -> Dictionary:
+	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
+	for fireteam_id_variant in lookup.keys():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		var trace: Dictionary = Dictionary(_recent_movement_trace_by_fireteam.get(fireteam_id, {})).duplicate(true)
+		if trace.is_empty():
+			continue
+		trace["fireteam_id"] = fireteam_id
+		trace["recent_trace"] = true
+		return trace
+	return {}
+
+
 func _find_first_order_plan_for_fireteams(fireteam_ids: Array, entries: Array) -> Dictionary:
 	var lookup: Dictionary = _build_fireteam_lookup_from_array(fireteam_ids)
 	for entry_variant in entries:
@@ -22249,6 +22266,7 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 			)
 		)
 		if bool(movement_result.get("started", false)):
+			_record_recent_movement_trace(fireteam_id, Dictionary(movement_result.get("movement_state", {})), "started")
 			_mirror_flow_driver_order_for_fireteam(fireteam_id, target_position, command_type, phase_index)
 			if command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK:
 				_notify_flank_initiated(fireteam_id, waypoint.target_position, target_position, behavior_profile)
@@ -22358,10 +22376,37 @@ func _update_fireteam_movement_execution(fireteam_id: String) -> Dictionary:
 			contact_context
 		)
 	)
+	var result_movement_state: Dictionary = Dictionary(result.get("movement_state", {})).duplicate(true)
+	if not result_movement_state.is_empty():
+		_record_recent_movement_trace(fireteam_id, result_movement_state, "active")
+	elif bool(result.get("finished", false)) and not active_movement_state.is_empty():
+		_record_recent_movement_trace(fireteam_id, active_movement_state, "completed")
 	var bound_data: Dictionary = Dictionary(result.get("bound_complete", {})).duplicate(true)
 	if not bound_data.is_empty():
 		_notify_fireteam_bound_complete(fireteam_id, bound_data)
 	return result
+
+
+func _record_recent_movement_trace(fireteam_id: String, movement_state: Dictionary, reason: String) -> void:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() or movement_state.is_empty():
+		return
+	var trace: Dictionary = movement_state.duplicate(true)
+	trace["fireteam_id"] = normalized_fireteam_id
+	trace["recent_trace"] = true
+	trace["recent_trace_reason"] = reason.strip_edges().to_lower()
+	trace["recent_trace_recorded_msec"] = Time.get_ticks_msec()
+	if String(trace.get("readability_status_line", "")).strip_edges().is_empty():
+		var command_type: String = String(trace.get("command_type", "move")).strip_edges().to_upper()
+		var target_position: Vector2 = Vector2(trace.get("final_target_position", trace.get("current_anchor_target_position", Vector2.ZERO)))
+		trace["readability_status_line"] = "%s %s %s" % [command_type, reason.strip_edges().to_upper(), _format_world_position(target_position)]
+	if typeof(trace.get("map_readability", null)) != TYPE_DICTIONARY or Dictionary(trace.get("map_readability", {})).is_empty():
+		trace["map_readability"] = {
+			"style_code": String(trace.get("effective_style", "move")).strip_edges().to_upper(),
+			"status": String(trace.get("recent_trace_reason", reason)),
+			"read_only": true,
+		}
+	_recent_movement_trace_by_fireteam[normalized_fireteam_id] = trace
 
 
 func _build_fireteam_engage_contact_halt_context(fireteam_id: String) -> Dictionary:

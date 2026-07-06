@@ -69,6 +69,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_release_export_mission_runtime_dependencies.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`.
 - Naechster Schritt: Frischen Export und sichtbaren EXE-Klick erneut ausfuehren.
 
+### TASK_825 - Release First GO Recent Movement Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_825_release_first_go_recent_movement_trace.md`, `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der First-Move-Execution-Snapshot nutzt weiterhin den aktiven `FireteamMovementController`-State, faellt aber direkt nach einer abgeschlossenen kurzen Bewegung auf eine read-only Recent-Movement-Spur zurueck.
+- Stand: Die Spur wird beim Movement-Start, bei laufenden Updates und beim finalen Abschluss aus bestehenden Movement-State-Daten gespiegelt, ohne die autoritative Movement-Ausfuehrung zu verlaengern.
+- Stand: `TASK_813` prueft jetzt, dass der erste GO-/Firefight-Smoke eine aktive Movement-Anzeige oder eine Recent-Trace-Begruendung liefert.
+- Risiken/offen: Der echte Fenster-Run bis `GO` bleibt wichtig, um Timing, HUD-Dichte und Lesbarkeit im Release-Build zu beurteilen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_541_mission_first_move_execution_feedback_pass.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release exportieren/starten und `Einzelspieler -> Start Mission -> LZ -> Drop -> Preview -> GO` sichtbar recapturen.
+
 ### TASK_818 - Station Reentry Release Candidate Playable Build Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_818_station_reentry_release_candidate_playable_build_acceptance.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`, `docs/dev/mission_command_feedback_contract.md`
