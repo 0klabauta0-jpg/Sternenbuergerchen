@@ -23,6 +23,7 @@ const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/
 const BACKGROUND_ID: String = "main_menu_shell"
 const GLOBAL_ESCAPE_MENU_NODE_PATH: String = "/root/GlobalEscapeMenu"
 const RELEASE_FIRST_PLAY_STYLE_ID: String = "task_823_release_singleplayer_first_play_cta_v1"
+const RELEASE_SINGLEPLAYER_DEEPLINK_ARG: String = "--release-singleplayer"
 const TEAM_EDITOR_POINT_DELTA: int = 1
 const TEAM_EDITOR_VIEW_SIX: String = "six"
 const TEAM_EDITOR_VIEW_NINE: String = "nine"
@@ -130,6 +131,9 @@ var _global_help_button: Button = null
 var _active_help_control: Control = null
 var _active_help_id: String = ""
 var _help_hover_token: int = 0
+var _release_singleplayer_deeplink_requested: bool = false
+var _release_singleplayer_deeplink_applied: bool = false
+var _release_singleplayer_deeplink_target: String = ""
 
 
 func _ready() -> void:
@@ -148,6 +152,7 @@ func _ready() -> void:
 	_configure_routes()
 	_connect_signals()
 	close_settings_panel()
+	call_deferred("_apply_release_singleplayer_deeplink")
 
 
 func get_background_path() -> String:
@@ -205,6 +210,56 @@ func get_release_singleplayer_visible_findings_polish_snapshot() -> Dictionary:
 		"ui_sets_gameplay_truth": false,
 		"creates_simulation_root": find_child("SimulationRoot", true, false) != null,
 	}
+
+
+func get_release_singleplayer_deeplink_snapshot(user_args: PackedStringArray = PackedStringArray()) -> Dictionary:
+	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_user_args()
+	var requested: bool = _has_release_singleplayer_deeplink_arg(args)
+	return {
+		"schema": "sternenbuergerchen.release_singleplayer_deeplink_evidence.v1",
+		"task_id": "TASK_829",
+		"arg": RELEASE_SINGLEPLAYER_DEEPLINK_ARG,
+		"args": Array(args),
+		"requested": requested,
+		"applied": _release_singleplayer_deeplink_applied,
+		"would_route_to": SINGLEPLAYER_SCENE_PATH if requested else "",
+		"target": _release_singleplayer_deeplink_target,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _get_release_cmdline_user_args() -> PackedStringArray:
+	var normalized := PackedStringArray()
+	for arg in OS.get_cmdline_args():
+		var text: String = String(arg).strip_edges()
+		if not text.is_empty() and not normalized.has(text):
+			normalized.append(text)
+	for arg in OS.get_cmdline_user_args():
+		var text: String = String(arg).strip_edges()
+		if not text.is_empty() and not normalized.has(text):
+			normalized.append(text)
+	return normalized
+
+
+func _has_release_singleplayer_deeplink_arg(args: PackedStringArray) -> bool:
+	for arg in args:
+		if String(arg).strip_edges() == RELEASE_SINGLEPLAYER_DEEPLINK_ARG:
+			return true
+	return false
+
+
+func _apply_release_singleplayer_deeplink() -> void:
+	var args: PackedStringArray = _get_release_cmdline_user_args()
+	if not _has_release_singleplayer_deeplink_arg(args):
+		return
+	_release_singleplayer_deeplink_requested = true
+	_release_singleplayer_deeplink_applied = true
+	_release_singleplayer_deeplink_target = SINGLEPLAYER_SCENE_PATH
+	set_meta("release_singleplayer_deeplink_requested", true)
+	set_meta("release_singleplayer_deeplink_target", SINGLEPLAYER_SCENE_PATH)
+	_status_label.text = "Singleplayer wird gestartet"
+	_on_singleplayer_pressed()
 
 
 func is_settings_panel_visible() -> bool:
