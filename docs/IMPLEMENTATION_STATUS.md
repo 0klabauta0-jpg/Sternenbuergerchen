@@ -59,6 +59,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_538_homebase_to_mission_launch_handoff_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`.
 - Naechster Schritt: Frischen Release exportieren, starten, `Einzelspieler` klicken und sichtbaren Homebase-Zustand erneut capturen.
 
+### BUGFIX - Release Export Mission Runtime Test Dependencies
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_release_export_mission_runtime_test_dependencies.md`, `data/export_runtime_package_contract.json`, `docs/dev/export_runtime_package_contract.md`
+- Stand: Der Runtime-Export schliesst `scripts/tests/**` nicht mehr pauschal aus, weil `scenes/tests/mission_reactivity_test.tscn` aktuell noch die reale Singleplayer-/MetaLayer-Missionsszene ist und Runtime-Skripte aus diesem Ordner referenziert.
+- Stand: Die Console-EXE-Diagnose zeigte, dass der MetaLayer im Export wegen fehlender `mission_map_camera_controller.gd`, `mission_test_setup.gd`, `mission_command_flow_driver.gd`, `enemy_wave_controller.gd`, `mission_combat_loop_driver.gd`, `mission_objective_status_view.gd`, `mission_tactical_sandbox_controller.gd` und `phase_controller.gd` nicht laden konnte.
+- Stand: `bugfix_release_export_mission_runtime_dependencies.gd` sichert den Export-Vertrag gegen ein erneutes pauschales `scripts/tests/**`-Exclude ab, solange die Live-Mission dort noch Runtime-Abhaengigkeiten hat.
+- Risiken/offen: Das Release-Paket enthaelt voruebergehend mehr Testordner-Inhalt. Folgearbeit: runtime-relevante Missionsskripte aus `scripts/tests/` nach `scripts/mission`/`scripts/tactical` umziehen und den Export-Exclude danach wieder schaerfen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_release_export_mission_runtime_dependencies.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`.
+- Naechster Schritt: Frischen Export und sichtbaren EXE-Klick erneut ausfuehren.
+
 ### TASK_818 - Station Reentry Release Candidate Playable Build Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_818_station_reentry_release_candidate_playable_build_acceptance.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`, `docs/dev/mission_command_feedback_contract.md`

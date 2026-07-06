@@ -9,7 +9,6 @@
     "addons/godot_open_rts_reference/**",
     "addons/map_builder_workbench/**",
     "docs/**",
-    "scripts/tests/**",
     "scripts/tools/**",
     "tmp/**"
   ],
