@@ -65,6 +65,7 @@ git checkout -b batch/<batch-name>
 - TASK_828 - Release Ultrawide Canvas Stretch (implementiert): der Release nutzt `canvas_items` + `expand`, damit UI-Screens auf breiteren Fenstern nicht als 1920px-Insel links oben mit leerer rechter Flaeche wirken.
 - TASK_829 - Release Singleplayer Deep-Link Evidence (implementiert): der Release-Launcher kann die EXE mit `--release-singleplayer` starten, damit QA den Singleplayer-Homebase-Pfad reproduzierbar ohne fragile Maus-Injektion erreicht.
 - TASK_830 - Release Start Mission Deep-Link Evidence (implementiert): `--release-singleplayer-start-mission` oeffnet den Singleplayer und loest danach den bestehenden `Start Mission`-Pfad aus, damit die EXE reproduzierbar bis zur Mission/LZ-Phase gecaptured werden kann.
+- TASK_831 - Release LZ Drop Preview Deep-Link Evidence (implementiert): `--release-singleplayer-lz-drop-preview` fuehrt die EXE bis LZ, Drop und Move-Preview vor `GO`, damit die erste echte Missionsentscheidung sichtbar reproduzierbar wird.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
