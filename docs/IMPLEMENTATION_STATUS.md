@@ -69,6 +69,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_821_release_first_homebase_cta_emphasis.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_810_station_reentry_release_candidate_first_mission_cta_visual_smoke.gd`, `git diff --check`.
 - Naechster Schritt: TASK_822 - Release Singleplayer Visible Window Findings.
 
+### TASK_822 - Release Singleplayer Visible Window Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_822_release_singleplayer_visible_window_findings.md`, `docs/tasks/TASK_821_release_first_homebase_cta_emphasis.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`
+- Stand: `scripts/tools/capture_release_singleplayer_visible_window.ps1` liest den Release-Export-Vertrag, findet laufende Release-Prozesse und schreibt ein read-only Findings-Manifest.
+- Stand: Der Helfer speichert einen Desktop-Screenshot und, falls Windows ein Hauptfenster meldet, einen Window-Crop fuer den sichtbaren Singleplayer-Review.
+- Stand: Das Manifest haelt die manuelle Checkliste fuer `Einzelspieler -> Homebase -> Start Mission -> LZ/Drop/Preview/GO -> Firefight-HUD` offen und mutiert keinen Spielzustand.
+- Risiken/offen: Der Capture ersetzt keine echte Bewertung durch den Spieler; `manual_review_done` bleibt deshalb `false`.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_singleplayer_visible_window.ps1`, `godot_console.exe --headless --path . --script scripts/tests/task_822_release_singleplayer_visible_window_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_823 - Release Singleplayer Visible Findings Polish.
+
 ### TASK_813 - Station Reentry Release Candidate First GO Firefight Actionability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`, `docs/tasks/TASK_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/reports/project_current_state_handbook_reentry_2026_07_01.html`
