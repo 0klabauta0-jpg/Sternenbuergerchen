@@ -29,6 +29,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_821_release_first_homebase_cta_emphasis.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release-Export bauen und die EXE neu starten.
 
+### BUGFIX - Singleplayer Release Homebase Post-Show Actionability Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_homebase_post_show_actionability_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_visible_homebase_deadend_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `_show_homebase()` plant nach dem sichtbaren View-Wechsel einen gezielten Post-Show-Guard ein, wenn der Singleplayer-Bootstrap aktiv ist.
+- Stand: Der Guard wartet zwei Frames, liest den sichtbaren Homebase-Actionability-Snapshot und nutzt bei leerem Flightdeck/Payload-Zustand die bestehende Bootstrap-Reparatur.
+- Stand: Der Bootstrap-Verifier deckt jetzt den Screenshot-nahen Fall ab, bei dem der Homebase-Show-Pfad nachtraeglich mit leerem Roster, Flightdeck und Payload gerendert wird.
+- Risiken/offen: Der echte Release-Fenster-Sichttest bleibt Pflicht, weil die EXE lokale Save-/Fensterzustaende anders sichtbar macht als Headless-Fixtures.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_823_release_singleplayer_visible_findings_polish.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release exportieren, starten, `Einzelspieler` klicken und Homebase erneut capturen.
+
 ### TASK_818 - Station Reentry Release Candidate Playable Build Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_818_station_reentry_release_candidate_playable_build_acceptance.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`, `docs/dev/mission_command_feedback_contract.md`
