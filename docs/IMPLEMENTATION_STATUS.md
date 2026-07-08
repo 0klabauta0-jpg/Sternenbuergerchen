@@ -39,6 +39,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_875_release_first_exchange_contact_fire_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_874_release_first_exchange_contact_fire_real_window_recapture.gd`, `git diff --check`.
 - Naechster Schritt: TASK_876 - Release First Exchange Visible Status Source Reconciliation.
 
+### TASK_876 - Release First Exchange Visible Status Source Reconciliation
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_876_release_first_exchange_visible_status_source_reconciliation.md`, `docs/tasks/TASK_875_release_first_exchange_contact_fire_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_873-Evidence wird im TacticalController als read-only First-Exchange-Statusquelle fuer den echten Release-Fensterblick gehalten.
+- Stand: `combat_hud_density` konsumiert diese Quelle, wenn sie aktiv ist, sodass #17/#18/#19 weiter CONTACT FIRE zuerst zeigen, auch wenn der normale Decision-Pfad danach wieder stale `NO_LOS` meldet.
+- Stand: `get_release_first_exchange_visible_status_source_reconciliation_snapshot()` prueft aktive Quelle, #17/#18 CONTACT FIRE-first, #19 CONTACT FIRE und read-only-Grenzen.
+- Risiken/offen: TASK_876 ist ein Runtime-/Snapshot-Fix, aber noch kein neuer echter PNG-Beweis. TASK_877 muss frisch exportieren/capturen und den realen Fensterblick pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_876_release_first_exchange_visible_status_source_reconciliation.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_875_release_first_exchange_contact_fire_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_877 - Release First Exchange Visible Status Recapture.
+
 ### TASK_869 - Release First Exchange Real Window Recapture After LOS Setup
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_869_release_first_exchange_real_window_recapture_after_los_setup.md`, `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -107,7 +107,9 @@ const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_STYLE_ID: String = "
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_STYLE_ID: String = "task_859_release_fire_exchange_real_window_primary_hud_source_binding_v1"
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID: String = "task_862_release_fire_exchange_real_window_primary_hud_runtime_text_v1"
 const RELEASE_FIRST_EXCHANGE_CONTACT_FIRE_READABILITY_FIX_STYLE_ID: String = "task_873_release_first_exchange_contact_fire_readability_fix_v1"
+const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_STYLE_ID: String = "task_876_release_first_exchange_visible_status_source_reconciliation_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 45000
+const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_MSEC: int = 120000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT: float = 1.35
@@ -322,6 +324,7 @@ var _release_candidate_firefight_decision_line_build_depth: int = 0
 var _release_firefight_event_log_fallback_created_msec: int = 0
 var _release_fire_exchange_visibility_persistence_evidence: Dictionary = {}
 var _release_fire_exchange_visibility_last_seed_event_id: String = ""
+var _release_first_exchange_visible_status_source_evidence: Dictionary = {}
 var _last_target_position: Vector2 = Vector2.ZERO
 var _lz_position: Vector2 = Vector2.ZERO
 var _has_lz_position: bool = false
@@ -7087,6 +7090,12 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 	if bool(visibility_persistence.get("active", false)):
 		compact_line = String(visibility_persistence.get("compact_line", compact_line)).strip_edges()
 		detail_snapshot = Dictionary(visibility_persistence.get("detail_tooltip", detail_snapshot)).duplicate(true)
+	else:
+		var first_exchange_status_source: Dictionary = _get_release_first_exchange_visible_status_source_evidence()
+		if bool(first_exchange_status_source.get("active", false)):
+			visibility_persistence = first_exchange_status_source
+			compact_line = String(first_exchange_status_source.get("compact_line", compact_line)).strip_edges()
+			detail_snapshot = Dictionary(first_exchange_status_source.get("detail_tooltip", detail_snapshot)).duplicate(true)
 	var selected_line: String = "Kampf %s" % compact_line if not compact_line.is_empty() else ""
 	var line_limit: int = 96
 	var snapshot: Dictionary = {
@@ -7121,6 +7130,8 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 		snapshot["reason"] = "fired"
 		snapshot["fire_event_id"] = String(visibility_persistence.get("fire_event_id", snapshot.get("fire_event_id", ""))).strip_edges()
 		snapshot["release_fire_exchange_visibility_persistence_style_id"] = RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID
+		snapshot["release_first_exchange_visible_status_source_active"] = String(visibility_persistence.get("task_id", "")) == "TASK_876"
+		snapshot["release_first_exchange_visible_status_source_style_id"] = String(visibility_persistence.get("style_id", ""))
 		snapshot["line_within_limit"] = compact_line.length() <= line_limit
 	return snapshot
 
@@ -7228,6 +7239,45 @@ func _build_release_fire_exchange_visibility_evidence(
 	}
 
 
+func _promote_release_first_exchange_visible_status_source_evidence(evidence: Dictionary, now_msec: int) -> Dictionary:
+	if evidence.is_empty():
+		return {}
+	var promoted: Dictionary = evidence.duplicate(true)
+	promoted["active"] = true
+	promoted["task_id"] = "TASK_876"
+	promoted["source_task_id"] = "TASK_873"
+	promoted["source_visibility_task_id"] = "TASK_847"
+	promoted["style_id"] = RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_STYLE_ID
+	promoted["created_msec"] = now_msec
+	promoted["expires_msec"] = now_msec + RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_MSEC
+	promoted["duration_msec"] = RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_MSEC
+	promoted["event_log_short_text"] = String(promoted.get("event_log_short_text", "CONTACT FIRE: Feuerwechsel lesen")).strip_edges()
+	promoted["event_log_map_label"] = String(promoted.get("event_log_map_label", "CONTACT FIRE")).strip_edges()
+	promoted["read_only"] = true
+	promoted["ui_sets_gameplay_truth"] = false
+	promoted["creates_command"] = false
+	promoted["creates_fire_event"] = false
+	promoted["creates_damage_event"] = false
+	promoted["creates_movement"] = false
+	promoted["sets_multiplayer_truth"] = false
+	_release_first_exchange_visible_status_source_evidence = promoted.duplicate(true)
+	return promoted
+
+
+func _get_release_first_exchange_visible_status_source_evidence() -> Dictionary:
+	if _release_first_exchange_visible_status_source_evidence.is_empty():
+		return {}
+	var now_msec: int = _release_fire_exchange_visibility_clock_msec()
+	var expires_msec: int = int(_release_first_exchange_visible_status_source_evidence.get("expires_msec", 0))
+	if now_msec > expires_msec:
+		_release_first_exchange_visible_status_source_evidence = {}
+		return {}
+	var active: Dictionary = _release_first_exchange_visible_status_source_evidence.duplicate(true)
+	active["active"] = true
+	active["remaining_msec"] = maxi(expires_msec - now_msec, 0)
+	return active
+
+
 func _build_release_fire_exchange_visibility_compact_line(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary) -> String:
 	var attacker_id: String = String(fire_event.get("attacker_unit_id", diagnostics.get("attacker_unit_id", ""))).strip_edges()
 	var target_id: String = String(fire_event.get("target_unit_id", diagnostics.get("target_unit_id", diagnostics.get("actual_target_id", "")))).strip_edges()
@@ -7277,6 +7327,8 @@ func apply_release_first_exchange_contact_fire_readability_fix(source_snapshot: 
 	var seeded_evidence: Dictionary = {}
 	if not source_snapshot.is_empty():
 		seeded_evidence = record_release_fire_exchange_visibility_evidence(source_snapshot)
+	if not seeded_evidence.is_empty():
+		_promote_release_first_exchange_visible_status_source_evidence(seeded_evidence, _release_fire_exchange_visibility_clock_msec())
 	_refresh_world_overlays()
 	_update_ui()
 	_refresh_tactical_event_log_panel()
@@ -7377,6 +7429,103 @@ func _build_release_first_exchange_contact_fire_readability_issue(issue_id: Stri
 	return {
 		"id": issue_id,
 		"text": text,
+	}
+
+
+func get_release_first_exchange_visible_status_source_reconciliation_snapshot() -> Dictionary:
+	_update_ui()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
+	var status_source: Dictionary = _get_release_first_exchange_visible_status_source_evidence()
+	var event_log_display: Dictionary = Dictionary(command_feedback.get("release_firefight_event_log_display", {})).duplicate(true)
+	var selected_text: String = String(command_feedback.get("selected_fireteam_status_label_text", _get_label_text(FIRETEAM_STATUS_LABEL_PATH))).strip_edges()
+	var mission_text: String = String(command_feedback.get("mission_control_status_text", _get_label_text(STRATEGIC_STATUS_LABEL_PATH))).strip_edges()
+	var event_log_short_text: String = String(Dictionary(event_log_display.get("fallback_entry", {})).get("short_text", "")).strip_edges()
+	var selected_contact_fire_first: bool = selected_text.to_upper().begins_with("CONTACT FIRE")
+	var mission_contact_fire_first: bool = mission_text.to_upper().begins_with("CONTACT FIRE")
+	var event_log_contact_fire: bool = event_log_short_text.contains("CONTACT FIRE") \
+		or _release_fire_exchange_event_log_entries_contain_contact_fire(Array(event_log_display.get("entries", [])))
+	var no_fire_before_contact_fire: bool = _release_first_exchange_primary_lines_contain_no_fire_before_contact_fire(
+		_join_release_first_exchange_primary_lines([selected_text, mission_text])
+	)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"status_source_active",
+			bool(status_source.get("active", false)),
+			"TASK_876 keeps TASK_873 first-exchange evidence active for the real-window status source."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_density_has_contact_fire_source",
+			bool(combat_hud_density.get("visibility_persistence_active", false))
+				and String(combat_hud_density.get("compact_line", "")).to_upper().begins_with("FIRE"),
+			"Combat HUD density has an active CONTACT FIRE status source; TASK_876 remains available if the normal persistence expires."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_contact_fire_first",
+			selected_contact_fire_first,
+			"#17 Selected Fireteam starts with CONTACT FIRE during the first-exchange window."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_contact_fire_first",
+			mission_contact_fire_first,
+			"#18 Mission Control starts with CONTACT FIRE during the first-exchange window."
+		),
+		_build_mission_first_move_readability_check(
+			"event_log_contact_fire",
+			event_log_contact_fire,
+			"#19 Event Log exposes CONTACT FIRE instead of stale CONTACT PRESSURE."
+		),
+		_build_mission_first_move_readability_check(
+			"no_debug_no_fire_before_contact_fire",
+			not no_fire_before_contact_fire,
+			"NO FIRE does not appear before CONTACT FIRE in the primary labels."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(status_source.get("read_only", false))
+				and not bool(status_source.get("ui_sets_gameplay_truth", true))
+				and not bool(status_source.get("creates_command", true))
+				and not bool(status_source.get("creates_fire_event", true))
+				and not bool(status_source.get("creates_damage_event", true))
+				and not bool(status_source.get("creates_movement", true))
+				and not bool(status_source.get("sets_multiplayer_truth", true)),
+			"TASK_876 status source is read-only and does not create gameplay truth."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_visible_status_source_reconciliation.v1",
+		"task_id": "TASK_876",
+		"source_task_id": "TASK_875",
+		"source_readability_task_id": "TASK_873",
+		"source_visibility_task_id": "TASK_847",
+		"style_id": RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_STYLE_ID,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"active": bool(status_source.get("active", false)),
+		"status_source": status_source,
+		"combat_hud_density": combat_hud_density,
+		"selected_fireteam_status_text": selected_text,
+		"mission_control_status_text": mission_text,
+		"event_log_short_text": event_log_short_text,
+		"selected_fireteam_contact_fire_first": selected_contact_fire_first,
+		"mission_control_contact_fire_first": mission_contact_fire_first,
+		"event_log_contact_fire": event_log_contact_fire,
+		"primary_lines_contain_debug_no_fire_before_contact_fire": no_fire_before_contact_fire,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+		"recommended_next_task": "TASK_877 - Release First Exchange Visible Status Recapture",
 	}
 
 
