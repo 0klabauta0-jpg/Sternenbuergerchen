@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_894 - Release First Exchange Fire Direction Impact Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_894_release_first_exchange_fire_direction_impact_visual_findings.md`, `docs/tasks/TASK_893_release_first_exchange_fire_direction_impact_real_window_recapture.md`, `docs/tasks/TASK_892_release_first_exchange_fire_direction_impact_clarity_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_894 bewertet den TASK_893-PNG-/Manifest-Befund read-only als Spielerblick.
+- Stand: Positive Befunde: CONTACT FIRE ist in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar; FIRE-/Impact-/Target-Signale sind im Weltbild vorhanden; Command-Surfaces bleiben bedienbar.
+- Stand: Primaere Restreibung ist `source_to_target_trace_not_obvious`: Der Feuerwechsel ist da, aber Quelle -> Schussrichtung -> Ziel -> Treffer liest sich im Weltbild noch nicht sofort als schicke Release-Kampfaktion.
+- Risiken/offen: TASK_894 aendert keine Runtime. Der naechste Slice muss eng Weltkampf-Fokus, Raster-/World-Noise-Dimmung und Source-to-target-Hierarchie polieren, ohne Combat- oder HUD-Wahrheit zu oeffnen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_894_release_first_exchange_fire_direction_impact_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_893_release_first_exchange_fire_direction_impact_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_895 - Release First Exchange World Combat Focal Hierarchy Polish.
+
 ### TASK_893 - Release First Exchange Fire Direction Impact Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_893_release_first_exchange_fire_direction_impact_real_window_recapture.md`, `docs/tasks/TASK_892_release_first_exchange_fire_direction_impact_clarity_polish.md`, `docs/tasks/TASK_890_release_first_exchange_hud_density_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
