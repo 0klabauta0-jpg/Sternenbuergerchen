@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_890 - Release First Exchange HUD Density Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_890_release_first_exchange_hud_density_real_window_recapture.md`, `docs/tasks/TASK_889_release_first_exchange_hud_density_and_fire_visual_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_890 legt einen eigenen Recapture-Contract, Analyzer und Capture-Wrapper an, der den TASK_887-Post-Final-Window-Handle-Pfad nach TASK_889 wiederverwendet.
+- Stand: Das Manifest referenziert TASK_889, TASK_887, TASK_879, TASK_883, TASK_880 und TASK_876 und haelt die erwartete TASK_889-Schema-/Style-ID fest.
+- Stand: Der Analyzer trennt `review_ready` vom echten visuellen `accepted`, damit kein Screenshot ohne Sichtbefund automatisch als angenehm lesbar gilt.
+- Stand: Lokaler Capture-Run schrieb `tmp/release_first_exchange_hud_density_real_window_recapture.json` mit `review_ready` sowie `tmp/release_first_exchange_hud_density_real_window_recapture.png`.
+- Risiken/offen: Der echte PNG-Sichtbefund zeigt CONTACT FIRE in #17/#18/#19 und sichtbare Fire-/Impact-Signale, muss aber als TASK_891 sauber read-only bewertet werden, bevor wir Akzeptanz oder weiteren Polish behaupten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_890_release_first_exchange_hud_density_real_window_recapture.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_hud_density_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `git diff --check`.
+- Naechster Schritt: TASK_891 - Release First Exchange HUD Density Visual Findings.
+
 ### TASK_889 - Release First Exchange HUD Density And Fire Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_889_release_first_exchange_hud_density_and_fire_visual_polish.md`, `docs/tasks/TASK_888_release_first_exchange_player_readability_polish_review.md`, `docs/dev/mission_command_feedback_contract.md`
