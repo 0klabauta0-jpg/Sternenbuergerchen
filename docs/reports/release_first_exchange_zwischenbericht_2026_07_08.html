@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - Release First Exchange / TASK_858</title>
+  <title>Sternenbuergerchen Zwischenbericht - Release First Exchange / TASK_860</title>
   <style>
     :root {
       color-scheme: dark;
@@ -77,7 +77,7 @@
 <body data-report-id="release_first_exchange_zwischenbericht_2026_07_08" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Release First Exchange Zwischenbericht</h1>
-    <p>Stand 2026-07-08: Zwischenbericht zum Singleplayer-Releasepfad, erledigtem TASK_858-Findings-Schnitt und offenem TASK_859-Source-Binding-Polish.</p>
+    <p>Stand 2026-07-08: Zwischenbericht zum Singleplayer-Releasepfad, erledigtem TASK_859-Source-Binding-Polish und laufendem TASK_860-Recapture-Nachweis.</p>
     <div class="meta-row">
       <span class="pill good">TASK_844 headless gruen</span>
       <span class="pill good">TASK_845 Capture review_ready</span>
@@ -95,8 +95,9 @@
       <span class="pill good">TASK_857 Recapture-Slice implementiert</span>
       <span class="pill good">TASK_858 Findings implementiert</span>
       <span class="pill good">TASK_859 Source-Binding implementiert</span>
-      <span class="pill warn">TASK_860 Recapture als naechster Schritt</span>
-      <span class="pill">Branch: task/release-fire-exchange-real-window-primary-hud-source-binding-polish</span>
+      <span class="pill good">TASK_860 Recapture-Slice implementiert</span>
+      <span class="pill warn">TASK_861 Findings als moeglicher Folgepunkt</span>
+      <span class="pill">Branch: task/release-fire-exchange-real-window-contact-fire-recapture</span>
     </div>
   </header>
 
@@ -132,8 +133,9 @@
             <li><strong>Aktueller Sichtbefund:</strong> Der echte TASK_857-Capture ist technisch <code>review_ready</code>, liest sich im Screenshot aber weiterhin eher als <code>NO FIRE NO_LOS</code> / CONTACT PRESSURE. Das ist kein Abbruch, sondern der belegte Input fuer TASK_858.</li>
             <li><strong>TASK_858:</strong> Dieser Sichtbefund ist jetzt als read-only Findings-Schnitt festgehalten: Primaer stoert weiter <code>NO FIRE NO_LOS</code> / LOS-Korrektur statt klarer CONTACT-FIRE-Lesung im echten #17/#18-Fensterpfad.</li>
             <li><strong>TASK_859:</strong> Der echte #17/#18-Window-HUD-Pfad wird bei aktiver Fire-Exchange-Persistence an die vorhandene TASK_856-<code>CONTACT FIRE | ...</code>-Primaerquelle gebunden.</li>
+            <li><strong>TASK_860:</strong> Der neue Recapture-Slice erzeugt ein eigenes Manifest <code>tmp/release_fire_exchange_real_window_contact_fire_recapture.json</code> und eigene Screenshotpfade fuer den echten Fensterblick nach TASK_859.</li>
             <li><strong>Bericht:</strong> Diese Workbench fasst Arbeitsstand, Spielwirkung, Screenshot-Befund, offene Risiken und naechste Arbeitsschritte zusammen. Unten kann daraus eine JSON-Notiz exportiert werden.</li>
-            <li><strong>Git:</strong> TASK_848 bis TASK_857 sind gemerged und gepusht. TASK_858 laeuft aktuell auf <code>task/release-fire-exchange-contact-fire-primary-hud-visual-findings</code>.</li>
+            <li><strong>Git:</strong> TASK_859 ist gemerged und gepusht. TASK_860 laeuft aktuell auf <code>task/release-fire-exchange-real-window-contact-fire-recapture</code>.</li>
           </ul>
         </article>
         <article class="card">
@@ -154,8 +156,10 @@
           <p><code>tmp/release_fire_exchange_after_readability_recapture.json</code> als TASK_854-Evidence-Paket</p>
           <p><code>tmp/release_fire_exchange_after_readability_recapture_acceptance.json</code> als lokaler Analyzer-Output</p>
           <p><code>tmp/release_fire_exchange_after_readability_visual_findings.json</code> als TASK_855-Findings-Paket</p>
+          <p><code>tmp/release_fire_exchange_contact_fire_primary_hud_recapture.json</code> als TASK_857-Evidence-Paket</p>
+          <p><code>tmp/release_fire_exchange_real_window_contact_fire_recapture.json</code> als TASK_860-Evidence-Paket</p>
           <p><code>tmp/release_first_exchange_recapture_acceptance.json</code></p>
-          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>, Findings-Status: <code>ready_for_polish</code>. TASK_858 bewertet die echte Bildwirkung: der Screenshot liest weiter nicht klar CONTACT FIRE, also folgt TASK_859 als enger Source-Binding-Polish.</p>
+          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>, Findings-Status: <code>ready_for_polish</code>. TASK_860 prueft nach TASK_859 den echten Fensterblick erneut. Der frische PNG-Blick ist technisch sauber, liest aber weiter nicht klar CONTACT FIRE; TASK_861 ist deshalb der naechste enge Findings-Schnitt.</p>
         </article>
       </div>
     </section>
@@ -165,10 +169,10 @@
         <article class="card full">
           <h2>Echter Fensterbefund</h2>
           <div class="status-box bad" style="margin-top: 12px;">
-            Erwartet ist ein klarer erster <code>CONTACT FIRE</code>-Moment. Der frische TASK_854-Capture nach TASK_853 ist technisch <code>review_ready</code>, zeigt im sichtbaren Fenster aber weiterhin eher <code>CONTACT PRESSURE</code> / <code>NO FIRE NO_LOS</code> als einen eindeutig bestandenen Fire-Exchange-Moment.
+            Erwartet ist ein klarer erster <code>CONTACT FIRE</code>-Moment. Die frueheren TASK_854-/TASK_857-Captures waren technisch <code>review_ready</code>, zeigten im sichtbaren Fenster aber weiterhin eher <code>CONTACT PRESSURE</code> / <code>NO FIRE NO_LOS</code>. Der neue TASK_860-Capture nach TASK_859 ist ebenfalls technisch <code>review_ready</code>, liest unten aber weiter als <code>NEXT LOS/RANGE KORRIGIEREN</code> und <code>Kampf NO FIRE NO_LOS</code>.
           </div>
           <div class="status-box" style="margin-top: 12px;">
-            TASK_854 hat nach TASK_853 neu exportiert und neu gecaptured. Der Readability-Style und die 45s-Persistenz sind im Contract und Manifest erwartbar, aber der echte Blick bestaetigt noch nicht klar genug den Feuerwechsel. TASK_855 sollte daraus einen engen Befund-/Polish-Slice machen.
+            TASK_860 haengt an TASK_857 an und erwartet zusaetzlich die TASK_859-Source-Binding-Style-ID. Der Screenshot zeigt, dass der echte Fensterpfad immer noch nicht spielerisch sauber als CONTACT FIRE ankommt. TASK_861 sollte diesen Befund read-only festhalten und den naechsten engen Polish vorbereiten.
           </div>
           <img class="screenshot" src="../../tmp/release_fire_exchange_after_readability_recapture.png" alt="TASK_854 Release Fire Exchange After Readability Recapture">
         </article>
@@ -178,6 +182,7 @@
             <li>Die Mission ist sichtbar und bedienbar.</li>
             <li>Fireteam-Karten, Command Matrix, Mission Control und Dropship-Karte sind lesbar und ueberlappen nicht kritisch.</li>
             <li>Der neue TASK_854-Capture ist reproduzierbar und liefert eigene PNG-/JSON-Artefakte fuer den naechsten Sichtbefund.</li>
+            <li>Der neue TASK_860-Schnitt ergaenzt genau die fehlende Quelle: den echten Fensterblick nach der TASK_859-Source-Bindung.</li>
             <li>Der Kontakt ist immerhin als taktischer Druck gerahmt statt als leeres Log.</li>
             <li>Der Acceptance- und Findings-Schnitt trennt technische Guete von manueller Sichtbewertung. Das verhindert, dass ein gruenes Script ein unlesbares Spielerlebnis schoenfaerbt.</li>
           </ul>
@@ -189,7 +194,7 @@
             <li>Das Start-/Automatik-Overlay lenkt im Fire-Exchange-Capture vom eigentlichen Kampfereignis ab.</li>
             <li>FireEvent/Trace/Impact bleibt im Fenster nicht prominent genug erhalten.</li>
             <li>#17, #18 und #19 muessen den Fire-Moment bestaetigen, statt zuerst wieder wie reine LOS-/Range-Korrektur oder leere Pressure zu wirken.</li>
-            <li>Der TASK_854-Blick liest sich noch als <code>CONTACT PRESSURE</code> und <code>NO FIRE NO_LOS</code>. Das ist fuer den Spieler eher Korrektur-/Debug-Sprache als Kampflesbarkeit.</li>
+            <li>Der TASK_860-Blick wurde echt gecaptured und manuell gesichtet; TASK_859 reicht fuer das reale Fenster noch nicht sichtbar genug.</li>
           </ul>
         </article>
       </div>
@@ -211,6 +216,7 @@
             <li><strong>TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings:</strong> TASK_857-Fensterblick read-only bewerten und die belegte Restreibung als <code>primary_hud_still_no_fire_no_los_visible</code> festhalten.</li>
             <li><strong>TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish:</strong> Den echten #17/#18-Window-HUD-Pfad eng an die TASK_856-CONTACT-FIRE-Quelle binden.</li>
             <li><strong>TASK_860 - Release Fire Exchange Real Window Contact-Fire Recapture:</strong> Nach dem Source-Binding neu exportieren/capturen und den echten Fensterblick pruefen.</li>
+            <li><strong>TASK_861 - Release Fire Exchange Real Window Contact-Fire Visual Findings:</strong> Nur falls der frische TASK_860-Screenshot noch nicht klar genug ist, den echten Restbefund read-only festhalten.</li>
           </ol>
         </article>
         <article class="card">
@@ -250,7 +256,8 @@
               <option value="task_855_findings_ready">TASK_855 Findings bereit, TASK_856 Polish</option>
               <option value="task_856_primary_hud_done">TASK_856 Primary-HUD-Polish bereit, TASK_857 Recapture</option>
               <option value="task_857_recapture_ready">TASK_857 Recapture-Slice bereit, TASK_858 Sichtbefund offen</option>
-              <option selected value="task_858_findings_ready">TASK_858 Findings bereit, TASK_859 Source-Binding</option>
+              <option value="task_858_findings_ready">TASK_858 Findings bereit, TASK_859 Source-Binding</option>
+              <option selected value="task_860_recapture_ready">TASK_860 Recapture-Slice bereit, echter Sichtreview offen</option>
               <option value="visual_polish_findings_ready">Visual-Polish-Findings fuer TASK_850 bereit</option>
               <option value="visibility_fix_done_recapture_next">Sichtbarkeits-Fix erledigt, Recapture als naechstes</option>
               <option value="findings_done_visibility_fix_in_progress">Findings erledigt, Sichtbarkeits-Fix in Arbeit</option>
@@ -271,6 +278,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_856_primary_hud_done"> TASK_856 priorisiert CONTACT FIRE als erste #17/#18-HUD-Lesung.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_857_recapture_ready"> TASK_857 paketiert den frischen CONTACT-FIRE-Primary-HUD-Recapture.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_858_findings_ready"> TASK_858 benennt die reale NO FIRE NO_LOS-/CONTACT-PRESSURE-Dominanz als naechsten Polish-Fokus.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_859_source_binding_done"> TASK_859 bindet den Real-Window-HUD-Pfad an CONTACT FIRE.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_860_recapture_slice_ready"> TASK_860 paketiert den naechsten echten Fensterbeweis nach TASK_859.</label>
         </article>
         <article class="card wide">
           <h2>Freie Notizen</h2>
@@ -345,13 +354,14 @@
             task_857_capture_gate: "review_ready",
             task_857_visible_observation: "Window screenshot still reads closer to NO FIRE NO_LOS / contact pressure than clear CONTACT FIRE.",
             completed_contact_fire_primary_hud_visual_findings_task: "TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings",
-            active_next_task: "TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish",
+            completed_real_window_source_binding_task: "TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish",
+            active_next_task: "TASK_860 - Release Fire Exchange Real Window Contact-Fire Recapture",
             current_player_value: "Release-Singleplayer startet bis in die Mission; bei aktiver Fire-Exchange-Evidence priorisieren #17/#18 jetzt CONTACT FIRE als erste HUD-Lesung.",
-            recommended_next_task: "TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish"
+            recommended_next_task: "TASK_861 - Release Fire Exchange Real Window Contact-Fire Visual Findings"
           },
           metadata: {
-            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849", "TASK_850", "TASK_851", "TASK_852", "TASK_853", "TASK_854", "TASK_855", "TASK_856", "TASK_857", "TASK_858"],
-            branch: "task/release-fire-exchange-contact-fire-primary-hud-visual-findings",
+            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849", "TASK_850", "TASK_851", "TASK_852", "TASK_853", "TASK_854", "TASK_855", "TASK_856", "TASK_857", "TASK_858", "TASK_859", "TASK_860"],
+            branch: "task/release-fire-exchange-real-window-contact-fire-recapture",
             merged_branches: [
               "task/release-first-exchange-recapture-acceptance",
               "task/release-fire-exchange-visual-polish-findings",
@@ -363,6 +373,7 @@
             findings_manifest_path: "tmp/release_fire_exchange_visual_polish_findings.json",
             acceptance_manifest_path: "tmp/release_first_exchange_recapture_acceptance.json",
             focused_visual_recapture_manifest_path: "tmp/release_fire_exchange_focused_visual_recapture.json",
+            real_window_contact_fire_recapture_manifest_path: "tmp/release_fire_exchange_real_window_contact_fire_recapture.json",
             focused_visual_recapture_acceptance_path: "tmp/release_fire_exchange_focused_visual_recapture_acceptance.json",
             focused_visual_findings_path: "tmp/release_fire_exchange_focused_visual_findings.json",
             after_readability_recapture_manifest_path: "tmp/release_fire_exchange_after_readability_recapture.json",
