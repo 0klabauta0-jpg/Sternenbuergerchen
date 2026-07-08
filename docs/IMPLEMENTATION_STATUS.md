@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### BUGFIX - Release Homebase Direct Start Copy Clarity
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_release_homebase_direct_start_copy_clarity.md`, `docs/tasks/BUGFIX_release_singleplayer_normal_click_homebase_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
+- Stand: Der frische `EXE -> Einzelspieler`-Pfad wurde im echten Fenster per sichtbarem Button-Klick geprueft und landet auf `Operation: Grid Sweep` mit aktivem `Start Mission`, Dropship, Pilot und geboardetem Payload.
+- Stand: Homebase-Direct zeigt jetzt `Mission payload`, `Direct sortie` und den naechsten Griff `Start Mission -> LZ -> Drop -> Preview -> GO`, statt alte FOB-Transfer-/Slot-Ueberlauf-Texte zu verwenden.
+- Risiken/offen: Ein alter laufender Release-Prozess kann weiterhin den alten Screenshot zeigen; vor Playtests alte Prozesse stoppen oder den checked Launcher nutzen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_388_homebase_fireteam_roster_shipcard_polish.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release exportieren/starten und den sichtbaren `Einzelspieler -> Start Mission`-Pfad erneut capturen.
+
 ### TASK_833 - Release Firefight HUD Readability Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_833_release_firefight_hud_readability_polish.md`, `docs/tasks/TASK_817_station_reentry_release_candidate_targeted_firefight_polish.md`, `docs/dev/mission_command_feedback_contract.md`
