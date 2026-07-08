@@ -10,8 +10,19 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
-### TASK_850 - Release Fire Exchange Focused Visual Polish
+### TASK_851 - Release Fire Exchange Focused Visual Recapture
 - Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_851_release_fire_exchange_focused_visual_recapture.md`, `docs/tasks/TASK_850_release_fire_exchange_focused_visual_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_fire_exchange_focused_visual_recapture.ps1` haengt einen eigenen TASK_851-Recapture an den bestehenden TASK_845-First-Exchange-Capture und nutzt weiter `--release-singleplayer-first-go-firefight`.
+- Stand: Das Manifest `tmp/release_fire_exchange_focused_visual_recapture.json` erwartet Schema `sternenbuergerchen.release_fire_exchange_focused_visual_polish.v1` und Style-ID `task_850_release_fire_exchange_focused_visual_polish_v1`.
+- Stand: `ReleaseFireExchangeFocusedVisualRecapture` paketiert das Capture als read-only Review-Snapshot mit Screenshotpfaden, TASK_850-/TASK_847-/TASK_845-/TASK_844-/TASK_837-Verweisen und manuellen Pflichtchecks fuer CONTACT FIRE, FireTrace/Impact, Target-Focus, gedimmte Weltlinien und HUD-Konsistenz.
+- Stand: Der lokale echte TASK_851-Capture lief mit `gate = review_ready`, Window-Handle gefunden, Window-/Desktop-Screenshot geschrieben und ohne Hard-Failures.
+- Risiken/offen: Der Snapshot ersetzt keinen menschlichen Bildentscheid; wenn der frische Screenshot noch nicht klar genug ist, folgt TASK_852 als Findings-/Polish-Slice statt weiterer Architekturarbeit.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_fire_exchange_focused_visual_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 32`, `godot_console.exe --headless --path . --script scripts/tests/task_851_release_fire_exchange_focused_visual_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_850_release_fire_exchange_focused_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_852 - Release Fire Exchange Focused Visual Findings.
+
+### TASK_850 - Release Fire Exchange Focused Visual Polish
+- Status: implementiert und gemerged
 - Relevante Docs/Contracts: `docs/tasks/TASK_850_release_fire_exchange_focused_visual_polish.md`, `docs/tasks/TASK_849_release_fire_exchange_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`
 - Stand: Der Mission-Controller setzt im aktiven TASK_847-Fire-Exchange-Visibility-Fenster einen expliziten Primary3D-Schalter `release_fire_exchange_focused_visual_polish`.
 - Stand: `TerrainMap3DView` meldet `task_850_release_fire_exchange_focused_visual_polish_v1`, dimmt Friendly-Aim-/LOS-Weltlinien und priorisiert FireTrace, Impact, Impact-Cross sowie Target-Focus mit groesseren Focus-Werten.
