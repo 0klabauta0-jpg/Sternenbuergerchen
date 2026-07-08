@@ -92,7 +92,8 @@
       <span class="pill good">Aktueller Strang: erster Release-Feuerwechsel</span>
       <span class="pill good">TASK_890 Capture review_ready</span>
       <span class="pill good">TASK_891 Findings implementiert</span>
-      <span class="pill warn">Naechster sinnvoller Slice: TASK_892</span>
+      <span class="pill good">TASK_892 Visual Polish im Arbeitsstand</span>
+      <span class="pill warn">Naechster sinnvoller Slice: TASK_893 Recapture</span>
       <span class="pill warn">Branch lokal ahead 1 vor diesem Report</span>
       <span class="pill warn">Untracked: builds/</span>
       <span class="pill">Report ist read-only</span>
@@ -116,14 +117,15 @@
             Der erste Singleplayer-/Release-Missionspfad ist inzwischen nicht mehr nur ein loses Testbild. Er ist als reproduzierbare Kette aus Homebase, Fireteam, Dropship, Mission, GO, Kontakt und erstem Feuerwechsel belegbar.
           </div>
           <p>Der wichtigste Fortschritt der letzten Slices: Wir haben den Widerspruch zwischen interner CONTACT-FIRE-Wahrheit und sichtbarem Fensterbild eingegrenzt und dann praktisch geloest. Der echte Post-Final-Fensterblick zeigt CONTACT FIRE jetzt in #17 Selected Fireteam, #18 Mission Control und #19 Event Log. TASK_890 hat diesen Stand erneut als echtes Fenster-Capture-Paket gesichert; TASK_891 bewertet ihn aus Spielerperspektive.</p>
-          <p>Was noch fehlt: Der Moment ist funktional da, aber noch nicht schoen genug. Schussrichtung, Impact und Zielbezug sind sichtbar, aber fuer einen Spieler noch nicht sofort als eine klare Aktion lesbar. Genau dort sollte TASK_892 ansetzen.</p>
+          <p>Was jetzt passiert ist: TASK_892 setzt genau dort an. Der bestaetigte CONTACT-FIRE-Moment bekommt im Primary3D-Weltbild eine staerkere Richtung-/Impact-Hierarchie: breiterer FireTrace, groesserer Impact, groesserer Target-Fokus und eine Ziel-End-Markierung, die Quelle -> Ziel -> Treffer schneller lesbar machen soll.</p>
+          <p>Was noch fehlt: Der neue Visual-Polish ist headless/runtime-messbar, aber noch nicht durch einen frischen echten Fensterblick bewiesen. Dafuer ist TASK_893 der naechste Schritt.</p>
         </article>
         <article class="card">
           <h2>Zahlenstand</h2>
           <div class="stack">
             <div class="metric"><strong>3</strong><span>zentrale HUD-Flaechen: #17, #18, #19.</span></div>
-            <div class="metric"><strong>2</strong><span>letzte Hauptslices: TASK_890 Recapture, TASK_891 Findings.</span></div>
-            <div class="metric"><strong>1</strong><span>naechster enger Polish: Fire Direction + Impact.</span></div>
+            <div class="metric"><strong>3</strong><span>letzte Hauptslices: TASK_890 Recapture, TASK_891 Findings, TASK_892 Visual Polish.</span></div>
+            <div class="metric"><strong>1</strong><span>naechster Beleg-Slice: TASK_893 Recapture.</span></div>
             <div class="metric"><strong>0</strong><span>neue Gameplay-Wahrheit durch diesen Bericht.</span></div>
           </div>
         </article>
@@ -165,6 +167,13 @@
                 <p>Der Screenshot wurde read-only bewertet: CONTACT FIRE ist da, Event Log ist ruhiger, FIRE/Impact ist vorhanden. Die offene Reibung ist jetzt eng benannt: Schussrichtung, Zielbezug und Impact muessen als zusammenhaengende Kampfaktion klarer werden.</p>
               </div>
             </div>
+            <div class="timeline-item">
+              <strong>TASK_892</strong>
+              <div>
+                <h3>Fire Direction / Impact Polish</h3>
+                <p>Der bestehende TASK_889-Visual-Pfad wird erweitert: Primary3D meldet einen eigenen TASK_892-Style, staerkere Trace-/Impact-/Target-Fokus-Werte und sichtbare Direction-/Impact-Relationship-Metadaten. Die Aenderung bleibt read-only und erzeugt keine neue Combat- oder Damage-Wahrheit.</p>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -189,14 +198,15 @@
           </div>
           <label class="checkline"><input type="checkbox" checked data-export-key="gameplay.singleplayer_path_repeatable"> Singleplayer-Pfad reproduzierbar</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="gameplay.contact_fire_visible"> CONTACT FIRE sichtbar</label>
-          <label class="checkline"><input type="checkbox" data-export-key="gameplay.fire_direction_obvious"> Schussrichtung sofort klar</label>
-          <label class="checkline"><input type="checkbox" data-export-key="gameplay.impact_target_obvious"> Impact und Ziel sofort klar</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="gameplay.fire_direction_polished_runtime"> Schussrichtung runtime-seitig poliert</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="gameplay.impact_target_polished_runtime"> Impact und Ziel runtime-seitig poliert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="gameplay.impact_target_real_window_verified"> Impact und Ziel im echten Fenster bestaetigt</label>
         </article>
         <article class="card full">
           <h2>Aktuelle Reibungen</h2>
           <ul class="list">
-            <li><strong>Fire Direction:</strong> Man sieht, dass etwas passiert, aber die Richtung und der Zusammenhang Quelle -> Ziel -> Treffer ist noch nicht stark genug.</li>
-            <li><strong>Impact / Target Focus:</strong> Treffer-/Impact-Hinweise sind vorhanden, wirken aber noch zu wenig wie der optische Schwerpunkt.</li>
+            <li><strong>Fire Direction:</strong> Runtime-seitig poliert; echter Fensterbeweis fehlt noch.</li>
+            <li><strong>Impact / Target Focus:</strong> Treffer-/Impact-Hinweise sind staerker und bekommen einen Ziel-End-/Direction-Anchor; TASK_893 muss zeigen, ob das im Spielerblick reicht.</li>
             <li><strong>HUD-Dichte:</strong> #17/#18/#19 sind deutlich besser, aber Bottom-HUD und Member Cards konkurrieren noch mit dem Weltbild.</li>
             <li><strong>Release-Gefuehl:</strong> Der Pfad ist pruefbar und besser lesbar, aber noch nicht so elegant, dass ein neuer Spieler den ersten Feuerwechsel ohne Projektwissen sofort versteht.</li>
           </ul>
@@ -209,10 +219,11 @@
         <article class="card wide">
           <h2>Technischer Stand</h2>
           <ul class="list">
-            <li><code>SimulationRoot</code> bleibt autoritativ; der Bericht und die Findings erzeugen keine Gameplay-Wahrheit.</li>
+            <li><code>SimulationRoot</code> bleibt autoritativ; der Bericht, die Findings und TASK_892 erzeugen keine Gameplay-Wahrheit.</li>
             <li>Die First-Exchange-Arbeiten unterscheiden inzwischen sauber zwischen Source-Snapshot, Render-Frame, Window-Handle-Capture und menschlichem Sichtbefund.</li>
             <li>TASK_890/891 sind read-only: keine Commands, keine FireEvents, keine DamageEvents, keine Movement- oder Multiplayer-Mutationen.</li>
-            <li>Der lokale Branch hatte vor diesem Report einen unpushed Commit: <code>82337b9b Record first exchange HUD density findings</code>.</li>
+            <li>TASK_892 ist ebenfalls read-only: eigener Primary3D-Style, staerkere Visual-Werte und Direction-/Impact-Metadaten, aber keine neue Combat- oder Damage-Entscheidung.</li>
+            <li>Der lokale Branch enthaelt jetzt den laufenden TASK_892-Arbeitsstand.</li>
             <li><code>builds/</code> bleibt untracked und gehoert nicht in diesen Report-Commit.</li>
           </ul>
         </article>
@@ -220,6 +231,7 @@
           <h2>Prueflogik</h2>
           <label class="checkline"><input type="checkbox" checked data-export-key="technical.task_891_verifier_green"> TASK_891 Verifier gruen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="technical.task_890_regression_green"> TASK_890 Regression gruen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="technical.task_892_verifier_green"> TASK_892 Verifier gruen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="technical.diff_check_green"> git diff --check gruen</label>
           <label class="checkline"><input type="checkbox" data-export-key="technical.report_committed_pushed"> Dieser Report committed und gepusht</label>
         </article>
@@ -235,8 +247,8 @@
         <article class="card wide">
           <h2>Was ich noch machen will</h2>
           <ol class="list">
-            <li><strong>TASK_892 - Fire Direction And Impact Clarity Polish:</strong> Schussrichtung, Impact und Zielbezug im ersten CONTACT-FIRE-Moment staerker zusammenfuehren.</li>
-            <li><strong>Recapture danach:</strong> Wieder echten Release-Fensterblick erzeugen und nicht nur Headless glauben.</li>
+            <li><strong>TASK_893 - Fire Direction Impact Real Window Recapture:</strong> Wieder echten Release-Fensterblick erzeugen und nicht nur Headless glauben.</li>
+            <li><strong>Sichtbefund danach:</strong> Pruefen, ob Quelle -> Schussrichtung -> Ziel -> Treffer jetzt ohne Projektwissen gelesen wird.</li>
             <li><strong>Spielerlesung entscheiden:</strong> Wenn der erste Feuerwechsel ohne Projektwissen lesbar ist, erst dann weiter Richtung groessere Mission/Map/Editor.</li>
             <li><strong>Release-Ordner sauber halten:</strong> Exportpfad und Taskleisten-/Startpfad nur anfassen, wenn ein neuer gepruefter Build gebraucht wird.</li>
           </ol>
@@ -245,15 +257,15 @@
           <h2>Empfohlener Fokus</h2>
           <label>Naechster Schritt
             <select data-export-key="next.focus">
-              <option selected value="task_892_fire_direction_impact">TASK_892 Fire Direction + Impact</option>
-              <option value="recapture_after_892">Recapture nach TASK_892</option>
+              <option value="task_892_fire_direction_impact">TASK_892 Fire Direction + Impact</option>
+              <option selected value="recapture_after_892">TASK_893 Recapture nach TASK_892</option>
               <option value="release_export">Neuen Release-Build paketieren</option>
               <option value="map_editor">Map-Editor/Builder fortsetzen</option>
               <option value="multiplayer">Multiplayer-Sichttest</option>
             </select>
           </label>
           <div class="button-row" style="margin-top: 12px;" data-choice-group="next.decision">
-            <button class="choice active" type="button" data-choice-value="continue_visual_polish">Visual Polish fortsetzen</button>
+            <button class="choice active" type="button" data-choice-value="recapture_visual_polish">TASK_893 recapturen</button>
             <button class="choice" type="button" data-choice-value="ship_current">Aktuellen Build testen</button>
             <button class="choice" type="button" data-choice-value="switch_editor">Zum Editor wechseln</button>
           </div>
@@ -335,13 +347,14 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_state: "CONTACT FIRE is visible in #17/#18/#19, but fire direction, impact and target relationship need clarity polish.",
+            current_state: "CONTACT FIRE is visible in #17/#18/#19, and TASK_892 now strengthens fire direction, impact and target relationship in Primary3D; a fresh real-window recapture is still needed.",
             completed_recent_work: [
               "TASK_890 recaptured the real post-final window after the HUD density and fire visual polish.",
               "TASK_891 recorded read-only visual findings from the TASK_890 capture.",
+              "TASK_892 adds a read-only Primary3D clarity style with stronger trace, impact, target focus and direction/impact relationship metadata.",
               "The first release firefight is now a repeatable quality anchor rather than a vague debug scene."
             ],
-            next_recommendation: "TASK_892 - Release First Exchange Fire Direction And Impact Clarity Polish",
+            next_recommendation: "TASK_893 - Release First Exchange Fire Direction Impact Real Window Recapture",
             repo_state: "Branch task/release-first-exchange-player-readability-polish-review; builds/ untracked; report is read-only."
           },
           metadata: {
@@ -349,7 +362,7 @@
             project_root: "C:/dev/SternenBuergerchen",
             report_file: "docs/reports/spielstand_zwischenbericht_2026_07_09.html",
             authoritative_state_note: "This report is a read-only workbench. It does not create gameplay truth.",
-            relevant_task_ids: ["TASK_890", "TASK_891", "TASK_892"]
+            relevant_task_ids: ["TASK_890", "TASK_891", "TASK_892", "TASK_893"]
           }
         };
 

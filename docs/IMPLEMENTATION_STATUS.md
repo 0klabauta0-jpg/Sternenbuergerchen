@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_892 - Release First Exchange Fire Direction And Impact Clarity Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_892_release_first_exchange_fire_direction_impact_clarity_polish.md`, `docs/tasks/TASK_891_release_first_exchange_hud_density_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_892 baut eng auf dem aktiven TASK_889-HUD-Density-/Fire-Visual-Pfad auf und setzt einen eigenen Primary3D-Schalter fuer den bestaetigten CONTACT-FIRE-Moment.
+- Stand: FireTrace, Impact, Target-Fokus, Statuslabel sowie eine Richtungspfeil-/Impact-Relationship-Markierung werden im Render-Snapshot messbar staerker.
+- Stand: `get_release_first_exchange_fire_direction_impact_clarity_polish_snapshot()` prueft den Pfad read-only gegen TASK_889, Primary3D-Style, Direction-/Impact-Anchor und Gameplay-Grenzen.
+- Risiken/offen: TASK_892 ist noch kein neuer echter Fensterbeweis. Der naechste Slice muss neu exportieren/capturen und den menschlichen Spielerblick auf Direction/Impact pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_892_release_first_exchange_fire_direction_impact_clarity_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_891_release_first_exchange_hud_density_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_889_release_first_exchange_hud_density_and_fire_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_893 - Release First Exchange Fire Direction Impact Real Window Recapture.
+
 ### TASK_891 - Release First Exchange HUD Density Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_891_release_first_exchange_hud_density_visual_findings.md`, `docs/tasks/TASK_890_release_first_exchange_hud_density_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`

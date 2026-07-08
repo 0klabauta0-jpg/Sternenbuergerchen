@@ -400,6 +400,21 @@ const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_RADIUS: float 
 const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_HEIGHT: float = 0.11
 const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE: int = 18
 const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.88, 0.24, 0.90)
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CLARITY_STYLE_ID: String = "task_892_release_first_exchange_fire_direction_impact_clarity_v1"
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TRACE_WIDTH: float = 0.092
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_MUZZLE_FLASH_WIDTH: float = 0.135
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_RADIUS: float = 0.46
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CROSS_WIDTH: float = 0.102
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TARGET_FOCUS_RADIUS: float = 0.78
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TARGET_FOCUS_HEIGHT: float = 0.145
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_STATUS_LABEL_FONT_SIZE: int = 20
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.94, 0.28, 0.96)
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WORLD: float = 30.0
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_HALF_WIDTH_WORLD: float = 14.0
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH: float = 0.095
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_RADIUS: float = 0.24
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_HEIGHT: float = 0.16
+const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR: Color = Color(1.0, 0.96, 0.20, 0.98)
 const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
 	"CONTACT",
 	"MOVE",
@@ -1748,6 +1763,14 @@ func get_render_snapshot() -> Dictionary:
 		"release_first_exchange_hud_density_fire_visual_target_focus_radius": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_RADIUS if _is_release_first_exchange_hud_density_fire_visual_polish_active() else RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_RADIUS,
 		"release_first_exchange_hud_density_fire_visual_status_label_font_size": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE if _is_release_first_exchange_hud_density_fire_visual_polish_active() else RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE,
 		"release_first_exchange_hud_density_fire_visual_policy": "contact_fire_first_prioritize_trace_impact_target_focus" if _is_release_first_exchange_hud_density_fire_visual_polish_active() else "default",
+		"release_first_exchange_fire_direction_impact_clarity_polish_active": _is_release_first_exchange_fire_direction_impact_clarity_polish_active(),
+		"release_first_exchange_fire_direction_impact_clarity_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CLARITY_STYLE_ID if _is_release_first_exchange_fire_direction_impact_clarity_polish_active() else "",
+		"release_first_exchange_fire_direction_impact_trace_width": RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TRACE_WIDTH if _is_release_first_exchange_fire_direction_impact_clarity_polish_active() else RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TRACE_WIDTH,
+		"release_first_exchange_fire_direction_impact_radius": RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_RADIUS if _is_release_first_exchange_fire_direction_impact_clarity_polish_active() else RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_IMPACT_RADIUS,
+		"release_first_exchange_fire_direction_target_focus_radius": RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TARGET_FOCUS_RADIUS if _is_release_first_exchange_fire_direction_impact_clarity_polish_active() else RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_RADIUS,
+		"release_first_exchange_fire_direction_arrow_world": RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WORLD if _is_release_first_exchange_fire_direction_impact_clarity_polish_active() else 0.0,
+		"release_first_exchange_fire_direction_arrow_width": RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH if _is_release_first_exchange_fire_direction_impact_clarity_polish_active() else 0.0,
+		"release_first_exchange_fire_direction_impact_policy": "source_to_target_direction_arrow_impact_anchor_and_target_endcap" if _is_release_first_exchange_fire_direction_impact_clarity_polish_active() else "default",
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -5066,6 +5089,14 @@ func _is_release_first_exchange_hud_density_fire_visual_polish_active() -> bool:
 	return bool(_mission_status_payload.get("release_first_exchange_hud_density_fire_visual_polish", false))
 
 
+func _is_release_first_exchange_fire_direction_impact_clarity_polish_active() -> bool:
+	if not _is_release_first_exchange_hud_density_fire_visual_polish_active():
+		return false
+	if bool(_order_payload.get("release_first_exchange_fire_direction_impact_clarity_polish", false)):
+		return true
+	return bool(_mission_status_payload.get("release_first_exchange_fire_direction_impact_clarity_polish", false))
+
+
 func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> Color:
 	if not _is_release_fire_exchange_focused_visual_polish_active():
 		return base_color
@@ -6450,6 +6481,7 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var focused_exchange_active: bool = _is_release_fire_exchange_focused_visual_polish_active()
 	var first_exchange_fire_visual_active: bool = _is_release_first_exchange_fire_visual_polish_active()
 	var first_exchange_hud_density_fire_visual_active: bool = _is_release_first_exchange_hud_density_fire_visual_polish_active()
+	var first_exchange_direction_impact_clarity_active: bool = _is_release_first_exchange_fire_direction_impact_clarity_polish_active()
 	var muzzle_flash_width: float = WEAPON_FIRE_MUZZLE_FLASH_WIDTH
 	var trace_width: float = WEAPON_FIRE_TRACE_WIDTH
 	var impact_radius: float = WEAPON_FIRE_IMPACT_RADIUS
@@ -6484,6 +6516,15 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		target_focus_height = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_HEIGHT
 		target_focus_color = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_COLOR
 		fire_status_label_font_size = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE
+	if first_exchange_direction_impact_clarity_active:
+		muzzle_flash_width = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_MUZZLE_FLASH_WIDTH
+		trace_width = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TRACE_WIDTH
+		impact_radius = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_RADIUS
+		impact_cross_width = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CROSS_WIDTH
+		target_focus_radius = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TARGET_FOCUS_RADIUS
+		target_focus_height = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TARGET_FOCUS_HEIGHT
+		target_focus_color = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_TARGET_FOCUS_COLOR
+		fire_status_label_font_size = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_STATUS_LABEL_FONT_SIZE
 	var muzzle_texture_available: bool = texture != null
 	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
 	if muzzle_texture_card_visible:
@@ -6502,6 +6543,23 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var impact_cross_a: Vector2 = target_position - impact_perp * WEAPON_FIRE_IMPACT_CROSS_WORLD
 	var impact_cross_b: Vector2 = target_position + impact_perp * WEAPON_FIRE_IMPACT_CROSS_WORLD
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(impact_cross_a, 0.83), _world_to_surface_3d_position(impact_cross_b, 0.83), impact_color, "WeaponFireImpactCross_%s" % _sanitize_node_name(event_id), impact_cross_width)
+	var direction_arrow_visible: bool = false
+	var impact_relationship_anchor_visible: bool = false
+	var target_endcap_visible: bool = false
+	var direction_arrow_world: float = 0.0
+	var direction_arrow_width: float = 0.0
+	if first_exchange_direction_impact_clarity_active:
+		direction_arrow_visible = true
+		impact_relationship_anchor_visible = true
+		target_endcap_visible = true
+		direction_arrow_world = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WORLD
+		direction_arrow_width = RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH
+		var arrow_base: Vector2 = target_position - normalized_direction * RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WORLD
+		var arrow_left: Vector2 = arrow_base + impact_perp * RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_HALF_WIDTH_WORLD
+		var arrow_right: Vector2 = arrow_base - impact_perp * RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_HALF_WIDTH_WORLD
+		_add_wide_line3d(_order_root, _world_to_surface_3d_position(arrow_left, 0.875), _world_to_surface_3d_position(target_position, 0.875), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireDirectionArrowLeft_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH)
+		_add_wide_line3d(_order_root, _world_to_surface_3d_position(arrow_right, 0.875), _world_to_surface_3d_position(target_position, 0.875), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireDirectionArrowRight_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH)
+		_add_marker3d(_order_root, target_position, RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireImpactRelationshipAnchor_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_RADIUS, RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_HEIGHT, 12, 0.88)
 	var fire_status_label: String = _build_weapon_fire_vfx_status_label(fire_event, combat_outcome, is_friendly_fire)
 	if not fire_status_label.is_empty():
 		if _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire):
@@ -6570,6 +6628,13 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"first_exchange_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID if first_exchange_fire_visual_active else "",
 		"first_exchange_hud_density_fire_visual_polish_active": first_exchange_hud_density_fire_visual_active,
 		"first_exchange_hud_density_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID if first_exchange_hud_density_fire_visual_active else "",
+		"fire_direction_impact_clarity_polish_active": first_exchange_direction_impact_clarity_active,
+		"fire_direction_impact_clarity_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CLARITY_STYLE_ID if first_exchange_direction_impact_clarity_active else "",
+		"fire_direction_arrow_visible": direction_arrow_visible,
+		"fire_direction_arrow_world": direction_arrow_world,
+		"fire_direction_arrow_width": direction_arrow_width,
+		"impact_relationship_anchor_visible": impact_relationship_anchor_visible,
+		"target_endcap_visible": target_endcap_visible,
 		"fire_status_label_visible": not fire_status_label.is_empty() and not _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
 		"fire_status_label_text": fire_status_label,
 		"fire_status_label_suppressed_by_declutter": _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
