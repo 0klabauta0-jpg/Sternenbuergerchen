@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sternenbuergerchen Zwischenbericht - aktueller Stand 2026-07-09</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10161a;
+      --panel: #182129;
+      --panel-2: #202b35;
+      --line: #3b4d5c;
+      --text: #edf5f8;
+      --muted: #a6b5bf;
+      --accent: #ffd34d;
+      --cyan: #55d6dc;
+      --green: #70db9d;
+      --red: #ff817a;
+      --orange: #ffb15f;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+    header { padding: 28px clamp(18px, 4vw, 52px) 18px; border-bottom: 1px solid var(--line); background: #141d24; }
+    main { width: min(1320px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+    h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: 0; }
+    h1 { font-size: clamp(28px, 3vw, 42px); }
+    h2 { font-size: 22px; }
+    h3 { font-size: 16px; color: var(--cyan); }
+    p { margin: 8px 0 0; color: var(--muted); }
+    code { color: var(--accent); }
+    button, input, select, textarea { font: inherit; }
+    button { border: 1px solid var(--line); background: #dce5ef; color: #10161a; border-radius: 6px; min-height: 38px; padding: 8px 12px; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--text); }
+    button.choice.active { border-color: var(--accent); background: var(--accent); color: #16120a; }
+    input, select, textarea, [contenteditable="true"] {
+      width: 100%; min-height: 36px; border: 1px solid var(--line); border-radius: 6px;
+      background: #0d1318; color: var(--text); padding: 8px 10px;
+    }
+    textarea { min-height: 118px; resize: vertical; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #74848e; }
+    .meta-row, .toolbar, .tabbar, .button-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .meta-row { margin-top: 14px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--muted); background: rgba(255,255,255,0.03); font-size: 13px; }
+    .pill.good { color: var(--green); border-color: rgba(112,219,157,0.5); }
+    .pill.warn { color: var(--accent); border-color: rgba(255,211,77,0.55); }
+    .pill.bad { color: var(--red); border-color: rgba(255,129,122,0.6); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 18px; }
+    .card { grid-column: span 4; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+    .wide { grid-column: span 8; }
+    .full { grid-column: 1 / -1; }
+    .stack { display: grid; gap: 12px; }
+    .list { margin: 10px 0 0; padding-left: 18px; color: var(--text); }
+    .list li { margin: 6px 0; }
+    .status-box { border-left: 4px solid var(--accent); background: rgba(255,211,77,0.08); padding: 12px; border-radius: 6px; }
+    .status-box.good { border-left-color: var(--green); background: rgba(112,219,157,0.08); }
+    .status-box.bad { border-left-color: var(--red); background: rgba(255,129,122,0.08); }
+    .status-box.info { border-left-color: var(--cyan); background: rgba(85,214,220,0.08); }
+    .checkline { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; color: var(--text); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .checkline:last-child { border-bottom: 0; }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; }
+    .metric { display: grid; gap: 4px; padding: 12px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: var(--panel-2); }
+    .metric strong { font-size: 24px; line-height: 1; }
+    .metric span { color: var(--muted); font-size: 13px; }
+    .tabbar { margin-top: 22px; border-bottom: 1px solid var(--line); }
+    .tab { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: transparent; color: var(--muted); border-bottom: 0; }
+    .tab.active { background: var(--panel); color: var(--text); border-color: var(--line); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .timeline { display: grid; gap: 10px; margin-top: 12px; }
+    .timeline-item { display: grid; grid-template-columns: 130px 1fr; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px; }
+    .timeline-item strong { color: var(--accent); }
+    .toolbar { position: sticky; bottom: 0; z-index: 5; justify-content: space-between; background: rgba(16,22,26,0.96); border-top: 1px solid var(--line); padding: 12px clamp(18px, 4vw, 52px); backdrop-filter: blur(8px); }
+    .toolbar textarea { min-height: 74px; max-height: 180px; flex: 1 1 420px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-status[data-tone="good"] { color: var(--green); }
+    .export-status[data-tone="warn"] { color: var(--accent); }
+    @media (max-width: 900px) {
+      .card, .wide { grid-column: 1 / -1; }
+      .timeline-item { grid-template-columns: 1fr; }
+      .toolbar { position: static; }
+    }
+  </style>
+</head>
+<body data-report-id="spielstand_zwischenbericht_2026_07_09_aktuell" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>Sternenbuergerchen Zwischenbericht</h1>
+    <p>Aktueller Arbeitsstand am 2026-07-09: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was als naechstes sinnvoll waere.</p>
+    <div class="meta-row">
+      <span class="pill good">Release-/Singleplayer-Pfad begehbar</span>
+      <span class="pill good">CONTACT FIRE im echten Fenster sichtbar</span>
+      <span class="pill good">TASK_897 abgeschlossen</span>
+      <span class="pill warn">TASK_898 Focal Elegance ist naechster Slice</span>
+      <span class="pill warn">Untracked lokal: builds/</span>
+      <span class="pill">Report ist read-only</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabbar" aria-label="Reportbereiche">
+      <button class="tab active" type="button" data-tab-target="overview">Uebersicht</button>
+      <button class="tab" type="button" data-tab-target="done">Was getan wurde</button>
+      <button class="tab" type="button" data-tab-target="gameplay">Spielwirkung</button>
+      <button class="tab" type="button" data-tab-target="risks">Reibung</button>
+      <button class="tab" type="button" data-tab-target="next">Naechstes</button>
+      <button class="tab" type="button" data-tab-target="notes">Notizen</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Kurzstand</h2>
+          <div class="status-box good">
+            Der wichtigste Fortschritt: Der erste Release-Singleplayer-Weg ist jetzt als echte Kette pruefbar: Einzelspieler starten, Homebase in einen spielbaren Direktstart bringen, Mission starten, LZ/Drop/GO ausfuehren, Kontakt erzeugen und den ersten Feuerwechsel sichtbar lesen.
+          </div>
+          <p>Der alte Hauptschmerz war nicht mehr nur "es gibt keinen Kampf", sondern "der Kampf passiert, aber der sichtbare Fensterstand erzaehlt ihn nicht sauber". Genau daran wurde gearbeitet: Statusquelle, Render-Zeitpunkt, HUD-Flächen und Weltkampf-Visuals wurden in kleinen Slices auseinandergezogen und wieder synchronisiert.</p>
+          <p>Aktuell ist CONTACT FIRE im echten Post-Final-Fenster in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar. Danach wurde die Weltansicht weiter poliert: FireTrace, Impact, Target-Fokus, Source-to-target-Lane, Source-Glow und Target-Halo machen den ersten Feuerwechsel im 3D-/Iso-Bild besser lesbar.</p>
+          <p>Der naechste Engpass ist deshalb nicht neue Kampfmechanik, sondern visuelle Eleganz. TASK_897 sagt: Die Signale funktionieren, wirken aber noch zu technisch und grossflaechig. TASK_898 sollte daraus eine natuerlichere, weniger debughafte Schussbahn machen.</p>
+        </article>
+        <article class="card">
+          <h2>Statusmarker</h2>
+          <div class="stack">
+            <div class="metric"><strong>#17</strong><span>Selected Fireteam zeigt den aktiven Feuerwechsel.</span></div>
+            <div class="metric"><strong>#18</strong><span>Mission Control spiegelt den Kampfstatus.</span></div>
+            <div class="metric"><strong>#19</strong><span>Event Log liefert die Rueckmeldung.</span></div>
+            <div class="metric"><strong>TASK_898</strong><span>naechster enger Polish: weniger debuggy, besser lesbar.</span></div>
+          </div>
+        </article>
+        <article class="card full">
+          <h2>Aktuelle Einordnung</h2>
+          <div class="grid" style="margin-top:12px;">
+            <div class="card" style="grid-column:span 3;">
+              <h3>Spielbarer Pfad</h3>
+              <p>Der Release-Pfad ist nicht final, aber er ist reproduzierbar genug, um echte Playtest-Slices daran aufzubauen.</p>
+            </div>
+            <div class="card" style="grid-column:span 3;">
+              <h3>Kampfrueckmeldung</h3>
+              <p>CONTACT FIRE kommt jetzt an den relevanten HUD-Flaechen an und ist nicht mehr nur interner Trace.</p>
+            </div>
+            <div class="card" style="grid-column:span 3;">
+              <h3>Weltbild</h3>
+              <p>Schussrichtung und Zielbezug sind sichtbar, aber noch nicht elegant genug fuer ein angenehmes Spielgefuehl.</p>
+            </div>
+            <div class="card" style="grid-column:span 3;">
+              <h3>Architektur</h3>
+              <p>Die Aenderungen bleiben read-only/visual-lastig; SimulationRoot und bestehende Contracts bleiben Wahrheit.</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="done" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Was zuletzt konkret passiert ist</h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <strong>Release-Start</strong>
+              <div>
+                <h3>Singleplayer-Dead-Ends gehaertet</h3>
+                <p>Der sichtbare EXE-&gt;Einzelspieler-Pfad repariert alte oder halbe Homebase-/FOB-/Flightdeck-Zustaende additiv. Ziel: Der Spieler landet nicht in einer Homebase mit leerem Operator-Pool, fehlendem Pilot, leerem Flightdeck oder blockiertem Start.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>Deep-Link</strong>
+              <div>
+                <h3>Erster Feuerwechsel reproduzierbar</h3>
+                <p>Die Release-Deep-Links fuehren bis zum ersten GO, Drop, Kontakt und Feuerwechsel. Dadurch kann derselbe Spielerweg immer wieder gecaptured und geprueft werden.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>HUD</strong>
+              <div>
+                <h3>CONTACT FIRE in #17/#18/#19 sichtbar</h3>
+                <p>Der Render-/Refresh-Zeitpunkt wurde so geschnitten, dass der echte Fensterblick nach finalem Trace denselben CONTACT-FIRE-Stand zeigt wie die Quelle. Der alte Widerspruch zwischen internem Zustand und sichtbarem Text ist damit fuer diesen Pfad belegt eingegrenzt.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>TASK_889-891</strong>
+              <div>
+                <h3>HUD-Dichte und Findings</h3>
+                <p>Selected Fireteam, Mission Control und Event Log wurden lesbarer gerahmt. Die Findings haben danach nicht "alles gut" behauptet, sondern den naechsten Engpass benannt: Richtung, Impact und Zielbezug muessen im Weltbild besser zusammenfallen.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>TASK_892-894</strong>
+              <div>
+                <h3>Fire Direction / Impact</h3>
+                <p>FireTrace, Impact und Target-Fokus wurden verstaerkt und per echtem Fensterbeweis wieder bewertet. Ergebnis: besser, aber Quelle - Schussrichtung - Ziel - Treffer liest sich noch nicht sofort als eine elegante Aktion.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>TASK_895-897</strong>
+              <div>
+                <h3>World Combat Focal</h3>
+                <p>Primary3D nutzt fuer den bestaetigten CONTACT-FIRE-Moment eine eigene Focal-Hierarchie: Source-to-target-Lane, Source-Glow, Target-Halo und Umfeld-Dimming. TASK_897 bewertet den echten PNG-/Manifest-Befund: sichtbar ja, aber noch zu technisch/debughaft.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>Report</strong>
+              <div>
+                <h3>Aktueller HTML-Zwischenstand</h3>
+                <p>Dieser Bericht fasst den Stand als lokal exportierbare Workbench zusammen. Er schreibt keine Runtime-Wahrheit und ist fuer Arbeitsnotizen gedacht.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="gameplay" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was sich fuer den Spieler verbessert hat</h2>
+          <ul class="list">
+            <li>Der Weg vom Einzelspieler-Klick zur Mission ist weniger zerbrechlich und repariert alte lokale Save-/FOB-Transfer-Reste.</li>
+            <li>Der Spieler bekommt im ersten Kampf nicht nur "irgendwo Status", sondern eine Rueckmeldung an mehreren erwartbaren Flaechen.</li>
+            <li>Der erste Feuerwechsel ist als reproduzierbarer Playtest-Moment vorhanden. Das ist wichtig, weil wir daran jetzt gutes Spielgefuehl iterieren koennen.</li>
+            <li>Das Weltbild traegt den Kampf zunehmend mit: FireTrace, Impact, Ziel-Fokus und Source-to-target-Fokus sind als sichtbarer Layer vorbereitet.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Spielgefuehl</h2>
+          <div class="status-box info">
+            Es fuehlt sich noch mehr nach "Release-Pfad wird lesbar" als nach finalem Combat-Game an. Das ist okay, weil die Entscheidungskette jetzt greifbar wird.
+          </div>
+          <p>Der naechste Qualitaetssprung kommt nicht durch mehr Text, sondern durch bessere Weltbild-Hierarchie: weniger harte Diagnose-Markierungen, mehr natuerliche Kampfspur.</p>
+        </article>
+        <article class="card full">
+          <h2>Playtest-Checkliste</h2>
+          <label class="checkline"><input type="checkbox" checked data-export-key="playtest.singleplayer_path_readable"> Einzelspieler-Pfad bis Mission ist als Testkette vorhanden.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="playtest.contact_fire_hud_visible"> CONTACT FIRE ist in #17/#18/#19 belegt sichtbar.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="playtest.world_focal_present"> Weltkampf-Fokus ist vorhanden.</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.world_focal_elegant"> Weltkampf-Fokus wirkt schon elegant und releasefertig.</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.longer_free_play_done"> Laengerer freier Playtest nach dem ersten Feuerwechsel wurde gemacht.</label>
+        </article>
+      </div>
+    </section>
+
+    <section id="risks" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Reibungen und Risiken</h2>
+          <ul class="list">
+            <li><strong>Debug-Look:</strong> TASK_897 benennt klar, dass Target-Halo und Focal-Signal noch zu technisch wirken.</li>
+            <li><strong>HUD-Konkurrenz:</strong> Bottom-Dock, Event Log, Karten und Weltbild sind gleichzeitig aktiv. Die erste Kampflesung ist besser, aber noch dicht.</li>
+            <li><strong>Ein-Pfad-Abnahme:</strong> Der Release-Pfad ist fuer den ersten Feuerwechsel gut belegt. Mehrere freie Spielvarianten, mehrere Fireteams und laengere Missionen brauchen weiter eigene Slices.</li>
+            <li><strong>Lokale Builds:</strong> `builds/` liegt als untracked lokaler Ordner im Arbeitsbaum und sollte nicht versehentlich in den Report-/Task-Commit.</li>
+            <li><strong>Architekturdisziplin:</strong> Die Gefahr bleibt, dass sichtbare UI-Politur zur zweiten Wahrheit wird. Bisher wurde das vermieden: HUD/Visuals lesen vorhandene Quellen und setzen keine neue Combat-Wahrheit.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Aktuelle Bewertung</h2>
+          <label>Playtest-Eindruck
+            <select data-export-key="assessment.playtest_feel">
+              <option value="promising">vielversprechend, aber noch polieren</option>
+              <option value="rough">funktional, aber zu rau</option>
+              <option value="ready">fuer naechsten groesseren Test bereit</option>
+              <option value="blocked">blockiert</option>
+            </select>
+          </label>
+          <div style="margin-top:12px;" contenteditable="true" data-note-key="assessment.notes" data-placeholder="Eigene Bewertung nach Sichttest..."></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="next" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was ich als naechstes machen wuerde</h2>
+          <ol class="list">
+            <li><strong>TASK_898 - Combat Focal Elegance Polish:</strong> Source-to-target-Lane, Source-Glow und Target-Halo weniger grossflaechig/debughaft machen, ohne Combat- oder HUD-Wahrheit zu veraendern.</li>
+            <li><strong>Recapture nach TASK_898:</strong> echten Fensterblick erneut erzeugen und pruefen, ob die Kampfspur jetzt natuerlicher wirkt.</li>
+            <li><strong>Kleiner freier Playtest:</strong> nach dem ersten Feuerwechsel nicht sofort stoppen, sondern 30-60 Sekunden weiterlaufen lassen: Befehle, Movement, Zielerkennung, UI-Dichte, Performance.</li>
+            <li><strong>Danach Entscheidung:</strong> Entweder erste Mission weiter ausbauen oder wieder Richtung taktische Entscheidungslesbarkeit gehen: Order Preview, Line-of-Fire, Threat Overlay.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h2>Entscheidung</h2>
+          <div class="button-row" data-choice-group="next.priority">
+            <button class="choice active" type="button" data-choice-value="task_898">TASK_898</button>
+            <button class="choice" type="button" data-choice-value="free_playtest">Freier Playtest</button>
+            <button class="choice" type="button" data-choice-value="decision_preview">Order Preview</button>
+          </div>
+          <p>Meine Empfehlung: erst TASK_898, weil der aktuelle Befund sehr eng und gut umsetzbar ist. Danach wieder ein echter Sichttest.</p>
+        </article>
+        <article class="card full">
+          <h2>Nicht jetzt</h2>
+          <ul class="list">
+            <li>Kein Combat-Rewrite, solange der aktuelle Pfad nur visuell rau ist.</li>
+            <li>Keine neue UI-Wahrheit fuer Kontakt, Feuer oder Treffer.</li>
+            <li>Keine groessere Missionslogik, bevor der erste Feuerwechsel angenehm und klar lesbar ist.</li>
+            <li>Kein Commit von lokalen `builds/`-Artefakten.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="notes" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Notizen fuer den naechsten Lauf</h2>
+          <textarea data-export-key="notes.next_run" placeholder="Was soll beim naechsten Playtest auffallen?"></textarea>
+        </article>
+        <article class="card">
+          <h2>Akzeptanzgefuehl</h2>
+          <div class="button-row" data-choice-group="notes.acceptance_feel">
+            <button class="choice active" type="button" data-choice-value="needs_polish">braucht Polish</button>
+            <button class="choice" type="button" data-choice-value="good_enough">gut genug</button>
+            <button class="choice" type="button" data-choice-value="wrong_direction">falsche Richtung</button>
+          </div>
+        </article>
+        <article class="card full">
+          <h2>Freie Arbeitsnotiz</h2>
+          <div contenteditable="true" data-note-key="notes.freeform" data-placeholder="Gedanken, Beobachtungen, Entscheidungen..."></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="toolbar">
+    <div class="export-actions">
+      <button id="exportJsonButton" type="button">JSON exportieren</button>
+      <button id="chooseExportFolderButton" class="secondary" type="button">Reports-Ordner verbinden</button>
+      <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+      <label class="secondary" style="display: inline-flex; gap: 8px; align-items: center;">
+        JSON importieren
+        <input id="importJsonInput" type="file" accept="application/json,.json" style="width: 180px;">
+      </label>
+      <span id="exportStatus" class="export-status">Export: lokal per Download oder mit verbundenem docs/reports-Ordner.</span>
+    </div>
+    <textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea>
+  </footer>
+
+  <script>
+    (function () {
+      const reportId = document.body.dataset.reportId || "html_workbench";
+      const schema = document.body.dataset.reportSchema || "sternenbuergerchen.html_workbench.v1";
+      const output = document.getElementById("jsonOutput");
+      const exportStatus = document.getElementById("exportStatus");
+      let exportDirectoryHandle = null;
+      let exportSequence = 0;
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+      function getPath(source, path) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        let cursor = source;
+        for (const part of parts) {
+          if (!cursor || typeof cursor !== "object" || !(part in cursor)) return undefined;
+          cursor = cursor[part];
+        }
+        return cursor;
+      }
+      function readControlValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        if (element.type === "number" || element.type === "range") return Number(element.value);
+        return element.value;
+      }
+      function setExportStatus(message, tone) {
+        if (!exportStatus) return;
+        exportStatus.textContent = message;
+        exportStatus.dataset.tone = tone || "";
+      }
+      function buildExportFilename(exportedAt) {
+        exportSequence += 1;
+        const stamp = String(exportedAt || new Date().toISOString()).replace(/[:.]/g, "-");
+        return `${reportId}_${stamp}_${String(exportSequence).padStart(2, "0")}.json`;
+      }
+      function supportsFolderExport() {
+        return typeof window.showDirectoryPicker === "function";
+      }
+      async function requestExportFolder() {
+        if (!supportsFolderExport()) {
+          setExportStatus("Ordner-Export nicht verfuegbar: Browser-Download bleibt aktiv.", "warn");
+          return null;
+        }
+        try {
+          setExportStatus("Bitte den docs/reports-Ordner auswaehlen. Danach schreibt Export neue JSON-Dateien dort hinein.", "warn");
+          const handle = await window.showDirectoryPicker({
+            id: "sternenbuergerchen-reports",
+            mode: "readwrite"
+          });
+          exportDirectoryHandle = handle;
+          setExportStatus(`Export-Ordner verbunden: ${handle.name}.`, "good");
+          return handle;
+        } catch (error) {
+          setExportStatus("Ordner-Auswahl abgebrochen. Download-Fallback bleibt aktiv.", "warn");
+          return null;
+        }
+      }
+      function collectWorkbenchState() {
+        const controls = {};
+        const notes = {};
+        const activeChoices = {};
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = readControlValue(element);
+          if (value !== undefined) setPath(controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          setPath(notes, element.dataset.noteKey, element.textContent || element.value || "");
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const active = group.querySelector(".choice.active");
+          if (active) setPath(activeChoices, group.dataset.choiceGroup, active.dataset.choiceValue || active.textContent.trim());
+        });
+        const exportedAt = new Date().toISOString();
+        return {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: exportedAt,
+          controls,
+          notes,
+          active_choices: activeChoices,
+          computed: {
+            current_task: "TASK_897 abgeschlossen; TASK_898 empfohlen",
+            release_path_state: "singleplayer_to_first_exchange_reproducible",
+            primary_open_risk: "focal_signal_reads_debuggy"
+          },
+          metadata: {
+            generated_from: "Codex interim report",
+            project: "SternenBuergerchen",
+            cwd: "C:/dev/SternenBuergerchen",
+            branch_context: "task/release-first-exchange-player-readability-polish-review"
+          }
+        };
+      }
+      function writeOutput(payload) {
+        const json = JSON.stringify(payload, null, 2);
+        if (output) output.value = json;
+        return json;
+      }
+      function downloadJson(filename, json) {
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+      async function exportJson() {
+        const payload = collectWorkbenchState();
+        const json = writeOutput(payload);
+        const filename = buildExportFilename(payload.exported_at);
+        if (exportDirectoryHandle) {
+          try {
+            const handle = await exportDirectoryHandle.getFileHandle(filename, { create: true });
+            const writable = await handle.createWritable();
+            await writable.write(json);
+            await writable.close();
+            setExportStatus(`Export geschrieben: ${filename}`, "good");
+            return;
+          } catch (error) {
+            setExportStatus("Ordner-Export fehlgeschlagen, Download-Fallback wird genutzt.", "warn");
+          }
+        }
+        downloadJson(filename, json);
+        setExportStatus(`Download vorbereitet: ${filename}`, "good");
+      }
+      function applyImportedState(payload) {
+        if (!payload || typeof payload !== "object") return;
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = getPath(payload.controls || {}, element.dataset.exportKey);
+          if (value === undefined) return;
+          if (element.type === "checkbox") element.checked = Boolean(value);
+          else if (element.type === "radio") element.checked = String(element.value) === String(value);
+          else element.value = value;
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          const value = getPath(payload.notes || {}, element.dataset.noteKey);
+          if (value !== undefined) element.textContent = String(value);
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const value = getPath(payload.active_choices || {}, group.dataset.choiceGroup);
+          if (value === undefined) return;
+          group.querySelectorAll(".choice").forEach((button) => {
+            button.classList.toggle("active", String(button.dataset.choiceValue) === String(value));
+          });
+        });
+      }
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.tabTarget;
+          document.querySelectorAll(".tab").forEach((item) => item.classList.toggle("active", item === button));
+          document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+        });
+      });
+      document.querySelectorAll("[data-choice-group] .choice").forEach((button) => {
+        button.addEventListener("click", () => {
+          const group = button.closest("[data-choice-group]");
+          group.querySelectorAll(".choice").forEach((item) => item.classList.toggle("active", item === button));
+        });
+      });
+      document.getElementById("exportJsonButton").addEventListener("click", exportJson);
+      document.getElementById("chooseExportFolderButton").addEventListener("click", requestExportFolder);
+      document.getElementById("copyJsonButton").addEventListener("click", async () => {
+        const json = writeOutput(collectWorkbenchState());
+        try {
+          await navigator.clipboard.writeText(json);
+          setExportStatus("JSON in die Zwischenablage kopiert.", "good");
+        } catch (error) {
+          setExportStatus("Kopieren nicht erlaubt. JSON steht im Textfeld.", "warn");
+        }
+      });
+      document.getElementById("importJsonInput").addEventListener("change", async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        try {
+          applyImportedState(JSON.parse(await file.text()));
+          setExportStatus(`Importiert: ${file.name}`, "good");
+        } catch (error) {
+          setExportStatus("Import fehlgeschlagen: ungueltiges JSON.", "warn");
+        }
+      });
+      writeOutput(collectWorkbenchState());
+    }());
+  </script>
+</body>
+</html>
