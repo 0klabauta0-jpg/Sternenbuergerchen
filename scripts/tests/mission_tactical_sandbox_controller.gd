@@ -70,6 +70,7 @@ const STATION_REENTRY_HOST_CLIENT_FIRETEAM_CARD_CONTEXT_SCRIPT: GDScript = prelo
 const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_fire_exchange_contact_fire_primary_hud_polish.gd")
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_fire_exchange_real_window_primary_hud_source_binding_polish.gd")
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_fire_exchange_real_window_primary_hud_runtime_text_polish.gd")
+const RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_real_window_hud_source_sync.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -109,6 +110,7 @@ const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_STYLE_
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID: String = "task_862_release_fire_exchange_real_window_primary_hud_runtime_text_v1"
 const RELEASE_FIRST_EXCHANGE_CONTACT_FIRE_READABILITY_FIX_STYLE_ID: String = "task_873_release_first_exchange_contact_fire_readability_fix_v1"
 const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_STYLE_ID: String = "task_876_release_first_exchange_visible_status_source_reconciliation_v1"
+const RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID: String = "task_883_release_first_exchange_real_window_hud_source_sync_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 45000
 const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_MSEC: int = 120000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
@@ -2546,6 +2548,7 @@ func _update_ui() -> void:
 		_apply_frontier_probe_one_screen_visual_polish_label_contract(strategic_status_label)
 		_apply_release_firefight_bottom_dock_density_label_contract(strategic_status_label)
 	_apply_release_fire_exchange_real_window_primary_hud_runtime_text()
+	_apply_release_first_exchange_real_window_hud_source_sync_to_labels()
 
 	var phase_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseStatusLabel") as Label
 	if phase_status_label != null:
@@ -2589,7 +2592,7 @@ func _refresh_tactical_event_log_panel() -> void:
 	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
 	if panel == null or not panel.has_method("set_feedback_snapshot"):
 		return
-	panel.call("set_feedback_snapshot", get_command_feedback_snapshot())
+	panel.call("set_feedback_snapshot", _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(get_command_feedback_snapshot()))
 
 
 func _refresh_runtime_mission_hud_surfaces() -> void:
@@ -7737,6 +7740,156 @@ func _apply_release_fire_exchange_real_window_primary_hud_runtime_text() -> void
 		)
 		strategic_status_label.set_meta("release_fire_exchange_real_window_runtime_text_style_id", RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID)
 		strategic_status_label.set_meta("release_fire_exchange_real_window_runtime_text_task", "TASK_862")
+
+
+func _build_release_first_exchange_real_window_hud_source_sync_source(
+	combat_hud_density: Dictionary,
+	raw_selected_text: String = "",
+	raw_mission_text: String = "",
+	event_log_display: Dictionary = {}
+) -> Dictionary:
+	var status_source: Dictionary = _get_release_first_exchange_visible_status_source_evidence()
+	var persistence: Dictionary = Dictionary(combat_hud_density.get("visibility_persistence", {})).duplicate(true)
+	if bool(status_source.get("active", false)):
+		persistence = status_source.duplicate(true)
+	var source_task_id: String = String(persistence.get("task_id", "")).strip_edges()
+	var source_active: bool = bool(persistence.get("active", false)) and source_task_id == "TASK_876"
+	var primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
+	if primary_line.is_empty() and source_active:
+		var compact_line: String = String(persistence.get("compact_line", "")).strip_edges()
+		if not compact_line.is_empty():
+			primary_line = compact_line if compact_line.to_upper().begins_with("CONTACT FIRE") else "CONTACT FIRE | %s" % compact_line
+	var selected_text: String = String(raw_selected_text).strip_edges()
+	if selected_text.is_empty():
+		selected_text = _get_label_text(FIRETEAM_STATUS_LABEL_PATH)
+	var mission_text: String = String(raw_mission_text).strip_edges()
+	if mission_text.is_empty():
+		mission_text = _get_label_text(STRATEGIC_STATUS_LABEL_PATH)
+	return {
+		"active": source_active and not primary_line.is_empty(),
+		"schema": "sternenbuergerchen.release_first_exchange_real_window_hud_source_sync.source.v1",
+		"task_id": "TASK_883",
+		"source_task_id": "TASK_882",
+		"source_trace_task_id": "TASK_879",
+		"source_status_task_id": "TASK_876",
+		"style_id": RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID,
+		"combat_hud_density": combat_hud_density.duplicate(true),
+		"status_source": persistence,
+		"contact_fire_primary_line": primary_line,
+		"raw_selected_fireteam_status_text": selected_text,
+		"raw_mission_control_status_text": mission_text,
+		"selected_fireteam_status_text": selected_text,
+		"mission_control_status_text": mission_text,
+		"selected_fireteam_fallback_text": "",
+		"mission_control_fallback_text": "",
+		"event_log_display": event_log_display.duplicate(true),
+		"event_log_short_text": String(persistence.get("event_log_short_text", "CONTACT FIRE: Feuerwechsel lesen")).strip_edges(),
+		"event_log_map_label": String(persistence.get("event_log_map_label", "CONTACT FIRE")).strip_edges(),
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"fireteam_id": String(_selected_fireteam_ids[0]).strip_edges().to_lower() if not _selected_fireteam_ids.is_empty() else "",
+		"created_msec": int(persistence.get("created_msec", _release_fire_exchange_visibility_clock_msec())),
+		"now_msec": _release_fire_exchange_visibility_clock_msec(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _build_release_first_exchange_real_window_hud_source_sync_snapshot_from_feedback(feedback_snapshot: Dictionary) -> Dictionary:
+	var combat_hud_density: Dictionary = Dictionary(feedback_snapshot.get("combat_hud_density", {})).duplicate(true)
+	var event_log_display: Dictionary = Dictionary(feedback_snapshot.get("release_firefight_event_log_display", {})).duplicate(true)
+	var source_snapshot: Dictionary = _build_release_first_exchange_real_window_hud_source_sync_source(
+		combat_hud_density,
+		String(feedback_snapshot.get("selected_fireteam_status_label_text", _get_label_text(FIRETEAM_STATUS_LABEL_PATH))),
+		String(feedback_snapshot.get("mission_control_status_text", _get_label_text(STRATEGIC_STATUS_LABEL_PATH))),
+		event_log_display
+	)
+	return Dictionary(RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_SCRIPT.call(
+		"build_snapshot",
+		source_snapshot,
+		{"source": "mission_tactical_sandbox_controller_feedback_snapshot"}
+	)).duplicate(true)
+
+
+func _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(feedback_snapshot: Dictionary) -> Dictionary:
+	var sync_snapshot: Dictionary = _build_release_first_exchange_real_window_hud_source_sync_snapshot_from_feedback(feedback_snapshot)
+	if not bool(sync_snapshot.get("active", false)):
+		return feedback_snapshot
+	var resolved: Dictionary = feedback_snapshot.duplicate(true)
+	var synced_event_log_display: Dictionary = Dictionary(sync_snapshot.get("event_log_display", {})).duplicate(true)
+	var synced_event_entries: Array = Array(synced_event_log_display.get("entries", []))
+	resolved["selected_fireteam_status_label_text"] = String(sync_snapshot.get("selected_fireteam_status_text", resolved.get("selected_fireteam_status_label_text", ""))).strip_edges()
+	resolved["mission_control_status_text"] = String(sync_snapshot.get("mission_control_status_text", resolved.get("mission_control_status_text", ""))).strip_edges()
+	resolved["selected_status_text"] = resolved["selected_fireteam_status_label_text"]
+	resolved["release_firefight_event_log_display"] = synced_event_log_display
+	resolved["release_firefight_event_log_fallback_active"] = bool(synced_event_log_display.get("fallback_active", false))
+	resolved["release_firefight_event_log_style_id"] = String(synced_event_log_display.get("style_id", RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID))
+	resolved["tactical_event_log"] = synced_event_entries
+	resolved["tactical_event_log_count"] = synced_event_entries.size()
+	resolved["release_first_exchange_real_window_hud_source_sync"] = sync_snapshot
+	resolved["release_first_exchange_real_window_hud_source_sync_active"] = true
+	resolved["release_first_exchange_real_window_hud_source_sync_style_id"] = RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID
+	return resolved
+
+
+func _apply_release_first_exchange_real_window_hud_source_sync_to_labels() -> void:
+	var status_source: Dictionary = _get_release_first_exchange_visible_status_source_evidence()
+	if not bool(status_source.get("active", false)):
+		return
+	var compact_line: String = String(status_source.get("compact_line", "")).strip_edges()
+	if compact_line.is_empty():
+		return
+	var primary_line: String = compact_line if compact_line.to_upper().begins_with("CONTACT FIRE") else "CONTACT FIRE | %s" % compact_line
+	var combat_hud_density: Dictionary = {
+		"active": true,
+		"compact_line": compact_line,
+		"visibility_persistence": status_source.duplicate(true),
+		"visibility_persistence_active": true,
+		"release_first_exchange_visible_status_source_active": true,
+		"release_first_exchange_visible_status_source_style_id": String(status_source.get("style_id", "")),
+	}
+	var source_snapshot: Dictionary = _build_release_first_exchange_real_window_hud_source_sync_source(
+		combat_hud_density,
+		_get_label_text(FIRETEAM_STATUS_LABEL_PATH),
+		_get_label_text(STRATEGIC_STATUS_LABEL_PATH),
+		{}
+	)
+	source_snapshot["contact_fire_primary_line"] = primary_line
+	var sync_snapshot: Dictionary = Dictionary(RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_SCRIPT.call(
+		"build_snapshot",
+		source_snapshot,
+		{"source": "mission_tactical_sandbox_controller_label_sync"}
+	)).duplicate(true)
+	if not bool(sync_snapshot.get("active", false)):
+		return
+	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
+	if fireteam_status_label != null:
+		fireteam_status_label.text = String(sync_snapshot.get("selected_fireteam_status_text", fireteam_status_label.text)).strip_edges()
+		fireteam_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_style_id", RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID)
+		fireteam_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_task", "TASK_883")
+	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	if strategic_status_label != null:
+		strategic_status_label.text = String(sync_snapshot.get("mission_control_status_text", strategic_status_label.text)).strip_edges()
+		strategic_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_style_id", RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID)
+		strategic_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_task", "TASK_883")
+
+
+func get_release_first_exchange_real_window_hud_source_sync_snapshot() -> Dictionary:
+	_update_ui()
+	var feedback_snapshot: Dictionary = get_command_feedback_snapshot()
+	var sync_snapshot: Dictionary = Dictionary(feedback_snapshot.get("release_first_exchange_real_window_hud_source_sync", {})).duplicate(true)
+	if sync_snapshot.is_empty():
+		sync_snapshot = _build_release_first_exchange_real_window_hud_source_sync_snapshot_from_feedback(feedback_snapshot)
+	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	if panel != null and panel.has_method("get_panel_snapshot"):
+		sync_snapshot["event_log_panel"] = Dictionary(panel.call("get_panel_snapshot")).duplicate(true)
+	if panel != null and panel.has_method("get_rendered_event_entries"):
+		sync_snapshot["event_log_rendered_entries"] = Array(panel.call("get_rendered_event_entries"))
+	return sync_snapshot
 
 
 func _build_mission_combat_hud_detail_tooltip_text() -> String:
@@ -21754,7 +21907,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		combat_hud_density
 	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
-	return {
+	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
 		"selected_tile": _build_selected_tile_snapshot(),
@@ -21907,6 +22060,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"npc_thought_bubble_count": get_npc_thought_bubble_snapshot().size(),
 		"npc_thought_bubbles": get_npc_thought_bubble_snapshot(),
 	}
+	return command_feedback_snapshot
 
 
 func get_active_ad_hoc_orders_snapshot() -> Array:

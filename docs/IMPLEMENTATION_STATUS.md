@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_883 - Release First Exchange Real Window HUD Source Sync Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_883_release_first_exchange_real_window_hud_source_sync_fix.md`, `docs/tasks/TASK_882_release_first_exchange_fire_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangeRealWindowHudSourceSync` bindet die aktive TASK_876-CONTACT-FIRE-Quelle read-only an #17 Selected Fireteam, #18 Mission Control und #19 Event Log.
+- Stand: Der TASK_883-Surface-Wrapper synchronisiert den rohen Command-Feedback-Snapshot gezielt fuer #17/#18/#19; `_refresh_tactical_event_log_panel()` konsumiert diesen synchronisierten Snapshot, damit das Event-Log-Panel nicht wieder eine spaetere CONTACT-PRESSURE-Fallback-Zeile zuerst rendert.
+- Stand: Die sichtbaren #17/#18-Labels werden nach dem bestehenden Runtime-Text-Polish erneut aus derselben TASK_883-Quelle gebunden.
+- Risiken/offen: TASK_883 ist ein Runtime-/Snapshot-Fix, aber noch kein neuer echter PNG-Beweis. Der naechste Schritt muss neu exportieren/capturen und den realen Fensterblick pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_883_release_first_exchange_real_window_hud_source_sync_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_876_release_first_exchange_visible_status_source_reconciliation.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_882_release_first_exchange_fire_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_884 - Release First Exchange HUD Source Sync Recapture.
+
 ### TASK_882 - Release First Exchange Fire Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_882_release_first_exchange_fire_visual_findings.md`, `docs/tasks/TASK_881_release_first_exchange_fire_visual_recapture.md`, `docs/tasks/TASK_880_release_first_exchange_fire_visual_polish.md`, `docs/dev/mission_command_feedback_contract.md`
