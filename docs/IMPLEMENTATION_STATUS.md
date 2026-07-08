@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_884 - Release First Exchange HUD Source Sync Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_884_release_first_exchange_hud_source_sync_recapture.md`, `docs/tasks/TASK_883_release_first_exchange_real_window_hud_source_sync_fix.md`, `docs/tasks/TASK_881_release_first_exchange_fire_visual_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_first_exchange_hud_source_sync_recapture.ps1` haengt einen eigenen TASK_884-Recapture an den bestehenden TASK_881-Window-Handle-/TASK_879-Trace-Pfad und schreibt eigene Manifest-/Screenshotpfade unter `tmp/release_first_exchange_hud_source_sync_recapture*`.
+- Stand: `ReleaseFirstExchangeHudSourceSyncRecapture` paketiert den Capture als read-only Acceptance-Snapshot mit TASK_883-HUD-Source-Sync-Schema/Style, TASK_880-Fire-Visual-Style, TASK_879-Trace-Evidence, TASK_876-Statusquellen-Evidence und manuellen Pflichtchecks fuer CONTACT FIRE in #17/#18/#19, FireTrace, Impact, Target-Fokus und stabiles Kurzlabel.
+- Stand: Lokaler TASK_884-Run schrieb `review_ready` mit trusted `window_handle_print`, eigener PNG-/JSON-Evidence und leerer Warning-/Hard-Failure-Liste.
+- Stand: Manueller Sichtblick auf `tmp/release_first_exchange_hud_source_sync_recapture.png` zeigt weiter `NEXT LOS/RANGE KORRIGIEREN`, `Kampf NO FIRE NO_LOS` und `CONTACT PRESSURE`; TASK_885 muss diesen Restbefund read-only schneiden.
+- Risiken/offen: TASK_884 erzeugt den belastbaren Belegrahmen, ersetzt aber nicht den menschlichen PNG-Befund. Der aktuelle echte Fensterblick ueberzeugt noch nicht; Folgearbeit ist TASK_885 als read-only Visual-Findings-Schnitt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_884_release_first_exchange_hud_source_sync_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_883_release_first_exchange_real_window_hud_source_sync_fix.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_hud_source_sync_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `git diff --check`.
+- Naechster Schritt: TASK_885 - Release First Exchange HUD Source Sync Visual Findings.
+
 ### TASK_883 - Release First Exchange Real Window HUD Source Sync Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_883_release_first_exchange_real_window_hud_source_sync_fix.md`, `docs/tasks/TASK_882_release_first_exchange_fire_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
