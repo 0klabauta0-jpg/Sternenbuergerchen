@@ -87,7 +87,8 @@
       <span class="pill good">TASK_856 CONTACT-FIRE-HUD-Polish erledigt</span>
       <span class="pill good">TASK_857 Recapture-Slice erledigt</span>
       <span class="pill good">TASK_858 Findings erledigt</span>
-      <span class="pill warn">Naechster Fokus: TASK_859 Source-Binding</span>
+      <span class="pill good">TASK_859 Source-Binding erledigt</span>
+      <span class="pill warn">Naechster Fokus: TASK_860 Recapture</span>
       <span class="pill warn">Repo: nur builds/ untracked</span>
       <span class="pill">Bericht ist read-only</span>
     </div>
@@ -117,6 +118,7 @@
             <li><strong>Neuer Nachweis-Slice:</strong> TASK_857 legt den frischen CONTACT-FIRE-Primary-HUD-Recapture als eigenes Manifest- und Screenshotpaket an, damit TASK_858 den echten Fensterblick bewerten kann.</li>
             <li><strong>Frischer Bildbefund:</strong> Der TASK_857-Capture ist technisch <code>review_ready</code>, wirkt im Fenster aber weiterhin nicht klar wie CONTACT FIRE. Genau dafuer ist TASK_858 der naechste kleine Findings-Schnitt.</li>
             <li><strong>TASK_858-Befund:</strong> Die reale Reibung ist jetzt benannt: #17/#18 lesen weiter <code>NO FIRE NO_LOS</code> / LOS-Korrektur statt CONTACT FIRE. Naechster enger Griff ist TASK_859.</li>
+            <li><strong>TASK_859-Bindung:</strong> Der reale #17/#18-HUD-Text wird bei aktiver Fire-Exchange-Persistence jetzt an die vorhandene <code>CONTACT FIRE | ...</code>-Primaerquelle gebunden; alte NO-FIRE-/LOS-Diagnostik bleibt nur nachrangig.</li>
           </ul>
         </article>
         <article class="card">
@@ -220,8 +222,8 @@
           <h2>Was ich als Naechstes machen will</h2>
           <ol class="list">
             <li><strong>Erledigt:</strong> TASK_854 hat den echten Fenster-Capture nach TASK_853 vorbereitet; TASK_855 hat daraus den sichtbaren Befund geschnitten; TASK_856 hat die belegte Reibung im HUD gezielt poliert; TASK_857 legt den neuen Recapture-Nachweis an; TASK_858 bewertet den Fensterblick.</li>
-            <li><strong>TASK_859:</strong> Den echten #17/#18-Window-HUD-Pfad eng an die CONTACT-FIRE-Primaerquelle binden.</li>
-            <li><strong>Nach TASK_859 erneut capturen:</strong> Nicht auf den Snapshot verlassen, sondern den echten Release-Fensterblick wieder als PNG/Manifest pruefen.</li>
+            <li><strong>Erledigt:</strong> TASK_859 bindet den echten #17/#18-Window-HUD-Pfad an die CONTACT-FIRE-Primaerquelle.</li>
+            <li><strong>TASK_860:</strong> Nicht auf den Snapshot verlassen, sondern den echten Release-Fensterblick wieder als PNG/Manifest pruefen.</li>
             <li><strong>Release-Ordner aktuell halten:</strong> Nach gruenem Slice erneut exportieren, damit deine EXE nicht hinter dem Repo-Stand herlaeuft.</li>
             <li><strong>Dann erst naechster Spielsystem-Block:</strong> je nach Capture-Ergebnis entweder weitere Firefight-Lesbarkeit oder Rueckkehr zu Editor-/Scenario-/Formation-Themen.</li>
             <li><strong>Danach sinnvoll:</strong> Wenn der First-Exchange endlich lesbar ist, wieder auf Spielerentscheidung vor dem Schuss gehen: Order Preview, Threat Overlay, Contact Reports und Map-/Editor-Bedienbarkeit.</li>
@@ -230,11 +232,11 @@
         <article class="card">
           <h2>Meine Empfehlung</h2>
           <div class="button-row" data-choice-group="recommendation.path">
-            <button class="choice active" type="button" data-choice-value="task_859_source_binding">TASK_859 jetzt</button>
+            <button class="choice active" type="button" data-choice-value="task_860_recapture">TASK_860 jetzt</button>
             <button class="choice" type="button" data-choice-value="editor_builder">Editor danach</button>
             <button class="choice" type="button" data-choice-value="formation_roe">Formation/ROE spaeter</button>
           </div>
-          <p>TASK_859 ist der richtige naechste Griff: Der Befund ist jetzt belegt, also muss der echte Window-HUD-Pfad an die CONTACT-FIRE-Primaerquelle gebunden werden. Erst danach lohnt sich wieder ein groesserer Themenwechsel.</p>
+          <p>TASK_860 ist der richtige naechste Griff: Der Source-Binding-Fix ist jetzt im Code, aber erst der echte Fenster-Capture beweist, ob der Spieler CONTACT FIRE wirklich zuerst sieht.</p>
         </article>
         <article class="card full">
           <h2>Playtest-Checkliste</h2>
@@ -259,7 +261,8 @@
               <option value="task_856_done">TASK_856 HUD-Polish erledigt</option>
               <option value="task_857_done">TASK_857 Recapture-Slice erledigt</option>
               <option value="task_858_done">TASK_858 Sichtbefund erledigt</option>
-              <option selected value="task_859_next">TASK_859 als naechster Source-Binding-Polish</option>
+              <option value="task_859_done">TASK_859 Source-Binding-Polish erledigt</option>
+              <option selected value="task_860_next">TASK_860 als naechster Recapture</option>
               <option value="manual_review_needed">Manueller Sichtreview noetig</option>
               <option value="release_export_needed">Neuer Release-Export noetig</option>
             </select>
@@ -328,12 +331,12 @@
               "Fireteam and dropship HUD/catalog consistency",
               "Tactical decision clarity block TASK_506-TASK_510",
               "Release export and launcher hygiene",
-              "First GO / firefight / first exchange readability TASK_832-TASK_858"
+              "First GO / firefight / first exchange readability TASK_832-TASK_859"
             ],
-            player_value: "The release path reaches mission play more reliably, TASK_856 prioritizes CONTACT FIRE as the #17/#18 primary HUD line, TASK_857 packages the real-window recapture evidence, and TASK_858 records that the real window still reads closer to NO FIRE NO_LOS/contact pressure than clear CONTACT FIRE.",
+            player_value: "The release path reaches mission play more reliably, TASK_856 prioritizes CONTACT FIRE as the #17/#18 primary HUD line, TASK_858 records the real-window gap, and TASK_859 binds the real #17/#18 window text to the CONTACT-FIRE primary source.",
             repo_state: "integration/core-foundation is current with origin; only local untracked builds/ remains outside this report slice.",
             report_value: "This HTML workbench is a read-only interim report with JSON export for playtest notes and decisions.",
-            next_task: "TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish"
+            next_task: "TASK_860 - Release Fire Exchange Real Window Contact-Fire Recapture"
           },
           metadata: {
             generated_at_local: "2026-07-08",
@@ -343,7 +346,7 @@
             relevant_task_ids: [
               "TASK_506", "TASK_507", "TASK_508", "TASK_509", "TASK_510",
               "TASK_818", "TASK_819", "TASK_820", "TASK_821",
-              "TASK_832", "TASK_837", "TASK_844", "TASK_847", "TASK_850", "TASK_853", "TASK_854", "TASK_855", "TASK_856", "TASK_857", "TASK_858", "TASK_859"
+              "TASK_832", "TASK_837", "TASK_844", "TASK_847", "TASK_850", "TASK_853", "TASK_854", "TASK_855", "TASK_856", "TASK_857", "TASK_858", "TASK_859", "TASK_860"
             ]
           }
         };

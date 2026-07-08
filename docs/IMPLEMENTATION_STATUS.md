@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_859_release_fire_exchange_real_window_primary_hud_source_binding_polish.md`, `docs/tasks/TASK_858_release_fire_exchange_contact_fire_primary_hud_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeRealWindowPrimaryHudSourceBindingPolish` bindet stale #17/#18-Real-Window-Labeltexte bei aktiver Fire-Exchange-Persistence an die vorhandene TASK_856-`CONTACT FIRE | ...`-Primaerquelle.
+- Stand: `get_command_feedback_snapshot()` liefert fuer `selected_fireteam_status_label_text` und `mission_control_status_text` gebundene Lesetexte, ohne Combat-, Command-, Damage-, Movement-, Contact- oder Multiplayer-Wahrheit zu erzeugen.
+- Stand: TacticalController und MetaLayer expose read-only TASK_859-Snapshots mit Style-ID `task_859_release_fire_exchange_real_window_primary_hud_source_binding_v1`.
+- Risiken/offen: Der echte Fensterbeweis steht noch aus. TASK_860 sollte nach frischem Export/Recapture pruefen, ob der Screenshot nun wirklich CONTACT FIRE als erste #17/#18-Lesung zeigt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_859_release_fire_exchange_real_window_primary_hud_source_binding_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_858_release_fire_exchange_contact_fire_primary_hud_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_856_release_fire_exchange_contact_fire_primary_hud_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_860 - Release Fire Exchange Real Window Contact-Fire Recapture.
+
 ### TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_858_release_fire_exchange_contact_fire_primary_hud_visual_findings.md`, `docs/tasks/TASK_857_release_fire_exchange_contact_fire_primary_hud_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
