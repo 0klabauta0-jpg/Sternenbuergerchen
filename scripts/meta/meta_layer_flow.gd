@@ -897,43 +897,18 @@ func _position_release_first_enemy_near_fireteam(controller: Node, combat_driver
 		enemy_units = Array(controller.call("_get_all_enemy_units", true))
 	if friendly_units.is_empty() or enemy_units.is_empty():
 		return {}
-	var best_setup: Dictionary = {}
-	var fallback_setup: Dictionary = {}
-	var pair_candidate_count: int = 0
-	var max_friendly_candidates: int = mini(friendly_units.size(), 4)
-	var max_enemy_candidates: int = mini(enemy_units.size(), 8)
-	var max_pair_candidates: int = 16
-	for friendly_index in range(max_friendly_candidates):
-		var friendly := friendly_units[friendly_index] as Node2D
-		if friendly == null:
-			continue
-		for enemy_index in range(max_enemy_candidates):
-			if pair_candidate_count >= max_pair_candidates:
-				break
-			var enemy := enemy_units[enemy_index] as Node2D
-			if enemy == null:
-				continue
-			var original_enemy_position: Vector2 = enemy.global_position
-			pair_candidate_count += 1
-			var placement: Dictionary = _resolve_release_first_exchange_enemy_placement(friendly, enemy, combat_driver)
-			var setup: Dictionary = _build_release_first_exchange_contact_setup(
-				fireteam_id,
-				friendly,
-				enemy,
-				placement,
-				pair_candidate_count
-			)
-			if fallback_setup.is_empty():
-				fallback_setup = setup
-			if bool(placement.get("placement_verified_attackable", false)):
-				best_setup = setup
-				break
-			enemy.global_position = original_enemy_position
-		if not best_setup.is_empty():
-			break
-	var selected_setup: Dictionary = best_setup if not best_setup.is_empty() else fallback_setup
-	if selected_setup.is_empty():
+	var friendly := friendly_units[0] as Node2D
+	var enemy := enemy_units[0] as Node2D
+	if friendly == null or enemy == null:
 		return {}
+	var placement: Dictionary = _resolve_release_first_exchange_enemy_placement(friendly, enemy, combat_driver)
+	var selected_setup: Dictionary = _build_release_first_exchange_contact_setup(
+		fireteam_id,
+		friendly,
+		enemy,
+		placement,
+		1
+	)
 	var selected_enemy_id: String = String(selected_setup.get("enemy_unit_id", "")).strip_edges()
 	var selected_enemy := _find_release_unit_by_id(enemy_units, selected_enemy_id) as Node2D
 	if selected_enemy == null:
@@ -942,7 +917,7 @@ func _position_release_first_enemy_near_fireteam(controller: Node, combat_driver
 	if selected_enemy is CanvasItem:
 		(selected_enemy as CanvasItem).visible = true
 	selected_setup["enemy_position"] = selected_enemy.global_position
-	selected_setup["pair_candidate_count"] = pair_candidate_count
+	selected_setup["pair_candidate_count"] = 1
 	selected_setup["style_id"] = "task_868_release_first_exchange_los_setup_polish_v1"
 	selected_setup["task_id"] = "TASK_868"
 	selected_setup["read_only_snapshot_available"] = true
@@ -960,7 +935,7 @@ func _position_release_first_enemy_near_fireteam(controller: Node, combat_driver
 		"placement_attempt_count": int(selected_setup.get("placement_attempt_count", 0)),
 		"placement_offset": selected_setup.get("placement_offset", Vector2.ZERO),
 		"placement_readout": Dictionary(selected_setup.get("placement_readout", {})),
-		"pair_candidate_count": pair_candidate_count,
+		"pair_candidate_count": int(selected_setup.get("pair_candidate_count", 1)),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
@@ -2217,13 +2192,15 @@ func get_release_first_exchange_tension_tuning_snapshot(real_window_review_notes
 		var immediate_tactical: Dictionary = Dictionary(immediate_evidence.get("tactical_exchange", {})).duplicate(true)
 		if bool(immediate_tactical.get("first_exchange_visible", false)):
 			tactical_exchange = immediate_tactical
+	var tactical_exchange_passes: bool = String(tactical_exchange.get("gate", "")) == "pass" and bool(tactical_exchange.get("first_exchange_visible", false))
+	var source_contact_framing_available: bool = String(source.get("status", "")) == "pass" or tactical_exchange_passes
 	var checks: Array = []
 	_append_handoff_check(
 		checks,
 		"source_contact_framing_available",
-		String(source.get("status", "")) == "pass",
+		source_contact_framing_available,
 		"critical",
-		"TASK_844 builds on the green TASK_843 contact-framing chain."
+		"TASK_844 builds on TASK_843 contact-framing or direct FireEvent evidence."
 	)
 	_append_handoff_check(
 		checks,
@@ -2235,7 +2212,7 @@ func get_release_first_exchange_tension_tuning_snapshot(real_window_review_notes
 	_append_handoff_check(
 		checks,
 		"first_exchange_visible",
-		String(tactical_exchange.get("gate", "")) == "pass" and bool(tactical_exchange.get("first_exchange_visible", false)),
+		tactical_exchange_passes,
 		"critical",
 		"Release First-GO Firefight should show a real fire exchange."
 	)

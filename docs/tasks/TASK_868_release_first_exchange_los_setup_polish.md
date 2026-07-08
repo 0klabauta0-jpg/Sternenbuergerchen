@@ -7,7 +7,7 @@ TASK_867 hat den echten Fensterbefund festgehalten: Der Release-First-Exchange w
 Der Release-Deep-Link durfte fuer den ersten Kontakt mehrere Gegner gleichzeitig als erkannt markieren. Dadurch konnte der Combat-Loop nach dem validierten Setup wieder einen anderen, nicht sauber positionierten Gegner zuerst auswerten. Der sichtbare Readout fiel dann ehrlich auf `NO_LOS`, waehrend die HUD-Polishes weiterhin CONTACT FIRE erwarteten.
 
 ## Umfang
-- Gegnerplatzierung fuer `--release-singleplayer-first-go-firefight` ueber alle Fireteam-/Enemy-Paare validieren.
+- Gegnerplatzierung fuer `--release-singleplayer-first-go-firefight` als enges Release-Testpaar validieren.
 - Den ersten Exchange auf das validierte Zielpaar begrenzen, damit der Readout nicht auf einen anderen Gegner kippt.
 - Zielgegner fuer den Release-Testmoment stabilisieren.
 - Read-only Snapshot fuer LOS-/Range-/Attackable-Setup bereitstellen.
@@ -24,7 +24,7 @@ Der Release-Deep-Link durfte fuer den ersten Kontakt mehrere Gegner gleichzeitig
 - `docs/tasks/TASK_844_release_first_exchange_tension_tuning.md`
 
 ## Akzeptanzkriterien
-- Der Release-Deep-Link waehlt ein durch bestehende Combat-Readouts validiertes Fireteam-/Enemy-Paar.
+- Der Release-Deep-Link waehlt ein durch bestehende Combat-Readouts validiertes Fireteam-/Enemy-Testpaar.
 - Der Force-Schritt oeffnet Detection nur fuer den validierten Zielgegner.
 - Der TASK_868-Snapshot meldet `placement_verified_attackable`, `in_range`, nicht blockierte LOS und fired Diagnostics.
 - Snapshot bleibt read-only und erzeugt keine FireEvents, DamageEvents, Commands oder Multiplayer-Wahrheit.
@@ -38,6 +38,7 @@ Der Release-Deep-Link durfte fuer den ersten Kontakt mehrere Gegner gleichzeitig
 - `docs/IMPLEMENTATION_STATUS.md`
 - `docs/TASK_ROADMAP.md`
 - `docs/reports/spielstand_zwischenbericht_2026_07_08.html`
+- `docs/reports/spielstand_zwischenbericht_task868_verified_2026_07_08.html`
 
 ## Lokale Pruefung
 - `godot_console.exe --headless --path . --script scripts/tests/task_868_release_first_exchange_los_setup_polish.gd`

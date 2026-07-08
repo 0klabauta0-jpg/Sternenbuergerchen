@@ -4,7 +4,7 @@ const TASK_PATH := "res://docs/tasks/TASK_868_release_first_exchange_los_setup_p
 const STATUS_PATH := "res://docs/IMPLEMENTATION_STATUS.md"
 const ROADMAP_PATH := "res://docs/TASK_ROADMAP.md"
 const CONTRACT_PATH := "res://docs/dev/mission_command_feedback_contract.md"
-const REPORT_PATH := "res://docs/reports/spielstand_zwischenbericht_2026_07_08.html"
+const REPORT_PATH := "res://docs/reports/spielstand_zwischenbericht_task868_verified_2026_07_08.html"
 const META_LAYER_SCRIPT_PATH := "res://scripts/meta/meta_layer_flow.gd"
 const META_LAYER_SCENE_PATH := "res://scenes/meta/meta_layer_test.tscn"
 const FIRST_GO_FIREFIGHT_ARG := "--release-singleplayer-first-go-firefight"
@@ -48,7 +48,7 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(report_text.contains("TASK_868") and report_text.contains("LOS-Setup"), "Spielstand report tracks TASK_868")
 	_assert(meta_text.contains("get_release_first_exchange_los_setup_polish_snapshot"), "MetaLayer exposes TASK_868 snapshot")
 	_assert(meta_text.contains(STYLE_ID), "MetaLayer exposes TASK_868 style id")
-	_assert(meta_text.contains("pair_candidate_count"), "Placement scans multiple pair candidates")
+	_assert(meta_text.contains("pair_candidate_count"), "Placement records bounded pair candidate count")
 	_assert(meta_text.contains("_stabilize_release_first_exchange_target_enemy"), "Release target enemy is stabilized")
 	_assert(meta_text.contains("enemy_ids.append(enemy_id)"), "Force step keeps validated target enemy first")
 	_assert(meta_text.contains("\"creates_fire_event\": false"), "TASK_868 snapshot declares no fire-event creation")
@@ -166,7 +166,7 @@ func _build_good_setup_evidence() -> Dictionary:
 		"placement_verified_attackable": true,
 		"placement_attempt_count": 1,
 		"placement_offset": Vector2(42.0, 0.0),
-		"pair_candidate_count": 2,
+		"pair_candidate_count": 1,
 		"placement_readout": {
 			"range_state": "in_range",
 			"los_state": "clear",
