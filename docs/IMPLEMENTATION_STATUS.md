@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_858_release_fire_exchange_contact_fire_primary_hud_visual_findings.md`, `docs/tasks/TASK_857_release_fire_exchange_contact_fire_primary_hud_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeContactFirePrimaryHudVisualFindings` wertet den TASK_857-Recapture als read-only Findings-Snapshot aus.
+- Stand: Positive Findings halten fest, dass der echte TASK_857-Fenster-Capture vorhanden ist, TASK_856-Primary-HUD-Style erwartet wird und Mission-/Command-Surfaces grundsaetzlich lesbar bleiben.
+- Stand: Offene Findings sind `primary_hud_still_no_fire_no_los_visible`, `contact_fire_primary_not_visible_in_real_window`, `event_log_still_contact_pressure`, `fire_trace_or_impact_not_dominant` und `snapshot_window_primary_hud_gap`.
+- Risiken/offen: TASK_858 ist nur der Befund-Schnitt. Die sichtbare Korrektur folgt in TASK_859 und soll eng klaeren, warum der Real-Window-HUD-Pfad die TASK_856-CONTACT-FIRE-Primaerzeile nicht sichtbar genug bindet.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_858_release_fire_exchange_contact_fire_primary_hud_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_857_release_fire_exchange_contact_fire_primary_hud_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish.
+
 ### TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_857_release_fire_exchange_contact_fire_primary_hud_recapture.md`, `docs/tasks/TASK_856_release_fire_exchange_contact_fire_primary_hud_polish.md`, `docs/dev/mission_command_feedback_contract.md`
