@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_887 - Release First Exchange Real Window HUD Render Frame Sync Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_887_release_first_exchange_real_window_hud_render_frame_sync_fix.md`, `docs/tasks/TASK_886_release_first_exchange_real_window_hud_render_frame_trace.md`, `docs/tasks/TASK_879_release_first_exchange_exported_status_source_trace.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_first_exchange_hud_render_frame_sync_fix.ps1` wartet ueber den TASK_879-Trace bis `deeplink_final` und captured danach denselben laufenden Release-Prozess erneut per Window-Handle.
+- Stand: Der echte Post-Final-Fensterblick zeigt CONTACT FIRE in #17 Selected Fireteam, #18 Mission Control und #19 Event Log; der alte TASK_886-Widerspruch war damit ein Capture-/Frame-Zeitpunktproblem, kein Combat-Rewrite-Kandidat.
+- Stand: `ReleaseFirstExchangeHudRenderFrameSyncFix` bewertet Post-Final-Frame und finalen Source-Snapshot gemeinsam und meldet `render_frame_synced_to_final_trace = true`, wenn beide CONTACT FIRE lesen.
+- Risiken/offen: TASK_887 beweist den synchronisierten Fensterframe, aber noch nicht, dass Dichte, Schoenheit und Spielerlesbarkeit im normalen Playtest angenehm genug sind.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_hud_render_frame_sync_fix.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_887_release_first_exchange_hud_render_frame_sync_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_886_release_first_exchange_hud_render_frame_trace.gd`, `git diff --check`.
+- Naechster Schritt: TASK_888 - Release First Exchange Player Readability Polish Review.
+
 ### TASK_886 - Release First Exchange Real Window HUD Render Frame Trace
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_886_release_first_exchange_real_window_hud_render_frame_trace.md`, `docs/tasks/TASK_885_release_first_exchange_hud_source_sync_visual_findings.md`, `docs/tasks/TASK_884_release_first_exchange_hud_source_sync_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
