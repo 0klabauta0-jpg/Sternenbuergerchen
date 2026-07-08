@@ -91,7 +91,7 @@
     <p>Stand 2026-07-08: Fortlaufender Zwischenbericht zum Release-/First-Exchange-Strang. Er fasst zusammen, was am Spiel sichtbar besser wurde, welche Reibung noch bleibt und was ich als naechstes umsetzen will.</p>
     <div class="meta-row">
       <span class="pill good">Basisbefund: TASK_880 committed + pushed</span>
-      <span class="pill warn">Aktueller Arbeitsbranch: task/release-first-exchange-fire-visual-recapture</span>
+      <span class="pill warn">Aktueller Arbeitsbranch: task/release-first-exchange-fire-visual-findings</span>
       <span class="pill good">TASK_874 committed + pushed</span>
       <span class="pill good">TASK_875 committed + pushed</span>
       <span class="pill good">TASK_876 committed + pushed</span>
@@ -101,8 +101,9 @@
       <span class="pill good">TASK_880 committed + pushed</span>
       <span class="pill good">Export Trace review_ready</span>
       <span class="pill good">TASK_880 Fire Visual Polish erledigt</span>
-      <span class="pill good">TASK_881 Recapture-Slice implementiert</span>
-      <span class="pill warn">Naechster Sichtentscheid: TASK_882 Findings</span>
+      <span class="pill good">TASK_881 committed + pushed</span>
+      <span class="pill good">TASK_882 Findings implementiert</span>
+      <span class="pill warn">Naechster Fix: TASK_883 HUD Source Sync</span>
       <span class="pill warn">Git: nur builds/ untracked</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -124,12 +125,12 @@
           <div class="status-box good">
             Der Release-/Singleplayer-Pfad ist inzwischen deutlich besser testbar: Homebase, Fireteam-/Dropship-Staging, Missionstart, erster GO-Moment und erster Kontakt sind als wiederholbare Testkette vorhanden. TASK_880 ist committed und gepusht; FireTrace, Impact, Target-Fokus und das kurze HIT/MISS/FIRE-Label sind im belegten First-Exchange angehoben.
           </div>
-          <p>In den letzten Slices wurde der Weg nicht nur behauptet, sondern ueber Godot-Verifier, Manifest-Dateien und echte Fenster-Captures belegt. TASK_879 hat den Exportpfad getraced: Die TASK_876-Quelle wird im finalen Runtime-Sample aktiv, #17/#18/#19 lesen CONTACT FIRE, und keine finale NO_LOS-/CONTACT-PRESSURE-Ueberschreibung bleibt stehen. TASK_880 setzt genau daran an: keine neue Combat-Wahrheit, sondern staerkere visuelle Feuerlesbarkeit.</p>
+          <p>In den letzten Slices wurde der Weg nicht nur behauptet, sondern ueber Godot-Verifier, Manifest-Dateien und echte Fenster-Captures belegt. TASK_879 hat den Exportpfad getraced: Die TASK_876-Quelle wird im finalen Runtime-Sample aktiv, #17/#18/#19 lesen CONTACT FIRE, und keine finale NO_LOS-/CONTACT-PRESSURE-Ueberschreibung bleibt stehen. TASK_880 hebt daraufhin FireTrace, Impact und Zielbezug an. TASK_881 hat das als echten Release-Fensterblick neu eingefangen; der Sichtbefund ist aber noch nicht zufriedenstellend, weil das Bild weiter zuerst wie NO_LOS/CONTACT PRESSURE liest.</p>
         </article>
         <article class="card">
           <h2>Aktueller Wert</h2>
           <div class="stack">
-            <div class="metric"><strong>6</strong><span>neuere Slices abgeschlossen: TASK_874 bis TASK_879.</span></div>
+            <div class="metric"><strong>8</strong><span>neuere Slices abgeschlossen: TASK_874 bis TASK_881.</span></div>
             <div class="metric"><strong>3</strong><span>HUD-Surfaces im Fokus: #17, #18, #19.</span></div>
             <div class="metric"><strong>10</strong><span>Runtime-Trace-Samples bis <code>deeplink_final</code>.</span></div>
           </div>
@@ -193,7 +194,14 @@
               <strong>TASK_881</strong>
               <div>
                 <h3>Fire Visual Recapture</h3>
-                <p>Der Recapture-Slice ist als eigenes Manifest-/Screenshot-Paket vorbereitet und lokal ausgefuehrt: <code>tmp/release_first_exchange_fire_visual_recapture.json</code> und <code>tmp/release_first_exchange_fire_visual_recapture.png</code>. Das Manifest ist <code>review_ready</code>, aber der manuelle Sichtblick zeigt weiter <code>NEXT LOS/RANGE KORRIGIEREN</code>, <code>Kampf NO FIRE NO_LOS</code> und <code>CONTACT PRESSURE</code>. TASK_882 soll genau diesen Restbefund read-only schneiden.</p>
+                <p>Der Recapture-Slice ist als eigenes Manifest-/Screenshot-Paket umgesetzt, lokal ausgefuehrt, committed und gepusht: <code>tmp/release_first_exchange_fire_visual_recapture.json</code> und <code>tmp/release_first_exchange_fire_visual_recapture.png</code>. Das Manifest ist <code>review_ready</code>, trusted <code>window_handle_print</code> ist aktiv, und der Runtime-Trace sieht sauber aus. Der manuelle Sichtblick zeigt aber weiter <code>NEXT LOS/RANGE KORRIGIEREN</code>, <code>Kampf NO FIRE NO_LOS</code> und <code>CONTACT PRESSURE</code>; TASK_882 schneidet genau diesen Restbefund read-only.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>TASK_882</strong>
+              <div>
+                <h3>Fire Visual Findings</h3>
+                <p>Der TASK_881-Befund ist jetzt als read-only Snapshot geschnitten. Positive Evidence bleibt: trusted Window-Handle, korrektes Missionsfenster, aktive TASK_879-Tracequelle und kein finaler stale Trace. Die primaere Reibung ist <code>task_880_fire_visual_not_real_window_first_reading</code>: Das echte Fenster liest weiter LOS/RANGE/NO_FIRE/CONTACT_PRESSURE statt CONTACT FIRE.</p>
               </div>
             </div>
           </div>
@@ -227,7 +235,7 @@
         <article class="card full">
           <h2>Spielerischer Zwischenstand</h2>
           <p>Das Spiel ist aktuell am ehesten in der Phase "der erste echte Missionsablauf wird hart lesbar gemacht". Es gibt genug Systemsubstanz fuer Fireteams, Dropships, Mission und Combat-Feedback, aber die entscheidende Frage ist noch: Sieht der Spieler im richtigen Moment das Richtige? Genau dafuer sind die letzten Tasks so kleinteilig.</p>
-          <p>TASK_879 hat den Statusquellenpfad im exportierten Runtime-Lauf entwirrt: Im finalen Sample ist CONTACT FIRE da. TASK_880 macht daraus den Runtime-Visual-Schritt: Schuss, Treffer und Zielbezug werden staerker gerendert. TASK_881 paketiert jetzt den echten Recapture; danach entscheidet TASK_882 anhand des PNGs, ob weitere Visual-Reibung bleibt.</p>
+          <p>TASK_879 hat den Statusquellenpfad im exportierten Runtime-Lauf entwirrt: Im finalen Sample ist CONTACT FIRE da. TASK_880 macht daraus den Runtime-Visual-Schritt: Schuss, Treffer und Zielbezug werden staerker gerendert. TASK_881 hat den echten Recapture geliefert. TASK_882 haelt jetzt fest, dass die reale Fensterlesung trotz sauberem Trace noch nicht nach erstem Feuerwechsel aussieht. Der naechste Hebel ist deshalb TASK_883: sichtbare HUD-/Event-Log-Quellen mit dem finalen Trace-Stand synchronisieren.</p>
         </article>
       </div>
     </section>
@@ -255,7 +263,8 @@
             <li><code>task_878_release_first_exchange_visible_status_visual_findings.gd</code>: gruen.</li>
             <li><code>task_879_release_first_exchange_exported_status_source_trace.gd</code>: gruen, auch gegen echtes Export-Trace-Manifest.</li>
             <li><code>task_880_release_first_exchange_fire_visual_polish.gd</code>: gruen, prueft den neuen FireTrace-/Impact-/Target-Fokus-Slice.</li>
-            <li><code>task_881_release_first_exchange_fire_visual_recapture.gd</code>: prueft Manifest, Pflichtchecks und read-only-Grenzen des neuen Recapture-Slice.</li>
+            <li><code>task_881_release_first_exchange_fire_visual_recapture.gd</code>: gruen; prueft Manifest, Pflichtchecks und read-only-Grenzen des neuen Recapture-Slice.</li>
+            <li><code>task_882_release_first_exchange_fire_visual_findings.gd</code>: prueft Findings, Issue-IDs, TASK_883-Empfehlung und read-only-Grenzen.</li>
             <li>Export + TASK_879-Capture: <code>review_ready</code>, 10 Samples bis <code>deeplink_final</code>.</li>
             <li><code>git diff --check</code>: gruen vor den Commits.</li>
           </ul>
@@ -263,17 +272,17 @@
         <article class="card">
           <h2>Git / Build</h2>
           <ul class="list">
-            <li>Aktueller Branch: <code>task/release-first-exchange-fire-visual-recapture</code>.</li>
-            <li>Letzter gepushter Slice: TASK_880 mit Commit <code>9013a575</code> auf <code>task/release-first-exchange-fire-visual-polish</code>.</li>
+            <li>Aktueller Branch: <code>task/release-first-exchange-fire-visual-findings</code>.</li>
+            <li>Letzter gepushter Slice: TASK_881 mit Commit <code>b2756f8e</code> auf <code>task/release-first-exchange-fire-visual-recapture</code>.</li>
             <li>Vorherige gepushte Slices: <code>1e1add6f</code>, <code>dbe7b53f</code>, <code>0fbdb413</code>, <code>c2b20380</code>, <code>facbbfbf</code>.</li>
             <li>Untracked bleibt nur <code>builds/</code>; der Ordner wird weiterhin nicht in den Report-Slice aufgenommen.</li>
-            <li>TASK_881-Artefakte sind lokal im Arbeitsstand, bis der Slice committed und gepusht wird.</li>
+            <li>TASK_881-Artefakte sind committed und gepusht; TASK_882 ist der aktuelle Findings-Slice auf <code>task/release-first-exchange-fire-visual-findings</code>.</li>
           </ul>
         </article>
         <article class="card full">
           <h2>Technische Reibung</h2>
-          <p>Die groesste technische Reibung war die Kette "interne Evidence -> HUD-Snapshot -> exportierte Runtime -> echtes Fenster -> Spielerlesung". TASK_879 zeigt: Die Statusquelle kommt im finalen Exportlauf an. TASK_880 verschiebt die Arbeit deshalb zur sichtbaren Feuerwirkung.</p>
-          <p>Performance-seitig bleibt TASK_880 leicht: Es nutzt bestehende VFX-Nodes und Payload-Signaturen. Es kommen keine SceneTree-Hotpath-Scans und keine neuen per-frame UI-Baum-Rebuilds dazu.</p>
+          <p>Die groesste technische Reibung war die Kette "interne Evidence -> HUD-Snapshot -> exportierte Runtime -> echtes Fenster -> Spielerlesung". TASK_879 zeigt: Die Statusquelle kommt im finalen Exportlauf an. TASK_880 verschiebt die Arbeit deshalb zur sichtbaren Feuerwirkung, und TASK_881 zeigt, dass wir den echten Fensterblick weiter als eigene Wahrheit kontrollieren muessen.</p>
+          <p>Performance-seitig bleibt der aktuelle Strang leicht: Er nutzt bestehende VFX-Nodes, Payload-Signaturen, Captures und Read-only-Findings. Es kommen keine SceneTree-Hotpath-Scans und keine neuen per-frame UI-Baum-Rebuilds dazu.</p>
         </article>
       </div>
     </section>
@@ -283,8 +292,8 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ol class="list">
-            <li><strong>TASK_881 - Release First Exchange Fire Visual Recapture:</strong> Frisch exportieren/capturen und den echten Window-Handle-Screenshot als eigenes Paket ablegen.</li>
-            <li><strong>TASK_882 - Release First Exchange Fire Visual Findings:</strong> Das TASK_881-PNG read-only bewerten; aktueller Sichtbefund ist weiter NO_LOS/CONTACT PRESSURE statt ueberzeugender CONTACT-FIRE-Erstlesung.</li>
+            <li><strong>TASK_883 - Real Window HUD Source Sync Fix:</strong> Die sichtbaren HUD-/Event-Log-Surfaces im echten Fenster mit dem finalen Trace-/CONTACT-FIRE-Stand synchronisieren, ohne neue Gameplay-Wahrheit zu erzeugen.</li>
+            <li><strong>Danach:</strong> Noch einmal echter Window-Handle-Recapture, damit der Spielerblick nach dem Sync wirklich CONTACT FIRE, Ziel und Impact zuerst liest.</li>
             <li><strong>Akzeptanz:</strong> CONTACT FIRE soll nicht nur im Text stehen; der Spieler soll Schussrichtung, Ziel und Treffer/Impact im Fenster sofort verstehen.</li>
             <li><strong>Weiter behalten:</strong> Den kurzen Spielerweg Homebase -> Fireteam -> Dropship -> Mission -> GO -> Contact als Release-Smoke nicht wieder in Einzelteile verlieren.</li>
           </ol>
@@ -292,11 +301,11 @@
         <article class="card">
           <h2>Vorschlag</h2>
           <div class="button-row" data-choice-group="next.recommendation">
-            <button class="choice active" type="button" data-choice-value="fire_visual_findings">TASK_882 Findings</button>
-            <button class="choice" type="button" data-choice-value="fire_visual_recapture">TASK_881 Recapture erneut</button>
+            <button class="choice" type="button" data-choice-value="fire_visual_findings">TASK_882 Findings</button>
+            <button class="choice active" type="button" data-choice-value="hud_source_sync_fix">TASK_883 HUD Sync</button>
             <button class="choice" type="button" data-choice-value="editor_backlog">Editor zurueckholen</button>
           </div>
-          <p>Meine Empfehlung nach dem TASK_881-Capture ist TASK_882: Den echten Screenshot knapp bewerten und dann nur den naechsten belegten Visual-Polish schneiden.</p>
+          <p>Meine Empfehlung nach TASK_882 ist TASK_883: nicht noch ein blinder VFX-Dreh, sondern ein enger Sync-Fix fuer die sichtbaren HUD-/Event-Log-Quellen.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -323,13 +332,16 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_880_fire_visual_polish_done"> TASK_880 Fire Visual Polish erledigt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_881_fire_visual_recapture_slice_done"> TASK_881 Recapture-Slice implementiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_881_fire_visual_capture_run_done"> TASK_881 echten Fire-Visual-Recapture lokal ausgefuehrt</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_881_committed_pushed"> TASK_881 committed und gepusht</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_882_findings_done"> TASK_882 Findings erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.player_readability_ok"> Spielerlesung im Fenster ueberzeugt</label>
         </article>
         <article class="card">
           <h2>Bewertung</h2>
           <label>Naechster Fokus
             <select data-export-key="notes.next_focus">
-              <option selected value="visual_fire_findings">TASK_882 Fire-Visual-Findings aus PNG schneiden</option>
+              <option value="visual_fire_findings">TASK_882 Fire-Visual-Findings aus PNG schneiden</option>
+              <option selected value="hud_source_sync_fix">TASK_883 echten HUD-/Event-Log-Source-Sync fixen</option>
               <option value="visual_fire_recapture">TASK_881 echten Fire-Visual-Recapture erneut ausfuehren</option>
               <option value="task_879_trace">TASK_879 Exported Status Source Trace erneut</option>
               <option value="hud_refresh_diagnosis">HUD-Refresh-Ueberschreibung suchen</option>
@@ -398,9 +410,9 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_branch: "task/release-first-exchange-fire-visual-recapture",
-            latest_pushed_commit: "9013a575 Polish first exchange fire visuals",
-            active_next_task: "TASK_882",
+            current_branch: "task/release-first-exchange-fire-visual-findings",
+            latest_pushed_commit: "b2756f8e Capture first exchange fire visuals",
+            active_next_task: "TASK_883",
             completed_blocks: [
               "TASK_874 real-window recapture captured trusted first exchange evidence gap",
               "TASK_875 visual findings recorded CONTACT-FIRE not being first real-window reading",
@@ -409,18 +421,20 @@
               "TASK_878 records the exported real-window NO_LOS / CONTACT PRESSURE gap",
               "TASK_879 proves the exported final status-source handoff reaches CONTACT FIRE at deeplink_final",
               "TASK_880 raises FireTrace, Impact, Target-Focus and the short fire status label for confirmed first exchange visuals",
-              "TASK_881 packages a fresh real-window recapture path for the TASK_880 fire visuals"
+              "TASK_881 packages and verifies a fresh real-window recapture path for the TASK_880 fire visuals",
+              "TASK_882 records that the trusted real-window screenshot still reads NO_LOS / CONTACT PRESSURE first"
             ],
-            player_value: "The first release mission path is more repeatable, CONTACT FIRE reaches #17/#18/#19 in trace evidence, TASK_880 raises first-exchange fire visuals, and TASK_881 now packages a real-window recapture. The current PNG still reads as NO_LOS / CONTACT PRESSURE, so TASK_882 should cut that finding cleanly.",
-            next_recommendation: "TASK_882 - Release First Exchange Fire Visual Findings",
-            repo_state: "Current work branch is task/release-first-exchange-fire-visual-recapture. TASK_880 is committed and pushed; TASK_881 is local until this branch is committed and pushed."
+            player_value: "The first release mission path is more repeatable, CONTACT FIRE reaches #17/#18/#19 in trace evidence, TASK_880 raises first-exchange fire visuals, TASK_881 provides a trusted real-window recapture, and TASK_882 records that the PNG still reads as NO_LOS / CONTACT PRESSURE first.",
+            next_recommendation: "TASK_883 - Release First Exchange Real Window HUD Source Sync Fix",
+            followup_candidate: "TASK_883 - Release First Exchange Real Window HUD Source Sync Fix",
+            repo_state: "Current work branch is task/release-first-exchange-fire-visual-findings. TASK_881 is committed and pushed on task/release-first-exchange-fire-visual-recapture; only builds/ remains untracked."
           },
           metadata: {
             generated_at_local: "2026-07-08",
             project_root: "C:/dev/SternenBuergerchen",
             report_file: "docs/reports/spielstand_zwischenbericht_2026_07_08.html",
             authoritative_state_note: "This report is a read-only workbench. It does not create gameplay truth.",
-            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881", "TASK_882"]
+            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881", "TASK_882", "TASK_883"]
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {

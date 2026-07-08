@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_882 - Release First Exchange Fire Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_882_release_first_exchange_fire_visual_findings.md`, `docs/tasks/TASK_881_release_first_exchange_fire_visual_recapture.md`, `docs/tasks/TASK_880_release_first_exchange_fire_visual_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangeFireVisualFindings` bewertet das TASK_881-Manifest und den manuellen Sichtbefund als read-only Findings-Snapshot.
+- Stand: Positive Evidence bleibt erhalten: TASK_881 ist `review_ready`, der Capture nutzt trusted `window_handle_print`, das Sternenbuergerchen-Missionsfenster ist bestaetigt, TASK_879-Trace-Aktivierung wurde beobachtet und der finale Trace meldet keine `NO_LOS`-/`CONTACT_PRESSURE`-Ueberschreibung.
+- Stand: Primaerer Befund ist `task_880_fire_visual_not_real_window_first_reading`: Trotz TASK_880-Fire-Visual-Polish liest der echte Fensterblick weiter `NEXT LOS/RANGE KORRIGIEREN`, `Kampf NO FIRE NO_LOS` und `CONTACT PRESSURE`.
+- Risiken/offen: TASK_882 aendert keine Runtime. Der naechste Fix muss die sichtbaren #17/#18/#19-Quellen im echten Fenster mit dem finalen CONTACT-FIRE-Trace-Stand synchronisieren, statt erneut blind VFX-Werte zu tunen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_882_release_first_exchange_fire_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_881_release_first_exchange_fire_visual_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_883 - Release First Exchange Real Window HUD Source Sync Fix.
+
 ### TASK_881 - Release First Exchange Fire Visual Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_881_release_first_exchange_fire_visual_recapture.md`, `docs/tasks/TASK_880_release_first_exchange_fire_visual_polish.md`, `docs/tasks/TASK_879_release_first_exchange_exported_status_source_trace.md`, `docs/dev/mission_command_feedback_contract.md`
