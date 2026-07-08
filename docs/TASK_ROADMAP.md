@@ -103,7 +103,8 @@ git checkout -b batch/<batch-name>
 - TASK_864 - Release Fire Exchange Runtime Text Visual Findings (implementiert): TASK_863-Fensterblick read-only bewerten und nur belegte Restreibung fuer den naechsten Polish benennen.
 - TASK_865 - Release Fire Exchange Runtime Text Visible Status Polish (implementiert): Den sichtbaren #17/#18-Status-/Decision-Pfad so polieren, dass CONTACT FIRE im aktiven Exchange-Fenster nicht mehr von LOS-/NO-FIRE-Text ueberstimmt wird.
 - TASK_866 - Release Fire Exchange Runtime Text Status Recapture (implementiert): Nach TASK_865 neu exportieren/capturen und pruefen, ob der echte Fensterblick CONTACT FIRE nun als erste #17/#18-Lesung zeigt.
-- TASK_867 - Release Fire Exchange Runtime Text Status Visual Findings (naechster Schritt): TASK_866-Fensterblick read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Schritt benennen.
+- TASK_867 - Release Fire Exchange Runtime Text Status Visual Findings (implementiert): TASK_866-Fensterblick read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Schritt benennen.
+- TASK_868 - Release First Exchange LOS Setup Polish (naechster Schritt): Den Release-First-Exchange so herstellen oder rahmen, dass der echte Fensterblick nicht mehr unehrlich CONTACT FIRE erzwingen muss, sondern entweder echte LOS-/FireEvent-Evidence zeigt oder CONTACT PRESSURE klar als Zwischenzustand fuehrt.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 
