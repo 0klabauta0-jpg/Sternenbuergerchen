@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_893 - Release First Exchange Fire Direction Impact Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_893_release_first_exchange_fire_direction_impact_real_window_recapture.md`, `docs/tasks/TASK_892_release_first_exchange_fire_direction_impact_clarity_polish.md`, `docs/tasks/TASK_890_release_first_exchange_hud_density_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_893 haengt einen eigenen Recapture-/Acceptance-Rahmen an den bestaetigten TASK_892-FireDirection-/Impact-Polish.
+- Stand: `capture_release_first_exchange_fire_direction_impact_real_window_recapture.ps1` wiederverwendet den bestehenden TASK_890-/TASK_887-Window-Handle-Pfad und schreibt eigene TASK_893-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFireDirectionImpactRealWindowRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Direction Arrow, Impact-Relationship-Anchor, Target-Endcap und Quelle-Ziel-Bezug.
+- Risiken/offen: TASK_893 erzeugt den echten Fensterbeweis, akzeptiert ihn aber nicht automatisch. Der naechste Slice muss den PNG-Befund als TASK_894 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_893_release_first_exchange_fire_direction_impact_real_window_recapture.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_fire_direction_impact_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_892_release_first_exchange_fire_direction_impact_clarity_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_894 - Release First Exchange Fire Direction Impact Visual Findings.
+
 ### TASK_892 - Release First Exchange Fire Direction And Impact Clarity Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_892_release_first_exchange_fire_direction_impact_clarity_polish.md`, `docs/tasks/TASK_891_release_first_exchange_hud_density_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
