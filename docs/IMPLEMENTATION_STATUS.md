@@ -32,6 +32,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_870_release_first_exchange_post_los_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_869_release_first_exchange_real_window_recapture_after_los_setup.gd`, `git diff --check`.
 - Naechster Schritt: TASK_871 - Release Window Identity Capture Target Fix.
 
+### TASK_872 - Release Correct Window First Exchange Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_872_release_correct_window_first_exchange_visual_findings.md`, `docs/tasks/TASK_871_release_window_identity_capture_target_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseCorrectWindowFirstExchangeVisualFindings` bewertet den TASK_869-Recapture nach TASK_871 als read-only Findings-Snapshot.
+- Stand: Positive Evidence ist jetzt getrennt vom Restbefund: `window_capture_method=window_handle_print`, `window_capture_trusted=true`, Ziel-Fenster zeigt wieder Sternenbuergerchen-Mission.
+- Stand: Primaerer Befund ist `correct_window_first_exchange_still_no_los`: Im korrekten Fenster dominiert weiter `NEXT LOS/RANGE KORRIGIEREN` / `Kampf NO FIRE NO_LOS` / `CONTACT PRESSURE`.
+- Risiken/offen: TASK_872 aendert keine Runtime. Der naechste sinnvolle Fix ist TASK_873: First-Exchange CONTACT-FIRE Readability Fix, ohne CONTACT FIRE nur kosmetisch gegen echte NO_LOS-Evidence zu ueberschreiben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_872_release_correct_window_first_exchange_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_871_release_window_identity_capture_target_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_873 - Release First Exchange CONTACT-FIRE Readability Fix.
+
 ### TASK_871 - Release Window Identity Capture Target Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_871_release_window_identity_capture_target_fix.md`, `docs/tasks/TASK_870_release_first_exchange_post_los_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
