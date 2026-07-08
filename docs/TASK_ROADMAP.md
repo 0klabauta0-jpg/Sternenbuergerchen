@@ -85,7 +85,8 @@ git checkout -b batch/<batch-name>
 - TASK_846 - Release First Exchange Visual Findings (implementiert): TASK_845-PNG-/Manifest-Befund bewertet die echte Fensterreibung als `first_exchange_not_visible_in_window`, `hud_surfaces_stale_pressure` und `fire_trace_or_impact_not_obvious`.
 - TASK_847 - Release Fire Exchange Visibility Persistence (implementiert): Fire-Exchange-Evidence bleibt in Event Log, #17 und #18 kurz sichtbar, ohne neue Combat- oder UI-Wahrheit zu erzeugen.
 - TASK_848 - Release First Exchange Recapture Acceptance (implementiert): Frischer Release-Export und TASK_845-Recapture nach TASK_847 werden als Acceptance-Paket mit Screenshotpfaden und manuellen Pflichtchecks festgehalten.
-- TASK_849 - Release Fire Exchange Visual Polish Findings (naechster Schritt): Neuen TASK_848-Screenshot manuell bewerten und nur belegte visuelle Reibungen wie FireTrace/Impact, Weltbild oder HUD-Dichte schneiden.
+- TASK_849 - Release Fire Exchange Visual Polish Findings (implementiert): Neuer TASK_848-Screenshot ist als read-only Findings-Schnitt bewertet; primaere Reibungen sind Start-/Automatik-Overlay, dominante Weltlinien, schwache FireTrace/Impact-Lesbarkeit und nicht eindeutig bestaetigter CONTACT-FIRE-HUD-Moment.
+- TASK_850 - Release Fire Exchange Focused Visual Polish (naechster Schritt): Nur die belegten TASK_849-Reibungen im echten Fenster polieren, ohne Combat- oder Gameplay-Wahrheit zu veraendern.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 

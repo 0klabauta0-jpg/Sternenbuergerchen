@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_849 - Release Fire Exchange Visual Polish Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_849_release_fire_exchange_visual_polish_findings.md`, `docs/tasks/TASK_848_release_first_exchange_recapture_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeVisualPolishFindings` wertet den frischen TASK_848-Acceptance-Screenshot und manuelle Sichtnotizen als read-only Findings-Snapshot aus.
+- Stand: Positive Findings halten fest, dass ein echter Fenster-Capture vorliegt und Terrain sowie eigene Einheitengruppe grundsaetzlich lesbar sind.
+- Stand: Offene Findings sind `start_overlay_competes_with_combat`, `world_lines_dominate_exchange`, `fire_trace_or_impact_not_readable` und `hud_contact_fire_not_confirmed`.
+- Risiken/offen: TASK_849 ist nur der Befund-Schnitt; die sichtbare Korrektur folgt eng in TASK_850.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_849_release_fire_exchange_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_848_release_first_exchange_recapture_acceptance.gd`, `git diff --check`.
+- Naechster Schritt: TASK_850 - Release Fire Exchange Focused Visual Polish.
+
 ### TASK_848 - Release First Exchange Recapture Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_848_release_first_exchange_recapture_acceptance.md`, `docs/tasks/TASK_847_release_fire_exchange_visibility_persistence.md`, `docs/dev/mission_command_feedback_contract.md`
