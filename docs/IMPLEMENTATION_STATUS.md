@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_862 - Release Fire Exchange Real Window Primary HUD Runtime Text Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_862_release_fire_exchange_real_window_primary_hud_runtime_text_polish.md`, `docs/tasks/TASK_861_release_fire_exchange_real_window_contact_fire_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeRealWindowPrimaryHudRuntimeTextPolish` bindet den sichtbaren Runtime-Labelpfad von #17 Selected Fireteam und #18 Mission Control an die vorhandene `CONTACT FIRE | ...`-Primaerzeile, wenn die Release-Fire-Exchange-Persistence aktiv ist.
+- Stand: `MissionTacticalSandboxController._apply_release_fire_exchange_real_window_primary_hud_runtime_text()` nutzt direkte NodePaths fuer die beiden Labels und setzt nur Displaytext/Metadaten.
+- Stand: TacticalController und MetaLayer expose read-only TASK_862-Snapshots mit Style-ID `task_862_release_fire_exchange_real_window_primary_hud_runtime_text_v1`.
+- Risiken/offen: Der Task beweist den Runtime-Textpfad headless. Ein echter Fenster-Recapture bleibt als Folgearbeit noetig, um die menschliche CONTACT-FIRE-Erstlesung im PNG zu bestaetigen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_862_release_fire_exchange_real_window_primary_hud_runtime_text_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_861_release_fire_exchange_real_window_contact_fire_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_859_release_fire_exchange_real_window_primary_hud_source_binding_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_863 - Release Fire Exchange Runtime Text Recapture.
+
 ### TASK_861 - Release Fire Exchange Real Window Contact-Fire Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_861_release_fire_exchange_real_window_contact_fire_visual_findings.md`, `docs/tasks/TASK_860_release_fire_exchange_real_window_contact_fire_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
