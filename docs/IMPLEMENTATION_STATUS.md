@@ -28,6 +28,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_834_release_firefight_hud_real_window_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_833_release_firefight_hud_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release mit `--release-singleplayer-first-go-firefight` starten und die neue Statuszeile sichtbar recapturen.
 
+### TASK_835 - Release Firefight Bottom Dock Density Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_835_release_firefight_bottom_dock_density_polish.md`, `docs/tasks/TASK_834_release_firefight_hud_real_window_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Mission Control priorisiert bei aktivem First-GO-Firefight dieselbe `NEXT/WHY`-Decision-Line wie Selected Fireteam.
+- Stand: Der kompakte Kampf-Readout steht direkt darunter, der Bottom-Dock-Status bleibt kurz und bekommt einen groesseren, nicht geclippten TASK_835-Style.
+- Risiken/offen: Der echte Fensterblick bleibt als Capture sinnvoll, weil Bottom-Dock-Dichte auf Ultrawide/FullHD visuell unterschiedlich wirken kann.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_835_release_firefight_bottom_dock_density_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_834_release_firefight_hud_real_window_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_833_release_firefight_hud_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
+- Naechster Schritt: First-GO-Firefight-Release erneut capturen und danach Command-Matrix-/Button-Lesbarkeit polieren.
+
 ### BUGFIX - Singleplayer Release EXE Actionability And Firefight Decision Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_exe_actionability_and_firefight_decision_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`

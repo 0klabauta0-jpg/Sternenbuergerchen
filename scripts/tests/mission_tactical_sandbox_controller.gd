@@ -85,6 +85,11 @@ const RELEASE_FIREFIGHT_HUD_REAL_WINDOW_STYLE_ID: String = "task_834_release_fir
 const RELEASE_FIREFIGHT_HUD_REAL_WINDOW_FONT_SIZE: int = 12
 const RELEASE_FIREFIGHT_HUD_REAL_WINDOW_OUTLINE_SIZE: int = 3
 const RELEASE_FIREFIGHT_HUD_REAL_WINDOW_MIN_HEIGHT: float = 62.0
+const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_STYLE_ID: String = "task_835_release_firefight_bottom_dock_density_v1"
+const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_FONT_SIZE: int = 11
+const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_OUTLINE_SIZE: int = 3
+const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MIN_HEIGHT: float = 84.0
+const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MAX_LINES: int = 5
 const MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID: String = "mission_team_chip_tooltip_hint_v1"
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
@@ -2510,6 +2515,7 @@ func _update_ui() -> void:
 		strategic_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
 		_apply_frontier_probe_one_screen_visual_polish_label_contract(strategic_status_label)
+		_apply_release_firefight_bottom_dock_density_label_contract(strategic_status_label)
 
 	var phase_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseStatusLabel") as Label
 	if phase_status_label != null:
@@ -6294,7 +6300,29 @@ func _build_strategic_status_text() -> String:
 	var station_debrief_handoff_line: String = String(station_debrief_handoff.get("handoff_line", "")).strip_edges()
 	if bool(station_debrief_handoff.get("handoff_ready", false)) and not station_debrief_handoff_line.is_empty() and not lines.has(station_debrief_handoff_line):
 		lines.append(station_debrief_handoff_line)
+	lines = _prioritize_release_firefight_bottom_dock_lines(lines)
 	return "\n".join(lines)
+
+
+func _prioritize_release_firefight_bottom_dock_lines(source_lines: PackedStringArray) -> PackedStringArray:
+	var decision_line: String = _build_release_candidate_firefight_decision_line()
+	if decision_line.is_empty():
+		return source_lines
+	var combat_line: String = _build_selected_fireteam_combat_hud_line()
+	var prioritized: PackedStringArray = PackedStringArray()
+	prioritized.append(decision_line)
+	if not combat_line.is_empty():
+		prioritized.append("Kampf %s" % combat_line)
+	for line_variant in source_lines:
+		var line: String = String(line_variant).strip_edges()
+		if line.is_empty() or prioritized.has(line) or line == decision_line:
+			continue
+		if not combat_line.is_empty() and (line == combat_line or line == "Kampf %s" % combat_line):
+			continue
+		prioritized.append(line)
+		if prioritized.size() >= RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MAX_LINES:
+			break
+	return prioritized
 
 
 func _build_mission_hud_interaction_density_snapshot(station_route_readout_override: Dictionary = {}, station_route_cue_override: Dictionary = {}, interaction_progress_readability_override: Dictionary = {}) -> Dictionary:
@@ -7177,6 +7205,28 @@ func _apply_release_firefight_hud_real_window_label_contract(label: Label) -> vo
 	)
 	label.set_meta("release_firefight_hud_real_window_style_id", RELEASE_FIREFIGHT_HUD_REAL_WINDOW_STYLE_ID)
 	label.set_meta("release_firefight_hud_real_window_task", "TASK_834")
+
+
+func _apply_release_firefight_bottom_dock_density_label_contract(label: Label) -> void:
+	if label == null:
+		return
+	var text: String = String(label.text).strip_edges()
+	var active: bool = text.begins_with("NEXT ") and text.contains(" | WHY ")
+	label.set_meta("release_firefight_bottom_dock_density_active", active)
+	if not active:
+		return
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.clip_text = false
+	label.add_theme_color_override("font_color", Color(0.82, 1.0, 0.94, 1.0))
+	label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.92))
+	label.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_FONT_SIZE)
+	label.add_theme_constant_override("outline_size", RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_OUTLINE_SIZE)
+	label.custom_minimum_size = Vector2(
+		maxf(label.custom_minimum_size.x, 420.0),
+		maxf(label.custom_minimum_size.y, RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MIN_HEIGHT)
+	)
+	label.set_meta("release_firefight_bottom_dock_density_style_id", RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_STYLE_ID)
+	label.set_meta("release_firefight_bottom_dock_density_task", "TASK_835")
 
 
 func _apply_frontier_probe_one_screen_visual_polish_label_contract(label: Label) -> void:
@@ -16051,6 +16101,115 @@ func get_release_firefight_hud_real_window_polish_snapshot() -> Dictionary:
 		"selected_fireteam_label_clip_text": bool(label.clip_text) if label != null else true,
 		"selected_fireteam_label_min_height": min_height,
 		"real_window_style_active": active,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
+	_update_ui()
+	var source_snapshot: Dictionary = get_release_firefight_hud_real_window_polish_snapshot()
+	var decision_line: String = String(source_snapshot.get("decision_line", "")).strip_edges()
+	var combat_line: String = _build_selected_fireteam_combat_hud_line()
+	var mission_control_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	if mission_control_label != null:
+		_apply_release_firefight_bottom_dock_density_label_contract(mission_control_label)
+	var mission_control_status_text: String = String(mission_control_label.text if mission_control_label != null else _build_strategic_status_text()).strip_edges()
+	var mission_lines: PackedStringArray = mission_control_status_text.split("\n", false)
+	var mission_first_line: String = String(mission_lines[0]).strip_edges() if mission_lines.size() > 0 else ""
+	var mission_second_line: String = String(mission_lines[1]).strip_edges() if mission_lines.size() > 1 else ""
+	var expected_combat_line: String = "Kampf %s" % combat_line if not combat_line.is_empty() else ""
+	var label_style: Dictionary = _get_combat_hud_tooltip_label_style_snapshot(mission_control_label)
+	var label_rect: Rect2 = _get_control_global_rect_or_empty(mission_control_label)
+	var style_id: String = String(mission_control_label.get_meta("release_firefight_bottom_dock_density_style_id", "")) if mission_control_label != null else ""
+	var active: bool = bool(mission_control_label.get_meta("release_firefight_bottom_dock_density_active", false)) if mission_control_label != null else false
+	var autowrap_enabled: bool = mission_control_label != null and int(mission_control_label.autowrap_mode) != int(TextServer.AUTOWRAP_OFF)
+	var min_height: float = mission_control_label.custom_minimum_size.y if mission_control_label != null else 0.0
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_real_window_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"Bottom-dock density polish builds on a green TASK_834 real-window snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_decision_line_first",
+			not decision_line.is_empty() and mission_first_line == decision_line,
+			"Mission Control starts with the same NEXT/WHY Firefight decision line."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_combat_line_second",
+			not expected_combat_line.is_empty() and mission_second_line == expected_combat_line,
+			"Mission Control keeps the compact combat readout directly below the decision line."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_status_not_overexpanded",
+			mission_lines.size() <= RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MAX_LINES,
+			"Mission Control keeps the first Firefight readout compact enough for the bottom dock."
+		),
+		_build_mission_first_move_readability_check(
+			"bottom_dock_density_style_active",
+			active and style_id == RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_STYLE_ID,
+			"Mission Control label carries the TASK_835 bottom-dock density style marker."
+		),
+		_build_mission_first_move_readability_check(
+			"bottom_dock_label_readable",
+			int(label_style.get("font_size", 0)) >= RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_FONT_SIZE
+				and int(label_style.get("outline_size", 0)) >= RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_OUTLINE_SIZE
+				and autowrap_enabled
+				and mission_control_label != null
+				and not bool(mission_control_label.clip_text)
+				and min_height >= RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MIN_HEIGHT,
+			"Mission Control is larger, outlined, wrapped and not clipped for the real bottom dock."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_label_has_area",
+			label_rect.size.x >= 280.0 and label_rect.size.y >= 20.0,
+			"Mission Control status label has visible bottom-dock area."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only_boundaries",
+			bool(source_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(source_snapshot.get("creates_command", true))
+				and not bool(source_snapshot.get("creates_fire_event", true))
+				and not bool(source_snapshot.get("creates_damage_event", true))
+				and not bool(source_snapshot.get("sets_multiplayer_truth", true)),
+			"Bottom-dock density polish reads existing HUD state only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_835",
+		"source_task_id": "TASK_834",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"source": source_snapshot,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": style_id,
+		"expected_style_id": RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_STYLE_ID,
+		"decision_line": decision_line,
+		"combat_line": combat_line,
+		"expected_mission_control_combat_line": expected_combat_line,
+		"mission_control_first_line": mission_first_line,
+		"mission_control_second_line": mission_second_line,
+		"mission_control_status_text": mission_control_status_text,
+		"mission_control_line_count": mission_lines.size(),
+		"mission_control_label_style": label_style,
+		"mission_control_label_rect": _rect_to_audit_dictionary(label_rect),
+		"mission_control_label_autowrap_enabled": autowrap_enabled,
+		"mission_control_label_clip_text": bool(mission_control_label.clip_text) if mission_control_label != null else true,
+		"mission_control_label_min_height": min_height,
+		"bottom_dock_density_style_active": active,
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",

@@ -69,6 +69,7 @@ git checkout -b batch/<batch-name>
 - TASK_832 - Release First GO Firefight Deep-Link Evidence (implementiert): `--release-singleplayer-first-go-firefight` fuehrt den Release-Pfad bis nach `GO`, erster Bewegung, erstem Kontakt und erster Engagement-Rueckmeldung.
 - TASK_833 - Release Firefight HUD Readability Polish (implementiert): Die Firefight-`NEXT/WHY`-Decision-Line steht im Selected-Fireteam-Status oben, damit der Spieler den naechsten Griff im ersten Feuerwechsel sofort lesen kann.
 - TASK_834 - Release Firefight HUD Real Window Polish (implementiert): Die priorisierte Firefight-Decision-Line nutzt im Selected-Fireteam-Status einen groesseren Real-Window-Stil mit Autowrap, Outline und Mindesthoehe.
+- TASK_835 - Release Firefight Bottom Dock Density Polish (implementiert): Mission Control beginnt im ersten Firefight ebenfalls mit `NEXT/WHY`, zeigt den Kampf-Readout direkt darunter und schuetzt den Bottom-Dock-Status gegen Abschneiden.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
