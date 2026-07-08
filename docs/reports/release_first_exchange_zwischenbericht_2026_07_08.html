@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - Release First Exchange / TASK_856</title>
+  <title>Sternenbuergerchen Zwischenbericht - Release First Exchange / TASK_857</title>
   <style>
     :root {
       color-scheme: dark;
@@ -77,7 +77,7 @@
 <body data-report-id="release_first_exchange_zwischenbericht_2026_07_08" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Release First Exchange Zwischenbericht</h1>
-    <p>Stand 2026-07-08: Zwischenbericht zum Singleplayer-Releasepfad, erledigtem TASK_856-Primary-HUD-Polish und offenem TASK_857-Recapture.</p>
+    <p>Stand 2026-07-08: Zwischenbericht zum Singleplayer-Releasepfad, erledigtem TASK_856-Primary-HUD-Polish und implementiertem TASK_857-Recapture-Slice.</p>
     <div class="meta-row">
       <span class="pill good">TASK_844 headless gruen</span>
       <span class="pill good">TASK_845 Capture review_ready</span>
@@ -92,7 +92,9 @@
       <span class="pill good">TASK_854 After-Readability-Recapture bereit</span>
       <span class="pill warn">TASK_855 Findings bereit</span>
       <span class="pill good">TASK_856 Primary-HUD-Polish implementiert</span>
-      <span class="pill">Branch: task/release-fire-exchange-contact-fire-primary-hud-polish</span>
+      <span class="pill good">TASK_857 Recapture-Slice implementiert</span>
+      <span class="pill warn">TASK_858 Findings als naechster Schritt</span>
+      <span class="pill">Branch: task/release-fire-exchange-contact-fire-primary-hud-recapture</span>
     </div>
   </header>
 
@@ -124,8 +126,10 @@
             <li><strong>TASK_854:</strong> Der naechste echte Fensterblick nach TASK_853 ist als eigenes Capture-Script, Manifest, Analyzer und Pflichtcheck-Paket vorbereitet: <code>tmp/release_fire_exchange_after_readability_recapture.json</code>.</li>
             <li><strong>TASK_855:</strong> Der TASK_854-Fensterblick ist als Findings-Schnitt bewertet: primaer stoert weiter <code>NO FIRE NO_LOS</code> im HUD-Primaertext statt klarer CONTACT-FIRE-Lesung.</li>
             <li><strong>TASK_856:</strong> #17 Selected Fireteam und #18 Mission Control priorisieren bei aktiver Fire-Exchange-Persistence jetzt eine gemeinsame <code>CONTACT FIRE | ...</code>-Primaerzeile.</li>
+            <li><strong>TASK_857:</strong> Der neue Recapture-Slice erzeugt ein eigenes Manifest <code>tmp/release_fire_exchange_contact_fire_primary_hud_recapture.json</code> und eigene Screenshotpfade fuer den echten Fensterblick nach TASK_856.</li>
+            <li><strong>Aktueller Sichtbefund:</strong> Der echte TASK_857-Capture ist technisch <code>review_ready</code>, liest sich im Screenshot aber weiterhin eher als <code>NO FIRE NO_LOS</code> / CONTACT PRESSURE. Das ist kein Abbruch, sondern der belegte Input fuer TASK_858.</li>
             <li><strong>Bericht:</strong> Diese Workbench fasst Arbeitsstand, Spielwirkung, Screenshot-Befund, offene Risiken und naechste Arbeitsschritte zusammen. Unten kann daraus eine JSON-Notiz exportiert werden.</li>
-            <li><strong>Git:</strong> TASK_848 bis TASK_855 sind gemerged und gepusht. TASK_856 laeuft aktuell auf <code>task/release-fire-exchange-contact-fire-primary-hud-polish</code>.</li>
+            <li><strong>Git:</strong> TASK_848 bis TASK_856 sind gemerged und gepusht. TASK_857 laeuft aktuell auf <code>task/release-fire-exchange-contact-fire-primary-hud-recapture</code>.</li>
           </ul>
         </article>
         <article class="card">
@@ -147,7 +151,7 @@
           <p><code>tmp/release_fire_exchange_after_readability_recapture_acceptance.json</code> als lokaler Analyzer-Output</p>
           <p><code>tmp/release_fire_exchange_after_readability_visual_findings.json</code> als TASK_855-Findings-Paket</p>
           <p><code>tmp/release_first_exchange_recapture_acceptance.json</code></p>
-          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>, Polish-Status: <code>ready_for_recapture</code>. TASK_856 setzt den Primary-HUD-Polish; als naechstes braucht es TASK_857 als echten Fenster-Recapture.</p>
+          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>, Polish-Status: <code>recapture_ready_visual_finding_open</code>. TASK_857 legt den neuen Recapture-Nachweis fuer den TASK_856-Primary-HUD-Polish an; TASK_858 bewertet jetzt die echte Bildwirkung, weil der Screenshot weiter nicht klar CONTACT FIRE liest.</p>
         </article>
       </div>
     </section>
@@ -199,7 +203,8 @@
             <li><strong>TASK_854 - Release Fire Exchange Focused Recapture After Readability Polish:</strong> Frischen echten Fensterblick nach dem 45s-Readability-Fix als eigenes Evidence-Paket erzeugen.</li>
             <li><strong>TASK_855 - Release Fire Exchange After Readability Visual Findings:</strong> Den TASK_854-Screenshot bewerten und nur belegte Restreibung polieren.</li>
             <li><strong>TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish:</strong> Aktive Fire-Exchange-Evidence im echten Fenster als primaere CONTACT-FIRE-Lesung stabilisieren.</li>
-            <li><strong>TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture:</strong> Frischen echten Fensterblick nach TASK_856 erzeugen und bewerten.</li>
+            <li><strong>TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture:</strong> Frischen echten Fensterblick nach TASK_856 als eigenes Manifest- und Screenshotpaket erzeugen.</li>
+            <li><strong>TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings:</strong> TASK_857-Fensterblick read-only bewerten und nur belegte Restreibung polieren.</li>
           </ol>
         </article>
         <article class="card">
@@ -237,7 +242,8 @@
               <option value="task_853_readability_done">TASK_853 Readability-Polish bereit, TASK_854 Recapture</option>
               <option value="task_854_recapture_ready">TASK_854 Recapture-Paket bereit, TASK_855 Sichtbefund offen</option>
               <option value="task_855_findings_ready">TASK_855 Findings bereit, TASK_856 Polish</option>
-              <option selected value="task_856_primary_hud_done">TASK_856 Primary-HUD-Polish bereit, TASK_857 Recapture</option>
+              <option value="task_856_primary_hud_done">TASK_856 Primary-HUD-Polish bereit, TASK_857 Recapture</option>
+              <option selected value="task_857_recapture_ready">TASK_857 Recapture-Slice bereit, TASK_858 Sichtbefund offen</option>
               <option value="visual_polish_findings_ready">Visual-Polish-Findings fuer TASK_850 bereit</option>
               <option value="visibility_fix_done_recapture_next">Sichtbarkeits-Fix erledigt, Recapture als naechstes</option>
               <option value="findings_done_visibility_fix_in_progress">Findings erledigt, Sichtbarkeits-Fix in Arbeit</option>
@@ -256,6 +262,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_854_recapture_ready"> TASK_854 bereitet den echten After-Readability-Recapture mit Manifest, Analyzer und Pflichtchecks vor.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_855_findings_ready"> TASK_855 benennt NO FIRE NO_LOS als primaere echte Fensterreibung.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_856_primary_hud_done"> TASK_856 priorisiert CONTACT FIRE als erste #17/#18-HUD-Lesung.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_857_recapture_ready"> TASK_857 paketiert den frischen CONTACT-FIRE-Primary-HUD-Recapture.</label>
         </article>
         <article class="card wide">
           <h2>Freie Notizen</h2>
@@ -326,13 +333,16 @@
             completed_after_readability_recapture_task: "TASK_854 - Release Fire Exchange Focused Recapture After Readability Polish",
             completed_after_readability_findings_task: "TASK_855 - Release Fire Exchange After Readability Visual Findings",
             completed_primary_hud_polish_task: "TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish",
-            active_next_task: "TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture",
+            completed_contact_fire_primary_hud_recapture_task: "TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture",
+            task_857_capture_gate: "review_ready",
+            task_857_visible_observation: "Window screenshot still reads closer to NO FIRE NO_LOS / contact pressure than clear CONTACT FIRE.",
+            active_next_task: "TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings",
             current_player_value: "Release-Singleplayer startet bis in die Mission; bei aktiver Fire-Exchange-Evidence priorisieren #17/#18 jetzt CONTACT FIRE als erste HUD-Lesung.",
-            recommended_next_task: "TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture"
+            recommended_next_task: "TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings"
           },
           metadata: {
-            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849", "TASK_850", "TASK_851", "TASK_852", "TASK_853", "TASK_854", "TASK_855", "TASK_856"],
-            branch: "task/release-fire-exchange-contact-fire-primary-hud-polish",
+            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849", "TASK_850", "TASK_851", "TASK_852", "TASK_853", "TASK_854", "TASK_855", "TASK_856", "TASK_857"],
+            branch: "task/release-fire-exchange-contact-fire-primary-hud-recapture",
             merged_branches: [
               "task/release-first-exchange-recapture-acceptance",
               "task/release-fire-exchange-visual-polish-findings",
@@ -350,7 +360,7 @@
             after_readability_recapture_acceptance_path: "tmp/release_fire_exchange_after_readability_recapture_acceptance.json",
             after_readability_visual_findings_path: "tmp/release_fire_exchange_after_readability_visual_findings.json",
             release_fire_exchange_persistence_msec: 45000,
-            next_branch_goal: "Recapture the real release window after TASK_856 and judge CONTACT FIRE readability."
+            next_branch_goal: "Judge the TASK_857 real release window and cut only proven remaining CONTACT FIRE readability issues."
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
