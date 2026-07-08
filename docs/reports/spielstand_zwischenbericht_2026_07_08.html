@@ -90,6 +90,7 @@
       <span class="pill good">TASK_858 Findings erledigt</span>
       <span class="pill good">TASK_859 Source-Binding erledigt</span>
       <span class="pill warn">Naechster Fokus: echter Fensterbeweis</span>
+      <span class="pill good">TASK_861 Findings im Arbeitsstand</span>
       <span class="pill warn">Repo: nur builds/ untracked</span>
       <span class="pill">Bericht ist read-only</span>
     </div>
@@ -121,6 +122,7 @@
             <li><strong>TASK_858-Befund:</strong> Die reale Reibung ist jetzt benannt: #17/#18 lesen weiter <code>NO FIRE NO_LOS</code> / LOS-Korrektur statt CONTACT FIRE. Naechster enger Griff ist TASK_859.</li>
             <li><strong>TASK_859-Bindung:</strong> Der reale #17/#18-HUD-Text wird bei aktiver Fire-Exchange-Persistence jetzt an die vorhandene <code>CONTACT FIRE | ...</code>-Primaerquelle gebunden; alte NO-FIRE-/LOS-Diagnostik bleibt nur nachrangig.</li>
             <li><strong>TASK_860-Capture:</strong> Der echte Release-Fenster-Recapture nach TASK_859 ist technisch <code>review_ready</code> und schreibt Manifest plus Window-/Desktop-PNG. Der sichtbare Zustand liest aber weiter eher als <code>NEXT LOS/RANGE KORRIGIEREN</code>, <code>Kampf NO FIRE NO_LOS</code> und <code>CONTACT PRESSURE</code> statt als klare CONTACT-FIRE-Erstlesung.</li>
+            <li><strong>TASK_861-Findings:</strong> Dieser echte Restbefund ist als read-only Findings-Schnitt vorbereitet und empfiehlt TASK_862 als engen Runtime-Text-Polish.</li>
           </ul>
         </article>
         <article class="card">
@@ -226,7 +228,8 @@
             <li><strong>Erledigt:</strong> TASK_854 hat den echten Fenster-Capture nach TASK_853 vorbereitet; TASK_855 hat daraus den sichtbaren Befund geschnitten; TASK_856 hat die belegte Reibung im HUD gezielt poliert; TASK_857 legt den neuen Recapture-Nachweis an; TASK_858 bewertet den Fensterblick.</li>
             <li><strong>Erledigt:</strong> TASK_859 bindet den echten #17/#18-Window-HUD-Pfad an die CONTACT-FIRE-Primaerquelle.</li>
             <li><strong>TASK_860 abschliessen:</strong> Den Capture-Slice committen und mergen, damit der echte Befund im Repo nachvollziehbar bleibt.</li>
-            <li><strong>TASK_861:</strong> Den sichtbaren TASK_860-Befund als read-only Findings-Schnitt festhalten und nur den belegten naechsten HUD-/Firefight-Polish vorbereiten.</li>
+            <li><strong>TASK_861 abschliessen:</strong> Den sichtbaren TASK_860-Befund als read-only Findings-Schnitt committen und mergen.</li>
+            <li><strong>TASK_862:</strong> Den echten #17/#18-Runtime-Window-Text so polieren, dass CONTACT FIRE im aktiven Exchange-Fenster die erste Spielerlesung wird.</li>
             <li><strong>Release-Ordner aktuell halten:</strong> Nach gruenem Slice erneut exportieren, damit deine EXE nicht hinter dem Repo-Stand herlaeuft.</li>
             <li><strong>Danach erst naechster Spielsystem-Block:</strong> je nach Findings entweder weitere Firefight-Lesbarkeit oder Rueckkehr zu Editor-/Scenario-/Formation-Themen.</li>
             <li><strong>Danach sinnvoll:</strong> Wenn der First-Exchange endlich lesbar ist, wieder auf Spielerentscheidung vor dem Schuss gehen: Order Preview, Threat Overlay, Contact Reports und Map-/Editor-Bedienbarkeit.</li>
@@ -265,7 +268,8 @@
               <option value="task_857_done">TASK_857 Recapture-Slice erledigt</option>
               <option value="task_858_done">TASK_858 Sichtbefund erledigt</option>
               <option value="task_859_done">TASK_859 Source-Binding-Polish erledigt</option>
-              <option selected value="task_860_next">TASK_860 als naechster Recapture</option>
+              <option value="task_860_next">TASK_860 als naechster Recapture</option>
+              <option selected value="task_861_findings_ready">TASK_861 Findings bereit, TASK_862 naechster Polish</option>
               <option value="manual_review_needed">Manueller Sichtreview noetig</option>
               <option value="release_export_needed">Neuer Release-Export noetig</option>
             </select>
@@ -335,12 +339,13 @@
               "Tactical decision clarity block TASK_506-TASK_510",
               "Release export and launcher hygiene",
               "First GO / firefight / first exchange readability TASK_832-TASK_859",
-              "TASK_860 real-window recapture proof is in progress"
+              "TASK_860 real-window recapture proof captured",
+              "TASK_861 visual findings slice records the remaining real-window NO FIRE/CONTACT PRESSURE issue"
             ],
-            player_value: "The release path reaches mission play more reliably, TASK_856 prioritizes CONTACT FIRE as the #17/#18 primary HUD line, TASK_858 records the real-window gap, TASK_859 binds the real #17/#18 window text to the CONTACT-FIRE primary source, and TASK_860 proves that the real window still needs a focused findings/polish follow-up.",
+            player_value: "The release path reaches mission play more reliably, TASK_856 prioritizes CONTACT FIRE as the #17/#18 primary HUD line, TASK_858 records the real-window gap, TASK_859 binds the real #17/#18 window text to the CONTACT-FIRE primary source, TASK_860 proves that the real window still needs polish, and TASK_861 records the exact visual finding.",
             repo_state: "Working branch is task/release-fire-exchange-real-window-contact-fire-recapture; only local untracked builds/ remains outside this report slice.",
             report_value: "This HTML workbench is a read-only interim report with JSON export for playtest notes and decisions.",
-            next_task: "TASK_861 - Release Fire Exchange Real Window Contact-Fire Visual Findings if the fresh TASK_860 screenshot still needs polish"
+            next_task: "TASK_862 - Release Fire Exchange Real Window Primary HUD Runtime Text Polish"
           },
           metadata: {
             generated_at_local: "2026-07-08",
@@ -350,7 +355,7 @@
             relevant_task_ids: [
               "TASK_506", "TASK_507", "TASK_508", "TASK_509", "TASK_510",
               "TASK_818", "TASK_819", "TASK_820", "TASK_821",
-              "TASK_832", "TASK_837", "TASK_844", "TASK_847", "TASK_850", "TASK_853", "TASK_854", "TASK_855", "TASK_856", "TASK_857", "TASK_858", "TASK_859", "TASK_860"
+              "TASK_832", "TASK_837", "TASK_844", "TASK_847", "TASK_850", "TASK_853", "TASK_854", "TASK_855", "TASK_856", "TASK_857", "TASK_858", "TASK_859", "TASK_860", "TASK_861"
             ]
           }
         };
