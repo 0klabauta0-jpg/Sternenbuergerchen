@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_881 - Release First Exchange Fire Visual Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_881_release_first_exchange_fire_visual_recapture.md`, `docs/tasks/TASK_880_release_first_exchange_fire_visual_polish.md`, `docs/tasks/TASK_879_release_first_exchange_exported_status_source_trace.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_first_exchange_fire_visual_recapture.ps1` haengt einen eigenen TASK_881-Recapture an den bestehenden TASK_879-Trace-/TASK_877-Window-Handle-Pfad und schreibt eigene Manifest-/Screenshotpfade.
+- Stand: `ReleaseFirstExchangeFireVisualRecapture` paketiert den Capture als read-only Acceptance-Snapshot mit TASK_880-Fire-Visual-Schema/Style, TASK_879-Trace-Evidence, TASK_876-Statusquellen-Evidence und manuellen Pflichtchecks fuer CONTACT FIRE, FireTrace, Impact, Target-Fokus und stabile #17/#18/#19-Lesbarkeit.
+- Stand: Lokaler TASK_881-Run schrieb `review_ready` mit trusted `window_handle_print`, eigener PNG-/JSON-Evidence und leerer Warning-/Hard-Failure-Liste.
+- Stand: Manueller Sichtblick auf `tmp/release_first_exchange_fire_visual_recapture.png` zeigt weiter `NEXT LOS/RANGE KORRIGIEREN`, `Kampf NO FIRE NO_LOS` und `CONTACT PRESSURE`; TASK_882 muss diesen Restbefund read-only schneiden.
+- Risiken/offen: TASK_881 ist ein Capture-/Acceptance-Slice. Der echte menschliche Sichtentscheid kommt aus dem frischen PNG; wenn der Screenshot weiter nicht ueberzeugt, folgt TASK_882 als Fire-Visual-Findings-Schnitt.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_fire_visual_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_881_release_first_exchange_fire_visual_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_880_release_first_exchange_fire_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_882 - Release First Exchange Fire Visual Findings.
+
 ### TASK_877 - Release First Exchange Visible Status Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_877_release_first_exchange_visible_status_recapture.md`, `docs/tasks/TASK_876_release_first_exchange_visible_status_source_reconciliation.md`, `docs/dev/mission_command_feedback_contract.md`
