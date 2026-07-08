@@ -20814,12 +20814,14 @@ func refresh_contact_overlay() -> void:
 func _sync_primary_3d_order_visuals() -> void:
 	if _get_primary_3d_view() == null:
 		return
+	var world_label_density_mode: String = _get_release_firefight_world_label_density_mode()
 	_primary_view_bridge.call(
 		"sync_order_visual_payload",
 		get_parent(),
 		{
 			"phase_index": _get_live_order_phase_index(),
-			"world_label_density_mode": _get_release_firefight_world_label_density_mode(),
+			"world_label_density_mode": world_label_density_mode,
+			"release_firefight_insertion_residue_declutter": _get_release_firefight_insertion_residue_declutter_enabled(world_label_density_mode),
 			"selected_fireteam_ids": _selected_fireteam_ids,
 			"fire_sector_overlay_enabled": _fire_sector_overlay_enabled,
 			"fire_sector_visual_mode": "los_line_only",
@@ -20841,6 +20843,25 @@ func _sync_primary_3d_order_visuals() -> void:
 			"tactical_communication_event_dicts": get_tactical_communication_event_snapshot(),
 		}
 	)
+
+
+func _get_release_firefight_insertion_residue_declutter_enabled(world_label_density_mode: String = "") -> bool:
+	var normalized_mode: String = world_label_density_mode.strip_edges().to_lower()
+	if normalized_mode.is_empty():
+		normalized_mode = _get_release_firefight_world_label_density_mode()
+	if normalized_mode != RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE:
+		return false
+	if not _deployed_unit_ids.is_empty():
+		return true
+	if _drop_sequence_phase == DROP_SEQUENCE_UNLOADING or _drop_sequence_phase == DROP_SEQUENCE_COMPLETE or _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
+		return true
+	for sequence_variant in _parallel_drop_sequences_by_craft.values():
+		if typeof(sequence_variant) != TYPE_DICTIONARY:
+			continue
+		var phase: String = String(Dictionary(sequence_variant).get("phase", "")).strip_edges().to_lower()
+		if phase == DROP_SEQUENCE_UNLOADING or phase == DROP_SEQUENCE_COMPLETE or phase == DROP_SEQUENCE_OUTBOUND:
+			return true
+	return false
 
 
 func refresh_flank_vulnerability_state() -> void:

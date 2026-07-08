@@ -228,7 +228,7 @@ func setup_roster(available_units: Array, selected_unit_ids: PackedStringArray =
 
 func set_fireteam_context(selected_fireteam_ids: PackedStringArray = [], fireteam_definitions: Array = []) -> void:
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(selected_fireteam_ids)
-	_fireteam_definitions = _normalize_fireteam_definitions(fireteam_definitions)
+	_fireteam_definitions = _merge_fireteam_definitions(_fireteam_definitions, fireteam_definitions)
 	_sanitize_homebase_direct_staging_state()
 	if is_inside_tree():
 		_render_homebase_fireteams()
@@ -6240,6 +6240,25 @@ func _normalize_fireteam_definitions(fireteam_definitions: Array) -> Array:
 	return normalized_definitions
 
 
+func _merge_fireteam_definitions(existing_definitions: Array, incoming_definitions: Array) -> Array:
+	var merged_by_id: Dictionary = {}
+	var ordered_ids: PackedStringArray = []
+	for source_definitions in [existing_definitions, incoming_definitions]:
+		for definition_variant in _normalize_fireteam_definitions(Array(source_definitions)):
+			var definition: Dictionary = Dictionary(definition_variant)
+			var fireteam_id: String = _normalize_fireteam_id(String(definition.get("id", "")))
+			if fireteam_id.is_empty():
+				continue
+			if not merged_by_id.has(fireteam_id):
+				ordered_ids.append(fireteam_id)
+			merged_by_id[fireteam_id] = definition
+	var merged_definitions: Array = []
+	for fireteam_id in ordered_ids:
+		if merged_by_id.has(fireteam_id):
+			merged_definitions.append(Dictionary(merged_by_id[fireteam_id]).duplicate(true))
+	return merged_definitions
+
+
 func _sanitize_homebase_direct_staging_state() -> void:
 	_selected_fireteam_ids = _normalize_selected_fireteam_ids(_selected_fireteam_ids)
 	if _fireteam_definitions.is_empty():
@@ -6439,6 +6458,9 @@ func _get_member_unit_ids_for_fireteam(fireteam_id: String) -> PackedStringArray
 			continue
 		if _normalize_fireteam_id(String(_selected_fireteam_ids[unit_index])) == normalized_fireteam_id:
 			member_ids.append(String(_selected_unit_ids[unit_index]))
+	if member_ids.is_empty():
+		var definition: Dictionary = _get_fireteam_definition(normalized_fireteam_id)
+		member_ids = PackedStringArray(Array(definition.get("member_unit_ids", [])))
 	return member_ids
 
 
