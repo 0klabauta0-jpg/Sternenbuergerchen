@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_845 - Release First Exchange Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_845_release_first_exchange_real_window_recapture.md`, `docs/tasks/TASK_844_release_first_exchange_tension_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_first_exchange_real_window.ps1` haengt einen eigenen TASK_845-Recapture an den bestehenden TASK_837-First-GO-Firefight-Capture und nutzt weiter `--release-singleplayer-first-go-firefight`.
+- Stand: Das Manifest `tmp/release_first_exchange_real_window_recapture.json` nennt TASK_844 als Quelle, erwartet Schema `sternenbuergerchen.release_first_exchange_tension_tuning.v1` und Style-ID `task_844_release_first_exchange_tension_tuning_v1`.
+- Stand: Eigene Desktop-/Window-Screenshotpfade und Pflichtchecks pruefen den echten Fensterblick auf sichtbares `CONTACT FIRE`, FireEvent-/Trace-/Impact-Lesbarkeit, Gegner-/Fireteam-Kontext und weiter bedienbare HUD-/Command-Flächen.
+- Stand: `docs/reports/release_first_exchange_zwischenbericht_2026_07_08.html` fasst Arbeitsstand, echten Fensterbefund, lokale Screenshot-Referenz und naechste Polish-Entscheidung als JSON-exportierbare Workbench zusammen.
+- Risiken/offen: Der Recapture erzeugt Evidenz, bewertet aber den PNG-Befund nicht automatisch; die visuelle Bewertung bleibt TASK_846.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_845_release_first_exchange_real_window_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_844_release_first_exchange_tension_tuning.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_real_window.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 32`, `git diff --check`.
+- Naechster Schritt: TASK_846 - Release First Exchange Visual Findings.
+
 ### TASK_844 - Release First Exchange Tension Tuning
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_844_release_first_exchange_tension_tuning.md`, `docs/tasks/TASK_843_release_first_firefight_contact_framing.md`, `docs/dev/mission_command_feedback_contract.md`
