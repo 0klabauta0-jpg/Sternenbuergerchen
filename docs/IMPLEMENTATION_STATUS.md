@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_855 - Release Fire Exchange After Readability Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_855_release_fire_exchange_after_readability_visual_findings.md`, `docs/tasks/TASK_854_release_fire_exchange_focused_recapture_after_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeAfterReadabilityVisualFindings` wertet den TASK_854-Recapture und die Sichtnotiz read-only aus.
+- Stand: Positive Findings halten fest, dass der After-Readability-Fenster-Capture vorhanden ist, TASK_853-Style und 45s-Persistenz erwartet werden und die Command-/Mission-Surfaces grundsaetzlich lesbar bleiben.
+- Stand: Offene Findings sind `primary_hud_no_fire_no_los_visible`, `after_readability_window_still_contact_pressure`, `event_log_not_contact_fire_primary`, `fire_trace_or_impact_not_dominant` und `headless_real_window_gap`.
+- Risiken/offen: TASK_855 ist nur der Befund-Schnitt. Die sichtbare Korrektur folgt in TASK_856 und soll den aktiven Release-Fire-Exchange im echten Fenster als CONTACT-FIRE-Moment stabilisieren, ohne Combat-Wahrheit zu verschieben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_855_release_fire_exchange_after_readability_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_854_release_fire_exchange_focused_recapture_after_readability_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish.
+
 ### TASK_854 - Release Fire Exchange Focused Recapture After Readability Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_854_release_fire_exchange_focused_recapture_after_readability_polish.md`, `docs/tasks/TASK_853_release_fire_exchange_engagement_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`

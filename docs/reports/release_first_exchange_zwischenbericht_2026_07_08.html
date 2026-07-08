@@ -89,8 +89,9 @@
       <span class="pill good">TASK_851 Recapture-Slice implementiert</span>
       <span class="pill good">TASK_852 Findings-Slice implementiert</span>
       <span class="pill good">TASK_853 Readability-Polish implementiert</span>
-      <span class="pill warn">TASK_854 After-Readability-Recapture bereit</span>
-      <span class="pill">Branch: task/release-fire-exchange-focused-recapture-after-readability-polish</span>
+      <span class="pill good">TASK_854 After-Readability-Recapture bereit</span>
+      <span class="pill warn">TASK_855 Findings bereit</span>
+      <span class="pill">Branch: task/release-fire-exchange-after-readability-visual-findings</span>
     </div>
   </header>
 
@@ -120,8 +121,9 @@
             <li><strong>TASK_852:</strong> Der neue Befund ist jetzt als Findings-Schnitt festgehalten: technisch ist der Capture sauber, spielerisch liest sich der erste Moment aber noch als <code>CONTACT PRESSURE</code> / <code>NO FIRE</code> mit Debug-Sprache statt als klarer Feuerwechsel.</li>
             <li><strong>TASK_853:</strong> Der Release-Readability-Polish haelt die Fire-Exchange-Evidence 45s sichtbar und prueft, dass #17, #18 und #19 im aktiven Exchange-Fenster dieselbe <code>FIRE</code>/<code>CONTACT FIRE</code>-Lesung tragen.</li>
             <li><strong>TASK_854:</strong> Der naechste echte Fensterblick nach TASK_853 ist als eigenes Capture-Script, Manifest, Analyzer und Pflichtcheck-Paket vorbereitet: <code>tmp/release_fire_exchange_after_readability_recapture.json</code>.</li>
+            <li><strong>TASK_855:</strong> Der TASK_854-Fensterblick ist als Findings-Schnitt bewertet: primaer stoert weiter <code>NO FIRE NO_LOS</code> im HUD-Primaertext statt klarer CONTACT-FIRE-Lesung.</li>
             <li><strong>Bericht:</strong> Diese Workbench fasst Arbeitsstand, Spielwirkung, Screenshot-Befund, offene Risiken und naechste Arbeitsschritte zusammen. Unten kann daraus eine JSON-Notiz exportiert werden.</li>
-            <li><strong>Git:</strong> TASK_848 bis TASK_853 sind gemerged und gepusht. TASK_854 laeuft aktuell auf <code>task/release-fire-exchange-focused-recapture-after-readability-polish</code>.</li>
+            <li><strong>Git:</strong> TASK_848 bis TASK_854 sind gemerged und gepusht. TASK_855 laeuft aktuell auf <code>task/release-fire-exchange-after-readability-visual-findings</code>.</li>
           </ul>
         </article>
         <article class="card">
@@ -141,8 +143,9 @@
           <p><code>tmp/release_fire_exchange_focused_visual_findings.json</code> als TASK_852-Findings-Paket</p>
           <p><code>tmp/release_fire_exchange_after_readability_recapture.json</code> als TASK_854-Evidence-Paket</p>
           <p><code>tmp/release_fire_exchange_after_readability_recapture_acceptance.json</code> als lokaler Analyzer-Output</p>
+          <p><code>tmp/release_fire_exchange_after_readability_visual_findings.json</code> als TASK_855-Findings-Paket</p>
           <p><code>tmp/release_first_exchange_recapture_acceptance.json</code></p>
-          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>, Polish-Status: <code>ready_for_polish</code>. TASK_854 ist der frische Evidence-Schnitt nach TASK_853; als naechstes muss der echte Screenshot bewertet werden.</p>
+          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>, Polish-Status: <code>ready_for_polish</code>. TASK_855 bewertet den echten Screenshot; als naechstes braucht es TASK_856 als engen Primary-HUD-Polish.</p>
         </article>
       </div>
     </section>
@@ -193,6 +196,7 @@
             <li><strong>TASK_853 - Release Fire Exchange Engagement Readability Polish:</strong> Debug-`NO FIRE` aus der primaeren Release-Lesung nehmen und #17/#18/#19 auf denselben Kampfstatus fuehren.</li>
             <li><strong>TASK_854 - Release Fire Exchange Focused Recapture After Readability Polish:</strong> Frischen echten Fensterblick nach dem 45s-Readability-Fix als eigenes Evidence-Paket erzeugen.</li>
             <li><strong>TASK_855 - Release Fire Exchange After Readability Visual Findings:</strong> Den TASK_854-Screenshot bewerten und nur belegte Restreibung polieren.</li>
+            <li><strong>TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish:</strong> Aktive Fire-Exchange-Evidence im echten Fenster als primaere CONTACT-FIRE-Lesung stabilisieren.</li>
           </ol>
         </article>
         <article class="card">
@@ -228,7 +232,8 @@
               <option value="task_851_slice_implemented">TASK_851 Slice implementiert, Recapture pruefen</option>
               <option value="task_852_findings_ready">TASK_852 Findings bereit, TASK_853 naechster Polish</option>
               <option value="task_853_readability_done">TASK_853 Readability-Polish bereit, TASK_854 Recapture</option>
-              <option selected value="task_854_recapture_ready">TASK_854 Recapture-Paket bereit, TASK_855 Sichtbefund offen</option>
+              <option value="task_854_recapture_ready">TASK_854 Recapture-Paket bereit, TASK_855 Sichtbefund offen</option>
+              <option selected value="task_855_findings_ready">TASK_855 Findings bereit, TASK_856 Polish</option>
               <option value="visual_polish_findings_ready">Visual-Polish-Findings fuer TASK_850 bereit</option>
               <option value="visibility_fix_done_recapture_next">Sichtbarkeits-Fix erledigt, Recapture als naechstes</option>
               <option value="findings_done_visibility_fix_in_progress">Findings erledigt, Sichtbarkeits-Fix in Arbeit</option>
@@ -245,6 +250,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_852_findings_ready"> TASK_852-Findings benennen CONTACT PRESSURE / NO FIRE als primaere Release-Reibung.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_853_readability_done"> TASK_853 haelt den Release-Fire-Exchange 45s sichtbar und synchronisiert #17/#18/#19 auf FIRE/CONTACT FIRE.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_854_recapture_ready"> TASK_854 bereitet den echten After-Readability-Recapture mit Manifest, Analyzer und Pflichtchecks vor.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_855_findings_ready"> TASK_855 benennt NO FIRE NO_LOS als primaere echte Fensterreibung.</label>
         </article>
         <article class="card wide">
           <h2>Freie Notizen</h2>
@@ -313,13 +319,14 @@
             completed_focused_visual_findings_task: "TASK_852 - Release Fire Exchange Focused Visual Findings",
             completed_engagement_readability_task: "TASK_853 - Release Fire Exchange Engagement Readability Polish",
             completed_after_readability_recapture_task: "TASK_854 - Release Fire Exchange Focused Recapture After Readability Polish",
-            active_next_task: "TASK_855 - Release Fire Exchange After Readability Visual Findings",
+            completed_after_readability_findings_task: "TASK_855 - Release Fire Exchange After Readability Visual Findings",
+            active_next_task: "TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish",
             current_player_value: "Release-Singleplayer startet bis in die Mission; der erste Fire-Exchange bleibt im HUD 45s als FIRE/CONTACT FIRE lesbar; TASK_854 liefert den frischen echten Fensterblick fuer die Sichtentscheidung.",
-            recommended_next_task: "TASK_855 - Release Fire Exchange After Readability Visual Findings"
+            recommended_next_task: "TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish"
           },
           metadata: {
-            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849", "TASK_850", "TASK_851", "TASK_852", "TASK_853", "TASK_854"],
-            branch: "task/release-fire-exchange-focused-recapture-after-readability-polish",
+            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849", "TASK_850", "TASK_851", "TASK_852", "TASK_853", "TASK_854", "TASK_855"],
+            branch: "task/release-fire-exchange-after-readability-visual-findings",
             merged_branches: [
               "task/release-first-exchange-recapture-acceptance",
               "task/release-fire-exchange-visual-polish-findings",
@@ -335,8 +342,9 @@
             focused_visual_findings_path: "tmp/release_fire_exchange_focused_visual_findings.json",
             after_readability_recapture_manifest_path: "tmp/release_fire_exchange_after_readability_recapture.json",
             after_readability_recapture_acceptance_path: "tmp/release_fire_exchange_after_readability_recapture_acceptance.json",
+            after_readability_visual_findings_path: "tmp/release_fire_exchange_after_readability_visual_findings.json",
             release_fire_exchange_persistence_msec: 45000,
-            next_branch_goal: "Review TASK_854 after-readability recapture and route a narrow TASK_855 findings/polish slice if needed."
+            next_branch_goal: "Apply narrow TASK_856 primary HUD polish for CONTACT FIRE during active release fire-exchange evidence."
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
