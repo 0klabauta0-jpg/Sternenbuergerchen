@@ -96,6 +96,7 @@ const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE: int = 12
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 9
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
+const RELEASE_FIRST_FIREFIGHT_CONTACT_FRAMING_STYLE_ID: String = "task_843_release_first_firefight_contact_framing_v1"
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT: float = 1.35
@@ -16596,6 +16597,202 @@ func get_release_firefight_world_label_declutter_snapshot() -> Dictionary:
 	}
 
 
+func get_release_first_firefight_contact_framing_snapshot() -> Dictionary:
+	_update_ui()
+	_refresh_order_visuals()
+	var source_snapshot: Dictionary = get_release_firefight_world_label_declutter_snapshot()
+	var engagement_snapshot: Dictionary = get_mission_first_engagement_feedback_snapshot()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
+	if combat_hud_density.is_empty():
+		combat_hud_density = _build_mission_combat_hud_density_snapshot()
+	var diagnostics: Dictionary = Dictionary(engagement_snapshot.get("contact_decision_diagnostics", get_contact_decision_diagnostics_snapshot())).duplicate(true)
+	var fire_events: Array = Array(engagement_snapshot.get("fire_events", get_fire_event_snapshot()))
+	var first_fire_event: Dictionary = Dictionary(engagement_snapshot.get("first_fire_event", {})).duplicate(true)
+	var selected_contact_count: int = int(engagement_snapshot.get("selected_contact_count", 0))
+	var combat_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
+	var decision_line: String = String(command_feedback.get("release_firefight_decision_line", _build_release_candidate_firefight_decision_line())).strip_edges()
+	var framing_state: String = _resolve_release_first_firefight_contact_framing_state(diagnostics, first_fire_event, fire_events, selected_contact_count, combat_line)
+	var framing_line: String = _build_release_first_firefight_contact_framing_line(framing_state, diagnostics, combat_line)
+	var pressure_reason: String = _release_first_firefight_contact_reason_text(diagnostics, combat_hud_density)
+	var next_step: String = _release_first_firefight_next_step_text(framing_state, diagnostics)
+	var event_log_display: Dictionary = Dictionary(command_feedback.get("release_firefight_event_log_display", {})).duplicate(true)
+	var fallback_entry: Dictionary = Dictionary(event_log_display.get("fallback_entry", {})).duplicate(true)
+	var event_log_frames_pressure: bool = _release_first_firefight_event_log_frames_pressure(event_log_display, framing_state)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_declutter_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"Contact framing builds on the green release firefight visual declutter."
+		),
+		_build_mission_first_move_readability_check(
+			"first_go_engagement_passes",
+			String(engagement_snapshot.get("gate", "")) == "pass",
+			"First engagement feedback remains available for framing."
+		),
+		_build_mission_first_move_readability_check(
+			"contact_or_fire_exchange_framed",
+			framing_state == "fire_exchange" or framing_state == "contact_pressure",
+			"First Firefight is framed as fire exchange or contact pressure, not as an unclear technical state."
+		),
+		_build_mission_first_move_readability_check(
+			"framing_line_human_readable",
+			(framing_line.contains("CONTACT FIRE") or framing_line.contains("CONTACT PRESSURE"))
+				and framing_line.contains("NEXT"),
+			"Framing line names contact state and a short next player step."
+		),
+		_build_mission_first_move_readability_check(
+			"pressure_reason_visible",
+			framing_state == "fire_exchange" or not pressure_reason.strip_edges().is_empty(),
+			"Contact-pressure state keeps LOS/Range/block reason visible."
+		),
+		_build_mission_first_move_readability_check(
+			"event_log_frames_pressure",
+			framing_state == "fire_exchange"
+				or event_log_frames_pressure,
+			"Event-log fallback frames no-fire as contact pressure."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only_boundaries",
+			bool(source_snapshot.get("read_only", false))
+				and bool(engagement_snapshot.get("read_only", false))
+				and bool(combat_hud_density.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(engagement_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(combat_hud_density.get("ui_sets_gameplay_truth", true)),
+			"Contact framing reads existing release/combat snapshots only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.release_first_firefight_contact_framing.v1",
+		"task_id": "TASK_843",
+		"source_task_id": "TASK_842",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"engagement_gate": String(engagement_snapshot.get("gate", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": RELEASE_FIRST_FIREFIGHT_CONTACT_FRAMING_STYLE_ID,
+		"framing_state": framing_state,
+		"framing_line": framing_line,
+		"pressure_reason": pressure_reason,
+		"next_step": next_step,
+		"selected_contact_count": selected_contact_count,
+		"fire_event_count": fire_events.size(),
+		"first_fire_event_id": String(first_fire_event.get("event_id", diagnostics.get("fire_event_id", ""))).strip_edges(),
+		"engagement_status": String(diagnostics.get("status", "")).strip_edges(),
+		"engagement_reason": String(diagnostics.get("reason", "")).strip_edges(),
+		"compact_combat_line": combat_line,
+		"decision_line": decision_line,
+		"contact_decision_diagnostics": diagnostics,
+		"combat_hud_density": combat_hud_density,
+		"event_log_display": event_log_display,
+		"event_log_frames_pressure": event_log_frames_pressure,
+		"source": source_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _release_first_firefight_event_log_frames_pressure(event_log_display: Dictionary, framing_state: String) -> bool:
+	if framing_state == "fire_exchange":
+		return true
+	var fallback_entry: Dictionary = Dictionary(event_log_display.get("fallback_entry", {}))
+	if String(fallback_entry.get("short_text", "")).contains("CONTACT PRESSURE"):
+		return true
+	for entry_variant in Array(event_log_display.get("entries", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var short_text: String = String(entry.get("short_text", "")).to_upper()
+		var detail_text: String = String(entry.get("detail_text", "")).to_upper()
+		if short_text.contains("CONTACT PRESSURE") or detail_text.contains("CONTACT PRESSURE"):
+			return true
+		if short_text.contains("CONTACT") or detail_text.contains("NO FIRE") or detail_text.contains("LOS") or detail_text.contains("RNG"):
+			return true
+	return false
+
+
+func _resolve_release_first_firefight_contact_framing_state(
+	diagnostics: Dictionary,
+	first_fire_event: Dictionary,
+	fire_events: Array,
+	selected_contact_count: int,
+	combat_line: String
+) -> String:
+	var reason: String = String(diagnostics.get("reason", "")).strip_edges().to_lower()
+	var status: String = String(diagnostics.get("status", "")).strip_edges().to_lower()
+	if reason == "fired" or status == "fired" or not first_fire_event.is_empty() or fire_events.size() > 0:
+		return "fire_exchange"
+	if selected_contact_count > 0 and _release_first_firefight_contact_pressure_active(diagnostics, combat_line):
+		return "contact_pressure"
+	return "unclear"
+
+
+func _release_first_firefight_contact_pressure_active(diagnostics: Dictionary, combat_line: String) -> bool:
+	var reason: String = String(diagnostics.get("reason", "")).strip_edges().to_lower()
+	var status: String = String(diagnostics.get("status", "")).strip_edges().to_lower()
+	if ["no_contact_pair", "no_damage_effect", "invalid_contact_pair", "cooldown"].has(reason):
+		return true
+	if ["blocked", "waiting"].has(status):
+		return true
+	var upper_line: String = combat_line.to_upper()
+	return upper_line.contains("NO FIRE") or upper_line.contains("WAIT") or upper_line.contains("CONTACT")
+
+
+func _build_release_first_firefight_contact_framing_line(framing_state: String, diagnostics: Dictionary, combat_line: String) -> String:
+	var next_step: String = _release_first_firefight_next_step_text(framing_state, diagnostics)
+	if framing_state == "fire_exchange":
+		return "CONTACT FIRE | NEXT %s" % next_step
+	if framing_state == "contact_pressure":
+		var reason_text: String = _release_first_firefight_contact_reason_text(diagnostics, {"compact_line": combat_line})
+		return "CONTACT PRESSURE %s | NEXT %s" % [reason_text, next_step]
+	return "CONTACT UNKLAR | NEXT HALTEN / NEU PLANEN"
+
+
+func _release_first_firefight_next_step_text(framing_state: String, diagnostics: Dictionary) -> String:
+	if framing_state == "fire_exchange":
+		return "Trefferbild lesen / Defend halten"
+	var reason: String = String(diagnostics.get("reason", "")).strip_edges().to_lower()
+	var range_state: String = String(diagnostics.get("range_state", "")).strip_edges().to_lower()
+	var los_state: String = String(diagnostics.get("los_state", "")).strip_edges().to_lower()
+	if range_state == "out_of_range" or reason.contains("range"):
+		return "Range schliessen"
+	if los_state == "blocked" or reason.contains("los"):
+		return "LOS freiziehen"
+	if reason == "cooldown":
+		return "Halten / Flanke suchen"
+	return "Position korrigieren"
+
+
+func _release_first_firefight_contact_reason_text(diagnostics: Dictionary, combat_hud_density: Dictionary) -> String:
+	var reason: String = String(diagnostics.get("reason", "")).strip_edges().to_upper()
+	var range_state: String = String(diagnostics.get("range_state", "")).strip_edges().to_upper()
+	var los_state: String = String(diagnostics.get("los_state", "")).strip_edges().to_upper()
+	if reason == "NO_CONTACT_PAIR" and typeof(diagnostics.get("candidate", null)) == TYPE_DICTIONARY:
+		reason = String(Dictionary(diagnostics.get("candidate", {})).get("candidate_reason", reason)).strip_edges().to_upper()
+	if reason.is_empty():
+		reason = String(combat_hud_density.get("reason", "")).strip_edges().to_upper()
+	var parts: PackedStringArray = PackedStringArray()
+	if not reason.is_empty():
+		parts.append(reason)
+	if not los_state.is_empty():
+		parts.append("LOS %s" % los_state)
+	if not range_state.is_empty():
+		parts.append("RNG %s" % range_state)
+	return " ".join(parts)
+
+
 func _build_release_firefight_event_log_display_snapshot(raw_entries: Array, release_decision: Dictionary, combat_hud_density: Dictionary) -> Dictionary:
 	var display_entries: Array = []
 	for entry_variant in raw_entries:
@@ -16636,7 +16833,10 @@ func _build_release_firefight_event_log_fallback_entry(release_decision: Diction
 	var short_text: String = "FIREFIGHT STATUS"
 	var severity: String = "tactical"
 	if combat_line.to_upper().contains("NO FIRE") or reason.contains("NO_LOS") or reason.contains("NO_RANGE"):
-		short_text = "NO FIRE: LOS/RANGE korrigieren"
+		short_text = "CONTACT PRESSURE: %s" % _release_first_firefight_next_step_text(
+			"contact_pressure",
+			Dictionary(combat_hud_density.get("contact_decision_diagnostics", get_contact_decision_diagnostics_snapshot()))
+		)
 		severity = "warning"
 	elif combat_line.to_upper().contains("CONTACT"):
 		short_text = "CONTACT: Entscheidung pruefen"
