@@ -122,7 +122,7 @@
             <li><strong>Release-Export-Hygiene:</strong> Der spielbare Build-Ordner, Launch-Helfer, Export-Abhaengigkeiten und Capture-/Manifest-Pfade sind kontrollierter, damit Playtests nicht jedes Mal an Setup-Reibung sterben.</li>
             <li><strong>Erster Firefight:</strong> Der Deep-Link <code>--release-singleplayer-first-go-firefight</code> bringt den Releasepfad bis GO, Bewegung, Kontakt und erster Engagement-Rueckmeldung.</li>
             <li><strong>Erster Feuerwechsel:</strong> TASK_844 bis TASK_861 haben die technische FireEvent-Evidence, Fenster-Captures, Findings, Sichtbarkeit, Focus-Visuals, HUD-/Event-Log-Readability, After-Readability-Recaptures, den aktuellen Real-Window-Befund und den CONTACT-FIRE-Primary-HUD-Polish schrittweise verbessert.</li>
-            <li><strong>Aktueller Arbeitsstand:</strong> #17 Selected Fireteam und #18 Mission Control sollen bei aktiver Release-Fire-Exchange-Persistence eine gemeinsame <code>CONTACT FIRE | ...</code>-Primaerzeile zeigen. Die Runtime-Text-Bindung ist in TASK_862 umgesetzt und durch Headless-Verifier gruen; TASK_863 paketiert jetzt den echten Fenster-Recapture als naechsten Beweis.</li>
+            <li><strong>Aktueller Arbeitsstand:</strong> #17 Selected Fireteam und #18 Mission Control sollten bei aktiver Release-Fire-Exchange-Persistence eine gemeinsame <code>CONTACT FIRE | ...</code>-Primaerzeile zeigen. TASK_862 bindet den Runtime-Text technisch, die spaeteren Fenster-Captures zeigen aber: Im echten Szenario fehlt weiterhin sichtbare LOS-/Fire-Evidence.</li>
             <li><strong>Neuer Nachweis-Slice:</strong> TASK_857 legt den frischen CONTACT-FIRE-Primary-HUD-Recapture als eigenes Manifest- und Screenshotpaket an, damit TASK_858 den echten Fensterblick bewerten kann.</li>
             <li><strong>Frischer Bildbefund:</strong> Der TASK_857-Capture ist technisch <code>review_ready</code>, wirkt im Fenster aber weiterhin nicht klar wie CONTACT FIRE. Genau dafuer ist TASK_858 der naechste kleine Findings-Schnitt.</li>
             <li><strong>TASK_858-Befund:</strong> Die reale Reibung ist jetzt benannt: #17/#18 lesen weiter <code>NO FIRE NO_LOS</code> / LOS-Korrektur statt CONTACT FIRE. Naechster enger Griff ist TASK_859.</li>
@@ -141,17 +141,17 @@
         <article class="card">
           <h2>Aktueller Wert fuer Spieler</h2>
           <div class="status-box good">
-            Der Spieler kommt vom Release-Start deutlich verlaesslicher in die Mission. Im ersten Feuerwechsel soll der Blick jetzt zuerst CONTACT FIRE lesen, statt vom alten NO-FIRE-/LOS-Debugpfad ueberstimmt zu werden.
+            Der Spieler kommt vom Release-Start deutlich verlaesslicher in die Mission. Der erste Feuerwechsel ist als echter Playtest-Moment vorhanden, aber TASK_867 zeigt ehrlich: Der sichtbare Zustand ist noch LOS-/Contact-Pressure-Reibung und darf nicht nur per HUD-Text als CONTACT FIRE ueberdeckt werden.
           </div>
           <div class="stack" style="margin-top: 12px;">
             <div class="metric"><strong>45s</strong><span>Fire-Exchange-Evidence bleibt im Release-HUD sichtbar.</span></div>
-            <div class="metric"><strong>3</strong><span>Hauptsurfaces lesen denselben Kampfstatus: #17, #18, #19.</span></div>
+            <div class="metric"><strong>3</strong><span>Hauptsurfaces werden gemeinsam bewertet: #17, #18, #19.</span></div>
             <div class="metric"><strong>0</strong><span>Neue Gameplay-Wahrheit im Report oder HUD; Mutationen bleiben bei Runtime/Simulation.</span></div>
           </div>
         </article>
         <article class="card full">
           <h2>Stand dieses Zwischenberichts</h2>
-          <p>Dieser Bericht ist bewusst ein Arbeitsstand und keine neue Gameplay-Wahrheit. Er fasst die gemergten Release-/Playtest-Slices bis TASK_866 zusammen und haelt fest, dass TASK_867 im aktuellen Arbeitsstand den echten Fensterbefund als First-Exchange-LOS-Reibung auswertet. Der Arbeitsstand liegt auf <code>task/release-fire-exchange-status-visual-findings</code>; der Integrationsstand war beim Abzweig sauber bis auf den lokalen untracked Ordner <code>builds/</code>.</p>
+          <p>Dieser Bericht ist bewusst ein Arbeitsstand und keine neue Gameplay-Wahrheit. Er fasst die gemergten Release-/Playtest-Slices bis TASK_867 zusammen und haelt fest, dass TASK_867 den echten Fensterbefund als First-Exchange-LOS-Reibung auswertet. Der Arbeitsstand ist nach Merge auf <code>integration/core-foundation</code>; lokal bleibt nur der untracked Ordner <code>builds/</code>.</p>
           <p>Wichtig: Der Bericht selber aendert keine Szene, keine Simulation und keinen HUD-Zustand. Er ist eine lokale Workbench mit JSON-Export, damit Playtest-Notizen und Entscheidungen spaeter wieder an Codex zurueckgegeben werden koennen.</p>
         </article>
         <article class="card full">
