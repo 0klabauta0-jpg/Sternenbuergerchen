@@ -41,6 +41,8 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(contract_text.contains("Release-Normalstart-Guard"), "Homebase Direct contract documents normalstart guard")
 	_assert(meta_text.contains("get_release_singleplayer_normal_click_homebase_guard_snapshot"), "MetaLayer exposes normal-click guard snapshot")
 	_assert(meta_text.contains("_ensure_singleplayer_visible_homebase_actionability()"), "Homebase show path reapplies actionability guard")
+	_assert(meta_text.contains("_selected_mission_id.strip_edges() != SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID"), "Actionability rejects stale release mission selection")
+	_assert(meta_text.contains("_get_mission_drop_source() != MISSION_DROP_SOURCE_HOMEBASE_DIRECT"), "Actionability rejects stale release drop source")
 
 
 func _test_normal_singleplayer_click_homebase_guard() -> void:

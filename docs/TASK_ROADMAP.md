@@ -72,6 +72,8 @@ git checkout -b batch/<batch-name>
 - TASK_834 - Release Firefight HUD Real Window Polish (implementiert): Die priorisierte Firefight-Decision-Line nutzt im Selected-Fireteam-Status einen groesseren Real-Window-Stil mit Autowrap, Outline und Mindesthoehe.
 - TASK_835 - Release Firefight Bottom Dock Density Polish (implementiert): Mission Control beginnt im ersten Firefight ebenfalls mit `NEXT/WHY`, zeigt den Kampf-Readout direkt darunter und schuetzt den Bottom-Dock-Status gegen Abschneiden.
 - TASK_836 - Release Firefight Command Matrix Visual Polish (implementiert): #16 Command Matrix macht GO, Primaerbefehle und die aktive Fire-Rule im ersten Firefight sichtbar unterscheidbar, ohne Gameplay-State im HUD zu speichern.
+- TASK_837 - Release First GO Firefight Real Window Review (implementiert): Der gepruefte Release kann mit `--release-singleplayer-first-go-firefight` gestartet, gecaptured und als TASK_837-Manifest fuer den echten Fensterbefund abgelegt werden.
+- BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)
