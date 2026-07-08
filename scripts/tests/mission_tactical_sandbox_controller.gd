@@ -67,6 +67,7 @@ const STATION_SCENARIO_ROUTE_CUE_POLISH_SCRIPT: GDScript = preload("res://script
 const STATION_REENTRY_PERFORMANCE_FEEL_PASS_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_performance_feel_pass.gd")
 const STATION_REENTRY_HOST_CLIENT_NEXT_ORDER_SYNC_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_host_client_next_order_sync.gd")
 const STATION_REENTRY_HOST_CLIENT_FIRETEAM_CARD_CONTEXT_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_host_client_fireteam_card_context.gd")
+const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_fire_exchange_contact_fire_primary_hud_polish.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -100,6 +101,7 @@ const RELEASE_FIRST_FIREFIGHT_CONTACT_FRAMING_STYLE_ID: String = "task_843_relea
 const RELEASE_FIRST_EXCHANGE_TENSION_TUNING_STYLE_ID: String = "task_844_release_first_exchange_tension_tuning_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID: String = "task_847_release_fire_exchange_visibility_persistence_v1"
 const RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID: String = "task_850_release_fire_exchange_focused_visual_polish_v1"
+const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_STYLE_ID: String = "task_856_release_fire_exchange_contact_fire_primary_hud_polish_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 45000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
@@ -5244,7 +5246,9 @@ func _build_fireteam_status_text() -> String:
 	var mode_text: String = "PREVIEW - START MISSION FOR GO | " if preview_mode else ""
 	var decision_text: String = _build_selected_decision_status_text()
 	var command_text: String = "kein aktiver Befehl" if decision_text == "-" else _format_selected_status_segment(decision_text)
-	var combat_hud_line: String = _build_selected_fireteam_combat_hud_line()
+	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
+	var combat_hud_line: String = String(combat_hud_density.get("selected_fireteam_line", "")).strip_edges()
+	var contact_fire_primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
 	var firefight_decision_line: String = _build_release_candidate_firefight_decision_line()
 	var first_line: String = "%s%s | Karten %d | Wegpunkte %d | Gebiete %d | Stance %s | Ausfuehrung %s" % [
 		mode_text,
@@ -5262,6 +5266,10 @@ func _build_fireteam_status_text() -> String:
 		_build_selected_flank_display_text(),
 		drop_state_text,
 	]
+	if not contact_fire_primary_line.is_empty():
+		if not firefight_decision_line.is_empty():
+			return "%s\n%s\n%s\n%s" % [contact_fire_primary_line, firefight_decision_line, first_line, second_line]
+		return "%s\n%s\n%s" % [contact_fire_primary_line, first_line, second_line]
 	if not firefight_decision_line.is_empty():
 		if not combat_hud_line.is_empty():
 			return "%s\n%s\n%s\n%s" % [firefight_decision_line, combat_hud_line, first_line, second_line]
@@ -6318,22 +6326,30 @@ func _build_strategic_status_text() -> String:
 	var station_debrief_handoff_line: String = String(station_debrief_handoff.get("handoff_line", "")).strip_edges()
 	if bool(station_debrief_handoff.get("handoff_ready", false)) and not station_debrief_handoff_line.is_empty() and not lines.has(station_debrief_handoff_line):
 		lines.append(station_debrief_handoff_line)
-	lines = _prioritize_release_firefight_bottom_dock_lines(lines)
+	lines = _prioritize_release_firefight_bottom_dock_lines(lines, combat_hud_density)
 	return "\n".join(lines)
 
 
-func _prioritize_release_firefight_bottom_dock_lines(source_lines: PackedStringArray) -> PackedStringArray:
+func _prioritize_release_firefight_bottom_dock_lines(source_lines: PackedStringArray, combat_hud_density: Dictionary = {}) -> PackedStringArray:
 	var decision_line: String = _build_release_candidate_firefight_decision_line()
-	if decision_line.is_empty():
+	var contact_fire_primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
+	if decision_line.is_empty() and contact_fire_primary_line.is_empty():
 		return source_lines
-	var combat_line: String = _build_selected_fireteam_combat_hud_line()
+	var combat_line: String = String(combat_hud_density.get("mission_control_line", "")).strip_edges()
+	if combat_line.is_empty():
+		combat_line = _build_selected_fireteam_combat_hud_line()
 	var prioritized: PackedStringArray = PackedStringArray()
-	prioritized.append(decision_line)
+	if not contact_fire_primary_line.is_empty():
+		prioritized.append(contact_fire_primary_line)
+	if not decision_line.is_empty():
+		prioritized.append(decision_line)
 	if not combat_line.is_empty():
 		prioritized.append("Kampf %s" % combat_line)
 	for line_variant in source_lines:
 		var line: String = String(line_variant).strip_edges()
 		if line.is_empty() or prioritized.has(line) or line == decision_line:
+			continue
+		if not contact_fire_primary_line.is_empty() and line == contact_fire_primary_line:
 			continue
 		if not combat_line.is_empty() and (line == combat_line or line == "Kampf %s" % combat_line):
 			continue
@@ -7361,6 +7377,20 @@ func _build_selected_fireteam_combat_hud_line() -> String:
 	return String(snapshot.get("selected_fireteam_line", "")).strip_edges()
 
 
+func _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density: Dictionary) -> String:
+	if not bool(combat_hud_density.get("visibility_persistence_active", false)):
+		return ""
+	var compact_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
+	if compact_line.is_empty():
+		var persistence: Dictionary = Dictionary(combat_hud_density.get("visibility_persistence", {}))
+		compact_line = String(persistence.get("compact_line", "")).strip_edges()
+	if compact_line.is_empty():
+		return ""
+	if compact_line.to_upper().begins_with("CONTACT FIRE"):
+		return compact_line
+	return "CONTACT FIRE | %s" % compact_line
+
+
 func _build_mission_combat_hud_detail_tooltip_text() -> String:
 	var snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	return String(snapshot.get("tooltip_text", "")).strip_edges()
@@ -7387,7 +7417,7 @@ func _apply_release_firefight_hud_real_window_label_contract(label: Label) -> vo
 	if label == null:
 		return
 	var text: String = String(label.text).strip_edges()
-	var active: bool = text.begins_with("NEXT ") and text.contains(" | WHY ")
+	var active: bool = (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE")
 	label.set_meta("release_firefight_hud_real_window_active", active)
 	if not active:
 		return
@@ -7409,7 +7439,7 @@ func _apply_release_firefight_bottom_dock_density_label_contract(label: Label) -
 	if label == null:
 		return
 	var text: String = String(label.text).strip_edges()
-	var active: bool = text.begins_with("NEXT ") and text.contains(" | WHY ")
+	var active: bool = (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE")
 	label.set_meta("release_firefight_bottom_dock_density_active", active)
 	if not active:
 		return
@@ -17173,6 +17203,33 @@ func get_release_fire_exchange_focused_visual_polish_snapshot() -> Dictionary:
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
 	}
+
+
+func get_release_fire_exchange_contact_fire_primary_hud_polish_snapshot() -> Dictionary:
+	_update_ui()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
+	var primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
+	var snapshot: Dictionary = {
+		"active": not primary_line.is_empty() and bool(combat_hud_density.get("visibility_persistence_active", false)),
+		"contact_fire_primary_line": primary_line,
+		"compact_line": String(combat_hud_density.get("compact_line", "")).strip_edges(),
+		"selected_fireteam_status_text": String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges(),
+		"mission_control_status_text": String(command_feedback.get("mission_control_status_text", "")).strip_edges(),
+		"combat_hud_density": combat_hud_density,
+		"visibility_persistence": Dictionary(combat_hud_density.get("visibility_persistence", {})).duplicate(true),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+	var result: Dictionary = Dictionary(RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_SCRIPT.call("build_snapshot", snapshot, {})).duplicate(true)
+	result["controller_style_id"] = RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_STYLE_ID
+	return result
 
 
 func _release_fire_exchange_event_log_entries_contain_contact_fire(entries: Array) -> bool:

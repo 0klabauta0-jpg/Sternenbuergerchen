@@ -108,7 +108,7 @@
             <li><strong>Tactical Decision Clarity:</strong> Move-Preview, Ghosts, Pfad-/Threat-Lesung, Line-of-Fire/Threat Analyzer, Combined Overlay und Contact Reports wurden als read-only Entscheidungslesbarkeit aufgebaut.</li>
             <li><strong>Release-Export-Hygiene:</strong> Der spielbare Build-Ordner, Launch-Helfer, Export-Abhaengigkeiten und Capture-/Manifest-Pfade sind kontrollierter, damit Playtests nicht jedes Mal an Setup-Reibung sterben.</li>
             <li><strong>Erster Firefight:</strong> Der Deep-Link <code>--release-singleplayer-first-go-firefight</code> bringt den Releasepfad bis GO, Bewegung, Kontakt und erster Engagement-Rueckmeldung.</li>
-            <li><strong>Erster Feuerwechsel:</strong> TASK_844 bis TASK_855 haben die technische FireEvent-Evidence, Fenster-Captures, Findings, Sichtbarkeit, Focus-Visuals, HUD-/Event-Log-Readability, After-Readability-Recapture und den aktuellen Real-Window-Befund schrittweise verbessert.</li>
+            <li><strong>Erster Feuerwechsel:</strong> TASK_844 bis TASK_856 haben die technische FireEvent-Evidence, Fenster-Captures, Findings, Sichtbarkeit, Focus-Visuals, HUD-/Event-Log-Readability, After-Readability-Recapture, den aktuellen Real-Window-Befund und den CONTACT-FIRE-Primary-HUD-Polish schrittweise verbessert.</li>
           </ul>
         </article>
         <article class="card">
@@ -145,7 +145,7 @@
         <article class="card">
           <h2>Was noch nicht als "fertig" gelten sollte</h2>
           <ul class="list">
-            <li>Der echte Fensterblick nach TASK_853 liegt als TASK_854-Paket vor; TASK_855 haelt fest, dass weiter CONTACT PRESSURE / NO FIRE NO_LOS statt klaren CONTACT FIRE dominiert.</li>
+            <li>Der echte Fensterblick nach TASK_853 liegt als TASK_854-Paket vor; TASK_855 haelt die Reibung fest, und TASK_856 priorisiert nun CONTACT FIRE als erste #17/#18-HUD-Lesung. Der frische Fensterbeweis steht noch aus.</li>
             <li>FireTrace/Impact muss im Bild wahrscheinlich noch staerker gegen UI-/Weltlinien bestehen.</li>
             <li>Der Map-/Editor-Workflow ist funktional begonnen, aber noch nicht der angenehme Baukasten, den wir langfristig wollen.</li>
             <li>Formation, ROE, Command-Kosten und AAR sind als Richtung gut, aber nicht der aktuelle Release-Fokus.</li>
@@ -199,6 +199,7 @@
             <li><strong>TASK_854:</strong> Frischen echten Fenster-Capture nach TASK_853 als Evidence-Paket erzeugen und pruefbar machen.</li>
             <li><strong>TASK_855:</strong> Den TASK_854-Capture als Befund festhalten und nur den belegten Stoerfaktor anfassen: CONTACT PRESSURE / NO FIRE NO_LOS dominiert weiter den ersten Feuerwechsel.</li>
             <li><strong>TASK_856:</strong> Aktive Release-Fire-Exchange-Evidence als primaere CONTACT-FIRE-Lesung stabilisieren, ohne Combat-State oder echte LOS-/Damage-Wahrheit zu veraendern.</li>
+            <li><strong>TASK_857:</strong> Nach TASK_856 erneut exportieren und capturen, damit der echte Fensterblick die neue CONTACT-FIRE-Primaerlesung beweist.</li>
             <li><strong>Release-Ordner aktuell halten:</strong> Nach gruenem Slice erneut exportieren, damit deine EXE nicht hinter dem Repo-Stand herlaeuft.</li>
             <li><strong>Dann erst naechster Spielsystem-Block:</strong> je nach Capture-Ergebnis entweder weitere Firefight-Lesbarkeit oder Rueckkehr zu Editor-/Scenario-/Formation-Themen.</li>
           </ol>
@@ -301,10 +302,10 @@
               "Fireteam and dropship HUD/catalog consistency",
               "Tactical decision clarity block TASK_506-TASK_510",
               "Release export and launcher hygiene",
-              "First GO / firefight / first exchange readability TASK_832-TASK_853"
+              "First GO / firefight / first exchange readability TASK_832-TASK_856"
             ],
-            player_value: "The release path reaches mission play more reliably, but the fresh TASK_854 window capture still reads as CONTACT PRESSURE / NO FIRE NO_LOS rather than clear CONTACT FIRE.",
-            next_task: "TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish"
+            player_value: "The release path reaches mission play more reliably, and TASK_856 now prioritizes CONTACT FIRE as the #17/#18 primary HUD line while keeping combat truth read-only.",
+            next_task: "TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture"
           },
           metadata: {
             generated_at_local: "2026-07-08",
@@ -314,7 +315,7 @@
             relevant_task_ids: [
               "TASK_506", "TASK_507", "TASK_508", "TASK_509", "TASK_510",
               "TASK_818", "TASK_819", "TASK_820", "TASK_821",
-              "TASK_832", "TASK_837", "TASK_844", "TASK_847", "TASK_850", "TASK_853", "TASK_854", "TASK_855", "TASK_856"
+              "TASK_832", "TASK_837", "TASK_844", "TASK_847", "TASK_850", "TASK_853", "TASK_854", "TASK_855", "TASK_856", "TASK_857"
             ]
           }
         };
