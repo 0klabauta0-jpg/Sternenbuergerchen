@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_841 - Release Firefight World Label Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_841_release_firefight_world_label_visual_findings.md`, `docs/tasks/TASK_840_release_firefight_world_label_real_window_recapture.md`, `docs/tasks/TASK_839_release_firefight_world_label_declutter.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirefightWorldLabelVisualFindings` baut aus dem TASK_840-Recapture-Manifest und manuellen Review-Notizen einen read-only Findings-Snapshot.
+- Stand: Positive Findings halten fest, dass die Welttext-Dichte ruhiger ist, HUD-Details lesbar bleiben und die Command Matrix weiterhin bedienbar wirkt.
+- Stand: Offene Findings benennen `insertion_residue_world_labels` als primaeres Polish-Problem, `first_firefight_no_fire_contact` als Combat-Framing-Warnung und `map_text_near_units_crowded` als weitere visuelle Reibung.
+- Risiken/offen: TASK_841 aendert bewusst noch keine World-Labels; der konkrete Code-Polish bleibt TASK_842 - Release Firefight Insertion Residue Declutter.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_841_release_firefight_world_label_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_840_release_firefight_world_label_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_842 - Release Firefight Insertion Residue Declutter.
+
 ### TASK_840 - Release Firefight World Label Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_840_release_firefight_world_label_real_window_recapture.md`, `docs/tasks/TASK_839_release_firefight_world_label_declutter.md`, `docs/tasks/TASK_837_release_first_go_firefight_real_window_review.md`, `docs/dev/mission_command_feedback_contract.md`
 - Stand: `capture_release_firefight_world_label_real_window.ps1` nutzt den vorhandenen TASK_837-First-GO-Firefight-Capture und schreibt ein eigenes TASK_840-Manifest fuer den echten Fensterblick nach dem World-Label-Declutter.
 - Stand: Das Manifest haelt `expected_world_label_density_mode = release_firefight_declutter`, `expected_world_label_declutter_style_id = task_839_release_firefight_world_label_declutter_v1`, eigene Screenshotpfade, Pflichtchecks und read-only Grenzen fest.
 - Stand: Der Recapture bleibt bewusst Review-/Evidence-Schicht: Er kann Prozesse nur mit expliziten Switches starten/stoppen und setzt keine Gameplay-, Combat-, Damage-, Command- oder Multiplayer-Wahrheit.
-- Risiken/offen: Der menschliche PNG-Befund ist noch nicht bewertet; Folgearbeit ist TASK_841 - Release Firefight World Label Visual Findings.
+- Risiken/offen: Der menschliche PNG-Befund ist mit TASK_841 bewertet; die sichtbare Folgearbeit ist jetzt TASK_842 - Release Firefight Insertion Residue Declutter.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_840_release_firefight_world_label_real_window_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_839_release_firefight_world_label_declutter.gd`, `git diff --check`.
-- Naechster Schritt: Frischen TASK_840-Recapture ausfuehren und den echten Fensterbefund in TASK_841 uebersetzen.
+- Naechster Schritt: TASK_842 - Release Firefight Insertion Residue Declutter.
 
 ### BUGFIX - Release Homebase Direct Start Copy Clarity
 - Status: implementiert im Arbeitsstand
