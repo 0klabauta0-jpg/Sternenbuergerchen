@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_847 - Release Fire Exchange Visibility Persistence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_847_release_fire_exchange_visibility_persistence.md`, `docs/tasks/TASK_846_release_first_exchange_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Mission-Controller haelt vorhandene FireEvent-/`fired`-Evidence fuer ein kurzes read-only Sichtbarkeitsfenster in `combat_hud_density` fest.
+- Stand: Waehrend des Fensters zeigen Combat-HUD, Decision-Line und Event-Log-Fallback `FIRE`, `NEXT HIT LESEN / DEFEND | WHY FEUER` und `CONTACT FIRE: Feuerwechsel lesen`, ohne neue Combat- oder UI-Wahrheit zu erzeugen.
+- Stand: MetaLayer reicht `get_release_fire_exchange_visibility_persistence_snapshot()` fuer den bestehenden Release-/QA-Pfad weiter.
+- Risiken/offen: Der echte Release-Fenster-Recapture steht noch aus; wenn Trace/Impact weiterhin zu schwach sind, folgt ein enger VFX-/World-Feedback-Polish statt weiterer Text-Persistenz.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_847_release_fire_exchange_visibility_persistence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_844_release_first_exchange_tension_tuning.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_846_release_first_exchange_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_848 - Release First Exchange Recapture Acceptance.
+
 ### TASK_846 - Release First Exchange Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_846_release_first_exchange_visual_findings.md`, `docs/tasks/TASK_845_release_first_exchange_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`

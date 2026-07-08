@@ -854,6 +854,9 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	controller.call("_update_ui")
 	var immediate_exchange_evidence: Dictionary = get_release_first_exchange_tension_tuning_snapshot()
 	set_meta("release_first_exchange_tension_tuning_evidence", immediate_exchange_evidence)
+	var immediate_tactical_exchange: Dictionary = Dictionary(immediate_exchange_evidence.get("tactical_exchange", {})).duplicate(true)
+	if controller.has_method("record_release_fire_exchange_visibility_evidence"):
+		controller.call("record_release_fire_exchange_visibility_evidence", immediate_tactical_exchange)
 	var immediate_exchange_applied: bool = String(immediate_exchange_evidence.get("status", "")) == "pass" \
 		and bool(immediate_exchange_evidence.get("first_exchange_visible", false))
 	if immediate_exchange_applied:
@@ -2149,6 +2152,80 @@ func get_release_first_exchange_tension_tuning_snapshot(real_window_review_notes
 		"issues": _build_handoff_issue_list(checks),
 		"status": "pass" if failed_count == 0 else "review",
 		"recommended_next_task": "TASK_845 - Release First Exchange Real Window Recapture",
+	}
+
+
+func get_release_fire_exchange_visibility_persistence_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_first_exchange_tension_tuning_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_persistence: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_fire_exchange_visibility_persistence_snapshot"):
+		tactical_persistence = Dictionary(tactical_controller.call("get_release_fire_exchange_visibility_persistence_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_first_exchange_available",
+		String(source.get("status", "")) == "pass" and bool(source.get("first_exchange_visible", false)),
+		"critical",
+		"TASK_847 builds on the green TASK_844 first-exchange chain."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_persistence_snapshot_present",
+		not tactical_persistence.is_empty(),
+		"critical",
+		"Active mission should expose the tactical fire-exchange visibility-persistence snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"visibility_persistence_gate_passes",
+		String(tactical_persistence.get("gate", "")) == "pass" and bool(tactical_persistence.get("visibility_persistence_active", false)),
+		"critical",
+		"Fire-Exchange evidence should remain readable in the release HUD surfaces."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_persistence.get("read_only", false))
+			and not bool(tactical_persistence.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_persistence.get("creates_command", true))
+			and not bool(tactical_persistence.get("creates_fire_event", true))
+			and not bool(tactical_persistence.get("creates_damage_event", true))
+			and not bool(tactical_persistence.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_847 reads and displays existing exchange evidence only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_fire_exchange_visibility_persistence.v1",
+		"task_id": "TASK_847",
+		"source_task_id": "TASK_846",
+		"source_exchange_task_id": "TASK_844",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_persistence": tactical_persistence,
+		"style_id": String(tactical_persistence.get("style_id", "")),
+		"visibility_persistence_active": bool(tactical_persistence.get("visibility_persistence_active", false)),
+		"compact_line": String(tactical_persistence.get("compact_line", "")),
+		"decision_line": String(tactical_persistence.get("decision_line", "")),
+		"event_log_short_text": String(tactical_persistence.get("event_log_short_text", "")),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_848 - Release First Exchange Recapture Acceptance",
 	}
 
 
