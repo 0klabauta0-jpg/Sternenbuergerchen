@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_897 - Release First Exchange World Combat Focal Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_897_release_first_exchange_world_combat_focal_visual_findings.md`, `docs/tasks/TASK_896_release_first_exchange_world_combat_focal_real_window_recapture.md`, `docs/tasks/TASK_895_release_first_exchange_world_combat_focal_hierarchy_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_897 bewertet den TASK_896-PNG-/Manifest-Befund read-only als Spielerblick.
+- Stand: Positive Befunde: CONTACT FIRE ist in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar; FIRE-/Focal-Signale, Source-Glow und Target-Halo sind im Weltbild vorhanden; Command-Surfaces bleiben bedienbar.
+- Stand: Primaere Restreibung ist `focal_signal_reads_debuggy`: Der Fokus ist sichtbar, wirkt aber noch zu technisch/grossflaechig und nicht elegant genug als natuerliche Schussbahn.
+- Risiken/offen: TASK_897 aendert keine Runtime. Der naechste Slice muss eng Focal-Eleganz, Halo-Form und Source-to-target-Lane polieren, ohne Combat- oder HUD-Wahrheit zu oeffnen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_897_release_first_exchange_world_combat_focal_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_896_release_first_exchange_world_combat_focal_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_898 - Release First Exchange Combat Focal Elegance Polish.
+
 ### TASK_896 - Release First Exchange World Combat Focal Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_896_release_first_exchange_world_combat_focal_real_window_recapture.md`, `docs/tasks/TASK_895_release_first_exchange_world_combat_focal_hierarchy_polish.md`, `docs/tasks/TASK_893_release_first_exchange_fire_direction_impact_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
