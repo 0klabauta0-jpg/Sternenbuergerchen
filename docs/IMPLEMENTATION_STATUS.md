@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_877 - Release First Exchange Visible Status Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_877_release_first_exchange_visible_status_recapture.md`, `docs/tasks/TASK_876_release_first_exchange_visible_status_source_reconciliation.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_first_exchange_visible_status_recapture.ps1` haengt einen eigenen TASK_877-Recapture an den bestehenden TASK_874-Real-Window-Pfad und schreibt eigene Manifest-/Screenshotpfade.
+- Stand: `ReleaseFirstExchangeVisibleStatusRecapture` paketiert den Capture als read-only Acceptance-Snapshot mit TASK_876-Statusquellen-Schema/Style, TASK_873-Readability-Schema/Style, Window-Handle-Capture-Evidence und manuellen Pflichtchecks fuer #17/#18/#19, FireTrace/Impact und stale `NO_LOS`/`CONTACT_PRESSURE`.
+- Risiken/offen: TASK_877 ist ein Capture-/Acceptance-Slice. Der echte menschliche Sichtentscheid kommt aus dem frischen PNG; wenn er weiter nicht passt, folgt TASK_878 als Visual-Findings-Schnitt.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_visible_status_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `godot_console.exe --headless --path . --script scripts/tests/task_877_release_first_exchange_visible_status_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_876_release_first_exchange_visible_status_source_reconciliation.gd`, `git diff --check`.
+- Naechster Schritt: TASK_878 - Release First Exchange Visible Status Visual Findings.
+
 ### TASK_873 - Release First Exchange CONTACT-FIRE Readability Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_873_release_first_exchange_contact_fire_readability_fix.md`, `docs/tasks/TASK_872_release_correct_window_first_exchange_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
