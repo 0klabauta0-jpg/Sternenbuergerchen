@@ -382,6 +382,15 @@ const RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_CROSS_WIDTH: float = 0.036
 const RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS: float = 0.32
 const RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_HEIGHT: float = 0.06
 const RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.74, 0.16, 0.58)
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID: String = "task_880_release_first_exchange_fire_visual_polish_v1"
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TRACE_WIDTH: float = 0.052
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_MUZZLE_FLASH_WIDTH: float = 0.088
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_IMPACT_RADIUS: float = 0.28
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_IMPACT_CROSS_WIDTH: float = 0.055
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_RADIUS: float = 0.48
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_HEIGHT: float = 0.085
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE: int = 16
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.82, 0.20, 0.76)
 const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
 	"CONTACT",
 	"MOVE",
@@ -1717,6 +1726,12 @@ func get_render_snapshot() -> Dictionary:
 		"release_fire_exchange_focused_impact_radius": RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_RADIUS if _is_release_fire_exchange_focused_visual_polish_active() else WEAPON_FIRE_IMPACT_RADIUS,
 		"release_fire_exchange_focused_target_focus_radius": RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS if _is_release_fire_exchange_focused_visual_polish_active() else WEAPON_FIRE_TARGET_FOCUS_RADIUS,
 		"release_fire_exchange_focused_policy": "dim_world_lines_prioritize_fire_trace_impact_and_target_focus" if _is_release_fire_exchange_focused_visual_polish_active() else "default",
+		"release_first_exchange_fire_visual_polish_active": _is_release_first_exchange_fire_visual_polish_active(),
+		"release_first_exchange_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID if _is_release_first_exchange_fire_visual_polish_active() else "",
+		"release_first_exchange_fire_visual_trace_width": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TRACE_WIDTH if _is_release_first_exchange_fire_visual_polish_active() else RELEASE_FIRE_EXCHANGE_FOCUSED_TRACE_WIDTH,
+		"release_first_exchange_fire_visual_impact_radius": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_IMPACT_RADIUS if _is_release_first_exchange_fire_visual_polish_active() else RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_RADIUS,
+		"release_first_exchange_fire_visual_target_focus_radius": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_RADIUS if _is_release_first_exchange_fire_visual_polish_active() else RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS,
+		"release_first_exchange_fire_visual_policy": "first_exchange_confirmed_emphasize_trace_impact_target_focus" if _is_release_first_exchange_fire_visual_polish_active() else "default",
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -5019,6 +5034,14 @@ func _is_release_fire_exchange_focused_visual_polish_active() -> bool:
 	return bool(_mission_status_payload.get("release_fire_exchange_focused_visual_polish", false))
 
 
+func _is_release_first_exchange_fire_visual_polish_active() -> bool:
+	if not _is_release_fire_exchange_focused_visual_polish_active():
+		return false
+	if bool(_order_payload.get("release_first_exchange_fire_visual_polish", false)):
+		return true
+	return bool(_mission_status_payload.get("release_first_exchange_fire_visual_polish", false))
+
+
 func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> Color:
 	if not _is_release_fire_exchange_focused_visual_polish_active():
 		return base_color
@@ -6401,13 +6424,32 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var combat_outcome: String = String(fire_event.get("combat_outcome", "")).strip_edges().to_lower()
 	var impact_color: Color = WEAPON_FIRE_IMPACT_HIT_COLOR if combat_outcome == "hit" else WEAPON_FIRE_IMPACT_MISS_COLOR
 	var focused_exchange_active: bool = _is_release_fire_exchange_focused_visual_polish_active()
-	var muzzle_flash_width: float = RELEASE_FIRE_EXCHANGE_FOCUSED_MUZZLE_FLASH_WIDTH if focused_exchange_active else WEAPON_FIRE_MUZZLE_FLASH_WIDTH
-	var trace_width: float = RELEASE_FIRE_EXCHANGE_FOCUSED_TRACE_WIDTH if focused_exchange_active else WEAPON_FIRE_TRACE_WIDTH
-	var impact_radius: float = RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_RADIUS if focused_exchange_active else WEAPON_FIRE_IMPACT_RADIUS
-	var impact_cross_width: float = RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_CROSS_WIDTH if focused_exchange_active else WEAPON_FIRE_IMPACT_CROSS_WIDTH
-	var target_focus_radius: float = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS if focused_exchange_active else WEAPON_FIRE_TARGET_FOCUS_RADIUS
-	var target_focus_height: float = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_HEIGHT if focused_exchange_active else WEAPON_FIRE_TARGET_FOCUS_HEIGHT
-	var target_focus_color: Color = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_COLOR if focused_exchange_active else WEAPON_FIRE_TARGET_FOCUS_COLOR
+	var first_exchange_fire_visual_active: bool = _is_release_first_exchange_fire_visual_polish_active()
+	var muzzle_flash_width: float = WEAPON_FIRE_MUZZLE_FLASH_WIDTH
+	var trace_width: float = WEAPON_FIRE_TRACE_WIDTH
+	var impact_radius: float = WEAPON_FIRE_IMPACT_RADIUS
+	var impact_cross_width: float = WEAPON_FIRE_IMPACT_CROSS_WIDTH
+	var target_focus_radius: float = WEAPON_FIRE_TARGET_FOCUS_RADIUS
+	var target_focus_height: float = WEAPON_FIRE_TARGET_FOCUS_HEIGHT
+	var target_focus_color: Color = WEAPON_FIRE_TARGET_FOCUS_COLOR
+	var fire_status_label_font_size: int = WEAPON_FIRE_STATUS_LABEL_FONT_SIZE
+	if focused_exchange_active:
+		muzzle_flash_width = RELEASE_FIRE_EXCHANGE_FOCUSED_MUZZLE_FLASH_WIDTH
+		trace_width = RELEASE_FIRE_EXCHANGE_FOCUSED_TRACE_WIDTH
+		impact_radius = RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_RADIUS
+		impact_cross_width = RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_CROSS_WIDTH
+		target_focus_radius = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS
+		target_focus_height = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_HEIGHT
+		target_focus_color = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_COLOR
+	if first_exchange_fire_visual_active:
+		muzzle_flash_width = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_MUZZLE_FLASH_WIDTH
+		trace_width = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TRACE_WIDTH
+		impact_radius = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_IMPACT_RADIUS
+		impact_cross_width = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_IMPACT_CROSS_WIDTH
+		target_focus_radius = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_RADIUS
+		target_focus_height = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_HEIGHT
+		target_focus_color = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_COLOR
+		fire_status_label_font_size = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE
 	var muzzle_texture_available: bool = texture != null
 	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
 	if muzzle_texture_card_visible:
@@ -6431,7 +6473,7 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		if _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire):
 			_world_label_declutter_suppressed_count += 1
 		else:
-			_add_label3d(_order_root, fire_status_label, _world_to_surface_3d_position(target_position + WEAPON_FIRE_STATUS_LABEL_OFFSET, MOVEMENT_LABEL_HEIGHT + 0.86), "WeaponFireStatus_%s" % _sanitize_node_name(event_id), Color(1.0, 0.84, 0.34, 0.98), WEAPON_FIRE_STATUS_LABEL_FONT_SIZE)
+			_add_label3d(_order_root, fire_status_label, _world_to_surface_3d_position(target_position + WEAPON_FIRE_STATUS_LABEL_OFFSET, MOVEMENT_LABEL_HEIGHT + 0.86), "WeaponFireStatus_%s" % _sanitize_node_name(event_id), Color(1.0, 0.84, 0.34, 0.98), fire_status_label_font_size)
 			if _is_release_firefight_world_label_declutter_active():
 				_world_label_declutter_rendered_count += 1
 	var flank_label: String = _build_flank_fire_vfx_label(fire_event)
@@ -6490,10 +6532,12 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"target_focus_color_hex": target_focus_color.to_html(true),
 		"focused_visual_polish_active": focused_exchange_active,
 		"focused_visual_polish_style_id": RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID if focused_exchange_active else "",
+		"first_exchange_fire_visual_polish_active": first_exchange_fire_visual_active,
+		"first_exchange_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID if first_exchange_fire_visual_active else "",
 		"fire_status_label_visible": not fire_status_label.is_empty() and not _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
 		"fire_status_label_text": fire_status_label,
 		"fire_status_label_suppressed_by_declutter": _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
-		"fire_status_label_font_size": WEAPON_FIRE_STATUS_LABEL_FONT_SIZE,
+		"fire_status_label_font_size": fire_status_label_font_size,
 		"flank_label_suppressed_by_declutter": not flank_label.is_empty() and _should_suppress_release_firefight_flank_label(fire_event),
 		"combat_outcome": combat_outcome,
 		"damage_resolved": int(fire_event.get("damage_resolved", 0)),

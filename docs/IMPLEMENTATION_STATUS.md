@@ -41,6 +41,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_exported_status_source_trace.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_879_release_first_exchange_exported_status_source_trace.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_878_release_first_exchange_visible_status_visual_findings.gd`, `git diff --check`.
 - Naechster Schritt: TASK_880 - Release First Exchange Fire Visual Polish.
 
+### TASK_880 - Release First Exchange Fire Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_880_release_first_exchange_fire_visual_polish.md`, `docs/tasks/TASK_879_release_first_exchange_exported_status_source_trace.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der TacticalController sendet bei aktiver TASK_876-First-Exchange-Statusquelle einen eigenen `release_first_exchange_fire_visual_polish`-Payload an Primary3D.
+- Stand: `TerrainMap3DView` hebt im TASK_880-Modus FireTrace, Muzzle-Flash, Impact, Target-Fokus und das kurze HIT/MISS/FIRE-Statuslabel ueber die TASK_850-Focus-Baseline an.
+- Stand: `get_release_first_exchange_fire_visual_polish_snapshot()` meldet Style, aktive First-Exchange-Visuals, VFX-Parameter und read-only-Grenzen fuer TacticalController und MetaLayer.
+- Risiken/offen: TASK_880 ist ein Headless-/Runtime-Visual-Polish-Slice. Der echte menschliche Fensterblick braucht danach einen frischen exportierten Window-Handle-Recapture.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_880_release_first_exchange_fire_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_879_release_first_exchange_exported_status_source_trace.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_850_release_fire_exchange_focused_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_881 - Release First Exchange Fire Visual Recapture.
+
 ### TASK_873 - Release First Exchange CONTACT-FIRE Readability Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_873_release_first_exchange_contact_fire_readability_fix.md`, `docs/tasks/TASK_872_release_correct_window_first_exchange_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`

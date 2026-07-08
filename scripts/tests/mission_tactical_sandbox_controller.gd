@@ -103,6 +103,7 @@ const RELEASE_FIRST_FIREFIGHT_CONTACT_FRAMING_STYLE_ID: String = "task_843_relea
 const RELEASE_FIRST_EXCHANGE_TENSION_TUNING_STYLE_ID: String = "task_844_release_first_exchange_tension_tuning_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID: String = "task_847_release_fire_exchange_visibility_persistence_v1"
 const RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID: String = "task_850_release_fire_exchange_focused_visual_polish_v1"
+const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID: String = "task_880_release_first_exchange_fire_visual_polish_v1"
 const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_STYLE_ID: String = "task_856_release_fire_exchange_contact_fire_primary_hud_polish_v1"
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_STYLE_ID: String = "task_859_release_fire_exchange_real_window_primary_hud_source_binding_v1"
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID: String = "task_862_release_fire_exchange_real_window_primary_hud_runtime_text_v1"
@@ -7278,6 +7279,25 @@ func _get_release_first_exchange_visible_status_source_evidence() -> Dictionary:
 	return active
 
 
+func _get_release_first_exchange_fire_visual_event_dicts() -> Array:
+	var fire_events: Array = get_fire_event_snapshot()
+	var status_source: Dictionary = _get_release_first_exchange_visible_status_source_evidence()
+	if not bool(status_source.get("active", false)):
+		return fire_events
+	var persisted_fire_event: Dictionary = Dictionary(status_source.get("fire_event", {})).duplicate(true)
+	if persisted_fire_event.is_empty():
+		return fire_events
+	var persisted_event_id: String = String(persisted_fire_event.get("event_id", "")).strip_edges()
+	if persisted_event_id.is_empty():
+		return fire_events
+	for event_variant in fire_events:
+		var event: Dictionary = Dictionary(event_variant)
+		if String(event.get("event_id", "")).strip_edges() == persisted_event_id:
+			return fire_events
+	fire_events.append(persisted_fire_event)
+	return fire_events
+
+
 func _build_release_fire_exchange_visibility_compact_line(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary) -> String:
 	var attacker_id: String = String(fire_event.get("attacker_unit_id", diagnostics.get("attacker_unit_id", ""))).strip_edges()
 	var target_id: String = String(fire_event.get("target_unit_id", diagnostics.get("target_unit_id", diagnostics.get("actual_target_id", "")))).strip_edges()
@@ -7290,6 +7310,21 @@ func _build_release_fire_exchange_visibility_compact_line(diagnostics: Dictionar
 	if not outcome.is_empty():
 		bits.append(outcome)
 	return "%s | %s" % [" ".join(bits), _build_mission_combat_cover_token_text(cover_readout)]
+
+
+func _find_unit_world_position_for_release_fire_visual(unit_id: String) -> Variant:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return null
+	var units: Array = []
+	units.append_array(_get_all_friendly_units(true))
+	units.append_array(_get_all_enemy_units(true))
+	for unit in units:
+		if unit == null or not (unit is Node2D):
+			continue
+		if unit.has_method("get_unit_id") and String(unit.call("get_unit_id")).strip_edges() == normalized_unit_id:
+			return (unit as Node2D).global_position
+	return null
 
 
 func record_release_fire_exchange_visibility_evidence(source_snapshot: Dictionary) -> Dictionary:
@@ -7308,6 +7343,12 @@ func record_release_fire_exchange_visibility_evidence(source_snapshot: Dictionar
 		"weapon_id": String(diagnostics.get("weapon_id", "")),
 		"combat_outcome": String(diagnostics.get("combat_outcome", "fired")),
 	}
+	var attacker_position_variant: Variant = _find_unit_world_position_for_release_fire_visual(String(fire_event.get("attacker_unit_id", "")))
+	var target_position_variant: Variant = _find_unit_world_position_for_release_fire_visual(String(fire_event.get("target_unit_id", "")))
+	if typeof(attacker_position_variant) == TYPE_VECTOR2:
+		fire_event["attacker_position"] = attacker_position_variant
+	if typeof(target_position_variant) == TYPE_VECTOR2:
+		fire_event["target_position"] = target_position_variant
 	var cover_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var compact_line: String = _build_release_fire_exchange_visibility_compact_line(diagnostics, cover_readout, fire_event)
 	var detail_snapshot: Dictionary = _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics, cover_readout, fire_event, compact_line)
@@ -17422,6 +17463,13 @@ func _get_release_fire_exchange_focused_visual_polish_enabled(world_label_densit
 	return _is_release_fire_exchange_visibility_persistence_evidence_active()
 
 
+func _get_release_first_exchange_fire_visual_polish_enabled(world_label_density_mode: String = "") -> bool:
+	if not _get_release_fire_exchange_focused_visual_polish_enabled(world_label_density_mode):
+		return false
+	var first_exchange_source: Dictionary = _get_release_first_exchange_visible_status_source_evidence()
+	return bool(first_exchange_source.get("active", false)) and String(first_exchange_source.get("task_id", "")) == "TASK_876"
+
+
 func get_release_fire_exchange_focused_visual_polish_snapshot() -> Dictionary:
 	_update_ui()
 	_sync_primary_3d_order_visuals()
@@ -17510,6 +17558,105 @@ func get_release_fire_exchange_focused_visual_polish_snapshot() -> Dictionary:
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_release_first_exchange_fire_visual_polish_snapshot() -> Dictionary:
+	_update_ui()
+	_sync_primary_3d_order_visuals()
+	_refresh_order_visuals()
+	var source_snapshot: Dictionary = get_release_first_exchange_visible_status_source_reconciliation_snapshot()
+	_sync_primary_3d_order_visuals()
+	_refresh_order_visuals()
+	var focus_snapshot: Dictionary = get_release_fire_exchange_focused_visual_polish_snapshot()
+	var primary_snapshot: Dictionary = Dictionary(focus_snapshot.get("primary_render_snapshot", {})).duplicate(true)
+	var fire_vfx_entries: Array = Array(primary_snapshot.get("weapon_fire_vfx_entries", [])).duplicate(true)
+	var first_fire_vfx: Dictionary = Dictionary(fire_vfx_entries[0]).duplicate(true) if not fire_vfx_entries.is_empty() else {}
+	var active: bool = bool(primary_snapshot.get("release_first_exchange_fire_visual_polish_active", false))
+	var style_id: String = String(primary_snapshot.get("release_first_exchange_fire_visual_polish_style_id", "")).strip_edges()
+	var trace_width: float = float(primary_snapshot.get("release_first_exchange_fire_visual_trace_width", first_fire_vfx.get("trace_width", 0.0)))
+	var impact_radius: float = float(primary_snapshot.get("release_first_exchange_fire_visual_impact_radius", first_fire_vfx.get("impact_radius", 0.0)))
+	var target_focus_radius: float = float(primary_snapshot.get("release_first_exchange_fire_visual_target_focus_radius", first_fire_vfx.get("target_focus_radius", 0.0)))
+	var status_label_font_size: int = int(first_fire_vfx.get("fire_status_label_font_size", 0))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"status_source_reconciliation_passes",
+			String(source_snapshot.get("gate", "")) == "pass" and bool(source_snapshot.get("active", false)),
+			"TASK_880 builds on active TASK_876 first-exchange status evidence."
+		),
+		_build_mission_first_move_readability_check(
+			"focused_visual_polish_still_active",
+			String(focus_snapshot.get("gate", "")) == "pass" and bool(focus_snapshot.get("focused_visual_polish_active", false)),
+			"TASK_880 extends the existing TASK_850 focus visual path."
+		),
+		_build_mission_first_move_readability_check(
+			"primary_first_exchange_fire_visual_active",
+			active and style_id == RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID,
+			"Primary3D receives and reports the TASK_880 first-exchange fire visual style."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_trace_impact_target_focus_stronger_than_task850",
+			trace_width > 0.034
+				and impact_radius > 0.18
+				and target_focus_radius > 0.32,
+			"FireTrace, Impact and Target-Focus are stronger than the TASK_850 focus baseline."
+		),
+		_build_mission_first_move_readability_check(
+			"fire_status_label_visible_and_enlarged",
+			bool(first_fire_vfx.get("fire_status_label_visible", false))
+				and status_label_font_size >= 16
+				and String(first_fire_vfx.get("fire_status_label_text", "")).strip_edges().to_upper() in ["HIT", "MISS", "FIRE"],
+			"The target-side HIT/MISS/FIRE label stays visible and larger during the first exchange."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only_boundaries",
+			bool(source_snapshot.get("read_only", false))
+				and bool(focus_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(focus_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(focus_snapshot.get("creates_command", true))
+				and not bool(focus_snapshot.get("creates_fire_event", true))
+				and not bool(focus_snapshot.get("creates_damage_event", true))
+				and not bool(focus_snapshot.get("sets_multiplayer_truth", true)),
+			"TASK_880 changes presentation only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_fire_visual_polish.v1",
+		"task_id": "TASK_880",
+		"source_task_id": "TASK_879",
+		"source_status_task_id": "TASK_876",
+		"source_focus_task_id": "TASK_850",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+		"style_id": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID,
+		"first_exchange_fire_visual_polish_active": active,
+		"primary_style_id": style_id,
+		"trace_width": trace_width,
+		"impact_radius": impact_radius,
+		"target_focus_radius": target_focus_radius,
+		"fire_status_label_font_size": status_label_font_size,
+		"weapon_fire_vfx_visual_count": int(primary_snapshot.get("weapon_fire_vfx_visual_count", 0)),
+		"weapon_fire_vfx_entries": fire_vfx_entries,
+		"source": source_snapshot,
+		"focus": focus_snapshot,
+		"primary_render_snapshot": primary_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"recommended_next_task": "TASK_881 - Release First Exchange Fire Visual Recapture",
 	}
 
 
@@ -21958,6 +22105,8 @@ func _sync_primary_3d_order_visuals() -> void:
 			"release_firefight_insertion_residue_declutter": _get_release_firefight_insertion_residue_declutter_enabled(world_label_density_mode),
 			"release_fire_exchange_focused_visual_polish": _get_release_fire_exchange_focused_visual_polish_enabled(world_label_density_mode),
 			"release_fire_exchange_focused_visual_polish_style_id": RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID if _get_release_fire_exchange_focused_visual_polish_enabled(world_label_density_mode) else "",
+			"release_first_exchange_fire_visual_polish": _get_release_first_exchange_fire_visual_polish_enabled(world_label_density_mode),
+			"release_first_exchange_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID if _get_release_first_exchange_fire_visual_polish_enabled(world_label_density_mode) else "",
 			"selected_fireteam_ids": _selected_fireteam_ids,
 			"fire_sector_overlay_enabled": _fire_sector_overlay_enabled,
 			"fire_sector_visual_mode": "los_line_only",
@@ -21974,7 +22123,7 @@ func _sync_primary_3d_order_visuals() -> void:
 			"movement_state_dicts": get_fireteam_movement_snapshot(),
 			"enemy_security_dicts": get_enemy_security_snapshot(),
 			"enemy_tactics_dicts": get_enemy_team_tactics_snapshot(),
-			"fire_event_dicts": get_fire_event_snapshot(),
+			"fire_event_dicts": _get_release_first_exchange_fire_visual_event_dicts(),
 			"feedback_bubble_dicts": get_comic_bubble_visual_payload_snapshot(),
 			"tactical_communication_event_dicts": get_tactical_communication_event_snapshot(),
 		}

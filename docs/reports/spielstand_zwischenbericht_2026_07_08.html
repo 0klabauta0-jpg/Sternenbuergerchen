@@ -90,15 +90,17 @@
     <h1>Sternenbuergerchen Zwischenbericht</h1>
     <p>Stand 2026-07-08: Fortlaufender Zwischenbericht zum Release-/First-Exchange-Strang. Er fasst zusammen, was am Spiel sichtbar besser wurde, welche Reibung noch bleibt und was ich als naechstes umsetzen will.</p>
     <div class="meta-row">
-      <span class="pill good">Basisbefund: TASK_878 committed + pushed</span>
-      <span class="pill warn">Aktueller Arbeitsbranch: task/release-first-exchange-exported-status-source-trace</span>
+      <span class="pill good">Basisbefund: TASK_879 committed + pushed</span>
+      <span class="pill warn">Aktueller Arbeitsbranch: task/release-first-exchange-fire-visual-polish</span>
       <span class="pill good">TASK_874 committed + pushed</span>
       <span class="pill good">TASK_875 committed + pushed</span>
       <span class="pill good">TASK_876 committed + pushed</span>
       <span class="pill good">TASK_877 committed + pushed</span>
       <span class="pill good">TASK_878 committed + pushed</span>
-      <span class="pill good">TASK_879 Export Trace review_ready</span>
-      <span class="pill warn">Naechster Schritt: TASK_880 Fire Visual Polish</span>
+      <span class="pill good">TASK_879 committed + pushed</span>
+      <span class="pill good">Export Trace review_ready</span>
+      <span class="pill good">TASK_880 Fire Visual Polish im Arbeitsstand</span>
+      <span class="pill warn">Naechster Schritt: TASK_881 Fire Visual Recapture</span>
       <span class="pill warn">Git: nur builds/ untracked</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -118,9 +120,9 @@
         <article class="card wide">
           <h2>Kurzstand</h2>
           <div class="status-box good">
-            Der Release-/Singleplayer-Pfad ist inzwischen deutlich besser testbar: Homebase, Fireteam-/Dropship-Staging, Missionstart, erster GO-Moment und erster Kontakt sind als wiederholbare Testkette vorhanden. Der aktuelle harte Fokus ist nicht "mehr Kampf", sondern: Der erste Feuerkontakt muss im echten Fenster eindeutig und ehrlich lesbar werden.
+            Der Release-/Singleplayer-Pfad ist inzwischen deutlich besser testbar: Homebase, Fireteam-/Dropship-Staging, Missionstart, erster GO-Moment und erster Kontakt sind als wiederholbare Testkette vorhanden. TASK_879 ist committed und gepusht; TASK_880 hebt im Arbeitsstand FireTrace, Impact, Target-Fokus und das kurze HIT/MISS/FIRE-Label fuer den belegten First-Exchange an.
           </div>
-          <p>In den letzten Slices wurde der Weg nicht nur behauptet, sondern ueber Godot-Verifier, Manifest-Dateien und echte Fenster-Captures belegt. TASK_876 war headless gruen, TASK_877 hat den echten Window-Handle-Capture geliefert, und TASK_878 hielt den wichtigen Befund fest: Im exportierten Fenster kam CONTACT FIRE noch nicht belastbar als erste Spielerlesung an. TASK_879 hat den Exportpfad jetzt getraced: Die TASK_876-Quelle wird im finalen Runtime-Sample aktiv, #17/#18/#19 lesen CONTACT FIRE, und keine finale NO_LOS-/CONTACT-PRESSURE-Ueberschreibung bleibt stehen.</p>
+          <p>In den letzten Slices wurde der Weg nicht nur behauptet, sondern ueber Godot-Verifier, Manifest-Dateien und echte Fenster-Captures belegt. TASK_879 hat den Exportpfad getraced: Die TASK_876-Quelle wird im finalen Runtime-Sample aktiv, #17/#18/#19 lesen CONTACT FIRE, und keine finale NO_LOS-/CONTACT-PRESSURE-Ueberschreibung bleibt stehen. TASK_880 setzt genau daran an: keine neue Combat-Wahrheit, sondern staerkere visuelle Feuerlesbarkeit.</p>
         </article>
         <article class="card">
           <h2>Aktueller Wert</h2>
@@ -132,6 +134,9 @@
         </article>
         <article class="card full">
           <h2>Was ich gemacht habe</h2>
+          <div class="status-box info">
+            Die letzten Arbeiten waren bewusst klein geschnitten: erst echter Fensterbeweis, dann Findings, dann Statusquelle, dann erneuter Capture, dann Export-Trace. Das verhindert, dass wir eine falsche UI-Anzeige fuer einen echten Combat-Fix halten.
+          </div>
           <div class="timeline">
             <div class="timeline-item">
               <strong>TASK_874</strong>
@@ -175,6 +180,13 @@
                 <p>Der read-only Runtime-Trace ist im echten Exportlauf <code>review_ready</code>. Er zeigt 10 Samples bis <code>deeplink_final</code>: TASK_876 wird aktiv, #17/#18/#19 lesen CONTACT FIRE, und final bleibt keine NO_LOS-/CONTACT-PRESSURE-Ueberschreibung stehen. Naechster Hebel ist deshalb FireTrace/Impact/Target-Fokus, nicht noch mehr Statusquellen-Text.</p>
               </div>
             </div>
+            <div class="timeline-item">
+              <strong>TASK_880</strong>
+              <div>
+                <h3>Fire Visual Polish</h3>
+                <p>Im Arbeitsstand gibt es einen eigenen TASK_880-First-Exchange-Visual-Modus: Er wird nur bei aktiver TASK_876-Statusquelle gesendet und hebt FireTrace, Impact, Target-Fokus sowie das kurze Zielstatuslabel ueber die TASK_850-Baseline an.</p>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -185,6 +197,7 @@
         <article class="card wide">
           <h2>Was sich am Spiel geaendert hat</h2>
           <ul class="list">
+            <li><strong>Der EXE-/Release-Test ist belastbarer:</strong> Der gepruefte Spielordner kann ueber Deep-Links und Capture-Skripte wiederholbar bis zum ersten GO-/Feuerwechsel gefahren werden.</li>
             <li><strong>Der Weg ins Spiel ist weniger bruechig:</strong> Der Singleplayer-Releasepfad wird nicht mehr nur grob gestartet, sondern entlang eines echten Spielerflusses kontrolliert: Homebase, Fireteams, Dropships, Mission, GO, Kontakt.</li>
             <li><strong>Fireteam-/Dropship-Zuordnung ist ernster genommen:</strong> Die frueheren Probleme mit parallelen Dropships, Payload-Readiness und linker Fireteam-Anzeige sind in den aktuellen Flow-Checks Teil der Regressionsdenke.</li>
             <li><strong>Der erste Kampfkontakt ist ein eigener Qualitaetsanker:</strong> Es reicht nicht, dass intern FireEvents existieren. Der Spieler muss im Fenster verstehen: Hier passiert Kontakt, hier wird geschossen, hier ist die Gefahr.</li>
@@ -195,16 +208,17 @@
         <article class="card">
           <h2>Was noch nicht gut genug ist</h2>
           <ul class="list">
-            <li>Der Statusquellenpfad ist jetzt im finalen Export-Trace belegt; was noch fehlt, ist die unmittelbare Bildlesbarkeit von Feuer, Treffer und Zielbezug.</li>
-            <li>FireTrace, Impact und Target-Fokus muessen im realen Bild staerker und weniger leicht zu uebersehen werden.</li>
+            <li>Der Statusquellenpfad ist im finalen Export-Trace belegt; TASK_880 hebt die unmittelbare Bildlesbarkeit von Feuer, Treffer und Zielbezug jetzt headless belegbar an.</li>
+            <li>Was noch fehlt, ist der neue echte Window-Handle-Recapture: Man muss im Bild sehen, ob FireTrace, Impact und Target-Fokus wirklich sofort ins Auge fallen.</li>
             <li>Die HUD-Flaechen sind funktional, aber noch nicht "schoen"; es ist mehr Kommando-Instrument als polierte Spieloberflaeche.</li>
+            <li>Der Release-Flow ist pruefbar, aber noch nicht "spielerisch selbstverstaendlich"; man merkt noch, dass wir eine Debug-/QA-Strecke in eine echte erste Mission verwandeln.</li>
             <li>Der Map-/Editor-Workflow ist weiter ein groesserer UX-Baustellenblock, wurde aber gerade bewusst hinter Release-Playability einsortiert.</li>
           </ul>
         </article>
         <article class="card full">
           <h2>Spielerischer Zwischenstand</h2>
           <p>Das Spiel ist aktuell am ehesten in der Phase "der erste echte Missionsablauf wird hart lesbar gemacht". Es gibt genug Systemsubstanz fuer Fireteams, Dropships, Mission und Combat-Feedback, aber die entscheidende Frage ist noch: Sieht der Spieler im richtigen Moment das Richtige? Genau dafuer sind die letzten Tasks so kleinteilig.</p>
-          <p>TASK_879 hat den Statusquellenpfad im exportierten Runtime-Lauf entwirrt: Im finalen Sample ist CONTACT FIRE da. Der naechste gute Schritt ist TASK_880: den ersten Feuerwechsel visuell so polieren, dass man Schuss, Treffer und Zielbezug am Bildschirm sofort erkennt, nicht nur im Text.</p>
+          <p>TASK_879 hat den Statusquellenpfad im exportierten Runtime-Lauf entwirrt: Im finalen Sample ist CONTACT FIRE da. TASK_880 macht daraus den naechsten Runtime-Visual-Schritt: Schuss, Treffer und Zielbezug werden staerker gerendert. Der naechste gute Schritt ist TASK_881 als echter Recapture.</p>
         </article>
       </div>
     </section>
@@ -231,6 +245,7 @@
             <li><code>task_877_release_first_exchange_visible_status_recapture.gd</code>: gruen.</li>
             <li><code>task_878_release_first_exchange_visible_status_visual_findings.gd</code>: gruen.</li>
             <li><code>task_879_release_first_exchange_exported_status_source_trace.gd</code>: gruen, auch gegen echtes Export-Trace-Manifest.</li>
+            <li><code>task_880_release_first_exchange_fire_visual_polish.gd</code>: prueft den neuen FireTrace-/Impact-/Target-Fokus-Slice.</li>
             <li>Export + TASK_879-Capture: <code>review_ready</code>, 10 Samples bis <code>deeplink_final</code>.</li>
             <li><code>git diff --check</code>: gruen vor den Commits.</li>
           </ul>
@@ -238,17 +253,17 @@
         <article class="card">
           <h2>Git / Build</h2>
           <ul class="list">
-            <li>Aktueller Branch: <code>task/release-first-exchange-exported-status-source-trace</code>.</li>
-            <li>Letzter gepushter Befund: TASK_878 mit Commit <code>1e1add6f</code> auf <code>task/release-first-exchange-visible-status-visual-findings</code>.</li>
-            <li>Vorherige gepushte Slices: <code>facbbfbf</code>, <code>c2b20380</code>, <code>0fbdb413</code>, <code>dbe7b53f</code>.</li>
-            <li>Untracked bleibt nur <code>builds/</code>; der Ordner wurde nicht in diesen Slice aufgenommen.</li>
-            <li>Dieser Bericht und TASK_879 sind aktuell lokal geaendert, bis sie committed werden.</li>
+            <li>Aktueller Branch: <code>task/release-first-exchange-fire-visual-polish</code>.</li>
+            <li>Letzter gepushter Slice: TASK_879 mit Commit <code>1f7748fe</code> auf <code>task/release-first-exchange-exported-status-source-trace</code>.</li>
+            <li>Vorherige gepushte Slices: <code>1e1add6f</code>, <code>dbe7b53f</code>, <code>0fbdb413</code>, <code>c2b20380</code>, <code>facbbfbf</code>.</li>
+            <li>Untracked bleibt nur <code>builds/</code>; der Ordner wird weiterhin nicht in den Report-Slice aufgenommen.</li>
+            <li>Diese Zwischenbericht-Aktualisierung ist lokal, bis sie bei Bedarf committed wird.</li>
           </ul>
         </article>
         <article class="card full">
           <h2>Technische Reibung</h2>
-          <p>Die groesste technische Reibung war die Kette "interne Evidence -> HUD-Snapshot -> exportierte Runtime -> echtes Fenster -> Spielerlesung". TASK_879 zeigt jetzt: Die Statusquelle kommt im finalen Exportlauf an. Damit verschiebt sich die Reibung vom Statusquellenpfad zur sichtbaren Feuerwirkung.</p>
-          <p>Performance-seitig bleibt der Trace harmlos: Er ist nur per Env-Var aktiv und schreibt read-only JSON-Samples. Fuer TASK_880 muss trotzdem gelten: keine per-frame UI-Baum-Rebuilds, sondern gezielte FireTrace-/Impact-/Target-Fokus-Updates.</p>
+          <p>Die groesste technische Reibung war die Kette "interne Evidence -> HUD-Snapshot -> exportierte Runtime -> echtes Fenster -> Spielerlesung". TASK_879 zeigt: Die Statusquelle kommt im finalen Exportlauf an. TASK_880 verschiebt die Arbeit deshalb zur sichtbaren Feuerwirkung.</p>
+          <p>Performance-seitig bleibt TASK_880 leicht: Es nutzt bestehende VFX-Nodes und Payload-Signaturen. Es kommen keine SceneTree-Hotpath-Scans und keine neuen per-frame UI-Baum-Rebuilds dazu.</p>
         </article>
       </div>
     </section>
@@ -258,19 +273,20 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ol class="list">
-            <li><strong>TASK_880 - Release First Exchange Fire Visual Polish:</strong> FireTrace, Impact, Target-Fokus und Welt-/HUD-Zusammenspiel im ersten Feuerwechsel sichtbarer machen.</li>
+            <li><strong>TASK_881 - Release First Exchange Fire Visual Recapture:</strong> Nach TASK_880 frisch exportieren/capturen und den echten Window-Handle-Screenshot bewerten.</li>
             <li><strong>Akzeptanz:</strong> CONTACT FIRE soll nicht nur im Text stehen; der Spieler soll Schussrichtung, Ziel und Treffer/Impact im Fenster sofort verstehen.</li>
+            <li><strong>Kontrolle:</strong> Den echten Fensterblick bewerten, nicht nur headless Snapshots.</li>
             <li><strong>Weiter behalten:</strong> Den kurzen Spielerweg Homebase -> Fireteam -> Dropship -> Mission -> GO -> Contact als Release-Smoke nicht wieder in Einzelteile verlieren.</li>
           </ol>
         </article>
         <article class="card">
           <h2>Vorschlag</h2>
           <div class="button-row" data-choice-group="next.recommendation">
-            <button class="choice active" type="button" data-choice-value="fire_visuals">TASK_880 Fire-Visuals</button>
+            <button class="choice active" type="button" data-choice-value="fire_visual_recapture">TASK_881 Recapture</button>
             <button class="choice" type="button" data-choice-value="task_879_trace">TASK_879 Trace erneut</button>
             <button class="choice" type="button" data-choice-value="editor_backlog">Editor zurueckholen</button>
           </div>
-          <p>Meine Empfehlung ist jetzt TASK_880. Der Trace hat die Statusquelle im Export belegt; jetzt muss das Feuer im Bild ueberzeugen.</p>
+          <p>Meine Empfehlung ist jetzt TASK_881. TASK_880 hebt die Visuals im Arbeitsstand an; jetzt muss ein echter Screenshot zeigen, ob das Feuer im Bild ueberzeugt.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -294,13 +310,14 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_877_capture_seen"> TASK_877 echten Fensterblick gesehen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_878_findings_done"> TASK_878 Findings erledigt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_879_trace_done"> TASK_879 Exported Runtime Trace erledigt</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_880_fire_visual_polish_done"> TASK_880 Fire Visual Polish im Arbeitsstand</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.player_readability_ok"> Spielerlesung im Fenster ueberzeugt</label>
         </article>
         <article class="card">
           <h2>Bewertung</h2>
           <label>Naechster Fokus
             <select data-export-key="notes.next_focus">
-              <option selected value="visual_fire_feedback">TASK_880 FireTrace / Impact / Target-Fokus</option>
+              <option selected value="visual_fire_recapture">TASK_881 echten Fire-Visual-Recapture erstellen</option>
               <option value="task_879_trace">TASK_879 Exported Status Source Trace erneut</option>
               <option value="hud_refresh_diagnosis">HUD-Refresh-Ueberschreibung suchen</option>
               <option value="editor_workflow">Map-Editor-Workflow fortsetzen</option>
@@ -368,27 +385,28 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_branch: "task/release-first-exchange-exported-status-source-trace",
-            source_branch: "task/release-first-exchange-visible-status-visual-findings",
-            active_next_task: "TASK_880",
+            current_branch: "task/release-first-exchange-fire-visual-polish",
+            latest_pushed_commit: "1f7748fe Trace exported first exchange status source",
+            active_next_task: "TASK_881",
             completed_blocks: [
               "TASK_874 real-window recapture captured trusted first exchange evidence gap",
               "TASK_875 visual findings recorded CONTACT-FIRE not being first real-window reading",
               "TASK_876 reconciled visible status source with validated CONTACT-FIRE evidence",
               "TASK_877 captured the exported real window after TASK_876",
               "TASK_878 records the exported real-window NO_LOS / CONTACT PRESSURE gap",
-              "TASK_879 proves the exported final status-source handoff reaches CONTACT FIRE at deeplink_final"
+              "TASK_879 proves the exported final status-source handoff reaches CONTACT FIRE at deeplink_final",
+              "TASK_880 raises FireTrace, Impact, Target-Focus and the short fire status label for confirmed first exchange visuals"
             ],
-            player_value: "The first release mission path is more repeatable, and the exported final trace now proves CONTACT FIRE reaches #17/#18/#19; the remaining player-facing gap is visual fire readability.",
-            next_recommendation: "TASK_880 - Release First Exchange Fire Visual Polish",
-            repo_state: "Current work branch is task/release-first-exchange-exported-status-source-trace. Only builds/ remains untracked before this local report update."
+            player_value: "The first release mission path is more repeatable, CONTACT FIRE reaches #17/#18/#19, and TASK_880 now raises the first-exchange fire visuals; the remaining player-facing gap is real-window confirmation.",
+            next_recommendation: "TASK_881 - Release First Exchange Fire Visual Recapture",
+            repo_state: "Current work branch is task/release-first-exchange-fire-visual-polish. TASK_879 is committed and pushed; TASK_880 is local until this branch is committed and pushed."
           },
           metadata: {
             generated_at_local: "2026-07-08",
             project_root: "C:/dev/SternenBuergerchen",
             report_file: "docs/reports/spielstand_zwischenbericht_2026_07_08.html",
             authoritative_state_note: "This report is a read-only workbench. It does not create gameplay truth.",
-            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880"]
+            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881"]
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {

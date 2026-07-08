@@ -2701,6 +2701,107 @@ func get_release_fire_exchange_focused_visual_polish_snapshot(real_window_review
 	}
 
 
+func get_release_first_exchange_fire_visual_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = {
+		"schema": "sternenbuergerchen.release_first_exchange_exported_status_source_trace_runtime_summary.v1",
+		"task_id": "TASK_879",
+		"sample_count": _release_first_exchange_exported_status_trace_samples.size(),
+		"primary_issue_id": "exported_status_source_trace_acceptance_ready" if not _release_first_exchange_exported_status_trace_samples.is_empty() else "",
+		"recommended_next_task": "TASK_880 - Release First Exchange Fire Visual Polish",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+	var focus: Dictionary = get_release_fire_exchange_focused_visual_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_visual: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_first_exchange_fire_visual_polish_snapshot"):
+		tactical_visual = Dictionary(tactical_controller.call("get_release_first_exchange_fire_visual_polish_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_trace_acceptance_ready",
+		String(source.get("primary_issue_id", "")) == "exported_status_source_trace_acceptance_ready"
+			or String(source.get("recommended_next_task", "")).contains("Fire Visual Polish"),
+		"warning",
+		"TASK_880 follows TASK_879 only after the exported status-source trace points at visual polish."
+	)
+	_append_handoff_check(
+		checks,
+		"source_focus_available",
+		String(focus.get("status", "")) == "pass" and bool(focus.get("focused_visual_polish_active", false)),
+		"critical",
+		"The existing TASK_850 focus visual path should still be active."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_first_exchange_visual_snapshot_present",
+		not tactical_visual.is_empty(),
+		"critical",
+		"Active mission should expose the tactical TASK_880 visual snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"first_exchange_fire_visual_gate_passes",
+		String(tactical_visual.get("gate", "")) == "pass" and bool(tactical_visual.get("first_exchange_fire_visual_polish_active", false)),
+		"critical",
+		"Primary3D should report active first-exchange FireTrace/Impact/Target-Focus polish."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_visual.get("read_only", false))
+			and not bool(tactical_visual.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_visual.get("creates_command", true))
+			and not bool(tactical_visual.get("creates_fire_event", true))
+			and not bool(tactical_visual.get("creates_damage_event", true))
+			and not bool(tactical_visual.get("creates_movement", true))
+			and not bool(tactical_visual.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_880 changes visual emphasis only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_fire_visual_polish.v1",
+		"task_id": "TASK_880",
+		"source_task_id": "TASK_879",
+		"source_status_task_id": "TASK_876",
+		"source_focus_task_id": "TASK_850",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"focus": focus,
+		"tactical_visual": tactical_visual,
+		"style_id": String(tactical_visual.get("style_id", "")),
+		"first_exchange_fire_visual_polish_active": bool(tactical_visual.get("first_exchange_fire_visual_polish_active", false)),
+		"trace_width": float(tactical_visual.get("trace_width", 0.0)),
+		"impact_radius": float(tactical_visual.get("impact_radius", 0.0)),
+		"target_focus_radius": float(tactical_visual.get("target_focus_radius", 0.0)),
+		"fire_status_label_font_size": int(tactical_visual.get("fire_status_label_font_size", 0)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_881 - Release First Exchange Fire Visual Recapture",
+	}
+
+
 func get_release_fire_exchange_contact_fire_primary_hud_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
 	var source: Dictionary = get_release_fire_exchange_focused_visual_polish_snapshot(real_window_review_notes, findings_notes, options)
 	var active_mission: Node = _active_mission
