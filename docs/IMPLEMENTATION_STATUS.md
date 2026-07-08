@@ -20,6 +20,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_873_release_first_exchange_contact_fire_readability_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_872_release_correct_window_first_exchange_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_871_release_window_identity_capture_target_fix.gd`, `git diff --check`.
 - Naechster Schritt: TASK_874 - Release First Exchange CONTACT-FIRE Real Window Recapture.
 
+### TASK_874 - Release First Exchange CONTACT-FIRE Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_874_release_first_exchange_contact_fire_real_window_recapture.md`, `docs/tasks/TASK_873_release_first_exchange_contact_fire_readability_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_first_exchange_contact_fire_real_window_recapture.ps1` haengt einen eigenen TASK_874-Recapture an den bestehenden TASK_869-Real-Window-Pfad und schreibt eigene Manifest-/Screenshotpfade.
+- Stand: `ReleaseFirstExchangeContactFireRealWindowRecapture` paketiert den Capture als read-only Acceptance-Snapshot mit TASK_873-Schema/Style, Window-Handle-Capture-Evidence und manuellen Pflichtchecks fuer #17/#18/#19, FireTrace/Impact und stale `NO_LOS`/`CONTACT PRESSURE`.
+- Risiken/offen: TASK_874 ist ein Capture-/Acceptance-Slice. Der echte menschliche Sichtentscheid kommt aus dem frischen PNG; wenn er weiter nicht passt, folgt TASK_875 als Visual-Findings-Schnitt.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_contact_fire_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `godot_console.exe --headless --path . --script scripts/tests/task_874_release_first_exchange_contact_fire_real_window_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_873_release_first_exchange_contact_fire_readability_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_875 - Release First Exchange CONTACT-FIRE Visual Findings.
+
 ### TASK_869 - Release First Exchange Real Window Recapture After LOS Setup
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_869_release_first_exchange_real_window_recapture_after_los_setup.md`, `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/dev/mission_command_feedback_contract.md`
