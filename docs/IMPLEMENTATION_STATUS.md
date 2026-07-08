@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_860 - Release Fire Exchange Real Window Contact-Fire Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_860_release_fire_exchange_real_window_contact_fire_recapture.md`, `docs/tasks/TASK_859_release_fire_exchange_real_window_primary_hud_source_binding_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_fire_exchange_real_window_contact_fire_recapture.ps1` haengt einen eigenen TASK_860-Recapture an den bestehenden TASK_857-Contact-Fire-Primary-HUD-Recapture.
+- Stand: Das Manifest `tmp/release_fire_exchange_real_window_contact_fire_recapture.json` erwartet TASK_859-Source-Binding-Schema, Style-ID `task_859_release_fire_exchange_real_window_primary_hud_source_binding_v1`, TASK_856-Primary-HUD-Style, TASK_853-Readability, TASK_850-Focus-Style und 45s Fire-Exchange-Persistenz.
+- Stand: `ReleaseFireExchangeRealWindowContactFireRecapture` paketiert das Capture als read-only Review-Snapshot mit Screenshotpfaden und manuellen Pflichtchecks fuer CONTACT FIRE als erste #17/#18-Lesung, kein primaeres Debug-`NO FIRE`, Event-Log, FireTrace/Impact/Target-Focus und weiter bedienbare Command-Surfaces.
+- Stand: Der lokale echte TASK_860-Capture lief mit `gate = review_ready`, Window-Handle gefunden, Window-/Desktop-Screenshot geschrieben und ohne Hard-Failures.
+- Risiken/offen: Der frische Screenshot ist technisch sauber, liest sich im sichtbaren Zustand aber weiter als `NEXT LOS/RANGE KORRIGIEREN`, `Kampf NO FIRE NO_LOS` und `CONTACT PRESSURE` statt als klare CONTACT-FIRE-Erstlesung. TASK_861 sollte diesen belegten Befund auswerten und eng polieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_860_release_fire_exchange_real_window_contact_fire_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_859_release_fire_exchange_real_window_primary_hud_source_binding_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_857_release_fire_exchange_contact_fire_primary_hud_recapture.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_fire_exchange_real_window_contact_fire_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `git diff --check`.
+- Naechster Schritt: TASK_861 - Release Fire Exchange Real Window Contact-Fire Visual Findings.
+
 ### TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_859_release_fire_exchange_real_window_primary_hud_source_binding_polish.md`, `docs/tasks/TASK_858_release_fire_exchange_contact_fire_primary_hud_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
