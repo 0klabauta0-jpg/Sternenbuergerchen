@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_896 - Release First Exchange World Combat Focal Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_896_release_first_exchange_world_combat_focal_real_window_recapture.md`, `docs/tasks/TASK_895_release_first_exchange_world_combat_focal_hierarchy_polish.md`, `docs/tasks/TASK_893_release_first_exchange_fire_direction_impact_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_896 legt einen eigenen Recapture-/Acceptance-Rahmen an den TASK_895-Weltkampf-Fokus.
+- Stand: `capture_release_first_exchange_world_combat_focal_real_window_recapture.ps1` wiederverwendet den TASK_893-Fire-Direction-/Impact-Window-Handle-Pfad und schreibt eigene TASK_896-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeWorldCombatFocalRealWindowRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Source-to-target-Lane, Source-Glow, Target-Halo, Umfeld-Dimming und stabile CONTACT-FIRE-Erstlesung.
+- Stand: Lokaler Capture-Run schrieb `tmp/release_first_exchange_world_combat_focal_real_window_recapture.json` mit `review_ready` sowie `tmp/release_first_exchange_world_combat_focal_real_window_recapture.png`.
+- Risiken/offen: TASK_896 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_897 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_896_release_first_exchange_world_combat_focal_real_window_recapture.gd`, optional `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_world_combat_focal_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_895_release_first_exchange_world_combat_focal_hierarchy_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_897 - Release First Exchange World Combat Focal Visual Findings.
+
 ### TASK_895 - Release First Exchange World Combat Focal Hierarchy Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_895_release_first_exchange_world_combat_focal_hierarchy_polish.md`, `docs/tasks/TASK_894_release_first_exchange_fire_direction_impact_visual_findings.md`, `docs/tasks/TASK_892_release_first_exchange_fire_direction_impact_clarity_polish.md`, `docs/dev/mission_command_feedback_contract.md`
