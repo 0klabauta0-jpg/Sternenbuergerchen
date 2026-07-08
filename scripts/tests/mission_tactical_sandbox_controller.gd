@@ -5233,9 +5233,11 @@ func _build_fireteam_status_text() -> String:
 		_build_selected_flank_display_text(),
 		drop_state_text,
 	]
+	if not firefight_decision_line.is_empty():
+		if not combat_hud_line.is_empty():
+			return "%s\n%s\n%s\n%s" % [firefight_decision_line, combat_hud_line, first_line, second_line]
+		return "%s\n%s\n%s" % [firefight_decision_line, first_line, second_line]
 	if not combat_hud_line.is_empty():
-		if not firefight_decision_line.is_empty():
-			return "%s\n%s\n%s\n%s" % [first_line, second_line, combat_hud_line, firefight_decision_line]
 		return "%s\n%s\n%s" % [first_line, second_line, combat_hud_line]
 	return "%s\n%s" % [first_line, second_line]
 
@@ -15860,6 +15862,76 @@ func get_release_candidate_targeted_firefight_polish_snapshot() -> Dictionary:
 		"decision_line": decision_line,
 		"mission_control_status_text": mission_control_status_text,
 		"selected_fireteam_status_text": selected_fireteam_status_text,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_release_firefight_hud_readability_polish_snapshot() -> Dictionary:
+	var source_snapshot: Dictionary = get_release_candidate_targeted_firefight_polish_snapshot()
+	var decision_line: String = String(source_snapshot.get("decision_line", "")).strip_edges()
+	var selected_fireteam_status_text: String = _build_fireteam_status_text()
+	var selected_lines: PackedStringArray = selected_fireteam_status_text.split("\n", false)
+	var selected_first_line: String = String(selected_lines[0]).strip_edges() if selected_lines.size() > 0 else ""
+	var combat_line: String = _build_selected_fireteam_combat_hud_line()
+	var combat_line_visible: bool = not combat_line.is_empty() and selected_fireteam_status_text.contains(combat_line)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_targeted_firefight_polish_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"HUD readability polish builds on a green TASK_817 targeted firefight snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"decision_line_first_in_selected_fireteam",
+			not decision_line.is_empty() and selected_first_line == decision_line,
+			"Selected Fireteam starts with the NEXT/WHY decision line."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_line_still_visible",
+			combat_line_visible,
+			"Combat readout remains visible below the prioritized decision line."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_status_not_overexpanded",
+			selected_lines.size() <= 4,
+			"Selected Fireteam status stays compact after reordering."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only_boundaries",
+			bool(source_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(source_snapshot.get("creates_command", true))
+				and not bool(source_snapshot.get("creates_fire_event", true))
+				and not bool(source_snapshot.get("creates_damage_event", true))
+				and not bool(source_snapshot.get("sets_multiplayer_truth", true)),
+			"HUD readability snapshot reads existing Firefight/HUD state only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_833",
+		"source_task_id": "TASK_817",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"source": source_snapshot,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": "task_833_release_firefight_hud_readability_v1",
+		"decision_line": decision_line,
+		"selected_fireteam_first_line": selected_first_line,
+		"selected_fireteam_status_text": selected_fireteam_status_text,
+		"selected_fireteam_line_count": selected_lines.size(),
+		"combat_line": combat_line,
+		"combat_line_visible": combat_line_visible,
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",

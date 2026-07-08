@@ -67,6 +67,7 @@ git checkout -b batch/<batch-name>
 - TASK_830 - Release Start Mission Deep-Link Evidence (implementiert): `--release-singleplayer-start-mission` oeffnet den Singleplayer und loest danach den bestehenden `Start Mission`-Pfad aus, damit die EXE reproduzierbar bis zur Mission/LZ-Phase gecaptured werden kann.
 - TASK_831 - Release LZ Drop Preview Deep-Link Evidence (implementiert): `--release-singleplayer-lz-drop-preview` fuehrt die EXE bis LZ, Drop und Move-Preview vor `GO`, damit die erste echte Missionsentscheidung sichtbar reproduzierbar wird.
 - TASK_832 - Release First GO Firefight Deep-Link Evidence (implementiert): `--release-singleplayer-first-go-firefight` fuehrt den Release-Pfad bis nach `GO`, erster Bewegung, erstem Kontakt und erster Engagement-Rueckmeldung.
+- TASK_833 - Release Firefight HUD Readability Polish (implementiert): Die Firefight-`NEXT/WHY`-Decision-Line steht im Selected-Fireteam-Status oben, damit der Spieler den naechsten Griff im ersten Feuerwechsel sofort lesen kann.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)

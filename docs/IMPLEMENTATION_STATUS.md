@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_833 - Release Firefight HUD Readability Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_833_release_firefight_hud_readability_polish.md`, `docs/tasks/TASK_817_station_reentry_release_candidate_targeted_firefight_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Die vorhandene Firefight-`NEXT/WHY`-Decision-Line wird im Selected-Fireteam-Status bei aktivem Firefight als erste Zeile angezeigt.
+- Stand: Combat-Readout und Fireteam-/Lead-Kontext bleiben im selben Statusblock erhalten; die Anzeige bleibt read-only.
+- Risiken/offen: Der echte Fensterblick sollte nach Export erneut auf Schriftgroesse, Paneldichte und Kontrast geprueft werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_833_release_firefight_hud_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_817_station_reentry_release_candidate_targeted_firefight_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release mit `--release-singleplayer-first-go-firefight` starten und die Firefight-HUD-Lesbarkeit sichtbar recapturen.
+
 ### BUGFIX - Singleplayer Release EXE Actionability And Firefight Decision Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_exe_actionability_and_firefight_decision_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`
