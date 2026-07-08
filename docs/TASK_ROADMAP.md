@@ -66,6 +66,7 @@ git checkout -b batch/<batch-name>
 - TASK_829 - Release Singleplayer Deep-Link Evidence (implementiert): der Release-Launcher kann die EXE mit `--release-singleplayer` starten, damit QA den Singleplayer-Homebase-Pfad reproduzierbar ohne fragile Maus-Injektion erreicht.
 - TASK_830 - Release Start Mission Deep-Link Evidence (implementiert): `--release-singleplayer-start-mission` oeffnet den Singleplayer und loest danach den bestehenden `Start Mission`-Pfad aus, damit die EXE reproduzierbar bis zur Mission/LZ-Phase gecaptured werden kann.
 - TASK_831 - Release LZ Drop Preview Deep-Link Evidence (implementiert): `--release-singleplayer-lz-drop-preview` fuehrt die EXE bis LZ, Drop und Move-Preview vor `GO`, damit die erste echte Missionsentscheidung sichtbar reproduzierbar wird.
+- TASK_832 - Release First GO Firefight Deep-Link Evidence (implementiert): `--release-singleplayer-first-go-firefight` fuehrt den Release-Pfad bis nach `GO`, erster Bewegung, erstem Kontakt und erster Engagement-Rueckmeldung.
 
 ## Aktueller Station-Route-Abnahmeblock
 - TASK_721 - Station Route Two-Window Visual Findings (implementiert)

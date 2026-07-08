@@ -105,6 +105,7 @@ const SINGLEPLAYER_BOOTSTRAP_CRAFT_TYPE := "dropship"
 const SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE := 3
 const RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG := "--release-singleplayer-start-mission"
 const RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG := "--release-singleplayer-lz-drop-preview"
+const RELEASE_SINGLEPLAYER_FIRST_GO_FIREFIGHT_DEEPLINK_ARG := "--release-singleplayer-first-go-firefight"
 const DEFAULT_MISSION_PLANNING_STATE: Dictionary = {
 	"has_lz_position": false,
 	"lz_position": Vector2.ZERO,
@@ -156,6 +157,11 @@ var _release_lz_drop_preview_deeplink_requested: bool = false
 var _release_lz_drop_preview_deeplink_applied: bool = false
 var _release_lz_drop_preview_deeplink_status: String = "idle"
 var _release_lz_drop_preview_deeplink_reason: String = ""
+var _release_first_go_firefight_deeplink_requested: bool = false
+var _release_first_go_firefight_deeplink_applied: bool = false
+var _release_first_go_firefight_deeplink_status: String = "idle"
+var _release_first_go_firefight_deeplink_reason: String = ""
+var _release_first_go_firefight_pre_go_passed: bool = false
 
 
 func _ready() -> void:
@@ -229,6 +235,7 @@ func _ready() -> void:
 	call_deferred("_sync_mission_host_visibility")
 	call_deferred("_apply_release_start_mission_deeplink")
 	call_deferred("_apply_release_lz_drop_preview_deeplink")
+	call_deferred("_apply_release_first_go_firefight_deeplink")
 
 
 func _process(_delta: float) -> void:
@@ -750,6 +757,202 @@ func _complete_release_lz_drop_preview_craft_arrival(craft_id: String) -> void:
 	_complete_mission_craft_transfer({"craft_id": normalized_craft_id, "phase": "to_mission"})
 	_sync_homebase_direct_mission_drop_transport_fields()
 	_start_or_update_active_mission()
+
+
+func get_release_first_go_firefight_deeplink_snapshot(user_args: PackedStringArray = PackedStringArray()) -> Dictionary:
+	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
+	var requested: bool = _has_release_first_go_firefight_deeplink_arg(args)
+	var firefight: Dictionary = get_release_candidate_first_go_firefight_actionability_snapshot() if _active_mission != null else {}
+	return {
+		"schema": "sternenbuergerchen.release_first_go_firefight_deeplink_evidence.v1",
+		"task_id": "TASK_832",
+		"arg": RELEASE_SINGLEPLAYER_FIRST_GO_FIREFIGHT_DEEPLINK_ARG,
+		"args": Array(args),
+		"requested": requested,
+		"applied": _release_first_go_firefight_deeplink_applied,
+		"status": _release_first_go_firefight_deeplink_status,
+		"reason": _release_first_go_firefight_deeplink_reason,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": _active_mission != null,
+		"firefight_status": String(firefight.get("status", "")),
+		"pre_go_status": String(firefight.get("pre_go_status", "")),
+		"pre_go_was_actionable": _release_first_go_firefight_pre_go_passed,
+		"execution_gate": String(firefight.get("execution_gate", "")),
+		"contact_gate": String(firefight.get("contact_gate", "")),
+		"engagement_gate": String(firefight.get("engagement_gate", "")),
+		"go_executed": bool(firefight.get("go_executed", false)),
+		"movement_state_count": int(firefight.get("movement_state_count", 0)),
+		"selected_contact_count": int(firefight.get("selected_contact_count", 0)),
+		"engagement_status": String(firefight.get("engagement_status", "")),
+		"fire_event_count": int(firefight.get("fire_event_count", 0)),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _has_release_first_go_firefight_deeplink_arg(args: PackedStringArray) -> bool:
+	for arg in args:
+		if String(arg).strip_edges() == RELEASE_SINGLEPLAYER_FIRST_GO_FIREFIGHT_DEEPLINK_ARG:
+			return true
+	return false
+
+
+func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = PackedStringArray()) -> void:
+	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
+	if not _has_release_first_go_firefight_deeplink_arg(args):
+		return
+	_release_first_go_firefight_deeplink_requested = true
+	_release_first_go_firefight_deeplink_status = "requested"
+	_release_first_go_firefight_deeplink_reason = ""
+	set_meta("release_first_go_firefight_deeplink_requested", true)
+
+	await _apply_release_lz_drop_preview_deeplink(PackedStringArray([RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG]))
+	await _wait_release_deeplink_frames(8)
+	if not _release_lz_drop_preview_deeplink_applied:
+		_release_first_go_firefight_deeplink_status = "blocked"
+		_release_first_go_firefight_deeplink_reason = "lz_drop_preview_failed"
+		return
+
+	var active_mission: Node = _active_mission
+	var controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var combat_driver: Node = active_mission.get_node_or_null("CombatLoopDriver") if active_mission != null else null
+	var simulation_root: Node = active_mission.get_node_or_null("SimulationRoot") if active_mission != null else null
+	if controller == null or combat_driver == null or simulation_root == null:
+		_release_first_go_firefight_deeplink_status = "blocked"
+		_release_first_go_firefight_deeplink_reason = "mission_runtime_nodes_missing"
+		return
+
+	var pre_go: Dictionary = get_release_candidate_lz_drop_preview_actionability_snapshot()
+	var first_move: Dictionary = Dictionary(pre_go.get("first_move", {}))
+	var selected_fireteam_id: String = _first_release_fireteam_id(first_move)
+	_release_first_go_firefight_pre_go_passed = String(pre_go.get("status", "")) == "pass"
+	if not _release_first_go_firefight_pre_go_passed or selected_fireteam_id.is_empty():
+		_release_first_go_firefight_deeplink_status = "blocked"
+		_release_first_go_firefight_deeplink_reason = "pre_go_not_actionable"
+		return
+	if not bool(controller.call("execute_selected_fireteam_orders")):
+		_release_first_go_firefight_deeplink_status = "blocked"
+		_release_first_go_firefight_deeplink_reason = "go_execution_failed"
+		return
+	controller.call("_refresh_world_overlays")
+	controller.call("_refresh_button_state")
+	controller.call("_update_ui")
+	await _wait_release_deeplink_frames(3)
+
+	var contact_setup: Dictionary = _position_release_first_enemy_near_fireteam(controller, selected_fireteam_id)
+	if contact_setup.is_empty():
+		_release_first_go_firefight_deeplink_status = "blocked"
+		_release_first_go_firefight_deeplink_reason = "contact_setup_failed"
+		return
+	_prepare_release_fireteam_for_first_engagement(controller, selected_fireteam_id, Vector2(contact_setup.get("enemy_position", Vector2.ZERO)))
+	_update_release_contact_tracking(combat_driver)
+	_force_release_first_engagement_decision(controller, combat_driver, simulation_root, selected_fireteam_id, contact_setup)
+	controller.call("refresh_contact_overlay")
+	controller.call("refresh_fireteam_security_state")
+	controller.call("_refresh_world_overlays")
+	controller.call("_update_ui")
+	await _wait_release_deeplink_frames(10)
+
+	var snapshot: Dictionary = get_release_first_go_firefight_deeplink_snapshot(PackedStringArray([RELEASE_SINGLEPLAYER_FIRST_GO_FIREFIGHT_DEEPLINK_ARG]))
+	_release_first_go_firefight_deeplink_applied = String(snapshot.get("firefight_status", "")) == "pass" \
+		and bool(snapshot.get("go_executed", false)) \
+		and int(snapshot.get("selected_contact_count", 0)) > 0 \
+		and not String(snapshot.get("engagement_status", "")).strip_edges().is_empty()
+	_release_first_go_firefight_deeplink_status = "applied" if _release_first_go_firefight_deeplink_applied else "blocked"
+	_release_first_go_firefight_deeplink_reason = "" if _release_first_go_firefight_deeplink_applied else "firefight_snapshot_not_pass"
+	set_meta("release_first_go_firefight_deeplink_applied", _release_first_go_firefight_deeplink_applied)
+
+
+func _first_release_fireteam_id(first_move: Dictionary) -> String:
+	for fireteam_id_variant in Array(first_move.get("selected_fireteam_ids", [])):
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not fireteam_id.is_empty():
+			return fireteam_id
+	return ""
+
+
+func _position_release_first_enemy_near_fireteam(controller: Node, fireteam_id: String) -> Dictionary:
+	var friendly_units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
+	var enemy_units: Array = Array(controller.call("_get_all_enemy_units", false))
+	if enemy_units.is_empty():
+		enemy_units = Array(controller.call("_get_all_enemy_units", true))
+	if friendly_units.is_empty() or enemy_units.is_empty():
+		return {}
+	var friendly := friendly_units[0] as Node2D
+	var enemy := enemy_units[0] as Node2D
+	if friendly == null or enemy == null:
+		return {}
+	enemy.global_position = friendly.global_position + Vector2(58.0, 0.0)
+	if enemy is CanvasItem:
+		(enemy as CanvasItem).visible = true
+	return {
+		"fireteam_id": fireteam_id,
+		"friendly_unit_id": _get_release_unit_id(friendly),
+		"enemy_unit_id": _get_release_unit_id(enemy),
+		"friendly_position": friendly.global_position,
+		"enemy_position": enemy.global_position,
+	}
+
+
+func _prepare_release_fireteam_for_first_engagement(controller: Node, fireteam_id: String, enemy_position: Vector2) -> void:
+	for unit_variant in Array(controller.call("_get_fireteam_units", fireteam_id, true)):
+		var unit := unit_variant as Node2D
+		if unit == null:
+			continue
+		unit.set("skill_accuracy", 1.0)
+		if unit.has_method("set_runtime_status"):
+			unit.call(
+				"set_runtime_status",
+				"holding",
+				"hold_position",
+				30,
+				"fire_at_will",
+				"defend",
+				1.0,
+				0.0,
+				0.0,
+				1,
+				enemy_position,
+				"engage",
+				"aimed",
+				"task832_release_first_go_firefight",
+				1.0,
+				75.0
+			)
+
+
+func _force_release_first_engagement_decision(controller: Node, combat_driver: Node, simulation_root: Node, fireteam_id: String, contact_setup: Dictionary) -> void:
+	var enemy_id: String = String(contact_setup.get("enemy_unit_id", "")).strip_edges()
+	var detection_progress: Dictionary = Dictionary(combat_driver.get("_detection_progress")).duplicate(true)
+	for unit_variant in Array(controller.call("_get_fireteam_units", fireteam_id, true)):
+		var unit := unit_variant as Node2D
+		if unit == null:
+			continue
+		var friendly_id: String = _get_release_unit_id(unit)
+		if friendly_id.is_empty() or enemy_id.is_empty():
+			continue
+		detection_progress["%s:%s" % [friendly_id, enemy_id]] = 0
+		detection_progress["%s:%s" % [enemy_id, friendly_id]] = 0
+	combat_driver.set("_detection_progress", detection_progress)
+	combat_driver.set("_current_tick", 120)
+	combat_driver.set("_next_attack_tick", 0)
+	if combat_driver.has_method("_try_enqueue_attacks"):
+		combat_driver.call("_try_enqueue_attacks", simulation_root)
+
+
+func _update_release_contact_tracking(combat_driver: Node) -> void:
+	if combat_driver.has_method("_update_contact_tracking"):
+		combat_driver.call("_update_contact_tracking")
+	if combat_driver.has_method("_advance_detection_timers"):
+		combat_driver.call("_advance_detection_timers")
+	if combat_driver.has_method("_update_contact_tracking"):
+		combat_driver.call("_update_contact_tracking")
+
+
+func _get_release_unit_id(unit: Node) -> String:
+	if unit != null and unit.has_method("get_unit_id"):
+		return String(unit.call("get_unit_id"))
+	return unit.name if unit != null else ""
 
 
 func _wait_release_deeplink_frames(count: int) -> void:

@@ -66,6 +66,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_831_release_lz_drop_preview_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_812_station_reentry_release_candidate_lz_drop_preview_actionability_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_830_release_start_mission_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `git diff --check`.
 - Naechster Schritt: Frischen Release mit `--release-singleplayer-lz-drop-preview` starten und den Pre-GO-Move-Preview-Zustand capturen.
 
+### TASK_832 - Release First GO Firefight Deep-Link Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_832_release_first_go_firefight_deeplink_evidence.md`, `docs/tasks/TASK_831_release_lz_drop_preview_deeplink_evidence.md`, `docs/tasks/TASK_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.md`
+- Stand: Das Main Menu behandelt `--release-singleplayer-first-go-firefight` als Singleplayer-Route.
+- Stand: Der MetaLayer nutzt den bestehenden LZ/Drop/Move-Preview-Deep-Link, fuehrt danach `GO` ueber `execute_selected_fireteam_orders()` aus und stoesst den vorhandenen Kontakt-/Engagement-Pfad fuer reproduzierbare Release-Evidenz an.
+- Stand: Der Snapshot meldet GO-Ausfuehrung, Movement-State, ersten Kontakt und Engagement-Status read-only fuer Release-Captures.
+- Risiken/offen: Der Deep-Link positioniert einen vorhandenen Gegner fuer den Nachweis reproduzierbar. Ein echter Fenster-Playtest fuer Kampfdramaturgie, Timing und HUD-Schoenheit bleibt danach sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_813_station_reentry_release_candidate_first_go_firefight_actionability_smoke.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_831_release_lz_drop_preview_deeplink_evidence.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release mit `--release-singleplayer-first-go-firefight` starten und den ersten Firefight-Sichtzustand capturen.
+
 ### BUGFIX - Singleplayer Release Visible Homebase Deadend Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_visible_homebase_deadend_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_start_bootstrap.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`
