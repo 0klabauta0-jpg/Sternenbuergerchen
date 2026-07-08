@@ -94,6 +94,7 @@ const RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID: String = "task_836_relea
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE: int = 9
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE: int = 12
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 9
+const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT: float = 1.35
 const MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID: String = "mission_team_chip_tooltip_hint_v1"
@@ -304,6 +305,7 @@ var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
 var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
 var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
 var _release_candidate_firefight_decision_line_build_depth: int = 0
+var _release_firefight_event_log_fallback_created_msec: int = 0
 var _last_target_position: Vector2 = Vector2.ZERO
 var _lz_position: Vector2 = Vector2.ZERO
 var _has_lz_position: bool = false
@@ -16442,6 +16444,153 @@ func get_release_firefight_command_matrix_visual_polish_snapshot() -> Dictionary
 	}
 
 
+func get_release_firefight_real_window_findings_polish_snapshot() -> Dictionary:
+	_update_ui()
+	var source_snapshot: Dictionary = get_release_firefight_command_matrix_visual_polish_snapshot()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	_refresh_tactical_event_log_panel()
+	var event_log_display: Dictionary = Dictionary(command_feedback.get("release_firefight_event_log_display", {})).duplicate(true)
+	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	var panel_snapshot: Dictionary = {}
+	var rendered_entries: Array = []
+	if panel != null and panel.has_method("get_panel_snapshot"):
+		panel_snapshot = Dictionary(panel.call("get_panel_snapshot")).duplicate(true)
+	if panel != null and panel.has_method("get_rendered_event_entries"):
+		rendered_entries = Array(panel.call("get_rendered_event_entries"))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_command_matrix_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"Event-Log findings polish builds on a green TASK_836 command-matrix snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"event_log_display_has_status",
+			int(event_log_display.get("display_count", 0)) >= 1,
+			"First Firefight exposes at least one event-log row or read-only fallback row."
+		),
+		_build_mission_first_move_readability_check(
+			"empty_no_events_hidden_when_fallback_active",
+			not bool(event_log_display.get("fallback_active", false)) or int(panel_snapshot.get("rendered_entry_count", 0)) >= 1,
+			"The panel renders the fallback instead of collapsing into NO EVENTS."
+		),
+		_build_mission_first_move_readability_check(
+			"fallback_is_read_only",
+			bool(event_log_display.get("read_only", false))
+				and not bool(event_log_display.get("ui_sets_gameplay_truth", true))
+				and not bool(event_log_display.get("creates_command", true))
+				and not bool(event_log_display.get("creates_fire_event", true))
+				and not bool(event_log_display.get("creates_damage_event", true))
+				and not bool(event_log_display.get("sets_multiplayer_truth", true)),
+			"The fallback reads existing decision/combat snapshots only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_838",
+		"source_task_id": "TASK_837",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"source": source_snapshot,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": String(event_log_display.get("style_id", "")),
+		"expected_style_id": RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID,
+		"event_log_display": event_log_display,
+		"event_log_raw_count": int(event_log_display.get("raw_count", 0)),
+		"event_log_display_count": int(event_log_display.get("display_count", 0)),
+		"event_log_fallback_active": bool(event_log_display.get("fallback_active", false)),
+		"event_log_panel": panel_snapshot,
+		"event_log_rendered_entries": rendered_entries,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_release_firefight_event_log_display_snapshot(raw_entries: Array, release_decision: Dictionary, combat_hud_density: Dictionary) -> Dictionary:
+	var display_entries: Array = []
+	for entry_variant in raw_entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		display_entries.append(Dictionary(entry_variant).duplicate(true))
+	var fallback_entry: Dictionary = {}
+	if display_entries.is_empty():
+		fallback_entry = _build_release_firefight_event_log_fallback_entry(release_decision, combat_hud_density)
+		if not fallback_entry.is_empty():
+			display_entries.append(fallback_entry)
+	return {
+		"style_id": RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"raw_count": raw_entries.size(),
+		"display_count": display_entries.size(),
+		"fallback_active": not fallback_entry.is_empty(),
+		"fallback_entry": fallback_entry,
+		"entries": display_entries,
+	}
+
+
+func _build_release_firefight_event_log_fallback_entry(release_decision: Dictionary, combat_hud_density: Dictionary) -> Dictionary:
+	var decision_line: String = String(release_decision.get("decision_line", "")).strip_edges()
+	var combat_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
+	var decision_active: bool = bool(release_decision.get("active", false)) and not decision_line.is_empty()
+	var combat_active: bool = bool(combat_hud_density.get("active", false)) and not combat_line.is_empty()
+	if not decision_active and not combat_active:
+		return {}
+	var fireteam_id: String = String(_selected_fireteam_ids[0]).strip_edges().to_lower() if not _selected_fireteam_ids.is_empty() else ""
+	var reason: String = String(combat_hud_density.get("reason", "")).strip_edges().to_upper()
+	var short_text: String = "FIREFIGHT STATUS"
+	var severity: String = "tactical"
+	if combat_line.to_upper().contains("NO FIRE") or reason.contains("NO_LOS") or reason.contains("NO_RANGE"):
+		short_text = "NO FIRE: LOS/RANGE korrigieren"
+		severity = "warning"
+	elif combat_line.to_upper().contains("CONTACT"):
+		short_text = "CONTACT: Entscheidung pruefen"
+	var detail_parts: PackedStringArray = PackedStringArray()
+	if not decision_line.is_empty():
+		detail_parts.append(decision_line)
+	if not combat_line.is_empty():
+		detail_parts.append("Kampf %s" % combat_line)
+	if not _last_command_text.strip_edges().is_empty():
+		detail_parts.append("Cmd %s" % _last_command_text.strip_edges())
+	if _release_firefight_event_log_fallback_created_msec <= 0:
+		_release_firefight_event_log_fallback_created_msec = Time.get_ticks_msec()
+	return {
+		"event_id": "task_838_firefight_status_%s" % ("selected" if fireteam_id.is_empty() else fireteam_id),
+		"event_type": "release_firefight_status",
+		"category": "engagement_feedback",
+		"severity": severity,
+		"priority": 2,
+		"created_msec": _release_firefight_event_log_fallback_created_msec,
+		"fireteam_id": fireteam_id,
+		"unit_id": "",
+		"short_text": short_text,
+		"detail_text": " | ".join(detail_parts),
+		"map_label": "NO_LOS" if severity == "warning" else "CONTACT",
+		"source": "release_firefight_event_log_fallback",
+		"style_id": RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID,
+		"visual_only": true,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+	}
+
+
 func _build_release_firefight_command_matrix_visual_snapshot(command_grid: GridContainer) -> Dictionary:
 	var active: bool = bool(command_grid.get_meta("release_firefight_command_matrix_visual_active", false)) if command_grid != null else false
 	var style_id: String = String(command_grid.get_meta("release_firefight_command_matrix_visual_style_id", "")) if command_grid != null else ""
@@ -20235,6 +20384,14 @@ func get_command_feedback_snapshot() -> Dictionary:
 		mission_hud_interaction_density
 	)
 	var mission_team_chip_snapshot: Dictionary = get_mission_team_chip_snapshot()
+	var tactical_event_log_entries: Array = get_tactical_event_log_snapshot()
+	var release_firefight_decision: Dictionary = _build_release_candidate_firefight_decision_line_snapshot()
+	var release_firefight_event_log_display: Dictionary = _build_release_firefight_event_log_display_snapshot(
+		tactical_event_log_entries,
+		release_firefight_decision,
+		combat_hud_density
+	)
+	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	return {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"selected_fireteam_label": _get_fireteam_name(),
@@ -20362,8 +20519,12 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"fireteamleader_feedback_bubbles": get_fireteamleader_feedback_bubble_snapshot(),
 		"tactical_communication_event_count": get_tactical_communication_event_snapshot().size(),
 		"tactical_communication_events": get_tactical_communication_event_snapshot(),
-		"tactical_event_log_count": get_tactical_event_log_snapshot().size(),
-		"tactical_event_log": get_tactical_event_log_snapshot(),
+		"tactical_event_log_count": tactical_event_log_display_entries.size(),
+		"tactical_event_log_raw_count": tactical_event_log_entries.size(),
+		"tactical_event_log": tactical_event_log_display_entries,
+		"release_firefight_event_log_display": release_firefight_event_log_display,
+		"release_firefight_event_log_fallback_active": bool(release_firefight_event_log_display.get("fallback_active", false)),
+		"release_firefight_event_log_style_id": String(release_firefight_event_log_display.get("style_id", "")),
 		"tactical_event_log_contract": get_tactical_event_log_contract_snapshot(),
 		"ftl_readiness_count": get_ftl_readiness_snapshot().size(),
 		"ftl_readiness": get_ftl_readiness_snapshot(),

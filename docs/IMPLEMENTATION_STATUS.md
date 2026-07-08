@@ -55,6 +55,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_837_release_first_go_firefight_real_window_review.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_go_firefight_real_window.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 30`, `git diff --check`.
 - Naechster Schritt: TASK_838 - Release Firefight Real Window Findings Polish aus dem echten PNG-/Manifest-Befund schneiden.
 
+### TASK_838 - Release Firefight Real Window Findings Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_838_release_firefight_real_window_findings_polish.md`, `docs/tasks/TASK_837_release_first_go_firefight_real_window_review.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: #19 Event Log bekommt im ersten GO-/Firefight-Fenster eine read-only Display-Zeile aus vorhandenen Decision-/Combat-Snapshots, wenn der echte TacticalEventLog noch leer ist.
+- Stand: Der Fallback bleibt stabil signiert, erzeugt keine Commands, Fire-Events oder Damage-Events und tritt zurueck, sobald echte Event-Log-Eintraege vorhanden sind.
+- Risiken/offen: World-Labels im echten Firefight-Fenster sind weiterhin dicht; das bleibt Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_838_release_firefight_real_window_findings_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_836_release_firefight_command_matrix_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release-Firefight capturen und bei Bedarf TASK_839 - Release Firefight World Label Declutter schneiden.
+
 ### BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_release_singleplayer_exe_stale_fob_transfer_actionability_guard.md`, `docs/tasks/BUGFIX_release_singleplayer_normal_click_homebase_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
