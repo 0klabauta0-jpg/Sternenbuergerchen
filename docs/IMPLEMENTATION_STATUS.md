@@ -10,8 +10,18 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
-### TASK_851 - Release Fire Exchange Focused Visual Recapture
+### TASK_852 - Release Fire Exchange Focused Visual Findings
 - Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_852_release_fire_exchange_focused_visual_findings.md`, `docs/tasks/TASK_851_release_fire_exchange_focused_visual_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeFocusedVisualFindings` wertet den TASK_851-Recapture und Sichtnotizen als read-only Findings-Snapshot aus.
+- Stand: Positive Findings halten fest, dass der fokussierte Real-Window-Capture vorhanden ist, der TASK_850-Focus-Style erwartet wird und Mission-/Command-Surfaces grundsaetzlich lesbar bleiben.
+- Stand: Offene Findings sind `contact_pressure_instead_of_contact_fire`, `debug_no_fire_reason_visible`, `fire_trace_or_impact_still_not_readable` und `hud_exchange_confirmation_missing`.
+- Risiken/offen: TASK_852 ist nur der Befund-Schnitt. Die sichtbare Korrektur folgt in TASK_853 und soll den ersten Exchange fuer Spieler als Kampf-Moment rahmen, ohne Combat-Wahrheit zu verschieben.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_852_release_fire_exchange_focused_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_851_release_fire_exchange_focused_visual_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_853 - Release Fire Exchange Engagement Readability Polish.
+
+### TASK_851 - Release Fire Exchange Focused Visual Recapture
+- Status: implementiert und gemerged
 - Relevante Docs/Contracts: `docs/tasks/TASK_851_release_fire_exchange_focused_visual_recapture.md`, `docs/tasks/TASK_850_release_fire_exchange_focused_visual_polish.md`, `docs/dev/mission_command_feedback_contract.md`
 - Stand: `capture_release_fire_exchange_focused_visual_recapture.ps1` haengt einen eigenen TASK_851-Recapture an den bestehenden TASK_845-First-Exchange-Capture und nutzt weiter `--release-singleplayer-first-go-firefight`.
 - Stand: Das Manifest `tmp/release_fire_exchange_focused_visual_recapture.json` erwartet Schema `sternenbuergerchen.release_fire_exchange_focused_visual_polish.v1` und Style-ID `task_850_release_fire_exchange_focused_visual_polish_v1`.

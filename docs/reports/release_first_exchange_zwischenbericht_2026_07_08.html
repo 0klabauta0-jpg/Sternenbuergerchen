@@ -86,8 +86,9 @@
       <span class="pill good">TASK_848 Acceptance gemerged</span>
       <span class="pill good">TASK_849 Findings gemerged</span>
       <span class="pill good">TASK_850 Focus Visual gemerged</span>
-      <span class="pill warn">TASK_851 Recapture-Slice implementiert</span>
-      <span class="pill">Branch: task/release-fire-exchange-focused-visual-recapture</span>
+      <span class="pill good">TASK_851 Recapture-Slice implementiert</span>
+      <span class="pill warn">TASK_852 Findings-Slice implementiert</span>
+      <span class="pill">Branch: task/release-fire-exchange-focused-visual-findings</span>
     </div>
   </header>
 
@@ -113,9 +114,10 @@
             <li><strong>TASK_848:</strong> Frischer Release-Export, echter Fenster-Capture und Acceptance-Manifest wurden nach TASK_847 erzeugt. Der technische Pfad ist gruen, die visuelle Bewertung bleibt bewusst offen.</li>
             <li><strong>TASK_849:</strong> Der frische Screenshot ist als Visual-Polish-Findings-Schnitt bewertet und in <code>integration/core-foundation</code> gemerged: Start-/Automatik-Overlay, dominante Weltlinien, schwache FireTrace/Impact-Lesbarkeit und kein eindeutig bestaetigter CONTACT-FIRE-HUD-Moment.</li>
             <li><strong>TASK_850:</strong> Der aktive Fire-Exchange hat jetzt einen expliziten Focus-Visual-Schalter: FireTrace/Impact/Target-Focus werden staerker, Friendly-Aim-/LOS-Weltlinien leiser. Combat-, Damage-, Command- und Multiplayer-Wahrheit bleiben unveraendert. Der Task ist in <code>integration/core-foundation</code> gemerged.</li>
-            <li><strong>TASK_851:</strong> Der aktuelle Schritt ist ein frischer Release-Export plus echter Fenster-Recapture nach TASK_850. Dafuer gibt es jetzt ein eigenes Capture-Script, ein Manifest und einen read-only Analyzer. Das ist absichtlich Evidence-/Review-Arbeit: erst schauen, ob der Spieler den Feuerwechsel wirklich besser lesen kann, dann gezielt weiter polieren.</li>
+            <li><strong>TASK_851:</strong> Der frische Release-Export plus echte Fenster-Recapture nach TASK_850 liegt als eigenes Capture-Script, Manifest und read-only Analyzer vor.</li>
+            <li><strong>TASK_852:</strong> Der neue Befund ist jetzt als Findings-Schnitt festgehalten: technisch ist der Capture sauber, spielerisch liest sich der erste Moment aber noch als <code>CONTACT PRESSURE</code> / <code>NO FIRE</code> mit Debug-Sprache statt als klarer Feuerwechsel.</li>
             <li><strong>Bericht:</strong> Diese Workbench fasst Arbeitsstand, Spielwirkung, Screenshot-Befund, offene Risiken und naechste Arbeitsschritte zusammen. Unten kann daraus eine JSON-Notiz exportiert werden.</li>
-            <li><strong>Git:</strong> TASK_848 bis TASK_850 sind gemerged und gepusht. TASK_851 laeuft aktuell auf <code>task/release-fire-exchange-focused-visual-recapture</code>.</li>
+            <li><strong>Git:</strong> TASK_848 bis TASK_851 sind gemerged und gepusht. TASK_852 laeuft aktuell auf <code>task/release-fire-exchange-focused-visual-findings</code>.</li>
           </ul>
         </article>
         <article class="card">
@@ -132,8 +134,9 @@
           <p><code>tmp/release_fire_exchange_visual_polish_findings.json</code></p>
           <p><code>tmp/release_fire_exchange_focused_visual_recapture.json</code> als TASK_851-Evidence-Paket</p>
           <p><code>tmp/release_fire_exchange_focused_visual_recapture_acceptance.json</code> als lokaler Analyzer-Output</p>
+          <p><code>tmp/release_fire_exchange_focused_visual_findings.json</code> als TASK_852-Findings-Paket</p>
           <p><code>tmp/release_first_exchange_recapture_acceptance.json</code></p>
-          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>, Polish-Status: <code>ready_for_polish</code>. TASK_850 ist technisch gruen; TASK_851 hat den echten Fensterblick neu belegt und laesst den menschlichen Sichtentscheid offen.</p>
+          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>, Polish-Status: <code>ready_for_polish</code>. TASK_852 setzt als naechsten konkreten Fix TASK_853: Kampf-Moment lesbar machen, ohne Combat-Wahrheit zu verschieben.</p>
         </article>
       </div>
     </section>
@@ -146,7 +149,7 @@
             Erwartet ist ein klarer erster <code>CONTACT FIRE</code>-Moment. Der frische TASK_851-Capture ist technisch review-ready, zeigt im sichtbaren Fenster aber weiterhin eher <code>CONTACT PRESSURE</code> / <code>NO FIRE</code> als einen eindeutig bestandenen Fire-Exchange-Moment.
           </div>
           <div class="status-box" style="margin-top: 12px;">
-            TASK_851 hat nach TASK_850 neu exportiert und neu gecaptured. Der Fokus-Style ist im Contract und Manifest erwartbar, aber der echte Blick bestaetigt noch nicht klar genug den Feuerwechsel. Das ist jetzt ein guter TASK_852-Fund: weniger neue Architektur, mehr gezielter sichtbarer Exchange-/AI-Engagement-Polish.
+            TASK_851 hat nach TASK_850 neu exportiert und neu gecaptured. Der Fokus-Style ist im Contract und Manifest erwartbar, aber der echte Blick bestaetigt noch nicht klar genug den Feuerwechsel. TASK_852 haelt das als belegten Befund fest: weniger neue Architektur, mehr gezielter sichtbarer Exchange-/AI-Engagement-Polish.
           </div>
           <img class="screenshot" src="../../tmp/release_fire_exchange_focused_visual_recapture.png" alt="TASK_851 Release Fire Exchange Focused Visual Recapture">
         </article>
@@ -180,7 +183,8 @@
           <ol class="list">
             <li><strong>TASK_850 abgeschlossen:</strong> Snapshot-/Contract-Test belegt, dass der Focus-Polish nur Darstellungsdaten veraendert und keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugt.</li>
             <li><strong>TASK_851 - Release Fire Exchange Focused Visual Recapture:</strong> Release erneut exportieren und mit echtem Fenster-Capture pruefen, ob der Spieler den ersten Feuerwechsel ohne Erklaertext versteht.</li>
-            <li><strong>TASK_852 - Release Fire Exchange Focused Visual Findings:</strong> Danach den Screenshot bewerten und nur den belegten naechsten Stoerfaktor polieren, kein Combat-Rewrite.</li>
+            <li><strong>TASK_852 - Release Fire Exchange Focused Visual Findings:</strong> Den Screenshot bewerten und nur den belegten naechsten Stoerfaktor polieren, kein Combat-Rewrite.</li>
+            <li><strong>TASK_853 - Release Fire Exchange Engagement Readability Polish:</strong> Debug-`NO FIRE` aus der primaeren Release-Lesung nehmen und #17/#18/#19 auf denselben Kampfstatus fuehren.</li>
           </ol>
         </article>
         <article class="card">
@@ -213,7 +217,8 @@
               <option value="recapture_acceptance_ready_manual_review_open">Recapture-Acceptance technisch fertig, Sichtreview offen</option>
               <option value="task_850_prepared">TASK_850 vorbereitet, Umsetzung offen</option>
               <option value="task_850_code_done">TASK_850 im Arbeitsstand umgesetzt</option>
-              <option selected value="task_851_slice_implemented">TASK_851 Slice implementiert, Recapture pruefen</option>
+              <option value="task_851_slice_implemented">TASK_851 Slice implementiert, Recapture pruefen</option>
+              <option selected value="task_852_findings_ready">TASK_852 Findings bereit, TASK_853 naechster Polish</option>
               <option value="visual_polish_findings_ready">Visual-Polish-Findings fuer TASK_850 bereit</option>
               <option value="visibility_fix_done_recapture_next">Sichtbarkeits-Fix erledigt, Recapture als naechstes</option>
               <option value="findings_done_visibility_fix_in_progress">Findings erledigt, Sichtbarkeits-Fix in Arbeit</option>
@@ -227,6 +232,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.manual_review_done"> Manueller Sichtreview ist als TASK_849-Findings dokumentiert.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_850_merged"> TASK_850-Code ist gemerged und gepusht.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_851_slice_implemented"> TASK_851-Slice mit Capture-Script, Analyzer und Verifier ist vorbereitet; echter Sichtentscheid bleibt offen.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_852_findings_ready"> TASK_852-Findings benennen CONTACT PRESSURE / NO FIRE als primaere Release-Reibung.</label>
         </article>
         <article class="card wide">
           <h2>Freie Notizen</h2>
@@ -291,17 +297,20 @@
             completed_acceptance_task: "TASK_848 - Release First Exchange Recapture Acceptance",
             completed_polish_findings_task: "TASK_849 - Release Fire Exchange Visual Polish Findings",
             completed_focus_visual_task: "TASK_850 - Release Fire Exchange Focused Visual Polish",
-            active_next_task: "TASK_851 - Release Fire Exchange Focused Visual Recapture",
+            completed_focused_recapture_task: "TASK_851 - Release Fire Exchange Focused Visual Recapture",
+            completed_focused_visual_findings_task: "TASK_852 - Release Fire Exchange Focused Visual Findings",
+            active_next_task: "TASK_853 - Release Fire Exchange Engagement Readability Polish",
             current_player_value: "Release-Singleplayer startet bis in die Mission; TASK_851-Capture ist review_ready, zeigt aber weiterhin eher CONTACT PRESSURE / NO FIRE als einen eindeutig lesbaren ersten Fire-Exchange.",
-            recommended_next_task: "TASK_852 - Release Fire Exchange Focused Visual Findings"
+            recommended_next_task: "TASK_853 - Release Fire Exchange Engagement Readability Polish"
           },
           metadata: {
-            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849", "TASK_850", "TASK_851"],
-            branch: "task/release-fire-exchange-focused-visual-recapture",
+            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849", "TASK_850", "TASK_851", "TASK_852"],
+            branch: "task/release-fire-exchange-focused-visual-findings",
             merged_branches: [
               "task/release-first-exchange-recapture-acceptance",
               "task/release-fire-exchange-visual-polish-findings",
-              "task/release-fire-exchange-focused-visual-polish"
+              "task/release-fire-exchange-focused-visual-polish",
+              "task/release-fire-exchange-focused-visual-recapture"
             ],
             manifest_path: "tmp/release_first_exchange_real_window_recapture.json",
             screenshot_path: "tmp/release_first_exchange_real_window.png",
@@ -309,7 +318,8 @@
             acceptance_manifest_path: "tmp/release_first_exchange_recapture_acceptance.json",
             focused_visual_recapture_manifest_path: "tmp/release_fire_exchange_focused_visual_recapture.json",
             focused_visual_recapture_acceptance_path: "tmp/release_fire_exchange_focused_visual_recapture_acceptance.json",
-            next_branch_goal: "Fresh release recapture after TASK_850; evidence only, no gameplay truth mutation."
+            focused_visual_findings_path: "tmp/release_fire_exchange_focused_visual_findings.json",
+            next_branch_goal: "Polish release engagement readability; no combat truth mutation."
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
