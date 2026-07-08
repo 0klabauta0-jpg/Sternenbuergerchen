@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_856_release_fire_exchange_contact_fire_primary_hud_polish.md`, `docs/tasks/TASK_855_release_fire_exchange_after_readability_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: #17 Selected Fireteam und #18 Mission Control priorisieren bei aktiver Release-Fire-Exchange-Persistence eine gemeinsame `CONTACT FIRE | ...`-Primaerzeile aus vorhandener FireEvent-/Visibility-Evidence.
+- Stand: Spaetere `NO FIRE`-/LOS-/Range-Diagnostics bleiben in Detailreadouts erreichbar, dominieren aber im aktiven Evidence-Fenster nicht mehr vor `CONTACT FIRE`.
+- Stand: `get_release_fire_exchange_contact_fire_primary_hud_polish_snapshot()` und der MetaLayer-Wrapper pruefen die gemeinsame Primaerzeile, Read-only-Grenzen und den Bezug auf die bestehende `combat_hud_density.visibility_persistence`.
+- Risiken/offen: Der echte Fensterbeweis steht noch aus. TASK_857 sollte nach frischem Export/Capture pruefen, ob der Screenshot jetzt wirklich als CONTACT-FIRE-Moment gelesen wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_856_release_fire_exchange_contact_fire_primary_hud_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_855_release_fire_exchange_after_readability_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture.
+
 ### TASK_855 - Release Fire Exchange After Readability Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_855_release_fire_exchange_after_readability_visual_findings.md`, `docs/tasks/TASK_854_release_fire_exchange_focused_recapture_after_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`

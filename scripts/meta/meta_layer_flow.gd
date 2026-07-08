@@ -2162,11 +2162,14 @@ func get_release_fire_exchange_visibility_persistence_snapshot(real_window_revie
 	var tactical_persistence: Dictionary = {}
 	if tactical_controller != null and tactical_controller.has_method("get_release_fire_exchange_visibility_persistence_snapshot"):
 		tactical_persistence = Dictionary(tactical_controller.call("get_release_fire_exchange_visibility_persistence_snapshot"))
+	var source_exchange_available: bool = String(source.get("status", "")) == "pass" and bool(source.get("first_exchange_visible", false))
+	if not source_exchange_available:
+		source_exchange_available = bool(tactical_persistence.get("visibility_persistence_active", false)) and not String(tactical_persistence.get("fire_event_id", "")).strip_edges().is_empty()
 	var checks: Array = []
 	_append_handoff_check(
 		checks,
 		"source_first_exchange_available",
-		String(source.get("status", "")) == "pass" and bool(source.get("first_exchange_visible", false)),
+		source_exchange_available,
 		"critical",
 		"TASK_847 builds on the green TASK_844 first-exchange chain."
 	)
@@ -2300,6 +2303,81 @@ func get_release_fire_exchange_focused_visual_polish_snapshot(real_window_review
 		"issues": _build_handoff_issue_list(checks),
 		"status": "pass" if failed_count == 0 else "review",
 		"recommended_next_task": "TASK_851 - Release Fire Exchange Focused Visual Recapture",
+	}
+
+
+func get_release_fire_exchange_contact_fire_primary_hud_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_fire_exchange_focused_visual_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_primary_hud: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_fire_exchange_contact_fire_primary_hud_polish_snapshot"):
+		tactical_primary_hud = Dictionary(tactical_controller.call("get_release_fire_exchange_contact_fire_primary_hud_polish_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_focus_snapshot_available",
+		String(source.get("status", "")) == "pass" or String(source.get("status", "")) == "review",
+		"warning",
+		"TASK_856 follows the existing release fire-exchange focus chain."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_primary_hud_snapshot_present",
+		not tactical_primary_hud.is_empty(),
+		"critical",
+		"Active mission should expose the tactical TASK_856 primary-HUD snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"contact_fire_primary_hud_gate_passes",
+		String(tactical_primary_hud.get("status", "")) == "pass" and bool(tactical_primary_hud.get("active", false)),
+		"critical",
+		"#17/#18 should present CONTACT FIRE as the first readable fire-exchange state."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_primary_hud.get("read_only", false))
+			and not bool(tactical_primary_hud.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_primary_hud.get("creates_command", true))
+			and not bool(tactical_primary_hud.get("creates_fire_event", true))
+			and not bool(tactical_primary_hud.get("creates_damage_event", true))
+			and not bool(tactical_primary_hud.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_856 changes HUD readability only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_fire_exchange_contact_fire_primary_hud_polish.v1",
+		"task_id": "TASK_856",
+		"source_task_id": "TASK_855",
+		"source_focus_task_id": "TASK_850",
+		"source_visibility_task_id": "TASK_847",
+		"source_exchange_task_id": "TASK_844",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_primary_hud": tactical_primary_hud,
+		"style_id": String(tactical_primary_hud.get("style_id", "")),
+		"contact_fire_primary_line": String(tactical_primary_hud.get("contact_fire_primary_line", "")),
+		"selected_fireteam_contains_contact_fire_primary": bool(tactical_primary_hud.get("selected_fireteam_contains_contact_fire_primary", false)),
+		"mission_control_contains_contact_fire_primary": bool(tactical_primary_hud.get("mission_control_contains_contact_fire_primary", false)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture",
 	}
 
 
