@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_863 - Release Fire Exchange Runtime Text Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_863_release_fire_exchange_runtime_text_recapture.md`, `docs/tasks/TASK_862_release_fire_exchange_real_window_primary_hud_runtime_text_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_fire_exchange_runtime_text_recapture.ps1` haengt einen eigenen TASK_863-Recapture an den bestehenden TASK_860-Real-Window-Capture und nutzt weiter `--release-singleplayer-first-go-firefight`.
+- Stand: Das Manifest `tmp/release_fire_exchange_runtime_text_recapture.json` erwartet TASK_862-Runtime-Text-Schema, Style-ID `task_862_release_fire_exchange_real_window_primary_hud_runtime_text_v1`, TASK_859-Source-Binding, TASK_856-Primary-HUD, TASK_853-Readability, TASK_850-Focus-Style und 45s Fire-Exchange-Persistenz.
+- Stand: `ReleaseFireExchangeRuntimeTextRecapture` paketiert das Capture als read-only Review-Snapshot mit Screenshotpfaden und Pflichtchecks fuer CONTACT FIRE als erste #17/#18-Runtime-Text-Lesung.
+- Stand: Der lokale echte TASK_863-Capture lief mit Gate `review_ready` und schreibt `tmp/release_fire_exchange_runtime_text_recapture.png` / `.json`. Sichtbefund: #17/#18 lesen im Fenster weiterhin primaer `NEXT LOS/RANGE KORRIGIEREN` / `Kampf NO FIRE NO_LOS`; das muss als TASK_864-Finding/Polish weiterverfolgt werden.
+- Risiken/offen: Der Recapture ersetzt keinen menschlichen Sichtentscheid; wenn der frische Screenshot noch nicht klar genug ist, folgt TASK_864 als Findings-/Polish-Slice.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_fire_exchange_runtime_text_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `godot_console.exe --headless --path . --script scripts/tests/task_863_release_fire_exchange_runtime_text_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_862_release_fire_exchange_real_window_primary_hud_runtime_text_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_864 - Release Fire Exchange Runtime Text Visual Findings.
+
 ### TASK_862 - Release Fire Exchange Real Window Primary HUD Runtime Text Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_862_release_fire_exchange_real_window_primary_hud_runtime_text_polish.md`, `docs/tasks/TASK_861_release_fire_exchange_real_window_contact_fire_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
