@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_867 - Release Fire Exchange Runtime Text Status Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_867_release_fire_exchange_runtime_text_status_visual_findings.md`, `docs/tasks/TASK_866_release_fire_exchange_runtime_text_status_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeRuntimeTextStatusVisualFindings` wertet den TASK_866-Recapture als read-only Findings-Snapshot aus.
+- Stand: Primaerer Befund ist `first_exchange_los_evidence_not_visible`: Der echte Fensterblick zeigt weiter `NO_LOS` / `CONTACT PRESSURE: Position korrigieren` statt eine belastbare CONTACT-FIRE-/FireEvent-Situation.
+- Stand: TASK_867 empfiehlt bewusst keinen weiteren blinden HUD-Override, sondern TASK_868 als First-Exchange-LOS-/Scenario-Setup-Polish.
+- Risiken/offen: Die eigentliche Spielverbesserung folgt in TASK_868. Dort muss entschieden werden, ob das Szenario echte LOS-/FireEvent-Evidence erzeugen soll oder ob CONTACT PRESSURE als korrekter Zwischenzustand klarer gerahmt wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_867_release_fire_exchange_runtime_text_status_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_866_release_fire_exchange_runtime_text_status_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_868 - Release First Exchange LOS Setup Polish.
+
 ### TASK_866 - Release Fire Exchange Runtime Text Status Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_866_release_fire_exchange_runtime_text_status_recapture.md`, `docs/tasks/TASK_865_release_fire_exchange_runtime_text_visible_status_polish.md`, `docs/dev/mission_command_feedback_contract.md`
