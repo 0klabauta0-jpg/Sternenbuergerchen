@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_861 - Release Fire Exchange Real Window Contact-Fire Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_861_release_fire_exchange_real_window_contact_fire_visual_findings.md`, `docs/tasks/TASK_860_release_fire_exchange_real_window_contact_fire_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeRealWindowContactFireVisualFindings` wertet den TASK_860-Recapture als read-only Findings-Snapshot aus.
+- Stand: Positive Findings halten fest, dass der echte TASK_860-Fenster-Capture vorhanden ist, TASK_859-Source-Binding-Style erwartet wird und Mission-/Command-Surfaces grundsaetzlich lesbar bleiben.
+- Stand: Offene Findings sind `real_window_still_no_fire_no_los_first_reading`, `contact_fire_not_first_in_selected_fireteam`, `contact_fire_not_first_in_mission_control`, `event_log_still_contact_pressure` und `source_binding_window_gap`.
+- Risiken/offen: TASK_861 ist nur der Befund-Schnitt. Die sichtbare Korrektur folgt in TASK_862 und soll eng klaeren, warum die TASK_859-Bindung nicht in der echten #17/#18-Erstlesung landet.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_861_release_fire_exchange_real_window_contact_fire_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_860_release_fire_exchange_real_window_contact_fire_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_862 - Release Fire Exchange Real Window Primary HUD Runtime Text Polish.
+
 ### TASK_860 - Release Fire Exchange Real Window Contact-Fire Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_860_release_fire_exchange_real_window_contact_fire_recapture.md`, `docs/tasks/TASK_859_release_fire_exchange_real_window_primary_hud_source_binding_polish.md`, `docs/dev/mission_command_feedback_contract.md`
