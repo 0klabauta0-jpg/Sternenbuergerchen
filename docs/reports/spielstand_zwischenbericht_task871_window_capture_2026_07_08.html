@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sternenbuergerchen Zwischenbericht - TASK_871</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10161a;
+      --panel: #182129;
+      --panel-2: #202b35;
+      --line: #3b4d5c;
+      --text: #edf5f8;
+      --muted: #9fb0bb;
+      --accent: #ffd34d;
+      --cyan: #55d6dc;
+      --green: #70db9d;
+      --red: #ff7b72;
+      --orange: #ffb86b;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+    header { padding: 28px clamp(18px, 4vw, 52px) 18px; border-bottom: 1px solid var(--line); background: #141d24; }
+    main { width: min(1380px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+    h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: 0; }
+    h1 { font-size: clamp(28px, 3vw, 42px); }
+    h2 { font-size: 22px; }
+    h3 { font-size: 16px; color: var(--cyan); }
+    p { margin: 8px 0 0; color: var(--muted); }
+    a { color: var(--cyan); }
+    code { color: var(--accent); }
+    button, input, select, textarea { font: inherit; }
+    button { border: 1px solid var(--line); background: #dce5ef; color: #10161a; border-radius: 6px; min-height: 38px; padding: 8px 12px; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--text); }
+    button.choice.active { border-color: var(--accent); background: var(--accent); color: #16120a; }
+    input, select, textarea, [contenteditable="true"] {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0d1318;
+      color: var(--text);
+      padding: 8px 10px;
+    }
+    textarea { min-height: 118px; resize: vertical; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #74848e; }
+    .meta-row, .toolbar, .tabbar, .button-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .meta-row { margin-top: 14px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--muted); background: rgba(255,255,255,0.03); font-size: 13px; }
+    .pill.good { color: var(--green); border-color: rgba(112,219,157,0.5); }
+    .pill.warn { color: var(--accent); border-color: rgba(255,211,77,0.55); }
+    .pill.bad { color: var(--red); border-color: rgba(255,123,114,0.6); }
+    .pill.orange { color: var(--orange); border-color: rgba(255,184,107,0.55); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 18px; }
+    .card { grid-column: span 4; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+    .wide { grid-column: span 8; }
+    .full { grid-column: 1 / -1; }
+    .stack { display: grid; gap: 12px; }
+    .list { margin: 10px 0 0; padding-left: 18px; color: var(--text); }
+    .list li { margin: 6px 0; }
+    .status-box { border-left: 4px solid var(--accent); background: rgba(255,211,77,0.08); padding: 12px; border-radius: 6px; }
+    .status-box.good { border-left-color: var(--green); background: rgba(112,219,157,0.08); }
+    .status-box.bad { border-left-color: var(--red); background: rgba(255,123,114,0.08); }
+    .status-box.orange { border-left-color: var(--orange); background: rgba(255,184,107,0.08); }
+    .checkline { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; color: var(--text); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .checkline:last-child { border-bottom: 0; }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; }
+    .metric { display: grid; gap: 4px; padding: 12px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: var(--panel-2); }
+    .metric strong { font-size: 24px; line-height: 1; }
+    .metric span { color: var(--muted); font-size: 13px; }
+    .shot { display: block; width: 100%; max-height: 520px; object-fit: contain; border: 1px solid var(--line); border-radius: 8px; background: #0d1318; margin-top: 12px; }
+    .tabbar { margin-top: 22px; border-bottom: 1px solid var(--line); }
+    .tab { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: transparent; color: var(--muted); border-bottom: 0; }
+    .tab.active { background: var(--panel); color: var(--text); border-color: var(--line); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .toolbar { position: sticky; bottom: 0; z-index: 5; justify-content: space-between; background: rgba(16,22,26,0.96); border-top: 1px solid var(--line); padding: 12px clamp(18px, 4vw, 52px); backdrop-filter: blur(8px); }
+    .toolbar textarea { min-height: 74px; max-height: 180px; flex: 1 1 420px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-status[data-tone="good"] { color: var(--green); }
+    .export-status[data-tone="warn"] { color: var(--accent); }
+    @media (max-width: 900px) { .card, .wide { grid-column: 1 / -1; } .toolbar { position: static; } }
+  </style>
+</head>
+<body data-report-id="spielstand_zwischenbericht_task871_window_capture_2026_07_08" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>Sternenbuergerchen Zwischenbericht</h1>
+    <p>Stand 2026-07-08: Was seit den letzten Release-/Playtest-Schnitten am Spiel passiert ist, was jetzt besser ist und was als naechstes sinnvoll dran ist.</p>
+    <div class="meta-row">
+      <span class="pill good">TASK_868 LOS-Setup gruen</span>
+      <span class="pill good">TASK_871 Handle-Capture gruen</span>
+      <span class="pill good">Richtiges Spiel-Fenster wieder sichtbar</span>
+      <span class="pill orange">First Exchange noch unklar</span>
+      <span class="pill bad">NO_LOS / CONTACT PRESSURE sichtbar</span>
+      <span class="pill">Bericht ist read-only</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabbar" aria-label="Reportbereiche">
+      <button class="tab active" type="button" data-tab-target="overview">Uebersicht</button>
+      <button class="tab" type="button" data-tab-target="game">Spielwirkung</button>
+      <button class="tab" type="button" data-tab-target="evidence">Belege</button>
+      <button class="tab" type="button" data-tab-target="next">Naechstes</button>
+      <button class="tab" type="button" data-tab-target="notes">Notizen</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was ich getan habe</h2>
+          <ul class="list">
+            <li><strong>Release-Fenster-Capture gehaertet:</strong> Der sichtbare Release-Capture versucht jetzt zuerst einen direkten Window-Handle-Capture ueber das Ziel-Fenster und nutzt den Desktop-Crop nur noch als Fallback.</li>
+            <li><strong>Manifest-Evidence erweitert:</strong> Die Capture-Manifeste schreiben jetzt <code>window_capture_method</code>, <code>window_capture_trusted</code>, <code>window_handle_capture</code>, <code>window_handle_capture_nonblank</code> und <code>desktop_crop_status</code>.</li>
+            <li><strong>TASK_869-Wrapper angepasst:</strong> Der First-Exchange-Recapture uebernimmt die neue Capture-Methode und stuft nicht vertrauenswuerdige Fensterbeweise ab.</li>
+            <li><strong>TASK_871 dokumentiert:</strong> Task-Datei, Status, Roadmap und Contract beschreiben jetzt den neuen read-only Capture-Pfad.</li>
+            <li><strong>Frisch recaptured:</strong> Der aktuelle Recapture zeigt wieder das echte Sternenbuergerchen-Missionsfenster statt der fremden World-at-War/TripleA-Karte.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Arbeitsstatus</h2>
+          <div class="stack">
+            <div class="metric"><strong>868</strong><span>valides LOS-/Range-/Attackable-Setup fuer den ersten Kontakt</span></div>
+            <div class="metric"><strong>869</strong><span>echter Release-Fenster-Recapture mit First-Go-Firefight</span></div>
+            <div class="metric"><strong>870</strong><span>Befund: alter Screenshot zeigte falsches Fenster</span></div>
+            <div class="metric"><strong>871</strong><span>Fix: direkte Ziel-Fensteraufnahme statt blindem Desktop-Crop</span></div>
+          </div>
+        </article>
+        <article class="card full">
+          <h2>Aktueller Befund</h2>
+          <div class="status-box good">
+            <strong>Der Capture-Beweis ist wieder belastbar.</strong>
+            <p>Der neue Screenshot kommt vom Ziel-Fenster selbst: <code>window_capture_method=window_handle_print</code>, <code>window_capture_trusted=true</code>, <code>window_handle_capture.succeeded=true</code>. Das loest den falschen Screenshot-Inhalt.</p>
+          </div>
+          <div class="status-box orange" style="margin-top: 12px;">
+            <strong>Der Spielmoment selbst ist noch nicht gut genug lesbar.</strong>
+            <p>Im korrekten Fenster liest der First Exchange weiterhin <code>NEXT LOS/RANGE KORRIGIEREN</code>, <code>Kampf NO FIRE NO_LOS</code> und im Event-Log <code>CONTACT PRESSURE</code>. Das ist jetzt wieder ein echter Spiel-/Lesbarkeitsbefund, nicht mehr nur ein Capture-Fehler.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="game" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was sich am Spiel getan hat</h2>
+          <ul class="list">
+            <li><strong>Der Release-Test ist naeher an Spielerwahrheit:</strong> Wir verlassen uns nicht mehr nur auf Headless-Snapshots, sondern auf das echte Fenster, das ein Spieler sehen wuerde.</li>
+            <li><strong>Fireteam-/Dropship-Flow bleibt der Fokus:</strong> Homebase, FOB, Mission, Dropship-Start und Missionseinstieg sind inzwischen testbar genug, dass die naechste Reibung im Gefecht sichtbar wird.</li>
+            <li><strong>HUD-Wahrheit bleibt getrennt:</strong> UI und Screenshot-Tools erzeugen keine Combat-Wahrheit. Sie lesen nur, was Runtime, Simulation und Contracts bereits liefern.</li>
+            <li><strong>Fehler werden sichtbarer:</strong> Wenn das Spiel keine saubere Schusslinie findet, steht jetzt nicht einfach ein kosmetisches CONTACT FIRE im HUD. Der sichtbare Restbefund kann deshalb gezielt gefixt werden.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Spielerlebnis jetzt</h2>
+          <div class="status-box orange">
+            <strong>Startbar, aber noch nicht rund.</strong>
+            <p>Man kommt in den Missionsblick, sieht Fireteam- und Mission-Control-Daten, aber der erste Feuerkontakt erklaert sich noch nicht gut genug.</p>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Architektur</h2>
+          <div class="status-box good">
+            <strong>Kein neuer Gameplay-Bypass.</strong>
+            <p>Die Aenderung ist Capture-/Evidence-seitig. Commands, FireEvents und Damage bleiben bei den bestehenden Runtime-Pfaden.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="evidence" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Aktueller Fensterbeweis</h2>
+          <p>Der folgende Screenshot ist der frisch erzeugte TASK_869-Recapture nach TASK_871. Wenn das Bild lokal nicht angezeigt wird, liegt die Datei unter <code>tmp/release_first_exchange_los_setup_real_window_recapture.png</code>.</p>
+          <img class="shot" src="../../tmp/release_first_exchange_los_setup_real_window_recapture.png" alt="TASK_869 Release First Exchange Recapture">
+        </article>
+        <article class="card">
+          <h2>Manifest-Werte</h2>
+          <label class="checkline"><input type="checkbox" checked data-export-key="evidence.window_capture_trusted"> <span><code>window_capture_trusted=true</code></span></label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="evidence.window_handle_print"> <span><code>window_capture_method=window_handle_print</code></span></label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="evidence.correct_window_seen"> <span>Screenshot zeigt Sternenbuergerchen-Fenster</span></label>
+          <label class="checkline"><input type="checkbox" data-export-key="evidence.contact_fire_readable"> <span>CONTACT FIRE ist bereits sauber lesbar</span></label>
+          <label class="checkline"><input type="checkbox" data-export-key="evidence.no_los_gone"> <span>NO_LOS / CONTACT PRESSURE ist aus Erstlesung verschwunden</span></label>
+        </article>
+        <article class="card full">
+          <h2>Was dieser Beweis bedeutet</h2>
+          <p>Vor TASK_871 konnten wir nicht sauber unterscheiden, ob ein Problem aus dem Spiel oder aus dem Screenshot-Weg kam. Jetzt ist diese Verwechslung weg: Das Bild ist wieder Sternenbuergerchen. Der naechste Befund darf also wieder am eigentlichen Missionsflow ansetzen.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="next" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was ich noch machen will</h2>
+          <ol class="list">
+            <li><strong>TASK_872 - Release Correct Window First Exchange Visual Findings:</strong> Den jetzt richtigen Fensterinhalt read-only bewerten und den verbleibenden First-Exchange-Befund sauber schneiden.</li>
+            <li><strong>CONTACT-FIRE-/LOS-Klarheit:</strong> Pruefen, warum trotz validiertem Setup im echten Fenster noch <code>NO_FIRE NO_LOS</code> und <code>CONTACT PRESSURE</code> dominieren.</li>
+            <li><strong>Spielerlesung verbessern:</strong> Selected-Fireteam, Mission-Control und Event-Log muessen den ersten Kontakt so zeigen, dass man ohne Debugwissen versteht, ob ein Fireteam schiesst, blockiert ist oder Position korrigieren muss.</li>
+            <li><strong>Danach wieder Playtest:</strong> Exportierte EXE starten, Einzelspieler klicken, Mission laufen lassen, ersten Kontakt im echten Fenster ansehen.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h2>Entscheidung</h2>
+          <p>Mein Vorschlag: erst TASK_872 fertig machen, dann erst wieder an groessere Gameplay-/Taktikfeatures gehen.</p>
+          <div class="button-row" data-choice-group="next.path" style="margin-top: 12px;">
+            <button class="choice active" type="button" data-choice-value="task872">TASK_872</button>
+            <button class="choice" type="button" data-choice-value="feature">Feature bauen</button>
+            <button class="choice" type="button" data-choice-value="release">Release packen</button>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Nicht jetzt</h2>
+          <ul class="list">
+            <li>Kein Combat-Rewrite.</li>
+            <li>Kein neues Missionssystem.</li>
+            <li>Kein kosmetischer CONTACT-FIRE-Text ohne Runtime-Evidence.</li>
+            <li>Kein Merge in den Integrationsbranch, solange die Task-Kette noch auf ungemergten Release-Schnitten aufbaut.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section id="notes" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Playtest-Notizen</h2>
+          <label class="checkline"><input type="checkbox" data-export-key="notes.singleplayer_retested"> Einzelspieler aus EXE nochmal gestartet</label>
+          <label class="checkline"><input type="checkbox" data-export-key="notes.first_exchange_seen"> Erster Feindkontakt im Fenster gesehen</label>
+          <label class="checkline"><input type="checkbox" data-export-key="notes.fireteam_left_panel_ok"> Fireteam-Anzeige links bleibt konsistent</label>
+          <label class="checkline"><input type="checkbox" data-export-key="notes.dropship_cards_ok"> Dropship-Karten zeigen richtige Fireteams</label>
+          <label class="checkline"><input type="checkbox" data-export-key="notes.performance_ok"> Bildlauf/Refresh fuehlt sich zuegig an</label>
+          <div style="margin-top: 12px;" contenteditable="true" data-note-key="notes.freeform" data-placeholder="Hier eigene Beobachtungen eintragen..."></div>
+        </article>
+        <article class="card wide">
+          <h2>Rueckmeldung fuer Codex</h2>
+          <textarea data-export-key="notes.codex_feedback" placeholder="Was soll ich aus diesem Bericht als naechstes tun?"></textarea>
+        </article>
+        <article class="card">
+          <h2>Bewertung</h2>
+          <div class="button-row" data-choice-group="notes.rating">
+            <button class="choice active" type="button" data-choice-value="weiter">Weiter so</button>
+            <button class="choice" type="button" data-choice-value="erst_spielen">Erst spielen</button>
+            <button class="choice" type="button" data-choice-value="stop">Stoppen</button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="toolbar">
+    <div class="export-actions">
+      <button id="exportJsonButton" type="button">JSON exportieren</button>
+      <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+      <span id="exportStatus" class="export-status">Export erzeugt lokal eine JSON-Datei oder legt den Inhalt ins Textfeld.</span>
+    </div>
+    <textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea>
+  </footer>
+
+  <script>
+    (function () {
+      const reportId = document.body.dataset.reportId || "html_workbench";
+      const schema = document.body.dataset.reportSchema || "sternenbuergerchen.html_workbench.v1";
+      const output = document.getElementById("jsonOutput");
+      const exportStatus = document.getElementById("exportStatus");
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+      function readControlValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        if (element.type === "number" || element.type === "range") return Number(element.value);
+        return element.value;
+      }
+      function setExportStatus(message, tone) {
+        if (!exportStatus) return;
+        exportStatus.textContent = message;
+        exportStatus.dataset.tone = tone || "";
+      }
+      function collectWorkbenchState() {
+        const controls = {};
+        const notes = {};
+        const activeChoices = {};
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = readControlValue(element);
+          if (value !== undefined) setPath(controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          setPath(notes, element.dataset.noteKey, element.innerText.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const active = group.querySelector(".choice.active");
+          if (active) setPath(activeChoices, group.dataset.choiceGroup, active.dataset.choiceValue || active.textContent.trim());
+        });
+        return {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: new Date().toISOString(),
+          controls,
+          notes,
+          active_choices: activeChoices,
+          computed: {
+            report_scope: "TASK_871 window-capture interim status",
+            current_recommended_next_task: "TASK_872 - Release Correct Window First Exchange Visual Findings",
+            core_remaining_issue: "Correct release window still shows NO_FIRE NO_LOS / CONTACT PRESSURE in first exchange."
+          },
+          metadata: {
+            repo: "C:\\dev\\SternenBuergerchen",
+            branch_at_report_time: "task/release-window-identity-capture-target-fix",
+            screenshot: "tmp/release_first_exchange_los_setup_real_window_recapture.png"
+          }
+        };
+      }
+      function buildExportFilename(exportedAt) {
+        return `${reportId}_${String(exportedAt).replace(/[:.]/g, "-")}.json`;
+      }
+      function downloadText(text, filename) {
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+      function exportJson(download) {
+        const payload = collectWorkbenchState();
+        const text = JSON.stringify(payload, null, 2);
+        output.value = text;
+        if (download) downloadText(text, buildExportFilename(payload.exported_at));
+        setExportStatus(download ? "JSON exportiert." : "JSON im Textfeld aktualisiert.", "good");
+        return text;
+      }
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.remove("active"));
+          button.classList.add("active");
+          const target = document.getElementById(button.dataset.tabTarget);
+          if (target) target.classList.add("active");
+        });
+      });
+      document.querySelectorAll("[data-choice-group] .choice").forEach((button) => {
+        button.addEventListener("click", () => {
+          const group = button.closest("[data-choice-group]");
+          group.querySelectorAll(".choice").forEach((choice) => choice.classList.remove("active"));
+          button.classList.add("active");
+        });
+      });
+      document.getElementById("exportJsonButton").addEventListener("click", () => exportJson(true));
+      document.getElementById("copyJsonButton").addEventListener("click", async () => {
+        const text = exportJson(false);
+        try {
+          await navigator.clipboard.writeText(text);
+          setExportStatus("JSON kopiert.", "good");
+        } catch (error) {
+          setExportStatus("Kopieren nicht erlaubt; JSON steht im Textfeld.", "warn");
+        }
+      });
+      exportJson(false);
+    }());
+  </script>
+</body>
+</html>

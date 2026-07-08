@@ -32,6 +32,17 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_870_release_first_exchange_post_los_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_869_release_first_exchange_real_window_recapture_after_los_setup.gd`, `git diff --check`.
 - Naechster Schritt: TASK_871 - Release Window Identity Capture Target Fix.
 
+### TASK_871 - Release Window Identity Capture Target Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_871_release_window_identity_capture_target_fix.md`, `docs/tasks/TASK_870_release_first_exchange_post_los_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_singleplayer_visible_window.ps1` versucht nun zuerst einen direkten Window-Handle-Capture via `PrintWindow` und nutzt den Desktop-Crop nur noch als Fallback.
+- Stand: Das sichtbare Capture-Manifest meldet `window_capture_method`, `window_capture_trusted`, `window_handle_capture`, `window_handle_capture_nonblank` und `desktop_crop_status`.
+- Stand: Der TASK_869-Wrapper propagiert `window_capture_method`, `window_capture_trusted` und `window_handle_capture_succeeded`, damit Folge-Captures nicht nur auf Desktop-Crop-Evidence schauen.
+- Stand: Lokaler Recapture nach TASK_871 lief mit `window_capture_method=window_handle_print`, `window_capture_trusted=true` und zeigt wieder das Sternenbuergerchen-Missionsfenster statt der fremden World-at-War/TripleA-Karte.
+- Risiken/offen: Der Capture-Inhalt ist jetzt wieder richtig, aber der sichtbare First-Exchange liest weiterhin `NEXT LOS/RANGE KORRIGIEREN` / `Kampf NO FIRE NO_LOS` und Event-Log `CONTACT PRESSURE`. TASK_872 sollte deshalb den korrekten Fensterinhalt als Acceptance sichern und den verbleibenden CONTACT-FIRE-/LOS-Befund neu schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_871_release_window_identity_capture_target_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_870_release_first_exchange_post_los_visual_findings.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_los_setup_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `git diff --check`.
+- Naechster Schritt: TASK_872 - Release Correct Window First Exchange Visual Findings.
+
 ### TASK_868 - Release First Exchange LOS Setup Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/tasks/TASK_867_release_fire_exchange_runtime_text_status_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`

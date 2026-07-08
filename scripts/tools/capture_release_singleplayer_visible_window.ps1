@@ -96,6 +96,8 @@ namespace Win32 {
 		public static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
 		[DllImport("user32.dll")]
 		public static extern bool ClientToScreen(IntPtr hWnd, ref POINT lpPoint);
+		[DllImport("user32.dll")]
+		public static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, uint nFlags);
 		public struct RECT {
 			public int Left;
 			public int Top;
@@ -191,6 +193,66 @@ function Get-WindowSnapshot {
 				height = $clientHeight
 			}
 		}
+	}
+	return $result
+}
+
+function Capture-WindowHandle {
+	param(
+		[object]$WindowSnapshot,
+		[string]$Path
+	)
+	$result = [ordered]@{
+		attempted = $false
+		succeeded = $false
+		reason = ""
+		width = 0
+		height = 0
+	}
+	if ($null -eq $WindowSnapshot -or -not [bool]$WindowSnapshot.window_handle_found) {
+		$result.reason = "window_handle_missing"
+		return $result
+	}
+	if ($null -eq $WindowSnapshot.rect) {
+		$result.reason = "window_rect_missing"
+		return $result
+	}
+	$handle = [IntPtr]([int64]$WindowSnapshot.main_window_handle)
+	if ($handle -eq [IntPtr]::Zero) {
+		$result.reason = "window_handle_zero"
+		return $result
+	}
+	$width = [int]$WindowSnapshot.rect.width
+	$height = [int]$WindowSnapshot.rect.height
+	if ($width -le 0 -or $height -le 0) {
+		$result.reason = "window_rect_invalid"
+		return $result
+	}
+	Add-Type -AssemblyName System.Drawing
+	$result.attempted = $true
+	$bitmap = New-Object System.Drawing.Bitmap $width, $height
+	$graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+	try {
+		$hdc = $graphics.GetHdc()
+		try {
+			$printed = [Win32.ReleaseSingleplayerWindowTools]::PrintWindow($handle, $hdc, 2)
+		} finally {
+			$graphics.ReleaseHdc($hdc)
+		}
+		if (-not $printed) {
+			$result.reason = "print_window_failed"
+			return $result
+		}
+		$bitmap.Save($Path, [System.Drawing.Imaging.ImageFormat]::Png)
+		$result.succeeded = Test-Path -LiteralPath $Path
+		$result.width = $width
+		$result.height = $height
+		if (-not $result.succeeded) {
+			$result.reason = "window_handle_write_failed"
+		}
+	} finally {
+		$graphics.Dispose()
+		$bitmap.Dispose()
 	}
 	return $result
 }
@@ -353,11 +415,16 @@ if ($null -ne $selectedProcess) {
 }
 
 $desktopScreenshotPath = Join-Path $OutputDirectory "release_singleplayer_visible_window_desktop.png"
+$windowHandleScreenshotPath = Join-Path $OutputDirectory "release_singleplayer_visible_window_handle.png"
+$desktopCropScreenshotPath = Join-Path $OutputDirectory "release_singleplayer_visible_window_desktop_crop.png"
 $windowScreenshotPath = Join-Path $OutputDirectory "release_singleplayer_visible_window.png"
 $manifestPath = Join-Path $OutputDirectory "release_singleplayer_visible_window_findings.json"
 
 $shouldFocusWindow = -not [bool]$SkipFocusWindow
 $windowSnapshot = Get-WindowSnapshot -SelectedProcessId $selectedProcessId -ShouldFocus $shouldFocusWindow
+$handleCaptureStatus = Capture-WindowHandle -WindowSnapshot $windowSnapshot -Path $windowHandleScreenshotPath
+$handleCaptureNonBlank = Test-ImageNonBlank -Path $windowHandleScreenshotPath
+$handleCaptureTrusted = [bool]$handleCaptureStatus.succeeded -and [bool]$handleCaptureNonBlank.nonblank
 $desktopCaptureError = ""
 $desktopScreenshotWritten = $false
 try {
@@ -380,11 +447,11 @@ if ([bool]$windowSnapshot.client_rect_found) {
 	$preferredCropRect = $windowSnapshot.client_rect
 }
 if ($desktopScreenshotWritten -and $null -ne $preferredCropRect) {
-	$cropStatus = Export-DesktopCrop -SourcePath $desktopScreenshotPath -DestinationPath $windowScreenshotPath -WindowRect $preferredCropRect
+	$cropStatus = Export-DesktopCrop -SourcePath $desktopScreenshotPath -DestinationPath $desktopCropScreenshotPath -WindowRect $preferredCropRect
 }
 
 $desktopNonBlank = Test-ImageNonBlank -Path $desktopScreenshotPath
-$windowNonBlank = Test-ImageNonBlank -Path $windowScreenshotPath
+$desktopCropNonBlank = Test-ImageNonBlank -Path $desktopCropScreenshotPath
 if ($desktopScreenshotWritten -and -not [bool]$desktopNonBlank.nonblank) {
 	$warnings += "desktop_screenshot_blank"
 }
@@ -403,12 +470,31 @@ if ([bool]$shouldFocusWindow -and -not [bool]$windowSnapshot.foreground_matches_
 	$windowCropTrusted = $false
 }
 
+$windowCaptureMethod = ""
+$windowScreenshotWritten = $false
+if ($handleCaptureTrusted) {
+	Copy-Item -LiteralPath $windowHandleScreenshotPath -Destination $windowScreenshotPath -Force
+	$windowCaptureMethod = "window_handle_print"
+	$windowScreenshotWritten = Test-Path -LiteralPath $windowScreenshotPath
+} elseif ([bool]$cropStatus.succeeded) {
+	Copy-Item -LiteralPath $desktopCropScreenshotPath -Destination $windowScreenshotPath -Force
+	$windowCaptureMethod = "desktop_crop_fallback"
+	$windowScreenshotWritten = Test-Path -LiteralPath $windowScreenshotPath
+} else {
+	$windowCaptureMethod = "none"
+}
+$windowNonBlank = Test-ImageNonBlank -Path $windowScreenshotPath
+$windowCaptureTrusted = $handleCaptureTrusted -or ([bool]$windowCropTrusted -and [bool]$windowNonBlank.nonblank)
+if (-not $handleCaptureTrusted -and [bool]$handleCaptureStatus.attempted) {
+	$warnings += "window_handle_capture_not_trusted"
+}
+
 $gate = "review_ready"
 if ($hardFailures.Count -gt 0) {
 	$gate = "fail"
 } elseif (-not $desktopScreenshotWritten) {
 	$gate = "manual_open"
-} elseif ([bool]$cropStatus.succeeded -and -not [bool]$windowCropTrusted) {
+} elseif ($windowScreenshotWritten -and -not [bool]$windowCaptureTrusted) {
 	$gate = "manual_open"
 }
 
@@ -439,14 +525,24 @@ $manifest = [ordered]@{
 	client_rect = $windowSnapshot.client_rect
 	desktop_screenshot_path = "tmp/release_singleplayer_visible_window_desktop.png"
 	window_screenshot_path = "tmp/release_singleplayer_visible_window.png"
+	window_handle_screenshot_path = "tmp/release_singleplayer_visible_window_handle.png"
+	desktop_crop_screenshot_path = "tmp/release_singleplayer_visible_window_desktop_crop.png"
 	desktop_screenshot_full_path = $desktopScreenshotPath
 	window_screenshot_full_path = $windowScreenshotPath
+	window_handle_screenshot_full_path = $windowHandleScreenshotPath
+	desktop_crop_screenshot_full_path = $desktopCropScreenshotPath
 	desktop_screenshot_written = [bool]$desktopScreenshotWritten
-	window_screenshot_written = [bool]$cropStatus.succeeded
+	window_screenshot_written = [bool]$windowScreenshotWritten
+	window_capture_method = $windowCaptureMethod
+	window_capture_trusted = [bool]$windowCaptureTrusted
+	window_handle_capture = $handleCaptureStatus
+	window_handle_capture_nonblank = $handleCaptureNonBlank
 	window_crop_trusted = [bool]$windowCropTrusted
 	desktop_screenshot_nonblank = $desktopNonBlank
 	window_screenshot_nonblank = $windowNonBlank
+	desktop_crop_nonblank = $desktopCropNonBlank
 	crop_status = $cropStatus
+	desktop_crop_status = $cropStatus
 	desktop_capture_error = $desktopCaptureError
 	warnings = @($warnings)
 	hard_failures = @($hardFailures)

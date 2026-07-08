@@ -117,7 +117,9 @@ if ($visibleWindowManifest -eq $null) {
 	if ([string]$visibleWindowManifest.gate -eq "fail") {
 		$hardFailures += "visible_window_manifest_failed"
 	}
-	if ($visibleWindowManifest.PSObject.Properties.Name -contains "window_crop_trusted" -and -not [bool]$visibleWindowManifest.window_crop_trusted) {
+	if ($visibleWindowManifest.PSObject.Properties.Name -contains "window_capture_trusted" -and -not [bool]$visibleWindowManifest.window_capture_trusted) {
+		$warnings += "source_window_capture_not_trusted"
+	} elseif ($visibleWindowManifest.PSObject.Properties.Name -contains "window_crop_trusted" -and -not [bool]$visibleWindowManifest.window_crop_trusted) {
 		$warnings += "source_window_crop_not_trusted"
 	}
 	if ($visibleWindowManifest.PSObject.Properties.Name -contains "window_snapshot" -and $visibleWindowManifest.window_snapshot -ne $null) {
@@ -140,6 +142,8 @@ $gate = "review_ready"
 if ($hardFailures.Count -gt 0) {
 	$gate = "fail"
 } elseif (-not $windowCopied) {
+	$gate = "manual_open"
+} elseif ($visibleWindowManifest -ne $null -and $visibleWindowManifest.PSObject.Properties.Name -contains "window_capture_trusted" -and -not [bool]$visibleWindowManifest.window_capture_trusted) {
 	$gate = "manual_open"
 } elseif ($visibleWindowManifest -ne $null -and $visibleWindowManifest.PSObject.Properties.Name -contains "window_crop_trusted" -and -not [bool]$visibleWindowManifest.window_crop_trusted) {
 	$gate = "manual_open"
@@ -187,6 +191,9 @@ $manifest = [ordered]@{
 	visible_window_manifest_path = "tmp/release_singleplayer_visible_window_findings.json"
 	visible_window_manifest_full_path = $visibleWindowManifestPath
 	visible_window_gate = if ($visibleWindowManifest -ne $null) { [string]$visibleWindowManifest.gate } else { "" }
+	window_capture_method = if ($visibleWindowManifest -ne $null -and $visibleWindowManifest.PSObject.Properties.Name -contains "window_capture_method") { [string]$visibleWindowManifest.window_capture_method } else { "" }
+	window_capture_trusted = if ($visibleWindowManifest -ne $null -and $visibleWindowManifest.PSObject.Properties.Name -contains "window_capture_trusted") { [bool]$visibleWindowManifest.window_capture_trusted } else { $false }
+	window_handle_capture_succeeded = if ($visibleWindowManifest -ne $null -and $visibleWindowManifest.PSObject.Properties.Name -contains "window_handle_capture" -and $visibleWindowManifest.window_handle_capture -ne $null -and $visibleWindowManifest.window_handle_capture.PSObject.Properties.Name -contains "succeeded") { [bool]$visibleWindowManifest.window_handle_capture.succeeded } else { $false }
 	window_crop_trusted = if ($visibleWindowManifest -ne $null -and $visibleWindowManifest.PSObject.Properties.Name -contains "window_crop_trusted") { [bool]$visibleWindowManifest.window_crop_trusted } else { $false }
 	window_focus_succeeded = if ($visibleWindowManifest -ne $null -and $visibleWindowManifest.PSObject.Properties.Name -contains "window_snapshot" -and $visibleWindowManifest.window_snapshot -ne $null -and $visibleWindowManifest.window_snapshot.PSObject.Properties.Name -contains "focus_succeeded") { [bool]$visibleWindowManifest.window_snapshot.focus_succeeded } else { $false }
 	foreground_process_id = if ($visibleWindowManifest -ne $null -and $visibleWindowManifest.PSObject.Properties.Name -contains "window_snapshot" -and $visibleWindowManifest.window_snapshot -ne $null -and $visibleWindowManifest.window_snapshot.PSObject.Properties.Name -contains "foreground_process_id") { [int]$visibleWindowManifest.window_snapshot.foreground_process_id } else { 0 }
