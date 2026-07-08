@@ -79,7 +79,7 @@
 <body data-report-id="spielstand_zwischenbericht_2026_07_08" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Spielstand Zwischenbericht</h1>
-    <p>Stand 2026-07-08, aktualisiert nach TASK_858: Was im Spiel jetzt besser funktioniert, wo es noch reibt und welche Arbeit als naechstes sinnvoll ist.</p>
+    <p>Stand 2026-07-08, Zwischenbericht fuer den laufenden Release-/Playtest-Strang: Was im Spiel jetzt besser funktioniert, wo es noch reibt und welche Arbeit als naechstes sinnvoll ist.</p>
     <div class="meta-row">
       <span class="pill good">Integration: core-foundation</span>
       <span class="pill good">Singleplayer-Releasepfad spielbar bis Mission</span>
@@ -88,6 +88,7 @@
       <span class="pill good">TASK_857 Recapture-Slice erledigt</span>
       <span class="pill good">TASK_858 Findings erledigt</span>
       <span class="pill warn">Naechster Fokus: TASK_859 Source-Binding</span>
+      <span class="pill warn">Repo: nur builds/ untracked</span>
       <span class="pill">Bericht ist read-only</span>
     </div>
   </header>
@@ -130,6 +131,11 @@
           </div>
         </article>
         <article class="card full">
+          <h2>Stand dieses Zwischenberichts</h2>
+          <p>Dieser Bericht ist bewusst ein Arbeitsstand und keine neue Gameplay-Wahrheit. Er fasst die gemergten Release-/Playtest-Slices bis <code>4f2198de Merge contact fire HUD visual findings</code> zusammen und haelt fest, dass der naechste sinnvolle Eingriff TASK_859 ist. Der aktuelle Integrationsstand ist sauber bis auf den lokalen untracked Ordner <code>builds/</code>.</p>
+          <p>Wichtig: Der Bericht selber aendert keine Szene, keine Simulation und keinen HUD-Zustand. Er ist eine lokale Workbench mit JSON-Export, damit Playtest-Notizen und Entscheidungen spaeter wieder an Codex zurueckgegeben werden koennen.</p>
+        </article>
+        <article class="card full">
           <h2>Architekturzustand</h2>
           <p>Der wichtigste rote Faden bleibt erhalten: UI, Reports und Visuals zeigen nur Lesedaten und schicken Commands. Gameplay-Commit laeuft weiter ueber die vorgesehenen Runtime-/Simulation-Pfade, besonders <code>SimulationRoot</code>, Mission-Contracts, Tactical-Resolver und vorhandene Registries.</p>
           <p>Der aktuelle Arbeitsmodus ist dadurch gesund: kleine Slices, konkrete Verifier, echte Fenster-Captures, Findings danach gezielt polieren. Das ist langsam im Task-Zaehler, aber es verhindert Architektur-Drift.</p>
@@ -148,6 +154,11 @@
             <li><strong>Kampfkontakt ist weniger unsichtbar:</strong> Der erste Fire-Exchange wird als solcher laenger festgehalten, statt sofort wieder von Debug- oder NO-FIRE-Fallbacks ueberdeckt zu werden.</li>
             <li><strong>Vorbereitung fuer Taktik:</strong> Preview-/LOS-/Threat-Systeme legen die Grundlage dafuer, dass Bewegung spaeter schon vor GO als sicher, riskant oder suizidal lesbar ist.</li>
           </ul>
+        </article>
+        <article class="card full">
+          <h2>Was jetzt konkret besser ist</h2>
+          <p>Der alte Zustand war: Release starten, Einzelspieler klicken, dann war der sichtbare Weg schnell von stale Homebase-/FOB-/Flightdeck-Zustaenden, uneindeutigen Fireteam-Dropship-Zuordnungen oder Debug-Lesung blockiert. Der aktuelle Zustand ist: Der Pfad ist ueber Deep-Links und normale Release-Checks viel besser reproduzierbar, die HUD-Flaechen sagen eher, was der Spieler als naechstes tun soll, und der erste Feuerwechsel ist als belegter Testmoment vorhanden.</p>
+          <p>Das Spiel ist damit nicht "fertig", aber es ist deutlich weniger Nebel im Maschinenraum: Wenn jetzt etwas falsch wirkt, gibt es meist ein Manifest, einen Screenshot, einen Contract oder einen kleinen Verifier dazu. Das ist fuer die weitere Fertigstellung sehr wertvoll.</p>
         </article>
         <article class="card">
           <h2>Was noch nicht als "fertig" gelten sollte</h2>
@@ -195,6 +206,11 @@
           <h2>Risiko, wenn wir jetzt falsch abbiegen</h2>
           <p>Ein grosser Combat-, Editor- oder Content-Umbau waere gerade verlockend, aber riskant. Der bessere Weg ist weiter: erst den sichtbaren Release-Durchlauf beweisen, dann genau den naechsten Stoerfaktor polieren, dann wieder capturen. Das ist unschoen klein, aber es macht das Spiel wirklich spielbarer.</p>
         </article>
+        <article class="card full">
+          <h2>Reibung durch Vorgaben</h2>
+          <p>Die strenge Regel "UI ist nicht die Wahrheit" macht manche HUD-Fixes langsamer, weil nicht einfach Text in irgendein Label geschrieben werden darf. Fuer dieses Projekt ist das trotzdem gut: Sonst wuerden Contact-Fire, LOS, Movement, Dropship und Fireteam-Zustand an mehreren Stellen auseinanderlaufen. Die Vorgabe erzeugt also kurzfristig Reibung, schuetzt aber den Multiplayer- und Release-Pfad.</p>
+          <p>Die zweite Reibung ist der echte Fensterbeweis. Headless-Tests sind gruen, aber der Spieler sieht ein Bild. Darum muessen die Capture-Slices bleiben, bis der reale Screenshot die Entscheidung wirklich erklaert.</p>
+        </article>
       </div>
     </section>
 
@@ -205,8 +221,10 @@
           <ol class="list">
             <li><strong>Erledigt:</strong> TASK_854 hat den echten Fenster-Capture nach TASK_853 vorbereitet; TASK_855 hat daraus den sichtbaren Befund geschnitten; TASK_856 hat die belegte Reibung im HUD gezielt poliert; TASK_857 legt den neuen Recapture-Nachweis an; TASK_858 bewertet den Fensterblick.</li>
             <li><strong>TASK_859:</strong> Den echten #17/#18-Window-HUD-Pfad eng an die CONTACT-FIRE-Primaerquelle binden.</li>
+            <li><strong>Nach TASK_859 erneut capturen:</strong> Nicht auf den Snapshot verlassen, sondern den echten Release-Fensterblick wieder als PNG/Manifest pruefen.</li>
             <li><strong>Release-Ordner aktuell halten:</strong> Nach gruenem Slice erneut exportieren, damit deine EXE nicht hinter dem Repo-Stand herlaeuft.</li>
             <li><strong>Dann erst naechster Spielsystem-Block:</strong> je nach Capture-Ergebnis entweder weitere Firefight-Lesbarkeit oder Rueckkehr zu Editor-/Scenario-/Formation-Themen.</li>
+            <li><strong>Danach sinnvoll:</strong> Wenn der First-Exchange endlich lesbar ist, wieder auf Spielerentscheidung vor dem Schuss gehen: Order Preview, Threat Overlay, Contact Reports und Map-/Editor-Bedienbarkeit.</li>
           </ol>
         </article>
         <article class="card">
@@ -216,7 +234,7 @@
             <button class="choice" type="button" data-choice-value="editor_builder">Editor danach</button>
             <button class="choice" type="button" data-choice-value="formation_roe">Formation/ROE spaeter</button>
           </div>
-          <p>TASK_859 ist der richtige naechste Griff: Der Befund ist jetzt belegt, also muss der echte Window-HUD-Pfad an die CONTACT-FIRE-Primaerquelle gebunden werden.</p>
+          <p>TASK_859 ist der richtige naechste Griff: Der Befund ist jetzt belegt, also muss der echte Window-HUD-Pfad an die CONTACT-FIRE-Primaerquelle gebunden werden. Erst danach lohnt sich wieder ein groesserer Themenwechsel.</p>
         </article>
         <article class="card full">
           <h2>Playtest-Checkliste</h2>
@@ -313,6 +331,8 @@
               "First GO / firefight / first exchange readability TASK_832-TASK_858"
             ],
             player_value: "The release path reaches mission play more reliably, TASK_856 prioritizes CONTACT FIRE as the #17/#18 primary HUD line, TASK_857 packages the real-window recapture evidence, and TASK_858 records that the real window still reads closer to NO FIRE NO_LOS/contact pressure than clear CONTACT FIRE.",
+            repo_state: "integration/core-foundation is current with origin; only local untracked builds/ remains outside this report slice.",
+            report_value: "This HTML workbench is a read-only interim report with JSON export for playtest notes and decisions.",
             next_task: "TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish"
           },
           metadata: {
