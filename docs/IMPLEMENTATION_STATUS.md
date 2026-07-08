@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_864 - Release Fire Exchange Runtime Text Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_864_release_fire_exchange_runtime_text_visual_findings.md`, `docs/tasks/TASK_863_release_fire_exchange_runtime_text_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFireExchangeRuntimeTextVisualFindings` wertet den TASK_863-Recapture als read-only Findings-Snapshot aus.
+- Stand: Positive Befunde sind echter Fenster-Capture, erwarteter TASK_862-Runtime-Text-Style, erwartete TASK_859-/TASK_856-Contracts und weiter lesbare Mission-/Command-Surfaces.
+- Stand: Primaerer Befund ist `runtime_text_window_still_los_no_fire_first_reading`: #17/#18 lesen im echten Fenster weiter `NEXT LOS/RANGE KORRIGIEREN` / `Kampf NO FIRE NO_LOS`, waehrend #19 `CONTACT PRESSURE` zeigt.
+- Risiken/offen: TASK_864 aendert keinen HUD-Code. Der naechste enge Schritt ist TASK_865, der klaeren und polieren muss, welcher sichtbare Status-/Decision-Pfad die TASK_862-CONTACT-FIRE-Zeile im Fenster ueberstimmt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_864_release_fire_exchange_runtime_text_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_863_release_fire_exchange_runtime_text_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_865 - Release Fire Exchange Runtime Text Visible Status Polish.
+
 ### TASK_863 - Release Fire Exchange Runtime Text Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_863_release_fire_exchange_runtime_text_recapture.md`, `docs/tasks/TASK_862_release_fire_exchange_real_window_primary_hud_runtime_text_polish.md`, `docs/dev/mission_command_feedback_contract.md`
