@@ -29,6 +29,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_contact_fire_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `godot_console.exe --headless --path . --script scripts/tests/task_874_release_first_exchange_contact_fire_real_window_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_873_release_first_exchange_contact_fire_readability_fix.gd`, `git diff --check`.
 - Naechster Schritt: TASK_875 - Release First Exchange CONTACT-FIRE Visual Findings.
 
+### TASK_875 - Release First Exchange CONTACT-FIRE Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_875_release_first_exchange_contact_fire_visual_findings.md`, `docs/tasks/TASK_874_release_first_exchange_contact_fire_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangeContactFireVisualFindings` bewertet den TASK_874-Recapture als read-only Findings-Snapshot.
+- Stand: Positive Evidence bleibt: trusted `window_handle_print`, Sternenbuergerchen-Missionsfenster, sichtbare Command-Surfaces und First-GO-Firefight-Deep-Link.
+- Stand: Primaerer Befund ist `task_873_evidence_not_real_window_first_reading`: Im echten Fenster dominieren weiter `NEXT LOS/RANGE KORRIGIEREN`, `Kampf NO FIRE NO_LOS` und `CONTACT PRESSURE`, obwohl TASK_873 CONTACT-FIRE-Evidence seeded.
+- Risiken/offen: TASK_875 aendert keine Runtime. TASK_876 muss die sichtbaren #17/#18/#19-Statusquellen und das TASK_873-Refresh-/Persistenz-Timing versoehnen, statt CONTACT FIRE kosmetisch zu erzwingen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_875_release_first_exchange_contact_fire_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_874_release_first_exchange_contact_fire_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_876 - Release First Exchange Visible Status Source Reconciliation.
+
 ### TASK_869 - Release First Exchange Real Window Recapture After LOS Setup
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_869_release_first_exchange_real_window_recapture_after_los_setup.md`, `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/dev/mission_command_feedback_contract.md`
