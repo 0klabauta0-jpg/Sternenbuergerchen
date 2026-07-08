@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_854 - Release Fire Exchange Focused Recapture After Readability Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_854_release_fire_exchange_focused_recapture_after_readability_polish.md`, `docs/tasks/TASK_853_release_fire_exchange_engagement_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_fire_exchange_after_readability_recapture.ps1` haengt einen eigenen TASK_854-Recapture an den bestehenden TASK_851-Focused-Recapture und nutzt weiter `--release-singleplayer-first-go-firefight`.
+- Stand: Das Manifest `tmp/release_fire_exchange_after_readability_recapture.json` erwartet TASK_853-Readability-Schema, Style-ID `task_853_release_fire_exchange_engagement_readability_v1`, TASK_850-Focus-Style und 45s Fire-Exchange-Persistenz.
+- Stand: `ReleaseFireExchangeAfterReadabilityRecapture` paketiert das Capture als read-only Review-Snapshot mit Screenshotpfaden und manuellen Pflichtchecks fuer CONTACT FIRE in #17/#18/#19, kein primaeres Debug-`NO FIRE`, FireTrace/Impact/Target-Focus und weiter bedienbare Command-Surfaces.
+- Stand: Der lokale echte TASK_854-Capture lief mit `gate = review_ready`, Window-Handle gefunden, Window-/Desktop-Screenshot geschrieben und ohne Hard-Failures.
+- Risiken/offen: Der frische Screenshot ist technisch sauber, liest sich im sichtbaren Zustand aber weiterhin eher als `CONTACT PRESSURE` / `NO FIRE NO_LOS` als als klarer `CONTACT FIRE`-Moment. TASK_855 sollte diesen belegten Befund auswerten und eng polieren.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_fire_exchange_after_readability_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `godot_console.exe --headless --path . --script scripts/tests/task_854_release_fire_exchange_focused_recapture_after_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_853_release_fire_exchange_engagement_readability_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_855 - Release Fire Exchange After Readability Visual Findings.
+
 ### TASK_853 - Release Fire Exchange Engagement Readability Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_853_release_fire_exchange_engagement_readability_polish.md`, `docs/tasks/TASK_852_release_fire_exchange_focused_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
