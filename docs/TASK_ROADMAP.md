@@ -74,6 +74,7 @@ git checkout -b batch/<batch-name>
 - TASK_836 - Release Firefight Command Matrix Visual Polish (implementiert): #16 Command Matrix macht GO, Primaerbefehle und die aktive Fire-Rule im ersten Firefight sichtbar unterscheidbar, ohne Gameplay-State im HUD zu speichern.
 - TASK_837 - Release First GO Firefight Real Window Review (implementiert): Der gepruefte Release kann mit `--release-singleplayer-first-go-firefight` gestartet, gecaptured und als TASK_837-Manifest fuer den echten Fensterbefund abgelegt werden.
 - TASK_838 - Release Firefight Real Window Findings Polish (implementiert): #19 Event Log zeigt bei leerem echten Log eine read-only Firefight-Statuszeile aus vorhandenen Decision-/Combat-Snapshots statt `NO EVENTS`.
+- TASK_839 - Release Firefight World Label Declutter (implementiert): Primary3D nutzt im ersten Release-Firefight einen visuellen `release_firefight_declutter`-Modus, der redundante Welttexte unterdrueckt und Fire-VFX/Friendly-Fire/kritische Unit-Zustaende erhaelt.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 

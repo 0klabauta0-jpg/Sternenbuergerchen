@@ -19,6 +19,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_388_homebase_fireteam_roster_shipcard_polish.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release exportieren/starten und den sichtbaren `Einzelspieler -> Start Mission`-Pfad erneut capturen.
 
+### TASK_839 - Release Firefight World Label Declutter
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_839_release_firefight_world_label_declutter.md`, `docs/tasks/TASK_838_release_firefight_real_window_findings_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der erste Release-Firefight setzt im Primary3D-Payload `world_label_density_mode = release_firefight_declutter`, sobald die vorhandene Firefight-Decision-Line aktiv ist.
+- Stand: `TerrainMap3DView` unterdrueckt in diesem Modus einfache `HIT`/`MISS`/`FIRE`-Weltlabels, Welt-Feedback-Bubbles und Routine-Unit-Badges, behaelt aber Fire-VFX, Impact/Trace, Friendly-Fire-Warnung und kritische Unit-Zustaende.
+- Stand: MetaLayer und TacticalController liefern einen read-only TASK_839-Snapshot mit Style-ID, Density-Mode, suppressed/rendered Counts und Gameplay-Grenzen.
+- Risiken/offen: Der echte Fenster-Recapture bleibt noetig, weil Headless nur Rendervertrag und Aktivierung beweist, nicht die finale visuelle Wirkung.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_839_release_firefight_world_label_declutter.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_838_release_firefight_real_window_findings_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_840 - Release Firefight World Label Real Window Recapture.
+
 ### TASK_833 - Release Firefight HUD Readability Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_833_release_firefight_hud_readability_polish.md`, `docs/tasks/TASK_817_station_reentry_release_candidate_targeted_firefight_polish.md`, `docs/dev/mission_command_feedback_contract.md`

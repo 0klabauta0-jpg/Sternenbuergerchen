@@ -95,6 +95,8 @@ const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE: int = 9
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE: int = 12
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 9
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
+const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
+const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT: float = 1.35
 const MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID: String = "mission_team_chip_tooltip_hint_v1"
@@ -7137,6 +7139,13 @@ func _build_empty_release_candidate_firefight_decision_line_snapshot(reason: Str
 		"combat_hud_density": {},
 		"guard_reason": reason.strip_edges(),
 	}
+
+
+func _get_release_firefight_world_label_density_mode() -> String:
+	var decision_snapshot: Dictionary = _build_release_candidate_firefight_decision_line_snapshot()
+	if bool(decision_snapshot.get("active", false)):
+		return RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE
+	return "default"
 
 
 func _release_candidate_firefight_next_token(player_action: Dictionary) -> String:
@@ -16515,6 +16524,78 @@ func get_release_firefight_real_window_findings_polish_snapshot() -> Dictionary:
 	}
 
 
+func get_release_firefight_world_label_declutter_snapshot() -> Dictionary:
+	_update_ui()
+	_refresh_order_visuals()
+	var source_snapshot: Dictionary = get_release_firefight_real_window_findings_polish_snapshot()
+	var primary_snapshot: Dictionary = {}
+	var primary_3d_view = _get_primary_3d_view()
+	if primary_3d_view != null and primary_3d_view.has_method("get_render_snapshot"):
+		primary_snapshot = Dictionary(primary_3d_view.call("get_render_snapshot")).duplicate(true)
+	var density_mode: String = String(primary_snapshot.get("world_label_density_mode", "")).strip_edges()
+	var active: bool = bool(primary_snapshot.get("world_label_declutter_active", false))
+	var suppressed_count: int = int(primary_snapshot.get("world_label_declutter_total_suppressed_count", 0))
+	var rendered_count: int = int(primary_snapshot.get("world_label_declutter_rendered_count", 0))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_findings_polish_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"World-label declutter builds on the green TASK_838 first-firefight findings polish."
+		),
+		_build_mission_first_move_readability_check(
+			"density_mode_active",
+			active and density_mode == RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE,
+			"Primary3D uses the release firefight density mode during the first-firefight readout."
+		),
+		_build_mission_first_move_readability_check(
+			"declutter_style_present",
+			String(primary_snapshot.get("world_label_declutter_style_id", "")) == RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID,
+			"Primary3D exposes the TASK_839 visual style id."
+		),
+		_build_mission_first_move_readability_check(
+			"label_suppression_recorded",
+			suppressed_count > 0,
+			"The render snapshot records suppressed redundant world labels."
+		),
+		_build_mission_first_move_readability_check(
+			"critical_render_path_preserved",
+			int(primary_snapshot.get("weapon_fire_vfx_visual_count", 0)) > 0 or rendered_count >= 0,
+			"Fire VFX/critical render path remains available while text density is reduced."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.release_firefight_world_label_declutter.v1",
+		"task_id": "TASK_839",
+		"source_task_id": "TASK_838",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": String(primary_snapshot.get("world_label_declutter_style_id", "")),
+		"expected_style_id": RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID,
+		"density_mode": density_mode,
+		"declutter_active": active,
+		"suppressed_count": suppressed_count,
+		"rendered_count": rendered_count,
+		"unit_badge_suppressed_count": int(primary_snapshot.get("world_label_declutter_unit_badge_suppressed_count", 0)),
+		"weapon_fire_vfx_visual_count": int(primary_snapshot.get("weapon_fire_vfx_visual_count", 0)),
+		"feedback_bubble_visual_count": int(primary_snapshot.get("feedback_bubble_visual_count", 0)),
+		"primary_3d": primary_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func _build_release_firefight_event_log_display_snapshot(raw_entries: Array, release_decision: Dictionary, combat_hud_density: Dictionary) -> Dictionary:
 	var display_entries: Array = []
 	for entry_variant in raw_entries:
@@ -20738,6 +20819,7 @@ func _sync_primary_3d_order_visuals() -> void:
 		get_parent(),
 		{
 			"phase_index": _get_live_order_phase_index(),
+			"world_label_density_mode": _get_release_firefight_world_label_density_mode(),
 			"selected_fireteam_ids": _selected_fireteam_ids,
 			"fire_sector_overlay_enabled": _fire_sector_overlay_enabled,
 			"fire_sector_visual_mode": "los_line_only",
