@@ -83,9 +83,10 @@
       <span class="pill good">TASK_845 Capture review_ready</span>
       <span class="pill good">TASK_846 Findings gemerged</span>
       <span class="pill good">TASK_847 implementiert</span>
-      <span class="pill warn">TASK_848 Recapture Acceptance</span>
-      <span class="pill warn">Frischer Capture braucht Sichtreview</span>
-      <span class="pill">Branch: task/release-first-exchange-recapture-acceptance</span>
+      <span class="pill good">TASK_848 Acceptance gemerged</span>
+      <span class="pill warn">TASK_849 Findings</span>
+      <span class="pill warn">TASK_850 Visual Polish als naechstes</span>
+      <span class="pill">Branch: task/release-fire-exchange-visual-polish-findings</span>
     </div>
   </header>
 
@@ -109,8 +110,9 @@
             <li><strong>TASK_846:</strong> Der echte Fensterbefund ist jetzt als maschinenlesbarer Findings-Schnitt dokumentiert: erster Feuerwechsel technisch vorhanden, aber im Fenster noch nicht gut genug sichtbar.</li>
             <li><strong>TASK_847:</strong> Fire-Exchange-Evidence bleibt jetzt fuer ein kurzes Anzeige-Fenster in Combat-HUD, Decision-Line und Event-Log sichtbar.</li>
             <li><strong>TASK_848:</strong> Frischer Release-Export, echter Fenster-Capture und Acceptance-Manifest wurden nach TASK_847 erzeugt. Der technische Pfad ist gruen, die visuelle Bewertung bleibt bewusst offen.</li>
+            <li><strong>TASK_849:</strong> Der frische Screenshot ist jetzt als Visual-Polish-Findings-Schnitt bewertet: Start-/Automatik-Overlay, dominante Weltlinien, schwache FireTrace/Impact-Lesbarkeit und kein eindeutig bestaetigter CONTACT-FIRE-HUD-Moment.</li>
             <li><strong>Bericht:</strong> Diese Workbench fasst jetzt Arbeitsstand, Spielwirkung, Screenshot-Befund, offene Risiken und naechste Arbeitsschritte zusammen. Unten kann daraus eine JSON-Notiz exportiert werden.</li>
-            <li><strong>Git:</strong> TASK_846 ist bereits gemerged; TASK_848 liegt aktuell auf dem Task-Branch und ist fuer Commit/Merge vorbereitet.</li>
+            <li><strong>Git:</strong> TASK_848 ist in <code>integration/core-foundation</code> gemerged; TASK_849 liegt aktuell auf dem neuen Task-Branch.</li>
           </ul>
         </article>
         <article class="card">
@@ -156,6 +158,7 @@
           <h2>Was noch stoert</h2>
           <ul class="list">
             <li>Der sichtbare Zustand ist noch nicht so eindeutig wie der TASK_844-Headless-Beweis.</li>
+            <li>Das Start-/Automatik-Overlay lenkt im Fire-Exchange-Capture vom eigentlichen Kampfereignis ab.</li>
             <li>FireEvent/Trace/Impact bleibt im Fenster nicht prominent genug erhalten.</li>
             <li>#17 und #18 duerfen den Spieler nicht wieder zuerst zu LOS/Range-Korrektur fuehren, wenn der wichtige Moment der erlebte erste Feuerwechsel ist.</li>
           </ul>
@@ -168,10 +171,9 @@
         <article class="card wide">
           <h2>Was ich als Naechstes machen will</h2>
           <ol class="list">
-            <li><strong>TASK_848 abschliessen:</strong> Task-Branch committen, pushen und nach <code>integration/core-foundation</code> mergen, solange die lokale Pruefung gruen bleibt.</li>
-            <li><strong>Manueller Sichtreview:</strong> Den neuen Screenshot gegen die Pflichtchecks bewerten, ohne automatisch Pixel als gelungen zu behaupten.</li>
-            <li><strong>TASK_849 - Release Fire Exchange Visual Polish Findings:</strong> Nur belegte visuelle Reibungen schneiden: Fire-Exchange-Moment, HUD-Prioritaet, Linienueberlagerung, naechster Griff.</li>
-            <li><strong>Danach:</strong> Einen kleinen Polish-Fix bauen, erneut Release exportieren und wieder mit echtem Fenster-Capture pruefen.</li>
+            <li><strong>TASK_849 abschliessen:</strong> Findings-Branch committen, pushen und mergen, wenn Verifier und Diffcheck gruen sind.</li>
+            <li><strong>TASK_850 - Release Fire Exchange Focused Visual Polish:</strong> Nur die belegten Reibungen polieren: Start-/Automatik-Overlay raus aus dem Moment, Weltlinien runtergewichten, FireTrace/Impact/HUD-Fire-Moment hochziehen.</li>
+            <li><strong>Danach:</strong> Erneut Release exportieren und mit echtem Fenster-Capture pruefen, ob der Spieler den ersten Feuerwechsel ohne Erklaertext versteht.</li>
           </ol>
         </article>
         <article class="card">
@@ -201,7 +203,8 @@
           <label>Stand
             <select data-export-key="status.state">
               <option value="recapture_acceptance_in_progress">Recapture-Acceptance in Arbeit</option>
-              <option selected value="recapture_acceptance_ready_manual_review_open">Recapture-Acceptance technisch fertig, Sichtreview offen</option>
+              <option value="recapture_acceptance_ready_manual_review_open">Recapture-Acceptance technisch fertig, Sichtreview offen</option>
+              <option selected value="visual_polish_findings_ready">Visual-Polish-Findings fuer TASK_850 bereit</option>
               <option value="visibility_fix_done_recapture_next">Sichtbarkeits-Fix erledigt, Recapture als naechstes</option>
               <option value="findings_done_visibility_fix_in_progress">Findings erledigt, Sichtbarkeits-Fix in Arbeit</option>
               <option value="capture_done_followup_open">Capture done, Follow-up offen</option>
@@ -274,12 +277,13 @@
             completed_findings_task: "TASK_846 - Release First Exchange Visual Findings",
             completed_visibility_task: "TASK_847 - Release Fire Exchange Visibility Persistence",
             active_acceptance_task: "TASK_848 - Release First Exchange Recapture Acceptance",
+            active_findings_task: "TASK_849 - Release Fire Exchange Visual Polish Findings",
             current_player_value: "Release-Singleplayer startet bis in die Mission; erster Exchange ist technisch nachweisbar, aber visuell noch nicht eindeutig genug.",
-            recommended_next_task: "TASK_849 - Release Fire Exchange Visual Polish Findings"
+            recommended_next_task: "TASK_850 - Release Fire Exchange Focused Visual Polish"
           },
           metadata: {
-            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848"],
-            branch: "task/release-first-exchange-recapture-acceptance",
+            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848", "TASK_849"],
+            branch: "task/release-fire-exchange-visual-polish-findings",
             merged_branch: "task/release-first-exchange-visual-findings",
             manifest_path: "tmp/release_first_exchange_real_window_recapture.json",
             screenshot_path: "tmp/release_first_exchange_real_window.png",
