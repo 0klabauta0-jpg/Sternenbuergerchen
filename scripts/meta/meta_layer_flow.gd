@@ -2458,6 +2458,84 @@ func get_release_fire_exchange_real_window_primary_hud_source_binding_polish_sna
 	}
 
 
+func get_release_fire_exchange_real_window_primary_hud_runtime_text_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_fire_exchange_real_window_primary_hud_source_binding_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_runtime_text: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_fire_exchange_real_window_primary_hud_runtime_text_polish_snapshot"):
+		tactical_runtime_text = Dictionary(tactical_controller.call("get_release_fire_exchange_real_window_primary_hud_runtime_text_polish_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_binding_snapshot_available",
+		String(source.get("status", "")) == "pass" or String(source.get("status", "")) == "review",
+		"warning",
+		"TASK_862 follows the TASK_859 real-window source-binding snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_runtime_text_snapshot_present",
+		not tactical_runtime_text.is_empty(),
+		"critical",
+		"Active mission should expose the tactical TASK_862 runtime-text snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"runtime_text_surfaces_contact_fire_first",
+		String(tactical_runtime_text.get("status", "")) == "pass"
+			and bool(tactical_runtime_text.get("selected_fireteam_runtime_text_contact_fire_first", false))
+			and bool(tactical_runtime_text.get("mission_control_runtime_text_contact_fire_first", false)),
+		"critical",
+		"#17/#18 runtime HUD labels should begin with CONTACT FIRE during active fire evidence."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_runtime_text.get("read_only", false))
+			and not bool(tactical_runtime_text.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_runtime_text.get("creates_command", true))
+			and not bool(tactical_runtime_text.get("creates_fire_event", true))
+			and not bool(tactical_runtime_text.get("creates_damage_event", true))
+			and not bool(tactical_runtime_text.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_862 changes runtime display text only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_fire_exchange_real_window_primary_hud_runtime_text_polish.v1",
+		"task_id": "TASK_862",
+		"source_task_id": "TASK_861",
+		"source_binding_task_id": "TASK_859",
+		"source_primary_hud_task_id": "TASK_856",
+		"source_visibility_task_id": "TASK_847",
+		"source_exchange_task_id": "TASK_844",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_runtime_text": tactical_runtime_text,
+		"style_id": String(tactical_runtime_text.get("style_id", "")),
+		"contact_fire_primary_line": String(tactical_runtime_text.get("contact_fire_primary_line", "")),
+		"selected_fireteam_runtime_text_contact_fire_first": bool(tactical_runtime_text.get("selected_fireteam_runtime_text_contact_fire_first", false)),
+		"mission_control_runtime_text_contact_fire_first": bool(tactical_runtime_text.get("mission_control_runtime_text_contact_fire_first", false)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_863 - Release Fire Exchange Runtime Text Recapture",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
