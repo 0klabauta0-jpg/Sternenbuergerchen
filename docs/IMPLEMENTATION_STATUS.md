@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_865 - Release Fire Exchange Runtime Text Visible Status Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_865_release_fire_exchange_runtime_text_visible_status_polish.md`, `docs/tasks/TASK_864_release_fire_exchange_runtime_text_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Die Release-Fire-Exchange-Persistenz nutzt fuer ihren 45s-Sichtbarkeitsbereich jetzt echte Godot-Zeit via `Time.get_ticks_msec()` statt `Engine.get_process_frames() * 16`.
+- Stand: Damit verbraucht ein Release-Fenster mit hoher Framerate die sichtbare CONTACT-FIRE-Persistenz nicht mehr schneller als reale Zeit.
+- Stand: Der TASK_865-Verifier prueft die Clock-Quelle, die TASK_847-Read-only-Grenzen und die weiter vorhandene Visibility-Persistence-Snapshot-Oberflaeche; der echte CONTACT-FIRE-Fensterbeweis bleibt TASK_866.
+- Risiken/offen: Ein neuer echter Fenster-Recapture bleibt noetig, um zu beweisen, dass der Release-PNG nach dieser Zeitbasis-Korrektur wirklich CONTACT FIRE zuerst zeigt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_865_release_fire_exchange_runtime_text_visible_status_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_864_release_fire_exchange_runtime_text_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_866 - Release Fire Exchange Runtime Text Status Recapture.
+
 ### TASK_864 - Release Fire Exchange Runtime Text Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_864_release_fire_exchange_runtime_text_visual_findings.md`, `docs/tasks/TASK_863_release_fire_exchange_runtime_text_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
