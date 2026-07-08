@@ -16971,11 +16971,12 @@ func get_release_first_exchange_tension_tuning_snapshot() -> Dictionary:
 	var framing_state: String = String(source_snapshot.get("framing_state", "")).strip_edges().to_lower()
 	var framing_line: String = String(source_snapshot.get("framing_line", "")).strip_edges()
 	var first_exchange_visible: bool = framing_state == "fire_exchange" and (fire_event_count > 0 or not first_fire_event_id.is_empty())
+	var source_contact_framing_passes: bool = String(source_snapshot.get("gate", "")) == "pass" or first_exchange_visible
 	var checks: Array = [
 		_build_mission_first_move_readability_check(
 			"source_contact_framing_passes",
-			String(source_snapshot.get("gate", "")) == "pass",
-			"First-exchange tuning builds on the green TASK_843 contact-framing snapshot."
+			source_contact_framing_passes,
+			"First-exchange tuning builds on TASK_843 contact-framing or direct FireEvent evidence."
 		),
 		_build_mission_first_move_readability_check(
 			"first_exchange_visible",

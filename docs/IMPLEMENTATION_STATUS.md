@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_868 - Release First Exchange LOS Setup Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/tasks/TASK_867_release_fire_exchange_runtime_text_status_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Release-Deep-Link validiert die erste Gegnerplatzierung jetzt als enges Release-Testpaar und begrenzt den ersten Exchange auf den validierten Zielgegner.
+- Stand: Der Force-Schritt oeffnet Detection fuer den validierten Zielgegner, damit der sichtbare First-Exchange-Readout nicht wieder auf einen anderen `NO_LOS`-Gegner kippt.
+- Stand: `get_release_first_exchange_los_setup_polish_snapshot()` meldet Setup-Evidence, `in_range`, nicht blockierte LOS, Attackable-Status und fired Diagnostics read-only.
+- Risiken/offen: Der echte Fensterbeweis folgt in TASK_869. Dort muss frisch exportiert und gecaptured werden, ob #17/#18/#19 nun CONTACT FIRE statt `NO_LOS` / `CONTACT PRESSURE` lesen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_868_release_first_exchange_los_setup_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_844_release_first_exchange_tension_tuning.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_867_release_fire_exchange_runtime_text_status_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_869 - Release First Exchange Real Window Recapture.
+
 ### TASK_867 - Release Fire Exchange Runtime Text Status Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_867_release_fire_exchange_runtime_text_status_visual_findings.md`, `docs/tasks/TASK_866_release_fire_exchange_runtime_text_status_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
