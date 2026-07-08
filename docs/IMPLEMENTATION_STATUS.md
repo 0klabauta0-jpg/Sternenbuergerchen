@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_886 - Release First Exchange Real Window HUD Render Frame Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_886_release_first_exchange_real_window_hud_render_frame_trace.md`, `docs/tasks/TASK_885_release_first_exchange_hud_source_sync_visual_findings.md`, `docs/tasks/TASK_884_release_first_exchange_hud_source_sync_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_first_exchange_hud_render_frame_trace.ps1` haengt an TASK_884 an, kopiert eigene TASK_886-Screenshotpfade und schreibt ein Manifest mit gerenderter #17/#18/#19-Erstlesung plus finalem TASK_879-Source-Snapshot.
+- Stand: `ReleaseFirstExchangeHudRenderFrameTrace` bewertet den Widerspruch zwischen echtem Screenshot-Frame und finalem CONTACT-FIRE-Source-Snapshot als read-only Trace-Snapshot.
+- Stand: Primaerer Befund ist `render_frame_differs_from_final_trace`: Der gerenderte Fenstertext liest weiter NO_FIRE/NO_LOS/CONTACT_PRESSURE, waehrend der finale Source-Snapshot CONTACT FIRE in #17/#18/#19 meldet.
+- Risiken/offen: TASK_886 behebt noch nicht den sichtbaren Frame. Der naechste Fix muss Render-/Refresh-Zeitpunkt oder sichtbare Source-Bindung so haerten, dass der gecapturete Fensterframe dieselbe CONTACT-FIRE-Quelle liest.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_hud_render_frame_trace.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_886_release_first_exchange_hud_render_frame_trace.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_885_release_first_exchange_hud_source_sync_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_887 - Release First Exchange Real Window HUD Render Frame Sync Fix.
+
 ### TASK_885 - Release First Exchange HUD Source Sync Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_885_release_first_exchange_hud_source_sync_visual_findings.md`, `docs/tasks/TASK_884_release_first_exchange_hud_source_sync_recapture.md`, `docs/tasks/TASK_883_release_first_exchange_real_window_hud_source_sync_fix.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -90,8 +90,8 @@
     <h1>Sternenbuergerchen Zwischenbericht</h1>
     <p>Stand 2026-07-08: Fortlaufender Zwischenbericht zum Release-/First-Exchange-Strang. Er fasst zusammen, was am Spiel sichtbar besser wurde, welche Reibung noch bleibt und was ich als naechstes umsetzen will.</p>
     <div class="meta-row">
-      <span class="pill good">Basisbefund: TASK_883 committed + pushed</span>
-      <span class="pill warn">Aktueller Arbeitsbranch: task/release-first-exchange-hud-source-sync-recapture</span>
+      <span class="pill good">Basisbefund: TASK_885 committed + pushed</span>
+      <span class="pill warn">Aktueller Arbeitsbranch: task/release-first-exchange-hud-source-sync-visual-findings</span>
       <span class="pill good">TASK_874 committed + pushed</span>
       <span class="pill good">TASK_875 committed + pushed</span>
       <span class="pill good">TASK_876 committed + pushed</span>
@@ -107,7 +107,8 @@
       <span class="pill good">TASK_884 Recapture review_ready</span>
       <span class="pill bad">Sichtbefund: weiter NO_FIRE/CONTACT_PRESSURE</span>
       <span class="pill good">TASK_885 Findings umgesetzt</span>
-      <span class="pill warn">Naechster Fix: TASK_886 Render-Frame-Trace</span>
+      <span class="pill good">TASK_886 Render-Frame-Trace umgesetzt</span>
+      <span class="pill warn">Naechster Fix: TASK_887 Render-Frame-Sync</span>
       <span class="pill warn">Git: nur builds/ untracked</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -134,7 +135,7 @@
         <article class="card">
           <h2>Aktueller Wert</h2>
           <div class="stack">
-            <div class="metric"><strong>12</strong><span>neuere Slices im Strang: TASK_874 bis TASK_885.</span></div>
+            <div class="metric"><strong>13</strong><span>neuere Slices im Strang: TASK_874 bis TASK_886.</span></div>
             <div class="metric"><strong>3</strong><span>HUD-Surfaces im Fokus: #17, #18, #19.</span></div>
             <div class="metric"><strong>10</strong><span>Runtime-Trace-Samples bis <code>deeplink_final</code>.</span></div>
           </div>
@@ -229,6 +230,13 @@
                 <p>Der TASK_884-PNG-/Manifest-Befund ist jetzt als read-only Findings-Snapshot gefasst. Positive Evidence bleibt: trusted Window-Handle, korrektes Missionsfenster, TASK_883 als erwartete HUD-Source-Sync-Quelle, TASK_879-Trace-Aktivierung und final kein stale NO_LOS/CONTACT_PRESSURE im Trace. Primaere Reibung ist <code>task_883_hud_source_sync_not_real_window_first_reading</code>: Der echte Screenshot liest weiter NO_FIRE/CONTACT_PRESSURE zuerst. Der naechste Task ist deshalb TASK_886: Screenshot-Zeitpunkt, gerenderte #17/#18/#19-Texte und finalen Source-Snapshot zusammen tracebar machen.</p>
               </div>
             </div>
+            <div class="timeline-item">
+              <strong>TASK_886</strong>
+              <div>
+                <h3>HUD Render Frame Trace</h3>
+                <p>Der neue Trace-Slice legt den gerenderten Fensterbefund und den finalen Runtime-Source-Snapshot nebeneinander: Screenshot-Readback liest weiter <code>NO FIRE NO_LOS</code> und <code>CONTACT PRESSURE</code>, waehrend der finale Source-Snapshot <code>CONTACT FIRE</code> in #17/#18/#19 meldet. Damit ist die Reibung enger: nicht Combat neu schreiben, sondern Render-/Refresh-Frame oder sichtbare Source-Bindung synchronisieren.</p>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -251,7 +259,7 @@
           <h2>Was noch nicht gut genug ist</h2>
           <ul class="list">
             <li>Der Statusquellenpfad ist im finalen Export-Trace belegt; TASK_883 bindet die sichtbaren HUD-/Event-Log-Surfaces daran. TASK_884 beweist aber: Im echten Fenster kommt diese Lesung fuer den Spieler noch nicht vorne an.</li>
-            <li>Der neue Window-Handle-Screenshot ist da und als TASK_885-Findings bewertet, aber er zeigt noch nicht die gewuenschte Erstlesung. CONTACT FIRE, FireTrace, Impact und Target-Fokus fallen noch nicht zuerst ins Auge.</li>
+            <li>Der neue Window-Handle-Screenshot ist da und als TASK_885-Findings bewertet; TASK_886 macht jetzt sichtbar, dass Screenshot-Frame und finaler CONTACT-FIRE-Source-Snapshot auseinanderlaufen.</li>
             <li>Die HUD-Flaechen sind funktional, aber noch nicht "schoen"; es ist mehr Kommando-Instrument als polierte Spieloberflaeche.</li>
             <li>Der Release-Flow ist pruefbar, aber noch nicht "spielerisch selbstverstaendlich"; man merkt noch, dass wir eine Debug-/QA-Strecke in eine echte erste Mission verwandeln.</li>
             <li>Der Map-/Editor-Workflow ist weiter ein groesserer UX-Baustellenblock, wurde aber gerade bewusst hinter Release-Playability einsortiert.</li>
@@ -260,7 +268,7 @@
         <article class="card full">
           <h2>Spielerischer Zwischenstand</h2>
           <p>Das Spiel ist aktuell am ehesten in der Phase "der erste echte Missionsablauf wird hart lesbar gemacht". Es gibt genug Systemsubstanz fuer Fireteams, Dropships, Mission und Combat-Feedback, aber die entscheidende Frage ist noch: Sieht der Spieler im richtigen Moment das Richtige? Genau dafuer sind die letzten Tasks so kleinteilig.</p>
-          <p>TASK_879 hat den Statusquellenpfad im exportierten Runtime-Lauf entwirrt: Im finalen Sample ist CONTACT FIRE da. TASK_880 macht daraus den Runtime-Visual-Schritt: Schuss, Treffer und Zielbezug werden staerker gerendert. TASK_881 hat den echten Recapture geliefert. TASK_882 haelt fest, dass die reale Fensterlesung trotz sauberem Trace noch nicht nach erstem Feuerwechsel aussieht. TASK_883 synchronisiert die sichtbaren HUD-/Event-Log-Quellen mit diesem finalen Trace-Stand. TASK_884 zeigt den sauberen Capture, TASK_885 den harten Befund: der Spielerblick bleibt weiter auf LOS/RANGE-Korrektur und CONTACT PRESSURE haengen.</p>
+          <p>TASK_879 hat den Statusquellenpfad im exportierten Runtime-Lauf entwirrt: Im finalen Sample ist CONTACT FIRE da. TASK_880 macht daraus den Runtime-Visual-Schritt: Schuss, Treffer und Zielbezug werden staerker gerendert. TASK_881 hat den echten Recapture geliefert. TASK_882 haelt fest, dass die reale Fensterlesung trotz sauberem Trace noch nicht nach erstem Feuerwechsel aussieht. TASK_883 synchronisiert die sichtbaren HUD-/Event-Log-Quellen mit diesem finalen Trace-Stand. TASK_884 zeigt den sauberen Capture, TASK_885 den harten Befund, und TASK_886 bindet den Widerspruch an den konkreten Render-/Source-Frame: der Spielerblick bleibt weiter auf LOS/RANGE-Korrektur und CONTACT PRESSURE haengen, obwohl die finale Quelle CONTACT FIRE sagt.</p>
         </article>
       </div>
     </section>
@@ -295,6 +303,7 @@
             <li><code>tmp/release_first_exchange_hud_source_sync_recapture.json</code>: <code>review_ready</code>, trusted <code>window_handle_print</code>, keine Warnings/Hard-Failures.</li>
             <li><code>tmp/release_first_exchange_hud_source_sync_recapture.png</code>: sichtbarer Restbefund bleibt <code>NEXT LOS/RANGE KORRIGIEREN</code>, <code>Kampf NO FIRE NO_LOS</code>, <code>CONTACT PRESSURE</code>.</li>
             <li><code>task_885_release_first_exchange_hud_source_sync_visual_findings.gd</code>: prueft den read-only Findings-Schnitt, primaere Issue-ID und TASK_886-Empfehlung.</li>
+            <li><code>task_886_release_first_exchange_hud_render_frame_trace.gd</code>: prueft Render-/Source-Frame-Trace, primaere Issue-ID und TASK_887-Empfehlung.</li>
             <li>Export + TASK_879-Capture: <code>review_ready</code>, 10 Samples bis <code>deeplink_final</code>.</li>
             <li><code>git diff --check</code>: gruen vor den Commits.</li>
           </ul>
@@ -303,10 +312,12 @@
           <h2>Git / Build</h2>
           <ul class="list">
             <li>Aktueller Branch: <code>task/release-first-exchange-hud-source-sync-visual-findings</code>.</li>
-            <li>Letzter gepushter Runtime-Fix: TASK_883 mit Commit <code>b1d4c4f7</code> auf <code>task/release-first-exchange-real-window-hud-source-sync</code>.</li>
-            <li>Vorheriger Findings-Slice: TASK_882 mit Commit <code>0d742173</code> auf <code>task/release-first-exchange-fire-visual-findings</code>.</li>
+            <li>Aktueller Arbeitsbranch: <code>task/release-first-exchange-hud-render-frame-trace</code>.</li>
+            <li>Letzter gepushter Stand vor TASK_886: TASK_885 mit Commit <code>e9982505</code> auf <code>task/release-first-exchange-hud-source-sync-visual-findings</code>.</li>
+            <li>Letzter Runtime-Fix davor: TASK_883 mit Commit <code>b1d4c4f7</code> auf <code>task/release-first-exchange-real-window-hud-source-sync</code>.</li>
+            <li>Vorheriger Recapture-Slice: TASK_884 mit Commit <code>b1d3afa6</code> auf <code>task/release-first-exchange-hud-source-sync-recapture</code>.</li>
             <li>Untracked bleibt nur <code>builds/</code>; der Ordner wird weiterhin nicht in den Report-Slice aufgenommen.</li>
-            <li>TASK_885 ist im Arbeitsstand angelegt; Commit/Push folgen nach finalen Verifiern.</li>
+            <li>TASK_886 ist lokal verifiziert; Commit/Push folgen.</li>
           </ul>
         </article>
         <article class="card full">
@@ -322,8 +333,7 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ol class="list">
-            <li><strong>TASK_885 - Visual Findings:</strong> Findings-Slice abschliessen und sichern: primaerer Restbefund ist <code>task_883_hud_source_sync_not_real_window_first_reading</code>.</li>
-            <li><strong>TASK_886 - Render Frame Trace:</strong> Screenshot-Zeitpunkt, gerenderte #17/#18/#19-Texte und finalen CONTACT-FIRE-Source-Snapshot zusammen tracebar machen.</li>
+            <li><strong>TASK_887 - Render Frame Sync Fix:</strong> Wenn TASK_886 bestaetigt, dass der falsche Frame oder eine spaete HUD-Quelle captured wird, gezielt den Render-/Refresh-Zeitpunkt oder die sichtbare Source-Bindung fixen.</li>
             <li><strong>Akzeptanz:</strong> CONTACT FIRE soll nicht nur im Text stehen; der Spieler soll Schussrichtung, Ziel und Treffer/Impact im Fenster sofort verstehen.</li>
             <li><strong>Weiter behalten:</strong> Den kurzen Spielerweg Homebase -> Fireteam -> Dropship -> Mission -> GO -> Contact als Release-Smoke nicht wieder in Einzelteile verlieren.</li>
           </ol>
@@ -334,10 +344,11 @@
             <button class="choice" type="button" data-choice-value="fire_visual_findings">TASK_882 Findings</button>
             <button class="choice" type="button" data-choice-value="hud_source_sync_fix">TASK_883 HUD Sync</button>
             <button class="choice" type="button" data-choice-value="hud_source_sync_recapture">TASK_884 Recapture</button>
-            <button class="choice active" type="button" data-choice-value="render_frame_trace">TASK_886 Frame Trace</button>
+            <button class="choice" type="button" data-choice-value="render_frame_trace">TASK_886 Frame Trace</button>
+            <button class="choice active" type="button" data-choice-value="render_frame_sync_fix">TASK_887 Frame Sync</button>
             <button class="choice" type="button" data-choice-value="editor_backlog">Editor zurueckholen</button>
           </div>
-          <p>Meine Empfehlung bleibt jetzt sehr konkret: TASK_885 committen/pushen, danach TASK_886 bauen. Der neue Fix soll nicht mehr Text stapeln, sondern beweisen, welcher Render-Frame tatsaechlich gecaptured wird.</p>
+          <p>Meine Empfehlung bleibt jetzt sehr konkret: TASK_887 bauen, sobald TASK_886-Manifest und Verifier gruen sind. Der Fix soll den sichtbaren Fensterframe an dieselbe CONTACT-FIRE-Quelle binden, die im finalen Runtime-Trace schon belegt ist.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -375,6 +386,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_884_visual_gap_seen"> TASK_884 Sichtbefund zeigt weiter NO_FIRE / CONTACT_PRESSURE</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_885_findings_done"> TASK_885 Findings-Schnitt umgesetzt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_885_recommends_task_886"> TASK_885 empfiehlt TASK_886 Render-Frame-Trace</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_886_render_frame_trace_done"> TASK_886 Render-/Source-Frame-Trace umgesetzt</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_886_recommends_task_887"> TASK_886 empfiehlt TASK_887 Render-Frame-Sync</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.player_readability_ok"> Spielerlesung im Fenster ueberzeugt</label>
         </article>
         <article class="card">
@@ -384,7 +397,8 @@
               <option value="visual_fire_findings">TASK_882 Fire-Visual-Findings aus PNG schneiden</option>
               <option value="hud_source_sync_fix">TASK_883 echten HUD-/Event-Log-Source-Sync fixen</option>
               <option value="hud_source_sync_recapture">TASK_884 echten HUD-Source-Sync recapturen</option>
-              <option selected value="render_frame_trace">TASK_886 Render-/Capture-Frame tracebar machen</option>
+              <option value="render_frame_trace">TASK_886 Render-/Capture-Frame tracebar machen</option>
+              <option selected value="render_frame_sync_fix">TASK_887 Render-/Source-Frame synchronisieren</option>
               <option value="visual_fire_recapture">TASK_881 echten Fire-Visual-Recapture erneut ausfuehren</option>
               <option value="task_879_trace">TASK_879 Exported Status Source Trace erneut</option>
               <option value="hud_refresh_diagnosis">HUD-Refresh-Ueberschreibung suchen</option>
@@ -453,9 +467,9 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_branch: "task/release-first-exchange-hud-source-sync-visual-findings",
-            latest_pushed_commit: "b1d4c4f7 Sync first exchange HUD source surfaces",
-            active_next_task: "TASK_886",
+            current_branch: "task/release-first-exchange-hud-render-frame-trace",
+            latest_pushed_commit: "e9982505 Record first exchange HUD source sync findings",
+            active_next_task: "TASK_887",
             completed_blocks: [
               "TASK_874 real-window recapture captured trusted first exchange evidence gap",
               "TASK_875 visual findings recorded CONTACT-FIRE not being first real-window reading",
@@ -469,19 +483,20 @@
               "TASK_883 synchronizes #17/#18/#19 with the final CONTACT-FIRE source without creating gameplay truth",
               "TASK_884 adds a dedicated recapture contract, capture wrapper, analyzer and report hook for the HUD source sync proof",
               "TASK_884 local capture is review_ready and trusted, but the real-window image still reads NO_FIRE / CONTACT_PRESSURE first",
-              "TASK_885 records the TASK_884 screenshot mismatch as read-only findings and recommends a render-frame trace"
+              "TASK_885 records the TASK_884 screenshot mismatch as read-only findings and recommends a render-frame trace",
+              "TASK_886 records the real-window rendered #17/#18/#19 text next to the final CONTACT-FIRE source snapshot"
             ],
-            player_value: "The first release mission path is more repeatable and the TASK_884 proof package is trusted, but the real-window player reading is still not acceptable. TASK_885 now records that mismatch as the next concrete release-readability problem.",
-            next_recommendation: "TASK_886 - Release First Exchange Real Window HUD Render Frame Trace",
-            followup_candidate: "TASK_886 - Release First Exchange Real Window HUD Render Frame Trace",
-            repo_state: "Current work branch is task/release-first-exchange-hud-source-sync-visual-findings. TASK_884 is committed and pushed on task/release-first-exchange-hud-source-sync-recapture; TASK_885 is implemented in the worktree and awaits verification/commit; only builds/ remains untracked."
+            player_value: "The first release mission path is more repeatable and the evidence is narrower: the final source snapshot says CONTACT FIRE, but the real rendered frame still reads NO_FIRE / CONTACT_PRESSURE first.",
+            next_recommendation: "TASK_887 - Release First Exchange Real Window HUD Render Frame Sync Fix",
+            followup_candidate: "TASK_887 - Release First Exchange Real Window HUD Render Frame Sync Fix",
+            repo_state: "Current work branch is task/release-first-exchange-hud-render-frame-trace. TASK_886 is locally verified and awaits commit/push; only builds/ remains untracked."
           },
           metadata: {
             generated_at_local: "2026-07-08",
             project_root: "C:/dev/SternenBuergerchen",
             report_file: "docs/reports/spielstand_zwischenbericht_2026_07_08.html",
             authoritative_state_note: "This report is a read-only workbench. It does not create gameplay truth.",
-            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881", "TASK_882", "TASK_883", "TASK_884", "TASK_885", "TASK_886"]
+            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881", "TASK_882", "TASK_883", "TASK_884", "TASK_885", "TASK_886", "TASK_887"]
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
