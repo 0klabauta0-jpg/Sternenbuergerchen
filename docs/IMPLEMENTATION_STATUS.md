@@ -10,8 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
-### TASK_852 - Release Fire Exchange Focused Visual Findings
+### TASK_853 - Release Fire Exchange Engagement Readability Polish
 - Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_853_release_fire_exchange_engagement_readability_polish.md`, `docs/tasks/TASK_852_release_fire_exchange_focused_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Die Release-Fire-Exchange-Persistenz bleibt nun 45s sichtbar, damit der bekannte echte 32s-Capture den Feuerwechsel nicht wieder als spaetes `NO FIRE` liest.
+- Stand: `ReleaseFireExchangeEngagementReadabilityPolish.build_snapshot()` prueft #17, #18 und #19 auf dieselbe `FIRE`/`CONTACT FIRE`-Lesung und haelt Debug-`NO FIRE` aus den primaeren Release-Zeilen heraus.
+- Risiken/offen: Ein frischer echter Fenster-Recapture bleibt als TASK_854 sinnvoll, um die menschliche Bildwirkung nach dem Readability-Polish zu belegen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_853_release_fire_exchange_engagement_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_852_release_fire_exchange_focused_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_850_release_fire_exchange_focused_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_847_release_fire_exchange_visibility_persistence.gd`, `git diff --check`.
+- Naechster Schritt: TASK_854 - Release Fire Exchange Focused Recapture After Readability Polish.
+
+### TASK_852 - Release Fire Exchange Focused Visual Findings
+- Status: implementiert und gemerged
 - Relevante Docs/Contracts: `docs/tasks/TASK_852_release_fire_exchange_focused_visual_findings.md`, `docs/tasks/TASK_851_release_fire_exchange_focused_visual_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
 - Stand: `ReleaseFireExchangeFocusedVisualFindings` wertet den TASK_851-Recapture und Sichtnotizen als read-only Findings-Snapshot aus.
 - Stand: Positive Findings halten fest, dass der fokussierte Real-Window-Capture vorhanden ist, der TASK_850-Focus-Style erwartet wird und Mission-/Command-Surfaces grundsaetzlich lesbar bleiben.
