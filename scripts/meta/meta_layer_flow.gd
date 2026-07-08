@@ -2229,6 +2229,80 @@ func get_release_fire_exchange_visibility_persistence_snapshot(real_window_revie
 	}
 
 
+func get_release_fire_exchange_focused_visual_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_fire_exchange_visibility_persistence_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_focus: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_fire_exchange_focused_visual_polish_snapshot"):
+		tactical_focus = Dictionary(tactical_controller.call("get_release_fire_exchange_focused_visual_polish_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_visibility_persistence_passes",
+		String(source.get("status", "")) == "pass" and bool(source.get("visibility_persistence_active", false)),
+		"critical",
+		"TASK_850 builds on the green TASK_847 visibility-persistence chain."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_focus_snapshot_present",
+		not tactical_focus.is_empty(),
+		"critical",
+		"Active mission should expose the tactical TASK_850 visual-focus snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"focused_visual_polish_gate_passes",
+		String(tactical_focus.get("gate", "")) == "pass" and bool(tactical_focus.get("focused_visual_polish_active", false)),
+		"critical",
+		"Primary3D should report active focused fire-exchange visual polish."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_focus.get("read_only", false))
+			and not bool(tactical_focus.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_focus.get("creates_command", true))
+			and not bool(tactical_focus.get("creates_fire_event", true))
+			and not bool(tactical_focus.get("creates_damage_event", true))
+			and not bool(tactical_focus.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_850 changes visual focus only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_fire_exchange_focused_visual_polish.v1",
+		"task_id": "TASK_850",
+		"source_task_id": "TASK_849",
+		"source_visibility_task_id": "TASK_847",
+		"source_exchange_task_id": "TASK_844",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_focus": tactical_focus,
+		"style_id": String(tactical_focus.get("style_id", "")),
+		"focused_visual_polish_active": bool(tactical_focus.get("focused_visual_polish_active", false)),
+		"world_line_dimming_active": bool(tactical_focus.get("world_line_dimming_active", false)),
+		"fire_vfx_focus_active": bool(tactical_focus.get("fire_vfx_focus_active", false)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_851 - Release Fire Exchange Focused Visual Recapture",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()

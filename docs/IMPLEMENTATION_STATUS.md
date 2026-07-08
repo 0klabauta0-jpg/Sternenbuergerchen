@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_850 - Release Fire Exchange Focused Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_850_release_fire_exchange_focused_visual_polish.md`, `docs/tasks/TASK_849_release_fire_exchange_visual_polish_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Mission-Controller setzt im aktiven TASK_847-Fire-Exchange-Visibility-Fenster einen expliziten Primary3D-Schalter `release_fire_exchange_focused_visual_polish`.
+- Stand: `TerrainMap3DView` meldet `task_850_release_fire_exchange_focused_visual_polish_v1`, dimmt Friendly-Aim-/LOS-Weltlinien und priorisiert FireTrace, Impact, Impact-Cross sowie Target-Focus mit groesseren Focus-Werten.
+- Stand: MetaLayer und TacticalController liefern einen read-only TASK_850-Snapshot mit Primary3D-Render-Snapshot, Focus-/Dimming-Flags und Visual-Parametern.
+- Risiken/offen: Die echte Fensterwirkung muss nach frischem Export erneut gecaptured werden; TASK_850 beweist Visual-Parameter, nicht automatisch den menschlichen PNG-Eindruck.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_850_release_fire_exchange_focused_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_849_release_fire_exchange_visual_polish_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_847_release_fire_exchange_visibility_persistence.gd`, `git diff --check`.
+- Naechster Schritt: TASK_851 - Release Fire Exchange Focused Visual Recapture.
+
 ### TASK_849 - Release Fire Exchange Visual Polish Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_849_release_fire_exchange_visual_polish_findings.md`, `docs/tasks/TASK_848_release_first_exchange_recapture_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -372,6 +372,16 @@ const WORLD_LABEL_DENSITY_MODE_DEFAULT: String = "default"
 const WORLD_LABEL_DENSITY_MODE_RELEASE_FIREFIGHT_DECLUTTER: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
 const RELEASE_FIREFIGHT_INSERTION_RESIDUE_DECLUTTER_STYLE_ID: String = "task_842_release_firefight_insertion_residue_declutter_v1"
+const RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID: String = "task_850_release_fire_exchange_focused_visual_polish_v1"
+const RELEASE_FIRE_EXCHANGE_FOCUSED_WORLD_LINE_ALPHA_FACTOR: float = 0.34
+const RELEASE_FIRE_EXCHANGE_FOCUSED_WORLD_LINE_WIDTH_FACTOR: float = 0.58
+const RELEASE_FIRE_EXCHANGE_FOCUSED_TRACE_WIDTH: float = 0.034
+const RELEASE_FIRE_EXCHANGE_FOCUSED_MUZZLE_FLASH_WIDTH: float = 0.066
+const RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_RADIUS: float = 0.18
+const RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_CROSS_WIDTH: float = 0.036
+const RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS: float = 0.32
+const RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_HEIGHT: float = 0.06
+const RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.74, 0.16, 0.58)
 const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
 	"CONTACT",
 	"MOVE",
@@ -1697,6 +1707,16 @@ func get_render_snapshot() -> Dictionary:
 		"release_firefight_insertion_residue_lz_label_suppressed_count": _release_firefight_insertion_residue_lz_label_suppressed_count,
 		"release_firefight_insertion_residue_approach_line_suppressed_count": _release_firefight_insertion_residue_approach_line_suppressed_count,
 		"release_firefight_insertion_residue_policy": "suppress_non_cargo_lz_labels_and_approach_vectors_after_go" if _is_release_firefight_insertion_residue_declutter_active() else "default",
+		"release_fire_exchange_focused_visual_polish_active": _is_release_fire_exchange_focused_visual_polish_active(),
+		"release_fire_exchange_focused_visual_polish_style_id": RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID if _is_release_fire_exchange_focused_visual_polish_active() else "",
+		"release_fire_exchange_fire_vfx_focus_active": _is_release_fire_exchange_focused_visual_polish_active(),
+		"release_fire_exchange_world_line_dimming_active": _is_release_fire_exchange_focused_visual_polish_active(),
+		"release_fire_exchange_world_line_alpha_factor": RELEASE_FIRE_EXCHANGE_FOCUSED_WORLD_LINE_ALPHA_FACTOR if _is_release_fire_exchange_focused_visual_polish_active() else 1.0,
+		"release_fire_exchange_world_line_width_factor": RELEASE_FIRE_EXCHANGE_FOCUSED_WORLD_LINE_WIDTH_FACTOR if _is_release_fire_exchange_focused_visual_polish_active() else 1.0,
+		"release_fire_exchange_focused_trace_width": RELEASE_FIRE_EXCHANGE_FOCUSED_TRACE_WIDTH if _is_release_fire_exchange_focused_visual_polish_active() else WEAPON_FIRE_TRACE_WIDTH,
+		"release_fire_exchange_focused_impact_radius": RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_RADIUS if _is_release_fire_exchange_focused_visual_polish_active() else WEAPON_FIRE_IMPACT_RADIUS,
+		"release_fire_exchange_focused_target_focus_radius": RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS if _is_release_fire_exchange_focused_visual_polish_active() else WEAPON_FIRE_TARGET_FOCUS_RADIUS,
+		"release_fire_exchange_focused_policy": "dim_world_lines_prioritize_fire_trace_impact_and_target_focus" if _is_release_fire_exchange_focused_visual_polish_active() else "default",
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -4991,6 +5011,26 @@ func _is_release_firefight_insertion_residue_declutter_active() -> bool:
 	return bool(_mission_status_payload.get("release_firefight_insertion_residue_declutter", false))
 
 
+func _is_release_fire_exchange_focused_visual_polish_active() -> bool:
+	if not _is_release_firefight_world_label_declutter_active():
+		return false
+	if bool(_order_payload.get("release_fire_exchange_focused_visual_polish", false)):
+		return true
+	return bool(_mission_status_payload.get("release_fire_exchange_focused_visual_polish", false))
+
+
+func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> Color:
+	if not _is_release_fire_exchange_focused_visual_polish_active():
+		return base_color
+	return Color(base_color.r, base_color.g, base_color.b, clampf(base_color.a * RELEASE_FIRE_EXCHANGE_FOCUSED_WORLD_LINE_ALPHA_FACTOR, 0.08, base_color.a))
+
+
+func _get_release_fire_exchange_focused_world_line_width(base_width: float) -> float:
+	if not _is_release_fire_exchange_focused_visual_polish_active():
+		return base_width
+	return maxf(base_width * RELEASE_FIRE_EXCHANGE_FOCUSED_WORLD_LINE_WIDTH_FACTOR, 0.01)
+
+
 func _should_suppress_release_firefight_world_bubble(feedback_bubble: Dictionary) -> bool:
 	if not _is_release_firefight_world_label_declutter_active():
 		return false
@@ -5001,6 +5041,8 @@ func _should_suppress_release_firefight_fire_status_label(fire_event: Dictionary
 	if not _is_release_firefight_world_label_declutter_active():
 		return false
 	if is_friendly_fire:
+		return false
+	if _is_release_fire_exchange_focused_visual_polish_active():
 		return false
 	var normalized_label: String = label_text.strip_edges().to_upper()
 	return normalized_label == "HIT" or normalized_label == "MISS" or normalized_label == "FIRE"
@@ -5554,6 +5596,8 @@ func _add_selected_fireteam_aim_visuals() -> void:
 		var contact_visual_active: bool = _unit_or_fireteam_has_visible_contact(unit, fireteam_id)
 		var line_color: Color = FRIENDLY_CONTACT_LINE_COLOR if contact_visual_active else FRIENDLY_AIM_LINE_COLOR
 		var tip_color: Color = FRIENDLY_CONTACT_TIP_COLOR if contact_visual_active else FRIENDLY_AIM_TIP_COLOR
+		line_color = _get_release_fire_exchange_focused_world_line_color(line_color)
+		tip_color = _get_release_fire_exchange_focused_world_line_color(tip_color)
 		line_anchor["line_color"] = line_color
 		line_anchor["tip_color"] = tip_color
 		line_anchor["contact_visual_active"] = contact_visual_active
@@ -5566,7 +5610,7 @@ func _add_selected_fireteam_aim_visuals() -> void:
 		if visual_mode == FRIENDLY_FIRE_SECTOR_VISUAL_MODE_TILE_ALIGNED_LOS:
 			sector_report = _add_fire_sector_tile_visuals(_order_root, unit_position, aim_direction, range_world, range_tiles, deg_to_rad(FRIENDLY_FIRE_SECTOR_ANGLE_DEGREES), "FriendlyFireSector_%s" % unit_id)
 			var facing_line_origin: Vector3 = Vector3(line_anchor.get("origin_3d", _world_to_surface_3d_position(unit_position, FRIENDLY_AIM_LINE_HEIGHT)))
-			_add_wide_line3d(_order_root, facing_line_origin, _world_to_3d_position(default_facing_tip_position, facing_line_origin.y), line_color, "FriendlyFacingLine_%s" % unit_id, FRIENDLY_FIRE_SECTOR_LINE_WIDTH)
+			_add_wide_line3d(_order_root, facing_line_origin, _world_to_3d_position(default_facing_tip_position, facing_line_origin.y), line_color, "FriendlyFacingLine_%s" % unit_id, _get_release_fire_exchange_focused_world_line_width(FRIENDLY_FIRE_SECTOR_LINE_WIDTH))
 			_add_marker3d(_order_root, default_facing_tip_position, tip_color, "FriendlyFacingTip_%s" % unit_id, 0.075, 0.07, 10)
 			visual_shape = "tile_sector"
 			tile_aligned = true
@@ -6356,24 +6400,32 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var trace_color: Color = WEAPON_FIRE_FRIENDLY_TRACE_COLOR if is_friendly_fire else WEAPON_FIRE_CONTACT_TRACE_COLOR
 	var combat_outcome: String = String(fire_event.get("combat_outcome", "")).strip_edges().to_lower()
 	var impact_color: Color = WEAPON_FIRE_IMPACT_HIT_COLOR if combat_outcome == "hit" else WEAPON_FIRE_IMPACT_MISS_COLOR
+	var focused_exchange_active: bool = _is_release_fire_exchange_focused_visual_polish_active()
+	var muzzle_flash_width: float = RELEASE_FIRE_EXCHANGE_FOCUSED_MUZZLE_FLASH_WIDTH if focused_exchange_active else WEAPON_FIRE_MUZZLE_FLASH_WIDTH
+	var trace_width: float = RELEASE_FIRE_EXCHANGE_FOCUSED_TRACE_WIDTH if focused_exchange_active else WEAPON_FIRE_TRACE_WIDTH
+	var impact_radius: float = RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_RADIUS if focused_exchange_active else WEAPON_FIRE_IMPACT_RADIUS
+	var impact_cross_width: float = RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_CROSS_WIDTH if focused_exchange_active else WEAPON_FIRE_IMPACT_CROSS_WIDTH
+	var target_focus_radius: float = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS if focused_exchange_active else WEAPON_FIRE_TARGET_FOCUS_RADIUS
+	var target_focus_height: float = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_HEIGHT if focused_exchange_active else WEAPON_FIRE_TARGET_FOCUS_HEIGHT
+	var target_focus_color: Color = RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_COLOR if focused_exchange_active else WEAPON_FIRE_TARGET_FOCUS_COLOR
 	var muzzle_texture_available: bool = texture != null
 	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
 	if muzzle_texture_card_visible:
 		_add_texture_card(_order_root, texture, _world_to_surface_3d_position(muzzle_position, 0.92), "WeaponFireMuzzle_%s" % _sanitize_node_name(event_id), pixel_size, Vector2.ZERO, Color(1.0, 0.95, 0.62, 0.92))
-	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.84), _world_to_surface_3d_position(muzzle_tip_position, 0.84), WEAPON_FIRE_MUZZLE_FLASH_COLOR, "WeaponFireMuzzleFlash_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_FLASH_WIDTH)
+	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.84), _world_to_surface_3d_position(muzzle_tip_position, 0.84), WEAPON_FIRE_MUZZLE_FLASH_COLOR, "WeaponFireMuzzleFlash_%s" % _sanitize_node_name(event_id), muzzle_flash_width)
 	var muzzle_perp: Vector2 = Vector2(-normalized_direction.y, normalized_direction.x)
 	var muzzle_cross_a: Vector2 = muzzle_position - muzzle_perp * WEAPON_FIRE_MUZZLE_FLARE_CROSS_WORLD
 	var muzzle_cross_b: Vector2 = muzzle_position + muzzle_perp * WEAPON_FIRE_MUZZLE_FLARE_CROSS_WORLD
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_cross_a, 0.865), _world_to_surface_3d_position(muzzle_cross_b, 0.865), WEAPON_FIRE_MUZZLE_TIP_COLOR, "WeaponFireMuzzleFlareCross_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_FLARE_CROSS_WIDTH)
 	_add_marker3d(_order_root, muzzle_position, WEAPON_FIRE_MUZZLE_BLOOM_COLOR, "WeaponFireMuzzleBloom_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_BLOOM_RADIUS, WEAPON_FIRE_MUZZLE_BLOOM_HEIGHT, 8, 0.84)
 	_add_marker3d(_order_root, muzzle_tip_position, WEAPON_FIRE_MUZZLE_TIP_COLOR, "WeaponFireMuzzleTip_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_MUZZLE_TIP_RADIUS, WEAPON_FIRE_MUZZLE_TIP_HEIGHT, 8, 0.84)
-	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), trace_color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_TRACE_WIDTH)
-	_add_marker3d(_order_root, target_position, impact_color, "WeaponFireImpact_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_IMPACT_RADIUS, 0.065, 8, 0.82)
-	_add_marker3d(_order_root, target_position, WEAPON_FIRE_TARGET_FOCUS_COLOR, "WeaponFireTargetFocus_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_TARGET_FOCUS_RADIUS, WEAPON_FIRE_TARGET_FOCUS_HEIGHT, 16, 0.815)
+	_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.78), _world_to_surface_3d_position(target_position, 0.78), trace_color, "WeaponFireTrace_%s" % _sanitize_node_name(event_id), trace_width)
+	_add_marker3d(_order_root, target_position, impact_color, "WeaponFireImpact_%s" % _sanitize_node_name(event_id), impact_radius, 0.065, 8, 0.82)
+	_add_marker3d(_order_root, target_position, target_focus_color, "WeaponFireTargetFocus_%s" % _sanitize_node_name(event_id), target_focus_radius, target_focus_height, 16, 0.815)
 	var impact_perp: Vector2 = Vector2(-normalized_direction.y, normalized_direction.x)
 	var impact_cross_a: Vector2 = target_position - impact_perp * WEAPON_FIRE_IMPACT_CROSS_WORLD
 	var impact_cross_b: Vector2 = target_position + impact_perp * WEAPON_FIRE_IMPACT_CROSS_WORLD
-	_add_wide_line3d(_order_root, _world_to_surface_3d_position(impact_cross_a, 0.83), _world_to_surface_3d_position(impact_cross_b, 0.83), impact_color, "WeaponFireImpactCross_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_IMPACT_CROSS_WIDTH)
+	_add_wide_line3d(_order_root, _world_to_surface_3d_position(impact_cross_a, 0.83), _world_to_surface_3d_position(impact_cross_b, 0.83), impact_color, "WeaponFireImpactCross_%s" % _sanitize_node_name(event_id), impact_cross_width)
 	var fire_status_label: String = _build_weapon_fire_vfx_status_label(fire_event, combat_outcome, is_friendly_fire)
 	if not fire_status_label.is_empty():
 		if _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire):
@@ -6417,24 +6469,27 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"muzzle_catalog_pixel_size": catalog_pixel_size,
 		"muzzle_flash_pixel_size": pixel_size,
 		"muzzle_flash_length_world": WEAPON_FIRE_MUZZLE_FLASH_LENGTH_WORLD,
-		"muzzle_flash_width": WEAPON_FIRE_MUZZLE_FLASH_WIDTH,
+		"muzzle_flash_width": muzzle_flash_width,
 		"muzzle_bloom_radius": WEAPON_FIRE_MUZZLE_BLOOM_RADIUS,
 		"muzzle_tip_radius": WEAPON_FIRE_MUZZLE_TIP_RADIUS,
 		"visible_event_limit": WEAPON_FIRE_VISIBLE_EVENT_LIMIT,
 		"trace_visible": true,
-		"trace_width": WEAPON_FIRE_TRACE_WIDTH,
+		"trace_width": trace_width,
 		"trace_color": trace_color,
 		"trace_color_hex": trace_color.to_html(true),
 		"impact_marker_visible": true,
 		"impact_cross_visible": true,
-		"impact_radius": WEAPON_FIRE_IMPACT_RADIUS,
+		"impact_radius": impact_radius,
 		"impact_cross_world": WEAPON_FIRE_IMPACT_CROSS_WORLD,
+		"impact_cross_width": impact_cross_width,
 		"impact_color": impact_color,
 		"impact_color_hex": impact_color.to_html(true),
 		"target_focus_visible": true,
-		"target_focus_radius": WEAPON_FIRE_TARGET_FOCUS_RADIUS,
-		"target_focus_height": WEAPON_FIRE_TARGET_FOCUS_HEIGHT,
-		"target_focus_color_hex": WEAPON_FIRE_TARGET_FOCUS_COLOR.to_html(true),
+		"target_focus_radius": target_focus_radius,
+		"target_focus_height": target_focus_height,
+		"target_focus_color_hex": target_focus_color.to_html(true),
+		"focused_visual_polish_active": focused_exchange_active,
+		"focused_visual_polish_style_id": RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID if focused_exchange_active else "",
 		"fire_status_label_visible": not fire_status_label.is_empty() and not _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
 		"fire_status_label_text": fire_status_label,
 		"fire_status_label_suppressed_by_declutter": _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
@@ -10096,16 +10151,20 @@ func _add_fire_sector_los_line_visuals(parent: Node3D, origin_world: Vector2, ce
 	var line_origin_3d_variant: Variant = line_anchor.get("origin_3d", null)
 	var line_origin_3d: Vector3 = Vector3(line_origin_3d_variant) if typeof(line_origin_3d_variant) == TYPE_VECTOR3 else _world_to_surface_3d_position(line_origin_world, FRIENDLY_AIM_LINE_HEIGHT)
 	var line_tip_3d: Vector3 = _world_to_3d_position(Vector2(report.get("tip_position", raw_tip_position)), line_origin_3d.y)
+	var visual_line_color: Color = FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR if bool(report.get("los_blocked", false)) else requested_line_color
+	visual_line_color = _get_release_fire_exchange_focused_world_line_color(visual_line_color)
 	_add_wide_line3d(
 		parent,
 		line_origin_3d,
 		line_tip_3d,
-		FRIENDLY_FIRE_SECTOR_BLOCKER_LINE_COLOR if bool(report.get("los_blocked", false)) else requested_line_color,
+		visual_line_color,
 		node_name,
-		FRIENDLY_FIRE_SECTOR_LINE_WIDTH
+		_get_release_fire_exchange_focused_world_line_width(FRIENDLY_FIRE_SECTOR_LINE_WIDTH)
 	)
 	_friendly_aim_los_line_count += 1
 	report["los_line_count"] = 1
+	report["line_color"] = visual_line_color
+	report["line_width"] = _get_release_fire_exchange_focused_world_line_width(FRIENDLY_FIRE_SECTOR_LINE_WIDTH)
 	return report
 
 
