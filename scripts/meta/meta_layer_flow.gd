@@ -1403,6 +1403,79 @@ func get_release_candidate_targeted_firefight_polish_snapshot(real_window_review
 	}
 
 
+func get_release_firefight_hud_readability_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_candidate_targeted_firefight_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_readability: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_firefight_hud_readability_polish_snapshot"):
+		tactical_readability = Dictionary(tactical_controller.call("get_release_firefight_hud_readability_polish_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_targeted_firefight_polish_passes",
+		String(source.get("status", "")) == "pass",
+		"critical",
+		"TASK_833 builds on a passing TASK_817 targeted Firefight polish snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_readability_snapshot_present",
+		not tactical_readability.is_empty(),
+		"critical",
+		"Active mission should expose tactical HUD readability polish."
+	)
+	_append_handoff_check(
+		checks,
+		"decision_line_first_in_selected_fireteam",
+		String(tactical_readability.get("gate", "")) == "pass"
+			and String(tactical_readability.get("selected_fireteam_first_line", "")).strip_edges() == String(tactical_readability.get("decision_line", "")).strip_edges()
+			and not String(tactical_readability.get("decision_line", "")).strip_edges().is_empty(),
+		"critical",
+		"Selected Fireteam should lead with the NEXT/WHY decision line."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_readability.get("read_only", false))
+			and not bool(tactical_readability.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_readability.get("creates_command", true))
+			and not bool(tactical_readability.get("creates_fire_event", true))
+			and not bool(tactical_readability.get("creates_damage_event", true))
+			and not bool(tactical_readability.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_833 reads existing mission/HUD state only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_firefight_hud_readability_polish.v1",
+		"task_id": "TASK_833",
+		"source_task_id": "TASK_817",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_readability": tactical_readability,
+		"decision_line": String(tactical_readability.get("decision_line", "")),
+		"selected_fireteam_first_line": String(tactical_readability.get("selected_fireteam_first_line", "")),
+		"selected_fireteam_status_text": String(tactical_readability.get("selected_fireteam_status_text", "")),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_834 - Release Firefight HUD Real Window Recapture",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
