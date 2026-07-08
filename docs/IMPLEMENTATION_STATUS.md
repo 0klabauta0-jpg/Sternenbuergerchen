@@ -19,6 +19,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_visible_status_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `godot_console.exe --headless --path . --script scripts/tests/task_877_release_first_exchange_visible_status_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_876_release_first_exchange_visible_status_source_reconciliation.gd`, `git diff --check`.
 - Naechster Schritt: TASK_878 - Release First Exchange Visible Status Visual Findings.
 
+### TASK_878 - Release First Exchange Visible Status Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_878_release_first_exchange_visible_status_visual_findings.md`, `docs/tasks/TASK_877_release_first_exchange_visible_status_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangeVisibleStatusVisualFindings` bewertet den TASK_877-Recapture als read-only Findings-Snapshot.
+- Stand: Positive Evidence bleibt: TASK_877-Manifest `review_ready`, trusted `window_handle_print`, Sternenbuergerchen-Missionsfenster, sichtbare Command-Surfaces und TASK_876 als erwartete Statusquellen-Quelle.
+- Stand: Primaerer Befund ist `task_876_status_source_not_real_window_first_reading`: TASK_876 ist headless gruen, aber der exportierte echte Fensterblick zeigt weiter `NEXT LOS/RANGE KORRIGIEREN`, `Kampf NO FIRE NO_LOS` und `CONTACT PRESSURE`.
+- Risiken/offen: TASK_878 aendert keine Runtime. TASK_879 muss im exportierten Runtime-Fenster isolieren, ob die TASK_876-Statusquelle nicht aktiviert wird, zu spaet kommt oder nachtraeglich von HUD-/Decision-Refresh ueberschrieben wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_878_release_first_exchange_visible_status_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_877_release_first_exchange_visible_status_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_879 - Release First Exchange Exported Status Source Trace.
+
 ### TASK_873 - Release First Exchange CONTACT-FIRE Readability Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_873_release_first_exchange_contact_fire_readability_fix.md`, `docs/tasks/TASK_872_release_correct_window_first_exchange_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`

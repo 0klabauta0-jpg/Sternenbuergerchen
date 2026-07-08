@@ -90,11 +90,13 @@
     <h1>Sternenbuergerchen Zwischenbericht</h1>
     <p>Stand 2026-07-08: Was am Spiel jetzt passiert ist, was sich fuer den Spieler geaendert hat und welche naechsten Schritte aus dem aktuellen Release-/First-Exchange-Strang sinnvoll sind.</p>
     <div class="meta-row">
-      <span class="pill good">Branch: task/release-first-exchange-visible-status-source-reconciliation</span>
+      <span class="pill good">Branch: task/release-first-exchange-visible-status-visual-findings</span>
       <span class="pill good">TASK_874 committed + pushed</span>
       <span class="pill good">TASK_875 committed + pushed</span>
       <span class="pill good">TASK_876 committed + pushed</span>
-      <span class="pill warn">Naechster sinnvoller Schritt: TASK_877 Recapture</span>
+      <span class="pill good">TASK_877 committed + pushed</span>
+      <span class="pill good">TASK_878 Findings aktiv</span>
+      <span class="pill warn">Naechster sinnvoller Schritt: TASK_879 Exported Status Trace</span>
       <span class="pill warn">Git: nur builds/ untracked</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -116,12 +118,12 @@
           <div class="status-box good">
             Der Release-/Singleplayer-Pfad ist inzwischen deutlich besser testbar: Homebase, Fireteam-/Dropship-Staging, Missionstart, erster GO-Moment und erster Kontakt sind als wiederholbare Testkette vorhanden. Der aktuelle harte Fokus ist nicht "mehr Kampf", sondern: Der erste Feuerkontakt muss im echten Fenster eindeutig und ehrlich lesbar werden.
           </div>
-          <p>In den letzten Slices wurde der Weg nicht nur behauptet, sondern ueber Godot-Verifier, Manifest-Dateien und echte Fenster-Captures belegt. TASK_876 ist dabei der aktuelle Stand: Die bereits validierte CONTACT-FIRE-Evidence wird als read-only sichtbare Statusquelle gehalten, damit #17 Selected Fireteam, #18 Mission Control und #19 Event Log nicht wieder durch spaetere NO_FIRE/NO_LOS-Diagnostik ueberdeckt werden.</p>
+          <p>In den letzten Slices wurde der Weg nicht nur behauptet, sondern ueber Godot-Verifier, Manifest-Dateien und echte Fenster-Captures belegt. TASK_876 ist headless gruen, TASK_877 hat den echten Window-Handle-Capture geliefert, und TASK_878 haelt den wichtigen Befund fest: Im exportierten Fenster kommt CONTACT FIRE noch nicht als erste Spielerlesung an.</p>
         </article>
         <article class="card">
           <h2>Aktueller Wert</h2>
           <div class="stack">
-            <div class="metric"><strong>3</strong><span>neuere Slices abgeschlossen: TASK_874, TASK_875, TASK_876.</span></div>
+            <div class="metric"><strong>5</strong><span>neuere Slices abgeschlossen: TASK_874 bis TASK_878.</span></div>
             <div class="metric"><strong>3</strong><span>HUD-Surfaces im Fokus: #17, #18, #19.</span></div>
             <div class="metric"><strong>0</strong><span>neue Gameplay-Wahrheit im UI oder Report.</span></div>
           </div>
@@ -150,6 +152,20 @@
                 <p>Der TacticalController haelt die TASK_873-CONTACT-FIRE-Evidence jetzt als eigene read-only First-Exchange-Statusquelle. Wenn die normale Combat-Diagnose wieder auf NO_LOS kippt, bleibt die belegte CONTACT-FIRE-Erstlesung fuer das Release-First-Exchange-Fenster als sichtbare Quelle verfuegbar.</p>
               </div>
             </div>
+            <div class="timeline-item">
+              <strong>TASK_877</strong>
+              <div>
+                <h3>Visible Status Recapture</h3>
+                <p>Der echte Release-Fenster-Capture nach TASK_876 ist <code>review_ready</code> und nutzt den trusted <code>window_handle_print</code>-Pfad. Der Screenshot zeigt aber weiter <code>NEXT LOS/RANGE KORRIGIEREN</code>, <code>Kampf NO FIRE NO_LOS</code> und <code>CONTACT PRESSURE</code>.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>TASK_878</strong>
+              <div>
+                <h3>Visual Findings</h3>
+                <p>Der sichtbare Widerspruch ist jetzt geschnitten: TASK_876 ist intern gruen, aber die exportierte Runtime-/HUD-Refresh-Kette zeigt im echten Fenster noch nicht die CONTACT-FIRE-Erstlesung. Naechster Hebel ist Trace statt weiterer Text-Override.</p>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -170,7 +186,7 @@
         <article class="card">
           <h2>Was noch nicht gut genug ist</h2>
           <ul class="list">
-            <li>Der frisch korrigierte Statusquellenpfad braucht noch einen echten neuen Fenster-Capture.</li>
+            <li>Der frisch korrigierte Statusquellenpfad hat jetzt einen echten Fenster-Capture, aber der sichtbare Text kippt weiter auf NO_LOS / CONTACT PRESSURE.</li>
             <li>FireTrace und Impact muessen im realen Bild wahrscheinlich noch staerker visuell lesbar werden.</li>
             <li>Die HUD-Flaechen sind funktional, aber noch nicht "schoen"; es ist mehr Kommando-Instrument als polierte Spieloberflaeche.</li>
             <li>Der Map-/Editor-Workflow ist weiter ein groesserer UX-Baustellenblock, wurde aber gerade bewusst hinter Release-Playability einsortiert.</li>
@@ -179,7 +195,7 @@
         <article class="card full">
           <h2>Spielerischer Zwischenstand</h2>
           <p>Das Spiel ist aktuell am ehesten in der Phase "der erste echte Missionsablauf wird hart lesbar gemacht". Es gibt genug Systemsubstanz fuer Fireteams, Dropships, Mission und Combat-Feedback, aber die entscheidende Frage ist noch: Sieht der Spieler im richtigen Moment das Richtige? Genau dafuer sind die letzten Tasks so kleinteilig.</p>
-          <p>Wenn TASK_877 im echten Fenster zeigt, dass #17/#18/#19 jetzt CONTACT FIRE sauber als erste Lesung tragen, waere der naechste gute Schritt nicht noch ein weiterer Text-Fix, sondern das sichtbare Kampfbild: FireTrace, Einschlag, Gegner-/Friendly-Status und kurze taktische Reaktion.</p>
+          <p>TASK_877 hat nicht den erhofften CONTACT-FIRE-Sichtbeweis geliefert. Deshalb ist der naechste gute Schritt TASK_879: im exportierten Runtime-Fenster tracebar machen, ob die TASK_876-Statusquelle nicht aktiviert wird, zu spaet kommt oder von HUD-/Decision-Refresh wieder ueberschrieben wird.</p>
         </article>
       </div>
     </section>
@@ -189,7 +205,7 @@
         <article class="card">
           <h2>Architektur</h2>
           <div class="status-box info">
-            Der aktuelle Pfad bleibt architekturfreundlich: Reports, HUD und Overlays lesen nur. Gameplay-State bleibt bei Runtime/Simulation/Contracts. TASK_876 haelt eine Evidence-Quelle, mutiert aber keine Mission und erzeugt keine neuen Commands.
+            Der aktuelle Pfad bleibt architekturfreundlich: Reports, HUD und Overlays lesen nur. Gameplay-State bleibt bei Runtime/Simulation/Contracts. TASK_878 ist ein Befund-Schnitt und erzeugt keine neuen Commands, FireEvents oder HUD-Wahrheit.
           </div>
           <ul class="list">
             <li><code>SimulationRoot.enqueue_command()</code> bleibt der Commit-Pfad.</li>
@@ -203,21 +219,23 @@
             <li><code>task_874_release_first_exchange_contact_fire_real_window_recapture.gd</code>: gruen.</li>
             <li><code>task_875_release_first_exchange_contact_fire_visual_findings.gd</code>: gruen.</li>
             <li><code>task_876_release_first_exchange_visible_status_source_reconciliation.gd</code>: gruen.</li>
+            <li><code>task_877_release_first_exchange_visible_status_recapture.gd</code>: gruen.</li>
+            <li><code>task_878_release_first_exchange_visible_status_visual_findings.gd</code>: gruen.</li>
             <li><code>git diff --check</code>: gruen vor den Commits.</li>
           </ul>
         </article>
         <article class="card">
           <h2>Git / Build</h2>
           <ul class="list">
-            <li>Aktueller Branch: <code>task/release-first-exchange-visible-status-source-reconciliation</code>.</li>
-            <li>Commits gepusht: <code>facbbfbf</code>, <code>c2b20380</code>, <code>0fbdb413</code>.</li>
+            <li>Aktueller Branch: <code>task/release-first-exchange-visible-status-visual-findings</code>.</li>
+            <li>Commits gepusht: <code>facbbfbf</code>, <code>c2b20380</code>, <code>0fbdb413</code>, <code>dbe7b53f</code>; TASK_878 ist noch der aktuelle Arbeitsstand.</li>
             <li>Untracked bleibt nur <code>builds/</code>; der Ordner wurde nicht in diesen Slice aufgenommen.</li>
             <li>Dieser Bericht ist aktuell lokal geaendert, bis er committed wird.</li>
           </ul>
         </article>
         <article class="card full">
           <h2>Technische Reibung</h2>
-          <p>Die groesste technische Reibung ist gerade nicht Pathfinding oder Combat-Resolver, sondern die Kette "interne Evidence -> HUD-Snapshot -> echtes Fenster -> Spielerlesung". Headless kann gruen sein und trotzdem kann der Screenshot noch falsch gelesen werden. Deshalb bleibt der naechste Recapture wichtig.</p>
+          <p>Die groesste technische Reibung ist gerade nicht Pathfinding oder Combat-Resolver, sondern die Kette "interne Evidence -> HUD-Snapshot -> exportierte Runtime -> echtes Fenster -> Spielerlesung". Headless ist gruen, aber der Screenshot liest weiter NO_LOS/CONTACT PRESSURE. Deshalb ist der naechste Schritt ein gezielter Runtime-Trace.</p>
           <p>Performance-seitig ist der aktuelle Fix harmlos: Es werden keine grossen UI-Baeume pro Frame neu gebaut. Die Statusquelle ist zeitlich begrenzt und read-only. Trotzdem muss bei weiteren sichtbaren Effekten weiter auf Dirty-/Batch-Updates geachtet werden.</p>
         </article>
       </div>
@@ -228,20 +246,20 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ol class="list">
-            <li><strong>TASK_877 - Release First Exchange Visible Status Recapture:</strong> Frischen echten Fenster-Capture nach TASK_876 erzeugen und pruefen, ob #17/#18/#19 jetzt wirklich CONTACT FIRE als erste Lesung zeigen.</li>
-            <li><strong>Wenn TASK_877 gut aussieht:</strong> Den ersten Feuerwechsel visuell staerker machen: FireTrace, Impact, Treffer-/Suppression-Feedback, kleine Statusreaktion am Ziel.</li>
-            <li><strong>Wenn TASK_877 weiter scheitert:</strong> Nicht am Text drehen, sondern die konkrete Ueberschreibquelle im echten Fenster isolieren: welcher Refresh schreibt wann wieder NO_FIRE/NO_LOS?</li>
+            <li><strong>TASK_879 - Release First Exchange Exported Status Source Trace:</strong> Im exportierten Fenster nachweisen, ob TASK_876 aktiviert wird und welcher Refresh danach wieder NO_FIRE/NO_LOS schreibt.</li>
+            <li><strong>Wenn die Quelle fehlt:</strong> Deep-Link-/Exportpfad nachziehen, damit die Statusquelle im Release wirklich aktiviert wird.</li>
+            <li><strong>Wenn die Quelle ueberschrieben wird:</strong> Den konkreten HUD-/Decision-Refresh eng korrigieren, statt CONTACT FIRE als weiteren Textlayer drueberzulegen.</li>
             <li><strong>Danach:</strong> Den kurzen Spielerweg Homebase -> Fireteam -> Dropship -> Mission -> GO -> Contact als Release-Smoke behalten und nicht wieder in Einzelteile verlieren.</li>
           </ol>
         </article>
         <article class="card">
           <h2>Vorschlag</h2>
           <div class="button-row" data-choice-group="next.recommendation">
-            <button class="choice active" type="button" data-choice-value="task_877_recapture">TASK_877 Recapture</button>
+            <button class="choice active" type="button" data-choice-value="task_879_trace">TASK_879 Trace</button>
             <button class="choice" type="button" data-choice-value="fire_visuals">Fire-Visuals</button>
             <button class="choice" type="button" data-choice-value="editor_backlog">Editor zurueckholen</button>
           </div>
-          <p>Meine Empfehlung ist eindeutig TASK_877. Erst den echten Fensterbeweis holen, dann entscheiden wir, ob der naechste Schlag visuell oder technisch sein muss.</p>
+          <p>Meine Empfehlung ist eindeutig TASK_879. Wir haben den echten Fensterbeweis jetzt: Das Problem sitzt im exportierten Statusquellen-/Refresh-Pfad, nicht im Wunsch nach noch mehr HUD-Text.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -262,14 +280,15 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_874_done"> TASK_874 Recapture erledigt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_875_done"> TASK_875 Findings erledigt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_876_done"> TASK_876 Statusquelle reconciled</label>
-          <label class="checkline"><input type="checkbox" data-export-key="status.task_877_capture_seen"> TASK_877 echten Fensterblick gesehen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_877_capture_seen"> TASK_877 echten Fensterblick gesehen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_878_findings_done"> TASK_878 Findings erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.player_readability_ok"> Spielerlesung im Fenster ueberzeugt</label>
         </article>
         <article class="card">
           <h2>Bewertung</h2>
           <label>Naechster Fokus
             <select data-export-key="notes.next_focus">
-              <option selected value="task_877_recapture">TASK_877 Recapture</option>
+              <option selected value="task_879_trace">TASK_879 Exported Status Source Trace</option>
               <option value="visual_fire_feedback">FireTrace / Impact / Status visuell staerken</option>
               <option value="hud_refresh_diagnosis">HUD-Refresh-Ueberschreibung suchen</option>
               <option value="editor_workflow">Map-Editor-Workflow fortsetzen</option>
@@ -337,14 +356,16 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_branch: "task/release-first-exchange-visible-status-source-reconciliation",
+            current_branch: "task/release-first-exchange-visible-status-visual-findings",
             completed_blocks: [
               "TASK_874 real-window recapture captured trusted first exchange evidence gap",
               "TASK_875 visual findings recorded CONTACT-FIRE not being first real-window reading",
-              "TASK_876 reconciled visible status source with validated CONTACT-FIRE evidence"
+              "TASK_876 reconciled visible status source with validated CONTACT-FIRE evidence",
+              "TASK_877 captured the exported real window after TASK_876",
+              "TASK_878 records the exported real-window NO_LOS / CONTACT PRESSURE gap"
             ],
-            player_value: "The first release mission path is more repeatable and the first-contact HUD/event-log chain is closer to a clear player-facing tactical read.",
-            next_recommendation: "TASK_877 - Release First Exchange Visible Status Recapture",
+            player_value: "The first release mission path is more repeatable, and the current evidence now isolates the gap between headless CONTACT-FIRE status and exported real-window NO_LOS / CONTACT PRESSURE readability.",
+            next_recommendation: "TASK_879 - Release First Exchange Exported Status Source Trace",
             repo_state: "Only builds/ remains untracked before this local report update."
           },
           metadata: {
@@ -352,7 +373,7 @@
             project_root: "C:/dev/SternenBuergerchen",
             report_file: "docs/reports/spielstand_zwischenbericht_2026_07_08.html",
             authoritative_state_note: "This report is a read-only workbench. It does not create gameplay truth.",
-            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877"]
+            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879"]
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
