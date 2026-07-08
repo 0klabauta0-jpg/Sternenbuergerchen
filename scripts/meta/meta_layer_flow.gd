@@ -1664,6 +1664,97 @@ func get_release_firefight_bottom_dock_density_polish_snapshot(real_window_revie
 	}
 
 
+func get_release_firefight_command_matrix_visual_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_firefight_bottom_dock_density_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_command_matrix: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_firefight_command_matrix_visual_polish_snapshot"):
+		tactical_command_matrix = Dictionary(tactical_controller.call("get_release_firefight_command_matrix_visual_polish_snapshot"))
+	var command_matrix: Dictionary = Dictionary(tactical_command_matrix.get("command_matrix", {}))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_bottom_dock_passes",
+		String(source.get("status", "")) == "pass",
+		"critical",
+		"TASK_836 builds on a passing TASK_835 bottom-dock snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_command_matrix_snapshot_present",
+		not tactical_command_matrix.is_empty(),
+		"critical",
+		"Active mission should expose tactical command-matrix visual polish."
+	)
+	_append_handoff_check(
+		checks,
+		"command_matrix_style_active",
+		String(tactical_command_matrix.get("gate", "")) == "pass"
+			and String(tactical_command_matrix.get("style_id", "")) == "task_836_release_firefight_command_matrix_visual_v1"
+			and bool(command_matrix.get("active", false)),
+		"critical",
+		"Command Matrix should carry the TASK_836 style in the first Firefight."
+	)
+	_append_handoff_check(
+		checks,
+		"go_button_prominent",
+		String(tactical_command_matrix.get("gate", "")) == "pass"
+			and bool(command_matrix.get("go_button_prominent", false))
+			and float(command_matrix.get("go_button_visual_weight", 0.0)) >= 2.4,
+		"critical",
+		"GO should be visually prominent before the player commits the next order."
+	)
+	_append_handoff_check(
+		checks,
+		"primary_and_fire_rule_readable",
+		String(tactical_command_matrix.get("gate", "")) == "pass"
+			and int(command_matrix.get("primary_readable_count", 0)) >= 5
+			and int(command_matrix.get("active_fire_rule_count", 0)) == 1,
+		"critical",
+		"Primary command buttons and exactly one active Fire-Rule should be readable."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_command_matrix.get("read_only", false))
+			and not bool(tactical_command_matrix.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_command_matrix.get("creates_command", true))
+			and not bool(tactical_command_matrix.get("creates_fire_event", true))
+			and not bool(tactical_command_matrix.get("creates_damage_event", true))
+			and not bool(tactical_command_matrix.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_836 reads existing mission/HUD state only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_firefight_command_matrix_visual_polish.v1",
+		"task_id": "TASK_836",
+		"source_task_id": "TASK_835",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"style_id": String(tactical_command_matrix.get("style_id", command_matrix.get("style_id", ""))),
+		"source": source,
+		"tactical_command_matrix": tactical_command_matrix,
+		"command_matrix": command_matrix,
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_837 - Release First GO Firefight Real Capture Review",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()

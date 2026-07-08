@@ -90,6 +90,12 @@ const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_FONT_SIZE: int = 11
 const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_OUTLINE_SIZE: int = 3
 const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MIN_HEIGHT: float = 84.0
 const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MAX_LINES: int = 5
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID: String = "task_836_release_firefight_command_matrix_visual_v1"
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE: int = 9
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE: int = 12
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 9
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT: float = 1.35
 const MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID: String = "mission_team_chip_tooltip_hint_v1"
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
@@ -2508,6 +2514,7 @@ func _update_ui() -> void:
 	_refresh_mission_dropship_panel()
 	_refresh_tactical_event_log_panel()
 	_refresh_runtime_mission_hud_surfaces()
+	_apply_release_firefight_command_matrix_visual_polish()
 
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
@@ -7227,6 +7234,141 @@ func _apply_release_firefight_bottom_dock_density_label_contract(label: Label) -
 	)
 	label.set_meta("release_firefight_bottom_dock_density_style_id", RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_STYLE_ID)
 	label.set_meta("release_firefight_bottom_dock_density_task", "TASK_835")
+
+
+func _apply_release_firefight_command_matrix_visual_polish() -> void:
+	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
+	if command_grid == null:
+		return
+	var active: bool = not _build_release_candidate_firefight_decision_line().strip_edges().is_empty()
+	command_grid.set_meta("release_firefight_command_matrix_visual_active", active)
+	command_grid.set_meta("release_firefight_command_matrix_visual_style_id", RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID)
+	command_grid.set_meta("release_firefight_command_matrix_visual_task", "TASK_836")
+	_apply_release_firefight_command_primary_button_polish(active)
+	_apply_release_firefight_command_go_button_polish(active)
+	_apply_release_firefight_command_fire_rule_button_polish(active)
+	_apply_release_firefight_command_placeholder_polish(active)
+
+
+func _apply_release_firefight_command_primary_button_polish(active: bool) -> void:
+	for spec_variant in _get_release_firefight_command_primary_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
+		if button == null:
+			continue
+		button.text = String(spec.get("text", button.text))
+		button.tooltip_text = String(spec.get("tooltip", button.tooltip_text))
+		button.clip_text = true
+		button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE)
+		button.set_meta("release_firefight_command_matrix_style_id", RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID)
+		button.set_meta("release_firefight_command_matrix_task", "TASK_836")
+		button.set_meta("release_firefight_command_matrix_active", active)
+		button.set_meta("release_firefight_command_matrix_role", String(spec.get("role", "primary_command")))
+		button.set_meta("release_firefight_command_matrix_readable", active and not button.text.strip_edges().is_empty() and not button.tooltip_text.strip_edges().is_empty())
+		button.set_meta("release_firefight_command_matrix_font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE)
+		button.set_meta("release_firefight_command_matrix_visual_weight", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT if active else 1.0)
+		if active:
+			button.self_modulate = Color(0.86, 0.95, 1.0, 1.0)
+
+
+func _apply_release_firefight_command_go_button_polish(active: bool) -> void:
+	var go_button := get_node_or_null("%s/GoCommandMatrixButton" % COMMAND_GRID_PATH) as Button
+	if go_button == null:
+		return
+	var go_ready: bool = not go_button.disabled and not preview_mode and _can_issue_local_commands() and _has_selected_fireteam_orders_to_execute()
+	go_button.text = "GO"
+	go_button.tooltip_text = "GO: geplante Orders ausfuehren." if go_ready else "GO blockiert: erst Fireteam waehlen und Order/Waypoint planen."
+	go_button.clip_text = true
+	go_button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE)
+	go_button.set_meta("release_firefight_command_matrix_style_id", RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID)
+	go_button.set_meta("release_firefight_command_matrix_task", "TASK_836")
+	go_button.set_meta("release_firefight_command_matrix_active", active)
+	go_button.set_meta("release_firefight_command_matrix_role", "go_execute")
+	go_button.set_meta("release_firefight_command_matrix_go_prominent", active)
+	go_button.set_meta("release_firefight_command_matrix_go_ready", go_ready)
+	go_button.set_meta("release_firefight_command_matrix_font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE)
+	go_button.set_meta("release_firefight_command_matrix_visual_weight", RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT if active else 1.0)
+	if active:
+		go_button.self_modulate = Color(0.70, 1.0, 0.82, 1.0) if go_ready else Color(1.0, 0.86, 0.42, 1.0)
+		go_button.add_theme_color_override("font_color", Color(0.02, 0.06, 0.035, 1.0))
+		go_button.add_theme_color_override("font_hover_color", Color(0.0, 0.04, 0.02, 1.0))
+		go_button.add_theme_color_override("font_pressed_color", Color(0.0, 0.04, 0.02, 1.0))
+		go_button.add_theme_color_override("font_focus_color", Color(0.0, 0.04, 0.02, 1.0))
+
+
+func _apply_release_firefight_command_fire_rule_button_polish(active: bool) -> void:
+	var consensus_rule: String = _get_selected_fire_rule_consensus()
+	for spec_variant in _get_fire_rule_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
+		if button == null:
+			continue
+		var rule: String = String(spec.get("rule", "")).strip_edges().to_lower()
+		var is_active_rule: bool = bool(button.get_meta("fire_rule_active", false)) or (not consensus_rule.is_empty() and consensus_rule != "mixed" and rule == consensus_rule)
+		button.text = String(spec.get("text", button.text))
+		button.tooltip_text = "%s | aktive ROE sichtbar im ersten Firefight." % String(spec.get("tooltip", button.tooltip_text))
+		button.clip_text = true
+		button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE)
+		button.set_meta("release_firefight_command_matrix_style_id", RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID)
+		button.set_meta("release_firefight_command_matrix_task", "TASK_836")
+		button.set_meta("release_firefight_command_matrix_active", active)
+		button.set_meta("release_firefight_command_matrix_role", "fire_rule")
+		button.set_meta("release_firefight_command_matrix_fire_rule_active", active and is_active_rule)
+		button.set_meta("release_firefight_command_matrix_font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE)
+		button.set_meta("release_firefight_command_matrix_visual_weight", 2.0 if active and is_active_rule else 1.0)
+		if active and is_active_rule:
+			button.self_modulate = Color(1.0, 0.90, 0.28, 1.0)
+
+
+func _apply_release_firefight_command_placeholder_polish(active: bool) -> void:
+	for slot_index in range(7, 21):
+		var placeholder := get_node_or_null("%s/CommandSlot%02d" % [COMMAND_GRID_PATH, slot_index]) as Button
+		if placeholder == null:
+			continue
+		placeholder.text = ""
+		placeholder.tooltip_text = "Reserve command slot"
+		placeholder.disabled = true
+		placeholder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		placeholder.self_modulate = Color(1.0, 1.0, 1.0, 0.36 if active else 0.55)
+		placeholder.set_meta("release_firefight_command_matrix_style_id", RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID)
+		placeholder.set_meta("release_firefight_command_matrix_task", "TASK_836")
+		placeholder.set_meta("release_firefight_command_matrix_role", "quiet_placeholder")
+		placeholder.set_meta("release_firefight_command_matrix_quiet_placeholder", active)
+
+
+func _get_release_firefight_command_primary_button_specs() -> Array:
+	return [
+		{
+			"path": "%s/MoveButton" % COMMAND_GRID_PATH,
+			"text": "Move",
+			"tooltip": "Move: Ziel anklicken, Preview lesen, dann GO.",
+			"role": "primary_command",
+		},
+		{
+			"path": "%s/TakeButton" % COMMAND_GRID_PATH,
+			"text": "Take",
+			"tooltip": "Take: Kontakt oder Gebiet aggressiv nehmen.",
+			"role": "primary_command",
+		},
+		{
+			"path": "%s/HoldButton" % COMMAND_GRID_PATH,
+			"text": "Hold",
+			"tooltip": "Hold: Position halten und Deckung/Sicherung nutzen.",
+			"role": "primary_command",
+		},
+		{
+			"path": "%s/FlankButton" % COMMAND_GRID_PATH,
+			"text": "Flank",
+			"tooltip": "Flank: Risiko nehmen, Winkel verbessern.",
+			"role": "primary_command",
+		},
+		{
+			"path": "%s/TargetButton" % COMMAND_GRID_PATH,
+			"text": "Pick" if _is_target_placement_armed else "Target",
+			"tooltip": "Target: Ziel-/Area-Fokus fuer Fireteam setzen.",
+			"role": "primary_command",
+		},
+	]
 
 
 func _apply_frontier_probe_one_screen_visual_polish_label_contract(label: Label) -> void:
@@ -16213,6 +16355,184 @@ func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_release_firefight_command_matrix_visual_polish_snapshot() -> Dictionary:
+	_update_ui()
+	_apply_release_firefight_command_matrix_visual_polish()
+	var source_snapshot: Dictionary = get_release_firefight_bottom_dock_density_polish_snapshot()
+	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
+	var command_matrix: Dictionary = _build_release_firefight_command_matrix_visual_snapshot(command_grid)
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_bottom_dock_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"Command Matrix polish builds on a green TASK_835 bottom-dock snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"command_matrix_style_active",
+			bool(command_matrix.get("active", false)) and String(command_matrix.get("style_id", "")) == RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID,
+			"Command Matrix carries the TASK_836 style marker in the first Firefight."
+		),
+		_build_mission_first_move_readability_check(
+			"go_button_prominent",
+			bool(command_matrix.get("go_button_present", false))
+				and bool(command_matrix.get("go_button_prominent", false))
+				and float(command_matrix.get("go_button_visual_weight", 0.0)) >= RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT
+				and int(command_matrix.get("go_button_font_size", 0)) >= RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE,
+			"GO is visually louder than the command grid filler buttons."
+		),
+		_build_mission_first_move_readability_check(
+			"primary_commands_readable",
+			int(command_matrix.get("primary_button_count", 0)) >= 5
+				and int(command_matrix.get("primary_readable_count", 0)) >= 5
+				and int(command_matrix.get("primary_min_font_size", 0)) >= RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE,
+			"Move/Take/Hold/Flank/Target are readable and keep helpful tooltips."
+		),
+		_build_mission_first_move_readability_check(
+			"active_fire_rule_visible",
+			int(command_matrix.get("fire_rule_button_count", 0)) >= 4
+				and int(command_matrix.get("active_fire_rule_count", 0)) == 1
+				and String(command_matrix.get("active_fire_rule_style_id", "")) == RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID
+				and float(command_matrix.get("active_fire_rule_visual_weight", 0.0)) >= 2.0,
+			"The selected ROE/Fire-Rule is visible as exactly one active rule."
+		),
+		_build_mission_first_move_readability_check(
+			"placeholder_buttons_quiet",
+			int(command_matrix.get("quiet_placeholder_count", 0)) >= 1
+				and int(command_matrix.get("quiet_placeholder_count", 0)) == int(command_matrix.get("placeholder_count", 0)),
+			"Reserve command slots stay visually quiet."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only_boundaries",
+			bool(source_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(source_snapshot.get("creates_command", true))
+				and not bool(source_snapshot.get("creates_fire_event", true))
+				and not bool(source_snapshot.get("creates_damage_event", true))
+				and not bool(source_snapshot.get("sets_multiplayer_truth", true)),
+			"Command Matrix polish reads existing HUD state only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_836",
+		"source_task_id": "TASK_835",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"source": source_snapshot,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": String(command_matrix.get("style_id", "")),
+		"expected_style_id": RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID,
+		"decision_line": String(source_snapshot.get("decision_line", "")),
+		"command_matrix": command_matrix,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _build_release_firefight_command_matrix_visual_snapshot(command_grid: GridContainer) -> Dictionary:
+	var active: bool = bool(command_grid.get_meta("release_firefight_command_matrix_visual_active", false)) if command_grid != null else false
+	var style_id: String = String(command_grid.get_meta("release_firefight_command_matrix_visual_style_id", "")) if command_grid != null else ""
+	var primary_buttons: Array = []
+	var primary_readable_count: int = 0
+	var primary_min_font_size: int = 999
+	for spec_variant in _get_release_firefight_command_primary_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
+		var snapshot: Dictionary = _build_release_firefight_command_button_visual_snapshot(button)
+		primary_buttons.append(snapshot)
+		if bool(snapshot.get("readable", false)):
+			primary_readable_count += 1
+		primary_min_font_size = mini(primary_min_font_size, int(snapshot.get("font_size", 0)))
+	var fire_rule_buttons: Array = []
+	var active_fire_rule_count: int = 0
+	var active_fire_rule_style_id: String = ""
+	var active_fire_rule_visual_weight: float = 0.0
+	for spec_variant in _get_fire_rule_button_specs():
+		var spec: Dictionary = Dictionary(spec_variant)
+		var button := get_node_or_null(NodePath(String(spec.get("path", "")))) as Button
+		var snapshot: Dictionary = _build_release_firefight_command_button_visual_snapshot(button)
+		fire_rule_buttons.append(snapshot)
+		if bool(snapshot.get("fire_rule_active", false)):
+			active_fire_rule_count += 1
+			active_fire_rule_style_id = String(snapshot.get("style_id", ""))
+			active_fire_rule_visual_weight = maxf(active_fire_rule_visual_weight, float(snapshot.get("visual_weight", 0.0)))
+	var placeholder_count: int = 0
+	var quiet_placeholder_count: int = 0
+	for slot_index in range(7, 21):
+		var placeholder := get_node_or_null("%s/CommandSlot%02d" % [COMMAND_GRID_PATH, slot_index]) as Button
+		if placeholder == null:
+			continue
+		placeholder_count += 1
+		if bool(placeholder.get_meta("release_firefight_command_matrix_quiet_placeholder", false)):
+			quiet_placeholder_count += 1
+	var go_button := get_node_or_null("%s/GoCommandMatrixButton" % COMMAND_GRID_PATH) as Button
+	var go_snapshot: Dictionary = _build_release_firefight_command_button_visual_snapshot(go_button)
+	if primary_min_font_size == 999:
+		primary_min_font_size = 0
+	return {
+		"schema": "sternenbuergerchen.release_firefight_command_matrix_visual.v1",
+		"active": active,
+		"style_id": style_id,
+		"columns": command_grid.columns if command_grid != null else 0,
+		"primary_buttons": primary_buttons,
+		"primary_button_count": primary_buttons.size(),
+		"primary_readable_count": primary_readable_count,
+		"primary_min_font_size": primary_min_font_size,
+		"go_button": go_snapshot,
+		"go_button_present": bool(go_snapshot.get("present", false)),
+		"go_button_prominent": bool(go_snapshot.get("go_prominent", false)),
+		"go_button_ready": bool(go_snapshot.get("go_ready", false)),
+		"go_button_visual_weight": float(go_snapshot.get("visual_weight", 0.0)),
+		"go_button_font_size": int(go_snapshot.get("font_size", 0)),
+		"fire_rule_buttons": fire_rule_buttons,
+		"fire_rule_button_count": fire_rule_buttons.size(),
+		"active_fire_rule_count": active_fire_rule_count,
+		"active_fire_rule_style_id": active_fire_rule_style_id,
+		"active_fire_rule_visual_weight": active_fire_rule_visual_weight,
+		"placeholder_count": placeholder_count,
+		"quiet_placeholder_count": quiet_placeholder_count,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+	}
+
+
+func _build_release_firefight_command_button_visual_snapshot(button: Button) -> Dictionary:
+	if button == null:
+		return {"present": false, "readable": false}
+	var text: String = String(button.text).strip_edges()
+	var tooltip: String = String(button.tooltip_text).strip_edges()
+	var style_id: String = String(button.get_meta("release_firefight_command_matrix_style_id", ""))
+	var font_size: int = int(button.get_meta("release_firefight_command_matrix_font_size", button.get_theme_font_size("font_size")))
+	var role: String = String(button.get_meta("release_firefight_command_matrix_role", ""))
+	return {
+		"present": true,
+		"name": String(button.name),
+		"text": text,
+		"tooltip": tooltip,
+		"disabled": button.disabled,
+		"role": role,
+		"style_id": style_id,
+		"font_size": font_size,
+		"visual_weight": float(button.get_meta("release_firefight_command_matrix_visual_weight", 0.0)),
+		"readable": not text.is_empty() and not tooltip.is_empty() and style_id == RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID,
+		"go_prominent": bool(button.get_meta("release_firefight_command_matrix_go_prominent", false)),
+		"go_ready": bool(button.get_meta("release_firefight_command_matrix_go_ready", false)),
+		"fire_rule_active": bool(button.get_meta("release_firefight_command_matrix_fire_rule_active", false)),
+		"quiet_placeholder": bool(button.get_meta("release_firefight_command_matrix_quiet_placeholder", false)),
 	}
 
 

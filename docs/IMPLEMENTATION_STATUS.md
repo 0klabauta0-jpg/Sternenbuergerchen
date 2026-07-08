@@ -37,6 +37,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_835_release_firefight_bottom_dock_density_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_834_release_firefight_hud_real_window_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_833_release_firefight_hud_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
 - Naechster Schritt: First-GO-Firefight-Release erneut capturen und danach Command-Matrix-/Button-Lesbarkeit polieren.
 
+### TASK_836 - Release Firefight Command Matrix Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_836_release_firefight_command_matrix_visual_polish.md`, `docs/tasks/TASK_835_release_firefight_bottom_dock_density_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Die Command Matrix traegt im ersten Firefight einen stabilen TASK_836-Style-Marker, ohne neue Commands oder Gameplay-Wahrheit zu erzeugen.
+- Stand: GO ist groesser und prominenter markiert; Move, Take, Hold, Flank und Target behalten klare Tooltips, die aktive Fire-Rule ist als genau eine ROE sichtbar, Reserve-Slots bleiben ruhig.
+- Risiken/offen: Der echte Fensterblick bleibt als Capture sinnvoll, weil Button-Kontrast und GO-Gewichtung auf dem Zielmonitor beurteilt werden muessen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_836_release_firefight_command_matrix_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_835_release_firefight_bottom_dock_density_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release mit `--release-singleplayer-first-go-firefight` starten und die echte Command-Matrix-Lesbarkeit capturen.
+
 ### BUGFIX - Release Singleplayer Normal Click Homebase Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_release_singleplayer_normal_click_homebase_guard.md`, `docs/tasks/TASK_827_release_homebase_save_override_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
