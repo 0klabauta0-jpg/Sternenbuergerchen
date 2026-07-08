@@ -1560,6 +1560,110 @@ func get_release_firefight_hud_real_window_polish_snapshot(real_window_review_no
 	}
 
 
+func get_release_firefight_bottom_dock_density_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_firefight_hud_real_window_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_bottom_dock: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_firefight_bottom_dock_density_polish_snapshot"):
+		tactical_bottom_dock = Dictionary(tactical_controller.call("get_release_firefight_bottom_dock_density_polish_snapshot"))
+	var label_style: Dictionary = Dictionary(tactical_bottom_dock.get("mission_control_label_style", {}))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_real_window_passes",
+		String(source.get("status", "")) == "pass",
+		"critical",
+		"TASK_835 builds on a passing TASK_834 real-window snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_bottom_dock_snapshot_present",
+		not tactical_bottom_dock.is_empty(),
+		"critical",
+		"Active mission should expose tactical bottom-dock density polish."
+	)
+	_append_handoff_check(
+		checks,
+		"mission_control_decision_line_first",
+		String(tactical_bottom_dock.get("gate", "")) == "pass"
+			and not String(tactical_bottom_dock.get("decision_line", "")).strip_edges().is_empty()
+			and String(tactical_bottom_dock.get("mission_control_first_line", "")).strip_edges() == String(tactical_bottom_dock.get("decision_line", "")).strip_edges(),
+		"critical",
+		"Mission Control should lead with the NEXT/WHY Firefight decision line."
+	)
+	_append_handoff_check(
+		checks,
+		"mission_control_combat_line_second",
+		String(tactical_bottom_dock.get("gate", "")) == "pass"
+			and not String(tactical_bottom_dock.get("expected_mission_control_combat_line", "")).strip_edges().is_empty()
+			and String(tactical_bottom_dock.get("mission_control_second_line", "")).strip_edges() == String(tactical_bottom_dock.get("expected_mission_control_combat_line", "")).strip_edges(),
+		"critical",
+		"Mission Control should keep the combat readout directly under the decision line."
+	)
+	_append_handoff_check(
+		checks,
+		"bottom_dock_density_style_active",
+		String(tactical_bottom_dock.get("gate", "")) == "pass"
+			and String(tactical_bottom_dock.get("style_id", "")) == "task_835_release_firefight_bottom_dock_density_v1"
+			and bool(tactical_bottom_dock.get("bottom_dock_density_style_active", false)),
+		"critical",
+		"Mission Control should carry the TASK_835 bottom-dock density style."
+	)
+	_append_handoff_check(
+		checks,
+		"bottom_dock_label_readable",
+		int(label_style.get("font_size", 0)) >= 11
+			and int(label_style.get("outline_size", 0)) >= 3
+			and bool(tactical_bottom_dock.get("mission_control_label_autowrap_enabled", false))
+			and not bool(tactical_bottom_dock.get("mission_control_label_clip_text", true))
+			and float(tactical_bottom_dock.get("mission_control_label_min_height", 0.0)) >= 84.0,
+		"critical",
+		"Mission Control should be larger, outlined, wrapped and not clipped."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_bottom_dock.get("read_only", false))
+			and not bool(tactical_bottom_dock.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_bottom_dock.get("creates_command", true))
+			and not bool(tactical_bottom_dock.get("creates_fire_event", true))
+			and not bool(tactical_bottom_dock.get("creates_damage_event", true))
+			and not bool(tactical_bottom_dock.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_835 reads existing mission/HUD state only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_firefight_bottom_dock_density_polish.v1",
+		"task_id": "TASK_835",
+		"source_task_id": "TASK_834",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_bottom_dock": tactical_bottom_dock,
+		"decision_line": String(tactical_bottom_dock.get("decision_line", "")),
+		"mission_control_status_text": String(tactical_bottom_dock.get("mission_control_status_text", "")),
+		"mission_control_first_line": String(tactical_bottom_dock.get("mission_control_first_line", "")),
+		"mission_control_second_line": String(tactical_bottom_dock.get("mission_control_second_line", "")),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_836 - Release Firefight Command Matrix Visual Polish",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
