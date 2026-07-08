@@ -94,8 +94,9 @@
       <span class="pill good">TASK_856 Primary-HUD-Polish implementiert</span>
       <span class="pill good">TASK_857 Recapture-Slice implementiert</span>
       <span class="pill good">TASK_858 Findings implementiert</span>
-      <span class="pill warn">TASK_859 Source-Binding als naechster Schritt</span>
-      <span class="pill">Branch: task/release-fire-exchange-contact-fire-primary-hud-visual-findings</span>
+      <span class="pill good">TASK_859 Source-Binding implementiert</span>
+      <span class="pill warn">TASK_860 Recapture als naechster Schritt</span>
+      <span class="pill">Branch: task/release-fire-exchange-real-window-primary-hud-source-binding-polish</span>
     </div>
   </header>
 
@@ -130,6 +131,7 @@
             <li><strong>TASK_857:</strong> Der neue Recapture-Slice erzeugt ein eigenes Manifest <code>tmp/release_fire_exchange_contact_fire_primary_hud_recapture.json</code> und eigene Screenshotpfade fuer den echten Fensterblick nach TASK_856.</li>
             <li><strong>Aktueller Sichtbefund:</strong> Der echte TASK_857-Capture ist technisch <code>review_ready</code>, liest sich im Screenshot aber weiterhin eher als <code>NO FIRE NO_LOS</code> / CONTACT PRESSURE. Das ist kein Abbruch, sondern der belegte Input fuer TASK_858.</li>
             <li><strong>TASK_858:</strong> Dieser Sichtbefund ist jetzt als read-only Findings-Schnitt festgehalten: Primaer stoert weiter <code>NO FIRE NO_LOS</code> / LOS-Korrektur statt klarer CONTACT-FIRE-Lesung im echten #17/#18-Fensterpfad.</li>
+            <li><strong>TASK_859:</strong> Der echte #17/#18-Window-HUD-Pfad wird bei aktiver Fire-Exchange-Persistence an die vorhandene TASK_856-<code>CONTACT FIRE | ...</code>-Primaerquelle gebunden.</li>
             <li><strong>Bericht:</strong> Diese Workbench fasst Arbeitsstand, Spielwirkung, Screenshot-Befund, offene Risiken und naechste Arbeitsschritte zusammen. Unten kann daraus eine JSON-Notiz exportiert werden.</li>
             <li><strong>Git:</strong> TASK_848 bis TASK_857 sind gemerged und gepusht. TASK_858 laeuft aktuell auf <code>task/release-fire-exchange-contact-fire-primary-hud-visual-findings</code>.</li>
           </ul>
@@ -208,6 +210,7 @@
             <li><strong>TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture:</strong> Frischen echten Fensterblick nach TASK_856 als eigenes Manifest- und Screenshotpaket erzeugen.</li>
             <li><strong>TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings:</strong> TASK_857-Fensterblick read-only bewerten und die belegte Restreibung als <code>primary_hud_still_no_fire_no_los_visible</code> festhalten.</li>
             <li><strong>TASK_859 - Release Fire Exchange Real Window Primary HUD Source Binding Polish:</strong> Den echten #17/#18-Window-HUD-Pfad eng an die TASK_856-CONTACT-FIRE-Quelle binden.</li>
+            <li><strong>TASK_860 - Release Fire Exchange Real Window Contact-Fire Recapture:</strong> Nach dem Source-Binding neu exportieren/capturen und den echten Fensterblick pruefen.</li>
           </ol>
         </article>
         <article class="card">

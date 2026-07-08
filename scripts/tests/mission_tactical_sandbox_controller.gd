@@ -68,6 +68,7 @@ const STATION_REENTRY_PERFORMANCE_FEEL_PASS_SCRIPT: GDScript = preload("res://sc
 const STATION_REENTRY_HOST_CLIENT_NEXT_ORDER_SYNC_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_host_client_next_order_sync.gd")
 const STATION_REENTRY_HOST_CLIENT_FIRETEAM_CARD_CONTEXT_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_host_client_fireteam_card_context.gd")
 const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_fire_exchange_contact_fire_primary_hud_polish.gd")
+const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_fire_exchange_real_window_primary_hud_source_binding_polish.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -102,6 +103,7 @@ const RELEASE_FIRST_EXCHANGE_TENSION_TUNING_STYLE_ID: String = "task_844_release
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID: String = "task_847_release_fire_exchange_visibility_persistence_v1"
 const RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID: String = "task_850_release_fire_exchange_focused_visual_polish_v1"
 const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_STYLE_ID: String = "task_856_release_fire_exchange_contact_fire_primary_hud_polish_v1"
+const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_STYLE_ID: String = "task_859_release_fire_exchange_real_window_primary_hud_source_binding_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 45000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
@@ -7389,6 +7391,16 @@ func _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_densi
 	if compact_line.to_upper().begins_with("CONTACT FIRE"):
 		return compact_line
 	return "CONTACT FIRE | %s" % compact_line
+
+
+func _bind_release_fire_exchange_real_window_primary_hud_text(source_text: String, combat_hud_density: Dictionary, fallback_text: String = "") -> String:
+	var primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
+	return String(RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_SCRIPT.call(
+		"bind_status_text",
+		source_text,
+		primary_line,
+		fallback_text
+	)).strip_edges()
 
 
 func _build_mission_combat_hud_detail_tooltip_text() -> String:
@@ -17232,6 +17244,35 @@ func get_release_fire_exchange_contact_fire_primary_hud_polish_snapshot() -> Dic
 	return result
 
 
+func get_release_fire_exchange_real_window_primary_hud_source_binding_polish_snapshot() -> Dictionary:
+	_update_ui()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
+	var primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
+	var snapshot: Dictionary = {
+		"active": not primary_line.is_empty() and bool(combat_hud_density.get("visibility_persistence_active", false)),
+		"contact_fire_primary_line": primary_line,
+		"raw_selected_fireteam_status_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH).strip_edges(),
+		"raw_mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH).strip_edges(),
+		"selected_fireteam_status_text": String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges(),
+		"mission_control_status_text": String(command_feedback.get("mission_control_status_text", "")).strip_edges(),
+		"selected_fireteam_fallback_text": _build_fireteam_status_text(),
+		"mission_control_fallback_text": _build_strategic_status_text(),
+		"combat_hud_density": combat_hud_density,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+	var result: Dictionary = Dictionary(RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_SCRIPT.call("build_snapshot", snapshot, {})).duplicate(true)
+	result["controller_style_id"] = RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_STYLE_ID
+	return result
+
+
 func _release_fire_exchange_event_log_entries_contain_contact_fire(entries: Array) -> bool:
 	for entry_variant in entries:
 		if typeof(entry_variant) != TYPE_DICTIONARY:
@@ -21183,6 +21224,16 @@ func _fire_cover_visual_has_status_badge_readability(primary_snapshot: Dictionar
 func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
+	var selected_fireteam_status_label_text: String = _bind_release_fire_exchange_real_window_primary_hud_text(
+		_get_label_text(FIRETEAM_STATUS_LABEL_PATH),
+		combat_hud_density,
+		_build_fireteam_status_text()
+	)
+	var mission_control_status_text: String = _bind_release_fire_exchange_real_window_primary_hud_text(
+		_get_label_text(STRATEGIC_STATUS_LABEL_PATH),
+		combat_hud_density,
+		_build_strategic_status_text()
+	)
 	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
@@ -21245,8 +21296,8 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"selected_decision_context": _build_selected_decision_context_snapshot(),
 		"last_command_text": _last_command_text,
 		"command_feedback_text": _get_label_text(command_feedback_label_path),
-		"selected_fireteam_status_label_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
-		"mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH),
+		"selected_fireteam_status_label_text": selected_fireteam_status_label_text,
+		"mission_control_status_text": mission_control_status_text,
 		"mission_identity_header_text": _get_label_text(MISSION_IDENTITY_HEADER_LABEL_PATH),
 		"mission_identity_body_text": _get_label_text(MISSION_IDENTITY_BODY_LABEL_PATH),
 		"station_scenario_identity_body": station_scenario_identity_body,
