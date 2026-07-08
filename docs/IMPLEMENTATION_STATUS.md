@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_843 - Release First Firefight Contact Framing
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_843_release_first_firefight_contact_framing.md`, `docs/tasks/TASK_842_release_firefight_insertion_residue_declutter.md`, `docs/tasks/TASK_832_release_first_go_firefight_deeplink_evidence.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Mission-Controller liefert `get_release_first_firefight_contact_framing_snapshot()` mit Style-ID `task_843_release_first_firefight_contact_framing_v1` und klassifiziert den ersten Release-Firefight als `fire_exchange` oder `contact_pressure`.
+- Stand: Contact-Pressure rahmt blockiertes/warteendes `NO FIRE` als taktischen Druckmoment mit Grund, LOS-/Range-Kontext und naechstem Griff statt nur als technische Blockmeldung.
+- Stand: Der Event-Log-Fallback nutzt im No-Fire-Fall `CONTACT PRESSURE`, waehrend MetaLayer den Snapshot fuer Release-/Deep-Link-Pruefung weiterreicht.
+- Risiken/offen: TASK_843 erzeugt keinen garantierten echten Schusswechsel; wenn der echte Fensterblick noch zu ruhig wirkt, folgt TASK_844 - Release First Exchange Tension Tuning.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_843_release_first_firefight_contact_framing.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_842_release_firefight_insertion_residue_declutter.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
+- Naechster Schritt: TASK_844 - Release First Exchange Tension Tuning.
+
 ### BUGFIX - Homebase Parallel Direct Dropship Fireteam Catalog Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_homebase_parallel_direct_dropship_fireteam_catalog_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/tasks/TASK_393_direct_dropship_independence_lz_vector.md`
@@ -18,7 +28,7 @@
 - Stand: `task_393_direct_dropship_independence_lz_vector.gd` prueft jetzt explizit, dass das zweite Dropship vor dem zweiten Direct-Launch eine eigene Payload staged und beide Dropship-Cards unabhaengige Transit-/Arrival-States behalten.
 - Risiken/offen: Spaetere echte Fireteam-Loeschfunktionen sollten explizit loeschen, nicht ueber unvollstaendige Kontext-Refreshes.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_393_direct_dropship_independence_lz_vector.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd`, `git diff --check`.
-- Naechster Schritt: TASK_843 - Release First Firefight Contact Framing.
+- Naechster Schritt: TASK_844 - Release First Exchange Tension Tuning.
 
 ### TASK_842 - Release Firefight Insertion Residue Declutter
 - Status: implementiert im Arbeitsstand
@@ -26,9 +36,9 @@
 - Stand: `TerrainMap3DView` unterdrueckt im aktiven `release_firefight_declutter`-Modus nur mit explizitem `release_firefight_insertion_residue_declutter`-Schalter nicht-Cargo Dropship-LZ-Labels und Approach-Vektoren, damit Insertionsreste den ersten Firefight nicht ueberlagern.
 - Stand: Der Snapshot meldet `task_842_release_firefight_insertion_residue_declutter_v1`, separate Suppression-Zaehler fuer LZ-Label und Approach-Line sowie eine klare Visual-Policy.
 - Stand: Der Mission-Controller setzt den expliziten Schalter erst nach Deployment-Beginn beziehungsweise bei Drop-Sequenzphasen `unloading`, `complete` oder `outbound`; Default-/Pre-GO-Drop-Visuals bleiben unveraendert; Cargo-/Freighter-Approach, Cargo-LZ-Label und Cargo-Statuslabel bleiben auch im Declutter sichtbar.
-- Risiken/offen: Der erste Firefight zeigt weiterhin ggf. `NO FIRE LOS/RANGE`; das bleibt TASK_843 - Release First Firefight Contact Framing.
+- Risiken/offen: Der erste Firefight kann weiterhin ohne garantierten Schusswechsel starten; TASK_843 rahmt das als Contact Pressure, echter Tension-/Exchange-Feinschliff bleibt TASK_844.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_842_release_firefight_insertion_residue_declutter.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_839_release_firefight_world_label_declutter.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_393_direct_dropship_independence_lz_vector.gd`, `git diff --check`.
-- Naechster Schritt: TASK_843 - Release First Firefight Contact Framing.
+- Naechster Schritt: TASK_844 - Release First Exchange Tension Tuning.
 
 ### TASK_841 - Release Firefight World Label Visual Findings
 - Status: implementiert im Arbeitsstand
@@ -36,9 +46,9 @@
 - Stand: `ReleaseFirefightWorldLabelVisualFindings` baut aus dem TASK_840-Recapture-Manifest und manuellen Review-Notizen einen read-only Findings-Snapshot.
 - Stand: Positive Findings halten fest, dass die Welttext-Dichte ruhiger ist, HUD-Details lesbar bleiben und die Command Matrix weiterhin bedienbar wirkt.
 - Stand: Offene Findings benennen `insertion_residue_world_labels` als primaeres Polish-Problem, `first_firefight_no_fire_contact` als Combat-Framing-Warnung und `map_text_near_units_crowded` als weitere visuelle Reibung.
-- Risiken/offen: Der konkrete Insertionsreste-Polish ist mit TASK_842 umgesetzt; Combat-Framing bleibt TASK_843.
+- Risiken/offen: Der konkrete Insertionsreste-Polish ist mit TASK_842 umgesetzt; Contact-Framing ist mit TASK_843 umgesetzt, echte Tension bleibt TASK_844.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_841_release_firefight_world_label_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_840_release_firefight_world_label_real_window_recapture.gd`, `git diff --check`.
-- Naechster Schritt: TASK_843 - Release First Firefight Contact Framing.
+- Naechster Schritt: TASK_844 - Release First Exchange Tension Tuning.
 
 ### TASK_840 - Release Firefight World Label Real Window Recapture
 - Status: implementiert im Arbeitsstand

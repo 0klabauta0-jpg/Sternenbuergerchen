@@ -1902,6 +1902,79 @@ func get_release_firefight_world_label_declutter_snapshot(real_window_review_not
 	}
 
 
+func get_release_first_firefight_contact_framing_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_firefight_world_label_declutter_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_framing: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_first_firefight_contact_framing_snapshot"):
+		tactical_framing = Dictionary(tactical_controller.call("get_release_first_firefight_contact_framing_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_declutter_snapshot_available",
+		String(source.get("status", "")) == "pass" or String(source.get("status", "")) == "review",
+		"critical",
+		"TASK_843 builds after the release firefight visual-declutter chain."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_framing_snapshot_present",
+		not tactical_framing.is_empty(),
+		"critical",
+		"Active mission should expose tactical first-firefight contact framing."
+	)
+	_append_handoff_check(
+		checks,
+		"framing_gate_passes",
+		String(tactical_framing.get("gate", "")) == "pass",
+		"critical",
+		"First Firefight should be framed as fire exchange or contact pressure."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_framing.get("read_only", false))
+			and not bool(tactical_framing.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_framing.get("creates_command", true))
+			and not bool(tactical_framing.get("creates_fire_event", true))
+			and not bool(tactical_framing.get("creates_damage_event", true))
+			and not bool(tactical_framing.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_843 reads existing contact/combat snapshots only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_first_firefight_contact_framing.v1",
+		"task_id": "TASK_843",
+		"source_task_id": "TASK_842",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_framing": tactical_framing,
+		"style_id": String(tactical_framing.get("style_id", "")),
+		"framing_state": String(tactical_framing.get("framing_state", "")),
+		"framing_line": String(tactical_framing.get("framing_line", "")),
+		"pressure_reason": String(tactical_framing.get("pressure_reason", "")),
+		"next_step": String(tactical_framing.get("next_step", "")),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_844 - Release First Exchange Tension Tuning",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
