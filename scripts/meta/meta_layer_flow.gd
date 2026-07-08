@@ -1755,6 +1755,80 @@ func get_release_firefight_command_matrix_visual_polish_snapshot(real_window_rev
 	}
 
 
+func get_release_firefight_real_window_findings_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_firefight_command_matrix_visual_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_findings: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_firefight_real_window_findings_polish_snapshot"):
+		tactical_findings = Dictionary(tactical_controller.call("get_release_firefight_real_window_findings_polish_snapshot"))
+	var event_log_display: Dictionary = Dictionary(tactical_findings.get("event_log_display", {}))
+	var event_log_panel: Dictionary = Dictionary(tactical_findings.get("event_log_panel", {}))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_command_matrix_passes",
+		String(source.get("status", "")) == "pass",
+		"critical",
+		"TASK_838 builds on a passing TASK_836 command-matrix snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_findings_snapshot_present",
+		not tactical_findings.is_empty(),
+		"critical",
+		"Active mission should expose tactical real-window findings polish."
+	)
+	_append_handoff_check(
+		checks,
+		"event_log_has_visible_status",
+		String(tactical_findings.get("gate", "")) == "pass"
+			and int(event_log_display.get("display_count", 0)) >= 1
+			and int(event_log_panel.get("rendered_entry_count", 0)) >= 1,
+		"critical",
+		"#19 Event Log should show a readable status row instead of NO EVENTS in the first Firefight."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_findings.get("read_only", false))
+			and not bool(tactical_findings.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_findings.get("creates_command", true))
+			and not bool(tactical_findings.get("creates_fire_event", true))
+			and not bool(tactical_findings.get("creates_damage_event", true))
+			and not bool(tactical_findings.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_838 reads existing event-log, decision and combat snapshots only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_firefight_real_window_findings_polish.v1",
+		"task_id": "TASK_838",
+		"source_task_id": "TASK_837",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_findings": tactical_findings,
+		"event_log_display": event_log_display,
+		"event_log_panel": event_log_panel,
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_839 - Release Firefight World Label Declutter",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()
