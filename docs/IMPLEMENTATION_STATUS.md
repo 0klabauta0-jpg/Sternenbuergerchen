@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_866 - Release Fire Exchange Runtime Text Status Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_866_release_fire_exchange_runtime_text_status_recapture.md`, `docs/tasks/TASK_865_release_fire_exchange_runtime_text_visible_status_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_fire_exchange_runtime_text_status_recapture.ps1` erzeugt nach TASK_865 ein eigenes TASK_866-Manifest und eigene Screenshotpfade.
+- Stand: `ReleaseFireExchangeRuntimeTextStatusRecapture` paketiert den Capture als read-only Review-Snapshot mit TASK_865 als Status-Polish-Quelle, TASK_863 als Recapture-Quelle und TASK_862 als Runtime-Text-Quelle.
+- Stand: Der lokale echte TASK_866-Capture lief mit Gate `review_ready` und schreibt `tmp/release_fire_exchange_runtime_text_status_recapture.png` / `.json`.
+- Stand: Sichtbefund im neuen PNG: #17/#18 lesen weiterhin `NEXT LOS/RANGE KORRIGIEREN` / `Kampf NO FIRE NO_LOS`, waehrend #19 `CONTACT PRESSURE: Position korrigieren` zeigt.
+- Risiken/offen: Der Task erzeugt keinen automatischen Sichtentscheid. TASK_867 sollte den belegten Befund als Contract-Reibung schneiden: Wenn Combat ehrlich NO_LOS meldet, darf CONTACT FIRE nicht einfach als UI-Text erzwungen werden; der naechste Fix muss vermutlich das First-Exchange-Szenario/LOS herstellen oder die Erwartung auf CONTACT PRESSURE umbenennen.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_fire_exchange_runtime_text_status_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `godot_console.exe --headless --path . --script scripts/tests/task_866_release_fire_exchange_runtime_text_status_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_865_release_fire_exchange_runtime_text_visible_status_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_867 - Release Fire Exchange Runtime Text Status Visual Findings.
+
 ### TASK_865 - Release Fire Exchange Runtime Text Visible Status Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_865_release_fire_exchange_runtime_text_visible_status_polish.md`, `docs/tasks/TASK_864_release_fire_exchange_runtime_text_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
