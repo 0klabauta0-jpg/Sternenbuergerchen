@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_844 - Release First Exchange Tension Tuning
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_844_release_first_exchange_tension_tuning.md`, `docs/tasks/TASK_843_release_first_firefight_contact_framing.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Release-First-GO-Firefight-Deep-Link positioniert den ersten Gegner nicht mehr mit einem blinden Fixoffset, sondern prueft nahe Kandidaten mit `build_cover_effectiveness_readout_for_units()` auf Range, LOS und `combat_attackable`.
+- Stand: TacticalController und MetaLayer liefern `get_release_first_exchange_tension_tuning_snapshot()` mit Style-ID `task_844_release_first_exchange_tension_tuning_v1` und FireEvent-Evidenz fuer `framing_state = fire_exchange`.
+- Stand: Der echte FireEvent entsteht weiter ueber den bestehenden Combat-Driver und `SimulationRoot.enqueue_effect()`; der neue Snapshot bleibt read-only und erzeugt keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit.
+- Risiken/offen: Der Task haertet bewusst nur den Release-/QA-Deep-Link; echte Encounter-Balance und Real-Window-Recapture bleiben Folgearbeit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_844_release_first_exchange_tension_tuning.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_843_release_first_firefight_contact_framing.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_842_release_firefight_insertion_residue_declutter.gd`, `git diff --check`.
+- Naechster Schritt: TASK_845 - Release First Exchange Real Window Recapture.
+
 ### TASK_843 - Release First Firefight Contact Framing
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_843_release_first_firefight_contact_framing.md`, `docs/tasks/TASK_842_release_firefight_insertion_residue_declutter.md`, `docs/tasks/TASK_832_release_first_go_firefight_deeplink_evidence.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -6,6 +6,7 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const MISSION_PROGRESSION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/mission_progression_resolver.gd")
 const PERSONNEL_EVENT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_resolver.gd")
+const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
@@ -837,9 +838,9 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	controller.call("_refresh_world_overlays")
 	controller.call("_refresh_button_state")
 	controller.call("_update_ui")
-	await _wait_release_deeplink_frames(3)
+	await _wait_release_deeplink_frames(45)
 
-	var contact_setup: Dictionary = _position_release_first_enemy_near_fireteam(controller, selected_fireteam_id)
+	var contact_setup: Dictionary = _position_release_first_enemy_near_fireteam(controller, combat_driver, selected_fireteam_id)
 	if contact_setup.is_empty():
 		_release_first_go_firefight_deeplink_status = "blocked"
 		_release_first_go_firefight_deeplink_reason = "contact_setup_failed"
@@ -851,13 +852,23 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	controller.call("refresh_fireteam_security_state")
 	controller.call("_refresh_world_overlays")
 	controller.call("_update_ui")
+	var immediate_exchange_evidence: Dictionary = get_release_first_exchange_tension_tuning_snapshot()
+	set_meta("release_first_exchange_tension_tuning_evidence", immediate_exchange_evidence)
+	var immediate_exchange_applied: bool = String(immediate_exchange_evidence.get("status", "")) == "pass" \
+		and bool(immediate_exchange_evidence.get("first_exchange_visible", false))
+	if immediate_exchange_applied:
+		_release_first_go_firefight_deeplink_applied = true
+		_release_first_go_firefight_deeplink_status = "applied"
+		_release_first_go_firefight_deeplink_reason = ""
+		set_meta("release_first_go_firefight_deeplink_applied", true)
 	await _wait_release_deeplink_frames(10)
 
 	var snapshot: Dictionary = get_release_first_go_firefight_deeplink_snapshot(PackedStringArray([RELEASE_SINGLEPLAYER_FIRST_GO_FIREFIGHT_DEEPLINK_ARG]))
-	_release_first_go_firefight_deeplink_applied = String(snapshot.get("firefight_status", "")) == "pass" \
-		and bool(snapshot.get("go_executed", false)) \
-		and int(snapshot.get("selected_contact_count", 0)) > 0 \
-		and not String(snapshot.get("engagement_status", "")).strip_edges().is_empty()
+	_release_first_go_firefight_deeplink_applied = immediate_exchange_applied \
+		or (String(snapshot.get("firefight_status", "")) == "pass" \
+			and bool(snapshot.get("go_executed", false)) \
+			and int(snapshot.get("selected_contact_count", 0)) > 0 \
+			and not String(snapshot.get("engagement_status", "")).strip_edges().is_empty())
 	_release_first_go_firefight_deeplink_status = "applied" if _release_first_go_firefight_deeplink_applied else "blocked"
 	_release_first_go_firefight_deeplink_reason = "" if _release_first_go_firefight_deeplink_applied else "firefight_snapshot_not_pass"
 	set_meta("release_first_go_firefight_deeplink_applied", _release_first_go_firefight_deeplink_applied)
@@ -871,7 +882,7 @@ func _first_release_fireteam_id(first_move: Dictionary) -> String:
 	return ""
 
 
-func _position_release_first_enemy_near_fireteam(controller: Node, fireteam_id: String) -> Dictionary:
+func _position_release_first_enemy_near_fireteam(controller: Node, combat_driver: Node, fireteam_id: String) -> Dictionary:
 	var friendly_units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
 	var enemy_units: Array = Array(controller.call("_get_all_enemy_units", false))
 	if enemy_units.is_empty():
@@ -882,7 +893,8 @@ func _position_release_first_enemy_near_fireteam(controller: Node, fireteam_id: 
 	var enemy := enemy_units[0] as Node2D
 	if friendly == null or enemy == null:
 		return {}
-	enemy.global_position = friendly.global_position + Vector2(58.0, 0.0)
+	var placement: Dictionary = _resolve_release_first_exchange_enemy_placement(friendly, enemy, combat_driver)
+	enemy.global_position = Vector2(placement.get("enemy_position", friendly.global_position + Vector2(58.0, 0.0)))
 	if enemy is CanvasItem:
 		(enemy as CanvasItem).visible = true
 	return {
@@ -891,6 +903,59 @@ func _position_release_first_enemy_near_fireteam(controller: Node, fireteam_id: 
 		"enemy_unit_id": _get_release_unit_id(enemy),
 		"friendly_position": friendly.global_position,
 		"enemy_position": enemy.global_position,
+		"placement_verified_attackable": bool(placement.get("placement_verified_attackable", false)),
+		"placement_attempt_count": int(placement.get("placement_attempt_count", 0)),
+		"placement_offset": placement.get("placement_offset", Vector2.ZERO),
+		"placement_readout": Dictionary(placement.get("placement_readout", {})),
+	}
+
+
+func _resolve_release_first_exchange_enemy_placement(friendly: Node2D, enemy: Node2D, combat_driver: Node) -> Dictionary:
+	var fallback_offset := Vector2(58.0, 0.0)
+	var fallback_position: Vector2 = friendly.global_position + fallback_offset
+	var candidate_offsets: Array = [
+		Vector2(42.0, 0.0),
+		Vector2(0.0, 42.0),
+		Vector2(-42.0, 0.0),
+		Vector2(0.0, -42.0),
+		Vector2(32.0, 32.0),
+		Vector2(-32.0, 32.0),
+		Vector2(32.0, -32.0),
+		Vector2(-32.0, -32.0),
+		Vector2(58.0, 0.0),
+		Vector2(0.0, 58.0),
+		Vector2(-58.0, 0.0),
+		Vector2(0.0, -58.0),
+	]
+	var attempt_count: int = 0
+	var fallback_readout: Dictionary = {}
+	if combat_driver != null and combat_driver.has_method("build_cover_effectiveness_readout_for_units"):
+		for offset_variant in candidate_offsets:
+			var offset: Vector2 = offset_variant
+			attempt_count += 1
+			enemy.global_position = friendly.global_position + offset
+			var readout: Dictionary = Dictionary(combat_driver.call("build_cover_effectiveness_readout_for_units", friendly, enemy, "confirmed")).duplicate(true)
+			if fallback_readout.is_empty():
+				fallback_readout = readout
+				fallback_position = enemy.global_position
+				fallback_offset = offset
+			if bool(readout.get("combat_attackable", false)) \
+					and String(readout.get("range_state", "")).strip_edges().to_lower() == "in_range" \
+					and String(readout.get("los_state", "")).strip_edges().to_lower() != "blocked":
+				return {
+					"enemy_position": enemy.global_position,
+					"placement_verified_attackable": true,
+					"placement_attempt_count": attempt_count,
+					"placement_offset": offset,
+					"placement_readout": readout,
+				}
+	enemy.global_position = fallback_position
+	return {
+		"enemy_position": fallback_position,
+		"placement_verified_attackable": false,
+		"placement_attempt_count": attempt_count,
+		"placement_offset": fallback_offset,
+		"placement_readout": fallback_readout,
 	}
 
 
@@ -900,6 +965,7 @@ func _prepare_release_fireteam_for_first_engagement(controller: Node, fireteam_i
 		if unit == null:
 			continue
 		unit.set("skill_accuracy", 1.0)
+		_assign_release_first_exchange_hold_command(unit, enemy_position)
 		if unit.has_method("set_runtime_status"):
 			unit.call(
 				"set_runtime_status",
@@ -921,20 +987,52 @@ func _prepare_release_fireteam_for_first_engagement(controller: Node, fireteam_i
 			)
 
 
+func _assign_release_first_exchange_hold_command(unit: Node2D, enemy_position: Vector2) -> void:
+	if unit == null or not unit.has_method("assign_unit_command"):
+		return
+	var command = UNIT_COMMAND_SCRIPT.new()
+	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
+	command.priority = 30
+	command.unit_id = _get_release_unit_id(unit)
+	if unit.has_method("get_team_id"):
+		command.team_id = String(unit.call("get_team_id"))
+	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
+	command.fire_rule = UNIT_COMMAND_SCRIPT.FIRE_RULE_FREE
+	command.source_command_type = "defend"
+	command.source_task_type = "task844_release_first_exchange_tension_tuning"
+	command.target_position = enemy_position
+	command.movement_posture = UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE
+	command.weapon_posture = UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED
+	command.sight_range_factor = 1.0
+	command.aim_readiness_percent = 100.0
+	if command.has_method("is_valid") and bool(command.call("is_valid")):
+		unit.call("assign_unit_command", command)
+
+
 func _force_release_first_engagement_decision(controller: Node, combat_driver: Node, simulation_root: Node, fireteam_id: String, contact_setup: Dictionary) -> void:
 	var enemy_id: String = String(contact_setup.get("enemy_unit_id", "")).strip_edges()
+	var enemy_ids: PackedStringArray = []
+	for enemy_variant in Array(controller.call("_get_all_enemy_units", false)):
+		var enemy := enemy_variant as Node
+		var next_enemy_id: String = _get_release_unit_id(enemy)
+		if not next_enemy_id.is_empty() and not enemy_ids.has(next_enemy_id):
+			enemy_ids.append(next_enemy_id)
+	if enemy_ids.is_empty() and not enemy_id.is_empty():
+		enemy_ids.append(enemy_id)
 	var detection_progress: Dictionary = Dictionary(combat_driver.get("_detection_progress")).duplicate(true)
 	for unit_variant in Array(controller.call("_get_fireteam_units", fireteam_id, true)):
 		var unit := unit_variant as Node2D
 		if unit == null:
 			continue
 		var friendly_id: String = _get_release_unit_id(unit)
-		if friendly_id.is_empty() or enemy_id.is_empty():
+		if friendly_id.is_empty():
 			continue
-		detection_progress["%s:%s" % [friendly_id, enemy_id]] = 0
-		detection_progress["%s:%s" % [enemy_id, friendly_id]] = 0
+		for next_enemy_id in enemy_ids:
+			detection_progress["%s:%s" % [friendly_id, next_enemy_id]] = 0
+			detection_progress["%s:%s" % [next_enemy_id, friendly_id]] = 0
 	combat_driver.set("_detection_progress", detection_progress)
-	combat_driver.set("_current_tick", 120)
+	_update_release_contact_tracking(combat_driver)
+	combat_driver.set("_current_tick", maxi(int(combat_driver.get("_current_tick")), 120))
 	combat_driver.set("_next_attack_tick", 0)
 	if combat_driver.has_method("_try_enqueue_attacks"):
 		combat_driver.call("_try_enqueue_attacks", simulation_root)
@@ -1972,6 +2070,85 @@ func get_release_first_firefight_contact_framing_snapshot(real_window_review_not
 		"issues": _build_handoff_issue_list(checks),
 		"status": "pass" if failed_count == 0 else "review",
 		"recommended_next_task": "TASK_844 - Release First Exchange Tension Tuning",
+	}
+
+
+func get_release_first_exchange_tension_tuning_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_first_firefight_contact_framing_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_exchange: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_first_exchange_tension_tuning_snapshot"):
+		tactical_exchange = Dictionary(tactical_controller.call("get_release_first_exchange_tension_tuning_snapshot"))
+	var immediate_evidence: Dictionary = Dictionary(get_meta("release_first_exchange_tension_tuning_evidence", {})).duplicate(true)
+	if String(immediate_evidence.get("schema", "")) == "sternenbuergerchen.release_first_exchange_tension_tuning.v1":
+		var immediate_tactical: Dictionary = Dictionary(immediate_evidence.get("tactical_exchange", {})).duplicate(true)
+		if bool(immediate_tactical.get("first_exchange_visible", false)):
+			tactical_exchange = immediate_tactical
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_contact_framing_available",
+		String(source.get("status", "")) == "pass",
+		"critical",
+		"TASK_844 builds on the green TASK_843 contact-framing chain."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_exchange_snapshot_present",
+		not tactical_exchange.is_empty(),
+		"critical",
+		"Active mission should expose the tactical first-exchange tuning snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"first_exchange_visible",
+		String(tactical_exchange.get("gate", "")) == "pass" and bool(tactical_exchange.get("first_exchange_visible", false)),
+		"critical",
+		"Release First-GO Firefight should show a real fire exchange."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_exchange.get("read_only", false))
+			and not bool(tactical_exchange.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_exchange.get("creates_command", true))
+			and not bool(tactical_exchange.get("creates_fire_event", true))
+			and not bool(tactical_exchange.get("creates_damage_event", true))
+			and not bool(tactical_exchange.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_844 reads the already created exchange evidence only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_tension_tuning.v1",
+		"task_id": "TASK_844",
+		"source_task_id": "TASK_843",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_exchange": tactical_exchange,
+		"style_id": String(tactical_exchange.get("style_id", "")),
+		"framing_state": String(tactical_exchange.get("framing_state", "")),
+		"framing_line": String(tactical_exchange.get("framing_line", "")),
+		"fire_event_count": int(tactical_exchange.get("fire_event_count", 0)),
+		"first_fire_event_id": String(tactical_exchange.get("first_fire_event_id", "")),
+		"first_exchange_visible": bool(tactical_exchange.get("first_exchange_visible", false)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_845 - Release First Exchange Real Window Recapture",
 	}
 
 
