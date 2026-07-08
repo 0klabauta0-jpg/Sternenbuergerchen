@@ -71,6 +71,8 @@ func _test_second_direct_send_keeps_first_mission_card_and_eta_alive() -> void:
 
 	_drop_fireteam_on_shipcard(homebase_screen, "ft2", "dropship_beta")
 	await _finish_boarding(homebase_screen, "ft2")
+	var beta_drop_state: Dictionary = Dictionary(homebase_screen.call("build_homebase_direct_drop_state_for_craft", "dropship_beta"))
+	_assert(bool(beta_drop_state.get("drop_ship_staged", false)) and int(beta_drop_state.get("mission_drop_passenger_count", 0)) > 0, "Second Dropship stages its own Direct payload before launch")
 	homebase_screen.call("_on_send_pilot_button_pressed", "dropship_beta")
 	await _wait_frames(6)
 	var second_mission: Node = scene.call("get_active_mission")
@@ -85,7 +87,7 @@ func _test_second_direct_send_keeps_first_mission_card_and_eta_alive() -> void:
 	var beta_card: Dictionary = _find_mission_drop_card(cards, "dropship_beta")
 	_assert(first_mission == second_mission, "Second Direct Send updates the active mission instead of replacing it")
 	_assert(not alpha_card.is_empty() and not beta_card.is_empty(), "Mission keeps separate Dropship cards for Alpha and Beta")
-	_assert(String(alpha_card.get("state", "")).strip_edges() == "to_mission" and String(beta_card.get("state", "")).strip_edges() == "to_mission", "Both Direct Dropships keep their own to_mission state")
+	_assert(_is_valid_direct_mission_transport_card(alpha_card) and _is_valid_direct_mission_transport_card(beta_card), "Both Direct Dropships keep an independent mission transport/arrival state")
 	_assert(float(alpha_card.get("progress", 0.0)) > alpha_progress_before, "First Dropship ETA/progress keeps advancing after the second Dropship launches")
 	_assert(_find_mission_dropship_card(second_mission, "dropship_alpha") != null and _find_mission_dropship_card(second_mission, "dropship_beta") != null, "Mission HUD renders both Direct Dropship cards at the same time")
 
@@ -248,11 +250,14 @@ func _build_dropship_definition(craft_id: String, display_name: String) -> Dicti
 	}
 
 
-func _drop_fireteam_on_shipcard(screen: Control, fireteam_id: String, craft_id: String) -> void:
+func _drop_fireteam_on_shipcard(screen: Control, fireteam_id: String, craft_id: String) -> Dictionary:
 	var target := _find_shipcard_drop_target(screen, craft_id)
 	if target == null:
-		return
+		return {"target_found": false}
 	target.call("_drop_data", Vector2.ZERO, {"type": "fob_fireteam_card", "fireteam_id": fireteam_id, "source_context": "fireteam_list"})
+	return {
+		"target_found": true,
+	}
 
 
 func _find_shipcard_drop_target(screen: Control, craft_id: String) -> Control:
@@ -314,6 +319,16 @@ func _find_mission_drop_card(cards: Array, craft_id: String) -> Dictionary:
 		if String(card.get("craft_id", "")).strip_edges() == craft_id:
 			return card
 	return {}
+
+
+func _is_valid_direct_mission_transport_card(card: Dictionary) -> bool:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	var progress: float = clampf(float(card.get("progress", 0.0)), 0.0, 100.0)
+	if state == "to_mission":
+		return progress >= 0.0 and progress < 100.0
+	if state == "waiting":
+		return progress >= 99.0
+	return false
 
 
 func _find_visual_entry(entries: Array, craft_id: String) -> Dictionary:

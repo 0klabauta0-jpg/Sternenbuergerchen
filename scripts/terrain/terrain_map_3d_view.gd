@@ -371,6 +371,7 @@ const WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_SURFACE_OFFSET: float = 0.96
 const WORLD_LABEL_DENSITY_MODE_DEFAULT: String = "default"
 const WORLD_LABEL_DENSITY_MODE_RELEASE_FIREFIGHT_DECLUTTER: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
+const RELEASE_FIREFIGHT_INSERTION_RESIDUE_DECLUTTER_STYLE_ID: String = "task_842_release_firefight_insertion_residue_declutter_v1"
 const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
 	"CONTACT",
 	"MOVE",
@@ -656,6 +657,9 @@ var _tactical_communication_event_entries: Array = []
 var _world_label_declutter_suppressed_count: int = 0
 var _world_label_declutter_rendered_count: int = 0
 var _world_label_declutter_unit_badge_suppressed_count: int = 0
+var _release_firefight_insertion_residue_suppressed_count: int = 0
+var _release_firefight_insertion_residue_lz_label_suppressed_count: int = 0
+var _release_firefight_insertion_residue_approach_line_suppressed_count: int = 0
 var _movement_step_ready_at_msec: Dictionary = {}
 var _movement_step_sfx_count: int = 0
 var _movement_step_sfx_suppressed_rate_limit_count: int = 0
@@ -838,6 +842,9 @@ func render_map(terrain_map_data = null) -> void:
 	_tactical_communication_event_entries.clear()
 	_world_label_declutter_suppressed_count = 0
 	_world_label_declutter_rendered_count = 0
+	_release_firefight_insertion_residue_suppressed_count = 0
+	_release_firefight_insertion_residue_lz_label_suppressed_count = 0
+	_release_firefight_insertion_residue_approach_line_suppressed_count = 0
 	_reset_fow_overlay_counters(false)
 	if _terrain_map_data == null:
 		_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
@@ -911,6 +918,7 @@ func get_selected_grid_positions() -> Array:
 
 func set_order_visual_payload(order_payload: Dictionary) -> void:
 	_order_payload_apply_count += 1
+	var previous_insertion_residue_declutter_active: bool = _is_release_firefight_insertion_residue_declutter_active()
 	var next_signature: String = _build_order_visual_signature(order_payload)
 	if next_signature == _order_visual_signature:
 		_order_payload = order_payload.duplicate(true)
@@ -923,6 +931,8 @@ func set_order_visual_payload(order_payload: Dictionary) -> void:
 			_set_contact_density_heatmap_enabled_internal(contact_density_enabled, true)
 	_order_dynamic_visual_signature = _build_order_dynamic_visual_signature()
 	_rebuild_order_visuals()
+	if previous_insertion_residue_declutter_active != _is_release_firefight_insertion_residue_declutter_active() and not _drop_payload.is_empty():
+		_rebuild_drop_visuals()
 	_request_viewport_redraw()
 
 
@@ -1249,9 +1259,12 @@ func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
 
 
 func set_mission_status_payload(status_payload: Dictionary) -> void:
+	var previous_insertion_residue_declutter_active: bool = _is_release_firefight_insertion_residue_declutter_active()
 	_mission_status_payload_apply_count += 1
 	_mission_status_payload = status_payload.duplicate(true)
 	_rebuild_status_visuals()
+	if previous_insertion_residue_declutter_active != _is_release_firefight_insertion_residue_declutter_active() and not _drop_payload.is_empty():
+		_rebuild_drop_visuals()
 	_request_viewport_redraw()
 
 
@@ -1678,6 +1691,12 @@ func get_render_snapshot() -> Dictionary:
 		"world_label_declutter_unit_badge_suppressed_count": _world_label_declutter_unit_badge_suppressed_count,
 		"world_label_declutter_total_suppressed_count": _world_label_declutter_suppressed_count + _world_label_declutter_unit_badge_suppressed_count,
 		"world_label_declutter_rendered_count": _world_label_declutter_rendered_count,
+		"release_firefight_insertion_residue_declutter_active": _is_release_firefight_insertion_residue_declutter_active(),
+		"release_firefight_insertion_residue_declutter_style_id": RELEASE_FIREFIGHT_INSERTION_RESIDUE_DECLUTTER_STYLE_ID if _is_release_firefight_insertion_residue_declutter_active() else "",
+		"release_firefight_insertion_residue_suppressed_count": _release_firefight_insertion_residue_suppressed_count,
+		"release_firefight_insertion_residue_lz_label_suppressed_count": _release_firefight_insertion_residue_lz_label_suppressed_count,
+		"release_firefight_insertion_residue_approach_line_suppressed_count": _release_firefight_insertion_residue_approach_line_suppressed_count,
+		"release_firefight_insertion_residue_policy": "suppress_non_cargo_lz_labels_and_approach_vectors_after_go" if _is_release_firefight_insertion_residue_declutter_active() else "default",
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -4729,7 +4748,7 @@ func _build_drop_visual_static_signature(payload: Dictionary) -> String:
 	var entries: Array = Array(payload.get("dropship_visuals", []))
 	for index in range(entries.size()):
 		var entry: Dictionary = Dictionary(entries[index])
-		parts.append("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [
+		parts.append("%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s:%s" % [
 			_get_dropship_visual_id(entry, index),
 			String(entry.get("state", "")).strip_edges().to_lower(),
 			_texture_signature(entry.get("dropship_texture", null)),
@@ -4741,6 +4760,7 @@ func _build_drop_visual_static_signature(payload: Dictionary) -> String:
 			str(bool(entry.get("show_approach_vector", true))),
 			String(entry.get("approach_vector_shape", "wide_arrow")).strip_edges(),
 			String(entry.get("team_id", AIR_LAYER_DEFAULT_TEAM_ID)).strip_edges(),
+			str(_is_release_firefight_insertion_residue_declutter_active()),
 		])
 		if bool(entry.get("cargo_visual", false)):
 			parts.append("cargo:%s:%s:%s:%s" % [
@@ -4963,6 +4983,14 @@ func _is_release_firefight_world_label_declutter_active() -> bool:
 	return _get_world_label_density_mode() == WORLD_LABEL_DENSITY_MODE_RELEASE_FIREFIGHT_DECLUTTER
 
 
+func _is_release_firefight_insertion_residue_declutter_active() -> bool:
+	if not _is_release_firefight_world_label_declutter_active():
+		return false
+	if bool(_order_payload.get("release_firefight_insertion_residue_declutter", false)):
+		return true
+	return bool(_mission_status_payload.get("release_firefight_insertion_residue_declutter", false))
+
+
 func _should_suppress_release_firefight_world_bubble(feedback_bubble: Dictionary) -> bool:
 	if not _is_release_firefight_world_label_declutter_active():
 		return false
@@ -4986,6 +5014,20 @@ func _should_suppress_release_firefight_unit_badge(badge_text: String) -> bool:
 	if not _is_release_firefight_world_label_declutter_active():
 		return false
 	return RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS.has(badge_text.strip_edges().to_upper())
+
+
+func _should_suppress_release_firefight_dropship_lz_label(entry: Dictionary, label_text: String) -> bool:
+	if not _is_release_firefight_insertion_residue_declutter_active():
+		return false
+	if bool(entry.get("cargo_visual", false)):
+		return false
+	return not label_text.strip_edges().is_empty()
+
+
+func _should_suppress_release_firefight_dropship_approach_line(entry: Dictionary) -> bool:
+	if not _is_release_firefight_insertion_residue_declutter_active():
+		return false
+	return not bool(entry.get("cargo_visual", false))
 
 
 func _select_feedback_bubbles_for_visuals(feedback_bubbles: Array) -> Array:
@@ -7063,6 +7105,9 @@ func _rebuild_drop_visuals() -> void:
 	_dropship_approach_lines_by_id.clear()
 	_dropship_approach_arrow_count = 0
 	_dropship_lz_label_count = 0
+	_release_firefight_insertion_residue_suppressed_count = 0
+	_release_firefight_insertion_residue_lz_label_suppressed_count = 0
+	_release_firefight_insertion_residue_approach_line_suppressed_count = 0
 	_dropship_texture_visible = false
 	_dropship_model_visible = false
 	_missing_dropship_model_count = 0
@@ -7134,8 +7179,12 @@ func _rebuild_drop_visuals() -> void:
 						_cargo_touchdown_lz_marker_count += 1
 					var lz_label: String = String(entry.get("lz_label", entry.get("lz_name", ""))).strip_edges()
 					if not lz_label.is_empty():
-						_add_label3d(_drop_root, lz_label, _world_to_surface_3d_position(entry_lz_position, 0.62), "DropshipLZLabel_%s" % _sanitize_node_name(visual_id), lz_color.lightened(0.18), 13)
-						_dropship_lz_label_count += 1
+						if _should_suppress_release_firefight_dropship_lz_label(entry, lz_label):
+							_release_firefight_insertion_residue_lz_label_suppressed_count += 1
+							_release_firefight_insertion_residue_suppressed_count += 1
+						else:
+							_add_label3d(_drop_root, lz_label, _world_to_surface_3d_position(entry_lz_position, 0.62), "DropshipLZLabel_%s" % _sanitize_node_name(visual_id), lz_color.lightened(0.18), 13)
+							_dropship_lz_label_count += 1
 			else:
 				_fow_hidden_air_visual_count += 1
 		var had_approach_line: bool = _dropship_approach_lines_by_id.has(visual_id)
@@ -7241,6 +7290,10 @@ func _get_dropship_visual_id(entry: Dictionary, index: int) -> String:
 func _add_dropship_approach_line(entry: Dictionary, visual_id: String, ship_position: Vector2) -> void:
 	if not bool(entry.get("show_approach_vector", true)):
 		return
+	if _should_suppress_release_firefight_dropship_approach_line(entry):
+		_release_firefight_insertion_residue_approach_line_suppressed_count += 1
+		_release_firefight_insertion_residue_suppressed_count += 1
+		return
 	var target_position: Vector2
 	if typeof(entry.get("approach_vector_target_position", null)) == TYPE_VECTOR2:
 		target_position = Vector2(entry.get("approach_vector_target_position", Vector2.ZERO))
@@ -7274,7 +7327,7 @@ func _update_dropship_approach_line(entry: Dictionary, visual_id: String, ship_p
 	var line := _dropship_approach_lines_by_id.get(visual_id, null) as MeshInstance3D
 	if line == null or not is_instance_valid(line):
 		return
-	if not bool(entry.get("show_approach_vector", true)):
+	if not bool(entry.get("show_approach_vector", true)) or _should_suppress_release_firefight_dropship_approach_line(entry):
 		line.visible = false
 		return
 	var target_position: Vector2
