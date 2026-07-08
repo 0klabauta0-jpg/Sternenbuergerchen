@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_873 - Release First Exchange CONTACT-FIRE Readability Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_873_release_first_exchange_contact_fire_readability_fix.md`, `docs/tasks/TASK_872_release_correct_window_first_exchange_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der TacticalController hat jetzt `apply_release_first_exchange_contact_fire_readability_fix()`, der gueltige TASK_844-First-Exchange-Evidence ueber die bestehende TASK_847-Visibility-Persistence seeded und danach #17/#18/#19 sowie World-Overlays sofort refreshed.
+- Stand: Der Release-First-GO-Firefight-Deep-Link ruft diesen Hook direkt nach dem Immediate-Exchange-Snapshot auf und legt die Evidence unter `release_first_exchange_contact_fire_readability_fix_evidence` ab.
+- Stand: MetaLayer und TacticalController liefern read-only TASK_873-Snapshots mit CONTACT-FIRE-first-/Event-Log-/NO-FIRE-before-CONTACT-FIRE-Pruefung.
+- Risiken/offen: TASK_873 beweist den Runtime-/Snapshot-Pfad, aber noch nicht den menschlichen Fensterblick. Der naechste Schritt muss neu exportieren/capturen und pruefen, ob CONTACT FIRE/FireTrace/Impact im echten Release-Fenster sichtbar sind.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_873_release_first_exchange_contact_fire_readability_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_872_release_correct_window_first_exchange_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_871_release_window_identity_capture_target_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_874 - Release First Exchange CONTACT-FIRE Real Window Recapture.
+
 ### TASK_869 - Release First Exchange Real Window Recapture After LOS Setup
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_869_release_first_exchange_real_window_recapture_after_los_setup.md`, `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/dev/mission_command_feedback_contract.md`

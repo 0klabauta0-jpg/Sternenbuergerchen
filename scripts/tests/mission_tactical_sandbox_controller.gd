@@ -106,6 +106,7 @@ const RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID: String = "task_850_r
 const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_STYLE_ID: String = "task_856_release_fire_exchange_contact_fire_primary_hud_polish_v1"
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_STYLE_ID: String = "task_859_release_fire_exchange_real_window_primary_hud_source_binding_v1"
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID: String = "task_862_release_fire_exchange_real_window_primary_hud_runtime_text_v1"
+const RELEASE_FIRST_EXCHANGE_CONTACT_FIRE_READABILITY_FIX_STYLE_ID: String = "task_873_release_first_exchange_contact_fire_readability_fix_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 45000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
@@ -7270,6 +7271,113 @@ func record_release_fire_exchange_visibility_evidence(source_snapshot: Dictionar
 		_release_fire_exchange_visibility_clock_msec()
 	)
 	return _release_fire_exchange_visibility_persistence_evidence.duplicate(true)
+
+
+func apply_release_first_exchange_contact_fire_readability_fix(source_snapshot: Dictionary = {}) -> Dictionary:
+	var seeded_evidence: Dictionary = {}
+	if not source_snapshot.is_empty():
+		seeded_evidence = record_release_fire_exchange_visibility_evidence(source_snapshot)
+	_refresh_world_overlays()
+	_update_ui()
+	_refresh_tactical_event_log_panel()
+	_apply_release_fire_exchange_real_window_primary_hud_runtime_text()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
+	var visibility_persistence: Dictionary = Dictionary(combat_hud_density.get("visibility_persistence", {})).duplicate(true)
+	var event_log_display: Dictionary = Dictionary(command_feedback.get("release_firefight_event_log_display", {})).duplicate(true)
+	var fallback_entry: Dictionary = Dictionary(event_log_display.get("fallback_entry", {})).duplicate(true)
+	var selected_text: String = String(command_feedback.get("selected_fireteam_status_label_text", _get_label_text(FIRETEAM_STATUS_LABEL_PATH))).strip_edges()
+	var mission_text: String = String(command_feedback.get("mission_control_status_text", _get_label_text(STRATEGIC_STATUS_LABEL_PATH))).strip_edges()
+	var primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
+	var event_log_short_text: String = String(fallback_entry.get("short_text", visibility_persistence.get("event_log_short_text", ""))).strip_edges()
+	var event_log_contact_fire: bool = event_log_short_text.contains("CONTACT FIRE") \
+		or _release_fire_exchange_event_log_entries_contain_contact_fire(Array(event_log_display.get("entries", [])))
+	var primary_lines_text: String = _join_release_first_exchange_primary_lines([selected_text, mission_text])
+	var no_fire_before_contact_fire: bool = _release_first_exchange_primary_lines_contain_no_fire_before_contact_fire(primary_lines_text)
+	var visibility_active: bool = bool(combat_hud_density.get("visibility_persistence_active", false))
+	var selected_contact_fire_first: bool = selected_text.to_upper().begins_with("CONTACT FIRE")
+	var mission_contact_fire_first: bool = mission_text.to_upper().begins_with("CONTACT FIRE")
+	var issues: Array = []
+	if seeded_evidence.is_empty():
+		issues.append(_build_release_first_exchange_contact_fire_readability_issue("visibility_evidence_not_seeded", "Keine gueltige First-Exchange-Evidence wurde seeded."))
+	if not visibility_active:
+		issues.append(_build_release_first_exchange_contact_fire_readability_issue("visibility_persistence_not_active", "Release-Fire-Exchange-Persistence ist nach dem Refresh nicht aktiv."))
+	if primary_line.is_empty() or not primary_line.to_upper().begins_with("CONTACT FIRE"):
+		issues.append(_build_release_first_exchange_contact_fire_readability_issue("primary_line_not_contact_fire", "CONTACT-FIRE-Primaerzeile fehlt."))
+	if not selected_contact_fire_first:
+		issues.append(_build_release_first_exchange_contact_fire_readability_issue("selected_fireteam_not_contact_fire_first", "#17 Selected Fireteam beginnt nicht mit CONTACT FIRE."))
+	if not mission_contact_fire_first:
+		issues.append(_build_release_first_exchange_contact_fire_readability_issue("mission_control_not_contact_fire_first", "#18 Mission Control beginnt nicht mit CONTACT FIRE."))
+	if not event_log_contact_fire:
+		issues.append(_build_release_first_exchange_contact_fire_readability_issue("event_log_not_contact_fire", "#19 Event Log enthaelt kein CONTACT FIRE."))
+	if no_fire_before_contact_fire:
+		issues.append(_build_release_first_exchange_contact_fire_readability_issue("debug_no_fire_before_contact_fire", "NO FIRE steht vor CONTACT FIRE in der primaeren Lesung."))
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_contact_fire_readability_fix.v1",
+		"task_id": "TASK_873",
+		"source_task_id": "TASK_872",
+		"source_exchange_task_id": "TASK_844",
+		"source_visibility_task_id": "TASK_847",
+		"source_primary_hud_task_id": "TASK_856",
+		"source_runtime_text_task_id": "TASK_862",
+		"style_id": RELEASE_FIRST_EXCHANGE_CONTACT_FIRE_READABILITY_FIX_STYLE_ID,
+		"status": "pass" if issues.is_empty() else "review",
+		"active": visibility_active and not primary_line.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+		"visibility_persistence_seeded": not seeded_evidence.is_empty(),
+		"visibility_persistence_active": visibility_active,
+		"contact_fire_primary_line": primary_line,
+		"selected_fireteam_status_text": selected_text,
+		"mission_control_status_text": mission_text,
+		"event_log_short_text": event_log_short_text,
+		"selected_fireteam_contact_fire_first": selected_contact_fire_first,
+		"mission_control_contact_fire_first": mission_contact_fire_first,
+		"event_log_contact_fire": event_log_contact_fire,
+		"primary_lines_text": primary_lines_text,
+		"primary_lines_contain_debug_no_fire_before_contact_fire": no_fire_before_contact_fire,
+		"seeded_evidence": seeded_evidence,
+		"combat_hud_density": combat_hud_density,
+		"visibility_persistence": visibility_persistence,
+		"event_log_display": event_log_display,
+		"source": source_snapshot.duplicate(true),
+		"issues": issues,
+		"issue_count": issues.size(),
+		"recommended_next_task": "TASK_874 - Release First Exchange CONTACT-FIRE Real Window Recapture",
+	}
+
+
+func _join_release_first_exchange_primary_lines(lines: Array) -> String:
+	var result: PackedStringArray = PackedStringArray()
+	var seen: Dictionary = {}
+	for line_variant in lines:
+		var line: String = String(line_variant).strip_edges()
+		if line.is_empty() or seen.has(line):
+			continue
+		seen[line] = true
+		result.append(line)
+	return "\n".join(result)
+
+
+func _release_first_exchange_primary_lines_contain_no_fire_before_contact_fire(text: String) -> bool:
+	var upper: String = String(text).to_upper()
+	var contact_index: int = upper.find("CONTACT FIRE")
+	var no_fire_index: int = upper.find("NO FIRE")
+	return no_fire_index >= 0 and (contact_index < 0 or no_fire_index < contact_index)
+
+
+func _build_release_first_exchange_contact_fire_readability_issue(issue_id: String, text: String) -> Dictionary:
+	return {
+		"id": issue_id,
+		"text": text,
+	}
 
 
 func _release_fire_exchange_visibility_clock_msec() -> int:

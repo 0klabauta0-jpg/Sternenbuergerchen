@@ -164,6 +164,7 @@ var _release_first_go_firefight_deeplink_status: String = "idle"
 var _release_first_go_firefight_deeplink_reason: String = ""
 var _release_first_go_firefight_pre_go_passed: bool = false
 var _release_first_exchange_los_setup_polish_evidence: Dictionary = {}
+var _release_first_exchange_contact_fire_readability_fix_evidence: Dictionary = {}
 
 
 func _ready() -> void:
@@ -860,8 +861,16 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	var immediate_exchange_evidence: Dictionary = get_release_first_exchange_tension_tuning_snapshot()
 	set_meta("release_first_exchange_tension_tuning_evidence", immediate_exchange_evidence)
 	var immediate_tactical_exchange: Dictionary = Dictionary(immediate_exchange_evidence.get("tactical_exchange", {})).duplicate(true)
-	if controller.has_method("record_release_fire_exchange_visibility_evidence"):
+	if controller.has_method("apply_release_first_exchange_contact_fire_readability_fix"):
+		_release_first_exchange_contact_fire_readability_fix_evidence = Dictionary(controller.call(
+			"apply_release_first_exchange_contact_fire_readability_fix",
+			immediate_tactical_exchange
+		)).duplicate(true)
+		set_meta("release_first_exchange_contact_fire_readability_fix_evidence", _release_first_exchange_contact_fire_readability_fix_evidence)
+	elif controller.has_method("record_release_fire_exchange_visibility_evidence"):
 		controller.call("record_release_fire_exchange_visibility_evidence", immediate_tactical_exchange)
+		controller.call("_refresh_world_overlays")
+		controller.call("_update_ui")
 	var immediate_exchange_applied: bool = String(immediate_exchange_evidence.get("status", "")) == "pass" \
 		and bool(immediate_exchange_evidence.get("first_exchange_visible", false))
 	if immediate_exchange_applied:
@@ -2362,6 +2371,38 @@ func get_release_first_exchange_los_setup_polish_snapshot(real_window_review_not
 		"status": "pass" if failed_count == 0 else "review",
 		"recommended_next_task": "TASK_869 - Release First Exchange Real Window Recapture",
 	}
+
+
+func get_release_first_exchange_contact_fire_readability_fix_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var evidence: Dictionary = Dictionary(options.get("evidence", {})).duplicate(true)
+	if evidence.is_empty():
+		evidence = _release_first_exchange_contact_fire_readability_fix_evidence.duplicate(true)
+	if evidence.is_empty():
+		evidence = Dictionary(get_meta("release_first_exchange_contact_fire_readability_fix_evidence", {})).duplicate(true)
+	if evidence.is_empty():
+		return {
+			"schema": "sternenbuergerchen.release_first_exchange_contact_fire_readability_fix.v1",
+			"task_id": "TASK_873",
+			"source_task_id": "TASK_872",
+			"style_id": "task_873_release_first_exchange_contact_fire_readability_fix_v1",
+			"status": "blocked",
+			"reason": "contact_fire_readability_fix_not_applied",
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+			"creates_command": false,
+			"creates_fire_event": false,
+			"creates_damage_event": false,
+			"creates_movement": false,
+			"sets_multiplayer_truth": false,
+			"updates_shortcuts": false,
+			"recommended_next_task": "TASK_874 - Release First Exchange CONTACT-FIRE Real Window Recapture",
+		}
+	var result: Dictionary = evidence.duplicate(true)
+	result["real_window_review_notes"] = real_window_review_notes.duplicate(true)
+	result["findings_notes"] = findings_notes.duplicate(true)
+	result["options"] = options.duplicate(true)
+	result["recommended_next_task"] = String(result.get("recommended_next_task", "TASK_874 - Release First Exchange CONTACT-FIRE Real Window Recapture"))
+	return result
 
 
 func get_release_fire_exchange_visibility_persistence_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
