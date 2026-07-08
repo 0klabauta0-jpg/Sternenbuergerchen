@@ -77,14 +77,15 @@
 <body data-report-id="release_first_exchange_zwischenbericht_2026_07_08" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Release First Exchange Zwischenbericht</h1>
-    <p>Stand 2026-07-08: Fortschritt seit dem Singleplayer-EXE-Problem, erledigter Findings-Schnitt, implementierter Sichtbarkeits-Fix und naechste sinnvolle Arbeitsschritte.</p>
+    <p>Stand 2026-07-08: Zwischenbericht zum Singleplayer-Releasepfad, erledigter Recapture-Acceptance, sichtbarer Spielwirkung und den naechsten sinnvollen Arbeitsschritten.</p>
     <div class="meta-row">
       <span class="pill good">TASK_844 headless gruen</span>
       <span class="pill good">TASK_845 Capture review_ready</span>
       <span class="pill good">TASK_846 Findings gemerged</span>
       <span class="pill good">TASK_847 implementiert</span>
-      <span class="pill bad">Fenster zeigt noch CONTACT PRESSURE</span>
-      <span class="pill">Branch: task/release-fire-exchange-visibility-persistence</span>
+      <span class="pill warn">TASK_848 Recapture Acceptance</span>
+      <span class="pill warn">Frischer Capture braucht Sichtreview</span>
+      <span class="pill">Branch: task/release-first-exchange-recapture-acceptance</span>
     </div>
   </header>
 
@@ -107,14 +108,16 @@
             <li><strong>Frischer Export:</strong> Der Release-Ordner wurde neu mit Godot 4.6.2 exportiert und danach erneut gecaptured.</li>
             <li><strong>TASK_846:</strong> Der echte Fensterbefund ist jetzt als maschinenlesbarer Findings-Schnitt dokumentiert: erster Feuerwechsel technisch vorhanden, aber im Fenster noch nicht gut genug sichtbar.</li>
             <li><strong>TASK_847:</strong> Fire-Exchange-Evidence bleibt jetzt fuer ein kurzes Anzeige-Fenster in Combat-HUD, Decision-Line und Event-Log sichtbar.</li>
-            <li><strong>Git:</strong> TASK_846 wurde committed, gepusht und nach <code>integration/core-foundation</code> gemerged.</li>
+            <li><strong>TASK_848:</strong> Frischer Release-Export, echter Fenster-Capture und Acceptance-Manifest wurden nach TASK_847 erzeugt. Der technische Pfad ist gruen, die visuelle Bewertung bleibt bewusst offen.</li>
+            <li><strong>Bericht:</strong> Diese Workbench fasst jetzt Arbeitsstand, Spielwirkung, Screenshot-Befund, offene Risiken und naechste Arbeitsschritte zusammen. Unten kann daraus eine JSON-Notiz exportiert werden.</li>
+            <li><strong>Git:</strong> TASK_846 ist bereits gemerged; TASK_848 liegt aktuell auf dem Task-Branch und ist fuer Commit/Merge vorbereitet.</li>
           </ul>
         </article>
         <article class="card">
           <h2>Spielwirkung</h2>
-          <p>Der Singleplayer-/GO-Pfad ist technisch deutlich besser abgesichert: Start, Mission, Drop, GO und erster Kontakt sind reproduzierbar erreichbar. Neu ist vor allem die Klarheit, dass das Problem nicht mehr im Combat-Beweis liegt, sondern in der sichtbaren Priorisierung des Moments.</p>
+          <p>Der Singleplayer-/GO-Pfad ist technisch deutlich besser abgesichert: Start, Mission, Drop, GO und erster Kontakt sind reproduzierbar erreichbar. Das Spiel kommt also nicht mehr nur bis zur Homebase, sondern bis in einen echten Release-Missionslauf mit Capture-Nachweis.</p>
           <div class="status-box" style="margin-top: 12px;">
-            <strong>Aber:</strong> Im sichtbaren Fenster kommt die erwartete Fire-Exchange-Lesbarkeit noch nicht beim Spieler an.
+            <strong>Aber:</strong> Fuer den Spieler muss der erste Feuerwechsel noch klarer lesbar werden. Der technische Nachweis allein reicht nicht, wenn das Fenster vor allem Weltlinien, Start-Overlay und grosse Bewegungs-/Sichtlinien zeigt.
           </div>
         </article>
         <article class="card">
@@ -122,7 +125,8 @@
           <p><code>tmp/release_first_exchange_real_window_recapture.json</code></p>
           <p><code>tmp/release_first_exchange_real_window.png</code></p>
           <p><code>tmp/release_first_exchange_visual_findings.json</code></p>
-          <p>Gate: <code>review_ready</code>, manueller Review bleibt offen.</p>
+          <p><code>tmp/release_first_exchange_recapture_acceptance.json</code></p>
+          <p>Gate: <code>review_ready</code>, Acceptance: <code>ready_for_manual_acceptance</code>. Manueller Review bleibt offen.</p>
         </article>
       </div>
     </section>
@@ -132,7 +136,10 @@
         <article class="card full">
           <h2>Echter Fensterbefund</h2>
           <div class="status-box bad" style="margin-top: 12px;">
-            Erwartet war ein klarer erster <code>CONTACT FIRE</code>-Moment. Der frische Capture zeigt weiterhin <code>CONTACT PRESSURE</code> und in #17/#18 <code>NO FIRE NO_LOS</code>. Das ist jetzt ein belegter Follow-up, kein vermuteter Altbuild.
+            Erwartet ist ein klarer erster <code>CONTACT FIRE</code>-Moment. Der frische Capture ist technisch review-ready, zeigt aber fuer die automatische Bewertung noch keinen eindeutig bestandenen Fire-Exchange-Moment.
+          </div>
+          <div class="status-box" style="margin-top: 12px;">
+            TASK_848 hat nach TASK_847 neu exportiert und neu gecaptured. Das Acceptance-Manifest ist technisch sauber, aber der Screenshot braucht menschliche Bewertung: sichtbar ist vor allem Weltbild mit grossen Linien und Start-/Overlay-Elementen; ein klarer #17/#18/#19-<code>CONTACT FIRE</code>-Moment ist nicht automatisch als bestanden markiert.
           </div>
           <img class="screenshot" src="../../tmp/release_first_exchange_real_window.png" alt="TASK_845 Release First Exchange Window Capture">
         </article>
@@ -142,14 +149,15 @@
             <li>Die Mission ist sichtbar und bedienbar.</li>
             <li>Fireteam-Karten, Command Matrix, Mission Control und Dropship-Karte sind lesbar und ueberlappen nicht kritisch.</li>
             <li>Der Kontakt ist immerhin als taktischer Druck gerahmt statt als leeres Log.</li>
+            <li>Der Acceptance-Schnitt trennt technische Guete von manueller Sichtbewertung. Das verhindert, dass ein gruenes Script ein unlesbares Spielerlebnis schoenfaerbt.</li>
           </ul>
         </article>
         <article class="card">
           <h2>Was noch stoert</h2>
           <ul class="list">
-            <li>Der sichtbare Zustand widerspricht dem TASK_844-Headless-Beweis.</li>
+            <li>Der sichtbare Zustand ist noch nicht so eindeutig wie der TASK_844-Headless-Beweis.</li>
             <li>FireEvent/Trace/Impact bleibt im Fenster nicht prominent genug erhalten.</li>
-            <li>#17 und #18 fuehren den Spieler wieder zu LOS/Range-Korrektur statt zum erlebten ersten Feuerwechsel.</li>
+            <li>#17 und #18 duerfen den Spieler nicht wieder zuerst zu LOS/Range-Korrektur fuehren, wenn der wichtige Moment der erlebte erste Feuerwechsel ist.</li>
           </ul>
         </article>
       </div>
@@ -160,9 +168,10 @@
         <article class="card wide">
           <h2>Was ich als Naechstes machen will</h2>
           <ol class="list">
-            <li><strong>Regression:</strong> TASK_847 mit bestehender TASK_844-/TASK_845-/TASK_846-Logik pruefen, damit Headless-Beweis, Capture-Pfad und Findings weiter zusammenpassen.</li>
-            <li><strong>TASK_848 - Release First Exchange Recapture Acceptance:</strong> Danach frisch exportieren, TASK_845 erneut laufen lassen und pruefen, ob <code>CONTACT FIRE</code>, Trace/Impact und naechster Griff im echten Fenster ankommen.</li>
-            <li><strong>Danach:</strong> Erst wenn der erste Kampf lesbar ist, weiter Richtung schoeneres HUD/Map-Polish und Multiplayer-Slice.</li>
+            <li><strong>TASK_848 abschliessen:</strong> Task-Branch committen, pushen und nach <code>integration/core-foundation</code> mergen, solange die lokale Pruefung gruen bleibt.</li>
+            <li><strong>Manueller Sichtreview:</strong> Den neuen Screenshot gegen die Pflichtchecks bewerten, ohne automatisch Pixel als gelungen zu behaupten.</li>
+            <li><strong>TASK_849 - Release Fire Exchange Visual Polish Findings:</strong> Nur belegte visuelle Reibungen schneiden: Fire-Exchange-Moment, HUD-Prioritaet, Linienueberlagerung, naechster Griff.</li>
+            <li><strong>Danach:</strong> Einen kleinen Polish-Fix bauen, erneut Release exportieren und wieder mit echtem Fenster-Capture pruefen.</li>
           </ol>
         </article>
         <article class="card">
@@ -191,6 +200,8 @@
           <h2>Arbeitsstatus</h2>
           <label>Stand
             <select data-export-key="status.state">
+              <option value="recapture_acceptance_in_progress">Recapture-Acceptance in Arbeit</option>
+              <option selected value="recapture_acceptance_ready_manual_review_open">Recapture-Acceptance technisch fertig, Sichtreview offen</option>
               <option value="visibility_fix_done_recapture_next">Sichtbarkeits-Fix erledigt, Recapture als naechstes</option>
               <option value="findings_done_visibility_fix_in_progress">Findings erledigt, Sichtbarkeits-Fix in Arbeit</option>
               <option value="capture_done_followup_open">Capture done, Follow-up offen</option>
@@ -199,7 +210,7 @@
             </select>
           </label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.fresh_export_done"> Frischer Export wurde vor dem Capture gebaut.</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="status.headless_green"> TASK_844 und TASK_845 Verifier sind gruen.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.headless_green"> TASK_845, TASK_847 und TASK_848 Verifier sind gruen.</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.manual_review_done"> Manueller Sichtreview abgeschlossen.</label>
         </article>
         <article class="card wide">
@@ -259,19 +270,21 @@
           active_choices: {},
           computed: {
             capture_gate: "review_ready",
-            observed_window_state: "CONTACT_PRESSURE_NO_FIRE",
+            observed_window_state: "TECHNICAL_RECAPTURE_READY_MANUAL_VISUAL_REVIEW_OPEN",
             completed_findings_task: "TASK_846 - Release First Exchange Visual Findings",
             completed_visibility_task: "TASK_847 - Release Fire Exchange Visibility Persistence",
-            active_next_task: "TASK_848 - Release First Exchange Recapture Acceptance",
-            recommended_next_task: "TASK_848 - Release First Exchange Recapture Acceptance"
+            active_acceptance_task: "TASK_848 - Release First Exchange Recapture Acceptance",
+            current_player_value: "Release-Singleplayer startet bis in die Mission; erster Exchange ist technisch nachweisbar, aber visuell noch nicht eindeutig genug.",
+            recommended_next_task: "TASK_849 - Release Fire Exchange Visual Polish Findings"
           },
           metadata: {
-            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847"],
-            branch: "task/release-fire-exchange-visibility-persistence",
+            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847", "TASK_848"],
+            branch: "task/release-first-exchange-recapture-acceptance",
             merged_branch: "task/release-first-exchange-visual-findings",
             manifest_path: "tmp/release_first_exchange_real_window_recapture.json",
             screenshot_path: "tmp/release_first_exchange_real_window.png",
-            findings_manifest_path: "tmp/release_first_exchange_visual_findings.json"
+            findings_manifest_path: "tmp/release_first_exchange_visual_findings.json",
+            acceptance_manifest_path: "tmp/release_first_exchange_recapture_acceptance.json"
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
