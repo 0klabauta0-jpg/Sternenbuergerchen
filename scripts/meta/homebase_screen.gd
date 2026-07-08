@@ -1216,6 +1216,9 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 	var action_cue_panel := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel") as Control
 	var action_cue_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/PreMissionReadinessPanel/ReadinessMargin/ReadinessVBox/ReadinessSummaryLabel") as Label
 	var start_button := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton") as Button
+	var mission_team_limit_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionTeamLimitLabel") as Label
+	var mission_transfer_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/MissionTransferLabel") as Label
+	var mission_summary_label := get_node_or_null("Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionSummaryLabel") as Label
 	var mission_rect: Rect2 = _control_global_rect(mission_panel)
 	var roster_rect: Rect2 = _control_global_rect(roster_panel)
 	var fireteam_rect: Rect2 = _control_global_rect(fireteam_panel)
@@ -1242,6 +1245,9 @@ func get_pre_mission_startflow_visual_snapshot() -> Dictionary:
 		"mission_child_max_bottom": child_bottom,
 		"mission_child_overflows": mission_panel != null and child_bottom > mission_rect.end.y + 0.5,
 		"mission_overlaps_work_columns": _rects_overlap(mission_rect, roster_rect) or _rects_overlap(mission_rect, fireteam_rect) or _rects_overlap(mission_rect, flightdeck_rect),
+		"mission_team_limit_text": mission_team_limit_label.text if mission_team_limit_label != null else "",
+		"mission_transfer_text": mission_transfer_label.text if mission_transfer_label != null else "",
+		"mission_summary_text": mission_summary_label.text if mission_summary_label != null else "",
 		"start_button_text": start_button.text if start_button != null else "",
 		"start_button_disabled": start_button.disabled if start_button != null else true,
 		"start_button_tooltip": start_button.tooltip_text if start_button != null else "",
@@ -3646,12 +3652,14 @@ func _update_mission_info() -> void:
 	start_mission_button.set_meta("homebase_direct_payload_status_text", direct_payload_status_text)
 	META_UI_SKIN_SCRIPT.style_transfer_button(start_mission_button, can_start_mission)
 	mission_name_label.text = _selected_mission_name
-	mission_team_limit_label.text = "Mission slots: %d / %d" % [mission_slot_usage, _selected_mission_slot_count]
+	mission_team_limit_label.text = _build_mission_slot_status_text(mission_slot_usage, pilot_count, direct_payload_operator_count, direct_payload_fireteam_count)
 	mission_team_limit_label.set_meta("mission_slot_usage_count", mission_slot_usage)
 	mission_team_limit_label.set_meta("mission_operator_count", staged_count)
 	mission_team_limit_label.set_meta("mission_pilot_count", pilot_count)
+	mission_team_limit_label.set_meta("homebase_direct_payload_operator_count", direct_payload_operator_count)
+	mission_team_limit_label.set_meta("homebase_direct_payload_fireteam_count", direct_payload_fireteam_count)
 	var launch_text: String = _mission_launch_summary if not _mission_launch_summary.is_empty() else ("Homebase dropship ready" if direct_payload_ready else ("Dropship ready for launch" if _mission_launch_ready else "Dropship not launch-ready"))
-	mission_transfer_label.text = "Map: %s | Transfer: %s | Pilots: %d | %s | %s" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count, launch_text, direct_payload_status_text]
+	mission_transfer_label.text = _build_mission_transfer_status_text(staged_count, team_capacity, pilot_count, launch_text, direct_payload_status_text, direct_payload_ready, can_start_mission)
 	mission_transfer_label.set_meta("homebase_direct_payload_ready", direct_payload_ready)
 	mission_transfer_label.set_meta("homebase_direct_payload_operator_count", direct_payload_operator_count)
 	mission_transfer_label.set_meta("homebase_direct_boarded_operator_count", direct_boarded_operator_count)
@@ -3659,7 +3667,7 @@ func _update_mission_info() -> void:
 	mission_transfer_label.set_meta("homebase_direct_payload_fireteam_count", direct_payload_fireteam_count)
 	mission_transfer_label.set_meta("homebase_direct_payload_status_text", direct_payload_status_text)
 	mission_summary_label.text = _build_mission_summary_text(staged_count, team_capacity, pilot_count, mission_slot_usage)
-	if not _mission_launch_summary.is_empty():
+	if not _mission_launch_summary.is_empty() and not _should_use_homebase_direct_mission_copy():
 		mission_summary_label.text = "%s\n%s" % [mission_summary_label.text, _mission_launch_summary]
 	mission_summary_label.set_meta("homebase_direct_payload_ready", direct_payload_ready)
 	mission_summary_label.set_meta("homebase_direct_payload_operator_count", direct_payload_operator_count)
@@ -7612,6 +7620,15 @@ func _build_transfer_status_text(staged_count: int, team_capacity: int) -> Strin
 func _build_mission_summary_text(staged_count: int, team_capacity: int, pilot_count: int, mission_slot_usage: int = -1) -> String:
 	if mission_slot_usage < 0:
 		mission_slot_usage = staged_count + pilot_count
+	if _should_use_homebase_direct_mission_copy():
+		var payload_operator_count: int = _get_homebase_direct_payload_operator_count()
+		var payload_fireteam_count: int = _get_homebase_direct_payload_fireteam_ids().size()
+		var boarded_operator_count: int = _get_homebase_direct_boarded_operator_count()
+		if payload_operator_count > 0 and boarded_operator_count >= payload_operator_count:
+			return "%s is ready as Homebase Direct sortie. Payload: %d ops / %d FT boarded, pilot assigned. Press Start Mission, then choose LZ, Drop, Preview and GO." % [_selected_mission_name, payload_operator_count, payload_fireteam_count]
+		if payload_operator_count > 0:
+			return "%s is staged as Homebase Direct sortie. Payload boarding: %d / %d NPC. Wait for boarding, then press Start Mission." % [_selected_mission_name, boarded_operator_count, payload_operator_count]
+		return "%s is a Homebase Direct sortie. Put a Fireteam into a Dropship and assign a pilot before Start Mission." % _selected_mission_name
 	var aircraft_snapshot: Dictionary = _aircraft_manager.get_contract_snapshot()
 	var has_aircraft_activity: bool = int(aircraft_snapshot.get("pilot_transfer_count", 0)) > 0 or int(aircraft_snapshot.get("cargo_load_count", 0)) > 0
 	if not _team_transfer_entries.is_empty() or has_aircraft_activity:
@@ -7624,6 +7641,26 @@ func _build_mission_summary_text(staged_count: int, team_capacity: int, pilot_co
 		return "The transfer package for %s is full. Mission occupancy is %d / %d including pilots; review the staged operators and send the team to FOB when ready." % [_selected_mission_name, mission_slot_usage, _selected_mission_slot_count]
 
 	return "The transfer package is still open. You can stage %d more operator(s) before the current Homebase mission limit is reached." % [team_capacity - staged_count]
+
+
+func _build_mission_slot_status_text(mission_slot_usage: int, pilot_count: int, payload_operator_count: int, payload_fireteam_count: int) -> String:
+	if _should_use_homebase_direct_mission_copy():
+		return "Mission payload: %d ops / %d FT | Pilot: %d" % [payload_operator_count, payload_fireteam_count, pilot_count]
+	return "Mission slots: %d / %d" % [mission_slot_usage, _selected_mission_slot_count]
+
+
+func _build_mission_transfer_status_text(staged_count: int, team_capacity: int, pilot_count: int, launch_text: String, direct_payload_status_text: String, direct_payload_ready: bool, can_start_mission: bool) -> String:
+	if _should_use_homebase_direct_mission_copy():
+		var readiness_text: String = "Start Mission ready" if can_start_mission else "Start Mission blocked"
+		var sortie_text: String = "Direct sortie ready" if direct_payload_ready else "Direct sortie staging"
+		return "Map: %s | %s | Pilots: %d | %s | %s" % [_build_selected_mission_map_label(), sortie_text, pilot_count, readiness_text, direct_payload_status_text]
+	return "Map: %s | Transfer: %s | Pilots: %d | %s | %s" % [_build_selected_mission_map_label(), _build_transfer_status_text(staged_count, team_capacity), pilot_count, launch_text, direct_payload_status_text]
+
+
+func _should_use_homebase_direct_mission_copy() -> bool:
+	return _has_homebase_direct_launch_payload() \
+		or _get_homebase_direct_payload_operator_count() > 0 \
+		or not _get_homebase_direct_payload_craft_id().is_empty()
 
 
 func _count_assigned_pilots() -> int:

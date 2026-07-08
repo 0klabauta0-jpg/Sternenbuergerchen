@@ -4222,6 +4222,10 @@ func get_release_singleplayer_normal_click_homebase_guard_snapshot() -> Dictiona
 			aircraft = Dictionary(homebase_screen.call("get_aircraft_panel_snapshot"))
 
 	var readiness_text: String = String(readiness.get("rendered_item_text", ""))
+	var mission_team_limit_text: String = String(startflow.get("mission_team_limit_text", "")).strip_edges()
+	var mission_transfer_text: String = String(startflow.get("mission_transfer_text", "")).strip_edges()
+	var mission_summary_text: String = String(startflow.get("mission_summary_text", "")).strip_edges()
+	var combined_mission_copy: String = "%s\n%s\n%s" % [mission_team_limit_text, mission_transfer_text, mission_summary_text]
 	var visible_aircraft_count: int = Array(aircraft.get("visible_aircraft_definitions", [])).size()
 	if visible_aircraft_count <= 0:
 		visible_aircraft_count = Array(staging.get("visible_aircraft_definitions", [])).size()
@@ -4271,6 +4275,11 @@ func get_release_singleplayer_normal_click_homebase_guard_snapshot() -> Dictiona
 			readiness_text.find("STOP Team") < 0 and readiness_text.find("STOP Dropship") < 0 and readiness_text.find("STOP Pilot") < 0 and readiness_text.find("STOP Boarding") < 0,
 			"The normal click must not show the old STOP Team/Dropship/Pilot/Boarding blockers."
 		),
+		_build_release_normal_click_guard_check(
+			"homebase_direct_copy_clear",
+			mission_team_limit_text.begins_with("Mission payload:") and mission_transfer_text.find("Direct sortie") >= 0 and mission_summary_text.find("Start Mission") >= 0 and combined_mission_copy.find("send the team to FOB") < 0 and combined_mission_copy.find("FOB Transfer") < 0,
+			"The visible Homebase Direct copy should not look like the stale FOB transfer workflow."
+		),
 	]
 	var failed_checks: Array = []
 	for check_variant in checks:
@@ -4292,6 +4301,9 @@ func get_release_singleplayer_normal_click_homebase_guard_snapshot() -> Dictiona
 		"boarded_operator_count": int(staging.get("boarded_operator_count", 0)),
 		"readiness_overall_state": String(readiness.get("overall_state", "")),
 		"rendered_readiness_item_text": readiness_text,
+		"mission_team_limit_text": mission_team_limit_text,
+		"mission_transfer_text": mission_transfer_text,
+		"mission_summary_text": mission_summary_text,
 		"start_button_text": String(startflow.get("start_button_text", "")),
 		"start_button_disabled": bool(startflow.get("start_button_disabled", true)),
 		"bootstrap": bootstrap,

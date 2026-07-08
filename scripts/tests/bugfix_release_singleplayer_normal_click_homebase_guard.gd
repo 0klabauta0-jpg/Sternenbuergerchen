@@ -88,6 +88,10 @@ func _test_normal_singleplayer_click_homebase_guard() -> void:
 	_assert(String(snapshot.get("readiness_overall_state", "")) == "ready", "Normal click readiness is ready")
 	_assert(String(snapshot.get("start_button_text", "")) == "Start Mission", "Normal click shows Start Mission")
 	_assert(not bool(snapshot.get("start_button_disabled", true)), "Normal click enables Start Mission")
+	_assert(String(snapshot.get("mission_team_limit_text", "")).begins_with("Mission payload:"), "Normal click names Homebase Direct payload instead of misleading mission slots")
+	_assert(String(snapshot.get("mission_transfer_text", "")).contains("Direct sortie"), "Normal click transfer text names direct sortie")
+	_assert(String(snapshot.get("mission_summary_text", "")).contains("Start Mission"), "Normal click summary names the next start action")
+	_assert(not String(snapshot.get("mission_summary_text", "")).contains("send the team to FOB"), "Normal click summary does not tell player to send team to FOB")
 	var readiness_text: String = String(snapshot.get("rendered_readiness_item_text", ""))
 	_assert(readiness_text.find("STOP Team") < 0, "Normal click has no STOP Team blocker")
 	_assert(readiness_text.find("STOP Dropship") < 0, "Normal click has no STOP Dropship blocker")
@@ -97,6 +101,7 @@ func _test_normal_singleplayer_click_homebase_guard() -> void:
 	_assert(_check_passed(snapshot, "drop_source_homebase_direct"), "Drop-source check passes")
 	_assert(_check_passed(snapshot, "start_mission_enabled"), "Start button check passes")
 	_assert(_check_passed(snapshot, "no_stop_blockers"), "STOP blocker check passes")
+	_assert(_check_passed(snapshot, "homebase_direct_copy_clear"), "Homebase Direct copy check passes")
 
 	scene.queue_free()
 	current_scene = null
