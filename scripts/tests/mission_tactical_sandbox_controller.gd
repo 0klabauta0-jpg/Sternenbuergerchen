@@ -7273,7 +7273,7 @@ func record_release_fire_exchange_visibility_evidence(source_snapshot: Dictionar
 
 
 func _release_fire_exchange_visibility_clock_msec() -> int:
-	return int(Engine.get_process_frames() * 16)
+	return Time.get_ticks_msec()
 
 
 func _build_release_candidate_firefight_decision_line() -> String:
