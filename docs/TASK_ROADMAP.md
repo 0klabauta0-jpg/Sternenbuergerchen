@@ -76,7 +76,9 @@ git checkout -b batch/<batch-name>
 - TASK_838 - Release Firefight Real Window Findings Polish (implementiert): #19 Event Log zeigt bei leerem echten Log eine read-only Firefight-Statuszeile aus vorhandenen Decision-/Combat-Snapshots statt `NO EVENTS`.
 - TASK_839 - Release Firefight World Label Declutter (implementiert): Primary3D nutzt im ersten Release-Firefight einen visuellen `release_firefight_declutter`-Modus, der redundante Welttexte unterdrueckt und Fire-VFX/Friendly-Fire/kritische Unit-Zustaende erhaelt.
 - TASK_840 - Release Firefight World Label Real Window Recapture (implementiert): Der gepruefte First-GO-Firefight-Capture erzeugt nach TASK_839 ein eigenes Manifest und eigene Screenshotpfade fuer den echten Declutter-Fensterbefund.
-- TASK_841 - Release Firefight World Label Visual Findings (naechster Schritt): Den TASK_840-PNG-/Manifest-Befund auswerten und konkrete visuelle Folgearbeit schneiden.
+- TASK_841 - Release Firefight World Label Visual Findings (implementiert): Der TASK_840-PNG-/Manifest-Befund ist als read-only Findings-Snapshot bewertet; primaerer Folgepunkt sind Insertionsreste im Firefight-Weltbild.
+- TASK_842 - Release Firefight Insertion Residue Declutter (naechster Schritt): Approach-/ETA-Welttexte und gruene Dropship-Route im Firefight ausblenden oder herabstufen, ohne LZ-/Drop-Feedback vor dem GO zu verlieren.
+- TASK_843 - Release First Firefight Contact Framing (danach): Den ersten Firefight so rahmen, dass neben `NO FIRE LOS/RANGE` auch ein echter, lesbarer erster Schusswechsel oder klarer Contact-Pressure-Moment sichtbar wird.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 
