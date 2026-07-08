@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_840 - Release Firefight World Label Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_840_release_firefight_world_label_real_window_recapture.md`, `docs/tasks/TASK_839_release_firefight_world_label_declutter.md`, `docs/tasks/TASK_837_release_first_go_firefight_real_window_review.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_firefight_world_label_real_window.ps1` nutzt den vorhandenen TASK_837-First-GO-Firefight-Capture und schreibt ein eigenes TASK_840-Manifest fuer den echten Fensterblick nach dem World-Label-Declutter.
+- Stand: Das Manifest haelt `expected_world_label_density_mode = release_firefight_declutter`, `expected_world_label_declutter_style_id = task_839_release_firefight_world_label_declutter_v1`, eigene Screenshotpfade, Pflichtchecks und read-only Grenzen fest.
+- Stand: Der Recapture bleibt bewusst Review-/Evidence-Schicht: Er kann Prozesse nur mit expliziten Switches starten/stoppen und setzt keine Gameplay-, Combat-, Damage-, Command- oder Multiplayer-Wahrheit.
+- Risiken/offen: Der menschliche PNG-Befund ist noch nicht bewertet; Folgearbeit ist TASK_841 - Release Firefight World Label Visual Findings.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_840_release_firefight_world_label_real_window_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_839_release_firefight_world_label_declutter.gd`, `git diff --check`.
+- Naechster Schritt: Frischen TASK_840-Recapture ausfuehren und den echten Fensterbefund in TASK_841 uebersetzen.
+
 ### BUGFIX - Release Homebase Direct Start Copy Clarity
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_release_homebase_direct_start_copy_clarity.md`, `docs/tasks/BUGFIX_release_singleplayer_normal_click_homebase_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
@@ -25,9 +35,9 @@
 - Stand: Der erste Release-Firefight setzt im Primary3D-Payload `world_label_density_mode = release_firefight_declutter`, sobald die vorhandene Firefight-Decision-Line aktiv ist.
 - Stand: `TerrainMap3DView` unterdrueckt in diesem Modus einfache `HIT`/`MISS`/`FIRE`-Weltlabels, Welt-Feedback-Bubbles und Routine-Unit-Badges, behaelt aber Fire-VFX, Impact/Trace, Friendly-Fire-Warnung und kritische Unit-Zustaende.
 - Stand: MetaLayer und TacticalController liefern einen read-only TASK_839-Snapshot mit Style-ID, Density-Mode, suppressed/rendered Counts und Gameplay-Grenzen.
-- Risiken/offen: Der echte Fenster-Recapture bleibt noetig, weil Headless nur Rendervertrag und Aktivierung beweist, nicht die finale visuelle Wirkung.
+- Risiken/offen: Der echte Fenster-Recapture ist als TASK_840 vorbereitet, aber der menschliche PNG-Befund muss noch bewertet werden.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_839_release_firefight_world_label_declutter.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_838_release_firefight_real_window_findings_polish.gd`, `git diff --check`.
-- Naechster Schritt: TASK_840 - Release Firefight World Label Real Window Recapture.
+- Naechster Schritt: TASK_841 - Release Firefight World Label Visual Findings.
 
 ### TASK_833 - Release Firefight HUD Readability Polish
 - Status: implementiert im Arbeitsstand
