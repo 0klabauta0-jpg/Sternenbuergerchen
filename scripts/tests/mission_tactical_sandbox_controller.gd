@@ -73,6 +73,7 @@ const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_SCRIPT: 
 const RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_real_window_hud_source_sync.gd")
 const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_hud_density_and_fire_visual_polish.gd")
 const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CLARITY_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_fire_direction_impact_clarity_polish.gd")
+const RELEASE_FIRST_EXCHANGE_WORLD_COMBAT_FOCAL_HIERARCHY_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_world_combat_focal_hierarchy_polish.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -115,6 +116,7 @@ const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_STYLE_ID: Stri
 const RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID: String = "task_883_release_first_exchange_real_window_hud_source_sync_v1"
 const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID: String = "task_889_release_first_exchange_hud_density_fire_visual_polish_v1"
 const RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CLARITY_POLISH_STYLE_ID: String = "task_892_release_first_exchange_fire_direction_impact_clarity_v1"
+const RELEASE_FIRST_EXCHANGE_WORLD_COMBAT_FOCAL_HIERARCHY_POLISH_STYLE_ID: String = "task_895_release_first_exchange_world_combat_focal_hierarchy_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 45000
 const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_MSEC: int = 120000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
@@ -17755,6 +17757,10 @@ func _get_release_first_exchange_fire_direction_impact_clarity_polish_enabled(wo
 	return _get_release_first_exchange_hud_density_fire_visual_polish_enabled(world_label_density_mode)
 
 
+func _get_release_first_exchange_world_combat_focal_hierarchy_polish_enabled(world_label_density_mode: String = "") -> bool:
+	return _get_release_first_exchange_fire_direction_impact_clarity_polish_enabled(world_label_density_mode)
+
+
 func get_release_fire_exchange_focused_visual_polish_snapshot() -> Dictionary:
 	_update_ui()
 	_sync_primary_3d_order_visuals()
@@ -18004,6 +18010,49 @@ func get_release_first_exchange_fire_direction_impact_clarity_polish_snapshot() 
 		"sets_multiplayer_truth": false,
 	}
 	return Dictionary(RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CLARITY_POLISH_SCRIPT.call(
+		"build_snapshot",
+		source,
+		{}
+	)).duplicate(true)
+
+
+func get_release_first_exchange_world_combat_focal_hierarchy_polish_snapshot() -> Dictionary:
+	_update_ui()
+	var direction_snapshot: Dictionary = get_release_first_exchange_fire_direction_impact_clarity_polish_snapshot()
+	_sync_primary_3d_order_visuals()
+	_refresh_order_visuals()
+	var primary_snapshot: Dictionary = {}
+	var primary_view: Node = _get_primary_3d_view()
+	if primary_view != null and primary_view.has_method("get_render_snapshot"):
+		primary_snapshot = Dictionary(primary_view.call("get_render_snapshot")).duplicate(true)
+	var findings_snapshot: Dictionary = {
+		"schema": "sternenbuergerchen.release_first_exchange_fire_direction_impact_visual_findings.v1",
+		"task_id": "TASK_894",
+		"source_task_id": "TASK_893",
+		"status": "ready_for_world_combat_focal_polish",
+		"primary_issue_id": "source_to_target_trace_not_obvious",
+		"recommended_next_task": "TASK_895 - Release First Exchange World Combat Focal Hierarchy Polish",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+	var source: Dictionary = {
+		"findings": findings_snapshot,
+		"direction": direction_snapshot,
+		"primary_render_snapshot": primary_snapshot,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+	return Dictionary(RELEASE_FIRST_EXCHANGE_WORLD_COMBAT_FOCAL_HIERARCHY_POLISH_SCRIPT.call(
 		"build_snapshot",
 		source,
 		{}
@@ -22462,6 +22511,8 @@ func _sync_primary_3d_order_visuals() -> void:
 			"release_first_exchange_hud_density_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID if _get_release_first_exchange_hud_density_fire_visual_polish_enabled(world_label_density_mode) else "",
 			"release_first_exchange_fire_direction_impact_clarity_polish": _get_release_first_exchange_fire_direction_impact_clarity_polish_enabled(world_label_density_mode),
 			"release_first_exchange_fire_direction_impact_clarity_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_IMPACT_CLARITY_POLISH_STYLE_ID if _get_release_first_exchange_fire_direction_impact_clarity_polish_enabled(world_label_density_mode) else "",
+			"release_first_exchange_world_combat_focal_hierarchy": _get_release_first_exchange_world_combat_focal_hierarchy_polish_enabled(world_label_density_mode),
+			"release_first_exchange_world_combat_focal_hierarchy_style_id": RELEASE_FIRST_EXCHANGE_WORLD_COMBAT_FOCAL_HIERARCHY_POLISH_STYLE_ID if _get_release_first_exchange_world_combat_focal_hierarchy_polish_enabled(world_label_density_mode) else "",
 			"selected_fireteam_ids": _selected_fireteam_ids,
 			"fire_sector_overlay_enabled": _fire_sector_overlay_enabled,
 			"fire_sector_visual_mode": "los_line_only",

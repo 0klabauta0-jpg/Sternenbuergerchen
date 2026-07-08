@@ -95,8 +95,9 @@
       <span class="pill good">TASK_892 Visual Polish implementiert und gepusht</span>
       <span class="pill good">TASK_893 Recapture-Artefakte angelegt</span>
       <span class="pill good">TASK_894 Findings geschnitten</span>
-      <span class="pill warn">Naechster sinnvoller Slice: TASK_895 World Combat Focus</span>
-      <span class="pill warn">Branch mit lokalen TASK_894-Aenderungen</span>
+      <span class="pill good">TASK_895 World Combat Focus implementiert</span>
+      <span class="pill good">TASK_894 committed und gepusht</span>
+      <span class="pill warn">Naechster sinnvoller Slice: TASK_896 Recapture</span>
       <span class="pill warn">Untracked: builds/</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -123,14 +124,15 @@
           <p>Was sich am Spiel dadurch konkret bewegt hat: Der erste Feuerwechsel ist nicht mehr nur Status-Text im HUD. Er hat jetzt eine klarere visuelle Kampfspur im Weltbild, damit der Spieler Schuetze, Schussrichtung, Ziel und Treffer als zusammenhaengende Aktion lesen kann.</p>
           <p>Was jetzt zusaetzlich vorbereitet ist: TASK_893 baut den echten Fensterbeweis fuer genau diesen Punkt. Der neue Capture-Wrapper haengt am bewaehrten TASK_890-/TASK_887-Window-Handle-Pfad, schreibt aber eigene TASK_893-Artefakte und verlangt als Sichtchecks Direction Arrow, Impact-Relationship-Anchor, Target-Endcap/Target-Fokus und Quelle-Ziel-Bezug.</p>
           <p>Was TASK_894 daraus liest: CONTACT FIRE ist als HUD-/Event-Log-Moment belastbar sichtbar. Der naechste belegte Engpass ist nicht mehr Status-Wahrheit, sondern Weltbild-Hierarchie: Quelle -> Schussrichtung -> Ziel -> Treffer konkurriert noch mit Raster, Tiles und dichtem Bottom-HUD.</p>
-          <p>Was noch fehlt: TASK_895 sollte den aktiven Feuerwechsel im Weltbild fokussieren, ohne Combat- oder HUD-Wahrheit neu zu oeffnen.</p>
+          <p>Was jetzt passiert ist: TASK_895 setzt fuer den aktiven Feuerwechsel einen eigenen Weltkampf-Fokus. Primary3D meldet eine staerkere Source-to-target-Lane, Source-Glow, Target-Halo und Dimming-Metadaten fuer Raster-/World-Noise sowie Nebenlinien, ohne Combat- oder HUD-Wahrheit neu zu oeffnen.</p>
+          <p>Was noch fehlt: Danach braucht dieser Polish wieder denselben harten Weg: echter Fenster-Capture, read-only Findings und erst dann die Entscheidung, ob der erste Feuerwechsel als Release-lesbar gilt.</p>
         </article>
         <article class="card">
           <h2>Zahlenstand</h2>
           <div class="stack">
             <div class="metric"><strong>3</strong><span>zentrale HUD-Flaechen: #17, #18, #19.</span></div>
-            <div class="metric"><strong>5</strong><span>letzte Hauptslices: TASK_890 Recapture, TASK_891 Findings, TASK_892 Visual Polish, TASK_893 Recapture, TASK_894 Findings.</span></div>
-            <div class="metric"><strong>1</strong><span>naechster Visual-Polish-Slice: TASK_895 World Combat Focus.</span></div>
+            <div class="metric"><strong>6</strong><span>letzte Hauptslices: TASK_890 Recapture, TASK_891 Findings, TASK_892 Visual Polish, TASK_893 Recapture, TASK_894 Findings, TASK_895 World Combat Focus.</span></div>
+            <div class="metric"><strong>1</strong><span>naechster Beweis-Slice: TASK_896 World Combat Focal Recapture.</span></div>
             <div class="metric"><strong>0</strong><span>neue Gameplay-Wahrheit durch diesen Bericht.</span></div>
           </div>
         </article>
@@ -193,6 +195,13 @@
                 <p>Der TASK_893-Fensterblick ist read-only bewertet: CONTACT FIRE ist in #17/#18/#19 vorhanden und FIRE/Impact ist sichtbar. Primaere Restreibung ist <code>source_to_target_trace_not_obvious</code>, also Weltkampf-Fokus statt neuer Kampf-Logik.</p>
               </div>
             </div>
+            <div class="timeline-item">
+              <strong>TASK_895</strong>
+              <div>
+                <h3>Weltkampf-Fokus</h3>
+                <p>Der bestaetigte CONTACT-FIRE-Moment bekommt eine staerkere Source-to-target-Lane, Source-Glow, Target-Halo und ruhigere Nebenlinien. Der Snapshot bleibt read-only und prueft ausdruecklich, dass keine Commands, FireEvents, DamageEvents, Movement- oder Multiplayer-Wahrheit erzeugt werden.</p>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -224,9 +233,9 @@
         <article class="card full">
           <h2>Aktuelle Reibungen</h2>
           <ul class="list">
-            <li><strong>Fire Direction:</strong> CONTACT FIRE ist belegt; die Quelle-Ziel-Spur ist noch nicht sofort dominant genug.</li>
-            <li><strong>Impact / Target Focus:</strong> Treffer-/Impact-Hinweise sind sichtbar, wirken aber noch eher wie Signale als wie ein eleganter Release-Kampfmoment.</li>
-            <li><strong>Weltbild-Hierarchie:</strong> Raster, Tiles und Gebaeudekanten konkurrieren noch mit dem Feuerwechsel.</li>
+            <li><strong>Fire Direction:</strong> CONTACT FIRE ist belegt; TASK_895 macht die Quelle-Ziel-Spur runtime-seitig dominanter.</li>
+            <li><strong>Impact / Target Focus:</strong> Treffer-/Impact-Hinweise sind sichtbar; TASK_895 ergaenzt Target-Halo und Source-Glow.</li>
+            <li><strong>Weltbild-Hierarchie:</strong> Raster, Tiles und Gebaeudekanten werden im TASK_895-Snapshot als zu dimmende Konkurrenz gefuehrt. Der echte Fensterblick muss das noch beweisen.</li>
             <li><strong>HUD-Dichte:</strong> #17/#18/#19 sind deutlich besser, aber Bottom-HUD und Member Cards konkurrieren noch mit dem Weltbild.</li>
             <li><strong>Release-Gefuehl:</strong> Der Pfad ist pruefbar und besser lesbar, aber noch nicht so elegant, dass ein neuer Spieler den ersten Feuerwechsel ohne Projektwissen sofort versteht.</li>
           </ul>
@@ -245,7 +254,8 @@
             <li>TASK_892 ist ebenfalls read-only: eigener Primary3D-Style, staerkere Visual-Werte und Direction-/Impact-Metadaten, aber keine neue Combat- oder Damage-Entscheidung.</li>
             <li>TASK_893 bleibt read-only: eigener Capture-/Analyzer-Rahmen, aber keine neue Combat-, Movement-, Command-, Shortcut- oder Multiplayer-Wahrheit.</li>
             <li>TASK_894 bleibt read-only: Findings aus Manifest/Screenshot, aber kein neuer Runtime-/HUD-State.</li>
-            <li>Der lokale Branch enthaelt den gepushten TASK_893-Stand plus lokale TASK_894-Artefakte und diesen Bericht.</li>
+            <li>TASK_895 bleibt read-only: eigener Primary3D-Focal-Style, aber keine neue Combat-, Movement-, Command-, Shortcut- oder Multiplayer-Wahrheit.</li>
+            <li>Der lokale Branch enthaelt den gepushten TASK_894-Stand plus aktuelle TASK_895-Arbeit; offen ist danach TASK_896 als echter Fensterbeweis.</li>
             <li><code>builds/</code> bleibt untracked und gehoert nicht in diesen Report-Commit.</li>
           </ul>
         </article>
@@ -257,6 +267,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="technical.task_893_verifier_green"> TASK_893 Verifier gruen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="technical.task_893_capture_done"> TASK_893 Capture gelaufen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="technical.task_894_verifier_green"> TASK_894 Verifier gruen</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="technical.task_895_verifier_green"> TASK_895 Verifier gruen</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="technical.diff_check_green"> git diff --check gruen</label>
           <label class="checkline"><input type="checkbox" data-export-key="technical.report_committed_pushed"> Dieser Report committed und gepusht</label>
         </article>
@@ -272,8 +283,8 @@
         <article class="card wide">
           <h2>Was ich noch machen will</h2>
           <ol class="list">
-            <li><strong>TASK_894 - Visual Findings:</strong> Den TASK_893-PNG-Befund als read-only Spielerblick sichern.</li>
-            <li><strong>TASK_895 - World Combat Focus:</strong> Quelle -> Schussrichtung -> Ziel -> Treffer im Weltbild fokussieren, Raster-/World-Noise dimmen und Impact schicker rahmen.</li>
+            <li><strong>TASK_896 - Recapture nach TASK_895:</strong> Den Weltkampf-Fokus im echten Release-Fenster beweisen, nicht nur im Headless-Snapshot.</li>
+            <li><strong>Findings danach:</strong> Den neuen Screenshot wieder read-only bewerten und nur belegte Restreibung anfassen.</li>
             <li><strong>Spielerlesung entscheiden:</strong> Wenn der erste Feuerwechsel danach ohne Projektwissen lesbar ist, erst dann weiter Richtung groessere Mission/Map/Editor.</li>
             <li><strong>Release-Ordner sauber halten:</strong> Exportpfad und Taskleisten-/Startpfad nur anfassen, wenn ein neuer gepruefter Build gebraucht wird.</li>
           </ol>
@@ -285,16 +296,17 @@
               <option value="task_892_fire_direction_impact">TASK_892 Fire Direction + Impact</option>
               <option value="recapture_after_892">TASK_893 Recapture nach TASK_892</option>
               <option value="findings_after_893">TASK_894 Findings nach TASK_893</option>
-              <option selected value="world_combat_focus_after_894">TASK_895 World Combat Focus</option>
+              <option value="world_combat_focus_after_894">TASK_895 World Combat Focus</option>
+              <option selected value="recapture_after_895">TASK_896 Recapture nach TASK_895</option>
               <option value="release_export">Neuen Release-Build paketieren</option>
               <option value="map_editor">Map-Editor/Builder fortsetzen</option>
               <option value="multiplayer">Multiplayer-Sichttest</option>
             </select>
           </label>
           <div class="button-row" style="margin-top: 12px;" data-choice-group="next.decision">
-            <button class="choice active" type="button" data-choice-value="world_combat_focus">TASK_895 fokussieren</button>
-            <button class="choice" type="button" data-choice-value="findings_after_recapture">TASK_894 bewerten</button>
-            <button class="choice" type="button" data-choice-value="recapture_visual_polish">TASK_893 recapturen</button>
+            <button class="choice" type="button" data-choice-value="world_combat_focus">TASK_895 fokussieren</button>
+            <button class="choice active" type="button" data-choice-value="recapture_after_focus">TASK_896 danach recapturen</button>
+            <button class="choice" type="button" data-choice-value="visual_findings_after_focus">Findings danach schneiden</button>
             <button class="choice" type="button" data-choice-value="ship_current">Aktuellen Build testen</button>
             <button class="choice" type="button" data-choice-value="switch_editor">Zum Editor wechseln</button>
           </div>
@@ -376,24 +388,25 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_state: "CONTACT FIRE is visible in #17/#18/#19, TASK_893 provides a real-window recapture, and TASK_894 cuts the visual findings: world combat focal hierarchy is the next proven friction.",
+            current_state: "CONTACT FIRE is visible in #17/#18/#19, TASK_895 adds read-only Primary3D world-combat focal hierarchy, and the next evidence step is a real-window recapture.",
             completed_recent_work: [
               "TASK_890 recaptured the real post-final window after the HUD density and fire visual polish.",
               "TASK_891 recorded read-only visual findings from the TASK_890 capture.",
               "TASK_892 added and verified a read-only Primary3D clarity style with stronger trace, impact, target focus and direction/impact relationship metadata.",
               "TASK_893 adds a read-only real-window recapture frame for the TASK_892 direction/impact polish.",
               "TASK_894 records read-only visual findings from the TASK_893 capture and recommends world combat focal hierarchy polish.",
+              "TASK_895 adds a read-only Primary3D focal hierarchy style with source-to-target lane, source glow, target halo and dimming metadata.",
               "The first release firefight is now a repeatable quality anchor rather than a vague debug scene."
             ],
-            next_recommendation: "TASK_895 - Release First Exchange World Combat Focal Hierarchy Polish",
-            repo_state: "Branch task/release-first-exchange-player-readability-polish-review has local TASK_894/report changes; builds/ remains untracked; report is read-only."
+            next_recommendation: "TASK_896 - Release First Exchange World Combat Focal Real Window Recapture, followed by read-only findings.",
+            repo_state: "Branch task/release-first-exchange-player-readability-polish-review has current TASK_895/report changes; builds/ remains untracked; report is read-only."
           },
           metadata: {
             generated_at_local: "2026-07-09",
             project_root: "C:/dev/SternenBuergerchen",
             report_file: "docs/reports/spielstand_zwischenbericht_2026_07_09.html",
             authoritative_state_note: "This report is a read-only workbench. It does not create gameplay truth.",
-            relevant_task_ids: ["TASK_890", "TASK_891", "TASK_892", "TASK_893", "TASK_894", "TASK_895"]
+            relevant_task_ids: ["TASK_890", "TASK_891", "TASK_892", "TASK_893", "TASK_894", "TASK_895", "TASK_896"]
           }
         };
 
