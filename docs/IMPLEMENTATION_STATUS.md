@@ -37,6 +37,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_835_release_firefight_bottom_dock_density_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_834_release_firefight_hud_real_window_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_833_release_firefight_hud_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
 - Naechster Schritt: First-GO-Firefight-Release erneut capturen und danach Command-Matrix-/Button-Lesbarkeit polieren.
 
+### BUGFIX - Release Singleplayer Normal Click Homebase Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_release_singleplayer_normal_click_homebase_guard.md`, `docs/tasks/TASK_827_release_homebase_save_override_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
+- Stand: `_show_homebase()` wendet den bestehenden Singleplayer-Actionability-Guard sofort erneut an, damit der sichtbare Normalstart nicht im alten `FOB Transfer`-/`Start blockiert`-Bild stehenbleibt.
+- Stand: `get_release_singleplayer_normal_click_homebase_guard_snapshot()` meldet den normalen `Einzelspieler`-Klickpfad inklusive Mission, Drop-Quelle, Flightdeck, Payload, Boarding, Readiness und Startbutton.
+- Risiken/offen: Ein stale laufender EXE-Prozess oder ein anderer Startpfad kann weiterhin wie derselbe Fehler aussehen; der frische Export-/Fenster-Capture bleibt Pflicht.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_827_release_homebase_save_override_guard.gd`, `git diff --check`.
+- Naechster Schritt: Release neu exportieren, alten Prozess stoppen und `Einzelspieler` im echten Fenster recapturen.
+
 ### BUGFIX - Singleplayer Release EXE Actionability And Firefight Decision Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_exe_actionability_and_firefight_decision_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`

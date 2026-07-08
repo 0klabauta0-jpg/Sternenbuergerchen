@@ -4022,6 +4022,8 @@ func _show_homebase() -> void:
 	if homebase_screen != null:
 		homebase_screen.visible = true
 		_refresh_homebase_screen()
+		_ensure_singleplayer_visible_homebase_actionability()
+		_refresh_homebase_screen()
 		_schedule_singleplayer_visible_homebase_actionability_guard()
 	if fob_screen != null:
 		fob_screen.visible = false
@@ -4031,6 +4033,110 @@ func _show_homebase() -> void:
 	_sync_mission_host_visibility()
 	_set_navigation_visible(true)
 	_refresh_navigation_state()
+
+
+func get_release_singleplayer_normal_click_homebase_guard_snapshot() -> Dictionary:
+	var homebase_screen = _get_homebase_screen()
+	var bootstrap: Dictionary = get_singleplayer_start_bootstrap_snapshot()
+	var staging: Dictionary = {}
+	var readiness: Dictionary = {}
+	var startflow: Dictionary = {}
+	var aircraft: Dictionary = {}
+	if homebase_screen != null:
+		if homebase_screen.has_method("get_homebase_direct_staging_snapshot"):
+			staging = Dictionary(homebase_screen.call("get_homebase_direct_staging_snapshot"))
+		if homebase_screen.has_method("get_pre_mission_readiness_snapshot"):
+			readiness = Dictionary(homebase_screen.call("get_pre_mission_readiness_snapshot"))
+		if homebase_screen.has_method("get_pre_mission_startflow_visual_snapshot"):
+			startflow = Dictionary(homebase_screen.call("get_pre_mission_startflow_visual_snapshot"))
+		if homebase_screen.has_method("get_aircraft_panel_snapshot"):
+			aircraft = Dictionary(homebase_screen.call("get_aircraft_panel_snapshot"))
+
+	var readiness_text: String = String(readiness.get("rendered_item_text", ""))
+	var visible_aircraft_count: int = Array(aircraft.get("visible_aircraft_definitions", [])).size()
+	if visible_aircraft_count <= 0:
+		visible_aircraft_count = Array(staging.get("visible_aircraft_definitions", [])).size()
+	var checks: Array = [
+		_build_release_normal_click_guard_check(
+			"homebase_visible",
+			homebase_screen != null and bool(homebase_screen.visible) and _current_meta_view == "homebase",
+			"The normal Singleplayer click should land on the visible Homebase screen."
+		),
+		_build_release_normal_click_guard_check(
+			"mission_is_grid_sweep",
+			String(bootstrap.get("selected_mission_id", "")) == SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID,
+			"The normal Singleplayer click must not remain on the stale FOB Transfer setup."
+		),
+		_build_release_normal_click_guard_check(
+			"drop_source_homebase_direct",
+			String(bootstrap.get("mission_drop_source", "")) == MISSION_DROP_SOURCE_HOMEBASE_DIRECT,
+			"The release start should use the Homebase Direct dropship path."
+		),
+		_build_release_normal_click_guard_check(
+			"flightdeck_has_ship",
+			visible_aircraft_count >= 1,
+			"The visible Flightdeck should show at least one shipcard."
+		),
+		_build_release_normal_click_guard_check(
+			"payload_has_operators",
+			int(staging.get("payload_operator_count", 0)) >= mini(SINGLEPLAYER_BOOTSTRAP_FIRETEAM_SIZE, 2),
+			"The bootstrap payload should contain a playable Fireteam."
+		),
+		_build_release_normal_click_guard_check(
+			"payload_boarded",
+			int(staging.get("boarded_operator_count", 0)) >= int(staging.get("payload_operator_count", 0)) and int(staging.get("payload_operator_count", 0)) > 0,
+			"The visible payload should start boarded for the first release sortie."
+		),
+		_build_release_normal_click_guard_check(
+			"readiness_ready",
+			String(readiness.get("overall_state", "")) == "ready",
+			"The Pre-Mission readiness should be ready after the normal click."
+		),
+		_build_release_normal_click_guard_check(
+			"start_mission_enabled",
+			String(startflow.get("start_button_text", "")) == "Start Mission" and not bool(startflow.get("start_button_disabled", true)),
+			"The visible Start Mission button should be enabled."
+		),
+		_build_release_normal_click_guard_check(
+			"no_stop_blockers",
+			readiness_text.find("STOP Team") < 0 and readiness_text.find("STOP Dropship") < 0 and readiness_text.find("STOP Pilot") < 0 and readiness_text.find("STOP Boarding") < 0,
+			"The normal click must not show the old STOP Team/Dropship/Pilot/Boarding blockers."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(check)
+	return {
+		"schema": "sternenbuergerchen.release_singleplayer_normal_click_homebase_guard.v1",
+		"task_id": "BUGFIX_release_singleplayer_normal_click_homebase_guard",
+		"status": "pass" if failed_checks.is_empty() else "fail",
+		"failed_count": failed_checks.size(),
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"current_meta_view": _current_meta_view,
+		"selected_mission_id": String(bootstrap.get("selected_mission_id", "")),
+		"mission_drop_source": String(bootstrap.get("mission_drop_source", "")),
+		"visible_aircraft_count": visible_aircraft_count,
+		"payload_operator_count": int(staging.get("payload_operator_count", 0)),
+		"boarded_operator_count": int(staging.get("boarded_operator_count", 0)),
+		"readiness_overall_state": String(readiness.get("overall_state", "")),
+		"rendered_readiness_item_text": readiness_text,
+		"start_button_text": String(startflow.get("start_button_text", "")),
+		"start_button_disabled": bool(startflow.get("start_button_disabled", true)),
+		"bootstrap": bootstrap,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _build_release_normal_click_guard_check(check_id: String, passed: bool, message: String) -> Dictionary:
+	return {
+		"id": check_id,
+		"passed": passed,
+		"message": message,
+	}
 
 
 func _show_fob() -> void:
