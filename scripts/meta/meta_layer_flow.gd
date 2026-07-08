@@ -163,6 +163,7 @@ var _release_first_go_firefight_deeplink_applied: bool = false
 var _release_first_go_firefight_deeplink_status: String = "idle"
 var _release_first_go_firefight_deeplink_reason: String = ""
 var _release_first_go_firefight_pre_go_passed: bool = false
+var _release_first_exchange_los_setup_polish_evidence: Dictionary = {}
 
 
 func _ready() -> void:
@@ -807,6 +808,7 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	_release_first_go_firefight_deeplink_reason = ""
 	set_meta("release_first_go_firefight_deeplink_requested", true)
 
+	await get_tree().process_frame
 	await _apply_release_lz_drop_preview_deeplink(PackedStringArray([RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG]))
 	await _wait_release_deeplink_frames(8)
 	if not _release_lz_drop_preview_deeplink_applied:
@@ -845,7 +847,10 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 		_release_first_go_firefight_deeplink_status = "blocked"
 		_release_first_go_firefight_deeplink_reason = "contact_setup_failed"
 		return
+	_release_first_exchange_los_setup_polish_evidence = contact_setup.duplicate(true)
+	set_meta("release_first_exchange_los_setup_polish_evidence", _release_first_exchange_los_setup_polish_evidence)
 	_prepare_release_fireteam_for_first_engagement(controller, selected_fireteam_id, Vector2(contact_setup.get("enemy_position", Vector2.ZERO)))
+	_stabilize_release_first_exchange_target_enemy(controller, contact_setup)
 	_update_release_contact_tracking(combat_driver)
 	_force_release_first_engagement_decision(controller, combat_driver, simulation_root, selected_fireteam_id, contact_setup)
 	controller.call("refresh_contact_overlay")
@@ -892,24 +897,76 @@ func _position_release_first_enemy_near_fireteam(controller: Node, combat_driver
 		enemy_units = Array(controller.call("_get_all_enemy_units", true))
 	if friendly_units.is_empty() or enemy_units.is_empty():
 		return {}
-	var friendly := friendly_units[0] as Node2D
-	var enemy := enemy_units[0] as Node2D
-	if friendly == null or enemy == null:
+	var best_setup: Dictionary = {}
+	var fallback_setup: Dictionary = {}
+	var pair_candidate_count: int = 0
+	var max_friendly_candidates: int = mini(friendly_units.size(), 4)
+	var max_enemy_candidates: int = mini(enemy_units.size(), 8)
+	var max_pair_candidates: int = 16
+	for friendly_index in range(max_friendly_candidates):
+		var friendly := friendly_units[friendly_index] as Node2D
+		if friendly == null:
+			continue
+		for enemy_index in range(max_enemy_candidates):
+			if pair_candidate_count >= max_pair_candidates:
+				break
+			var enemy := enemy_units[enemy_index] as Node2D
+			if enemy == null:
+				continue
+			var original_enemy_position: Vector2 = enemy.global_position
+			pair_candidate_count += 1
+			var placement: Dictionary = _resolve_release_first_exchange_enemy_placement(friendly, enemy, combat_driver)
+			var setup: Dictionary = _build_release_first_exchange_contact_setup(
+				fireteam_id,
+				friendly,
+				enemy,
+				placement,
+				pair_candidate_count
+			)
+			if fallback_setup.is_empty():
+				fallback_setup = setup
+			if bool(placement.get("placement_verified_attackable", false)):
+				best_setup = setup
+				break
+			enemy.global_position = original_enemy_position
+		if not best_setup.is_empty():
+			break
+	var selected_setup: Dictionary = best_setup if not best_setup.is_empty() else fallback_setup
+	if selected_setup.is_empty():
 		return {}
-	var placement: Dictionary = _resolve_release_first_exchange_enemy_placement(friendly, enemy, combat_driver)
-	enemy.global_position = Vector2(placement.get("enemy_position", friendly.global_position + Vector2(58.0, 0.0)))
-	if enemy is CanvasItem:
-		(enemy as CanvasItem).visible = true
+	var selected_enemy_id: String = String(selected_setup.get("enemy_unit_id", "")).strip_edges()
+	var selected_enemy := _find_release_unit_by_id(enemy_units, selected_enemy_id) as Node2D
+	if selected_enemy == null:
+		return {}
+	selected_enemy.global_position = Vector2(selected_setup.get("enemy_position", selected_enemy.global_position))
+	if selected_enemy is CanvasItem:
+		(selected_enemy as CanvasItem).visible = true
+	selected_setup["enemy_position"] = selected_enemy.global_position
+	selected_setup["pair_candidate_count"] = pair_candidate_count
+	selected_setup["style_id"] = "task_868_release_first_exchange_los_setup_polish_v1"
+	selected_setup["task_id"] = "TASK_868"
+	selected_setup["read_only_snapshot_available"] = true
+	selected_setup["ui_sets_gameplay_truth"] = false
 	return {
-		"fireteam_id": fireteam_id,
-		"friendly_unit_id": _get_release_unit_id(friendly),
-		"enemy_unit_id": _get_release_unit_id(enemy),
-		"friendly_position": friendly.global_position,
-		"enemy_position": enemy.global_position,
-		"placement_verified_attackable": bool(placement.get("placement_verified_attackable", false)),
-		"placement_attempt_count": int(placement.get("placement_attempt_count", 0)),
-		"placement_offset": placement.get("placement_offset", Vector2.ZERO),
-		"placement_readout": Dictionary(placement.get("placement_readout", {})),
+		"schema": "sternenbuergerchen.release_first_exchange_los_setup_polish.setup.v1",
+		"task_id": "TASK_868",
+		"style_id": "task_868_release_first_exchange_los_setup_polish_v1",
+		"fireteam_id": String(selected_setup.get("fireteam_id", fireteam_id)),
+		"friendly_unit_id": String(selected_setup.get("friendly_unit_id", "")),
+		"enemy_unit_id": selected_enemy_id,
+		"friendly_position": selected_setup.get("friendly_position", Vector2.ZERO),
+		"enemy_position": selected_setup.get("enemy_position", Vector2.ZERO),
+		"placement_verified_attackable": bool(selected_setup.get("placement_verified_attackable", false)),
+		"placement_attempt_count": int(selected_setup.get("placement_attempt_count", 0)),
+		"placement_offset": selected_setup.get("placement_offset", Vector2.ZERO),
+		"placement_readout": Dictionary(selected_setup.get("placement_readout", {})),
+		"pair_candidate_count": pair_candidate_count,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
 	}
 
 
@@ -917,6 +974,10 @@ func _resolve_release_first_exchange_enemy_placement(friendly: Node2D, enemy: No
 	var fallback_offset := Vector2(58.0, 0.0)
 	var fallback_position: Vector2 = friendly.global_position + fallback_offset
 	var candidate_offsets: Array = [
+		Vector2(24.0, 0.0),
+		Vector2(0.0, 24.0),
+		Vector2(-24.0, 0.0),
+		Vector2(0.0, -24.0),
 		Vector2(42.0, 0.0),
 		Vector2(0.0, 42.0),
 		Vector2(-42.0, 0.0),
@@ -929,9 +990,14 @@ func _resolve_release_first_exchange_enemy_placement(friendly: Node2D, enemy: No
 		Vector2(0.0, 58.0),
 		Vector2(-58.0, 0.0),
 		Vector2(0.0, -58.0),
+		Vector2(84.0, 0.0),
+		Vector2(0.0, 84.0),
+		Vector2(-84.0, 0.0),
+		Vector2(0.0, -84.0),
 	]
 	var attempt_count: int = 0
 	var fallback_readout: Dictionary = {}
+	var original_enemy_position: Vector2 = enemy.global_position
 	if combat_driver != null and combat_driver.has_method("build_cover_effectiveness_readout_for_units"):
 		for offset_variant in candidate_offsets:
 			var offset: Vector2 = offset_variant
@@ -953,13 +1019,47 @@ func _resolve_release_first_exchange_enemy_placement(friendly: Node2D, enemy: No
 					"placement_readout": readout,
 				}
 	enemy.global_position = fallback_position
+	if fallback_readout.is_empty():
+		enemy.global_position = original_enemy_position
 	return {
-		"enemy_position": fallback_position,
+		"enemy_position": enemy.global_position,
 		"placement_verified_attackable": false,
 		"placement_attempt_count": attempt_count,
 		"placement_offset": fallback_offset,
 		"placement_readout": fallback_readout,
 	}
+
+
+func _build_release_first_exchange_contact_setup(
+	fireteam_id: String,
+	friendly: Node2D,
+	enemy: Node2D,
+	placement: Dictionary,
+	pair_candidate_count: int
+) -> Dictionary:
+	return {
+		"fireteam_id": fireteam_id,
+		"friendly_unit_id": _get_release_unit_id(friendly),
+		"enemy_unit_id": _get_release_unit_id(enemy),
+		"friendly_position": friendly.global_position,
+		"enemy_position": Vector2(placement.get("enemy_position", friendly.global_position + Vector2(58.0, 0.0))),
+		"placement_verified_attackable": bool(placement.get("placement_verified_attackable", false)),
+		"placement_attempt_count": int(placement.get("placement_attempt_count", 0)),
+		"placement_offset": placement.get("placement_offset", Vector2.ZERO),
+		"placement_readout": Dictionary(placement.get("placement_readout", {})),
+		"pair_candidate_count": pair_candidate_count,
+	}
+
+
+func _find_release_unit_by_id(units: Array, unit_id: String) -> Node:
+	var normalized_id: String = unit_id.strip_edges()
+	if normalized_id.is_empty():
+		return null
+	for unit_variant in units:
+		var unit := unit_variant as Node
+		if unit != null and _get_release_unit_id(unit) == normalized_id:
+			return unit
+	return null
 
 
 func _prepare_release_fireteam_for_first_engagement(controller: Node, fireteam_id: String, enemy_position: Vector2) -> void:
@@ -990,6 +1090,34 @@ func _prepare_release_fireteam_for_first_engagement(controller: Node, fireteam_i
 			)
 
 
+func _stabilize_release_first_exchange_target_enemy(controller: Node, contact_setup: Dictionary) -> void:
+	var enemy_id: String = String(contact_setup.get("enemy_unit_id", "")).strip_edges()
+	var friendly_position: Vector2 = Vector2(contact_setup.get("friendly_position", Vector2.ZERO))
+	var enemy_units: Array = Array(controller.call("_get_all_enemy_units", true))
+	var enemy := _find_release_unit_by_id(enemy_units, enemy_id) as Node2D
+	if enemy == null:
+		return
+	if enemy.has_method("set_runtime_status"):
+		enemy.call(
+			"set_runtime_status",
+			"holding",
+			"hold_position",
+			30,
+			"fire_at_will",
+			"defend",
+			1.0,
+			0.0,
+			0.0,
+			1,
+			friendly_position,
+			"engage",
+			"aimed",
+			"task868_release_first_exchange_los_setup_polish",
+			1.0,
+			75.0
+		)
+
+
 func _assign_release_first_exchange_hold_command(unit: Node2D, enemy_position: Vector2) -> void:
 	if unit == null or not unit.has_method("assign_unit_command"):
 		return
@@ -1015,13 +1143,14 @@ func _assign_release_first_exchange_hold_command(unit: Node2D, enemy_position: V
 func _force_release_first_engagement_decision(controller: Node, combat_driver: Node, simulation_root: Node, fireteam_id: String, contact_setup: Dictionary) -> void:
 	var enemy_id: String = String(contact_setup.get("enemy_unit_id", "")).strip_edges()
 	var enemy_ids: PackedStringArray = []
-	for enemy_variant in Array(controller.call("_get_all_enemy_units", false)):
-		var enemy := enemy_variant as Node
-		var next_enemy_id: String = _get_release_unit_id(enemy)
-		if not next_enemy_id.is_empty() and not enemy_ids.has(next_enemy_id):
-			enemy_ids.append(next_enemy_id)
-	if enemy_ids.is_empty() and not enemy_id.is_empty():
+	if not enemy_id.is_empty():
 		enemy_ids.append(enemy_id)
+	else:
+		for enemy_variant in Array(controller.call("_get_all_enemy_units", false)):
+			var enemy := enemy_variant as Node
+			var next_enemy_id: String = _get_release_unit_id(enemy)
+			if not next_enemy_id.is_empty() and not enemy_ids.has(next_enemy_id):
+				enemy_ids.append(next_enemy_id)
 	var detection_progress: Dictionary = Dictionary(combat_driver.get("_detection_progress")).duplicate(true)
 	for unit_variant in Array(controller.call("_get_fireteam_units", fireteam_id, true)):
 		var unit := unit_variant as Node2D
@@ -2152,6 +2281,109 @@ func get_release_first_exchange_tension_tuning_snapshot(real_window_review_notes
 		"issues": _build_handoff_issue_list(checks),
 		"status": "pass" if failed_count == 0 else "review",
 		"recommended_next_task": "TASK_845 - Release First Exchange Real Window Recapture",
+	}
+
+
+func get_release_first_exchange_los_setup_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = Dictionary(options.get("source_snapshot", {})).duplicate(true)
+	if source.is_empty():
+		source = get_release_first_exchange_tension_tuning_snapshot(real_window_review_notes, findings_notes, options)
+	var setup_evidence: Dictionary = Dictionary(options.get("setup_evidence", {})).duplicate(true)
+	if setup_evidence.is_empty():
+		setup_evidence = _release_first_exchange_los_setup_polish_evidence.duplicate(true)
+	if setup_evidence.is_empty():
+		setup_evidence = Dictionary(get_meta("release_first_exchange_los_setup_polish_evidence", {})).duplicate(true)
+	var tactical_exchange: Dictionary = Dictionary(source.get("tactical_exchange", {})).duplicate(true)
+	var diagnostics: Dictionary = Dictionary(tactical_exchange.get("contact_decision_diagnostics", {})).duplicate(true)
+	var placement_readout: Dictionary = Dictionary(setup_evidence.get("placement_readout", {})).duplicate(true)
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_first_exchange_available",
+		String(source.get("status", "")) == "pass" and bool(source.get("first_exchange_visible", false)),
+		"critical",
+		"TASK_868 builds on the existing TASK_844 first-exchange evidence."
+	)
+	_append_handoff_check(
+		checks,
+		"los_setup_evidence_present",
+		not setup_evidence.is_empty(),
+		"critical",
+		"Release first-exchange setup records the exact friendly/enemy pair used for the window run."
+	)
+	_append_handoff_check(
+		checks,
+		"placement_verified_attackable",
+		bool(setup_evidence.get("placement_verified_attackable", false)),
+		"critical",
+		"Release first-exchange target placement is validated through the existing combat readout."
+	)
+	_append_handoff_check(
+		checks,
+		"placement_los_and_range_stable",
+		String(placement_readout.get("range_state", "")).strip_edges().to_lower() == "in_range"
+			and String(placement_readout.get("los_state", "")).strip_edges().to_lower() != "blocked"
+			and bool(placement_readout.get("combat_attackable", false)),
+		"critical",
+		"Placement readout reports in-range, non-blocked LOS and attackable target."
+	)
+	_append_handoff_check(
+		checks,
+		"diagnostics_still_fire_exchange",
+		String(diagnostics.get("status", "")).strip_edges().to_lower() == "fired"
+			and String(diagnostics.get("los_state", "")).strip_edges().to_lower() != "blocked"
+			and String(diagnostics.get("range_state", "")).strip_edges().to_lower() == "in_range",
+		"critical",
+		"Current combat diagnostics still point at a fired first exchange."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(source.get("read_only", false))
+			and not bool(source.get("ui_sets_gameplay_truth", true))
+			and not bool(source.get("creates_command", true))
+			and not bool(source.get("creates_fire_event", true))
+			and not bool(source.get("creates_damage_event", true))
+			and not bool(source.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_868 snapshot reads setup and combat evidence only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_los_setup_polish.v1",
+		"task_id": "TASK_868",
+		"source_task_id": "TASK_867",
+		"source_exchange_task_id": "TASK_844",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": "task_868_release_first_exchange_los_setup_polish_v1",
+		"setup_evidence": setup_evidence,
+		"placement_verified_attackable": bool(setup_evidence.get("placement_verified_attackable", false)),
+		"placement_attempt_count": int(setup_evidence.get("placement_attempt_count", 0)),
+		"pair_candidate_count": int(setup_evidence.get("pair_candidate_count", 0)),
+		"placement_los_state": String(placement_readout.get("los_state", "")).strip_edges(),
+		"placement_range_state": String(placement_readout.get("range_state", "")).strip_edges(),
+		"placement_combat_attackable": bool(placement_readout.get("combat_attackable", false)),
+		"framing_state": String(source.get("framing_state", "")),
+		"first_exchange_visible": bool(source.get("first_exchange_visible", false)),
+		"fire_event_count": int(source.get("fire_event_count", 0)),
+		"first_fire_event_id": String(source.get("first_fire_event_id", "")),
+		"diagnostics_status": String(diagnostics.get("status", "")),
+		"diagnostics_los_state": String(diagnostics.get("los_state", "")),
+		"diagnostics_range_state": String(diagnostics.get("range_state", "")),
+		"source": source,
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_869 - Release First Exchange Real Window Recapture",
 	}
 
 
