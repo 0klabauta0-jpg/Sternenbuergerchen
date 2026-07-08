@@ -94,6 +94,7 @@
       <span class="pill warn">TASK_869 Recapture in Arbeit</span>
       <span class="pill orange">Capture-Trust-Guard ergaenzt</span>
       <span class="pill bad">Aktueller PNG-Inhalt falsch</span>
+      <span class="pill good">TASK_870 Findings-Schnitt</span>
       <span class="pill orange">Sichtentscheid noch offen</span>
       <span class="pill">Bericht ist read-only</span>
     </div>
@@ -128,7 +129,8 @@
           <div class="stack">
             <div class="metric"><strong>868</strong><span>LOS-Setup implementiert und lokal verifiziert</span></div>
             <div class="metric"><strong>869</strong><span>Recapture-Task, Tool, Verifier und Crop-Trust-Guard vorbereitet</span></div>
-            <div class="metric"><strong>870</strong><span>geplanter Findings-/Polish-Schnitt nach Sichtpruefung</span></div>
+            <div class="metric"><strong>870</strong><span>Findings-Schnitt: falscher Fensterinhalt als primaerer Befund</span></div>
+            <div class="metric"><strong>871</strong><span>naechster Fix: Release Window Identity / Capture Target</span></div>
           </div>
         </article>
         <article class="card full">
@@ -194,7 +196,7 @@
           <ul class="list">
             <li><strong>Headless vs. echtes Fenster:</strong> Viele Snapshots waren korrekt, aber der Screenshot las sich trotzdem wie NO FIRE / NO_LOS. Deshalb ist TASK_869 als echter Fenster-Recapture wichtig.</li>
             <li><strong>Fenster-Crop-Falle:</strong> Der Release-Prozess kann korrekt laufen, waehrend der Desktop-Crop ein anderes Vordergrundfenster zeigt. TASK_869 propagiert deshalb Fokus-/Foreground-Evidence und stuft nicht vertrauenswuerdige Crops auf `manual_open`.</li>
-            <li><strong>Content-Falle:</strong> Der aktuelle trusted Screenshot zeigt eine fremde World-at-War/TripleA-Karte. Das ist kein bestandener Sichttest, sondern ein TASK_870-Befund zur Release-/Fenster-/Capture-Zielklaerung.</li>
+            <li><strong>Content-Falle:</strong> Der aktuelle trusted Screenshot zeigt eine fremde World-at-War/TripleA-Karte. TASK_870 wertet das als `trusted_capture_content_not_sternenbuergerchen`; TASK_871 muss Release-Fensteridentitaet oder Capture-Ziel reparieren.</li>
             <li><strong>HUD darf nicht luegen:</strong> CONTACT FIRE soll aus vorhandener FireEvent-/Visibility-Evidence kommen, nicht als Text-Override gegen die Simulation.</li>
             <li><strong>Performance-Hotpaths:</strong> HUD-/Event-Log-/Dropship-Refreshes wurden getrennt, aber jeder neue Lesbarkeits-Layer muss weiterhin ohne per-frame UI-Rebuild auskommen.</li>
             <li><strong>Build-Hygiene:</strong> `builds/` liegt lokal untracked. Das ist kein Spielcode-Problem, sollte aber beim Commit bewusst draussen bleiben.</li>
@@ -218,8 +220,9 @@
           <h2>Was ich als naechstes machen will</h2>
           <ol class="list">
             <li><strong>TASK_869 fertigziehen:</strong> Release exportieren, echten Fenster-Recapture starten, Manifest/Screenshots pruefen.</li>
-            <li><strong>Sichtentscheidung treffen:</strong> Wenn CONTACT FIRE und FireTrace/Impact klar sind, Haken dran. Wenn nicht, TASK_870 als kleiner Visual-Findings-/Polish-Schnitt.</li>
-            <li><strong>Release-Spielordner sauber halten:</strong> EXE/Pack/Exporttemplates stimmen, aber Export-Muell und Editor-/Testkram sollen nicht in den Release.</li>
+            <li><strong>TASK_870 abschliessen:</strong> Falschen Fensterinhalt als read-only Findings-Snapshot festhalten.</li>
+            <li><strong>TASK_871 bauen:</strong> Release-Fensteridentitaet, Capture-Ziel und sichtbaren Inhalt so pruefen/haerten, dass der Screenshot wirklich Sternenbuergerchen zeigt.</li>
+            <li><strong>Danach Sichtentscheidung:</strong> Erst wenn das richtige Fenster sichtbar ist, CONTACT FIRE, FireTrace/Impact und HUD-Lesbarkeit erneut bewerten.</li>
             <li><strong>Danach wieder Gameplay:</strong> Tactical Decision Clarity weiter ausbauen: Order-Preview, Line-of-Fire, Threat-Lesbarkeit und Contact Reports sind der naechste spielerische Hebel.</li>
           </ol>
         </article>

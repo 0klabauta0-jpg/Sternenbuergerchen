@@ -106,7 +106,8 @@ git checkout -b batch/<batch-name>
 - TASK_867 - Release Fire Exchange Runtime Text Status Visual Findings (implementiert): TASK_866-Fensterblick read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Schritt benennen.
 - TASK_868 - Release First Exchange LOS Setup Polish (implementiert): Den Release-First-Exchange so herstellen, dass der Deep-Link ein validiertes LOS-/Range-/Attackable-Zielpaar nutzt und der Force-Schritt nicht auf einen anderen `NO_LOS`-Gegner kippt.
 - TASK_869 - Release First Exchange Real Window Recapture (implementiert): Nach TASK_868 neu exportieren/capturen und pruefen, ob der echte Fensterblick #17/#18/#19 nun als CONTACT FIRE statt `NO_LOS` / `CONTACT PRESSURE` gelesen wird.
-- TASK_870 - Release First Exchange Post-LOS Visual Findings (naechster Schritt): TASK_869-Fensterblick read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Spielbarkeits-/Visual-Polish benennen.
+- TASK_870 - Release First Exchange Post-LOS Visual Findings (implementiert): TASK_869-Fensterblick read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Spielbarkeits-/Visual-Polish benennen.
+- TASK_871 - Release Window Identity Capture Target Fix (naechster Schritt): Klaeren und haerten, warum der formal gestartete `Sternenbuergerchen_rel.exe`-Prozess im Screenshot eine fremde World-at-War/TripleA-Karte zeigt oder warum Capture-Ziel und sichtbarer Inhalt auseinanderlaufen.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 

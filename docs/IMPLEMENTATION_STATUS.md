@@ -22,6 +22,16 @@
 - Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1` gruen; `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_los_setup_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38` erzeugt Manifest/Screenshots, aber Sichtbeweis ist nur vertrauenswuerdig, wenn `window_crop_trusted=true`; `godot_console.exe --headless --path . --script scripts/tests/task_869_release_first_exchange_real_window_recapture_after_los_setup.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_868_release_first_exchange_los_setup_polish.gd`, `git diff --check`.
 - Naechster Schritt: TASK_870 - Release First Exchange Post-LOS Visual Findings.
 
+### TASK_870 - Release First Exchange Post-LOS Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_870_release_first_exchange_post_los_visual_findings.md`, `docs/tasks/TASK_869_release_first_exchange_real_window_recapture_after_los_setup.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangePostLosVisualFindings` bewertet den TASK_869-Recapture als read-only Findings-Snapshot.
+- Stand: Positive Evidence bleibt erhalten: TASK_868-LOS-Setup-Quelle, First-GO-Firefight-Deep-Link, geschriebener Window-Screenshot, `window_crop_trusted=true`, Fokus und passender Foreground-Prozess.
+- Stand: Primaerer Befund ist `trusted_capture_content_not_sternenbuergerchen`: Der aktuelle Screenshot zeigt eine World-at-War/TripleA-Kartenansicht statt der erwarteten Sternenbuergerchen-Mission, damit ist CONTACT-FIRE-Lesbarkeit aus diesem PNG nicht bewertbar.
+- Risiken/offen: TASK_870 aendert keine Runtime. Der naechste sinnvolle Fix ist TASK_871: Release Window Identity / Capture Target Fix, bevor weiteres HUD-/Combat-Polish sinnvoll ist.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_870_release_first_exchange_post_los_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_869_release_first_exchange_real_window_recapture_after_los_setup.gd`, `git diff --check`.
+- Naechster Schritt: TASK_871 - Release Window Identity Capture Target Fix.
+
 ### TASK_868 - Release First Exchange LOS Setup Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/tasks/TASK_867_release_fire_exchange_runtime_text_status_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
