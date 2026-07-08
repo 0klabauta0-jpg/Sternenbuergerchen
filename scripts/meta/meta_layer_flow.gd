@@ -1476,6 +1476,90 @@ func get_release_firefight_hud_readability_polish_snapshot(real_window_review_no
 	}
 
 
+func get_release_firefight_hud_real_window_polish_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_firefight_hud_readability_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_real_window: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_firefight_hud_real_window_polish_snapshot"):
+		tactical_real_window = Dictionary(tactical_controller.call("get_release_firefight_hud_real_window_polish_snapshot"))
+	var label_style: Dictionary = Dictionary(tactical_real_window.get("selected_fireteam_label_style", {}))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_readability_passes",
+		String(source.get("status", "")) == "pass",
+		"critical",
+		"TASK_834 builds on a passing TASK_833 readability snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_real_window_snapshot_present",
+		not tactical_real_window.is_empty(),
+		"critical",
+		"Active mission should expose tactical real-window HUD polish."
+	)
+	_append_handoff_check(
+		checks,
+		"real_window_style_active",
+		String(tactical_real_window.get("gate", "")) == "pass"
+			and String(tactical_real_window.get("style_id", "")) == "task_834_release_firefight_hud_real_window_v1"
+			and bool(tactical_real_window.get("real_window_style_active", false)),
+		"critical",
+		"Selected Fireteam should carry the TASK_834 real-window style."
+	)
+	_append_handoff_check(
+		checks,
+		"real_window_label_readable",
+		int(label_style.get("font_size", 0)) >= 12
+			and int(label_style.get("outline_size", 0)) >= 3
+			and bool(tactical_real_window.get("selected_fireteam_label_autowrap_enabled", false))
+			and not bool(tactical_real_window.get("selected_fireteam_label_clip_text", true))
+			and float(tactical_real_window.get("selected_fireteam_label_min_height", 0.0)) >= 62.0,
+		"critical",
+		"Selected Fireteam should be larger, outlined, wrapped and not clipped."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_real_window.get("read_only", false))
+			and not bool(tactical_real_window.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_real_window.get("creates_command", true))
+			and not bool(tactical_real_window.get("creates_fire_event", true))
+			and not bool(tactical_real_window.get("creates_damage_event", true))
+			and not bool(tactical_real_window.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_834 reads existing mission/HUD state only."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_firefight_hud_real_window_polish.v1",
+		"task_id": "TASK_834",
+		"source_task_id": "TASK_833",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_real_window": tactical_real_window,
+		"decision_line": String(tactical_real_window.get("decision_line", "")),
+		"selected_fireteam_status_text": String(tactical_real_window.get("selected_fireteam_status_text", "")),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_835 - Release Firefight Bottom Dock Density Polish",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()

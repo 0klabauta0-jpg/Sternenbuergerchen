@@ -19,6 +19,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_833_release_firefight_hud_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_817_station_reentry_release_candidate_targeted_firefight_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release mit `--release-singleplayer-first-go-firefight` starten und die Firefight-HUD-Lesbarkeit sichtbar recapturen.
 
+### TASK_834 - Release Firefight HUD Real Window Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_834_release_firefight_hud_real_window_polish.md`, `docs/tasks/TASK_833_release_firefight_hud_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der Selected-Fireteam-Status erhaelt bei aktiver Firefight-`NEXT/WHY`-Zeile einen groesseren Real-Window-Stil mit Autowrap, Outline und Mindesthoehe.
+- Stand: Der Text bleibt aus bestehenden Combat-/Command-Snapshots abgeleitet und setzt keine Gameplay-Wahrheit.
+- Risiken/offen: Der gesamte Bottom-Dock-Blick bleibt dicht; nach dem Headless-Gate sollte ein frischer Release-Capture den echten Fensterblick bestaetigen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_834_release_firefight_hud_real_window_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_833_release_firefight_hud_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
+- Naechster Schritt: Frischen Release mit `--release-singleplayer-first-go-firefight` starten und die neue Statuszeile sichtbar recapturen.
+
 ### BUGFIX - Singleplayer Release EXE Actionability And Firefight Decision Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_singleplayer_release_exe_actionability_and_firefight_decision_guard.md`, `docs/tasks/BUGFIX_singleplayer_release_homebase_partial_save_actionability.md`, `docs/dev/mission_command_feedback_contract.md`

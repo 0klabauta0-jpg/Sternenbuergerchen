@@ -81,6 +81,10 @@ const DROPSHIP_TEXTURE_SW: Texture2D = preload("res://Assets/kenney_space-kit/Is
 const COMBAT_HUD_TOOLTIP_STYLE_ID: String = "combat_hud_tooltip_hint_v1"
 const COMBAT_HUD_TOOLTIP_FONT_SIZE: int = 10
 const COMBAT_HUD_TOOLTIP_OUTLINE_SIZE: int = 2
+const RELEASE_FIREFIGHT_HUD_REAL_WINDOW_STYLE_ID: String = "task_834_release_firefight_hud_real_window_v1"
+const RELEASE_FIREFIGHT_HUD_REAL_WINDOW_FONT_SIZE: int = 12
+const RELEASE_FIREFIGHT_HUD_REAL_WINDOW_OUTLINE_SIZE: int = 3
+const RELEASE_FIREFIGHT_HUD_REAL_WINDOW_MIN_HEIGHT: float = 62.0
 const MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID: String = "mission_team_chip_tooltip_hint_v1"
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
@@ -2490,6 +2494,7 @@ func _update_ui() -> void:
 		fireteam_status_label.text = _build_fireteam_status_text()
 		fireteam_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 		_apply_combat_hud_detail_tooltip_label_contract(fireteam_status_label)
+		_apply_release_firefight_hud_real_window_label_contract(fireteam_status_label)
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
 	_refresh_mission_nav_timer_label()
@@ -7150,6 +7155,28 @@ func _apply_combat_hud_detail_tooltip_label_contract(label: Label) -> void:
 	label.set_meta("combat_hud_detail_tooltip_label", true)
 	label.set_meta("combat_hud_detail_tooltip_task", "TASK_551")
 	label.set_meta("combat_hud_tooltip_style_id", COMBAT_HUD_TOOLTIP_STYLE_ID)
+
+
+func _apply_release_firefight_hud_real_window_label_contract(label: Label) -> void:
+	if label == null:
+		return
+	var text: String = String(label.text).strip_edges()
+	var active: bool = text.begins_with("NEXT ") and text.contains(" | WHY ")
+	label.set_meta("release_firefight_hud_real_window_active", active)
+	if not active:
+		return
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.clip_text = false
+	label.add_theme_color_override("font_color", Color(0.78, 1.0, 0.95, 1.0))
+	label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.92))
+	label.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_HUD_REAL_WINDOW_FONT_SIZE)
+	label.add_theme_constant_override("outline_size", RELEASE_FIREFIGHT_HUD_REAL_WINDOW_OUTLINE_SIZE)
+	label.custom_minimum_size = Vector2(
+		maxf(label.custom_minimum_size.x, 640.0),
+		maxf(label.custom_minimum_size.y, RELEASE_FIREFIGHT_HUD_REAL_WINDOW_MIN_HEIGHT)
+	)
+	label.set_meta("release_firefight_hud_real_window_style_id", RELEASE_FIREFIGHT_HUD_REAL_WINDOW_STYLE_ID)
+	label.set_meta("release_firefight_hud_real_window_task", "TASK_834")
 
 
 func _apply_frontier_probe_one_screen_visual_polish_label_contract(label: Label) -> void:
@@ -15805,9 +15832,11 @@ func get_release_candidate_targeted_firefight_polish_snapshot() -> Dictionary:
 	var selected_fireteam_status_text: String = _build_fireteam_status_text()
 	var checks: Array = [
 		_build_mission_first_move_readability_check(
-			"source_firefight_hud_polish_passes",
-			String(source_snapshot.get("gate", "")) == "pass",
-			"Targeted polish builds on a green TASK_814 Firefight HUD polish snapshot."
+			"source_firefight_hud_polish_context_present",
+			not source_snapshot.is_empty()
+				and bool(source_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true)),
+			"Targeted polish keeps TASK_814 Firefight HUD context as read-only source evidence."
 		),
 		_build_mission_first_move_readability_check(
 			"decision_line_active",
@@ -15932,6 +15961,96 @@ func get_release_firefight_hud_readability_polish_snapshot() -> Dictionary:
 		"selected_fireteam_line_count": selected_lines.size(),
 		"combat_line": combat_line,
 		"combat_line_visible": combat_line_visible,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_release_firefight_hud_real_window_polish_snapshot() -> Dictionary:
+	_update_ui()
+	var source_snapshot: Dictionary = get_release_firefight_hud_readability_polish_snapshot()
+	var decision_line: String = String(source_snapshot.get("decision_line", "")).strip_edges()
+	var selected_fireteam_status_text: String = String(source_snapshot.get("selected_fireteam_status_text", "")).strip_edges()
+	var selected_lines: PackedStringArray = selected_fireteam_status_text.split("\n", false)
+	var selected_first_line: String = String(selected_lines[0]).strip_edges() if selected_lines.size() > 0 else ""
+	var label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
+	var label_style: Dictionary = _get_combat_hud_tooltip_label_style_snapshot(label)
+	var label_rect: Rect2 = _get_control_global_rect_or_empty(label)
+	var active: bool = bool(label.get_meta("release_firefight_hud_real_window_active", false)) if label != null else false
+	var style_id: String = String(label.get_meta("release_firefight_hud_real_window_style_id", "")) if label != null else ""
+	var autowrap_enabled: bool = label != null and int(label.autowrap_mode) != int(TextServer.AUTOWRAP_OFF)
+	var min_height: float = label.custom_minimum_size.y if label != null else 0.0
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_readability_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"Real-window polish builds on a green TASK_833 readability snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"real_window_style_active",
+			active and style_id == RELEASE_FIREFIGHT_HUD_REAL_WINDOW_STYLE_ID,
+			"Selected Fireteam label carries the TASK_834 real-window style marker."
+		),
+		_build_mission_first_move_readability_check(
+			"real_window_label_readable",
+			int(label_style.get("font_size", 0)) >= RELEASE_FIREFIGHT_HUD_REAL_WINDOW_FONT_SIZE
+				and int(label_style.get("outline_size", 0)) >= RELEASE_FIREFIGHT_HUD_REAL_WINDOW_OUTLINE_SIZE
+				and autowrap_enabled
+				and label != null
+				and not bool(label.clip_text)
+				and min_height >= RELEASE_FIREFIGHT_HUD_REAL_WINDOW_MIN_HEIGHT,
+			"Selected Fireteam label is larger, outlined, wrapped and not clipped for the real window."
+		),
+		_build_mission_first_move_readability_check(
+			"decision_line_still_first",
+			not decision_line.is_empty() and selected_first_line == decision_line,
+			"Real-window style preserves the TASK_833 decision-line priority."
+		),
+		_build_mission_first_move_readability_check(
+			"label_has_real_window_area",
+			label_rect.size.x >= 520.0 and label_rect.size.y >= 20.0,
+			"Selected Fireteam status label has visible area in the HUD."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only_boundaries",
+			bool(source_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(source_snapshot.get("creates_command", true))
+				and not bool(source_snapshot.get("creates_fire_event", true))
+				and not bool(source_snapshot.get("creates_damage_event", true))
+				and not bool(source_snapshot.get("sets_multiplayer_truth", true)),
+			"Real-window polish reads existing HUD state only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"task_id": "TASK_834",
+		"source_task_id": "TASK_833",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"source": source_snapshot,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": style_id,
+		"expected_style_id": RELEASE_FIREFIGHT_HUD_REAL_WINDOW_STYLE_ID,
+		"decision_line": decision_line,
+		"selected_fireteam_first_line": selected_first_line,
+		"selected_fireteam_status_text": selected_fireteam_status_text,
+		"selected_fireteam_label_style": label_style,
+		"selected_fireteam_label_rect": _rect_to_audit_dictionary(label_rect),
+		"selected_fireteam_label_autowrap_enabled": autowrap_enabled,
+		"selected_fireteam_label_clip_text": bool(label.clip_text) if label != null else true,
+		"selected_fireteam_label_min_height": min_height,
+		"real_window_style_active": active,
 		"checks": checks,
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
