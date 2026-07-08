@@ -29,6 +29,18 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_878_release_first_exchange_visible_status_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_877_release_first_exchange_visible_status_recapture.gd`, `git diff --check`.
 - Naechster Schritt: TASK_879 - Release First Exchange Exported Status Source Trace.
 
+### TASK_879 - Release First Exchange Exported Status Source Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_879_release_first_exchange_exported_status_source_trace.md`, `docs/tasks/TASK_878_release_first_exchange_visible_status_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Der First-GO-Firefight-Deep-Link kann per `STERNENBUERGERCHEN_RELEASE_FIRST_EXCHANGE_TRACE_PATH` einen read-only Runtime-Trace schreiben.
+- Stand: Der Trace sampled den Weg `requested -> runtime nodes -> pre GO -> GO refresh -> contact setup -> immediate exchange -> contact-fire readability fix -> final snapshot` und haelt #17/#18/#19-Status, TASK_876-Aktivierung, `combat_hud_density`-Konsum und finale `NO_LOS`/`CONTACT_PRESSURE`-Lesung fest.
+- Stand: `capture_release_first_exchange_exported_status_source_trace.ps1` nutzt den bestehenden TASK_877-Capture-Pfad und sammelt zusaetzlich `tmp/release_first_exchange_exported_status_source_trace_runtime.json` ein.
+- Stand: `ReleaseFirstExchangeExportedStatusSourceTrace` bewertet, ob die Statusquelle im Export nie aktiviert wurde oder nach Aktivierung von einem spaeteren HUD-/Decision-Refresh ueberschrieben wurde.
+- Stand: Der echte Exportlauf schrieb `review_ready` mit 10 Runtime-Samples bis `deeplink_final`: TASK_876-Aktivierung wurde beobachtet, finale #17/#18/#19 lesen CONTACT FIRE, und keine finale `NO_LOS`-/`CONTACT_PRESSURE`-Ueberschreibung wurde beobachtet.
+- Risiken/offen: TASK_879 erzeugt Evidence und noch keinen sichtbaren FireTrace-/Impact-Fix. Der Statusquellenpfad ist jetzt im Export belegt; die naechste Reibung ist visuelle Feuerlesbarkeit.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_exported_status_source_trace.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_879_release_first_exchange_exported_status_source_trace.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_878_release_first_exchange_visible_status_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_880 - Release First Exchange Fire Visual Polish.
+
 ### TASK_873 - Release First Exchange CONTACT-FIRE Readability Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_873_release_first_exchange_contact_fire_readability_fix.md`, `docs/tasks/TASK_872_release_correct_window_first_exchange_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
