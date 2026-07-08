@@ -1829,6 +1829,79 @@ func get_release_firefight_real_window_findings_polish_snapshot(real_window_revi
 	}
 
 
+func get_release_firefight_world_label_declutter_snapshot(real_window_review_notes: Dictionary = {}, findings_notes: Dictionary = {}, options: Dictionary = {}) -> Dictionary:
+	var source: Dictionary = get_release_firefight_real_window_findings_polish_snapshot(real_window_review_notes, findings_notes, options)
+	var active_mission: Node = _active_mission
+	var tactical_controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
+	var tactical_declutter: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_firefight_world_label_declutter_snapshot"):
+		tactical_declutter = Dictionary(tactical_controller.call("get_release_firefight_world_label_declutter_snapshot"))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"source_findings_polish_passes",
+		String(source.get("status", "")) == "pass",
+		"critical",
+		"TASK_839 builds on a passing TASK_838 real-window findings polish snapshot."
+	)
+	_append_handoff_check(
+		checks,
+		"tactical_declutter_snapshot_present",
+		not tactical_declutter.is_empty(),
+		"critical",
+		"Active mission should expose tactical world-label declutter."
+	)
+	_append_handoff_check(
+		checks,
+		"declutter_gate_passes",
+		String(tactical_declutter.get("gate", "")) == "pass",
+		"critical",
+		"Primary3D should reduce redundant world labels during the release firefight readout."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_declutter.get("read_only", false))
+			and not bool(tactical_declutter.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_declutter.get("creates_command", true))
+			and not bool(tactical_declutter.get("creates_fire_event", true))
+			and not bool(tactical_declutter.get("creates_damage_event", true))
+			and not bool(tactical_declutter.get("sets_multiplayer_truth", true)),
+		"critical",
+		"TASK_839 changes visual density only and does not create gameplay truth."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_firefight_world_label_declutter.v1",
+		"task_id": "TASK_839",
+		"source_task_id": "TASK_838",
+		"source_status": String(source.get("status", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": source,
+		"tactical_declutter": tactical_declutter,
+		"style_id": String(tactical_declutter.get("style_id", "")),
+		"density_mode": String(tactical_declutter.get("density_mode", "")),
+		"suppressed_count": int(tactical_declutter.get("suppressed_count", 0)),
+		"rendered_count": int(tactical_declutter.get("rendered_count", 0)),
+		"unit_badge_suppressed_count": int(tactical_declutter.get("unit_badge_suppressed_count", 0)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_840 - Release Firefight World Label Real Window Recapture",
+	}
+
+
 func get_debrief_return_homebase_handoff_snapshot() -> Dictionary:
 	var homebase_screen: Node = _get_homebase_screen()
 	var fob_screen: Node = _get_fob_screen()

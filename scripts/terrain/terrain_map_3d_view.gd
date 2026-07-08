@@ -368,6 +368,20 @@ const WAYPOINT_PREVIEW_SUPPRESS_AREA_AXIS_LINE_COUNT: int = 2
 const WAYPOINT_PREVIEW_SUPPRESS_AREA_BOUNDARY_MARKER_COUNT: int = 4
 const WAYPOINT_PREVIEW_SUPPRESS_AREA_SURFACE_OFFSET: float = 0.88
 const WAYPOINT_PREVIEW_SUPPRESS_AREA_OUTLINE_SURFACE_OFFSET: float = 0.96
+const WORLD_LABEL_DENSITY_MODE_DEFAULT: String = "default"
+const WORLD_LABEL_DENSITY_MODE_RELEASE_FIREFIGHT_DECLUTTER: String = "release_firefight_declutter"
+const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
+const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
+	"CONTACT",
+	"MOVE",
+	"ENGAGE",
+	"TAKE",
+	"DEF",
+	"FLANK",
+	"HOLD",
+	"READY",
+	"IDLE",
+]
 
 const LEGACY_MODEL_BY_TYPE: Dictionary = {
 	"wall_straight_se": "corridor_wall",
@@ -639,6 +653,9 @@ var _feedback_bubble_visual_count: int = 0
 var _feedback_bubble_entries: Array = []
 var _tactical_communication_event_visual_count: int = 0
 var _tactical_communication_event_entries: Array = []
+var _world_label_declutter_suppressed_count: int = 0
+var _world_label_declutter_rendered_count: int = 0
+var _world_label_declutter_unit_badge_suppressed_count: int = 0
 var _movement_step_ready_at_msec: Dictionary = {}
 var _movement_step_sfx_count: int = 0
 var _movement_step_sfx_suppressed_rate_limit_count: int = 0
@@ -819,6 +836,8 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_feedback_bubble_hud_root)
 	_tactical_communication_event_visual_count = 0
 	_tactical_communication_event_entries.clear()
+	_world_label_declutter_suppressed_count = 0
+	_world_label_declutter_rendered_count = 0
 	_reset_fow_overlay_counters(false)
 	if _terrain_map_data == null:
 		_map_render_duration_msec = Time.get_ticks_msec() - render_started_at_msec
@@ -1652,6 +1671,13 @@ func get_render_snapshot() -> Dictionary:
 		"feedback_bubble_entries": _feedback_bubble_entries.duplicate(true),
 		"tactical_communication_event_visual_count": _tactical_communication_event_visual_count,
 		"tactical_communication_event_entries": _tactical_communication_event_entries.duplicate(true),
+		"world_label_density_mode": _get_world_label_density_mode(),
+		"world_label_declutter_active": _is_release_firefight_world_label_declutter_active(),
+		"world_label_declutter_style_id": RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID if _is_release_firefight_world_label_declutter_active() else "",
+		"world_label_declutter_suppressed_count": _world_label_declutter_suppressed_count,
+		"world_label_declutter_unit_badge_suppressed_count": _world_label_declutter_unit_badge_suppressed_count,
+		"world_label_declutter_total_suppressed_count": _world_label_declutter_suppressed_count + _world_label_declutter_unit_badge_suppressed_count,
+		"world_label_declutter_rendered_count": _world_label_declutter_rendered_count,
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -4818,6 +4844,8 @@ func _rebuild_order_visuals() -> void:
 	_feedback_bubble_entries.clear()
 	_tactical_communication_event_visual_count = 0
 	_tactical_communication_event_entries.clear()
+	_world_label_declutter_suppressed_count = 0
+	_world_label_declutter_rendered_count = 0
 	_fow_hidden_order_visual_count = 0
 	if _order_root == null:
 		return
@@ -4919,6 +4947,45 @@ func _select_weapon_fire_events_for_visuals(fire_events: Array) -> Array:
 		return filtered
 	_fow_hidden_order_visual_count += overflow_count
 	return filtered.slice(overflow_count)
+
+
+func _get_world_label_density_mode() -> String:
+	var order_mode: String = String(_order_payload.get("world_label_density_mode", "")).strip_edges().to_lower()
+	if not order_mode.is_empty():
+		return order_mode
+	var status_mode: String = String(_mission_status_payload.get("world_label_density_mode", "")).strip_edges().to_lower()
+	if not status_mode.is_empty():
+		return status_mode
+	return WORLD_LABEL_DENSITY_MODE_DEFAULT
+
+
+func _is_release_firefight_world_label_declutter_active() -> bool:
+	return _get_world_label_density_mode() == WORLD_LABEL_DENSITY_MODE_RELEASE_FIREFIGHT_DECLUTTER
+
+
+func _should_suppress_release_firefight_world_bubble(feedback_bubble: Dictionary) -> bool:
+	if not _is_release_firefight_world_label_declutter_active():
+		return false
+	return String(feedback_bubble.get("anchor_space", "")).strip_edges().to_lower() != "hud"
+
+
+func _should_suppress_release_firefight_fire_status_label(fire_event: Dictionary, label_text: String, is_friendly_fire: bool) -> bool:
+	if not _is_release_firefight_world_label_declutter_active():
+		return false
+	if is_friendly_fire:
+		return false
+	var normalized_label: String = label_text.strip_edges().to_upper()
+	return normalized_label == "HIT" or normalized_label == "MISS" or normalized_label == "FIRE"
+
+
+func _should_suppress_release_firefight_flank_label(_fire_event: Dictionary) -> bool:
+	return _is_release_firefight_world_label_declutter_active()
+
+
+func _should_suppress_release_firefight_unit_badge(badge_text: String) -> bool:
+	if not _is_release_firefight_world_label_declutter_active():
+		return false
+	return RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS.has(badge_text.strip_edges().to_upper())
 
 
 func _select_feedback_bubbles_for_visuals(feedback_bubbles: Array) -> Array:
@@ -6267,13 +6334,25 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	_add_wide_line3d(_order_root, _world_to_surface_3d_position(impact_cross_a, 0.83), _world_to_surface_3d_position(impact_cross_b, 0.83), impact_color, "WeaponFireImpactCross_%s" % _sanitize_node_name(event_id), WEAPON_FIRE_IMPACT_CROSS_WIDTH)
 	var fire_status_label: String = _build_weapon_fire_vfx_status_label(fire_event, combat_outcome, is_friendly_fire)
 	if not fire_status_label.is_empty():
-		_add_label3d(_order_root, fire_status_label, _world_to_surface_3d_position(target_position + WEAPON_FIRE_STATUS_LABEL_OFFSET, MOVEMENT_LABEL_HEIGHT + 0.86), "WeaponFireStatus_%s" % _sanitize_node_name(event_id), Color(1.0, 0.84, 0.34, 0.98), WEAPON_FIRE_STATUS_LABEL_FONT_SIZE)
+		if _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire):
+			_world_label_declutter_suppressed_count += 1
+		else:
+			_add_label3d(_order_root, fire_status_label, _world_to_surface_3d_position(target_position + WEAPON_FIRE_STATUS_LABEL_OFFSET, MOVEMENT_LABEL_HEIGHT + 0.86), "WeaponFireStatus_%s" % _sanitize_node_name(event_id), Color(1.0, 0.84, 0.34, 0.98), WEAPON_FIRE_STATUS_LABEL_FONT_SIZE)
+			if _is_release_firefight_world_label_declutter_active():
+				_world_label_declutter_rendered_count += 1
 	var flank_label: String = _build_flank_fire_vfx_label(fire_event)
 	if not flank_label.is_empty():
-		_add_label3d(_order_root, flank_label, _world_to_surface_3d_position(target_position + Vector2(0.0, -22.0), MOVEMENT_LABEL_HEIGHT + 0.82), "WeaponFireFlank_%s" % _sanitize_node_name(event_id), Color(1.0, 0.70, 0.24, 0.96), 12)
+		if _should_suppress_release_firefight_flank_label(fire_event):
+			_world_label_declutter_suppressed_count += 1
+		else:
+			_add_label3d(_order_root, flank_label, _world_to_surface_3d_position(target_position + Vector2(0.0, -22.0), MOVEMENT_LABEL_HEIGHT + 0.82), "WeaponFireFlank_%s" % _sanitize_node_name(event_id), Color(1.0, 0.70, 0.24, 0.96), 12)
+			if _is_release_firefight_world_label_declutter_active():
+				_world_label_declutter_rendered_count += 1
 	if is_friendly_fire:
 		_add_marker3d(_order_root, target_position, Color(1.0, 0.16, 0.14, 0.62), "WeaponFireFriendlyFlash_%s" % _sanitize_node_name(event_id), 0.18, 0.12, 8)
 		_add_label3d(_order_root, "FRIENDLY FIRE", _world_to_surface_3d_position(target_position + Vector2(0.0, -38.0), MOVEMENT_LABEL_HEIGHT + 0.94), "WeaponFireFriendlyLabel_%s" % _sanitize_node_name(event_id), Color(1.0, 0.24, 0.22, 0.98), 13)
+		if _is_release_firefight_world_label_declutter_active():
+			_world_label_declutter_rendered_count += 1
 	var audio_result: Dictionary = _emit_weapon_fire_sfx_from_fire_event(fire_event, weapon_id, muzzle_position)
 	_weapon_fire_vfx_visual_count += 1
 	_weapon_fire_vfx_entries.append({
@@ -6314,9 +6393,11 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"target_focus_radius": WEAPON_FIRE_TARGET_FOCUS_RADIUS,
 		"target_focus_height": WEAPON_FIRE_TARGET_FOCUS_HEIGHT,
 		"target_focus_color_hex": WEAPON_FIRE_TARGET_FOCUS_COLOR.to_html(true),
-		"fire_status_label_visible": not fire_status_label.is_empty(),
+		"fire_status_label_visible": not fire_status_label.is_empty() and not _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
 		"fire_status_label_text": fire_status_label,
+		"fire_status_label_suppressed_by_declutter": _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
 		"fire_status_label_font_size": WEAPON_FIRE_STATUS_LABEL_FONT_SIZE,
+		"flank_label_suppressed_by_declutter": not flank_label.is_empty() and _should_suppress_release_firefight_flank_label(fire_event),
 		"combat_outcome": combat_outcome,
 		"damage_resolved": int(fire_event.get("damage_resolved", 0)),
 		"hit_chance_resolved": float(fire_event.get("hit_chance_resolved", 0.0)),
@@ -6361,6 +6442,9 @@ func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	if String(feedback_bubble.get("anchor_space", "")).strip_edges().to_lower() == "hud" and typeof(feedback_bubble.get("hud_anchor_position", null)) == TYPE_VECTOR2:
 		_add_hud_feedback_bubble_visual(feedback_bubble)
 		return
+	if _should_suppress_release_firefight_world_bubble(feedback_bubble):
+		_world_label_declutter_suppressed_count += 1
+		return
 	if typeof(feedback_bubble.get("anchor_position", null)) != TYPE_VECTOR2:
 		return
 	var bubble_id: String = String(feedback_bubble.get("bubble_id", "")).strip_edges()
@@ -6397,6 +6481,8 @@ func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	label.outline_size = 3
 	label.outline_modulate = Color(TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_OUTLINE.r, TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_OUTLINE.g, TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_OUTLINE.b, 0.9)
 	_feedback_bubble_visual_count += 1
+	if _is_release_firefight_world_label_declutter_active():
+		_world_label_declutter_rendered_count += 1
 	_feedback_bubble_entries.append({
 		"bubble_id": bubble_id,
 		"fireteam_id": String(feedback_bubble.get("fireteam_id", "")).strip_edges().to_lower(),
@@ -8067,6 +8153,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	var unit_visual_loadout_error_count: int = 0
 	var enemy_animated_unit_model_count: int = 0
 	var unit_status_badge_count: int = 0
+	var world_label_declutter_unit_badge_suppressed_count: int = 0
 	var missing_unit_model_count: int = 0
 	var fow_hidden_unit_proxy_count: int = 0
 	var changed: bool = false
@@ -8169,6 +8256,8 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			changed = true
 		if _update_unit_status_badge(proxy, unit):
 			unit_status_badge_count += 1
+		if bool(proxy.get_meta("unit_status_badge_suppressed_by_declutter", false)):
+			world_label_declutter_unit_badge_suppressed_count += 1
 		if bool(proxy.get_meta("uses_unit_texture", false)):
 			unit_texture_count += 1
 		if bool(proxy.get_meta("uses_kenney_model", false)):
@@ -8279,6 +8368,9 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 	if _unit_status_badge_count != unit_status_badge_count:
 		changed = true
 	_unit_status_badge_count = unit_status_badge_count
+	if _world_label_declutter_unit_badge_suppressed_count != world_label_declutter_unit_badge_suppressed_count:
+		changed = true
+	_world_label_declutter_unit_badge_suppressed_count = world_label_declutter_unit_badge_suppressed_count
 	if _missing_unit_model_count != missing_unit_model_count:
 		changed = true
 	_missing_unit_model_count = missing_unit_model_count
@@ -8437,9 +8529,14 @@ func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
 		return false
 	var label := proxy.get_node_or_null("UnitStateBadge") as Label3D
 	var badge_text: String = _get_unit_status_badge_text(unit)
-	if badge_text.is_empty() or not proxy.visible:
+	var suppressed_by_declutter: bool = _should_suppress_release_firefight_unit_badge(badge_text)
+	proxy.set_meta("unit_status_badge_suppressed_by_declutter", suppressed_by_declutter)
+	if badge_text.is_empty() or not proxy.visible or suppressed_by_declutter:
 		if label != null:
 			label.visible = false
+		if suppressed_by_declutter:
+			proxy.set_meta("unit_status_badge_text", badge_text)
+			proxy.set_meta("unit_status_badge_style", "suppressed_release_firefight_declutter")
 		return false
 	if label == null:
 		label = _add_label3d(proxy, badge_text, Vector3(0.0, 0.98, 0.0), "UnitStateBadge", _get_unit_status_badge_color(unit), 13)
@@ -9745,6 +9842,8 @@ func _get_unit_proxy_state_by_id() -> Dictionary:
 			"unit_weapon_upper_body_pose_source_animation": String(proxy.get_meta("unit_weapon_upper_body_pose_source_animation", "")).strip_edges(),
 			"unit_status_badge_visible": badge_visible,
 			"unit_status_badge_text": badge.text if badge_visible else "",
+			"unit_status_badge_suppressed_by_declutter": bool(proxy.get_meta("unit_status_badge_suppressed_by_declutter", false)),
+			"unit_status_badge_raw_text": String(proxy.get_meta("unit_status_badge_text", "")).strip_edges(),
 			"unit_status_badge_color_hex": String(proxy.get_meta("unit_status_badge_color_hex", "")).strip_edges(),
 			"unit_status_badge_style": String(proxy.get_meta("unit_status_badge_style", "")).strip_edges(),
 		}
