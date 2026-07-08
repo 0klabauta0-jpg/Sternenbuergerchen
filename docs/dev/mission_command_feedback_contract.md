@@ -202,6 +202,11 @@ TASK_843 rahmt den ersten Release-Firefight als lesbaren Kontaktmoment. `get_rel
 
 Erwartete Struktur: Snapshot und MetaLayer-Wrapper enthalten `schema = sternenbuergerchen.release_first_firefight_contact_framing.v1`, `task_id = TASK_843`, `style_id = task_843_release_first_firefight_contact_framing_v1`, `framing_state`, `framing_line`, `pressure_reason`, `next_step`, `selected_contact_count`, `fire_event_count`, `compact_combat_line`, `decision_line`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false` und `sets_multiplayer_truth = false`. Bei `contact_pressure` muss der Event-Log-Fallback `CONTACT PRESSURE` statt nur `NO FIRE` nennen.
 
+## Release-First-Exchange-Tension-Tuning
+TASK_844 haertet nur den Release-/QA-Deep-Link fuer den ersten Feuerwechsel. `_apply_release_first_go_firefight_deeplink()` darf den ersten Gegner fuer diesen expliziten Pfad anhand vorhandener Combat-Readouts repositionieren, muss aber den Schusswechsel weiter ueber `MissionCombatLoopDriver._try_enqueue_attacks()` und `SimulationRoot.enqueue_effect()` laufen lassen. Die normale Mission-, KI-, Spawn-, Damage- und Multiplayer-Wahrheit bleibt unveraendert.
+
+Erwartete Struktur: `get_release_first_exchange_tension_tuning_snapshot()` in TacticalController und MetaLayer enthaelt `schema = sternenbuergerchen.release_first_exchange_tension_tuning.v1`, `task_id = TASK_844`, `style_id = task_844_release_first_exchange_tension_tuning_v1`, `first_exchange_visible = true`, `framing_state = fire_exchange`, `framing_line`, `fire_event_count`, `first_fire_event_id`, `range_state`, `los_state`, `combat_attackable`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false` und `sets_multiplayer_truth = false`. Der Deep-Link darf `placement_verified_attackable` und das genutzte `placement_readout` als Diagnose melden.
+
 ## Suppress-Fire-Outcome-AAR-Diagnostic-Stub
 TASK_582 macht den TASK_581-Outcome als kleinen AAR-/Debug-Anker zaehlbar. Gezaehlt werden nur deduplizierte Contact-Decision-Diagnostics mit `status = fired`, aktiver SUP-Absicht und `outcome_label = suppress_pressure_intent`. Snapshot-Lesezugriffe, Preview, Cooldown und blockierte Decisions duerfen den Count nicht erhoehen.
 

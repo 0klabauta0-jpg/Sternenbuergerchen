@@ -97,6 +97,7 @@ const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 9
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
 const RELEASE_FIRST_FIREFIGHT_CONTACT_FRAMING_STYLE_ID: String = "task_843_release_first_firefight_contact_framing_v1"
+const RELEASE_FIRST_EXCHANGE_TENSION_TUNING_STYLE_ID: String = "task_844_release_first_exchange_tension_tuning_v1"
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT: float = 1.35
@@ -16697,6 +16698,84 @@ func get_release_first_firefight_contact_framing_snapshot() -> Dictionary:
 		"combat_hud_density": combat_hud_density,
 		"event_log_display": event_log_display,
 		"event_log_frames_pressure": event_log_frames_pressure,
+		"source": source_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func get_release_first_exchange_tension_tuning_snapshot() -> Dictionary:
+	var source_snapshot: Dictionary = get_release_first_firefight_contact_framing_snapshot()
+	var diagnostics: Dictionary = Dictionary(source_snapshot.get("contact_decision_diagnostics", get_contact_decision_diagnostics_snapshot())).duplicate(true)
+	var fire_event_count: int = int(source_snapshot.get("fire_event_count", 0))
+	var first_fire_event_id: String = String(source_snapshot.get("first_fire_event_id", diagnostics.get("fire_event_id", ""))).strip_edges()
+	var framing_state: String = String(source_snapshot.get("framing_state", "")).strip_edges().to_lower()
+	var framing_line: String = String(source_snapshot.get("framing_line", "")).strip_edges()
+	var first_exchange_visible: bool = framing_state == "fire_exchange" and (fire_event_count > 0 or not first_fire_event_id.is_empty())
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_contact_framing_passes",
+			String(source_snapshot.get("gate", "")) == "pass",
+			"First-exchange tuning builds on the green TASK_843 contact-framing snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"first_exchange_visible",
+			first_exchange_visible,
+			"First Release Firefight should show FireEvent evidence, not only contact pressure."
+		),
+		_build_mission_first_move_readability_check(
+			"framing_line_names_contact_fire",
+			framing_line.contains("CONTACT FIRE") and framing_line.contains("NEXT"),
+			"Exchange framing line names contact fire and the next player step."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_context_readable",
+			String(diagnostics.get("range_state", "")).strip_edges() == "in_range"
+				and String(diagnostics.get("los_state", "")).strip_edges().to_lower() != "blocked"
+				and bool(diagnostics.get("combat_attackable", false)),
+			"Fire decision keeps range, LOS and attackability readable."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only_boundaries",
+			bool(source_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(source_snapshot.get("creates_command", true))
+				and not bool(source_snapshot.get("creates_fire_event", true))
+				and not bool(source_snapshot.get("creates_damage_event", true))
+				and not bool(source_snapshot.get("sets_multiplayer_truth", true)),
+			"First-exchange tuning snapshot reads existing combat evidence only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_tension_tuning.v1",
+		"task_id": "TASK_844",
+		"source_task_id": "TASK_843",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": RELEASE_FIRST_EXCHANGE_TENSION_TUNING_STYLE_ID,
+		"first_exchange_visible": first_exchange_visible,
+		"framing_state": framing_state,
+		"framing_line": framing_line,
+		"fire_event_count": fire_event_count,
+		"first_fire_event_id": first_fire_event_id,
+		"engagement_status": String(diagnostics.get("status", "")).strip_edges(),
+		"engagement_reason": String(diagnostics.get("reason", "")).strip_edges(),
+		"range_state": String(diagnostics.get("range_state", "")).strip_edges(),
+		"los_state": String(diagnostics.get("los_state", "")).strip_edges(),
+		"combat_attackable": bool(diagnostics.get("combat_attackable", false)),
+		"contact_decision_diagnostics": diagnostics,
 		"source": source_snapshot,
 		"checks": checks,
 		"failed_checks": failed_checks,
