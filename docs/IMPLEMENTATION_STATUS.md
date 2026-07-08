@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_891 - Release First Exchange HUD Density Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_891_release_first_exchange_hud_density_visual_findings.md`, `docs/tasks/TASK_890_release_first_exchange_hud_density_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_891 bewertet den TASK_890-PNG-/Manifest-Befund read-only als Spielerblick.
+- Stand: Positive Befunde: CONTACT FIRE ist in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar; Event Log ist ruhiger; FIRE-/Impact-Signale sind im Weltbild vorhanden.
+- Stand: Primaere Restreibung ist `fire_direction_and_impact_relationship_not_obvious`: Schussrichtung, Impact und Zielbezug sind sichtbar, aber noch nicht als eine klare Aktion sofort lesbar.
+- Risiken/offen: TASK_891 aendert keine Runtime. Der naechste Slice muss eng FireDirection/Impact/Target-Fokus polieren, ohne Combat- oder Damage-Logik neu zu oeffnen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_891_release_first_exchange_hud_density_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_890_release_first_exchange_hud_density_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_892 - Release First Exchange Fire Direction And Impact Clarity Polish.
+
 ### TASK_890 - Release First Exchange HUD Density Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_890_release_first_exchange_hud_density_real_window_recapture.md`, `docs/tasks/TASK_889_release_first_exchange_hud_density_and_fire_visual_polish.md`, `docs/dev/mission_command_feedback_contract.md`

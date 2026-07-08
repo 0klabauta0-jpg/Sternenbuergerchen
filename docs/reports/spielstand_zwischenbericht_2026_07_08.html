@@ -113,7 +113,8 @@
       <span class="pill good">Letzter Commit: 144e2d56</span>
       <span class="pill good">TASK_889 HUD Density + Fire Visual committed + pushed</span>
       <span class="pill good">TASK_890 Recapture-Paket angelegt</span>
-      <span class="pill warn">Naechster Sichtschnitt: TASK_891 Visual Findings</span>
+      <span class="pill good">TASK_891 Visual Findings umgesetzt</span>
+      <span class="pill warn">Naechster Polish: TASK_892 Fire Direction + Impact</span>
       <span class="pill warn">Git: nur builds/ untracked</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -136,15 +137,15 @@
             Der Release-/Singleplayer-Pfad ist inzwischen deutlich besser testbar: Homebase, Fireteam-/Dropship-Staging, Missionstart, erster GO-Moment und erster Kontakt sind als wiederholbare Testkette vorhanden. TASK_887 hat den harten TASK_886-Widerspruch aufgeloest: Wenn nach <code>deeplink_final</code> derselbe laufende Release-Prozess erneut gecaptured wird, lesen #17, #18 und #19 im echten Fenster CONTACT FIRE.
           </div>
           <p>In den letzten Slices wurde der Weg nicht nur behauptet, sondern ueber Godot-Verifier, Manifest-Dateien und echte Fenster-Captures belegt. TASK_879 hat den Exportpfad getraced: Die TASK_876-Quelle wird im finalen Runtime-Sample aktiv, #17/#18/#19 lesen CONTACT FIRE, und keine finale NO_LOS-/CONTACT-PRESSURE-Ueberschreibung bleibt stehen. TASK_886 zeigte, dass der alte Screenshot noch ein frueher Frame war. TASK_887 wartet jetzt auf den finalen Trace und captured danach neu; der echte Post-Final-Fensterblick zeigt CONTACT FIRE.</p>
-          <p><strong>Zwischenstand jetzt:</strong> Die technische Belegkette ist fuer diesen ersten Feuerwechsel nicht mehr der Hauptgegner. TASK_889 reduziert die Dichte im CONTACT-FIRE-Moment, rahmt #19 groesser und hebt FireTrace/Impact/Target-Fokus an. TASK_890 legt dafuer das eigene Real-Window-Recapture-Paket an; der naechste fachliche Schnitt ist der echte PNG-/Manifest-Befund.</p>
+          <p><strong>Zwischenstand jetzt:</strong> Die technische Belegkette ist fuer diesen ersten Feuerwechsel nicht mehr der Hauptgegner. TASK_889 reduziert die Dichte im CONTACT-FIRE-Moment, rahmt #19 groesser und hebt FireTrace/Impact/Target-Fokus an. TASK_890 liefert den echten Fensterbeweis. TASK_891 bewertet ihn: CONTACT FIRE ist sichtbar, aber Schussrichtung, Impact und Zielbezug muessen noch klarer als eine Aktion gelesen werden.</p>
         </article>
         <article class="card">
           <h2>Aktueller Wert</h2>
           <div class="stack">
-            <div class="metric"><strong>17</strong><span>neuere Slices im Strang: TASK_874 bis TASK_890.</span></div>
+            <div class="metric"><strong>18</strong><span>neuere Slices im Strang: TASK_874 bis TASK_891.</span></div>
             <div class="metric"><strong>3</strong><span>HUD-Surfaces im Fokus: #17, #18, #19.</span></div>
             <div class="metric"><strong>10</strong><span>Runtime-Trace-Samples bis <code>deeplink_final</code>.</span></div>
-            <div class="metric"><strong>1</strong><span>konkreter naechster Befund-Slice: TASK_891.</span></div>
+            <div class="metric"><strong>1</strong><span>konkreter naechster Polish-Slice: TASK_892.</span></div>
           </div>
         </article>
         <article class="card full">
@@ -272,6 +273,13 @@
                 <p>Der naechste Beweisrahmen ist jetzt angelegt und lokal ausgefuehrt: eigener TASK_890-Contract, Analyzer, Capture-Wrapper und Verifier. Der Capture nutzt den TASK_887-Post-Final-Window-Handle-Pfad, referenziert TASK_889 als erwarteten Dichte-/Fire-Visual-Style und trennt <code>review_ready</code> bewusst von echter visueller Akzeptanz. Lokale Artefakte: <code>tmp/release_first_exchange_hud_density_real_window_recapture.json</code> und <code>tmp/release_first_exchange_hud_density_real_window_recapture.png</code>.</p>
               </div>
             </div>
+            <div class="timeline-item">
+              <strong>TASK_891</strong>
+              <div>
+                <h3>HUD Density Visual Findings</h3>
+                <p>Der TASK_890-Fensterblick ist jetzt als read-only Spielerbefund geschnitten. Positive Befunde: CONTACT FIRE ist in #17/#18/#19 sichtbar, #19 ist ruhiger, FIRE/Impact ist im Weltbild vorhanden. Primaere Restreibung: <code>fire_direction_and_impact_relationship_not_obvious</code>, also Schussrichtung, Impact und Zielbezug muessen im bestaetigten CONTACT-FIRE-Moment staerker zusammengefuehrt werden.</p>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -297,9 +305,9 @@
           <ul class="list">
             <li>Der Statusquellenpfad ist im finalen Export-Trace belegt; TASK_883 bindet die sichtbaren HUD-/Event-Log-Surfaces daran. TASK_887 beweist jetzt: Wenn der echte Fensterframe nach dem finalen Trace gecaptured wird, kommt CONTACT FIRE sichtbar vorne an.</li>
             <li>Der neue Post-Final-Window-Handle-Screenshot ist da; der alte TASK_886-Widerspruch war ein Capture-/Frame-Zeitpunktproblem.</li>
-            <li>TASK_889 poliert die Headless-/Runtime-Lesbarkeitsparameter; TASK_890 legt den echten Fensterbeweis dafuer an. Ob der Screenshot angenehm genug wirkt, ist noch nicht bewertet.</li>
-            <li>Die HUD-Flaechen sind funktional, aber noch nicht final "schoen"; der naechste Blick muss pruefen, ob Bottom-Dock, Event-Log-Overlay und Weltlabels jetzt wirklich ruhiger wirken.</li>
-            <li>FireTrace, Impact und Zielbezug sind nun staerker priorisiert und haben einen eigenen TASK_890-Recapture-Pfad. Der frische PNG-Blick zeigt CONTACT FIRE in #17/#18/#19 und sichtbare Fire-/Impact-Signale; die genaue Spielerwertung folgt als TASK_891.</li>
+            <li>TASK_889 poliert die Headless-/Runtime-Lesbarkeitsparameter; TASK_890 liefert den echten Fensterbeweis; TASK_891 bewertet ihn als Fortschritt mit verbleibender visueller Ziel-/Impact-Reibung.</li>
+            <li>Die HUD-Flaechen sind funktional und CONTACT FIRE ist jetzt sichtbar. "Schoen" ist der Moment noch nicht ganz, weil Welt-Fire/Impact und Bottom-HUD noch um Aufmerksamkeit konkurrieren.</li>
+            <li>FireTrace, Impact und Zielbezug sind nun sichtbar, aber noch nicht stark genug als zusammenhaengende Aktion. TASK_892 soll genau diesen Welt-Visual-Fokus polieren.</li>
             <li>Der Release-Flow ist pruefbar, aber noch nicht "spielerisch selbstverstaendlich"; man merkt noch, dass wir eine Debug-/QA-Strecke in eine echte erste Mission verwandeln.</li>
             <li>Der Map-/Editor-Workflow ist weiter ein groesserer UX-Baustellenblock, wurde aber gerade bewusst hinter Release-Playability einsortiert.</li>
           </ul>
@@ -307,7 +315,7 @@
         <article class="card full">
           <h2>Spielerischer Zwischenstand</h2>
           <p>Das Spiel ist aktuell am ehesten in der Phase "der erste echte Missionsablauf wird hart lesbar gemacht". Es gibt genug Systemsubstanz fuer Fireteams, Dropships, Mission und Combat-Feedback, aber die entscheidende Frage ist noch: Sieht der Spieler im richtigen Moment das Richtige? Genau dafuer sind die letzten Tasks so kleinteilig.</p>
-          <p>TASK_879 hat den Statusquellenpfad im exportierten Runtime-Lauf entwirrt: Im finalen Sample ist CONTACT FIRE da. TASK_880 macht daraus den Runtime-Visual-Schritt: Schuss, Treffer und Zielbezug werden staerker gerendert. TASK_883 synchronisiert die sichtbaren HUD-/Event-Log-Quellen mit diesem finalen Trace-Stand. TASK_886 bindet den Widerspruch an den konkreten Render-/Source-Frame. TASK_887 loest ihn praktisch: Der Post-Final-Capture zeigt CONTACT FIRE im echten Fenster. TASK_888 bewertet den Spielerblick, TASK_889 setzt den ersten Dichte-/Visual-Polish um. TASK_890 bereitet jetzt den echten Fensterbeweis fuer genau diesen Polish vor.</p>
+          <p>TASK_879 hat den Statusquellenpfad im exportierten Runtime-Lauf entwirrt: Im finalen Sample ist CONTACT FIRE da. TASK_880 macht daraus den Runtime-Visual-Schritt: Schuss, Treffer und Zielbezug werden staerker gerendert. TASK_883 synchronisiert die sichtbaren HUD-/Event-Log-Quellen mit diesem finalen Trace-Stand. TASK_886 bindet den Widerspruch an den konkreten Render-/Source-Frame. TASK_887 loest ihn praktisch: Der Post-Final-Capture zeigt CONTACT FIRE im echten Fenster. TASK_888 bewertet den Spielerblick, TASK_889 setzt den ersten Dichte-/Visual-Polish um, TASK_890 captured ihn echt, TASK_891 benennt jetzt den naechsten kleinen visuellen Engpass.</p>
         </article>
       </div>
     </section>
@@ -347,6 +355,7 @@
             <li><code>task_888_release_first_exchange_player_readability_polish_review.gd</code>: prueft den technischen Post-Final-CONTACT-FIRE-Frame gegen die menschliche Spielerlesbarkeit und benennt <code>bottom_hud_density_high</code> als naechste Reibung.</li>
             <li><code>task_889_release_first_exchange_hud_density_and_fire_visual_polish.gd</code>: prueft kompakte CONTACT-FIRE-Zeilen, #19-Panel-Komfortstil und staerkere Primary3D-Fire-Visuals gegen read-only-Grenzen.</li>
             <li><code>task_890_release_first_exchange_hud_density_real_window_recapture.gd</code>: prueft TASK_890-Manifest, TASK_889-/TASK_887-Quellen, Pflichtchecks, Review/Acceptance-Trennung und read-only-Grenzen.</li>
+            <li><code>task_891_release_first_exchange_hud_density_visual_findings.gd</code>: prueft den TASK_890-PNG-/Manifest-Befund, positive CONTACT-FIRE-Findings, FireDirection-/Impact-Restreibung und read-only-Grenzen.</li>
             <li><code>tmp/release_first_exchange_hud_density_real_window_recapture.json</code>: <code>review_ready</code>, trusted Window-Handle-Pfad ueber TASK_887-Post-Final-Capture.</li>
             <li><code>tmp/release_first_exchange_hud_density_real_window_recapture.png</code>: echter Fensterblick nach TASK_889; CONTACT FIRE ist in #17/#18/#19 sichtbar, Fire-/Impact-Signale sind vorhanden.</li>
             <li>Export + TASK_879-Capture: <code>review_ready</code>, 10 Samples bis <code>deeplink_final</code>.</li>
@@ -365,7 +374,7 @@
             <li>Letzter Runtime-Fix davor: TASK_883 mit Commit <code>b1d4c4f7</code> auf <code>task/release-first-exchange-real-window-hud-source-sync</code>.</li>
             <li>Vorheriger Recapture-Slice: TASK_884 mit Commit <code>b1d3afa6</code> auf <code>task/release-first-exchange-hud-source-sync-recapture</code>.</li>
             <li>Untracked bleibt nur <code>builds/</code>; der Ordner wird weiterhin nicht in den Report-Slice aufgenommen.</li>
-            <li>Naechster fachlicher Schritt ist TASK_891: den frischen TASK_890-PNG-/Manifest-Befund read-only schneiden.</li>
+            <li>Naechster fachlicher Schritt ist TASK_892: FireDirection, Impact und Target-Fokus enger zusammenfuehren.</li>
           </ul>
         </article>
         <article class="card full">
@@ -381,8 +390,8 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ol class="list">
-            <li><strong>TASK_890 - HUD Density Real Window Recapture:</strong> Capture-Paket ausfuehren und den echten Fensterblick nach TASK_889 als PNG/Manifest sichern.</li>
-            <li><strong>TASK_891 - Visual Findings:</strong> Den PNG-Befund bewerten: sieht der Spieler sofort CONTACT FIRE, Schussrichtung, Ziel und Treffer/Impact, ohne die Statuszeilen entziffern zu muessen?</li>
+            <li><strong>TASK_891 - Visual Findings:</strong> erledigt; CONTACT FIRE ist sichtbar, aber FireDirection/Impact/Target-Bezug ist noch nicht sofort stark genug.</li>
+            <li><strong>TASK_892 - Fire Direction And Impact Clarity Polish:</strong> Schussrichtung, Trefferpunkt und Ziel-Fokus im bestaetigten CONTACT-FIRE-Moment staerker zusammenfuehren.</li>
             <li><strong>Weiter behalten:</strong> Den kurzen Spielerweg Homebase -> Fireteam -> Dropship -> Mission -> GO -> Contact als Release-Smoke nicht wieder in Einzelteile verlieren.</li>
           </ol>
         </article>
@@ -397,10 +406,11 @@
             <button class="choice" type="button" data-choice-value="player_readability_review">TASK_888 Player Review</button>
             <button class="choice" type="button" data-choice-value="hud_density_fire_visual_polish">TASK_889 Polish</button>
             <button class="choice" type="button" data-choice-value="hud_density_real_window_recapture">TASK_890 Recapture</button>
-            <button class="choice active" type="button" data-choice-value="hud_density_visual_findings">TASK_891 Findings</button>
+            <button class="choice" type="button" data-choice-value="hud_density_visual_findings">TASK_891 Findings</button>
+            <button class="choice active" type="button" data-choice-value="fire_direction_impact_polish">TASK_892 Fire/Impact</button>
             <button class="choice" type="button" data-choice-value="editor_backlog">Editor zurueckholen</button>
           </div>
-          <p>Meine Empfehlung ist jetzt: TASK_890 ausfuehren und danach TASK_891 als ehrlichen Sichtbefund schneiden. TASK_889 ist der Headless-/Runtime-Polish; TASK_890 ist der Beweisrahmen; TASK_891 entscheidet, ob das wirklich angenehm lesbar ist.</p>
+          <p>Meine Empfehlung ist jetzt: TASK_892 klein umsetzen. Nicht mehr CONTACT-FIRE-Texte stapeln, sondern im Weltbild die Aktion lesbar machen: Wer schiesst wohin, wo trifft es, welches Ziel ist gemeint?</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -451,7 +461,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.report_refreshed_after_task_889"> Dieser Zwischenbericht ist nach TASK_889 aktualisiert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_890_recapture_packet_added"> TASK_890 Recapture-Paket angelegt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_890_capture_run_review_ready"> TASK_890 Capture lokal ausgefuehrt und review_ready</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_891_next"> TASK_891 ist der naechste Sichtbefund-Slice</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_891_visual_findings_done"> TASK_891 Sichtbefund umgesetzt</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_892_next"> TASK_892 ist der naechste Fire-/Impact-Polish</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.player_readability_ok"> Spielerlesung im Fenster ueberzeugt</label>
         </article>
         <article class="card">
@@ -475,7 +486,8 @@
               <option value="player_readability_review">TASK_888 Player-Readability-Review</option>
               <option value="hud_density_fire_visual_polish">TASK_889 HUD-Dichte / Fire-Visual-Polish</option>
               <option value="hud_density_real_window_recapture">TASK_890 HUD-Dichte Real-Window-Recapture</option>
-              <option selected value="hud_density_visual_findings">TASK_891 HUD-Dichte Visual Findings</option>
+              <option value="hud_density_visual_findings">TASK_891 HUD-Dichte Visual Findings</option>
+              <option selected value="fire_direction_impact_polish">TASK_892 Fire Direction / Impact Polish</option>
               <option value="visual_fire_recapture">TASK_881 echten Fire-Visual-Recapture erneut ausfuehren</option>
               <option value="task_879_trace">TASK_879 Exported Status Source Trace erneut</option>
               <option value="hud_refresh_diagnosis">HUD-Refresh-Ueberschreibung suchen</option>
@@ -547,7 +559,7 @@
             current_branch: "task/release-first-exchange-player-readability-polish-review",
             latest_pushed_commit: "144e2d56 Polish first exchange HUD density",
             previous_frame_sync_commit: "35db5f8a Sync first exchange HUD render frame",
-            active_next_task: "TASK_891",
+            active_next_task: "TASK_892",
             completed_blocks: [
               "TASK_874 real-window recapture captured trusted first exchange evidence gap",
               "TASK_875 visual findings recorded CONTACT-FIRE not being first real-window reading",
@@ -566,19 +578,20 @@
               "TASK_887 waits for deeplink_final and captures the same release process after the final trace, proving the real post-final window reads CONTACT FIRE",
               "TASK_888 records the post-final CONTACT-FIRE window as technically correct but still too dense for comfortable first-player readability",
               "TASK_889 compacts #17/#18 CONTACT-FIRE, enlarges and calms #19 Event Log, and strengthens first-exchange FireTrace/Impact/Target-Focus",
-              "TASK_890 adds and runs the real-window recapture packet for the TASK_889 HUD-density polish and keeps manual visual acceptance separate from review-ready capture evidence"
+              "TASK_890 adds and runs the real-window recapture packet for the TASK_889 HUD-density polish and keeps manual visual acceptance separate from review-ready capture evidence",
+              "TASK_891 records the TASK_890 real-window view as CONTACT-FIRE visible with remaining fire-direction and impact-relationship clarity work"
             ],
             player_value: "The first release mission path is more repeatable and the post-final real window now reads CONTACT FIRE in #17/#18/#19; remaining work is readability, density and visual polish.",
-            next_recommendation: "TASK_891 - Release First Exchange HUD Density Visual Findings",
-            followup_candidate: "TASK_891 - Release First Exchange HUD Density Visual Findings",
-            repo_state: "Current work branch is task/release-first-exchange-player-readability-polish-review. TASK_890 is in progress in this worktree; only builds/ remains untracked."
+            next_recommendation: "TASK_892 - Release First Exchange Fire Direction And Impact Clarity Polish",
+            followup_candidate: "TASK_892 - Release First Exchange Fire Direction And Impact Clarity Polish",
+            repo_state: "Current work branch is task/release-first-exchange-player-readability-polish-review. TASK_891 is implemented in this worktree; only builds/ remains untracked."
           },
           metadata: {
             generated_at_local: "2026-07-08",
             project_root: "C:/dev/SternenBuergerchen",
             report_file: "docs/reports/spielstand_zwischenbericht_2026_07_08.html",
             authoritative_state_note: "This report is a read-only workbench. It does not create gameplay truth.",
-            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881", "TASK_882", "TASK_883", "TASK_884", "TASK_885", "TASK_886", "TASK_887", "TASK_888", "TASK_889", "TASK_890", "TASK_891"]
+            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881", "TASK_882", "TASK_883", "TASK_884", "TASK_885", "TASK_886", "TASK_887", "TASK_888", "TASK_889", "TASK_890", "TASK_891", "TASK_892"]
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
