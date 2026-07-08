@@ -48,3 +48,10 @@ Dieses Dokument haelt den manuellen Zielzustand fuer Homebase-Direct-Dropships f
 - Schiffszustaende duerfen pro Frame weiter simulieren.
 - Vollstaendige HUD-Rebuilds, Mission-Dropship-Panel-Rebuilds, Planning-State-Emits und rekursive Unit-Tree-Suppression duerfen nicht pro Frame waehrend Fortschrittsbalken laufen.
 - Fortschrittsanzeigen sollen in kurzen Intervallen aktualisieren, aber Eingabe, Drag-and-Drop und Map-Flug muessen fluessig bleiben.
+
+## Release-Normalstart-Guard
+- Der sichtbare Release-Pfad `EXE -> Einzelspieler -> Homebase` muss direkt handlungsfaehig sein.
+- Die erste Homebase im Release-Normalstart ist eine `grid_sweep`-Homebase-Direct-Sortie, nicht der alte `FOB Transfer`-Arbeitsmodus.
+- Beim Anzeigen der Homebase darf der MetaLayer den bestehenden Singleplayer-Actionability-Guard erneut ausfuehren, damit lokale Save-/UI-Fragmente nicht als sichtbares `Start blockiert` stehenbleiben.
+- Erwarteter Sichtzustand: Flightdeck mit Schiff, Payload mit Operatoren, Payload geboardet, Readiness `ready`, Button `Start Mission` aktiv.
+- Der Guard gehoert in den MetaLayer-Startvertrag. HUD, HomebaseScreen und Snapshots duerfen den Zustand anzeigen, aber keine zweite Gameplay-Wahrheit speichern.
