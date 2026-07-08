@@ -98,6 +98,8 @@ const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
 const RELEASE_FIRST_FIREFIGHT_CONTACT_FRAMING_STYLE_ID: String = "task_843_release_first_firefight_contact_framing_v1"
 const RELEASE_FIRST_EXCHANGE_TENSION_TUNING_STYLE_ID: String = "task_844_release_first_exchange_tension_tuning_v1"
+const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID: String = "task_847_release_fire_exchange_visibility_persistence_v1"
+const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 18000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT: float = 1.35
@@ -310,6 +312,8 @@ var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
 var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
 var _release_candidate_firefight_decision_line_build_depth: int = 0
 var _release_firefight_event_log_fallback_created_msec: int = 0
+var _release_fire_exchange_visibility_persistence_evidence: Dictionary = {}
+var _release_fire_exchange_visibility_last_seed_event_id: String = ""
 var _last_target_position: Vector2 = Vector2.ZERO
 var _lz_position: Vector2 = Vector2.ZERO
 var _has_lz_position: bool = false
@@ -7050,9 +7054,19 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 	var first_fire_event: Dictionary = _find_first_relevant_fire_event_for_fireteams(Array(_selected_fireteam_ids), fire_events, diagnostics)
 	var compact_line: String = _build_mission_combat_hud_compact_line(diagnostics, cover_readout, first_fire_event)
 	var detail_snapshot: Dictionary = _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics, cover_readout, first_fire_event, compact_line)
+	var visibility_persistence: Dictionary = _update_release_fire_exchange_visibility_persistence(
+		diagnostics,
+		cover_readout,
+		first_fire_event,
+		compact_line,
+		detail_snapshot
+	)
+	if bool(visibility_persistence.get("active", false)):
+		compact_line = String(visibility_persistence.get("compact_line", compact_line)).strip_edges()
+		detail_snapshot = Dictionary(visibility_persistence.get("detail_tooltip", detail_snapshot)).duplicate(true)
 	var selected_line: String = "Kampf %s" % compact_line if not compact_line.is_empty() else ""
 	var line_limit: int = 96
-	return {
+	var snapshot: Dictionary = {
 		"active": not compact_line.is_empty(),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
@@ -7068,13 +7082,176 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 		"reason": String(diagnostics.get("reason", "")).strip_edges().to_lower(),
 		"fire_event_id": String(first_fire_event.get("event_id", diagnostics.get("fire_event_id", ""))).strip_edges(),
 		"cover_text": _build_mission_combat_cover_token_text(cover_readout),
+		"contact_decision_diagnostics": diagnostics.duplicate(true),
 		"detail_tooltip": detail_snapshot,
 		"tooltip_text": String(detail_snapshot.get("tooltip_text", "")),
 		"contains_fire_state": _combat_hud_line_contains_any(compact_line, ["FIRE", "WAIT", "NO FIRE", "CONTACT"]),
 		"contains_cover_context": compact_line.contains("COV"),
 		"contains_los_context": compact_line.contains("LOS"),
 		"contains_range_context": compact_line.contains("RNG"),
+		"visibility_persistence": visibility_persistence,
+		"visibility_persistence_active": bool(visibility_persistence.get("active", false)),
 	}
+	if bool(visibility_persistence.get("active", false)):
+		snapshot["source"] = "contact_decision_cover_fireevent_snapshot_visibility_persistence"
+		snapshot["status"] = "fired"
+		snapshot["reason"] = "fired"
+		snapshot["fire_event_id"] = String(visibility_persistence.get("fire_event_id", snapshot.get("fire_event_id", ""))).strip_edges()
+		snapshot["release_fire_exchange_visibility_persistence_style_id"] = RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID
+		snapshot["line_within_limit"] = compact_line.length() <= line_limit
+	return snapshot
+
+
+func _update_release_fire_exchange_visibility_persistence(
+	diagnostics: Dictionary,
+	cover_readout: Dictionary,
+	fire_event: Dictionary,
+	compact_line: String,
+	detail_snapshot: Dictionary
+) -> Dictionary:
+	var now_msec: int = _release_fire_exchange_visibility_clock_msec()
+	var reason: String = String(diagnostics.get("reason", "")).strip_edges().to_lower()
+	var status: String = String(diagnostics.get("status", "")).strip_edges().to_lower()
+	var event_id: String = String(fire_event.get("event_id", diagnostics.get("fire_event_id", ""))).strip_edges()
+	var has_current_fire_line: bool = compact_line.strip_edges().to_upper().begins_with("FIRE")
+	var has_fire_evidence: bool = reason == "fired" or status == "fired" or has_current_fire_line or not event_id.is_empty()
+	if has_fire_evidence:
+		var previous_event_id: String = String(_release_fire_exchange_visibility_persistence_evidence.get("fire_event_id", "")).strip_edges()
+		var previous_expires_msec: int = int(_release_fire_exchange_visibility_persistence_evidence.get("expires_msec", 0))
+		var new_event_id: bool = not event_id.is_empty() and event_id != _release_fire_exchange_visibility_last_seed_event_id
+		var should_seed: bool = has_current_fire_line or reason == "fired" or status == "fired" or new_event_id or (event_id == previous_event_id and now_msec <= previous_expires_msec)
+		if should_seed:
+			var persisted_compact_line: String = compact_line.strip_edges()
+			if not persisted_compact_line.to_upper().begins_with("FIRE"):
+				persisted_compact_line = _build_release_fire_exchange_visibility_compact_line(diagnostics, cover_readout, fire_event)
+			if not persisted_compact_line.is_empty():
+				if not event_id.is_empty():
+					_release_fire_exchange_visibility_last_seed_event_id = event_id
+				_release_fire_exchange_visibility_persistence_evidence = _build_release_fire_exchange_visibility_evidence(
+					diagnostics,
+					cover_readout,
+					fire_event,
+					persisted_compact_line,
+					detail_snapshot,
+					now_msec
+				)
+	if not _release_fire_exchange_visibility_persistence_evidence.is_empty():
+		var evidence_expires_msec: int = int(_release_fire_exchange_visibility_persistence_evidence.get("expires_msec", 0))
+		if now_msec <= evidence_expires_msec:
+			var active_evidence: Dictionary = _release_fire_exchange_visibility_persistence_evidence.duplicate(true)
+			active_evidence["active"] = true
+			active_evidence["remaining_msec"] = maxi(evidence_expires_msec - now_msec, 0)
+			return active_evidence
+	_release_fire_exchange_visibility_persistence_evidence = {}
+	return {
+		"active": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID,
+	}
+
+
+func _build_release_fire_exchange_visibility_evidence(
+	diagnostics: Dictionary,
+	cover_readout: Dictionary,
+	fire_event: Dictionary,
+	compact_line: String,
+	detail_snapshot: Dictionary,
+	now_msec: int
+) -> Dictionary:
+	var event_id: String = String(fire_event.get("event_id", diagnostics.get("fire_event_id", ""))).strip_edges()
+	var tooltip: Dictionary = detail_snapshot.duplicate(true)
+	var tooltip_text: String = String(tooltip.get("tooltip_text", "")).strip_edges()
+	var persistence_detail: PackedStringArray = PackedStringArray()
+	persistence_detail.append("Fire-Exchange sichtbar gehalten")
+	if not event_id.is_empty():
+		persistence_detail.append("Event %s" % event_id)
+	if not tooltip_text.is_empty():
+		persistence_detail.append(tooltip_text)
+	tooltip["tooltip_text"] = " | ".join(persistence_detail)
+	tooltip["style_id"] = RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID
+	return {
+		"active": true,
+		"schema": "sternenbuergerchen.release_fire_exchange_visibility_persistence.evidence.v1",
+		"task_id": "TASK_847",
+		"style_id": RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID,
+		"created_msec": now_msec,
+		"expires_msec": now_msec + RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC,
+		"duration_msec": RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC,
+		"fire_event_id": event_id,
+		"compact_line": compact_line.strip_edges(),
+		"selected_fireteam_line": "Kampf %s" % compact_line.strip_edges(),
+		"mission_control_line": compact_line.strip_edges(),
+		"decision_line": "NEXT HIT LESEN / DEFEND | WHY FEUER",
+		"event_log_short_text": "CONTACT FIRE: Feuerwechsel lesen",
+		"event_log_map_label": "CONTACT FIRE",
+		"status": "fired",
+		"reason": "fired",
+		"cover_text": _build_mission_combat_cover_token_text(cover_readout),
+		"fire_event": fire_event.duplicate(true),
+		"contact_decision_diagnostics": diagnostics.duplicate(true),
+		"detail_tooltip": tooltip,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _build_release_fire_exchange_visibility_compact_line(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary) -> String:
+	var attacker_id: String = String(fire_event.get("attacker_unit_id", diagnostics.get("attacker_unit_id", ""))).strip_edges()
+	var target_id: String = String(fire_event.get("target_unit_id", diagnostics.get("target_unit_id", diagnostics.get("actual_target_id", "")))).strip_edges()
+	var pair_text: String = "%s>%s" % [_compact_unit_id_for_diagnostics(attacker_id), _compact_unit_id_for_diagnostics(target_id)]
+	var weapon_id: String = String(fire_event.get("weapon_id", diagnostics.get("weapon_id", ""))).strip_edges().to_upper()
+	var outcome: String = String(fire_event.get("combat_outcome", diagnostics.get("combat_outcome", ""))).strip_edges().to_upper()
+	var bits: PackedStringArray = PackedStringArray(["FIRE", pair_text])
+	if not weapon_id.is_empty():
+		bits.append(weapon_id)
+	if not outcome.is_empty():
+		bits.append(outcome)
+	return "%s | %s" % [" ".join(bits), _build_mission_combat_cover_token_text(cover_readout)]
+
+
+func record_release_fire_exchange_visibility_evidence(source_snapshot: Dictionary) -> Dictionary:
+	if String(source_snapshot.get("schema", "")) != "sternenbuergerchen.release_first_exchange_tension_tuning.v1":
+		return {}
+	if not bool(source_snapshot.get("first_exchange_visible", false)):
+		return {}
+	var diagnostics: Dictionary = Dictionary(source_snapshot.get("contact_decision_diagnostics", get_contact_decision_diagnostics_snapshot())).duplicate(true)
+	diagnostics["status"] = "fired"
+	diagnostics["reason"] = "fired"
+	var fire_event_id: String = String(source_snapshot.get("first_fire_event_id", diagnostics.get("fire_event_id", ""))).strip_edges()
+	var fire_event: Dictionary = {
+		"event_id": fire_event_id,
+		"attacker_unit_id": String(diagnostics.get("attacker_unit_id", "")),
+		"target_unit_id": String(diagnostics.get("target_unit_id", diagnostics.get("actual_target_id", ""))),
+		"weapon_id": String(diagnostics.get("weapon_id", "")),
+		"combat_outcome": String(diagnostics.get("combat_outcome", "fired")),
+	}
+	var cover_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
+	var compact_line: String = _build_release_fire_exchange_visibility_compact_line(diagnostics, cover_readout, fire_event)
+	var detail_snapshot: Dictionary = _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics, cover_readout, fire_event, compact_line)
+	_release_fire_exchange_visibility_last_seed_event_id = fire_event_id
+	_release_fire_exchange_visibility_persistence_evidence = _build_release_fire_exchange_visibility_evidence(
+		diagnostics,
+		cover_readout,
+		fire_event,
+		compact_line,
+		detail_snapshot,
+		_release_fire_exchange_visibility_clock_msec()
+	)
+	return _release_fire_exchange_visibility_persistence_evidence.duplicate(true)
+
+
+func _release_fire_exchange_visibility_clock_msec() -> int:
+	return int(Engine.get_process_frames() * 16)
 
 
 func _build_release_candidate_firefight_decision_line() -> String:
@@ -16783,6 +16960,122 @@ func get_release_first_exchange_tension_tuning_snapshot() -> Dictionary:
 	}
 
 
+func get_release_fire_exchange_visibility_persistence_snapshot() -> Dictionary:
+	_update_ui()
+	var source_snapshot: Dictionary = get_release_first_exchange_tension_tuning_snapshot()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
+	var persistence: Dictionary = Dictionary(combat_hud_density.get("visibility_persistence", {})).duplicate(true)
+	var event_log_display: Dictionary = Dictionary(command_feedback.get("release_firefight_event_log_display", {})).duplicate(true)
+	var fallback_entry: Dictionary = Dictionary(event_log_display.get("fallback_entry", {})).duplicate(true)
+	var decision_line: String = String(command_feedback.get("release_firefight_decision_line", _build_release_candidate_firefight_decision_line())).strip_edges()
+	var compact_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
+	var selected_fireteam_line: String = String(combat_hud_density.get("selected_fireteam_line", "")).strip_edges()
+	var mission_control_line: String = String(combat_hud_density.get("mission_control_line", "")).strip_edges()
+	var selected_status_text: String = String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges()
+	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
+	var event_short_text: String = String(fallback_entry.get("short_text", "")).strip_edges()
+	var active: bool = bool(combat_hud_density.get("visibility_persistence_active", false)) and bool(persistence.get("active", false))
+	var source_exchange_available: bool = (String(source_snapshot.get("gate", "")) == "pass" and bool(source_snapshot.get("first_exchange_visible", false))) \
+		or (active and not String(persistence.get("fire_event_id", "")).strip_edges().is_empty())
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_first_exchange_passes",
+			source_exchange_available,
+			"Visibility persistence builds on the green TASK_844 first-exchange evidence."
+		),
+		_build_mission_first_move_readability_check(
+			"visibility_persistence_active",
+			active,
+			"Fire-Exchange evidence remains visible after the immediate FireEvent frame."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_hud_shows_fire",
+			compact_line.to_upper().begins_with("FIRE") and not compact_line.to_upper().begins_with("NO FIRE"),
+			"Combat HUD keeps FIRE as the primary readout during the visibility window."
+		),
+		_build_mission_first_move_readability_check(
+			"decision_line_reads_hit",
+			decision_line.contains("NEXT HIT LESEN / DEFEND") and decision_line.contains("WHY FEUER"),
+			"Release decision-line points the player to reading the hit and defending."
+		),
+		_build_mission_first_move_readability_check(
+			"event_log_frames_contact_fire",
+			event_short_text.contains("CONTACT FIRE") or _release_fire_exchange_event_log_entries_contain_contact_fire(Array(event_log_display.get("entries", []))),
+			"Event-log fallback frames the persisted exchange as contact fire."
+		),
+		_build_mission_first_move_readability_check(
+			"surfaces_share_same_fire_line",
+			not compact_line.is_empty()
+				and (selected_fireteam_line.is_empty() or selected_fireteam_line.contains(compact_line))
+				and (mission_control_line.is_empty() or mission_control_line.contains(compact_line) or mission_control_line == compact_line),
+			"Selected Fireteam and Mission Control share the same persisted combat line."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only_boundaries",
+			bool(source_snapshot.get("read_only", false))
+				and bool(combat_hud_density.get("read_only", false))
+				and bool(persistence.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(combat_hud_density.get("ui_sets_gameplay_truth", true))
+				and not bool(persistence.get("ui_sets_gameplay_truth", true))
+				and not bool(persistence.get("creates_command", true))
+				and not bool(persistence.get("creates_fire_event", true))
+				and not bool(persistence.get("creates_damage_event", true))
+				and not bool(persistence.get("sets_multiplayer_truth", true)),
+			"Visibility persistence reads existing fire evidence only."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.release_fire_exchange_visibility_persistence.v1",
+		"task_id": "TASK_847",
+		"source_task_id": "TASK_846",
+		"source_exchange_task_id": "TASK_844",
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID,
+		"visibility_persistence_active": active,
+		"compact_line": compact_line,
+		"selected_fireteam_line": selected_fireteam_line,
+		"mission_control_line": mission_control_line,
+		"selected_fireteam_status_text": selected_status_text,
+		"mission_control_status_text": mission_control_status_text,
+		"decision_line": decision_line,
+		"event_log_short_text": event_short_text,
+		"event_log_display": event_log_display,
+		"fire_event_id": String(persistence.get("fire_event_id", combat_hud_density.get("fire_event_id", ""))).strip_edges(),
+		"remaining_msec": int(persistence.get("remaining_msec", 0)),
+		"duration_msec": int(persistence.get("duration_msec", RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC)),
+		"combat_hud_density": combat_hud_density,
+		"visibility_persistence": persistence,
+		"source": source_snapshot,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
+func _release_fire_exchange_event_log_entries_contain_contact_fire(entries: Array) -> bool:
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if String(entry.get("short_text", "")).contains("CONTACT FIRE") or String(entry.get("map_label", "")).contains("CONTACT FIRE"):
+			return true
+	return false
+
+
 func _release_first_firefight_event_log_frames_pressure(event_log_display: Dictionary, framing_state: String) -> bool:
 	if framing_state == "fire_exchange":
 		return true
@@ -16879,7 +17172,12 @@ func _build_release_firefight_event_log_display_snapshot(raw_entries: Array, rel
 			continue
 		display_entries.append(Dictionary(entry_variant).duplicate(true))
 	var fallback_entry: Dictionary = {}
-	if display_entries.is_empty():
+	if bool(combat_hud_density.get("visibility_persistence_active", false)) \
+			and not _release_fire_exchange_event_log_entries_contain_contact_fire(display_entries):
+		fallback_entry = _build_release_firefight_event_log_fallback_entry(release_decision, combat_hud_density)
+		if not fallback_entry.is_empty():
+			display_entries.insert(0, fallback_entry)
+	elif display_entries.is_empty():
 		fallback_entry = _build_release_firefight_event_log_fallback_entry(release_decision, combat_hud_density)
 		if not fallback_entry.is_empty():
 			display_entries.append(fallback_entry)
@@ -16911,12 +17209,22 @@ func _build_release_firefight_event_log_fallback_entry(release_decision: Diction
 	var reason: String = String(combat_hud_density.get("reason", "")).strip_edges().to_upper()
 	var short_text: String = "FIREFIGHT STATUS"
 	var severity: String = "tactical"
-	if combat_line.to_upper().contains("NO FIRE") or reason.contains("NO_LOS") or reason.contains("NO_RANGE"):
+	var map_label: String = "CONTACT"
+	var source: String = "release_firefight_event_log_fallback"
+	var style_id: String = RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID
+	if bool(combat_hud_density.get("visibility_persistence_active", false)):
+		var persistence: Dictionary = Dictionary(combat_hud_density.get("visibility_persistence", {}))
+		short_text = String(persistence.get("event_log_short_text", "CONTACT FIRE: Feuerwechsel lesen")).strip_edges()
+		map_label = String(persistence.get("event_log_map_label", "CONTACT FIRE")).strip_edges()
+		source = "release_fire_exchange_visibility_persistence"
+		style_id = RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_STYLE_ID
+	elif combat_line.to_upper().contains("NO FIRE") or reason.contains("NO_LOS") or reason.contains("NO_RANGE"):
 		short_text = "CONTACT PRESSURE: %s" % _release_first_firefight_next_step_text(
 			"contact_pressure",
 			Dictionary(combat_hud_density.get("contact_decision_diagnostics", get_contact_decision_diagnostics_snapshot()))
 		)
 		severity = "warning"
+		map_label = "NO_LOS"
 	elif combat_line.to_upper().contains("CONTACT"):
 		short_text = "CONTACT: Entscheidung pruefen"
 	var detail_parts: PackedStringArray = PackedStringArray()
@@ -16939,9 +17247,9 @@ func _build_release_firefight_event_log_fallback_entry(release_decision: Diction
 		"unit_id": "",
 		"short_text": short_text,
 		"detail_text": " | ".join(detail_parts),
-		"map_label": "NO_LOS" if severity == "warning" else "CONTACT",
-		"source": "release_firefight_event_log_fallback",
-		"style_id": RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID,
+		"map_label": map_label,
+		"source": source,
+		"style_id": style_id,
 		"visual_only": true,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
@@ -17052,6 +17360,11 @@ func _build_release_candidate_firefight_player_action_snapshot(engagement_snapsh
 	var compact_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
 	var next_action: String = "Naechster Griff: Feuerstatus lesen | Position halten oder neuen Move/Defend/Flank waehlen"
 	var why_line: String = "Warum: Combat-HUD zeigt Feuerstatus, Zielpaar, Cover, Range und LOS."
+	if bool(combat_hud_density.get("visibility_persistence_active", false)):
+		status = "fired"
+		reason = "fired"
+		diagnostics["status"] = "fired"
+		diagnostics["reason"] = "fired"
 	if reason == "fired" or status == "fired":
 		next_action = "Naechster Griff: Trefferwirkung lesen | bei Risiko Defend, Flank oder neuen Move planen"
 		why_line = "Warum: Es wurde geschossen; Ziel, Waffe und Kontext stehen im Kampf-Readout."

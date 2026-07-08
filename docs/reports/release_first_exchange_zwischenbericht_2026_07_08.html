@@ -77,12 +77,14 @@
 <body data-report-id="release_first_exchange_zwischenbericht_2026_07_08" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Release First Exchange Zwischenbericht</h1>
-    <p>Stand 2026-07-08: Fortschritt seit dem Singleplayer-EXE-Problem, aktueller echter Fensterbefund und naechste sinnvolle Arbeitsschritte.</p>
+    <p>Stand 2026-07-08: Fortschritt seit dem Singleplayer-EXE-Problem, erledigter Findings-Schnitt, implementierter Sichtbarkeits-Fix und naechste sinnvolle Arbeitsschritte.</p>
     <div class="meta-row">
       <span class="pill good">TASK_844 headless gruen</span>
       <span class="pill good">TASK_845 Capture review_ready</span>
+      <span class="pill good">TASK_846 Findings gemerged</span>
+      <span class="pill good">TASK_847 implementiert</span>
       <span class="pill bad">Fenster zeigt noch CONTACT PRESSURE</span>
-      <span class="pill">Branch: task/release-first-exchange-real-window-recapture</span>
+      <span class="pill">Branch: task/release-fire-exchange-visibility-persistence</span>
     </div>
   </header>
 
@@ -103,11 +105,14 @@
             <li><strong>Combat-Pfad bleibt sauber:</strong> FireEvents entstehen weiter ueber den Combat-Driver und <code>SimulationRoot.enqueue_effect()</code>; der neue Snapshot ist read-only.</li>
             <li><strong>TASK_845:</strong> Ein neues Capture-Tool erzeugt ein echtes Fensterpaket mit Manifest und Screenshots fuer den ersten Exchange.</li>
             <li><strong>Frischer Export:</strong> Der Release-Ordner wurde neu mit Godot 4.6.2 exportiert und danach erneut gecaptured.</li>
+            <li><strong>TASK_846:</strong> Der echte Fensterbefund ist jetzt als maschinenlesbarer Findings-Schnitt dokumentiert: erster Feuerwechsel technisch vorhanden, aber im Fenster noch nicht gut genug sichtbar.</li>
+            <li><strong>TASK_847:</strong> Fire-Exchange-Evidence bleibt jetzt fuer ein kurzes Anzeige-Fenster in Combat-HUD, Decision-Line und Event-Log sichtbar.</li>
+            <li><strong>Git:</strong> TASK_846 wurde committed, gepusht und nach <code>integration/core-foundation</code> gemerged.</li>
           </ul>
         </article>
         <article class="card">
           <h2>Spielwirkung</h2>
-          <p>Der Singleplayer-/GO-Pfad ist technisch deutlich besser abgesichert: Start, Mission, Drop, GO und erster Kontakt sind reproduzierbar erreichbar.</p>
+          <p>Der Singleplayer-/GO-Pfad ist technisch deutlich besser abgesichert: Start, Mission, Drop, GO und erster Kontakt sind reproduzierbar erreichbar. Neu ist vor allem die Klarheit, dass das Problem nicht mehr im Combat-Beweis liegt, sondern in der sichtbaren Priorisierung des Moments.</p>
           <div class="status-box" style="margin-top: 12px;">
             <strong>Aber:</strong> Im sichtbaren Fenster kommt die erwartete Fire-Exchange-Lesbarkeit noch nicht beim Spieler an.
           </div>
@@ -116,6 +121,7 @@
           <h2>Aktueller Nachweis</h2>
           <p><code>tmp/release_first_exchange_real_window_recapture.json</code></p>
           <p><code>tmp/release_first_exchange_real_window.png</code></p>
+          <p><code>tmp/release_first_exchange_visual_findings.json</code></p>
           <p>Gate: <code>review_ready</code>, manueller Review bleibt offen.</p>
         </article>
       </div>
@@ -154,9 +160,8 @@
         <article class="card wide">
           <h2>Was ich als Naechstes machen will</h2>
           <ol class="list">
-            <li><strong>TASK_846 - Release First Exchange Visual Findings:</strong> Den TASK_845-PNG-/Manifest-Befund als read-only Findings-Snapshot dokumentieren.</li>
-            <li><strong>TASK_847 - Fire Exchange Visibility Persistence:</strong> Fire-Exchange-Evidence fuer kurze Zeit in Event Log, #17 und #18 sichtbar halten, ohne neue Combat-Wahrheit zu erzeugen.</li>
-            <li><strong>Recapture:</strong> Frisch exportieren, TASK_845 erneut laufen lassen und pruefen, ob <code>CONTACT FIRE</code>, Trace/Impact und naechster Griff im echten Fenster ankommen.</li>
+            <li><strong>Regression:</strong> TASK_847 mit bestehender TASK_844-/TASK_845-/TASK_846-Logik pruefen, damit Headless-Beweis, Capture-Pfad und Findings weiter zusammenpassen.</li>
+            <li><strong>TASK_848 - Release First Exchange Recapture Acceptance:</strong> Danach frisch exportieren, TASK_845 erneut laufen lassen und pruefen, ob <code>CONTACT FIRE</code>, Trace/Impact und naechster Griff im echten Fenster ankommen.</li>
             <li><strong>Danach:</strong> Erst wenn der erste Kampf lesbar ist, weiter Richtung schoeneres HUD/Map-Polish und Multiplayer-Slice.</li>
           </ol>
         </article>
@@ -186,6 +191,8 @@
           <h2>Arbeitsstatus</h2>
           <label>Stand
             <select data-export-key="status.state">
+              <option value="visibility_fix_done_recapture_next">Sichtbarkeits-Fix erledigt, Recapture als naechstes</option>
+              <option value="findings_done_visibility_fix_in_progress">Findings erledigt, Sichtbarkeits-Fix in Arbeit</option>
               <option value="capture_done_followup_open">Capture done, Follow-up offen</option>
               <option value="ready_to_polish">Bereit fuer Polish</option>
               <option value="blocked">Blockiert</option>
@@ -253,13 +260,18 @@
           computed: {
             capture_gate: "review_ready",
             observed_window_state: "CONTACT_PRESSURE_NO_FIRE",
-            recommended_next_task: "TASK_846 - Release First Exchange Visual Findings"
+            completed_findings_task: "TASK_846 - Release First Exchange Visual Findings",
+            completed_visibility_task: "TASK_847 - Release Fire Exchange Visibility Persistence",
+            active_next_task: "TASK_848 - Release First Exchange Recapture Acceptance",
+            recommended_next_task: "TASK_848 - Release First Exchange Recapture Acceptance"
           },
           metadata: {
-            task_ids: ["TASK_844", "TASK_845"],
-            branch: "task/release-first-exchange-real-window-recapture",
+            task_ids: ["TASK_844", "TASK_845", "TASK_846", "TASK_847"],
+            branch: "task/release-fire-exchange-visibility-persistence",
+            merged_branch: "task/release-first-exchange-visual-findings",
             manifest_path: "tmp/release_first_exchange_real_window_recapture.json",
-            screenshot_path: "tmp/release_first_exchange_real_window.png"
+            screenshot_path: "tmp/release_first_exchange_real_window.png",
+            findings_manifest_path: "tmp/release_first_exchange_visual_findings.json"
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
