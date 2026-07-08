@@ -3399,6 +3399,10 @@ func _run_singleplayer_visible_homebase_actionability_post_show_guard() -> void:
 func _is_singleplayer_visible_homebase_actionable(homebase_screen: Node) -> bool:
 	if homebase_screen == null or not homebase_screen.has_method("get_homebase_direct_staging_snapshot"):
 		return false
+	if _selected_mission_id.strip_edges() != SINGLEPLAYER_RELEASE_DEFAULT_MISSION_ID:
+		return false
+	if _get_mission_drop_source() != MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
+		return false
 	var craft_id: String = String(get_meta("singleplayer_bootstrap_craft_id", "")).strip_edges()
 	var staging: Dictionary = Dictionary(homebase_screen.call("get_homebase_direct_staging_snapshot"))
 	var payload_operator_count: int = int(staging.get("payload_operator_count", 0))

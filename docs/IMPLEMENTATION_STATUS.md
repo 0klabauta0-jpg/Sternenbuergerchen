@@ -46,6 +46,24 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_836_release_firefight_command_matrix_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_835_release_firefight_bottom_dock_density_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_832_release_first_go_firefight_deeplink_evidence.gd`, `git diff --check`.
 - Naechster Schritt: Frischen Release mit `--release-singleplayer-first-go-firefight` starten und die echte Command-Matrix-Lesbarkeit capturen.
 
+### TASK_837 - Release First GO Firefight Real Window Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_837_release_first_go_firefight_real_window_review.md`, `docs/tasks/TASK_836_release_firefight_command_matrix_visual_polish.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/export_runtime_package_contract.md`
+- Stand: `capture_release_first_go_firefight_real_window.ps1` startet optional den geprueften Release mit `--release-singleplayer-first-go-firefight`, nutzt den bestehenden Screenshot-Capture und schreibt ein eigenes TASK_837-Manifest.
+- Stand: Das Manifest nennt Desktop-/Window-Screenshotpfade, erwartete HUD-/Command-Matrix-Vertraege, manuelle Pflichtchecks und haelt `manual_review_done=false`.
+- Risiken/offen: Der echte PNG-Befund muss danach bewusst bewertet werden; TASK_837 erzeugt Evidence, aber keinen automatischen Pixel-/Schoenheitsentscheid.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_837_release_first_go_firefight_real_window_review.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_go_firefight_real_window.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 30`, `git diff --check`.
+- Naechster Schritt: TASK_838 - Release Firefight Real Window Findings Polish aus dem echten PNG-/Manifest-Befund schneiden.
+
+### BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/BUGFIX_release_singleplayer_exe_stale_fob_transfer_actionability_guard.md`, `docs/tasks/BUGFIX_release_singleplayer_normal_click_homebase_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
+- Stand: Die Release-Singleplayer-Actionability verlangt jetzt neben Payload/Flightdeck auch die sichtbare `grid_sweep`-Mission und `homebase_direct` als Drop-Quelle.
+- Stand: Ein stale `FOB Transfer`-/FOB-Drop-Fragment kann dadurch nicht mehr als spielbarer Normalstart durchrutschen; der vorhandene Guard repariert weiter ueber Bootstrap und Homebase-Direct-Payload.
+- Risiken/offen: Alte laufende EXE-Prozesse oder falsche Verknuepfungen koennen denselben Screenshot verursachen; deshalb bleiben frischer Export und Startcheck Pflicht.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/bugfix_release_singleplayer_normal_click_homebase_guard.gd`, `godot_console.exe --headless --path . --script scripts/tests/bugfix_singleplayer_release_homebase_start_bootstrap.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_827_release_homebase_save_override_guard.gd`, `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `git diff --check`.
+- Naechster Schritt: Release-Fenster neu starten und den sichtbaren `Einzelspieler`-Klick gegen `Operation: Grid Sweep`/`Start Mission` pruefen.
+
 ### BUGFIX - Release Singleplayer Normal Click Homebase Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/BUGFIX_release_singleplayer_normal_click_homebase_guard.md`, `docs/tasks/TASK_827_release_homebase_save_override_guard.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
