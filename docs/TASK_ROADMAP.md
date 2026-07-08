@@ -82,7 +82,8 @@ git checkout -b batch/<batch-name>
 - TASK_843 - Release First Firefight Contact Framing (implementiert): Der erste Release-Firefight wird als `fire_exchange` oder `contact_pressure` gerahmt; der Event-Log-Fallback nennt im No-Fire-Fall `CONTACT PRESSURE` mit naechstem Griff statt nur technischem `NO FIRE`.
 - TASK_844 - Release First Exchange Tension Tuning (implementiert): Der First-GO-Firefight-Deep-Link prueft die erste Gegnerposition gegen Combat-Readouts und erzeugt reproduzierbar FireEvent-Evidenz fuer einen echten ersten Fire-Exchange.
 - TASK_845 - Release First Exchange Real Window Recapture (implementiert): Der First-GO-Firefight-Capture erzeugt nach TASK_844 ein eigenes Manifest und eigene Screenshotpfade fuer den echten Fire-Exchange-Fensterbefund.
-- TASK_846 - Release First Exchange Visual Findings (naechster Schritt): TASK_845-PNG-/Manifest-Befund bewerten und nur belegte Reibung als konkreten Polish schneiden.
+- TASK_846 - Release First Exchange Visual Findings (implementiert): TASK_845-PNG-/Manifest-Befund bewertet die echte Fensterreibung als `first_exchange_not_visible_in_window`, `hud_surfaces_stale_pressure` und `fire_trace_or_impact_not_obvious`.
+- TASK_847 - Release Fire Exchange Visibility Persistence (naechster Schritt): Fire-Exchange-Evidence in Event Log, #17 und #18 kurz sichtbar halten, ohne neue Combat- oder UI-Wahrheit zu erzeugen.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 
