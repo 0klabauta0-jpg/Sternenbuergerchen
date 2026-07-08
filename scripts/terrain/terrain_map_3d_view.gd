@@ -391,6 +391,15 @@ const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_RADIUS: float = 0.48
 const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_HEIGHT: float = 0.085
 const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE: int = 16
 const RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.82, 0.20, 0.76)
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID: String = "task_889_release_first_exchange_hud_density_fire_visual_polish_v1"
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TRACE_WIDTH: float = 0.07
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_MUZZLE_FLASH_WIDTH: float = 0.11
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_IMPACT_RADIUS: float = 0.36
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_IMPACT_CROSS_WIDTH: float = 0.072
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_RADIUS: float = 0.62
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_HEIGHT: float = 0.11
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE: int = 18
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.88, 0.24, 0.90)
 const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
 	"CONTACT",
 	"MOVE",
@@ -1732,6 +1741,13 @@ func get_render_snapshot() -> Dictionary:
 		"release_first_exchange_fire_visual_impact_radius": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_IMPACT_RADIUS if _is_release_first_exchange_fire_visual_polish_active() else RELEASE_FIRE_EXCHANGE_FOCUSED_IMPACT_RADIUS,
 		"release_first_exchange_fire_visual_target_focus_radius": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_RADIUS if _is_release_first_exchange_fire_visual_polish_active() else RELEASE_FIRE_EXCHANGE_FOCUSED_TARGET_FOCUS_RADIUS,
 		"release_first_exchange_fire_visual_policy": "first_exchange_confirmed_emphasize_trace_impact_target_focus" if _is_release_first_exchange_fire_visual_polish_active() else "default",
+		"release_first_exchange_hud_density_fire_visual_polish_active": _is_release_first_exchange_hud_density_fire_visual_polish_active(),
+		"release_first_exchange_hud_density_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID if _is_release_first_exchange_hud_density_fire_visual_polish_active() else "",
+		"release_first_exchange_hud_density_fire_visual_trace_width": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TRACE_WIDTH if _is_release_first_exchange_hud_density_fire_visual_polish_active() else RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TRACE_WIDTH,
+		"release_first_exchange_hud_density_fire_visual_impact_radius": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_IMPACT_RADIUS if _is_release_first_exchange_hud_density_fire_visual_polish_active() else RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_IMPACT_RADIUS,
+		"release_first_exchange_hud_density_fire_visual_target_focus_radius": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_RADIUS if _is_release_first_exchange_hud_density_fire_visual_polish_active() else RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_RADIUS,
+		"release_first_exchange_hud_density_fire_visual_status_label_font_size": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE if _is_release_first_exchange_hud_density_fire_visual_polish_active() else RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE,
+		"release_first_exchange_hud_density_fire_visual_policy": "contact_fire_first_prioritize_trace_impact_target_focus" if _is_release_first_exchange_hud_density_fire_visual_polish_active() else "default",
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -5042,6 +5058,14 @@ func _is_release_first_exchange_fire_visual_polish_active() -> bool:
 	return bool(_mission_status_payload.get("release_first_exchange_fire_visual_polish", false))
 
 
+func _is_release_first_exchange_hud_density_fire_visual_polish_active() -> bool:
+	if not _is_release_first_exchange_fire_visual_polish_active():
+		return false
+	if bool(_order_payload.get("release_first_exchange_hud_density_fire_visual_polish", false)):
+		return true
+	return bool(_mission_status_payload.get("release_first_exchange_hud_density_fire_visual_polish", false))
+
+
 func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> Color:
 	if not _is_release_fire_exchange_focused_visual_polish_active():
 		return base_color
@@ -6425,6 +6449,7 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var impact_color: Color = WEAPON_FIRE_IMPACT_HIT_COLOR if combat_outcome == "hit" else WEAPON_FIRE_IMPACT_MISS_COLOR
 	var focused_exchange_active: bool = _is_release_fire_exchange_focused_visual_polish_active()
 	var first_exchange_fire_visual_active: bool = _is_release_first_exchange_fire_visual_polish_active()
+	var first_exchange_hud_density_fire_visual_active: bool = _is_release_first_exchange_hud_density_fire_visual_polish_active()
 	var muzzle_flash_width: float = WEAPON_FIRE_MUZZLE_FLASH_WIDTH
 	var trace_width: float = WEAPON_FIRE_TRACE_WIDTH
 	var impact_radius: float = WEAPON_FIRE_IMPACT_RADIUS
@@ -6450,6 +6475,15 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		target_focus_height = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_HEIGHT
 		target_focus_color = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_TARGET_FOCUS_COLOR
 		fire_status_label_font_size = RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE
+	if first_exchange_hud_density_fire_visual_active:
+		muzzle_flash_width = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_MUZZLE_FLASH_WIDTH
+		trace_width = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TRACE_WIDTH
+		impact_radius = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_IMPACT_RADIUS
+		impact_cross_width = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_IMPACT_CROSS_WIDTH
+		target_focus_radius = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_RADIUS
+		target_focus_height = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_HEIGHT
+		target_focus_color = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TARGET_FOCUS_COLOR
+		fire_status_label_font_size = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_STATUS_LABEL_FONT_SIZE
 	var muzzle_texture_available: bool = texture != null
 	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
 	if muzzle_texture_card_visible:
@@ -6534,6 +6568,8 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"focused_visual_polish_style_id": RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID if focused_exchange_active else "",
 		"first_exchange_fire_visual_polish_active": first_exchange_fire_visual_active,
 		"first_exchange_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID if first_exchange_fire_visual_active else "",
+		"first_exchange_hud_density_fire_visual_polish_active": first_exchange_hud_density_fire_visual_active,
+		"first_exchange_hud_density_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID if first_exchange_hud_density_fire_visual_active else "",
 		"fire_status_label_visible": not fire_status_label.is_empty() and not _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),
 		"fire_status_label_text": fire_status_label,
 		"fire_status_label_suppressed_by_declutter": _should_suppress_release_firefight_fire_status_label(fire_event, fire_status_label, is_friendly_fire),

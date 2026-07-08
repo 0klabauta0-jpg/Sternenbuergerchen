@@ -71,6 +71,7 @@ const RELEASE_FIRE_EXCHANGE_CONTACT_FIRE_PRIMARY_HUD_POLISH_SCRIPT: GDScript = p
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_SOURCE_BINDING_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_fire_exchange_real_window_primary_hud_source_binding_polish.gd")
 const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_fire_exchange_real_window_primary_hud_runtime_text_polish.gd")
 const RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_real_window_hud_source_sync.gd")
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_hud_density_and_fire_visual_polish.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -111,6 +112,7 @@ const RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID
 const RELEASE_FIRST_EXCHANGE_CONTACT_FIRE_READABILITY_FIX_STYLE_ID: String = "task_873_release_first_exchange_contact_fire_readability_fix_v1"
 const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_STYLE_ID: String = "task_876_release_first_exchange_visible_status_source_reconciliation_v1"
 const RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID: String = "task_883_release_first_exchange_real_window_hud_source_sync_v1"
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID: String = "task_889_release_first_exchange_hud_density_fire_visual_polish_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 45000
 const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_MSEC: int = 120000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
@@ -2592,7 +2594,10 @@ func _refresh_tactical_event_log_panel() -> void:
 	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
 	if panel == null or not panel.has_method("set_feedback_snapshot"):
 		return
-	panel.call("set_feedback_snapshot", _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(get_command_feedback_snapshot()))
+	var feedback_snapshot: Dictionary = _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(get_command_feedback_snapshot())
+	if panel.has_method("apply_release_first_exchange_hud_density_fire_visual_polish"):
+		panel.call("apply_release_first_exchange_hud_density_fire_visual_polish", Dictionary(feedback_snapshot.get("release_first_exchange_hud_density_fire_visual_polish", {})))
+	panel.call("set_feedback_snapshot", feedback_snapshot)
 
 
 func _refresh_runtime_mission_hud_surfaces() -> void:
@@ -7833,7 +7838,116 @@ func _build_release_first_exchange_real_window_hud_source_synced_feedback_snapsh
 	resolved["release_first_exchange_real_window_hud_source_sync"] = sync_snapshot
 	resolved["release_first_exchange_real_window_hud_source_sync_active"] = true
 	resolved["release_first_exchange_real_window_hud_source_sync_style_id"] = RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID
+	return _apply_release_first_exchange_hud_density_fire_visual_polish_to_feedback(resolved, sync_snapshot)
+
+
+func _apply_release_first_exchange_hud_density_fire_visual_polish_to_feedback(feedback_snapshot: Dictionary, sync_snapshot: Dictionary) -> Dictionary:
+	if not bool(sync_snapshot.get("active", false)):
+		return feedback_snapshot
+	var primary_line: String = _compact_release_first_exchange_contact_fire_line(String(sync_snapshot.get("contact_fire_primary_line", "")))
+	if primary_line.is_empty():
+		primary_line = _compact_release_first_exchange_contact_fire_line(String(sync_snapshot.get("selected_fireteam_status_text", "")))
+	if primary_line.is_empty():
+		return feedback_snapshot
+	var next_line: String = _build_release_first_exchange_hud_density_next_line(sync_snapshot)
+	var selected_text: String = primary_line
+	if not next_line.is_empty():
+		selected_text = "%s\n%s" % [primary_line, next_line]
+	var mission_text: String = selected_text
+	var polish_snapshot: Dictionary = {
+		"schema": "sternenbuergerchen.release_first_exchange_hud_density_fire_visual_polish.surface.v1",
+		"task_id": "TASK_889",
+		"source_task_id": "TASK_888",
+		"source_hud_sync_task_id": "TASK_883",
+		"source_visible_status_task_id": "TASK_876",
+		"source_fire_visual_task_id": "TASK_880",
+		"style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID,
+		"active": true,
+		"selected_fireteam_status_text": selected_text,
+		"mission_control_status_text": mission_text,
+		"primary_line": primary_line,
+		"next_line": next_line,
+		"selected_fireteam_line_count": _count_text_lines(selected_text),
+		"mission_control_line_count": _count_text_lines(mission_text),
+		"event_log_minimum_size": Vector2(360.0, 220.0),
+		"event_log_max_visible_events": 5,
+		"event_log_header_font_size": 11,
+		"event_log_row_font_size": 11,
+		"event_log_row_min_height": 30.0,
+		"fire_visual_payload_enabled": true,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+	var resolved: Dictionary = feedback_snapshot.duplicate(true)
+	resolved["selected_fireteam_status_label_text"] = selected_text
+	resolved["selected_status_text"] = selected_text
+	resolved["mission_control_status_text"] = mission_text
+	resolved["release_first_exchange_hud_density_fire_visual_polish"] = polish_snapshot
+	resolved["release_first_exchange_hud_density_fire_visual_polish_active"] = true
+	resolved["release_first_exchange_hud_density_fire_visual_polish_style_id"] = RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID
 	return resolved
+
+
+func _compact_release_first_exchange_contact_fire_line(raw_line: String, max_length: int = 96) -> String:
+	var line: String = raw_line.strip_edges()
+	if line.is_empty():
+		return ""
+	if not line.to_upper().begins_with("CONTACT FIRE"):
+		line = "CONTACT FIRE | %s" % line
+	var parts: PackedStringArray = line.split("|", false)
+	var kept: PackedStringArray = PackedStringArray()
+	for part_variant in parts:
+		var part: String = String(part_variant).strip_edges()
+		if part.is_empty():
+			continue
+		var upper_part: String = part.to_upper()
+		if upper_part.begins_with("COV ") or upper_part.begins_with("COOLDOWN") or upper_part.begins_with("DBG"):
+			continue
+		kept.append(part)
+		if kept.size() >= 3:
+			break
+	var compact: String = ""
+	for index in range(kept.size()):
+		if index > 0:
+			compact += " | "
+		compact += String(kept[index])
+	if compact.length() > max_length:
+		compact = compact.substr(0, maxi(max_length - 1, 1)).strip_edges() + "..."
+	return compact
+
+
+func _build_release_first_exchange_hud_density_next_line(sync_snapshot: Dictionary) -> String:
+	var source: Dictionary = Dictionary(sync_snapshot.get("source", {})).duplicate(true)
+	var status_source: Dictionary = Dictionary(source.get("status_source", {})).duplicate(true)
+	var decision_line: String = String(status_source.get("decision_line", "")).strip_edges()
+	if decision_line.is_empty():
+		decision_line = String(Dictionary(source.get("combat_hud_density", {})).get("decision_line", "")).strip_edges()
+	if decision_line.is_empty():
+		decision_line = "NEXT DEFEND / ADJUST | WHY FEUER"
+	return _compact_release_first_exchange_contact_fire_secondary_line(decision_line)
+
+
+func _compact_release_first_exchange_contact_fire_secondary_line(raw_line: String, max_length: int = 74) -> String:
+	var line: String = raw_line.strip_edges()
+	if line.is_empty():
+		return ""
+	line = line.replace("HIT LESEN / DEFEND", "DEFEND")
+	line = line.replace("LOS/RANGE KORRIGIEREN", "ADJUST")
+	if line.length() > max_length:
+		line = line.substr(0, maxi(max_length - 1, 1)).strip_edges() + "..."
+	return line
+
+
+func _count_text_lines(text: String) -> int:
+	var stripped: String = text.strip_edges()
+	if stripped.is_empty():
+		return 0
+	return stripped.split("\n", false).size()
 
 
 func _apply_release_first_exchange_real_window_hud_source_sync_to_labels() -> void:
@@ -7866,16 +7980,24 @@ func _apply_release_first_exchange_real_window_hud_source_sync_to_labels() -> vo
 	)).duplicate(true)
 	if not bool(sync_snapshot.get("active", false)):
 		return
+	var polished_feedback: Dictionary = _apply_release_first_exchange_hud_density_fire_visual_polish_to_feedback({
+		"selected_fireteam_status_label_text": String(sync_snapshot.get("selected_fireteam_status_text", "")),
+		"mission_control_status_text": String(sync_snapshot.get("mission_control_status_text", "")),
+	}, sync_snapshot)
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
-		fireteam_status_label.text = String(sync_snapshot.get("selected_fireteam_status_text", fireteam_status_label.text)).strip_edges()
+		fireteam_status_label.text = String(polished_feedback.get("selected_fireteam_status_label_text", sync_snapshot.get("selected_fireteam_status_text", fireteam_status_label.text))).strip_edges()
 		fireteam_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_style_id", RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID)
 		fireteam_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_task", "TASK_883")
+		fireteam_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_style_id", RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID)
+		fireteam_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_task", "TASK_889")
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
-		strategic_status_label.text = String(sync_snapshot.get("mission_control_status_text", strategic_status_label.text)).strip_edges()
+		strategic_status_label.text = String(polished_feedback.get("mission_control_status_text", sync_snapshot.get("mission_control_status_text", strategic_status_label.text))).strip_edges()
 		strategic_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_style_id", RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID)
 		strategic_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_task", "TASK_883")
+		strategic_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_style_id", RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID)
+		strategic_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_task", "TASK_889")
 
 
 func get_release_first_exchange_real_window_hud_source_sync_snapshot() -> Dictionary:
@@ -17623,6 +17745,10 @@ func _get_release_first_exchange_fire_visual_polish_enabled(world_label_density_
 	return bool(first_exchange_source.get("active", false)) and String(first_exchange_source.get("task_id", "")) == "TASK_876"
 
 
+func _get_release_first_exchange_hud_density_fire_visual_polish_enabled(world_label_density_mode: String = "") -> bool:
+	return _get_release_first_exchange_fire_visual_polish_enabled(world_label_density_mode)
+
+
 func get_release_fire_exchange_focused_visual_polish_snapshot() -> Dictionary:
 	_update_ui()
 	_sync_primary_3d_order_visuals()
@@ -17811,6 +17937,44 @@ func get_release_first_exchange_fire_visual_polish_snapshot() -> Dictionary:
 		"gate": "pass" if failed_checks.is_empty() else "review",
 		"recommended_next_task": "TASK_881 - Release First Exchange Fire Visual Recapture",
 	}
+
+
+func get_release_first_exchange_hud_density_fire_visual_polish_snapshot() -> Dictionary:
+	_update_ui()
+	_apply_release_first_exchange_real_window_hud_source_sync_to_labels()
+	var command_feedback: Dictionary = get_command_feedback_snapshot()
+	var synced_feedback: Dictionary = _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(command_feedback)
+	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	if panel != null and panel.has_method("apply_release_first_exchange_hud_density_fire_visual_polish"):
+		panel.call("apply_release_first_exchange_hud_density_fire_visual_polish", Dictionary(synced_feedback.get("release_first_exchange_hud_density_fire_visual_polish", {})))
+	if panel != null and panel.has_method("set_feedback_snapshot"):
+		panel.call("set_feedback_snapshot", synced_feedback)
+	_sync_primary_3d_order_visuals()
+	_refresh_order_visuals()
+	var primary_snapshot: Dictionary = {}
+	var primary_view: Node = _get_primary_3d_view()
+	if primary_view != null and primary_view.has_method("get_render_snapshot"):
+		primary_snapshot = Dictionary(primary_view.call("get_render_snapshot")).duplicate(true)
+	var source: Dictionary = {
+		"active": bool(synced_feedback.get("release_first_exchange_hud_density_fire_visual_polish_active", false)),
+		"hud_sync": Dictionary(synced_feedback.get("release_first_exchange_real_window_hud_source_sync", {})).duplicate(true),
+		"event_log_panel": Dictionary(panel.call("get_panel_snapshot")).duplicate(true) if panel != null and panel.has_method("get_panel_snapshot") else {},
+		"primary_render_snapshot": primary_snapshot,
+		"selected_fireteam_status_text": String(synced_feedback.get("selected_fireteam_status_label_text", "")),
+		"mission_control_status_text": String(synced_feedback.get("mission_control_status_text", "")),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+	return Dictionary(RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_SCRIPT.call(
+		"build_snapshot",
+		source,
+		{}
+	)).duplicate(true)
 
 
 func get_release_fire_exchange_contact_fire_primary_hud_polish_snapshot() -> Dictionary:
@@ -22261,6 +22425,8 @@ func _sync_primary_3d_order_visuals() -> void:
 			"release_fire_exchange_focused_visual_polish_style_id": RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID if _get_release_fire_exchange_focused_visual_polish_enabled(world_label_density_mode) else "",
 			"release_first_exchange_fire_visual_polish": _get_release_first_exchange_fire_visual_polish_enabled(world_label_density_mode),
 			"release_first_exchange_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_VISUAL_POLISH_STYLE_ID if _get_release_first_exchange_fire_visual_polish_enabled(world_label_density_mode) else "",
+			"release_first_exchange_hud_density_fire_visual_polish": _get_release_first_exchange_hud_density_fire_visual_polish_enabled(world_label_density_mode),
+			"release_first_exchange_hud_density_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID if _get_release_first_exchange_hud_density_fire_visual_polish_enabled(world_label_density_mode) else "",
 			"selected_fireteam_ids": _selected_fireteam_ids,
 			"fire_sector_overlay_enabled": _fire_sector_overlay_enabled,
 			"fire_sector_visual_mode": "los_line_only",

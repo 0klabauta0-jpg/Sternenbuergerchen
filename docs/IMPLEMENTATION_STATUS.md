@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_889 - Release First Exchange HUD Density And Fire Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_889_release_first_exchange_hud_density_and_fire_visual_polish.md`, `docs/tasks/TASK_888_release_first_exchange_player_readability_polish_review.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_889 kompaktet die bestaetigte CONTACT-FIRE-Erstlesung fuer #17 Selected Fireteam und #18 Mission Control auf wenige Zeilen, statt weitere Combat-Wahrheit zu erzeugen.
+- Stand: #19 Tactical Event Log kann im TASK_889-Modus groesser, mit groesseren Zeilen und reduziertem sichtbaren Event-Cap gerendert werden.
+- Stand: Primary3D erhaelt einen eigenen TASK_889-Schalter und hebt FireTrace, Impact, Target-Fokus und das HIT/MISS/FIRE-Label ueber die TASK_880-Baseline.
+- Risiken/offen: Der Headless-/Runtime-Snapshot prueft die neuen Lesbarkeitsparameter. Ein echter nicht-headless Fensterblick bleibt als Folgearbeit noetig.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_889_release_first_exchange_hud_density_and_fire_visual_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_888_release_first_exchange_player_readability_polish_review.gd`, `git diff --check`.
+- Naechster Schritt: TASK_890 - Release First Exchange HUD Density Real Window Recapture.
+
 ### TASK_888 - Release First Exchange Player Readability Polish Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_888_release_first_exchange_player_readability_polish_review.md`, `docs/tasks/TASK_887_release_first_exchange_real_window_hud_render_frame_sync_fix.md`, `docs/dev/mission_command_feedback_contract.md`

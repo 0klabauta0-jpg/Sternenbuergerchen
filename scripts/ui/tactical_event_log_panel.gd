@@ -3,6 +3,15 @@ extends PanelContainer
 
 const DEFAULT_MAX_VISIBLE_EVENTS: int = 8
 const ROW_MIN_HEIGHT: float = 22.0
+const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID: String = "task_889_release_first_exchange_hud_density_fire_visual_polish_v1"
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS: int = 5
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE: Vector2 = Vector2(360.0, 220.0)
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_MIN_HEIGHT: float = 30.0
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_HEADER_FONT_SIZE: int = 11
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE: int = 10
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE: int = 11
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE: int = 10
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_STRIP_WIDTH: float = 5.0
 
 @export var max_visible_events: int = DEFAULT_MAX_VISIBLE_EVENTS
 @export var selected_only: bool = false
@@ -19,6 +28,7 @@ var _count_label: Label = null
 var _selected_filter_button: CheckButton = null
 var _scroll: ScrollContainer = null
 var _entry_list: VBoxContainer = null
+var _release_first_exchange_hud_density_fire_visual_polish_active: bool = false
 
 
 func _ready() -> void:
@@ -27,6 +37,8 @@ func _ready() -> void:
 
 
 func set_feedback_snapshot(snapshot: Dictionary) -> void:
+	if snapshot.has("release_first_exchange_hud_density_fire_visual_polish"):
+		apply_release_first_exchange_hud_density_fire_visual_polish(Dictionary(snapshot.get("release_first_exchange_hud_density_fire_visual_polish", {})))
 	var selected_ids: PackedStringArray = PackedStringArray()
 	for fireteam_id_variant in Array(snapshot.get("selected_fireteam_ids", [])):
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
@@ -34,6 +46,29 @@ func set_feedback_snapshot(snapshot: Dictionary) -> void:
 			continue
 		selected_ids.append(fireteam_id)
 	set_event_entries(Array(snapshot.get("tactical_event_log", [])), selected_ids, selected_only)
+
+
+func apply_release_first_exchange_hud_density_fire_visual_polish(snapshot: Dictionary) -> void:
+	var active: bool = bool(snapshot.get("active", false)) and String(snapshot.get("style_id", "")) == RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID
+	var size_needs_update: bool = active and (
+		custom_minimum_size.x < RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE.x
+		or custom_minimum_size.y < RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE.y
+	)
+	if _release_first_exchange_hud_density_fire_visual_polish_active == active and not size_needs_update and (not active or max_visible_events == RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS):
+		return
+	_release_first_exchange_hud_density_fire_visual_polish_active = active
+	if active:
+		max_visible_events = int(snapshot.get("event_log_max_visible_events", RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS))
+		if custom_minimum_size == Vector2.ZERO:
+			custom_minimum_size = RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE
+		else:
+			custom_minimum_size = Vector2(
+				maxf(custom_minimum_size.x, RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE.x),
+				maxf(custom_minimum_size.y, RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE.y)
+			)
+	else:
+		max_visible_events = DEFAULT_MAX_VISIBLE_EVENTS
+	_refresh_display(true)
 
 
 func set_event_entries(entries: Array, selected_fireteam_ids: PackedStringArray = PackedStringArray(), show_selected_only: Variant = null) -> void:
@@ -74,6 +109,13 @@ func get_panel_snapshot() -> Dictionary:
 		"first_event_id": first_event_id,
 		"newest_first": true,
 		"scrollable_overflow": _rendered_entries.size() > max_visible_events,
+		"source_event_count": _event_entries.size(),
+		"release_first_exchange_hud_density_fire_visual_polish_active": _release_first_exchange_hud_density_fire_visual_polish_active,
+		"release_first_exchange_hud_density_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID if _release_first_exchange_hud_density_fire_visual_polish_active else "",
+		"row_min_height": _get_row_min_height(),
+		"row_font_size": _get_row_font_size(),
+		"custom_minimum_size_x": custom_minimum_size.x,
+		"custom_minimum_size_y": custom_minimum_size.y,
 		"severity_counts": severity_counts,
 		"global_rect": get_global_rect(),
 		"collapse_when_empty": collapse_when_empty,
@@ -125,13 +167,13 @@ func _ensure_structure() -> void:
 	_header_label.name = "EventLogHeaderLabel"
 	_header_label.text = "#19 EVENT LOG"
 	_header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_header_label.add_theme_font_size_override("font_size", 10)
+	_header_label.add_theme_font_size_override("font_size", _get_header_font_size())
 	header.add_child(_header_label)
 
 	_count_label = Label.new()
 	_count_label.name = "EventLogCountLabel"
 	_count_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_count_label.add_theme_font_size_override("font_size", 9)
+	_count_label.add_theme_font_size_override("font_size", _get_count_font_size())
 	header.add_child(_count_label)
 
 	_selected_filter_button = CheckButton.new()
@@ -168,6 +210,7 @@ func _refresh_display(force: bool = false) -> void:
 	_last_render_signature = signature
 	_rendered_entries = filtered_entries
 	_clear_entry_list()
+	_apply_release_first_exchange_event_log_header_style()
 	if _selected_filter_button != null:
 		_selected_filter_button.set_pressed_no_signal(selected_only)
 	if _count_label != null:
@@ -199,28 +242,31 @@ func _build_filtered_entries() -> Array:
 			return String(a.get("event_id", "")) < String(b.get("event_id", ""))
 		return a_time > b_time
 	)
+	if _release_first_exchange_hud_density_fire_visual_polish_active and max_visible_events > 0 and filtered.size() > max_visible_events:
+		return filtered.slice(0, max_visible_events)
 	return filtered
 
 
 func _add_event_row(entry: Dictionary) -> void:
 	var row := HBoxContainer.new()
 	row.name = "EventLogRow_%s" % _sanitize_node_name(String(entry.get("event_id", "event")))
-	row.custom_minimum_size = Vector2(0.0, ROW_MIN_HEIGHT)
+	var row_min_height: float = _get_row_min_height()
+	row.custom_minimum_size = Vector2(0.0, row_min_height)
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_theme_constant_override("separation", 5)
+	row.add_theme_constant_override("separation", 6 if _release_first_exchange_hud_density_fire_visual_polish_active else 5)
 	_entry_list.add_child(row)
 
 	var strip := ColorRect.new()
 	strip.name = "SeverityStrip"
-	strip.custom_minimum_size = Vector2(4.0, ROW_MIN_HEIGHT)
+	strip.custom_minimum_size = Vector2(_get_severity_strip_width(), row_min_height)
 	strip.color = _color_for_severity(String(entry.get("severity", "info")))
 	row.add_child(strip)
 
 	var time_label := Label.new()
 	time_label.name = "TimeLabel"
-	time_label.custom_minimum_size = Vector2(38.0, ROW_MIN_HEIGHT)
+	time_label.custom_minimum_size = Vector2(44.0 if _release_first_exchange_hud_density_fire_visual_polish_active else 38.0, row_min_height)
 	time_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	time_label.add_theme_font_size_override("font_size", 9)
+	time_label.add_theme_font_size_override("font_size", _get_time_font_size())
 	time_label.add_theme_color_override("font_color", Color(0.70, 0.78, 0.82, 0.96))
 	time_label.text = _format_time(int(entry.get("created_msec", 0)))
 	row.add_child(time_label)
@@ -230,7 +276,7 @@ func _add_event_row(entry: Dictionary) -> void:
 	text_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	text_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text_label.add_theme_font_size_override("font_size", 9)
+	text_label.add_theme_font_size_override("font_size", _get_row_font_size())
 	text_label.add_theme_color_override("font_color", _text_color_for_severity(String(entry.get("severity", "info"))))
 	text_label.text = _format_event_text(entry)
 	row.add_child(text_label)
@@ -240,9 +286,44 @@ func _add_empty_row() -> void:
 	var label := Label.new()
 	label.name = "EventLogEmptyLabel"
 	label.text = "NO EVENTS"
-	label.add_theme_font_size_override("font_size", 9)
+	label.add_theme_font_size_override("font_size", _get_row_font_size())
 	label.add_theme_color_override("font_color", Color(0.62, 0.70, 0.74, 0.86))
 	_entry_list.add_child(label)
+
+
+func _apply_release_first_exchange_event_log_header_style() -> void:
+	if _header_label != null:
+		_header_label.add_theme_font_size_override("font_size", _get_header_font_size())
+	if _count_label != null:
+		_count_label.add_theme_font_size_override("font_size", _get_count_font_size())
+	if _selected_filter_button != null:
+		_selected_filter_button.add_theme_font_size_override("font_size", 9 if _release_first_exchange_hud_density_fire_visual_polish_active else 8)
+	if _entry_list != null:
+		_entry_list.add_theme_constant_override("separation", 4 if _release_first_exchange_hud_density_fire_visual_polish_active else 3)
+
+
+func _get_row_min_height() -> float:
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_MIN_HEIGHT if _release_first_exchange_hud_density_fire_visual_polish_active else ROW_MIN_HEIGHT
+
+
+func _get_header_font_size() -> int:
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_HEADER_FONT_SIZE if _release_first_exchange_hud_density_fire_visual_polish_active else 10
+
+
+func _get_count_font_size() -> int:
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE if _release_first_exchange_hud_density_fire_visual_polish_active else 9
+
+
+func _get_row_font_size() -> int:
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE if _release_first_exchange_hud_density_fire_visual_polish_active else 9
+
+
+func _get_time_font_size() -> int:
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE if _release_first_exchange_hud_density_fire_visual_polish_active else 9
+
+
+func _get_severity_strip_width() -> float:
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_STRIP_WIDTH if _release_first_exchange_hud_density_fire_visual_polish_active else 4.0
 
 
 func _apply_empty_state_layout(is_empty: bool) -> void:
