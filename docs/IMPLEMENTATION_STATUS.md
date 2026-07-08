@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_848 - Release First Exchange Recapture Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_848_release_first_exchange_recapture_acceptance.md`, `docs/tasks/TASK_847_release_fire_exchange_visibility_persistence.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangeRecaptureAcceptance` paketiert den frischen TASK_845-Recapture nach TASK_847 als read-only Acceptance-Snapshot.
+- Stand: Das Acceptance-Paket haelt Screenshotpfade, Recapture-Gate, erwartete TASK_847-Visibility-Style-ID und manuelle Pflichtchecks fuer `CONTACT FIRE`, #17/#18 `NEXT/WHY`, FireTrace/Impact und stale Pressure fest.
+- Stand: Der HTML-Zwischenbericht nennt TASK_848 als aktuellen Recapture-/Acceptance-Anker.
+- Risiken/offen: Der Snapshot ersetzt keinen menschlichen Bildentscheid; echte visuelle Bewertung bleibt `manual_review_required = true`.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_real_window.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 32`, `godot_console.exe --headless --path . --script scripts/tests/task_848_release_first_exchange_recapture_acceptance.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_847_release_fire_exchange_visibility_persistence.gd`, `git diff --check`.
+- Naechster Schritt: TASK_849 - Release Fire Exchange Visual Polish Findings.
+
 ### TASK_847 - Release Fire Exchange Visibility Persistence
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_847_release_fire_exchange_visibility_persistence.md`, `docs/tasks/TASK_846_release_first_exchange_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
