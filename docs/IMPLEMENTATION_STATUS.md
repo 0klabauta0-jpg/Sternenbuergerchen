@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_885 - Release First Exchange HUD Source Sync Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_885_release_first_exchange_hud_source_sync_visual_findings.md`, `docs/tasks/TASK_884_release_first_exchange_hud_source_sync_recapture.md`, `docs/tasks/TASK_883_release_first_exchange_real_window_hud_source_sync_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangeHudSourceSyncVisualFindings` bewertet das TASK_884-Manifest und den manuellen Sichtbefund als read-only Findings-Snapshot.
+- Stand: Positive Evidence bleibt erhalten: TASK_884 ist `review_ready`, der Capture nutzt trusted `window_handle_print`, das Sternenbuergerchen-Missionsfenster ist bestaetigt, TASK_879-Trace-Aktivierung wurde beobachtet und der finale Trace meldet keine `NO_LOS`-/`CONTACT_PRESSURE`-Ueberschreibung.
+- Stand: Primaerer Befund ist `task_883_hud_source_sync_not_real_window_first_reading`: Trotz TASK_883-HUD-Source-Sync liest der echte Fensterblick weiter `NEXT LOS/RANGE KORRIGIEREN`, `Kampf NO FIRE NO_LOS` und `CONTACT PRESSURE`.
+- Risiken/offen: TASK_885 aendert keine Runtime. Der naechste Fix muss Screenshot-Zeitpunkt, gerenderte #17/#18/#19-Texte und finalen CONTACT-FIRE-Source-Snapshot im echten Fenster zusammen tracebar machen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_885_release_first_exchange_hud_source_sync_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_884_release_first_exchange_hud_source_sync_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_886 - Release First Exchange Real Window HUD Render Frame Trace.
+
 ### TASK_884 - Release First Exchange HUD Source Sync Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_884_release_first_exchange_hud_source_sync_recapture.md`, `docs/tasks/TASK_883_release_first_exchange_real_window_hud_source_sync_fix.md`, `docs/tasks/TASK_881_release_first_exchange_fire_visual_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
