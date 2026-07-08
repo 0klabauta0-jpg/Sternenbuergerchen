@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_846 - Release First Exchange Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_846_release_first_exchange_visual_findings.md`, `docs/tasks/TASK_845_release_first_exchange_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangeVisualFindings` wertet den TASK_845-Recapture und die Zwischenbericht-Notizen read-only aus.
+- Stand: Der Befund akzeptiert das `review_ready`-Manifest technisch, markiert aber `first_exchange_not_visible_in_window` als primaeres sichtbares Problem.
+- Stand: Weitere Findings sind `hud_surfaces_stale_pressure` fuer #17/#18 mit dominanter `NO FIRE`-/LOS-Korrektur und `fire_trace_or_impact_not_obvious` fuer nicht offensichtliche FireEvent-/Trace-/Impact-Evidence.
+- Risiken/offen: TASK_846 ist nur der Findings-Schnitt; die sichtbare Korrektur folgt in TASK_847.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_846_release_first_exchange_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_845_release_first_exchange_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_847 - Release Fire Exchange Visibility Persistence.
+
 ### TASK_845 - Release First Exchange Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_845_release_first_exchange_real_window_recapture.md`, `docs/tasks/TASK_844_release_first_exchange_tension_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
