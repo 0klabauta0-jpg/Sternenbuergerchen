@@ -10,6 +10,18 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_869 - Release First Exchange Real Window Recapture After LOS Setup
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_869_release_first_exchange_real_window_recapture_after_los_setup.md`, `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_first_exchange_los_setup_real_window_recapture.ps1` erzeugt nach TASK_868 einen eigenen echten Release-Fenster-Recapture mit eigenen Screenshotpfaden und eigenem Manifest.
+- Stand: Das Manifest erwartet TASK_868-LOS-Setup-Schema/Style, TASK_844-First-Exchange-Evidence, TASK_866-Runtime-Text-Status-Capture und die sichtbaren CONTACT-FIRE-/FireTrace-/Impact-Pflichtchecks.
+- Stand: Der Capture-Pfad propagiert jetzt `window_crop_trusted`, Fokusstatus und Foreground-Prozess aus dem generischen Visible-Window-Capture, damit ein Desktop-Crop eines falschen Fensters nicht mehr als `review_ready` durchgereicht wird.
+- Stand: Ein lokaler TASK_869-Run hat diesen Guard notwendig gemacht: der Release-Prozess lief, aber der Desktop-Crop zeigte ein fremdes Fenster. Nicht vertrauenswuerdige Crops werden deshalb als `manual_open`/Warnung statt als harter Sichtbeweis behandelt.
+- Stand: Nach dem Guard lief TASK_869 technisch wieder mit `gate=review_ready`, `window_crop_trusted=true`, Fokus und passendem Foreground-Prozess. Der manuelle Sichtblick auf `tmp/release_first_exchange_los_setup_real_window_recapture.png` zeigt aber weiterhin nicht die erwartete Sternenbuergerchen-Mission, sondern eine World-at-War/TripleA-Kartenansicht. Das ist ein belegter TASK_870-Finding-Kandidat.
+- Risiken/offen: TASK_869 beweist nur den frischen Fensterstand und haelt den manuellen Sichtentscheid offen. Wenn der Screenshot weiter `NO_LOS` / `CONTACT PRESSURE` oder unlesbare FireTrace/Impact-Signale zeigt, folgt TASK_870 als Visual-Findings-Schnitt.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1` gruen; `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_los_setup_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38` erzeugt Manifest/Screenshots, aber Sichtbeweis ist nur vertrauenswuerdig, wenn `window_crop_trusted=true`; `godot_console.exe --headless --path . --script scripts/tests/task_869_release_first_exchange_real_window_recapture_after_los_setup.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_868_release_first_exchange_los_setup_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_870 - Release First Exchange Post-LOS Visual Findings.
+
 ### TASK_868 - Release First Exchange LOS Setup Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_868_release_first_exchange_los_setup_polish.md`, `docs/tasks/TASK_867_release_fire_exchange_runtime_text_status_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`

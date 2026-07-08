@@ -87,6 +87,10 @@ namespace Win32 {
 		[DllImport("user32.dll")]
 		public static extern bool SetForegroundWindow(IntPtr hWnd);
 		[DllImport("user32.dll")]
+		public static extern IntPtr GetForegroundWindow();
+		[DllImport("user32.dll")]
+		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+		[DllImport("user32.dll")]
 		public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 		[DllImport("user32.dll")]
 		public static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
@@ -122,6 +126,8 @@ function Get-WindowSnapshot {
 		rect = $null
 		client_rect_found = $false
 		client_rect = $null
+		foreground_process_id = 0
+		foreground_matches_selected_process = $false
 	}
 	if ($SelectedProcessId -le 0) {
 		return $result
@@ -149,6 +155,13 @@ function Get-WindowSnapshot {
 		[Win32.ReleaseSingleplayerWindowTools]::ShowWindow($handle, 5) | Out-Null
 		$result.focus_succeeded = [Win32.ReleaseSingleplayerWindowTools]::SetForegroundWindow($handle)
 		Start-Sleep -Milliseconds 200
+	}
+	$foregroundHandle = [Win32.ReleaseSingleplayerWindowTools]::GetForegroundWindow()
+	if ($foregroundHandle -ne [IntPtr]::Zero) {
+		[uint32]$foregroundProcessId = 0
+		[Win32.ReleaseSingleplayerWindowTools]::GetWindowThreadProcessId($foregroundHandle, [ref]$foregroundProcessId) | Out-Null
+		$result.foreground_process_id = [int]$foregroundProcessId
+		$result.foreground_matches_selected_process = ([int]$foregroundProcessId -eq $SelectedProcessId)
 	}
 	$rect = New-Object Win32.ReleaseSingleplayerWindowTools+RECT
 	if ([Win32.ReleaseSingleplayerWindowTools]::GetWindowRect($handle, [ref]$rect)) {
@@ -378,11 +391,24 @@ if ($desktopScreenshotWritten -and -not [bool]$desktopNonBlank.nonblank) {
 if ($desktopScreenshotWritten -and -not [bool]$windowSnapshot.window_handle_found) {
 	$warnings += "main_window_handle_not_found"
 }
+if ($desktopScreenshotWritten -and [bool]$windowSnapshot.window_handle_found -and [bool]$shouldFocusWindow -and -not [bool]$windowSnapshot.focus_succeeded) {
+	$warnings += "window_focus_failed_crop_may_show_wrong_window"
+}
+if ($desktopScreenshotWritten -and [bool]$windowSnapshot.window_handle_found -and [bool]$shouldFocusWindow -and -not [bool]$windowSnapshot.foreground_matches_selected_process) {
+	$warnings += "foreground_window_does_not_match_selected_release_process"
+}
+
+$windowCropTrusted = [bool]$cropStatus.succeeded
+if ([bool]$shouldFocusWindow -and -not [bool]$windowSnapshot.foreground_matches_selected_process) {
+	$windowCropTrusted = $false
+}
 
 $gate = "review_ready"
 if ($hardFailures.Count -gt 0) {
 	$gate = "fail"
 } elseif (-not $desktopScreenshotWritten) {
+	$gate = "manual_open"
+} elseif ([bool]$cropStatus.succeeded -and -not [bool]$windowCropTrusted) {
 	$gate = "manual_open"
 }
 
@@ -417,6 +443,7 @@ $manifest = [ordered]@{
 	window_screenshot_full_path = $windowScreenshotPath
 	desktop_screenshot_written = [bool]$desktopScreenshotWritten
 	window_screenshot_written = [bool]$cropStatus.succeeded
+	window_crop_trusted = [bool]$windowCropTrusted
 	desktop_screenshot_nonblank = $desktopNonBlank
 	window_screenshot_nonblank = $windowNonBlank
 	crop_status = $cropStatus
