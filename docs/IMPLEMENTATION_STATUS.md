@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_857 - Release Fire Exchange Contact-Fire Primary HUD Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_857_release_fire_exchange_contact_fire_primary_hud_recapture.md`, `docs/tasks/TASK_856_release_fire_exchange_contact_fire_primary_hud_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `capture_release_fire_exchange_contact_fire_primary_hud_recapture.ps1` haengt einen eigenen TASK_857-Recapture an den bestehenden TASK_854-After-Readability-Recapture und nutzt weiter `--release-singleplayer-first-go-firefight`.
+- Stand: Das Manifest `tmp/release_fire_exchange_contact_fire_primary_hud_recapture.json` erwartet TASK_856-Primary-HUD-Schema, Style-ID `task_856_release_fire_exchange_contact_fire_primary_hud_polish_v1`, TASK_853-Readability, TASK_850-Focus-Style und 45s Fire-Exchange-Persistenz.
+- Stand: `ReleaseFireExchangeContactFirePrimaryHudRecapture` paketiert das Capture als read-only Review-Snapshot mit Screenshotpfaden und manuellen Pflichtchecks fuer CONTACT FIRE in #17/#18, kein primaeres Debug-`NO FIRE`, Event-Log, FireTrace/Impact/Target-Focus und weiter bedienbare Command-Surfaces.
+- Stand: Der lokale echte TASK_857-Capture lief mit `gate = review_ready`, Window-Handle gefunden, Window-/Desktop-Screenshot geschrieben und ohne Hard-Failures.
+- Risiken/offen: Der frische Screenshot ist technisch sauber, liest sich im sichtbaren Zustand aber weiter eher als `NO FIRE NO_LOS` / `CONTACT PRESSURE` statt als klarer CONTACT-FIRE-Moment. TASK_858 sollte diesen belegten Befund auswerten und eng polieren.
+- Lokale Pruefung: `powershell -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1`, `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_fire_exchange_contact_fire_primary_hud_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 38`, `godot_console.exe --headless --path . --script scripts/tests/task_857_release_fire_exchange_contact_fire_primary_hud_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_856_release_fire_exchange_contact_fire_primary_hud_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_858 - Release Fire Exchange Contact-Fire Primary HUD Visual Findings.
+
 ### TASK_856 - Release Fire Exchange Contact-Fire Primary HUD Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_856_release_fire_exchange_contact_fire_primary_hud_polish.md`, `docs/tasks/TASK_855_release_fire_exchange_after_readability_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
