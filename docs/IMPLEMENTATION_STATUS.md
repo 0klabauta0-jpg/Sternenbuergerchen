@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_888 - Release First Exchange Player Readability Polish Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_888_release_first_exchange_player_readability_polish_review.md`, `docs/tasks/TASK_887_release_first_exchange_real_window_hud_render_frame_sync_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstExchangePlayerReadabilityPolishReview` bewertet den TASK_887-Post-Final-CONTACT-FIRE-Frame als technische Quelle und trennt technische Synchronitaet von menschlicher Spielerlesbarkeit.
+- Stand: Positive Befunde bleiben erhalten: CONTACT FIRE erreicht #17 Selected Fireteam, #18 Mission Control und #19 Event Log; Event Log, Welt-FIRE/CONTACT, FireTrace/Impact und Command-Surfaces sind vorhanden.
+- Stand: Primaere Reibung ist `bottom_hud_density_high`: Bottom-HUD, #18-Text, Event-Log-Overlay, Weltlabels/FireTrace und #17-Member-Cards konkurrieren noch zu stark um Aufmerksamkeit.
+- Risiken/offen: TASK_888 ist ein read-only Review-Slice und poliert die sichtbare HUD-Dichte noch nicht selbst.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_888_release_first_exchange_player_readability_polish_review.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_887_release_first_exchange_hud_render_frame_sync_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_889 - Release First Exchange HUD Density And Fire Visual Polish.
+
 ### TASK_887 - Release First Exchange Real Window HUD Render Frame Sync Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_887_release_first_exchange_real_window_hud_render_frame_sync_fix.md`, `docs/tasks/TASK_886_release_first_exchange_real_window_hud_render_frame_trace.md`, `docs/tasks/TASK_879_release_first_exchange_exported_status_source_trace.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -109,7 +109,8 @@
       <span class="pill good">TASK_885 Findings umgesetzt</span>
       <span class="pill good">TASK_886 Render-Frame-Trace umgesetzt</span>
       <span class="pill good">TASK_887 Post-Final Render-Frame-Sync umgesetzt</span>
-      <span class="pill warn">Aktuell dran: TASK_888 Player Readability</span>
+      <span class="pill good">TASK_888 Player Readability Review umgesetzt</span>
+      <span class="pill warn">Naechster Polish: TASK_889 HUD Density + Fire Visual</span>
       <span class="pill warn">Git: nur builds/ untracked</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -137,7 +138,7 @@
         <article class="card">
           <h2>Aktueller Wert</h2>
           <div class="stack">
-            <div class="metric"><strong>14</strong><span>neuere Slices im Strang: TASK_874 bis TASK_887.</span></div>
+            <div class="metric"><strong>15</strong><span>neuere Slices im Strang: TASK_874 bis TASK_888.</span></div>
             <div class="metric"><strong>3</strong><span>HUD-Surfaces im Fokus: #17, #18, #19.</span></div>
             <div class="metric"><strong>10</strong><span>Runtime-Trace-Samples bis <code>deeplink_final</code>.</span></div>
           </div>
@@ -246,6 +247,13 @@
                 <p>Der neue Capture-Pfad wartet erst auf den TASK_879-Runtime-Trace bis <code>deeplink_final</code> und captured danach denselben laufenden Release-Prozess per <code>window_handle_print</code> erneut. Dieser Post-Final-Fensterblick zeigt #17, #18 und #19 mit CONTACT FIRE. Der alte Widerspruch war also ein Capture-/Frame-Zeitpunktproblem, kein Grund fuer Combat-Rewrite oder weitere HUD-Wahrheit.</p>
               </div>
             </div>
+            <div class="timeline-item">
+              <strong>TASK_888</strong>
+              <div>
+                <h3>Player Readability Review</h3>
+                <p>Der technische CONTACT-FIRE-Frame ist als Spielerblick bewertet: positiv sind #17/#18/#19 CONTACT FIRE, Event-Log-Kontakt, Welt-FIRE/CONTACT und sichtbare FireTrace-/Impact-Signale. Die primaere Reibung ist jetzt <code>bottom_hud_density_high</code>: Bottom-HUD, #18-Text, #19-Overlay, kleine Weltlabels und Member-Cards konkurrieren noch zu stark. Naechster sinnvoller Slice ist TASK_889 fuer HUD-Dichte und Fire-Visual-Hierarchie.</p>
+              </div>
+            </div>
           </div>
         </article>
       </div>
@@ -325,12 +333,12 @@
           <ul class="list">
             <li>Aktueller Arbeitsbranch: <code>task/release-first-exchange-player-readability-polish-review</code>.</li>
             <li>Letzter gepushter TASK_887-Stand: Commit <code>35db5f8a</code> auf <code>task/release-first-exchange-hud-render-frame-sync-fix</code>.</li>
-            <li>TASK_887 ist implementiert, lokal verifiziert und gepusht; der aktuelle Branch bereitet TASK_888 und diesen Zwischenbericht vor.</li>
+            <li>TASK_887 ist implementiert, lokal verifiziert und gepusht; TASK_888 ist im aktuellen Branch als Readability-Review umgesetzt.</li>
             <li>Vorheriger Findings-Schnitt: TASK_885 mit Commit <code>e9982505</code> auf <code>task/release-first-exchange-hud-source-sync-visual-findings</code>.</li>
             <li>Letzter Runtime-Fix davor: TASK_883 mit Commit <code>b1d4c4f7</code> auf <code>task/release-first-exchange-real-window-hud-source-sync</code>.</li>
             <li>Vorheriger Recapture-Slice: TASK_884 mit Commit <code>b1d3afa6</code> auf <code>task/release-first-exchange-hud-source-sync-recapture</code>.</li>
             <li>Untracked bleibt nur <code>builds/</code>; der Ordner wird weiterhin nicht in den Report-Slice aufgenommen.</li>
-            <li>Naechster fachlicher Schritt bleibt TASK_888: echter Spielerlesbarkeits-Review des synchronen CONTACT-FIRE-Fensters.</li>
+            <li>Naechster fachlicher Schritt ist TASK_889: HUD-Dichte, Event-Log-Rahmung und FireTrace-/Impact-Hierarchie konkret polieren.</li>
           </ul>
         </article>
         <article class="card full">
@@ -346,9 +354,8 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ol class="list">
-            <li><strong>TASK_888 - Player Readability Polish Review:</strong> Den synchronen CONTACT-FIRE-Fensterblick auf Dichte, Schoenheit, FireTrace/Impact, Zielbezug und naechsten Griff bewerten.</li>
-            <li><strong>Konkreter Folge-Polish:</strong> Wenn der Review bestaetigt, was der Screenshot nahelegt, folgt ein kleiner TASK_889 fuer HUD-Dichte, Event-Log-Lesbarkeit und FireTrace-/Impact-Rahmung.</li>
-            <li><strong>Akzeptanz:</strong> CONTACT FIRE steht sichtbar an der richtigen Stelle; als naechstes muss der Spieler Schussrichtung, Ziel und Treffer/Impact im Fenster sofort angenehm verstehen.</li>
+            <li><strong>TASK_889 - HUD Density And Fire Visual Polish:</strong> Den TASK_888-Befund konkret umsetzen: Bottom-HUD entlasten, #18-Text nicht clippen lassen, #19 besser rahmen und FireTrace/Impact/Zielbezug priorisieren.</li>
+            <li><strong>Akzeptanz:</strong> Der Spieler sieht sofort CONTACT FIRE, Schussrichtung, Ziel und Treffer/Impact, ohne die Statuszeilen entziffern zu muessen.</li>
             <li><strong>Weiter behalten:</strong> Den kurzen Spielerweg Homebase -> Fireteam -> Dropship -> Mission -> GO -> Contact als Release-Smoke nicht wieder in Einzelteile verlieren.</li>
           </ol>
         </article>
@@ -360,10 +367,11 @@
             <button class="choice" type="button" data-choice-value="hud_source_sync_recapture">TASK_884 Recapture</button>
             <button class="choice" type="button" data-choice-value="render_frame_trace">TASK_886 Frame Trace</button>
             <button class="choice" type="button" data-choice-value="render_frame_sync_fix">TASK_887 Frame Sync</button>
-            <button class="choice active" type="button" data-choice-value="player_readability_review">TASK_888 Player Review</button>
+            <button class="choice" type="button" data-choice-value="player_readability_review">TASK_888 Player Review</button>
+            <button class="choice active" type="button" data-choice-value="hud_density_fire_visual_polish">TASK_889 Polish</button>
             <button class="choice" type="button" data-choice-value="editor_backlog">Editor zurueckholen</button>
           </div>
-          <p>Meine Empfehlung ist jetzt: TASK_888 als echten Spielerlesbarkeits-Review bauen und daraus einen kleinen Polish-Slice ableiten. Der technische CONTACT-FIRE-Frame ist synchron; jetzt geht es um Spielgefuehl, Dichte und klare visuelle Wirkung.</p>
+          <p>Meine Empfehlung ist jetzt: TASK_889 als kleinen sichtbaren Polish bauen. Der Review ist geschnitten; jetzt muss der erste Feuerwechsel mit weniger HUD-Druck und klarerer FireTrace-/Impact-Hierarchie wirken.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -405,6 +413,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_886_recommends_task_887"> TASK_886 empfiehlt TASK_887 Render-Frame-Sync</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_887_post_final_sync_done"> TASK_887 Post-Final-Frame-Sync umgesetzt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="status.task_887_recommends_task_888"> TASK_887 empfiehlt TASK_888 Player-Readability-Review</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_888_player_readability_review_done"> TASK_888 Player-Readability-Review umgesetzt</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="status.task_888_recommends_task_889"> TASK_888 empfiehlt TASK_889 HUD-Dichte/Fire-Visual-Polish</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.player_readability_ok"> Spielerlesung im Fenster ueberzeugt</label>
         </article>
         <article class="card">
@@ -416,7 +426,8 @@
               <option value="hud_source_sync_recapture">TASK_884 echten HUD-Source-Sync recapturen</option>
               <option value="render_frame_trace">TASK_886 Render-/Capture-Frame tracebar machen</option>
               <option value="render_frame_sync_fix">TASK_887 Render-/Source-Frame synchronisieren</option>
-              <option selected value="player_readability_review">TASK_888 Player-Readability-Review</option>
+              <option value="player_readability_review">TASK_888 Player-Readability-Review</option>
+              <option selected value="hud_density_fire_visual_polish">TASK_889 HUD-Dichte / Fire-Visual-Polish</option>
               <option value="visual_fire_recapture">TASK_881 echten Fire-Visual-Recapture erneut ausfuehren</option>
               <option value="task_879_trace">TASK_879 Exported Status Source Trace erneut</option>
               <option value="hud_refresh_diagnosis">HUD-Refresh-Ueberschreibung suchen</option>
@@ -487,7 +498,7 @@
           computed: {
             current_branch: "task/release-first-exchange-player-readability-polish-review",
             latest_pushed_commit: "35db5f8a Sync first exchange HUD render frame",
-            active_next_task: "TASK_888",
+            active_next_task: "TASK_889",
             completed_blocks: [
               "TASK_874 real-window recapture captured trusted first exchange evidence gap",
               "TASK_875 visual findings recorded CONTACT-FIRE not being first real-window reading",
@@ -503,19 +514,20 @@
               "TASK_884 local capture is review_ready and trusted, but the real-window image still reads NO_FIRE / CONTACT_PRESSURE first",
               "TASK_885 records the TASK_884 screenshot mismatch as read-only findings and recommends a render-frame trace",
               "TASK_886 records the real-window rendered #17/#18/#19 text next to the final CONTACT-FIRE source snapshot",
-              "TASK_887 waits for deeplink_final and captures the same release process after the final trace, proving the real post-final window reads CONTACT FIRE"
+              "TASK_887 waits for deeplink_final and captures the same release process after the final trace, proving the real post-final window reads CONTACT FIRE",
+              "TASK_888 records the post-final CONTACT-FIRE window as technically correct but still too dense for comfortable first-player readability"
             ],
             player_value: "The first release mission path is more repeatable and the post-final real window now reads CONTACT FIRE in #17/#18/#19; remaining work is readability, density and visual polish.",
-            next_recommendation: "TASK_888 - Release First Exchange Player Readability Polish Review",
+            next_recommendation: "TASK_889 - Release First Exchange HUD Density And Fire Visual Polish",
             followup_candidate: "TASK_889 - Release First Exchange HUD Density And Fire Visual Polish",
-            repo_state: "Current work branch is task/release-first-exchange-player-readability-polish-review. TASK_887 is implemented, locally verified and pushed; only builds/ remains untracked."
+            repo_state: "Current work branch is task/release-first-exchange-player-readability-polish-review. TASK_888 is implemented in this worktree; only builds/ remains untracked."
           },
           metadata: {
             generated_at_local: "2026-07-08",
             project_root: "C:/dev/SternenBuergerchen",
             report_file: "docs/reports/spielstand_zwischenbericht_2026_07_08.html",
             authoritative_state_note: "This report is a read-only workbench. It does not create gameplay truth.",
-            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881", "TASK_882", "TASK_883", "TASK_884", "TASK_885", "TASK_886", "TASK_887", "TASK_888"]
+            relevant_task_ids: ["TASK_874", "TASK_875", "TASK_876", "TASK_877", "TASK_878", "TASK_879", "TASK_880", "TASK_881", "TASK_882", "TASK_883", "TASK_884", "TASK_885", "TASK_886", "TASK_887", "TASK_888", "TASK_889"]
           }
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {
