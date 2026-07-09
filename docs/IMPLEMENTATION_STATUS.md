@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1011 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1011_release_first_decision_loop_two_player_loop_micro_objective_round_loop_acceptance_slice.md`, `docs/tasks/TASK_1010_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopAcceptanceSlice.build_snapshot()` bewertet einen TASK_1010-Player-Feel-Polish plus Acceptance-Trace.
+- Stand: Ohne Trace bleibt der Slice `needs_round_loop_acceptance_trace`; Regressionen routen zurueck zu TASK_1010; ein guter Trace setzt `round_loop_acceptance_slice_passed`.
+- Stand: Der Slice prueft `FEEL/NEXT/GO`, Start, Rhythmus, Feedback-zurueck-zu-NEXT, GO-Grenze, HUD-Ruhe, Performance-Gefuehl, Multiplayer-Grenze und HUD-read-only-Grenze.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1011 im Command-Feedback als Snapshot, Acceptance-Zeile und Status.
+- Risiken/offen: TASK_1011 ist noch kein Szenario. TASK_1012 sollte den akzeptierten Round-Loop in einen kleinen Szenario-Stitch ueberfuehren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1011_release_first_decision_loop_two_player_loop_micro_objective_round_loop_acceptance_slice.gd`, Regression TASK_1010, TASK_1009, TASK_1008, `git diff --check`.
+- Naechster Schritt: TASK_1012 - Release First Decision Loop Two Player Loop Scenario Stitch.
+
 ### TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1010_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_polish.md`, `docs/tasks/TASK_1009_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

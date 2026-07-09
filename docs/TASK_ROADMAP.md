@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_1011 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice (implementiert): Der TASK_1010-Player-Feel-Polish wird mit Trace-Evidence als akzeptierter kleiner Spielergriff bewertet: `FEEL/NEXT/GO`, Feedback-zurueck-zu-NEXT, GO separat, ruhiges HUD, Performance-Gefuehl und Multiplayer-Grenze.
 - TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish (implementiert): TASK_1009-Findings werden in sechs read-only Player-Feel-Surface-Specs uebersetzt: Start, ROUND/NEXT/GO-Rhythmus, Feedback, GO-Grenze, HUD-Ruhe und Multiplayer-Grenze plus `FEEL | NEXT | GO`-Zeile.
 - TASK_1009 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Findings (implementiert): Der bestandene TASK_1008-Integrated-Playtest wird mit Player-Feel-Notizen als read-only Befund bewertet: keine Notizen halten Review offen, Reibung routet zu Player-Feel-Polish, sauberer Befund routet zum Round-Loop-Acceptance-Slice.
 - TASK_1008 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Integrated Playtest (implementiert): Der bestandene TASK_1007-Round-Loop wird im Release-/Mission-Kontext mit Trace-Evidence bewertet: Entry, Command-Feedback, `ROUND`, `NEXT`, Confirm, separates `GO`, Post-GO-Feedback, Rueckkehr zu NEXT, HUD-/Multiplayer-Grenze und Performance-Budget.

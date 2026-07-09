@@ -85,6 +85,11 @@ TASK_1010 uebersetzt TASK_1009-Findings in eine konkrete Player-Feel-Leseschicht
 
 Der Player-Feel-Polish bleibt read-only. Er darf dem HUD sagen, welche Texte, Rollen, Akzente und Budgets fuer den runden kleinen Loop gelten, aber keine UI-Baeume bauen, keine Commands erzeugen, kein Movement starten und keine Multiplayer-Wahrheit setzen. Der naechste Schritt ist `TASK_1011 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice`.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice (TASK_1011)
+TASK_1011 prueft, ob sich der TASK_1010-Polish als kleiner Spielergriff akzeptieren laesst. Ein guter Trace bestaetigt sichtbares `FEEL/NEXT/GO`, klaren Start, lesbaren Round-/Next-/GO-Rhythmus, Feedback-zurueck-zu-NEXT, klare `GO separat`-Grenze, ruhiges HUD, responsives Gefuehl und erhaltene Multiplayer-/Wahrheitsgrenze.
+
+Der Acceptance-Slice bleibt read-only. Ohne Trace bleibt er `needs_round_loop_acceptance_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1012 - Release First Decision Loop Two Player Loop Scenario Stitch`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 
