@@ -235,3 +235,8 @@ Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_ma
 TASK_983 macht die vier Runtime-Choices lesbarer, ohne neue Befehlslogik einzufuehren. Aus TASK_982-Findings und TASK_979-Button-Specs entstehen Mindestgroessen, Tooltips, Style-IDs, Gruppenlinie und Confirm-Feedback-Zeile fuer `SECURE/PUSH/FLANK/RESET`.
 
 Der Snapshot bleibt read-only. Die Buttons duerfen visuell ruhiger und lesbarer werden und Metadaten tragen, aber keine Commands, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit erzeugen. Der naechste Beweis ist `TASK_984 - Release First Decision Loop Two Player Loop Acceptance Slice`.
+
+## Release First Decision Loop Two Player Loop Acceptance Slice (TASK_984)
+TASK_984 akzeptiert den gepolishen Vier-Choice-Loop nur mit Trace-Evidence. Bewertet werden sichtbare und lesbare `SECURE/PUSH/FLANK/RESET`-Choices, Tooltips mit `GO`-Grenze, Confirm-Feedback, getrenntes `GO`, keine Auto-Ausfuehrung, Order-Vorbereitung, Spielerlesbarkeit, HUD-read-only und Multiplayer-Grenze.
+
+Der Acceptance-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_player_loop_acceptance_trace`; bei Reibung routet er zurueck zu TASK_983; bei voller Evidence fuehrt er zu `TASK_985 - Release First Decision Loop Two Player Loop Scenario Outcome Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

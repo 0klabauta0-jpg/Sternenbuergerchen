@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_984 - Release First Decision Loop Two Player Loop Acceptance Slice (implementiert): Der gepolishte Vier-Choice-Loop wird read-only als Ablauf bewertet: vier Choices sichtbar/lesbar, Confirm-Feedback, `GO separat`, keine Auto-Ausfuehrung, HUD-/Multiplayer-Grenze.
 - TASK_983 - Release First Decision Loop Two Player Loop Visual Polish (implementiert): Die vier Runtime-Choice-Buttons erhalten read-only Visual-Specs mit Mindestgroessen, Tooltips, ruhiger Akzentlogik, Confirm-Feedback und klarer `GO separat`-Grenze.
 - TASK_982 - Release First Decision Loop Two Player Loop Visual Findings (implementiert): Der TASK_981-Capture wird als read-only Sichtbefund geschnitten; Reibung routet zu Visual Polish, sauberer Befund zum Player-Loop-Acceptance-Slice.
 - TASK_981 - Release First Decision Loop Two Player Loop Real Window Capture (implementiert): Der bestandene Choice-Confirm-Smoke bekommt einen read-only Real-Window-Capture-/Manifest-Rahmen fuer sichtbare vier Choice-Buttons, Confirm-Feedback und getrenntes `GO`.
