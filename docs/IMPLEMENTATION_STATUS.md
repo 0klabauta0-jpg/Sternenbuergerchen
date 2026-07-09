@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_938 - Release First Exchange Followup Fix Player Polish Final Tuning
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_938 setzt den TASK_937-Restbefund als engen Presentation-Final-Tuning-Slice um, statt ohne akzeptierten Sichtbefund einen Playability-Smoke zu starten.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuning.build_snapshot()` verlangt TASK_937-Findings plus passierenden TASK_935-Player-Polish und prueft Lane/Core, Label/Halo-Rueckzug, Richtunganker, World-Noise-Rueckzug und read-only-Grenzen.
+- Stand: `TerrainMap3DView` meldet den Style `task_938_release_first_exchange_followup_fix_player_polish_final_tuning_v1`; Lane/Core werden minimal klarer, Label/Halo/Grid/Weltlinien leiser und Source-/Target-Anker bleiben unter der Scheiben-Grenze.
+- Risiken/offen: TASK_938 ersetzt keinen echten Fensterbeweis und keinen Smoke. Der naechste Slice muss frisch recapturen, ob der Spielerblick jetzt wirklich funktioniert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_938_release_first_exchange_followup_fix_player_polish_final_tuning.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_937_release_first_exchange_followup_fix_player_polish_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_935_release_first_exchange_followup_fix_player_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_939 - Release First Exchange Followup Fix Player Polish Final Tuning Recapture.
+
 ### TASK_937 - Release First Exchange Followup Fix Player Polish Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_936_release_first_exchange_followup_fix_player_polish_recapture.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/tasks/TASK_934_release_first_exchange_followup_fix_visual_findings.md`, `docs/tasks/TASK_933_release_first_exchange_followup_fix_recapture.md`, `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`

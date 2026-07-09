@@ -88,7 +88,8 @@
       <span class="pill good">TASK_935 umgesetzt</span>
       <span class="pill good">TASK_936 umgesetzt</span>
       <span class="pill good">TASK_937 umgesetzt</span>
-      <span class="pill warn">TASK_938 als naechster Schnitt</span>
+      <span class="pill good">TASK_938 umgesetzt</span>
+      <span class="pill warn">TASK_939 als naechster Schnitt</span>
       <span class="pill warn">Sichtakzeptanz noch offen</span>
       <span class="pill">HTML-Workbench</span>
     </div>
@@ -117,7 +118,7 @@
           <div class="stack">
             <div class="metric"><strong>gruen</strong><span>Release-Start, Homebase-Direct-Sortie, Missionstart, LZ/Drop/GO, First-Exchange-Evidence.</span></div>
             <div class="metric"><strong>gelb</strong><span>Erster Weltblick: Fire-Lane/Core konkurriert noch mit Text, Halo, Grid und Weltlinien.</span></div>
-            <div class="metric"><strong>naechst</strong><span>TASK_938: Final-Tuning bei Restreibung oder Playability-Smoke bei akzeptiertem Sichtbefund.</span></div>
+            <div class="metric"><strong>naechst</strong><span>TASK_939: Final-Tuning recapturen und danach Smoke-Freigabe entscheiden.</span></div>
           </div>
         </article>
       </div>
@@ -170,7 +171,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task935"> TASK_935 Player-Polish umgesetzt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task936"> TASK_936 Recapture-Rahmen umgesetzt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task937"> TASK_937 Findings umgesetzt</label>
-          <label class="checkline"><input type="checkbox" data-export-key="done.task938"> TASK_938 fertig</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task938"> TASK_938 fertig</label>
         </article>
       </div>
     </section>
@@ -200,19 +201,19 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ul class="list">
-            <li><strong>TASK_938 enger schneiden:</strong> Wenn der TASK_937-Befund Restreibung bestaetigt, kommt ein kleiner Final-Tuning-Slice fuer Lane/Core/Label/Halo/Grid/World-Lines.</li>
-            <li><strong>Oder Smoke starten:</strong> Wenn der echte Sichtbefund akzeptiert ist, wird TASK_938 zum First-Exchange-Playability-Smoke statt weiterem Pixel-Polish.</li>
+            <li><strong>TASK_938 ist umgesetzt:</strong> Der kleine Final-Tuning-Slice staerkt Lane/Core und nimmt Label/Halo/Grid/World-Lines weiter zurueck.</li>
+            <li><strong>TASK_939 recapturen:</strong> Als naechstes muss ein frischer echter Fensterblick pruefen, ob der First-Exchange-Playability-Smoke freigegeben werden kann.</li>
             <li><strong>Danach wieder groesser denken:</strong> Erst nach akzeptierter Lesbarkeit lohnt sich der naechste Gameplay-Block: Entscheidungsvorschau, Line-of-Fire, Contact Reports, AI Intent oder Squad-Spacing.</li>
             <li><strong>Berichte weiterpflegen:</strong> Diese HTML-Workbench bleibt als Zwischenstand nutzbar. Deine Notizen lassen sich unten als JSON exportieren und wieder an Codex geben.</li>
           </ul>
         </article>
         <article class="card">
           <h2>Empfehlung</h2>
-          <div class="status-box good">Ich wuerde TASK_938 jetzt als engen Final-Tuning-Slice machen, solange kein akzeptierter echter Sichtbefund vorliegt.</div>
+          <div class="status-box good">Ich wuerde als naechstes TASK_939 machen: frischen Fensterblick nach TASK_938 sichern und dann Smoke oder Restreibung sauber entscheiden.</div>
           <label style="margin-top:12px; display:block;">Naechster Modus
             <select data-export-key="next.mode">
-              <option value="task938_final_tuning" selected>TASK_938 Final-Tuning</option>
-              <option value="task938_smoke">TASK_938 Playability-Smoke</option>
+              <option value="task939_recapture" selected>TASK_939 Recapture</option>
+              <option value="task940_smoke">Playability-Smoke nach Akzeptanz</option>
               <option value="pause_visuals">Visuals stoppen, Systemblock starten</option>
             </select>
           </label>
@@ -224,10 +225,10 @@
       <div class="grid">
         <article class="card full">
           <h2>Deine Notizen</h2>
-          <p>Wenn du den Bericht im Browser liest, kannst du hier direkt markieren, ob du TASK_938 als Final-Tuning oder Smoke willst.</p>
+          <p>Wenn du den Bericht im Browser liest, kannst du hier direkt markieren, ob TASK_939 als Recapture weitergehen soll oder ob der Fokus wechseln soll.</p>
           <div class="button-row" style="margin-top:12px;" data-choice-group="decision.task938">
-            <button class="choice active" type="button" data-choice-value="final_tuning">Final-Tuning machen</button>
-            <button class="choice" type="button" data-choice-value="smoke">Smoke starten</button>
+            <button class="choice active" type="button" data-choice-value="recapture">TASK_939 recapturen</button>
+            <button class="choice" type="button" data-choice-value="smoke">Smoke nach Akzeptanz</button>
             <button class="choice" type="button" data-choice-value="switch">Fokus wechseln</button>
           </div>
           <div style="margin-top:12px;" contenteditable="true" data-note-key="notes.user" data-placeholder="Sichtbefund, Bauchgefuehl, Stopper oder naechste Prioritaet..."></div>
@@ -310,9 +311,9 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_task: "TASK_937",
-            next_task: "TASK_938",
-            recommended_next_task: "TASK_938 - Release First Exchange Followup Fix Player Polish Final Tuning",
+            current_task: "TASK_938",
+            next_task: "TASK_939",
+            recommended_next_task: "TASK_939 - Release First Exchange Followup Fix Player Polish Final Tuning Recapture",
             release_path_status: "playable_path_hardened",
             first_exchange_status: "visible_but_needs_acceptance"
           },
