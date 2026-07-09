@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_915 - Release First Exchange Fire Lane World Read Acceptance Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_915_release_first_exchange_fire_lane_world_read_acceptance_visual_findings.md`, `docs/tasks/TASK_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.md`, `docs/tasks/TASK_913_release_first_exchange_fire_lane_world_read_acceptance_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_915 bewertet den TASK_914-Snapshot/Manifest read-only als Spielerblick.
+- Stand: `ReleaseFirstExchangeFireLaneWorldReadAcceptanceVisualFindings.build_snapshot()` trennt Quellintegritaet, fehlenden manuellen Sichttest, Restreibung und echte Akzeptanz fuer einen First-Exchange-Playability-Smoke.
+- Stand: Positive Befunde werden erhalten: finaler CONTACT-FIRE-Source-Snapshot, trusted Window-Handle-Capture, TASK_913-Acceptance-Style und TASK_910-World-Read-Basis.
+- Risiken/offen: Ohne manuellen Sichtbefund bleibt der Snapshot `needs_manual_review`. Bei Restreibung empfiehlt TASK_915 einen engen Final-Polish; bei Akzeptanz einen Playability-Smoke.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_915_release_first_exchange_fire_lane_world_read_acceptance_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_916 - Release First Exchange Playability Smoke oder TASK_916 - Release First Exchange Fire Lane World Read Final Polish, abhaengig vom Sichtbefund.
+
 ### TASK_914 - Release First Exchange Fire Lane World Read Acceptance Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.md`, `docs/tasks/TASK_913_release_first_exchange_fire_lane_world_read_acceptance_polish.md`, `docs/tasks/TASK_911_release_first_exchange_fire_lane_world_read_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
