@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_956 - First Decision Micro Scenario Polish (implementiert): Der bestandene Decision-Overlay-Smoke wird im Controller als kurze NEXT/WHY/GO-Spielerzeile und drei lesbare Choice-Zeilen in Command Feedback exportiert.
 - TASK_955 - Decision Overlay Playability Smoke (implementiert): Akzeptierte TASK_954-Findings werden mit einem Playthrough-Trace gegen Zielpreview, Pfad, Risk-Level, GO-Grenze, Command-Surfaces, Post-GO-Feedback und Hotpath-Ruhe als kleiner Playability-Smoke bewertet.
 - TASK_954 - Decision Overlay Real Window Visual Findings (implementiert): TASK_953-Recapture-Snapshots und manuelle Sichtnotizen werden read-only bewertet; offene Sichtbefunde bleiben offen, Reibungen routen zum Polish-Follow-up, saubere Befunde zum Playability-Smoke.
 - BUGFIX - Singleplayer Release Homebase Start Bootstrap (implementiert): EXE-Startpfad seedet Roster, ALPHA-Fireteam, Dropship, Pilot und fertiges Boarding, damit `Einzelspieler` nicht in einer blockierten Homebase-Readiness haengen bleibt.

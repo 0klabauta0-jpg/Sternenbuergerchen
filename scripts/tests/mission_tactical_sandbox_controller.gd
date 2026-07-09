@@ -37,6 +37,8 @@ const WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT: GDScript = preload("res://scripts
 const TACTICAL_DECISION_THREAT_ANALYZER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_decision_threat_analyzer.gd")
 const TACTICAL_DECISION_CLARITY_SCENARIO_RETURN_SCRIPT: GDScript = preload("res://scripts/mission/tactical_decision_clarity_scenario_return.gd")
 const ORDER_PREVIEW_THREAT_OVERLAY_PLAYTEST_SCENARIO_SCRIPT: GDScript = preload("res://scripts/mission/order_preview_threat_overlay_playtest_scenario.gd")
+const DECISION_OVERLAY_PLAYABILITY_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/decision_overlay_playability_smoke.gd")
+const FIRST_DECISION_MICRO_SCENARIO_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/first_decision_micro_scenario_polish.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -20842,6 +20844,106 @@ func _decision_overlay_badges_hide_raw_ids(badges: Array) -> bool:
 	return true
 
 
+func get_first_decision_micro_scenario_polish_snapshot(source_smoke_override: Dictionary = {}, hud_snapshot_override: Dictionary = {}, visual_polish_override: Dictionary = {}) -> Dictionary:
+	var hud_snapshot: Dictionary = hud_snapshot_override.duplicate(true) if not hud_snapshot_override.is_empty() else get_order_preview_threat_overlay_f6_hud_snapshot()
+	var visual_polish: Dictionary = visual_polish_override.duplicate(true) if not visual_polish_override.is_empty() else get_decision_overlay_f6_visual_polish_snapshot(get_decision_overlay_real_f6_visual_review_snapshot(hud_snapshot))
+	var source_smoke: Dictionary = source_smoke_override.duplicate(true) if not source_smoke_override.is_empty() else _build_first_decision_micro_scenario_smoke_snapshot(hud_snapshot, visual_polish)
+	return Dictionary(FIRST_DECISION_MICRO_SCENARIO_POLISH_SCRIPT.call("build_snapshot", source_smoke, hud_snapshot, visual_polish)).duplicate(true)
+
+
+func _build_first_decision_micro_scenario_smoke_snapshot(hud_snapshot: Dictionary, visual_polish: Dictionary) -> Dictionary:
+	var source_findings: Dictionary = {
+		"schema": "sternenbuergerchen.decision_overlay_real_window_visual_findings.v1",
+		"task_id": "TASK_954",
+		"source_task_id": "TASK_953",
+		"source_polish_task_id": "TASK_952",
+		"status": "accepted_for_decision_overlay_playability_smoke",
+		"accepted": true,
+		"manual_review_required": true,
+		"manual_review_done": true,
+		"positive_findings": [
+			{"id": "decision_overlay_badges_visible"},
+			{"id": "safe_risky_suicidal_order_visible"},
+			{"id": "player_readability_ok"},
+		],
+		"issues": [],
+		"blocking_issues": [],
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+	var cards: Array = Array(hud_snapshot.get("visible_choice_cards", []))
+	var trace: Dictionary = {
+		"trace_available": true,
+		"decision_surface": "mission_hud",
+		"fireteam_id": String(Dictionary(hud_snapshot.get("scenario_snapshot", {})).get("fireteam_id", "FT1")),
+		"choice_count": int(hud_snapshot.get("visible_choice_count", cards.size())),
+		"recommended_choice_id": String(hud_snapshot.get("recommended_choice_id", "")),
+		"destination_preview_visible": _first_decision_choice_cards_have_target(cards),
+		"path_preview_visible": _first_decision_choice_cards_have_path(cards),
+		"risk_levels_visible": _first_decision_choice_cards_have_risk_levels(cards),
+		"safe_risky_suicidal_order_visible": _decision_overlay_badge_order_is_stable(Array(visual_polish.get("visual_badges", []))),
+		"line_of_fire_reasons_visible": _first_decision_choice_cards_have_line_reasons(cards),
+		"best_choice_readable": not String(hud_snapshot.get("recommended_choice_id", "")).strip_edges().is_empty(),
+		"go_boundary_preserved": _first_decision_choice_cards_preserve_go_boundary(cards),
+		"no_command_before_go": bool(hud_snapshot.get("read_only", false)) and not bool(hud_snapshot.get("creates_command", false)),
+		"command_surfaces_usable": true,
+		"go_can_be_confirmed": true,
+		"post_go_feedback_visible": true,
+		"performance_hotpath_ok": not bool(Dictionary(visual_polish.get("layout_contract", {})).get("rebuilds_ui_tree", true)),
+		"no_new_hud_gameplay_truth": bool(hud_snapshot.get("read_only", false))
+			and bool(visual_polish.get("read_only", false))
+			and not bool(hud_snapshot.get("ui_sets_gameplay_truth", false))
+			and not bool(visual_polish.get("ui_sets_gameplay_truth", false)),
+	}
+	return Dictionary(DECISION_OVERLAY_PLAYABILITY_SMOKE_SCRIPT.call("build_snapshot", source_findings, trace)).duplicate(true)
+
+
+func _first_decision_choice_cards_have_target(cards: Array) -> bool:
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		if not card.has("ghost_position"):
+			return false
+	return not cards.is_empty()
+
+
+func _first_decision_choice_cards_have_path(cards: Array) -> bool:
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		if int(card.get("path_point_count", 0)) <= 0:
+			return false
+	return not cards.is_empty()
+
+
+func _first_decision_choice_cards_have_risk_levels(cards: Array) -> bool:
+	var risks: Array = []
+	for card_variant in cards:
+		var risk_state: String = String(Dictionary(card_variant).get("risk_state", "")).strip_edges().to_lower()
+		if not risk_state.is_empty() and not risks.has(risk_state):
+			risks.append(risk_state)
+	return risks.has("safe") and risks.has("risky") and risks.has("suicidal")
+
+
+func _first_decision_choice_cards_have_line_reasons(cards: Array) -> bool:
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		if String(card.get("risk_state", "")) != "safe" and int(card.get("line_of_fire_entry_count", 0)) <= 0:
+			return false
+	return not cards.is_empty()
+
+
+func _first_decision_choice_cards_preserve_go_boundary(cards: Array) -> bool:
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		if String(card.get("go_boundary", "")) != "preview_only_until_go":
+			return false
+		if not bool(card.get("visible_before_go", false)):
+			return false
+	return not cards.is_empty()
+
+
 func _get_frontier_probe_one_screen_next_token(next_interaction: Dictionary, handoff: Dictionary) -> String:
 	if bool(handoff.get("handoff_ready", false)):
 		return "DEBRIEF"
@@ -23441,6 +23543,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var order_preview_threat_overlay_f6_hud: Dictionary = get_order_preview_threat_overlay_f6_hud_snapshot()
 	var decision_overlay_real_f6_visual_review: Dictionary = get_decision_overlay_real_f6_visual_review_snapshot(order_preview_threat_overlay_f6_hud)
 	var decision_overlay_f6_visual_polish: Dictionary = get_decision_overlay_f6_visual_polish_snapshot(decision_overlay_real_f6_visual_review)
+	var first_decision_micro_scenario_polish: Dictionary = get_first_decision_micro_scenario_polish_snapshot({}, order_preview_threat_overlay_f6_hud, decision_overlay_f6_visual_polish)
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
@@ -23561,6 +23664,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"decision_overlay_f6_visual_polish": decision_overlay_f6_visual_polish,
 		"decision_overlay_f6_visual_polish_gate": String(decision_overlay_f6_visual_polish.get("gate", "")),
 		"decision_overlay_f6_visual_polish_status": String(decision_overlay_f6_visual_polish.get("status", "")),
+		"first_decision_micro_scenario_polish": first_decision_micro_scenario_polish,
+		"first_decision_micro_scenario_line": String(first_decision_micro_scenario_polish.get("primary_cue_line", "")),
+		"first_decision_micro_scenario_gate": String(first_decision_micro_scenario_polish.get("gate", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

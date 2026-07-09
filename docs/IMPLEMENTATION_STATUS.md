@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_956 - First Decision Micro Scenario Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_956_first_decision_micro_scenario_polish.md`, `docs/tasks/TASK_955_decision_overlay_playability_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `FirstDecisionMicroScenarioPolish.build_snapshot()` macht aus bestandenem TASK_955-Smoke, TASK_950-HUD-Choices und TASK_952-Badges einen kurzen Spielergriff fuer die erste Entscheidung.
+- Stand: `MissionTacticalSandboxController.get_first_decision_micro_scenario_polish_snapshot()` exportiert `NEXT`, `WHY`, Vor-GO- und Nach-GO-Zeilen sowie drei lesbare Choice-Zeilen; Command Feedback stellt die primaere Zeile bereit.
+- Stand: Der empfohlene gedeckte Vorstoss steht zuerst, waehrend Risky/Suicidal als Alternativen erhalten bleiben. Der Snapshot bleibt read-only und erzeugt keine Commands oder Movement.
+- Risiken/offen: Der echte Real-Window-Playthrough-Capture fehlt noch; TASK_956 macht die Daten-/HUD-Zeile bereit, ersetzt aber keine Sichtabnahme im laufenden Fenster.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_956_first_decision_micro_scenario_polish.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_955_decision_overlay_playability_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_952_decision_overlay_f6_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_957 - First Decision Real Playthrough Capture.
+
 ### TASK_955 - Decision Overlay Playability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_955_decision_overlay_playability_smoke.md`, `docs/tasks/TASK_954_decision_overlay_real_window_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

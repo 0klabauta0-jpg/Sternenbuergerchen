@@ -95,3 +95,8 @@ Ohne manuelle Sichtnotizen bleibt der Status `needs_manual_review`. Belegte visu
 TASK_955 ist der kleine Rueckweg von Sichtbefund zu Spielbarkeit. Er akzeptiert nur TASK_954-Findings mit `accepted_for_decision_overlay_playability_smoke` und wertet danach einen Playthrough-Trace aus.
 
 Der Trace muss belegen, dass der Spieler vor `GO` Ziel, Pfad, Risiko, Line-of-Fire-Gruende und beste Wahl lesen kann, dass vor `GO` kein Command erzeugt wird, dass `GO` bestaetigbar bleibt und dass danach sichtbares Feedback erscheint. Der Snapshot bleibt read-only und erzeugt keine Gameplay-, Movement-, Combat- oder Multiplayer-Wahrheit.
+
+## First Decision Micro Scenario Polish (TASK_956)
+TASK_956 uebersetzt den bestandenen Decision-Overlay-Smoke in eine konkrete, kurze Spielerlesung fuer den ersten Griff. Erwartet sind eine `NEXT ... -> GO`-Zeile, eine `WHY`-Zeile, eine Vor-GO-Grenze und eine Nach-GO-Feedback-Zeile.
+
+Die empfohlene sichere Choice steht zuerst; risky und suicidal bleiben als Alternativen sichtbar. Alle Zeilen muessen spielernahe Labels nutzen und interne Choice-IDs verstecken. Der Snapshot bleibt read-only, nutzt vorhandene TASK_950-/TASK_952-Daten und erzeugt keine Gameplay-, Movement-, Combat- oder Multiplayer-Wahrheit.
