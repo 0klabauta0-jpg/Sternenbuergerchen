@@ -457,6 +457,28 @@ const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_NOISE_ALPHA: float = 0.28
 const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_SHADOW_ALPHA: float = 0.20
 const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_ALPHA_FACTOR: float = 0.22
 const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_WIDTH_FACTOR: float = 0.34
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_STYLE_ID: String = "task_904_release_first_exchange_fire_lane_readability_v1"
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_LANE_WIDTH: float = 0.092
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_LANE_COLOR: Color = Color(1.0, 0.90, 0.42, 0.54)
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_WIDTH: float = 0.038
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_COLOR: Color = Color(1.0, 0.98, 0.68, 0.88)
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_RADIUS: float = 0.38
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_HEIGHT: float = 0.068
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_COLOR: Color = Color(1.0, 0.91, 0.48, 0.10)
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_FOCUS_RADIUS: float = 0.48
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_FOCUS_HEIGHT: float = 0.08
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.96, 0.58, 0.66)
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_RADIUS: float = 0.16
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_HEIGHT: float = 0.085
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_COLOR: Color = Color(0.72, 0.95, 1.0, 0.30)
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_ANCHOR_RADIUS: float = 0.07
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_ANCHOR_COLOR: Color = Color(0.76, 0.97, 1.0, 0.78)
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_ANCHOR_RADIUS: float = 0.08
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_ANCHOR_COLOR: Color = Color(1.0, 0.97, 0.62, 0.78)
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_GRID_NOISE_ALPHA: float = 0.24
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_GRID_SHADOW_ALPHA: float = 0.18
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_WORLD_LINE_ALPHA_FACTOR: float = 0.18
+const RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_WORLD_LINE_WIDTH_FACTOR: float = 0.30
 const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
 	"CONTACT",
 	"MOVE",
@@ -1005,6 +1027,7 @@ func set_order_visual_payload(order_payload: Dictionary) -> void:
 	_order_payload_apply_count += 1
 	var previous_insertion_residue_declutter_active: bool = _is_release_firefight_insertion_residue_declutter_active()
 	var previous_marker_scale_world_noise_active: bool = _is_release_first_exchange_combat_marker_scale_world_noise_active()
+	var previous_fire_lane_readability_active: bool = _is_release_first_exchange_fire_lane_readability_active()
 	var next_signature: String = _build_order_visual_signature(order_payload)
 	if next_signature == _order_visual_signature:
 		_order_payload = order_payload.duplicate(true)
@@ -1012,7 +1035,7 @@ func set_order_visual_payload(order_payload: Dictionary) -> void:
 		return
 	_order_visual_signature = next_signature
 	_order_payload = order_payload.duplicate(true)
-	if previous_marker_scale_world_noise_active != _is_release_first_exchange_combat_marker_scale_world_noise_active():
+	if previous_marker_scale_world_noise_active != _is_release_first_exchange_combat_marker_scale_world_noise_active() or previous_fire_lane_readability_active != _is_release_first_exchange_fire_lane_readability_active():
 		_refresh_tile_grid_materials_for_release_polish()
 	if _order_payload.has("contact_density_heatmap_enabled"):
 		var contact_density_enabled: bool = bool(_order_payload.get("contact_density_heatmap_enabled", false))
@@ -1861,6 +1884,31 @@ func get_render_snapshot() -> Dictionary:
 		"world_combat_marker_scale_world_line_alpha_factor": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_ALPHA_FACTOR if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 1.0,
 		"world_combat_marker_scale_world_line_width_factor": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_WIDTH_FACTOR if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 1.0,
 		"world_combat_marker_scale_policy": "smaller_target_halo_quieter_source_glow_reduced_grid_world_noise" if _is_release_first_exchange_combat_marker_scale_world_noise_active() else "default",
+		"release_first_exchange_fire_lane_readability_polish_active": _is_release_first_exchange_fire_lane_readability_active(),
+		"release_first_exchange_fire_lane_readability_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_STYLE_ID if _is_release_first_exchange_fire_lane_readability_active() else "",
+		"world_combat_fire_lane_readability_lane_visible": _is_release_first_exchange_fire_lane_readability_active(),
+		"world_combat_fire_lane_readability_lane_width": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_LANE_WIDTH if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_lane_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_LANE_COLOR.a if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_core_visible": _is_release_first_exchange_fire_lane_readability_active(),
+		"world_combat_fire_lane_readability_core_width": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_WIDTH if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_core_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_COLOR.a if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_target_halo_visible": _is_release_first_exchange_fire_lane_readability_active(),
+		"world_combat_fire_lane_readability_target_halo_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_RADIUS if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_target_halo_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_COLOR.a if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_target_focus_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_FOCUS_RADIUS if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_source_glow_visible": _is_release_first_exchange_fire_lane_readability_active(),
+		"world_combat_fire_lane_readability_source_glow_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_RADIUS if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_source_glow_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_COLOR.a if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_source_anchor_visible": _is_release_first_exchange_fire_lane_readability_active(),
+		"world_combat_fire_lane_readability_source_anchor_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_ANCHOR_RADIUS if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_target_anchor_visible": _is_release_first_exchange_fire_lane_readability_active(),
+		"world_combat_fire_lane_readability_target_anchor_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_ANCHOR_RADIUS if _is_release_first_exchange_fire_lane_readability_active() else 0.0,
+		"world_combat_fire_lane_readability_grid_noise_dimming_active": _is_release_first_exchange_fire_lane_readability_active(),
+		"world_combat_fire_lane_readability_grid_noise_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_GRID_NOISE_ALPHA if _is_release_first_exchange_fire_lane_readability_active() else 1.0,
+		"world_combat_fire_lane_readability_world_line_dimming_active": _is_release_first_exchange_fire_lane_readability_active(),
+		"world_combat_fire_lane_readability_world_line_alpha_factor": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_WORLD_LINE_ALPHA_FACTOR if _is_release_first_exchange_fire_lane_readability_active() else 1.0,
+		"world_combat_fire_lane_readability_world_line_width_factor": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_WORLD_LINE_WIDTH_FACTOR if _is_release_first_exchange_fire_lane_readability_active() else 1.0,
+		"world_combat_fire_lane_readability_policy": "soft_lane_plus_bright_core_with_small_anchors" if _is_release_first_exchange_fire_lane_readability_active() else "default",
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -5213,7 +5261,17 @@ func _is_release_first_exchange_combat_marker_scale_world_noise_active() -> bool
 	return bool(_mission_status_payload.get("release_first_exchange_combat_marker_scale_world_noise_polish", false))
 
 
+func _is_release_first_exchange_fire_lane_readability_active() -> bool:
+	if not _is_release_first_exchange_combat_marker_scale_world_noise_active():
+		return false
+	if bool(_order_payload.get("release_first_exchange_fire_lane_readability_polish", false)):
+		return true
+	return bool(_mission_status_payload.get("release_first_exchange_fire_lane_readability_polish", false))
+
+
 func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> Color:
+	if _is_release_first_exchange_fire_lane_readability_active():
+		return Color(base_color.r, base_color.g, base_color.b, clampf(base_color.a * RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_WORLD_LINE_ALPHA_FACTOR, 0.035, base_color.a))
 	if _is_release_first_exchange_combat_marker_scale_world_noise_active():
 		return Color(base_color.r, base_color.g, base_color.b, clampf(base_color.a * RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_ALPHA_FACTOR, 0.04, base_color.a))
 	if _is_release_first_exchange_combat_focal_elegance_active():
@@ -5226,6 +5284,8 @@ func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> C
 
 
 func _get_release_fire_exchange_focused_world_line_width(base_width: float) -> float:
+	if _is_release_first_exchange_fire_lane_readability_active():
+		return maxf(base_width * RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_WORLD_LINE_WIDTH_FACTOR, 0.01)
 	if _is_release_first_exchange_combat_marker_scale_world_noise_active():
 		return maxf(base_width * RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_WIDTH_FACTOR, 0.01)
 	if _is_release_first_exchange_combat_focal_elegance_active():
@@ -6613,6 +6673,7 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var first_exchange_world_combat_focal_active: bool = _is_release_first_exchange_world_combat_focal_hierarchy_active()
 	var first_exchange_combat_focal_elegance_active: bool = _is_release_first_exchange_combat_focal_elegance_active()
 	var first_exchange_combat_marker_scale_world_noise_active: bool = _is_release_first_exchange_combat_marker_scale_world_noise_active()
+	var first_exchange_fire_lane_readability_active: bool = _is_release_first_exchange_fire_lane_readability_active()
 	var muzzle_flash_width: float = WEAPON_FIRE_MUZZLE_FLASH_WIDTH
 	var trace_width: float = WEAPON_FIRE_TRACE_WIDTH
 	var impact_radius: float = WEAPON_FIRE_IMPACT_RADIUS
@@ -6671,6 +6732,11 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		target_focus_radius = RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_RADIUS
 		target_focus_height = RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_HEIGHT
 		target_focus_color = RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_COLOR
+	if first_exchange_fire_lane_readability_active:
+		trace_width = RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_WIDTH
+		target_focus_radius = RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_FOCUS_RADIUS
+		target_focus_height = RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_FOCUS_HEIGHT
+		target_focus_color = RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_FOCUS_COLOR
 	var muzzle_texture_available: bool = texture != null
 	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
 	if muzzle_texture_card_visible:
@@ -6706,7 +6772,14 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		_add_wide_line3d(_order_root, _world_to_surface_3d_position(arrow_left, 0.875), _world_to_surface_3d_position(target_position, 0.875), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireDirectionArrowLeft_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH)
 		_add_wide_line3d(_order_root, _world_to_surface_3d_position(arrow_right, 0.875), _world_to_surface_3d_position(target_position, 0.875), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireDirectionArrowRight_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH)
 		_add_marker3d(_order_root, target_position, RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireImpactRelationshipAnchor_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_RADIUS, RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_HEIGHT, 12, 0.88)
-	if first_exchange_combat_marker_scale_world_noise_active:
+	if first_exchange_fire_lane_readability_active:
+		_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.912), _world_to_surface_3d_position(target_position, 0.912), RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_LANE_COLOR, "WeaponFireWorldCombatFireLaneReadabilityLane_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_LANE_WIDTH)
+		_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.925), _world_to_surface_3d_position(target_position, 0.925), RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_COLOR, "WeaponFireWorldCombatFireLaneReadabilityCore_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_WIDTH)
+		_add_marker3d(_order_root, muzzle_position, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_COLOR, "WeaponFireWorldCombatFireLaneReadabilitySourceGlow_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_RADIUS, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_HEIGHT, 12, 0.89)
+		_add_marker3d(_order_root, muzzle_position, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_ANCHOR_COLOR, "WeaponFireWorldCombatFireLaneReadabilitySourceAnchor_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_ANCHOR_RADIUS, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_HEIGHT, 10, 0.93)
+		_add_marker3d(_order_root, target_position, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_COLOR, "WeaponFireWorldCombatFireLaneReadabilityTargetHalo_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_RADIUS, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_HEIGHT, 20, 0.905)
+		_add_marker3d(_order_root, target_position, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_ANCHOR_COLOR, "WeaponFireWorldCombatFireLaneReadabilityTargetAnchor_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_ANCHOR_RADIUS, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_HEIGHT, 10, 0.93)
+	elif first_exchange_combat_marker_scale_world_noise_active:
 		_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.91), _world_to_surface_3d_position(target_position, 0.91), RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_COLOR, "WeaponFireWorldCombatMarkerScaleLane_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_WIDTH)
 		_add_marker3d(_order_root, muzzle_position, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_COLOR, "WeaponFireWorldCombatMarkerScaleSourceGlow_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_RADIUS, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_HEIGHT, 12, 0.89)
 		_add_marker3d(_order_root, target_position, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_COLOR, "WeaponFireWorldCombatMarkerScaleTargetHalo_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_RADIUS, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_HEIGHT, 20, 0.905)
@@ -6820,6 +6893,25 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"world_combat_marker_scale_source_glow_visible": first_exchange_combat_marker_scale_world_noise_active,
 		"world_combat_marker_scale_source_glow_radius": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_RADIUS if first_exchange_combat_marker_scale_world_noise_active else 0.0,
 		"world_combat_marker_scale_source_glow_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_COLOR.a if first_exchange_combat_marker_scale_world_noise_active else 0.0,
+		"fire_lane_readability_polish_active": first_exchange_fire_lane_readability_active,
+		"fire_lane_readability_polish_style_id": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_STYLE_ID if first_exchange_fire_lane_readability_active else "",
+		"world_combat_fire_lane_readability_lane_visible": first_exchange_fire_lane_readability_active,
+		"world_combat_fire_lane_readability_lane_width": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_LANE_WIDTH if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_lane_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_LANE_COLOR.a if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_core_visible": first_exchange_fire_lane_readability_active,
+		"world_combat_fire_lane_readability_core_width": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_WIDTH if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_core_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_CORE_COLOR.a if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_target_halo_visible": first_exchange_fire_lane_readability_active,
+		"world_combat_fire_lane_readability_target_halo_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_RADIUS if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_target_halo_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_HALO_COLOR.a if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_target_focus_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_FOCUS_RADIUS if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_source_glow_visible": first_exchange_fire_lane_readability_active,
+		"world_combat_fire_lane_readability_source_glow_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_RADIUS if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_source_glow_alpha": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_GLOW_COLOR.a if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_source_anchor_visible": first_exchange_fire_lane_readability_active,
+		"world_combat_fire_lane_readability_source_anchor_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_SOURCE_ANCHOR_RADIUS if first_exchange_fire_lane_readability_active else 0.0,
+		"world_combat_fire_lane_readability_target_anchor_visible": first_exchange_fire_lane_readability_active,
+		"world_combat_fire_lane_readability_target_anchor_radius": RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_TARGET_ANCHOR_RADIUS if first_exchange_fire_lane_readability_active else 0.0,
 		"fire_direction_arrow_visible": direction_arrow_visible,
 		"fire_direction_arrow_world": direction_arrow_world,
 		"fire_direction_arrow_width": direction_arrow_width,
@@ -10942,7 +11034,9 @@ func _make_editor_grid_material(is_highlight: bool = true) -> StandardMaterial3D
 
 func _get_tile_grid_line_color_for_release_polish(is_highlight: bool) -> Color:
 	var color: Color = TILE_GRID_LINE_COLOR if is_highlight else TILE_GRID_LINE_SHADOW_COLOR
-	if _is_release_first_exchange_combat_marker_scale_world_noise_active():
+	if _is_release_first_exchange_fire_lane_readability_active():
+		color.a = minf(color.a, RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_GRID_NOISE_ALPHA if is_highlight else RELEASE_FIRST_EXCHANGE_FIRE_LANE_READABILITY_GRID_SHADOW_ALPHA)
+	elif _is_release_first_exchange_combat_marker_scale_world_noise_active():
 		color.a = minf(color.a, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_NOISE_ALPHA if is_highlight else RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_SHADOW_ALPHA)
 	return color
 

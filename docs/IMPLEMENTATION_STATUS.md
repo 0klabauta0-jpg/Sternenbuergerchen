@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_904 - Release First Exchange Fire Lane Readability Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_904_release_first_exchange_fire_lane_readability_polish.md`, `docs/tasks/TASK_903_release_first_exchange_combat_marker_scale_visual_findings.md`, `docs/tasks/TASK_901_release_first_exchange_combat_marker_scale_world_noise_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_904 setzt den belegten TASK_903-Befund eng um: Die Source-to-target-Fire-Lane bekommt eine weichere Fuehrung plus schmalen hellen Kern, kleine Source-/Target-Anker und weiter ruhige Grid-/World-Line-Dimmung.
+- Stand: `TerrainMap3DView` meldet den Style `task_904_release_first_exchange_fire_lane_readability_v1` und effektive Lane-/Core-/Halo-/Anchor-/Noise-Werte im Render-Snapshot und in den Weapon-Fire-VFX-Entries.
+- Stand: Der Mission-Controller haengt den neuen Primary3D-Payload-Schalter nur an die bestehende TASK_901-Kette und stellt `get_release_first_exchange_fire_lane_readability_polish_snapshot()` read-only bereit.
+- Risiken/offen: TASK_904 ist noch kein neuer echter Fensterbeweis. Der naechste Slice muss frisch exportieren/capturen und pruefen, ob die Fire-Lane im Spielerblick wirklich intuitiver wirkt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_904_release_first_exchange_fire_lane_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_903_release_first_exchange_combat_marker_scale_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_901_release_first_exchange_combat_marker_scale_world_noise_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_905 - Release First Exchange Fire Lane Real Window Recapture.
+
 ### TASK_903 - Release First Exchange Combat Marker Scale Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_903_release_first_exchange_combat_marker_scale_visual_findings.md`, `docs/tasks/TASK_902_release_first_exchange_combat_marker_scale_real_window_recapture.md`, `docs/tasks/TASK_901_release_first_exchange_combat_marker_scale_world_noise_polish.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Stand: Primaere Restreibung ist `fire_lane_still_too_subtle`: Die Schussbahn ist vorhanden, aber im Weltbild noch nicht die erste intuitive Lesung des Feuerwechsels. Weitere Reibung: FIRE/CONTACT-Marker-Cluster und dichtes Bottom-HUD.
 - Risiken/offen: TASK_903 aendert keine Runtime. Der naechste Slice muss eng Fire-Lane-/Source-to-target-Lesbarkeit polieren, ohne Combat- oder HUD-Wahrheit zu oeffnen.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_903_release_first_exchange_combat_marker_scale_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_902_release_first_exchange_combat_marker_scale_real_window_recapture.gd`, `git diff --check`.
-- Naechster Schritt: TASK_904 - Release First Exchange Fire Lane Readability Polish.
+- Naechster Schritt: TASK_904 - Release First Exchange Fire Lane Readability Polish (implementiert im Arbeitsstand).
 
 ### TASK_902 - Release First Exchange Combat Marker Scale Real Window Recapture
 - Status: implementiert im Arbeitsstand

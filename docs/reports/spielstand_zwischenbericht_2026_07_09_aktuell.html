@@ -87,7 +87,7 @@
 <body data-report-id="spielstand_zwischenbericht_2026_07_09_aktuell" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Aktueller Arbeitsstand am 2026-07-09, 03:32 Uhr: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was ich als naechstes bearbeiten will. Neu aktualisiert nach TASK_903: Der TASK_902-EXE-/Window-Capture ist gelaufen, der Sichtbefund ist geschnitten, und TASK_904 soll die Fire-Lane als erste Weltlesung staerken.</p>
+    <p>Aktueller Arbeitsstand am 2026-07-09: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was ich als naechstes bearbeiten will. Neu aktualisiert nach TASK_904: Die belegte Fire-Lane-Reibung aus TASK_903 ist als enger Primary3D-Visual-Polish umgesetzt, und TASK_905 soll den echten Fensterblick frisch recapturen.</p>
     <div class="meta-row">
       <span class="pill good">Release-/Singleplayer-Pfad begehbar</span>
       <span class="pill good">CONTACT FIRE im echten Fenster sichtbar</span>
@@ -100,8 +100,8 @@
       <span class="pill good">TASK_902 Recapture-Rahmen implementiert</span>
       <span class="pill good">TASK_902 Window-Capture review_ready</span>
       <span class="pill good">TASK_903 Findings geschnitten</span>
-      <span class="pill warn">Naechster Polish: TASK_904 Fire Lane</span>
-      <span class="pill warn">Zwischenbericht aktualisiert 03:32</span>
+      <span class="pill good">TASK_904 Fire-Lane-Polish umgesetzt</span>
+      <span class="pill warn">Naechster Beweis: TASK_905 Recapture</span>
       <span class="pill warn">Untracked lokal: builds/</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -125,7 +125,7 @@
             Der wichtigste Fortschritt: Der erste Release-Singleplayer-Weg ist jetzt als echte Kette pruefbar: Einzelspieler starten, Homebase in einen spielbaren Direktstart bringen, Mission starten, LZ/Drop/GO ausfuehren, Kontakt erzeugen und den ersten Feuerwechsel sichtbar lesen.
           </div>
           <div class="status-box info" style="margin-top:12px;">
-            Zwischenstand jetzt: Ich habe keinen neuen Gameplay-State gebaut, sondern den aktuellen Spielstand als Arbeitsreport nachgezogen. Der belegte Stand bleibt TASK_903: CONTACT FIRE ist in den wichtigen HUD-Flaechen sichtbar, die Marker sind ruhiger, aber die Schussbahn muss als naechstes im Weltbild staerker werden.
+            Zwischenstand jetzt: Ich habe keinen neuen Gameplay-State gebaut, sondern die bestehende Weltkampf-Darstellung weiter poliert. Der belegte Stand bleibt: CONTACT FIRE ist in den wichtigen HUD-Flaechen sichtbar, die Marker sind ruhiger, und TASK_904 macht die Schussbahn durch eine klarere Fire-Lane im Weltbild besser lesbar.
           </div>
           <h3 style="margin-top:16px;">Was sich am Spiel konkret getan hat</h3>
           <ul class="list">
@@ -133,6 +133,7 @@
             <li>Fireteam-, Mission-Control- und Event-Log-Flaechen zeigen den bestaetigten ersten Feuerkontakt synchroner an.</li>
             <li>Die Weltansicht hat jetzt eine erkennbare Feuerlesbarkeit: Trace, Impact, Ziel-Fokus, Lane, Source-Glow und Target-Halo sind als zusammenhaengende Kampfspur vorhanden.</li>
             <li>Die letzte echte Fenster-Auswertung hat die offene Reibung eingegrenzt: Nicht noch mehr Text ins HUD, sondern die vorhandene Fire-Lane als Blickfuehrung staerken.</li>
+            <li>TASK_904 setzt genau das um: weichere Fuehrungslinie, schmaler heller Kern, kleine Source-/Target-Anker und weiter leiser Halo.</li>
             <li>Der Build-/EXE-Fokus ist klarer: Der Spielordner ist nicht Doku-Deko, sondern der eigentliche Abnahmepfad fuer Singleplayer-Klick, Missionseinstieg und ersten Feuerwechsel.</li>
             <li>Der aktuelle Stand ist nicht final huebsch, aber endlich gut genug instrumentiert, um gezielt ueber Spielerblick statt ueber Vermutung zu polieren.</li>
           </ul>
@@ -143,7 +144,8 @@
             <li>Der echte TASK_902-Capture ist gelaufen: `tmp/release_first_exchange_combat_marker_scale_real_window_recapture.png` und Manifest stehen auf `review_ready`.</li>
             <li>TASK_903 ist umgesetzt: Der Screenshot bestaetigt CONTACT FIRE und ruhigere Marker, aber die Fire-Lane ist noch zu subtil als erste Weltlesung.</li>
             <li>Dieser HTML-Zwischenbericht wurde aktualisiert und bleibt als lokale Workbench fuer Playtest-Notizen, Entscheidungen und JSON-Export nutzbar.</li>
-            <li>Als naechstes TASK_904: Fire-Lane/Source-to-target-Beziehung gezielt klarer machen, ohne Combat- oder HUD-Wahrheit neu zu oeffnen.</li>
+            <li>TASK_904 ist umgesetzt: Fire-Lane/Source-to-target-Beziehung gezielt klarer machen, ohne Combat- oder HUD-Wahrheit neu zu oeffnen.</li>
+            <li>Als naechstes TASK_905: frisch exportieren/capturen und den echten Spielerfensterblick bewerten.</li>
             <li>Wenn der erste Feuerwechsel angenehm liest, den Playtest 30-60 Sekunden laenger laufen lassen: Movement, Zielerkennung, Taktik, UI-Dichte und Performance.</li>
           </ul>
           <p>Der alte Hauptschmerz war nicht mehr nur "es gibt keinen Kampf", sondern "der Kampf passiert, aber der sichtbare Fensterstand erzaehlt ihn nicht sauber". Genau daran wurde gearbeitet: Statusquelle, Render-Zeitpunkt, HUD-Flaechen und Weltkampf-Visuals wurden in kleinen Slices auseinandergezogen und wieder synchronisiert.</p>
@@ -162,7 +164,8 @@
             <div class="metric"><strong>TASK_901</strong><span>umgesetzt: Marker kleiner, Grid/World-Noise ruhiger.</span></div>
             <div class="metric"><strong>TASK_902</strong><span>umgesetzt: eigener Window-Recapture-Rahmen.</span></div>
             <div class="metric"><strong>TASK_903</strong><span>umgesetzt: echten Sichtbeleg ausgewertet.</span></div>
-            <div class="metric"><strong>TASK_904</strong><span>naechster Polish: Fire-Lane staerken.</span></div>
+            <div class="metric"><strong>TASK_904</strong><span>umgesetzt: Fire-Lane staerker lesbar.</span></div>
+            <div class="metric"><strong>TASK_905</strong><span>naechster Beweis: echter Window-Recapture.</span></div>
           </div>
         </article>
         <article class="card full">
@@ -361,8 +364,7 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen wuerde</h2>
           <ol class="list">
-            <li><strong>TASK_904 - Fire Lane Readability Polish:</strong> Die belegte TASK_903-Reibung eng umsetzen: Source-to-target-Fire-Lane klarer als Schussbahn lesen lassen, ohne neue Combat- oder HUD-Wahrheit.</li>
-            <li><strong>TASK_905 - frischer Recapture danach:</strong> Nach TASK_904 wieder exportieren/capturen, damit nicht nur der Verifier, sondern der echte Spielerfensterblick zaehlt.</li>
+            <li><strong>TASK_905 - frischer Recapture:</strong> Nach TASK_904 wieder exportieren/capturen, damit nicht nur der Verifier, sondern der echte Spielerfensterblick zaehlt.</li>
             <li><strong>Kleiner freier Playtest:</strong> Nach dem ersten Feuerwechsel nicht sofort stoppen, sondern 30-60 Sekunden weiterlaufen lassen: Befehle, Movement, Zielerkennung, UI-Dichte, Performance.</li>
             <li><strong>Spielerfuehrung nachziehen:</strong> Wenn TASK_904 den Spielerblick bestaetigt, den ersten Missionsgriff weiter angenehmer machen: naechster sinnvoller Befehl, Rueckmeldung, weniger Denk-Arbeit fuer den Spieler.</li>
             <li><strong>Danach Entscheidung:</strong> Entweder erste Mission weiter ausbauen oder wieder Richtung taktische Entscheidungslesbarkeit gehen: Order Preview, Line-of-Fire, Threat Overlay.</li>
@@ -371,11 +373,11 @@
         <article class="card">
           <h2>Entscheidung</h2>
           <div class="button-row" data-choice-group="next.priority">
-            <button class="choice active" type="button" data-choice-value="task_904">TASK_904</button>
+            <button class="choice active" type="button" data-choice-value="task_905">TASK_905</button>
             <button class="choice" type="button" data-choice-value="free_playtest">Freier Playtest</button>
             <button class="choice" type="button" data-choice-value="decision_preview">Order Preview</button>
           </div>
-          <p>Meine Empfehlung: jetzt TASK_904. Der echte Spielerblick ist geschnitten; nun sollte die Schussbahn im Weltbild staerker werden.</p>
+          <p>Meine Empfehlung: jetzt TASK_905. Der Visual-Polish ist umgesetzt; nun muss der echte Spielerblick zeigen, ob die Schussbahn wirklich besser gelesen wird.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -516,14 +518,14 @@
           notes,
           active_choices: activeChoices,
           computed: {
-            current_task: "TASK_903 marker scale visual findings implemented; TASK_904 fire-lane readability polish recommended",
+            current_task: "TASK_904 fire-lane readability polish implemented; TASK_905 real-window recapture recommended",
             release_path_state: "singleplayer_to_first_exchange_reproducible",
             build_export_state: "task_902_real_window_capture_review_ready",
             current_player_gain: "first_exchange_contact_fire_visible_marker_scale_world_noise_polish_confirmed_in_real_window",
-            primary_open_risk: "fire_lane_still_too_subtle_for_first_world_read",
-            next_recommended_slice: "TASK_904",
-            following_recapture_slice: "TASK_905",
-            report_updated_at_local: "2026-07-09 03:32 +02:00",
+            primary_open_risk: "task_904_needs_real_window_recapture_before_visual_acceptance",
+            next_recommended_slice: "TASK_905",
+            following_recapture_slice: "free_playtest_after_task_905",
+            report_updated_at_local: "2026-07-09",
             report_purpose: "interim_workbench_for_done_changed_next"
           },
           metadata: {
