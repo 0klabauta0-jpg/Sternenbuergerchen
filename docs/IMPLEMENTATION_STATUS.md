@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_930 - Release First Exchange Final Readability Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_930_release_first_exchange_final_readability_recapture.md`, `docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md`, `docs/tasks/TASK_928_release_first_exchange_followup_player_polish_tuning_visual_findings.md`, `docs/tasks/TASK_927_release_first_exchange_followup_player_polish_tuning_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_930 legt einen frischen Recapture-/Review-Rahmen an den TASK_929-Final-Readability-Polish.
+- Stand: `capture_release_first_exchange_final_readability_recapture.ps1` wiederverwendet den TASK_927-Window-Handle-Pfad und schreibt eigene TASK_930-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFinalReadabilityRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Final-Readability-Fire-Lane als erste Weltbewegung, tragende Source-/Target-Anker, leises Label/Halo/Grid und Lane-vor-FIRE/CONTACT-Text.
+- Risiken/offen: TASK_930 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_931 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_930_release_first_exchange_final_readability_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_931 - Release First Exchange Final Readability Visual Findings.
+
 ### TASK_929 - Release First Exchange Followup Player Polish Tuning Final Readability Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md`, `docs/tasks/TASK_928_release_first_exchange_followup_player_polish_tuning_visual_findings.md`, `docs/tasks/TASK_926_release_first_exchange_followup_player_polish_tuning.md`, `docs/dev/mission_command_feedback_contract.md`

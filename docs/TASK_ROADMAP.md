@@ -170,7 +170,8 @@ git checkout -b batch/<batch-name>
 - TASK_928 - Release First Exchange Followup Player Polish Tuning Visual Findings (implementiert): TASK_927-PNG und Manifest read-only bewerten und entscheiden, ob danach ein First-Exchange-Playability-Smoke reicht.
 - TASK_928 Entscheidungsstand: Ohne akzeptierten TASK_928-Spielerblick wird `TASK_929 - Release First Exchange Playability Smoke` nicht gestartet; bei Restreibung ist `TASK_929 - Release First Exchange Followup Player Polish Tuning Final Readability Polish` der engere Folge-Schnitt.
 - TASK_929 - Release First Exchange Followup Player Polish Tuning Final Readability Polish (implementiert): Die letzte belegte Lesereibung eng polieren: Fire-Lane/Core minimal klarer, Label/Halo/Grid/Weltlinien leiser, Source-/Target-Anker tragender, ohne Combat- oder HUD-Wahrheit zu oeffnen.
-- TASK_930 - Release First Exchange Final Readability Recapture (naechster Schritt): Nach TASK_929 frisch capturen und pruefen, ob danach der Playability-Smoke freigegeben werden kann.
+- TASK_930 - Release First Exchange Final Readability Recapture (implementiert): Nach TASK_929 frisch capturen und pruefen, ob danach der Playability-Smoke freigegeben werden kann.
+- TASK_931 - Release First Exchange Final Readability Visual Findings (naechster Schritt): TASK_930-PNG und Manifest read-only bewerten und entscheiden, ob danach ein First-Exchange-Playability-Smoke reicht.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 

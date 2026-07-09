@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - TASK_929 Final Readability Polish</title>
+  <title>Sternenbuergerchen Zwischenbericht - TASK_930 Final Readability Recapture</title>
   <style>
     :root {
       color-scheme: dark;
@@ -81,14 +81,15 @@
 <body data-report-id="spielstand_zwischenbericht_task926_in_progress_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Stand 2026-07-09: TASK_926 bis TASK_928 sind erledigt. TASK_929 setzt den daraus folgenden Final-Readability-Polish um, bevor wir wieder per Recapture und danach Smoke pruefen.</p>
+    <p>Stand 2026-07-09: TASK_926 bis TASK_929 sind erledigt. TASK_930 legt den Final-Readability-Recapture-Rahmen an, bevor TASK_931 den echten Fensterblick als Findings-Schnitt bewertet.</p>
     <div class="meta-row">
       <span class="pill good">Branch: task/release-first-exchange-player-readability-polish-review</span>
       <span class="pill good">TASK_925 gepusht</span>
       <span class="pill good">TASK_926 umgesetzt</span>
       <span class="pill good">TASK_927 Recapture-Rahmen</span>
       <span class="pill good">TASK_928 Findings</span>
-      <span class="pill warn">TASK_929 Final Polish</span>
+      <span class="pill good">TASK_929 Final Polish</span>
+      <span class="pill warn">TASK_930 Recapture</span>
       <span class="pill">Report read-only</span>
     </div>
   </header>
@@ -109,14 +110,14 @@
           <h2>Kurzstand</h2>
           <div class="status-box good">Der Singleplayer-Releasepfad ist jetzt als pruefbare Kette greifbar: Start, Homebase, Mission, Dropship/GO, erster Kontakt und erster Feuerwechsel werden nicht mehr nur durch Debugwissen zusammengehalten.</div>
           <div class="status-box info" style="margin-top:12px;">Die letzten Slices haben keine neue Gameplay-Wahrheit gebaut, sondern vorhandene Runtime- und Render-Snapshots lesbarer gemacht. Das ist wichtig, weil Multiplayer spaeter dieselbe Mission lesen muss, ohne dass HUD oder Report eine zweite Wahrheit erzeugen.</div>
-          <div class="status-box" style="margin-top:12px;">TASK_926 zieht aus TASK_925 die Konsequenz: kein Smoke auf Verdacht, sondern die Fire-Lane im ersten Feuerwechsel staerker, Anker klarer, Labels/Halo/Grid leiser. TASK_927 belegt diesen Stand per eigenem Manifest und Screenshotpfad; TASK_928 schneidet daraus den Spielerblick; TASK_929 poliert die letzte Lesereibung eng nach.</div>
+          <div class="status-box" style="margin-top:12px;">TASK_926 zieht aus TASK_925 die Konsequenz: kein Smoke auf Verdacht, sondern die Fire-Lane im ersten Feuerwechsel staerker, Anker klarer, Labels/Halo/Grid leiser. TASK_927 belegt diesen Stand per eigenem Manifest und Screenshotpfad; TASK_928 schneidet daraus den Spielerblick; TASK_929 poliert die letzte Lesereibung eng nach; TASK_930 stellt jetzt wieder den echten Recapture-Rahmen her.</div>
         </article>
         <article class="card">
           <h2>Statusampel</h2>
           <div class="stack">
             <div class="metric"><strong>gruen</strong><span>Startpfad, Exporthygiene und CONTACT-FIRE-Kette sind testbar.</span></div>
-            <div class="metric"><strong>gelb</strong><span>Erster Weltblick braucht nach TASK_929 wieder echten Fensterbeweis.</span></div>
-            <div class="metric"><strong>naechst</strong><span>TASK_930: Final-Readability-Recapture, danach Smoke-Gate.</span></div>
+            <div class="metric"><strong>gelb</strong><span>Erster Weltblick braucht nach TASK_930 noch den read-only Findings-Schnitt.</span></div>
+            <div class="metric"><strong>naechst</strong><span>TASK_931: Final-Readability-Visual-Findings, danach Smoke-Gate falls akzeptiert.</span></div>
           </div>
         </article>
       </div>
@@ -136,6 +137,7 @@
             <li>TASK_927 ist als Recapture-Rahmen angelegt: eigenes Manifest, eigene Screenshotpfade und Pflichtchecks fuer den echten Fensterblick.</li>
             <li>TASK_928 ist als read-only Findings-Schnitt angelegt: er entscheidet nur zwischen Smoke-Freigabe und engem Final-Readability-Polish.</li>
             <li>TASK_929 setzt den Final-Readability-Polish um: Lane/Core klarer, Label/Halo/Grid/Weltlinien leiser, Anker tragender.</li>
+            <li>TASK_930 legt Manifest, Screenshotpfade und Reviewpflichten fuer den finalen Fensterbeweis an.</li>
           </ul>
         </article>
         <article class="card">
@@ -148,6 +150,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task927_recapture_frame"> TASK_927 Recapture-Rahmen angelegt.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task928_findings_frame"> TASK_928 Findings-Schnitt angelegt.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task929_final_polish"> TASK_929 Final-Readability-Polish angelegt.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task930_recapture_frame"> TASK_930 Final-Readability-Recapture-Rahmen angelegt.</label>
         </article>
         <article class="card full">
           <h2>Aktuelle Dateien</h2>
@@ -156,11 +159,14 @@
             <li><code>docs/tasks/TASK_927_release_first_exchange_followup_player_polish_tuning_recapture.md</code></li>
             <li><code>docs/tasks/TASK_928_release_first_exchange_followup_player_polish_tuning_visual_findings.md</code></li>
             <li><code>docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md</code></li>
+            <li><code>docs/tasks/TASK_930_release_first_exchange_final_readability_recapture.md</code></li>
             <li><code>scripts/mission/release_first_exchange_followup_player_polish_tuning.gd</code></li>
             <li><code>scripts/mission/release_first_exchange_followup_player_polish_tuning_visual_findings.gd</code></li>
             <li><code>scripts/mission/release_first_exchange_followup_player_polish_tuning_final_readability_polish.gd</code></li>
+            <li><code>scripts/mission/release_first_exchange_final_readability_recapture.gd</code></li>
             <li><code>scripts/tests/task_928_release_first_exchange_followup_player_polish_tuning_visual_findings.gd</code></li>
             <li><code>scripts/tests/task_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.gd</code></li>
+            <li><code>scripts/tests/task_930_release_first_exchange_final_readability_recapture.gd</code></li>
             <li><code>docs/reports/spielstand_zwischenbericht_task926_in_progress_2026_07_09.html</code> ist dieser Arbeitsbericht.</li>
           </ul>
         </article>
@@ -195,7 +201,7 @@
           <h2>Wo es noch reibt</h2>
           <ul class="list">
             <li>Die erste Weltlesung ist knapp an der Grenze: Text, Halo, Raster und Fire-Lane konkurrieren noch zu leicht.</li>
-            <li>Die vielen kleinen Release-Tasks sind sicher, aber langsam. Nach TASK_929 muss TASK_930 wieder ein echter Fensterbeweis sein.</li>
+            <li>Die vielen kleinen Release-Tasks sind sicher, aber langsam. Nach TASK_930 muss TASK_931 den echten Fensterblick schneiden, statt wieder blind weiterzupolieren.</li>
             <li>Map-Editor, Assets und groessere Szenarien bleiben relevant, sollten aber gerade nicht in diesen First-Exchange-Slice zurueckfallen.</li>
             <li>Der lokale Build-Ordner bleibt untracked; Git soll Quellstand, Tests und Reports tragen, nicht erzeugte Exe-Pakete.</li>
           </ul>
@@ -205,10 +211,11 @@
           <div class="button-row" data-choice-group="friction.path">
             <button class="choice" type="button" data-choice-value="recapture_task927">TASK_927 Recapture</button>
             <button class="choice" type="button" data-choice-value="findings_task928">TASK_928 Findings</button>
-            <button class="choice active" type="button" data-choice-value="task929_final_polish">TASK_929 Final Polish</button>
-            <button class="choice" type="button" data-choice-value="task930_recapture">TASK_930 Recapture</button>
+            <button class="choice" type="button" data-choice-value="task929_final_polish">TASK_929 Final Polish</button>
+            <button class="choice active" type="button" data-choice-value="task930_recapture">TASK_930 Recapture</button>
+            <button class="choice" type="button" data-choice-value="task931_findings">TASK_931 Findings</button>
           </div>
-          <p>Meine Empfehlung: TASK_929 verifizieren und danach TASK_930 als frischen Window-Handle-Recapture schneiden. Erst danach wieder Smoke-Gate.</p>
+          <p>Meine Empfehlung: TASK_930 verifizieren und danach TASK_931 als read-only Findings-Schnitt auf den echten Window-Handle-Recapture setzen. Erst danach wieder Smoke-Gate.</p>
         </article>
       </div>
     </section>
@@ -218,10 +225,10 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ol class="list">
-            <li>TASK_929-Verifier laufen lassen: Source-Metadaten, Terrain-Style und read-only-Grenzen.</li>
-            <li>TASK_928-/TASK_926-Regression laufen lassen, damit der Final-Polish die Findings- und Tuning-Pfade nicht veraendert.</li>
+            <li>TASK_930-Verifier laufen lassen: Manifest-Metadaten, Capture-Grenzen und read-only-Vertrag.</li>
+            <li>TASK_929-/TASK_927-Regression laufen lassen, damit der Recapture-Rahmen Final-Polish und Tuning-Pfade nicht veraendert.</li>
             <li>Docs/Status/Roadmap/Contract committen und pushen.</li>
-            <li>Als naechsten echten Spielschritt TASK_930 Recapture aus dem finalen Readability-Stand schneiden.</li>
+            <li>Als naechsten echten Spielschritt TASK_931 Findings aus dem finalen Recapture schneiden.</li>
             <li>Danach den First-Exchange-Playability-Smoke freigeben, wenn der Spielerblick passt.</li>
           </ol>
         </article>
@@ -231,6 +238,7 @@
             <select data-export-key="next.focus">
               <option value="task929_final_polish">TASK_929 Final Polish</option>
               <option value="task930_recapture">TASK_930 Recapture</option>
+              <option value="task931_findings">TASK_931 Findings</option>
               <option value="playability_smoke">Playability-Smoke</option>
               <option value="map_editor">Map-/Editor-Komfort</option>
             </select>
@@ -314,10 +322,10 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_task: "TASK_929 - Release First Exchange Followup Player Polish Tuning Final Readability Polish",
+            current_task: "TASK_930 - Release First Exchange Final Readability Recapture",
             current_status: "implemented_pending_local_verification",
-            last_pushed_task: "TASK_928 - Release First Exchange Followup Player Polish Tuning Visual Findings",
-            recommended_next: "TASK_930 - Release First Exchange Final Readability Recapture",
+            last_pushed_task: "TASK_929 - Release First Exchange Followup Player Polish Tuning Final Readability Polish",
+            recommended_next: "TASK_931 - Release First Exchange Final Readability Visual Findings",
             gameplay_truth_mutated_by_report: false
           },
           metadata: {
