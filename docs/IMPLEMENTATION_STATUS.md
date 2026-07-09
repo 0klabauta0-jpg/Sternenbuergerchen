@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_950 - Wire Decision Scenario Into F6 Mission HUD
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_950_wire_decision_scenario_into_f6_mission_hud.md`, `docs/tasks/TASK_949_order_preview_threat_overlay_playtest_scenario.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `MissionTacticalSandboxController.get_order_preview_threat_overlay_f6_hud_snapshot()` baut aus TASK_948/TASK_949 einen read-only HUD-Snapshot fuer die drei Preview-Choices `covered_push`, `exposed_crossing` und `kill_zone_dash`.
+- Stand: Mission Control erhaelt eine kompakte `PREVIEW SAFE ... / RISKY ... / SUICIDAL ...`-Zeile, und `get_command_feedback_snapshot()` exportiert denselben Snapshot plus Choice-Karten.
+- Stand: Das Strategic-Status-Label bekommt TASK_950-Metadaten fuer spaetere F6-Sichtchecks; der Snapshot erzeugt weiterhin keine Commands, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit.
+- Risiken/offen: Der naechste Slice sollte ein echter F6-Sichtcheck sein, ob Position, Kontrast und Textlaenge im laufenden Fenster angenehm lesbar sind.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_950_wire_decision_scenario_into_f6_mission_hud.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_949_order_preview_threat_overlay_playtest_scenario.gd`, `git diff --check`.
+- Naechster Schritt: TASK_951 - Decision Overlay Real F6 Visual Review.
+
 ### TASK_949 - Order Preview Threat Overlay Playtest Scenario
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_949_order_preview_threat_overlay_playtest_scenario.md`, `docs/tasks/TASK_948_tactical_decision_clarity_scenario_return.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

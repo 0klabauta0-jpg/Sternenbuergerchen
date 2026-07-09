@@ -1623,6 +1623,11 @@ TASK_949 konkretisiert den TASK_948-Ruecksprung als kleinen read-only Entscheidu
 
 Erwartete Struktur: `OrderPreviewThreatOverlayPlaytestScenario.build_snapshot()` liefert `schema = sternenbuergerchen.order_preview_threat_overlay_playtest_scenario.v1`, `task_id = TASK_949`, `source_task_id = TASK_948`, `status = blocked | ready_for_f6_hud_wiring`, `scenario_id`, `player_prompt`, `move_choices`, `move_choice_count = 3`, `recommended_choice_id`, `overlay_summary`, `answered_player_questions`, `recommended_next_task = TASK_950 - Wire Decision Scenario Into F6 Mission HUD`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`. Erwartete Choices: `covered_push/safe`, `exposed_crossing/risky`, `kill_zone_dash/suicidal`.
 
+## F6 Mission HUD Wiring (TASK_950)
+TASK_950 bindet den TASK_949-Scenario-Payload an den vorhandenen Mission-Control-/Command-Feedback-Pfad. UI zeigt den Preview-Entscheidungsstand, aber sie wird nicht zur Gameplay-Wahrheit.
+
+Erwartete Struktur: `MissionTacticalSandboxController.get_order_preview_threat_overlay_f6_hud_snapshot()` liefert `schema = sternenbuergerchen.order_preview_threat_overlay_f6_hud.v1`, `task_id = TASK_950`, `source_task_id = TASK_949`, `scenario_snapshot`, `visible_choice_cards`, `visible_choice_count = 3`, `mission_control_choice_line`, `selected_fireteam_choice_line`, `recommended_choice_id`, `gate = pass | review`, `recommended_next_task = TASK_951 - Decision Overlay Real F6 Visual Review`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`. `get_command_feedback_snapshot()` exportiert zusaetzlich `order_preview_threat_overlay_f6_hud`, `order_preview_threat_overlay_choice_line`, `order_preview_threat_overlay_choice_cards`, `order_preview_threat_overlay_selected_fireteam_line` und `order_preview_threat_overlay_gate`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

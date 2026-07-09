@@ -35,6 +35,8 @@ const AD_HOC_ORDER_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical
 const AD_HOC_ORDER_SCRIPT: GDScript = preload("res://scripts/command/ad_hoc_order.gd")
 const WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/waypoint_intent_preview_resolver.gd")
 const TACTICAL_DECISION_THREAT_ANALYZER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_decision_threat_analyzer.gd")
+const TACTICAL_DECISION_CLARITY_SCENARIO_RETURN_SCRIPT: GDScript = preload("res://scripts/mission/tactical_decision_clarity_scenario_return.gd")
+const ORDER_PREVIEW_THREAT_OVERLAY_PLAYTEST_SCENARIO_SCRIPT: GDScript = preload("res://scripts/mission/order_preview_threat_overlay_playtest_scenario.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -2584,6 +2586,7 @@ func _update_ui() -> void:
 		strategic_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
 		_apply_frontier_probe_one_screen_visual_polish_label_contract(strategic_status_label)
+		_apply_order_preview_threat_overlay_label_contract(strategic_status_label)
 		_apply_release_firefight_bottom_dock_density_label_contract(strategic_status_label)
 	_apply_release_fire_exchange_real_window_primary_hud_runtime_text()
 	_apply_release_first_exchange_real_window_hud_source_sync_to_labels()
@@ -6356,6 +6359,10 @@ func _build_strategic_status_text() -> String:
 	var frontier_probe_one_screen_line: String = String(frontier_probe_one_screen.get("one_screen_line", "")).strip_edges()
 	if bool(frontier_probe_one_screen.get("active", false)) and not frontier_probe_one_screen_line.is_empty():
 		lines.append(frontier_probe_one_screen_line)
+	var order_preview_threat_overlay: Dictionary = get_order_preview_threat_overlay_f6_hud_snapshot()
+	var order_preview_threat_overlay_line: String = String(order_preview_threat_overlay.get("mission_control_choice_line", "")).strip_edges()
+	if bool(order_preview_threat_overlay.get("active", false)) and not order_preview_threat_overlay_line.is_empty() and not lines.has(order_preview_threat_overlay_line):
+		lines.append(order_preview_threat_overlay_line)
 	var next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var next_interaction_line: String = String(next_interaction.get("next_interaction_line", "")).strip_edges()
 	var one_screen_covers_next: bool = bool(frontier_probe_one_screen.get("active", false)) \
@@ -6381,6 +6388,8 @@ func _build_strategic_status_text() -> String:
 	if bool(station_debrief_handoff.get("handoff_ready", false)) and not station_debrief_handoff_line.is_empty() and not lines.has(station_debrief_handoff_line):
 		lines.append(station_debrief_handoff_line)
 	lines = _prioritize_release_firefight_bottom_dock_lines(lines, combat_hud_density)
+	if bool(order_preview_threat_overlay.get("active", false)) and not order_preview_threat_overlay_line.is_empty() and not lines.has(order_preview_threat_overlay_line):
+		lines.append(order_preview_threat_overlay_line)
 	return "\n".join(lines)
 
 
@@ -8265,6 +8274,23 @@ func _apply_frontier_probe_one_screen_visual_polish_label_contract(label: Label)
 	label.set_meta("frontier_probe_one_screen_polish_style_id", "task_657_mission_control_one_screen_anchor")
 	label.set_meta("frontier_probe_one_screen_line", one_screen_line)
 	label.set_meta("frontier_probe_one_screen_next_token", String(readout.get("next_token", "")).strip_edges())
+
+
+func _apply_order_preview_threat_overlay_label_contract(label: Label) -> void:
+	if label == null:
+		return
+	var snapshot: Dictionary = get_order_preview_threat_overlay_f6_hud_snapshot()
+	var choice_line: String = String(snapshot.get("mission_control_choice_line", "")).strip_edges()
+	if not bool(snapshot.get("active", false)) or choice_line.is_empty():
+		return
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.clip_text = true
+	label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	label.set_meta("order_preview_threat_overlay_task", "TASK_950")
+	label.set_meta("order_preview_threat_overlay_style_id", "task_950_decision_choice_line")
+	label.set_meta("order_preview_threat_overlay_choice_line", choice_line)
+	label.set_meta("order_preview_threat_overlay_choice_count", int(snapshot.get("visible_choice_count", 0)))
+	label.set_meta("order_preview_threat_overlay_gate", String(snapshot.get("gate", "")))
 
 
 func _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary, compact_line: String) -> Dictionary:
@@ -20339,6 +20365,178 @@ func _build_frontier_probe_one_screen_playability_readout() -> Dictionary:
 	}
 
 
+func get_order_preview_threat_overlay_f6_hud_snapshot() -> Dictionary:
+	var source_snapshot: Dictionary = _build_order_preview_threat_overlay_task_948_source_snapshot()
+	var scenario_snapshot: Dictionary = Dictionary(ORDER_PREVIEW_THREAT_OVERLAY_PLAYTEST_SCENARIO_SCRIPT.call(
+		"build_snapshot",
+		source_snapshot,
+		{
+			"scenario_id": "frontier_probe_decision_preview_3v3_f6",
+			"fireteam_id": "blue",
+		}
+	)).duplicate(true)
+	var cards: Array = _build_order_preview_threat_overlay_visible_choice_cards(scenario_snapshot)
+	var choice_line: String = _build_order_preview_threat_overlay_f6_choice_line(cards)
+	var selected_line: String = _build_order_preview_threat_overlay_selected_fireteam_line(cards, String(scenario_snapshot.get("recommended_choice_id", "")))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"scenario_ready",
+			String(scenario_snapshot.get("status", "")) == "ready_for_f6_hud_wiring",
+			"TASK_949 payload is ready for HUD wiring."
+		),
+		_build_mission_first_move_readability_check(
+			"three_preview_choices_visible",
+			cards.size() == 3,
+			"F6 HUD exposes safe, risky and suicidal preview choices before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"mission_control_line_names_all_risks",
+			choice_line.contains("SAFE") and choice_line.contains("RISKY") and choice_line.contains("SUICIDAL"),
+			"Mission Control compact line names all risk states."
+		),
+		_build_mission_first_move_readability_check(
+			"recommended_safe_choice_visible",
+			_has_order_preview_threat_overlay_card(cards, String(scenario_snapshot.get("recommended_choice_id", "")), "safe"),
+			"Recommended safe choice remains visible in the HUD payload."
+		),
+		_build_mission_first_move_readability_check(
+			"choice_line_compact",
+			not choice_line.is_empty() and choice_line.length() <= 128,
+			"Choice line is short enough for the existing Mission Control surface."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(scenario_snapshot.get("read_only", false))
+				and not bool(scenario_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(scenario_snapshot.get("creates_command", true))
+				and not bool(scenario_snapshot.get("creates_movement", true))
+				and not bool(scenario_snapshot.get("creates_fire_event", true))
+				and not bool(scenario_snapshot.get("creates_damage_event", true))
+				and not bool(scenario_snapshot.get("sets_multiplayer_truth", true)),
+			"HUD wiring reads the preview payload and does not commit gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.order_preview_threat_overlay_f6_hud.v1",
+		"task_id": "TASK_950",
+		"source_task_id": "TASK_949",
+		"source_schema": String(scenario_snapshot.get("schema", "")),
+		"active": String(scenario_snapshot.get("status", "")) == "ready_for_f6_hud_wiring",
+		"scenario_snapshot": scenario_snapshot,
+		"visible_choice_cards": cards,
+		"visible_choice_count": cards.size(),
+		"mission_control_choice_line": choice_line,
+		"selected_fireteam_choice_line": selected_line,
+		"choice_line_char_limit": 128,
+		"choice_line_within_limit": choice_line.length() <= 128,
+		"recommended_choice_id": String(scenario_snapshot.get("recommended_choice_id", "")),
+		"visible_before_go": true,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"recommended_next_task": "TASK_951 - Decision Overlay Real F6 Visual Review",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
+func _build_order_preview_threat_overlay_task_948_source_snapshot() -> Dictionary:
+	var task_947_source := {
+		"schema": "sternenbuergerchen.release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_visual_findings.v1",
+		"task_id": "TASK_947",
+		"status": "ready_for_tactical_decision_clarity_return",
+		"recommended_next_task": "TASK_948 - Tactical Decision Clarity Scenario Return",
+		"recommended_direction": "stop_first_exchange_polish_loop_and_return_to_playable_scenario",
+	}
+	return Dictionary(TACTICAL_DECISION_CLARITY_SCENARIO_RETURN_SCRIPT.call("build_snapshot", task_947_source, {
+		"implemented_capabilities": [
+			"order_preview_ghost",
+			"path_preview",
+			"threat_exposure_levels",
+			"line_of_fire_planner",
+			"contact_report_awareness",
+			"ai_intent_debug_visibility",
+		],
+		"candidate_fixture": "frontier_probe_first_move",
+	})).duplicate(true)
+
+
+func _build_order_preview_threat_overlay_visible_choice_cards(scenario_snapshot: Dictionary) -> Array:
+	var cards: Array = []
+	for choice_variant in Array(scenario_snapshot.get("move_choices", [])):
+		if typeof(choice_variant) != TYPE_DICTIONARY:
+			continue
+		var choice: Dictionary = Dictionary(choice_variant)
+		var preview: Dictionary = Dictionary(choice.get("preview_entry", {}))
+		var choice_id: String = String(choice.get("choice_id", "")).strip_edges()
+		var risk_state: String = String(choice.get("risk_state", "unknown")).strip_edges().to_lower()
+		var screen_text: String = String(choice.get("screen_text", "")).strip_edges()
+		cards.append({
+			"choice_id": choice_id,
+			"title": String(choice.get("title", choice_id)).strip_edges(),
+			"text": screen_text,
+			"risk_state": risk_state,
+			"risk_color_key": String(choice.get("risk_color_key", "")),
+			"risk_reason": String(choice.get("risk_reason", "")),
+			"distance_world": float(choice.get("distance_world", 0.0)),
+			"eta_seconds_estimate": float(choice.get("eta_seconds_estimate", 0.0)),
+			"line_of_fire_entry_count": int(choice.get("line_of_fire_entry_count", 0)),
+			"enemy_exposure_count": int(choice.get("enemy_exposure_count", 0)),
+			"ghost_position": preview.get("ghost_ftl_position", choice.get("target_position", Vector2.ZERO)),
+			"path_point_count": Array(preview.get("ghost_path_points", [])).size(),
+			"visible_before_go": bool(choice.get("visible_before_go", false)),
+			"go_boundary": String(choice.get("go_boundary", "preview_only_until_go")),
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+	return cards
+
+
+func _build_order_preview_threat_overlay_f6_choice_line(cards: Array) -> String:
+	var tokens: PackedStringArray = PackedStringArray()
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		var risk_state: String = String(card.get("risk_state", "unknown")).strip_edges().to_upper()
+		var choice_id: String = String(card.get("choice_id", "")).strip_edges()
+		if risk_state.is_empty() or choice_id.is_empty():
+			continue
+		tokens.append("%s %s" % [risk_state, choice_id])
+	if tokens.is_empty():
+		return ""
+	return "PREVIEW %s | GO commits later" % " / ".join(Array(tokens))
+
+
+func _build_order_preview_threat_overlay_selected_fireteam_line(cards: Array, recommended_choice_id: String) -> String:
+	var recommended: String = recommended_choice_id.strip_edges()
+	if recommended.is_empty():
+		return ""
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		if String(card.get("choice_id", "")) == recommended:
+			return "Recommended preview: %s (%s)" % [recommended, String(card.get("risk_state", "unknown")).to_upper()]
+	return "Recommended preview: %s" % recommended
+
+
+func _has_order_preview_threat_overlay_card(cards: Array, expected_choice_id: String, expected_risk: String) -> bool:
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		if String(card.get("choice_id", "")) == expected_choice_id and String(card.get("risk_state", "")) == expected_risk:
+			return bool(card.get("visible_before_go", false))
+	return false
+
+
 func _get_frontier_probe_one_screen_next_token(next_interaction: Dictionary, handoff: Dictionary) -> String:
 	if bool(handoff.get("handoff_ready", false)):
 		return "DEBRIEF"
@@ -22935,6 +23133,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		_build_strategic_status_text()
 	)
 	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
+	var order_preview_threat_overlay_f6_hud: Dictionary = get_order_preview_threat_overlay_f6_hud_snapshot()
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
@@ -23044,6 +23243,11 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"mission_hud_interaction_line": String(mission_hud_interaction_density.get("mission_control_line", "")),
 		"frontier_probe_one_screen_playability": frontier_probe_one_screen,
 		"frontier_probe_one_screen_line": String(frontier_probe_one_screen.get("one_screen_line", "")),
+		"order_preview_threat_overlay_f6_hud": order_preview_threat_overlay_f6_hud,
+		"order_preview_threat_overlay_choice_line": String(order_preview_threat_overlay_f6_hud.get("mission_control_choice_line", "")),
+		"order_preview_threat_overlay_choice_cards": Array(order_preview_threat_overlay_f6_hud.get("visible_choice_cards", [])),
+		"order_preview_threat_overlay_selected_fireteam_line": String(order_preview_threat_overlay_f6_hud.get("selected_fireteam_choice_line", "")),
+		"order_preview_threat_overlay_gate": String(order_preview_threat_overlay_f6_hud.get("gate", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
