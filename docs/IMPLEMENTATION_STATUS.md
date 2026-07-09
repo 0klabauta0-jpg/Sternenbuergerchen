@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_926 - Release First Exchange Followup Player Polish Tuning
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_926_release_first_exchange_followup_player_polish_tuning.md`, `docs/tasks/TASK_925_release_first_exchange_followup_player_polish_visual_findings.md`, `docs/tasks/TASK_923_release_first_exchange_followup_world_read_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_926 setzt die in TASK_925 benannte Restreibung als engen Presentation-Slice um, statt den Playability-Smoke ohne akzeptierten Sichtbefund zu starten.
+- Stand: `ReleaseFirstExchangeFollowupPlayerPolishTuning.build_snapshot()` verlangt TASK_925-Restreibung plus einen passierenden TASK_923-Player-Polish und prueft Fire-Lane/Core, Label/Halo-Rueckzug, Richtunganker und read-only-Grenzen.
+- Stand: `TerrainMap3DView` meldet den Style `task_926_release_first_exchange_followup_player_polish_tuning_v1`; Lane/Core werden fuer den ersten Feuerwechsel staerker, Label/Halo/Grid/Weltlinien leiser und Source-/Target-Anker klarer.
+- Risiken/offen: TASK_926 ersetzt keinen echten Sichtbeweis und keinen Playability-Smoke. Nach dem Tuning braucht es einen frischen Recapture, bevor der Smoke freigegeben wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_926_release_first_exchange_followup_player_polish_tuning.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_925_release_first_exchange_followup_player_polish_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_923_release_first_exchange_followup_world_read_player_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_927 - Release First Exchange Followup Player Polish Tuning Recapture.
+
 ### TASK_925 - Release First Exchange Followup Player Polish Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_925_release_first_exchange_followup_player_polish_visual_findings.md`, `docs/tasks/TASK_924_release_first_exchange_followup_player_polish_recapture.md`, `docs/tasks/TASK_923_release_first_exchange_followup_world_read_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
