@@ -1648,6 +1648,11 @@ TASK_954 bewertet den TASK_953-Recapture und optionale manuelle Sichtnotizen. De
 
 Erwartete Struktur: `DecisionOverlayRealWindowVisualFindings.build_snapshot()` liefert `schema = sternenbuergerchen.decision_overlay_real_window_visual_findings.v1`, `task_id = TASK_954`, `source_task_id = TASK_953`, `source_polish_task_id = TASK_952`, Source-/Screenshot-Metadaten, `manual_review_required`, `manual_review_done`, `positive_findings`, `issues`, `blocking_issues`, `status = blocked | needs_manual_review | ready_for_decision_overlay_visual_polish | accepted_for_decision_overlay_playability_smoke`, `recommended_next_task = TASK_954 - Decision Overlay Real Window Visual Findings | TASK_955 - Decision Overlay Real Window Polish Followup | TASK_955 - Decision Overlay Playability Smoke`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
 
+## Decision Overlay Playability Smoke (TASK_955)
+TASK_955 wertet akzeptierte TASK_954-Findings zusammen mit einem Playthrough-Trace als kleinen Decision-Overlay-Smoke aus. Das Ergebnis darf nur Gate-/Review-Evidence sein; echte Commands laufen weiterhin erst ueber die bestehenden Gameplay-Pfade.
+
+Erwartete Struktur: `DecisionOverlayPlayabilitySmoke.build_snapshot()` liefert `schema = sternenbuergerchen.decision_overlay_playability_smoke.v1`, `task_id = TASK_955`, `source_task_id = TASK_954`, Source-Status, Trace-Metadaten, `required_smoke_checks`, `missing_smoke_checks`, `answered_player_questions`, `gate = blocked | needs_smoke_run | smoke_regression_found | smoke_passed`, `smoke_passed`, `issues`, `blocking_issues`, `recommended_next_task = TASK_955 - Decision Overlay Playability Smoke | TASK_956 - First Decision Micro Scenario Polish`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

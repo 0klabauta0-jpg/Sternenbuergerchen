@@ -90,3 +90,8 @@ Der Recapture-Snapshot darf erst `accepted` werden, wenn die manuellen Pflichtch
 TASK_954 schneidet aus einem TASK_953-Recapture-Snapshot und optionalen manuellen Sichtnotizen einen read-only Findings-Snapshot. Er prueft, ob die Quelle wirklich TASK_953 ist, ob sie auf dem TASK_952-Polish-Style basiert und ob sie review-ready ist.
 
 Ohne manuelle Sichtnotizen bleibt der Status `needs_manual_review`. Belegte visuelle Reibungen wie konkurrierende Badge-Farben, laute Mission-Control-Zeile oder verdeckte Command-Surfaces routen zu `TASK_955 - Decision Overlay Real Window Polish Followup`. Ein sauberer Sichtbefund routet zu `TASK_955 - Decision Overlay Playability Smoke`. TASK_954 setzt keine Gameplay-, Movement-, Combat- oder Multiplayer-Wahrheit.
+
+## Decision Overlay Playability Smoke (TASK_955)
+TASK_955 ist der kleine Rueckweg von Sichtbefund zu Spielbarkeit. Er akzeptiert nur TASK_954-Findings mit `accepted_for_decision_overlay_playability_smoke` und wertet danach einen Playthrough-Trace aus.
+
+Der Trace muss belegen, dass der Spieler vor `GO` Ziel, Pfad, Risiko, Line-of-Fire-Gruende und beste Wahl lesen kann, dass vor `GO` kein Command erzeugt wird, dass `GO` bestaetigbar bleibt und dass danach sichtbares Feedback erscheint. Der Snapshot bleibt read-only und erzeugt keine Gameplay-, Movement-, Combat- oder Multiplayer-Wahrheit.

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_955 - Decision Overlay Playability Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_955_decision_overlay_playability_smoke.md`, `docs/tasks/TASK_954_decision_overlay_real_window_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `DecisionOverlayPlayabilitySmoke.build_snapshot()` wertet akzeptierte TASK_954-Findings plus einen Playthrough-Trace read-only als ersten Decision-Overlay-Playability-Smoke aus.
+- Stand: Der Smoke prueft Zielpreview, Pfad, Risk-Level, Line-of-Fire-Gruende, beste Wahl, GO-Grenze, Command-Surfaces, Post-GO-Feedback, Hotpath-Ruhe und HUD-Read-only-Grenze.
+- Stand: Ohne Trace bleibt der Gate `needs_smoke_run`; vollstaendige Trace-Evidence setzt `smoke_passed`; Regressionsflags routen zu `TASK_956 - First Decision Micro Scenario Polish`.
+- Risiken/offen: TASK_955 ist noch kein echter automatisierter Fenster-Playtest. Der naechste Slice sollte den Micro-Scenario-Polish aus Smoke-Evidence im spielbaren Pfad konkretisieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_955_decision_overlay_playability_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_954_decision_overlay_real_window_visual_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_953_decision_overlay_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_956 - First Decision Micro Scenario Polish.
+
 ### TASK_954 - Decision Overlay Real Window Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_954_decision_overlay_real_window_visual_findings.md`, `docs/tasks/TASK_953_decision_overlay_real_window_recapture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
