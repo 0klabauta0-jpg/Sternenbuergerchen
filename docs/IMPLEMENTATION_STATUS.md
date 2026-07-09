@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_960 - First Decision Release Playable Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_960_first_decision_release_playable_slice.md`, `docs/tasks/TASK_959_first_decision_playability_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `FirstDecisionReleasePlayableSlice.build_snapshot()` akzeptiert nur bestandenen TASK_959-Smoke und bleibt bei fehlendem oder regressivem Smoke blockiert.
+- Stand: Ein Release-Spine-Trace prueft Homebase, Fireteam, Flightdeck, Dropship-Payload, Mission, LZ, Drop, deployed Fireteam, Decision-Preview, NEXT/WHY, Risk, GO-Grenze, GO, Post-GO-Feedback, Command-Queue-Lifecycle, Hotpath, HUD-Read-only und Multiplayer-Snapshot-Grenze.
+- Stand: Vollstaendige Evidence setzt `release_slice_playable`; fehlende Checks routen als `release_slice_regression_found` zu `TASK_961 - Release First Decision Integrated Playtest`.
+- Risiken/offen: TASK_960 startet noch keinen echten Playtest; der naechste Slice sollte den Release-Pfad wirklich integriert ausfuehren/capturen oder belegte Regressionspunkte eng fixen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_960_first_decision_release_playable_slice.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_959_first_decision_playability_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_958_first_decision_real_playthrough_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_961 - Release First Decision Integrated Playtest.
+
 ### TASK_959 - First Decision Playability Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_959_first_decision_playability_smoke.md`, `docs/tasks/TASK_958_first_decision_real_playthrough_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

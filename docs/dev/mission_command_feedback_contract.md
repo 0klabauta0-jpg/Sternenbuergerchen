@@ -1673,6 +1673,11 @@ TASK_959 prueft den ersten Decision-Griff als Ablauf-Smoke. Der Smoke darf nur a
 
 Erwartete Struktur: `FirstDecisionPlayabilitySmoke.build_snapshot()` liefert `schema = sternenbuergerchen.first_decision_playability_smoke.v1`, `task_id = TASK_959`, `source_task_id = TASK_958`, Trace-Metadaten, `required_smoke_checks`, `missing_smoke_checks`, `answered_player_questions`, `gate = blocked | needs_smoke_run | smoke_regression_found | smoke_passed`, `smoke_passed`, `recommended_next_task = TASK_959 - First Decision Playability Smoke | TASK_960 - First Decision Release Playable Slice`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
 
+## First Decision Release Playable Slice (TASK_960)
+TASK_960 fasst den ersten Decision-Griff als kleinen Release-Spine zusammen. Der Slice darf nur einen bestandenen TASK_959-Smoke und einen Ablauf-Trace auswerten; er darf keine Homebase-, Dropship-, Mission-, Command-, Movement-, Combat- oder Multiplayer-Wahrheit erzeugen.
+
+Erwartete Struktur: `FirstDecisionReleasePlayableSlice.build_snapshot()` liefert `schema = sternenbuergerchen.first_decision_release_playable_slice.v1`, `task_id = TASK_960`, `source_task_id = TASK_959`, Release-Spine-Metadaten, `required_slice_checks`, `missing_slice_checks`, `covered_release_stages`, `gate = blocked | needs_release_slice_trace | release_slice_regression_found | release_slice_playable`, `release_slice_playable`, `recommended_next_task = TASK_960 - First Decision Release Playable Slice | TASK_961 - Release First Decision Integrated Playtest`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

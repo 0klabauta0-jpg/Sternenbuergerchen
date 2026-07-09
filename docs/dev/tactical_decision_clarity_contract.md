@@ -115,3 +115,8 @@ Ein sauberer Befund darf erst zum First-Decision-Playability-Smoke routen, wenn 
 TASK_959 verbindet den akzeptierten Fensterbefund mit einem Ablauf-Trace. Der Smoke muss belegen, dass der Spieler vor `GO` den naechsten Griff, die Begruendung, Ziel/Pfad, Risk-/Line-of-Fire-Gruende und die Preview-Grenze lesen kann, dass `GO` bedienbar bleibt und nach `GO` sichtbares Feedback erscheint.
 
 Der Smoke bleibt ein Gate: ohne akzeptierten TASK_958-Befund bleibt er blockiert, ohne Trace bleibt er `needs_smoke_run`, und bei fehlenden Pflichtchecks meldet er `smoke_regression_found`. Auch dieser Schritt erzeugt keine Commands, keine Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## First Decision Release Playable Slice (TASK_960)
+TASK_960 spannt die erste Entscheidung ueber den Release-Spine: Homebase bereit, Fireteam und Flightdeck bereit, Dropship-Payload, Mission geladen, LZ gesetzt, Drop abgeschlossen, Fireteam deployed, Preview sichtbar, `GO` bestaetigt und Post-GO-Feedback lesbar.
+
+Der Slice darf nur Trace-Evidence bewerten. Er ist kein Export, kein neuer Mission-Flow und kein Gameplay-Mutator. Die Multiplayer-Vorbereitung bleibt als Grenze sichtbar: Der Slice muss `multiplayer_snapshot_boundary_preserved` belegen, setzt aber keine Peer- oder Team-Wahrheit.
