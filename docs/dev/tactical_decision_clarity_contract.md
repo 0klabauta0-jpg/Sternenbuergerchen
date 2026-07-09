@@ -265,3 +265,8 @@ Der Polish-Snapshot bleibt read-only. Er darf Surface-Specs, Style-IDs, Mindesth
 TASK_989 bewertet den TASK_988-Outcome-Polish gegen einen kleinen Playability-Trace. Der Spieler muss nach der Choice lesen koennen, was passiert ist, was sich am Ziel geaendert hat und welcher naechste Griff sinnvoll ist.
 
 Der Slice bleibt read-only. Ohne Trace meldet er `needs_outcome_playability_trace`; fehlende RESULT-/OBJ-/NEXT-Lesbarkeit, fehlendes Spieler-Verstaendnis, HUD-State-Mutation oder gebrochene Multiplayer-Grenze melden `outcome_playability_regression_found`. Erst ein vollstaendiger Trace setzt `outcome_playability_slice_passed` und routet zu `TASK_990 - Release First Decision Loop Two Player Loop Next Micro Objective`.
+
+## Release First Decision Loop Two Player Loop Next Micro Objective (TASK_990)
+TASK_990 macht aus dem bestandenen Outcome wieder einen naechsten kleinen Auftrag. Erwartet sind drei read-only Micro-Objective-Karten: `SICHERN`, `DRUECKEN` und `SAMMELN`.
+
+Der Snapshot bleibt Anzeige-/Planungsvertrag: Er darf eine Empfehlung, kurze Spielerzeilen, Warum-Zeilen, Confirm-/Execute-Pfadnamen und `GO separat` liefern, aber keine Commands erzeugen und kein Objective-State setzen. Der naechste Schritt ist `TASK_991 - Release First Decision Loop Two Player Loop Micro Objective HUD Wiring`.

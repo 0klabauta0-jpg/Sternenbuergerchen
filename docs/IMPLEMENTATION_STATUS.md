@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_990 - Release First Decision Loop Two Player Loop Next Micro Objective
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_990_release_first_decision_loop_two_player_loop_next_micro_objective.md`, `docs/tasks/TASK_989_release_first_decision_loop_two_player_loop_outcome_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopNextMicroObjective.build_snapshot()` erzeugt aus einem bestandenen TASK_989-Slice drei read-only Micro-Objective-Karten.
+- Stand: Die Karten nennen `SICHERN`, `DRUECKEN` und `SAMMELN`, halten `GO separat`, nennen vorhandene Confirm-/Execute-Pfade nur als Pfadnamen und erzeugen keine Commands.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_990 im Command-Feedback; ohne bestandenen TASK_989-Slice bleibt der Snapshot blockiert.
+- Risiken/offen: TASK_990 macht die naechsten Objective-Karten noch nicht sichtbar bedienbar. TASK_991 sollte das HUD-Wiring fuer die Micro-Objectives bauen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_990_release_first_decision_loop_two_player_loop_next_micro_objective.gd`, Regression TASK_989, TASK_988, TASK_987, `git diff --check`.
+- Naechster Schritt: TASK_991 - Release First Decision Loop Two Player Loop Micro Objective HUD Wiring.
+
 ### TASK_989 - Release First Decision Loop Two Player Loop Outcome Playability Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_989_release_first_decision_loop_two_player_loop_outcome_playability_slice.md`, `docs/tasks/TASK_988_release_first_decision_loop_two_player_loop_outcome_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
