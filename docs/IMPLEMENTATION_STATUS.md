@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1022 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1022_release_first_decision_loop_two_player_loop_scenario_integrated_player_feel_findings.md`, `docs/tasks/TASK_1021_release_first_decision_loop_two_player_loop_scenario_integrated_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioIntegratedPlayerFeelFindings.build_snapshot()` bewertet einen bestandenen TASK_1021-Integrated-Playtest plus optionale Player-Feel-Notizen.
+- Stand: Ohne Notizen bleibt der Status `needs_scenario_integrated_player_feel_review`; Reibungsnotizen melden `scenario_integrated_player_feel_rework_needed`; ein sauberer Befund setzt `accepted_for_small_game_acceptance_slice`.
+- Stand: Geprueft werden Entry, FOB-Griff, NEXT/CONFIRM/GO, Post-GO-Feedback, Rueckkehr zu NEXT, HUD-Ruhe, Performance-Gefuehl, Multiplayer-Grenze, Zwei-Spieler-Kontext und "kleines rundes Spiel".
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1022 im Command-Feedback als Snapshot, Status, Issue-Count und Summary.
+- Risiken/offen: TASK_1022 ist ein Befundschnitt. Reibung sollte in TASK_1023 poliert werden; ein sauberer Befund sollte in TASK_1023 als Small-Game-Acceptance-Slice abgesichert werden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1022_release_first_decision_loop_two_player_loop_scenario_integrated_player_feel_findings.gd`, Regression TASK_1021, TASK_1020, TASK_1019, `git diff --check`.
+- Naechster Schritt: TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish oder TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice.
+
 ### TASK_1021 - Release First Decision Loop Two Player Loop Scenario Integrated Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1021_release_first_decision_loop_two_player_loop_scenario_integrated_playtest.md`, `docs/tasks/TASK_1020_release_first_decision_loop_two_player_loop_scenario_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

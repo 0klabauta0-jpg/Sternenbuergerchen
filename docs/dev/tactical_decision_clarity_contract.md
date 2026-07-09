@@ -140,6 +140,11 @@ TASK_1021 prueft, ob der bestandene TASK_1020-Slice im integrierten Release-/Mis
 
 Der Scenario-Integrated-Playtest bleibt read-only. Ohne Trace bleibt er `needs_scenario_integrated_playtest_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1022 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Player Feel Findings (TASK_1022)
+TASK_1022 schneidet aus dem bestandenen TASK_1021-Trace den menschlichen Player-Feel-Befund: Fuehlt sich der Entry klar an, greift der FOB-Moment rund, bleibt NEXT/CONFIRM/GO getrennt, fuehrt Post-GO-Feedback angenehm zum naechsten Griff, kehrt der Loop ohne Verwirrung zu NEXT zurueck, bleibt das HUD ruhig, reagiert der Ablauf schnell, ist der Zwei-Spieler-Kontext klar und bleibt die Multiplayer-/Wahrheitsgrenze sichtbar?
+
+Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

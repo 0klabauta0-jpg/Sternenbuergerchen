@@ -43,6 +43,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_scenario_integrated_playtest_trace | scenario_integrated_playtest_regression_found | scenario_integrated_playtest_passed`.
 - Naechster Schritt: TASK_1022 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings.
 
+## TASK_1022 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings (implementiert im Arbeitsstand)
+- Grundlage: bestandener TASK_1021 Scenario Integrated Playtest.
+- Ziel: Menschlichen Player-Feel-Befund schneiden: fuehlt sich Entry, FOB, NEXT/CONFIRM/GO, Post-GO-Feedback, HUD, Performance, Zwei-Spieler-Kontext und Multiplayer-Grenze wie ein kleiner runder Spielmoment an?
+- Ergebnis: Read-only Snapshot `needs_scenario_integrated_player_feel_review | scenario_integrated_player_feel_rework_needed | accepted_for_small_game_acceptance_slice`.
+- Naechster Schritt: TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish oder TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice.
+
 # Arbeitsregeln
 
 ## Reihenfolge
