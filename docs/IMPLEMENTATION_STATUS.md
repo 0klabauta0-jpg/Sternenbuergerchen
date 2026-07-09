@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_914 - Release First Exchange Fire Lane World Read Acceptance Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.md`, `docs/tasks/TASK_913_release_first_exchange_fire_lane_world_read_acceptance_polish.md`, `docs/tasks/TASK_911_release_first_exchange_fire_lane_world_read_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_914 legt einen eigenen Recapture-/Acceptance-Rahmen an den TASK_913-World-Read-Acceptance-Polish.
+- Stand: `capture_release_first_exchange_fire_lane_world_read_acceptance_recapture.ps1` wiederverwendet den TASK_911-Window-Handle-Pfad und schreibt eigene TASK_914-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFireLaneWorldReadAcceptanceRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Fire-Lane als erste Weltbewegung, Richtunganker, ruhiges Label/Halo-Cluster und bedienbare Command-Surfaces.
+- Risiken/offen: TASK_914 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_915 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_913_release_first_exchange_fire_lane_world_read_acceptance_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_915 - Release First Exchange Fire Lane World Read Acceptance Visual Findings.
+
 ### TASK_913 - Release First Exchange Fire Lane World Read Acceptance Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_913_release_first_exchange_fire_lane_world_read_acceptance_polish.md`, `docs/tasks/TASK_912_release_first_exchange_fire_lane_world_read_visual_findings.md`, `docs/tasks/TASK_910_release_first_exchange_fire_lane_world_read_micro_polish.md`, `docs/dev/mission_command_feedback_contract.md`
