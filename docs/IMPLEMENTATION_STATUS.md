@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_952 - Decision Overlay F6 Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_952_decision_overlay_f6_visual_polish.md`, `docs/tasks/TASK_951_decision_overlay_real_f6_visual_review.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `get_decision_overlay_f6_visual_polish_snapshot()` normalisiert den TASK_951-Readout in drei kompakte Badge-Segmente fuer safe/risky/suicidal.
+- Stand: Die Badge-Reihenfolge ist stabil, Farbrollen sind `green`, `yellow`, `red`, Marker sind `OK`, `!`, `!!`, und Labels/Microcopy enthalten keine rohen Choice-IDs.
+- Stand: Der Layout-Vertrag bleibt kompakt, eine Mission-Control-Zeile, kein UI-Tree-Rebuild; `get_command_feedback_snapshot()` exportiert den TASK_952-Polish-Snapshot.
+- Risiken/offen: Der echte Real-Window-Recapture bleibt Folgearbeit; TASK_952 macht den Visual-Polish-Vertrag pruefbar, ersetzt aber keine manuelle Sichtabnahme.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_952_decision_overlay_f6_visual_polish.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_951_decision_overlay_real_f6_visual_review.gd`, `git diff --check`.
+- Naechster Schritt: TASK_953 - Decision Overlay Real Window Recapture.
+
 ### TASK_951 - Decision Overlay Real F6 Visual Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_951_decision_overlay_real_f6_visual_review.md`, `docs/tasks/TASK_950_wire_decision_scenario_into_f6_mission_hud.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

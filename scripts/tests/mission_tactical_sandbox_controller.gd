@@ -2587,6 +2587,7 @@ func _update_ui() -> void:
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
 		_apply_frontier_probe_one_screen_visual_polish_label_contract(strategic_status_label)
 		_apply_order_preview_threat_overlay_label_contract(strategic_status_label)
+		_apply_decision_overlay_f6_visual_polish_label_contract(strategic_status_label)
 		_apply_release_firefight_bottom_dock_density_label_contract(strategic_status_label)
 	_apply_release_fire_exchange_real_window_primary_hud_runtime_text()
 	_apply_release_first_exchange_real_window_hud_source_sync_to_labels()
@@ -8291,6 +8292,18 @@ func _apply_order_preview_threat_overlay_label_contract(label: Label) -> void:
 	label.set_meta("order_preview_threat_overlay_choice_line", choice_line)
 	label.set_meta("order_preview_threat_overlay_choice_count", int(snapshot.get("visible_choice_count", 0)))
 	label.set_meta("order_preview_threat_overlay_gate", String(snapshot.get("gate", "")))
+
+
+func _apply_decision_overlay_f6_visual_polish_label_contract(label: Label) -> void:
+	if label == null:
+		return
+	var snapshot: Dictionary = get_decision_overlay_f6_visual_polish_snapshot()
+	if String(snapshot.get("gate", "")) != "pass":
+		return
+	label.set_meta("decision_overlay_f6_visual_polish_task", "TASK_952")
+	label.set_meta("decision_overlay_f6_visual_polish_style_id", String(snapshot.get("style_id", "")))
+	label.set_meta("decision_overlay_f6_visual_polish_badge_count", int(snapshot.get("visual_badge_count", 0)))
+	label.set_meta("decision_overlay_f6_visual_polish_density", String(Dictionary(snapshot.get("layout_contract", {})).get("density", "")))
 
 
 func _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary, compact_line: String) -> Dictionary:
@@ -20672,6 +20685,163 @@ func _order_preview_threat_overlay_text_contains_raw_choice_id(text: String) -> 
 	return text.contains("covered_push") or text.contains("exposed_crossing") or text.contains("kill_zone_dash")
 
 
+func get_decision_overlay_f6_visual_polish_snapshot(source_review_override: Dictionary = {}) -> Dictionary:
+	var source_review: Dictionary = source_review_override.duplicate(true) if not source_review_override.is_empty() else get_decision_overlay_real_f6_visual_review_snapshot()
+	var badges: Array = _build_decision_overlay_f6_visual_badges(Array(source_review.get("visible_choice_cards", [])))
+	var layout_contract: Dictionary = {
+		"density": "compact",
+		"surface_role": "decision_preview",
+		"max_line_count": 1,
+		"max_badge_count": 3,
+		"rebuilds_ui_tree": false,
+		"uses_existing_status_label": true,
+		"visual_noise_budget": "low",
+	}
+	var choice_line: String = String(source_review.get("mission_control_choice_line", "")).strip_edges()
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_task_951_ready",
+			String(source_review.get("schema", "")) == "sternenbuergerchen.decision_overlay_real_f6_visual_review.v1"
+				and String(source_review.get("task_id", "")) == "TASK_951"
+				and String(source_review.get("automated_readability_gate", "")) == "pass",
+			"TASK_951 visual-review preflight is ready."
+		),
+		_build_mission_first_move_readability_check(
+			"three_badges_compact",
+			badges.size() == 3 and String(layout_contract.get("density", "")) == "compact",
+			"Decision preview is represented as three compact badge segments."
+		),
+		_build_mission_first_move_readability_check(
+			"badge_order_stable",
+			_decision_overlay_badge_order_is_stable(badges),
+			"Badges keep the safe, risky, suicidal reading order."
+		),
+		_build_mission_first_move_readability_check(
+			"badges_hide_raw_ids",
+			_decision_overlay_badges_hide_raw_ids(badges),
+			"Badge labels and microcopy do not expose internal choice ids."
+		),
+		_build_mission_first_move_readability_check(
+			"one_line_no_tree_rebuild",
+			int(layout_contract.get("max_line_count", 0)) == 1 and not bool(layout_contract.get("rebuilds_ui_tree", true)),
+			"Polish stays on the existing HUD line and avoids UI-tree rebuilds."
+		),
+		_build_mission_first_move_readability_check(
+			"choice_line_still_readable",
+			not choice_line.is_empty() and choice_line.length() <= 96 and choice_line.contains("SAFE") and choice_line.contains("SUICIDAL"),
+			"Polish keeps the compact choice line readable."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(source_review.get("read_only", false))
+				and not bool(source_review.get("ui_sets_gameplay_truth", true))
+				and not bool(source_review.get("creates_command", true))
+				and not bool(source_review.get("creates_movement", true))
+				and not bool(source_review.get("creates_fire_event", true))
+				and not bool(source_review.get("creates_damage_event", true))
+				and not bool(source_review.get("sets_multiplayer_truth", true)),
+			"Visual polish reads HUD data and does not commit gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.decision_overlay_f6_visual_polish.v1",
+		"task_id": "TASK_952",
+		"source_task_id": "TASK_951",
+		"source_schema": String(source_review.get("schema", "")),
+		"source_gate": String(source_review.get("gate", "")),
+		"style_id": "task_952_decision_overlay_compact_badges_v1",
+		"mission_control_choice_line": choice_line,
+		"visual_badges": badges,
+		"visual_badge_count": badges.size(),
+		"layout_contract": layout_contract,
+		"status": "ready_for_real_window_recapture" if failed_checks.is_empty() else "needs_visual_polish",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"accepted": false,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+		"recommended_next_task": "TASK_953 - Decision Overlay Real Window Recapture",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
+func _build_decision_overlay_f6_visual_badges(cards: Array) -> Array:
+	var by_risk: Dictionary = {}
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		var risk_state: String = String(card.get("risk_state", "")).strip_edges().to_lower()
+		if not risk_state.is_empty():
+			by_risk[risk_state] = card
+	var order: Array = [
+		{"risk_state": "safe", "color_key": "green", "marker": "OK", "fallback_label": "Gedeckt", "fallback_microcopy": "klare Preview"},
+		{"risk_state": "risky", "color_key": "yellow", "marker": "!", "fallback_label": "Querung", "fallback_microcopy": "eine Linie"},
+		{"risk_state": "suicidal", "color_key": "red", "marker": "!!", "fallback_label": "Killzone", "fallback_microcopy": "drei Linien"},
+	]
+	var badges: Array = []
+	for spec_variant in order:
+		var spec: Dictionary = Dictionary(spec_variant)
+		var risk_state: String = String(spec.get("risk_state", ""))
+		var card: Dictionary = Dictionary(by_risk.get(risk_state, {}))
+		var label: String = String(card.get("line_label", spec.get("fallback_label", ""))).strip_edges()
+		var microcopy: String = _build_decision_overlay_badge_microcopy(card, String(spec.get("fallback_microcopy", "")))
+		badges.append({
+			"risk_state": risk_state,
+			"color_key": String(spec.get("color_key", "")),
+			"marker": String(spec.get("marker", "")),
+			"label": label,
+			"microcopy": microcopy,
+			"choice_id": String(card.get("choice_id", "")),
+			"style_role": "decision_preview_badge",
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+	return badges
+
+
+func _build_decision_overlay_badge_microcopy(card: Dictionary, fallback: String) -> String:
+	var risk_state: String = String(card.get("risk_state", "")).strip_edges().to_lower()
+	match risk_state:
+		"safe":
+			return "Deckung ok"
+		"risky":
+			return "%d Linie" % maxi(int(card.get("line_of_fire_entry_count", 1)), 1)
+		"suicidal":
+			return "%d Linien" % maxi(int(card.get("line_of_fire_entry_count", 3)), 3)
+		_:
+			return fallback
+
+
+func _decision_overlay_badge_order_is_stable(badges: Array) -> bool:
+	return badges.size() == 3 \
+		and String(Dictionary(badges[0]).get("risk_state", "")) == "safe" \
+		and String(Dictionary(badges[1]).get("risk_state", "")) == "risky" \
+		and String(Dictionary(badges[2]).get("risk_state", "")) == "suicidal"
+
+
+func _decision_overlay_badges_hide_raw_ids(badges: Array) -> bool:
+	for badge_variant in badges:
+		var badge: Dictionary = Dictionary(badge_variant)
+		if _order_preview_threat_overlay_text_contains_raw_choice_id(String(badge.get("label", ""))):
+			return false
+		if _order_preview_threat_overlay_text_contains_raw_choice_id(String(badge.get("microcopy", ""))):
+			return false
+	return true
+
+
 func _get_frontier_probe_one_screen_next_token(next_interaction: Dictionary, handoff: Dictionary) -> String:
 	if bool(handoff.get("handoff_ready", false)):
 		return "DEBRIEF"
@@ -23270,6 +23440,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
 	var order_preview_threat_overlay_f6_hud: Dictionary = get_order_preview_threat_overlay_f6_hud_snapshot()
 	var decision_overlay_real_f6_visual_review: Dictionary = get_decision_overlay_real_f6_visual_review_snapshot(order_preview_threat_overlay_f6_hud)
+	var decision_overlay_f6_visual_polish: Dictionary = get_decision_overlay_f6_visual_polish_snapshot(decision_overlay_real_f6_visual_review)
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
@@ -23387,6 +23558,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"decision_overlay_real_f6_visual_review": decision_overlay_real_f6_visual_review,
 		"decision_overlay_real_f6_visual_review_gate": String(decision_overlay_real_f6_visual_review.get("gate", "")),
 		"decision_overlay_real_f6_visual_review_status": String(decision_overlay_real_f6_visual_review.get("status", "")),
+		"decision_overlay_f6_visual_polish": decision_overlay_f6_visual_polish,
+		"decision_overlay_f6_visual_polish_gate": String(decision_overlay_f6_visual_polish.get("gate", "")),
+		"decision_overlay_f6_visual_polish_status": String(decision_overlay_f6_visual_polish.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

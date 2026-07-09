@@ -207,6 +207,8 @@ git checkout -b batch/<batch-name>
 - TASK_950 Entscheidungsstand: Naechster Slice ist `TASK_951 - Decision Overlay Real F6 Visual Review`, um die echte Fensterlesbarkeit von Position, Kontrast und Textlaenge zu pruefen.
 - TASK_951 - Decision Overlay Real F6 Visual Review (implementiert): TASK_950-Choice-Line von rohen IDs auf spielernahe Labels umstellen und einen automatisierten Review-Snapshot fuer den echten F6-Sichtcheck bereitstellen.
 - TASK_951 Entscheidungsstand: Naechster Slice ist `TASK_952 - Decision Overlay F6 Visual Polish`, falls der echte F6-Sichtcheck Kontrast, Position oder Rhythmus der Preview-Zeile noch als Reibung meldet.
+- TASK_952 - Decision Overlay F6 Visual Polish (implementiert): Die Decision-Preview als drei kompakte safe/risky/suicidal-Badges mit stabilen Farbrollen und niedrigem HUD-Laerm fuer den Real-Window-Recapture vorbereiten.
+- TASK_952 Entscheidungsstand: Naechster Slice ist `TASK_953 - Decision Overlay Real Window Recapture`, um die Badge-/Line-Politur im echten Fenster zu belegen.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 
