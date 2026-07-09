@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - TASK_925 in Arbeit</title>
+  <title>Sternenbuergerchen Zwischenbericht - TASK_925 umgesetzt</title>
   <style>
     :root {
       color-scheme: dark;
@@ -83,13 +83,13 @@
 <body data-report-id="spielstand_zwischenbericht_task925_in_progress_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Stand 2026-07-09: aktueller Spielstand nach dem Release-First-Exchange-Block, mit TASK_925 gerade in Arbeit. Dieser Bericht beschreibt, was sich fuer den Spieler geaendert hat, was technisch schon sauberer ist und was ich als naechstes weiterziehen will.</p>
+    <p>Stand 2026-07-09: aktueller Spielstand nach dem Release-First-Exchange-Block, mit TASK_925 als read-only Findings-Schnitt umgesetzt. Dieser Bericht beschreibt, was sich fuer den Spieler geaendert hat, was technisch schon sauberer ist und was ich als naechstes weiterziehen will.</p>
     <div class="meta-row">
       <span class="pill good">Branch: task/release-first-exchange-player-readability-polish-review</span>
       <span class="pill good">Basis-Commit: 23f308ef</span>
       <span class="pill good">TASK_924 gepusht</span>
-      <span class="pill warn">TASK_925 begonnen</span>
-      <span class="pill warn">TASK_926 noch offen</span>
+      <span class="pill good">TASK_925 Findings umgesetzt</span>
+      <span class="pill warn">TASK_926 Entscheidung offen</span>
       <span class="pill">Report read-only</span>
     </div>
   </header>
@@ -115,7 +115,7 @@
             Der Schwerpunkt der letzten Slices war nicht neuer Kampfcode, sondern Lesbarkeit: Der Spieler soll im ersten Feuerwechsel verstehen, wo Quelle, Ziel, Feuerlinie und Event-Status liegen. TASK_920 bis TASK_924 haben diesen Blick in kleinen, testbaren Stufen enger gemacht.
           </div>
           <div class="status-box" style="margin-top:12px;">
-            Jetzt liegt TASK_925 als begonnenes Findings-/Review-Stueck im Arbeitsstand. Es soll nicht selbst Gameplay veraendern, sondern den TASK_924-Recapture read-only bewerten: Smoke-ready, noch manueller Sichtbefund noetig, oder enger Player-Polish fuer TASK_926.
+            TASK_925 liegt jetzt als Findings-/Review-Stueck im Arbeitsstand. Es veraendert kein Gameplay, sondern bewertet den TASK_924-Recapture read-only: Smoke-ready, noch manueller Sichtbefund noetig, oder enger Player-Polish fuer TASK_926.
           </div>
         </article>
         <article class="card">
@@ -123,7 +123,7 @@
           <div class="stack">
             <div class="metric"><strong>gruen</strong><span>Releasepfad und CONTACT-FIRE-Kommunikation sind reproduzierbar belegt.</span></div>
             <div class="metric"><strong>gelb</strong><span>Erster Weltblick auf die Fire-Lane muss noch final akzeptiert werden.</span></div>
-            <div class="metric"><strong>offen</strong><span>TASK_925-Test/Doku-Integration und danach TASK_926-Entscheidung.</span></div>
+            <div class="metric"><strong>offen</strong><span>TASK_926-Entscheidung: Smoke bei Akzeptanz, sonst Player-Polish-Tuning.</span></div>
           </div>
         </article>
         <article class="card full">
@@ -131,7 +131,7 @@
           <ul class="list">
             <li>TASK_923 hat den sichtbaren Player-Polish auf dem Follow-up-World-Read-Pfad umgesetzt.</li>
             <li>TASK_924 hat dafuer einen frischen Window-Handle-Recapture-Rahmen gebaut, damit der Spielerblick nicht geraten wird.</li>
-            <li>TASK_925 ist als read-only Findings-Schnitt begonnen: technische Evidenz pruefen, manuellen Sichtbefund aufnehmen, und sauber entscheiden, ob Smoke oder weiterer Polish folgt.</li>
+            <li>TASK_925 ist als read-only Findings-Schnitt umgesetzt: technische Evidenz pruefen, manuellen Sichtbefund aufnehmen, und sauber entscheiden, ob Smoke oder weiterer Polish folgt.</li>
             <li>Der Bericht hier ist eine Arbeitsflaeche dazu: keine Runtime-Wahrheit, keine Mission-Mutation, nur Orientierung und exportierbare Notizen.</li>
           </ul>
         </article>
@@ -149,23 +149,24 @@
             <li>CONTACT-FIRE-Feedback in die sichtbaren Spielerflaechen gezogen: Selected Fireteam, Mission Control und Event Log.</li>
             <li>Die Fire-Lane-/World-Read-Kette in kleinen Tasks poliert, statt den Combat- oder HUD-Pfad gross umzubauen.</li>
             <li>Capture- und Findings-Slices aufgebaut, damit echte Screenshots und Manifeste zwischen "technisch da" und "spielerisch lesbar" unterscheiden.</li>
-            <li>Als neuen aktuellen Schritt TASK_925 angelegt und den Service fuer den read-only Findings-Schnitt begonnen.</li>
+            <li>Als neuen aktuellen Schritt TASK_925 angelegt und den Service fuer den read-only Findings-Schnitt umgesetzt.</li>
           </ul>
         </article>
         <article class="card">
           <h2>Arbeitscheck</h2>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task924_pushed"> TASK_924 ist committed/gepusht.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task925_task_file_started"> TASK_925 Task-Datei ist angelegt.</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="done.task925_service_started"> TASK_925 Service-Datei ist begonnen.</label>
-          <label class="checkline"><input type="checkbox" data-export-key="done.task925_test_done"> TASK_925 Verifier ist noch zu bauen/zu pruefen.</label>
-          <label class="checkline"><input type="checkbox" data-export-key="done.task925_docs_integrated"> TASK_925 Status/Roadmap/Contract noch final integrieren.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task925_service_started"> TASK_925 Service-Datei ist umgesetzt.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task925_test_done"> TASK_925 Verifier ist angelegt.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task925_docs_integrated"> TASK_925 Status/Roadmap/Contract sind integriert.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.report_created"> Dieser Zwischenbericht ist erstellt.</label>
         </article>
         <article class="card full">
           <h2>Betroffene aktuelle Artefakte</h2>
           <ul class="list">
             <li><code>docs/tasks/TASK_925_release_first_exchange_followup_player_polish_visual_findings.md</code> beschreibt den naechsten Findings-Schnitt.</li>
-            <li><code>scripts/mission/release_first_exchange_followup_player_polish_visual_findings.gd</code> ist der begonnene read-only Service fuer Status, Issues und naechste Empfehlung.</li>
+            <li><code>scripts/mission/release_first_exchange_followup_player_polish_visual_findings.gd</code> ist der read-only Service fuer Status, Issues und naechste Empfehlung.</li>
+            <li><code>scripts/tests/task_925_release_first_exchange_followup_player_polish_visual_findings.gd</code> prueft Doku, Blocker, Akzeptanz, Restreibung und read-only-Grenzen.</li>
             <li><code>docs/reports/spielstand_zwischenbericht_task925_in_progress_2026_07_09.html</code> ist dieser Zwischenbericht mit JSON-Export.</li>
             <li><code>builds/</code> bleibt lokal/untracked und wird nicht als Quellstand behandelt.</li>
           </ul>
@@ -209,7 +210,7 @@
         <article class="card wide">
           <h2>Reibungen</h2>
           <ul class="list">
-            <li>TASK_925 ist begonnen, aber noch nicht als kompletter Slice fertig: Testdatei, Status/Roadmap/Contract-Integration und lokale Pruefung fehlen noch.</li>
+            <li>TASK_925 ist als Slice aufgebaut; offen bleibt die echte Sichtentscheidung, ob der TASK_924-Spielerblick fuer Smoke reicht.</li>
             <li>Der echte visuelle Akzeptanzpunkt ist noch offen: Die Frage ist, ob die Fire-Lane im Fenster wirklich zuerst gelesen wird.</li>
             <li>Die Task-Kette 909-925 ist sehr granular. Das ist gut fuer Sicherheit, aber sie braucht jetzt bald einen echten kurzen Playability-Smoke, sonst wird sie zu selbstbezogen.</li>
             <li>Die Release-/Build-Ausgabe liegt lokal unter <code>builds/</code>; das bleibt absichtlich nicht Teil der Git-Wahrheit.</li>
@@ -219,11 +220,11 @@
         <article class="card">
           <h2>Entscheidung</h2>
           <div class="button-row" data-choice-group="friction.next_decision">
-            <button class="choice active" type="button" data-choice-value="finish_task925">TASK_925 fertigstellen</button>
+            <button class="choice active" type="button" data-choice-value="review_task925_result">TASK_925 auswerten</button>
             <button class="choice" type="button" data-choice-value="manual_review">erst Sichttest</button>
             <button class="choice" type="button" data-choice-value="smoke_now">Smoke sofort</button>
           </div>
-          <p>Meine Empfehlung: TASK_925 fertigstellen, dann anhand des echten Befunds entscheiden.</p>
+          <p>Meine Empfehlung: TASK_925-Verifier laufen lassen, dann anhand des echten Befunds TASK_926 als Smoke oder als engen Player-Polish-Tuning-Slice schneiden.</p>
         </article>
         <article class="card full">
           <h2>Was ich nicht machen will</h2>
@@ -242,7 +243,7 @@
         <article class="card wide">
           <h2>Was ich als naechstes mache</h2>
           <ol class="list">
-            <li>TASK_925 sauber abschliessen: Testdatei bauen, Status/Roadmap/Contract nachziehen und Verifier laufen lassen.</li>
+            <li>TASK_925 lokal verifizieren und committen.</li>
             <li>Wenn TASK_925 nur "manual review missing" meldet: echten PNG-/Fensterbefund einholen oder den vorhandenen Capture gezielt bewerten.</li>
             <li>Wenn der Befund gut ist: TASK_926 als Release First Exchange Playability Smoke starten.</li>
             <li>Wenn noch Restreibung sichtbar ist: TASK_926 als enger Player-Polish-Tuning-Slice statt als Smoke.</li>
@@ -253,7 +254,7 @@
           <h2>Prioritaet</h2>
           <label>Naechster Fokus
             <select data-export-key="next.focus">
-              <option value="finish_task925">TASK_925 fertigstellen</option>
+              <option value="verify_task925">TASK_925 verifizieren</option>
               <option value="manual_visual_review">manueller Sichtbefund</option>
               <option value="playability_smoke">Playability-Smoke</option>
               <option value="player_polish_tuning">Player-Polish-Tuning</option>
@@ -265,6 +266,7 @@
         </article>
         <article class="card full">
           <h2>Akzeptanz fuer den naechsten Schritt</h2>
+          <label class="checkline"><input type="checkbox" checked data-export-key="next.task925_verifier_present"> TASK_925-Verifier vorhanden.</label>
           <label class="checkline"><input type="checkbox" data-export-key="next.task925_verifier_green"> TASK_925-Verifier gruen.</label>
           <label class="checkline"><input type="checkbox" data-export-key="next.git_diff_check_green"> <code>git diff --check</code> gruen.</label>
           <label class="checkline"><input type="checkbox" data-export-key="next.window_capture_reviewed"> TASK_924-Fensterbild wirklich geprueft.</label>
@@ -355,9 +357,9 @@
           active_choices: {},
           computed: {
             current_task: "TASK_925 - Release First Exchange Followup Player Polish Visual Findings",
-            current_status: "in_progress",
+            current_status: "implemented_pending_local_verification",
             last_pushed_task: "TASK_924 - Release First Exchange Followup Player Polish Recapture",
-            recommended_next: "TASK_925 fertigstellen; danach TASK_926 Smoke oder Player-Polish-Tuning",
+            recommended_next: "TASK_925 verifizieren; danach TASK_926 Smoke oder Player-Polish-Tuning",
             gameplay_truth_mutated_by_report: false
           },
           metadata: {
