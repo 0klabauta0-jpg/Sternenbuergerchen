@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_940 - Release First Exchange Followup Fix Player Polish Final Tuning Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_936_release_first_exchange_followup_fix_player_polish_recapture.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_940 bewertet den TASK_939-Snapshot/Manifest read-only als Spielerblick nach dem TASK_938-Final-Tuning.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningVisualFindings.build_snapshot()` trennt technische Capture-Evidence, fehlenden manuellen Sichtbefund, belegte Restreibung und echte Akzeptanz fuer den First-Exchange-Playability-Smoke.
+- Stand: Positive Evidenz bleibt erhalten: CONTACT FIRE in #17/#18/#19, trusted Window-Handle-Capture, TASK_938-Final-Tuning-Style und TASK_935-Player-Polish-Basis.
+- Risiken/offen: Ohne akzeptierten Sichtbefund bleibt der Snapshot `needs_manual_review` oder empfiehlt einen engen TASK_941-Folgefix. Der Playability-Smoke ist erst nach Akzeptanz sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_941 - Release First Exchange Playability Smoke bei Akzeptanz; sonst TASK_941 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix.
+
 ### TASK_939 - Release First Exchange Followup Fix Player Polish Final Tuning Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_936_release_first_exchange_followup_fix_player_polish_recapture.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
