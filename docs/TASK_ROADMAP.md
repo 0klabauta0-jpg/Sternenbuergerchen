@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_1015 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings (implementiert): Der bestandene TASK_1014-Smoke wird gegen Player-Feel-Notizen bewertet: Entry, FOB-Objective, zwei Rollen, NEXT/CONFIRM/GO, Feedback, HUD-Ruhe, Responsiveness und Multiplayer-Grenze routen zu Polish oder Scenario-Playability.
 - TASK_1014 - Release First Decision Loop Two Player Loop Scenario Runtime Smoke (implementiert): Der TASK_1013-Runtime-Hook wird als Smoke-Trace bewertet: ENTRY, NEXT, CONFIRM, GO separat, Feedback-zurueck-zu-NEXT sowie HUD-/Multiplayer-Grenzen.
 - TASK_1013 - Release First Decision Loop Two Player Loop Scenario Runtime Hook (implementiert): Der TASK_1012-FOB-Stitch wird als Runtime-Hook sichtbar: Szenario-Schritte, `SICHERN/DRUECKEN/SAMMELN`, Mission-Control-Zeile, Selected-Fireteam-Zeile und read-only Command-Matrix-Hooks fuer `NEXT`, `CONFIRM` und `GO`.
 - TASK_1012 - Release First Decision Loop Two Player Loop Scenario Stitch (implementiert): Der akzeptierte TASK_1011-Round-Loop wird in einen kleinen FOB-Szenario-Rahmen ueberfuehrt: Einstieg, Objective, NPC-Druck, zwei Spielerrollen, FEEL/NEXT/GO, Feedback-zurueck-zu-NEXT, Exit und naechster Runtime-Hook.

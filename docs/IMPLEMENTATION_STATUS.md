@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1015 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1015_release_first_decision_loop_two_player_loop_scenario_player_feel_findings.md`, `docs/tasks/TASK_1014_release_first_decision_loop_two_player_loop_scenario_runtime_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioPlayerFeelFindings.build_snapshot()` bewertet einen bestandenen TASK_1014-Smoke plus optionale Player-Feel-Notizen.
+- Stand: Der Befund trennt technische Smoke-Evidence von Spielerlesbarkeit fuer Entry, FOB-Objective, zwei Rollen, NEXT/CONFIRM/GO, Feedback, HUD-Ruhe, Responsiveness und Multiplayer-Grenze.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1015 im Command-Feedback als Snapshot, Summary, Status und Issue-Count.
+- Risiken/offen: TASK_1015 ist noch kein Visual-Polish und kein echter Fenster-Sichttest. TASK_1016 sollte je nach Befund Polish oder einen Playability-Slice schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1015_release_first_decision_loop_two_player_loop_scenario_player_feel_findings.gd`, Regression TASK_1014, TASK_1013, TASK_1012, `git diff --check`.
+- Naechster Schritt: TASK_1016 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish oder TASK_1016 - Release First Decision Loop Two Player Loop Scenario Playability Slice.
+
 ### TASK_1014 - Release First Decision Loop Two Player Loop Scenario Runtime Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1014_release_first_decision_loop_two_player_loop_scenario_runtime_smoke.md`, `docs/tasks/TASK_1013_release_first_decision_loop_two_player_loop_scenario_runtime_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

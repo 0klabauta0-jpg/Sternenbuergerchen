@@ -105,6 +105,11 @@ TASK_1014 prueft, ob der TASK_1013-Runtime-Hook als kleiner Spielgriff traegt: `
 
 Der Smoke bleibt read-only. Er bewertet Trace-Evidence fuer sichtbaren Entry, NEXT, Runtime-Choice, Confirm, GO separat, Feedback-zurueck-zu-NEXT, HUD-Ruhe und Multiplayer-Grenze. Ein bestandener Smoke routet zu `TASK_1015 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings`.
 
+## Release First Decision Loop Two Player Loop Scenario Player Feel Findings (TASK_1015)
+TASK_1015 trennt den technischen TASK_1014-Smoke vom Spielerblick. Erwartet wird ein read-only Befund dazu, ob FOB-Entry, Objective, Alpha-/Bravo-Rollen, NEXT/CONFIRM/GO, Feedback, HUD-Ruhe, Responsiveness und Multiplayer-Grenze als kleiner Szenario-Griff rund wirken.
+
+Ohne Player-Feel-Notizen bleibt der Status `needs_scenario_player_feel_review`. Belegte Reibung routet zu `TASK_1016 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1016 - Release First Decision Loop Two Player Loop Scenario Playability Slice`. TASK_1015 erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 
