@@ -240,3 +240,8 @@ Der Snapshot bleibt read-only. Die Buttons duerfen visuell ruhiger und lesbarer 
 TASK_984 akzeptiert den gepolishen Vier-Choice-Loop nur mit Trace-Evidence. Bewertet werden sichtbare und lesbare `SECURE/PUSH/FLANK/RESET`-Choices, Tooltips mit `GO`-Grenze, Confirm-Feedback, getrenntes `GO`, keine Auto-Ausfuehrung, Order-Vorbereitung, Spielerlesbarkeit, HUD-read-only und Multiplayer-Grenze.
 
 Der Acceptance-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_player_loop_acceptance_trace`; bei Reibung routet er zurueck zu TASK_983; bei voller Evidence fuehrt er zu `TASK_985 - Release First Decision Loop Two Player Loop Scenario Outcome Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Scenario Outcome Slice (TASK_985)
+TASK_985 macht aus dem akzeptierten Vier-Choice-Loop ein kleines Szenario-Ergebnis. Bewertet werden gewaehlte Choice, sichtbare Outcome-Zeile, Mini-Zielzustand, naechster Griff, Spielerlesbarkeit, HUD-read-only und Multiplayer-Grenze.
+
+Der Outcome-Snapshot bleibt read-only. Ohne Outcome-Trace bleibt er `needs_player_loop_outcome_trace`; bei Reibung bleibt er in TASK_985; bei voller Evidence fuehrt er zu `TASK_986 - Release First Decision Loop Two Player Loop Outcome Real Window Capture`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

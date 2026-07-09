@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_985 - Release First Decision Loop Two Player Loop Scenario Outcome Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_985_release_first_decision_loop_two_player_loop_scenario_outcome_slice.md`, `docs/tasks/TASK_984_release_first_decision_loop_two_player_loop_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioOutcomeSlice.build_snapshot()` bewertet einen bestandenen TASK_984-Acceptance-Slice plus Outcome-Trace.
+- Stand: Der Slice prueft gewaehlte Choice, Outcome-Zeile, Mini-Zielzustand, naechsten Griff, Spielerlesbarkeit, HUD-read-only-Grenze und Multiplayer-Grenze.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_985 im Command-Feedback; ohne Outcome-Trace bleibt der Slice offen.
+- Risiken/offen: TASK_985 erzeugt noch keinen echten Fensterbeweis. TASK_986 sollte das Outcome im Real-Window-Capture pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_985_release_first_decision_loop_two_player_loop_scenario_outcome_slice.gd`, Regression TASK_984, TASK_983, TASK_980, `git diff --check`.
+- Naechster Schritt: TASK_986 - Release First Decision Loop Two Player Loop Outcome Real Window Capture.
+
 ### TASK_984 - Release First Decision Loop Two Player Loop Acceptance Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_984_release_first_decision_loop_two_player_loop_acceptance_slice.md`, `docs/tasks/TASK_983_release_first_decision_loop_two_player_loop_visual_polish.md`, `docs/tasks/TASK_980_release_first_decision_loop_two_player_loop_choice_confirm_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
