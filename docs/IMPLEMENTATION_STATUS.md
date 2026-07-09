@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1032 - Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1032_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan.md`, `docs/tasks/TASK_1031_release_first_decision_loop_two_player_loop_scenario_tester_run_acceptance.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioNextPlayableSlicePlan.build_snapshot()` bewertet eine akzeptierte TASK_1031-Quelle plus optionale Next-Slice-Plan-Notizen.
+- Stand: Ohne Plan bleibt der Status `needs_next_playable_slice_plan`; fehlende Pflichtitems melden `needs_next_playable_slice_plan_completion`; Issue-Flags melden `next_playable_slice_plan_regression_found`; ein sauberer Plan setzt `next_playable_slice_plan_ready`.
+- Stand: Der gewaehlte naechste Slice ist `first_contact_decision`: CONTACT, COVER, LOS, FIRE/WAIT und FEEDBACK werden als naechster echter Laufzeitgriff fuer TASK_1033 vorbereitet.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1032 im Command-Feedback als Snapshot, Next-Slice-Line, Status und Gate.
+- Risiken/offen: TASK_1032 ist bewusst noch kein Runtime-Hook und trifft keinen Pixelentscheid. Der sichtbare erste Kontakt kommt mit TASK_1033.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1032_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan.gd`, Regression TASK_1031, TASK_1030, TASK_1029, `git diff --check`.
+- Naechster Schritt: TASK_1033 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook oder TASK_1032 - Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan Polish.
+
 ### TASK_1031 - Release First Decision Loop Two Player Loop Scenario Tester Run Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1031_release_first_decision_loop_two_player_loop_scenario_tester_run_acceptance.md`, `docs/tasks/TASK_1030_release_first_decision_loop_two_player_loop_scenario_tester_run.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

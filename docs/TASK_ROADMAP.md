@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1032 - Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (implementiert im Arbeitsstand)
+- Grundlage: akzeptierter TASK_1031 Scenario Tester Run Acceptance.
+- Ziel: Den naechsten konkreten spielbaren Slice festlegen: erster Kontakt mit lesbarer CONTACT/COVER/LOS/FIRE-WAIT/FEEDBACK-Entscheidung.
+- Ergebnis: Read-only Snapshot `blocked_until_tester_run_acceptance | needs_next_playable_slice_plan | needs_next_playable_slice_plan_completion | next_playable_slice_plan_regression_found | next_playable_slice_plan_ready`.
+- Naechster Schritt: TASK_1033 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook.
+
 ## TASK_1017 - Release First Decision Loop Two Player Loop Scenario Playability Slice (implementiert im Arbeitsstand)
 - Grundlage: TASK_1016 Scenario Player Feel Polish.
 - Ziel: Kleinen FOB-Szenario-Griff mit Trace gegen Spielerfragen pruefen: FOB, Objective, Rollen, NEXT/CONFIRM/GO, Feedback, HUD-Ruhe und Multiplayer-Grenze.

@@ -188,6 +188,11 @@ TASK_1031 nimmt einen bereiten TASK_1030-Tester-Run und entscheidet, ob der klei
 
 Die Acceptance bleibt read-only. Ohne Review bleibt sie `needs_acceptance_review`; fehlende Checks bleiben `needs_acceptance_review_completion`; Issue-Flags routen zu TASK_1031-Polish; ein sauberer Review setzt `tester_run_accepted` und `ready_for_next_playable_slice`. Geprueft werden Tester-Run, Release-Dateien, Singleplayer-Pfad, FOB/NEXT/GO/FEEDBACK, Performance, HUD-Grenze, Multiplayer-Grenze, bekannte Risiken und ein benannter naechster spielbarer Slice. Sie erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und routet danach zu TASK_1032 Next Playable Slice Plan.
 
+## Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (TASK_1032)
+TASK_1032 nimmt eine akzeptierte TASK_1031-Quelle und legt den naechsten kleinen spielbaren Slice fest: erster Kontakt mit lesbarer CONTACT/COVER/LOS/FIRE-WAIT/FEEDBACK-Entscheidung.
+
+Der Plan bleibt read-only. Ohne akzeptierte TASK_1031-Quelle bleibt er `blocked_until_tester_run_acceptance`; ohne Plan bleibt er `needs_next_playable_slice_plan`; fehlende Pflichtitems bleiben `needs_next_playable_slice_plan_completion`; Issue-Flags routen zu TASK_1032-Polish; ein sauberer Plan setzt `next_playable_slice_plan_ready` und `ready_for_first_contact_runtime_hook`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und routet danach zu `TASK_1033 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook`.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)
