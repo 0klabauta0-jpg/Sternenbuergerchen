@@ -10,6 +10,27 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_900 - Release First Exchange Combat Focal Elegance Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_900_release_first_exchange_combat_focal_elegance_visual_findings.md`, `docs/tasks/TASK_899_release_first_exchange_combat_focal_elegance_real_window_recapture.md`, `docs/tasks/TASK_898_release_first_exchange_combat_focal_elegance_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_900 bewertet den echten TASK_899-Window-Handle-Screenshot read-only als Spielerblick.
+- Stand: Positive Befunde: CONTACT FIRE ist in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar; Event Log, FIRE-Weltlabel, weichere Lane, Source-Glow und Target-Halo sind vorhanden; Command-Surfaces bleiben nutzbar.
+- Stand: Primaere Restreibung ist `target_halo_still_reads_marker_disc`: Der gelbe Halo ist kleiner/weicher als vorher, liest sich im echten Fenster aber noch als grosse Marker-/Debug-Scheibe. Weitere Reibung: Grid-/World-Noise konkurriert weiter, Source-to-target-Beziehung ist noch nicht elegant genug, FIRE-Label und Halo ziehen zusammen viel Aufmerksamkeit.
+- Risiken/offen: TASK_900 aendert keine Runtime. Der naechste Slice muss eng Marker-Skalierung, Halo-Form und World-/Grid-Noise polieren, ohne Combat- oder HUD-Wahrheit zu oeffnen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_900_release_first_exchange_combat_focal_elegance_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_899_release_first_exchange_combat_focal_elegance_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_901 - Release First Exchange Combat Marker Scale And World Noise Polish.
+
+### TASK_899 - Release First Exchange Combat Focal Elegance Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_899_release_first_exchange_combat_focal_elegance_real_window_recapture.md`, `docs/tasks/TASK_898_release_first_exchange_combat_focal_elegance_polish.md`, `docs/tasks/TASK_896_release_first_exchange_world_combat_focal_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_899 legt einen eigenen Recapture-/Acceptance-Rahmen an den TASK_898-Focal-Elegance-Polish.
+- Stand: Lokaler Capture-Run schrieb `tmp/release_first_exchange_combat_focal_elegance_real_window_recapture.json` mit `review_ready` sowie `tmp/release_first_exchange_combat_focal_elegance_real_window_recapture.png`.
+- Stand: `capture_release_first_exchange_combat_focal_elegance_real_window_recapture.ps1` wiederverwendet den TASK_896-Weltkampf-Focal-Window-Handle-Pfad und schreibt eigene TASK_899-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeCombatFocalEleganceRealWindowRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer weichere Lane, kleineren Target-Halo, subtilen Source-Glow, CONTACT FIRE und stabile Erstlesung.
+- Risiken/offen: TASK_899 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. TASK_900 schneidet den echten PNG-Befund read-only.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_899_release_first_exchange_combat_focal_elegance_real_window_recapture.gd`, optional `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_combat_focal_elegance_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_898_release_first_exchange_combat_focal_elegance_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_900 - Release First Exchange Combat Focal Elegance Visual Findings.
+
 ### TASK_898 - Release First Exchange Combat Focal Elegance Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_898_release_first_exchange_combat_focal_elegance_polish.md`, `docs/tasks/TASK_897_release_first_exchange_world_combat_focal_visual_findings.md`, `docs/tasks/TASK_895_release_first_exchange_world_combat_focal_hierarchy_polish.md`, `docs/dev/mission_command_feedback_contract.md`
