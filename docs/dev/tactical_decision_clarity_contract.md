@@ -130,6 +130,11 @@ TASK_1019 trennt die technische TASK_1018-Capture-Evidence vom eigentlichen Spie
 
 Ohne Sichtnotizen bleibt der Status `needs_manual_review`. Belegte Reibung routet zu `TASK_1020 - Release First Decision Loop Two Player Loop Scenario Visual Polish`; ein sauberer Befund routet zu `TASK_1020 - Release First Decision Loop Two Player Loop Scenario Acceptance Slice`. TASK_1019 erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Acceptance Slice (TASK_1020)
+TASK_1020 prueft, ob der akzeptierte TASK_1019-Befund als kleiner FOB-Szenario-Griff traegt. Ein guter Trace bestaetigt: FOB-Entry gelesen, Objective verstanden, Alpha/Bravo-Rollen lesbar, NEXT/CONFIRM/GO klar, Feedback fuehrt wieder zu NEXT, GO bleibt separat, HUD bleibt ruhig, Responsiveness fuehlt sich schnell an und Multiplayer-/Gameplay-Wahrheit bleibt unberuehrt.
+
+Der Scenario-Acceptance-Slice bleibt read-only. Ohne Trace bleibt er `needs_scenario_acceptance_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1021 - Release First Decision Loop Two Player Loop Scenario Integrated Playtest`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

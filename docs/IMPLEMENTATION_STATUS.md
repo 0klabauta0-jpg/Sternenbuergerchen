@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1020 - Release First Decision Loop Two Player Loop Scenario Acceptance Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1020_release_first_decision_loop_two_player_loop_scenario_acceptance_slice.md`, `docs/tasks/TASK_1019_release_first_decision_loop_two_player_loop_scenario_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioAcceptanceSlice.build_snapshot()` bewertet akzeptierte TASK_1019-Findings plus optionalen Acceptance-Trace.
+- Stand: Ohne Trace bleibt der Status `needs_scenario_acceptance_trace`; fehlende Checks melden `scenario_acceptance_regression_found`; ein guter Trace setzt `scenario_acceptance_slice_passed`.
+- Stand: Der Slice prueft FOB-Entry, Objective, Rollen, NEXT/CONFIRM/GO, Feedback-zurueck-zu-NEXT, GO-Grenze, HUD-Ruhe, Responsiveness, Multiplayer-Grenze und keine HUD-Gameplay-Wahrheit.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1020 im Command-Feedback als Snapshot, Acceptance-Zeile und Status.
+- Risiken/offen: TASK_1020 akzeptiert den kleinen Griff als Trace-Slice, ist aber noch kein integrierter Echtfenster-Playtest. TASK_1021 sollte den Release-/Mission-Kontext pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1020_release_first_decision_loop_two_player_loop_scenario_acceptance_slice.gd`, Regression TASK_1019, TASK_1018, TASK_1017, `git diff --check`.
+- Naechster Schritt: TASK_1021 - Release First Decision Loop Two Player Loop Scenario Integrated Playtest.
+
 ### TASK_1019 - Release First Decision Loop Two Player Loop Scenario Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1019_release_first_decision_loop_two_player_loop_scenario_visual_findings.md`, `docs/tasks/TASK_1018_release_first_decision_loop_two_player_loop_scenario_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

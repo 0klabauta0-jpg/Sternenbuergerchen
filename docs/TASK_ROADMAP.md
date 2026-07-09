@@ -31,6 +31,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_manual_review | ready_for_scenario_visual_polish | accepted_for_scenario_acceptance_slice`.
 - Naechster Schritt: TASK_1020 - Release First Decision Loop Two Player Loop Scenario Visual Polish oder TASK_1020 - Release First Decision Loop Two Player Loop Scenario Acceptance Slice.
 
+## TASK_1020 - Release First Decision Loop Two Player Loop Scenario Acceptance Slice (implementiert im Arbeitsstand)
+- Grundlage: akzeptierte TASK_1019 Scenario Visual Findings.
+- Ziel: Kleinen FOB-Szenario-Griff als Acceptance-Slice pruefen: FOB, Objective, Rollen, NEXT/CONFIRM/GO, Feedback, HUD-Ruhe und Multiplayer-Grenze.
+- Ergebnis: Read-only Snapshot `needs_scenario_acceptance_trace | scenario_acceptance_regression_found | scenario_acceptance_slice_passed`.
+- Naechster Schritt: TASK_1021 - Release First Decision Loop Two Player Loop Scenario Integrated Playtest.
+
 # Arbeitsregeln
 
 ## Reihenfolge
