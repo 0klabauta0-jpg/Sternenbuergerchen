@@ -87,7 +87,7 @@
 <body data-report-id="spielstand_zwischenbericht_2026_07_09_aktuell" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Aktueller Arbeitsstand am 2026-07-09: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was ich als naechstes bearbeiten will. Neu aktualisiert nach TASK_903: Der TASK_902-EXE-/Window-Capture ist gelaufen, der Sichtbefund ist geschnitten, und TASK_904 soll die Fire-Lane als erste Weltlesung staerken.</p>
+    <p>Aktueller Arbeitsstand am 2026-07-09, 03:32 Uhr: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was ich als naechstes bearbeiten will. Neu aktualisiert nach TASK_903: Der TASK_902-EXE-/Window-Capture ist gelaufen, der Sichtbefund ist geschnitten, und TASK_904 soll die Fire-Lane als erste Weltlesung staerken.</p>
     <div class="meta-row">
       <span class="pill good">Release-/Singleplayer-Pfad begehbar</span>
       <span class="pill good">CONTACT FIRE im echten Fenster sichtbar</span>
@@ -101,6 +101,7 @@
       <span class="pill good">TASK_902 Window-Capture review_ready</span>
       <span class="pill good">TASK_903 Findings geschnitten</span>
       <span class="pill warn">Naechster Polish: TASK_904 Fire Lane</span>
+      <span class="pill warn">Zwischenbericht aktualisiert 03:32</span>
       <span class="pill warn">Untracked lokal: builds/</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -123,11 +124,15 @@
           <div class="status-box good">
             Der wichtigste Fortschritt: Der erste Release-Singleplayer-Weg ist jetzt als echte Kette pruefbar: Einzelspieler starten, Homebase in einen spielbaren Direktstart bringen, Mission starten, LZ/Drop/GO ausfuehren, Kontakt erzeugen und den ersten Feuerwechsel sichtbar lesen.
           </div>
+          <div class="status-box info" style="margin-top:12px;">
+            Zwischenstand jetzt: Ich habe keinen neuen Gameplay-State gebaut, sondern den aktuellen Spielstand als Arbeitsreport nachgezogen. Der belegte Stand bleibt TASK_903: CONTACT FIRE ist in den wichtigen HUD-Flaechen sichtbar, die Marker sind ruhiger, aber die Schussbahn muss als naechstes im Weltbild staerker werden.
+          </div>
           <h3 style="margin-top:16px;">Was sich am Spiel konkret getan hat</h3>
           <ul class="list">
             <li>Der Release-/EXE-Pfad fuehrt nicht mehr in eine stumme Sackgasse, sondern in einen nachvollziehbaren Homebase-&gt;Mission-&gt;Drop-&gt;Kontakt-Testlauf.</li>
             <li>Fireteam-, Mission-Control- und Event-Log-Flaechen zeigen den bestaetigten ersten Feuerkontakt synchroner an.</li>
             <li>Die Weltansicht hat jetzt eine erkennbare Feuerlesbarkeit: Trace, Impact, Ziel-Fokus, Lane, Source-Glow und Target-Halo sind als zusammenhaengende Kampfspur vorhanden.</li>
+            <li>Die letzte echte Fenster-Auswertung hat die offene Reibung eingegrenzt: Nicht noch mehr Text ins HUD, sondern die vorhandene Fire-Lane als Blickfuehrung staerken.</li>
             <li>Der Build-/EXE-Fokus ist klarer: Der Spielordner ist nicht Doku-Deko, sondern der eigentliche Abnahmepfad fuer Singleplayer-Klick, Missionseinstieg und ersten Feuerwechsel.</li>
             <li>Der aktuelle Stand ist nicht final huebsch, aber endlich gut genug instrumentiert, um gezielt ueber Spielerblick statt ueber Vermutung zu polieren.</li>
           </ul>
@@ -137,6 +142,7 @@
             <li>TASK_902 ist umgesetzt: Es gibt jetzt eigenen Capture-Wrapper, Manifest, Analyzer und Pflichtchecks fuer den echten Spielerfenster-Beleg nach TASK_901.</li>
             <li>Der echte TASK_902-Capture ist gelaufen: `tmp/release_first_exchange_combat_marker_scale_real_window_recapture.png` und Manifest stehen auf `review_ready`.</li>
             <li>TASK_903 ist umgesetzt: Der Screenshot bestaetigt CONTACT FIRE und ruhigere Marker, aber die Fire-Lane ist noch zu subtil als erste Weltlesung.</li>
+            <li>Dieser HTML-Zwischenbericht wurde aktualisiert und bleibt als lokale Workbench fuer Playtest-Notizen, Entscheidungen und JSON-Export nutzbar.</li>
             <li>Als naechstes TASK_904: Fire-Lane/Source-to-target-Beziehung gezielt klarer machen, ohne Combat- oder HUD-Wahrheit neu zu oeffnen.</li>
             <li>Wenn der erste Feuerwechsel angenehm liest, den Playtest 30-60 Sekunden laenger laufen lassen: Movement, Zielerkennung, Taktik, UI-Dichte und Performance.</li>
           </ul>
@@ -356,6 +362,7 @@
           <h2>Was ich als naechstes machen wuerde</h2>
           <ol class="list">
             <li><strong>TASK_904 - Fire Lane Readability Polish:</strong> Die belegte TASK_903-Reibung eng umsetzen: Source-to-target-Fire-Lane klarer als Schussbahn lesen lassen, ohne neue Combat- oder HUD-Wahrheit.</li>
+            <li><strong>TASK_905 - frischer Recapture danach:</strong> Nach TASK_904 wieder exportieren/capturen, damit nicht nur der Verifier, sondern der echte Spielerfensterblick zaehlt.</li>
             <li><strong>Kleiner freier Playtest:</strong> Nach dem ersten Feuerwechsel nicht sofort stoppen, sondern 30-60 Sekunden weiterlaufen lassen: Befehle, Movement, Zielerkennung, UI-Dichte, Performance.</li>
             <li><strong>Spielerfuehrung nachziehen:</strong> Wenn TASK_904 den Spielerblick bestaetigt, den ersten Missionsgriff weiter angenehmer machen: naechster sinnvoller Befehl, Rueckmeldung, weniger Denk-Arbeit fuer den Spieler.</li>
             <li><strong>Danach Entscheidung:</strong> Entweder erste Mission weiter ausbauen oder wieder Richtung taktische Entscheidungslesbarkeit gehen: Order Preview, Line-of-Fire, Threat Overlay.</li>
@@ -515,7 +522,8 @@
             current_player_gain: "first_exchange_contact_fire_visible_marker_scale_world_noise_polish_confirmed_in_real_window",
             primary_open_risk: "fire_lane_still_too_subtle_for_first_world_read",
             next_recommended_slice: "TASK_904",
-            report_updated_at_local: "2026-07-09",
+            following_recapture_slice: "TASK_905",
+            report_updated_at_local: "2026-07-09 03:32 +02:00",
             report_purpose: "interim_workbench_for_done_changed_next"
           },
           metadata: {
