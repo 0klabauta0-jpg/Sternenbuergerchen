@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - Stand TASK_932</title>
+  <title>Sternenbuergerchen Zwischenbericht - Stand TASK_933</title>
   <style>
     :root {
       color-scheme: dark;
@@ -82,13 +82,13 @@
 <body data-report-id="spielstand_zwischenbericht_task932_ausblick_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Stand 2026-07-09: Der Release-Singleplayer-Pfad ist lauffaehig und der erste Feuerwechsel ist als lesbarer Spielerblick in Arbeit. TASK_932 ist als enger Final-Readability-Follow-up-Fix umgesetzt; TASK_933 ist der naechste Recapture-Schnitt.</p>
+    <p>Stand 2026-07-09: Der Release-Singleplayer-Pfad ist lauffaehig und der erste Feuerwechsel ist als lesbarer Spielerblick in Arbeit. TASK_932 ist als enger Final-Readability-Follow-up-Fix umgesetzt; TASK_933 stellt jetzt den frischen Recapture-Rahmen bereit.</p>
     <div class="meta-row">
       <span class="pill good">Branch: task/release-first-exchange-player-readability-polish-review</span>
       <span class="pill good">Release-EXE-Pfad stabilisiert</span>
       <span class="pill good">CONTACT FIRE sichtbar gefuehrt</span>
-      <span class="pill good">TASK_926-932 umgesetzt</span>
-      <span class="pill warn">TASK_933 Recapture offen</span>
+      <span class="pill good">TASK_926-933 umgesetzt</span>
+      <span class="pill warn">TASK_934 Findings offen</span>
       <span class="pill">Report read-only</span>
     </div>
   </header>
@@ -116,7 +116,7 @@
           <div class="stack">
             <div class="metric"><strong>gruen</strong><span>Release-Start, Homebase-Direct, Missionstart, Deep-Link-/Capture-Kette.</span></div>
             <div class="metric"><strong>gelb</strong><span>Erster Weltblick: Fire-Lane, Source/Target und Text/Halo konkurrieren noch knapp.</span></div>
-            <div class="metric"><strong>naechst</strong><span>TASK_933 als frischer Recapture nach dem Follow-up-Fix.</span></div>
+            <div class="metric"><strong>naechst</strong><span>TASK_934 als read-only Findings-Schnitt auf dem TASK_933-Recapture.</span></div>
           </div>
         </article>
       </div>
@@ -138,6 +138,7 @@
             <li>TASK_930 legt den finalen Recapture-/Review-Rahmen an.</li>
             <li>TASK_931 bewertet den finalen Spielerblick read-only und blockt einen Smoke, solange kein echter Sichtbefund akzeptiert ist.</li>
             <li>TASK_932 setzt den engen Folgefix um: Lane/Core leicht staerker, Label/Halo/Grid/Weltlinien leiser, Anker tragender aber nicht scheibenhaft.</li>
+            <li>TASK_933 legt den frischen Recapture-/Review-Rahmen nach TASK_932 an und schreibt eigene Manifest-/Screenshotpfade.</li>
           </ul>
         </article>
         <article class="card">
@@ -148,16 +149,17 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="done.visual_polish"> Fire-Lane-/World-Read-Polish implementiert.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.recapture_findings"> Recapture-/Findings-Slices TASK_930/931 vorhanden.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task932_followup_fix"> TASK_932 Follow-up-Fix umgesetzt.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task933_recapture"> TASK_933 Recapture-Rahmen umgesetzt.</label>
           <label class="checkline"><input type="checkbox" data-export-key="done.manual_acceptance"> Manueller Spielerblick akzeptiert.</label>
         </article>
         <article class="card full">
           <h2>Wichtige Artefakte</h2>
           <ul class="list">
-            <li><code>docs/IMPLEMENTATION_STATUS.md</code> beschreibt TASK_932 als aktuellen Stand.</li>
-            <li><code>docs/TASK_ROADMAP.md</code> nennt TASK_933 als naechsten Recapture-Schritt.</li>
-            <li><code>docs/tasks/TASK_926_release_first_exchange_followup_player_polish_tuning.md</code> bis <code>docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md</code> halten die letzten Slices fest.</li>
+            <li><code>docs/IMPLEMENTATION_STATUS.md</code> beschreibt TASK_933 als aktuellen Stand.</li>
+            <li><code>docs/TASK_ROADMAP.md</code> nennt TASK_934 als naechsten Findings-Schritt.</li>
+            <li><code>docs/tasks/TASK_926_release_first_exchange_followup_player_polish_tuning.md</code> bis <code>docs/tasks/TASK_933_release_first_exchange_followup_fix_recapture.md</code> halten die letzten Slices fest.</li>
             <li><code>scripts/mission/release_first_exchange_*gd</code> enthaelt die read-only Services fuer Polish, Recapture und Findings.</li>
-            <li><code>scripts/tests/task_926_*.gd</code> bis <code>scripts/tests/task_932_*.gd</code> sichern die Contracts gegen Drift.</li>
+            <li><code>scripts/tests/task_926_*.gd</code> bis <code>scripts/tests/task_933_*.gd</code> sichern die Contracts gegen Drift.</li>
             <li><code>docs/reports/spielstand_zwischenbericht_task932_ausblick_2026_07_09.html</code> ist dieser neue Zwischenbericht.</li>
           </ul>
         </article>
@@ -204,11 +206,11 @@
           <h2>Entscheidung</h2>
           <p>Welche Richtung ist nach TASK_932 sinnvoll?</p>
           <div class="button-row" data-choice-group="task932.path">
-            <button class="choice active" type="button" data-choice-value="recapture">TASK_933 Recapture</button>
+            <button class="choice active" type="button" data-choice-value="findings">TASK_934 Findings</button>
             <button class="choice" type="button" data-choice-value="playability_smoke">Smoke nach Akzeptanz</button>
             <button class="choice" type="button" data-choice-value="manual_review_first">Erst manuell ansehen</button>
           </div>
-          <p>Meine Empfehlung bleibt: jetzt frisch recapturen, dann erst Smoke freigeben.</p>
+          <p>Meine Empfehlung bleibt: den TASK_933-Recapture read-only als TASK_934 schneiden, dann erst Smoke freigeben.</p>
         </article>
       </div>
     </section>
@@ -218,7 +220,7 @@
         <article class="card wide">
           <h2>Was ich als Naechstes machen will</h2>
           <ul class="list">
-            <li><strong>TASK_933:</strong> Frischen Window-Handle-Recapture nach TASK_932 erzeugen und pruefen, ob die Follow-up-Fire-Lane jetzt als erste Weltbewegung gelesen wird.</li>
+            <li><strong>TASK_934:</strong> TASK_933-Window-Handle-Recapture read-only bewerten und pruefen, ob die Follow-up-Fire-Lane jetzt als erste Weltbewegung gelesen wird.</li>
             <li><strong>Danach:</strong> Bei Akzeptanz den kurzen Release First Exchange Playability Smoke starten.</li>
             <li><strong>Bei Restreibung:</strong> Keine neuen HUD-Texte und keinen Combat-Rewrite, sondern den echten Screenshot-Befund wieder als kleinen Findings-Schnitt auswerten.</li>
             <li>Erst danach wuerde ich wieder breiter werden: kurzer Spielzug-Smoke, dann Map-/Workbench-/Szenario-Arbeit.</li>
@@ -230,7 +232,8 @@
           <label class="checkline"><input type="checkbox" data-export-key="next.view_report"> Bericht gelesen.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="next.decide_task932"> TASK_932-Richtung entschieden.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="next.run_followup"> Follow-up-Fix umgesetzt.</label>
-          <label class="checkline"><input type="checkbox" data-export-key="next.recapture_task933"> TASK_933 Recapture starten.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="next.recapture_task933"> TASK_933 Recapture-Rahmen steht.</label>
+          <label class="checkline"><input type="checkbox" data-export-key="next.findings_task934"> TASK_934 Findings starten.</label>
           <label class="checkline"><input type="checkbox" data-export-key="next.run_tests"> Verifier und <code>git diff --check</code> laufen lassen.</label>
           <label class="checkline"><input type="checkbox" data-export-key="next.commit_push"> Commit und Push.</label>
         </article>
@@ -245,7 +248,7 @@
           <label>Was wirkt im ersten Feuerwechsel noch falsch?
             <textarea data-export-key="notes.first_exchange" placeholder="z.B. Lane zu schwach, Text zu laut, Ziel nicht erkennbar..."></textarea>
           </label>
-          <label>Was sollte nach TASK_933 als naechstes kommen?
+          <label>Was sollte nach TASK_934 als naechstes kommen?
             <textarea data-export-key="notes.next_slice" placeholder="z.B. Smoke, Map-Editor, groessere Karte, Tactical Decision Clarity..."></textarea>
           </label>
           <div contenteditable="true" data-note-key="notes.freeform" data-placeholder="Freie Zwischenbericht-Notizen..."></div>
@@ -333,10 +336,10 @@
           notes,
           active_choices: activeChoices,
           computed: {
-            current_task: "TASK_932",
-            next_task: "TASK_933",
-            recommended_without_manual_acceptance: "TASK_933 - Release First Exchange Followup Fix Recapture",
-            recommended_with_manual_acceptance: "TASK_933 - Release First Exchange Followup Fix Recapture"
+            current_task: "TASK_933",
+            next_task: "TASK_934",
+            recommended_without_manual_acceptance: "TASK_934 - Release First Exchange Followup Fix Visual Findings",
+            recommended_with_manual_acceptance: "TASK_934 - Release First Exchange Followup Fix Visual Findings"
           },
           metadata: {
             date: "2026-07-09",

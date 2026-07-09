@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_933 - Release First Exchange Followup Fix Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_933_release_first_exchange_followup_fix_recapture.md`, `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/tasks/TASK_931_release_first_exchange_final_readability_visual_findings.md`, `docs/tasks/TASK_930_release_first_exchange_final_readability_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_933 legt einen frischen Recapture-/Review-Rahmen an den TASK_932-Follow-up-Fix.
+- Stand: `capture_release_first_exchange_followup_fix_recapture.ps1` wiederverwendet den TASK_930-Window-Handle-Pfad und schreibt eigene TASK_933-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFollowupFixRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Follow-up-Fix-Fire-Lane als erste Weltbewegung, tragende Source-/Target-Anker, leises Label/Halo/Grid und Lane-vor-FIRE/CONTACT-Text.
+- Risiken/offen: TASK_933 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_934 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_933_release_first_exchange_followup_fix_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_932_release_first_exchange_final_readability_followup_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_934 - Release First Exchange Followup Fix Visual Findings.
+
 ### TASK_932 - Release First Exchange Final Readability Followup Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/tasks/TASK_931_release_first_exchange_final_readability_visual_findings.md`, `docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
