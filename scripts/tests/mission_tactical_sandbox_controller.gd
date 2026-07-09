@@ -46,6 +46,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_EXECUTION_HOOK_SCRIPT: GDScript = preload(
 const RELEASE_FIRST_DECISION_LOOP_TWO_GO_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_go_smoke.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_RUNTIME_BUTTON_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_runtime_button.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_visual_polish.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYABILITY_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_playability_smoke.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21007,6 +21008,12 @@ func get_release_first_decision_loop_two_visual_polish_snapshot(visual_findings_
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_VISUAL_POLISH_SCRIPT.call("build_snapshot", visual_findings, runtime_button)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_playability_smoke_snapshot(visual_polish_override: Dictionary = {}, playability_trace_override: Dictionary = {}) -> Dictionary:
+	var visual_polish: Dictionary = visual_polish_override.duplicate(true) if not visual_polish_override.is_empty() else get_release_first_decision_loop_two_visual_polish_snapshot()
+	var playability_trace: Dictionary = playability_trace_override.duplicate(true) if not playability_trace_override.is_empty() else _build_release_first_decision_loop_two_playability_smoke_trace(visual_polish)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYABILITY_SMOKE_SCRIPT.call("build_snapshot", visual_polish, playability_trace)).duplicate(true)
+
+
 func confirm_release_first_decision_loop_two_runtime_button(selected_choice_id: String = "") -> bool:
 	var runtime_button: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot()
 	if not bool(runtime_button.get("button_enabled", false)):
@@ -21081,6 +21088,27 @@ func _build_release_first_decision_loop_two_visual_polish_source(runtime_button:
 		"creates_movement": false,
 		"sets_multiplayer_truth": false,
 		"updates_shortcuts": false,
+	}
+
+
+func _build_release_first_decision_loop_two_playability_smoke_trace(visual_polish: Dictionary) -> Dictionary:
+	var line: String = String(visual_polish.get("post_confirm_line", visual_polish.get("hud_line", ""))).strip_edges()
+	return {
+		"trace_available": false,
+		"completed_checks": [],
+		"second_decision_button_visible": bool(visual_polish.get("button_enabled", false)),
+		"second_decision_confirmed": false,
+		"go_button_still_separate": String(visual_polish.get("go_separation_line", "")).contains("GO"),
+		"go_executed_after_confirm": false,
+		"post_go_feedback_visible": false,
+		"post_go_feedback_line": line,
+		"no_go_before_second_confirm": true,
+		"no_new_hud_gameplay_truth": true,
+		"multiplayer_boundary_preserved": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
 	}
 
 
@@ -23936,6 +23964,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		{},
 		release_first_decision_loop_two_runtime_button
 	)
+	var release_first_decision_loop_two_playability_smoke: Dictionary = get_release_first_decision_loop_two_playability_smoke_snapshot(
+		release_first_decision_loop_two_visual_polish,
+		{}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24038,6 +24070,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_visual_polish": release_first_decision_loop_two_visual_polish,
 		"release_first_decision_loop_two_visual_polish_line": String(release_first_decision_loop_two_visual_polish.get("hud_line", "")),
 		"release_first_decision_loop_two_visual_polish_status": String(release_first_decision_loop_two_visual_polish.get("status", "")),
+		"release_first_decision_loop_two_playability_smoke": release_first_decision_loop_two_playability_smoke,
+		"release_first_decision_loop_two_playability_smoke_line": String(release_first_decision_loop_two_playability_smoke.get("smoke_line", "")),
+		"release_first_decision_loop_two_playability_smoke_status": String(release_first_decision_loop_two_playability_smoke.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

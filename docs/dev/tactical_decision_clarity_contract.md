@@ -175,3 +175,8 @@ Der Findings-Schnitt bleibt read-only. Ohne manuelle Review bleibt er `needs_man
 TASK_971 poliert die Lesbarkeit des zweiten Griffs: `2ND` bleibt kompakt, der Tooltip erklaert den zweiten Griff, die HUD-/Command-Feedback-Zeile nennt `GO separat`, und Post-Confirm-Feedback sagt dem Spieler den naechsten Griff.
 
 Der Polish-Snapshot bleibt read-only. Er darf Button-Metadaten, Mindestgroesse, Tooltip und Feedback-Zeilen liefern, aber keine Commands erzeugen und kein `GO` ausloesen. Der naechste Beweis ist `TASK_972 - Release First Decision Loop Two Playability Smoke`.
+
+## Release First Decision Loop Two Playability Smoke (TASK_972)
+TASK_972 prueft den zweiten Griff als kleinen Ablauf: `2ND` sichtbar, zweiter Griff bestaetigt, `GO` bleibt separat, `GO` wird erst danach ausgefuehrt, und Post-GO-Feedback ist sichtbar.
+
+Der Smoke-Snapshot bleibt read-only. Er darf Trace-Evidence bewerten und eine Statuszeile liefern, aber keine Commands erzeugen und keine Gameplay- oder Multiplayer-Wahrheit setzen. Bei Erfolg routet er zu `TASK_973 - Release First Decision Loop Two Real Window Recapture`.

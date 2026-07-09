@@ -20,6 +20,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_968_release_first_decision_loop_two_runtime_button.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_967_release_first_decision_loop_two_go_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_966_release_first_decision_loop_two_execution_hook.gd`, `git diff --check`.
 - Naechster Schritt: TASK_969 - Release First Decision Loop Two Real Window Capture.
 
+### TASK_972 - Release First Decision Loop Two Playability Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_972_release_first_decision_loop_two_playability_smoke.md`, `docs/tasks/TASK_971_release_first_decision_loop_two_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayabilitySmoke.build_snapshot()` bewertet read-only den Ablauf `2ND -> GO -> Feedback` gegen Pflichtchecks.
+- Stand: Fehlende Trace-Evidence bleibt `needs_playability_smoke_run`; fehlender `GO` oder fehlendes Feedback routet zurueck zu TASK_971.
+- Stand: `MissionTacticalSandboxController` exportiert den TASK_972-Snapshot und die Smoke-Zeile im Command Feedback.
+- Risiken/offen: Der Smoke bewertet Evidence, ersetzt aber noch keinen echten Fensterblick. TASK_973 sollte den Ablauf im laufenden Fenster recapturen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_972_release_first_decision_loop_two_playability_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_971_release_first_decision_loop_two_visual_polish.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_970_release_first_decision_loop_two_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_973 - Release First Decision Loop Two Real Window Recapture.
+
 ### TASK_971 - Release First Decision Loop Two Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_971_release_first_decision_loop_two_visual_polish.md`, `docs/tasks/TASK_970_release_first_decision_loop_two_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
