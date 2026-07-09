@@ -245,3 +245,8 @@ Der Acceptance-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_player_loo
 TASK_985 macht aus dem akzeptierten Vier-Choice-Loop ein kleines Szenario-Ergebnis. Bewertet werden gewaehlte Choice, sichtbare Outcome-Zeile, Mini-Zielzustand, naechster Griff, Spielerlesbarkeit, HUD-read-only und Multiplayer-Grenze.
 
 Der Outcome-Snapshot bleibt read-only. Ohne Outcome-Trace bleibt er `needs_player_loop_outcome_trace`; bei Reibung bleibt er in TASK_985; bei voller Evidence fuehrt er zu `TASK_986 - Release First Decision Loop Two Player Loop Outcome Real Window Capture`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Outcome Real Window Capture (TASK_986)
+TASK_986 legt den echten Fensterrahmen fuer das TASK_985-Outcome fest. Bewertet werden Outcome-Zeile, Mini-Zielzustand, naechster Griff, Spielerlesbarkeit, Screenshotpfade, manuelle Pflichtchecks, HUD-read-only und Multiplayer-Grenze.
+
+Der Capture-Snapshot bleibt read-only und setzt `manual_review_done` nicht automatisch. Ohne Manifest bleibt er `needs_outcome_real_window_capture`; ein gueltiges Manifest wird `review_ready`; vollstaendige manuelle Checks akzeptieren ihn fuer `TASK_987 - Release First Decision Loop Two Player Loop Outcome Visual Findings`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

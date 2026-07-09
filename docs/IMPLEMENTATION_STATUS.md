@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_986 - Release First Decision Loop Two Player Loop Outcome Real Window Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_986_release_first_decision_loop_two_player_loop_outcome_real_window_capture.md`, `docs/tasks/TASK_985_release_first_decision_loop_two_player_loop_scenario_outcome_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopOutcomeRealWindowCapture.build_snapshot()` bewertet einen ready TASK_985-Outcome-Slice plus Capture-Manifest.
+- Stand: Das Manifest verlangt Outcome-Zeile, Mini-Zielzustand, Next-Step-Zeile, Spielerlesbarkeit, HUD-read-only-Grenze und Multiplayer-Grenze im echten Fensterrahmen.
+- Stand: `capture_release_first_decision_loop_two_player_loop_outcome_real_window.ps1` schreibt ein Review-Manifest, setzt `manual_review_done = $false` und veraendert keine Shortcuts.
+- Risiken/offen: TASK_986 erzeugt noch keinen visuellen Befund. TASK_987 sollte aus dem Capture konkrete Outcome-Visual-Findings schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_986_release_first_decision_loop_two_player_loop_outcome_real_window_capture.gd`, Regression TASK_985, TASK_984, TASK_983, `git diff --check`.
+- Naechster Schritt: TASK_987 - Release First Decision Loop Two Player Loop Outcome Visual Findings.
+
 ### TASK_985 - Release First Decision Loop Two Player Loop Scenario Outcome Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_985_release_first_decision_loop_two_player_loop_scenario_outcome_slice.md`, `docs/tasks/TASK_984_release_first_decision_loop_two_player_loop_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
