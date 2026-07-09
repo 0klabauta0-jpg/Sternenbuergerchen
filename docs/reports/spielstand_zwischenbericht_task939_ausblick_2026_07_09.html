@@ -91,13 +91,14 @@
 <body data-report-id="spielstand_zwischenbericht_task940_task941_ausblick_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Stand 2026-07-09: Der Release-Singleplayer-Pfad ist bis zum ersten Feuerkontakt als reproduzierbare Strecke aufgebaut. TASK_941 fuegt jetzt ein read-only Playability-Smoke-Gate hinzu: Der naechste reale Slice ist TASK_942, je nach Gate als Smoke-Run, enger Folgefix oder manueller Fensterentscheid.</p>
+    <p>Stand 2026-07-09: Der Release-Singleplayer-Pfad ist bis zum ersten Feuerkontakt als reproduzierbare Strecke aufgebaut. TASK_941 hat das read-only Playability-Smoke-Gate geliefert; TASK_942 setzt den Restreibungs-Pfad als engen Followup-Fix um, danach ist TASK_943 als neuer Recapture-/Review-Schnitt faellig.</p>
     <div class="meta-row">
       <span class="pill good">Branch: task/release-first-exchange-player-readability-polish-review</span>
       <span class="pill good">TASK_939 umgesetzt</span>
       <span class="pill good">TASK_940 umgesetzt</span>
       <span class="pill good">TASK_941 Gate umgesetzt</span>
-      <span class="pill warn">TASK_942 naechster Entscheid</span>
+      <span class="pill good">TASK_942 Followup-Fix umgesetzt</span>
+      <span class="pill warn">TASK_943 naechster Recapture</span>
       <span class="pill warn">Playability-Smoke noch nicht freigegeben</span>
       <span class="pill good">Zwischenbericht aktualisiert</span>
       <span class="pill">HTML-Workbench</span>
@@ -321,7 +322,7 @@
           active_choices: {},
           computed: {
             current_done_task: "TASK_941",
-            recommended_next_task: "TASK_942 - Release First Exchange Playability Smoke Run | TASK_942 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix | TASK_942 - Release First Exchange Manual Window Review",
+            recommended_next_task: "TASK_943 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Recapture",
             release_path_status: "singleplayer_to_first_exchange_hardened",
             first_exchange_status: "final_tuning_playability_smoke_gate_done_needs_task942_decision",
             gameplay_truth_policy: "read_only_report_no_runtime_truth"

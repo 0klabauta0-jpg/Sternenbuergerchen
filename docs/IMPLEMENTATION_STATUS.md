@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_942 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.md`, `docs/tasks/TASK_941_release_first_exchange_final_tuning_playability_smoke_gate.md`, `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_942 setzt den TASK_941-`followup_fix_required`-Pfad als engen read-only Presentation-Fix um.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningFollowupFix.build_snapshot()` verlangt TASK_941-Gate, TASK_940-Restbefund `final_tuning_fire_lane_not_first_world_movement` und TASK_938 als Baseline.
+- Stand: `TerrainMap3DView` meldet den Style `task_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix_v1`; Lane/Core werden gegenueber TASK_938 staerker, Label/Halo/Grid/Weltlinien leiser und Source-/Target-Anker bleiben unter der Scheiben-Grenze.
+- Risiken/offen: TASK_942 ersetzt keinen echten Fensterbeweis und keinen Smoke. Der naechste Slice muss frisch recapturen, ob der Spielerblick jetzt wirklich funktioniert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_941_release_first_exchange_final_tuning_playability_smoke_gate.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_938_release_first_exchange_followup_fix_player_polish_final_tuning.gd`, `git diff --check`.
+- Naechster Schritt: TASK_943 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Recapture.
+
 ### TASK_941 - Release First Exchange Final Tuning Playability Smoke Gate
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_941_release_first_exchange_final_tuning_playability_smoke_gate.md`, `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_936_release_first_exchange_followup_fix_player_polish_recapture.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
