@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1003 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1003_release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish.md`, `docs/tasks/TASK_1002_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playtest_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopRuntimePolish.build_snapshot()` erzeugt aus einem bestandenen TASK_1002-Slice kurze Runtime-Zeilen und Surface-Specs.
+- Stand: Der Polish liefert Surfaces fuer `ROUND`, `NEXT` und `GO`, plus Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen mit sichtbarer `GO separat`-Grenze.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1003 im Command-Feedback als Snapshot, Status, Linie und Runtime-Surface-Specs.
+- Risiken/offen: TASK_1003 ist noch kein echter Fensterbeweis; TASK_1004 sollte den Round-Loop im Real-Window/F6-Kontext capturen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1003_release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish.gd`, Regression TASK_1002, TASK_1001, TASK_1000, `git diff --check`.
+- Naechster Schritt: TASK_1004 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture.
+
 ### TASK_1002 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playtest Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1002_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playtest_slice.md`, `docs/tasks/TASK_1001_release_first_decision_loop_two_player_loop_micro_objective_round_trip_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

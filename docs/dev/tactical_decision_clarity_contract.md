@@ -330,3 +330,8 @@ Der Round-Trip-Smoke bleibt read-only. Ohne Trace bleibt er `needs_micro_objecti
 TASK_1002 prueft, ob aus dem bestandenen Round-Trip ein wiederholbarer kleiner Spielgriff wird. Ein guter Trace bestaetigt zwei lesbare Micro-Objective-Runden, sichtbare zweite NEXT-Optionen, Confirm, getrenntes `GO`, Post-Feedback, erneuten NEXT-Zustand, kein Feedback-Dead-End, stabile HUD-Surfaces, wiederverwendeten Command-Pfad und erhaltene Multiplayer-Grenze.
 
 Der Round-Loop-Playtest-Slice bleibt read-only. Ohne Trace bleibt er `needs_micro_objective_round_loop_playtest_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1003 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish (TASK_1003)
+TASK_1003 uebersetzt den bestandenen Zwei-Runden-Slice in kurze Runtime-Leseflaechen. Erwartet werden Surface-Specs fuer `ROUND`, `NEXT` und `GO`, eine Selected-Fireteam-Zeile, eine Mission-Control-Zeile und eine Command-Feedback-Zeile. Die Texte muessen spielernahe Tokens nutzen, die `GO separat`-Grenze sichtbar halten und rohe interne Check-IDs verstecken.
+
+Der Runtime-Polish bleibt read-only. Ein bestandener Source-Slice routet zu `TASK_1004 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture`. Er erzeugt keine UI-Baeume, keine Commands, kein Movement, keine Combat-/Damage-Ereignisse und keine Multiplayer-Wahrheit.

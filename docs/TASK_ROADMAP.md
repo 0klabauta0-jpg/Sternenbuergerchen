@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_1003 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish (implementiert): Der bestandene TASK_1002-Zwei-Runden-Slice erzeugt read-only Runtime-Surfaces fuer `ROUND`, `NEXT` und `GO` plus kurze HUD-Zeilen mit sichtbarer `GO separat`-Grenze.
 - TASK_1002 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playtest Slice (implementiert): Ein bestandener TASK_1001-Smoke wird mit Trace-Evidence als read-only Zwei-Runden-Slice bewertet; `NEXT -> CONFIRM -> GO -> FEEDBACK -> NEXT`, kein Feedback-Dead-End und HUD-/Multiplayer-Grenzen bleiben erhalten.
 - TASK_1001 - Release First Decision Loop Two Player Loop Micro Objective Round Trip Smoke (implementiert): Ein bestandener TASK_1000-Slice wird mit Trace-Evidence als read-only `NEXT -> CONFIRM -> GO -> FEEDBACK`-Smoke bewertet; Rueckkehr in den naechsten Entscheidungszustand und HUD-/Multiplayer-Grenzen bleiben erhalten.
 - TASK_1000 - Release First Decision Loop Two Player Loop Micro Objective Playability Slice (implementiert): Der TASK_999-Polish wird mit Trace-Evidence als read-only Playability-Slice bewertet: OUTCOME/OBJ/NEXT lesbar, naechster Griff verstanden, GO-Grenze und HUD-/Multiplayer-Grenzen erhalten.
