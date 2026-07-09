@@ -320,3 +320,8 @@ Der Polish-Snapshot bleibt read-only. Ein falscher oder nicht polishbarer TASK_9
 TASK_1000 prueft, ob die TASK_999-Flaechen als Spielergriff funktionieren. Ein guter Trace bestaetigt sichtbares `OUTCOME`, `OBJ` und `NEXT`, verstandenen Micro-Objective-Ausgang, verstandenen naechsten Griff, sichtbares Post-Objective-Feedback, erhaltene GO-Grenze und unveraenderte HUD-/Multiplayer-Grenzen.
 
 Der Playability-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_micro_objective_playability_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1001 - Release First Decision Loop Two Player Loop Micro Objective Round Trip Smoke`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Micro Objective Round Trip Smoke (TASK_1001)
+TASK_1001 prueft, ob der bestandene Micro-Objective-Griff wieder in den naechsten Griff zurueckfuehrt. Ein guter Trace bestaetigt sichtbare naechste Micro-Objective-Optionen, Confirm, sichtbares Confirm-Feedback, weiterhin separates `GO`, keine Auto-Ausfuehrung nach Confirm, Post-Round-Trip-Feedback, Rueckkehr in den Entscheidungszustand, wiederverwendeten Command-Pfad sowie HUD-/Multiplayer-Grenzen.
+
+Der Round-Trip-Smoke bleibt read-only. Ohne Trace bleibt er `needs_micro_objective_round_trip_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1002 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playtest Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

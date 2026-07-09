@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1001 - Release First Decision Loop Two Player Loop Micro Objective Round Trip Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1001_release_first_decision_loop_two_player_loop_micro_objective_round_trip_smoke.md`, `docs/tasks/TASK_1000_release_first_decision_loop_two_player_loop_micro_objective_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundTripSmoke.build_snapshot()` bewertet einen bestandenen TASK_1000-Slice plus Round-Trip-Trace.
+- Stand: Der Smoke prueft `NEXT -> CONFIRM -> GO -> FEEDBACK`, Rueckkehr in den naechsten Entscheidungszustand, wiederverwendeten Command-Pfad sowie HUD-/Multiplayer-Grenzen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1001 im Command-Feedback als Snapshot, Status, Gate und Round-Trip-Zeile.
+- Risiken/offen: TASK_1001 ist noch kein langer Playthrough und kein echter Real-Window-Beweis; TASK_1002 sollte daraus einen Round-Loop-Playtest-Slice schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1001_release_first_decision_loop_two_player_loop_micro_objective_round_trip_smoke.gd`, Regression TASK_1000, TASK_999, TASK_998, `git diff --check`.
+- Naechster Schritt: TASK_1002 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playtest Slice.
+
 ### TASK_1000 - Release First Decision Loop Two Player Loop Micro Objective Playability Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1000_release_first_decision_loop_two_player_loop_micro_objective_playability_slice.md`, `docs/tasks/TASK_999_release_first_decision_loop_two_player_loop_micro_objective_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
