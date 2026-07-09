@@ -315,3 +315,8 @@ Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_ma
 TASK_999 definiert die sichtbare Leseflaeche nach einem Micro-Objective-Ausgang. Erwartet werden drei getrennte read-only Surfaces fuer `OUTCOME`, `OBJ` und `NEXT`, damit der Spieler nach einem kleinen Griff sofort versteht, was passiert ist, welches Mini-Ziel gilt und was als naechster Griff angeboten wird.
 
 Der Polish-Snapshot bleibt read-only. Ein falscher oder nicht polishbarer TASK_998-Befund blockiert mit expliziten Blockern; ein polishbarer Befund routet zu `TASK_1000 - Release First Decision Loop Two Player Loop Micro Objective Playability Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Micro Objective Playability Slice (TASK_1000)
+TASK_1000 prueft, ob die TASK_999-Flaechen als Spielergriff funktionieren. Ein guter Trace bestaetigt sichtbares `OUTCOME`, `OBJ` und `NEXT`, verstandenen Micro-Objective-Ausgang, verstandenen naechsten Griff, sichtbares Post-Objective-Feedback, erhaltene GO-Grenze und unveraenderte HUD-/Multiplayer-Grenzen.
+
+Der Playability-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_micro_objective_playability_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1001 - Release First Decision Loop Two Player Loop Micro Objective Round Trip Smoke`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
