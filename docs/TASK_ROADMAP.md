@@ -177,6 +177,8 @@ git checkout -b batch/<batch-name>
 - TASK_933 - Release First Exchange Followup Fix Recapture (implementiert): Nach TASK_932 frisch capturen und pruefen, ob danach der Playability-Smoke freigegeben werden kann.
 - TASK_934 - Release First Exchange Followup Fix Visual Findings (implementiert): TASK_933-PNG und Manifest read-only bewerten und entscheiden, ob danach ein First-Exchange-Playability-Smoke reicht.
 - TASK_934 Entscheidungsstand: Bei Akzeptanz waere `TASK_935 - Release First Exchange Playability Smoke` der naechste Slice; bei Restreibung ist `TASK_935 - Release First Exchange Followup Fix Player Polish` der engere Folge-Schnitt.
+- TASK_935 - Release First Exchange Followup Fix Player Polish (implementiert): Den TASK_934-Restbefund eng umsetzen: Fire-Lane/Core minimal klarer, Label/Halo/Grid/Weltlinien leiser und Richtunganker tragender, ohne Combat- oder HUD-Wahrheit zu oeffnen.
+- TASK_936 - Release First Exchange Followup Fix Player Polish Recapture (naechster Schritt): Nach TASK_935 frisch capturen und pruefen, ob danach der Playability-Smoke freigegeben werden kann.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 

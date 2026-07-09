@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_935 - Release First Exchange Followup Fix Player Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/tasks/TASK_934_release_first_exchange_followup_fix_visual_findings.md`, `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_935 setzt den TASK_934-Restbefund als engen Presentation-Polish um, statt ohne akzeptierten Sichtbefund einen Playability-Smoke zu starten.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolish.build_snapshot()` verlangt TASK_934-Findings plus passierenden TASK_932-Follow-up-Fix und prueft Lane/Core, Label/Halo-Rueckzug, Richtunganker, World-Noise-Rueckzug und read-only-Grenzen.
+- Stand: `TerrainMap3DView` meldet den Style `task_935_release_first_exchange_followup_fix_player_polish_v1`; Lane/Core werden minimal klarer, Label/Halo/Grid/Weltlinien leiser und Source-/Target-Anker bleiben unter der Scheiben-Grenze.
+- Risiken/offen: TASK_935 ersetzt keinen echten Fensterbeweis und keinen Smoke. Der naechste Slice muss frisch recapturen, ob der Spielerblick jetzt wirklich funktioniert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_935_release_first_exchange_followup_fix_player_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_934_release_first_exchange_followup_fix_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_936 - Release First Exchange Followup Fix Player Polish Recapture.
+
 ### TASK_934 - Release First Exchange Followup Fix Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_934_release_first_exchange_followup_fix_visual_findings.md`, `docs/tasks/TASK_933_release_first_exchange_followup_fix_recapture.md`, `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/tasks/TASK_931_release_first_exchange_final_readability_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
