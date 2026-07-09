@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_993 - Release First Decision Loop Two Player Loop Micro Objective Runtime Buttons
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_993_release_first_decision_loop_two_player_loop_micro_objective_runtime_buttons.md`, `docs/tasks/TASK_992_release_first_decision_loop_two_player_loop_micro_objective_choice_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRuntimeButtons.build_snapshot()` erzeugt aus einem bereiten TASK_992/TASK_991-Stand drei read-only Button-Specs.
+- Stand: Die Specs liegen auf `CommandSlot08`, `CommandSlot09` und `CommandSlot10`, nennen `SICHERN`, `DRUECKEN` und `SAMMELN`, und behalten `GO separat`.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_993 im Command-Feedback; ohne bereiten Choice-Hook oder HUD-Wiring bleibt der Snapshot blockiert.
+- Risiken/offen: TASK_993 macht die Micro-Objectives als Button-Specs sichtbar, aber noch keinen echten Click-Confirm-Smoke. TASK_994 sollte den Confirm-Smoke bauen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_993_release_first_decision_loop_two_player_loop_micro_objective_runtime_buttons.gd`, Regression TASK_992, TASK_991, TASK_990, `git diff --check`.
+- Naechster Schritt: TASK_994 - Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke.
+
 ### TASK_992 - Release First Decision Loop Two Player Loop Micro Objective Choice Hook
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_992_release_first_decision_loop_two_player_loop_micro_objective_choice_hook.md`, `docs/tasks/TASK_991_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
