@@ -143,6 +143,11 @@ Der Scenario-Integrated-Playtest bleibt read-only. Ohne Trace bleibt er `needs_s
 ## Release First Decision Loop Two Player Loop Scenario Player Feel Findings (TASK_1022)
 TASK_1022 schneidet aus dem bestandenen TASK_1021-Trace den menschlichen Player-Feel-Befund: Fuehlt sich der Entry klar an, greift der FOB-Moment rund, bleibt NEXT/CONFIRM/GO getrennt, fuehrt Post-GO-Feedback angenehm zum naechsten Griff, kehrt der Loop ohne Verwirrung zu NEXT zurueck, bleibt das HUD ruhig, reagiert der Ablauf schnell, ist der Zwei-Spieler-Kontext klar und bleibt die Multiplayer-/Wahrheitsgrenze sichtbar?
 
+## Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice (TASK_1023)
+TASK_1023 akzeptiert einen sauberen TASK_1022-Befund nur mit eigenem Acceptance-Trace. Der Trace muss belegen, dass FOB/NEXT sichtbar sind, Objective und Alpha/Bravo-Rollen verstanden werden, NEXT/CONFIRM/GO als Vorbereitung lesbar bleiben, GO separat bleibt, Post-GO-Feedback wieder zu NEXT fuehrt, HUD und Performance ruhig bleiben, Zwei-Spieler-Kontext und Multiplayer-Grenze erhalten sind und das HUD keine Gameplay-Wahrheit setzt.
+
+Der Small-Game-Acceptance-Slice bleibt read-only. Ohne Trace bleibt er `needs_small_game_acceptance_trace`; fehlende Checks werden als `small_game_acceptance_regression_found` gemeldet; ein bestandener Trace setzt `small_game_acceptance_slice_passed` und routet zu `TASK_1024 - Release First Decision Loop Two Player Loop Scenario Release Candidate Playtest`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)

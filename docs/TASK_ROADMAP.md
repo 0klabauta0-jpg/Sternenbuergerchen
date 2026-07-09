@@ -49,6 +49,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_scenario_integrated_player_feel_review | scenario_integrated_player_feel_rework_needed | accepted_for_small_game_acceptance_slice`.
 - Naechster Schritt: TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish oder TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice.
 
+## TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice (implementiert im Arbeitsstand)
+- Grundlage: akzeptierter TASK_1022 Scenario Integrated Player Feel Findings.
+- Ziel: Kleinen FOB-Szenario-Griff als kleines Spielmoment akzeptieren: FOB/NEXT sichtbar, Objective/Rollen klar, GO separat, Feedback zurueck zu NEXT, HUD ruhig, Zwei-Spieler-Kontext und Multiplayer-Grenze erhalten.
+- Ergebnis: Read-only Snapshot `needs_small_game_acceptance_trace | small_game_acceptance_regression_found | small_game_acceptance_slice_passed`.
+- Naechster Schritt: TASK_1024 - Release First Decision Loop Two Player Loop Scenario Release Candidate Playtest.
+
 # Arbeitsregeln
 
 ## Reihenfolge

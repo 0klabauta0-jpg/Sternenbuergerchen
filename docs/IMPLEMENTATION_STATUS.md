@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1023_release_first_decision_loop_two_player_loop_scenario_small_game_acceptance_slice.md`, `docs/tasks/TASK_1022_release_first_decision_loop_two_player_loop_scenario_integrated_player_feel_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioSmallGameAcceptanceSlice.build_snapshot()` bewertet einen akzeptierten TASK_1022-Player-Feel-Befund plus optionalen Acceptance-Trace.
+- Stand: Ohne Trace bleibt der Status `needs_small_game_acceptance_trace`; fehlende Checks melden `small_game_acceptance_regression_found`; ein guter Trace setzt `small_game_acceptance_slice_passed`.
+- Stand: Geprueft werden FOB/NEXT-Sichtbarkeit, Objective/Rollen, NEXT/CONFIRM/GO-Grenze, separates GO, Post-GO-Feedback, HUD-Ruhe, Responsiveness, Zwei-Spieler-Kontext, Multiplayer-Grenze und keine HUD-Gameplay-Wahrheit.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1023 im Command-Feedback als Snapshot, Acceptance-Line, Status und Gate.
+- Risiken/offen: TASK_1023 ist ein Acceptance-Slice, noch kein echter Release-Candidate-Playtest. TASK_1024 sollte den kleinen Spielmoment im Release-Fenster praktisch pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1023_release_first_decision_loop_two_player_loop_scenario_small_game_acceptance_slice.gd`, Regression TASK_1022, TASK_1021, TASK_1020, `git diff --check`.
+- Naechster Schritt: TASK_1024 - Release First Decision Loop Two Player Loop Scenario Release Candidate Playtest.
+
 ### TASK_1022 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1022_release_first_decision_loop_two_player_loop_scenario_integrated_player_feel_findings.md`, `docs/tasks/TASK_1021_release_first_decision_loop_two_player_loop_scenario_integrated_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
