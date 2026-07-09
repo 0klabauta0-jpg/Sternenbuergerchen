@@ -170,3 +170,8 @@ Der Capture-Schnitt bleibt read-only. Ohne Manifest meldet er `needs_real_window
 TASK_970 macht aus dem zweiten echten Fensterblick einen konkreten Spielerbefund. Bewertet werden `2ND`-Sichtbarkeit, Lesbarkeit, Confirm-Beobachtung, klare `GO`-Trennung, Post-Confirm-Feedback, Pre-GO-Grenze und Read-only-HUD-Grenze.
 
 Der Findings-Schnitt bleibt read-only. Ohne manuelle Review bleibt er `needs_manual_review`; bei Reibung routet er zu `TASK_971 - Release First Decision Loop Two Visual Polish`; bei sauberem Befund zu `TASK_971 - Release First Decision Loop Two Playability Smoke`. Er erzeugt keine UI-, Command-, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Visual Polish (TASK_971)
+TASK_971 poliert die Lesbarkeit des zweiten Griffs: `2ND` bleibt kompakt, der Tooltip erklaert den zweiten Griff, die HUD-/Command-Feedback-Zeile nennt `GO separat`, und Post-Confirm-Feedback sagt dem Spieler den naechsten Griff.
+
+Der Polish-Snapshot bleibt read-only. Er darf Button-Metadaten, Mindestgroesse, Tooltip und Feedback-Zeilen liefern, aber keine Commands erzeugen und kein `GO` ausloesen. Der naechste Beweis ist `TASK_972 - Release First Decision Loop Two Playability Smoke`.

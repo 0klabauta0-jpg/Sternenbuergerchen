@@ -20,6 +20,15 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_968_release_first_decision_loop_two_runtime_button.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_967_release_first_decision_loop_two_go_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_966_release_first_decision_loop_two_execution_hook.gd`, `git diff --check`.
 - Naechster Schritt: TASK_969 - Release First Decision Loop Two Real Window Capture.
 
+### TASK_971 - Release First Decision Loop Two Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_971_release_first_decision_loop_two_visual_polish.md`, `docs/tasks/TASK_970_release_first_decision_loop_two_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoVisualPolish.build_snapshot()` erzeugt eine read-only Leseschicht fuer `2ND`, Tooltip, HUD-Zeile, Post-Confirm-Hinweis und `GO`-Trennung.
+- Stand: `MissionTacticalSandboxController` exportiert den TASK_971-Snapshot im Command Feedback und versieht `CommandSlot07` mit TASK_971-Metadaten, Mindestgroesse und klarerem Tooltip.
+- Risiken/offen: Der zweite Griff braucht als naechsten Schritt einen echten Playability-Smoke ueber `2ND -> GO -> Feedback`.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_971_release_first_decision_loop_two_visual_polish.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_970_release_first_decision_loop_two_visual_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_969_release_first_decision_loop_two_real_window_capture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_972 - Release First Decision Loop Two Playability Smoke.
+
 ### TASK_970 - Release First Decision Loop Two Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_970_release_first_decision_loop_two_visual_findings.md`, `docs/tasks/TASK_969_release_first_decision_loop_two_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
