@@ -55,6 +55,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_small_game_acceptance_trace | small_game_acceptance_regression_found | small_game_acceptance_slice_passed`.
 - Naechster Schritt: TASK_1024 - Release First Decision Loop Two Player Loop Scenario Release Candidate Playtest.
 
+## TASK_1024 - Release First Decision Loop Two Player Loop Scenario Release Candidate Playtest (implementiert im Arbeitsstand)
+- Grundlage: bestandener TASK_1023 Small Game Acceptance Slice.
+- Ziel: Kleinen FOB-Szenario-Griff im Release-Candidate-Playtest pruefen: Release-Exe, Singleplayer, FOB, Rollen, NEXT/CONFIRM/GO, GO, FEEDBACK, Rueckkehr zu NEXT, Performance und Multiplayer-Grenze.
+- Ergebnis: Read-only Snapshot `needs_release_candidate_playtest_manifest | needs_release_candidate_playtest_completion | release_candidate_playtest_regression_found | release_candidate_playtest_passed`.
+- Naechster Schritt: TASK_1025 - Release First Decision Loop Two Player Loop Scenario Release Candidate Acceptance oder TASK_1025 - Release First Decision Loop Two Player Loop Scenario Targeted RC Polish.
+
 # Arbeitsregeln
 
 ## Reihenfolge

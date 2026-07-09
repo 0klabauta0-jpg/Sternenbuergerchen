@@ -148,6 +148,11 @@ TASK_1023 akzeptiert einen sauberen TASK_1022-Befund nur mit eigenem Acceptance-
 
 Der Small-Game-Acceptance-Slice bleibt read-only. Ohne Trace bleibt er `needs_small_game_acceptance_trace`; fehlende Checks werden als `small_game_acceptance_regression_found` gemeldet; ein bestandener Trace setzt `small_game_acceptance_slice_passed` und routet zu `TASK_1024 - Release First Decision Loop Two Player Loop Scenario Release Candidate Playtest`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Release Candidate Playtest (TASK_1024)
+TASK_1024 prueft den akzeptierten kleinen Spielmoment gegen ein Release-Candidate-Playtest-Manifest. Der Trace muss belegen, dass die Release-Exe gestartet wurde, Singleplayer in den FOB-Flow fuehrt, Alpha/Bravo-Kontext sichtbar bleibt, NEXT/CONFIRM/GO wirklich benutzt wird, GO einmal ausgefuehrt wurde, Post-GO-Feedback sichtbar ist, der Loop zu NEXT zurueckkehrt, kein Input-Dead-End entsteht, Performance responsiv bleibt und HUD-/Multiplayer-Wahrheitsgrenzen erhalten sind.
+
+Der Release-Candidate-Playtest bleibt read-only. Ohne Manifest bleibt er `needs_release_candidate_playtest_manifest`; offene Checks bleiben `needs_release_candidate_playtest_completion`; echte Reibung wird `release_candidate_playtest_regression_found`; ein sauberer Manifest-Trace setzt `release_candidate_playtest_passed` und `ready_for_release_candidate_acceptance`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)
