@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_923 - Release First Exchange Followup World Read Player Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_923_release_first_exchange_followup_world_read_player_polish.md`, `docs/tasks/TASK_922_release_first_exchange_followup_world_read_visual_findings.md`, `docs/tasks/TASK_920_release_first_exchange_final_world_read_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_923 setzt den TASK_922-Restbefund eng als Presentation-Polish auf dem bestehenden TASK_920-Primary3D-Fire-Lane-Pfad um.
+- Stand: `ReleaseFirstExchangeFollowupWorldReadPlayerPolish.build_snapshot()` verlangt TASK_922-Restreibung plus TASK_920-Pass und blockt fehlende/falsche Quellen.
+- Stand: `TerrainMap3DView` meldet den Style `task_923_release_first_exchange_followup_world_read_player_v1`; Fire-Lane-Core und Source-/Target-Anker tragen die Weltlesung staerker, waehrend Label, Halo, Grid und Weltlinien weiter zuruecktreten.
+- Risiken/offen: TASK_923 ist noch kein echter Fensterbeweis und keine Spielerakzeptanz. Der naechste Slice muss frisch recapturen, ob die Weltbewegung jetzt im echten Fenster zuerst gelesen wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_923_release_first_exchange_followup_world_read_player_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_922_release_first_exchange_followup_world_read_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_920_release_first_exchange_final_world_read_followup_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_924 - Release First Exchange Followup Player Polish Recapture.
+
 ### TASK_922 - Release First Exchange Followup World Read Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_922_release_first_exchange_followup_world_read_visual_findings.md`, `docs/tasks/TASK_921_release_first_exchange_followup_world_read_recapture.md`, `docs/tasks/TASK_920_release_first_exchange_final_world_read_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`

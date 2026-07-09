@@ -604,6 +604,31 @@ const RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_WORLD_LINE_WIDTH_FACTOR: 
 const RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_FONT_SIZE: int = 8
 const RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_COLOR: Color = Color(1.0, 0.82, 0.46, 0.15)
 const RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_OFFSET: Vector2 = Vector2(54.0, -86.0)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STYLE_ID: String = "task_923_release_first_exchange_followup_world_read_player_v1"
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_LANE_WIDTH: float = 0.154
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_LANE_COLOR: Color = Color(1.0, 0.94, 0.58, 0.30)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_WIDTH: float = 0.102
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_COLOR: Color = Color(1.0, 1.0, 0.90, 1.0)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_RADIUS: float = 0.096
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_HEIGHT: float = 0.038
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_COLOR: Color = Color(1.0, 0.95, 0.60, 0.010)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_FOCUS_RADIUS: float = 0.225
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_FOCUS_HEIGHT: float = 0.054
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.99, 0.74, 0.20)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_GLOW_RADIUS: float = 0.070
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_GLOW_HEIGHT: float = 0.054
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_GLOW_COLOR: Color = Color(0.80, 0.99, 1.0, 0.08)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_ANCHOR_RADIUS: float = 0.186
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_ANCHOR_COLOR: Color = Color(0.90, 1.0, 1.0, 1.0)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_ANCHOR_RADIUS: float = 0.190
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_ANCHOR_COLOR: Color = Color(1.0, 1.0, 0.84, 1.0)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_GRID_NOISE_ALPHA: float = 0.115
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_GRID_SHADOW_ALPHA: float = 0.090
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_WORLD_LINE_ALPHA_FACTOR: float = 0.048
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_WORLD_LINE_WIDTH_FACTOR: float = 0.13
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_FONT_SIZE: int = 7
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_COLOR: Color = Color(1.0, 0.82, 0.46, 0.10)
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_OFFSET: Vector2 = Vector2(62.0, -96.0)
 const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
 	"CONTACT",
 	"MOVE",
@@ -2131,6 +2156,25 @@ func get_render_snapshot() -> Dictionary:
 		"world_combat_final_world_read_followup_world_line_alpha_factor": RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_WORLD_LINE_ALPHA_FACTOR if _is_release_first_exchange_final_world_read_followup_active() else 1.0,
 		"world_combat_final_world_read_followup_world_line_width_factor": RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_WORLD_LINE_WIDTH_FACTOR if _is_release_first_exchange_final_world_read_followup_active() else 1.0,
 		"world_combat_final_world_read_followup_policy": "followup_fix_fire_lane_first_world_read" if _is_release_first_exchange_final_world_read_followup_active() else "default",
+		"release_first_exchange_followup_world_read_player_polish_active": _is_release_first_exchange_followup_world_read_player_active(),
+		"release_first_exchange_followup_world_read_player_polish_style_id": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STYLE_ID if _is_release_first_exchange_followup_world_read_player_active() else "",
+		"world_combat_followup_player_lane_visible": _is_release_first_exchange_followup_world_read_player_active(),
+		"world_combat_followup_player_lane_width": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_LANE_WIDTH if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_lane_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_LANE_COLOR.a if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_core_visible": _is_release_first_exchange_followup_world_read_player_active(),
+		"world_combat_followup_player_core_width": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_WIDTH if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_core_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_COLOR.a if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_target_halo_radius": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_RADIUS if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_target_halo_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_COLOR.a if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_source_anchor_radius": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_ANCHOR_RADIUS if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_target_anchor_radius": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_ANCHOR_RADIUS if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_status_label_font_size": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_FONT_SIZE if _is_release_first_exchange_followup_world_read_player_active() else 0,
+		"world_combat_followup_player_status_label_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_COLOR.a if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_status_label_offset_y": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_OFFSET.y if _is_release_first_exchange_followup_world_read_player_active() else 0.0,
+		"world_combat_followup_player_grid_noise_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_GRID_NOISE_ALPHA if _is_release_first_exchange_followup_world_read_player_active() else 1.0,
+		"world_combat_followup_player_world_line_alpha_factor": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_WORLD_LINE_ALPHA_FACTOR if _is_release_first_exchange_followup_world_read_player_active() else 1.0,
+		"world_combat_followup_player_world_line_width_factor": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_WORLD_LINE_WIDTH_FACTOR if _is_release_first_exchange_followup_world_read_player_active() else 1.0,
+		"world_combat_followup_player_policy": "followup_player_polish_fire_lane_first_world_read" if _is_release_first_exchange_followup_world_read_player_active() else "default",
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -5531,7 +5575,17 @@ func _is_release_first_exchange_final_world_read_followup_active() -> bool:
 	return bool(_mission_status_payload.get("release_first_exchange_final_world_read_followup_fix", false))
 
 
+func _is_release_first_exchange_followup_world_read_player_active() -> bool:
+	if not _is_release_first_exchange_final_world_read_followup_active():
+		return false
+	if bool(_order_payload.get("release_first_exchange_followup_world_read_player_polish", false)):
+		return true
+	return bool(_mission_status_payload.get("release_first_exchange_followup_world_read_player_polish", false))
+
+
 func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> Color:
+	if _is_release_first_exchange_followup_world_read_player_active():
+		return Color(base_color.r, base_color.g, base_color.b, clampf(base_color.a * RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_WORLD_LINE_ALPHA_FACTOR, 0.016, base_color.a))
 	if _is_release_first_exchange_final_world_read_followup_active():
 		return Color(base_color.r, base_color.g, base_color.b, clampf(base_color.a * RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_WORLD_LINE_ALPHA_FACTOR, 0.018, base_color.a))
 	if _is_release_first_exchange_fire_lane_world_read_final_active():
@@ -5556,6 +5610,8 @@ func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> C
 
 
 func _get_release_fire_exchange_focused_world_line_width(base_width: float) -> float:
+	if _is_release_first_exchange_followup_world_read_player_active():
+		return maxf(base_width * RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_WORLD_LINE_WIDTH_FACTOR, 0.01)
 	if _is_release_first_exchange_final_world_read_followup_active():
 		return maxf(base_width * RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_WORLD_LINE_WIDTH_FACTOR, 0.01)
 	if _is_release_first_exchange_fire_lane_world_read_final_active():
@@ -6961,6 +7017,7 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var first_exchange_fire_lane_world_read_acceptance_active: bool = _is_release_first_exchange_fire_lane_world_read_acceptance_active()
 	var first_exchange_fire_lane_world_read_final_active: bool = _is_release_first_exchange_fire_lane_world_read_final_active()
 	var first_exchange_final_world_read_followup_active: bool = _is_release_first_exchange_final_world_read_followup_active()
+	var first_exchange_followup_world_read_player_active: bool = _is_release_first_exchange_followup_world_read_player_active()
 	var muzzle_flash_width: float = WEAPON_FIRE_MUZZLE_FLASH_WIDTH
 	var trace_width: float = WEAPON_FIRE_TRACE_WIDTH
 	var impact_radius: float = WEAPON_FIRE_IMPACT_RADIUS
@@ -7054,6 +7111,12 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		target_focus_height = RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_TARGET_FOCUS_HEIGHT
 		target_focus_color = RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_TARGET_FOCUS_COLOR
 		fire_status_label_font_size = RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_FONT_SIZE
+	if first_exchange_followup_world_read_player_active:
+		trace_width = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_WIDTH
+		target_focus_radius = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_FOCUS_RADIUS
+		target_focus_height = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_FOCUS_HEIGHT
+		target_focus_color = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_FOCUS_COLOR
+		fire_status_label_font_size = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_FONT_SIZE
 	var muzzle_texture_available: bool = texture != null
 	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
 	if muzzle_texture_card_visible:
@@ -7179,6 +7242,21 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 			target_halo_height = RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_TARGET_HALO_HEIGHT
 			target_anchor_color = RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_TARGET_ANCHOR_COLOR
 			target_anchor_radius = RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_TARGET_ANCHOR_RADIUS
+		if first_exchange_followup_world_read_player_active:
+			lane_color = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_LANE_COLOR
+			lane_width = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_LANE_WIDTH
+			core_color = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_COLOR
+			core_width = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_WIDTH
+			source_glow_color = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_GLOW_COLOR
+			source_glow_radius = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_GLOW_RADIUS
+			source_glow_height = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_GLOW_HEIGHT
+			source_anchor_color = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_ANCHOR_COLOR
+			source_anchor_radius = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_ANCHOR_RADIUS
+			target_halo_color = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_COLOR
+			target_halo_radius = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_RADIUS
+			target_halo_height = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_HEIGHT
+			target_anchor_color = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_ANCHOR_COLOR
+			target_anchor_radius = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_ANCHOR_RADIUS
 		_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.912), _world_to_surface_3d_position(target_position, 0.912), lane_color, "WeaponFireWorldCombatFireLaneReadabilityLane_%s" % _sanitize_node_name(event_id), lane_width)
 		_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.925), _world_to_surface_3d_position(target_position, 0.925), core_color, "WeaponFireWorldCombatFireLaneReadabilityCore_%s" % _sanitize_node_name(event_id), core_width)
 		_add_marker3d(_order_root, muzzle_position, source_glow_color, "WeaponFireWorldCombatFireLaneReadabilitySourceGlow_%s" % _sanitize_node_name(event_id), source_glow_radius, source_glow_height, 12, 0.89)
@@ -7219,6 +7297,9 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 			if first_exchange_final_world_read_followup_active:
 				status_label_offset = RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_OFFSET
 				status_label_color = RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_COLOR
+			if first_exchange_followup_world_read_player_active:
+				status_label_offset = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_OFFSET
+				status_label_color = RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_COLOR
 			_add_label3d(_order_root, fire_status_label, _world_to_surface_3d_position(target_position + status_label_offset, MOVEMENT_LABEL_HEIGHT + 0.86), "WeaponFireStatus_%s" % _sanitize_node_name(event_id), status_label_color, fire_status_label_font_size)
 			if _is_release_firefight_world_label_declutter_active():
 				_world_label_declutter_rendered_count += 1
@@ -7397,8 +7478,20 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"world_combat_final_world_read_followup_target_halo_alpha": RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_TARGET_HALO_COLOR.a if first_exchange_final_world_read_followup_active else 0.0,
 		"world_combat_final_world_read_followup_source_anchor_radius": RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_SOURCE_ANCHOR_RADIUS if first_exchange_final_world_read_followup_active else 0.0,
 		"world_combat_final_world_read_followup_target_anchor_radius": RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_TARGET_ANCHOR_RADIUS if first_exchange_final_world_read_followup_active else 0.0,
-		"fire_status_label_alpha": RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_COLOR.a if first_exchange_final_world_read_followup_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_FINAL_STATUS_LABEL_COLOR.a if first_exchange_fire_lane_world_read_final_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_ACCEPTANCE_STATUS_LABEL_COLOR.a if first_exchange_fire_lane_world_read_acceptance_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_MICRO_STATUS_LABEL_COLOR.a if first_exchange_fire_lane_world_read_micro_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_LABEL_CLUSTER_STATUS_LABEL_COLOR.a if first_exchange_fire_lane_label_cluster_active else 0.98)))),
-		"fire_status_label_offset_y": RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_OFFSET.y if first_exchange_final_world_read_followup_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_FINAL_STATUS_LABEL_OFFSET.y if first_exchange_fire_lane_world_read_final_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_ACCEPTANCE_STATUS_LABEL_OFFSET.y if first_exchange_fire_lane_world_read_acceptance_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_MICRO_STATUS_LABEL_OFFSET.y if first_exchange_fire_lane_world_read_micro_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_LABEL_CLUSTER_STATUS_LABEL_OFFSET.y if first_exchange_fire_lane_label_cluster_active else WEAPON_FIRE_STATUS_LABEL_OFFSET.y)))),
+		"followup_world_read_player_polish_active": first_exchange_followup_world_read_player_active,
+		"followup_world_read_player_polish_style_id": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STYLE_ID if first_exchange_followup_world_read_player_active else "",
+		"world_combat_followup_player_lane_visible": first_exchange_followup_world_read_player_active,
+		"world_combat_followup_player_lane_width": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_LANE_WIDTH if first_exchange_followup_world_read_player_active else 0.0,
+		"world_combat_followup_player_lane_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_LANE_COLOR.a if first_exchange_followup_world_read_player_active else 0.0,
+		"world_combat_followup_player_core_visible": first_exchange_followup_world_read_player_active,
+		"world_combat_followup_player_core_width": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_WIDTH if first_exchange_followup_world_read_player_active else 0.0,
+		"world_combat_followup_player_core_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_CORE_COLOR.a if first_exchange_followup_world_read_player_active else 0.0,
+		"world_combat_followup_player_target_halo_radius": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_RADIUS if first_exchange_followup_world_read_player_active else 0.0,
+		"world_combat_followup_player_target_halo_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_HALO_COLOR.a if first_exchange_followup_world_read_player_active else 0.0,
+		"world_combat_followup_player_source_anchor_radius": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_SOURCE_ANCHOR_RADIUS if first_exchange_followup_world_read_player_active else 0.0,
+		"world_combat_followup_player_target_anchor_radius": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_TARGET_ANCHOR_RADIUS if first_exchange_followup_world_read_player_active else 0.0,
+		"fire_status_label_alpha": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_COLOR.a if first_exchange_followup_world_read_player_active else (RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_COLOR.a if first_exchange_final_world_read_followup_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_FINAL_STATUS_LABEL_COLOR.a if first_exchange_fire_lane_world_read_final_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_ACCEPTANCE_STATUS_LABEL_COLOR.a if first_exchange_fire_lane_world_read_acceptance_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_MICRO_STATUS_LABEL_COLOR.a if first_exchange_fire_lane_world_read_micro_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_LABEL_CLUSTER_STATUS_LABEL_COLOR.a if first_exchange_fire_lane_label_cluster_active else 0.98))))),
+		"fire_status_label_offset_y": RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_STATUS_LABEL_OFFSET.y if first_exchange_followup_world_read_player_active else (RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_STATUS_LABEL_OFFSET.y if first_exchange_final_world_read_followup_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_FINAL_STATUS_LABEL_OFFSET.y if first_exchange_fire_lane_world_read_final_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_ACCEPTANCE_STATUS_LABEL_OFFSET.y if first_exchange_fire_lane_world_read_acceptance_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_MICRO_STATUS_LABEL_OFFSET.y if first_exchange_fire_lane_world_read_micro_active else (RELEASE_FIRST_EXCHANGE_FIRE_LANE_LABEL_CLUSTER_STATUS_LABEL_OFFSET.y if first_exchange_fire_lane_label_cluster_active else WEAPON_FIRE_STATUS_LABEL_OFFSET.y))))),
 		"fire_direction_arrow_visible": direction_arrow_visible,
 		"fire_direction_arrow_world": direction_arrow_world,
 		"fire_direction_arrow_width": direction_arrow_width,
@@ -11521,7 +11614,9 @@ func _make_editor_grid_material(is_highlight: bool = true) -> StandardMaterial3D
 
 func _get_tile_grid_line_color_for_release_polish(is_highlight: bool) -> Color:
 	var color: Color = TILE_GRID_LINE_COLOR if is_highlight else TILE_GRID_LINE_SHADOW_COLOR
-	if _is_release_first_exchange_final_world_read_followup_active():
+	if _is_release_first_exchange_followup_world_read_player_active():
+		color.a = minf(color.a, RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_GRID_NOISE_ALPHA if is_highlight else RELEASE_FIRST_EXCHANGE_FOLLOWUP_WORLD_READ_PLAYER_GRID_SHADOW_ALPHA)
+	elif _is_release_first_exchange_final_world_read_followup_active():
 		color.a = minf(color.a, RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_GRID_NOISE_ALPHA if is_highlight else RELEASE_FIRST_EXCHANGE_FINAL_WORLD_READ_FOLLOWUP_GRID_SHADOW_ALPHA)
 	elif _is_release_first_exchange_fire_lane_world_read_final_active():
 		color.a = minf(color.a, RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_FINAL_GRID_NOISE_ALPHA if is_highlight else RELEASE_FIRST_EXCHANGE_FIRE_LANE_WORLD_READ_FINAL_GRID_SHADOW_ALPHA)
