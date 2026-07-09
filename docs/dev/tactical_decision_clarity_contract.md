@@ -110,6 +110,11 @@ TASK_1015 trennt den technischen TASK_1014-Smoke vom Spielerblick. Erwartet wird
 
 Ohne Player-Feel-Notizen bleibt der Status `needs_scenario_player_feel_review`. Belegte Reibung routet zu `TASK_1016 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1016 - Release First Decision Loop Two Player Loop Scenario Playability Slice`. TASK_1015 erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Player Feel Polish (TASK_1016)
+TASK_1016 uebersetzt TASK_1015-Findings in konkrete read-only Surface-Specs. Erwartet sind sieben Polishing-Flaechen fuer FOB-Entry, Objective, Alpha/Bravo-Rollen, NEXT/CONFIRM/GO-Flow, Feedback, GO-Grenze und Multiplayer-Grenze.
+
+Die Specs duerfen nur Rollen, Style-IDs, Mindesthoehen, Textbudgets und kompakte Displaytexte festlegen. Sie erzeugen keine Controls, keine Commands, kein Movement, keine Combat-/Damage-Wirkung und keine Multiplayer-Wahrheit. Der naechste Schritt ist `TASK_1017 - Release First Decision Loop Two Player Loop Scenario Playability Slice`.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1016 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1016_release_first_decision_loop_two_player_loop_scenario_player_feel_polish.md`, `docs/tasks/TASK_1015_release_first_decision_loop_two_player_loop_scenario_player_feel_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioPlayerFeelPolish.build_snapshot()` uebersetzt polishbare TASK_1015-Findings in sieben read-only Scenario-Feel-Surface-Specs.
+- Stand: Die Specs decken FOB-Entry, Objective, Alpha/Bravo-Rollen, NEXT/CONFIRM/GO-Flow, Feedback, GO-Grenze und Multiplayer-Grenze ab.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1016 im Command-Feedback als Snapshot, Polish-Zeile, Status und Surface-Specs.
+- Risiken/offen: TASK_1016 baut noch keine echten Controls und keinen Fensterbeweis. TASK_1017 sollte daraus einen Scenario-Playability-Slice schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1016_release_first_decision_loop_two_player_loop_scenario_player_feel_polish.gd`, Regression TASK_1015, TASK_1014, TASK_1013, `git diff --check`.
+- Naechster Schritt: TASK_1017 - Release First Decision Loop Two Player Loop Scenario Playability Slice.
+
 ### TASK_1015 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1015_release_first_decision_loop_two_player_loop_scenario_player_feel_findings.md`, `docs/tasks/TASK_1014_release_first_decision_loop_two_player_loop_scenario_runtime_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

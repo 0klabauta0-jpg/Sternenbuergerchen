@@ -84,6 +84,11 @@ Erwartete Struktur: Ohne Trace bleibt `needs_scenario_runtime_smoke_trace`; fehl
 
 Erwartete Struktur: Ohne Notizen bleibt `needs_scenario_player_feel_review`; belegte Reibung an Entry, FOB-Objective, zwei Rollen, NEXT/CONFIRM/GO, Feedback, HUD-Ruhe, Responsiveness oder Multiplayer-Grenze routet zu TASK_1016 Scenario Player Feel Polish; ein sauberer Befund setzt `ready_for_scenario_playability_slice = true` und routet zu TASK_1016 Scenario Playability Slice. Der Befund setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Player Feel Polish (TASK_1016)
+`get_release_first_decision_loop_two_player_loop_scenario_player_feel_polish_snapshot()` ist der read-only Pruefpunkt fuer die UI-nahe Szenario-Feel-Leseschicht nach TASK_1015. Der Snapshot darf nur polishbare TASK_1015-Findings lesen und muss im Command-Feedback als Snapshot, Polish-Zeile, Status und Surface-Spec-Liste exportiert werden.
+
+Erwartete Struktur: Der Polish erzeugt sieben Surface-Specs fuer FOB-Entry, Objective, Alpha/Bravo-Rollen, NEXT/CONFIRM/GO-Flow, Feedback, GO-Grenze und Multiplayer-Grenze. Die Specs definieren Rollen, Style-IDs, Mindesthoehen, Textbudgets und kompakte Displaytexte, erzeugen aber keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release-Firefight-Command-Matrix-Visual-Polish
 `get_release_firefight_command_matrix_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer TASK_836. Der Snapshot darf nur vorhandene Command-Matrix-Buttons, Fire-Rule-Status und den bestehenden TASK_835-Firefight-HUD-Zustand lesen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugen.
 
