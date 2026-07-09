@@ -290,3 +290,8 @@ Der Snapshot bleibt read-only: Er darf Button-Slots, Texte, Tooltips, `press_act
 TASK_994 prueft den ersten Micro-Objective-Klick als kleinen Smoke. Erwartet ist, dass ein Button wie `SICHERN` den vorhandenen Confirm-Pfad vorbereitet, eine kurze Rueckmeldung erzeugt und den getrennten `GO`-Schritt weiter sichtbar laesst.
 
 Der Snapshot bleibt read-only: Er darf Trace-Evidence, Confirm-Zeile, Feedback-Zeile, `confirm_action = confirm_release_first_decision_loop_two_player_loop_micro_objective_button`, `draft_confirm_action = _issue_command`, `execute_action = execute_selected_fireteam_orders` und `GO separat` liefern, aber selbst keine Movement-, Fire-, Damage- oder Multiplayer-Wahrheit setzen. Der naechste Schritt ist `TASK_995 - Release First Decision Loop Two Player Loop Micro Objective Acceptance Slice`.
+
+## Release First Decision Loop Two Player Loop Micro Objective Acceptance Slice (TASK_995)
+TASK_995 nimmt den bestandenen Micro-Objective-Confirm-Smoke und prueft, ob daraus ein kleiner lesbarer Spielergriff wird. Erwartet sind sichtbare und lesbare `SICHERN`, `DRUECKEN`, `SAMMELN`, bestaetigte Auswahl, sichtbares Feedback, vorbereitete Order und weiterhin getrenntes `GO`.
+
+Der Snapshot bleibt read-only: Er darf Acceptance-Evidence, beantwortete Spielerfragen, Status-/Gate-Werte und eine kompakte `SICHERN / DRUECKEN / SAMMELN | ... | GO separat`-Zeile liefern, aber keinen Outcome setzen, kein Movement starten und keine Multiplayer-Wahrheit erzeugen. Der naechste Schritt ist `TASK_996 - Release First Decision Loop Two Player Loop Micro Objective Outcome Slice`.

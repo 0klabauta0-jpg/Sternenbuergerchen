@@ -63,6 +63,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_HUD_WIRING_SCR
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_CHOICE_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_choice_hook.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_RUNTIME_BUTTONS_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_runtime_buttons.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_CONFIRM_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_ACCEPTANCE_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21176,6 +21177,12 @@ func get_release_first_decision_loop_two_player_loop_micro_objective_confirm_smo
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_CONFIRM_SMOKE_SCRIPT.call("build_snapshot", runtime_buttons, choice_hook, trace)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice_snapshot(source_confirm_smoke_override: Dictionary = {}, acceptance_trace_override: Dictionary = {}) -> Dictionary:
+	var source_confirm_smoke: Dictionary = source_confirm_smoke_override.duplicate(true) if not source_confirm_smoke_override.is_empty() else get_release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_snapshot()
+	var acceptance_trace: Dictionary = acceptance_trace_override.duplicate(true)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_ACCEPTANCE_SLICE_SCRIPT.call("build_snapshot", source_confirm_smoke, acceptance_trace)).duplicate(true)
+
+
 func _build_release_first_decision_loop_two_player_loop_outcome_visual_polish_source(outcome_capture: Dictionary) -> Dictionary:
 	var outcome_line: String = String(outcome_capture.get("source_outcome_line", "")).strip_edges()
 	var mini_objective_state: String = String(outcome_capture.get("source_mini_objective_state", "")).strip_edges()
@@ -24486,6 +24493,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_micro_objective_choice_hook,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice: Dictionary = get_release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice_snapshot(
+		release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke,
+		{}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24653,6 +24664,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_line": String(release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke.get("micro_objective_confirm_line", "")),
 		"release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_status": String(release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke.get("status", "")),
 		"release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_gate": String(release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke.get("gate", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice": release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice,
+		"release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice_line": String(release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice.get("acceptance_line", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice_status": String(release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice.get("status", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice_gate": String(release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice.get("gate", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
