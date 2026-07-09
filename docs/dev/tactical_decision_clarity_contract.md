@@ -155,3 +155,8 @@ Der Hook bleibt read-only: `auto_confirms = false`, `auto_executes_go = false`, 
 TASK_967 prueft den zweiten Griff als Smoke-Evidence: Der Spielerpfad muss Confirm und GO als getrennte Schritte belegen, die vorhandenen Controller-Pfade nutzen und nach GO sichtbares Feedback erzeugen.
 
 Der Smoke-Snapshot bleibt read-only. Ohne Trace ist der Zustand bewusst `needs_loop_two_go_smoke`; bestandene Evidence routet zu `TASK_968 - Release First Decision Loop Two Runtime Button`, damit der belegte Pfad danach aus der sichtbaren Runtime-Bedienung erreichbar wird.
+
+## Release First Decision Loop Two Runtime Button (TASK_968)
+TASK_968 macht die zweite Entscheidung als `2ND`-Button in der Command-Matrix erreichbar. Der Button bestaetigt den zweiten Intent und laesst `GO` sichtbar als separaten Schritt.
+
+Der Button nutzt `CommandSlot07` und bestehende Controller-Pfade: `_issue_command(...)` fuer HOLD/ADV oder `return_selected_fireteams_to_plan()` fuer BACK. Er darf kein automatisches `execute_selected_fireteam_orders()` ausloesen. Der naechste Beweis ist ein Real-Window-Capture in TASK_969.

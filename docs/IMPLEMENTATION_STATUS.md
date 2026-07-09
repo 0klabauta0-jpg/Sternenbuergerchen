@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_968 - Release First Decision Loop Two Runtime Button
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_968_release_first_decision_loop_two_runtime_button.md`, `docs/tasks/TASK_967_release_first_decision_loop_two_go_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoRuntimeButton.build_snapshot()` baut aus TASK_967 und TASK_966 einen read-only Button-Vertrag fuer den zweiten Griff.
+- Stand: `MissionTacticalSandboxController` exportiert den Runtime-Button-Snapshot, spiegelt ihn im Command-Feedback und nutzt `CommandSlot07` als sichtbaren `2ND`-Button.
+- Stand: `confirm_release_first_decision_loop_two_runtime_button()` bestaetigt nur ueber vorhandene Pfade (`_issue_command(...)` oder `return_selected_fireteams_to_plan()`); `execute_selected_fireteam_orders()` bleibt ein separater GO-Schritt.
+- Risiken/offen: TASK_968 braucht noch Real-Window-Capture. TASK_969 sollte pruefen, ob `2ND`, Confirm, GO und Feedback im laufenden Fenster wirklich angenehm lesbar sind.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_968_release_first_decision_loop_two_runtime_button.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_967_release_first_decision_loop_two_go_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_966_release_first_decision_loop_two_execution_hook.gd`, `git diff --check`.
+- Naechster Schritt: TASK_969 - Release First Decision Loop Two Real Window Capture.
+
 ### TASK_967 - Release First Decision Loop Two GO Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_967_release_first_decision_loop_two_go_smoke.md`, `docs/tasks/TASK_966_release_first_decision_loop_two_execution_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

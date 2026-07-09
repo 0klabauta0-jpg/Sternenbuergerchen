@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_968 - Release First Decision Loop Two Runtime Button (implementiert): Der zweite Griff ist als `2ND`-Button auf `CommandSlot07` erreichbar; er bestaetigt nur ueber vorhandene Pfade und laesst `GO` als separaten bestehenden Ausfuehrungsschritt stehen.
 - TASK_967 - Release First Decision Loop Two GO Smoke (implementiert): Der zweite Intent ist als Smoke-Evidence pruefbar; bestandene Evidence braucht vorhandene Confirm-/GO-Pfade, getrennte Schritte, erfolgreiche Resultate und sichtbares Post-GO-Feedback, bleibt aber read-only.
 - TASK_966 - Release First Decision Loop Two Execution Hook (implementiert): Der zweite Intent erzeugt read-only einen Command-Draft fuer vorhandene Pfade (`_issue_command`, `return_selected_fireteams_to_plan`, `execute_selected_fireteam_orders`), ohne automatisch zu bestaetigen oder GO auszufuehren.
 - TASK_965 - Release First Decision Loop Two Polish (implementiert): Die sichtbare zweite Entscheidung wird read-only in klare Intents uebersetzt: `HOLD Defend`, `ADV Move`, `BACK Return`; jeder Intent bleibt `requires_go` und erzeugt noch keine Commands oder Movement.

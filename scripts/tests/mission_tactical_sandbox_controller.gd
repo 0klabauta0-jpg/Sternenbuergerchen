@@ -44,6 +44,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYTEST_SCRIPT: GDScript = preload("res:/
 const RELEASE_FIRST_DECISION_LOOP_TWO_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_polish.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_EXECUTION_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_execution_hook.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_GO_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_go_smoke.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_RUNTIME_BUTTON_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_runtime_button.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -8191,6 +8192,7 @@ func _apply_release_firefight_command_matrix_visual_polish() -> void:
 	_apply_release_firefight_command_go_button_polish(active)
 	_apply_release_firefight_command_fire_rule_button_polish(active)
 	_apply_release_firefight_command_placeholder_polish(active)
+	_apply_release_first_decision_loop_two_runtime_button_polish(active)
 
 
 func _apply_release_firefight_command_primary_button_polish(active: bool) -> void:
@@ -8277,6 +8279,28 @@ func _apply_release_firefight_command_placeholder_polish(active: bool) -> void:
 		placeholder.set_meta("release_firefight_command_matrix_task", "TASK_836")
 		placeholder.set_meta("release_firefight_command_matrix_role", "quiet_placeholder")
 		placeholder.set_meta("release_firefight_command_matrix_quiet_placeholder", active)
+
+
+func _apply_release_first_decision_loop_two_runtime_button_polish(active: bool) -> void:
+	var runtime_button_snapshot: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot()
+	var button := get_node_or_null("%s/CommandSlot07" % COMMAND_GRID_PATH) as Button
+	if button == null:
+		return
+	var button_enabled: bool = active and bool(runtime_button_snapshot.get("button_enabled", false))
+	button.text = String(runtime_button_snapshot.get("button_text", "2ND"))
+	button.tooltip_text = String(runtime_button_snapshot.get("button_tooltip", "2ND: zweiten Griff bestaetigen, danach GO separat ausfuehren."))
+	button.disabled = not button_enabled
+	button.mouse_filter = Control.MOUSE_FILTER_STOP if button_enabled else Control.MOUSE_FILTER_IGNORE
+	button.clip_text = true
+	button.set_meta("release_first_decision_loop_two_runtime_button", runtime_button_snapshot.duplicate(true))
+	button.set_meta("release_first_decision_loop_two_runtime_button_task", "TASK_968")
+	button.set_meta("release_first_decision_loop_two_runtime_button_enabled", button_enabled)
+	button.set_meta("release_first_decision_loop_two_runtime_button_role", String(runtime_button_snapshot.get("button_role", "second_decision_confirm")))
+	button.set_meta("release_first_decision_loop_two_runtime_button_separate_go_required", bool(runtime_button_snapshot.get("separate_go_required", true)))
+	if button_enabled:
+		button.self_modulate = Color(0.78, 0.96, 1.0, 1.0)
+	if not button.pressed.is_connected(_on_release_first_decision_loop_two_button_pressed):
+		button.pressed.connect(_on_release_first_decision_loop_two_button_pressed)
 
 
 func _get_release_firefight_command_primary_button_specs() -> Array:
@@ -20961,6 +20985,40 @@ func get_release_first_decision_loop_two_go_smoke_snapshot(execution_hook_overri
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_GO_SMOKE_SCRIPT.call("build_snapshot", execution_hook, smoke_trace)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_runtime_button_snapshot(go_smoke_override: Dictionary = {}, execution_hook_override: Dictionary = {}) -> Dictionary:
+	var execution_hook: Dictionary = execution_hook_override.duplicate(true) if not execution_hook_override.is_empty() else get_release_first_decision_loop_two_execution_hook_snapshot()
+	var go_smoke: Dictionary = go_smoke_override.duplicate(true) if not go_smoke_override.is_empty() else get_release_first_decision_loop_two_go_smoke_snapshot(execution_hook, {})
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_RUNTIME_BUTTON_SCRIPT.call("build_snapshot", go_smoke, execution_hook)).duplicate(true)
+
+
+func confirm_release_first_decision_loop_two_runtime_button(selected_choice_id: String = "") -> bool:
+	var runtime_button: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot()
+	if not bool(runtime_button.get("button_enabled", false)):
+		_last_command_text = "2ND BLOCKED"
+		_update_ui()
+		return false
+	var execution_hook: Dictionary = get_release_first_decision_loop_two_execution_hook_snapshot({}, selected_choice_id)
+	var command_draft: Dictionary = Dictionary(execution_hook.get("command_draft", {}))
+	if command_draft.is_empty():
+		_last_command_text = "2ND NO COMMAND"
+		_update_ui()
+		return false
+	var confirm_action: String = String(command_draft.get("confirm_action", "")).strip_edges()
+	var command_type: String = String(command_draft.get("command_type", "")).strip_edges().to_lower()
+	var command_label: String = String(command_draft.get("command_label", command_type.capitalize())).strip_edges()
+	if confirm_action == "return_selected_fireteams_to_plan":
+		return return_selected_fireteams_to_plan()
+	if confirm_action == "_issue_command" and not command_type.is_empty():
+		return _issue_command(command_type, "2ND %s" % command_label.to_upper())
+	_last_command_text = "2ND UNKNOWN"
+	_update_ui()
+	return false
+
+
+func _on_release_first_decision_loop_two_button_pressed() -> void:
+	confirm_release_first_decision_loop_two_runtime_button()
+
+
 func _build_release_first_decision_loop_two_go_smoke_trace(execution_hook: Dictionary) -> Dictionary:
 	var command_draft: Dictionary = Dictionary(execution_hook.get("command_draft", {}))
 	var confirm_action: String = String(command_draft.get("confirm_action", "")).strip_edges()
@@ -23816,6 +23874,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_execution_hook,
 		{}
 	)
+	var release_first_decision_loop_two_runtime_button: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot(
+		release_first_decision_loop_two_go_smoke,
+		release_first_decision_loop_two_execution_hook
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -23911,6 +23973,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_go_smoke_line": String(release_first_decision_loop_two_go_smoke.get("smoke_line", "")),
 		"release_first_decision_loop_two_go_smoke_gate": String(release_first_decision_loop_two_go_smoke.get("gate", "")),
 		"release_first_decision_loop_two_go_smoke_status": String(release_first_decision_loop_two_go_smoke.get("status", "")),
+		"release_first_decision_loop_two_runtime_button": release_first_decision_loop_two_runtime_button,
+		"release_first_decision_loop_two_runtime_button_line": String(release_first_decision_loop_two_runtime_button.get("runtime_line", "")),
+		"release_first_decision_loop_two_runtime_button_gate": String(release_first_decision_loop_two_runtime_button.get("gate", "")),
+		"release_first_decision_loop_two_runtime_button_status": String(release_first_decision_loop_two_runtime_button.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
