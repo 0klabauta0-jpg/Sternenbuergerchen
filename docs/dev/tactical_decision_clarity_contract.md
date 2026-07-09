@@ -250,3 +250,8 @@ Der Outcome-Snapshot bleibt read-only. Ohne Outcome-Trace bleibt er `needs_playe
 TASK_986 legt den echten Fensterrahmen fuer das TASK_985-Outcome fest. Bewertet werden Outcome-Zeile, Mini-Zielzustand, naechster Griff, Spielerlesbarkeit, Screenshotpfade, manuelle Pflichtchecks, HUD-read-only und Multiplayer-Grenze.
 
 Der Capture-Snapshot bleibt read-only und setzt `manual_review_done` nicht automatisch. Ohne Manifest bleibt er `needs_outcome_real_window_capture`; ein gueltiges Manifest wird `review_ready`; vollstaendige manuelle Checks akzeptieren ihn fuer `TASK_987 - Release First Decision Loop Two Player Loop Outcome Visual Findings`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Outcome Visual Findings (TASK_987)
+TASK_987 trennt den technischen TASK_986-Outcome-Capture vom eigentlichen Spielerblick. Bewertet werden sichtbare Outcome-Zeile, Mini-Zielzustand, Next-Step-Zeile, Ergebnislesbarkeit, HUD-read-only-Grenze, Multiplayer-Grenze und korrektes Release-Fenster.
+
+Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_manual_review`; bei Reibung routet er zu `TASK_988 - Release First Decision Loop Two Player Loop Outcome Visual Polish`; bei sauberem Befund zu `TASK_988 - Release First Decision Loop Two Player Loop Outcome Playability Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

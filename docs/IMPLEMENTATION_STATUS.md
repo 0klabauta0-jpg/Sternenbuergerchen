@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_987 - Release First Decision Loop Two Player Loop Outcome Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_987_release_first_decision_loop_two_player_loop_outcome_visual_findings.md`, `docs/tasks/TASK_986_release_first_decision_loop_two_player_loop_outcome_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopOutcomeVisualFindings.build_snapshot()` schneidet aus einem review-ready TASK_986-Outcome-Capture und manuellen Notizen konkrete Sichtbefunde.
+- Stand: Positive Findings und Issues decken Outcome-Zeile, Mini-Zielzustand, Next-Step-Zeile, Ergebnislesbarkeit, HUD-read-only-Grenze und Multiplayer-Grenze ab.
+- Stand: Reibungen routen zu `TASK_988 - Release First Decision Loop Two Player Loop Outcome Visual Polish`; saubere Notizen routen zu `TASK_988 - Release First Decision Loop Two Player Loop Outcome Playability Slice`.
+- Risiken/offen: TASK_987 verbessert noch keine UI selbst. Der naechste Task sollte je nach echtem Sichtbefund Polish bauen oder den Outcome in einen Playability-Slice fuehren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_987_release_first_decision_loop_two_player_loop_outcome_visual_findings.gd`, Regression TASK_986, TASK_985, TASK_984, `git diff --check`.
+- Naechster Schritt: TASK_988 - Release First Decision Loop Two Player Loop Outcome Visual Polish oder TASK_988 - Release First Decision Loop Two Player Loop Outcome Playability Slice.
+
 ### TASK_986 - Release First Decision Loop Two Player Loop Outcome Real Window Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_986_release_first_decision_loop_two_player_loop_outcome_real_window_capture.md`, `docs/tasks/TASK_985_release_first_decision_loop_two_player_loop_scenario_outcome_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
