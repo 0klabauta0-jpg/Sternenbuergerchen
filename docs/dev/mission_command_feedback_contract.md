@@ -1683,6 +1683,11 @@ TASK_961 bewertet den ersten Release-Decision-Ablauf als integriertes Playtest-M
 
 Erwartete Struktur: `ReleaseFirstDecisionIntegratedPlaytest.build_snapshot()` liefert `schema = sternenbuergerchen.release_first_decision_integrated_playtest.v1`, `task_id = TASK_961`, `source_task_id = TASK_960`, Manifest-/Prozessmetadaten, `required_playtest_checks`, `missing_playtest_checks`, `observed_release_stages`, `gate = blocked | needs_integrated_playtest_run | integrated_playtest_regression_found | integrated_playtest_passed`, `integrated_playtest_passed`, `recommended_next_task = TASK_961 - Release First Decision Integrated Playtest | TASK_962 - Release First Decision Playtest Findings`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
 
+## Release First Decision Playtest Findings (TASK_962)
+TASK_962 schneidet aus TASK_961 einen read-only Spielerbefund. Der Analyzer darf eine reviewbare TASK_961-Quelle und manuelle Playtest-Notizen lesen, aber keine Homebase-, Dropship-, Mission-, Command-, Movement-, Combat-, Damage-, HUD- oder Multiplayer-Wahrheit erzeugen.
+
+Erwartete Struktur: `ReleaseFirstDecisionPlaytestFindings.build_snapshot()` liefert `schema = sternenbuergerchen.release_first_decision_playtest_findings.v1`, `task_id = TASK_962`, `source_task_id = TASK_961`, Source-Gate, Source-Issues, `observed_release_stages`, `review_notes`, `manual_review_required = true`, `manual_review_done`, `positive_findings`, `issues`, `status = blocked | needs_manual_review | ready_for_release_first_decision_polish | accepted_for_release_first_decision_next_loop`, `recommended_next_task = TASK_962 - Release First Decision Playtest Findings | TASK_963 - Release First Decision Integrated Polish Followup | TASK_963 - Release First Decision Next Playable Loop`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

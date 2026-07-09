@@ -125,3 +125,8 @@ Der Slice darf nur Trace-Evidence bewerten. Er ist kein Export, kein neuer Missi
 TASK_961 bindet den Slice an einen echten Release-Playtest-Beleg. Das Manifest muss Release-EXE-Start, Deep-Link, korrekten Fensterinhalt, Homebase-bis-Mission, Dropship/LZ/Drop, First-Decision-Preview, `GO`, Post-GO-Feedback, Performance und Multiplayer-Snapshot-Grenze dokumentieren.
 
 Der Playtest-Rahmen darf keine Erfolgsmeldung automatisch setzen. `manual_playtest_done` bleibt im Tool false, bis ein echter Sicht-/Bedienbefund vorliegt. Der Analyzer ist read-only und routet offene oder regressierende Evidence zu TASK_962-Findings.
+
+## Release First Decision Playtest Findings (TASK_962)
+TASK_962 bewertet den TASK_961-Stand als Spielerbefund: korrektes Fenster, Homebase-bis-Mission, Dropship/LZ/Drop, First-Decision-Preview, `GO`, Post-GO-Feedback, Performance, HUD-Read-only-Grenze, Multiplayer-Grenze und allgemeine Spielerlesbarkeit.
+
+Der Findings-Schnitt darf Akzeptanz nicht faken. Ohne manuelle Review bleibt er `needs_manual_review`; bei belegter Reibung routet er zu `TASK_963 - Release First Decision Integrated Polish Followup`; bei sauberer Review darf er zu `TASK_963 - Release First Decision Next Playable Loop` fuehren. Er erzeugt keine Commands, Movement-, Combat-, Damage-, UI- oder Multiplayer-Wahrheit.

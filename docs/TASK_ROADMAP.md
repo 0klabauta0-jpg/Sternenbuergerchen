@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_962 - Release First Decision Playtest Findings (implementiert): Der TASK_961-Playteststand wird als read-only Befund geschnitten; offene Review bleibt offen, Reibungen routen zu engem Polish, saubere Review fuehrt zum naechsten kleinen spielbaren Loop.
 - TASK_961 - Release First Decision Integrated Playtest (implementiert): Der TASK_960-Slice bekommt einen read-only integrierten Playtest-/Manifest-Rahmen mit Release-Prozess, Deep-Link, Fensterinhalt, Homebase-bis-Mission, LZ/Drop, Preview, GO, Post-GO, Performance und Multiplayer-Grenze.
 - TASK_960 - First Decision Release Playable Slice (implementiert): Bestandener TASK_959-Smoke wird mit einem Release-Spine-Trace von Homebase ueber Flightdeck, Dropship, LZ/Drop, Decision-Preview, GO und Post-GO-Feedback als kleiner spielbarer Ablauf bewertet.
 - TASK_959 - First Decision Playability Smoke (implementiert): Akzeptierte TASK_958-Findings werden mit einem Playthrough-Trace gegen NEXT, WHY, Choice-Zeilen, Empfehlung, Preview, Risk, Line-of-Fire, GO-Grenze, Post-GO-Feedback, Hotpath-Ruhe und HUD-Read-only-Grenze bewertet.

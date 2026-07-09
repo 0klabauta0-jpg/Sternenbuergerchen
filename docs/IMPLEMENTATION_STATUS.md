@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_962 - Release First Decision Playtest Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_962_release_first_decision_playtest_findings.md`, `docs/tasks/TASK_961_release_first_decision_integrated_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionPlaytestFindings.build_snapshot()` akzeptiert nur reviewbare TASK_961-Quellen mit integriertem Playtest-Manifest und bleibt ohne manuelle Review bewusst `needs_manual_review`.
+- Stand: TASK_961-Regressionen bleiben als konkrete Findings sichtbar; saubere Review-Notizen akzeptieren den ersten Release-Decision-Griff fuer den naechsten kleinen spielbaren Loop.
+- Stand: Der Snapshot bleibt read-only und erzeugt keine Homebase-, Dropship-, Mission-, Command-, Movement-, Combat-, Damage-, HUD- oder Multiplayer-Wahrheit.
+- Risiken/offen: Echte Sicht-/Bedienabnahme bleibt ein menschlicher Befund. Bei Akzeptanz sollte TASK_963 wieder Inhalt/Loop bauen, nicht nur ein weiteres Gate.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_962_release_first_decision_playtest_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_961_release_first_decision_integrated_playtest.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_960_first_decision_release_playable_slice.gd`, `git diff --check`.
+- Naechster Schritt: TASK_963 - Release First Decision Next Playable Loop oder TASK_963 - Release First Decision Integrated Polish Followup, je nach Befund.
+
 ### TASK_961 - Release First Decision Integrated Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_961_release_first_decision_integrated_playtest.md`, `docs/tasks/TASK_960_first_decision_release_playable_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
