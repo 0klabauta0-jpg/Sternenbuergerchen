@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_931 - Release First Exchange Final Readability Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_931_release_first_exchange_final_readability_visual_findings.md`, `docs/tasks/TASK_930_release_first_exchange_final_readability_recapture.md`, `docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md`, `docs/tasks/TASK_928_release_first_exchange_followup_player_polish_tuning_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_931 bewertet den TASK_930-Snapshot/Manifest read-only als Spielerblick nach dem TASK_929-Final-Readability-Polish.
+- Stand: `ReleaseFirstExchangeFinalReadabilityVisualFindings.build_snapshot()` trennt technische Capture-Evidence, fehlenden manuellen Sichtbefund, belegte Restreibung und echte Akzeptanz fuer den First-Exchange-Playability-Smoke.
+- Stand: Positive Evidenz bleibt erhalten: CONTACT FIRE in #17/#18/#19, trusted Window-Handle-Capture, TASK_929-Final-Readability-Style und TASK_926-Tuning-Basis.
+- Risiken/offen: Ohne echten akzeptierten Sichtbefund bleibt der Snapshot `needs_manual_review` oder empfiehlt einen engen TASK_932-Follow-up-Fix. Der Playability-Smoke ist erst nach Akzeptanz sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_931_release_first_exchange_final_readability_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_930_release_first_exchange_final_readability_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_932 - Release First Exchange Playability Smoke bei Akzeptanz; sonst TASK_932 - Release First Exchange Final Readability Followup Fix.
+
 ### TASK_930 - Release First Exchange Final Readability Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_930_release_first_exchange_final_readability_recapture.md`, `docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md`, `docs/tasks/TASK_928_release_first_exchange_followup_player_polish_tuning_visual_findings.md`, `docs/tasks/TASK_927_release_first_exchange_followup_player_polish_tuning_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
