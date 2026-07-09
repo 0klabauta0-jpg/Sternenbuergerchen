@@ -10,6 +10,26 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_909 - Release First Exchange Fire Lane Label Cluster Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_909_release_first_exchange_fire_lane_label_cluster_visual_findings.md`, `docs/tasks/TASK_908_release_first_exchange_fire_lane_label_cluster_real_window_recapture.md`, `docs/tasks/TASK_907_release_first_exchange_fire_lane_label_cluster_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_909 bewertet den frischen TASK_908-Window-Handle-Screenshot read-only als Spielerblick.
+- Stand: Positive Befunde: CONTACT FIRE ist in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar; der TASK_907-Label-Cluster-Pfad ist im echten Fenster vorhanden; Event Log und Command-Surfaces bleiben nutzbar.
+- Stand: Primaere Restreibung ist `label_halo_cluster_still_first_read`: FIRE/CONTACT-Welttext, Halo und kleine Marker sind weiter der erste Blickfang vor der Fire-Lane. Weitere Reibung: Fire-Lane-Core liest noch nicht als primaere Bewegung, Source-/Target-Anker tragen die Blickfuehrung noch nicht stark genug, Bottom-HUD bleibt dicht.
+- Risiken/offen: TASK_909 aendert keine Runtime. Der naechste Slice muss sehr eng Weltbild-Hierarchie und Fire-Lane-First-Read polieren, ohne Combat- oder HUD-Wahrheit zu oeffnen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_909_release_first_exchange_fire_lane_label_cluster_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_908_release_first_exchange_fire_lane_label_cluster_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_910 - Release First Exchange Fire Lane World Read Micro Polish.
+
+### TASK_908 - Release First Exchange Fire Lane Label Cluster Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_908_release_first_exchange_fire_lane_label_cluster_real_window_recapture.md`, `docs/tasks/TASK_907_release_first_exchange_fire_lane_label_cluster_polish.md`, `docs/tasks/TASK_905_release_first_exchange_fire_lane_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_908 legt einen eigenen Recapture-/Acceptance-Rahmen an den TASK_907-Label-Cluster-Polish.
+- Stand: `capture_release_first_exchange_fire_lane_label_cluster_real_window_recapture.ps1` wiederverwendet den TASK_905-Fire-Lane-Window-Handle-Pfad und schreibt eigene TASK_908-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFireLaneLabelClusterRealWindowRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Fire-Lane-vor-Label-/Halo-Cluster, leises Weltlabel, ruhigen Halo, Direction-Anker und weiter bedienbare Command-Surfaces.
+- Risiken/offen: TASK_908 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_909 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_908_release_first_exchange_fire_lane_label_cluster_real_window_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_907_release_first_exchange_fire_lane_label_cluster_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_909 - Release First Exchange Fire Lane Label Cluster Visual Findings.
+
 ### TASK_907 - Release First Exchange Fire Lane Label Cluster Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_907_release_first_exchange_fire_lane_label_cluster_polish.md`, `docs/tasks/TASK_906_release_first_exchange_fire_lane_visual_findings.md`, `docs/tasks/TASK_904_release_first_exchange_fire_lane_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
