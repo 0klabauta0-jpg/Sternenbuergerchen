@@ -178,6 +178,11 @@ TASK_1029 schneidet aus einer bereiten Delivery-Review ein kleines Tester-Handof
 
 Das Handoff-Packet bleibt read-only. Ohne Paket bleibt es `needs_handoff_packet`; fehlende Items werden `needs_handoff_packet_completion`; konkrete Reibung wird `handoff_packet_regression_found`; ein sauberes Paket setzt `handoff_packet_ready` und `ready_for_tester_run`. Es erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und aendert keine Shortcuts.
 
+## Release First Decision Loop Two Player Loop Scenario Tester Run (TASK_1030)
+TASK_1030 haelt fest, ob der kleine FOB/NEXT/GO/FEEDBACK-Spielmoment aus dem Handoff frisch getestet wurde: Handoff genutzt, frische EXE gestartet, Singleplayer/Homebase handlungsfaehig, FOB/NEXT/GO/FEEDBACK sichtbar, erster Loop reagiert, keine Input-Sackgasse, Performance schnell genug, HUD blockiert nicht, Multiplayer-Grenze erhalten und Tester-Notizen exportiert.
+
+Der Tester-Run bleibt read-only. Ohne Notizen bleibt er `needs_tester_run`; fehlende Checks werden `needs_tester_run_completion`; konkrete Reibung wird `tester_run_regression_found`; ein sauberer Run setzt `tester_run_ready` und `ready_for_acceptance_review`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und aendert keine Shortcuts.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)
