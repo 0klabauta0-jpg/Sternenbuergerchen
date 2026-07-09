@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1019 - Release First Decision Loop Two Player Loop Scenario Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1019_release_first_decision_loop_two_player_loop_scenario_visual_findings.md`, `docs/tasks/TASK_1018_release_first_decision_loop_two_player_loop_scenario_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioVisualFindings.build_snapshot()` bewertet einen review-ready TASK_1018-Capture plus optionale manuelle Sichtnotizen.
+- Stand: Ohne Sichtnotizen bleibt der Status `needs_manual_review`; belegte Reibung routet zu `TASK_1020 - Release First Decision Loop Two Player Loop Scenario Visual Polish`; ein sauberer Befund setzt `accepted_for_scenario_acceptance_slice`.
+- Stand: Geprueft werden FOB-Entry, Objective, Alpha/Bravo-Rollen, NEXT/CONFIRM/GO, GO-Grenze, Feedback, HUD-Ruhe, Scenario-Playability-Zeile, Spielerlesbarkeit und Multiplayer-Grenze.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1019 im Command-Feedback als Snapshot, Status und Issue-Count.
+- Risiken/offen: TASK_1019 ist ein geschnittener Sichtbefund, keine automatische Screenshot-Auswertung. TASK_1020 sollte je nach Befund Visual Polish oder den Acceptance-Slice liefern.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1019_release_first_decision_loop_two_player_loop_scenario_visual_findings.gd`, Regression TASK_1018, TASK_1017, TASK_1016, `git diff --check`.
+- Naechster Schritt: TASK_1020 - Release First Decision Loop Two Player Loop Scenario Visual Polish oder TASK_1020 - Release First Decision Loop Two Player Loop Scenario Acceptance Slice.
+
 ### TASK_1018 - Release First Decision Loop Two Player Loop Scenario Real Window Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1018_release_first_decision_loop_two_player_loop_scenario_real_window_capture.md`, `docs/tasks/TASK_1017_release_first_decision_loop_two_player_loop_scenario_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

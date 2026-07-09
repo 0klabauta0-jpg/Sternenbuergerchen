@@ -25,6 +25,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_scenario_real_window_capture | review_ready | accepted`.
 - Naechster Schritt: TASK_1019 - Release First Decision Loop Two Player Loop Scenario Visual Findings.
 
+## TASK_1019 - Release First Decision Loop Two Player Loop Scenario Visual Findings (implementiert im Arbeitsstand)
+- Grundlage: TASK_1018 Scenario Real Window Capture.
+- Ziel: Echten Fensterblick als Sichtbefund schneiden: FOB-Entry, Objective, Rollen, NEXT/CONFIRM/GO, Feedback, HUD-Ruhe und Multiplayer-Grenze.
+- Ergebnis: Read-only Snapshot `needs_manual_review | ready_for_scenario_visual_polish | accepted_for_scenario_acceptance_slice`.
+- Naechster Schritt: TASK_1020 - Release First Decision Loop Two Player Loop Scenario Visual Polish oder TASK_1020 - Release First Decision Loop Two Player Loop Scenario Acceptance Slice.
+
 # Arbeitsregeln
 
 ## Reihenfolge
