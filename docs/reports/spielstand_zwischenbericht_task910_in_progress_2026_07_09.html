@@ -101,7 +101,8 @@
       <span class="pill good">TASK_918 Findings umgesetzt</span>
       <span class="pill good">TASK_919 Smoke-Gate umgesetzt</span>
       <span class="pill good">TASK_920 Follow-up-Fix umgesetzt</span>
-      <span class="pill warn">TASK_921 Recapture folgt</span>
+      <span class="pill good">TASK_921 Recapture-Rahmen umgesetzt</span>
+      <span class="pill warn">TASK_922 Findings folgt</span>
       <span class="pill">Report read-only</span>
     </div>
   </header>
@@ -130,7 +131,7 @@
             TASK_910 ist deshalb als Micro-Polish umgesetzt: Label/Halo/Marker treten weiter zurueck, waehrend Fire-Lane-Core und Source-/Target-Beziehung staerker die erste Lesung fuehren. TASK_913 staerkt Fire-Lane-Core und Richtunganker weiter; TASK_914 baut dafuer den eigenen Fenster-Capture-Rahmen, TASK_915 bewertet daraus die Restreibung, TASK_916 setzt den letzten engen Weltlese-Polish auf dieser Kette, TASK_917 prueft diesen Stand wieder als echtes Fensterartefakt, TASK_918 trennt daraus Akzeptanz von belegter Restreibung, und TASK_919 macht daraus ein Smoke-Gate.
           </div>
           <div class="status-box" style="margin-top:12px;">
-            Nachtrag aus dem echten TASK_917-Capture: Das Manifest steht auf <code>review_ready</code>, der Window-Handle-Capture ist trusted, Git-Stand ist <code>e6f23d9c</code>, und der Source-Snapshot sagt klar <code>FINAL_SOURCE_CONTACT_FIRE</code>. Auf dem Screenshot sind CONTACT-FIRE-HUD-Flaechen vorhanden; die Restreibung liegt im Weltbild, weil FIRE/CONTACT-Text und Zielcluster noch schneller ins Auge fallen als die Source-to-target-Fire-Lane. TASK_920 setzt dafuer jetzt einen engen Follow-up-Style auf den bestehenden TASK_916-Pfad.
+            Nachtrag aus dem echten TASK_917-Capture: Das Manifest steht auf <code>review_ready</code>, der Window-Handle-Capture ist trusted, Git-Stand ist <code>e6f23d9c</code>, und der Source-Snapshot sagt klar <code>FINAL_SOURCE_CONTACT_FIRE</code>. Auf dem Screenshot sind CONTACT-FIRE-HUD-Flaechen vorhanden; die Restreibung liegt im Weltbild, weil FIRE/CONTACT-Text und Zielcluster noch schneller ins Auge fallen als die Source-to-target-Fire-Lane. TASK_920 setzt dafuer jetzt einen engen Follow-up-Style auf den bestehenden TASK_916-Pfad, und TASK_921 stellt den eigenen Recapture-Rahmen bereit.
           </div>
           <div class="status-box info" style="margin-top:12px;">
             Der Bericht selbst schreibt keine Spielwahrheit und startet keine Runtime-Aktion. Er ist eine Arbeitsflaeche fuer Sichttest, Entscheidung und naechste Codex-Schritte: Notizen eintragen, JSON exportieren, danach kann daraus der naechste konkrete Task-Schnitt entstehen.
@@ -156,7 +157,7 @@
             <li>Die Weltansicht wurde schrittweise von Debug-Lesung zu Spiel-Lesung gezogen: FireTrace, Impact, Target-Fokus, Source-to-target-Lane, Source-Glow und Halo wurden in kleinen Slices messbar gemacht.</li>
             <li>Der aktuelle Engpass ist nicht mehr "sieht man Kampf ueberhaupt?", sondern "liest der Blick zuerst die eigentliche Schussbewegung?". Das ist ein gutes, kleineres Problem.</li>
             <li>Der aktuelle Code-Slice macht daraus einen pruefbaren Sichtpfad: TASK_914 kann nach TASK_913 eigene PNG-/JSON-Artefakte erzeugen, TASK_915 trennt fehlenden Sichttest, Restreibung und echte Akzeptanz, TASK_916 poliert nur die belegte Weltlese-Reibung, TASK_917 erzeugt den finalen Recapture-Rahmen, TASK_918 bewertet diesen Befund read-only, und TASK_919 gibt den Smoke nur bei Akzeptanz frei.</li>
-            <li>Der zuletzt echte TASK_917-Capture hat die positive Seite bestaetigt: CONTACT FIRE liegt in der Spielerkommunikation. TASK_920 setzt daraus den engen Follow-up-Fix fuer die Weltlesung: Core/Anker staerker, Label/Halo/Grid/Weltlinien ruhiger.</li>
+            <li>Der zuletzt echte TASK_917-Capture hat die positive Seite bestaetigt: CONTACT FIRE liegt in der Spielerkommunikation. TASK_920 setzt daraus den engen Follow-up-Fix fuer die Weltlesung: Core/Anker staerker, Label/Halo/Grid/Weltlinien ruhiger. TASK_921 kann diesen Stand jetzt wieder als echtes Fensterartefakt belegen.</li>
           </ul>
         </article>
       </div>
@@ -192,6 +193,7 @@
             <label class="checkline"><input type="checkbox" checked data-export-key="done.task918_findings"> TASK_918 Final-World-Read-Findings umgesetzt.</label>
             <label class="checkline"><input type="checkbox" checked data-export-key="done.task919_smoke_gate"> TASK_919 Playability-Smoke-Gate umgesetzt.</label>
             <label class="checkline"><input type="checkbox" checked data-export-key="done.task920_followup_fix"> TASK_920 Final-World-Read-Follow-up-Fix umgesetzt.</label>
+            <label class="checkline"><input type="checkbox" checked data-export-key="done.task921_recapture"> TASK_921 Follow-up-World-Read-Recapture-Rahmen umgesetzt.</label>
             <label class="checkline"><input type="checkbox" checked data-export-key="done.report_updated"> HTML-Zwischenbericht aktualisiert.</label>
         </article>
         <article class="card full">
@@ -221,6 +223,8 @@
             <li><code>scripts/tests/task_919_release_first_exchange_playability_smoke_gate.gd</code> prueft Review-/Fix-/Smoke-ready-Gate und read-only-Grenzen fuer TASK_919.</li>
             <li><code>docs/tasks/TASK_920_release_first_exchange_final_world_read_followup_fix.md</code> und <code>scripts/mission/release_first_exchange_final_world_read_followup_fix.gd</code> setzen den belegten Restbefund als engen Presentation-Fix um.</li>
             <li><code>scripts/tests/task_920_release_first_exchange_final_world_read_followup_fix.gd</code> prueft Controller, Primary3D-Renderwerte und read-only-Grenzen fuer TASK_920.</li>
+            <li><code>docs/tasks/TASK_921_release_first_exchange_followup_world_read_recapture.md</code>, <code>scripts/mission/release_first_exchange_followup_world_read_recapture.gd</code> und <code>scripts/tools/capture_release_first_exchange_followup_world_read_recapture.ps1</code> stellen den echten Follow-up-Window-Handle-Beweisrahmen bereit.</li>
+            <li><code>scripts/tests/task_921_release_first_exchange_followup_world_read_recapture.gd</code> prueft Manifest, Pflichtchecks und read-only-Grenzen fuer TASK_921.</li>
             <li><code>docs/reports/spielstand_zwischenbericht_task910_in_progress_2026_07_09.html</code> ist diese aktualisierte Arbeits-/Playtest-Workbench.</li>
           </ul>
         </article>
@@ -265,7 +269,7 @@
             <li><strong>Schussbewegung:</strong> Quelle -> Ziel ist im Renderpfad final staerker priorisiert, aber der echte Screenshot liest die Fire-Lane noch nicht sicher als erste Weltbewegung.</li>
             <li><strong>Bottom-HUD:</strong> weiterhin dicht. Akut nicht der groesste Blocker, aber fuer laengere Playtests bleibt es ein Thema.</li>
             <li><strong>TASK_917 Restgrenze:</strong> Der echte Capture ist review_ready und trusted, aber nicht automatisch akzeptiert.</li>
-            <li><strong>Fensterakzeptanz:</strong> TASK_919 macht daraus ein Gate: ohne akzeptierten TASK_918-Sichtbefund kein Smoke-Run. TASK_920 ist umgesetzt; jetzt braucht es wieder einen echten Recapture.</li>
+            <li><strong>Fensterakzeptanz:</strong> TASK_919 macht daraus ein Gate: ohne akzeptierten TASK_918-Sichtbefund kein Smoke-Run. TASK_920 ist umgesetzt; TASK_921 stellt den echten Recapture-Rahmen bereit, aber akzeptiert den Screenshot nicht automatisch.</li>
             <li><strong>Untracked lokal:</strong> <code>builds/</code> liegt weiter untracked im Arbeitsbaum und wird nicht fuer diesen Bericht angefasst.</li>
           </ul>
         </article>
@@ -300,15 +304,17 @@
             <li>TASK_918-Verifier gruen halten und den Findings-Schnitt nicht als automatischen Sichttest missverstehen.</li>
             <li>TASK_919-Verifier gruen halten und das Smoke-Gate nicht als echten Smoke-Run missverstehen.</li>
             <li>TASK_920-Verifier gruen halten und den Follow-up-Fix nicht als echten Fensterbeweis missverstehen.</li>
-            <li>Als naechster Slice TASK_921: frischer Window-Handle-Recapture nach TASK_920, damit der Spielerblick wieder belegt wird.</li>
+            <li>TASK_921-Verifier gruen halten und den Recapture-Rahmen nicht als manuelle Akzeptanz missverstehen.</li>
+            <li>Als naechster Slice TASK_922: TASK_921-PNG/Manifest read-only bewerten und entscheiden, ob danach Smoke reicht.</li>
           </ol>
         </article>
         <article class="card">
           <h2>Meine Empfehlung</h2>
-          <p>Ich wuerde als naechstes TASK_921 bauen: frisch capturen, ob TASK_920 im echten Fenster wirklich die Fire-Lane zuerst lesbar macht. Erst wenn das akzeptiert ist, lohnt sich der Playability-Smoke.</p>
+          <p>Ich wuerde als naechstes TASK_922 bauen: den TASK_921-Fensterblick read-only schneiden. Erst wenn dieser Schnitt akzeptiert, lohnt sich der Playability-Smoke.</p>
           <label style="display:block; margin-top:12px;">Prioritaet
             <select data-export-key="next.priority">
-              <option value="task921_recapture" selected>TASK_921 Recapture</option>
+              <option value="task922_findings" selected>TASK_922 Findings</option>
+              <option value="task921_recapture">TASK_921 Recapture</option>
               <option value="task920_followup_fix">TASK_920 Follow-up Fix</option>
               <option value="task920_smoke_run">TASK_920 Smoke Run</option>
               <option value="task920_manual_review">TASK_920 Manual Review</option>
@@ -324,7 +330,7 @@
             <li>Kein neues Missionssystem.</li>
             <li>Keine neue HUD-Wahrheit fuer FireEvents.</li>
             <li>Kein grosser Editor-Umbau mitten im Release-Firefight-Slice.</li>
-            <li>Kein "fertig" ohne TASK_921-Recapture oder echte manuelle Akzeptanz der Weltlesung.</li>
+            <li>Kein "fertig" ohne TASK_922-Findings oder echte manuelle Akzeptanz der Weltlesung.</li>
           </ul>
         </article>
       </div>
@@ -352,7 +358,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="notes.check_task917_real_capture"> TASK_917-Capture liegt als echtes PNG-/JSON-Artefakt vor.</label>
           <label class="checkline"><input type="checkbox" data-export-key="notes.check_hud"> Bottom-HUD ist nicht zu dicht fuer den naechsten Griff.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="notes.check_task920"> TASK_920-Follow-up-Fix ist als Presentation-Slice vorhanden.</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="notes.check_next"> TASK_921 als Recapture vor Smoke klingt richtig.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="notes.check_task921"> TASK_921-Recapture-Rahmen ist vorhanden.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="notes.check_next"> TASK_922 als Findings-Schnitt vor Smoke klingt richtig.</label>
         </article>
       </div>
     </section>
@@ -436,8 +443,9 @@
             task_919_status: "implemented_playability_smoke_gate",
             task_920_status: "implemented_final_world_read_followup_fix",
             task_920_style_id: "task_920_release_first_exchange_final_world_read_followup_v1",
-            current_friction: "task_920_needs_real_window_recapture_before_smoke",
-            recommended_next_task: "TASK_921 - Release First Exchange Followup World Read Recapture",
+            task_921_status: "implemented_followup_world_read_recapture_framework",
+            current_friction: "task_921_needs_visual_findings_before_smoke",
+            recommended_next_task: "TASK_922 - Release First Exchange Followup World Read Visual Findings",
             optional_manual_capture: "powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_final_world_read_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52"
           },
           metadata: {

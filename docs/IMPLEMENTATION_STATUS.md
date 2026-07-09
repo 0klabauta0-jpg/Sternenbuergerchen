@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_921 - Release First Exchange Followup World Read Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_921_release_first_exchange_followup_world_read_recapture.md`, `docs/tasks/TASK_920_release_first_exchange_final_world_read_followup_fix.md`, `docs/tasks/TASK_917_release_first_exchange_final_world_read_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_921 legt einen eigenen Recapture-/Review-Rahmen an den TASK_920-Follow-up-World-Read-Fix.
+- Stand: `capture_release_first_exchange_followup_world_read_recapture.ps1` wiederverwendet den TASK_917-Window-Handle-Pfad und schreibt eigene TASK_921-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFollowupWorldReadRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Follow-up-Fire-Lane als erste Weltbewegung, Richtunganker, ruhiges Label/Halo-Cluster und bedienbare Command-Surfaces.
+- Risiken/offen: TASK_921 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_922 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_921_release_first_exchange_followup_world_read_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_920_release_first_exchange_final_world_read_followup_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_922 - Release First Exchange Followup World Read Visual Findings.
+
 ### TASK_920 - Release First Exchange Final World Read Followup Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_920_release_first_exchange_final_world_read_followup_fix.md`, `docs/tasks/TASK_919_release_first_exchange_playability_smoke_gate.md`, `docs/tasks/TASK_918_release_first_exchange_final_world_read_visual_findings.md`, `docs/tasks/TASK_916_release_first_exchange_fire_lane_world_read_final_polish.md`, `docs/dev/mission_command_feedback_contract.md`
