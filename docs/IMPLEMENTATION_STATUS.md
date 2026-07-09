@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_932 - Release First Exchange Final Readability Followup Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/tasks/TASK_931_release_first_exchange_final_readability_visual_findings.md`, `docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_932 setzt den TASK_931-Restbefund als engen Presentation-Folgefix um, statt ohne akzeptierten Spielerblick den Playability-Smoke zu starten.
+- Stand: `ReleaseFirstExchangeFinalReadabilityFollowupFix.build_snapshot()` verlangt TASK_931-Findings plus passierenden TASK_929-Final-Readability-Polish und prueft Lane/Core, Label/Halo-Rueckzug, Grid-/World-Line-Rueckzug, Richtunganker und read-only-Grenzen.
+- Stand: `TerrainMap3DView` meldet den Style `task_932_release_first_exchange_final_readability_followup_v1`; Lane/Core werden minimal klarer, Label/Halo/Grid/Weltlinien leiser und Source-/Target-Anker bleiben unter der Scheiben-Grenze.
+- Risiken/offen: TASK_932 ist noch kein echter Fensterbeweis und kein Playability-Smoke. Der naechste Slice muss frisch recapturen, ob der Follow-up-Fix im echten Spielerblick als erste Weltbewegung funktioniert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_932_release_first_exchange_final_readability_followup_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_931_release_first_exchange_final_readability_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_933 - Release First Exchange Followup Fix Recapture.
+
 ### TASK_931 - Release First Exchange Final Readability Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_931_release_first_exchange_final_readability_visual_findings.md`, `docs/tasks/TASK_930_release_first_exchange_final_readability_recapture.md`, `docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md`, `docs/tasks/TASK_928_release_first_exchange_followup_player_polish_tuning_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
