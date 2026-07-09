@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1018 - Release First Decision Loop Two Player Loop Scenario Real Window Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1018_release_first_decision_loop_two_player_loop_scenario_real_window_capture.md`, `docs/tasks/TASK_1017_release_first_decision_loop_two_player_loop_scenario_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioRealWindowCapture.build_snapshot()` bewertet einen bestandenen TASK_1017-Szenario-Slice plus optionales Real-Window-Capture-Manifest.
+- Stand: Ohne Manifest bleibt der Status `needs_scenario_real_window_capture`; ein trusted Manifest ohne manuelle Checks ist nur `review_ready`; alle Pflichtchecks setzen `accepted`.
+- Stand: `capture_release_first_decision_loop_two_player_loop_scenario_real_window.ps1` schreibt ein TASK_1018-Manifest fuer `--release-singleplayer-lz-drop-preview`, setzt `manual_review_done = $false` und veraendert keine Shortcuts.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1018 im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad.
+- Risiken/offen: TASK_1018 ist der Capture-Rahmen, noch kein echter manueller Sichtbefund. TASK_1019 sollte daraus Scenario Visual Findings schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1018_release_first_decision_loop_two_player_loop_scenario_real_window_capture.gd`, Regression TASK_1017, TASK_1016, TASK_1015, `git diff --check`.
+- Naechster Schritt: TASK_1019 - Release First Decision Loop Two Player Loop Scenario Visual Findings.
+
 ### TASK_1017 - Release First Decision Loop Two Player Loop Scenario Playability Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1017_release_first_decision_loop_two_player_loop_scenario_playability_slice.md`, `docs/tasks/TASK_1016_release_first_decision_loop_two_player_loop_scenario_player_feel_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

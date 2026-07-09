@@ -19,6 +19,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `scenario_playability_slice_passed | needs_scenario_playability_trace | scenario_playability_regression_found`.
 - Naechster Schritt: TASK_1018 - Release First Decision Loop Two Player Loop Scenario Real Window Capture.
 
+## TASK_1018 - Release First Decision Loop Two Player Loop Scenario Real Window Capture (implementiert im Arbeitsstand)
+- Grundlage: TASK_1017 Scenario Playability Slice.
+- Ziel: Echten Release-Fenster-Capture-Rahmen fuer den kleinen FOB-Szenario-Griff vorbereiten.
+- Ergebnis: Read-only Snapshot `needs_scenario_real_window_capture | review_ready | accepted`.
+- Naechster Schritt: TASK_1019 - Release First Decision Loop Two Player Loop Scenario Visual Findings.
+
 # Arbeitsregeln
 
 ## Reihenfolge

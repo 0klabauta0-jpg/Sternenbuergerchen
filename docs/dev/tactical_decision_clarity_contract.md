@@ -120,6 +120,11 @@ TASK_1017 prueft, ob die TASK_1016-Surfaces als kleiner Szenario-Griff lesbar si
 
 Der Scenario-Playability-Slice bleibt read-only. Ohne Trace bleibt er `needs_scenario_playability_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1018 - Release First Decision Loop Two Player Loop Scenario Real Window Capture`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Real Window Capture (TASK_1018)
+TASK_1018 legt den read-only Fensterbeweis-Rahmen fuer den TASK_1017-Szenario-Griff an. Erwartet wird ein Release-Fenster mit sichtbarem FOB-Entry, Objective, Alpha/Bravo-Rollen, NEXT/CONFIRM/GO-Flow, GO-Grenze, Feedback-Zeile und ruhiger HUD-Fuehrung.
+
+Ohne Capture-Manifest bleibt der Status offen. Ein trusted Manifest ohne erledigte manuelle Sichtabnahme wird nur `review_ready`; akzeptiert wird erst, wenn Fensterstart, korrekter Inhalt, Screenshotpfade, sichtbare Szenario-Flaechen, HUD-read-only-Grenze und Multiplayer-Grenze bestaetigt sind. Der Snapshot erzeugt keine Gameplay-Wahrheit und routet danach zu TASK_1019 fuer konkrete Scenario Visual Findings.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 
