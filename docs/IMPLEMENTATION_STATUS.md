@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1027_release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke.md`, `docs/tasks/TASK_1026_release_first_decision_loop_two_player_loop_scenario_ship_readiness_review.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioVisibleShipSmoke.build_snapshot()` bewertet eine bereite TASK_1026-Ship-Readiness plus optionale Sicht-Smoke-Notizen.
+- Stand: Ohne Notizen bleibt der Status `needs_visible_ship_smoke`; fehlende Pflichtchecks melden `needs_visible_ship_smoke_completion`; Issue-Flags melden `visible_ship_smoke_regression_found`; ein sauberer Smoke setzt `visible_ship_smoke_passed`.
+- Stand: Geprueft werden frischer Release-Ordner, EXE-Start, Einzelspieler, FOB, NEXT, GO, FEEDBACK, keine Input-Sackgasse, Responsiveness, keine stale Taskbar-/Build-Verwechslung und exportierte Smoke-Notizen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1027 im Command-Feedback als Snapshot, Visible-Smoke-Line, Status und Gate.
+- Risiken/offen: TASK_1027 wertet Sicht-Smoke-Notizen aus, startet die EXE aber noch nicht selbst und trifft keinen Pixelentscheid. Bei Reibung folgt TASK_1027-Polish, sonst TASK_1028 Delivery Review.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1027_release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke.gd`, Regression TASK_1026, TASK_1025, TASK_1024, `git diff --check`.
+- Naechster Schritt: TASK_1028 - Release First Decision Loop Two Player Loop Scenario Delivery Review oder TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke Polish.
+
 ### TASK_1026 - Release First Decision Loop Two Player Loop Scenario Ship Readiness Review
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1026_release_first_decision_loop_two_player_loop_scenario_ship_readiness_review.md`, `docs/tasks/TASK_1025_release_first_decision_loop_two_player_loop_scenario_release_candidate_acceptance.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

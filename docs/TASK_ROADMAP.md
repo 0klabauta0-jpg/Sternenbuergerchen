@@ -73,6 +73,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_ship_readiness_packet | ship_readiness_incomplete | ship_readiness_ready`.
 - Naechster Schritt: TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke.
 
+## TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke (implementiert im Arbeitsstand)
+- Grundlage: bereite TASK_1026 Ship Readiness.
+- Ziel: Sichtbaren Release-Smoke fuer den kleinen FOB/NEXT/GO/FEEDBACK-Spielmoment schneiden: frische EXE, Einzelspieler, FOB, NEXT, GO, FEEDBACK, keine Input-Sackgasse, Responsiveness und keine stale Taskbar-/Build-Verwechslung.
+- Ergebnis: Read-only Snapshot `needs_visible_ship_smoke | needs_visible_ship_smoke_completion | visible_ship_smoke_regression_found | visible_ship_smoke_passed`.
+- Naechster Schritt: TASK_1028 - Release First Decision Loop Two Player Loop Scenario Delivery Review oder TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke Polish.
+
 # Arbeitsregeln
 
 ## Reihenfolge

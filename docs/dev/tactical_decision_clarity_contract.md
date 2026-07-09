@@ -163,6 +163,11 @@ TASK_1026 prueft nach einer akzeptierten TASK_1025-Acceptance, ob der kleine FOB
 
 Die Ship-Readiness-Review bleibt read-only. Ohne Paket bleibt sie `needs_ship_readiness_packet`; fehlende Daten werden `ship_readiness_incomplete`; ein sauberes Paket setzt `ship_readiness_ready` und `ready_for_visible_ship_smoke`. Sie erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und setzt keine neue Spielwahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke (TASK_1027)
+TASK_1027 prueft nach einer bereiten TASK_1026-Ship-Readiness, ob der kleine Spielmoment in der sichtbaren Release-EXE wirklich lesbar ist: frischer Release-Ordner, EXE-Start, Einzelspieler, FOB, NEXT, GO, FEEDBACK, keine Input-Sackgasse, responsive Bedienung, keine stale Taskbar-/Build-Verwechslung und exportierte Smoke-Notizen.
+
+Der Visible-Ship-Smoke bleibt read-only. Ohne Notizen bleibt er `needs_visible_ship_smoke`; fehlende Pflichtchecks werden `needs_visible_ship_smoke_completion`; konkrete Reibung wird `visible_ship_smoke_regression_found`; ein sauberer Smoke setzt `visible_ship_smoke_passed` und `ready_for_delivery_review`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)
