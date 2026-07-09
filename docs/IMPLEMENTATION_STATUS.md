@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_964 - Release First Decision Loop Two Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_964_release_first_decision_loop_two_playtest.md`, `docs/tasks/TASK_963_release_first_decision_next_playable_loop.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlaytest.build_snapshot()` prueft read-only, ob die TASK_963-Zeile in Selected Fireteam, Mission Control und Command Feedback sichtbar ist.
+- Stand: `MissionTacticalSandboxController.get_release_first_decision_loop_two_playtest_snapshot()` exportiert Gate/Status, und die TASK_963-Zeile wird in den sichtbaren HUD-Texten ergaenzt.
+- Stand: Fehlende Sichtbarkeit routet zu `TASK_965 - Release First Decision Loop Two Polish`; erfolgreiche Sichtbarkeit meldet `loop_two_playtest_passed`.
+- Risiken/offen: TASK_964 fuehrt HOLD/ADV/BACK noch nicht aus. Der naechste Schritt sollte entweder enger HUD-Polish oder die echte zweite Mikroentscheidung sein.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_964_release_first_decision_loop_two_playtest.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_963_release_first_decision_next_playable_loop.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_962_release_first_decision_playtest_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_965 - Release First Decision Loop Two Polish.
+
 ### TASK_963 - Release First Decision Next Playable Loop
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_963_release_first_decision_next_playable_loop.md`, `docs/tasks/TASK_962_release_first_decision_playtest_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

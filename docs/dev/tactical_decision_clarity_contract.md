@@ -135,3 +135,8 @@ Der Findings-Schnitt darf Akzeptanz nicht faken. Ohne manuelle Review bleibt er 
 TASK_963 macht aus dem ersten `Preview -> GO -> Feedback`-Griff eine zweite kleine Entscheidung. Der Spieler soll nach dem ersten Kontakt nicht nur Feedback sehen, sondern einen klaren Folgegriff lesen: `HOLD` Winkel halten, `ADV` gedeckt nachsetzen oder `BACK` neu sammeln.
 
 Der Loop ist read-only und erzeugt keine zweite Gameplay-Wahrheit. Ohne echte TASK_962-Akzeptanz darf er als Live-Preview sichtbar sein, muss aber `preview_available_needs_task_962_acceptance` melden. Mit akzeptierten TASK_962-Findings wird er `ready_for_second_decision_loop` und routet zu `TASK_964 - Release First Decision Loop Two Playtest`.
+
+## Release First Decision Loop Two Playtest (TASK_964)
+TASK_964 prueft den zweiten Griff als sichtbaren HUD-Playtest. Die TASK_963-Zeile muss in Selected Fireteam, Mission Control und Command Feedback lesbar sein, bevor der naechste echte zweite Spielzug gebaut wird.
+
+Der Analyzer bleibt read-only: Er bewertet `selected_fireteam_shows_loop_line`, `mission_control_shows_loop_line`, `command_feedback_exports_loop_line`, `hold_advance_back_visible` und `manual_acceptance_state_visible`. Bei Erfolg meldet er `gate = loop_two_playtest_passed`; bei Reibung routet er zu `TASK_965 - Release First Decision Loop Two Polish`. Er erzeugt keine Commands, keine Movement-, Fire-, Damage- oder Multiplayer-Wahrheit.

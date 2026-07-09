@@ -40,6 +40,7 @@ const ORDER_PREVIEW_THREAT_OVERLAY_PLAYTEST_SCENARIO_SCRIPT: GDScript = preload(
 const DECISION_OVERLAY_PLAYABILITY_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/decision_overlay_playability_smoke.gd")
 const FIRST_DECISION_MICRO_SCENARIO_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/first_decision_micro_scenario_polish.gd")
 const RELEASE_FIRST_DECISION_NEXT_PLAYABLE_LOOP_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_next_playable_loop.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYTEST_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_playtest.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -367,6 +368,7 @@ var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
 var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
 var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
 var _release_candidate_firefight_decision_line_build_depth: int = 0
+var _release_first_decision_loop_two_hud_build_depth: int = 0
 var _release_firefight_event_log_fallback_created_msec: int = 0
 var _release_fire_exchange_visibility_persistence_evidence: Dictionary = {}
 var _release_fire_exchange_visibility_last_seed_event_id: String = ""
@@ -5311,6 +5313,7 @@ func _build_fireteam_status_text() -> String:
 	var combat_hud_line: String = String(combat_hud_density.get("selected_fireteam_line", "")).strip_edges()
 	var contact_fire_primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
 	var firefight_decision_line: String = _build_release_candidate_firefight_decision_line()
+	var loop_two_line: String = _build_release_first_decision_loop_two_hud_line()
 	var first_line: String = "%s%s | Karten %d | Wegpunkte %d | Gebiete %d | Stance %s | Ausfuehrung %s" % [
 		mode_text,
 		_get_fireteam_name(),
@@ -5328,13 +5331,25 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text,
 	]
 	if not contact_fire_primary_line.is_empty():
+		if not loop_two_line.is_empty() and loop_two_line != firefight_decision_line:
+			if not firefight_decision_line.is_empty():
+				return "%s\n%s\n%s\n%s\n%s" % [contact_fire_primary_line, firefight_decision_line, loop_two_line, first_line, second_line]
+			return "%s\n%s\n%s\n%s" % [contact_fire_primary_line, loop_two_line, first_line, second_line]
 		if not firefight_decision_line.is_empty():
 			return "%s\n%s\n%s\n%s" % [contact_fire_primary_line, firefight_decision_line, first_line, second_line]
 		return "%s\n%s\n%s" % [contact_fire_primary_line, first_line, second_line]
 	if not firefight_decision_line.is_empty():
+		if not loop_two_line.is_empty() and loop_two_line != firefight_decision_line:
+			if not combat_hud_line.is_empty():
+				return "%s\n%s\n%s\n%s\n%s" % [firefight_decision_line, loop_two_line, combat_hud_line, first_line, second_line]
+			return "%s\n%s\n%s\n%s" % [firefight_decision_line, loop_two_line, first_line, second_line]
 		if not combat_hud_line.is_empty():
 			return "%s\n%s\n%s\n%s" % [firefight_decision_line, combat_hud_line, first_line, second_line]
 		return "%s\n%s\n%s" % [firefight_decision_line, first_line, second_line]
+	if not loop_two_line.is_empty():
+		if not combat_hud_line.is_empty():
+			return "%s\n%s\n%s\n%s" % [loop_two_line, first_line, second_line, combat_hud_line]
+		return "%s\n%s\n%s" % [loop_two_line, first_line, second_line]
 	if not combat_hud_line.is_empty():
 		return "%s\n%s\n%s" % [first_line, second_line, combat_hud_line]
 	return "%s\n%s" % [first_line, second_line]
@@ -6383,6 +6398,9 @@ func _build_strategic_status_text() -> String:
 		var firefight_decision_line: String = _build_release_candidate_firefight_decision_line()
 		if not firefight_decision_line.is_empty() and not lines.has(firefight_decision_line):
 			lines.append(firefight_decision_line)
+		var loop_two_line: String = _build_release_first_decision_loop_two_hud_line()
+		if not loop_two_line.is_empty() and not lines.has(loop_two_line):
+			lines.append(loop_two_line)
 	var debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var debrief_handoff_line: String = String(debrief_handoff.get("handoff_line", "")).strip_edges()
 	if bool(debrief_handoff.get("handoff_ready", false)) and not debrief_handoff_line.is_empty():
@@ -6392,6 +6410,9 @@ func _build_strategic_status_text() -> String:
 	if bool(station_debrief_handoff.get("handoff_ready", false)) and not station_debrief_handoff_line.is_empty() and not lines.has(station_debrief_handoff_line):
 		lines.append(station_debrief_handoff_line)
 	lines = _prioritize_release_firefight_bottom_dock_lines(lines, combat_hud_density)
+	var loop_two_line_after_priority: String = _build_release_first_decision_loop_two_hud_line()
+	if not loop_two_line_after_priority.is_empty() and not lines.has(loop_two_line_after_priority):
+		lines.append(loop_two_line_after_priority)
 	if bool(order_preview_threat_overlay.get("active", false)) and not order_preview_threat_overlay_line.is_empty() and not lines.has(order_preview_threat_overlay_line):
 		lines.append(order_preview_threat_overlay_line)
 	return "\n".join(lines)
@@ -20862,6 +20883,45 @@ func get_release_first_decision_next_playable_loop_snapshot(source_findings_over
 	return Dictionary(RELEASE_FIRST_DECISION_NEXT_PLAYABLE_LOOP_SCRIPT.call("build_snapshot", source_findings, first_decision, firefight_decision, context)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_playtest_snapshot(next_loop_override: Dictionary = {}, selected_fireteam_status_override: String = "", mission_control_status_override: String = "", command_feedback_override: Dictionary = {}) -> Dictionary:
+	var next_loop: Dictionary = next_loop_override.duplicate(true) if not next_loop_override.is_empty() else get_release_first_decision_next_playable_loop_snapshot()
+	var selected_text: String = selected_fireteam_status_override.strip_edges()
+	if selected_text.is_empty():
+		selected_text = _build_fireteam_status_text()
+	var mission_text: String = mission_control_status_override.strip_edges()
+	if mission_text.is_empty():
+		mission_text = _build_strategic_status_text()
+	var command_feedback_line: String = String(command_feedback_override.get(
+		"release_first_decision_next_loop_line",
+		next_loop.get("visible_loop_line", next_loop.get("primary_line", ""))
+	)).strip_edges()
+	var command_feedback_status: String = String(command_feedback_override.get(
+		"release_first_decision_next_loop_status",
+		next_loop.get("status", "")
+	)).strip_edges()
+	var surfaces: Dictionary = {
+		"selected_fireteam_status_text": selected_text,
+		"mission_control_status_text": mission_text,
+		"command_feedback_line": command_feedback_line,
+		"command_feedback_status": command_feedback_status,
+	}
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYTEST_SCRIPT.call("build_snapshot", next_loop, surfaces, {})).duplicate(true)
+
+
+func _build_release_first_decision_loop_two_hud_line(next_loop_override: Dictionary = {}) -> String:
+	if _release_first_decision_loop_two_hud_build_depth > 0:
+		return ""
+	_release_first_decision_loop_two_hud_build_depth += 1
+	var next_loop: Dictionary = next_loop_override.duplicate(true) if not next_loop_override.is_empty() else get_release_first_decision_next_playable_loop_snapshot()
+	var line: String = ""
+	if bool(next_loop.get("active", false)):
+		line = String(next_loop.get("visible_loop_line", next_loop.get("primary_line", ""))).strip_edges()
+		if line.length() > 128:
+			line = line.substr(0, 128).strip_edges()
+	_release_first_decision_loop_two_hud_build_depth = maxi(_release_first_decision_loop_two_hud_build_depth - 1, 0)
+	return line
+
+
 func _build_release_first_decision_next_loop_live_source_findings(first_decision: Dictionary) -> Dictionary:
 	var first_decision_passed: bool = String(first_decision.get("gate", "")) == "pass" and bool(first_decision.get("read_only", false))
 	return {
@@ -23633,6 +23693,16 @@ func get_command_feedback_snapshot() -> Dictionary:
 		first_decision_micro_scenario_polish,
 		release_firefight_decision
 	)
+	var release_first_decision_next_loop_line: String = String(release_first_decision_next_playable_loop.get("visible_loop_line", release_first_decision_next_playable_loop.get("primary_line", "")))
+	var release_first_decision_loop_two_playtest: Dictionary = get_release_first_decision_loop_two_playtest_snapshot(
+		release_first_decision_next_playable_loop,
+		selected_fireteam_status_label_text,
+		mission_control_status_text,
+		{
+			"release_first_decision_next_loop_line": release_first_decision_next_loop_line,
+			"release_first_decision_next_loop_status": String(release_first_decision_next_playable_loop.get("status", "")),
+		}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -23711,8 +23781,11 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"first_decision_micro_scenario_line": String(first_decision_micro_scenario_polish.get("primary_cue_line", "")),
 		"first_decision_micro_scenario_gate": String(first_decision_micro_scenario_polish.get("gate", "")),
 		"release_first_decision_next_playable_loop": release_first_decision_next_playable_loop,
-		"release_first_decision_next_loop_line": String(release_first_decision_next_playable_loop.get("visible_loop_line", release_first_decision_next_playable_loop.get("primary_line", ""))),
+		"release_first_decision_next_loop_line": release_first_decision_next_loop_line,
 		"release_first_decision_next_loop_status": String(release_first_decision_next_playable_loop.get("status", "")),
+		"release_first_decision_loop_two_playtest": release_first_decision_loop_two_playtest,
+		"release_first_decision_loop_two_gate": String(release_first_decision_loop_two_playtest.get("gate", "")),
+		"release_first_decision_loop_two_status": String(release_first_decision_loop_two_playtest.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
