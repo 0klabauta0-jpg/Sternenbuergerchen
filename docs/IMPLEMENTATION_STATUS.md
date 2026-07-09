@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_898 - Release First Exchange Combat Focal Elegance Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_898_release_first_exchange_combat_focal_elegance_polish.md`, `docs/tasks/TASK_897_release_first_exchange_world_combat_focal_visual_findings.md`, `docs/tasks/TASK_895_release_first_exchange_world_combat_focal_hierarchy_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_898 baut eng auf dem TASK_897-Befund `focal_signal_reads_debuggy` auf.
+- Stand: Der bestehende TASK_895-Focal-Hierarchy-Pfad bleibt als Basis- und Regression-Metadaten erhalten; zusaetzlich meldet Primary3D den Style `task_898_release_first_exchange_combat_focal_elegance_v1`.
+- Stand: Die aktive Feuer-VFX nutzt eine schmalere/weichere Source-to-target-Lane, einen kleineren Target-Halo und einen weniger dominanten Source-Glow, ohne Combat- oder HUD-Wahrheit zu veraendern.
+- Risiken/offen: TASK_898 ist noch kein neuer echter Fensterbeweis. Der naechste Slice muss neu exportieren/capturen und pruefen, ob die Focal-Elegance im Spielerblick wirklich natuerlicher wirkt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_898_release_first_exchange_combat_focal_elegance_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_897_release_first_exchange_world_combat_focal_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_895_release_first_exchange_world_combat_focal_hierarchy_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_899 - Release First Exchange Combat Focal Elegance Real Window Recapture.
+
 ### TASK_897 - Release First Exchange World Combat Focal Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_897_release_first_exchange_world_combat_focal_visual_findings.md`, `docs/tasks/TASK_896_release_first_exchange_world_combat_focal_real_window_recapture.md`, `docs/tasks/TASK_895_release_first_exchange_world_combat_focal_hierarchy_polish.md`, `docs/dev/mission_command_feedback_contract.md`

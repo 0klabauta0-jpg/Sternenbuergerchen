@@ -92,7 +92,8 @@
       <span class="pill good">Release-/Singleplayer-Pfad begehbar</span>
       <span class="pill good">CONTACT FIRE im echten Fenster sichtbar</span>
       <span class="pill good">TASK_897 abgeschlossen</span>
-      <span class="pill warn">TASK_898 Focal Elegance ist naechster Slice</span>
+      <span class="pill good">TASK_898 Focal Elegance implementiert</span>
+      <span class="pill warn">TASK_899 Recapture ist naechster Slice</span>
       <span class="pill warn">Untracked lokal: builds/</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -117,7 +118,7 @@
           </div>
           <p>Der alte Hauptschmerz war nicht mehr nur "es gibt keinen Kampf", sondern "der Kampf passiert, aber der sichtbare Fensterstand erzaehlt ihn nicht sauber". Genau daran wurde gearbeitet: Statusquelle, Render-Zeitpunkt, HUD-Flächen und Weltkampf-Visuals wurden in kleinen Slices auseinandergezogen und wieder synchronisiert.</p>
           <p>Aktuell ist CONTACT FIRE im echten Post-Final-Fenster in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar. Danach wurde die Weltansicht weiter poliert: FireTrace, Impact, Target-Fokus, Source-to-target-Lane, Source-Glow und Target-Halo machen den ersten Feuerwechsel im 3D-/Iso-Bild besser lesbar.</p>
-          <p>Der naechste Engpass ist deshalb nicht neue Kampfmechanik, sondern visuelle Eleganz. TASK_897 sagt: Die Signale funktionieren, wirken aber noch zu technisch und grossflaechig. TASK_898 sollte daraus eine natuerlichere, weniger debughafte Schussbahn machen.</p>
+          <p>Der naechste Engpass war deshalb nicht neue Kampfmechanik, sondern visuelle Eleganz. TASK_897 sagt: Die Signale funktionieren, wirken aber noch zu technisch und grossflaechig. TASK_898 setzt genau dort an: Lane, Source-Glow und Target-Halo bleiben sichtbar, werden aber schmaler, dezenter und weniger debughaft.</p>
         </article>
         <article class="card">
           <h2>Statusmarker</h2>
@@ -125,7 +126,7 @@
             <div class="metric"><strong>#17</strong><span>Selected Fireteam zeigt den aktiven Feuerwechsel.</span></div>
             <div class="metric"><strong>#18</strong><span>Mission Control spiegelt den Kampfstatus.</span></div>
             <div class="metric"><strong>#19</strong><span>Event Log liefert die Rueckmeldung.</span></div>
-            <div class="metric"><strong>TASK_898</strong><span>naechster enger Polish: weniger debuggy, besser lesbar.</span></div>
+            <div class="metric"><strong>TASK_898</strong><span>enger Polish: weniger debuggy, besser lesbar.</span></div>
           </div>
         </article>
         <article class="card full">
@@ -200,6 +201,13 @@
               </div>
             </div>
             <div class="timeline-item">
+              <strong>TASK_898</strong>
+              <div>
+                <h3>Focal Elegance Polish</h3>
+                <p>Der Focal-Effekt bleibt an denselben bestaetigten Feuerwechsel gebunden, rendert aber weicher: schmalere Source-to-target-Lane, kleinerer/luftiger Target-Halo und weniger dominanter Source-Glow. Die bestehende TASK_895-Basis bleibt als Regression erhalten.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
               <strong>Report</strong>
               <div>
                 <h3>Aktueller HTML-Zwischenstand</h3>
@@ -245,7 +253,7 @@
         <article class="card wide">
           <h2>Reibungen und Risiken</h2>
           <ul class="list">
-            <li><strong>Debug-Look:</strong> TASK_897 benennt klar, dass Target-Halo und Focal-Signal noch zu technisch wirken.</li>
+            <li><strong>Debug-Look:</strong> TASK_898 reduziert den Debug-Look im Headless-/Runtime-Snapshot; der echte Fensterblick muss als TASK_899 noch neu gecaptured werden.</li>
             <li><strong>HUD-Konkurrenz:</strong> Bottom-Dock, Event Log, Karten und Weltbild sind gleichzeitig aktiv. Die erste Kampflesung ist besser, aber noch dicht.</li>
             <li><strong>Ein-Pfad-Abnahme:</strong> Der Release-Pfad ist fuer den ersten Feuerwechsel gut belegt. Mehrere freie Spielvarianten, mehrere Fireteams und laengere Missionen brauchen weiter eigene Slices.</li>
             <li><strong>Lokale Builds:</strong> `builds/` liegt als untracked lokaler Ordner im Arbeitsbaum und sollte nicht versehentlich in den Report-/Task-Commit.</li>
@@ -272,8 +280,7 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen wuerde</h2>
           <ol class="list">
-            <li><strong>TASK_898 - Combat Focal Elegance Polish:</strong> Source-to-target-Lane, Source-Glow und Target-Halo weniger grossflaechig/debughaft machen, ohne Combat- oder HUD-Wahrheit zu veraendern.</li>
-            <li><strong>Recapture nach TASK_898:</strong> echten Fensterblick erneut erzeugen und pruefen, ob die Kampfspur jetzt natuerlicher wirkt.</li>
+            <li><strong>TASK_899 - Combat Focal Elegance Real Window Recapture:</strong> echten Fensterblick erneut erzeugen und pruefen, ob die Kampfspur nach TASK_898 natuerlicher wirkt.</li>
             <li><strong>Kleiner freier Playtest:</strong> nach dem ersten Feuerwechsel nicht sofort stoppen, sondern 30-60 Sekunden weiterlaufen lassen: Befehle, Movement, Zielerkennung, UI-Dichte, Performance.</li>
             <li><strong>Danach Entscheidung:</strong> Entweder erste Mission weiter ausbauen oder wieder Richtung taktische Entscheidungslesbarkeit gehen: Order Preview, Line-of-Fire, Threat Overlay.</li>
           </ol>
@@ -281,11 +288,11 @@
         <article class="card">
           <h2>Entscheidung</h2>
           <div class="button-row" data-choice-group="next.priority">
-            <button class="choice active" type="button" data-choice-value="task_898">TASK_898</button>
+            <button class="choice active" type="button" data-choice-value="task_899">TASK_899</button>
             <button class="choice" type="button" data-choice-value="free_playtest">Freier Playtest</button>
             <button class="choice" type="button" data-choice-value="decision_preview">Order Preview</button>
           </div>
-          <p>Meine Empfehlung: erst TASK_898, weil der aktuelle Befund sehr eng und gut umsetzbar ist. Danach wieder ein echter Sichttest.</p>
+          <p>Meine Empfehlung: jetzt TASK_899, weil TASK_898 nur der Headless-/Runtime-Polish ist. Danach brauchen wir den echten Fensterblick.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -426,7 +433,7 @@
           notes,
           active_choices: activeChoices,
           computed: {
-            current_task: "TASK_897 abgeschlossen; TASK_898 empfohlen",
+            current_task: "TASK_898 implementiert; TASK_899 empfohlen",
             release_path_state: "singleplayer_to_first_exchange_reproducible",
             primary_open_risk: "focal_signal_reads_debuggy"
           },
