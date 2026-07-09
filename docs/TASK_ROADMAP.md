@@ -85,6 +85,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_delivery_review | needs_delivery_review_completion | delivery_review_regression_found | delivery_review_ready`.
 - Naechster Schritt: TASK_1029 - Release First Decision Loop Two Player Loop Scenario Handoff Packet oder TASK_1028 - Release First Decision Loop Two Player Loop Scenario Delivery Polish.
 
+## TASK_1029 - Release First Decision Loop Two Player Loop Scenario Handoff Packet (implementiert im Arbeitsstand)
+- Grundlage: bereite TASK_1028 Delivery Review.
+- Ziel: Kleines Tester-Handoff fuer den FOB/NEXT/GO/FEEDBACK-Spielmoment schneiden: Release-Dateien, Startanweisung, Shortcut-Warnung, Risiken, naechste Tester-Aktion, Multiplayer-Grenze und HUD-Wahrheit.
+- Ergebnis: Read-only Snapshot `needs_handoff_packet | needs_handoff_packet_completion | handoff_packet_regression_found | handoff_packet_ready`.
+- Naechster Schritt: TASK_1030 - Release First Decision Loop Two Player Loop Scenario Tester Run oder TASK_1029 - Release First Decision Loop Two Player Loop Scenario Handoff Polish.
+
 # Arbeitsregeln
 
 ## Reihenfolge
