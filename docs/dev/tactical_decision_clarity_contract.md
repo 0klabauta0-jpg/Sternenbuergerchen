@@ -90,6 +90,11 @@ TASK_1011 prueft, ob sich der TASK_1010-Polish als kleiner Spielergriff akzeptie
 
 Der Acceptance-Slice bleibt read-only. Ohne Trace bleibt er `needs_round_loop_acceptance_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1012 - Release First Decision Loop Two Player Loop Scenario Stitch`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Stitch (TASK_1012)
+TASK_1012 prueft, ob der akzeptierte Round-Loop als kleiner Szenario-Moment lesbar ist. Ein guter Trace bestaetigt FOB-Einstieg, Mission-Objective, NPC-Druck, zwei Spielerrollen, mindestens fuenf Beats von Entry bis Exit, eingebetteten FEEL/NEXT/GO-Rhythmus, Feedback-zurueck-zu-NEXT und erhaltene Multiplayer-/Wahrheitsgrenzen.
+
+Der Scenario-Stitch bleibt read-only. Ohne Trace bleibt er `needs_scenario_stitch_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1013 - Release First Decision Loop Two Player Loop Scenario Runtime Hook`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

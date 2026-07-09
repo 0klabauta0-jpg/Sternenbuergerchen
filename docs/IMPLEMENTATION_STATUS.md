@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1012 - Release First Decision Loop Two Player Loop Scenario Stitch
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1012_release_first_decision_loop_two_player_loop_scenario_stitch.md`, `docs/tasks/TASK_1011_release_first_decision_loop_two_player_loop_micro_objective_round_loop_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioStitch.build_snapshot()` bewertet eine akzeptierte TASK_1011-Quelle plus optionalen Szenario-Stitch-Trace.
+- Stand: Ohne Trace bleibt TASK_1012 `needs_scenario_stitch_trace`; Regressionen routen zurueck zu TASK_1011; ein guter Trace setzt `scenario_stitch_ready`.
+- Stand: Der Stitch beschreibt FOB-Einstieg, Mission-Objective, NPC-Druck, zwei Spielerrollen, FEEL/NEXT/GO, Feedback-zurueck-zu-NEXT, Exit und erhaltene Multiplayer-/Wahrheitsgrenzen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1012 im Command-Feedback als Snapshot, Szenario-Stitch-Zeile und Status.
+- Risiken/offen: TASK_1012 ist weiterhin read-only und noch kein Runtime-Hook. TASK_1013 sollte daraus einen echten kleinen Szenario-Ablauf im Missionsfenster bauen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1012_release_first_decision_loop_two_player_loop_scenario_stitch.gd`, Regression TASK_1011, TASK_1010, TASK_1009, `git diff --check`.
+- Naechster Schritt: TASK_1013 - Release First Decision Loop Two Player Loop Scenario Runtime Hook.
+
 ### TASK_1011 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1011_release_first_decision_loop_two_player_loop_micro_objective_round_loop_acceptance_slice.md`, `docs/tasks/TASK_1010_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

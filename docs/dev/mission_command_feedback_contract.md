@@ -64,6 +64,11 @@ Erwartete Struktur: Rework-Findings erzeugen sechs Surface-Specs fuer Start, Rou
 
 Erwartete Struktur: Ohne Trace bleibt der Status `needs_round_loop_acceptance_trace`; fehlende Checks erzeugen `round_loop_acceptance_regression_found`; ein guter Trace setzt `round_loop_acceptance_slice_passed = true`. Der Slice prueft `FEEL/NEXT/GO`, Start-Kontext, Feedback-zurueck-zu-NEXT, `GO separat`, ruhiges HUD, Performance-Gefuehl, Multiplayer-Grenze und HUD-read-only-Grenze. Er setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Stitch (TASK_1012)
+`get_release_first_decision_loop_two_player_loop_scenario_stitch_snapshot()` ist der read-only Pruefpunkt fuer den kleinen FOB-Szenario-Rahmen nach TASK_1011. Der Snapshot darf nur eine akzeptierte TASK_1011-Quelle und optionalen Szenario-Stitch-Trace bewerten. Er muss im Command-Feedback als Snapshot, Szenario-Stitch-Zeile und Status exportiert werden.
+
+Erwartete Struktur: Ohne Trace bleibt der Status `needs_scenario_stitch_trace`; fehlende Szenario-Beats, Entry/Exit, Objective, zwei Spielerrollen, NPC-Druck, FEEL/NEXT/GO-Loop, Feedback-zurueck-zu-NEXT oder Wahrheitsgrenzen erzeugen `scenario_stitch_regression_found`; ein guter Trace setzt `scenario_stitch_ready = true` und routet zu TASK_1013. Der Stitch setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release-Firefight-Command-Matrix-Visual-Polish
 `get_release_firefight_command_matrix_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer TASK_836. Der Snapshot darf nur vorhandene Command-Matrix-Buttons, Fire-Rule-Status und den bestehenden TASK_835-Firefight-HUD-Zustand lesen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugen.
 
