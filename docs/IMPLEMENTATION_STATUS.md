@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_954 - Decision Overlay Real Window Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_954_decision_overlay_real_window_visual_findings.md`, `docs/tasks/TASK_953_decision_overlay_real_window_recapture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `DecisionOverlayRealWindowVisualFindings.build_snapshot()` bewertet TASK_953-Recapture-Snapshots und optionale manuelle Sichtnotizen read-only.
+- Stand: Fehlende oder falsche Quellen blockieren; gute Quellen ohne Review bleiben `needs_manual_review`; belegte Reibungen routen zu `TASK_955 - Decision Overlay Real Window Polish Followup`.
+- Stand: Saubere manuelle Sichtnotizen setzen `accepted_for_decision_overlay_playability_smoke` und empfehlen `TASK_955 - Decision Overlay Playability Smoke`.
+- Risiken/offen: TASK_954 erzeugt keinen neuen Screenshot und faked keine Sichtabnahme; der naechste Slice muss je nach Befund Polish oder Playability-Smoke sein.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_954_decision_overlay_real_window_visual_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_953_decision_overlay_real_window_recapture.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_952_decision_overlay_f6_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_955 - Decision Overlay Playability Smoke oder TASK_955 - Decision Overlay Real Window Polish Followup, je nach echtem Sichtbefund.
+
 ### TASK_953 - Decision Overlay Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_953_decision_overlay_real_window_recapture.md`, `docs/tasks/TASK_952_decision_overlay_f6_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

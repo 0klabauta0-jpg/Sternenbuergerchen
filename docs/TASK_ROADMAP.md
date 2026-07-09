@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_954 - Decision Overlay Real Window Visual Findings (implementiert): TASK_953-Recapture-Snapshots und manuelle Sichtnotizen werden read-only bewertet; offene Sichtbefunde bleiben offen, Reibungen routen zum Polish-Follow-up, saubere Befunde zum Playability-Smoke.
 - BUGFIX - Singleplayer Release Homebase Start Bootstrap (implementiert): EXE-Startpfad seedet Roster, ALPHA-Fireteam, Dropship, Pilot und fertiges Boarding, damit `Einzelspieler` nicht in einer blockierten Homebase-Readiness haengen bleibt.
 - BUGFIX - Singleplayer Release Homebase Partial Save Actionability (implementiert): halbvolle lokale Saves werden beim Release-Start additiv repariert, damit vorhandenes Fireteam plus fehlender Pilot/Flightdeck-Payload nicht wieder in `Start blockiert` endet.
 - BUGFIX - Player Roster Corrupt Save Quiet Recovery (implementiert): leere oder kaputte lokale Roster-Saves werden diagnostiziert und vom Bootstrap reparierbar gehalten, statt beim Singleplayer-Start Godot-JSON-Errors auszugeben.

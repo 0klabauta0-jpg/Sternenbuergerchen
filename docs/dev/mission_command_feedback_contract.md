@@ -1643,6 +1643,11 @@ TASK_953 wertet ein Decision-Overlay-Real-Window-Manifest read-only aus. Es prue
 
 Erwartete Struktur: `DecisionOverlayRealWindowRecapture.build_snapshot()` liefert `schema = sternenbuergerchen.decision_overlay_real_window_recapture.v1`, `task_id = TASK_953`, `source_task_id = TASK_952`, Manifest-/Source-Metadaten, Screenshotpfade, Pflichtchecks, `status = blocked | review_ready | accepted`, `recommended_next_task = TASK_954 - Decision Overlay Real Window Visual Findings`, `read_only = true`, `read_only_capture = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`. Das Capture-Tool `capture_decision_overlay_real_window_recapture.ps1` schreibt `decision_overlay_real_window_recapture.json` und setzt `manual_review_done = false`.
 
+## Decision Overlay Real Window Visual Findings (TASK_954)
+TASK_954 bewertet den TASK_953-Recapture und optionale manuelle Sichtnotizen. Der Analyzer ist ein Service fuer Review-Entscheidungen, nicht fuer UI- oder Gameplay-Mutation.
+
+Erwartete Struktur: `DecisionOverlayRealWindowVisualFindings.build_snapshot()` liefert `schema = sternenbuergerchen.decision_overlay_real_window_visual_findings.v1`, `task_id = TASK_954`, `source_task_id = TASK_953`, `source_polish_task_id = TASK_952`, Source-/Screenshot-Metadaten, `manual_review_required`, `manual_review_done`, `positive_findings`, `issues`, `blocking_issues`, `status = blocked | needs_manual_review | ready_for_decision_overlay_visual_polish | accepted_for_decision_overlay_playability_smoke`, `recommended_next_task = TASK_954 - Decision Overlay Real Window Visual Findings | TASK_955 - Decision Overlay Real Window Polish Followup | TASK_955 - Decision Overlay Playability Smoke`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
