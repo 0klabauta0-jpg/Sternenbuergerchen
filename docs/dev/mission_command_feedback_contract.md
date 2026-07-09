@@ -1668,6 +1668,11 @@ TASK_958 schneidet den TASK_957-Fensterblick als read-only Sichtbefund. Der Befu
 
 Erwartete Struktur: `FirstDecisionRealPlaythroughVisualFindings.build_snapshot()` liefert `schema = sternenbuergerchen.first_decision_real_playthrough_visual_findings.v1`, `task_id = TASK_958`, `source_task_id = TASK_957`, `source_micro_task_id = TASK_956`, Screenshotpfade, Review-Notizen, positive Findings, Issues, `status = blocked | needs_manual_review | ready_for_first_decision_visual_polish | accepted_for_first_decision_playability_smoke`, `recommended_next_task = TASK_959 - First Decision Real Playthrough Polish Followup | TASK_959 - First Decision Playability Smoke`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
 
+## First Decision Playability Smoke (TASK_959)
+TASK_959 prueft den ersten Decision-Griff als Ablauf-Smoke. Der Smoke darf nur akzeptierte TASK_958-Findings und einen Playthrough-Trace auswerten. Er darf kein `GO` selbst ausloesen, keine Commands erzeugen und keine HUD- oder Gameplay-Wahrheit speichern.
+
+Erwartete Struktur: `FirstDecisionPlayabilitySmoke.build_snapshot()` liefert `schema = sternenbuergerchen.first_decision_playability_smoke.v1`, `task_id = TASK_959`, `source_task_id = TASK_958`, Trace-Metadaten, `required_smoke_checks`, `missing_smoke_checks`, `answered_player_questions`, `gate = blocked | needs_smoke_run | smoke_regression_found | smoke_passed`, `smoke_passed`, `recommended_next_task = TASK_959 - First Decision Playability Smoke | TASK_960 - First Decision Release Playable Slice`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

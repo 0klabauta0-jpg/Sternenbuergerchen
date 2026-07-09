@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_959 - First Decision Playability Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_959_first_decision_playability_smoke.md`, `docs/tasks/TASK_958_first_decision_real_playthrough_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `FirstDecisionPlayabilitySmoke.build_snapshot()` akzeptiert nur TASK_958-Findings mit `accepted_for_first_decision_playability_smoke` und bleibt sonst blockiert.
+- Stand: Akzeptierte Findings ohne Trace bleiben `needs_smoke_run`; vollstaendige Trace-Evidence zu NEXT, WHY, Choice-Zeilen, Preview, Risk, Line-of-Fire, GO-Grenze, Post-GO-Feedback, Hotpath und HUD-Read-only-Grenze setzt `smoke_passed`.
+- Stand: Regressionsflags erzeugen konkrete Issues und routen weiter zu `TASK_960 - First Decision Release Playable Slice`, ohne Commands, Movement oder Gameplay-Wahrheit zu erzeugen.
+- Risiken/offen: Der Smoke ist ein Gate. Der naechste Slice muss den ersten Entscheidungsgriff als kleinen release-spielbaren Ablauf zusammenziehen oder belegte Smoke-Regressionspunkte eng polieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_959_first_decision_playability_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_958_first_decision_real_playthrough_visual_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_957_first_decision_real_playthrough_capture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_960 - First Decision Release Playable Slice.
+
 ### TASK_958 - First Decision Real Playthrough Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_958_first_decision_real_playthrough_visual_findings.md`, `docs/tasks/TASK_957_first_decision_real_playthrough_capture.md`, `docs/tasks/TASK_956_first_decision_micro_scenario_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

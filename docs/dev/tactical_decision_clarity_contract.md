@@ -110,3 +110,8 @@ Der Capture darf erst `accepted` werden, wenn `NEXT`, `WHY`, Choice-Zeilen, Prev
 TASK_958 trennt technische TASK_957-Capture-Evidence vom eigentlichen Spielerblick. Ein guter Capture ohne Review-Notizen bleibt `needs_manual_review`; belegte Reibungen wie fehlende `NEXT`-Zeile, unklare Preview-vor-GO-Grenze oder schwache Empfehlung routen zu einem engen Polish-Followup.
 
 Ein sauberer Befund darf erst zum First-Decision-Playability-Smoke routen, wenn `NEXT`, `WHY`, Choice-Zeilen, Empfehlung, Preview-Grenze, GO-Bedienbarkeit, kein Command vor GO und die read-only HUD-Grenze manuell bestaetigt sind. Der Findings-Snapshot bleibt read-only und erzeugt keine Commands, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## First Decision Playability Smoke (TASK_959)
+TASK_959 verbindet den akzeptierten Fensterbefund mit einem Ablauf-Trace. Der Smoke muss belegen, dass der Spieler vor `GO` den naechsten Griff, die Begruendung, Ziel/Pfad, Risk-/Line-of-Fire-Gruende und die Preview-Grenze lesen kann, dass `GO` bedienbar bleibt und nach `GO` sichtbares Feedback erscheint.
+
+Der Smoke bleibt ein Gate: ohne akzeptierten TASK_958-Befund bleibt er blockiert, ohne Trace bleibt er `needs_smoke_run`, und bei fehlenden Pflichtchecks meldet er `smoke_regression_found`. Auch dieser Schritt erzeugt keine Commands, keine Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
