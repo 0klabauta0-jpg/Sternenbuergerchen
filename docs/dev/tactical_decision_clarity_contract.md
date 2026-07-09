@@ -135,6 +135,11 @@ TASK_1020 prueft, ob der akzeptierte TASK_1019-Befund als kleiner FOB-Szenario-G
 
 Der Scenario-Acceptance-Slice bleibt read-only. Ohne Trace bleibt er `needs_scenario_acceptance_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1021 - Release First Decision Loop Two Player Loop Scenario Integrated Playtest`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Integrated Playtest (TASK_1021)
+TASK_1021 prueft, ob der bestandene TASK_1020-Slice im integrierten Release-/Mission-Kontext weiter lesbar bleibt. Ein guter Trace bestaetigt: Release-/Mission-Entry erreicht, Command-Feedback enthaelt den Acceptance-Slice, FOB/Objective/Rollen sind im Kontext lesbar, NEXT/CONFIRM/GO laufen im selben Griff, GO bleibt separat, Post-GO-Feedback erscheint, der Flow kehrt zu NEXT zurueck, HUD bleibt read-only, Multiplayer-Grenze bleibt erhalten und das Performance-Budget ist gruen.
+
+Der Scenario-Integrated-Playtest bleibt read-only. Ohne Trace bleibt er `needs_scenario_integrated_playtest_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1022 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

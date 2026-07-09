@@ -37,6 +37,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_scenario_acceptance_trace | scenario_acceptance_regression_found | scenario_acceptance_slice_passed`.
 - Naechster Schritt: TASK_1021 - Release First Decision Loop Two Player Loop Scenario Integrated Playtest.
 
+## TASK_1021 - Release First Decision Loop Two Player Loop Scenario Integrated Playtest (implementiert im Arbeitsstand)
+- Grundlage: bestandener TASK_1020 Scenario Acceptance Slice.
+- Ziel: Kleinen FOB-Szenario-Griff im integrierten Release-/Mission-Kontext pruefen: Entry, Command-Feedback, FOB, NEXT/CONFIRM/GO, GO separat, Post-GO-Feedback, Rueckkehr zu NEXT, Performance und Multiplayer-Grenze.
+- Ergebnis: Read-only Snapshot `needs_scenario_integrated_playtest_trace | scenario_integrated_playtest_regression_found | scenario_integrated_playtest_passed`.
+- Naechster Schritt: TASK_1022 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings.
+
 # Arbeitsregeln
 
 ## Reihenfolge

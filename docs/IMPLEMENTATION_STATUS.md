@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1021 - Release First Decision Loop Two Player Loop Scenario Integrated Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1021_release_first_decision_loop_two_player_loop_scenario_integrated_playtest.md`, `docs/tasks/TASK_1020_release_first_decision_loop_two_player_loop_scenario_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioIntegratedPlaytest.build_snapshot()` bewertet einen bestandenen TASK_1020-Slice plus optionalen Integrated-Playtest-Trace.
+- Stand: Ohne Trace bleibt der Status `needs_scenario_integrated_playtest_trace`; fehlende Checks melden `scenario_integrated_playtest_regression_found`; ein guter Trace setzt `scenario_integrated_playtest_passed`.
+- Stand: Der Integrated-Playtest prueft Release-/Mission-Entry, Command-Feedback, FOB-Entry, Objective, Rollen, NEXT/CONFIRM/GO, GO-Grenze, Post-GO-Feedback, Rueckkehr zu NEXT, HUD-read-only, Multiplayer-Grenze und Performance-Budget.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1021 im Command-Feedback als Snapshot, Integrated-Playtest-Zeile, Status und Gate.
+- Risiken/offen: TASK_1021 ist noch kein menschlicher Player-Feel-Befund; TASK_1022 sollte Tempo, Reibung und Rundheit des kleinen Spielmoments auswerten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1021_release_first_decision_loop_two_player_loop_scenario_integrated_playtest.gd`, Regression TASK_1020, TASK_1019, TASK_1018, `git diff --check`.
+- Naechster Schritt: TASK_1022 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings.
+
 ### TASK_1020 - Release First Decision Loop Two Player Loop Scenario Acceptance Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1020_release_first_decision_loop_two_player_loop_scenario_acceptance_slice.md`, `docs/tasks/TASK_1019_release_first_decision_loop_two_player_loop_scenario_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
