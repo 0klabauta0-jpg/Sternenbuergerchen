@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_943 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_943_release_first_exchange_followup_fix_player_polish_final_tuning_followup_recapture.md`, `docs/tasks/TASK_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.md`, `docs/tasks/TASK_941_release_first_exchange_final_tuning_playability_smoke_gate.md`, `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_943 legt den read-only Recapture-/Review-Rahmen nach dem TASK_942-Followup-Fix an.
+- Stand: `capture_release_first_exchange_followup_fix_player_polish_final_tuning_followup_recapture.ps1` wiederverwendet den TASK_939-Window-Handle-Pfad und schreibt eigene TASK_943-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningFollowupRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer TASK_942-Fire-Lane als erste Weltbewegung, tragende Source-/Target-Anker, leises Label/Halo/Grid und Lane-vor-FIRE/CONTACT-Text.
+- Risiken/offen: TASK_943 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_944 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_943_release_first_exchange_followup_fix_player_polish_final_tuning_followup_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_944 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Visual Findings.
+
 ### TASK_942 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.md`, `docs/tasks/TASK_941_release_first_exchange_final_tuning_playability_smoke_gate.md`, `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/dev/mission_command_feedback_contract.md`

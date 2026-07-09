@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - TASK_942 umgesetzt</title>
+  <title>Sternenbuergerchen Zwischenbericht - TASK_943 Recapture-Rahmen</title>
   <style>
     :root {
       color-scheme: dark;
@@ -91,13 +91,15 @@
 <body data-report-id="spielstand_zwischenbericht_task942_in_progress_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Stand 2026-07-09: Der Release-Pfad bis zum ersten Feuerkontakt ist stabiler und lesbarer geworden. TASK_942 setzt den engen Follow-up-Fix um, weil das letzte Gate noch Restreibung bei der ersten Fire-Lane-Lesung gemeldet hat. Der naechste fachliche Schritt ist TASK_943 als neuer Fenster-Recapture.</p>
+    <p>Stand 2026-07-09: Der Release-Pfad bis zum ersten Feuerkontakt ist stabiler und lesbarer geworden. TASK_942 setzt den engen Follow-up-Fix um, und TASK_943 legt danach den neuen Fenster-Recapture-/Review-Rahmen an. Der naechste fachliche Schritt ist TASK_944 als read-only Visual-Findings-Schnitt.</p>
     <div class="meta-row">
       <span class="pill good">Branch: task/release-first-exchange-player-readability-polish-review</span>
       <span class="pill good">TASK_941 abgeschlossen</span>
       <span class="pill good">TASK_942 umgesetzt</span>
-      <span class="pill warn">Commit/Push folgt</span>
-      <span class="pill good">TASK_942 Test gruen</span>
+      <span class="pill good">TASK_943 Recapture-Rahmen</span>
+      <span class="pill warn">TASK_944 naechster Befund</span>
+      <span class="pill warn">Git-Abschluss folgt</span>
+      <span class="pill good">TASK_943 Test gruen</span>
       <span class="pill">HTML-Workbench</span>
     </div>
   </header>
@@ -214,12 +216,11 @@
         <article class="card wide">
           <h2>Was ich noch machen will</h2>
           <ul class="list">
-            <li><strong>TASK_942 fertig verdrahten:</strong> Controller-Snapshot und Payload an den neuen read-only Presentation-Style anschliessen.</li>
-            <li><strong>Terrain-/VFX-Werte sauber machen:</strong> Fire-Lane/Core staerken, breiten Lane-Schimmer leiser machen, Label/Halo/Grid/Weltlinien weiter zuruecknehmen.</li>
-            <li><strong>Doku synchronisieren:</strong> Implementation Status, Roadmap, Mission-Feedback-Contract und diesen HTML-Bericht auf TASK_942/TASK_943 bringen.</li>
-            <li><strong>Tests gruen bekommen:</strong> TASK_942, TASK_941, TASK_938 und `git diff --check` laufen lassen.</li>
-            <li><strong>Danach TASK_943:</strong> frischer Recapture/Review-Slice, damit wir nicht behaupten, TASK_942 sehe gut aus, bevor das Fenster es zeigt.</li>
-            <li><strong>Wenn TASK_943 akzeptiert:</strong> endlich den kurzen First-Exchange-Playability-Smoke starten.</li>
+            <li><strong>TASK_943 Recapture-Rahmen halten:</strong> Screenshot, Prozess, Launch-Arg, Source-Snapshots und manuelle Pflichtchecks trennen.</li>
+            <li><strong>Doku synchronisieren:</strong> Implementation Status, Roadmap, Mission-Feedback-Contract und diesen HTML-Bericht auf TASK_943/TASK_944 bringen.</li>
+            <li><strong>Tests gruen halten:</strong> TASK_943, TASK_942 und `git diff --check` laufen lassen.</li>
+            <li><strong>Danach TASK_944:</strong> echten Screenshot-Befund schneiden, damit wir nicht behaupten, TASK_942 sehe gut aus, bevor das Fenster es zeigt.</li>
+            <li><strong>Wenn TASK_944 akzeptiert:</strong> endlich den kurzen First-Exchange-Playability-Smoke starten.</li>
             <li><strong>Danach wieder groesser denken:</strong> Tactical Decision Clarity Block mit Order Preview, Line-of-Fire, Contact Reports, AI Intent und Squad Spacing.</li>
           </ul>
         </article>
@@ -326,10 +327,10 @@
           notes: {},
           active_choices: {},
           computed: {
-            last_completed_task: "TASK_941",
-            current_task: "TASK_942 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix",
-            recommended_next_task: "TASK_943 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Recapture",
-            current_git_state: "green_uncommitted",
+            last_completed_task: "TASK_943",
+            current_task: "TASK_943 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Recapture",
+            recommended_next_task: "TASK_944 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Visual Findings",
+            current_git_state: "green_verified_task_slice",
             release_path_status: "singleplayer_to_first_exchange_hardened",
             gameplay_truth_policy: "read_only_report_no_runtime_truth"
           },
