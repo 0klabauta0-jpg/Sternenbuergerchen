@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_979 - Release First Decision Loop Two Player Loop Runtime Choice Buttons
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_979_release_first_decision_loop_two_player_loop_runtime_choice_buttons.md`, `docs/tasks/TASK_978_release_first_decision_loop_two_player_loop_choice_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopRuntimeChoiceButtons.build_snapshot()` erzeugt vier read-only Button-Specs fuer `SECURE`, `PUSH`, `FLANK` und `RESET` auf `CommandSlot08` bis `CommandSlot11`.
+- Stand: Der Snapshot nennt Choice-ID, Slot, Tooltip, Press-Action und getrennten `GO`-Pfad, erzeugt aber keine Commands, kein Movement und keine Multiplayer-Wahrheit.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_979 im Command-Feedback und kann die vorhandenen Command-Slot-Buttons mit TASK_979-Metadaten vorbereiten.
+- Risiken/offen: TASK_979 beweist noch keinen Klick-Confirm. TASK_980 sollte den Choice-Confirm mit separatem `GO` als Smoke belegen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_979_release_first_decision_loop_two_player_loop_runtime_choice_buttons.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_978_release_first_decision_loop_two_player_loop_choice_hook.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_977_release_first_decision_loop_two_player_loop_hud_wiring.gd`, `git diff --check`.
+- Naechster Schritt: TASK_980 - Release First Decision Loop Two Player Loop Choice Confirm Smoke.
+
 ### TASK_978 - Release First Decision Loop Two Player Loop Choice Hook
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_978_release_first_decision_loop_two_player_loop_choice_hook.md`, `docs/tasks/TASK_977_release_first_decision_loop_two_player_loop_hud_wiring.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

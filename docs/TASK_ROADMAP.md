@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_979 - Release First Decision Loop Two Player Loop Runtime Choice Buttons (implementiert): `SECURE / PUSH / FLANK / RESET` bekommen stabile Runtime-Button-Specs auf `CommandSlot08` bis `CommandSlot11`, mit getrenntem `GO` und ohne Gameplay-Mutation im Snapshot.
 - TASK_978 - Release First Decision Loop Two Player Loop Choice Hook (implementiert): Die sichtbaren `SECURE / PUSH / FLANK / RESET`-Choices erzeugen read-only Command-Drafts fuer vorhandene Pfade, behalten `GO` separat und mutieren keine Gameplay-Wahrheit.
 - TASK_977 - Release First Decision Loop Two Player Loop HUD Wiring (implementiert): Die TASK_976-Choices `SECURE / PUSH / FLANK / RESET` werden read-only als Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen plus Choice-Chips exportiert.
 - TASK_976 - Release First Decision Loop Two Player Loop Extension (implementiert): Der bestandene zweite Acceptance-Slice erzeugt read-only den naechsten Spielergriff `SECURE / PUSH / FLANK / RESET`.

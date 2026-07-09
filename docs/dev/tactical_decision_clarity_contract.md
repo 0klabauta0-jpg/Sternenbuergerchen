@@ -210,3 +210,8 @@ Das Wiring darf keine Choice ausfuehren und kein `GO` bestaetigen. Ohne aktive T
 TASK_978 macht die sichtbaren TASK_977-Choice-Chips anschlussfaehig, ohne sie auszufuehren. Der Hook uebersetzt `SECURE`, `PUSH`, `FLANK` und `RESET` in read-only Command-Drafts fuer vorhandene Befehlswege.
 
 Der Hook darf nur `confirm_action`, `execute_action`, Command-Typ und eine kurze Hook-Zeile beschreiben. `GO` bleibt separat, `auto_confirms` und `auto_executes_go` bleiben false. Runtime-Buttons oder echte Bestätigung sind Folgearbeit in TASK_979.
+
+## Release First Decision Loop Two Player Loop Runtime Choice Buttons (TASK_979)
+TASK_979 macht aus dem TASK_978-Hook stabile Runtime-Button-Spezifikationen. `SECURE`, `PUSH`, `FLANK` und `RESET` liegen auf `CommandSlot08` bis `CommandSlot11` und tragen Choice-ID, Tooltip, Press-Action und `GO separat`.
+
+Der Snapshot bleibt Anzeige-/Bedienvertrag: Er darf Button-Nodes markieren, aber keine bestaetigte Order, kein Movement und kein `GO` erzeugen. Der naechste Beweis ist ein Choice-Confirm-Smoke in TASK_980.

@@ -50,6 +50,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYABILITY_SMOKE_SCRIPT: GDScript = prelo
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_EXTENSION_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_extension.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_HUD_WIRING_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_hud_wiring.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_choice_hook.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_RUNTIME_CHOICE_BUTTONS_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_runtime_choice_buttons.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -8199,6 +8200,7 @@ func _apply_release_firefight_command_matrix_visual_polish() -> void:
 	_apply_release_firefight_command_fire_rule_button_polish(active)
 	_apply_release_firefight_command_placeholder_polish(active)
 	_apply_release_first_decision_loop_two_runtime_button_polish(active)
+	_apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(active)
 
 
 func _apply_release_firefight_command_primary_button_polish(active: bool) -> void:
@@ -8315,6 +8317,28 @@ func _apply_release_first_decision_loop_two_runtime_button_polish(active: bool) 
 		button.self_modulate = Color(0.78, 0.96, 1.0, 1.0)
 	if not button.pressed.is_connected(_on_release_first_decision_loop_two_button_pressed):
 		button.pressed.connect(_on_release_first_decision_loop_two_button_pressed)
+
+
+func _apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(active: bool) -> void:
+	var snapshot: Dictionary = get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot()
+	var specs: Array = Array(snapshot.get("button_specs", []))
+	for spec_variant in specs:
+		var spec := Dictionary(spec_variant)
+		var button := get_node_or_null(NodePath(String(spec.get("slot_path", "")))) as Button
+		if button == null:
+			continue
+		var button_enabled: bool = active and bool(spec.get("button_enabled", false))
+		button.text = String(spec.get("button_text", button.text))
+		button.tooltip_text = String(spec.get("tooltip", button.tooltip_text))
+		button.disabled = not button_enabled
+		button.mouse_filter = Control.MOUSE_FILTER_STOP if button_enabled else Control.MOUSE_FILTER_IGNORE
+		button.clip_text = true
+		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_button", spec.duplicate(true))
+		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_button_task", "TASK_979")
+		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_id", String(spec.get("choice_id", "")))
+		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_separate_go_required", bool(spec.get("separate_go_required", true)))
+		if button_enabled:
+			button.self_modulate = Color(0.82, 0.98, 0.88, 1.0)
 
 
 func _get_release_firefight_command_primary_button_specs() -> Array:
@@ -21038,6 +21062,12 @@ func get_release_first_decision_loop_two_player_loop_choice_hook_snapshot(player
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_HOOK_SCRIPT.call("build_snapshot", player_loop_hud_wiring, selected_choice_id)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot(player_loop_choice_hook_override: Dictionary = {}, player_loop_hud_wiring_override: Dictionary = {}) -> Dictionary:
+	var player_loop_hud_wiring: Dictionary = player_loop_hud_wiring_override.duplicate(true) if not player_loop_hud_wiring_override.is_empty() else get_release_first_decision_loop_two_player_loop_hud_wiring_snapshot()
+	var player_loop_choice_hook: Dictionary = player_loop_choice_hook_override.duplicate(true) if not player_loop_choice_hook_override.is_empty() else get_release_first_decision_loop_two_player_loop_choice_hook_snapshot(player_loop_hud_wiring, "")
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_RUNTIME_CHOICE_BUTTONS_SCRIPT.call("build_snapshot", player_loop_choice_hook, player_loop_hud_wiring)).duplicate(true)
+
+
 func confirm_release_first_decision_loop_two_runtime_button(selected_choice_id: String = "") -> bool:
 	var runtime_button: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot()
 	if not bool(runtime_button.get("button_enabled", false)):
@@ -24040,6 +24070,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_hud_wiring,
 		""
 	)
+	var release_first_decision_loop_two_player_loop_runtime_choice_buttons: Dictionary = get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot(
+		release_first_decision_loop_two_player_loop_choice_hook,
+		release_first_decision_loop_two_player_loop_hud_wiring
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24156,6 +24190,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_choice_hook_line": String(release_first_decision_loop_two_player_loop_choice_hook.get("choice_hook_line", "")),
 		"release_first_decision_loop_two_player_loop_choice_hook_status": String(release_first_decision_loop_two_player_loop_choice_hook.get("status", "")),
 		"release_first_decision_loop_two_player_loop_choice_hook_command_draft": Dictionary(release_first_decision_loop_two_player_loop_choice_hook.get("command_draft", {})).duplicate(true),
+		"release_first_decision_loop_two_player_loop_runtime_choice_buttons": release_first_decision_loop_two_player_loop_runtime_choice_buttons,
+		"release_first_decision_loop_two_player_loop_runtime_choice_buttons_line": String(release_first_decision_loop_two_player_loop_runtime_choice_buttons.get("runtime_buttons_line", "")),
+		"release_first_decision_loop_two_player_loop_runtime_choice_buttons_status": String(release_first_decision_loop_two_player_loop_runtime_choice_buttons.get("status", "")),
+		"release_first_decision_loop_two_player_loop_runtime_choice_button_specs": Array(release_first_decision_loop_two_player_loop_runtime_choice_buttons.get("button_specs", [])),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
