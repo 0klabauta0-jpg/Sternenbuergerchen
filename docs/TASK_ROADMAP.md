@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_965 - Release First Decision Loop Two Polish (implementiert): Die sichtbare zweite Entscheidung wird read-only in klare Intents uebersetzt: `HOLD Defend`, `ADV Move`, `BACK Return`; jeder Intent bleibt `requires_go` und erzeugt noch keine Commands oder Movement.
 - TASK_964 - Release First Decision Loop Two Playtest (implementiert): Die TASK_963-Zeile wird read-only gegen die sichtbaren HUD-Flaechen geprueft; Selected Fireteam, Mission Control und Command Feedback muessen `HOLD / ADV / BACK` zeigen, sonst routet der Befund zu TASK_965.
 - TASK_963 - Release First Decision Next Playable Loop (implementiert): Der erste Decision-Griff fuehrt read-only in eine zweite sichtbare Auswahl aus Hold/Advance/Fallback; Live-Preview bleibt als nicht akzeptierte Preview markiert, akzeptierte TASK_962-Findings aktivieren den zweiten Loop.
 - TASK_962 - Release First Decision Playtest Findings (implementiert): Der TASK_961-Playteststand wird als read-only Befund geschnitten; offene Review bleibt offen, Reibungen routen zu engem Polish, saubere Review fuehrt zum naechsten kleinen spielbaren Loop.

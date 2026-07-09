@@ -140,3 +140,8 @@ Der Loop ist read-only und erzeugt keine zweite Gameplay-Wahrheit. Ohne echte TA
 TASK_964 prueft den zweiten Griff als sichtbaren HUD-Playtest. Die TASK_963-Zeile muss in Selected Fireteam, Mission Control und Command Feedback lesbar sein, bevor der naechste echte zweite Spielzug gebaut wird.
 
 Der Analyzer bleibt read-only: Er bewertet `selected_fireteam_shows_loop_line`, `mission_control_shows_loop_line`, `command_feedback_exports_loop_line`, `hold_advance_back_visible` und `manual_acceptance_state_visible`. Bei Erfolg meldet er `gate = loop_two_playtest_passed`; bei Reibung routet er zu `TASK_965 - Release First Decision Loop Two Polish`. Er erzeugt keine Commands, keine Movement-, Fire-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Polish (TASK_965)
+TASK_965 uebersetzt den sichtbaren zweiten Griff in klare Intent-Bedeutung: `HOLD Defend`, `ADV Move`, `BACK Return`. Der Spieler soll verstehen, welcher Befehl gemeint ist, ohne dass der HUD-Pfad den Befehl ausfuehrt.
+
+Der Snapshot bleibt read-only und setzt fuer jeden zweiten Intent `execution_boundary = requires_go`. Erwartet sind drei stabile Intents fuer `hold_angle`, `advance_cover` und `fallback_regroup`; sichtbare Zeilen duerfen keine rohen Choice-IDs zeigen. Bei Erfolg routet TASK_965 zu `TASK_966 - Release First Decision Loop Two Execution Hook`.

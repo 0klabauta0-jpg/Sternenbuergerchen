@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_965 - Release First Decision Loop Two Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_965_release_first_decision_loop_two_polish.md`, `docs/tasks/TASK_964_release_first_decision_loop_two_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPolish.build_snapshot()` uebersetzt die sichtbaren HOLD/ADV/BACK-Optionen read-only in klare zweite Command-Intents: Defend, Move und Return.
+- Stand: `MissionTacticalSandboxController.get_release_first_decision_loop_two_polish_snapshot()` exportiert die kompakte `2ND ...`-Zeile, Gate und Status in `get_command_feedback_snapshot()`.
+- Stand: Die HUD-Statusbuilder koennen die Polish-Zeile anzeigen, waehrend jeder Intent `execution_boundary = requires_go` behaelt und keine Commands, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit erzeugt.
+- Risiken/offen: TASK_965 fuehrt die zweite Entscheidung noch nicht aus. TASK_966 sollte den Execution-Hook an den vorhandenen GO-/Command-Pfad anschliessen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_965_release_first_decision_loop_two_polish.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_964_release_first_decision_loop_two_playtest.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_963_release_first_decision_next_playable_loop.gd`, `git diff --check`.
+- Naechster Schritt: TASK_966 - Release First Decision Loop Two Execution Hook.
+
 ### TASK_964 - Release First Decision Loop Two Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_964_release_first_decision_loop_two_playtest.md`, `docs/tasks/TASK_963_release_first_decision_next_playable_loop.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
