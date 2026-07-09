@@ -10,6 +10,26 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_913 - Release First Exchange Fire Lane World Read Acceptance Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_913_release_first_exchange_fire_lane_world_read_acceptance_polish.md`, `docs/tasks/TASK_912_release_first_exchange_fire_lane_world_read_visual_findings.md`, `docs/tasks/TASK_910_release_first_exchange_fire_lane_world_read_micro_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_913 setzt den belegten TASK_912-Befund eng im bestehenden Primary3D-Fire-Lane-/World-Read-Pfad um.
+- Stand: Der Mission-Controller haengt `release_first_exchange_fire_lane_world_read_acceptance_polish` nur an die bestehende TASK_910-Kette und stellt `get_release_first_exchange_fire_lane_world_read_acceptance_polish_snapshot()` read-only bereit.
+- Stand: `TerrainMap3DView` meldet den Style `task_913_release_first_exchange_fire_lane_world_read_acceptance_v1`; Fire-Lane-Core und Source-/Target-Anker werden staerker, waehrend Target-Halo, Welt-Fire-Label und Weltlinien weiter zuruecktreten.
+- Risiken/offen: TASK_913 ist noch kein echter Fensterbeweis. Der naechste Slice muss frisch exportieren/capturen und pruefen, ob die Fire-Lane im echten Fenster wirklich als erste Weltbewegung gelesen wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_913_release_first_exchange_fire_lane_world_read_acceptance_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_912_release_first_exchange_fire_lane_world_read_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_910_release_first_exchange_fire_lane_world_read_micro_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_914 - Release First Exchange Fire Lane World Read Acceptance Recapture.
+
+### TASK_912 - Release First Exchange Fire Lane World Read Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_912_release_first_exchange_fire_lane_world_read_visual_findings.md`, `docs/tasks/TASK_911_release_first_exchange_fire_lane_world_read_real_window_recapture.md`, `docs/tasks/TASK_910_release_first_exchange_fire_lane_world_read_micro_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_912 bewertet den TASK_911-PNG-/Manifest-Befund read-only als Spielerblick.
+- Stand: Positive Befunde bleiben erhalten: CONTACT FIRE in #17/#18/#19, trusted Window-Handle-Capture, TASK_910-World-Read-Micro-Pfad, leiseres Weltlabel, zuruecktretender Target-Halo, Fire-Lane-Core/Anker und bedienbare Command-Surfaces.
+- Stand: Primaere Restreibung ist `fire_lane_not_first_world_read_after_micro_polish`: Die Fire-Lane ist staerker, aber als erste intuitive Weltbewegung noch nicht sicher akzeptiert. Weitere Reibung: Label/Halo/Marker konkurrieren weiter, Anker tragen Richtung noch nicht stark genug, Bottom-HUD bleibt dicht.
+- Risiken/offen: TASK_912 aendert keine Runtime. Der naechste Slice muss sehr eng die World-Read-Akzeptanz polieren, ohne Combat- oder HUD-Wahrheit zu oeffnen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_912_release_first_exchange_fire_lane_world_read_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_911_release_first_exchange_fire_lane_world_read_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_913 - Release First Exchange Fire Lane World Read Acceptance Polish.
+
 ### TASK_911 - Release First Exchange Fire Lane World Read Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_911_release_first_exchange_fire_lane_world_read_real_window_recapture.md`, `docs/tasks/TASK_910_release_first_exchange_fire_lane_world_read_micro_polish.md`, `docs/tasks/TASK_908_release_first_exchange_fire_lane_label_cluster_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
