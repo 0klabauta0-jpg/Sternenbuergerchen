@@ -87,7 +87,7 @@
 <body data-report-id="spielstand_zwischenbericht_2026_07_09_aktuell" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Aktueller Arbeitsstand am 2026-07-09: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was ich als naechstes bearbeiten will. Aktualisiert nach TASK_901; offen ist jetzt der echte Fensterbeweis TASK_902.</p>
+    <p>Aktueller Arbeitsstand am 2026-07-09: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was ich als naechstes bearbeiten will. Neu aktualisiert nach TASK_902: Der Marker-/World-Noise-Polish hat jetzt einen eigenen echten Fenster-/EXE-Belegrahmen; TASK_903 soll den Sichtbefund schneiden.</p>
     <div class="meta-row">
       <span class="pill good">Release-/Singleplayer-Pfad begehbar</span>
       <span class="pill good">CONTACT FIRE im echten Fenster sichtbar</span>
@@ -97,7 +97,8 @@
       <span class="pill good">TASK_900 Findings geschnitten</span>
       <span class="pill good">Headless-Verifier gruen</span>
       <span class="pill good">TASK_901 Marker-/World-Noise-Polish umgesetzt</span>
-      <span class="pill warn">Naechster Beleg: TASK_902 Recapture</span>
+      <span class="pill good">TASK_902 Recapture-Rahmen implementiert</span>
+      <span class="pill warn">Naechster Befund: TASK_903 Findings</span>
       <span class="pill warn">Untracked lokal: builds/</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -125,12 +126,14 @@
             <li>Der Release-/EXE-Pfad fuehrt nicht mehr in eine stumme Sackgasse, sondern in einen nachvollziehbaren Homebase-&gt;Mission-&gt;Drop-&gt;Kontakt-Testlauf.</li>
             <li>Fireteam-, Mission-Control- und Event-Log-Flaechen zeigen den bestaetigten ersten Feuerkontakt synchroner an.</li>
             <li>Die Weltansicht hat jetzt eine erkennbare Feuerlesbarkeit: Trace, Impact, Ziel-Fokus, Lane, Source-Glow und Target-Halo sind als zusammenhaengende Kampfspur vorhanden.</li>
+            <li>Der Build-/EXE-Fokus ist klarer: Der Spielordner ist nicht Doku-Deko, sondern der eigentliche Abnahmepfad fuer Singleplayer-Klick, Missionseinstieg und ersten Feuerwechsel.</li>
             <li>Der aktuelle Stand ist nicht final huebsch, aber endlich gut genug instrumentiert, um gezielt ueber Spielerblick statt ueber Vermutung zu polieren.</li>
           </ul>
           <h3 style="margin-top:16px;">Was ich noch machen will</h3>
           <ul class="list">
             <li>TASK_901 ist umgesetzt: Halo/Marker kleiner und weniger scheibenhaft, Grid-/World-Noise ruhiger, Feuerbeziehung enger als Visual-Slice.</li>
-            <li>Als naechstes TASK_902: wieder einen echten Fensterblick/capture-orientierten Review machen, damit wir nicht nur Zahlen, sondern den Spielerblick bewerten.</li>
+            <li>TASK_902 ist umgesetzt: Es gibt jetzt eigenen Capture-Wrapper, Manifest, Analyzer und Pflichtchecks fuer den echten Spielerfenster-Beleg nach TASK_901.</li>
+            <li>Als naechstes TASK_903: den TASK_902-PNG-/Manifest-Befund read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Polish nennen.</li>
             <li>Wenn der erste Feuerwechsel angenehm liest, den Playtest 30-60 Sekunden laenger laufen lassen: Movement, Zielerkennung, Taktik, UI-Dichte und Performance.</li>
           </ul>
           <p>Der alte Hauptschmerz war nicht mehr nur "es gibt keinen Kampf", sondern "der Kampf passiert, aber der sichtbare Fensterstand erzaehlt ihn nicht sauber". Genau daran wurde gearbeitet: Statusquelle, Render-Zeitpunkt, HUD-Flaechen und Weltkampf-Visuals wurden in kleinen Slices auseinandergezogen und wieder synchronisiert.</p>
@@ -147,7 +150,8 @@
             <div class="metric"><strong>TASK_899</strong><span>Recapture-/Acceptance-Rahmen fuer den echten Spielerblick.</span></div>
             <div class="metric"><strong>TASK_900</strong><span>Findings: Halo/Marker und Grid-Noise bleiben der naechste Reibpunkt.</span></div>
             <div class="metric"><strong>TASK_901</strong><span>umgesetzt: Marker kleiner, Grid/World-Noise ruhiger.</span></div>
-            <div class="metric"><strong>TASK_902</strong><span>naechster Beleg: echter Window-Recapture.</span></div>
+            <div class="metric"><strong>TASK_902</strong><span>umgesetzt: eigener Window-Recapture-Rahmen.</span></div>
+            <div class="metric"><strong>TASK_903</strong><span>naechster Befund: echten Sichtbeleg auswerten.</span></div>
           </div>
         </article>
         <article class="card full">
@@ -164,6 +168,10 @@
             <div class="card" style="grid-column:span 3;">
               <h3>Weltbild</h3>
               <p>Schussrichtung und Zielbezug sind sichtbar und weicher poliert, muessen aber noch im echten Fenster als angenehm bestaetigt werden.</p>
+            </div>
+            <div class="card" style="grid-column:span 3;">
+              <h3>Build/EXE</h3>
+              <p>Der Spielordner bleibt der harte Realitaetscheck: Nur was dort nach frischem Export sichtbar funktioniert, zaehlt fuer die Spielerfahrung.</p>
             </div>
             <div class="card" style="grid-column:span 3;">
               <h3>Architektur</h3>
@@ -198,6 +206,13 @@
               <div>
                 <h3>CONTACT FIRE in #17/#18/#19 sichtbar</h3>
                 <p>Der Render-/Refresh-Zeitpunkt wurde so geschnitten, dass der echte Fensterblick nach finalem Trace denselben CONTACT-FIRE-Stand zeigt wie die Quelle. Der alte Widerspruch zwischen internem Zustand und sichtbarem Text ist damit fuer diesen Pfad belegt eingegrenzt.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>EXE/Build</strong>
+              <div>
+                <h3>Spielordner als Abnahmepfad geschaerft</h3>
+                <p>Die lokalen Build-Artefakte bleiben bewusst ausserhalb des Commits, aber der Testfokus liegt klar auf dem exportierten Spiel: Einzelspieler-Klick, Homebase-Readiness, Missionseinstieg und erster Feuerwechsel muessen im echten Fenster funktionieren.</p>
               </div>
             </div>
             <div class="timeline-item">
@@ -243,6 +258,13 @@
               </div>
             </div>
             <div class="timeline-item">
+              <strong>TASK_902</strong>
+              <div>
+                <h3>Marker Scale Real Window Recapture</h3>
+                <p>Der TASK_901-Visual-Slice hat jetzt einen eigenen Recapture-/Acceptance-Rahmen. Der Wrapper nutzt den bestehenden TASK_899-Window-Handle-Pfad, schreibt eigene TASK_902-Screenshot-/Manifestpfade und trennt `review_ready` weiter sauber von echter visueller Akzeptanz.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
               <strong>Report</strong>
               <div>
                 <h3>Aktueller HTML-Zwischenstand</h3>
@@ -277,6 +299,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="playtest.singleplayer_path_readable"> Einzelspieler-Pfad bis Mission ist als Testkette vorhanden.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="playtest.contact_fire_hud_visible"> CONTACT FIRE ist in #17/#18/#19 belegt sichtbar.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="playtest.world_focal_present"> Weltkampf-Fokus ist vorhanden.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="playtest.task_902_recapture_framework_done"> TASK_902-EXE-/Window-Recapture-Rahmen wurde nach TASK_901 implementiert.</label>
+          <label class="checkline"><input type="checkbox" data-export-key="playtest.task_902_exe_recapture_done"> Frischer TASK_902-EXE-/Window-Capture wurde lokal ausgefuehrt und als PNG/Manifest geschrieben.</label>
           <label class="checkline"><input type="checkbox" data-export-key="playtest.world_focal_elegant"> Weltkampf-Fokus wirkt schon elegant und releasefertig.</label>
           <label class="checkline"><input type="checkbox" data-export-key="playtest.longer_free_play_done"> Laengerer freier Playtest nach dem ersten Feuerwechsel wurde gemacht.</label>
         </article>
@@ -290,6 +314,7 @@
           <ul class="list">
             <li><strong>Marker-Look:</strong> TASK_900 bestaetigt den Fortschritt, aber der gelbe Target-Halo liest im echten Fenster noch zu sehr als grosse Marker-/Debug-Scheibe.</li>
             <li><strong>World-Noise:</strong> Tile-Raster, Stationskanten und Weltlinien konkurrieren im Feuerbereich weiter mit Halo, FIRE-Label und Lane.</li>
+            <li><strong>Build-Drift:</strong> Nach Visual-Slices darf der lokale Spielordner nicht als automatisch aktuell gelten. TASK_902 hat den Belegrahmen, aber ein frischer Export/Capture muss fuer den echten Spielerblick bewusst laufen.</li>
             <li><strong>HUD-Konkurrenz:</strong> Bottom-Dock, Event Log, Karten und Weltbild sind gleichzeitig aktiv. Die erste Kampflesung ist besser, aber noch dicht.</li>
             <li><strong>Ein-Pfad-Abnahme:</strong> Der Release-Pfad ist fuer den ersten Feuerwechsel gut belegt. Mehrere freie Spielvarianten, mehrere Fireteams und laengere Missionen brauchen weiter eigene Slices.</li>
             <li><strong>Lokale Builds:</strong> `builds/` liegt als untracked lokaler Ordner im Arbeitsbaum und sollte nicht versehentlich in den Report-/Task-Commit.</li>
@@ -316,20 +341,20 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen wuerde</h2>
           <ol class="list">
-            <li><strong>TASK_902 - Combat Marker Scale Real Window Recapture:</strong> Nach TASK_901 frisch exportieren/capturen und pruefen, ob der kleinere Halo und das ruhigere Raster im echten Fenster natuerlicher wirken.</li>
+            <li><strong>TASK_903 - Combat Marker Scale Visual Findings:</strong> TASK_902-PNG und Manifest read-only bewerten: wirkt der kleinere Halo wirklich weniger scheibenhaft, ist das Raster ruhiger, bleibt die Schussbahn lesbar?</li>
             <li><strong>Kleiner freier Playtest:</strong> Nach dem ersten Feuerwechsel nicht sofort stoppen, sondern 30-60 Sekunden weiterlaufen lassen: Befehle, Movement, Zielerkennung, UI-Dichte, Performance.</li>
-            <li><strong>Spielerfuehrung nachziehen:</strong> Wenn TASK_902 den Spielerblick bestaetigt, den ersten Missionsgriff weiter angenehmer machen: naechster sinnvoller Befehl, Rueckmeldung, weniger Denk-Arbeit fuer den Spieler.</li>
+            <li><strong>Spielerfuehrung nachziehen:</strong> Wenn TASK_903 den Spielerblick bestaetigt, den ersten Missionsgriff weiter angenehmer machen: naechster sinnvoller Befehl, Rueckmeldung, weniger Denk-Arbeit fuer den Spieler.</li>
             <li><strong>Danach Entscheidung:</strong> Entweder erste Mission weiter ausbauen oder wieder Richtung taktische Entscheidungslesbarkeit gehen: Order Preview, Line-of-Fire, Threat Overlay.</li>
           </ol>
         </article>
         <article class="card">
           <h2>Entscheidung</h2>
           <div class="button-row" data-choice-group="next.priority">
-            <button class="choice active" type="button" data-choice-value="task_902">TASK_902</button>
+            <button class="choice active" type="button" data-choice-value="task_903">TASK_903</button>
             <button class="choice" type="button" data-choice-value="free_playtest">Freier Playtest</button>
             <button class="choice" type="button" data-choice-value="decision_preview">Order Preview</button>
           </div>
-          <p>Meine Empfehlung: jetzt TASK_902. Der Code-Slice ist drin; nun zaehlt wieder der echte Spielerblick im Fenster.</p>
+          <p>Meine Empfehlung: jetzt TASK_903. Der Belegrahmen ist drin; nun zaehlt wieder der echte Spielerblick im exportierten Fenster.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -470,11 +495,12 @@
           notes,
           active_choices: activeChoices,
           computed: {
-            current_task: "TASK_901 marker scale and world-noise polish implemented; TASK_902 real-window recapture recommended",
+            current_task: "TASK_902 marker scale real-window recapture framework implemented; TASK_903 visual findings recommended",
             release_path_state: "singleplayer_to_first_exchange_reproducible",
-            current_player_gain: "first_exchange_contact_fire_visible_marker_scale_world_noise_polish_active",
-            primary_open_risk: "task_901_not_yet_real_window_recaptured",
-            next_recommended_slice: "TASK_902",
+            build_export_state: "local_build_artifacts_untracked_task_902_capture_framework_ready",
+            current_player_gain: "first_exchange_contact_fire_visible_marker_scale_world_noise_polish_has_recapture_gate",
+            primary_open_risk: "task_902_visual_findings_not_cut_yet",
+            next_recommended_slice: "TASK_903",
             report_updated_at_local: "2026-07-09",
             report_purpose: "interim_workbench_for_done_changed_next"
           },

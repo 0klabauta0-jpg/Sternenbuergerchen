@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_902 - Release First Exchange Combat Marker Scale Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_902_release_first_exchange_combat_marker_scale_real_window_recapture.md`, `docs/tasks/TASK_901_release_first_exchange_combat_marker_scale_world_noise_polish.md`, `docs/tasks/TASK_899_release_first_exchange_combat_focal_elegance_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_902 legt einen eigenen Recapture-/Acceptance-Rahmen an den TASK_901-Marker-/World-Noise-Polish.
+- Stand: `capture_release_first_exchange_combat_marker_scale_real_window_recapture.ps1` wiederverwendet den TASK_899-Focal-Elegance-Window-Handle-Pfad und schreibt eigene TASK_902-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeCombatMarkerScaleRealWindowRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer kleineren Halo, ruhigeres Grid/World-Noise, lesbare Source-to-target-Lane, CONTACT FIRE und weiter bedienbare Command-Surfaces.
+- Risiken/offen: TASK_902 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_903 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_902_release_first_exchange_combat_marker_scale_real_window_recapture.gd`, optional `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_combat_marker_scale_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_901_release_first_exchange_combat_marker_scale_world_noise_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_903 - Release First Exchange Combat Marker Scale Visual Findings.
+
 ### TASK_901 - Release First Exchange Combat Marker Scale And World Noise Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_901_release_first_exchange_combat_marker_scale_world_noise_polish.md`, `docs/tasks/TASK_900_release_first_exchange_combat_focal_elegance_visual_findings.md`, `docs/tasks/TASK_898_release_first_exchange_combat_focal_elegance_polish.md`, `docs/dev/mission_command_feedback_contract.md`
