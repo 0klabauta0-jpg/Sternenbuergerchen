@@ -75,6 +75,11 @@ TASK_1008 prueft, ob der bestandene Round-Loop im integrierten Release-/Mission-
 
 Der Integrated-Playtest-Slice bleibt read-only. Ohne Trace bleibt er `needs_round_loop_integrated_playtest_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1009 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Findings`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Findings (TASK_1009)
+TASK_1009 trennt den technischen Integrated-Playtest vom eigentlichen Spielerblick. Erwartet wird ein read-only Befund dazu, ob Entry, `ROUND`, `NEXT`, getrenntes `GO`, Feedback, naechster Griff, HUD-Ruhe, Performance-Gefuehl und Multiplayer-Grenze im Ablauf rund wirken.
+
+Ohne Player-Feel-Notizen bleibt der Status `needs_player_feel_review`. Belegte Reibung routet zu `TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish`; ein sauberer Befund routet zu `TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice`. TASK_1009 erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

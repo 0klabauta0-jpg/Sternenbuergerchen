@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1009 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1009_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_findings.md`, `docs/tasks/TASK_1008_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopPlayerFeelFindings.build_snapshot()` bewertet einen bestandenen TASK_1008-Integrated-Playtest plus optionale Player-Feel-Notizen.
+- Stand: Ohne Notizen bleibt der Slice `needs_player_feel_review`; Reibung routet zu Player-Feel-Polish; saubere Notizen setzen `ready_for_round_loop_acceptance_slice`.
+- Stand: Der Befund benennt Positive Findings und Issues fuer Entry, Round-/Next-/GO-Rhythmus, Feedback, GO-Grenze, HUD-Ruhe, Performance-Gefuehl und Multiplayer-Grenze.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1009 im Command-Feedback als Snapshot, Status, Issue-Count und Summary-Zeile.
+- Risiken/offen: TASK_1009 verbessert die UI noch nicht selbst. TASK_1010 sollte je nach Befund entweder engen Player-Feel-Polish bauen oder den Round-Loop als Acceptance-Slice schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1009_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_findings.gd`, Regression TASK_1008, TASK_1007, TASK_1006, `git diff --check`.
+- Naechster Schritt: TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish oder TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice.
+
 ### TASK_1008 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Integrated Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1008_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.md`, `docs/tasks/TASK_1007_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
