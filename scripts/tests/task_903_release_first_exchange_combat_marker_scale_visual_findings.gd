@@ -1,0 +1,273 @@
+extends SceneTree
+
+const Findings := preload("res://scripts/mission/release_first_exchange_combat_marker_scale_visual_findings.gd")
+
+const TASK_PATH := "res://docs/tasks/TASK_903_release_first_exchange_combat_marker_scale_visual_findings.md"
+const STATUS_PATH := "res://docs/IMPLEMENTATION_STATUS.md"
+const ROADMAP_PATH := "res://docs/TASK_ROADMAP.md"
+const CONTRACT_PATH := "res://docs/dev/mission_command_feedback_contract.md"
+const REPORT_PATH := "res://docs/reports/spielstand_zwischenbericht_2026_07_09_aktuell.html"
+const SERVICE_PATH := "res://scripts/mission/release_first_exchange_combat_marker_scale_visual_findings.gd"
+const SOURCE_MANIFEST_PATH := "res://tmp/release_first_exchange_combat_marker_scale_real_window_recapture.json"
+const OUTPUT_PATH := "res://tmp/release_first_exchange_combat_marker_scale_visual_findings.json"
+const SCHEMA := "sternenbuergerchen.release_first_exchange_combat_marker_scale_visual_findings.v1"
+const SOURCE_SCHEMA := "sternenbuergerchen.release_first_exchange_combat_marker_scale_real_window_recapture.v1"
+const MARKER_SCALE_SCHEMA := "sternenbuergerchen.release_first_exchange_combat_marker_scale_world_noise_polish.v1"
+const MARKER_SCALE_STYLE_ID := "task_901_release_first_exchange_combat_marker_scale_world_noise_v1"
+const ELEGANCE_RECAPTURE_SCHEMA := "sternenbuergerchen.release_first_exchange_combat_focal_elegance_real_window_recapture.v1"
+const FIRST_GO_ARG := "--release-singleplayer-first-go-firefight"
+const NEXT_TASK := "TASK_904 - Release First Exchange Fire Lane Readability Polish"
+
+var _passed: int = 0
+var _failed: int = 0
+
+
+func _init() -> void:
+	call_deferred("_run_tests")
+
+
+func _run_tests() -> void:
+	print("=== TASK_903 Release First Exchange Combat Marker Scale Visual Findings ===")
+	_test_docs_and_static_hooks()
+	_test_missing_manifest_blocks()
+	_test_visual_findings_from_review_notes()
+	_test_clean_notes_can_accept()
+	_test_optional_actual_manifest()
+	_test_manifest_roundtrip()
+	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
+	if _failed > 0:
+		print("TASK_903_release_first_exchange_combat_marker_scale_visual_findings: FAILED")
+		quit(1)
+		return
+	print("TASK_903_release_first_exchange_combat_marker_scale_visual_findings: ALL PASSED")
+	quit(0)
+
+
+func _test_docs_and_static_hooks() -> void:
+	var task_text: String = _read_text(TASK_PATH)
+	var status_text: String = _read_text(STATUS_PATH)
+	var roadmap_text: String = _read_text(ROADMAP_PATH)
+	var contract_text: String = _read_text(CONTRACT_PATH)
+	var report_text: String = _read_text(REPORT_PATH)
+	var service_text: String = _read_text(SERVICE_PATH)
+	_assert(FileAccess.file_exists(TASK_PATH), "TASK_903 task file exists")
+	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_903 analyzer exists")
+	_assert(task_text.contains("Release First Exchange Combat Marker Scale Visual Findings"), "Task names TASK_903")
+	_assert(task_text.contains(NEXT_TASK), "Task names TASK_904 follow-up")
+	_assert(status_text.contains("TASK_903 - Release First Exchange Combat Marker Scale Visual Findings"), "Implementation status tracks TASK_903")
+	_assert(roadmap_text.contains("TASK_903 - Release First Exchange Combat Marker Scale Visual Findings (implementiert)"), "Roadmap marks TASK_903 implemented")
+	_assert(roadmap_text.contains(NEXT_TASK), "Roadmap names TASK_904 follow-up")
+	_assert(contract_text.contains("Release-First-Exchange-Combat-Marker-Scale-Visual-Findings (TASK_903)"), "Contract documents TASK_903")
+	_assert(report_text.contains("TASK_903") and report_text.contains("TASK_904"), "HTML report tracks TASK_903 and TASK_904")
+	_assert(service_text.contains(SCHEMA), "Analyzer exposes stable TASK_903 schema")
+	_assert(service_text.contains("TASK_ID: String = \"TASK_903\""), "Analyzer writes TASK_903 id")
+	_assert(service_text.contains("SOURCE_TASK_ID: String = \"TASK_902\""), "Analyzer links TASK_902")
+	_assert(service_text.contains("SOURCE_MARKER_SCALE_TASK_ID: String = \"TASK_901\""), "Analyzer links TASK_901")
+	_assert(service_text.contains("SOURCE_FINDINGS_TASK_ID: String = \"TASK_900\""), "Analyzer links TASK_900")
+	_assert(service_text.contains("fire_lane_still_too_subtle"), "Analyzer names fire-lane issue")
+	_assert(service_text.contains("contact_marker_cluster_still_attention_heavy"), "Analyzer names contact marker cluster issue")
+	_assert(service_text.contains("bottom_hud_still_dense_for_first_fire_read"), "Analyzer names bottom HUD density issue")
+	_assert(service_text.contains("do_not_add_more_contact_fire_text_or_reopen_damage_logic"), "Analyzer rejects text/damage churn")
+	_assert(service_text.contains("\"read_only\": true"), "Analyzer declares read-only")
+	_assert(service_text.contains("\"creates_command\": false"), "Analyzer declares no command creation")
+	_assert(service_text.contains("\"creates_fire_event\": false"), "Analyzer declares no fire-event creation")
+	_assert(service_text.contains("\"creates_damage_event\": false"), "Analyzer declares no damage-event creation")
+	_assert(service_text.contains("\"creates_movement\": false"), "Analyzer declares no movement")
+	_assert(service_text.contains("\"sets_multiplayer_truth\": false"), "Analyzer declares no multiplayer truth")
+	_assert(service_text.contains("\"updates_shortcuts\": false"), "Analyzer updates no shortcuts")
+
+
+func _test_missing_manifest_blocks() -> void:
+	var snapshot: Dictionary = Findings.build_snapshot({}, {})
+	var blocker_ids: Array = _issue_ids(Array(snapshot.get("blocking_issues", [])))
+	_assert(String(snapshot.get("status", "")) == "blocked", "Missing source manifest blocks TASK_903")
+	_assert(blocker_ids.has("capture_schema_mismatch"), "Missing manifest reports schema mismatch")
+	_assert(blocker_ids.has("capture_task_mismatch"), "Missing manifest reports TASK_902 mismatch")
+	_assert(blocker_ids.has("source_marker_scale_task_mismatch"), "Missing manifest reports TASK_901 mismatch")
+	_assert(blocker_ids.has("source_findings_task_mismatch"), "Missing manifest reports TASK_900 mismatch")
+	_assert(blocker_ids.has("source_elegance_recapture_task_mismatch"), "Missing manifest reports TASK_899 mismatch")
+	_assert(blocker_ids.has("marker_scale_schema_mismatch"), "Missing manifest reports TASK_901 schema mismatch")
+	_assert(blocker_ids.has("marker_scale_style_mismatch"), "Missing manifest reports TASK_901 style mismatch")
+	_assert(blocker_ids.has("source_elegance_recapture_schema_mismatch"), "Missing manifest reports TASK_899 schema mismatch")
+	_assert(blocker_ids.has("manual_visual_review_missing"), "Missing notes report manual review missing")
+	_assert(blocker_ids.has("correct_window_content_not_confirmed"), "Missing notes report window confirmation missing")
+	_assert(bool(snapshot.get("read_only", false)), "Blocked snapshot remains read-only")
+	_assert(not bool(snapshot.get("creates_command", true)), "Blocked snapshot creates no commands")
+
+
+func _test_visual_findings_from_review_notes() -> void:
+	var snapshot: Dictionary = Findings.build_snapshot(_good_manifest(), _review_notes_with_issues())
+	var issue_ids: Array = _issue_ids(Array(snapshot.get("issues", [])))
+	var positive_ids: Array = _issue_ids(Array(snapshot.get("positive_findings", [])))
+	_assert(String(snapshot.get("schema", "")) == SCHEMA, "Snapshot schema matches TASK_903")
+	_assert(String(snapshot.get("task_id", "")) == "TASK_903", "Snapshot task id matches TASK_903")
+	_assert(String(snapshot.get("source_task_id", "")) == "TASK_902", "Snapshot links TASK_902")
+	_assert(String(snapshot.get("source_marker_scale_task_id", "")) == "TASK_901", "Snapshot links TASK_901")
+	_assert(String(snapshot.get("source_findings_task_id", "")) == "TASK_900", "Snapshot links TASK_900")
+	_assert(String(snapshot.get("source_elegance_recapture_task_id", "")) == "TASK_899", "Snapshot links TASK_899")
+	_assert(String(snapshot.get("status", "")) == "ready_for_fire_lane_readability_polish", "Findings recommend fire-lane polish")
+	_assert(bool(snapshot.get("final_source_contact_fire", false)), "Snapshot records final source CONTACT FIRE")
+	_assert(bool(snapshot.get("manual_visual_review_done", false)), "Snapshot records manual review")
+	_assert(not bool(snapshot.get("player_readability_ok", true)), "Snapshot does not accept readability")
+	_assert(positive_ids.has("final_source_contact_fire_clean"), "Snapshot keeps source positive")
+	_assert(positive_ids.has("trusted_window_handle_capture"), "Snapshot keeps trusted capture positive")
+	_assert(positive_ids.has("contact_fire_hud_surfaces_present"), "Snapshot records CONTACT FIRE surfaces")
+	_assert(positive_ids.has("event_log_contact_fire_visible"), "Snapshot records event-log contact fire")
+	_assert(positive_ids.has("marker_scale_polish_visible"), "Snapshot records marker scale polish")
+	_assert(positive_ids.has("target_halo_less_marker_disc"), "Snapshot records quieter target halo")
+	_assert(positive_ids.has("grid_world_noise_quieter"), "Snapshot records quieter grid/world noise")
+	_assert(positive_ids.has("source_to_target_lane_visible"), "Snapshot records source-to-target lane")
+	_assert(issue_ids.has("fire_lane_still_too_subtle"), "Snapshot records fire-lane issue")
+	_assert(issue_ids.has("contact_marker_cluster_still_attention_heavy"), "Snapshot records marker cluster issue")
+	_assert(issue_ids.has("bottom_hud_still_dense_for_first_fire_read"), "Snapshot records bottom HUD density issue")
+	_assert(String(snapshot.get("primary_issue_id", "")) == "fire_lane_still_too_subtle", "Fire lane is primary issue")
+	_assert(String(snapshot.get("recommended_next_task", "")) == NEXT_TASK, "Snapshot recommends TASK_904")
+	_assert(String(snapshot.get("recommended_direction", "")) == "polish_fire_lane_readability_without_reopening_combat_truth", "Snapshot recommends tight fire-lane polish")
+	_assert(String(snapshot.get("avoid_next_action", "")) == "do_not_add_more_contact_fire_text_or_reopen_damage_logic", "Snapshot rejects text/damage churn")
+	_assert(bool(snapshot.get("read_only", false)), "Snapshot is read-only")
+	_assert(not bool(snapshot.get("ui_sets_gameplay_truth", true)), "Snapshot sets no gameplay truth")
+	_assert(not bool(snapshot.get("creates_command", true)), "Snapshot creates no commands")
+	_assert(not bool(snapshot.get("creates_fire_event", true)), "Snapshot creates no fire events")
+	_assert(not bool(snapshot.get("creates_damage_event", true)), "Snapshot creates no damage events")
+	_assert(not bool(snapshot.get("creates_movement", true)), "Snapshot creates no movement")
+	_assert(not bool(snapshot.get("sets_multiplayer_truth", true)), "Snapshot sets no multiplayer truth")
+	_assert(not bool(snapshot.get("updates_shortcuts", true)), "Snapshot updates no shortcuts")
+
+
+func _test_clean_notes_can_accept() -> void:
+	var notes: Dictionary = _review_notes_with_issues()
+	notes["player_readability_ok"] = true
+	notes["fire_lane_still_too_subtle"] = false
+	notes["contact_marker_cluster_still_attention_heavy"] = false
+	notes["bottom_hud_still_dense_for_first_fire_read"] = false
+	notes["event_log_over_world_competes_left_flank"] = false
+	notes["source_to_target_relationship_obvious"] = true
+	var snapshot: Dictionary = Findings.build_snapshot(_good_manifest(), notes)
+	_assert(String(snapshot.get("status", "")) == "accepted_for_release_smoke", "Clean notes can accept TASK_903")
+	_assert(bool(snapshot.get("player_readability_ok", false)), "Clean notes mark player readability OK")
+	_assert(int(snapshot.get("issue_count", -1)) == 0, "Clean notes have no issues")
+
+
+func _test_optional_actual_manifest() -> void:
+	if not FileAccess.file_exists(SOURCE_MANIFEST_PATH):
+		_assert(true, "TASK_902 manifest is optional before local capture")
+		return
+	var manifest: Dictionary = _read_json_dict(SOURCE_MANIFEST_PATH)
+	var snapshot: Dictionary = Findings.build_snapshot(manifest, _review_notes_with_issues())
+	_assert(String(snapshot.get("schema", "")) == SCHEMA, "Actual manifest builds TASK_903 schema")
+	_assert(String(snapshot.get("source_task_id", "")) == "TASK_902", "Actual manifest links TASK_902")
+	_assert(String(snapshot.get("capture_gate", "")) == "review_ready", "Actual manifest keeps review-ready gate")
+	_assert(bool(snapshot.get("final_source_contact_fire", false)), "Actual manifest keeps CONTACT FIRE source")
+	_assert(String(snapshot.get("recommended_next_task", "")) == NEXT_TASK, "Actual manifest recommends TASK_904")
+	_assert(bool(snapshot.get("read_only", false)), "Actual manifest snapshot remains read-only")
+	_assert(not bool(snapshot.get("ui_sets_gameplay_truth", true)), "Actual manifest snapshot sets no gameplay truth")
+
+
+func _test_manifest_roundtrip() -> void:
+	var source_manifest: Dictionary = _read_json_dict(SOURCE_MANIFEST_PATH) if FileAccess.file_exists(SOURCE_MANIFEST_PATH) else _good_manifest()
+	var snapshot: Dictionary = Findings.build_snapshot(source_manifest, _review_notes_with_issues())
+	var file := FileAccess.open(OUTPUT_PATH, FileAccess.WRITE)
+	if file == null:
+		_assert(false, "Can write TASK_903 output manifest")
+		return
+	file.store_string(JSON.stringify(snapshot, "\t"))
+	file.close()
+	var roundtrip: Dictionary = _read_json_dict(OUTPUT_PATH)
+	_assert(String(roundtrip.get("task_id", "")) == "TASK_903", "Roundtrip keeps task id")
+	_assert(String(roundtrip.get("source_task_id", "")) == "TASK_902", "Roundtrip keeps TASK_902 link")
+	_assert(String(roundtrip.get("status", "")) == "ready_for_fire_lane_readability_polish", "Roundtrip keeps findings status")
+	_assert(String(roundtrip.get("primary_issue_id", "")) == "fire_lane_still_too_subtle", "Roundtrip keeps primary issue")
+	_assert(String(roundtrip.get("recommended_next_task", "")) == NEXT_TASK, "Roundtrip keeps next task")
+	_assert(bool(roundtrip.get("read_only", false)), "Roundtrip keeps read-only boundary")
+
+
+func _good_manifest() -> Dictionary:
+	return {
+		"schema": SOURCE_SCHEMA,
+		"task_id": "TASK_902",
+		"source_task_id": "TASK_901",
+		"source_findings_task_id": "TASK_900",
+		"source_elegance_recapture_task_id": "TASK_899",
+		"gate": "review_ready",
+		"branch": "task/release-first-exchange-player-readability-polish-review",
+		"git_head": "test",
+		"launch_argument": FIRST_GO_ARG,
+		"expected_marker_scale_schema": MARKER_SCALE_SCHEMA,
+		"expected_marker_scale_style_id": MARKER_SCALE_STYLE_ID,
+		"source_elegance_recapture_schema": ELEGANCE_RECAPTURE_SCHEMA,
+		"source_elegance_recapture_gate": "review_ready",
+		"post_final_capture_after_deeplink_final": true,
+		"post_final_window_capture_method": "window_handle_print",
+		"post_final_window_capture_trusted": true,
+		"post_final_window_screenshot_written": true,
+		"post_final_window_screenshot_path": "tmp/release_first_exchange_combat_marker_scale_real_window_recapture.png",
+		"post_final_desktop_screenshot_path": "tmp/release_first_exchange_combat_marker_scale_real_window_recapture_desktop.png",
+		"hard_failures": [],
+		"final_source_snapshot": {
+			"source_observed_state": "FINAL_SOURCE_CONTACT_FIRE",
+			"stage": "deeplink_final",
+			"selected_starts_contact_fire": true,
+			"mission_starts_contact_fire": true,
+			"event_log_contains_contact_fire": true,
+			"event_log_contains_contact_pressure": false,
+		},
+		"post_final_combat_marker_scale_render_review": {
+			"screenshot_observed_state": "TASK_902_REVIEW_REQUIRED",
+			"expected_marker_scale_style_id": MARKER_SCALE_STYLE_ID,
+			"expected_target_halo_smaller_than_task_898": true,
+			"expected_grid_world_noise_quieter_than_task_899": true,
+			"expected_source_to_target_lane_readable": true,
+		},
+	}
+
+
+func _review_notes_with_issues() -> Dictionary:
+	return {
+		"manual_visual_review_done": true,
+		"correct_window_content_confirmed": true,
+		"observed_window_state": "CONTACT_FIRE_VISIBLE_MARKER_SCALE_IMPROVED_FIRE_LANE_STILL_SUBTLE",
+		"review_screenshot_path": "tmp/release_first_exchange_combat_marker_scale_real_window_recapture.png",
+		"player_readability_ok": false,
+		"contact_fire_hud_surfaces_present": true,
+		"event_log_contact_fire_visible": true,
+		"marker_scale_polish_visible": true,
+		"target_halo_less_marker_disc": true,
+		"grid_world_noise_quieter": true,
+		"source_to_target_lane_visible": true,
+		"source_to_target_relationship_obvious": false,
+		"command_surfaces_still_usable": true,
+		"fire_lane_still_too_subtle": true,
+		"contact_marker_cluster_still_attention_heavy": true,
+		"bottom_hud_still_dense_for_first_fire_read": true,
+		"event_log_over_world_competes_left_flank": false,
+	}
+
+
+func _issue_ids(issues: Array) -> Array:
+	var ids: Array = []
+	for issue_variant in issues:
+		ids.append(String(Dictionary(issue_variant).get("id", "")))
+	return ids
+
+
+func _read_json_dict(path: String) -> Dictionary:
+	var text: String = _read_text(path)
+	var parsed: Variant = JSON.parse_string(text)
+	if typeof(parsed) == TYPE_DICTIONARY:
+		return Dictionary(parsed)
+	return {}
+
+
+func _read_text(path: String) -> String:
+	if not FileAccess.file_exists(path):
+		return ""
+	return FileAccess.get_file_as_string(path)
+
+
+func _assert(condition: bool, message: String) -> void:
+	if condition:
+		_passed += 1
+		print("[PASS] %s" % message)
+	else:
+		_failed += 1
+		push_error("[FAIL] %s" % message)
