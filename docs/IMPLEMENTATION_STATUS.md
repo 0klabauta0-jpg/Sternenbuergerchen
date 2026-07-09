@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1007 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playability Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1007_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playability_slice.md`, `docs/tasks/TASK_1006_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopPlayabilitySlice.build_snapshot()` bewertet einen bereiten TASK_1006-Visual-Polish-Snapshot plus Round-Loop-Trace.
+- Stand: Ohne Trace bleibt der Slice `needs_round_loop_playability_trace`; fehlende Checks melden konkrete Regressionen; ein guter Trace setzt `round_loop_playability_slice_passed` und `ready_for_integrated_playtest`.
+- Stand: Der Slice prueft `ROUND`, `NEXT`, `GO separat`, Runtime-Zeilen, Confirm, kein Auto-GO, Feedback-zurueck-zu-NEXT sowie HUD-/Multiplayer-Grenzen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1007 im Command-Feedback als Snapshot, Status, Gate und Playability-Zeile.
+- Risiken/offen: TASK_1007 ist ein Trace-/Contract-Gate, noch kein langer echter Fensterplaytest.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1007_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playability_slice.gd`, Regression TASK_1006, TASK_1005, TASK_1004, `git diff --check`.
+- Naechster Schritt: TASK_1008 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Integrated Playtest.
+
 ### TASK_1006 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1006_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_polish.md`, `docs/tasks/TASK_1005_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

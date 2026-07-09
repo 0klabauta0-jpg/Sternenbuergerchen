@@ -39,6 +39,11 @@ Erwartete Lesbarkeit: Ohne Review-Notizen bleibt der Status `needs_manual_review
 
 Erwartete Lesbarkeit: Command Feedback exportiert den Snapshot, Status, eine kurze `ROUND | NEXT | GO`-Polish-Zeile und die Surface-Specs. Die Specs definieren Rollen, Style-IDs, Mindesthoehen und Textbudgets, erzeugen aber keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Playability Slice (TASK_1007)
+`get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playability_slice_snapshot()` ist der read-only Pruefpunkt fuer den kleinen Round-Loop-Spielergriff nach TASK_1006. Der Snapshot darf nur den TASK_1006-Visual-Polish und einen optionalen Playability-Trace bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und kurze `ROUND/NEXT/GO/FEEDBACK`-Zeile exportiert werden.
+
+Erwartete Struktur: Ohne Trace bleibt der Status `needs_round_loop_playability_trace`; fehlende Checks erzeugen `round_loop_playability_regression_found`; ein guter Trace setzt `round_loop_playability_slice_passed = true` und `ready_for_integrated_playtest = true`. Der Slice prueft `ROUND`, `NEXT`, `GO separat`, Runtime-Zeilen, Confirm, kein Auto-GO, kein Command vor Confirm, Feedback-zurueck-zu-NEXT sowie HUD-/Multiplayer-Grenzen. Er setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release-Firefight-Command-Matrix-Visual-Polish
 `get_release_firefight_command_matrix_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer TASK_836. Der Snapshot darf nur vorhandene Command-Matrix-Buttons, Fire-Rule-Status und den bestehenden TASK_835-Firefight-HUD-Zustand lesen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugen.
 

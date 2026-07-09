@@ -65,6 +65,11 @@ TASK_1006 uebersetzt TASK_1005-Findings in konkrete read-only Surface-Specs. Erw
 
 Die Specs duerfen nur Rollen, Style-IDs, Mindesthoehen, Textbudgets und kompakte Displaytexte festlegen. Sie erzeugen keine Controls, keine Commands, kein Movement, keine Combat-/Damage-Wirkung und keine Multiplayer-Wahrheit. Der naechste Schritt ist TASK_1007, der daraus einen spielbaren Round-Loop-Playability-Slice macht.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Playability Slice (TASK_1007)
+TASK_1007 prueft, ob der gepolishte Round-Loop als kleiner Spielergriff lesbar ist. Ein guter Trace bestaetigt: `ROUND` gelesen, `NEXT` verstanden, Confirm verfuegbar, `GO` bleibt separat, kein Command vor Confirm, kein Auto-GO, Feedback fuehrt wieder zu `NEXT`, Runtime-Zeilen bleiben lesbar und HUD-/Multiplayer-Grenzen bleiben unangetastet.
+
+Der Round-Loop-Playability-Slice bleibt read-only. Ohne Trace bleibt er `needs_round_loop_playability_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1008 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Integrated Playtest`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 
