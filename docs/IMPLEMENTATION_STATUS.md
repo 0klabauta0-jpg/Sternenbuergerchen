@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1026 - Release First Decision Loop Two Player Loop Scenario Ship Readiness Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1026_release_first_decision_loop_two_player_loop_scenario_ship_readiness_review.md`, `docs/tasks/TASK_1025_release_first_decision_loop_two_player_loop_scenario_release_candidate_acceptance.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioShipReadinessReview.build_snapshot()` bewertet eine akzeptierte TASK_1025-Release-Candidate-Acceptance plus optionales Ship-Readiness-Paket.
+- Stand: Ohne Paket bleibt der Status `needs_ship_readiness_packet`; fehlende Uebergabedaten melden `ship_readiness_incomplete`; ein gutes Paket setzt `ship_readiness_ready`.
+- Stand: Geprueft werden Release-EXE, PCK, Szenario-ID, Testerhinweise, Operator-Ziel, bekannte Risiken, Uebergabe-Items, Multiplayer-Grenze, HUD-Wahrheit und Review-Abschluss.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1026 im Command-Feedback als Snapshot, Ship-Readiness-Line, Status und Gate.
+- Risiken/offen: TASK_1026 ist das Readiness-Gate vor dem sichtbaren Ship-Smoke, nicht der Smoke selbst. TASK_1027 sollte die frische EXE sichtbar starten und den kleinen Spielmoment praktisch bestaetigen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1026_release_first_decision_loop_two_player_loop_scenario_ship_readiness_review.gd`, Regression TASK_1025, TASK_1024, TASK_1023, `git diff --check`.
+- Naechster Schritt: TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke.
+
 ### TASK_1025 - Release First Decision Loop Two Player Loop Scenario Release Candidate Acceptance
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1025_release_first_decision_loop_two_player_loop_scenario_release_candidate_acceptance.md`, `docs/tasks/TASK_1024_release_first_decision_loop_two_player_loop_scenario_release_candidate_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

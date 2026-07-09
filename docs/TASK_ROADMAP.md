@@ -67,6 +67,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_release_candidate_acceptance_review | release_candidate_acceptance_regression_found | release_candidate_accepted`.
 - Naechster Schritt: TASK_1026 - Release First Decision Loop Two Player Loop Scenario Ship Readiness Review.
 
+## TASK_1026 - Release First Decision Loop Two Player Loop Scenario Ship Readiness Review (implementiert im Arbeitsstand)
+- Grundlage: akzeptierter TASK_1025 Release Candidate.
+- Ziel: Uebergabe fuer den sichtbaren EXE-/Ship-Smoke pruefen: Release-EXE, PCK, Szenario-ID, Testerhinweise, Operator-Ziel, bekannte Risiken, Uebergabe-Items, Multiplayer-Grenze, HUD-Wahrheit und Review-Abschluss.
+- Ergebnis: Read-only Snapshot `needs_ship_readiness_packet | ship_readiness_incomplete | ship_readiness_ready`.
+- Naechster Schritt: TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke.
+
 # Arbeitsregeln
 
 ## Reihenfolge
