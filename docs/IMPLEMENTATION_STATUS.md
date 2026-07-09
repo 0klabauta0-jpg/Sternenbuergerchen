@@ -20,6 +20,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_968_release_first_decision_loop_two_runtime_button.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_967_release_first_decision_loop_two_go_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_966_release_first_decision_loop_two_execution_hook.gd`, `git diff --check`.
 - Naechster Schritt: TASK_969 - Release First Decision Loop Two Real Window Capture.
 
+### TASK_969 - Release First Decision Loop Two Real Window Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_969_release_first_decision_loop_two_real_window_capture.md`, `docs/tasks/TASK_968_release_first_decision_loop_two_runtime_button.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoRealWindowCapture.build_snapshot()` bewertet den TASK_968-Runtime-Button und ein Real-Window-Capture-Manifest read-only.
+- Stand: Fehlendes Capture-Manifest bleibt ehrlich `needs_real_window_capture`; ein reviewbares Manifest wird `review_ready` und routet zu `TASK_970 - Release First Decision Loop Two Visual Findings`.
+- Stand: `capture_release_first_decision_loop_two_real_window.ps1` schreibt ein Manifest fuer `--release-singleplayer-lz-drop-preview`, setzt `manual_review_done = $false` und veraendert keine Shortcuts.
+- Risiken/offen: Der echte Sichtbefund ist noch nicht akzeptiert. TASK_970 sollte aus dem Capture konkrete visuelle Findings fuer `2ND`, getrenntes `GO` und Post-Confirm-Feedback schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_969_release_first_decision_loop_two_real_window_capture.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_968_release_first_decision_loop_two_runtime_button.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_967_release_first_decision_loop_two_go_smoke.gd`, `git diff --check`.
+- Naechster Schritt: TASK_970 - Release First Decision Loop Two Visual Findings.
+
 ### TASK_967 - Release First Decision Loop Two GO Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_967_release_first_decision_loop_two_go_smoke.md`, `docs/tasks/TASK_966_release_first_decision_loop_two_execution_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -160,3 +160,8 @@ Der Smoke-Snapshot bleibt read-only. Ohne Trace ist der Zustand bewusst `needs_l
 TASK_968 macht die zweite Entscheidung als `2ND`-Button in der Command-Matrix erreichbar. Der Button bestaetigt den zweiten Intent und laesst `GO` sichtbar als separaten Schritt.
 
 Der Button nutzt `CommandSlot07` und bestehende Controller-Pfade: `_issue_command(...)` fuer HOLD/ADV oder `return_selected_fireteams_to_plan()` fuer BACK. Er darf kein automatisches `execute_selected_fireteam_orders()` ausloesen. Der naechste Beweis ist ein Real-Window-Capture in TASK_969.
+
+## Release First Decision Loop Two Real Window Capture (TASK_969)
+TASK_969 prueft nicht noch mehr Theorie, sondern den echten Fensterblick: Ist `2ND` sichtbar, lesbar, bestaetigbar, bleibt `GO` separat, und ist Post-Confirm-Feedback erkennbar? Das Manifest muss diese Punkte als Pflichtchecks fuehren.
+
+Der Capture-Schnitt bleibt read-only. Ohne Manifest meldet er `needs_real_window_capture`; mit reviewbarem Manifest routet er zu `TASK_970 - Release First Decision Loop Two Visual Findings`; erst manuell erledigte Pflichtchecks akzeptieren den Capture. Keine Shortcut-, UI-, Command-, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit wird erzeugt.
