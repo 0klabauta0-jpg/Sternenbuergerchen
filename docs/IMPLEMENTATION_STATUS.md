@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1008 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Integrated Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1008_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.md`, `docs/tasks/TASK_1007_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopIntegratedPlaytest.build_snapshot()` bewertet einen bestandenen TASK_1007-Slice plus integrierten Release-/Mission-Playtest-Trace.
+- Stand: Ohne Trace bleibt der Slice `needs_round_loop_integrated_playtest_trace`; fehlende Checks melden konkrete Regressionen; ein guter Trace setzt `round_loop_integrated_playtest_passed` und `ready_for_player_feel_findings`.
+- Stand: Der Slice prueft Entry-Kontext, Command-Feedback, `ROUND`, `NEXT`, Confirm-/GO-Pfade, Post-GO-Feedback, Rueckkehr zu `NEXT`, HUD-/Multiplayer-Grenzen und Performance-Budget.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1008 im Command-Feedback als Snapshot, Status, Gate und Integrated-Playtest-Zeile.
+- Risiken/offen: TASK_1008 ist ein integrierter Trace-Gate, kein echter manueller Fensterbericht. TASK_1009 sollte daraus Player-Feel-Findings schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1008_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.gd`, Regression TASK_1007, TASK_1006, TASK_1005, `git diff --check`.
+- Naechster Schritt: TASK_1009 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Findings.
+
 ### TASK_1007 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playability Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1007_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playability_slice.md`, `docs/tasks/TASK_1006_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

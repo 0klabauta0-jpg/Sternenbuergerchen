@@ -44,6 +44,11 @@ Erwartete Lesbarkeit: Command Feedback exportiert den Snapshot, Status, eine kur
 
 Erwartete Struktur: Ohne Trace bleibt der Status `needs_round_loop_playability_trace`; fehlende Checks erzeugen `round_loop_playability_regression_found`; ein guter Trace setzt `round_loop_playability_slice_passed = true` und `ready_for_integrated_playtest = true`. Der Slice prueft `ROUND`, `NEXT`, `GO separat`, Runtime-Zeilen, Confirm, kein Auto-GO, kein Command vor Confirm, Feedback-zurueck-zu-NEXT sowie HUD-/Multiplayer-Grenzen. Er setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Integrated Playtest (TASK_1008)
+`get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest_snapshot()` ist der read-only Pruefpunkt fuer den integrierten Round-Loop nach TASK_1007. Der Snapshot darf nur den bestandenen TASK_1007-Slice und einen optionalen integrierten Playtest-Trace bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und kurze `ENTRY/ROUND/NEXT/GO/FEEDBACK`-Zeile exportiert werden.
+
+Erwartete Struktur: Ohne Trace bleibt der Status `needs_round_loop_integrated_playtest_trace`; fehlende Checks erzeugen `round_loop_integrated_playtest_regression_found`; ein guter Trace setzt `round_loop_integrated_playtest_passed = true` und `ready_for_player_feel_findings = true`. Der Slice prueft Release-/Mission-Entry, Command-Feedback, `ROUND`, `NEXT`, Confirm-/GO-Pfad, Post-GO-Feedback, Rueckkehr zu `NEXT`, HUD-read-only-Grenze, Multiplayer-Grenze und Performance-Budget. Er setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release-Firefight-Command-Matrix-Visual-Polish
 `get_release_firefight_command_matrix_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer TASK_836. Der Snapshot darf nur vorhandene Command-Matrix-Buttons, Fire-Rule-Status und den bestehenden TASK_835-Firefight-HUD-Zustand lesen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugen.
 
