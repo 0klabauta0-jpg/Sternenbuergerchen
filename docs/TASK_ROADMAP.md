@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_1005 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Findings (implementiert): Der TASK_1004-Capture wird als read-only Sichtbefund geschnitten; Reibung routet zu Round-Loop Visual Polish, sauberer Befund zum Round-Loop Playability Slice.
 - TASK_1004 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (implementiert): Der TASK_1003-Runtime-Polish bekommt einen read-only Real-Window-Capture-/Manifest-Rahmen fuer `ROUND`, `NEXT`, `GO separat`, Screenshotpfade, manuelle Pflichtchecks und erhaltene HUD-/Multiplayer-Grenzen.
 - TASK_1003 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish (implementiert): Der bestandene TASK_1002-Zwei-Runden-Slice erzeugt read-only Runtime-Surfaces fuer `ROUND`, `NEXT` und `GO` plus kurze HUD-Zeilen mit sichtbarer `GO separat`-Grenze.
 - TASK_1002 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playtest Slice (implementiert): Ein bestandener TASK_1001-Smoke wird mit Trace-Evidence als read-only Zwei-Runden-Slice bewertet; `NEXT -> CONFIRM -> GO -> FEEDBACK -> NEXT`, kein Feedback-Dead-End und HUD-/Multiplayer-Grenzen bleiben erhalten.

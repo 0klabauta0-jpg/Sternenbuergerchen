@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1005 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1005_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_findings.md`, `docs/tasks/TASK_1004_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopVisualFindings.build_snapshot()` bewertet einen review-ready/accepted TASK_1004-Capture plus optionale Sichtnotizen.
+- Stand: Ohne Sichtnotizen bleibt der Slice `needs_manual_review`; Reibung routet zu TASK_1006 Visual Polish; ein sauberer Befund routet zu TASK_1007 Playability Slice.
+- Stand: Der Snapshot benennt Positive Findings und Reibungen fuer `ROUND`, `NEXT`, `GO separat`, Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1005 im Command-Feedback als Snapshot, Status und Issue-Count.
+- Risiken/offen: TASK_1005 erzeugt keinen Screenshot und behauptet keinen manuellen Sichttest. Ohne echte Sichtnotizen bleibt die Review offen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1005_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_findings.gd`, Regression TASK_1004, TASK_1003, TASK_1002, `git diff --check`.
+- Naechster Schritt: TASK_1006 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Polish oder TASK_1007 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playability Slice, je nach Befund.
+
 ### TASK_1004 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1004_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture.md`, `docs/tasks/TASK_1003_release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

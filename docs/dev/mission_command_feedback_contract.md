@@ -29,6 +29,11 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 
 Erwartete Lesbarkeit: Ohne Manifest bleibt der Status `needs_round_loop_real_window_capture`; ein trusted Manifest mit offenem manuellen Check bleibt `review_ready`; erst alle Pflichtchecks akzeptieren den Capture und routen zu TASK_1005. Der Snapshot setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Findings (TASK_1005)
+`get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_findings_snapshot()` ist der read-only Pruefpunkt fuer Sichtnotizen zum TASK_1004-Capture. Der Snapshot darf nur den Capture-Snapshot und optionale Review-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Status und Issue-Count exportiert werden.
+
+Erwartete Lesbarkeit: Ohne Review-Notizen bleibt der Status `needs_manual_review`; Sichtreibung an `ROUND`, `NEXT`, `GO separat` oder den Runtime-Zeilen routet zu TASK_1006 Visual Polish; ein sauberer Befund routet zu TASK_1007 Playability Slice. Der Snapshot setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release-Firefight-Command-Matrix-Visual-Polish
 `get_release_firefight_command_matrix_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer TASK_836. Der Snapshot darf nur vorhandene Command-Matrix-Buttons, Fire-Rule-Status und den bestehenden TASK_835-Firefight-HUD-Zustand lesen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugen.
 
