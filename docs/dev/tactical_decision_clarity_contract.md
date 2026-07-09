@@ -185,3 +185,8 @@ Der Smoke-Snapshot bleibt read-only. Er darf Trace-Evidence bewerten und eine St
 TASK_973 legt den echten Fenster-Recapture-Rahmen nach dem bestandenen TASK_972-Smoke an. Erwartet sind Manifest-Felder fuer TASK_972-Source-Schema, Launch-Argument, Window-/Desktop-Screenshotpfade, Prozessmetadaten, `window_handle_print` und Pflichtchecks fuer `2ND`, getrenntes `GO`, Post-GO-Feedback und sichtbare Smoke-Zeile.
 
 Der Recapture-Snapshot bleibt read-only und darf erst `accepted` werden, wenn die manuellen Pflichtchecks abgeschlossen sind. Ohne Sichtabnahme bleibt er `review_ready`; ohne Manifest bleibt er `needs_real_window_recapture`. Er erzeugt keine Commands, kein Movement, keine Combat-/Damage-Ereignisse und keine Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Recapture Visual Findings (TASK_974)
+TASK_974 trennt technische Recapture-Evidence vom eigentlichen Spielerblick. Ein guter TASK_973-Recapture ohne Review-Notizen bleibt `needs_manual_review`; belegte Reibungen wie fehlende Smoke-Zeile, schwaches Post-GO-Feedback, unklare `GO`-Trennung oder fehlende Multiplayer-/HUD-Grenzbestaetigung routen zu `TASK_975 - Release First Decision Loop Two Recapture Visual Polish`.
+
+Ein sauberer Sichtbefund darf erst zum Acceptance-Slice routen, wenn `2ND`, Confirm, getrenntes `GO`, GO-Ausfuehrung, Post-GO-Feedback, Smoke-Zeile, HUD-read-only-Grenze, Multiplayer-Grenze und Spielerlesbarkeit manuell bestaetigt sind. Der Findings-Snapshot bleibt read-only und erzeugt keine Commands, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

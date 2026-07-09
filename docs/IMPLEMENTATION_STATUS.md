@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_974 - Release First Decision Loop Two Recapture Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_974_release_first_decision_loop_two_recapture_visual_findings.md`, `docs/tasks/TASK_973_release_first_decision_loop_two_real_window_recapture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoRecaptureVisualFindings.build_snapshot()` bewertet TASK_973-Recapture-Snapshots und manuelle Sichtnotizen read-only.
+- Stand: Offene Sichtabnahme bleibt `needs_manual_review`; belegte Reibungen routen zu `TASK_975 - Release First Decision Loop Two Recapture Visual Polish`.
+- Stand: Saubere Notizen akzeptieren den zweiten Recapture-Blick fuer `TASK_975 - Release First Decision Loop Two Acceptance Slice`.
+- Risiken/offen: Der Analyzer poliert noch nicht. Der naechste Task sollte je nach Befund entweder sichtbaren Polish bauen oder den zweiten Griff in einen kleinen Acceptance-Slice ueberfuehren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_974_release_first_decision_loop_two_recapture_visual_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_973_release_first_decision_loop_two_real_window_recapture.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_972_release_first_decision_loop_two_playability_smoke.gd`, `git diff --check`.
+- Naechster Schritt: TASK_975 - Release First Decision Loop Two Recapture Visual Polish oder TASK_975 - Release First Decision Loop Two Acceptance Slice.
+
 ### TASK_973 - Release First Decision Loop Two Real Window Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_973_release_first_decision_loop_two_real_window_recapture.md`, `docs/tasks/TASK_972_release_first_decision_loop_two_playability_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
