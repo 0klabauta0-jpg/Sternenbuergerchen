@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1002 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playtest Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1002_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playtest_slice.md`, `docs/tasks/TASK_1001_release_first_decision_loop_two_player_loop_micro_objective_round_trip_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopPlaytestSlice.build_snapshot()` bewertet einen bestandenen TASK_1001-Smoke plus Round-Loop-Playtest-Trace.
+- Stand: Der Slice prueft zwei lesbare Micro-Objective-Runden, `NEXT -> CONFIRM -> GO -> FEEDBACK -> NEXT`, kein Feedback-Dead-End, stabile HUD-Surfaces und erhaltene Multiplayer-Grenze.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1002 im Command-Feedback als Snapshot, Status, Gate und Round-Loop-Zeile.
+- Risiken/offen: TASK_1002 ist noch kein langer manueller Playtest und kein Runtime-Polish; TASK_1003 sollte die sichtbare Runtime-Runde enger spielbar machen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1002_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playtest_slice.gd`, Regression TASK_1001, TASK_1000, TASK_999, `git diff --check`.
+- Naechster Schritt: TASK_1003 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish.
+
 ### TASK_1001 - Release First Decision Loop Two Player Loop Micro Objective Round Trip Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1001_release_first_decision_loop_two_player_loop_micro_objective_round_trip_smoke.md`, `docs/tasks/TASK_1000_release_first_decision_loop_two_player_loop_micro_objective_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

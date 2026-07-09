@@ -325,3 +325,8 @@ Der Playability-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_micro_obj
 TASK_1001 prueft, ob der bestandene Micro-Objective-Griff wieder in den naechsten Griff zurueckfuehrt. Ein guter Trace bestaetigt sichtbare naechste Micro-Objective-Optionen, Confirm, sichtbares Confirm-Feedback, weiterhin separates `GO`, keine Auto-Ausfuehrung nach Confirm, Post-Round-Trip-Feedback, Rueckkehr in den Entscheidungszustand, wiederverwendeten Command-Pfad sowie HUD-/Multiplayer-Grenzen.
 
 Der Round-Trip-Smoke bleibt read-only. Ohne Trace bleibt er `needs_micro_objective_round_trip_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1002 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playtest Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Playtest Slice (TASK_1002)
+TASK_1002 prueft, ob aus dem bestandenen Round-Trip ein wiederholbarer kleiner Spielgriff wird. Ein guter Trace bestaetigt zwei lesbare Micro-Objective-Runden, sichtbare zweite NEXT-Optionen, Confirm, getrenntes `GO`, Post-Feedback, erneuten NEXT-Zustand, kein Feedback-Dead-End, stabile HUD-Surfaces, wiederverwendeten Command-Pfad und erhaltene Multiplayer-Grenze.
+
+Der Round-Loop-Playtest-Slice bleibt read-only. Ohne Trace bleibt er `needs_micro_objective_round_loop_playtest_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1003 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
