@@ -43,6 +43,7 @@ const RELEASE_FIRST_DECISION_NEXT_PLAYABLE_LOOP_SCRIPT: GDScript = preload("res:
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYTEST_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_playtest.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_polish.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_EXECUTION_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_execution_hook.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_GO_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_go_smoke.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -20954,6 +20955,42 @@ func get_release_first_decision_loop_two_execution_hook_snapshot(loop_two_polish
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_EXECUTION_HOOK_SCRIPT.call("build_snapshot", loop_two_polish, context)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_go_smoke_snapshot(execution_hook_override: Dictionary = {}, smoke_trace_override: Dictionary = {}) -> Dictionary:
+	var execution_hook: Dictionary = execution_hook_override.duplicate(true) if not execution_hook_override.is_empty() else get_release_first_decision_loop_two_execution_hook_snapshot()
+	var smoke_trace: Dictionary = smoke_trace_override.duplicate(true) if not smoke_trace_override.is_empty() else _build_release_first_decision_loop_two_go_smoke_trace(execution_hook)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_GO_SMOKE_SCRIPT.call("build_snapshot", execution_hook, smoke_trace)).duplicate(true)
+
+
+func _build_release_first_decision_loop_two_go_smoke_trace(execution_hook: Dictionary) -> Dictionary:
+	var command_draft: Dictionary = Dictionary(execution_hook.get("command_draft", {}))
+	var confirm_action: String = String(command_draft.get("confirm_action", "")).strip_edges()
+	var execute_action: String = String(command_draft.get("execute_action", "")).strip_edges()
+	return {
+		"confirm_action_exists": _release_first_loop_two_action_exists(confirm_action),
+		"execute_action_exists": _release_first_loop_two_action_exists(execute_action),
+		"confirm_action_called": false,
+		"execute_action_called": false,
+		"confirm_action_result": false,
+		"execute_action_result": false,
+		"confirm_and_go_are_separate_steps": not confirm_action.is_empty() and not execute_action.is_empty() and confirm_action != execute_action,
+		"post_go_feedback_visible": false,
+		"post_go_feedback_line": "",
+		"command_queue_lifecycle_observed": false,
+		"runtime_mutation_owner": "MissionTacticalSandboxController -> SimulationRoot.enqueue_command",
+		"ui_sets_gameplay_truth": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _release_first_loop_two_action_exists(action_name: String) -> bool:
+	var normalized_action: String = action_name.strip_edges()
+	if normalized_action.is_empty():
+		return false
+	if normalized_action == "_issue_command":
+		return has_method("_issue_command")
+	return has_method(normalized_action)
+
+
 func _build_release_first_decision_loop_two_hud_line(next_loop_override: Dictionary = {}) -> String:
 	if _release_first_decision_loop_two_hud_build_depth > 0:
 		return ""
@@ -23775,6 +23812,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_polish,
 		String(release_first_decision_loop_two_polish.get("recommended_choice_id", "hold_angle"))
 	)
+	var release_first_decision_loop_two_go_smoke: Dictionary = get_release_first_decision_loop_two_go_smoke_snapshot(
+		release_first_decision_loop_two_execution_hook,
+		{}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -23866,6 +23907,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_execution_line": String(release_first_decision_loop_two_execution_hook.get("execution_line", "")),
 		"release_first_decision_loop_two_execution_gate": String(release_first_decision_loop_two_execution_hook.get("gate", "")),
 		"release_first_decision_loop_two_execution_status": String(release_first_decision_loop_two_execution_hook.get("status", "")),
+		"release_first_decision_loop_two_go_smoke": release_first_decision_loop_two_go_smoke,
+		"release_first_decision_loop_two_go_smoke_line": String(release_first_decision_loop_two_go_smoke.get("smoke_line", "")),
+		"release_first_decision_loop_two_go_smoke_gate": String(release_first_decision_loop_two_go_smoke.get("gate", "")),
+		"release_first_decision_loop_two_go_smoke_status": String(release_first_decision_loop_two_go_smoke.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

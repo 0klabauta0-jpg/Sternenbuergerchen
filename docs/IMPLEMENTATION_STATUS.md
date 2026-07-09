@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_967 - Release First Decision Loop Two GO Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_967_release_first_decision_loop_two_go_smoke.md`, `docs/tasks/TASK_966_release_first_decision_loop_two_execution_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoGoSmoke.build_snapshot()` prueft read-only, ob ein TASK_966-Hook mit getrenntem Confirm- und GO-Trace belegt ist.
+- Stand: Der Controller exportiert `get_release_first_decision_loop_two_go_smoke_snapshot()` und spiegelt Smoke-Zeile, Gate und Status im Command-Feedback-Snapshot.
+- Stand: Ein Hook ohne Lauf bleibt ehrlich `needs_loop_two_go_smoke`; ein bestandener Trace braucht vorhandene Confirm-/GO-Pfade, erfolgreiche Resultate, getrennte Schritte und sichtbares Post-GO-Feedback.
+- Risiken/offen: TASK_967 beweist den Smoke ueber Evidence, baut aber noch keinen Runtime-Button fuer den zweiten Griff. TASK_968 sollte den sichtbaren Button/Shortcut an den belegten Pfad anschliessen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_967_release_first_decision_loop_two_go_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_966_release_first_decision_loop_two_execution_hook.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_965_release_first_decision_loop_two_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_968 - Release First Decision Loop Two Runtime Button.
+
 ### TASK_966 - Release First Decision Loop Two Execution Hook
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_966_release_first_decision_loop_two_execution_hook.md`, `docs/tasks/TASK_965_release_first_decision_loop_two_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

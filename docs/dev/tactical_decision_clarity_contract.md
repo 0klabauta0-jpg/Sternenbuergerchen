@@ -150,3 +150,8 @@ Der Snapshot bleibt read-only und setzt fuer jeden zweiten Intent `execution_bou
 TASK_966 macht die zweite Entscheidung anschlussfaehig an vorhandene Bedienpfade. Aus einem ausgewaehlten Intent wird ein Command-Draft, der zeigt, welcher Controller-Pfad beim Bestaetigen genutzt werden soll.
 
 Der Hook bleibt read-only: `auto_confirms = false`, `auto_executes_go = false`, keine Commands und keine Movement-Mutation. HOLD/ADV/BACK muessen auf bestehende Pfade zeigen und GO sichtbar halten. Der naechste Beweis ist `TASK_967 - Release First Decision Loop Two GO Smoke`.
+
+## Release First Decision Loop Two GO Smoke (TASK_967)
+TASK_967 prueft den zweiten Griff als Smoke-Evidence: Der Spielerpfad muss Confirm und GO als getrennte Schritte belegen, die vorhandenen Controller-Pfade nutzen und nach GO sichtbares Feedback erzeugen.
+
+Der Smoke-Snapshot bleibt read-only. Ohne Trace ist der Zustand bewusst `needs_loop_two_go_smoke`; bestandene Evidence routet zu `TASK_968 - Release First Decision Loop Two Runtime Button`, damit der belegte Pfad danach aus der sichtbaren Runtime-Bedienung erreichbar wird.
