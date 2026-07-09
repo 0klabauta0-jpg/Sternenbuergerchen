@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sternenbuergerchen - Spielhandbuch</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0f1519;
+      --panel: #182129;
+      --panel-soft: #202b34;
+      --ink: #edf5f8;
+      --muted: #a8bac4;
+      --line: #3b4d5c;
+      --gold: #ffd34d;
+      --cyan: #5ed9df;
+      --green: #74d99f;
+      --red: #ff8f86;
+      --shadow: rgba(0, 0, 0, 0.28);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        linear-gradient(135deg, rgba(94, 217, 223, 0.08), transparent 28rem),
+        linear-gradient(320deg, rgba(255, 211, 77, 0.08), transparent 32rem),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.58;
+    }
+    header {
+      min-height: 72vh;
+      display: grid;
+      align-items: end;
+      padding: 56px clamp(20px, 6vw, 84px) 36px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(15, 21, 25, 0.52), rgba(15, 21, 25, 0.96)),
+        radial-gradient(circle at 74% 22%, rgba(94, 217, 223, 0.16), transparent 24rem),
+        #111a20;
+    }
+    .hero { max-width: 960px; }
+    .eyebrow {
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    h1, h2, h3 { margin: 0; line-height: 1.12; letter-spacing: 0; }
+    h1 { margin-top: 12px; font-size: clamp(42px, 7vw, 86px); }
+    h2 { font-size: clamp(28px, 3vw, 40px); }
+    h3 { font-size: 20px; color: var(--cyan); }
+    p { margin: 10px 0 0; color: var(--muted); }
+    strong { color: var(--ink); }
+    code { color: var(--gold); }
+    a { color: var(--cyan); }
+    .lead { max-width: 820px; font-size: clamp(18px, 2vw, 22px); color: #d7e5eb; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+    .pill {
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 999px;
+      padding: 6px 11px;
+      background: rgba(255,255,255,0.045);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .pill.good { border-color: rgba(116,217,159,0.45); color: var(--green); }
+    .pill.warn { border-color: rgba(255,211,77,0.52); color: var(--gold); }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(210px, 270px) minmax(0, 1fr);
+      gap: 28px;
+      width: min(1440px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 72px;
+    }
+    nav {
+      position: sticky;
+      top: 16px;
+      align-self: start;
+      display: grid;
+      gap: 8px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(24, 33, 41, 0.9);
+      box-shadow: 0 14px 34px var(--shadow);
+    }
+    nav a {
+      display: block;
+      padding: 8px 10px;
+      border-radius: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    nav a:hover { background: var(--panel-soft); color: var(--ink); }
+    main { min-width: 0; }
+    section {
+      margin-bottom: 18px;
+      padding: clamp(20px, 3vw, 30px);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(24, 33, 41, 0.86);
+      box-shadow: 0 14px 34px var(--shadow);
+    }
+    .section-intro { max-width: 900px; font-size: 17px; color: #d1e0e6; }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 18px; }
+    .card {
+      grid-column: span 4;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      background: var(--panel-soft);
+    }
+    .half { grid-column: span 6; }
+    .wide { grid-column: span 8; }
+    .full { grid-column: 1 / -1; }
+    .callout {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--gold);
+      border-radius: 7px;
+      background: rgba(255, 211, 77, 0.08);
+      color: #e9f2f5;
+    }
+    .callout.good { border-left-color: var(--green); background: rgba(116,217,159,0.08); }
+    .callout.info { border-left-color: var(--cyan); background: rgba(94,217,223,0.08); }
+    ul, ol { margin: 10px 0 0; padding-left: 22px; color: var(--muted); }
+    li { margin: 7px 0; }
+    .flow { display: grid; gap: 10px; margin-top: 18px; }
+    .step {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 13px;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.035);
+    }
+    .num {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #16120a;
+      font-weight: 800;
+    }
+    .status-list { display: grid; gap: 10px; margin-top: 16px; }
+    .status {
+      display: grid;
+      grid-template-columns: 112px 1fr;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.035);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .tag { color: var(--green); font-weight: 800; }
+    .tag.warn { color: var(--gold); }
+    .tag.bad { color: var(--red); }
+    footer {
+      padding: 28px clamp(20px, 6vw, 84px);
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      background: #10161a;
+    }
+    @media (max-width: 980px) {
+      header { min-height: 58vh; }
+      .layout { grid-template-columns: 1fr; }
+      nav { position: static; }
+      .card, .half, .wide { grid-column: 1 / -1; }
+      .status { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <div class="eyebrow">Spielhandbuch und Projektueberblick</div>
+      <h1>Sternenbuergerchen</h1>
+      <p class="lead">Ein Commander-gesteuertes Echtzeit-Taktikspiel: Du fuehrst Fireteams, planst Dropships und Einsaetze, liest die Lage, gibst Befehle und laesst deine Leute die gefaehrliche Arbeit ausfuehren.</p>
+      <div class="meta-row">
+        <span class="pill good">Godot 4.6.2</span>
+        <span class="pill good">Commander-Taktik</span>
+        <span class="pill good">Singleplayer-Release-Pfad im Aufbau</span>
+        <span class="pill warn">Multiplayer-faehig vorbereitet</span>
+        <span class="pill warn">Stand: 2026-07-09</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="Kapitel">
+      <a href="#idee">1. Die Idee</a>
+      <a href="#spielerrolle">2. Deine Rolle</a>
+      <a href="#ablauf">3. Spielablauf</a>
+      <a href="#funktionen">4. Was schon drin ist</a>
+      <a href="#mission">5. Mission und Kampf</a>
+      <a href="#entscheidung">6. Entscheidungslesbarkeit</a>
+      <a href="#multiplayer">7. Multiplayer-Gedanke</a>
+      <a href="#architektur">8. Architektur</a>
+      <a href="#stand">9. Aktueller Stand</a>
+      <a href="#roadmap">10. Was noch fehlt</a>
+      <a href="#glossar">11. Glossar</a>
+    </nav>
+
+    <main>
+      <section id="idee">
+        <h2>1. Die Idee</h2>
+        <p class="section-intro">Sternenbuergerchen soll kein hektisches Klickspiel werden, in dem du jede einzelne Figur wie eine Marionette ziehst. Die Grundidee ist ein taktisches Commander-Spiel: Du entscheidest, was passieren soll. Deine Fireteams setzen es nach Lage, Rolle, Formation, Moral, Sicht und Befehl selbst um.</p>
+        <div class="grid">
+          <article class="card">
+            <h3>Commander statt Einzelsoldat</h3>
+            <p>Du steuerst nicht jeden NPC direkt. Du gibst Fireteams Auftraege: bewegen, halten, flankieren, sichern, nehmen, Feuerregeln setzen.</p>
+          </article>
+          <article class="card">
+            <h3>Lesbare Taktik</h3>
+            <p>Gute Entscheidungen entstehen, wenn du vorher siehst, was gefaehrlich ist: Pfad, Zielposition, Sichtlinie, Risiko, Kontaktmeldung.</p>
+          </article>
+          <article class="card">
+            <h3>Meta plus Einsatz</h3>
+            <p>Homebase und FOB sind Staging-Orte. Dort stellst du Teams, Loadouts und Dropships zusammen. Der eigentliche Druck entsteht im Einsatz.</p>
+          </article>
+        </div>
+        <div class="callout info">Das Spiel soll sich spaeter so anfuehlen: Du bist nicht der beste Schuetze im Raum. Du bist die Person, die entscheidet, welches Team wann welchen Raum betritt.</div>
+      </section>
+
+      <section id="spielerrolle">
+        <h2>2. Deine Rolle im Spiel</h2>
+        <p class="section-intro">Du bist der Commander. Du hast Informationen, aber nie perfekte Sicherheit. Du siehst Fireteams, Dropships, Kontakte, Risiken und Ziele. Daraus machst du einen Plan.</p>
+        <div class="grid">
+          <article class="card half">
+            <h3>Was du direkt machst</h3>
+            <ul>
+              <li>Fireteams zusammenstellen und auswaehlen.</li>
+              <li>Loadouts und Rollen vorbereiten.</li>
+              <li>Dropships beladen und zur Mission schicken.</li>
+              <li>Landezonen waehlen und Teams absetzen.</li>
+              <li>Bewegungsziele, Haltungen und Feuerregeln geben.</li>
+              <li>Auf Kontaktmeldungen, Verwundete, Friendly-Fire-Risiken und Missionsziele reagieren.</li>
+            </ul>
+          </article>
+          <article class="card half">
+            <h3>Was deine Teams machen</h3>
+            <ul>
+              <li>Sie laufen nicht blind als Pixelklumpen, sondern folgen Fireteam-Logik.</li>
+              <li>Sie suchen Deckung, halten Bereiche, feuern oder halten Feuer je nach Befehl.</li>
+              <li>Sie koennen Ziele sehen, verlieren, melden oder nur ungefaehr einschaetzen.</li>
+              <li>Sie sollen spaeter durch Skills, Rollen und Erfahrung besser oder eigenwilliger werden.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="ablauf">
+        <h2>3. Der Spielablauf</h2>
+        <p class="section-intro">Der rote Faden ist bewusst einfach. Komplexitaet entsteht nicht dadurch, dass du durch viele Menues musst, sondern dadurch, dass deine Entscheidungen Folgen haben.</p>
+        <div class="flow">
+          <div class="step"><div class="num">1</div><div><strong>Homebase</strong><p>Hier startet der Spielerpfad. Du siehst verfuegbare Leute, Fireteams, Missionsauswahl und den naechsten sinnvollen Griff.</p></div></div>
+          <div class="step"><div class="num">2</div><div><strong>Team und Loadout</strong><p>Du stellst ein Fireteam zusammen, pruefst Rollen, Waffen und Empfehlungen. Schwere Waffen, Sniper, Raketenwerfer und andere Loadouts sind als Auswahlpfad vorbereitet.</p></div></div>
+          <div class="step"><div class="num">3</div><div><strong>Dropship und Start</strong><p>Das Fireteam wird einem Dropship zugeordnet. Pilot, Payload, Boarding und Startbereitschaft muessen zusammenpassen.</p></div></div>
+          <div class="step"><div class="num">4</div><div><strong>Landezone und Drop</strong><p>In der Mission waehlt der Spieler eine LZ, setzt das Dropship ab und bekommt den ersten taktischen Griff.</p></div></div>
+          <div class="step"><div class="num">5</div><div><strong>Erster Befehl</strong><p>Vor GO soll ein Move als Vorschau lesbar sein: Ghost, Pfad, ETA, Risiko und Sichtlage. GO bestaetigt den Plan.</p></div></div>
+          <div class="step"><div class="num">6</div><div><strong>Kontakt und Feuerwechsel</strong><p>Wenn Gegner erkannt werden, entstehen Contact Reports, CONTACT FIRE, Fire-Lanes, Event-Log-Eintraege und taktischer Druck.</p></div></div>
+          <div class="step"><div class="num">7</div><div><strong>Ergebnis und Rueckkehr</strong><p>Missionen sollen spaeter mit Debrief, Verwundeten, Erfahrung, Material und naechsten Entscheidungen zur Homebase zurueckfuehren.</p></div></div>
+        </div>
+      </section>
+
+      <section id="funktionen">
+        <h2>4. Was aktuell schon drin ist</h2>
+        <p class="section-intro">Viele Systeme sind schon vorhanden, aber nicht alle fuehlen sich fertig an. Diese Liste beschreibt deshalb nicht nur "existiert im Code", sondern auch, welche Spielidee dahinter steckt.</p>
+        <div class="grid">
+          <article class="card">
+            <h3>Homebase-Start</h3>
+            <p>Der Singleplayer-Start wird repariert und normalisiert, wenn alte lokale Saves oder halbe Roster den Start blockieren wuerden.</p>
+          </article>
+          <article class="card">
+            <h3>Fireteams</h3>
+            <p>Fireteams haben IDs, Karten, Runtime-Zustand, Leader, Mitglieder und Befehlsoberflaechen. Mehrere Teams und Dropships sind als Ziel wichtig.</p>
+          </article>
+          <article class="card">
+            <h3>Dropships</h3>
+            <p>Teams koennen in Dropships, zur Mission, zur LZ und in den Drop gebracht werden. HUD und Runtime wurden gegen widerspruechliche Anzeigezustaende gehaertet.</p>
+          </article>
+          <article class="card">
+            <h3>Map und Terrain</h3>
+            <p>Iso-/3D-Terrain, LOS-Blocker, Cover, Hoehen, Bodenplatten, Stationselemente und groessere Testkarten existieren als laufende Arbeitsbasis.</p>
+          </article>
+          <article class="card">
+            <h3>Combat</h3>
+            <p>Combat ist datenbasiert. Es geht nicht um echte Ballistik, sondern um Sicht, Reichweite, Risiko, Deckung, Treffer, Feedback und lesbare Entscheidungen.</p>
+          </article>
+          <article class="card">
+            <h3>Contact Reports</h3>
+            <p>Gegnerwissen kann als Meldung mit Typ, ungefaehrer Position, Confidence und Alter angezeigt werden. Das ist spannender als perfekte Allwissenheit.</p>
+          </article>
+          <article class="card">
+            <h3>Order Preview</h3>
+            <p>Bewegungsziele koennen als Vorschau mit Ghost, Pfad, Distanz, ETA und Risiko beschrieben werden, ohne den Befehl schon auszufuehren.</p>
+          </article>
+          <article class="card">
+            <h3>Line-of-Fire</h3>
+            <p>Das System kann Threat-/LOS-Daten lesen: freie Linie, blockierte Linie, Friendly-Fire-Risiko und Gegnerdruck.</p>
+          </article>
+          <article class="card">
+            <h3>Feuerdisziplin</h3>
+            <p>Hold Fire, Return Fire, Fire at Will und Suppress sind als wichtige Commander-Hebel angelegt, damit Nicht-Schiessen auch eine Entscheidung ist.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="mission">
+        <h2>5. Mission und Kampf</h2>
+        <p class="section-intro">Der Kampf soll nicht dadurch interessant sein, dass sofort jemand stirbt. Interessant wird er, wenn du unter Unsicherheit eine Position waehlen musst und die Konsequenzen vorher halbwegs lesen kannst.</p>
+        <div class="grid">
+          <article class="card half">
+            <h3>Der erste Feuerkontakt</h3>
+            <p>Der aktuelle Release-Pfad konzentriert sich stark auf den ersten echten Feuerwechsel. CONTACT FIRE soll in den passenden HUD-Bereichen, im Event Log und im Weltbild auftauchen. Die Fire-Lane soll sichtbar machen, von wo nach wo geschossen wird.</p>
+            <p>Der Grund fuer die vielen kleinen Polishes: Im echten Fenster muss der Spieler zuerst die Handlung sehen, nicht nur Text, Marker oder technische Debug-Werte.</p>
+          </article>
+          <article class="card half">
+            <h3>Friendly Fire und Risiko</h3>
+            <p>Friendly Fire ist Teil der Spielidee. Das heisst: Sichtlinien, Deckung und eigene Leute im Feuerkorridor sind nicht nur Deko. Sie sollen beeinflussen, ob ein Befehl sicher, riskant oder unsinnig ist.</p>
+          </article>
+          <article class="card half">
+            <h3>Deckung und Sicht</h3>
+            <p>Cover und LOS sind zentrale Spielinformationen. Eine Wand, ein Fahrzeug, ein Zaun oder ein Busch sollen nicht nur anders aussehen, sondern andere Konsequenzen haben: Sicht blockieren, Schutz geben, nur Tarnung bieten oder gar nichts stoppen.</p>
+          </article>
+          <article class="card half">
+            <h3>Spannung ohne Soforttod</h3>
+            <p>Langfristig soll Druck auch durch Suppression, Verzoegerung, schlechte Aim-Werte, verweigerte Bewegung, Munition, Verwundete und Moral entstehen. Das Fundament dafuer ist Lesbarkeit.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="entscheidung">
+        <h2>6. Tactical Decision Clarity</h2>
+        <p class="section-intro">Das ist einer der wichtigsten Begriffe fuer das Projekt. Gemeint ist: Der Spieler soll nicht raten, warum ein Befehl gut oder schlecht ist. Das Spiel soll vor der Bestaetigung zeigen, was voraussichtlich passiert.</p>
+        <div class="status-list">
+          <div class="status"><div class="tag">Preview</div><div>Ein Klick auf ein Ziel erzeugt zuerst eine Vorschau: Ziel-Ghost, Pfad, Distanz und grobe ETA.</div></div>
+          <div class="status"><div class="tag">Threat</div><div>Die Zielposition wird als <code>safe</code>, <code>risky</code>, <code>suicidal</code> oder <code>unknown</code> bewertet, je nachdem welche Informationen vorhanden sind.</div></div>
+          <div class="status"><div class="tag">LOS</div><div>Line-of-Fire zeigt, ob eigene oder gegnerische Linien frei, blockiert oder durch Friendly Fire gefaehrlich sind.</div></div>
+          <div class="status"><div class="tag">Contacts</div><div>Gegnerwissen kommt nicht als perfekte Wahrheit, sondern als Contact Report mit Alter, Unsicherheit und Confidence.</div></div>
+          <div class="status"><div class="tag warn">Offen</div><div>Diese Systeme muessen nach dem aktuellen First-Exchange-Gate wieder staerker in den normalen Spielerpfad gezogen werden.</div></div>
+        </div>
+        <div class="callout good">Wenn Bewegung allein schon eine interessante Entscheidung ist, traegt danach auch Combat, KI, Munition, Moral und Multiplayer viel besser.</div>
+      </section>
+
+      <section id="multiplayer">
+        <h2>7. Multiplayer-Gedanke</h2>
+        <p class="section-intro">Multiplayer ist nicht als spaeter Fremdkoerper gedacht. Das Spiel soll schon frueh so gebaut werden, dass Host/Client, Teamzuordnung und getrennte Sichtweisen nicht alles zerbrechen.</p>
+        <div class="grid">
+          <article class="card half">
+            <h3>V1-Gedanke</h3>
+            <p>Im ersten Schritt geht es um Testteams, Host/Join und klare Ownership: Wer fuehrt welches Fireteam, welche Anzeige ist lokal, welche Wahrheit ist autoritativ?</p>
+          </article>
+          <article class="card half">
+            <h3>Warum die Architektur streng ist</h3>
+            <p>Wenn UI die Wahrheit waere, wuerde Multiplayer sofort auseinanderlaufen. Deshalb sollen UI und HUD nur lesen, anzeigen und Commands senden. Die eigentliche Simulation bleibt zentral.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="architektur">
+        <h2>8. Architektur leicht erklaert</h2>
+        <p class="section-intro">Die Architektur ist nicht Selbstzweck. Sie soll verhindern, dass ein Spiel, das mit Singleplayer noch funktioniert, im Multiplayer oder bei groesseren Karten unwartbar wird.</p>
+        <div class="grid">
+          <article class="card">
+            <h3>SimulationRoot</h3>
+            <p>Die autoritative Stelle fuer Gameplay-Mutationen. Wenn sich wirklich etwas im Spielzustand aendert, soll es ueber diesen Pfad laufen.</p>
+          </article>
+          <article class="card">
+            <h3>EventRouter</h3>
+            <p>Die Signal-Drehscheibe. Systeme sollen nicht wild durcheinander greifen, sondern Ereignisse sauber weiterreichen.</p>
+          </article>
+          <article class="card">
+            <h3>Registries</h3>
+            <p>UnitRegistry, FTLRegistry und TerrainRegistry helfen beim schnellen Lookup. Sie ersetzen teure SceneTree-Suchen, sind aber keine zweite Gameplay-Wahrheit.</p>
+          </article>
+          <article class="card">
+            <h3>Tactical Services</h3>
+            <p>Resolver und Analyzer berechnen Lesedaten: Preview, Threat, Contact, Cover, Pfade. Sie sollen planen und beschreiben, nicht heimlich den Spielzustand veraendern.</p>
+          </article>
+          <article class="card">
+            <h3>HUD und UI</h3>
+            <p>Die Oberflaeche zeigt Zustand, gibt Feedback und sendet Commands. Sie darf keine eigene Mission-, Combat-, Fireteam- oder Dropship-Wahrheit erfinden.</p>
+          </article>
+          <article class="card">
+            <h3>Performance</h3>
+            <p>Keine Vollscans im Hotpath, keine per-frame Komplett-Rebuilds grosser UI-Baeume. Dirty-Flags, Snapshots und gezielte Updates sind Pflicht.</p>
+          </article>
+        </div>
+        <div class="callout info">Kurz gesagt: UI ist das Cockpit. SimulationRoot ist der Maschinenraum. Registries sind das Adressbuch. Snapshots sind die Anzeigen, die beide Seiten verstehen.</div>
+      </section>
+
+      <section id="stand">
+        <h2>9. Aktueller Stand</h2>
+        <p class="section-intro">Der Stand ist besser als er sich in der Task-Liste anfuehlt. Die vielen Tasks verdecken, dass ein echter spielbarer Pfad entstanden ist. Gleichzeitig ist noch nicht alles ein rundes Spiel.</p>
+        <div class="status-list">
+          <div class="status"><div class="tag">Stabiler</div><div>Singleplayer-Start, lokale Save-Reparaturen, Fireteam-/Dropship-Pfad und Release-Deep-Links wurden deutlich gehaertet.</div></div>
+          <div class="status"><div class="tag">Spielbarer</div><div>Homebase bis erster Kontakt ist als kontrollierter Pfad erreichbar und wird immer weniger von alten FOB-/Debug-Zustaenden blockiert.</div></div>
+          <div class="status"><div class="tag">Lesbarer</div><div>CONTACT FIRE, Event Log, Mission Control, Selected Fireteam und Fire-Lane sind als erster Kampflesepfad vorhanden.</div></div>
+          <div class="status"><div class="tag warn">Noch offen</div><div>Der aktuelle TASK_944-Befund sagt: Der erste Feuerwechsel ist sichtbar, aber die Fire-Lane ist noch nicht sicher die erste Weltbewegung. TASK_945 muss das entscheiden.</div></div>
+          <div class="status"><div class="tag warn">Schaetzung</div><div>Bis zu einem kleinen ehrlichen Release-Slice: etwa 8 bis 12 fokussierte Tasks. Bis zu einem runden kleinen Spielgefuehl: eher 20 bis 35, je nachdem wie tief Map-Editor, KI und Multiplayer werden.</div></div>
+        </div>
+      </section>
+
+      <section id="roadmap">
+        <h2>10. Was noch fehlt</h2>
+        <p class="section-intro">Die naechsten Schritte sollten nicht wieder alles gleichzeitig wollen. Erst den ersten spielbaren Pfad ehrlich machen, dann ein kleines Szenario, dann groessere Systeme.</p>
+        <div class="grid">
+          <article class="card half">
+            <h3>Naechste 8 bis 12 Tasks</h3>
+            <ol>
+              <li>TASK_945 sauber entscheiden: Second Fix oder Playability-Smoke.</li>
+              <li>First-Exchange-Smoke als echten Spielerpfad laufen lassen.</li>
+              <li>Move Preview, LOS und Threat wieder in den normalen Missionsgriff ziehen.</li>
+              <li>Ein kleines Szenario bauen: 3 Friendlies, 3 Gegner, Deckung, ein Ziel.</li>
+              <li>Fireteam-/Dropship-HUD im echten Durchlauf pruefen.</li>
+              <li>Performance auf groesserer Karte erneut messen.</li>
+              <li>Eine kleine AAR-/Debrief-Rueckmeldung vorbereiten.</li>
+              <li>Handbuch und Ingame-Startfuehrung angleichen.</li>
+            </ol>
+          </article>
+          <article class="card half">
+            <h3>Danach</h3>
+            <ul>
+              <li>AI Intent Bubble als Debug-/Designhilfe.</li>
+              <li>Squad Spacing und Formationen: tight, normal, wide, panic.</li>
+              <li>Hold Fire / Return Fire / Suppress als gut sichtbare ROE-Werkzeuge.</li>
+              <li>Mini After-Action Report, damit Spieler aus Fehlern lernen.</li>
+              <li>Map-Editor-/Builder-Block: Assets, Hoehen, Stationselemente, gute Vorschauen.</li>
+              <li>Host/Client-Szenario mit klarer Team-Ownership.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="glossar">
+        <h2>11. Glossar</h2>
+        <div class="grid">
+          <article class="card"><h3>FTL</h3><p>Fire Team Leader. Die niedrigste Ebene, die der Spieler direkt als Fuehrungsebene beeinflussen soll.</p></article>
+          <article class="card"><h3>Fireteam</h3><p>Kleine Kampfeinheit mit Leader, Rollen, Loadout und gemeinsamer Befehlslogik.</p></article>
+          <article class="card"><h3>FOB</h3><p>Forward Operating Base. Vorgeschobener Staging-Ort zwischen Homebase und Einsatz.</p></article>
+          <article class="card"><h3>LZ</h3><p>Landing Zone. Ort, an dem ein Dropship ein Team absetzt.</p></article>
+          <article class="card"><h3>GO</h3><p>Bestaetigung, dass ein geplanter Befehl wirklich ausgefuehrt wird.</p></article>
+          <article class="card"><h3>CONTACT FIRE</h3><p>Lesbarer Zustand fuer den ersten echten Feuerkontakt: Ein Kontakt ist nicht nur Druck, sondern es wird wirklich geschossen.</p></article>
+          <article class="card"><h3>Threat</h3><p>Gefahrenbewertung einer Position oder Bewegung: sicher, riskant, suizidal oder unbekannt.</p></article>
+          <article class="card"><h3>Snapshot</h3><p>Read-only-Datenpaket fuer UI, Verifier oder Debug. Es beschreibt Zustand, ohne ihn zu veraendern.</p></article>
+          <article class="card"><h3>Read-only</h3><p>Ein System darf lesen und anzeigen, aber keine Gameplay-Wahrheit schreiben.</p></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <footer>
+    <strong>Pflegehinweis:</strong> Diese Seite ist als menschliches Handbuch gedacht. Task-Details, Tests und technische Gates bleiben in Roadmap, Status, Contracts und Reports. Wenn ein System spielerisch stabil wird, sollte diese Seite aktualisiert werden.
+  </footer>
+</body>
+</html>
