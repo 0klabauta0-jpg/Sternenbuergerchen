@@ -24,6 +24,11 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Snapshot-Regel
 `get_command_feedback_snapshot()` ist der Headless-Pruefpunkt fuer Auswahl, #16/#17/#18-Texte, geplante/visualisierte Waypoints und AreaOrders. `TerrainMap3DView.get_render_snapshot()` spiegelt die selektierten Fireteams ueber `order_selected_fireteam_ids` und den aktiven Order-Phase-Index.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
+`get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
+
+Erwartete Lesbarkeit: Ohne Manifest bleibt der Status `needs_round_loop_real_window_capture`; ein trusted Manifest mit offenem manuellen Check bleibt `review_ready`; erst alle Pflichtchecks akzeptieren den Capture und routen zu TASK_1005. Der Snapshot setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release-Firefight-Command-Matrix-Visual-Polish
 `get_release_firefight_command_matrix_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer TASK_836. Der Snapshot darf nur vorhandene Command-Matrix-Buttons, Fire-Rule-Status und den bestehenden TASK_835-Firefight-HUD-Zustand lesen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugen.
 

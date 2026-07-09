@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1004 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1004_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture.md`, `docs/tasks/TASK_1003_release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopRealWindowCapture.build_snapshot()` bewertet einen bereiten TASK_1003-Runtime-Polish-Snapshot plus optionales Capture-Manifest.
+- Stand: Ohne Manifest meldet der Snapshot `needs_round_loop_real_window_capture`; ein trusted Manifest ohne manuelle Sichtabnahme bleibt `review_ready`; alle Pflichtchecks akzeptieren den Capture.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1004 im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad.
+- Risiken/offen: TASK_1004 erzeugt keinen Screenshot und behauptet keinen manuellen Sichttest. TASK_1005 muss aus echter Fensteraufnahme und Sichtnotizen konkrete Visual-Findings schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1004_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture.gd`, Regression TASK_1003, TASK_1002, TASK_1001, `git diff --check`.
+- Naechster Schritt: TASK_1005 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Findings.
+
 ### TASK_1003 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Runtime Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1003_release_first_decision_loop_two_player_loop_micro_objective_round_loop_runtime_polish.md`, `docs/tasks/TASK_1002_release_first_decision_loop_two_player_loop_micro_objective_round_loop_playtest_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

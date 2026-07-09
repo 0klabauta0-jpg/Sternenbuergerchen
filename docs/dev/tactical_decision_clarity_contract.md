@@ -50,6 +50,11 @@ Ein Preview-Eintrag enthaelt mindestens:
 - Threat-Kontext wird als Array/Snapshot uebergeben.
 - Visuals nutzen den bestehenden Order-Payload und Render-Snapshot-Zaehler.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
+TASK_1004 ist der read-only Fensterbeweis-Rahmen fuer den TASK_1003-Round-Loop-Polish. Er erwartet im echten Fenster sichtbare `ROUND`-, `NEXT`- und `GO separat`-Surfaces sowie kurze Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen.
+
+Ohne Capture-Manifest bleibt der Status offen. Ein trusted Manifest ohne erledigte manuelle Sichtabnahme wird nur `review_ready`; akzeptiert wird erst, wenn Fensterstart, korrekter Inhalt, Screenshotpfade, sichtbare Round-/Next-/GO-Grenze, HUD-read-only-Grenze und Multiplayer-Grenze bestaetigt sind. Der Snapshot erzeugt keine Gameplay-Wahrheit und routet danach zu TASK_1005 fuer konkrete Visual-Findings.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 
