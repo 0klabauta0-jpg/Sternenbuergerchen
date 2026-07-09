@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_901 - Release First Exchange Combat Marker Scale And World Noise Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_901_release_first_exchange_combat_marker_scale_world_noise_polish.md`, `docs/tasks/TASK_900_release_first_exchange_combat_focal_elegance_visual_findings.md`, `docs/tasks/TASK_898_release_first_exchange_combat_focal_elegance_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_901 setzt den belegten TASK_900-Befund eng um: Target-Halo und Target-Focus werden kleiner/transparenter, Source-Glow leiser, Source-to-target-Lane schmaler aber lesbar, und Grid-/World-Line-Noise wird fuer den aktiven First-Exchange weiter gedimmt.
+- Stand: `TerrainMap3DView` meldet den Style `task_901_release_first_exchange_combat_marker_scale_world_noise_v1` sowie effektive Marker-/Noise-Werte im Render-Snapshot und in den Weapon-Fire-VFX-Entries.
+- Stand: Der Mission-Controller haengt den neuen Primary3D-Payload-Schalter nur an die bestehende TASK_898-Focal-Elegance-Kette und stellt `get_release_first_exchange_combat_marker_scale_world_noise_polish_snapshot()` read-only bereit.
+- Risiken/offen: TASK_901 ist noch kein neuer echter Fensterbeweis. Der naechste Slice muss frisch exportieren/capturen und den Spielerblick auf kleineren Halo, ruhigeres Raster und klarere Kampfspur pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_901_release_first_exchange_combat_marker_scale_world_noise_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_900_release_first_exchange_combat_focal_elegance_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_898_release_first_exchange_combat_focal_elegance_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_902 - Release First Exchange Combat Marker Scale Real Window Recapture.
+
 ### TASK_900 - Release First Exchange Combat Focal Elegance Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_900_release_first_exchange_combat_focal_elegance_visual_findings.md`, `docs/tasks/TASK_899_release_first_exchange_combat_focal_elegance_real_window_recapture.md`, `docs/tasks/TASK_898_release_first_exchange_combat_focal_elegance_polish.md`, `docs/dev/mission_command_feedback_contract.md`

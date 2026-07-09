@@ -441,6 +441,22 @@ const RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_SOURCE_GLOW_HEIGHT: float = 0
 const RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_SOURCE_GLOW_COLOR: Color = Color(0.62, 0.92, 1.0, 0.36)
 const RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_WORLD_LINE_ALPHA_FACTOR: float = 0.34
 const RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_WORLD_LINE_WIDTH_FACTOR: float = 0.42
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_NOISE_STYLE_ID: String = "task_901_release_first_exchange_combat_marker_scale_world_noise_v1"
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_WIDTH: float = 0.066
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_COLOR: Color = Color(1.0, 0.92, 0.48, 0.64)
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_RADIUS: float = 0.42
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_HEIGHT: float = 0.074
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_COLOR: Color = Color(1.0, 0.90, 0.46, 0.14)
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_RADIUS: float = 0.52
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_HEIGHT: float = 0.086
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_COLOR: Color = Color(1.0, 0.94, 0.54, 0.58)
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_RADIUS: float = 0.17
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_HEIGHT: float = 0.088
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_COLOR: Color = Color(0.68, 0.94, 1.0, 0.28)
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_NOISE_ALPHA: float = 0.28
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_SHADOW_ALPHA: float = 0.20
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_ALPHA_FACTOR: float = 0.22
+const RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_WIDTH_FACTOR: float = 0.34
 const RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS: PackedStringArray = [
 	"CONTACT",
 	"MOVE",
@@ -988,12 +1004,16 @@ func get_selected_grid_positions() -> Array:
 func set_order_visual_payload(order_payload: Dictionary) -> void:
 	_order_payload_apply_count += 1
 	var previous_insertion_residue_declutter_active: bool = _is_release_firefight_insertion_residue_declutter_active()
+	var previous_marker_scale_world_noise_active: bool = _is_release_first_exchange_combat_marker_scale_world_noise_active()
 	var next_signature: String = _build_order_visual_signature(order_payload)
 	if next_signature == _order_visual_signature:
 		_order_payload = order_payload.duplicate(true)
+		_refresh_tile_grid_materials_for_release_polish()
 		return
 	_order_visual_signature = next_signature
 	_order_payload = order_payload.duplicate(true)
+	if previous_marker_scale_world_noise_active != _is_release_first_exchange_combat_marker_scale_world_noise_active():
+		_refresh_tile_grid_materials_for_release_polish()
 	if _order_payload.has("contact_density_heatmap_enabled"):
 		var contact_density_enabled: bool = bool(_order_payload.get("contact_density_heatmap_enabled", false))
 		if contact_density_enabled != _contact_density_overlay_enabled:
@@ -1823,6 +1843,24 @@ func get_render_snapshot() -> Dictionary:
 		"world_combat_focal_elegance_source_glow_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_SOURCE_GLOW_COLOR.a if _is_release_first_exchange_combat_focal_elegance_active() else 0.0,
 		"world_combat_focal_elegance_debugginess_reduced": _is_release_first_exchange_combat_focal_elegance_active(),
 		"world_combat_focal_elegance_policy": "soft_source_to_target_lane_ring_halo_subtle_source_glow" if _is_release_first_exchange_combat_focal_elegance_active() else "default",
+		"release_first_exchange_combat_marker_scale_world_noise_polish_active": _is_release_first_exchange_combat_marker_scale_world_noise_active(),
+		"release_first_exchange_combat_marker_scale_world_noise_polish_style_id": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_NOISE_STYLE_ID if _is_release_first_exchange_combat_marker_scale_world_noise_active() else "",
+		"world_combat_marker_scale_lane_visible": _is_release_first_exchange_combat_marker_scale_world_noise_active(),
+		"world_combat_marker_scale_lane_width": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_WIDTH if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 0.0,
+		"world_combat_marker_scale_lane_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_COLOR.a if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 0.0,
+		"world_combat_marker_scale_target_halo_visible": _is_release_first_exchange_combat_marker_scale_world_noise_active(),
+		"world_combat_marker_scale_target_halo_radius": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_RADIUS if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 0.0,
+		"world_combat_marker_scale_target_halo_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_COLOR.a if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 0.0,
+		"world_combat_marker_scale_target_focus_radius": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_RADIUS if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 0.0,
+		"world_combat_marker_scale_source_glow_visible": _is_release_first_exchange_combat_marker_scale_world_noise_active(),
+		"world_combat_marker_scale_source_glow_radius": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_RADIUS if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 0.0,
+		"world_combat_marker_scale_source_glow_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_COLOR.a if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 0.0,
+		"world_combat_marker_scale_grid_noise_dimming_active": _is_release_first_exchange_combat_marker_scale_world_noise_active(),
+		"world_combat_marker_scale_grid_noise_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_NOISE_ALPHA if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 1.0,
+		"world_combat_marker_scale_world_line_dimming_active": _is_release_first_exchange_combat_marker_scale_world_noise_active(),
+		"world_combat_marker_scale_world_line_alpha_factor": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_ALPHA_FACTOR if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 1.0,
+		"world_combat_marker_scale_world_line_width_factor": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_WIDTH_FACTOR if _is_release_first_exchange_combat_marker_scale_world_noise_active() else 1.0,
+		"world_combat_marker_scale_policy": "smaller_target_halo_quieter_source_glow_reduced_grid_world_noise" if _is_release_first_exchange_combat_marker_scale_world_noise_active() else "default",
 		"movement_step_sfx_count": _movement_step_sfx_count,
 		"movement_step_sfx_suppressed_rate_limit_count": _movement_step_sfx_suppressed_rate_limit_count,
 		"movement_step_sfx_entries": _movement_step_sfx_entries.duplicate(true),
@@ -1854,6 +1892,8 @@ func get_render_snapshot() -> Dictionary:
 		"requested_lz_position": _drop_payload.get("requested_lz_position", _drop_payload.get("target_lz_position", _drop_payload.get("lz_position", null))),
 		"resolved_lz_position": _drop_payload.get("resolved_lz_position", _drop_payload.get("actual_landing_position", null)),
 		"tile_grid_line_count": _tile_grid_line_count,
+		"tile_grid_line_effective_alpha": _get_tile_grid_line_color_for_release_polish(true).a,
+		"tile_grid_shadow_effective_alpha": _get_tile_grid_line_color_for_release_polish(false).a,
 		"contact_count": _contact_count,
 		"contact_entries": _get_contact_visual_entries(),
 		"contact_density_heatmap": get_contact_density_heatmap_snapshot(),
@@ -5165,7 +5205,17 @@ func _is_release_first_exchange_combat_focal_elegance_active() -> bool:
 	return bool(_mission_status_payload.get("release_first_exchange_combat_focal_elegance_polish", false))
 
 
+func _is_release_first_exchange_combat_marker_scale_world_noise_active() -> bool:
+	if not _is_release_first_exchange_combat_focal_elegance_active():
+		return false
+	if bool(_order_payload.get("release_first_exchange_combat_marker_scale_world_noise_polish", false)):
+		return true
+	return bool(_mission_status_payload.get("release_first_exchange_combat_marker_scale_world_noise_polish", false))
+
+
 func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> Color:
+	if _is_release_first_exchange_combat_marker_scale_world_noise_active():
+		return Color(base_color.r, base_color.g, base_color.b, clampf(base_color.a * RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_ALPHA_FACTOR, 0.04, base_color.a))
 	if _is_release_first_exchange_combat_focal_elegance_active():
 		return Color(base_color.r, base_color.g, base_color.b, clampf(base_color.a * RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_WORLD_LINE_ALPHA_FACTOR, 0.06, base_color.a))
 	if _is_release_first_exchange_world_combat_focal_hierarchy_active():
@@ -5176,6 +5226,8 @@ func _get_release_fire_exchange_focused_world_line_color(base_color: Color) -> C
 
 
 func _get_release_fire_exchange_focused_world_line_width(base_width: float) -> float:
+	if _is_release_first_exchange_combat_marker_scale_world_noise_active():
+		return maxf(base_width * RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_LINE_WIDTH_FACTOR, 0.01)
 	if _is_release_first_exchange_combat_focal_elegance_active():
 		return maxf(base_width * RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_WORLD_LINE_WIDTH_FACTOR, 0.01)
 	if _is_release_first_exchange_world_combat_focal_hierarchy_active():
@@ -6560,6 +6612,7 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 	var first_exchange_direction_impact_clarity_active: bool = _is_release_first_exchange_fire_direction_impact_clarity_polish_active()
 	var first_exchange_world_combat_focal_active: bool = _is_release_first_exchange_world_combat_focal_hierarchy_active()
 	var first_exchange_combat_focal_elegance_active: bool = _is_release_first_exchange_combat_focal_elegance_active()
+	var first_exchange_combat_marker_scale_world_noise_active: bool = _is_release_first_exchange_combat_marker_scale_world_noise_active()
 	var muzzle_flash_width: float = WEAPON_FIRE_MUZZLE_FLASH_WIDTH
 	var trace_width: float = WEAPON_FIRE_TRACE_WIDTH
 	var impact_radius: float = WEAPON_FIRE_IMPACT_RADIUS
@@ -6613,6 +6666,11 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		target_focus_radius = RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_TARGET_FOCUS_RADIUS
 		target_focus_height = RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_TARGET_FOCUS_HEIGHT
 		target_focus_color = RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_TARGET_FOCUS_COLOR
+	if first_exchange_combat_marker_scale_world_noise_active:
+		trace_width = RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_WIDTH
+		target_focus_radius = RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_RADIUS
+		target_focus_height = RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_HEIGHT
+		target_focus_color = RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_COLOR
 	var muzzle_texture_available: bool = texture != null
 	var muzzle_texture_card_visible: bool = muzzle_texture_available and WEAPON_FIRE_MUZZLE_TEXTURE_CARDS_ENABLED
 	if muzzle_texture_card_visible:
@@ -6648,7 +6706,11 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		_add_wide_line3d(_order_root, _world_to_surface_3d_position(arrow_left, 0.875), _world_to_surface_3d_position(target_position, 0.875), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireDirectionArrowLeft_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH)
 		_add_wide_line3d(_order_root, _world_to_surface_3d_position(arrow_right, 0.875), _world_to_surface_3d_position(target_position, 0.875), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireDirectionArrowRight_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ARROW_WIDTH)
 		_add_marker3d(_order_root, target_position, RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_COLOR, "WeaponFireImpactRelationshipAnchor_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_RADIUS, RELEASE_FIRST_EXCHANGE_FIRE_DIRECTION_ANCHOR_HEIGHT, 12, 0.88)
-	if first_exchange_combat_focal_elegance_active:
+	if first_exchange_combat_marker_scale_world_noise_active:
+		_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.91), _world_to_surface_3d_position(target_position, 0.91), RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_COLOR, "WeaponFireWorldCombatMarkerScaleLane_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_WIDTH)
+		_add_marker3d(_order_root, muzzle_position, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_COLOR, "WeaponFireWorldCombatMarkerScaleSourceGlow_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_RADIUS, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_HEIGHT, 12, 0.89)
+		_add_marker3d(_order_root, target_position, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_COLOR, "WeaponFireWorldCombatMarkerScaleTargetHalo_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_RADIUS, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_HEIGHT, 20, 0.905)
+	elif first_exchange_combat_focal_elegance_active:
 		_add_wide_line3d(_order_root, _world_to_surface_3d_position(muzzle_position, 0.91), _world_to_surface_3d_position(target_position, 0.91), RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_LANE_COLOR, "WeaponFireWorldCombatElegantLane_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_LANE_WIDTH)
 		_add_marker3d(_order_root, muzzle_position, RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_SOURCE_GLOW_COLOR, "WeaponFireWorldCombatElegantSourceGlow_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_SOURCE_GLOW_RADIUS, RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_SOURCE_GLOW_HEIGHT, 12, 0.89)
 		_add_marker3d(_order_root, target_position, RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_TARGET_HALO_COLOR, "WeaponFireWorldCombatElegantTargetHalo_%s" % _sanitize_node_name(event_id), RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_TARGET_HALO_RADIUS, RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_TARGET_HALO_HEIGHT, 20, 0.905)
@@ -6746,6 +6808,18 @@ func _add_weapon_fire_vfx_visual(fire_event: Dictionary) -> void:
 		"world_combat_focal_elegance_source_glow_radius": RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_SOURCE_GLOW_RADIUS if first_exchange_combat_focal_elegance_active else 0.0,
 		"world_combat_focal_elegance_source_glow_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_FOCAL_ELEGANCE_SOURCE_GLOW_COLOR.a if first_exchange_combat_focal_elegance_active else 0.0,
 		"world_combat_focal_elegance_debugginess_reduced": first_exchange_combat_focal_elegance_active,
+		"combat_marker_scale_world_noise_polish_active": first_exchange_combat_marker_scale_world_noise_active,
+		"combat_marker_scale_world_noise_polish_style_id": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_WORLD_NOISE_STYLE_ID if first_exchange_combat_marker_scale_world_noise_active else "",
+		"world_combat_marker_scale_lane_visible": first_exchange_combat_marker_scale_world_noise_active,
+		"world_combat_marker_scale_lane_width": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_WIDTH if first_exchange_combat_marker_scale_world_noise_active else 0.0,
+		"world_combat_marker_scale_lane_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_LANE_COLOR.a if first_exchange_combat_marker_scale_world_noise_active else 0.0,
+		"world_combat_marker_scale_target_halo_visible": first_exchange_combat_marker_scale_world_noise_active,
+		"world_combat_marker_scale_target_halo_radius": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_RADIUS if first_exchange_combat_marker_scale_world_noise_active else 0.0,
+		"world_combat_marker_scale_target_halo_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_HALO_COLOR.a if first_exchange_combat_marker_scale_world_noise_active else 0.0,
+		"world_combat_marker_scale_target_focus_radius": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_TARGET_FOCUS_RADIUS if first_exchange_combat_marker_scale_world_noise_active else 0.0,
+		"world_combat_marker_scale_source_glow_visible": first_exchange_combat_marker_scale_world_noise_active,
+		"world_combat_marker_scale_source_glow_radius": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_RADIUS if first_exchange_combat_marker_scale_world_noise_active else 0.0,
+		"world_combat_marker_scale_source_glow_alpha": RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_SOURCE_GLOW_COLOR.a if first_exchange_combat_marker_scale_world_noise_active else 0.0,
 		"fire_direction_arrow_visible": direction_arrow_visible,
 		"fire_direction_arrow_world": direction_arrow_world,
 		"fire_direction_arrow_width": direction_arrow_width,
@@ -10850,9 +10924,11 @@ func _make_unshaded_material(color: Color, transparent: bool = false) -> Standar
 func _make_editor_grid_material(is_highlight: bool = true) -> StandardMaterial3D:
 	var key: String = TILE_GRID_LINE_MATERIAL_KEY if is_highlight else TILE_GRID_LINE_SHADOW_MATERIAL_KEY
 	if _material_cache.has(key):
-		return _material_cache[key] as StandardMaterial3D
+		var cached_material := _material_cache[key] as StandardMaterial3D
+		cached_material.albedo_color = _get_tile_grid_line_color_for_release_polish(is_highlight)
+		return cached_material
 	var material := StandardMaterial3D.new()
-	material.albedo_color = TILE_GRID_LINE_COLOR if is_highlight else TILE_GRID_LINE_SHADOW_COLOR
+	material.albedo_color = _get_tile_grid_line_color_for_release_polish(is_highlight)
 	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	material.blend_mode = BaseMaterial3D.BLEND_MODE_MIX
@@ -10862,6 +10938,22 @@ func _make_editor_grid_material(is_highlight: bool = true) -> StandardMaterial3D
 	material.disable_receive_shadows = true
 	_material_cache[key] = material
 	return material
+
+
+func _get_tile_grid_line_color_for_release_polish(is_highlight: bool) -> Color:
+	var color: Color = TILE_GRID_LINE_COLOR if is_highlight else TILE_GRID_LINE_SHADOW_COLOR
+	if _is_release_first_exchange_combat_marker_scale_world_noise_active():
+		color.a = minf(color.a, RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_NOISE_ALPHA if is_highlight else RELEASE_FIRST_EXCHANGE_COMBAT_MARKER_SCALE_GRID_SHADOW_ALPHA)
+	return color
+
+
+func _refresh_tile_grid_materials_for_release_polish() -> void:
+	if _material_cache.has(TILE_GRID_LINE_MATERIAL_KEY):
+		var highlight_material := _material_cache[TILE_GRID_LINE_MATERIAL_KEY] as StandardMaterial3D
+		highlight_material.albedo_color = _get_tile_grid_line_color_for_release_polish(true)
+	if _material_cache.has(TILE_GRID_LINE_SHADOW_MATERIAL_KEY):
+		var shadow_material := _material_cache[TILE_GRID_LINE_SHADOW_MATERIAL_KEY] as StandardMaterial3D
+		shadow_material.albedo_color = _get_tile_grid_line_color_for_release_polish(false)
 
 
 func _make_editor_selection_material(is_border: bool) -> StandardMaterial3D:
