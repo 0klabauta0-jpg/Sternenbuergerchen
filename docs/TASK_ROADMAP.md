@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_977 - Release First Decision Loop Two Player Loop HUD Wiring (implementiert): Die TASK_976-Choices `SECURE / PUSH / FLANK / RESET` werden read-only als Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen plus Choice-Chips exportiert.
 - TASK_976 - Release First Decision Loop Two Player Loop Extension (implementiert): Der bestandene zweite Acceptance-Slice erzeugt read-only den naechsten Spielergriff `SECURE / PUSH / FLANK / RESET`.
 - TASK_975 - Release First Decision Loop Two Acceptance Slice (implementiert): Akzeptierte TASK_974-Findings werden mit einem read-only Ablauf-Trace als kleiner `2ND -> GO -> Feedback`-Acceptance-Slice bewertet.
 - TASK_974 - Release First Decision Loop Two Recapture Visual Findings (implementiert): Der TASK_973-Recapture wird als read-only Sichtbefund geschnitten; Reibung routet zu engem Visual Polish, sauberer Befund zum Loop-Two-Acceptance-Slice.

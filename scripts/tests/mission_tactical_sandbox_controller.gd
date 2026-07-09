@@ -47,6 +47,8 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_GO_SMOKE_SCRIPT: GDScript = preload("res:/
 const RELEASE_FIRST_DECISION_LOOP_TWO_RUNTIME_BUTTON_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_runtime_button.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_visual_polish.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYABILITY_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_playability_smoke.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_EXTENSION_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_extension.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_HUD_WIRING_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_hud_wiring.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21014,6 +21016,22 @@ func get_release_first_decision_loop_two_playability_smoke_snapshot(visual_polis
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYABILITY_SMOKE_SCRIPT.call("build_snapshot", visual_polish, playability_trace)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_extension_snapshot(source_acceptance_override: Dictionary = {}, tactical_context_override: Dictionary = {}) -> Dictionary:
+	var source_acceptance: Dictionary = source_acceptance_override.duplicate(true) if not source_acceptance_override.is_empty() else _build_release_first_decision_loop_two_player_loop_extension_source()
+	var tactical_context: Dictionary = tactical_context_override.duplicate(true) if not tactical_context_override.is_empty() else _build_release_first_decision_loop_two_player_loop_tactical_context()
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_EXTENSION_SCRIPT.call("build_snapshot", source_acceptance, tactical_context)).duplicate(true)
+
+
+func get_release_first_decision_loop_two_player_loop_hud_wiring_snapshot(player_loop_extension_override: Dictionary = {}, surfaces_override: Dictionary = {}) -> Dictionary:
+	var player_loop_extension: Dictionary = player_loop_extension_override.duplicate(true) if not player_loop_extension_override.is_empty() else get_release_first_decision_loop_two_player_loop_extension_snapshot()
+	var surfaces: Dictionary = surfaces_override.duplicate(true) if not surfaces_override.is_empty() else {
+		"selected_fireteam_status_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
+		"mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH),
+		"command_feedback_text": _get_label_text(command_feedback_label_path),
+	}
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_HUD_WIRING_SCRIPT.call("build_snapshot", player_loop_extension, surfaces)).duplicate(true)
+
+
 func confirm_release_first_decision_loop_two_runtime_button(selected_choice_id: String = "") -> bool:
 	var runtime_button: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot()
 	if not bool(runtime_button.get("button_enabled", false)):
@@ -21109,6 +21127,41 @@ func _build_release_first_decision_loop_two_playability_smoke_trace(visual_polis
 		"creates_command": false,
 		"creates_movement": false,
 		"sets_multiplayer_truth": false,
+	}
+
+
+func _build_release_first_decision_loop_two_player_loop_extension_source() -> Dictionary:
+	var playability_smoke: Dictionary = get_release_first_decision_loop_two_playability_smoke_snapshot()
+	var passed: bool = bool(playability_smoke.get("playability_smoke_passed", false)) and String(playability_smoke.get("gate", "")) == "loop_two_playability_smoke_passed"
+	var smoke_line: String = String(playability_smoke.get("smoke_line", playability_smoke.get("post_go_feedback_line", ""))).strip_edges()
+	return {
+		"schema": "sternenbuergerchen.release_first_decision_loop_two_acceptance_slice.v1",
+		"task_id": "TASK_975",
+		"source_task_id": "TASK_974",
+		"status": "loop_two_acceptance_slice_passed" if passed else "needs_acceptance_slice_trace",
+		"gate": "loop_two_acceptance_slice_passed" if passed else "needs_loop_two_acceptance_slice_trace",
+		"acceptance_slice_passed": passed,
+		"acceptance_line": smoke_line if passed else "",
+		"answered_player_question_count": 5 if passed else 0,
+		"recommended_next_task": "TASK_976 - Release First Decision Loop Two Player Loop Extension",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
+func _build_release_first_decision_loop_two_player_loop_tactical_context() -> Dictionary:
+	return {
+		"objective_pressure": "medium",
+		"known_contact_pressure": "medium",
+		"team_condition": "stable",
+		"ammo_pressure": "low",
 	}
 
 
@@ -23968,6 +24021,15 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_visual_polish,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_extension: Dictionary = get_release_first_decision_loop_two_player_loop_extension_snapshot()
+	var release_first_decision_loop_two_player_loop_hud_wiring: Dictionary = get_release_first_decision_loop_two_player_loop_hud_wiring_snapshot(
+		release_first_decision_loop_two_player_loop_extension,
+		{
+			"selected_fireteam_status_text": selected_fireteam_status_label_text,
+			"mission_control_status_text": mission_control_status_text,
+			"command_feedback_text": _get_label_text(command_feedback_label_path),
+		}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24073,6 +24135,13 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_playability_smoke": release_first_decision_loop_two_playability_smoke,
 		"release_first_decision_loop_two_playability_smoke_line": String(release_first_decision_loop_two_playability_smoke.get("smoke_line", "")),
 		"release_first_decision_loop_two_playability_smoke_status": String(release_first_decision_loop_two_playability_smoke.get("status", "")),
+		"release_first_decision_loop_two_player_loop_extension": release_first_decision_loop_two_player_loop_extension,
+		"release_first_decision_loop_two_player_loop_extension_line": String(release_first_decision_loop_two_player_loop_extension.get("visible_loop_line", release_first_decision_loop_two_player_loop_extension.get("primary_line", ""))),
+		"release_first_decision_loop_two_player_loop_extension_status": String(release_first_decision_loop_two_player_loop_extension.get("status", "")),
+		"release_first_decision_loop_two_player_loop_hud_wiring": release_first_decision_loop_two_player_loop_hud_wiring,
+		"release_first_decision_loop_two_player_loop_hud_wiring_line": String(release_first_decision_loop_two_player_loop_hud_wiring.get("command_feedback_line", "")),
+		"release_first_decision_loop_two_player_loop_hud_wiring_status": String(release_first_decision_loop_two_player_loop_hud_wiring.get("status", "")),
+		"release_first_decision_loop_two_player_loop_hud_choice_chips": Array(release_first_decision_loop_two_player_loop_hud_wiring.get("hud_choice_chips", [])),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

@@ -200,3 +200,8 @@ Der Acceptance-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_acceptance
 TASK_976 macht aus dem akzeptierten zweiten Griff wieder eine naechste Spielerentscheidung. Erwartet sind vier read-only Choices: `SECURE Bereich sichern`, `PUSH Ziel druecken`, `FLANK Druck drehen` und `RESET neu sammeln`.
 
 Der Extension-Snapshot liefert `NEXT/WHY`-Zeilen und eine Empfehlung aus kleinem taktischem Kontext, erzeugt aber keine Commands, kein Movement und keine Multiplayer-Wahrheit. Der naechste Schritt ist HUD-Wiring in TASK_977, damit diese Choices sichtbar werden.
+
+## Release First Decision Loop Two Player Loop HUD Wiring (TASK_977)
+TASK_977 macht die TASK_976-Choices in den bestehenden HUD-/Command-Feedback-Snapshots sichtbar. Erwartet sind kurze read-only Zeilen fuer Selected Fireteam, Mission Control und Command Feedback sowie vier Choice-Chips fuer `SECURE`, `PUSH`, `FLANK` und `RESET`.
+
+Das Wiring darf keine Choice ausfuehren und kein `GO` bestaetigen. Ohne aktive TASK_976-Quelle bleibt der Snapshot blockiert; mit aktiver Quelle liefert er nur Anzeige- und Sichtbarkeitsdaten. Der naechste Schritt ist ein Choice-Hook in TASK_978.

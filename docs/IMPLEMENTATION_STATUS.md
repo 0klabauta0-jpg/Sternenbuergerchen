@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_977 - Release First Decision Loop Two Player Loop HUD Wiring
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_977_release_first_decision_loop_two_player_loop_hud_wiring.md`, `docs/tasks/TASK_976_release_first_decision_loop_two_player_loop_extension.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopHudWiring.build_snapshot()` macht aus einem aktiven TASK_976-Player-Loop kurze read-only HUD-Zeilen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_976 und TASK_977 im Command-Feedback; TASK_977 liefert Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen plus vier Choice-Chips fuer `SECURE`, `PUSH`, `FLANK`, `RESET`.
+- Stand: Ohne aktive/read-only TASK_976-Quelle bleibt der Snapshot ehrlich blockiert und erzeugt keine Commands, kein Movement, keine Combat-/Damage-Ereignisse und keine Multiplayer-Wahrheit.
+- Risiken/offen: TASK_977 macht die naechsten Choices sichtbar, aber noch nicht als Runtime-Auswahl bedienbar. TASK_978 sollte daraus einen read-only Choice-Hook fuer vorhandene Befehlswege bauen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_977_release_first_decision_loop_two_player_loop_hud_wiring.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_976_release_first_decision_loop_two_player_loop_extension.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_975_release_first_decision_loop_two_acceptance_slice.gd`, `git diff --check`.
+- Naechster Schritt: TASK_978 - Release First Decision Loop Two Player Loop Choice Hook.
+
 ### TASK_976 - Release First Decision Loop Two Player Loop Extension
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_976_release_first_decision_loop_two_player_loop_extension.md`, `docs/tasks/TASK_975_release_first_decision_loop_two_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
