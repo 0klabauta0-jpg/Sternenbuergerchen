@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_963 - Release First Decision Next Playable Loop
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_963_release_first_decision_next_playable_loop.md`, `docs/tasks/TASK_962_release_first_decision_playtest_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionNextPlayableLoop.build_snapshot()` verlaengert den ersten Decision-Griff read-only um eine zweite Auswahl: Winkel halten, gedeckt nachsetzen oder zuruecknehmen.
+- Stand: `MissionTacticalSandboxController.get_release_first_decision_next_playable_loop_snapshot()` exportiert den neuen Loop und `get_command_feedback_snapshot()` spiegelt die kompakte `release_first_decision_next_loop_line`.
+- Stand: Eine Live-Preview bleibt sichtbar, ist aber ehrlich `preview_available_needs_task_962_acceptance`; akzeptierte TASK_962-Findings schalten den Status `ready_for_second_decision_loop`.
+- Risiken/offen: TASK_963 fuehrt keine zweite Entscheidung aus. TASK_964 sollte den Loop im sichtbaren Playtest pruefen und bei Bedarf die HUD-Platzierung polieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_963_release_first_decision_next_playable_loop.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_962_release_first_decision_playtest_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_956_first_decision_micro_scenario_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_964 - Release First Decision Loop Two Playtest.
+
 ### TASK_962 - Release First Decision Playtest Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_962_release_first_decision_playtest_findings.md`, `docs/tasks/TASK_961_release_first_decision_integrated_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

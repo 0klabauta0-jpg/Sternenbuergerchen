@@ -130,3 +130,8 @@ Der Playtest-Rahmen darf keine Erfolgsmeldung automatisch setzen. `manual_playte
 TASK_962 bewertet den TASK_961-Stand als Spielerbefund: korrektes Fenster, Homebase-bis-Mission, Dropship/LZ/Drop, First-Decision-Preview, `GO`, Post-GO-Feedback, Performance, HUD-Read-only-Grenze, Multiplayer-Grenze und allgemeine Spielerlesbarkeit.
 
 Der Findings-Schnitt darf Akzeptanz nicht faken. Ohne manuelle Review bleibt er `needs_manual_review`; bei belegter Reibung routet er zu `TASK_963 - Release First Decision Integrated Polish Followup`; bei sauberer Review darf er zu `TASK_963 - Release First Decision Next Playable Loop` fuehren. Er erzeugt keine Commands, Movement-, Combat-, Damage-, UI- oder Multiplayer-Wahrheit.
+
+## Release First Decision Next Playable Loop (TASK_963)
+TASK_963 macht aus dem ersten `Preview -> GO -> Feedback`-Griff eine zweite kleine Entscheidung. Der Spieler soll nach dem ersten Kontakt nicht nur Feedback sehen, sondern einen klaren Folgegriff lesen: `HOLD` Winkel halten, `ADV` gedeckt nachsetzen oder `BACK` neu sammeln.
+
+Der Loop ist read-only und erzeugt keine zweite Gameplay-Wahrheit. Ohne echte TASK_962-Akzeptanz darf er als Live-Preview sichtbar sein, muss aber `preview_available_needs_task_962_acceptance` melden. Mit akzeptierten TASK_962-Findings wird er `ready_for_second_decision_loop` und routet zu `TASK_964 - Release First Decision Loop Two Playtest`.

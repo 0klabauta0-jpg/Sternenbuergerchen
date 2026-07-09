@@ -39,6 +39,7 @@ const TACTICAL_DECISION_CLARITY_SCENARIO_RETURN_SCRIPT: GDScript = preload("res:
 const ORDER_PREVIEW_THREAT_OVERLAY_PLAYTEST_SCENARIO_SCRIPT: GDScript = preload("res://scripts/mission/order_preview_threat_overlay_playtest_scenario.gd")
 const DECISION_OVERLAY_PLAYABILITY_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/decision_overlay_playability_smoke.gd")
 const FIRST_DECISION_MICRO_SCENARIO_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/first_decision_micro_scenario_polish.gd")
+const RELEASE_FIRST_DECISION_NEXT_PLAYABLE_LOOP_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_next_playable_loop.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -20851,6 +20852,43 @@ func get_first_decision_micro_scenario_polish_snapshot(source_smoke_override: Di
 	return Dictionary(FIRST_DECISION_MICRO_SCENARIO_POLISH_SCRIPT.call("build_snapshot", source_smoke, hud_snapshot, visual_polish)).duplicate(true)
 
 
+func get_release_first_decision_next_playable_loop_snapshot(source_findings_override: Dictionary = {}, first_decision_override: Dictionary = {}, firefight_decision_override: Dictionary = {}) -> Dictionary:
+	var first_decision: Dictionary = first_decision_override.duplicate(true) if not first_decision_override.is_empty() else get_first_decision_micro_scenario_polish_snapshot()
+	var firefight_decision: Dictionary = firefight_decision_override.duplicate(true) if not firefight_decision_override.is_empty() else _build_release_candidate_firefight_decision_line_snapshot()
+	var source_findings: Dictionary = source_findings_override.duplicate(true) if not source_findings_override.is_empty() else _build_release_first_decision_next_loop_live_source_findings(first_decision)
+	var context: Dictionary = {
+		"allow_live_preview_without_task_962_acceptance": source_findings_override.is_empty(),
+	}
+	return Dictionary(RELEASE_FIRST_DECISION_NEXT_PLAYABLE_LOOP_SCRIPT.call("build_snapshot", source_findings, first_decision, firefight_decision, context)).duplicate(true)
+
+
+func _build_release_first_decision_next_loop_live_source_findings(first_decision: Dictionary) -> Dictionary:
+	var first_decision_passed: bool = String(first_decision.get("gate", "")) == "pass" and bool(first_decision.get("read_only", false))
+	return {
+		"schema": "sternenbuergerchen.release_first_decision_playtest_findings.v1",
+		"task_id": "TASK_962",
+		"source_task_id": "TASK_961",
+		"status": "live_preview_only",
+		"accepted": false,
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"positive_findings": [
+			{"id": "first_decision_preview_readable"} if first_decision_passed else {"id": "first_decision_preview_pending"},
+		],
+		"issues": [] if first_decision_passed else [{"id": "first_decision_not_ready"}],
+		"blocking_issues": [],
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
 func _build_first_decision_micro_scenario_smoke_snapshot(hud_snapshot: Dictionary, visual_polish: Dictionary) -> Dictionary:
 	var source_findings: Dictionary = {
 		"schema": "sternenbuergerchen.decision_overlay_real_window_visual_findings.v1",
@@ -23590,6 +23628,11 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_firefight_decision,
 		combat_hud_density
 	)
+	var release_first_decision_next_playable_loop: Dictionary = get_release_first_decision_next_playable_loop_snapshot(
+		{},
+		first_decision_micro_scenario_polish,
+		release_firefight_decision
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -23667,6 +23710,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"first_decision_micro_scenario_polish": first_decision_micro_scenario_polish,
 		"first_decision_micro_scenario_line": String(first_decision_micro_scenario_polish.get("primary_cue_line", "")),
 		"first_decision_micro_scenario_gate": String(first_decision_micro_scenario_polish.get("gate", "")),
+		"release_first_decision_next_playable_loop": release_first_decision_next_playable_loop,
+		"release_first_decision_next_loop_line": String(release_first_decision_next_playable_loop.get("visible_loop_line", release_first_decision_next_playable_loop.get("primary_line", ""))),
+		"release_first_decision_next_loop_status": String(release_first_decision_next_playable_loop.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
