@@ -52,6 +52,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_HUD_WIRING_SCRIPT: GDScript = 
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_choice_hook.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_RUNTIME_CHOICE_BUTTONS_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_runtime_choice_buttons.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_CONFIRM_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_choice_confirm_smoke.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_visual_polish.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -8324,21 +8325,37 @@ func _apply_release_first_decision_loop_two_runtime_button_polish(active: bool) 
 func _apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(active: bool) -> void:
 	var snapshot: Dictionary = get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot()
 	var specs: Array = Array(snapshot.get("button_specs", []))
+	var visual_polish: Dictionary = get_release_first_decision_loop_two_player_loop_visual_polish_snapshot({}, snapshot)
+	var visual_specs_by_choice_id: Dictionary = {}
+	for visual_spec_variant in Array(visual_polish.get("button_visual_specs", [])):
+		var visual_spec := Dictionary(visual_spec_variant)
+		visual_specs_by_choice_id[String(visual_spec.get("choice_id", ""))] = visual_spec
 	for spec_variant in specs:
 		var spec := Dictionary(spec_variant)
 		var button := get_node_or_null(NodePath(String(spec.get("slot_path", "")))) as Button
 		if button == null:
 			continue
+		var choice_id: String = String(spec.get("choice_id", ""))
+		var visual_spec: Dictionary = Dictionary(visual_specs_by_choice_id.get(choice_id, {}))
 		var button_enabled: bool = active and bool(spec.get("button_enabled", false))
 		button.text = String(spec.get("button_text", button.text))
-		button.tooltip_text = String(spec.get("tooltip", button.tooltip_text))
+		button.tooltip_text = String(visual_spec.get("button_tooltip", spec.get("tooltip", button.tooltip_text)))
 		button.disabled = not button_enabled
 		button.mouse_filter = Control.MOUSE_FILTER_STOP if button_enabled else Control.MOUSE_FILTER_IGNORE
 		button.clip_text = true
+		if not visual_spec.is_empty():
+			button.custom_minimum_size = Vector2(
+				maxf(button.custom_minimum_size.x, float(visual_spec.get("button_min_width", 78.0))),
+				maxf(button.custom_minimum_size.y, float(visual_spec.get("button_min_height", 46.0)))
+			)
 		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_button", spec.duplicate(true))
 		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_button_task", "TASK_979")
-		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_id", String(spec.get("choice_id", "")))
+		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_id", choice_id)
 		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_separate_go_required", bool(spec.get("separate_go_required", true)))
+		if not visual_spec.is_empty():
+			button.set_meta("release_first_decision_loop_two_player_loop_visual_polish", visual_spec.duplicate(true))
+			button.set_meta("release_first_decision_loop_two_player_loop_visual_polish_task", "TASK_983")
+			button.set_meta("release_first_decision_loop_two_player_loop_visual_polish_style_id", String(visual_spec.get("visual_style_id", "")))
 		if button_enabled:
 			button.self_modulate = Color(0.82, 0.98, 0.88, 1.0)
 		var pressed_callable := Callable(self, "_on_release_first_decision_loop_two_player_loop_choice_button_pressed").bind(button)
@@ -21081,6 +21098,39 @@ func get_release_first_decision_loop_two_player_loop_choice_confirm_smoke_snapsh
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_CONFIRM_SMOKE_SCRIPT.call("build_snapshot", runtime_buttons, choice_hook, trace)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_visual_polish_snapshot(source_findings_override: Dictionary = {}, runtime_buttons_override: Dictionary = {}) -> Dictionary:
+	var runtime_buttons: Dictionary = runtime_buttons_override.duplicate(true) if not runtime_buttons_override.is_empty() else get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot()
+	var source_findings: Dictionary = source_findings_override.duplicate(true) if not source_findings_override.is_empty() else _build_release_first_decision_loop_two_player_loop_visual_polish_source(runtime_buttons)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_VISUAL_POLISH_SCRIPT.call("build_snapshot", source_findings, runtime_buttons)).duplicate(true)
+
+
+func _build_release_first_decision_loop_two_player_loop_visual_polish_source(runtime_buttons: Dictionary) -> Dictionary:
+	var active: bool = bool(runtime_buttons.get("active", false)) and int(runtime_buttons.get("button_count", 0)) >= 4
+	return {
+		"schema": "sternenbuergerchen.release_first_decision_loop_two_player_loop_visual_findings.v1",
+		"task_id": "TASK_982",
+		"source_task_id": "TASK_981",
+		"status": "ready_for_player_loop_visual_polish" if active else "needs_manual_review",
+		"manual_review_done": active,
+		"issue_count": 1 if active else 0,
+		"issues": [
+			{
+				"id": "runtime_choice_buttons_need_polish",
+				"text": "Vier Runtime-Choices brauchen stabile Groesse, Tooltips und GO-Grenze.",
+			},
+		] if active else [],
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
 func confirm_release_first_decision_loop_two_player_loop_choice_button(selected_choice_id: String = "") -> bool:
 	var runtime_buttons: Dictionary = get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot()
 	var normalized_choice_id: String = selected_choice_id.strip_edges()
@@ -24188,6 +24238,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_choice_hook,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_visual_polish: Dictionary = get_release_first_decision_loop_two_player_loop_visual_polish_snapshot(
+		{},
+		release_first_decision_loop_two_player_loop_runtime_choice_buttons
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24311,6 +24365,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_choice_confirm_smoke": release_first_decision_loop_two_player_loop_choice_confirm_smoke,
 		"release_first_decision_loop_two_player_loop_choice_confirm_smoke_line": String(release_first_decision_loop_two_player_loop_choice_confirm_smoke.get("smoke_line", "")),
 		"release_first_decision_loop_two_player_loop_choice_confirm_smoke_status": String(release_first_decision_loop_two_player_loop_choice_confirm_smoke.get("status", "")),
+		"release_first_decision_loop_two_player_loop_visual_polish": release_first_decision_loop_two_player_loop_visual_polish,
+		"release_first_decision_loop_two_player_loop_visual_polish_line": String(release_first_decision_loop_two_player_loop_visual_polish.get("choice_group_line", "")),
+		"release_first_decision_loop_two_player_loop_visual_polish_status": String(release_first_decision_loop_two_player_loop_visual_polish.get("status", "")),
+		"release_first_decision_loop_two_player_loop_visual_polish_button_specs": Array(release_first_decision_loop_two_player_loop_visual_polish.get("button_visual_specs", [])),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

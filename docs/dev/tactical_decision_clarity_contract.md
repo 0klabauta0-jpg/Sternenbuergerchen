@@ -230,3 +230,8 @@ Der Capture-Snapshot bleibt read-only und akzeptiert erst nach manueller Sichtab
 TASK_982 trennt den technischen TASK_981-Capture vom eigentlichen Spielerblick. Bewertet werden sichtbare/lesbare `SECURE/PUSH/FLANK/RESET`-Buttons, beobachteter Choice-Confirm, lesbares Confirm-Feedback, getrenntes `GO`, keine Ausfuehrung vor `GO`, sichtbare Smoke-Zeile, HUD-read-only-Grenze, Multiplayer-Grenze und Gesamtlesbarkeit.
 
 Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_manual_review`; bei Reibung routet er zu `TASK_983 - Release First Decision Loop Two Player Loop Visual Polish`; bei sauberem Befund zu `TASK_983 - Release First Decision Loop Two Player Loop Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Visual Polish (TASK_983)
+TASK_983 macht die vier Runtime-Choices lesbarer, ohne neue Befehlslogik einzufuehren. Aus TASK_982-Findings und TASK_979-Button-Specs entstehen Mindestgroessen, Tooltips, Style-IDs, Gruppenlinie und Confirm-Feedback-Zeile fuer `SECURE/PUSH/FLANK/RESET`.
+
+Der Snapshot bleibt read-only. Die Buttons duerfen visuell ruhiger und lesbarer werden und Metadaten tragen, aber keine Commands, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit erzeugen. Der naechste Beweis ist `TASK_984 - Release First Decision Loop Two Player Loop Acceptance Slice`.

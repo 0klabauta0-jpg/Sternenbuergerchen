@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_983 - Release First Decision Loop Two Player Loop Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_983_release_first_decision_loop_two_player_loop_visual_polish.md`, `docs/tasks/TASK_982_release_first_decision_loop_two_player_loop_visual_findings.md`, `docs/tasks/TASK_979_release_first_decision_loop_two_player_loop_runtime_choice_buttons.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopVisualPolish.build_snapshot()` erzeugt aus TASK_982-Findings und TASK_979-Runtime-Buttons vier Button-Visual-Specs fuer `SECURE/PUSH/FLANK/RESET`.
+- Stand: Die Visual-Specs liefern Mindestgroessen, Tooltips mit `GO separat`, Style-IDs, Gruppenlinie und Confirm-Feedback-Zeile.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_983 im Command-Feedback und kann die Visual-Specs auf die bestehenden Choice-Buttons anwenden.
+- Risiken/offen: TASK_983 beweist noch keinen akzeptierten Gesamtloop. TASK_984 sollte den gepolishten Vier-Choice-Loop als Acceptance-Slice bewerten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_983_release_first_decision_loop_two_player_loop_visual_polish.gd`, Regression TASK_982 bis TASK_980, `git diff --check`.
+- Naechster Schritt: TASK_984 - Release First Decision Loop Two Player Loop Acceptance Slice.
+
 ### TASK_982 - Release First Decision Loop Two Player Loop Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_982_release_first_decision_loop_two_player_loop_visual_findings.md`, `docs/tasks/TASK_981_release_first_decision_loop_two_player_loop_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
