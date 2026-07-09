@@ -10,6 +10,26 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_917 - Release First Exchange Final World Read Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_917_release_first_exchange_final_world_read_recapture.md`, `docs/tasks/TASK_916_release_first_exchange_fire_lane_world_read_final_polish.md`, `docs/tasks/TASK_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_917 legt einen eigenen Recapture-/Review-Rahmen an den TASK_916-Final-World-Read-Polish.
+- Stand: `capture_release_first_exchange_final_world_read_recapture.ps1` wiederverwendet den TASK_914-Window-Handle-Pfad und schreibt eigene TASK_917-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFinalWorldReadRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Fire-Lane als erste Weltbewegung, Richtunganker, ruhiges Label/Halo-Cluster und bedienbare Command-Surfaces.
+- Risiken/offen: TASK_917 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_918 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_917_release_first_exchange_final_world_read_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_916_release_first_exchange_fire_lane_world_read_final_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_918 - Release First Exchange Final World Read Visual Findings.
+
+### TASK_916 - Release First Exchange Fire Lane World Read Final Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_916_release_first_exchange_fire_lane_world_read_final_polish.md`, `docs/tasks/TASK_915_release_first_exchange_fire_lane_world_read_acceptance_visual_findings.md`, `docs/tasks/TASK_913_release_first_exchange_fire_lane_world_read_acceptance_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_916 setzt den TASK_915-Restbefund eng im bestehenden Primary3D-Fire-Lane-/World-Read-Pfad um.
+- Stand: Der Mission-Controller haengt `release_first_exchange_fire_lane_world_read_final_polish` nur an die bestehende TASK_913-Kette und stellt `get_release_first_exchange_fire_lane_world_read_final_polish_snapshot()` read-only bereit.
+- Stand: `TerrainMap3DView` meldet den Style `task_916_release_first_exchange_fire_lane_world_read_final_v1`; Fire-Lane-Core und Source-/Target-Anker werden final etwas staerker, waehrend Target-Halo, Welt-Fire-Label, Grid und Weltlinien weiter zuruecktreten.
+- Risiken/offen: TASK_916 ist noch kein echter Fensterbeweis. Der naechste Slice muss frisch recapturen und pruefen, ob der Final-Polish im echten Fenster als erste Weltbewegung gelesen wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_916_release_first_exchange_fire_lane_world_read_final_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_915_release_first_exchange_fire_lane_world_read_acceptance_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_913_release_first_exchange_fire_lane_world_read_acceptance_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_917 - Release First Exchange Final World Read Recapture.
+
 ### TASK_915 - Release First Exchange Fire Lane World Read Acceptance Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_915_release_first_exchange_fire_lane_world_read_acceptance_visual_findings.md`, `docs/tasks/TASK_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.md`, `docs/tasks/TASK_913_release_first_exchange_fire_lane_world_read_acceptance_polish.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +38,7 @@
 - Stand: Positive Befunde werden erhalten: finaler CONTACT-FIRE-Source-Snapshot, trusted Window-Handle-Capture, TASK_913-Acceptance-Style und TASK_910-World-Read-Basis.
 - Risiken/offen: Ohne manuellen Sichtbefund bleibt der Snapshot `needs_manual_review`. Bei Restreibung empfiehlt TASK_915 einen engen Final-Polish; bei Akzeptanz einen Playability-Smoke.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_915_release_first_exchange_fire_lane_world_read_acceptance_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.gd`, `git diff --check`.
-- Naechster Schritt: TASK_916 - Release First Exchange Playability Smoke oder TASK_916 - Release First Exchange Fire Lane World Read Final Polish, abhaengig vom Sichtbefund.
+- Naechster Schritt: TASK_916 - Release First Exchange Fire Lane World Read Final Polish.
 
 ### TASK_914 - Release First Exchange Fire Lane World Read Acceptance Recapture
 - Status: implementiert im Arbeitsstand

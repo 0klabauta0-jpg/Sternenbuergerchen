@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - aktueller Spielstand nach TASK_915</title>
+  <title>Sternenbuergerchen Zwischenbericht - aktueller Spielstand nach TASK_917</title>
   <style>
     :root {
       color-scheme: dark;
@@ -80,10 +80,10 @@
     }
   </style>
 </head>
-<body data-report-id="spielstand_zwischenbericht_task914_current_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
+<body data-report-id="spielstand_zwischenbericht_task917_current_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Stand 2026-07-09: Was zuletzt am Spiel passiert ist, was davon im Spielerflow ankommt, wo es noch reibt und was ich als naechstes weiterziehe. Dieser Bericht ist ein aktueller Arbeitsstand nach TASK_915: TASK_913 setzt den engen Acceptance-Polish im Weltbild um, TASK_914 stellt den echten Window-Handle-Recapture-Rahmen bereit, und TASK_915 schneidet daraus den read-only Spielerblick fuer die naechste Entscheidung.</p>
+    <p>Stand 2026-07-09: Was zuletzt am Spiel passiert ist, was davon im Spielerflow ankommt, wo es noch reibt und was ich als naechstes weiterziehe. Dieser Bericht ist ein aktueller Arbeitsstand nach TASK_917: TASK_913 setzt den engen Acceptance-Polish im Weltbild um, TASK_914 stellt den echten Window-Handle-Recapture-Rahmen bereit, TASK_915 schneidet daraus den read-only Spielerblick, TASK_916 setzt den finalen engen Weltlese-Polish um, und TASK_917 legt den naechsten echten Fensterbeweisrahmen bereit.</p>
     <div class="meta-row">
       <span class="pill good">Singleplayer-Releasepfad begehbar</span>
       <span class="pill good">CONTACT FIRE sichtbar in #17/#18/#19</span>
@@ -95,7 +95,9 @@
       <span class="pill good">TASK_913 Polish umgesetzt</span>
       <span class="pill good">TASK_914 Recapture-Rahmen umgesetzt</span>
       <span class="pill good">TASK_915 Findings umgesetzt</span>
-      <span class="pill warn">TASK_916 Entscheidung folgt</span>
+      <span class="pill good">TASK_916 Final-Polish umgesetzt</span>
+      <span class="pill good">TASK_917 Recapture-Rahmen umgesetzt</span>
+      <span class="pill warn">TASK_918 Findings folgt</span>
       <span class="pill">Report read-only</span>
     </div>
   </header>
@@ -121,7 +123,7 @@
             TASK_909 hat den echten TASK_908-Fensterblick read-only bewertet. Ergebnis: CONTACT FIRE ist in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar. Der offene Punkt ist enger geworden: Im Weltbild liest man nicht mehr "gar nichts", sondern noch zu spaet die eigentliche Schussbewegung Quelle -> Ziel.
           </div>
           <div class="status-box" style="margin-top:12px;">
-            TASK_910 ist deshalb als Micro-Polish umgesetzt: Label/Halo/Marker treten weiter zurueck, waehrend Fire-Lane-Core und Source-/Target-Beziehung staerker die erste Lesung fuehren. TASK_913 staerkt Fire-Lane-Core und Richtunganker weiter; TASK_914 baut dafuer den eigenen Fenster-Capture-Rahmen, und TASK_915 bewertet daraus, ob ein Playability-Smoke reicht oder ein letzter enger Weltlese-Polish noetig ist.
+            TASK_910 ist deshalb als Micro-Polish umgesetzt: Label/Halo/Marker treten weiter zurueck, waehrend Fire-Lane-Core und Source-/Target-Beziehung staerker die erste Lesung fuehren. TASK_913 staerkt Fire-Lane-Core und Richtunganker weiter; TASK_914 baut dafuer den eigenen Fenster-Capture-Rahmen, TASK_915 bewertet daraus die Restreibung, TASK_916 setzt den letzten engen Weltlese-Polish auf dieser Kette, und TASK_917 prueft diesen Stand wieder als echtes Fensterartefakt.
           </div>
           <div class="status-box info" style="margin-top:12px;">
             Der Bericht selbst schreibt keine Spielwahrheit und startet keine Runtime-Aktion. Er ist eine Arbeitsflaeche fuer Sichttest, Entscheidung und naechste Codex-Schritte: Notizen eintragen, JSON exportieren, danach kann daraus der naechste konkrete Task-Schnitt entstehen.
@@ -146,7 +148,7 @@
             <li>Die Kampfmeldung hat sich vom internen Trace in sichtbare Spielerkommunikation bewegt: CONTACT FIRE kommt in den relevanten HUD-Flaechen an.</li>
             <li>Die Weltansicht wurde schrittweise von Debug-Lesung zu Spiel-Lesung gezogen: FireTrace, Impact, Target-Fokus, Source-to-target-Lane, Source-Glow und Halo wurden in kleinen Slices messbar gemacht.</li>
             <li>Der aktuelle Engpass ist nicht mehr "sieht man Kampf ueberhaupt?", sondern "liest der Blick zuerst die eigentliche Schussbewegung?". Das ist ein gutes, kleineres Problem.</li>
-            <li>Der aktuelle Code-Slice macht daraus einen pruefbaren Sichtpfad: TASK_914 kann nach TASK_913 eigene PNG-/JSON-Artefakte erzeugen, und TASK_915 trennt fehlenden Sichttest, Restreibung und echte Akzeptanz fuer den naechsten Smoke.</li>
+            <li>Der aktuelle Code-Slice macht daraus einen pruefbaren Sichtpfad: TASK_914 kann nach TASK_913 eigene PNG-/JSON-Artefakte erzeugen, TASK_915 trennt fehlenden Sichttest, Restreibung und echte Akzeptanz, TASK_916 poliert nur die belegte Weltlese-Reibung, und TASK_917 erzeugt den naechsten finalen Recapture-Rahmen.</li>
           </ul>
         </article>
       </div>
@@ -177,6 +179,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task913_polish"> TASK_913 Acceptance-Polish umgesetzt.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task914_recapture"> TASK_914 Recapture-Rahmen umgesetzt.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task915_findings"> TASK_915 Acceptance-Findings umgesetzt.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task916_final_polish"> TASK_916 Final-World-Read-Polish umgesetzt.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task917_recapture"> TASK_917 Final-World-Read-Recapture-Rahmen umgesetzt.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.report_updated"> HTML-Zwischenbericht aktualisiert.</label>
         </article>
         <article class="card full">
@@ -196,6 +200,10 @@
             <li><code>scripts/mission/release_first_exchange_fire_lane_world_read_acceptance_recapture.gd</code> und <code>scripts/tests/task_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.gd</code> pruefen Manifest, Pflichtchecks und read-only-Grenzen.</li>
             <li><code>docs/tasks/TASK_915_release_first_exchange_fire_lane_world_read_acceptance_visual_findings.md</code> und <code>scripts/mission/release_first_exchange_fire_lane_world_read_acceptance_visual_findings.gd</code> bewerten den TASK_914-Befund read-only.</li>
             <li><code>scripts/tests/task_915_release_first_exchange_fire_lane_world_read_acceptance_visual_findings.gd</code> prueft, dass TASK_915 keine Commands, FireEvents, DamageEvents, Movement-, Shortcut- oder Multiplayer-Wahrheit mutiert.</li>
+            <li><code>docs/tasks/TASK_916_release_first_exchange_fire_lane_world_read_final_polish.md</code> und <code>scripts/mission/release_first_exchange_fire_lane_world_read_final_polish.gd</code> setzen den finalen engen Weltlese-Polish read-only um.</li>
+            <li><code>scripts/tests/task_916_release_first_exchange_fire_lane_world_read_final_polish.gd</code> prueft Controller, Primary3D-Renderwerte und read-only-Grenzen fuer TASK_916.</li>
+            <li><code>docs/tasks/TASK_917_release_first_exchange_final_world_read_recapture.md</code>, <code>scripts/mission/release_first_exchange_final_world_read_recapture.gd</code> und <code>scripts/tools/capture_release_first_exchange_final_world_read_recapture.ps1</code> legen den finalen echten Fensterbeweisrahmen nach TASK_916 an.</li>
+            <li><code>scripts/tests/task_917_release_first_exchange_final_world_read_recapture.gd</code> prueft Manifest, Pflichtchecks und read-only-Grenzen fuer TASK_917.</li>
             <li><code>docs/reports/spielstand_zwischenbericht_task910_in_progress_2026_07_09.html</code> ist diese aktualisierte Arbeits-/Playtest-Workbench.</li>
           </ul>
         </article>
@@ -237,10 +245,10 @@
           <h2>Aktuelle Reibung</h2>
           <ul class="list">
             <li><strong>Weltbild-Hierarchie:</strong> TASK_913 poliert Fire-Lane/Core/Anker gegen FIRE/CONTACT-Weltlabel und Halo; TASK_914 kann den echten Fensterbeweis erzeugen.</li>
-            <li><strong>Schussbewegung:</strong> Quelle -> Ziel ist im Renderpfad staerker priorisiert; TASK_915 bewertet jetzt read-only, ob das fuer den Spielerblick reicht.</li>
+            <li><strong>Schussbewegung:</strong> Quelle -> Ziel ist im Renderpfad jetzt final staerker priorisiert; TASK_917 kann den echten Fensterblick dafuer erzeugen.</li>
             <li><strong>Bottom-HUD:</strong> weiterhin dicht. Akut nicht der groesste Blocker, aber fuer laengere Playtests bleibt es ein Thema.</li>
             <li><strong>TASK_914 Restgrenze:</strong> Der Rahmen ist gebaut, aber ein Screenshot wird nicht automatisch als akzeptiert gewertet.</li>
-            <li><strong>Fensterakzeptanz:</strong> TASK_915 trennt fehlenden Sichttest, Restreibung und Akzeptanz fuer TASK_916.</li>
+            <li><strong>Fensterakzeptanz:</strong> TASK_917 ist ein Beweisrahmen, aber noch keine Akzeptanz. TASK_918 muss den echten Screenshot read-only auswerten.</li>
             <li><strong>Untracked lokal:</strong> <code>builds/</code> liegt weiter untracked im Arbeitsbaum und wird nicht fuer diesen Bericht angefasst.</li>
           </ul>
         </article>
@@ -249,6 +257,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="risks.no_gameplay_truth"> Kein neuer Gameplay-State im Report.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="risks.task914_not_manual_acceptance"> TASK_914 nicht als manuelle Akzeptanz missverstehen.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="risks.acceptance_findings_done"> TASK_915 Findings-Schnitt erledigt.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="risks.final_polish_done"> TASK_916 Final-Polish erledigt.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="risks.final_recapture_ready"> TASK_917 Recapture-Rahmen erledigt.</label>
           <label class="checkline"><input type="checkbox" data-export-key="risks.bottom_hud"> Bottom-HUD spaeter separat polieren.</label>
         </article>
         <article class="card full">
@@ -266,17 +276,18 @@
             <li>HTML-Zwischenbericht aktuell halten und mit JSON-Export als Arbeitsnotiz nutzbar machen.</li>
             <li>TASK_914-Verifier gruen halten und den Capture-Rahmen nicht als Akzeptanz missverstehen.</li>
             <li>TASK_915-Verifier gruen halten und den Findings-Schnitt nicht als automatischen Sichttest missverstehen.</li>
-            <li>Als naechster Slice TASK_916: Bei Akzeptanz Playability-Smoke, bei Restreibung enger Final-World-Read-Polish.</li>
+            <li>TASK_916-Verifier gruen halten und den Final-Polish nicht als echten Fensterbeweis missverstehen.</li>
+            <li>TASK_917-Verifier gruen halten und den Recapture-Rahmen nicht als manuelle Akzeptanz missverstehen.</li>
+            <li>Als naechster Slice TASK_918: TASK_917-PNG/Manifest read-only auswerten und dann Playability-Smoke oder Restpolish entscheiden.</li>
           </ol>
         </article>
         <article class="card">
           <h2>Meine Empfehlung</h2>
-          <p>Ich wuerde als naechstes TASK_916 aus TASK_915 ableiten und nicht parallel wieder an Editor, Assets oder grossen Taktiksystemen drehen. Wenn der Sichtbefund akzeptiert, gehen wir in einen kurzen First-Exchange-Playability-Smoke; wenn nicht, nur in einen letzten engen Weltlese-Polish.</p>
+          <p>Ich wuerde als naechstes TASK_918 bauen und nicht parallel wieder an Editor, Assets oder grossen Taktiksystemen drehen. Nach TASK_917 brauchen wir den ehrlichen Findings-Schnitt: liest man die Fire-Lane jetzt wirklich zuerst, oder muss die Arbeit in einen Playability-Smoke uebergehen?</p>
           <label style="display:block; margin-top:12px;">Prioritaet
             <select data-export-key="next.priority">
-              <option value="task916_decision">TASK_916 Entscheidung</option>
-              <option value="task916_smoke">TASK_916 Playability Smoke</option>
-              <option value="task916_polish">TASK_916 Final Polish</option>
+              <option value="task918_findings">TASK_918 Findings</option>
+              <option value="playability_smoke">Danach Playability Smoke</option>
               <option value="longer_playtest">Laengeren Playtest starten</option>
               <option value="editor">Editor/Mapbau wieder aufnehmen</option>
             </select>
@@ -289,7 +300,7 @@
             <li>Kein neues Missionssystem.</li>
             <li>Keine neue HUD-Wahrheit fuer FireEvents.</li>
             <li>Kein grosser Editor-Umbau mitten im Release-Firefight-Slice.</li>
-            <li>Kein "fertig" ohne echten Fensterbefund und TASK_916-Entscheidung.</li>
+            <li>Kein "fertig" ohne echten Fensterbefund nach TASK_917/TASK_918.</li>
           </ul>
         </article>
       </div>
@@ -315,7 +326,7 @@
           <label class="checkline"><input type="checkbox" data-export-key="notes.check_contact"> CONTACT FIRE wird in #17/#18/#19 verstanden.</label>
           <label class="checkline"><input type="checkbox" data-export-key="notes.check_lane"> Die Fire-Lane fuehrt den Blick staerker als der Halo.</label>
           <label class="checkline"><input type="checkbox" data-export-key="notes.check_hud"> Bottom-HUD ist nicht zu dicht fuer den naechsten Griff.</label>
-          <label class="checkline"><input type="checkbox" data-export-key="notes.check_next"> TASK_916 als Playability-Smoke oder Final-Polish klingt richtig.</label>
+          <label class="checkline"><input type="checkbox" data-export-key="notes.check_next"> TASK_918 als Findings-Schnitt nach TASK_917 klingt richtig.</label>
         </article>
       </div>
     </section>
@@ -389,9 +400,11 @@
             task_913_status: "implemented_acceptance_polish",
             task_914_status: "implemented_acceptance_recapture_framework",
             task_915_status: "implemented_acceptance_visual_findings",
-            current_friction: "needs_manual_visual_review_or_task916_decision",
-            recommended_next_task: "TASK_916 - Release First Exchange Playability Smoke or Final World Read Polish",
-            optional_manual_capture: "powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_fire_lane_world_read_acceptance_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52"
+            task_916_status: "implemented_final_world_read_polish",
+            task_917_status: "implemented_final_world_read_recapture_framework",
+            current_friction: "needs_read_only_visual_findings_after_final_recapture",
+            recommended_next_task: "TASK_918 - Release First Exchange Final World Read Visual Findings",
+            optional_manual_capture: "powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_final_world_read_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52"
           },
           metadata: {
             branch: "task/release-first-exchange-player-readability-polish-review",
