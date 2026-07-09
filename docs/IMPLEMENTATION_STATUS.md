@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_911 - Release First Exchange Fire Lane World Read Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_911_release_first_exchange_fire_lane_world_read_real_window_recapture.md`, `docs/tasks/TASK_910_release_first_exchange_fire_lane_world_read_micro_polish.md`, `docs/tasks/TASK_908_release_first_exchange_fire_lane_label_cluster_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_911 legt einen eigenen Recapture-/Acceptance-Rahmen an den TASK_910-World-Read-Micro-Polish.
+- Stand: `capture_release_first_exchange_fire_lane_world_read_real_window_recapture.ps1` wiederverwendet den TASK_908-Label-Cluster-Window-Handle-Pfad und schreibt eigene TASK_911-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFireLaneWorldReadRealWindowRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Fire-Lane-vor-Label-/Halo-/Marker-Cluster, leises Weltlabel, zuruecktretenden Target-Halo, Source-to-target-Lane-Core und weiter bedienbare Command-Surfaces.
+- Risiken/offen: TASK_911 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_912 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_911_release_first_exchange_fire_lane_world_read_real_window_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_910_release_first_exchange_fire_lane_world_read_micro_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_912 - Release First Exchange Fire Lane World Read Visual Findings.
+
 ### TASK_910 - Release First Exchange Fire Lane World Read Micro Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_910_release_first_exchange_fire_lane_world_read_micro_polish.md`, `docs/tasks/TASK_909_release_first_exchange_fire_lane_label_cluster_visual_findings.md`, `docs/tasks/TASK_907_release_first_exchange_fire_lane_label_cluster_polish.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -90,7 +90,8 @@
       <span class="pill good">TASK_909 gepusht</span>
       <span class="pill good">TASK_910 umgesetzt</span>
       <span class="pill good">aktueller Zwischenbericht</span>
-      <span class="pill warn">TASK_911 Capture folgt</span>
+      <span class="pill good">TASK_911 Rahmen umgesetzt</span>
+      <span class="pill warn">TASK_912 Findings folgt</span>
       <span class="pill">Report read-only</span>
     </div>
   </header>
@@ -116,7 +117,7 @@
             TASK_909 hat den echten TASK_908-Fensterblick read-only bewertet. Ergebnis: CONTACT FIRE ist in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar. Der offene Punkt ist enger geworden: Im Weltbild liest man noch zu zuerst FIRE/CONTACT-Text, Halo und kleine Marker, nicht sofort die Schussbewegung Quelle -> Ziel.
           </div>
           <div class="status-box" style="margin-top:12px;">
-            TASK_910 ist deshalb als Micro-Polish umgesetzt: Label/Halo/Marker treten weiter zurueck, waehrend Fire-Lane-Core und Source-/Target-Beziehung staerker die erste Lesung fuehren. Der naechste Schritt bleibt ein echter Fenster-Capture, damit die Zahlen nicht mit Spielerblick verwechselt werden.
+            TASK_910 ist deshalb als Micro-Polish umgesetzt: Label/Halo/Marker treten weiter zurueck, waehrend Fire-Lane-Core und Source-/Target-Beziehung staerker die erste Lesung fuehren. TASK_911 legt jetzt den echten Fenster-Capture-Rahmen dafuer an, damit die Zahlen nicht mit Spielerblick verwechselt werden.
           </div>
           <div class="status-box info" style="margin-top:12px;">
             Der Bericht selbst schreibt keine Spielwahrheit und startet keine Runtime-Aktion. Er ist eine Arbeitsflaeche fuer Sichttest, Entscheidung und naechste Codex-Schritte: Notizen eintragen, JSON exportieren, danach kann daraus der naechste konkrete Task-Schnitt entstehen.
@@ -127,7 +128,7 @@
           <div class="stack">
             <div class="metric"><strong>909</strong><span>Findings fertig und gepusht.</span></div>
             <div class="metric"><strong>910</strong><span>Task-Datei, Analyse-Service, Controller-Snapshot und Terrain-Render umgesetzt.</span></div>
-            <div class="metric"><strong>911</strong><span>Naechster echter Fenster-Recapture.</span></div>
+            <div class="metric"><strong>911</strong><span>Recapture-/Acceptance-Rahmen im Arbeitsstand.</span></div>
           </div>
         </article>
         <article class="card full">
@@ -138,7 +139,7 @@
             <li>Die Kampfmeldung hat sich vom internen Trace in sichtbare Spielerkommunikation bewegt: CONTACT FIRE kommt in den relevanten HUD-Flaechen an.</li>
             <li>Die Weltansicht wurde schrittweise von Debug-Lesung zu Spiel-Lesung gezogen: FireTrace, Impact, Target-Fokus, Source-to-target-Lane, Source-Glow und Halo wurden in kleinen Slices messbar gemacht.</li>
             <li>Der aktuelle Engpass ist nicht mehr "sieht man Kampf ueberhaupt?", sondern "liest der Blick zuerst die eigentliche Schussbewegung?". Das ist ein gutes, kleineres Problem.</li>
-            <li>Die naechste Arbeit ist deshalb kein neues Feature, sondern ein echter Fenster-Nachweis fuer den aktuellen Weltbild-Polish.</li>
+            <li>Die naechste Arbeit ist deshalb kein neues Feature, sondern der TASK_912-Findings-Schnitt aus dem TASK_911-Fensternachweis.</li>
           </ul>
         </article>
       </div>
@@ -217,7 +218,7 @@
             <li><strong>Weltbild-Hierarchie:</strong> FIRE/CONTACT-Weltlabel, Halo und kleine Marker ziehen noch mehr Aufmerksamkeit als die Fire-Lane.</li>
             <li><strong>Schussbewegung:</strong> Quelle -> Ziel ist vorhanden, aber noch nicht in jedem echten Fensterblick die erste intuitive Lesung.</li>
             <li><strong>Bottom-HUD:</strong> weiterhin dicht. Akut nicht der groesste Blocker, aber fuer laengere Playtests bleibt es ein Thema.</li>
-            <li><strong>TASK_910 Restgrenze:</strong> Der Micro-Polish ist umgesetzt, aber noch kein echter Fensterbeweis. Erst TASK_911 zeigt, ob der Spielerblick wirklich zuerst die Fire-Lane liest.</li>
+            <li><strong>TASK_911 Restgrenze:</strong> Der Recapture-Rahmen ist umgesetzt, aber der echte Screenshot ist dadurch noch nicht automatisch akzeptiert. Erst TASK_912 bewertet den Spielerblick.</li>
             <li><strong>Untracked lokal:</strong> <code>builds/</code> liegt weiter untracked im Arbeitsbaum und wird nicht fuer diesen Bericht angefasst.</li>
           </ul>
         </article>
@@ -225,7 +226,7 @@
           <h2>Risiko</h2>
           <label class="checkline"><input type="checkbox" checked data-export-key="risks.no_gameplay_truth"> Kein neuer Gameplay-State im Report.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="risks.task910_not_window_proven"> TASK_910 nicht als Fenster-akzeptiert behaupten.</label>
-          <label class="checkline"><input type="checkbox" data-export-key="risks.needs_recapture"> Nach TASK_910 neuer echter Capture noetig.</label>
+          <label class="checkline"><input type="checkbox" data-export-key="risks.needs_visual_findings"> Nach TASK_911 echter Findings-Schnitt noetig.</label>
           <label class="checkline"><input type="checkbox" data-export-key="risks.bottom_hud"> Bottom-HUD spaeter separat polieren.</label>
         </article>
         <article class="card full">
@@ -241,18 +242,18 @@
           <h2>Naechste Arbeitsschritte</h2>
           <ol class="list">
             <li>HTML-Zwischenbericht aktuell halten und mit JSON-Export als Arbeitsnotiz nutzbar machen.</li>
-            <li>Als naechster Code-Slice TASK_911: echter Release-/Window-Recapture, damit der Micro-Polish nicht nur Zahlen im Snapshot ist.</li>
+            <li>TASK_911-Verifier gruen halten und optional echten Release-/Window-Recapture starten.</li>
             <li>Danach TASK_912 als read-only Visual Findings schneiden: Fire-Lane zuerst oder weiter Label/Halo/Marker zuerst?</li>
             <li>Erst wenn der Fensterblick sitzt, wieder laengere Playtests oder groessere Spielsysteme anfassen.</li>
           </ol>
         </article>
         <article class="card">
           <h2>Meine Empfehlung</h2>
-          <p>Ich wuerde als naechstes TASK_911 bauen und nicht parallel wieder an Editor, Assets oder grossen Taktiksystemen drehen. Der erste spielbare Release-Moment braucht jetzt einen echten Fensterbeweis, dann haben alle folgenden Systeme einen besseren Referenzpunkt.</p>
+          <p>Ich wuerde als naechstes TASK_912 schneiden und nicht parallel wieder an Editor, Assets oder grossen Taktiksystemen drehen. Der erste spielbare Release-Moment braucht jetzt die ehrliche Sichtbewertung des neuen Fensterbeweises, dann haben alle folgenden Systeme einen besseren Referenzpunkt.</p>
           <label style="display:block; margin-top:12px;">Prioritaet
             <select data-export-key="next.priority">
-              <option value="capture_task911">TASK_911 Recapture vorbereiten</option>
-              <option value="task912_findings">TASK_912 Findings danach schneiden</option>
+              <option value="capture_task911">TASK_911 Recapture optional ausfuehren</option>
+              <option value="task912_findings">TASK_912 Findings schneiden</option>
               <option value="longer_playtest">Laengeren Playtest starten</option>
               <option value="editor">Editor/Mapbau wieder aufnehmen</option>
             </select>
@@ -360,8 +361,9 @@
             task_909_status: "implemented_and_pushed",
             task_910_status: "implemented_in_current_branch",
             report_status: "updated_current_interim_report",
-            recommended_next_task: "TASK_911 - Release First Exchange Fire Lane World Read Real Window Recapture",
-            following_task: "TASK_912 - Release First Exchange Fire Lane World Read Visual Findings"
+            task_911_status: "implemented_recapture_framework",
+            recommended_next_task: "TASK_912 - Release First Exchange Fire Lane World Read Visual Findings",
+            optional_manual_capture: "powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_fire_lane_world_read_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52"
           },
           metadata: {
             branch: "task/release-first-exchange-player-readability-polish-review",
