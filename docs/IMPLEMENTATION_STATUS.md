@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_929 - Release First Exchange Followup Player Polish Tuning Final Readability Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.md`, `docs/tasks/TASK_928_release_first_exchange_followup_player_polish_tuning_visual_findings.md`, `docs/tasks/TASK_926_release_first_exchange_followup_player_polish_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_929 setzt den TASK_928-Restbefund eng als Presentation-Polish um, statt ohne akzeptierten Spielerblick den Smoke zu starten.
+- Stand: `ReleaseFirstExchangeFollowupPlayerPolishTuningFinalReadabilityPolish.build_snapshot()` verlangt TASK_928-Findings plus passierendes TASK_926-Tuning und prueft Lane/Core, Label/Halo-Rueckzug, Richtunganker und read-only-Grenzen.
+- Stand: `TerrainMap3DView` meldet den Style `task_929_release_first_exchange_followup_player_polish_tuning_final_readability_v1`; Lane/Core werden minimal klarer, Label/Halo/Grid/Weltlinien leiser und Source-/Target-Anker etwas tragender.
+- Risiken/offen: TASK_929 ist noch kein echter Fensterbeweis und kein Playability-Smoke. Der naechste Slice muss frisch recapturen, ob der finale Spielerblick jetzt als erste Weltbewegung funktioniert.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_929_release_first_exchange_followup_player_polish_tuning_final_readability_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_928_release_first_exchange_followup_player_polish_tuning_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_926_release_first_exchange_followup_player_polish_tuning.gd`, `git diff --check`.
+- Naechster Schritt: TASK_930 - Release First Exchange Final Readability Recapture.
+
 ### TASK_928 - Release First Exchange Followup Player Polish Tuning Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_928_release_first_exchange_followup_player_polish_tuning_visual_findings.md`, `docs/tasks/TASK_927_release_first_exchange_followup_player_polish_tuning_recapture.md`, `docs/tasks/TASK_926_release_first_exchange_followup_player_polish_tuning.md`, `docs/tasks/TASK_925_release_first_exchange_followup_player_polish_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
