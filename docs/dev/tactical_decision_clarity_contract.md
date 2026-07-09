@@ -310,3 +310,8 @@ Der Capture-Snapshot bleibt read-only und setzt `manual_review_done` nicht autom
 TASK_998 trennt den technischen TASK_997-Capture vom eigentlichen Spielerblick. Bewertet werden sichtbare Micro-Objective-Outcome-Zeile, Mini-Zielzustand, Next-Step-Zeile, Ergebnislesbarkeit, HUD-read-only-Grenze, Multiplayer-Grenze und korrektes Release-Fenster.
 
 Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_manual_review`; bei Reibung routet er zu `TASK_999 - Release First Decision Loop Two Player Loop Micro Objective Visual Polish`; bei sauberem Befund zu `TASK_999 - Release First Decision Loop Two Player Loop Micro Objective Playability Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Micro Objective Visual Polish (TASK_999)
+TASK_999 definiert die sichtbare Leseflaeche nach einem Micro-Objective-Ausgang. Erwartet werden drei getrennte read-only Surfaces fuer `OUTCOME`, `OBJ` und `NEXT`, damit der Spieler nach einem kleinen Griff sofort versteht, was passiert ist, welches Mini-Ziel gilt und was als naechster Griff angeboten wird.
+
+Der Polish-Snapshot bleibt read-only. Ein falscher oder nicht polishbarer TASK_998-Befund blockiert mit expliziten Blockern; ein polishbarer Befund routet zu `TASK_1000 - Release First Decision Loop Two Player Loop Micro Objective Playability Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

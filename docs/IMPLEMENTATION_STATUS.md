@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_999 - Release First Decision Loop Two Player Loop Micro Objective Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_999_release_first_decision_loop_two_player_loop_micro_objective_visual_polish.md`, `docs/tasks/TASK_998_release_first_decision_loop_two_player_loop_micro_objective_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveVisualPolish.build_snapshot()` erzeugt read-only Surface-Spezifikationen fuer Micro-Objective-Outcome, Mini-Zielzustand und naechsten Griff.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_999 im Command-Feedback als Snapshot, Status, Polish-Zeile und Surface-Specs.
+- Stand: Blockierte oder falsche TASK_998-Quellen bleiben read-only und nennen klare Blocker; polishbare Quellen routen zum Micro-Objective Playability Slice.
+- Risiken/offen: TASK_999 baut noch keine echten sichtbaren Controls um; er macht die naechste spielbare HUD-Umsetzung sicher konsumierbar.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_999_release_first_decision_loop_two_player_loop_micro_objective_visual_polish.gd`, Regression TASK_998, TASK_997, TASK_996, `git diff --check`.
+- Naechster Schritt: TASK_1000 - Release First Decision Loop Two Player Loop Micro Objective Playability Slice.
+
 ### TASK_998 - Release First Decision Loop Two Player Loop Micro Objective Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_998_release_first_decision_loop_two_player_loop_micro_objective_visual_findings.md`, `docs/tasks/TASK_997_release_first_decision_loop_two_player_loop_micro_objective_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Stand: Ohne manuelle Sichtnotiz bleibt der Slice offen; Reibung routet zu Micro-Objective Visual Polish, sauberer Befund zum Micro-Objective Playability Slice.
 - Risiken/offen: TASK_998 verbessert noch keine UI; er trennt nur Befund von technischem Capture.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_998_release_first_decision_loop_two_player_loop_micro_objective_visual_findings.gd`, Regression TASK_997, TASK_996, TASK_995, `git diff --check`.
-- Naechster Schritt: TASK_999 - Release First Decision Loop Two Player Loop Micro Objective Visual Polish oder TASK_999 - Release First Decision Loop Two Player Loop Micro Objective Playability Slice.
+- Naechster Schritt: TASK_999 - Release First Decision Loop Two Player Loop Micro Objective Visual Polish.
 
 ### TASK_997 - Release First Decision Loop Two Player Loop Micro Objective Real Window Capture
 - Status: implementiert im Arbeitsstand

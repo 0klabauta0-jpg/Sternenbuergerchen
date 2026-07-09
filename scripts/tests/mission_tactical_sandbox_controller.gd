@@ -66,6 +66,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_CONFIRM_SMOKE_
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_ACCEPTANCE_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_OUTCOME_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_outcome_slice.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_REAL_WINDOW_CAPTURE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_real_window_capture.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_visual_polish.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21197,6 +21198,50 @@ func get_release_first_decision_loop_two_player_loop_micro_objective_real_window
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_REAL_WINDOW_CAPTURE_SCRIPT.call("build_snapshot", source_outcome, manifest)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_micro_objective_visual_polish_snapshot(source_findings_override: Dictionary = {}, micro_objective_capture_override: Dictionary = {}) -> Dictionary:
+	var micro_objective_capture: Dictionary = micro_objective_capture_override.duplicate(true) if not micro_objective_capture_override.is_empty() else get_release_first_decision_loop_two_player_loop_micro_objective_real_window_capture_snapshot()
+	var source_findings: Dictionary = source_findings_override.duplicate(true) if not source_findings_override.is_empty() else _build_release_first_decision_loop_two_player_loop_micro_objective_visual_polish_source(micro_objective_capture)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_VISUAL_POLISH_SCRIPT.call("build_snapshot", source_findings)).duplicate(true)
+
+
+func _build_release_first_decision_loop_two_player_loop_micro_objective_visual_polish_source(micro_objective_capture: Dictionary) -> Dictionary:
+	var outcome_line: String = String(micro_objective_capture.get("source_outcome_line", "")).strip_edges()
+	var mini_objective_state: String = String(micro_objective_capture.get("source_mini_objective_state", "")).strip_edges()
+	var next_step_line: String = String(micro_objective_capture.get("source_next_step_line", "")).strip_edges()
+	var active: bool = not outcome_line.is_empty() and not mini_objective_state.is_empty() and not next_step_line.is_empty()
+	return {
+		"schema": "sternenbuergerchen.release_first_decision_loop_two_player_loop_micro_objective_visual_findings.v1",
+		"task_id": "TASK_998",
+		"source_task_id": "TASK_997",
+		"status": "ready_for_micro_objective_visual_polish" if active else "needs_manual_review",
+		"manual_review_done": active,
+		"source_selected_micro_objective_id": String(micro_objective_capture.get("source_selected_micro_objective_id", "")),
+		"source_selected_micro_objective_label": String(micro_objective_capture.get("source_selected_micro_objective_label", "")),
+		"source_outcome_line": outcome_line,
+		"source_mini_objective_state": mini_objective_state,
+		"source_next_step_line": next_step_line,
+		"window_screenshot_path": String(micro_objective_capture.get("window_screenshot_path", "")),
+		"desktop_screenshot_path": String(micro_objective_capture.get("desktop_screenshot_path", "")),
+		"issue_count": 1 if active else 0,
+		"issues": [
+			{
+				"id": "micro_objective_surfaces_need_polish",
+				"text": "Micro-Objective-Outcome, Mini-Zielzustand und naechster Griff brauchen getrennte Leseflaechen.",
+			},
+		] if active else [],
+		"read_only": true,
+		"read_only_capture": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
 func _build_release_first_decision_loop_two_player_loop_outcome_visual_polish_source(outcome_capture: Dictionary) -> Dictionary:
 	var outcome_line: String = String(outcome_capture.get("source_outcome_line", "")).strip_edges()
 	var mini_objective_state: String = String(outcome_capture.get("source_mini_objective_state", "")).strip_edges()
@@ -24519,6 +24564,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_micro_objective_outcome_slice,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_micro_objective_visual_polish: Dictionary = get_release_first_decision_loop_two_player_loop_micro_objective_visual_polish_snapshot(
+		{},
+		release_first_decision_loop_two_player_loop_micro_objective_real_window_capture
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24699,6 +24748,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_micro_objective_real_window_capture_status": String(release_first_decision_loop_two_player_loop_micro_objective_real_window_capture.get("status", "")),
 		"release_first_decision_loop_two_player_loop_micro_objective_real_window_capture_gate": String(release_first_decision_loop_two_player_loop_micro_objective_real_window_capture.get("gate", "")),
 		"release_first_decision_loop_two_player_loop_micro_objective_real_window_capture_window_screenshot_path": String(release_first_decision_loop_two_player_loop_micro_objective_real_window_capture.get("window_screenshot_path", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_visual_polish": release_first_decision_loop_two_player_loop_micro_objective_visual_polish,
+		"release_first_decision_loop_two_player_loop_micro_objective_visual_polish_line": String(release_first_decision_loop_two_player_loop_micro_objective_visual_polish.get("micro_objective_polish_line", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_visual_polish_status": String(release_first_decision_loop_two_player_loop_micro_objective_visual_polish.get("status", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_visual_polish_surface_specs": Array(release_first_decision_loop_two_player_loop_micro_objective_visual_polish.get("micro_objective_surface_specs", [])),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
