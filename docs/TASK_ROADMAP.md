@@ -156,7 +156,8 @@ git checkout -b batch/<batch-name>
 - TASK_916 - Release First Exchange Fire Lane World Read Final Polish (implementiert): Den TASK_915-Restbefund eng umsetzen: Fire-Lane-Core und Anker final staerken, Label/Halo/Grid/Weltlinien weiter beruhigen, ohne Combat- oder HUD-Wahrheit zu oeffnen.
 - TASK_917 - Release First Exchange Final World Read Recapture (implementiert): Nach TASK_916 frisch exportieren/capturen und pruefen, ob die Fire-Lane im echten Window-Handle-Screenshot jetzt als erste Weltbewegung gelesen wird.
 - TASK_918 - Release First Exchange Final World Read Visual Findings (implementiert): TASK_917-PNG und Manifest read-only bewerten und entscheiden, ob danach ein First-Exchange-Playability-Smoke reicht.
-- TASK_919 - Release First Exchange Playability Smoke oder Final World Read Followup Fix (naechster Schritt): Bei akzeptiertem TASK_918-Spielerblick den kurzen First-Exchange-Smoke starten; bei Restreibung nur belegte Follow-up-Fixes schneiden.
+- TASK_919 - Release First Exchange Playability Smoke Gate (implementiert): TASK_918-Findings read-only als `manual_review_required`, `followup_fix_required` oder `smoke_ready` auswerten und den Smoke nur bei echter Akzeptanz freigeben.
+- TASK_920 - Release First Exchange Playability Smoke Run oder Final World Read Followup Fix (naechster Schritt): Bei `smoke_ready` den kurzen First-Exchange-Smoke starten; sonst nur belegte Review-/Follow-up-Fixes schneiden.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_919 - Release First Exchange Playability Smoke Gate
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_919_release_first_exchange_playability_smoke_gate.md`, `docs/tasks/TASK_918_release_first_exchange_final_world_read_visual_findings.md`, `docs/tasks/TASK_917_release_first_exchange_final_world_read_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_919 bewertet den TASK_918-Findings-Snapshot read-only und sperrt den Playability-Smoke, solange der Spielerblick nicht akzeptiert ist.
+- Stand: `ReleaseFirstExchangePlayabilitySmokeGate.build_snapshot()` trennt `manual_review_required`, `followup_fix_required` und `smoke_ready`.
+- Stand: Der Smoke bekommt Pflichtchecks fuer EXE/Singleplayer, Homebase-Direct-Sortie, Dropship/LZ/GO, CONTACT-FIRE-Surfaces, Fire-Lane-World-Read, HUD-Wahrheitsgrenzen und Performance-Smoke.
+- Risiken/offen: TASK_919 ersetzt keinen echten Smoke-Run. Ohne akzeptierten TASK_918-Befund bleibt das Gate zu.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_919_release_first_exchange_playability_smoke_gate.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_918_release_first_exchange_final_world_read_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_920 - Release First Exchange Playability Smoke Run bei `smoke_ready`; sonst TASK_920 - Release First Exchange Final World Read Followup Fix oder Manual Window Review.
+
 ### TASK_918 - Release First Exchange Final World Read Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_918_release_first_exchange_final_world_read_visual_findings.md`, `docs/tasks/TASK_917_release_first_exchange_final_world_read_recapture.md`, `docs/tasks/TASK_916_release_first_exchange_fire_lane_world_read_final_polish.md`, `docs/dev/mission_command_feedback_contract.md`
