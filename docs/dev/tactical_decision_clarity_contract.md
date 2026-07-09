@@ -183,6 +183,11 @@ TASK_1030 haelt fest, ob der kleine FOB/NEXT/GO/FEEDBACK-Spielmoment aus dem Han
 
 Der Tester-Run bleibt read-only. Ohne Notizen bleibt er `needs_tester_run`; fehlende Checks werden `needs_tester_run_completion`; konkrete Reibung wird `tester_run_regression_found`; ein sauberer Run setzt `tester_run_ready` und `ready_for_acceptance_review`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und aendert keine Shortcuts.
 
+## Release First Decision Loop Two Player Loop Scenario Tester Run Acceptance (TASK_1031)
+TASK_1031 nimmt einen bereiten TASK_1030-Tester-Run und entscheidet, ob der kleine FOB/NEXT/GO/FEEDBACK-Spielmoment als akzeptierter Release-Griff fuer den naechsten spielbaren Slice gilt.
+
+Die Acceptance bleibt read-only. Ohne Review bleibt sie `needs_acceptance_review`; fehlende Checks bleiben `needs_acceptance_review_completion`; Issue-Flags routen zu TASK_1031-Polish; ein sauberer Review setzt `tester_run_accepted` und `ready_for_next_playable_slice`. Geprueft werden Tester-Run, Release-Dateien, Singleplayer-Pfad, FOB/NEXT/GO/FEEDBACK, Performance, HUD-Grenze, Multiplayer-Grenze, bekannte Risiken und ein benannter naechster spielbarer Slice. Sie erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und routet danach zu TASK_1032 Next Playable Slice Plan.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)

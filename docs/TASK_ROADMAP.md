@@ -97,6 +97,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_tester_run | needs_tester_run_completion | tester_run_regression_found | tester_run_ready`.
 - Naechster Schritt: TASK_1031 - Release First Decision Loop Two Player Loop Scenario Tester Run Acceptance oder TASK_1030 - Release First Decision Loop Two Player Loop Scenario Tester Run Polish.
 
+## TASK_1031 - Release First Decision Loop Two Player Loop Scenario Tester Run Acceptance (implementiert im Arbeitsstand)
+- Grundlage: bereiter TASK_1030 Tester Run.
+- Ziel: Tester-Run bewusst akzeptieren oder gezielt zur Politur zurueckgeben: Release-Dateien, Singleplayer-Pfad, FOB/NEXT/GO/FEEDBACK, Performance, HUD-Grenze, Multiplayer-Grenze, bekannte Risiken und naechster spielbarer Slice.
+- Ergebnis: Read-only Snapshot `needs_acceptance_review | needs_acceptance_review_completion | tester_run_acceptance_regression_found | tester_run_accepted`.
+- Naechster Schritt: TASK_1032 - Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan oder TASK_1031 - Release First Decision Loop Two Player Loop Scenario Acceptance Polish.
+
 # Arbeitsregeln
 
 ## Reihenfolge
