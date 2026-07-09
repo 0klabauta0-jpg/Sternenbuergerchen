@@ -270,3 +270,8 @@ Der Slice bleibt read-only. Ohne Trace meldet er `needs_outcome_playability_trac
 TASK_990 macht aus dem bestandenen Outcome wieder einen naechsten kleinen Auftrag. Erwartet sind drei read-only Micro-Objective-Karten: `SICHERN`, `DRUECKEN` und `SAMMELN`.
 
 Der Snapshot bleibt Anzeige-/Planungsvertrag: Er darf eine Empfehlung, kurze Spielerzeilen, Warum-Zeilen, Confirm-/Execute-Pfadnamen und `GO separat` liefern, aber keine Commands erzeugen und kein Objective-State setzen. Der naechste Schritt ist `TASK_991 - Release First Decision Loop Two Player Loop Micro Objective HUD Wiring`.
+
+## Release First Decision Loop Two Player Loop Micro Objective HUD Wiring (TASK_991)
+TASK_991 macht die TASK_990-Karten in bestehenden HUD-/Command-Feedback-Flaechen lesbar. Erwartet sind drei read-only Chips fuer `SICHERN`, `DRUECKEN` und `SAMMELN` plus kurze Zeilen fuer Selected Fireteam, Mission Control und Command Feedback.
+
+Der Snapshot bleibt eine Leseschicht: Er darf Fokus, Empfehlung, Tooltip-Texte, Chip-Zeile und `GO separat` liefern, aber keine Commands erzeugen, kein Movement starten und keine Multiplayer-Wahrheit setzen. Der naechste Schritt ist `TASK_992 - Release First Decision Loop Two Player Loop Micro Objective Choice Hook`.

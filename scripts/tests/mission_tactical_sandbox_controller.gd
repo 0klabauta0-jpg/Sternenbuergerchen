@@ -59,6 +59,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_REAL_WINDOW_CAPTURE_SC
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_outcome_visual_polish.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_PLAYABILITY_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_outcome_playability_slice.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_NEXT_MICRO_OBJECTIVE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_next_micro_objective.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_HUD_WIRING_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21146,6 +21147,12 @@ func get_release_first_decision_loop_two_player_loop_next_micro_objective_snapsh
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_NEXT_MICRO_OBJECTIVE_SCRIPT.call("build_snapshot", source_outcome_playability, context)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_snapshot(source_next_micro_objective_override: Dictionary = {}, context_override: Dictionary = {}) -> Dictionary:
+	var source_next_micro_objective: Dictionary = source_next_micro_objective_override.duplicate(true) if not source_next_micro_objective_override.is_empty() else get_release_first_decision_loop_two_player_loop_next_micro_objective_snapshot()
+	var context: Dictionary = context_override.duplicate(true)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_HUD_WIRING_SCRIPT.call("build_snapshot", source_next_micro_objective, context)).duplicate(true)
+
+
 func _build_release_first_decision_loop_two_player_loop_outcome_visual_polish_source(outcome_capture: Dictionary) -> Dictionary:
 	var outcome_line: String = String(outcome_capture.get("source_outcome_line", "")).strip_edges()
 	var mini_objective_state: String = String(outcome_capture.get("source_mini_objective_state", "")).strip_edges()
@@ -24342,6 +24349,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_outcome_playability_slice,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_micro_objective_hud_wiring: Dictionary = get_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_snapshot(
+		release_first_decision_loop_two_player_loop_next_micro_objective,
+		{}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24491,6 +24502,12 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_next_micro_objective_line": String(release_first_decision_loop_two_player_loop_next_micro_objective.get("next_micro_objective_line", "")),
 		"release_first_decision_loop_two_player_loop_next_micro_objective_status": String(release_first_decision_loop_two_player_loop_next_micro_objective.get("status", "")),
 		"release_first_decision_loop_two_player_loop_next_micro_objective_cards": Array(release_first_decision_loop_two_player_loop_next_micro_objective.get("micro_objective_cards", [])),
+		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring": release_first_decision_loop_two_player_loop_micro_objective_hud_wiring,
+		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_line": String(release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.get("command_feedback_line", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_status": String(release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.get("status", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_chips": Array(release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.get("hud_micro_objective_chips", [])),
+		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_selected_fireteam_line": String(release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.get("selected_fireteam_line", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_mission_control_line": String(release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.get("mission_control_line", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

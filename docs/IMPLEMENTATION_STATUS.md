@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_991 - Release First Decision Loop Two Player Loop Micro Objective HUD Wiring
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_991_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.md`, `docs/tasks/TASK_990_release_first_decision_loop_two_player_loop_next_micro_objective.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveHudWiring.build_snapshot()` erzeugt aus einem bereiten TASK_990-Snapshot drei read-only HUD-Chips fuer `SICHERN`, `DRUECKEN` und `SAMMELN`.
+- Stand: Der Snapshot liefert Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen, fokussiert standardmaessig die Empfehlung und behaelt `GO separat`.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_991 im Command-Feedback; ohne bereiten TASK_990-Snapshot bleibt der Snapshot blockiert.
+- Risiken/offen: TASK_991 macht die Micro-Objectives sichtbar, aber noch nicht als echte klickbare Runtime-Auswahl. TASK_992 sollte den Choice-Hook fuer die fokussierte Micro-Objective bauen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_991_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.gd`, Regression TASK_990, TASK_989, TASK_988, `git diff --check`.
+- Naechster Schritt: TASK_992 - Release First Decision Loop Two Player Loop Micro Objective Choice Hook.
+
 ### TASK_990 - Release First Decision Loop Two Player Loop Next Micro Objective
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_990_release_first_decision_loop_two_player_loop_next_micro_objective.md`, `docs/tasks/TASK_989_release_first_decision_loop_two_player_loop_outcome_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
