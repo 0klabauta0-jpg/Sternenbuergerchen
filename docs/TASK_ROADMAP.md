@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_958 - First Decision Real Playthrough Visual Findings (implementiert): Der TASK_957-Fensterblick wird read-only als manueller Befund geschnitten; offene Sichtbefunde bleiben offen, Reibungen routen zu einem engen Polish-Followup, saubere Befunde zum First-Decision-Playability-Smoke.
 - TASK_957 - First Decision Real Playthrough Capture (implementiert): Der erste Decision-Micro-Scenario-Polish bekommt einen read-only Real-Window-Capture-/Review-Rahmen mit LZ-Drop-Preview-Deep-Link, Screenshotpfaden und manuellen Pflichtchecks.
 - TASK_956 - First Decision Micro Scenario Polish (implementiert): Der bestandene Decision-Overlay-Smoke wird im Controller als kurze NEXT/WHY/GO-Spielerzeile und drei lesbare Choice-Zeilen in Command Feedback exportiert.
 - TASK_955 - Decision Overlay Playability Smoke (implementiert): Akzeptierte TASK_954-Findings werden mit einem Playthrough-Trace gegen Zielpreview, Pfad, Risk-Level, GO-Grenze, Command-Surfaces, Post-GO-Feedback und Hotpath-Ruhe als kleiner Playability-Smoke bewertet.

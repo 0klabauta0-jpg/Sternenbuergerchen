@@ -105,3 +105,8 @@ Die empfohlene sichere Choice steht zuerst; risky und suicidal bleiben als Alter
 TASK_957 legt den echten Fenster-Capture-Rahmen fuer den ersten Decision-Playthrough nach TASK_956 an. Erwartet ist ein Manifest mit TASK_956-Source, `--release-singleplayer-lz-drop-preview`, Window-/Desktop-Screenshotpfaden, `window_handle_print`, Prozessmetadaten und manuellen Pflichtchecks.
 
 Der Capture darf erst `accepted` werden, wenn `NEXT`, `WHY`, Choice-Zeilen, Preview-Grenze, Command-Surface/GO, kein Command vor GO und keine neue HUD-Gameplay-Wahrheit manuell bestaetigt wurden. Ohne diese Sichtabnahme bleibt der Status `review_ready`.
+
+## First Decision Real Playthrough Visual Findings (TASK_958)
+TASK_958 trennt technische TASK_957-Capture-Evidence vom eigentlichen Spielerblick. Ein guter Capture ohne Review-Notizen bleibt `needs_manual_review`; belegte Reibungen wie fehlende `NEXT`-Zeile, unklare Preview-vor-GO-Grenze oder schwache Empfehlung routen zu einem engen Polish-Followup.
+
+Ein sauberer Befund darf erst zum First-Decision-Playability-Smoke routen, wenn `NEXT`, `WHY`, Choice-Zeilen, Empfehlung, Preview-Grenze, GO-Bedienbarkeit, kein Command vor GO und die read-only HUD-Grenze manuell bestaetigt sind. Der Findings-Snapshot bleibt read-only und erzeugt keine Commands, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_958 - First Decision Real Playthrough Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_958_first_decision_real_playthrough_visual_findings.md`, `docs/tasks/TASK_957_first_decision_real_playthrough_capture.md`, `docs/tasks/TASK_956_first_decision_micro_scenario_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `FirstDecisionRealPlaythroughVisualFindings.build_snapshot()` wertet TASK_957-Capture-Snapshots read-only aus und verlangt TASK_956-Micro-Scenario-Basis, trusted Window-Capture, Screenshot-Evidence und read-only-Grenzen.
+- Stand: Ohne manuelle Sichtnotizen bleibt der Befund `needs_manual_review`; belegte Reibungen routen zu `TASK_959 - First Decision Real Playthrough Polish Followup`.
+- Stand: Saubere Sichtnotizen setzen `accepted_for_first_decision_playability_smoke` und empfehlen `TASK_959 - First Decision Playability Smoke`.
+- Risiken/offen: Der echte Playability-Smoke ist Folgearbeit; TASK_958 schneidet nur den Fensterbefund und erzeugt keine Commands oder Gameplay-Wahrheit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_958_first_decision_real_playthrough_visual_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_957_first_decision_real_playthrough_capture.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_956_first_decision_micro_scenario_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_959 - First Decision Playability Smoke bei Akzeptanz oder TASK_959 - First Decision Real Playthrough Polish Followup bei Reibung.
+
 ### TASK_957 - First Decision Real Playthrough Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_957_first_decision_real_playthrough_capture.md`, `docs/tasks/TASK_956_first_decision_micro_scenario_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

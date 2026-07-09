@@ -1663,6 +1663,11 @@ TASK_957 wertet ein First-Decision-Real-Playthrough-Manifest read-only aus. Es p
 
 Erwartete Struktur: `FirstDecisionRealPlaythroughCapture.build_snapshot()` liefert `schema = sternenbuergerchen.first_decision_real_playthrough_capture.v1`, `task_id = TASK_957`, `source_task_id = TASK_956`, Manifest-/Source-Metadaten, Screenshotpfade, Pflichtchecks, `status = blocked | review_ready | accepted`, `recommended_next_task = TASK_958 - First Decision Real Playthrough Visual Findings`, `read_only = true`, `read_only_capture = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`. Das Capture-Tool `capture_first_decision_real_playthrough.ps1` schreibt `first_decision_real_playthrough_capture.json` und setzt `manual_review_done = false`.
 
+## First Decision Real Playthrough Visual Findings (TASK_958)
+TASK_958 schneidet den TASK_957-Fensterblick als read-only Sichtbefund. Der Befund darf nur Capture-Evidence und manuelle Review-Notizen auswerten; er darf keine neuen HUD-Zustaende, Commands, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit erzeugen.
+
+Erwartete Struktur: `FirstDecisionRealPlaythroughVisualFindings.build_snapshot()` liefert `schema = sternenbuergerchen.first_decision_real_playthrough_visual_findings.v1`, `task_id = TASK_958`, `source_task_id = TASK_957`, `source_micro_task_id = TASK_956`, Screenshotpfade, Review-Notizen, positive Findings, Issues, `status = blocked | needs_manual_review | ready_for_first_decision_visual_polish | accepted_for_first_decision_playability_smoke`, `recommended_next_task = TASK_959 - First Decision Real Playthrough Polish Followup | TASK_959 - First Decision Playability Smoke`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
