@@ -57,6 +57,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_ACCEPTANCE_SLICE_SCRIPT: GDScr
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_OUTCOME_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_outcome_slice.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_REAL_WINDOW_CAPTURE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_outcome_real_window_capture.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_outcome_visual_polish.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_PLAYABILITY_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_outcome_playability_slice.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21132,6 +21133,12 @@ func get_release_first_decision_loop_two_player_loop_outcome_visual_polish_snaps
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_VISUAL_POLISH_SCRIPT.call("build_snapshot", source_findings, outcome_capture)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_outcome_playability_slice_snapshot(source_visual_polish_override: Dictionary = {}, trace_override: Dictionary = {}) -> Dictionary:
+	var source_visual_polish: Dictionary = source_visual_polish_override.duplicate(true) if not source_visual_polish_override.is_empty() else get_release_first_decision_loop_two_player_loop_outcome_visual_polish_snapshot()
+	var trace: Dictionary = trace_override.duplicate(true)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_PLAYABILITY_SLICE_SCRIPT.call("build_snapshot", source_visual_polish, trace)).duplicate(true)
+
+
 func _build_release_first_decision_loop_two_player_loop_outcome_visual_polish_source(outcome_capture: Dictionary) -> Dictionary:
 	var outcome_line: String = String(outcome_capture.get("source_outcome_line", "")).strip_edges()
 	var mini_objective_state: String = String(outcome_capture.get("source_mini_objective_state", "")).strip_edges()
@@ -24320,6 +24327,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		{},
 		release_first_decision_loop_two_player_loop_outcome_real_window_capture
 	)
+	var release_first_decision_loop_two_player_loop_outcome_playability_slice: Dictionary = get_release_first_decision_loop_two_player_loop_outcome_playability_slice_snapshot(
+		release_first_decision_loop_two_player_loop_outcome_visual_polish,
+		{}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24461,6 +24472,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_outcome_visual_polish_line": String(release_first_decision_loop_two_player_loop_outcome_visual_polish.get("outcome_polish_line", "")),
 		"release_first_decision_loop_two_player_loop_outcome_visual_polish_status": String(release_first_decision_loop_two_player_loop_outcome_visual_polish.get("status", "")),
 		"release_first_decision_loop_two_player_loop_outcome_visual_polish_surface_specs": Array(release_first_decision_loop_two_player_loop_outcome_visual_polish.get("outcome_surface_specs", [])),
+		"release_first_decision_loop_two_player_loop_outcome_playability_slice": release_first_decision_loop_two_player_loop_outcome_playability_slice,
+		"release_first_decision_loop_two_player_loop_outcome_playability_slice_line": String(release_first_decision_loop_two_player_loop_outcome_playability_slice.get("outcome_playability_line", "")),
+		"release_first_decision_loop_two_player_loop_outcome_playability_slice_status": String(release_first_decision_loop_two_player_loop_outcome_playability_slice.get("status", "")),
+		"release_first_decision_loop_two_player_loop_outcome_playability_slice_gate": String(release_first_decision_loop_two_player_loop_outcome_playability_slice.get("gate", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

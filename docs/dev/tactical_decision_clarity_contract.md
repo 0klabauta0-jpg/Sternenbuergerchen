@@ -260,3 +260,8 @@ Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_ma
 TASK_988 macht aus dem Outcome-Befund einen konkreten Lesbarkeitsvertrag. Erwartet sind drei getrennte Surfaces fuer `RESULT`, `OBJ` und `NEXT`, damit Ergebnis, Mini-Zielzustand und naechster Griff schnell erfassbar werden.
 
 Der Polish-Snapshot bleibt read-only. Er darf Surface-Specs, Style-IDs, Mindesthoehen, Autowrap und eine kompakte `RESULT | OBJ | NEXT`-Zeile liefern, erzeugt aber keine Commands, kein Movement, keine Combat-/Damage-Ereignisse und keine Multiplayer-Wahrheit. Der naechste Beweis ist `TASK_989 - Release First Decision Loop Two Player Loop Outcome Playability Slice`.
+
+## Release First Decision Loop Two Player Loop Outcome Playability Slice (TASK_989)
+TASK_989 bewertet den TASK_988-Outcome-Polish gegen einen kleinen Playability-Trace. Der Spieler muss nach der Choice lesen koennen, was passiert ist, was sich am Ziel geaendert hat und welcher naechste Griff sinnvoll ist.
+
+Der Slice bleibt read-only. Ohne Trace meldet er `needs_outcome_playability_trace`; fehlende RESULT-/OBJ-/NEXT-Lesbarkeit, fehlendes Spieler-Verstaendnis, HUD-State-Mutation oder gebrochene Multiplayer-Grenze melden `outcome_playability_regression_found`. Erst ein vollstaendiger Trace setzt `outcome_playability_slice_passed` und routet zu `TASK_990 - Release First Decision Loop Two Player Loop Next Micro Objective`.

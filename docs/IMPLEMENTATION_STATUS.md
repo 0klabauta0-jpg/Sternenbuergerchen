@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_989 - Release First Decision Loop Two Player Loop Outcome Playability Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_989_release_first_decision_loop_two_player_loop_outcome_playability_slice.md`, `docs/tasks/TASK_988_release_first_decision_loop_two_player_loop_outcome_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopOutcomePlayabilitySlice.build_snapshot()` bewertet einen read-only TASK_988-Outcome-Visual-Polish-Snapshot plus Trace-Evidence.
+- Stand: Der Slice prueft RESULT-/OBJ-/NEXT-Sichtbarkeit, Spieler-Verstaendnis, Post-Choice-Feedback, HUD-read-only-Grenze, Multiplayer-Grenze, keine Extra-Commands und Wiederverwendung der Surface-Specs.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_989 im Command-Feedback; ohne Trace bleibt der Slice ehrlich offen.
+- Risiken/offen: TASK_989 ist kein echter manueller Sichttest und erzeugt noch kein neues Micro-Objective. TASK_990 sollte aus dem bestandenen Outcome den naechsten kleinen Spielgriff machen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_989_release_first_decision_loop_two_player_loop_outcome_playability_slice.gd`, Regression TASK_988, TASK_987, TASK_986, `git diff --check`.
+- Naechster Schritt: TASK_990 - Release First Decision Loop Two Player Loop Next Micro Objective.
+
 ### TASK_988 - Release First Decision Loop Two Player Loop Outcome Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_988_release_first_decision_loop_two_player_loop_outcome_visual_polish.md`, `docs/tasks/TASK_987_release_first_decision_loop_two_player_loop_outcome_visual_findings.md`, `docs/tasks/TASK_986_release_first_decision_loop_two_player_loop_outcome_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

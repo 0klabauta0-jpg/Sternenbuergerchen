@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_989 - Release First Decision Loop Two Player Loop Outcome Playability Slice (implementiert): Der TASK_988-Outcome-Polish wird mit Trace-Evidence als read-only Playability-Slice bewertet: RESULT/OBJ/NEXT lesbar, naechster Griff verstanden, HUD-/Multiplayer-Grenze erhalten.
 - TASK_988 - Release First Decision Loop Two Player Loop Outcome Visual Polish (implementiert): Das TASK_987-Finding erzeugt drei read-only Outcome-Surface-Specs fuer Ergebnis, Mini-Zielzustand und naechsten Griff plus `RESULT | OBJ | NEXT`-Polish-Zeile.
 - TASK_987 - Release First Decision Loop Two Player Loop Outcome Visual Findings (implementiert): Der TASK_986-Outcome-Capture wird als read-only Sichtbefund geschnitten; Reibung routet zu Outcome Visual Polish, sauberer Befund zum Outcome-Playability-Slice.
 - TASK_986 - Release First Decision Loop Two Player Loop Outcome Real Window Capture (implementiert): Das TASK_985-Outcome bekommt einen read-only Real-Window-Capture-Rahmen mit Manifest, Screenshotpfaden, manuellen Pflichtchecks und unveraenderter HUD-/Multiplayer-Grenze.
