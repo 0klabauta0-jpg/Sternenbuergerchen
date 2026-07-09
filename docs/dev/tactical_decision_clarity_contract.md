@@ -100,3 +100,8 @@ Der Trace muss belegen, dass der Spieler vor `GO` Ziel, Pfad, Risiko, Line-of-Fi
 TASK_956 uebersetzt den bestandenen Decision-Overlay-Smoke in eine konkrete, kurze Spielerlesung fuer den ersten Griff. Erwartet sind eine `NEXT ... -> GO`-Zeile, eine `WHY`-Zeile, eine Vor-GO-Grenze und eine Nach-GO-Feedback-Zeile.
 
 Die empfohlene sichere Choice steht zuerst; risky und suicidal bleiben als Alternativen sichtbar. Alle Zeilen muessen spielernahe Labels nutzen und interne Choice-IDs verstecken. Der Snapshot bleibt read-only, nutzt vorhandene TASK_950-/TASK_952-Daten und erzeugt keine Gameplay-, Movement-, Combat- oder Multiplayer-Wahrheit.
+
+## First Decision Real Playthrough Capture (TASK_957)
+TASK_957 legt den echten Fenster-Capture-Rahmen fuer den ersten Decision-Playthrough nach TASK_956 an. Erwartet ist ein Manifest mit TASK_956-Source, `--release-singleplayer-lz-drop-preview`, Window-/Desktop-Screenshotpfaden, `window_handle_print`, Prozessmetadaten und manuellen Pflichtchecks.
+
+Der Capture darf erst `accepted` werden, wenn `NEXT`, `WHY`, Choice-Zeilen, Preview-Grenze, Command-Surface/GO, kein Command vor GO und keine neue HUD-Gameplay-Wahrheit manuell bestaetigt wurden. Ohne diese Sichtabnahme bleibt der Status `review_ready`.

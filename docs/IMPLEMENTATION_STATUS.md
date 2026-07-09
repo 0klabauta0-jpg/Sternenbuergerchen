@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_957 - First Decision Real Playthrough Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_957_first_decision_real_playthrough_capture.md`, `docs/tasks/TASK_956_first_decision_micro_scenario_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `FirstDecisionRealPlaythroughCapture.build_snapshot()` wertet TASK_957-Capture-Manifeste read-only aus und verlangt TASK_956-Source-Schema, Gate, LZ-Drop-Preview-Deep-Link, Window-Handle-Capture, Screenshotpfade und Pflichtchecks.
+- Stand: Das Capture-Tool-Geruest `capture_first_decision_real_playthrough.ps1` schreibt ein Manifest mit TASK_956-Source, Screenshotpfaden und `manual_review_done = false`.
+- Stand: Gute Manifeste werden `review_ready`; erst completed manual checks koennen `accepted` setzen. Der Snapshot bleibt `read_only` und `read_only_capture`.
+- Risiken/offen: Der echte Fenster-Screenshot und die Bewertung sind Folgearbeit; TASK_957 akzeptiert nichts automatisch.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_957_first_decision_real_playthrough_capture.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_956_first_decision_micro_scenario_polish.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_955_decision_overlay_playability_smoke.gd`, `git diff --check`.
+- Naechster Schritt: TASK_958 - First Decision Real Playthrough Visual Findings.
+
 ### TASK_956 - First Decision Micro Scenario Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_956_first_decision_micro_scenario_polish.md`, `docs/tasks/TASK_955_decision_overlay_playability_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
