@@ -69,6 +69,11 @@ Erwartete Struktur: Ohne Trace bleibt der Status `needs_round_loop_acceptance_tr
 
 Erwartete Struktur: Ohne Trace bleibt der Status `needs_scenario_stitch_trace`; fehlende Szenario-Beats, Entry/Exit, Objective, zwei Spielerrollen, NPC-Druck, FEEL/NEXT/GO-Loop, Feedback-zurueck-zu-NEXT oder Wahrheitsgrenzen erzeugen `scenario_stitch_regression_found`; ein guter Trace setzt `scenario_stitch_ready = true` und routet zu TASK_1013. Der Stitch setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Runtime Hook (TASK_1013)
+`get_release_first_decision_loop_two_player_loop_scenario_runtime_hook_snapshot()` ist der read-only Pruefpunkt fuer den sichtbaren Runtime-Hook nach TASK_1012. Der Snapshot darf nur einen bereiten Szenario-Stitch und optionalen Runtime-Context bewerten. Er muss im Command-Feedback als Snapshot, Mission-Control-Runtime-Zeile und Status exportiert werden.
+
+Erwartete Struktur: Ein bereiter Stitch erzeugt `scenario_runtime_steps`, `mission_control_runtime_line`, `selected_fireteam_runtime_line` und `command_matrix_runtime_hooks` fuer `NEXT`, `CONFIRM` und `GO`. Ungueltige Step-/Choice-/Role-Auswahl erzeugt `runtime_hook_review`; ein sauberer Hook setzt `runtime_hook_ready` und routet zu TASK_1014. Der Hook setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release-Firefight-Command-Matrix-Visual-Polish
 `get_release_firefight_command_matrix_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer TASK_836. Der Snapshot darf nur vorhandene Command-Matrix-Buttons, Fire-Rule-Status und den bestehenden TASK_835-Firefight-HUD-Zustand lesen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugen.
 

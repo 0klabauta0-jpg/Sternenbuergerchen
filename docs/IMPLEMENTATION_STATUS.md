@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1013 - Release First Decision Loop Two Player Loop Scenario Runtime Hook
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1013_release_first_decision_loop_two_player_loop_scenario_runtime_hook.md`, `docs/tasks/TASK_1012_release_first_decision_loop_two_player_loop_scenario_stitch.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioRuntimeHook.build_snapshot()` uebersetzt den bereiten TASK_1012-Stitch in Runtime-Schritte, Runtime-Choices und kompakte HUD-Hook-Zeilen.
+- Stand: Mission Control bekommt `FOB/Objective/NEXT/GO separat`, Selected Fireteam bekommt Rollen-/Schritttext, und die Command Matrix bekommt read-only Hooks fuer `NEXT`, `CONFIRM` und `GO`.
+- Stand: Invalide Runtime-Context-Werte melden Review-Issues statt still falsche Schritte oder Choices zu verwenden.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1013 im Command-Feedback als Snapshot, Runtime-Hook-Zeile und Status.
+- Risiken/offen: TASK_1013 fuehrt noch keinen echten F6-/Fenster-Smoke aus. TASK_1014 sollte pruefen, ob sich dieser Runtime-Hook im Missionsfenster als kleiner Szenario-Loop anfuehlt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1013_release_first_decision_loop_two_player_loop_scenario_runtime_hook.gd`, Regression TASK_1012, TASK_1011, TASK_1010, `git diff --check`.
+- Naechster Schritt: TASK_1014 - Release First Decision Loop Two Player Loop Scenario Runtime Smoke.
+
 ### TASK_1012 - Release First Decision Loop Two Player Loop Scenario Stitch
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1012_release_first_decision_loop_two_player_loop_scenario_stitch.md`, `docs/tasks/TASK_1011_release_first_decision_loop_two_player_loop_micro_objective_round_loop_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

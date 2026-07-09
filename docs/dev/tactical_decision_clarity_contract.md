@@ -95,6 +95,11 @@ TASK_1012 prueft, ob der akzeptierte Round-Loop als kleiner Szenario-Moment lesb
 
 Der Scenario-Stitch bleibt read-only. Ohne Trace bleibt er `needs_scenario_stitch_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1013 - Release First Decision Loop Two Player Loop Scenario Runtime Hook`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Runtime Hook (TASK_1013)
+TASK_1013 macht den Scenario-Stitch als kleinen Runtime-Griff sichtbar. Ein guter Snapshot zeigt den aktuellen Beat, FOB/Objective, Alpha- oder Bravo-Rolle, eine ausgewaehlte Runtime-Choice, `NEXT`, `CONFIRM` und `GO separat`.
+
+Der Runtime-Hook bleibt read-only. Er darf Command-Matrix-Hooks und HUD-Zeilen beschreiben, aber keine UI-Baeume bauen, keine Commands erzeugen, kein Movement starten und keine Multiplayer-Wahrheit setzen. Ein bestandener Hook routet zu `TASK_1014 - Release First Decision Loop Two Player Loop Scenario Runtime Smoke`.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 
