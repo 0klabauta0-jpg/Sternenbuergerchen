@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1014 - Release First Decision Loop Two Player Loop Scenario Runtime Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1014_release_first_decision_loop_two_player_loop_scenario_runtime_smoke.md`, `docs/tasks/TASK_1013_release_first_decision_loop_two_player_loop_scenario_runtime_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioRuntimeSmoke.build_snapshot()` bewertet den bereiten TASK_1013-Runtime-Hook plus Smoke-Trace.
+- Stand: Der Smoke prueft `ENTRY -> NEXT -> CONFIRM -> GO -> FEEDBACK`, getrenntes GO, Feedback-zurueck-zu-NEXT, HUD-read-only und Multiplayer-Grenze.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1014 im Command-Feedback als Snapshot, Smoke-Zeile und Status.
+- Risiken/offen: TASK_1014 ist noch kein echter Fenster-Sichttest. TASK_1015 sollte daraus Player-Feel-Findings schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1014_release_first_decision_loop_two_player_loop_scenario_runtime_smoke.gd`, Regression TASK_1013, TASK_1012, TASK_1011, `git diff --check`.
+- Naechster Schritt: TASK_1015 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings.
+
 ### TASK_1013 - Release First Decision Loop Two Player Loop Scenario Runtime Hook
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1013_release_first_decision_loop_two_player_loop_scenario_runtime_hook.md`, `docs/tasks/TASK_1012_release_first_decision_loop_two_player_loop_scenario_stitch.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

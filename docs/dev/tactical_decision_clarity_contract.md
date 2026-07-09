@@ -100,6 +100,11 @@ TASK_1013 macht den Scenario-Stitch als kleinen Runtime-Griff sichtbar. Ein gute
 
 Der Runtime-Hook bleibt read-only. Er darf Command-Matrix-Hooks und HUD-Zeilen beschreiben, aber keine UI-Baeume bauen, keine Commands erzeugen, kein Movement starten und keine Multiplayer-Wahrheit setzen. Ein bestandener Hook routet zu `TASK_1014 - Release First Decision Loop Two Player Loop Scenario Runtime Smoke`.
 
+## Release First Decision Loop Two Player Loop Scenario Runtime Smoke (TASK_1014)
+TASK_1014 prueft, ob der TASK_1013-Runtime-Hook als kleiner Spielgriff traegt: `ENTRY -> NEXT -> CONFIRM -> GO -> FEEDBACK -> NEXT/EXIT`.
+
+Der Smoke bleibt read-only. Er bewertet Trace-Evidence fuer sichtbaren Entry, NEXT, Runtime-Choice, Confirm, GO separat, Feedback-zurueck-zu-NEXT, HUD-Ruhe und Multiplayer-Grenze. Ein bestandener Smoke routet zu `TASK_1015 - Release First Decision Loop Two Player Loop Scenario Player Feel Findings`.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 
