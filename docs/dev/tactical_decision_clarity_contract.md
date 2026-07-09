@@ -70,3 +70,8 @@ Jede Choice muss Ghost, Pfad, ETA, Risk-State, Risk-Farbe und Line-of-Fire-Zaehl
 TASK_950 verdrahtet den TASK_949-Payload in das bestehende F6-Missions-HUD, ohne daraus Gameplay-Wahrheit zu machen. Erwartet ist ein `order_preview_threat_overlay_f6_hud`-Snapshot mit drei sichtbaren Choice-Karten, einer kompakten Mission-Control-Zeile und einer empfohlenen sicheren Wahl.
 
 Die Mission-Control-Zeile muss `SAFE`, `RISKY` und `SUICIDAL` nennen und kurz genug fuer das bestehende Strategic-Status-Fenster bleiben. `get_command_feedback_snapshot()` muss denselben Snapshot exportieren, damit Tests und spaetere Sichtchecks die sichtbare Preview gegen denselben Contract lesen. Der Snapshot bleibt read-only und erzeugt keine Commands, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit.
+
+## Decision Overlay Real F6 Visual Review (TASK_951)
+TASK_951 ist die automatische Vorpruefung fuer den echten F6-Sichtcheck. Die Mission-Control-Zeile darf keine rohen internen Choice-IDs mehr zeigen, sondern nutzt spielernahe Labels wie `SAFE Gedeckt`, `RISKY Querung` und `SUICIDAL Killzone`.
+
+Der Snapshot `decision_overlay_real_f6_visual_review` prueft Textlaenge, Risk-Token, Display-Texte und Read-only-Grenzen. Er darf `manual_review_required = true` setzen und `manual_review_done = false` lassen; eine echte Screenshot- oder Fensterabnahme wird dadurch nicht ersetzt.

@@ -20479,6 +20479,7 @@ func _build_order_preview_threat_overlay_visible_choice_cards(scenario_snapshot:
 		if typeof(choice_variant) != TYPE_DICTIONARY:
 			continue
 		var choice: Dictionary = Dictionary(choice_variant)
+		var humanized: Dictionary = _humanize_order_preview_threat_overlay_card(choice)
 		var preview: Dictionary = Dictionary(choice.get("preview_entry", {}))
 		var choice_id: String = String(choice.get("choice_id", "")).strip_edges()
 		var risk_state: String = String(choice.get("risk_state", "unknown")).strip_edges().to_lower()
@@ -20487,6 +20488,9 @@ func _build_order_preview_threat_overlay_visible_choice_cards(scenario_snapshot:
 			"choice_id": choice_id,
 			"title": String(choice.get("title", choice_id)).strip_edges(),
 			"text": screen_text,
+			"display_title": String(humanized.get("display_title", "")),
+			"display_text": String(humanized.get("display_text", "")),
+			"line_label": String(humanized.get("line_label", "")),
 			"risk_state": risk_state,
 			"risk_color_key": String(choice.get("risk_color_key", "")),
 			"risk_reason": String(choice.get("risk_reason", "")),
@@ -20504,18 +20508,51 @@ func _build_order_preview_threat_overlay_visible_choice_cards(scenario_snapshot:
 	return cards
 
 
+func _humanize_order_preview_threat_overlay_card(choice: Dictionary) -> Dictionary:
+	var choice_id: String = String(choice.get("choice_id", "")).strip_edges()
+	var risk_state: String = String(choice.get("risk_state", "unknown")).strip_edges().to_lower()
+	match choice_id:
+		"covered_push":
+			return {
+				"display_title": "SAFE - Gedeckter Vorstoss",
+				"display_text": "Gedeckt vorruecken: klare Preview vor GO.",
+				"line_label": "Gedeckt",
+			}
+		"exposed_crossing":
+			return {
+				"display_title": "RISKY - Offene Querung",
+				"display_text": "Offene Querung: eine gegnerische Linie liest mit.",
+				"line_label": "Querung",
+			}
+		"kill_zone_dash":
+			return {
+				"display_title": "SUICIDAL - Killzone",
+				"display_text": "Killzone: drei freie Gegnerlinien, keine Deckung.",
+				"line_label": "Killzone",
+			}
+		_:
+			var token: String = risk_state.to_upper()
+			if token.is_empty():
+				token = "UNKNOWN"
+			return {
+				"display_title": "%s - Preview" % token,
+				"display_text": "Move-Preview vor GO pruefen.",
+				"line_label": "Preview",
+			}
+
+
 func _build_order_preview_threat_overlay_f6_choice_line(cards: Array) -> String:
 	var tokens: PackedStringArray = PackedStringArray()
 	for card_variant in cards:
 		var card: Dictionary = Dictionary(card_variant)
 		var risk_state: String = String(card.get("risk_state", "unknown")).strip_edges().to_upper()
-		var choice_id: String = String(card.get("choice_id", "")).strip_edges()
-		if risk_state.is_empty() or choice_id.is_empty():
+		var line_label: String = String(card.get("line_label", "")).strip_edges()
+		if risk_state.is_empty() or line_label.is_empty():
 			continue
-		tokens.append("%s %s" % [risk_state, choice_id])
+		tokens.append("%s %s" % [risk_state, line_label])
 	if tokens.is_empty():
 		return ""
-	return "PREVIEW %s | GO commits later" % " / ".join(Array(tokens))
+	return "PREVIEW %s | GO spaeter" % " / ".join(Array(tokens))
 
 
 func _build_order_preview_threat_overlay_selected_fireteam_line(cards: Array, recommended_choice_id: String) -> String:
@@ -20525,7 +20562,7 @@ func _build_order_preview_threat_overlay_selected_fireteam_line(cards: Array, re
 	for card_variant in cards:
 		var card: Dictionary = Dictionary(card_variant)
 		if String(card.get("choice_id", "")) == recommended:
-			return "Recommended preview: %s (%s)" % [recommended, String(card.get("risk_state", "unknown")).to_upper()]
+			return "Recommended preview: %s" % String(card.get("display_title", recommended))
 	return "Recommended preview: %s" % recommended
 
 
@@ -20535,6 +20572,104 @@ func _has_order_preview_threat_overlay_card(cards: Array, expected_choice_id: St
 		if String(card.get("choice_id", "")) == expected_choice_id and String(card.get("risk_state", "")) == expected_risk:
 			return bool(card.get("visible_before_go", false))
 	return false
+
+
+func get_decision_overlay_real_f6_visual_review_snapshot(source_snapshot_override: Dictionary = {}) -> Dictionary:
+	var source_snapshot: Dictionary = source_snapshot_override.duplicate(true) if not source_snapshot_override.is_empty() else get_order_preview_threat_overlay_f6_hud_snapshot()
+	var choice_line: String = String(source_snapshot.get("mission_control_choice_line", "")).strip_edges()
+	var cards: Array = Array(source_snapshot.get("visible_choice_cards", []))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"source_task_950_ready",
+			String(source_snapshot.get("schema", "")) == "sternenbuergerchen.order_preview_threat_overlay_f6_hud.v1"
+				and String(source_snapshot.get("task_id", "")) == "TASK_950"
+				and String(source_snapshot.get("gate", "")) == "pass",
+			"TASK_950 HUD payload is ready for F6 visual review."
+		),
+		_build_mission_first_move_readability_check(
+			"choice_line_hides_raw_ids",
+			not _order_preview_threat_overlay_text_contains_raw_choice_id(choice_line),
+			"Mission Control line uses player-facing labels instead of debug choice ids."
+		),
+		_build_mission_first_move_readability_check(
+			"choice_line_within_visual_limit",
+			not choice_line.is_empty() and choice_line.length() <= 96,
+			"Mission Control line stays within the stricter visual-review limit."
+		),
+		_build_mission_first_move_readability_check(
+			"risk_tokens_still_visible",
+			choice_line.contains("SAFE") and choice_line.contains("RISKY") and choice_line.contains("SUICIDAL"),
+			"Risk states remain visible even after humanizing labels."
+		),
+		_build_mission_first_move_readability_check(
+			"three_choice_cards_have_display_text",
+			_order_preview_threat_overlay_cards_have_display_text(cards),
+			"All three choice cards carry player-facing display titles and body text."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			bool(source_snapshot.get("read_only", false))
+				and not bool(source_snapshot.get("ui_sets_gameplay_truth", true))
+				and not bool(source_snapshot.get("creates_command", true))
+				and not bool(source_snapshot.get("creates_movement", true))
+				and not bool(source_snapshot.get("creates_fire_event", true))
+				and not bool(source_snapshot.get("creates_damage_event", true))
+				and not bool(source_snapshot.get("sets_multiplayer_truth", true)),
+			"Visual review reads HUD data and does not commit gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	var automated_gate: String = "pass" if failed_checks.is_empty() else "review"
+	return {
+		"schema": "sternenbuergerchen.decision_overlay_real_f6_visual_review.v1",
+		"task_id": "TASK_951",
+		"source_task_id": "TASK_950",
+		"source_schema": String(source_snapshot.get("schema", "")),
+		"source_gate": String(source_snapshot.get("gate", "")),
+		"mission_control_choice_line": choice_line,
+		"visible_choice_cards": cards,
+		"choice_line_char_limit": 96,
+		"automated_readability_gate": automated_gate,
+		"status": "ready_for_real_f6_sight_check" if automated_gate == "pass" else "needs_visual_polish",
+		"manual_review_required": true,
+		"manual_review_done": false,
+		"accepted": false,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": automated_gate,
+		"recommended_next_task": "TASK_952 - Decision Overlay F6 Visual Polish",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
+func _order_preview_threat_overlay_cards_have_display_text(cards: Array) -> bool:
+	if cards.size() != 3:
+		return false
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		var title: String = String(card.get("display_title", "")).strip_edges()
+		var text: String = String(card.get("display_text", "")).strip_edges()
+		if title.is_empty() or text.is_empty():
+			return false
+		if _order_preview_threat_overlay_text_contains_raw_choice_id(title) or _order_preview_threat_overlay_text_contains_raw_choice_id(text):
+			return false
+	return true
+
+
+func _order_preview_threat_overlay_text_contains_raw_choice_id(text: String) -> bool:
+	return text.contains("covered_push") or text.contains("exposed_crossing") or text.contains("kill_zone_dash")
 
 
 func _get_frontier_probe_one_screen_next_token(next_interaction: Dictionary, handoff: Dictionary) -> String:
@@ -23134,6 +23269,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 	)
 	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
 	var order_preview_threat_overlay_f6_hud: Dictionary = get_order_preview_threat_overlay_f6_hud_snapshot()
+	var decision_overlay_real_f6_visual_review: Dictionary = get_decision_overlay_real_f6_visual_review_snapshot(order_preview_threat_overlay_f6_hud)
 	var frontier_probe_next_interaction: Dictionary = _build_frontier_probe_playfeel_next_interaction_snapshot()
 	var frontier_probe_debrief_handoff: Dictionary = _build_frontier_probe_debrief_handoff_feel_snapshot()
 	var mission_interaction_use_feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
@@ -23248,6 +23384,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"order_preview_threat_overlay_choice_cards": Array(order_preview_threat_overlay_f6_hud.get("visible_choice_cards", [])),
 		"order_preview_threat_overlay_selected_fireteam_line": String(order_preview_threat_overlay_f6_hud.get("selected_fireteam_choice_line", "")),
 		"order_preview_threat_overlay_gate": String(order_preview_threat_overlay_f6_hud.get("gate", "")),
+		"decision_overlay_real_f6_visual_review": decision_overlay_real_f6_visual_review,
+		"decision_overlay_real_f6_visual_review_gate": String(decision_overlay_real_f6_visual_review.get("gate", "")),
+		"decision_overlay_real_f6_visual_review_status": String(decision_overlay_real_f6_visual_review.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

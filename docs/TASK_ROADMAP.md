@@ -205,6 +205,8 @@ git checkout -b batch/<batch-name>
 - TASK_949 Entscheidungsstand: Naechster Slice ist `TASK_950 - Wire Decision Scenario Into F6 Mission HUD`, damit die drei Preview-Choices im Missionsfenster sichtbar und spielbar lesbar werden.
 - TASK_950 - Wire Decision Scenario Into F6 Mission HUD (implementiert): TASK_949-Choices als read-only Mission-Control-Zeile und Command-Feedback-Snapshot im F6-HUD verdrahten.
 - TASK_950 Entscheidungsstand: Naechster Slice ist `TASK_951 - Decision Overlay Real F6 Visual Review`, um die echte Fensterlesbarkeit von Position, Kontrast und Textlaenge zu pruefen.
+- TASK_951 - Decision Overlay Real F6 Visual Review (implementiert): TASK_950-Choice-Line von rohen IDs auf spielernahe Labels umstellen und einen automatisierten Review-Snapshot fuer den echten F6-Sichtcheck bereitstellen.
+- TASK_951 Entscheidungsstand: Naechster Slice ist `TASK_952 - Decision Overlay F6 Visual Polish`, falls der echte F6-Sichtcheck Kontrast, Position oder Rhythmus der Preview-Zeile noch als Reibung meldet.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 

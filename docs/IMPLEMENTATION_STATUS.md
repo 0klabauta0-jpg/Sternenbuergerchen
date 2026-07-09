@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_951 - Decision Overlay Real F6 Visual Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_951_decision_overlay_real_f6_visual_review.md`, `docs/tasks/TASK_950_wire_decision_scenario_into_f6_mission_hud.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: Die TASK_950-Mission-Control-Zeile nutzt jetzt spielernahe Labels statt roher Choice-IDs: SAFE Gedeckt, RISKY Querung, SUICIDAL Killzone.
+- Stand: Choice-Cards tragen `display_title`, `display_text` und `line_label`, damit die HUD-/Review-Schicht nicht mit internen IDs arbeiten muss.
+- Stand: `get_decision_overlay_real_f6_visual_review_snapshot()` prueft automatisiert Textlaenge, risk-token-Sichtbarkeit, Player-Labels und Read-only-Grenzen; `get_command_feedback_snapshot()` exportiert den Snapshot.
+- Risiken/offen: Der Snapshot ist bereit fuer einen echten F6-Sichtcheck, aber markiert `manual_review_required` und setzt keine manuelle Abnahme.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_951_decision_overlay_real_f6_visual_review.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_950_wire_decision_scenario_into_f6_mission_hud.gd`, `git diff --check`.
+- Naechster Schritt: TASK_952 - Decision Overlay F6 Visual Polish.
+
 ### TASK_950 - Wire Decision Scenario Into F6 Mission HUD
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_950_wire_decision_scenario_into_f6_mission_hud.md`, `docs/tasks/TASK_949_order_preview_threat_overlay_playtest_scenario.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
