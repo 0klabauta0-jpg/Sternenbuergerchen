@@ -87,7 +87,7 @@
 <body data-report-id="spielstand_zwischenbericht_2026_07_09_aktuell" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Aktueller Arbeitsstand am 2026-07-09: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was ich als naechstes bearbeiten will. Neu aktualisiert nach TASK_904: Die belegte Fire-Lane-Reibung aus TASK_903 ist als enger Primary3D-Visual-Polish umgesetzt, und TASK_905 soll den echten Fensterblick frisch recapturen.</p>
+    <p>Aktueller Arbeitsstand am 2026-07-09: was am Spiel passiert ist, welche Spielerwirkung dadurch entstanden ist, welche Reibung noch offen ist und was ich als naechstes bearbeiten will. Neu aktualisiert nach TASK_905: Die belegte Fire-Lane-Reibung aus TASK_903 ist als enger Primary3D-Visual-Polish umgesetzt; danach wurde frisch exportiert und ein echter Window-Handle-Capture mit `review_ready` geschrieben. Der naechste Schritt ist TASK_906 als read-only Sichtbefund.</p>
     <div class="meta-row">
       <span class="pill good">Release-/Singleplayer-Pfad begehbar</span>
       <span class="pill good">CONTACT FIRE im echten Fenster sichtbar</span>
@@ -101,7 +101,8 @@
       <span class="pill good">TASK_902 Window-Capture review_ready</span>
       <span class="pill good">TASK_903 Findings geschnitten</span>
       <span class="pill good">TASK_904 Fire-Lane-Polish umgesetzt</span>
-      <span class="pill warn">Naechster Beweis: TASK_905 Recapture</span>
+      <span class="pill good">TASK_905 Capture review_ready</span>
+      <span class="pill warn">TASK_906 folgt: Visual Findings</span>
       <span class="pill warn">Untracked lokal: builds/</span>
       <span class="pill">Report ist read-only</span>
     </div>
@@ -136,6 +137,7 @@
             <li>TASK_904 setzt genau das um: weichere Fuehrungslinie, schmaler heller Kern, kleine Source-/Target-Anker und weiter leiser Halo.</li>
             <li>Der Build-/EXE-Fokus ist klarer: Der Spielordner ist nicht Doku-Deko, sondern der eigentliche Abnahmepfad fuer Singleplayer-Klick, Missionseinstieg und ersten Feuerwechsel.</li>
             <li>Der aktuelle Stand ist nicht final huebsch, aber endlich gut genug instrumentiert, um gezielt ueber Spielerblick statt ueber Vermutung zu polieren.</li>
+            <li>Neu im Arbeitsstand: TASK_905 legt den echten Release-/Window-Handle-Recapture nach TASK_904 an und hat einen frischen `review_ready`-Beleg unter `tmp/release_first_exchange_fire_lane_real_window_recapture.png` geschrieben.</li>
           </ul>
           <h3 style="margin-top:16px;">Was ich noch machen will</h3>
           <ul class="list">
@@ -145,7 +147,8 @@
             <li>TASK_903 ist umgesetzt: Der Screenshot bestaetigt CONTACT FIRE und ruhigere Marker, aber die Fire-Lane ist noch zu subtil als erste Weltlesung.</li>
             <li>Dieser HTML-Zwischenbericht wurde aktualisiert und bleibt als lokale Workbench fuer Playtest-Notizen, Entscheidungen und JSON-Export nutzbar.</li>
             <li>TASK_904 ist umgesetzt: Fire-Lane/Source-to-target-Beziehung gezielt klarer machen, ohne Combat- oder HUD-Wahrheit neu zu oeffnen.</li>
-            <li>Als naechstes TASK_905: frisch exportieren/capturen und den echten Spielerfensterblick bewerten.</li>
+            <li>TASK_905 ist als Recapture-Rahmen plus frischer Export/Capture umgesetzt: Manifest `review_ready`, trusted Window-Handle, finaler Source-Snapshot CONTACT FIRE in #17/#18/#19.</li>
+            <li>Als naechstes TASK_906: den TASK_905-PNG-/Manifest-Befund read-only schneiden und nur belegte Restreibung oder Akzeptanz benennen.</li>
             <li>Wenn der erste Feuerwechsel angenehm liest, den Playtest 30-60 Sekunden laenger laufen lassen: Movement, Zielerkennung, Taktik, UI-Dichte und Performance.</li>
           </ul>
           <p>Der alte Hauptschmerz war nicht mehr nur "es gibt keinen Kampf", sondern "der Kampf passiert, aber der sichtbare Fensterstand erzaehlt ihn nicht sauber". Genau daran wurde gearbeitet: Statusquelle, Render-Zeitpunkt, HUD-Flaechen und Weltkampf-Visuals wurden in kleinen Slices auseinandergezogen und wieder synchronisiert.</p>
@@ -165,7 +168,8 @@
             <div class="metric"><strong>TASK_902</strong><span>umgesetzt: eigener Window-Recapture-Rahmen.</span></div>
             <div class="metric"><strong>TASK_903</strong><span>umgesetzt: echten Sichtbeleg ausgewertet.</span></div>
             <div class="metric"><strong>TASK_904</strong><span>umgesetzt: Fire-Lane staerker lesbar.</span></div>
-            <div class="metric"><strong>TASK_905</strong><span>naechster Beweis: echter Window-Recapture.</span></div>
+            <div class="metric"><strong>TASK_905</strong><span>Capture review_ready: Manifest und Window-PNG geschrieben.</span></div>
+            <div class="metric"><strong>TASK_906</strong><span>naechster Schnitt: echte Fire-Lane-Visual-Findings.</span></div>
           </div>
         </article>
         <article class="card full">
@@ -286,6 +290,20 @@
               </div>
             </div>
             <div class="timeline-item">
+              <strong>TASK_904</strong>
+              <div>
+                <h3>Fire-Lane Readability Polish</h3>
+                <p>Die durch TASK_903 belegte Restreibung wurde eng umgesetzt: Source-to-target-Fire-Lane mit weicher Fuehrung, schmalem hellem Kern, kleinen Source-/Target-Ankern und weiter ruhigem Target-Halo. Das wurde committed und auf den Task-Branch gepusht.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <strong>TASK_905</strong>
+              <div>
+                <h3>Recapture im Arbeitsstand</h3>
+                <p>Task-Datei, Capture-Wrapper, Analyzer/Manifest-Helper und Verifier fuer den echten Release-Fensterblick nach TASK_904 sind angelegt. Der frische Export/Capture schrieb Manifest und Window-PNG mit `review_ready`; offen ist nur der read-only Sichtbefund in TASK_906.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
               <strong>Report</strong>
               <div>
                 <h3>Aktueller HTML-Zwischenstand</h3>
@@ -338,6 +356,7 @@
             <li><strong>Fire-Lane:</strong> Nach TASK_903 ist das primaere Problem enger: Die Schussbahn ist vorhanden, aber noch nicht die erste intuitive Weltlesung.</li>
             <li><strong>Marker-Cluster:</strong> FIRE/CONTACT-Text und kleine Marker sitzen im Kontaktbereich weiter dicht beieinander.</li>
             <li><strong>Build-Drift:</strong> Nach Visual-Slices darf der lokale Spielordner nicht als automatisch aktuell gelten. Der letzte frische Capture liegt bei `tmp/release_first_exchange_combat_marker_scale_real_window_recapture.png`.</li>
+            <li><strong>TASK_905 ist kein Sichturteil:</strong> Der Recapture-Rahmen und der frische Fensterbeweis sind da, aber die visuelle Akzeptanz wird erst in TASK_906 aus dem PNG-/Manifest-Befund geschnitten.</li>
             <li><strong>HUD-Konkurrenz:</strong> Bottom-Dock, Event Log, Karten und Weltbild sind gleichzeitig aktiv. Die erste Kampflesung ist besser, aber noch dicht.</li>
             <li><strong>Ein-Pfad-Abnahme:</strong> Der Release-Pfad ist fuer den ersten Feuerwechsel gut belegt. Mehrere freie Spielvarianten, mehrere Fireteams und laengere Missionen brauchen weiter eigene Slices.</li>
             <li><strong>Lokale Builds:</strong> `builds/` liegt als untracked lokaler Ordner im Arbeitsbaum und sollte nicht versehentlich in den Report-/Task-Commit.</li>
@@ -364,7 +383,8 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen wuerde</h2>
           <ol class="list">
-            <li><strong>TASK_905 - frischer Recapture:</strong> Nach TASK_904 wieder exportieren/capturen, damit nicht nur der Verifier, sondern der echte Spielerfensterblick zaehlt.</li>
+            <li><strong>TASK_906 - Findings:</strong> Den echten TASK_905-Spielerfensterblick auswerten: Fire-Lane als erste Weltlesung ja/nein, Source-/Target-Anker, Halo-Ruhe und HUD-Konkurrenz.</li>
+            <li><strong>Kleiner Release-Regressionslauf:</strong> TASK_905-Verifier, TASK_904-Regression und Diff-Hygiene als Commit-Gate laufen lassen.</li>
             <li><strong>Kleiner freier Playtest:</strong> Nach dem ersten Feuerwechsel nicht sofort stoppen, sondern 30-60 Sekunden weiterlaufen lassen: Befehle, Movement, Zielerkennung, UI-Dichte, Performance.</li>
             <li><strong>Spielerfuehrung nachziehen:</strong> Wenn TASK_904 den Spielerblick bestaetigt, den ersten Missionsgriff weiter angenehmer machen: naechster sinnvoller Befehl, Rueckmeldung, weniger Denk-Arbeit fuer den Spieler.</li>
             <li><strong>Danach Entscheidung:</strong> Entweder erste Mission weiter ausbauen oder wieder Richtung taktische Entscheidungslesbarkeit gehen: Order Preview, Line-of-Fire, Threat Overlay.</li>
@@ -377,7 +397,7 @@
             <button class="choice" type="button" data-choice-value="free_playtest">Freier Playtest</button>
             <button class="choice" type="button" data-choice-value="decision_preview">Order Preview</button>
           </div>
-          <p>Meine Empfehlung: jetzt TASK_905. Der Visual-Polish ist umgesetzt; nun muss der echte Spielerblick zeigen, ob die Schussbahn wirklich besser gelesen wird.</p>
+          <p>Meine Empfehlung: jetzt TASK_906. Der echte TASK_905-Fensterbeweis ist da; nun muss der Spielerblick entscheiden, ob die Schussbahn wirklich besser gelesen wird.</p>
         </article>
         <article class="card full">
           <h2>Nicht jetzt</h2>
@@ -518,13 +538,13 @@
           notes,
           active_choices: activeChoices,
           computed: {
-            current_task: "TASK_904 fire-lane readability polish implemented; TASK_905 real-window recapture recommended",
+            current_task: "TASK_905 real-window recapture implemented and review_ready",
             release_path_state: "singleplayer_to_first_exchange_reproducible",
-            build_export_state: "task_902_real_window_capture_review_ready",
-            current_player_gain: "first_exchange_contact_fire_visible_marker_scale_world_noise_polish_confirmed_in_real_window",
-            primary_open_risk: "task_904_needs_real_window_recapture_before_visual_acceptance",
-            next_recommended_slice: "TASK_905",
-            following_recapture_slice: "free_playtest_after_task_905",
+            build_export_state: "task_905_real_window_capture_review_ready",
+            current_player_gain: "first_exchange_contact_fire_visible_and_task_904_fire_lane_capture_available",
+            primary_open_risk: "task_905_is_not_visual_acceptance_until_task_906_findings",
+            next_recommended_slice: "TASK_906",
+            following_recapture_slice: "free_playtest_after_task_906",
             report_updated_at_local: "2026-07-09",
             report_purpose: "interim_workbench_for_done_changed_next"
           },
