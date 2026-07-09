@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - TASK_940 Ausblick</title>
+  <title>Sternenbuergerchen Zwischenbericht - Aktueller Spielstand und TASK_942 Ausblick</title>
   <style>
     :root {
       color-scheme: dark;
@@ -88,16 +88,18 @@
     }
   </style>
 </head>
-<body data-report-id="spielstand_zwischenbericht_task939_ausblick_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
+<body data-report-id="spielstand_zwischenbericht_task940_task941_ausblick_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Stand 2026-07-09: Der Release-Singleplayer-Pfad ist bis zum ersten Feuerkontakt als reproduzierbare Strecke aufgebaut. TASK_940 schneidet den TASK_939-Spielerblick jetzt read-only: Smoke nur bei akzeptierter Lesbarkeit, sonst enger Folgefix.</p>
+    <p>Stand 2026-07-09: Der Release-Singleplayer-Pfad ist bis zum ersten Feuerkontakt als reproduzierbare Strecke aufgebaut. TASK_941 fuegt jetzt ein read-only Playability-Smoke-Gate hinzu: Der naechste reale Slice ist TASK_942, je nach Gate als Smoke-Run, enger Folgefix oder manueller Fensterentscheid.</p>
     <div class="meta-row">
       <span class="pill good">Branch: task/release-first-exchange-player-readability-polish-review</span>
       <span class="pill good">TASK_939 umgesetzt</span>
       <span class="pill good">TASK_940 umgesetzt</span>
-      <span class="pill warn">TASK_941 naechster Entscheid</span>
+      <span class="pill good">TASK_941 Gate umgesetzt</span>
+      <span class="pill warn">TASK_942 naechster Entscheid</span>
       <span class="pill warn">Playability-Smoke noch nicht freigegeben</span>
+      <span class="pill good">Zwischenbericht aktualisiert</span>
       <span class="pill">HTML-Workbench</span>
     </div>
   </header>
@@ -118,14 +120,14 @@
           <h2>Kurzfassung</h2>
           <div class="status-box good">Der technische Spielpfad steht deutlich besser: EXE -> Einzelspieler -> Homebase-Direct-Sortie -> Mission -> LZ/Drop -> GO -> erster Kontakt ist nicht mehr nur Wunsch, sondern als Release-Strecke wiederholt gehaertet.</div>
           <div class="status-box info" style="margin-top:12px;">Die letzten Slices haben die erste Feuerwechsel-Lesbarkeit verbessert: CONTACT-FIRE-Quellen, Event-Log, Selected-Fireteam, Mission-Control und 2.5D-Fire-Lane greifen jetzt ueber read-only Anzeigevertraege ineinander.</div>
-          <div class="status-box" style="margin-top:12px;">Der Sichtentscheid ist jetzt als TASK_940-Schnitt modelliert: Ein sauberer manueller Befund schaltet TASK_941 Playability-Smoke frei; belegte Restreibung fuehrt stattdessen zu einem engen TASK_941-Folgefix.</div>
+          <div class="status-box" style="margin-top:12px;">Der Sichtentscheid ist jetzt als TASK_940-Schnitt modelliert und TASK_941 macht daraus eine Gate-Ampel: Smoke nur bei echter TASK_940-Akzeptanz, Restreibung als enger Folgefix, offener Sichtbefund als manueller Review.</div>
         </article>
         <article class="card">
           <h2>Ampel</h2>
           <div class="stack">
             <div class="metric"><strong>gruen</strong><span>Singleplayer-Start, Homebase-Reparatur, Direct-Sortie, Dropship-Kette.</span></div>
             <div class="metric"><strong>gruen</strong><span>CONTACT FIRE ist als Anzeigequelle an #17/#18/#19 und Weltvisuals angebunden.</span></div>
-            <div class="metric"><strong>gelb</strong><span>Der echte Fensterblick muss noch akzeptiert oder als Restbefund geschnitten werden.</span></div>
+            <div class="metric"><strong>gelb</strong><span>Der echte Fensterblick ist dokumentiert, aber noch nicht als Spielbarkeits-Smoke freigegeben.</span></div>
           </div>
         </article>
       </div>
@@ -136,7 +138,7 @@
         <article class="card wide">
           <h2>Was sich am Spiel getan hat</h2>
           <ul class="list">
-            <li><strong>Der Einzelspieler ist weniger Sackgasse:</strong> leere oder halb kaputte lokale Save-Zustaende werden beim sichtbaren Start additiv repariert.</li>
+            <li><strong>Der Einzelspieler ist weniger Sackgasse:</strong> leere oder halb kaputte lokale Save-Zustaende werden beim sichtbaren Start additiv repariert, damit der Spieler nicht nach dem Klick auf Einzelspieler in einem blockierten Homebase-Bild haengen bleibt.</li>
             <li><strong>Der erste Auftrag ist direkter:</strong> statt im alten FOB-Transfer-Arbeitsmodus zu bleiben, startet der Spieler in eine kleine Homebase-Direct-Sortie.</li>
             <li><strong>Dropship und Fireteam sind besser gekoppelt:</strong> Flightdeck, Payload, Boarding, LZ, Drop und GO sind als Spielerweg nachvollziehbarer.</li>
             <li><strong>Der erste Feuerkontakt bekommt eine Sprache:</strong> CONTACT FIRE, FireTrace, Impact, Target-Bezug und Event-Log sollen denselben Moment beschreiben.</li>
@@ -169,6 +171,7 @@
             <div class="timeline-item"><strong>TASK_938 umgesetzt</strong><span>Fire-Lane/Core minimal klarer, Source-/Target-Anker tragender, Label/Halo/Grid/Weltlinien leiser.</span></div>
             <div class="timeline-item"><strong>TASK_939 umgesetzt</strong><span>Frischer Recapture-/Review-Rahmen fuer den TASK_938-Final-Tuning-Stand.</span></div>
             <div class="timeline-item"><strong>TASK_940 umgesetzt</strong><span>Read-only Findings-Schnitt fuer TASK_939 mit Akzeptanzpfad zu TASK_941 Playability-Smoke oder engem Folgefix.</span></div>
+            <div class="timeline-item"><strong>TASK_941 umgesetzt</strong><span>Read-only Smoke-Gate fuer TASK_940: `smoke_ready`, `manual_review_required`, `followup_fix_required` oder `blocked`.</span></div>
           </div>
         </article>
         <article class="card">
@@ -179,6 +182,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="done.contact_fire"> CONTACT-FIRE-Anzeige angebunden</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task939"> TASK_939 Recapture-Rahmen vorhanden</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task940"> TASK_940 Findings-Schnitt vorhanden</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task941"> TASK_941 Smoke-Gate vorhanden</label>
         </article>
       </div>
     </section>
@@ -208,17 +212,17 @@
         <article class="card wide">
           <h2>Was ich als Naechstes machen will</h2>
           <ul class="list">
-            <li><strong>TASK_941 entscheiden:</strong> wenn der echte Blick akzeptiert ist, naechster Schritt Playability-Smoke; wenn nicht, nur den belegten Restpunkt polieren.</li>
-            <li><strong>Danach First-Exchange-Playability-Smoke:</strong> erst wenn der erste Blick stimmt, den Ablauf spielerisch pruefen: Drop, GO, erste Bewegung, Kontakt, Feuerentscheidung, naechster Griff.</li>
+            <li><strong>TASK_942 aus dem Gate ableiten:</strong> bei `smoke_ready` den First-Exchange-Playability-Smoke laufen lassen; bei Restreibung nur den belegten Folgefix bauen; bei offenem Sichtbefund manuell reviewen.</li>
+            <li><strong>First-Exchange-Playability-Smoke:</strong> erst wenn das Gate gruen ist, den Ablauf spielerisch pruefen: Drop, GO, erste Bewegung, Kontakt, Feuerentscheidung, naechster Griff.</li>
             <li><strong>Danach wieder Gameplay-Fundament:</strong> Tactical Decision Clarity mit Order Preview, Line-of-Fire, Contact Reports, AI Intent und Squad Spacing bleibt der sinnvollste naechste Spielblock.</li>
             <li><strong>Berichte weiter nutzen:</strong> dieser HTML-Zwischenbericht kann deine Sichtnotizen per JSON exportieren, damit aus Bauchgefuehl wieder ein Task wird.</li>
           </ul>
         </article>
         <article class="card">
           <h2>Empfohlene Entscheidung</h2>
-          <div class="status-box good">Weiter mit TASK_941 auf Basis des TASK_940-Befunds. Das ist der saubere Uebergang von "Spielerblick schneiden" zu "Smoke starten oder engen Restfix bauen".</div>
+          <div class="status-box good">Weiter mit TASK_942 auf Basis des TASK_941-Gates. Das ist der saubere Uebergang von "Spielerblick schneiden" zu "Smoke starten oder engen Restfix bauen", ohne den ausgelassenen Sichttest nachtraeglich als erledigt zu behaupten.</div>
           <div class="button-row" style="margin-top:12px;" data-choice-group="next.decision">
-            <button class="choice active" type="button" data-choice-value="task941_decide">TASK_941 entscheiden</button>
+            <button class="choice active" type="button" data-choice-value="task942_from_gate">TASK_942 aus Gate</button>
             <button class="choice" type="button" data-choice-value="smoke_if_accepted">Smoke bei Akzeptanz</button>
             <button class="choice" type="button" data-choice-value="switch_focus">Fokus wechseln</button>
           </div>
@@ -316,10 +320,10 @@
           notes: {},
           active_choices: {},
           computed: {
-            current_done_task: "TASK_940",
-            recommended_next_task: "TASK_941 - Release First Exchange Playability Smoke | TASK_941 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix",
+            current_done_task: "TASK_941",
+            recommended_next_task: "TASK_942 - Release First Exchange Playability Smoke Run | TASK_942 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix | TASK_942 - Release First Exchange Manual Window Review",
             release_path_status: "singleplayer_to_first_exchange_hardened",
-            first_exchange_status: "final_tuning_visual_findings_done_needs_acceptance_or_followup_fix",
+            first_exchange_status: "final_tuning_playability_smoke_gate_done_needs_task942_decision",
             gameplay_truth_policy: "read_only_report_no_runtime_truth"
           },
           metadata: { url: window.location.href, user_agent: navigator.userAgent }

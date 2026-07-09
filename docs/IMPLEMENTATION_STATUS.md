@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_941 - Release First Exchange Final Tuning Playability Smoke Gate
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_941_release_first_exchange_final_tuning_playability_smoke_gate.md`, `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_936_release_first_exchange_followup_fix_player_polish_recapture.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_941 wertet den TASK_940-Findings-Snapshot read-only als Gate aus.
+- Stand: `ReleaseFirstExchangeFinalTuningPlayabilitySmokeGate.build_snapshot()` trennt `smoke_ready`, `manual_review_required`, `followup_fix_required` und `blocked`, damit der ausgelassene oder offene Sichtbefund nicht als Playability-Smoke-Freigabe zaehlt.
+- Stand: Der Snapshot nennt die Pflichtchecks fuer den folgenden Smoke: EXE-Singleplayer, Homebase-Direct-Sortie, Dropship/LZ/GO, erster CONTACT FIRE, #17/#18/#19, Fire-Lane, Command-Surfaces, HUD-Truth-Grenze, Performance und Multiplayer-Snapshot-Grenze.
+- Risiken/offen: TASK_941 fuehrt keinen Smoke aus und ersetzt keinen echten Fensterblick. Der naechste Slice muss je nach Gate `TASK_942 - Release First Exchange Playability Smoke Run`, `TASK_942 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix` oder `TASK_942 - Release First Exchange Manual Window Review` sein.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_941_release_first_exchange_final_tuning_playability_smoke_gate.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_942 - Release First Exchange Playability Smoke Run bei `smoke_ready`; sonst TASK_942 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix oder Manual Window Review.
+
 ### TASK_940 - Release First Exchange Followup Fix Player Polish Final Tuning Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_936_release_first_exchange_followup_fix_player_polish_recapture.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Stand: Positive Evidenz bleibt erhalten: CONTACT FIRE in #17/#18/#19, trusted Window-Handle-Capture, TASK_938-Final-Tuning-Style und TASK_935-Player-Polish-Basis.
 - Risiken/offen: Ohne akzeptierten Sichtbefund bleibt der Snapshot `needs_manual_review` oder empfiehlt einen engen TASK_941-Folgefix. Der Playability-Smoke ist erst nach Akzeptanz sinnvoll.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.gd`, `git diff --check`.
-- Naechster Schritt: TASK_941 - Release First Exchange Playability Smoke bei Akzeptanz; sonst TASK_941 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Fix.
+- Naechster Schritt: TASK_941 - Release First Exchange Final Tuning Playability Smoke Gate.
 
 ### TASK_939 - Release First Exchange Followup Fix Player Polish Final Tuning Recapture
 - Status: implementiert im Arbeitsstand
