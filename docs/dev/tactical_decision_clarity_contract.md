@@ -115,6 +115,11 @@ TASK_1016 uebersetzt TASK_1015-Findings in konkrete read-only Surface-Specs. Erw
 
 Die Specs duerfen nur Rollen, Style-IDs, Mindesthoehen, Textbudgets und kompakte Displaytexte festlegen. Sie erzeugen keine Controls, keine Commands, kein Movement, keine Combat-/Damage-Wirkung und keine Multiplayer-Wahrheit. Der naechste Schritt ist `TASK_1017 - Release First Decision Loop Two Player Loop Scenario Playability Slice`.
 
+## Release First Decision Loop Two Player Loop Scenario Playability Slice (TASK_1017)
+TASK_1017 prueft, ob die TASK_1016-Surfaces als kleiner Szenario-Griff lesbar sind. Ein guter Trace bestaetigt: FOB-Entry gelesen, Objective verstanden, Alpha/Bravo-Rollen lesbar, NEXT/CONFIRM/GO als ruhiger Ablauf erkennbar, GO bleibt separat, Feedback fuehrt wieder zu NEXT, HUD bleibt ruhig, Responsiveness fuehlt sich schnell an und Multiplayer-/Gameplay-Wahrheit bleibt unberuehrt.
+
+Der Scenario-Playability-Slice bleibt read-only. Ohne Trace bleibt er `needs_scenario_playability_trace`; fehlende Checks werden als Regression benannt; ein bestandener Trace routet zu `TASK_1018 - Release First Decision Loop Two Player Loop Scenario Real Window Capture`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

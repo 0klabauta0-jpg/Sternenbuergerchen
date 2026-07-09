@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1017 - Release First Decision Loop Two Player Loop Scenario Playability Slice (implementiert im Arbeitsstand)
+- Grundlage: TASK_1016 Scenario Player Feel Polish.
+- Ziel: Kleinen FOB-Szenario-Griff mit Trace gegen Spielerfragen pruefen: FOB, Objective, Rollen, NEXT/CONFIRM/GO, Feedback, HUD-Ruhe und Multiplayer-Grenze.
+- Ergebnis: Read-only Snapshot `scenario_playability_slice_passed | needs_scenario_playability_trace | scenario_playability_regression_found`.
+- Naechster Schritt: TASK_1018 - Release First Decision Loop Two Player Loop Scenario Real Window Capture.
+
 # Arbeitsregeln
 
 ## Reihenfolge

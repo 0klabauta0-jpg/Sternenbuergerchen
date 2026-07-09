@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1017 - Release First Decision Loop Two Player Loop Scenario Playability Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1017_release_first_decision_loop_two_player_loop_scenario_playability_slice.md`, `docs/tasks/TASK_1016_release_first_decision_loop_two_player_loop_scenario_player_feel_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioPlayabilitySlice.build_snapshot()` bewertet einen bereiten TASK_1016-Scenario-Polish plus Playability-Trace.
+- Stand: Ohne Trace bleibt der Slice `needs_scenario_playability_trace`; fehlende Checks melden konkrete Regressionen; ein guter Trace setzt `scenario_playability_slice_passed`.
+- Stand: Der Slice prueft FOB-Entry, Objective, Alpha/Bravo-Rollen, NEXT/CONFIRM/GO, GO separat, Feedback-zurueck-zu-NEXT, HUD-Ruhe, Responsiveness, Multiplayer-Grenze und keine Gameplay-Wahrheitsmutation.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1017 im Command-Feedback als Snapshot, Status, Gate und Playability-Zeile.
+- Risiken/offen: TASK_1017 ist ein Trace-/Contract-Gate, noch kein echter Fensterbeweis. TASK_1018 sollte daraus einen Real-Window-Capture schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1017_release_first_decision_loop_two_player_loop_scenario_playability_slice.gd`, Regression TASK_1016, TASK_1015, TASK_1014, `git diff --check`.
+- Naechster Schritt: TASK_1018 - Release First Decision Loop Two Player Loop Scenario Real Window Capture.
+
 ### TASK_1016 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1016_release_first_decision_loop_two_player_loop_scenario_player_feel_polish.md`, `docs/tasks/TASK_1015_release_first_decision_loop_two_player_loop_scenario_player_feel_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
