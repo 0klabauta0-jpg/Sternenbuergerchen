@@ -275,3 +275,8 @@ Der Snapshot bleibt Anzeige-/Planungsvertrag: Er darf eine Empfehlung, kurze Spi
 TASK_991 macht die TASK_990-Karten in bestehenden HUD-/Command-Feedback-Flaechen lesbar. Erwartet sind drei read-only Chips fuer `SICHERN`, `DRUECKEN` und `SAMMELN` plus kurze Zeilen fuer Selected Fireteam, Mission Control und Command Feedback.
 
 Der Snapshot bleibt eine Leseschicht: Er darf Fokus, Empfehlung, Tooltip-Texte, Chip-Zeile und `GO separat` liefern, aber keine Commands erzeugen, kein Movement starten und keine Multiplayer-Wahrheit setzen. Der naechste Schritt ist `TASK_992 - Release First Decision Loop Two Player Loop Micro Objective Choice Hook`.
+
+## Release First Decision Loop Two Player Loop Micro Objective Choice Hook (TASK_992)
+TASK_992 macht aus dem fokussierten Micro-Objective einen vorbereitenden Command-Draft. `SICHERN`, `DRUECKEN` und `SAMMELN` mappen auf bestehende Command-Typen und bleiben an die vorhandenen Confirm-/GO-Pfade gebunden.
+
+Der Snapshot bleibt read-only: Er darf `micro_objective_command_draft`, Hook-Zeile, `confirm_action = _issue_command`, `execute_action = execute_selected_fireteam_orders` und `GO separat` liefern, aber keine Commands bestaetigen, kein Movement starten und keine Multiplayer-Wahrheit setzen. Der naechste Schritt ist `TASK_993 - Release First Decision Loop Two Player Loop Micro Objective Runtime Buttons`.

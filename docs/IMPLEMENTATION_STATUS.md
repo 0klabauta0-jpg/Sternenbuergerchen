@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_992 - Release First Decision Loop Two Player Loop Micro Objective Choice Hook
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_992_release_first_decision_loop_two_player_loop_micro_objective_choice_hook.md`, `docs/tasks/TASK_991_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveChoiceHook.build_snapshot()` erzeugt aus einem bereiten TASK_991-Snapshot einen read-only Command-Draft fuer die fokussierte Micro-Objective.
+- Stand: `SICHERN`, `DRUECKEN` und `SAMMELN` mappen auf bestehende Command-Typen `defend`, `move` und `hold`; Confirm bleibt `_issue_command`, GO bleibt `execute_selected_fireteam_orders`.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_992 im Command-Feedback; ohne bereiten TASK_991-Snapshot bleibt der Snapshot blockiert.
+- Risiken/offen: TASK_992 macht die Micro-Objective als Draft vorbereitbar, aber noch nicht als echte klickbare Runtime-Auswahl. TASK_993 sollte Runtime-Buttons fuer die Micro-Objectives bauen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_992_release_first_decision_loop_two_player_loop_micro_objective_choice_hook.gd`, Regression TASK_991, TASK_990, TASK_989, `git diff --check`.
+- Naechster Schritt: TASK_993 - Release First Decision Loop Two Player Loop Micro Objective Runtime Buttons.
+
 ### TASK_991 - Release First Decision Loop Two Player Loop Micro Objective HUD Wiring
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_991_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.md`, `docs/tasks/TASK_990_release_first_decision_loop_two_player_loop_next_micro_objective.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

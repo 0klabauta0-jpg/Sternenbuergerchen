@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_992 - Release First Decision Loop Two Player Loop Micro Objective Choice Hook (implementiert): Das fokussierte TASK_991-Micro-Objective wird read-only als Command-Draft fuer `_issue_command` plus separaten `GO`-Pfad vorbereitet.
 - TASK_991 - Release First Decision Loop Two Player Loop Micro Objective HUD Wiring (implementiert): Die TASK_990-Micro-Objectives werden read-only als HUD-Chips plus Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen exportiert; `GO` bleibt separat.
 - TASK_990 - Release First Decision Loop Two Player Loop Next Micro Objective (implementiert): Ein bestandener TASK_989-Outcome-Slice erzeugt drei read-only Micro-Objective-Karten fuer `SICHERN`, `DRUECKEN` und `SAMMELN` plus Empfehlung und `GO separat`.
 - TASK_989 - Release First Decision Loop Two Player Loop Outcome Playability Slice (implementiert): Der TASK_988-Outcome-Polish wird mit Trace-Evidence als read-only Playability-Slice bewertet: RESULT/OBJ/NEXT lesbar, naechster Griff verstanden, HUD-/Multiplayer-Grenze erhalten.

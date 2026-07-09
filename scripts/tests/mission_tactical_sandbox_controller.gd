@@ -60,6 +60,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_VISUAL_POLISH_SCRIPT: 
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_PLAYABILITY_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_outcome_playability_slice.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_NEXT_MICRO_OBJECTIVE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_next_micro_objective.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_HUD_WIRING_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_CHOICE_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_choice_hook.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21153,6 +21154,11 @@ func get_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_HUD_WIRING_SCRIPT.call("build_snapshot", source_next_micro_objective, context)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_micro_objective_choice_hook_snapshot(source_hud_wiring_override: Dictionary = {}, selected_objective_id: String = "") -> Dictionary:
+	var source_hud_wiring: Dictionary = source_hud_wiring_override.duplicate(true) if not source_hud_wiring_override.is_empty() else get_release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_snapshot()
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_CHOICE_HOOK_SCRIPT.call("build_snapshot", source_hud_wiring, selected_objective_id)).duplicate(true)
+
+
 func _build_release_first_decision_loop_two_player_loop_outcome_visual_polish_source(outcome_capture: Dictionary) -> Dictionary:
 	var outcome_line: String = String(outcome_capture.get("source_outcome_line", "")).strip_edges()
 	var mini_objective_state: String = String(outcome_capture.get("source_mini_objective_state", "")).strip_edges()
@@ -24353,6 +24359,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_next_micro_objective,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_micro_objective_choice_hook: Dictionary = get_release_first_decision_loop_two_player_loop_micro_objective_choice_hook_snapshot(
+		release_first_decision_loop_two_player_loop_micro_objective_hud_wiring,
+		""
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24508,6 +24518,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_chips": Array(release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.get("hud_micro_objective_chips", [])),
 		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_selected_fireteam_line": String(release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.get("selected_fireteam_line", "")),
 		"release_first_decision_loop_two_player_loop_micro_objective_hud_wiring_mission_control_line": String(release_first_decision_loop_two_player_loop_micro_objective_hud_wiring.get("mission_control_line", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_choice_hook": release_first_decision_loop_two_player_loop_micro_objective_choice_hook,
+		"release_first_decision_loop_two_player_loop_micro_objective_choice_hook_line": String(release_first_decision_loop_two_player_loop_micro_objective_choice_hook.get("micro_objective_choice_hook_line", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_choice_hook_status": String(release_first_decision_loop_two_player_loop_micro_objective_choice_hook.get("status", "")),
+		"release_first_decision_loop_two_player_loop_micro_objective_choice_hook_command_draft": Dictionary(release_first_decision_loop_two_player_loop_micro_objective_choice_hook.get("micro_objective_command_draft", {})).duplicate(true),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
