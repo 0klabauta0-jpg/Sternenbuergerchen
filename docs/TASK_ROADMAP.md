@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_996 - Release First Decision Loop Two Player Loop Micro Objective Outcome Slice (implementiert): Der akzeptierte Micro-Objective-Griff erhaelt read-only Outcome-Zeile, Mini-Zielzustand und naechsten Griff; HUD- und Multiplayer-Grenzen bleiben erhalten.
 - TASK_995 - Release First Decision Loop Two Player Loop Micro Objective Acceptance Slice (implementiert): Der Micro-Objective-Loop `SICHERN / DRUECKEN / SAMMELN` wird read-only als Spielergriff akzeptiert: sichtbar, lesbar, Confirm-Feedback, `GO` separat und Multiplayer-Grenze erhalten.
 - TASK_994 - Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke (implementiert): Micro-Objective-Buttondruck wird als read-only Smoke bewertet; Confirm nutzt den vorhandenen Command-Pfad, Feedback wird sichtbar und `GO` bleibt getrennt.
 - TASK_993 - Release First Decision Loop Two Player Loop Micro Objective Runtime Buttons (implementiert): `SICHERN`, `DRUECKEN` und `SAMMELN` bekommen read-only Runtime-Button-Specs auf `CommandSlot08` bis `CommandSlot10`; Confirm und `GO` bleiben getrennt.

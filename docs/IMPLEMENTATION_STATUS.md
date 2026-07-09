@@ -10,13 +10,23 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_996 - Release First Decision Loop Two Player Loop Micro Objective Outcome Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_996_release_first_decision_loop_two_player_loop_micro_objective_outcome_slice.md`, `docs/tasks/TASK_995_release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveOutcomeSlice.build_snapshot()` bewertet einen bestandenen TASK_995-Acceptance-Slice plus Outcome-Trace.
+- Stand: Der Slice prueft gewaehlte Micro-Objective, Outcome-Zeile, Mini-Zielzustand, naechsten Griff, Spielerlesbarkeit und HUD-/Multiplayer-Grenzen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_996 im Command-Feedback; ohne Outcome-Trace bleibt der Slice offen.
+- Risiken/offen: TASK_996 ist noch kein Real-Window-Beweis. TASK_997 sollte den Micro-Objective-Outcome im echten Fenster capturen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_996_release_first_decision_loop_two_player_loop_micro_objective_outcome_slice.gd`, Regression TASK_995, TASK_994, TASK_993, `git diff --check`.
+- Naechster Schritt: TASK_997 - Release First Decision Loop Two Player Loop Micro Objective Real Window Capture.
+
 ### TASK_995 - Release First Decision Loop Two Player Loop Micro Objective Acceptance Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_995_release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice.md`, `docs/tasks/TASK_994_release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
 - Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveAcceptanceSlice.build_snapshot()` bewertet einen bestandenen TASK_994-Confirm-Smoke plus Acceptance-Trace.
 - Stand: Der Slice prueft sichtbare und lesbare `SICHERN`/`DRUECKEN`/`SAMMELN`, bestaetigte Auswahl, sichtbares Feedback, getrenntes `GO`, vorbereitete Order, Spielerlesbarkeit und HUD-/Multiplayer-Grenzen.
 - Stand: `MissionTacticalSandboxController` exportiert TASK_995 im Command-Feedback; ohne Trace bleibt der Slice ehrlich offen.
-- Risiken/offen: TASK_995 ist noch kein Outcome und kein Real-Window-Beweis. TASK_996 sollte ein Micro-Objective-Outcome schneiden.
+- Risiken/offen: TASK_995 ist noch kein Real-Window-Beweis. TASK_996 schneidet den Micro-Objective-Outcome.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_995_release_first_decision_loop_two_player_loop_micro_objective_acceptance_slice.gd`, Regression TASK_994, TASK_993, TASK_992, `git diff --check`.
 - Naechster Schritt: TASK_996 - Release First Decision Loop Two Player Loop Micro Objective Outcome Slice.
 

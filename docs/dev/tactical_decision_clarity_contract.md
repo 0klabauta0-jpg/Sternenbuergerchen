@@ -295,3 +295,8 @@ Der Snapshot bleibt read-only: Er darf Trace-Evidence, Confirm-Zeile, Feedback-Z
 TASK_995 nimmt den bestandenen Micro-Objective-Confirm-Smoke und prueft, ob daraus ein kleiner lesbarer Spielergriff wird. Erwartet sind sichtbare und lesbare `SICHERN`, `DRUECKEN`, `SAMMELN`, bestaetigte Auswahl, sichtbares Feedback, vorbereitete Order und weiterhin getrenntes `GO`.
 
 Der Snapshot bleibt read-only: Er darf Acceptance-Evidence, beantwortete Spielerfragen, Status-/Gate-Werte und eine kompakte `SICHERN / DRUECKEN / SAMMELN | ... | GO separat`-Zeile liefern, aber keinen Outcome setzen, kein Movement starten und keine Multiplayer-Wahrheit erzeugen. Der naechste Schritt ist `TASK_996 - Release First Decision Loop Two Player Loop Micro Objective Outcome Slice`.
+
+## Release First Decision Loop Two Player Loop Micro Objective Outcome Slice (TASK_996)
+TASK_996 nimmt den akzeptierten Micro-Objective-Griff und prueft, ob daraus eine kleine Ergebnis-Rueckmeldung wird. Erwartet sind gewaehlte Micro-Objective, Outcome-Zeile, Mini-Zielzustand, naechster Griff und eine fuer den Spieler lesbare Rueckmeldung.
+
+Der Snapshot bleibt read-only: Er darf Outcome-Evidence, Status-/Gate-Werte, `outcome_line`, `mini_objective_state` und `next_step_line` liefern, aber keinen Objective-State setzen, kein Movement starten, kein Feuer/Damage ausloesen und keine Multiplayer-Wahrheit erzeugen. Der naechste Schritt ist `TASK_997 - Release First Decision Loop Two Player Loop Micro Objective Real Window Capture`.
