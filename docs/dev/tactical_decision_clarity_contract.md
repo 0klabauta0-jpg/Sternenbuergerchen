@@ -300,3 +300,8 @@ Der Snapshot bleibt read-only: Er darf Acceptance-Evidence, beantwortete Spieler
 TASK_996 nimmt den akzeptierten Micro-Objective-Griff und prueft, ob daraus eine kleine Ergebnis-Rueckmeldung wird. Erwartet sind gewaehlte Micro-Objective, Outcome-Zeile, Mini-Zielzustand, naechster Griff und eine fuer den Spieler lesbare Rueckmeldung.
 
 Der Snapshot bleibt read-only: Er darf Outcome-Evidence, Status-/Gate-Werte, `outcome_line`, `mini_objective_state` und `next_step_line` liefern, aber keinen Objective-State setzen, kein Movement starten, kein Feuer/Damage ausloesen und keine Multiplayer-Wahrheit erzeugen. Der naechste Schritt ist `TASK_997 - Release First Decision Loop Two Player Loop Micro Objective Real Window Capture`.
+
+## Release First Decision Loop Two Player Loop Micro Objective Real Window Capture (TASK_997)
+TASK_997 trennt den Micro-Objective-Outcome-Snapshot vom echten Fensterbeweis. Erwartet ist ein Manifest, das das Release-Fenster, Screenshotpfade, sichtbare Outcome-Zeile, Mini-Zielzustand, naechsten Griff, Spielerlesbarkeit und HUD-/Multiplayer-Grenze reviewbar macht.
+
+Der Capture-Snapshot bleibt read-only und setzt `manual_review_done` nicht automatisch. Ohne Manifest bleibt er `needs_micro_objective_real_window_capture`; ein gueltiges Manifest wird `review_ready`; vollstaendige manuelle Checks akzeptieren ihn fuer `TASK_998 - Release First Decision Loop Two Player Loop Micro Objective Visual Findings`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
