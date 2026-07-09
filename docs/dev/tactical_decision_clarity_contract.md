@@ -195,3 +195,8 @@ Ein sauberer Sichtbefund darf erst zum Acceptance-Slice routen, wenn `2ND`, Conf
 TASK_975 verbindet akzeptierte TASK_974-Findings mit einem Ablauf-Trace. Der Slice muss belegen, dass der Release-Kontext erhalten bleibt, `2ND` sichtbar und bestaetigt ist, `GO` separat bleibt und erst danach ausgefuehrt wird, Post-GO-Feedback sichtbar ist und die Spielerfragen zum zweiten Griff beantwortet sind.
 
 Der Acceptance-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_acceptance_slice_trace`; bei regressiver Evidence routet er zu einem engen Recapture-Polish; bei voller Evidence meldet er `loop_two_acceptance_slice_passed` und fuehrt zu `TASK_976 - Release First Decision Loop Two Player Loop Extension`. Er erzeugt keine Commands, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Extension (TASK_976)
+TASK_976 macht aus dem akzeptierten zweiten Griff wieder eine naechste Spielerentscheidung. Erwartet sind vier read-only Choices: `SECURE Bereich sichern`, `PUSH Ziel druecken`, `FLANK Druck drehen` und `RESET neu sammeln`.
+
+Der Extension-Snapshot liefert `NEXT/WHY`-Zeilen und eine Empfehlung aus kleinem taktischem Kontext, erzeugt aber keine Commands, kein Movement und keine Multiplayer-Wahrheit. Der naechste Schritt ist HUD-Wiring in TASK_977, damit diese Choices sichtbar werden.

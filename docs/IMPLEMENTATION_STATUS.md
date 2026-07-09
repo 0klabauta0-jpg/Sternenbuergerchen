@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_976 - Release First Decision Loop Two Player Loop Extension
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_976_release_first_decision_loop_two_player_loop_extension.md`, `docs/tasks/TASK_975_release_first_decision_loop_two_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopExtension.build_snapshot()` baut aus einem bestandenen TASK_975-Acceptance-Slice einen read-only naechsten Spielergriff.
+- Stand: Der naechste Loop bietet `SECURE`, `PUSH`, `FLANK` und `RESET` mit kurzer `NEXT/WHY`-Lesung und Empfehlung aus kleinem taktischem Kontext.
+- Stand: Der Snapshot erzeugt keine Commands, kein Movement, keine Combat-/Damage-Ereignisse und keine Multiplayer-Wahrheit.
+- Risiken/offen: TASK_976 verdrahtet den neuen Spielergriff noch nicht sichtbar ins HUD. TASK_977 sollte die Loop-Zeilen und Choices in die bestehenden Command-Surfaces fuehren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_976_release_first_decision_loop_two_player_loop_extension.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_975_release_first_decision_loop_two_acceptance_slice.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_974_release_first_decision_loop_two_recapture_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_977 - Release First Decision Loop Two Player Loop HUD Wiring.
+
 ### TASK_975 - Release First Decision Loop Two Acceptance Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_975_release_first_decision_loop_two_acceptance_slice.md`, `docs/tasks/TASK_974_release_first_decision_loop_two_recapture_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

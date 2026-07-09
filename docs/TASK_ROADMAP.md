@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_976 - Release First Decision Loop Two Player Loop Extension (implementiert): Der bestandene zweite Acceptance-Slice erzeugt read-only den naechsten Spielergriff `SECURE / PUSH / FLANK / RESET`.
 - TASK_975 - Release First Decision Loop Two Acceptance Slice (implementiert): Akzeptierte TASK_974-Findings werden mit einem read-only Ablauf-Trace als kleiner `2ND -> GO -> Feedback`-Acceptance-Slice bewertet.
 - TASK_974 - Release First Decision Loop Two Recapture Visual Findings (implementiert): Der TASK_973-Recapture wird als read-only Sichtbefund geschnitten; Reibung routet zu engem Visual Polish, sauberer Befund zum Loop-Two-Acceptance-Slice.
 - TASK_973 - Release First Decision Loop Two Real Window Recapture (implementiert): Der bestandene `2ND -> GO -> Feedback`-Smoke bekommt einen read-only Recapture-/Manifest-Rahmen; echte manuelle Sichtabnahme bleibt offen und routet zu TASK_974.
