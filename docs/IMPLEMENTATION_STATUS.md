@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_939 - Release First Exchange Followup Fix Player Polish Final Tuning Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_936_release_first_exchange_followup_fix_player_polish_recapture.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_939 legt den frischen Recapture-/Review-Rahmen an den TASK_938-Final-Tuning-Slice.
+- Stand: `capture_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.ps1` wiederverwendet den TASK_936-Window-Handle-Pfad und schreibt eigene TASK_939-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Final-Tuning-Fire-Lane als erste Weltbewegung, tragende Source-/Target-Anker, leises Label/Halo/Grid und Lane-vor-FIRE/CONTACT-Text.
+- Risiken/offen: TASK_939 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_940 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_938_release_first_exchange_followup_fix_player_polish_final_tuning.gd`, `git diff --check`.
+- Naechster Schritt: TASK_940 - Release First Exchange Followup Fix Player Polish Final Tuning Visual Findings.
+
 ### TASK_938 - Release First Exchange Followup Fix Player Polish Final Tuning
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/tasks/TASK_937_release_first_exchange_followup_fix_player_polish_visual_findings.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`

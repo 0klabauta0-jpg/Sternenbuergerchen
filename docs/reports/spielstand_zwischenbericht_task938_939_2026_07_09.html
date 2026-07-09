@@ -86,7 +86,8 @@
     <div class="meta-row">
       <span class="pill good">Branch: task/release-first-exchange-player-readability-polish-review</span>
       <span class="pill good">TASK_938 umgesetzt</span>
-      <span class="pill warn">TASK_939 naechster Schritt</span>
+      <span class="pill good">TASK_939 umgesetzt</span>
+      <span class="pill warn">TASK_940 naechster Schritt</span>
       <span class="pill warn">Echter Fensterbeweis offen</span>
       <span class="pill">HTML-Workbench</span>
     </div>
@@ -108,14 +109,14 @@
           <h2>Kurzfassung</h2>
           <div class="status-box good">Der grosse Fortschritt ist der durchgehende Spielpfad: EXE -> Einzelspieler -> Homebase-Direct-Sortie -> Mission -> LZ/Drop -> GO -> erster Kontakt ist inzwischen als gehaertete Release-Strecke greifbar.</div>
           <div class="status-box info" style="margin-top:12px;">TASK_938 hat den letzten belegten Sichtbefund eng poliert: Fire-Lane/Core staerker, Label/Halo/Grid/Weltlinien leiser, Source-/Target-Anker tragender. Das bleibt bewusst Anzeige, keine Gameplay-Wahrheit.</div>
-          <div class="status-box" style="margin-top:12px;">Der naechste sinnvolle Griff ist TASK_939: frischer echter Fenster-Capture nach TASK_938. Danach entscheiden wir, ob der First-Exchange-Playability-Smoke endlich dran ist oder ob noch ein konkreter Restbefund sichtbar bleibt.</div>
+          <div class="status-box" style="margin-top:12px;">Der naechste sinnvolle Griff ist TASK_940: den TASK_939-Capture-/Review-Rahmen als echten Findings-Schnitt bewerten. Danach entscheiden wir, ob der First-Exchange-Playability-Smoke endlich dran ist oder ob noch ein konkreter Restbefund sichtbar bleibt.</div>
         </article>
         <article class="card">
           <h2>Ampel</h2>
           <div class="stack">
             <div class="metric"><strong>gruen</strong><span>Release-Start, Homebase-Direct-Sortie, Missionstart, Dropship-/GO-Kette.</span></div>
             <div class="metric"><strong>gruen</strong><span>CONTACT-FIRE-Evidence und HUD/Event-Log-Pfade sind vertraglich angebunden.</span></div>
-            <div class="metric"><strong>gelb</strong><span>First-Exchange muss nach TASK_938 im echten Fenster bestaetigt werden.</span></div>
+            <div class="metric"><strong>gelb</strong><span>First-Exchange muss nach TASK_939 im echten Fenster bewertet werden.</span></div>
           </div>
         </article>
       </div>
@@ -157,7 +158,7 @@
             <li>Den Dropship-/Payload-/Boarding-/LZ-/Drop-/GO-Faden wiederholt vertraglich geprueft und in kleinen Slices stabilisiert.</li>
             <li>Den First-GO-Firefight ueber Deep-Links, Captures, Findings und Folgepolishes reproduzierbar gemacht.</li>
             <li>CONTACT FIRE in den sichtbaren HUD-/Event-Log-Oberflaechen priorisiert, ohne HUD zur zweiten Combat-Wahrheit zu machen.</li>
-            <li>TASK_935 bis TASK_938 als enges Player-Polish-/Recapture-/Findings-/Final-Tuning-Band umgesetzt.</li>
+            <li>TASK_935 bis TASK_939 als enges Player-Polish-/Recapture-/Findings-/Final-Tuning-/Recapture-Band umgesetzt.</li>
             <li>Den Reportfluss selbst als HTML-Workbench mit JSON-Export aufgebaut, damit Sichtbefunde nicht im Chat verschwinden.</li>
           </ul>
         </article>
@@ -168,7 +169,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="done.mission_chain"> Mission-/LZ-/Drop-/GO-Kette pruefbar</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.contact_fire"> CONTACT-FIRE-Anzeige angebunden</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task938"> TASK_938 Final-Tuning umgesetzt</label>
-          <label class="checkline"><input type="checkbox" data-export-key="done.task939"> TASK_939 Recapture erledigt</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task939"> TASK_939 Recapture-Rahmen erledigt</label>
         </article>
       </div>
     </section>
@@ -198,8 +199,8 @@
         <article class="card wide">
           <h2>Was ich noch machen will</h2>
           <ul class="list">
-            <li><strong>TASK_939:</strong> frischen Recapture nach TASK_938 anlegen, inklusive Manifest und Pflichtchecks fuer Fire-Lane, CONTACT FIRE, Source/Target und HUD-Oberflaechen.</li>
-            <li><strong>TASK_940 nur bei Bedarf:</strong> falls der Screenshot noch Restreibung zeigt, diese read-only als Visual Findings schneiden statt direkt weiterzupolieren.</li>
+            <li><strong>TASK_940:</strong> TASK_939-PNG und Manifest read-only als Visual Findings schneiden, inklusive Akzeptanz oder konkretem Restbefund.</li>
+            <li><strong>Smoke nur bei Akzeptanz:</strong> falls der Screenshot klar genug ist, den First-Exchange-Playability-Smoke starten; sonst nur belegte Restreibung polieren.</li>
             <li><strong>First-Exchange-Playability-Smoke:</strong> sobald der echte Blick akzeptiert ist, den ersten Spielablauf nicht nur als Anzeige, sondern als Spielbarkeit pruefen.</li>
             <li><strong>Danach wieder Spielsysteme:</strong> Tactical Decision Clarity, Order Preview, Line-of-Fire, Contact Reports, AI Intent und Squad Spacing bleiben die sinnvolleren naechsten Gameplay-Bloecke.</li>
             <li><strong>Report pflegen:</strong> diese HTML-Seite kann weiter als Zwischenstand und Notizzettel dienen; deine JSON-Exporte koennen wieder in die naechsten Tasks einfliessen.</li>
@@ -207,9 +208,9 @@
         </article>
         <article class="card">
           <h2>Empfehlung</h2>
-          <div class="status-box good">Ich wuerde TASK_939 jetzt fertig machen. Das ist der sauberste kleine Schritt: Er belegt, ob TASK_938 im echten Fenster wirklich hilft, bevor wir den Playability-Smoke starten.</div>
+          <div class="status-box good">Ich wuerde als naechstes TASK_940 machen. Das ist der saubere Schnitt: Er bewertet, ob TASK_939/TASK_938 im echten Fenster wirklich helfen, bevor wir den Playability-Smoke starten.</div>
           <div class="button-row" style="margin-top:12px;" data-choice-group="next.decision">
-            <button class="choice active" type="button" data-choice-value="task939">TASK_939</button>
+            <button class="choice active" type="button" data-choice-value="task940">TASK_940</button>
             <button class="choice" type="button" data-choice-value="smoke">Smoke</button>
             <button class="choice" type="button" data-choice-value="switch">Fokus wechseln</button>
           </div>
@@ -221,7 +222,7 @@
       <div class="grid">
         <article class="card full">
           <h2>Deine Sichtnotizen</h2>
-          <p>Hier kannst du im Browser markieren, ob der Bericht den Stand trifft und ob ich mit TASK_939 weitermachen soll.</p>
+          <p>Hier kannst du im Browser markieren, ob der Bericht den Stand trifft und ob ich mit TASK_940 weitermachen soll.</p>
           <div class="button-row" style="margin-top:12px;" data-choice-group="notes.review">
             <button class="choice active" type="button" data-choice-value="passt">Passt</button>
             <button class="choice" type="button" data-choice-value="unklar">Unklar</button>
@@ -308,9 +309,9 @@
           active_choices: {},
           computed: {
             current_done_task: "TASK_938",
-            recommended_next_task: "TASK_939 - Release First Exchange Followup Fix Player Polish Final Tuning Recapture",
+            recommended_next_task: "TASK_940 - Release First Exchange Followup Fix Player Polish Final Tuning Visual Findings",
             release_path_status: "playable_path_hardened",
-            first_exchange_status: "final_tuning_done_needs_recapture",
+            first_exchange_status: "final_tuning_recapture_frame_done_needs_visual_findings",
             gameplay_truth_policy: "read_only_report_no_runtime_truth"
           },
           metadata: { url: window.location.href, user_agent: navigator.userAgent }
