@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1025 - Release First Decision Loop Two Player Loop Scenario Release Candidate Acceptance
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1025_release_first_decision_loop_two_player_loop_scenario_release_candidate_acceptance.md`, `docs/tasks/TASK_1024_release_first_decision_loop_two_player_loop_scenario_release_candidate_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioReleaseCandidateAcceptance.build_snapshot()` bewertet einen bestandenen TASK_1024-Release-Candidate-Playtest plus optionale Acceptance-Review.
+- Stand: Ohne Review bleibt der Status `needs_release_candidate_acceptance_review`; fehlende Gates melden `release_candidate_acceptance_regression_found`; ein guter Review setzt `release_candidate_accepted`.
+- Stand: Geprueft werden RC-Playtest-Pass, Release-Build, sichtbare Spielerblocker, Regressionen, Input-Dead-End, Performance, Multiplayer-Grenze, HUD-Wahrheit und Ship-Readiness-Notizen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1025 im Command-Feedback als Snapshot, Acceptance-Line, Status und Gate.
+- Risiken/offen: TASK_1025 ist die Acceptance-Entscheidung ueber Evidence, nicht der Ship-Readiness-Paketbau. TASK_1026 sollte den naechsten Uebergabe-/Review-Schritt buendeln.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1025_release_first_decision_loop_two_player_loop_scenario_release_candidate_acceptance.gd`, Regression TASK_1024, TASK_1023, TASK_1022, `git diff --check`.
+- Naechster Schritt: TASK_1026 - Release First Decision Loop Two Player Loop Scenario Ship Readiness Review.
+
 ### TASK_1024 - Release First Decision Loop Two Player Loop Scenario Release Candidate Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1024_release_first_decision_loop_two_player_loop_scenario_release_candidate_playtest.md`, `docs/tasks/TASK_1023_release_first_decision_loop_two_player_loop_scenario_small_game_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

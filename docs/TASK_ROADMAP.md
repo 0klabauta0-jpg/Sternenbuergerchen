@@ -61,6 +61,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_release_candidate_playtest_manifest | needs_release_candidate_playtest_completion | release_candidate_playtest_regression_found | release_candidate_playtest_passed`.
 - Naechster Schritt: TASK_1025 - Release First Decision Loop Two Player Loop Scenario Release Candidate Acceptance oder TASK_1025 - Release First Decision Loop Two Player Loop Scenario Targeted RC Polish.
 
+## TASK_1025 - Release First Decision Loop Two Player Loop Scenario Release Candidate Acceptance (implementiert im Arbeitsstand)
+- Grundlage: bestandener TASK_1024 Release Candidate Playtest.
+- Ziel: Acceptance-Entscheidung fuer den kleinen FOB-Szenario-Griff schneiden: keine sichtbaren Spielerblocker, keine Regressionen, keine Input-Sackgasse, Performance akzeptabel, Multiplayer-/HUD-Grenze erhalten und Ship-Readiness-Notizen vorhanden.
+- Ergebnis: Read-only Snapshot `needs_release_candidate_acceptance_review | release_candidate_acceptance_regression_found | release_candidate_accepted`.
+- Naechster Schritt: TASK_1026 - Release First Decision Loop Two Player Loop Scenario Ship Readiness Review.
+
 # Arbeitsregeln
 
 ## Reihenfolge

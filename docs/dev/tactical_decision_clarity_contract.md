@@ -153,6 +153,11 @@ TASK_1024 prueft den akzeptierten kleinen Spielmoment gegen ein Release-Candidat
 
 Der Release-Candidate-Playtest bleibt read-only. Ohne Manifest bleibt er `needs_release_candidate_playtest_manifest`; offene Checks bleiben `needs_release_candidate_playtest_completion`; echte Reibung wird `release_candidate_playtest_regression_found`; ein sauberer Manifest-Trace setzt `release_candidate_playtest_passed` und `ready_for_release_candidate_acceptance`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Release Candidate Acceptance (TASK_1025)
+TASK_1025 macht aus einem bestandenen TASK_1024-Playtest eine explizite Acceptance-Entscheidung. Die Review muss bestaetigen, dass der RC-Playtest bestanden ist, der Release-Build vorhanden ist, keine sichtbaren Spielerblocker oder Regressionen bleiben, keine Input-Sackgasse existiert, Performance akzeptabel ist, Multiplayer- und HUD-Wahrheitsgrenzen erhalten sind und Ship-Readiness-Notizen fuer den naechsten Schritt vorliegen.
+
+Die Release-Candidate-Acceptance bleibt read-only. Ohne Review bleibt sie `needs_release_candidate_acceptance_review`; fehlende Gates werden `release_candidate_acceptance_regression_found`; ein sauberer Review setzt `release_candidate_accepted` und `ready_for_ship_readiness_review`. Sie erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)
