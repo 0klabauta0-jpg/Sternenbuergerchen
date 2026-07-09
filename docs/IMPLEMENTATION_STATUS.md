@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_920 - Release First Exchange Final World Read Followup Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_920_release_first_exchange_final_world_read_followup_fix.md`, `docs/tasks/TASK_919_release_first_exchange_playability_smoke_gate.md`, `docs/tasks/TASK_918_release_first_exchange_final_world_read_visual_findings.md`, `docs/tasks/TASK_916_release_first_exchange_fire_lane_world_read_final_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_920 setzt den belegten TASK_917/TASK_918-Restbefund eng im bestehenden Primary3D-Fire-Lane-/World-Read-Pfad um.
+- Stand: Der Mission-Controller haengt `release_first_exchange_final_world_read_followup_fix` nur an die bestehende TASK_916-Kette und stellt `get_release_first_exchange_final_world_read_followup_fix_snapshot()` read-only bereit.
+- Stand: `TerrainMap3DView` meldet den Style `task_920_release_first_exchange_final_world_read_followup_v1`; Fire-Lane-Core und Source-/Target-Anker werden etwas staerker, waehrend Welt-Fire-Label, Target-Halo, Raster und Weltlinien weiter zuruecktreten.
+- Risiken/offen: TASK_920 ist noch kein echter Fensterbeweis. Der naechste Slice muss frisch recapturen und pruefen, ob der Follow-up-Fix im echten Fenster als erste Weltbewegung gelesen wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_920_release_first_exchange_final_world_read_followup_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_919_release_first_exchange_playability_smoke_gate.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_916_release_first_exchange_fire_lane_world_read_final_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_921 - Release First Exchange Followup World Read Recapture.
+
 ### TASK_919 - Release First Exchange Playability Smoke Gate
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_919_release_first_exchange_playability_smoke_gate.md`, `docs/tasks/TASK_918_release_first_exchange_final_world_read_visual_findings.md`, `docs/tasks/TASK_917_release_first_exchange_final_world_read_recapture.md`, `docs/dev/mission_command_feedback_contract.md`

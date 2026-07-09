@@ -53,7 +53,7 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(task_text.contains(NEXT_FIX_TASK), "Task names fix follow-up")
 	_assert(status_text.contains("TASK_919 - Release First Exchange Playability Smoke Gate"), "Implementation status tracks TASK_919")
 	_assert(roadmap_text.contains("TASK_919 - Release First Exchange Playability Smoke Gate (implementiert"), "Roadmap marks TASK_919 implemented")
-	_assert(roadmap_text.contains(NEXT_SMOKE_TASK), "Roadmap names TASK_920 smoke follow-up")
+	_assert(roadmap_text.contains(NEXT_SMOKE_TASK) or roadmap_text.contains(NEXT_FIX_TASK + " (implementiert"), "Roadmap names resolved TASK_920 follow-up")
 	_assert(contract_text.contains("Release-First-Exchange-Playability-Smoke-Gate (TASK_919)"), "Contract documents TASK_919")
 	_assert(report_text.contains("TASK_919") and report_text.contains("TASK_920"), "HTML report tracks TASK_919 and TASK_920")
 	_assert(service_text.contains(SCHEMA), "Gate exposes stable TASK_919 schema")
