@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_910 - Release First Exchange Fire Lane World Read Micro Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_910_release_first_exchange_fire_lane_world_read_micro_polish.md`, `docs/tasks/TASK_909_release_first_exchange_fire_lane_label_cluster_visual_findings.md`, `docs/tasks/TASK_907_release_first_exchange_fire_lane_label_cluster_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_910 setzt den belegten TASK_909-Befund eng im bestehenden Primary3D-Fire-Lane-/Label-Cluster-Pfad um.
+- Stand: Der Mission-Controller haengt `release_first_exchange_fire_lane_world_read_micro_polish` nur an die bestehende TASK_907-Kette und stellt `get_release_first_exchange_fire_lane_world_read_micro_polish_snapshot()` read-only bereit.
+- Stand: `TerrainMap3DView` meldet den Style `task_910_release_first_exchange_fire_lane_world_read_micro_v1`; das Welt-Fire-Statuslabel ist kleiner/leiser/weiter aus dem Target-Cluster verschoben, der Target-Halo tritt weiter zurueck, Fire-Lane-Core und Source-/Target-Anker tragen die Schussbewegung staerker.
+- Risiken/offen: TASK_910 ist noch kein echter Fensterbeweis. Der naechste Slice muss frisch exportieren/capturen und pruefen, ob die Fire-Lane im echten Fenster wirklich vor Label/Halo/Marker gelesen wird.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_910_release_first_exchange_fire_lane_world_read_micro_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_909_release_first_exchange_fire_lane_label_cluster_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_907_release_first_exchange_fire_lane_label_cluster_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_911 - Release First Exchange Fire Lane World Read Real Window Recapture.
+
 ### TASK_909 - Release First Exchange Fire Lane Label Cluster Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_909_release_first_exchange_fire_lane_label_cluster_visual_findings.md`, `docs/tasks/TASK_908_release_first_exchange_fire_lane_label_cluster_real_window_recapture.md`, `docs/tasks/TASK_907_release_first_exchange_fire_lane_label_cluster_polish.md`, `docs/dev/mission_command_feedback_contract.md`
