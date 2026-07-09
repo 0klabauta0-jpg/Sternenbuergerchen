@@ -168,6 +168,11 @@ TASK_1027 prueft nach einer bereiten TASK_1026-Ship-Readiness, ob der kleine Spi
 
 Der Visible-Ship-Smoke bleibt read-only. Ohne Notizen bleibt er `needs_visible_ship_smoke`; fehlende Pflichtchecks werden `needs_visible_ship_smoke_completion`; konkrete Reibung wird `visible_ship_smoke_regression_found`; ein sauberer Smoke setzt `visible_ship_smoke_passed` und `ready_for_delivery_review`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario Delivery Review (TASK_1028)
+TASK_1028 prueft nach einem bestandenen sichtbaren Smoke, ob der kleine Release-Spielmoment als Paket weitergegeben werden darf: sichtbarer Smoke, benannte Release-Dateien, klare Startanweisung, bekannte Risiken, Risikoannahme, Shortcut-Warnung, Multiplayer-Grenze, HUD-Wahrheit und naechster Handoff.
+
+Der Delivery-Review bleibt read-only. Ohne Review bleibt er `needs_delivery_review`; fehlende Pflichtchecks werden `needs_delivery_review_completion`; konkrete Issue-Flags werden `delivery_review_regression_found`; ein sauberer Review setzt `delivery_review_ready` und `ready_for_handoff_packet`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und aendert keine Shortcuts.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)

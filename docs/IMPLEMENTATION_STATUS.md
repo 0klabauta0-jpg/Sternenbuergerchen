@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1028 - Release First Decision Loop Two Player Loop Scenario Delivery Review
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1028_release_first_decision_loop_two_player_loop_scenario_delivery_review.md`, `docs/tasks/TASK_1027_release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioDeliveryReview.build_snapshot()` bewertet einen bestandenen TASK_1027-Visible-Ship-Smoke plus optionale Delivery-Review-Notizen.
+- Stand: Ohne Review bleibt der Status `needs_delivery_review`; fehlende Pflichtchecks melden `needs_delivery_review_completion`; Issue-Flags melden `delivery_review_regression_found`; ein sauberer Review setzt `delivery_review_ready`.
+- Stand: Geprueft werden sichtbarer Smoke, Release-Dateien, Startanweisung, bekannte Risiken, Risikoannahme, Shortcut-Warnung, Multiplayer-Grenze, HUD-Wahrheit und naechster Handoff.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1028 im Command-Feedback als Snapshot, Delivery-Review-Line, Status und Gate.
+- Risiken/offen: TASK_1028 startet die EXE nicht selbst und trifft keinen Pixelentscheid. Bei Reibung folgt TASK_1028-Polish, sonst TASK_1029 Handoff Packet.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1028_release_first_decision_loop_two_player_loop_scenario_delivery_review.gd`, Regression TASK_1027, TASK_1026, TASK_1025, `git diff --check`.
+- Naechster Schritt: TASK_1029 - Release First Decision Loop Two Player Loop Scenario Handoff Packet oder TASK_1028 - Release First Decision Loop Two Player Loop Scenario Delivery Polish.
+
 ### TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1027_release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke.md`, `docs/tasks/TASK_1026_release_first_decision_loop_two_player_loop_scenario_ship_readiness_review.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

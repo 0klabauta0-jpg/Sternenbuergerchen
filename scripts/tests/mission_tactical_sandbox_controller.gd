@@ -95,6 +95,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_RELEASE_CANDIDATE_PLA
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_RELEASE_CANDIDATE_ACCEPTANCE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_release_candidate_acceptance.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_SHIP_READINESS_REVIEW_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_ship_readiness_review.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_VISIBLE_SHIP_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_DELIVERY_REVIEW_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_delivery_review.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21396,6 +21397,12 @@ func get_release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_VISIBLE_SHIP_SMOKE_SCRIPT.call("build_snapshot", source_ship_readiness, visible_smoke_notes)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_scenario_delivery_review_snapshot(source_visible_ship_smoke_override: Dictionary = {}, delivery_review_notes_override: Dictionary = {}) -> Dictionary:
+	var source_visible_ship_smoke: Dictionary = source_visible_ship_smoke_override.duplicate(true) if not source_visible_ship_smoke_override.is_empty() else get_release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke_snapshot()
+	var delivery_review_notes: Dictionary = delivery_review_notes_override.duplicate(true)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_DELIVERY_REVIEW_SCRIPT.call("build_snapshot", source_visible_ship_smoke, delivery_review_notes)).duplicate(true)
+
+
 func _build_release_first_decision_loop_two_player_loop_micro_objective_visual_polish_source(micro_objective_capture: Dictionary) -> Dictionary:
 	var outcome_line: String = String(micro_objective_capture.get("source_outcome_line", "")).strip_edges()
 	var mini_objective_state: String = String(micro_objective_capture.get("source_mini_objective_state", "")).strip_edges()
@@ -24868,6 +24875,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_scenario_ship_readiness_review,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_scenario_delivery_review: Dictionary = get_release_first_decision_loop_two_player_loop_scenario_delivery_review_snapshot(
+		release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke,
+		{}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -25156,6 +25167,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke_line": String(release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke.get("visible_ship_smoke_line", "")),
 		"release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke_status": String(release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke.get("status", "")),
 		"release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke_gate": String(release_first_decision_loop_two_player_loop_scenario_visible_ship_smoke.get("gate", "")),
+		"release_first_decision_loop_two_player_loop_scenario_delivery_review": release_first_decision_loop_two_player_loop_scenario_delivery_review,
+		"release_first_decision_loop_two_player_loop_scenario_delivery_review_line": String(release_first_decision_loop_two_player_loop_scenario_delivery_review.get("delivery_review_line", "")),
+		"release_first_decision_loop_two_player_loop_scenario_delivery_review_status": String(release_first_decision_loop_two_player_loop_scenario_delivery_review.get("status", "")),
+		"release_first_decision_loop_two_player_loop_scenario_delivery_review_gate": String(release_first_decision_loop_two_player_loop_scenario_delivery_review.get("gate", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

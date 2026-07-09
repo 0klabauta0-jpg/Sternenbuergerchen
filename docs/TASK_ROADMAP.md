@@ -79,6 +79,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Read-only Snapshot `needs_visible_ship_smoke | needs_visible_ship_smoke_completion | visible_ship_smoke_regression_found | visible_ship_smoke_passed`.
 - Naechster Schritt: TASK_1028 - Release First Decision Loop Two Player Loop Scenario Delivery Review oder TASK_1027 - Release First Decision Loop Two Player Loop Scenario Visible Ship Smoke Polish.
 
+## TASK_1028 - Release First Decision Loop Two Player Loop Scenario Delivery Review (implementiert im Arbeitsstand)
+- Grundlage: bestandener TASK_1027 Visible Ship Smoke.
+- Ziel: Delivery-Review fuer den kleinen Release-Spielmoment schneiden: Release-Dateien, Startanweisung, bekannte Risiken, Risikoannahme, Shortcut-Warnung, Multiplayer-/HUD-Grenze und naechsten Handoff pruefen.
+- Ergebnis: Read-only Snapshot `needs_delivery_review | needs_delivery_review_completion | delivery_review_regression_found | delivery_review_ready`.
+- Naechster Schritt: TASK_1029 - Release First Decision Loop Two Player Loop Scenario Handoff Packet oder TASK_1028 - Release First Decision Loop Two Player Loop Scenario Delivery Polish.
+
 # Arbeitsregeln
 
 ## Reihenfolge
