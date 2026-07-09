@@ -1638,6 +1638,11 @@ TASK_952 bereitet den TASK_951-Readout als kompakte Badge-Struktur fuer den echt
 
 Erwartete Struktur: `MissionTacticalSandboxController.get_decision_overlay_f6_visual_polish_snapshot()` liefert `schema = sternenbuergerchen.decision_overlay_f6_visual_polish.v1`, `task_id = TASK_952`, `source_task_id = TASK_951`, `style_id = task_952_decision_overlay_compact_badges_v1`, `mission_control_choice_line`, `visual_badges`, `visual_badge_count = 3`, `layout_contract`, `status = ready_for_real_window_recapture | needs_visual_polish`, `manual_review_required = true`, `manual_review_done = false`, `accepted = false`, `recommended_next_task = TASK_953 - Decision Overlay Real Window Recapture`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`. `get_command_feedback_snapshot()` exportiert `decision_overlay_f6_visual_polish`, `decision_overlay_f6_visual_polish_gate` und `decision_overlay_f6_visual_polish_status`.
 
+## Decision Overlay Real Window Recapture (TASK_953)
+TASK_953 wertet ein Decision-Overlay-Real-Window-Manifest read-only aus. Es prueft nur, ob der TASK_952-Polish im echten Fenster fuer eine Sichtbewertung eingefangen werden kann; die manuelle Sichtabnahme bleibt offen.
+
+Erwartete Struktur: `DecisionOverlayRealWindowRecapture.build_snapshot()` liefert `schema = sternenbuergerchen.decision_overlay_real_window_recapture.v1`, `task_id = TASK_953`, `source_task_id = TASK_952`, Manifest-/Source-Metadaten, Screenshotpfade, Pflichtchecks, `status = blocked | review_ready | accepted`, `recommended_next_task = TASK_954 - Decision Overlay Real Window Visual Findings`, `read_only = true`, `read_only_capture = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`. Das Capture-Tool `capture_decision_overlay_real_window_recapture.ps1` schreibt `decision_overlay_real_window_recapture.json` und setzt `manual_review_done = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

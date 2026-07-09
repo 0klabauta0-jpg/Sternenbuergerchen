@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_953 - Decision Overlay Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_953_decision_overlay_real_window_recapture.md`, `docs/tasks/TASK_952_decision_overlay_f6_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `DecisionOverlayRealWindowRecapture.build_snapshot()` wertet TASK_953-Manifeste read-only aus und verlangt TASK_952-Source-Schema, Style, Window-Handle-Capture, Screenshotpfade und Pflichtchecks.
+- Stand: Das Capture-Tool-Geruest `capture_decision_overlay_real_window_recapture.ps1` schreibt ein Manifest mit TASK_952-Style, Screenshotpfaden und `manual_review_done = false`.
+- Stand: Gute Manifeste werden `review_ready`; erst completed manual checks koennen `accepted` setzen. Der Snapshot bleibt `read_only` und `read_only_capture`.
+- Risiken/offen: Der echte Fenster-Screenshot und die Bewertung sind Folgearbeit; TASK_953 akzeptiert nichts automatisch.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_953_decision_overlay_real_window_recapture.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_952_decision_overlay_f6_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_954 - Decision Overlay Real Window Visual Findings.
+
 ### TASK_952 - Decision Overlay F6 Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_952_decision_overlay_f6_visual_polish.md`, `docs/tasks/TASK_951_decision_overlay_real_f6_visual_review.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

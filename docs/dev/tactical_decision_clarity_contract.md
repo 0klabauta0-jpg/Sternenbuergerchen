@@ -80,3 +80,8 @@ Der Snapshot `decision_overlay_real_f6_visual_review` prueft Textlaenge, Risk-To
 TASK_952 bereitet die Decision-Preview fuer den echten Fensterbeweis als kompakte Badge-Struktur vor. Erwartet sind drei Segmente in stabiler Reihenfolge: `safe/green/OK`, `risky/yellow/!`, `suicidal/red/!!`.
 
 Der Polish-Snapshot bleibt auf der vorhandenen Mission-Control-Flaeche, nutzt maximal eine Zeile und darf keine UI-Baeume rebuilden. Labels und Microcopy duerfen keine internen Choice-IDs zeigen. Auch dieser Snapshot ist read-only und ersetzt keine manuelle Sichtabnahme.
+
+## Decision Overlay Real Window Recapture (TASK_953)
+TASK_953 stellt den read-only Real-Window-Recapture-Rahmen fuer den TASK_952-Polish bereit. Erwartet sind Manifest-Felder fuer TASK_952-Source-Schema, Style, Window-/Desktop-Screenshotpfade, Capture-Prozess, `window_handle_print` und Pflichtchecks.
+
+Der Recapture-Snapshot darf erst `accepted` werden, wenn die manuellen Pflichtchecks abgeschlossen sind. Ohne manuelle Sichtabnahme bleibt er `review_ready`. Er setzt keine Gameplay-, Movement-, Combat- oder Multiplayer-Wahrheit.
