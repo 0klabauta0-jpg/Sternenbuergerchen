@@ -285,3 +285,8 @@ Der Snapshot bleibt read-only: Er darf `micro_objective_command_draft`, Hook-Zei
 TASK_993 macht die drei Micro-Objectives als stabile Runtime-Button-Specs greifbar. Erwartet sind kompakte Buttons fuer `SICHERN`, `DRUECKEN` und `SAMMELN` auf stabilen Command-Slots.
 
 Der Snapshot bleibt read-only: Er darf Button-Slots, Texte, Tooltips, `press_action = confirm_release_first_decision_loop_two_player_loop_micro_objective_button`, `execute_action = execute_selected_fireteam_orders` und `GO separat` liefern, aber keinen Button-Press simulieren, keine Commands bestaetigen, kein Movement starten und keine Multiplayer-Wahrheit setzen. Der naechste Schritt ist `TASK_994 - Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke`.
+
+## Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke (TASK_994)
+TASK_994 prueft den ersten Micro-Objective-Klick als kleinen Smoke. Erwartet ist, dass ein Button wie `SICHERN` den vorhandenen Confirm-Pfad vorbereitet, eine kurze Rueckmeldung erzeugt und den getrennten `GO`-Schritt weiter sichtbar laesst.
+
+Der Snapshot bleibt read-only: Er darf Trace-Evidence, Confirm-Zeile, Feedback-Zeile, `confirm_action = confirm_release_first_decision_loop_two_player_loop_micro_objective_button`, `draft_confirm_action = _issue_command`, `execute_action = execute_selected_fireteam_orders` und `GO separat` liefern, aber selbst keine Movement-, Fire-, Damage- oder Multiplayer-Wahrheit setzen. Der naechste Schritt ist `TASK_995 - Release First Decision Loop Two Player Loop Micro Objective Acceptance Slice`.

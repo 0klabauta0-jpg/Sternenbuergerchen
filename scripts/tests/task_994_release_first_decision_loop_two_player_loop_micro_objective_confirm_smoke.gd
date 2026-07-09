@@ -1,0 +1,347 @@
+extends SceneTree
+
+const ControllerScript := preload("res://scripts/tests/mission_tactical_sandbox_controller.gd")
+
+const TASK_PATH := "res://docs/tasks/TASK_994_release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke.md"
+const STATUS_PATH := "res://docs/IMPLEMENTATION_STATUS.md"
+const ROADMAP_PATH := "res://docs/TASK_ROADMAP.md"
+const COMMAND_CONTRACT_PATH := "res://docs/dev/mission_command_feedback_contract.md"
+const CLARITY_CONTRACT_PATH := "res://docs/dev/tactical_decision_clarity_contract.md"
+const SERVICE_PATH := "res://scripts/mission/release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke.gd"
+const CONTROLLER_PATH := "res://scripts/tests/mission_tactical_sandbox_controller.gd"
+const OUTPUT_PATH := "res://tmp/release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_acceptance.json"
+const SCHEMA := "sternenbuergerchen.release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke.v1"
+const SOURCE_SCHEMA := "sternenbuergerchen.release_first_decision_loop_two_player_loop_micro_objective_runtime_buttons.v1"
+const CHOICE_HOOK_SCHEMA := "sternenbuergerchen.release_first_decision_loop_two_player_loop_micro_objective_choice_hook.v1"
+const NEXT_TASK := "TASK_995 - Release First Decision Loop Two Player Loop Micro Objective Acceptance Slice"
+
+var _passed: int = 0
+var _failed: int = 0
+
+
+func _init() -> void:
+	call_deferred("_run_tests")
+
+
+func _run_tests() -> void:
+	print("=== TASK_994 Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke ===")
+	_test_docs_and_static_hooks()
+	_test_missing_source_blocks()
+	_test_ready_source_without_trace_requests_smoke()
+	_test_good_trace_passes_confirm_smoke()
+	_test_regression_trace_flags_auto_go_and_missing_feedback()
+	_test_controller_exports_micro_objective_confirm_smoke()
+	_test_micro_objective_confirm_smoke_roundtrip()
+	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
+	if _failed > 0:
+		print("TASK_994_release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke: FAILED")
+		quit(1)
+		return
+	print("TASK_994_release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke: ALL PASSED")
+	quit(0)
+
+
+func _test_docs_and_static_hooks() -> void:
+	var task_text: String = _read_text(TASK_PATH)
+	var status_text: String = _read_text(STATUS_PATH)
+	var roadmap_text: String = _read_text(ROADMAP_PATH)
+	var command_contract_text: String = _read_text(COMMAND_CONTRACT_PATH)
+	var clarity_contract_text: String = _read_text(CLARITY_CONTRACT_PATH)
+	var service_text: String = _read_text(SERVICE_PATH)
+	var controller_text: String = _read_text(CONTROLLER_PATH)
+	_assert(FileAccess.file_exists(TASK_PATH), "TASK_994 task file exists")
+	_assert(FileAccess.file_exists(SERVICE_PATH), "TASK_994 confirm smoke service exists")
+	_assert(task_text.contains("TASK_994 - Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke"), "Task names TASK_994")
+	_assert(task_text.contains(NEXT_TASK), "Task names acceptance follow-up")
+	_assert(status_text.contains("TASK_994 - Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke"), "Implementation status tracks TASK_994")
+	_assert(roadmap_text.contains("TASK_994 - Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke (implementiert"), "Roadmap marks TASK_994 implemented")
+	_assert(command_contract_text.contains("Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke (TASK_994)"), "Mission feedback contract documents TASK_994")
+	_assert(clarity_contract_text.contains("Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke (TASK_994)"), "Decision clarity contract documents TASK_994")
+	_assert(service_text.contains(SCHEMA), "Confirm smoke service exposes stable TASK_994 schema")
+	_assert(service_text.contains("TASK_ID: String = \"TASK_994\""), "Confirm smoke service writes TASK_994 id")
+	_assert(service_text.contains("SOURCE_TASK_ID: String = \"TASK_993\""), "Confirm smoke service links TASK_993")
+	_assert(service_text.contains("\"micro_objective_confirm_smoke_passed\""), "Confirm smoke reports pass flag")
+	_assert(service_text.contains("\"go_executed_during_micro_objective_confirm\""), "Confirm smoke catches auto-GO")
+	_assert(service_text.contains("\"confirm_action\": \"confirm_release_first_decision_loop_two_player_loop_micro_objective_button\""), "Confirm smoke exposes micro-objective button confirm action")
+	_assert(service_text.contains("\"execute_action\": \"execute_selected_fireteam_orders\""), "Confirm smoke exposes GO action")
+	_assert(service_text.contains("\"creates_command\": false"), "Confirm smoke snapshot creates no command")
+	_assert(service_text.contains("\"sets_multiplayer_truth\": false"), "Confirm smoke creates no multiplayer truth")
+	_assert(controller_text.contains("RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_MICRO_OBJECTIVE_CONFIRM_SMOKE_SCRIPT"), "Controller preloads TASK_994 service")
+	_assert(controller_text.contains("confirm_release_first_decision_loop_two_player_loop_micro_objective_button"), "Controller exposes TASK_994 confirm callback")
+	_assert(controller_text.contains("get_release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_snapshot"), "Controller exposes TASK_994 snapshot")
+	_assert(controller_text.contains("release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_line"), "Command feedback exports TASK_994 line")
+
+
+func _test_missing_source_blocks() -> void:
+	var snapshot: Dictionary = _build_snapshot({}, {}, {})
+	var blocker_ids: Array = _issue_ids(Array(snapshot.get("blocking_issues", [])))
+	_assert(String(snapshot.get("status", "")) == "blocked", "Missing source blocks TASK_994")
+	_assert(blocker_ids.has("source_schema_mismatch"), "Missing source reports runtime button schema mismatch")
+	_assert(blocker_ids.has("source_task_mismatch"), "Missing source reports runtime button task mismatch")
+	_assert(blocker_ids.has("runtime_buttons_not_ready"), "Missing source reports runtime buttons not ready")
+	_assert(_snapshot_is_read_only(snapshot), "Blocked snapshot remains read-only")
+
+
+func _test_ready_source_without_trace_requests_smoke() -> void:
+	var snapshot: Dictionary = _build_snapshot(_runtime_buttons_source(), _choice_hook_source(), {})
+	_assert(String(snapshot.get("schema", "")) == SCHEMA, "Snapshot schema matches TASK_994")
+	_assert(String(snapshot.get("status", "")) == "needs_micro_objective_confirm_smoke", "Ready source without trace asks for smoke")
+	_assert(String(snapshot.get("gate", "")) == "needs_micro_objective_confirm_smoke_run", "Ready source without trace keeps smoke gate open")
+	_assert(not bool(snapshot.get("micro_objective_confirm_smoke_passed", true)), "No trace does not pass smoke")
+	_assert(String(snapshot.get("recommended_next_task", "")) == "TASK_994 - Release First Decision Loop Two Player Loop Micro Objective Confirm Smoke", "No trace recommends same smoke")
+	_assert(_snapshot_is_read_only(snapshot), "No-trace snapshot remains read-only")
+
+
+func _test_good_trace_passes_confirm_smoke() -> void:
+	var snapshot: Dictionary = _build_snapshot(_runtime_buttons_source(), _choice_hook_source(), _good_trace())
+	var completed: Array = Array(snapshot.get("completed_checks", []))
+	_assert(String(snapshot.get("status", "")) == "micro_objective_confirm_smoke_passed", "Good trace passes TASK_994")
+	_assert(String(snapshot.get("gate", "")) == "micro_objective_confirm_smoke_passed", "Good trace passes gate")
+	_assert(bool(snapshot.get("micro_objective_confirm_smoke_passed", false)), "Good trace sets pass flag")
+	_assert(String(snapshot.get("selected_micro_objective_id", "")) == "secure_gained_ground", "Good trace keeps selected micro objective")
+	_assert(String(snapshot.get("micro_objective_confirm_line", "")).contains("SICHERN"), "Good trace line names selected objective")
+	_assert(String(snapshot.get("micro_objective_confirm_line", "")).contains("GO separat"), "Good trace line names GO boundary")
+	_assert(completed.has("micro_objective_button_pressed"), "Good trace records button press")
+	_assert(completed.has("confirm_action_called"), "Good trace records confirm")
+	_assert(completed.has("go_button_still_separate"), "Good trace records separate GO")
+	_assert(completed.has("post_confirm_feedback_visible"), "Good trace records feedback")
+	_assert(String(snapshot.get("recommended_next_task", "")) == NEXT_TASK, "Good trace recommends acceptance slice")
+	_assert(_snapshot_is_read_only(snapshot), "Passed snapshot remains read-only")
+
+
+func _test_regression_trace_flags_auto_go_and_missing_feedback() -> void:
+	var trace: Dictionary = _good_trace()
+	trace["go_executed"] = true
+	trace["post_confirm_feedback_visible"] = false
+	var snapshot: Dictionary = _build_snapshot(_runtime_buttons_source(), _choice_hook_source(), trace)
+	var issue_ids: Array = _issue_ids(Array(snapshot.get("issues", [])))
+	_assert(String(snapshot.get("status", "")) == "micro_objective_confirm_regression_found", "Auto-GO trace fails TASK_994")
+	_assert(issue_ids.has("go_executed_during_micro_objective_confirm"), "Auto-GO trace reports GO regression")
+	_assert(issue_ids.has("post_confirm_feedback_missing"), "Bad trace reports missing feedback")
+	_assert(not bool(snapshot.get("micro_objective_confirm_smoke_passed", true)), "Regression trace does not pass")
+	_assert(_snapshot_is_read_only(snapshot), "Regression snapshot remains read-only")
+
+
+func _test_controller_exports_micro_objective_confirm_smoke() -> void:
+	var controller := ControllerScript.new()
+	if not controller.has_method("get_release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_snapshot"):
+		_assert(false, "Controller exposes TASK_994 method")
+		controller.queue_free()
+		return
+	var snapshot: Dictionary = Dictionary(controller.call(
+		"get_release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_snapshot",
+		_runtime_buttons_source(),
+		_choice_hook_source(),
+		_good_trace()
+	))
+	var feedback: Dictionary = controller.get_command_feedback_snapshot()
+	_assert(String(snapshot.get("schema", "")) == SCHEMA, "Controller TASK_994 schema matches")
+	_assert(String(snapshot.get("status", "")) == "micro_objective_confirm_smoke_passed", "Controller TASK_994 can pass with trace")
+	_assert(_snapshot_is_read_only(snapshot), "Controller TASK_994 snapshot remains read-only")
+	_assert(controller.has_method("confirm_release_first_decision_loop_two_player_loop_micro_objective_button"), "Controller exposes micro-objective confirm method")
+	_assert(feedback.has("release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke"), "Command feedback embeds TASK_994")
+	_assert(feedback.has("release_first_decision_loop_two_player_loop_micro_objective_confirm_smoke_line"), "Command feedback exports TASK_994 line")
+	controller.queue_free()
+
+
+func _test_micro_objective_confirm_smoke_roundtrip() -> void:
+	var snapshot: Dictionary = _build_snapshot(_runtime_buttons_source(), _choice_hook_source(), _good_trace())
+	var file := FileAccess.open(OUTPUT_PATH, FileAccess.WRITE)
+	if file == null:
+		_assert(false, "Can write TASK_994 output manifest")
+		return
+	file.store_string(JSON.stringify(snapshot, "\t"))
+	file.close()
+	var roundtrip: Dictionary = _read_json_dict(OUTPUT_PATH)
+	_assert(String(roundtrip.get("task_id", "")) == "TASK_994", "Roundtrip keeps task id")
+	_assert(String(roundtrip.get("source_task_id", "")) == "TASK_993", "Roundtrip keeps TASK_993 link")
+	_assert(bool(roundtrip.get("micro_objective_confirm_smoke_passed", false)), "Roundtrip keeps pass flag")
+	_assert(_snapshot_is_read_only(roundtrip), "Roundtrip keeps read-only boundary")
+
+
+func _build_snapshot(runtime_buttons: Dictionary, choice_hook: Dictionary, trace: Dictionary) -> Dictionary:
+	if not FileAccess.file_exists(SERVICE_PATH):
+		_assert(false, "TASK_994 service is loadable")
+		return {
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+			"creates_command": false,
+			"creates_fire_event": false,
+			"creates_damage_event": false,
+			"creates_movement": false,
+			"sets_multiplayer_truth": false,
+		}
+	var service_script: GDScript = load(SERVICE_PATH)
+	if service_script == null:
+		_assert(false, "TASK_994 service script loads")
+		return {}
+	var snapshot_variant: Variant = service_script.call("build_snapshot", runtime_buttons, choice_hook, trace)
+	if typeof(snapshot_variant) == TYPE_DICTIONARY:
+		return Dictionary(snapshot_variant)
+	_assert(false, "TASK_994 service returns dictionary")
+	return {}
+
+
+func _runtime_buttons_source() -> Dictionary:
+	return {
+		"schema": SOURCE_SCHEMA,
+		"task_id": "TASK_993",
+		"source_task_id": "TASK_992",
+		"status": "micro_objective_runtime_buttons_ready",
+		"gate": "micro_objective_runtime_buttons_ready",
+		"active": true,
+		"micro_objective_button_specs": [
+			_spec("secure_gained_ground", "SICHERN", "CommandSlot08", "defend"),
+			_spec("press_next_contact", "DRUECKEN", "CommandSlot09", "move"),
+			_spec("regroup_fireteam", "SAMMELN", "CommandSlot10", "hold"),
+		],
+		"micro_objective_button_count": 3,
+		"runtime_buttons_line": "MICRO OBJ BUTTONS SICHERN / DRUECKEN / SAMMELN | GO separat",
+		"press_action": "confirm_release_first_decision_loop_two_player_loop_micro_objective_button",
+		"execute_action": "execute_selected_fireteam_orders",
+		"separate_go_required": true,
+		"auto_confirms": false,
+		"auto_executes_go": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
+func _choice_hook_source() -> Dictionary:
+	return {
+		"schema": CHOICE_HOOK_SCHEMA,
+		"task_id": "TASK_992",
+		"source_task_id": "TASK_991",
+		"status": "micro_objective_choice_hook_ready",
+		"gate": "micro_objective_choice_hook_ready",
+		"active": true,
+		"selected_micro_objective_id": "secure_gained_ground",
+		"selected_micro_objective_label": "SICHERN",
+		"selected_command_type": "defend",
+		"micro_objective_command_draft": {
+			"micro_objective_id": "secure_gained_ground",
+			"command_type": "defend",
+			"confirm_action": "_issue_command",
+			"execute_action": "execute_selected_fireteam_orders",
+			"separate_go_required": true,
+			"auto_executes_go": false,
+			"read_only": true,
+		},
+		"confirm_action": "_issue_command",
+		"execute_action": "execute_selected_fireteam_orders",
+		"requires_existing_go_path": true,
+		"separate_go_required": true,
+		"auto_confirms": false,
+		"auto_executes_go": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
+func _spec(micro_objective_id: String, text: String, slot_name: String, command_type: String) -> Dictionary:
+	return {
+		"micro_objective_id": micro_objective_id,
+		"button_text": text,
+		"slot_name": slot_name,
+		"command_type": command_type,
+		"press_action": "confirm_release_first_decision_loop_two_player_loop_micro_objective_button",
+		"execute_action": "execute_selected_fireteam_orders",
+		"button_enabled": true,
+		"separate_go_required": true,
+		"auto_confirms": false,
+		"auto_executes_go": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _good_trace() -> Dictionary:
+	return {
+		"trace_available": true,
+		"selected_micro_objective_id": "secure_gained_ground",
+		"pressed_button_slot": "CommandSlot08",
+		"press_action_exists": true,
+		"confirm_action_exists": true,
+		"execute_action_exists": true,
+		"micro_objective_button_pressed": true,
+		"confirm_action_called": true,
+		"confirm_action_result": true,
+		"go_executed": false,
+		"go_button_still_separate": true,
+		"post_confirm_feedback_visible": true,
+		"post_confirm_feedback_line": "MICRO OBJ SICHERN -> GO",
+		"command_queue_lifecycle_observed": true,
+		"runtime_mutation_owner": "MissionTacticalSandboxController -> SimulationRoot.enqueue_command",
+		"ui_sets_gameplay_truth": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _snapshot_is_read_only(snapshot: Dictionary) -> bool:
+	return bool(snapshot.get("read_only", false)) \
+		and not bool(snapshot.get("ui_sets_gameplay_truth", true)) \
+		and not bool(snapshot.get("creates_command", true)) \
+		and not bool(snapshot.get("creates_fire_event", true)) \
+		and not bool(snapshot.get("creates_damage_event", true)) \
+		and not bool(snapshot.get("creates_movement", true)) \
+		and not bool(snapshot.get("sets_multiplayer_truth", true))
+
+
+func _issue_ids(issues: Array) -> Array:
+	var result: Array = []
+	for issue_variant in issues:
+		if typeof(issue_variant) == TYPE_DICTIONARY:
+			result.append(String(Dictionary(issue_variant).get("id", "")))
+	return result
+
+
+func _read_json_dict(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return {}
+	var text: String = file.get_as_text()
+	file.close()
+	var parsed: Variant = JSON.parse_string(text)
+	if typeof(parsed) == TYPE_DICTIONARY:
+		return Dictionary(parsed)
+	return {}
+
+
+func _read_text(path: String) -> String:
+	if not FileAccess.file_exists(path):
+		return ""
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		return ""
+	var text: String = file.get_as_text()
+	file.close()
+	return text
+
+
+func _assert(condition: bool, message: String) -> void:
+	if condition:
+		_passed += 1
+		print("PASS: %s" % message)
+		return
+	_failed += 1
+	push_error("FAIL: %s" % message)
