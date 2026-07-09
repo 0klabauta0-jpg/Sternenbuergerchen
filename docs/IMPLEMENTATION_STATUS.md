@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1010_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_polish.md`, `docs/tasks/TASK_1009_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopPlayerFeelPolish.build_snapshot()` uebersetzt polishbare TASK_1009-Findings in sechs read-only Player-Feel-Surface-Specs.
+- Stand: Der Polish liefert `FEEL | NEXT | GO`-Zeile, `next_grip_line`, `go_boundary_microcopy`, `calm_hud_guidance` und Performance-Hinweis.
+- Stand: Rework-Findings bekommen konkrete Antworten auf Entry-, Rhythmus-, Feedback-, GO-, HUD- und Multiplayer-Reibung; akzeptierte Findings bleiben acceptance-ready.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1010 im Command-Feedback als Snapshot, Polish-Zeile und Surface-Specs.
+- Risiken/offen: TASK_1010 baut noch keine echten neuen Controls. TASK_1011 sollte daraus den Round-Loop als Acceptance-Slice gegen sichtbare Runtime-Flaechen pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1010_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_polish.gd`, Regression TASK_1009, TASK_1008, TASK_1007, `git diff --check`.
+- Naechster Schritt: TASK_1011 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice.
+
 ### TASK_1009 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1009_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_findings.md`, `docs/tasks/TASK_1008_release_first_decision_loop_two_player_loop_micro_objective_round_loop_integrated_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

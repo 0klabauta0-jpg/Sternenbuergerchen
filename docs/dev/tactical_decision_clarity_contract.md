@@ -80,6 +80,11 @@ TASK_1009 trennt den technischen Integrated-Playtest vom eigentlichen Spielerbli
 
 Ohne Player-Feel-Notizen bleibt der Status `needs_player_feel_review`. Belegte Reibung routet zu `TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish`; ein sauberer Befund routet zu `TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice`. TASK_1009 erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish (TASK_1010)
+TASK_1010 uebersetzt TASK_1009-Findings in eine konkrete Player-Feel-Leseschicht. Erwartet werden sechs kurze, stabile Surface-Specs fuer `START`, `ROUND/NEXT/GO`, Feedback, `GO`-Grenze, HUD-Ruhe und Multiplayer-/Wahrheitsgrenze plus eine kompakte `FEEL | NEXT | GO`-Zeile.
+
+Der Player-Feel-Polish bleibt read-only. Er darf dem HUD sagen, welche Texte, Rollen, Akzente und Budgets fuer den runden kleinen Loop gelten, aber keine UI-Baeume bauen, keine Commands erzeugen, kein Movement starten und keine Multiplayer-Wahrheit setzen. Der naechste Schritt ist `TASK_1011 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Acceptance Slice`.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

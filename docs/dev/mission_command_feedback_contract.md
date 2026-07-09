@@ -54,6 +54,11 @@ Erwartete Struktur: Ohne Trace bleibt der Status `needs_round_loop_integrated_pl
 
 Erwartete Struktur: Ohne Notizen bleibt der Status `needs_player_feel_review`; Reibung erzeugt konkrete Issues und routet zu `TASK_1010 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish`; saubere Notizen setzen `ready_for_round_loop_acceptance_slice = true` und routen zum Acceptance-Slice. Der Befund prueft Entry-Gefuehl, Round-/Next-/GO-Rhythmus, Feedback, GO-Grenze, HUD-Ruhe, Performance-Gefuehl und Multiplayer-Grenze. Er setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Player Feel Polish (TASK_1010)
+`get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_player_feel_polish_snapshot()` ist der read-only Pruefpunkt fuer die UI-nahe Player-Feel-Leseschicht nach TASK_1009. Der Snapshot darf nur polishbare TASK_1009-Findings lesen und muss im Command-Feedback als Snapshot, `FEEL | NEXT | GO`-Zeile und Surface-Spec-Liste exportiert werden.
+
+Erwartete Struktur: Rework-Findings erzeugen sechs Surface-Specs fuer Start, Round-/Next-/GO-Rhythmus, Feedback, GO-Grenze, HUD-Ruhe und Multiplayer-Grenze. Akzeptierte Findings erzeugen dieselbe ruhige Leseschicht als Acceptance-ready Stand. Der Snapshot setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release-Firefight-Command-Matrix-Visual-Polish
 `get_release_firefight_command_matrix_visual_polish_snapshot()` ist der Headless-Pruefpunkt fuer TASK_836. Der Snapshot darf nur vorhandene Command-Matrix-Buttons, Fire-Rule-Status und den bestehenden TASK_835-Firefight-HUD-Zustand lesen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit erzeugen.
 
