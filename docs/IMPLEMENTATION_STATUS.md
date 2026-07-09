@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1033 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1033_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_hook.md`, `docs/tasks/TASK_1032_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactRuntimeHook.build_snapshot()` bewertet einen bereiten TASK_1032-Plan plus expliziten First-Contact-/Engagement-/Fire-Cover-/Combat-HUD-Runtime-Kontext.
+- Stand: Ohne Runtime-Kontext bleibt der Status `needs_first_contact_runtime_hook_context`; unvollstaendige Kontexte melden `first_contact_runtime_hook_review`; ein sauberer Kontext setzt `first_contact_runtime_hook_ready`.
+- Stand: Der Hook liefert eine kompakte `CONTACT | COVER | LOS | FIRE/WAIT | FEEDBACK | GO separat`-Zeile, Spielerfragen und Command-Matrix-Hook-Metadaten fuer CONTACT, WHY, NEXT und GO.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1033 im Command-Feedback als Snapshot, Runtime-Line, Status und Gate.
+- Risiken/offen: Der allgemeine Command-Feedback-Pfad erzeugt den teuren Live-Kontext nicht automatisch, um Rekursion zu vermeiden. TASK_1034 soll den sichtbaren Runtime-Smoke mit echten Snapshot-Daten pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1033_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_hook.gd`, Regression TASK_1032, TASK_1031, TASK_1030, `git diff --check`.
+- Naechster Schritt: TASK_1034 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke oder TASK_1033 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook Polish.
+
 ### TASK_1032 - Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1032_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan.md`, `docs/tasks/TASK_1031_release_first_decision_loop_two_player_loop_scenario_tester_run_acceptance.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

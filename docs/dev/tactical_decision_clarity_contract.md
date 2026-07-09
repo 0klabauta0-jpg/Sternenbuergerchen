@@ -193,6 +193,11 @@ TASK_1032 nimmt eine akzeptierte TASK_1031-Quelle und legt den naechsten kleinen
 
 Der Plan bleibt read-only. Ohne akzeptierte TASK_1031-Quelle bleibt er `blocked_until_tester_run_acceptance`; ohne Plan bleibt er `needs_next_playable_slice_plan`; fehlende Pflichtitems bleiben `needs_next_playable_slice_plan_completion`; Issue-Flags routen zu TASK_1032-Polish; ein sauberer Plan setzt `next_playable_slice_plan_ready` und `ready_for_first_contact_runtime_hook`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit und routet danach zu `TASK_1033 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook`.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook (TASK_1033)
+TASK_1033 macht den ersten Kontakt als Runtime-Hook lesbar: CONTACT, COVER, LOS, FIRE/WAIT, FEEDBACK und `GO separat` werden aus bestehenden Snapshots zusammengefuehrt.
+
+Der Hook bleibt read-only. Ohne bereiten TASK_1032-Plan bleibt er `blocked_until_next_playable_slice_plan`; ohne First-Contact-/Engagement-/Fire-Cover-/Combat-HUD-Kontext bleibt er `needs_first_contact_runtime_hook_context`; unvollstaendige Kontexte routen zu TASK_1033-Review; ein sauberer Kontext setzt `first_contact_runtime_hook_ready`. Er beantwortet die Spielerfragen `Wer sieht wen?`, `Warum ist das sicher oder gefaehrlich?`, `Warum schiesst das Fireteam oder wartet es?` und `Was ist der naechste Griff?`, erzeugt aber keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit. Der naechste Beweis ist `TASK_1034 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke`.
+
 Der Integrated-Player-Feel-Befund bleibt read-only. Ohne Notizen bleibt er `needs_scenario_integrated_player_feel_review`; belegte Reibung routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Player Feel Polish`; ein sauberer Befund routet zu `TASK_1023 - Release First Decision Loop Two Player Loop Scenario Small Game Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
 ## Scenario Return (TASK_948)
