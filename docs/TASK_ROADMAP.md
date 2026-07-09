@@ -201,6 +201,8 @@ git checkout -b batch/<batch-name>
 - TASK_947 Entscheidungsstand: Bei Akzeptanz ist `TASK_948 - Release First Exchange Playability Smoke` der naechste Slice; bei Restreibung wird die reine First-Exchange-Polish-Schleife gestoppt und `TASK_948 - Tactical Decision Clarity Scenario Return` priorisiert.
 - TASK_948 - Tactical Decision Clarity Scenario Return (implementiert): Den TASK_947-Restreibungs-Pfad bewusst aus der First-Exchange-Mikropolish-Schleife heraus auf den vorhandenen Order-Preview-/Threat-/Line-of-Fire-Stack zurueckfuehren.
 - TASK_948 Entscheidungsstand: Naechster konkreter Slice ist `TASK_949 - Order Preview Threat Overlay Playtest Scenario`, damit Ghost, Pfad, Risiko und Line-of-Fire wieder in einer kleinen spielbaren Entscheidung vor `GO` zusammenkommen.
+- TASK_949 - Order Preview Threat Overlay Playtest Scenario (implementiert): Drei konkrete Move-Choices (`covered_push`, `exposed_crossing`, `kill_zone_dash`) mit Ghost, Pfad, Risiko und Threat-Line-Zaehlern aus den vorhandenen Preview-/Threat-Resolvern bereitstellen.
+- TASK_949 Entscheidungsstand: Naechster Slice ist `TASK_950 - Wire Decision Scenario Into F6 Mission HUD`, damit die drei Preview-Choices im Missionsfenster sichtbar und spielbar lesbar werden.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 

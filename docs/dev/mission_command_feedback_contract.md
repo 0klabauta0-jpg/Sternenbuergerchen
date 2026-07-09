@@ -1618,6 +1618,11 @@ TASK_948 ist der bewusste Ruecksprung aus der First-Exchange-Mikropolish-Schleif
 
 Erwartete Struktur: `TacticalDecisionClarityScenarioReturn.build_snapshot()` liefert `schema = sternenbuergerchen.tactical_decision_clarity_scenario_return.v1`, `task_id = TASK_948`, `source_task_id = TASK_947`, Source-Status und Source-Empfehlung, `status = blocked | ready_for_order_preview_threat_overlay_playtest`, `recommended_next_task = TASK_949 - Order Preview Threat Overlay Playtest Scenario`, `recommended_direction = build_small_decision_before_commit_scenario`, `stop_first_exchange_polish_loop`, `playability_focus = decision_before_commit`, Spielerfragen zu Ziel, Enemy-LOS, Risiko und `GO`-Grenze, konkrete Capabilities fuer Ghost, Pfad, Threat-Level, Line-of-Fire, Contact-Awareness, AI-Intent-Debug und kleine Fixture, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
 
+## Order-Preview-Threat-Overlay-Playtest-Scenario (TASK_949)
+TASK_949 konkretisiert den TASK_948-Ruecksprung als kleinen read-only Entscheidungs-Payload. Er darf nur eine TASK_948-Quelle mit `status = ready_for_order_preview_threat_overlay_playtest` akzeptieren und erzeugt daraus drei Move-Choices fuer die naechste F6-/HUD-Verdrahtung.
+
+Erwartete Struktur: `OrderPreviewThreatOverlayPlaytestScenario.build_snapshot()` liefert `schema = sternenbuergerchen.order_preview_threat_overlay_playtest_scenario.v1`, `task_id = TASK_949`, `source_task_id = TASK_948`, `status = blocked | ready_for_f6_hud_wiring`, `scenario_id`, `player_prompt`, `move_choices`, `move_choice_count = 3`, `recommended_choice_id`, `overlay_summary`, `answered_player_questions`, `recommended_next_task = TASK_950 - Wire Decision Scenario Into F6 Mission HUD`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`. Erwartete Choices: `covered_push/safe`, `exposed_crossing/risky`, `kill_zone_dash/suicidal`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.

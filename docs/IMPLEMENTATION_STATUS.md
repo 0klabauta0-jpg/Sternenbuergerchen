@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_949 - Order Preview Threat Overlay Playtest Scenario
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_949_order_preview_threat_overlay_playtest_scenario.md`, `docs/tasks/TASK_948_tactical_decision_clarity_scenario_return.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `OrderPreviewThreatOverlayPlaytestScenario.build_snapshot()` nimmt den TASK_948-Ruecksprung und baut daraus drei konkrete Move-Choices: `covered_push`, `exposed_crossing`, `kill_zone_dash`.
+- Stand: Die Choices nutzen `WaypointIntentPreviewResolver` und `TacticalDecisionThreatAnalyzer`, liefern Ghost, Pfad, ETA, Risk-State, Risk-Farbe und Line-of-Fire-Zaehler.
+- Stand: Der Snapshot bleibt read-only und empfiehlt `TASK_950 - Wire Decision Scenario Into F6 Mission HUD` als sichtbaren Folge-Slice.
+- Risiken/offen: TASK_949 verdrahtet die Choice-Karten noch nicht in F6/HUD; der naechste Task muss den Payload im Missionsfenster lesbar machen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_949_order_preview_threat_overlay_playtest_scenario.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_948_tactical_decision_clarity_scenario_return.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_506_tactical_decision_clarity_contract.gd`, `git diff --check`.
+- Naechster Schritt: TASK_950 - Wire Decision Scenario Into F6 Mission HUD.
+
 ### TASK_948 - Tactical Decision Clarity Scenario Return
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_948_tactical_decision_clarity_scenario_return.md`, `docs/tasks/TASK_947_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
