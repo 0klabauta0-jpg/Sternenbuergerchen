@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_975 - Release First Decision Loop Two Acceptance Slice
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_975_release_first_decision_loop_two_acceptance_slice.md`, `docs/tasks/TASK_974_release_first_decision_loop_two_recapture_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoAcceptanceSlice.build_snapshot()` bewertet akzeptierte TASK_974-Findings und einen Ablauf-Trace read-only.
+- Stand: Fehlende Trace-Evidence bleibt `needs_acceptance_slice_trace`; regressiver Trace routet zu `TASK_975 - Release First Decision Loop Two Recapture Visual Polish`.
+- Stand: Vollstaendige Evidence markiert den zweiten Griff als `loop_two_acceptance_slice_passed` und routet zu `TASK_976 - Release First Decision Loop Two Player Loop Extension`.
+- Risiken/offen: TASK_975 erweitert noch keinen neuen Inhalt nach dem zweiten Griff. TASK_976 sollte daraus den naechsten Spieler-Loop bauen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_975_release_first_decision_loop_two_acceptance_slice.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_974_release_first_decision_loop_two_recapture_visual_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_973_release_first_decision_loop_two_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_976 - Release First Decision Loop Two Player Loop Extension.
+
 ### TASK_974 - Release First Decision Loop Two Recapture Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_974_release_first_decision_loop_two_recapture_visual_findings.md`, `docs/tasks/TASK_973_release_first_decision_loop_two_real_window_recapture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

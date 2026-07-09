@@ -190,3 +190,8 @@ Der Recapture-Snapshot bleibt read-only und darf erst `accepted` werden, wenn di
 TASK_974 trennt technische Recapture-Evidence vom eigentlichen Spielerblick. Ein guter TASK_973-Recapture ohne Review-Notizen bleibt `needs_manual_review`; belegte Reibungen wie fehlende Smoke-Zeile, schwaches Post-GO-Feedback, unklare `GO`-Trennung oder fehlende Multiplayer-/HUD-Grenzbestaetigung routen zu `TASK_975 - Release First Decision Loop Two Recapture Visual Polish`.
 
 Ein sauberer Sichtbefund darf erst zum Acceptance-Slice routen, wenn `2ND`, Confirm, getrenntes `GO`, GO-Ausfuehrung, Post-GO-Feedback, Smoke-Zeile, HUD-read-only-Grenze, Multiplayer-Grenze und Spielerlesbarkeit manuell bestaetigt sind. Der Findings-Snapshot bleibt read-only und erzeugt keine Commands, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Acceptance Slice (TASK_975)
+TASK_975 verbindet akzeptierte TASK_974-Findings mit einem Ablauf-Trace. Der Slice muss belegen, dass der Release-Kontext erhalten bleibt, `2ND` sichtbar und bestaetigt ist, `GO` separat bleibt und erst danach ausgefuehrt wird, Post-GO-Feedback sichtbar ist und die Spielerfragen zum zweiten Griff beantwortet sind.
+
+Der Acceptance-Snapshot bleibt read-only. Ohne Trace bleibt er `needs_acceptance_slice_trace`; bei regressiver Evidence routet er zu einem engen Recapture-Polish; bei voller Evidence meldet er `loop_two_acceptance_slice_passed` und fuehrt zu `TASK_976 - Release First Decision Loop Two Player Loop Extension`. Er erzeugt keine Commands, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
