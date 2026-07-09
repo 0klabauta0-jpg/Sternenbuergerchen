@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_981 - Release First Decision Loop Two Player Loop Real Window Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_981_release_first_decision_loop_two_player_loop_real_window_capture.md`, `docs/tasks/TASK_980_release_first_decision_loop_two_player_loop_choice_confirm_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopRealWindowCapture.build_snapshot()` bewertet read-only ein Manifest fuer den echten Runtime-Blick auf die vier Choice-Buttons.
+- Stand: Das Capture-Manifest verlangt sichtbare/lesbare `SECURE/PUSH/FLANK/RESET`-Buttons, beobachteten Choice-Confirm, Feedback, getrenntes `GO`, sichtbare Smoke-Zeile, HUD-read-only-Grenze und Multiplayer-Grenze.
+- Stand: `capture_release_first_decision_loop_two_player_loop_real_window.ps1` schreibt den TASK_981-Review-Rahmen, setzt `manual_review_done = $false` und veraendert keine Shortcuts.
+- Risiken/offen: TASK_981 akzeptiert erst nach manueller Sichtabnahme. TASK_982 sollte aus dem Capture konkrete Visual Findings schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_981_release_first_decision_loop_two_player_loop_real_window_capture.gd`, Regression TASK_980 bis TASK_978, `git diff --check`.
+- Naechster Schritt: TASK_982 - Release First Decision Loop Two Player Loop Visual Findings.
+
 ### TASK_980 - Release First Decision Loop Two Player Loop Choice Confirm Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_980_release_first_decision_loop_two_player_loop_choice_confirm_smoke.md`, `docs/tasks/TASK_979_release_first_decision_loop_two_player_loop_runtime_choice_buttons.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

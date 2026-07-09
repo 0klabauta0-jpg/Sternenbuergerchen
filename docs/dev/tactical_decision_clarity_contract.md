@@ -220,3 +220,8 @@ Der Snapshot bleibt Anzeige-/Bedienvertrag: Er darf Button-Nodes markieren, aber
 TASK_980 belegt die vier Runtime-Choices als kleinen Bedien-Smoke. Ein Choice-Button darf eine vorhandene Command-Vorbereitung bestaetigen und sichtbares Feedback erzeugen; `GO` muss danach weiterhin als separater Schritt erkennbar bleiben.
 
 Der Smoke-Snapshot bleibt read-only und bewertet Trace-Evidence fuer Button-Press, vorhandenen Press-/Confirm-/Execute-Pfad, Confirm-Erfolg, getrenntes `GO`, Post-Confirm-Feedback und Command-Queue-Lifecycle. Auto-GO, fehlendes Feedback oder Gameplay-/Multiplayer-Wahrheit im UI sind Regressionen. Der naechste Beweis ist `TASK_981 - Release First Decision Loop Two Player Loop Real Window Capture`.
+
+## Release First Decision Loop Two Player Loop Real Window Capture (TASK_981)
+TASK_981 prueft den echten Runtime-Blick auf den neuen Spielerloop. Erwartet sind sichtbare und lesbare `SECURE`, `PUSH`, `FLANK` und `RESET`-Buttons, ein beobachteter Choice-Confirm, sichtbares Feedback, klare `GO`-Trennung und eine sichtbare Smoke-Zeile.
+
+Der Capture-Snapshot bleibt read-only und akzeptiert erst nach manueller Sichtabnahme aller Pflichtchecks. Ohne Manifest bleibt er `needs_real_window_capture`; mit gueltigem Manifest wird er `review_ready`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit. Der naechste Schritt ist `TASK_982 - Release First Decision Loop Two Player Loop Visual Findings`.
