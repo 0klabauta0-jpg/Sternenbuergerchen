@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_918 - Release First Exchange Final World Read Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_918_release_first_exchange_final_world_read_visual_findings.md`, `docs/tasks/TASK_917_release_first_exchange_final_world_read_recapture.md`, `docs/tasks/TASK_916_release_first_exchange_fire_lane_world_read_final_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_918 bewertet den TASK_917-Snapshot/Manifest read-only als Spielerblick.
+- Stand: `ReleaseFirstExchangeFinalWorldReadVisualFindings.build_snapshot()` trennt Quellintegritaet, fehlenden manuellen Sichttest, Restreibung und echte Akzeptanz fuer einen First-Exchange-Playability-Smoke.
+- Stand: Positive Befunde werden erhalten: finaler CONTACT-FIRE-Source-Snapshot, trusted Window-Handle-Capture, TASK_916-Final-Style und TASK_913-Acceptance-Basis.
+- Risiken/offen: Ohne echten TASK_917-Sichtbefund bleibt der Snapshot `needs_manual_review`. Bei Akzeptanz empfiehlt TASK_918 einen Playability-Smoke, bei Restreibung nur einen belegten Follow-up-Fix.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_918_release_first_exchange_final_world_read_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_917_release_first_exchange_final_world_read_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_919 - Release First Exchange Playability Smoke bei Akzeptanz; sonst TASK_919 - Release First Exchange Final World Read Followup Fix.
+
 ### TASK_917 - Release First Exchange Final World Read Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_917_release_first_exchange_final_world_read_recapture.md`, `docs/tasks/TASK_916_release_first_exchange_fire_lane_world_read_final_polish.md`, `docs/tasks/TASK_914_release_first_exchange_fire_lane_world_read_acceptance_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
