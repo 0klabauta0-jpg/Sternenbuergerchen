@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_980 - Release First Decision Loop Two Player Loop Choice Confirm Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_980_release_first_decision_loop_two_player_loop_choice_confirm_smoke.md`, `docs/tasks/TASK_979_release_first_decision_loop_two_player_loop_runtime_choice_buttons.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopChoiceConfirmSmoke.build_snapshot()` bewertet read-only, ob ein `SECURE/PUSH/FLANK/RESET`-Button gedrueckt, bestaetigt und mit sichtbarem Feedback vorbereitet wurde.
+- Stand: `MissionTacticalSandboxController.confirm_release_first_decision_loop_two_player_loop_choice_button()` nutzt die vorhandenen Command-Pfade, speichert Smoke-Trace-Evidence und loest kein `GO` aus.
+- Stand: `get_command_feedback_snapshot()` exportiert TASK_980-Snapshot, Status und Smoke-Zeile; Auto-GO oder fehlendes Feedback werden als Regression markiert.
+- Risiken/offen: TASK_980 ist noch kein echter Fenster-Capture. TASK_981 sollte den Runtime-Blick mit sichtbaren Choice-Buttons, Confirm-Feedback und getrenntem `GO` belegen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_980_release_first_decision_loop_two_player_loop_choice_confirm_smoke.gd`, Regression TASK_979 bis TASK_976, `git diff --check`.
+- Naechster Schritt: TASK_981 - Release First Decision Loop Two Player Loop Real Window Capture.
+
 ### TASK_979 - Release First Decision Loop Two Player Loop Runtime Choice Buttons
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_979_release_first_decision_loop_two_player_loop_runtime_choice_buttons.md`, `docs/tasks/TASK_978_release_first_decision_loop_two_player_loop_choice_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

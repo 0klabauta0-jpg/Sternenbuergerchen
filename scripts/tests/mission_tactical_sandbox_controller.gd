@@ -51,6 +51,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_EXTENSION_SCRIPT: GDScript = p
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_HUD_WIRING_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_hud_wiring.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_choice_hook.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_RUNTIME_CHOICE_BUTTONS_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_runtime_choice_buttons.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_CONFIRM_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_choice_confirm_smoke.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -381,6 +382,7 @@ var _release_candidate_firefight_decision_line_build_depth: int = 0
 var _release_first_decision_loop_two_hud_build_depth: int = 0
 var _release_first_decision_loop_two_polish_hud_build_depth: int = 0
 var _release_first_decision_loop_two_visual_polish_hud_build_depth: int = 0
+var _release_first_decision_loop_two_player_loop_choice_confirm_last_trace: Dictionary = {}
 var _release_firefight_event_log_fallback_created_msec: int = 0
 var _release_fire_exchange_visibility_persistence_evidence: Dictionary = {}
 var _release_fire_exchange_visibility_last_seed_event_id: String = ""
@@ -8339,6 +8341,9 @@ func _apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(a
 		button.set_meta("release_first_decision_loop_two_player_loop_runtime_choice_separate_go_required", bool(spec.get("separate_go_required", true)))
 		if button_enabled:
 			button.self_modulate = Color(0.82, 0.98, 0.88, 1.0)
+		var pressed_callable := Callable(self, "_on_release_first_decision_loop_two_player_loop_choice_button_pressed").bind(button)
+		if not button.pressed.is_connected(pressed_callable):
+			button.pressed.connect(pressed_callable)
 
 
 func _get_release_firefight_command_primary_button_specs() -> Array:
@@ -21068,6 +21073,110 @@ func get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snap
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_RUNTIME_CHOICE_BUTTONS_SCRIPT.call("build_snapshot", player_loop_choice_hook, player_loop_hud_wiring)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_choice_confirm_smoke_snapshot(runtime_buttons_override: Dictionary = {}, choice_hook_override: Dictionary = {}, trace_override: Dictionary = {}) -> Dictionary:
+	var runtime_buttons: Dictionary = runtime_buttons_override.duplicate(true) if not runtime_buttons_override.is_empty() else get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot()
+	var selected_choice_id: String = _get_release_first_decision_loop_two_player_loop_default_choice_id(runtime_buttons)
+	var choice_hook: Dictionary = choice_hook_override.duplicate(true) if not choice_hook_override.is_empty() else get_release_first_decision_loop_two_player_loop_choice_hook_snapshot({}, selected_choice_id)
+	var trace: Dictionary = trace_override.duplicate(true) if not trace_override.is_empty() else _build_release_first_decision_loop_two_player_loop_choice_confirm_smoke_trace(runtime_buttons, choice_hook)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_CONFIRM_SMOKE_SCRIPT.call("build_snapshot", runtime_buttons, choice_hook, trace)).duplicate(true)
+
+
+func confirm_release_first_decision_loop_two_player_loop_choice_button(selected_choice_id: String = "") -> bool:
+	var runtime_buttons: Dictionary = get_release_first_decision_loop_two_player_loop_runtime_choice_buttons_snapshot()
+	var normalized_choice_id: String = selected_choice_id.strip_edges()
+	if normalized_choice_id.is_empty():
+		normalized_choice_id = _get_release_first_decision_loop_two_player_loop_default_choice_id(runtime_buttons)
+	var button_spec: Dictionary = _find_release_first_decision_loop_two_player_loop_choice_button_spec(runtime_buttons, normalized_choice_id)
+	var choice_hook: Dictionary = get_release_first_decision_loop_two_player_loop_choice_hook_snapshot({}, normalized_choice_id)
+	var command_draft: Dictionary = Dictionary(choice_hook.get("command_draft", {}))
+	var command_type: String = String(command_draft.get("command_type", button_spec.get("command_type", ""))).strip_edges().to_lower()
+	var confirm_action: String = String(command_draft.get("confirm_action", choice_hook.get("confirm_action", ""))).strip_edges()
+	var button_text: String = String(button_spec.get("button_text", normalized_choice_id.to_upper())).strip_edges()
+	var trace: Dictionary = _build_release_first_decision_loop_two_player_loop_choice_confirm_smoke_trace(runtime_buttons, choice_hook)
+	trace["trace_available"] = true
+	trace["selected_choice_id"] = normalized_choice_id
+	trace["pressed_button_slot"] = String(button_spec.get("slot_name", ""))
+	trace["choice_button_pressed"] = true
+	trace["confirm_action_called"] = true
+	var confirm_result: bool = false
+	if not bool(runtime_buttons.get("active", false)):
+		_last_command_text = "CHOICE BLOCKED"
+		_update_ui()
+	elif command_type.is_empty() or confirm_action.is_empty():
+		_last_command_text = "CHOICE NO COMMAND"
+		_update_ui()
+	elif confirm_action == "return_selected_fireteams_to_plan":
+		confirm_result = return_selected_fireteams_to_plan()
+	elif confirm_action == "_issue_command":
+		confirm_result = _issue_command(command_type, "%s %s" % [button_text, command_type.to_upper()])
+	else:
+		_last_command_text = "CHOICE UNKNOWN"
+		_update_ui()
+	trace["confirm_action_result"] = confirm_result
+	trace["post_confirm_feedback_visible"] = not String(_last_command_text).strip_edges().is_empty()
+	trace["post_confirm_feedback_line"] = _last_command_text
+	trace["command_queue_lifecycle_observed"] = confirm_result
+	trace["go_executed"] = false
+	trace["go_button_still_separate"] = true
+	trace["ui_sets_gameplay_truth"] = false
+	trace["creates_movement"] = false
+	trace["sets_multiplayer_truth"] = false
+	_release_first_decision_loop_two_player_loop_choice_confirm_last_trace = trace.duplicate(true)
+	return confirm_result
+
+
+func _on_release_first_decision_loop_two_player_loop_choice_button_pressed(button: Button) -> void:
+	if button == null:
+		confirm_release_first_decision_loop_two_player_loop_choice_button()
+		return
+	confirm_release_first_decision_loop_two_player_loop_choice_button(String(button.get_meta("release_first_decision_loop_two_player_loop_runtime_choice_id", "")))
+
+
+func _build_release_first_decision_loop_two_player_loop_choice_confirm_smoke_trace(runtime_buttons: Dictionary, choice_hook: Dictionary) -> Dictionary:
+	if not _release_first_decision_loop_two_player_loop_choice_confirm_last_trace.is_empty():
+		return _release_first_decision_loop_two_player_loop_choice_confirm_last_trace.duplicate(true)
+	var selected_choice_id: String = _get_release_first_decision_loop_two_player_loop_default_choice_id(runtime_buttons)
+	var button_spec: Dictionary = _find_release_first_decision_loop_two_player_loop_choice_button_spec(runtime_buttons, selected_choice_id)
+	var confirm_action: String = String(choice_hook.get("confirm_action", Dictionary(choice_hook.get("command_draft", {})).get("confirm_action", ""))).strip_edges()
+	var execute_action: String = String(runtime_buttons.get("execute_action", choice_hook.get("execute_action", "execute_selected_fireteam_orders"))).strip_edges()
+	return {
+		"trace_available": false,
+		"selected_choice_id": selected_choice_id,
+		"pressed_button_slot": String(button_spec.get("slot_name", "")),
+		"press_action_exists": _release_first_loop_two_action_exists(String(runtime_buttons.get("press_action", "confirm_release_first_decision_loop_two_player_loop_choice_button"))),
+		"confirm_action_exists": _release_first_loop_two_action_exists(confirm_action),
+		"execute_action_exists": _release_first_loop_two_action_exists(execute_action),
+		"choice_button_pressed": false,
+		"confirm_action_called": false,
+		"confirm_action_result": false,
+		"go_executed": false,
+		"go_button_still_separate": not execute_action.is_empty() and execute_action != confirm_action,
+		"post_confirm_feedback_visible": false,
+		"post_confirm_feedback_line": "",
+		"command_queue_lifecycle_observed": false,
+		"runtime_mutation_owner": "MissionTacticalSandboxController -> SimulationRoot.enqueue_command",
+		"ui_sets_gameplay_truth": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _get_release_first_decision_loop_two_player_loop_default_choice_id(runtime_buttons: Dictionary) -> String:
+	var specs: Array = Array(runtime_buttons.get("button_specs", []))
+	if specs.is_empty():
+		return ""
+	return String(Dictionary(specs[0]).get("choice_id", "")).strip_edges()
+
+
+func _find_release_first_decision_loop_two_player_loop_choice_button_spec(runtime_buttons: Dictionary, selected_choice_id: String) -> Dictionary:
+	for spec_variant in Array(runtime_buttons.get("button_specs", [])):
+		var spec := Dictionary(spec_variant)
+		if String(spec.get("choice_id", "")).strip_edges() == selected_choice_id:
+			return spec
+	var specs: Array = Array(runtime_buttons.get("button_specs", []))
+	return Dictionary(specs[0]) if not specs.is_empty() else {}
+
+
 func confirm_release_first_decision_loop_two_runtime_button(selected_choice_id: String = "") -> bool:
 	var runtime_button: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot()
 	if not bool(runtime_button.get("button_enabled", false)):
@@ -24074,6 +24183,11 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_choice_hook,
 		release_first_decision_loop_two_player_loop_hud_wiring
 	)
+	var release_first_decision_loop_two_player_loop_choice_confirm_smoke: Dictionary = get_release_first_decision_loop_two_player_loop_choice_confirm_smoke_snapshot(
+		release_first_decision_loop_two_player_loop_runtime_choice_buttons,
+		release_first_decision_loop_two_player_loop_choice_hook,
+		{}
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24194,6 +24308,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_runtime_choice_buttons_line": String(release_first_decision_loop_two_player_loop_runtime_choice_buttons.get("runtime_buttons_line", "")),
 		"release_first_decision_loop_two_player_loop_runtime_choice_buttons_status": String(release_first_decision_loop_two_player_loop_runtime_choice_buttons.get("status", "")),
 		"release_first_decision_loop_two_player_loop_runtime_choice_button_specs": Array(release_first_decision_loop_two_player_loop_runtime_choice_buttons.get("button_specs", [])),
+		"release_first_decision_loop_two_player_loop_choice_confirm_smoke": release_first_decision_loop_two_player_loop_choice_confirm_smoke,
+		"release_first_decision_loop_two_player_loop_choice_confirm_smoke_line": String(release_first_decision_loop_two_player_loop_choice_confirm_smoke.get("smoke_line", "")),
+		"release_first_decision_loop_two_player_loop_choice_confirm_smoke_status": String(release_first_decision_loop_two_player_loop_choice_confirm_smoke.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

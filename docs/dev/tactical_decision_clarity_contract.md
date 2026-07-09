@@ -215,3 +215,8 @@ Der Hook darf nur `confirm_action`, `execute_action`, Command-Typ und eine kurze
 TASK_979 macht aus dem TASK_978-Hook stabile Runtime-Button-Spezifikationen. `SECURE`, `PUSH`, `FLANK` und `RESET` liegen auf `CommandSlot08` bis `CommandSlot11` und tragen Choice-ID, Tooltip, Press-Action und `GO separat`.
 
 Der Snapshot bleibt Anzeige-/Bedienvertrag: Er darf Button-Nodes markieren, aber keine bestaetigte Order, kein Movement und kein `GO` erzeugen. Der naechste Beweis ist ein Choice-Confirm-Smoke in TASK_980.
+
+## Release First Decision Loop Two Player Loop Choice Confirm Smoke (TASK_980)
+TASK_980 belegt die vier Runtime-Choices als kleinen Bedien-Smoke. Ein Choice-Button darf eine vorhandene Command-Vorbereitung bestaetigen und sichtbares Feedback erzeugen; `GO` muss danach weiterhin als separater Schritt erkennbar bleiben.
+
+Der Smoke-Snapshot bleibt read-only und bewertet Trace-Evidence fuer Button-Press, vorhandenen Press-/Confirm-/Execute-Pfad, Confirm-Erfolg, getrenntes `GO`, Post-Confirm-Feedback und Command-Queue-Lifecycle. Auto-GO, fehlendes Feedback oder Gameplay-/Multiplayer-Wahrheit im UI sind Regressionen. Der naechste Beweis ist `TASK_981 - Release First Decision Loop Two Player Loop Real Window Capture`.
