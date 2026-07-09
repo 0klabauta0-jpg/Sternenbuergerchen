@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_947 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Second Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_947_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_visual_findings.md`, `docs/tasks/TASK_946_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_recapture.md`, `docs/tasks/TASK_945_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_947 bewertet den TASK_946-Snapshot/Manifest read-only als Spielerblick nach dem TASK_945-Second-Fix.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningFollowupSecondVisualFindings.build_snapshot()` trennt technische Source-Evidence, offenen manuellen Sichtbefund, belegte Restreibung und echte Akzeptanz fuer den First-Exchange-Playability-Smoke.
+- Stand: Bei sauber akzeptiertem Sichtbefund empfiehlt TASK_947 `TASK_948 - Release First Exchange Playability Smoke`; bei Restreibung empfiehlt er bewusst `TASK_948 - Tactical Decision Clarity Scenario Return`, statt automatisch noch einen Mikro-Polish zu starten.
+- Risiken/offen: TASK_947 fuehrt keinen Smoke aus. Wenn der Sichtbefund offen bleibt, muss entweder manuell bewertet werden oder der naechste Slice soll die Spielbarkeit im kleinen Szenario wieder nach vorne stellen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_947_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_946_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_recapture.gd`, `git diff --check`.
+- Naechster Schritt: Bei Akzeptanz TASK_948 - Release First Exchange Playability Smoke; bei Restreibung TASK_948 - Tactical Decision Clarity Scenario Return.
+
 ### TASK_946 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Second Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_946_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_recapture.md`, `docs/tasks/TASK_945_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix.md`, `docs/tasks/TASK_944_release_first_exchange_followup_fix_player_polish_final_tuning_followup_visual_findings.md`, `docs/tasks/TASK_943_release_first_exchange_followup_fix_player_polish_final_tuning_followup_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
