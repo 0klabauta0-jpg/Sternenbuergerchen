@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_927 - Release First Exchange Followup Player Polish Tuning Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_927_release_first_exchange_followup_player_polish_tuning_recapture.md`, `docs/tasks/TASK_926_release_first_exchange_followup_player_polish_tuning.md`, `docs/tasks/TASK_925_release_first_exchange_followup_player_polish_visual_findings.md`, `docs/tasks/TASK_924_release_first_exchange_followup_player_polish_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_927 legt einen frischen Recapture-/Review-Rahmen an das TASK_926-Player-Polish-Tuning.
+- Stand: `capture_release_first_exchange_followup_player_polish_tuning_recapture.ps1` wiederverwendet den TASK_924-Window-Handle-Pfad und schreibt eigene TASK_927-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFollowupPlayerPolishTuningRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Tuning-Fire-Lane als erste Weltbewegung, Richtunganker, ruhiges Label/Halo/Grid und Lane-vor-FIRE/CONTACT-Text.
+- Risiken/offen: TASK_927 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_928 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_927_release_first_exchange_followup_player_polish_tuning_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_926_release_first_exchange_followup_player_polish_tuning.gd`, `git diff --check`.
+- Naechster Schritt: TASK_928 - Release First Exchange Followup Player Polish Tuning Visual Findings.
+
 ### TASK_926 - Release First Exchange Followup Player Polish Tuning
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_926_release_first_exchange_followup_player_polish_tuning.md`, `docs/tasks/TASK_925_release_first_exchange_followup_player_polish_visual_findings.md`, `docs/tasks/TASK_923_release_first_exchange_followup_world_read_player_polish.md`, `docs/dev/mission_command_feedback_contract.md`
