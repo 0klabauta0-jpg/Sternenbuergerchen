@@ -305,3 +305,8 @@ Der Snapshot bleibt read-only: Er darf Outcome-Evidence, Status-/Gate-Werte, `ou
 TASK_997 trennt den Micro-Objective-Outcome-Snapshot vom echten Fensterbeweis. Erwartet ist ein Manifest, das das Release-Fenster, Screenshotpfade, sichtbare Outcome-Zeile, Mini-Zielzustand, naechsten Griff, Spielerlesbarkeit und HUD-/Multiplayer-Grenze reviewbar macht.
 
 Der Capture-Snapshot bleibt read-only und setzt `manual_review_done` nicht automatisch. Ohne Manifest bleibt er `needs_micro_objective_real_window_capture`; ein gueltiges Manifest wird `review_ready`; vollstaendige manuelle Checks akzeptieren ihn fuer `TASK_998 - Release First Decision Loop Two Player Loop Micro Objective Visual Findings`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Micro Objective Visual Findings (TASK_998)
+TASK_998 trennt den technischen TASK_997-Capture vom eigentlichen Spielerblick. Bewertet werden sichtbare Micro-Objective-Outcome-Zeile, Mini-Zielzustand, Next-Step-Zeile, Ergebnislesbarkeit, HUD-read-only-Grenze, Multiplayer-Grenze und korrektes Release-Fenster.
+
+Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_manual_review`; bei Reibung routet er zu `TASK_999 - Release First Decision Loop Two Player Loop Micro Objective Visual Polish`; bei sauberem Befund zu `TASK_999 - Release First Decision Loop Two Player Loop Micro Objective Playability Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

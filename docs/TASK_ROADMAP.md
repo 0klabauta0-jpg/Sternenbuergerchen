@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_998 - Release First Decision Loop Two Player Loop Micro Objective Visual Findings (implementiert): Der TASK_997-Capture wird als read-only Sichtbefund geschnitten; Reibung routet zu Micro-Objective Visual Polish, sauberer Befund zum Micro-Objective Playability Slice.
 - TASK_997 - Release First Decision Loop Two Player Loop Micro Objective Real Window Capture (implementiert): Der TASK_996-Micro-Objective-Outcome bekommt einen read-only Real-Window-Capture-/Manifest-Rahmen fuer sichtbare Outcome-Zeile, Mini-Zielzustand und naechsten Griff.
 - TASK_996 - Release First Decision Loop Two Player Loop Micro Objective Outcome Slice (implementiert): Der akzeptierte Micro-Objective-Griff erhaelt read-only Outcome-Zeile, Mini-Zielzustand und naechsten Griff; HUD- und Multiplayer-Grenzen bleiben erhalten.
 - TASK_995 - Release First Decision Loop Two Player Loop Micro Objective Acceptance Slice (implementiert): Der Micro-Objective-Loop `SICHERN / DRUECKEN / SAMMELN` wird read-only als Spielergriff akzeptiert: sichtbar, lesbar, Confirm-Feedback, `GO` separat und Multiplayer-Grenze erhalten.
