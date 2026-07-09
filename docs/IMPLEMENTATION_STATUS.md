@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_948 - Tactical Decision Clarity Scenario Return
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_948_tactical_decision_clarity_scenario_return.md`, `docs/tasks/TASK_947_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_948 stoppt den automatischen First-Exchange-Fire-Lane-Mikropolish, wenn TASK_947 in `ready_for_tactical_decision_clarity_return` routet.
+- Stand: `TacticalDecisionClarityScenarioReturn.build_snapshot()` benennt den vorhandenen Playability-Stack aus Ghost, Pfad, Threat-Level, Line-of-Fire, Contact-Awareness und AI-Intent-Debug und empfiehlt `TASK_949 - Order Preview Threat Overlay Playtest Scenario`.
+- Stand: Akzeptierte First-Exchange-Smoke-Quellen werden nicht umgedeutet, sondern bleiben blockiert auf ihrem Smoke-Pfad.
+- Risiken/offen: TASK_948 baut noch keine neue Spielszene; der naechste Slice muss die Preview-/Threat-Faehigkeiten in einer kleinen spielbaren 3v3-Entscheidung vor `GO` sichtbar machen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_948_tactical_decision_clarity_scenario_return.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_947_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_949 - Order Preview Threat Overlay Playtest Scenario.
+
 ### TASK_947 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Second Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_947_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_visual_findings.md`, `docs/tasks/TASK_946_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_recapture.md`, `docs/tasks/TASK_945_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix.md`, `docs/dev/mission_command_feedback_contract.md`

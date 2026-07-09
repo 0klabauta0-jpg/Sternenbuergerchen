@@ -49,3 +49,14 @@ Ein Preview-Eintrag enthaelt mindestens:
 - Keine neuen per-frame SceneTree-Vollscans im Preview-Analyzer.
 - Threat-Kontext wird als Array/Snapshot uebergeben.
 - Visuals nutzen den bestehenden Order-Payload und Render-Snapshot-Zaehler.
+
+## Scenario Return (TASK_948)
+TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
+
+Erwartete Spielerfragen fuer den naechsten Slice:
+- `where_will_the_fireteam_go`
+- `who_can_see_the_destination`
+- `why_is_the_move_safe_risky_or_suicidal`
+- `what_happens_only_after_go`
+
+Der naechste konkrete Slice ist `TASK_949 - Order Preview Threat Overlay Playtest Scenario`. Er soll Ghost, Pfad, Risk-State und Line-of-Fire in einer kleinen 3v3-Entscheidungssituation sichtbar machen, ohne vor `GO` Commands, Movement, Combat, Damage oder Multiplayer-Wahrheit zu erzeugen.
