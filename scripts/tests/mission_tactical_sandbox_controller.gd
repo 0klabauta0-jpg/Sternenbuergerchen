@@ -56,6 +56,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_VISUAL_POLISH_SCRIPT: GDScript
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_ACCEPTANCE_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_acceptance_slice.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_OUTCOME_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_outcome_slice.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_REAL_WINDOW_CAPTURE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_outcome_real_window_capture.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_outcome_visual_polish.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21125,6 +21126,46 @@ func get_release_first_decision_loop_two_player_loop_outcome_real_window_capture
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_REAL_WINDOW_CAPTURE_SCRIPT.call("build_snapshot", source_scenario_outcome, manifest)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_outcome_visual_polish_snapshot(source_findings_override: Dictionary = {}, outcome_capture_override: Dictionary = {}) -> Dictionary:
+	var outcome_capture: Dictionary = outcome_capture_override.duplicate(true) if not outcome_capture_override.is_empty() else get_release_first_decision_loop_two_player_loop_outcome_real_window_capture_snapshot()
+	var source_findings: Dictionary = source_findings_override.duplicate(true) if not source_findings_override.is_empty() else _build_release_first_decision_loop_two_player_loop_outcome_visual_polish_source(outcome_capture)
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_OUTCOME_VISUAL_POLISH_SCRIPT.call("build_snapshot", source_findings, outcome_capture)).duplicate(true)
+
+
+func _build_release_first_decision_loop_two_player_loop_outcome_visual_polish_source(outcome_capture: Dictionary) -> Dictionary:
+	var outcome_line: String = String(outcome_capture.get("source_outcome_line", "")).strip_edges()
+	var mini_objective_state: String = String(outcome_capture.get("source_mini_objective_state", "")).strip_edges()
+	var next_step_line: String = String(outcome_capture.get("source_next_step_line", "")).strip_edges()
+	var active: bool = not outcome_line.is_empty() and not mini_objective_state.is_empty() and not next_step_line.is_empty()
+	return {
+		"schema": "sternenbuergerchen.release_first_decision_loop_two_player_loop_outcome_visual_findings.v1",
+		"task_id": "TASK_987",
+		"source_task_id": "TASK_986",
+		"status": "ready_for_outcome_visual_polish" if active else "needs_manual_review",
+		"manual_review_done": active,
+		"source_outcome_line": outcome_line,
+		"source_mini_objective_state": mini_objective_state,
+		"source_next_step_line": next_step_line,
+		"issue_count": 1 if active else 0,
+		"issues": [
+			{
+				"id": "outcome_surfaces_need_polish",
+				"text": "Outcome-Zeile, Mini-Zielzustand und naechster Griff brauchen getrennte Leseflaechen.",
+			},
+		] if active else [],
+		"read_only": true,
+		"read_only_capture": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+
+
 func _build_release_first_decision_loop_two_player_loop_visual_polish_source(runtime_buttons: Dictionary) -> Dictionary:
 	var active: bool = bool(runtime_buttons.get("active", false)) and int(runtime_buttons.get("button_count", 0)) >= 4
 	return {
@@ -24275,6 +24316,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_scenario_outcome_slice,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_outcome_visual_polish: Dictionary = get_release_first_decision_loop_two_player_loop_outcome_visual_polish_snapshot(
+		{},
+		release_first_decision_loop_two_player_loop_outcome_real_window_capture
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24412,6 +24457,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_outcome_real_window_capture": release_first_decision_loop_two_player_loop_outcome_real_window_capture,
 		"release_first_decision_loop_two_player_loop_outcome_real_window_capture_status": String(release_first_decision_loop_two_player_loop_outcome_real_window_capture.get("status", "")),
 		"release_first_decision_loop_two_player_loop_outcome_real_window_capture_gate": String(release_first_decision_loop_two_player_loop_outcome_real_window_capture.get("gate", "")),
+		"release_first_decision_loop_two_player_loop_outcome_visual_polish": release_first_decision_loop_two_player_loop_outcome_visual_polish,
+		"release_first_decision_loop_two_player_loop_outcome_visual_polish_line": String(release_first_decision_loop_two_player_loop_outcome_visual_polish.get("outcome_polish_line", "")),
+		"release_first_decision_loop_two_player_loop_outcome_visual_polish_status": String(release_first_decision_loop_two_player_loop_outcome_visual_polish.get("status", "")),
+		"release_first_decision_loop_two_player_loop_outcome_visual_polish_surface_specs": Array(release_first_decision_loop_two_player_loop_outcome_visual_polish.get("outcome_surface_specs", [])),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

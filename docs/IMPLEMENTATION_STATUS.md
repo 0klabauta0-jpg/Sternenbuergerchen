@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_988 - Release First Decision Loop Two Player Loop Outcome Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_988_release_first_decision_loop_two_player_loop_outcome_visual_polish.md`, `docs/tasks/TASK_987_release_first_decision_loop_two_player_loop_outcome_visual_findings.md`, `docs/tasks/TASK_986_release_first_decision_loop_two_player_loop_outcome_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopOutcomeVisualPolish.build_snapshot()` erzeugt aus TASK_987-Findings und TASK_986-Capture drei read-only Surface-Specs fuer Outcome-Zeile, Mini-Zielzustand und Next-Step-Zeile.
+- Stand: Die Surface-Specs liefern Rolle, Text, Style-ID, Akzent, Mindesthoehe, Autowrap und eine kompakte `RESULT | OBJ | NEXT`-Polish-Zeile.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_988 im Command-Feedback, ohne Commands, Movement, Combat, Damage oder Multiplayer-Wahrheit zu erzeugen.
+- Risiken/offen: TASK_988 beweist noch keinen akzeptierten Outcome-Ablauf. TASK_989 sollte die gepolishte Outcome-Lesung mit Trace-Evidence als Playability-Slice bewerten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_988_release_first_decision_loop_two_player_loop_outcome_visual_polish.gd`, Regression TASK_987, TASK_986, TASK_985, `git diff --check`.
+- Naechster Schritt: TASK_989 - Release First Decision Loop Two Player Loop Outcome Playability Slice.
+
 ### TASK_987 - Release First Decision Loop Two Player Loop Outcome Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_987_release_first_decision_loop_two_player_loop_outcome_visual_findings.md`, `docs/tasks/TASK_986_release_first_decision_loop_two_player_loop_outcome_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

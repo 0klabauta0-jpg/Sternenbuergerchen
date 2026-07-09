@@ -255,3 +255,8 @@ Der Capture-Snapshot bleibt read-only und setzt `manual_review_done` nicht autom
 TASK_987 trennt den technischen TASK_986-Outcome-Capture vom eigentlichen Spielerblick. Bewertet werden sichtbare Outcome-Zeile, Mini-Zielzustand, Next-Step-Zeile, Ergebnislesbarkeit, HUD-read-only-Grenze, Multiplayer-Grenze und korrektes Release-Fenster.
 
 Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_manual_review`; bei Reibung routet er zu `TASK_988 - Release First Decision Loop Two Player Loop Outcome Visual Polish`; bei sauberem Befund zu `TASK_988 - Release First Decision Loop Two Player Loop Outcome Playability Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
+## Release First Decision Loop Two Player Loop Outcome Visual Polish (TASK_988)
+TASK_988 macht aus dem Outcome-Befund einen konkreten Lesbarkeitsvertrag. Erwartet sind drei getrennte Surfaces fuer `RESULT`, `OBJ` und `NEXT`, damit Ergebnis, Mini-Zielzustand und naechster Griff schnell erfassbar werden.
+
+Der Polish-Snapshot bleibt read-only. Er darf Surface-Specs, Style-IDs, Mindesthoehen, Autowrap und eine kompakte `RESULT | OBJ | NEXT`-Zeile liefern, erzeugt aber keine Commands, kein Movement, keine Combat-/Damage-Ereignisse und keine Multiplayer-Wahrheit. Der naechste Beweis ist `TASK_989 - Release First Decision Loop Two Player Loop Outcome Playability Slice`.
