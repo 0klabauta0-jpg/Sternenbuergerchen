@@ -89,6 +89,7 @@ const RELEASE_FIRST_EXCHANGE_FINAL_READABILITY_FOLLOWUP_FIX_SCRIPT: GDScript = p
 const RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_followup_fix_player_polish.gd")
 const RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_followup_fix_player_polish_final_tuning.gd")
 const RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_FIX_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.gd")
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_SECOND_FIX_SCRIPT: GDScript = preload("res://scripts/mission/release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix.gd")
 const MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/mission_command_hierarchy_contract.gd")
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")
 const COMIC_BUBBLE_RUNTIME_GATE_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_runtime_gate.gd")
@@ -147,6 +148,7 @@ const RELEASE_FIRST_EXCHANGE_FINAL_READABILITY_FOLLOWUP_FIX_STYLE_ID: String = "
 const RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_STYLE_ID: String = "task_935_release_first_exchange_followup_fix_player_polish_v1"
 const RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_STYLE_ID: String = "task_938_release_first_exchange_followup_fix_player_polish_final_tuning_v1"
 const RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_FIX_STYLE_ID: String = "task_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix_v1"
+const RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_SECOND_FIX_STYLE_ID: String = "task_945_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix_v1"
 const RELEASE_FIRE_EXCHANGE_VISIBILITY_PERSISTENCE_MSEC: int = 45000
 const RELEASE_FIRST_EXCHANGE_VISIBLE_STATUS_SOURCE_RECONCILIATION_MSEC: int = 120000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_declutter"
@@ -17851,6 +17853,10 @@ func _get_release_first_exchange_followup_fix_player_polish_final_tuning_followu
 	return _get_release_first_exchange_followup_fix_player_polish_final_tuning_enabled(world_label_density_mode)
 
 
+func _get_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix_enabled(world_label_density_mode: String = "") -> bool:
+	return _get_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix_enabled(world_label_density_mode)
+
+
 func get_release_fire_exchange_focused_visual_polish_snapshot() -> Dictionary:
 	_update_ui()
 	_sync_primary_3d_order_visuals()
@@ -18823,6 +18829,59 @@ func get_release_first_exchange_followup_fix_player_polish_final_tuning_followup
 		"sets_multiplayer_truth": false,
 	}
 	return Dictionary(RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_FIX_SCRIPT.call(
+		"build_snapshot",
+		source,
+		{}
+	)).duplicate(true)
+
+
+func get_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix_snapshot() -> Dictionary:
+	_update_ui()
+	var followup_fix_snapshot: Dictionary = get_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix_snapshot()
+	_sync_primary_3d_order_visuals()
+	_refresh_order_visuals()
+	var primary_snapshot: Dictionary = {}
+	var primary_view: Node = _get_primary_3d_view()
+	if primary_view != null and primary_view.has_method("get_render_snapshot"):
+		primary_snapshot = Dictionary(primary_view.call("get_render_snapshot")).duplicate(true)
+	var findings_snapshot: Dictionary = {
+		"schema": "sternenbuergerchen.release_first_exchange_followup_fix_player_polish_final_tuning_followup_visual_findings.v1",
+		"task_id": "TASK_944",
+		"source_task_id": "TASK_943",
+		"source_followup_fix_task_id": "TASK_942",
+		"source_gate_task_id": "TASK_941",
+		"source_findings_task_id": "TASK_940",
+		"status": "ready_for_followup_fix_player_polish_final_tuning_followup_second_fix",
+		"primary_issue_id": "followup_fire_lane_not_first_world_movement",
+		"accepted": false,
+		"followup_fire_lane_is_first_world_movement": false,
+		"followup_lane_reads_before_fire_contact_text": false,
+		"followup_world_fire_label_stays_behind_lane": false,
+		"followup_target_halo_stays_behind_lane": false,
+		"recommended_next_task": "TASK_945 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Second Fix",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+	var source: Dictionary = {
+		"findings": findings_snapshot,
+		"followup_fix": followup_fix_snapshot,
+		"primary_render_snapshot": primary_snapshot,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+		"updates_shortcuts": false,
+	}
+	return Dictionary(RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_SECOND_FIX_SCRIPT.call(
 		"build_snapshot",
 		source,
 		{}
@@ -23313,6 +23372,8 @@ func _sync_primary_3d_order_visuals() -> void:
 			"release_first_exchange_followup_fix_player_polish_final_tuning_style_id": RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_STYLE_ID if _get_release_first_exchange_followup_fix_player_polish_final_tuning_enabled(world_label_density_mode) else "",
 			"release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix": _get_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix_enabled(world_label_density_mode),
 			"release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix_style_id": RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_FIX_STYLE_ID if _get_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix_enabled(world_label_density_mode) else "",
+			"release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix": _get_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix_enabled(world_label_density_mode),
+			"release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix_style_id": RELEASE_FIRST_EXCHANGE_FOLLOWUP_FIX_PLAYER_POLISH_FINAL_TUNING_FOLLOWUP_SECOND_FIX_STYLE_ID if _get_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix_enabled(world_label_density_mode) else "",
 			"selected_fireteam_ids": _selected_fireteam_ids,
 			"fire_sector_overlay_enabled": _fire_sector_overlay_enabled,
 			"fire_sector_visual_mode": "los_line_only",

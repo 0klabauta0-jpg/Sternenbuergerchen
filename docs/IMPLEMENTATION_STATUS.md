@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_945 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Second Fix
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_945_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix.md`, `docs/tasks/TASK_944_release_first_exchange_followup_fix_player_polish_final_tuning_followup_visual_findings.md`, `docs/tasks/TASK_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_945 setzt nur den belegten TASK_944-Restbefund um: Die erste Fire-Lane/Core-Bewegung wird noch klarer, waehrend FIRE/CONTACT-Label, Zielhalo, Grid und Weltlinien weiter zuruecktreten.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningFollowupSecondFix.build_snapshot()` verlangt TASK_944-Findings, TASK_942-Followup-Fix-Basis und einen aktiven TASK_945-Terrain-Style mit staerkerer Kernspur und leiseren Begleitmarkern.
+- Stand: `TerrainMap3DView` meldet den Style `task_945_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix_v1`; Source-/Target-Anker bleiben klein genug, Label/Grid/Weltlinien sind leiser als TASK_942, und die effektive Trace-Breite folgt dem TASK_945-Core.
+- Risiken/offen: TASK_945 ersetzt keinen echten Fensterbeweis. Der naechste Schritt muss wieder capturen/pruefen, ob sich der sichtbare Spielerblick jetzt wirklich rund liest.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_945_release_first_exchange_followup_fix_player_polish_final_tuning_followup_second_fix.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_944_release_first_exchange_followup_fix_player_polish_final_tuning_followup_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.gd`, `git diff --check`.
+- Naechster Schritt: TASK_946 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Second Recapture.
+
 ### TASK_944 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_944_release_first_exchange_followup_fix_player_polish_final_tuning_followup_visual_findings.md`, `docs/tasks/TASK_943_release_first_exchange_followup_fix_player_polish_final_tuning_followup_recapture.md`, `docs/tasks/TASK_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.md`, `docs/tasks/TASK_941_release_first_exchange_final_tuning_playability_smoke_gate.md`, `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
