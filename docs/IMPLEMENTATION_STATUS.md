@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_944 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_944_release_first_exchange_followup_fix_player_polish_final_tuning_followup_visual_findings.md`, `docs/tasks/TASK_943_release_first_exchange_followup_fix_player_polish_final_tuning_followup_recapture.md`, `docs/tasks/TASK_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.md`, `docs/tasks/TASK_941_release_first_exchange_final_tuning_playability_smoke_gate.md`, `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_944 bewertet den TASK_943-Snapshot/Manifest read-only als Spielerblick nach dem TASK_942-Followup-Fix.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishFinalTuningFollowupVisualFindings.build_snapshot()` trennt technische Capture-Evidence, fehlenden manuellen Sichtbefund, belegte Restreibung und echte Akzeptanz fuer den First-Exchange-Playability-Smoke.
+- Stand: Positive Evidenz bleibt erhalten: CONTACT FIRE in #17/#18/#19, trusted Window-Handle-Capture, TASK_942-Followup-Fix-Style, TASK_941-Gate, TASK_940-Findings und TASK_938-Basis.
+- Risiken/offen: Ohne akzeptierten Sichtbefund bleibt der Snapshot `needs_manual_review` oder empfiehlt einen engen TASK_945-Folgefix. Der Playability-Smoke ist erst nach Akzeptanz sinnvoll.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_944_release_first_exchange_followup_fix_player_polish_final_tuning_followup_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_943_release_first_exchange_followup_fix_player_polish_final_tuning_followup_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.gd`, `git diff --check`.
+- Naechster Schritt: Bei Akzeptanz TASK_945 - Release First Exchange Playability Smoke; bei Restreibung TASK_945 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Second Fix.
+
 ### TASK_943 - Release First Exchange Followup Fix Player Polish Final Tuning Followup Recapture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_943_release_first_exchange_followup_fix_player_polish_final_tuning_followup_recapture.md`, `docs/tasks/TASK_942_release_first_exchange_followup_fix_player_polish_final_tuning_followup_fix.md`, `docs/tasks/TASK_941_release_first_exchange_final_tuning_playability_smoke_gate.md`, `docs/tasks/TASK_940_release_first_exchange_followup_fix_player_polish_final_tuning_visual_findings.md`, `docs/tasks/TASK_939_release_first_exchange_followup_fix_player_polish_final_tuning_recapture.md`, `docs/tasks/TASK_938_release_first_exchange_followup_fix_player_polish_final_tuning.md`, `docs/dev/mission_command_feedback_contract.md`
