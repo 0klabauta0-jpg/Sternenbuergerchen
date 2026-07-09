@@ -60,6 +60,11 @@ TASK_1005 trennt technische TASK_1004-Capture-Evidence vom eigentlichen Spielerb
 
 Ohne Sichtnotizen bleibt der Status `needs_manual_review`. Belegte Reibung routet zu TASK_1006 fuer engen Visual Polish; ein sauberer Befund routet zu TASK_1007 fuer den Round-Loop-Playability-Slice. TASK_1005 erzeugt keine Commands, kein Movement, keine Combat-/Damage-Wirkung und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Polish (TASK_1006)
+TASK_1006 uebersetzt TASK_1005-Findings in konkrete read-only Surface-Specs. Erwartet sind sechs Polishing-Flaechen fuer `ROUND`, `NEXT`, `GO separat`, Selected-Fireteam-Runtime, Mission-Control-Runtime und Command-Feedback-Runtime.
+
+Die Specs duerfen nur Rollen, Style-IDs, Mindesthoehen, Textbudgets und kompakte Displaytexte festlegen. Sie erzeugen keine Controls, keine Commands, kein Movement, keine Combat-/Damage-Wirkung und keine Multiplayer-Wahrheit. Der naechste Schritt ist TASK_1007, der daraus einen spielbaren Round-Loop-Playability-Slice macht.
+
 ## Scenario Return (TASK_948)
 TASK_948 stoppt die reine First-Exchange-Polish-Schleife, wenn TASK_947 nicht sauber in einen First-Exchange-Smoke routet. Der Return ist kein neues Gameplay-System: Er fasst die vorhandenen Bausteine aus TASK_506 bis TASK_510 als naechsten kleinen Playability-Stack zusammen.
 

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1006 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1006_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_polish.md`, `docs/tasks/TASK_1005_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopMicroObjectiveRoundLoopVisualPolish.build_snapshot()` erzeugt aus polishbaren TASK_1005-Findings stabile Surface-Specs fuer `ROUND`, `NEXT`, `GO`, Selected Fireteam, Mission Control und Command Feedback.
+- Stand: Der Polish liefert sechs read-only Surface-Specs plus eine kompakte `ROUND | NEXT | GO`-Zeile fuer Command-Feedback.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1006 im Command-Feedback als Snapshot, Status, Polish-Zeile und Surface-Specs.
+- Risiken/offen: TASK_1006 baut noch keine echten Controls um; er stabilisiert die HUD-Sprache fuer den naechsten Playability-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1006_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_polish.gd`, Regression TASK_1005, TASK_1004, TASK_1003, `git diff --check`.
+- Naechster Schritt: TASK_1007 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Playability Slice.
+
 ### TASK_1005 - Release First Decision Loop Two Player Loop Micro Objective Round Loop Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1005_release_first_decision_loop_two_player_loop_micro_objective_round_loop_visual_findings.md`, `docs/tasks/TASK_1004_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
