@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_961 - Release First Decision Integrated Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_961_release_first_decision_integrated_playtest.md`, `docs/tasks/TASK_960_first_decision_release_playable_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionIntegratedPlaytest.build_snapshot()` akzeptiert nur einen `release_slice_playable`-TASK_960-Slice und bewertet danach ein integriertes Playtest-Manifest read-only.
+- Stand: `capture_release_first_decision_integrated_playtest.ps1` schreibt ein TASK_961-Manifest mit `--release-singleplayer-lz-drop-preview`, Screenshotpfaden, Prozessfeldern und offenen manuellen Pflichtchecks, setzt aber `manual_playtest_done = false`.
+- Stand: Vollstaendige Evidence setzt `integrated_playtest_passed`; fehlende oder regressierende Evidence routet zu `TASK_962 - Release First Decision Playtest Findings`.
+- Risiken/offen: Der echte menschliche Playtest ist Folgearbeit; TASK_961 faked keine Abnahme und erzeugt keine Gameplay-Wahrheit.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_961_release_first_decision_integrated_playtest.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_960_first_decision_release_playable_slice.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_959_first_decision_playability_smoke.gd`, `git diff --check`.
+- Naechster Schritt: TASK_962 - Release First Decision Playtest Findings.
+
 ### TASK_960 - First Decision Release Playable Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_960_first_decision_release_playable_slice.md`, `docs/tasks/TASK_959_first_decision_playability_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

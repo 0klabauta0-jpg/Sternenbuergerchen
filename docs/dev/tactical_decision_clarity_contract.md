@@ -120,3 +120,8 @@ Der Smoke bleibt ein Gate: ohne akzeptierten TASK_958-Befund bleibt er blockiert
 TASK_960 spannt die erste Entscheidung ueber den Release-Spine: Homebase bereit, Fireteam und Flightdeck bereit, Dropship-Payload, Mission geladen, LZ gesetzt, Drop abgeschlossen, Fireteam deployed, Preview sichtbar, `GO` bestaetigt und Post-GO-Feedback lesbar.
 
 Der Slice darf nur Trace-Evidence bewerten. Er ist kein Export, kein neuer Mission-Flow und kein Gameplay-Mutator. Die Multiplayer-Vorbereitung bleibt als Grenze sichtbar: Der Slice muss `multiplayer_snapshot_boundary_preserved` belegen, setzt aber keine Peer- oder Team-Wahrheit.
+
+## Release First Decision Integrated Playtest (TASK_961)
+TASK_961 bindet den Slice an einen echten Release-Playtest-Beleg. Das Manifest muss Release-EXE-Start, Deep-Link, korrekten Fensterinhalt, Homebase-bis-Mission, Dropship/LZ/Drop, First-Decision-Preview, `GO`, Post-GO-Feedback, Performance und Multiplayer-Snapshot-Grenze dokumentieren.
+
+Der Playtest-Rahmen darf keine Erfolgsmeldung automatisch setzen. `manual_playtest_done` bleibt im Tool false, bis ein echter Sicht-/Bedienbefund vorliegt. Der Analyzer ist read-only und routet offene oder regressierende Evidence zu TASK_962-Findings.

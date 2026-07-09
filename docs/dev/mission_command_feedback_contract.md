@@ -1678,6 +1678,11 @@ TASK_960 fasst den ersten Decision-Griff als kleinen Release-Spine zusammen. Der
 
 Erwartete Struktur: `FirstDecisionReleasePlayableSlice.build_snapshot()` liefert `schema = sternenbuergerchen.first_decision_release_playable_slice.v1`, `task_id = TASK_960`, `source_task_id = TASK_959`, Release-Spine-Metadaten, `required_slice_checks`, `missing_slice_checks`, `covered_release_stages`, `gate = blocked | needs_release_slice_trace | release_slice_regression_found | release_slice_playable`, `release_slice_playable`, `recommended_next_task = TASK_960 - First Decision Release Playable Slice | TASK_961 - Release First Decision Integrated Playtest`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
 
+## Release First Decision Integrated Playtest (TASK_961)
+TASK_961 bewertet den ersten Release-Decision-Ablauf als integriertes Playtest-Manifest. Der Analyzer darf nur den bestandenen TASK_960-Slice und Manifest-Evidence lesen. Das Tool darf ein Manifest schreiben, aber keine Shortcut-, UI-, Command-, Movement-, Combat- oder Multiplayer-Wahrheit erzeugen und keine manuelle Abnahme faken.
+
+Erwartete Struktur: `ReleaseFirstDecisionIntegratedPlaytest.build_snapshot()` liefert `schema = sternenbuergerchen.release_first_decision_integrated_playtest.v1`, `task_id = TASK_961`, `source_task_id = TASK_960`, Manifest-/Prozessmetadaten, `required_playtest_checks`, `missing_playtest_checks`, `observed_release_stages`, `gate = blocked | needs_integrated_playtest_run | integrated_playtest_regression_found | integrated_playtest_passed`, `integrated_playtest_passed`, `recommended_next_task = TASK_961 - Release First Decision Integrated Playtest | TASK_962 - Release First Decision Playtest Findings`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_navigation = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false`, `creates_movement = false`, `sets_multiplayer_truth = false` und `updates_shortcuts = false`.
+
 ## Grenzen
 - Keine neue Area-Semantik.
 - Keine zweite UI-seitige Gameplay-Wahrheit.
