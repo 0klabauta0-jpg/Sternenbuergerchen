@@ -165,3 +165,8 @@ Der Button nutzt `CommandSlot07` und bestehende Controller-Pfade: `_issue_comman
 TASK_969 prueft nicht noch mehr Theorie, sondern den echten Fensterblick: Ist `2ND` sichtbar, lesbar, bestaetigbar, bleibt `GO` separat, und ist Post-Confirm-Feedback erkennbar? Das Manifest muss diese Punkte als Pflichtchecks fuehren.
 
 Der Capture-Schnitt bleibt read-only. Ohne Manifest meldet er `needs_real_window_capture`; mit reviewbarem Manifest routet er zu `TASK_970 - Release First Decision Loop Two Visual Findings`; erst manuell erledigte Pflichtchecks akzeptieren den Capture. Keine Shortcut-, UI-, Command-, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit wird erzeugt.
+
+## Release First Decision Loop Two Visual Findings (TASK_970)
+TASK_970 macht aus dem zweiten echten Fensterblick einen konkreten Spielerbefund. Bewertet werden `2ND`-Sichtbarkeit, Lesbarkeit, Confirm-Beobachtung, klare `GO`-Trennung, Post-Confirm-Feedback, Pre-GO-Grenze und Read-only-HUD-Grenze.
+
+Der Findings-Schnitt bleibt read-only. Ohne manuelle Review bleibt er `needs_manual_review`; bei Reibung routet er zu `TASK_971 - Release First Decision Loop Two Visual Polish`; bei sauberem Befund zu `TASK_971 - Release First Decision Loop Two Playability Smoke`. Er erzeugt keine UI-, Command-, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit.

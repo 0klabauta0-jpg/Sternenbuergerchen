@@ -20,6 +20,16 @@
 - Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_968_release_first_decision_loop_two_runtime_button.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_967_release_first_decision_loop_two_go_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_966_release_first_decision_loop_two_execution_hook.gd`, `git diff --check`.
 - Naechster Schritt: TASK_969 - Release First Decision Loop Two Real Window Capture.
 
+### TASK_970 - Release First Decision Loop Two Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_970_release_first_decision_loop_two_visual_findings.md`, `docs/tasks/TASK_969_release_first_decision_loop_two_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoVisualFindings.build_snapshot()` bewertet TASK_969-Capture-Snapshots und manuelle Sichtnotizen read-only.
+- Stand: Offene Sichtabnahme bleibt `needs_manual_review`; konkrete Reibungen routen zu `TASK_971 - Release First Decision Loop Two Visual Polish`.
+- Stand: Saubere Notizen akzeptieren den zweiten Griff fuer `TASK_971 - Release First Decision Loop Two Playability Smoke`.
+- Risiken/offen: Der Analyzer poliert noch nicht. TASK_971 sollte entweder die gefundenen visuellen Reibungen eng beheben oder bei sauberem Befund den zweiten Griff als Playability-Smoke pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_970_release_first_decision_loop_two_visual_findings.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_969_release_first_decision_loop_two_real_window_capture.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_968_release_first_decision_loop_two_runtime_button.gd`, `git diff --check`.
+- Naechster Schritt: TASK_971 - Release First Decision Loop Two Visual Polish oder TASK_971 - Release First Decision Loop Two Playability Smoke.
+
 ### TASK_969 - Release First Decision Loop Two Real Window Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_969_release_first_decision_loop_two_real_window_capture.md`, `docs/tasks/TASK_968_release_first_decision_loop_two_runtime_button.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
