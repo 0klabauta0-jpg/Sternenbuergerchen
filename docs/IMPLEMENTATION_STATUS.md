@@ -10,16 +10,26 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
-### TASK_905 - Release First Exchange Fire Lane Real Window Recapture
+### TASK_906 - Release First Exchange Fire Lane Visual Findings
 - Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_906_release_first_exchange_fire_lane_visual_findings.md`, `docs/tasks/TASK_905_release_first_exchange_fire_lane_real_window_recapture.md`, `docs/tasks/TASK_904_release_first_exchange_fire_lane_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_906 bewertet den echten TASK_905-Window-Handle-Screenshot read-only als Spielerblick.
+- Stand: Positive Befunde: CONTACT FIRE ist in #17 Selected Fireteam, #18 Mission Control und #19 Event Log sichtbar; der TASK_904-Fire-Lane-Polish ist im Fenster vorhanden; Fire-Lane-Core, Source-/Target-Anker, ruhigerer Target-Halo und nutzbare Command-Surfaces sind belegt.
+- Stand: Primaere Restreibung ist `fire_lane_not_first_world_read`: Die Fire-Lane ist sichtbar, aber der erste Blick geht weiter auf FIRE/CONTACT-/Halo-/Marker-Cluster statt auf eine klare Schussbewegung. Weitere Reibung: Source-/Target-Anker tragen die Blickfuehrung noch nicht stark genug, Bottom-HUD bleibt dicht.
+- Risiken/offen: TASK_906 aendert keine Runtime. Der naechste Slice muss eng Label-/Halo-Cluster und Fire-Lane-Hierarchie polieren, ohne Combat- oder HUD-Wahrheit zu oeffnen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_906_release_first_exchange_fire_lane_visual_findings.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_905_release_first_exchange_fire_lane_real_window_recapture.gd`, `git diff --check`.
+- Naechster Schritt: TASK_907 - Release First Exchange Fire Lane Label Cluster Polish.
+
+### TASK_905 - Release First Exchange Fire Lane Real Window Recapture
+- Status: implementiert und gepusht
 - Relevante Docs/Contracts: `docs/tasks/TASK_905_release_first_exchange_fire_lane_real_window_recapture.md`, `docs/tasks/TASK_904_release_first_exchange_fire_lane_readability_polish.md`, `docs/tasks/TASK_902_release_first_exchange_combat_marker_scale_real_window_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
 - Stand: TASK_905 legt einen eigenen echten Release-/Window-Handle-Recapture-Rahmen an den TASK_904-Fire-Lane-Polish.
 - Stand: Lokaler Export/Capture-Run schrieb `tmp/release_first_exchange_fire_lane_real_window_recapture.json` mit `review_ready` sowie `tmp/release_first_exchange_fire_lane_real_window_recapture.png`.
 - Stand: `capture_release_first_exchange_fire_lane_real_window_recapture.ps1` wiederverwendet den bestehenden TASK_902-Marker-Scale-Window-Handle-Pfad und schreibt eigene TASK_905-PNG-/JSON-Artefakte.
 - Stand: `ReleaseFirstExchangeFireLaneRealWindowRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer CONTACT FIRE, Fire-Lane-Core, Source-/Target-Anker, ruhigen Halo, Grid-/World-Noise und weiter bedienbare Command-Surfaces.
-- Risiken/offen: TASK_905 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_906 read-only schneiden.
+- Risiken/offen: TASK_905 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. TASK_906 schneidet den echten PNG-Befund read-only.
 - Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_905_release_first_exchange_fire_lane_real_window_recapture.gd`, optional `powershell -ExecutionPolicy Bypass -File scripts/tools/capture_release_first_exchange_fire_lane_real_window_recapture.ps1 -Launch -StopRunningReleaseProcess -CleanTempFiles -WaitSeconds 52`, `godot_console.exe --headless --path . --script scripts/tests/task_904_release_first_exchange_fire_lane_readability_polish.gd`, `git diff --check`.
-- Naechster Schritt: TASK_906 - Release First Exchange Fire Lane Visual Findings.
+- Naechster Schritt: TASK_906 - Release First Exchange Fire Lane Visual Findings (implementiert im Arbeitsstand).
 
 ### TASK_904 - Release First Exchange Fire Lane Readability Polish
 - Status: implementiert und gepusht

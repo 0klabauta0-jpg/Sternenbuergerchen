@@ -142,7 +142,8 @@ git checkout -b batch/<batch-name>
 - TASK_903 - Release First Exchange Combat Marker Scale Visual Findings (implementiert): TASK_902-PNG und Manifest read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Spielbarkeits-/Visual-Polish benennen.
 - TASK_904 - Release First Exchange Fire Lane Readability Polish (implementiert): Den belegten TASK_903-Befund eng umsetzen: Source-to-target-Fire-Lane klarer und weniger markerhaft lesbar machen, ohne Combat- oder HUD-Wahrheit zu veraendern.
 - TASK_905 - Release First Exchange Fire Lane Real Window Recapture (implementiert): Nach TASK_904 frisch exportieren/capturen und pruefen, ob die Fire-Lane im echten Window-Handle-Screenshot als erste Weltlesung funktioniert.
-- TASK_906 - Release First Exchange Fire Lane Visual Findings (naechster Schritt): TASK_905-PNG und Manifest read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Spielbarkeits-/Visual-Polish benennen.
+- TASK_906 - Release First Exchange Fire Lane Visual Findings (implementiert): TASK_905-PNG und Manifest read-only bewerten und nur belegte Restreibung oder Akzeptanz fuer den naechsten Spielbarkeits-/Visual-Polish benennen.
+- TASK_907 - Release First Exchange Fire Lane Label Cluster Polish (naechster Schritt): Den belegten TASK_906-Befund eng umsetzen: FIRE/CONTACT-/Halo-Cluster und Fire-Lane-Hierarchie klarer machen, ohne Combat- oder HUD-Wahrheit zu veraendern.
 - BUGFIX - Release Singleplayer EXE Stale FOB Transfer Actionability Guard (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart gilt erst als actionable, wenn `grid_sweep` und `homebase_direct` wiederhergestellt sind.
 - BUGFIX - Release Homebase Direct Start Copy Clarity (implementiert): Der sichtbare `EXE -> Einzelspieler`-Normalstart zeigt Homebase-Direct als `Mission payload`/`Direct sortie` mit aktivem `Start Mission`, statt alte FOB-Transfer- und Slot-Ueberlauf-Texte zu mischen.
 
