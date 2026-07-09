@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_907 - Release First Exchange Fire Lane Label Cluster Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_907_release_first_exchange_fire_lane_label_cluster_polish.md`, `docs/tasks/TASK_906_release_first_exchange_fire_lane_visual_findings.md`, `docs/tasks/TASK_904_release_first_exchange_fire_lane_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_907 setzt den belegten TASK_906-Befund eng im bestehenden Primary3D-Fire-Lane-Pfad um.
+- Stand: Der Mission-Controller schaltet `release_first_exchange_fire_lane_label_cluster_polish` nur auf der bestehenden TASK_904-Kette und stellt `get_release_first_exchange_fire_lane_label_cluster_polish_snapshot()` read-only bereit.
+- Stand: `TerrainMap3DView` meldet den Style `task_907_release_first_exchange_fire_lane_label_cluster_v1`; das Welt-Fire-Statuslabel ist kleiner/leiser/versetzt, der Target-Halo ist ruhiger, Fire-Lane-Core und Source-/Target-Anker tragen die Schussbewegung etwas staerker.
+- Risiken/offen: TASK_907 ist noch kein echter Fensterbeweis. Der naechste Slice muss frisch exportieren/capturen und den Spielerblick bewerten.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_907_release_first_exchange_fire_lane_label_cluster_polish.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_906_release_first_exchange_fire_lane_visual_findings.gd`, `git diff --check`.
+- Naechster Schritt: TASK_908 - Release First Exchange Fire Lane Label Cluster Real Window Recapture.
+
 ### TASK_906 - Release First Exchange Fire Lane Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_906_release_first_exchange_fire_lane_visual_findings.md`, `docs/tasks/TASK_905_release_first_exchange_fire_lane_real_window_recapture.md`, `docs/tasks/TASK_904_release_first_exchange_fire_lane_readability_polish.md`, `docs/dev/mission_command_feedback_contract.md`
