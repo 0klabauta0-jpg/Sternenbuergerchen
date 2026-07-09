@@ -205,3 +205,8 @@ Der Extension-Snapshot liefert `NEXT/WHY`-Zeilen und eine Empfehlung aus kleinem
 TASK_977 macht die TASK_976-Choices in den bestehenden HUD-/Command-Feedback-Snapshots sichtbar. Erwartet sind kurze read-only Zeilen fuer Selected Fireteam, Mission Control und Command Feedback sowie vier Choice-Chips fuer `SECURE`, `PUSH`, `FLANK` und `RESET`.
 
 Das Wiring darf keine Choice ausfuehren und kein `GO` bestaetigen. Ohne aktive TASK_976-Quelle bleibt der Snapshot blockiert; mit aktiver Quelle liefert er nur Anzeige- und Sichtbarkeitsdaten. Der naechste Schritt ist ein Choice-Hook in TASK_978.
+
+## Release First Decision Loop Two Player Loop Choice Hook (TASK_978)
+TASK_978 macht die sichtbaren TASK_977-Choice-Chips anschlussfaehig, ohne sie auszufuehren. Der Hook uebersetzt `SECURE`, `PUSH`, `FLANK` und `RESET` in read-only Command-Drafts fuer vorhandene Befehlswege.
+
+Der Hook darf nur `confirm_action`, `execute_action`, Command-Typ und eine kurze Hook-Zeile beschreiben. `GO` bleibt separat, `auto_confirms` und `auto_executes_go` bleiben false. Runtime-Buttons oder echte Bestätigung sind Folgearbeit in TASK_979.

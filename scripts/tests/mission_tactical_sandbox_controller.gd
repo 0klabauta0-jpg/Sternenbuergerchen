@@ -49,6 +49,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_VISUAL_POLISH_SCRIPT: GDScript = preload("
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYABILITY_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_playability_smoke.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_EXTENSION_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_extension.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_HUD_WIRING_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_hud_wiring.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_choice_hook.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21032,6 +21033,11 @@ func get_release_first_decision_loop_two_player_loop_hud_wiring_snapshot(player_
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_HUD_WIRING_SCRIPT.call("build_snapshot", player_loop_extension, surfaces)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_choice_hook_snapshot(player_loop_hud_wiring_override: Dictionary = {}, selected_choice_id: String = "") -> Dictionary:
+	var player_loop_hud_wiring: Dictionary = player_loop_hud_wiring_override.duplicate(true) if not player_loop_hud_wiring_override.is_empty() else get_release_first_decision_loop_two_player_loop_hud_wiring_snapshot()
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_CHOICE_HOOK_SCRIPT.call("build_snapshot", player_loop_hud_wiring, selected_choice_id)).duplicate(true)
+
+
 func confirm_release_first_decision_loop_two_runtime_button(selected_choice_id: String = "") -> bool:
 	var runtime_button: Dictionary = get_release_first_decision_loop_two_runtime_button_snapshot()
 	if not bool(runtime_button.get("button_enabled", false)):
@@ -24030,6 +24036,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 			"command_feedback_text": _get_label_text(command_feedback_label_path),
 		}
 	)
+	var release_first_decision_loop_two_player_loop_choice_hook: Dictionary = get_release_first_decision_loop_two_player_loop_choice_hook_snapshot(
+		release_first_decision_loop_two_player_loop_hud_wiring,
+		""
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -24142,6 +24152,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_hud_wiring_line": String(release_first_decision_loop_two_player_loop_hud_wiring.get("command_feedback_line", "")),
 		"release_first_decision_loop_two_player_loop_hud_wiring_status": String(release_first_decision_loop_two_player_loop_hud_wiring.get("status", "")),
 		"release_first_decision_loop_two_player_loop_hud_choice_chips": Array(release_first_decision_loop_two_player_loop_hud_wiring.get("hud_choice_chips", [])),
+		"release_first_decision_loop_two_player_loop_choice_hook": release_first_decision_loop_two_player_loop_choice_hook,
+		"release_first_decision_loop_two_player_loop_choice_hook_line": String(release_first_decision_loop_two_player_loop_choice_hook.get("choice_hook_line", "")),
+		"release_first_decision_loop_two_player_loop_choice_hook_status": String(release_first_decision_loop_two_player_loop_choice_hook.get("status", "")),
+		"release_first_decision_loop_two_player_loop_choice_hook_command_draft": Dictionary(release_first_decision_loop_two_player_loop_choice_hook.get("command_draft", {})).duplicate(true),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,

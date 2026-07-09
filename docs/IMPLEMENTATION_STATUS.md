@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_978 - Release First Decision Loop Two Player Loop Choice Hook
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_978_release_first_decision_loop_two_player_loop_choice_hook.md`, `docs/tasks/TASK_977_release_first_decision_loop_two_player_loop_hud_wiring.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopChoiceHook.build_snapshot()` baut aus einem aktiven TASK_977-HUD-Wiring einen read-only Command-Draft fuer die gewaehlt sichtbare Choice.
+- Stand: `SECURE`, `PUSH`, `FLANK` und `RESET` mappen auf vorhandene Befehlsarten `defend`, `move`, `flank` und `move`; der Draft nennt `_issue_command` als Confirm-Pfad und `execute_selected_fireteam_orders` als getrennten GO-Pfad.
+- Stand: `MissionTacticalSandboxController` exportiert den TASK_978-Snapshot, die Hook-Zeile und den Command-Draft in `get_command_feedback_snapshot()`.
+- Risiken/offen: TASK_978 erzeugt noch keine Runtime-Choice-Buttons und fuehrt nichts aus. TASK_979 sollte die sichtbaren Choices als Bedienung vorbereiten, weiterhin mit separatem `GO`.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_978_release_first_decision_loop_two_player_loop_choice_hook.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_977_release_first_decision_loop_two_player_loop_hud_wiring.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_976_release_first_decision_loop_two_player_loop_extension.gd`, `git diff --check`.
+- Naechster Schritt: TASK_979 - Release First Decision Loop Two Player Loop Runtime Choice Buttons.
+
 ### TASK_977 - Release First Decision Loop Two Player Loop HUD Wiring
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_977_release_first_decision_loop_two_player_loop_hud_wiring.md`, `docs/tasks/TASK_976_release_first_decision_loop_two_player_loop_extension.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
