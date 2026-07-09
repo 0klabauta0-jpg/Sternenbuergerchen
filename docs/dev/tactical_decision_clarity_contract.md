@@ -145,3 +145,8 @@ Der Analyzer bleibt read-only: Er bewertet `selected_fireteam_shows_loop_line`, 
 TASK_965 uebersetzt den sichtbaren zweiten Griff in klare Intent-Bedeutung: `HOLD Defend`, `ADV Move`, `BACK Return`. Der Spieler soll verstehen, welcher Befehl gemeint ist, ohne dass der HUD-Pfad den Befehl ausfuehrt.
 
 Der Snapshot bleibt read-only und setzt fuer jeden zweiten Intent `execution_boundary = requires_go`. Erwartet sind drei stabile Intents fuer `hold_angle`, `advance_cover` und `fallback_regroup`; sichtbare Zeilen duerfen keine rohen Choice-IDs zeigen. Bei Erfolg routet TASK_965 zu `TASK_966 - Release First Decision Loop Two Execution Hook`.
+
+## Release First Decision Loop Two Execution Hook (TASK_966)
+TASK_966 macht die zweite Entscheidung anschlussfaehig an vorhandene Bedienpfade. Aus einem ausgewaehlten Intent wird ein Command-Draft, der zeigt, welcher Controller-Pfad beim Bestaetigen genutzt werden soll.
+
+Der Hook bleibt read-only: `auto_confirms = false`, `auto_executes_go = false`, keine Commands und keine Movement-Mutation. HOLD/ADV/BACK muessen auf bestehende Pfade zeigen und GO sichtbar halten. Der naechste Beweis ist `TASK_967 - Release First Decision Loop Two GO Smoke`.

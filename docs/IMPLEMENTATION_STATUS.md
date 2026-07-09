@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_966 - Release First Decision Loop Two Execution Hook
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_966_release_first_decision_loop_two_execution_hook.md`, `docs/tasks/TASK_965_release_first_decision_loop_two_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoExecutionHook.build_snapshot()` baut aus dem ausgewaehlten zweiten Intent einen read-only Command-Draft fuer vorhandene Controller-Pfade.
+- Stand: HOLD/ADV/BACK routen auf `_issue_command("defend")`, `_issue_command("move")` oder `return_selected_fireteams_to_plan`; GO bleibt als bestehender `execute_selected_fireteam_orders`-Pfad sichtbar.
+- Stand: Der Hook setzt `auto_confirms = false` und `auto_executes_go = false` und erzeugt keine Commands, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit.
+- Risiken/offen: TASK_966 beweist den Anschluss als Draft, nicht die echte Ausfuehrung. TASK_967 sollte einen GO-Smoke fuer den zweiten Loop bauen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_966_release_first_decision_loop_two_execution_hook.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_965_release_first_decision_loop_two_polish.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_964_release_first_decision_loop_two_playtest.gd`, `git diff --check`.
+- Naechster Schritt: TASK_967 - Release First Decision Loop Two GO Smoke.
+
 ### TASK_965 - Release First Decision Loop Two Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_965_release_first_decision_loop_two_polish.md`, `docs/tasks/TASK_964_release_first_decision_loop_two_playtest.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
