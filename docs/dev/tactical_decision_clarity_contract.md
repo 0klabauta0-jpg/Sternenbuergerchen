@@ -225,3 +225,8 @@ Der Smoke-Snapshot bleibt read-only und bewertet Trace-Evidence fuer Button-Pres
 TASK_981 prueft den echten Runtime-Blick auf den neuen Spielerloop. Erwartet sind sichtbare und lesbare `SECURE`, `PUSH`, `FLANK` und `RESET`-Buttons, ein beobachteter Choice-Confirm, sichtbares Feedback, klare `GO`-Trennung und eine sichtbare Smoke-Zeile.
 
 Der Capture-Snapshot bleibt read-only und akzeptiert erst nach manueller Sichtabnahme aller Pflichtchecks. Ohne Manifest bleibt er `needs_real_window_capture`; mit gueltigem Manifest wird er `review_ready`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit. Der naechste Schritt ist `TASK_982 - Release First Decision Loop Two Player Loop Visual Findings`.
+
+## Release First Decision Loop Two Player Loop Visual Findings (TASK_982)
+TASK_982 trennt den technischen TASK_981-Capture vom eigentlichen Spielerblick. Bewertet werden sichtbare/lesbare `SECURE/PUSH/FLANK/RESET`-Buttons, beobachteter Choice-Confirm, lesbares Confirm-Feedback, getrenntes `GO`, keine Ausfuehrung vor `GO`, sichtbare Smoke-Zeile, HUD-read-only-Grenze, Multiplayer-Grenze und Gesamtlesbarkeit.
+
+Der Findings-Snapshot bleibt read-only. Ohne manuelle Review bleibt er `needs_manual_review`; bei Reibung routet er zu `TASK_983 - Release First Decision Loop Two Player Loop Visual Polish`; bei sauberem Befund zu `TASK_983 - Release First Decision Loop Two Player Loop Acceptance Slice`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.

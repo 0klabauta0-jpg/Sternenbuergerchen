@@ -43,6 +43,7 @@ git checkout -b batch/<batch-name>
 - Hotpath-Tasks muessen SceneTree-Vollscans und per-frame Komplett-Rebuilds vermeiden.
 
 ## Aktueller Release-Hotfix
+- TASK_982 - Release First Decision Loop Two Player Loop Visual Findings (implementiert): Der TASK_981-Capture wird als read-only Sichtbefund geschnitten; Reibung routet zu Visual Polish, sauberer Befund zum Player-Loop-Acceptance-Slice.
 - TASK_981 - Release First Decision Loop Two Player Loop Real Window Capture (implementiert): Der bestandene Choice-Confirm-Smoke bekommt einen read-only Real-Window-Capture-/Manifest-Rahmen fuer sichtbare vier Choice-Buttons, Confirm-Feedback und getrenntes `GO`.
 - TASK_980 - Release First Decision Loop Two Player Loop Choice Confirm Smoke (implementiert): Die Runtime-Choice-Buttons werden als Smoke bestaetigt; Confirm nutzt vorhandene Command-Pfade, zeigt Feedback und laesst `GO` getrennt.
 - TASK_979 - Release First Decision Loop Two Player Loop Runtime Choice Buttons (implementiert): `SECURE / PUSH / FLANK / RESET` bekommen stabile Runtime-Button-Specs auf `CommandSlot08` bis `CommandSlot11`, mit getrenntem `GO` und ohne Gameplay-Mutation im Snapshot.

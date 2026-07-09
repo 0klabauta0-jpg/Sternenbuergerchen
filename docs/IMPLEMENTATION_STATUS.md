@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_982 - Release First Decision Loop Two Player Loop Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_982_release_first_decision_loop_two_player_loop_visual_findings.md`, `docs/tasks/TASK_981_release_first_decision_loop_two_player_loop_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopVisualFindings.build_snapshot()` schneidet aus einem review-ready TASK_981-Capture und manuellen Notizen konkrete Sichtbefunde.
+- Stand: Positive Findings und Issues decken die vier Runtime-Choices, Choice-Confirm, Confirm-Feedback, `GO`-Trennung, Smoke-Zeile, HUD-read-only-Grenze, Multiplayer-Grenze und Spielerlesbarkeit ab.
+- Stand: Reibungen routen zu `TASK_983 - Release First Decision Loop Two Player Loop Visual Polish`; saubere Notizen routen zu `TASK_983 - Release First Decision Loop Two Player Loop Acceptance Slice`.
+- Risiken/offen: TASK_982 verbessert noch keine UI selbst. Der naechste Task sollte je nach echtem Sichtbefund Polish bauen oder den Player-Loop akzeptieren.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_982_release_first_decision_loop_two_player_loop_visual_findings.gd`, Regression TASK_981 bis TASK_979, `git diff --check`.
+- Naechster Schritt: TASK_983 - Release First Decision Loop Two Player Loop Visual Polish oder TASK_983 - Release First Decision Loop Two Player Loop Acceptance Slice.
+
 ### TASK_981 - Release First Decision Loop Two Player Loop Real Window Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_981_release_first_decision_loop_two_player_loop_real_window_capture.md`, `docs/tasks/TASK_980_release_first_decision_loop_two_player_loop_choice_confirm_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
