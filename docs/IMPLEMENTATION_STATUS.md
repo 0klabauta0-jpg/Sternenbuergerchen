@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_973 - Release First Decision Loop Two Real Window Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_973_release_first_decision_loop_two_real_window_recapture.md`, `docs/tasks/TASK_972_release_first_decision_loop_two_playability_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoRealWindowRecapture.build_snapshot()` bewertet den bestandenen TASK_972-Smoke und ein Recapture-Manifest read-only.
+- Stand: Fehlendes Manifest bleibt ehrlich `needs_real_window_recapture`; ein reviewbares Manifest wird `review_ready` und routet zu `TASK_974 - Release First Decision Loop Two Recapture Visual Findings`.
+- Stand: `capture_release_first_decision_loop_two_real_window_recapture.ps1` schreibt ein Manifest fuer `--release-singleplayer-lz-drop-preview`, setzt `manual_review_done = $false` und veraendert keine Shortcuts.
+- Risiken/offen: Der echte Sichtbefund ist noch nicht akzeptiert. TASK_974 sollte aus dem Recapture konkrete visuelle Findings fuer `2ND`, getrenntes `GO`, Post-GO-Feedback und Smoke-Zeile schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_973_release_first_decision_loop_two_real_window_recapture.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_972_release_first_decision_loop_two_playability_smoke.gd`, `godot_console.exe --headless --path . --script res://scripts/tests/task_971_release_first_decision_loop_two_visual_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_974 - Release First Decision Loop Two Recapture Visual Findings.
+
 ### TASK_968 - Release First Decision Loop Two Runtime Button
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_968_release_first_decision_loop_two_runtime_button.md`, `docs/tasks/TASK_967_release_first_decision_loop_two_go_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

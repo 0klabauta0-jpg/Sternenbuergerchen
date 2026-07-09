@@ -180,3 +180,8 @@ Der Polish-Snapshot bleibt read-only. Er darf Button-Metadaten, Mindestgroesse, 
 TASK_972 prueft den zweiten Griff als kleinen Ablauf: `2ND` sichtbar, zweiter Griff bestaetigt, `GO` bleibt separat, `GO` wird erst danach ausgefuehrt, und Post-GO-Feedback ist sichtbar.
 
 Der Smoke-Snapshot bleibt read-only. Er darf Trace-Evidence bewerten und eine Statuszeile liefern, aber keine Commands erzeugen und keine Gameplay- oder Multiplayer-Wahrheit setzen. Bei Erfolg routet er zu `TASK_973 - Release First Decision Loop Two Real Window Recapture`.
+
+## Release First Decision Loop Two Real Window Recapture (TASK_973)
+TASK_973 legt den echten Fenster-Recapture-Rahmen nach dem bestandenen TASK_972-Smoke an. Erwartet sind Manifest-Felder fuer TASK_972-Source-Schema, Launch-Argument, Window-/Desktop-Screenshotpfade, Prozessmetadaten, `window_handle_print` und Pflichtchecks fuer `2ND`, getrenntes `GO`, Post-GO-Feedback und sichtbare Smoke-Zeile.
+
+Der Recapture-Snapshot bleibt read-only und darf erst `accepted` werden, wenn die manuellen Pflichtchecks abgeschlossen sind. Ohne Sichtabnahme bleibt er `review_ready`; ohne Manifest bleibt er `needs_real_window_recapture`. Er erzeugt keine Commands, kein Movement, keine Combat-/Damage-Ereignisse und keine Multiplayer-Wahrheit.
