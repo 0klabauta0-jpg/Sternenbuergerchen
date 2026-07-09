@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Sternenbuergerchen Zwischenbericht - TASK_910 umgesetzt</title>
+  <title>Sternenbuergerchen Zwischenbericht - aktueller Spielstand nach TASK_910</title>
   <style>
     :root {
       color-scheme: dark;
@@ -80,15 +80,16 @@
     }
   </style>
 </head>
-<body data-report-id="spielstand_zwischenbericht_task910_in_progress_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
+<body data-report-id="spielstand_zwischenbericht_task910_current_2026_07_09" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>Sternenbuergerchen Zwischenbericht</h1>
-    <p>Stand 2026-07-09: Was zuletzt am Spiel passiert ist, was davon im Spielerflow ankommt, wo es noch reibt und was ich als naechstes weiterziehe. Dieser Bericht ist ein Arbeitsstand nach TASK_910: TASK_909 ist abgeschlossen, TASK_910 ist als enger Weltbild-Micro-Polish umgesetzt, und TASK_911 bleibt der naechste echte Fensterbeweis.</p>
+    <p>Stand 2026-07-09: Was zuletzt am Spiel passiert ist, was davon im Spielerflow ankommt, wo es noch reibt und was ich als naechstes weiterziehe. Dieser Bericht ist ein aktueller Arbeitsstand nach TASK_910: TASK_909 ist abgeschlossen, TASK_910 ist als enger Weltbild-Micro-Polish umgesetzt, und TASK_911 bleibt der naechste echte Fensterbeweis.</p>
     <div class="meta-row">
       <span class="pill good">Singleplayer-Releasepfad begehbar</span>
       <span class="pill good">CONTACT FIRE sichtbar in #17/#18/#19</span>
       <span class="pill good">TASK_909 gepusht</span>
       <span class="pill good">TASK_910 umgesetzt</span>
+      <span class="pill good">aktueller Zwischenbericht</span>
       <span class="pill warn">TASK_911 Capture folgt</span>
       <span class="pill">Report read-only</span>
     </div>
@@ -117,6 +118,9 @@
           <div class="status-box" style="margin-top:12px;">
             TASK_910 ist deshalb als Micro-Polish umgesetzt: Label/Halo/Marker treten weiter zurueck, waehrend Fire-Lane-Core und Source-/Target-Beziehung staerker die erste Lesung fuehren. Der naechste Schritt bleibt ein echter Fenster-Capture, damit die Zahlen nicht mit Spielerblick verwechselt werden.
           </div>
+          <div class="status-box info" style="margin-top:12px;">
+            Der Bericht selbst schreibt keine Spielwahrheit und startet keine Runtime-Aktion. Er ist eine Arbeitsflaeche fuer Sichttest, Entscheidung und naechste Codex-Schritte: Notizen eintragen, JSON exportieren, danach kann daraus der naechste konkrete Task-Schnitt entstehen.
+          </div>
         </article>
         <article class="card">
           <h2>Arbeitsstand</h2>
@@ -134,6 +138,7 @@
             <li>Die Kampfmeldung hat sich vom internen Trace in sichtbare Spielerkommunikation bewegt: CONTACT FIRE kommt in den relevanten HUD-Flaechen an.</li>
             <li>Die Weltansicht wurde schrittweise von Debug-Lesung zu Spiel-Lesung gezogen: FireTrace, Impact, Target-Fokus, Source-to-target-Lane, Source-Glow und Halo wurden in kleinen Slices messbar gemacht.</li>
             <li>Der aktuelle Engpass ist nicht mehr "sieht man Kampf ueberhaupt?", sondern "liest der Blick zuerst die eigentliche Schussbewegung?". Das ist ein gutes, kleineres Problem.</li>
+            <li>Die naechste Arbeit ist deshalb kein neues Feature, sondern ein echter Fenster-Nachweis fuer den aktuellen Weltbild-Polish.</li>
           </ul>
         </article>
       </div>
@@ -158,7 +163,8 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task910_file"> TASK_910 Task-Datei angelegt.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task910_service"> TASK_910 Analyse-Service angelegt.</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task910_render"> TASK_910 Render-Pfad fertig.</label>
-          <label class="checkline"><input type="checkbox" checked data-export-key="done.task910_tests"> TASK_910 Verifier im Arbeitsstand vorgesehen.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task910_tests"> TASK_910 Verifier ist Teil des Arbeitsstands.</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.report_updated"> HTML-Zwischenbericht aktualisiert.</label>
         </article>
         <article class="card full">
           <h2>Repo-Artefakte</h2>
@@ -168,6 +174,7 @@
             <li><code>scripts/tests/mission_tactical_sandbox_controller.gd</code> liefert TASK_910-Payload und Snapshot im Arbeitsstand.</li>
             <li><code>scripts/terrain/terrain_map_3d_view.gd</code> rendert und meldet die TASK_910-Micro-Werte.</li>
             <li><code>scripts/tests/task_910_release_first_exchange_fire_lane_world_read_micro_polish.gd</code> prueft Doku, Snapshot, Renderwerte und read-only-Grenzen.</li>
+            <li><code>docs/reports/spielstand_zwischenbericht_task910_in_progress_2026_07_09.html</code> ist diese aktualisierte Arbeits-/Playtest-Workbench.</li>
           </ul>
         </article>
       </div>
@@ -183,6 +190,7 @@
             <li>Missionseinstieg: Drop-/LZ-Zwischenzustand ist weniger stumm.</li>
             <li>Feuerwechsel: CONTACT FIRE ist als Spielertext sichtbar, nicht nur im Code vorhanden.</li>
             <li>Weltbild: Die Fire-Lane ist da, aber muss als erste Lesung noch staerker werden.</li>
+            <li>Arbeitsweise: Jeder sichtbare Schritt wird mit Contract/Verifier/Window-Befund abgesichert, statt im HUD eine zweite Wahrheit zu bauen.</li>
           </ul>
         </article>
         <article class="card">
@@ -232,19 +240,19 @@
         <article class="card wide">
           <h2>Naechste Arbeitsschritte</h2>
           <ol class="list">
-            <li>Godot-Headless-Tests fuer TASK_910 plus Regression TASK_909/TASK_907 laufen lassen.</li>
-            <li>Danach committen und pushen, wenn gruen.</li>
-            <li>Als naechster Slice TASK_911: echter Release-/Window-Recapture, damit der Micro-Polish nicht nur Zahlen im Snapshot ist.</li>
-            <li>Dann den echten Spielerblick bewerten: Fire-Lane zuerst oder weiter Label/Halo zuerst?</li>
+            <li>HTML-Zwischenbericht aktuell halten und mit JSON-Export als Arbeitsnotiz nutzbar machen.</li>
+            <li>Als naechster Code-Slice TASK_911: echter Release-/Window-Recapture, damit der Micro-Polish nicht nur Zahlen im Snapshot ist.</li>
+            <li>Danach TASK_912 als read-only Visual Findings schneiden: Fire-Lane zuerst oder weiter Label/Halo/Marker zuerst?</li>
+            <li>Erst wenn der Fensterblick sitzt, wieder laengere Playtests oder groessere Spielsysteme anfassen.</li>
           </ol>
         </article>
         <article class="card">
           <h2>Meine Empfehlung</h2>
-          <p>Ich wuerde nach den Tests direkt TASK_911 vorbereiten und nicht parallel wieder an Editor, Assets oder grossen Taktiksystemen drehen. Der erste spielbare Release-Moment braucht jetzt einen echten Fensterbeweis, dann haben alle folgenden Systeme einen besseren Referenzpunkt.</p>
+          <p>Ich wuerde als naechstes TASK_911 bauen und nicht parallel wieder an Editor, Assets oder grossen Taktiksystemen drehen. Der erste spielbare Release-Moment braucht jetzt einen echten Fensterbeweis, dann haben alle folgenden Systeme einen besseren Referenzpunkt.</p>
           <label style="display:block; margin-top:12px;">Prioritaet
             <select data-export-key="next.priority">
-              <option value="finish_task910">TASK_910 fertigstellen</option>
               <option value="capture_task911">TASK_911 Recapture vorbereiten</option>
+              <option value="task912_findings">TASK_912 Findings danach schneiden</option>
               <option value="longer_playtest">Laengeren Playtest starten</option>
               <option value="editor">Editor/Mapbau wieder aufnehmen</option>
             </select>
@@ -350,8 +358,10 @@
           active_choices: activeChoices,
           computed: {
             task_909_status: "implemented_and_pushed",
-            task_910_status: "implemented_worktree_pending_test_evidence",
-            recommended_next_task: "TASK_911 - Release First Exchange Fire Lane World Read Real Window Recapture"
+            task_910_status: "implemented_in_current_branch",
+            report_status: "updated_current_interim_report",
+            recommended_next_task: "TASK_911 - Release First Exchange Fire Lane World Read Real Window Recapture",
+            following_task: "TASK_912 - Release First Exchange Fire Lane World Read Visual Findings"
           },
           metadata: {
             branch: "task/release-first-exchange-player-readability-polish-review",
