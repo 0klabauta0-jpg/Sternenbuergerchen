@@ -86,7 +86,8 @@
     <div class="meta-row">
       <span class="pill good">Branch: task/release-first-exchange-player-readability-polish-review</span>
       <span class="pill good">TASK_935 umgesetzt</span>
-      <span class="pill warn">TASK_936 in Vorbereitung</span>
+      <span class="pill good">TASK_936 umgesetzt</span>
+      <span class="pill warn">TASK_937 naechster Sichtbefund</span>
       <span class="pill warn">Playability-Smoke noch geblockt</span>
       <span class="pill">Report read-only</span>
     </div>
@@ -115,7 +116,7 @@
           <div class="stack">
             <div class="metric"><strong>gruen</strong><span>Release-Start, Homebase-Direct, Missionstart, Deep-Link-/Capture-Kette.</span></div>
             <div class="metric"><strong>gelb</strong><span>Erster Weltblick: Fire-Lane, Source/Target und Text/Halo konkurrieren noch knapp.</span></div>
-            <div class="metric"><strong>naechst</strong><span>TASK_936 Recapture prueft den neuen Spielerblick nach TASK_935.</span></div>
+            <div class="metric"><strong>naechst</strong><span>TASK_937 bewertet den TASK_936-Fensterblick read-only.</span></div>
           </div>
         </article>
       </div>
@@ -135,7 +136,8 @@
             <li>Primary3D bekam mehrere kleine Styles, damit FireTrace, Impact, Source-to-target-Lane, Source-/Target-Anker und Umfeld-Helligkeit im ersten Exchange lesbarer werden.</li>
             <li>TASK_926 bis TASK_935 haben die Weltlesung eng poliert: Fire-Lane/Core klarer, Label/Halo/Grid/Weltlinien leiser, Anker tragender.</li>
             <li>TASK_935 ist der aktuelle fertige Spielpolish: er zieht die belegte Reibung aus TASK_934 nach, ohne den Scope zum Combat-Rewrite zu oeffnen.</li>
-            <li>TASK_936 ist als naechster Recapture-Schnitt begonnen: er soll den echten Fensterblick nach TASK_935 wieder belegbar machen.</li>
+            <li>TASK_936 stellt den Recapture-Schnitt bereit: er macht den echten Fensterblick nach TASK_935 wieder belegbar.</li>
+            <li>TASK_937 ist der naechste passende Befund-Schnitt: Screenshot und Manifest werden read-only bewertet.</li>
           </ul>
         </article>
         <article class="card">
@@ -143,7 +145,7 @@
           <label class="checkline"><input type="checkbox" checked data-export-key="done.release_path"> Release-Singleplayer-Pfad repariert</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.first_exchange"> Erster Feuerwechsel sichtbar gefuehrt</label>
           <label class="checkline"><input type="checkbox" checked data-export-key="done.task935"> TASK_935 Player-Polish umgesetzt</label>
-          <label class="checkline"><input type="checkbox" data-export-key="done.task936"> TASK_936 Recapture fertig</label>
+          <label class="checkline"><input type="checkbox" checked data-export-key="done.task936"> TASK_936 Recapture fertig</label>
           <label class="checkline"><input type="checkbox" data-export-key="done.playability_smoke"> Playability-Smoke freigegeben</label>
         </article>
       </div>
@@ -181,14 +183,14 @@
             <li>Der Playability-Smoke ist absichtlich noch nicht gestartet, weil der Spielerblick aus dem echten Fenster nicht akzeptiert war.</li>
             <li>Die letzten Slices waren sehr kleinteilig, weil Capture, Findings und Polish sauber getrennt wurden. Das verhindert Architektur-Drift, fuehlt sich aber langsam an.</li>
             <li>Der erste Feuerwechsel ist funktional da, muss aber als "ich sehe, wer auf wen feuert" auf den ersten Blick sitzen.</li>
-            <li>Ein untracked TASK_936-Servicefile liegt bereits im Arbeitsbaum; der Task selbst ist noch nicht voll dokumentiert, getestet und committed.</li>
+            <li>TASK_936 erzeugt nur den Belegrahmen. Der echte Spielerblick ist erst nach TASK_937 als akzeptiert oder nicht akzeptiert geschnitten.</li>
             <li>Untracked `builds/` bleibt lokal und gehoert nicht automatisch in den Commit.</li>
           </ul>
         </article>
         <article class="card">
           <h2>Risiko</h2>
           <div class="status-box">Wenn wir ohne akzeptierten Sichtbefund in neue Systeme springen, bauen wir wieder Gameplay auf einer unklaren Lesbarkeit auf.</div>
-          <div class="status-box info" style="margin-top:12px;">Der bessere Schnitt ist: TASK_936 fertig machen, echten Spielerblick schneiden, dann entweder TASK_937 Findings oder bei Akzeptanz der kleine Playability-Smoke.</div>
+          <div class="status-box info" style="margin-top:12px;">Der bessere Schnitt ist jetzt: TASK_937 Findings schneiden, dann entweder akzeptieren und Smoke starten oder einen letzten engen Visual-Fix benennen.</div>
         </article>
       </div>
     </section>
@@ -198,7 +200,7 @@
         <article class="card wide">
           <h2>Was ich als naechstes machen will</h2>
           <ul class="list">
-            <li><strong>TASK_936 fertigstellen:</strong> Task-Datei, Analyzer, Capture-Script, Tests und Doku fuer den Player-Polish-Recapture abschliessen.</li>
+            <li><strong>TASK_936 verifizieren:</strong> Analyzer, Capture-Script, Tests und Doku fuer den Player-Polish-Recapture lokal gruen halten.</li>
             <li><strong>Recapture fahren:</strong> Nach TASK_935 einen echten Window-Handle-Screenshot erzeugen, nicht nur Headless-/Renderwerte glauben.</li>
             <li><strong>TASK_937 Findings:</strong> Screenshot und Manifest read-only bewerten: liest man Fire-Lane, Source/Target und CONTACT FIRE wirklich als erstes?</li>
             <li><strong>Bei Akzeptanz:</strong> kleinen First-Exchange-Playability-Smoke starten und nicht weiter Pixel-polieren.</li>
@@ -207,10 +209,10 @@
         </article>
         <article class="card">
           <h2>Naechster Griff</h2>
-          <div class="status-box good">TASK_936 ist der sinnvollste direkte Anschluss. Danach entscheiden die echten Fenster-Findings, ob Smoke oder noch ein kleiner visueller Fix dran ist.</div>
+          <div class="status-box good">TASK_937 ist der sinnvollste direkte Anschluss. Danach entscheiden die echten Fenster-Findings, ob Smoke oder noch ein kleiner visueller Fix dran ist.</div>
           <label style="margin-top:12px; display:block;">Prioritaet
             <select data-export-key="next.priority">
-              <option value="task936" selected>TASK_936 Recapture fertigstellen</option>
+              <option value="task937" selected>TASK_937 Findings schneiden</option>
               <option value="smoke">Playability-Smoke nur bei Akzeptanz</option>
               <option value="broader">Breiter Gameflow erst nach Sichtbefund</option>
             </select>
@@ -225,7 +227,7 @@
           <h2>Notizen und Entscheidung</h2>
           <p>Hier kannst du beim Lesen festhalten, ob du den Weg so weitergehen willst oder ob wir den Fokus wechseln sollen.</p>
           <div class="button-row" style="margin-top:12px;" data-choice-group="decision.path">
-            <button class="choice active" type="button" data-choice-value="continue_task936">TASK_936 weiter</button>
+            <button class="choice active" type="button" data-choice-value="continue_task937">TASK_937 weiter</button>
             <button class="choice" type="button" data-choice-value="smoke_now">Smoke trotz Risiko</button>
             <button class="choice" type="button" data-choice-value="switch_focus">Fokus wechseln</button>
           </div>
@@ -305,9 +307,9 @@
           report_id: reportId,
           title: document.title,
           exported_at: new Date().toISOString(),
-          current_task: "TASK_935",
-          in_progress_task: "TASK_936",
-          recommended_next_task: "TASK_936 - Release First Exchange Followup Fix Player Polish Recapture",
+          current_task: "TASK_936",
+          in_progress_task: "TASK_937",
+          recommended_next_task: "TASK_937 - Release First Exchange Followup Fix Player Polish Visual Findings",
           data: {}
         };
         document.querySelectorAll("[data-export-key]").forEach((element) => {

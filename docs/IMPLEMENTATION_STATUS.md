@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_936 - Release First Exchange Followup Fix Player Polish Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_936_release_first_exchange_followup_fix_player_polish_recapture.md`, `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/tasks/TASK_934_release_first_exchange_followup_fix_visual_findings.md`, `docs/tasks/TASK_933_release_first_exchange_followup_fix_recapture.md`, `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_936 legt den frischen Recapture-/Review-Rahmen an den TASK_935-Player-Polish.
+- Stand: `capture_release_first_exchange_followup_fix_player_polish_recapture.ps1` wiederverwendet den TASK_933-Window-Handle-Pfad und schreibt eigene TASK_936-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFollowupFixPlayerPolishRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Player-Polish-Fire-Lane als erste Weltbewegung, tragende Source-/Target-Anker, leises Label/Halo/Grid und Lane-vor-FIRE/CONTACT-Text.
+- Risiken/offen: TASK_936 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_937 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_936_release_first_exchange_followup_fix_player_polish_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_935_release_first_exchange_followup_fix_player_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_937 - Release First Exchange Followup Fix Player Polish Visual Findings.
+
 ### TASK_935 - Release First Exchange Followup Fix Player Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_935_release_first_exchange_followup_fix_player_polish.md`, `docs/tasks/TASK_934_release_first_exchange_followup_fix_visual_findings.md`, `docs/tasks/TASK_932_release_first_exchange_final_readability_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`
