@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_924 - Release First Exchange Followup Player Polish Recapture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_924_release_first_exchange_followup_player_polish_recapture.md`, `docs/tasks/TASK_923_release_first_exchange_followup_world_read_player_polish.md`, `docs/tasks/TASK_921_release_first_exchange_followup_world_read_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: TASK_924 legt einen frischen Recapture-/Review-Rahmen an den TASK_923-Player-Polish.
+- Stand: `capture_release_first_exchange_followup_player_polish_recapture.ps1` wiederverwendet den TASK_921-Window-Handle-Pfad und schreibt eigene TASK_924-PNG-/JSON-Artefakte.
+- Stand: `ReleaseFirstExchangeFollowupPlayerPolishRecapture.build_snapshot()` trennt `review_ready` von echter Akzeptanz und verlangt manuelle Checks fuer Player-Polish-Fire-Lane als erste Weltbewegung, Richtunganker, ruhiges Label/Halo/Grid und Lane-vor-FIRE/CONTACT-Text.
+- Risiken/offen: TASK_924 erzeugt den Belegrahmen, akzeptiert aber keinen Screenshot automatisch. Der naechste Slice muss den echten PNG-Befund als TASK_925 read-only schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script scripts/tests/task_924_release_first_exchange_followup_player_polish_recapture.gd`, `godot_console.exe --headless --path . --script scripts/tests/task_923_release_first_exchange_followup_world_read_player_polish.gd`, `git diff --check`.
+- Naechster Schritt: TASK_925 - Release First Exchange Followup Player Polish Visual Findings.
+
 ### TASK_923 - Release First Exchange Followup World Read Player Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_923_release_first_exchange_followup_world_read_player_polish.md`, `docs/tasks/TASK_922_release_first_exchange_followup_world_read_visual_findings.md`, `docs/tasks/TASK_920_release_first_exchange_final_world_read_followup_fix.md`, `docs/dev/mission_command_feedback_contract.md`
