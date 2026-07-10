@@ -307,6 +307,11 @@ TASK_1085 verlangt fuer echte Window-Captures ein Runtime-Ready-Signal statt ein
 
 Waehrend der dokumentierten Evidence-Dauer muessen #17 Selected Fireteam, #18 Mission Control und #19 Event Log dieselbe echte FireEvent-Quelle lesen. Die sichtbare Primaerzeile benennt Fireteam, Kontaktklasse, Waffe und Ergebnis ohne technische Runtime-IDs. Sie bleibt read-only; sie erzeugt weder Commands noch FireEvents, Schaden, Bewegung oder Multiplayer-Wahrheit.
 
+## Release-Mission-Ready-Time
+TASK_1086 ersetzt im First-GO-/First-Exchange-Direkteinstieg feste Frame-Wartefenster durch begrenzte Zustandsabfragen. GO gilt erst nach mindestens einem weiteren autoritativen `SimulationRoot`-Tick und einem passierenden Execution-Snapshot mit sichtbarem GO- und Movement-State als uebernommen. Eine waehrend der Bewegung erneut gefuellte Command Queue ist kein Fehler und darf nicht kuenstlich geleert werden.
+
+Der finale Capture-Zustand verlangt einen aktiven read-only First-Exchange-Status, eine echte `fire_event_id` und `CONTACT FIRE` als erste Zeile in #17 und #18. Wird dieser Zustand innerhalb der begrenzten Polls nicht erreicht, endet der Direkteinstieg mit `first_exchange_visible_not_ready`. Jeder Trace-Sample exportiert `elapsed_msec` seit Start und `delta_msec` seit der vorherigen Stufe. Der Pfad erzeugt keine zusaetzliche Gameplay- oder Multiplayer-Wahrheit.
+
 ## Fire-Rule-Controls-Readability-Polish
 TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Command-Grid-Controls `HF`, `RF`, `FW` und `SUP` duerfen nur den bestehenden `MissionTacticalSandboxController.set_selected_fireteams_fire_rule()`-Pfad ausloesen. Sie duerfen keine Movement-, Combat-, Unit- oder Command-Queue-Wahrheit direkt schreiben.
 

@@ -856,9 +856,19 @@ func _build_release_first_exchange_exported_status_trace_sample(stage: String, c
 	if mission_text.is_empty():
 		mission_text = String(status_source_snapshot.get("mission_control_status_text", "")).strip_edges()
 	var event_log_text: String = String(fallback_entry.get("short_text", status_source_snapshot.get("event_log_short_text", ""))).strip_edges()
+	var timestamp_msec: int = Time.get_ticks_msec()
+	var first_timestamp_msec: int = timestamp_msec
+	var previous_timestamp_msec: int = timestamp_msec
+	if not _release_first_exchange_exported_status_trace_samples.is_empty():
+		var first_sample: Dictionary = Dictionary(_release_first_exchange_exported_status_trace_samples[0])
+		var previous_sample: Dictionary = Dictionary(_release_first_exchange_exported_status_trace_samples.back())
+		first_timestamp_msec = int(first_sample.get("timestamp_msec", timestamp_msec))
+		previous_timestamp_msec = int(previous_sample.get("timestamp_msec", timestamp_msec))
 	return {
 		"stage": String(stage).strip_edges(),
-		"timestamp_msec": Time.get_ticks_msec(),
+		"timestamp_msec": timestamp_msec,
+		"elapsed_msec": maxi(timestamp_msec - first_timestamp_msec, 0),
+		"delta_msec": maxi(timestamp_msec - previous_timestamp_msec, 0),
 		"deeplink_requested": _release_first_go_firefight_deeplink_requested,
 		"deeplink_applied": _release_first_go_firefight_deeplink_applied,
 		"deeplink_status": _release_first_go_firefight_deeplink_status,
@@ -987,7 +997,13 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	controller.call("_refresh_button_state")
 	controller.call("_update_ui")
 	_append_release_first_exchange_exported_status_trace_sample("after_go_execute_refresh", controller, {"selected_fireteam_id": selected_fireteam_id}, args)
-	await _wait_release_deeplink_frames(45)
+	var go_ready: Dictionary = await _wait_release_first_go_runtime_ready(controller, simulation_root)
+	_append_release_first_exchange_exported_status_trace_sample("after_go_runtime_ready", controller, go_ready, args)
+	if not bool(go_ready.get("ready", false)):
+		_release_first_go_firefight_deeplink_status = "blocked"
+		_release_first_go_firefight_deeplink_reason = "go_runtime_not_ready"
+		_append_release_first_exchange_exported_status_trace_sample("blocked_go_runtime_not_ready", controller, go_ready, args)
+		return
 
 	var contact_setup: Dictionary = _position_release_first_enemy_near_fireteam(controller, combat_driver, selected_fireteam_id)
 	if contact_setup.is_empty():
@@ -1032,8 +1048,15 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 		_release_first_go_firefight_deeplink_reason = ""
 		set_meta("release_first_go_firefight_deeplink_applied", true)
 	_append_release_first_exchange_exported_status_trace_sample("after_immediate_exchange_applied_gate", controller, {"immediate_exchange_applied": immediate_exchange_applied}, args)
-	await _wait_release_deeplink_frames(10)
-	_append_release_first_exchange_exported_status_trace_sample("after_final_wait_before_snapshot", controller, {}, args)
+	var visible_ready: Dictionary = await _wait_release_first_exchange_visible_ready(controller)
+	_append_release_first_exchange_exported_status_trace_sample("after_final_wait_before_snapshot", controller, visible_ready, args)
+	if not bool(visible_ready.get("ready", false)):
+		_release_first_go_firefight_deeplink_applied = false
+		_release_first_go_firefight_deeplink_status = "blocked"
+		_release_first_go_firefight_deeplink_reason = "first_exchange_visible_not_ready"
+		set_meta("release_first_go_firefight_deeplink_applied", false)
+		_append_release_first_exchange_exported_status_trace_sample("blocked_first_exchange_visible_not_ready", controller, visible_ready, args)
+		return
 
 	var snapshot: Dictionary = get_release_first_go_firefight_deeplink_snapshot(PackedStringArray([RELEASE_SINGLEPLAYER_FIRST_GO_FIREFIGHT_DEEPLINK_ARG]))
 	_release_first_go_firefight_deeplink_applied = immediate_exchange_applied \
@@ -1045,6 +1068,74 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	_release_first_go_firefight_deeplink_reason = "" if _release_first_go_firefight_deeplink_applied else "firefight_snapshot_not_pass"
 	set_meta("release_first_go_firefight_deeplink_applied", _release_first_go_firefight_deeplink_applied)
 	_append_release_first_exchange_exported_status_trace_sample("deeplink_final", controller, snapshot.duplicate(true), args)
+
+
+func _wait_release_first_go_runtime_ready(controller: Node, simulation_root: Node, max_checks: int = 8) -> Dictionary:
+	var last_snapshot: Dictionary = {}
+	var start_tick: int = int(simulation_root.call("get_tick")) if simulation_root != null and simulation_root.has_method("get_tick") else -1
+	for check_index in range(maxi(max_checks, 1)):
+		await get_tree().physics_frame
+		await get_tree().process_frame
+		var command_queue_empty: bool = true
+		var command_queue_count: int = 0
+		if simulation_root != null:
+			var queue_variant: Variant = simulation_root.get("command_queue")
+			if typeof(queue_variant) == TYPE_ARRAY:
+				command_queue_count = Array(queue_variant).size()
+				command_queue_empty = command_queue_count == 0
+		var execution: Dictionary = {}
+		if controller != null and controller.has_method("get_mission_first_move_execution_feedback_snapshot"):
+			execution = Dictionary(controller.call("get_mission_first_move_execution_feedback_snapshot"))
+		var go_feedback_visible: bool = _insertion_check_passed(execution, "go_feedback_visible")
+		var movement_state_visible: bool = _insertion_check_passed(execution, "movement_state_visible")
+		var current_tick: int = int(simulation_root.call("get_tick")) if simulation_root != null and simulation_root.has_method("get_tick") else start_tick + 1
+		var authoritative_tick_advanced: bool = current_tick > start_tick
+		var ready: bool = authoritative_tick_advanced \
+			and String(execution.get("gate", "")) == "pass" \
+			and go_feedback_visible \
+			and movement_state_visible
+		last_snapshot = {
+			"ready": ready,
+			"checks": check_index + 1,
+			"command_queue_empty": command_queue_empty,
+			"command_queue_count": command_queue_count,
+			"start_tick": start_tick,
+			"current_tick": current_tick,
+			"authoritative_tick_advanced": authoritative_tick_advanced,
+			"execution_gate": String(execution.get("gate", "")),
+			"go_feedback_visible": go_feedback_visible,
+			"movement_state_visible": movement_state_visible,
+		}
+		if ready:
+			return last_snapshot
+	return last_snapshot
+
+
+func _wait_release_first_exchange_visible_ready(controller: Node, max_checks: int = 8) -> Dictionary:
+	for check_index in range(maxi(max_checks, 1)):
+		await get_tree().process_frame
+		var feedback: Dictionary = {}
+		var source: Dictionary = {}
+		if controller != null and controller.has_method("get_command_feedback_snapshot"):
+			feedback = Dictionary(controller.call("get_command_feedback_snapshot"))
+		if controller != null and controller.has_method("get_release_first_exchange_visible_status_source_reconciliation_snapshot"):
+			source = Dictionary(controller.call("get_release_first_exchange_visible_status_source_reconciliation_snapshot"))
+		var status_source: Dictionary = Dictionary(source.get("status_source", {}))
+		var fire_event_id: String = String(status_source.get("fire_event_id", "")).strip_edges()
+		var selected_text: String = String(feedback.get("selected_fireteam_status_label_text", "")).strip_edges()
+		var mission_text: String = String(feedback.get("mission_control_status_text", "")).strip_edges()
+		var ready: bool = bool(source.get("active", false)) \
+			and not fire_event_id.is_empty() \
+			and selected_text.to_upper().begins_with("CONTACT FIRE") \
+			and mission_text.to_upper().begins_with("CONTACT FIRE")
+		if ready:
+			return {
+				"ready": true,
+				"checks": check_index + 1,
+				"fire_event_id": fire_event_id,
+				"status_source_active": true,
+			}
+	return {"ready": false, "checks": maxi(max_checks, 1), "status_source_active": false}
 
 
 func _first_release_fireteam_id(first_move: Dictionary) -> String:
