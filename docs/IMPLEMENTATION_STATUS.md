@@ -10,6 +10,11 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1050 - LZ Drop and Deboard Flow Timing Breakdown
+- Status: implementiert im Arbeitsstand
+- Stand: Der LZ-Teilpfad-Timer misst rund 13,8 Sekunden fuer LZ-Setzen. Davon entfallen rund 13,2 Sekunden auf `_emit_planning_state_changed()`; Tile-Kontext rund 185 ms, Auswahl rund 202 ms, World-Refresh rund 21 ms und HUD rund 145 ms.
+- Naechster Schritt: TASK_1051 - Planning State Signal Fanout Audit and Guard.
+
 ### TASK_1049 - Enemy Team Tactics Hotpath Breakdown and Decision Revision Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1049_enemy_team_tactics_decision_revision_guard.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1048_simulation_tick_signal_fanout_audit.md`

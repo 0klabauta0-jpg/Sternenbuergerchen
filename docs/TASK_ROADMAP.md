@@ -13,11 +13,15 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1050 - LZ Drop and Deboard Flow Timing Breakdown (geplant)
+## TASK_1051 - Planning State Signal Fanout Audit and Guard (geplant)
+- Grundlage: TASK_1050 misst `_emit_planning_state_changed()` mit rund 13,2 Sekunden beim LZ-Setzen.
+- Ziel: Empfaenger, Snapshot-/UI-Folgearbeit und vermeidbare Repeats des Planning-State-Signals sichtbar machen und nur viewer-seitige Wiederholungen begrenzen.
+
+## TASK_1050 - LZ Drop and Deboard Flow Timing Breakdown (implementiert im Arbeitsstand)
 - Grundlage: TASK_1049 beendet den sichtbaren Startframe-Blocker; TASK_1045 erreicht erstmals LZ/Drop und stoppt dort kontrolliert.
 - Ziel: LZ setzen, Drop ausloesen, Aussteigen und Runtime-Aktivierung nach Transport-, Simulation-, Terrain- und HUD-Teilpfaden messen.
-- Ergebnis: Read-only Stage-/Frame-Evidence fuer den naechsten Spielerflowblocker und ein enger Folgefix.
-- Naechster Schritt: Danach die einzelne Controller-UI-Spitze oder den gemessenen LZ/Drop-Teilpfad behandeln.
+- Ergebnis: LZ-Setzen misst rund 13,8 Sekunden, davon `_emit_planning_state_changed()` rund 13,2 Sekunden. Transport und Deboarding sind noch nicht der erste Blocker.
+- Naechster Schritt: TASK_1051 - Planning State Signal Fanout Audit and Guard.
 
 ## TASK_1049 - Enemy Team Tactics Hotpath Breakdown and Decision Revision Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1048 misst `enemy_team_tactics_usec` mit rund 405-420 ms als dominanten Anteil des Combat-Listeners.

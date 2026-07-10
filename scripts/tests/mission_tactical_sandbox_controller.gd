@@ -496,6 +496,8 @@ var _card_refresh_time_remaining: float = 0.0
 var _fireteam_security_refresh_time_remaining: float = 0.0
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
+var _lz_drop_timing_debug_enabled: bool = false
+var _lz_drop_timing_debug_snapshot: Dictionary = {}
 var _drop_sequence_phase: String = ""
 var _drop_sequence_units: Array = []
 var _drop_sequence_unit_index: int = 0
@@ -2168,10 +2170,20 @@ func try_place_target_from_screen_position(screen_position: Vector2) -> bool:
 
 
 func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
+	var profile_enabled: bool = _lz_drop_timing_debug_enabled
+	var started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var scopes_usec: Dictionary = {}
+	var scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var armed_craft_id: String = _lz_placement_craft_id.strip_edges()
 	if not armed_craft_id.is_empty() and armed_craft_id != _mission_drop_craft_id.strip_edges():
 		_select_mission_dropship_craft(armed_craft_id, false)
+	if profile_enabled:
+		scopes_usec["craft_selection_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	var tile_context: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	if profile_enabled:
+		scopes_usec["tile_context_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	if _has_primary_grid_for_command_selection() and tile_context.is_empty():
 		_last_command_text = "NO TILE UNDER CURSOR"
 		_update_ui()
@@ -2182,13 +2194,39 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 	_has_lz_position = true
 	_is_lz_placement_armed = false
 	_lz_placement_craft_id = ""
+	if profile_enabled:
+		scopes_usec["lz_position_and_selection_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	var lz_label: String = _build_mission_dropship_lz_name(_mission_drop_craft_id, _mission_drop_display_name, _get_mission_dropship_card_order_number(_mission_drop_craft_id))
 	_last_command_text = "%s SET %s @ %s" % [lz_label, _get_approach_angle_name(), _format_world_position(_lz_position)]
 	_store_selected_mission_dropship_plan()
+	if profile_enabled:
+		scopes_usec["store_plan_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_button_state()
 	_refresh_world_overlays()
+	if profile_enabled:
+		scopes_usec["button_and_world_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_update_ui()
+	if profile_enabled:
+		scopes_usec["update_ui_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_emit_planning_state_changed()
+	if profile_enabled:
+		scopes_usec["planning_emit_usec"] = Time.get_ticks_usec() - scope_started_usec
+		_lz_drop_timing_debug_snapshot = {
+			"enabled": true,
+			"total_usec": Time.get_ticks_usec() - started_usec,
+			"scopes_usec": scopes_usec.duplicate(true),
+			"read_only": true,
+			"sets_gameplay_truth": false,
+			"creates_command": false,
+			"creates_movement": false,
+			"creates_fire_event": false,
+			"creates_damage_event": false,
+			"sets_multiplayer_truth": false,
+		}
 	return true
 
 
@@ -3427,6 +3465,16 @@ func set_mission_visible_frame_timing_debug_enabled(enabled: bool) -> void:
 
 func get_mission_visible_frame_timing_debug_snapshot() -> Dictionary:
 	return _mission_visible_frame_timing_debug_snapshot.duplicate(true)
+
+
+func set_lz_drop_timing_debug_enabled(enabled: bool) -> void:
+	_lz_drop_timing_debug_enabled = enabled
+	if not enabled:
+		_lz_drop_timing_debug_snapshot.clear()
+
+
+func get_lz_drop_timing_debug_snapshot() -> Dictionary:
+	return _lz_drop_timing_debug_snapshot.duplicate(true)
 
 
 func _record_mission_visible_frame_timing_snapshot(frame_started_usec: int, scopes_usec: Dictionary, included_ui_refresh: bool) -> void:
