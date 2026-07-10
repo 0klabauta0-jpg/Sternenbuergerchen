@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1034 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke (implementiert im Arbeitsstand)
+- Grundlage: bereiter TASK_1033 First Contact Runtime Hook.
+- Ziel: CONTACT, WHY, NEXT, FEEDBACK und `GO separat` in einem read-only Smoke-Trace gegen echten Snapshot-Kontext pruefen.
+- Ergebnis: Read-only Snapshot `blocked_until_first_contact_runtime_hook | needs_first_contact_runtime_smoke_trace | needs_first_contact_runtime_smoke_completion | first_contact_runtime_smoke_regression_found | first_contact_runtime_smoke_passed`.
+- Naechster Schritt: TASK_1035 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings.
+
 ## TASK_1033 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook (implementiert im Arbeitsstand)
 - Grundlage: bereiter TASK_1032 Next Playable Slice Plan.
 - Ziel: Den ersten Kontakt als Runtime-Hook lesbar machen: CONTACT, COVER, LOS, FIRE/WAIT, FEEDBACK und `GO separat`.

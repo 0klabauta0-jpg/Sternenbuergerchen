@@ -50,6 +50,11 @@ Ein Preview-Eintrag enthaelt mindestens:
 - Threat-Kontext wird als Array/Snapshot uebergeben.
 - Visuals nutzen den bestehenden Order-Payload und Render-Snapshot-Zaehler.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke (TASK_1034)
+TASK_1034 prueft, ob der TASK_1033-First-Contact-Runtime-Hook als kleiner Entscheidungsmoment lesbar ist: CONTACT sichtbar, WHY begruendet, NEXT bleibt der naechste Griff, FEEDBACK fuehrt zurueck, und `GO separat` bleibt ein echter Commit statt Auto-Ausfuehrung.
+
+Der Runtime-Smoke bleibt read-only. Er bewertet Trace-Evidence fuer echten Snapshot-Kontext, sichtbare CONTACT-/WHY-/NEXT-/GO-Hooks, First-Contact-/Engagement-/Combat-HUD-Gates, Feedback-zurueck-zu-NEXT, HUD-Wahrheitsgrenze, Multiplayer-Grenze und Performance-Budget. Ein bestandener Smoke routet zu `TASK_1035 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings`; Reibung routet zu TASK_1034-Polish. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 TASK_1004 ist der read-only Fensterbeweis-Rahmen fuer den TASK_1003-Round-Loop-Polish. Er erwartet im echten Fenster sichtbare `ROUND`-, `NEXT`- und `GO separat`-Surfaces sowie kurze Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen.
 

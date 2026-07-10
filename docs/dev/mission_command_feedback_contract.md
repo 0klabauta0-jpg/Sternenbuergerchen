@@ -34,6 +34,11 @@ Erwartete Struktur: Ohne akzeptierten TASK_1031-Stand bleibt der Status `blocked
 
 Erwartete Struktur: Ohne bereiten TASK_1032-Plan bleibt `blocked_until_next_playable_slice_plan`; ohne Runtime-Kontext bleibt `needs_first_contact_runtime_hook_context`; unvollstaendige Kontexte werden `first_contact_runtime_hook_review`; ein sauberer Kontext wird `first_contact_runtime_hook_ready` und routet zu TASK_1034 First Contact Runtime Smoke. Die Runtime-Line nennt CONTACT, COVER, LOS, FIRE/WAIT, FEEDBACK und `GO separat`. Der Hook setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke (TASK_1034)
+`get_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_smoke_snapshot()` ist der read-only Smoke-Pruefpunkt fuer den TASK_1033-First-Contact-Runtime-Hook. Der Snapshot darf nur einen bereiten TASK_1033-Hook und optionalen Smoke-Trace bewerten. Er muss im Command-Feedback als Snapshot, Smoke-Line, Status und Gate exportiert werden.
+
+Erwartete Struktur: Ohne bereiten TASK_1033-Hook bleibt `blocked_until_first_contact_runtime_hook`; ohne Trace bleibt `needs_first_contact_runtime_smoke_trace`; fehlende Smoke-Checks melden `needs_first_contact_runtime_smoke_completion`; Issue-Flags melden `first_contact_runtime_smoke_regression_found`; ein sauberer Trace setzt `first_contact_runtime_smoke_passed` und routet zu TASK_1035 First Contact Player Feel Findings. Der Smoke prueft CONTACT, WHY, NEXT, FEEDBACK, `GO separat`, echten Snapshot-Kontext, First-Contact-/Engagement-/Combat-HUD-Gates, HUD-read-only-Grenze, Multiplayer-Grenze und Performance-Budget. Er setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 `get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
 

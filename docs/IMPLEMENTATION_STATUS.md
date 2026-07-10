@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1034 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1034_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_smoke.md`, `docs/tasks/TASK_1033_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactRuntimeSmoke.build_snapshot()` bewertet einen bereiten TASK_1033-First-Contact-Hook plus optionalen Smoke-Trace.
+- Stand: Ohne bereiten Hook bleibt `blocked_until_first_contact_runtime_hook`; ohne Trace bleibt `needs_first_contact_runtime_smoke_trace`; unvollstaendige Checks melden `needs_first_contact_runtime_smoke_completion`; Issue-Flags melden `first_contact_runtime_smoke_regression_found`.
+- Stand: Ein sauberer Trace setzt `first_contact_runtime_smoke_passed` und routet zu `TASK_1035 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings`.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1034 im Command-Feedback als Snapshot, Smoke-Line, Status und Gate.
+- Risiken/offen: TASK_1034 beweist noch keinen menschlichen Player-Feel-Befund und fuehrt keinen sichtbaren F6-/Release-Smoke aus. Der Trace bleibt ein read-only Pruefpunkt.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1034_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_smoke.gd`, Regression TASK_1033, TASK_1032, TASK_1031, `git diff --check`.
+- Naechster Schritt: TASK_1035 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings oder TASK_1034 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke Polish.
+
 ### TASK_1033 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Hook
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1033_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_hook.md`, `docs/tasks/TASK_1032_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
