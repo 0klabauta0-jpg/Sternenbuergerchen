@@ -13,6 +13,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1084 - Release Deep-Link Runtime Authority Repair (implementiert im Arbeitsstand)
+- Grundlage: TASK_284 meldete 63/64, weil historische First-Exchange-Release-Helfer Runtime-Status direkt aus dem Meta-Layer setzten.
+- Ergebnis: TASK_1084 ist 12/12 und TASK_284 wieder 64/64 gruen. Meta delegiert nur Setup-Absicht; der Missionscontroller enqueued einen gueltigen Hold-Command ueber `SimulationRoot`, und der erste Feuerentscheid wartet auf den autoritativen Tick. TASK_832 37/37 und TASK_868 41/41 belegen den unveraendert funktionierenden Release-Direkteinstieg.
+- Naechster Schritt: Sichtbarer Zwei-Fenster-/Station-Route-Polish auf dem frischen Release-Build. Weitere interne Schichten nur aus einem konkreten Spieler- oder Performancebefund schneiden.
+
 ## TASK_1057 - Controlled Dropship Inbound to Deboard Trace (implementiert im Arbeitsstand)
 - Grundlage: TASK_1056 startet den Drop mit korrekten zwei Runtime-Units nach Transferankunft.
 - Ergebnis: TASK_396 prueft 17/17 den echten Alpha-/Beta-Handoff: vier Units, korrekte ft1-/ft2-Paare, getrennte LZs, parallelen Inbound, Deboarding und beide aktiven Runtime-Fireteams.

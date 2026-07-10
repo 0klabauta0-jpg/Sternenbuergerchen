@@ -297,6 +297,11 @@ TASK_1083 belegt den TASK_1082-Pfad ueber zwei echte lokale MultiplayerAPI-Subtr
 
 Der Mission-Controller zeigt fuer `set_fire_rule` kompakt `ROE <FT> <RULE> HOST OK` oder `ROE BLOCKED <reason>`. Diese Zeile ist Feedback auf Host-Validierung, kein Commit. Gameplay-State entsteht weiterhin erst durch Host-Command-Verarbeitung und Snapshot-Replikation.
 
+## Release-Deep-Link-Runtime-Authority
+TASK_1084 zieht auch den deterministischen First-GO-/First-Exchange-Testaufbau durch dieselbe Besitzgrenze. `MetaLayerFlow` darf keine Runtime-Status- oder UnitCommand-Wahrheit setzen. Es uebergibt nur Unit-ID, Zielposition und Setup-Quellenkennung an `MissionTacticalSandboxController.queue_release_first_exchange_hold_command()`.
+
+Der Missionscontroller validiert die Runtime-Unit, baut den begrenzten Hold-/Fire-at-will-Command und enqueued ihn ueber `SimulationRoot`. Der Direkteinstieg wartet den autoritativen Physik-Tick ab, bevor der Combat-Driver den ersten Feuerentscheid anfordert. Dieser Gateway ist ausschliesslich Release-/Testaufbau und kein zweiter normaler Spielerbefehlsweg.
+
 ## Fire-Rule-Controls-Readability-Polish
 TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Command-Grid-Controls `HF`, `RF`, `FW` und `SUP` duerfen nur den bestehenden `MissionTacticalSandboxController.set_selected_fireteams_fire_rule()`-Pfad ausloesen. Sie duerfen keine Movement-, Combat-, Unit- oder Command-Queue-Wahrheit direkt schreiben.
 

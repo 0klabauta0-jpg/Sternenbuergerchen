@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1084 - Release Deep-Link Runtime Authority Repair
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1084_release_deeplink_runtime_authority_repair.md`, `docs/ARCHITECTURE.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_284, TASK_832, TASK_868
+- Stand: TASK_1084 ist 12/12 gruen. Der reproduzierbare First-GO-/First-Exchange-Direkteinstieg setzt Fireteam- und Gegnerstatus nicht mehr aus `MetaLayerFlow`. Meta uebergibt nur Unit-ID, Ziel und Setup-Quelle an ein begrenztes Missionsruntime-Gateway; der Missionscontroller baut den Hold-Command und enqueued ihn ueber `SimulationRoot`.
+- Ursache/Fix: Historische Release-Helfer riefen `set_runtime_status()` und `assign_unit_command()` direkt auf Units auf. Der neue Pfad wartet nach dem Enqueue bis hinter den autoritativen Physik-Tick und fordert erst danach die erste Combat-Entscheidung an. TASK_284 steht damit wieder bei 64/64.
+- Risiken/offen: Der Direkteinstieg bleibt ein Test-/Release-Aufbau und darf nicht als zweiter normaler Missionsbefehlspfad wachsen. Der bekannte ObjectDB-Leak-Hinweis der grossen Meta-Testszene bleibt bei Exit 0 bestehen.
+- Lokale Pruefung: TASK_1084 12/12, TASK_284 64/64, TASK_832 37/37, TASK_868 41/41 und `git diff --check`.
+- Naechster Schritt: Einen sichtbaren Zwei-Fenster-/Station-Route-Polish-Slice aus dem aktuellen Release-Build ableiten; neue Architekturarbeit nur bei einem konkreten Playtestbefund.
+
 ### TASK_1057 - Controlled Dropship Inbound to Deboard Trace
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1057_controlled_dropship_inbound_to_deboard_trace.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/combat_loop_authority_contract.md`
