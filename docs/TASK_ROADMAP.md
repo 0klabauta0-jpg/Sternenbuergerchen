@@ -49,6 +49,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1063 ist 14/14 gruen. `Operation: Station Route` startet aus Homebase mit der vorhandenen Stationkarte und ScenarioData. Die Mission erhaelt echte Runtime-Gates; der sichtbare erste Schritt ist AA-Shutdown. TASK_726 30/30 und TASK_586 37/37 halten Route und Debriefing-Handoff als bestehende Folgegrenzen gruen.
 - Naechster Schritt: Einen kurzen echten Spielrunden-Readability-/Balance-Slice fuer Station Route bauen: erster Kontakt, NPC-Druck, erste Erfolg- oder Abbruchentscheidung und Debriefing ohne technischen Leerlauf.
 
+## TASK_1065 - Mission Runtime Review and Performance Pass (implementiert im Arbeitsstand)
+- Grundlage: TASK_1061/1062 hatten den sichtbaren Zwei-Fireteam-Flow profiliert und statische Mini-Card-Arbeit bereits getrennt, aber die Member-Statusrow bei jedem Runtime-Refresh weiter gezeichnet.
+- Ergebnis: TASK_1065 ist 13/13 gruen. Unveraenderte read-only Member-Snapshots ueberspringen jetzt die Row-Normalisierung und ihr Redraw; Suppression bleibt sichtbar live und ein echter Member-Statuswechsel wird weiter gezeichnet. Der aktuelle Code-/Performancebericht dokumentiert Messgrenzen, Architektur- und Hotpath-Befunde als HTML-Workbench.
+- Naechster Schritt: TASK_1066 - Mission Feedback Surface Delta Extraction. Command-Feedback, Event-Log und Sekundaerlabels muessen weiter voneinander entkoppelt werden, ohne SimulationRoot- oder Multiplayer-Autoritaet in die UI zu ziehen.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

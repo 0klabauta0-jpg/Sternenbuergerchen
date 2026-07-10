@@ -69,6 +69,15 @@
 - Lokale Pruefung: TASK_1063 14/14, TASK_726 30/30, TASK_586 37/37, TASK_1062 18/18, TASK_1061 11/11 und `git diff --check`.
 - Naechster Schritt: Die erste Station-Route im echten Missionsfenster auf Lesbarkeit und Spielerentscheidung verdichten: sichtbare Start-/Ziel-Cues, NPC-Druck und eine klare erste erfolgreiche oder abgebrochene Runde.
 
+### TASK_1065 - Mission Runtime Review and Performance Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1065_mission_runtime_review_performance_pass.md`, `docs/ARCHITECTURE.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/html_report_workbench_contract.md`, TASK_1061, TASK_1062
+- Stand: TASK_1065 ist 13/13 gruen. Die Fireteam-Mini-Card behaelt ihre Member-Statusrow bei unveraenderten Memberdaten. Eine Suppression-Aenderung aktualisiert weiter den SUPP-Balken, erhoeht aber den neuen Row-Skip-Zaehler statt `set_member_snapshot()` und `queue_redraw()` erneut auszufuehren. Echter Schaden wendet die Row wieder an.
+- Ursache/Fix: `_apply_fireteam_member_status_row()` baute bei jeder legitimen Runtime-Kartenaktualisierung denselben read-only Member-Snapshot und forderte ein Redraw an. Ein lokaler JSON-Signaturvergleich am existierenden Row-Control trennt Apply und Skip; weder UI noch Diagnose besitzen Gameplay-Wahrheit.
+- Review: Kein bestaetigter P0- oder Autoritaetsbruch im geprueften Homebase -> zwei Dropships -> Deboard -> Contact -> Preview -> GO-Pfad. Das dominante technische Risiko bleibt der 28k-Zeilen-Mission-Controller im Testpfad; sein 0.35-Sekunden-Refresh und viele direkte UI-Aufrufe machen weitere kleine Delta-Slices sinnvoll. `MissionCombatLoopDriver` nutzt im Tick den vorhandenen Cache, faellt ausserhalb davon aber weiter auf NodePath-/Registry-Merges zurueck.
+- Lokale Pruefung: TASK_1065 13/13, TASK_1062 18/18, TASK_1061 11/11, TASK_503 10/10 und `git diff --check` gruen.
+- Naechster Schritt: TASK_1066 als Controller-Schnitt vorbereiten: Command-/Mission-Feedback und Sekundaerlabels als echte read-only Delta-Surfaces abtrennen, bevor weiterer Station-Route-Content auf den grossen Controller gelegt wird.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

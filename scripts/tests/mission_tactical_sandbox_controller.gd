@@ -433,6 +433,8 @@ var _mission_fireteam_card_delta_rendering_counts: Dictionary = {
 	"static_apply": 0,
 	"static_skip": 0,
 	"runtime_status_apply": 0,
+	"member_status_row_apply": 0,
+	"member_status_row_skip": 0,
 }
 var _mission_hud_runtime_surface_guard_apply_counts: Dictionary = {
 	"command_matrix": 0,
@@ -3535,6 +3537,8 @@ func get_mission_fireteam_card_delta_rendering_snapshot() -> Dictionary:
 		"static_apply_count": int(_mission_fireteam_card_delta_rendering_counts.get("static_apply", 0)),
 		"static_skip_count": int(_mission_fireteam_card_delta_rendering_counts.get("static_skip", 0)),
 		"runtime_status_apply_count": int(_mission_fireteam_card_delta_rendering_counts.get("runtime_status_apply", 0)),
+		"member_status_row_apply_count": int(_mission_fireteam_card_delta_rendering_counts.get("member_status_row_apply", 0)),
+		"member_status_row_skip_count": int(_mission_fireteam_card_delta_rendering_counts.get("member_status_row_skip", 0)),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
@@ -3969,8 +3973,14 @@ func _apply_fireteam_member_status_row(card: Control, fireteam_id: String, units
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.custom_minimum_size = FIRETEAM_MEMBER_STATUS_ROW_SCRIPT.DEFAULT_SIZE
 	row.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	var snapshot: Dictionary = _build_fireteam_member_status_row_entry(fireteam_id, _get_fireteam_units(fireteam_id, true))
-	row.call("set_member_snapshot", snapshot)
+	var snapshot: Dictionary = _build_fireteam_member_status_row_entry(fireteam_id, units)
+	var snapshot_signature: String = JSON.stringify(snapshot)
+	if String(row.get_meta("mission_fireteam_member_status_signature", "")) == snapshot_signature:
+		_increment_mission_fireteam_card_delta_rendering_count("member_status_row_skip")
+	else:
+		row.call("set_member_snapshot", snapshot)
+		row.set_meta("mission_fireteam_member_status_signature", snapshot_signature)
+		_increment_mission_fireteam_card_delta_rendering_count("member_status_row_apply")
 	row.set_meta("mission_fireteam_member_status_row", true)
 	row.set_meta("mission_fireteam_member_status_snapshot", Dictionary(row.call("get_row_snapshot")).duplicate(true))
 	card.set_meta("mission_fireteam_member_status_host", true)
