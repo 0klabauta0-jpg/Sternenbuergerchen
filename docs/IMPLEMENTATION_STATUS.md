@@ -10,6 +10,11 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1053 - LOS-Valid First Contact Fixture
+- Status: implementiert im Arbeitsstand
+- Stand: Trace benutzt Combat-Friendlies und echten LOS-Resolver. Nach Deboarding fehlt fuer ft1 weiterhin eine gueltige Kontaktbasis; das weist auf Deployment-/Combat-Registry-Aktivierung statt UI-Readability.
+- Naechster Schritt: TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit.
+
 ### TASK_1052 - First Move and Contact Flow Trace
 - Status: implementiert im Arbeitsstand
 - Stand: Der Trace erreicht First Move/GO (rund 14,5 s) und First Contact (rund 14,5 s) ohne Stage-Timeout. Contact bleibt `review`: kein gueltiger LOS-Kontakt in der Testposition, daher keine Contact-Felder/Overlays.

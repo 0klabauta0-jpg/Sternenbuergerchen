@@ -13,9 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1053 - Reproducible LOS-Valid First Contact Fixture (geplant)
+## TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit (geplant)
+- Grundlage: TASK_1053 findet nach Deboarding keine Combat-registrierte ft1-LOS-Basis.
+- Ziel: Deployment, Fireteam-ID, UnitRegistry, Combat-Friendly-Liste und LOS-Bereitschaft vor First Move gemeinsam pruefen.
+
+## TASK_1053 - LOS-Valid First Contact Fixture (implementiert im Arbeitsstand)
 - Grundlage: TASK_1052 erreicht First Contact, erzeugt aber noch keinen validen LOS-Kontakt.
-- Ziel: Eine reproduzierbare Sichtlinie fuer den First-Contact-Trace schaffen und Report, Overlay und Threat-/Cover-Kontext gegen echten Kontakt pruefen.
+- Ergebnis: Die Fixture nutzt echte Combat-Friendlies und LOS, belegt aber eine fehlende Deboarded-Runtime-Registry-Basis.
 
 ## TASK_1052 - First Move and Contact Flow Trace (implementiert im Arbeitsstand)
 - Grundlage: TASK_1051 bringt den Flow durch LZ/Drop/Deboard.

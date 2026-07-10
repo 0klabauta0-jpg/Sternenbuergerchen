@@ -183,7 +183,8 @@ func _run_trace() -> void:
 	_finish_stage("complete")
 
 	_begin_stage("first_contact")
-	_position_first_enemy_near_fireteam(controller, "ft1")
+	var contact_fixture_ready: bool = _position_first_enemy_near_fireteam(controller, combat_driver, "ft1")
+	print("TRACE first_contact_fixture los_valid=%s" % [str(contact_fixture_ready)])
 	_update_contact_tracking(combat_driver)
 	controller.call("refresh_contact_overlay")
 	controller.call("refresh_fireteam_security_state")
@@ -364,17 +365,28 @@ func _drop_fireteam_on_shipcard(screen: Control, fireteam_id: String, craft_id: 
 			return
 
 
-func _position_first_enemy_near_fireteam(controller: Node, fireteam_id: String) -> void:
-	var friendlies: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
+func _position_first_enemy_near_fireteam(controller: Node, combat_driver: Node, fireteam_id: String) -> bool:
+	var friendlies: Array = []
+	for friendly_variant in Array(combat_driver.call("_get_friendly_combat_units")):
+		if friendly_variant != null and friendly_variant.has_method("get_fireteam_id") and String(friendly_variant.call("get_fireteam_id")).strip_edges().to_lower() == fireteam_id.strip_edges().to_lower():
+			friendlies.append(friendly_variant)
 	var enemies: Array = Array(controller.call("_get_all_enemy_units", false))
 	if enemies.is_empty():
 		enemies = Array(controller.call("_get_all_enemy_units", true))
 	if friendlies.is_empty() or enemies.is_empty():
-		return
+		return false
 	var friendly := friendlies[0] as Node2D
 	var enemy := enemies[0] as Node2D
-	if friendly != null and enemy != null:
-		enemy.global_position = friendly.global_position + Vector2(58.0, 0.0)
+	if friendly == null or enemy == null or combat_driver == null:
+		return false
+	for offset in [
+		Vector2(48.0, 0.0), Vector2(-48.0, 0.0), Vector2(0.0, 48.0), Vector2(0.0, -48.0),
+		Vector2(96.0, 0.0), Vector2(-96.0, 0.0), Vector2(0.0, 96.0), Vector2(0.0, -96.0),
+	]:
+		enemy.global_position = Vector2(controller.call("_snap_world_position_to_primary_tile", friendly.global_position + offset))
+		if bool(combat_driver.call("_has_valid_los", friendly, enemy)):
+			return true
+	return false
 
 
 func _update_contact_tracking(combat_driver: Node) -> void:
