@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sternenbuergerchen Zwischenbericht - TASK_1042 und Ausblick</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10161a;
+      --panel: #182129;
+      --panel-2: #202b35;
+      --line: #3b4d5c;
+      --text: #edf5f8;
+      --muted: #9fb0bb;
+      --accent: #ffd34d;
+      --cyan: #55d6dc;
+      --green: #70db9d;
+      --red: #ff817a;
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); line-height: 1.5; }
+    header { padding: 28px clamp(18px, 4vw, 52px) 18px; border-bottom: 1px solid var(--line); background: #141d24; }
+    main { width: min(1320px, calc(100vw - 32px)); margin: 0 auto; padding: 24px 0 48px; }
+    h1, h2, h3 { margin: 0; line-height: 1.15; letter-spacing: 0; }
+    h1 { font-size: clamp(28px, 3vw, 42px); }
+    h2 { font-size: 22px; }
+    h3 { font-size: 16px; color: var(--cyan); }
+    p { margin: 8px 0 0; color: var(--muted); }
+    code { color: var(--accent); }
+    button, input, select, textarea { font: inherit; }
+    button { border: 1px solid var(--line); background: #dce5ef; color: #10161a; border-radius: 6px; min-height: 38px; padding: 8px 12px; cursor: pointer; }
+    button.secondary { background: transparent; color: var(--text); }
+    button.choice.active { border-color: var(--accent); background: var(--accent); color: #16120a; }
+    input, select, textarea, [contenteditable="true"] {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #0d1318;
+      color: var(--text);
+      padding: 8px 10px;
+    }
+    textarea { min-height: 118px; resize: vertical; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #74848e; }
+    .meta-row, .toolbar, .tabbar, .button-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .meta-row { margin-top: 14px; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; color: var(--muted); background: rgba(255,255,255,0.03); font-size: 13px; }
+    .pill.good { color: var(--green); border-color: rgba(112,219,157,0.5); }
+    .pill.warn { color: var(--accent); border-color: rgba(255,211,77,0.55); }
+    .pill.bad { color: var(--red); border-color: rgba(255,129,122,0.6); }
+    .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; margin-top: 18px; }
+    .card { grid-column: span 4; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+    .wide { grid-column: span 8; }
+    .full { grid-column: 1 / -1; }
+    .stack { display: grid; gap: 12px; }
+    .list { margin: 10px 0 0; padding-left: 18px; color: var(--text); }
+    .list li { margin: 6px 0; }
+    .status-box { border-left: 4px solid var(--accent); background: rgba(255,211,77,0.08); padding: 12px; border-radius: 6px; color: var(--text); }
+    .status-box.good { border-left-color: var(--green); background: rgba(112,219,157,0.08); }
+    .status-box.info { border-left-color: var(--cyan); background: rgba(85,214,220,0.08); }
+    .status-box.bad { border-left-color: var(--red); background: rgba(255,129,122,0.08); }
+    .checkline { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; color: var(--text); padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .checkline:last-child { border-bottom: 0; }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; }
+    .metric { display: grid; gap: 4px; padding: 12px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: var(--panel-2); }
+    .metric strong { font-size: 22px; line-height: 1; }
+    .metric span { color: var(--muted); font-size: 13px; }
+    .timeline { display: grid; gap: 10px; margin-top: 12px; }
+    .timeline-item { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; }
+    .timeline-item strong { display: block; color: var(--text); }
+    .timeline-item span { color: var(--muted); }
+    .tabbar { margin-top: 22px; border-bottom: 1px solid var(--line); }
+    .tab { border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: transparent; color: var(--muted); border-bottom: 0; }
+    .tab.active { background: var(--panel); color: var(--text); border-color: var(--line); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .toolbar { position: sticky; bottom: 0; z-index: 5; justify-content: space-between; background: rgba(16,22,26,0.96); border-top: 1px solid var(--line); padding: 12px clamp(18px, 4vw, 52px); backdrop-filter: blur(8px); }
+    .toolbar textarea { min-height: 74px; max-height: 180px; flex: 1 1 420px; font-family: Consolas, "Courier New", monospace; font-size: 12px; }
+    .export-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .export-status { color: var(--muted); font-size: 12px; }
+    .export-status[data-tone="good"] { color: var(--green); }
+    .export-status[data-tone="warn"] { color: var(--accent); }
+    @media (max-width: 900px) {
+      .card, .wide { grid-column: 1 / -1; }
+      .toolbar { position: static; }
+    }
+  </style>
+</head>
+<body data-report-id="spielstand_zwischenbericht_task1042_ausblick_2026_07_10" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>Zwischenbericht: First Contact integriert</h1>
+    <p>Stand 2026-07-10: Der Spielerweg bis zum ersten taktischen Kontakt ist als zusammenhaengender, read-only pruefbarer Ablauf beschrieben und gegen stille Command-, HUD- und Multiplayer-Seiteneffekte abgesichert. Der naechste Beweis muss jetzt wieder im echten Spiel stattfinden.</p>
+    <div class="meta-row">
+      <span class="pill good">Branch: task/task-1042-first-contact-integrated-playtest</span>
+      <span class="pill good">TASK_1042: 94/94</span>
+      <span class="pill good">TASK_1041/1040/1039 gruen</span>
+      <span class="pill good">Read-only und Multiplayer-Grenze geprueft</span>
+      <span class="pill warn">Echter Integrated Trace noch offen</span>
+      <span class="pill warn">TASK_1043: Player Feel</span>
+      <span class="pill">HTML-Workbench</span>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabbar" aria-label="Reportbereiche">
+      <button class="tab active" type="button" data-tab-target="overview">Stand</button>
+      <button class="tab" type="button" data-tab-target="done">Gemacht</button>
+      <button class="tab" type="button" data-tab-target="gameplay">Spielwirkung</button>
+      <button class="tab" type="button" data-tab-target="friction">Reibung</button>
+      <button class="tab" type="button" data-tab-target="next">Weiter</button>
+      <button class="tab" type="button" data-tab-target="playtest">Notizen</button>
+    </nav>
+
+    <section id="overview" class="tab-panel active">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Kurzfassung</h2>
+          <div class="status-box good">TASK_1042 verbindet die bisher getrennten First-Contact-Bausteine zu einem pruefbaren Ablauf: ENTRY, CONTACT, WHY, NEXT, FIRE/WAIT, GO, FEEDBACK und wieder NEXT.</div>
+          <div class="status-box info" style="margin-top:12px;">Der Ablauf bleibt Anzeige und Analyse. Kein Preview, HUD oder Testservice darf Commands, Bewegung, Schuesse, Schaden oder Multiplayer-Wahrheit erzeugen.</div>
+          <div class="status-box" style="margin-top:12px;">Wichtig: Der neue Service ist noch kein menschlicher Playtest. Ohne echten Trace meldet das Spiel korrekt <code>needs_first_contact_integrated_playtest_trace</code>. Das ist der aktuelle Arbeitsauftrag, kein versteckter Erfolg.</div>
+        </article>
+        <article class="card">
+          <h2>Ampel</h2>
+          <div class="stack">
+            <div class="metric"><strong>gruen</strong><span>94 TASK_1042-Checks, plus 69/67/64 Regressionen, sind auf dem finalen Commit gruen.</span></div>
+            <div class="metric"><strong>gruen</strong><span>Explizit fehlende Traces werden nicht mehr faelschlich als Regression gewertet.</span></div>
+            <div class="metric"><strong>gelb</strong><span>Der sichtbare Release-/Mission-Durchlauf muss noch als echter Trace aufgenommen werden.</span></div>
+            <div class="metric"><strong>rot</strong><span>Weiterer Contract-Aufbau ohne sichtbaren Playtest wuerde das Spiel nicht spuerbar voranbringen.</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="done" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was seit dem letzten Bericht passiert ist</h2>
+          <ul class="list">
+            <li><strong>First Contact als Entscheidungskette gefasst:</strong> Der Spieler soll nicht nur CONTACT sehen, sondern verstehen, warum die Lage riskant ist, was als naechstes entschieden wird und was nach GO passiert.</li>
+            <li><strong>Acceptance-Slice uebernommen:</strong> TASK_1041 liefert die freigegebene CONTACT-/WHY-/NEXT-/FIRE-WAIT-/GO-Lesbarkeit als Quelle.</li>
+            <li><strong>Integrated-Playtest-Service gebaut:</strong> TASK_1042 bewertet Release-/Mission-Kontext, Command-Feedback, Post-GO-Feedback, Rueckkehr zu NEXT und Performance-Budget gemeinsam.</li>
+            <li><strong>Command-Feedback angebunden:</strong> Snapshot, kompakte Integrated-Playtest-Line, Status und Gate stehen im bestehenden Controller-Pfad zur Verfuegung.</li>
+            <li><strong>Trace-Randfall korrigiert:</strong> <code>trace_available: false</code> bleibt fehlender Trace, auch wenn das Dictionary weitere Metadaten enthaelt.</li>
+            <li><strong>Controller-Test verschaerft:</strong> Die Tests pruefen nicht nur, ob Keys existieren, sondern ob Line, Status und Gate wirklich zum eingebetteten Snapshot passen.</li>
+            <li><strong>Unabhaengige Review geschlossen:</strong> Nach dem Fix blieben keine Critical-, Important- oder Minor-Befunde fuer TASK_1042 offen.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Was daran gut ist</h2>
+          <p>Der technische Gewinn ist eine gemeinsame Sprache fuer den ersten taktischen Moment. Wenn der Spieler spaeter sagt „ich wusste nicht, warum das schlecht war“, kann der Trace genau CONTACT, WHY, FIRE/WAIT, GO und FEEDBACK auseinanderhalten.</p>
+          <label style="margin-top:12px; display:block;">Berichtsgewichtung
+            <select data-export-key="done.report_weight">
+              <option value="player_feel" selected>Player Feel / echter Run</option>
+              <option value="release_path">Release-Pfad</option>
+              <option value="tactical_clarity">Tactical Clarity</option>
+              <option value="multiplayer">Multiplayer-Grenze</option>
+            </select>
+          </label>
+        </article>
+      </div>
+    </section>
+
+    <section id="gameplay" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was sich dadurch am Spiel geaendert hat</h2>
+          <ul class="list">
+            <li><strong>Die Erwartung ist klarer:</strong> Vor GO muss der Spieler Kontakt, Risiko und Wahl verstehen; nach GO muss die Folge sichtbar sein.</li>
+            <li><strong>Feuerdisziplin bekommt Bedeutung:</strong> FIRE/WAIT ist Teil der Entscheidung und nicht nur zufaelliges Autoschiessen.</li>
+            <li><strong>Der Loop hat einen Rueckgriff:</strong> FEEDBACK endet nicht im Event-Log, sondern fuehrt wieder zu einer sichtbaren NEXT-Entscheidung.</li>
+            <li><strong>Mehrspieler bleibt vorbereitet:</strong> HUD und Preview lesen autoritative Snapshots; sie setzen keine eigene Team-, Command- oder Combat-Wahrheit.</li>
+            <li><strong>Noch nicht sichtbar bewiesen:</strong> Ob sich das im Release-Fenster wirklich klar und angenehm anfuehlt, ist genau der offene TASK_1043-Befund.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Designrichtung</h2>
+          <p>Die Richtung bleibt Commander-Taktik: Informationen vor der Entscheidung, klare Freigabe durch GO und unmittelbares Feedback. Der naechste Schritt soll diese Idee nicht weiter beschreiben, sondern am Bildschirm beweisen.</p>
+          <div class="button-row" data-choice-group="gameplay.direction" style="margin-top:12px;">
+            <button class="choice active" type="button" data-choice-value="real_playtest">Echter Playtest</button>
+            <button class="choice" type="button" data-choice-value="runtime_fix">Runtime-Fix</button>
+            <button class="choice" type="button" data-choice-value="new_feature">Neues Feature</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="friction" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Wo es noch reibt</h2>
+          <ul class="list">
+            <li><strong>Zu viele Gate-Tasks:</strong> Die letzten Slices sind sauber, aber ein weiterer reiner Snapshot-Contract wuerde kaum neues Spielerlebnis erzeugen.</li>
+            <li><strong>Kein echter TASK_1042-Trace:</strong> Der gute Trace ist reproduzierbar im Verifier, aber noch kein beobachteter menschlicher Release-/Mission-Durchlauf.</li>
+            <li><strong>UI-Wahrheit ist getrennt, UI-Gefuehl aber offen:</strong> Technisch stimmt die Grenze; ob CONTACT, WHY, NEXT und FIRE/WAIT schnell genug gelesen werden, muss ein Spieler beantworten.</li>
+            <li><strong>Multiplayer ist eine Grenze, kein bewiesener Match:</strong> Die Architektur verhindert lokale HUD-Wahrheit, ersetzt aber noch keinen Zwei-Client-Lauf mit unterschiedlichen Fireteams und Dropships.</li>
+            <li><strong>Performance ist Gate-Evidence:</strong> Das Budgetfeld ist vorhanden; ein echter grosser Kartenlauf muss weiterhin Frametimes und Refresh-Hotpaths liefern.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h2>Risiko</h2>
+          <div class="status-box bad">Groesstes Produkt-Risiko: Der Projektfortschritt wird an gruenen Contracts gemessen, obwohl der Spieler im Fenster noch keinen neuen Unterschied spueren kann.</div>
+          <div class="status-box info" style="margin-top:12px;">Gegenmittel: TASK_1043 als echter Player-Feel-Befund. Danach genau den staerksten sichtbaren oder funktionalen Engpass beheben, neu bauen und denselben Lauf wiederholen.</div>
+        </article>
+      </div>
+    </section>
+
+    <section id="next" class="tab-panel">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Was ich als naechstes machen will</h2>
+          <div class="timeline">
+            <div class="timeline-item"><strong>1. TASK_1043 als echten Player-Feel-Lauf schneiden</strong><span>Release oder reproduzierbarer F6-Pfad: Mission erreichen, ersten Kontakt ausloesen, WHY lesen, FIRE/WAIT waehlen, GO bestaetigen, FEEDBACK und NEXT beobachten.</span></div>
+            <div class="timeline-item"><strong>2. Trace und Sichtnotizen gemeinsam erfassen</strong><span>Nicht nur Pass/Fail: Einstieg, Verzoegerung, unklare Labels, falsche Prioritaet, Frametimes und Multiplayer-Grenze festhalten.</span></div>
+            <div class="timeline-item"><strong>3. Einen realen Engpass beheben</strong><span>Je nach Befund UI-Hierarchie, Feedback-Timing, Command-Uebergang oder Runtime-Datenfluss korrigieren. Kein weiterer allgemeiner Gate-Baukasten.</span></div>
+            <div class="timeline-item"><strong>4. Zwei Fireteams und zwei Dropships pruefen</strong><span>Unterschiedliche Teams/Schiffe duerfen weder Auswahl, Boarding, Anzeige noch GO-/Feedback-Zuordnung vermischen.</span></div>
+            <div class="timeline-item"><strong>5. Danach wieder Produktbreite</strong><span>Kleines Szenario, Map-Inhalt, KI-Taktik und sichtbarer Multiplayer-Smoke werden gegen denselben runden Spielpfad priorisiert.</span></div>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Naechste Haken</h2>
+          <label class="checkline"><input type="checkbox" checked data-export-key="next.task1042_done"> TASK_1042 integriert</label>
+          <label class="checkline"><input type="checkbox" data-export-key="next.real_trace"> Echter First-Contact-Trace</label>
+          <label class="checkline"><input type="checkbox" data-export-key="next.player_feel"> TASK_1043 Player Feel</label>
+          <label class="checkline"><input type="checkbox" data-export-key="next.runtime_fix"> Sichtbarer Runtime-/UI-Fix</label>
+          <label class="checkline"><input type="checkbox" data-export-key="next.two_team_smoke"> Zwei-Team-/Dropship-Smoke</label>
+        </article>
+      </div>
+    </section>
+
+    <section id="playtest" class="tab-panel">
+      <div class="grid">
+        <article class="card full">
+          <h2>Deine Playtest-Notizen</h2>
+          <p>Diese Notizen bilden den echten TASK_1043-Eingang. Nach dem Lauf kannst du sie per <code>JSON exportieren</code> strukturiert zurueckgeben.</p>
+          <div class="grid" style="margin-top:12px;">
+            <article class="card">
+              <h3>Startpfad</h3>
+              <label class="checkline"><input type="checkbox" data-export-key="playtest.entry_reached"> Release-/Mission-Entry erreicht</label>
+              <label class="checkline"><input type="checkbox" data-export-key="playtest.contact_clear"> CONTACT sofort verstanden</label>
+              <label class="checkline"><input type="checkbox" data-export-key="playtest.why_clear"> WHY/Risiko klar</label>
+            </article>
+            <article class="card">
+              <h3>Entscheidung</h3>
+              <label class="checkline"><input type="checkbox" data-export-key="playtest.fire_wait_clear"> FIRE/WAIT ist eine echte Wahl</label>
+              <label class="checkline"><input type="checkbox" data-export-key="playtest.go_separate"> GO bleibt separat</label>
+              <label class="checkline"><input type="checkbox" data-export-key="playtest.feedback_next"> FEEDBACK fuehrt zu NEXT</label>
+            </article>
+            <article class="card">
+              <h3>Bewertung</h3>
+              <div class="button-row" data-choice-group="playtest.rating">
+                <button class="choice active" type="button" data-choice-value="not_run">Noch nicht gelaufen</button>
+                <button class="choice" type="button" data-choice-value="round">Rund spielbar</button>
+                <button class="choice" type="button" data-choice-value="needs_fix">Braucht Fix</button>
+              </div>
+            </article>
+          </div>
+          <label style="margin-top:14px; display:block;">Beobachtung
+            <textarea data-export-key="playtest.observation" placeholder="Wo war der erste Moment, an dem du nicht wusstest, was oder warum als naechstes passiert?"></textarea>
+          </label>
+          <div style="margin-top:14px;" contenteditable="true" data-note-key="playtest.free_notes" data-placeholder="Freie Notizen zu Lesbarkeit, Timing, Performance, Fireteams, Dropships und Multiplayer-Grenzen..."></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="toolbar">
+    <div class="export-actions">
+      <button id="exportJsonButton" type="button">JSON exportieren</button>
+      <button id="chooseExportFolderButton" class="secondary" type="button">Reports-Ordner verbinden</button>
+      <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+      <label class="secondary" style="display:inline-flex;gap:8px;align-items:center;">
+        JSON importieren
+        <input id="importJsonInput" type="file" accept="application/json,.json" style="width:180px;">
+      </label>
+      <span id="exportStatus" class="export-status">Export: lokal per file://; optional docs/reports als Ordner waehlen.</span>
+    </div>
+    <textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea>
+  </footer>
+
+  <script>
+    (function () {
+      const reportId = document.body.dataset.reportId || "html_workbench";
+      const schema = document.body.dataset.reportSchema || "sternenbuergerchen.html_workbench.v1";
+      const output = document.getElementById("jsonOutput");
+      const exportStatus = document.getElementById("exportStatus");
+      let exportDirectoryHandle = null;
+      let exportSequence = 0;
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+      function getPath(source, path) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        let cursor = source;
+        for (const part of parts) {
+          if (!cursor || typeof cursor !== "object" || !(part in cursor)) return undefined;
+          cursor = cursor[part];
+        }
+        return cursor;
+      }
+      function readControlValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        if (element.type === "number" || element.type === "range") return Number(element.value);
+        return element.value;
+      }
+      function setExportStatus(message, tone) {
+        if (!exportStatus) return;
+        exportStatus.textContent = message;
+        exportStatus.dataset.tone = tone || "";
+      }
+      function buildExportFilename(exportedAt) {
+        exportSequence += 1;
+        const stamp = String(exportedAt || new Date().toISOString()).replace(/[:.]/g, "-");
+        return `${reportId}_${stamp}_${String(exportSequence).padStart(2, "0")}.json`;
+      }
+      function supportsFolderExport() {
+        return typeof window.showDirectoryPicker === "function";
+      }
+      async function requestExportFolder() {
+        if (!supportsFolderExport()) {
+          setExportStatus("Ordner-Export nicht verfuegbar: Browser-Download bleibt aktiv.", "warn");
+          return null;
+        }
+        try {
+          setExportStatus("Bitte den docs/reports-Ordner auswaehlen. Danach schreibt Export neue JSON-Dateien dort hinein.", "warn");
+          const handle = await window.showDirectoryPicker({ id: "sternenbuergerchen-reports", mode: "readwrite" });
+          exportDirectoryHandle = handle;
+          setExportStatus(`Export-Ordner verbunden: ${handle.name}.`, "good");
+          return handle;
+        } catch (error) {
+          setExportStatus("Ordner-Auswahl abgebrochen: Browser-Download bleibt aktiv.", "warn");
+          return null;
+        }
+      }
+      async function hasWritePermission(handle) {
+        if (!handle) return false;
+        if (typeof handle.queryPermission !== "function" || typeof handle.requestPermission !== "function") return true;
+        const options = { mode: "readwrite" };
+        if (await handle.queryPermission(options) === "granted") return true;
+        return await handle.requestPermission(options) === "granted";
+      }
+      async function writeToExportFolder(text, fileName, promptForFolder) {
+        if (!exportDirectoryHandle && promptForFolder) await requestExportFolder();
+        if (!exportDirectoryHandle) return false;
+        if (!(await hasWritePermission(exportDirectoryHandle))) {
+          setExportStatus("Keine Schreibfreigabe fuer den Export-Ordner: Browser-Download bleibt aktiv.", "warn");
+          return false;
+        }
+        try {
+          const fileHandle = await exportDirectoryHandle.getFileHandle(fileName, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(text);
+          await writable.close();
+          setExportStatus(`Gespeichert: ${exportDirectoryHandle.name}/${fileName}`, "good");
+          return true;
+        } catch (error) {
+          setExportStatus(`Ordner-Export fehlgeschlagen: ${error && error.message ? error.message : error}`, "warn");
+          return false;
+        }
+      }
+      function downloadExport(text, fileName) {
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+      function buildPayload() {
+        const payload = {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: new Date().toISOString(),
+          controls: {},
+          notes: {},
+          active_choices: {},
+          computed: {
+            current_focus: "TASK_1043 echter First-Contact-Player-Feel-Lauf",
+            recommended_after_gate: "Tactical Decision Clarity wieder in spielbaren Pfad ziehen",
+            source_report: "TASK_1042 First Contact Integrated Playtest"
+          },
+          metadata: {
+            branch: "task/release-first-exchange-player-readability-polish-review",
+            created_for_task: "TASK_1042/TASK_1043",
+            generated_on: "2026-07-09",
+            report_kind: "interim_status_workbench"
+          }
+        };
+        document.querySelectorAll("[data-export-key]").forEach((element) => {
+          const value = readControlValue(element);
+          if (value !== undefined) setPath(payload.controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach((element) => {
+          setPath(payload.notes, element.dataset.noteKey, element.innerText.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach((group) => {
+          const active = group.querySelector(".choice.active");
+          if (active) setPath(payload.active_choices, group.dataset.choiceGroup, active.dataset.choiceValue || active.textContent.trim());
+        });
+        return payload;
+      }
+      function renderPayload() {
+        const text = JSON.stringify(buildPayload(), null, 2);
+        output.value = text;
+        return text;
+      }
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
+          document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.remove("active"));
+          button.classList.add("active");
+          document.getElementById(button.dataset.tabTarget).classList.add("active");
+        });
+      });
+      document.querySelectorAll(".choice").forEach((button) => {
+        button.addEventListener("click", () => {
+          const group = button.closest("[data-choice-group]");
+          if (!group) return;
+          group.querySelectorAll(".choice").forEach((item) => item.classList.remove("active"));
+          button.classList.add("active");
+          renderPayload();
+        });
+      });
+      document.addEventListener("input", renderPayload);
+      document.getElementById("chooseExportFolderButton").addEventListener("click", requestExportFolder);
+      document.getElementById("copyJsonButton").addEventListener("click", async () => {
+        const text = renderPayload();
+        try {
+          await navigator.clipboard.writeText(text);
+          setExportStatus("JSON in die Zwischenablage kopiert.", "good");
+        } catch (error) {
+          setExportStatus("Kopieren nicht erlaubt: JSON steht im Textfeld.", "warn");
+        }
+      });
+      document.getElementById("exportJsonButton").addEventListener("click", async () => {
+        const text = renderPayload();
+        const fileName = buildExportFilename(JSON.parse(text).exported_at);
+        const wroteFile = await writeToExportFolder(text, fileName, false);
+        if (!wroteFile) {
+          downloadExport(text, fileName);
+          setExportStatus(`Download erstellt: ${fileName}`, "good");
+        }
+      });
+      document.getElementById("importJsonInput").addEventListener("change", async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        try {
+          const payload = JSON.parse(await file.text());
+          document.querySelectorAll("[data-export-key]").forEach((element) => {
+            const value = getPath(payload.controls || {}, element.dataset.exportKey);
+            if (value === undefined) return;
+            if (element.type === "checkbox") element.checked = Boolean(value);
+            else element.value = String(value);
+          });
+          document.querySelectorAll("[data-note-key]").forEach((element) => {
+            const value = getPath(payload.notes || {}, element.dataset.noteKey);
+            if (value !== undefined) element.innerText = String(value);
+          });
+          document.querySelectorAll("[data-choice-group]").forEach((group) => {
+            const value = getPath(payload.active_choices || {}, group.dataset.choiceGroup);
+            if (value === undefined) return;
+            group.querySelectorAll(".choice").forEach((item) => {
+              item.classList.toggle("active", String(item.dataset.choiceValue || item.textContent.trim()) === String(value));
+            });
+          });
+          renderPayload();
+          setExportStatus("JSON importiert.", "good");
+        } catch (error) {
+          setExportStatus(`Import fehlgeschlagen: ${error && error.message ? error.message : error}`, "warn");
+        }
+      });
+      renderPayload();
+    })();
+  </script>
+</body>
+</html>
