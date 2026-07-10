@@ -3,7 +3,7 @@ extends RefCounted
 
 const SCHEMA_VERSION: int = 1
 const SNAPSHOT_TYPE_STATE: String = "state"
-const TRANSFER_STATE_SNAPSHOT: String = "unreliable_ordered"
+const TRANSFER_STATE_SNAPSHOT: String = "unreliable"
 const TRANSFER_VITAL_DELTA: String = "reliable"
 const TRANSFER_MISSION_RESULT: String = "reliable"
 const TRANSFER_START_LOAD: String = "reliable"
@@ -83,9 +83,11 @@ func normalize_display_context(context: Dictionary) -> Dictionary:
 func get_transfer_contract() -> Dictionary:
 	return {
 		"state_snapshot": {
-			"rpc": "_receive_tick_state",
+			"rpc": "_receive_tick_state_chunk",
 			"mode": TRANSFER_STATE_SNAPSHOT,
-			"purpose": "frequent unit/runtime/objective/tactical display state",
+			"purpose": "compressed packetized unit/runtime/objective/tactical display state",
+			"chunk_payload_budget_bytes": 1000,
+			"reassembly_tick_guard": true,
 		},
 		"vital_delta": {
 			"rpc": "_receive_vital_state_updates",

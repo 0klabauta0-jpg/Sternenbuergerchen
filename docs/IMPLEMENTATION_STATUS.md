@@ -148,6 +148,15 @@
 - Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
 - Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
 
+### TASK_1083 - Two-Instance ROE Ownership Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1083_two_instance_roe_ownership_playtest.md`, `docs/dev/multiplayer_snapshot_replication_contract.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_607, TASK_1082, TASK_221
+- Stand: Zwei getrennte Mission-Subtrees nutzen ein offenes lokales ENet-Paar und jeweils eine eigene `MultiplayerAPI`. Der Client-Fire-Rule-Setter erreicht den Host per RPC, Host-Tick committed ROE/Revision und der Client uebernimmt denselben State. Akzeptanz und Wrong-Owner-Reject erscheinen als kompaktes read-only Feedback.
+- Ursache/Fix: TASK_607 schloss das ENet-Paar vor den Mission-Instanzen und konnte den echten Button-/RPC-Pfad nicht pruefen. Der neue Lauf fand zusaetzlich einen 14,7-KB-State oberhalb der MTU. Snapshots werden jetzt binaer/ZSTD komprimiert, in ungeordnete maximal 1000 Byte grosse `unreliable`-Chunks geteilt und nur vollstaendig pro Tick angewendet.
+- Risiken/offen: Lokales ENet ersetzt keinen Internet-/NAT-/Latenztest. Unvollstaendige alte Chunks werden verworfen; Interest Management bleibt spaetere Skalierungsarbeit. Ein manueller Zwei-Fenster-Sichttest kann die Textwirkung bestaetigen. TASK_284 bleibt 63/64 wegen der getrennten Release-Deep-Link-Runtime-Mutation.
+- Lokale Pruefung: TASK_1083 24/24, TASK_1082 21/21, TASK_168 20/20, TASK_169 15/15, TASK_221 63/63, TASK_281 33/33 und TASK_607 41/41 gruen. Echter Lauf: 14.740 Raw-Bytes -> 2.282 Wire-Bytes / 3 Chunks, Pack 151 us, Reassembly/Apply 1.590 us; Reverse-Order-Reassembly gruen. Abschlusschecks folgen.
+- Naechster Schritt: `TASK_1084 - Release Deep-Link Runtime Authority Repair`: die im Audit belegten direkten `set_runtime_status`-Aufrufe aus MetaLayerFlow in einen autoritativen Test-Setup-/Command-Pfad verschieben.
+
 ### TASK_1082 - Multiplayer ROE Authority And Replication
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1082_multiplayer_roe_authority_and_replication.md`, `docs/dev/mission_command_feedback_contract.md`, `scripts/multiplayer/multiplayer_command_contract.gd`, `scripts/multiplayer/multiplayer_snapshot_contract.gd`, TASK_281, TASK_1081
@@ -9880,9 +9889,9 @@ Die Kenney `corridor_wallCorner_XX.png`-Dateien benennen die Innenseite der Kurv
 ### TASK_168 - Multiplayer Snapshot Replication Contract
 - Status: implementiert
 - Stand: `scripts/multiplayer/multiplayer_snapshot_contract.gd` definiert und normalisiert das V1-Snapshot-Schema mit `tick`, `units`, `vital_updates`, `objective`, `dropship`, `contacts` und `mission_result`.
-- Stand: `SimulationRoot` baut State-Snapshots zentral ueber diesen Contract, sendet sie als `unreliable_ordered`, behaelt Vital-Deltas als `reliable` bei und stellt Snapshot-Debugwerte fuer letzten Tick, Apply-Count, Out-of-order-Count und fehlende Units bereit.
+- Stand: `SimulationRoot` baut State-Snapshots zentral ueber diesen Contract, sendet sie nach TASK_1083 ZSTD-komprimiert als ungeordnete `unreliable`-Chunks bis 1000 Byte Nutzlast, behaelt Vital-Deltas als `reliable` bei und stellt Snapshot-/Transport-Debugwerte fuer Tick, Apply, Chunkzahl, Raw-/Wire-Bytes und Reassembly bereit.
 - Stand: Client-Anwendung ueber `apply_multiplayer_snapshot()` ignoriert alte oder doppelte Ticks, wendet Unit-/Objective-State nur als Spiegelung an und enqueued keine Commands oder Effects. `MissionCombatLoopDriver` speist Contacts/Mission-Result ein; `MissionTacticalSandboxController` speist Dropship-Anzeigezustand ein.
-- Offene Punkte: Prediction, Rollback, Interest Management und dedizierter Server bleiben bewusst ausserhalb dieses Tasks. Der sichtbare Zwei-Instanzen-Test bleibt als manuelle Abnahme offen.
+- Offene Punkte: Prediction, Rollback, Interest Management und dedizierter Server bleiben bewusst ausserhalb dieses Tasks. TASK_1083 belegt inzwischen den echten lokalen Zwei-Instanzen-RPC-/Snapshot-Pfad; ein visueller Zwei-Fenster-Screenshot bleibt manuelle Abnahme.
 - Risiken: Snapshot-Felder muessen klein bleiben, damit die Kopplung nicht waechst; neue Felder sollen ueber den Contract laufen statt ad hoc in UI oder 3D-View.
 - Lokale Pruefung: `task_168_multiplayer_snapshot_contract_verifier.gd`, `task_160_tactical_playability_verifier.gd` und `git diff --check` laufen gruen. Der manuelle Zwei-Instanzen-Smoke wurde nicht ausgefuehrt.
 - Naechster Schritt: Snapshot-Felder erst erweitern, wenn ein konkreter Folge-Task sie benoetigt.

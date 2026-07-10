@@ -10,7 +10,7 @@ Der Multiplayer-Snapshot-Pfad ist eine reine Server-zu-Client-Spiegelung. Client
 Pflichtfelder:
 - `schema_version`: aktuell `1`
 - `snapshot_type`: `state`
-- `transfer_mode`: `unreliable_ordered`
+- `transfer_mode`: `unreliable` (Chunk-Reihenfolge wird ueber `tick` und `chunk_index` selbst aufgeloest)
 - `tick`
 - `units`
 - `vital_updates`
@@ -39,7 +39,7 @@ Anzeige-/Mission-Felder:
 - `mission_result`: Ergebnis, Gewinnerteam, Win-Condition, Dauer und optionale Teamstates.
 
 ## Transfer-Vertrag
-- State-Snapshots: `unreliable_ordered` ueber `SimulationRoot._receive_tick_state`.
+- State-Snapshots: `unreliable` als komprimierte, maximal 1000 Byte grosse Nutzlast-Chunks ueber `SimulationRoot._receive_tick_state_chunk`. Chunks duerfen in beliebiger Reihenfolge eintreffen; der Client setzt nur vollstaendige Ticks zusammen und gibt danach denselben Dictionary-State an `apply_multiplayer_snapshot()` weiter.
 - Vital-Deltas: `reliable` ueber `SimulationRoot._receive_vital_state_updates`.
 - Mission-Result: `reliable`, bleibt fuer bestehende Combat-Result-RPCs und wird zusaetzlich im Snapshot-Schema gespiegelt.
 - Start/Load: `reliable`, bleibt bei der Session-/Lobby-Schicht aus TASK_167.
@@ -60,6 +60,7 @@ Debug:
 - `missing_unit_count`
 - `last_reject_reason`
 - `transfer_contract`
+- `get_snapshot_transport_debug_snapshot()`: Chunkzahl, maximale Chunk-Nutzlast, Raw-/Wire-Bytes, Reassembly- und Fehlerzaehler.
 
 ## Einbindung bestehender Mission
 - `MissionCombatLoopDriver` publiziert Contacts und Mission-Result in den Snapshot-Kontext.

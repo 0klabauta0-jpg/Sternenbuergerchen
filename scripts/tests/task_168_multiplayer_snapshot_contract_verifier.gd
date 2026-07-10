@@ -72,7 +72,7 @@ func _test_snapshot_schema_contains_v1_fields() -> void:
 	)
 	var snapshot: Dictionary = simulation_root.call("build_multiplayer_snapshot")
 	_assert(int(snapshot.get("schema_version", 0)) == 1, "Snapshot carries schema version")
-	_assert(String(snapshot.get("transfer_mode", "")) == "unreliable_ordered", "State snapshot declares unreliable ordered transfer")
+	_assert(String(snapshot.get("transfer_mode", "")) == "unreliable", "State snapshot declares unordered unreliable chunk transfer")
 	_assert(int(snapshot.get("tick", 0)) == 12, "Snapshot carries the authoritative tick")
 	_assert(Array(snapshot.get("units", [])).size() == 1, "Snapshot includes unit state")
 	_assert(String(Dictionary(Array(snapshot.get("units", []))[0]).get("team_id", "")) == "team_alpha", "Snapshot includes unit team identity")

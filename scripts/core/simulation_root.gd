@@ -5,6 +5,7 @@ signal tick_processed(tick: int)
 signal damage_effect_resolved(result: Dictionary)
 signal fire_rule_committed(state: Dictionary)
 signal multiplayer_snapshot_applied(snapshot: Dictionary)
+signal network_command_result_received(result: Dictionary)
 
 const MOVE_SPEED_PER_SECOND: float = 80.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
@@ -23,6 +24,9 @@ const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mu
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
+const SNAPSHOT_CHUNK_PAYLOAD_BYTES: int = 1000
+const SNAPSHOT_MAX_CHUNK_COUNT: int = 256
+const SNAPSHOT_COMPRESSION_MODE: int = FileAccess.COMPRESSION_ZSTD
 
 const HIT_CHANCE_MIN: float = 0.05
 const HIT_CHANCE_MAX: float = 0.95
@@ -80,6 +84,7 @@ var _peer_team_assignments: Dictionary = {1: "team_alpha"}
 var _peer_role_assignments: Dictionary = {1: "commander"}
 var _peer_fireteam_assignments: Dictionary = {}
 var _last_network_command_rejection: Dictionary = {}
+var _last_network_command_result: Dictionary = {}
 var _network_command_accept_count: int = 0
 var _network_command_reject_count: int = 0
 var _multiplayer_snapshot_context: Dictionary = {}
@@ -97,6 +102,15 @@ var _last_snapshot_audio_result: Dictionary = {}
 var _audio_event_bus = null
 var _last_broadcast_vital_state_by_unit_id: Dictionary = {}
 var _last_server_state: Dictionary = {}
+var _incoming_snapshot_chunks_by_tick: Dictionary = {}
+var _snapshot_transport_last_chunk_count: int = 0
+var _snapshot_transport_last_max_chunk_payload_bytes: int = 0
+var _snapshot_transport_last_raw_bytes: int = 0
+var _snapshot_transport_last_wire_bytes: int = 0
+var _snapshot_transport_reassembled_count: int = 0
+var _snapshot_transport_reassembly_failure_count: int = 0
+var _snapshot_transport_last_pack_usec: int = 0
+var _snapshot_transport_last_reassembly_usec: int = 0
 var _combat_rng := RandomNumberGenerator.new()
 var _hpa_navigation_graph = null
 var _hpa_pathfinder = HPA_PATHFINDER_SCRIPT.new()
@@ -512,6 +526,10 @@ func get_last_server_state() -> Dictionary:
 	return _last_server_state.duplicate(true)
 
 
+func get_last_network_command_result() -> Dictionary:
+	return _last_network_command_result.duplicate(true)
+
+
 func get_authoritative_fire_rule_state(fireteam_id: String) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty() or not _authoritative_fire_rules_by_fireteam.has(normalized_fireteam_id):
@@ -580,6 +598,24 @@ func get_multiplayer_snapshot_debug_snapshot() -> Dictionary:
 	}
 
 
+func get_snapshot_transport_debug_snapshot() -> Dictionary:
+	return {
+		"schema": "sternenbuergerchen.snapshot_chunk_transport_debug.v1",
+		"chunk_payload_budget_bytes": SNAPSHOT_CHUNK_PAYLOAD_BYTES,
+		"last_chunk_count": _snapshot_transport_last_chunk_count,
+		"last_max_chunk_payload_bytes": _snapshot_transport_last_max_chunk_payload_bytes,
+		"last_raw_bytes": _snapshot_transport_last_raw_bytes,
+		"last_wire_bytes": _snapshot_transport_last_wire_bytes,
+		"reassembled_snapshot_count": _snapshot_transport_reassembled_count,
+		"reassembly_failure_count": _snapshot_transport_reassembly_failure_count,
+		"last_pack_usec": _snapshot_transport_last_pack_usec,
+		"last_reassembly_usec": _snapshot_transport_last_reassembly_usec,
+		"pending_tick_count": _incoming_snapshot_chunks_by_tick.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
 func get_snapshot_audio_debug_snapshot() -> Dictionary:
 	return {
 		"played_count": _snapshot_audio_played_count,
@@ -639,9 +675,36 @@ func request_command(command_dict: Dictionary) -> void:
 		sending_peer_id = 1
 
 	var result: Dictionary = submit_network_command_for_peer(command_dict, sending_peer_id)
+	_send_network_command_result(sending_peer_id, result, command_dict)
 	if not bool(result.get("accepted", false)):
 		push_warning("SimulationRoot rejected a network command: %s." % String(result.get("reason", "unknown")))
 		return
+
+
+@rpc("authority", "reliable")
+func _receive_network_command_result(result: Dictionary) -> void:
+	_last_network_command_result = result.duplicate(true)
+	network_command_result_received.emit(_last_network_command_result.duplicate(true))
+
+
+func _send_network_command_result(peer_id: int, result: Dictionary, command: Dictionary) -> void:
+	var payload: Dictionary = {
+		"schema": "sternenbuergerchen.network_command_result.v1",
+		"accepted": bool(result.get("accepted", false)),
+		"reason": String(result.get("reason", "")).strip_edges(),
+		"category": String(result.get("category", command.get("contract_category", ""))).strip_edges().to_lower(),
+		"command_type": String(result.get("command_type", command.get("command_type", ""))).strip_edges().to_lower(),
+		"team_id": String(result.get("team_id", command.get("team_id", ""))).strip_edges(),
+		"fireteam_id": String(result.get("fireteam_id", command.get("fireteam_id", ""))).strip_edges().to_lower(),
+		"fire_rule": String(command.get("fire_rule", "")).strip_edges().to_lower(),
+		"peer_id": peer_id,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	if _has_active_multiplayer_peer() and multiplayer.is_server() and peer_id > 1:
+		_receive_network_command_result.rpc_id(peer_id, payload)
+		return
+	_receive_network_command_result(payload)
 
 
 func validate_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1) -> Dictionary:
@@ -677,6 +740,56 @@ func submit_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1)
 @rpc("authority", "unreliable_ordered")
 func _receive_tick_state(state_dict: Dictionary) -> void:
 	_apply_remote_state(state_dict)
+
+
+@rpc("authority", "unreliable")
+func _receive_tick_state_chunk(tick: int, chunk_index: int, chunk_count: int, raw_size: int, compressed: bool, chunk: PackedByteArray) -> void:
+	if tick < 0 or chunk_count <= 0 or chunk_count > SNAPSHOT_MAX_CHUNK_COUNT or chunk_index < 0 or chunk_index >= chunk_count:
+		_snapshot_transport_reassembly_failure_count += 1
+		return
+	if chunk.size() > SNAPSHOT_CHUNK_PAYLOAD_BYTES:
+		_snapshot_transport_reassembly_failure_count += 1
+		return
+	var entry: Dictionary = Dictionary(_incoming_snapshot_chunks_by_tick.get(tick, {}))
+	if entry.is_empty() or int(entry.get("chunk_count", -1)) != chunk_count or int(entry.get("raw_size", -1)) != raw_size or bool(entry.get("compressed", false)) != compressed:
+		entry = {
+			"chunk_count": chunk_count,
+			"raw_size": raw_size,
+			"compressed": compressed,
+			"chunks": {},
+		}
+	var chunks: Dictionary = Dictionary(entry.get("chunks", {}))
+	chunks[chunk_index] = chunk.duplicate()
+	entry["chunks"] = chunks
+	_incoming_snapshot_chunks_by_tick[tick] = entry
+	_prune_incoming_snapshot_chunks(tick)
+	if chunks.size() < chunk_count:
+		return
+	var reassembly_started_usec: int = Time.get_ticks_usec()
+	var wire_bytes := PackedByteArray()
+	for index in range(chunk_count):
+		if not chunks.has(index):
+			_snapshot_transport_reassembly_failure_count += 1
+			return
+		wire_bytes.append_array(PackedByteArray(chunks[index]))
+	_incoming_snapshot_chunks_by_tick.erase(tick)
+	var raw_bytes: PackedByteArray = wire_bytes.decompress(raw_size, SNAPSHOT_COMPRESSION_MODE) if compressed else wire_bytes
+	if raw_bytes.size() != raw_size:
+		_snapshot_transport_reassembly_failure_count += 1
+		return
+	var decoded: Variant = bytes_to_var(raw_bytes)
+	if typeof(decoded) != TYPE_DICTIONARY:
+		_snapshot_transport_reassembly_failure_count += 1
+		return
+	_snapshot_transport_reassembled_count += 1
+	_apply_remote_state(Dictionary(decoded))
+	_snapshot_transport_last_reassembly_usec = Time.get_ticks_usec() - reassembly_started_usec
+
+
+func _prune_incoming_snapshot_chunks(latest_tick: int) -> void:
+	for tick_variant in _incoming_snapshot_chunks_by_tick.keys():
+		if int(tick_variant) < latest_tick - 2:
+			_incoming_snapshot_chunks_by_tick.erase(tick_variant)
 
 
 @rpc("authority", "reliable")
@@ -844,11 +957,34 @@ func _broadcast_tick_state() -> void:
 		return
 
 	var state_dict: Dictionary = _build_tick_state()
-	_receive_tick_state.rpc(state_dict)
+	_broadcast_tick_state_chunks(state_dict)
 
 	var vital_updates: Array = _build_vital_state_updates()
 	if not vital_updates.is_empty():
 		_receive_vital_state_updates.rpc(vital_updates)
+
+
+func _broadcast_tick_state_chunks(state_dict: Dictionary) -> void:
+	var pack_started_usec: int = Time.get_ticks_usec()
+	var raw_bytes: PackedByteArray = var_to_bytes(state_dict)
+	var compressed_bytes: PackedByteArray = raw_bytes.compress(SNAPSHOT_COMPRESSION_MODE)
+	var use_compression: bool = not compressed_bytes.is_empty() and compressed_bytes.size() < raw_bytes.size()
+	var wire_bytes: PackedByteArray = compressed_bytes if use_compression else raw_bytes
+	var chunk_count: int = maxi((wire_bytes.size() + SNAPSHOT_CHUNK_PAYLOAD_BYTES - 1) / SNAPSHOT_CHUNK_PAYLOAD_BYTES, 1)
+	if chunk_count > SNAPSHOT_MAX_CHUNK_COUNT:
+		push_warning("SimulationRoot snapshot exceeds chunk transport capacity: %d chunks." % chunk_count)
+		return
+	_snapshot_transport_last_chunk_count = chunk_count
+	_snapshot_transport_last_max_chunk_payload_bytes = 0
+	_snapshot_transport_last_raw_bytes = raw_bytes.size()
+	_snapshot_transport_last_wire_bytes = wire_bytes.size()
+	for chunk_index in range(chunk_count):
+		var start_offset: int = chunk_index * SNAPSHOT_CHUNK_PAYLOAD_BYTES
+		var end_offset: int = mini(start_offset + SNAPSHOT_CHUNK_PAYLOAD_BYTES, wire_bytes.size())
+		var chunk: PackedByteArray = wire_bytes.slice(start_offset, end_offset)
+		_snapshot_transport_last_max_chunk_payload_bytes = maxi(_snapshot_transport_last_max_chunk_payload_bytes, chunk.size())
+		_receive_tick_state_chunk.rpc(tick_counter, chunk_index, chunk_count, raw_bytes.size(), use_compression, chunk)
+	_snapshot_transport_last_pack_usec = Time.get_ticks_usec() - pack_started_usec
 
 
 func _build_tick_state() -> Dictionary:
