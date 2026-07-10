@@ -65,6 +65,11 @@ TASK_1036 uebersetzt TASK_1035-Reibung oder einen akzeptierten Befund in konkret
 
 Die Specs duerfen nur Rollen, Style-IDs, Akzente, Mindesthoehen, Textbudgets und kompakte Displaytexte festlegen. Sie erzeugen keine Controls, keine Commands, kein Movement, keine Combat-/Damage-Wirkung und keine Multiplayer-Wahrheit. Ein bereiter Snapshot routet zu `TASK_1037 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice`.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice (TASK_1037)
+TASK_1037 prueft, ob der gepolishte erste Kontakt als kleiner spielbarer Griff lesbar ist. Ein guter Trace bestaetigt: CONTACT gelesen, WHY verstanden, NEXT sichtbar, FIRE/WAIT als Wahl erkennbar, `GO separat`, Feedback fuehrt wieder zu NEXT, HUD bleibt ruhig, Performance fuehlt sich responsiv an, Multiplayer-Grenze bleibt klar und es wurde keine Gameplay-Wahrheit im HUD erzeugt.
+
+Der Playability-Slice bleibt read-only. Ohne Trace bleibt er `needs_first_contact_playability_trace`; fehlende Checks werden als `first_contact_playability_regression_found` benannt; ein bestandener Trace routet zu `TASK_1038 - Release First Decision Loop Two Player Loop Scenario First Contact Real Window Capture`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 TASK_1004 ist der read-only Fensterbeweis-Rahmen fuer den TASK_1003-Round-Loop-Polish. Er erwartet im echten Fenster sichtbare `ROUND`-, `NEXT`- und `GO separat`-Surfaces sowie kurze Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen.
 

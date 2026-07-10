@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1037 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice (implementiert im Arbeitsstand)
+- Grundlage: TASK_1036 First Contact Player Feel Polish.
+- Ziel: CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK und `GO separat` als kleinen spielbaren First-Contact-Griff pruefen.
+- Ergebnis: Read-only Snapshot `blocked | needs_first_contact_playability_trace | first_contact_playability_regression_found | first_contact_playability_slice_passed`.
+- Naechster Schritt: TASK_1038 - Release First Decision Loop Two Player Loop Scenario First Contact Real Window Capture.
+
 ## TASK_1036 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Polish (implementiert im Arbeitsstand)
 - Grundlage: TASK_1035 First Contact Player Feel Findings mit Reibung oder akzeptiertem First-Contact-Befund.
 - Ziel: CONTACT, WHY, NEXT, FEEDBACK, GO und HUD/MP als ruhige read-only Surface-Specs fuer den ersten Kontakt polishen.
