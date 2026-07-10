@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1036 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1036_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish.md`, `docs/tasks/TASK_1035_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactPlayerFeelPolish.build_snapshot()` uebersetzt TASK_1035-Reibung oder einen akzeptierten Player-Feel-Befund in sechs read-only Surface-Specs fuer CONTACT, WHY, NEXT, FEEDBACK, GO und HUD/MP.
+- Stand: Fehlende oder nicht polishbare TASK_1035-Quellen blockieren mit klaren Issues; Rework- und Accepted-Quellen setzen `first_contact_player_feel_polish_ready` und bleiben read-only.
+- Stand: Der Snapshot liefert Polish-Line, NEXT-Griff, GO-Microcopy, HUD-Guidance und Performance-Hinweis, ohne Commands, Movement, Fire-/Damage-Events oder Multiplayer-Wahrheit zu erzeugen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1036 im Command-Feedback als Snapshot, Polish-Line, Surface-Specs und Status.
+- Risiken/offen: TASK_1036 ist noch kein sichtbarer F6-/Release-Playability-Slice. Der naechste Schritt muss die polierten First-Contact-Surfaces in eine kleine spielbare Situation bringen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1036_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish.gd`, Regression TASK_1035, TASK_1034, TASK_1033, `git diff --check`.
+- Naechster Schritt: TASK_1037 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice.
+
 ### TASK_1035 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1035_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings.md`, `docs/tasks/TASK_1034_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

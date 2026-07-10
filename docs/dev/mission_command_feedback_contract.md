@@ -44,6 +44,11 @@ Erwartete Struktur: Ohne bereiten TASK_1033-Hook bleibt `blocked_until_first_con
 
 Erwartete Struktur: Ohne bestandenen TASK_1034-Smoke bleibt `blocked`; ohne Review-Notizen bleibt `needs_first_contact_player_feel_review`; belegte Reibung wird `first_contact_player_feel_rework_needed`; saubere Notizen setzen `accepted_for_first_contact_playability_slice` und `ready_for_first_contact_playability_slice`. Geprueft werden CONTACT-Lesbarkeit, handlungsfaehiges WHY, NEXT-Griff, sichere `GO separat`-Grenze, Feedback-zurueck-zum naechsten Griff, HUD-Ruhe, Responsiveness, Multiplayer-Grenze und taktisches First-Contact-Gefuehl. Der Snapshot setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Polish (TASK_1036)
+`get_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish_snapshot()` ist der read-only Polish-Schnitt nach TASK_1035. Der Snapshot darf nur eine TASK_1035-Quelle mit `first_contact_player_feel_rework_needed` oder `accepted_for_first_contact_playability_slice` lesen und daraus lesbare Surface-Specs fuer den ersten Kontakt ableiten.
+
+Erwartete Struktur: Der Command-Feedback-Snapshot exportiert TASK_1036 als Snapshot, `release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish_line`, `release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_surface_specs` und Status. Die Surface-Specs decken CONTACT, WHY, NEXT, FEEDBACK, GO und HUD/MP ab. Sie sind Anzeige-/Feedback-Vertrag, keine Gameplay-Wahrheit, kein Command-Commit, kein Movement, kein Fire-/Damage-Event und keine Multiplayer-Autoritaet. Ein bereiter Snapshot routet zu `TASK_1037 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice`.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 `get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
 

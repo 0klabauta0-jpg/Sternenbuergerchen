@@ -103,6 +103,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_NEXT_PLAYABLE_SLICE_P
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_RUNTIME_HOOK_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_hook.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_RUNTIME_SMOKE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_smoke.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_PLAYER_FEEL_FINDINGS_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings.gd")
+const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_PLAYER_FEEL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -21452,6 +21453,11 @@ func get_release_first_decision_loop_two_player_loop_scenario_first_contact_play
 	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_PLAYER_FEEL_FINDINGS_SCRIPT.call("build_snapshot", source_runtime_smoke, player_feel_notes)).duplicate(true)
 
 
+func get_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish_snapshot(source_player_feel_findings_override: Dictionary = {}) -> Dictionary:
+	var source_player_feel_findings: Dictionary = source_player_feel_findings_override.duplicate(true) if not source_player_feel_findings_override.is_empty() else get_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings_snapshot()
+	return Dictionary(RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_PLAYER_FEEL_POLISH_SCRIPT.call("build_snapshot", source_player_feel_findings)).duplicate(true)
+
+
 func _build_release_first_decision_loop_two_player_loop_micro_objective_visual_polish_source(micro_objective_capture: Dictionary) -> Dictionary:
 	var outcome_line: String = String(micro_objective_capture.get("source_outcome_line", "")).strip_edges()
 	var mini_objective_state: String = String(micro_objective_capture.get("source_mini_objective_state", "")).strip_edges()
@@ -24956,6 +24962,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_smoke,
 		{}
 	)
+	var release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish: Dictionary = get_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish_snapshot(
+		release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings
+	)
 	var tactical_event_log_display_entries: Array = Array(release_firefight_event_log_display.get("entries", []))
 	var command_feedback_snapshot: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
@@ -25276,6 +25285,10 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings_status": String(release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings.get("status", "")),
 		"release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings_issue_count": int(release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings.get("issue_count", 0)),
 		"release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings_summary_line": String(release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings.get("first_contact_player_feel_summary_line", "")),
+		"release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish": release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish,
+		"release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish_line": String(release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish.get("first_contact_player_feel_polish_line", "")),
+		"release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_surface_specs": Array(release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish.get("first_contact_player_feel_surface_specs", [])).duplicate(true),
+		"release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish_status": String(release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish.get("status", "")),
 		"frontier_probe_playfeel_next_interaction": frontier_probe_next_interaction,
 		"frontier_probe_next_interaction_line": String(frontier_probe_next_interaction.get("next_interaction_line", "")),
 		"frontier_probe_debrief_handoff_feel": frontier_probe_debrief_handoff,
