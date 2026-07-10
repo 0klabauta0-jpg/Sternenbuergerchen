@@ -3,6 +3,7 @@
   "preset_name": "Windows Desktop",
   "export_preset_path": "export_presets.cfg",
   "runtime_export_path": "../Sternenbuergerchen_rel/Sternenbuergerchen_rel.exe",
+  "runtime_provenance_file": "release_build_provenance.json",
   "exclude_filter_patterns": [
     "addons/asset_placer/**",
     "addons/godot_mcp/**",
@@ -17,6 +18,9 @@
     "addons/terrain_3d",
     "addons/netfox",
     "addons/netfox.internals"
+  ],
+  "runtime_script_dependency_roots": [
+    "scripts/tests/"
   ],
   "restore_local_export_preset_after_run": true,
   "release_workflow_script": "scripts/tools/export_runtime_release.ps1",

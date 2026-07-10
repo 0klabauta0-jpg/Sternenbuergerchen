@@ -19,13 +19,21 @@ Nicht ausgeschlossen werden Runtime-Addons und GDExtensions, die im Spielpfad ge
 - `addons/netfox`
 - `addons/netfox.internals`
 
+Der sichtbare Mission-Controller liegt historisch noch unter `scripts/tests/`.
+Bis ein eigener Extraction-Task diesen Legacy-Bridge-Pfad migriert, ist
+`scripts/tests/` deshalb als explizite Runtime-Script-Abhaengigkeit im
+Exportvertrag dokumentiert und darf nicht pauschal ausgeschlossen werden.
+
 ## Workflow
 1. Das Script liest den lokalen `export_presets.cfg`.
 2. Es schreibt einen Backup-Snapshot.
 3. Es ersetzt nur den `exclude_filter` fuer den Exportlauf.
 4. Es ruft Godot mit dem gewaehlten Preset auf und schreibt Godot-stdout/stderr als normales Export-Log.
-5. Es stellt den lokalen Preset wieder her, ausser `-KeepPatchedPreset` ist explizit gesetzt.
-6. Nach dem Export kann `scripts/tools/release_runtime_start_check.ps1` den vertraglichen Spieleordner read-only pruefen und ein Manifest unter `tmp/release_runtime_start_check.json` schreiben.
+5. Nach einem erfolgreichen Export schreibt es `release_build_provenance.json` neben EXE und PCK. Die Datei enthaelt den vollen Git-Commit, Branch, Exportzeit, PCK-Groesse und SHA-256 des PCK.
+6. Es stellt den lokalen Preset wieder her, ausser `-KeepPatchedPreset` ist explizit gesetzt.
+7. Nach dem Export kann `scripts/tools/release_runtime_start_check.ps1` den vertraglichen Spieleordner read-only pruefen und ein Manifest unter `tmp/release_runtime_start_check.json` schreiben.
+
+Der Export verweigert bewusst getrackte, nicht committete Aenderungen. Lokale untracked Arbeitsordner bleiben davon unberuehrt. So kann die Provenance nicht eine Commit-ID behaupten, waehrend der PCK noch uncommitteten Code enthaelt.
 
 ## Release-Startcheck
 Der Startcheck ist kein Launcher und keine Taskleisten-Reparatur. Er liest `data/export_runtime_package_contract.json`, loest `runtime_export_path` auf und prueft:
@@ -37,6 +45,8 @@ Der Startcheck ist kein Launcher und keine Taskleisten-Reparatur. Er liest `data
 - Windows-Temporaerdateien nach ueberschriebenen/gesperrten Runtime-Dateien
 
 Fehlende Pflichtdateien sind ein hartes Fail-Gate. Laufende Prozesse oder `~RF*.TMP`-Dateien erzeugen ein Review-Gate, weil Codex sie ohne explizite Freigabe nicht beendet oder entfernt.
+
+Zusatzlich ist die Build-Provenance Pflicht: Fehlende oder unlesbare Provenance, ein anderer Git-Commit oder ein abweichender PCK-Hash sind harte Fehler. Der Startcheck berechnet den PCK-Hash absichtlich nur als manuellen Release-Gate, nie im Spiel oder einem Runtime-Hotpath.
 
 ## Gepruefter Release-Start
 `scripts/tools/start_release_runtime_checked.ps1` ist der explizite Playtest-Startgriff fuer den geprueften Runtime-Ordner. Ohne Schalter fuehrt er nur Vor- und Nachcheck aus. Mit bewussten Schaltern darf er:

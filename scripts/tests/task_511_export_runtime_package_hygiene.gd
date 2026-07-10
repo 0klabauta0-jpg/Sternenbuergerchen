@@ -58,7 +58,11 @@ func _test_contract_shape(contract: Dictionary) -> void:
 
 func _test_contract_excludes(contract: Dictionary) -> void:
 	var excludes: PackedStringArray = PackedStringArray(Array(contract.get("exclude_filter_patterns", [])))
+	var runtime_script_roots: PackedStringArray = PackedStringArray(Array(contract.get("runtime_script_dependency_roots", [])))
 	for required in REQUIRED_EXCLUDES:
+		if required == "scripts/tests/**":
+			_assert(not excludes.has(required) and runtime_script_roots.has("scripts/tests/"), "Contract documents scripts/tests as an explicit runtime legacy dependency")
+			continue
 		_assert(excludes.has(required), "Contract excludes %s from runtime package" % required)
 	for addon_path in RUNTIME_ADDON_ALLOWLIST:
 		_assert(not _patterns_exclude_path(excludes, addon_path), "Contract does not exclude runtime addon %s" % addon_path)

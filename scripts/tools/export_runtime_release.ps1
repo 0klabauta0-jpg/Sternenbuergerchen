@@ -34,6 +34,74 @@ function Set-OrReplaceLine {
 	return $Content.TrimEnd() + [Environment]::NewLine + $line + [Environment]::NewLine
 }
 
+function Get-GitValue {
+	param(
+		[string]$RepoRoot,
+		[string[]]$Arguments
+	)
+	$previousLocation = Get-Location
+	try {
+		Set-Location $RepoRoot
+		return [string](& git @Arguments 2>$null).Trim()
+	} finally {
+		Set-Location $previousLocation
+	}
+}
+
+function Test-GitTrackedWorktreeClean {
+	param([string]$RepoRoot)
+	$previousLocation = Get-Location
+	try {
+		Set-Location $RepoRoot
+		& git diff --quiet
+		$unstagedClean = ($LASTEXITCODE -eq 0)
+		& git diff --cached --quiet
+		$stagedClean = ($LASTEXITCODE -eq 0)
+		return $unstagedClean -and $stagedClean
+	} finally {
+		Set-Location $previousLocation
+	}
+}
+
+function Write-ReleaseBuildProvenance {
+	param(
+		[string]$RepoRoot,
+		[object]$Contract
+	)
+	$exePath = [System.IO.Path]::GetFullPath((Join-Path $RepoRoot ([string]$Contract.runtime_export_path)))
+	$releaseDirectory = Split-Path -Parent $exePath
+	$baseName = [System.IO.Path]::GetFileNameWithoutExtension($exePath)
+	$pckPath = Join-Path $releaseDirectory "$baseName.pck"
+	if (-not (Test-Path -LiteralPath $exePath -PathType Leaf)) {
+		throw "Runtime export completed without EXE: $exePath"
+	}
+	if (-not (Test-Path -LiteralPath $pckPath -PathType Leaf)) {
+		throw "Runtime export completed without PCK: $pckPath"
+	}
+	$provenanceFileName = [string]$Contract.runtime_provenance_file
+	if ([string]::IsNullOrWhiteSpace($provenanceFileName)) {
+		$provenanceFileName = "release_build_provenance.json"
+	}
+	$provenancePath = Join-Path $releaseDirectory $provenanceFileName
+	$pckItem = Get-Item -LiteralPath $pckPath
+	$provenance = [ordered]@{
+		schema = "sternenbuergerchen.release_build_provenance.v1"
+		task_id = "TASK_1073"
+		exported_at_utc = [DateTime]::UtcNow.ToString("o")
+		branch = Get-GitValue -RepoRoot $RepoRoot -Arguments @("branch", "--show-current")
+		git_commit = Get-GitValue -RepoRoot $RepoRoot -Arguments @("rev-parse", "HEAD")
+		runtime_export_path = [string]$Contract.runtime_export_path
+		exe_name = [System.IO.Path]::GetFileName($exePath)
+		pck_name = [System.IO.Path]::GetFileName($pckPath)
+		pck_size_bytes = [int64]$pckItem.Length
+		pck_sha256 = [string](Get-FileHash -LiteralPath $pckPath -Algorithm SHA256).Hash.ToLowerInvariant()
+		tracked_worktree_clean = $true
+		read_only_consumer_required = $true
+	}
+	$provenance | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $provenancePath -Encoding UTF8
+	Write-Host "Release provenance: $provenancePath"
+}
+
 $repoRoot = Resolve-RepoRoot
 if ([string]::IsNullOrWhiteSpace($ContractPath)) {
 	$ContractPath = Join-Path $repoRoot "data\export_runtime_package_contract.json"
@@ -57,6 +125,10 @@ if ($excludePatterns.Count -eq 0) {
 	throw "Export runtime package contract contains no exclude_filter_patterns."
 }
 $excludeFilter = ($excludePatterns -join ",")
+
+if (-not $SkipExport -and -not (Test-GitTrackedWorktreeClean -RepoRoot $repoRoot)) {
+	throw "Refusing runtime export with tracked Git changes. Commit or stash the tracked worktree first."
+}
 
 $originalContent = Get-Content -LiteralPath $exportPresetPath -Raw
 $patchedContent = Set-OrReplaceLine -Content $originalContent -Key "exclude_filter" -Value $excludeFilter
@@ -115,3 +187,5 @@ try {
 		Write-Host "Restored local export preset."
 	}
 }
+
+Write-ReleaseBuildProvenance -RepoRoot $repoRoot -Contract $contract

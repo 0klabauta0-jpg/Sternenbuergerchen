@@ -89,6 +89,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1072 ist 23/23 gruen. Nach dem Hierarchy-Pass und weiteren UI-Frames folgt der Slot wieder der aktiven Interaction: AA/Computer verwenden Take ohne Breach/B, Cargo verwendet Defend ohne Breach/B, echte Doors behalten Breach, `B->GO` und `B`.
 - Naechster Schritt: Den gesamten Station-Route-Spielzug als sichtbaren F6-Playtest unter NPC-Druck bewerten und nur konkrete Bedien-, Lesbarkeits- oder Performance-Befunde in Folgearbeit schneiden.
 
+## TASK_1073 - Release Build Provenance Guard (implementiert im Arbeitsstand)
+- Grundlage: Der Runtime-Startcheck bestaetigte EXE/PCK, schrieb jedoch den aktuellen Git-HEAD ohne Nachweis, dass der vorhandene PCK wirklich daraus exportiert wurde.
+- Ergebnis: TASK_1073 ist 13/13 gruen. Erfolgreiche Exporte schreiben Commit- und PCK-Hash-Provenance; der read-only Startcheck verlangt sie und lehnt fehlende oder abweichende Pakete hart ab. TASK_511 27/27 dokumentiert `scripts/tests/` explizit als aktuelle Runtime-Legacy-Abhaengigkeit.
+- Naechster Schritt: Den Release aus dem sauberen Commit erzeugen, positiv pruefen und den belegten Spieleordner fuer den naechsten sichtbaren Station-Route- oder Host/Client-Playtest verwenden.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

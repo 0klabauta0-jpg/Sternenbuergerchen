@@ -139,6 +139,15 @@
 - Lokale Pruefung: TASK_1072 23/23, TASK_1070 23/23, TASK_1071 47/47, TASK_695 32/32 und `git diff --check` gruen.
 - Naechster Schritt: Den vollstaendigen Station-Route-F6-Lauf unter NPC-Druck auf Bedienbarkeit, Lesbarkeit und Performance bewerten; neue Mechanik nur aus einem konkreten Befund ableiten.
 
+### TASK_1073 - Release Build Provenance Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1073_release_build_provenance_guard.md`, `docs/dev/export_runtime_package_contract.md`, `data/export_runtime_package_contract.json`, TASK_511, TASK_818
+- Stand: Jeder erfolgreiche Runtime-Export schreibt `release_build_provenance.json` neben EXE und PCK. Der read-only Startcheck verlangt diese Datei und vergleicht vollen Git-Commit, PCK-Groesse und SHA-256 gegen den aktuellen Repository-Stand und das reale Paket.
+- Ursache/Fix: Der alte Startcheck zeigte zwar den aktuellen Git-HEAD, konnte aber nicht belegen, dass der vorhandene PCK aus diesem Commit stammte. Fehlende, kaputte oder nicht passende Provenance ist jetzt ein hartes Fail-Gate; der Export selbst verweigert getrackte, nicht committete Aenderungen.
+- Risiken/offen: Die PCK-Hash-Pruefung liest das gesamte Paket und ist absichtlich nur Release-/Playtest-Arbeit. Sichtbarer F6- und Host/Client-Playtest bleiben von dieser technischen Herkunftsgrenze getrennt.
+- Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
+- Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

@@ -50,6 +50,35 @@ function Get-FileSnapshot {
 	return $snapshot
 }
 
+function Get-ReleaseProvenanceSnapshot {
+	param([string]$Path)
+	$snapshot = [ordered]@{
+		path = $Path
+		exists = Test-Path -LiteralPath $Path -PathType Leaf
+		valid = $false
+		git_commit = ""
+		pck_sha256 = ""
+		pck_size_bytes = 0
+		exported_at_utc = ""
+		tracked_worktree_clean = $false
+	}
+	if (-not $snapshot.exists) {
+		return $snapshot
+	}
+	try {
+		$data = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+		$snapshot.valid = ([string]$data.schema -eq "sternenbuergerchen.release_build_provenance.v1") -and -not [string]::IsNullOrWhiteSpace([string]$data.git_commit) -and -not [string]::IsNullOrWhiteSpace([string]$data.pck_sha256) -and [bool]$data.tracked_worktree_clean
+		$snapshot.git_commit = [string]$data.git_commit
+		$snapshot.pck_sha256 = [string]$data.pck_sha256
+		$snapshot.pck_size_bytes = [int64]$data.pck_size_bytes
+		$snapshot.exported_at_utc = [string]$data.exported_at_utc
+		$snapshot.tracked_worktree_clean = [bool]$data.tracked_worktree_clean
+	} catch {
+		$snapshot.valid = $false
+	}
+	return $snapshot
+}
+
 function Get-ReleaseProcesses {
 	param(
 		[string]$ExePath,
@@ -106,6 +135,11 @@ $runtimeDllNames = @(
 	"liblimboai.windows.template_release.x86_64.dll",
 	"libterrain.windows.release.x86_64.dll"
 )
+$provenanceFileName = [string]$contract.runtime_provenance_file
+if ([string]::IsNullOrWhiteSpace($provenanceFileName)) {
+	$provenanceFileName = "release_build_provenance.json"
+}
+$provenancePath = Join-Path $releaseDirectory $provenanceFileName
 
 $requiredFiles = [ordered]@{
 	exe = Get-FileSnapshot -Path $exePath
@@ -121,6 +155,27 @@ $warnings = @()
 foreach ($entry in $requiredFiles.GetEnumerator()) {
 	if (-not $entry.Value.exists) {
 		$hardFailures += "missing_required_file:$($entry.Key)"
+	}
+}
+
+$provenance = Get-ReleaseProvenanceSnapshot -Path $provenancePath
+$expectedGitCommit = Get-GitValue -Arguments @("rev-parse", "HEAD")
+$actualPckSha256 = ""
+if (-not $provenance.exists) {
+	$hardFailures += "missing_release_provenance"
+} elseif (-not $provenance.valid) {
+	$hardFailures += "invalid_release_provenance"
+} elseif ([string]::IsNullOrWhiteSpace($expectedGitCommit)) {
+	$hardFailures += "repository_git_head_unavailable"
+} else {
+	if ($provenance.git_commit -ne $expectedGitCommit) {
+		$hardFailures += "release_provenance_git_commit_mismatch"
+	}
+	if ($requiredFiles.pck.exists) {
+		$actualPckSha256 = [string](Get-FileHash -LiteralPath $pckPath -Algorithm SHA256).Hash.ToLowerInvariant()
+		if ($provenance.pck_size_bytes -ne [int64]$requiredFiles.pck.size_bytes -or $provenance.pck_sha256.ToLowerInvariant() -ne $actualPckSha256) {
+			$hardFailures += "release_provenance_pck_mismatch"
+		}
 	}
 }
 
@@ -169,6 +224,7 @@ $manifest = [ordered]@{
 	repo_root = $script:repoRoot
 	branch = Get-GitValue -Arguments @("branch", "--show-current")
 	git_head = Get-GitValue -Arguments @("rev-parse", "--short", "HEAD")
+	expected_git_commit = $expectedGitCommit
 	contract_path = [System.IO.Path]::GetFullPath($ContractPath)
 	release_directory = $releaseDirectory
 	exe_path = $exePath
@@ -176,6 +232,9 @@ $manifest = [ordered]@{
 	console_exe_path = $consoleExePath
 	max_age_hours = $MaxAgeHours
 	pck_fresh_enough = $pckFreshEnough
+	release_provenance = $provenance
+	release_provenance_path = $provenancePath
+	actual_pck_sha256 = $actualPckSha256
 	required_files = $requiredFiles
 	running_processes = @($runningProcesses)
 	temp_files = @($tempFiles)

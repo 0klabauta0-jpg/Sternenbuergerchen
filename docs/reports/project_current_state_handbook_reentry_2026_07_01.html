@@ -78,6 +78,7 @@
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
       <span class="pill good">Letzter Abschluss: TASK_817</span>
       <span class="pill warn">Aktueller Griff: TASK_817</span>
+      <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
       <span class="pill">Report ist read-only</span>
@@ -190,9 +191,12 @@
           <h2>Naechste Schritte</h2>
           <p>TASK_817 macht den ersten Feuerwechsel im HUD handlungsfaehiger: dieselbe kurze <code>NEXT ... | WHY ...</code>-Zeile erscheint in Mission Control und Selected Fireteam.</p>
           <p>Quelle bleiben TASK_814/TASK_816 und bestehende Firefight-/Combat-HUD-Daten. Der Snapshot selbst bleibt read-only.</p>
+          <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout warning">Naechster Schritt danach: TASK_818 Playable-Build-Acceptance oder gezielter HUD-Style-Polish nach echtem Fensterbefund.</div>
           <input readonly value="TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish" data-export-key="reentry_handbook.current_task">
           <input readonly value="TASK_818 - Station Reentry Release Candidate Playable Build Acceptance" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
+          <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
           <input readonly value="BUGFIX - Player Roster Corrupt Save Quiet Recovery" data-export-key="reentry_handbook.latest_hotfix">
           <input readonly value="tmp/station_reentry_visible_host_client_playtest_export.json" data-export-key="reentry_host_client_export.manifest_path">
           <input readonly value="tmp/station_reentry_host_client_export_findings.json" data-export-key="reentry_host_client_findings.manifest_path">
