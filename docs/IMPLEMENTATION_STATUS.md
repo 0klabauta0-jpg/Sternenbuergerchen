@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1045 - Mission First Contact End-to-End Timing Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1045_mission_first_contact_end_to_end_timing_trace.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`
+- Stand: Der bounded Trace markiert Szene, Missionsauswahl, Roster/Transport, Boarding, Missionsstart, sichtbare Mission, LZ/Drop, ersten Move/GO und First Contact. Bei Budgetueberschreitung beendet er sich mit Stage-ID statt auf ein Shell-Timeout zu warten.
+- Stand: Der Trace belegt `mission_start_visible_frames` als ersten echten Blocker: 5 Frames brauchten rund 22 Sekunden; einzeln 7.112 ms, 3.597 ms, 3.500 ms, 4.227 ms und 3.606 ms. Homebase-Refresh nach dem Start kostet zusaetzlich rund 12,4 Sekunden, Missionsinstanz-Update rund 1,5 Sekunden.
+- Stand: Die Prozess-Isolation misst `MissionTacticalSandboxController + SimulationRoot + TerrainMap3DView` mit rund 3.495 ms pro Frame, waehrend Controller + Terrain bei rund 37 ms und Controller + Simulation bei rund 407 ms liegen.
+- Risiken/offen: Der Trace ist Diagnose, kein Fix. `TerrainMap3DView.set_mission_status_payload()` rekonstruiert Statusvisuals derzeit ohne Payload-Signatur und ist der naechste direkt belegte Kandidat.
+- Lokale Pruefung: TASK_1045 Trace beendet kontrolliert mit `budget_exceeded` an `mission_start_visible_frames`; `git diff --check`.
+- Naechster Schritt: TASK_1046 - Terrain Mission Status Payload Signature Guard.
+
 ### TASK_1044 - Mission HUD Runtime Surface Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1044_mission_hud_runtime_surface_guard.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1043_mission_hud_hotpath_event_log_guard.md`

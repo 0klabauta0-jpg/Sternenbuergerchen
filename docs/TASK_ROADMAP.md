@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1045 - Mission First Contact End-to-End Timing Trace (implementiert im Arbeitsstand)
+- Grundlage: TASK_542 blieb nach den HUD-Guards offen und lieferte nur ein externes Timeout.
+- Ziel: Den echten Homebase-zu-First-Contact-Ablauf intern pro Stage zeitmarkieren und den wartenden Lebenszyklus-Schritt eindeutig nennen.
+- Ergebnis: Der Trace misst sichtbare Missionsframes als Blocker: 5 Frames brauchten rund 22 Sekunden, mit einzelnen Frames von rund 3,5 bis 7,1 Sekunden. Die Interaktion `MissionTacticalSandboxController + SimulationRoot + TerrainMap3DView` ist der gemessene Hotpath.
+- Naechster Schritt: TASK_1046 - Terrain Mission Status Payload Signature Guard.
+
 ## TASK_1044 - Mission HUD Runtime Surface Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1043 entfernte den Event-Log-Vollsnapshot; die Frame-Probe zeigte danach weiter wiederholte Matrix- und Fireteam-Card-Rebuilds.
 - Ziel: Command Matrix, Selected Member Cards und Fireteam Mini Cards nur bei sichtbarer Zustandsaenderung neu anwenden oder aufbauen.

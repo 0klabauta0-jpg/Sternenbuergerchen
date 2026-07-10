@@ -34,6 +34,11 @@ Der Live-Snapshot setzt keine Gameplay-Wahrheit und erzeugt keine Commands, Move
 
 Die Fingerprints und Zaehler sind reine Controller-UI-Diagnostik. Sie cachen oder mutieren keinen Missions-, Unit-, Combat-, Dropship- oder Multiplayer-State und erzeugen keine Commands.
 
+## End-to-End Timing Trace (TASK_1045)
+`task_1045_mission_first_contact_end_to_end_timing_trace.gd` ist ein Test-Evidence-Pfad fuer den Spielerweg Homebase bis First Contact. Er misst Szene, Missionsauswahl, Roster/Transport, Boarding, Missionsstart, sichtbare Missionsframes, LZ/Drop, ersten Move/GO und Kontakt. Ein Stage-Budget beendet nur den Trace mit einer Stage-ID; es ist kein Runtime-Timer und keine Gameplay- oder HUD-Wahrheit.
+
+Die Trace-Ausgabe bleibt read-only: Sie erzeugt keine neue Command-, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit. Bestehende Test-Hooks duerfen den normalen Spielerablauf nur reproduzieren.
+
 ## Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (TASK_1032)
 `get_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan_snapshot()` ist der read-only Pruefpunkt fuer den naechsten spielbaren Slice nach TASK_1031. Der Snapshot darf nur die akzeptierte Tester-Run-Acceptance und optionale Plan-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Next-Slice-Line, Status und Gate exportiert werden.
 
