@@ -1018,6 +1018,8 @@ var _dropship_surface_y: float = 0.0
 var _dropship_air_clearance: float = 0.0
 var _dropship_rotation_y: float = 0.0
 var _map_render_duration_msec: int = 0
+var _runtime_frame_timing_debug_enabled: bool = false
+var _runtime_frame_timing_debug_snapshot: Dictionary = {}
 var _marker_count: int = 0
 var _compass_marker_count: int = 0
 var _patrol_segment_count: int = 0
@@ -1153,11 +1155,39 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	var profile_enabled: bool = _runtime_frame_timing_debug_enabled
+	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var scopes_usec: Dictionary = {}
+	var scope_started_usec: int = 0
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_resize_subviewport()
+	if profile_enabled:
+		scopes_usec["resize_subviewport_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_sync_unit_proxies(false, delta)
+	if profile_enabled:
+		scopes_usec["unit_proxy_sync_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_dynamic_order_visuals_if_needed()
+	if profile_enabled:
+		scopes_usec["dynamic_order_visuals_usec"] = Time.get_ticks_usec() - scope_started_usec
 	if _subviewport != null and _subviewport.render_target_update_mode == SubViewport.UPDATE_ALWAYS and Time.get_ticks_msec() > _continuous_redraw_until_msec:
 		_subviewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+	if profile_enabled:
+		_runtime_frame_timing_debug_snapshot = {
+			"enabled": _runtime_frame_timing_debug_enabled,
+			"total_usec": Time.get_ticks_usec() - frame_started_usec,
+			"scopes_usec": scopes_usec.duplicate(true),
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+			"sets_gameplay_truth": false,
+			"creates_command": false,
+			"creates_fire_event": false,
+			"creates_damage_event": false,
+			"creates_movement": false,
+			"sets_multiplayer_truth": false,
+		}
 
 
 func configure_from_map(terrain_map_data) -> void:
@@ -2012,6 +2042,16 @@ func set_editor_network_drag_preview_snapshot(snapshot: Dictionary) -> void:
 	if _network_preview_root != null and _terrain_map_data != null:
 		_rebuild_network_drag_preview_visuals()
 	_request_viewport_redraw()
+
+
+func set_runtime_frame_timing_debug_enabled(enabled: bool) -> void:
+	_runtime_frame_timing_debug_enabled = enabled
+	if not enabled:
+		_runtime_frame_timing_debug_snapshot.clear()
+
+
+func get_runtime_frame_timing_debug_snapshot() -> Dictionary:
+	return _runtime_frame_timing_debug_snapshot.duplicate(true)
 
 
 func get_render_snapshot() -> Dictionary:

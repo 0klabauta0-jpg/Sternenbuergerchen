@@ -13,6 +13,8 @@ var _trace_entries: Array = []
 var _trace_status: String = "running"
 var _trace_blocker_stage: String = ""
 var _failed: int = 0
+var _cross_system_timing_nodes: Dictionary = {}
+var _trace_scene: Node = null
 
 
 func _init() -> void:
@@ -25,6 +27,7 @@ func _run_trace() -> void:
 	root.size = Vector2i(1920, 1080)
 	_begin_stage("scene_ready")
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
+	_trace_scene = scene
 	root.add_child(scene)
 	if not await _wait_stage_frames(5):
 		_finish_trace(scene)
@@ -109,6 +112,8 @@ func _run_trace() -> void:
 		return
 	_finish_stage("complete")
 
+	var profiled_active_mission: Node = scene.call("get_active_mission")
+	_enable_cross_system_timing(profiled_active_mission)
 	_begin_stage("mission_start_visible_frames")
 	if not await _wait_stage_frames(8):
 		_finish_trace(scene)
@@ -191,7 +196,10 @@ func _wait_stage_frames(frame_count: int) -> bool:
 		await process_frame
 		_stage_frames += 1
 		if _stage_id == "mission_start_visible_frames":
+			if _cross_system_timing_nodes.is_empty() and _trace_scene != null:
+				_enable_cross_system_timing(_trace_scene.call("get_active_mission"))
 			print("TRACE frame stage=%s index=%d elapsed_msec=%d" % [_stage_id, _stage_frames, Time.get_ticks_msec() - frame_started_msec])
+			_print_cross_system_timing_line()
 		if not _stage_within_budget():
 			return false
 	return true
@@ -227,9 +235,69 @@ func _finish_trace(scene: Node) -> void:
 		print("TRACE stage=%s elapsed_msec=%d frames=%d status=%s budget_msec=%d" % [String(entry.get("stage_id", "")), int(entry.get("elapsed_msec", 0)), int(entry.get("frame_count", 0)), String(entry.get("status", "")), int(entry.get("budget_msec", 0))])
 	print("TRACE evidence read_only=true ui_sets_gameplay_truth=false creates_command=false creates_movement=false creates_fire_event=false creates_damage_event=false sets_multiplayer_truth=false")
 	if scene != null:
+		_disable_cross_system_timing()
 		scene.queue_free()
 		await process_frame
+	_trace_scene = null
 	quit(1 if _failed > 0 else 0)
+
+
+func _enable_cross_system_timing(active_mission: Node) -> void:
+	if active_mission == null:
+		return
+	var controller: Node = active_mission.get_node_or_null("TacticalController")
+	var simulation_root: Node = active_mission.get_node_or_null("SimulationRoot")
+	var terrain: Node = active_mission.get_node_or_null("Primary3DView")
+	if controller == null or simulation_root == null or terrain == null:
+		return
+	_cross_system_timing_nodes = {"controller": controller, "simulation": simulation_root, "terrain": terrain}
+	controller.call("set_mission_visible_frame_timing_debug_enabled", true)
+	simulation_root.call("set_runtime_tick_budget_debug_enabled", true)
+	terrain.call("set_runtime_frame_timing_debug_enabled", true)
+
+
+func _disable_cross_system_timing() -> void:
+	for entry_variant in _cross_system_timing_nodes:
+		var node: Node = _cross_system_timing_nodes.get(entry_variant) as Node
+		if node == null:
+			continue
+		if String(entry_variant) == "controller":
+			node.call("set_mission_visible_frame_timing_debug_enabled", false)
+		elif String(entry_variant) == "simulation":
+			node.call("set_runtime_tick_budget_debug_enabled", false)
+		else:
+			node.call("set_runtime_frame_timing_debug_enabled", false)
+	_cross_system_timing_nodes.clear()
+
+
+func _print_cross_system_timing_line() -> void:
+	var controller: Node = _cross_system_timing_nodes.get("controller") as Node
+	var simulation_root: Node = _cross_system_timing_nodes.get("simulation") as Node
+	var terrain: Node = _cross_system_timing_nodes.get("terrain") as Node
+	if controller == null or simulation_root == null or terrain == null:
+		return
+	var controller_snapshot: Dictionary = Dictionary(controller.call("get_mission_visible_frame_timing_debug_snapshot"))
+	var simulation_snapshot: Dictionary = Dictionary(simulation_root.call("get_runtime_tick_budget_debug_snapshot"))
+	var terrain_snapshot: Dictionary = Dictionary(terrain.call("get_runtime_frame_timing_debug_snapshot"))
+	var slowest_scope: String = ""
+	var slowest_duration_usec: int = -1
+	for source in [
+		{"prefix": "controller", "scopes": Dictionary(controller_snapshot.get("scopes_usec", {}))},
+		{"prefix": "simulation", "scopes": Dictionary(simulation_snapshot.get("scopes_usec", {}))},
+		{"prefix": "terrain", "scopes": Dictionary(terrain_snapshot.get("scopes_usec", {}))},
+	]:
+		for scope_variant in Dictionary(source.get("scopes", {})).keys():
+			var duration_usec: int = int(Dictionary(source.get("scopes", {})).get(scope_variant, 0))
+			if duration_usec > slowest_duration_usec:
+				slowest_duration_usec = duration_usec
+				slowest_scope = "%s.%s" % [String(source.get("prefix", "")), String(scope_variant)]
+	print("TRACE cross_system_timing slowest_scope=%s duration_usec=%d controller_total_usec=%d simulation_total_usec=%d terrain_total_usec=%d" % [
+		slowest_scope,
+		slowest_duration_usec,
+		int(controller_snapshot.get("total_usec", 0)),
+		int(simulation_snapshot.get("total_tick_usec", 0)),
+		int(terrain_snapshot.get("total_usec", 0)),
+	])
 
 
 func _build_dropship_definition(craft_id: String, display_name: String) -> Dictionary:

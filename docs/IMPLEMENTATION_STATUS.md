@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1047_mission_visible_frame_cross_system_timing_breakdown.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1045_mission_first_contact_end_to_end_timing_trace.md`
+- Stand: Controller und Terrain besitzen jetzt default-off, read-only Timing-Snapshots; SimulationRoot nutzt den vorhandenen Tick-Profiler. TASK_1047 prueft 11/11 den Toggle, alle drei Snapshot-Quellen, benannte Scopes, eine echte Missionsfixture und die Grenzen gegen Gameplay-Wahrheit.
+- Stand: Im echten TASK-1045-Startfenster ist `simulation.tick_signal_emit_usec` der erste klare Code-Hotpath: rund 478, 400, 444 und 445 ms in den sichtbaren Frames 2-5. Terrain-Skriptarbeit lag bei rund 35, 33, 31 und 36 ms. Controller lag meist unter 1 ms, einmal bei rund 444 ms UI-Refresh.
+- Risiken/offen: Die gemessenen Scripttimes erklaeren noch nicht die gesamten 3,3-4,0-Sekunden-Frames. Der naechste Code-Schnitt ist trotzdem eindeutig: Listener/Fanout von `SimulationRoot.tick_processed` muessen nach teurer Folgearbeit auditiert werden; danach bleibt ein separater Viewport-/Renderpfad-Kandidat.
+- Lokale Pruefung: TASK_1047 11/11, TASK_1045 kontrolliert `budget_exceeded` mit Cross-System-Timing, `git diff --check`.
+- Naechster Schritt: TASK_1048 - Simulation Tick Signal Fanout Audit and Guard.
+
 ### TASK_1046 - Terrain Mission Status Payload Signature Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1046_terrain_mission_status_payload_signature_guard.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1045_mission_first_contact_end_to_end_timing_trace.md`

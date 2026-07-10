@@ -13,11 +13,17 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown (geplant)
+## TASK_1048 - Simulation Tick Signal Fanout Audit and Guard (geplant)
+- Grundlage: TASK_1047 misst `SimulationRoot.tick_processed.emit()` mit rund 400-478 ms innerhalb langsamer Missionsframes.
+- Ziel: Alle verbundenen Tick-Empfaenger, ihre teure Folgearbeit und vermeidbare Wiederholungswege transparent machen; nur belegte Viewer-/Visual-Listener gezielt takten oder dirty-gaten.
+- Ergebnis: Read-only Fanout-Evidence, klarer teuerster Empfaenger und ein begrenzter Fix ohne Aenderung der autoritativen Simulationstaktung.
+- Naechster Schritt: Danach Viewport-/Renderarbeit erneut messen, weil Scriptzeiten nicht den gesamten Frame erklaeren.
+
+## TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown (implementiert im Arbeitsstand)
 - Grundlage: TASK_1045 belegt langsame sichtbare Missionsframes; TASK_1046 schuetzt wiederholte Terrain-Statusvisuals, senkt den kombinierten Frame aber nicht messbar.
 - Ziel: Den einzelnen sichtbaren Missionsframe entlang Controller, SimulationRoot und TerrainMap3DView in benannte Teilpfade und Zeiten zerlegen, ohne den Runtime-State zu veraendern.
-- Ergebnis: Read-only Timing-Snapshot mit maximalen/aktuellen Teilpfaden, eindeutiger erster Fix-Kandidat und Regression gegen die bestehende Mission-Flow-Trace.
-- Naechster Schritt: Nur den gemessenen teuersten Teilpfad schneiden; kein weiterer pauschaler UI- oder Cache-Guard.
+- Ergebnis: TASK_1047 ist 11/11 gruen. Im echten Startfenster ist `SimulationRoot.tick_signal_emit_usec` mit rund 400-478 ms der erste belegte Code-Hotpath; Terrain-Skriptarbeit liegt bei rund 32-37 ms, Controller einmal bei rund 444 ms.
+- Naechster Schritt: TASK_1048 - Simulation Tick Signal Fanout Audit and Guard.
 
 ## TASK_1046 - Terrain Mission Status Payload Signature Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1045 zeigte wiederkehrende Terrain-Statusvisuals als plausiblen Kandidaten innerhalb des Controller-/Simulation-/Terrain-Hotpaths.

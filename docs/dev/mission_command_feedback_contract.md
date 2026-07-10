@@ -44,6 +44,11 @@ Die Trace-Ausgabe bleibt read-only: Sie erzeugt keine neue Command-, Movement-, 
 
 Die Signatur, Zaehler und Render-Snapshot-Felder sind rein visuelle Diagnose. Sie cachen oder mutieren keine Missions-, Objective-, Unit-, Combat- oder Multiplayer-Wahrheit und erzeugen keine Commands, Movement-, Fire- oder Damage-Ereignisse. Nicht gerenderte Laufzeitdiagnostik darf daher keinen `StatusRoot3D`-Rebuild ausloesen.
 
+## Visible Frame Cross-System Timing (TASK_1047)
+`MissionTacticalSandboxController` und `TerrainMap3DView` besitzen ausschliesslich opt-in Timing-Snapshots; `SimulationRoot` verwendet seinen bestehenden opt-in Tick-Profiler. Im normalen Runtime-Betrieb sind die Profiler deaktiviert. Die Snapshots enthalten nur lokale Teilzeiten und keine zusaetzliche Missions-, Unit-, Combat- oder Multiplayer-Wahrheit.
+
+Der TASK-1045-Trace aktiviert die drei Profiler erst, sobald die aktive Mission wirklich im Tree steht. Die Messung im langsamen Startfenster zeigte `SimulationRoot.tick_signal_emit_usec` mit rund 400-478 ms als ersten klaren Code-Hotpath, Terrain-Skriptarbeit mit rund 32-37 ms und einen einzelnen Controller-UI-Refresh mit rund 444 ms. Folgeschnitte muessen daher Signal-Empfaenger und deren Folgearbeit auditieren; sie duerfen den Simulationstick nicht ueber UI- oder Terrain-Caches umdefinieren.
+
 ## Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (TASK_1032)
 `get_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan_snapshot()` ist der read-only Pruefpunkt fuer den naechsten spielbaren Slice nach TASK_1031. Der Snapshot darf nur die akzeptierte Tester-Run-Acceptance und optionale Plan-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Next-Slice-Line, Status und Gate exportiert werden.
 

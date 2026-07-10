@@ -494,6 +494,8 @@ var _meta_transfer_routes: Array = []
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
 var _fireteam_security_refresh_time_remaining: float = 0.0
+var _mission_visible_frame_timing_debug_enabled: bool = false
+var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
 var _drop_sequence_phase: String = ""
 var _drop_sequence_units: Array = []
 var _drop_sequence_unit_index: int = 0
@@ -655,6 +657,12 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
+	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var scopes_usec: Dictionary = {}
+	var scope_started_usec: int = 0
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	if _drop_ship_cooldown_remaining > 0.0:
 		_drop_ship_cooldown_remaining = maxf(_drop_ship_cooldown_remaining - delta, 0.0)
 	_update_drop_sequence(delta)
@@ -665,6 +673,9 @@ func _process(delta: float) -> void:
 	_update_area_defense_execution(delta)
 	_update_area_attack_execution(delta)
 	_update_npc_thought_peek_visuals()
+	if profile_enabled:
+		scopes_usec["execution_updates_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	if _prune_fireteamleader_feedback_bubbles():
 		_refresh_order_visuals()
 	_flush_pending_drop_runtime_phase_starts()
@@ -673,11 +684,20 @@ func _process(delta: float) -> void:
 	if _fireteam_security_refresh_time_remaining <= 0.0:
 		_fireteam_security_refresh_time_remaining = FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS
 		refresh_fireteam_security_state()
+	if profile_enabled:
+		scopes_usec["feedback_and_security_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_card_refresh_time_remaining -= delta
 	if _card_refresh_time_remaining > 0.0:
+		if profile_enabled:
+			scopes_usec["ui_refresh_usec"] = 0
+			_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, false)
 		return
 	_card_refresh_time_remaining = CARD_REFRESH_INTERVAL_SECONDS
 	_update_ui()
+	if profile_enabled:
+		scopes_usec["ui_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
+		_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, true)
 
 
 func _advance_mission_dropship_runtime_feedback_timer(delta: float) -> void:
@@ -3389,6 +3409,32 @@ func get_mission_hud_runtime_surface_guard_snapshot() -> Dictionary:
 		"selected_cards_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("selected_cards", 0)),
 		"mini_cards_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("mini_cards", 0)),
 		"mini_cards_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("mini_cards", 0)),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func set_mission_visible_frame_timing_debug_enabled(enabled: bool) -> void:
+	_mission_visible_frame_timing_debug_enabled = enabled
+	if not enabled:
+		_mission_visible_frame_timing_debug_snapshot.clear()
+
+
+func get_mission_visible_frame_timing_debug_snapshot() -> Dictionary:
+	return _mission_visible_frame_timing_debug_snapshot.duplicate(true)
+
+
+func _record_mission_visible_frame_timing_snapshot(frame_started_usec: int, scopes_usec: Dictionary, included_ui_refresh: bool) -> void:
+	_mission_visible_frame_timing_debug_snapshot = {
+		"enabled": _mission_visible_frame_timing_debug_enabled,
+		"total_usec": Time.get_ticks_usec() - frame_started_usec,
+		"scopes_usec": scopes_usec.duplicate(true),
+		"included_ui_refresh": included_ui_refresh,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
