@@ -94,6 +94,15 @@
 - Lokale Pruefung: TASK_1067 8/8, TASK_1043 14/14, TASK_1066 8/8, TASK_1062 18/18, TASK_1061 11/11, TASK_503 10/10 und `git diff --check` gruen.
 - Naechster Schritt: Der naechste Wert ist ein spielbarer Station-Route-First-Round-Slice: klarer Erstkontakt, NPC-Druck, eine echte Erfolg- oder Abbruchentscheidung und Debriefing. Weitere UI-Deltas nur noch bei einem neuen Messbefund.
 
+### TASK_1068 - Station Route First Playable Round Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1068_station_route_first_playable_round_trace.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_1063, TASK_1059, TASK_1060, TASK_726, TASK_813
+- Stand: TASK_1068 ist 16/16 gruen. Die echte Station-Route-Auswahl startet aus Homebase, behaelt ihre ausgewaehlte Scenario-Datei am MissionSetup, erreicht ueber den vorhandenen Craft-Handoff die Mission, setzt LZ und deboardet ein Ground-Fireteam. Im ersten sichtbaren Entscheidungszustand bleibt `disable_air_defense` der naechste Schritt; ein LOS-Kontakt sowie Ghost, Pfad und Risiko einer Move-Preview sind gleichzeitig sichtbar.
+- Ursache/Fix: Die Route war zuvor ueber Einzelverifier abgesichert, aber nicht als zusammenhaengender Spielerzustand. Der neue Trace verbindet ausschliesslich bestehende Katalog-, Transport-, LZ-, ContactTracker- und Preview-Vertraege. Es war kein Produktionsfix noetig; die Trace-Pruefung folgt den bestehenden read-only-Snapshot-Contracts, statt interne Controller-Methoden aufzurufen.
+- Risiken/offen: Der Headless-Trace beweist den verbundenen Datenfluss und die Lesbarkeit vor GO, nicht Balancing oder finale Bildkomposition. Der naechste Spielwert ist eine kurze Vorstoss-gegen-Abbruch-Entscheidung mit NPC-Druck und sichtbarem Debriefing-Ausgang.
+- Lokale Pruefung: TASK_1068 16/16, TASK_1063 14/14, TASK_1059 10/10, TASK_1060 14/14, TASK_726 30/30, TASK_813 43/43 und `git diff --check` gruen. TASK_1059 und TASK_813 melden beim Headless-Exit weiter eine ObjectDB-Leak-Warnung; alle Assertions und Exit-Codes bleiben gruen.
+- Naechster Schritt: Einen kleinen Station-Route-Entscheidungs-Slice bauen, der nach dem ersten Kontakt einen nachvollziehbaren Erfolg- oder Abbruchpfad bis zum Debriefing zeigt, statt weitere technische UI-Politur vorzuziehen.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

@@ -64,6 +64,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1067 ist 8/8 gruen. Ein gemeinsamer, rein visueller Text-Delta-Helper laesst gleiche Werte liegen und wendet echte Command-Aenderungen weiter an. Die Diagnose bleibt read-only; Tooltips, Buttons und Simulation werden nicht mitgecacht.
 - Naechster Schritt: Keine weitere pauschale HUD-Optimierung. Die stabilisierte Kette soll jetzt als kurze Station-Route-First-Round mit NPC-Druck, Erfolg-/Abbruchentscheidung und Debriefing fuer einen Menschen spielbar werden.
 
+## TASK_1068 - Station Route First Playable Round Trace (implementiert im Arbeitsstand)
+- Grundlage: Station Route war aus Homebase startbar und ihre einzelnen Route-, Dropship-, Contact- und Preview-Grenzen waren separat getestet. Es fehlte ein realer, zusammenhaengender Erstentscheidungsnachweis vor GO.
+- Ergebnis: TASK_1068 ist 16/16 gruen. Der echte Katalogstart behaelt die Station-Scenario-Datei am MissionSetup und fuehrt durch Craft-Ankunft, LZ und Deboarding zu einem Ground-Fireteam. AA bleibt der erste Route-Schritt, ein LOS-Kontakt entsteht reproduzierbar und die Move-Preview zeigt Ghost, Pfad und Risiko, ohne Bewegung vor GO zu committen.
+- Naechster Schritt: Eine kleine, spielbare Vorstoss-gegen-Abbruch-Entscheidung unter NPC-Druck bauen und ihren klaren Erfolg- oder Debriefing-Ausgang verbinden.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.
