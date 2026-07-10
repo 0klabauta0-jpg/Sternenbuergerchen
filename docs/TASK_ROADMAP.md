@@ -24,6 +24,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: Selected-Fireteam-Cards und ihr Dirty-Signature-Pfad filtern embarked Units wie die linke Mini-Card-Liste. TASK_503 prueft 10/10: Hinweis waehrend Inbound, echte Cards nach Deboarding.
 - Naechster Schritt: Mehr-Fireteam First Contact nach Deboarding mit Combat-Registry und LOS verifizieren.
 
+## TASK_1059 - Multi-Fireteam First Contact Runtime Trace (implementiert im Arbeitsstand)
+- Grundlage: TASK_1057 prueft zwei deboardete Runtime-Fireteams, aber der alte First-Contact-Trace stammt aus der frueheren, unvollstaendigen Transportkette.
+- Ergebnis: TASK_1059 ist 10/10 gruen. ft1 und ft2 erscheinen mit korrekten Unit-Paaren in CombatRegistry, erhalten jeweils eine gueltige LOS-Fixture und erzeugen bestaetigte ContactTracker-Reports ohne UI-Gameplay-Wahrheit.
+- Naechster Schritt: Den nun technisch belegten First-Contact-Moment als sichtbaren Spielergriff pruefen: Auswahl, Contact-Overlay, Threat-/Fire-Feedback und erster Command mit beiden Teams.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

@@ -26,6 +26,14 @@
 - Lokale Pruefung: `task_503_mission_dropship_fireteam_hud_truth.gd` 10/10, `task_396_mission_dropship_lz_drop_hotfix.gd` 17/17.
 - Naechster Schritt: Mehr-Fireteam First Contact nach Deboarding mit Combat-Registry und LOS.
 
+### TASK_1059 - Multi-Fireteam First Contact Runtime Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1059_multi_fireteam_first_contact_runtime_trace.md`, `docs/dev/contact_report_contract.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/tasks/TASK_1057_controlled_dropship_inbound_to_deboard_trace.md`
+- Stand: TASK_1059 ist 10/10 gruen. Der reale Homebase-/Alpha-/Beta-Pfad deboardet vier korrekt zugeordnete Operatoren. Beide Fireteams erscheinen in CombatRegistry, beide erhalten eine Terrain-gueltige LOS-Position und beide erzeugen bestaetigte ContactTracker-Reports.
+- Ursache/Fix: Kein neuer Produktionsfehler. Der alte First-Contact-Befund hatte vor der korrigierten Transferankunft keine deployed Runtime-Units. Der aktuelle Nachweis belegt, dass Contact-/LOS-Logik auf dem reparierten Handoff funktioniert.
+- Lokale Pruefung: `task_1059_multi_fireteam_first_contact_runtime_trace.gd` 10/10; danach Dropship-/HUD-Regressionen und `git diff --check`.
+- Naechster Schritt: Sichtbarer Multi-Fireteam-First-Contact-Player-Feel-Slice fuer Contact-Overlay, Threat-Feedback und ersten Befehl.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.
