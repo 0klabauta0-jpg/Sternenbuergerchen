@@ -59,6 +59,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1066 ist 8/8 gruen. Identisches Event-Log-Feedback wird am Panel-Eingang uebersprungen, ohne bestehende Entries zu verlieren. Neue Events und sichtbare Style-/Auswahl-Aenderungen werden weiter angewendet. Der Controller uebergibt den vorhandenen Polish-Contract nur noch einmal an den Panel-Eingang.
 - Naechster Schritt: Die Command-Feedback- und Sekundaerlabel-Surfaces gegen denselben Zwei-Fireteam-Trace schneiden; danach den gewonnenen stabilen Pfad fuer eine kurze spielbare Station-Route-Runde nutzen.
 
+## TASK_1067 - Mission Command Label Delta Rendering (implementiert im Arbeitsstand)
+- Grundlage: TASK_1065/1066 haben redundante Karten- und Event-Log-Arbeit entfernt; weitere sichtbare Command-/Sekundaerlabels wurden im wiederkehrenden Refresh dennoch bei gleichem Text beschrieben.
+- Ergebnis: TASK_1067 ist 8/8 gruen. Ein gemeinsamer, rein visueller Text-Delta-Helper laesst gleiche Werte liegen und wendet echte Command-Aenderungen weiter an. Die Diagnose bleibt read-only; Tooltips, Buttons und Simulation werden nicht mitgecacht.
+- Naechster Schritt: Keine weitere pauschale HUD-Optimierung. Die stabilisierte Kette soll jetzt als kurze Station-Route-First-Round mit NPC-Druck, Erfolg-/Abbruchentscheidung und Debriefing fuer einen Menschen spielbar werden.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

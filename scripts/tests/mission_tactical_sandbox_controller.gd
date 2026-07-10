@@ -436,6 +436,10 @@ var _mission_fireteam_card_delta_rendering_counts: Dictionary = {
 	"member_status_row_apply": 0,
 	"member_status_row_skip": 0,
 }
+var _mission_label_delta_rendering_counts: Dictionary = {
+	"apply": 0,
+	"skip": 0,
+}
 var _mission_hud_runtime_surface_guard_apply_counts: Dictionary = {
 	"command_matrix": 0,
 	"selected_cards": 0,
@@ -2704,7 +2708,7 @@ func _update_ui() -> void:
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
 	if command_feedback_label != null:
 		if not _last_planning_state_issue.is_empty():
-			command_feedback_label.text = "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen."
+			_set_mission_label_text_delta(command_feedback_label, "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen.")
 		else:
 			var door_authority_line: String = _build_visible_door_authority_command_line()
 			var station_route_line: String = String(_build_station_route_run_readout_snapshot().get("compact_line", "")).strip_edges()
@@ -2712,25 +2716,25 @@ func _update_ui() -> void:
 			if not door_authority_line.is_empty():
 				last_line = "%s\n%s" % [door_authority_line, last_line]
 			var route_block: String = "\n%s" % station_route_line if not station_route_line.is_empty() else ""
-			command_feedback_label.text = "TEAM %s | PHASE %s\nTARGET %s%s\n%s\nLAST %s" % [
+			_set_mission_label_text_delta(command_feedback_label, "TEAM %s | PHASE %s\nTARGET %s%s\n%s\nLAST %s" % [
 				_get_fireteam_name(),
 				_get_phase_name(),
 				_build_target_text(),
 				route_block,
 				_build_selected_waypoint_info_text(),
 				last_line,
-			]
+			])
 
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
 	if hotkey_legend_label != null:
 		if preview_mode:
-			hotkey_legend_label.text = "MISSION PREVIEW | Homebase Start unlocks GO/orders | RMB waypoints | DEL removes"
+			_set_mission_label_text_delta(hotkey_legend_label, "MISSION PREVIEW | Homebase Start unlocks GO/orders | RMB waypoints | DEL removes")
 		else:
-			hotkey_legend_label.text = HOTKEY_LEGEND if _can_issue_local_commands() else "OBSERVER MODE | Host controls mission orders in multiplayer V1"
+			_set_mission_label_text_delta(hotkey_legend_label, HOTKEY_LEGEND if _can_issue_local_commands() else "OBSERVER MODE | Host controls mission orders in multiplayer V1")
 
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
-		fireteam_status_label.text = _build_fireteam_status_text()
+		_set_mission_label_text_delta(fireteam_status_label, _build_fireteam_status_text())
 		fireteam_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 		_apply_combat_hud_detail_tooltip_label_contract(fireteam_status_label)
 		_apply_release_firefight_hud_real_window_label_contract(fireteam_status_label)
@@ -2755,7 +2759,7 @@ func _update_ui() -> void:
 
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
-		strategic_status_label.text = _build_strategic_status_text()
+		_set_mission_label_text_delta(strategic_status_label, _build_strategic_status_text())
 		strategic_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
 		_apply_frontier_probe_one_screen_visual_polish_label_contract(strategic_status_label)
@@ -2767,11 +2771,11 @@ func _update_ui() -> void:
 
 	var phase_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseStatusLabel") as Label
 	if phase_status_label != null:
-		phase_status_label.text = _build_phase_status_text()
+		_set_mission_label_text_delta(phase_status_label, _build_phase_status_text())
 
 	var phase_list_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseListLabel") as Label
 	if phase_list_label != null:
-		phase_list_label.text = _build_phase_list_text()
+		_set_mission_label_text_delta(phase_list_label, _build_phase_list_text())
 
 	var set_lz_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button
 	if set_lz_button != null:
@@ -3079,10 +3083,10 @@ func _refresh_fireteam_phase_panel() -> void:
 		return
 	var status_label := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseStatusLabel") as Label
 	if status_label != null:
-		status_label.text = _build_phase_status_text()
+		_set_mission_label_text_delta(status_label, _build_phase_status_text())
 	var list_label := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseListLabel") as Label
 	if list_label != null:
-		list_label.text = _build_phase_list_text()
+		_set_mission_label_text_delta(list_label, _build_phase_list_text())
 	var prev_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/PrevEditPhaseButton") as Button
 	var add_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/AddPhaseButton") as Button
 	var next_edit_button := panel.get_node_or_null("MarginContainer/VBoxContainer/PhaseActionRow/NextEditPhaseButton") as Button
@@ -3528,6 +3532,31 @@ func get_mission_hud_runtime_surface_guard_snapshot() -> Dictionary:
 
 func _increment_mission_fireteam_card_delta_rendering_count(key: String) -> void:
 	_mission_fireteam_card_delta_rendering_counts[key] = int(_mission_fireteam_card_delta_rendering_counts.get(key, 0)) + 1
+
+
+func _set_mission_label_text_delta(label: Label, next_text: String) -> bool:
+	if label == null:
+		return false
+	if label.text == next_text:
+		_mission_label_delta_rendering_counts["skip"] = int(_mission_label_delta_rendering_counts.get("skip", 0)) + 1
+		return false
+	label.text = next_text
+	_mission_label_delta_rendering_counts["apply"] = int(_mission_label_delta_rendering_counts.get("apply", 0)) + 1
+	return true
+
+
+func get_mission_label_delta_rendering_snapshot() -> Dictionary:
+	return {
+		"apply_count": int(_mission_label_delta_rendering_counts.get("apply", 0)),
+		"skip_count": int(_mission_label_delta_rendering_counts.get("skip", 0)),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
 
 
 func get_mission_fireteam_card_delta_rendering_snapshot() -> Dictionary:
@@ -9679,11 +9708,11 @@ func _refresh_mission_nav_timer_label() -> void:
 		var remaining_seconds: float = float(combat_driver.call("get_remaining_time_limit_seconds"))
 		if remaining_seconds >= 0.0:
 			var total_seconds: int = maxi(int(round(remaining_seconds)), 0)
-			timer_label.text = "%02d:%02d" % [floori(float(total_seconds) / 60.0), total_seconds % 60]
+			_set_mission_label_text_delta(timer_label, "%02d:%02d" % [floori(float(total_seconds) / 60.0), total_seconds % 60])
 			timer_label.visible = true
 			timer_label.set_meta("station_route_nav_timer_state", "runtime")
 			return
-	timer_label.text = ""
+	_set_mission_label_text_delta(timer_label, "")
 	timer_label.visible = false
 	timer_label.set_meta("station_route_nav_timer_state", "hidden_until_runtime")
 
@@ -9892,7 +9921,7 @@ func _refresh_mission_identity_session_badge() -> void:
 	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
 	var header_label := get_node_or_null(MISSION_IDENTITY_HEADER_LABEL_PATH) as Label
 	if header_label != null:
-		header_label.text = "#15 LIVE TACTICAL GRID" if badge_text.is_empty() else "#15 LIVE TACTICAL GRID | %s" % badge_text
+		_set_mission_label_text_delta(header_label, "#15 LIVE TACTICAL GRID" if badge_text.is_empty() else "#15 LIVE TACTICAL GRID | %s" % badge_text)
 		header_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
 		header_label.set_meta("review_session_badge_text", badge_text)
 		header_label.set_meta("review_session_badge_visible", not badge_text.is_empty())
@@ -9900,7 +9929,7 @@ func _refresh_mission_identity_session_badge() -> void:
 	var body_label := get_node_or_null(MISSION_IDENTITY_BODY_LABEL_PATH) as Label
 	if body_label != null:
 		var identity_body: Dictionary = build_station_scenario_identity_body_snapshot()
-		body_label.text = String(identity_body.get("text", "Realtime insertion feed | live fireteam deployment"))
+		_set_mission_label_text_delta(body_label, String(identity_body.get("text", "Realtime insertion feed | live fireteam deployment")))
 		body_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
 		body_label.set_meta("review_session_badge_text", badge_text)
 		body_label.set_meta("review_session_badge_visible", not badge_text.is_empty())
@@ -9947,7 +9976,7 @@ func _refresh_mission_team_chip_label() -> void:
 	if label == null:
 		return
 	var snapshot: Dictionary = get_mission_team_chip_snapshot()
-	label.text = String(snapshot.get("display_text", snapshot.get("compact_status_text", snapshot.get("status_text", "Teams: not configured"))))
+	_set_mission_label_text_delta(label, String(snapshot.get("display_text", snapshot.get("compact_status_text", snapshot.get("status_text", "Teams: not configured")))))
 	label.autowrap_mode = TextServer.AUTOWRAP_OFF
 	label.clip_text = true
 	label.tooltip_text = String(snapshot.get("display_tooltip_text", snapshot.get("tooltip_text", snapshot.get("status_text", "")))).strip_edges()

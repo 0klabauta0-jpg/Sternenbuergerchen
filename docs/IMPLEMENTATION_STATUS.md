@@ -86,6 +86,14 @@
 - Lokale Pruefung: TASK_1066 8/8, TASK_1043 14/14, TASK_1062 18/18, TASK_1061 11/11, TASK_503 10/10 und `git diff --check` gruen.
 - Naechster Schritt: Die noch breite Command-Feedback-/Sekundaerlabel-Flaeche mit demselben Muster profilieren. Erst danach Station-Route-Readability und NPC-Druck als spielbarer erster Runden-Slice weiterbauen.
 
+### TASK_1067 - Mission Command Label Delta Rendering
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1067_mission_command_label_delta_rendering.md`, `docs/ARCHITECTURE.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_1043, TASK_1065, TASK_1066
+- Stand: TASK_1067 ist 8/8 gruen. Gleichbleibende Textwerte an Command-Feedback, Hotkey, Fireteam-/Strategie-/Phase-Status, Nav-Timer, Missionsidentitaet und Team-Chip werden nicht erneut an ihre Labels geschrieben. Eine neue Command-Rueckmeldung bleibt sofort sichtbar.
+- Ursache/Fix: Der 0.35-Sekunden-Refresh schrieb dieselben read-only Texte wiederholt in Controls. `_set_mission_label_text_delta()` prueft nur den aktuellen sichtbaren Text und zaehlt Apply/Skip rein diagnostisch. Snapshot-Berechnung, Tooltips, Buttons und jede Gameplay-Wahrheit bleiben unveraendert.
+- Lokale Pruefung: TASK_1067 8/8, TASK_1043 14/14, TASK_1066 8/8, TASK_1062 18/18, TASK_1061 11/11, TASK_503 10/10 und `git diff --check` gruen.
+- Naechster Schritt: Der naechste Wert ist ein spielbarer Station-Route-First-Round-Slice: klarer Erstkontakt, NPC-Druck, eine echte Erfolg- oder Abbruchentscheidung und Debriefing. Weitere UI-Deltas nur noch bei einem neuen Messbefund.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.
