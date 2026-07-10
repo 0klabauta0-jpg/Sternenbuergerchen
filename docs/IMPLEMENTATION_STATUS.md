@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1044 - Mission HUD Runtime Surface Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1044_mission_hud_runtime_surface_guard.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1043_mission_hud_hotpath_event_log_guard.md`
+- Stand: Command Matrix, Selected Member Cards und Fireteam Mini Cards vergleichen jetzt einen Controller-lokalen Visual-Fingerprint. Gleiche Anzeigeeingaben uebernehmen keine Styles/Metadaten neu und ersetzen keine Karten-Nodes; sichtbare State-Wechsel aktualisieren sofort.
+- Stand: `get_mission_hud_runtime_surface_guard_snapshot()` liefert nur Apply-/Skip-Zaehler und Read-only-Grenzen. Er besitzt keine Gameplay-Wahrheit und erzeugt keine Commands, Movement-, Fire-, Damage- oder Multiplayer-Ereignisse.
+- Stand: Die lokale Mission-Frame-Probe reduzierte die periodische Spitze von rund 620-700 ms auf rund 300 ms. Einzelmessungen: Command-Matrix-Polish ca. 187 ms auf 3 ms, Selected Cards ca. 71 ms auf 1 ms, Mini Cards ca. 70 ms auf 6 ms.
+- Risiken/offen: TASK_542 erreicht nach 244 Sekunden noch nicht den Abschluss. Das ist eine Verbesserung gegenueber dem vorigen 364-Sekunden-Timeout, aber kein akzeptierter Gesamtflow. Der naechste Task markiert den wartenden Meta-/Missionsuebergang exakt statt pauschal weitere HUD-Guards zu setzen.
+- Lokale Pruefung: TASK_1044 15/15, TASK_1043 14/14, TASK_431 19/19, TASK_418 19/19 und `git diff --check` sind gruen. TASK_542 blieb mit 244 Sekunden offen.
+- Naechster Schritt: TASK_1045 - Mission First Contact End-to-End Timing Trace.
+
 ### TASK_1043 - Mission HUD Hotpath Event Log Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1043_mission_hud_hotpath_event_log_guard.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_480_mission_ui_hotpath_feedback_guard.md`

@@ -426,6 +426,19 @@ var _tactical_communication_resolver = null
 var _tactical_communication_events: Array = []
 var _tactical_event_log = null
 var _last_contact_report_event_signature_by_id: Dictionary = {}
+var _last_release_firefight_command_matrix_visual_signature: String = ""
+var _last_selected_fireteam_cards_runtime_signature: String = ""
+var _last_fireteam_mini_cards_runtime_signature: String = ""
+var _mission_hud_runtime_surface_guard_apply_counts: Dictionary = {
+	"command_matrix": 0,
+	"selected_cards": 0,
+	"mini_cards": 0,
+}
+var _mission_hud_runtime_surface_guard_skip_counts: Dictionary = {
+	"command_matrix": 0,
+	"selected_cards": 0,
+	"mini_cards": 0,
+}
 var _tactical_breakout_resolver = null
 var _tactical_breakout_records: Array = []
 var _npc_thought_bubbles: Array = []
@@ -3108,6 +3121,12 @@ func _refresh_selected_fireteam_cards() -> void:
 	var card_row := get_node_or_null(FIRETEAM_SELECTED_CARDS_ROW_PATH) as HBoxContainer
 	if card_row == null:
 		return
+	var runtime_signature: String = _build_selected_fireteam_cards_runtime_signature()
+	if runtime_signature == _last_selected_fireteam_cards_runtime_signature:
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "selected_cards")
+		return
+	_last_selected_fireteam_cards_runtime_signature = runtime_signature
+	_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "selected_cards")
 
 	for child in card_row.get_children():
 		child.queue_free()
@@ -3191,6 +3210,12 @@ func _refresh_fireteam_mini_cards() -> void:
 	var card_host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
 	if card_host == null:
 		return
+	var runtime_signature: String = _build_fireteam_mini_cards_runtime_signature()
+	if runtime_signature == _last_fireteam_mini_cards_runtime_signature:
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "mini_cards")
+		return
+	_last_fireteam_mini_cards_runtime_signature = runtime_signature
+	_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "mini_cards")
 
 	var fireteam_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
 	var existing_cards_by_id: Dictionary = {}
@@ -3274,6 +3299,104 @@ func _refresh_fireteam_mini_cards() -> void:
 		child.queue_free()
 	if fireteam_panel != null:
 		fireteam_panel.visible = desired_index > 0
+
+
+func _build_selected_fireteam_cards_runtime_signature() -> String:
+	var selected_cards_fireteam_id: String = _get_selected_member_cards_fireteam_id()
+	var units: Array = []
+	if not selected_cards_fireteam_id.is_empty():
+		units = _get_fireteam_units(selected_cards_fireteam_id, true)
+		if not _fireteam_has_embarked_payload(selected_cards_fireteam_id):
+			units = _filter_ground_fireteam_card_units(units)
+	else:
+		units = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
+		units = _filter_ground_fireteam_card_units(units)
+	var tokens: PackedStringArray = PackedStringArray([
+		"team=%s" % selected_cards_fireteam_id,
+		"selected=%s" % "|".join(_selected_fireteam_ids),
+		"preview=%s" % str(preview_mode),
+		"embarked=%s" % str(_embarked_unit_ids),
+		"deployed=%s" % str(_deployed_unit_ids),
+	])
+	for unit_variant in units:
+		tokens.append(_build_mission_hud_unit_runtime_signature(unit_variant as Node))
+	return ";".join(tokens)
+
+
+func _build_fireteam_mini_cards_runtime_signature() -> String:
+	var tokens: PackedStringArray = PackedStringArray([
+		"selected=%s" % "|".join(_selected_fireteam_ids),
+		"preview=%s" % str(preview_mode),
+	])
+	for fireteam_id_variant in _get_displayable_fireteam_ids():
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(fireteam_id, not _use_visible_units_for_fireteam_ui()))
+		var suppression_state: Dictionary = Dictionary(_suppression_state_by_fireteam.get(fireteam_id, {}))
+		var movement_state: Dictionary = get_fireteam_movement_state(fireteam_id)
+		var contact_context: Dictionary = _build_fireteam_contact_badge_context(fireteam_id)
+		var behavior_profile: Dictionary = get_active_behavior_profile(fireteam_id)
+		tokens.append("team=%s" % fireteam_id)
+		tokens.append("active=%s" % str(_is_fireteam_runtime_active(fireteam_id)))
+		tokens.append("stance=%s" % get_requested_tactical_stance(fireteam_id))
+		tokens.append("supp=%s" % str(suppression_state))
+		tokens.append("move=%s" % str(movement_state))
+		tokens.append("contact=%s" % str(contact_context))
+		tokens.append("behavior=%s" % str(behavior_profile))
+		for unit_variant in units:
+			tokens.append(_build_mission_hud_unit_runtime_signature(unit_variant as Node))
+	return ";".join(tokens)
+
+
+func _build_mission_hud_unit_runtime_signature(unit: Node) -> String:
+	if unit == null:
+		return "unit=<null>"
+	var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit.has_method("get_unit_id") else String(unit.name)
+	var fireteam_id: String = String(unit.call("get_fireteam_id")).strip_edges().to_lower() if unit.has_method("get_fireteam_id") else ""
+	var health: int = int(unit.call("get_health")) if unit.has_method("get_health") else -1
+	var max_health: int = int(unit.call("get_max_health_points")) if unit.has_method("get_max_health_points") else -1
+	var vital_state: String = String(unit.call("get_vital_state")).strip_edges().to_lower() if unit.has_method("get_vital_state") else ""
+	var fire_status: String = String(unit.call("get_fire_status")).strip_edges().to_lower() if unit.has_method("get_fire_status") else ""
+	var phase: int = int(unit.call("get_phase")) if unit.has_method("get_phase") else -1
+	var stance_revision: int = int(unit.call("get_tactical_stance_indicator_revision")) if unit.has_method("get_tactical_stance_indicator_revision") else -1
+	var runtime_command: String = str(unit.call("get_current_unit_command")) if unit.has_method("get_current_unit_command") else ""
+	return "%s|team=%s|hp=%d/%d|vital=%s|fire=%s|phase=%d|stance=%d|cmd=%s|selected=%s|embarked=%s|deployed=%s" % [
+		unit_id,
+		fireteam_id,
+		health,
+		max_health,
+		vital_state,
+		fire_status,
+		phase,
+		stance_revision,
+		runtime_command,
+		str(_is_unit_selected(unit)),
+		str(_embarked_unit_ids.has(unit_id)),
+		str(_deployed_unit_ids.has(unit_id)),
+	]
+
+
+func _increment_mission_hud_runtime_surface_guard_count(counters: Dictionary, key: String) -> void:
+	counters[key] = int(counters.get(key, 0)) + 1
+
+
+func get_mission_hud_runtime_surface_guard_snapshot() -> Dictionary:
+	return {
+		"command_matrix_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("command_matrix", 0)),
+		"command_matrix_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("command_matrix", 0)),
+		"selected_cards_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("selected_cards", 0)),
+		"selected_cards_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("selected_cards", 0)),
+		"mini_cards_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("mini_cards", 0)),
+		"mini_cards_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("mini_cards", 0)),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
 
 
 func _on_fireteam_mini_card_gui_input(event: InputEvent, fireteam_id: String) -> void:
@@ -8252,7 +8375,14 @@ func _apply_release_firefight_command_matrix_visual_polish() -> void:
 	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
 	if command_grid == null:
 		return
-	var active: bool = not _build_release_candidate_firefight_decision_line().strip_edges().is_empty()
+	var decision_line: String = _build_release_candidate_firefight_decision_line().strip_edges()
+	var active: bool = not decision_line.is_empty()
+	var visual_signature: String = _build_release_firefight_command_matrix_visual_signature(active, decision_line, command_grid)
+	if visual_signature == _last_release_firefight_command_matrix_visual_signature:
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "command_matrix")
+		return
+	_last_release_firefight_command_matrix_visual_signature = visual_signature
+	_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "command_matrix")
 	command_grid.set_meta("release_firefight_command_matrix_visual_active", active)
 	command_grid.set_meta("release_firefight_command_matrix_visual_style_id", RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID)
 	command_grid.set_meta("release_firefight_command_matrix_visual_task", "TASK_836")
@@ -8262,6 +8392,21 @@ func _apply_release_firefight_command_matrix_visual_polish() -> void:
 	_apply_release_firefight_command_placeholder_polish(active)
 	_apply_release_first_decision_loop_two_runtime_button_polish(active)
 	_apply_release_first_decision_loop_two_player_loop_runtime_choice_buttons(active)
+
+
+func _build_release_firefight_command_matrix_visual_signature(active: bool, decision_line: String, command_grid: GridContainer) -> String:
+	var go_button := get_node_or_null("%s/GoCommandMatrixButton" % COMMAND_GRID_PATH) as Button
+	var go_ready: bool = go_button != null and not go_button.disabled and not preview_mode and _can_issue_local_commands() and _has_selected_fireteam_orders_to_execute()
+	return "active=%s|decision=%s|selected=%s|preview=%s|local=%s|go=%s|roe=%s|grid=%d" % [
+		str(active),
+		decision_line,
+		"|".join(_selected_fireteam_ids),
+		str(preview_mode),
+		str(_can_issue_local_commands()),
+		str(go_ready),
+		_get_selected_fire_rule_consensus(),
+		command_grid.get_instance_id() if command_grid != null else 0,
+	]
 
 
 func _apply_release_firefight_command_primary_button_polish(active: bool) -> void:

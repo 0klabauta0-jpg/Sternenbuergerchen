@@ -29,6 +29,11 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 
 Der Live-Snapshot setzt keine Gameplay-Wahrheit und erzeugt keine Commands, Movement-, Fire-, Damage- oder Multiplayer-Ereignisse. Der volle `get_command_feedback_snapshot()` bleibt ein expliziter Headless-, Debug- und Report-Pfad; er ist kein wiederkehrender HUD-Transport fuer ein einzelnes Panel.
 
+## Mission Runtime Surface Guard (TASK_1044)
+`get_mission_hud_runtime_surface_guard_snapshot()` beschreibt die lokalen Visual-Guards fuer Command Matrix, Selected Member Cards und Fireteam Mini Cards. Diese Oberflaechen werden aus bestehendem Runtime-State abgeleitet. Bei gleichem Anzeige-Fingerprint duerfen sie ihre Node-Baeume, Styles und Metadaten behalten; bei geaenderter Auswahl, ROE/GO-Lage, Mitgliedschaft, Health, Vital-State, Stance, Runtime-Command oder Transportlage aktualisieren sie sofort.
+
+Die Fingerprints und Zaehler sind reine Controller-UI-Diagnostik. Sie cachen oder mutieren keinen Missions-, Unit-, Combat-, Dropship- oder Multiplayer-State und erzeugen keine Commands.
+
 ## Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (TASK_1032)
 `get_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan_snapshot()` ist der read-only Pruefpunkt fuer den naechsten spielbaren Slice nach TASK_1031. Der Snapshot darf nur die akzeptierte Tester-Run-Acceptance und optionale Plan-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Next-Slice-Line, Status und Gate exportiert werden.
 

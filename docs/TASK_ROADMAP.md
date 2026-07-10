@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1044 - Mission HUD Runtime Surface Guard (implementiert im Arbeitsstand)
+- Grundlage: TASK_1043 entfernte den Event-Log-Vollsnapshot; die Frame-Probe zeigte danach weiter wiederholte Matrix- und Fireteam-Card-Rebuilds.
+- Ziel: Command Matrix, Selected Member Cards und Fireteam Mini Cards nur bei sichtbarer Zustandsaenderung neu anwenden oder aufbauen.
+- Ergebnis: Controller-lokale UI-Fingerprints behalten unveraenderte Node-Instanzen, wenden echte Zustandsaenderungen sofort an und bleiben read-only.
+- Naechster Schritt: Den verbleibenden Meta-/Missionsuebergang im TASK-542-Gesamtflow zeitlich markieren und den naechsten tatsaechlichen Blocker entfernen.
+
 ## TASK_1043 - Mission HUD Hotpath Event Log Guard (implementiert im Arbeitsstand)
 - Grundlage: Der echte Homebase-zu-First-Contact-Flow zeigte einen ueberladenen wiederkehrenden HUD-Refresh.
 - Ziel: Das Tactical Event Log ueber einen schmalen Live-Snapshot versorgen, statt im 0.35-Sekunden-Refresh den vollstaendigen Command-Feedback-/Release-Report zu bauen.
