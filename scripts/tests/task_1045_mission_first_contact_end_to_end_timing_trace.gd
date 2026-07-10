@@ -163,6 +163,7 @@ func _run_trace() -> void:
 	if not _stage_within_budget() or not await _wait_stage_frames(10):
 		_finish_trace(scene)
 		return
+	_print_deboarded_combat_registry_trace(controller, combat_driver)
 	_finish_stage("complete")
 
 	_begin_stage("first_move_and_go")
@@ -391,6 +392,23 @@ func _position_first_enemy_near_fireteam(controller: Node, combat_driver: Node, 
 
 func _update_contact_tracking(combat_driver: Node) -> void:
 	combat_driver.call("_update_contact_tracking")
+
+
+func _print_deboarded_combat_registry_trace(controller: Node, combat_driver: Node) -> void:
+	var deployed_ids: Array = Array(Dictionary(controller.get("_deployed_unit_ids")).keys())
+	deployed_ids.sort()
+	var combat_friendlies: Array = []
+	for unit_variant in Array(combat_driver.call("_get_friendly_combat_units")):
+		if unit_variant == null or not unit_variant.has_method("get_unit_id"):
+			continue
+		combat_friendlies.append({
+			"unit_id": String(unit_variant.call("get_unit_id")),
+			"fireteam_id": String(unit_variant.call("get_fireteam_id")) if unit_variant.has_method("get_fireteam_id") else "",
+			"vital_state": String(unit_variant.call("get_vital_state")) if unit_variant.has_method("get_vital_state") else "",
+		})
+	print("TRACE deboard_registry deployed_ids=%s combat_friendlies=%s pending_runtime_activation=%s" % [
+		str(deployed_ids), str(combat_friendlies), str(Dictionary(controller.get("_runtime_activation_pending_fireteam_ids"))),
+	])
 	# The runtime needs up to 15 authoritative ticks before a new sighting becomes a confirmed report.
 	for _tick_index in range(16):
 		combat_driver.call("_advance_detection_timers")

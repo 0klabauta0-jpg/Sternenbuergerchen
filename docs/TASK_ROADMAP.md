@@ -13,9 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit (geplant)
+## TASK_1055 - Homebase Transport Payload to Active Mission Repair (geplant)
+- Grundlage: TASK_1054 meldet nach Deboarding keine deployed Fireteam-Mitglieder.
+- Ziel: Ausgewaehlte Homebase-Fireteams ueber Dropship bis Active Mission und Combat-Registry durchreichen.
+
+## TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit (implementiert im Arbeitsstand)
 - Grundlage: TASK_1053 findet nach Deboarding keine Combat-registrierte ft1-LOS-Basis.
-- Ziel: Deployment, Fireteam-ID, UnitRegistry, Combat-Friendly-Liste und LOS-Bereitschaft vor First Move gemeinsam pruefen.
+- Ergebnis: deployed IDs und Combat-Friendlies sind nach Deboarding leer; der Fehler liegt im Homebase-zu-Mission-Payload-Handoff.
 
 ## TASK_1053 - LOS-Valid First Contact Fixture (implementiert im Arbeitsstand)
 - Grundlage: TASK_1052 erreicht First Contact, erzeugt aber noch keinen validen LOS-Kontakt.

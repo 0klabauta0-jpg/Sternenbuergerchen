@@ -10,6 +10,11 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
+- Status: implementiert im Arbeitsstand
+- Stand: Trace belegt nach Deboarding leere deployed- und Combat-Friendly-Listen. Ursache liegt vor Contact/LOS: Homebase-Passagiere kommen nicht bis zur aktiven Mission.
+- Naechster Schritt: TASK_1055 - Homebase Transport Payload to Active Mission Repair.
+
 ### TASK_1053 - LOS-Valid First Contact Fixture
 - Status: implementiert im Arbeitsstand
 - Stand: Trace benutzt Combat-Friendlies und echten LOS-Resolver. Nach Deboarding fehlt fuer ft1 weiterhin eine gueltige Kontaktbasis; das weist auf Deployment-/Combat-Registry-Aktivierung statt UI-Readability.
