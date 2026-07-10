@@ -121,6 +121,15 @@
 - Lokale Pruefung: TASK_1070 23/23; Anschlussregressionen folgen vor Commit mit TASK_1068, TASK_1069, TASK_695, TASK_726, TASK_813 und `git diff --check`.
 - Naechster Schritt: Die Door-/Computer-/Cargo-Folge im sichtbaren Playtest pruefen und als kleinen vollstaendigen Station-Route-Sieg bis Debrief absichern, ohne die neue Context-Action wieder zu duplizieren.
 
+### TASK_1071 - Station Route Full Victory Debrief Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1071_station_route_full_victory_debrief_trace.md`, `docs/dev/mission_interaction_point_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, TASK_1070, TASK_726, TASK_586
+- Stand: TASK_1071 ist 47/47 gruen. Die echte Station Route startet aus Homebase, deboardet einen Ground-Fireteam und fuehrt den sichtbaren Context-Slot nacheinander durch AA, Door, Computer und Cargo. Jeder Schritt erzeugt nur den bestehenden Intent und braucht ein separates GO. Der Runtime-Progress schliesst die vier Gates; Cargo erzeugt `victory / won` und der vorhandene MetaLayerFlow zeigt Debrief mit demselben Result.
+- Ursache/Fix: Die Einzelverifier belegten Gates und Debrief getrennt, aber nicht die komplette Bedienkette. Der neue Trace musste keinen produktiven Handoff reparieren. Er beschleunigt nur die bereits berechneten Movement-Staffelziele und liest den finalen Result-Stand aus MetaLayer/Debrief, weil die erfolgreiche Mission-Instanz korrekt freigegeben wird.
+- Risiken/offen: Der volle Headless-Trace dauert rund 220 Sekunden und ist ein Integrationsnachweis, kein FPS-Wert. Sichtbarer F6-Balance-/Bild-/NPC-Druck sowie Host/Client-Synchronisation bleiben die naechsten echten Abnahmen.
+- Lokale Pruefung: TASK_1071 47/47; Anschlussregressionen folgen vor Commit mit TASK_1070, TASK_1069, TASK_695, TASK_726, TASK_586, TASK_813 und `git diff --check`.
+- Naechster Schritt: Den gewonnenen Pfad als sichtbaren F6-Playtest unter NPC-Druck bewerten und den ersten belegten Bedien-, Lesbarkeits- oder Performance-Befund statt weiterer theoretischer Route-Snapshots beheben.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

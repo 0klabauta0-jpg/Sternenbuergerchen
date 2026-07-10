@@ -79,6 +79,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1070 ist 23/23 gruen. Slot `16.8` folgt jetzt dem naechsten Objective-Gate, zeigt `AA` ausser Reichweite und `AA->GO` im Radius. Die Aktion erzeugt nur den bestehenden `take`-Intent; erst GO durchlaeuft Formation/Movement/Runtime-Progress, setzt AA ab und leitet sichtbar zur Door-Cue weiter.
 - Naechster Schritt: Den sichtbaren Door -> Computer -> Cargo-Folgepfad unter NPC-Druck als kurze vollstaendige Station-Route bis Debrief pruefen, bevor weitere neue Missionsmechanik entsteht.
 
+## TASK_1071 - Station Route Full Victory Debrief Trace (implementiert im Arbeitsstand)
+- Grundlage: TASK_1070 machte den ersten AA-Erfolgsuebergang sichtbar, aber Door, Computer, Cargo und Debrief waren noch nur als getrennte Gate-/Smoke-Nachweise vorhanden.
+- Ergebnis: TASK_1071 ist 47/47 gruen. Der reale Context-Slot fuehrt AA -> Door -> Computer -> Cargo; jede Aktion plant nur und GO fuehrt aus. Cargo schliesst die vorhandenen Scenario-Gates und erreicht ueber Combat-Result und MetaLayerFlow den bestehenden Debrief-Screen mit `victory / won`.
+- Naechster Schritt: Einen echten sichtbaren Station-Route-F6-Lauf mit NPC-Druck und dieser vollstaendigen Route bewerten. Neue Mechanik erst nach einem belegten Bedien-, Lesbarkeits- oder Performance-Befund.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.
