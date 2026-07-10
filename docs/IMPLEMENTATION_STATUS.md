@@ -10,6 +10,11 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1051 - Planning State Signal Fanout Guard
+- Status: implementiert im Arbeitsstand
+- Stand: Aktive Missionen erhalten Planning-State sofort, bauen aber nicht mehr versteckt Homebase, FOB und Karte neu auf. LZ-Setzen fiel von rund 13,8 Sekunden auf rund 1,0 Sekunde; Planning-Emit liegt bei rund 453 ms. LZ-/Drop-/Deboard schliesst jetzt nach rund 17,5 Sekunden ab.
+- Naechster Schritt: TASK_1052 - First Move and Contact Flow Trace Completion.
+
 ### TASK_1050 - LZ Drop and Deboard Flow Timing Breakdown
 - Status: implementiert im Arbeitsstand
 - Stand: Der LZ-Teilpfad-Timer misst rund 13,8 Sekunden fuer LZ-Setzen. Davon entfallen rund 13,2 Sekunden auf `_emit_planning_state_changed()`; Tile-Kontext rund 185 ms, Auswahl rund 202 ms, World-Refresh rund 21 ms und HUD rund 145 ms.

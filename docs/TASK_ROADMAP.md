@@ -13,9 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1051 - Planning State Signal Fanout Audit and Guard (geplant)
+## TASK_1052 - First Move and Contact Flow Trace Completion (geplant)
+- Grundlage: TASK_1051 bringt den Flow durch LZ/Drop/Deboard.
+- Ziel: Ersten Move, GO und First Contact bis zur Abschluss- oder Review-Entscheidung als naechsten Spielerflowblock messen.
+
+## TASK_1051 - Planning State Signal Fanout Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1050 misst `_emit_planning_state_changed()` mit rund 13,2 Sekunden beim LZ-Setzen.
-- Ziel: Empfaenger, Snapshot-/UI-Folgearbeit und vermeidbare Repeats des Planning-State-Signals sichtbar machen und nur viewer-seitige Wiederholungen begrenzen.
+- Ergebnis: Unsichtbare Meta-Screen-Refreshes werden waehrend aktiver Mission nicht mehr ausgefuehrt. LZ: 13,8 s auf 1,0 s; LZ-/Drop-/Deboard-Stage schliesst nach 17,5 s ab.
 
 ## TASK_1050 - LZ Drop and Deboard Flow Timing Breakdown (implementiert im Arbeitsstand)
 - Grundlage: TASK_1049 beendet den sichtbaren Startframe-Blocker; TASK_1045 erreicht erstmals LZ/Drop und stoppt dort kontrolliert.

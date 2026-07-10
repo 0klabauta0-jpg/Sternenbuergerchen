@@ -6632,9 +6632,11 @@ func _on_mission_planning_state_changed(planning_state: Dictionary) -> void:
 		_apply_planning_state_to_mission(_preview_mission)
 	if _active_mission != null:
 		_apply_planning_state_to_mission(_active_mission)
-	_refresh_homebase_screen()
-	_refresh_fob_screen()
-	_refresh_map_screen()
+	# Hidden meta screens rebuild large planning surfaces; the active mission already received the same state above.
+	if _active_mission == null:
+		_refresh_homebase_screen()
+		_refresh_fob_screen()
+		_refresh_map_screen()
 	_ensure_transport_timer_state()
 
 
