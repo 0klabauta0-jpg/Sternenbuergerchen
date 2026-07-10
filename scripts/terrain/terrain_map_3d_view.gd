@@ -887,6 +887,7 @@ var _contact_entries: Array = []
 var _contact_selected_fireteam_ids: PackedStringArray = PackedStringArray()
 var _drop_payload: Dictionary = {}
 var _mission_status_payload: Dictionary = {}
+var _mission_status_payload_signature: String = ""
 var _route_callout_entries: Array = []
 var _route_callout_tone_counts: Dictionary = {}
 var _route_callout_visual_count: int = 0
@@ -1133,6 +1134,8 @@ var _order_payload_apply_count: int = 0
 var _contact_payload_apply_count: int = 0
 var _drop_payload_apply_count: int = 0
 var _mission_status_payload_apply_count: int = 0
+var _mission_status_payload_rebuild_count: int = 0
+var _mission_status_payload_skip_count: int = 0
 var _order_visual_signature: String = ""
 var _order_dynamic_visual_signature: String = ""
 var _last_dynamic_order_visual_refresh_msec: int = 0
@@ -1696,13 +1699,78 @@ func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
 
 
 func set_mission_status_payload(status_payload: Dictionary) -> void:
-	var previous_insertion_residue_declutter_active: bool = _is_release_firefight_insertion_residue_declutter_active()
+	var normalized_payload: Dictionary = status_payload.duplicate(true)
+	var next_signature: String = _build_mission_status_payload_signature(normalized_payload)
 	_mission_status_payload_apply_count += 1
-	_mission_status_payload = status_payload.duplicate(true)
+	var previous_insertion_residue_declutter_active: bool = _is_release_firefight_insertion_residue_declutter_active()
+	_mission_status_payload = normalized_payload
+	if next_signature == _mission_status_payload_signature:
+		_mission_status_payload_skip_count += 1
+		if previous_insertion_residue_declutter_active != _is_release_firefight_insertion_residue_declutter_active() and not _drop_payload.is_empty():
+			_rebuild_drop_visuals()
+			_request_viewport_redraw()
+		return
+	_mission_status_payload_signature = next_signature
+	_mission_status_payload_rebuild_count += 1
 	_rebuild_status_visuals()
 	if previous_insertion_residue_declutter_active != _is_release_firefight_insertion_residue_declutter_active() and not _drop_payload.is_empty():
 		_rebuild_drop_visuals()
 	_request_viewport_redraw()
+
+
+func _build_mission_status_payload_signature(payload: Dictionary) -> String:
+	var visual_payload: Dictionary = {}
+	for key in [
+		"objective_position",
+		"objective_capture_radius",
+		"objective_capture_progress",
+		"objective_owner_team_id",
+		"objective_capturing_team_id",
+		"objective_contested",
+		"mission_resolved",
+		"result",
+		"win_condition_type",
+		"winning_team_id",
+		"route_callouts",
+		"mission_interaction_object_reactions",
+		"mission_interaction_visual_states",
+	]:
+		if payload.has(key):
+			visual_payload[key] = payload[key]
+	return _serialize_mission_status_signature_value(visual_payload)
+
+
+func _serialize_mission_status_signature_value(value: Variant) -> String:
+	match typeof(value):
+		TYPE_DICTIONARY:
+			var dictionary: Dictionary = Dictionary(value)
+			var keys: PackedStringArray = PackedStringArray()
+			for key_variant in dictionary.keys():
+				keys.append(String(key_variant))
+			keys.sort()
+			var tokens: PackedStringArray = PackedStringArray()
+			for key in keys:
+				tokens.append("%s=%s" % [key, _serialize_mission_status_signature_value(dictionary.get(key, null))])
+			return "{%s}" % ",".join(tokens)
+		TYPE_ARRAY:
+			var array_tokens: PackedStringArray = PackedStringArray()
+			for entry_variant in Array(value):
+				array_tokens.append(_serialize_mission_status_signature_value(entry_variant))
+			return "[%s]" % ",".join(array_tokens)
+		TYPE_VECTOR2:
+			var vector: Vector2 = Vector2(value)
+			return "v2(%.5f,%.5f)" % [vector.x, vector.y]
+		TYPE_VECTOR2I:
+			var vector_i: Vector2i = Vector2i(value)
+			return "v2i(%d,%d)" % [vector_i.x, vector_i.y]
+		TYPE_VECTOR3:
+			var vector3: Vector3 = Vector3(value)
+			return "v3(%.5f,%.5f,%.5f)" % [vector3.x, vector3.y, vector3.z]
+		TYPE_COLOR:
+			var color: Color = Color(value)
+			return "color(%.5f,%.5f,%.5f,%.5f)" % [color.r, color.g, color.b, color.a]
+		_:
+			return str(value)
 
 
 func focus_world_position(world_position: Vector2) -> void:
@@ -2619,6 +2687,16 @@ func get_render_snapshot() -> Dictionary:
 		"contact_payload_apply_count": _contact_payload_apply_count,
 		"drop_payload_apply_count": _drop_payload_apply_count,
 		"mission_status_payload_apply_count": _mission_status_payload_apply_count,
+		"mission_status_payload_rebuild_count": _mission_status_payload_rebuild_count,
+		"mission_status_payload_skip_count": _mission_status_payload_skip_count,
+		"mission_status_payload_signature_active": not _mission_status_payload_signature.is_empty(),
+		"mission_status_payload_read_only": true,
+		"mission_status_payload_sets_gameplay_truth": false,
+		"mission_status_payload_creates_command": false,
+		"mission_status_payload_creates_movement": false,
+		"mission_status_payload_creates_fire_event": false,
+		"mission_status_payload_creates_damage_event": false,
+		"mission_status_payload_sets_multiplayer_truth": false,
 	}
 
 

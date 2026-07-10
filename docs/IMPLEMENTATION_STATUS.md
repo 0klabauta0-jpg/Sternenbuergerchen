@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1046 - Terrain Mission Status Payload Signature Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1046_terrain_mission_status_payload_signature_guard.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1045_mission_first_contact_end_to_end_timing_trace.md`
+- Stand: `TerrainMap3DView` vergleicht den vollstaendigen eingehenden Status-Payload mit einer deterministischen Projektion aller wirklich gerenderten Objective-, Route-, Interaction- und Result-Felder. Gleiche Visualdaten behalten `StatusRoot3D`-Kindinstanzen, aktualisieren den read-only Payload fuer bestehende Helfer und erhoehen nur den Skip-Zaehler. Reale Sichtbarkeitsaenderungen bauen sofort neu auf.
+- Stand: TASK_1046 prueft 12/12: erster Aufbau, identischer Payload, nicht gerenderte Diagnostikaenderung, Capture-Aenderung sowie die Grenzen gegen Gameplay-/Command-Wahrheit. Der breite Terrain-/Navigation-Gate TASK_170 bleibt mit 62/62 gruen.
+- Stand: Die integrierte Messung zeigt keinen relevanten Gewinn am Hauptblocker: Controller + SimulationRoot + TerrainMap3DView liegt weiter bei rund 3.396 ms pro Frame; fuenf sichtbare Missionsframes brauchen weiter rund 21.162 ms. Der Guard ist damit ein korrekter Wiederholungs-Schutz, aber nicht die Ursache der langsamen integrierten Frames.
+- Risiken/offen: Der naechste Slice muss Controller-/Simulation-/Terrain-Arbeit innerhalb eines einzelnen sichtbaren Missionsframes zeitlich und nach Teilpfad zerlegen. Ohne diesen Nachweis waere weiterer Cache-Code Raten.
+- Lokale Pruefung: TASK_1046 12/12, TASK_170 62/62, TASK_1045 kontrolliert `budget_exceeded` an `mission_start_visible_frames`, Kombinationsprobe und `git diff --check`.
+- Naechster Schritt: TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown.
+
 ### TASK_1045 - Mission First Contact End-to-End Timing Trace
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1045_mission_first_contact_end_to_end_timing_trace.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`
 - Stand: Der bounded Trace markiert Szene, Missionsauswahl, Roster/Transport, Boarding, Missionsstart, sichtbare Mission, LZ/Drop, ersten Move/GO und First Contact. Bei Budgetueberschreitung beendet er sich mit Stage-ID statt auf ein Shell-Timeout zu warten.
 - Stand: Der Trace belegt `mission_start_visible_frames` als ersten echten Blocker: 5 Frames brauchten rund 22 Sekunden; einzeln 7.112 ms, 3.597 ms, 3.500 ms, 4.227 ms und 3.606 ms. Homebase-Refresh nach dem Start kostet zusaetzlich rund 12,4 Sekunden, Missionsinstanz-Update rund 1,5 Sekunden.
 - Stand: Die Prozess-Isolation misst `MissionTacticalSandboxController + SimulationRoot + TerrainMap3DView` mit rund 3.495 ms pro Frame, waehrend Controller + Terrain bei rund 37 ms und Controller + Simulation bei rund 407 ms liegen.
-- Risiken/offen: Der Trace ist Diagnose, kein Fix. `TerrainMap3DView.set_mission_status_payload()` rekonstruiert Statusvisuals derzeit ohne Payload-Signatur und ist der naechste direkt belegte Kandidat.
+- Risiken/offen: Der Trace ist Diagnose, kein Fix. TASK_1046 schuetzt identische Terrain-Statusdaten, hat den kombinierten Frame aber nicht messbar gesenkt; die Cross-System-Wechselwirkung bleibt offen.
 - Lokale Pruefung: TASK_1045 Trace beendet kontrolliert mit `budget_exceeded` an `mission_start_visible_frames`; `git diff --check`.
-- Naechster Schritt: TASK_1046 - Terrain Mission Status Payload Signature Guard.
+- Naechster Schritt: TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown.
 
 ### TASK_1044 - Mission HUD Runtime Surface Guard
 - Status: implementiert im Arbeitsstand

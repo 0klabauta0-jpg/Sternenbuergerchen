@@ -13,11 +13,23 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown (geplant)
+- Grundlage: TASK_1045 belegt langsame sichtbare Missionsframes; TASK_1046 schuetzt wiederholte Terrain-Statusvisuals, senkt den kombinierten Frame aber nicht messbar.
+- Ziel: Den einzelnen sichtbaren Missionsframe entlang Controller, SimulationRoot und TerrainMap3DView in benannte Teilpfade und Zeiten zerlegen, ohne den Runtime-State zu veraendern.
+- Ergebnis: Read-only Timing-Snapshot mit maximalen/aktuellen Teilpfaden, eindeutiger erster Fix-Kandidat und Regression gegen die bestehende Mission-Flow-Trace.
+- Naechster Schritt: Nur den gemessenen teuersten Teilpfad schneiden; kein weiterer pauschaler UI- oder Cache-Guard.
+
+## TASK_1046 - Terrain Mission Status Payload Signature Guard (implementiert im Arbeitsstand)
+- Grundlage: TASK_1045 zeigte wiederkehrende Terrain-Statusvisuals als plausiblen Kandidaten innerhalb des Controller-/Simulation-/Terrain-Hotpaths.
+- Ziel: Gleiche sichtbare Objective-, Route-, Interaction- und Result-Daten duerfen `StatusRoot3D` nicht erneut aufbauen; echte Sichtaenderungen muessen unmittelbar bleiben.
+- Ergebnis: TASK_1046 ist 12/12 gruen, TASK_170 bleibt 62/62 gruen. Der Guard behaelt gleiche Status-3D-Nodes und filtert nicht gerenderte Diagnostik aus der Visual-Signatur. Die integrierte Kombinationsprobe liegt dennoch weiter bei rund 3.396 ms pro Frame.
+- Naechster Schritt: TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown.
+
 ## TASK_1045 - Mission First Contact End-to-End Timing Trace (implementiert im Arbeitsstand)
 - Grundlage: TASK_542 blieb nach den HUD-Guards offen und lieferte nur ein externes Timeout.
 - Ziel: Den echten Homebase-zu-First-Contact-Ablauf intern pro Stage zeitmarkieren und den wartenden Lebenszyklus-Schritt eindeutig nennen.
-- Ergebnis: Der Trace misst sichtbare Missionsframes als Blocker: 5 Frames brauchten rund 22 Sekunden, mit einzelnen Frames von rund 3,5 bis 7,1 Sekunden. Die Interaktion `MissionTacticalSandboxController + SimulationRoot + TerrainMap3DView` ist der gemessene Hotpath.
-- Naechster Schritt: TASK_1046 - Terrain Mission Status Payload Signature Guard.
+- Ergebnis: Der Trace misst sichtbare Missionsframes als Blocker: 5 Frames brauchten rund 21 Sekunden, mit einzelnen Frames von rund 3,4 bis 7,0 Sekunden. Die Interaktion `MissionTacticalSandboxController + SimulationRoot + TerrainMap3DView` ist der gemessene Hotpath.
+- Naechster Schritt: TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown.
 
 ## TASK_1044 - Mission HUD Runtime Surface Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1043 entfernte den Event-Log-Vollsnapshot; die Frame-Probe zeigte danach weiter wiederholte Matrix- und Fireteam-Card-Rebuilds.

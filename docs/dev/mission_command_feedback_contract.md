@@ -39,6 +39,11 @@ Die Fingerprints und Zaehler sind reine Controller-UI-Diagnostik. Sie cachen ode
 
 Die Trace-Ausgabe bleibt read-only: Sie erzeugt keine neue Command-, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit. Bestehende Test-Hooks duerfen den normalen Spielerablauf nur reproduzieren.
 
+## Terrain Mission Status Payload Guard (TASK_1046)
+`TerrainMap3DView.set_mission_status_payload()` ist ein Visual-Consumer fuer Objective-, Result-, Route- und Interaction-Status. Er speichert den letzten vollstaendigen read-only Payload fuer bestehende Visual-Helfer, vergleicht aber nur die Felder, die `StatusRoot3D` wirklich zeichnet. Unveraenderte Visual-Daten behalten die bestehenden 3D-Nodes und erhoehen nur den lokalen Skip-Zaehler; geaenderte Objective-, Route-, Interaction- oder Result-Daten bauen die Statusvisuals sofort neu auf.
+
+Die Signatur, Zaehler und Render-Snapshot-Felder sind rein visuelle Diagnose. Sie cachen oder mutieren keine Missions-, Objective-, Unit-, Combat- oder Multiplayer-Wahrheit und erzeugen keine Commands, Movement-, Fire- oder Damage-Ereignisse. Nicht gerenderte Laufzeitdiagnostik darf daher keinen `StatusRoot3D`-Rebuild ausloesen.
+
 ## Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (TASK_1032)
 `get_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan_snapshot()` ist der read-only Pruefpunkt fuer den naechsten spielbaren Slice nach TASK_1031. Der Snapshot darf nur die akzeptierte Tester-Run-Acceptance und optionale Plan-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Next-Slice-Line, Status und Gate exportiert werden.
 
