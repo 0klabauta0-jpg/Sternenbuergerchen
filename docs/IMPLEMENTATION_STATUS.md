@@ -15,10 +15,10 @@
 - Relevante Docs/Contracts: `docs/tasks/TASK_1086_release_mission_ready_time_performance_pass.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_1084, TASK_1085, TASK_832, TASK_868
 - Stand: TASK_1086 ist 16/16 gruen. Der First-GO-Direkteinstieg wartet nach GO nicht mehr 45 schwere Missionsframes und vor dem finalen Snapshot nicht mehr weitere 10 Frames. Er wartet begrenzt auf einen fortgeschrittenen `SimulationRoot`-Tick plus sichtbaren Execution-State sowie danach auf echte FireEvent- und CONTACT-FIRE-Evidence.
 - Ursache/Fix: Die drei Eintraege in `SimulationRoot.command_queue` bleiben waehrend der laufenden Unit-Bewegung legitim aktiv und sind kein Readiness-Blocker. Autoritative Uebernahme wird deshalb ueber Tick-Fortschritt plus Execution-Contract belegt. Der finale Poll besitzt mit `first_exchange_visible_not_ready` einen expliziten Timeout-Blocker.
-- Performance: Der alte Headless-Referenzlauf brauchte 53.287 ms. Die neuen Laeufe lagen hardware-/lastabhaengig bei 26.501 bis 41.436 ms; der letzte Green-Lauf erreichte denselben echten FireEvent-Zustand nach 30.194 ms. Der Test nutzt ein konservatives 45-Sekunden-Regressionsbudget, der echte 4.6.2-Release-Capture bleibt die Abnahme.
-- Risiken/offen: Missions-/LZ-Aufbau und Kontakt-/Feueraufbau bleiben die groessten echten Phasen. Headless-Wandzeit ist kein FPS-Versprechen. Der Trace exportiert jetzt `elapsed_msec` und `delta_msec` pro Stufe, damit der naechste Schnitt am frischen Release-Wert ansetzt.
-- Lokale Pruefung: TASK_1086 16/16, TASK_1085 15/15, TASK_1084 12/12, TASK_832 37/37, TASK_868 41/41, TASK_1083 24/24, TASK_1082 21/21.
-- Naechster Schritt: Frischen 4.6.2-Release exportieren und die neue Stufenverteilung messen; danach den weiterhin dominanten realen Abschnitt als TASK_1087 schneiden.
+- Performance: Der alte echte Release brauchte 50.046 ms bis Ready. Der frische integrierte Godot-4.6.2-Release auf `c6d4a316` braucht 31.363 ms, rund 37 Prozent weniger. Der interne Trace endet nach 22.946 ms; davon entfallen 10.400 ms auf Mission-/LZ-Aufbau und 7.439 ms auf Kontakt bis echte FireEvent-Evidence.
+- Risiken/offen: Der Missions-/LZ-Aufbau ist jetzt der groesste echte Abschnitt. Headless-Wandzeit bleibt kein FPS-Versprechen. Der Trace exportiert `elapsed_msec` und `delta_msec` pro Stufe, damit die naechste Aenderung wieder am belegten Engpass ansetzt.
+- Lokale Pruefung: TASK_1086 16/16, TASK_1085 15/15, TASK_1084 12/12, TASK_832 37/37, TASK_868 41/41, TASK_1083 24/24, TASK_1082 21/21; 4.6.2-Export, Provenance-Startcheck und echter Window-Capture `review_ready` bei 31.363 ms.
+- Naechster Schritt: TASK_1087 - Release Mission/LZ Setup Readiness Pass. Die 10.400 ms bis `mission_runtime_nodes_ready` werden zerlegt und der dominante reale Teil reduziert, ohne den normalen Homebase-/Dropship-Handoff zu umgehen.
 
 ### TASK_1085 - Stable First Exchange Visible State
 - Status: implementiert im Arbeitsstand

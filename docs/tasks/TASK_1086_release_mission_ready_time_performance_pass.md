@@ -49,3 +49,6 @@ Der Trace zeigt mehrere feste Frame-Wartefenster. Besonders die 45 Frames nach G
 
 ## Risiken / offene Punkte
 Zustands-Polls brauchen harte Obergrenzen und aussagekraeftige Blocker. Falls die eigentliche Missionsinstanziierung oder ein einzelner UI-Refresh danach dominiert, wird dieser Befund als naechster enger Task behandelt statt durch weitere Testabkuerzungen verdeckt.
+
+## Ergebnis
+Der integrierte Godot-4.6.2-Release auf `c6d4a316` erreicht `deeplink_final` nach 31.363 ms statt zuvor 50.046 ms. Der interne Runtime-Trace benoetigt 22.946 ms. Groesster verbleibender Abschnitt ist Mission-/LZ-Aufbau bis `mission_runtime_nodes_ready` mit 10.400 ms; daraus folgt TASK_1087.
