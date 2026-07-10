@@ -148,6 +148,15 @@
 - Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
 - Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
 
+### TASK_1075 - Large Map Tactical Badge Lifecycle Audit
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1075_large_map_tactical_badge_lifecycle_audit.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_505, TASK_160, TASK_833
+- Stand: TASK_505 behaelt auf der 192x192-Karte nach Sieg Chunk-Streaming und Renderbudget und meldet wieder fuenf sichtbare Unit-Tactical-Badges. Der aktive Feuerkontakt behaelt waehrend der Mission weiter seinen kompakten Declutter-Fokus.
+- Ursache/Fix: Sichtbare Proxies und rohe Badge-Texte waren vorhanden. Alle Routine-Badges wurden ausschliesslich unterdrueckt, weil die Firefight-Decision auch nach `victory` weiter `release_firefight_declutter` setzte. Der Controller faellt nach einem autoritativen Missionsresultat ausserhalb von `in_progress` auf die normale World-Label-Dichte zurueck. Simulation, Combat-Result und Streaming werden nicht mutiert.
+- Risiken/offen: TASK_838 und TASK_839 haben eine separate, vorgelagerte Release-UI-Snapshot-Kette, die derzeit auf dem alten TASK_836-/TASK_838-Readout scheitert. Ihre direkten Visualchecks bleiben gruen; dieser Contract-Refresh ist Folgearbeit und kein Badge-/Missionsend-Regression.
+- Lokale Pruefung: TASK_505 PASS, TASK_160 22/22, TASK_833 23/23 und `git diff --check`.
+- Naechster Schritt: Den integrierten Stand committen, aus dem sauberen Integrationscommit einen frischen Provenance-Release exportieren und den sichtbaren Station-Route- oder Host/Client-Lauf fortsetzen.
+
 ### TASK_1074 - Host Client F6 Contract Refresh
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1074_host_client_f6_contract_refresh.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_604, TASK_606, TASK_607, TASK_817, TASK_833

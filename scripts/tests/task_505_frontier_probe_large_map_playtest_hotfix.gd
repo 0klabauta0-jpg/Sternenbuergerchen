@@ -113,6 +113,7 @@ func _run() -> void:
 	_check(objective_status != null and float(objective_status.capture_progress) >= 1.0 and String(objective_status.owning_team_id) == "team_alpha", "Friendly fireteam captures the objective")
 	_check(String(mission_result.get("result", "")) == "victory", "Mission resolves as victory")
 	_check(bool(final_snapshot.get("mission_result_visible", false)), "Mission result is visible")
+	_check(not bool(final_snapshot.get("world_label_declutter_active", true)), "Mission victory releases firefight world-label declutter")
 	_check(int(final_snapshot.get("unit_status_badge_count", 0)) > 0, "Unit tactical badges remain visible")
 	_check(int(final_snapshot.get("rendered_tile_count", 0)) < int(final_snapshot.get("total_tile_count", 0)), "Final view still uses chunked rendering")
 

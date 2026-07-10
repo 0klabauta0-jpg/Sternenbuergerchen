@@ -99,6 +99,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1074 ist mit TASK_607 41/41, TASK_604 28/28, TASK_606 39/39, TASK_817 34/34, TASK_833 23/23, TASK_169 15/15 und ENet 3/3 gruen. Beide Seiten zeigen im Feuerkontakt `CONTACT FIRE` und die kompakte `NEXT ... | WHY ...`-Zeile; ACT-/Objective-/Cargo-/ROE bleiben strukturiert und read-only erhalten.
 - Naechster Schritt: Den separaten Large-Map-Befund `unit_status_badge_count = 0` nach Missionsende als kleinen Badge-Lifecycle-Slice klaeren und danach aus dem sauberen Integrationscommit einen frischen Provenance-Release exportieren.
 
+## TASK_1075 - Large Map Tactical Badge Lifecycle Audit (implementiert im Arbeitsstand)
+- Grundlage: TASK_505 behaelt 192x192-Streaming und das Renderbudget, zeigte nach Sieg aber keine sichtbaren Unit-Tactical-Badges.
+- Ergebnis: TASK_505 ist nach Sieg wieder gruen: fuenf sichtbare Proxies tragen lesbare Badges, Chunk-Streaming bleibt aktiv. TASK_160 22/22 und TASK_833 23/23 sichern die normale Missionsansicht sowie den weiterhin kompakten aktiven Feuerkontakt ab.
+- Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
+- Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

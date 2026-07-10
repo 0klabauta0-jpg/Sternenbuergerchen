@@ -8336,6 +8336,10 @@ func _build_empty_release_candidate_firefight_decision_line_snapshot(reason: Str
 
 
 func _get_release_firefight_world_label_density_mode() -> String:
+	var mission_result: Dictionary = _get_mission_result_for_mini_aar()
+	var result_state: String = String(mission_result.get("result", "")).strip_edges().to_lower()
+	if not result_state.is_empty() and result_state != "in_progress":
+		return "default"
 	var decision_snapshot: Dictionary = _build_release_candidate_firefight_decision_line_snapshot()
 	if bool(decision_snapshot.get("active", false)):
 		return RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE
