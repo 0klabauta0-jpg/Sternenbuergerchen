@@ -69,6 +69,11 @@ Erwartete Struktur: Ohne akzeptierte TASK_1038-Quelle bleibt `blocked`; ohne Sic
 
 Erwartete Struktur: Der Command-Feedback-Snapshot exportiert TASK_1040 als Snapshot, `release_first_decision_loop_two_player_loop_scenario_first_contact_visual_polish_line`, `release_first_decision_loop_two_player_loop_scenario_first_contact_visual_surface_specs` und Status. Die Specs decken CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, GO und HUD/MP ab. Sie sind Anzeige-/Feedback-Vertrag, keine Gameplay-Wahrheit, kein Command-Commit, kein Movement, kein Fire-/Damage-Event und keine Multiplayer-Autoritaet. Ein bereiter Snapshot routet zu `TASK_1041 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice`.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice (TASK_1041)
+`get_release_first_decision_loop_two_player_loop_scenario_first_contact_acceptance_slice_snapshot()` ist der read-only Acceptance-Schnitt nach TASK_1040. Der Snapshot darf nur die bereite Visual-Polish-Quelle und einen optionalen Acceptance-Trace bewerten. Er muss im Command-Feedback als Snapshot, Acceptance-Line, Status und Gate exportiert werden.
+
+Erwartete Struktur: Ohne Trace meldet der Snapshot `needs_first_contact_acceptance_trace`; fehlende Checks melden `first_contact_acceptance_regression_found`; ein sauberer Trace setzt `first_contact_acceptance_slice_passed` und routet zu `TASK_1042 - Release First Decision Loop Two Player Loop Scenario First Contact Integrated Playtest`. Der Trace prueft CONTACT, WHY, NEXT, FIRE/WAIT, Feedback-zurueck-zu-NEXT, `GO separat`, HUD-Ruhe, Responsiveness, Multiplayer-Grenze und keine Gameplay-Truth-Mutation. Der Snapshot setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 `get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
 

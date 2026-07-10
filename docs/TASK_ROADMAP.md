@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1041 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice (implementiert im Arbeitsstand)
+- Grundlage: TASK_1040 First Contact Visual Polish mit bereiten CONTACT-/WHY-/NEXT-/FIRE-WAIT-/FEEDBACK-/GO-/HUD-MP-Surface-Specs.
+- Ziel: Den gepolishte First-Contact-Griff als kleinen Acceptance-Slice pruefen: Spieler versteht Kontakt, Risiko, naechsten Griff, Feuerwahl, Feedback und bewusste GO-Grenze.
+- Ergebnis: Read-only Snapshot `blocked | needs_first_contact_acceptance_trace | first_contact_acceptance_regression_found | first_contact_acceptance_slice_passed`.
+- Naechster Schritt: TASK_1042 - Release First Decision Loop Two Player Loop Scenario First Contact Integrated Playtest.
+
 ## TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish (implementiert im Arbeitsstand)
 - Grundlage: TASK_1039 First Contact Visual Findings mit Reibung oder akzeptiertem Befund.
 - Ziel: CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, GO und HUD/MP als ruhige read-only Surface-Specs fuer den ersten Kontakt polishen.
