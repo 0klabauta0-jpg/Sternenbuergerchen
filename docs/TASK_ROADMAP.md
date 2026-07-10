@@ -13,6 +13,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1086 - Release Mission Ready-Time Performance Pass (implementiert im Arbeitsstand)
+- Grundlage: TASK_1085 machte die rund 50 Sekunden bis `deeplink_final` erstmals stabil messbar. Davon entfielen allein rund 20 Sekunden auf feste 45- und 10-Frame-Wartefenster in einer schweren Missionsszene.
+- Ergebnis: GO-Readiness verlangt jetzt einen fortgeschrittenen autoritativen SimulationRoot-Tick und sichtbaren Execution-State. Final-Readiness verlangt echte FireEvent-Evidence und `CONTACT FIRE` in #17/#18. Trace-Samples enthalten Stufen-Delta und Gesamtdauer; Timeouts blockieren explizit. Der letzte Green-Headless-Lauf sank von 53.287 auf 30.194 ms.
+- Naechster Schritt: TASK_1087 aus dem frischen 4.6.2-Release-Trace ableiten. Kandidaten sind der Missions-/LZ-Aufbau oder der Kontakt-/Feueraufbau; entschieden wird nach gemessener Dominanz.
+
 ## TASK_1085 - Stable First Exchange Visible State (implementiert im Arbeitsstand)
 - Grundlage: Der frische 35-Sekunden-Release-Capture zeigte noch `NO FIRE NO_LOS`, obwohl der unmittelbare TASK-832-Snapshot gruen war. Ein 90-Sekunden-Capture lag bereits in einem spaeteren HUD-Zustand.
 - Ergebnis: Der Capture wartet jetzt auf den vorhandenen `deeplink_final / applied`-Trace. Der aktuelle Lauf wurde nach 51.457 ms bereit. #17/#18 verwenden `CONTACT FIRE | FT1 -> PATROL` ohne technische Unit-IDs, #19 behaelt die echte FireEvent-Evidence. Ein redundanter kompletter Status-Neuaufbau entfiel; der isolierte Sync sank von rund 22,6 ms auf etwa 0,5 bis 0,6 ms.
