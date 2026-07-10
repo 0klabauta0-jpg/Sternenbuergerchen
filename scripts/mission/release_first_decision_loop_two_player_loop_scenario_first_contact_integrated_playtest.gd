@@ -43,7 +43,11 @@ static func build_snapshot(source_acceptance_slice: Dictionary, trace: Dictionar
 	var source: Dictionary = source_acceptance_slice.duplicate(true)
 	var integrated_trace: Dictionary = trace.duplicate(true)
 	var blockers: Array = _build_source_blockers(source)
-	var trace_available: bool = bool(integrated_trace.get("trace_available", false)) or not integrated_trace.is_empty()
+	var trace_available: bool = false
+	if integrated_trace.has("trace_available"):
+		trace_available = bool(integrated_trace.get("trace_available", false))
+	else:
+		trace_available = not integrated_trace.is_empty()
 	var completed_checks: Array = _completed_integrated_checks(integrated_trace) if trace_available else []
 	var missing_checks: Array = _missing_integrated_checks(completed_checks) if trace_available else []
 	var issues: Array = []

@@ -28,6 +28,7 @@ func _run_tests() -> void:
 	_test_docs_and_static_hooks()
 	_test_missing_source_blocks()
 	_test_ready_source_without_trace_needs_trace()
+	_test_nonempty_trace_with_explicit_false_still_needs_trace()
 	_test_failed_trace_reports_regression()
 	_test_good_trace_passes_integrated_playtest()
 	_test_controller_exports_integrated_playtest()
@@ -100,6 +101,17 @@ func _test_ready_source_without_trace_needs_trace() -> void:
 	_assert(_snapshot_is_read_only(snapshot), "Trace-needed snapshot remains read-only")
 
 
+func _test_nonempty_trace_with_explicit_false_still_needs_trace() -> void:
+	var snapshot: Dictionary = _build_snapshot(_source_acceptance_slice(), _explicit_false_trace())
+	var issue_ids: Array = _issue_ids(Array(snapshot.get("issues", [])))
+	_assert(not bool(snapshot.get("trace_available", true)), "Explicit false trace stays unavailable")
+	_assert(String(snapshot.get("status", "")) == "needs_first_contact_integrated_playtest_trace", "Explicit false trace still needs integrated trace")
+	_assert(String(snapshot.get("gate", "")) == "needs_first_contact_integrated_playtest_trace", "Explicit false trace keeps needs-trace gate")
+	_assert(issue_ids.has("first_contact_integrated_playtest_trace_missing"), "Explicit false trace reports missing integrated trace")
+	_assert(not bool(snapshot.get("first_contact_integrated_playtest_passed", true)), "Explicit false trace does not pass integrated playtest")
+	_assert(_snapshot_is_read_only(snapshot), "Explicit false trace snapshot remains read-only")
+
+
 func _test_failed_trace_reports_regression() -> void:
 	var snapshot: Dictionary = _build_snapshot(_source_acceptance_slice(), _failed_trace())
 	var missing_checks: Array = Array(snapshot.get("missing_integrated_checks", []))
@@ -147,8 +159,13 @@ func _test_controller_exports_integrated_playtest() -> void:
 		_assert(false, "Controller exposes TASK_1042 snapshot")
 		controller.queue_free()
 		return
+	var trace_needed_snapshot: Dictionary = controller.get_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_snapshot(_source_acceptance_slice(), {})
 	var snapshot: Dictionary = controller.get_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_snapshot(_source_acceptance_slice(), _good_trace())
 	var feedback: Dictionary = controller.get_command_feedback_snapshot()
+	var embedded_snapshot: Dictionary = Dictionary(feedback.get("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest", {}))
+	_assert(String(trace_needed_snapshot.get("status", "")) == "needs_first_contact_integrated_playtest_trace", "Controller TASK_1042 {} trace path needs integrated trace")
+	_assert(String(trace_needed_snapshot.get("gate", "")) == "needs_first_contact_integrated_playtest_trace", "Controller TASK_1042 {} trace gate needs trace")
+	_assert(_issue_ids(Array(trace_needed_snapshot.get("issues", []))).has("first_contact_integrated_playtest_trace_missing"), "Controller TASK_1042 {} trace path reports missing integrated trace")
 	_assert(String(snapshot.get("schema", "")) == SCHEMA, "Controller TASK_1042 schema matches")
 	_assert(String(snapshot.get("status", "")) == "first_contact_integrated_playtest_passed", "Controller TASK_1042 passes with trace")
 	_assert(String(snapshot.get("integrated_playtest_line", "")).contains("FEEDBACK"), "Controller TASK_1042 line names feedback")
@@ -157,6 +174,10 @@ func _test_controller_exports_integrated_playtest() -> void:
 	_assert(feedback.has("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_line"), "Command feedback exports TASK_1042 line")
 	_assert(feedback.has("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_status"), "Command feedback exports TASK_1042 status")
 	_assert(feedback.has("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_gate"), "Command feedback exports TASK_1042 gate")
+	_assert(String(embedded_snapshot.get("integrated_playtest_line", "")) == String(feedback.get("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_line", "")), "Command feedback TASK_1042 line matches embedded snapshot")
+	_assert(String(embedded_snapshot.get("status", "")) == String(feedback.get("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_status", "")), "Command feedback TASK_1042 status matches embedded snapshot")
+	_assert(String(embedded_snapshot.get("gate", "")) == String(feedback.get("release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest_gate", "")), "Command feedback TASK_1042 gate matches embedded snapshot")
+	_assert(_snapshot_is_read_only(embedded_snapshot), "Embedded TASK_1042 command feedback snapshot remains read-only")
 	controller.queue_free()
 
 
@@ -271,6 +292,14 @@ func _failed_trace() -> Dictionary:
 		"what_happened_after_go",
 	]
 	return trace
+
+
+func _explicit_false_trace() -> Dictionary:
+	return {
+		"trace_available": false,
+		"trace_id": "explicit_false_trace",
+		"release_mission_context_reached": true,
+	}
 
 
 func _read_only_fallback() -> Dictionary:
