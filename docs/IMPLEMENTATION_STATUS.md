@@ -60,6 +60,15 @@
 - Lokale Pruefung: `task_1062_fireteam_card_delta_rendering.gd` 18/18, `task_1061_multi_fireteam_mission_runtime_budget.gd` 11/11, TASK_1044 15/15, TASK_1060 14/14, TASK_1059 10/10, TASK_396 17/17, TASK_503 10/10 und `git diff --check`.
 - Naechster Schritt: Ein kleiner spielbarer Objective-Slice mit klarer Aufgabe, sichtbaren Erfolg-/Fehlschlaggrenzen und Debriefing, damit die stabilisierte Taktik nicht nur in Verifiern lebt.
 
+### TASK_1063 - First Objective Scenario
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1063_first_objective_scenario.md`, `docs/dev/mission_briefing_contract.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_726, TASK_586
+- Stand: TASK_1063 ist 14/14 gruen. `Operation: Station Route` erscheint im echten Homebase-Missionskatalog. Nach der Wahl startet der vorhandene Direct-Dropship-Player-Flow die reale Mission mit `station_outpost_192x192.json` und `station_route_one_screen_multiplayer_drill.json`. Der Combat-Driver konfiguriert die vier vorhandenen Gates; der Tactical-Controller zeigt `disable_air_defense` als ersten sichtbaren Schritt.
+- Ursache/Fix: Die AA -> Door -> Computer -> Cargo-Route war schon als ScenarioData, Runtime-Gate, HUD-Readout und Debriefing-Pfad vorhanden, aber nicht ueber `HOMEBASE_MISSION_CATALOG` waehlbar. Der Katalogeintrag macht exakt diesen vorhandenen Contract fuer den Spieler erreichbar.
+- Risiken/offen: Der Route- und Debriefing-Teil wird durch TASK_726 30/30 und TASK_586 37/37 abgesichert; echter Spieler-Balance-, Host/Client- und Sichtbefund bleiben Folgearbeit. Der neue Entry ist Singleplayer-startbar und behaelt die vorhandene Coop-/PvP-Scenario-Aussage, ersetzt aber keine Lobby.
+- Lokale Pruefung: TASK_1063 14/14, TASK_726 30/30, TASK_586 37/37, TASK_1062 18/18, TASK_1061 11/11 und `git diff --check`.
+- Naechster Schritt: Die erste Station-Route im echten Missionsfenster auf Lesbarkeit und Spielerentscheidung verdichten: sichtbare Start-/Ziel-Cues, NPC-Druck und eine klare erste erfolgreiche oder abgebrochene Runde.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

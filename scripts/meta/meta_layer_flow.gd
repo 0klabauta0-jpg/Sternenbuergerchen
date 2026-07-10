@@ -16,6 +16,7 @@ const FRIENDLY_NODE_NAMES: PackedStringArray = ["UnitAlpha", "UnitBravo", "UnitC
 const DEFAULT_META_MAP_PATH: String = "res://maps/Ground_Mission01_32x32.json"
 const DEFAULT_META_SCENARIO_PATH: String = "res://data/mission_scenarios/ground_mission01_default.json"
 const FRONTIER_VERTICAL_SLICE_SCENARIO_PATH: String = "res://data/mission_scenarios/frontier_probe_vertical_slice.json"
+const STATION_ROUTE_ONE_SCREEN_SCENARIO_PATH: String = "res://data/mission_scenarios/station_route_one_screen_multiplayer_drill.json"
 const NO_SCENARIO_FILE_PATH: String = ""
 const HOMEBASE_MISSION_CATALOG: Array = [
 	{
@@ -58,6 +59,15 @@ const HOMEBASE_MISSION_CATALOG: Array = [
 		"scenario_file_path": FRONTIER_VERTICAL_SLICE_SCENARIO_PATH,
 		"slot_count": 8,
 		"time_limit_seconds": 1500.0,
+		"win_condition": "objective_capture",
+	},
+	{
+		"mission_id": "station_route_one_screen_multiplayer_drill",
+		"mission_name": "Operation: Station Route",
+		"map_file_path": "res://maps/station_outpost_192x192.json",
+		"scenario_file_path": STATION_ROUTE_ONE_SCREEN_SCENARIO_PATH,
+		"slot_count": 8,
+		"time_limit_seconds": 900.0,
 		"win_condition": "objective_capture",
 	},
 	{

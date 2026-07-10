@@ -44,6 +44,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1062 ist 18/18 gruen. Statische Kartenidentitaet wird nur bei geaenderter Referenz erneut eingerichtet; Selection, Suppression, Contact, Bewegung und Coordination bleiben kleine Runtime-Deltas. Lead- und Member-Portraets werden bei gleicher Identitaet nicht erneut gesetzt. Der frische Zwei-Team-Trace misst rund 46 bis 48 ms Fireteam-Card-Surface in Contact/Preview/GO.
 - Naechster Schritt: Ein kleines spielbares Objective-Szenario bauen, das den nun lesbaren und stabilen Homebase-zu-Mission-zu-Debriefing-Pfad fuer einen Menschen erlebbar macht.
 
+## TASK_1063 - First Objective Scenario (implementiert im Arbeitsstand)
+- Grundlage: Die Station-Route hatte schon AA-, Door-, Computer-, Cargo-, HUD- und Debriefing-Bausteine, war fuer einen Spieler aber nicht im echten Homebase-Katalog waehlbar.
+- Ergebnis: TASK_1063 ist 14/14 gruen. `Operation: Station Route` startet aus Homebase mit der vorhandenen Stationkarte und ScenarioData. Die Mission erhaelt echte Runtime-Gates; der sichtbare erste Schritt ist AA-Shutdown. TASK_726 30/30 und TASK_586 37/37 halten Route und Debriefing-Handoff als bestehende Folgegrenzen gruen.
+- Naechster Schritt: Einen kurzen echten Spielrunden-Readability-/Balance-Slice fuer Station Route bauen: erster Kontakt, NPC-Druck, erste Erfolg- oder Abbruchentscheidung und Debriefing ohne technischen Leerlauf.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.
