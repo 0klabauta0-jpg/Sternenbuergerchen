@@ -678,6 +678,12 @@ func _normalize_tactical_rules(value: Variant) -> Array:
 			"normalized_from_conflict": bool(source.get("normalized_from_conflict", false)),
 			"ui_sets_gameplay_truth": false,
 		}
+		if source.has("revision"):
+			entry["revision"] = maxi(int(source.get("revision", 0)), 0)
+		if source.has("runtime_authority"):
+			entry["runtime_authority"] = String(source.get("runtime_authority", "SimulationRoot")).strip_edges()
+		if source.has("read_only"):
+			entry["read_only"] = bool(source.get("read_only", true))
 		_copy_string_if_present(source, entry, "command_id")
 		_copy_string_if_present(source, entry, "sync_group_id")
 		entry["warnings"] = _normalize_string_array(source.get("warnings", []))

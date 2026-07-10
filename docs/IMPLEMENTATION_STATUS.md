@@ -148,6 +148,15 @@
 - Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
 - Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
 
+### TASK_1082 - Multiplayer ROE Authority And Replication
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1082_multiplayer_roe_authority_and_replication.md`, `docs/dev/mission_command_feedback_contract.md`, `scripts/multiplayer/multiplayer_command_contract.gd`, `scripts/multiplayer/multiplayer_snapshot_contract.gd`, TASK_281, TASK_1081
+- Stand: `tactical_rule / set_fire_rule` laeuft im aktiven Multiplayer ueber `SimulationRoot`. Fireteam-Peers und explizit zugewiesene Commander-Peers duerfen nur ihre Fireteams aendern; der Host committed Fire Rule und monotone Revision. Der bestehende `tactical_rules`-Snapshot repliziert beides read-only.
+- Ursache/Fix: Der ROE-Button mutierte zuvor Controller, Movement-State und UnitCommands direkt. Im Netzwerk sendet er jetzt nur einen Request. Erst `fire_rule_committed` aktualisiert auf dem Host aktive Runtime-Commands; `multiplayer_snapshot_applied` aktualisiert auf Clients nur neuere Leserevisionen und reiht keine Gameplay-Commands ein.
+- Risiken/offen: Der Contract-/Fixture-Pfad ist belegt; ein echter Zwei-Fenster-Klicklauf mit zwei getrennt zugewiesenen Fireteams und sichtbarer Wrong-Owner-Ablehnung ist der naechste Multiplayer-Playtest. Der historische Mission-Controller bleibt Folgearchitektur unter `scripts/tests/`. TASK_284 bleibt unabhaengig 63/64, weil alte Release-Deep-Link-Helfer in `meta_layer_flow.gd` Runtime-Status direkt setzen; geplant als TASK_1084 nach dem Playtest.
+- Lokale Pruefung: TASK_1082 21/21, TASK_281 33/33, TASK_1081 33/33, TASK_1080 22/22, TASK_570 46/46 und TASK_607 41/41 gruen; `git diff --check` und HTML-Syntax folgen im Abschlusslauf.
+- Naechster Schritt: `TASK_1083 - Two-Instance ROE Ownership Playtest`: echte ENet-Buttons fuer getrennte Fireteams, Host-Commit, Client-Konsequenz und sichtbares Reject-Feedback pruefen.
+
 ### TASK_1081 - Station Route ROE Consequence Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1081_station_route_roe_consequence_readability.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_570, TASK_603, TASK_1080

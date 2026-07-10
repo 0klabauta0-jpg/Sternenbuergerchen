@@ -105,6 +105,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
 - Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
 
+## TASK_1082 - Multiplayer ROE Authority And Replication (implementiert im Arbeitsstand)
+- Grundlage: TASK_1080/1081 machen ROE wirksam und lesbar, aber der sichtbare Buttonpfad umging im Netzwerk noch den allgemeinen Authority-Contract.
+- Ergebnis: TASK_1082 ist 21/21 gruen. `set_fire_rule` ist ein host-validierter Tactical-Rule-Command; zugewiesene Peers koennen kein fremdes Fireteam desselben Teams aendern. Fire Rule und Revision werden ueber den bestehenden `tactical_rules`-Snapshot repliziert, waehrend Client-Apply keine Runtime-Commands erzeugt.
+- Naechster Schritt: TASK_1083 als echten Zwei-Instanzen-Playtest: getrennte Fireteams per Button umstellen, Host-/Client-ACT vergleichen und einen Wrong-Owner-Request sichtbar ablehnen.
+- Danach: TASK_1084 repariert die im TASK_284-Audit bestaetigten direkten `set_runtime_status`-Aufrufe der Release-Deep-Link-Helfer ueber einen autoritativen Test-Setup-/Command-Pfad.
+
 ## TASK_1081 - Station Route ROE Consequence Readability (implementiert im Arbeitsstand)
 - Grundlage: TASK_1080 machte die ROE im laufenden UnitCommand wirksam, das HUD zeigte aber weiterhin nur den Namen der Regel ohne unmittelbare Folge.
 - Ergebnis: TASK_1081 ist 33/33 gruen. `ACT` zeigt `HF HOLD`, `RF WAIT/RETURN`, `FW READY/ENGAGE/BLOCK`, `SUP READY` oder `MIX`; Runtime-Konsistenz, Return-Fire-Fenster und vorhandener Combat-Kontext bleiben read-only diagnostizierbar. Der echte Guard-Trace ist 22/22 und Host/Client 41/41 gruen.

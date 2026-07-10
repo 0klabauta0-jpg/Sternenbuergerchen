@@ -27,6 +27,7 @@ const CATEGORY_COMMANDER_INTENT: String = "commander_intent"
 const CATEGORY_ROLE_OVERRIDE: String = "role_override"
 const CATEGORY_BREAKOUT_RESPONSE: String = "breakout_response"
 const CATEGORY_AIR_ASSET_COMMAND: String = "air_asset_command"
+const CATEGORY_TACTICAL_RULE: String = "tactical_rule"
 
 const ALLOWED_AREA_ORDER_TYPES: PackedStringArray = [
 	"engage",
@@ -53,6 +54,12 @@ const ALLOWED_AIR_ASSET_COMMAND_TYPES: PackedStringArray = [
 	"air_asset_abort_approach",
 	"air_asset_hold",
 	"air_asset_request_status",
+]
+const ALLOWED_FIRE_RULES: PackedStringArray = [
+	"hold",
+	"return",
+	"free",
+	"suppress",
 ]
 const FORBIDDEN_STATE_KEYS: PackedStringArray = [
 	"effect_type",
@@ -150,6 +157,8 @@ func _validate_category_payload(category: String, command: Dictionary) -> Dictio
 			return _validate_breakout_response(command)
 		CATEGORY_AIR_ASSET_COMMAND:
 			return _validate_air_asset_command(command)
+		CATEGORY_TACTICAL_RULE:
+			return _validate_tactical_rule(command)
 		_:
 			return _reject("command_not_whitelisted")
 
@@ -291,6 +300,20 @@ func _validate_air_asset_command(command: Dictionary) -> Dictionary:
 	return _accept_payload(command_type, String(command.get("unit_id", "")).strip_edges(), team_id, String(command.get("fireteam_id", "")).strip_edges().to_lower())
 
 
+func _validate_tactical_rule(command: Dictionary) -> Dictionary:
+	var command_type: String = _extract_command_type(command)
+	if command_type != "set_fire_rule":
+		return _reject("tactical_rule_not_whitelisted")
+	var team_id: String = String(command.get("team_id", "")).strip_edges()
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var fire_rule: String = String(command.get("fire_rule", "")).strip_edges().to_lower()
+	if team_id.is_empty() or fireteam_id.is_empty():
+		return _reject("tactical_rule_missing_owner")
+	if not ALLOWED_FIRE_RULES.has(fire_rule):
+		return _reject("invalid_fire_rule")
+	return _accept_payload(command_type, "", team_id, fireteam_id, {"requires_fireteam_assignment": true})
+
+
 func _validate_peer_rights(ownership: Dictionary, context: Dictionary) -> Dictionary:
 	var role_id: String = String(context.get("peer_role", ROLE_COMMANDER)).strip_edges().to_lower()
 	if role_id.is_empty():
@@ -313,6 +336,13 @@ func _validate_peer_rights(ownership: Dictionary, context: Dictionary) -> Dictio
 		return _reject("peer_team_mismatch")
 	if not unit_team_id.is_empty() and unit_team_id != peer_team_id:
 		return _reject("unit_team_mismatch")
+	if bool(ownership.get("requires_fireteam_assignment", false)):
+		var assigned_fireteam_ids: PackedStringArray = _normalize_string_array(context.get("peer_fireteam_ids", PackedStringArray()))
+		var required_fireteam_id: String = String(ownership.get("fireteam_id", "")).strip_edges().to_lower()
+		if required_fireteam_id.is_empty():
+			return _reject("fireteam_role_missing_fireteam")
+		if not assigned_fireteam_ids.has(required_fireteam_id):
+			return _reject("fireteam_not_assigned_to_peer")
 	if role_id == ROLE_COMMANDER:
 		return {"accepted": true}
 
@@ -342,6 +372,7 @@ func _detect_category(command: Dictionary) -> String:
 		CATEGORY_ROLE_OVERRIDE,
 		CATEGORY_BREAKOUT_RESPONSE,
 		CATEGORY_AIR_ASSET_COMMAND,
+		CATEGORY_TACTICAL_RULE,
 	]:
 		return explicit_category
 	if command.has("area_order_id") or command.has("world_polygon") or command.has("tile_positions"):
