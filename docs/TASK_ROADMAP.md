@@ -105,6 +105,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
 - Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
 
+## TASK_1080 - Station Route Live Fire-Rule Propagation (implementiert im Arbeitsstand)
+- Grundlage: TASK_1079 zeigte, dass `Hold Fire` im echten Guard-Contact keinen freiwilligen FireEvent hinzufuegt. Der Setter aktualisierte dabei aber nur Controller und Behavior-Profil; laufende Unit-Commands konnten ihre vorherige ROE behalten.
+- Ergebnis: TASK_1080 ist 17/17 gruen. `return` und `free` erreichen im realen Homebase -> Drop -> Deboard -> GO -> Guard-Contact sofort Movement-State und alle aktiven Bravo-Unit-Commands. Die Command-Revision steigt bei jedem Wechsel; TASK_1079, TASK_570, TASK_501 und TASK_607 bleiben gruen.
+- Ursache/Fix: Der bestehende Live-Stance-Refresh wurde als Fire-Rule-Refresh gespiegelt. Der aktuelle Stage wird mit unveraendertem Ziel ueber `SimulationRoot` neu ausgegeben, sodass alte tokenisierte Move-Commands die neuere ROE nicht zuruecksetzen koennen.
+- Naechster Schritt: TASK_1081 macht die jetzt echte Wirkung lesbar: kurze Konsequenzanzeige fuer Hold/Return/Free, Incoming-Fire-Fenster sowie Friendly-Fire-/Cover-Grund im Guard-Contact.
+
 ## TASK_1079 - Station Route Real First Exchange (implementiert im Arbeitsstand)
 - Grundlage: Die vorhandenen First-Engagement-Smokes erzeugten ihren Gegnerkontakt teilweise per Test-Positionierung. Nach TASK_1078 musste geklaert werden, ob der echte Scenario-Guard nach dem Advance denselben Entscheidungsweg erreicht.
 - Ergebnis: TASK_1079 ist 14/14 gruen. Der reale Guard-Contact liefert Fire-/Wait-/No-Fire-Status, Grund und Deckungs-/Range-/LOS-Kontext ohne Teleport, Status-Manipulation oder erzwungenen Treffer. Hold Fire setzt im selben Contact keine freiwilligen FireEvents; Evac bleibt erreichbar.
