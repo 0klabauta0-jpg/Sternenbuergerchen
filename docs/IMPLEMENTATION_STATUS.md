@@ -148,6 +148,15 @@
 - Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
 - Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
 
+### TASK_1074 - Host Client F6 Contract Refresh
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1074_host_client_f6_contract_refresh.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_604, TASK_606, TASK_607, TASK_817, TASK_833
+- Stand: Aktiver Feuerkontakt hat jetzt in Selected Fireteam und Mission Control eine feste Zwei-Zeilen-Prioritaet: `CONTACT FIRE` zuerst, danach die kompakte `NEXT ... | WHY ...`-Entscheidung. Die ACT-/Objective-/Cargo-/ROE-Daten bleiben als strukturierte read-only Quelle erhalten und werden nicht mehr als alte Statusanhaenge in die Primaeranzeige gedrueckt.
+- Ursache/Fix: Der F6-Inspector las Combat-Dichte mehrfach und traf dadurch ein kurzlebiges Visual-Persistenzfenster nicht immer. Gleichzeitig hingen alte Source-Bindings alten Labeltext an die neue Contact-Fire-Zeile. Command-Feedback und F6-Density lesen jetzt konsistent dieselbe Anzeige-Evidence; echte Commands, Simulation, ENet und Snapshots bleiben unveraendert.
+- Risiken/offen: Der technische Host/Client-Readout ist gruen; ein menschlicher Zwei-Fenster-Sichtentscheid bleibt separat. TASK_505 hielt Large-Map-Streaming und Renderzeiten ein, meldete am Missionsende aber keine sichtbaren Unit-Tactical-Badges; das ist ein separater Visual-/Performance-Folgepunkt.
+- Lokale Pruefung: TASK_607 41/41, TASK_604 28/28, TASK_606 39/39, TASK_817 34/34, TASK_833 23/23, TASK_169 15/15 und lokaler ENet-Smoketest 3/3; TASK_505 bestaetigte Chunk-Streaming und 489-609 ms Renderzeit, aber den Badge-Befund.
+- Naechster Schritt: Den Large-Map-Unit-Tactical-Badge-Lifecycle getrennt nach Missionsende pruefen und reparieren; danach den frischen Provenance-Release fuer einen sichtbaren Station-Route- oder Host/Client-Playtest exportieren.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

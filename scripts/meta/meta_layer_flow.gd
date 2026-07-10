@@ -1796,12 +1796,12 @@ func get_release_firefight_hud_readability_polish_snapshot(real_window_review_no
 	)
 	_append_handoff_check(
 		checks,
-		"decision_line_first_in_selected_fireteam",
+		"contact_fire_first_in_selected_fireteam",
 		String(tactical_readability.get("gate", "")) == "pass"
-			and String(tactical_readability.get("selected_fireteam_first_line", "")).strip_edges() == String(tactical_readability.get("decision_line", "")).strip_edges()
+			and String(tactical_readability.get("selected_fireteam_first_line", "")).strip_edges().begins_with("CONTACT FIRE")
 			and not String(tactical_readability.get("decision_line", "")).strip_edges().is_empty(),
 		"critical",
-		"Selected Fireteam should lead with the NEXT/WHY decision line."
+		"Selected Fireteam should lead with active contact fire and keep NEXT/WHY immediately below it."
 	)
 	_append_handoff_check(
 		checks,

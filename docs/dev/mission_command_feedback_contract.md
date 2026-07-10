@@ -602,6 +602,26 @@ TASK_606 wendet belegte Reibung aus TASK_605 an: Der Host/Client-F6-Snapshot dar
 
 Erwartete Struktur: `get_core_loop_host_client_feel_snapshot()` enthaelt weiter `task_id = TASK_604`, meldet aber zusaetzlich `mission_hud_interaction_line_full`, `mission_hud_interaction_line_compacted`, `mission_hud_interaction_line_char_limit`, `mission_hud_interaction_line_length` und `selected_fireteam_status_line_count`. Die Checks muessen `host_client_act_line_compacted` und `selected_fireteam_context_deduped` enthalten. `mission_hud_interaction_line` bleibt die kompakte Displayzeile fuer den Host/Client-F6-Blick; `mission_hud_interaction_line_full` bleibt die Debug-/Quellzeile aus dem Mission-HUD-Density-Stack. TASK_607 bleibt fuer einen echten Zwei-Instanz-Host/Client-Runtime-Smoke vorgesehen.
 
+## Host-Client-F6-Firefight-Focus
+TASK_1074 erweitert den bestehenden TASK_604/606-Readout nur fuer einen
+aktiven Feuerkontakt. `get_mission_hud_density_interaction_polish_snapshot()`
+meldet dann `presentation_mode = firefight_focus`,
+`firefight_focus_active = true`, `contact_fire_primary_line` und
+`firefight_decision_line`. Selected Fireteam und Mission Control zeigen in
+diesem Modus genau die sichtbare Prioritaet `CONTACT FIRE ...` gefolgt von der
+kompakten `NEXT ... | WHY ...`-Zeile. Die volle ACT-/Objective-/Cargo-/ROE-
+Quelle bleibt in `interaction_density`, `mission_hud_interaction_line` und
+`mission_hud_interaction_line_full` lesbar; sie wird nicht als dritter oder
+vierter Primaertext an die Feuerkontaktanzeige angehaengt.
+
+Der Snapshot darf vorhandene Visual-Persistenzwerte als Anzeigeevidence lesen,
+muss den F6-Gate aber gegen die tatsaechlich sichtbaren Contact-Fire- und
+Decision-Lines bewerten. `get_core_loop_host_client_feel_snapshot()` darf im
+`firefight_focus` deshalb `mission_control_keeps_act_line` und
+`objective_cargo_roe_context_visible` ueber die strukturierte Quelle bestehen
+lassen. Es enqueued weiterhin keine Commands und setzt keine Simulation-,
+Combat-, Peer- oder UI-Wahrheit.
+
 ## Two-Instance-Host-Client-Runtime-Smoke
 TASK_607 verbindet die vorhandenen Multiplayer-Bausteine in einem Runtime-Smoke: lokale ENet-Verbindung, getrennte Host-/Client-Missionsinstanz, serverseitige Command-Autorisierung, Server-State-Snapshot und Client-Apply. Der Host bleibt autoritativ; der Client darf keine Mission-, Combat-, Objective-, Cargo-, Movement- oder UI-Wahrheit setzen. F6-Snapshots auf beiden Instanzen bleiben reine Leseschicht.
 

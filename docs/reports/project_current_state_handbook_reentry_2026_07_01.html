@@ -76,8 +76,8 @@
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_817</span>
-      <span class="pill warn">Aktueller Griff: TASK_817</span>
+      <span class="pill good">Letzter Abschluss: TASK_1074</span>
+      <span class="pill warn">Aktueller Griff: TASK_1074</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
@@ -106,6 +106,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.homebase_reentry_bridge"> Homebase-Reentry-Bruecken lesbar</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.station_route_drill"> Station-Route-Drill vorhanden</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.preview_contract"> Preview/Threat-Contract vorhanden</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.host_client_firefight_focus_contract"> Host/Client-Firefight-Fokus konsistent</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.visible_reentry_review_done"> Sichtbarer Reentry-Review erledigt</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.host_client_review_done"> Host/Client-Fensterlauf erledigt</label>
         </article>
@@ -145,6 +146,7 @@
             <li><strong>Sichttest offen:</strong> Headless-Verifier sind gruen, aber der echte Zwei-Fenster-Blick ist noch nicht abgenommen.</li>
             <li><strong>Preview-Sprache:</strong> Ohne klares Wort <code>PREVIEW</code> kann ein geplanter Move wie ein laufender Move wirken.</li>
           <li><strong>Host/Client:</strong> Beide Fenster sehen denselben naechsten Auftrag; die Fireteam-Karten-Relation ist jetzt als OWN/VIEW/FT ? lesbar.</li>
+          <li><strong>Firefight-Fokus:</strong> Im echten Zwei-Instanzen-Smoketest zeigen Host und Client jetzt dieselben zwei Zeilen: <code>CONTACT FIRE</code> und die naechste <code>NEXT ... | WHY ...</code>-Entscheidung. Objective, Cargo und ROE bleiben als Quelle erhalten, statt die Anzeige zu ueberladen.</li>
           <li><strong>Interaction Feel:</strong> AA, Door, Computer und Cargo sind als Griff mit klaren Cues und Commands lesbar.</li>
           <li><strong>Contact Pressure:</strong> Kontaktmeldung, Risk-/LOS-Grund und Combat-HUD-Druck bleiben als erster Druckmoment zusammen lesbar.</li>
           <li><strong>Firefight Tension:</strong> Schuss, Outcome, Visual, Metrik und naechster Spielergriff sind als erster Feuerwechsel zusammengefuehrt.</li>
@@ -179,7 +181,8 @@
           <li><strong>Firefight HUD Polish:</strong> TASK_814 bringt den kompakten Kampf-Readout in Mission Control, prueft Tooltip, HUD-Bounds und naechsten Spielergriff.</li>
           <li><strong>Release-Start-Hotfix:</strong> Halbvolle lokale Saves werden beim Einzelspieler-Start additiv repariert, damit vorhandenes Fireteam plus fehlender Pilot/Flightdeck-Payload nicht mehr in `Start blockiert` endet.</li>
           <li><strong>Roster-Save-Guard:</strong> Leere oder kaputte lokale Roster-Saves werden jetzt diagnostiziert und reparierbar gehalten, statt beim Einzelspieler-Start JSON-Errors auszuloesen.</li>
-            <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
+          <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
+          <li><strong>Large-Map-Badge-Befund:</strong> Der 192x192-Smoke hielt Chunk-Streaming und Renderbudget, meldete nach Missionssieg aber keine sichtbaren Unit-Tactical-Badges. Das ist ein gezielter Folgepunkt, kein bekannter Host/Client-Fehler.</li>
           </ul>
         </article>
       </div>
@@ -189,12 +192,13 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_817 macht den ersten Feuerwechsel im HUD handlungsfaehiger: dieselbe kurze <code>NEXT ... | WHY ...</code>-Zeile erscheint in Mission Control und Selected Fireteam.</p>
-          <p>Quelle bleiben TASK_814/TASK_816 und bestehende Firefight-/Combat-HUD-Daten. Der Snapshot selbst bleibt read-only.</p>
+          <p>TASK_1074 hat den Zwei-Instanzen-Firefight-Readout geschlossen: Host und Client zeigen im aktiven Kontakt dieselbe kurze <code>CONTACT FIRE</code>-Zeile und darunter die naechste <code>NEXT ... | WHY ...</code>-Entscheidung.</p>
+          <p>Objective, Cargo und ROE bleiben als strukturierte, read-only ACT-Quelle erhalten. Der F6-Check richtet sich damit an die sichtbare Anzeige und nicht an einen kurzlebigen Visual-Timer.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
-          <div class="callout warning">Naechster Schritt danach: TASK_818 Playable-Build-Acceptance oder gezielter HUD-Style-Polish nach echtem Fensterbefund.</div>
-          <input readonly value="TASK_817 - Station Reentry Release Candidate Targeted Firefight Polish" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_818 - Station Reentry Release Candidate Playable Build Acceptance" data-export-key="reentry_handbook.recommended_next_task">
+          <div class="callout warning">Naechster Schritt: Large-Map-Unit-Tactical-Badge-Lifecycle nach Missionsende klaeren; danach frischen Provenance-Release exportieren und im sichtbaren Station-Route- oder Host/Client-Lauf pruefen.</div>
+          <input readonly value="TASK_1074 - Host Client F6 Contract Refresh (TASK_607 41/41)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1075 - Large Map Tactical Badge Lifecycle Audit" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_505 - Streaming gruen, unit_status_badge_count nach Sieg = 0" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
           <input readonly value="BUGFIX - Player Roster Corrupt Save Quiet Recovery" data-export-key="reentry_handbook.latest_hotfix">
@@ -829,10 +833,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_818 - Station Reentry Release Candidate Playable Build Acceptance"
+            recommended_next_task: "TASK_1075 - Large Map Tactical Badge Lifecycle Audit"
           },
           metadata: {
-            generated_for_task: "TASK_817",
+            generated_for_task: "TASK_1074",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

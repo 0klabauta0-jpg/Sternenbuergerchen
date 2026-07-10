@@ -44,7 +44,7 @@ func _test_docs_contract_and_static_hooks() -> void:
 	_assert(contract_text.contains("Release-Firefight-HUD-Readability-Polish"), "Mission command feedback contract documents TASK_833")
 	_assert(meta_text.contains("get_release_firefight_hud_readability_polish_snapshot"), "MetaLayer exposes TASK_833 snapshot")
 	_assert(controller_text.contains("get_release_firefight_hud_readability_polish_snapshot"), "TacticalController exposes TASK_833 snapshot")
-	_assert(controller_text.contains("decision_line_first_in_selected_fireteam"), "Controller verifies decision line priority")
+	_assert(controller_text.contains("_compact_release_first_exchange_contact_fire_line"), "Controller exposes the compact contact-fire priority helper")
 
 
 func _test_firefight_decision_line_is_first_selected_fireteam_line() -> void:
@@ -67,6 +67,7 @@ func _test_firefight_decision_line_is_first_selected_fireteam_line() -> void:
 	var snapshot: Dictionary = Dictionary(scene.call("get_release_firefight_hud_readability_polish_snapshot", {}, {}, {}))
 	var tactical: Dictionary = Dictionary(snapshot.get("tactical_readability", {}))
 	var decision_line: String = String(snapshot.get("decision_line", "")).strip_edges()
+	var visible_decision_line: String = String(tactical.get("visible_decision_line", "")).strip_edges()
 	var selected_first_line: String = String(snapshot.get("selected_fireteam_first_line", "")).strip_edges()
 	var selected_text: String = String(snapshot.get("selected_fireteam_status_text", "")).strip_edges()
 	_assert(String(snapshot.get("schema", "")) == "sternenbuergerchen.release_firefight_hud_readability_polish.v1", "TASK_833 schema is stable")
@@ -75,10 +76,10 @@ func _test_firefight_decision_line_is_first_selected_fireteam_line() -> void:
 	_assert(String(snapshot.get("status", "")) == "pass", "Meta TASK_833 gate passes")
 	_assert(String(tactical.get("gate", "")) == "pass", "Tactical TASK_833 gate passes")
 	_assert(not decision_line.is_empty() and decision_line.begins_with("NEXT "), "Decision line is active")
-	_assert(selected_first_line == decision_line, "Selected Fireteam starts with decision line")
-	_assert(selected_text.begins_with(decision_line), "Selected Fireteam status text begins with decision line")
-	_assert(bool(tactical.get("combat_line_visible", false)), "Combat readout remains visible below decision line")
-	_assert(int(tactical.get("selected_fireteam_line_count", 0)) <= 4, "Selected Fireteam status stays compact")
+	_assert(selected_first_line.begins_with("CONTACT FIRE"), "Selected Fireteam starts with the active contact-fire readout")
+	_assert(not visible_decision_line.is_empty() and selected_text.begins_with(selected_first_line) and selected_text.contains(visible_decision_line), "Selected Fireteam keeps the decision directly below contact fire")
+	_assert(bool(tactical.get("combat_line_visible", false)), "Combat readout remains visible through the contact-fire line")
+	_assert(int(tactical.get("selected_fireteam_line_count", 0)) <= 2, "Selected Fireteam status stays within the two-line firefight budget")
 	_assert(_snapshot_is_read_only(snapshot), "Meta TASK_833 snapshot is read-only")
 	_assert(_snapshot_is_read_only(tactical), "Tactical TASK_833 snapshot is read-only")
 

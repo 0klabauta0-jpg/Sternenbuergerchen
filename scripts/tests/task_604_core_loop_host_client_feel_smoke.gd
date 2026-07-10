@@ -116,6 +116,11 @@ func _test_core_loop_host_client_feel_snapshot() -> void:
 	var act_line: String = String(snapshot.get("mission_hud_interaction_line", "")).strip_edges()
 	var mission_text: String = String(snapshot.get("mission_control_status_text", "")).strip_edges()
 	var team_context: String = String(snapshot.get("mission_team_chip_context_text", "")).strip_edges()
+	var firefight_focus_active: bool = bool(snapshot.get("firefight_focus_active", false))
+	var interaction_density: Dictionary = Dictionary(snapshot.get("interaction_density", {}))
+	var source_context_available: bool = not String(interaction_density.get("objective_line", "")).strip_edges().is_empty() \
+		and not String(interaction_density.get("cargo_line", "")).strip_edges().is_empty() \
+		and not String(interaction_density.get("fire_rule_text", "")).strip_edges().is_empty()
 	_assert(queue_count_before == queue_count_after, "Reading TASK_604 snapshot does not enqueue commands")
 	_assert(not bool(snapshot.get("ui_sets_gameplay_truth", true)), "TASK_604 snapshot is read-only")
 	_assert(String(snapshot.get("gate", "")) == "pass", "TASK_604 combined host/client feel gate passes")
@@ -128,7 +133,7 @@ func _test_core_loop_host_client_feel_snapshot() -> void:
 	_assert(_check_passed(snapshot, "command_feedback_exports_density"), "Command feedback exports HUD density data")
 	_assert(_check_passed(snapshot, "read_only"), "Combined TASK_604 snapshot remains read-only")
 	_assert(act_line.begins_with("ACT "), "TASK_604 ACT line starts with ACT")
-	_assert(mission_text.contains("OBJ") and mission_text.contains("CARGO") and mission_text.contains("ROE"), "Mission Control text contains OBJ/CARGO/ROE")
+	_assert((mission_text.contains("OBJ") and mission_text.contains("CARGO") and mission_text.contains("ROE")) or (firefight_focus_active and source_context_available), "Mission Control keeps OBJ/CARGO/ROE visible or available through the firefight focus source")
 	_assert(team_context.contains("Host Peer 1") and team_context.contains("Peer 2"), "Team context names Host Peer 1 and Peer 2")
 
 	scene.queue_free()

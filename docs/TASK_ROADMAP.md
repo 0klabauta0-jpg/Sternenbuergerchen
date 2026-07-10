@@ -94,6 +94,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1073 ist 13/13 gruen. Erfolgreiche Exporte schreiben Commit- und PCK-Hash-Provenance; der read-only Startcheck verlangt sie und lehnt fehlende oder abweichende Pakete hart ab. TASK_511 27/27 dokumentiert `scripts/tests/` explizit als aktuelle Runtime-Legacy-Abhaengigkeit.
 - Naechster Schritt: Den Release aus dem sauberen Commit erzeugen, positiv pruefen und den belegten Spieleordner fuer den naechsten sichtbaren Station-Route- oder Host/Client-Playtest verwenden.
 
+## TASK_1074 - Host Client F6 Contract Refresh (implementiert im Arbeitsstand)
+- Grundlage: Der echte lokale ENet-Host/Client-Pfad war korrekt, aber Firefight-Labels und F6-Snapshots konnten durch alte Statusanhaenge und einen kurzlebigen Visual-Persistenzwert auseinanderlaufen.
+- Ergebnis: TASK_1074 ist mit TASK_607 41/41, TASK_604 28/28, TASK_606 39/39, TASK_817 34/34, TASK_833 23/23, TASK_169 15/15 und ENet 3/3 gruen. Beide Seiten zeigen im Feuerkontakt `CONTACT FIRE` und die kompakte `NEXT ... | WHY ...`-Zeile; ACT-/Objective-/Cargo-/ROE bleiben strukturiert und read-only erhalten.
+- Naechster Schritt: Den separaten Large-Map-Befund `unit_status_badge_count = 0` nach Missionsende als kleinen Badge-Lifecycle-Slice klaeren und danach aus dem sauberen Integrationscommit einen frischen Provenance-Release exportieren.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

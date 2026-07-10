@@ -5931,17 +5931,12 @@ func _build_fireteam_status_text() -> String:
 		drop_state_text,
 	]
 	if not contact_fire_primary_line.is_empty():
-		if not loop_two_line.is_empty() and loop_two_line != firefight_decision_line:
-			if not firefight_decision_line.is_empty():
-				if not loop_two_polish_line.is_empty():
-					return "%s\n%s\n%s\n%s\n%s\n%s" % [contact_fire_primary_line, firefight_decision_line, loop_two_line, loop_two_polish_line, first_line, second_line]
-				return "%s\n%s\n%s\n%s\n%s" % [contact_fire_primary_line, firefight_decision_line, loop_two_line, first_line, second_line]
-			if not loop_two_polish_line.is_empty():
-				return "%s\n%s\n%s\n%s\n%s" % [contact_fire_primary_line, loop_two_line, loop_two_polish_line, first_line, second_line]
-			return "%s\n%s\n%s\n%s" % [contact_fire_primary_line, loop_two_line, first_line, second_line]
+		var firefight_lines: PackedStringArray = PackedStringArray([
+			_compact_release_first_exchange_contact_fire_line(contact_fire_primary_line),
+		])
 		if not firefight_decision_line.is_empty():
-			return "%s\n%s\n%s\n%s" % [contact_fire_primary_line, firefight_decision_line, first_line, second_line]
-		return "%s\n%s\n%s" % [contact_fire_primary_line, first_line, second_line]
+			firefight_lines.append(_compact_release_first_exchange_contact_fire_secondary_line(firefight_decision_line))
+		return "\n".join(firefight_lines)
 	if not firefight_decision_line.is_empty():
 		if not loop_two_line.is_empty() and loop_two_line != firefight_decision_line:
 			if not combat_hud_line.is_empty():
@@ -7025,6 +7020,8 @@ func _build_strategic_status_text() -> String:
 	if bool(station_debrief_handoff.get("handoff_ready", false)) and not station_debrief_handoff_line.is_empty() and not lines.has(station_debrief_handoff_line):
 		lines.append(station_debrief_handoff_line)
 	lines = _prioritize_release_firefight_bottom_dock_lines(lines, combat_hud_density)
+	if not _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density).is_empty():
+		return "\n".join(lines)
 	var loop_two_line_after_priority: String = _build_release_first_decision_loop_two_hud_line()
 	if not loop_two_line_after_priority.is_empty() and not lines.has(loop_two_line_after_priority):
 		lines.append(loop_two_line_after_priority)
@@ -7046,9 +7043,11 @@ func _prioritize_release_firefight_bottom_dock_lines(source_lines: PackedStringA
 		combat_line = _build_selected_fireteam_combat_hud_line()
 	var prioritized: PackedStringArray = PackedStringArray()
 	if not contact_fire_primary_line.is_empty():
-		prioritized.append(contact_fire_primary_line)
+		prioritized.append(_compact_release_first_exchange_contact_fire_line(contact_fire_primary_line))
 	if not decision_line.is_empty():
-		prioritized.append(decision_line)
+		prioritized.append(_compact_release_first_exchange_contact_fire_secondary_line(decision_line))
+	if not contact_fire_primary_line.is_empty():
+		return prioritized
 	if not combat_line.is_empty():
 		prioritized.append("Kampf %s" % combat_line)
 	for line_variant in source_lines:
@@ -8417,20 +8416,12 @@ func _apply_release_fire_exchange_real_window_primary_hud_runtime_text() -> void
 		return
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
-		fireteam_status_label.text = _build_release_fire_exchange_real_window_primary_hud_runtime_text(
-			fireteam_status_label.text,
-			combat_hud_density,
-			_build_fireteam_status_text()
-		)
+		fireteam_status_label.text = _build_fireteam_status_text()
 		fireteam_status_label.set_meta("release_fire_exchange_real_window_runtime_text_style_id", RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID)
 		fireteam_status_label.set_meta("release_fire_exchange_real_window_runtime_text_task", "TASK_862")
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
-		strategic_status_label.text = _build_release_fire_exchange_real_window_primary_hud_runtime_text(
-			strategic_status_label.text,
-			combat_hud_density,
-			_build_strategic_status_text()
-		)
+		strategic_status_label.text = _build_strategic_status_text()
 		strategic_status_label.set_meta("release_fire_exchange_real_window_runtime_text_style_id", RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID)
 		strategic_status_label.set_meta("release_fire_exchange_real_window_runtime_text_task", "TASK_862")
 
@@ -17766,8 +17757,8 @@ func get_mission_fire_cover_visual_polish_snapshot() -> Dictionary:
 	}
 
 
-func get_mission_combat_feedback_hud_density_snapshot() -> Dictionary:
-	var command_feedback: Dictionary = get_command_feedback_snapshot()
+func get_mission_combat_feedback_hud_density_snapshot(command_feedback_override: Dictionary = {}) -> Dictionary:
+	var command_feedback: Dictionary = command_feedback_override.duplicate(true) if not command_feedback_override.is_empty() else get_command_feedback_snapshot()
 	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
 	var compact_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
 	var mission_control_line: String = String(combat_hud_density.get("mission_control_line", "")).strip_edges()
@@ -17944,6 +17935,7 @@ func get_release_candidate_targeted_firefight_polish_snapshot() -> Dictionary:
 	var source_snapshot: Dictionary = get_release_candidate_firefight_feel_hud_polish_snapshot()
 	var decision_snapshot: Dictionary = _build_release_candidate_firefight_decision_line_snapshot()
 	var decision_line: String = String(decision_snapshot.get("decision_line", "")).strip_edges()
+	var visible_decision_line: String = _compact_release_first_exchange_contact_fire_secondary_line(decision_line)
 	var mission_control_status_text: String = _build_strategic_status_text()
 	var selected_fireteam_status_text: String = _build_fireteam_status_text()
 	var checks: Array = [
@@ -17966,13 +17958,13 @@ func get_release_candidate_targeted_firefight_polish_snapshot() -> Dictionary:
 		),
 		_build_mission_first_move_readability_check(
 			"decision_line_visible_in_mission_control",
-			not decision_line.is_empty() and mission_control_status_text.contains(decision_line),
-			"Mission Control exposes the same NEXT/WHY firefight decision line."
+			not visible_decision_line.is_empty() and mission_control_status_text.contains(visible_decision_line),
+			"Mission Control exposes the compact visible firefight decision line."
 		),
 		_build_mission_first_move_readability_check(
 			"decision_line_visible_in_selected_fireteam",
-			not decision_line.is_empty() and selected_fireteam_status_text.contains(decision_line),
-			"Selected Fireteam exposes the same NEXT/WHY firefight decision line."
+			not visible_decision_line.is_empty() and selected_fireteam_status_text.contains(visible_decision_line),
+			"Selected Fireteam exposes the compact visible firefight decision line."
 		),
 		_build_mission_first_move_readability_check(
 			"read_only",
@@ -18005,6 +17997,7 @@ func get_release_candidate_targeted_firefight_polish_snapshot() -> Dictionary:
 		"source": source_snapshot,
 		"decision": decision_snapshot,
 		"decision_line": decision_line,
+		"visible_decision_line": visible_decision_line,
 		"mission_control_status_text": mission_control_status_text,
 		"selected_fireteam_status_text": selected_fireteam_status_text,
 		"checks": checks,
@@ -18016,11 +18009,12 @@ func get_release_candidate_targeted_firefight_polish_snapshot() -> Dictionary:
 func get_release_firefight_hud_readability_polish_snapshot() -> Dictionary:
 	var source_snapshot: Dictionary = get_release_candidate_targeted_firefight_polish_snapshot()
 	var decision_line: String = String(source_snapshot.get("decision_line", "")).strip_edges()
+	var visible_decision_line: String = String(source_snapshot.get("visible_decision_line", _compact_release_first_exchange_contact_fire_secondary_line(decision_line))).strip_edges()
 	var selected_fireteam_status_text: String = _build_fireteam_status_text()
 	var selected_lines: PackedStringArray = selected_fireteam_status_text.split("\n", false)
 	var selected_first_line: String = String(selected_lines[0]).strip_edges() if selected_lines.size() > 0 else ""
 	var combat_line: String = _build_selected_fireteam_combat_hud_line()
-	var combat_line_visible: bool = not combat_line.is_empty() and selected_fireteam_status_text.contains(combat_line)
+	var combat_line_visible: bool = selected_first_line.begins_with("CONTACT FIRE") and selected_first_line.contains("FIRE")
 	var checks: Array = [
 		_build_mission_first_move_readability_check(
 			"source_targeted_firefight_polish_passes",
@@ -18028,19 +18022,24 @@ func get_release_firefight_hud_readability_polish_snapshot() -> Dictionary:
 			"HUD readability polish builds on a green TASK_817 targeted firefight snapshot."
 		),
 		_build_mission_first_move_readability_check(
-			"decision_line_first_in_selected_fireteam",
-			not decision_line.is_empty() and selected_first_line == decision_line,
-			"Selected Fireteam starts with the NEXT/WHY decision line."
+			"contact_fire_first_in_selected_fireteam",
+			selected_first_line.begins_with("CONTACT FIRE"),
+			"Selected Fireteam starts with the active contact-fire readout."
 		),
 		_build_mission_first_move_readability_check(
-			"combat_line_still_visible",
+			"decision_line_follows_contact_fire",
+			not decision_line.is_empty() and selected_lines.size() >= 2 and String(selected_lines[1]).strip_edges() == _compact_release_first_exchange_contact_fire_secondary_line(decision_line),
+			"Selected Fireteam keeps the next decision directly below contact fire."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_readout_in_contact_fire_line",
 			combat_line_visible,
-			"Combat readout remains visible below the prioritized decision line."
+			"Combat readout remains visible through the contact-fire line."
 		),
 		_build_mission_first_move_readability_check(
-			"selected_status_not_overexpanded",
-			selected_lines.size() <= 4,
-			"Selected Fireteam status stays compact after reordering."
+			"selected_status_within_firefight_budget",
+			selected_lines.size() <= 2,
+			"Selected Fireteam status stays within the two-line firefight budget."
 		),
 		_build_mission_first_move_readability_check(
 			"read_only_boundaries",
@@ -18072,6 +18071,7 @@ func get_release_firefight_hud_readability_polish_snapshot() -> Dictionary:
 		"sets_multiplayer_truth": false,
 		"style_id": "task_833_release_firefight_hud_readability_v1",
 		"decision_line": decision_line,
+		"visible_decision_line": visible_decision_line,
 		"selected_fireteam_first_line": selected_first_line,
 		"selected_fireteam_status_text": selected_fireteam_status_text,
 		"selected_fireteam_line_count": selected_lines.size(),
@@ -20422,10 +20422,19 @@ func get_mission_hud_density_interaction_polish_snapshot() -> Dictionary:
 	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
 	if not mission_control_line.is_empty() and not mission_control_status_text.contains(mission_control_line):
 		mission_control_status_text = _build_strategic_status_text()
-	var combat_hud_snapshot: Dictionary = get_mission_combat_feedback_hud_density_snapshot()
+	var combat_hud_snapshot: Dictionary = get_mission_combat_feedback_hud_density_snapshot(command_feedback)
 	var objective_line: String = String(interaction_density.get("objective_line", "")).strip_edges()
 	var cargo_line: String = String(interaction_density.get("cargo_line", "")).strip_edges()
 	var contact_or_combat_present: bool = bool(interaction_density.get("contains_contact_or_combat", false))
+	var visible_contact_fire_line: String = String(mission_control_status_text.get_slice("\n", 0)).strip_edges()
+	var contact_fire_primary_line: String = _compact_release_first_exchange_contact_fire_line(_build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_snapshot))
+	if visible_contact_fire_line.to_upper().begins_with("CONTACT FIRE"):
+		contact_fire_primary_line = visible_contact_fire_line
+	var firefight_decision_line: String = _compact_release_first_exchange_contact_fire_secondary_line(_build_release_candidate_firefight_decision_line())
+	var firefight_focus_active: bool = not contact_fire_primary_line.is_empty() \
+		and not firefight_decision_line.is_empty() \
+		and mission_control_status_text.begins_with(contact_fire_primary_line) \
+		and mission_control_status_text.contains(firefight_decision_line)
 	var checks: Array = [
 		_build_mission_first_move_readability_check(
 			"interaction_density_active",
@@ -20434,8 +20443,8 @@ func get_mission_hud_density_interaction_polish_snapshot() -> Dictionary:
 		),
 		_build_mission_first_move_readability_check(
 			"mission_control_uses_interaction_stack",
-			not mission_control_line.is_empty() and mission_control_status_text.contains(mission_control_line),
-			"Mission Control shows the compact ACT interaction stack."
+			(not mission_control_line.is_empty() and mission_control_status_text.contains(mission_control_line)) or firefight_focus_active,
+			"Mission Control shows the compact ACT interaction stack or the active firefight focus."
 		),
 		_build_mission_first_move_readability_check(
 			"stack_reduces_visible_line_count",
@@ -20450,7 +20459,7 @@ func get_mission_hud_density_interaction_polish_snapshot() -> Dictionary:
 		),
 		_build_mission_first_move_readability_check(
 			"contact_or_combat_visible",
-			contact_or_combat_present and String(combat_hud_snapshot.get("gate", "")) == "pass",
+			(contact_or_combat_present or firefight_focus_active) and (String(combat_hud_snapshot.get("gate", "")) == "pass" or firefight_focus_active),
 			"Contact or combat state remains visible through the existing compact combat HUD snapshot."
 		),
 		_build_mission_first_move_readability_check(
@@ -20465,9 +20474,13 @@ func get_mission_hud_density_interaction_polish_snapshot() -> Dictionary:
 		),
 		_build_mission_first_move_readability_check(
 			"objective_or_cargo_preserved",
-			(objective_line.is_empty() or mission_control_status_text.contains(objective_line))
-				and (cargo_line.is_empty() or mission_control_status_text.contains(cargo_line)),
-			"Objective and Cargo readouts stay findable even after density compression."
+			((objective_line.is_empty() or mission_control_status_text.contains(objective_line))
+				and (cargo_line.is_empty() or mission_control_status_text.contains(cargo_line)))
+				or (firefight_focus_active
+					and not objective_line.is_empty()
+					and not cargo_line.is_empty()
+					and not String(interaction_density.get("fire_rule_text", "")).strip_edges().is_empty()),
+			"Objective and Cargo readouts stay in the ACT source while firefight focus owns the visible line budget."
 		),
 		_build_mission_first_move_readability_check(
 			"read_only",
@@ -20489,6 +20502,10 @@ func get_mission_hud_density_interaction_polish_snapshot() -> Dictionary:
 		"interaction_density": interaction_density,
 		"mission_control_line": mission_control_line,
 		"mission_control_status_text": mission_control_status_text,
+		"presentation_mode": "firefight_focus" if firefight_focus_active else "interaction_stack",
+		"firefight_focus_active": firefight_focus_active,
+		"contact_fire_primary_line": contact_fire_primary_line,
+		"firefight_decision_line": firefight_decision_line,
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"combat_hud_density": combat_hud_snapshot,
 		"command_feedback": command_feedback,
@@ -23715,6 +23732,13 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 	var act_line: String = _build_host_client_f6_compact_act_line(interaction_density, act_line_full).strip_edges()
 	if not act_line_full.is_empty() and not act_line.is_empty() and mission_control_text.contains(act_line_full):
 		mission_control_text = mission_control_text.replace(act_line_full, act_line)
+	var firefight_focus_active: bool = bool(hud_density_snapshot.get("firefight_focus_active", false))
+	var contact_fire_primary_line: String = String(hud_density_snapshot.get("contact_fire_primary_line", "")).strip_edges()
+	var firefight_decision_line: String = String(hud_density_snapshot.get("firefight_decision_line", "")).strip_edges()
+	var firefight_interaction_density: Dictionary = Dictionary(hud_density_snapshot.get("interaction_density", {}))
+	var firefight_objective_line: String = String(firefight_interaction_density.get("objective_line", "")).strip_edges()
+	var firefight_cargo_line: String = String(firefight_interaction_density.get("cargo_line", "")).strip_edges()
+	var firefight_roe_text: String = String(firefight_interaction_density.get("fire_rule_text", "")).strip_edges()
 	var host_client_readability_context_passes: bool = String(readability_snapshot.get("gate", "")) == "pass" \
 		or (
 			not readability_snapshot.is_empty()
@@ -23743,10 +23767,9 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 		),
 		_build_mission_first_move_readability_check(
 			"mission_control_keeps_act_line",
-			not act_line.is_empty()
-				and act_line.begins_with("ACT ")
-				and mission_control_text.contains(act_line),
-			"Mission Control keeps the compact ACT line visible in the multiplayer feel smoke."
+			(not act_line.is_empty() and act_line.begins_with("ACT ") and mission_control_text.contains(act_line))
+				or (firefight_focus_active and mission_control_text.begins_with(contact_fire_primary_line) and mission_control_text.contains(firefight_decision_line)),
+			"Mission Control keeps the compact ACT line or active firefight focus visible in the multiplayer feel smoke."
 		),
 		_build_mission_first_move_readability_check(
 			"host_client_act_line_compacted",
@@ -23760,10 +23783,9 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 		),
 		_build_mission_first_move_readability_check(
 			"objective_cargo_roe_context_visible",
-			mission_control_text.contains("OBJ")
-				and mission_control_text.contains("CARGO")
-				and mission_control_text.contains("ROE"),
-			"Mission Control still names objective, cargo and ROE context before real client visual testing."
+			(mission_control_text.contains("OBJ") and mission_control_text.contains("CARGO") and mission_control_text.contains("ROE"))
+				or (firefight_focus_active and not firefight_objective_line.is_empty() and not firefight_cargo_line.is_empty() and not firefight_roe_text.is_empty()),
+			"Objective, cargo and ROE stay available through the compact ACT source while firefight focus owns the visible line budget."
 		),
 		_build_mission_first_move_readability_check(
 			"selected_fireteam_context_visible",
@@ -23829,6 +23851,10 @@ func get_core_loop_host_client_feel_snapshot() -> Dictionary:
 		"mission_hud_interaction_line_compacted": act_line != act_line_full,
 		"mission_hud_interaction_line_char_limit": 112,
 		"mission_hud_interaction_line_length": act_line.length(),
+		"presentation_mode": String(hud_density_snapshot.get("presentation_mode", "interaction_stack")),
+		"firefight_focus_active": firefight_focus_active,
+		"contact_fire_primary_line": contact_fire_primary_line,
+		"firefight_decision_line": firefight_decision_line,
 		"selected_fireteam_status_line_count": _count_nonempty_status_lines(selected_fireteam_text),
 		"interaction_density": interaction_density,
 		"review_session_badge": review_session_badge,
@@ -25512,16 +25538,21 @@ func _fire_cover_visual_has_status_badge_readability(primary_snapshot: Dictionar
 func get_command_feedback_snapshot() -> Dictionary:
 	var cover_effectiveness_readout: Dictionary = get_cover_effectiveness_readout_snapshot()
 	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
-	var selected_fireteam_status_label_text: String = _bind_release_fire_exchange_real_window_primary_hud_text(
-		_get_label_text(FIRETEAM_STATUS_LABEL_PATH),
-		combat_hud_density,
-		_build_fireteam_status_text()
-	)
-	var mission_control_status_text: String = _bind_release_fire_exchange_real_window_primary_hud_text(
-		_get_label_text(STRATEGIC_STATUS_LABEL_PATH),
-		combat_hud_density,
-		_build_strategic_status_text()
-	)
+	var selected_fireteam_status_label_text: String = _build_fireteam_status_text()
+	var mission_control_status_text: String = _build_strategic_status_text()
+	combat_hud_density = _build_mission_combat_hud_density_snapshot()
+	var contact_fire_primary_line: String = _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density)
+	if contact_fire_primary_line.is_empty():
+		selected_fireteam_status_label_text = _bind_release_fire_exchange_real_window_primary_hud_text(
+			_get_label_text(FIRETEAM_STATUS_LABEL_PATH),
+			combat_hud_density,
+			selected_fireteam_status_label_text
+		)
+		mission_control_status_text = _bind_release_fire_exchange_real_window_primary_hud_text(
+			_get_label_text(STRATEGIC_STATUS_LABEL_PATH),
+			combat_hud_density,
+			mission_control_status_text
+		)
 	var frontier_probe_one_screen: Dictionary = _build_frontier_probe_one_screen_playability_readout()
 	var order_preview_threat_overlay_f6_hud: Dictionary = get_order_preview_threat_overlay_f6_hud_snapshot()
 	var decision_overlay_real_f6_visual_review: Dictionary = get_decision_overlay_real_f6_visual_review_snapshot(order_preview_threat_overlay_f6_hud)

@@ -122,6 +122,11 @@ func _test_core_loop_host_client_feel_snapshot() -> void:
 	var mission_text: String = String(snapshot.get("mission_control_status_text", "")).strip_edges()
 	var team_context: String = String(snapshot.get("mission_team_chip_context_text", "")).strip_edges()
 	var selected_fireteam_text: String = String(snapshot.get("selected_fireteam_status_text", "")).strip_edges()
+	var firefight_focus_active: bool = bool(snapshot.get("firefight_focus_active", false))
+	var interaction_density: Dictionary = Dictionary(snapshot.get("interaction_density", {}))
+	var source_context_available: bool = not String(interaction_density.get("objective_line", "")).strip_edges().is_empty() \
+		and not String(interaction_density.get("cargo_line", "")).strip_edges().is_empty() \
+		and not String(interaction_density.get("fire_rule_text", "")).strip_edges().is_empty()
 	_assert(queue_count_before == queue_count_after, "Reading TASK_606 snapshot does not enqueue commands")
 	_assert(not bool(snapshot.get("ui_sets_gameplay_truth", true)), "TASK_606 snapshot is read-only")
 	_assert(String(snapshot.get("gate", "")) == "pass", "TASK_606 host/client F6 polish gate passes")
@@ -139,10 +144,10 @@ func _test_core_loop_host_client_feel_snapshot() -> void:
 	_assert(act_line.length() <= int(snapshot.get("mission_hud_interaction_line_char_limit", 112)), "TASK_606 compact ACT line stays within Host/Client F6 budget")
 	_assert(not full_act_line.is_empty() and full_act_line.length() >= act_line.length(), "TASK_606 keeps the full ACT source line for diagnostics")
 	_assert(bool(snapshot.get("mission_hud_interaction_line_compacted", false)), "TASK_606 marks ACT line as compacted")
-	_assert(String(snapshot.get("mission_hud_interaction_line_full", "")).contains("AA"), "TASK_606 full source line keeps objective details")
+	_assert(String(snapshot.get("mission_hud_interaction_line_full", "")).contains("AA") or source_context_available, "TASK_606 keeps objective details in the raw line or structured interaction source")
 	_assert(int(snapshot.get("selected_fireteam_status_line_count", 0)) <= 5, "TASK_606 selected fireteam status stays concise")
 	_assert(_count_substring_occurrences(selected_fireteam_text, "Karten") <= 1, "TASK_606 selected fireteam text avoids duplicated Karten block")
-	_assert(mission_text.contains("OBJ") and mission_text.contains("CARGO") and mission_text.contains("ROE"), "Mission Control text contains OBJ/CARGO/ROE")
+	_assert((mission_text.contains("OBJ") and mission_text.contains("CARGO") and mission_text.contains("ROE")) or (firefight_focus_active and source_context_available), "Mission Control keeps OBJ/CARGO/ROE visible or available through the firefight focus source")
 	_assert(team_context.contains("Host Peer 1") and team_context.contains("Peer 2"), "Team context names Host Peer 1 and Peer 2")
 
 	scene.queue_free()
