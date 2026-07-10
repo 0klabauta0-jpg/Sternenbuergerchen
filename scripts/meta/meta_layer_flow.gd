@@ -1066,16 +1066,36 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	_append_release_first_exchange_exported_status_trace_sample("after_contact_setup", controller, {"contact_setup": contact_setup.duplicate(true)}, args)
 	_prepare_release_fireteam_for_first_engagement(controller, selected_fireteam_id, Vector2(contact_setup.get("enemy_position", Vector2.ZERO)))
 	_stabilize_release_first_exchange_target_enemy(controller, contact_setup)
+	_append_release_first_exchange_exported_status_trace_sample("engagement_commands_ready", null, {
+		"command_queue_count": Array(simulation_root.get("command_queue")).size(),
+	}, args)
 	await get_tree().physics_frame
 	await get_tree().process_frame
+	_append_release_first_exchange_exported_status_trace_sample("engagement_authority_tick_ready", null, {
+		"simulation_tick": int(simulation_root.call("get_tick")) if simulation_root.has_method("get_tick") else -1,
+		"command_queue_count": Array(simulation_root.get("command_queue")).size(),
+	}, args)
 	_update_release_contact_tracking(combat_driver)
+	_append_release_first_exchange_exported_status_trace_sample("engagement_contact_tracking_ready", null, {
+		"selected_contact_count": Array(controller.call("get_fireteam_contact_snapshot", selected_fireteam_id)).size(),
+	}, args)
 	_force_release_first_engagement_decision(controller, combat_driver, simulation_root, selected_fireteam_id, contact_setup)
+	var fire_events_after_decision: Array = Array(combat_driver.call("get_fire_event_snapshot")) if combat_driver.has_method("get_fire_event_snapshot") else []
+	_append_release_first_exchange_exported_status_trace_sample("engagement_fire_event_ready", null, {
+		"fire_event_count": fire_events_after_decision.size(),
+		"first_fire_event_id": String(Dictionary(fire_events_after_decision[0]).get("event_id", "")) if not fire_events_after_decision.is_empty() else "",
+	}, args)
 	controller.call("refresh_contact_overlay")
 	controller.call("refresh_fireteam_security_state")
 	controller.call("_refresh_world_overlays")
 	controller.call("_update_ui")
-	var immediate_exchange_evidence: Dictionary = get_release_first_exchange_tension_tuning_snapshot()
+	_append_release_first_exchange_exported_status_trace_sample("engagement_visual_feedback_ready", null, {}, args)
+	var immediate_exchange_evidence: Dictionary = _build_release_first_exchange_immediate_evidence(controller)
 	set_meta("release_first_exchange_tension_tuning_evidence", immediate_exchange_evidence)
+	_append_release_first_exchange_exported_status_trace_sample("engagement_evidence_ready", null, {
+		"immediate_exchange_status": String(immediate_exchange_evidence.get("status", "")),
+		"first_exchange_visible": bool(immediate_exchange_evidence.get("first_exchange_visible", false)),
+	}, args)
 	_append_release_first_exchange_exported_status_trace_sample("after_immediate_exchange_evidence", controller, {"immediate_exchange_status": String(immediate_exchange_evidence.get("status", ""))}, args)
 	var immediate_tactical_exchange: Dictionary = Dictionary(immediate_exchange_evidence.get("tactical_exchange", {})).duplicate(true)
 	if controller.has_method("apply_release_first_exchange_contact_fire_readability_fix"):
@@ -2450,6 +2470,75 @@ func get_release_first_firefight_contact_framing_snapshot(real_window_review_not
 		"issues": _build_handoff_issue_list(checks),
 		"status": "pass" if failed_count == 0 else "review",
 		"recommended_next_task": "TASK_844 - Release First Exchange Tension Tuning",
+	}
+
+
+func _build_release_first_exchange_immediate_evidence(tactical_controller: Node) -> Dictionary:
+	var tactical_exchange: Dictionary = {}
+	if tactical_controller != null and tactical_controller.has_method("get_release_first_exchange_immediate_evidence_snapshot"):
+		tactical_exchange = Dictionary(tactical_controller.call("get_release_first_exchange_immediate_evidence_snapshot")).duplicate(true)
+	var tactical_exchange_passes: bool = String(tactical_exchange.get("gate", "")) == "pass" \
+		and bool(tactical_exchange.get("first_exchange_visible", false))
+	var checks: Array = []
+	_append_handoff_check(
+		checks,
+		"tactical_exchange_snapshot_present",
+		not tactical_exchange.is_empty(),
+		"critical",
+		"Immediate release evidence reads the active tactical exchange."
+	)
+	_append_handoff_check(
+		checks,
+		"first_exchange_visible",
+		tactical_exchange_passes,
+		"critical",
+		"Immediate release evidence references a real FireEvent."
+	)
+	_append_handoff_check(
+		checks,
+		"read_only_boundaries",
+		bool(tactical_exchange.get("read_only", false))
+			and not bool(tactical_exchange.get("ui_sets_gameplay_truth", true))
+			and not bool(tactical_exchange.get("creates_command", true))
+			and not bool(tactical_exchange.get("creates_fire_event", true))
+			and not bool(tactical_exchange.get("creates_damage_event", true))
+			and not bool(tactical_exchange.get("sets_multiplayer_truth", true)),
+		"critical",
+		"Immediate release evidence remains a read-only view of combat truth."
+	)
+	var failed_count: int = _count_handoff_failures(checks, "critical")
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_tension_tuning.v1",
+		"task_id": "TASK_844",
+		"source_task_id": "TASK_843",
+		"source_status": "pass" if tactical_exchange_passes else "review",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"current_meta_view": _current_meta_view,
+		"active_mission_exists": _active_mission != null,
+		"mission_host_visible": _is_mission_host_visible_for_current_view(),
+		"source": {
+			"schema": "sternenbuergerchen.release_first_exchange_immediate_handoff.v1",
+			"read_only": true,
+		},
+		"tactical_exchange": tactical_exchange,
+		"style_id": String(tactical_exchange.get("style_id", "")),
+		"framing_state": String(tactical_exchange.get("framing_state", "")),
+		"framing_line": String(tactical_exchange.get("framing_line", "")),
+		"fire_event_count": int(tactical_exchange.get("fire_event_count", 0)),
+		"first_fire_event_id": String(tactical_exchange.get("first_fire_event_id", "")),
+		"first_exchange_visible": bool(tactical_exchange.get("first_exchange_visible", false)),
+		"checks": checks,
+		"failed_count": failed_count,
+		"check_count": checks.size(),
+		"issues": _build_handoff_issue_list(checks),
+		"status": "pass" if failed_count == 0 else "review",
+		"recommended_next_task": "TASK_845 - Release First Exchange Real Window Recapture",
 	}
 
 
