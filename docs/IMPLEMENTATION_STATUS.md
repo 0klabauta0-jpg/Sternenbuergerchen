@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1085 - Stable First Exchange Visible State
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1085_stable_first_exchange_visible_state.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_837, TASK_862, TASK_883, TASK_1084
+- Stand: TASK_1085 ist 15/15 gruen. Ein echter Release-Capture wartet jetzt auf `deeplink_final / applied` statt auf einen geratenen Timer. #17, #18 und #19 behalten dieselbe echte FireEvent-Evidence; die Primaerzeile zeigt Fireteam und Kontaktklasse statt technischer Runtime-IDs.
+- Ursache/Fix: Der bisherige 35-Sekunden-Capture nahm einen Zwischenzustand mit `NO FIRE NO_LOS` auf; 90 Sekunden waren bereits zu spaet. Der readiness-basierte Lauf belegte 51.457 ms bis zum finalen Zustand. Im HUD berechnete zudem ein alter TASK-862-Pfad Fireteam- und Strategic-Status direkt nach dem regulaeren Aufbau erneut. Dieser Doppelaufbau entfiel, Label-Sync nutzt Delta-Textsetzung.
+- Performance: Der isolierte First-Exchange-Sync sank in vergleichbaren profilierten Laeufen von rund 22,6 ms auf etwa 0,5 bis 0,6 ms. Der verbleibende UI-Refresh liegt lokal weiter grob zwischen 84 und 107 ms; Strategic-Status, Mission-Panels und Craft-Controls bleiben sichtbar.
+- Risiken/offen: Die Ready-Zeit von rund 51,5 Sekunden ist fuer ein schnelles Spiel zu hoch. Headless- und Capture-Zeiten sind Hardware-/Fixture-Signale, aber der echte Release-Trace macht den Engpass reproduzierbar.
+- Lokale Pruefung: TASK_1085 15/15, readiness-basierter TASK-837-Capture, danach TASK_832, TASK_868, TASK_1084, TASK_1083, TASK_1082 und `git diff --check`.
+- Naechster Schritt: TASK_1086 - Release Mission Ready-Time Performance Pass. Die 51,5 Sekunden werden nach LZ-Setup, GO-Wartefenster, Kontaktaufbau und finalem Refresh zerlegt; zuerst wird der dominante echte Abschnitt reduziert.
+
 ### TASK_1084 - Release Deep-Link Runtime Authority Repair
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1084_release_deeplink_runtime_authority_repair.md`, `docs/ARCHITECTURE.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_284, TASK_832, TASK_868

@@ -65,6 +65,7 @@ $genericCaptureManifestPath = Join-Path $OutputDirectory "release_singleplayer_v
 $taskManifestPath = Join-Path $OutputDirectory "release_first_go_firefight_real_window_review.json"
 $taskDesktopScreenshotPath = Join-Path $OutputDirectory "release_first_go_firefight_real_window_desktop.png"
 $taskWindowScreenshotPath = Join-Path $OutputDirectory "release_first_go_firefight_real_window.png"
+$readyTracePath = Join-Path $OutputDirectory "release_first_go_firefight_ready_trace.json"
 
 if (-not (Test-Path -LiteralPath $launcherScript -PathType Leaf)) {
 	throw "Missing launcher script: $launcherScript"
@@ -74,7 +75,15 @@ if (-not (Test-Path -LiteralPath $captureScript -PathType Leaf)) {
 }
 
 $launcherOutput = @()
+$readyObserved = $false
+$readyWaitMsec = 0
+$readyStage = ""
 if ($Launch) {
+	if (Test-Path -LiteralPath $readyTracePath -PathType Leaf) {
+		Remove-Item -LiteralPath $readyTracePath -Force
+	}
+	$previousTracePath = $env:STERNENBUERGERCHEN_RELEASE_FIRST_EXCHANGE_TRACE_PATH
+	$env:STERNENBUERGERCHEN_RELEASE_FIRST_EXCHANGE_TRACE_PATH = $readyTracePath
 	$launcherArgs = @("-ExecutionPolicy", "Bypass", "-File", $launcherScript, "-Launch", "-LaunchArguments", $launchArgument)
 	if (-not [string]::IsNullOrWhiteSpace($ContractPath)) {
 		$launcherArgs += @("-ContractPath", $ContractPath)
@@ -86,10 +95,30 @@ if ($Launch) {
 		$launcherArgs += "-CleanTempFiles"
 	}
 	$launcherOutput = & powershell @launcherArgs
+	if ([string]::IsNullOrWhiteSpace($previousTracePath)) {
+		Remove-Item Env:\STERNENBUERGERCHEN_RELEASE_FIRST_EXCHANGE_TRACE_PATH -ErrorAction SilentlyContinue
+	} else {
+		$env:STERNENBUERGERCHEN_RELEASE_FIRST_EXCHANGE_TRACE_PATH = $previousTracePath
+	}
 	if ($LASTEXITCODE -ne 0) {
 		throw "First-GO-Firefight release launcher failed with exit code $LASTEXITCODE."
 	}
-	Start-Sleep -Seconds ([Math]::Max(1, $WaitSeconds))
+	$readyStartedAt = [DateTimeOffset]::UtcNow
+	$readyDeadline = $readyStartedAt.AddSeconds([Math]::Max(1, $WaitSeconds))
+	do {
+		Start-Sleep -Milliseconds 250
+		$readyTrace = Read-JsonFile -Path $readyTracePath
+		if ($readyTrace -ne $null -and $readyTrace.latest_sample -ne $null) {
+			$readyStage = [string]$readyTrace.latest_sample.stage
+			$readyObserved = $readyStage -eq "deeplink_final" `
+				-and [bool]$readyTrace.latest_sample.deeplink_applied `
+				-and [string]$readyTrace.latest_sample.deeplink_status -eq "applied"
+		}
+	} while (-not $readyObserved -and [DateTimeOffset]::UtcNow -lt $readyDeadline)
+	$readyWaitMsec = [int]([DateTimeOffset]::UtcNow - $readyStartedAt).TotalMilliseconds
+	if ($readyObserved) {
+		Start-Sleep -Milliseconds 750
+	}
 }
 
 $launcherManifest = Read-JsonFile -Path $launcherManifestPath
@@ -136,6 +165,9 @@ if (-not $desktopCopied) {
 if (-not $windowCopied) {
 	$warnings += "window_screenshot_copy_missing"
 }
+if ($Launch -and -not $readyObserved) {
+	$warnings += "deeplink_final_not_observed_before_capture_timeout"
+}
 
 $gate = "review_ready"
 if ($hardFailures.Count -gt 0) {
@@ -176,6 +208,11 @@ $manifest = [ordered]@{
 	git_head = Get-GitValue -Arguments @("rev-parse", "--short", "HEAD")
 	launch_argument = $launchArgument
 	wait_seconds = $WaitSeconds
+	ready_trace_path = "tmp/release_first_go_firefight_ready_trace.json"
+	ready_trace_full_path = $readyTracePath
+	ready_observed = $readyObserved
+	ready_wait_msec = $readyWaitMsec
+	ready_stage = $readyStage
 	launcher_requested = [bool]$Launch
 	stop_running_release_process_requested = [bool]$StopRunningReleaseProcess
 	clean_temp_files_requested = [bool]$CleanTempFiles

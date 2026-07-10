@@ -302,6 +302,11 @@ TASK_1084 zieht auch den deterministischen First-GO-/First-Exchange-Testaufbau d
 
 Der Missionscontroller validiert die Runtime-Unit, baut den begrenzten Hold-/Fire-at-will-Command und enqueued ihn ueber `SimulationRoot`. Der Direkteinstieg wartet den autoritativen Physik-Tick ab, bevor der Combat-Driver den ersten Feuerentscheid anfordert. Dieser Gateway ist ausschliesslich Release-/Testaufbau und kein zweiter normaler Spielerbefehlsweg.
 
+## Stable-First-Exchange-Visible-State
+TASK_1085 verlangt fuer echte Window-Captures ein Runtime-Ready-Signal statt einer festen Wartezeit. Der vorhandene First-Exchange-Trace gilt erst bei `latest_sample.stage = deeplink_final`, `deeplink_applied = true` und `deeplink_status = applied` als aufnahmebereit. Das Capture-Manifest exportiert Ready-Status, Ready-Stufe und gemessene Wartezeit.
+
+Waehrend der dokumentierten Evidence-Dauer muessen #17 Selected Fireteam, #18 Mission Control und #19 Event Log dieselbe echte FireEvent-Quelle lesen. Die sichtbare Primaerzeile benennt Fireteam, Kontaktklasse, Waffe und Ergebnis ohne technische Runtime-IDs. Sie bleibt read-only; sie erzeugt weder Commands noch FireEvents, Schaden, Bewegung oder Multiplayer-Wahrheit.
+
 ## Fire-Rule-Controls-Readability-Polish
 TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Command-Grid-Controls `HF`, `RF`, `FW` und `SUP` duerfen nur den bestehenden `MissionTacticalSandboxController.set_selected_fireteams_fire_rule()`-Pfad ausloesen. Sie duerfen keine Movement-, Combat-, Unit- oder Command-Queue-Wahrheit direkt schreiben.
 

@@ -72,12 +72,12 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1084: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance, echte lokale ENet-Feuerdisziplin und ein reparierter autoritativer Release-Testpfad.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1085: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance, echte lokale ENet-Feuerdisziplin und ein stabiler sichtbarer erster Feuerwechsel.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1084</span>
-      <span class="pill good">Release-Testautoritaet: repariert</span>
+      <span class="pill good">Letzter Abschluss: TASK_1085</span>
+      <span class="pill good">First Exchange: Ready-Signal statt Blind-Timer</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
@@ -202,10 +202,10 @@
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
-          <div class="callout success">TASK_1084 ist abgeschlossen: Der Release-Direkteinstieg beschreibt nur noch den gewuenschten Setup-Befehl. Die Missionsruntime baut ihn, SimulationRoot committed ihn im Physik-Tick, und erst danach wird der erste Feuerentscheid angefordert.</div>
-          <p><strong>Architekturstand:</strong> Der separate TASK_284-Audit steht wieder bei 64/64. Im Meta-Layer gibt es weder direkte Runtime-Status-Setzungen noch direkte UnitCommand-Zuweisungen. TASK_832 und TASK_868 zeigen zugleich, dass der sichtbare First-GO-/First-Exchange-Pfad unveraendert funktioniert.</p>
-          <input readonly value="TASK_1084 - Release Deep-Link Runtime Authority Repair (12/12 gruen)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="Sichtbarer Zwei-Fenster-/Station-Route-Polish" data-export-key="reentry_handbook.recommended_next_task">
+          <div class="callout success">TASK_1085 ist abgeschlossen: Der Sichttest wartet auf den echten finalen Runtime-Zustand. #17, #18 und #19 lesen dieselbe FireEvent-Evidence; die primaere Zeile zeigt nun Fireteam und Kontaktklasse statt technischer Unit-IDs.</div>
+          <p><strong>Performancebefund:</strong> Der aktuelle Release brauchte 51.457 ms bis <code>deeplink_final</code>. Ein redundanter Status-Neuaufbau wurde entfernt; der isolierte First-Exchange-Sync sank von rund 22,6 ms auf etwa 0,5 bis 0,6 ms. Der verbleibende UI-Refresh und der Missionsstart sind noch zu teuer.</p>
+          <input readonly value="TASK_1085 - Stable First Exchange Visible State (15/15 gruen)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1086 - Release Mission Ready-Time Performance Pass" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -841,10 +841,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "Sichtbarer Zwei-Fenster-/Station-Route-Polish"
+            recommended_next_task: "TASK_1086 - Release Mission Ready-Time Performance Pass"
           },
           metadata: {
-            generated_for_task: "TASK_1084",
+            generated_for_task: "TASK_1085",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
