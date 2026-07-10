@@ -15,8 +15,8 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ## TASK_1088 - Release Contact/Fire Ready-Time Pass (implementiert im Arbeitsstand)
 - Grundlage: Der TASK-1087-Release-Trace zeigte 7.996 ms zwischen Kontaktaufbau und FireEvent-Evidence. Feingranulare Stufen belegten einen 11.068-ms-Review-Snapshot-Hotpath, waehrend Contact-Tracking, LOS und FireEvent nur einstellige Millisekunden benoetigten.
-- Ergebnis: Der Deep-Link nutzt fuer den unmittelbaren sichtbaren Feuerwechsel einen kompakten read-only Snapshot aus vorhandener FireEvent- und Contact-Diagnostik. Die Evidence-Stufe sank auf 2 ms, der komplette vergleichbare Headless-Pfad von 20.641 auf 11.527 ms. Alle Combat-, CONTACT-FIRE-, ROE- und Multiplayer-Regressionen bleiben gruen.
-- Naechster Schritt: Frischer Release-Export und Real-Window-Trace. Danach nur den dort belegten groessten Restblock bearbeiten; aktuell ist der Sichtbarkeits-/HUD-Readback nach dem FireEvent der wahrscheinlichste Kandidat.
+- Ergebnis: Der Deep-Link nutzt fuer den unmittelbaren sichtbaren Feuerwechsel einen kompakten read-only Snapshot aus vorhandener FireEvent- und Contact-Diagnostik. Die Evidence-Stufe sank auf 2 ms, der komplette vergleichbare Headless-Pfad von 20.641 auf 11.527 ms. Der frische Godot-4.6.2-Release erreicht `deeplink_final / applied` nach 9.702 ms und zeigt CONTACT FIRE weiter in #17/#18/#19. Alle Combat-, CONTACT-FIRE-, ROE- und Multiplayer-Regressionen bleiben gruen.
+- Naechster Schritt: Nur den im echten Release-Trace belegten groessten Restblock bearbeiten. Der Sichtbarkeits-/HUD-Readback nach dem FireEvent bleibt Kandidat; Combat selbst wird nicht umgebaut.
 
 ## TASK_1087 - Release Mission/LZ Setup Readiness Pass (implementiert im Arbeitsstand)
 - Grundlage: TASK_1086 isolierte 10.400 ms bis `mission_runtime_nodes_ready` als groessten Release-Abschnitt. Innerhalb des LZ-Pfads lagen historische 3/4/8/10-Frame-Pausen ohne konkrete Runtime-Bedingung.
