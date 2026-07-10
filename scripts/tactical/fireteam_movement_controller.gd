@@ -808,6 +808,35 @@ func update_tactical_stance(fireteam_id: String, tactical_stance: String, units:
 	}
 
 
+func update_fire_rule(fireteam_id: String, fire_rule: String, units: Array, leader, simulation_root, terrain_registry = null) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {"updated": false, "reason": "empty_fireteam_id"}
+	var normalized_rule: String = fire_rule.strip_edges().to_lower()
+	if not TACTICAL_COMMAND_RULES_SCRIPT.is_allowed_fire_rule(normalized_rule):
+		return {"updated": false, "reason": "invalid_fire_rule"}
+	var state: Dictionary = Dictionary(_execution_by_fireteam.get(normalized_fireteam_id, {}))
+	if state.is_empty():
+		return {"updated": false, "reason": "no_active_execution"}
+	if simulation_root == null:
+		return {"updated": false, "reason": "missing_simulation_root", "movement_state": _build_public_state(state)}
+	var member_records: Array = _build_member_records(units, leader)
+	if member_records.is_empty():
+		_execution_by_fireteam.erase(normalized_fireteam_id)
+		return {"updated": false, "reason": "no_members", "finished": true, "movement_state": {}}
+	var previous_rule: String = String(state.get("fire_rule", "")).strip_edges().to_lower()
+	state["fire_rule"] = normalized_rule
+	state["command_revision"] = int(state.get("command_revision", 0)) + 1
+	_reissue_current_stage(state, member_records, simulation_root, terrain_registry)
+	_execution_by_fireteam[normalized_fireteam_id] = state
+	return {
+		"updated": true,
+		"changed": normalized_rule != previous_rule,
+		"fire_rule": normalized_rule,
+		"movement_state": _build_public_state(state),
+	}
+
+
 func _issue_stage(state: Dictionary, member_records: Array, simulation_root, terrain_registry = null) -> Dictionary:
 	var style: String = String(state.get("effective_style", ADVANCE_STYLE_RUSH))
 	var moving_unit_ids: PackedStringArray = PackedStringArray()

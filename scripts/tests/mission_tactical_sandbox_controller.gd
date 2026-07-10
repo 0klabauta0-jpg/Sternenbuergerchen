@@ -1909,6 +1909,7 @@ func set_fireteams_fire_rule(fireteam_ids: PackedStringArray, next_fire_rule: St
 			continue
 		_fire_rule_by_fireteam[fireteam_id] = normalized_rule
 		_refresh_active_behavior_profile_fire_rule(fireteam_id)
+		_apply_live_fire_rule_to_fireteam(fireteam_id)
 		applied_count += 1
 	if applied_count <= 0:
 		return false
@@ -28229,6 +28230,32 @@ func _apply_live_tactical_stance_to_fireteam(fireteam_id: String) -> bool:
 			"update_tactical_stance",
 			normalized_fireteam_id,
 			get_requested_tactical_stance(normalized_fireteam_id),
+			_get_fireteam_units(normalized_fireteam_id, true),
+			_resolve_fireteam_leader_for_behavior(normalized_fireteam_id),
+			simulation_root,
+			_get_terrain_registry()
+		)
+	)
+	return bool(result.get("updated", false))
+
+
+func _apply_live_fire_rule_to_fireteam(fireteam_id: String) -> bool:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return false
+	_ensure_fireteam_movement_controller()
+	if _fireteam_movement_controller == null or not _fireteam_movement_controller.has_method("update_fire_rule"):
+		return false
+	if not bool(_fireteam_movement_controller.call("has_active_execution", normalized_fireteam_id)):
+		return false
+	var simulation_root = get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	var result: Dictionary = Dictionary(
+		_fireteam_movement_controller.call(
+			"update_fire_rule",
+			normalized_fireteam_id,
+			get_fireteam_fire_rule(normalized_fireteam_id),
 			_get_fireteam_units(normalized_fireteam_id, true),
 			_resolve_fireteam_leader_for_behavior(normalized_fireteam_id),
 			simulation_root,

@@ -279,6 +279,9 @@ TASK_570 verbindet die bestehenden taktischen Fire-Rules mit dem Live-Missionspf
 
 Erwartete Rule-Abbildung: `hold` und `return` setzen `UnitCommand.fire_status = hold_fire`; `free` und `suppress` setzen `fire_at_will`. `CombatFireDecisionResolver` blockiert `hold`, erlaubt `return` nur bei aktivem Incoming-Fire-Fenster des Fireteams und behandelt `free`/`suppress` als feuerbereit. `suppress` ist in TASK_570 noch kein vollstaendiges Suppression-/Ammo-System, sondern ein durchgereichter Fire-Rule-Zustand fuer den naechsten Gameplay-Slice. Contact-Decision-Diagnostik muss `attacker_fire_rule`, `attacker_fire_status` und `attacker_return_fire_window_active` sichtbar machen.
 
+## Station-Route-Live-Fire-Rule-Propagation
+TASK_1080 schliesst die Laufzeitgrenze fuer bereits aktive Fireteam-Stages. Eine explizit gesetzte Fire-Rule muss nicht nur Controller und Behavior-Profil aktualisieren, sondern sofort den aktiven `FireteamMovementController`-State und alle laufenden `UnitCommand`-Instanzen erreichen. Der Movement-Controller erhoeht dafuer die `command_revision` und gibt den aktuellen Stage mit unveraendertem Ziel ueber `SimulationRoot.enqueue_command()` neu aus. Die UI bleibt dabei Command-Ausloeser; die Unit-Wahrheit wird weiter ueber den autoritativen Runtime-Pfad aktualisiert. Alte tokenisierte Move-Commands duerfen eine neuere ROE-Revision nicht ueberschreiben.
+
 ## Fire-Rule-Controls-Readability-Polish
 TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Command-Grid-Controls `HF`, `RF`, `FW` und `SUP` duerfen nur den bestehenden `MissionTacticalSandboxController.set_selected_fireteams_fire_rule()`-Pfad ausloesen. Sie duerfen keine Movement-, Combat-, Unit- oder Command-Queue-Wahrheit direkt schreiben.
 
