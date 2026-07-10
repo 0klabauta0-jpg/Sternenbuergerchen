@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1087: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance, echte lokale ENet-Feuerdisziplin und ein zustandsbasiert bereitgestellter Mission-/LZ-/Drop-Pfad.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1088: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance, echte lokale ENet-Feuerdisziplin und ein schneller, autoritativer Mission-/LZ-/CONTACT-FIRE-Pfad.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1087</span>
+      <span class="pill good">Letzter Abschluss: TASK_1088</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -202,9 +202,9 @@
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
-          <div class="callout success">TASK_1087 ist abgeschlossen: Missionstart, Transfer, LZ, Deboard und Move-Preview warten auf konkrete Runtime-Zustaende. Der normale Dropship-Ablauf bleibt unveraendert; nur der reproduzierbare Release-Direkteinstieg verliert historische Blindpausen.</div>
+          <div class="callout success">TASK_1088 ist abgeschlossen: Contact-Tracking, LOS und Combat waren bereits schnell. Der eigentliche Engpass war ein verschachtelter read-only Review-Snapshot nach dem echten FireEvent. Der unmittelbare Evidence-Aufbau sank von 11.068 ms auf 2 ms, ohne Gameplay- oder Multiplayer-Wahrheit ins HUD zu verschieben.</div>
           <p><strong>Performancebefund:</strong> Im echten 4.6.2-Release fiel Mission/LZ bis Runtime-Nodes von 10.400 auf 4.647 ms. Gesamt-Ready sank von 31.363 auf 25.732 ms, intern von 22.946 auf 17.048 ms. Schnell abgeschlossene Bewegung bleibt als echter recent movement trace lesbar. Groesster Restblock ist nun Kontakt bis FireEvent mit 7.996 ms.</p>
-          <input readonly value="TASK_1087 - Release Mission/LZ Setup Readiness Pass (19/19 gruen)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1088 - Release Contact/Fire Ready-Time Pass (21/21 gruen)" data-export-key="reentry_handbook.current_task">
           <input readonly value="TASK_1088 - Release Contact/Fire Ready-Time Pass" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
@@ -844,7 +844,7 @@
             recommended_next_task: "TASK_1088 - Release Contact/Fire Ready-Time Pass"
           },
           metadata: {
-            generated_for_task: "TASK_1087",
+            generated_for_task: "TASK_1088",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

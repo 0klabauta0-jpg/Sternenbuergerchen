@@ -18937,6 +18937,74 @@ func get_release_first_firefight_contact_framing_snapshot() -> Dictionary:
 	}
 
 
+func get_release_first_exchange_immediate_evidence_snapshot() -> Dictionary:
+	var diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
+	var fire_events: Array = get_fire_event_snapshot()
+	var first_fire_event: Dictionary = Dictionary(fire_events[0]).duplicate(true) if not fire_events.is_empty() else {}
+	var first_fire_event_id: String = String(first_fire_event.get("event_id", diagnostics.get("fire_event_id", ""))).strip_edges()
+	var first_exchange_visible: bool = not first_fire_event_id.is_empty()
+	var framing_state: String = "fire_exchange" if first_exchange_visible else "contact_pressure"
+	var framing_line: String = _build_release_first_firefight_contact_framing_line(framing_state, diagnostics, "")
+	var combat_context_readable: bool = String(diagnostics.get("range_state", "")).strip_edges() == "in_range" \
+		and String(diagnostics.get("los_state", "")).strip_edges().to_lower() != "blocked" \
+		and bool(diagnostics.get("combat_attackable", false))
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"first_exchange_visible",
+			first_exchange_visible,
+			"Immediate evidence references an already-created FireEvent."
+		),
+		_build_mission_first_move_readability_check(
+			"framing_line_names_contact_fire",
+			framing_line.contains("CONTACT FIRE") and framing_line.contains("NEXT"),
+			"Immediate framing names contact fire and the next player step."
+		),
+		_build_mission_first_move_readability_check(
+			"combat_context_readable",
+			combat_context_readable,
+			"Immediate evidence keeps range, LOS and attackability readable."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.release_first_exchange_tension_tuning.v1",
+		"task_id": "TASK_844",
+		"source_task_id": "TASK_843",
+		"source_gate": "pass" if first_exchange_visible else "review",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_navigation": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+		"style_id": RELEASE_FIRST_EXCHANGE_TENSION_TUNING_STYLE_ID,
+		"first_exchange_visible": first_exchange_visible,
+		"framing_state": framing_state,
+		"framing_line": framing_line,
+		"fire_event_count": fire_events.size(),
+		"first_fire_event_id": first_fire_event_id,
+		"engagement_status": String(diagnostics.get("status", "")).strip_edges(),
+		"engagement_reason": String(diagnostics.get("reason", "")).strip_edges(),
+		"range_state": String(diagnostics.get("range_state", "")).strip_edges(),
+		"los_state": String(diagnostics.get("los_state", "")).strip_edges(),
+		"combat_attackable": bool(diagnostics.get("combat_attackable", false)),
+		"contact_decision_diagnostics": diagnostics,
+		"source": {
+			"schema": "sternenbuergerchen.release_first_exchange_immediate_evidence_source.v1",
+			"read_only": true,
+			"fire_event": first_fire_event,
+		},
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func get_release_first_exchange_tension_tuning_snapshot() -> Dictionary:
 	var source_snapshot: Dictionary = get_release_first_firefight_contact_framing_snapshot()
 	var diagnostics: Dictionary = Dictionary(source_snapshot.get("contact_decision_diagnostics", get_contact_decision_diagnostics_snapshot())).duplicate(true)

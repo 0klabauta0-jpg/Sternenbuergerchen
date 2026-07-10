@@ -13,6 +13,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1088 - Release Contact/Fire Ready-Time Pass (implementiert im Arbeitsstand)
+- Grundlage: Der TASK-1087-Release-Trace zeigte 7.996 ms zwischen Kontaktaufbau und FireEvent-Evidence. Feingranulare Stufen belegten einen 11.068-ms-Review-Snapshot-Hotpath, waehrend Contact-Tracking, LOS und FireEvent nur einstellige Millisekunden benoetigten.
+- Ergebnis: Der Deep-Link nutzt fuer den unmittelbaren sichtbaren Feuerwechsel einen kompakten read-only Snapshot aus vorhandener FireEvent- und Contact-Diagnostik. Die Evidence-Stufe sank auf 2 ms, der komplette vergleichbare Headless-Pfad von 20.641 auf 11.527 ms. Alle Combat-, CONTACT-FIRE-, ROE- und Multiplayer-Regressionen bleiben gruen.
+- Naechster Schritt: Frischer Release-Export und Real-Window-Trace. Danach nur den dort belegten groessten Restblock bearbeiten; aktuell ist der Sichtbarkeits-/HUD-Readback nach dem FireEvent der wahrscheinlichste Kandidat.
+
 ## TASK_1087 - Release Mission/LZ Setup Readiness Pass (implementiert im Arbeitsstand)
 - Grundlage: TASK_1086 isolierte 10.400 ms bis `mission_runtime_nodes_ready` als groessten Release-Abschnitt. Innerhalb des LZ-Pfads lagen historische 3/4/8/10-Frame-Pausen ohne konkrete Runtime-Bedingung.
 - Ergebnis: Der direkte Headless-LZ-Trace sank vergleichbar von 12.814 auf 5.774 ms. Im echten 4.6.2-Release fiel Mission/LZ bis Runtime-Nodes von 10.400 auf 4.647 ms. Gesamt-Ready sank von 31.363 auf 25.732 ms. Deployment wartet genau auf einen autoritativen Tick; Preview auf echten GO-ready-State. Schnelle abgeschlossene Bewegung bleibt ueber `recent_movement_trace` lesbar.
