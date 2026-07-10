@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1038 - Release First Decision Loop Two Player Loop Scenario First Contact Real Window Capture (implementiert im Arbeitsstand)
+- Grundlage: TASK_1037 First Contact Playability Slice.
+- Ziel: Echten Fenster-/Capture-Rahmen fuer CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK und `GO separat` vorbereiten.
+- Ergebnis: Read-only Snapshot `blocked | needs_first_contact_real_window_capture | review_ready | accepted`.
+- Naechster Schritt: TASK_1039 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings.
+
 ## TASK_1037 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice (implementiert im Arbeitsstand)
 - Grundlage: TASK_1036 First Contact Player Feel Polish.
 - Ziel: CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK und `GO separat` als kleinen spielbaren First-Contact-Griff pruefen.

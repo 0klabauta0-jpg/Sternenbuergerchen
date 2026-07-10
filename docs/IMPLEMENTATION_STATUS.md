@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1038 - Release First Decision Loop Two Player Loop Scenario First Contact Real Window Capture
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1038_release_first_decision_loop_two_player_loop_scenario_first_contact_real_window_capture.md`, `docs/tasks/TASK_1037_release_first_decision_loop_two_player_loop_scenario_first_contact_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactRealWindowCapture.build_snapshot()` bewertet eine bestandene TASK_1037-Quelle plus optionales Capture-Manifest.
+- Stand: Ohne Manifest meldet der Snapshot `needs_first_contact_real_window_capture`; gutes Manifest ohne erledigte manuelle Sichtchecks wird `review_ready`; vollstaendige manuelle Checks setzen `accepted`.
+- Stand: Das Capture-Manifest fordert sichtbare CONTACT-, WHY-, NEXT-, FIRE/WAIT-, GO-, FEEDBACK- und HUD/MP-Grenzen, Window-Screenshot, trusted Window-Capture und keine neue HUD-Gameplay-Wahrheit.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1038 im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad.
+- Risiken/offen: TASK_1038 akzeptiert nur ein Manifest und macht noch keine automatische Pixelbewertung. Der naechste Schritt ist ein konkreter Visual-Findings-Schnitt aus dem echten Fensterbild.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1038_release_first_decision_loop_two_player_loop_scenario_first_contact_real_window_capture.gd`, Regression TASK_1037, TASK_1036, TASK_1035, `git diff --check`.
+- Naechster Schritt: TASK_1039 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings.
+
 ### TASK_1037 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1037_release_first_decision_loop_two_player_loop_scenario_first_contact_playability_slice.md`, `docs/tasks/TASK_1036_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
