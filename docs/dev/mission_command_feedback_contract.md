@@ -292,6 +292,11 @@ TASK_1082 fuehrt Fire-Rule-Aenderungen im aktiven Netzwerk als `contract_categor
 
 Erst die autoritative Command-Verarbeitung committed `fire_rule` und eine monotone `revision`. `SimulationRoot` publiziert diesen State im vorhandenen `tactical_rules`-Snapshot. Das Host-Signal darf aktive Behavior-/Movement-/UnitCommand-Daten aktualisieren. Ein Client-Snapshot darf dagegen nur eine neuere lokale Leserevision und die sichtbare Regel uebernehmen; er erzeugt keine Movement-, Combat-, Command- oder Effect-Wahrheit. Veraltete Snapshots duerfen die sichtbare ROE nicht zurueckrollen.
 
+## Two-Instance-ROE-Ownership-Feedback
+TASK_1083 belegt den TASK_1082-Pfad ueber zwei echte lokale MultiplayerAPI-Subtrees. `SimulationRoot.request_command()` sendet fuer jeden Remote-Request ein sanitisiertes, read-only `network_command_result` an den sendenden Peer. Das Ergebnis enthaelt nur Accepted/Reason, Kategorie, Command-Typ, Team-/Fireteam-ID und Fire Rule; keine Runtime- oder Payload-Wahrheit.
+
+Der Mission-Controller zeigt fuer `set_fire_rule` kompakt `ROE <FT> <RULE> HOST OK` oder `ROE BLOCKED <reason>`. Diese Zeile ist Feedback auf Host-Validierung, kein Commit. Gameplay-State entsteht weiterhin erst durch Host-Command-Verarbeitung und Snapshot-Replikation.
+
 ## Fire-Rule-Controls-Readability-Polish
 TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Command-Grid-Controls `HF`, `RF`, `FW` und `SUP` duerfen nur den bestehenden `MissionTacticalSandboxController.set_selected_fireteams_fire_rule()`-Pfad ausloesen. Sie duerfen keine Movement-, Combat-, Unit- oder Command-Queue-Wahrheit direkt schreiben.
 

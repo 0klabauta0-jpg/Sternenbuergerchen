@@ -105,6 +105,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
 - Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
 
+## TASK_1083 - Two-Instance ROE Ownership Playtest (implementiert im Arbeitsstand)
+- Grundlage: TASK_1082 pruefte Authority und Snapshot isoliert; TASK_607 verband ENet nur vor den Mission-Instanzen und reichte Commands danach direkt ein.
+- Ergebnis: TASK_1083 ist 24/24 gruen. Der Client-Setter laeuft durch echten RPC, Host-Commit und Snapshot zurueck; akzeptierte und abgewiesene ROE-Requests werden clientseitig lesbar. Der dabei entdeckte 14,7-KB-Unreliable-State wird ZSTD-komprimiert und in ungeordnete maximal 1000-Byte-Chunks transportiert; Reverse-Order-Reassembly und die breiten Pack-/Apply-Budgets sind belegt.
+- Naechster Schritt: TASK_1084 behebt den bestaetigten TASK_284-Architekturverstoß der Release-Deep-Link-Helfer, bevor weiterer visueller Missionspolish Runtime-Wahrheit im Meta-Layer zementiert.
+
 ## TASK_1082 - Multiplayer ROE Authority And Replication (implementiert im Arbeitsstand)
 - Grundlage: TASK_1080/1081 machen ROE wirksam und lesbar, aber der sichtbare Buttonpfad umging im Netzwerk noch den allgemeinen Authority-Contract.
 - Ergebnis: TASK_1082 ist 21/21 gruen. `set_fire_rule` ist ein host-validierter Tactical-Rule-Command; zugewiesene Peers koennen kein fremdes Fireteam desselben Teams aendern. Fire Rule und Revision werden ueber den bestehenden `tactical_rules`-Snapshot repliziert, waehrend Client-Apply keine Runtime-Commands erzeugt.

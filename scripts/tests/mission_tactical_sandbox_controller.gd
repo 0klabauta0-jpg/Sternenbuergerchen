@@ -582,6 +582,7 @@ var _phase_execution_by_fireteam: Dictionary = {}
 var _active_behavior_profiles_by_fireteam: Dictionary = {}
 var _fire_rule_by_fireteam: Dictionary = {}
 var _fire_rule_authority_revision_by_fireteam: Dictionary = {}
+var _fire_rule_authority_feedback: Dictionary = {}
 var _ad_hoc_order_controller = null
 var _area_order_resolver = null
 var _multi_fireteam_plan_resolver = null
@@ -1968,6 +1969,9 @@ func _connect_fire_rule_authority_signals() -> void:
 	var snapshot_callable := Callable(self, "_on_multiplayer_authority_snapshot_applied")
 	if simulation_root.has_signal("multiplayer_snapshot_applied") and not simulation_root.is_connected("multiplayer_snapshot_applied", snapshot_callable):
 		simulation_root.connect("multiplayer_snapshot_applied", snapshot_callable)
+	var result_callable := Callable(self, "_on_network_command_result_received")
+	if simulation_root.has_signal("network_command_result_received") and not simulation_root.is_connected("network_command_result_received", result_callable):
+		simulation_root.connect("network_command_result_received", result_callable)
 
 
 func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
@@ -1976,6 +1980,33 @@ func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
 
 func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	apply_authoritative_fire_rule_snapshot(snapshot.get("tactical_rules", []))
+
+
+func _on_network_command_result_received(result: Dictionary) -> void:
+	if String(result.get("command_type", "")).strip_edges().to_lower() != "set_fire_rule":
+		return
+	var accepted: bool = bool(result.get("accepted", false))
+	var reason: String = String(result.get("reason", "")).strip_edges()
+	var fireteam_id: String = String(result.get("fireteam_id", "")).strip_edges().to_lower()
+	var fire_rule: String = String(result.get("fire_rule", "")).strip_edges().to_upper()
+	var compact_line: String = "ROE %s %s HOST OK" % [fireteam_id.to_upper(), fire_rule] if accepted else "ROE BLOCKED %s" % reason
+	_fire_rule_authority_feedback = {
+		"schema": "sternenbuergerchen.fire_rule_authority_feedback.v1",
+		"status": "accepted" if accepted else "blocked",
+		"accepted": accepted,
+		"reason": reason,
+		"fireteam_id": fireteam_id,
+		"fire_rule": String(result.get("fire_rule", "")).strip_edges().to_lower(),
+		"compact_line": compact_line,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	_last_command_text = compact_line
+	_update_ui()
+
+
+func get_fire_rule_authority_feedback_snapshot() -> Dictionary:
+	return _fire_rule_authority_feedback.duplicate(true)
 
 
 func _should_route_fire_rule_through_network_authority() -> bool:
