@@ -15,8 +15,8 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ## TASK_1087 - Release Mission/LZ Setup Readiness Pass (implementiert im Arbeitsstand)
 - Grundlage: TASK_1086 isolierte 10.400 ms bis `mission_runtime_nodes_ready` als groessten Release-Abschnitt. Innerhalb des LZ-Pfads lagen historische 3/4/8/10-Frame-Pausen ohne konkrete Runtime-Bedingung.
-- Ergebnis: Der direkte Headless-LZ-Trace sank vergleichbar von 12.814 auf 5.774 ms. Missionstart, Transfer, LZ, Deboard und Preview sind einzeln messbar. Deployment wartet genau auf einen autoritativen Tick; Preview wartet auf echten GO-ready-State. Schnelle abgeschlossene Bewegung bleibt ueber `recent_movement_trace` im Execution-Contract lesbar.
-- Naechster Schritt: TASK_1088 - Release Contact/Fire Ready-Time Pass. Der aktuelle volle Trace weist 11.823 ms von Kontaktaufbau bis echter FireEvent-Evidence als groessten Restblock aus.
+- Ergebnis: Der direkte Headless-LZ-Trace sank vergleichbar von 12.814 auf 5.774 ms. Im echten 4.6.2-Release fiel Mission/LZ bis Runtime-Nodes von 10.400 auf 4.647 ms. Gesamt-Ready sank von 31.363 auf 25.732 ms. Deployment wartet genau auf einen autoritativen Tick; Preview auf echten GO-ready-State. Schnelle abgeschlossene Bewegung bleibt ueber `recent_movement_trace` lesbar.
+- Naechster Schritt: TASK_1088 - Release Contact/Fire Ready-Time Pass. Der frische Release weist 7.996 ms von Kontaktaufbau bis echter FireEvent-Evidence als groessten Restblock aus.
 
 ## TASK_1086 - Release Mission Ready-Time Performance Pass (implementiert im Arbeitsstand)
 - Grundlage: TASK_1085 machte die rund 50 Sekunden bis `deeplink_final` erstmals stabil messbar. Davon entfielen allein rund 20 Sekunden auf feste 45- und 10-Frame-Wartefenster in einer schweren Missionsszene.

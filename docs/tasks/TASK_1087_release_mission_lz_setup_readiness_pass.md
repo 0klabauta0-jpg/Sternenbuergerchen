@@ -50,4 +50,4 @@ Der aktuelle Trace fasst den gesamten LZ-/Drop-/Preview-Pfad in einer Stufe zusa
 Ein Teil der Dauer kann echte Szeneninstanziierung, Asset-/Terrain-Aufbau oder notwendige UI-Initialisierung sein. Solche Kosten werden nicht durch Testabkuerzungen verdeckt, sondern als eigener Folgeengpass dokumentiert.
 
 ## Ergebnis
-Der vergleichbare direkte Headless-LZ-Trace sank von 12.814 auf 5.774 ms. Der volle First-Exchange-Trace endet im aktuellen Arbeitsstand nach 27.722 ms; groesster Restabschnitt ist Kontaktaufbau bis echte FireEvent-Evidence mit 11.823 ms. TASK_1088 setzt dort an.
+Der vergleichbare direkte Headless-LZ-Trace sank von 12.814 auf 5.774 ms. Im integrierten Godot-4.6.2-Release auf `737faa04` fiel der Abschnitt bis `mission_runtime_nodes_ready` von 10.400 auf 4.647 ms. Gesamt-Ready sank von 31.363 auf 25.732 ms; der interne Trace endet nach 17.048 ms. Groesster Restabschnitt ist Kontaktaufbau bis echte FireEvent-Evidence mit 7.996 ms. TASK_1088 setzt dort an.
