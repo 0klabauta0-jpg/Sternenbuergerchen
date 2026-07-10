@@ -282,6 +282,11 @@ Erwartete Rule-Abbildung: `hold` und `return` setzen `UnitCommand.fire_status = 
 ## Station-Route-Live-Fire-Rule-Propagation
 TASK_1080 schliesst die Laufzeitgrenze fuer bereits aktive Fireteam-Stages. Eine explizit gesetzte Fire-Rule muss nicht nur Controller und Behavior-Profil aktualisieren, sondern sofort den aktiven `FireteamMovementController`-State und alle laufenden `UnitCommand`-Instanzen erreichen. Der Movement-Controller erhoeht dafuer die `command_revision` und gibt den aktuellen Stage mit unveraendertem Ziel ueber `SimulationRoot.enqueue_command()` neu aus. Die UI bleibt dabei Command-Ausloeser; die Unit-Wahrheit wird weiter ueber den autoritativen Runtime-Pfad aktualisiert. Alte tokenisierte Move-Commands duerfen eine neuere ROE-Revision nicht ueberschreiben.
 
+## Station-Route-ROE-Consequence-Readability
+TASK_1081 fasst die wirksame Fire-Rule als read-only Commander-Konsequenz zusammen. `FireRuleConsequenceReadability.build_snapshot()` darf nur ausgewaehlte Fire-Rule, aktuelle Unit-Command-Felder, Return-Fire-Fenster und vorhandene Contact-/Combat-Diagnostics lesen. Erwartete Tokens: `HF HOLD`, `RF WAIT`, `RF RETURN`, `FW READY`, `FW ENGAGE`, `FW BLOCK`, `SUP READY` und `MIX`. LOS, Range, Cover und Friendly-Fire-Kontext duerfen nur aus vorhandenen Combat-Daten stammen; das Waypoint-Threat-Preview bleibt die getrennte Planungsquelle und wird fuer die ROE-Zeile nicht erneut berechnet.
+
+Die vorhandene einzeilige Mission-Control-Dichte zeigt `ROE <Token>` und exportiert `fire_rule_consequence_readability`, `fire_rule_consequence_line` und `fire_rule_consequence_state` im Command-Feedback. Snapshot-Lesen erzeugt keine Commands oder Events. Aktive Firefights duerfen weiterhin die spaeter eingefuehrte `CONTACT FIRE | ...`-Primaerzeile vor dem vollstaendigen ACT-Stack zeigen. Ein expliziter Command-Feedback-Override bleibt fuer Host/Client- und Verifier-Snapshots autoritativ und darf nicht mit Live-Szenentext ersetzt werden.
+
 ## Fire-Rule-Controls-Readability-Polish
 TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Command-Grid-Controls `HF`, `RF`, `FW` und `SUP` duerfen nur den bestehenden `MissionTacticalSandboxController.set_selected_fireteams_fire_rule()`-Pfad ausloesen. Sie duerfen keine Movement-, Combat-, Unit- oder Command-Queue-Wahrheit direkt schreiben.
 

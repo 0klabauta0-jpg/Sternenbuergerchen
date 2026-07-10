@@ -148,13 +148,22 @@
 - Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
 - Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
 
+### TASK_1081 - Station Route ROE Consequence Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1081_station_route_roe_consequence_readability.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_570, TASK_603, TASK_1080
+- Stand: Die Mission-Control-`ACT`-Zeile zeigt nicht mehr nur `ROE HF/RF/FW`, sondern die unmittelbare Konsequenz: `HF HOLD`, `RF WAIT/RETURN`, `FW READY/ENGAGE/BLOCK`, `SUP READY` oder `MIX`. Der read-only Resolver vergleicht Controller-Regel mit aktiven Unit-Commands und nutzt vorhandene Return-Fire-/Combat-Diagnostics fuer LOS, Range, Cover und Friendly-Fire-Kontext.
+- Ursache/Fix: Nach TASK_1080 war die Regel technisch wirksam, aber der sichtbare Token erklaerte ihre Folge nicht. Die neue Leseschicht fasst vorhandene Runtime-Wahrheit zusammen und wird in Command-Feedback sowie Host/Client-ACT-Dichte exportiert. Das Threat-Preview wird nicht doppelt gelesen. Alte TASK_546/603-Gates akzeptieren wieder den aktuellen `CONTACT FIRE`-Fokus und explizite Feedback-Overrides bleiben unveraendert.
+- Risiken/offen: TASK_546 ist funktional 23/23 gruen, benoetigt im alten Meta-Layer-Fixture aber rund 343 Sekunden. Das ist Testlaufzeit, kein Framerate-Messwert. Die neue ROE muss als naechstes explizit ueber Host-Authority und Client-Replikation getestet werden.
+- Lokale Pruefung: TASK_1081 33/33, TASK_1080 22/22, TASK_1079 14/14, TASK_571 32/32, TASK_570 46/46, TASK_603 35/35, TASK_546 23/23 und TASK_607 41/41; `git diff --check` folgt mit HTML-Pruefung.
+- Naechster Schritt: `TASK_1082 - Multiplayer ROE Authority And Replication`: Peer-Berechtigung, Host-Commit, Client-Snapshot und sichtbare Konsequenz fuer getrennte Fireteams pruefen.
+
 ### TASK_1080 - Station Route Live Fire-Rule Propagation
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1080_station_route_live_fire_rule_propagation.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_command_rules_contract.md`, TASK_570, TASK_1079
 - Stand: `HF`, `RF`, `FW` und `SUP` aktualisieren bei einer bereits laufenden Fireteam-Ausfuehrung nicht mehr nur Controller und Behavior-Profil. Der `FireteamMovementController` uebernimmt die neue Regel sofort, erhoeht die Command-Revision und gibt den aktuellen Stage ueber `SimulationRoot` neu aus. Der reale Guard-Contact belegt `return -> hold_fire` und `free -> fire_at_will` in allen aktiven Bravo-Unit-Commands.
 - Ursache/Fix: Der Fire-Rule-Setter aktualisierte bisher nur Profile-Metadaten. Laufende Unit-Commands behielten bis zum naechsten Stage-Issue ihre alte ROE; dadurch konnten HUD und Combat-Resolver widersprechen. Der neue Live-Refresh folgt der bestehenden `update_tactical_stance()`-Strategie und invalidiert alte tokenisierte Move-Commands.
 - Risiken/offen: TASK_1080 beweist die sofortige Command-Propagation, aber erzeugt fuer `return` keinen kuenstlichen Incoming-Fire-Treffer. Als naechster Spieler-Feel-Schnitt fehlt sichtbares Konsequenzfeedback fuer Hold/Return/Free samt Friendly-Fire-/Cover-Hinweis.
-- Lokale Pruefung: TASK_1080 17/17, TASK_1079 14/14, TASK_570 46/46, TASK_501 10/10 und TASK_607 41/41; `git diff --check` folgt mit Doku-/HTML-Pruefung.
+- Lokale Pruefung: TASK_1080 22/22, TASK_1079 14/14, TASK_570 46/46, TASK_501 10/10 und TASK_607 41/41; `git diff --check` folgt mit Doku-/HTML-Pruefung.
 - Naechster Schritt: `TASK_1081 - Station Route ROE Consequence Readability`: die wirksame Regel als kurze, sichtbare Commander-Konsequenz im echten Guard-Contact zeigen, ohne eine zweite Combat-Wahrheit im HUD anzulegen.
 
 ### TASK_1079 - Station Route Real First Exchange

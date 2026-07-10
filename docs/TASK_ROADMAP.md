@@ -105,9 +105,16 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
 - Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
 
+## TASK_1081 - Station Route ROE Consequence Readability (implementiert im Arbeitsstand)
+- Grundlage: TASK_1080 machte die ROE im laufenden UnitCommand wirksam, das HUD zeigte aber weiterhin nur den Namen der Regel ohne unmittelbare Folge.
+- Ergebnis: TASK_1081 ist 33/33 gruen. `ACT` zeigt `HF HOLD`, `RF WAIT/RETURN`, `FW READY/ENGAGE/BLOCK`, `SUP READY` oder `MIX`; Runtime-Konsistenz, Return-Fire-Fenster und vorhandener Combat-Kontext bleiben read-only diagnostizierbar. Der echte Guard-Trace ist 22/22 und Host/Client 41/41 gruen.
+- Ursache/Fix: Ein kleiner Resolver fasst bestehende Runtime-Snapshots zusammen. Planungs-Threat wird nicht doppelt berechnet. TASK_546/603 wurden auf den aktuellen `CONTACT FIRE`-Presenter abgeglichen; explizite Feedback-Overrides bleiben erhalten.
+- Risiken/offen: Der alte TASK_546-Meta-Layer-Smoke ist mit rund 343 Sekunden zu teuer und braucht spaeter ein kleineres Fixture. Das ist kein gemessener Runtime-FPS-Befund.
+- Naechster Schritt: TASK_1082 prueft ROE als echten Multiplayer-Command: Peer darf nur sein Fireteam aendern, Host committed, Client repliziert Regel und Konsequenz.
+
 ## TASK_1080 - Station Route Live Fire-Rule Propagation (implementiert im Arbeitsstand)
 - Grundlage: TASK_1079 zeigte, dass `Hold Fire` im echten Guard-Contact keinen freiwilligen FireEvent hinzufuegt. Der Setter aktualisierte dabei aber nur Controller und Behavior-Profil; laufende Unit-Commands konnten ihre vorherige ROE behalten.
-- Ergebnis: TASK_1080 ist 17/17 gruen. `return` und `free` erreichen im realen Homebase -> Drop -> Deboard -> GO -> Guard-Contact sofort Movement-State und alle aktiven Bravo-Unit-Commands. Die Command-Revision steigt bei jedem Wechsel; TASK_1079, TASK_570, TASK_501 und TASK_607 bleiben gruen.
+- Ergebnis: TASK_1080 ist nach TASK_1081 22/22 gruen. `return` und `free` erreichen im realen Homebase -> Drop -> Deboard -> GO -> Guard-Contact sofort Movement-State und alle aktiven Bravo-Unit-Commands sowie den passenden sichtbaren ROE-Konsequenz-Token innerhalb des HUD-Budgets. Die Command-Revision steigt bei jedem Wechsel; TASK_1079, TASK_570, TASK_501 und TASK_607 bleiben gruen.
 - Ursache/Fix: Der bestehende Live-Stance-Refresh wurde als Fire-Rule-Refresh gespiegelt. Der aktuelle Stage wird mit unveraendertem Ziel ueber `SimulationRoot` neu ausgegeben, sodass alte tokenisierte Move-Commands die neuere ROE nicht zuruecksetzen koennen.
 - Naechster Schritt: TASK_1081 macht die jetzt echte Wirkung lesbar: kurze Konsequenzanzeige fuer Hold/Return/Free, Incoming-Fire-Fenster sowie Friendly-Fire-/Cover-Grund im Guard-Contact.
 
