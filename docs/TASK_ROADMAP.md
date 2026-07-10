@@ -29,6 +29,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1059 ist 10/10 gruen. ft1 und ft2 erscheinen mit korrekten Unit-Paaren in CombatRegistry, erhalten jeweils eine gueltige LOS-Fixture und erzeugen bestaetigte ContactTracker-Reports ohne UI-Gameplay-Wahrheit.
 - Naechster Schritt: Den nun technisch belegten First-Contact-Moment als sichtbaren Spielergriff pruefen: Auswahl, Contact-Overlay, Threat-/Fire-Feedback und erster Command mit beiden Teams.
 
+## TASK_1060 - Multi-Fireteam First Command Player Grip (implementiert im Arbeitsstand)
+- Grundlage: TASK_1059 belegt getrennte Contacts fuer zwei deboardete Teams, aber noch nicht den gemeinsamen Commander-Griff vor und nach `GO`.
+- Ergebnis: TASK_1060 ist 14/14 gruen. Beide Teams erhalten eigene Ghost-/Pfad-/Risk-Previews und Contact-Kontexte. `GO` bleibt ein separater Commit; danach bildet der vorhandene CoordinationManager sichtbar Vorstoss plus Partner-Deckung statt einen Team-Plan still zu verlieren.
+- Naechster Schritt: Mehr-Fireteam-Missionsflow gegen die verbleibenden sichtbaren Runtime-/Framekosten messen, bevor weitere Bedienoberflaechen auf einen noch langsamen Pfad gelegt werden.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

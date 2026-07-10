@@ -34,6 +34,14 @@
 - Lokale Pruefung: `task_1059_multi_fireteam_first_contact_runtime_trace.gd` 10/10; danach Dropship-/HUD-Regressionen und `git diff --check`.
 - Naechster Schritt: Sichtbarer Multi-Fireteam-First-Contact-Player-Feel-Slice fuer Contact-Overlay, Threat-Feedback und ersten Befehl.
 
+### TASK_1060 - Multi-Fireteam First Command Player Grip
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1060_multi_fireteam_first_command_player_grip.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/contact_report_contract.md`, `docs/tasks/TASK_1059_multi_fireteam_first_contact_runtime_trace.md`
+- Stand: TASK_1060 ist 14/14 gruen. Nach gemeinsamen Alpha-/Beta-Kontakten erzeugt ein Move fuer beide ausgewaehlten Fireteams getrennte Ghost-/Pfad-/Risk-Previews. `GO` bleibt separat, startet den vorhandenen Vorstoss und zeigt die bewusst erzeugte Partner-Deckung als Coordination-Assignment.
+- Ursache/Fix: Die bestehenden Einzel-Snapshots enthielten alle Daten, aber keinen stabilen, pro Fireteam aggregierten Commander-Blick. `get_multi_fireteam_first_command_readability_snapshot()` fasst nur vorhandene Preview-, Runtime- und ContactTracker-Daten zusammen; es besitzt keine Gameplay-Wahrheit.
+- Lokale Pruefung: `task_1060_multi_fireteam_first_command_player_grip.gd` 14/14; danach TASK_1059, TASK_396, TASK_503 und `git diff --check`.
+- Naechster Schritt: Den echten Mehr-Fireteam-Erstkontakt unter dem verbleibenden Mission-Frame-/LZ-/Deboard-Performancebudget messen und die naechste noch dominante Laufzeitgrenze beseitigen.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

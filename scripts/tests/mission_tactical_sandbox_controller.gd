@@ -15951,6 +15951,90 @@ func get_mission_first_move_decision_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_multi_fireteam_first_command_readability_snapshot() -> Dictionary:
+	var first_move: Dictionary = get_mission_first_move_decision_readability_snapshot()
+	var selected_fireteam_ids: Array = Array(first_move.get("selected_fireteam_ids", Array(_selected_fireteam_ids)))
+	var preview_entries: Array = get_waypoint_intent_preview_snapshot()
+	var fireteams: Array = []
+	var missing_preview_ids: PackedStringArray = PackedStringArray()
+	var missing_contact_ids: PackedStringArray = PackedStringArray()
+	var inactive_fireteam_ids: PackedStringArray = PackedStringArray()
+	for fireteam_id_variant in selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var preview: Dictionary = _find_first_waypoint_preview_for_fireteams([fireteam_id], preview_entries)
+		var contacts: Array = _build_selected_fireteam_contact_readability_entries([fireteam_id])
+		var runtime_active: bool = _is_fireteam_runtime_active(fireteam_id)
+		if preview.is_empty():
+			missing_preview_ids.append(fireteam_id)
+		if contacts.is_empty():
+			missing_contact_ids.append(fireteam_id)
+		if not runtime_active:
+			inactive_fireteam_ids.append(fireteam_id)
+		fireteams.append({
+			"fireteam_id": fireteam_id,
+			"runtime_active": runtime_active,
+			"preview": preview,
+			"contact_count": contacts.size(),
+			"contacts": contacts,
+			"risk_state": String(preview.get("risk_state", "unknown")).strip_edges().to_lower(),
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		})
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"multiple_fireteams_selected",
+			fireteams.size() >= 2,
+			"At least two Fireteams are selected for one coordinated command."
+		),
+		_build_mission_first_move_readability_check(
+			"all_selected_fireteams_runtime_active",
+			inactive_fireteam_ids.is_empty(),
+			"Every selected Fireteam is deployed and runtime-active."
+		),
+		_build_mission_first_move_readability_check(
+			"preview_per_selected_fireteam",
+			missing_preview_ids.is_empty(),
+			"Every selected Fireteam owns a separate pending waypoint preview."
+		),
+		_build_mission_first_move_readability_check(
+			"contact_per_selected_fireteam",
+			missing_contact_ids.is_empty(),
+			"Every selected Fireteam keeps a separate readable contact context."
+		),
+		_build_mission_first_move_readability_check(
+			"go_ready",
+			bool(first_move.get("go_ready", false)),
+			"The existing GO control is available without committing from this snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			true,
+			"Snapshot aggregates existing preview and contact data without creating a command."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	return {
+		"schema": "sternenbuergerchen.multi_fireteam_first_command_player_grip.v1",
+		"task_id": "TASK_1060",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"go_executed": false,
+		"selected_fireteam_ids": selected_fireteam_ids,
+		"fireteams": fireteams,
+		"go_ready": bool(first_move.get("go_ready", false)),
+		"first_move": first_move,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"gate": "pass" if failed_checks.is_empty() else "review",
+	}
+
+
 func get_frontier_probe_first_move_threat_preview_readability_snapshot() -> Dictionary:
 	var first_move_snapshot: Dictionary = get_mission_first_move_decision_readability_snapshot()
 	var command_feedback: Dictionary = get_command_feedback_snapshot()
