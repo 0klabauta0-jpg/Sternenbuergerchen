@@ -59,4 +59,6 @@ Implementiert als reale Stations-Regression. TASK_1079 ist 12/12 gruen:
 Der Scenario-Guard-Contact nach dem bestaetigten Approach-Move liefert ohne
 Positions-, Status- oder Treffer-Manipulation einen bestehenden sichtbaren
 Engagement-Entscheid, dessen Grund sowie Deckungs-/Range-/LOS-Kontext. LZ
-Evac und die read-only Grenze bleiben im selben Lauf erhalten.
+Evac und die read-only Grenze bleiben im selben Lauf erhalten. Der Trace
+setzt danach die vorhandene Hold-Fire-Regel und belegt, dass sie im echten
+Guard-Contact keinen freiwilligen FireEvent hinzufuegt.

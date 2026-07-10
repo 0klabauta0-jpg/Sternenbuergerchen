@@ -151,7 +151,7 @@
 ### TASK_1079 - Station Route Real First Exchange
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1079_station_route_real_first_exchange.md`, `docs/dev/contact_report_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, TASK_1078, TASK_813, TASK_843
-- Stand: Nach dem echten Station-Route-Approach-Contact liefert der vorhandene Engagement-Resolver ohne Test-Teleport einen sichtbaren Fire-/Wait-/No-Fire-Entscheid. Contact, Grund und Deckungs-/Range-/LOS-Kontext sind im read-only First-Engagement-Snapshot belegt; LZ Evac bleibt im selben Lauf erreichbar.
+- Stand: Nach dem echten Station-Route-Approach-Contact liefert der vorhandene Engagement-Resolver ohne Test-Teleport einen sichtbaren Fire-/Wait-/No-Fire-Entscheid. Contact, Grund und Deckungs-/Range-/LOS-Kontext sind im read-only First-Engagement-Snapshot belegt; LZ Evac bleibt im selben Lauf erreichbar. Die vorhandene Hold-Fire-Regel laesst sich im selben echten Contact setzen und fuegt keinen freiwilligen FireEvent hinzu.
 - Ursache/Fix: Die alten First-Engagement-Smokes positionierten einen Gegner fuer Reproduzierbarkeit direkt neben das Fireteam. TASK_1079 fuegt keine Combat-Regel hinzu, sondern beweist, dass der reale Scenario-Guard-Pfad die bestehende Combat- und HUD-Diagnose bereits korrekt erreicht.
 - Risiken/offen: Der Test beweist eine begruendete Entscheidung, nicht einen garantiert dramatischen Trefferwechsel. Die sichtbare Balance von Guard-Deckung, Feuerdisziplin und Friendly-Fire-Hinweis bleibt der naechste Spieler-Feel-Schnitt.
 - Lokale Pruefung: TASK_1079 12/12; `git diff --check` folgt mit den Dokumentations- und Route-Regressionen.

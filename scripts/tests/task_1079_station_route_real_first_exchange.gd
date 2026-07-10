@@ -38,8 +38,9 @@ func _test_real_approach_contact_exposes_existing_engagement_feedback() -> void:
 	var controller: Node = mission.get_node_or_null("TacticalController") if mission != null else null
 	var primary_view: Node = mission.get_node_or_null("Primary3DView") if mission != null else null
 	var combat_driver: Node = mission.get_node_or_null("CombatLoopDriver") if mission != null else null
-	_assert(controller != null and primary_view != null and combat_driver != null, "Real first-exchange trace exposes Station runtime")
-	if controller == null or primary_view == null or combat_driver == null:
+	var simulation_root: Node = mission.get_node_or_null("SimulationRoot") if mission != null else null
+	_assert(controller != null and primary_view != null and combat_driver != null and simulation_root != null, "Real first-exchange trace exposes Station runtime")
+	if controller == null or primary_view == null or combat_driver == null or simulation_root == null:
 		await _cleanup(flow)
 		return
 	var craft_id: String = _get_mission_drop_craft_id(flow)
@@ -75,6 +76,11 @@ func _test_real_approach_contact_exposes_existing_engagement_feedback() -> void:
 	_assert(not String(engagement.get("engagement_status", "")).strip_edges().is_empty(), "Real contact exposes a Fire/Wait/No-Fire decision")
 	_assert(not String(engagement.get("engagement_reason", "")).strip_edges().is_empty(), "Real engagement decision names its reason")
 	_assert(_has_passed_check(engagement, "cover_range_los_context_visible"), "Real engagement keeps cover, range or LOS context visible")
+	var fire_events_before_hold: int = int(engagement.get("fire_event_count", 0))
+	_assert(bool(controller.call("set_selected_fireteams_fire_rule", "hold")), "Hold Fire can be selected during the real Guard contact")
+	combat_driver.call("_try_enqueue_attacks", simulation_root)
+	var held_engagement: Dictionary = Dictionary(controller.call("get_mission_first_engagement_feedback_snapshot"))
+	_assert(int(held_engagement.get("fire_event_count", 0)) == fire_events_before_hold, "Hold Fire adds no voluntary fire event during the real Guard contact")
 	var evac: Dictionary = Dictionary(controller.call("get_mission_evacuation_snapshot"))
 	_assert(bool(evac.get("eligible", false)), "Real first exchange keeps LZ Evac available")
 	_assert(_read_only_snapshot(contact) and _read_only_snapshot(engagement), "Real first-exchange snapshots remain read-only")

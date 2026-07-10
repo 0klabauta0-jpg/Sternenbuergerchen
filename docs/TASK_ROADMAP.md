@@ -107,7 +107,7 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ## TASK_1079 - Station Route Real First Exchange (implementiert im Arbeitsstand)
 - Grundlage: Die vorhandenen First-Engagement-Smokes erzeugten ihren Gegnerkontakt teilweise per Test-Positionierung. Nach TASK_1078 musste geklaert werden, ob der echte Scenario-Guard nach dem Advance denselben Entscheidungsweg erreicht.
-- Ergebnis: TASK_1079 ist 12/12 gruen. Der reale Guard-Contact liefert Fire-/Wait-/No-Fire-Status, Grund und Deckungs-/Range-/LOS-Kontext ohne Teleport, Status-Manipulation oder erzwungenen Treffer. Evac bleibt im selben Lauf erreichbar.
+- Ergebnis: TASK_1079 ist 14/14 gruen. Der reale Guard-Contact liefert Fire-/Wait-/No-Fire-Status, Grund und Deckungs-/Range-/LOS-Kontext ohne Teleport, Status-Manipulation oder erzwungenen Treffer. Hold Fire setzt im selben Contact keine freiwilligen FireEvents; Evac bleibt erreichbar.
 - Ursache/Fix: Kein neuer Produktionsfehler. Die bestehende Contact-, Combat- und Feedback-Kette funktioniert auf der echten Route; der neue Trace ersetzt die unsichere Annahme durch einen wiederholbaren End-to-End-Nachweis.
 - Naechster Schritt: Den bestehenden Fire-/Wait-Entscheid als sichtbare Commander-Wahl balancen: Guard-Deckung, Feuerdisziplin, Friendly-Fire-Hinweis sowie Advance, Hold und Evac.
 
