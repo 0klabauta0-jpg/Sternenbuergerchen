@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1039 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings (implementiert im Arbeitsstand)
+- Grundlage: akzeptierter TASK_1038 First Contact Real Window Capture.
+- Ziel: Echten Fensterblick als Sichtbefund schneiden: CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, `GO separat`, HUD-Ruhe und Multiplayer-Grenze.
+- Ergebnis: Read-only Snapshot `blocked | needs_first_contact_visual_review | ready_for_first_contact_visual_polish | accepted_for_first_contact_acceptance_slice`.
+- Naechster Schritt: TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish oder TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice.
+
 ## TASK_1038 - Release First Decision Loop Two Player Loop Scenario First Contact Real Window Capture (implementiert im Arbeitsstand)
 - Grundlage: TASK_1037 First Contact Playability Slice.
 - Ziel: Echten Fenster-/Capture-Rahmen fuer CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK und `GO separat` vorbereiten.

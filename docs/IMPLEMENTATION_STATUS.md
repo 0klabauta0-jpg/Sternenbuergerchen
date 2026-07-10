@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1039 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1039_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_findings.md`, `docs/tasks/TASK_1038_release_first_decision_loop_two_player_loop_scenario_first_contact_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactVisualFindings.build_snapshot()` bewertet eine akzeptierte TASK_1038-Quelle plus optionale Sichtnotizen.
+- Stand: Ohne Review-Notizen bleibt der Snapshot `needs_first_contact_visual_review`; belegte Reibung wird `ready_for_first_contact_visual_polish`; saubere Notizen setzen `accepted_for_first_contact_acceptance_slice`.
+- Stand: Geprueft werden sichtbare CONTACT-, WHY-, NEXT-, FIRE/WAIT-, GO-, FEEDBACK-, HUD- und Multiplayer-Grenzen. Die Summary-Line bleibt kurz und nennt die Spielerentscheidungen.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1039 im Command-Feedback als Snapshot, Status, Issue-Count und Summary-Line.
+- Risiken/offen: TASK_1039 ist weiterhin ein manueller Sichtbefund und keine Pixelabnahme. Bei Reibung folgt Visual Polish; bei sauberem Befund folgt ein Acceptance-Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1039_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_findings.gd`, Regression TASK_1038, TASK_1037, TASK_1036, `git diff --check`.
+- Naechster Schritt: TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish oder TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice.
+
 ### TASK_1038 - Release First Decision Loop Two Player Loop Scenario First Contact Real Window Capture
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1038_release_first_decision_loop_two_player_loop_scenario_first_contact_real_window_capture.md`, `docs/tasks/TASK_1037_release_first_decision_loop_two_player_loop_scenario_first_contact_playability_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

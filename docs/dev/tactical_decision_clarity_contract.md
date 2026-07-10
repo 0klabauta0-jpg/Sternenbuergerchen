@@ -75,6 +75,11 @@ TASK_1038 legt den echten Fensterbeweis-Rahmen fuer den ersten Kontakt an. Erwar
 
 Der Capture-Schnitt bleibt read-only. Er darf Screenshotpfade, Prozess-/Branch-Daten, Pflichtchecks und Review-Status halten, aber keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit erzeugen. Ein akzeptierter Capture routet zu `TASK_1039 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings`.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings (TASK_1039)
+TASK_1039 trennt den technischen TASK_1038-Fensterbeweis vom konkreten Spielerblick. Erwartet wird ein read-only Befund dazu, ob CONTACT sichtbar ist, WHY die Gefahr handlungsfaehig macht, NEXT erkennbar bleibt, FIRE/WAIT als Wahl lesbar ist, `GO separat` klar bleibt, Feedback zurueckfuehrt, HUD ruhig bleibt und die Multiplayer-Grenze nicht verschwimmt.
+
+Ohne Sichtnotizen bleibt der Status `needs_first_contact_visual_review`. Belegte Reibung routet zu `TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish`; ein sauberer Befund routet zu `TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice`. TASK_1039 erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 TASK_1004 ist der read-only Fensterbeweis-Rahmen fuer den TASK_1003-Round-Loop-Polish. Er erwartet im echten Fenster sichtbare `ROUND`-, `NEXT`- und `GO separat`-Surfaces sowie kurze Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen.
 

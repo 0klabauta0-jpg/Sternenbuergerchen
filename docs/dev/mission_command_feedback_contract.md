@@ -59,6 +59,11 @@ Erwartete Struktur: Ohne Trace meldet der Snapshot `needs_first_contact_playabil
 
 Erwartete Struktur: Ohne Manifest meldet der Snapshot `needs_first_contact_real_window_capture`; ein trusted Manifest mit offenem manuellem Check wird nur `review_ready`; erst alle Pflichtchecks plus `manual_review_done` akzeptieren den Capture und routen zu `TASK_1039 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings`. Der Capture prueft sichtbare CONTACT-, WHY-, NEXT-, FIRE/WAIT-, GO-, FEEDBACK- und HUD/MP-Grenzen. Er setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings (TASK_1039)
+`get_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_findings_snapshot()` ist der read-only Sichtbefund nach TASK_1038. Der Snapshot darf nur einen akzeptierten First-Contact-Real-Window-Capture und optionale Review-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Status, Issue-Count und Summary-Line exportiert werden.
+
+Erwartete Struktur: Ohne akzeptierte TASK_1038-Quelle bleibt `blocked`; ohne Sichtnotizen bleibt `needs_first_contact_visual_review`; belegte Reibung an CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, `GO separat`, HUD oder Multiplayer-Grenze wird `ready_for_first_contact_visual_polish`; ein sauberer Befund setzt `accepted_for_first_contact_acceptance_slice` und routet zu TASK_1040 Acceptance Slice. Der Snapshot setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 `get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
 
