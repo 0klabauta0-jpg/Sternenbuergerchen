@@ -69,6 +69,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1068 ist 16/16 gruen. Der echte Katalogstart behaelt die Station-Scenario-Datei am MissionSetup und fuehrt durch Craft-Ankunft, LZ und Deboarding zu einem Ground-Fireteam. AA bleibt der erste Route-Schritt, ein LOS-Kontakt entsteht reproduzierbar und die Move-Preview zeigt Ghost, Pfad und Risiko, ohne Bewegung vor GO zu committen.
 - Naechster Schritt: Eine kleine, spielbare Vorstoss-gegen-Abbruch-Entscheidung unter NPC-Druck bauen und ihren klaren Erfolg- oder Debriefing-Ausgang verbinden.
 
+## TASK_1069 - Station Route LZ Evacuation Abort Outcome (implementiert im Arbeitsstand)
+- Grundlage: Die Station-Route konnte echten Erstkontakt und Move-Preview zeigen, besass aber keinen spielbaren Rueckzug. Die vorhandene Dropship-RTB-Aktion war kein Evac, sondern nur Craft-Rueckkehr.
+- Ergebnis: TASK_1069 ist 28/28 gruen. EVAC wird nur fuer ein ausgewaehltes Ground-Fireteam im LZ aktiv. Ein Host beendet die Mission ueber den bestehenden Combat-Result- und Debrief-Pfad mit `aborted / evacuation`; ein Nicht-Authority-Aufruf wird ohne lokale Mutation abgelehnt.
+- Naechster Schritt: Den komplementaeren Vorstossausgang zur AA-Interaktion als kleinen NPC-Druck- und Erfolg-zu-Door-Cue-Slice bauen.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

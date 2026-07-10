@@ -122,10 +122,11 @@ static func build_mission_result(
 	duration_seconds: float,
 	team_states: Array
 ) -> Dictionary:
+	var mission_outcome: String = "won" if result == "victory" else ("aborted" if result == "aborted" else "lost")
 	return {
 		"winning_team_id": winning_team_id,
 		"friendly_team_id": friendly_team_id,
-		"mission_outcome": "won" if result == "victory" else "lost",
+		"mission_outcome": mission_outcome,
 		"result": result,
 		"win_condition_type": win_condition_type,
 		"objective_captured": objective_captured,

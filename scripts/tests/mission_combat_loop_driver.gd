@@ -303,6 +303,41 @@ func get_mission_result() -> Dictionary:
 	return _mission_result.duplicate(true)
 
 
+func get_mission_evacuation_authority_snapshot() -> Dictionary:
+	var reason: String = "ready"
+	if not _runs_local_authority:
+		reason = "not_authority"
+	elif _combat_finished:
+		reason = "mission_resolved"
+	return {
+		"accepted": reason == "ready",
+		"reason": reason,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_movement": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func request_mission_evacuation() -> Dictionary:
+	var authority: Dictionary = get_mission_evacuation_authority_snapshot()
+	if not bool(authority.get("accepted", false)):
+		return {
+			"accepted": false,
+			"reason": String(authority.get("reason", "rejected")),
+			"mission_result": get_mission_result(),
+		}
+	_resolve_combat("aborted", "", "evacuation")
+	return {
+		"accepted": true,
+		"reason": "evacuation",
+		"mission_result": get_mission_result(),
+	}
+
+
 func configure_scenario_runtime_gates_from_file(path: String) -> bool:
 	if _mission_scenario_runtime_gates == null:
 		return false

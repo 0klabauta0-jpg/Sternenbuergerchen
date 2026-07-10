@@ -387,6 +387,8 @@ const POST_DROP_SECURITY_TILE_WORLD_STEP: float = 64.0
 const POST_DROP_SECURITY_MOVE_SPEED_FACTOR: float = 0.68
 const POST_DROP_COVER_SEARCH_RADIUS_FACTOR: float = 1.65
 const POST_DROP_COVER_MIN_SCORE: float = 32.0
+const MISSION_EVACUATION_LZ_RADIUS: float = 72.0
+const MISSION_EVACUATION_BUTTON_NAME: String = "MissionEvacuationButton"
 
 signal planning_state_changed(planning_state)
 
@@ -1487,6 +1489,81 @@ func get_fireteam_movement_state(fireteam_id: String) -> Dictionary:
 		push_warning("FireteamMovementController is missing get_fireteam_state(); movement state unavailable.")
 		return {}
 	return Dictionary(_fireteam_movement_controller.call("get_fireteam_state", fireteam_id)).duplicate(true)
+
+
+func get_mission_evacuation_snapshot() -> Dictionary:
+	var snapshot: Dictionary = {
+		"schema": "sternenbuergerchen.mission_evacuation.v1",
+		"active": false,
+		"eligible": false,
+		"reason": "lz_missing",
+		"lz_position": _lz_position,
+		"lz_radius": MISSION_EVACUATION_LZ_RADIUS,
+		"selected_fireteam_ids": [],
+		"ground_fireteam_count": 0,
+		"outside_lz_fireteam_ids": [],
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_movement": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+	if not _has_lz_position:
+		return snapshot
+	var ground_fireteam_ids: PackedStringArray = []
+	var outside_lz_fireteam_ids: PackedStringArray = []
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
+			continue
+		var anchor := _get_selection_anchor_for_fireteam(fireteam_id)
+		if anchor == null:
+			continue
+		ground_fireteam_ids.append(fireteam_id)
+		if anchor.global_position.distance_to(_lz_position) > MISSION_EVACUATION_LZ_RADIUS:
+			outside_lz_fireteam_ids.append(fireteam_id)
+	snapshot["selected_fireteam_ids"] = Array(ground_fireteam_ids)
+	snapshot["ground_fireteam_count"] = ground_fireteam_ids.size()
+	snapshot["outside_lz_fireteam_ids"] = Array(outside_lz_fireteam_ids)
+	if ground_fireteam_ids.is_empty():
+		snapshot["reason"] = "no_ground_fireteam"
+		return snapshot
+	if not outside_lz_fireteam_ids.is_empty():
+		snapshot["reason"] = "fireteam_outside_lz"
+		return snapshot
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_mission_evacuation_authority_snapshot"):
+		snapshot["reason"] = "combat_authority_unavailable"
+		return snapshot
+	var authority: Dictionary = Dictionary(combat_driver.call("get_mission_evacuation_authority_snapshot")).duplicate(true)
+	snapshot["authority"] = authority
+	if not bool(authority.get("accepted", false)):
+		snapshot["reason"] = String(authority.get("reason", "not_authority"))
+		return snapshot
+	snapshot["active"] = true
+	snapshot["eligible"] = true
+	snapshot["reason"] = "ready"
+	return snapshot
+
+
+func request_selected_fireteam_evacuation() -> Dictionary:
+	var evacuation: Dictionary = get_mission_evacuation_snapshot()
+	if not bool(evacuation.get("eligible", false)):
+		var blocked_reason: String = String(evacuation.get("reason", "blocked"))
+		_last_command_text = "EVAC BLOCKED: %s" % blocked_reason.to_upper()
+		_update_ui()
+		return {"accepted": false, "reason": blocked_reason, "mission_result": {}}
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("request_mission_evacuation"):
+		_last_command_text = "EVAC BLOCKED: COMBAT AUTHORITY"
+		_update_ui()
+		return {"accepted": false, "reason": "combat_authority_unavailable", "mission_result": {}}
+	var result: Dictionary = Dictionary(combat_driver.call("request_mission_evacuation")).duplicate(true)
+	_last_command_text = "EVACUATION CONFIRMED" if bool(result.get("accepted", false)) else "EVAC BLOCKED: %s" % String(result.get("reason", "rejected")).to_upper()
+	_update_ui()
+	return result
 
 
 func get_fireteam_security_state(fireteam_id: String) -> Dictionary:
@@ -2826,6 +2903,7 @@ func _refresh_runtime_mission_hud_surfaces() -> void:
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_control_craft_summary()
+	_refresh_mission_evacuation_button()
 	_refresh_dynamic_button_styles()
 	_apply_drop_light_hud_button_labels()
 	_apply_command_hierarchy_metadata()
@@ -10630,6 +10708,53 @@ func _refresh_mission_control_craft_summary() -> void:
 	var plan_label := panel.get_node_or_null("Margin/Row/Info/PlanLabel") as Label
 	if plan_label != null:
 		plan_label.text = "%s | %s" % [_get_approach_angle_name(), "LZ OK" if _has_lz_position else "LZ offen"]
+
+
+func _ensure_mission_evacuation_button() -> Button:
+	var action_row := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow") as HBoxContainer
+	if action_row == null:
+		return null
+	var button := action_row.get_node_or_null(MISSION_EVACUATION_BUTTON_NAME) as Button
+	if button == null:
+		button = Button.new()
+		button.name = MISSION_EVACUATION_BUTTON_NAME
+		button.text = "EVAC"
+		button.custom_minimum_size = Vector2(42.0, 42.0)
+		button.tooltip_text = "Evacuate selected Ground-Fireteam from LZ."
+		button.set_meta("mission_evacuation_action", true)
+		action_row.add_child(button)
+		var drop_button := action_row.get_node_or_null("CallDropshipButton") as Button
+		if drop_button != null:
+			action_row.move_child(button, drop_button.get_index() + 1)
+		if not button.pressed.is_connected(_on_mission_evacuation_pressed):
+			button.pressed.connect(_on_mission_evacuation_pressed)
+	return button
+
+
+func _refresh_mission_evacuation_button() -> void:
+	var button := _ensure_mission_evacuation_button()
+	if button == null:
+		return
+	var snapshot: Dictionary = get_mission_evacuation_snapshot()
+	button.visible = int(snapshot.get("ground_fireteam_count", 0)) > 0
+	button.disabled = not bool(snapshot.get("eligible", false))
+	var reason: String = String(snapshot.get("reason", ""))
+	match reason:
+		"ready":
+			button.tooltip_text = "End this host mission through the existing Debrief path."
+		"lz_missing":
+			button.tooltip_text = "Set an LZ before evacuation."
+		"fireteam_outside_lz":
+			button.tooltip_text = "Regroup selected Ground-Fireteam at the LZ before evacuation."
+		"not_authority":
+			button.tooltip_text = "Only host authority can evacuate the shared mission."
+		_:
+			button.tooltip_text = "Evacuation unavailable: %s." % reason.replace("_", " ")
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, bool(snapshot.get("eligible", false)))
+
+
+func _on_mission_evacuation_pressed() -> void:
+	request_selected_fireteam_evacuation()
 
 
 func _on_mission_dropship_card_gui_input(event: InputEvent, craft_id: String, card_panel: Control = null) -> void:

@@ -103,6 +103,15 @@
 - Lokale Pruefung: TASK_1068 16/16, TASK_1063 14/14, TASK_1059 10/10, TASK_1060 14/14, TASK_726 30/30, TASK_813 43/43 und `git diff --check` gruen. TASK_1059 und TASK_813 melden beim Headless-Exit weiter eine ObjectDB-Leak-Warnung; alle Assertions und Exit-Codes bleiben gruen.
 - Naechster Schritt: Einen kleinen Station-Route-Entscheidungs-Slice bauen, der nach dem ersten Kontakt einen nachvollziehbaren Erfolg- oder Abbruchpfad bis zum Debriefing zeigt, statt weitere technische UI-Politur vorzuziehen.
 
+### TASK_1069 - Station Route LZ Evacuation Abort Outcome
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1069_station_route_evac_abort_outcome.md`, `docs/dev/mission_evacuation_abort_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, TASK_1068, TASK_586, TASK_813
+- Stand: TASK_1069 ist 28/28 gruen. Mission Control zeigt nach Deboarding einen kleinen EVAC-Button. Ohne LZ oder ausserhalb des LZ-Radius bleibt er mit konkretem Grund blockiert. Ein lokaler Host kann mit dem ausgewaehlten Ground-Fireteam im LZ die laufende Mission als `result = aborted`, `mission_outcome = aborted`, `win_condition_type = evacuation` beenden. Der vorhandene `combat_resolved`-Signalweg fuehrt mit demselben Resultat in Debrief.
+- Ursache/Fix: Der bisherige Dropship-RTB schickte nur das leere Craft zurueck; `withdraw` war ein Move-Alias. Der neue Controller-Snapshot berechnet Eligibility aus bestehender LZ-, Selection- und Runtime-Wahrheit, waehrend der Combat-Driver allein das Missionsresultat setzt. Der Button speichert keine zweite Wahrheit.
+- Risiken/offen: TASK_1069 ist ein Host-kontrollierter Missionsabbruch fuer die aktuelle Singleplayer-/Host-Route. Individuelle PvP-Team-Extraction und Client-zu-Host-Request-Transport brauchen einen eigenen Server-Command-Task. Eine Evac-Cinematic ist bewusst nicht Teil dieses Slice.
+- Lokale Pruefung: TASK_1069 28/28, TASK_1068 16/16, TASK_1063 14/14, TASK_813 43/43, TASK_586 37/37 und `git diff --check` gruen. TASK_813 meldet beim Headless-Exit weiter eine ObjectDB-Leak-Warnung bei gruenem Exit.
+- Naechster Schritt: Den anderen echten Ausgang schneiden: ein sichtbarer Vorstoss vom Erstkontakt zum AA-Gate mit NPC-Druck, klarer AA-Abschlussrueckmeldung und anschliessendem Door-Route-Cue.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.
