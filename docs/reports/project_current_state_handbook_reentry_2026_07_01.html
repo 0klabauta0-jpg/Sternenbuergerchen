@@ -72,12 +72,12 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1078: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance und exportierbare Notizen fuer den sichtbaren Playtest.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1079: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance und Feuerentscheid sowie exportierbare Notizen fuer den sichtbaren Playtest.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1078</span>
-      <span class="pill warn">Aktueller Griff: Station-Route Advance-Kontakt</span>
+      <span class="pill good">Letzter Abschluss: TASK_1079</span>
+      <span class="pill warn">Aktueller Griff: Station-Route Feuerentscheid</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
@@ -188,7 +188,7 @@
           <li><strong>Performance-Gefuehl:</strong> Die Systeme sind bewusst read-only und snapshot-basiert, aber der Fensterlauf muss sich schnell anfuehlen.</li>
           <li><strong>Large-Map-Badges:</strong> Der 192x192-Smoke behaelt nach Missionssieg Chunk-Streaming, Renderbudget und sichtbare Tactical-Badges. Der Feuerkampf-Declutter endet dabei bewusst mit dem autoritativen Missionsresultat.</li>
           <li><strong>Release-Firefight-Kette:</strong> TASK_834 bis TASK_839 folgen wieder dem sichtbaren Contract: <code>CONTACT FIRE</code> zuerst, die kompakte <code>NEXT ... | WHY ...</code>-Zeile direkt darunter. Der Event-Log kann dafuer auch den bestehenden, read-only Visibility-Presenter verwenden.</li>
-          <li><strong>Station-Route Erstkontakt:</strong> Die Bravo-Guard-Gruppe startet am benannten Approach-Posten und patrouilliert aus den Szenariodaten. Nach Deboard bleibt Raum zum Planen; erst der bestaetigte Advance erzeugt den ersten Druck. Die Luftabwehr bleibt separat am AA-Spawn.</li>
+          <li><strong>Station-Route Erstkontakt:</strong> Die Bravo-Guard-Gruppe startet am benannten Approach-Posten und patrouilliert aus den Szenariodaten. Nach Deboard bleibt Raum zum Planen; erst der bestaetigte Advance erzeugt den ersten Druck. Der reale Kontakt liefert Fire/Wait/No-Fire samt Grund und Deckungs-/Range-/LOS-Kontext. Die Luftabwehr bleibt separat am AA-Spawn.</li>
           </ul>
         </article>
       </div>
@@ -198,12 +198,12 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_1078 macht die erste Station-Route-Entscheidung zeitlich sauber: Nach Homebase, Drop und Deboard steht eine Bravo-Guard-Gruppe auf der Approach-Route, aber Alpha kann zuerst planen. Der Kontakt entsteht erst nach dem bestaetigten Advance aus Spawn-/Patrol-Daten, nicht aus einem Verifier-Teleport.</p>
+          <p>TASK_1079 beweist den ersten echten Feuerentscheid der Station Route: Nach Homebase, Drop, Deboard und bestaetigtem Advance erzeugt die Scenario-Guard-Gruppe Contact sowie Fire/Wait/No-Fire mitsamt Grund und Deckungs-/Range-/LOS-Kontext. Kein Verifier teleportiert Gegner oder erzwingt Treffer.</p>
           <p>Objective, Cargo und ROE bleiben als strukturierte, read-only ACT-Quelle erhalten. Ghost, Pfad, Risiko und Evac sind weiter nur Entscheidungshilfe beziehungsweise bestehende Commands; der F6-Check richtet sich an die sichtbare Anzeige und nicht an einen kurzlebigen Visual-Timer.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
-          <div class="callout warning">Naechster Schritt: ersten Feuerwechsel nach dem Advance balancen. Guard-Deckung, Feuerdisziplin, Friendly-Fire-Hinweis sowie Advance und Evac muessen als eine klare Entscheidung lesbar bleiben.</div>
-          <input readonly value="TASK_1078 - Station Route Approach Contact Timing (11/11 gruen)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="Ersten Feuerwechsel nach dem Advance auf Deckung, Feuerdisziplin, Friendly Fire und Evac balancen" data-export-key="reentry_handbook.recommended_next_task">
+          <div class="callout warning">Naechster Schritt: den bestehenden Feuerentscheid als klare Commander-Wahl balancen. Guard-Deckung, Feuerdisziplin, Friendly-Fire-Hinweis sowie Advance, Hold und Evac muessen zusammen lesbar bleiben.</div>
+          <input readonly value="TASK_1079 - Station Route Real First Exchange (12/12 gruen)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="Ersten Feuerentscheid auf Guard-Deckung, Feuerdisziplin, Friendly Fire, Advance, Hold und Evac balancen" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -839,10 +839,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "Ersten Feuerwechsel nach dem Advance auf Deckung, Feuerdisziplin, Friendly Fire und Evac balancen"
+            recommended_next_task: "Ersten Feuerentscheid auf Guard-Deckung, Feuerdisziplin, Friendly Fire, Advance, Hold und Evac balancen"
           },
           metadata: {
-            generated_for_task: "TASK_1078",
+            generated_for_task: "TASK_1079",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

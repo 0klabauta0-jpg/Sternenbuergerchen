@@ -148,6 +148,15 @@
 - Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
 - Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
 
+### TASK_1079 - Station Route Real First Exchange
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1079_station_route_real_first_exchange.md`, `docs/dev/contact_report_contract.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, TASK_1078, TASK_813, TASK_843
+- Stand: Nach dem echten Station-Route-Approach-Contact liefert der vorhandene Engagement-Resolver ohne Test-Teleport einen sichtbaren Fire-/Wait-/No-Fire-Entscheid. Contact, Grund und Deckungs-/Range-/LOS-Kontext sind im read-only First-Engagement-Snapshot belegt; LZ Evac bleibt im selben Lauf erreichbar.
+- Ursache/Fix: Die alten First-Engagement-Smokes positionierten einen Gegner fuer Reproduzierbarkeit direkt neben das Fireteam. TASK_1079 fuegt keine Combat-Regel hinzu, sondern beweist, dass der reale Scenario-Guard-Pfad die bestehende Combat- und HUD-Diagnose bereits korrekt erreicht.
+- Risiken/offen: Der Test beweist eine begruendete Entscheidung, nicht einen garantiert dramatischen Trefferwechsel. Die sichtbare Balance von Guard-Deckung, Feuerdisziplin und Friendly-Fire-Hinweis bleibt der naechste Spieler-Feel-Schnitt.
+- Lokale Pruefung: TASK_1079 12/12; `git diff --check` folgt mit den Dokumentations- und Route-Regressionen.
+- Naechster Schritt: Ersten sichtbaren Feuerwechsel als Commander-Entscheidung balancen: kurze Auswahl zwischen Advance, Hold Fire und Evac mit erkennbarer Friendly-Fire-/Cover-Begruendung.
+
 ### TASK_1078 - Station Route Approach Contact Timing
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1078_station_route_approach_contact_timing.md`, `docs/dev/contact_report_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, TASK_1068, TASK_1069, TASK_1070, TASK_1071, TASK_1077

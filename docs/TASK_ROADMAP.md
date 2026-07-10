@@ -105,6 +105,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
 - Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
 
+## TASK_1079 - Station Route Real First Exchange (implementiert im Arbeitsstand)
+- Grundlage: Die vorhandenen First-Engagement-Smokes erzeugten ihren Gegnerkontakt teilweise per Test-Positionierung. Nach TASK_1078 musste geklaert werden, ob der echte Scenario-Guard nach dem Advance denselben Entscheidungsweg erreicht.
+- Ergebnis: TASK_1079 ist 12/12 gruen. Der reale Guard-Contact liefert Fire-/Wait-/No-Fire-Status, Grund und Deckungs-/Range-/LOS-Kontext ohne Teleport, Status-Manipulation oder erzwungenen Treffer. Evac bleibt im selben Lauf erreichbar.
+- Ursache/Fix: Kein neuer Produktionsfehler. Die bestehende Contact-, Combat- und Feedback-Kette funktioniert auf der echten Route; der neue Trace ersetzt die unsichere Annahme durch einen wiederholbaren End-to-End-Nachweis.
+- Naechster Schritt: Den bestehenden Fire-/Wait-Entscheid als sichtbare Commander-Wahl balancen: Guard-Deckung, Feuerdisziplin, Friendly-Fire-Hinweis sowie Advance, Hold und Evac.
+
 ## TASK_1078 - Station Route Approach Contact Timing (implementiert im Arbeitsstand)
 - Grundlage: Der neue TASK-1077-Guard erzeugte zwar einen echten Scenario-Contact, stand nach Deboard aber bereits in Kontaktreichweite. Damit fehlte die kurze, lesbare Planungsphase vor dem ersten `GO`.
 - Ergebnis: Der normale Drop beginnt kontaktfrei. Ein vorhandener Move bleibt als Ghost/Pfad/Risiko Preview; erst der bestaetigte Move in die Approach-Zone erzeugt einen Bravo-Contact. Die LZ-Evac-Alternative bleibt erreichbar. TASK_1078 ist 11/11 und TASK_1077 10/10 gruen.
