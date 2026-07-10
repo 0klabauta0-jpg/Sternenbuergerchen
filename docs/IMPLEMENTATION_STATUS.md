@@ -10,6 +10,11 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1052 - First Move and Contact Flow Trace
+- Status: implementiert im Arbeitsstand
+- Stand: Der Trace erreicht First Move/GO (rund 14,5 s) und First Contact (rund 14,5 s) ohne Stage-Timeout. Contact bleibt `review`: kein gueltiger LOS-Kontakt in der Testposition, daher keine Contact-Felder/Overlays.
+- Naechster Schritt: TASK_1053 - Reproducible LOS-Valid First Contact Fixture.
+
 ### TASK_1051 - Planning State Signal Fanout Guard
 - Status: implementiert im Arbeitsstand
 - Stand: Aktive Missionen erhalten Planning-State sofort, bauen aber nicht mehr versteckt Homebase, FOB und Karte neu auf. LZ-Setzen fiel von rund 13,8 Sekunden auf rund 1,0 Sekunde; Planning-Emit liegt bei rund 453 ms. LZ-/Drop-/Deboard schliesst jetzt nach rund 17,5 Sekunden ab.

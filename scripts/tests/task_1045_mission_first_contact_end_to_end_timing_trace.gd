@@ -193,6 +193,12 @@ func _run_trace() -> void:
 		_finish_trace(scene)
 		return
 	var contact_snapshot: Dictionary = Dictionary(controller.call("get_mission_first_contact_readability_snapshot"))
+	print("TRACE first_contact_snapshot gate=%s status=%s summary=%s failed_checks=%s" % [
+		String(contact_snapshot.get("gate", "")),
+		String(contact_snapshot.get("status", "")),
+		String(contact_snapshot.get("summary", contact_snapshot.get("summary_line", ""))),
+		str(Array(contact_snapshot.get("failed_checks", []))),
+	])
 	if not bool(contact_snapshot.get("ui_sets_gameplay_truth", true)) and String(contact_snapshot.get("gate", "")) == "pass":
 		_finish_stage("complete")
 		_trace_status = "complete"
@@ -373,7 +379,9 @@ func _position_first_enemy_near_fireteam(controller: Node, fireteam_id: String) 
 
 func _update_contact_tracking(combat_driver: Node) -> void:
 	combat_driver.call("_update_contact_tracking")
-	combat_driver.call("_advance_detection_timers")
+	# The runtime needs up to 15 authoritative ticks before a new sighting becomes a confirmed report.
+	for _tick_index in range(16):
+		combat_driver.call("_advance_detection_timers")
 	combat_driver.call("_update_contact_tracking")
 
 

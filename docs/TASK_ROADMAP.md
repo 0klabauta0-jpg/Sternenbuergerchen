@@ -13,9 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1052 - First Move and Contact Flow Trace Completion (geplant)
+## TASK_1053 - Reproducible LOS-Valid First Contact Fixture (geplant)
+- Grundlage: TASK_1052 erreicht First Contact, erzeugt aber noch keinen validen LOS-Kontakt.
+- Ziel: Eine reproduzierbare Sichtlinie fuer den First-Contact-Trace schaffen und Report, Overlay und Threat-/Cover-Kontext gegen echten Kontakt pruefen.
+
+## TASK_1052 - First Move and Contact Flow Trace (implementiert im Arbeitsstand)
 - Grundlage: TASK_1051 bringt den Flow durch LZ/Drop/Deboard.
-- Ziel: Ersten Move, GO und First Contact bis zur Abschluss- oder Review-Entscheidung als naechsten Spielerflowblock messen.
+- Ergebnis: Move/GO und Contact-Stages liegen unter Budget; Contact ist wegen fehlender LOS-Gueltigkeit noch `review`.
 
 ## TASK_1051 - Planning State Signal Fanout Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1050 misst `_emit_planning_state_changed()` mit rund 13,2 Sekunden beim LZ-Setzen.
