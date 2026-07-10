@@ -13,6 +13,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1085 - Stable First Exchange Visible State (implementiert im Arbeitsstand)
+- Grundlage: Der frische 35-Sekunden-Release-Capture zeigte noch `NO FIRE NO_LOS`, obwohl der unmittelbare TASK-832-Snapshot gruen war. Ein 90-Sekunden-Capture lag bereits in einem spaeteren HUD-Zustand.
+- Ergebnis: Der Capture wartet jetzt auf den vorhandenen `deeplink_final / applied`-Trace. Der aktuelle Lauf wurde nach 51.457 ms bereit. #17/#18 verwenden `CONTACT FIRE | FT1 -> PATROL` ohne technische Unit-IDs, #19 behaelt die echte FireEvent-Evidence. Ein redundanter kompletter Status-Neuaufbau entfiel; der isolierte Sync sank von rund 22,6 ms auf etwa 0,5 bis 0,6 ms.
+- Naechster Schritt: TASK_1086 - Release Mission Ready-Time Performance Pass. Die nun messbaren 51,5 Sekunden bis Ready muessen in reale Phasen zerlegt und am dominanten Abschnitt reduziert werden.
+
 ## TASK_1084 - Release Deep-Link Runtime Authority Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_284 meldete 63/64, weil historische First-Exchange-Release-Helfer Runtime-Status direkt aus dem Meta-Layer setzten.
 - Ergebnis: TASK_1084 ist 12/12 und TASK_284 wieder 64/64 gruen. Meta delegiert nur Setup-Absicht; der Missionscontroller enqueued einen gueltigen Hold-Command ueber `SimulationRoot`, und der erste Feuerentscheid wartet auf den autoritativen Tick. TASK_832 37/37 und TASK_868 41/41 belegen den unveraendert funktionierenden Release-Direkteinstieg.

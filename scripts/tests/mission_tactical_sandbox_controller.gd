@@ -2981,15 +2981,37 @@ func _update_ui() -> void:
 
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
+		if profile_enabled:
+			scope_started_usec = Time.get_ticks_usec()
 		_set_mission_label_text_delta(strategic_status_label, _build_strategic_status_text())
+		if profile_enabled:
+			scopes_usec["secondary_strategic_text_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
 		strategic_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
+		if profile_enabled:
+			scopes_usec["secondary_tooltip_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
 		_apply_frontier_probe_one_screen_visual_polish_label_contract(strategic_status_label)
+		if profile_enabled:
+			scopes_usec["secondary_frontier_contract_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
 		_apply_order_preview_threat_overlay_label_contract(strategic_status_label)
+		if profile_enabled:
+			scopes_usec["secondary_preview_contract_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
 		_apply_decision_overlay_f6_visual_polish_label_contract(strategic_status_label)
+		if profile_enabled:
+			scopes_usec["secondary_decision_contract_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
 		_apply_release_firefight_bottom_dock_density_label_contract(strategic_status_label)
-	_apply_release_fire_exchange_real_window_primary_hud_runtime_text()
+		if profile_enabled:
+			scopes_usec["secondary_density_contract_usec"] = Time.get_ticks_usec() - scope_started_usec
+			scope_started_usec = Time.get_ticks_usec()
 	_apply_release_first_exchange_real_window_hud_source_sync_to_labels()
+	if profile_enabled:
+		scopes_usec["secondary_release_sync_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 
 	var phase_status_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseStatusLabel") as Label
 	if phase_status_label != null:
@@ -2998,6 +3020,9 @@ func _update_ui() -> void:
 	var phase_list_label := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseListLabel") as Label
 	if phase_list_label != null:
 		_set_mission_label_text_delta(phase_list_label, _build_phase_list_text())
+	if profile_enabled:
+		scopes_usec["secondary_phase_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 
 	var set_lz_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button
 	if set_lz_button != null:
@@ -3028,7 +3053,14 @@ func _update_ui() -> void:
 
 	_apply_compact_mission_control_layout()
 	if profile_enabled:
+		scopes_usec["secondary_buttons_layout_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scopes_usec["secondary_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		var secondary_total_usec: int = 0
+		for scope_name_variant in scopes_usec.keys():
+			var scope_name: String = String(scope_name_variant)
+			if scope_name.begins_with("secondary_") and scope_name != "secondary_labels_usec":
+				secondary_total_usec += int(scopes_usec.get(scope_name, 0))
+		scopes_usec["secondary_labels_usec"] = secondary_total_usec
 		_record_mission_ui_refresh_timing_snapshot(refresh_started_usec, scopes_usec)
 
 
@@ -8626,6 +8658,8 @@ func _build_release_first_exchange_real_window_hud_source_sync_source(
 		var compact_line: String = String(persistence.get("compact_line", "")).strip_edges()
 		if not compact_line.is_empty():
 			primary_line = compact_line if compact_line.to_upper().begins_with("CONTACT FIRE") else "CONTACT FIRE | %s" % compact_line
+	if source_active:
+		primary_line = _build_release_first_exchange_player_fire_line(persistence, primary_line)
 	var selected_text: String = String(raw_selected_text).strip_edges()
 	if selected_text.is_empty():
 		selected_text = _get_label_text(FIRETEAM_STATUS_LABEL_PATH)
@@ -8819,7 +8853,7 @@ func _apply_release_first_exchange_real_window_hud_source_sync_to_labels() -> vo
 	var compact_line: String = String(status_source.get("compact_line", "")).strip_edges()
 	if compact_line.is_empty():
 		return
-	var primary_line: String = compact_line if compact_line.to_upper().begins_with("CONTACT FIRE") else "CONTACT FIRE | %s" % compact_line
+	var primary_line: String = _build_release_first_exchange_player_fire_line(status_source, compact_line)
 	var combat_hud_density: Dictionary = {
 		"active": true,
 		"compact_line": compact_line,
@@ -8848,18 +8882,55 @@ func _apply_release_first_exchange_real_window_hud_source_sync_to_labels() -> vo
 	}, sync_snapshot)
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
-		fireteam_status_label.text = String(polished_feedback.get("selected_fireteam_status_label_text", sync_snapshot.get("selected_fireteam_status_text", fireteam_status_label.text))).strip_edges()
+		_set_mission_label_text_delta(fireteam_status_label, String(polished_feedback.get("selected_fireteam_status_label_text", sync_snapshot.get("selected_fireteam_status_text", fireteam_status_label.text))).strip_edges())
 		fireteam_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_style_id", RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID)
 		fireteam_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_task", "TASK_883")
 		fireteam_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_style_id", RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID)
 		fireteam_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_task", "TASK_889")
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
-		strategic_status_label.text = String(polished_feedback.get("mission_control_status_text", sync_snapshot.get("mission_control_status_text", strategic_status_label.text))).strip_edges()
+		_set_mission_label_text_delta(strategic_status_label, String(polished_feedback.get("mission_control_status_text", sync_snapshot.get("mission_control_status_text", strategic_status_label.text))).strip_edges())
 		strategic_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_style_id", RELEASE_FIRST_EXCHANGE_REAL_WINDOW_HUD_SOURCE_SYNC_STYLE_ID)
 		strategic_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_task", "TASK_883")
 		strategic_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_style_id", RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID)
 		strategic_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_task", "TASK_889")
+
+
+func _build_release_first_exchange_player_fire_line(status_source: Dictionary, fallback_compact_line: String) -> String:
+	var fire_event: Dictionary = Dictionary(status_source.get("fire_event", {}))
+	var fireteam_id: String = String(status_source.get("fireteam_id", "")).strip_edges().to_upper()
+	if fireteam_id.is_empty() and not _selected_fireteam_ids.is_empty():
+		fireteam_id = String(_selected_fireteam_ids[0]).strip_edges().to_upper()
+	if fireteam_id.is_empty():
+		fireteam_id = "TEAM"
+	var target_id: String = String(fire_event.get("target_unit_id", "")).strip_edges().to_lower()
+	var target_label: String = "CONTACT"
+	if target_id.contains("patrol"):
+		target_label = "PATROL"
+	elif target_id.contains("defense"):
+		target_label = "DEFENSE"
+	elif not target_id.is_empty():
+		target_label = _shorten_unit_id_for_card(target_id).to_upper()
+	var weapon_label: String = String(fire_event.get("weapon_id", "")).strip_edges().to_upper()
+	var outcome: String = String(fire_event.get("combat_outcome", "")).strip_edges().to_upper()
+	match outcome:
+		"HIT":
+			outcome = "TREFFER"
+		"MISS":
+			outcome = "DANEBEN"
+		"FIRED":
+			outcome = "FEUER"
+	var detail_parts: PackedStringArray = PackedStringArray()
+	if not weapon_label.is_empty():
+		detail_parts.append(weapon_label)
+	if not outcome.is_empty():
+		detail_parts.append(outcome)
+	var line: String = "CONTACT FIRE | %s -> %s" % [fireteam_id, target_label]
+	if not detail_parts.is_empty():
+		line += " | %s" % " ".join(detail_parts)
+	if fire_event.is_empty() and not fallback_compact_line.strip_edges().is_empty():
+		return _compact_release_first_exchange_contact_fire_line(fallback_compact_line)
+	return line
 
 
 func get_release_first_exchange_real_window_hud_source_sync_snapshot() -> Dictionary:
@@ -26584,7 +26655,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"npc_thought_bubble_count": get_npc_thought_bubble_snapshot().size(),
 		"npc_thought_bubbles": get_npc_thought_bubble_snapshot(),
 	}
-	return command_feedback_snapshot
+	return _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(command_feedback_snapshot)
 
 
 func get_active_ad_hoc_orders_snapshot() -> Array:
