@@ -3,6 +3,8 @@ extends Node
 
 signal tick_processed(tick: int)
 signal damage_effect_resolved(result: Dictionary)
+signal fire_rule_committed(state: Dictionary)
+signal multiplayer_snapshot_applied(snapshot: Dictionary)
 
 const MOVE_SPEED_PER_SECOND: float = 80.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
@@ -81,6 +83,7 @@ var _last_network_command_rejection: Dictionary = {}
 var _network_command_accept_count: int = 0
 var _network_command_reject_count: int = 0
 var _multiplayer_snapshot_context: Dictionary = {}
+var _authoritative_fire_rules_by_fireteam: Dictionary = {}
 var _air_asset_status_by_id: Dictionary = {}
 var _last_applied_snapshot_tick: int = -1
 var _snapshot_apply_count: int = 0
@@ -509,6 +512,22 @@ func get_last_server_state() -> Dictionary:
 	return _last_server_state.duplicate(true)
 
 
+func get_authoritative_fire_rule_state(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() or not _authoritative_fire_rules_by_fireteam.has(normalized_fireteam_id):
+		return {}
+	return Dictionary(_authoritative_fire_rules_by_fireteam[normalized_fireteam_id]).duplicate(true)
+
+
+func get_authoritative_fire_rule_snapshot() -> Array:
+	var fireteam_ids: Array = _authoritative_fire_rules_by_fireteam.keys()
+	fireteam_ids.sort()
+	var result: Array = []
+	for fireteam_id_variant in fireteam_ids:
+		result.append(Dictionary(_authoritative_fire_rules_by_fireteam[fireteam_id_variant]).duplicate(true))
+	return result
+
+
 func set_multiplayer_snapshot_context(context: Dictionary) -> void:
 	var normalized_context: Dictionary = Dictionary(_multiplayer_snapshot_contract.call("normalize_display_context", context))
 	var next_context: Dictionary = _multiplayer_snapshot_context.duplicate(true)
@@ -853,7 +872,7 @@ func _build_tick_state() -> Dictionary:
 				"commander_intents": snapshot_context.get("commander_intents", []),
 				"fireteam_plan_status": snapshot_context.get("fireteam_plan_status", []),
 				"communication_events": snapshot_context.get("communication_events", []),
-				"tactical_rules": snapshot_context.get("tactical_rules", []),
+				"tactical_rules": _build_authoritative_tactical_rules_snapshot(snapshot_context.get("tactical_rules", [])),
 				"breakout_states": snapshot_context.get("breakout_states", []),
 				"air_asset_status": _build_air_asset_status_snapshots(snapshot_context.get("air_asset_status", [])),
 				"mission_result": snapshot_context.get("mission_result", {}),
@@ -1121,6 +1140,7 @@ func _apply_remote_state(state_dict: Dictionary) -> Dictionary:
 		_apply_remote_snapshot_fallback(unit, unit_snapshot)
 
 	_snapshot_missing_unit_count += missing_unit_count
+	multiplayer_snapshot_applied.emit(snapshot.duplicate(true))
 	return {
 		"accepted": true,
 		"tick": _last_applied_snapshot_tick,
@@ -1267,9 +1287,51 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 			_apply_move_command(cmd, delta)
 		"hold_position":
 			_apply_unit_command_status(cmd)
+		"set_fire_rule":
+			_apply_fire_rule_command(cmd)
 		_:
 			# TODO: Authoritative gameplay state commits belong here once systems exist.
 			pass
+
+
+func _apply_fire_rule_command(command: Dictionary) -> void:
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var fire_rule: String = String(command.get("fire_rule", "")).strip_edges().to_lower()
+	if fireteam_id.is_empty() or not fire_rule in ["hold", "return", "free", "suppress"]:
+		return
+	var previous: Dictionary = Dictionary(_authoritative_fire_rules_by_fireteam.get(fireteam_id, {}))
+	var revision: int = int(previous.get("revision", 0)) + 1
+	_authoritative_fire_rules_by_fireteam[fireteam_id] = {
+		"fireteam_id": fireteam_id,
+		"team_id": String(command.get("team_id", previous.get("team_id", ""))).strip_edges(),
+		"fire_rule": fire_rule,
+		"revision": revision,
+		"command_id": String(command.get("command_id", "roe:%s:%d" % [fireteam_id, revision])).strip_edges(),
+		"runtime_authority": "SimulationRoot",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	fire_rule_committed.emit(get_authoritative_fire_rule_state(fireteam_id))
+
+
+func _build_authoritative_tactical_rules_snapshot(context_rules: Variant) -> Array:
+	var by_fireteam: Dictionary = {}
+	for entry_variant in Array(context_rules):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		if not fireteam_id.is_empty():
+			by_fireteam[fireteam_id] = entry
+	for entry_variant in get_authoritative_fire_rule_snapshot():
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		by_fireteam[String(entry.get("fireteam_id", ""))] = entry
+	var fireteam_ids: Array = by_fireteam.keys()
+	fireteam_ids.sort()
+	var result: Array = []
+	for fireteam_id_variant in fireteam_ids:
+		result.append(Dictionary(by_fireteam[fireteam_id_variant]).duplicate(true))
+	return result
 
 
 func _apply_effect(effect: Dictionary, delta: float) -> void:

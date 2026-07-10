@@ -581,6 +581,7 @@ var _order_visualizer_pending: bool = false
 var _phase_execution_by_fireteam: Dictionary = {}
 var _active_behavior_profiles_by_fireteam: Dictionary = {}
 var _fire_rule_by_fireteam: Dictionary = {}
+var _fire_rule_authority_revision_by_fireteam: Dictionary = {}
 var _ad_hoc_order_controller = null
 var _area_order_resolver = null
 var _multi_fireteam_plan_resolver = null
@@ -646,6 +647,7 @@ func _ready() -> void:
 	_ensure_coordination_manager()
 	_ensure_fireteam_movement_controller()
 	_ensure_fireteam_security_controller()
+	_connect_fire_rule_authority_signals()
 	_get_comic_bubble_runtime_gate()
 	_ensure_order_visualizer()
 	_ensure_contact_map_overlay()
@@ -1903,14 +1905,21 @@ func set_fireteams_fire_rule(fireteam_ids: PackedStringArray, next_fire_rule: St
 	var normalized_rule: String = _normalize_fire_rule(next_fire_rule)
 	if normalized_rule.is_empty():
 		return false
+	if _should_route_fire_rule_through_network_authority():
+		return _request_network_authoritative_fire_rules(fireteam_ids, normalized_rule)
+	return _apply_fireteams_fire_rule_locally(fireteam_ids, normalized_rule)
+
+
+func _apply_fireteams_fire_rule_locally(fireteam_ids: PackedStringArray, normalized_rule: String, apply_runtime: bool = true) -> bool:
 	var applied_count: int = 0
 	for fireteam_id_variant in fireteam_ids:
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty():
 			continue
 		_fire_rule_by_fireteam[fireteam_id] = normalized_rule
-		_refresh_active_behavior_profile_fire_rule(fireteam_id)
-		_apply_live_fire_rule_to_fireteam(fireteam_id)
+		if apply_runtime:
+			_refresh_active_behavior_profile_fire_rule(fireteam_id)
+			_apply_live_fire_rule_to_fireteam(fireteam_id)
 		applied_count += 1
 	if applied_count <= 0:
 		return false
@@ -1919,6 +1928,95 @@ func set_fireteams_fire_rule(fireteam_ids: PackedStringArray, next_fire_rule: St
 	_refresh_order_visuals()
 	_update_ui()
 	_emit_planning_state_changed()
+	return true
+
+
+func apply_authoritative_fire_rule_snapshot(tactical_rules: Variant, apply_runtime: bool = false) -> int:
+	var applied_count: int = 0
+	for entry_variant in Array(tactical_rules):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		var fireteam_id: String = String(entry.get("fireteam_id", "")).strip_edges().to_lower()
+		var fire_rule: String = _normalize_fire_rule(String(entry.get("fire_rule", "")))
+		var revision: int = maxi(int(entry.get("revision", 0)), 0)
+		if fireteam_id.is_empty() or fire_rule.is_empty() or revision <= int(_fire_rule_authority_revision_by_fireteam.get(fireteam_id, 0)):
+			continue
+		_fire_rule_authority_revision_by_fireteam[fireteam_id] = revision
+		if _apply_fireteams_fire_rule_locally(PackedStringArray([fireteam_id]), fire_rule, apply_runtime):
+			applied_count += 1
+	return applied_count
+
+
+func get_fire_rule_authority_sync_snapshot() -> Dictionary:
+	return {
+		"schema": "sternenbuergerchen.fire_rule_authority_sync.v1",
+		"revisions": _fire_rule_authority_revision_by_fireteam.duplicate(true),
+		"fire_rules": _fire_rule_by_fireteam.duplicate(true),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _connect_fire_rule_authority_signals() -> void:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return
+	var committed_callable := Callable(self, "_on_authoritative_fire_rule_committed")
+	if simulation_root.has_signal("fire_rule_committed") and not simulation_root.is_connected("fire_rule_committed", committed_callable):
+		simulation_root.connect("fire_rule_committed", committed_callable)
+	var snapshot_callable := Callable(self, "_on_multiplayer_authority_snapshot_applied")
+	if simulation_root.has_signal("multiplayer_snapshot_applied") and not simulation_root.is_connected("multiplayer_snapshot_applied", snapshot_callable):
+		simulation_root.connect("multiplayer_snapshot_applied", snapshot_callable)
+
+
+func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
+	apply_authoritative_fire_rule_snapshot([state], true)
+
+
+func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
+	apply_authoritative_fire_rule_snapshot(snapshot.get("tactical_rules", []))
+
+
+func _should_route_fire_rule_through_network_authority() -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or simulation_root.get("is_server_authoritative") != true:
+		return false
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	return peer != null and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED
+
+
+func _request_network_authoritative_fire_rules(fireteam_ids: PackedStringArray, fire_rule: String) -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	var peer_id: int = multiplayer.get_unique_id()
+	var team_id: String = String(simulation_root.call("get_peer_team", peer_id)).strip_edges() if simulation_root.has_method("get_peer_team") else ""
+	if team_id.is_empty():
+		team_id = "team_alpha"
+	var accepted_count: int = 0
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var command: Dictionary = {
+			"contract_category": "tactical_rule",
+			"command_type": "set_fire_rule",
+			"team_id": team_id,
+			"fireteam_id": fireteam_id,
+			"fire_rule": fire_rule,
+		}
+		if multiplayer.is_server():
+			var result: Dictionary = Dictionary(simulation_root.call("submit_network_command_for_peer", command, peer_id))
+			if bool(result.get("accepted", false)):
+				accepted_count += 1
+		else:
+			simulation_root.rpc_id(1, "request_command", command)
+			accepted_count += 1
+	if accepted_count <= 0:
+		return false
+	_last_command_text = "FIRE %s REQUEST (%d)" % [fire_rule.to_upper(), accepted_count]
+	_update_ui()
 	return true
 
 

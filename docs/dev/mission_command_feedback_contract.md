@@ -287,6 +287,11 @@ TASK_1081 fasst die wirksame Fire-Rule als read-only Commander-Konsequenz zusamm
 
 Die vorhandene einzeilige Mission-Control-Dichte zeigt `ROE <Token>` und exportiert `fire_rule_consequence_readability`, `fire_rule_consequence_line` und `fire_rule_consequence_state` im Command-Feedback. Snapshot-Lesen erzeugt keine Commands oder Events. Aktive Firefights duerfen weiterhin die spaeter eingefuehrte `CONTACT FIRE | ...`-Primaerzeile vor dem vollstaendigen ACT-Stack zeigen. Ein expliziter Command-Feedback-Override bleibt fuer Host/Client- und Verifier-Snapshots autoritativ und darf nicht mit Live-Szenentext ersetzt werden.
 
+## Multiplayer-ROE-Authority-And-Replication
+TASK_1082 fuehrt Fire-Rule-Aenderungen im aktiven Netzwerk als `contract_category = tactical_rule`, `command_type = set_fire_rule` ueber `SimulationRoot.request_command()` beziehungsweise `submit_network_command_for_peer()`. Der MultiplayerCommandContract validiert Team, Fireteam, erlaubte Regel und explizite Fireteam-Zuweisung auch fuer Commander-Peers; nur der Host darf diese Zuweisung umgehen.
+
+Erst die autoritative Command-Verarbeitung committed `fire_rule` und eine monotone `revision`. `SimulationRoot` publiziert diesen State im vorhandenen `tactical_rules`-Snapshot. Das Host-Signal darf aktive Behavior-/Movement-/UnitCommand-Daten aktualisieren. Ein Client-Snapshot darf dagegen nur eine neuere lokale Leserevision und die sichtbare Regel uebernehmen; er erzeugt keine Movement-, Combat-, Command- oder Effect-Wahrheit. Veraltete Snapshots duerfen die sichtbare ROE nicht zurueckrollen.
+
 ## Fire-Rule-Controls-Readability-Polish
 TASK_571 macht die TASK_570-Fire-Rules im Missions-HUD bedienbar. Die vier Command-Grid-Controls `HF`, `RF`, `FW` und `SUP` duerfen nur den bestehenden `MissionTacticalSandboxController.set_selected_fireteams_fire_rule()`-Pfad ausloesen. Sie duerfen keine Movement-, Combat-, Unit- oder Command-Queue-Wahrheit direkt schreiben.
 

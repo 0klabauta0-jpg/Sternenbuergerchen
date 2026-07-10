@@ -72,12 +72,12 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1081: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance und eine wirksame, unmittelbar lesbare Feuerdisziplin.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1082: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance und eine host-autorisierte, unmittelbar lesbare Feuerdisziplin.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1081</span>
-      <span class="pill warn">Aktueller Griff: Multiplayer-ROE absichern</span>
+      <span class="pill good">Letzter Abschluss: TASK_1082</span>
+      <span class="pill warn">Aktueller Griff: Zwei-Instanzen-ROE-Playtest</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
@@ -198,12 +198,13 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation und TASK_1081 die sichtbare Konsequenz. Die Mission-Control-Zeile zeigt jetzt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
-          <p>Der Token stammt aus Controller-Regel, aktiven Unit-Commands, Return-Fire-Fenster und Combat-Diagnostics. LOS, Range, Cover und Friendly Fire bleiben vorhandene Runtime-Lesedaten. Objective, Cargo, Ghost, Pfad, Risiko und Evac behalten ihre bisherigen Wahrheitsgrenzen.</p>
+          <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz und TASK_1082 den autoritativen Multiplayer-Weg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
+          <p>Im Netzwerk sendet der ROE-Button nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie im vorhandenen Tactical-Rules-Snapshot. Clients koennen weder fremde Fireteams noch Runtime-State direkt setzen und uebernehmen keine veraltete Revision.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
-          <div class="callout warning">Naechster Schritt: dieselbe ROE als echten Multiplayer-Command pruefen. Ein Peer darf nur sein Fireteam aendern; der Host committed und der Client muss Regel sowie Konsequenz konsistent anzeigen.</div>
-          <input readonly value="TASK_1081 - Station Route ROE Consequence Readability (33/33 gruen)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1082 - Multiplayer ROE Authority And Replication" data-export-key="reentry_handbook.recommended_next_task">
+          <div class="callout warning">Naechster Schritt: den Contract in zwei echten ENet-Fenstern per ROE-Button spielen. Eigene Fireteams muessen auf beiden Seiten dieselbe Revision und Konsequenz zeigen; ein fremdes Fireteam braucht klares Reject-Feedback.</div>
+          <p><strong>Offener Architekturpunkt:</strong> Der separate TASK_284-Audit steht bei 63/64. Historische Release-Deep-Link-Helfer fuer den reproduzierbaren First-Exchange-Test setzen Runtime-Status noch direkt. Das betrifft nicht den normalen Spieler-ROE-Pfad, wird aber als TASK_1084 ueber eine autoritative Test-Setup-Grenze bereinigt.</p>
+          <input readonly value="TASK_1082 - Multiplayer ROE Authority And Replication (21/21 gruen)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1083 - Two-Instance ROE Ownership Playtest" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -839,10 +840,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1082 - Multiplayer ROE Authority And Replication"
+            recommended_next_task: "TASK_1083 - Two-Instance ROE Ownership Playtest"
           },
           metadata: {
-            generated_for_task: "TASK_1081",
+            generated_for_task: "TASK_1082",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
