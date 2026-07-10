@@ -29,6 +29,7 @@ func _test_late_homebase_direct_payload_can_keep_lz_and_drop() -> void:
 	root.size = Vector2i(1920, 1080)
 	var scene: Node = await _build_two_dropship_meta_scene()
 	var homebase_screen := scene.get_node("HomebaseScreen") as Control
+	_assert(PackedStringArray(homebase_screen.call("get_selected_unit_ids")).size() == 4, "Eight-slot multi-dropship fixture stages both two-operator Fireteams before boarding")
 
 	_drop_fireteam_on_shipcard(homebase_screen, "ft1", "dropship_alpha")
 	await _finish_boarding(homebase_screen, "ft1")
@@ -54,7 +55,9 @@ func _test_late_homebase_direct_payload_can_keep_lz_and_drop() -> void:
 		return
 
 	var selected_unit_ids := PackedStringArray(mission_setup.get("selected_team_unit_ids"))
+	var selected_fireteam_ids := PackedStringArray(mission_setup.get("selected_team_fireteam_ids"))
 	_assert(selected_unit_ids.has("unit_alpha") and selected_unit_ids.has("unit_bravo") and selected_unit_ids.has("unit_charlie") and selected_unit_ids.has("unit_delta"), "Late Direct Send expands the active MissionSetup friendly contract to both payloads")
+	_assert(_matches_unit_fireteam_ids(selected_unit_ids, selected_fireteam_ids, {"unit_alpha": "ft1", "unit_bravo": "ft1", "unit_charlie": "ft2", "unit_delta": "ft2"}), "Late Direct Send keeps the two Dropship Fireteam memberships in the active MissionSetup contract")
 	_assert(_collect_friendly_unit_ids(active_mission).has("unit_charlie") and _collect_friendly_unit_ids(active_mission).has("unit_delta"), "Late beta payload units are friendly runtime slots, not unused slots")
 
 	var alpha_lz_world := Vector2(384.0, 224.0)
@@ -95,6 +98,22 @@ func _test_late_homebase_direct_payload_can_keep_lz_and_drop() -> void:
 	_assert(String(alpha_drop_card.get("state", "")) == "inbound" and String(beta_drop_card.get("state", "")) == "inbound", "Alpha and Beta drops start independent inbound sequences")
 	_assert(alpha_progress != null and alpha_progress.visible and beta_progress != null and beta_progress.visible, "Inbound Dropship cards show progress bars for both ships")
 
+	for _step in range(180):
+		controller.call("_update_drop_sequence", 0.2)
+		var step_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+		var step_alpha_card: Dictionary = _find_card(Array(step_state.get("mission_drop_cards", [])), "dropship_alpha")
+		var step_beta_card: Dictionary = _find_card(Array(step_state.get("mission_drop_cards", [])), "dropship_beta")
+		if Array(step_alpha_card.get("embarked_unit_ids", [])).is_empty() and Array(step_beta_card.get("embarked_unit_ids", [])).is_empty():
+			break
+	await _wait_frames(4)
+	var deboard_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+	var deboard_alpha_card: Dictionary = _find_card(Array(deboard_state.get("mission_drop_cards", [])), "dropship_alpha")
+	var deboard_beta_card: Dictionary = _find_card(Array(deboard_state.get("mission_drop_cards", [])), "dropship_beta")
+	var deployed_unit_ids: Array = Array(deboard_state.get("deployed_unit_ids", []))
+	_assert(Array(deboard_alpha_card.get("embarked_unit_ids", [])).is_empty() and Array(deboard_beta_card.get("embarked_unit_ids", [])).is_empty(), "Both Direct Dropships clear only their own passenger payload after controlled Deboarding")
+	_assert(deployed_unit_ids.has("unit_alpha") and deployed_unit_ids.has("unit_bravo") and deployed_unit_ids.has("unit_charlie") and deployed_unit_ids.has("unit_delta"), "Both Direct Dropships deploy all four staged operators after controlled Deboarding")
+	_assert(bool(controller.call("_is_fireteam_runtime_active", "ft1")) and bool(controller.call("_is_fireteam_runtime_active", "ft2")), "Both Direct-Dropship Fireteams are runtime-active after their own Deboarding")
+
 	scene.queue_free()
 	await _wait_frames(2)
 
@@ -113,6 +132,7 @@ func _build_two_dropship_meta_scene() -> Node:
 	scene.set("_homebase_aircraft_definitions", craft_definitions.duplicate(true))
 	scene.set("_assigned_aircraft_pilot_by_craft", pilot_by_craft.duplicate(true))
 	scene.set("_aircraft_location_by_craft", location_by_craft.duplicate(true))
+	homebase_screen.call("set_mission_context", [], "res://maps/station_outpost_192x192.json", "Task 396 Multi-Dropship", 8, "task_396_multi_dropship")
 	homebase_screen.call("setup_roster", roster, PackedStringArray(["unit_alpha", "unit_bravo", "unit_charlie", "unit_delta"]))
 	homebase_screen.call(
 		"set_fireteam_context",
@@ -187,6 +207,16 @@ func _find_card(cards: Array, craft_id: String) -> Dictionary:
 		if String(card.get("craft_id", "")).strip_edges() == craft_id:
 			return card
 	return {}
+
+
+func _matches_unit_fireteam_ids(unit_ids: PackedStringArray, fireteam_ids: PackedStringArray, expected_by_unit_id: Dictionary) -> bool:
+	if unit_ids.size() != fireteam_ids.size() or unit_ids.size() != expected_by_unit_id.size():
+		return false
+	for unit_index in range(unit_ids.size()):
+		var unit_id: String = String(unit_ids[unit_index]).strip_edges()
+		if String(expected_by_unit_id.get(unit_id, "")).strip_edges().to_lower() != String(fireteam_ids[unit_index]).strip_edges().to_lower():
+			return false
+	return true
 
 
 func _find_mission_card_button(root_node: Node, craft_id: String, action_id: String) -> Button:

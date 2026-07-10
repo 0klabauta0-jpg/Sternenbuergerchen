@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SternenBuergerchen - Zwischenbericht TASK 1057/1058</title>
+  <style>
+    :root { color-scheme: dark; --bg:#10161a; --panel:#182129; --line:#3b4d5c; --text:#edf5f8; --muted:#9fb0bb; --cyan:#55d6dc; --green:#70db9d; --amber:#ffd34d; --red:#ee8f89; font-family:"Segoe UI",Arial,sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); line-height:1.5; }
+    header { padding:28px clamp(18px,4vw,52px) 18px; border-bottom:1px solid var(--line); background:#141d24; }
+    main { width:min(1320px,calc(100vw - 32px)); margin:0 auto; padding:24px 0 92px; }
+    h1,h2,h3 { margin:0; line-height:1.15; } h1 { font-size:clamp(28px,3vw,44px); } h2 { font-size:21px; } h3 { font-size:15px; color:var(--cyan); }
+    p { margin:8px 0 0; color:var(--muted); } code { color:#d8edf2; }
+    .meta,.tabs,.row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; } .meta { margin-top:14px; }
+    .pill { border:1px solid var(--line); border-radius:999px; padding:4px 10px; color:var(--muted); font-size:13px; } .good { color:var(--green); border-color:rgba(112,219,157,.5); } .warn { color:var(--amber); border-color:rgba(255,211,77,.55); }
+    button,input,textarea { font:inherit; } button { border:1px solid var(--line); border-radius:6px; min-height:38px; padding:8px 12px; cursor:pointer; background:#dce5ef; color:#10161a; } button.secondary,.tab { background:transparent; color:var(--text); } .tab.active { background:var(--panel); border-color:var(--line); } button.choice.active { background:var(--amber); border-color:var(--amber); }
+    .tabs { margin-top:22px; border-bottom:1px solid var(--line); } .tab { border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom:0; } .page { display:none; } .page.active { display:block; }
+    .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px; margin-top:18px; } .card { grid-column:span 4; padding:16px; border:1px solid var(--line); border-radius:8px; background:var(--panel); } .wide { grid-column:span 8; } .full { grid-column:1/-1; }
+    ul { margin:10px 0 0; padding-left:20px; color:var(--muted); } li { margin:5px 0; } .metric { font-size:25px; color:var(--green); margin-top:8px; } .check { display:grid; grid-template-columns:auto 1fr; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.07); } .check input { width:auto; }
+    textarea,[contenteditable="true"] { width:100%; min-height:96px; padding:9px; border:1px solid var(--line); border-radius:6px; background:#0d1318; color:var(--text); } [contenteditable="true"]:empty::before { content:attr(data-placeholder); color:#74848e; }
+    footer { position:fixed; bottom:0; left:0; right:0; display:flex; gap:10px; padding:12px clamp(18px,4vw,52px); background:rgba(16,22,26,.96); border-top:1px solid var(--line); } #jsonOutput { min-height:62px; max-height:120px; font:12px Consolas,monospace; } #exportStatus { color:var(--muted); font-size:12px; align-self:center; }
+    @media(max-width:900px) { .card,.wide { grid-column:1/-1; } footer { position:static; flex-wrap:wrap; } }
+  </style>
+</head>
+<body data-report-id="zwischenbericht_task1057_1058_2026_07_10" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <header>
+    <h1>Mehr-Dropship-Flow stabilisiert</h1>
+    <p>Zwischenbericht zu TASK 1057 und TASK 1058. Der Spieler kann nun zwei Fireteams auf getrennte Dropships verteilen, beide parallel einsetzen und ihren Status ohne falsche Boden-Anzeige lesen.</p>
+    <div class="meta"><span class="pill good">Verifiziert</span><span class="pill good">TASK 396: 17/17</span><span class="pill good">TASK 503: 10/10</span><span class="pill good">Singleplayer: 103/103</span><span class="pill">10. Juli 2026</span><span class="pill warn">Naechster Fokus: First Contact</span></div>
+  </header>
+  <main>
+    <nav class="tabs" aria-label="Berichtbereiche"><button class="tab active" data-tab="overview">Uebersicht</button><button class="tab" data-tab="playtest">Playtest</button><button class="tab" data-tab="next">Naechste Arbeit</button></nav>
+    <section id="overview" class="page active"><div class="grid">
+      <article class="card"><h3>Homebase zu Mission</h3><div class="metric">17 / 17</div><p>Zwei Dropships, vier Operatoren, getrennte LZs, paralleler Inbound und beide Deboardings laufen im echten Meta-zu-Mission-Pfad.</p></article>
+      <article class="card"><h3>Parallelflug</h3><div class="metric">61 / 61</div><p>Bestehende Karten-, LZ-, Auswahl-, Inbound- und Rueckflug-Regressionsprobe bleibt gruen.</p></article>
+      <article class="card"><h3>HUD-Wahrheit</h3><div class="metric">10 / 10</div><p>Eingebarkte Teams erscheinen nicht mehr als Boden-Team. Nach Deboarding kehren ihre Member-Cards sichtbar zurueck.</p></article>
+      <article class="card wide"><h2>Was sich im Spiel geaendert hat</h2><ul><li>Die Mission kombiniert Unit-/Fireteam-Paare aus allen payloadtragenden Dropship-Karten, statt die Auswahl mit dem zuletzt gestarteten Schiff zu ueberschreiben.</li><li>Alpha und Beta behalten eigene LZ, Approach, Inbound, Passenger- und Deboarding-Zustaende.</li><li>Nach Deboarding sind beide Fireteams als Runtime-Teams aktiv und ihre Operatoren sind deployed.</li><li>Waerend eines Inbounds zeigt der grosse Selected-Fireteam-Bereich nur <code>Fireteam im Dropship.</code>, keine irrefuehrenden Boden-Cards.</li></ul></article>
+      <article class="card"><h2>Wichtig</h2><p>Die UI liest weiterhin nur den Planning-/Runtime-Zustand. Es wurde keine zweite Payload- oder HUD-Wahrheit eingefuehrt. Der veroeffentlichte Einzelspieler-Startpfad bleibt mit 103/103 Checks gruen.</p></article>
+    </div></section>
+    <section id="playtest" class="page"><div class="grid"><article class="card full"><h2>Manuelle Abnahme</h2><label class="check"><input type="checkbox" data-export-key="playtest.two_ships"><span>Zwei Fireteams auf getrennte Dropships legen, beide starten und getrennte LZs setzen.</span></label><label class="check"><input type="checkbox" data-export-key="playtest.inbound"><span>Waehrend beide Schiffe inbound sind: Karten, Progress und Passagiere bleiben getrennt lesbar.</span></label><label class="check"><input type="checkbox" data-export-key="playtest.hud"><span>Ein eingebarktes, ausgewaehltes Fireteam zeigt nur den Dropship-Hinweis; nach Deboarding erscheinen seine Member-Cards.</span></label><label class="check"><input type="checkbox" data-export-key="playtest.contact"><span>Nach Deboarding beider Teams: Auswahl, Move, GO und erster Kontakt funktionieren fuer beide Fireteams.</span></label></article><article class="card"><h3>Bewertung</h3><div class="row" data-choice-group="playtest.rating"><button class="choice active" data-choice-value="ready">Bereit</button><button class="choice" data-choice-value="unclear">Unklar</button><button class="choice" data-choice-value="broken">Kaputt</button></div></article><article class="card wide"><h3>Beobachtung</h3><textarea data-export-key="playtest.observation" placeholder="Was war im echten Fenster klar, unklar oder falsch?"></textarea></article></div></section>
+    <section id="next" class="page"><div class="grid"><article class="card wide"><h2>Naechster sinnvoller Slice</h2><p><strong>TASK 1059 - Multi-Fireteam First Contact Runtime Trace:</strong> Nach dem nun stabilen Deboarding werden Combat-Registry, LOS, Zielerkennung, Command-Feedback und der erste echte Feindkontakt mit <em>beiden</em> Fireteams in einer nachvollziehbaren Fixture geprueft.</p><ul><li>Kein neues Combat-System, sondern Nachweis des echten Spielpfads.</li><li>Prueft, dass Alpha und Bravo nicht nur sichtbar, sondern auch getrennt taktisch handlungsfaehig sind.</li><li>Danach erst Player-Feel, Szenarioinhalt und Multiplayer-Soak breiter angehen.</li></ul></article><article class="card"><h2>Offen</h2><label class="check"><input type="checkbox" data-export-key="next.contact_trace"> First Contact mit zwei Teams</label><label class="check"><input type="checkbox" data-export-key="next.manual_window"> Manueller F6-Fenstercheck</label><label class="check"><input type="checkbox" data-export-key="next.multiplayer_soak"> Spaeterer Ownership-/Resync-Soak</label></article><article class="card full"><h3>Arbeitsnotizen</h3><div contenteditable="true" data-note-key="next.notes" data-placeholder="Spielerbeobachtungen, Entscheidungen oder Folgeideen..."></div></article></div></section>
+  </main>
+  <footer><button id="exportJsonButton">JSON exportieren</button><button id="copyJsonButton" class="secondary">JSON kopieren</button><span id="exportStatus">Export erzeugt eine lokale JSON-Datei und zeigt sie hier an.</span><textarea id="jsonOutput" readonly placeholder="Export erscheint hier..."></textarea></footer>
+  <script>
+    (() => {
+      const out=document.getElementById('jsonOutput'), status=document.getElementById('exportStatus');
+      const activeChoices={};
+      document.querySelectorAll('.tab').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.tab,.page').forEach(node=>node.classList.remove('active'));button.classList.add('active');document.getElementById(button.dataset.tab).classList.add('active');}));
+      document.querySelectorAll('[data-choice-group] .choice').forEach(button=>button.addEventListener('click',()=>{const group=button.parentElement.dataset.choiceGroup;button.parentElement.querySelectorAll('.choice').forEach(node=>node.classList.remove('active'));button.classList.add('active');activeChoices[group]=button.dataset.choiceValue;}));
+      function setPath(target,path,value){const parts=path.split('.');let cursor=target;parts.slice(0,-1).forEach(part=>cursor=cursor[part]||(cursor[part]={}));cursor[parts.at(-1)]=value;}
+      function payload(){const data={schema:document.body.dataset.reportSchema,report_id:document.body.dataset.reportId,title:document.title,exported_at:new Date().toISOString(),controls:{},notes:{},active_choices:activeChoices,computed:{task_396:'17/17',multi_dropship_cards:'61/61',task_503:'10/10'},metadata:{source:'local HTML workbench',gameplay_truth:'unchanged'}};document.querySelectorAll('[data-export-key]').forEach(node=>setPath(data.controls,node.dataset.exportKey,node.type==='checkbox'?node.checked:node.value));document.querySelectorAll('[data-note-key]').forEach(node=>setPath(data.notes,node.dataset.noteKey,node.textContent.trim()));return data;}
+      function exportJson(){const text=JSON.stringify(payload(),null,2),name=`${document.body.dataset.reportId}_${new Date().toISOString().replace(/[:.]/g,'-')}.json`;out.value=text;const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([text],{type:'application/json'}));link.download=name;link.click();URL.revokeObjectURL(link.href);status.textContent=`JSON exportiert: ${name}`;}
+      document.getElementById('exportJsonButton').addEventListener('click',exportJson);document.getElementById('copyJsonButton').addEventListener('click',async()=>{out.value=JSON.stringify(payload(),null,2);try{await navigator.clipboard.writeText(out.value);status.textContent='JSON in die Zwischenablage kopiert.';}catch{status.textContent='JSON steht im Exportfeld bereit.';}});document.querySelector('.choice.active').click();
+    })();
+  </script>
+</body>
+</html>

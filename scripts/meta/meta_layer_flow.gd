@@ -5896,13 +5896,6 @@ func _apply_homebase_direct_setup_selection_from_drop_cards(drop_state: Dictiona
 	var setup_unit_ids: PackedStringArray = []
 	var setup_fireteam_ids: PackedStringArray = []
 	var seen_unit_ids: Dictionary = {}
-	_append_homebase_direct_setup_selection(
-		setup_unit_ids,
-		setup_fireteam_ids,
-		seen_unit_ids,
-		Array(result.get("mission_setup_unit_ids", result.get("selected_unit_ids", []))),
-		Array(result.get("mission_setup_fireteam_ids", result.get("selected_fireteam_ids", [])))
-	)
 	for card_variant in Array(result.get("mission_drop_cards", [])):
 		if typeof(card_variant) != TYPE_DICTIONARY:
 			continue
@@ -5916,9 +5909,19 @@ func _apply_homebase_direct_setup_selection_from_drop_cards(drop_state: Dictiona
 		var card_fireteam_ids: Array = _build_homebase_direct_card_fireteam_selection(card, card_unit_ids)
 		_append_homebase_direct_setup_selection(setup_unit_ids, setup_fireteam_ids, seen_unit_ids, card_unit_ids, card_fireteam_ids)
 	if setup_unit_ids.is_empty():
+		_append_homebase_direct_setup_selection(
+			setup_unit_ids,
+			setup_fireteam_ids,
+			seen_unit_ids,
+			Array(result.get("mission_setup_unit_ids", result.get("selected_unit_ids", []))),
+			Array(result.get("mission_setup_fireteam_ids", result.get("selected_fireteam_ids", [])))
+		)
+	if setup_unit_ids.is_empty():
 		return result
 	result["mission_setup_unit_ids"] = Array(setup_unit_ids)
 	result["mission_setup_fireteam_ids"] = Array(setup_fireteam_ids)
+	result["selected_unit_ids"] = Array(setup_unit_ids)
+	result["selected_fireteam_ids"] = Array(setup_fireteam_ids)
 	_selected_unit_ids = setup_unit_ids.duplicate()
 	_selected_fireteam_ids = _normalize_homebase_fireteam_selection(_selected_unit_ids, setup_fireteam_ids)
 	return result

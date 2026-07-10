@@ -10,15 +10,31 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1057 - Controlled Dropship Inbound to Deboard Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1057_controlled_dropship_inbound_to_deboard_trace.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/combat_loop_authority_contract.md`
+- Stand: TASK_396 ist 17/17 gruen. Eine echte 8-Slot-Mission fixt die fruehere 3-Slot-Testfixture; Alpha und Beta uebernehmen jeweils zwei Operatoren in den kombinierten MissionSetup-Vertrag, behalten LZ/Inbound getrennt, deboarden beide Payloads und aktivieren `ft1` sowie `ft2` als Runtime-Fireteams.
+- Ursache/Fix: Die Homebase-Direct-Adapter-Funktion kombiniert Unit-/Fireteam-Paare aus payloadtragenden Mission-Karten und spiegelt diese kombinierte Auswahl in `mission_setup_*` sowie `selected_*`. Der spaete Einzel-Dropship-Snapshot kann die aktive Mission nicht mehr auf ein Teilteam zuruecksetzen.
+- Lokale Pruefung: `task_396_mission_dropship_lz_drop_hotfix.gd` 17/17, danach Multi-Dropship-/HUD-Regressionen und `git diff --check`.
+- Naechster Schritt: First-Contact-Trace mit zwei deboardeten Fireteams und echter Combat-Registry/LOS.
+
+### TASK_1058 - Embarked Fireteam Selected HUD Truth
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1058_embarked_fireteam_selected_hud_truth.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
+- Stand: Der Selected-Fireteam-Renderer filtert eingebarkte Units jetzt immer aus den Boden-Member-Cards. Bei erhaltener Fireteam-Auswahl zeigt #17 die klare Zeile `Fireteam im Dropship.`; nach Deboarding werden die regulären Member-Cards wieder aufgebaut.
+- Ursache/Fix: Der alte Sonderpfad erkannte den Embarked-State, uebersprang danach aber den Ground-Filter. Renderer und Runtime-Signatur folgen jetzt derselben Ground-Unit-Regel wie die linke Mini-Card-Liste.
+- Lokale Pruefung: `task_503_mission_dropship_fireteam_hud_truth.gd` 10/10, `task_396_mission_dropship_lz_drop_hotfix.gd` 17/17.
+- Naechster Schritt: Mehr-Fireteam First Contact nach Deboarding mit Combat-Registry und LOS.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
-- Stand: Trace belegt nach Deboarding leere deployed- und Combat-Friendly-Listen. TASK_1055 belegt jedoch korrekte Homebase- und Planning-Payloads; die aktive Mission konsumiert sie nicht in Runtime-Units.
-- Naechster Schritt: TASK_1056 - Active Mission Transport Payload Consumer Repair.
+- Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.
+- Naechster Schritt: Combat-Registry/LOS nach dem jetzt belegten Mehr-Dropship-Deboarding pruefen.
 
 ### TASK_1055 - Homebase Transport Payload to Active Mission Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Boarding und Planning enthalten `unit_alpha`, `unit_bravo`, `ft1`, Dropship-Karte und MissionSetup-Felder korrekt.
-- Naechster Schritt: TASK_1056 - Active Mission Transport Payload Consumer Repair.
+- Naechster Schritt: TASK_1056 bestaetigt den Consumer nach Transferankunft; TASK_1057 prueft den Mehr-Dropship-Handoff.
 
 ### TASK_1056 - Active Mission Transport Payload Consumer Repair
 - Status: implementiert im Arbeitsstand

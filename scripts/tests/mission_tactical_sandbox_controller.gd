@@ -3193,8 +3193,7 @@ func _refresh_selected_fireteam_cards() -> void:
 	var units: Array = []
 	if not selected_cards_fireteam_id.is_empty():
 		units = _get_fireteam_units(selected_cards_fireteam_id, true)
-		if not _fireteam_has_embarked_payload(selected_cards_fireteam_id):
-			units = _filter_ground_fireteam_card_units(units)
+		units = _filter_ground_fireteam_card_units(units)
 	else:
 		units = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
 		units = _filter_ground_fireteam_card_units(units)
@@ -3364,8 +3363,7 @@ func _build_selected_fireteam_cards_runtime_signature() -> String:
 	var units: Array = []
 	if not selected_cards_fireteam_id.is_empty():
 		units = _get_fireteam_units(selected_cards_fireteam_id, true)
-		if not _fireteam_has_embarked_payload(selected_cards_fireteam_id):
-			units = _filter_ground_fireteam_card_units(units)
+		units = _filter_ground_fireteam_card_units(units)
 	else:
 		units = _get_selected_friendly_units(not _use_visible_units_for_fireteam_ui())
 		units = _filter_ground_fireteam_card_units(units)

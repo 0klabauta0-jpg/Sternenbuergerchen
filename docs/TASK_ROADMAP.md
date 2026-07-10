@@ -13,16 +13,23 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1056 - Active Mission Transport Payload Consumer Repair (geplant)
-- Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
-- Ziel: Den vorhandenen Planning-/MissionSetup-Payload in Active Mission, deployed Units und Combat-Registry konsumieren.
-
-## TASK_1057 - Controlled Dropship Inbound to Deboard Trace (geplant)
+## TASK_1057 - Controlled Dropship Inbound to Deboard Trace (implementiert im Arbeitsstand)
 - Grundlage: TASK_1056 startet den Drop mit korrekten zwei Runtime-Units nach Transferankunft.
-- Ziel: Inbound bis Touchdown im Test kontrolliert fortschreiben und Deboard/Contact auf echten Units pruefen.
+- Ergebnis: TASK_396 prueft 17/17 den echten Alpha-/Beta-Handoff: vier Units, korrekte ft1-/ft2-Paare, getrennte LZs, parallelen Inbound, Deboarding und beide aktiven Runtime-Fireteams.
+- Ursache/Fix: Die Direct-Contract-Auswahl wird aus den payloadtragenden Karten kombiniert statt aus dem zuletzt gestarteten Einzel-Dropship ueberschrieben.
+- Naechster Schritt: First-Contact-Trace auf den nun verifizierten Mehr-Fireteam-Deboarding-Pfad ausweiten und dabei Combat-Registry/LOS pruefen.
+
+## TASK_1058 - Embarked Fireteam Selected HUD Truth (implementiert im Arbeitsstand)
+- Grundlage: TASK_503 zeigt fuer ein eingebarktes, aber ausgewaehltes Fireteam disabled Boden-Member-Cards statt des klaren Dropship-Hinweises.
+- Ergebnis: Selected-Fireteam-Cards und ihr Dirty-Signature-Pfad filtern embarked Units wie die linke Mini-Card-Liste. TASK_503 prueft 10/10: Hinweis waehrend Inbound, echte Cards nach Deboarding.
+- Naechster Schritt: Mehr-Fireteam First Contact nach Deboarding mit Combat-Registry und LOS verifizieren.
+
+## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
+- Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
+- Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.
 
 ## TASK_1055 - Homebase Transport Payload to Active Mission Audit (implementiert im Arbeitsstand)
-- Ergebnis: Payload ist vor Missionsstart vollstaendig; Consumer der aktiven Mission verliert ihn danach.
+- Ergebnis: Payload ist vor Missionsstart vollstaendig. TASK_1056 stellte klar, dass der Einzel-Dropship-Consumer nach Transferankunft korrekt arbeitet; TASK_1057 korrigiert den separaten Mehr-Dropship-Contract-Handoff.
 
 ## TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit (implementiert im Arbeitsstand)
 - Grundlage: TASK_1053 findet nach Deboarding keine Combat-registrierte ft1-LOS-Basis.
