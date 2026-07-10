@@ -54,6 +54,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1065 ist 13/13 gruen. Unveraenderte read-only Member-Snapshots ueberspringen jetzt die Row-Normalisierung und ihr Redraw; Suppression bleibt sichtbar live und ein echter Member-Statuswechsel wird weiter gezeichnet. Der aktuelle Code-/Performancebericht dokumentiert Messgrenzen, Architektur- und Hotpath-Befunde als HTML-Workbench.
 - Naechster Schritt: TASK_1066 - Mission Feedback Surface Delta Extraction. Command-Feedback, Event-Log und Sekundaerlabels muessen weiter voneinander entkoppelt werden, ohne SimulationRoot- oder Multiplayer-Autoritaet in die UI zu ziehen.
 
+## TASK_1066 - Mission Feedback Surface Delta Extraction (implementiert im Arbeitsstand)
+- Grundlage: TASK_1065 belegte den breiten wiederkehrenden UI-Refresh; das Event-Log besass zwar einen Render-Guard, kopierte aber davor noch jedes Mal seine Daten.
+- Ergebnis: TASK_1066 ist 8/8 gruen. Identisches Event-Log-Feedback wird am Panel-Eingang uebersprungen, ohne bestehende Entries zu verlieren. Neue Events und sichtbare Style-/Auswahl-Aenderungen werden weiter angewendet. Der Controller uebergibt den vorhandenen Polish-Contract nur noch einmal an den Panel-Eingang.
+- Naechster Schritt: Die Command-Feedback- und Sekundaerlabel-Surfaces gegen denselben Zwei-Fireteam-Trace schneiden; danach den gewonnenen stabilen Pfad fuer eine kurze spielbare Station-Route-Runde nutzen.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

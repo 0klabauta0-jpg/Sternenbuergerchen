@@ -2811,8 +2811,6 @@ func _refresh_tactical_event_log_panel() -> void:
 	if panel == null or not panel.has_method("set_feedback_snapshot"):
 		return
 	var feedback_snapshot: Dictionary = get_live_tactical_event_log_feedback_snapshot()
-	if panel.has_method("apply_release_first_exchange_hud_density_fire_visual_polish"):
-		panel.call("apply_release_first_exchange_hud_density_fire_visual_polish", Dictionary(feedback_snapshot.get("release_first_exchange_hud_density_fire_visual_polish", {})))
 	panel.call("set_feedback_snapshot", feedback_snapshot)
 
 

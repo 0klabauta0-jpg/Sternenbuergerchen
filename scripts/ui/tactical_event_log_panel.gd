@@ -21,6 +21,9 @@ var _event_entries: Array = []
 var _selected_fireteam_ids: PackedStringArray = PackedStringArray()
 var _rendered_entries: Array = []
 var _last_render_signature: String = ""
+var _last_feedback_snapshot_signature: String = ""
+var _feedback_snapshot_apply_count: int = 0
+var _feedback_snapshot_skip_count: int = 0
 var _empty_state_collapsed: bool = false
 
 var _header_label: Label = null
@@ -37,15 +40,23 @@ func _ready() -> void:
 
 
 func set_feedback_snapshot(snapshot: Dictionary) -> void:
-	if snapshot.has("release_first_exchange_hud_density_fire_visual_polish"):
-		apply_release_first_exchange_hud_density_fire_visual_polish(Dictionary(snapshot.get("release_first_exchange_hud_density_fire_visual_polish", {})))
 	var selected_ids: PackedStringArray = PackedStringArray()
 	for fireteam_id_variant in Array(snapshot.get("selected_fireteam_ids", [])):
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty() or selected_ids.has(fireteam_id):
 			continue
 		selected_ids.append(fireteam_id)
-	set_event_entries(Array(snapshot.get("tactical_event_log", [])), selected_ids, selected_only)
+	var event_entries: Array = Array(snapshot.get("tactical_event_log", []))
+	var polish_snapshot: Dictionary = Dictionary(snapshot.get("release_first_exchange_hud_density_fire_visual_polish", {}))
+	if snapshot.has("release_first_exchange_hud_density_fire_visual_polish"):
+		apply_release_first_exchange_hud_density_fire_visual_polish(polish_snapshot)
+	var feedback_signature: String = _build_feedback_snapshot_signature(event_entries, selected_ids, selected_only, polish_snapshot)
+	if feedback_signature == _last_feedback_snapshot_signature:
+		_feedback_snapshot_skip_count += 1
+		return
+	_last_feedback_snapshot_signature = feedback_signature
+	_feedback_snapshot_apply_count += 1
+	set_event_entries(event_entries, selected_ids, selected_only)
 
 
 func apply_release_first_exchange_hud_density_fire_visual_polish(snapshot: Dictionary) -> void:
@@ -123,6 +134,10 @@ func get_panel_snapshot() -> Dictionary:
 		"visible": visible,
 		"mouse_filter": mouse_filter,
 		"visibility_mode": "collapsed_empty" if _empty_state_collapsed else "expanded",
+		"feedback_snapshot_apply_count": _feedback_snapshot_apply_count,
+		"feedback_snapshot_skip_count": _feedback_snapshot_skip_count,
+		"feedback_snapshot_delta_read_only": true,
+		"feedback_snapshot_sets_gameplay_truth": false,
 	}
 
 
@@ -350,6 +365,28 @@ func _build_render_signature(entries: Array) -> String:
 			int(entry.get("created_msec", 0)),
 			String(entry.get("severity", "")),
 			String(entry.get("short_text", "")),
+		])
+	return ";".join(tokens)
+
+
+func _build_feedback_snapshot_signature(entries: Array, selected_fireteam_ids: PackedStringArray, show_selected_only: bool, polish_snapshot: Dictionary) -> String:
+	var tokens: PackedStringArray = PackedStringArray([
+		"selected=%s" % "|".join(selected_fireteam_ids),
+		"selected_only=%s" % str(show_selected_only),
+		"polish_active=%s" % str(bool(polish_snapshot.get("active", false))),
+		"polish_style=%s" % String(polish_snapshot.get("style_id", "")).strip_edges(),
+		"polish_max=%d" % int(polish_snapshot.get("event_log_max_visible_events", DEFAULT_MAX_VISIBLE_EVENTS)),
+	])
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		tokens.append("%s:%d:%s:%s:%s" % [
+			String(entry.get("event_id", "")),
+			int(entry.get("created_msec", 0)),
+			String(entry.get("severity", "")),
+			String(entry.get("short_text", "")),
+			String(entry.get("fireteam_id", "")),
 		])
 	return ";".join(tokens)
 

@@ -78,6 +78,14 @@
 - Lokale Pruefung: TASK_1065 13/13, TASK_1062 18/18, TASK_1061 11/11, TASK_503 10/10 und `git diff --check` gruen.
 - Naechster Schritt: TASK_1066 als Controller-Schnitt vorbereiten: Command-/Mission-Feedback und Sekundaerlabels als echte read-only Delta-Surfaces abtrennen, bevor weiterer Station-Route-Content auf den grossen Controller gelegt wird.
 
+### TASK_1066 - Mission Feedback Surface Delta Extraction
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1066_mission_feedback_surface_delta_extraction.md`, `docs/ARCHITECTURE.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_1043, TASK_1065
+- Stand: TASK_1066 ist 8/8 gruen. Der TacticalEventLogPanel erkennt identisches Controller-Feedback vor der Entry-Kopie. Gleiches Feedback erhoeht den Skip-Zaehler und behaelt gerenderte Eintraege; ein neuer Event erhoeht den Apply-Zaehler und erscheint sichtbar.
+- Ursache/Fix: Der Event-Log-Panel besass bereits einen spaeten Render-Guard, kopierte zuvor aber trotzdem bei jeder Aktualisierung alle Entries. Der neue Feedback-Signature-Guard umfasst Auswahl, Filter, sichtbare Event-Felder und den vorhandenen Polish-Contract. Die doppelte Style-Weitergabe im Controller entfiel; der Panel-Eingang bleibt alleinige Visual-Grenze.
+- Lokale Pruefung: TASK_1066 8/8, TASK_1043 14/14, TASK_1062 18/18, TASK_1061 11/11, TASK_503 10/10 und `git diff --check` gruen.
+- Naechster Schritt: Die noch breite Command-Feedback-/Sekundaerlabel-Flaeche mit demselben Muster profilieren. Erst danach Station-Route-Readability und NPC-Druck als spielbarer erster Runden-Slice weiterbauen.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.
