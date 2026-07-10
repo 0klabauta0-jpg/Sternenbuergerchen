@@ -38,6 +38,20 @@
 	},
 	"map_name": "station_outpost_192x192",
 	"markers": {
+		"approach_guard_post": {
+			"color": {
+				"a": 0.98,
+				"b": 0.32,
+				"g": 0.58,
+				"r": 1.0
+			},
+			"marker_type_id": "rally_point",
+			"name": "Approach Guard Post",
+			"placement_context": "editor_only",
+			"symbol": "circle",
+			"x": 2176,
+			"y": 5056
+		},
 		"factory_danger_zone": {
 			"color": {
 				"a": 0.98,

@@ -15,7 +15,7 @@
 			"group_id": "bravo_station_guard",
 			"display_name": "Bravo Station Guard",
 			"team_id": "team_bravo",
-			"spawn_marker_id": "spawn_bravo",
+			"spawn_marker_id": "approach_guard_post",
 			"enemy_ids": ["bravo_guard_01", "bravo_guard_02", "bravo_guard_03", "bravo_guard_04"],
 			"tactics": {
 				"profile_id": "defensive_cover",
@@ -81,7 +81,7 @@
 	"patrol_bindings": [
 		{
 			"binding_id": "bravo_guard_station_loop",
-			"target_id": "spawn_bravo",
+			"target_id": "bravo_station_guard",
 			"patrol_path_id": "station_loop_route",
 			"mode": "pre_contact"
 		},

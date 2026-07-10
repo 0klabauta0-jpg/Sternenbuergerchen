@@ -105,6 +105,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
 - Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
 
+## TASK_1077 - Station Route First Contact Pressure (implementiert im Arbeitsstand)
+- Grundlage: Die Station Route beschrieb Guard-Druck, aber TASK_1068 musste einen Bravo-NPC fuer den ersten sichtbaren Kontakt noch manuell umsetzen. Beide Bravo-Gruppen starteten am fernen AA-Spawn.
+- Ergebnis: Nach normalem Homebase -> Drop -> Deboard entsteht vor dem ersten `GO` ein echter, szenariogetriebener Bravo-Kontakt. Ghost, Pfad und Risiko bleiben ein Plan; der Spieler kann den Move bestaetigen oder die vorhandene LZ-Evac-Alternative nutzen. AA, Door, Computer, Cargo und der volle Debriefing-Pfad bleiben gruen.
+- Ursache/Fix: `bravo_station_guard` startet am neuen `approach_guard_post` und bindet die bestehende `station_loop_route` gegen seine Group-ID. `bravo_air_defense` bleibt bei `spawn_bravo`. Der Validator akzeptiert nun dieselbe Enemy-Group-Referenz, die der Runtime-Patrol-Resolver seit jeher aufloesen konnte.
+- Naechster Schritt: Den sichtbaren First-Contact-Run auf Lesbarkeit und Balance abnehmen: kein Spawn-Camping, aber genug Druck fuer die Wahl zwischen Advance mit Preview und Evac.
+
 ## TASK_1076 - Release Firefight Contract Chain Refresh (implementiert im Arbeitsstand)
 - Grundlage: TASK_1074 etablierte `CONTACT FIRE` vor `NEXT/WHY`, aber die alten TASK_834- bis TASK_839-Gates erwarteten noch die umgekehrte Reihenfolge und fielen dadurch als ganze Kette.
 - Ergebnis: TASK_834 27/27, TASK_835 28/28, TASK_836 29/29, TASK_838 28/28 und TASK_839 31/31 sind wieder gruen. Die Kette prueft damit den aktuellen sichtbaren Firefight-Contract statt historische Presentation-Details.

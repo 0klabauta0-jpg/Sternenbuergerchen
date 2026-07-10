@@ -473,6 +473,11 @@ func _validate_patrol_bindings(terrain_map_data, enemy_ids: PackedStringArray, e
 	var valid_targets: Dictionary = {}
 	for enemy_id in enemy_ids:
 		valid_targets[String(enemy_id)] = true
+	for group_variant in enemy_groups:
+		var group: Dictionary = Dictionary(group_variant)
+		var group_id: String = String(group.get("group_id", "")).strip_edges()
+		if not group_id.is_empty():
+			valid_targets[group_id] = true
 	if terrain_map_data != null:
 		if terrain_map_data.has_method("get_marker_ids"):
 			for marker_id in PackedStringArray(terrain_map_data.call("get_marker_ids")):
@@ -488,7 +493,7 @@ func _validate_patrol_bindings(terrain_map_data, enemy_ids: PackedStringArray, e
 		if target_id.is_empty():
 			errors.append("patrol_bindings[%d].target_id is required" % binding_index)
 		elif not valid_targets.has(target_id):
-			errors.append("patrol_bindings[%d].target_id is not an enemy id or map spawn/patrol id: %s" % [binding_index, target_id])
+			errors.append("patrol_bindings[%d].target_id is not an enemy, enemy group or map spawn/patrol id: %s" % [binding_index, target_id])
 		if String(binding.get("patrol_path_id", "")).strip_edges().is_empty():
 			errors.append("patrol_bindings[%d].patrol_path_id is required" % binding_index)
 
