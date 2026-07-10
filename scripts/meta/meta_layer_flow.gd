@@ -6,7 +6,6 @@ const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_ros
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const MISSION_PROGRESSION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/mission_progression_resolver.gd")
 const PERSONNEL_EVENT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_resolver.gd")
-const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
@@ -1001,6 +1000,8 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	_append_release_first_exchange_exported_status_trace_sample("after_contact_setup", controller, {"contact_setup": contact_setup.duplicate(true)}, args)
 	_prepare_release_fireteam_for_first_engagement(controller, selected_fireteam_id, Vector2(contact_setup.get("enemy_position", Vector2.ZERO)))
 	_stabilize_release_first_exchange_target_enemy(controller, contact_setup)
+	await get_tree().physics_frame
+	await get_tree().process_frame
 	_update_release_contact_tracking(combat_driver)
 	_force_release_first_engagement_decision(controller, combat_driver, simulation_root, selected_fireteam_id, contact_setup)
 	controller.call("refresh_contact_overlay")
@@ -1206,27 +1207,12 @@ func _prepare_release_fireteam_for_first_engagement(controller: Node, fireteam_i
 		var unit := unit_variant as Node2D
 		if unit == null:
 			continue
-		unit.set("skill_accuracy", 1.0)
-		_assign_release_first_exchange_hold_command(unit, enemy_position)
-		if unit.has_method("set_runtime_status"):
-			unit.call(
-				"set_runtime_status",
-				"holding",
-				"hold_position",
-				30,
-				"fire_at_will",
-				"defend",
-				1.0,
-				0.0,
-				0.0,
-				1,
-				enemy_position,
-				"engage",
-				"aimed",
-				"task832_release_first_go_firefight",
-				1.0,
-				75.0
-			)
+		controller.call(
+			"queue_release_first_exchange_hold_command",
+			_get_release_unit_id(unit),
+			enemy_position,
+			"task832_release_first_go_firefight"
+		)
 
 
 func _stabilize_release_first_exchange_target_enemy(controller: Node, contact_setup: Dictionary) -> void:
@@ -1236,47 +1222,12 @@ func _stabilize_release_first_exchange_target_enemy(controller: Node, contact_se
 	var enemy := _find_release_unit_by_id(enemy_units, enemy_id) as Node2D
 	if enemy == null:
 		return
-	if enemy.has_method("set_runtime_status"):
-		enemy.call(
-			"set_runtime_status",
-			"holding",
-			"hold_position",
-			30,
-			"fire_at_will",
-			"defend",
-			1.0,
-			0.0,
-			0.0,
-			1,
-			friendly_position,
-			"engage",
-			"aimed",
-			"task868_release_first_exchange_los_setup_polish",
-			1.0,
-			75.0
-		)
-
-
-func _assign_release_first_exchange_hold_command(unit: Node2D, enemy_position: Vector2) -> void:
-	if unit == null or not unit.has_method("assign_unit_command"):
-		return
-	var command = UNIT_COMMAND_SCRIPT.new()
-	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
-	command.priority = 30
-	command.unit_id = _get_release_unit_id(unit)
-	if unit.has_method("get_team_id"):
-		command.team_id = String(unit.call("get_team_id"))
-	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
-	command.fire_rule = UNIT_COMMAND_SCRIPT.FIRE_RULE_FREE
-	command.source_command_type = "defend"
-	command.source_task_type = "task844_release_first_exchange_tension_tuning"
-	command.target_position = enemy_position
-	command.movement_posture = UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE
-	command.weapon_posture = UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED
-	command.sight_range_factor = 1.0
-	command.aim_readiness_percent = 100.0
-	if command.has_method("is_valid") and bool(command.call("is_valid")):
-		unit.call("assign_unit_command", command)
+	controller.call(
+		"queue_release_first_exchange_hold_command",
+		enemy_id,
+		friendly_position,
+		"task868_release_first_exchange_los_setup_polish"
+	)
 
 
 func _force_release_first_engagement_decision(controller: Node, combat_driver: Node, simulation_root: Node, fireteam_id: String, contact_setup: Dictionary) -> void:

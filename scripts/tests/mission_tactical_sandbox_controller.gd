@@ -5637,6 +5637,46 @@ func _find_friendly_unit_by_id_recursive(root_node: Node, unit_id: String) -> No
 	return null
 
 
+func queue_release_first_exchange_hold_command(unit_id: String, target_position: Vector2, source_task_type: String) -> bool:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return false
+	var unit: Node = _find_friendly_unit_by_id(normalized_unit_id)
+	if unit == null:
+		for enemy_variant in _get_all_enemy_units(true):
+			var enemy := enemy_variant as Node
+			if enemy != null and enemy.has_method("get_unit_id") and String(enemy.call("get_unit_id")).strip_edges() == normalized_unit_id:
+				unit = enemy
+				break
+	if unit == null:
+		return false
+
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	unit.set("skill_accuracy", 1.0)
+	var command = UNIT_COMMAND_SCRIPT.new()
+	command.command_type = UNIT_COMMAND_SCRIPT.TYPE_HOLD_POSITION
+	command.priority = 30
+	command.unit_id = normalized_unit_id
+	if unit.has_method("get_team_id"):
+		command.team_id = String(unit.call("get_team_id"))
+	command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
+	command.fire_rule = UNIT_COMMAND_SCRIPT.FIRE_RULE_FREE
+	command.source_command_type = "defend"
+	command.source_task_type = source_task_type.strip_edges()
+	command.command_token = "release_first_exchange:%s" % normalized_unit_id
+	command.target_position = target_position
+	command.movement_posture = UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE
+	command.weapon_posture = UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED
+	command.sight_range_factor = 1.0
+	command.aim_readiness_percent = 100.0
+	if not bool(command.call("is_valid")):
+		return false
+	simulation_root.call("enqueue_command", command.to_dict())
+	return true
+
+
 func _get_character_overlay_host() -> VBoxContainer:
 	var overlay := get_node_or_null("../TacticalUI/CharacterOverlay") as Control
 	if overlay == null:
