@@ -72,12 +72,12 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1086: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance, echte lokale ENet-Feuerdisziplin und ein deutlich schneller bereitstehender erster Feuerwechsel.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1087: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance, echte lokale ENet-Feuerdisziplin und ein zustandsbasiert bereitgestellter Mission-/LZ-/Drop-Pfad.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1086</span>
-      <span class="pill good">First Exchange: zustandsbasiert statt 55 Blind-Frames</span>
+      <span class="pill good">Letzter Abschluss: TASK_1087</span>
+      <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
@@ -202,10 +202,10 @@
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
-          <div class="callout success">TASK_1086 ist abgeschlossen: Nach GO wartet der Release-Test auf einen echten SimulationRoot-Tick und sichtbare Bewegung; vor dem Screenshot auf echte FireEvent- und CONTACT-FIRE-Evidence. Laufende Unit-Kommandos bleiben unangetastet.</div>
-          <p><strong>Performancebefund:</strong> Der echte 4.6.2-Release erreicht Ready jetzt nach 31.363 ms statt 50.046 ms, rund 37 Prozent schneller. Der interne Trace endet nach 22.946 ms. Mit 10.400 ms ist Missions-/LZ-Aufbau der groesste Restblock; Kontakt bis FireEvent folgt mit 7.439 ms.</p>
-          <input readonly value="TASK_1086 - Release Mission Ready-Time Performance Pass (16/16 gruen)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1087 - Release Mission/LZ Setup Readiness Pass" data-export-key="reentry_handbook.recommended_next_task">
+          <div class="callout success">TASK_1087 ist abgeschlossen: Missionstart, Transfer, LZ, Deboard und Move-Preview warten auf konkrete Runtime-Zustaende. Der normale Dropship-Ablauf bleibt unveraendert; nur der reproduzierbare Release-Direkteinstieg verliert historische Blindpausen.</div>
+          <p><strong>Performancebefund:</strong> Der direkte Headless-LZ-Trace sank vergleichbar von 12.814 auf 5.774 ms. Der aktuelle volle Trace endet nach 27.722 ms. Schnell abgeschlossene Bewegung bleibt als echter recent movement trace lesbar. Groesster Restblock ist nun Kontakt bis FireEvent mit 11.823 ms.</p>
+          <input readonly value="TASK_1087 - Release Mission/LZ Setup Readiness Pass (19/19 gruen)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1088 - Release Contact/Fire Ready-Time Pass" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -841,10 +841,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1087 - Release Mission/LZ Setup Readiness Pass"
+            recommended_next_task: "TASK_1088 - Release Contact/Fire Ready-Time Pass"
           },
           metadata: {
-            generated_for_task: "TASK_1086",
+            generated_for_task: "TASK_1087",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

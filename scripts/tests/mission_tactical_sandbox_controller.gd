@@ -17744,6 +17744,7 @@ func get_mission_first_move_execution_feedback_snapshot() -> Dictionary:
 	var movement_state: Dictionary = _find_first_movement_state_for_fireteams(selected_fireteam_ids, movement_snapshot)
 	if movement_state.is_empty():
 		movement_state = _find_first_recent_movement_trace_for_fireteams(selected_fireteam_ids)
+	var completed_movement_trace_visible: bool = bool(movement_state.get("recent_trace", false))
 	var order_plan: Dictionary = _find_first_order_plan_for_fireteams(selected_fireteam_ids, get_order_plans_snapshot())
 	var visualized_waypoint: Dictionary = _find_first_visualized_waypoint_for_fireteams(selected_fireteam_ids, get_visualized_waypoints_snapshot())
 	var last_command_text: String = String(command_feedback.get("last_command_text", "")).strip_edges()
@@ -17764,8 +17765,8 @@ func get_mission_first_move_execution_feedback_snapshot() -> Dictionary:
 		),
 		_build_mission_first_move_readability_check(
 			"phase_execution_visible",
-			not active_execution.is_empty(),
-			"Selected fireteam has an active phase execution state."
+			not active_execution.is_empty() or completed_movement_trace_visible,
+			"Selected fireteam has an active phase execution or a traceable completed movement."
 		),
 		_build_mission_first_move_readability_check(
 			"movement_state_visible",

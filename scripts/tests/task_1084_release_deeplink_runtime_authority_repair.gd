@@ -44,8 +44,7 @@ func _test_release_deeplink_regression() -> void:
 		return
 	root.add_child(scene)
 	await _wait_frames(10)
-	scene.call("_apply_release_first_go_firefight_deeplink", PackedStringArray([DEEPLINK_ARG]))
-	await _wait_frames(110)
+	await scene.call("_apply_release_first_go_firefight_deeplink", PackedStringArray([DEEPLINK_ARG]))
 	var snapshot: Dictionary = Dictionary(scene.call("get_release_first_go_firefight_deeplink_snapshot", PackedStringArray([DEEPLINK_ARG])))
 	_assert(bool(snapshot.get("applied", false)), "First GO/firefight deep-link still applies")
 	_assert(String(snapshot.get("firefight_status", "")) == "pass", "First firefight remains actionable")
