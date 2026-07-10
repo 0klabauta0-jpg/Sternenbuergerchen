@@ -72,12 +72,12 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1080: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance und eine jetzt bis in laufende Unit-Commands wirksame Feuerdisziplin.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1081: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance und eine wirksame, unmittelbar lesbare Feuerdisziplin.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1080</span>
-      <span class="pill warn">Aktueller Griff: ROE-Konsequenz lesbar machen</span>
+      <span class="pill good">Letzter Abschluss: TASK_1081</span>
+      <span class="pill warn">Aktueller Griff: Multiplayer-ROE absichern</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
       <span class="pill good">Hotfix: kaputte Roster-Saves abgefangen</span>
@@ -198,12 +198,12 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p>TASK_1079 beweist den ersten echten Feuerentscheid der Station Route: Nach Homebase, Drop, Deboard und bestaetigtem Advance erzeugt die Scenario-Guard-Gruppe Contact sowie Fire/Wait/No-Fire mitsamt Grund und Deckungs-/Range-/LOS-Kontext. TASK_1080 schliesst die dabei gefundene Laufzeitluecke: Eine neue ROE erreicht jetzt sofort den laufenden Movement-State und alle aktiven Bravo-Unit-Commands.</p>
-          <p><code>Return Fire</code> wird im echten Contact als <code>hold_fire</code> bis zum Incoming-Fire-Fenster durchgereicht, <code>Fire at Will</code> als <code>fire_at_will</code>. Jede Aenderung erzeugt eine neuere Command-Revision, damit alte Move-Commands die Auswahl nicht wieder zuruecksetzen. Objective, Cargo, Ghost, Pfad, Risiko und Evac behalten ihre bisherigen Wahrheitsgrenzen.</p>
+          <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation und TASK_1081 die sichtbare Konsequenz. Die Mission-Control-Zeile zeigt jetzt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
+          <p>Der Token stammt aus Controller-Regel, aktiven Unit-Commands, Return-Fire-Fenster und Combat-Diagnostics. LOS, Range, Cover und Friendly Fire bleiben vorhandene Runtime-Lesedaten. Objective, Cargo, Ghost, Pfad, Risiko und Evac behalten ihre bisherigen Wahrheitsgrenzen.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
-          <div class="callout warning">Naechster Schritt: Die jetzt echte ROE-Wirkung als kurze Commander-Konsequenz zeigen. Der Spieler soll direkt erkennen, ob Hold blockiert, Return auf Beschuss wartet oder Fire at Will freigegeben ist und welcher Cover-/Friendly-Fire-Grund gilt.</div>
-          <input readonly value="TASK_1080 - Station Route Live Fire-Rule Propagation (17/17 gruen)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1081 - Station Route ROE Consequence Readability" data-export-key="reentry_handbook.recommended_next_task">
+          <div class="callout warning">Naechster Schritt: dieselbe ROE als echten Multiplayer-Command pruefen. Ein Peer darf nur sein Fireteam aendern; der Host committed und der Client muss Regel sowie Konsequenz konsistent anzeigen.</div>
+          <input readonly value="TASK_1081 - Station Route ROE Consequence Readability (33/33 gruen)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1082 - Multiplayer ROE Authority And Replication" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -839,10 +839,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1081 - Station Route ROE Consequence Readability"
+            recommended_next_task: "TASK_1082 - Multiplayer ROE Authority And Replication"
           },
           metadata: {
-            generated_for_task: "TASK_1080",
+            generated_for_task: "TASK_1081",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

@@ -116,6 +116,7 @@ const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/t
 const FIRETEAM_COORDINATION_MANAGER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_coordination_manager.gd")
 const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_stance_controller.gd")
 const TACTICAL_COMMAND_RULES_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_command_rules.gd")
+const FIRE_RULE_CONSEQUENCE_READABILITY_SCRIPT: GDScript = preload("res://scripts/tactical/fire_rule_consequence_readability.gd")
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_movement_controller.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_map_overlay.gd")
@@ -7083,6 +7084,8 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 	var combat_hud_line: String = String(combat_hud_snapshot.get("mission_control_line", "")).strip_edges()
 	var combat_or_contact_line: String = combat_hud_line if not combat_hud_line.is_empty() else contact_diagnostics_text
 	var fire_rule_text: String = _compact_fire_rule_for_hud(_get_selected_fire_rule_consensus())
+	var fire_rule_consequence: Dictionary = get_fire_rule_consequence_readability_snapshot()
+	var fire_rule_consequence_token: String = String(fire_rule_consequence.get("hud_token", "")).strip_edges().to_upper()
 	var source_lines: PackedStringArray = PackedStringArray()
 	if not station_route_line.is_empty():
 		source_lines.append(station_route_line)
@@ -7107,7 +7110,9 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 		compact_parts.append(objective_line)
 	if not cargo_line.is_empty() and not objective_cargo_deferred_to_route_cue:
 		compact_parts.append(cargo_line)
-	if not fire_rule_text.is_empty():
+	if not fire_rule_consequence_token.is_empty():
+		compact_parts.append("ROE %s" % fire_rule_consequence_token)
+	elif not fire_rule_text.is_empty():
 		compact_parts.append("ROE %s" % fire_rule_text)
 	if not combat_or_contact_line.is_empty():
 		compact_parts.append(combat_or_contact_line)
@@ -7149,9 +7154,13 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 		"contact_line": contact_diagnostics_text,
 		"fire_rule": _get_selected_fire_rule_consensus(),
 		"fire_rule_text": fire_rule_text,
+		"fire_rule_consequence": fire_rule_consequence,
+		"fire_rule_consequence_token": fire_rule_consequence_token,
+		"fire_rule_consequence_line": String(fire_rule_consequence.get("consequence_line", "")),
 		"combat_hud_density": combat_hud_snapshot,
 		"contains_contact_or_combat": not combat_or_contact_line.is_empty(),
 		"contains_roe": not fire_rule_text.is_empty(),
+		"contains_roe_consequence": not fire_rule_consequence_token.is_empty() and mission_control_line.contains("ROE %s" % fire_rule_consequence_token),
 		"contains_suppress": fire_rule_text == "SUP" or mission_control_line.to_upper().contains("SUP"),
 		"contains_interaction_progress": not interaction_progress_line.is_empty() and mission_control_line.contains(interaction_progress_line),
 		"contains_objective": not objective_line.is_empty() and mission_control_line.contains(objective_line),
@@ -7531,7 +7540,7 @@ func _build_host_client_f6_compact_act_line(interaction_density: Dictionary, fal
 	var compact_parts: PackedStringArray = PackedStringArray()
 	var objective_token: String = _compact_host_client_f6_objective_token(String(interaction_density.get("objective_line", "")))
 	var cargo_token: String = _compact_host_client_f6_cargo_token(String(interaction_density.get("cargo_line", "")))
-	var fire_rule_text: String = String(interaction_density.get("fire_rule_text", "")).strip_edges().to_upper()
+	var fire_rule_text: String = String(interaction_density.get("fire_rule_consequence_token", interaction_density.get("fire_rule_text", ""))).strip_edges().to_upper()
 	var combat_source: String = String(interaction_density.get("combat_line", "")).strip_edges()
 	if combat_source.is_empty():
 		combat_source = String(interaction_density.get("contact_line", "")).strip_edges()
@@ -11625,6 +11634,7 @@ func _build_fire_rule_button_snapshot() -> Dictionary:
 
 func get_fire_rule_controls_readability_snapshot() -> Dictionary:
 	var buttons: Dictionary = _build_fire_rule_button_snapshot()
+	var consequence: Dictionary = get_fire_rule_consequence_readability_snapshot()
 	return {
 		"schema": "sternenbuergerchen.fire_rule_controls_readability.v1",
 		"source": "MissionTacticalSandboxController",
@@ -11635,9 +11645,49 @@ func get_fire_rule_controls_readability_snapshot() -> Dictionary:
 		"selected_fireteam_count": _selected_fireteam_ids.size(),
 		"selected_fire_rule_consensus": _get_selected_fire_rule_consensus(),
 		"fire_rule_snapshot": get_fireteam_fire_rule_snapshot(),
+		"consequence": consequence,
+		"consequence_line": String(consequence.get("consequence_line", "")),
 		"button_count": buttons.size(),
 		"buttons": buttons,
 	}
+
+
+func get_fire_rule_consequence_readability_snapshot() -> Dictionary:
+	return Dictionary(FIRE_RULE_CONSEQUENCE_READABILITY_SCRIPT.call("build_snapshot", {
+		"fire_rule": _get_selected_fire_rule_consensus(),
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"runtime_entries": _build_selected_fire_rule_runtime_entries(),
+		"return_fire_window_by_fireteam": _get_return_fire_window_by_fireteam_snapshot(),
+		"contact_decision_diagnostics": get_contact_decision_diagnostics_snapshot(),
+	})).duplicate(true)
+
+
+func _build_selected_fire_rule_runtime_entries() -> Array:
+	var entries: Array = []
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		for unit in _get_fireteam_units(fireteam_id, true):
+			if unit == null or not unit.has_method("get_current_unit_command"):
+				continue
+			var command = unit.call("get_current_unit_command")
+			if command == null or not command.has_method("get"):
+				continue
+			entries.append({
+				"fireteam_id": fireteam_id,
+				"unit_id": String(unit.call("get_unit_id")) if unit.has_method("get_unit_id") else "",
+				"fire_rule": String(command.get("fire_rule")).strip_edges().to_lower(),
+				"fire_status": String(command.get("fire_status")).strip_edges().to_lower(),
+			})
+	return entries
+
+
+func _get_return_fire_window_by_fireteam_snapshot() -> Dictionary:
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver == null or not combat_driver.has_method("get_return_fire_window_snapshot"):
+		return {}
+	return Dictionary(combat_driver.call("get_return_fire_window_snapshot")).duplicate(true)
 
 
 func get_fire_rule_f6_readability_snapshot() -> Dictionary:
@@ -17763,16 +17813,17 @@ func get_mission_fire_cover_visual_polish_snapshot() -> Dictionary:
 
 
 func get_mission_combat_feedback_hud_density_snapshot(command_feedback_override: Dictionary = {}) -> Dictionary:
-	var command_feedback: Dictionary = command_feedback_override.duplicate(true) if not command_feedback_override.is_empty() else get_command_feedback_snapshot()
+	var uses_feedback_override: bool = not command_feedback_override.is_empty()
+	var command_feedback: Dictionary = command_feedback_override.duplicate(true) if uses_feedback_override else get_command_feedback_snapshot()
 	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
 	var compact_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
 	var mission_control_line: String = String(combat_hud_density.get("mission_control_line", "")).strip_edges()
 	var selected_fireteam_line: String = String(combat_hud_density.get("selected_fireteam_line", "")).strip_edges()
 	var mission_control_status_text: String = String(command_feedback.get("mission_control_status_text", "")).strip_edges()
 	var selected_fireteam_status_text: String = String(command_feedback.get("selected_fireteam_status_label_text", command_feedback.get("selected_status_text", ""))).strip_edges()
-	if not mission_control_line.is_empty() and not mission_control_status_text.contains(mission_control_line):
+	if not uses_feedback_override and not mission_control_line.is_empty() and not mission_control_status_text.contains(mission_control_line):
 		mission_control_status_text = _build_strategic_status_text()
-	if not selected_fireteam_line.is_empty() and not selected_fireteam_status_text.contains(selected_fireteam_line):
+	if not uses_feedback_override and not selected_fireteam_line.is_empty() and not selected_fireteam_status_text.contains(selected_fireteam_line):
 		selected_fireteam_status_text = String(command_feedback.get("selected_status_text", _build_fireteam_status_text())).strip_edges()
 	var checks: Array = [
 		_build_mission_first_move_readability_check(
@@ -17799,13 +17850,13 @@ func get_mission_combat_feedback_hud_density_snapshot(command_feedback_override:
 		),
 		_build_mission_first_move_readability_check(
 			"mission_control_uses_compact_line",
-			not mission_control_line.is_empty() and mission_control_status_text.contains(mission_control_line),
-			"Mission Control displays the compact combat line instead of a wider diagnostics paragraph."
+			_combat_hud_status_text_exposes_current_focus(mission_control_status_text, mission_control_line),
+			"Mission Control displays the compact combat line or the current CONTACT FIRE focus."
 		),
 		_build_mission_first_move_readability_check(
 			"selected_fireteam_uses_compact_line",
-			not selected_fireteam_line.is_empty() and selected_fireteam_status_text.contains(selected_fireteam_line),
-			"Selected Fireteam panel displays the compact combat line under execution status."
+			_combat_hud_status_text_exposes_current_focus(selected_fireteam_status_text, compact_line),
+			"Selected Fireteam panel displays the compact combat line or the current CONTACT FIRE focus."
 		),
 		_build_mission_first_move_readability_check(
 			"read_only",
@@ -17833,6 +17884,17 @@ func get_mission_combat_feedback_hud_density_snapshot(command_feedback_override:
 		"failed_checks": failed_checks,
 		"gate": "pass" if failed_checks.is_empty() else "review",
 	}
+
+
+func _combat_hud_status_text_exposes_current_focus(status_text: String, compact_line: String) -> bool:
+	var normalized_status: String = status_text.strip_edges()
+	var normalized_compact: String = compact_line.strip_edges()
+	if normalized_status.is_empty() or normalized_compact.is_empty():
+		return false
+	if normalized_status.contains(normalized_compact):
+		return true
+	var first_line: String = normalized_status.get_slice("\n", 0).strip_edges().to_upper()
+	return first_line.begins_with("CONTACT FIRE | ") and first_line.length() > "CONTACT FIRE | ".length()
 
 
 func get_release_candidate_firefight_feel_hud_polish_snapshot() -> Dictionary:
@@ -25607,6 +25669,7 @@ func get_command_feedback_snapshot() -> Dictionary:
 		station_scenario_route_cue_polish,
 		mission_interaction_progress_readability
 	)
+	var fire_rule_consequence_readability: Dictionary = Dictionary(mission_hud_interaction_density.get("fire_rule_consequence", {})).duplicate(true)
 	var station_scenario_identity_body: Dictionary = build_station_scenario_identity_body_snapshot(station_route_run_readout, [], station_scenario_route_cue_polish)
 	var station_scenario_debrief_handoff_cue: Dictionary = _build_station_scenario_debrief_handoff_cue_snapshot(
 		station_route_run_readout,
@@ -25971,6 +26034,9 @@ func get_command_feedback_snapshot() -> Dictionary:
 		"combat_hud_compact_line": String(combat_hud_density.get("compact_line", "")),
 		"mission_hud_interaction_density": mission_hud_interaction_density,
 		"mission_hud_interaction_line": String(mission_hud_interaction_density.get("mission_control_line", "")),
+		"fire_rule_consequence_readability": fire_rule_consequence_readability,
+		"fire_rule_consequence_line": String(fire_rule_consequence_readability.get("consequence_line", "")),
+		"fire_rule_consequence_state": String(fire_rule_consequence_readability.get("consequence_state", "")),
 		"frontier_probe_one_screen_playability": frontier_probe_one_screen,
 		"frontier_probe_one_screen_line": String(frontier_probe_one_screen.get("one_screen_line", "")),
 		"order_preview_threat_overlay_f6_hud": order_preview_threat_overlay_f6_hud,
