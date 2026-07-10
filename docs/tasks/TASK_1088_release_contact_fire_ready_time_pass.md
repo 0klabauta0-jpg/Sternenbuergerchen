@@ -64,3 +64,7 @@ Ein Teil der Dauer kann aus echten Detection-Ticks oder umfangreichen read-only 
 - TASK_844: 36/36, TASK_847: 38/38, TASK_868: 41/41, TASK_873: 53/53 gruen.
 - TASK_1082: 21/21, TASK_1083: 24/24, TASK_1084: 12/12, TASK_1085: 15/15, TASK_1086: 16/16, TASK_1087: 19/19 gruen.
 - Naechster messbarer Kandidat ist der read-only Sichtbarkeits-/HUD-Readback nach dem Evidence-Aufbau; er soll nur mit frischem Release-Trace angefasst werden.
+- Godot 4.6.2 exportiert den Merge-Stand erfolgreich; der Provenance-Startcheck ist gruen.
+- Der direkte echte Release-Trace erreicht `deeplink_final / applied` nach 9.702 ms. Contact-Tracking benoetigt 2 ms, FireEvent 9 ms, visuelles Feedback 129 ms und Immediate Evidence 1 ms.
+- Der echte Window-Capture zeigt `CONTACT FIRE` weiterhin als Primaerlesung in #17 Selected Fireteam, #18 Mission Control und #19 Event Log.
+- Bekannter Harness-Befund: Der historische TASK-879-Wrapper reichte die Trace-Umgebungsvariable in seiner verschachtelten Capture-Kette nicht bis zum Release-Prozess durch (`runtime_trace_missing`). Der direkte Start desselben Exports schrieb 24 Samples bis `deeplink_final`; Gameplay und Export waren davon nicht betroffen.

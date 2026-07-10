@@ -15,9 +15,10 @@
 - Relevante Docs/Contracts: `docs/tasks/TASK_1088_release_contact_fire_ready_time_pass.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/dev/contact_report_contract.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_844, TASK_1087
 - Stand: TASK_1088 ist 21/21 gruen. Der First-Exchange-Trace trennt Commands, autoritativen Tick, Contact-Tracking, FireEvent, visuelles Feedback und Evidence. Detection/LOS/Combat waren nicht der Engpass; der alte read-only TASK-844-Evidence-Aufbau kopierte ueberlappende historische Snapshot-Baeume.
 - Architektur: Ein kompakter Immediate-Evidence-Snapshot liest vorhandene FireEvents und Contact-Decision-Diagnostik. Er erstellt weder Commands noch Fire-/Damage-Events und setzt keine Multiplayer-Wahrheit. Die ausfuehrliche historische Review-API bleibt erhalten.
-- Performance: `engagement_evidence_ready` sank im vergleichbaren Headless-Lauf von 11.068 ms auf 2 ms; der komplette TASK-1088-Deep-Link sank von 20.641 ms auf 11.527 ms.
+- Performance: `engagement_evidence_ready` sank im vergleichbaren Headless-Lauf von 11.068 ms auf 2 ms; der komplette TASK-1088-Deep-Link sank von 20.641 ms auf 11.527 ms. Im frischen Godot-4.6.2-Release erreicht derselbe Pfad `deeplink_final / applied` nach 9.702 ms; Immediate Evidence kostet dort 1 ms.
 - Lokale Pruefung: TASK_1088 21/21, TASK_844 36/36, TASK_847 38/38, TASK_868 41/41, TASK_873 53/53, TASK_1082 21/21, TASK_1083 24/24, TASK_1084 12/12, TASK_1085 15/15, TASK_1086 16/16 und TASK_1087 19/19.
-- Naechster Schritt: Frischen Godot-4.6.2-Release messen. Nur falls der reale Trace es bestaetigt, den verbleibenden read-only Sichtbarkeits-/HUD-Readback nach dem FireEvent als eigenen Task schneiden.
+- Release-Pruefung: Export und Provenance-Startcheck sind gruen; echter Window-Capture zeigt CONTACT FIRE in #17/#18/#19. Der alte TASK-879-Capture-Wrapper meldet wegen nicht durchgereichter Trace-Umgebung `runtime_trace_missing`, waehrend der direkte identische Release-Start 24 Runtime-Samples schreibt.
+- Naechster Schritt: Den im Release-Trace verbleibenden read-only Sichtbarkeits-/HUD-Readback nur bei weiterem messbarem Spielnutzen als eigenen Task schneiden; Combat selbst ist nicht der Engpass.
 
 ### TASK_1087 - Release Mission/LZ Setup Readiness Pass
 - Status: implementiert im Arbeitsstand
