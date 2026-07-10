@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1042 - Release First Decision Loop Two Player Loop Scenario First Contact Integrated Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1042_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest.md`, `docs/tasks/TASK_1041_release_first_decision_loop_two_player_loop_scenario_first_contact_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactIntegratedPlaytest.build_snapshot()` liest einen bestandenen TASK_1041-Acceptance-Slice und optionalen Integrated-Playtest-Trace.
+- Stand: Ohne Trace bleiben Status und Gate `needs_first_contact_integrated_playtest_trace`; fehlende Checks melden `first_contact_integrated_playtest_regression_found` mit Gate `first_contact_integrated_playtest_regression`; ein sauberer Trace setzt `first_contact_integrated_playtest_passed`.
+- Stand: Geprueft werden Release-/Mission-Entry, eingebettete Acceptance-Slice-Lesbarkeit, CONTACT, WHY, NEXT, FIRE/WAIT, GO-Wiederverwendung, GO-Grenze, Post-GO-FEEDBACK, Rueckkehr zu NEXT, kein Command vor GO, kein Auto-GO, HUD-read-only, Multiplayer-Grenze, Performance-Budget und keine neue HUD-Gameplay-Wahrheit.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1042 im Command-Feedback als Snapshot, Integrated-Playtest-Line, Status und Gate.
+- Risiken/offen: TASK_1042 ist ein headless Integrated-Playtest-Contract. Der naechste Schritt muss aus dem bestandenen Trace einen echten Player-Feel-Befund fuer den First-Contact-Moment schneiden.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1042_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest.gd`, Regression TASK_1041, TASK_1040, TASK_1039, `git diff --check`.
+- Naechster Schritt: TASK_1043 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings.
+
 ### TASK_1041 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1041_release_first_decision_loop_two_player_loop_scenario_first_contact_acceptance_slice.md`, `docs/tasks/TASK_1040_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_polish.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -90,6 +90,11 @@ TASK_1041 prueft, ob der gepolishte erste Kontakt als zusammenhaengender Mini-Gr
 
 Der Acceptance-Slice bleibt read-only. Ohne Trace bleibt er `needs_first_contact_acceptance_trace`; fehlende Checks werden als `first_contact_acceptance_regression_found` benannt; ein bestandener Trace routet zu `TASK_1042 - Release First Decision Loop Two Player Loop Scenario First Contact Integrated Playtest`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Integrated Playtest (TASK_1042)
+TASK_1042 prueft, ob der akzeptierte First-Contact-Griff im integrierten Release-/Mission-Kontext zusammenhaelt. Ein guter Trace bestaetigt: ENTRY erreicht, Acceptance-Slice im Command-Feedback eingebettet, CONTACT und WHY bleiben im Kontext lesbar, NEXT und FIRE/WAIT bleiben handlungsfaehig, `GO separat` wird wiederverwendet, FEEDBACK wird nach GO beobachtet, die Rueckkehr zu NEXT bleibt klar, kein Command passiert vor GO, kein Auto-GO laeuft an, HUD und Multiplayer-Grenze bleiben read-only und das Budget bleibt performant.
+
+Der Integrated-Playtest bleibt read-only. Ohne Trace bleiben Status und Gate `needs_first_contact_integrated_playtest_trace`; fehlende Checks werden als `first_contact_integrated_playtest_regression_found` mit Gate `first_contact_integrated_playtest_regression` benannt; ein bestandener Trace routet zu `TASK_1043 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings`. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 TASK_1004 ist der read-only Fensterbeweis-Rahmen fuer den TASK_1003-Round-Loop-Polish. Er erwartet im echten Fenster sichtbare `ROUND`-, `NEXT`- und `GO separat`-Surfaces sowie kurze Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen.
 
