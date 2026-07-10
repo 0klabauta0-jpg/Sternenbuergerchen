@@ -84,6 +84,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1071 ist 47/47 gruen. Der reale Context-Slot fuehrt AA -> Door -> Computer -> Cargo; jede Aktion plant nur und GO fuehrt aus. Cargo schliesst die vorhandenen Scenario-Gates und erreicht ueber Combat-Result und MetaLayerFlow den bestehenden Debrief-Screen mit `victory / won`.
 - Naechster Schritt: Einen echten sichtbaren Station-Route-F6-Lauf mit NPC-Druck und dieser vollstaendigen Route bewerten. Neue Mechanik erst nach einem belegten Bedien-, Lesbarkeits- oder Performance-Befund.
 
+## TASK_1072 - Contextual Interaction HUD Semantics (implementiert im Arbeitsstand)
+- Grundlage: Der sichtbare Context-Slot plante die richtige AA-/Door-/Computer-/Cargo-Interaction, konnte nach dem statischen Command-Hierarchy-Pass aber noch den historischen Breach-Tooltip, Door-Hilfe und Hotkey `B` zeigen.
+- Ergebnis: TASK_1072 ist 23/23 gruen. Nach dem Hierarchy-Pass und weiteren UI-Frames folgt der Slot wieder der aktiven Interaction: AA/Computer verwenden Take ohne Breach/B, Cargo verwendet Defend ohne Breach/B, echte Doors behalten Breach, `B->GO` und `B`.
+- Naechster Schritt: Den gesamten Station-Route-Spielzug als sichtbaren F6-Playtest unter NPC-Druck bewerten und nur konkrete Bedien-, Lesbarkeits- oder Performance-Befunde in Folgearbeit schneiden.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

@@ -130,6 +130,15 @@
 - Lokale Pruefung: TASK_1071 47/47; Anschlussregressionen folgen vor Commit mit TASK_1070, TASK_1069, TASK_695, TASK_726, TASK_586, TASK_813 und `git diff --check`.
 - Naechster Schritt: Den gewonnenen Pfad als sichtbaren F6-Playtest unter NPC-Druck bewerten und den ersten belegten Bedien-, Lesbarkeits- oder Performance-Befund statt weiterer theoretischer Route-Snapshots beheben.
 
+### TASK_1072 - Contextual Interaction HUD Semantics
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1072_contextual_interaction_hud_semantics.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1070, TASK_1071, TASK_695
+- Stand: TASK_1072 ist 23/23 gruen. Der gemeinsame CommandGrid-Slot `16.8` behaelt fuer AA die Take-Semantik samt AA-Tooltip und ohne Door-Hotkey. Eine echte Door behaelt weiterhin Breach, `B->GO`, `B` und die Door-Hilfe. Der Nachweis prueft den finalen Zustand nach dem Command-Hierarchy-Pass und nach weiteren UI-Frames.
+- Ursache/Fix: Der dynamische Interaction-Refresh setzte den korrekten Kontext, doch der spaeter laufende historische Hierarchy-Katalog schrieb denselben Node wieder als `breach_door`. Ein kleiner finaler Snapshot-Pass stellt nur sichtbare Text-, Tooltip-, Help- und Metadaten wieder passend zur aktiven Interaction her; Command- und Gate-Wahrheit bleiben unveraendert.
+- Risiken/offen: Die Korrektur deckt den gemeinsam verwendeten Slot ab. Ein sichtbarer F6-Playtest mit NPC-Druck, HUD-Dichte und Host/Client-Sync bleibt getrennte menschliche Abnahme.
+- Lokale Pruefung: TASK_1072 23/23, TASK_1070 23/23, TASK_1071 47/47, TASK_695 32/32 und `git diff --check` gruen.
+- Naechster Schritt: Den vollstaendigen Station-Route-F6-Lauf unter NPC-Druck auf Bedienbarkeit, Lesbarkeit und Performance bewerten; neue Mechanik nur aus einem konkreten Befund ableiten.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

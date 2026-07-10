@@ -164,6 +164,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Ein offenes Scenario-Gate ist keine laufende Bedienung. Ohne expliziten Interaction-Runtime-State bleibt eine Fireteam im Radius `usable`, damit der Spieler die Aktion bewusst ausloesen kann.
 - Button, Snapshot und Tooltip sind Bedienfeedback und besitzen keine Mission-, Gate-, Door-, Cargo- oder Combat-Wahrheit.
 
+## Contextual Interaction HUD Semantics
+- Der historische Command-Hierarchy-Pass darf den gemeinsamen Slot `16.8` nicht abschliessend als Door beschreiben. Danach richtet ein rein visueller Semantikpass Text, Tooltip, `help_id` und Metadaten wieder an dem bereits gelesenen Primary-Interaction-Snapshot aus.
+- AA-Shutdown und Computer-Interactions nutzen `mission.command.take`; Cargo-Hold nutzt `mission.command.defend`. Diese Nicht-Door-Interactions duerfen weder `Breach` noch den Door-Shortcut `B` anzeigen oder exportieren.
+- Nur eine Interaction mit `interaction_type = door` behaelt `mission.command.breach_door`, den sichtbaren Breach-Text und den Shortcut `B`.
+- Der Semantikpass liest ausschliesslich den vorhandenen Snapshot. Er erzeugt keinen Command, setzt keine Route, kein Gate und keinen Door-/Cargo-State.
+
 ## Door Runtime Visual Animation/Asset Swap
 - Door-Object-Reactions exportieren `door_animation_phase`, `door_asset_swap_state`, `door_leaf_gap_fraction`, `door_threshold_visible` und `door_runtime_collision_source`.
 - Die zulaessigen Door-Visualphasen sind `closed_idle`, `opening_*_percent` und `open`; sie bilden nur den sichtbaren Runtime-Status ab.

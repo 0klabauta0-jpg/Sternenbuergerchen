@@ -11985,6 +11985,45 @@ func _apply_command_hierarchy_metadata() -> void:
 			button.set_meta(str(key_variant), metadata[key_variant])
 		button.set_meta("command_hierarchy_group_help_id", _get_command_hierarchy_group_help_id(str(action.get("group_id", ""))))
 		button.tooltip_text = _build_command_hierarchy_tooltip(action, button, str(metadata.get("command_hierarchy_disabled_reason", "")))
+	_apply_primary_mission_interaction_semantics(Dictionary(button_snapshots.get("mission_interaction", {})))
+
+
+func _apply_primary_mission_interaction_semantics(interaction_snapshot: Dictionary = {}) -> void:
+	var button := get_node_or_null(DOOR_BREACH_BUTTON_PATH) as Button
+	if button == null:
+		return
+	var snapshot: Dictionary = interaction_snapshot
+	if snapshot.is_empty():
+		snapshot = get_primary_mission_interaction_button_snapshot()
+	var interaction_type: String = String(snapshot.get("interaction_type", "")).strip_edges().to_lower()
+	var is_door: bool = interaction_type == "door"
+	button.visible = bool(snapshot.get("visible", true))
+	button.disabled = bool(snapshot.get("disabled", true))
+	button.text = String(snapshot.get("text", button.text))
+	button.tooltip_text = String(snapshot.get("tooltip_text", button.tooltip_text))
+	button.set_meta("door_interaction_button_enabled", not button.disabled)
+	button.set_meta("door_interaction_id", String(snapshot.get("interaction_id", "")).strip_edges())
+	button.set_meta("door_interaction_display_token", String(snapshot.get("display_token", "USE")).strip_edges().to_upper())
+	button.set_meta("mission_interaction_button", true)
+	button.set_meta("mission_interaction_type", interaction_type)
+	button.set_meta("mission_interaction_required_order", String(snapshot.get("required_order", "")).strip_edges().to_lower())
+	button.set_meta("mission_interaction_requires_go", bool(snapshot.get("requires_go", false)))
+	button.set_meta("help_id", String(snapshot.get("help_id", "mission.command.take")))
+	button.set_meta("command_hierarchy_disabled_reason", String(snapshot.get("disabled_reason", "")).strip_edges())
+	button.set_meta("command_hierarchy_action_id", "breach_door" if is_door else "mission_interaction")
+	button.set_meta("command_hierarchy_group_id", "door_interaction" if is_door else "mission_interaction")
+	button.set_meta("command_hierarchy_group_help_id", String(snapshot.get("help_id", "mission.command.take")))
+	button.set_meta("command_hierarchy_context", "door_interaction" if is_door else "mission_interaction")
+	button.set_meta("command_hierarchy_label", "Breach" if is_door else String(snapshot.get("display_token", "USE")).strip_edges().to_upper())
+	button.set_meta("door_interaction_shortcut", String(snapshot.get("shortcut", "")))
+	META_UI_SKIN_SCRIPT.style_tactical_button(button, not button.disabled)
+
+
+func _get_primary_mission_interaction_help_id(interaction_feedback: Dictionary) -> String:
+	if String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower() == "door":
+		return "mission.command.breach_door"
+	var required_order: String = String(interaction_feedback.get("required_order", "")).strip_edges().to_lower()
+	return "mission.command.defend" if required_order == "defend" else "mission.command.take"
 
 
 func _get_command_hierarchy_group_help_id(group_id: String) -> String:
@@ -13285,6 +13324,8 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 	button.set_meta("mission_interaction_type", interaction_type)
 	button.set_meta("mission_interaction_required_order", String(interaction_feedback.get("required_order", "")).strip_edges().to_lower())
 	button.set_meta("mission_interaction_requires_go", enabled)
+	button.set_meta("help_id", _get_primary_mission_interaction_help_id(interaction_feedback))
+	button.set_meta("door_interaction_shortcut", "B" if is_door else "")
 	button.set_meta("door_authority_ui_status", String(authority_ui_feedback.get("status", "")).strip_edges())
 	button.set_meta("door_authority_ui_summary_line", String(authority_ui_feedback.get("summary_line", "")).strip_edges())
 	button.set_meta("door_authority_ui_compact_line", String(authority_ui_feedback.get("compact_line", "")).strip_edges())
@@ -13312,18 +13353,25 @@ func get_primary_mission_interaction_button_snapshot() -> Dictionary:
 		display_token = "USE"
 	var usable_door_feedback: Dictionary = interaction_feedback if is_door and usable else {}
 	var door_authority: Dictionary = build_mission_interaction_door_authority_ui_feedback({}, _build_door_authority_button_context(feedback, usable_door_feedback)) if is_door else {}
+	var tooltip_text: String = String(door_authority.get("tooltip_text", "")).strip_edges() if is_door else "%s -> GO" % String(interaction_feedback.get("feedback_line", "interaction unavailable")).strip_edges()
+	if tooltip_text.is_empty() and is_door:
+		tooltip_text = "Breach %s [B] -> GO" % display_token if enabled else _build_door_interaction_button_disabled_tooltip(usable)
 	return {
 		"schema": "sternenbuergerchen.mission_primary_interaction_button.v1",
 		"button_path": DOOR_BREACH_BUTTON_PATH,
 		"visible": true,
 		"disabled": not enabled,
 		"text": _build_door_interaction_button_text(String(door_authority.get("status", "")).strip_edges(), enabled) if is_door else ("%s->GO" % display_token if enabled else display_token),
+		"tooltip_text": tooltip_text,
 		"interaction_id": String(interaction_feedback.get("interaction_id", "")).strip_edges(),
 		"interaction_type": interaction_type,
 		"required_order": String(interaction_feedback.get("required_order", "")).strip_edges().to_lower(),
 		"status": String(interaction_feedback.get("status", "unknown")).strip_edges().to_lower(),
 		"display_token": display_token,
+		"help_id": _get_primary_mission_interaction_help_id(interaction_feedback),
+		"shortcut": "B" if is_door else "",
 		"requires_go": enabled,
+		"disabled_reason": "" if enabled else _resolve_primary_mission_interaction_button_disabled_reason(interaction_feedback, is_door),
 		"uses_door_breach_bridge": is_door,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
