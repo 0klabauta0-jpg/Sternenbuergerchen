@@ -56,6 +56,7 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `MissionInteractionRuntimeUseState` verbindet den Binding-Snapshot mit Terrain-Markerpositionen, aktiven Fireteam-Ankern und optionalen Interaction-Runtime-Stati.
 - Der Snapshot liefert `usable`, `out_of_range`, `blocked`, `in_progress`, `interrupted`, `complete` oder `unknown`.
 - Naehe wird aus `radius_world` und dem naechsten erlaubten Fireteam abgeleitet.
+- Ein noch offenes oder als aktiv markiertes Scenario-Gate allein ist kein laufender Use: `in_progress` entsteht erst aus einem expliziten Interaction-Runtime-State des laufenden Waypoints. Ein Fireteam im Radius bleibt davor `usable` und kann den Befehl bewusst planen.
 - `required_team` begrenzt, welches Team eine Interaction bedienen darf; `any` oder leer erlaubt jedes Team.
 - Der Snapshot bleibt read-only: `SimulationRoot`/Scenario-Gates entscheiden weiterhin ueber echten Fortschritt, Abschluss und Fehlschlag.
 - `MissionTacticalSandboxController.get_mission_interaction_runtime_use_state_snapshot()` ist eine on-demand Fassade fuer Verifier, Debug und spaetere UI-Preview, kein neuer HUD-Hotpath.
@@ -154,6 +155,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Button muss auch blockiert sichtbar bleiben, damit der Spieler erkennt, dass Door-Breach existiert, aber gerade keine nutzbare Door in Reichweite ist.
 - Command-Control- und Command-Hierarchy-Snapshots muessen `breach_door`, Slot, Tooltip, Shortcut und Door-ID exportieren.
 - `requires_go = true` bleibt Pflicht; echter Runtime-State entsteht erst ueber Waypoint-Ausfuehrung, Runtime-Progress und Door Runtime State Producer.
+
+## Contextual Mission Interaction Slot
+- Der bestehende CommandGrid-Slot `16.8` bleibt als `DoorBreachButton` und vorhandener Door-/Shortcut-Pfad kompatibel, dient aber fuer die aktive Missionsroute als kontextuelle Interaction-Aktion.
+- `MissionTacticalSandboxController.get_primary_mission_interaction_button_snapshot()` waehlt zuerst die Interaction aus `MissionInteractionObjectiveGate.next_interaction_id`; allgemeine Feedback-Prioritaet darf einen spaeteren blockierten Cargo-Schritt nicht vor die aktive AA-/Door-/Computer-Aktion ziehen.
+- `issue_primary_mission_interaction()` nutzt fuer Doors weiter den vorhandenen Door-Breach-Hook. Fuer AA, Computer und Cargo nutzt es ausschliesslich `create_selected_mission_interaction_use_intent()`.
+- Der Slot bleibt ausser Reichweite sichtbar und deaktiviert. Im Radius erzeugt er nur einen Intent mit `requires_go = true`; erst die vorhandene GO-/Waypoint-Ausfuehrung publiziert Interaction-Progress und aendert Scenario-Gates.
+- Ein offenes Scenario-Gate ist keine laufende Bedienung. Ohne expliziten Interaction-Runtime-State bleibt eine Fireteam im Radius `usable`, damit der Spieler die Aktion bewusst ausloesen kann.
+- Button, Snapshot und Tooltip sind Bedienfeedback und besitzen keine Mission-, Gate-, Door-, Cargo- oder Combat-Wahrheit.
 
 ## Door Runtime Visual Animation/Asset Swap
 - Door-Object-Reactions exportieren `door_animation_phase`, `door_asset_swap_state`, `door_leaf_gap_fraction`, `door_threshold_visible` und `door_runtime_collision_source`.

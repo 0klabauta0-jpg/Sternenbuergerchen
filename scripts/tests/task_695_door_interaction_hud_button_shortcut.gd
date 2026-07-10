@@ -96,7 +96,7 @@ func _test_door_hud_button_and_shortcut() -> void:
 	_assert(bool(button_snapshot.get("exists", false)), "Command feedback exports breach door button")
 	_assert(bool(button_snapshot.get("visible", false)), "Breach door button is visible")
 	_assert(not bool(button_snapshot.get("disabled", true)), "Breach door button is enabled for usable door")
-	_assert(String(button_snapshot.get("text", "")) == "Breach", "Breach door button has readable label")
+	_assert(String(button_snapshot.get("text", "")) == "B->GO", "Breach door button keeps its compact GO cue")
 	_assert(String(button_snapshot.get("command_matrix_slot_id", "")) == "16.8", "Breach door button occupies command slot 16.8")
 	_assert(String(button_snapshot.get("door_interaction_shortcut", "")) == "B", "Breach door button advertises B shortcut")
 	_assert(String(button_snapshot.get("door_interaction_id", "")) == DOOR_INTERACTION_ID, "Breach door button targets usable door")

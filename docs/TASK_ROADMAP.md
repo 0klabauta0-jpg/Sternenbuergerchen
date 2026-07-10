@@ -74,6 +74,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1069 ist 28/28 gruen. EVAC wird nur fuer ein ausgewaehltes Ground-Fireteam im LZ aktiv. Ein Host beendet die Mission ueber den bestehenden Combat-Result- und Debrief-Pfad mit `aborted / evacuation`; ein Nicht-Authority-Aufruf wird ohne lokale Mutation abgelehnt.
 - Naechster Schritt: Den komplementaeren Vorstossausgang zur AA-Interaktion als kleinen NPC-Druck- und Erfolg-zu-Door-Cue-Slice bauen.
 
+## TASK_1070 - Station Route AA Assault and Door Transition (implementiert im Arbeitsstand)
+- Grundlage: AA war als erster Scenario-Gate und allgemeiner Use-Intent vorhanden, aber der sichtbare CommandGrid-Slot konnte nur Doors planen. Eine allgemeine Feedback-Prioritaet zog zudem einen spaeteren blockierten Cargo-Schritt vor die aktive AA-Route.
+- Ergebnis: TASK_1070 ist 23/23 gruen. Slot `16.8` folgt jetzt dem naechsten Objective-Gate, zeigt `AA` ausser Reichweite und `AA->GO` im Radius. Die Aktion erzeugt nur den bestehenden `take`-Intent; erst GO durchlaeuft Formation/Movement/Runtime-Progress, setzt AA ab und leitet sichtbar zur Door-Cue weiter.
+- Naechster Schritt: Den sichtbaren Door -> Computer -> Cargo-Folgepfad unter NPC-Druck als kurze vollstaendige Station-Route bis Debrief pruefen, bevor weitere neue Missionsmechanik entsteht.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

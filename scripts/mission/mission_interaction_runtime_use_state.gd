@@ -100,7 +100,7 @@ static func _derive_runtime_use_status(binding: Dictionary, state: Dictionary, h
 		return STATUS_UNKNOWN
 	if not in_range:
 		return STATUS_OUT_OF_RANGE
-	if bool(binding.get("in_progress", false)) or binding_status == STATUS_IN_PROGRESS or ["active", "holding", "operating"].has(explicit_state):
+	if ["active", "holding", "operating", "in_progress"].has(explicit_state):
 		return STATUS_IN_PROGRESS
 	return STATUS_USABLE
 

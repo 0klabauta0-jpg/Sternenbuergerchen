@@ -112,6 +112,15 @@
 - Lokale Pruefung: TASK_1069 28/28, TASK_1068 16/16, TASK_1063 14/14, TASK_813 43/43, TASK_586 37/37 und `git diff --check` gruen. TASK_813 meldet beim Headless-Exit weiter eine ObjectDB-Leak-Warnung bei gruenem Exit.
 - Naechster Schritt: Den anderen echten Ausgang schneiden: ein sichtbarer Vorstoss vom Erstkontakt zum AA-Gate mit NPC-Druck, klarer AA-Abschlussrueckmeldung und anschliessendem Door-Route-Cue.
 
+### TASK_1070 - Station Route AA Assault and Door Transition
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1070_station_route_aa_assault_door_transition.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1068, TASK_1069, TASK_695, TASK_726
+- Stand: TASK_1070 ist 23/23 gruen. Der bestehende CommandGrid-Slot `16.8` folgt der aktiven Objective-Route statt einer allgemeinen Feedback-Sortierung. Vor AA zeigt er sichtbar `AA`, wird im Shutdown-Radius als `AA->GO` aktiv und erzeugt nur den vorhandenen `take`-Intent. Erst GO fuehrt die reale Movement-/Interaction-Progress-Kette aus, setzt `disable_air_defense = aa_disabled` und wechselt die naechste Cue zu `open_station_door`.
+- Ursache/Fix: Der allgemeine Use-Intent war schon vorhanden, aber nur Door besass eine sichtbare Bedienbruecke. Zusaetzlich interpretierte der Runtime-Use-Presenter ein offenes Scenario-Gate als laufende Bedienung. Der Button waehlt nun zuerst `ObjectiveGate.next_interaction_id`; `in_progress` kommt ausschliesslich von explizitem Interaction-Runtime-State, nicht von einer offenen Route.
+- Risiken/offen: Der Trace beschleunigt nach einem echten GO nur die vom bestehenden Movement-Controller berechneten Staffelziele, damit die Headless-Pruefung nicht auf Renderzeit wartet. Ein sichtbarer F6-Lauf mit NPC-Druck, Balance und Door-/Computer-/Cargo-Folgeaktion bleibt offen.
+- Lokale Pruefung: TASK_1070 23/23; Anschlussregressionen folgen vor Commit mit TASK_1068, TASK_1069, TASK_695, TASK_726, TASK_813 und `git diff --check`.
+- Naechster Schritt: Die Door-/Computer-/Cargo-Folge im sichtbaren Playtest pruefen und als kleinen vollstaendigen Station-Route-Sieg bis Debrief absichern, ohne die neue Context-Action wieder zu duplizieren.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.

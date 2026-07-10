@@ -990,6 +990,20 @@ func issue_breach_door_interaction() -> bool:
 	return bool(result.get("accepted", false))
 
 
+func issue_primary_mission_interaction() -> Dictionary:
+	if preview_mode:
+		_last_command_text = "PREVIEW MODE"
+		_update_ui()
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "preview_mode"))
+	var interaction_feedback: Dictionary = _resolve_primary_mission_interaction_feedback(get_mission_interaction_use_feedback_snapshot())
+	if interaction_feedback.is_empty():
+		return _store_mission_interaction_use_intent_result(_build_mission_interaction_use_intent_result(false, "no_interaction_feedback"))
+	if String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower() == "door":
+		var door_result: Dictionary = create_selected_mission_interaction_door_use_breach_command_hook(String(interaction_feedback.get("interaction_id", "")).strip_edges())
+		return Dictionary(door_result.get("use_intent", door_result)).duplicate(true)
+	return create_selected_mission_interaction_use_intent(String(interaction_feedback.get("interaction_id", "")).strip_edges())
+
+
 func issue_ad_hoc_order(order_type: String, target_position: Variant = null) -> bool:
 	if preview_mode:
 		_last_command_text = "PREVIEW MODE"
@@ -11583,6 +11597,7 @@ func _build_command_control_snapshot() -> Dictionary:
 		"flank": _build_button_snapshot(flank_button_path),
 		"take": _build_button_snapshot(take_button_path),
 		"breach_door": _build_button_snapshot(NodePath(DOOR_BREACH_BUTTON_PATH)),
+		"mission_interaction": get_primary_mission_interaction_button_snapshot(),
 		"target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_TARGET")))),
 		"clear_target": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_CLEAR_TARGET")))),
 		"delete_order": _build_button_snapshot(NodePath(str(MISSION_COMMAND_HIERARCHY_CONTRACT_SCRIPT.get("BUTTON_PATH_DELETE_ORDER")))),
@@ -13233,7 +13248,7 @@ func _ensure_door_interaction_command_button(command_grid: GridContainer, slot_i
 
 
 func _on_door_breach_button_pressed() -> void:
-	issue_breach_door_interaction()
+	issue_primary_mission_interaction()
 
 
 func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) -> void:
@@ -13243,22 +13258,33 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 	var feedback: Dictionary = feedback_snapshot
 	if feedback.is_empty():
 		feedback = get_mission_interaction_use_feedback_snapshot()
-	var door_feedback: Dictionary = _resolve_usable_door_interaction_feedback(feedback)
-	var has_usable_door: bool = not door_feedback.is_empty()
-	var enabled: bool = not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty() and has_usable_door
-	var display_token: String = String(door_feedback.get("display_token", "DOOR")).strip_edges().to_upper()
+	var interaction_feedback: Dictionary = _resolve_primary_mission_interaction_feedback(feedback)
+	var interaction_type: String = String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower()
+	var is_door: bool = interaction_type == "door"
+	var has_usable_interaction: bool = bool(interaction_feedback.get("can_prompt_use", false)) and String(interaction_feedback.get("status", "")).strip_edges().to_lower() == "usable"
+	var enabled: bool = not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty() and has_usable_interaction
+	var display_token: String = String(interaction_feedback.get("display_token", "USE")).strip_edges().to_upper()
 	if display_token.is_empty():
-		display_token = "DOOR"
+		display_token = "USE"
 	button.visible = true
 	button.disabled = not enabled
-	var authority_ui_feedback: Dictionary = build_mission_interaction_door_authority_ui_feedback({}, _build_door_authority_button_context(feedback, door_feedback))
-	button.text = _build_door_interaction_button_text(String(authority_ui_feedback.get("status", "")).strip_edges(), enabled)
-	button.tooltip_text = String(authority_ui_feedback.get("tooltip_text", "")).strip_edges()
-	if button.tooltip_text.is_empty():
-		button.tooltip_text = "Breach %s [B] -> GO" % display_token if enabled else _build_door_interaction_button_disabled_tooltip(has_usable_door)
+	var usable_door_feedback: Dictionary = interaction_feedback if is_door and has_usable_interaction else {}
+	var authority_ui_feedback: Dictionary = build_mission_interaction_door_authority_ui_feedback({}, _build_door_authority_button_context(feedback, usable_door_feedback)) if is_door else {}
+	if is_door:
+		button.text = _build_door_interaction_button_text(String(authority_ui_feedback.get("status", "")).strip_edges(), enabled)
+		button.tooltip_text = String(authority_ui_feedback.get("tooltip_text", "")).strip_edges()
+		if button.tooltip_text.is_empty():
+			button.tooltip_text = "Breach %s [B] -> GO" % display_token if enabled else _build_door_interaction_button_disabled_tooltip(has_usable_interaction)
+	else:
+		button.text = "%s->GO" % display_token if enabled else display_token
+		button.tooltip_text = "%s -> GO" % String(interaction_feedback.get("feedback_line", "interaction unavailable")).strip_edges()
 	button.set_meta("door_interaction_button_enabled", enabled)
-	button.set_meta("door_interaction_id", String(door_feedback.get("interaction_id", "")).strip_edges())
+	button.set_meta("door_interaction_id", String(interaction_feedback.get("interaction_id", "")).strip_edges())
 	button.set_meta("door_interaction_display_token", display_token)
+	button.set_meta("mission_interaction_button", true)
+	button.set_meta("mission_interaction_type", interaction_type)
+	button.set_meta("mission_interaction_required_order", String(interaction_feedback.get("required_order", "")).strip_edges().to_lower())
+	button.set_meta("mission_interaction_requires_go", enabled)
 	button.set_meta("door_authority_ui_status", String(authority_ui_feedback.get("status", "")).strip_edges())
 	button.set_meta("door_authority_ui_summary_line", String(authority_ui_feedback.get("summary_line", "")).strip_edges())
 	button.set_meta("door_authority_ui_compact_line", String(authority_ui_feedback.get("compact_line", "")).strip_edges())
@@ -13269,9 +13295,58 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 	button.set_meta("door_authority_ui_reject_reason_label", String(authority_ui_feedback.get("reject_reason_label", "")).strip_edges())
 	button.set_meta("door_authority_ui_requires_go", bool(authority_ui_feedback.get("requires_go", false)))
 	button.set_meta("door_authority_ui_read_only", bool(authority_ui_feedback.get("read_only", false)))
-	button.set_meta("command_hierarchy_disabled_reason", "" if enabled else _resolve_door_interaction_button_disabled_reason(has_usable_door))
+	button.set_meta("command_hierarchy_disabled_reason", "" if enabled else _resolve_primary_mission_interaction_button_disabled_reason(interaction_feedback, is_door))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, enabled)
-	_apply_door_authority_button_affordance(button, String(authority_ui_feedback.get("severity", "")).strip_edges())
+	_apply_door_authority_button_affordance(button, String(authority_ui_feedback.get("severity", "action" if enabled else "warning")).strip_edges())
+
+
+func get_primary_mission_interaction_button_snapshot() -> Dictionary:
+	var feedback: Dictionary = get_mission_interaction_use_feedback_snapshot()
+	var interaction_feedback: Dictionary = _resolve_primary_mission_interaction_feedback(feedback)
+	var interaction_type: String = String(interaction_feedback.get("interaction_type", "")).strip_edges().to_lower()
+	var is_door: bool = interaction_type == "door"
+	var usable: bool = bool(interaction_feedback.get("can_prompt_use", false)) and String(interaction_feedback.get("status", "")).strip_edges().to_lower() == "usable"
+	var enabled: bool = not preview_mode and _can_issue_local_commands() and not _selected_fireteam_ids.is_empty() and usable
+	var display_token: String = String(interaction_feedback.get("display_token", "USE")).strip_edges().to_upper()
+	if display_token.is_empty():
+		display_token = "USE"
+	var usable_door_feedback: Dictionary = interaction_feedback if is_door and usable else {}
+	var door_authority: Dictionary = build_mission_interaction_door_authority_ui_feedback({}, _build_door_authority_button_context(feedback, usable_door_feedback)) if is_door else {}
+	return {
+		"schema": "sternenbuergerchen.mission_primary_interaction_button.v1",
+		"button_path": DOOR_BREACH_BUTTON_PATH,
+		"visible": true,
+		"disabled": not enabled,
+		"text": _build_door_interaction_button_text(String(door_authority.get("status", "")).strip_edges(), enabled) if is_door else ("%s->GO" % display_token if enabled else display_token),
+		"interaction_id": String(interaction_feedback.get("interaction_id", "")).strip_edges(),
+		"interaction_type": interaction_type,
+		"required_order": String(interaction_feedback.get("required_order", "")).strip_edges().to_lower(),
+		"status": String(interaction_feedback.get("status", "unknown")).strip_edges().to_lower(),
+		"display_token": display_token,
+		"requires_go": enabled,
+		"uses_door_breach_bridge": is_door,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _resolve_primary_mission_interaction_button_disabled_reason(interaction_feedback: Dictionary, is_door: bool) -> String:
+	if preview_mode:
+		return "preview mode"
+	if not _can_issue_local_commands():
+		return "host controls mission commands"
+	if _selected_fireteam_ids.is_empty():
+		return "select fireteam"
+	if is_door:
+		return _resolve_door_interaction_button_disabled_reason(false)
+	var status: String = String(interaction_feedback.get("status", "")).strip_edges().to_lower()
+	if status == "out_of_range":
+		return "move selected fireteam into interaction range"
+	if status == "blocked":
+		return "complete the previous route step"
+	if String(interaction_feedback.get("interaction_id", "")).strip_edges().is_empty():
+		return "no mission interaction available"
+	return "interaction not usable"
 
 
 func _build_door_interaction_button_text(status: String, enabled: bool) -> String:
@@ -24413,6 +24488,28 @@ func _resolve_mission_interaction_feedback_for_intent(feedback_snapshot: Diction
 			continue
 		var entry: Dictionary = Dictionary(entry_variant)
 		if String(entry.get("interaction_id", "")).strip_edges() == normalized_interaction_id:
+			return entry.duplicate(true)
+	return {}
+
+
+func _resolve_primary_mission_interaction_feedback(feedback_snapshot: Dictionary) -> Dictionary:
+	var objective_gate: Dictionary = get_mission_interaction_objective_gate_snapshot()
+	var next_interaction_id: String = String(objective_gate.get("next_interaction_id", "")).strip_edges()
+	if not next_interaction_id.is_empty():
+		for entry_variant in Array(feedback_snapshot.get("feedback_entries", [])):
+			if typeof(entry_variant) != TYPE_DICTIONARY:
+				continue
+			var entry: Dictionary = Dictionary(entry_variant)
+			if String(entry.get("interaction_id", "")).strip_edges() == next_interaction_id:
+				return entry.duplicate(true)
+	var primary: Dictionary = Dictionary(feedback_snapshot.get("primary_feedback", {}))
+	if not String(primary.get("interaction_id", "")).strip_edges().is_empty():
+		return primary.duplicate(true)
+	for entry_variant in Array(feedback_snapshot.get("feedback_entries", [])):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant)
+		if not String(entry.get("interaction_id", "")).strip_edges().is_empty():
 			return entry.duplicate(true)
 	return {}
 
