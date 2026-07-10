@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1087 - Release Mission/LZ Setup Readiness Pass
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1087_release_mission_lz_setup_readiness_pass.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_831, TASK_396, TASK_503, TASK_1086
+- Stand: TASK_1087 ist 19/19 gruen. Missionstart, Transfer, LZ, Deboarding und Preview besitzen eigene Trace-Stufen. Der LZ-Direkteinstieg und der Homebase-Missionsrequest enthalten keine blinden Frame-Wartefenster mehr; begrenzte Conditions pruefen aktive Runtime-Nodes, Drop-Start, Deployment nach autoritativem Tick und GO-bereiten Preview-State.
+- Ursache/Fix: Der alte direkte LZ-Trace verteilte 12.814 ms vor allem auf Deboarding (5.741 ms) und Preview (3.216 ms). Der neue vergleichbare Trace endet nach 5.774 ms. Ein Regressionstest deckte ausserdem auf, dass sehr schnell abgeschlossene Bewegung ihren aktiven Phase-State verlieren kann; der Execution-Snapshot akzeptiert deshalb einen realen `recent_movement_trace` als nachvollziehbaren Abschluss.
+- Risiken/offen: Die normale Dropship-Simulation wird nicht beschleunigt; nur der Release-/Test-Direkteinstieg wartet nicht mehr blind. Der aktuelle volle Headless-Trace zeigt Kontakt bis FireEvent mit 11.823 ms als groessten Restblock. Echte Release-Wandzeit bleibt Abnahme, nicht Headless-FPS-Versprechen.
+- Lokale Pruefung: TASK_1087 19/19, TASK_831 37/37, TASK_396 17/17, TASK_503 10/10, TASK_1086 16/16, TASK_1085 15/15 und TASK_1084 12/12.
+- Naechster Schritt: TASK_1088 - Release Contact/Fire Ready-Time Pass. Kontaktaufbau, Detection/LOS, Combat-Decision und FireEvent-/HUD-Evidence werden einzeln gemessen; nur der dominante reale Teil wird optimiert.
+
 ### TASK_1086 - Release Mission Ready-Time Performance Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1086_release_mission_ready_time_performance_pass.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_1084, TASK_1085, TASK_832, TASK_868

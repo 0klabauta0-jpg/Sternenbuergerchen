@@ -49,6 +49,14 @@ Dieses Dokument haelt den manuellen Zielzustand fuer Homebase-Direct-Dropships f
 - Vollstaendige HUD-Rebuilds, Mission-Dropship-Panel-Rebuilds, Planning-State-Emits und rekursive Unit-Tree-Suppression duerfen nicht pro Frame waehrend Fortschrittsbalken laufen.
 - Fortschrittsanzeigen sollen in kurzen Intervallen aktualisieren, aber Eingabe, Drag-and-Drop und Map-Flug muessen fluessig bleiben.
 
+## Release-Setup-Readiness
+- Der Release-/Test-Direkteinstieg darf Missionstart, Transfer, LZ, Drop, Deboarding und Preview nicht mit festen Framezahlen abschaetzen.
+- Missionstart gilt bei sichtbarer Mission und aktiver Missionsinstanz als bereit.
+- Transfer gilt erst mit vorhandenen Missionscontroller- und Primary3DView-Nodes als bereit.
+- Deboarding gilt nach mindestens einem autoritativen `SimulationRoot`-Tick und sichtbaren deployed Unit-IDs als bereit.
+- Preview gilt erst mit passierendem LZ-/Move-Snapshot, geplantem Wegpunkt und explizit weiter unbestaetigtem `GO ready` als bereit.
+- Alle Polls sind begrenzt und liefern bei Timeout einen benannten Blocker. Der normale zeitliche Dropship-Gameplaypfad wird dadurch nicht veraendert.
+
 ## Release-Normalstart-Guard
 - Der sichtbare Release-Pfad `EXE -> Einzelspieler -> Homebase` muss direkt handlungsfaehig sein.
 - Die erste Homebase im Release-Normalstart ist eine `grid_sweep`-Homebase-Direct-Sortie, nicht der alte `FOB Transfer`-Arbeitsmodus.

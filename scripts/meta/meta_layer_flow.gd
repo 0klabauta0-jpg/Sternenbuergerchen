@@ -687,7 +687,7 @@ func _apply_release_lz_drop_preview_deeplink(user_args: PackedStringArray = Pack
 	_release_lz_drop_preview_deeplink_status = "requested"
 	_release_lz_drop_preview_deeplink_reason = ""
 	set_meta("release_lz_drop_preview_deeplink_requested", true)
-	await _wait_release_deeplink_frames(3)
+	_append_release_first_exchange_exported_status_trace_sample("lz_setup_begin", null, {}, args)
 
 	if _active_mission == null:
 		var started: bool = await _request_release_start_mission_from_homebase_for_deeplink()
@@ -695,7 +695,7 @@ func _apply_release_lz_drop_preview_deeplink(user_args: PackedStringArray = Pack
 			_release_lz_drop_preview_deeplink_status = "blocked"
 			_release_lz_drop_preview_deeplink_reason = "start_mission_failed"
 			return
-	await _wait_release_deeplink_frames(8)
+	_append_release_first_exchange_exported_status_trace_sample("lz_mission_started", null, {}, args)
 
 	var handoff: Dictionary = get_homebase_to_mission_handoff_snapshot()
 	var planning: Dictionary = Dictionary(handoff.get("planning", {}))
@@ -705,7 +705,17 @@ func _apply_release_lz_drop_preview_deeplink(user_args: PackedStringArray = Pack
 		_release_lz_drop_preview_deeplink_reason = "missing_mission_drop_craft_id"
 		return
 	_complete_release_lz_drop_preview_craft_arrival(craft_id)
-	await _wait_release_deeplink_frames(8)
+	var transfer_ready: Dictionary = await _wait_release_lz_setup_condition(func() -> bool:
+		var mission: Node = _active_mission
+		return mission != null \
+			and mission.get_node_or_null("TacticalController") != null \
+			and mission.get_node_or_null("Primary3DView") != null
+	)
+	_append_release_first_exchange_exported_status_trace_sample("lz_transfer_ready", null, {"craft_id": craft_id, "readiness": transfer_ready}, args)
+	if not bool(transfer_ready.get("ready", false)):
+		_release_lz_drop_preview_deeplink_status = "blocked"
+		_release_lz_drop_preview_deeplink_reason = "transfer_runtime_not_ready"
+		return
 
 	var active_mission: Node = _active_mission
 	var controller: Node = active_mission.get_node_or_null("TacticalController") if active_mission != null else null
@@ -721,14 +731,35 @@ func _apply_release_lz_drop_preview_deeplink(user_args: PackedStringArray = Pack
 		_release_lz_drop_preview_deeplink_status = "blocked"
 		_release_lz_drop_preview_deeplink_reason = "lz_placement_failed"
 		return
+	_append_release_first_exchange_exported_status_trace_sample("lz_placement_ready", null, {"craft_id": craft_id}, args)
 	controller.call("_on_mission_dropship_card_drop_pressed", craft_id)
-	await _wait_release_deeplink_frames(4)
+	var drop_ready: Dictionary = await _wait_release_lz_setup_condition(func() -> bool:
+		var planning_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+		return bool(planning_state.get("drop_ship_requested", false))
+	)
+	if not bool(drop_ready.get("ready", false)):
+		_release_lz_drop_preview_deeplink_status = "blocked"
+		_release_lz_drop_preview_deeplink_reason = "drop_sequence_not_ready"
+		return
+	var simulation_root: Node = active_mission.get_node_or_null("SimulationRoot")
+	var deploy_start_tick: int = int(simulation_root.call("get_tick")) if simulation_root != null and simulation_root.has_method("get_tick") else -1
 	controller.call("_complete_drop_sequence_deployment")
 	controller.call("_advance_primary_drop_sequence_unloading", 999.0)
 	controller.call("_flush_pending_drop_runtime_phase_starts")
 	controller.call("_refresh_world_overlays")
 	controller.call("_update_ui")
-	await _wait_release_deeplink_frames(10)
+	var deboard_ready: Dictionary = await _wait_release_lz_setup_condition(func() -> bool:
+		var planning_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+		var deployed_ids: Array = Array(planning_state.get("deployed_unit_ids", []))
+		var current_tick: int = int(simulation_root.call("get_tick")) if simulation_root != null and simulation_root.has_method("get_tick") else deploy_start_tick + 1
+		return not deployed_ids.is_empty() \
+			and current_tick > deploy_start_tick
+	, 8, true)
+	_append_release_first_exchange_exported_status_trace_sample("lz_deboard_ready", null, {"craft_id": craft_id, "readiness": deboard_ready}, args)
+	if not bool(deboard_ready.get("ready", false)):
+		_release_lz_drop_preview_deeplink_status = "blocked"
+		_release_lz_drop_preview_deeplink_reason = "deboard_runtime_not_ready"
+		return
 
 	var move_target := Vector2(544.0, 288.0)
 	if not bool(controller.call("issue_right_click_command_for_test", move_target, "move", false)):
@@ -738,7 +769,17 @@ func _apply_release_lz_drop_preview_deeplink(user_args: PackedStringArray = Pack
 	controller.call("_refresh_world_overlays")
 	controller.call("_refresh_button_state")
 	controller.call("_update_ui")
-	await _wait_release_deeplink_frames(10)
+	var preview_ready: Dictionary = await _wait_release_lz_setup_condition(func() -> bool:
+		var preview_snapshot: Dictionary = get_release_candidate_lz_drop_preview_actionability_snapshot()
+		return String(preview_snapshot.get("status", "")) == "pass" \
+			and int(preview_snapshot.get("planned_waypoint_count", 0)) > 0 \
+			and bool(preview_snapshot.get("go_ready", false))
+	)
+	_append_release_first_exchange_exported_status_trace_sample("lz_preview_ready", null, {"craft_id": craft_id, "readiness": preview_ready}, args)
+	if not bool(preview_ready.get("ready", false)):
+		_release_lz_drop_preview_deeplink_status = "blocked"
+		_release_lz_drop_preview_deeplink_reason = "move_preview_not_ready"
+		return
 
 	var snapshot: Dictionary = get_release_lz_drop_preview_deeplink_snapshot(PackedStringArray([RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG]))
 	_release_lz_drop_preview_deeplink_applied = String(snapshot.get("preview_status", "")) == "pass" \
@@ -750,7 +791,6 @@ func _apply_release_lz_drop_preview_deeplink(user_args: PackedStringArray = Pack
 
 
 func _request_release_start_mission_from_homebase_for_deeplink() -> bool:
-	await _wait_release_deeplink_frames(3)
 	if _current_meta_view != "homebase":
 		return _current_meta_view == "mission" and _active_mission != null
 	var homebase_screen = _get_homebase_screen()
@@ -760,8 +800,10 @@ func _request_release_start_mission_from_homebase_for_deeplink() -> bool:
 	if not _is_singleplayer_visible_homebase_actionable(homebase_screen):
 		return false
 	homebase_screen.call("request_mission_start")
-	await _wait_release_deeplink_frames(8)
-	return _current_meta_view == "mission" and _active_mission != null
+	var mission_ready: Dictionary = await _wait_release_lz_setup_condition(func() -> bool:
+		return _current_meta_view == "mission" and _active_mission != null
+	, 12)
+	return bool(mission_ready.get("ready", false))
 
 
 func _complete_release_lz_drop_preview_craft_arrival(craft_id: String) -> void:
@@ -957,11 +999,19 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 
 	await get_tree().process_frame
 	await _apply_release_lz_drop_preview_deeplink(PackedStringArray([RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG]))
-	await _wait_release_deeplink_frames(8)
-	if not _release_lz_drop_preview_deeplink_applied:
+	var first_go_lz_ready: Dictionary = await _wait_release_lz_setup_condition(func() -> bool:
+		var mission: Node = _active_mission
+		return _release_lz_drop_preview_deeplink_applied \
+			and mission != null \
+			and mission.get_node_or_null("TacticalController") != null \
+			and mission.get_node_or_null("CombatLoopDriver") != null \
+			and mission.get_node_or_null("SimulationRoot") != null
+	)
+	_append_release_first_exchange_exported_status_trace_sample("first_go_lz_setup_ready", null, first_go_lz_ready, args)
+	if not bool(first_go_lz_ready.get("ready", false)):
 		_release_first_go_firefight_deeplink_status = "blocked"
 		_release_first_go_firefight_deeplink_reason = "lz_drop_preview_failed"
-		_append_release_first_exchange_exported_status_trace_sample("blocked_lz_drop_preview_failed", null, {"reason": _release_first_go_firefight_deeplink_reason}, args)
+		_append_release_first_exchange_exported_status_trace_sample("blocked_lz_drop_preview_failed", null, {"reason": _release_first_go_firefight_deeplink_reason, "readiness": first_go_lz_ready}, args)
 		return
 
 	var active_mission: Node = _active_mission
@@ -1369,6 +1419,18 @@ func _get_release_unit_id(unit: Node) -> String:
 func _wait_release_deeplink_frames(count: int) -> void:
 	for _index in range(count):
 		await get_tree().process_frame
+
+
+func _wait_release_lz_setup_condition(predicate: Callable, max_checks: int = 8, include_physics_tick: bool = false) -> Dictionary:
+	var bounded_checks: int = maxi(max_checks, 1)
+	for check_index in range(bounded_checks):
+		if predicate.is_valid() and bool(predicate.call()):
+			return {"ready": true, "checks": check_index}
+		if include_physics_tick:
+			await get_tree().physics_frame
+		await get_tree().process_frame
+	var ready_after_wait: bool = predicate.is_valid() and bool(predicate.call())
+	return {"ready": ready_after_wait, "checks": bounded_checks}
 
 
 func get_release_candidate_lz_drop_preview_actionability_snapshot() -> Dictionary:
