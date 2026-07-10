@@ -496,6 +496,8 @@ var _card_refresh_time_remaining: float = 0.0
 var _fireteam_security_refresh_time_remaining: float = 0.0
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
+var _mission_ui_refresh_timing_debug_snapshot: Dictionary = {}
+var _mission_runtime_surface_timing_debug_snapshot: Dictionary = {}
 var _lz_drop_timing_debug_enabled: bool = false
 var _lz_drop_timing_debug_snapshot: Dictionary = {}
 var _drop_sequence_phase: String = ""
@@ -2684,6 +2686,12 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 
 
 func _update_ui() -> void:
+	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
+	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var scopes_usec: Dictionary = {}
+	var scope_started_usec: int = 0
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_apply_block_labels()
 	_sync_unit_tactical_stance_badges()
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
@@ -2719,6 +2727,9 @@ func _update_ui() -> void:
 		fireteam_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
 		_apply_combat_hud_detail_tooltip_label_contract(fireteam_status_label)
 		_apply_release_firefight_hud_real_window_label_contract(fireteam_status_label)
+	if profile_enabled:
+		scopes_usec["primary_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
 	_refresh_mission_nav_timer_label()
@@ -2726,8 +2737,14 @@ func _update_ui() -> void:
 	_refresh_mission_team_chip_label()
 	_refresh_mission_dropship_panel()
 	_refresh_tactical_event_log_panel()
+	if profile_enabled:
+		scopes_usec["mission_panels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_runtime_mission_hud_surfaces()
 	_apply_release_firefight_command_matrix_visual_polish()
+	if profile_enabled:
+		scopes_usec["runtime_surfaces_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if strategic_status_label != null:
@@ -2777,6 +2794,9 @@ func _update_ui() -> void:
 					call_dropship_button.text = "Drop"
 
 	_apply_compact_mission_control_layout()
+	if profile_enabled:
+		scopes_usec["secondary_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		_record_mission_ui_refresh_timing_snapshot(refresh_started_usec, scopes_usec)
 
 
 func _refresh_tactical_event_log_panel() -> void:
@@ -2790,21 +2810,42 @@ func _refresh_tactical_event_log_panel() -> void:
 
 
 func _refresh_runtime_mission_hud_surfaces() -> void:
+	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
+	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+	var scopes_usec: Dictionary = {}
+	var scope_started_usec: int = 0
+	if profile_enabled:
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_control_craft_summary()
 	_refresh_dynamic_button_styles()
 	_apply_drop_light_hud_button_labels()
 	_apply_command_hierarchy_metadata()
 	_enforce_drop_light_fixed_hud_layout()
+	if profile_enabled:
+		scopes_usec["craft_controls_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_world_overlays()
+	if profile_enabled:
+		scopes_usec["world_overlays_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_sync_primary_3d_mission_status_visuals()
 	_suppress_legacy_2d_readability_overlays(true)
+	if profile_enabled:
+		scopes_usec["primary_status_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_ad_hoc_panel_visibility()
 	_refresh_selected_fireteam_cards()
 	_refresh_fireteam_mini_cards()
 	if _character_overlay_open:
 		_update_character_overlay()
+	if profile_enabled:
+		scopes_usec["fireteam_cards_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	if not _tactical_ui_visible:
 		set_tactical_ui_visible(false)
+	if profile_enabled:
+		scopes_usec["visibility_usec"] = Time.get_ticks_usec() - scope_started_usec
+		_record_mission_runtime_surface_timing_snapshot(refresh_started_usec, scopes_usec)
 
 
 func _ensure_ad_hoc_panel() -> Control:
@@ -3459,10 +3500,20 @@ func set_mission_visible_frame_timing_debug_enabled(enabled: bool) -> void:
 	_mission_visible_frame_timing_debug_enabled = enabled
 	if not enabled:
 		_mission_visible_frame_timing_debug_snapshot.clear()
+		_mission_ui_refresh_timing_debug_snapshot.clear()
+		_mission_runtime_surface_timing_debug_snapshot.clear()
 
 
 func get_mission_visible_frame_timing_debug_snapshot() -> Dictionary:
 	return _mission_visible_frame_timing_debug_snapshot.duplicate(true)
+
+
+func get_mission_ui_refresh_timing_debug_snapshot() -> Dictionary:
+	return _mission_ui_refresh_timing_debug_snapshot.duplicate(true)
+
+
+func get_mission_runtime_surface_timing_debug_snapshot() -> Dictionary:
+	return _mission_runtime_surface_timing_debug_snapshot.duplicate(true)
 
 
 func set_lz_drop_timing_debug_enabled(enabled: bool) -> void:
@@ -3481,6 +3532,36 @@ func _record_mission_visible_frame_timing_snapshot(frame_started_usec: int, scop
 		"total_usec": Time.get_ticks_usec() - frame_started_usec,
 		"scopes_usec": scopes_usec.duplicate(true),
 		"included_ui_refresh": included_ui_refresh,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _record_mission_ui_refresh_timing_snapshot(refresh_started_usec: int, scopes_usec: Dictionary) -> void:
+	_mission_ui_refresh_timing_debug_snapshot = {
+		"enabled": _mission_visible_frame_timing_debug_enabled,
+		"total_usec": Time.get_ticks_usec() - refresh_started_usec,
+		"scopes_usec": scopes_usec.duplicate(true),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _record_mission_runtime_surface_timing_snapshot(refresh_started_usec: int, scopes_usec: Dictionary) -> void:
+	_mission_runtime_surface_timing_debug_snapshot = {
+		"enabled": _mission_visible_frame_timing_debug_enabled,
+		"total_usec": Time.get_ticks_usec() - refresh_started_usec,
+		"scopes_usec": scopes_usec.duplicate(true),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
@@ -3702,11 +3783,22 @@ func _apply_fireteam_mini_security_coverage_indicator(card: Control, fireteam_id
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.visible = bool(context.get("active", false))
 	bar.tooltip_text = String(context.get("tooltip_text", ""))
-	_clear_control_children(bar)
-	if bar.visible:
-		_add_security_coverage_bar_segments(bar, context)
+	var visual_signature: String = _build_fireteam_security_coverage_visual_signature(context)
+	if String(bar.get_meta("mission_fireteam_mini_security_coverage_visual_signature", "")) != visual_signature:
+		_clear_control_children(bar)
+		if bar.visible:
+			_add_security_coverage_bar_segments(bar, context)
+		bar.set_meta("mission_fireteam_mini_security_coverage_visual_signature", visual_signature)
 	bar.set_meta("mission_fireteam_mini_security_coverage_bar", true)
 	bar.set_meta("mission_fireteam_mini_security_coverage_snapshot", context.duplicate(true))
+
+
+func _build_fireteam_security_coverage_visual_signature(context: Dictionary) -> String:
+	return "active=%s|shape=%s|roles=%s" % [
+		str(bool(context.get("active", false))),
+		String(context.get("coverage_shape", "inactive")).strip_edges().to_lower(),
+		str(Dictionary(context.get("role_counts", {}))),
+	]
 
 
 func _build_fireteam_security_coverage_context(fireteam_id: String) -> Dictionary:

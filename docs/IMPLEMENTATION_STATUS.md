@@ -42,6 +42,15 @@
 - Lokale Pruefung: `task_1060_multi_fireteam_first_command_player_grip.gd` 14/14; danach TASK_1059, TASK_396, TASK_503 und `git diff --check`.
 - Naechster Schritt: Den echten Mehr-Fireteam-Erstkontakt unter dem verbleibenden Mission-Frame-/LZ-/Deboard-Performancebudget messen und die naechste noch dominante Laufzeitgrenze beseitigen.
 
+### TASK_1061 - Multi-Fireteam Mission Runtime Budget
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1061_multi_fireteam_mission_runtime_budget.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1045_mission_first_contact_end_to_end_timing_trace.md`, `docs/tasks/TASK_1060_multi_fireteam_first_command_player_grip.md`
+- Stand: TASK_1061 ist 11/11 gruen. Der reale Zwei-Team-Trace misst Setup, Transfer, paralleles Deboarding, Contact, Preview und GO mit opt-in Controller-/Simulation-/Terrain-/Combat-Snapshots. Die UI-Messung zerlegt Runtime-Surfaces bis zu Fireteam-Cards; die Security-Coverage-Segmente werden bei reiner Suppression nicht mehr neu instanziiert.
+- Ursache/Fix: Die Mini-Card baute ihre unveraenderte Sicherheitsform bei jedem Status-Refresh durch `_clear_control_children()` neu auf. Ein lokaler Visual-Signature-Guard aktualisiert weiterhin Tooltip/Status, erzeugt die Segmente aber nur bei geaenderter Coverage-Form oder Rollenverteilung.
+- Risiken/offen: Die Headless-Gesamtdauer schwankt und ist kein FPS-Versprechen. Wiederkehrende Fireteam-Card- sowie Text-/Panel-Kosten bleiben gemessen und sind der naechste schmale Optimierungsschnitt.
+- Lokale Pruefung: `task_1061_multi_fireteam_mission_runtime_budget.gd` 11/11; danach TASK_1060, TASK_1059, TASK_396, TASK_503 und `git diff --check`.
+- Naechster Schritt: Fireteam-Card-Delta-Rendering fuer die weiterhin gemessenen Karten-/Textkosten, ohne Suppression, Contact, Coordination oder Lead-Status zu verschleiern.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.
