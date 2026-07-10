@@ -148,14 +148,23 @@
 - Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
 - Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
 
+### TASK_1078 - Station Route Approach Contact Timing
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1078_station_route_approach_contact_timing.md`, `docs/dev/contact_report_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, TASK_1068, TASK_1069, TASK_1070, TASK_1071, TASK_1077
+- Stand: Die Station Route hat jetzt eine kurze LZ-Readiness-Phase: Nach Homebase -> Drop -> Deboard bleibt Alpha ausserhalb des Bravo-Contacts. Ein normaler `move`-Intent bleibt Preview-only; erst das bestehende `GO` in die Approach-Zone erzeugt aus der Szenariowache einen bestaetigten Contact. LZ Evac bleibt dabei erreichbar.
+- Ursache/Fix: Der TASK-1077-Posten stand so nah, dass die Guard-Gruppe beim Deboard sofort contact-locked wurde. Der benannte, editor-only `approach_guard_post` ist um einen Tile-Schritt nach aussen abgestimmt. Keine AI-, Contact-, Movement- oder UI-Autoritaet wurde veraendert.
+- Risiken/offen: Die technische Distanzgrenze ist jetzt belegt. Die menschliche Balance bleibt offen: im sichtbaren Fenster muss der kurze ruhige Moment ausreichend lesbar, aber nicht leer wirken; der nachfolgende Contact darf weder als Spawn-Camp noch als toter Anmarsch erscheinen.
+- Lokale Pruefung: TASK_1078 11/11 und TASK_1077 10/10; beide End-to-End-Traces nutzen die reale 192x192-Map und dauern daher jeweils etwa zwei bis drei Minuten. `git diff --check` folgt mit den Route-/Host-/Client-Regressionen.
+- Naechster Schritt: Den ersten sichtbaren Feuerwechsel nach diesem echten Move-Contact auf Guard-Deckung, Feuerdisziplin, Friendly-Fire-Readout und die Advance-/Evac-Wahl pruefen.
+
 ### TASK_1077 - Station Route First Contact Pressure
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1077_station_route_first_contact_pressure.md`, `docs/dev/contact_report_contract.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`, TASK_1068, TASK_1069, TASK_1070, TASK_1071, TASK_607
-- Stand: Der normale Homebase -> Drop -> Deboard-Start der Station Route erzeugt jetzt einen echten Bravo-Kontakt ohne Test-Teleport. Die Guard-Gruppe startet am benannten `approach_guard_post` und folgt als Gruppe der vorhandenen `station_loop_route`; die separate Luftabwehr-Gruppe bleibt bei `spawn_bravo`. Vor `GO` bleiben Ghost, Pfad und Risk-Preview lesbar, waehrend LZ Evac als bestehende Alternative erreichbar bleibt.
+- Stand: Die Guard-Gruppe startet am benannten `approach_guard_post` und folgt als Gruppe der vorhandenen `station_loop_route`; die separate Luftabwehr-Gruppe bleibt bei `spawn_bravo`. Vor `GO` bleiben Ghost, Pfad und Risk-Preview lesbar, waehrend LZ Evac als bestehende Alternative erreichbar bleibt. TASK_1078 verfeinert die zeitliche Grenze: der reale Contact folgt erst dem bestaetigten Approach-Move.
 - Ursache/Fix: Beide Bravo-Gruppen verwendeten den fernen AA-Spawn. Der Runtime-Resolver konnte Patrol-Bindings bereits gegen eine Enemy-Group aufloesen, aber der Scenario-Validator akzeptierte diese legale Gruppen-ID nicht. Ein benannter Kartenmarker plus gruppengebundene Patrol-Daten erzeugen den ersten Druck aus der Datenautoritaet; der Validator kennt Enemy-Group-IDs nun ebenfalls.
-- Risiken/offen: Der Guard ist absichtlich nahe genug fuer eine erste Entscheidung, aber nicht als Spawn-Camp gedacht. Ob Distanz, Sichtkontakt und Feuerdruck im echten Fenster angenehm wirken, bleibt eine sichtbare Balance-Abnahme; Mission-, Combat- und Multiplayer-Autoritaet wurden nicht veraendert.
+- Risiken/offen: Der Guard bleibt als szenariogetriebener Druck statt Test-Teleport erhalten. Distanz, Sichtkontakt und Feuerdruck im echten Fenster sind sichtbare Balance-Arbeit; Mission-, Combat- und Multiplayer-Autoritaet wurden nicht veraendert.
 - Lokale Pruefung: TASK_1077 10/10, TASK_1068 16/16, TASK_726 30/30, TASK_1069 28/28, TASK_1070 23/23, TASK_1071 47/47, TASK_607 41/41 und `git diff --check`.
-- Naechster Schritt: Den echten sichtbaren First-Contact-Run auf der Station Route balancen: Guard-Position, Deckung, Evac-Lesbarkeit und die erste Feuerwechsel-Entscheidung im Fenster abnehmen.
+- Naechster Schritt: TASK_1078 prueft den Contact erst nach `GO`; danach den ersten sichtbaren Feuerwechsel, Guard-Deckung und Evac-Lesbarkeit im Fenster abnehmen.
 
 ### TASK_1076 - Release Firefight Contract Chain Refresh
 - Status: implementiert im Arbeitsstand

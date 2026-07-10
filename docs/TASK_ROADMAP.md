@@ -105,11 +105,17 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
 - Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
 
+## TASK_1078 - Station Route Approach Contact Timing (implementiert im Arbeitsstand)
+- Grundlage: Der neue TASK-1077-Guard erzeugte zwar einen echten Scenario-Contact, stand nach Deboard aber bereits in Kontaktreichweite. Damit fehlte die kurze, lesbare Planungsphase vor dem ersten `GO`.
+- Ergebnis: Der normale Drop beginnt kontaktfrei. Ein vorhandener Move bleibt als Ghost/Pfad/Risiko Preview; erst der bestaetigte Move in die Approach-Zone erzeugt einen Bravo-Contact. Die LZ-Evac-Alternative bleibt erreichbar. TASK_1078 ist 11/11 und TASK_1077 10/10 gruen.
+- Ursache/Fix: Der benannte Guard-Posten ist um einen Tile-Schritt nach aussen abgestimmt. Der Runtime-Patrol-, Contact-, Command- und Evac-Pfad wird unveraendert wiederverwendet; kein Test teleportiert NPCs oder mutiert Contact-Wahrheit.
+- Naechster Schritt: Den ersten Feuerwechsel nach dem jetzt echten Advance-Contact als kleine Spielerentscheidung pruefen: Guard-Deckung, Feuerdisziplin, Friendly-Fire-Hinweis und die sichtbare Wahl zwischen Advance und Evac.
+
 ## TASK_1077 - Station Route First Contact Pressure (implementiert im Arbeitsstand)
 - Grundlage: Die Station Route beschrieb Guard-Druck, aber TASK_1068 musste einen Bravo-NPC fuer den ersten sichtbaren Kontakt noch manuell umsetzen. Beide Bravo-Gruppen starteten am fernen AA-Spawn.
-- Ergebnis: Nach normalem Homebase -> Drop -> Deboard entsteht vor dem ersten `GO` ein echter, szenariogetriebener Bravo-Kontakt. Ghost, Pfad und Risiko bleiben ein Plan; der Spieler kann den Move bestaetigen oder die vorhandene LZ-Evac-Alternative nutzen. AA, Door, Computer, Cargo und der volle Debriefing-Pfad bleiben gruen.
+- Ergebnis: Nach normalem Homebase -> Drop -> Deboard ist der Szenarioguard vorbereitet, ohne den Spawn in Contact zu sperren. Ghost, Pfad und Risiko bleiben ein Plan; der Spieler kann den Move bestaetigen oder die vorhandene LZ-Evac-Alternative nutzen. TASK_1078 sichert den folgenden Contact nach `GO`; AA, Door, Computer, Cargo und der volle Debriefing-Pfad bleiben gruen.
 - Ursache/Fix: `bravo_station_guard` startet am neuen `approach_guard_post` und bindet die bestehende `station_loop_route` gegen seine Group-ID. `bravo_air_defense` bleibt bei `spawn_bravo`. Der Validator akzeptiert nun dieselbe Enemy-Group-Referenz, die der Runtime-Patrol-Resolver seit jeher aufloesen konnte.
-- Naechster Schritt: Den sichtbaren First-Contact-Run auf Lesbarkeit und Balance abnehmen: kein Spawn-Camping, aber genug Druck fuer die Wahl zwischen Advance mit Preview und Evac.
+- Naechster Schritt: TASK_1078 legt die zeitliche Contact-Grenze fest; danach den sichtbaren First-Contact-Run auf Guard-Deckung, Feuerdisziplin und die Wahl zwischen Advance und Evac abnehmen.
 
 ## TASK_1076 - Release Firefight Contract Chain Refresh (implementiert im Arbeitsstand)
 - Grundlage: TASK_1074 etablierte `CONTACT FIRE` vor `NEXT/WHY`, aber die alten TASK_834- bis TASK_839-Gates erwarteten noch die umgekehrte Reihenfolge und fielen dadurch als ganze Kette.

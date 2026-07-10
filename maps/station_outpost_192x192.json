@@ -49,7 +49,7 @@
 			"name": "Approach Guard Post",
 			"placement_context": "editor_only",
 			"symbol": "circle",
-			"x": 2176,
+			"x": 2304,
 			"y": 5056
 		},
 		"factory_danger_zone": {

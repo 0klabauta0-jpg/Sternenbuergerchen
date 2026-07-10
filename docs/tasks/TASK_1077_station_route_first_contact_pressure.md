@@ -23,8 +23,9 @@ die AA-Wache bleibt bei der eigentlichen AA-Position.
   manuelles Versetzen eines Gegners bauen.
 - Die Station-Scenario-Guard-Start-/Patrol-Daten so authoren, dass nach dem
   ersten route-aligned Move ein LOS-Kontakt mit einer Bravo-Wache entsteht.
-- Contact, NPC-Taktik, Move-Preview und Evac-Eligibility als bestehende
-  Runtime-/Snapshot-Pfade pruefen.
+- Szenarioguard, Move-Preview und Evac-Eligibility als bestehende
+  Runtime-/Snapshot-Pfade pruefen. Den erst nach `GO` entstehenden Contact
+  prueft TASK_1078 getrennt.
 - Den Player-Run weiterhin mit getrenntem `GO` aufbauen; der Test darf keine
   Objectives, Damage- oder MissionResults direkt setzen.
 
@@ -48,10 +49,9 @@ die AA-Wache bleibt bei der eigentlichen AA-Position.
 
 - Der Trace veraendert keine Enemy-Position direkt.
 - Eine reale Bravo-Wache startet aus den Scenario-Spawn-/Patrol-Daten am
-  Alpha-Approach und erzeugt nach dem ersten ausgefuehrten Route-Move einen
-  LOS-Kontakt.
-- Vor dem Commit bleiben Ghost, Pfad und Risiko sichtbar; nach dem Commit
-  wird Contact ohne Test-Teleport sichtbar.
+  Alpha-Approach, ohne den normalen Deboard sofort in Contact zu sperren.
+- Vor dem Commit bleiben Ghost, Pfad und Risiko sichtbar. Der echte Contact
+  nach dem ersten ausgefuehrten Route-Move ist durch TASK_1078 abgesichert.
 - Ein LZ-Rueckzug bleibt als bestehende, host-autoritative Alternative
   erreichbar; die neue Datenautorenschaft erzeugt keine zweite Wahrheit.
 
@@ -89,5 +89,7 @@ editor-only Kartenmarker auf der Alpha-Approach-Route. Nur
 `station_loop_route` gegen die Enemy-Group-ID; `bravo_air_defense` bleibt am
 AA-Spawn `spawn_bravo`. `MissionScenarioData` akzeptiert die gleiche
 Group-ID als Patrol-Ziel, die der bestehende Runtime-Resolver bereits
-auflosen konnte. TASK_1077 ist 10/10 gruen, ohne Enemy-Teleport oder
+auflosen konnte. TASK_1078 verfeinert danach den Posten auf einen
+contact-freien Deboard mit Contact erst nach `GO`. TASK_1077 sichert den
+verbleibenden Szenario-/Preview-/Evac-Contract ohne Enemy-Teleport oder
 autoritative UI-Mutation.

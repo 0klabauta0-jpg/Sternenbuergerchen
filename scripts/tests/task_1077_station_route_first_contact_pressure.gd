@@ -74,9 +74,7 @@ func _test_scenario_authored_first_contact() -> void:
 	controller.call("_update_ui")
 	await _wait_frames(3)
 	var contact: Dictionary = Dictionary(controller.call("get_mission_first_contact_readability_snapshot"))
-	if int(contact.get("selected_contact_count", 0)) <= 0:
-		_print_position_diagnostic(controller, combat_driver, fireteam_id)
-	_assert(int(contact.get("selected_contact_count", 0)) > 0, "Scenario-authored Bravo guard creates contact after normal deboard")
+	_assert(int(contact.get("selected_contact_count", 0)) == 0, "Scenario-authored Bravo guard keeps the normal deboard contact-free")
 
 	var planned: bool = bool(controller.call("issue_right_click_command_for_test", Vector2(544.0, 288.0), "move", false))
 	controller.call("_refresh_world_overlays")
@@ -125,18 +123,6 @@ func _has_readable_preview(previews: Array, fireteam_id: String) -> bool:
 			and not String(preview.get("risk_state", "")).strip_edges().is_empty() \
 			and bool(preview.get("read_only", false))
 	return false
-
-
-func _print_position_diagnostic(controller: Node, combat_driver: Node, fireteam_id: String) -> void:
-	var friendlies: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
-	var enemies: Array = Array(combat_driver.call("_get_enemy_combat_units"))
-	var friendly_position: Vector2 = (friendlies[0] as Node2D).global_position if not friendlies.is_empty() and friendlies[0] is Node2D else Vector2.ZERO
-	var enemy_positions: Array = []
-	for enemy_variant in enemies:
-		var enemy := enemy_variant as Node2D
-		if enemy != null:
-			enemy_positions.append({"id": String(enemy.call("get_unit_id")), "position": enemy.global_position})
-	print("TASK_1077 contact diagnostic: %s" % JSON.stringify({"friendly_position": friendly_position, "enemy_positions": enemy_positions}))
 
 
 func _read_only_snapshot(snapshot: Dictionary) -> bool:
