@@ -55,6 +55,11 @@ TASK_1034 prueft, ob der TASK_1033-First-Contact-Runtime-Hook als kleiner Entsch
 
 Der Runtime-Smoke bleibt read-only. Er bewertet Trace-Evidence fuer echten Snapshot-Kontext, sichtbare CONTACT-/WHY-/NEXT-/GO-Hooks, First-Contact-/Engagement-/Combat-HUD-Gates, Feedback-zurueck-zu-NEXT, HUD-Wahrheitsgrenze, Multiplayer-Grenze und Performance-Budget. Ein bestandener Smoke routet zu `TASK_1035 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings`; Reibung routet zu TASK_1034-Polish. Er erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings (TASK_1035)
+TASK_1035 trennt den technischen TASK_1034-Smoke vom Spielerblick. Erwartet wird ein read-only Befund dazu, ob CONTACT sofort klar ist, WHY eine Handlung nahelegt, NEXT den naechsten Griff zeigt, `GO separat` sicher wirkt, Feedback zurueck zum naechsten Griff fuehrt, HUD und Performance ruhig bleiben, die Multiplayer-Grenze klar ist und der erste Kontakt sich taktisch anfuehlt.
+
+Ohne Player-Feel-Notizen bleibt der Status `needs_first_contact_player_feel_review`. Belegte Reibung routet zu `TASK_1036 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Polish`; ein sauberer Befund routet zu `TASK_1036 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice`. TASK_1035 erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 TASK_1004 ist der read-only Fensterbeweis-Rahmen fuer den TASK_1003-Round-Loop-Polish. Er erwartet im echten Fenster sichtbare `ROUND`-, `NEXT`- und `GO separat`-Surfaces sowie kurze Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen.
 

@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1035 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings (implementiert im Arbeitsstand)
+- Grundlage: bestandener TASK_1034 First Contact Runtime Smoke.
+- Ziel: Den Spielerblick auf den ersten Kontakt schneiden: CONTACT klar, WHY handlungsfaehig, NEXT verstaendlich, `GO separat`, Feedback, HUD-Ruhe, Responsiveness und Multiplayer-Grenze.
+- Ergebnis: Read-only Snapshot `blocked | needs_first_contact_player_feel_review | first_contact_player_feel_rework_needed | accepted_for_first_contact_playability_slice`.
+- Naechster Schritt: TASK_1036 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Polish oder TASK_1036 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice.
+
 ## TASK_1034 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke (implementiert im Arbeitsstand)
 - Grundlage: bereiter TASK_1033 First Contact Runtime Hook.
 - Ziel: CONTACT, WHY, NEXT, FEEDBACK und `GO separat` in einem read-only Smoke-Trace gegen echten Snapshot-Kontext pruefen.

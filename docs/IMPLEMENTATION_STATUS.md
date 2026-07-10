@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1035 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Findings
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1035_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings.md`, `docs/tasks/TASK_1034_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_smoke.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactPlayerFeelFindings.build_snapshot()` bewertet einen bestandenen TASK_1034-First-Contact-Runtime-Smoke plus optionale Player-Feel-Notizen.
+- Stand: Ohne bestandenen Smoke bleibt TASK_1035 blockiert; ohne Review-Notizen meldet der Snapshot `needs_first_contact_player_feel_review`; Reibungsnotizen erzeugen `first_contact_player_feel_rework_needed`; saubere Notizen setzen `accepted_for_first_contact_playability_slice`.
+- Stand: Geprueft werden CONTACT-Lesbarkeit, handlungsfaehiges WHY, NEXT-Griff, sichere GO-Grenze, Feedback-zurueck-zum naechsten Griff, HUD-Ruhe, Responsiveness, Multiplayer-Grenze und taktisches First-Contact-Gefuehl.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1035 im Command-Feedback als Snapshot, Status, Issue-Count und Summary-Line.
+- Risiken/offen: TASK_1035 ist ein read-only Befundschnitt und noch kein sichtbarer F6-/Release-Sichttest. Bei Reibung folgt TASK_1036 First Contact Player Feel Polish, sonst TASK_1036 First Contact Playability Slice.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1035_release_first_decision_loop_two_player_loop_scenario_first_contact_player_feel_findings.gd`, Regression TASK_1034, TASK_1033, TASK_1032, `git diff --check`.
+- Naechster Schritt: TASK_1036 - Release First Decision Loop Two Player Loop Scenario First Contact Player Feel Polish oder TASK_1036 - Release First Decision Loop Two Player Loop Scenario First Contact Playability Slice.
+
 ### TASK_1034 - Release First Decision Loop Two Player Loop Scenario First Contact Runtime Smoke
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1034_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_smoke.md`, `docs/tasks/TASK_1033_release_first_decision_loop_two_player_loop_scenario_first_contact_runtime_hook.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
