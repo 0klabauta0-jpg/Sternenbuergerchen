@@ -39,6 +39,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ergebnis: TASK_1061 ist 11/11 gruen. Der neue Zwei-Team-Trace zerlegt die echten Player-Stufen und die Controller-UI bis zu Runtime-Surfaces. Security-Coverage-Segmente der Mini-Cards werden bei reiner Suppression wiederverwendet statt neu aufgebaut.
 - Naechster Schritt: Fireteam-Card-Delta-Rendering auf die verbleibenden echten Karten-/Text-Refresh-Kosten konzentrieren und dabei Contact, Suppression, Coordination und Lead-Zeile sichtbar erhalten.
 
+## TASK_1062 - Fireteam Card Delta Rendering (implementiert im Arbeitsstand)
+- Grundlage: TASK_1061 isolierte wiederkehrende Fireteam-Card-/Textkosten, obwohl die Karten bereits bei vollstaendig unveraendertem Runtime-State uebersprungen wurden.
+- Ergebnis: TASK_1062 ist 18/18 gruen. Statische Kartenidentitaet wird nur bei geaenderter Referenz erneut eingerichtet; Selection, Suppression, Contact, Bewegung und Coordination bleiben kleine Runtime-Deltas. Lead- und Member-Portraets werden bei gleicher Identitaet nicht erneut gesetzt. Der frische Zwei-Team-Trace misst rund 46 bis 48 ms Fireteam-Card-Surface in Contact/Preview/GO.
+- Naechster Schritt: Ein kleines spielbares Objective-Szenario bauen, das den nun lesbaren und stabilen Homebase-zu-Mission-zu-Debriefing-Pfad fuer einen Menschen erlebbar macht.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

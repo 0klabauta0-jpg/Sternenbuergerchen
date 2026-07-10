@@ -429,6 +429,11 @@ var _last_contact_report_event_signature_by_id: Dictionary = {}
 var _last_release_firefight_command_matrix_visual_signature: String = ""
 var _last_selected_fireteam_cards_runtime_signature: String = ""
 var _last_fireteam_mini_cards_runtime_signature: String = ""
+var _mission_fireteam_card_delta_rendering_counts: Dictionary = {
+	"static_apply": 0,
+	"static_skip": 0,
+	"runtime_status_apply": 0,
+}
 var _mission_hud_runtime_surface_guard_apply_counts: Dictionary = {
 	"command_matrix": 0,
 	"selected_cards": 0,
@@ -3349,32 +3354,43 @@ func _refresh_fireteam_mini_cards() -> void:
 			card = FOB_FIRETEAM_CARD_SCRIPT.new()
 			card.name = "FireteamMiniCard_%s" % normalized_fireteam_id.capitalize()
 			card_host.add_child(card)
-		card.custom_minimum_size = Vector2(0.0, 112.0)
-		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		card.mouse_filter = Control.MOUSE_FILTER_STOP
 		card.set_meta("fireteam_id", normalized_fireteam_id)
-		card.set_meta("mission_fireteam_mini_card", true)
-		card.set_meta("fob_fireteam_reference_card", true)
 
 		var lead = _resolve_fireteam_leader_for_behavior(normalized_fireteam_id)
 		var selected_fireteam: bool = _selected_fireteam_ids.has(normalized_fireteam_id)
 		var runtime_inactive: bool = not preview_mode and not _is_fireteam_runtime_active(normalized_fireteam_id)
 		var lead_name: String = String(lead.call("get_display_name")) if lead != null and lead.has_method("get_display_name") else "Kein Lead"
 		var lead_summary: String = _build_mission_fireteam_reference_summary(normalized_fireteam_id, lead_name, units)
-		card.call(
-			"setup_card",
-			normalized_fireteam_id,
-			_get_fireteam_display_label(normalized_fireteam_id),
-			selected_fireteam,
-			false,
-			_get_mission_fireteam_loadout_id(normalized_fireteam_id),
-			lead_summary,
-			"mission_mini"
-		)
-		card.set_meta("mission_fireteam_lead_summary", lead_summary)
-		card.set_meta("station_route_hud_visual_polish_task", "TASK_722")
-		card.set_meta("station_route_hud_compact_mini_card", true)
+		var static_signature: String = _build_fireteam_mini_card_static_signature(normalized_fireteam_id, lead, lead_summary)
+		var static_configuration_changed: bool = is_new_card or String(card.get_meta("mission_fireteam_mini_card_static_signature", "")) != static_signature
+		if static_configuration_changed:
+			card.custom_minimum_size = Vector2(0.0, 112.0)
+			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			card.mouse_filter = Control.MOUSE_FILTER_STOP
+			card.set_meta("mission_fireteam_mini_card", true)
+			card.set_meta("fob_fireteam_reference_card", true)
+			card.call(
+				"setup_card",
+				normalized_fireteam_id,
+				_get_fireteam_display_label(normalized_fireteam_id),
+				selected_fireteam,
+				false,
+				_get_mission_fireteam_loadout_id(normalized_fireteam_id),
+				lead_summary,
+				"mission_mini"
+			)
+			card.set_meta("mission_fireteam_lead_summary", lead_summary)
+			card.set_meta("station_route_hud_visual_polish_task", "TASK_722")
+			card.set_meta("station_route_hud_compact_mini_card", true)
+			card.set_meta("mission_fireteam_mini_card_static_signature", static_signature)
+			_increment_mission_fireteam_card_delta_rendering_count("static_apply")
+		else:
+			_increment_mission_fireteam_card_delta_rendering_count("static_skip")
+		if bool(card.get_meta("mission_fireteam_mini_card_selected", selected_fireteam)) != selected_fireteam:
+			card.call("set_selected", selected_fireteam)
+		card.set_meta("mission_fireteam_mini_card_selected", selected_fireteam)
 		_apply_fireteam_mini_card_status_context(card, normalized_fireteam_id, units)
+		_increment_mission_fireteam_card_delta_rendering_count("runtime_status_apply")
 		_apply_fireteam_mini_card_leader_portrait(card, lead)
 		card.modulate = Color(1.0, 1.0, 1.0, 0.58) if runtime_inactive else Color.WHITE
 		if is_new_card:
@@ -3397,6 +3413,20 @@ func _refresh_fireteam_mini_cards() -> void:
 		child.queue_free()
 	if fireteam_panel != null:
 		fireteam_panel.visible = desired_index > 0
+
+
+func _build_fireteam_mini_card_static_signature(fireteam_id: String, lead, lead_summary: String) -> String:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var lead_id: String = ""
+	if lead != null:
+		lead_id = String(lead.call("get_unit_id")).strip_edges() if lead.has_method("get_unit_id") else String(lead.name).strip_edges()
+	return "team=%s|label=%s|loadout=%s|lead=%s|summary=%s|context=mission_mini" % [
+		normalized_fireteam_id,
+		_get_fireteam_display_label(normalized_fireteam_id),
+		_get_mission_fireteam_loadout_id(normalized_fireteam_id),
+		lead_id,
+		lead_summary.strip_edges(),
+	]
 
 
 func _build_selected_fireteam_cards_runtime_signature() -> String:
@@ -3486,6 +3516,25 @@ func get_mission_hud_runtime_surface_guard_snapshot() -> Dictionary:
 		"selected_cards_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("selected_cards", 0)),
 		"mini_cards_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("mini_cards", 0)),
 		"mini_cards_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("mini_cards", 0)),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _increment_mission_fireteam_card_delta_rendering_count(key: String) -> void:
+	_mission_fireteam_card_delta_rendering_counts[key] = int(_mission_fireteam_card_delta_rendering_counts.get(key, 0)) + 1
+
+
+func get_mission_fireteam_card_delta_rendering_snapshot() -> Dictionary:
+	return {
+		"static_apply_count": int(_mission_fireteam_card_delta_rendering_counts.get("static_apply", 0)),
+		"static_skip_count": int(_mission_fireteam_card_delta_rendering_counts.get("static_skip", 0)),
+		"runtime_status_apply_count": int(_mission_fireteam_card_delta_rendering_counts.get("runtime_status_apply", 0)),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
@@ -3622,12 +3671,17 @@ func _is_selected_member_card_unit(unit: Node, selected_cards_fireteam_id: Strin
 
 
 func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
-	if card == null or lead == null:
+	if card == null:
 		return
 	var header_row := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
 	if header_row == null:
 		return
 	var portrait_rect := header_row.get_node_or_null("LeaderPortraitRect") as TextureRect
+	if lead == null:
+		if portrait_rect != null:
+			portrait_rect.visible = false
+			portrait_rect.set_meta("mission_fireteam_leader_portrait_signature", "none")
+		return
 	if portrait_rect == null:
 		portrait_rect = TextureRect.new()
 		portrait_rect.name = "LeaderPortraitRect"
@@ -3645,9 +3699,16 @@ func _apply_fireteam_mini_card_leader_portrait(card: Control, lead) -> void:
 		portrait_path = String(profile.get("portrait_path")).strip_edges()
 	if portrait_path.is_empty() and lead.has_method("get_portrait_path"):
 		portrait_path = String(lead.call("get_portrait_path")).strip_edges()
+	var lead_id: String = String(lead.call("get_unit_id")).strip_edges() if lead.has_method("get_unit_id") else String(lead.name).strip_edges()
+	var portrait_signature: String = "%s|%s|%s" % [lead_id, portrait_id, portrait_path]
+	if String(portrait_rect.get_meta("mission_fireteam_leader_portrait_signature", "")) == portrait_signature:
+		portrait_rect.visible = true
+		return
 	portrait_rect.texture = _load_portrait_identity_texture(portrait_id, portrait_path)
 	portrait_rect.modulate = Color.WHITE if portrait_rect.texture != null else Color(0.36, 0.39, 0.44, 1.0)
+	portrait_rect.visible = true
 	portrait_rect.set_meta("mission_fireteam_leader_portrait", true)
+	portrait_rect.set_meta("mission_fireteam_leader_portrait_signature", portrait_signature)
 
 
 func _apply_fireteam_mini_card_status_context(card: Control, fireteam_id: String, units: Array = []) -> void:
@@ -3929,6 +3990,10 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 	var resolved_units: Array = units.duplicate()
 	if resolved_units.is_empty():
 		resolved_units = _filter_ground_fireteam_card_units(_get_fireteam_units(fireteam_id, true))
+	var portrait_signature: String = _build_fireteam_mini_member_portrait_signature(resolved_units)
+	if String(strip.get_meta("mission_fireteam_member_portrait_signature", "")) == portrait_signature:
+		strip.visible = not resolved_units.is_empty()
+		return
 	strip.visible = not resolved_units.is_empty()
 	strip.custom_minimum_size = Vector2(0.0, 20.0)
 	strip.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
@@ -3960,6 +4025,25 @@ func _apply_fireteam_mini_member_portrait_strip(card: Control, fireteam_id: Stri
 		portrait_rect.tooltip_text = String(unit.call("get_display_name")) if unit.has_method("get_display_name") else unit.name
 		portrait_rect.set_meta("mission_fireteam_member_portrait", true)
 	strip.set_meta("mission_fireteam_member_portrait_strip", true)
+	strip.set_meta("mission_fireteam_member_portrait_signature", portrait_signature)
+
+
+func _build_fireteam_mini_member_portrait_signature(units: Array) -> String:
+	var tokens: PackedStringArray = PackedStringArray()
+	for unit_variant in units:
+		var unit := unit_variant as Node
+		if unit == null:
+			tokens.append("<null>")
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit.has_method("get_unit_id") else String(unit.name).strip_edges()
+		var profile_variant: Variant = _build_profile_from_unit(unit)
+		var profile: Dictionary = Dictionary(profile_variant) if typeof(profile_variant) == TYPE_DICTIONARY else {}
+		var portrait_id: String = String(profile.get("portrait_id", "")).strip_edges()
+		var portrait_path: String = String(profile.get("portrait_path", "")).strip_edges()
+		if portrait_path.is_empty() and unit.has_method("get_portrait_path"):
+			portrait_path = String(unit.call("get_portrait_path")).strip_edges()
+		tokens.append("%s|%s|%s" % [unit_id, portrait_id, portrait_path])
+	return ";".join(tokens)
 
 
 func _apply_fireteam_mini_readiness_footer(card: Control, status_snapshot: Dictionary) -> void:

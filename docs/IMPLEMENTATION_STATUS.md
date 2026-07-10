@@ -51,6 +51,15 @@
 - Lokale Pruefung: `task_1061_multi_fireteam_mission_runtime_budget.gd` 11/11; danach TASK_1060, TASK_1059, TASK_396, TASK_503 und `git diff --check`.
 - Naechster Schritt: Fireteam-Card-Delta-Rendering fuer die weiterhin gemessenen Karten-/Textkosten, ohne Suppression, Contact, Coordination oder Lead-Status zu verschleiern.
 
+### TASK_1062 - Fireteam Card Delta Rendering
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1062_fireteam_card_delta_rendering.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1061_multi_fireteam_mission_runtime_budget.md`, `docs/tasks/TASK_1044_mission_hud_runtime_surface_guard.md`
+- Stand: TASK_1062 ist 18/18 gruen. Eine reine Suppression-Aenderung behaelt Karte, Titel und Lead-Portraet, aktualisiert aber sichtbar den SUPP-Balken und Status-Snapshot. Ein absichtlich veralteter Referenzvertrag richtet die statische Karte wieder ein. Im erneuten echten Zwei-Team-Trace lag die Fireteam-Card-Surface nach Contact, Preview und GO bei rund 46 bis 48 ms statt der zuvor wiederholt beobachteten 74 bis 83 ms.
+- Ursache/Fix: `_refresh_fireteam_mini_cards()` rief bei jeder legitimen Runtime-Aenderung erneut `FOBFireteamCard.setup_card()` auf, obwohl Fireteam-ID, Name, Loadout, Lead und Kartenform gleich blieben. Eine statische Referenzsignatur grenzt den Aufbau ein; Selection bleibt ein kleines Visual-Delta. Lead- und Member-Portraets pruefen ihre Identitaet, bevor Textur-/Control-Arbeit wiederholt wird.
+- Risiken/offen: Die Headless-Messung ist ein Vergleichssignal, kein FPS-Versprechen. Member-Status, Contact, Suppression, Coordination und Readiness werden absichtlich weiter live aktualisiert. TASK_503 endet weiterhin mit der bekannten Godot-ObjectDB-Leak-Warnung, aber Exit 0 und 10/10 Assertions.
+- Lokale Pruefung: `task_1062_fireteam_card_delta_rendering.gd` 18/18, `task_1061_multi_fireteam_mission_runtime_budget.gd` 11/11, TASK_1044 15/15, TASK_1060 14/14, TASK_1059 10/10, TASK_396 17/17, TASK_503 10/10 und `git diff --check`.
+- Naechster Schritt: Ein kleiner spielbarer Objective-Slice mit klarer Aufgabe, sichtbaren Erfolg-/Fehlschlaggrenzen und Debriefing, damit die stabilisierte Taktik nicht nur in Verifiern lebt.
+
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
 - Stand: Der fruehe Trace vor der Transferankunft war nicht aussagekraeftig. TASK_1056 belegt den Einzel-Dropship-Consumer nach Ankunft; TASK_1057 deckt die Mehr-Dropship-Contract-Uebergabe und beide Runtime-Fireteams ab.
