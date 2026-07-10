@@ -67,6 +67,7 @@ func _run_trace() -> void:
 	_drop_fireteam_on_shipcard(homebase_screen, "ft1", "dropship_alpha")
 	var boarding_seconds: float = float(homebase_screen.call("_debug_get_homebase_fireteam_boarding_total_seconds", "ft1"))
 	homebase_screen.call("_debug_advance_homebase_direct_boarding", boarding_seconds + 0.2)
+	print("TRACE transport_payload stage=after_boarding payload=%s" % [str(Dictionary(homebase_screen.call("build_homebase_direct_drop_state_for_craft", "dropship_alpha")))])
 	if not _stage_within_budget() or not await _wait_stage_frames(3):
 		_finish_trace(scene)
 		return
@@ -88,6 +89,7 @@ func _run_trace() -> void:
 	scene.call("_sync_homebase_direct_staging_from_screen")
 	var payload_source: String = "homebase_direct" if bool(scene.call("_has_homebase_direct_payload_from_screen", requested_direct_craft_id)) else "homebase_direct_then_fob"
 	scene.call("_sync_fob_dropship_state_into_mission_planning", not had_preview_deployed_payload, payload_source, requested_direct_craft_id)
+	print("TRACE transport_payload stage=after_planning_sync source=%s payload=%s" % [payload_source, str(Dictionary(scene.get("_mission_planning_state")))])
 	if not _stage_within_budget():
 		_finish_trace(scene)
 		return

@@ -12,8 +12,13 @@
 
 ### TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit
 - Status: implementiert im Arbeitsstand
-- Stand: Trace belegt nach Deboarding leere deployed- und Combat-Friendly-Listen. Ursache liegt vor Contact/LOS: Homebase-Passagiere kommen nicht bis zur aktiven Mission.
-- Naechster Schritt: TASK_1055 - Homebase Transport Payload to Active Mission Repair.
+- Stand: Trace belegt nach Deboarding leere deployed- und Combat-Friendly-Listen. TASK_1055 belegt jedoch korrekte Homebase- und Planning-Payloads; die aktive Mission konsumiert sie nicht in Runtime-Units.
+- Naechster Schritt: TASK_1056 - Active Mission Transport Payload Consumer Repair.
+
+### TASK_1055 - Homebase Transport Payload to Active Mission Audit
+- Status: implementiert im Arbeitsstand
+- Stand: Boarding und Planning enthalten `unit_alpha`, `unit_bravo`, `ft1`, Dropship-Karte und MissionSetup-Felder korrekt.
+- Naechster Schritt: TASK_1056 - Active Mission Transport Payload Consumer Repair.
 
 ### TASK_1053 - LOS-Valid First Contact Fixture
 - Status: implementiert im Arbeitsstand

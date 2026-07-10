@@ -13,9 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1055 - Homebase Transport Payload to Active Mission Repair (geplant)
-- Grundlage: TASK_1054 meldet nach Deboarding keine deployed Fireteam-Mitglieder.
-- Ziel: Ausgewaehlte Homebase-Fireteams ueber Dropship bis Active Mission und Combat-Registry durchreichen.
+## TASK_1056 - Active Mission Transport Payload Consumer Repair (geplant)
+- Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
+- Ziel: Den vorhandenen Planning-/MissionSetup-Payload in Active Mission, deployed Units und Combat-Registry konsumieren.
+
+## TASK_1055 - Homebase Transport Payload to Active Mission Audit (implementiert im Arbeitsstand)
+- Ergebnis: Payload ist vor Missionsstart vollstaendig; Consumer der aktiven Mission verliert ihn danach.
 
 ## TASK_1054 - Deboarded Fireteam Combat Registry Activation Audit (implementiert im Arbeitsstand)
 - Grundlage: TASK_1053 findet nach Deboarding keine Combat-registrierte ft1-LOS-Basis.
