@@ -148,6 +148,15 @@
 - Lokale Pruefung: TASK_1073 13/13, TASK_511 27/27 und `git diff --check`; der echte Export plus Startcheck erfolgt nach dem sauberen Commit.
 - Naechster Schritt: Aus dem sauberen TASK-1073-Commit frisch exportieren und den Spieleordner mit positiver Provenance pruefen; danach wieder in den sichtbaren Station-Route-Spieltest zurueckkehren.
 
+### TASK_1076 - Release Firefight Contract Chain Refresh
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1076_release_firefight_contract_chain_refresh.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_833, TASK_834, TASK_835, TASK_836, TASK_838, TASK_839, TASK_1074
+- Stand: Die historische Release-Firefight-Kette ist wieder zusammenhaengend gruen: TASK_834 27/27, TASK_835 28/28, TASK_836 29/29, TASK_838 28/28 und TASK_839 31/31.
+- Ursache/Fix: TASK_834 verlangte noch `NEXT/WHY` vor `CONTACT FIRE`, obwohl TASK_1074 den sichtbaren Multiplayer-Contract bewusst auf `CONTACT FIRE` und danach `NEXT/WHY` umgestellt hatte. TASK_835 bis 839 kaskadierten den alten Gate-Fehler. Die read-only Snapshots exportieren jetzt erste Contact- und zweite Visible-Decision-Line explizit. TASK_838 akzeptiert den bestehenden Visibility-Persistence-Fallback als zweite erlaubte, visuelle Quelle.
+- Risiken/offen: Einzelne Surfaces koennen innerhalb eines Combat-Ticks `FIRED` statt `HIT` zeigen. Der Contract sichert daher Prioritaet und gemeinsame Entscheidung, nicht eine kuenstliche Outcome-Kopie. Ein echter Zwei-Fenster-Sichtentscheid bleibt weiterhin separate Playtest-Arbeit.
+- Lokale Pruefung: TASK_834 27/27, TASK_835 28/28, TASK_836 29/29, TASK_838 28/28, TASK_839 31/31, TASK_833 23/23, TASK_505 PASS, TASK_160 22/22, TASK_607 41/41 und `git diff --check`.
+- Naechster Schritt: Firefight-, Large-Map- und Host/Client-Regressionen vollenden, frischen Provenance-Release exportieren und dann den sichtbaren Station-Route-First-Round-Befund als naechsten Spielwert schneiden.
+
 ### TASK_1075 - Large Map Tactical Badge Lifecycle Audit
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1075_large_map_tactical_badge_lifecycle_audit.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_505, TASK_160, TASK_833

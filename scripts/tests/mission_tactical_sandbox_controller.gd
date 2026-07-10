@@ -18091,9 +18091,12 @@ func get_release_firefight_hud_real_window_polish_snapshot() -> Dictionary:
 	_update_ui()
 	var source_snapshot: Dictionary = get_release_firefight_hud_readability_polish_snapshot()
 	var decision_line: String = String(source_snapshot.get("decision_line", "")).strip_edges()
+	var visible_decision_line: String = String(source_snapshot.get("visible_decision_line", "")).strip_edges()
+	var contact_fire_line: String = String(source_snapshot.get("selected_fireteam_first_line", "")).strip_edges()
 	var selected_fireteam_status_text: String = String(source_snapshot.get("selected_fireteam_status_text", "")).strip_edges()
 	var selected_lines: PackedStringArray = selected_fireteam_status_text.split("\n", false)
 	var selected_first_line: String = String(selected_lines[0]).strip_edges() if selected_lines.size() > 0 else ""
+	var selected_second_line: String = String(selected_lines[1]).strip_edges() if selected_lines.size() > 1 else ""
 	var label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	var label_style: Dictionary = _get_combat_hud_tooltip_label_style_snapshot(label)
 	var label_rect: Rect2 = _get_control_global_rect_or_empty(label)
@@ -18123,9 +18126,14 @@ func get_release_firefight_hud_real_window_polish_snapshot() -> Dictionary:
 			"Selected Fireteam label is larger, outlined, wrapped and not clipped for the real window."
 		),
 		_build_mission_first_move_readability_check(
-			"decision_line_still_first",
-			not decision_line.is_empty() and selected_first_line == decision_line,
-			"Real-window style preserves the TASK_833 decision-line priority."
+			"contact_fire_line_first",
+			contact_fire_line.begins_with("CONTACT FIRE") and selected_first_line == contact_fire_line,
+			"Real-window style preserves the TASK_1074 contact-fire priority."
+		),
+		_build_mission_first_move_readability_check(
+			"visible_decision_line_second",
+			not visible_decision_line.is_empty() and selected_second_line == visible_decision_line,
+			"Real-window style keeps the compact NEXT/WHY decision directly below contact fire."
 		),
 		_build_mission_first_move_readability_check(
 			"label_has_real_window_area",
@@ -18163,7 +18171,10 @@ func get_release_firefight_hud_real_window_polish_snapshot() -> Dictionary:
 		"style_id": style_id,
 		"expected_style_id": RELEASE_FIREFIGHT_HUD_REAL_WINDOW_STYLE_ID,
 		"decision_line": decision_line,
+		"visible_decision_line": visible_decision_line,
+		"contact_fire_line": contact_fire_line,
 		"selected_fireteam_first_line": selected_first_line,
+		"selected_fireteam_second_line": selected_second_line,
 		"selected_fireteam_status_text": selected_fireteam_status_text,
 		"selected_fireteam_label_style": label_style,
 		"selected_fireteam_label_rect": _rect_to_audit_dictionary(label_rect),
@@ -18181,7 +18192,8 @@ func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
 	_update_ui()
 	var source_snapshot: Dictionary = get_release_firefight_hud_real_window_polish_snapshot()
 	var decision_line: String = String(source_snapshot.get("decision_line", "")).strip_edges()
-	var combat_line: String = _build_selected_fireteam_combat_hud_line()
+	var visible_decision_line: String = String(source_snapshot.get("visible_decision_line", "")).strip_edges()
+	var selected_contact_fire_line: String = String(source_snapshot.get("contact_fire_line", "")).strip_edges()
 	var mission_control_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
 	if mission_control_label != null:
 		_apply_release_firefight_bottom_dock_density_label_contract(mission_control_label)
@@ -18189,7 +18201,7 @@ func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
 	var mission_lines: PackedStringArray = mission_control_status_text.split("\n", false)
 	var mission_first_line: String = String(mission_lines[0]).strip_edges() if mission_lines.size() > 0 else ""
 	var mission_second_line: String = String(mission_lines[1]).strip_edges() if mission_lines.size() > 1 else ""
-	var expected_combat_line: String = "Kampf %s" % combat_line if not combat_line.is_empty() else ""
+	var contact_fire_line: String = mission_first_line
 	var label_style: Dictionary = _get_combat_hud_tooltip_label_style_snapshot(mission_control_label)
 	var label_rect: Rect2 = _get_control_global_rect_or_empty(mission_control_label)
 	var style_id: String = String(mission_control_label.get_meta("release_firefight_bottom_dock_density_style_id", "")) if mission_control_label != null else ""
@@ -18203,14 +18215,14 @@ func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
 			"Bottom-dock density polish builds on a green TASK_834 real-window snapshot."
 		),
 		_build_mission_first_move_readability_check(
-			"mission_control_decision_line_first",
-			not decision_line.is_empty() and mission_first_line == decision_line,
-			"Mission Control starts with the same NEXT/WHY Firefight decision line."
+			"mission_control_contact_fire_first",
+			contact_fire_line.begins_with("CONTACT FIRE"),
+			"Mission Control starts with a CONTACT FIRE readout."
 		),
 		_build_mission_first_move_readability_check(
-			"mission_control_combat_line_second",
-			not expected_combat_line.is_empty() and mission_second_line == expected_combat_line,
-			"Mission Control keeps the compact combat readout directly below the decision line."
+			"mission_control_visible_decision_second",
+			not visible_decision_line.is_empty() and mission_second_line == visible_decision_line,
+			"Mission Control keeps the compact NEXT/WHY decision directly below contact fire."
 		),
 		_build_mission_first_move_readability_check(
 			"mission_control_status_not_overexpanded",
@@ -18268,8 +18280,9 @@ func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
 		"style_id": style_id,
 		"expected_style_id": RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_STYLE_ID,
 		"decision_line": decision_line,
-		"combat_line": combat_line,
-		"expected_mission_control_combat_line": expected_combat_line,
+		"visible_decision_line": visible_decision_line,
+		"contact_fire_line": contact_fire_line,
+		"selected_contact_fire_line": selected_contact_fire_line,
 		"mission_control_first_line": mission_first_line,
 		"mission_control_second_line": mission_second_line,
 		"mission_control_status_text": mission_control_status_text,

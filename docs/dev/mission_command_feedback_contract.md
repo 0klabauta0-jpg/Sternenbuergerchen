@@ -377,6 +377,21 @@ TASK_847 macht vorhandene Fire-Exchange-Evidence im echten Release-HUD kurz laen
 
 Erwartete Struktur: `get_release_fire_exchange_visibility_persistence_snapshot()` in TacticalController und MetaLayer enthaelt `schema = sternenbuergerchen.release_fire_exchange_visibility_persistence.v1`, `task_id = TASK_847`, `source_task_id = TASK_846`, `source_exchange_task_id = TASK_844`, `style_id = task_847_release_fire_exchange_visibility_persistence_v1`, `visibility_persistence_active`, `compact_line`, `decision_line`, `event_log_short_text`, `fire_event_id`, `remaining_msec`, `duration_msec`, `combat_hud_density`, `visibility_persistence`, `read_only = true`, `ui_sets_gameplay_truth = false`, `creates_command = false`, `creates_fire_event = false`, `creates_damage_event = false` und `sets_multiplayer_truth = false`. Bei aktivem Fenster muss `compact_line` mit `FIRE` beginnen, `decision_line` muss `NEXT HIT LESEN / DEFEND | WHY FEUER` enthalten und der Event-Log-Fallback muss `CONTACT FIRE` nennen.
 
+## Release-Firefight Contract Chain (TASK_1076)
+Die historischen TASK_834- bis TASK_839-Snapshots folgen dem aktuellen
+TASK_1074-Readout: Selected Fireteam und Mission Control beginnen im aktiven
+Feuerkontakt jeweils mit einer eigenen `CONTACT FIRE`-Zeile; ihre zweite
+sichtbare Zeile ist dieselbe kompakte `NEXT ... | WHY ...`-Entscheidung.
+`contact_fire_line` beschreibt die lokale erste Zeile der jeweiligen Surface,
+`visible_decision_line` die gemeinsame zweite Zeile. Kurzlebige Combat-Outcomes
+wie `FIRED` und `HIT` duerfen zwischen Surfaces abweichen; sie sind keine
+zweite UI- oder Gameplay-Wahrheit.
+
+Der TASK_838-Event-Log-Fallback bleibt rein visuell. Seine einzige erlaubte
+Quelle ist entweder `release_firefight_event_log_fallback` oder der neuere
+`release_fire_exchange_visibility_persistence`-Presenter. Beide erzeugen
+keine Commands, FireEvents, DamageEvents oder Multiplayer-Wahrheit.
+
 ## Release-First-Exchange-Recapture-Acceptance
 TASK_848 paketiert den frischen echten Release-Fenster-Recapture nach TASK_847. Der Acceptance-Snapshot darf den TASK_845-Recapture, Screenshotpfade, Git-/Branch-Kontext, erwartete TASK_847-Visibility-Style-ID und manuelle Review-Checks zusammenfassen. Er darf keine UI-, Command-, Combat-, Damage-, Contact-, Movement-, Multiplayer- oder Gameplay-Wahrheit erzeugen und keinen Pixelentscheid als bestanden behaupten.
 

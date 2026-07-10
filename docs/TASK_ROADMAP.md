@@ -105,6 +105,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Ursache/Fix: Der Release-Firefight-Declutter blieb trotz autoritativem Missionsresultat aktiv, weil nur die noch sichtbare Decision-Line ausgewertet wurde. Nach `victory`, `defeat` oder `aborted` wird die normale World-Label-Dichte verwendet; Gameplay- und Streaming-Wahrheit bleiben unveraendert.
 - Naechster Schritt: Sauberen Integrationscommit exportieren und einen frischen Provenance-Release fuer den sichtbaren Station-Route- oder Host/Client-Lauf erzeugen. TASK_838/839 brauchen getrennt einen Refresh ihrer alten Release-UI-Snapshot-Kette.
 
+## TASK_1076 - Release Firefight Contract Chain Refresh (implementiert im Arbeitsstand)
+- Grundlage: TASK_1074 etablierte `CONTACT FIRE` vor `NEXT/WHY`, aber die alten TASK_834- bis TASK_839-Gates erwarteten noch die umgekehrte Reihenfolge und fielen dadurch als ganze Kette.
+- Ergebnis: TASK_834 27/27, TASK_835 28/28, TASK_836 29/29, TASK_838 28/28 und TASK_839 31/31 sind wieder gruen. Die Kette prueft damit den aktuellen sichtbaren Firefight-Contract statt historische Presentation-Details.
+- Ursache/Fix: Read-only Snapshots exportieren nun die lokale Contact-Zeile und die gemeinsame sichtbare Decision-Zeile. Der Event-Log akzeptiert neben dem alten Fallback den vorhandenen TASK_847-Visibility-Presenter. Keine UI, Combat-, Command- oder Multiplayer-Wahrheit wurde veraendert.
+- Naechster Schritt: Den zusammenhaengenden Firefight mit Large-Map, Host/Client und frischem Provenance-Release pruefen; danach den sichtbaren Station-Route-First-Round-Playtest anhand konkreter Befunde verbessern.
+
 ## TASK_1056 - Active Mission Transport Payload Consumer Repair (implementiert im Arbeitsstand)
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ergebnis: Nach der vorhandenen Transferankunft startet der Einzel-Dropship mit seinem korrekten Pending-/Sequence-Payload; TASK_1057 prueft den Mehr-Dropship-Folgepfad.

@@ -68,7 +68,8 @@ func _test_firefight_selected_fireteam_label_real_window_style() -> void:
 	var snapshot: Dictionary = Dictionary(scene.call("get_release_firefight_hud_real_window_polish_snapshot", {}, {}, {}))
 	var tactical: Dictionary = Dictionary(snapshot.get("tactical_real_window", {}))
 	var label_style: Dictionary = Dictionary(tactical.get("selected_fireteam_label_style", {}))
-	var decision_line: String = String(snapshot.get("decision_line", "")).strip_edges()
+	var contact_fire_line: String = String(snapshot.get("contact_fire_line", "")).strip_edges()
+	var visible_decision_line: String = String(snapshot.get("visible_decision_line", "")).strip_edges()
 	var selected_text: String = String(snapshot.get("selected_fireteam_status_text", "")).strip_edges()
 	if String(snapshot.get("status", "")) != "pass" or String(tactical.get("gate", "")) != "pass":
 		print("TASK_834 snapshot issues: %s" % [str(snapshot.get("issues", []))])
@@ -85,7 +86,8 @@ func _test_firefight_selected_fireteam_label_real_window_style() -> void:
 	_assert(bool(tactical.get("selected_fireteam_label_autowrap_enabled", false)), "Selected Fireteam label wraps")
 	_assert(not bool(tactical.get("selected_fireteam_label_clip_text", true)), "Selected Fireteam label is not clipped")
 	_assert(float(tactical.get("selected_fireteam_label_min_height", 0.0)) >= 62.0, "Selected Fireteam label has increased minimum height")
-	_assert(not decision_line.is_empty() and selected_text.begins_with(decision_line), "Decision line remains first after style polish")
+	_assert(contact_fire_line.begins_with("CONTACT FIRE") and selected_text.begins_with(contact_fire_line), "Contact fire remains first after style polish")
+	_assert(not visible_decision_line.is_empty() and selected_text.split("\n", false).size() >= 2 and String(selected_text.split("\n", false)[1]).strip_edges() == visible_decision_line, "Visible decision remains directly below contact fire")
 	_assert(_snapshot_is_read_only(snapshot), "Meta TASK_834 snapshot is read-only")
 	_assert(_snapshot_is_read_only(tactical), "Tactical TASK_834 snapshot is read-only")
 

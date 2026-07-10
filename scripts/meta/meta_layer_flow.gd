@@ -1919,6 +1919,8 @@ func get_release_firefight_hud_real_window_polish_snapshot(real_window_review_no
 		"source": source,
 		"tactical_real_window": tactical_real_window,
 		"decision_line": String(tactical_real_window.get("decision_line", "")),
+		"visible_decision_line": String(tactical_real_window.get("visible_decision_line", "")),
+		"contact_fire_line": String(tactical_real_window.get("contact_fire_line", "")),
 		"selected_fireteam_status_text": String(tactical_real_window.get("selected_fireteam_status_text", "")),
 		"checks": checks,
 		"failed_count": failed_count,
@@ -1954,21 +1956,21 @@ func get_release_firefight_bottom_dock_density_polish_snapshot(real_window_revie
 	)
 	_append_handoff_check(
 		checks,
-		"mission_control_decision_line_first",
+		"mission_control_contact_fire_first",
 		String(tactical_bottom_dock.get("gate", "")) == "pass"
-			and not String(tactical_bottom_dock.get("decision_line", "")).strip_edges().is_empty()
-			and String(tactical_bottom_dock.get("mission_control_first_line", "")).strip_edges() == String(tactical_bottom_dock.get("decision_line", "")).strip_edges(),
+			and String(tactical_bottom_dock.get("contact_fire_line", "")).strip_edges().begins_with("CONTACT FIRE")
+			and String(tactical_bottom_dock.get("mission_control_first_line", "")).strip_edges() == String(tactical_bottom_dock.get("contact_fire_line", "")).strip_edges(),
 		"critical",
-		"Mission Control should lead with the NEXT/WHY Firefight decision line."
+		"Mission Control should lead with its CONTACT FIRE readout."
 	)
 	_append_handoff_check(
 		checks,
-		"mission_control_combat_line_second",
+		"mission_control_visible_decision_second",
 		String(tactical_bottom_dock.get("gate", "")) == "pass"
-			and not String(tactical_bottom_dock.get("expected_mission_control_combat_line", "")).strip_edges().is_empty()
-			and String(tactical_bottom_dock.get("mission_control_second_line", "")).strip_edges() == String(tactical_bottom_dock.get("expected_mission_control_combat_line", "")).strip_edges(),
+			and not String(tactical_bottom_dock.get("visible_decision_line", "")).strip_edges().is_empty()
+			and String(tactical_bottom_dock.get("mission_control_second_line", "")).strip_edges() == String(tactical_bottom_dock.get("visible_decision_line", "")).strip_edges(),
 		"critical",
-		"Mission Control should keep the combat readout directly under the decision line."
+		"Mission Control should keep the compact NEXT/WHY decision directly below contact fire."
 	)
 	_append_handoff_check(
 		checks,
@@ -2021,6 +2023,9 @@ func get_release_firefight_bottom_dock_density_polish_snapshot(real_window_revie
 		"source": source,
 		"tactical_bottom_dock": tactical_bottom_dock,
 		"decision_line": String(tactical_bottom_dock.get("decision_line", "")),
+		"visible_decision_line": String(tactical_bottom_dock.get("visible_decision_line", "")),
+		"contact_fire_line": String(tactical_bottom_dock.get("contact_fire_line", "")),
+		"selected_contact_fire_line": String(tactical_bottom_dock.get("selected_contact_fire_line", "")),
 		"mission_control_status_text": String(tactical_bottom_dock.get("mission_control_status_text", "")),
 		"mission_control_first_line": String(tactical_bottom_dock.get("mission_control_first_line", "")),
 		"mission_control_second_line": String(tactical_bottom_dock.get("mission_control_second_line", "")),

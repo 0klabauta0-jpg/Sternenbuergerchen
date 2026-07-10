@@ -86,7 +86,8 @@ func _test_firefight_event_log_findings_polish() -> void:
 	_assert(_snapshot_is_read_only(display), "Event-log display fallback is read-only")
 	if bool(display.get("fallback_active", false)):
 		var fallback: Dictionary = Dictionary(display.get("fallback_entry", {}))
-		_assert(String(fallback.get("source", "")) == "release_firefight_event_log_fallback", "Fallback source is explicit")
+		var fallback_source: String = String(fallback.get("source", ""))
+		_assert(fallback_source == "release_firefight_event_log_fallback" or fallback_source == "release_fire_exchange_visibility_persistence", "Fallback source is an explicit read-only Firefight presenter")
 		_assert(bool(fallback.get("visual_only", false)), "Fallback is visual-only")
 		_assert(not String(fallback.get("short_text", "")).strip_edges().is_empty(), "Fallback has visible short text")
 
