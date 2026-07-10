@@ -13,11 +13,17 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1049 - Enemy Team Tactics Hotpath Breakdown and Decision Revision Guard (geplant)
+## TASK_1050 - LZ Drop and Deboard Flow Timing Breakdown (geplant)
+- Grundlage: TASK_1049 beendet den sichtbaren Startframe-Blocker; TASK_1045 erreicht erstmals LZ/Drop und stoppt dort kontrolliert.
+- Ziel: LZ setzen, Drop ausloesen, Aussteigen und Runtime-Aktivierung nach Transport-, Simulation-, Terrain- und HUD-Teilpfaden messen.
+- Ergebnis: Read-only Stage-/Frame-Evidence fuer den naechsten Spielerflowblocker und ein enger Folgefix.
+- Naechster Schritt: Danach die einzelne Controller-UI-Spitze oder den gemessenen LZ/Drop-Teilpfad behandeln.
+
+## TASK_1049 - Enemy Team Tactics Hotpath Breakdown and Decision Revision Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1048 misst `enemy_team_tactics_usec` mit rund 405-420 ms als dominanten Anteil des Combat-Listeners.
 - Ziel: Enemy-Team-Taktik intern nach Gruppen-/Threat-/Cover-/Flank-Entscheidungen aufschluesseln und bei unveraendertem Entscheidungsinput wiederholte Berechnung vermeiden, ohne Reaktionszeit oder Autoritaet zu verlieren.
-- Ergebnis: Read-only Timing-/Revision-Evidence plus ein enger Guard fuer identische Entscheidungseingaben.
-- Naechster Schritt: Danach First-Contact-Flow und verbleibenden Viewport-/Renderanteil erneut messen.
+- Ergebnis: TASK_1049 ist 6/6 gruen. Identische Taktikinpute skippen Cover-/LOS-Rebuilds; Friendly-Bewegung berechnet sofort neu. Der reale Starttrace erreicht acht sichtbare Frames in rund 4,8 Sekunden, danach ist `lz_drop_and_deboard` der erste Blocker.
+- Naechster Schritt: TASK_1050 - LZ Drop and Deboard Flow Timing Breakdown.
 
 ## TASK_1048 - Simulation Tick Signal Fanout Audit and Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1047 misst `SimulationRoot.tick_processed.emit()` mit rund 400-478 ms innerhalb langsamer Missionsframes.

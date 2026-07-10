@@ -54,6 +54,11 @@ Der TASK-1045-Trace aktiviert die drei Profiler erst, sobald die aktive Mission 
 
 Im realen Missionsstart entspricht die Combat-Gesamtzeit nahezu der Signal-Emit-Zeit. Der groesste Combat-Scope ist `enemy_team_tactics_usec` mit rund 405-420 ms. Folgerungen muessen deshalb den gegnerischen Taktikpfad intern messen und bei unveraendertem Entscheidungsinput dirty-/intervallgaten; der Signalvertrag und die autoritative Tickfolge bleiben bestehen.
 
+## Enemy Team Tactics Decision Revision Guard (TASK_1049)
+`MissionCombatLoopDriver` bildet eine lokale, deterministische Entscheidungs-Signatur aus aktiven Enemy-/Friendly-Positionen und Vital-States, expliziten Teamtaktiken sowie Objective-Position. Gleiche Eingaben behalten die bereits berechneten Teamtaktikstates und vermeiden erneut ausgefuehrte Cover-/LOS-Sortierung. Jede dieser sicht- oder entscheidungsrelevanten Aenderungen rekonstruiert den State sofort; es gibt kein Zeitfenster, das KI-Entscheidungen heimlich aussetzt.
+
+Die Rebuild-/Skip-Zaehler sind reine Diagnose. Die Taktikstates bleiben abgeleitete Combat-Runtime-Daten; der Guard setzt keine UI- oder Multiplayer-Wahrheit und erzeugt keine Commands, Movement-, Fire- oder Damage-Ereignisse. Im TASK-1045-Trace vervollstaendigte die sichtbare Startphase danach acht Frames in rund 4,8 Sekunden; der erste Folgeblocker liegt bei LZ/Drop.
+
 ## Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (TASK_1032)
 `get_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan_snapshot()` ist der read-only Pruefpunkt fuer den naechsten spielbaren Slice nach TASK_1031. Der Snapshot darf nur die akzeptierte Tester-Run-Acceptance und optionale Plan-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Next-Slice-Line, Status und Gate exportiert werden.
 

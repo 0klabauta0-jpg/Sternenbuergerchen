@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1049 - Enemy Team Tactics Hotpath Breakdown and Decision Revision Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1049_enemy_team_tactics_decision_revision_guard.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1048_simulation_tick_signal_fanout_audit.md`
+- Stand: Der Combat-Driver bildet eine lokale Entscheidungs-Signatur aus Enemy-/Friendly-Lage und Vital-States, Taktikprofil/-stil/-Coververhalten sowie Objective. Gleiche Eingaben behalten die bestehende Gruppenentscheidung; Bewegungen loesen sie sofort neu aus. TASK_1049 prueft 6/6 Skip, Rebuild und Read-only-Grenze.
+- Stand: Der reale Starttrace passiert jetzt acht sichtbare Missionsframes in rund 4.839 ms statt nach fuenf Frames und rund 21 Sekunden abzubrechen. Frames 2-5 liegen bei rund 36-150 ms, Frame 6 bei rund 450 ms durch einen Controller-UI-Refresh. Combat liegt danach bei rund 1,7-2,2 ms pro Tick; Terrain-Proxy-Sync bei rund 31-48 ms.
+- Risiken/offen: Der erste Startframe kostet weiter rund 4 Sekunden. Der erste Trace-Blocker hat sich auf `lz_drop_and_deboard` verschoben; dort muessen Dropship-/Transport-/UI-Teilpfade getrennt gemessen werden. Die verbleibende einzelne UI-Spitze bleibt ein eigener Guard-Kandidat.
+- Lokale Pruefung: TASK_1049 6/6, TASK_1045 sichtbare Startphase komplett und kontrollierter Folgeblocker, TASK_170, `git diff --check`.
+- Naechster Schritt: TASK_1050 - LZ Drop and Deboard Flow Timing Breakdown.
+
 ### TASK_1048 - Simulation Tick Signal Fanout Audit and Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1048_simulation_tick_signal_fanout_audit.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1047_mission_visible_frame_cross_system_timing_breakdown.md`

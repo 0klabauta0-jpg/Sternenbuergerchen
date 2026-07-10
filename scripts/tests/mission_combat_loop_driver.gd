@@ -153,6 +153,10 @@ var _enemy_patrol_waypoint_index_by_unit_id: Dictionary = {}
 var _enemy_patrol_contact_locked: Dictionary = {}
 var _enemy_security_states_by_group_id: Dictionary = {}
 var _enemy_team_tactics_states_by_group_id: Dictionary = {}
+var _enemy_team_tactics_input_signature: String = ""
+var _enemy_team_tactics_input_signature_initialized: bool = false
+var _enemy_team_tactics_rebuild_count: int = 0
+var _enemy_team_tactics_skip_count: int = 0
 var _recent_fire_events: Array = []
 var _combat_outcome_by_fire_event_id: Dictionary = {}
 var _next_fire_event_sequence: int = 1
@@ -3601,7 +3605,6 @@ func _angle_within_sector(target_angle: float, center_angle: float, arc_width: f
 
 
 func _update_enemy_team_tactics_state() -> void:
-	_enemy_team_tactics_states_by_group_id.clear()
 	var grouped_units: Dictionary = {}
 	var tactics_by_group: Dictionary = {}
 	for enemy in _get_active_enemy_units():
@@ -3619,12 +3622,69 @@ func _update_enemy_team_tactics_state() -> void:
 		var units: Array = Array(grouped_units.get(group_id, []))
 		units.append(enemy)
 		grouped_units[group_id] = units
+	var input_signature: String = _build_enemy_team_tactics_input_signature(grouped_units, tactics_by_group)
+	if _enemy_team_tactics_input_signature_initialized and input_signature == _enemy_team_tactics_input_signature:
+		_enemy_team_tactics_skip_count += 1
+		return
+	_enemy_team_tactics_input_signature = input_signature
+	_enemy_team_tactics_input_signature_initialized = true
+	_enemy_team_tactics_rebuild_count += 1
+	_enemy_team_tactics_states_by_group_id.clear()
 	for group_id_variant in grouped_units.keys():
 		var group_id: String = String(group_id_variant)
 		var state: Dictionary = _build_enemy_team_tactics_state(group_id, Array(grouped_units.get(group_id_variant, [])), Dictionary(tactics_by_group.get(group_id_variant, {})))
 		if state.is_empty():
 			continue
 		_enemy_team_tactics_states_by_group_id[group_id] = state
+
+
+func _build_enemy_team_tactics_input_signature(grouped_units: Dictionary, tactics_by_group: Dictionary) -> String:
+	var tokens: PackedStringArray = PackedStringArray()
+	var group_ids: Array = grouped_units.keys()
+	group_ids.sort()
+	for group_id_variant in group_ids:
+		var group_id: String = String(group_id_variant)
+		var tactics: Dictionary = Dictionary(tactics_by_group.get(group_id, {}))
+		tokens.append("group:%s:%s:%s:%s" % [
+			group_id,
+			String(tactics.get("profile_id", "")),
+			String(tactics.get("advance_style", "")),
+			String(tactics.get("cover_behavior", "")),
+		])
+		for unit in _sort_enemy_units_by_id(Array(grouped_units.get(group_id, []))):
+			_append_enemy_team_tactics_signature_unit(tokens, unit, "enemy")
+	for friendly in _sort_enemy_units_by_id(_get_friendly_combat_units()):
+		_append_enemy_team_tactics_signature_unit(tokens, friendly, "friendly")
+	var objective_position: Vector2 = _get_objective_position()
+	tokens.append("objective:%.3f:%.3f" % [objective_position.x, objective_position.y])
+	return "|".join(tokens)
+
+
+func _append_enemy_team_tactics_signature_unit(tokens: PackedStringArray, unit, relation: String) -> void:
+	if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id"):
+		return
+	var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
+	if unit_id.is_empty():
+		return
+	var vital_state: String = String(unit.call("get_vital_state")) if unit.has_method("get_vital_state") else "fit"
+	var position: Vector2 = (unit as Node2D).global_position
+	tokens.append("%s:%s:%s:%.3f:%.3f" % [relation, unit_id, vital_state, position.x, position.y])
+
+
+func get_enemy_team_tactics_runtime_guard_snapshot() -> Dictionary:
+	return {
+		"input_signature_initialized": _enemy_team_tactics_input_signature_initialized,
+		"rebuild_count": _enemy_team_tactics_rebuild_count,
+		"skip_count": _enemy_team_tactics_skip_count,
+		"group_count": _enemy_team_tactics_states_by_group_id.size(),
+		"read_only_diagnostics": true,
+		"sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_movement": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
 
 
 func _build_enemy_team_tactics_state(group_id: String, units: Array, tactics: Dictionary) -> Dictionary:
