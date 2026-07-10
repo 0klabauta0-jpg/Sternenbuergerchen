@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1048 - Simulation Tick Signal Fanout Audit and Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1048_simulation_tick_signal_fanout_audit.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1047_mission_visible_frame_cross_system_timing_breakdown.md`
+- Stand: Der direkte Empfaengerscan zeigt `MissionCombatLoopDriver` als einzigen Runtime-Listener von `SimulationRoot.tick_processed`. Der vorhandene Combat-Profiler laeuft nun im TASK-1045-Trace mit Controller, Simulation und Terrain zusammen; TASK_1048 prueft 7/7 Signalvertrag, Listener, opt-in Scope-Snapshot, Authority und Read-only-Grenze.
+- Stand: Die sichtbaren Startframes 2-5 messen Combat-Gesamtzeiten von rund 407, 416, 441 und 422 ms. Der dominante Scope ist jeweils `enemy_team_tactics_usec` mit rund 405, 414, 438 und 419 ms. Das erklaert die grosse Signal-Emit-Zeit direkt.
+- Risiken/offen: Die Taktikberechnung ist Gameplay-Entscheidungslogik. Ein Fix darf sie nicht einfach aussetzen, sondern muss Eingaben/Revisionen, echte Entscheidungswechsel und taktische Reaktionszeit explizit erhalten. Restliche Mehrsekunden-Framezeit bleibt danach als Viewport-/Renderkandidat offen.
+- Lokale Pruefung: TASK_1048 7/7, TASK_1045 kontrolliert `budget_exceeded` mit Combat-Scope-Evidence, `git diff --check`.
+- Naechster Schritt: TASK_1049 - Enemy Team Tactics Hotpath Breakdown and Decision Revision Guard.
+
 ### TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1047_mission_visible_frame_cross_system_timing_breakdown.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_1045_mission_first_contact_end_to_end_timing_trace.md`

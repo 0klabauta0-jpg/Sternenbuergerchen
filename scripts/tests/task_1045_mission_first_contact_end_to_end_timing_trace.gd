@@ -248,12 +248,14 @@ func _enable_cross_system_timing(active_mission: Node) -> void:
 	var controller: Node = active_mission.get_node_or_null("TacticalController")
 	var simulation_root: Node = active_mission.get_node_or_null("SimulationRoot")
 	var terrain: Node = active_mission.get_node_or_null("Primary3DView")
-	if controller == null or simulation_root == null or terrain == null:
+	var combat_driver: Node = active_mission.get_node_or_null("CombatLoopDriver")
+	if controller == null or simulation_root == null or terrain == null or combat_driver == null:
 		return
-	_cross_system_timing_nodes = {"controller": controller, "simulation": simulation_root, "terrain": terrain}
+	_cross_system_timing_nodes = {"controller": controller, "simulation": simulation_root, "terrain": terrain, "combat": combat_driver}
 	controller.call("set_mission_visible_frame_timing_debug_enabled", true)
 	simulation_root.call("set_runtime_tick_budget_debug_enabled", true)
 	terrain.call("set_runtime_frame_timing_debug_enabled", true)
+	combat_driver.call("set_combat_tick_budget_debug_enabled", true)
 
 
 func _disable_cross_system_timing() -> void:
@@ -265,6 +267,8 @@ func _disable_cross_system_timing() -> void:
 			node.call("set_mission_visible_frame_timing_debug_enabled", false)
 		elif String(entry_variant) == "simulation":
 			node.call("set_runtime_tick_budget_debug_enabled", false)
+		elif String(entry_variant) == "combat":
+			node.call("set_combat_tick_budget_debug_enabled", false)
 		else:
 			node.call("set_runtime_frame_timing_debug_enabled", false)
 	_cross_system_timing_nodes.clear()
@@ -274,29 +278,42 @@ func _print_cross_system_timing_line() -> void:
 	var controller: Node = _cross_system_timing_nodes.get("controller") as Node
 	var simulation_root: Node = _cross_system_timing_nodes.get("simulation") as Node
 	var terrain: Node = _cross_system_timing_nodes.get("terrain") as Node
-	if controller == null or simulation_root == null or terrain == null:
+	var combat_driver: Node = _cross_system_timing_nodes.get("combat") as Node
+	if controller == null or simulation_root == null or terrain == null or combat_driver == null:
 		return
 	var controller_snapshot: Dictionary = Dictionary(controller.call("get_mission_visible_frame_timing_debug_snapshot"))
 	var simulation_snapshot: Dictionary = Dictionary(simulation_root.call("get_runtime_tick_budget_debug_snapshot"))
 	var terrain_snapshot: Dictionary = Dictionary(terrain.call("get_runtime_frame_timing_debug_snapshot"))
+	var combat_snapshot: Dictionary = Dictionary(combat_driver.call("get_combat_tick_budget_debug_snapshot"))
 	var slowest_scope: String = ""
 	var slowest_duration_usec: int = -1
+	var combat_slowest_scope: String = ""
+	var combat_slowest_duration_usec: int = -1
 	for source in [
 		{"prefix": "controller", "scopes": Dictionary(controller_snapshot.get("scopes_usec", {}))},
 		{"prefix": "simulation", "scopes": Dictionary(simulation_snapshot.get("scopes_usec", {}))},
 		{"prefix": "terrain", "scopes": Dictionary(terrain_snapshot.get("scopes_usec", {}))},
+		{"prefix": "combat", "scopes": Dictionary(combat_snapshot.get("scopes_usec", {}))},
 	]:
 		for scope_variant in Dictionary(source.get("scopes", {})).keys():
 			var duration_usec: int = int(Dictionary(source.get("scopes", {})).get(scope_variant, 0))
 			if duration_usec > slowest_duration_usec:
 				slowest_duration_usec = duration_usec
 				slowest_scope = "%s.%s" % [String(source.get("prefix", "")), String(scope_variant)]
-	print("TRACE cross_system_timing slowest_scope=%s duration_usec=%d controller_total_usec=%d simulation_total_usec=%d terrain_total_usec=%d" % [
+	for combat_scope_variant in Dictionary(combat_snapshot.get("scopes_usec", {})).keys():
+		var combat_duration_usec: int = int(Dictionary(combat_snapshot.get("scopes_usec", {})).get(combat_scope_variant, 0))
+		if combat_duration_usec > combat_slowest_duration_usec:
+			combat_slowest_duration_usec = combat_duration_usec
+			combat_slowest_scope = String(combat_scope_variant)
+	print("TRACE cross_system_timing slowest_scope=%s duration_usec=%d combat_slowest_scope=%s combat_slowest_duration_usec=%d controller_total_usec=%d simulation_total_usec=%d terrain_total_usec=%d combat_total_usec=%d" % [
 		slowest_scope,
 		slowest_duration_usec,
+		combat_slowest_scope,
+		combat_slowest_duration_usec,
 		int(controller_snapshot.get("total_usec", 0)),
 		int(simulation_snapshot.get("total_tick_usec", 0)),
 		int(terrain_snapshot.get("total_usec", 0)),
+		int(combat_snapshot.get("total_tick_usec", 0)),
 	])
 
 

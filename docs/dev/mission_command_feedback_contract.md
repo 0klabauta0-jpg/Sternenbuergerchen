@@ -49,6 +49,11 @@ Die Signatur, Zaehler und Render-Snapshot-Felder sind rein visuelle Diagnose. Si
 
 Der TASK-1045-Trace aktiviert die drei Profiler erst, sobald die aktive Mission wirklich im Tree steht. Die Messung im langsamen Startfenster zeigte `SimulationRoot.tick_signal_emit_usec` mit rund 400-478 ms als ersten klaren Code-Hotpath, Terrain-Skriptarbeit mit rund 32-37 ms und einen einzelnen Controller-UI-Refresh mit rund 444 ms. Folgeschnitte muessen daher Signal-Empfaenger und deren Folgearbeit auditieren; sie duerfen den Simulationstick nicht ueber UI- oder Terrain-Caches umdefinieren.
 
+## Simulation Tick Signal Fanout Audit (TASK_1048)
+`SimulationRoot.tick_processed` bleibt der autoritative Tick-Abschluss. Der direkte Runtime-Empfaenger ist `MissionCombatLoopDriver`; sein bestehender opt-in Combat-Profiler wird im TASK-1045-Trace zusammen mit Controller, Simulation und Terrain aktiviert. Die Diagnose selbst bleibt read-only und darf keine Combat-Entscheidung, Commands, Movement, Fire-/Damage-Ereignisse oder Multiplayer-Wahrheit erzeugen.
+
+Im realen Missionsstart entspricht die Combat-Gesamtzeit nahezu der Signal-Emit-Zeit. Der groesste Combat-Scope ist `enemy_team_tactics_usec` mit rund 405-420 ms. Folgerungen muessen deshalb den gegnerischen Taktikpfad intern messen und bei unveraendertem Entscheidungsinput dirty-/intervallgaten; der Signalvertrag und die autoritative Tickfolge bleiben bestehen.
+
 ## Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (TASK_1032)
 `get_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan_snapshot()` ist der read-only Pruefpunkt fuer den naechsten spielbaren Slice nach TASK_1031. Der Snapshot darf nur die akzeptierte Tester-Run-Acceptance und optionale Plan-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Next-Slice-Line, Status und Gate exportiert werden.
 

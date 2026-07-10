@@ -1118,6 +1118,13 @@ func _record_combat_tick_budget_debug_snapshot(tick: int, tick_started_usec: int
 	var active_enemy_units: Array = _get_active_enemy_units()
 	_combat_tick_budget_debug_snapshot = {
 		"enabled": combat_tick_budget_debug_enabled,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
 		"tick": tick,
 		"state": state,
 		"total_tick_usec": Time.get_ticks_usec() - tick_started_usec,

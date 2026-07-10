@@ -13,11 +13,17 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1048 - Simulation Tick Signal Fanout Audit and Guard (geplant)
+## TASK_1049 - Enemy Team Tactics Hotpath Breakdown and Decision Revision Guard (geplant)
+- Grundlage: TASK_1048 misst `enemy_team_tactics_usec` mit rund 405-420 ms als dominanten Anteil des Combat-Listeners.
+- Ziel: Enemy-Team-Taktik intern nach Gruppen-/Threat-/Cover-/Flank-Entscheidungen aufschluesseln und bei unveraendertem Entscheidungsinput wiederholte Berechnung vermeiden, ohne Reaktionszeit oder Autoritaet zu verlieren.
+- Ergebnis: Read-only Timing-/Revision-Evidence plus ein enger Guard fuer identische Entscheidungseingaben.
+- Naechster Schritt: Danach First-Contact-Flow und verbleibenden Viewport-/Renderanteil erneut messen.
+
+## TASK_1048 - Simulation Tick Signal Fanout Audit and Guard (implementiert im Arbeitsstand)
 - Grundlage: TASK_1047 misst `SimulationRoot.tick_processed.emit()` mit rund 400-478 ms innerhalb langsamer Missionsframes.
 - Ziel: Alle verbundenen Tick-Empfaenger, ihre teure Folgearbeit und vermeidbare Wiederholungswege transparent machen; nur belegte Viewer-/Visual-Listener gezielt takten oder dirty-gaten.
-- Ergebnis: Read-only Fanout-Evidence, klarer teuerster Empfaenger und ein begrenzter Fix ohne Aenderung der autoritativen Simulationstaktung.
-- Naechster Schritt: Danach Viewport-/Renderarbeit erneut messen, weil Scriptzeiten nicht den gesamten Frame erklaeren.
+- Ergebnis: TASK_1048 ist 7/7 gruen. Der einzige direkte Listener ist `MissionCombatLoopDriver`; seine `enemy_team_tactics_usec` kostet im echten Startfenster rund 405-420 ms und erklaert die Signal-Emit-Zeit.
+- Naechster Schritt: TASK_1049 - Enemy Team Tactics Hotpath Breakdown and Decision Revision Guard.
 
 ## TASK_1047 - Mission Visible Frame Cross-System Timing Breakdown (implementiert im Arbeitsstand)
 - Grundlage: TASK_1045 belegt langsame sichtbare Missionsframes; TASK_1046 schuetzt wiederholte Terrain-Statusvisuals, senkt den kombinierten Frame aber nicht messbar.
