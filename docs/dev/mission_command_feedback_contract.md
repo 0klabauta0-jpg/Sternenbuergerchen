@@ -64,6 +64,11 @@ Erwartete Struktur: Ohne Manifest meldet der Snapshot `needs_first_contact_real_
 
 Erwartete Struktur: Ohne akzeptierte TASK_1038-Quelle bleibt `blocked`; ohne Sichtnotizen bleibt `needs_first_contact_visual_review`; belegte Reibung an CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, `GO separat`, HUD oder Multiplayer-Grenze wird `ready_for_first_contact_visual_polish`; ein sauberer Befund setzt `accepted_for_first_contact_acceptance_slice` und routet zu TASK_1040 Acceptance Slice. Der Snapshot setzt keine Commands, kein Movement, keine Fire-/Damage-Events und keine Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish (TASK_1040)
+`get_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_polish_snapshot()` ist der read-only Polish-Schnitt nach TASK_1039. Der Snapshot darf nur eine TASK_1039-Quelle mit `ready_for_first_contact_visual_polish` oder `accepted_for_first_contact_acceptance_slice` lesen und daraus Surface-Specs fuer den ersten Kontakt ableiten.
+
+Erwartete Struktur: Der Command-Feedback-Snapshot exportiert TASK_1040 als Snapshot, `release_first_decision_loop_two_player_loop_scenario_first_contact_visual_polish_line`, `release_first_decision_loop_two_player_loop_scenario_first_contact_visual_surface_specs` und Status. Die Specs decken CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, GO und HUD/MP ab. Sie sind Anzeige-/Feedback-Vertrag, keine Gameplay-Wahrheit, kein Command-Commit, kein Movement, kein Fire-/Damage-Event und keine Multiplayer-Autoritaet. Ein bereiter Snapshot routet zu `TASK_1041 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice`.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 `get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
 

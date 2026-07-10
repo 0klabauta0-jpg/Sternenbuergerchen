@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1040_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_polish.md`, `docs/tasks/TASK_1039_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_findings.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Stand: `ReleaseFirstDecisionLoopTwoPlayerLoopScenarioFirstContactVisualPolish.build_snapshot()` liest polishbare TASK_1039-Findings und erzeugt sieben read-only Surface-Specs.
+- Stand: Die Specs decken CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, GO und HUD/MP ab, jeweils mit stabiler Hoehe, Textbudget, Style-ID und ohne Command-/Movement-Wirkung.
+- Stand: Der Snapshot liefert Polish-Line, NEXT-Line, FIRE/WAIT-Microcopy und GO-Microcopy fuer den naechsten Acceptance-Slice.
+- Stand: `MissionTacticalSandboxController` exportiert TASK_1040 im Command-Feedback als Snapshot, Polish-Line, Surface-Specs und Status.
+- Risiken/offen: TASK_1040 baut noch keine sichtbaren Controls um; der naechste Schritt muss die Surface-Specs in einem Acceptance-Slice gegen den First-Contact-Griff pruefen.
+- Lokale Pruefung: `godot_console.exe --headless --path . --script res://scripts/tests/task_1040_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_polish.gd`, Regression TASK_1039, TASK_1038, TASK_1037, `git diff --check`.
+- Naechster Schritt: TASK_1041 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice.
+
 ### TASK_1039 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1039_release_first_decision_loop_two_player_loop_scenario_first_contact_visual_findings.md`, `docs/tasks/TASK_1038_release_first_decision_loop_two_player_loop_scenario_first_contact_real_window_capture.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

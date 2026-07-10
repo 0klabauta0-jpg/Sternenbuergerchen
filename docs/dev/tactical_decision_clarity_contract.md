@@ -80,6 +80,11 @@ TASK_1039 trennt den technischen TASK_1038-Fensterbeweis vom konkreten Spielerbl
 
 Ohne Sichtnotizen bleibt der Status `needs_first_contact_visual_review`. Belegte Reibung routet zu `TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish`; ein sauberer Befund routet zu `TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice`. TASK_1039 erzeugt keine UI-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
 
+## Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish (TASK_1040)
+TASK_1040 uebersetzt TASK_1039-Reibung oder einen akzeptierten Sichtbefund in konkrete read-only Polishing-Flaechen fuer den ersten Kontakt. Erwartet sind sieben Surface-Specs: CONTACT fuer die Kontaktzeile, WHY fuer handlungsfaehige Begruendung, NEXT fuer den naechsten Griff, FIRE/WAIT fuer Feuerdisziplin, FEEDBACK fuer Rueckfuehrung, GO fuer die getrennte Ausfuehrungsgrenze und HUD/MP fuer Anzeige- und Multiplayer-Autoritaetsgrenzen.
+
+Die Specs duerfen nur Rollen, Style-IDs, Akzente, Mindesthoehen, Textbudgets und kompakte Displaytexte festlegen. Sie erzeugen keine Controls, keine Commands, kein Movement, keine Combat-/Damage-Wirkung und keine Multiplayer-Wahrheit. Ein bereiter Snapshot routet zu `TASK_1041 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice`.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 TASK_1004 ist der read-only Fensterbeweis-Rahmen fuer den TASK_1003-Round-Loop-Polish. Er erwartet im echten Fenster sichtbare `ROUND`-, `NEXT`- und `GO separat`-Surfaces sowie kurze Selected-Fireteam-, Mission-Control- und Command-Feedback-Zeilen.
 

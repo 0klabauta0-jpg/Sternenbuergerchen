@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1040 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Polish (implementiert im Arbeitsstand)
+- Grundlage: TASK_1039 First Contact Visual Findings mit Reibung oder akzeptiertem Befund.
+- Ziel: CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, GO und HUD/MP als ruhige read-only Surface-Specs fuer den ersten Kontakt polishen.
+- Ergebnis: Read-only Snapshot `blocked | first_contact_visual_polish_ready` mit Polish-Line, Surface-Specs, FIRE/WAIT-Microcopy und GO-Microcopy.
+- Naechster Schritt: TASK_1041 - Release First Decision Loop Two Player Loop Scenario First Contact Acceptance Slice.
+
 ## TASK_1039 - Release First Decision Loop Two Player Loop Scenario First Contact Visual Findings (implementiert im Arbeitsstand)
 - Grundlage: akzeptierter TASK_1038 First Contact Real Window Capture.
 - Ziel: Echten Fensterblick als Sichtbefund schneiden: CONTACT, WHY, NEXT, FIRE/WAIT, FEEDBACK, `GO separat`, HUD-Ruhe und Multiplayer-Grenze.
