@@ -131,6 +131,11 @@ func _run_trace() -> void:
 		_finish_trace(scene)
 		return
 
+	_complete_mission_craft_arrival(scene, "dropship_alpha")
+	if not await _wait_stage_frames(2):
+		_finish_trace(scene)
+		return
+
 	_begin_stage("lz_drop_and_deboard")
 	var lz_world := Vector2(384.0, 224.0)
 	controller.call("set_lz_drop_timing_debug_enabled", true)
@@ -144,6 +149,14 @@ func _run_trace() -> void:
 	lz_step_started_msec = Time.get_ticks_msec()
 	controller.call("_on_mission_dropship_card_drop_pressed", "dropship_alpha")
 	print("TRACE lz_step=request_drop elapsed_msec=%d" % [Time.get_ticks_msec() - lz_step_started_msec])
+	print("TRACE drop_resolution phase=%s command=%s embarked=%s pending_units=%d sequence_units=%d card=%s" % [
+		String(controller.get("_drop_sequence_phase")),
+		String(controller.get("_last_command_text")),
+		str(Dictionary(controller.get("_embarked_unit_ids")).keys()),
+		Array(controller.call("_get_units_for_drop_operation")).size(),
+		Array(controller.get("_drop_sequence_units")).size(),
+		str(Dictionary(controller.call("_find_mission_dropship_card_entry", "dropship_alpha"))),
+	])
 	if not _stage_within_budget() or not await _wait_stage_frames(4):
 		_finish_trace(scene)
 		return

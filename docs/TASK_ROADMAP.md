@@ -17,6 +17,10 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 - Grundlage: TASK_1055 belegt korrekte Homebase-/Planning-Payloads, aber keine Runtime-Units nach Start.
 - Ziel: Den vorhandenen Planning-/MissionSetup-Payload in Active Mission, deployed Units und Combat-Registry konsumieren.
 
+## TASK_1057 - Controlled Dropship Inbound to Deboard Trace (geplant)
+- Grundlage: TASK_1056 startet den Drop mit korrekten zwei Runtime-Units nach Transferankunft.
+- Ziel: Inbound bis Touchdown im Test kontrolliert fortschreiben und Deboard/Contact auf echten Units pruefen.
+
 ## TASK_1055 - Homebase Transport Payload to Active Mission Audit (implementiert im Arbeitsstand)
 - Ergebnis: Payload ist vor Missionsstart vollstaendig; Consumer der aktiven Mission verliert ihn danach.
 

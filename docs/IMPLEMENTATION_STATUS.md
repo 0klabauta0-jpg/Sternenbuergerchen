@@ -20,6 +20,11 @@
 - Stand: Boarding und Planning enthalten `unit_alpha`, `unit_bravo`, `ft1`, Dropship-Karte und MissionSetup-Felder korrekt.
 - Naechster Schritt: TASK_1056 - Active Mission Transport Payload Consumer Repair.
 
+### TASK_1056 - Active Mission Transport Payload Consumer Repair
+- Status: implementiert im Arbeitsstand
+- Stand: Payload-Consumer ist korrekt; der Trace wartete nur nicht auf die Missions-Transferankunft. Danach: zwei Pending-/Sequence-Units, Dropship `inbound`.
+- Naechster Schritt: TASK_1057 - Controlled Dropship Inbound to Deboard Trace.
+
 ### TASK_1053 - LOS-Valid First Contact Fixture
 - Status: implementiert im Arbeitsstand
 - Stand: Trace benutzt Combat-Friendlies und echten LOS-Resolver. Nach Deboarding fehlt fuer ft1 weiterhin eine gueltige Kontaktbasis; das weist auf Deployment-/Combat-Registry-Aktivierung statt UI-Readability.
