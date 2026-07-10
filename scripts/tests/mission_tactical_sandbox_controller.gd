@@ -2712,7 +2712,7 @@ func _refresh_tactical_event_log_panel() -> void:
 	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
 	if panel == null or not panel.has_method("set_feedback_snapshot"):
 		return
-	var feedback_snapshot: Dictionary = _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(get_command_feedback_snapshot())
+	var feedback_snapshot: Dictionary = get_live_tactical_event_log_feedback_snapshot()
 	if panel.has_method("apply_release_first_exchange_hud_density_fire_visual_polish"):
 		panel.call("apply_release_first_exchange_hud_density_fire_visual_polish", Dictionary(feedback_snapshot.get("release_first_exchange_hud_density_fire_visual_polish", {})))
 	panel.call("set_feedback_snapshot", feedback_snapshot)
@@ -13263,6 +13263,34 @@ func get_tactical_event_log_snapshot(options: Dictionary = {}) -> Array:
 	if _tactical_event_log == null:
 		return []
 	return Array(_tactical_event_log.call("get_snapshot", options))
+
+
+func get_live_tactical_event_log_feedback_snapshot() -> Dictionary:
+	var combat_hud_density: Dictionary = _build_mission_combat_hud_density_snapshot()
+	var raw_entries: Array = get_tactical_event_log_snapshot()
+	var firefight_decision: Dictionary = _build_release_candidate_firefight_decision_line_snapshot()
+	var event_log_display: Dictionary = _build_release_firefight_event_log_display_snapshot(
+		raw_entries,
+		firefight_decision,
+		combat_hud_density
+	)
+	var live_feedback: Dictionary = {
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"selected_fireteam_status_label_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
+		"mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH),
+		"combat_hud_density": combat_hud_density,
+		"release_firefight_event_log_display": event_log_display,
+		"tactical_event_log": Array(event_log_display.get("entries", [])).duplicate(true),
+		"tactical_event_log_count": int(event_log_display.get("display_count", 0)),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+	return _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(live_feedback)
 
 
 func get_tactical_event_log_contract_snapshot() -> Dictionary:

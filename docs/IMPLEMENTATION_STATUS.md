@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1043 - Mission HUD Hotpath Event Log Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1043_mission_hud_hotpath_event_log_guard.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/tasks/TASK_480_mission_ui_hotpath_feedback_guard.md`
+- Stand: Der wiederkehrende `_refresh_tactical_event_log_panel()` baut kein volles `get_command_feedback_snapshot()` mehr. Er liest `get_live_tactical_event_log_feedback_snapshot()` mit nur ausgewaehlten Fireteams, Tactical-Event-Log-, Firefight-/CONTACT-FIRE- und Event-Log-Polishdaten.
+- Stand: Der volle Command-Feedback-Snapshot bleibt fuer explizite Headless-, Debug- und Report-Pfade erhalten. Der Live-Snapshot ist read-only und setzt keine Gameplay-, Command-, Movement-, Fire-, Damage- oder Multiplayer-Wahrheit.
+- Stand: Die lokale Flow-Probe reduzierte den direkten Event-Log-Refresh von rund 405 ms auf 11 ms und den gemessenen `_update_ui()`-Durchlauf von rund 1.021 ms auf 470 ms in derselben Fixture. Restkandidaten sind Strategic-Text und Runtime-Mission-HUD-Surfaces.
+- Risiken/offen: Der Controller hat weiterhin weitere teure HUD-Teilpfade. Der folgende Slice soll diese anhand der Messung entkoppeln; kein pauschaler Hardware-Timing-Grenzwert wird aus einem lokalen Profil abgeleitet.
+- Lokale Pruefung: `task_1043_mission_hud_hotpath_event_log_guard.gd`, TASK_366, TASK_883, `tmp/task_542_flow_probe.gd` und `git diff --check` sind gruene Teilnachweise. TASK_542 wurde mit 364 Sekunden Laufzeit abgebrochen und ist expliziter Eingang fuer TASK_1044.
+- Naechster Schritt: TASK_1044 - Mission HUD Runtime Surface Guard und danach der verschobene First-Contact-Player-Feel-Befund.
+
 ### TASK_1042 - Release First Decision Loop Two Player Loop Scenario First Contact Integrated Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1042_release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest.md`, `docs/tasks/TASK_1041_release_first_decision_loop_two_player_loop_scenario_first_contact_acceptance_slice.md`, `docs/dev/tactical_decision_clarity_contract.md`, `docs/dev/mission_command_feedback_contract.md`

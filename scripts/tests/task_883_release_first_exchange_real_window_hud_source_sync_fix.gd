@@ -69,7 +69,8 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(controller_text.contains("_build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot"), "Controller builds synced feedback snapshot")
 	_assert(controller_text.contains("_apply_release_first_exchange_real_window_hud_source_sync_to_labels"), "Controller applies TASK_883 label sync")
 	_assert(controller_text.contains("get_release_first_exchange_real_window_hud_source_sync_snapshot"), "Controller exposes TASK_883 snapshot")
-	_assert(controller_text.contains("panel.call(\"set_feedback_snapshot\", _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(get_command_feedback_snapshot()))"), "Event log panel consumes synced snapshot")
+	_assert(controller_text.contains("func get_live_tactical_event_log_feedback_snapshot() -> Dictionary:"), "Controller exposes the narrow live event-log snapshot")
+	_assert(controller_text.contains("return _build_release_first_exchange_real_window_hud_source_synced_feedback_snapshot(live_feedback)"), "Live event-log snapshot keeps TASK_883 source sync")
 
 
 func _test_helper_syncs_status_and_event_log() -> void:

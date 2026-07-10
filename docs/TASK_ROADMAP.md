@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1043 - Mission HUD Hotpath Event Log Guard (implementiert im Arbeitsstand)
+- Grundlage: Der echte Homebase-zu-First-Contact-Flow zeigte einen ueberladenen wiederkehrenden HUD-Refresh.
+- Ziel: Das Tactical Event Log ueber einen schmalen Live-Snapshot versorgen, statt im 0.35-Sekunden-Refresh den vollstaendigen Command-Feedback-/Release-Report zu bauen.
+- Ergebnis: `get_live_tactical_event_log_feedback_snapshot()` bleibt read-only, haelt CONTACT-FIRE-First und Event-Log-Polish sichtbar und erzeugt keine Gameplay-, Command-, Movement-, Combat-, Damage- oder Multiplayer-Wahrheit.
+- Naechster Schritt: Die verbleibenden gemessenen HUD-Surfaces gezielt entschlacken und erst danach den First-Contact-Player-Feel-Befund als sichtbaren Task schneiden.
+
 ## TASK_1042 - Release First Decision Loop Two Player Loop Scenario First Contact Integrated Playtest (implementiert im Arbeitsstand)
 - Grundlage: bestandener TASK_1041 First Contact Acceptance Slice.
 - Ziel: Den First-Contact-Griff im integrierten Release-/Mission-Kontext pruefen: Entry, Command-Feedback, CONTACT, WHY, NEXT, FIRE/WAIT, GO, FEEDBACK, Rueckkehr zu NEXT, Performance und Systemgrenzen.

@@ -24,6 +24,11 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 ## Snapshot-Regel
 `get_command_feedback_snapshot()` ist der Headless-Pruefpunkt fuer Auswahl, #16/#17/#18-Texte, geplante/visualisierte Waypoints und AreaOrders. `TerrainMap3DView.get_render_snapshot()` spiegelt die selektierten Fireteams ueber `order_selected_fireteam_ids` und den aktiven Order-Phase-Index.
 
+## Live Tactical Event Log Hotpath (TASK_1043)
+`get_live_tactical_event_log_feedback_snapshot()` ist der schmale, read-only Runtime-Pfad fuer `TacticalEventLogPanel`. Er liefert nur ausgewaehlte Fireteam-IDs, sichtbare Tactical-Event-Log-Eintraege, bestehende Firefight-/CONTACT-FIRE-Displaydaten und die benoetigten Event-Log-Polish-Metadaten. Der wiederkehrende Panel-Refresh darf dafuer nicht `get_command_feedback_snapshot()` aufrufen.
+
+Der Live-Snapshot setzt keine Gameplay-Wahrheit und erzeugt keine Commands, Movement-, Fire-, Damage- oder Multiplayer-Ereignisse. Der volle `get_command_feedback_snapshot()` bleibt ein expliziter Headless-, Debug- und Report-Pfad; er ist kein wiederkehrender HUD-Transport fuer ein einzelnes Panel.
+
 ## Release First Decision Loop Two Player Loop Scenario Next Playable Slice Plan (TASK_1032)
 `get_release_first_decision_loop_two_player_loop_scenario_next_playable_slice_plan_snapshot()` ist der read-only Pruefpunkt fuer den naechsten spielbaren Slice nach TASK_1031. Der Snapshot darf nur die akzeptierte Tester-Run-Acceptance und optionale Plan-Notizen bewerten. Er muss im Command-Feedback als Snapshot, Next-Slice-Line, Status und Gate exportiert werden.
 
