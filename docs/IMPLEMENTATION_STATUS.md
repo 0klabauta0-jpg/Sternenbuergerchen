@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1097 - Connected Interaction Feedback Visual Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1097_connected_interaction_feedback_visual_evidence.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1096
+- Stand: Pending, Progress, Success und Blocked werden mit vier etablierten Tactical-UI-Farben und Outline-Kontrast auf demselben Command-Feedback-Label dargestellt.
+- Layout: Kein neues Control, keine Mindestgroessenaenderung und kein kompletter HUD-Rebuild.
+- Risiken/offen: Manueller Sichttest bleibt auf Wunsch uebersprungen; naechster technischer Fokus ist Snapshot-Frequenz bei mehreren Fireteams.
+- Lokale Pruefung: TASK_1097 9/9 und TASK_1096 10/10.
+- Naechster Schritt: TASK_1098 - Connected Interaction Progress Performance Budget.
+
 ### TASK_1096 - Connected Interaction Runtime Progress Surface
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1096_connected_interaction_runtime_progress_surface.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1095
