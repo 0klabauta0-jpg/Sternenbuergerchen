@@ -195,6 +195,7 @@ const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE: int = 9
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE: int = 12
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 9
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
+const CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC: int = 5000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
 const RELEASE_FIRST_FIREFIGHT_CONTACT_FRAMING_STYLE_ID: String = "task_843_release_first_firefight_contact_framing_v1"
 const RELEASE_FIRST_EXCHANGE_TENSION_TUNING_STYLE_ID: String = "task_844_release_first_exchange_tension_tuning_v1"
@@ -10804,6 +10805,31 @@ func _get_mission_dropship_card_entries() -> Array:
 	return _sanitize_mission_dropship_cards(entries)
 
 
+func _build_contact_focused_mission_dropship_card_entries(entries: Array, contact_focus_active: bool) -> Array:
+	var result: Array = []
+	for card_variant in entries:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = Dictionary(card_variant).duplicate(true)
+		if contact_focus_active and _is_completed_empty_mission_dropship_card(card):
+			continue
+		result.append(card)
+	return result
+
+
+func _is_completed_empty_mission_dropship_card(card: Dictionary) -> bool:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if String(card.get("state", "")).strip_edges().to_lower() != "to_fob" or int(card.get("eta_seconds", 0)) > 0:
+		return false
+	if not Array(card.get("embarked_unit_ids", [])).is_empty() or int(card.get("passenger_count", 0)) > 0:
+		return false
+	if not String(card.get("pilot_unit_id", "")).strip_edges().is_empty():
+		return false
+	if not craft_id.is_empty() and (_pending_network_dropship_commands_by_craft.has(craft_id) or _network_dropship_feedback_by_craft.has(craft_id)):
+		return false
+	return not _is_active_drop_sequence_for_craft(craft_id)
+
+
 func _find_mission_dropship_card_entry(craft_id: String) -> Dictionary:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	if normalized_craft_id.is_empty():
@@ -11337,7 +11363,9 @@ func _refresh_mission_dropship_panel() -> void:
 	if panel == null:
 		return
 	_enforce_mission_dropship_panel_geometry(panel)
-	var card_entries: Array = _get_mission_dropship_card_entries()
+	var contact_perspective: Dictionary = get_connected_first_contact_hud_perspective_snapshot()
+	var contact_focus_active: bool = String(contact_perspective.get("primary_line", "")).contains("CONTACT FIRE")
+	var card_entries: Array = _build_contact_focused_mission_dropship_card_entries(_get_mission_dropship_card_entries(), contact_focus_active)
 	var show_panel: bool = _tactical_ui_visible and not card_entries.is_empty()
 	if not show_panel:
 		panel.visible = false
@@ -15294,6 +15322,7 @@ func get_live_tactical_event_log_feedback_snapshot() -> Dictionary:
 	)
 	var live_feedback: Dictionary = {
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"event_log_selected_only_default": _is_connected_multiplayer_hud_session() and not _selected_fireteam_ids.is_empty(),
 		"selected_fireteam_status_label_text": _get_label_text(FIRETEAM_STATUS_LABEL_PATH),
 		"mission_control_status_text": _get_label_text(STRATEGIC_STATUS_LABEL_PATH),
 		"combat_hud_density": combat_hud_density,
@@ -21586,11 +21615,13 @@ func _release_first_firefight_contact_reason_text(diagnostics: Dictionary, comba
 
 
 func _build_release_firefight_event_log_display_snapshot(raw_entries: Array, release_decision: Dictionary, combat_hud_density: Dictionary) -> Dictionary:
-	var display_entries: Array = []
+	var source_entries: Array = []
 	for entry_variant in raw_entries:
 		if typeof(entry_variant) != TYPE_DICTIONARY:
 			continue
-		display_entries.append(Dictionary(entry_variant).duplicate(true))
+		source_entries.append(Dictionary(entry_variant).duplicate(true))
+	var dedupe_result: Dictionary = _dedupe_release_first_contact_display_entries(source_entries)
+	var display_entries: Array = Array(dedupe_result.get("entries", [])).duplicate(true)
 	var fallback_entry: Dictionary = {}
 	if bool(combat_hud_density.get("visibility_persistence_active", false)) \
 			and not _release_fire_exchange_event_log_entries_contain_contact_fire(display_entries):
@@ -21601,6 +21632,17 @@ func _build_release_firefight_event_log_display_snapshot(raw_entries: Array, rel
 		fallback_entry = _build_release_firefight_event_log_fallback_entry(release_decision, combat_hud_density)
 		if not fallback_entry.is_empty():
 			display_entries.append(fallback_entry)
+	display_entries.sort_custom(func(left: Dictionary, right: Dictionary) -> bool:
+		var left_contact_fire: bool = _is_release_first_contact_fire_display_entry(left)
+		var right_contact_fire: bool = _is_release_first_contact_fire_display_entry(right)
+		if left_contact_fire != right_contact_fire:
+			return left_contact_fire
+		var left_time: int = int(left.get("created_msec", 0))
+		var right_time: int = int(right.get("created_msec", 0))
+		if left_time == right_time:
+			return String(left.get("event_id", "")) < String(right.get("event_id", ""))
+		return left_time > right_time
+	)
 	return {
 		"style_id": RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID,
 		"read_only": true,
@@ -21612,10 +21654,65 @@ func _build_release_firefight_event_log_display_snapshot(raw_entries: Array, rel
 		"sets_multiplayer_truth": false,
 		"raw_count": raw_entries.size(),
 		"display_count": display_entries.size(),
+		"collapsed_repeat_count": int(dedupe_result.get("collapsed_repeat_count", 0)),
+		"contact_group_count": int(dedupe_result.get("contact_group_count", 0)),
 		"fallback_active": not fallback_entry.is_empty(),
 		"fallback_entry": fallback_entry,
 		"entries": display_entries,
 	}
+
+
+func _dedupe_release_first_contact_display_entries(entries: Array) -> Dictionary:
+	var result: Array = []
+	var contact_groups: Dictionary = {}
+	var collapsed_repeat_count: int = 0
+	for entry_variant in entries:
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		var event_type: String = String(entry.get("event_type", "")).strip_edges().to_lower()
+		if event_type != "contact_report":
+			result.append(entry)
+			continue
+		var created_msec: int = int(entry.get("created_msec", 0))
+		var time_bucket: int = created_msec / CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC
+		var semantic_key: String = "%s|%s|%s|%d" % [
+			String(entry.get("fireteam_id", "")).strip_edges().to_lower(),
+			String(entry.get("unit_id", "")).strip_edges(),
+			event_type,
+			time_bucket,
+		]
+		if not contact_groups.has(semantic_key):
+			entry["repeat_count"] = 1
+			entry["collapsed_event_ids"] = [String(entry.get("event_id", ""))]
+			contact_groups[semantic_key] = result.size()
+			result.append(entry)
+			continue
+		var result_index: int = int(contact_groups[semantic_key])
+		var retained: Dictionary = Dictionary(result[result_index]).duplicate(true)
+		var collapsed_ids: Array = Array(retained.get("collapsed_event_ids", [])).duplicate()
+		collapsed_ids.append(String(entry.get("event_id", "")))
+		retained["repeat_count"] = collapsed_ids.size()
+		retained["collapsed_event_ids"] = collapsed_ids
+		if int(entry.get("created_msec", 0)) > int(retained.get("created_msec", 0)):
+			var repeat_count: int = int(retained.get("repeat_count", collapsed_ids.size()))
+			retained = entry
+			retained["repeat_count"] = repeat_count
+			retained["collapsed_event_ids"] = collapsed_ids
+		result[result_index] = retained
+		collapsed_repeat_count += 1
+	return {
+		"entries": result,
+		"contact_group_count": contact_groups.size(),
+		"collapsed_repeat_count": collapsed_repeat_count,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _is_release_first_contact_fire_display_entry(entry: Dictionary) -> bool:
+	var text: String = "%s %s" % [String(entry.get("short_text", "")), String(entry.get("map_label", ""))]
+	return text.to_upper().contains("CONTACT FIRE")
 
 
 func _build_release_firefight_event_log_fallback_entry(release_decision: Dictionary, combat_hud_density: Dictionary) -> Dictionary:
@@ -33002,6 +33099,11 @@ func _apply_drop_presence_state_to_units() -> void:
 			else:
 				_enqueue_dropship_presence_effect(unit, unit_id, desired_visible)
 	_suppress_primary_view_legacy_unit_visuals()
+
+
+func _is_connected_multiplayer_hud_session() -> bool:
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	return peer != null and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED
 
 
 func _is_connected_network_snapshot_client() -> bool:

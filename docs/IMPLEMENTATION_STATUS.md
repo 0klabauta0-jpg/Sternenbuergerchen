@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1120 - Connected First Contact Event Log Dedupe and HUD Declutter
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1120_connected_first_contact_event_log_dedupe_hud_declutter.md`, `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `scripts/tactical/tactical_event_log.gd`
+- Befund: Wiederholte Contact-Reports mit jeweils neuer Event-ID verdraengten die eigentliche `CONTACT FIRE`-Entscheidung. Gleichzeitig blieben leere, abgeschlossene `to_fob 0s`-Dropship-Karten im Erstkontakt sichtbar; verbundene Spieler starteten mit globalem statt lokalem Event-Log-Filter.
+- Aenderung: Die reine Displayleseschicht gruppiert semantisch gleiche Contact-Reports in Fuenf-Sekunden-Fenstern, behaelt alle Quell-IDs und zeigt `xN`. Contact Fire wird priorisiert. Der lokale Fireteam-Filter wird einmalig initialisiert und respektiert danach manuelle Bedienung. Nur funktional inaktive Transportkarten werden waehrend Contact Focus ausgeblendet.
+- Multiplayer/Performance: Rohhistorie, ContactTracker, Transportstate und Snapshotwahrheit bleiben unveraendert. Kein RPC, Command oder Effect; keine per-frame UI-Rebuilds. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: TASK_627 und TASK_715 enthalten veraltete Layout-/Leerzustandsannahmen, deren aktuelle Runtime-Teile gruen bleiben. Nach der HUD-Bereinigung ist die naechste echte Reibung die Lesbarkeit von Einheiten, Kontaktposition und Gefahrenbezug direkt im taktischen Spielfeld.
+- Lokale Pruefung: TASK_1120 11/11, TASK_1119 Real-Window 22/22, TASK_366 19/19, TASK_1109 18/18, TASK_1110 20/20 und TASK_222 82/82. Sichtbeleg: `tmp/task_1119_product_first_contact_gold.png`.
+- Naechster Schritt: TASK_1121 - Connected First Contact Tactical World Readability.
+
 ### TASK_1119 - Connected First Contact Three-Peer Product Visual Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `docs/tasks/TASK_1104_product_lobby_multi_client_parallel_interaction_playtest.md`, `scripts/multiplayer/multiplayer_snapshot_contract.gd`
