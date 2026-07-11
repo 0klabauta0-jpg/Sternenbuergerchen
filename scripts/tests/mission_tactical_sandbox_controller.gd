@@ -2050,6 +2050,8 @@ func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	var mission_interactions: Dictionary = Dictionary(snapshot.get("mission_interactions", {}))
 	mission_interactions["source_tick"] = maxi(int(snapshot.get("tick", -1)), -1)
 	var combat_driver = _get_combat_loop_driver()
+	if combat_driver != null and combat_driver.has_method("apply_multiplayer_combat_snapshot"):
+		combat_driver.call("apply_multiplayer_combat_snapshot", snapshot)
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
 		combat_driver.call("apply_multiplayer_interaction_snapshot", mission_interactions)
 	_apply_network_mission_interaction_progress_surface(mission_interactions)

@@ -1162,7 +1162,7 @@ func _apply_remote_vital_status(vital_dict: Dictionary) -> void:
 
 func _build_remote_runtime_dict(snapshot: Dictionary) -> Dictionary:
 	var runtime_variant: Variant = snapshot.get("runtime_status", {})
-	if typeof(runtime_variant) == TYPE_DICTIONARY:
+	if typeof(runtime_variant) == TYPE_DICTIONARY and not Dictionary(runtime_variant).is_empty():
 		return (runtime_variant as Dictionary).duplicate(true)
 
 	var runtime_dict: Dictionary = {
@@ -1188,7 +1188,7 @@ func _build_remote_runtime_dict(snapshot: Dictionary) -> Dictionary:
 
 func _build_remote_vital_dict(snapshot: Dictionary) -> Dictionary:
 	var vital_variant: Variant = snapshot.get("vital_status", {})
-	if typeof(vital_variant) == TYPE_DICTIONARY:
+	if typeof(vital_variant) == TYPE_DICTIONARY and not Dictionary(vital_variant).is_empty():
 		return (vital_variant as Dictionary).duplicate(true)
 
 	return {
