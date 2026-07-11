@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1126 - Connected First Contact Local Marker and Label Hierarchy (implementiert im Arbeitsstand)
+- Grundlage: Der vollstaendig gerahmte Erstkontakt wurde durch grosse Selection-Ringe, Routine-Unit-Badges und doppelte Tactical-Communication-Contact-Reports ueberlagert.
+- Ergebnis: Selection tritt im Connected-Fokus hinter den Contact-Marker zurueck. Routine-Badges und redundante `contact_report`-Mapvisuals verschwinden; HP-/Vitalhinweise bleiben. Detached Mission-Konfiguration erzeugt keinen MultiplayerAPI-Scriptfehler mehr.
+- Architektur: Read-only Renderhierarchie aus dem bestehenden `world_label_focus_mode`; keine Positions-, Gameplay-, RPC-, Command-, Effect- oder Netzwerk-Snapshotmutation.
+- Verifikation: TASK_1126 13/13; TASK_1119 33/33 headless und 39/39 je Real Window; TASK_1125 10/10; TASK_1124 11/11; TASK_839 31/31; TASK_1104 31/31; Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair. TASK_274 ist ohne Script Error, aber zwei Bubble-/Ankerassertions bleiben bei 74/76 offen.
+
 ## TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability (implementiert im Arbeitsstand)
 - Grundlage: Das verbundene Contact-Framing kannte nur einen Fireteam-Anker plus Kontakt. Bei BLUE blieb ausserdem das fuenfte Fixture-Mitglied ausserhalb der Viererslots und wurde hinter dem HUD mitgerahmt.
 - Ergebnis: Alle Mitglieder des lokal ausgewaehlten Fireteams und nur dessen Kontakte bestimmen den einmaligen read-only Frame. Der Fuenferslot ist vollstaendig; BLUE und GOLD liegen bei Camera-Size 24 in der HUD-freien Taktikflaeche.

@@ -33205,11 +33205,15 @@ func _apply_drop_presence_state_to_units() -> void:
 
 
 func _is_connected_multiplayer_hud_session() -> bool:
+	if not is_inside_tree():
+		return false
 	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
 	return peer != null and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED
 
 
 func _is_connected_network_snapshot_client() -> bool:
+	if not is_inside_tree():
+		return false
 	var simulation_root := get_node_or_null("../SimulationRoot")
 	if simulation_root == null or simulation_root.get("is_server_authoritative") != true:
 		return false
