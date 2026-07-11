@@ -230,9 +230,9 @@ func _apply_density(
 	teamfit_label.visible = false
 	drop_hint_label.visible = false
 	if _source_context == "mission_mini":
-		stage_label.add_theme_font_size_override("font_size", 8)
-		member_label.add_theme_font_size_override("font_size", 8)
-		title_edit.add_theme_font_size_override("font_size", 10)
+		stage_label.add_theme_font_size_override("font_size", 10)
+		member_label.add_theme_font_size_override("font_size", 10)
+		title_edit.add_theme_font_size_override("font_size", 12)
 	set_meta("fob_fireteam_reference_card", true)
 
 

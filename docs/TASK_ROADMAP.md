@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1130 - Fireteam Mini-Card Identity and Typography Polish (implementiert im Arbeitsstand)
+- Grundlage: Der Full-HD-Beleg zeigte `FT ?` ohne aktive Review-Session sowie 10/8/8-px-Mini-Card-Typografie.
+- Ergebnis: Inaktive lokale Sessions blenden den Relation-Kontext aus; aktive Host/Client-Semantik bleibt ehrlich. BLUE/GOLD nutzen 12 px, beide Statuszeilen 10 px. Bubbles bleiben kollisionsfrei verankert.
+- Architektur: Reine UI-Leseschicht; keine Fireteam-, Team-, Peer-, Gameplay-, RPC-, Command-, Effect- oder Snapshotmutation.
+- Verifikation: TASK_1130 6/6; TASK_773 25/25; TASK_431 19/19; TASK_1128 8/8 Real Window.
+- Naechster Schritt: TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression. BLUE/GOLD soll sich klarer von oberen Bars und Statusrauschen abheben.
+
 ## TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation (implementiert im Arbeitsstand)
 - Grundlage: Der TASK-1128-Capture zeigte 8-px-Bubbletext. TASK_212 verlor mehrere Unit-Gedanken im Fireteam-Dedupe; TASK_214 belegte ein echtes Minimalmodus-Leck sowie veraltete Text-/Rohpayload-Annahmen.
 - Ergebnis: HUD-Bubbletext ist 10 px und im Snapshot messbar. HUD-Dedupe bleibt Fireteam-basiert, World-Dedupe wird Unit-basiert. Minimal unterdrueckt Routine, Blocked bleibt. `command_context` ist der konkrete Order-Summary-Vertrag.
 - Architektur: Visual- und Settingskorrektur innerhalb bestehender Limits; keine Gameplay-, Event-, Command-, Effect-, RPC- oder Netzwerk-Snapshotwahrheit.
 - Verifikation: TASK_1129 4/4; TASK_212 19/19; TASK_214 36/36; TASK_1128 8/8 Real Window.
-- Naechster Schritt: TASK_1130 - Fireteam Mini-Card Identity and Typography Polish. Der Full-HD-Beleg zeigt kleine Statuszeilen und `FT ?` trotz bekannter BLUE-/GOLD-Zuordnung.
+- Naechster Schritt: abgeschlossen durch TASK_1130.
 
 ## TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability (implementiert im Arbeitsstand)
 - Grundlage: TASK_1127 bewies Eventbindung und Mini-Card-Anker, aber nicht die gleichzeitige sichtbare Full-HD-Geometrie.

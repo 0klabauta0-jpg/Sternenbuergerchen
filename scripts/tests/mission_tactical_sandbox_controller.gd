@@ -11212,11 +11212,17 @@ func _build_station_route_sequence_display_line(route_readout: Dictionary) -> St
 
 func _build_fireteam_review_session_card_context(fireteam_id: String = "", fireteam_team_id: String = "", session_snapshot: Dictionary = {}) -> Dictionary:
 	var resolved_session: Dictionary = session_snapshot.duplicate(true) if not session_snapshot.is_empty() else _get_review_session_identity_snapshot()
-	return Dictionary(STATION_REENTRY_HOST_CLIENT_FIRETEAM_CARD_CONTEXT_SCRIPT.call("build_context", resolved_session, {
+	var context: Dictionary = Dictionary(STATION_REENTRY_HOST_CLIENT_FIRETEAM_CARD_CONTEXT_SCRIPT.call("build_context", resolved_session, {
 		"fireteam_id": fireteam_id.strip_edges().to_lower(),
 		"fireteam_team_id": fireteam_team_id.strip_edges().to_lower(),
 		"fireteam_team_label": _build_review_session_team_label(fireteam_team_id),
 	}))
+	if not bool(resolved_session.get("active", false)):
+		context["visible"] = false
+		context["text"] = ""
+		context["tooltip_text"] = ""
+		context["inactive_session_hidden"] = true
+	return context
 
 
 func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
