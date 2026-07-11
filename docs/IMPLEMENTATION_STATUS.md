@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1103 - Parallel Interaction Ownership Feedback Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1103_parallel_interaction_ownership_feedback_readability.md`, `docs/dev/mission_interaction_point_contract.md`, `scripts/tests/mission_tactical_sandbox_controller.gd`
+- Stand: Die bestehende `LAST`-Zeile zeigt bei einem laufenden State den Fireteam-Besitzer und kombiniert bei paralleler Arbeit maximal zwei kompakte Eintraege wie `COM 42% BLUE | CARGO 58% GOLD`.
+- Konfliktfeedback: Der Reservierungs-Reject lautet sichtbar `ANDERES FIRETEAM AKTIV`, nennt das anfragende Fireteam und verbirgt technische IDs.
+- Performance: Owner und zwei sichtbare Parallel-States sind Teil des Dedupe-Fingerprints. Acht States und 2000 Snapshots benoetigen lokal rund 120 ms und 201 Label-Updates.
+- Risiken/offen: Mehr als zwei parallele States bleiben bewusst aus der einen Kompaktzeile heraus. Ein echter Produkt-Lobby-Lauf mit mehreren Clients ist der naechste Beleg.
+- Lokale Pruefung: TASK_1103 18/18, TASK_1095 8/8, TASK_1096 10/10, TASK_1098 5/5 und TASK_1102 26/26.
+- Naechster Schritt: TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest.
+
 ### TASK_1102 - Parallel Fireteam Interaction Ownership and Recovery
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1102_parallel_fireteam_interaction_ownership_recovery.md`, `docs/dev/mission_interaction_point_contract.md`, `scripts/core/simulation_root.gd`
 - Stand: Zwei Fireteams koennen unterschiedliche Host-Interactions gleichzeitig bearbeiten. Eine laufende Interaction bleibt an ihr Fireteam gebunden; ein fremder Command wird vor Queue und Accept mit `interaction_reserved_by_other_fireteam` abgewiesen.
 - Recovery: Ein neuer Peer darf nach Assignment-Rebind dieselbe Fireteam-Interaction fortsetzen. Der vorhandene Hold-Wert bleibt erhalten, weil Ownership am Fireteam und nicht an der fluechtigen Peer-ID haengt.
 - Performance: Der optionale Preflight laesst fremde Command-Typen unveraendert; 2000 normale Validierungen bleiben unter dem breiten 250-ms-Guard.
-- Risiken/offen: Die technische Ablehnung ist korrekt, aber parallele Besitzer und der neue Reservierungsgrund brauchen noch eine kompakte sichtbare HUD-Uebersetzung.
+- Risiken/offen: Die technische Ablehnung und HUD-Uebersetzung sind korrekt; ein echter Produkt-Lobby-Lauf mit mehreren Clients bleibt offen.
 - Lokale Pruefung: TASK_1102 26/26, TASK_1093 19/19, TASK_1101 46/46, TASK_1083 24/24, TASK_697 42/42 und TASK_166 15/15.
-- Naechster Schritt: TASK_1103 - Parallel Interaction Ownership Feedback Readability.
+- Naechster Schritt: TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest.
 
 ### TASK_1101 - Connected Interaction Reconnect State Recovery
 - Status: implementiert im Arbeitsstand

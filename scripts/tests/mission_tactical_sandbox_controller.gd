@@ -2067,8 +2067,15 @@ func _apply_network_mission_interaction_progress_surface(snapshot: Dictionary) -
 	var complete: bool = bool(state.get("complete", false))
 	var source_tick: int = maxi(int(snapshot.get("source_tick", -1)), -1)
 	var interaction_type: String = String(state.get("interaction_type", "")).strip_edges().to_lower()
+	var owner_fireteam_id: String = String(state.get("fireteam_id", "")).strip_edges().to_lower()
+	var owner_fireteam_token: String = _network_interaction_owner_token(owner_fireteam_id)
 	var display_token: String = _build_network_mission_interaction_display_token(interaction_id, interaction_type)
-	var fingerprint: String = "%s|%s|%s|%d|%d|%d|%s" % [interaction_id, display_token, interaction_type, int(round(progress * 100.0)), int(floor(hold_seconds)), int(ceil(duration_seconds)), str(complete)]
+	var parallel_owner_entries: Array = _build_parallel_network_interaction_owner_entries(states, interaction_id)
+	var parallel_signature_parts: PackedStringArray = PackedStringArray()
+	for entry_variant in parallel_owner_entries.slice(0, 2):
+		var entry: Dictionary = Dictionary(entry_variant)
+		parallel_signature_parts.append("%s:%s:%s:%d:%d:%d" % [String(entry.get("interaction_id", "")), String(entry.get("display_token", "")), String(entry.get("fireteam_id", "")), int(round(float(entry.get("progress", 0.0)) * 100.0)), int(floor(float(entry.get("hold_seconds", 0.0)))), int(ceil(float(entry.get("duration_seconds", 0.0))))])
+	var fingerprint: String = "%s|%s|%s|%s|%d|%d|%d|%s|%s" % [interaction_id, display_token, interaction_type, owner_fireteam_id, int(round(progress * 100.0)), int(floor(hold_seconds)), int(ceil(duration_seconds)), str(complete), ";".join(parallel_signature_parts)]
 	if fingerprint == _network_mission_interaction_progress_fingerprint:
 		if source_tick >= 0:
 			_network_mission_interaction_feedback["source_tick"] = source_tick
@@ -2076,16 +2083,28 @@ func _apply_network_mission_interaction_progress_surface(snapshot: Dictionary) -
 	_network_mission_interaction_progress_fingerprint = fingerprint
 	_network_mission_interaction_progress_update_count += 1
 	var compact_line: String
-	if complete:
-		compact_line = "%s FERTIG" % display_token
+	if parallel_owner_entries.size() > 1:
+		var owner_parts: PackedStringArray = PackedStringArray()
+		for entry_variant in parallel_owner_entries.slice(0, 2):
+			var entry: Dictionary = Dictionary(entry_variant)
+			owner_parts.append("%s %d%% %s" % [String(entry.get("display_token", "ACTION")), int(round(float(entry.get("progress", 0.0)) * 100.0)), String(entry.get("fireteam_token", "FT?"))])
+		compact_line = " | ".join(owner_parts)
+	elif complete:
+		compact_line = "%s FERTIG%s" % [display_token, " " + owner_fireteam_token if not owner_fireteam_token.is_empty() else ""]
 	elif interaction_type == "hold_zone":
-		compact_line = "%s HALTEN | %d/%ds" % [display_token, int(floor(hold_seconds)), int(ceil(duration_seconds))]
+		compact_line = "%s HALTEN | %d/%ds%s" % [display_token, int(floor(hold_seconds)), int(ceil(duration_seconds)), " " + owner_fireteam_token if not owner_fireteam_token.is_empty() else ""]
 	else:
-		compact_line = "%s %d%% | %d/%ds" % [display_token, int(round(progress * 100.0)), int(floor(hold_seconds)), int(ceil(duration_seconds))]
+		compact_line = "%s %d%% | %d/%ds%s" % [display_token, int(round(progress * 100.0)), int(floor(hold_seconds)), int(ceil(duration_seconds)), " " + owner_fireteam_token if not owner_fireteam_token.is_empty() else ""]
+	if compact_line.length() > 72:
+		compact_line = compact_line.substr(0, 69).strip_edges() + "..."
 	_network_mission_interaction_feedback = {
 		"status": "complete" if complete else "in_progress",
 		"interaction_id": interaction_id,
 		"display_token": display_token,
+		"fireteam_id": owner_fireteam_id,
+		"owner_fireteam_id": owner_fireteam_id,
+		"parallel_owner_count": parallel_owner_entries.size(),
+		"parallel_owner_entries": parallel_owner_entries.slice(0, 2),
 		"compact_line": compact_line,
 		"progress": progress,
 		"hold_seconds": hold_seconds,
@@ -2098,6 +2117,39 @@ func _apply_network_mission_interaction_progress_surface(snapshot: Dictionary) -
 	_last_command_text = compact_line
 	_refresh_network_interaction_command_feedback_label(compact_line, String(_network_mission_interaction_feedback.get("tone", "progress")))
 	return true
+
+
+func _build_parallel_network_interaction_owner_entries(states: Dictionary, preferred_id: String) -> Array:
+	var active_ids: Array = []
+	for id_variant in states.keys():
+		var candidate: Dictionary = Dictionary(states.get(id_variant, {}))
+		var state_name: String = String(candidate.get("state", "")).strip_edges().to_lower()
+		if not bool(candidate.get("complete", false)) and (float(candidate.get("hold_seconds", 0.0)) > 0.0 or ["active", "holding", "operating", "in_progress"].has(state_name)):
+			active_ids.append(String(id_variant))
+	active_ids.sort()
+	if active_ids.has(preferred_id):
+		active_ids.erase(preferred_id)
+		active_ids.push_front(preferred_id)
+	var entries: Array = []
+	for interaction_id_variant in active_ids:
+		var interaction_id: String = String(interaction_id_variant)
+		var state: Dictionary = Dictionary(states.get(interaction_id, {}))
+		var fireteam_id: String = String(state.get("fireteam_id", "")).strip_edges().to_lower()
+		entries.append({
+			"interaction_id": interaction_id,
+			"display_token": _build_network_mission_interaction_display_token(interaction_id, String(state.get("interaction_type", ""))),
+			"fireteam_id": fireteam_id,
+			"fireteam_token": _network_interaction_owner_token(fireteam_id) if not fireteam_id.is_empty() else "FT?",
+			"progress": clampf(float(state.get("progress", 0.0)), 0.0, 1.0),
+			"hold_seconds": maxf(float(state.get("hold_seconds", 0.0)), 0.0),
+			"duration_seconds": maxf(float(state.get("duration_seconds", 0.0)), 0.0),
+			"read_only": true,
+		})
+	return entries
+
+
+func _network_interaction_owner_token(fireteam_id: String) -> String:
+	return fireteam_id.strip_edges().to_upper()
 
 
 func _refresh_network_interaction_command_feedback_label(compact_line: String, tone: String = "progress") -> void:
@@ -2190,15 +2242,19 @@ func _apply_network_mission_interaction_result(result: Dictionary) -> void:
 	var accepted: bool = bool(result.get("accepted", false))
 	var interaction_id: String = String(result.get("interaction_id", "")).strip_edges()
 	var reason: String = String(result.get("reason", "")).strip_edges()
+	var fireteam_id: String = String(result.get("fireteam_id", _network_mission_interaction_feedback.get("fireteam_id", ""))).strip_edges().to_lower()
+	var fireteam_token: String = _network_interaction_owner_token(fireteam_id)
 	var display_token: String = String(_network_mission_interaction_feedback.get("display_token", "")).strip_edges().to_upper()
 	if display_token.is_empty():
 		display_token = _build_network_mission_interaction_display_token(interaction_id, "")
 	var reason_label: String = _build_network_mission_interaction_reason_label(reason)
-	var line: String = "%s HOST OK | LAEUFT" % display_token if accepted else "%s BLOCKIERT | %s" % [display_token, reason_label]
+	var subject: String = "%s %s" % [display_token, fireteam_token] if not fireteam_token.is_empty() else display_token
+	var line: String = "%s HOST OK | LAEUFT" % subject if accepted else "%s BLOCKIERT | %s" % [subject, reason_label]
 	_network_mission_interaction_feedback = {
 		"status": "accepted" if accepted else "blocked",
 		"accepted": accepted,
 		"interaction_id": interaction_id,
+		"fireteam_id": fireteam_id,
 		"reason": reason,
 		"reason_label": reason_label,
 		"display_token": display_token,
@@ -2232,6 +2288,8 @@ func _build_network_mission_interaction_reason_label(reason: String) -> String:
 			return "FALSCHES TEAM"
 		"fireteam_not_assigned_to_peer":
 			return "FIRETEAM NICHT ZUGEWIESEN"
+		"interaction_reserved_by_other_fireteam":
+			return "ANDERES FIRETEAM AKTIV"
 		"request_on_non_authority", "host_required":
 			return "HOST ERFORDERLICH"
 		"command_not_whitelisted":
