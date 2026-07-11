@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1133 - Fireteam Mini-Card Stance Control Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1133_fireteam_mini_card_stance_control_readability.md`, `docs/tasks/TASK_1132_fireteam_mini_card_tactical_state_language_polish.md`, `docs/tasks/TASK_109_tactical_stance.md`, `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`
+- Befund: Die direkte Mini-Card-Steuerung zeigte nur `C / N / A`. Ohne Tooltip waren vorsichtig, normal und offensiv sowie der aktive Zustand nicht ausreichend lesbar.
+- Aenderung: Drei feste Segmente zeigen `VORS / NORM / OFF` mit vorhandenen CC0-Taktikicons. Tooltips benennen Tempo, Waffenhaltung, Sicht und Risiko. Genau ein Segment ist aktiv; bestehende Buttonnamen, Callbacks und Fireteam-spezifische Stance-IDs bleiben erhalten.
+- Multiplayer/Performance: Keine Aenderung an Stance-State, Resolver, Commands, RPCs, Effects oder Snapshotfeldern. TASK_109 bestaetigt Sync/Planning/Unit-Badges 37/37; TASK_429 bestaetigt die aktuelle Doctrine 100/100.
+- Risiken/offen: Der grosse Selected-Fireteam-Bereich unten nutzt weiterhin `C / N / A` und sollte denselben visuellen Vertrag erhalten. TASK_421 und TASK_425 erwarten noch die aelteren Move-Sonderfaktoren und widersprechen der spaeteren TASK_429-Doctrine; das braucht einen getrennten Reconciliation-Task.
+- Lokale Pruefung: TASK_1133 19/19; TASK_109 37/37; TASK_429 100/100; TASK_180 98/98; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window.
+- Naechster Schritt: TASK_1134 - Selected Fireteam Stance Control Consistency.
+
 ### TASK_1132 - Fireteam Mini-Card Tactical State Language Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1132_fireteam_mini_card_tactical_state_language_polish.md`, `docs/tasks/TASK_1131_fireteam_mini_card_header_contrast_status_compression.md`, `docs/tasks/TASK_369_fireteam_status_card_enhancement.md`
@@ -18,7 +28,7 @@
 - Multiplayer/Performance: Reiner Presenter auf bestehenden read-only Snapshots; keine Aenderung an ContactTracker, Combat, Readiness-Berechnung, Fireteam-State, RPC, Command, Effect oder Netzwerkpayload. Performance-Gate bleibt 82/82 gruen.
 - Risiken/offen: Die Statuszeile ist jetzt menschlich lesbar. Die direkt darunter liegenden Stance-Tasten `C / N / A` bleiben ohne Tooltip kryptisch.
 - Lokale Pruefung: TASK_1132 15/15; TASK_1131 8/8; TASK_369 14/14; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window; TASK_222 82/82.
-- Naechster Schritt: TASK_1133 - Fireteam Mini-Card Stance Control Readability.
+- Naechster Schritt: abgeschlossen durch TASK_1133.
 
 ### TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression
 - Status: implementiert im Arbeitsstand

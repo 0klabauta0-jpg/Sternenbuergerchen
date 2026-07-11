@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1132: Fireteam-Karten zeigen taktische Zustaende in Spielsprache statt als Diagnosecodes.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1133: Fireteam-Karten zeigen Stance als lesbare, bebilderte Segmentsteuerung.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1132</span>
+      <span class="pill good">Letzter Abschluss: TASK_1133</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -134,6 +134,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_multi_dropship_perspective"> Host/Client teilen Transportstate, nicht den lokalen Auswahlfokus</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.fireteam_mini_header_status_compression"> BLUE/GOLD und Primaerstatus sind ohne abgeschnittene Karten gleichzeitig sichtbar</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.fireteam_mini_player_state_language"> WARTET, Kontakt und Fitness ersetzen EX/C0/HP/RDY-N/A-Diagnosekuerzel</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.fireteam_mini_stance_segments"> VORS, NORM und OFF sind mit Icons und aktivem Zustand direkt lesbar</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_dropship_command_authority"> LZ, Approach, Drop und Return werden erst vom Host committed</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.parallel_dropship_command_recovery"> Parallele Craft-Commands sind idempotent und ueberstehen Disconnect/Rebind</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.dropship_pending_double_submit_guard"> Offene Craft-Requests sperren nur das betroffene Schiff bis Result/Snapshot</label>
@@ -313,6 +314,11 @@
           <p>Der neutrale Zustand liest sich jetzt als <code>WARTET | KEIN KONTAKT | FIT 5/5</code>. Aktive Ausfuehrung zeigt einen verstaendlichen Zustand samt Fidelity; bestaetigte, gesichtete, vermutete oder verlorene Kontakte werden ausgeschrieben.</p>
           <div class="callout">Fehlende Readiness wird nicht mehr als scheinbare Information <code>RDY N/A</code> gezeigt. Technische Werte bleiben im Tooltip und Snapshot. TASK_1132 15/15, Karten 14/14 + 19/19, Multiplayer 25/25, Full-HD 8/8 und Performance 82/82.</div>
         </article>
+        <article class="card wide">
+          <h2>Lesbare Stance-Segmente TASK_1133</h2>
+          <p>Die Mini-Cards zeigen <code>VORS</code>, <code>NORM</code> und <code>OFF</code> mit Ziel-, Bewegungs- und Angriffsicon. Der aktive Modus ist hervorgehoben; Tooltips erklaeren Tempo, Waffenhaltung, Sicht und Risiko.</p>
+          <div class="callout">Die Auswahl bleibt pro Fireteam getrennt und nutzt denselben vorhandenen Sync-/Command-Pfad. TASK_1133 19/19, Stance-Sync 37/37, aktuelle Doctrine 100/100, Full-HD 8/8.</div>
+        </article>
       </div>
     </section>
 
@@ -355,7 +361,9 @@
             <li><strong>Bubble-Typografie geschlossen:</strong> 10-px-Schrift bleibt in beiden Full-HD-Bubbles kollisionsfrei und ist im Render-Snapshot messbar.</li>
             <li><strong>Mini-Card-Identitaet geschlossen:</strong> Ohne aktive Session verschwindet `FT ?`; Name und Status nutzen 12/10/10 px.</li>
             <li><strong>Mini-Card-Sprache geschlossen:</strong> Neutraler Zustand, Kontakt, Fitness und Readiness sind spielsprachlich und ehrlich.</li>
-            <li><strong>Stance-Bedienung offen:</strong> `C / N / A` ist platzsparend, aber ohne Tooltip nicht selbsterklaerend.</li>
+            <li><strong>Mini-Card-Stance geschlossen:</strong> `VORS / NORM / OFF` ist bebildert, selektiert und Fireteam-spezifisch.</li>
+            <li><strong>#17-Stance offen:</strong> Der grosse Selected-Fireteam-Bereich nutzt weiterhin `C / N / A` und widerspricht damit der Mini-Card.</li>
+            <li><strong>Stance-Contract-Drift:</strong> TASK_421/425 erwarten alte Move-Faktoren; TASK_429 ist die spaetere und aktuell gruene Doctrine-Wahrheit.</li>
             <li><strong>Sichttest offen:</strong> Headless-Verifier sind gruen, aber der echte Zwei-Fenster-Blick ist noch nicht abgenommen.</li>
             <li><strong>Preview-Sprache:</strong> Ohne klares Wort <code>PREVIEW</code> kann ein geplanter Move wie ein laufender Move wirken.</li>
           <li><strong>Host/Client:</strong> Beide Fenster sehen denselben naechsten Auftrag; die Fireteam-Karten-Relation ist jetzt als OWN/VIEW/FT ? lesbar.</li>
@@ -407,15 +415,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1132 uebersetzt neutralen Zustand, Ausfuehrung, Kontakt, Fitness und Readiness in klare Spielsprache. Als naechstes werden die drei Stance-Tasten ohne Tooltip eindeutig lesbar.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1133 macht die Stance-Steuerung der Mini-Cards als bebilderte Segmente lesbar. Als naechstes wird derselbe Vertrag auf den grossen Selected-Fireteam-Bereich angewendet.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1132 - Fireteam Mini-Card Tactical State Language Polish (15/15, Full-HD 8/8)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1133 - Fireteam Mini-Card Stance Control Readability" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1133 - Fireteam Mini-Card Stance Control Readability (19/19, Full-HD 8/8)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1134 - Selected Fireteam Stance Control Consistency" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1051,10 +1059,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1133 - Fireteam Mini-Card Stance Control Readability"
+            recommended_next_task: "TASK_1134 - Selected Fireteam Stance Control Consistency"
           },
           metadata: {
-            generated_for_task: "TASK_1132",
+            generated_for_task: "TASK_1133",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
