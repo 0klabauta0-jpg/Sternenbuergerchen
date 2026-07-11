@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1097: verbundener Stationsweg, gemeinsamer GO-Griff sowie farblich getrennte, deduplizierte Host-/Client-Zeilen fuer Pending, Progress, Erfolg und Blockade.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1098: verbundener Stationsweg, gemeinsamer GO-Griff sowie farblich getrennte und unter paralleler Snapshot-Last deduplizierte Host-/Client-Zeilen.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1097</span>
+      <span class="pill good">Letzter Abschluss: TASK_1098</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -119,6 +119,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_feedback_readable"> Host-Pending/OK/Blocked ohne technische IDs lesbar</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_progress_surface"> Replizierter Hold-Fortschritt ist kompakt und dedupliziert</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_tone_styles"> Pending/Progress/Success/Blocked nutzen stabile Theme-Farben</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_progress_budget"> 2000 Parallel-Snapshots bleiben unter 250 ms und 250 Label-Updates</label>
         </article>
       </div>
     </section>
@@ -848,10 +849,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1098 - Connected Interaction Progress Performance Budget"
+            recommended_next_task: "TASK_1099 - Connected Interaction Snapshot Payload Budget"
           },
           metadata: {
-            generated_for_task: "TASK_1097",
+            generated_for_task: "TASK_1098",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

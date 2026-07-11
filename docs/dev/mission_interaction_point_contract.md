@@ -648,5 +648,11 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Label-Metadaten exportieren Tone, Style-Key und finale Farbe fuer automatisierte Evidenz, setzen aber keine Gameplay-Wahrheit.
 - TASK_1097 ersetzt keinen subjektiven Sichttest, prueft aber Palette, Kontrastmetadaten und Layoutstabilitaet reproduzierbar.
 
+## Connected Interaction Progress Performance Contract
+- Bei mehreren laufenden States gewinnt die bevorzugte aktive Interaction; ist sie abgeschlossen, gewinnt ein anderer laufender State.
+- Der Prozent-/Sekunden-Fingerprint bleibt die einzige Ursache fuer ein Label-Update.
+- Der lokale Guard prueft 2000 Snapshots mit acht parallelen States gegen 250 ms und maximal 250 Label-Updates.
+- TASK_1098 misst rund 75 ms und 201 Updates; kein `_update_ui()` wird in den Progress-Hotpath eingefuehrt.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

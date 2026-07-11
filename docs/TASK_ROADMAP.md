@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1098 - Connected Interaction Progress Performance Budget (implementiert im Arbeitsstand)
+- Grundlage: Mehrere parallele Fireteams durften weder die falsche Interaction anzeigen noch Snapshot-HUD-Arbeit vervielfachen.
+- Ergebnis: Bevorzugte aktive Interaction gewinnt; 2000 Snapshots mit acht States benoetigen rund 75 ms und 201 Label-Updates.
+- Verifikation: TASK_1098 5/5 und TASK_1096 10/10.
+- Naechster Schritt: TASK_1099 - Connected Interaction Snapshot Payload Budget.
+
 ## TASK_1097 - Connected Interaction Feedback Visual Evidence (implementiert im Arbeitsstand)
 - Grundlage: Tone existierte nur als Metadatum und veraenderte die sichtbare Command-Zeile noch nicht.
 - Ergebnis: Vier etablierte Theme-Farben, Outline-Kontrast und stabile Label-Metadaten ohne Layoutaenderung oder HUD-Rebuild.

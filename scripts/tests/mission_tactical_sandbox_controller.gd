@@ -2039,7 +2039,12 @@ func _apply_network_mission_interaction_progress_surface(snapshot: Dictionary) -
 	var interaction_id: String = ""
 	var ids: Array = states.keys()
 	ids.sort()
-	for id_variant in ids:
+	if states.has(preferred_id):
+		var preferred_state: Dictionary = Dictionary(states.get(preferred_id, {}))
+		var preferred_state_name: String = String(preferred_state.get("state", "")).strip_edges().to_lower()
+		if not bool(preferred_state.get("complete", false)) and (float(preferred_state.get("hold_seconds", 0.0)) > 0.0 or ["active", "holding", "operating", "in_progress"].has(preferred_state_name)):
+			interaction_id = preferred_id
+	for id_variant in ids if interaction_id.is_empty() else []:
 		var candidate: Dictionary = Dictionary(states.get(id_variant, {}))
 		var candidate_state: String = String(candidate.get("state", "")).strip_edges().to_lower()
 		if not bool(candidate.get("complete", false)) and (float(candidate.get("hold_seconds", 0.0)) > 0.0 or ["active", "holding", "operating", "in_progress"].has(candidate_state)):
