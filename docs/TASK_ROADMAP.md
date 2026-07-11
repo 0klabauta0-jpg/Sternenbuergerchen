@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation (implementiert im Arbeitsstand)
+- Grundlage: Der TASK-1128-Capture zeigte 8-px-Bubbletext. TASK_212 verlor mehrere Unit-Gedanken im Fireteam-Dedupe; TASK_214 belegte ein echtes Minimalmodus-Leck sowie veraltete Text-/Rohpayload-Annahmen.
+- Ergebnis: HUD-Bubbletext ist 10 px und im Snapshot messbar. HUD-Dedupe bleibt Fireteam-basiert, World-Dedupe wird Unit-basiert. Minimal unterdrueckt Routine, Blocked bleibt. `command_context` ist der konkrete Order-Summary-Vertrag.
+- Architektur: Visual- und Settingskorrektur innerhalb bestehender Limits; keine Gameplay-, Event-, Command-, Effect-, RPC- oder Netzwerk-Snapshotwahrheit.
+- Verifikation: TASK_1129 4/4; TASK_212 19/19; TASK_214 36/36; TASK_1128 8/8 Real Window.
+- Naechster Schritt: TASK_1130 - Fireteam Mini-Card Identity and Typography Polish. Der Full-HD-Beleg zeigt kleine Statuszeilen und `FT ?` trotz bekannter BLUE-/GOLD-Zuordnung.
+
 ## TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability (implementiert im Arbeitsstand)
 - Grundlage: TASK_1127 bewies Eventbindung und Mini-Card-Anker, aber nicht die gleichzeitige sichtbare Full-HD-Geometrie.
 - Ergebnis: BLUE und GOLD rendern je eine getrennte eventgebundene Bubble. Beide Rechtecke bleiben im Viewport, halten 6 px Sicherheitsabstand, bleiben dem eigenen Anker am naechsten und zeigen per linkem Tail zur richtigen Mini-Card. Ein echter D3D12-PNG-Beleg wurde erzeugt.
 - Architektur: Reiner read-only Verifier/Capture ohne Produktionscode-, Gameplay-, RPC-, Command-, Effect-, Event- oder Snapshotaenderung.
 - Verifikation: TASK_1128 7/7 headless und 8/8 Real Window; `tmp/task_1128_tactical_communication_hud_bubble_density.png`.
-- Naechster Schritt: TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation. Die kleine 8-px-Schrift und vier veraltete TASK-214-Annahmen werden gegen den heutigen Spieler-/Settingsvertrag geklaert.
+- Naechster Schritt: abgeschlossen durch TASK_1129.
 
 ## TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair (implementiert im Arbeitsstand)
 - Grundlage: Command- und Tactical-Event-Feedback konkurrierten im selben Gate und globalen Ein-Bubble-Speicher. Bei zwei Fireteams verlor TASK_274 Eventbindung oder Mini-Card-Anker vor dem Render-Snapshot.

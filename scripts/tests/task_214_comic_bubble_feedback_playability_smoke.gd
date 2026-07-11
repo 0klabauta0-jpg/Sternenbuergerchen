@@ -77,7 +77,7 @@ func _test_mission_command_feedback_modes_and_blocked_path() -> void:
 	_assert(accepted, "Normal mode keeps an accepted move command accepted")
 	_assert(normal_bubbles.size() == 1, "Normal mode emits one FTL command bubble")
 	_assert(String(Dictionary(normal_bubbles[0]).get("feedback_state", "")) == "accepted", "Normal command bubble stores accepted feedback state")
-	_assert(String(Dictionary(normal_bubbles[0]).get("text_source", "")) == "comms_lines", "Normal command bubble uses comms line catalog text")
+	_assert(String(Dictionary(normal_bubbles[0]).get("text_source", "")) == "command_context", "Normal command bubble uses the concrete order-summary text")
 	var normal_bubble_expires_at_msec: int = int(Dictionary(normal_bubbles[0]).get("expires_at_msec", 0))
 	_assert(normal_bubble_expires_at_msec > 0, "Normal command bubble carries an expiry timestamp")
 	controller.call("_prune_fireteamleader_feedback_bubbles", normal_bubble_expires_at_msec + 1)
@@ -197,7 +197,7 @@ func _test_2_5d_render_snapshot_and_visual_only_boundary() -> void:
 	await _wait_frames(8)
 	var render_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var entries: Array = Array(render_snapshot.get("feedback_bubble_entries", []))
-	_assert(int(render_snapshot.get("feedback_bubble_visual_count", 0)) == payloads.size(), "2.5D map renders every active smoke bubble payload")
+	_assert(int(render_snapshot.get("feedback_bubble_visual_count", 0)) > 0 and int(render_snapshot.get("feedback_bubble_visual_count", 0)) <= payloads.size(), "2.5D map renders bounded active smoke bubbles after per-anchor dedupe")
 	_assert(payloads.size() <= 4, "Integrated visual payload snapshot respects the total bubble maximum")
 	_assert(_entries_have_text_source(entries), "2.5D render snapshot keeps text-source diagnostics")
 	_assert(_entries_are_visual_only(entries), "2.5D render entries remain visual-only")
@@ -357,7 +357,7 @@ func _entries_have_text_source(entries: Array) -> bool:
 		return false
 	for entry_variant in entries:
 		var text_source: String = String(Dictionary(entry_variant).get("text_source", "")).strip_edges()
-		if text_source != "comic_bubble_text_catalog" and text_source != "comms_lines":
+		if text_source != "comic_bubble_text_catalog" and text_source != "comms_lines" and text_source != "command_context":
 			return false
 	return true
 
