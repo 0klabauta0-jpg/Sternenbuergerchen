@@ -465,6 +465,10 @@ var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
 var _network_mission_interaction_feedback: Dictionary = {}
 var _network_mission_interaction_request_pending: bool = false
 var _network_dropship_command_sequence: int = 0
+const NETWORK_DROPSHIP_PENDING_TIMEOUT_SECONDS: float = 8.0
+var _pending_network_dropship_commands_by_craft: Dictionary = {}
+var _network_dropship_pending_timeout_count: int = 0
+var _network_dropship_pending_blocked_submit_count: int = 0
 var _network_mission_interaction_progress_fingerprint: String = ""
 var _network_mission_interaction_progress_update_count: int = 0
 var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
@@ -696,6 +700,7 @@ func _process(delta: float) -> void:
 		scope_started_usec = Time.get_ticks_usec()
 	if _drop_ship_cooldown_remaining > 0.0:
 		_drop_ship_cooldown_remaining = maxf(_drop_ship_cooldown_remaining - delta, 0.0)
+	_advance_network_dropship_pending(delta)
 	_update_drop_sequence(delta)
 	_update_fireteam_suppression(delta)
 	_update_leader_initiated_flanks()
@@ -2037,6 +2042,7 @@ func apply_authoritative_mission_dropship_snapshot(dropship_snapshot: Dictionary
 	if not preserved_selection.is_empty():
 		_set_selected_fireteams(preserved_selection, false)
 	_apply_drop_presence_state_to_units()
+	_apply_authoritative_dropship_pending_snapshot(incoming_cards)
 	_refresh_button_state()
 	_refresh_selection_visuals()
 	_refresh_world_overlays()
@@ -2113,8 +2119,91 @@ func _apply_network_dropship_command_result(result: Dictionary) -> void:
 	var craft_id: String = String(result.get("craft_id", "")).strip_edges()
 	var reason: String = String(result.get("reason", "")).strip_edges()
 	var action_label: String = _build_dropship_command_action_label(command_type)
+	var command_id: String = String(result.get("command_id", "")).strip_edges()
+	var pending: Dictionary = Dictionary(_pending_network_dropship_commands_by_craft.get(craft_id, {}))
+	if not pending.is_empty() and (command_id.is_empty() or String(pending.get("command_id", "")) == command_id):
+		if accepted:
+			pending["phase"] = "accepted_waiting_snapshot"
+			pending["compact_line"] = "%s %s HOST OK" % [action_label, craft_id]
+			_pending_network_dropship_commands_by_craft[craft_id] = pending
+		else:
+			_pending_network_dropship_commands_by_craft.erase(craft_id)
 	_last_command_text = "%s %s HOST OK" % [action_label, craft_id] if accepted else "%s BLOCKIERT | %s" % [action_label, _build_network_mission_interaction_reason_label(reason)]
 	_update_ui()
+
+
+func _is_network_dropship_command_pending(craft_id: String) -> bool:
+	return _pending_network_dropship_commands_by_craft.has(craft_id.strip_edges())
+
+
+func get_network_dropship_pending_debug_snapshot() -> Dictionary:
+	return {
+		"pending_count": _pending_network_dropship_commands_by_craft.size(),
+		"entries": _pending_network_dropship_commands_by_craft.duplicate(true),
+		"timeout_count": _network_dropship_pending_timeout_count,
+		"blocked_submit_count": _network_dropship_pending_blocked_submit_count,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _advance_network_dropship_pending(delta: float) -> void:
+	if _pending_network_dropship_commands_by_craft.is_empty() or delta <= 0.0:
+		return
+	var expired_craft_ids: Array[String] = []
+	for craft_id_variant in _pending_network_dropship_commands_by_craft.keys():
+		var craft_id: String = String(craft_id_variant)
+		var pending: Dictionary = Dictionary(_pending_network_dropship_commands_by_craft.get(craft_id, {}))
+		pending["remaining_seconds"] = maxf(float(pending.get("remaining_seconds", NETWORK_DROPSHIP_PENDING_TIMEOUT_SECONDS)) - delta, 0.0)
+		if float(pending.get("remaining_seconds", 0.0)) <= 0.0:
+			expired_craft_ids.append(craft_id)
+		else:
+			_pending_network_dropship_commands_by_craft[craft_id] = pending
+	if expired_craft_ids.is_empty():
+		return
+	for craft_id in expired_craft_ids:
+		_pending_network_dropship_commands_by_craft.erase(craft_id)
+		_network_dropship_pending_timeout_count += 1
+		_last_command_text = "DROPSHIP %s HOST TIMEOUT" % craft_id
+	_update_ui()
+
+
+func _apply_authoritative_dropship_pending_snapshot(incoming_cards: Array) -> void:
+	if _pending_network_dropship_commands_by_craft.is_empty():
+		return
+	var incoming_by_craft: Dictionary = {}
+	for card_variant in incoming_cards:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var card: Dictionary = Dictionary(card_variant)
+		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+		if not craft_id.is_empty():
+			incoming_by_craft[craft_id] = card
+	for craft_id_variant in _pending_network_dropship_commands_by_craft.keys():
+		var craft_id: String = String(craft_id_variant)
+		if not incoming_by_craft.has(craft_id):
+			continue
+		var pending: Dictionary = Dictionary(_pending_network_dropship_commands_by_craft.get(craft_id, {}))
+		if _does_authoritative_dropship_card_satisfy_pending(Dictionary(incoming_by_craft[craft_id]), pending):
+			_pending_network_dropship_commands_by_craft.erase(craft_id)
+
+
+func _does_authoritative_dropship_card_satisfy_pending(card: Dictionary, pending: Dictionary) -> bool:
+	var command_type: String = String(pending.get("command_type", "")).strip_edges().to_lower()
+	var payload: Dictionary = Dictionary(pending.get("payload", {}))
+	match command_type:
+		"set_lz":
+			var expected_position: Vector2 = Vector2(payload.get("lz_position", payload.get("target_position", Vector2.ZERO)))
+			return bool(card.get("has_lz_position", false)) and Vector2(card.get("lz_position", Vector2.ZERO)).is_equal_approx(expected_position)
+		"clear_lz":
+			return not bool(card.get("has_lz_position", false))
+		"set_dropship_approach":
+			return _sanitize_approach_angle_name(String(card.get("approach_angle", ""))) == _sanitize_approach_angle_name(String(payload.get("approach_angle", "")))
+		"call_dropship":
+			return String(card.get("state", "")).strip_edges().to_lower() != "waiting"
+		"return_dropship":
+			return String(card.get("state", "")).strip_edges().to_lower().begins_with("to_")
+	return false
 
 
 func _build_dropship_command_action_label(command_type: String) -> String:
@@ -2192,6 +2281,11 @@ func request_network_authoritative_dropship_command(command_type: String, craft_
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_craft_id.is_empty() or normalized_fireteam_id.is_empty():
 		return false
+	if _is_network_dropship_command_pending(normalized_craft_id):
+		_network_dropship_pending_blocked_submit_count += 1
+		_last_command_text = "%s %s | WARTE AUF HOST" % [_build_dropship_command_action_label(command_type), normalized_craft_id]
+		_update_ui()
+		return false
 	var peer_id: int = multiplayer.get_unique_id()
 	var team_id: String = String(simulation_root.call("get_peer_team", peer_id)).strip_edges() if simulation_root.has_method("get_peer_team") else ""
 	if team_id.is_empty():
@@ -2207,10 +2301,18 @@ func request_network_authoritative_dropship_command(command_type: String, craft_
 	_network_dropship_command_sequence += 1
 	command["command_id"] = "dropship:%d:%d:%s:%s" % [peer_id, _network_dropship_command_sequence, normalized_craft_id, command_type.strip_edges().to_lower()]
 	command.merge(payload, true)
+	_pending_network_dropship_commands_by_craft[normalized_craft_id] = {
+		"command_id": String(command.get("command_id", "")),
+		"command_type": String(command.get("command_type", "")),
+		"phase": "request_sent",
+		"remaining_seconds": NETWORK_DROPSHIP_PENDING_TIMEOUT_SECONDS,
+		"payload": payload.duplicate(true),
+		"compact_line": "%s %s -> HOST" % [_build_dropship_command_action_label(command_type), normalized_craft_id],
+	}
 	if multiplayer.is_server():
 		var result: Dictionary = Dictionary(simulation_root.call("submit_network_command_for_peer", command, peer_id))
 		if not bool(result.get("accepted", false)):
-			_apply_network_dropship_command_result(result.merged({"source_context": "mission_dropship_ui", "craft_id": normalized_craft_id}, true))
+			_apply_network_dropship_command_result(result.merged({"source_context": "mission_dropship_ui", "craft_id": normalized_craft_id, "command_id": String(command.get("command_id", ""))}, true))
 			return false
 	else:
 		simulation_root.rpc_id(1, "request_command", command)
@@ -11030,7 +11132,7 @@ func _refresh_mission_dropship_panel() -> void:
 					"visible": _can_request_mission_dropship_return(card),
 					"text": "FOB",
 					"tooltip_text": "Return this dropship to FOB.",
-					"disabled": not _can_request_mission_dropship_return(card),
+					"disabled": _is_network_dropship_command_pending(craft_id) or not _can_request_mission_dropship_return(card),
 					"square_size": 42.0,
 					"ready_style": true,
 					"callback": Callable(self, "_on_mission_dropship_return_pressed").bind(craft_id),
@@ -11098,6 +11200,7 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 	if craft_id.is_empty():
 		return
+	var command_pending: bool = _is_network_dropship_command_pending(craft_id)
 	var row := HBoxContainer.new()
 	row.name = "MissionDropshipCardCommandRow"
 	row.add_theme_constant_override("separation", 2)
@@ -11108,7 +11211,7 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 	var lz_button := _build_mission_dropship_card_command_button(
 		"LZ",
 		_build_mission_dropship_card_lz_tooltip(card),
-		not _can_request_mission_dropship_card_lz(card),
+		command_pending or not _can_request_mission_dropship_card_lz(card),
 		Callable(self, "_on_mission_dropship_card_set_lz_pressed").bind(craft_id),
 		craft_id,
 		"set_lz"
@@ -11128,7 +11231,7 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 			_build_mission_dropship_card_command_button(
 				String(approach_angle),
 				"Set %s approach for this dropship." % String(approach_angle),
-				not _can_request_mission_dropship_card_lz(card),
+				command_pending or not _can_request_mission_dropship_card_lz(card),
 				Callable(self, "_on_mission_dropship_card_approach_pressed").bind(craft_id, String(approach_angle)),
 				craft_id,
 				"approach_%s" % String(approach_angle).to_lower(),
@@ -11138,7 +11241,7 @@ func _append_mission_dropship_card_command_row(host: VBoxContainer, card: Dictio
 	var drop_button := _build_mission_dropship_card_command_button(
 		_build_mission_dropship_card_drop_button_label(card),
 		_build_mission_dropship_card_drop_tooltip(card),
-		not _can_request_mission_dropship_card_drop(card),
+		command_pending or not _can_request_mission_dropship_card_drop(card),
 		Callable(self, "_on_mission_dropship_card_drop_pressed").bind(craft_id),
 		craft_id,
 		"drop"
@@ -11750,6 +11853,10 @@ func _should_show_mission_dropship_card_progress(card: Dictionary) -> bool:
 
 
 func _get_mission_dropship_card_feedback_text(card: Dictionary) -> String:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	var pending: Dictionary = Dictionary(_pending_network_dropship_commands_by_craft.get(craft_id, {}))
+	if not pending.is_empty():
+		return String(pending.get("compact_line", "WARTE AUF HOST")).strip_edges()
 	return String(card.get("card_feedback_text", "")).strip_edges()
 
 
@@ -17234,6 +17341,10 @@ func _build_mission_dropship_card_ui_readability_snapshot(craft_id: String) -> D
 			result["drop_button_disabled"] = button.disabled
 	result["commands"] = commands
 	return result
+
+
+func get_mission_dropship_card_ui_snapshot(craft_id: String) -> Dictionary:
+	return _build_mission_dropship_card_ui_readability_snapshot(craft_id)
 
 
 func _build_mission_insertion_readability_check(check_id: String, passed: bool, details: String) -> Dictionary:
