@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1136 - Live Tactical Stance Effect Playtest and Feedback
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1136_live_tactical_stance_effect_playtest_feedback.md`, `docs/tasks/TASK_1134_selected_fireteam_stance_control_consistency.md`, `docs/tasks/TASK_1135_tactical_stance_doctrine_contract_reconciliation.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/mission_command_feedback_contract.md`
+- Befund: Ein laufender Wechsel wirkte korrekt auf Speed, Sicht, Movement- und Weapon-Posture, wurde aber als technisches `STANCE C LIVE (1)` bestaetigt. Die ausfuehrliche CommandFeedbackLabel war im echten unteren Dock nicht direkt sichtbar.
+- Aenderung: Ausfuehrliches Feedback wird aus dem aktiven Command-Typ und dem globalen Stance-Profil abgeleitet. Direkt ueber den Segmenten steht eine passende Einzeile wie `VORS LIVE | langsam | Sicht voll | Anschlag` oder `OFF LIVE | schnell | Sicht kurz | gesenkt`; der Tooltip traegt die ausgeschriebene Fassung.
+- Sicht-/Runtime-Beleg: Derselbe laufende Drill-Move wechselt VORS -> OFF. OFF hat hoeheren Runtime-Speed, VORS mehr Sicht; Unit-Cards wechseln gleichzeitig von engage/aimed auf run/lowered. Zwei echte Full-HD-Captures belegen Text, Auswahl und Kartenstatus ohne Ueberlauf.
+- Multiplayer/Performance: Reiner Presenter aus vorhandenen Modifiers und aktivem Movement-State. Keine neue Gameplay-Wahrheit, RPCs, Snapshots, Commands, Effects, Scans oder per-frame Rebuilds.
+- Lokale Pruefung: TASK_1136 17/17 headless und 19/19 Real Window; Captures `tmp/task_1136_stance_cautious.png` und `tmp/task_1136_stance_offensive.png`.
+- Naechster Schritt: TASK_1137 - Selected Fireteam Member Card Player Language Polish.
+
 ### TASK_1135 - Tactical Stance Doctrine Contract Reconciliation
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1135_tactical_stance_doctrine_contract_reconciliation.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_421_move_stance_posture_speed_sight.md`, `docs/tasks/TASK_425_live_move_stance_update.md`, `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`, `docs/tasks/TASK_451_fireteam_workbench_runtime_import.md`
@@ -18,7 +28,7 @@
 - Multiplayer/Performance: Verhalten und Netzwerkpayload bleiben unveraendert; dies ist eine verhaltensneutrale Contract-/Codebereinigung. Keine neuen RPCs, Snapshots, Commands, Effects, Scans oder Framearbeit.
 - Risiken/offen: Die globalen Werte sind weiterhin Workbench-Startbalance. Der naechste Spielwert entsteht eher aus einem sichtbaren Live-Stance-Effect-Playtest als aus weiteren Tabellenanpassungen ohne Spielbeleg.
 - Lokale Pruefung: TASK_1135 32/32; TASK_421 32/32; TASK_425 42/42; TASK_429 100/100; TASK_475 17/17; TASK_479 25/25; TASK_501 10/10; TASK_513 26/26.
-- Naechster Schritt: TASK_1136 - Live Tactical Stance Effect Playtest and Feedback.
+- Naechster Schritt: abgeschlossen durch TASK_1136.
 
 ### TASK_1134 - Selected Fireteam Stance Control Consistency
 - Status: implementiert im Arbeitsstand

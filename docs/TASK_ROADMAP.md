@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1136 - Live Tactical Stance Effect Playtest and Feedback (implementiert im Arbeitsstand)
+- Grundlage: Runtime-Wirkung und Auswahl waren korrekt, die Klickbestaetigung blieb aber bei `STANCE C LIVE (1)` und war im dichten Dock nicht als Wirkung lesbar.
+- Ergebnis: Das aktive Command-Profil erzeugt menschliches Feedback fuer Tempo, Sicht und Waffenhaltung. Die kompakte Einzeile steht direkt ueber `VORS / NORM / OFF`; die ausfuehrliche Fassung bleibt in Command-Feedback und Tooltip.
+- Architektur: Read-only Presenter aus bestehendem Movement-State und `get_behavior_stance_modifiers()`. Keine State-Mutation, kein neuer Netzwerkpfad und keine neue Hotpath-Arbeit.
+- Verifikation: TASK_1136 17/17 headless, 19/19 Real Window sowie zwei Full-HD-Captures. VORS ist langsamer und sichtstaerker; OFF schneller und sichtschwaecher; Postures wechseln gleichzeitig.
+- Naechster Schritt: TASK_1137 - Selected Fireteam Member Card Player Language Polish. `Move`, `Aim up`, `Run` und rohe `A:/S:`-Diagnose werden in eine klare Spielerhierarchie ueberfuehrt, technische Details bleiben im Tooltip.
+
 ## TASK_1135 - Tactical Stance Doctrine Contract Reconciliation (implementiert im Arbeitsstand)
 - Grundlage: Alte TASK_421-/TASK_425-Move-Werte, spaetere TASK_451-Workbench-Werte und tote command-spezifische Konstanten sahen wie mehrere parallele Balancequellen aus.
 - Ergebnis: Das globale C/N/A-Profil ist die einzige Speed-/Sicht-/Deckungs-/Aim-/Kontakt-/Zielhilfequelle. Command-Identitaet bleibt ueber Posture, Zielpolitik, Formation und Sequenz erhalten; Live-Revision und Fog-of-War-Weitergabe bleiben intakt.
 - Architektur: Verhaltensneutrale Bereinigung im bestehenden MovementController. Keine zweite Gameplay-Wahrheit und keine Aenderung an SimulationRoot, RPC, Snapshot, Command-Queue oder Effect-Queue.
 - Verifikation: TASK_1135 32/32; TASK_421 32/32; TASK_425 42/42; TASK_429 100/100; TASK_475 17/17; TASK_479 25/25; TASK_501 10/10; TASK_513 26/26.
-- Naechster Schritt: TASK_1136 - Live Tactical Stance Effect Playtest and Feedback. Im echten Mission-Fenster werden Tempo, Sicht, Posture und Wechselwirkung mit Kontakt/Preview als Spielerentscheidung bewertet.
+- Naechster Schritt: abgeschlossen durch TASK_1136.
 
 ## TASK_1134 - Selected Fireteam Stance Control Consistency (implementiert im Arbeitsstand)
 - Grundlage: Der grosse #17-Bereich nutzte noch `C / N / A`. Sein Refresh adressierte unbenannte Laufzeit-Container per festen NodePaths und erreichte Zusammenfassung sowie Auswahlzustand deshalb nicht verlaesslich.
