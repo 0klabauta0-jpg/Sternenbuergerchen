@@ -148,9 +148,16 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 	var fireteam_cards_spacer := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsSpacer") as Control
 	_assert(fireteam_info_scroll.custom_minimum_size.x <= 320.0 and fireteam_cards_scroll.custom_minimum_size.x >= 800.0 and String(fireteam_cards_scroll.get_meta("selected_fireteam_cards_source", "")) == "_refresh_selected_fireteam_cards", "#17 selected-fireteam layout reserves the wide right member-card lane")
 	_assert(not fireteam_cards_spacer.visible and fireteam_cards_spacer.custom_minimum_size == Vector2.ZERO, "#17 selected-fireteam card spacer no longer pushes cards off to the side")
+	var stance_labels := {"cautious": "VORS", "normal": "NORM", "aggressive": "OFF"}
 	for stance_id in ["cautious", "normal", "aggressive"]:
 		var stance_button := _find_stance_button(scene, stance_id)
-		_assert(_button_is_square(stance_button), "%s stance button uses the same #16 button size" % stance_id)
+		_assert(
+			stance_button != null
+				and stance_button.text == String(stance_labels.get(stance_id, ""))
+				and stance_button.custom_minimum_size == Vector2(64.0, 24.0)
+				and stance_button.size_flags_horizontal == Control.SIZE_EXPAND_FILL,
+			"%s stance control uses the compact readable #17 segment contract" % stance_id
+		)
 
 	var phase_control_panel := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel") as Control
 	_assert(not phase_control_panel.visible, "Disabled phase-planning template controls are hidden in the fixed Mission HUD")

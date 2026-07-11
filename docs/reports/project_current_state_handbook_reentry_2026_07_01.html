@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1133: Fireteam-Karten zeigen Stance als lesbare, bebilderte Segmentsteuerung.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1134: Mini-Cards und Selected Fireteam verwenden dieselbe lesbare Haltungssteuerung.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1133</span>
+      <span class="pill good">Letzter Abschluss: TASK_1134</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -319,6 +319,11 @@
           <p>Die Mini-Cards zeigen <code>VORS</code>, <code>NORM</code> und <code>OFF</code> mit Ziel-, Bewegungs- und Angriffsicon. Der aktive Modus ist hervorgehoben; Tooltips erklaeren Tempo, Waffenhaltung, Sicht und Risiko.</p>
           <div class="callout">Die Auswahl bleibt pro Fireteam getrennt und nutzt denselben vorhandenen Sync-/Command-Pfad. TASK_1133 19/19, Stance-Sync 37/37, aktuelle Doctrine 100/100, Full-HD 8/8.</div>
         </article>
+        <article class="card wide">
+          <h2>Einheitliche Haltungssteuerung TASK_1134</h2>
+          <p>Der grosse Bereich <code>#17 Selected Fireteam</code> zeigt nun ebenfalls <code>VORS</code>, <code>NORM</code> und <code>OFF</code> mit denselben Icons und Wirkungstooltips. Die Zusammenfassung spricht von <code>HALTUNG NORMAL</code> oder <code>HALTUNG GEMISCHT</code>.</p>
+          <div class="callout">Der Task repariert zugleich einen echten Refresh-Fehler: Laufzeit-Container haben jetzt stabile Namen und koennen nach Auswahl- oder Haltungswechsel per NodePath erreicht werden. Homogene und gemischte Mehrfachauswahl sind abgesichert. TASK_1134 20/20, Layout 98/98, Multiplayer 25/25, Full-HD 8/8 und Performance 82/82.</div>
+        </article>
       </div>
     </section>
 
@@ -415,15 +420,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1133 macht die Stance-Steuerung der Mini-Cards als bebilderte Segmente lesbar. Als naechstes wird derselbe Vertrag auf den grossen Selected-Fireteam-Bereich angewendet.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1134 vereinheitlicht die Haltungssteuerung zwischen Mini-Cards und grossem Selected-Fireteam-Bereich und repariert dessen Auswahl-Refresh. Als naechstes wird der widerspruechliche Altvertrag in TASK_421/TASK_425 gegen die aktuelle TASK_429-Doctrine bereinigt.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1133 - Fireteam Mini-Card Stance Control Readability (19/19, Full-HD 8/8)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1134 - Selected Fireteam Stance Control Consistency" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1134 - Selected Fireteam Stance Control Consistency (20/20, Full-HD 8/8)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1135 - Tactical Stance Doctrine Contract Reconciliation" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1059,10 +1064,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1134 - Selected Fireteam Stance Control Consistency"
+            recommended_next_task: "TASK_1135 - Tactical Stance Doctrine Contract Reconciliation"
           },
           metadata: {
-            generated_for_task: "TASK_1133",
+            generated_for_task: "TASK_1134",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1134 - Selected Fireteam Stance Control Consistency (implementiert im Arbeitsstand)
+- Grundlage: Der grosse #17-Bereich nutzte noch `C / N / A`. Sein Refresh adressierte unbenannte Laufzeit-Container per festen NodePaths und erreichte Zusammenfassung sowie Auswahlzustand deshalb nicht verlaesslich.
+- Ergebnis: `VORS / NORM / OFF`, Icons, Wirkungstooltips und aktiver Zustand sind zwischen Mini-Cards und Selected Fireteam identisch. Stabile Runtime-Namen reparieren den echten Refresh; die Zusammenfassung verwendet deutsche Spielsprache.
+- Architektur: Reiner Presenter auf demselben bestehenden Stance-Callback und revisionierten Sync-State. Keine Gameplay-, Resolver-, RPC-, Command-, Effect- oder Snapshotmutation und keine neue Hotpath-Arbeit.
+- Verifikation: TASK_1134 20/20; TASK_1133 19/19; TASK_109 37/37; TASK_429 100/100; TASK_180 98/98; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window; TASK_222 82/82.
+- Naechster Schritt: TASK_1135 - Tactical Stance Doctrine Contract Reconciliation. TASK_421/TASK_425 werden gegen den aktuellen TASK_429-Vertrag geprueft und ohne Gameplay-Raten bereinigt.
+
 ## TASK_1133 - Fireteam Mini-Card Stance Control Readability (implementiert im Arbeitsstand)
 - Grundlage: Die Mini-Card-Steuerung `C / N / A` war nur mit Vorwissen oder Tooltip verstaendlich.
 - Ergebnis: `VORS / NORM / OFF` nutzt Ziel-, Bewegungs- und Angriffsicon aus dem bestehenden CC0-Katalog. Tooltips erklaeren die taktische Wirkung; genau ein Segment ist sichtbar aktiv und ein Klick bleibt Fireteam-spezifisch.
 - Architektur: Reine UI-Darstellung auf dem bestehenden Stance-Callback und Sync-State; keine Gameplay-, Resolver-, RPC-, Command-, Effect- oder Snapshotmutation.
 - Verifikation: TASK_1133 19/19; TASK_109 37/37; TASK_429 100/100; TASK_180 98/98; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window.
-- Naechster Schritt: TASK_1134 - Selected Fireteam Stance Control Consistency. Der grosse #17-Bereich soll denselben lesbaren Segmentvertrag erhalten. Danach TASK_421/TASK_425 gegen die aktuelle TASK_429-Doctrine reconciliieren.
+- Naechster Schritt: abgeschlossen durch TASK_1134.
 
 ## TASK_1132 - Fireteam Mini-Card Tactical State Language Polish (implementiert im Arbeitsstand)
 - Grundlage: Nach TASK_1131 waren beide Karten sichtbar, aber `EX -`, `C0`, `HP 5/5` und `RDY N/A` blieben reine Diagnosekuerzel.
