@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1120: Der echte Mehrspieler-Erstkontakt zeigt die lokale Fireteam-Perspektive jetzt ohne wiederholte Contact-Zeilen und ohne abgeschlossene leere Dropship-Karten.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1121: Der echte Mehrspieler-Erstkontakt zeigt jetzt die taktische 3D-Karte statt des Lobby-Hangars und koppelt Welt, Fireteam-Auswahl und HUD an denselben Peer.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1120</span>
+      <span class="pill good">Letzter Abschluss: TASK_1121</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -251,6 +251,11 @@
           <p>Unmittelbar wiederholte Contact-Reports erscheinen als eine Zeile mit Wiederholungszahl, waehrend ein spaeter echter Wiederkontakt wieder separat sichtbar wird. <code>CONTACT FIRE</code> steht vor Routinekontakten und der lokale Spieler startet mit seinem Fireteam-Filter.</p>
           <div class="callout success">Leere, abgeschlossene <code>to_fob 0s</code>-Dropships werden nur im Contact Focus ausgeblendet. Aktive, beladene, bemannte oder wartende Crafts bleiben erhalten. TASK_1120 11/11, Real-Window-Regressionslauf 22/22, Performance 82/82.</div>
         </article>
+        <article class="card wide">
+          <h2>Die Taktische Welt Ist Wieder Sichtbar TASK_1121</h2>
+          <p>Der Multiplayer-Lobby-Hintergrund lag bisher auch nach Missionsstart als vollflaechige Control-Schicht ueber der laufenden Karte. Jetzt verschwinden Panel, Hangarbild und Shade gemeinsam; beim Missionsende oder Disconnect kehren sie gemeinsam zurueck.</p>
+          <div class="callout success">BLUE und GOLD wurden neu in Full HD aufgenommen. Beide Bilder zeigen die echte 3D-Karte, Einheiten und Weltmarker unter der jeweils passenden Fireteam-UI. Headless 21/21, je Perspektive Real Window 22/22, Multiplayer 31/31 und Performance 82/82.</div>
+        </article>
       </div>
     </section>
 
@@ -336,15 +341,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1120 bereinigt den ersten Feuerkontakt im echten Host-/BLUE-/GOLD-Produktpfad. Lokale Auswahl, Combat-Start, Snapshotfelder und HUD-Perspektive greifen zusammen; das Event Log priorisiert die aktuelle Entscheidung und inaktive Transportkarten treten zurueck. Als naechstes soll TASK_1121 Kontaktposition, beteiligte Einheiten und Gefahrenbezug direkt im taktischen Spielfeld schneller lesbar machen.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1121 legt im echten Host-/BLUE-/GOLD-Produktpfad erstmals die vorhandene taktische 3D-Welt frei. Lokale Auswahl, Welt und HUD stammen jetzt aus derselben Peer-Perspektive. Als naechstes soll TASK_1122 den Kamerarahmen enger auf den Erstkontakt setzen, helle Stationsassets lesbarer belichten und das Label-Cluster am Kontaktpunkt beruhigen.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1120 - Connected First Contact Event Log Dedupe and HUD Declutter (11/11, performance 82/82)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1121 - Connected First Contact Tactical World Readability" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1121 - Connected First Contact Tactical World Readability (7/7, real window 22/22 je Peer)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -980,10 +985,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1121 - Connected First Contact Tactical World Readability"
+            recommended_next_task: "TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability"
           },
           metadata: {
-            generated_for_task: "TASK_1120",
+            generated_for_task: "TASK_1121",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

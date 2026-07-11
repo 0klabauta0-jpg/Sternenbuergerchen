@@ -212,7 +212,7 @@ func _capture_product_perspective(lobbies: Array, target_index: int, path: Strin
 		var is_target: bool = index == target_index
 		lobby.visible = true
 		if mission is Node2D:
-			(mission as Node2D).visible = index == 0
+			(mission as Node2D).visible = is_target
 		var tactical_ui: CanvasLayer = mission.get_node_or_null("TacticalUI") as CanvasLayer
 		if tactical_ui != null:
 			tactical_ui.visible = is_target

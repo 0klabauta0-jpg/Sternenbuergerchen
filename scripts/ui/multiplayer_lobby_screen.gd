@@ -743,6 +743,10 @@ func _set_lobby_panel_visible(visible: bool) -> void:
 	var panel := get_node_or_null("Panel") as Control
 	if panel != null:
 		panel.visible = visible
+	if _background_rect != null:
+		_background_rect.visible = visible
+	if _background_shade != null:
+		_background_shade.visible = visible
 
 
 func _on_product_mission_resolved(_mission_result: Dictionary) -> void:

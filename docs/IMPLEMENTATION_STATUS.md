@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1121 - Connected First Contact Tactical World Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1121_connected_first_contact_tactical_world_readability.md`, `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `scripts/mission/mission_primary_view_bridge.gd`
+- Befund: Das Mehrspielerprodukt blendete beim Missionsstart nur das Lobby-Panel aus. Vollflaechiger Hangar-Hintergrund und Shade verdeckten die komplette taktische Welt. Der GOLD-Capture zeigte zudem Host-Welt und GOLD-HUD als gemischte Perspektive.
+- Aenderung: Panel, Background und Shade bilden eine gemeinsame Lobby-Chrome-Sichtbarkeitsgrenze. Missionsstart legt die lokale 3D-Welt frei; alle Rueckkehrpfade stellen die Lobby wieder her. Der Capture rendert Mission und Tactical UI desselben Ziel-Peers.
+- Multiplayer/Performance: Keine Aenderung an Session, RPC, Snapshot, Commands, Effects oder Simulation. Nicht gewaehlte Capture-Peers verarbeiten ihr Netzwerk weiter und werden nur visuell ausgeblendet. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Die echte Welt ist jetzt sichtbar und zeigt die naechsten UX-Befunde: ueberstrahlte helle Assets im Compatibility-Renderer, zu weiter Kamerarahmen, Label-Cluster am Erstkontakt sowie eine starre Dedupe-Bucket-Grenze im BLUE-Event-Log.
+- Lokale Pruefung: TASK_1121 7/7, TASK_1119 21/21 headless und 22/22 je BLUE/GOLD Real Window, TASK_1104 31/31, TASK_1120 11/11 und TASK_222 82/82.
+- Naechster Schritt: TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability.
+
 ### TASK_1120 - Connected First Contact Event Log Dedupe and HUD Declutter
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1120_connected_first_contact_event_log_dedupe_hud_declutter.md`, `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `scripts/tactical/tactical_event_log.gd`
