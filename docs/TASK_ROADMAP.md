@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1106 - Coop Lobby Layout Hardening (implementiert im Arbeitsstand)
+- Grundlage: TASK_258 meldete das Lobby-Panel ausserhalb 1280x720, obwohl Rollenlabels und ScrollContainer nicht ueberliefen.
+- Ergebnis: Der Befund war eine falsche Audit-Koordinatenbasis. Ein echter 1280x720-`SubViewport` belegt Idle- und Drei-Peer-Geometrie, lange Namen, 720x560-Panel, vertikales Scrollen und horizontale Begrenzung.
+- Architektur: Keine Produktions- oder Session-Logik geaendert; die Korrektur liegt in der reproduzierbaren Layoutmessung.
+- Verifikation: TASK_1106 10/10. TASK_258 verbessert sich von 69/71 auf 70/71 und laesst nur den getrennten Mission-Control-Fixed-Rect-Befund offen.
+- Naechster Schritt: TASK_1107 - Mission Control Fixed Layout Repair.
+
 ## TASK_1105 - Coop Lobby Active and Spectator Role Readability (implementiert im Arbeitsstand)
 - Grundlage: TASK_1104 wies `blue`, `gold` und Spectator korrekt zu, die Produktlobby zeigte aber weiterhin interne Peer-, Team-, Rollen- und Boolean-Werte.
 - Ergebnis: Der bestehende Labelbereich zeigt kompakte Einsatzrollen mit `DU`, Name, Fireteam, Zuschauer und Bereitschaft. Coop nennt aktive/wartende Sitze und erklaert das Premission-Nachruecken; Versus bleibt getrennt lesbar.

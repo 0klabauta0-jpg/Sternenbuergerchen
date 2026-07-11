@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1106 - Coop Lobby Layout Hardening
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1106_coop_lobby_layout_hardening.md`, `scripts/tests/task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `scenes/ui/multiplayer_lobby.tscn`
+- Befund: Das Lobby-Panel war bereits korrekt 720x560 gross und scrollte mit langen Drei-Peer-Rollen. Der alte Audit verglich jedoch Full-HD-Headless-Koordinaten gegen eine nur nominell gesetzte 1280x720-Grenze.
+- Aenderung: Lobby-Layout wird in einem echten 1280x720-`SubViewport` geprueft. Idle und drei Peers bleiben bei `(280,80)` vollstaendig im Zielbereich; Rollen- und Assignment-Labels erzwingen weder Panelwachstum noch horizontales Scrollen.
+- Authority/Performance: Keine Produktions- oder Multiplayer-Wahrheit wurde geaendert. Der neue Verifier instanziiert nur eine Produktlobby und erzeugt keine Runtime-Commands.
+- Risiken/offen: Subjektive Schrift-/Hierarchieabnahme bleibt auf Wunsch uebersprungen. TASK_258 meldet weiterhin den getrennten Mission-Control-Fixed-Rect-Befund.
+- Lokale Pruefung: TASK_1106 10/10; TASK_258 Lobby-Teil gruen und gesamt 70/71 mit nur Mission-Control offen; TASK_1105 16/16 folgt vor Integration erneut.
+- Naechster Schritt: TASK_1107 - Mission Control Fixed Layout Repair.
+
 ### TASK_1105 - Coop Lobby Active and Spectator Role Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1105_coop_lobby_active_spectator_role_readability.md`, `scripts/ui/multiplayer_lobby_screen.gd`, `scripts/multiplayer/multiplayer_session.gd`
