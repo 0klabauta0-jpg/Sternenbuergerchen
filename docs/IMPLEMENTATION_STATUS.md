@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1110_connected_multi_dropship_fireteam_selection_perspective.md`, `docs/tasks/TASK_1109_multi_dropship_fireteam_selection_hud_consistency.md`, `scripts/multiplayer/multiplayer_snapshot_contract.gd`
+- Befund: Der Host-Snapshot transportierte nur einen einzelnen vereinfachten Dropship-Visualzustand. Mehrere Craft-Karten sowie Embarked-/Deployed-IDs erreichten den Client-HUD nicht autoritativ.
+- Aenderung: Der whitelisted Dropship-Snapshot enthaelt alle Karten und Presence-IDs ohne Texture-Pfade oder lokale Auswahl. Der Client merged diese Transportfelder read-only, behaelt seinen gueltigen lokalen Craft-/Fireteam-Fokus und dedupliziert unveraenderte Payloads vor HUD-/World-Refresh.
+- Authority/Performance: Auswahl bleibt pro Peer lokal; Transportstate konvergiert vom Host. Apply erzeugt keine Commands oder Effects. Identische Snapshots erhoehen nur einen billigen Dedupe-Zaehler.
+- Risiken/offen: LZ-, Drop- und Return-Bedienung eines Clients braucht als naechstes einen expliziten hostautoritativen Craft-/Fireteam-Commandpfad.
+- Lokale Pruefung: TASK_1110 20/20, TASK_168 20/20, TASK_1109 18/18, TASK_396 17/17, TASK_399 9/9, TASK_1099 38/38 und TASK_1104 31/31. Zwei TASK-230-FoW/LZ-Altbefunde reproduzieren unveraendert auf der Basis.
+- Naechster Schritt: TASK_1111 - Connected Dropship Command Authority and Ownership.
+
 ### TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1109_multi_dropship_fireteam_selection_hud_consistency.md`, `docs/tasks/TASK_1108_embarked_selected_fireteam_hud_contract_reconciliation.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`

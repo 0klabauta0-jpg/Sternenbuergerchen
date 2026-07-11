@@ -310,7 +310,55 @@ func _normalize_dropship(value: Variant) -> Dictionary:
 		dropship["lz_position"] = lz_position
 	_copy_float_if_present(source, dropship, "progress")
 	_copy_string_if_present(source, dropship, "team_id")
+	dropship["mission_drop_cards"] = _normalize_mission_drop_cards(source.get("mission_drop_cards", []))
+	dropship["embarked_unit_ids"] = _normalize_string_array(source.get("embarked_unit_ids", []))
+	dropship["deployed_unit_ids"] = _normalize_string_array(source.get("deployed_unit_ids", []))
 	return dropship
+
+
+func _normalize_mission_drop_cards(value: Variant) -> Array:
+	var result: Array = []
+	for card_variant in _variant_to_array(value):
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		var source: Dictionary = Dictionary(card_variant)
+		var craft_id: String = String(source.get("craft_id", "")).strip_edges()
+		if craft_id.is_empty():
+			continue
+		var card: Dictionary = {
+			"craft_id": craft_id,
+			"state": String(source.get("state", "")).strip_edges().to_lower(),
+			"progress": clampf(float(source.get("progress", 0.0)), 0.0, 100.0),
+			"passenger_count": maxi(int(source.get("passenger_count", 0)), 0),
+			"embarked_unit_ids": _normalize_string_array(source.get("embarked_unit_ids", [])),
+			"boarded_fireteam_ids": _normalize_string_array(source.get("boarded_fireteam_ids", [])),
+			"queued_fireteam_ids": _normalize_string_array(source.get("queued_fireteam_ids", [])),
+			"has_lz_position": bool(source.get("has_lz_position", false)),
+			"approach_angle": String(source.get("approach_angle", "")).strip_edges().to_upper(),
+		}
+		_copy_string_if_present(source, card, "display_name")
+		_copy_string_if_present(source, card, "title_text")
+		_copy_string_if_present(source, card, "source")
+		_copy_string_if_present(source, card, "pilot_unit_id")
+		_copy_string_if_present(source, card, "pilot_display_name")
+		_copy_string_if_present(source, card, "pilot_text")
+		_copy_string_if_present(source, card, "status_line")
+		_copy_string_if_present(source, card, "card_feedback_text")
+		_copy_string_if_present(source, card, "lz_label")
+		_copy_string_if_present(source, card, "payload_source")
+		_copy_float_if_present(source, card, "eta_seconds")
+		_copy_bool_if_present(source, card, "drop_ship_requested")
+		_copy_bool_if_present(source, card, "drop_ship_staged")
+		_copy_bool_if_present(source, card, "return_requested")
+		_copy_position_if_present(source, card, "lz_position")
+		_copy_position_if_present(source, card, "dropship_position")
+		_copy_position_if_present(source, card, "dropship_target_position")
+		_copy_position_if_present(source, card, "drop_sequence_position")
+		result.append(card)
+	result.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return String(a.get("craft_id", "")) < String(b.get("craft_id", ""))
+	)
+	return result
 
 
 func _normalize_contacts(value: Variant) -> Array:
