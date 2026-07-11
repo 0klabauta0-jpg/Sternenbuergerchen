@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1107 - Mission Control Fixed Layout Repair (implementiert im Arbeitsstand)
+- Grundlage: Nach TASK_1106 blieb in TASK_258 nur `#18 Mission Control` ausserhalb seines festen Contract-Rechtecks.
+- Ursache: Eine historische TASK_835-Mindestbreite von 420 Pixeln verbreiterte das 344-Pixel-Panel inklusive Innenraendern auf 448 Pixel.
+- Ergebnis: Mission Control bleibt ueber spaete UI-Frames exakt bei `(1552,808,344,248)`. Statuszeile, CONTACT-FIRE/NEXT-WHY-Lesbarkeit, Smart-Wrap, Mindesthoehe und Scrollbereich bleiben erhalten.
+- Verifikation: TASK_1107 9/9, kompletter TASK_258 71/71 und TASK_835 28/28. Keine Commands oder UI-Gameplay-Wahrheit.
+- Naechster Schritt: TASK_1108 - Embarked Selected Fireteam Member-Card Repair fuer den verbleibenden TASK_180-Befund.
+
 ## TASK_1106 - Coop Lobby Layout Hardening (implementiert im Arbeitsstand)
 - Grundlage: TASK_258 meldete das Lobby-Panel ausserhalb 1280x720, obwohl Rollenlabels und ScrollContainer nicht ueberliefen.
 - Ergebnis: Der Befund war eine falsche Audit-Koordinatenbasis. Ein echter 1280x720-`SubViewport` belegt Idle- und Drei-Peer-Geometrie, lange Namen, 720x560-Panel, vertikales Scrollen und horizontale Begrenzung.

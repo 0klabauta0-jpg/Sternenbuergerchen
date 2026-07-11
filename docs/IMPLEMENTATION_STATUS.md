@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1107 - Mission Control Fixed Layout Repair
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1107_mission_control_fixed_layout_repair.md`, `scripts/meta/drop_light_layout_contract.gd`, `docs/reports/playability_layout_clipping_scrollbar_report.md`
+- Ursache: Der TASK_835-Firefight-Polish setzte `StrategicStatusLabel` auf mindestens 420 Pixel Breite. Zusammen mit den Innenraendern wuchs das vertraglich 344 Pixel breite Mission-Control-Panel spaet auf 448 Pixel.
+- Aenderung: Die Statuszeile expandiert innerhalb der vorhandenen Breite und behaelt Smart-Wrap, 84 Pixel Mindesthoehe, Outline und Farbstil. Die TASK_835-Diagnose liest reale Label-/Scrollbreite und nutzt nur im ungelayouteten Deep-Link die zentrale 316-Pixel-Contract-Innenbreite.
+- Authority/Performance: Keine Mission-, Combat-, Command- oder Multiplayer-Wahrheit geaendert. Der Pfad erzeugt keine Commands; es entfaellt lediglich eine konkurrierende Minimum-Size-Ausweitung.
+- Risiken/offen: TASK_180 bestaetigt alle Fixed-Layout-Punkte, bleibt aber wegen eines getrennten Inbound-Fireteam-Member-Card-Befunds bei 99/100.
+- Lokale Pruefung: TASK_1107 9/9, TASK_258 71/71, TASK_835 28/28. TASK_180: alle Layoutchecks gruen, ein sachfremder Inbound-Auswahlbefund offen.
+- Naechster Schritt: TASK_1108 - Embarked Selected Fireteam Member-Card Repair.
+
 ### TASK_1106 - Coop Lobby Layout Hardening
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1106_coop_lobby_layout_hardening.md`, `scripts/tests/task_258_fixed_window_clipping_scrollbar_playability_audit.gd`, `scenes/ui/multiplayer_lobby.tscn`

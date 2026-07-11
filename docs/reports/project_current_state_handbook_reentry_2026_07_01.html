@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1106: verbundener Stationsweg, lesbare Drei-Peer-Coop-Rollen und reproduzierbar abgesicherte Lobby-Geometrie bei 1280x720.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1107: verbundener Stationsweg, lesbare Drei-Peer-Coop-Rollen und ein vollstaendig gruener Fixed-Window-Audit fuer Lobby, Homebase, FOB, Mission-HUD und Map-Editor.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1106</span>
+      <span class="pill good">Letzter Abschluss: TASK_1107</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -128,6 +128,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.product_lobby_three_peer_coop"> Drei Produkt-Peers starten als BLUE, GOLD und Spectator konsistent</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.coop_lobby_role_readability"> Lobby zeigt DU, aktive Fireteams, Zuschauer und Bereitschaft ohne Rohcodes</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.coop_lobby_fixed_layout"> Drei-Peer-Lobby bleibt bei 1280x720 fest, begrenzt und scrollbar</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.mission_control_fixed_layout"> Mission Control bleibt bei 344x248 und TASK_258 ist 71/71 gruen</label>
         </article>
         <article class="card wide">
           <h2>Multiplayer-Payload TASK_1099</h2>
@@ -168,6 +169,11 @@
           <h2>Lobby-Geometrie TASK_1106</h2>
           <p>Der alte 1280x720-Audit mischte Full-HD-Headless-Koordinaten mit einer kleineren Vergleichsgrenze. Ein echter 1280x720-Testviewport zeigt nun den realen Zustand: Das Panel bleibt in Idle und mit drei langen Spielernamen exakt <code>720x560</code> bei <code>280,80</code>.</p>
           <div class="callout">Langer Inhalt nutzt den vorhandenen vertikalen Scrollbereich. Peer- und Assignment-Zeilen vergroessern das Panel nicht horizontal. TASK_258 besteht damit den gesamten Lobby-Abschnitt; offen bleibt nur sein getrenntes Mission-Control-Fenster.</div>
+        </article>
+        <article class="card wide">
+          <h2>Mission Control TASK_1107</h2>
+          <p>Eine alte Firefight-Polish-Regel gab dem Statuslabel 420 Pixel Mindestbreite und drueckte das vertraglich 344 Pixel breite Panel auf 448 Pixel. Die Zeile nutzt nun die vorhandene Innenbreite und bricht dort kontrolliert um.</p>
+          <div class="callout">CONTACT FIRE, NEXT/WHY, Outline, Farbe, 84 Pixel Mindesthoehe und Scrollen bleiben erhalten. Der komplette Fixed-Window-Audit ist jetzt <code>71/71</code> gruen; keine UI-Aenderung erzeugt Commands oder Multiplayer-Wahrheit.</div>
         </article>
       </div>
     </section>
@@ -254,15 +260,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Fokus:</strong> TASK_1106 belegt die Drei-Peer-Lobby automatisiert bei 1280x720. Als naechstes wird der letzte echte TASK_258-Befund repariert: Das Mission-Control-Fenster muss wieder exakt dem festen Layout-Contract entsprechen.</p>
+          <p><strong>Aktueller Fokus:</strong> TASK_1107 schliesst den Fixed-Window-Audit vollstaendig. Als naechstes sollte TASK_1108 den getrennten TASK_180-Befund reparieren: Ein ausgewaehltes, noch eingeschifftes Fireteam befuellt seine rechte Member-Card-Lane nicht wie erwartet.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1106 - Coop Lobby Layout Hardening (10/10 gruen)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1107 - Mission Control Fixed Layout Repair" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1107 - Mission Control Fixed Layout Repair (9/9, TASK_258 71/71)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1108 - Embarked Selected Fireteam Member-Card Repair" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -898,10 +904,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1107 - Mission Control Fixed Layout Repair"
+            recommended_next_task: "TASK_1108 - Embarked Selected Fireteam Member-Card Repair"
           },
           metadata: {
-            generated_for_task: "TASK_1106",
+            generated_for_task: "TASK_1107",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
