@@ -661,5 +661,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Guard misst leere sowie 1, 8, 32 und 64 parallele Interaction-States. 64 States duerfen gegenueber leerer Baseline maximal 8 KiB Wire-Payload und acht Chunks addieren.
 - TASK_1099 misst lokal 1775 zusaetzliche Wire-Bytes, zwei zusaetzliche Chunks und deutlich unter 1 ms fuer 64 States. Dieser Befund rechtfertigt aktuell keine Delta-Sonderarchitektur.
 
+## Connected Interaction Snapshot Loss/Jitter Contract
+- `SimulationRoot.validate_for_apply()` bleibt die einzige Tick-Grenze. Nur strikt neuere Snapshots emittieren `multiplayer_snapshot_applied` und erreichen CombatDriver, Gates oder HUD.
+- Der Controller traegt den akzeptierten Top-Level-`tick` als read-only `source_tick` in das Interaction-Feedback; der Wert setzt keine Gameplay-Wahrheit.
+- Ausgelassene Zwischenticks brauchen kein Replay: Ein spaeterer voller State-Snapshot konvergiert direkt auf den neuesten Host-State.
+- Ein verspaeteter aelterer Tick darf Progress und Completion nicht zuruecksetzen und kein Label-Update erzeugen.
+- Ein semantisch identischer neuerer Tick darf `source_tick` aktualisieren, bleibt durch den Progress-Fingerprint aber ohne Text-/Layoutarbeit. Der Fingerprint umfasst alle gerenderten Einfluesse: Interaction, Display-Token, Modus/Typ, Prozent, Hold-Sekunde, Dauer und Complete.
+- Ein Progress-Reset in einem wirklich neueren autoritativen Tick bleibt erlaubt, weil Arrival-/Hold beim Verlassen des Radius legitim auf null zurueckfaellt. Der Client klemmt Host-State nicht monoton.
+- TASK_1100 prueft Skip, Out-of-order vor und nach Completion, Gate-Stabilitaet, legitimen neueren Hold-Reset, Dauer-Korrektur, Dedupe sowie command-/effect-freie Anwendung am echten SimulationRoot-Signalpfad.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

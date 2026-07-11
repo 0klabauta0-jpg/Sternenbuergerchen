@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1100 - Connected Interaction Snapshot Loss/Jitter Resilience (implementiert im Arbeitsstand)
+- Grundlage: Die Payload ist klein; verbleibendes Multiplayer-Risiko waren ausgelassene und verspätete unreliable Snapshots.
+- Ergebnis: Der akzeptierte Host-Tick laeuft read-only bis ins Feedback. Alte Ticks erreichen weder CombatDriver/Gates noch HUD, Completion bleibt geschlossen und identische neuere Snapshots erzeugen kein neues Label-Update. Neuere autoritative Hold-Resets und gerenderte Dauer-Korrekturen bleiben sichtbar.
+- Verifikation: TASK_1100 31/31 sowie TASK_1096, TASK_1098, TASK_1099 und echter TASK_1091-ENet-Drill gruen.
+- Naechster Schritt: TASK_1101 - Connected Interaction Reconnect State Recovery.
+
 ## TASK_1099 - Connected Interaction Snapshot Payload Budget (implementiert im Arbeitsstand)
 - Grundlage: Der lokale HUD-Hotpath war begrenzt, die zusaetzlichen Host-Client-Kosten wachsender Interaction-States aber noch ungemessen.
 - Ergebnis: Gemeinsame Snapshot-Metriken messen Raw-/Wire-Bytes, ZSTD, Chunkzahl und Interaction-Anzahl. 64 States addieren nur 1775 Wire-Bytes und zwei Chunks gegenueber leerer Baseline.

@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1100 - Connected Interaction Snapshot Loss/Jitter Resilience
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1100_connected_interaction_snapshot_loss_jitter_resilience.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1099
+- Stand: Der echte `SimulationRoot.apply_multiplayer_snapshot()`-Signalpfad traegt den akzeptierten Host-Tick read-only bis ins Interaction-Feedback. Ausgelassene Zwischenticks konvergieren direkt auf den neuesten State.
+- Jitter: Verspaetete Ticks koennen weder replizierten Runtime-/Gate-State noch sichtbare Progress-/Complete-Zeilen zuruecksetzen. Semantisch identische neuere Ticks aktualisieren nur `source_tick`; gerenderte Dauer-/Modusaenderungen bleiben dagegen sichtbar.
+- Risiken/offen: Ein neuerer autoritativer Hold-Reset bleibt absichtlich erlaubt. Reconnect waehrend laufender Interaktion ist noch nicht belegt.
+- Lokale Pruefung: TASK_1100 31/31, TASK_1096 10/10, TASK_1098 5/5, TASK_1099 38/38 und TASK_1091 17/17.
+- Naechster Schritt: TASK_1101 - Connected Interaction Reconnect State Recovery.
+
 ### TASK_1099 - Connected Interaction Snapshot Payload Budget
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1099_connected_interaction_snapshot_payload_budget.md`, `docs/dev/mission_interaction_point_contract.md`, `scripts/multiplayer/multiplayer_snapshot_contract.gd`
