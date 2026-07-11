@@ -24,7 +24,7 @@ func _run() -> void:
 	_assert(_cards_keep_header_controls_separate(cards), "Status badges and stance controls no longer compete with the Fireteam title")
 	_assert(_cards_do_not_duplicate_member_status_row(cards), "Member health snapshot remains available without a redundant visible chip row")
 	_assert(_cards_fit_fireteam_scroll(cards, host), "Both Fireteam cards fit completely inside the left overview viewport")
-	_assert(_cards_show_primary_status_first(cards), "First visible status line exposes EX, contact and health")
+	_assert(_cards_show_primary_status_first(cards), "First visible status line exposes execution, contact and health in player language")
 	_assert(_cards_show_compact_identity_second(cards), "Second visible line keeps lead and operator count without waypoint noise")
 	_assert(_cards_keep_full_detail_tooltip(cards), "Compressed cards retain movement, position and suppression detail in the tooltip")
 	mission.queue_free()
@@ -60,7 +60,7 @@ func _cards_show_primary_status_first(cards: Dictionary) -> bool:
 	for card_variant in cards.values():
 		var card := card_variant as Control
 		var stage := card.get_node_or_null("Margin/VBox/StageLabel") as Label if card != null else null
-		if stage == null or not stage.text.begins_with("EX ") or not stage.text.contains("HP "):
+		if stage == null or stage.text.split(" | ").size() != 3 or not stage.text.contains("KONTAKT") or not stage.text.contains("FIT "):
 			return false
 	return not cards.is_empty()
 
