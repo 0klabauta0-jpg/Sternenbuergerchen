@@ -25,6 +25,7 @@ var _last_feedback_snapshot_signature: String = ""
 var _feedback_snapshot_apply_count: int = 0
 var _feedback_snapshot_skip_count: int = 0
 var _empty_state_collapsed: bool = false
+var _selected_only_default_initialized: bool = false
 
 var _header_label: Label = null
 var _count_label: Label = null
@@ -47,6 +48,9 @@ func set_feedback_snapshot(snapshot: Dictionary) -> void:
 			continue
 		selected_ids.append(fireteam_id)
 	var event_entries: Array = Array(snapshot.get("tactical_event_log", []))
+	if snapshot.has("event_log_selected_only_default") and not _selected_only_default_initialized:
+		selected_only = bool(snapshot.get("event_log_selected_only_default", false))
+		_selected_only_default_initialized = true
 	var polish_snapshot: Dictionary = Dictionary(snapshot.get("release_first_exchange_hud_density_fire_visual_polish", {}))
 	if snapshot.has("release_first_exchange_hud_density_fire_visual_polish"):
 		apply_release_first_exchange_hud_density_fire_visual_polish(polish_snapshot)
@@ -95,6 +99,7 @@ func set_event_entries(entries: Array, selected_fireteam_ids: PackedStringArray 
 
 
 func set_selected_only(is_enabled: bool) -> void:
+	_selected_only_default_initialized = true
 	if selected_only == is_enabled:
 		return
 	selected_only = is_enabled
@@ -138,6 +143,7 @@ func get_panel_snapshot() -> Dictionary:
 		"feedback_snapshot_skip_count": _feedback_snapshot_skip_count,
 		"feedback_snapshot_delta_read_only": true,
 		"feedback_snapshot_sets_gameplay_truth": false,
+		"selected_only_default_initialized": _selected_only_default_initialized,
 	}
 
 
@@ -360,11 +366,12 @@ func _build_render_signature(entries: Array) -> String:
 		if typeof(entry_variant) != TYPE_DICTIONARY:
 			continue
 		var entry: Dictionary = Dictionary(entry_variant)
-		tokens.append("%s:%d:%s:%s" % [
+		tokens.append("%s:%d:%s:%s:%d" % [
 			String(entry.get("event_id", "")),
 			int(entry.get("created_msec", 0)),
 			String(entry.get("severity", "")),
 			String(entry.get("short_text", "")),
+			int(entry.get("repeat_count", 1)),
 		])
 	return ";".join(tokens)
 
@@ -381,12 +388,13 @@ func _build_feedback_snapshot_signature(entries: Array, selected_fireteam_ids: P
 		if typeof(entry_variant) != TYPE_DICTIONARY:
 			continue
 		var entry: Dictionary = Dictionary(entry_variant)
-		tokens.append("%s:%d:%s:%s:%s" % [
+		tokens.append("%s:%d:%s:%s:%s:%d" % [
 			String(entry.get("event_id", "")),
 			int(entry.get("created_msec", 0)),
 			String(entry.get("severity", "")),
 			String(entry.get("short_text", "")),
 			String(entry.get("fireteam_id", "")),
+			int(entry.get("repeat_count", 1)),
 		])
 	return ";".join(tokens)
 
@@ -396,6 +404,9 @@ func _format_event_text(entry: Dictionary) -> String:
 	var text: String = String(entry.get("short_text", entry.get("map_label", ""))).strip_edges()
 	if text.is_empty():
 		text = String(entry.get("event_type", "event")).strip_edges().replace("_", " ").to_upper()
+	var repeat_count: int = maxi(int(entry.get("repeat_count", 1)), 1)
+	if repeat_count > 1:
+		text = "%s x%d" % [text, repeat_count]
 	if team.is_empty():
 		return text
 	return "%s %s" % [team, text]

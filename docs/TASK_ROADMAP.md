@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1120 - Connected First Contact Event Log Dedupe and HUD Declutter (implementiert im Arbeitsstand)
+- Grundlage: Der echte Produktcapture zeigte zwar korrekte BLUE-/GOLD-Perspektiven, aber wiederholte Wahrnehmungszeilen und abgeschlossene leere Dropships konkurrierten mit der aktuellen Contact-Fire-Entscheidung.
+- Ergebnis: Contact-Reports werden nur in der Anzeige innerhalb von Fuenf Sekunden zusammengefasst, behalten alle Quell-IDs und zeigen ihre Wiederholungszahl. Contact Fire steht zuerst; verbundene Spieler starten lokal gefiltert. Leere `to_fob 0s`-Karten verschwinden im Contact Focus, aktive Crafts bleiben.
+- Architektur: TacticalEventLog, ContactTracker, Transportstate und Snapshot bleiben Wahrheit. Die UI initialisiert und verdichtet read-only, erzeugt keine Commands/Effects und baut keine grossen Control-Trees pro Frame neu.
+- Verifikation: TASK_1120 11/11, TASK_1119 Real-Window 22/22, TASK_366 19/19, TASK_1109 18/18, TASK_1110 20/20 und Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1121 - Connected First Contact Tactical World Readability.
+
 ## TASK_1119 - Connected First Contact Three-Peer Product Visual Playtest (implementiert im Arbeitsstand)
 - Grundlage: Fixture- und Direktmissionsbelege konnten nicht beweisen, dass echte Produkt-Lobby-Zuweisungen, Combat-Start, Snapshotfelder und lokale HUD-Perspektive gemeinsam funktionieren.
 - Ergebnis: Host BLUE, Client GOLD und Spectator starten mit korrektem lokalem Fokus. Eine kurze Startup-Grace verhindert unsichtbaren Fruehcombat; Fireteam-Fairness liefert beiden aktiven Teams echte Events, die mit Fireteam/Outcome lange genug und auf acht Eintraege begrenzt repliziert werden.
