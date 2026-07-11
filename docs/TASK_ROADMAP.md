@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1119 - Connected First Contact Three-Peer Product Visual Playtest (implementiert im Arbeitsstand)
+- Grundlage: Fixture- und Direktmissionsbelege konnten nicht beweisen, dass echte Produkt-Lobby-Zuweisungen, Combat-Start, Snapshotfelder und lokale HUD-Perspektive gemeinsam funktionieren.
+- Ergebnis: Host BLUE, Client GOLD und Spectator starten mit korrektem lokalem Fokus. Eine kurze Startup-Grace verhindert unsichtbaren Fruehcombat; Fireteam-Fairness liefert beiden aktiven Teams echte Events, die mit Fireteam/Outcome lange genug und auf acht Eintraege begrenzt repliziert werden.
+- Architektur: Perspektive bleibt lokal, Combat hostautoritativ und Snapshot read-only. Kein neuer RPC, keine Client-Commands/Effects und kein unbeschraenktes Eventwachstum.
+- Verifikation: TASK_1119 headless 21/21 und Real-Window 22/22 je BLUE/GOLD; TASK_1104 31/31, TASK_1117 15/15, TASK_168 20/20, TASK_466 22/22, TASK_467 14/14 und Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1120 - Connected First Contact Event Log Dedupe and HUD Declutter.
+
 ## TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence (implementiert im Arbeitsstand)
 - Grundlage: Der normale Snapshot transportierte Contact, First Fire und Vitalstatus korrekt, aber eine gemeinsame Diagnoseauswahl konnte BLUE und GOLD im HUD dasselbe letzte Ereignis zeigen. Mission Control priorisierte Phasencontrols vor dem aktuellen Kampfstatus.
 - Ergebnis: Selected Fireteam und Mission Control zeigen pro Auswahl dieselbe kompakte Zeile mit Fireteam-Besitz, Contact Fire, ROE, Hit/Miss und naechstem Griff. BLUE und GOLD besitzen unterschiedliche stabile Perspektivsignaturen.

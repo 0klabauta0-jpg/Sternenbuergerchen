@@ -37,7 +37,8 @@ const MAX_DETECTION_DELAY_TICKS: int = 15
 const CONTACT_INITIATIVE_BASELINE_SECONDS: float = 2.0
 const AIM_READINESS_BASELINE_PERCENT: float = 50.0
 const AIM_READINESS_MAX_DELAY_DELTA_TICKS: int = 4
-const RECENT_FIRE_EVENT_TTL_TICKS: int = 12
+const RECENT_FIRE_EVENT_TTL_TICKS: int = 72
+const MAX_RECENT_FIRE_EVENTS: int = 8
 const DOWN_STATE_VISIBLE_MIN_SECONDS: float = 3.0
 const TACTICAL_COMBAT_VISUAL_REFRESH_INTERVAL_MSEC: int = 160
 const COMBAT_HOTPATH_AUDIT_BUCKET_CELL_SIZE: float = 256.0
@@ -135,6 +136,8 @@ var _objective_owned_since_msec: int = -1
 var _mission_result: Dictionary = {}
 var _mission_result_condition_override: String = ""
 var _runs_local_authority: bool = true
+var _combat_startup_grace_ticks: int = 0
+var _last_standard_attacker_fireteam_id: String = ""
 var _fireteam_original_leads: Dictionary = {}
 var _fireteam_acting_leads: Dictionary = {}
 var _fireteam_members: Dictionary = {}
@@ -272,6 +275,10 @@ func get_contact_decision_diagnostics_snapshot() -> Dictionary:
 		return snapshot
 	_refresh_contact_decision_snapshot_presence(snapshot)
 	return snapshot
+
+
+func set_combat_startup_grace_ticks(grace_ticks: int) -> void:
+	_combat_startup_grace_ticks = maxi(grace_ticks, 0)
 
 
 func get_contact_decision_diagnostics_for_fireteams(fireteam_ids: Variant) -> Dictionary:
@@ -1148,6 +1155,12 @@ func _prune_recent_fire_events() -> void:
 		if _current_tick - int(event.get("tick", _current_tick)) <= RECENT_FIRE_EVENT_TTL_TICKS:
 			retained.append(event)
 			retained_ids[String(event.get("event_id", "")).strip_edges()] = true
+	if retained.size() > MAX_RECENT_FIRE_EVENTS:
+		retained = retained.slice(retained.size() - MAX_RECENT_FIRE_EVENTS)
+		retained_ids.clear()
+		for retained_event_variant in retained:
+			var retained_event: Dictionary = Dictionary(retained_event_variant)
+			retained_ids[String(retained_event.get("event_id", "")).strip_edges()] = true
 	_recent_fire_events = retained
 	for fire_event_id in _combat_outcome_by_fire_event_id.keys().duplicate():
 		if not bool(retained_ids.get(String(fire_event_id), false)):
@@ -1365,6 +1378,13 @@ func _on_tick_processed(tick: int) -> void:
 	_advance_pending_network_mission_interactions(interaction_delta)
 
 	_update_presence_seen_flags()
+	if _current_tick < _combat_startup_grace_ticks:
+		_update_status_label("staging")
+		_publish_multiplayer_snapshot_context(simulation_root)
+		if profile_enabled:
+			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "startup_grace")
+		_close_hotpath_unit_cache_scope()
+		return
 
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
@@ -1633,6 +1653,7 @@ func _try_enqueue_attacks(simulation_root: Node) -> void:
 		damage_effect["misidentified_target_unit_id"] = actual_target_id
 	var fire_event_id: String = _record_fire_event_from_effect(damage_effect, attacker, actual_target, "standard")
 	if not fire_event_id.is_empty():
+		_last_standard_attacker_fireteam_id = _get_unit_fireteam_id(attacker)
 		damage_effect["fire_event_id"] = fire_event_id
 		_refresh_tactical_combat_visuals()
 	simulation_root.call("enqueue_effect", damage_effect)
@@ -3037,17 +3058,32 @@ func _get_contact_enemy_type(enemy) -> String:
 
 
 func _find_first_contact_pair() -> Dictionary:
+	var friendly_units: Array = _prioritize_standard_attack_fireteam_fairness(_get_friendly_combat_units())
 	return Dictionary(
 		COMBAT_FIRE_DECISION_RESOLVER_SCRIPT.call(
 			"find_first_contact_pair",
 			_build_fire_decision_context(
 				{
-					"friendly_units": _get_friendly_combat_units(),
+					"friendly_units": friendly_units,
 					"enemy_units": _get_enemy_combat_units(),
 				}
 			)
 		)
 	).duplicate(true)
+
+
+func _prioritize_standard_attack_fireteam_fairness(units: Array) -> Array:
+	if _last_standard_attacker_fireteam_id.is_empty():
+		return units
+	var prioritized: Array = []
+	var deferred: Array = []
+	for unit in units:
+		if _get_unit_fireteam_id(unit) == _last_standard_attacker_fireteam_id:
+			deferred.append(unit)
+		else:
+			prioritized.append(unit)
+	prioritized.append_array(deferred)
+	return prioritized
 
 
 func resolve_flank_attack(attacker, target) -> Dictionary:
