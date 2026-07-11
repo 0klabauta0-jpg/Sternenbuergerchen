@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1134 - Selected Fireteam Stance Control Consistency
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1134_selected_fireteam_stance_control_consistency.md`, `docs/tasks/TASK_1133_fireteam_mini_card_stance_control_readability.md`, `docs/tasks/TASK_109_tactical_stance.md`, `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`
+- Befund: Der grosse `#17 Selected Fireteam`-Bereich verwendete noch einen eigenen `C / N / A`-Presenter. Seine Laufzeit-Container hatten keine stabilen Namen, obwohl der Refresh sie per NodePath adressierte; Auswahltext und aktives Segment konnten deshalb stehen bleiben.
+- Aenderung: Der Bereich zeigt denselben `VORS / NORM / OFF`-Vertrag samt Icons, Wirkungstooltips und Auswahlzustand wie die Mini-Cards. Die Laufzeitstruktur hat stabile Namen, die Zusammenfassung nutzt deutsche Spielsprache, und die generische Quadrat-Button-Nachformatierung ueberschreibt diese Segmente nicht mehr.
+- Multiplayer/Performance: Derselbe bestehende selected-fireteam Callback, Stance-Sync und Planning-State bleiben autoritativ. Keine neuen RPCs, Commands, Effects, Snapshots, Scans oder Frame-Rebuilds; TASK_109 37/37, TASK_773 25/25 und TASK_222 82/82 bleiben gruen.
+- Risiken/offen: TASK_421 und TASK_425 erwarten weiterhin alte Move-Sonderfaktoren, waehrend TASK_429 die spaetere gemeinsame Stance-Doctrine 100/100 bestaetigt. Dieser Test-/Contract-Drift ist der naechste getrennte Review-Fund.
+- Lokale Pruefung: TASK_1134 20/20; TASK_1133 19/19; TASK_109 37/37; TASK_429 100/100; TASK_180 98/98; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window; TASK_222 82/82.
+- Naechster Schritt: TASK_1135 - Tactical Stance Doctrine Contract Reconciliation.
+
 ### TASK_1133 - Fireteam Mini-Card Stance Control Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1133_fireteam_mini_card_stance_control_readability.md`, `docs/tasks/TASK_1132_fireteam_mini_card_tactical_state_language_polish.md`, `docs/tasks/TASK_109_tactical_stance.md`, `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`
 - Befund: Die direkte Mini-Card-Steuerung zeigte nur `C / N / A`. Ohne Tooltip waren vorsichtig, normal und offensiv sowie der aktive Zustand nicht ausreichend lesbar.
 - Aenderung: Drei feste Segmente zeigen `VORS / NORM / OFF` mit vorhandenen CC0-Taktikicons. Tooltips benennen Tempo, Waffenhaltung, Sicht und Risiko. Genau ein Segment ist aktiv; bestehende Buttonnamen, Callbacks und Fireteam-spezifische Stance-IDs bleiben erhalten.
 - Multiplayer/Performance: Keine Aenderung an Stance-State, Resolver, Commands, RPCs, Effects oder Snapshotfeldern. TASK_109 bestaetigt Sync/Planning/Unit-Badges 37/37; TASK_429 bestaetigt die aktuelle Doctrine 100/100.
-- Risiken/offen: Der grosse Selected-Fireteam-Bereich unten nutzt weiterhin `C / N / A` und sollte denselben visuellen Vertrag erhalten. TASK_421 und TASK_425 erwarten noch die aelteren Move-Sonderfaktoren und widersprechen der spaeteren TASK_429-Doctrine; das braucht einen getrennten Reconciliation-Task.
+- Risiken/offen: Der grosse Selected-Fireteam-Bereich ist durch TASK_1134 angeglichen. TASK_421 und TASK_425 erwarten noch die aelteren Move-Sonderfaktoren und widersprechen der spaeteren TASK_429-Doctrine; das braucht einen getrennten Reconciliation-Task.
 - Lokale Pruefung: TASK_1133 19/19; TASK_109 37/37; TASK_429 100/100; TASK_180 98/98; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window.
-- Naechster Schritt: TASK_1134 - Selected Fireteam Stance Control Consistency.
+- Naechster Schritt: abgeschlossen durch TASK_1134.
 
 ### TASK_1132 - Fireteam Mini-Card Tactical State Language Polish
 - Status: implementiert im Arbeitsstand

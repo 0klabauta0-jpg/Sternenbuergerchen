@@ -4088,6 +4088,7 @@ func _ensure_tactical_stance_panel() -> Control:
 	fireteam_info_vbox.move_child(panel, 0)
 
 	var margin := MarginContainer.new()
+	margin.name = "MarginContainer"
 	margin.add_theme_constant_override("margin_left", 8)
 	margin.add_theme_constant_override("margin_top", 6)
 	margin.add_theme_constant_override("margin_right", 8)
@@ -4095,6 +4096,7 @@ func _ensure_tactical_stance_panel() -> Control:
 	panel.add_child(margin)
 
 	var vbox := VBoxContainer.new()
+	vbox.name = "VBoxContainer"
 	vbox.add_theme_constant_override("separation", 4)
 	margin.add_child(vbox)
 
@@ -4104,16 +4106,18 @@ func _ensure_tactical_stance_panel() -> Control:
 	vbox.add_child(summary_label)
 
 	var row := HBoxContainer.new()
+	row.name = "HBoxContainer"
 	row.add_theme_constant_override("separation", 6)
 	vbox.add_child(row)
 	for stance_id in ["cautious", "normal", "aggressive"]:
 		var button := Button.new()
 		button.name = "%sButton" % String(stance_id).capitalize()
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.custom_minimum_size = Vector2(0.0, 22.0)
-		button.add_theme_font_size_override("font_size", 8)
-		button.text = _get_tactical_stance_button_text(stance_id)
+		button.custom_minimum_size = Vector2(64.0, 24.0)
+		button.add_theme_font_size_override("font_size", 9)
+		button.toggle_mode = true
 		button.set_meta("tactical_stance_id", stance_id)
+		_apply_selected_fireteam_stance_button_presentation(button, stance_id, false)
 		if not button.pressed.is_connected(_on_tactical_stance_button_pressed.bind(button)):
 			button.pressed.connect(_on_tactical_stance_button_pressed.bind(button))
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, false)
@@ -4193,16 +4197,16 @@ func _refresh_tactical_stance_panel() -> void:
 		return
 	var summary_label := panel.get_node_or_null("MarginContainer/VBoxContainer/SummaryLabel") as Label
 	var shared_stance: String = _get_shared_selected_tactical_stance()
-	var summary_text: String = "STANCE N | no fireteams selected"
+	var summary_text: String = "HALTUNG NORMAL | kein Fireteam ausgewaehlt"
 	if not _selected_fireteam_ids.is_empty():
-		var selection_text: String = "%s selected" % _get_fireteam_name()
+		var selection_text: String = "%s ausgewaehlt" % _get_fireteam_name()
 		if _selected_fireteam_ids.size() > 1 and not _is_all_fireteams_selected():
-			selection_text = "%d fireteams selected" % _selected_fireteam_ids.size()
+			selection_text = "%d Fireteams ausgewaehlt" % _selected_fireteam_ids.size()
 		elif _is_all_fireteams_selected():
-			selection_text = "all fireteams selected"
-		var stance_text: String = "STANCE MIXED"
+			selection_text = "alle Fireteams ausgewaehlt"
+		var stance_text: String = "HALTUNG GEMISCHT"
 		if not shared_stance.is_empty():
-			stance_text = "STANCE %s" % _get_tactical_stance_short_label(shared_stance)
+			stance_text = "HALTUNG %s" % _get_tactical_stance_player_label(shared_stance)
 		summary_text = "%s | %s" % [stance_text, selection_text]
 	if summary_label != null:
 		summary_label.text = summary_text
@@ -4214,7 +4218,9 @@ func _refresh_tactical_stance_panel() -> void:
 		if button == null:
 			continue
 		var stance_id: String = String(button.get_meta("tactical_stance_id", "")).strip_edges().to_lower()
-		META_UI_SKIN_SCRIPT.style_tactical_button(button, not shared_stance.is_empty() and stance_id == shared_stance)
+		var is_selected: bool = not shared_stance.is_empty() and stance_id == shared_stance
+		_apply_selected_fireteam_stance_button_presentation(button, stance_id, is_selected)
+		META_UI_SKIN_SCRIPT.style_tactical_button(button, is_selected)
 		button.disabled = not _can_edit_planning() or _selected_fireteam_ids.is_empty()
 	_apply_fireteam_panel_action_button_contract()
 
@@ -15108,8 +15114,12 @@ func _apply_fireteam_panel_action_button_contract() -> void:
 			continue
 		var stance_id: String = String(button.get_meta("tactical_stance_id", "")).strip_edges().to_lower()
 		if not stance_id.is_empty():
-			button.tooltip_text = _get_tactical_stance_button_text(stance_id)
-			button.text = _get_tactical_stance_short_label(stance_id)
+			_apply_selected_fireteam_stance_button_presentation(
+				button,
+				stance_id,
+				bool(button.get_meta("mission_selected_fireteam_stance_selected", false))
+			)
+			continue
 		elif button.name == "ReturnToPlanButton":
 			button.tooltip_text = "Plan: kehrt nur aus Ad-hoc oder Unterbrechung in die geplante Wegpunktkette zurueck."
 			button.text = "Plan"
@@ -29963,6 +29973,34 @@ func _get_tactical_stance_short_label(stance_id: String) -> String:
 			return "A"
 		_:
 			return "N"
+
+
+func _get_tactical_stance_player_label(stance_id: String) -> String:
+	match stance_id.strip_edges().to_lower():
+		"cautious":
+			return "VORSICHTIG"
+		"aggressive":
+			return "OFFENSIV"
+		_:
+			return "NORMAL"
+
+
+func _apply_selected_fireteam_stance_button_presentation(button: Button, stance_id: String, is_selected: bool) -> void:
+	if button == null:
+		return
+	button.text = _get_tactical_stance_segment_label(stance_id)
+	button.icon = _get_tactical_stance_segment_icon(stance_id)
+	button.expand_icon = true
+	button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	button.tooltip_text = _get_tactical_stance_effect_tooltip(stance_id)
+	button.toggle_mode = true
+	button.button_pressed = is_selected
+	button.custom_minimum_size = Vector2(64.0, 24.0)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.add_theme_font_size_override("font_size", 9)
+	button.set_meta("mission_selected_fireteam_stance_selected", is_selected)
+	button.set_meta("mission_selected_fireteam_stance_player_label", button.text)
+	button.set_meta("mission_selected_fireteam_stance_icon_path", String(button.icon.resource_path) if button.icon != null else "")
 
 
 func _get_tactical_stance_button_text(stance_id: String) -> String:
