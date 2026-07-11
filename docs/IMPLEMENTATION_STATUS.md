@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1117 - Connected Post-Deboard First Contact Combat Handoff
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1117_connected_post_deboard_first_contact_combat_handoff.md`, `docs/tasks/TASK_1116_connected_post_deboard_fireteam_command_handoff.md`, `scripts/core/simulation_root.gd`
+- Befund: Der Host publizierte Kontakte, Feuerereignisse und Vitalstatus bereits im normalen Snapshot, der Client reichte davon aber nur ROE, Dropship und Missionsinteraktionen an seine Leseschichten weiter. Nach einem spaeten ENet-Verbindungsaufbau behielt der Client-Combat-Driver ausserdem Offline-Autoritaet. Flache Runtime-/Vitalfelder wurden wegen eines leeren Nested-Dictionary-Fallbacks nicht angewendet.
+- Aenderung: Snapshot-Clients schalten beim ersten autoritativen Snapshot auf reine Beobachtung, spiegeln Contact-/Fire-Event-Daten read-only in den bestehenden Combat-HUD-Pfad und bilden Diagnosefeedback ohne Gameplay-Mutation. Contact-Dedupe nutzt `fireteam_id + unit_id`. `TestUnit` liest flache Runtime-/Vitalfelder, wenn kein gefuellter Nested-Block vorliegt.
+- Multiplayer/Performance: Kein neuer RPC und kein Client-Combat. Ein echter Host-/BLUE-/GOLD-Lauf erzeugt getrennte Kontakte, dasselbe First-Fire-Event und konvergierenden Zielstatus; Client-Queues bleiben leer. Snapshot-Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Die Funktion ist headless konsistent. Als naechstes sollten drei echte Fenster zeigen, ob Contact, ROE, Treffer und naechster Spielergriff fuer BLUE und GOLD visuell schnell genug lesbar sind.
+- Lokale Pruefung: TASK_1117 15/15, TASK_168 20/20, TASK_281 34/34, TASK_466 22/22, TASK_467 14/14, TASK_1116 16/16, TASK_1104 31/31 und TASK_222 82/82.
+- Naechster Schritt: TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence.
+
 ### TASK_1116 - Connected Post-Deboard Fireteam Command Handoff
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1116_connected_post_deboard_fireteam_command_handoff.md`, `docs/tasks/TASK_1115_connected_parallel_dropship_drop_deboard_return_playthrough.md`, `scripts/command/commander_intent.gd`

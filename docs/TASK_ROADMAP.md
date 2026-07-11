@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1117 - Connected Post-Deboard First Contact Combat Handoff (implementiert im Arbeitsstand)
+- Grundlage: Clients stoppten ihren lokalen Combat nach spaetem Verbindungsaufbau nicht sicher, und der bereits transportierte Contact-/Fire-/Vital-Snapshot erreichte den bestehenden Combat-HUD-Lesepfad nicht vollstaendig.
+- Ergebnis: Nur der Host erkennt Ziele, entscheidet Feuer und mutiert Vitalstatus. BLUE und GOLD lesen getrennte Kontakte zum selben Gegner, dasselbe First-Fire-Event, read-only Diagnostics und denselben Health-Wert aus dem normalen Snapshot.
+- Architektur: Kein neuer Combat-RPC. Der Combat-Driver schaltet dynamisch auf Observer, Contact-Dedupe ist fireteam-spezifisch, und flache Unit-Runtime-/Vitalfelder werden korrekt angewendet. Clients erzeugen weder Commands noch Effects.
+- Verifikation: TASK_1117 15/15, TASK_168 20/20, TASK_281 34/34, TASK_466 22/22, TASK_467 14/14, TASK_1116 16/16, TASK_1104 31/31 und Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence.
+
 ## TASK_1116 - Connected Post-Deboard Fireteam Command Handoff (implementiert im Arbeitsstand)
 - Grundlage: Nach verbundenem Deboarding konnten normale Move-/Defend-Orders noch lokal in nicht tickenden Client-Pfaden landen; nur Missionsinteraktionen hatten einen GO-RPC-Handoff.
 - Ergebnis: Clientplanung bleibt Preview, GO sendet je Fireteam einen Intent, Host committed und startet die vorhandene Movement-/Pathfinding-/Formation-Kette. BLUE und GOLD sehen ihre Positionsaenderungen ueber Snapshots.

@@ -158,6 +158,7 @@ var _enemy_team_tactics_input_signature_initialized: bool = false
 var _enemy_team_tactics_rebuild_count: int = 0
 var _enemy_team_tactics_skip_count: int = 0
 var _recent_fire_events: Array = []
+var _remote_contact_snapshot: Array = []
 var _combat_outcome_by_fire_event_id: Dictionary = {}
 var _next_fire_event_sequence: int = 1
 var _combat_tick_budget_debug_snapshot: Dictionary = {}
@@ -767,6 +768,8 @@ func get_combat_hotpath_audit_snapshot() -> Dictionary:
 
 
 func get_contact_snapshot() -> Array:
+	if not _runs_local_authority:
+		return _remote_contact_snapshot.duplicate(true)
 	if _contact_tracker == null:
 		return []
 	return Array(_contact_tracker.call("get_contact_snapshot", _current_tick)).duplicate(true)
@@ -793,9 +796,88 @@ func get_unit_presence_audit_snapshot() -> Dictionary:
 
 
 func get_fireteam_contact_snapshot(fireteam_id: String) -> Array:
+	if not _runs_local_authority:
+		var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+		var filtered: Array = []
+		for entry_variant in _remote_contact_snapshot:
+			if typeof(entry_variant) != TYPE_DICTIONARY:
+				continue
+			var entry: Dictionary = Dictionary(entry_variant)
+			if String(entry.get("fireteam_id", "")).strip_edges().to_lower() == normalized_fireteam_id:
+				filtered.append(entry.duplicate(true))
+		return filtered
 	if _contact_tracker == null:
 		return []
 	return Array(_contact_tracker.call("get_fireteam_contacts", fireteam_id, _current_tick)).duplicate(true)
+
+
+func apply_multiplayer_combat_snapshot(snapshot: Dictionary) -> bool:
+	refresh_multiplayer_runtime_authority()
+	if _runs_local_authority:
+		return false
+	_current_tick = maxi(int(snapshot.get("tick", _current_tick)), _current_tick)
+	_remote_contact_snapshot = _sanitize_remote_combat_entries(snapshot.get("contacts", []), "unit_id")
+	_recent_fire_events = _sanitize_remote_combat_entries(snapshot.get("fire_events", []), "event_id")
+	_last_contact_decision_diagnostics = _build_remote_contact_decision_diagnostics()
+	return true
+
+
+func refresh_multiplayer_runtime_authority() -> bool:
+	return _refresh_runtime_authority(get_node_or_null(simulation_root_path))
+
+
+func _sanitize_remote_combat_entries(entries_variant: Variant, identity_key: String) -> Array:
+	var result: Array = []
+	var seen_ids: Dictionary = {}
+	for entry_variant in Array(entries_variant):
+		if typeof(entry_variant) != TYPE_DICTIONARY:
+			continue
+		var entry: Dictionary = Dictionary(entry_variant).duplicate(true)
+		var identity: String = String(entry.get(identity_key, "")).strip_edges()
+		if identity.is_empty():
+			continue
+		if identity_key == "unit_id":
+			identity = "%s|%s" % [String(entry.get("fireteam_id", "")).strip_edges().to_lower(), identity]
+		if seen_ids.has(identity):
+			continue
+		seen_ids[identity] = true
+		entry["read_only"] = true
+		entry["ui_sets_gameplay_truth"] = false
+		result.append(entry)
+	return result
+
+
+func _build_remote_contact_decision_diagnostics() -> Dictionary:
+	if not _recent_fire_events.is_empty():
+		var fire_event: Dictionary = Dictionary(_recent_fire_events.back()).duplicate(true)
+		return {
+			"status": "fired",
+			"reason": "fired",
+			"fire_event_id": String(fire_event.get("event_id", "")),
+			"attacker_unit_id": String(fire_event.get("attacker_unit_id", "")),
+			"attacker_team_id": String(fire_event.get("attacker_team_id", "")),
+			"attacker_fireteam_id": String(fire_event.get("attacker_fireteam_id", "")),
+			"target_unit_id": String(fire_event.get("target_unit_id", "")),
+			"target_team_id": String(fire_event.get("target_team_id", "")),
+			"weapon_id": String(fire_event.get("weapon_id", "")),
+			"combat_outcome": String(fire_event.get("combat_outcome", fire_event.get("result", ""))),
+			"source": "multiplayer_combat_snapshot",
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		}
+	if not _remote_contact_snapshot.is_empty():
+		var contact: Dictionary = Dictionary(_remote_contact_snapshot[0]).duplicate(true)
+		return {
+			"status": "contact",
+			"reason": "contact_visible",
+			"target_unit_id": String(contact.get("unit_id", "")),
+			"target_team_id": String(contact.get("team_id", "")),
+			"target_position": contact.get("last_known_position", Vector2.ZERO),
+			"source": "multiplayer_combat_snapshot",
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		}
+	return {}
 
 
 func _publish_multiplayer_snapshot_context(simulation_root: Node) -> void:
@@ -1215,8 +1297,11 @@ func _receive_remote_event(
 
 func _on_tick_processed(tick: int) -> void:
 	_current_tick = tick
-	_refresh_hotpath_unit_cache_for_tick()
 	var simulation_root = get_node_or_null(simulation_root_path)
+	if not _refresh_runtime_authority(simulation_root):
+		_close_hotpath_unit_cache_scope()
+		return
+	_refresh_hotpath_unit_cache_for_tick()
 	var profile_enabled: bool = combat_tick_budget_debug_enabled
 	var tick_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var profile_scopes: Dictionary = {}
@@ -1331,6 +1416,22 @@ func _on_tick_processed(tick: int) -> void:
 	if profile_enabled:
 		_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "active")
 	_close_hotpath_unit_cache_scope()
+
+
+func _refresh_runtime_authority(simulation_root: Node) -> bool:
+	var should_run: bool = _should_run_local_combat(simulation_root)
+	if should_run == _runs_local_authority:
+		return should_run
+	_runs_local_authority = should_run
+	if not should_run:
+		if simulation_root != null and simulation_root.has_method("clear_network_command_preflight_validator"):
+			simulation_root.call("clear_network_command_preflight_validator", Callable(self, "_validate_network_interaction_command_preflight"))
+		_update_status_label("observing")
+		return false
+	if simulation_root != null and simulation_root.has_method("set_network_command_preflight_validator"):
+		simulation_root.call("set_network_command_preflight_validator", Callable(self, "_validate_network_interaction_command_preflight"))
+	_update_status_label("active")
+	return true
 
 
 func _record_combat_tick_budget_debug_snapshot(tick: int, tick_started_usec: int, profile_scopes: Dictionary, simulation_root: Node, state: String) -> void:
