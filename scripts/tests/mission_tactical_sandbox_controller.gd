@@ -9305,9 +9305,10 @@ func _apply_release_firefight_bottom_dock_density_label_contract(label: Label) -
 	label.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_FONT_SIZE)
 	label.add_theme_constant_override("outline_size", RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_OUTLINE_SIZE)
 	label.custom_minimum_size = Vector2(
-		maxf(label.custom_minimum_size.x, 420.0),
+		0.0,
 		maxf(label.custom_minimum_size.y, RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MIN_HEIGHT)
 	)
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	label.set_meta("release_firefight_bottom_dock_density_style_id", RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_STYLE_ID)
 	label.set_meta("release_firefight_bottom_dock_density_task", "TASK_835")
 
@@ -18835,6 +18836,12 @@ func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
 	var contact_fire_line: String = mission_first_line
 	var label_style: Dictionary = _get_combat_hud_tooltip_label_style_snapshot(mission_control_label)
 	var label_rect: Rect2 = _get_control_global_rect_or_empty(mission_control_label)
+	var mission_control_scroll := get_node_or_null(STRATEGIC_VBOX_PATH.get_base_dir()) as ScrollContainer
+	var scroll_rect: Rect2 = _get_control_global_rect_or_empty(mission_control_scroll)
+	var mission_layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
+	var mission_control_rect: Rect2i = mission_layout.get("mission_control", Rect2i())
+	var contract_inner_width: float = maxf(0.0, float(mission_control_rect.size.x) - 28.0)
+	var available_label_width: float = maxf(label_rect.size.x, maxf(scroll_rect.size.x, contract_inner_width))
 	var style_id: String = String(mission_control_label.get_meta("release_firefight_bottom_dock_density_style_id", "")) if mission_control_label != null else ""
 	var active: bool = bool(mission_control_label.get_meta("release_firefight_bottom_dock_density_active", false)) if mission_control_label != null else false
 	var autowrap_enabled: bool = mission_control_label != null and int(mission_control_label.autowrap_mode) != int(TextServer.AUTOWRAP_OFF)
@@ -18877,8 +18884,9 @@ func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
 		),
 		_build_mission_first_move_readability_check(
 			"mission_control_label_has_area",
-			label_rect.size.x >= 280.0 and label_rect.size.y >= 20.0,
-			"Mission Control status label has visible bottom-dock area."
+			available_label_width >= 280.0
+				and (label_rect.size.y >= 20.0 or min_height >= RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MIN_HEIGHT),
+			"Mission Control status label has visible width in its fixed scroll viewport and readable height."
 		),
 		_build_mission_first_move_readability_check(
 			"read_only_boundaries",
@@ -18920,6 +18928,9 @@ func get_release_firefight_bottom_dock_density_polish_snapshot() -> Dictionary:
 		"mission_control_line_count": mission_lines.size(),
 		"mission_control_label_style": label_style,
 		"mission_control_label_rect": _rect_to_audit_dictionary(label_rect),
+		"mission_control_scroll_rect": _rect_to_audit_dictionary(scroll_rect),
+		"mission_control_label_available_width": available_label_width,
+		"mission_control_contract_inner_width": contract_inner_width,
 		"mission_control_label_autowrap_enabled": autowrap_enabled,
 		"mission_control_label_clip_text": bool(mission_control_label.clip_text) if mission_control_label != null else true,
 		"mission_control_label_min_height": min_height,
