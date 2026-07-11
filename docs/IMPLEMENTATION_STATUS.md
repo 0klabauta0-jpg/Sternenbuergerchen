@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1096 - Connected Interaction Runtime Progress Surface
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1096_connected_interaction_runtime_progress_surface.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1095
+- Stand: Replizierte Host-Interactions erscheinen als `COM 42% | 8/18s`, `CARGO HALTEN | 7/12s` oder `CARGO FERTIG`.
+- Performance: Prozent-/Sekunden-Fingerprint dedupliziert Snapshots; nur die bestehende Command-Feedback-Zeile wird per Textdelta aktualisiert.
+- Risiken/offen: Farbe, Abstand und Overlap brauchen noch einen echten Zwei-Fenster-Sichtbeleg.
+- Lokale Pruefung: TASK_1096 10/10 und TASK_1094 6/6.
+- Naechster Schritt: TASK_1097 - Connected Interaction Feedback Two-Window Visual Evidence.
+
 ### TASK_1095 - Connected Interaction Feedback Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1095_connected_interaction_feedback_visual_polish.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1094
