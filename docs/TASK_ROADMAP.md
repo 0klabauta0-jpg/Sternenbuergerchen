@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1105 - Coop Lobby Active and Spectator Role Readability (implementiert im Arbeitsstand)
+- Grundlage: TASK_1104 wies `blue`, `gold` und Spectator korrekt zu, die Produktlobby zeigte aber weiterhin interne Peer-, Team-, Rollen- und Boolean-Werte.
+- Ergebnis: Der bestehende Labelbereich zeigt kompakte Einsatzrollen mit `DU`, Name, Fireteam, Zuschauer und Bereitschaft. Coop nennt aktive/wartende Sitze und erklaert das Premission-Nachruecken; Versus bleibt getrennt lesbar.
+- Architektur: Ein read-only Presenter leitet Text und Diagnose aus dem Session-Snapshot ab. UI mutiert weder Assignments noch Gameplay-State.
+- Verifikation: TASK_1105 16/16, echter Drei-Peer-Produktlauf TASK_1104 31/31, Team-Readability TASK_523 32/32 und Lobby-Flow TASK_227 27/27.
+- Naechster Schritt: TASK_1106 - Three-Window Coop Lobby Visual Evidence fuer Full-HD-Layout, Textumbruch und schnelle Rollenerkennung.
+
 ## TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest (implementiert im Arbeitsstand)
 - Grundlage: Mehr als ein Client erhielt dieselbe `red`-Zuweisung, obwohl die Coop-Mission nur `blue` und `gold` als steuerbare Friendly-Fireteams besitzt.
 - Ergebnis: Coop verteilt die zwei realen Fireteams deterministisch und setzt weitere Peers als Spectator. Drei Produkt-Lobbys starten gemeinsam; aktive Owner, Konfliktfeedback und Spectator-Snapshots bleiben konsistent.

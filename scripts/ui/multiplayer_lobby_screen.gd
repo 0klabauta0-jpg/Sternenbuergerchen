@@ -64,6 +64,12 @@ var _team_mode_option: OptionButton = null
 var _map_option: OptionButton = null
 var _connection_mode_option: OptionButton = null
 var _network_hint_label: Label = null
+var _role_readability_snapshot: Dictionary = {
+	"ui_sets_gameplay_truth": false,
+	"active_count": 0,
+	"spectator_count": 0,
+	"local_role_label": "",
+}
 
 
 func _ready() -> void:
@@ -254,6 +260,7 @@ func get_lobby_ui_snapshot() -> Dictionary:
 		"team_badges": _build_team_badge_data(session_snapshot),
 		"peer_text": _peer_label.text,
 		"assignment_text": _assignment_label.text,
+		"role_readability": _role_readability_snapshot.duplicate(true),
 		"settings_text": _settings_label.text,
 		"map_consent_visible": _map_consent_panel.visible,
 		"map_consent_text": _map_consent_label.text,
@@ -753,8 +760,9 @@ func _apply_session_snapshot(snapshot: Dictionary) -> void:
 	if snapshot.has("map_transfer"):
 		_map_consent_state = Dictionary(snapshot.get("map_transfer", _map_consent_state)).duplicate(true)
 	_apply_roster_mode_snapshot(Dictionary(snapshot.get("roster", {})))
-	_peer_label.text = _format_peer_lines(Array(snapshot.get("peers", [])))
-	_assignment_label.text = _format_assignment_lines(Dictionary(snapshot.get("assignments", {})))
+	_role_readability_snapshot = _build_lobby_role_readability_snapshot(snapshot)
+	_peer_label.text = String(_role_readability_snapshot.get("peer_text", "EINSATZROLLEN\n-"))
+	_assignment_label.text = String(_role_readability_snapshot.get("assignment_text", "LOBBY\n-"))
 	_team_readability_label.text = _build_team_readability_text(snapshot)
 	_team_readability_label.visible = not _team_readability_label.text.strip_edges().is_empty()
 	_refresh_team_badges(snapshot)
@@ -992,44 +1000,66 @@ func _refresh_settings_summary() -> void:
 	_settings_label.text = "FoW: %s" % String(snapshot.get("fog_of_war_mode", "known_terrain"))
 
 
-func _format_peer_lines(peers: Array) -> String:
-	if peers.is_empty():
-		return "Peers: -"
-	var lines: PackedStringArray = PackedStringArray(["Peers:"])
+func _build_lobby_role_readability_snapshot(snapshot: Dictionary) -> Dictionary:
+	var assignments: Dictionary = Dictionary(snapshot.get("assignments", {}))
+	var roles: Dictionary = Dictionary(assignments.get("peer_roles", {}))
+	var fireteams: Dictionary = Dictionary(assignments.get("peer_fireteams", {}))
+	var local_peer_id: int = int(snapshot.get("local_peer_id", 0))
+	var peers: Array = Array(snapshot.get("peers", [])).duplicate(true)
+	peers.sort_custom(func(left: Variant, right: Variant) -> bool:
+		return int(Dictionary(left).get("peer_id", 0)) < int(Dictionary(right).get("peer_id", 0))
+	)
+	var peer_lines := PackedStringArray(["EINSATZROLLEN"])
+	var active_count := 0
+	var spectator_count := 0
+	var local_role_label := ""
 	for peer_variant in peers:
 		if typeof(peer_variant) != TYPE_DICTIONARY:
 			continue
 		var peer: Dictionary = Dictionary(peer_variant)
-		lines.append("#%d %s %s %s ready=%s" % [
-			int(peer.get("peer_id", 0)),
-			String(peer.get("display_name", "Player")),
-			String(peer.get("team_id", "")),
-			String(peer.get("role_id", "")),
-			str(bool(peer.get("ready", false))),
+		var peer_id: int = int(peer.get("peer_id", 0))
+		var role_id: String = String(roles.get(peer_id, peer.get("role_id", ""))).strip_edges().to_lower()
+		var assigned_fireteams := PackedStringArray(fireteams.get(peer_id, peer.get("fireteam_ids", PackedStringArray())))
+		var role_label: String = _build_lobby_role_label(role_id, assigned_fireteams)
+		if role_id == "spectator" or assigned_fireteams.is_empty():
+			spectator_count += 1
+		else:
+			active_count += 1
+		if peer_id == local_peer_id:
+			local_role_label = role_label
+		var local_prefix: String = "DU | " if peer_id == local_peer_id else ""
+		peer_lines.append("%s%s | %s | %s" % [
+			local_prefix,
+			String(peer.get("display_name", "Player")).strip_edges(),
+			role_label,
+			"BEREIT" if bool(peer.get("ready", false)) else "NICHT BEREIT",
 		])
-	return "\n".join(lines)
+	if peers.is_empty():
+		peer_lines[0] = "EINSATZROLLEN | -"
+	var mode: String = String(assignments.get("team_play_mode", TEAM_PLAY_MODE_COOP)).strip_edges().to_lower()
+	var mode_label: String = "VERSUS" if mode == TEAM_PLAY_MODE_VERSUS else "COOP"
+	var assignment_lines := PackedStringArray(["%s | %d AKTIV | %d ZUSCHAUER" % [mode_label, active_count, spectator_count]])
+	if mode == TEAM_PLAY_MODE_COOP and spectator_count > 0:
+		assignment_lines.append("Zuschauer ruecken vor dem Start nach, sobald ein Fireteam frei wird.")
+	return {
+		"schema": "lobby_role_readability_v1",
+		"ui_sets_gameplay_truth": false,
+		"team_play_mode": mode,
+		"active_count": active_count,
+		"spectator_count": spectator_count,
+		"local_role_label": local_role_label,
+		"peer_text": "\n".join(peer_lines),
+		"assignment_text": "\n".join(assignment_lines),
+	}
 
 
-func _format_assignment_lines(assignments: Dictionary) -> String:
-	var roles: Dictionary = Dictionary(assignments.get("peer_roles", {}))
-	var teams: Dictionary = Dictionary(assignments.get("peer_teams", {}))
-	var fireteams: Dictionary = Dictionary(assignments.get("peer_fireteams", {}))
-	if roles.is_empty() and teams.is_empty() and fireteams.is_empty():
-		return "Assignments: -"
-	var lines: PackedStringArray = PackedStringArray(["Assignments:"])
-	var team_play_mode: String = String(assignments.get("team_play_mode", "coop"))
-	var selected_map_path: String = String(assignments.get("selected_map_path", ""))
-	if not team_play_mode.is_empty() or not selected_map_path.is_empty():
-		lines.append("Mode %s | Map %s" % [team_play_mode, selected_map_path.get_file() if not selected_map_path.is_empty() else "-"])
-	for peer_id_variant in teams.keys():
-		var peer_id: int = int(peer_id_variant)
-		lines.append("#%d %s %s %s" % [
-			peer_id,
-			String(teams.get(peer_id_variant, "")),
-			String(roles.get(peer_id_variant, "")),
-			",".join(PackedStringArray(fireteams.get(peer_id_variant, PackedStringArray()))),
-		])
-	return "\n".join(lines)
+func _build_lobby_role_label(role_id: String, fireteam_ids: PackedStringArray) -> String:
+	if role_id == "spectator" or fireteam_ids.is_empty():
+		return "ZUSCHAUER"
+	var fireteam_label: String = " + ".join(fireteam_ids).to_upper()
+	if role_id == "host":
+		return "HOST / %s" % fireteam_label
+	return "AKTIV / %s" % fireteam_label
 
 
 func _build_team_readability_text(snapshot: Dictionary) -> String:

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1105 - Coop Lobby Active and Spectator Role Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1105_coop_lobby_active_spectator_role_readability.md`, `scripts/ui/multiplayer_lobby_screen.gd`, `scripts/multiplayer/multiplayer_session.gd`
+- Stand: Die Produktlobby zeigt keine rohe `#peer team_alpha role ready=true`-Debugliste mehr. Spieler lesen `DU`, Name, aktive Fireteams, Zuschauerrolle und Bereitschaft direkt als Einsatzrollen.
+- Coop: Die Zusammenfassung zeigt `COOP | 2 AKTIV | 1 ZUSCHAUER` und erklaert das Nachruecken vor Missionsstart. Nach einer Beforderung wird der ehemalige Zuschauer als `AKTIV / GOLD` gezeigt und der Hinweis verschwindet.
+- Authority: Die Anzeige wird ausschliesslich aus dem bestehenden Session-Snapshot abgeleitet. Der neue Diagnose-Snapshot setzt `ui_sets_gameplay_truth = false`; Assignments und Mission bleiben unveraendert.
+- Risiken/offen: Schriftgroesse, Panelhoehe und Full-HD-Lesbarkeit brauchen noch einen echten Host-plus-zwei-Clients-Sichttest.
+- Lokale Pruefung: TASK_1105 16/16, TASK_1104 31/31, TASK_523 32/32 und TASK_227 27/27. Im historischen Bugfix-Sammeltest bleibt nach dem Textabgleich nur dessen drei sachfremde Roster-/Asset-Altbefunde offen.
+- Naechster Schritt: TASK_1106 - Three-Window Coop Lobby Visual Evidence.
+
 ### TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1104_product_lobby_multi_client_parallel_interaction_playtest.md`, `docs/dev/mission_interaction_point_contract.md`, `scripts/multiplayer/multiplayer_session.gd`

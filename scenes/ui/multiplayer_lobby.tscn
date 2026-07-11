@@ -159,12 +159,16 @@ autowrap_mode = 3
 
 [node name="PeerLabel" type="Label" parent="Panel/Margin/VBox"]
 layout_mode = 2
-text = "Peers: -"
+theme_override_colors/font_color = Color(0.88, 0.94, 0.98, 1)
+theme_override_font_sizes/font_size = 13
+text = "EINSATZROLLEN | -"
 autowrap_mode = 3
 
 [node name="AssignmentLabel" type="Label" parent="Panel/Margin/VBox"]
 layout_mode = 2
-text = "Assignments: -"
+theme_override_colors/font_color = Color(0.64, 0.77, 0.84, 1)
+theme_override_font_sizes/font_size = 12
+text = "LOBBY\n-"
 autowrap_mode = 3
 
 [node name="SettingsLabel" type="Label" parent="Panel/Margin/VBox"]
