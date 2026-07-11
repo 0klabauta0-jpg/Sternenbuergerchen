@@ -23,6 +23,8 @@ Die C/N/A-Werte sind seit TASK_451 globale Haltungsprofile. Move, Engage, Take u
 
 Command-spezifisch bleiben Bewegung, Waffe, Zielpolitik und Sequenzlogik. Beispiel: `Move C` nutzt dieselben C-Werte wie `Engage C`, bewegt aber als Positionswechsel; `Engage C` nutzt diese Werte in einer Kampfbewegung mit `fire_at_will`.
 
+TASK_1135 schliesst die Migration ab: `_build_stance_modifier_dict()` akzeptiert keine befehlsspezifischen Speed-, Sicht-, Deckungs- oder Attack-Fallbacktabellen mehr. Historische Move-Sonderwerte aus TASK_421/TASK_425 sind als superseded markiert. Damit gibt es im Runtime-Code genau eine sichtbare C/N/A-Balancequelle; command-spezifische Postures, Zielpolitik, Formation und Sequenz bleiben davon getrennt.
+
 ## Workbench-Ebenen
 
 Die Formation-Workbench trennt drei Dinge, die im Runtime-Verhalten spaeter zusammenkommen, aber nicht dieselbe Datenform haben:

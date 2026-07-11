@@ -1,11 +1,14 @@
 # TASK_421 - Move Stance Posture Speed Sight
 
+## Aktueller Balancehinweis
+Die urspruenglichen Move-Sonderwerte sind durch TASK_451 und TASK_1135 **superseded**. Posture-, Runtime-, Fog-of-War- und Command-Weitergabe dieses Tasks bleiben gueltig; Speed und Sicht lesen jetzt wie alle Basisbefehle das globale C/N/A-Profil aus `fireteam_behavior_modes_contract.md`.
+
 ## Ziel / Problem
 Das Fireteam-Command `Move` soll die aktuell gewaehlte taktische Haltung klar und pruefbar in Runtime-Verhalten uebersetzen:
 
-- `vorsichtig` / `cautious`: Waffe im Aim, Geschwindigkeit -35%, Sichtweite +20%.
-- `normal`: Walk / Reisebewegung, Waffe unten, Geschwindigkeit unveraendert, Sichtweite unveraendert.
-- `aggressiv` / `aggressive`: Run, Waffe unten, Geschwindigkeit +20%, Sichtweite -35%.
+- `vorsichtig` / `cautious`: Waffe im Aim, globales Speedprofil 35%, Sichtfaktor 1.0.
+- `normal`: Walk / Reisebewegung, Waffe unten, globales Speedprofil 65%, Sichtfaktor 0.8.
+- `aggressiv` / `aggressive`: Run, Waffe unten, globales Speedprofil 100%, Sichtfaktor 0.5.
 
 ## Sinnhaftigkeit / Ursache
 Die C/N/A-Auswahl ist im Playtest sichtbar, ihre Wirkung muss aber im autoritativen Mission-Tactical-Pfad ankommen. Speed, Waffenhaltung und Sichtweite duerfen nicht in der UI simuliert werden, sondern muessen als `UnitCommand`/Runtime-Status bei den betroffenen Units landen.
@@ -29,9 +32,9 @@ Die C/N/A-Auswahl ist im Playtest sichtbar, ihre Wirkung muss aber im autoritati
 - `docs/tasks/TASK_420_waypoint_completion_area_followup_hotfix.md`
 
 ## Akzeptanzkriterien
-- [x] `Move` + `cautious` erzeugt Commands mit `weapon_posture = aimed`, einem Speed-Multiplikator von `0.65` auf den bestehenden Move-Speed und `sight_range_factor = 1.2`.
-- [x] `Move` + `normal` erzeugt Commands mit `movement_posture = travel`, `weapon_posture = lowered`, Speed-Multiplikator `1.0` und `sight_range_factor = 1.0`.
-- [x] `Move` + `aggressive` erzeugt Commands mit `movement_posture = run`, `weapon_posture = lowered`, Speed-Multiplikator `1.2` und `sight_range_factor = 0.65`.
+- [x] `Move` + `cautious` erzeugt Commands mit `weapon_posture = aimed`, globalem Speed-Multiplikator `0.35` und `sight_range_factor = 1.0`.
+- [x] `Move` + `normal` erzeugt Commands mit `movement_posture = travel`, `weapon_posture = lowered`, globalem Speed-Multiplikator `0.65` und `sight_range_factor = 0.8`.
+- [x] `Move` + `aggressive` erzeugt Commands mit `movement_posture = run`, `weapon_posture = lowered`, globalem Speed-Multiplikator `1.0` und `sight_range_factor = 0.5`.
 - [x] `SimulationRoot`-Snapshots und `TestUnit`-Runtime-Status geben `sight_range_factor` weiter.
 - [x] Fog-of-War nutzt pro Observer den wirksamen Sichtweitenfaktor.
 

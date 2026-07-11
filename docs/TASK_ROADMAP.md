@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1135 - Tactical Stance Doctrine Contract Reconciliation (implementiert im Arbeitsstand)
+- Grundlage: Alte TASK_421-/TASK_425-Move-Werte, spaetere TASK_451-Workbench-Werte und tote command-spezifische Konstanten sahen wie mehrere parallele Balancequellen aus.
+- Ergebnis: Das globale C/N/A-Profil ist die einzige Speed-/Sicht-/Deckungs-/Aim-/Kontakt-/Zielhilfequelle. Command-Identitaet bleibt ueber Posture, Zielpolitik, Formation und Sequenz erhalten; Live-Revision und Fog-of-War-Weitergabe bleiben intakt.
+- Architektur: Verhaltensneutrale Bereinigung im bestehenden MovementController. Keine zweite Gameplay-Wahrheit und keine Aenderung an SimulationRoot, RPC, Snapshot, Command-Queue oder Effect-Queue.
+- Verifikation: TASK_1135 32/32; TASK_421 32/32; TASK_425 42/42; TASK_429 100/100; TASK_475 17/17; TASK_479 25/25; TASK_501 10/10; TASK_513 26/26.
+- Naechster Schritt: TASK_1136 - Live Tactical Stance Effect Playtest and Feedback. Im echten Mission-Fenster werden Tempo, Sicht, Posture und Wechselwirkung mit Kontakt/Preview als Spielerentscheidung bewertet.
+
 ## TASK_1134 - Selected Fireteam Stance Control Consistency (implementiert im Arbeitsstand)
 - Grundlage: Der grosse #17-Bereich nutzte noch `C / N / A`. Sein Refresh adressierte unbenannte Laufzeit-Container per festen NodePaths und erreichte Zusammenfassung sowie Auswahlzustand deshalb nicht verlaesslich.
 - Ergebnis: `VORS / NORM / OFF`, Icons, Wirkungstooltips und aktiver Zustand sind zwischen Mini-Cards und Selected Fireteam identisch. Stabile Runtime-Namen reparieren den echten Refresh; die Zusammenfassung verwendet deutsche Spielsprache.
 - Architektur: Reiner Presenter auf demselben bestehenden Stance-Callback und revisionierten Sync-State. Keine Gameplay-, Resolver-, RPC-, Command-, Effect- oder Snapshotmutation und keine neue Hotpath-Arbeit.
 - Verifikation: TASK_1134 20/20; TASK_1133 19/19; TASK_109 37/37; TASK_429 100/100; TASK_180 98/98; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window; TASK_222 82/82.
-- Naechster Schritt: TASK_1135 - Tactical Stance Doctrine Contract Reconciliation. TASK_421/TASK_425 werden gegen den aktuellen TASK_429-Vertrag geprueft und ohne Gameplay-Raten bereinigt.
+- Naechster Schritt: abgeschlossen durch TASK_1135.
 
 ## TASK_1133 - Fireteam Mini-Card Stance Control Readability (implementiert im Arbeitsstand)
 - Grundlage: Die Mini-Card-Steuerung `C / N / A` war nur mit Vorwissen oder Tooltip verstaendlich.

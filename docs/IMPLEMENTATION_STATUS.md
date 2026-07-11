@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1135 - Tactical Stance Doctrine Contract Reconciliation
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1135_tactical_stance_doctrine_contract_reconciliation.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/tasks/TASK_421_move_stance_posture_speed_sight.md`, `docs/tasks/TASK_425_live_move_stance_update.md`, `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`, `docs/tasks/TASK_451_fireteam_workbench_runtime_import.md`
+- Befund: TASK_421/TASK_425 erwarteten alte Move-Sonderwerte. Seit TASK_451 ueberschrieb das globale Workbench-Profil diese Werte fuer alle Commands, waehrend wirkungslose Move-/Defend-/Take-/Engage-Konstanten im Code wie aktive Balance aussahen.
+- Aenderung: Das globale C/N/A-Profil ist nun die einzige Speed-/Sicht-/Deckungs-/Aim-/Kontakt-/Zielhilfequelle. Tote command-spezifische Balanceparameter wurden entfernt; Movement-/Weapon-Posture, Zielpolitik, Formation und Sequenz bleiben command-spezifisch. TASK_421/425 pruefen weiterhin Fog-of-War, Live-Revisionsschutz und UI-Weitergabe, jetzt gegen den aktuellen Vertrag.
+- Multiplayer/Performance: Verhalten und Netzwerkpayload bleiben unveraendert; dies ist eine verhaltensneutrale Contract-/Codebereinigung. Keine neuen RPCs, Snapshots, Commands, Effects, Scans oder Framearbeit.
+- Risiken/offen: Die globalen Werte sind weiterhin Workbench-Startbalance. Der naechste Spielwert entsteht eher aus einem sichtbaren Live-Stance-Effect-Playtest als aus weiteren Tabellenanpassungen ohne Spielbeleg.
+- Lokale Pruefung: TASK_1135 32/32; TASK_421 32/32; TASK_425 42/42; TASK_429 100/100; TASK_475 17/17; TASK_479 25/25; TASK_501 10/10; TASK_513 26/26.
+- Naechster Schritt: TASK_1136 - Live Tactical Stance Effect Playtest and Feedback.
+
 ### TASK_1134 - Selected Fireteam Stance Control Consistency
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1134_selected_fireteam_stance_control_consistency.md`, `docs/tasks/TASK_1133_fireteam_mini_card_stance_control_readability.md`, `docs/tasks/TASK_109_tactical_stance.md`, `docs/tasks/TASK_429_fireteam_behavior_modes_runtime.md`
 - Befund: Der grosse `#17 Selected Fireteam`-Bereich verwendete noch einen eigenen `C / N / A`-Presenter. Seine Laufzeit-Container hatten keine stabilen Namen, obwohl der Refresh sie per NodePath adressierte; Auswahltext und aktives Segment konnten deshalb stehen bleiben.
 - Aenderung: Der Bereich zeigt denselben `VORS / NORM / OFF`-Vertrag samt Icons, Wirkungstooltips und Auswahlzustand wie die Mini-Cards. Die Laufzeitstruktur hat stabile Namen, die Zusammenfassung nutzt deutsche Spielsprache, und die generische Quadrat-Button-Nachformatierung ueberschreibt diese Segmente nicht mehr.
 - Multiplayer/Performance: Derselbe bestehende selected-fireteam Callback, Stance-Sync und Planning-State bleiben autoritativ. Keine neuen RPCs, Commands, Effects, Snapshots, Scans oder Frame-Rebuilds; TASK_109 37/37, TASK_773 25/25 und TASK_222 82/82 bleiben gruen.
-- Risiken/offen: TASK_421 und TASK_425 erwarten weiterhin alte Move-Sonderfaktoren, waehrend TASK_429 die spaetere gemeinsame Stance-Doctrine 100/100 bestaetigt. Dieser Test-/Contract-Drift ist der naechste getrennte Review-Fund.
+- Risiken/offen: Der TASK_421-/TASK_425-Drift ist durch TASK_1135 bereinigt.
 - Lokale Pruefung: TASK_1134 20/20; TASK_1133 19/19; TASK_109 37/37; TASK_429 100/100; TASK_180 98/98; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window; TASK_222 82/82.
-- Naechster Schritt: TASK_1135 - Tactical Stance Doctrine Contract Reconciliation.
+- Naechster Schritt: abgeschlossen durch TASK_1135.
 
 ### TASK_1133 - Fireteam Mini-Card Stance Control Readability
 - Status: implementiert im Arbeitsstand

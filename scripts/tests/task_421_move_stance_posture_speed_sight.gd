@@ -97,17 +97,17 @@ func _test_move_stances_apply_posture_speed_and_sight() -> void:
 
 	_assert(String(cautious_command.get("weapon_posture", "")) == "aimed", "Cautious Move keeps weapon aimed")
 	_assert(String(cautious_command.get("movement_posture", "")) == "engage", "Cautious Move uses engage movement posture")
-	_assert(_is_close_ratio(float(cautious_command.get("move_speed_factor", 0.0)), normal_speed, 0.65), "Cautious Move applies -35 percent speed")
-	_assert(is_equal_approx(float(cautious_command.get("sight_range_factor", 0.0)), 1.2), "Cautious Move applies +20 percent sight")
+	_assert(_is_close_ratio(float(cautious_command.get("move_speed_factor", 0.0)), normal_speed, 0.35 / 0.65), "Cautious Move applies the global 35 versus 65 speed profile")
+	_assert(is_equal_approx(float(cautious_command.get("sight_range_factor", 0.0)), 1.0), "Cautious Move applies global full sight")
 
 	_assert(String(normal_command.get("movement_posture", "")) == "travel", "Normal Move uses travel/walk posture")
 	_assert(String(normal_command.get("weapon_posture", "")) == "lowered", "Normal Move keeps weapon lowered")
-	_assert(is_equal_approx(float(normal_command.get("sight_range_factor", 0.0)), 1.0), "Normal Move keeps sight unchanged")
+	_assert(is_equal_approx(float(normal_command.get("sight_range_factor", 0.0)), 0.8), "Normal Move applies global 80 percent sight")
 
 	_assert(String(aggressive_command.get("movement_posture", "")) == "run", "Aggressive Move uses run posture")
 	_assert(String(aggressive_command.get("weapon_posture", "")) == "lowered", "Aggressive Move keeps weapon lowered")
-	_assert(_is_close_ratio(float(aggressive_command.get("move_speed_factor", 0.0)), normal_speed, 1.2), "Aggressive Move applies +20 percent speed")
-	_assert(is_equal_approx(float(aggressive_command.get("sight_range_factor", 0.0)), 0.65), "Aggressive Move applies -35 percent sight")
+	_assert(_is_close_ratio(float(aggressive_command.get("move_speed_factor", 0.0)), normal_speed, 1.0 / 0.65), "Aggressive Move applies the global 100 versus 65 speed profile")
+	_assert(is_equal_approx(float(aggressive_command.get("sight_range_factor", 0.0)), 0.5), "Aggressive Move applies global 50 percent sight")
 
 	for result in [normal_result, cautious_result, aggressive_result]:
 		var command: Dictionary = Dictionary(result.get("command", {}))
@@ -182,8 +182,8 @@ func _test_docs_capture_task() -> void:
 	_assert(task_text.contains("TASK_421 - Move Stance Posture Speed Sight"), "TASK_421 task file exists")
 	_assert(status_text.contains("TASK_421 - Move Stance Posture Speed Sight"), "Implementation status documents TASK_421")
 	_assert(roadmap_text.contains("TASK_421 - Move Stance Posture Speed Sight"), "Roadmap lists TASK_421")
-	_assert(controller_text.contains("MOVE_STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.65"), "Movement controller documents cautious speed multiplier")
-	_assert(controller_text.contains("MOVE_STANCE_AGGRESSIVE_SIGHT_FACTOR: float = 0.65"), "Movement controller documents aggressive sight factor")
+	_assert(controller_text.contains("STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.35"), "Movement controller documents global cautious speed multiplier")
+	_assert(controller_text.contains("STANCE_AGGRESSIVE_SIGHT_FACTOR: float = 0.5"), "Movement controller documents global aggressive sight factor")
 	_assert(fog_text.contains("_get_observer_sight_range_factor"), "Fog-of-war reads observer sight range factor")
 
 
