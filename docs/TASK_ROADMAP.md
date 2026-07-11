@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish (implementiert im Arbeitsstand)
+- Grundlage: Im oberen Einsatzstatus, Event Log und Live-Haltungsfeedback blieb nach TASK_1142 ein sichtbarer Mix aus englischen Steuerwoertern und deutscher Spielersprache.
+- Ergebnis: Ein read-only Presenter liefert `#15 EINSATZLAGE`, `NAECHSTER SCHRITT`, `Fireteam im Einsatz`, `#19 EREIGNISSE`, `KONTAKTDRUCK` und `AKTIV`. Rohtexte, Event-Dictionaries und technische Evidence bleiben unveraendert.
+- Architektur: Reine finale Darstellung auf vorhandenen Snapshots. Keine Aenderung an Simulation, Combat, Contact, Movement, Transport, Multiplayer oder Hotpath-Refresh.
+- Verifikation: TASK_1143 18/18; TASK_366 19/19; TASK_1120 11/11; TASK_1118 13/13; TASK_1136 17/17 headless und 19/19 Real Window; TASK_222 82/82 direkt.
+- Naechster Schritt: TASK_1144 - Tactical Panel Header and Navigation Player Language Polish.
+
 ## TASK_1142 - Mission Control Mission-State Player Language Polish (implementiert im Arbeitsstand)
 - Grundlage: Team-, LZ-, Anflug- und Dropship-Lage mischten deutsche Texte mit Runtime-States. Ein angrenzender Abschlussfixture belegte zudem eine falsche Informationsprioritaet zugunsten leerer Combatdiagnose.
 - Ergebnis: Kurze deutsche State-Zeilen, kompakter `Einsatz:`-Chip und vollstaendige Rohdiagnose im Tooltip. Bei kompletter Route bleiben AA/COM/OBJ/CARGO vor `NO_FRIENDLY_COMBAT_UNITS` sichtbar.
 - Architektur: Read-only Presenter und HUD-Priorisierung auf vorhandenen Snapshots. Keine Aenderung an Transport-, Objective-, Peer-, Command-, Effect-, RPC- oder Snapshot-Wahrheit.
 - Verifikation: TASK_1142 78/78; TASK_560 20/20; TASK_566 33/33; TASK_1109 18/18; TASK_1115 25/25; TASK_1118 13/13; TASK_222 82/82; TASK_1136 19/19 Real Window.
-- Naechster Schritt: TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1143.
 
 ## TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish (implementiert im Arbeitsstand)
 - Grundlage: Die rechte Kontrollflaeche zeigte rohe `NEXT/WHY`-Evidence und technische Combat-Dichtezeilen. Die erste deutsche Langform passte nicht in das feste 344-Pixel-Panel; der historische Style-Guard kannte nur die alten Praefixe.

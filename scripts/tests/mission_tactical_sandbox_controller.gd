@@ -7,6 +7,7 @@ const STATUS_BADGE_SCRIPT: GDScript = preload("res://scripts/ui/components/statu
 const COMMAND_BUTTON_SCRIPT: GDScript = preload("res://scripts/ui/components/command_button.gd")
 const SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/selected_fireteam_decision_presenter.gd")
 const MISSION_CONTROL_STATE_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/mission_control_state_presenter.gd")
+const TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/tactical_hud_language_presenter.gd")
 const PROGRESS_LINE_SCRIPT: GDScript = preload("res://scripts/ui/components/progress_line.gd")
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
@@ -11440,6 +11441,7 @@ func build_station_scenario_identity_body_snapshot(route_readout: Dictionary = {
 		"active": route_active,
 		"style_id": "station_scenario_identity_route_body_v2",
 		"text": text,
+		"display_text": String(Dictionary(TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT.call("identity_snapshot", text)).get("display_text", text)),
 		"badge_text": badge_text,
 		"route_line": route_line,
 		"display_route_line": display_route_line,
@@ -11550,7 +11552,7 @@ func _refresh_mission_identity_session_badge() -> void:
 	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
 	var header_label := get_node_or_null(MISSION_IDENTITY_HEADER_LABEL_PATH) as Label
 	if header_label != null:
-		_set_mission_label_text_delta(header_label, "#15 LIVE TACTICAL GRID" if badge_text.is_empty() else "#15 LIVE TACTICAL GRID | %s" % badge_text)
+		_set_mission_label_text_delta(header_label, String(TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT.call("mission_header", badge_text)))
 		header_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
 		header_label.set_meta("review_session_badge_text", badge_text)
 		header_label.set_meta("review_session_badge_visible", not badge_text.is_empty())
@@ -11558,7 +11560,7 @@ func _refresh_mission_identity_session_badge() -> void:
 	var body_label := get_node_or_null(MISSION_IDENTITY_BODY_LABEL_PATH) as Label
 	if body_label != null:
 		var identity_body: Dictionary = build_station_scenario_identity_body_snapshot()
-		_set_mission_label_text_delta(body_label, String(identity_body.get("text", "Realtime insertion feed | live fireteam deployment")))
+		_set_mission_label_text_delta(body_label, String(identity_body.get("display_text", identity_body.get("text", "Einsatzdaten in Echtzeit | Fireteam im Einsatz"))))
 		body_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
 		body_label.set_meta("review_session_badge_text", badge_text)
 		body_label.set_meta("review_session_badge_visible", not badge_text.is_empty())
@@ -30173,8 +30175,7 @@ func _build_tactical_stance_feedback_text(stance_id: String, command_type: Strin
 		"lowered":
 			weapon_text = "Waffe gesenkt"
 	var mode_text: String = _get_tactical_stance_player_label(stance_id)
-	if is_live:
-		mode_text = "%s LIVE" % mode_text
+	mode_text = String(TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT.call("stance_mode_text", mode_text, is_live))
 	var count_text: String = " | %d Fireteams" % affected_count if affected_count > 1 else ""
 	return "%s | %s | %s | %s%s" % [mode_text, speed_text, sight_text, weapon_text, count_text]
 
@@ -30194,8 +30195,7 @@ func _build_tactical_stance_panel_feedback_text(stance_id: String, command_type:
 		"lowered":
 			weapon_text = "gesenkt"
 	var mode_text: String = _get_tactical_stance_segment_label(stance_id)
-	if is_live:
-		mode_text = "%s LIVE" % mode_text
+	mode_text = String(TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT.call("stance_mode_text", mode_text, is_live))
 	return "%s | %s | %s | %s" % [mode_text, speed_text, sight_text, weapon_text]
 
 

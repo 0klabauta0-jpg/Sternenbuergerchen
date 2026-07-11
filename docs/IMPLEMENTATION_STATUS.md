@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1143_tactical_hud_remaining_player_language_audit_polish.md`, `docs/tasks/TASK_1142_mission_control_mission_state_player_language_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Befund: Der Full-HD-Lauf mischte nach der Mission-Control-Bereinigung weiterhin `LIVE TACTICAL GRID`, `CUE WAIT`, `live fireteam deployment`, `EVENT LOG`, `CONTACT PRESSURE` und `OFF LIVE` in die deutsche Spielflaeche.
+- Aenderung: Ein zustandsloser HUD-Language-Presenter uebersetzt nur die final sichtbaren Einsatz-, Event- und Haltungszeilen. Event-Dictionaries, Rohtexte, Filterlogik, Dedupe-Signaturen, Multiplayer-Snapshots und Gameplay-State bleiben unveraendert.
+- Sicht-/Runtime-Beleg: Der Full-HD-Lauf zeigt `#15 EINSATZLAGE`, `NAECHSTER SCHRITT: Route pruefen | Fireteam im Einsatz`, `#19 EREIGNISSE`, `KONTAKTDRUCK` und `OFF AKTIV` ohne Ueberlauf.
+- Multiplayer/Performance: Keine Aenderung an SimulationRoot, Commands, Effects, Combat, Contact, Transport, RPC oder Snapshot-Wahrheit. TASK_1118 bleibt 13/13; das direkte TASK_222-Gate bleibt 82/82. Der bestehende Godot-Exit-Leakhinweis und der PowerShell-5-Wrapper-Konflikt bleiben separate Harness-Schuld.
+- Lokale Pruefung: TASK_1143 18/18; TASK_366 19/19; TASK_1120 11/11; TASK_1118 13/13; TASK_1136 17/17 headless und 19/19 Real Window; TASK_222 82/82 direkt; `git diff --check`.
+- Naechster Schritt: TASK_1144 - Tactical Panel Header and Navigation Player Language Polish.
+
 ### TASK_1142 - Mission Control Mission-State Player Language Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1142_mission_control_mission_state_player_language_polish.md`, `docs/tasks/TASK_1141_mission_control_decision_language_diagnostic_hierarchy_polish.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Sicht-/Runtime-Beleg: Der Full-HD-Lauf zeigt `LZ: nicht gesetzt`, `ANFLUG: Nordwest`, eine kurze Dropship-/Vorschauzeile und den voll lesbaren Einsatz-Chip ohne englische Runtime-States.
 - Multiplayer/Performance: Transportstate, Sequenzen, ETA, LZ, Craft-Auswahl, Peer-/Team-Zuweisung, Commands, Effects, RPCs und Snapshots bleiben unveraendert. Zwei parallele Dropships konvergieren weiterhin bei Host und beiden Clients.
 - Lokale Pruefung: TASK_1142 78/78; TASK_560 20/20; TASK_566 33/33; TASK_1109 18/18; TASK_1115 25/25; TASK_1118 13/13; TASK_222 82/82; TASK_1136 19/19 Real Window.
-- Naechster Schritt: TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish. `CUE WAIT`, `live fireteam deployment`, `CONTACT PRESSURE` und `OFF LIVE` sind der naechste sichtbare Sprachmix.
+- Naechster Schritt: abgeschlossen durch TASK_1143.
 
 ### TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish
 - Status: implementiert im Arbeitsstand
