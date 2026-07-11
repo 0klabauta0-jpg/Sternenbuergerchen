@@ -299,6 +299,8 @@ func set_lobby_player_setup(setup: Dictionary) -> bool:
 	_team_play_mode = _normalize_team_play_mode(String(setup.get("team_play_mode", _team_play_mode)))
 	_selected_map_path = String(setup.get("map_path", _selected_map_path)).strip_edges()
 	_connection_mode = _normalize_connection_mode(String(setup.get("connection_mode", _connection_mode)))
+	if _is_authority_session():
+		_rebalance_lobby_fireteam_assignments()
 	var changed: bool = previous_setup != get_lobby_setup_snapshot()
 	if _peers_by_id.has(_get_local_peer_id()):
 		_apply_local_setup_to_peer(_get_local_peer_id())
@@ -462,12 +464,17 @@ func request_update_player_setup(setup: Dictionary) -> void:
 			return
 	peer_data["display_name"] = _normalize_player_name(String(setup.get("player_name", peer_data.get("display_name", "Player"))))
 	if not _mission_started:
-		peer_data["team_id"] = _normalize_team_slot(String(setup.get("team_slot", peer_data.get("team_id", client_team_id))))
+		if _team_play_mode == TEAM_PLAY_MODE_COOP:
+			peer_data["team_id"] = _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
+		else:
+			peer_data["team_id"] = _normalize_team_slot(String(setup.get("team_slot", peer_data.get("team_id", client_team_id))))
 		peer_data["roster_entry_path"] = String(setup.get("roster_path", peer_data.get("roster_entry_path", ""))).strip_edges()
 		peer_data["connection_mode"] = _normalize_connection_mode(String(setup.get("connection_mode", CONNECTION_MODE_LAN)))
 		if not reconnect_token.is_empty():
 			_reconnect_tokens_by_peer_id[peer_id] = reconnect_token
 	_peers_by_id[peer_id] = peer_data
+	if not _mission_started:
+		_rebalance_lobby_fireteam_assignments()
 	if rebound:
 		_last_start_assignments = build_session_assignments()
 		mission_assignments_changed.emit(_last_start_assignments.duplicate(true))
@@ -557,6 +564,7 @@ func _on_peer_connected(peer_id: int) -> void:
 		_refresh_status_text()
 		_emit_snapshot()
 		return
+	_rebalance_lobby_fireteam_assignments()
 	_refresh_status_text()
 	_emit_snapshot()
 	_broadcast_snapshot()
@@ -575,6 +583,8 @@ func _on_peer_disconnected(peer_id: int) -> void:
 			_last_start_assignments = build_session_assignments()
 			mission_assignments_changed.emit(_last_start_assignments.duplicate(true))
 			mission_rejoin_peer_block_changed.emit(peer_id, false)
+		else:
+			_rebalance_lobby_fireteam_assignments()
 		_refresh_status_text()
 		_emit_snapshot()
 		_broadcast_snapshot()
@@ -663,6 +673,54 @@ func _upsert_peer(peer_id: int, is_host_peer: bool) -> void:
 	_peers_by_id[peer_id] = existing
 	if peer_id == _get_local_peer_id() or (is_host_peer and _local_is_host):
 		_apply_local_setup_to_peer(peer_id)
+
+
+func _rebalance_lobby_fireteam_assignments() -> void:
+	if _mission_started or not _peers_by_id.has(HOST_PEER_ID):
+		return
+	if _team_play_mode != TEAM_PLAY_MODE_COOP:
+		_restore_versus_fireteam_assignments()
+		return
+	var available_fireteams: PackedStringArray = _normalize_fireteam_ids(host_fireteam_ids)
+	var peer_ids: Array = _peers_by_id.keys()
+	peer_ids.sort()
+	for index in range(peer_ids.size()):
+		var peer_id: int = int(peer_ids[index])
+		var peer_data: Dictionary = Dictionary(_peers_by_id.get(peer_id, {})).duplicate(true)
+		peer_data["team_id"] = _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
+		if index >= available_fireteams.size():
+			peer_data["fireteam_ids"] = PackedStringArray()
+			if peer_id != HOST_PEER_ID:
+				peer_data["role_id"] = ROLE_SPECTATOR
+			_peers_by_id[peer_id] = peer_data
+			continue
+		peer_data["fireteam_ids"] = PackedStringArray([available_fireteams[index]])
+		if peer_id != HOST_PEER_ID and String(peer_data.get("role_id", "")) == ROLE_SPECTATOR:
+			peer_data["role_id"] = _get_client_role_id()
+		_peers_by_id[peer_id] = peer_data
+
+
+func _restore_versus_fireteam_assignments() -> void:
+	var peer_ids: Array = _peers_by_id.keys()
+	peer_ids.sort()
+	var active_client_assigned: bool = false
+	for peer_id_variant in peer_ids:
+		var peer_id: int = int(peer_id_variant)
+		var peer_data: Dictionary = Dictionary(_peers_by_id.get(peer_id, {})).duplicate(true)
+		if peer_id == HOST_PEER_ID:
+			peer_data["team_id"] = _selected_team_slot if not _selected_team_slot.is_empty() else host_team_id
+			peer_data["role_id"] = ROLE_HOST
+			peer_data["fireteam_ids"] = _normalize_fireteam_ids(host_fireteam_ids)
+		elif not active_client_assigned:
+			peer_data["team_id"] = client_team_id
+			peer_data["role_id"] = _get_client_role_id()
+			peer_data["fireteam_ids"] = _normalize_fireteam_ids(client_fireteam_ids)
+			active_client_assigned = true
+		else:
+			peer_data["team_id"] = client_team_id
+			peer_data["role_id"] = ROLE_SPECTATOR
+			peer_data["fireteam_ids"] = PackedStringArray()
+		_peers_by_id[peer_id] = peer_data
 
 
 func _apply_pending_rejoin_identity(peer_id: int, reconnect_token: String) -> bool:

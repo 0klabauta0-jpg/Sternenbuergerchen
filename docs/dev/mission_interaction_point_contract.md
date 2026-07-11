@@ -705,5 +705,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der Dedupe-Fingerprint umfasst die zwei sichtbaren Display-Tokens, Besitzer, Fortschritts-, Hold- und Dauerwerte. Reine Tick-Aenderungen erzeugen keine Textarbeit; ein echter Owner- oder Token-Wechsel wird sichtbar.
 - TASK_1103 belegt Single-/Parallelzeile, echte `LAST`-HUD-Aktualisierung bei stabiler Label-Dimension, menschlichen Reservierungs-Reject, technische-ID-Hygiene, Owner-Dedupe und read-only UI. TASK_1098 misst mit acht States 2000 Snapshots in rund 120 ms bei 201 Label-Updates.
 
+## Product Lobby Multi-Client Coop Assignment Contract
+- Im Coop-Modus werden nur tatsaechlich vorhandene Friendly-Fireteams aktiv verteilt. Fuer die aktuelle Mission sind das `blue` und `gold`.
+- Peer-IDs werden deterministisch sortiert und auf das Host-Team normalisiert. Host erhaelt `blue`, der erste Client `gold`; weitere Peers erhalten keine Command-Fireteams und die explizite Rolle `spectator`. Nachtraegliche Client-Setup-RPCs laufen erneut durch diese Host-Verteilung und koennen die Coop-Team-ID nicht umschreiben.
+- Faellt ein aktiver Client vor Missionsstart aus, wird erneut verteilt und der naechste Spectator uebernimmt das freie Fireteam. Waehrend einer laufenden Mission findet keine Neuverteilung statt.
+- Der bestehende Versus-Vertrag bleibt unveraendert: Host `blue,gold`, erster Client `red`; weitere Peers sind Spectator. Ein Moduswechsel `Coop -> Versus` stellt Team-, Rollen- und Fireteam-Zuordnung symmetrisch wieder her.
+- Spectator erhaelt Mission und autoritative Snapshots, erzeugt daraus keine Commands/Effects und kann auch mit bekannter Unit-ID kein Command autorisieren. Der sichtbare Reject lautet `ZUSCHAUER KANN NICHT BEFEHLEN`.
+- TASK_1104 belegt den echten Produktpfad mit drei getrennten MultiplayerAPIs: Ready, Mission-Handoff, zwei parallele Owner, Konflikt-Reject, Spectator-HUD, Snapshot-Konvergenz und Premission-Promotion.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

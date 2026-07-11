@@ -13,11 +13,17 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest (implementiert im Arbeitsstand)
+- Grundlage: Mehr als ein Client erhielt dieselbe `red`-Zuweisung, obwohl die Coop-Mission nur `blue` und `gold` als steuerbare Friendly-Fireteams besitzt.
+- Ergebnis: Coop verteilt die zwei realen Fireteams deterministisch und setzt weitere Peers als Spectator. Drei Produkt-Lobbys starten gemeinsam; aktive Owner, Konfliktfeedback und Spectator-Snapshots bleiben konsistent.
+- Verifikation: TASK_1104 31/31 mit drei echten MultiplayerAPIs, ENet, Produkt-Mission, Parallelprogress, Client-Setup-Spoof-Guard, symmetrischem Moduswechsel, Spectator-Authority und Premission-Promotion; Session-, Lobby-, Reconnect-, Ownership- und HUD-Regressionen gruen.
+- Naechster Schritt: TASK_1105 - Coop Lobby Active and Spectator Role Readability.
+
 ## TASK_1103 - Parallel Interaction Ownership Feedback Readability (implementiert im Arbeitsstand)
 - Grundlage: TASK_1102 replizierte `fireteam_id`, aber die sichtbare Network-Progress-Zeile verwarf den Besitzer und der Reservierungs-Reject blieb technisch.
 - Ergebnis: Single- und Parallel-Progress nennen Fireteams in derselben kompakten `LAST`-Zeile. Zwei sichtbare States bleiben unter 72 Zeichen; Owner-Wechsel invalidiert den Dedupe-Fingerprint.
 - Verifikation: TASK_1103 18/18 inklusive echter `LAST`-HUD-Zeile, stabiler Label-Dimension und Dedupe bei sichtbarem Zweit-Token-Wechsel; bestehende Feedback-, Progress-, Performance- und Ownership-Regressionen gruen. Acht States/2000 Snapshots rund 120 ms bei 201 Updates.
-- Naechster Schritt: TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest.
+- Naechster Schritt: TASK_1105 - Coop Lobby Active and Spectator Role Readability.
 
 ## TASK_1102 - Parallel Fireteam Interaction Ownership and Recovery (implementiert im Arbeitsstand)
 - Grundlage: Pending-Interactions waren nach Interaction-ID indiziert, konnten aber durch einen spaeter akzeptierten Command eines anderen Fireteams still ueberschrieben werden.

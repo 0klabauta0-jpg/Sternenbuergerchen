@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1103: verbundener Stationsweg, Reconnect-Recovery und sichtbar getrennte Ownership fuer parallel arbeitende Fireteams.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1104: verbundener Stationsweg, sichtbare Parallel-Ownership und echter Drei-Peer-Coop-Pfad ueber die Produkt-Lobby.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1103</span>
+      <span class="pill good">Letzter Abschluss: TASK_1104</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -125,6 +125,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_reconnect_recovery"> Rejoin stellt laufende Host-Interaction mit neuer Peer-ID wieder her</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.parallel_fireteam_interaction_ownership"> Parallele Fireteams behalten getrennte Interaction-Besitzer und Hold-Werte</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.parallel_interaction_owner_feedback"> HUD zeigt bis zu zwei parallele Interaction-Besitzer kompakt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.product_lobby_three_peer_coop"> Drei Produkt-Peers starten als BLUE, GOLD und Spectator konsistent</label>
         </article>
         <article class="card wide">
           <h2>Multiplayer-Payload TASK_1099</h2>
@@ -150,6 +151,11 @@
           <h2>Besitzer Im HUD TASK_1103</h2>
           <p>Die bestehende Command-Zeile benennt nun das arbeitende Fireteam. Bei zwei parallelen Interaktionen liest sie sich beispielsweise als <code>COM 42% BLUE | CARGO 58% GOLD</code>, statt nur einen anonymen Fortschritt zu zeigen.</p>
           <div class="callout">Konflikte bleiben knapp und menschlich: <code>COM GOLD BLOCKIERT | ANDERES FIRETEAM AKTIV</code>. Peer-IDs, interne Interaction-Namen und rohe Reject-Codes bleiben aus der Spielansicht heraus.</div>
+        </article>
+        <article class="card wide">
+          <h2>Drei-Peer-Coop TASK_1104</h2>
+          <p>Host und zwei Clients laufen durch die echte Produkt-Lobby. Die beiden vorhandenen Missions-Fireteams werden eindeutig als <code>BLUE</code> und <code>GOLD</code> verteilt; der dritte Peer nimmt als Spectator an derselben Mission und denselben Snapshots teil.</p>
+          <div class="callout">Der Spectator kann keine bekannte Unit uebernehmen und sieht <code>ZUSCHAUER KANN NICHT BEFEHLEN</code>. Faellt vor dem Start ein aktiver Client aus, rueckt der wartende Spectator deterministisch in das freie Fireteam nach.</div>
         </article>
       </div>
     </section>
@@ -879,10 +885,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest"
+            recommended_next_task: "TASK_1105 - Coop Lobby Active and Spectator Role Readability"
           },
           metadata: {
-            generated_for_task: "TASK_1103",
+            generated_for_task: "TASK_1104",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
