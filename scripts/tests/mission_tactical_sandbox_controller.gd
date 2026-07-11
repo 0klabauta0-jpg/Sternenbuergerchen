@@ -2034,7 +2034,7 @@ func _try_submit_connected_client_mission_interaction() -> Dictionary:
 	if not bool(intent.get("accepted", false)) or not bool(intent.get("requires_go", false)):
 		return {"handled": false, "accepted": false}
 	if _network_mission_interaction_request_pending:
-		_last_command_text = "INTERACTION HOST PENDING"
+		_last_command_text = String(_network_mission_interaction_feedback.get("compact_line", "HOST PENDING"))
 		_update_ui()
 		return {"handled": true, "accepted": false}
 	var fireteam_id: String = String(intent.get("fireteam_id", "")).strip_edges().to_lower()
@@ -2051,17 +2051,22 @@ func _try_submit_connected_client_mission_interaction() -> Dictionary:
 		_update_ui()
 		return {"handled": true, "accepted": false}
 	_network_mission_interaction_request_pending = true
+	var display_token: String = _build_network_mission_interaction_display_token(String(intent.get("interaction_id", "")), String(intent.get("interaction_type", "")))
+	var pending_line: String = "%s -> HOST" % display_token
 	_network_mission_interaction_feedback = {
 		"status": "pending",
 		"interaction_id": String(intent.get("interaction_id", "")),
 		"fireteam_id": fireteam_id,
-		"compact_line": "INTERACTION HOST PENDING",
+		"display_token": display_token,
+		"compact_line": pending_line,
+		"detail_line": "Warte auf Host-Bestaetigung.",
+		"tone": "pending",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
 	_replace_next_orders_for_fireteams(PackedStringArray([fireteam_id]), int(intent.get("phase", _get_live_order_phase_index())))
 	simulation_root.rpc_id(1, "request_command", command)
-	_last_command_text = "INTERACTION HOST PENDING"
+	_last_command_text = pending_line
 	_refresh_order_visuals()
 	_update_ui()
 	return {"handled": true, "accepted": true}
@@ -2072,18 +2077,57 @@ func _apply_network_mission_interaction_result(result: Dictionary) -> void:
 	var accepted: bool = bool(result.get("accepted", false))
 	var interaction_id: String = String(result.get("interaction_id", "")).strip_edges()
 	var reason: String = String(result.get("reason", "")).strip_edges()
-	var line: String = "INTERACTION %s HOST OK" % interaction_id.to_upper() if accepted else "INTERACTION BLOCKED %s" % reason.to_upper()
+	var display_token: String = String(_network_mission_interaction_feedback.get("display_token", "")).strip_edges().to_upper()
+	if display_token.is_empty():
+		display_token = _build_network_mission_interaction_display_token(interaction_id, "")
+	var reason_label: String = _build_network_mission_interaction_reason_label(reason)
+	var line: String = "%s HOST OK | LAEUFT" % display_token if accepted else "%s BLOCKIERT | %s" % [display_token, reason_label]
 	_network_mission_interaction_feedback = {
 		"status": "accepted" if accepted else "blocked",
 		"accepted": accepted,
 		"interaction_id": interaction_id,
 		"reason": reason,
+		"reason_label": reason_label,
+		"display_token": display_token,
 		"compact_line": line,
+		"detail_line": "Host hat den Befehl angenommen." if accepted else "Host lehnt den Befehl ab: %s." % reason_label,
+		"tone": "success" if accepted else "blocked",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
 	_last_command_text = line
 	_update_ui()
+
+
+func _build_network_mission_interaction_display_token(interaction_id: String, interaction_type: String) -> String:
+	var normalized_id: String = interaction_id.strip_edges().to_lower()
+	if normalized_id.contains("aa_") or normalized_id.contains("air_defense"):
+		return "AA"
+	if normalized_id.contains("cargo"):
+		return "CARGO"
+	if normalized_id.contains("computer") or interaction_type.strip_edges().to_lower() == "computer":
+		return "COM"
+	if normalized_id.contains("door") or interaction_type.strip_edges().to_lower() == "door":
+		return "DOOR"
+	return "ACTION"
+
+
+func _build_network_mission_interaction_reason_label(reason: String) -> String:
+	var normalized_reason: String = reason.strip_edges().to_lower()
+	match normalized_reason:
+		"peer_team_mismatch", "unit_team_mismatch":
+			return "FALSCHES TEAM"
+		"fireteam_not_assigned_to_peer":
+			return "FIRETEAM NICHT ZUGEWIESEN"
+		"request_on_non_authority", "host_required":
+			return "HOST ERFORDERLICH"
+		"command_not_whitelisted":
+			return "BEFEHL NICHT ERLAUBT"
+	if normalized_reason.begins_with("state_mutation_key:"):
+		return "UNGUELTIGE DATEN"
+	if normalized_reason.is_empty():
+		return "UNBEKANNT"
+	return normalized_reason.replace("_", " ").to_upper()
 
 
 func get_fire_rule_authority_feedback_snapshot() -> Dictionary:
