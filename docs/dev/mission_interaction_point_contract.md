@@ -595,5 +595,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Keine Ressourcen-/Pipeline-Simulation.
 - Keine neue UI-Parallelwahrheit fuer Missionsfortschritt.
 
+## Connected Interaction Snapshot Contract
+- `MissionCombatLoopDriver` bleibt Besitzer von Interaction-Progress und Scenario-Gates.
+- Der Host publiziert `get_mission_interaction_runtime_state_snapshot()` als `mission_interactions` im bestehenden `SimulationRoot`-State-Snapshot.
+- `MultiplayerSnapshotContract` uebernimmt nur bekannte skalare Interaction-Felder, sortiert IDs deterministisch und erzwingt `read_only = true` sowie `ui_sets_gameplay_truth = false`.
+- Ein Client darf den Snapshot in seine lokale Darstellungs-/Gate-Replik anwenden, aber daraus weder Commands noch Effects erzeugen.
+- Door-, Computer- und Cargo-Abschluss werden aus demselben replizierten Interaction-State rekonstruiert; die UI besitzt keine zweite Gate-Wahrheit.
+- TASK_1091 prueft den echten ENet-RPC-/Snapshot-Rundweg in einer kompakten Missionsfixture. Vollstaendige 64x64-Renderwelt und Arrival-/Hold-Ausloesung bleiben getrennte Integrationspruefungen.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

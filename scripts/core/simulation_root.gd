@@ -577,6 +577,8 @@ func set_multiplayer_snapshot_context(context: Dictionary) -> void:
 		next_context["breakout_states"] = Array(normalized_context.get("breakout_states", [])).duplicate(true)
 	if context.has("air_asset_status") or context.has("air_asset_statuses"):
 		next_context["air_asset_status"] = Array(normalized_context.get("air_asset_status", [])).duplicate(true)
+	if context.has("mission_interactions"):
+		next_context["mission_interactions"] = Dictionary(normalized_context.get("mission_interactions", {})).duplicate(true)
 	if context.has("mission_result"):
 		next_context["mission_result"] = Dictionary(normalized_context.get("mission_result", {})).duplicate(true)
 	_multiplayer_snapshot_context = next_context
@@ -1011,6 +1013,7 @@ func _build_tick_state() -> Dictionary:
 				"tactical_rules": _build_authoritative_tactical_rules_snapshot(snapshot_context.get("tactical_rules", [])),
 				"breakout_states": snapshot_context.get("breakout_states", []),
 				"air_asset_status": _build_air_asset_status_snapshots(snapshot_context.get("air_asset_status", [])),
+				"mission_interactions": snapshot_context.get("mission_interactions", {}),
 				"mission_result": snapshot_context.get("mission_result", {}),
 			}
 		)

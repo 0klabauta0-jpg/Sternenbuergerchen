@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1090: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance, getrennte Alpha-/Bravo-Spielerperspektiven, echte lokale ENet-Feuerdisziplin und ein schneller autoritativer Mission-/LZ-/CONTACT-FIRE-Pfad.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1091: aktueller Reentry-Stand, Bedienhandbuch fuer den ersten Station-Route-Advance, getrennte Spielerperspektiven, echte lokale ENet-Commands und replizierte Door-/Computer-/Cargo-Zustaende.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1090</span>
+      <span class="pill good">Letzter Abschluss: TASK_1091</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -112,6 +112,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.station_route_authored_first_contact"> Station-Route Contact folgt dem bestaetigten Advance</label>
           <label class="checkline"><input type="checkbox" data-export-key="status.visible_reentry_review_done"> Sichtbarer Reentry-Review erledigt</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.host_client_review_done"> Host/Client-Fensterlauf erledigt</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_station_interaction_snapshot"> Station-Interaktionen ueber echte ENet-Snapshots konsistent</label>
         </article>
       </div>
     </section>
@@ -841,10 +842,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1091 - Connected Station Route Two-Player Command Playtest"
+            recommended_next_task: "TASK_1092 - Connected Station Route Runtime Arrival/Hold Integration"
           },
           metadata: {
-            generated_for_task: "TASK_1090",
+            generated_for_task: "TASK_1091",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

@@ -407,6 +407,32 @@ func get_mission_interaction_runtime_state_snapshot() -> Dictionary:
 	}
 
 
+func apply_multiplayer_interaction_snapshot(snapshot: Dictionary) -> Dictionary:
+	var source_states: Dictionary = Dictionary(snapshot.get("interaction_states", {}))
+	_mission_interaction_runtime_states.clear()
+	_mission_scenario_runtime_step_states.clear()
+	var interaction_ids: Array = source_states.keys()
+	interaction_ids.sort()
+	for interaction_id_variant in interaction_ids:
+		var interaction_id: String = String(interaction_id_variant).strip_edges()
+		if interaction_id.is_empty() or typeof(source_states.get(interaction_id_variant, null)) != TYPE_DICTIONARY:
+			continue
+		var state: Dictionary = Dictionary(source_states.get(interaction_id_variant, {})).duplicate(true)
+		state["read_only"] = true
+		state["ui_sets_gameplay_truth"] = false
+		_mission_interaction_runtime_states[interaction_id] = state
+		if bool(state.get("complete", false)):
+			_apply_completed_mission_interaction_state(state)
+		else:
+			_apply_in_progress_mission_interaction_state(state)
+	_update_mission_scenario_runtime_gates()
+	return {
+		"applied_count": _mission_interaction_runtime_states.size(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
 func update_mission_interaction_runtime_progress(payload: Dictionary) -> Dictionary:
 	var interaction_id: String = String(payload.get("interaction_id", "")).strip_edges()
 	if interaction_id.is_empty():
@@ -623,6 +649,7 @@ func _publish_multiplayer_snapshot_context(simulation_root: Node) -> void:
 			"enemy_team_tactics": get_enemy_team_tactics_snapshot(),
 			"character_gameplay": get_character_gameplay_snapshot(),
 			"fire_events": get_fire_event_snapshot(),
+			"mission_interactions": get_mission_interaction_runtime_state_snapshot(),
 			"mission_result": get_mission_result(),
 		}
 	)

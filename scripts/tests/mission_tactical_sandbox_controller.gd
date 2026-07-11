@@ -1983,6 +1983,9 @@ func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
 
 func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	apply_authoritative_fire_rule_snapshot(snapshot.get("tactical_rules", []))
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
+		combat_driver.call("apply_multiplayer_interaction_snapshot", Dictionary(snapshot.get("mission_interactions", {})))
 
 
 func _on_network_command_result_received(result: Dictionary) -> void:
