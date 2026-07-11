@@ -22,10 +22,10 @@ const APPROACH_BUTTON_PATHS := [
 ]
 
 const FIRE_RULE_BUTTONS := [
-	{"name": "FireRuleHoldButton", "slot": 11, "text": "HF"},
-	{"name": "FireRuleReturnButton", "slot": 12, "text": "RF"},
-	{"name": "FireRuleFreeButton", "slot": 13, "text": "FW"},
-	{"name": "FireRuleSuppressButton", "slot": 14, "text": "SUP"},
+	{"name": "FireRuleHoldButton", "slot": 11, "text": "FH"},
+	{"name": "FireRuleReturnButton", "slot": 12, "text": "AF"},
+	{"name": "FireRuleFreeButton", "slot": 13, "text": "FF"},
+	{"name": "FireRuleSuppressButton", "slot": 14, "text": "UN"},
 ]
 
 var _passed: int = 0
@@ -113,7 +113,7 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 			and _button_is_square(fire_rule_button)
 			and bool(fire_rule_button.get_meta("fire_rule_control", false))
 			and String(fire_rule_button.text) == String(fire_rule_spec.get("text", "")),
-			"%s lives in #%s as an active fire-rule command button" % [String(fire_rule_spec.get("name", "")), str(fire_rule_spec.get("slot", ""))]
+			"%s lives in #%s as an active fire-rule command button (index=%s size=%s min=%s text=%s expected=%s)" % [String(fire_rule_spec.get("name", "")), str(fire_rule_spec.get("slot", "")), str(fire_rule_button.get_index() if fire_rule_button != null else -1), str(fire_rule_button.size if fire_rule_button != null else Vector2.ZERO), str(fire_rule_button.custom_minimum_size if fire_rule_button != null else Vector2.ZERO), String(fire_rule_button.text if fire_rule_button != null else ""), String(fire_rule_spec.get("text", ""))]
 		)
 	var delete_button := command_grid.get_node_or_null("DeleteOrderButton") as Button
 	var door_button := command_grid.get_node_or_null("DoorBreachButton") as Button

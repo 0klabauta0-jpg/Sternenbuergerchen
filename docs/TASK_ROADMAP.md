@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish (implementiert im Arbeitsstand)
+- Grundlage: Die Matrix war funktional, aber sichtbare englische Langtexte und alte Feuerregelkuerzel widersprachen dem deutschen Fireteam-HUD. Unskalierte Iconquellen sprengten im ersten echten Sichtlauf das Grid.
+- Ergebnis: Feste deutsche Iconcodes, vollstaendige Tooltips, deutscher Hierarchie-Catalog und ein einmaliger 10-Pixel-Iconcache. Alle 20 Slots bleiben im bestehenden 5-Spalten-Layout; die aktive Feuerregel bleibt eindeutig hervorgehoben.
+- Architektur: Reine UI-Leseschicht und Anzeigenamen. Keine Aenderung an Command-ID, NodePath, Callback, Fire-Rule-State, Simulation, RPC oder Snapshot.
+- Verifikation: TASK_1139 51/51; TASK_191 24/24; TASK_271 104/104; TASK_570 46/46; TASK_571 32/32; TASK_572 28/28; TASK_836 29/29; TASK_1136 19/19 Real Window; TASK_1109 18/18; TASK_222 82/82.
+- Naechster Schritt: TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish. Der Full-HD-Beleg zeigt dort noch gemischte `NEXT/WHY/HOLD/ADV/BACK`-Diagnose als groessten verbleibenden Sprachbruch.
+
 ## TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish (implementiert im Arbeitsstand)
 - Grundlage: Sprachlich klare Member-Cards blieben bei 156 Pixeln durch Rangbadges, Lead-Aktion und zufaellige Pipe-Umbrueche visuell zu eng.
 - Ergebnis: 176 x 118 Pixel, eine 94-Pixel-Textspalte, kontextspezifisch ausgeblendete Rangbadges und feste Zeilen fuer Command/Haltung, Feuerregel, Waffenhaltung und Bewegung. Vollstaendige Diagnose bleibt im Tooltip; Badge-Ableitung bleibt in allen anderen Karten erhalten.
 - Architektur: Read-only Card-/Presenter-Anpassung im bestehenden Dirty-Refresh. Keine Gameplay-, Rank-, Lead-, Fireteam-, Combat-, Netzwerk- oder Hotpath-Aenderung.
 - Verifikation: TASK_1138 7/7; TASK_1137 13/13; TASK_464 15/15; TASK_472 13/13; TASK_207 31/31; TASK_1136 19/19 Real Window; TASK_503 10/10; TASK_1109 18/18; TASK_222 82/82.
-- Naechster Schritt: TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish. Der Full-HD-Beleg zeigt dort noch `Move/Take/Hold/Flank/Target` und `HF/RF/FW/SUP` neben inzwischen deutscher Kartenhierarchie.
+- Naechster Schritt: abgeschlossen durch TASK_1139.
 
 ## TASK_1137 - Selected Fireteam Member Card Player Language Polish (implementiert im Arbeitsstand)
 - Grundlage: Die kompakten Member-Cards zeigten korrekte Runtime-Daten, mischten aber deutsche Spielsprache mit englischen Enums und rohen Skill-Kuerzeln.

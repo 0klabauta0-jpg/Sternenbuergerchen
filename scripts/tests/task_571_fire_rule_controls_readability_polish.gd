@@ -87,10 +87,10 @@ func _test_fire_rule_controls_in_mission_hud() -> void:
 	await _wait_frames(2)
 	var selected_snapshot: Dictionary = Dictionary(controller.call("get_fire_rule_controls_readability_snapshot"))
 	_assert(_all_buttons_enabled(selected_snapshot), "Fire-rule buttons are enabled with selected fireteam")
-	_assert(_button_snapshot(selected_snapshot, "hold").get("text", "") == "HF", "Hold Fire button uses compact label")
-	_assert(_button_snapshot(selected_snapshot, "return").get("text", "") == "RF", "Return Fire button uses compact label")
-	_assert(_button_snapshot(selected_snapshot, "free").get("text", "") == "FW", "Fire at Will button uses compact label")
-	_assert(_button_snapshot(selected_snapshot, "suppress").get("text", "") == "SUP", "Suppress button uses compact label")
+	_assert(_button_snapshot(selected_snapshot, "hold").get("text", "") == "FH", "Hold Fire button uses the German compact label")
+	_assert(_button_snapshot(selected_snapshot, "return").get("text", "") == "AF", "Return Fire button uses the German compact label")
+	_assert(_button_snapshot(selected_snapshot, "free").get("text", "") == "FF", "Fire at Will button uses the German compact label")
+	_assert(_button_snapshot(selected_snapshot, "suppress").get("text", "") == "UN", "Suppress button uses the German compact label")
 	_assert(String(_button_snapshot(selected_snapshot, "hold").get("help_id", "")).contains("fire_rule_hold"), "Hold Fire button carries help id")
 
 	var hold_button := scene.get_node_or_null(String(FIRE_RULE_BUTTON_PATHS["hold"])) as BaseButton

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1139_command_matrix_player_language_icon_hierarchy_polish.md`, `docs/tasks/TASK_836_release_firefight_command_matrix_visual_polish.md`, `scripts/ui/mission_command_hierarchy_contract.gd`, `docs/dev/mission_command_feedback_contract.md`
+- Befund: Die Matrix mischte `Move/Take/Hold/Flank/Target`, `Del/Sort/USE` und `HF/RF/FW/SUP` mit dem inzwischen deutschen Fireteam-HUD. Ein erster Iconversuch belegte im echten Fenster, dass unskalierte Quelltexturen das Grid aufsprengen.
+- Aenderung: Alle sichtbaren Matrixaktionen verwenden feste deutsche Iconcodes (`BW`, `HL`, `FL`, `NM`, `ZL`, `LOE`, `NUTZ`, `ORD`, `FH`, `AF`, `FF`, `UN`) und vollstaendige deutsche Tooltips. Neun vorhandene CC0-Taktikicons werden einmalig auf 10 Pixel skaliert und gecacht. Der Action-Catalog nutzt ausgeschriebene deutsche Anzeigenamen bei unveraenderten IDs und NodePaths.
+- Sicht-/Runtime-Beleg: Der echte Full-HD-Blick zeigt alle 5 x 4 Slots im alten Panelrechteck, vollstaendige Codes, kleine Icons und genau eine aktive gelbe Feuerregel. Keine Text- oder Iconkachel wird abgeschnitten oder vergroessert das Grid.
+- Multiplayer/Performance: Reiner Presenter-/Contract-Polish. Command-IDs, Callbacks, Fire-Rule-State, SimulationRoot, Commands, Effects, RPCs und Snapshots bleiben unveraendert. Iconbilder werden nur beim ersten Zugriff je Pfad skaliert und danach gecacht.
+- Lokale Pruefung: TASK_1139 51/51; TASK_191 24/24; TASK_271 104/104; TASK_570 46/46; TASK_571 32/32; TASK_572 28/28; TASK_836 29/29; TASK_1136 19/19 Real Window; TASK_1109 18/18; TASK_222 82/82.
+- Naechster Schritt: TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish.
+
 ### TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1138_selected_fireteam_member_card_name_priority_fit_polish.md`, `docs/tasks/TASK_1137_selected_fireteam_member_card_player_language_polish.md`, `docs/tasks/TASK_472_fireteam_contact_perf_bubble_card_readability.md`
@@ -18,7 +28,7 @@
 - Sicht-/Runtime-Beleg: Vier Karten passen gleichzeitig in den Full-HD-Dock. `Anja Voss`, `Darius Holt`, `Leona Rhee` und `Milo Saren` sind voll lesbar; `Bewegen | OFF`, `Feuer frei`, `Waffe gesenkt`, `Rennt` bilden eine stabile Hierarchie.
 - Multiplayer/Performance: Reiner Card-/Presenter-Polish. Keine Gameplay-, Rank-, Lead-, Fireteam-, Combat-, Command-, Effect-, RPC- oder Snapshotaenderung; keine neue Framearbeit.
 - Lokale Pruefung: TASK_1138 7/7; TASK_1137 13/13; TASK_464 15/15; TASK_472 13/13; TASK_207 31/31; TASK_1136 19/19 Real Window; TASK_503 10/10; TASK_1109 18/18; TASK_222 82/82.
-- Naechster Schritt: TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1139.
 
 ### TASK_1137 - Selected Fireteam Member Card Player Language Polish
 - Status: implementiert im Arbeitsstand

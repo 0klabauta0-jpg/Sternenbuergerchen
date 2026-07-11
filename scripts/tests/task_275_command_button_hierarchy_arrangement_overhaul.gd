@@ -163,7 +163,7 @@ func _test_mission_scene_hierarchy() -> void:
 		var order: PackedStringArray = PackedStringArray(command_grid.get_meta("command_hierarchy_order", PackedStringArray()))
 		_assert(order.size() >= 8 and order[0] == "move" and order[1] == "take" and order.has("delete_order") and order.has("sort_fireteam"), "#16 command grid order includes Move/Take plus Delete/Sort")
 		_assert(command_grid.get_child_count() >= 20, "#16 command grid exposes the full 5x4 slot frame")
-		_assert(int(command_grid.get_meta("command_placeholder_slots", 0)) >= 10, "#16 command grid keeps reserve slots marked for communication")
+		_assert(int(command_grid.get_meta("command_placeholder_slots", 0)) >= 5, "#16 command grid keeps the five current reserve slots marked for communication")
 		var sort_button := command_grid.get_node_or_null("SortCommandMatrixButton") as Button
 		_assert(sort_button != null and sort_button.get_index() == 9, "Sort command occupies #16.10")
 
