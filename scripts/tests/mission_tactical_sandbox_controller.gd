@@ -13538,6 +13538,9 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 	var seen_craft_ids: Dictionary = {}
 	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
 	var cards: Array = _get_mission_dropship_card_entries()
+	var contact_perspective: Dictionary = get_connected_first_contact_hud_perspective_snapshot()
+	var contact_focus_active: bool = String(contact_perspective.get("primary_line", "")).contains("CONTACT FIRE")
+	cards = _build_contact_focused_mission_dropship_card_entries(cards, contact_focus_active)
 	for index in range(cards.size()):
 		var card: Dictionary = Dictionary(cards[index])
 		var craft_id: String = String(card.get("craft_id", "")).strip_edges()
