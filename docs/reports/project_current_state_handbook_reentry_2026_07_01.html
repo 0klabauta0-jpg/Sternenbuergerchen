@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1142: Mission Control zeigt jetzt auch Team-, LZ-, Anflug- und Dropship-Lage in einheitlicher Spielersprache.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1143: Einsatzstatus, Event Log und Live-Haltung sprechen jetzt dieselbe knappe Spielersprache wie Mission Control.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1142</span>
+      <span class="pill good">Letzter Abschluss: TASK_1143</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -349,6 +349,11 @@
           <p>Mission Control zeigt nun <code>Einsatz</code>, <code>LZ</code>, <code>ANFLUG</code>, Dropship-Bereitschaft, Landung, Ausstieg und Rueckflug ohne sichtbare Runtime-States wie <code>inbound</code>, <code>outbound</code> oder <code>off-map</code>.</p>
           <div class="callout">Der Regressionstest fand dabei einen wichtigeren Informationsfehler: Nach einer abgeschlossenen Route verschwanden AA-, Computer-, Objective- und Cargo-Erfolg hinter einer leeren Combatdiagnose. Bestaetigte Missionsziele haben jetzt Vorrang; die technische Diagnose bleibt im Tooltip.</div>
         </article>
+        <article class="card wide">
+          <h2>Einheitliche Einsatzsprache TASK_1143</h2>
+          <p>Der obere Status, das Event Log und das Live-Haltungsfeedback zeigen nun <code>EINSATZLAGE</code>, <code>NAECHSTER SCHRITT</code>, <code>EREIGNISSE</code>, <code>KONTAKTDRUCK</code> und <code>AKTIV</code> statt gemischter Runtime-Begriffe.</p>
+          <div class="callout">Die Uebersetzung sitzt ausschliesslich an der sichtbaren Rendergrenze. Rohtexte, Event-Dictionaries, Dedupe, Filter, Multiplayer-Evidence und Gameplay-State bleiben unveraendert. Der Full-HD-Beleg ist ueberlauffrei; Event-, Perspektiv- und Performance-Gates bleiben gruen.</div>
+        </article>
       </div>
     </section>
 
@@ -445,16 +450,16 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1142 vereinheitlicht Entscheidung, Einsatzteam, LZ, Anflug und Dropship-Lage. Zwei parallele Dropships, lokale Multiplayer-Perspektive, Objective-Abschluss und Performance bleiben gruen.</p>
-          <p><strong>Naechster sinnvoller Schritt:</strong> Im oberen HUD und Event Log stehen noch <code>CUE WAIT</code>, <code>live fireteam deployment</code>, <code>CONTACT PRESSURE</code> und <code>OFF LIVE</code>. TASK_1143 soll diesen restlichen sichtbaren Sprachmix systematisch bereinigen.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1143 vereinheitlicht Entscheidung, Einsatzteam, LZ, Anflug, Dropship-Lage, Einsatzstatus, Event Log und Live-Haltung. Zwei parallele Dropships, lokale Multiplayer-Perspektive, Objective-Abschluss und Performance bleiben gruen.</p>
+          <p><strong>Naechster sinnvoller Schritt:</strong> Die grossen Flaechentitel <code>COMMAND MATRIX</code>, <code>SELECTED FIRETEAM</code> und <code>MISSION CONTROL</code> sowie die obere Navigation bleiben als letzter auffaelliger Sprachmix. TASK_1144 soll nur diese sichtbare Hierarchie bereinigen.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1142 - Mission Control Mission-State Player Language Polish (78/78, Real Window 19/19)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish (18/18, Real Window 19/19)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1144 - Tactical Panel Header and Navigation Player Language Polish" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1090,10 +1095,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish"
+            recommended_next_task: "TASK_1144 - Tactical Panel Header and Navigation Player Language Polish"
           },
           metadata: {
-            generated_for_task: "TASK_1142",
+            generated_for_task: "TASK_1143",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

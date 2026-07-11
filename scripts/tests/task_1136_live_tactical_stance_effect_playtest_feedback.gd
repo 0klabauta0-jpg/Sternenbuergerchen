@@ -60,9 +60,9 @@ func _run_live_stance_playtest(controller: Node, feedback_label: Label, stance_s
 	await _wait_frames(3)
 	var cautious_runtime: Dictionary = Dictionary((leader as Node).call("get_runtime_status").to_dict())
 	var cautious_text := feedback_label.text
-	_assert(cautious_text.contains("VORSICHTIG LIVE") and cautious_text.contains("langsam"), "Real HUD confirms cautious live tempo")
+	_assert(cautious_text.contains("VORSICHTIG AKTIV") and cautious_text.contains("langsam"), "Real HUD confirms cautious live tempo")
 	_assert(cautious_text.contains("volle Sicht") and cautious_text.contains("Waffe im Anschlag"), "Real HUD explains cautious sight and weapon posture")
-	_assert(stance_summary.text == "VORS LIVE | langsam | Sicht voll | Anschlag", "Visible stance panel mirrors compact cautious effects")
+	_assert(stance_summary.text == "VORS AKTIV | langsam | Sicht voll | Anschlag", "Visible stance panel mirrors compact cautious effects")
 	_assert(stance_summary.max_lines_visible == 1 and stance_summary.get_global_rect().size.y >= 14.0 and stance_summary.get_minimum_size().x <= stance_summary.get_global_rect().size.x, "Visible cautious feedback reserves one fitting line")
 	_assert(String(cautious_runtime.get("movement_posture", "")) == "engage" and String(cautious_runtime.get("weapon_posture", "")) == "aimed", "Cautious runtime simultaneously uses engage/aimed")
 	if OS.get_environment("STERNEN_TASK1136_CAPTURE") == "1":
@@ -72,9 +72,9 @@ func _run_live_stance_playtest(controller: Node, feedback_label: Label, stance_s
 	await _wait_frames(3)
 	var offensive_runtime: Dictionary = Dictionary((leader as Node).call("get_runtime_status").to_dict())
 	var offensive_text := feedback_label.text
-	_assert(offensive_text.contains("OFFENSIV LIVE") and offensive_text.contains("schnell"), "Real HUD confirms offensive live tempo")
+	_assert(offensive_text.contains("OFFENSIV AKTIV") and offensive_text.contains("schnell"), "Real HUD confirms offensive live tempo")
 	_assert(offensive_text.contains("kurze Sicht") and offensive_text.contains("Waffe gesenkt"), "Real HUD explains offensive sight and weapon posture")
-	_assert(stance_summary.text == "OFF LIVE | schnell | Sicht kurz | gesenkt", "Visible stance panel mirrors compact offensive effects")
+	_assert(stance_summary.text == "OFF AKTIV | schnell | Sicht kurz | gesenkt", "Visible stance panel mirrors compact offensive effects")
 	_assert(stance_summary.get_minimum_size().x <= stance_summary.get_global_rect().size.x, "Visible offensive feedback fits without truncation")
 	_assert(String(offensive_runtime.get("movement_posture", "")) == "run" and String(offensive_runtime.get("weapon_posture", "")) == "lowered", "Offensive runtime simultaneously uses run/lowered")
 	_assert(float(cautious_runtime.get("move_speed_factor", 0.0)) < float(offensive_runtime.get("move_speed_factor", 0.0)), "Live runtime makes OFF faster than VORS")

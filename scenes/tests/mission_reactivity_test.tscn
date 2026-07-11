@@ -325,10 +325,10 @@ offset_bottom = -8.0
 theme_override_constants/separation = 2
 
 [node name="MissionIdentityHeaderLabel" type="Label" parent="TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox"]
-text = "#15 LIVE TACTICAL GRID"
+text = "#15 EINSATZLAGE"
 
 [node name="MissionIdentityBodyLabel" type="Label" parent="TacticalUI/MissionIdentityPanel/MissionIdentityMargin/MissionIdentityVBox"]
-text = "Realtime insertion feed | live fireteam deployment"
+text = "Einsatzdaten in Echtzeit | Fireteam im Einsatz"
 autowrap_mode = 3
 
 [node name="TopNavPanel" type="PanelContainer" parent="TacticalUI"]

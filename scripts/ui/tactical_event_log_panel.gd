@@ -1,6 +1,8 @@
 class_name TacticalEventLogPanel
 extends PanelContainer
 
+const TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/tactical_hud_language_presenter.gd")
+
 const DEFAULT_MAX_VISIBLE_EVENTS: int = 8
 const ROW_MIN_HEIGHT: float = 22.0
 const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID: String = "task_889_release_first_exchange_hud_density_fire_visual_polish_v1"
@@ -186,7 +188,7 @@ func _ensure_structure() -> void:
 
 	_header_label = Label.new()
 	_header_label.name = "EventLogHeaderLabel"
-	_header_label.text = "#19 EVENT LOG"
+	_header_label.text = String(TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT.call("event_log_header"))
 	_header_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_header_label.add_theme_font_size_override("font_size", _get_header_font_size())
 	header.add_child(_header_label)
@@ -200,7 +202,7 @@ func _ensure_structure() -> void:
 	_selected_filter_button = CheckButton.new()
 	_selected_filter_button.name = "EventLogSelectedFilterButton"
 	_selected_filter_button.focus_mode = Control.FOCUS_NONE
-	_selected_filter_button.text = "SEL"
+	_selected_filter_button.text = String(TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT.call("selected_filter_label"))
 	_selected_filter_button.button_pressed = selected_only
 	_selected_filter_button.custom_minimum_size = Vector2(48.0, 0.0)
 	_selected_filter_button.add_theme_font_size_override("font_size", 8)
@@ -306,7 +308,7 @@ func _add_event_row(entry: Dictionary) -> void:
 func _add_empty_row() -> void:
 	var label := Label.new()
 	label.name = "EventLogEmptyLabel"
-	label.text = "NO EVENTS"
+	label.text = "KEINE EREIGNISSE"
 	label.add_theme_font_size_override("font_size", _get_row_font_size())
 	label.add_theme_color_override("font_color", Color(0.62, 0.70, 0.74, 0.86))
 	_entry_list.add_child(label)
@@ -404,6 +406,7 @@ func _format_event_text(entry: Dictionary) -> String:
 	var text: String = String(entry.get("short_text", entry.get("map_label", ""))).strip_edges()
 	if text.is_empty():
 		text = String(entry.get("event_type", "event")).strip_edges().replace("_", " ").to_upper()
+	text = String(Dictionary(TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT.call("event_text_snapshot", text)).get("display_text", text))
 	var repeat_count: int = maxi(int(entry.get("repeat_count", 1)), 1)
 	if repeat_count > 1:
 		text = "%s x%d" % [text, repeat_count]

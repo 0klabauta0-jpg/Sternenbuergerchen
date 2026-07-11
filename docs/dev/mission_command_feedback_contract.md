@@ -17,6 +17,8 @@ TASK_1141 trennt in #18 Mission Control sichtbare Spielersprache von technischer
 
 TASK_1142 uebersetzt den sichtbaren LZ-, Anflug-, Dropship- und Teamkontext, ohne die zugrunde liegenden State-, Peer-, Spawn- oder Craftwerte zu veraendern. Technische Transportphasen bleiben im Tooltip. Bei abgeschlossener Route muessen bestaetigte `AA/COM/OBJ/CARGO`-Ergebnisse vor leerer Combatdiagnose sichtbar bleiben.
 
+TASK_1143 erweitert diese Presenter-Grenze auf den oberen Einsatzstatus, das Tactical Event Log und das sichtbare Live-Haltungsfeedback. Uebersetzt wird erst die finale Anzeige; rohe Eventtexte, Event-Dictionaries, Dedupe-Signaturen, Filter, Evidence-Snapshots und Multiplayerdaten bleiben unveraendert und read-only zugaenglich.
+
 ## Fensterrollen
 | Bereich | Rolle | Textregel |
 | --- | --- | --- |
