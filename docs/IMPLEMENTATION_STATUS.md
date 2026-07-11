@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1127_tactical_communication_hud_bubble_event_mini_card_anchor_repair.md`, `docs/tasks/TASK_274_tactical_communication_feedback_layer.md`, `docs/dev/tactical_communication_feedback_layer_design.md`
+- Befund: Routine-Command-Feedback und Tactical-Communication-Events liefen durch dasselbe Cooldown-Gate. Die spaetere Bubble ersetzte global die vorherige; schwere Renderframes konnten die Zeitdarstellung vor dem Snapshot vollstaendig aufbrauchen. Primary3D verlor zudem die Event-ID im Render-Diagnoseeintrag.
+- Aenderung: Tactical Events binden ihre ID an die aktive Command-Bubble desselben Fireteams. Der Speicher dedupliziert pro Fireteam/Leader, bleibt global begrenzt und garantiert eventgebundenen Bubbles mindestens zwoelf Prozessframes. HUD-/World-Render-Snapshots behalten die Event-ID.
+- Multiplayer/Performance: Keine Gameplay-, Command-, Effect-, Event- oder Snapshotwahrheit im HUD. Der Pfad arbeitet auf hoechstens dem bestehenden Bubble-Limit von vier Eintraegen; Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Zwei gleichzeitige Mini-Card-Bubbles sind vertraglich korrekt, aber noch nicht als eigener Real-Window-Dichtetest abgenommen. TASK_214 enthaelt vier unabhaengige veraltete Erwartungen und bleibt bei 32/36.
+- Lokale Pruefung: TASK_1127 5/5; TASK_274 76/76; TASK_431 19/19; TASK_219 48/48; TASK_1126 13/13; TASK_1119 33/33; TASK_1104 31/31; TASK_222 82/82.
+- Naechster Schritt: TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability.
+
 ### TASK_1126 - Connected First Contact Local Marker and Label Hierarchy
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1126_connected_first_contact_local_marker_label_hierarchy.md`, `docs/tasks/TASK_1125_connected_first_contact_local_team_contact_cluster_readability.md`, `docs/dev/tactical_decision_clarity_contract.md`
 - Befund: Selection-Ringe, Unit-Routine-Badges und doppelte Tactical-Communication-Contact-Reports konkurrierten im selben Cluster. Der sichtbare `CONTACT`-Text stammte aus mehreren `TacCom_contact_report_*_Label`-Nodes, nicht aus dem ContactRoot.
 - Aenderung: Connected Contact nutzt kleinere/transparente Selection-Ringe, unterdrueckt Routine-Badges und rendert Contact-Reports nicht doppelt als Tactical-Communication-Mapvisual. Kritische HP-/Vitalhinweise bleiben. Detached Mission-Konfiguration greift nicht mehr auf eine fehlende MultiplayerAPI zu.
 - Multiplayer/Performance: Reine vorhandene Payload-/Visualauswertung; kein Gameplay-State, RPC, Command, Effect oder Snapshot-Netzfeld. Keine SceneTree-Scans im Runtimepfad. Performance-Gate bleibt 82/82 gruen.
-- Risiken/offen: TASK_274 laeuft nach dem Lifecycle-Guard ohne Script Error, findet aber in zwei von 76 Assertions weiterhin keine Event-gebundenen FTL-Bubbles an der linken Fireteam-Mini-Card. Das ist der naechste Spielerfeedback-Slice.
+- Risiken/offen: Die damalige TASK_274-Bubble-/Ankerluecke ist mit TASK_1127 geschlossen.
 - Lokale Pruefung: TASK_1126 13/13; TASK_1119 33/33 headless sowie 39/39 je BLUE/GOLD Real Window; TASK_1125 10/10; TASK_1124 11/11; TASK_839 31/31; TASK_1104 31/31; TASK_222 82/82; TASK_274 74/76.
-- Naechster Schritt: TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair.
+- Naechster Schritt: abgeschlossen durch TASK_1127.
 
 ### TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability
 - Status: implementiert im Arbeitsstand

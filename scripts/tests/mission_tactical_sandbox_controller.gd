@@ -233,6 +233,7 @@ const RELEASE_FIREFIGHT_WORLD_LABEL_DENSITY_MODE: String = "release_firefight_de
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_VISUAL_WEIGHT: float = 2.4
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_VISUAL_WEIGHT: float = 1.35
 const MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID: String = "mission_team_chip_tooltip_hint_v1"
+const TACTICAL_COMMUNICATION_BUBBLE_MIN_VISIBLE_FRAMES: int = 12
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
@@ -15853,9 +15854,43 @@ func _maybe_store_tactical_communication_bubble(event: Dictionary) -> void:
 	))
 	if not bool(payload.get("ok", false)):
 		return
+	if _bind_tactical_event_to_active_command_bubble(payload):
+		return
+	if _is_routine_tactical_event_suppressed_by_bubble_mode(payload):
+		return
 	if not bool(_get_comic_bubble_runtime_gate().call("should_emit_payload", payload, COMIC_BUBBLE_SETTINGS_SCRIPT.CATEGORY_FTL_COMMAND_FEEDBACK)):
 		return
 	_store_fireteamleader_feedback_bubble(payload)
+
+
+func _bind_tactical_event_to_active_command_bubble(payload: Dictionary) -> bool:
+	var event_id: String = String(payload.get("tactical_communication_event_id", "")).strip_edges()
+	var fireteam_id: String = String(payload.get("fireteam_id", "")).strip_edges().to_lower()
+	if event_id.is_empty() or fireteam_id.is_empty():
+		return false
+	for bubble_index in range(_fireteamleader_feedback_bubbles.size()):
+		var bubble_variant = _fireteamleader_feedback_bubbles[bubble_index]
+		if typeof(bubble_variant) != TYPE_DICTIONARY:
+			continue
+		var bubble: Dictionary = Dictionary(bubble_variant).duplicate(true)
+		if String(bubble.get("fireteam_id", "")).strip_edges().to_lower() != fireteam_id:
+			continue
+		if String(bubble.get("tactical_communication_event_id", "")).strip_edges() == event_id:
+			return false
+		if not String(bubble.get("tactical_communication_event_id", "")).strip_edges().is_empty():
+			return false
+		bubble["tactical_communication_event_id"] = event_id
+		bubble["minimum_visible_until_frame"] = Engine.get_process_frames() + TACTICAL_COMMUNICATION_BUBBLE_MIN_VISIBLE_FRAMES
+		_fireteamleader_feedback_bubbles[bubble_index] = bubble
+		return true
+	return false
+
+
+func _is_routine_tactical_event_suppressed_by_bubble_mode(payload: Dictionary) -> bool:
+	var settings: Dictionary = get_fireteamleader_feedback_bubble_settings()
+	if String(settings.get("mode", COMIC_BUBBLE_SETTINGS_SCRIPT.MODE_NORMAL)) != COMIC_BUBBLE_SETTINGS_SCRIPT.MODE_MINIMAL:
+		return false
+	return String(payload.get("tactical_communication_event_type", "")).strip_edges() == TACTICAL_COMMUNICATION_EVENT_SCRIPT.EVENT_PLAN_ROLE_ASSIGNED
 
 
 func _build_selected_tactical_communication_text() -> String:
@@ -16007,9 +16042,28 @@ func _store_fireteamleader_feedback_bubble(payload: Dictionary) -> void:
 	var duration_seconds: float = clampf(float(normalized_payload.get("duration_seconds", 1.8)), 0.4, 6.0)
 	normalized_payload["created_at_msec"] = now_msec
 	normalized_payload["expires_at_msec"] = now_msec + maxi(roundi(duration_seconds * 1000.0), 250)
+	if not String(normalized_payload.get("tactical_communication_event_id", "")).strip_edges().is_empty():
+		normalized_payload["minimum_visible_until_frame"] = Engine.get_process_frames() + TACTICAL_COMMUNICATION_BUBBLE_MIN_VISIBLE_FRAMES
 	_fireteamleader_feedback_sequence += 1
 	normalized_payload["feedback_sequence"] = _fireteamleader_feedback_sequence
-	_fireteamleader_feedback_bubbles = [normalized_payload]
+	var fireteam_id: String = String(normalized_payload.get("fireteam_id", "")).strip_edges().to_lower()
+	var unit_id: String = String(normalized_payload.get("unit_id", "")).strip_edges()
+	var retained_bubbles: Array = []
+	for bubble_variant in _fireteamleader_feedback_bubbles:
+		if typeof(bubble_variant) != TYPE_DICTIONARY:
+			continue
+		var existing: Dictionary = Dictionary(bubble_variant)
+		var same_fireteam: bool = not fireteam_id.is_empty() and String(existing.get("fireteam_id", "")).strip_edges().to_lower() == fireteam_id
+		var same_unit: bool = not unit_id.is_empty() and String(existing.get("unit_id", "")).strip_edges() == unit_id
+		if same_fireteam or same_unit:
+			continue
+		retained_bubbles.append(existing)
+	retained_bubbles.append(normalized_payload)
+	var settings: Dictionary = get_fireteamleader_feedback_bubble_settings()
+	var max_total: int = maxi(int(settings.get("max_active_bubbles_total", 4)), 1)
+	while retained_bubbles.size() > max_total:
+		retained_bubbles.pop_front()
+	_fireteamleader_feedback_bubbles = retained_bubbles
 
 
 func _prune_fireteamleader_feedback_bubbles(now_msec: int = -1) -> bool:
@@ -16024,7 +16078,9 @@ func _prune_fireteamleader_feedback_bubbles(now_msec: int = -1) -> bool:
 			continue
 		var bubble: Dictionary = Dictionary(bubble_variant).duplicate(true)
 		var expires_at_msec: int = int(bubble.get("expires_at_msec", 0))
-		if expires_at_msec > 0 and resolved_now_msec >= expires_at_msec:
+		var minimum_visible_until_frame: int = int(bubble.get("minimum_visible_until_frame", 0))
+		var minimum_frames_elapsed: bool = now_msec >= 0 or minimum_visible_until_frame <= 0 or Engine.get_process_frames() >= minimum_visible_until_frame
+		if expires_at_msec > 0 and resolved_now_msec >= expires_at_msec and minimum_frames_elapsed:
 			changed = true
 			continue
 		retained_bubbles.append(bubble)
