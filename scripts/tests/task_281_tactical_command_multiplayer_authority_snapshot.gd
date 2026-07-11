@@ -52,6 +52,7 @@ func _test_tactical_command_whitelist_and_rejects() -> void:
 	simulation_root.set("is_server_authoritative", true)
 	simulation_root.call("set_peer_team", 2, "team_bravo")
 	simulation_root.call("set_peer_role", 2, "commander")
+	simulation_root.call("set_peer_fireteams", 2, ["red"])
 	simulation_root.call("set_peer_team", 1, "team_alpha")
 	simulation_root.call("set_peer_role", 1, "host")
 
@@ -68,6 +69,15 @@ func _test_tactical_command_whitelist_and_rejects() -> void:
 	}, 2))
 	_assert(bool(intent_result.get("accepted", false)), "CommanderIntent is whitelisted for the owning commander peer")
 	_assert(String(intent_result.get("category", "")) == "commander_intent", "CommanderIntent validation reports its category")
+	var foreign_intent_result: Dictionary = Dictionary(simulation_root.call("submit_network_command_for_peer", {
+		"contract_category": "commander_intent",
+		"command_id": "intent_blue_foreign",
+		"verb": "move",
+		"team_id": "team_bravo",
+		"fireteam_id": "blue",
+		"target_position": Vector2(128.0, 64.0),
+	}, 2))
+	_assert(String(foreign_intent_result.get("reason", "")) == "fireteam_not_assigned_to_peer", "CommanderIntent rejects a foreign Fireteam for the commander peer")
 
 	var breakout_result: Dictionary = Dictionary(simulation_root.call("submit_network_command_for_peer", {
 		"command_type": "breakout_confirm",

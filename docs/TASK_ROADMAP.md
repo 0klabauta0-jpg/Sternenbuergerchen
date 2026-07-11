@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1116 - Connected Post-Deboard Fireteam Command Handoff (implementiert im Arbeitsstand)
+- Grundlage: Nach verbundenem Deboarding konnten normale Move-/Defend-Orders noch lokal in nicht tickenden Client-Pfaden landen; nur Missionsinteraktionen hatten einen GO-RPC-Handoff.
+- Ergebnis: Clientplanung bleibt Preview, GO sendet je Fireteam einen Intent, Host committed und startet die vorhandene Movement-/Pathfinding-/Formation-Kette. BLUE und GOLD sehen ihre Positionsaenderungen ueber Snapshots.
+- Architektur: `commander_intent` verlangt Peer-Fireteam-Besitz. `SimulationRoot` ist Commit-Grenze; Clients erzeugen keine Gameplay-Commands oder Effects und replizieren keine Planungs-UI.
+- Verifikation: TASK_1116 16/16, TASK_281 34/34, TASK_501 10/10, TASK_475 17/17, TASK_1094 6/6, TASK_1115 25/25 und Drei-Peer-Produktlauf TASK_1104 31/31.
+- Naechster Schritt: TASK_1117 - Connected Post-Deboard First Contact Combat Handoff.
+
 ## TASK_1115 - Connected Parallel Dropship Drop Deboard Return Playthrough (implementiert im Arbeitsstand)
 - Grundlage: Commands, Snapshots und Kartenfeedback waren verbunden, aber zwei komplette parallele Drops bis Deboarding und RTB waren nur lokal bewiesen.
 - Ergebnis: Host, BLUE und GOLD konvergieren ueber echte ENet-Snapshots auf zwei getrennte Drop-Sequenzen, alle deployten Units und beide RTB-Zustaende. Lokale Craft-/Fireteam-Auswahl bleibt erhalten.

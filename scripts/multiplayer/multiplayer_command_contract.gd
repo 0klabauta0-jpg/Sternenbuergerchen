@@ -275,7 +275,7 @@ func _validate_commander_intent(command: Dictionary) -> Dictionary:
 		var fireteam_ids: PackedStringArray = PackedStringArray(intent_dict.get("coordinated_fireteam_ids", PackedStringArray()))
 		if not fireteam_ids.is_empty():
 			fireteam_id = String(fireteam_ids[0]).strip_edges().to_lower()
-	return _accept_payload("commander_intent", "", team_id, fireteam_id)
+	return _accept_payload("commander_intent", "", team_id, fireteam_id, {"requires_fireteam_assignment": true})
 
 
 func _validate_role_override(command: Dictionary) -> Dictionary:

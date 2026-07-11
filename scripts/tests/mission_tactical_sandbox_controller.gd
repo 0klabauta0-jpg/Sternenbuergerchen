@@ -465,6 +465,9 @@ var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
 var _network_mission_interaction_feedback: Dictionary = {}
 var _network_mission_interaction_request_pending: bool = false
 var _network_dropship_command_sequence: int = 0
+var _network_fireteam_command_sequence: int = 0
+var _pending_network_fireteam_commands: Dictionary = {}
+var _network_fireteam_command_feedback: Dictionary = {}
 const NETWORK_DROPSHIP_PENDING_TIMEOUT_SECONDS: float = 8.0
 const NETWORK_DROPSHIP_RESULT_FEEDBACK_SECONDS: float = 3.0
 var _pending_network_dropship_commands_by_craft: Dictionary = {}
@@ -1372,6 +1375,9 @@ func execute_selected_fireteam_orders() -> bool:
 	var network_interaction_handoff: Dictionary = _try_submit_connected_client_mission_interaction()
 	if bool(network_interaction_handoff.get("handled", false)):
 		return bool(network_interaction_handoff.get("accepted", false))
+	var network_fireteam_handoff: Dictionary = _try_submit_connected_client_fireteam_orders()
+	if bool(network_fireteam_handoff.get("handled", false)):
+		return bool(network_fireteam_handoff.get("accepted", false))
 	var target_phase_index: int = _get_live_order_phase_index()
 	var issued_fireteams: PackedStringArray = []
 	var already_active_fireteams: PackedStringArray = []
@@ -1464,6 +1470,38 @@ func execute_selected_fireteam_orders() -> bool:
 	_update_ui()
 	_emit_planning_state_changed()
 	return true
+
+
+func _try_submit_connected_client_fireteam_orders() -> Dictionary:
+	if not _is_connected_network_snapshot_client():
+		return {"handled": false, "accepted": false}
+	var phase_index: int = _get_live_order_phase_index()
+	var submitted_count: int = 0
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or _pending_network_fireteam_commands.has(fireteam_id):
+			_last_command_text = "%s | WARTE AUF HOST" % fireteam_id.to_upper()
+			_update_ui()
+			return {"handled": true, "accepted": false}
+		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, phase_index), null)
+		if plan == null or plan.waypoints.is_empty():
+			continue
+		var waypoint_index: int = _find_next_executable_waypoint_index(plan)
+		if waypoint_index < 0 or waypoint_index >= plan.waypoints.size():
+			continue
+		var waypoint = plan.waypoints[waypoint_index]
+		if waypoint == null or typeof(waypoint.target_position) != TYPE_VECTOR2:
+			continue
+		if request_network_authoritative_fireteam_intent(fireteam_id, String(waypoint.command_type), Vector2(waypoint.target_position), phase_index):
+			waypoint.status = FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE
+			plan.active_waypoint_index = waypoint_index
+			plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_ACTIVE
+			submitted_count += 1
+	if submitted_count <= 0:
+		_last_command_text = "NO ORDERS TO SEND"
+		_update_ui()
+		return {"handled": true, "accepted": false}
+	return {"handled": true, "accepted": true, "submitted_count": submitted_count}
 
 
 func get_phase_state_snapshot() -> Dictionary:
@@ -1994,6 +2032,9 @@ func _connect_fire_rule_authority_signals() -> void:
 	var dropship_commit_callable := Callable(self, "_on_authoritative_dropship_command_committed")
 	if simulation_root.has_signal("dropship_command_committed") and not simulation_root.is_connected("dropship_command_committed", dropship_commit_callable):
 		simulation_root.connect("dropship_command_committed", dropship_commit_callable)
+	var commander_intent_commit_callable := Callable(self, "_on_authoritative_commander_intent_committed")
+	if simulation_root.has_signal("commander_intent_committed") and not simulation_root.is_connected("commander_intent_committed", commander_intent_commit_callable):
+		simulation_root.connect("commander_intent_committed", commander_intent_commit_callable)
 	var result_callable := Callable(self, "_on_network_command_result_received")
 	if simulation_root.has_signal("network_command_result_received") and not simulation_root.is_connected("network_command_result_received", result_callable):
 		simulation_root.connect("network_command_result_received", result_callable)
@@ -2092,6 +2133,9 @@ func _on_network_command_result_received(result: Dictionary) -> void:
 		return
 	if String(result.get("source_context", "")).strip_edges() == "mission_interaction_use_intent_command":
 		_apply_network_mission_interaction_result(result)
+		return
+	if String(result.get("source_context", "")).strip_edges() == "mission_fireteam_go":
+		_apply_network_fireteam_command_result(result)
 		return
 	if String(result.get("command_type", "")).strip_edges().to_lower() != "set_fire_rule":
 		return
@@ -2349,6 +2393,113 @@ func request_network_authoritative_dropship_command(command_type: String, craft_
 	_last_command_text = "%s %s -> HOST" % [_build_dropship_command_action_label(command_type), normalized_craft_id]
 	_update_ui()
 	return true
+
+
+func request_network_authoritative_fireteam_intent(fireteam_id: String, command_type: String, target_position: Vector2, phase_index: int = LIVE_ORDER_PHASE_INDEX) -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	var normalized_command_type: String = command_type.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty() or not normalized_command_type in ["move", "defend", "take", "flank", "engage", "hold"]:
+		return false
+	if _pending_network_fireteam_commands.has(normalized_fireteam_id):
+		_last_command_text = "%s %s | WARTE AUF HOST" % [normalized_command_type.to_upper(), normalized_fireteam_id.to_upper()]
+		_update_ui()
+		return false
+	var peer_id: int = multiplayer.get_unique_id()
+	var team_id: String = String(simulation_root.call("get_peer_team", peer_id)).strip_edges() if simulation_root.has_method("get_peer_team") else ""
+	if team_id.is_empty():
+		team_id = FRIENDLY_TEAM_ID
+	_network_fireteam_command_sequence += 1
+	var command_id: String = "fireteam:%d:%d:%s:%s" % [peer_id, _network_fireteam_command_sequence, normalized_fireteam_id, normalized_command_type]
+	var command: Dictionary = {
+		"contract_category": "commander_intent",
+		"command_type": normalized_command_type,
+		"command_id": command_id,
+		"verb": normalized_command_type,
+		"team_id": team_id,
+		"fireteam_id": normalized_fireteam_id,
+		"target_position": target_position,
+		"phase": phase_index,
+		"source_context": "mission_fireteam_go",
+	}
+	_pending_network_fireteam_commands[normalized_fireteam_id] = command.duplicate(true)
+	if multiplayer.is_server():
+		var result: Dictionary = Dictionary(simulation_root.call("submit_network_command_for_peer", command, peer_id))
+		_apply_network_fireteam_command_result(result.merged({"source_context": "mission_fireteam_go", "command_id": command_id, "fireteam_id": normalized_fireteam_id, "command_type": normalized_command_type}, true))
+		if not bool(result.get("accepted", false)):
+			return false
+	else:
+		simulation_root.rpc_id(1, "request_command", command)
+	_last_command_text = "%s %s -> HOST" % [normalized_command_type.to_upper(), normalized_fireteam_id.to_upper()]
+	_update_ui()
+	return true
+
+
+func _apply_network_fireteam_command_result(result: Dictionary) -> void:
+	var fireteam_id: String = String(result.get("fireteam_id", "")).strip_edges().to_lower()
+	var command_id: String = String(result.get("command_id", "")).strip_edges()
+	var pending: Dictionary = Dictionary(_pending_network_fireteam_commands.get(fireteam_id, {}))
+	if not pending.is_empty() and (command_id.is_empty() or String(pending.get("command_id", "")) == command_id):
+		_pending_network_fireteam_commands.erase(fireteam_id)
+	var accepted: bool = bool(result.get("accepted", false))
+	var command_type: String = String(result.get("command_type", pending.get("command_type", "move"))).strip_edges().to_lower()
+	var reason: String = String(result.get("reason", "")).strip_edges()
+	var compact_line: String = "%s %s HOST OK" % [command_type.to_upper(), fireteam_id.to_upper()] if accepted else "%s %s BLOCKIERT | %s" % [command_type.to_upper(), fireteam_id.to_upper(), _build_network_mission_interaction_reason_label(reason)]
+	_network_fireteam_command_feedback = {
+		"status": "accepted" if accepted else "blocked",
+		"accepted": accepted,
+		"fireteam_id": fireteam_id,
+		"command_type": command_type,
+		"reason": reason,
+		"compact_line": compact_line,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	_last_command_text = compact_line
+	_update_ui()
+
+
+func get_network_fireteam_command_feedback_snapshot() -> Dictionary:
+	return _network_fireteam_command_feedback.duplicate(true)
+
+
+func _on_authoritative_commander_intent_committed(command: Dictionary) -> void:
+	if String(command.get("source_context", "")).strip_edges() != "mission_fireteam_go":
+		return
+	_apply_authoritative_fireteam_intent(command)
+
+
+func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var command_type: String = String(command.get("verb", command.get("command_type", "move"))).strip_edges().to_lower()
+	var target_variant: Variant = command.get("target_position", null)
+	if fireteam_id.is_empty() or typeof(target_variant) != TYPE_VECTOR2 or not _is_fireteam_runtime_active(fireteam_id):
+		return false
+	var target_position := Vector2(target_variant)
+	var phase_index: int = int(command.get("phase", LIVE_ORDER_PHASE_INDEX))
+	var waypoint = FIRETEAM_WAYPOINT_SCRIPT.new({
+		"waypoint_id": String(command.get("command_id", "")),
+		"command_type": command_type,
+		"status": FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE,
+		"target_position": target_position,
+	})
+	var behavior_profile = _resolve_fireteam_behavior_profile(fireteam_id, command_type, target_position)
+	if behavior_profile != null:
+		var metadata: Dictionary = Dictionary(behavior_profile.metadata).duplicate(true)
+		metadata["origin"] = "network_commander_intent"
+		metadata["phase"] = phase_index
+		behavior_profile.metadata = metadata
+	_set_active_behavior_profile(fireteam_id, behavior_profile)
+	_phase_execution_by_fireteam[fireteam_id] = {
+		"phase": phase_index,
+		"waypoint_index": 0,
+		"hold_elapsed": 0.0,
+		"resolved_target_position": target_position,
+		"started_msec": Time.get_ticks_msec(),
+	}
+	return _issue_waypoint_for_fireteam(fireteam_id, waypoint, phase_index, behavior_profile)
 
 
 func _get_dropship_command_fireteam_id(craft_id: String) -> String:
@@ -3144,6 +3295,8 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 		return false
 	if requires_tile:
 		_apply_selected_tile_to_target_marker()
+	if _is_connected_network_snapshot_client():
+		return _plan_connected_client_fireteam_command(command_type, display_text, _selected_tile_world_position if requires_tile else _get_target_position())
 
 	var issued_count: int = 0
 	for driver in _get_active_flow_drivers():
@@ -3169,6 +3322,35 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 	_record_fireteamleader_feedback_for_selected_fireteams(command_type, "accepted", "accepted")
 	_refresh_order_visuals()
 	_update_ui()
+	return true
+
+
+func _plan_connected_client_fireteam_command(command_type: String, display_text: String, target_position: Vector2) -> bool:
+	var phase_index: int = _get_live_order_phase_index()
+	var waypoint_refs: Array = _create_waypoints_for_selected_fireteams(target_position, true, false)
+	if waypoint_refs.is_empty():
+		_last_command_text = "%s FAILED" % display_text
+		_update_ui()
+		return false
+	for ref_variant in waypoint_refs:
+		if typeof(ref_variant) != TYPE_DICTIONARY:
+			continue
+		var ref: Dictionary = Dictionary(ref_variant)
+		var fireteam_id: String = String(ref.get("fireteam_id", "")).strip_edges().to_lower()
+		var waypoint_id: String = String(ref.get("waypoint_id", "")).strip_edges()
+		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, phase_index), null)
+		if plan == null:
+			continue
+		for waypoint in plan.waypoints:
+			if waypoint != null and String(waypoint.waypoint_id) == waypoint_id:
+				waypoint.command_type = command_type.strip_edges().to_lower()
+				break
+	_last_command_text = "%s GEPLANT | GO" % display_text
+	_record_fireteamleader_feedback_for_selected_fireteams(command_type, "accepted", "planned_network")
+	_refresh_button_state()
+	_refresh_order_visuals()
+	_update_ui()
+	_emit_planning_state_changed()
 	return true
 
 

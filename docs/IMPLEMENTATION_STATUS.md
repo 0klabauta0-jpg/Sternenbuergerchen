@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1116 - Connected Post-Deboard Fireteam Command Handoff
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1116_connected_post_deboard_fireteam_command_handoff.md`, `docs/tasks/TASK_1115_connected_parallel_dropship_drop_deboard_return_playthrough.md`, `scripts/command/commander_intent.gd`
+- Befund: Nach Deboarding plante ein verbundener Client normale Move-/Defend-Befehle noch ueber den historischen FlowDriver. Dieser sendete bereits beim Planen Unit-Commands, waehrend GO keinen allgemeinen Host-Handoff besass. Fremde Commander-Intents verlangten ausserdem keine explizite Fireteam-Zuweisung.
+- Aenderung: Verbundene Clients erzeugen beim Planen nur lokale Preview-Waypoints. GO sendet pro Fireteam einen `commander_intent`; `SimulationRoot` validiert Besitz, committed im Host-Tick und emittiert den Intent. Der Host-Controller startet damit den bestehenden FireteamMovementController. Pending blockiert Doppel-GO, Result-Feedback bleibt read-only.
+- Multiplayer/Performance: Nur kompakte Intent-Daten laufen ueber den vorhandenen reliable Command-RPC. Pathfinding, Formation, Taktikprofil und Unit-Commands bleiben Host-Sache. Clients sehen Bewegungspositionen ueber normale Snapshots und erzeugen keine lokalen Commands oder Effects.
+- Risiken/offen: Movement ist verbunden; als naechstes muss der erste parallele Kontakt mit ROE, Zielerkennung und Combat-Snapshot fuer beide Fireteams nachgewiesen werden.
+- Lokale Pruefung: TASK_1116 16/16, TASK_281 34/34, TASK_501 10/10, TASK_475 17/17, TASK_1094 6/6, TASK_1115 25/25 und TASK_1104 31/31.
+- Naechster Schritt: TASK_1117 - Connected Post-Deboard First Contact Combat Handoff.
+
 ### TASK_1115 - Connected Parallel Dropship Drop Deboard Return Playthrough
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1115_connected_parallel_dropship_drop_deboard_return_playthrough.md`, `docs/tasks/TASK_1112_connected_parallel_dropship_command_lifecycle_recovery.md`, `docs/tasks/TASK_396_mission_dropship_lz_drop_hotfix.md`
