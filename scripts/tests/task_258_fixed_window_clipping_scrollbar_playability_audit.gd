@@ -61,8 +61,11 @@ func _test_main_menu_and_lobby_fixed_shells() -> void:
 		main_menu.queue_free()
 		await process_frame
 
-	root.size = Vector2i(1280, 720)
-	var lobby: Node = HARNESS_SCRIPT.instantiate_scene(MULTIPLAYER_LOBBY_SCENE_PATH, root)
+	var lobby_viewport := SubViewport.new()
+	lobby_viewport.size = Vector2i(1280, 720)
+	lobby_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	root.add_child(lobby_viewport)
+	var lobby: Node = HARNESS_SCRIPT.instantiate_scene(MULTIPLAYER_LOBBY_SCENE_PATH, lobby_viewport)
 	_assert(lobby != null, "Multiplayer lobby instantiates for layout audit")
 	if lobby != null:
 		await _wait_frames(2)
@@ -76,7 +79,7 @@ func _test_main_menu_and_lobby_fixed_shells() -> void:
 			"Panel/Margin/VBox/AssignmentLabel",
 			"Panel/Margin/VBox/HintLabel",
 		]), "Lobby critical labels avoid hard overflow")
-		lobby.queue_free()
+		lobby_viewport.queue_free()
 		await process_frame
 
 
