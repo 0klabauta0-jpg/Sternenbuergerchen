@@ -269,6 +269,9 @@ const EDITOR_LIGHT_SHADOW_OPACITY: float = 0.42
 const EDITOR_LIGHT_SHADOW_BLUR: float = 2.15
 const EDITOR_AMBIENT_LIGHT_COLOR: Color = Color(0.82, 0.86, 0.88, 1.0)
 const EDITOR_AMBIENT_LIGHT_ENERGY: float = 0.92
+const EDITOR_ADJUSTMENT_BRIGHTNESS: float = 0.78
+const EDITOR_ADJUSTMENT_CONTRAST: float = 1.06
+const EDITOR_ADJUSTMENT_SATURATION: float = 0.92
 const TILE_GRID_LINE_COLOR: Color = Color(0.56, 0.97, 1.0, 0.96)
 const TILE_GRID_LINE_SHADOW_COLOR: Color = Color(0.015, 0.025, 0.03, 0.96)
 const TILE_GRID_LINE_WIDTH_FACTOR: float = 0.045
@@ -1808,6 +1811,39 @@ func focus_world_position(world_position: Vector2) -> void:
 	_update_camera_transform()
 
 
+func frame_world_positions(world_positions: Array, padding: float = 6.0, minimum_size: float = 18.0, maximum_size: float = CAMERA_DEFAULT_SIZE) -> Dictionary:
+	var grid_positions: Array[Vector2] = []
+	for position_variant in world_positions:
+		if typeof(position_variant) != TYPE_VECTOR2:
+			continue
+		grid_positions.append(_world_to_grid_float(Vector2(position_variant)))
+	if grid_positions.is_empty():
+		return {"framed": false, "reason": "no_world_positions"}
+	var min_grid: Vector2 = grid_positions[0]
+	var max_grid: Vector2 = grid_positions[0]
+	for grid_position in grid_positions:
+		min_grid.x = minf(min_grid.x, grid_position.x)
+		min_grid.y = minf(min_grid.y, grid_position.y)
+		max_grid.x = maxf(max_grid.x, grid_position.x)
+		max_grid.y = maxf(max_grid.y, grid_position.y)
+	_focus_grid_position = (min_grid + max_grid) * 0.5
+	_clamp_focus_to_map()
+	var normalized_minimum: float = clampf(minimum_size, CAMERA_MIN_SIZE, CAMERA_MAX_SIZE)
+	var normalized_maximum: float = clampf(maximum_size, normalized_minimum, CAMERA_MAX_SIZE)
+	var span: Vector2 = max_grid - min_grid
+	_camera_size = clampf(maxf(span.x, span.y) + maxf(padding, 0.0), normalized_minimum, normalized_maximum)
+	_update_camera_transform()
+	_request_viewport_redraw(true)
+	return {
+		"framed": true,
+		"focus_grid_position": _focus_grid_position,
+		"camera_size": _camera_size,
+		"point_count": grid_positions.size(),
+		"read_only": true,
+		"sets_gameplay_truth": false,
+	}
+
+
 func focus_map_center() -> void:
 	if _grid_size == Vector2i.ZERO:
 		_focus_grid_position = Vector2.ZERO
@@ -2794,6 +2830,12 @@ func _build_editor_light_snapshot() -> Dictionary:
 		"ambient_light_color": environment.ambient_light_color.to_html(true) if environment != null else EDITOR_AMBIENT_LIGHT_COLOR.to_html(true),
 		"ambient_light_energy": float(environment.ambient_light_energy) if environment != null else EDITOR_AMBIENT_LIGHT_ENERGY,
 		"background_color": environment.background_color.to_html(true) if environment != null else EDITOR_EMPTY_BACKGROUND_COLOR.to_html(true),
+		"tonemap_enabled": environment != null and environment.tonemap_mode == Environment.TONE_MAPPER_FILMIC,
+		"tonemap_mode": "filmic" if environment != null and environment.tonemap_mode == Environment.TONE_MAPPER_FILMIC else "other",
+		"adjustment_enabled": bool(environment.adjustment_enabled) if environment != null else true,
+		"adjustment_brightness": float(environment.adjustment_brightness) if environment != null else EDITOR_ADJUSTMENT_BRIGHTNESS,
+		"adjustment_contrast": float(environment.adjustment_contrast) if environment != null else EDITOR_ADJUSTMENT_CONTRAST,
+		"adjustment_saturation": float(environment.adjustment_saturation) if environment != null else EDITOR_ADJUSTMENT_SATURATION,
 	}
 
 
@@ -3057,6 +3099,11 @@ func _ensure_nodes() -> void:
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = EDITOR_AMBIENT_LIGHT_COLOR
 	environment.ambient_light_energy = EDITOR_AMBIENT_LIGHT_ENERGY
+	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	environment.adjustment_enabled = true
+	environment.adjustment_brightness = EDITOR_ADJUSTMENT_BRIGHTNESS
+	environment.adjustment_contrast = EDITOR_ADJUSTMENT_CONTRAST
+	environment.adjustment_saturation = EDITOR_ADJUSTMENT_SATURATION
 
 
 func _apply_editor_light_settings() -> void:
@@ -5901,6 +5948,10 @@ func _get_world_label_density_mode() -> String:
 	return WORLD_LABEL_DENSITY_MODE_DEFAULT
 
 
+func _is_connected_contact_world_label_focus_active() -> bool:
+	return String(_order_payload.get("world_label_focus_mode", "")).strip_edges().to_lower() == "connected_contact"
+
+
 func _is_release_firefight_world_label_declutter_active() -> bool:
 	return _get_world_label_density_mode() == WORLD_LABEL_DENSITY_MODE_RELEASE_FIREFIGHT_DECLUTTER
 
@@ -6168,6 +6219,8 @@ func _should_suppress_release_firefight_world_bubble(feedback_bubble: Dictionary
 
 
 func _should_suppress_release_firefight_fire_status_label(fire_event: Dictionary, label_text: String, is_friendly_fire: bool) -> bool:
+	if bool(fire_event.get("suppress_world_status_label", false)) and not is_friendly_fire:
+		return true
 	if not _is_release_firefight_world_label_declutter_active():
 		return false
 	if is_friendly_fire:
@@ -6598,7 +6651,10 @@ func _add_enemy_security_visual(security_state: Dictionary) -> void:
 	var label_text: String = String(security_state.get("watch_label", "")).strip_edges()
 	if label_text.is_empty():
 		label_text = "EN SEC %s" % security_mode.to_upper()
-	_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.22), "EnemySecurityLabel_%s" % group_id, color.lightened(0.08), 12)
+	if not _is_connected_contact_world_label_focus_active():
+		_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.22), "EnemySecurityLabel_%s" % group_id, color.lightened(0.08), 12)
+	else:
+		_world_label_declutter_suppressed_count += 1
 	_enemy_security_entries.append({
 		"security_group_id": group_id,
 		"security_mode": security_mode,
@@ -6640,7 +6696,10 @@ func _add_enemy_tactics_visual(tactics_state: Dictionary) -> void:
 		_add_line3d(_order_root, _world_to_surface_3d_position(anchor_position, 0.58), _world_to_surface_3d_position(target_position, 0.58), color, "EnemyTacticLine_%s_%s" % [group_id, String(unit_id)])
 		_add_marker3d(_order_root, target_position, Color(color.r, color.g, color.b, 0.48), "EnemyTacticTarget_%s_%s" % [group_id, String(unit_id)], 0.1, 0.09, 4)
 	_enemy_tactics_visual_count += 1
-	_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.44), "EnemyTacticLabel_%s" % group_id, color.lightened(0.06), 12)
+	if not _is_connected_contact_world_label_focus_active():
+		_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.44), "EnemyTacticLabel_%s" % group_id, color.lightened(0.06), 12)
+	else:
+		_world_label_declutter_suppressed_count += 1
 	_enemy_tactics_entries.append({
 		"security_group_id": group_id,
 		"advance_style": String(tactics_state.get("advance_style", "")),

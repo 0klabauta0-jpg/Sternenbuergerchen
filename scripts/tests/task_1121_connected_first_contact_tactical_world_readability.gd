@@ -34,6 +34,7 @@ func _run() -> void:
 	_assert(lobby_source.contains("_background_rect.visible = visible") and lobby_source.contains("_background_shade.visible = visible"), "Lobby visibility contract explicitly owns background and shade")
 	var playtest_source := FileAccess.get_file_as_string(PRODUCT_PLAYTEST_PATH)
 	_assert(playtest_source.contains("(mission as Node2D).visible = is_target"), "Real-window capture couples world visibility to the requested peer")
+	_assert(playtest_source.contains("primary_view.visible = is_target"), "Real-window capture couples Primary3D CanvasLayer visibility to the requested peer")
 	_assert(not playtest_source.contains("(mission as Node2D).visible = index == 0"), "Real-window capture no longer mixes Host world with another peer HUD")
 
 	lobby.queue_free()
