@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1115 - Connected Parallel Dropship Drop Deboard Return Playthrough
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1115_connected_parallel_dropship_drop_deboard_return_playthrough.md`, `docs/tasks/TASK_1112_connected_parallel_dropship_command_lifecycle_recovery.md`, `docs/tasks/TASK_396_mission_dropship_lz_drop_hotfix.md`
+- Befund: Parallele LZ- und Command-Authority waren verbunden abgesichert, der komplette Zwei-Schiff-Lauf bis Deboarding und RTB jedoch nur lokal. Der rote Drei-Peer-Lauf fand ausserdem, dass Client-Snapshot-Presence lokale Deploy-Effects in eine absichtlich nicht tickende Client-Queue legte.
+- Aenderung: Ein echter Host-/BLUE-/GOLD-Playthrough setzt zwei LZs, startet beide Drops, beschleunigt ausschliesslich den Host-Runtime-Timer und prueft alle Snapshots bis Deboarding und RTB. Verbundene Snapshot-Clients spiegeln Embarked-/Deployed-Presence jetzt direkt als Darstellung und erzeugen keine lokalen Gameplay-Effects.
+- Multiplayer/Performance: Host bleibt alleinige Drop-Simulationsstelle. Clients behalten lokale Auswahl, Payloads bleiben craft-spezifisch, Command-/Effect-Queues wachsen durch Snapshot-Anwendung nicht. Kein neues Snapshotformat und kein zusaetzlicher RPC.
+- Risiken/offen: Der Transport-Handoff ist abgeschlossen; als naechstes muss der verbundene erste Bodenbefehl direkt nach Deboarding fuer BLUE und GOLD nachgewiesen werden.
+- Lokale Pruefung: TASK_1115 25/25, TASK_1114 13/13, TASK_1113 16/16, TASK_1112 13/13, TASK_396 17/17, TASK_399 9/9 und TASK_1104 31/31.
+- Naechster Schritt: TASK_1116 - Connected Post-Deboard Fireteam Command Handoff.
+
 ### TASK_1114 - Connected Dropship Pending Card Visual Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1114_connected_dropship_pending_card_visual_polish.md`, `docs/tasks/TASK_1113_connected_dropship_pending_feedback_double_submit_guard.md`, `scripts/ui/tactical_ui_theme.gd`

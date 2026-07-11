@@ -32703,6 +32703,7 @@ func _prune_deployed_unit_positions() -> void:
 func _apply_drop_presence_state_to_units() -> void:
 	var mission_setup = get_node_or_null("../MissionSetup")
 	var uses_deferred_activation: bool = mission_setup != null and bool(mission_setup.get("defer_friendly_runtime_activation"))
+	var network_snapshot_client: bool = _is_connected_network_snapshot_client()
 	if not uses_deferred_activation and _embarked_unit_ids.is_empty() and _deployed_unit_ids.is_empty():
 		return
 	var deployed_index: int = 0
@@ -32724,6 +32725,9 @@ func _apply_drop_presence_state_to_units() -> void:
 			continue
 		if preview_mode:
 			(unit as CanvasItem).visible = desired_visible
+		elif network_snapshot_client:
+			# Remote snapshots already carry authoritative unit state. The client only mirrors visibility here.
+			(unit as CanvasItem).visible = desired_visible
 		else:
 			if _deployed_unit_ids.has(unit_id):
 				if not _is_unit_runtime_registered(unit_id):
@@ -32743,6 +32747,14 @@ func _apply_drop_presence_state_to_units() -> void:
 			else:
 				_enqueue_dropship_presence_effect(unit, unit_id, desired_visible)
 	_suppress_primary_view_legacy_unit_visuals()
+
+
+func _is_connected_network_snapshot_client() -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or simulation_root.get("is_server_authoritative") != true:
+		return false
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	return peer != null and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED and not multiplayer.is_server()
 
 
 func _is_unit_runtime_registered(unit_id: String) -> bool:

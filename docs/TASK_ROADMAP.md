@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1115 - Connected Parallel Dropship Drop Deboard Return Playthrough (implementiert im Arbeitsstand)
+- Grundlage: Commands, Snapshots und Kartenfeedback waren verbunden, aber zwei komplette parallele Drops bis Deboarding und RTB waren nur lokal bewiesen.
+- Ergebnis: Host, BLUE und GOLD konvergieren ueber echte ENet-Snapshots auf zwei getrennte Drop-Sequenzen, alle deployten Units und beide RTB-Zustaende. Lokale Craft-/Fireteam-Auswahl bleibt erhalten.
+- Architektur: Snapshot-Clients spiegeln Presence rein visuell und legen keine hostautoritativen Deploy-Effects mehr in lokale Queues. Host bleibt alleinige Drop-Simulation; Payload und Snapshotformat bleiben unveraendert.
+- Verifikation: TASK_1115 25/25, TASK_1114 13/13, TASK_1113 16/16, TASK_1112 13/13, TASK_396 17/17, TASK_399 9/9 und Drei-Peer-Produktlauf TASK_1104 31/31.
+- Naechster Schritt: TASK_1116 - Connected Post-Deboard Fireteam Command Handoff.
+
 ## TASK_1114 - Connected Dropship Pending Card Visual Polish (implementiert im Arbeitsstand)
 - Grundlage: Per-Craft Pending funktionierte, aber Result- und Timeout-Rueckmeldung waren auf der Craft-Karte nicht dauerhaft und tonal unterscheidbar.
 - Ergebnis: Pending ist gelb, Snapshot-OK gruen und Reject/Timeout rot. Result-Feedback bleibt drei Sekunden pro Craft; BLUE beeinflusst GOLD weder visuell noch funktional.
