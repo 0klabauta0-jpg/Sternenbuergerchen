@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish (implementiert im Arbeitsstand)
+- Grundlage: Die rechte Kontrollflaeche zeigte rohe `NEXT/WHY`-Evidence und technische Combat-Dichtezeilen. Die erste deutsche Langform passte nicht in das feste 344-Pixel-Panel; der historische Style-Guard kannte nur die alten Praefixe.
+- Ergebnis: Eine kurze Zeile wie `POSITION AENDERN | KEIN ZIEL` bleibt im festen Panel lesbar. Raw Combat-Diagnose tritt bei vorhandenem Spielerhinweis aus der sichtbaren Liste zurueck und bleibt im Tooltip sowie in Evidence-Snapshots. Neue Aktionstypen behalten den bestehenden lesbaren HUD-Style.
+- Architektur: Reiner gemeinsamer Presenter und finaler Bottom-Dock-Filter. Keine Aenderung an Simulation, Combat, LOS, Contact, FireEvent, RPC, Command, Effect oder Snapshot-Wahrheit.
+- Verifikation: TASK_1141 14/14; TASK_1140 22/22; TASK_833 23/23; TASK_834 27/27; TASK_835 28/28; TASK_1118 13/13; TASK_1109 18/18; TASK_222 82/82; TASK_1136 19/19 Real Window.
+- Naechster Schritt: TASK_1142 - Mission Control Mission-State Player Language Polish.
+
 ## TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish (implementiert im Arbeitsstand)
 - Grundlage: Die Selected-Fireteam-Flaeche mischte mehrere read-only Diagnosevertraege ungefiltert und stapelte bis zu sechs Zeilen mit englischen Steuerwoertern.
 - Ergebnis: Ein zustandsloser Presenter zeigt hoechstens drei deutsche Spielerzeilen fuer naechsten Griff, Grund und Optionen. Roh-Evidence bleibt unveraendert im Tooltip; sichtbarer Text und Tooltip teilen denselben Refresh-Snapshot.
 - Architektur: Reine UI-Leseschicht. Keine Aenderung an SimulationRoot, Combat, Navigation, Commands, Effects, RPCs oder Snapshots.
 - Verifikation: TASK_1140 22/22; TASK_833 23/23; TASK_834 27/27; TASK_835 28/28; TASK_836 29/29; TASK_1109 18/18; TASK_222 82/82; TASK_1136 19/19 Real Window.
-- Naechster Schritt: TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish. Die rechte Kontrollflaeche bleibt der groesste sichtbare Sprach- und Dichtebruch.
+- Naechster Schritt: abgeschlossen durch TASK_1141.
 
 ## TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish (implementiert im Arbeitsstand)
 - Grundlage: Die Matrix war funktional, aber sichtbare englische Langtexte und alte Feuerregelkuerzel widersprachen dem deutschen Fireteam-HUD. Unskalierte Iconquellen sprengten im ersten echten Sichtlauf das Grid.

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1141_mission_control_decision_language_diagnostic_hierarchy_polish.md`, `docs/tasks/TASK_1140_selected_fireteam_decision_language_action_cue_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Befund: Mission Control zeigte trotz TASK_1140 weiterhin `NEXT/WHY`, danach rohe `NO FIRE`, `NO_LOS`, `COV`, `RNG`, `LOS?` und `FLK?`-Diagnose. Die erste deutsche Langform brach im schmalen Panel unruhig um; ein alter Style-Guard machte die verdichtete Folgeversion zunaechst unsichtbar.
+- Aenderung: Derselbe read-only Presenter liefert fuer Mission Control eine echte Kontrollzeile wie `POSITION AENDERN | KEIN ZIEL`. Technische Combat-Dichtezeilen werden bei vorhandenem Spielerhinweis aus der sichtbaren Liste entfernt, bleiben aber im Tooltip und in Roh-Snapshots. Der Style-Guard erkennt die neuen Aktionstypen explizit.
+- Sicht-/Runtime-Beleg: Der echte Full-HD-Lauf zeigt eine einzelne lesbare Aktionszeile sowie darunter nur LZ-, Anflug- und Dropship-Lage. Selected Fireteam, Member-Cards, Matrix und Welt bleiben stabil.
+- Multiplayer/Performance: Keine Aenderung an Combat-, LOS-, Range-, Contact-, FireEvent-, Command-, Effect-, RPC- oder Snapshot-Wahrheit. Die Perspektivsignaturen fuer BLUE/GOLD und das Performance-Gate bleiben gruen.
+- Lokale Pruefung: TASK_1141 14/14; TASK_1140 22/22; TASK_833 23/23; TASK_834 27/27; TASK_835 28/28; TASK_1118 13/13; TASK_1109 18/18; TASK_222 82/82; TASK_1136 19/19 Real Window.
+- Naechster Schritt: TASK_1142 - Mission Control Mission-State Player Language Polish. `Teams`, `Approach`, `Drop wartend` und LZ-Kuerzel bilden den naechsten sichtbaren Sprachbruch.
+
 ### TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1140_selected_fireteam_decision_language_action_cue_polish.md`, `docs/tasks/TASK_1139_command_matrix_player_language_icon_hierarchy_polish.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Sicht-/Runtime-Beleg: Der echte Full-HD-Lauf zeigt `LOS/Reichweite korrigieren`, `Kein Ziel erfasst` sowie `Halten | Vorruecken | Zurueck` klar oberhalb der Member-Cards. Karten, Matrix und Welt bleiben stabil.
 - Multiplayer/Performance: Reine read-only Praesentation. SimulationRoot, Combat, Navigation, Commands, Effects, RPCs und Snapshotfelder bleiben unveraendert. TASK_1109 und TASK_222 bleiben gruen.
 - Lokale Pruefung: TASK_1140 22/22; TASK_833 23/23; TASK_834 27/27; TASK_835 28/28; TASK_836 29/29; TASK_1109 18/18; TASK_222 82/82; TASK_1136 19/19 Real Window; `git diff --check`.
-- Naechster Schritt: TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish. Der Full-HD-Beleg zeigt rechts noch `NEXT/WHY`, `NO FIRE`, `LOS?` und rohe Kurzdiagnose.
+- Naechster Schritt: abgeschlossen durch TASK_1141.
 
 ### TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish
 - Status: implementiert im Arbeitsstand
