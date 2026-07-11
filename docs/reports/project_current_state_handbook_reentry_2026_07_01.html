@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1139: Die Command Matrix ist jetzt deutsch, icon-gestuetzt und im festen HUD-Raster lesbar.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1140: Die ausgewaehlte Fireteam-Entscheidung ist jetzt kurz, deutsch und handlungsorientiert.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1139</span>
+      <span class="pill good">Letzter Abschluss: TASK_1140</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -334,6 +334,11 @@
           <p>Die 5 x 4 Command Matrix zeigt feste Codes fuer Bewegen, Halten, Flanke, Nehmen, Ziel, Loeschen, Nutzen, Ordnen und vier Feuerregeln. Kleine CC0-Icons trennen die Aktionen visuell; deutsche Tooltips erklaeren jeden Code vollstaendig.</p>
           <div class="callout">Der echte Fensterlauf hat einen wichtigen Zwischenfehler aufgedeckt: Quellicons machten Buttons riesig. Der finale Presenter skaliert jedes Icon einmal auf 10 Pixel und cached es. Das Raster bleibt stabil, genau eine Feuerregel ist gelb aktiv, und keine UI-Aktion setzt Gameplay-Wahrheit.</div>
         </article>
+        <article class="card wide">
+          <h2>Klare Fireteam-Entscheidung TASK_1140</h2>
+          <p>Der grosse Bereich <code>#17 Selected Fireteam</code> zeigt die aktuelle Entscheidung jetzt als <code>NAECHSTER GRIFF</code>, <code>GRUND</code> und <code>OPTIONEN</code>. Interne Steuerwoerter wie <code>NEXT</code>, <code>WHY</code>, <code>HOLD</code>, <code>ADV</code> und <code>BACK</code> verschwinden aus der Spielflaeche.</p>
+          <div class="callout">Die technische Evidence bleibt vollstaendig im Tooltip und damit fuer Diagnose und Multiplayer-Vergleich erhalten. Der Presenter ist read-only, verwendet hoechstens drei Zeilen und teilt seinen Snapshot zwischen Text und Tooltip. Der Full-HD-Lauf sowie Multi-Dropship- und Performance-Gates bleiben gruen.</div>
+        </article>
       </div>
     </section>
 
@@ -430,16 +435,16 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1139 macht die Matrix kompakt, deutsch und icon-gestuetzt. Command-Hierarchie, Feuerdisziplin, Multi-Dropship-Auswahl und Performance bleiben gruen.</p>
-          <p><strong>Naechster sinnvoller Schritt:</strong> Der grosse Selected-Fireteam-Entscheidungstext mischt noch <code>NEXT/WHY/HOLD/ADV/BACK</code> mit deutschen Woertern. TASK_1140 soll daraus eine kurze Spielerlesung mit naechstem Griff und Grund machen, ohne die Combat-Evidence oder Multiplayer-Perspektive zu veraendern.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1140 macht die Selected-Fireteam-Entscheidung kompakt, deutsch und handlungsorientiert. Command-Hierarchie, Feuerdisziplin, Multi-Dropship-Auswahl und Performance bleiben gruen.</p>
+          <p><strong>Naechster sinnvoller Schritt:</strong> Mission Control rechts zeigt im Full-HD-Beleg noch <code>NEXT/WHY</code>, <code>NO FIRE</code>, <code>LOS?</code> und technische Kurzdiagnose. TASK_1141 soll diese Flaeche auf dieselbe deutsche Spielerhierarchie bringen, ohne die Rohdiagnose oder lokale Multiplayer-Perspektive zu verlieren.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish (51/51, Real Window 19/19)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish (22/22, Real Window 19/19)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1075,10 +1080,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish"
+            recommended_next_task: "TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish"
           },
           metadata: {
-            generated_for_task: "TASK_1139",
+            generated_for_task: "TASK_1140",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
