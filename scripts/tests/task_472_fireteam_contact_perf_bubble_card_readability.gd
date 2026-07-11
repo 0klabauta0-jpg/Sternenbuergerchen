@@ -20,7 +20,7 @@ func _init() -> void:
 func _run_tests() -> void:
 	print("=== TASK_472 Fireteam Contact Perf Bubble Card Readability ===")
 	await _test_hud_bubble_and_tactical_event_visuals_are_capped()
-	await _test_selected_member_card_wraps_downward_without_widening()
+	await _test_selected_member_card_wraps_downward_with_readable_width()
 	_test_flank_vulnerability_is_disabled_for_drill_baseline()
 	_test_docs_capture_task()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
@@ -55,10 +55,10 @@ func _test_hud_bubble_and_tactical_event_visuals_are_capped() -> void:
 	await _wait_frames(2)
 
 
-func _test_selected_member_card_wraps_downward_without_widening() -> void:
+func _test_selected_member_card_wraps_downward_with_readable_width() -> void:
 	var card = NPC_COMPACT_CARD_SCENE.instantiate()
 	root.add_child(card)
-	card.custom_minimum_size = Vector2(156.0, 118.0)
+	card.custom_minimum_size = Vector2(176.0, 118.0)
 	card.call(
 		"setup_from_profile",
 		{
@@ -72,20 +72,21 @@ func _test_selected_member_card_wraps_downward_without_widening() -> void:
 			"compact_mode": true,
 			"drag_enabled": false,
 			"show_lead_indicator": true,
+			"show_badges": false,
 			"is_lead": true,
 			"selected": true,
 			"fixed_size": true,
-			"fixed_card_size": Vector2(156.0, 118.0),
+			"fixed_card_size": Vector2(176.0, 118.0),
 			"compact_wrap_text": true,
 			"compact_data_a_max_lines": 2,
 			"compact_data_b_max_lines": 4,
-			"compact_text_min_width": 76.0,
+			"compact_text_min_width": 94.0,
 		}
 	)
 	await _wait_frames(4)
 	var data_a_label := card.get_node_or_null("Margin/HBox/TextVBox/DataALabel") as Label
 	var data_b_label := card.get_node_or_null("Margin/HBox/TextVBox/DataBLabel") as Label
-	_assert(card.custom_minimum_size.x == 156.0 and card.custom_minimum_size.y == 118.0, "Selected member card keeps width and grows downward")
+	_assert(card.custom_minimum_size.x == 176.0 and card.custom_minimum_size.y == 118.0, "Selected member card uses the readable mission width and grows downward")
 	_assert(data_a_label != null and data_a_label.autowrap_mode == TextServer.AUTOWRAP_WORD_SMART and data_a_label.max_lines_visible == 2, "Runtime line wraps within the compact card")
 	_assert(data_b_label != null and data_b_label.autowrap_mode == TextServer.AUTOWRAP_WORD_SMART and data_b_label.max_lines_visible == 4 and data_b_label.text.contains("Ziel enemy_01"), "Detail line shows wrapped contact explanation")
 	card.queue_free()

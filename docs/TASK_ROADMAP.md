@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish (implementiert im Arbeitsstand)
+- Grundlage: Sprachlich klare Member-Cards blieben bei 156 Pixeln durch Rangbadges, Lead-Aktion und zufaellige Pipe-Umbrueche visuell zu eng.
+- Ergebnis: 176 x 118 Pixel, eine 94-Pixel-Textspalte, kontextspezifisch ausgeblendete Rangbadges und feste Zeilen fuer Command/Haltung, Feuerregel, Waffenhaltung und Bewegung. Vollstaendige Diagnose bleibt im Tooltip; Badge-Ableitung bleibt in allen anderen Karten erhalten.
+- Architektur: Read-only Card-/Presenter-Anpassung im bestehenden Dirty-Refresh. Keine Gameplay-, Rank-, Lead-, Fireteam-, Combat-, Netzwerk- oder Hotpath-Aenderung.
+- Verifikation: TASK_1138 7/7; TASK_1137 13/13; TASK_464 15/15; TASK_472 13/13; TASK_207 31/31; TASK_1136 19/19 Real Window; TASK_503 10/10; TASK_1109 18/18; TASK_222 82/82.
+- Naechster Schritt: TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish. Der Full-HD-Beleg zeigt dort noch `Move/Take/Hold/Flank/Target` und `HF/RF/FW/SUP` neben inzwischen deutscher Kartenhierarchie.
+
 ## TASK_1137 - Selected Fireteam Member Card Player Language Polish (implementiert im Arbeitsstand)
 - Grundlage: Die kompakten Member-Cards zeigten korrekte Runtime-Daten, mischten aber deutsche Spielsprache mit englischen Enums und rohen Skill-Kuerzeln.
 - Ergebnis: `Bewegen`, `Angreifen`, `Waffe im Anschlag`, `Waffe gesenkt`, `Marschiert`, `Rennt`, `Steht` und `Zielbereit` bilden eine konsistente Spielerhierarchie. Skill-/Trait-Diagnose bleibt im Tooltip statt in der knappen Sichtflaeche.
 - Architektur: Read-only Presenter-Erweiterung am bestehenden Card-Setup. Keine Gameplay-, Combat-, Movement-, Command-, Effect-, RPC-, Snapshot- oder Hotpath-Aenderung.
 - Verifikation: TASK_1137 13/13; TASK_464 15/15; TASK_1136 17/17 headless und 19/19 Real Window; TASK_503 10/10; TASK_1109 18/18; TASK_773 25/25; TASK_222 82/82.
-- Naechster Schritt: TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish. Der Full-HD-Beleg zeigt, dass lange Namen und mehrere gleichwertig sichtbare Statuszeilen noch um die 156-px-Kartenbreite konkurrieren.
+- Naechster Schritt: abgeschlossen durch TASK_1138.
 
 ## TASK_1136 - Live Tactical Stance Effect Playtest and Feedback (implementiert im Arbeitsstand)
 - Grundlage: Runtime-Wirkung und Auswahl waren korrekt, die Klickbestaetigung blieb aber bei `STANCE C LIVE (1)` und war im dichten Dock nicht als Wirkung lesbar.
