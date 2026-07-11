@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1142 - Mission Control Mission-State Player Language Polish (implementiert im Arbeitsstand)
+- Grundlage: Team-, LZ-, Anflug- und Dropship-Lage mischten deutsche Texte mit Runtime-States. Ein angrenzender Abschlussfixture belegte zudem eine falsche Informationsprioritaet zugunsten leerer Combatdiagnose.
+- Ergebnis: Kurze deutsche State-Zeilen, kompakter `Einsatz:`-Chip und vollstaendige Rohdiagnose im Tooltip. Bei kompletter Route bleiben AA/COM/OBJ/CARGO vor `NO_FRIENDLY_COMBAT_UNITS` sichtbar.
+- Architektur: Read-only Presenter und HUD-Priorisierung auf vorhandenen Snapshots. Keine Aenderung an Transport-, Objective-, Peer-, Command-, Effect-, RPC- oder Snapshot-Wahrheit.
+- Verifikation: TASK_1142 78/78; TASK_560 20/20; TASK_566 33/33; TASK_1109 18/18; TASK_1115 25/25; TASK_1118 13/13; TASK_222 82/82; TASK_1136 19/19 Real Window.
+- Naechster Schritt: TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish.
+
 ## TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish (implementiert im Arbeitsstand)
 - Grundlage: Die rechte Kontrollflaeche zeigte rohe `NEXT/WHY`-Evidence und technische Combat-Dichtezeilen. Die erste deutsche Langform passte nicht in das feste 344-Pixel-Panel; der historische Style-Guard kannte nur die alten Praefixe.
 - Ergebnis: Eine kurze Zeile wie `POSITION AENDERN | KEIN ZIEL` bleibt im festen Panel lesbar. Raw Combat-Diagnose tritt bei vorhandenem Spielerhinweis aus der sichtbaren Liste zurueck und bleibt im Tooltip sowie in Evidence-Snapshots. Neue Aktionstypen behalten den bestehenden lesbaren HUD-Style.
 - Architektur: Reiner gemeinsamer Presenter und finaler Bottom-Dock-Filter. Keine Aenderung an Simulation, Combat, LOS, Contact, FireEvent, RPC, Command, Effect oder Snapshot-Wahrheit.
 - Verifikation: TASK_1141 14/14; TASK_1140 22/22; TASK_833 23/23; TASK_834 27/27; TASK_835 28/28; TASK_1118 13/13; TASK_1109 18/18; TASK_222 82/82; TASK_1136 19/19 Real Window.
-- Naechster Schritt: TASK_1142 - Mission Control Mission-State Player Language Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1142.
 
 ## TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish (implementiert im Arbeitsstand)
 - Grundlage: Die Selected-Fireteam-Flaeche mischte mehrere read-only Diagnosevertraege ungefiltert und stapelte bis zu sechs Zeilen mit englischen Steuerwoertern.

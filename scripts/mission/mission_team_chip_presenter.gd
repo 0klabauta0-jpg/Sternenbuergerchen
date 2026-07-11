@@ -31,6 +31,7 @@ func build_snapshot(network_contract_snapshot: Dictionary, play_mode: String = "
 		"summary_text": String(ownership_snapshot.get("team_readability_summary", "")),
 		"status_text": _build_status_text(chips),
 		"compact_status_text": _build_compact_status_text(chips),
+		"display_text": _build_player_status_text(chips),
 		"tooltip_text": _build_tooltip_text(chips),
 		"authority_visual": authority_visual,
 		"authority_visible": bool(authority_visual.get("visible", false)),
@@ -321,6 +322,21 @@ func _build_compact_status_text(chips: Array) -> String:
 	if parts.is_empty():
 		return "Teams: not configured"
 	return "Teams: %s" % " | ".join(parts)
+
+
+func _build_player_status_text(chips: Array) -> String:
+	var parts := PackedStringArray()
+	for chip_variant in chips:
+		var chip := Dictionary(chip_variant)
+		var short_label := String(chip.get("short_label", "")).strip_edges()
+		var owner := String(chip.get("compact_owner_label", "")).strip_edges()
+		var spawn := String(chip.get("spawn_icon_text", "")).strip_edges()
+		if short_label.is_empty():
+			continue
+		parts.append("%s %s %s" % [short_label.left(1).to_upper(), owner, spawn])
+	if parts.is_empty():
+		return "Einsatz: kein Team zugewiesen"
+	return "Einsatz: %s" % " | ".join(parts)
 
 
 func _build_tooltip_text(chips: Array) -> String:

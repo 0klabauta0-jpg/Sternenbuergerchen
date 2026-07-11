@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1142 - Mission Control Mission-State Player Language Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1142_mission_control_mission_state_player_language_polish.md`, `docs/tasks/TASK_1141_mission_control_decision_language_diagnostic_hierarchy_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Befund: Mission Control mischte `Teams`, `Approach`, `Drop wartend`, `off-map`, `inbound`, `outbound`, `staged` und `Preview`. Der echte Abschlussfixture zeigte ausserdem, dass `CUE DONE` bestaetigte `AA/COM/OBJ/CARGO`-Ergebnisse verdraengte, waehrend `NO_FRIENDLY_COMBAT_UNITS` sichtbar blieb.
+- Aenderung: Ein zustandsloser Mission-State-Presenter uebersetzt LZ, Anflug, Bereitschaft, Landung, Ausstieg, Abflug und Rueckflug. Der Team-Chip zeigt kompakt `Einsatz: A Host A-LZ | B NPC`. Technische State-, Peer- und Spawnwerte bleiben in Tooltip und Rohfeldern. Bei abgeschlossener Route erhalten AA/COM/OBJ/CARGO Vorrang vor leerer Combatdiagnose.
+- Sicht-/Runtime-Beleg: Der Full-HD-Lauf zeigt `LZ: nicht gesetzt`, `ANFLUG: Nordwest`, eine kurze Dropship-/Vorschauzeile und den voll lesbaren Einsatz-Chip ohne englische Runtime-States.
+- Multiplayer/Performance: Transportstate, Sequenzen, ETA, LZ, Craft-Auswahl, Peer-/Team-Zuweisung, Commands, Effects, RPCs und Snapshots bleiben unveraendert. Zwei parallele Dropships konvergieren weiterhin bei Host und beiden Clients.
+- Lokale Pruefung: TASK_1142 78/78; TASK_560 20/20; TASK_566 33/33; TASK_1109 18/18; TASK_1115 25/25; TASK_1118 13/13; TASK_222 82/82; TASK_1136 19/19 Real Window.
+- Naechster Schritt: TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish. `CUE WAIT`, `live fireteam deployment`, `CONTACT PRESSURE` und `OFF LIVE` sind der naechste sichtbare Sprachmix.
+
 ### TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1141_mission_control_decision_language_diagnostic_hierarchy_polish.md`, `docs/tasks/TASK_1140_selected_fireteam_decision_language_action_cue_polish.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Sicht-/Runtime-Beleg: Der echte Full-HD-Lauf zeigt eine einzelne lesbare Aktionszeile sowie darunter nur LZ-, Anflug- und Dropship-Lage. Selected Fireteam, Member-Cards, Matrix und Welt bleiben stabil.
 - Multiplayer/Performance: Keine Aenderung an Combat-, LOS-, Range-, Contact-, FireEvent-, Command-, Effect-, RPC- oder Snapshot-Wahrheit. Die Perspektivsignaturen fuer BLUE/GOLD und das Performance-Gate bleiben gruen.
 - Lokale Pruefung: TASK_1141 14/14; TASK_1140 22/22; TASK_833 23/23; TASK_834 27/27; TASK_835 28/28; TASK_1118 13/13; TASK_1109 18/18; TASK_222 82/82; TASK_1136 19/19 Real Window.
-- Naechster Schritt: TASK_1142 - Mission Control Mission-State Player Language Polish. `Teams`, `Approach`, `Drop wartend` und LZ-Kuerzel bilden den naechsten sichtbaren Sprachbruch.
+- Naechster Schritt: abgeschlossen durch TASK_1142.
 
 ### TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish
 - Status: implementiert im Arbeitsstand

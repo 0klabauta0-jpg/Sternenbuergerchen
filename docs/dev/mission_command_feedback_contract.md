@@ -15,6 +15,8 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 
 TASK_1141 trennt in #18 Mission Control sichtbare Spielersprache von technischer Combat-Evidence. Die Kontrollzeile benennt Handlung und Grund kompakt, waehrend `NEXT/WHY`, `NO FIRE`, `NO_LOS`, Cover-, Range-, LOS- und Flank-Diagnose in Tooltip und read-only Snapshots erhalten bleiben. Bei aktiver Contact-Fire-Evidence bleibt `CONTACT FIRE` die erste sichtbare Zeile. Der Presenter erzeugt keine Commands, Effects, Combat-, Contact- oder Multiplayer-Wahrheit.
 
+TASK_1142 uebersetzt den sichtbaren LZ-, Anflug-, Dropship- und Teamkontext, ohne die zugrunde liegenden State-, Peer-, Spawn- oder Craftwerte zu veraendern. Technische Transportphasen bleiben im Tooltip. Bei abgeschlossener Route muessen bestaetigte `AA/COM/OBJ/CARGO`-Ergebnisse vor leerer Combatdiagnose sichtbar bleiben.
+
 ## Fensterrollen
 | Bereich | Rolle | Textregel |
 | --- | --- | --- |
