@@ -2085,11 +2085,11 @@ func _apply_network_mission_interaction_progress_surface(snapshot: Dictionary) -
 		"ui_sets_gameplay_truth": false,
 	}
 	_last_command_text = compact_line
-	_refresh_network_interaction_command_feedback_label(compact_line)
+	_refresh_network_interaction_command_feedback_label(compact_line, String(_network_mission_interaction_feedback.get("tone", "progress")))
 	return true
 
 
-func _refresh_network_interaction_command_feedback_label(compact_line: String) -> void:
+func _refresh_network_interaction_command_feedback_label(compact_line: String, tone: String = "progress") -> void:
 	var label := get_node_or_null(command_feedback_label_path) as Label
 	if label == null:
 		return
@@ -2103,6 +2103,27 @@ func _refresh_network_interaction_command_feedback_label(compact_line: String) -
 	if not replaced:
 		lines.append("LAST %s" % compact_line)
 	_set_mission_label_text_delta(label, "\n".join(lines))
+	var style_key: String = _build_network_mission_interaction_tone_style_key(tone)
+	var tone_color: Color = TACTICAL_UI_THEME_SCRIPT.call("status_color", style_key)
+	label.add_theme_color_override("font_color", tone_color)
+	label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+	label.add_theme_constant_override("outline_size", 2)
+	label.set_meta("network_interaction_tone", tone.strip_edges().to_lower())
+	label.set_meta("network_interaction_style_key", style_key)
+	label.set_meta("network_interaction_font_color", tone_color.to_html(true))
+
+
+func _build_network_mission_interaction_tone_style_key(tone: String) -> String:
+	match tone.strip_edges().to_lower():
+		"pending":
+			return "warning"
+		"progress":
+			return "accent"
+		"success", "complete":
+			return "success"
+		"blocked", "danger":
+			return "danger"
+	return "neutral"
 
 
 func _try_submit_connected_client_mission_interaction() -> Dictionary:

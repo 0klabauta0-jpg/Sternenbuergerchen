@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1097 - Connected Interaction Feedback Visual Evidence (implementiert im Arbeitsstand)
+- Grundlage: Tone existierte nur als Metadatum und veraenderte die sichtbare Command-Zeile noch nicht.
+- Ergebnis: Vier etablierte Theme-Farben, Outline-Kontrast und stabile Label-Metadaten ohne Layoutaenderung oder HUD-Rebuild.
+- Verifikation: TASK_1097 9/9 und TASK_1096 10/10.
+- Naechster Schritt: TASK_1098 - Connected Interaction Progress Performance Budget.
+
 ## TASK_1096 - Connected Interaction Runtime Progress Surface (implementiert im Arbeitsstand)
 - Grundlage: Host-Pending/OK war lesbar, replizierter Hold-Fortschritt noch nicht als gemeinsame ruhige Zeile sichtbar.
 - Ergebnis: Progress-/Hold-/Complete-Zeilen mit Mehrschritt-Prioritaet und Fingerprint-Dedupe aktualisieren nur das bestehende Command-Feedback-Label.

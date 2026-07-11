@@ -641,5 +641,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Aktualisiert wird nur die `LAST`-Zeile des vorhandenen Command-Feedback-Labels per Textdelta; kein kompletter HUD-Rebuild.
 - TASK_1096 prueft Mehrschritt-Prioritaet, Dedupe und read-only-Grenze.
 
+## Connected Interaction Tone Style Contract
+- Pending mappt auf Tactical-UI `warning`, Progress auf `accent`, Success/Complete auf `success`, Blocked auf `danger`.
+- Das bestehende Command-Feedback-Label wird wiederverwendet; Styling darf weder Mindestgroesse noch Containerlayout veraendern.
+- Ein dunkler Outline-Kontrast bleibt fuer alle Tone-Farben aktiv.
+- Label-Metadaten exportieren Tone, Style-Key und finale Farbe fuer automatisierte Evidenz, setzen aber keine Gameplay-Wahrheit.
+- TASK_1097 ersetzt keinen subjektiven Sichttest, prueft aber Palette, Kontrastmetadaten und Layoutstabilitaet reproduzierbar.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.
