@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1114 - Connected Dropship Pending Card Visual Polish (implementiert im Arbeitsstand)
+- Grundlage: Per-Craft Pending funktionierte, aber Result- und Timeout-Rueckmeldung waren auf der Craft-Karte nicht dauerhaft und tonal unterscheidbar.
+- Ergebnis: Pending ist gelb, Snapshot-OK gruen und Reject/Timeout rot. Result-Feedback bleibt drei Sekunden pro Craft; BLUE beeinflusst GOLD weder visuell noch funktional.
+- Architektur: Ein lokales read-only Feedback-Dictionary nutzt vorhandene Theme-Tones und wird nie repliziert oder als Transportstate gelesen. UI wird nur bei Result, Snapshot oder Ablauf aktualisiert.
+- Verifikation: TASK_1114 headless 13/13 und Real-Window 15/15, TASK_1113 16/16, TASK_1112 13/13 und Dropship-Hotpath TASK_399 9/9.
+- Naechster Schritt: TASK_1115 - Connected Parallel Dropship Drop Deboard Return Playthrough.
+
 ## TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard (implementiert im Arbeitsstand)
 - Grundlage: Der Host konnte gleiche Command-IDs deduplizieren, aber schnelle Kartenklicks erzeugten neue IDs und hatten keinen per-Craft sichtbaren Rundwegzustand.
 - Ergebnis: BLUE blockiert waehrend eines offenen Requests nur seine eigenen Aktionsbuttons; GOLD bleibt parallel bedienbar. Host-OK wird erst vom passenden Snapshot abgeschlossen, Reject und Acht-Sekunden-Timeout geben den Craft wieder frei.
