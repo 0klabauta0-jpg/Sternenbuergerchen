@@ -241,8 +241,16 @@ func _ready() -> void:
 		var network_interaction_callable := Callable(self, "_on_network_command_accepted")
 		if not simulation_root.is_connected("network_command_accepted", network_interaction_callable):
 			simulation_root.connect("network_command_accepted", network_interaction_callable)
+	if _runs_local_authority and simulation_root.has_method("set_network_command_preflight_validator"):
+		simulation_root.call("set_network_command_preflight_validator", Callable(self, "_validate_network_interaction_command_preflight"))
 
 	_update_status_label("waiting" if _runs_local_authority else "observing")
+
+
+func _exit_tree() -> void:
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root != null and simulation_root.has_method("clear_network_command_preflight_validator"):
+		simulation_root.call("clear_network_command_preflight_validator", Callable(self, "_validate_network_interaction_command_preflight"))
 
 
 func is_combat_finished() -> bool:
@@ -456,7 +464,10 @@ func _on_network_command_accepted(command: Dictionary, peer_id: int) -> void:
 	var target_position: Variant = command.get("target_position", null)
 	if interaction_id.is_empty() or unit_id.is_empty() or typeof(target_position) != TYPE_VECTOR2:
 		return
-	_pending_network_mission_interactions[interaction_id] = {
+	var previous_pending: Dictionary = Dictionary(_pending_network_mission_interactions.get(interaction_id, {}))
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var continues_existing: bool = not previous_pending.is_empty() and String(previous_pending.get("fireteam_id", "")).strip_edges().to_lower() == fireteam_id
+	var next_pending: Dictionary = {
 		"interaction_id": interaction_id,
 		"unit_id": unit_id,
 		"peer_id": maxi(peer_id, 0),
@@ -464,13 +475,59 @@ func _on_network_command_accepted(command: Dictionary, peer_id: int) -> void:
 		"radius_world": maxf(float(command.get("interaction_radius_world", 72.0)), 1.0),
 		"hold_seconds": 0.0,
 		"duration_seconds": maxf(float(command.get("duration_seconds", 0.0)), 0.0),
-		"fireteam_id": String(command.get("fireteam_id", "")).strip_edges().to_lower(),
+		"fireteam_id": fireteam_id,
 		"team_id": String(command.get("team_id", friendly_team_id)).strip_edges().to_lower(),
 		"step_id": String(command.get("step_id", "")).strip_edges(),
 		"gate_id": String(command.get("gate_id", command.get("step_id", ""))).strip_edges(),
 		"required_state": String(command.get("required_state", "door_open")).strip_edges(),
 		"interaction_type": String(command.get("interaction_type", "door")).strip_edges().to_lower(),
 		"command_type": String(command.get("command_type", "")).strip_edges().to_lower(),
+	}
+	if continues_existing:
+		for stable_key in ["target_position", "radius_world", "hold_seconds", "duration_seconds", "fireteam_id", "team_id", "step_id", "gate_id", "required_state", "interaction_type", "command_type"]:
+			if previous_pending.has(stable_key):
+				next_pending[stable_key] = previous_pending[stable_key]
+	_pending_network_mission_interactions[interaction_id] = next_pending
+
+
+func _validate_network_interaction_command_preflight(command: Dictionary, _peer_id: int) -> Dictionary:
+	if not ["mission_interaction_door_breach_command", "mission_interaction_use_intent_command"].has(String(command.get("source_context", "")).strip_edges()):
+		return {"accepted": true}
+	var interaction_id: String = String(command.get("interaction_id", "")).strip_edges()
+	var requested_fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	if interaction_id.is_empty() or requested_fireteam_id.is_empty():
+		return {"accepted": true}
+	var pending: Dictionary = Dictionary(_pending_network_mission_interactions.get(interaction_id, {}))
+	if pending.is_empty():
+		return {"accepted": true}
+	var owner_fireteam_id: String = String(pending.get("fireteam_id", "")).strip_edges().to_lower()
+	if owner_fireteam_id.is_empty():
+		return {"accepted": true}
+	if owner_fireteam_id == requested_fireteam_id:
+		var canonical_command: Dictionary = command.duplicate(true)
+		var stable_command_fields: Dictionary = {
+			"target_position": "target_position",
+			"interaction_radius_world": "radius_world",
+			"duration_seconds": "duration_seconds",
+			"fireteam_id": "fireteam_id",
+			"team_id": "team_id",
+			"step_id": "step_id",
+			"gate_id": "gate_id",
+			"required_state": "required_state",
+			"interaction_type": "interaction_type",
+			"command_type": "command_type",
+		}
+		for command_key in stable_command_fields.keys():
+			var pending_key: String = String(stable_command_fields[command_key])
+			if pending.has(pending_key):
+				canonical_command[command_key] = pending[pending_key]
+		return {
+			"accepted": true,
+			"command": canonical_command,
+		}
+	return {
+		"accepted": false,
+		"reason": "interaction_reserved_by_other_fireteam",
 	}
 
 

@@ -89,6 +89,7 @@ var _last_network_command_rejection: Dictionary = {}
 var _last_network_command_result: Dictionary = {}
 var _network_command_accept_count: int = 0
 var _network_command_reject_count: int = 0
+var _network_command_preflight_validator: Callable = Callable()
 var _multiplayer_snapshot_context: Dictionary = {}
 var _authoritative_fire_rules_by_fireteam: Dictionary = {}
 var _air_asset_status_by_id: Dictionary = {}
@@ -542,6 +543,15 @@ func get_last_network_command_result() -> Dictionary:
 	return _last_network_command_result.duplicate(true)
 
 
+func set_network_command_preflight_validator(validator: Callable) -> void:
+	_network_command_preflight_validator = validator
+
+
+func clear_network_command_preflight_validator(validator: Callable = Callable()) -> void:
+	if not validator.is_valid() or _network_command_preflight_validator == validator:
+		_network_command_preflight_validator = Callable()
+
+
 func get_authoritative_fire_rule_state(fireteam_id: String) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty() or not _authoritative_fire_rules_by_fireteam.has(normalized_fireteam_id):
@@ -744,7 +754,26 @@ func validate_network_command_for_peer(command_dict: Dictionary, peer_id: int = 
 			"accepted": false,
 			"reason": "command_not_dictionary",
 		}
-	return _multiplayer_command_contract.call("validate", command_dict, _build_network_command_context(command_dict, peer_id))
+	var validation: Dictionary = Dictionary(_multiplayer_command_contract.call("validate", command_dict, _build_network_command_context(command_dict, peer_id))).duplicate(true)
+	if not bool(validation.get("accepted", false)) or not _network_command_preflight_validator.is_valid():
+		return validation
+	var accepted_command: Dictionary = Dictionary(validation.get("command", command_dict)).duplicate(true)
+	var preflight_variant: Variant = _network_command_preflight_validator.call(accepted_command, peer_id)
+	if typeof(preflight_variant) != TYPE_DICTIONARY:
+		return validation
+	var preflight: Dictionary = Dictionary(preflight_variant)
+	if bool(preflight.get("accepted", true)):
+		if typeof(preflight.get("command", null)) == TYPE_DICTIONARY:
+			var canonical_command: Dictionary = Dictionary(preflight.get("command", {})).duplicate(true)
+			validation["command"] = canonical_command
+			for result_key in ["category", "command_type", "team_id", "fireteam_id"]:
+				var command_key: String = "contract_category" if result_key == "category" else result_key
+				if canonical_command.has(command_key):
+					validation[result_key] = canonical_command[command_key]
+		return validation
+	validation["accepted"] = false
+	validation["reason"] = String(preflight.get("reason", "network_command_preflight_rejected")).strip_edges()
+	return validation
 
 
 func submit_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1) -> Dictionary:

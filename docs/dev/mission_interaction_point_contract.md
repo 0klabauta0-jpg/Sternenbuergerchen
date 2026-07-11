@@ -687,5 +687,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Ein Host-Combat-Result pausiert den Broadcast, setzt die Session auf Lobby und entfernt Host-/Client-Missionen nach kurzer Netzwerk-Drain-Phase.
 - TASK_1101 belegt Secret-Redaction, malformed/falsche Token-Rejects, per-Peer-Unblock per ACK, gueltigen Rejoin, stale Role Cleanup, Authority-Spoof-Guard, Full-State-Recovery und Completion-Return.
 
+## Parallel Fireteam Interaction Ownership Contract
+- `SimulationRoot` bleibt die autoritative Command-Commit-Grenze und kann genau einen optionalen read-only Preflight-Validator aufrufen, bevor ein bereits strukturell valider Network-Command enqueuet oder als akzeptiert gemeldet wird.
+- Der Validator besitzt keinen Gameplay-State. `MissionCombatLoopDriver` prueft seine bestehende Pending-Interaction-Wahrheit und antwortet nur mit Accept oder einem stabilen Reject-Grund.
+- Eine laufende `interaction_id` ist fuer ihr `fireteam_id` reserviert. Ein anderes Fireteam erhaelt `interaction_reserved_by_other_fireteam`; sein Command erreicht weder Queue noch `network_command_accepted`.
+- Derselbe Fireteam darf nach erneutem Senden oder Peer-ID-Rebind die Interaction fortsetzen. Der Preflight normalisiert das akzeptierte Command-Payload auf Hold-Zeit, Ziel, Radius, Dauer und Gate-Metadaten des ersten host-akzeptierten Pending-Eintrags, sodass Queue, Accepted-Signal, Client-Ergebnis und Pending-State dieselbe Wahrheit sehen; nur Peer und ausfuehrende Unit duerfen wechseln.
+- Unterschiedliche Fireteams duerfen unterschiedliche Interactions parallel halten. Beide States werden im gemeinsamen autoritativen Snapshot mit ihrem jeweiligen `fireteam_id` repliziert.
+- Ohne registrierten Preflight-Validator bleibt die bestehende Multiplayer-Command-Validierung unveraendert.
+- TASK_1102 belegt echten ENet-Reject, parallelen Fortschritt, read-only Client-Replikation, Fireteam-basierten Peer-Rebind und einen 2000-Validierungen-Performance-Guard.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.
