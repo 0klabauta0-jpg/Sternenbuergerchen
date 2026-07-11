@@ -2941,9 +2941,16 @@ func set_fireteams_tactical_stance(fireteam_ids: PackedStringArray, next_stance:
 		if _apply_live_tactical_stance_to_fireteam(String(fireteam_id_variant)):
 			live_update_count += 1
 	var first_stance: String = String(_tactical_stance_controller.call("get_requested_stance", String(normalized_fireteam_ids[0])))
-	_last_command_text = "STANCE %s (%d)" % [_get_tactical_stance_short_label(first_stance), applied_count]
+	var active_command_type: String = "move"
 	if live_update_count > 0:
-		_last_command_text = "STANCE %s LIVE (%d)" % [_get_tactical_stance_short_label(first_stance), live_update_count]
+		var movement_state: Dictionary = get_fireteam_movement_state(String(normalized_fireteam_ids[0]))
+		active_command_type = String(movement_state.get("command_type", "move"))
+	_last_command_text = _build_tactical_stance_feedback_text(
+		first_stance,
+		active_command_type,
+		live_update_count > 0,
+		live_update_count if live_update_count > 0 else applied_count
+	)
 	_refresh_button_state()
 	_refresh_order_visuals()
 	_update_ui()
@@ -4102,6 +4109,8 @@ func _ensure_tactical_stance_panel() -> Control:
 
 	var summary_label := Label.new()
 	summary_label.name = "SummaryLabel"
+	summary_label.custom_minimum_size = Vector2(0.0, 14.0)
+	summary_label.max_lines_visible = 1
 	META_UI_SKIN_SCRIPT.style_body_label(summary_label, 10)
 	vbox.add_child(summary_label)
 
@@ -4206,10 +4215,21 @@ func _refresh_tactical_stance_panel() -> void:
 			selection_text = "alle Fireteams ausgewaehlt"
 		var stance_text: String = "HALTUNG GEMISCHT"
 		if not shared_stance.is_empty():
-			stance_text = "HALTUNG %s" % _get_tactical_stance_player_label(shared_stance)
-		summary_text = "%s | %s" % [stance_text, selection_text]
+			var active_command_type: String = "move"
+			var active_state: Dictionary = get_fireteam_movement_state(String(_selected_fireteam_ids[0]))
+			if not active_state.is_empty():
+				active_command_type = String(active_state.get("command_type", "move"))
+			stance_text = _build_tactical_stance_panel_feedback_text(shared_stance, active_command_type, not active_state.is_empty())
+			summary_text = stance_text
+		else:
+			summary_text = "%s | %s" % [stance_text, selection_text]
 	if summary_label != null:
 		summary_label.text = summary_text
+		var tooltip_command_type: String = "move"
+		var tooltip_state: Dictionary = get_fireteam_movement_state(String(_selected_fireteam_ids[0])) if not _selected_fireteam_ids.is_empty() else {}
+		if not tooltip_state.is_empty():
+			tooltip_command_type = String(tooltip_state.get("command_type", "move"))
+		summary_label.tooltip_text = _build_tactical_stance_feedback_text(shared_stance, tooltip_command_type, not tooltip_state.is_empty(), _selected_fireteam_ids.size()) if not shared_stance.is_empty() else summary_text
 	var button_row := panel.get_node_or_null("MarginContainer/VBoxContainer/HBoxContainer") as HBoxContainer
 	if button_row == null:
 		return
@@ -15101,8 +15121,10 @@ func _apply_compact_fireteam_info_text_contract() -> void:
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		label.clip_text = true
 		label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-		label.max_lines_visible = 1
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.max_lines_visible = 1
+		if label.name == "SummaryLabel":
+			label.custom_minimum_size = Vector2(0.0, 14.0)
 func _apply_fireteam_panel_action_button_contract() -> void:
 	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
 	var fireteam_info_vbox := get_node_or_null(FIRETEAM_INFO_VBOX_PATH) as Node
@@ -29983,6 +30005,47 @@ func _get_tactical_stance_player_label(stance_id: String) -> String:
 			return "OFFENSIV"
 		_:
 			return "NORMAL"
+
+
+func _build_tactical_stance_feedback_text(stance_id: String, command_type: String, is_live: bool, affected_count: int) -> String:
+	var modifiers: Dictionary = Dictionary(FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.call("get_behavior_stance_modifiers", command_type, stance_id))
+	var speed_factor: float = float(modifiers.get("speed_multiplier", 0.65))
+	var sight_factor: float = float(modifiers.get("sight_range_factor", 0.8))
+	var speed_text: String = "langsam" if speed_factor <= 0.4 else ("schnell" if speed_factor >= 0.95 else "zuegig")
+	var sight_text: String = "volle Sicht" if sight_factor >= 0.95 else ("kurze Sicht" if sight_factor <= 0.55 else "reduzierte Sicht")
+	var weapon_text: String = "Waffe ausgeglichen"
+	match String(modifiers.get("weapon_posture", "")).strip_edges().to_lower():
+		"aimed":
+			weapon_text = "Waffe im Anschlag"
+		"ready":
+			weapon_text = "Waffe bereit"
+		"lowered":
+			weapon_text = "Waffe gesenkt"
+	var mode_text: String = _get_tactical_stance_player_label(stance_id)
+	if is_live:
+		mode_text = "%s LIVE" % mode_text
+	var count_text: String = " | %d Fireteams" % affected_count if affected_count > 1 else ""
+	return "%s | %s | %s | %s%s" % [mode_text, speed_text, sight_text, weapon_text, count_text]
+
+
+func _build_tactical_stance_panel_feedback_text(stance_id: String, command_type: String, is_live: bool) -> String:
+	var modifiers: Dictionary = Dictionary(FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.call("get_behavior_stance_modifiers", command_type, stance_id))
+	var speed_factor: float = float(modifiers.get("speed_multiplier", 0.65))
+	var sight_factor: float = float(modifiers.get("sight_range_factor", 0.8))
+	var speed_text: String = "langsam" if speed_factor <= 0.4 else ("schnell" if speed_factor >= 0.95 else "zuegig")
+	var sight_text: String = "Sicht voll" if sight_factor >= 0.95 else ("Sicht kurz" if sight_factor <= 0.55 else "Sicht reduziert")
+	var weapon_text: String = "ausgeglichen"
+	match String(modifiers.get("weapon_posture", "")).strip_edges().to_lower():
+		"aimed":
+			weapon_text = "Anschlag"
+		"ready":
+			weapon_text = "bereit"
+		"lowered":
+			weapon_text = "gesenkt"
+	var mode_text: String = _get_tactical_stance_segment_label(stance_id)
+	if is_live:
+		mode_text = "%s LIVE" % mode_text
+	return "%s | %s | %s | %s" % [mode_text, speed_text, sight_text, weapon_text]
 
 
 func _apply_selected_fireteam_stance_button_presentation(button: Button, stance_id: String, is_selected: bool) -> void:

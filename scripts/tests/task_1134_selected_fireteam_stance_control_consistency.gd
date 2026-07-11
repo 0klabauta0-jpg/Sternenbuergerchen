@@ -59,7 +59,7 @@ func _test_selected_state(controller: Node, panel: Control) -> void:
 	var summary := panel.find_child("SummaryLabel", true, false) as Label
 	_assert(selected_count == 1 and normal != null and normal.button_pressed, "Homogeneous selection exposes exactly one active segment")
 	_assert(normal != null and bool(normal.get_meta("mission_selected_fireteam_stance_selected", false)), "Active segment exposes stable selected metadata")
-	_assert(summary != null and summary.text.contains("HALTUNG NORMAL") and not summary.text.contains("STANCE"), "Selected-fireteam summary uses readable German game language")
+	_assert(summary != null and summary.text == "NORM | zuegig | Sicht reduziert | gesenkt" and not summary.text.contains("STANCE"), "Selected-fireteam summary uses current readable effect language")
 
 
 func _test_selected_fireteam_interaction(controller: Node, panel: Control) -> void:

@@ -45,3 +45,5 @@ Beide Oberflaechen schreiben bereits ueber denselben bestehenden Tactical-Stance
 
 ## Risiken / offene Punkte
 Der grosse Bereich ist breiter als die Mini-Card, liegt aber in einem dichten unteren HUD-Dock. Feste Segmenthoehe, kurze Beschriftung und vorhandene Icons duerfen den restlichen Fireteam-Inhalt nicht verdraengen.
+
+TASK_1136 erweitert die damalige `HALTUNG NORMAL`-Zusammenfassung um die kompakte, sichtgepruefte Wirkungszeile. Auswahl-, Icon-, Tooltip- und Callback-Vertrag dieses Tasks bleiben unveraendert.
