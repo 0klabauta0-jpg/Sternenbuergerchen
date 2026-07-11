@@ -350,6 +350,9 @@ const SELECTED_UNIT_MARKER_COLOR: Color = Color(1.0, 0.84, 0.20, 0.50)
 const SELECTED_UNIT_MARKER_RADIUS: float = 0.32
 const SELECTED_UNIT_MARKER_HEIGHT: float = 0.018
 const SELECTED_UNIT_MARKER_SURFACE_OFFSET: float = 0.006
+const CONNECTED_CONTACT_SELECTED_UNIT_MARKER_COLOR: Color = Color(1.0, 0.84, 0.20, 0.24)
+const CONNECTED_CONTACT_SELECTED_UNIT_MARKER_RADIUS: float = 0.20
+const CONTACT_MARKER_RADIUS: float = 0.26
 const DYNAMIC_ORDER_VISUAL_REFRESH_INTERVAL_MSEC: int = 150
 const TACTICAL_COMMUNICATION_EVENT_VISIBLE_LIMIT: int = 4
 const MISSION_LOS_DEBUG_SAMPLE_LIMIT: int = 24
@@ -1092,6 +1095,7 @@ var _feedback_bubble_visual_count: int = 0
 var _feedback_bubble_entries: Array = []
 var _tactical_communication_event_visual_count: int = 0
 var _tactical_communication_event_entries: Array = []
+var _connected_contact_tactical_communication_suppressed_count: int = 0
 var _world_label_declutter_suppressed_count: int = 0
 var _world_label_declutter_rendered_count: int = 0
 var _world_label_declutter_unit_badge_suppressed_count: int = 0
@@ -1308,6 +1312,7 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_feedback_bubble_hud_root)
 	_tactical_communication_event_visual_count = 0
 	_tactical_communication_event_entries.clear()
+	_connected_contact_tactical_communication_suppressed_count = 0
 	_world_label_declutter_suppressed_count = 0
 	_world_label_declutter_rendered_count = 0
 	_release_firefight_insertion_residue_suppressed_count = 0
@@ -2380,6 +2385,11 @@ func get_render_snapshot() -> Dictionary:
 		"waypoint_intent_preview_entries": _waypoint_intent_preview_entries.duplicate(true),
 		"selected_unit_marker_count": _selected_unit_marker_count,
 		"selected_unit_marker_entries": _selected_unit_marker_entries.duplicate(true),
+		"connected_contact_marker_hierarchy_active": _is_connected_contact_marker_hierarchy_active(),
+		"connected_contact_selected_marker_radius": CONNECTED_CONTACT_SELECTED_UNIT_MARKER_RADIUS,
+		"connected_contact_selected_marker_alpha": CONNECTED_CONTACT_SELECTED_UNIT_MARKER_COLOR.a,
+		"connected_contact_contact_marker_radius": CONTACT_MARKER_RADIUS,
+		"connected_contact_routine_badge_policy": "suppress_contact_engage_move_keep_vital_health" if _is_connected_contact_marker_hierarchy_active() else "default",
 		"weapon_fire_vfx_visual_count": _weapon_fire_vfx_visual_count,
 		"weapon_fire_vfx_entries": _weapon_fire_vfx_entries.duplicate(true),
 		"weapon_fire_vfx_catalog_loaded": not _get_weapon_fire_vfx_catalog().is_empty(),
@@ -2389,6 +2399,7 @@ func get_render_snapshot() -> Dictionary:
 		"feedback_bubble_entries": _feedback_bubble_entries.duplicate(true),
 		"tactical_communication_event_visual_count": _tactical_communication_event_visual_count,
 		"tactical_communication_event_entries": _tactical_communication_event_entries.duplicate(true),
+		"connected_contact_tactical_communication_suppressed_count": _connected_contact_tactical_communication_suppressed_count,
 		"world_label_density_mode": _get_world_label_density_mode(),
 		"world_label_declutter_active": _is_release_firefight_world_label_declutter_active(),
 		"world_label_declutter_style_id": RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID if _is_release_firefight_world_label_declutter_active() else "",
@@ -5949,6 +5960,7 @@ func _rebuild_order_visuals() -> void:
 	_feedback_bubble_entries.clear()
 	_tactical_communication_event_visual_count = 0
 	_tactical_communication_event_entries.clear()
+	_connected_contact_tactical_communication_suppressed_count = 0
 	_world_label_declutter_suppressed_count = 0
 	_world_label_declutter_rendered_count = 0
 	_fow_hidden_order_visual_count = 0
@@ -6039,6 +6051,9 @@ func _rebuild_order_visuals() -> void:
 		if not _fow_allows_tactical_communication_event_visual(communication_event):
 			_fow_hidden_order_visual_count += 1
 			continue
+		if _should_suppress_connected_contact_tactical_communication_event(communication_event):
+			_connected_contact_tactical_communication_suppressed_count += 1
+			continue
 		_add_tactical_communication_event_visual(communication_event)
 
 
@@ -6066,6 +6081,12 @@ func _get_world_label_density_mode() -> String:
 
 func _is_connected_contact_world_label_focus_active() -> bool:
 	return String(_order_payload.get("world_label_focus_mode", "")).strip_edges().to_lower() == "connected_contact"
+
+
+func _is_connected_contact_marker_hierarchy_active() -> bool:
+	if not _is_connected_contact_world_label_focus_active():
+		return false
+	return not _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray())).is_empty()
 
 
 func _is_release_firefight_world_label_declutter_active() -> bool:
@@ -6352,7 +6373,7 @@ func _should_suppress_release_firefight_flank_label(_fire_event: Dictionary) -> 
 
 
 func _should_suppress_release_firefight_unit_badge(badge_text: String) -> bool:
-	if not _is_release_firefight_world_label_declutter_active():
+	if not _is_release_firefight_world_label_declutter_active() and not _is_connected_contact_marker_hierarchy_active():
 		return false
 	return RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS.has(badge_text.strip_edges().to_upper())
 
@@ -6830,6 +6851,8 @@ func _add_selected_fireteam_unit_markers() -> void:
 	var selected_fireteam_ids: PackedStringArray = _get_string_array_from_variant(_order_payload.get("selected_fireteam_ids", PackedStringArray()))
 	if selected_fireteam_ids.is_empty():
 		return
+	var marker_color: Color = CONNECTED_CONTACT_SELECTED_UNIT_MARKER_COLOR if _is_connected_contact_marker_hierarchy_active() else SELECTED_UNIT_MARKER_COLOR
+	var marker_radius: float = CONNECTED_CONTACT_SELECTED_UNIT_MARKER_RADIUS if _is_connected_contact_marker_hierarchy_active() else SELECTED_UNIT_MARKER_RADIUS
 	for unit in _unit_nodes:
 		if unit == null or not (unit is Node2D):
 			continue
@@ -6843,9 +6866,9 @@ func _add_selected_fireteam_unit_markers() -> void:
 		_add_marker3d(
 			_order_root,
 			unit_position,
-			SELECTED_UNIT_MARKER_COLOR,
+			marker_color,
 			"SelectedUnit_%s" % _sanitize_node_name(unit_id),
-			SELECTED_UNIT_MARKER_RADIUS,
+			marker_radius,
 			SELECTED_UNIT_MARKER_HEIGHT,
 			4,
 			SELECTED_UNIT_MARKER_SURFACE_OFFSET
@@ -6858,8 +6881,8 @@ func _add_selected_fireteam_unit_markers() -> void:
 			"grid_position": _world_to_grid_position(unit_position),
 			"surface_offset": SELECTED_UNIT_MARKER_SURFACE_OFFSET,
 			"height": SELECTED_UNIT_MARKER_HEIGHT,
-			"radius": SELECTED_UNIT_MARKER_RADIUS,
-			"color": SELECTED_UNIT_MARKER_COLOR,
+			"radius": marker_radius,
+			"color": marker_color,
 			"visual_only": true,
 		})
 
@@ -8783,7 +8806,11 @@ func _add_tactical_communication_event_visual(communication_event: Dictionary) -
 	var label_text: String = String(communication_event.get("map_label", communication_event.get("short_text", ""))).strip_edges()
 	if label_text.is_empty():
 		label_text = String(communication_event.get("event_type", "")).strip_edges().to_upper()
-	_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.38), "%s_Label" % marker_name, color.lightened(0.08), 11)
+	var suppress_routine_label: bool = _is_connected_contact_marker_hierarchy_active() and RELEASE_FIREFIGHT_SUPPRESSED_BADGE_TEXTS.has(label_text.to_upper())
+	if suppress_routine_label:
+		_connected_contact_tactical_communication_suppressed_count += 1
+	else:
+		_add_label3d(_order_root, label_text, _world_to_surface_3d_position(anchor_position, MOVEMENT_LABEL_HEIGHT + 0.38), "%s_Label" % marker_name, color.lightened(0.08), 11)
 	var target_variant = communication_event.get("target_position", null)
 	var has_highlight_line: bool = String(communication_event.get("event_type", "")).strip_edges().to_lower() == "bounding_rotation" and typeof(target_variant) == TYPE_VECTOR2
 	if has_highlight_line:
@@ -8803,8 +8830,15 @@ func _add_tactical_communication_event_visual(communication_event: Dictionary) -
 		"anchor_position": anchor_position,
 		"target_position": Vector2(target_variant) if typeof(target_variant) == TYPE_VECTOR2 else null,
 		"has_highlight_line": has_highlight_line,
+		"routine_label_suppressed": suppress_routine_label,
 		"visual_only": true,
 	})
+
+
+func _should_suppress_connected_contact_tactical_communication_event(communication_event: Dictionary) -> bool:
+	if not _is_connected_contact_marker_hierarchy_active():
+		return false
+	return String(communication_event.get("event_type", "")).strip_edges().to_lower() == "contact_report"
 
 
 func _get_tactical_communication_color(priority: int, event_type: String) -> Color:
@@ -9066,7 +9100,7 @@ func _rebuild_contact_visuals() -> void:
 			continue
 		var detection_state: String = String(contact.get("detection_state", "unknown")).strip_edges().to_lower()
 		var report_state: String = String(contact.get("report_state", "current")).strip_edges().to_lower()
-		_add_marker3d(_contact_root, Vector2(position_variant), _get_contact_color(detection_state, report_state), "Contact_%s" % String(contact.get("unit_id", _contact_count)), 0.26, 0.035, 16, 0.015)
+		_add_marker3d(_contact_root, Vector2(position_variant), _get_contact_color(detection_state, report_state), "Contact_%s" % String(contact.get("unit_id", _contact_count)), CONTACT_MARKER_RADIUS, 0.035, 16, 0.015)
 		var enemy_profile_label: String = String(contact.get("enemy_profile_label", "")).strip_edges()
 		if bool(contact.get("enemy_profile_revealed", false)) and not enemy_profile_label.is_empty():
 			_add_label3d(_contact_root, enemy_profile_label.to_upper(), _world_to_surface_3d_position(Vector2(position_variant) + Vector2(0.0, -24.0), MOVEMENT_LABEL_HEIGHT + 0.52), "ContactProfile_%s" % String(contact.get("unit_id", _contact_count)), Color(1.0, 0.76, 0.32, 0.95), 11)

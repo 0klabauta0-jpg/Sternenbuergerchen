@@ -141,6 +141,11 @@ func _run() -> void:
 		print("TASK1119 %s FRAME DEBUG %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
 		_assert(float(primary_snapshot.get("camera_size", 99.0)) >= 24.0 and float(primary_snapshot.get("camera_size", 99.0)) <= 32.0 and not String(controller.get("_connected_first_contact_world_frame_signature")).is_empty(), "%s product world frames the complete local Fireteam and Contact once: %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
 		_assert(_local_contact_frame_is_hud_clear(controller, primary_view), "%s complete local Fireteam and Contact stay inside the HUD-clear tactical area" % fireteam_id.to_upper())
+		_assert(_product_contact_marker_hierarchy_is_readable(primary_snapshot), "%s product world prioritizes Contact over Selection and routine Unit labels" % fireteam_id.to_upper())
+		var visible_routine_labels: PackedStringArray = _get_visible_routine_world_label_paths(primary_view)
+		if not visible_routine_labels.is_empty():
+			print("TASK1119 %s ROUTINE WORLD LABELS %s" % [fireteam_id.to_upper(), JSON.stringify(Array(visible_routine_labels))])
+		_assert(visible_routine_labels.is_empty(), "%s connected Contact cluster contains no visible routine CONTACT/ENGAGE/MOVE labels" % fireteam_id.to_upper())
 		_assert(int(primary_snapshot.get("dropship_visual_count", -1)) == 0, "%s product Contact world removes completed empty return Dropships" % fireteam_id.to_upper())
 		perspective_signatures.append(String(perspective.get("perspective_signature", "")))
 	_assert(perspective_signatures.size() == 2 and not perspective_signatures[0].is_empty() and perspective_signatures[0] != perspective_signatures[1], "Product peers expose distinct stable HUD perspectives")
@@ -251,6 +256,39 @@ func _local_contact_frame_is_hud_clear(controller: Node, view: Node) -> bool:
 		if not tactical_area.has_point(screen_position):
 			return false
 	return true
+
+
+func _product_contact_marker_hierarchy_is_readable(snapshot: Dictionary) -> bool:
+	if not bool(snapshot.get("connected_contact_marker_hierarchy_active", false)):
+		return false
+	var selection_radius: float = float(snapshot.get("connected_contact_selected_marker_radius", 99.0))
+	var contact_radius: float = float(snapshot.get("connected_contact_contact_marker_radius", 0.0))
+	if selection_radius >= contact_radius or float(snapshot.get("connected_contact_selected_marker_alpha", 1.0)) >= 0.4:
+		return false
+	for entry_variant in Array(snapshot.get("selected_unit_marker_entries", [])):
+		if not is_equal_approx(float(Dictionary(entry_variant).get("radius", 99.0)), selection_radius):
+			return false
+	for state_variant in Dictionary(snapshot.get("unit_proxy_state_by_id", {})).values():
+		var state: Dictionary = Dictionary(state_variant)
+		var badge_text: String = String(state.get("unit_status_badge_text", "")).strip_edges().to_upper()
+		if bool(state.get("unit_status_badge_visible", false)) and ["CONTACT", "ENGAGE", "MOVE"].has(badge_text):
+			return false
+	return true
+
+
+func _get_visible_routine_world_label_paths(root_node: Node) -> PackedStringArray:
+	var result := PackedStringArray()
+	_collect_visible_routine_world_label_paths(root_node, result)
+	return result
+
+
+func _collect_visible_routine_world_label_paths(node: Node, result: PackedStringArray) -> void:
+	if node is Label3D:
+		var label := node as Label3D
+		if label.visible and ["CONTACT", "ENGAGE", "MOVE"].has(label.text.strip_edges().to_upper()):
+			result.append("%s:%s" % [String(label.get_path()), label.text.strip_edges().to_upper()])
+	for child in node.get_children():
+		_collect_visible_routine_world_label_paths(child, result)
 
 
 func _has_fireteam_event(events: Array, fireteam_id: String) -> bool:

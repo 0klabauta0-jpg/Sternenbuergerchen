@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1125: Der verbundene Erstkontakt rahmt das vollstaendige lokale Fireteam und dessen Kontakt innerhalb der wirklich freien Spielflaeche.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1126: Der verbundene Erstkontakt ordnet Selection, Contact und kritische Statushinweise zu einer klaren lokalen Markerhierarchie.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1125</span>
+      <span class="pill good">Letzter Abschluss: TASK_1126</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -276,6 +276,11 @@
           <p>Die Kamera kannte beim ersten verbundenen Kontakt bisher nur den Leader und den Gegner. Wingmen konnten deshalb am Rand oder hinter dem unteren HUD liegen. Jetzt bestimmen alle Mitglieder des lokal ausgewaehlten Fireteams und nur dessen Kontakte den einmaligen Kamerarahmen.</p>
           <div class="callout success">BLUE mit fuenf und GOLD mit drei Mitgliedern bleiben vollstaendig in der HUD-freien Taktikflaeche. Beide Perspektiven nutzen Camera-Size 24. TASK_1125 10/10, Drei-Peer 29/29 headless, je Sicht 35/35 Real Window, Multiplayer 31/31 und Performance 82/82.</div>
         </article>
+        <article class="card wide">
+          <h2>Contact Vor Selection Vor Routine TASK_1126</h2>
+          <p>Der Spieler sieht weiterhin, welches Fireteam ausgewaehlt ist, aber dessen Bodenringe ueberdecken nicht mehr den Gegner. Doppelte Tactical-Communication-Contact-Marker und das redundante Wort <code>CONTACT</code> verschwinden. Ein echter Schadenhinweis wie <code>HP</code> bleibt sichtbar.</p>
+          <div class="callout success">BLUE und GOLD enthalten keine sichtbaren Routine-Labels mehr. TASK_1126 13/13, Drei-Peer 33/33 headless, je Sicht 39/39 Real Window, Multiplayer 31/31 und Performance 82/82.</div>
+        </article>
       </div>
     </section>
 
@@ -312,7 +317,8 @@
           <ul>
             <li><strong>World-Residue geschlossen:</strong> Der weisse Doppelblock kam aus einer zwischen Peer-Subviewports geteilten <code>World3D</code>. Getrennte Renderwelten beseitigen ihn in BLUE und GOLD; der gemessene Restwert ist 0.</li>
             <li><strong>Lokaler Kamerarahmen geschlossen:</strong> Alle lokalen Mitglieder und der zugehoerige Kontakt bleiben oberhalb des Bottom-HUD und zwischen den Seitenpanels. BLUE verliert sein fuenftes Mitglied nicht mehr an einer alten Fixture-Position.</li>
-            <li><strong>Marker-Hierarchie offen:</strong> Selection-Ringe, Unit-Proxies und das CONTACT-Label liegen im gemeinsamen Feuercluster noch uebereinander. TASK_1126 soll eine klare lokale Rangfolge schaffen, ohne Einheiten oder Kontakte zu verschieben.</li>
+            <li><strong>Marker-Hierarchie geschlossen:</strong> Contact ist staerker als Selection, Routine-Labels verschwinden und kritische HP-/Vitalhinweise bleiben. Es werden keine Unit- oder Contact-Positionen veraendert.</li>
+            <li><strong>FTL-Bubble-Anker offen:</strong> TASK_274 erreicht Eventlog und 3D-Karte, aber zwei Assertions finden keine Event-gebundenen FTL-Bubbles an der linken Fireteam-Mini-Card. TASK_1127 verfolgt diesen Spielerfeedback-Pfad.</li>
             <li><strong>Sichttest offen:</strong> Headless-Verifier sind gruen, aber der echte Zwei-Fenster-Blick ist noch nicht abgenommen.</li>
             <li><strong>Preview-Sprache:</strong> Ohne klares Wort <code>PREVIEW</code> kann ein geplanter Move wie ein laufender Move wirken.</li>
           <li><strong>Host/Client:</strong> Beide Fenster sehen denselben naechsten Auftrag; die Fireteam-Karten-Relation ist jetzt als OWN/VIEW/FT ? lesbar.</li>
@@ -364,15 +370,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1125 rahmt das vollstaendige lokale Fireteam plus Kontakt in der HUD-freien Taktikflaeche. BLUE und GOLD bleiben bei demselben engen Massstab. Als naechstes ordnet TASK_1126 Selection-, Unit- und CONTACT-Marker innerhalb des sichtbaren Feuerclusters.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1126 gibt dem Contact-Marker Vorrang, haelt Selection dezent und bewahrt nur wichtige HP-/Vitalhinweise. Als naechstes repariert TASK_1127 die noch nicht nachgewiesene Bindung von FTL-Bubbles an Tactical-Communication-Events und linke Fireteam-Mini-Cards.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability (10/10, Drei-Peer 35/35 je Sicht)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1126 - Connected First Contact Local Marker and Label Hierarchy" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1126 - Connected First Contact Local Marker and Label Hierarchy (13/13, Drei-Peer 39/39 je Sicht)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1008,10 +1014,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1126 - Connected First Contact Local Marker and Label Hierarchy"
+            recommended_next_task: "TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair"
           },
           metadata: {
-            generated_for_task: "TASK_1125",
+            generated_for_task: "TASK_1126",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

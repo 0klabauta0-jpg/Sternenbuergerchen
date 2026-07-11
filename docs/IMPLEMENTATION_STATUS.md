@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1126 - Connected First Contact Local Marker and Label Hierarchy
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1126_connected_first_contact_local_marker_label_hierarchy.md`, `docs/tasks/TASK_1125_connected_first_contact_local_team_contact_cluster_readability.md`, `docs/dev/tactical_decision_clarity_contract.md`
+- Befund: Selection-Ringe, Unit-Routine-Badges und doppelte Tactical-Communication-Contact-Reports konkurrierten im selben Cluster. Der sichtbare `CONTACT`-Text stammte aus mehreren `TacCom_contact_report_*_Label`-Nodes, nicht aus dem ContactRoot.
+- Aenderung: Connected Contact nutzt kleinere/transparente Selection-Ringe, unterdrueckt Routine-Badges und rendert Contact-Reports nicht doppelt als Tactical-Communication-Mapvisual. Kritische HP-/Vitalhinweise bleiben. Detached Mission-Konfiguration greift nicht mehr auf eine fehlende MultiplayerAPI zu.
+- Multiplayer/Performance: Reine vorhandene Payload-/Visualauswertung; kein Gameplay-State, RPC, Command, Effect oder Snapshot-Netzfeld. Keine SceneTree-Scans im Runtimepfad. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: TASK_274 laeuft nach dem Lifecycle-Guard ohne Script Error, findet aber in zwei von 76 Assertions weiterhin keine Event-gebundenen FTL-Bubbles an der linken Fireteam-Mini-Card. Das ist der naechste Spielerfeedback-Slice.
+- Lokale Pruefung: TASK_1126 13/13; TASK_1119 33/33 headless sowie 39/39 je BLUE/GOLD Real Window; TASK_1125 10/10; TASK_1124 11/11; TASK_839 31/31; TASK_1104 31/31; TASK_222 82/82; TASK_274 74/76.
+- Naechster Schritt: TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair.
+
 ### TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1125_connected_first_contact_local_team_contact_cluster_readability.md`, `docs/tasks/TASK_1122_connected_mission_world_camera_exposure_contact_cluster_readability.md`, `docs/dev/tactical_decision_clarity_contract.md`
