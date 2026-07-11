@@ -5,6 +5,7 @@ signal tick_processed(tick: int)
 signal damage_effect_resolved(result: Dictionary)
 signal fire_rule_committed(state: Dictionary)
 signal dropship_command_committed(command: Dictionary)
+signal commander_intent_committed(command: Dictionary)
 signal multiplayer_snapshot_applied(snapshot: Dictionary)
 signal network_command_result_received(result: Dictionary)
 signal network_command_accepted(command: Dictionary, peer_id: int)
@@ -1550,6 +1551,9 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 
 	if delta < 0.0:
 		push_warning("SimulationRoot received a negative physics delta while applying a command.")
+		return
+	if String(cmd.get("contract_category", "")).strip_edges().to_lower() == "commander_intent":
+		commander_intent_committed.emit(cmd.duplicate(true))
 		return
 
 	match _extract_command_type(cmd):
