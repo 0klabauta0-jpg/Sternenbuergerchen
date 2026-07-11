@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1100: verbundener Stationsweg, kompakte Snapshot-Payloads und stabile Interaction-Anzeige trotz ausgelassener oder verspäteter Netzwerk-Ticks.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1101: verbundener Stationsweg, stabile Snapshot-Anzeige und Wiederaufnahme einer laufenden Host-Mission nach Client-Reconnect.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1100</span>
+      <span class="pill good">Letzter Abschluss: TASK_1101</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -122,6 +122,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_progress_budget"> 2000 Parallel-Snapshots bleiben unter 250 ms und 250 Label-Updates</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_payload_budget"> 64 Interaction-States addieren nur 1775 Wire-Bytes und zwei Chunks</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_jitter_resilience"> Alte Snapshot-Ticks koennen Progress und Completion nicht zuruecksetzen</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_reconnect_recovery"> Rejoin stellt laufende Host-Interaction mit neuer Peer-ID wieder her</label>
         </article>
         <article class="card wide">
           <h2>Multiplayer-Payload TASK_1099</h2>
@@ -132,6 +133,11 @@
           <h2>Netzwerk-Konvergenz TASK_1100</h2>
           <p>Der Client kann Zwischenticks verpassen und springt mit dem naechsten vollen Host-Snapshot direkt auf den aktuellen Stand. Verspaetete aeltere Ticks werden vor CombatDriver, Scenario-Gates und HUD verworfen.</p>
           <div class="callout">Completion bleibt abgeschlossen. Ein identischer neuerer Snapshot aktualisiert nur den read-only Quell-Tick und erzeugt kein neues Label-Update. Ein wirklich neuerer Host-Reset bleibt erlaubt; neue sichtbare Dauer-/Moduswerte werden trotz Dedupe aktualisiert.</div>
+        </article>
+        <article class="card wide">
+          <h2>Reconnect TASK_1101</h2>
+          <p>Die Produkt-Lobby startet und beendet echte Host-/Client-Missionen. Ein nicht publizierter 256-Bit-Token schuetzt die host-autorisierte Identitaet; malformed und falsche Rejoin-Versuche erhalten weder Mission noch Assignment-Slot.</p>
+          <div class="callout">Nur der wartende Peer ist fuer Snapshot-RPCs gesperrt. Nach erzeugter Mission entsperrt ein reliable Ready-ACK genau diese Peer-ID. Andere Clients und Host-Simulation laufen weiter; Combat-Result bringt beide Seiten sauber in die Lobby.</div>
         </article>
       </div>
     </section>
@@ -861,10 +867,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1101 - Connected Interaction Reconnect State Recovery"
+            recommended_next_task: "TASK_1102 - Parallel Fireteam Interaction Ownership and Recovery"
           },
           metadata: {
-            generated_for_task: "TASK_1100",
+            generated_for_task: "TASK_1101",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

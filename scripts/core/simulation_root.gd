@@ -113,6 +113,8 @@ var _snapshot_transport_reassembled_count: int = 0
 var _snapshot_transport_reassembly_failure_count: int = 0
 var _snapshot_transport_last_pack_usec: int = 0
 var _snapshot_transport_last_reassembly_usec: int = 0
+var _snapshot_broadcast_paused: bool = false
+var _snapshot_blocked_peer_ids: Dictionary = {}
 var _combat_rng := RandomNumberGenerator.new()
 var _hpa_navigation_graph = null
 var _hpa_pathfinder = HPA_PATHFINDER_SCRIPT.new()
@@ -480,6 +482,14 @@ func set_peer_role(peer_id: int, role_id: String) -> void:
 	_peer_role_assignments[peer_id] = normalized_role_id
 
 
+func set_peer_role_assignments(assignments: Dictionary) -> void:
+	_peer_role_assignments.clear()
+	for raw_peer_id in assignments.keys():
+		set_peer_role(int(raw_peer_id), String(assignments[raw_peer_id]))
+	if not _peer_role_assignments.has(1):
+		_peer_role_assignments[1] = "commander"
+
+
 func get_peer_role(peer_id: int) -> String:
 	if peer_id <= 0:
 		return ""
@@ -615,9 +625,24 @@ func get_snapshot_transport_debug_snapshot() -> Dictionary:
 		"last_pack_usec": _snapshot_transport_last_pack_usec,
 		"last_reassembly_usec": _snapshot_transport_last_reassembly_usec,
 		"pending_tick_count": _incoming_snapshot_chunks_by_tick.size(),
+		"broadcast_paused": _snapshot_broadcast_paused,
+		"blocked_peer_ids": _snapshot_blocked_peer_ids.keys(),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
+
+
+func set_snapshot_broadcast_paused(paused: bool) -> void:
+	_snapshot_broadcast_paused = paused
+
+
+func set_snapshot_peer_blocked(peer_id: int, blocked: bool) -> void:
+	if peer_id <= 1:
+		return
+	if blocked:
+		_snapshot_blocked_peer_ids[peer_id] = true
+	else:
+		_snapshot_blocked_peer_ids.erase(peer_id)
 
 
 func get_snapshot_audio_debug_snapshot() -> Dictionary:
@@ -966,18 +991,22 @@ func _is_peer_allowed_for_team(peer_id: int, team_id: String) -> bool:
 
 
 func _broadcast_tick_state() -> void:
-	if not is_server_authoritative or not _has_active_multiplayer_peer() or not multiplayer.is_server():
+	if _snapshot_broadcast_paused or not is_server_authoritative or not _has_active_multiplayer_peer() or not multiplayer.is_server():
 		return
 
+	var recipient_peer_ids: PackedInt32Array = _get_snapshot_recipient_peer_ids()
+	if recipient_peer_ids.is_empty():
+		return
 	var state_dict: Dictionary = _build_tick_state()
-	_broadcast_tick_state_chunks(state_dict)
+	_broadcast_tick_state_chunks(state_dict, recipient_peer_ids)
 
 	var vital_updates: Array = _build_vital_state_updates()
 	if not vital_updates.is_empty():
-		_receive_vital_state_updates.rpc(vital_updates)
+		for peer_id in recipient_peer_ids:
+			_receive_vital_state_updates.rpc_id(peer_id, vital_updates)
 
 
-func _broadcast_tick_state_chunks(state_dict: Dictionary) -> void:
+func _broadcast_tick_state_chunks(state_dict: Dictionary, recipient_peer_ids: PackedInt32Array) -> void:
 	var pack_started_usec: int = Time.get_ticks_usec()
 	var raw_bytes: PackedByteArray = var_to_bytes(state_dict)
 	var compressed_bytes: PackedByteArray = raw_bytes.compress(SNAPSHOT_COMPRESSION_MODE)
@@ -996,8 +1025,18 @@ func _broadcast_tick_state_chunks(state_dict: Dictionary) -> void:
 		var end_offset: int = mini(start_offset + SNAPSHOT_CHUNK_PAYLOAD_BYTES, wire_bytes.size())
 		var chunk: PackedByteArray = wire_bytes.slice(start_offset, end_offset)
 		_snapshot_transport_last_max_chunk_payload_bytes = maxi(_snapshot_transport_last_max_chunk_payload_bytes, chunk.size())
-		_receive_tick_state_chunk.rpc(tick_counter, chunk_index, chunk_count, raw_bytes.size(), use_compression, chunk)
+		for peer_id in recipient_peer_ids:
+			_receive_tick_state_chunk.rpc_id(peer_id, tick_counter, chunk_index, chunk_count, raw_bytes.size(), use_compression, chunk)
 	_snapshot_transport_last_pack_usec = Time.get_ticks_usec() - pack_started_usec
+
+
+func _get_snapshot_recipient_peer_ids() -> PackedInt32Array:
+	var result := PackedInt32Array()
+	for peer_id_variant in multiplayer.get_peers():
+		var peer_id: int = int(peer_id_variant)
+		if peer_id > 1 and not _snapshot_blocked_peer_ids.has(peer_id):
+			result.append(peer_id)
+	return result
 
 
 func _build_tick_state() -> Dictionary:

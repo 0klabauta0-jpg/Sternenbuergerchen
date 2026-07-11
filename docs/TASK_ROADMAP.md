@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1101 - Connected Interaction Reconnect State Recovery (implementiert im Arbeitsstand)
+- Grundlage: Client-Disconnect setzte `_mission_started` auf false, obwohl die Host-Mission weiterlief; Rejoin konnte keine Mission oder Interaction-Wahrheit wiederherstellen.
+- Ergebnis: Die Produkt-Lobby startet und beendet echte Missioninstanzen. Ein nicht publizierter 256-Bit-Token schuetzt den Slot; malformed/falsche Tokens werden abgewiesen und nur der wartende Peer bleibt bis zum Mission-Ready-ACK vom Snapshot-Transport ausgeschlossen.
+- Verifikation: Echter Produkt-Lobby-/Mission-ENet-Rejoin inklusive Secret-Redaction, zwei Reject-Faellen, ACK, Private-Roster-Ownership-Rebind und Completion TASK_1101 46/46; Zwei-Instanz-, Stationsweg-, Session-, Lobby-, Authority- und Jitter-Regressionen gruen.
+- Naechster Schritt: TASK_1102 - Parallel Fireteam Interaction Ownership and Recovery.
+
 ## TASK_1100 - Connected Interaction Snapshot Loss/Jitter Resilience (implementiert im Arbeitsstand)
 - Grundlage: Die Payload ist klein; verbleibendes Multiplayer-Risiko waren ausgelassene und verspätete unreliable Snapshots.
 - Ergebnis: Der akzeptierte Host-Tick laeuft read-only bis ins Feedback. Alte Ticks erreichen weder CombatDriver/Gates noch HUD, Completion bleibt geschlossen und identische neuere Snapshots erzeugen kein neues Label-Update. Neuere autoritative Hold-Resets und gerenderte Dauer-Korrekturen bleiben sichtbar.

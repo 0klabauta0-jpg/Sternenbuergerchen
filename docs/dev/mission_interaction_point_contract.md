@@ -670,5 +670,22 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Ein Progress-Reset in einem wirklich neueren autoritativen Tick bleibt erlaubt, weil Arrival-/Hold beim Verlassen des Radius legitim auf null zurueckfaellt. Der Client klemmt Host-State nicht monoton.
 - TASK_1100 prueft Skip, Out-of-order vor und nach Completion, Gate-Stabilitaet, legitimen neueren Hold-Reset, Dauer-Korrektur, Dedupe sowie command-/effect-freie Anwendung am echten SimulationRoot-Signalpfad.
 
+## Connected Interaction Reconnect Contract
+- Ein Client-Disconnect beendet keine laufende Host-Mission und setzt `_mission_started` auf dem Host nicht zurueck.
+- Die Host-Session speichert beim Disconnect die bereits autorisierte Missionsidentitaet, entfernt die alte Peer-ID und bindet Team, Rolle, Fireteams sowie oeffentliche Roster-Referenzen an die neue Peer-ID.
+- Die Identitaet ist durch einen lokal persistenten, zufaelligen 256-Bit-Reconnect-Token gebunden. Der Token liegt getrennt von `peer_data` und darf weder Session-Snapshot, Assignments, UI, Debugpayload noch Log erreichen.
+- Ein Peer ohne passenden Token erhaelt weder `mission_start_requested` noch Assignment-Slot und wird ueber einen reliable Reject-Handoff zur Lobby zurueckgefuehrt.
+- Player-Setup-RPCs duerfen waehrend `_mission_started` den Anzeigenamen aktualisieren, aber keine Team-, Roster- oder Connection-Autoritaet umschreiben.
+- Team-, Rollen- und Fireteam-Assignments werden in Host und Client als vollstaendige Saetze ersetzt; alte Peer-Rollen duerfen nicht in `SimulationRoot` verbleiben.
+- Solange ein Rejoin-Peer noch nicht authentifiziert und seine Mission-Szene nicht vorhanden ist, blockiert `SimulationRoot` Snapshot- und Vital-RPCs nur fuer diese Peer-ID. Andere Clients sowie autoritative Simulation/Interaction laufen weiter.
+- Nach Szenenerzeugung sendet der Client `notify_mission_runtime_ready`; erst dieses reliable ACK entsperrt den Peer fuer Snapshot-Chunks.
+- Verbindet sich ein Peer waehrend `_mission_started`, erhaelt nur dieser Peer den bestehenden reliable Mission-Start-Handoff mit den aktuellen Assignments.
+- Die neu erzeugte Client-Mission startet ohne lokale Interaction-Wahrheit und konvergiert ueber den naechsten vollstaendigen Host-Snapshot auf aktuelle Interaction-/Gate-/HUD-Zustaende.
+- Interaction-Fortschritt laeuft auf dem Host waehrend der Trennung weiter. Der Rejoin erzeugt keine Client-Commands oder Effects.
+- Reconnect ist keine Host-Migration: Wenn der Host selbst verschwindet, endet die Session weiterhin.
+- Die Produkt-Lobby `scenes/ui/multiplayer_lobby.tscn` besitzt den MissionHost, startet die echte Missioninstanz und wendet Reconnect-Assignments auf deren `SimulationRoot` an.
+- Ein Host-Combat-Result pausiert den Broadcast, setzt die Session auf Lobby und entfernt Host-/Client-Missionen nach kurzer Netzwerk-Drain-Phase.
+- TASK_1101 belegt Secret-Redaction, malformed/falsche Token-Rejects, per-Peer-Unblock per ACK, gueltigen Rejoin, stale Role Cleanup, Authority-Spoof-Guard, Full-State-Recovery und Completion-Return.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.
