@@ -28146,18 +28146,36 @@ func refresh_contact_overlay() -> void:
 	overlay.call("set_contact_entries", contact_snapshot)
 
 
+func _build_connected_first_contact_frame_positions(contact_snapshot: Array) -> Array:
+	var world_positions: Array = []
+	for fireteam_id_variant in _selected_fireteam_ids:
+		for unit_variant in _get_fireteam_units(String(fireteam_id_variant), true):
+			if unit_variant is Node2D:
+				world_positions.append((unit_variant as Node2D).global_position)
+	for contact_variant in contact_snapshot:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
+		if not _selected_fireteam_ids.has(fireteam_id):
+			continue
+		var position_variant: Variant = contact.get("approximate_position", contact.get("last_known_position", contact.get("position", null)))
+		if typeof(position_variant) != TYPE_VECTOR2:
+			continue
+		world_positions.append(Vector2(position_variant))
+	return world_positions
+
+
 func _focus_connected_first_contact_world(contact_snapshot: Array) -> Dictionary:
 	if not _is_connected_multiplayer_hud_session() or _selected_fireteam_ids.is_empty() or contact_snapshot.is_empty():
 		return {"framed": false, "reason": "inactive_connected_contact"}
 	var primary_view: Node = _get_primary_3d_view()
 	if primary_view == null or not primary_view.has_method("frame_world_positions"):
 		return {"framed": false, "reason": "primary_view_not_ready"}
-	var world_positions: Array = []
+	var world_positions: Array = _build_connected_first_contact_frame_positions(contact_snapshot)
+	if world_positions.size() < 2:
+		return {"framed": false, "reason": "insufficient_world_positions"}
 	var signature_tokens: PackedStringArray = PackedStringArray(Array(_selected_fireteam_ids))
-	for fireteam_id_variant in _selected_fireteam_ids:
-		var anchor: Node = _get_selection_anchor_for_fireteam(String(fireteam_id_variant))
-		if anchor is Node2D:
-			world_positions.append((anchor as Node2D).global_position)
 	for contact_variant in contact_snapshot:
 		if typeof(contact_variant) != TYPE_DICTIONARY:
 			continue
@@ -28169,14 +28187,11 @@ func _focus_connected_first_contact_world(contact_snapshot: Array) -> Dictionary
 		if typeof(position_variant) != TYPE_VECTOR2:
 			continue
 		var position: Vector2 = Vector2(position_variant)
-		world_positions.append(position)
 		signature_tokens.append("%s:%d:%d" % [String(contact.get("target_id", contact.get("unit_id", ""))), roundi(position.x), roundi(position.y)])
-	if world_positions.size() < 2:
-		return {"framed": false, "reason": "insufficient_world_positions"}
 	var signature: String = "|".join(signature_tokens)
 	if signature == _connected_first_contact_world_frame_signature:
 		return {"framed": false, "reason": "already_framed", "signature": signature}
-	var result: Dictionary = Dictionary(primary_view.call("frame_world_positions", world_positions, 9.0, 24.0, 30.0)).duplicate(true)
+	var result: Dictionary = Dictionary(primary_view.call("frame_world_positions", world_positions, 12.0, 24.0, 32.0)).duplicate(true)
 	if bool(result.get("framed", false)):
 		_connected_first_contact_world_frame_signature = signature
 	result["signature"] = signature

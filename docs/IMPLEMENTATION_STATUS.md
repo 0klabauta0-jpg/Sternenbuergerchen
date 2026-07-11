@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1125_connected_first_contact_local_team_contact_cluster_readability.md`, `docs/tasks/TASK_1122_connected_mission_world_camera_exposure_contact_cluster_readability.md`, `docs/dev/tactical_decision_clarity_contract.md`
+- Befund: Das einmalige Connected-Contact-Framing verwendete nur Fireteam-Leader plus Kontakt. Ein fuenftes BLUE-Fixture-Mitglied wurde zudem nicht in die lokale Aufstellung versetzt, zog die Kamera auf Size 32 und lag visuell hinter dem unteren HUD.
+- Aenderung: Der read-only Frame-Punktesatz enthaelt alle Mitglieder der lokal ausgewaehlten Fireteams und nur deren Kontakte. Der Produktfixture besitzt einen fuenften zentralen Slot. BLUE und GOLD werden gegen die tatsaechlich HUD-freie Full-HD-Taktikflaeche geprueft.
+- Multiplayer/Performance: Kein Gameplay-State, RPC, Command, Effect oder Snapshotfeld; einmalige vorhandene Unit-Lookups beim ersten verbundenen Kontakt, kein Frame-Hotpath. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Beide Perspektiven bleiben bei Camera-Size 24 und verlieren kein lokales Mitglied hinter HUD-Panels. Im Kontaktcluster ueberlagern sich weiterhin Selection-, Unit- und CONTACT-Marker; das ist der naechste sichtbare Slice.
+- Lokale Pruefung: TASK_1125 10/10; TASK_1119 29/29 headless sowie 35/35 je BLUE/GOLD Real Window; TASK_1122 11/11; TASK_1123 9/9; TASK_1124 11/11; TASK_1104 31/31; TASK_222 82/82.
+- Naechster Schritt: TASK_1126 - Connected First Contact Local Marker and Label Hierarchy.
+
 ### TASK_1124 - Connected Contact World Root and Compositing Residue Isolation
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1124_connected_contact_world_root_compositing_residue_isolation.md`, `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `docs/ARCHITECTURE.md`

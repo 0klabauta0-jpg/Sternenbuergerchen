@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability (implementiert im Arbeitsstand)
+- Grundlage: Das verbundene Contact-Framing kannte nur einen Fireteam-Anker plus Kontakt. Bei BLUE blieb ausserdem das fuenfte Fixture-Mitglied ausserhalb der Viererslots und wurde hinter dem HUD mitgerahmt.
+- Ergebnis: Alle Mitglieder des lokal ausgewaehlten Fireteams und nur dessen Kontakte bestimmen den einmaligen read-only Frame. Der Fuenferslot ist vollstaendig; BLUE und GOLD liegen bei Camera-Size 24 in der HUD-freien Taktikflaeche.
+- Architektur: Keine Positionsmutation, kein RPC, Command, Effect oder Snapshotfeld. Der vorhandene one-shot Kamera-Lesepfad nutzt den bestehenden Registry-/Unit-Lookup und bleibt ausserhalb des Frame-Hotpaths.
+- Verifikation: TASK_1125 10/10; TASK_1119 29/29 headless und 35/35 je Real Window; TASK_1122 11/11; TASK_1123 9/9; TASK_1124 11/11; TASK_1104 31/31; Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1126 - Connected First Contact Local Marker and Label Hierarchy. Selection-, Unit- und CONTACT-Marker sollen im gemeinsamen Cluster eine klare visuelle Rangfolge erhalten.
+
 ## TASK_1124 - Connected Contact World Root and Compositing Residue Isolation (implementiert im Arbeitsstand)
 - Grundlage: Der verbleibende weisse Doppelblock war weder ein aktives Dropship noch ein registriertes Zielwelt-Asset. Direkte Ziel-World-Captures belegten, dass er vor dem Root-Compositing entstand.
 - Ergebnis: Parallele taktische SubViewports besitzen getrennte `World3D`-Instanzen. BLUE-/GOLD-Produkt- und World-Captures enthalten im ehemaligen Residue-Bereich jeweils 0 Fremdpixel.
