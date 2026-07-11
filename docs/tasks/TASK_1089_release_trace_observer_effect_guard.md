@@ -51,3 +51,7 @@ Kompakte Trace-Daten duerfen keine neue Gameplay-Wahrheit bilden. Sie werden nur
 - TASK_879 63/63, TASK_1088 21/21, TASK_1087 19/19, TASK_1086 16/16, TASK_1085 15/15 und TASK_1084 12/12 gruen.
 - TASK_1083 24/24 und TASK_1082 21/21 gruen; Host-Autoritaet, Ownership, Kompression, Packetisierung und Client-Read-only-State bleiben erhalten.
 - Naechster Schritt nach dem echten Releasevergleich: spielnaher Zwei-Spieler-Station-Route-Playtest statt weiterer synthetischer Trace-Politur.
+- Godot 4.6.2 exportiert den Merge-Stand erfolgreich; Provenance-Startcheck ist gruen.
+- Im echten Release sinkt `deeplink_final / applied` von 9.702 ms auf 7.545 ms, rund 22 Prozent. Der 24-Sample-Trace enthaelt exakt einen Controller-Vollsnapshot.
+- Finaler Release-Trace: Selected Fireteam, Mission Control und Event Log behalten CONTACT FIRE.
+- Empfohlener Follow-up: TASK_1090 - Two-Player Station Route Decision Playtest. Zwei reale Instanzen sollen Deployment, Fireteam-Ownership, ersten Kontakt, getrennte Befehle und sichtbare Konsequenzen durchspielen.
