@@ -7,6 +7,8 @@ const TRANSFER_STATE_SNAPSHOT: String = "unreliable"
 const TRANSFER_VITAL_DELTA: String = "reliable"
 const TRANSFER_MISSION_RESULT: String = "reliable"
 const TRANSFER_START_LOAD: String = "reliable"
+const SNAPSHOT_COMPRESSION_MODE: int = FileAccess.COMPRESSION_ZSTD
+const SNAPSHOT_CHUNK_PAYLOAD_BYTES: int = 1000
 const MULTIPLAYER_ROSTER_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_roster_contract.gd")
 
 
@@ -88,7 +90,7 @@ func get_transfer_contract() -> Dictionary:
 			"rpc": "_receive_tick_state_chunk",
 			"mode": TRANSFER_STATE_SNAPSHOT,
 			"purpose": "compressed packetized unit/runtime/objective/tactical display state",
-			"chunk_payload_budget_bytes": 1000,
+			"chunk_payload_budget_bytes": SNAPSHOT_CHUNK_PAYLOAD_BYTES,
 			"reassembly_tick_guard": true,
 		},
 		"vital_delta": {
@@ -108,6 +110,13 @@ func get_transfer_contract() -> Dictionary:
 
 
 func build_serialization_metrics(snapshot: Dictionary) -> Dictionary:
+	var transport_started_usec: int = Time.get_ticks_usec()
+	var transport_raw: PackedByteArray = var_to_bytes(snapshot)
+	var compressed: PackedByteArray = transport_raw.compress(SNAPSHOT_COMPRESSION_MODE)
+	var transport_compressed: bool = not compressed.is_empty() and compressed.size() < transport_raw.size()
+	var transport_wire: PackedByteArray = compressed if transport_compressed else transport_raw
+	var transport_chunk_count: int = maxi((transport_wire.size() + SNAPSHOT_CHUNK_PAYLOAD_BYTES - 1) / SNAPSHOT_CHUNK_PAYLOAD_BYTES, 1)
+	var transport_measure_usec: int = Time.get_ticks_usec() - transport_started_usec
 	var json_safe: Variant = _to_json_safe(snapshot)
 	var canonical_json: String = JSON.stringify(json_safe)
 	var field_counts: Dictionary = _build_field_counts(snapshot)
@@ -118,6 +127,16 @@ func build_serialization_metrics(snapshot: Dictionary) -> Dictionary:
 		"array_count": _count_variant_type(json_safe, TYPE_ARRAY),
 		"scalar_count": _count_scalars(json_safe),
 		"field_counts": field_counts,
+		"mission_interaction_count": int(field_counts.get("mission_interaction_count", 0)),
+		"transport_raw_bytes": transport_raw.size(),
+		"transport_wire_bytes": transport_wire.size(),
+		"transport_chunk_count": transport_chunk_count,
+		"transport_chunk_payload_bytes": SNAPSHOT_CHUNK_PAYLOAD_BYTES,
+		"transport_compressed": transport_compressed,
+		"transport_compression_ratio": float(transport_wire.size()) / float(maxi(transport_raw.size(), 1)),
+		"transport_measure_usec": transport_measure_usec,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
 		"large_payload_offenders": large_payload_offenders,
 		"asset_reference_policy": "ids_only_no_texture_paths_or_raw_payloads",
 		"event_delta_candidate_count": int(field_counts.get("vital_update_count", 0)) + int(field_counts.get("fire_event_count", 0)) + int(field_counts.get("feedback_bubble_count", 0)) + int(field_counts.get("communication_event_count", 0)),
@@ -1065,6 +1084,8 @@ func _bubble_sort_key(entry: Dictionary) -> String:
 
 
 func _build_field_counts(snapshot: Dictionary) -> Dictionary:
+	var mission_interactions: Dictionary = Dictionary(snapshot.get("mission_interactions", {}))
+	var interaction_states: Dictionary = Dictionary(mission_interactions.get("interaction_states", {}))
 	return {
 		"unit_count": Array(snapshot.get("units", [])).size(),
 		"vital_update_count": Array(snapshot.get("vital_updates", [])).size(),
@@ -1081,6 +1102,7 @@ func _build_field_counts(snapshot: Dictionary) -> Dictionary:
 		"tactical_rules_count": Array(snapshot.get("tactical_rules", [])).size(),
 		"breakout_state_count": Array(snapshot.get("breakout_states", [])).size(),
 		"air_asset_status_count": Array(snapshot.get("air_asset_status", [])).size(),
+		"mission_interaction_count": interaction_states.size(),
 		"has_objective": not Dictionary(snapshot.get("objective", {})).is_empty(),
 		"has_dropship": not Dictionary(snapshot.get("dropship", {})).is_empty(),
 		"has_mission_result": not Dictionary(snapshot.get("mission_result", {})).is_empty(),

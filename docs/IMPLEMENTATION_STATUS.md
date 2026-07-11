@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1099 - Connected Interaction Snapshot Payload Budget
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1099_connected_interaction_snapshot_payload_budget.md`, `docs/dev/mission_interaction_point_contract.md`, `scripts/multiplayer/multiplayer_snapshot_contract.gd`
+- Stand: Die gemeinsame Snapshot-Metrik meldet jetzt reale `var_to_bytes`-/ZSTD-/1000-Byte-Chunk-Kosten sowie die Anzahl replizierter Mission-Interactions.
+- Performance: 64 parallele Interaction-States benoetigen lokal 2258 Wire-Bytes gegenueber 483 Byte leerer Baseline, also 1775 zusaetzliche Bytes und zwei zusaetzliche Chunks. Die groesste Messung lag bei rund 214 us.
+- Risiken/offen: Eine eigene Delta-Replikation ist durch diese Messung nicht gerechtfertigt. Unreliable-Verlust, Jitter und Out-of-order-Konvergenz bleiben als naechster Multiplayer-Fallstrick.
+- Lokale Pruefung: TASK_1099 38/38, TASK_1091 17/17, TASK_1098 5/5 und TASK_221 63/63.
+- Naechster Schritt: TASK_1100 - Connected Interaction Snapshot Loss/Jitter Resilience.
+
 ### TASK_1098 - Connected Interaction Progress Performance Budget
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1098_connected_interaction_progress_performance_budget.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1096
