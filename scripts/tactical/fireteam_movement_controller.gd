@@ -18,12 +18,6 @@ const RUSH_MAX_SPEED_FACTOR: float = 1.15
 const MOVE_RUSH_MIN_SPEED_FACTOR: float = 0.92
 const MOVE_RUSH_MAX_SPEED_FACTOR: float = 1.22
 const MOVE_STANCE_POLICY_ID: String = "move_stance"
-const MOVE_STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.65
-const MOVE_STANCE_NORMAL_SPEED_MULTIPLIER: float = 1.0
-const MOVE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER: float = 1.2
-const MOVE_STANCE_CAUTIOUS_SIGHT_FACTOR: float = 1.2
-const MOVE_STANCE_NORMAL_SIGHT_FACTOR: float = 1.0
-const MOVE_STANCE_AGGRESSIVE_SIGHT_FACTOR: float = 0.65
 const BEHAVIOR_STANCE_POLICY_ID: String = "fireteam_behavior"
 const WORKBENCH_RUNTIME_SOURCE_ID: String = "fireteam_formation_tuning_2026-05-17T08-46-56-746Z_05"
 const STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.35
@@ -44,30 +38,6 @@ const STANCE_AGGRESSIVE_CONTACT_INITIATIVE_SECONDS: float = 0.0
 const STANCE_CAUTIOUS_TEAM_TARGET_SUPPORT_PERCENT: float = 5.0
 const STANCE_NORMAL_TEAM_TARGET_SUPPORT_PERCENT: float = 0.0
 const STANCE_AGGRESSIVE_TEAM_TARGET_SUPPORT_PERCENT: float = -3.0
-const DEFEND_STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.8
-const DEFEND_STANCE_NORMAL_SPEED_MULTIPLIER: float = 1.0
-const DEFEND_STANCE_AGGRESSIVE_SPEED_MULTIPLIER: float = 1.1
-const DEFEND_STANCE_CAUTIOUS_SIGHT_FACTOR: float = 1.2
-const DEFEND_STANCE_NORMAL_SIGHT_FACTOR: float = 1.0
-const DEFEND_STANCE_AGGRESSIVE_SIGHT_FACTOR: float = 0.85
-const DEFEND_STANCE_CAUTIOUS_COVER_BONUS: float = 15.0
-const DEFEND_STANCE_NORMAL_COVER_BONUS: float = 0.0
-const DEFEND_STANCE_AGGRESSIVE_COVER_BONUS: float = -10.0
-const DEFEND_STANCE_CAUTIOUS_ATTACK_BONUS: float = -0.03
-const DEFEND_STANCE_NORMAL_ATTACK_BONUS: float = 0.0
-const DEFEND_STANCE_AGGRESSIVE_ATTACK_BONUS: float = 0.04
-const TAKE_STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.7
-const TAKE_STANCE_NORMAL_SPEED_MULTIPLIER: float = 1.0
-const TAKE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER: float = 1.2
-const TAKE_STANCE_CAUTIOUS_SIGHT_FACTOR: float = 1.15
-const TAKE_STANCE_NORMAL_SIGHT_FACTOR: float = 1.0
-const TAKE_STANCE_AGGRESSIVE_SIGHT_FACTOR: float = 0.75
-const TAKE_STANCE_CAUTIOUS_COVER_BONUS: float = 10.0
-const TAKE_STANCE_NORMAL_COVER_BONUS: float = 0.0
-const TAKE_STANCE_AGGRESSIVE_COVER_BONUS: float = -12.0
-const TAKE_STANCE_CAUTIOUS_ATTACK_BONUS: float = 0.0
-const TAKE_STANCE_NORMAL_ATTACK_BONUS: float = 0.0
-const TAKE_STANCE_AGGRESSIVE_ATTACK_BONUS: float = 0.06
 const TAKE_DOCTRINE_ID: String = "take_control_v1"
 const TAKE_TARGET_POLICY_OPTIMAL_RANGE_AREA_CONTROL: String = "optimal_range_area_control"
 const TAKE_CAUTIOUS_ADVANCE_MODE: String = "cautious_buddy_entry"
@@ -80,18 +50,6 @@ const TAKE_CAUTIOUS_STEP_MULTIPLIER: float = 0.78
 const TAKE_CAUTIOUS_FORMATION_SCATTER_FACTOR: float = 0.82
 const TAKE_NORMAL_FORMATION_SCATTER_FACTOR: float = 0.96
 const TAKE_AGGRESSIVE_FORMATION_SCATTER_FACTOR: float = 1.08
-const ENGAGE_STANCE_CAUTIOUS_SPEED_MULTIPLIER: float = 0.75
-const ENGAGE_STANCE_NORMAL_SPEED_MULTIPLIER: float = 1.0
-const ENGAGE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER: float = 1.15
-const ENGAGE_STANCE_CAUTIOUS_SIGHT_FACTOR: float = 1.15
-const ENGAGE_STANCE_NORMAL_SIGHT_FACTOR: float = 1.0
-const ENGAGE_STANCE_AGGRESSIVE_SIGHT_FACTOR: float = 0.8
-const ENGAGE_STANCE_CAUTIOUS_COVER_BONUS: float = 10.0
-const ENGAGE_STANCE_NORMAL_COVER_BONUS: float = 0.0
-const ENGAGE_STANCE_AGGRESSIVE_COVER_BONUS: float = -8.0
-const ENGAGE_STANCE_CAUTIOUS_ATTACK_BONUS: float = 0.02
-const ENGAGE_STANCE_NORMAL_ATTACK_BONUS: float = 0.0
-const ENGAGE_STANCE_AGGRESSIVE_ATTACK_BONUS: float = 0.08
 const ENGAGE_DOCTRINE_ID: String = "engage_control_v1"
 const ENGAGE_TARGET_POLICY_WEAPON_RANGE_AREA_PRIORITY: String = "weapon_range_area_priority"
 const ENGAGE_CAUTIOUS_ADVANCE_MODE: String = "cautious_buddy_bounds"
@@ -2230,31 +2188,31 @@ static func normalize_tactical_stance(value: String) -> String:
 static func _build_move_stance_modifiers(tactical_stance: String) -> Dictionary:
 	match tactical_stance:
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
-			return _build_stance_modifier_dict("move", tactical_stance, MOVE_STANCE_CAUTIOUS_SPEED_MULTIPLIER, MOVE_STANCE_CAUTIOUS_SIGHT_FACTOR, 0.0, 0.0, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, MOVE_STANCE_POLICY_ID)
+			return _build_stance_modifier_dict("move", tactical_stance, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, MOVE_STANCE_POLICY_ID)
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
-			return _build_stance_modifier_dict("move", tactical_stance, MOVE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER, MOVE_STANCE_AGGRESSIVE_SIGHT_FACTOR, 0.0, 0.0, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_LOWERED, MOVE_STANCE_POLICY_ID)
+			return _build_stance_modifier_dict("move", tactical_stance, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_LOWERED, MOVE_STANCE_POLICY_ID)
 		_:
-			return _build_stance_modifier_dict("move", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, MOVE_STANCE_NORMAL_SPEED_MULTIPLIER, MOVE_STANCE_NORMAL_SIGHT_FACTOR, 0.0, 0.0, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_TRAVEL, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_LOWERED, MOVE_STANCE_POLICY_ID)
+			return _build_stance_modifier_dict("move", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_TRAVEL, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_LOWERED, MOVE_STANCE_POLICY_ID)
 
 
 static func _build_defend_stance_modifiers(tactical_stance: String) -> Dictionary:
 	match tactical_stance:
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
-			return _build_stance_modifier_dict("defend", tactical_stance, DEFEND_STANCE_CAUTIOUS_SPEED_MULTIPLIER, DEFEND_STANCE_CAUTIOUS_SIGHT_FACTOR, DEFEND_STANCE_CAUTIOUS_COVER_BONUS, DEFEND_STANCE_CAUTIOUS_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
+			return _build_stance_modifier_dict("defend", tactical_stance, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
-			return _build_stance_modifier_dict("defend", tactical_stance, DEFEND_STANCE_AGGRESSIVE_SPEED_MULTIPLIER, DEFEND_STANCE_AGGRESSIVE_SIGHT_FACTOR, DEFEND_STANCE_AGGRESSIVE_COVER_BONUS, DEFEND_STANCE_AGGRESSIVE_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
+			return _build_stance_modifier_dict("defend", tactical_stance, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID)
 		_:
-			return _build_stance_modifier_dict("defend", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, DEFEND_STANCE_NORMAL_SPEED_MULTIPLIER, DEFEND_STANCE_NORMAL_SIGHT_FACTOR, DEFEND_STANCE_NORMAL_COVER_BONUS, DEFEND_STANCE_NORMAL_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_TACTICAL, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_READY, BEHAVIOR_STANCE_POLICY_ID)
+			return _build_stance_modifier_dict("defend", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_TACTICAL, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_READY, BEHAVIOR_STANCE_POLICY_ID)
 
 
 static func _build_take_stance_modifiers(tactical_stance: String) -> Dictionary:
 	match tactical_stance:
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
-			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", tactical_stance, TAKE_STANCE_CAUTIOUS_SPEED_MULTIPLIER, TAKE_STANCE_CAUTIOUS_SIGHT_FACTOR, TAKE_STANCE_CAUTIOUS_COVER_BONUS, TAKE_STANCE_CAUTIOUS_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
+			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", tactical_stance, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
-			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", tactical_stance, TAKE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER, TAKE_STANCE_AGGRESSIVE_SIGHT_FACTOR, TAKE_STANCE_AGGRESSIVE_COVER_BONUS, TAKE_STANCE_AGGRESSIVE_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
+			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", tactical_stance, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
 		_:
-			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, TAKE_STANCE_NORMAL_SPEED_MULTIPLIER, TAKE_STANCE_NORMAL_SIGHT_FACTOR, TAKE_STANCE_NORMAL_COVER_BONUS, TAKE_STANCE_NORMAL_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL)
+			return _with_take_doctrine_fields(_build_stance_modifier_dict("take", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL)
 
 
 static func _with_take_doctrine_fields(modifiers: Dictionary, tactical_stance: String) -> Dictionary:
@@ -2279,11 +2237,11 @@ static func _with_take_doctrine_fields(modifiers: Dictionary, tactical_stance: S
 static func _build_engage_stance_modifiers(tactical_stance: String) -> Dictionary:
 	match tactical_stance:
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_CAUTIOUS:
-			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", tactical_stance, ENGAGE_STANCE_CAUTIOUS_SPEED_MULTIPLIER, ENGAGE_STANCE_CAUTIOUS_SIGHT_FACTOR, ENGAGE_STANCE_CAUTIOUS_COVER_BONUS, ENGAGE_STANCE_CAUTIOUS_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
+			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", tactical_stance, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
 		FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_AGGRESSIVE:
-			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", tactical_stance, ENGAGE_STANCE_AGGRESSIVE_SPEED_MULTIPLIER, ENGAGE_STANCE_AGGRESSIVE_SIGHT_FACTOR, ENGAGE_STANCE_AGGRESSIVE_COVER_BONUS, ENGAGE_STANCE_AGGRESSIVE_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
+			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", tactical_stance, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_RUN, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), tactical_stance)
 		_:
-			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, ENGAGE_STANCE_NORMAL_SPEED_MULTIPLIER, ENGAGE_STANCE_NORMAL_SIGHT_FACTOR, ENGAGE_STANCE_NORMAL_COVER_BONUS, ENGAGE_STANCE_NORMAL_ATTACK_BONUS, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL)
+			return _with_engage_doctrine_fields(_build_stance_modifier_dict("engage", FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL, UNIT_COMMAND_SCRIPT.MOVEMENT_POSTURE_ENGAGE, UNIT_COMMAND_SCRIPT.WEAPON_POSTURE_AIMED, BEHAVIOR_STANCE_POLICY_ID), FIRETEAM_BEHAVIOR_PROFILE_SCRIPT.TACTICAL_STANCE_NORMAL)
 
 
 static func _with_engage_doctrine_fields(modifiers: Dictionary, tactical_stance: String) -> Dictionary:
@@ -2304,10 +2262,6 @@ static func _with_engage_doctrine_fields(modifiers: Dictionary, tactical_stance:
 static func _build_stance_modifier_dict(
 	command_type: String,
 	tactical_stance: String,
-	speed_multiplier: float,
-	sight_range_factor: float,
-	cover_score_bonus: float,
-	attack_bonus: float,
 	movement_posture: String,
 	weapon_posture: String,
 	posture_policy_id: String
@@ -2317,14 +2271,14 @@ static func _build_stance_modifier_dict(
 	return {
 		"command_type": command_type,
 		"tactical_stance": tactical_stance,
-		"speed_multiplier": float(stance_profile.get("speed_multiplier", speed_multiplier)),
-		"sight_range_factor": float(stance_profile.get("sight_range_factor", sight_range_factor)),
-		"cover_score_bonus": float(stance_profile.get("cover_priority_percent", cover_score_bonus)),
+		"speed_multiplier": float(stance_profile.get("speed_multiplier", 1.0)),
+		"sight_range_factor": float(stance_profile.get("sight_range_factor", 1.0)),
+		"cover_score_bonus": float(stance_profile.get("cover_priority_percent", 0.0)),
 		"attack_bonus": team_target_support_percent / 100.0,
 		"movement_posture": movement_posture,
 		"weapon_posture": weapon_posture,
 		"posture_policy_id": posture_policy_id,
-		"cover_priority_percent": float(stance_profile.get("cover_priority_percent", cover_score_bonus)),
+		"cover_priority_percent": float(stance_profile.get("cover_priority_percent", 0.0)),
 		"aim_readiness_percent": float(stance_profile.get("aim_readiness_percent", 0.0)),
 		"contact_initiative_seconds": float(stance_profile.get("contact_initiative_seconds", 0.0)),
 		"team_target_support_percent": team_target_support_percent,

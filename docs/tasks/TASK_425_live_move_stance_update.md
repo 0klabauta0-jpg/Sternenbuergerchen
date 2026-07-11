@@ -1,5 +1,8 @@
 # TASK_425 - Live Move Stance Update
 
+## Aktueller Balancehinweis
+Die urspruenglichen Move-Sonderwerte sind durch TASK_451 und TASK_1135 **superseded**. Live-Update, Command-Revision und stale-token Schutz bleiben unveraendert; Speed und Sicht werden beim Requeue aus dem globalen C/N/A-Profil gelesen.
+
 ## Ziel / Problem
 
 Bei laufendem Fireteam-`Move` wird die C/N/A-Haltung zwar in der UI umgestellt, aber die bereits aktive Bewegung uebernimmt die neue Haltung nicht zuverlaessig. Dadurch bleibt `cautious` im Playtest sichtbar ohne Waffe im Aim, und ein Wechsel auf `aggressive` oder `normal` waehrend des Laufens aendert Bewegung und Waffe nicht.
@@ -36,9 +39,9 @@ Der aktuelle Runtime-Pfad requeued Move-Commands bis zum Ziel. Ohne eigene Revis
 
 ## Akzeptanzkriterien
 
-- [x] Ein laufender `Move` wechselt bei `cautious` sofort auf `movement_posture = engage`, `weapon_posture = aimed`, Speed x0.65 und Sicht x1.2.
-- [x] Ein laufender `Move` wechselt bei `normal` sofort auf `movement_posture = travel`, `weapon_posture = lowered`, Speed x1.0 und Sicht x1.0.
-- [x] Ein laufender `Move` wechselt bei `aggressive` sofort auf `movement_posture = run`, `weapon_posture = lowered`, Speed x1.2 und Sicht x0.65.
+- [x] Ein laufender `Move` wechselt bei `cautious` sofort auf `movement_posture = engage`, `weapon_posture = aimed`, globales Speedprofil 0.35 und Sicht 1.0.
+- [x] Ein laufender `Move` wechselt bei `normal` sofort auf `movement_posture = travel`, `weapon_posture = lowered`, globales Speedprofil 0.65 und Sicht 0.8.
+- [x] Ein laufender `Move` wechselt bei `aggressive` sofort auf `movement_posture = run`, `weapon_posture = lowered`, globales Speedprofil 1.0 und Sicht 0.5.
 - [x] Die Stance-Umschaltung im Drill-UI aktualisiert aktive Move-Commands, statt nur zukuenftige Waypoints zu beeinflussen.
 - [x] Command-Tokens erhalten eine Revision, damit alte requeue-Kommandos nach einer Live-Haltungsumstellung nicht mehr autoritativ angewendet werden.
 

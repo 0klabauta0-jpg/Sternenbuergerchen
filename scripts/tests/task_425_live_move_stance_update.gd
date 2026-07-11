@@ -69,8 +69,8 @@ func _test_controller_live_stance_reissues_move_commands() -> void:
 	_assert(String(cautious_command.get("command_token", "")) != normal_token, "Live cautious update emits a fresh command token")
 	_assert(String(cautious_command.get("movement_posture", "")) == "engage", "Live cautious Move uses engage posture")
 	_assert(String(cautious_command.get("weapon_posture", "")) == "aimed", "Live cautious Move keeps weapon aimed")
-	_assert(_is_close_ratio(float(cautious_command.get("move_speed_factor", 0.0)), normal_speed, 0.65), "Live cautious Move applies -35 percent speed")
-	_assert(is_equal_approx(float(cautious_command.get("sight_range_factor", 0.0)), 1.2), "Live cautious Move applies +20 percent sight")
+	_assert(_is_close_ratio(float(cautious_command.get("move_speed_factor", 0.0)), normal_speed, 0.35 / 0.65), "Live cautious Move applies the global 35 versus 65 speed profile")
+	_assert(is_equal_approx(float(cautious_command.get("sight_range_factor", 0.0)), 1.0), "Live cautious Move applies global full sight")
 	_assert(String(cautious_runtime.get("weapon_posture", "")) == "aimed", "Assigned runtime status carries live cautious aimed posture")
 
 	var aggressive_result: Dictionary = Dictionary(controller.call("update_tactical_stance", "drill", "aggressive", [leader, wing], leader, simulation))
@@ -80,8 +80,8 @@ func _test_controller_live_stance_reissues_move_commands() -> void:
 	_assert(int(aggressive_state.get("command_revision", 0)) > int(cautious_state.get("command_revision", 0)), "Live aggressive update advances command revision again")
 	_assert(String(aggressive_command.get("movement_posture", "")) == "run", "Live aggressive Move switches to run posture")
 	_assert(String(aggressive_command.get("weapon_posture", "")) == "lowered", "Live aggressive Move lowers weapon")
-	_assert(_is_close_ratio(float(aggressive_command.get("move_speed_factor", 0.0)), normal_speed, 1.2), "Live aggressive Move applies +20 percent speed")
-	_assert(is_equal_approx(float(aggressive_command.get("sight_range_factor", 0.0)), 0.65), "Live aggressive Move applies -35 percent sight")
+	_assert(_is_close_ratio(float(aggressive_command.get("move_speed_factor", 0.0)), normal_speed, 1.0 / 0.65), "Live aggressive Move applies the global 100 versus 65 speed profile")
+	_assert(is_equal_approx(float(aggressive_command.get("sight_range_factor", 0.0)), 0.5), "Live aggressive Move applies global 50 percent sight")
 
 	var normal_result: Dictionary = Dictionary(controller.call("update_tactical_stance", "drill", "normal", [leader, wing], leader, simulation))
 	var live_normal_command: Dictionary = _find_last_command(simulation.commands, leader.unit_id)
@@ -89,7 +89,7 @@ func _test_controller_live_stance_reissues_move_commands() -> void:
 	_assert(String(live_normal_command.get("movement_posture", "")) == "travel", "Live normal Move returns to travel posture")
 	_assert(String(live_normal_command.get("weapon_posture", "")) == "lowered", "Live normal Move keeps weapon lowered")
 	_assert(_is_close_ratio(float(live_normal_command.get("move_speed_factor", 0.0)), normal_speed, 1.0), "Live normal Move restores baseline speed")
-	_assert(is_equal_approx(float(live_normal_command.get("sight_range_factor", 0.0)), 1.0), "Live normal Move restores baseline sight")
+	_assert(is_equal_approx(float(live_normal_command.get("sight_range_factor", 0.0)), 0.8), "Live normal Move restores global 80 percent sight")
 
 	wing.queue_free()
 	leader.queue_free()
