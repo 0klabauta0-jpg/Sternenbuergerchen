@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1092 - Connected Station Route Runtime Arrival Hold
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1092_connected_station_route_runtime_arrival_hold.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1091, TASK_714
+- Stand: Ein echter Client-Door-Command wird vom Host akzeptiert, als Pending-Interaction registriert und erst nach autoritativer Unit-Ankunft plus zwei Sekunden Hold abgeschlossen. Der Client spiegelt das Ergebnis ueber den vorhandenen Snapshot.
+- Architektur: `SimulationRoot` publiziert nur den validierten Command und sein Tick-Delta. Position, Hold und Interaction-Progress bleiben beim Host-`MissionCombatLoopDriver`; UI und Client setzen keine Gameplay-Wahrheit.
+- Ursache/Fix: Netzwerkbewegung und lokaler Waypoint-Interaction-Producer waren getrennt. Der neue Host-Handoff verbindet sie ohne zweiten Bewegungspfad.
+- Risiken/offen: Der komplette verbundene AA-/Door-/Computer-/Cargo-Lauf mit 18-/12-Sekunden-Holds fehlt noch.
+- Lokale Pruefung: TASK_1092 15/15, TASK_1091 17/17, TASK_1083 24/24, TASK_714 37/37, TASK_697 42/42 und TASK_1071 47/47.
+- Naechster Schritt: TASK_1093 - Connected Station Route Full Interaction Trace.
+
 ### TASK_1090 - Two-Player Station Route Decision Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1090_two_player_station_route_decision_playtest.md`, TASK_712, TASK_714, TASK_1082, TASK_1083

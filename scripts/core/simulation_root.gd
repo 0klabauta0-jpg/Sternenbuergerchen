@@ -6,6 +6,7 @@ signal damage_effect_resolved(result: Dictionary)
 signal fire_rule_committed(state: Dictionary)
 signal multiplayer_snapshot_applied(snapshot: Dictionary)
 signal network_command_result_received(result: Dictionary)
+signal network_command_accepted(command: Dictionary, peer_id: int)
 
 const MOVE_SPEED_PER_SECOND: float = 80.0
 const DAMAGE_MODEL_SCRIPT: GDScript = preload("res://scripts/core/damage_model.gd")
@@ -72,6 +73,7 @@ var command_queue: Array = []
 var effects_queue: Array = []
 var tick_counter: int = 0
 var is_processing_tick: bool = false
+var _last_tick_delta: float = 0.0
 var _contact_path_recompute_ready_at_msec: Dictionary = {}
 var _objective_status: RefCounted = null
 var _terrain_pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
@@ -735,7 +737,9 @@ func submit_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1)
 		return validation
 
 	_network_command_accept_count += 1
-	enqueue_command(Dictionary(validation.get("command", command_dict)).duplicate(true))
+	var accepted_command: Dictionary = Dictionary(validation.get("command", command_dict)).duplicate(true)
+	enqueue_command(accepted_command)
+	network_command_accepted.emit(accepted_command.duplicate(true), sending_peer_id)
 	return validation
 
 
@@ -812,6 +816,7 @@ func _physics_process(delta: float) -> void:
 	if _should_skip_local_tick_processing():
 		return
 
+	_last_tick_delta = maxf(delta, 0.0)
 	var profile_enabled: bool = runtime_tick_budget_debug_enabled
 	var tick_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var profile_scopes: Dictionary = {}
@@ -865,6 +870,10 @@ func _physics_process(delta: float) -> void:
 	if profile_enabled:
 		profile_scopes["tick_signal_emit_usec"] = Time.get_ticks_usec() - scope_started_usec
 		_record_runtime_tick_budget_debug_snapshot(delta, tick_started_usec, profile_scopes, command_count, effect_count)
+
+
+func get_last_tick_delta() -> float:
+	return _last_tick_delta
 
 
 func _should_skip_local_tick_processing() -> bool:

@@ -198,6 +198,7 @@ var _mission_scenario_cargo_hold_seconds: float = 0.0
 var _mission_cargo_touchdown_bridge = MISSION_CARGO_TOUCHDOWN_BRIDGE_SCRIPT.new()
 var _mission_cargo_touchdown_snapshot: Dictionary = {}
 var _mission_interaction_runtime_states: Dictionary = {}
+var _pending_network_mission_interactions: Dictionary = {}
 var _readability_presenter = COMBAT_READABILITY_PRESENTER_SCRIPT.new()
 var _audio_event_bus = null
 
@@ -236,6 +237,10 @@ func _ready() -> void:
 
 	if _runs_local_authority and not simulation_root.tick_processed.is_connected(_on_tick_processed):
 		simulation_root.tick_processed.connect(_on_tick_processed)
+	if _runs_local_authority and simulation_root.has_signal("network_command_accepted"):
+		var network_interaction_callable := Callable(self, "_on_network_command_accepted")
+		if not simulation_root.is_connected("network_command_accepted", network_interaction_callable):
+			simulation_root.connect("network_command_accepted", network_interaction_callable)
 
 	_update_status_label("waiting" if _runs_local_authority else "observing")
 
@@ -431,6 +436,106 @@ func apply_multiplayer_interaction_snapshot(snapshot: Dictionary) -> Dictionary:
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
+
+
+func get_pending_network_mission_interaction_snapshot() -> Dictionary:
+	return {
+		"schema": "sternenbuergerchen.pending_network_mission_interactions.v1",
+		"pending_count": _pending_network_mission_interactions.size(),
+		"entries": _pending_network_mission_interactions.duplicate(true),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _on_network_command_accepted(command: Dictionary, peer_id: int) -> void:
+	if String(command.get("source_context", "")).strip_edges() != "mission_interaction_door_breach_command":
+		return
+	var interaction_id: String = String(command.get("interaction_id", "")).strip_edges()
+	var unit_id: String = String(command.get("unit_id", "")).strip_edges()
+	var target_position: Variant = command.get("target_position", null)
+	if interaction_id.is_empty() or unit_id.is_empty() or typeof(target_position) != TYPE_VECTOR2:
+		return
+	_pending_network_mission_interactions[interaction_id] = {
+		"interaction_id": interaction_id,
+		"unit_id": unit_id,
+		"peer_id": maxi(peer_id, 0),
+		"target_position": Vector2(target_position),
+		"radius_world": maxf(float(command.get("interaction_radius_world", 72.0)), 1.0),
+		"hold_seconds": 0.0,
+		"duration_seconds": maxf(float(command.get("duration_seconds", 0.0)), 0.0),
+		"fireteam_id": String(command.get("fireteam_id", "")).strip_edges().to_lower(),
+		"team_id": String(command.get("team_id", friendly_team_id)).strip_edges().to_lower(),
+		"step_id": String(command.get("step_id", "")).strip_edges(),
+		"gate_id": String(command.get("gate_id", command.get("step_id", ""))).strip_edges(),
+		"required_state": String(command.get("required_state", "door_open")).strip_edges(),
+		"interaction_type": String(command.get("interaction_type", "door")).strip_edges().to_lower(),
+		"command_type": String(command.get("command_type", "")).strip_edges().to_lower(),
+	}
+
+
+func _advance_pending_network_mission_interactions(delta: float) -> void:
+	for interaction_id_variant in _pending_network_mission_interactions.keys().duplicate():
+		var interaction_id: String = String(interaction_id_variant)
+		var pending: Dictionary = Dictionary(_pending_network_mission_interactions.get(interaction_id, {})).duplicate(true)
+		var unit = _resolve_runtime_unit_by_id(String(pending.get("unit_id", "")))
+		if unit == null or not (unit is Node2D):
+			continue
+		var target_position: Vector2 = Vector2(pending.get("target_position", Vector2.ZERO))
+		if (unit as Node2D).global_position.distance_to(target_position) > float(pending.get("radius_world", 72.0)):
+			var had_hold_progress: bool = float(pending.get("hold_seconds", 0.0)) > 0.0
+			pending["hold_seconds"] = 0.0
+			_pending_network_mission_interactions[interaction_id] = pending
+			if had_hold_progress:
+				_publish_pending_network_interaction_progress(pending, false)
+			continue
+		var duration_seconds: float = maxf(float(pending.get("duration_seconds", 0.0)), 0.0)
+		var hold_seconds: float = maxf(float(pending.get("hold_seconds", 0.0)) + maxf(delta, 0.0), 0.0)
+		var complete: bool = duration_seconds <= 0.0 or hold_seconds + 0.001 >= duration_seconds
+		pending["hold_seconds"] = hold_seconds
+		_pending_network_mission_interactions[interaction_id] = pending
+		_publish_pending_network_interaction_progress(pending, complete)
+		if complete:
+			_pending_network_mission_interactions.erase(interaction_id)
+
+
+func _publish_pending_network_interaction_progress(pending: Dictionary, complete: bool) -> void:
+	var interaction_id: String = String(pending.get("interaction_id", "")).strip_edges()
+	if interaction_id.is_empty():
+		return
+	var duration_seconds: float = maxf(float(pending.get("duration_seconds", 0.0)), 0.0)
+	var hold_seconds: float = maxf(float(pending.get("hold_seconds", 0.0)), 0.0)
+	update_mission_interaction_runtime_progress({
+		"interaction_id": interaction_id,
+		"state": "complete" if complete else ("holding" if String(pending.get("interaction_type", "")) == "hold_zone" else "operating"),
+		"complete": complete,
+		"hold_seconds": hold_seconds,
+		"duration_seconds": duration_seconds,
+		"fireteam_id": String(pending.get("fireteam_id", "")),
+		"team_id": String(pending.get("team_id", friendly_team_id)),
+		"step_id": String(pending.get("step_id", "")),
+		"gate_id": String(pending.get("gate_id", "")),
+		"required_state": String(pending.get("required_state", "")),
+		"interaction_type": String(pending.get("interaction_type", "")),
+		"command_type": String(pending.get("command_type", "")),
+		"can_complete_zero_duration": duration_seconds <= 0.0,
+	})
+
+
+func _resolve_runtime_unit_by_id(unit_id: String):
+	var registry = _get_unit_registry()
+	if registry != null and registry.has_method("get_unit"):
+		var registered_unit = registry.call("get_unit", unit_id)
+		if registered_unit != null:
+			return registered_unit
+	return _resolve_known_unit_by_id(unit_id)
+
+
+func _resolve_known_unit_by_id(unit_id: String):
+	for unit in _get_units(friendly_unit_paths):
+		if unit != null and unit.has_method("get_unit_id") and String(unit.call("get_unit_id")) == unit_id:
+			return unit
+	return null
 
 
 func update_mission_interaction_runtime_progress(payload: Dictionary) -> Dictionary:
@@ -1079,6 +1184,8 @@ func _on_tick_processed(tick: int) -> void:
 			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "missing_simulation_root")
 		_close_hotpath_unit_cache_scope()
 		return
+	var interaction_delta: float = float(simulation_root.call("get_last_tick_delta")) if simulation_root.has_method("get_last_tick_delta") else 0.0
+	_advance_pending_network_mission_interactions(interaction_delta)
 
 	_update_presence_seen_flags()
 

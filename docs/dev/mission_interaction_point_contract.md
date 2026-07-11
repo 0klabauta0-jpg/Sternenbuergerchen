@@ -603,5 +603,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Door-, Computer- und Cargo-Abschluss werden aus demselben replizierten Interaction-State rekonstruiert; die UI besitzt keine zweite Gate-Wahrheit.
 - TASK_1091 prueft den echten ENet-RPC-/Snapshot-Rundweg in einer kompakten Missionsfixture. Vollstaendige 64x64-Renderwelt und Arrival-/Hold-Ausloesung bleiben getrennte Integrationspruefungen.
 
+## Connected Interaction Arrival Hold Contract
+- `SimulationRoot.network_command_accepted` meldet nur bereits validierte und enqueuete Host-Commands; Rejects erzeugen kein Signal.
+- `MissionCombatLoopDriver` darf daraus einen Pending-Interaction-Eintrag anlegen, wenn Source, Interaction-ID, Unit-ID und Zielposition vollstaendig sind.
+- Ankunft wird ausschliesslich an der autoritativen registrierten Unit-Position gegen `interaction_radius_world` gemessen.
+- Hold-Zeit verwendet das autoritative `SimulationRoot`-Tick-Delta. Verlaesst die Unit vor Abschluss den Radius, faellt der Pending-Hold auf null zurueck.
+- Abschluss laeuft ueber `update_mission_interaction_runtime_progress()` und danach ueber den TASK-1091-Snapshot. Weder Client noch UI besitzen einen Timer oder setzen Door-State.
+- TASK_1092 belegt Door-Arrival/Hold ueber echte lokale ENet-RPC. Rejects erzeugen keinen Pending-State.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

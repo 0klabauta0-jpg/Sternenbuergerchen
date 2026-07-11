@@ -10107,10 +10107,11 @@ func build_review_session_identity_snapshot(args: Array = []) -> Dictionary:
 
 func get_local_command_team_id(args: Array = []) -> String:
 	var simulation_root := get_node_or_null("../SimulationRoot")
-	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	var multiplayer_api: MultiplayerAPI = multiplayer
+	var peer: MultiplayerPeer = multiplayer_api.multiplayer_peer if multiplayer_api != null else null
 	if simulation_root != null and peer != null and not (peer is OfflineMultiplayerPeer) \
 			and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
-		var peer_id: int = multiplayer.get_unique_id()
+		var peer_id: int = multiplayer_api.get_unique_id()
 		if peer_id > 0 and simulation_root.has_method("get_peer_team"):
 			var assigned_team_id: String = String(simulation_root.call("get_peer_team", peer_id)).strip_edges().to_lower()
 			if not assigned_team_id.is_empty():
