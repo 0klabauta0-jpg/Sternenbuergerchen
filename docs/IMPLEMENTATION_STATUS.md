@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1111 - Connected Dropship Command Authority and Ownership
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1111_connected_dropship_command_authority_ownership.md`, `docs/tasks/TASK_1110_connected_multi_dropship_fireteam_selection_perspective.md`, `scripts/multiplayer/multiplayer_command_contract.gd`
+- Befund: Verbundene Mission-Callbacks mutierten LZ, Approach, Drop und Return lokal. Der vorhandene Dropship-Command-Contract verlangte keine Craft-ID, kannte Approach/Return nicht vollstaendig und akzeptierte Commands wurden in `SimulationRoot` nicht committed.
+- Aenderung: Craft-, Fireteam- und Peer-Besitz werden gegen den autoritativen Dropship-Kontext geprueft. `SimulationRoot` committed im Physiktick und emittiert ein Dropship-Signal; nur dieses Signal mutiert den vorhandenen Mission-Transportstate. Clients warten mit `-> HOST` auf Result/Snapshot.
+- Multiplayer/Performance: Echter ENet-LZ-Rundweg konvergiert; Fremd-Craft und Spectator werden abgewiesen. Keine neue Transportwahrheit und kein zusaetzlicher Snapshotkanal.
+- Risiken/offen: Zwei Clients muessen als naechstes zwei Crafts gleichzeitig bedienen koennen, ohne dass Doppelrequests, Disconnect oder Return die andere Drop-Sequenz beeinflussen.
+- Lokale Pruefung: TASK_1111 30/30, TASK_281 33/33, TASK_1110 20/20, TASK_396 17/17, TASK_399 9/9 und TASK_1104 31/31.
+- Naechster Schritt: TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery.
+
 ### TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1110_connected_multi_dropship_fireteam_selection_perspective.md`, `docs/tasks/TASK_1109_multi_dropship_fireteam_selection_hud_consistency.md`, `scripts/multiplayer/multiplayer_snapshot_contract.gd`

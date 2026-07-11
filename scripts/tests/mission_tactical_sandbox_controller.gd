@@ -1983,6 +1983,9 @@ func _connect_fire_rule_authority_signals() -> void:
 	var snapshot_callable := Callable(self, "_on_multiplayer_authority_snapshot_applied")
 	if simulation_root.has_signal("multiplayer_snapshot_applied") and not simulation_root.is_connected("multiplayer_snapshot_applied", snapshot_callable):
 		simulation_root.connect("multiplayer_snapshot_applied", snapshot_callable)
+	var dropship_commit_callable := Callable(self, "_on_authoritative_dropship_command_committed")
+	if simulation_root.has_signal("dropship_command_committed") and not simulation_root.is_connected("dropship_command_committed", dropship_commit_callable):
+		simulation_root.connect("dropship_command_committed", dropship_commit_callable)
 	var result_callable := Callable(self, "_on_network_command_result_received")
 	if simulation_root.has_signal("network_command_result_received") and not simulation_root.is_connected("network_command_result_received", result_callable):
 		simulation_root.connect("network_command_result_received", result_callable)
@@ -2075,6 +2078,9 @@ func _merge_authoritative_mission_dropship_cards(incoming_cards: Array) -> Array
 
 
 func _on_network_command_result_received(result: Dictionary) -> void:
+	if String(result.get("source_context", "")).strip_edges() == "mission_dropship_ui":
+		_apply_network_dropship_command_result(result)
+		return
 	if String(result.get("source_context", "")).strip_edges() == "mission_interaction_use_intent_command":
 		_apply_network_mission_interaction_result(result)
 		return
@@ -2098,6 +2104,128 @@ func _on_network_command_result_received(result: Dictionary) -> void:
 	}
 	_last_command_text = compact_line
 	_update_ui()
+
+
+func _apply_network_dropship_command_result(result: Dictionary) -> void:
+	var accepted: bool = bool(result.get("accepted", false))
+	var command_type: String = String(result.get("command_type", "")).strip_edges().to_lower()
+	var craft_id: String = String(result.get("craft_id", "")).strip_edges()
+	var reason: String = String(result.get("reason", "")).strip_edges()
+	var action_label: String = _build_dropship_command_action_label(command_type)
+	_last_command_text = "%s %s HOST OK" % [action_label, craft_id] if accepted else "%s BLOCKIERT | %s" % [action_label, _build_network_mission_interaction_reason_label(reason)]
+	_update_ui()
+
+
+func _build_dropship_command_action_label(command_type: String) -> String:
+	match command_type.strip_edges().to_lower():
+		"set_lz":
+			return "LZ"
+		"set_dropship_approach":
+			return "APPROACH"
+		"call_dropship":
+			return "DROP"
+		"return_dropship":
+			return "RETURN"
+	return "DROPSHIP"
+
+
+func _on_authoritative_dropship_command_committed(command: Dictionary) -> void:
+	apply_authoritative_dropship_command(command)
+
+
+func apply_authoritative_dropship_command(command: Dictionary) -> bool:
+	var command_type: String = String(command.get("command_type", "")).strip_edges().to_lower()
+	var craft_id: String = String(command.get("craft_id", "")).strip_edges()
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var card: Dictionary = _find_mission_dropship_card_entry(craft_id)
+	if card.is_empty() or not _extract_mission_dropship_card_fireteam_ids(card).has(fireteam_id):
+		return false
+	if not _select_mission_dropship_craft(craft_id, false):
+		return false
+	match command_type:
+		"set_lz":
+			var lz_variant: Variant = command.get("lz_position", command.get("target_position", null))
+			if typeof(lz_variant) != TYPE_VECTOR2 and typeof(lz_variant) != TYPE_VECTOR3:
+				return false
+			_lz_position = Vector2(lz_variant.x, lz_variant.z) if typeof(lz_variant) == TYPE_VECTOR3 else Vector2(lz_variant.x, lz_variant.y)
+			_has_lz_position = true
+			if command.has("approach_angle"):
+				_current_approach_index = maxi(APPROACH_ANGLES.find(_sanitize_approach_angle_name(String(command.get("approach_angle", "NW")))), 0)
+			_last_command_text = "%s SET %s @ %s" % [_build_mission_dropship_lz_name(craft_id, _mission_drop_display_name, _get_mission_dropship_card_order_number(craft_id)), _get_approach_angle_name(), _format_world_position(_lz_position)]
+			_store_selected_mission_dropship_plan()
+		"clear_lz":
+			_has_lz_position = false
+			_lz_position = Vector2.ZERO
+			_last_command_text = "%s LZ CLEARED" % _mission_drop_display_name
+			_store_selected_mission_dropship_plan()
+		"set_dropship_approach":
+			_select_approach_angle(String(command.get("approach_angle", "NW")))
+			return true
+		"call_dropship":
+			_request_selected_mission_dropship_drop(true, true)
+			return true
+		"return_dropship":
+			return _apply_selected_mission_dropship_return(craft_id)
+		_:
+			return false
+	_refresh_button_state()
+	_refresh_world_overlays()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
+
+
+func _should_route_dropship_command_through_network_authority() -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null or simulation_root.get("is_server_authoritative") != true:
+		return false
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	return peer != null and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED
+
+
+func request_network_authoritative_dropship_command(command_type: String, craft_id: String, fireteam_id: String, payload: Dictionary = {}) -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_craft_id.is_empty() or normalized_fireteam_id.is_empty():
+		return false
+	var peer_id: int = multiplayer.get_unique_id()
+	var team_id: String = String(simulation_root.call("get_peer_team", peer_id)).strip_edges() if simulation_root.has_method("get_peer_team") else ""
+	if team_id.is_empty():
+		team_id = FRIENDLY_TEAM_ID
+	var command: Dictionary = {
+		"contract_category": "dropship_command",
+		"command_type": command_type.strip_edges().to_lower(),
+		"team_id": team_id,
+		"fireteam_id": normalized_fireteam_id,
+		"craft_id": normalized_craft_id,
+		"source_context": "mission_dropship_ui",
+	}
+	command.merge(payload, true)
+	if multiplayer.is_server():
+		var result: Dictionary = Dictionary(simulation_root.call("submit_network_command_for_peer", command, peer_id))
+		if not bool(result.get("accepted", false)):
+			_apply_network_dropship_command_result(result.merged({"source_context": "mission_dropship_ui", "craft_id": normalized_craft_id}, true))
+			return false
+	else:
+		simulation_root.rpc_id(1, "request_command", command)
+	_last_command_text = "%s %s -> HOST" % [_build_dropship_command_action_label(command_type), normalized_craft_id]
+	_update_ui()
+	return true
+
+
+func _get_dropship_command_fireteam_id(craft_id: String) -> String:
+	var card: Dictionary = _find_mission_dropship_card_entry(craft_id)
+	var fireteam_ids: PackedStringArray = _extract_mission_dropship_card_fireteam_ids(card)
+	if fireteam_ids.is_empty():
+		return ""
+	for selected_fireteam_id_variant in _selected_fireteam_ids:
+		var selected_fireteam_id: String = String(selected_fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_ids.has(selected_fireteam_id):
+			return selected_fireteam_id
+	return String(fireteam_ids[0]).strip_edges().to_lower()
 
 
 func get_network_mission_interaction_feedback_snapshot() -> Dictionary:
@@ -2796,9 +2924,19 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 		_last_command_text = "NO TILE UNDER CURSOR"
 		_update_ui()
 		return false
-	_lz_position = Vector2(tile_context.get("world_position", _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position))))) if not tile_context.is_empty() else _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
+	var candidate_lz_position: Vector2 = Vector2(tile_context.get("world_position", _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position))))) if not tile_context.is_empty() else _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
 	if not tile_context.is_empty():
 		_set_selected_tile_context(tile_context, "", false, false)
+	if _should_route_dropship_command_through_network_authority():
+		_is_lz_placement_armed = false
+		_lz_placement_craft_id = ""
+		return request_network_authoritative_dropship_command(
+			"set_lz",
+			_mission_drop_craft_id,
+			_get_dropship_command_fireteam_id(_mission_drop_craft_id),
+			{"lz_position": candidate_lz_position, "approach_angle": _get_approach_angle_name()}
+		)
+	_lz_position = candidate_lz_position
 	_has_lz_position = true
 	_is_lz_placement_armed = false
 	_lz_placement_craft_id = ""
@@ -3063,7 +3201,7 @@ func _on_call_dropship_pressed() -> void:
 	_request_selected_mission_dropship_drop(false)
 
 
-func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = false) -> void:
+func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = false, authority_committed: bool = false) -> void:
 	if not _can_edit_planning():
 		_last_command_text = "OBSERVER MODE"
 		_update_ui()
@@ -3079,6 +3217,9 @@ func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = fals
 	if not _has_lz_position:
 		_last_command_text = "SET LZ BEFORE DROP CALL"
 		_update_ui()
+		return
+	if not authority_committed and _should_route_dropship_command_through_network_authority():
+		request_network_authoritative_dropship_command("call_dropship", _mission_drop_craft_id, _get_dropship_command_fireteam_id(_mission_drop_craft_id))
 		return
 	_drop_ship_staged = true
 	_mission_drop_return_requested = false
@@ -11531,6 +11672,9 @@ func _on_mission_dropship_card_approach_pressed(craft_id: String, angle_name: St
 		return
 	if not _select_mission_dropship_craft(normalized_craft_id, false):
 		return
+	if _should_route_dropship_command_through_network_authority():
+		request_network_authoritative_dropship_command("set_dropship_approach", normalized_craft_id, _get_dropship_command_fireteam_id(normalized_craft_id), {"approach_angle": _sanitize_approach_angle_name(angle_name)})
+		return
 	_select_approach_angle(angle_name)
 
 
@@ -11550,6 +11694,17 @@ func _on_mission_dropship_return_pressed(craft_id: String) -> void:
 	var selected_card: Dictionary = _find_mission_dropship_card_entry(normalized_craft_id)
 	if selected_card.is_empty() or not _can_request_mission_dropship_return(selected_card):
 		return
+	if _should_route_dropship_command_through_network_authority():
+		request_network_authoritative_dropship_command("return_dropship", normalized_craft_id, _get_dropship_command_fireteam_id(normalized_craft_id))
+		return
+	_apply_selected_mission_dropship_return(normalized_craft_id)
+
+
+func _apply_selected_mission_dropship_return(craft_id: String) -> bool:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var selected_card: Dictionary = _find_mission_dropship_card_entry(normalized_craft_id)
+	if selected_card.is_empty() or not _can_request_mission_dropship_return(selected_card):
+		return false
 	_select_mission_dropship_craft(normalized_craft_id, false)
 	_drop_ship_requested = false
 	_drop_ship_staged = false
@@ -11563,6 +11718,7 @@ func _on_mission_dropship_return_pressed(craft_id: String) -> void:
 	_refresh_button_state()
 	_update_ui()
 	_refresh_world_overlays()
+	return true
 
 
 func _clear_mission_dropship_panel_cards(panel: Control) -> void:

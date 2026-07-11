@@ -4,6 +4,7 @@ extends Node
 signal tick_processed(tick: int)
 signal damage_effect_resolved(result: Dictionary)
 signal fire_rule_committed(state: Dictionary)
+signal dropship_command_committed(command: Dictionary)
 signal multiplayer_snapshot_applied(snapshot: Dictionary)
 signal network_command_result_received(result: Dictionary)
 signal network_command_accepted(command: Dictionary, peer_id: int)
@@ -735,6 +736,7 @@ func _send_network_command_result(peer_id: int, result: Dictionary, command: Dic
 		"command_type": String(result.get("command_type", command.get("command_type", ""))).strip_edges().to_lower(),
 		"team_id": String(result.get("team_id", command.get("team_id", ""))).strip_edges(),
 		"fireteam_id": String(result.get("fireteam_id", command.get("fireteam_id", ""))).strip_edges().to_lower(),
+		"craft_id": String(command.get("craft_id", "")).strip_edges(),
 		"fire_rule": String(command.get("fire_rule", "")).strip_edges().to_lower(),
 		"source_context": String(command.get("source_context", "")).strip_edges(),
 		"interaction_id": String(command.get("interaction_id", "")).strip_edges(),
@@ -965,6 +967,21 @@ func _build_network_command_context(command_dict: Dictionary, peer_id: int) -> D
 		if unit.has_method("get_fireteam_id"):
 			unit_fireteam_id = String(unit.call("get_fireteam_id")).strip_edges().to_lower()
 
+	var craft_id: String = String(command_dict.get("craft_id", "")).strip_edges()
+	var craft_exists := false
+	var craft_fireteam_ids := PackedStringArray()
+	if not craft_id.is_empty():
+		var dropship_context: Dictionary = Dictionary(_multiplayer_snapshot_context.get("dropship", {}))
+		for card_variant in Array(dropship_context.get("mission_drop_cards", [])):
+			if typeof(card_variant) != TYPE_DICTIONARY:
+				continue
+			var card: Dictionary = Dictionary(card_variant)
+			if String(card.get("craft_id", "")).strip_edges() != craft_id:
+				continue
+			craft_exists = true
+			craft_fireteam_ids = PackedStringArray(Array(card.get("boarded_fireteam_ids", [])))
+			break
+
 	return {
 		"peer_id": peer_id,
 		"peer_role": get_peer_role(peer_id),
@@ -972,6 +989,8 @@ func _build_network_command_context(command_dict: Dictionary, peer_id: int) -> D
 		"peer_fireteam_ids": get_peer_fireteams(peer_id),
 		"unit_team_id": unit_team_id,
 		"unit_fireteam_id": unit_fireteam_id,
+		"craft_exists": craft_exists,
+		"craft_fireteam_ids": craft_fireteam_ids,
 	}
 
 
@@ -1507,9 +1526,15 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 			_apply_unit_command_status(cmd)
 		"set_fire_rule":
 			_apply_fire_rule_command(cmd)
+		"set_lz", "clear_lz", "call_dropship", "set_dropship_approach", "return_dropship":
+			_apply_dropship_command(cmd)
 		_:
 			# TODO: Authoritative gameplay state commits belong here once systems exist.
 			pass
+
+
+func _apply_dropship_command(command: Dictionary) -> void:
+	dropship_command_committed.emit(command.duplicate(true))
 
 
 func _apply_fire_rule_command(command: Dictionary) -> void:
