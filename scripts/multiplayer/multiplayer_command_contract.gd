@@ -37,6 +37,8 @@ const ALLOWED_DROPSHIP_COMMAND_TYPES: PackedStringArray = [
 	"set_lz",
 	"clear_lz",
 	"call_dropship",
+	"set_dropship_approach",
+	"return_dropship",
 ]
 const ALLOWED_ROLE_OVERRIDE_COMMAND_TYPES: PackedStringArray = [
 	"role_override",
@@ -235,12 +237,28 @@ func _validate_dropship_command(command: Dictionary) -> Dictionary:
 		return _reject("lz_from_forbidden_source")
 
 	var team_id: String = String(command.get("team_id", "")).strip_edges()
+	var craft_id: String = String(command.get("craft_id", "")).strip_edges()
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
 	if team_id.is_empty():
 		return _reject("dropship_command_missing_team")
+	if craft_id.is_empty():
+		return _reject("dropship_command_missing_craft")
+	if fireteam_id.is_empty():
+		return _reject("dropship_command_missing_fireteam")
 	if command_type == "set_lz" and not (_has_vector2_or_vector3(command, "target_position") or _has_vector2_or_vector3(command, "lz_position")):
 		return _reject("set_lz_missing_position")
+	if command_type == "set_dropship_approach":
+		var approach_angle: String = String(command.get("approach_angle", "")).strip_edges().to_upper()
+		if approach_angle.is_empty():
+			return _reject("dropship_approach_missing_angle")
+		if not approach_angle in ["NW", "NE", "SW", "SE"]:
+			return _reject("dropship_approach_invalid")
 
-	return _accept_payload(command_type, String(command.get("unit_id", "")).strip_edges(), team_id, String(command.get("fireteam_id", "")).strip_edges().to_lower())
+	return _accept_payload(command_type, String(command.get("unit_id", "")).strip_edges(), team_id, fireteam_id, {
+		"craft_id": craft_id,
+		"requires_fireteam_assignment": true,
+		"requires_dropship_assignment": true,
+	})
 
 
 func _validate_commander_intent(command: Dictionary) -> Dictionary:
@@ -343,6 +361,14 @@ func _validate_peer_rights(ownership: Dictionary, context: Dictionary) -> Dictio
 			return _reject("fireteam_role_missing_fireteam")
 		if not assigned_fireteam_ids.has(required_fireteam_id):
 			return _reject("fireteam_not_assigned_to_peer")
+	if bool(ownership.get("requires_dropship_assignment", false)):
+		var required_craft_id: String = String(ownership.get("craft_id", "")).strip_edges()
+		var required_fireteam_id: String = String(ownership.get("fireteam_id", "")).strip_edges().to_lower()
+		var craft_fireteam_ids: PackedStringArray = _normalize_string_array(context.get("craft_fireteam_ids", PackedStringArray()))
+		if required_craft_id.is_empty() or not bool(context.get("craft_exists", false)):
+			return _reject("dropship_craft_unknown")
+		if required_fireteam_id.is_empty() or not craft_fireteam_ids.has(required_fireteam_id):
+			return _reject("dropship_not_assigned_to_fireteam")
 	if role_id == ROLE_COMMANDER:
 		return {"accepted": true}
 

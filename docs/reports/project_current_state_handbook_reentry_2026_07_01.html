@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1110: mehrere Dropships konvergieren im Host/Client-Snapshot, waehrend jeder Spieler seinen eigenen Fireteam-Fokus behaelt.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1111: Dropship-Bedienung laeuft verbunden ueber Host-Authority, Craft-/Fireteam-Besitz und Snapshot-Konvergenz.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1110</span>
+      <span class="pill good">Letzter Abschluss: TASK_1111</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -132,6 +132,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.embarked_selected_fireteam_truth"> Eingeschifftes Fireteam zeigt Dropship-Hinweis statt falscher Boden-Cards</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.multi_dropship_fireteam_selection_truth"> Mehrere Dropships behalten getrennte Auswahl und gemeinsame HUD-Embarked-Sicht</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_multi_dropship_perspective"> Host/Client teilen Transportstate, nicht den lokalen Auswahlfokus</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_dropship_command_authority"> LZ, Approach, Drop und Return werden erst vom Host committed</label>
         </article>
         <article class="card wide">
           <h2>Multiplayer-Payload TASK_1099</h2>
@@ -192,6 +193,11 @@
           <h2>Verbundene Mehrschiff-Perspektive TASK_1110</h2>
           <p>Der Host-Snapshot uebertraegt jetzt alle Dropship-Karten sowie Embarked-/Deployed-IDs. Ein Client kann weiterhin GOLD betrachten, waehrend der Host BLUE ausgewaehlt hat; beide sehen trotzdem denselben autoritativen Transportzustand.</p>
           <div class="callout">Der Netzwerkvertrag uebertraegt nur IDs, Status und Positionen, keine Texture-Pfade oder UI-Auswahl. Identische Dropship-Payloads werden vor einem erneuten HUD-/World-Refresh verworfen. TASK_1110 besteht 20/20, das Snapshotbudget 38/38 und der Drei-Peer-Produktpfad 31/31.</div>
+        </article>
+        <article class="card wide">
+          <h2>Dropship-Command-Authority TASK_1111</h2>
+          <p>Ein Client setzt LZ, Approach, Drop oder Return nicht mehr lokal. Er sendet einen Craft- und Fireteam-gebundenen Request; der Host prueft Team, Rolle, Zuweisung und Kartenpayload und committed erst im Simulations-Tick.</p>
+          <div class="callout">Der echte ENet-Test zeigt: BLUE-LZ bleibt auf dem Client unveraendert, wird vom Host angenommen und kommt per Snapshot zurueck. BLUE auf GOLD wird abgewiesen und als BLOCKIERT angezeigt. Spectator und unbekannte Winkel bleiben ebenfalls gesperrt.</div>
         </article>
       </div>
     </section>
@@ -278,15 +284,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1110 trennt lokale Host/Client-Auswahl sauber vom gemeinsam replizierten Mehrschiff-Transportstate. Als naechstes sollte TASK_1111 LZ, Drop und Return als hostautoritative, Craft- und Fireteam-gebundene Client-Commands absichern.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1111 fuehrt LZ, Approach, Drop und Return hostautoritativ aus. Als naechstes sollte TASK_1112 zwei verbundene Clients gleichzeitig zwei Crafts bedienen lassen und Doppelrequest, Disconnect sowie Recovery pruefen.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective (20/20)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1111 - Connected Dropship Command Authority and Ownership" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1111 - Connected Dropship Command Authority and Ownership (30/30)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -922,10 +928,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1111 - Connected Dropship Command Authority and Ownership"
+            recommended_next_task: "TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery"
           },
           metadata: {
-            generated_for_task: "TASK_1110",
+            generated_for_task: "TASK_1111",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

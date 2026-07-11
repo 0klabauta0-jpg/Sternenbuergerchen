@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1111 - Connected Dropship Command Authority and Ownership (implementiert im Arbeitsstand)
+- Grundlage: Der Mehrschiff-Snapshot konvergierte, aber Client-Callbacks konnten Transportstate lokal aendern; akzeptierte Dropship-Commands hatten keinen autoritativen Commit-Pfad.
+- Ergebnis: LZ, Approach, Drop und Return laufen ueber Craft-/Fireteam-/Peer-Validierung und werden erst im `SimulationRoot`-Physiktick committed. Client-HUD bleibt bis Result/Snapshot read-only.
+- Architektur: Der bestehende Mission-Controller behaelt seinen historischen Transportstate, mutiert ihn im Netzwerk aber nur nach `dropship_command_committed`. Kein zweiter RPC- oder Transportstate.
+- Verifikation: TASK_1111 30/30 mit echtem ENet-Rundweg sowie TASK_281 33/33, TASK_1110 20/20, TASK_396 17/17, TASK_399 9/9 und Drei-Peer-Produktlauf TASK_1104 31/31.
+- Naechster Schritt: TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery.
+
 ## TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective (implementiert im Arbeitsstand)
 - Grundlage: TASK_1109 stabilisierte zwei Dropships lokal, der gemeinsame Multiplayer-Snapshot enthielt aber weder mehrere Craft-Karten noch Embarked-/Deployed-IDs.
 - Ergebnis: Der Host repliziert whitelisted Karten- und Presence-Daten. Clients behalten ihre lokale gueltige Auswahl, zeigen aber denselben autoritativen Transportzustand; identische Payloads werden vor dem HUD-Refresh dedupliziert.
