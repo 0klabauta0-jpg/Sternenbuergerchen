@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1132 - Fireteam Mini-Card Tactical State Language Polish (implementiert im Arbeitsstand)
+- Grundlage: Nach TASK_1131 waren beide Karten sichtbar, aber `EX -`, `C0`, `HP 5/5` und `RDY N/A` blieben reine Diagnosekuerzel.
+- Ergebnis: Neutraler Zustand zeigt `WARTET | KEIN KONTAKT | FIT n/n`. Aktive Ausfuehrung, Contact-Confidence und verfuegbare Readiness werden spielsprachlich dargestellt; fehlende Readiness bleibt ehrlich verborgen. Technische Detailwerte bleiben in Snapshot und Tooltip.
+- Architektur: Reine Presenter-Ableitung aus vorhandenen read-only Daten; keine Gameplay-, Contact-, Readiness-, RPC-, Command-, Effect- oder Snapshotmutation.
+- Verifikation: TASK_1132 15/15; TASK_1131 8/8; TASK_369 14/14; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window; TASK_222 82/82.
+- Naechster Schritt: TASK_1133 - Fireteam Mini-Card Stance Control Readability. `C / N / A` soll ohne Tooltip als vorsichtig, normal und offensiv erkennbar werden.
+
 ## TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression (implementiert im Arbeitsstand)
 - Grundlage: BLUE/GOLD konkurrierte im Header mit vier Status-/Bediengruppen. Die wichtigste taktische Zeile wurde hinter einer abgeschnittenen Lead-Zeile verborgen; zwei Karten passten nicht vollstaendig in den linken Scrollbereich.
 - Ergebnis: Kontrastreicher Titel, getrennte Badge-/Stance-Zeile, primaerer `EX | Kontakt | HP`-Status zuerst und kompakte `Lead | Ops`-Identitaet. Vollstaendige Details bleiben im Tooltip; der Member-Snapshot bleibt trotz entfallener redundanter Chip-Zeile read-only erhalten. Der linke HUD-Contract zeigt beide Karten vollstaendig und setzt das Event-Log darunter.
 - Architektur: Reine UI-Leseschicht und fester Layoutcontract; keine Gameplay-, Fireteam-, Combat-, RPC-, Command-, Effect- oder Snapshotmutation. Delta-Rendering und Performance-Gates bleiben gruen.
 - Verifikation: TASK_1131 8/8; TASK_1128 8/8 Real Window; TASK_1130 6/6; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1065 13/13; TASK_180 98/98; TASK_258 71/71; TASK_627 21/21; TASK_222 82/82.
-- Naechster Schritt: TASK_1132 - Fireteam Mini-Card Tactical State Language Polish. Technische Kurzformen wie `EX -`, `C0` und `RDY N/A` sollen spielsprachlich lesbar werden.
+- Naechster Schritt: abgeschlossen durch TASK_1132.
 
 ## TASK_1130 - Fireteam Mini-Card Identity and Typography Polish (implementiert im Arbeitsstand)
 - Grundlage: Der Full-HD-Beleg zeigte `FT ?` ohne aktive Review-Session sowie 10/8/8-px-Mini-Card-Typografie.

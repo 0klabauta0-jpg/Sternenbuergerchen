@@ -98,7 +98,11 @@ func _test_fireteam_mini_card_reuse_and_cleanup() -> void:
 	if first_card != null:
 		readiness_footer = first_card.find_child("ReadinessFooterLabel", true, false) as Label
 		portrait_strip = first_card.find_child("FireteamMemberPortraitStrip", true, false) as HBoxContainer
-	_assert(readiness_footer != null and readiness_footer.text.begins_with("RDY"), "Readiness moved to bottom footer")
+	var readiness_state: String = String(readiness_footer.get_meta("mission_fireteam_readiness_state", "")) if readiness_footer != null else ""
+	var truthful_readiness: bool = readiness_footer != null \
+		and ((readiness_state == "unavailable" and not readiness_footer.visible and readiness_footer.text.is_empty()) \
+		or (readiness_state != "unavailable" and readiness_footer.visible and not readiness_footer.text.is_empty()))
+	_assert(truthful_readiness, "Readiness footer shows only available player-readable state")
 	_assert(portrait_strip != null and portrait_strip.get_child_count() >= 4, "Mini-card shows member portraits at the bottom")
 	scene.queue_free()
 	await _wait_frames(2)

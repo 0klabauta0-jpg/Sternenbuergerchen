@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1132 - Fireteam Mini-Card Tactical State Language Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1132_fireteam_mini_card_tactical_state_language_polish.md`, `docs/tasks/TASK_1131_fireteam_mini_card_header_contrast_status_compression.md`, `docs/tasks/TASK_369_fireteam_status_card_enhancement.md`
+- Befund: Die geometrisch reparierten Karten zeigten weiterhin Diagnosekuerzel wie `EX -`, `C0`, `HP 5/5` und `RDY N/A`. Ohne Vorwissen war weder neutraler Zustand noch Kontakt-/Readiness-Bedeutung eindeutig.
+- Aenderung: Neutral liest sich als `WARTET | KEIN KONTAKT | FIT n/n`. Aktive Profile uebersetzen Ausfuehrung und Fidelity, Kontakte zeigen Confidence spielsprachlich. Readiness ist nur bei echten Daten sichtbar. Technische Snapshot- und Tooltipwerte bleiben vollstaendig erhalten.
+- Multiplayer/Performance: Reiner Presenter auf bestehenden read-only Snapshots; keine Aenderung an ContactTracker, Combat, Readiness-Berechnung, Fireteam-State, RPC, Command, Effect oder Netzwerkpayload. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Die Statuszeile ist jetzt menschlich lesbar. Die direkt darunter liegenden Stance-Tasten `C / N / A` bleiben ohne Tooltip kryptisch.
+- Lokale Pruefung: TASK_1132 15/15; TASK_1131 8/8; TASK_369 14/14; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window; TASK_222 82/82.
+- Naechster Schritt: TASK_1133 - Fireteam Mini-Card Stance Control Readability.
+
 ### TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1131_fireteam_mini_card_header_contrast_status_compression.md`, `docs/tasks/TASK_1130_fireteam_mini_card_identity_typography_polish.md`, `scripts/meta/drop_light_layout_contract.gd`
@@ -18,7 +28,7 @@
 - Multiplayer/Performance: Keine Gameplay-, Fireteam-, Combat-, Command-, Effect-, RPC- oder Snapshotmutation. Bestehende Card-Instanzen und Dirty-/Delta-Pfade bleiben erhalten; TASK_1065 ist 13/13 und TASK_222 82/82 gruen.
 - Risiken/offen: Die Karten sind geometrisch sauber, verwenden aber noch technische Kurzformen wie `EX -`, `C0` und `RDY N/A`. TASK_370 enthaelt sechs veraltete direkte-Child-/96-px-Annahmen; seine aktuelle Nachfolgepruefung TASK_1065 ist gruen.
 - Lokale Pruefung: TASK_1131 8/8; TASK_1128 8/8 Real Window; TASK_1130 6/6; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1065 13/13; TASK_180 98/98; TASK_258 71/71; TASK_627 21/21; TASK_222 82/82.
-- Naechster Schritt: TASK_1132 - Fireteam Mini-Card Tactical State Language Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1132.
 
 ### TASK_1130 - Fireteam Mini-Card Identity and Typography Polish
 - Status: implementiert im Arbeitsstand

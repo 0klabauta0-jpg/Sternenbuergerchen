@@ -5296,12 +5296,27 @@ func _apply_fireteam_mini_readiness_footer(card: Control, status_snapshot: Dicti
 		footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		footer.add_theme_font_size_override("font_size", 8)
 		row_host.add_child(footer)
-	var readiness_label: String = String(status_snapshot.get("readiness_label", "N/A")).strip_edges().to_upper()
-	footer.text = "RDY %s" % (readiness_label if not readiness_label.is_empty() else "N/A")
-	footer.visible = true
+	var readiness_state: String = String(status_snapshot.get("readiness_state", "unavailable")).strip_edges().to_lower()
+	var readiness_label: String = _format_fireteam_visible_readiness_text(readiness_state)
+	footer.text = readiness_label
+	footer.visible = readiness_state != "unavailable" and not readiness_label.is_empty()
 	footer.modulate = Color(0.78, 0.88, 0.94, 0.95)
 	footer.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 	footer.set_meta("mission_fireteam_readiness_footer", true)
+	footer.set_meta("mission_fireteam_readiness_state", readiness_state)
+	footer.set_meta("mission_fireteam_readiness_truthful_visibility", true)
+
+
+func _format_fireteam_visible_readiness_text(state: String) -> String:
+	match state.strip_edges().to_lower():
+		"high":
+			return "EINSATZBEREIT"
+		"medium":
+			return "BEREIT"
+		"low":
+			return "ANGESCHLAGEN"
+		_:
+			return ""
 
 
 func _apply_fireteam_mini_contact_badge(card: Control, contact_context: Dictionary) -> void:
@@ -5851,10 +5866,13 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		contact_state = "clear"
 	var contact_text: String = _format_fireteam_status_contact_text(contact_state, contact_count)
 	var loadout_id: String = _get_mission_fireteam_loadout_id(normalized_fireteam_id).strip_edges()
-	var primary_text: String = "EX %s | %s | %s" % [
-		execution_text,
-		contact_text,
-		String(health_context.get("text", "HP 0/0")),
+	var visible_execution_text: String = _format_fireteam_visible_execution_text(resolved_profile)
+	var visible_contact_text: String = _format_fireteam_visible_contact_text(contact_state, contact_count)
+	var visible_health_text: String = _format_fireteam_visible_health_text(health_context)
+	var primary_text: String = "%s | %s | %s" % [
+		visible_execution_text,
+		visible_contact_text,
+		visible_health_text,
 	]
 	var secondary_parts: PackedStringArray = PackedStringArray()
 	if bool(review_session_context.get("visible", false)):
@@ -5885,6 +5903,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		"review_session_context_visible": bool(review_session_context.get("visible", false)),
 		"review_session_context_style_id": String(review_session_context.get("style_id", "")),
 		"execution_text": execution_text,
+		"visible_execution_text": visible_execution_text,
 		"execution_label": String(resolved_profile.get("execution_label", "STEADY")).strip_edges().to_upper(),
 		"readiness_state": String(readiness_context.get("state", "unavailable")),
 		"readiness_label": String(readiness_context.get("label", "N/A")),
@@ -5899,6 +5918,8 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		"contact_state": contact_state,
 		"contact_count": contact_count,
 		"contact_text": contact_text,
+		"visible_contact_text": visible_contact_text,
+		"visible_health_text": visible_health_text,
 		"movement_text": movement_text,
 		"movement_state": movement_state.duplicate(true),
 		"advance_style": String(resolved_profile.get("advance_style", movement_state.get("effective_style", ""))).strip_edges().to_lower(),
@@ -6022,6 +6043,57 @@ func _format_fireteam_status_contact_text(contact_state: String, contact_count: 
 			return "C%d LOST" % count
 		_:
 			return "C%d" % count
+
+
+func _format_fireteam_visible_execution_text(profile_dict: Dictionary) -> String:
+	if profile_dict.is_empty():
+		return "WARTET"
+	var raw_label: String = String(profile_dict.get("execution_label", "STEADY")).strip_edges().to_upper()
+	var visible_label: String
+	match raw_label:
+		"STEADY":
+			visible_label = "STABIL"
+		"CLEAN EXEC":
+			visible_label = "PRAEZISE"
+		"COMMS LOW":
+			visible_label = "FUNK SCHWACH"
+		"LOW DISC":
+			visible_label = "FEUERDISZ."
+		"SCATTER":
+			visible_label = "VERSTREUT"
+		"DELAY":
+			visible_label = "VERZUG"
+		_:
+			visible_label = "AKTIV"
+	if visible_label.is_empty():
+		visible_label = "AKTIV"
+	var fidelity: int = int(roundi(clampf(float(profile_dict.get("order_fidelity", 0.0)), 0.0, 1.0) * 100.0))
+	return "%s %d%%" % [visible_label, fidelity]
+
+
+func _format_fireteam_visible_contact_text(contact_state: String, contact_count: int) -> String:
+	var count: int = maxi(contact_count, 0)
+	if count <= 0:
+		return "KEIN KONTAKT"
+	var state_label: String
+	match contact_state.strip_edges().to_lower():
+		"confirmed":
+			state_label = "BESTAETIGT"
+		"spotted":
+			state_label = "GESICHTET"
+		"suspected":
+			state_label = "VERMUTET"
+		"lost":
+			state_label = "VERLOREN"
+		_:
+			state_label = "KONTAKT"
+	return "%d %s" % [count, state_label]
+
+
+func _format_fireteam_visible_health_text(health_context: Dictionary) -> String:
+	var fit_count: int = maxi(int(health_context.get("fit_count", 0)), 0)
+	var total_count: int = maxi(int(health_context.get("total_count", 0)), 0)
+	return "FIT %d/%d" % [fit_count, total_count]
 
 
 func _compact_fireteam_movement_text(movement_state: Dictionary, profile_dict: Dictionary) -> String:

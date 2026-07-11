@@ -24,7 +24,7 @@ Titel, Kontakt, Moral, Koordination und Stance-Buttons teilen sich dieselbe schm
 
 ## Akzeptanzkriterien
 - BLUE/GOLD haben einen expliziten kontrastreichen Titelstil mit mindestens 12 px.
-- Die erste sichtbare Statuszeile beginnt mit dem taktischen Primaerstatus `EX`.
+- Die erste sichtbare Statuszeile beginnt mit dem taktischen Primaerstatus; seine Spielsprache wird ab TASK_1132 ohne Diagnosekuerzel dargestellt.
 - Die zweite sichtbare Zeile enthaelt Lead und Operatorzahl, aber keine Wegpunktzahl und keinen versteckten Zeilenumbruch.
 - Der vollstaendige technische Status bleibt im Tooltip abrufbar.
 - Bestehende Mini-Card-, Multiplayer- und Performance-Verifier bleiben gruen.

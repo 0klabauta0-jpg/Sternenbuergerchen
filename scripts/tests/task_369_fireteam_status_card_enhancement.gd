@@ -53,14 +53,15 @@ func _test_fireteam_status_snapshots_and_card_lines() -> void:
 	var blue_card := card_list.get_node_or_null("FireteamMiniCard_Blue") as Control
 	_assert(blue_card != null, "Blue mini card exists")
 	if blue_card != null:
-		var primary_label := blue_card.get_node_or_null("Margin/VBox/MemberLabel") as Label
-		var secondary_label := blue_card.get_node_or_null("Margin/VBox/StageLabel") as Label
+		var identity_label := blue_card.get_node_or_null("Margin/VBox/MemberLabel") as Label
+		var status_label := blue_card.get_node_or_null("Margin/VBox/StageLabel") as Label
 		var stored_snapshot: Dictionary = Dictionary(blue_card.get_meta("mission_fireteam_status_card_snapshot", {}))
-		_assert(primary_label != null and _line_contains_status_tokens(primary_label.text), "Card primary line shows execution, readiness, contact and health tokens")
-		_assert(secondary_label != null and secondary_label.text.find("MV ") >= 0 and secondary_label.text.find("POS ") >= 0, "Card secondary line shows movement and position")
+		_assert(status_label != null and _line_contains_player_status(status_label.text), "Card status line shows execution, contact and health in player language")
+		_assert(identity_label != null and identity_label.text.begins_with("Lead ") and identity_label.text.contains(" Ops"), "Card identity line shows lead and operator count")
+		_assert(status_label != null and status_label.tooltip_text.contains("Move:") and status_label.tooltip_text.contains("Position:"), "Movement and position remain available in the card tooltip")
 		_assert(not stored_snapshot.is_empty() and String(stored_snapshot.get("fireteam_id", "")) == "blue", "Card stores read-only status snapshot metadata")
 		_assert(bool(blue_card.get_meta("mission_fireteam_status_selected", false)), "Card metadata keeps selected marker")
-		_assert(_mini_cards_stay_compact(card_list), "Status enhancement keeps mini cards compact")
+		_assert(_mini_cards_fit_scroll(card_list), "Status enhancement keeps all mini cards inside the scroll viewport")
 	scene.queue_free()
 	await _wait_frames(2)
 
@@ -126,7 +127,10 @@ func _snapshot_has_required_status_fields(snapshot: Dictionary) -> bool:
 	if not snapshot.has("contact_count") or not snapshot.has("health"):
 		return false
 	var health: Dictionary = Dictionary(snapshot.get("health", {}))
-	return health.has("fit_count") and health.has("total_count") and String(snapshot.get("primary_text", "")).find("HP ") >= 0
+	return health.has("fit_count") \
+		and health.has("total_count") \
+		and String(snapshot.get("visible_health_text", "")).begins_with("FIT ") \
+		and not String(snapshot.get("primary_text", "")).strip_edges().is_empty()
 
 
 func _status_snapshots_are_distinct(first: Dictionary, second: Dictionary) -> bool:
@@ -137,16 +141,27 @@ func _status_snapshots_are_distinct(first: Dictionary, second: Dictionary) -> bo
 	return String(first.get("readiness_state", "")) != String(second.get("readiness_state", ""))
 
 
-func _line_contains_status_tokens(text: String) -> bool:
-	return text.find("EX ") >= 0 and text.find("RDY ") >= 0 and text.find("C") >= 0 and text.find("HP ") >= 0
+func _line_contains_player_status(text: String) -> bool:
+	var contact_readable: bool = false
+	for token in ["KONTAKT", "BESTAETIGT", "GESICHTET", "VERMUTET", "VERLOREN"]:
+		if text.contains(token):
+			contact_readable = true
+			break
+	return text.split(" | ").size() == 3 and contact_readable and text.contains("FIT ") and not text.contains("EX ") and not text.contains("C0")
 
 
-func _mini_cards_stay_compact(card_list: Node) -> bool:
+
+func _mini_cards_fit_scroll(card_list: Node) -> bool:
+	var host := card_list as Control
+	var scroll := host.get_parent() as ScrollContainer if host != null else null
+	if scroll == null:
+		return false
+	var viewport_rect := scroll.get_global_rect()
 	for child in card_list.get_children():
 		var control := child as Control
 		if control == null or not control.visible:
 			continue
-		if control.size.y > 92.0:
+		if not viewport_rect.encloses(control.get_global_rect()):
 			return false
 	return true
 
