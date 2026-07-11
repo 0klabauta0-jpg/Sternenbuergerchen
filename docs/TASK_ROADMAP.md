@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1144 - Tactical Panel Header and Navigation Player Language Polish (implementiert im Arbeitsstand)
+- Grundlage: Die grossen unteren Paneltitel und der obere Missions-Tab blieben als letzter auffaelliger englischer Sprachmix im aktuellen Full-HD-HUD.
+- Ergebnis: `#16 BEFEHLE`, `#17 AUSGEWAEHLTES FIRETEAM`, `#18 EINSATZKONTROLLE` und `Einsatz` sind sichtbar; `Homebase`, `FOB`, Blocknummern, Node-Namen und Callbacks bleiben stabil.
+- Architektur: Statische Szenen- und gemeinsame Blocklabel-Texte ohne neue Lokalisierungsschicht. Keine Aenderung an Gameplay-, Multiplayer- oder Snapshot-Wahrheit.
+- Verifikation: TASK_1144 16/16; TASK_180 98/98; TASK_1118 13/13; TASK_1136 19/19 Real Window; TASK_222 82/82 direkt.
+- Naechster Schritt: TASK_1145 - Player-Flow Regression Harness Trust Repair.
+
 ## TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish (implementiert im Arbeitsstand)
 - Grundlage: Im oberen Einsatzstatus, Event Log und Live-Haltungsfeedback blieb nach TASK_1142 ein sichtbarer Mix aus englischen Steuerwoertern und deutscher Spielersprache.
 - Ergebnis: Ein read-only Presenter liefert `#15 EINSATZLAGE`, `NAECHSTER SCHRITT`, `Fireteam im Einsatz`, `#19 EREIGNISSE`, `KONTAKTDRUCK` und `AKTIV`. Rohtexte, Event-Dictionaries und technische Evidence bleiben unveraendert.
 - Architektur: Reine finale Darstellung auf vorhandenen Snapshots. Keine Aenderung an Simulation, Combat, Contact, Movement, Transport, Multiplayer oder Hotpath-Refresh.
 - Verifikation: TASK_1143 18/18; TASK_366 19/19; TASK_1120 11/11; TASK_1118 13/13; TASK_1136 17/17 headless und 19/19 Real Window; TASK_222 82/82 direkt.
-- Naechster Schritt: TASK_1144 - Tactical Panel Header and Navigation Player Language Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1144.
 
 ## TASK_1142 - Mission Control Mission-State Player Language Polish (implementiert im Arbeitsstand)
 - Grundlage: Team-, LZ-, Anflug- und Dropship-Lage mischten deutsche Texte mit Runtime-States. Ein angrenzender Abschlussfixture belegte zudem eine falsche Informationsprioritaet zugunsten leerer Combatdiagnose.

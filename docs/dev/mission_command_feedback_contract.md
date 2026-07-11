@@ -19,6 +19,8 @@ TASK_1142 uebersetzt den sichtbaren LZ-, Anflug-, Dropship- und Teamkontext, ohn
 
 TASK_1143 erweitert diese Presenter-Grenze auf den oberen Einsatzstatus, das Tactical Event Log und das sichtbare Live-Haltungsfeedback. Uebersetzt wird erst die finale Anzeige; rohe Eventtexte, Event-Dictionaries, Dedupe-Signaturen, Filter, Evidence-Snapshots und Multiplayerdaten bleiben unveraendert und read-only zugaenglich.
 
+TASK_1144 benennt die sichtbaren Mission-HUD-Flaechen `#16 BEFEHLE`, `#17 AUSGEWAEHLTES FIRETEAM` und `#18 EINSATZKONTROLLE`; der obere Navigationspunkt heisst `Einsatz`. Die Blocknummern, Node-Namen, NodePaths, Button-Signale und Navigationscallbacks sind technische Vertraege und bleiben unveraendert.
+
 ## Fensterrollen
 | Bereich | Rolle | Textregel |
 | --- | --- | --- |
