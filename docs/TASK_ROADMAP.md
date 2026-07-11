@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency (implementiert im Arbeitsstand)
+- Grundlage: Bei mehreren Dropships konnte nur die aeussere Craft-Karte gewaehlt werden. Der HUD-Embarked-Filter kannte nach einem Craft-Wechsel nur dessen Payload und stellte Passagiere anderer Schiffe dadurch als Boden-Fireteams dar.
+- Ergebnis: Jede Payload-Karte waehlt Craft und genau ein Fireteam. Ein read-only HUD-Resolver vereinigt alle nicht deboardeten Karten- und Sequenzpayloads, waehrend jede Drop-Sequenz weiterhin nur ihr eigenes Schiff und ihre eigenen Passagiere verarbeitet.
+- Architektur: Keine neue Transport- oder Selection-Wahrheit im UI. Auswahl mutiert nur lokalen Planning-Kontext und erzeugt keine SimulationRoot-Commands oder Effects; der Union-State wird nur fuer HUD-Filter und Dirty-Signaturen gelesen.
+- Verifikation: TASK_1109 18/18, TASK_503 10/10, TASK_396 17/17, TASK_180 98/98, TASK_399 9/9 und Drei-Peer-Produktlauf TASK_1104 31/31.
+- Naechster Schritt: TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective.
+
 ## TASK_1108 - Embarked Selected Fireteam HUD Contract Reconciliation (implementiert im Arbeitsstand)
 - Grundlage: TASK_180 meldete eine leere Member-Card-Lane, erwartete dabei aber den durch TASK_1058 bewusst ersetzten alten Inbound-Card-Vertrag.
 - Ergebnis: Der historische Verifier prueft jetzt die konkrete Auswahl- und Ground-Truth: #17 behaelt die Fireteam-ID, zeigt `Fireteam im Dropship.`, rendert keine Boden-Operator-Cards und fuehrt das Team nicht in der linken Boden-Mini-Liste.

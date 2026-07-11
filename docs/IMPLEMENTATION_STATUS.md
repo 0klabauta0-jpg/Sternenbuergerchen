@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1109_multi_dropship_fireteam_selection_hud_consistency.md`, `docs/tasks/TASK_1108_embarked_selected_fireteam_hud_contract_reconciliation.md`, `docs/dev/homebase_direct_dropship_flow_contract.md`
+- Befund: Die aeussere Dropship-Karte war waehbar, ihre Fireteam-Payload-Karte aber nicht. Beim Craft-Wechsel bildete `_embarked_unit_ids` ausserdem nur den aktiven Craft-Payload ab, sodass Passagiere anderer Schiffe im HUD faelschlich als Boden-Fireteams erscheinen konnten.
+- Aenderung: Payload-Karten waehlen Craft und Fireteam gemeinsam per Maus oder Tastatur. Ein read-only HUD-Resolver vereinigt alle Karten- und aktiven Sequenzpayloads, entfernt deboardete Units und wird einmal je Runtime-Signaturaufbau berechnet. Die eigentlichen Drop-Sequenzen bleiben schiffspezifisch.
+- Authority/Performance: Auswahl erzeugt keine Commands oder Effects. Keine neue Gameplay-Wahrheit; der vereinigte State dient nur Ground-/Embarked-Filtern und HUD-Signaturen.
+- Risiken/offen: Der lokale Mehrschiffpfad ist abgesichert. Als naechstes fehlt der verbundene Host/Client-Perspektivtest, damit lokale Auswahl und autoritativer Transportstate auch zwischen Peers klar getrennt bleiben.
+- Lokale Pruefung: TASK_1109 18/18, TASK_503 10/10, TASK_396 17/17, TASK_180 98/98, TASK_399 9/9 und TASK_1104 31/31.
+- Naechster Schritt: TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective.
+
 ### TASK_1108 - Embarked Selected Fireteam HUD Contract Reconciliation
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1108_embarked_selected_fireteam_hud_contract_reconciliation.md`, `docs/tasks/TASK_1058_embarked_fireteam_selected_hud_truth.md`, `scripts/tests/task_503_mission_dropship_fireteam_hud_truth.gd`

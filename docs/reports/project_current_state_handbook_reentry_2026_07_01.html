@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1108: verbundener Stationsweg, lesbare Drei-Peer-Coop-Rollen, gruene Fixed-Window-Vertraege und konsistente Dropship-/Boden-Fireteam-Darstellung.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1109: verbundener Stationsweg, lesbare Drei-Peer-Coop-Rollen und konsistente Auswahl mehrerer Fireteams in mehreren Dropships.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1108</span>
+      <span class="pill good">Letzter Abschluss: TASK_1109</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -130,6 +130,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.coop_lobby_fixed_layout"> Drei-Peer-Lobby bleibt bei 1280x720 fest, begrenzt und scrollbar</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.mission_control_fixed_layout"> Mission Control bleibt bei 344x248 und TASK_258 ist 71/71 gruen</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.embarked_selected_fireteam_truth"> Eingeschifftes Fireteam zeigt Dropship-Hinweis statt falscher Boden-Cards</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.multi_dropship_fireteam_selection_truth"> Mehrere Dropships behalten getrennte Auswahl und gemeinsame HUD-Embarked-Sicht</label>
         </article>
         <article class="card wide">
           <h2>Multiplayer-Payload TASK_1099</h2>
@@ -180,6 +181,11 @@
           <h2>Fireteam Im Dropship TASK_1108</h2>
           <p>Ein noch eingeschifftes, aber ausgewaehltes Fireteam bleibt im Commander-Kontext. Es wird nicht als bodenaktiv dargestellt: links fehlt seine Boden-Mini-Card und #17 zeigt <code>Fireteam im Dropship.</code> statt deaktivierter Operator-Cards.</p>
           <div class="callout">Nach dem Deboarding kehren dieselben Operatoren automatisch als Boden-Cards zurueck. TASK_180, TASK_503 und der echte Zwei-Dropship-Flow bestaetigen denselben Vertrag; keine zweite UI-Wahrheit wurde eingefuehrt.</div>
+        </article>
+        <article class="card wide">
+          <h2>Mehrere Dropships TASK_1109</h2>
+          <p>Die Fireteam-Unterkarte eines Dropships ist jetzt selbst waehbar. Ein Klick auf BLUE oder GOLD setzt das zugehoerige Schiff und genau dieses Fireteam; #17 folgt der Auswahl und zeigt bei eingeschifften Teams weiterhin den Dropship-Hinweis.</p>
+          <div class="callout">Der HUD-Filter betrachtet alle noch eingeschifften Payloads gemeinsam, ohne die echte Drop-Sequenz zu vermischen. Deshalb kann BLUE bereits am Boden stehen, waehrend GOLD im zweiten Schiff bleibt. Der Testpfad besteht 18/18 Zielchecks, 17/17 Zwei-Schiff-Deboarding und 9/9 Dropship-Hotpath.</div>
         </article>
       </div>
     </section>
@@ -266,15 +272,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Fokus:</strong> TASK_1108 klaert den alten Inbound-HUD-Widerspruch. Als naechstes sollte TASK_1109 zwei Fireteams in zwei Dropships durch Auswahl, getrennte Inbound-/Deboard-Zustaende und den jeweiligen Wechsel zwischen Dropship-Hinweis und Boden-Member-Cards verfolgen.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1109 verfolgt zwei Fireteams in zwei Dropships durch Auswahl und getrennte Inbound-/Deboard-Zustaende. Als naechstes sollte TASK_1110 denselben Ablauf in einer verbundenen Host/Client-Session pruefen: Die lokale Auswahl darf pro Peer verschieden sein, der autoritative Embarked-/Deployed-State muss konvergieren.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1108 - Embarked Selected Fireteam HUD Contract Reconciliation (TASK_180 98/98)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency (18/18)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -910,10 +916,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency"
+            recommended_next_task: "TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective"
           },
           metadata: {
-            generated_for_task: "TASK_1108",
+            generated_for_task: "TASK_1109",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

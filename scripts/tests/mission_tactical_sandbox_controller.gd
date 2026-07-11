@@ -3812,10 +3812,11 @@ func _refresh_selected_fireteam_cards() -> void:
 		card_row.add_child(empty_label)
 		return
 
+	var hud_embarked_unit_state: Dictionary = _build_hud_embarked_unit_state()
 	for unit in units:
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit != null and unit.has_method("get_unit_id") else ""
-		var in_drop_transit: bool = not unit_id.is_empty() and _embarked_unit_ids.has(unit_id) and not _deployed_unit_ids.has(unit_id)
+		var in_drop_transit: bool = not unit_id.is_empty() and hud_embarked_unit_state.has(unit_id) and not _deployed_unit_ids.has(unit_id)
 		card.custom_minimum_size = Vector2(156.0, 118.0)
 		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		card.call(
@@ -3845,11 +3846,11 @@ func _refresh_selected_fireteam_cards() -> void:
 
 
 func _filter_ground_fireteam_card_units(units: Array) -> Array:
-	return _mission_fireteam_runtime_state.filter_ground_units(units, _embarked_unit_ids, _deployed_unit_ids)
+	return _mission_fireteam_runtime_state.filter_ground_units(units, _build_hud_embarked_unit_state(), _deployed_unit_ids)
 
 
 func _is_unit_embarked_without_deployment(unit) -> bool:
-	return _mission_fireteam_runtime_state.is_unit_embarked_without_deployment(unit, _embarked_unit_ids, _deployed_unit_ids)
+	return _mission_fireteam_runtime_state.is_unit_embarked_without_deployment(unit, _build_hud_embarked_unit_state(), _deployed_unit_ids)
 
 
 func _selected_fireteams_have_embarked_payload() -> bool:
@@ -3863,7 +3864,29 @@ func _fireteam_has_embarked_payload(fireteam_id: String) -> bool:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
 		return false
-	return _mission_fireteam_runtime_state.fireteam_has_embarked_payload(_get_fireteam_units(normalized_fireteam_id, true), _embarked_unit_ids, _deployed_unit_ids)
+	return _mission_fireteam_runtime_state.fireteam_has_embarked_payload(_get_fireteam_units(normalized_fireteam_id, true), _build_hud_embarked_unit_state(), _deployed_unit_ids)
+
+
+func _build_hud_embarked_unit_state() -> Dictionary:
+	var result: Dictionary = _embarked_unit_ids.duplicate(true)
+	for card_variant in _mission_drop_cards:
+		if typeof(card_variant) != TYPE_DICTIONARY:
+			continue
+		for unit_id_variant in Array(Dictionary(card_variant).get("embarked_unit_ids", [])):
+			var unit_id: String = String(unit_id_variant).strip_edges()
+			if not unit_id.is_empty():
+				result[unit_id] = true
+	if _is_drop_sequence_active():
+		for unit_id_variant in _drop_sequence_embarked_unit_ids.keys():
+			result[String(unit_id_variant)] = true
+	for sequence_variant in _parallel_drop_sequences_by_craft.values():
+		if typeof(sequence_variant) != TYPE_DICTIONARY:
+			continue
+		for unit_id_variant in Dictionary(Dictionary(sequence_variant).get("embarked_unit_ids", {})).keys():
+			result[String(unit_id_variant)] = true
+	for deployed_unit_id_variant in _deployed_unit_ids.keys():
+		result.erase(String(deployed_unit_id_variant))
+	return result
 
 
 func _refresh_fireteam_mini_cards() -> void:
@@ -3987,6 +4010,7 @@ func _build_fireteam_mini_card_static_signature(fireteam_id: String, lead, lead_
 
 
 func _build_selected_fireteam_cards_runtime_signature() -> String:
+	var hud_embarked_unit_state: Dictionary = _build_hud_embarked_unit_state()
 	var selected_cards_fireteam_id: String = _get_selected_member_cards_fireteam_id()
 	var units: Array = []
 	if not selected_cards_fireteam_id.is_empty():
@@ -3999,15 +4023,16 @@ func _build_selected_fireteam_cards_runtime_signature() -> String:
 		"team=%s" % selected_cards_fireteam_id,
 		"selected=%s" % "|".join(_selected_fireteam_ids),
 		"preview=%s" % str(preview_mode),
-		"embarked=%s" % str(_embarked_unit_ids),
+		"embarked=%s" % str(hud_embarked_unit_state),
 		"deployed=%s" % str(_deployed_unit_ids),
 	])
 	for unit_variant in units:
-		tokens.append(_build_mission_hud_unit_runtime_signature(unit_variant as Node))
+		tokens.append(_build_mission_hud_unit_runtime_signature(unit_variant as Node, hud_embarked_unit_state))
 	return ";".join(tokens)
 
 
 func _build_fireteam_mini_cards_runtime_signature() -> String:
+	var hud_embarked_unit_state: Dictionary = _build_hud_embarked_unit_state()
 	var tokens: PackedStringArray = PackedStringArray([
 		"selected=%s" % "|".join(_selected_fireteam_ids),
 		"preview=%s" % str(preview_mode),
@@ -4029,11 +4054,11 @@ func _build_fireteam_mini_cards_runtime_signature() -> String:
 		tokens.append("contact=%s" % str(contact_context))
 		tokens.append("behavior=%s" % str(behavior_profile))
 		for unit_variant in units:
-			tokens.append(_build_mission_hud_unit_runtime_signature(unit_variant as Node))
+			tokens.append(_build_mission_hud_unit_runtime_signature(unit_variant as Node, hud_embarked_unit_state))
 	return ";".join(tokens)
 
 
-func _build_mission_hud_unit_runtime_signature(unit: Node) -> String:
+func _build_mission_hud_unit_runtime_signature(unit: Node, hud_embarked_unit_state: Dictionary) -> String:
 	if unit == null:
 		return "unit=<null>"
 	var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit.has_method("get_unit_id") else String(unit.name)
@@ -4056,7 +4081,7 @@ func _build_mission_hud_unit_runtime_signature(unit: Node) -> String:
 		stance_revision,
 		runtime_command,
 		str(_is_unit_selected(unit)),
-		str(_embarked_unit_ids.has(unit_id)),
+		str(hud_embarked_unit_state.has(unit_id)),
 		str(_deployed_unit_ids.has(unit_id)),
 	]
 
@@ -10230,6 +10255,24 @@ func select_mission_dropship_craft(craft_id: String) -> bool:
 	return _select_mission_dropship_craft(craft_id, true)
 
 
+func select_mission_dropship_fireteam(craft_id: String, fireteam_id: String) -> bool:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_craft_id.is_empty() or normalized_fireteam_id.is_empty():
+		return false
+	var card: Dictionary = _find_mission_dropship_card_entry(normalized_craft_id)
+	if card.is_empty() or not _extract_mission_dropship_card_fireteam_ids(card).has(normalized_fireteam_id):
+		return false
+	if not _select_mission_dropship_craft(normalized_craft_id, false):
+		return false
+	_set_selected_fireteams(PackedStringArray([normalized_fireteam_id]), false)
+	_last_command_text = "FIRETEAM SELECTED: %s | %s" % [_get_fireteam_display_label(normalized_fireteam_id), _mission_drop_display_name]
+	_refresh_button_state()
+	_update_ui()
+	_emit_planning_state_changed()
+	return true
+
+
 func _select_mission_dropship_craft(craft_id: String, should_emit_signal: bool = true) -> bool:
 	var normalized_craft_id: String = craft_id.strip_edges()
 	var current_craft_id: String = _mission_drop_craft_id.strip_edges()
@@ -10956,12 +10999,18 @@ func _build_mission_dropship_fireteam_payload_card(fireteam_id: String, group_id
 	var panel := PanelContainer.new()
 	panel.name = "PassengerGroup_%s" % _sanitize_node_name(normalized_fireteam_id)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.focus_mode = Control.FOCUS_ALL
+	panel.tooltip_text = "Select %s in %s." % [_get_fireteam_display_label(normalized_fireteam_id), String(card.get("display_name", "Dropship")).strip_edges()]
 	panel.set_meta("mission_dropship_fireteam_payload_card", true)
 	panel.set_meta("mission_dropship_fireteam_id", normalized_fireteam_id)
+	panel.set_meta("mission_dropship_craft_id", String(card.get("craft_id", "")).strip_edges())
 	panel.set_meta("mission_dropship_payload_unit_ids", _sanitize_drop_payload_ids(group_ids))
 	panel.set_meta("mission_dropship_deboard_progress", _build_mission_dropship_fireteam_deboard_progress_value(card, group_ids))
 	META_UI_SKIN_SCRIPT.style_tactical_panel(panel, "thin_frame")
+	var selection_callable := Callable(self, "_on_mission_dropship_fireteam_payload_gui_input").bind(String(card.get("craft_id", "")).strip_edges(), normalized_fireteam_id)
+	if not panel.gui_input.is_connected(selection_callable):
+		panel.gui_input.connect(selection_callable)
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 4)
@@ -11186,9 +11235,29 @@ func _restore_mission_dropship_action_button_mouse_filters(card_panel: PanelCont
 			continue
 		button.mouse_filter = Control.MOUSE_FILTER_STOP
 	for node in _collect_node_tree(card_panel):
+		var payload_card := node as Control
+		if payload_card != null and bool(payload_card.get_meta("mission_dropship_fireteam_payload_card", false)):
+			payload_card.mouse_filter = Control.MOUSE_FILTER_STOP
+			payload_card.focus_mode = Control.FOCUS_ALL
 		var command_button := node as Button
 		if command_button != null and bool(command_button.get_meta("mission_dropship_card_command_button", false)):
 			command_button.mouse_filter = Control.MOUSE_FILTER_STOP
+
+
+func _on_mission_dropship_fireteam_payload_gui_input(event: InputEvent, craft_id: String, fireteam_id: String) -> void:
+	var should_select := false
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		should_select = mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed
+	elif event is InputEventKey:
+		var key_event := event as InputEventKey
+		should_select = key_event.pressed and (key_event.keycode == KEY_ENTER or key_event.keycode == KEY_SPACE)
+	if not should_select:
+		return
+	if select_mission_dropship_fireteam(craft_id, fireteam_id):
+		var viewport := get_viewport()
+		if viewport != null:
+			viewport.set_input_as_handled()
 
 
 func _collect_node_tree(root_node: Node) -> Array:
