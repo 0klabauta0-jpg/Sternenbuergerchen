@@ -27,6 +27,8 @@ var _profile = null
 var _uses_readonly_profile_reference: bool = false
 var _secondary_text_override: String = ""
 var _has_secondary_text_override: bool = false
+var _card_tooltip_override: String = ""
+var _has_card_tooltip_override: bool = false
 var _source_context: String = "roster"
 var _is_selected: bool = false
 var _is_disabled: bool = false
@@ -77,6 +79,13 @@ func setup_from_profile(profile, options: Dictionary = {}) -> void:
 	else:
 		_secondary_text_override = ""
 		_has_secondary_text_override = false
+
+	if options.has("card_tooltip_override"):
+		_card_tooltip_override = String(options.get("card_tooltip_override", "")).strip_edges()
+		_has_card_tooltip_override = true
+	else:
+		_card_tooltip_override = ""
+		_has_card_tooltip_override = false
 
 	_source_context = String(options.get("source_context", _source_context)).strip_edges()
 	if _source_context.is_empty():
@@ -148,6 +157,7 @@ func get_profile_reference_contract_snapshot() -> Dictionary:
 		"external_get_profile_returns_copy": true,
 		"has_reference_getter": true,
 		"secondary_text_override": _secondary_text_override if _has_secondary_text_override else "",
+		"has_card_tooltip_override": _has_card_tooltip_override,
 	}
 
 
@@ -444,6 +454,7 @@ func _refresh_card() -> void:
 	name_label.text = display_name
 	data_a_label.text = data_a_text
 	data_b_label.text = data_b_text
+	tooltip_text = _card_tooltip_override if _has_card_tooltip_override else ""
 	_populate_badge_row(badge_row)
 	remove_button.visible = _show_remove_action
 	remove_button.disabled = _is_disabled

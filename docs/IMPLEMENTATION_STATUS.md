@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1137 - Selected Fireteam Member Card Player Language Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1137_selected_fireteam_member_card_player_language_polish.md`, `docs/tasks/TASK_1136_live_tactical_stance_effect_playtest_feedback.md`, `docs/dev/mission_command_feedback_contract.md`
+- Befund: Die vier sichtbaren Member-Card-Zeilen mischten deutsche Spielsprache mit `Move`, `Engage`, `Aim up`, `Run`, `Walk`, `idle` und rohen `A:/S:`-Skillwerten.
+- Aenderung: Commands, Waffenhaltung, Bewegung und Zielbereitschaft sind deutsch und handlungsnah formuliert. Skill-/Trait-Diagnose wurde aus der knappen Kartenflaeche entfernt, bleibt aber vollstaendig im Karten-Tooltip und Character-Sheet erreichbar.
+- Multiplayer/Performance: Reiner Presenter auf bestehenden read-only Unit-Daten. Card-Instanzen, Dirty-Signatur, SimulationRoot, Commands, Effects, RPCs und Snapshots bleiben unveraendert.
+- Sicht-/Runtime-Beleg: Der echte Full-HD-Lauf zeigt `Bewegen`, `Waffe gesenkt` und `Rennt` ohne rohe Skillzeile; der laufende OFF-Move bleibt funktional.
+- Lokale Pruefung: TASK_1137 13/13; TASK_464 15/15; TASK_1136 17/17 headless und 19/19 Real Window; TASK_503 10/10; TASK_1109 18/18; TASK_773 25/25; TASK_222 82/82.
+- Naechster Schritt: TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish.
+
 ### TASK_1136 - Live Tactical Stance Effect Playtest and Feedback
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1136_live_tactical_stance_effect_playtest_feedback.md`, `docs/tasks/TASK_1134_selected_fireteam_stance_control_consistency.md`, `docs/tasks/TASK_1135_tactical_stance_doctrine_contract_reconciliation.md`, `docs/dev/fireteam_behavior_modes_contract.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Sicht-/Runtime-Beleg: Derselbe laufende Drill-Move wechselt VORS -> OFF. OFF hat hoeheren Runtime-Speed, VORS mehr Sicht; Unit-Cards wechseln gleichzeitig von engage/aimed auf run/lowered. Zwei echte Full-HD-Captures belegen Text, Auswahl und Kartenstatus ohne Ueberlauf.
 - Multiplayer/Performance: Reiner Presenter aus vorhandenen Modifiers und aktivem Movement-State. Keine neue Gameplay-Wahrheit, RPCs, Snapshots, Commands, Effects, Scans oder per-frame Rebuilds.
 - Lokale Pruefung: TASK_1136 17/17 headless und 19/19 Real Window; Captures `tmp/task_1136_stance_cautious.png` und `tmp/task_1136_stance_offensive.png`.
-- Naechster Schritt: TASK_1137 - Selected Fireteam Member Card Player Language Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1137.
 
 ### TASK_1135 - Tactical Stance Doctrine Contract Reconciliation
 - Status: implementiert im Arbeitsstand
