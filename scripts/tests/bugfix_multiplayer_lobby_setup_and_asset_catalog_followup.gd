@@ -60,7 +60,7 @@ func _test_lobby_exposes_player_roster_map_team_and_direct_ip_hint() -> void:
 	await _wait_frames(2)
 	ui_snapshot = Dictionary(lobby.call("get_lobby_ui_snapshot"))
 	_assert(String(ui_snapshot.get("peer_text", "")).contains("Sternenbuerger Test"), "Peer list shows configured player name")
-	_assert(String(ui_snapshot.get("assignment_text", "")).contains("versus"), "Assignments expose team mode")
+	_assert(String(ui_snapshot.get("assignment_text", "")).contains("VERSUS"), "Assignments expose team mode")
 	lobby.queue_free()
 	await _wait_frames(2)
 
