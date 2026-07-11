@@ -3905,6 +3905,9 @@ func _update_ui() -> void:
 			scopes_usec["secondary_strategic_text_usec"] = Time.get_ticks_usec() - scope_started_usec
 			scope_started_usec = Time.get_ticks_usec()
 		strategic_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
+		var strategic_decision_tooltip: String = _build_selected_fireteam_live_decision_detail_tooltip()
+		if not strategic_decision_tooltip.is_empty():
+			strategic_status_label.tooltip_text = "%s\n\n%s" % [strategic_status_label.tooltip_text, strategic_decision_tooltip] if not strategic_status_label.tooltip_text.is_empty() else strategic_decision_tooltip
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
 		if profile_enabled:
 			scopes_usec["secondary_tooltip_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -8431,11 +8434,13 @@ func _prioritize_release_firefight_bottom_dock_lines(source_lines: PackedStringA
 		prioritized.append(_compact_release_first_exchange_contact_fire_secondary_line(decision_line))
 	if not contact_fire_primary_line.is_empty():
 		return prioritized
-	if not combat_line.is_empty():
+	if not combat_line.is_empty() and decision_line.is_empty():
 		prioritized.append("Kampf %s" % combat_line)
 	for line_variant in source_lines:
 		var line: String = String(line_variant).strip_edges()
 		if line.is_empty() or prioritized.has(line) or line == decision_line:
+			continue
+		if not decision_line.is_empty() and bool(SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT.call("is_raw_combat_diagnostic_line", line)):
 			continue
 		if not contact_fire_primary_line.is_empty() and line == contact_fire_primary_line:
 			continue
@@ -10051,11 +10056,10 @@ func _build_release_first_exchange_hud_density_next_line(sync_snapshot: Dictiona
 
 
 func _compact_release_first_exchange_contact_fire_secondary_line(raw_line: String, max_length: int = 74) -> String:
-	var line: String = raw_line.strip_edges()
+	var snapshot: Dictionary = Dictionary(SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT.call("build_mission_control_snapshot", raw_line))
+	var line: String = String(snapshot.get("visible_line", "")).strip_edges()
 	if line.is_empty():
 		return ""
-	line = line.replace("HIT LESEN / DEFEND", "DEFEND")
-	line = line.replace("LOS/RANGE KORRIGIEREN", "ADJUST")
 	if line.length() > max_length:
 		line = line.substr(0, maxi(max_length - 1, 1)).strip_edges() + "..."
 	return line
@@ -10195,7 +10199,7 @@ func _apply_release_firefight_hud_real_window_label_contract(label: Label) -> vo
 	if label == null:
 		return
 	var text: String = String(label.text).strip_edges()
-	var active: bool = text.begins_with("NAECHSTER GRIFF:") or (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
+	var active: bool = bool(SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT.call("is_mission_control_action_line", text)) or text.begins_with("NAECHSTER GRIFF:") or (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
 	label.set_meta("release_firefight_hud_real_window_active", active)
 	if not active:
 		return
@@ -10217,7 +10221,7 @@ func _apply_release_firefight_bottom_dock_density_label_contract(label: Label) -
 	if label == null:
 		return
 	var text: String = String(label.text).strip_edges()
-	var active: bool = text.begins_with("NAECHSTER GRIFF:") or (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
+	var active: bool = bool(SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT.call("is_mission_control_action_line", text)) or text.begins_with("NAECHSTER GRIFF:") or (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
 	label.set_meta("release_firefight_bottom_dock_density_active", active)
 	if not active:
 		return

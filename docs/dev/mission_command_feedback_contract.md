@@ -13,6 +13,8 @@ Dieser Vertrag beschreibt, wo Mission-Command-Feedback angezeigt wird und welche
 5. #17 Selected Fireteam zeigt Details zum ausgewaehlten Fireteam: Bewegung, Security, Flank, Area-/Waypoint-Fortschritt.
 6. #18 Mission Control zeigt Missions-/Ziel-/letzte-Command-Lage und die naechsten erlaubten Schritte.
 
+TASK_1141 trennt in #18 Mission Control sichtbare Spielersprache von technischer Combat-Evidence. Die Kontrollzeile benennt Handlung und Grund kompakt, waehrend `NEXT/WHY`, `NO FIRE`, `NO_LOS`, Cover-, Range-, LOS- und Flank-Diagnose in Tooltip und read-only Snapshots erhalten bleiben. Bei aktiver Contact-Fire-Evidence bleibt `CONTACT FIRE` die erste sichtbare Zeile. Der Presenter erzeugt keine Commands, Effects, Combat-, Contact- oder Multiplayer-Wahrheit.
+
 ## Fensterrollen
 | Bereich | Rolle | Textregel |
 | --- | --- | --- |
