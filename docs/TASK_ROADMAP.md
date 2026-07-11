@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability (implementiert im Arbeitsstand)
+- Grundlage: TASK_1127 bewies Eventbindung und Mini-Card-Anker, aber nicht die gleichzeitige sichtbare Full-HD-Geometrie.
+- Ergebnis: BLUE und GOLD rendern je eine getrennte eventgebundene Bubble. Beide Rechtecke bleiben im Viewport, halten 6 px Sicherheitsabstand, bleiben dem eigenen Anker am naechsten und zeigen per linkem Tail zur richtigen Mini-Card. Ein echter D3D12-PNG-Beleg wurde erzeugt.
+- Architektur: Reiner read-only Verifier/Capture ohne Produktionscode-, Gameplay-, RPC-, Command-, Effect-, Event- oder Snapshotaenderung.
+- Verifikation: TASK_1128 7/7 headless und 8/8 Real Window; `tmp/task_1128_tactical_communication_hud_bubble_density.png`.
+- Naechster Schritt: TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation. Die kleine 8-px-Schrift und vier veraltete TASK-214-Annahmen werden gegen den heutigen Spieler-/Settingsvertrag geklaert.
+
 ## TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair (implementiert im Arbeitsstand)
 - Grundlage: Command- und Tactical-Event-Feedback konkurrierten im selben Gate und globalen Ein-Bubble-Speicher. Bei zwei Fireteams verlor TASK_274 Eventbindung oder Mini-Card-Anker vor dem Render-Snapshot.
 - Ergebnis: Tactical Events binden ihre ID an die aktive Command-Bubble desselben Fireteams. BLUE und GOLD behalten gleichzeitig begrenzte HUD-Bubbles; Primary3D transportiert Event-ID und Mini-Card-Anker. Zwoelf Mindestframes verhindern, dass schwere Frames die Bubble vor dem sichtbaren Snapshot aufzehren.
 - Architektur: Read-only Feedbackdarstellung; keine Gameplay-, Command-, Effect-, Event- oder Netzwerk-Snapshotmutation. Dedupe und Gesamtlimit bleiben bestehende Runtime-Grenzen.
 - Verifikation: TASK_1127 5/5; TASK_274 76/76; TASK_431 19/19; TASK_219 48/48; TASK_1126 13/13; TASK_1119 33/33; TASK_1104 31/31; Performance-Gate TASK_222 82/82.
-- Naechster Schritt: TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability. Zwei gleichzeitige Mini-Card-Bubbles werden im echten Fenster auf Ueberlagerung, Dauer und Lesbarkeit geprueft.
+- Naechster Schritt: abgeschlossen durch TASK_1128.
 
 ## TASK_1126 - Connected First Contact Local Marker and Label Hierarchy (implementiert im Arbeitsstand)
 - Grundlage: Der vollstaendig gerahmte Erstkontakt wurde durch grosse Selection-Ringe, Routine-Unit-Badges und doppelte Tactical-Communication-Contact-Reports ueberlagert.

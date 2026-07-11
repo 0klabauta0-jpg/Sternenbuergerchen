@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1128_tactical_communication_hud_bubble_density_real_window_readability.md`, `docs/tasks/TASK_1127_tactical_communication_hud_bubble_event_mini_card_anchor_repair.md`
+- Befund: Nach TASK_1127 war die Datenzuordnung gruen, aber Abstand, Bildschirmgrenzen und sichtbare Tail-Zuordnung zweier gleichzeitiger Fireteam-Bubbles waren nicht im echten Fenster belegt.
+- Aenderung: Ein Full-HD-Verifier liest echte HUD-Renderrechtecke, Event-IDs und Mini-Card-Anker. Ein optionaler D3D12-Fensterlauf erzeugt einen PNG-Sichtbeleg. Der bestehende Layoutpfad bestand alle Gates; Produktionscode wurde bewusst nicht veraendert.
+- Multiplayer/Performance: Reiner read-only Sicht-/Geometrievertrag. Keine Gameplay-, Command-, Effect-, Event-, RPC- oder Snapshotmutation und keine neue Runtimearbeit.
+- Risiken/offen: Die 8-px-Bubble-Typografie wirkt im Full-HD-Beleg klein. TASK_214 enthaelt weiterhin vier veraltete Bubble-Erwartungen.
+- Lokale Pruefung: TASK_1128 7/7 headless und 8/8 Real Window; Sichtbeleg `tmp/task_1128_tactical_communication_hud_bubble_density.png`.
+- Naechster Schritt: TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation.
+
 ### TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1127_tactical_communication_hud_bubble_event_mini_card_anchor_repair.md`, `docs/tasks/TASK_274_tactical_communication_feedback_layer.md`, `docs/dev/tactical_communication_feedback_layer_design.md`
 - Befund: Routine-Command-Feedback und Tactical-Communication-Events liefen durch dasselbe Cooldown-Gate. Die spaetere Bubble ersetzte global die vorherige; schwere Renderframes konnten die Zeitdarstellung vor dem Snapshot vollstaendig aufbrauchen. Primary3D verlor zudem die Event-ID im Render-Diagnoseeintrag.
 - Aenderung: Tactical Events binden ihre ID an die aktive Command-Bubble desselben Fireteams. Der Speicher dedupliziert pro Fireteam/Leader, bleibt global begrenzt und garantiert eventgebundenen Bubbles mindestens zwoelf Prozessframes. HUD-/World-Render-Snapshots behalten die Event-ID.
 - Multiplayer/Performance: Keine Gameplay-, Command-, Effect-, Event- oder Snapshotwahrheit im HUD. Der Pfad arbeitet auf hoechstens dem bestehenden Bubble-Limit von vier Eintraegen; Performance-Gate bleibt 82/82 gruen.
-- Risiken/offen: Zwei gleichzeitige Mini-Card-Bubbles sind vertraglich korrekt, aber noch nicht als eigener Real-Window-Dichtetest abgenommen. TASK_214 enthaelt vier unabhaengige veraltete Erwartungen und bleibt bei 32/36.
+- Risiken/offen: Die Zwei-Bubble-Dichte ist mit TASK_1128 im echten Full-HD-Fenster abgenommen. TASK_214 enthaelt vier unabhaengige veraltete Erwartungen und bleibt bei 32/36.
 - Lokale Pruefung: TASK_1127 5/5; TASK_274 76/76; TASK_431 19/19; TASK_219 48/48; TASK_1126 13/13; TASK_1119 33/33; TASK_1104 31/31; TASK_222 82/82.
-- Naechster Schritt: TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability.
+- Naechster Schritt: abgeschlossen durch TASK_1128.
 
 ### TASK_1126 - Connected First Contact Local Marker and Label Hierarchy
 - Status: implementiert im Arbeitsstand
