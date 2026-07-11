@@ -87,7 +87,7 @@ func _test_fireteam_mini_card_reuse_and_cleanup() -> void:
 	if second_card != null:
 		second_stance_button = second_card.find_child("StanceCButton", true, false) as Button
 	_assert(first_card != null and first_card == second_card, "Mini-card is reused across refreshes")
-	_assert(first_stance_button != null and first_stance_button == second_stance_button, "C/N/A stance buttons keep their instances across refreshes")
+	_assert(first_stance_button != null and first_stance_button == second_stance_button, "Mini-card stance segments keep their instances across refreshes")
 	_assert(first_card != null and first_card.find_child("FTLReadinessGauge", true, false) == null, "Mini-card no longer shows the round FTL readiness gauge")
 	var stage_label := first_card.get_node_or_null("Margin/VBox/StageLabel") as Label if first_card != null else null
 	var member_label := first_card.get_node_or_null("Margin/VBox/MemberLabel") as Label if first_card != null else null

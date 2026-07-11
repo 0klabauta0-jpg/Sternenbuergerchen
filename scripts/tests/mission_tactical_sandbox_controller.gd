@@ -174,6 +174,9 @@ const NPC_THOUGHT_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/n
 const HOVER_SCROLL_BEHAVIOR_SCRIPT: GDScript = preload("res://scripts/ui/hover_scroll_behavior.gd")
 const FTL_READINESS_GAUGE_SCRIPT: GDScript = preload("res://scripts/ui/ftl_readiness_gauge.gd")
 const FIRETEAM_MEMBER_STATUS_ROW_SCRIPT: GDScript = preload("res://scripts/ui/fireteam_member_status_row.gd")
+const STANCE_CAUTIOUS_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/target_marker.png")
+const STANCE_NORMAL_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/move_prompt.png")
+const STANCE_AGGRESSIVE_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/sword_attack.png")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -5477,15 +5480,22 @@ func _apply_fireteam_mini_stance_toggle(card: Control, fireteam_id: String) -> v
 			button.focus_mode = Control.FOCUS_NONE
 			button.mouse_filter = Control.MOUSE_FILTER_STOP
 			button.toggle_mode = true
-			button.custom_minimum_size = Vector2(24.0, 20.0)
-			button.add_theme_font_size_override("font_size", 9)
+			button.custom_minimum_size = Vector2(52.0, 24.0)
+			button.add_theme_font_size_override("font_size", 8)
+			button.expand_icon = true
+			button.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+			button.alignment = HORIZONTAL_ALIGNMENT_CENTER
 			toggle_row.add_child(button)
-		button.text = _get_tactical_stance_short_label(String(stance_id))
-		button.tooltip_text = "Tactical Stance: %s" % _get_tactical_stance_button_text(String(stance_id))
+		button.text = _get_tactical_stance_segment_label(String(stance_id))
+		button.icon = _get_tactical_stance_segment_icon(String(stance_id))
+		button.tooltip_text = _get_tactical_stance_effect_tooltip(String(stance_id))
 		button.button_pressed = current_stance == String(stance_id)
 		button.set_meta("mission_fireteam_stance_button", true)
 		button.set_meta("fireteam_id", normalized_fireteam_id)
 		button.set_meta("mission_fireteam_stance_id", String(stance_id))
+		button.set_meta("mission_fireteam_stance_selected", button.button_pressed)
+		button.set_meta("mission_fireteam_stance_player_label", button.text)
+		button.set_meta("mission_fireteam_stance_icon_path", String(button.icon.resource_path) if button.icon != null else "")
 		if button.has_meta("tactical_stance_id"):
 			button.remove_meta("tactical_stance_id")
 		META_UI_SKIN_SCRIPT.style_tactical_button(button, button.button_pressed)
@@ -5493,6 +5503,37 @@ func _apply_fireteam_mini_stance_toggle(card: Control, fireteam_id: String) -> v
 		if not button.pressed.is_connected(press_callable):
 			button.pressed.connect(press_callable)
 	toggle_row.set_meta("mission_fireteam_stance_toggle", true)
+	toggle_row.set_meta("mission_fireteam_stance_segmented_control", true)
+
+
+func _get_tactical_stance_segment_label(stance_id: String) -> String:
+	match stance_id.strip_edges().to_lower():
+		"cautious":
+			return "VORS"
+		"aggressive":
+			return "OFF"
+		_:
+			return "NORM"
+
+
+func _get_tactical_stance_segment_icon(stance_id: String) -> Texture2D:
+	match stance_id.strip_edges().to_lower():
+		"cautious":
+			return STANCE_CAUTIOUS_ICON
+		"aggressive":
+			return STANCE_AGGRESSIVE_ICON
+		_:
+			return STANCE_NORMAL_ICON
+
+
+func _get_tactical_stance_effect_tooltip(stance_id: String) -> String:
+	match stance_id.strip_edges().to_lower():
+		"cautious":
+			return "Vorsichtig: langsameres Tempo, Waffen im Anschlag, mehr Sicht."
+		"aggressive":
+			return "Offensiv: hoeheres Tempo, weniger Sicht, staerkeres Risiko."
+		_:
+			return "Normal: ausgeglichenes Tempo, normale Waffenhaltung und Sicht."
 
 
 func _on_fireteam_mini_stance_button_pressed(fireteam_id: String, stance_id: String) -> void:

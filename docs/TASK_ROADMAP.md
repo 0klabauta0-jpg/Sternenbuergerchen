@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1133 - Fireteam Mini-Card Stance Control Readability (implementiert im Arbeitsstand)
+- Grundlage: Die Mini-Card-Steuerung `C / N / A` war nur mit Vorwissen oder Tooltip verstaendlich.
+- Ergebnis: `VORS / NORM / OFF` nutzt Ziel-, Bewegungs- und Angriffsicon aus dem bestehenden CC0-Katalog. Tooltips erklaeren die taktische Wirkung; genau ein Segment ist sichtbar aktiv und ein Klick bleibt Fireteam-spezifisch.
+- Architektur: Reine UI-Darstellung auf dem bestehenden Stance-Callback und Sync-State; keine Gameplay-, Resolver-, RPC-, Command-, Effect- oder Snapshotmutation.
+- Verifikation: TASK_1133 19/19; TASK_109 37/37; TASK_429 100/100; TASK_180 98/98; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window.
+- Naechster Schritt: TASK_1134 - Selected Fireteam Stance Control Consistency. Der grosse #17-Bereich soll denselben lesbaren Segmentvertrag erhalten. Danach TASK_421/TASK_425 gegen die aktuelle TASK_429-Doctrine reconciliieren.
+
 ## TASK_1132 - Fireteam Mini-Card Tactical State Language Polish (implementiert im Arbeitsstand)
 - Grundlage: Nach TASK_1131 waren beide Karten sichtbar, aber `EX -`, `C0`, `HP 5/5` und `RDY N/A` blieben reine Diagnosekuerzel.
 - Ergebnis: Neutraler Zustand zeigt `WARTET | KEIN KONTAKT | FIT n/n`. Aktive Ausfuehrung, Contact-Confidence und verfuegbare Readiness werden spielsprachlich dargestellt; fehlende Readiness bleibt ehrlich verborgen. Technische Detailwerte bleiben in Snapshot und Tooltip.
 - Architektur: Reine Presenter-Ableitung aus vorhandenen read-only Daten; keine Gameplay-, Contact-, Readiness-, RPC-, Command-, Effect- oder Snapshotmutation.
 - Verifikation: TASK_1132 15/15; TASK_1131 8/8; TASK_369 14/14; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1128 8/8 Real Window; TASK_222 82/82.
-- Naechster Schritt: TASK_1133 - Fireteam Mini-Card Stance Control Readability. `C / N / A` soll ohne Tooltip als vorsichtig, normal und offensiv erkennbar werden.
+- Naechster Schritt: abgeschlossen durch TASK_1133.
 
 ## TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression (implementiert im Arbeitsstand)
 - Grundlage: BLUE/GOLD konkurrierte im Header mit vier Status-/Bediengruppen. Die wichtigste taktische Zeile wurde hinter einer abgeschnittenen Lead-Zeile verborgen; zwei Karten passten nicht vollstaendig in den linken Scrollbereich.
