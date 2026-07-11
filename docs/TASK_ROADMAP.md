@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1096 - Connected Interaction Runtime Progress Surface (implementiert im Arbeitsstand)
+- Grundlage: Host-Pending/OK war lesbar, replizierter Hold-Fortschritt noch nicht als gemeinsame ruhige Zeile sichtbar.
+- Ergebnis: Progress-/Hold-/Complete-Zeilen mit Mehrschritt-Prioritaet und Fingerprint-Dedupe aktualisieren nur das bestehende Command-Feedback-Label.
+- Verifikation: TASK_1096 10/10 und TASK_1094 6/6.
+- Naechster Schritt: TASK_1097 - Connected Interaction Feedback Two-Window Visual Evidence.
+
 ## TASK_1095 - Connected Interaction Feedback Visual Polish (implementiert im Arbeitsstand)
 - Grundlage: Der Client-GO-Handoff zeigte technische Interaction-IDs und rohe Reject-Codes.
 - Ergebnis: Kurze AA-/DOOR-/COM-/CARGO-Zeilen, verstaendliche Gruende, Detailtext und Tone machen Pending/Success/Blocked spielerlesbar.

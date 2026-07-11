@@ -464,6 +464,8 @@ var _last_command_text: String = "AWAITING INPUT"
 var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
 var _network_mission_interaction_feedback: Dictionary = {}
 var _network_mission_interaction_request_pending: bool = false
+var _network_mission_interaction_progress_fingerprint: String = ""
+var _network_mission_interaction_progress_update_count: int = 0
 var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
 var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
 var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
@@ -1989,9 +1991,11 @@ func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
 
 func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	apply_authoritative_fire_rule_snapshot(snapshot.get("tactical_rules", []))
+	var mission_interactions: Dictionary = Dictionary(snapshot.get("mission_interactions", {}))
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
-		combat_driver.call("apply_multiplayer_interaction_snapshot", Dictionary(snapshot.get("mission_interactions", {})))
+		combat_driver.call("apply_multiplayer_interaction_snapshot", mission_interactions)
+	_apply_network_mission_interaction_progress_surface(mission_interactions)
 
 
 func _on_network_command_result_received(result: Dictionary) -> void:
@@ -2021,7 +2025,84 @@ func _on_network_command_result_received(result: Dictionary) -> void:
 
 
 func get_network_mission_interaction_feedback_snapshot() -> Dictionary:
-	return _network_mission_interaction_feedback.duplicate(true)
+	var snapshot: Dictionary = _network_mission_interaction_feedback.duplicate(true)
+	snapshot["progress_update_count"] = _network_mission_interaction_progress_update_count
+	snapshot["progress_fingerprint"] = _network_mission_interaction_progress_fingerprint
+	return snapshot
+
+
+func _apply_network_mission_interaction_progress_surface(snapshot: Dictionary) -> bool:
+	var states: Dictionary = Dictionary(snapshot.get("interaction_states", {}))
+	if states.is_empty():
+		return false
+	var preferred_id: String = String(_network_mission_interaction_feedback.get("interaction_id", "")).strip_edges()
+	var interaction_id: String = ""
+	var ids: Array = states.keys()
+	ids.sort()
+	for id_variant in ids:
+		var candidate: Dictionary = Dictionary(states.get(id_variant, {}))
+		var candidate_state: String = String(candidate.get("state", "")).strip_edges().to_lower()
+		if not bool(candidate.get("complete", false)) and (float(candidate.get("hold_seconds", 0.0)) > 0.0 or ["active", "holding", "operating", "in_progress"].has(candidate_state)):
+			interaction_id = String(id_variant)
+			break
+	if interaction_id.is_empty() and states.has(preferred_id):
+		interaction_id = preferred_id
+	if interaction_id.is_empty():
+		for id_variant in ids:
+			if bool(Dictionary(states.get(id_variant, {})).get("complete", false)):
+				interaction_id = String(id_variant)
+				break
+	if interaction_id.is_empty():
+		return false
+	var state: Dictionary = Dictionary(states.get(interaction_id, {}))
+	var progress: float = clampf(float(state.get("progress", 0.0)), 0.0, 1.0)
+	var hold_seconds: float = maxf(float(state.get("hold_seconds", 0.0)), 0.0)
+	var duration_seconds: float = maxf(float(state.get("duration_seconds", 0.0)), 0.0)
+	var complete: bool = bool(state.get("complete", false))
+	var display_token: String = _build_network_mission_interaction_display_token(interaction_id, String(state.get("interaction_type", "")))
+	var fingerprint: String = "%s|%d|%d|%s" % [interaction_id, int(round(progress * 100.0)), int(floor(hold_seconds)), str(complete)]
+	if fingerprint == _network_mission_interaction_progress_fingerprint:
+		return false
+	_network_mission_interaction_progress_fingerprint = fingerprint
+	_network_mission_interaction_progress_update_count += 1
+	var compact_line: String
+	if complete:
+		compact_line = "%s FERTIG" % display_token
+	elif String(state.get("interaction_type", "")).strip_edges().to_lower() == "hold_zone":
+		compact_line = "%s HALTEN | %d/%ds" % [display_token, int(floor(hold_seconds)), int(ceil(duration_seconds))]
+	else:
+		compact_line = "%s %d%% | %d/%ds" % [display_token, int(round(progress * 100.0)), int(floor(hold_seconds)), int(ceil(duration_seconds))]
+	_network_mission_interaction_feedback = {
+		"status": "complete" if complete else "in_progress",
+		"interaction_id": interaction_id,
+		"display_token": display_token,
+		"compact_line": compact_line,
+		"progress": progress,
+		"hold_seconds": hold_seconds,
+		"duration_seconds": duration_seconds,
+		"tone": "success" if complete else "progress",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	_last_command_text = compact_line
+	_refresh_network_interaction_command_feedback_label(compact_line)
+	return true
+
+
+func _refresh_network_interaction_command_feedback_label(compact_line: String) -> void:
+	var label := get_node_or_null(command_feedback_label_path) as Label
+	if label == null:
+		return
+	var lines: PackedStringArray = label.text.split("\n")
+	var replaced: bool = false
+	for index in range(lines.size()):
+		if lines[index].begins_with("LAST "):
+			lines[index] = "LAST %s" % compact_line
+			replaced = true
+			break
+	if not replaced:
+		lines.append("LAST %s" % compact_line)
+	_set_mission_label_text_delta(label, "\n".join(lines))
 
 
 func _try_submit_connected_client_mission_interaction() -> Dictionary:

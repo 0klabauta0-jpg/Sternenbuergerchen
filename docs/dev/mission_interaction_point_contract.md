@@ -633,5 +633,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - `tone` darf `pending`, `success` oder `blocked` fuer Presenter liefern, setzt aber keinen Runtime-State.
 - TASK_1095 prueft Textbudget, technische-ID-Hygiene und unveraenderten Client-GO-Handoff.
 
+## Connected Interaction Progress Surface Contract
+- Der Client liest Progress nur aus `mission_interactions.interaction_states` des Host-Snapshots.
+- Laufende States haben Vorrang vor frueheren abgeschlossenen Route-Schritten.
+- Computer/Door zeigen Prozent und Sekunden, Hold-Zones verwenden `HALTEN`, Abschluss verwendet `FERTIG`.
+- Ein Fingerprint aus Interaction, Prozent, Sekunde und Complete-State dedupliziert identische Snapshots.
+- Aktualisiert wird nur die `LAST`-Zeile des vorhandenen Command-Feedback-Labels per Textdelta; kein kompletter HUD-Rebuild.
+- TASK_1096 prueft Mehrschritt-Prioritaet, Dedupe und read-only-Grenze.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.
