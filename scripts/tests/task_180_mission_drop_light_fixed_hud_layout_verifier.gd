@@ -75,9 +75,9 @@ func _test_mission_hud_fixed_window_positions() -> void:
 	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow") as Control).mouse_filter == Control.MOUSE_FILTER_IGNORE, "Bottom row host does not consume map input outside fixed panels")
 	_assert(bool((scene.get_node("TacticalUI/FireteamMiniPanel") as Control).get_meta("mission_fireteam_mini_backgroundless", false)), "Fireteam mini HUD renders as cards without a background window")
 
-	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel") as Label).text == "#16 COMMAND MATRIX", "#16 block label is preserved")
-	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel") as Label).text == "#17 SELECTED FIRETEAM", "#17 block label is preserved")
-	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel") as Label).text == "#18 MISSION CONTROL", "#18 block label is preserved")
+	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandHeaderLabel") as Label).text == "#16 BEFEHLE", "#16 German block label is preserved")
+	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/FireteamHeaderLabel") as Label).text == "#17 AUSGEWAEHLTES FIRETEAM", "#17 German block label is preserved")
+	_assert((scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel") as Label).text == "#18 EINSATZKONTROLLE", "#18 German block label is preserved")
 
 	scene.queue_free()
 	await _wait_frames(2)

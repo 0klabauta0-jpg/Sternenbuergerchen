@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1144 - Tactical Panel Header and Navigation Player Language Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1144_tactical_panel_header_navigation_player_language_polish.md`, `docs/tasks/TASK_1143_tactical_hud_remaining_player_language_audit_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Befund: Der Full-HD-HUD zeigte nach TASK_1143 weiterhin `COMMAND MATRIX`, `SELECTED FIRETEAM`, `MISSION CONTROL` und `Mission` als auffaelligen englischen Sprachmix.
+- Aenderung: Die sichtbaren Titel lauten `#16 BEFEHLE`, `#17 AUSGEWAEHLTES FIRETEAM`, `#18 EINSATZKONTROLLE` und `Einsatz`. `Homebase` und `FOB` bleiben als etablierte Eigennamen. Stabile Node-Namen, NodePaths, Blocknummern und Callbacks bleiben unveraendert.
+- Sicht-/Runtime-Beleg: Der echte Full-HD-Lauf zeigt alle vier Bezeichnungen vollstaendig und ohne Layoutverschiebung; Command-Grid, Member-Cards, Mission Control und Karte bleiben lesbar.
+- Multiplayer/Performance: Keine Aenderung an Navigation, Simulation, Commands, Effects, Combat, Contact, Transport, RPC oder Snapshots. TASK_1118 bleibt 13/13 und TASK_222 82/82 direkt.
+- Lokale Pruefung: TASK_1144 16/16; TASK_180 98/98; TASK_1118 13/13; TASK_1136 19/19 Real Window; TASK_222 82/82 direkt; `git diff --check`.
+- Naechster Schritt: TASK_1145 - Player-Flow Regression Harness Trust Repair. TASK_257 meldet 11 oberflaechenuebergreifende Sichtbarkeitsfehler, TASK_096 liefert trotz 4 Fehlern Exitcode 0 und der historische Dropship-Gesamttest ueberschreitet 180 Sekunden.
+
 ### TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1143_tactical_hud_remaining_player_language_audit_polish.md`, `docs/tasks/TASK_1142_mission_control_mission_state_player_language_polish.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Sicht-/Runtime-Beleg: Der Full-HD-Lauf zeigt `#15 EINSATZLAGE`, `NAECHSTER SCHRITT: Route pruefen | Fireteam im Einsatz`, `#19 EREIGNISSE`, `KONTAKTDRUCK` und `OFF AKTIV` ohne Ueberlauf.
 - Multiplayer/Performance: Keine Aenderung an SimulationRoot, Commands, Effects, Combat, Contact, Transport, RPC oder Snapshot-Wahrheit. TASK_1118 bleibt 13/13; das direkte TASK_222-Gate bleibt 82/82. Der bestehende Godot-Exit-Leakhinweis und der PowerShell-5-Wrapper-Konflikt bleiben separate Harness-Schuld.
 - Lokale Pruefung: TASK_1143 18/18; TASK_366 19/19; TASK_1120 11/11; TASK_1118 13/13; TASK_1136 17/17 headless und 19/19 Real Window; TASK_222 82/82 direkt; `git diff --check`.
-- Naechster Schritt: TASK_1144 - Tactical Panel Header and Navigation Player Language Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1144.
 
 ### TASK_1142 - Mission Control Mission-State Player Language Polish
 - Status: implementiert im Arbeitsstand

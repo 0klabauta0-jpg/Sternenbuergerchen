@@ -360,7 +360,7 @@ text = "FOB"
 [node name="MissionNavButton" type="Button" parent="TacticalUI/TopNavPanel/NavMargin/NavRow"]
 focus_mode = 0
 custom_minimum_size = Vector2(74, 0)
-text = "Mission"
+text = "Einsatz"
 
 [node name="FireteamMiniPanel" type="PanelContainer" parent="TacticalUI"]
 offset_left = 24.0
@@ -453,7 +453,7 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
 [node name="CommandHeaderLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox"]
-text = "#16 COMMAND MATRIX"
+text = "#16 BEFEHLE"
 
 [node name="CommandGrid" type="GridContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox"]
 columns = 3
@@ -504,7 +504,7 @@ theme_override_constants/separation = 4
 theme_override_constants/separation = 8
 
 [node name="FireteamHeaderLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
-text = "#17 SELECTED FIRETEAM"
+text = "#17 AUSGEWAEHLTES FIRETEAM"
 
 [node name="FireteamStatusLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow"]
 size_flags_horizontal = 3
@@ -578,7 +578,7 @@ vertical_scroll_mode = 1
 theme_override_constants/separation = 4
 
 [node name="StrategicHeaderLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox"]
-text = "#18 MISSION CONTROL"
+text = "#18 EINSATZKONTROLLE"
 
 [node name="PhaseControlPanel" type="PanelContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox"]
 
