@@ -1992,6 +1992,7 @@ func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
 func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	apply_authoritative_fire_rule_snapshot(snapshot.get("tactical_rules", []))
 	var mission_interactions: Dictionary = Dictionary(snapshot.get("mission_interactions", {}))
+	mission_interactions["source_tick"] = maxi(int(snapshot.get("tick", -1)), -1)
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
 		combat_driver.call("apply_multiplayer_interaction_snapshot", mission_interactions)
@@ -2064,16 +2065,20 @@ func _apply_network_mission_interaction_progress_surface(snapshot: Dictionary) -
 	var hold_seconds: float = maxf(float(state.get("hold_seconds", 0.0)), 0.0)
 	var duration_seconds: float = maxf(float(state.get("duration_seconds", 0.0)), 0.0)
 	var complete: bool = bool(state.get("complete", false))
-	var display_token: String = _build_network_mission_interaction_display_token(interaction_id, String(state.get("interaction_type", "")))
-	var fingerprint: String = "%s|%d|%d|%s" % [interaction_id, int(round(progress * 100.0)), int(floor(hold_seconds)), str(complete)]
+	var source_tick: int = maxi(int(snapshot.get("source_tick", -1)), -1)
+	var interaction_type: String = String(state.get("interaction_type", "")).strip_edges().to_lower()
+	var display_token: String = _build_network_mission_interaction_display_token(interaction_id, interaction_type)
+	var fingerprint: String = "%s|%s|%s|%d|%d|%d|%s" % [interaction_id, display_token, interaction_type, int(round(progress * 100.0)), int(floor(hold_seconds)), int(ceil(duration_seconds)), str(complete)]
 	if fingerprint == _network_mission_interaction_progress_fingerprint:
+		if source_tick >= 0:
+			_network_mission_interaction_feedback["source_tick"] = source_tick
 		return false
 	_network_mission_interaction_progress_fingerprint = fingerprint
 	_network_mission_interaction_progress_update_count += 1
 	var compact_line: String
 	if complete:
 		compact_line = "%s FERTIG" % display_token
-	elif String(state.get("interaction_type", "")).strip_edges().to_lower() == "hold_zone":
+	elif interaction_type == "hold_zone":
 		compact_line = "%s HALTEN | %d/%ds" % [display_token, int(floor(hold_seconds)), int(ceil(duration_seconds))]
 	else:
 		compact_line = "%s %d%% | %d/%ds" % [display_token, int(round(progress * 100.0)), int(floor(hold_seconds)), int(ceil(duration_seconds))]
@@ -2084,6 +2089,7 @@ func _apply_network_mission_interaction_progress_surface(snapshot: Dictionary) -
 		"compact_line": compact_line,
 		"progress": progress,
 		"hold_seconds": hold_seconds,
+		"source_tick": source_tick,
 		"duration_seconds": duration_seconds,
 		"tone": "success" if complete else "progress",
 		"read_only": true,
