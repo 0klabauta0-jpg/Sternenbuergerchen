@@ -3152,6 +3152,7 @@ func _ensure_nodes() -> void:
 		_subviewport.transparent_bg = false
 		_subviewport.size = _get_viewport_size()
 		_viewport_container.add_child(_subviewport)
+	_subviewport.own_world_3d = true
 
 	if _feedback_bubble_hud_root == null:
 		_feedback_bubble_hud_root = get_node_or_null(FEEDBACK_BUBBLE_HUD_ROOT_NAME) as Control

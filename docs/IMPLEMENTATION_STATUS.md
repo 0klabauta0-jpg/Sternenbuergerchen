@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1124 - Connected Contact World Root and Compositing Residue Isolation
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1124_connected_contact_world_root_compositing_residue_isolation.md`, `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `docs/ARCHITECTURE.md`
+- Befund: Der weisse Doppelblock war bereits in den reinen Ziel-World-Captures vorhanden. Parallele taktische `SubViewport`s teilten im Einprozess-Drei-Peer-Lauf dieselbe `World3D`, sodass fremde Peer-Geometrie in BLUE und GOLD mitgerendert wurde.
+- Aenderung: Jeder taktische SubViewport besitzt jetzt eine eigene `World3D`. Der Produktverifier speichert zusaetzlich reine Zielwelt-Belege; ein RED/GREEN-Test prueft zwei parallele Missionen und die Pixelbelegung des ehemaligen Residue-Bereichs.
+- Multiplayer/Performance: Nur Renderwelt-Isolation; kein RPC, Command, Effect, Snapshotfeld oder Gameplay-State. Keine neuen Frame-Scans. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Der Fremdblock ist mit jeweils 0 Residue-Pixeln beseitigt. Im sauberen Capture bleibt die lokale Unit-/Contact-Ballung am oberen Kartenrand als naechster sichtbarer Lesbarkeitsbefund.
+- Lokale Pruefung: TASK_1124 11/11; TASK_1119 27/27 headless sowie 33/33 je BLUE/GOLD Real Window; TASK_1123 9/9; TASK_1120 11/11; TASK_1122 11/11; TASK_1104 31/31; TASK_222 82/82.
+- Naechster Schritt: TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability.
+
 ### TASK_1123 - Connected First Contact Unit Formation and World Residue Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1123_connected_first_contact_unit_formation_world_residue_readability.md`, `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `docs/tasks/TASK_1120_connected_first_contact_event_log_dedupe_hud_declutter.md`

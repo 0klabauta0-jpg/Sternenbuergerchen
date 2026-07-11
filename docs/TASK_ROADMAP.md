@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1124 - Connected Contact World Root and Compositing Residue Isolation (implementiert im Arbeitsstand)
+- Grundlage: Der verbleibende weisse Doppelblock war weder ein aktives Dropship noch ein registriertes Zielwelt-Asset. Direkte Ziel-World-Captures belegten, dass er vor dem Root-Compositing entstand.
+- Ergebnis: Parallele taktische SubViewports besitzen getrennte `World3D`-Instanzen. BLUE-/GOLD-Produkt- und World-Captures enthalten im ehemaligen Residue-Bereich jeweils 0 Fremdpixel.
+- Architektur: Reine Renderwelt-Isolation und explizite Testdiagnostik. Kein Gameplay-State, RPC, Command, Effect, Snapshotfeld oder Hotpath-Scan.
+- Verifikation: TASK_1124 11/11; TASK_1119 27/27 headless und 33/33 je Real Window; TASK_1123 9/9; TASK_1120 11/11; TASK_1122 11/11; TASK_1104 31/31; Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability. Die saubere Welt zeigt Fireteams und Kontakt noch zu eng am oberen Kartenrand.
+
 ## TASK_1123 - Connected First Contact Unit Formation and World Residue Readability (implementiert im Arbeitsstand)
 - Grundlage: Der Produktcapture stapelte Fixture-Units entlang einer isometrischen Tiefenachse. Leere abgeschlossene Return-Crafts verschwanden nur als HUD-Karten. Mehrere eingebettete Peer-Subviewports waren im Einprozess-Capture nicht vollstaendig isoliert.
 - Ergebnis: Die reale Drei-/Viereraufstellung wird mit projizierter Mindestdistanz geprueft. Abgeschlossene leere `to_fob`-Crafts erzeugen im Contact Focus weder Karte noch World-Visual. Capture-Lobby, CanvasLayer und SubViewportContainer werden pro Peer isoliert; ein read-only Diagnosevertrag liefert Visual-Bounds und CPU-Registrierungsdaten auf Anfrage.

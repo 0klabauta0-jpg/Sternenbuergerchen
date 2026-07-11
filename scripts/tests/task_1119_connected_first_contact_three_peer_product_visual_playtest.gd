@@ -5,6 +5,8 @@ const ENET_PORT_START := 19840
 const ENET_PORT_END := 19850
 const BLUE_PNG := "res://tmp/task_1119_product_first_contact_blue.png"
 const GOLD_PNG := "res://tmp/task_1119_product_first_contact_gold.png"
+const BLUE_WORLD_PNG := "res://tmp/task_1124_first_contact_blue_world.png"
+const GOLD_WORLD_PNG := "res://tmp/task_1124_first_contact_gold_world.png"
 
 var _passed := 0
 var _failed := 0
@@ -79,7 +81,7 @@ func _run() -> void:
 	host_controller.call("_apply_fireteams_fire_rule_locally", PackedStringArray(["blue", "gold"]), "free", true)
 	_assert(bool(host_controller.call("_apply_default_fireteam_behavior", "blue", 1)), "Host activates BLUE contact behavior")
 	_assert(bool(host_controller.call("_apply_default_fireteam_behavior", "gold", 1)), "Host activates GOLD contact behavior")
-	for _index in range(40):
+	for _index in range(80):
 		await _poll_all(apis, 1)
 		var events: Array = Array(host_driver.call("get_fire_event_snapshot"))
 		if _has_fireteam_event(events, "blue") and _has_fireteam_event(events, "gold"):
@@ -293,6 +295,12 @@ func _capture_product_perspective(lobbies: Array, target_index: int, path: Strin
 	_assert(_capture_viewport_geometry_is_isolated(lobbies, target_index), "Product capture moves non-target SubViewport textures outside the evidence frame")
 	RenderingServer.force_draw(true)
 	await process_frame
+	var target_primary_view: Node = target_mission.get_node_or_null("Primary3DView")
+	var target_subviewport := target_primary_view.get("_subviewport") as SubViewport if target_primary_view != null else null
+	var world_image: Image = target_subviewport.get_texture().get_image() if target_subviewport != null else null
+	var world_path: String = BLUE_WORLD_PNG if path == BLUE_PNG else GOLD_WORLD_PNG
+	var world_error: Error = world_image.save_png(world_path) if world_image != null else ERR_CANT_CREATE
+	_assert(world_image != null and world_image.get_width() == 1920 and world_image.get_height() == 1080 and world_error == OK, "%s is a valid FullHD target-world capture" % world_path.get_file())
 	var image: Image = root.get_texture().get_image()
 	var error: Error = image.save_png(path) if image != null else ERR_CANT_CREATE
 	_assert(image != null and image.get_width() == 1920 and image.get_height() == 1080 and error == OK, "%s is a valid FullHD product capture" % path.get_file())
