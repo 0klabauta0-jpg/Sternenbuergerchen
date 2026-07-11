@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1110 - Connected Multi-Dropship Fireteam Selection Perspective (implementiert im Arbeitsstand)
+- Grundlage: TASK_1109 stabilisierte zwei Dropships lokal, der gemeinsame Multiplayer-Snapshot enthielt aber weder mehrere Craft-Karten noch Embarked-/Deployed-IDs.
+- Ergebnis: Der Host repliziert whitelisted Karten- und Presence-Daten. Clients behalten ihre lokale gueltige Auswahl, zeigen aber denselben autoritativen Transportzustand; identische Payloads werden vor dem HUD-Refresh dedupliziert.
+- Architektur: Keine lokale Selection im Netzwerk, keine Texture-Pfade und keine Client-Gameplay-Mutation. Der bestehende Snapshot bleibt die einzige verbundene Display-Wahrheit.
+- Verifikation: TASK_1110 20/20, TASK_168 20/20, TASK_1109 18/18, TASK_396 17/17, TASK_399 9/9, TASK_1099 38/38 und Drei-Peer-Produktlauf TASK_1104 31/31.
+- Naechster Schritt: TASK_1111 - Connected Dropship Command Authority and Ownership.
+
 ## TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency (implementiert im Arbeitsstand)
 - Grundlage: Bei mehreren Dropships konnte nur die aeussere Craft-Karte gewaehlt werden. Der HUD-Embarked-Filter kannte nach einem Craft-Wechsel nur dessen Payload und stellte Passagiere anderer Schiffe dadurch als Boden-Fireteams dar.
 - Ergebnis: Jede Payload-Karte waehlt Craft und genau ein Fireteam. Ein read-only HUD-Resolver vereinigt alle nicht deboardeten Karten- und Sequenzpayloads, waehrend jede Drop-Sequenz weiterhin nur ihr eigenes Schiff und ihre eigenen Passagiere verarbeitet.

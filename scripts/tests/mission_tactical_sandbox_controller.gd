@@ -542,6 +542,9 @@ var _fireteam_runtime_ui_refresh_frames_remaining: int = 0
 var _mission_dropship_runtime_ui_refresh_remaining: float = 0.0
 var _mission_dropship_runtime_feedback_flush_count: int = 0
 var _mission_dropship_runtime_planning_emit_count: int = 0
+var _last_authoritative_dropship_snapshot_signature: String = ""
+var _authoritative_dropship_snapshot_apply_count: int = 0
+var _authoritative_dropship_snapshot_dedupe_count: int = 0
 var _map_world_bounds_cache: Rect2 = Rect2()
 var _map_world_bounds_cache_revision: int = -1
 var _map_world_bounds_cache_valid: bool = false
@@ -1991,12 +1994,84 @@ func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
 
 func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	apply_authoritative_fire_rule_snapshot(snapshot.get("tactical_rules", []))
+	apply_authoritative_mission_dropship_snapshot(Dictionary(snapshot.get("dropship", {})))
 	var mission_interactions: Dictionary = Dictionary(snapshot.get("mission_interactions", {}))
 	mission_interactions["source_tick"] = maxi(int(snapshot.get("tick", -1)), -1)
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
 		combat_driver.call("apply_multiplayer_interaction_snapshot", mission_interactions)
 	_apply_network_mission_interaction_progress_surface(mission_interactions)
+
+
+func apply_authoritative_mission_dropship_snapshot(dropship_snapshot: Dictionary) -> bool:
+	if dropship_snapshot.is_empty() or not dropship_snapshot.has("mission_drop_cards"):
+		return false
+	var snapshot_signature: String = JSON.stringify(dropship_snapshot)
+	if snapshot_signature == _last_authoritative_dropship_snapshot_signature:
+		_authoritative_dropship_snapshot_dedupe_count += 1
+		return false
+	var incoming_cards: Array = _sanitize_mission_dropship_cards(Array(dropship_snapshot.get("mission_drop_cards", [])))
+	if incoming_cards.is_empty():
+		return false
+	var local_craft_id: String = _mission_drop_craft_id.strip_edges()
+	var local_selected_fireteams: PackedStringArray = _selected_fireteam_ids.duplicate()
+	_mission_drop_cards = _merge_authoritative_mission_dropship_cards(incoming_cards)
+	_deployed_unit_ids = _build_drop_unit_state_dict(Array(dropship_snapshot.get("deployed_unit_ids", [])))
+	_embarked_unit_ids = _build_drop_unit_state_dict(Array(dropship_snapshot.get("embarked_unit_ids", [])))
+	var local_card: Dictionary = _find_raw_mission_dropship_card_entry(local_craft_id)
+	if local_card.is_empty():
+		local_card = Dictionary(_mission_drop_cards[0]).duplicate(true)
+		local_craft_id = String(local_card.get("craft_id", "")).strip_edges()
+	if not local_card.is_empty():
+		_apply_mission_dropship_card_selection(local_card)
+	var available_fireteams: PackedStringArray = _get_available_fireteam_ids()
+	var preserved_selection := PackedStringArray()
+	for fireteam_id_variant in local_selected_fireteams:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if available_fireteams.has(fireteam_id):
+			preserved_selection.append(fireteam_id)
+	if not preserved_selection.is_empty():
+		_set_selected_fireteams(preserved_selection, false)
+	_apply_drop_presence_state_to_units()
+	_refresh_button_state()
+	_refresh_selection_visuals()
+	_refresh_world_overlays()
+	_update_ui()
+	_last_authoritative_dropship_snapshot_signature = snapshot_signature
+	_authoritative_dropship_snapshot_apply_count += 1
+	return not local_craft_id.is_empty()
+
+
+func get_authoritative_dropship_snapshot_apply_debug_snapshot() -> Dictionary:
+	return {
+		"apply_count": _authoritative_dropship_snapshot_apply_count,
+		"dedupe_count": _authoritative_dropship_snapshot_dedupe_count,
+		"has_signature": not _last_authoritative_dropship_snapshot_signature.is_empty(),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _merge_authoritative_mission_dropship_cards(incoming_cards: Array) -> Array:
+	var local_by_craft_id: Dictionary = {}
+	for local_variant in _mission_drop_cards:
+		if typeof(local_variant) != TYPE_DICTIONARY:
+			continue
+		var local_card: Dictionary = Dictionary(local_variant).duplicate(true)
+		var craft_id: String = String(local_card.get("craft_id", "")).strip_edges()
+		if not craft_id.is_empty():
+			local_by_craft_id[craft_id] = local_card
+	var merged: Array = []
+	for incoming_variant in incoming_cards:
+		if typeof(incoming_variant) != TYPE_DICTIONARY:
+			continue
+		var incoming: Dictionary = Dictionary(incoming_variant).duplicate(true)
+		var craft_id: String = String(incoming.get("craft_id", "")).strip_edges()
+		var card: Dictionary = Dictionary(local_by_craft_id.get(craft_id, {})).duplicate(true)
+		for key_variant in incoming.keys():
+			card[key_variant] = incoming[key_variant]
+		merged.append(card)
+	return _sanitize_mission_dropship_cards(merged)
 
 
 func _on_network_command_result_received(result: Dictionary) -> void:
@@ -12761,6 +12836,9 @@ func _refresh_world_overlays() -> void:
 			"dropship_visuals": dropship_visuals,
 			"progress": _build_mission_dropship_progress_value(),
 			"air_asset_status": get_air_asset_status_snapshot(),
+			"mission_drop_cards": _build_mission_drop_cards_snapshot(),
+			"embarked_unit_ids": _build_sorted_drop_unit_id_array(_build_hud_embarked_unit_state()),
+			"deployed_unit_ids": _build_sorted_drop_unit_id_array(_deployed_unit_ids),
 		}
 	)
 
