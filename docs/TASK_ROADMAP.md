@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1090 - Two-Player Station Route Decision Playtest (implementiert im Arbeitsstand)
+- Grundlage: Technische ROE-/Snapshot-Gates waren gruen, aber der sichtbare Zwei-Fenster-Pfad behandelte Fireteams und lokale Team-Perspektive weiterhin teilweise als Alpha-only.
+- Ergebnis: Host und Client zeigen im Godot-4.6.2-Capture ihre eigenen Alpha-/Bravo-Fireteams, lokale Auswahl und dieselbe lesbare Station-Route-Karte. Szenario-Bootstrap und lokale FoW-Sicht sind getrennt; UI setzt keine Gameplay-Wahrheit.
+- Verifikation: TASK_1090 16/16, TASK_714 37/37, TASK_712 62/62, TASK_1082 21/21 und TASK_1083 24/24.
+- Naechster Schritt: TASK_1091 - Connected Station Route Two-Player Command Playtest. Der bisherige Zwei-Fenster-Helfer wird nicht als Netzwerksession ausgegeben; Door, Computer und Cargo muessen als echter Host/Client-Befehlsweg mit getrennten Fireteams durchlaufen werden.
+
 ## TASK_1089 - Release Trace Observer-Effect Guard (implementiert im Arbeitsstand)
 - Grundlage: Der echte TASK-1088-Release war mit 9.702 ms bereits schnell, aber mehrere erfolgreiche Trace-Stufen lasen erneut breite Command-Feedback- und Visible-Status-Snapshots. Die Messung verlaengerte damit den gemessenen Pfad selbst.
 - Ergebnis: Nur Pre-GO liest im Erfolgsfall noch einen vollen Controller-Snapshot. Spaetere Stufen verwenden vorhandene kompakte CONTACT-FIRE-Evidence. Der vergleichbare Headless-Pfad sank von 11.527 auf 8.856 ms; CONTACT FIRE, echte FireEvent-ID und Multiplayer-Grenzen bleiben gruen.
