@@ -464,6 +464,7 @@ var _last_command_text: String = "AWAITING INPUT"
 var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
 var _network_mission_interaction_feedback: Dictionary = {}
 var _network_mission_interaction_request_pending: bool = false
+var _network_dropship_command_sequence: int = 0
 var _network_mission_interaction_progress_fingerprint: String = ""
 var _network_mission_interaction_progress_update_count: int = 0
 var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
@@ -2203,6 +2204,8 @@ func request_network_authoritative_dropship_command(command_type: String, craft_
 		"craft_id": normalized_craft_id,
 		"source_context": "mission_dropship_ui",
 	}
+	_network_dropship_command_sequence += 1
+	command["command_id"] = "dropship:%d:%d:%s:%s" % [peer_id, _network_dropship_command_sequence, normalized_craft_id, command_type.strip_edges().to_lower()]
 	command.merge(payload, true)
 	if multiplayer.is_server():
 		var result: Dictionary = Dictionary(simulation_root.call("submit_network_command_for_peer", command, peer_id))
