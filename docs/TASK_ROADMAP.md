@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1091 - Connected Station Route Two-Player Command Playtest (implementiert im Arbeitsstand)
+- Grundlage: TASK_1090 zeigte getrennte Perspektiven, aber keine verbundene Session; TASK_714 transportierte Station-Interaktionen noch nicht zum Client.
+- Ergebnis: Ein echtes lokales ENet-Paar prueft Client-Command, Host-Autoritaet und read-only Interaction-Replikation. Door, Computer, Cargo und das vollstaendige Gate sind beim Client konsistent, ohne Client-Commands zu erzeugen.
+- Verifikation: TASK_1091 17/17; breite Regressionen folgen vor Integration.
+- Naechster Schritt: TASK_1092 - Connected Station Route Runtime Arrival/Hold Integration. Bewegung und Aufenthalt sollen den Host-Abschluss ohne direkte Verifier-Fortschrittsaufrufe ausloesen.
+
 ## TASK_1090 - Two-Player Station Route Decision Playtest (implementiert im Arbeitsstand)
 - Grundlage: Technische ROE-/Snapshot-Gates waren gruen, aber der sichtbare Zwei-Fenster-Pfad behandelte Fireteams und lokale Team-Perspektive weiterhin teilweise als Alpha-only.
 - Ergebnis: Host und Client zeigen im Godot-4.6.2-Capture ihre eigenen Alpha-/Bravo-Fireteams, lokale Auswahl und dieselbe lesbare Station-Route-Karte. Szenario-Bootstrap und lokale FoW-Sicht sind getrennt; UI setzt keine Gameplay-Wahrheit.

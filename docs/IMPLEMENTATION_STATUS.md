@@ -20,6 +20,16 @@
 - Lokale Pruefung: TASK_1090 16/16, TASK_714 37/37, TASK_712 62/62, TASK_1082 21/21 und TASK_1083 24/24; sichtbarer 4.6.2-Capture zeigt beide Karten und Teamkontexte.
 - Naechster Schritt: TASK_1091 - Connected Station Route Two-Player Command Playtest. Zwei echte Netzwerk-Instanzen fuehren mit eigenen Fireteams Door, Computer und Cargo ueber Host-Autoritaet aus.
 
+### TASK_1091 - Connected Station Route Two-Player Command Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1091_connected_station_route_two_player_command_playtest.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_714, TASK_1083
+- Stand: Ein echtes lokales ENet-Paar transportiert einen eigenen Alpha-Fireteam-Door-Command zum Host. Der Host repliziert danach Door, Computer, Cargo und das abgeschlossene Station-Route-Gate read-only zum Client.
+- Architektur: `MissionCombatLoopDriver` bleibt Runtime-Besitzer. `SimulationRoot` und `MultiplayerSnapshotContract` transportieren nur sanitisierten Interaction-State; Client-Apply erzeugt keine Gameplay-Commands.
+- Ursache/Fix: Der State-Snapshot enthielt bisher keine Missionsinteraktionen. Der neue `mission_interactions`-Block schliesst diese Luecke deterministisch und ohne UI-Wahrheit.
+- Risiken/offen: Der Headless-Test schliesst Arrival/Hold ueber den vorhandenen Driver direkt ab. Der naechste Integrationsslice muss Bewegung und Aufenthalt selbst bis zum autoritativen Abschluss laufen lassen. Zwei volle 64x64-Renderwelten bleiben wegen eines Godot-4.6.1-Fog-/Terrain-Callback-Crashs ausserhalb dieser Fixture.
+- Lokale Pruefung: TASK_1091 17/17.
+- Naechster Schritt: TASK_1092 - Connected Station Route Runtime Arrival/Hold Integration.
+
 ### TASK_1089 - Release Trace Observer-Effect Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1089_release_trace_observer_effect_guard.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_879, TASK_1088

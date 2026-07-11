@@ -33,6 +33,7 @@ func build_state_snapshot(data: Dictionary) -> Dictionary:
 		"tactical_rules": _normalize_tactical_rules(data.get("tactical_rules", [])),
 		"breakout_states": _normalize_breakout_states(data.get("breakout_states", [])),
 		"air_asset_status": _normalize_air_asset_statuses(data.get("air_asset_status", data.get("air_asset_statuses", []))),
+		"mission_interactions": _normalize_mission_interactions(data.get("mission_interactions", {})),
 		"mission_result": _normalize_mission_result(data.get("mission_result", {})),
 	}
 	return snapshot
@@ -76,6 +77,7 @@ func normalize_display_context(context: Dictionary) -> Dictionary:
 		"tactical_rules": _normalize_tactical_rules(context.get("tactical_rules", [])),
 		"breakout_states": _normalize_breakout_states(context.get("breakout_states", [])),
 		"air_asset_status": _normalize_air_asset_statuses(context.get("air_asset_status", context.get("air_asset_statuses", []))),
+		"mission_interactions": _normalize_mission_interactions(context.get("mission_interactions", {})),
 		"mission_result": _normalize_mission_result(context.get("mission_result", {})),
 	}
 
@@ -807,6 +809,50 @@ func _normalize_mission_result(value: Variant) -> Dictionary:
 	if source.has("team_states"):
 		mission_result["team_states"] = _variant_to_array(source.get("team_states", [])).duplicate(true)
 	return mission_result
+
+
+func _normalize_mission_interactions(value: Variant) -> Dictionary:
+	if typeof(value) != TYPE_DICTIONARY:
+		return {}
+	var source: Dictionary = Dictionary(value)
+	var source_states: Dictionary = Dictionary(source.get("interaction_states", {}))
+	var states: Dictionary = {}
+	var in_progress_count: int = 0
+	var complete_count: int = 0
+	var interaction_ids: Array = source_states.keys()
+	interaction_ids.sort()
+	for interaction_id_variant in interaction_ids:
+		var interaction_id: String = String(interaction_id_variant).strip_edges()
+		var state_source_variant: Variant = source_states.get(interaction_id_variant, null)
+		if interaction_id.is_empty() or typeof(state_source_variant) != TYPE_DICTIONARY:
+			continue
+		var state_source: Dictionary = Dictionary(state_source_variant)
+		var state: Dictionary = {
+			"complete": bool(state_source.get("complete", false)),
+			"hold_seconds": maxf(float(state_source.get("hold_seconds", 0.0)), 0.0),
+			"duration_seconds": maxf(float(state_source.get("duration_seconds", 0.0)), 0.0),
+			"progress": clampf(float(state_source.get("progress", 0.0)), 0.0, 1.0),
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		}
+		for key in ["state", "fireteam_id", "team_id", "active_team_id", "step_id", "gate_id", "required_state", "interaction_type", "command_type"]:
+			_copy_string_if_present(state_source, state, key)
+		_copy_int_if_present(state_source, state, "updated_msec")
+		states[interaction_id] = state
+		if bool(state.get("complete", false)):
+			complete_count += 1
+		elif ["active", "holding", "operating", "in_progress"].has(String(state.get("state", "")).strip_edges().to_lower()):
+			in_progress_count += 1
+	return {
+		"schema": "sternenbuergerchen.mission_interaction_runtime_progress.v1",
+		"runtime_authority": "MissionCombatLoopDriver",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"interaction_count": states.size(),
+		"in_progress_count": in_progress_count,
+		"complete_count": complete_count,
+		"interaction_states": states,
+	}
 
 
 func _looks_like_rule_entry(source: Dictionary) -> bool:
