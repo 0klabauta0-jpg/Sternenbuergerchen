@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1140_selected_fireteam_decision_language_action_cue_polish.md`, `docs/tasks/TASK_1139_command_matrix_player_language_icon_hierarchy_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Befund: Die ausgewaehlte Fireteam-Flaeche stapelte bis zu sechs historische Diagnosezeilen und mischte `NEXT/WHY/HOLD/ADV/BACK/2ND` mit deutscher Spielsprache.
+- Aenderung: Ein kleiner zustandsloser Presenter verdichtet die vorhandenen Rohdaten auf hoechstens drei Zeilen: `NAECHSTER GRIFF`, `GRUND` und `OPTIONEN`. Die vollstaendige unveraenderte Evidence bleibt im Tooltip. Der UI-Refresh verwendet denselben Snapshot fuer Text und Tooltip und berechnet Combat-/Loop-Diagnose nicht doppelt.
+- Sicht-/Runtime-Beleg: Der echte Full-HD-Lauf zeigt `LOS/Reichweite korrigieren`, `Kein Ziel erfasst` sowie `Halten | Vorruecken | Zurueck` klar oberhalb der Member-Cards. Karten, Matrix und Welt bleiben stabil.
+- Multiplayer/Performance: Reine read-only Praesentation. SimulationRoot, Combat, Navigation, Commands, Effects, RPCs und Snapshotfelder bleiben unveraendert. TASK_1109 und TASK_222 bleiben gruen.
+- Lokale Pruefung: TASK_1140 22/22; TASK_833 23/23; TASK_834 27/27; TASK_835 28/28; TASK_836 29/29; TASK_1109 18/18; TASK_222 82/82; TASK_1136 19/19 Real Window; `git diff --check`.
+- Naechster Schritt: TASK_1141 - Mission Control Decision Language and Diagnostic Hierarchy Polish. Der Full-HD-Beleg zeigt rechts noch `NEXT/WHY`, `NO FIRE`, `LOS?` und rohe Kurzdiagnose.
+
 ### TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1139_command_matrix_player_language_icon_hierarchy_polish.md`, `docs/tasks/TASK_836_release_firefight_command_matrix_visual_polish.md`, `scripts/ui/mission_command_hierarchy_contract.gd`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Sicht-/Runtime-Beleg: Der echte Full-HD-Blick zeigt alle 5 x 4 Slots im alten Panelrechteck, vollstaendige Codes, kleine Icons und genau eine aktive gelbe Feuerregel. Keine Text- oder Iconkachel wird abgeschnitten oder vergroessert das Grid.
 - Multiplayer/Performance: Reiner Presenter-/Contract-Polish. Command-IDs, Callbacks, Fire-Rule-State, SimulationRoot, Commands, Effects, RPCs und Snapshots bleiben unveraendert. Iconbilder werden nur beim ersten Zugriff je Pfad skaliert und danach gecacht.
 - Lokale Pruefung: TASK_1139 51/51; TASK_191 24/24; TASK_271 104/104; TASK_570 46/46; TASK_571 32/32; TASK_572 28/28; TASK_836 29/29; TASK_1136 19/19 Real Window; TASK_1109 18/18; TASK_222 82/82.
-- Naechster Schritt: TASK_1140 - Selected Fireteam Decision Language and Action Cue Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1140.
 
 ### TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish
 - Status: implementiert im Arbeitsstand

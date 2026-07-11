@@ -5,6 +5,7 @@ const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.g
 const TACTICAL_CARD_SCRIPT: GDScript = preload("res://scripts/ui/components/tactical_card.gd")
 const STATUS_BADGE_SCRIPT: GDScript = preload("res://scripts/ui/components/status_badge.gd")
 const COMMAND_BUTTON_SCRIPT: GDScript = preload("res://scripts/ui/components/command_button.gd")
+const SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/selected_fireteam_decision_presenter.gd")
 const PROGRESS_LINE_SCRIPT: GDScript = preload("res://scripts/ui/components/progress_line.gd")
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
@@ -496,6 +497,7 @@ var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
 var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
 var _release_candidate_firefight_decision_line_build_depth: int = 0
 var _release_first_decision_loop_two_hud_build_depth: int = 0
+var _selected_fireteam_player_decision_snapshot: Dictionary = {}
 var _release_first_decision_loop_two_polish_hud_build_depth: int = 0
 var _release_first_decision_loop_two_visual_polish_hud_build_depth: int = 0
 var _release_first_decision_loop_two_player_loop_choice_confirm_last_trace: Dictionary = {}
@@ -3868,7 +3870,11 @@ func _update_ui() -> void:
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
 		_set_mission_label_text_delta(fireteam_status_label, _build_fireteam_status_text())
-		fireteam_status_label.tooltip_text = _build_mission_combat_hud_detail_tooltip_text()
+		var combat_tooltip: String = _build_mission_combat_hud_detail_tooltip_text()
+		var decision_tooltip: String = _build_selected_fireteam_live_decision_detail_tooltip()
+		fireteam_status_label.tooltip_text = combat_tooltip
+		if not decision_tooltip.is_empty():
+			fireteam_status_label.tooltip_text = "%s\n\n%s" % [combat_tooltip, decision_tooltip] if not combat_tooltip.is_empty() else decision_tooltip
 		_apply_combat_hud_detail_tooltip_label_contract(fireteam_status_label)
 		_apply_release_firefight_hud_real_window_label_contract(fireteam_status_label)
 	if profile_enabled:
@@ -7207,6 +7213,7 @@ func _get_selected_fireteam_id() -> String:
 
 
 func _build_fireteam_status_text() -> String:
+	_selected_fireteam_player_decision_snapshot = {}
 	if _selected_fireteam_ids.is_empty():
 		var no_selection_loop_line: String = _build_release_first_decision_loop_two_hud_line()
 		var no_selection_polish_line: String = _build_release_first_decision_loop_two_polish_hud_line()
@@ -7257,6 +7264,14 @@ func _build_fireteam_status_text() -> String:
 	var firefight_decision_line: String = _build_release_candidate_firefight_decision_line()
 	var loop_two_line: String = _build_release_first_decision_loop_two_hud_line()
 	var loop_two_polish_line: String = _build_release_first_decision_loop_two_polish_hud_line()
+	var player_decision: Dictionary = _build_selected_fireteam_player_decision_snapshot(
+		firefight_decision_line,
+		loop_two_line,
+		loop_two_polish_line,
+		combat_hud_line
+	)
+	_selected_fireteam_player_decision_snapshot = player_decision.duplicate(true)
+	var player_decision_lines: PackedStringArray = PackedStringArray(player_decision.get("visible_lines", PackedStringArray()))
 	var first_line: String = "%s%s | Karten %d | Wegpunkte %d | Gebiete %d | Stance %s | Ausfuehrung %s" % [
 		mode_text,
 		_get_fireteam_name(),
@@ -7280,6 +7295,8 @@ func _build_fireteam_status_text() -> String:
 		if not firefight_decision_line.is_empty():
 			firefight_lines.append(_compact_release_first_exchange_contact_fire_secondary_line(firefight_decision_line))
 		return "\n".join(firefight_lines)
+	if not player_decision_lines.is_empty():
+		return "\n".join(player_decision_lines)
 	if not firefight_decision_line.is_empty():
 		if not loop_two_line.is_empty() and loop_two_line != firefight_decision_line:
 			if not combat_hud_line.is_empty():
@@ -7303,6 +7320,29 @@ func _build_fireteam_status_text() -> String:
 	if not combat_hud_line.is_empty():
 		return "%s\n%s\n%s" % [first_line, second_line, combat_hud_line]
 	return "%s\n%s" % [first_line, second_line]
+
+
+func _build_selected_fireteam_player_decision_snapshot(
+	raw_decision_line: String,
+	raw_loop_line: String = "",
+	raw_polish_line: String = "",
+	raw_combat_line: String = ""
+) -> Dictionary:
+	return SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT.call(
+		"build_snapshot",
+		raw_decision_line,
+		raw_loop_line,
+		raw_polish_line,
+		raw_combat_line
+	)
+
+
+func _build_selected_fireteam_decision_detail_tooltip(snapshot: Dictionary) -> String:
+	return String(SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT.call("build_detail_tooltip", snapshot))
+
+
+func _build_selected_fireteam_live_decision_detail_tooltip() -> String:
+	return _build_selected_fireteam_decision_detail_tooltip(_selected_fireteam_player_decision_snapshot)
 
 
 func _build_mission_insertion_next_step_cue_snapshot(selected_card: Dictionary = {}, card_ui: Dictionary = {}) -> Dictionary:
@@ -10155,7 +10195,7 @@ func _apply_release_firefight_hud_real_window_label_contract(label: Label) -> vo
 	if label == null:
 		return
 	var text: String = String(label.text).strip_edges()
-	var active: bool = (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
+	var active: bool = text.begins_with("NAECHSTER GRIFF:") or (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
 	label.set_meta("release_firefight_hud_real_window_active", active)
 	if not active:
 		return
@@ -10177,7 +10217,7 @@ func _apply_release_firefight_bottom_dock_density_label_contract(label: Label) -
 	if label == null:
 		return
 	var text: String = String(label.text).strip_edges()
-	var active: bool = (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
+	var active: bool = text.begins_with("NAECHSTER GRIFF:") or (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
 	label.set_meta("release_firefight_bottom_dock_density_active", active)
 	if not active:
 		return
