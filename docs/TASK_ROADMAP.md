@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1092 - Connected Station Route Runtime Arrival Hold (implementiert im Arbeitsstand)
+- Grundlage: TASK_1091 replizierte Interaction-State, schloss ihn im Verifier aber noch direkt ab. Netzwerkbewegung erreichte den lokalen Waypoint-Progress-Produzenten nicht.
+- Ergebnis: Akzeptierter Client-Command registriert auf dem Host eine Pending-Interaction. Autoritative Unit-Ankunft und Tick-Hold schliessen Door ab; Rejects erzeugen keinen Pending-State; der Client spiegelt den Abschluss read-only.
+- Verifikation: TASK_1092 15/15, TASK_1091 17/17, TASK_1083 24/24, TASK_714 37/37, TASK_697 42/42 und TASK_1071 47/47.
+- Naechster Schritt: TASK_1093 - Connected Station Route Full Interaction Trace fuer AA, Door, Computer und Cargo.
+
 ## TASK_1091 - Connected Station Route Two-Player Command Playtest (implementiert im Arbeitsstand)
 - Grundlage: TASK_1090 zeigte getrennte Perspektiven, aber keine verbundene Session; TASK_714 transportierte Station-Interaktionen noch nicht zum Client.
 - Ergebnis: Ein echtes lokales ENet-Paar prueft Client-Command, Host-Autoritaet und read-only Interaction-Replikation. Door, Computer, Cargo und das vollstaendige Gate sind beim Client konsistent, ohne Client-Commands zu erzeugen.
