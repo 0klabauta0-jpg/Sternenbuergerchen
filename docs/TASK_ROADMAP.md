@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1137 - Selected Fireteam Member Card Player Language Polish (implementiert im Arbeitsstand)
+- Grundlage: Die kompakten Member-Cards zeigten korrekte Runtime-Daten, mischten aber deutsche Spielsprache mit englischen Enums und rohen Skill-Kuerzeln.
+- Ergebnis: `Bewegen`, `Angreifen`, `Waffe im Anschlag`, `Waffe gesenkt`, `Marschiert`, `Rennt`, `Steht` und `Zielbereit` bilden eine konsistente Spielerhierarchie. Skill-/Trait-Diagnose bleibt im Tooltip statt in der knappen Sichtflaeche.
+- Architektur: Read-only Presenter-Erweiterung am bestehenden Card-Setup. Keine Gameplay-, Combat-, Movement-, Command-, Effect-, RPC-, Snapshot- oder Hotpath-Aenderung.
+- Verifikation: TASK_1137 13/13; TASK_464 15/15; TASK_1136 17/17 headless und 19/19 Real Window; TASK_503 10/10; TASK_1109 18/18; TASK_773 25/25; TASK_222 82/82.
+- Naechster Schritt: TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish. Der Full-HD-Beleg zeigt, dass lange Namen und mehrere gleichwertig sichtbare Statuszeilen noch um die 156-px-Kartenbreite konkurrieren.
+
 ## TASK_1136 - Live Tactical Stance Effect Playtest and Feedback (implementiert im Arbeitsstand)
 - Grundlage: Runtime-Wirkung und Auswahl waren korrekt, die Klickbestaetigung blieb aber bei `STANCE C LIVE (1)` und war im dichten Dock nicht als Wirkung lesbar.
 - Ergebnis: Das aktive Command-Profil erzeugt menschliches Feedback fuer Tempo, Sicht und Waffenhaltung. Die kompakte Einzeile steht direkt ueber `VORS / NORM / OFF`; die ausfuehrliche Fassung bleibt in Command-Feedback und Tooltip.
 - Architektur: Read-only Presenter aus bestehendem Movement-State und `get_behavior_stance_modifiers()`. Keine State-Mutation, kein neuer Netzwerkpfad und keine neue Hotpath-Arbeit.
 - Verifikation: TASK_1136 17/17 headless, 19/19 Real Window sowie zwei Full-HD-Captures. VORS ist langsamer und sichtstaerker; OFF schneller und sichtschwaecher; Postures wechseln gleichzeitig.
-- Naechster Schritt: TASK_1137 - Selected Fireteam Member Card Player Language Polish. `Move`, `Aim up`, `Run` und rohe `A:/S:`-Diagnose werden in eine klare Spielerhierarchie ueberfuehrt, technische Details bleiben im Tooltip.
+- Naechster Schritt: abgeschlossen durch TASK_1137.
 
 ## TASK_1135 - Tactical Stance Doctrine Contract Reconciliation (implementiert im Arbeitsstand)
 - Grundlage: Alte TASK_421-/TASK_425-Move-Werte, spaetere TASK_451-Workbench-Werte und tote command-spezifische Konstanten sahen wie mehrere parallele Balancequellen aus.

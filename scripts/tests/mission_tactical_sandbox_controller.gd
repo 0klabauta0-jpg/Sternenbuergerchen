@@ -4458,6 +4458,7 @@ func _refresh_selected_fireteam_cards() -> void:
 				"compact_data_a_max_lines": 2,
 				"compact_data_b_max_lines": 4,
 				"compact_text_min_width": 76.0,
+				"card_tooltip_override": _build_live_fireteam_card_technical_tooltip(unit) if not preview_mode else "",
 			}
 		)
 		card.set_meta("mission_selected_fireteam_member_in_drop_transit", in_drop_transit)
@@ -6408,15 +6409,27 @@ func _build_live_fireteam_card_detail_line(unit: Node) -> String:
 	var suppression_text: String = _build_unit_suppression_readability_text(unit)
 	if not suppression_text.is_empty():
 		detail_lines.append(suppression_text)
-	var detail_parts: PackedStringArray = []
+	return "\n".join(detail_lines)
+
+
+func _build_live_fireteam_card_technical_tooltip(unit: Node) -> String:
+	if unit == null:
+		return ""
+	var lines: PackedStringArray = ["Taktische Details"]
+	var runtime_line: String = _build_live_fireteam_card_runtime_line(unit)
+	if not runtime_line.is_empty():
+		lines.append(runtime_line)
+	var detail_line: String = _build_live_fireteam_card_detail_line(unit)
+	if not detail_line.is_empty():
+		lines.append(detail_line)
 	if unit.has_method("get_skill_summary_text"):
-		detail_parts.append(String(unit.call("get_skill_summary_text")))
+		var skill_text: String = String(unit.call("get_skill_summary_text")).strip_edges()
+		if not skill_text.is_empty():
+			lines.append("Skills: %s" % skill_text)
 	var trait_text: String = String(unit.call("get_trait_summary_text")).strip_edges() if unit.has_method("get_trait_summary_text") else ""
 	if not trait_text.is_empty():
-		detail_parts.append(trait_text)
-	if not detail_parts.is_empty():
-		detail_lines.append(" | ".join(detail_parts))
-	return "\n".join(detail_lines)
+		lines.append("Merkmale: %s" % trait_text)
+	return "\n".join(lines)
 
 
 func _build_unit_suppression_readability_text(unit: Node) -> String:
@@ -6448,15 +6461,15 @@ func _format_unit_fire_status_short(fire_status: String) -> String:
 func _format_unit_command_label(command_label: String) -> String:
 	match command_label.strip_edges().to_lower():
 		"move", "move_to_position", "pending_move":
-			return "Move"
+			return "Bewegen"
 		"engage", "engage_area", "engaging":
-			return "Engage"
+			return "Angreifen"
 		"take":
-			return "Take"
+			return "Nehmen"
 		"defend", "defend_area", "hold_position", "holding":
-			return "Defend"
+			return "Verteidigen"
 		"idle":
-			return "Idle"
+			return "Wartet"
 		_:
 			return command_label.strip_edges().capitalize()
 
@@ -6500,18 +6513,18 @@ func _build_unit_posture_readability_text(unit: Node) -> String:
 		parts.append(_format_unit_movement_posture_text(String(unit.call("get_movement_posture"))))
 	var aim_readiness: float = _get_unit_aim_readiness_percent(unit)
 	if aim_readiness > 0.01:
-		parts.append("Aim %d%%" % int(round(aim_readiness)))
+		parts.append("Zielbereit %d%%" % int(round(aim_readiness)))
 	return " | ".join(parts)
 
 
 func _format_unit_weapon_posture_text(weapon_posture: String) -> String:
 	match weapon_posture.strip_edges().to_lower():
 		"aimed":
-			return "Aim up"
+			return "Waffe im Anschlag"
 		"ready":
 			return "Waffe bereit"
 		"lowered":
-			return "Waffe unten"
+			return "Waffe gesenkt"
 		_:
 			return weapon_posture.strip_edges()
 
@@ -6519,19 +6532,19 @@ func _format_unit_weapon_posture_text(weapon_posture: String) -> String:
 func _format_unit_movement_posture_text(movement_posture: String) -> String:
 	match movement_posture.strip_edges().to_lower():
 		"engage":
-			return "Bewegung: Kampf"
+			return "Kampfbewegung"
 		"travel":
-			return "Bewegung: Walk"
+			return "Marschiert"
 		"run":
-			return "Bewegung: Run"
+			return "Rennt"
 		"tactical":
-			return "Bewegung: taktisch"
+			return "Taktische Bewegung"
 		"overwatch":
-			return "Bewegung: sichern"
+			return "Sichert"
 		"crouch", "crouch_walk", "crouch_run":
-			return "Bewegung: geduckt"
+			return "Geduckt"
 		"idle":
-			return "Bewegung: idle"
+			return "Steht"
 		_:
 			return movement_posture.strip_edges()
 
