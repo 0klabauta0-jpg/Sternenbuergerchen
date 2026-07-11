@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1113_connected_dropship_pending_feedback_double_submit_guard.md`, `docs/tasks/TASK_1112_connected_parallel_dropship_command_lifecycle_recovery.md`
+- Befund: Jeder schnelle UI-Klick erzeugte eine neue Dropship-Command-ID. Der Host deduplizierte Retransmits, konnte aber zwei verschiedene Klick-Requests desselben Crafts nicht als Doppelsubmit erkennen; die Karte zeigte waehrend des Rundwegs keine stabile Sperre.
+- Aenderung: Der Mission-Controller fuehrt pro Craft einen read-only Pending-Eintrag mit Command-ID, Aktion, Phase, Payload und Acht-Sekunden-Timeout. Derselbe Craft blockiert weitere Requests vor ID/RPC, andere Crafts bleiben bedienbar. Host-OK wartet auf einen passenden autoritativen Snapshot; Reject und Timeout loesen die Sperre.
+- Multiplayer/Performance: Pending ist ausschliesslich lokales Feedback und keine Transportwahrheit. Der Abgleich laeuft ueber die ohnehin eintreffenden Dropship-Karten; `_process()` iteriert nur, solange Eintraege offen sind. Kein SceneTree-Scan, kein neuer RPC und kein per-frame HUD-Rebuild.
+- Risiken/offen: Die funktionale Kartenrueckmeldung ist headless abgesichert. Ein naechster Real-Window-Smoke sollte Text, Disabled-Ton und parallele BLUE-/GOLD-Lesbarkeit sichtbar abnehmen.
+- Lokale Pruefung: TASK_1113 16/16, TASK_1112 13/13, TASK_1111 30/30, TASK_1110 20/20, TASK_399 9/9 und TASK_1104 31/31.
+- Naechster Schritt: TASK_1114 - Connected Dropship Pending Card Visual Polish.
+
 ### TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1112_connected_parallel_dropship_command_lifecycle_recovery.md`, `docs/tasks/TASK_1111_connected_dropship_command_authority_ownership.md`, `scripts/core/simulation_root.gd`

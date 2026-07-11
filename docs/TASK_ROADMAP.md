@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard (implementiert im Arbeitsstand)
+- Grundlage: Der Host konnte gleiche Command-IDs deduplizieren, aber schnelle Kartenklicks erzeugten neue IDs und hatten keinen per-Craft sichtbaren Rundwegzustand.
+- Ergebnis: BLUE blockiert waehrend eines offenen Requests nur seine eigenen Aktionsbuttons; GOLD bleibt parallel bedienbar. Host-OK wird erst vom passenden Snapshot abgeschlossen, Reject und Acht-Sekunden-Timeout geben den Craft wieder frei.
+- Architektur: Der Pending-Eintrag ist lokales read-only Feedback mit Command-ID und erwarteter Payload. Er erzeugt keine Gameplay-Mutation, keinen Sonder-RPC und keinen zweiten Transportstate.
+- Verifikation: TASK_1113 16/16, TASK_1112 13/13, TASK_1111 30/30, TASK_1110 20/20, TASK_399 9/9 und Drei-Peer-Produktlauf TASK_1104 31/31.
+- Naechster Schritt: TASK_1114 - Connected Dropship Pending Card Visual Polish.
+
 ## TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery (implementiert im Arbeitsstand)
 - Grundlage: Zwei Crafts konnten autoritativ bedient werden, aber Retransmits committed mehrfach und Disconnect-/Rebind-Verhalten war nicht parallel verifiziert.
 - Ergebnis: BLUE und GOLD setzen ueber drei echte ENet-Peers parallel LZs. Identische Dropship-Command-IDs committen einmal; der bounded 2048-ID-Cache evicted alte Eintraege. GOLD bleibt nach Disconnect erhalten und kann nach Rebind fortgesetzt werden, ohne BLUE zu aendern.

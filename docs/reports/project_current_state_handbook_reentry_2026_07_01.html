@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1112: zwei Clients bedienen zwei Dropships parallel, Retransmits committen einmal und Craft-State ueberlebt Disconnect/Rebind.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1113: offene Dropship-Requests sind pro Schiff sichtbar, Doppelklicks bleiben lokal stehen und andere Schiffe bleiben parallel bedienbar.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1112</span>
+      <span class="pill good">Letzter Abschluss: TASK_1113</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -134,6 +134,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_multi_dropship_perspective"> Host/Client teilen Transportstate, nicht den lokalen Auswahlfokus</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_dropship_command_authority"> LZ, Approach, Drop und Return werden erst vom Host committed</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.parallel_dropship_command_recovery"> Parallele Craft-Commands sind idempotent und ueberstehen Disconnect/Rebind</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.dropship_pending_double_submit_guard"> Offene Craft-Requests sperren nur das betroffene Schiff bis Result/Snapshot</label>
         </article>
         <article class="card wide">
           <h2>Multiplayer-Payload TASK_1099</h2>
@@ -204,6 +205,11 @@
           <h2>Parallele Dropship-Recovery TASK_1112</h2>
           <p>BLUE und GOLD setzen in einer echten Drei-Peer-Session gleichzeitig unterschiedliche LZs. Host und beide Clients sehen danach beide Karten korrekt. Ein retransmittierter Request mit derselben Command-ID wird nur einmal committed.</p>
           <div class="callout">Nach GOLD-Disconnect bleibt dessen Craft-State beim Host erhalten. Wird GOLD dem verbleibenden Client zugewiesen, kann dieser den Approach fortsetzen, ohne BLUE zu veraendern. Der Dedupe-Cache speichert hoechstens 2048 IDs und keine Payloads.</div>
+        </article>
+        <article class="card wide">
+          <h2>Dropship-Pending-Guard TASK_1113</h2>
+          <p>Ein Klick auf LZ, Approach, Drop oder Return zeigt direkt <code>ACTION -&gt; HOST</code> auf der betroffenen Schiffskarte. Bis Result und passendem Host-Snapshot sind nur deren Aktionsbuttons gesperrt; ein zweites Schiff bleibt gleichzeitig bedienbar.</p>
+          <div class="callout">Ein schneller zweiter Klick erzeugt keine neue Command-ID und keinen RPC. Host-Reject zeigt BLOCKIERT und gibt sofort frei; ohne Antwort greift nach acht Sekunden HOST TIMEOUT. Der Eintrag bleibt read-only und ist niemals Beweis fuer einen erfolgreichen Transport.</div>
         </article>
       </div>
     </section>
@@ -290,15 +296,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1112 stabilisiert parallele Craft-Commands, Retransmits und Assignment-Recovery. Als naechstes sollte TASK_1113 pro Craft einen sichtbaren Pending-Guard setzen, damit schnelle Doppelklicks keine zwei verschiedenen Requests erzeugen und Reject/Timeout den Button sauber freigeben.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1113 stabilisiert die sichtbare Request-Lebensdauer pro Craft. Als naechstes sollte TASK_1114 die Pending-Zeile, Disabled-Zustaende und parallele BLUE-/GOLD-Lesbarkeit in einem echten Fensterlauf abnehmen und knapp polieren.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery (13/13)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard (16/16)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1114 - Connected Dropship Pending Card Visual Polish" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -934,10 +940,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard"
+            recommended_next_task: "TASK_1114 - Connected Dropship Pending Card Visual Polish"
           },
           metadata: {
-            generated_for_task: "TASK_1112",
+            generated_for_task: "TASK_1113",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
