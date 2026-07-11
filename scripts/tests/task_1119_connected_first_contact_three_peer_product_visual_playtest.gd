@@ -73,6 +73,9 @@ func _run() -> void:
 	host_controller.call("set_planning_state", _build_deboarded_state(host_controller, blue_ids, gold_ids, PackedStringArray([String(peer_fireteams.get(1, PackedStringArray())[0])])))
 	host_controller.call("_apply_drop_presence_state_to_units")
 	_prepare_parallel_live_contacts(host_controller)
+	var host_primary_view: Node = host_mission.get_node_or_null("Primary3DView")
+	_assert(_fireteam_projection_is_readable(host_controller, host_primary_view, "blue"), "BLUE First Contact fixture projects as a readable two-dimensional formation")
+	_assert(_fireteam_projection_is_readable(host_controller, host_primary_view, "gold"), "GOLD First Contact fixture projects as a readable two-dimensional formation")
 	host_controller.call("_apply_fireteams_fire_rule_locally", PackedStringArray(["blue", "gold"]), "free", true)
 	_assert(bool(host_controller.call("_apply_default_fireteam_behavior", "blue", 1)), "Host activates BLUE contact behavior")
 	_assert(bool(host_controller.call("_apply_default_fireteam_behavior", "gold", 1)), "Host activates GOLD contact behavior")
@@ -135,6 +138,7 @@ func _run() -> void:
 		}
 		print("TASK1119 %s FRAME DEBUG %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
 		_assert(float(primary_snapshot.get("camera_size", 99.0)) >= 24.0 and float(primary_snapshot.get("camera_size", 99.0)) <= 30.0 and not String(controller.get("_connected_first_contact_world_frame_signature")).is_empty(), "%s product world frames local Fireteam and Contact once: %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
+		_assert(int(primary_snapshot.get("dropship_visual_count", -1)) == 0, "%s product Contact world removes completed empty return Dropships" % fireteam_id.to_upper())
 		perspective_signatures.append(String(perspective.get("perspective_signature", "")))
 	_assert(perspective_signatures.size() == 2 and not perspective_signatures[0].is_empty() and perspective_signatures[0] != perspective_signatures[1], "Product peers expose distinct stable HUD perspectives")
 	var active_client_index: int = int(index_by_fireteam.get("gold", -1)) if int(index_by_fireteam.get("gold", -1)) != 0 else int(index_by_fireteam.get("blue", -1))
@@ -188,10 +192,46 @@ func _prepare_parallel_live_contacts(controller: Node) -> void:
 
 func _place_fireteam(controller: Node, fireteam_id: String, center: Vector2) -> void:
 	var units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
-	var offsets: Array[Vector2] = [Vector2.ZERO, Vector2(0.0, 32.0), Vector2(-32.0, 0.0), Vector2(-32.0, 32.0)]
+	var offsets: Array[Vector2] = [Vector2(-32.0, -32.0), Vector2(32.0, -32.0), Vector2(-32.0, 32.0), Vector2(32.0, 32.0)]
 	for index in range(mini(units.size(), offsets.size())):
 		if units[index] is Node2D:
 			(units[index] as Node2D).global_position = center + offsets[index]
+
+
+func _fireteam_projection_is_readable(controller: Node, view: Node, fireteam_id: String) -> bool:
+	if view == null or not view.has_method("world_to_screen_position"):
+		return false
+	var screen_positions: Array[Vector2] = []
+	for unit_variant in Array(controller.call("_get_fireteam_units", fireteam_id, true)):
+		var unit := unit_variant as Node2D
+		if unit != null:
+			screen_positions.append(Vector2(view.call("world_to_screen_position", unit.global_position)))
+	if screen_positions.size() < 3:
+		print("TASK1119 FORMATION DEBUG %s" % JSON.stringify({"fireteam_id": fireteam_id, "unit_count": screen_positions.size()}))
+		return false
+	var min_x: float = INF
+	var max_x: float = -INF
+	var min_y: float = INF
+	var max_y: float = -INF
+	var minimum_pair_distance: float = INF
+	for first_index in range(screen_positions.size()):
+		var point: Vector2 = screen_positions[first_index]
+		min_x = minf(min_x, point.x)
+		max_x = maxf(max_x, point.x)
+		min_y = minf(min_y, point.y)
+		max_y = maxf(max_y, point.y)
+		for second_index in range(first_index + 1, screen_positions.size()):
+			minimum_pair_distance = minf(minimum_pair_distance, point.distance_to(screen_positions[second_index]))
+	var metrics: Dictionary = {
+		"fireteam_id": fireteam_id,
+		"minimum_pair_distance": minimum_pair_distance,
+		"horizontal_span": max_x - min_x,
+		"vertical_span": max_y - min_y,
+	}
+	var readable: bool = minimum_pair_distance >= 18.0 and float(metrics["horizontal_span"]) >= 18.0 and float(metrics["vertical_span"]) >= 18.0
+	if not readable:
+		print("TASK1119 FORMATION DEBUG %s" % JSON.stringify(metrics))
+	return readable
 
 
 func _has_fireteam_event(events: Array, fireteam_id: String) -> bool:
@@ -220,15 +260,19 @@ func _capture_product_perspective(lobbies: Array, target_index: int, path: Strin
 		mission.get_node("SimulationRoot").process_mode = Node.PROCESS_MODE_DISABLED
 		mission.get_node("CombatLoopDriver").process_mode = Node.PROCESS_MODE_DISABLED
 		var is_target: bool = index == target_index
-		lobby.visible = true
+		lobby.visible = is_target
 		if mission is Node2D:
 			(mission as Node2D).visible = is_target
 		var primary_view: CanvasLayer = mission.get_node_or_null("Primary3DView") as CanvasLayer
 		if primary_view != null:
 			primary_view.visible = is_target
+			var viewport_container := primary_view.get("_viewport_container") as Control
+			if viewport_container != null:
+				viewport_container.visible = is_target
 		var tactical_ui: CanvasLayer = mission.get_node_or_null("TacticalUI") as CanvasLayer
 		if tactical_ui != null:
 			tactical_ui.visible = is_target
+	_assert(_capture_visibility_is_isolated(lobbies, target_index), "Product capture isolates the selected peer root without pausing other peers")
 	var target_mission: Node = (lobbies[target_index] as Node).get("_active_mission")
 	target_mission.get_node("TacticalController").call("_update_ui")
 	var full_frame_dirty := ColorRect.new()
@@ -243,11 +287,65 @@ func _capture_product_perspective(lobbies: Array, target_index: int, path: Strin
 	root.size = capture_size
 	for _frame in range(8):
 		await process_frame
+	_isolate_capture_viewport_geometry(lobbies, target_index)
+	_assert(_capture_layers_are_isolated(lobbies, target_index), "Product capture keeps non-target CanvasLayers hidden through the settle frames")
+	_assert(_capture_viewport_containers_are_isolated(lobbies, target_index), "Product capture isolates the embedded tactical SubViewportContainer")
+	_assert(_capture_viewport_geometry_is_isolated(lobbies, target_index), "Product capture moves non-target SubViewport textures outside the evidence frame")
 	RenderingServer.force_draw(true)
 	await process_frame
 	var image: Image = root.get_texture().get_image()
 	var error: Error = image.save_png(path) if image != null else ERR_CANT_CREATE
 	_assert(image != null and image.get_width() == 1920 and image.get_height() == 1080 and error == OK, "%s is a valid FullHD product capture" % path.get_file())
+
+
+func _capture_visibility_is_isolated(lobbies: Array, target_index: int) -> bool:
+	for index in range(lobbies.size()):
+		if bool((lobbies[index] as Control).visible) != (index == target_index):
+			return false
+	return true
+
+
+func _capture_layers_are_isolated(lobbies: Array, target_index: int) -> bool:
+	for index in range(lobbies.size()):
+		var mission: Node = (lobbies[index] as Node).get("_active_mission")
+		for layer_name in ["Primary3DView", "TacticalUI"]:
+			var layer := mission.get_node_or_null(layer_name) as CanvasLayer
+			if layer != null and layer.visible != (index == target_index):
+				return false
+	return true
+
+
+func _capture_viewport_containers_are_isolated(lobbies: Array, target_index: int) -> bool:
+	for index in range(lobbies.size()):
+		var mission: Node = (lobbies[index] as Node).get("_active_mission")
+		var primary_view: Node = mission.get_node_or_null("Primary3DView")
+		var viewport_container := primary_view.get("_viewport_container") as Control if primary_view != null else null
+		if viewport_container != null and viewport_container.visible != (index == target_index):
+			return false
+	return true
+
+
+func _capture_viewport_geometry_is_isolated(lobbies: Array, target_index: int) -> bool:
+	for index in range(lobbies.size()):
+		if index == target_index:
+			continue
+		var mission: Node = (lobbies[index] as Node).get("_active_mission")
+		var primary_view: Node = mission.get_node_or_null("Primary3DView")
+		var viewport_container := primary_view.get("_viewport_container") as Control if primary_view != null else null
+		if viewport_container != null and viewport_container.position.x < float(root.size.x * 2):
+			return false
+	return true
+
+
+func _isolate_capture_viewport_geometry(lobbies: Array, target_index: int) -> void:
+	for index in range(lobbies.size()):
+		if index == target_index:
+			continue
+		var mission: Node = (lobbies[index] as Node).get("_active_mission")
+		var primary_view: Node = mission.get_node_or_null("Primary3DView")
+		var viewport_container := primary_view.get("_viewport_container") as Control if primary_view != null else null
+		if viewport_container != null:
+			viewport_container.position = Vector2(float(root.size.x * 3), 0.0)
 
 
 func _create_lobby_triple() -> Dictionary:

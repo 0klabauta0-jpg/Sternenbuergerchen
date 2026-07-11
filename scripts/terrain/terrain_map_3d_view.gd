@@ -2090,6 +2090,121 @@ func get_runtime_frame_timing_debug_snapshot() -> Dictionary:
 	return _runtime_frame_timing_debug_snapshot.duplicate(true)
 
 
+func get_map_visual_bounds_snapshot() -> Dictionary:
+	_ensure_nodes()
+	var entries: Array = []
+	var outside_map_bounds_count: int = 0
+	var cell_size: float = _get_3d_cell_size()
+	var footprint_allowance: float = cell_size * 0.1
+	var footprint_min := Vector2((-cell_size * 0.5) - footprint_allowance, (-cell_size * 0.5) - footprint_allowance)
+	var footprint_max := Vector2(
+		(maxf(float(_grid_size.x - 1), 0.0) * cell_size) + (cell_size * 0.5) + footprint_allowance,
+		(maxf(float(_grid_size.y - 1), 0.0) * cell_size) + (cell_size * 0.5) + footprint_allowance
+	)
+	if _map_root != null:
+		for child_variant in _map_root.get_children():
+			var child := child_variant as Node3D
+			if child == null:
+				continue
+			var bounds: Dictionary = _get_local_visual_bounds(child)
+			if not bool(bounds.get("valid", false)):
+				continue
+			var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+			var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+			var outside_map_bounds: bool = (
+				min_value.x < footprint_min.x
+				or min_value.z < footprint_min.y
+				or max_value.x > footprint_max.x
+				or max_value.z > footprint_max.y
+			)
+			if outside_map_bounds:
+				outside_map_bounds_count += 1
+			entries.append({
+				"node_name": String(child.name),
+				"visual_kind": "asset" if String(child.name).begins_with("Asset_") else "map_visual",
+				"position": child.position,
+				"screen_center": _camera.unproject_position((min_value + max_value) * 0.5) if _camera != null else Vector2.ZERO,
+				"bounds_min": min_value,
+				"bounds_max": max_value,
+				"bounds_size": max_value - min_value,
+				"outside_map_bounds": outside_map_bounds,
+			})
+	return {
+		"read_only": true,
+		"hotpath": false,
+		"grid_size": _grid_size,
+		"cell_size": cell_size,
+		"footprint_min": footprint_min,
+		"footprint_max": footprint_max,
+		"outside_map_bounds_count": outside_map_bounds_count,
+		"entries": entries,
+		"height_edge_entries": _height_edge_visual_entries.duplicate(true),
+		"registered_screen_entries": _build_registered_map_visual_screen_entries(),
+		"world_mesh_entries": _build_world_mesh_diagnostic_entries(),
+	}
+
+
+func _build_registered_map_visual_screen_entries() -> Array:
+	var result: Array = []
+	if _camera == null:
+		return result
+	for entry_variant in _surface_visual_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var grid_position: Vector2 = Vector2(entry.get("grid_position", Vector2.ZERO))
+		var world_y: float = float(entry.get("world_y", entry.get("surface_y", 0.0)))
+		result.append({
+			"visual_kind": "surface",
+			"visual_id": String(entry.get("visual_id", entry.get("model_key", ""))),
+			"grid_position": grid_position,
+			"screen_position": _camera.unproject_position(_grid_to_3d_position(grid_position, world_y)),
+			"visual_height": float(entry.get("visual_height", 0.0)),
+		})
+	for entry_variant in _height_edge_visual_entries:
+		var entry: Dictionary = Dictionary(entry_variant)
+		var anchor_grid_position: Vector2 = Vector2(entry.get("anchor_grid_position", entry.get("grid_position", Vector2.ZERO)))
+		var center_y: float = (float(entry.get("base_y", 0.0)) + float(entry.get("top_y", 0.0))) * 0.5
+		result.append({
+			"visual_kind": "height_edge",
+			"visual_id": String(entry.get("visual_type_id", "")),
+			"grid_position": Vector2(entry.get("grid_position", Vector2.ZERO)),
+			"anchor_grid_position": anchor_grid_position,
+			"screen_position": _camera.unproject_position(_grid_to_3d_position(anchor_grid_position, center_y)),
+			"height_span": float(entry.get("height_span", 0.0)),
+		})
+	return result
+
+
+func _build_world_mesh_diagnostic_entries() -> Array:
+	var result: Array = []
+	if _world_root == null or _camera == null:
+		return result
+	_collect_world_mesh_diagnostic_entries(_world_root, Transform3D.IDENTITY, result)
+	return result
+
+
+func _collect_world_mesh_diagnostic_entries(node: Node, parent_transform: Transform3D, entries: Array) -> void:
+	var current_transform: Transform3D = parent_transform
+	var node_3d := node as Node3D
+	if node_3d != null:
+		current_transform = parent_transform * node_3d.transform
+	var mesh_instance := node as MeshInstance3D
+	if mesh_instance != null and mesh_instance.mesh != null and mesh_instance.is_visible_in_tree():
+		var bounds: Dictionary = {"valid": false, "min": Vector3.ZERO, "max": Vector3.ZERO}
+		_merge_transformed_aabb(bounds, current_transform, mesh_instance.get_aabb())
+		if bool(bounds.get("valid", false)):
+			var min_value: Vector3 = Vector3(bounds.get("min", Vector3.ZERO))
+			var max_value: Vector3 = Vector3(bounds.get("max", Vector3.ZERO))
+			entries.append({
+				"node_path": String(mesh_instance.get_path()),
+				"screen_center": _camera.unproject_position((min_value + max_value) * 0.5),
+				"bounds_min": min_value,
+				"bounds_max": max_value,
+				"bounds_size": max_value - min_value,
+			})
+	for child in node.get_children():
+		_collect_world_mesh_diagnostic_entries(child, current_transform, entries)
+
+
 func get_render_snapshot() -> Dictionary:
 	_render_snapshot_request_count += 1
 	var render_budget_by_category: Dictionary = _build_render_budget_by_category()

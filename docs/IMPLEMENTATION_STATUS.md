@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1123 - Connected First Contact Unit Formation and World Residue Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1123_connected_first_contact_unit_formation_world_residue_readability.md`, `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `docs/tasks/TASK_1120_connected_first_contact_event_log_dedupe_hud_declutter.md`
+- Befund: Die sichtbare Fireteam-Reihe stammte aus einer isometrisch unguenstigen 32-Pixel-Fixture-Aufstellung, nicht aus der produktiven Formation. Abgeschlossene leere `to_fob`-Karten wurden nur im HUD, nicht im World-Visual-Build gefiltert. Der Drei-Peer-Capture liess Nicht-Ziel-Subviewport-Texturen im Belegframe.
+- Aenderung: Der Produktfixture nutzt ein symmetrisches Viererraster und prueft die projizierte Mindestdistanz fuer die realen Drei-/Vierer-Roster. Der bestehende Empty-Return-Contract filtert jetzt auch World-Dropship-Visuals im Contact Focus. Capture-Lobby, CanvasLayer und SubViewportContainer werden ohne Pausieren der Peers isoliert. Ein expliziter read-only Visualdiagnose-Snapshot liefert Bounds, registrierte Surface-/HeightEdge-Zellen und Meshpfade nur auf Anfrage.
+- Multiplayer/Performance: Kein Command, Effect, RPC, Snapshotfeld oder Gameplay-State. Der Dropship-Filter verwendet vorhandene Kartenwahrheit; Diagnose laeuft nicht im Render-Snapshot oder Frame-Hotpath. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Ein weisser Doppelblock bleibt im realen Contact-Capture trotz leerem Dropship-World-Snapshot und Ziel-Peer-Isolation sichtbar. Er ist weder als normales Zielwelt-Mesh noch als registriertes Terrain-/HeightEdge-Visual am Bildort zuordenbar und braucht einen eigenen kleinen Root-/Compositing-Slice statt spekulativer Runtime-Loeschung.
+- Lokale Pruefung: TASK_1123 9/9, TASK_1119 27/27 headless und bis 32/32 Real Window, TASK_1120 11/11, TASK_1122 11/11, TASK_423 12/12, TASK_446 30/30, TASK_475 17/17, TASK_1104 31/31 und TASK_222 82/82.
+- Naechster Schritt: TASK_1124 - Connected Contact World Root and Compositing Residue Isolation.
+
 ### TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1122_connected_mission_world_camera_exposure_contact_cluster_readability.md`, `docs/tasks/TASK_1121_connected_first_contact_tactical_world_readability.md`, `docs/dev/tactical_decision_clarity_contract.md`

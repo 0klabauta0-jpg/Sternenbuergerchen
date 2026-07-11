@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1123 - Connected First Contact Unit Formation and World Residue Readability (implementiert im Arbeitsstand)
+- Grundlage: Der Produktcapture stapelte Fixture-Units entlang einer isometrischen Tiefenachse. Leere abgeschlossene Return-Crafts verschwanden nur als HUD-Karten. Mehrere eingebettete Peer-Subviewports waren im Einprozess-Capture nicht vollstaendig isoliert.
+- Ergebnis: Die reale Drei-/Viereraufstellung wird mit projizierter Mindestdistanz geprueft. Abgeschlossene leere `to_fob`-Crafts erzeugen im Contact Focus weder Karte noch World-Visual. Capture-Lobby, CanvasLayer und SubViewportContainer werden pro Peer isoliert; ein read-only Diagnosevertrag liefert Visual-Bounds und CPU-Registrierungsdaten auf Anfrage.
+- Architektur: Keine neue Gameplay-Wahrheit, kein RPC, Command, Effect oder Snapshotfeld. Visualdiagnose ist explizit und nicht im Hotpath; Transportfilter liest vorhandene Kartenwahrheit.
+- Verifikation: TASK_1123 9/9, TASK_1119 27/27 headless und bis 32/32 Real Window, TASK_1120 11/11, TASK_1122 11/11, TASK_423 12/12, TASK_446 30/30, TASK_475 17/17, TASK_1104 31/31 und Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1124 - Connected Contact World Root and Compositing Residue Isolation. Der verbleibende weisse Doppelblock wird als eigener sichtbarer Befund verfolgt, nicht spekulativ aus Runtime-State geloescht.
+
 ## TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability (implementiert im Arbeitsstand)
 - Grundlage: Die erstmals sichtbare Produktwelt war ueberstrahlt, zu weit gerahmt und am Kontaktpunkt mit mehreren globalen Fire-/Taktiklabels ueberladen. Client-Contactdaten loesten keinen Weltrefresh aus; fortlaufende Contact-Reports konnten an der Fuenf-Sekunden-Grenze geteilt werden.
 - Ergebnis: Filmic-Tonemapping erhaelt helle Flaechen. BLUE und GOLD rahmen lokales Fireteam plus Kontakt einmalig bei Camera-Size 24. Nur das neueste lokale Fire-Event wird visualisiert; redundante World-Taktiktexte treten zurueck. Die Display-Dedupe folgt einer kontinuierlichen gleitenden Kette.

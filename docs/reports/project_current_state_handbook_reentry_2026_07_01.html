@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1122: Der echte Mehrspieler-Erstkontakt ist lokal gerahmt, heller Assetdetail bleibt erhalten und redundante globale Feuer-/Taktiklabels treten hinter die aktuelle Entscheidung zurueck.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1123: Der Mehrspieler-Erstkontakt prueft lesbare Fireteam-Abstaende, entfernt abgeschlossene leere Rueckflugmodelle und isoliert Belegbilder pro Peer.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1122</span>
+      <span class="pill good">Letzter Abschluss: TASK_1123</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -261,6 +261,11 @@
           <p>Filmic-Tonemapping erhaelt Kanten und Flaechen heller Stationsassets. Beim ersten Kontakt rahmt jeder aktive Peer einmalig sein Fireteam und den gemeldeten Gegner, ohne spaeteres manuelles Panning zu ueberschreiben.</p>
           <div class="callout success">BLUE und GOLD zeigen nur ihr neuestes relevantes Feuerereignis in der Welt. Client-Contact-Refreshes sind signaturgedrosselt, die Dedupe arbeitet gleitend und alle Multiplayer-/Performance-Grenzen bleiben gruen.</div>
         </article>
+        <article class="card wide">
+          <h2>Fireteam-Abstand Und Transportreste TASK_1123</h2>
+          <p>Der sichtbare Einheitenstapel war kein Fehler der produktiven Formation, sondern eine unguenstige Testaufstellung entlang der isometrischen Tiefenachse. Der Produktlauf prueft jetzt alle vorhandenen Mitglieder mit Mindestabstand und Spannweite in beiden Bildschirmachsen.</p>
+          <div class="callout success">Leere abgeschlossene <code>to_fob</code>-Crafts verschwinden jetzt auch aus der 3D-Welt. Lobby, CanvasLayer und SubViewportContainer werden fuer BLUE-/GOLD-Belegbilder getrennt. TASK_1123 9/9, Drei-Peer 27/27 headless, Multiplayer 31/31 und Performance 82/82.</div>
+        </article>
       </div>
     </section>
 
@@ -295,6 +300,7 @@
         <article class="card full">
           <h2>Aktuelle Reibungen</h2>
           <ul>
+            <li><strong>World-Residue offen:</strong> Ein weisser Doppelblock bleibt im Contact-Capture sichtbar. Dropship-Worldcount ist null; normales Zielwelt-Mesh sowie registrierte Surface-/HeightEdge-Zelle sind am Bildort ausgeschlossen. TASK_1124 isoliert den verbleibenden Root-/Compositing-Pfad.</li>
             <li><strong>Sichttest offen:</strong> Headless-Verifier sind gruen, aber der echte Zwei-Fenster-Blick ist noch nicht abgenommen.</li>
             <li><strong>Preview-Sprache:</strong> Ohne klares Wort <code>PREVIEW</code> kann ein geplanter Move wie ein laufender Move wirken.</li>
           <li><strong>Host/Client:</strong> Beide Fenster sehen denselben naechsten Auftrag; die Fireteam-Karten-Relation ist jetzt als OWN/VIEW/FT ? lesbar.</li>
@@ -346,15 +352,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1122 rahmt den echten Host-/BLUE-/GOLD-Erstkontakt lokal, kalibriert die helle 3D-Welt und reduziert globale Welttexte auf die relevante Peer-Perspektive. Als naechstes soll TASK_1123 die noch gestapelte Fireteam-Formation lesbar auffaechern und isolierte Off-Map-Assetreste aus dem sichtbaren Fokus entfernen.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1123 trennt Fixture-Geometrie von produktiver Formation, prueft projizierte Abstaende, entfernt abgeschlossene leere Return-Crafts auch aus der Welt und isoliert Peer-Subviewports im Capture. Als naechstes verfolgt TASK_1124 ausschliesslich den verbleibenden weissen Doppelblock bis zu seinem echten Root-/Compositing-Ursprung.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability (11/11, real window 24/24 je Peer)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1123 - Connected First Contact Unit Formation and World Residue Readability" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1123 - Connected First Contact Unit Formation and World Residue Readability (9/9, Drei-Peer 27/27)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1124 - Connected Contact World Root and Compositing Residue Isolation" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -990,7 +996,7 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1123 - Connected First Contact Unit Formation and World Residue Readability"
+            recommended_next_task: "TASK_1124 - Connected Contact World Root and Compositing Residue Isolation"
           },
           metadata: {
             generated_for_task: "TASK_1122",
