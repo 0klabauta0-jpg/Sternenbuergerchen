@@ -13,6 +13,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1089 - Release Trace Observer-Effect Guard (implementiert im Arbeitsstand)
+- Grundlage: Der echte TASK-1088-Release war mit 9.702 ms bereits schnell, aber mehrere erfolgreiche Trace-Stufen lasen erneut breite Command-Feedback- und Visible-Status-Snapshots. Die Messung verlaengerte damit den gemessenen Pfad selbst.
+- Ergebnis: Nur Pre-GO liest im Erfolgsfall noch einen vollen Controller-Snapshot. Spaetere Stufen verwenden vorhandene kompakte CONTACT-FIRE-Evidence. Der vergleichbare Headless-Pfad sank von 11.527 auf 8.856 ms; CONTACT FIRE, echte FireEvent-ID und Multiplayer-Grenzen bleiben gruen.
+- Naechster Schritt: Echter Godot-4.6.2-Releasevergleich, dann Zwei-Spieler-Station-Route-Playtest fuer sichtbare Spiel- und Multiplayer-Reibungen. Keine weitere Trace-Optimierung ohne neuen belegten Spieler-Nutzen.
+
 ## TASK_1088 - Release Contact/Fire Ready-Time Pass (implementiert im Arbeitsstand)
 - Grundlage: Der TASK-1087-Release-Trace zeigte 7.996 ms zwischen Kontaktaufbau und FireEvent-Evidence. Feingranulare Stufen belegten einen 11.068-ms-Review-Snapshot-Hotpath, waehrend Contact-Tracking, LOS und FireEvent nur einstellige Millisekunden benoetigten.
 - Ergebnis: Der Deep-Link nutzt fuer den unmittelbaren sichtbaren Feuerwechsel einen kompakten read-only Snapshot aus vorhandener FireEvent- und Contact-Diagnostik. Die Evidence-Stufe sank auf 2 ms, der komplette vergleichbare Headless-Pfad von 20.641 auf 11.527 ms. Der frische Godot-4.6.2-Release erreicht `deeplink_final / applied` nach 9.702 ms und zeigt CONTACT FIRE weiter in #17/#18/#19. Alle Combat-, CONTACT-FIRE-, ROE- und Multiplayer-Regressionen bleiben gruen.
