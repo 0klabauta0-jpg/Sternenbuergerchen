@@ -462,27 +462,27 @@ theme_override_constants/v_separation = 6
 
 [node name="MoveButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
 focus_mode = 0
-text = "Move [1]"
+text = "Bewegen [1]"
 
 [node name="HoldButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
 focus_mode = 0
-text = "Hold [2]"
+text = "Halten [2]"
 
 [node name="FlankButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
 focus_mode = 0
-text = "Flank [3]"
+text = "Flanke [3]"
 
 [node name="TakeButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
 focus_mode = 0
-text = "Take [4]"
+text = "Nehmen [4]"
 
 [node name="TargetButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
 focus_mode = 0
-text = "Target"
+text = "Ziel"
 
 [node name="ClearTargetButton" type="Button" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid"]
 focus_mode = 0
-text = "Clear"
+text = "Leeren"
 
 [node name="FireteamPanel" type="PanelContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow"]
 custom_minimum_size = Vector2(432, 146)
@@ -536,7 +536,7 @@ text = "TEAM ALL | PHASE APPROACH\nTARGET 320, 180\nLAST AWAITING INPUT"
 autowrap_mode = 3
 
 [node name="HotkeyLegendLabel" type="Label" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamInfoScroll/FireteamInfoVBox"]
-text = "LMB Select | RMB Waypoint | CTRL+LMB Add | Drag Lasso | DEL Waypoint | 1 Move | 2 Hold | 3 Flank | 4 Take | Q/E Team | R/F Edit Phase | G Next Phase"
+text = "LMB Auswahl | RMB Wegpunkt | CTRL+LMB Hinzu | Ziehen Auswahl | DEL Wegpunkt | 1 Bewegen | 2 Halten | 3 Flanke | 4 Nehmen | Q/E Team"
 autowrap_mode = 3
 
 [node name="FireteamCardsScroll" type="ScrollContainer" parent="TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow"]

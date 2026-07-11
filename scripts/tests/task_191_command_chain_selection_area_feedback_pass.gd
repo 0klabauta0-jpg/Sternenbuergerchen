@@ -105,7 +105,7 @@ func _test_area_take_and_engage_feedback_is_consistent() -> void:
 	await _wait_frames(2)
 	feedback = Dictionary(controller.call("get_command_feedback_snapshot"))
 	var multi_text: String = String(feedback.get("selected_order_text", ""))
-	_assert(multi_text.contains("BLUE AREA TAKE") and multi_text.contains("GOLD AREA ATTACK"), "Multi-selection #17 feedback keeps Area command ownership clear")
+	_assert(multi_text.contains("BLUE AREA TAKE") and multi_text.contains("GOLD AREA ENGAGE"), "Multi-selection #17 feedback keeps serialized Area command ownership clear: %s" % multi_text)
 	_assert(not multi_text.contains("Zentrum") and not multi_text.contains("Debug"), "Area feedback avoids long debug wording")
 	scene.queue_free()
 	await process_frame

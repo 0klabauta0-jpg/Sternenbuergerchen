@@ -177,6 +177,15 @@ const FIRETEAM_MEMBER_STATUS_ROW_SCRIPT: GDScript = preload("res://scripts/ui/fi
 const STANCE_CAUTIOUS_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/target_marker.png")
 const STANCE_NORMAL_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/move_prompt.png")
 const STANCE_AGGRESSIVE_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/sword_attack.png")
+const COMMAND_MOVE_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/move_prompt.png")
+const COMMAND_HOLD_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/target_marker.png")
+const COMMAND_FLANK_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/pointer_triangle.png")
+const COMMAND_TAKE_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/sword_attack.png")
+const COMMAND_TARGET_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/target_marker.png")
+const FIRE_RULE_HOLD_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/target_marker.png")
+const FIRE_RULE_RETURN_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/pointer_triangle.png")
+const FIRE_RULE_FREE_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/sword_attack.png")
+const FIRE_RULE_SUPPRESS_ICON: Texture2D = preload("res://Assets/curated/kenney/tactical_icons/dice_sword_attack.png")
 const DROPSHIP_TEXTURE_NE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NE.png")
 const DROPSHIP_TEXTURE_NW: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_NW.png")
 const DROPSHIP_TEXTURE_SE: Texture2D = preload("res://Assets/kenney_space-kit/Isometric/craft_speederB_SE.png")
@@ -415,6 +424,7 @@ signal planning_state_changed(planning_state)
 
 var preview_mode: bool = false
 var _tactical_ui_visible: bool = true
+var _command_matrix_icon_cache: Dictionary = {}
 var _primary_view_bridge = MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT.new()
 var _dropship_effect_adapter = MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT.new()
 var _mission_fireteam_runtime_state = MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT.new()
@@ -3931,7 +3941,7 @@ func _update_ui() -> void:
 
 	var target_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton") as Button
 	if target_button != null:
-		target_button.text = "Click Map..." if _is_target_placement_armed else "Target"
+		target_button.text = "ST" if _is_target_placement_armed else "ZL"
 
 	var call_dropship_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button
 	if call_dropship_button != null:
@@ -12819,8 +12829,8 @@ func _get_fire_rule_button_specs() -> Array:
 			"rule": TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_HOLD,
 			"name": "FireRuleHoldButton",
 			"path": FIRE_RULE_HOLD_BUTTON_PATH,
-			"text": "HF",
-			"tooltip": "Hold Fire: kein freiwilliges Feuer",
+			"text": "FH",
+			"tooltip": "Feuer halten: kein freiwilliges Feuer.",
 			"help_id": "mission.rule.fire_rule_hold",
 			"slot": 11,
 		},
@@ -12828,8 +12838,8 @@ func _get_fire_rule_button_specs() -> Array:
 			"rule": TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_RETURN,
 			"name": "FireRuleReturnButton",
 			"path": FIRE_RULE_RETURN_BUTTON_PATH,
-			"text": "RF",
-			"tooltip": "Return Fire: nur nach Beschuss antworten",
+			"text": "AF",
+			"tooltip": "Antwortfeuer: nur nach gegnerischem Beschuss feuern.",
 			"help_id": "mission.rule.fire_rule_return",
 			"slot": 12,
 		},
@@ -12837,8 +12847,8 @@ func _get_fire_rule_button_specs() -> Array:
 			"rule": TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_FREE,
 			"name": "FireRuleFreeButton",
 			"path": FIRE_RULE_FREE_BUTTON_PATH,
-			"text": "FW",
-			"tooltip": "Fire at Will: sichtbare Ziele frei bekaempfen",
+			"text": "FF",
+			"tooltip": "Feuer frei: sichtbare Gegner selbststaendig bekaempfen.",
 			"help_id": "mission.rule.fire_rule_free",
 			"slot": 13,
 		},
@@ -12846,8 +12856,8 @@ func _get_fire_rule_button_specs() -> Array:
 			"rule": TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_SUPPRESS,
 			"name": "FireRuleSuppressButton",
 			"path": FIRE_RULE_SUPPRESS_BUTTON_PATH,
-			"text": "SUP",
-			"tooltip": "Suppress: feuerbereit fuer Unterdrueckung",
+			"text": "UN",
+			"tooltip": "Unterdruecken: Feuer fuer Unterdrueckungsbefehle bereithalten.",
 			"help_id": "mission.rule.fire_rule_suppress",
 			"slot": 14,
 		},
@@ -14560,19 +14570,19 @@ func _apply_button_corner_marker(path: String, marker_text: String) -> void:
 
 func _apply_drop_light_hud_button_labels() -> void:
 	var command_labels: Dictionary = {
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton": "Move",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton": "Hold",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "Flank",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "Take",
-		DOOR_BREACH_BUTTON_PATH: "Breach",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "Pick" if _is_target_placement_armed else "Target",
-		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "Clear",
-		DELETE_ORDER_BUTTON_PATH: "Del",
-		SORT_COMMAND_BUTTON_PATH: "Sort",
-		FIRE_RULE_HOLD_BUTTON_PATH: "HF",
-		FIRE_RULE_RETURN_BUTTON_PATH: "RF",
-		FIRE_RULE_FREE_BUTTON_PATH: "FW",
-		FIRE_RULE_SUPPRESS_BUTTON_PATH: "SUP",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton": "BW",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton": "HL",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "FL",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "NM",
+		DOOR_BREACH_BUTTON_PATH: "Sturm",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "ST" if _is_target_placement_armed else "ZL",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "Leeren",
+		DELETE_ORDER_BUTTON_PATH: "LOE",
+		SORT_COMMAND_BUTTON_PATH: "ORD",
+		FIRE_RULE_HOLD_BUTTON_PATH: "FH",
+		FIRE_RULE_RETURN_BUTTON_PATH: "AF",
+		FIRE_RULE_FREE_BUTTON_PATH: "FF",
+		FIRE_RULE_SUPPRESS_BUTTON_PATH: "UN",
 		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/GoCommandMatrixButton": "GO",
 		WAYPOINT_ERASE_BUTTON_PATH: "WP-",
 	}
@@ -14581,7 +14591,8 @@ func _apply_drop_light_hud_button_labels() -> void:
 		if button == null:
 			continue
 		button.text = String(command_labels[path_variant])
-		button.tooltip_text = String(command_labels[path_variant])
+		button.tooltip_text = _get_command_matrix_player_tooltip(String(path_variant), String(command_labels[path_variant]))
+	_apply_command_matrix_player_icons()
 
 	var lz_button := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton") as Button
 	if lz_button != null:
@@ -14593,6 +14604,57 @@ func _apply_drop_light_hud_button_labels() -> void:
 		drop_button.text = _build_drop_light_drop_button_label()
 		drop_button.tooltip_text = "Call dropship"
 	_apply_command_button_markers()
+
+
+func _get_command_matrix_player_tooltip(path: String, fallback: String) -> String:
+	var tooltip_by_path: Dictionary = {
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton": "Bewegen: Zielposition planen. Ausfuehrung erst mit GO.",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton": "Halten: Position verteidigen und Winkel sichern.",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": "Flanke: seitlichen Anmarsch auf das gewaehlte Ziel planen.",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": "Nehmen: Zielbereich besetzen und sichern.",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": "Ziel: Angriffsbereich auswaehlen.",
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton": "Leeren: ausgewaehltes Ziel entfernen.",
+		FIRE_RULE_HOLD_BUTTON_PATH: "Feuer halten: kein freiwilliges Feuer.",
+		FIRE_RULE_RETURN_BUTTON_PATH: "Antwortfeuer: nur nach gegnerischem Beschuss feuern.",
+		FIRE_RULE_FREE_BUTTON_PATH: "Feuer frei: sichtbare Gegner selbststaendig bekaempfen.",
+		FIRE_RULE_SUPPRESS_BUTTON_PATH: "Unterdruecken: Feuer fuer Unterdrueckungsbefehle bereithalten.",
+	}
+	return String(tooltip_by_path.get(path, fallback))
+
+
+func _apply_command_matrix_player_icons() -> void:
+	var icons_by_path: Dictionary = {
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/MoveButton": COMMAND_MOVE_ICON,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/HoldButton": COMMAND_HOLD_ICON,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/FlankButton": COMMAND_FLANK_ICON,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TakeButton": COMMAND_TAKE_ICON,
+		"../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton": COMMAND_TARGET_ICON,
+		FIRE_RULE_HOLD_BUTTON_PATH: FIRE_RULE_HOLD_ICON,
+		FIRE_RULE_RETURN_BUTTON_PATH: FIRE_RULE_RETURN_ICON,
+		FIRE_RULE_FREE_BUTTON_PATH: FIRE_RULE_FREE_ICON,
+		FIRE_RULE_SUPPRESS_BUTTON_PATH: FIRE_RULE_SUPPRESS_ICON,
+	}
+	for path_variant in icons_by_path:
+		var button := get_node_or_null(String(path_variant)) as Button
+		if button == null:
+			continue
+		button.icon = _get_compact_command_matrix_icon(String(path_variant), icons_by_path[path_variant] as Texture2D)
+		button.expand_icon = false
+		button.add_theme_font_size_override("font_size", 6)
+
+
+func _get_compact_command_matrix_icon(cache_key: String, source: Texture2D) -> Texture2D:
+	if _command_matrix_icon_cache.has(cache_key):
+		return _command_matrix_icon_cache[cache_key] as Texture2D
+	if source == null:
+		return null
+	var image: Image = source.get_image()
+	if image == null or image.is_empty():
+		return source
+	image.resize(10, 10, Image.INTERPOLATE_LANCZOS)
+	var compact_texture := ImageTexture.create_from_image(image)
+	_command_matrix_icon_cache[cache_key] = compact_texture
+	return compact_texture
 
 
 func _build_drop_light_drop_button_label() -> String:
@@ -14798,13 +14860,13 @@ func _ensure_command_grid_placeholder_buttons(command_grid: GridContainer) -> vo
 	var action_button_size: Vector2i = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.get("ACTION_BUTTON_SIZE")
 	for slot_index in range(7, 21):
 		if slot_index == 7:
-			_ensure_command_grid_action_button(command_grid, "DeleteOrderButton", "Del", "Delete selected waypoint or area order", Callable(self, "_on_delete_order_pressed"), slot_index)
+			_ensure_command_grid_action_button(command_grid, "DeleteOrderButton", "LOE", "Ausgewaehlten Wegpunkt oder Flaechenbefehl loeschen.", Callable(self, "_on_delete_order_pressed"), slot_index)
 			continue
 		if slot_index == 8:
 			_ensure_door_interaction_command_button(command_grid, slot_index)
 			continue
 		if slot_index == 10:
-			_ensure_command_grid_action_button(command_grid, "SortCommandMatrixButton", "Sort", "Center and sort selected fireteam", Callable(self, "_on_sort_fireteam_pressed"), slot_index)
+			_ensure_command_grid_action_button(command_grid, "SortCommandMatrixButton", "ORD", "Ausgewaehltes Fireteam zentrieren und Plan ordnen.", Callable(self, "_on_sort_fireteam_pressed"), slot_index)
 			continue
 		var fire_rule_spec: Dictionary = _find_fire_rule_button_spec_for_slot(slot_index)
 		if not fire_rule_spec.is_empty():
@@ -14924,7 +14986,8 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 		if button.tooltip_text.is_empty():
 			button.tooltip_text = "Breach %s [B] -> GO" % display_token if enabled else _build_door_interaction_button_disabled_tooltip(has_usable_interaction)
 	else:
-		button.text = "%s->GO" % display_token if enabled else display_token
+		var player_token: String = _get_player_interaction_button_token(display_token)
+		button.text = "%s->GO" % player_token if enabled else player_token
 		button.tooltip_text = "%s -> GO" % String(interaction_feedback.get("feedback_line", "interaction unavailable")).strip_edges()
 	button.set_meta("door_interaction_button_enabled", enabled)
 	button.set_meta("door_interaction_id", String(interaction_feedback.get("interaction_id", "")).strip_edges())
@@ -14948,6 +15011,10 @@ func _refresh_door_interaction_button_state(feedback_snapshot: Dictionary = {}) 
 	button.set_meta("command_hierarchy_disabled_reason", "" if enabled else _resolve_primary_mission_interaction_button_disabled_reason(interaction_feedback, is_door))
 	META_UI_SKIN_SCRIPT.style_tactical_button(button, enabled)
 	_apply_door_authority_button_affordance(button, String(authority_ui_feedback.get("severity", "action" if enabled else "warning")).strip_edges())
+
+
+func _get_player_interaction_button_token(display_token: String) -> String:
+	return "NUTZ" if display_token.strip_edges().to_upper() == "USE" else display_token.strip_edges().to_upper()
 
 
 func get_primary_mission_interaction_button_snapshot() -> Dictionary:
