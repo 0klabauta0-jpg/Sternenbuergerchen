@@ -419,6 +419,7 @@ var _current_fireteam_index: int = 0
 var _current_phase_index: int = 1
 var _current_approach_index: int = 0
 var _selected_fireteam_ids: PackedStringArray = []
+var _default_fireteam_selection_initialized: bool = false
 var _focused_fireteam_id: String = ""
 var _fire_sector_overlay_enabled: bool = false
 var _los_debug_overlay_enabled: bool = false
@@ -701,6 +702,8 @@ func _process(delta: float) -> void:
 		_refresh_order_visuals()
 	_flush_pending_drop_runtime_phase_starts()
 	_refresh_fireteam_runtime_ui_if_pending()
+	if not _default_fireteam_selection_initialized:
+		_ensure_default_fireteam_selection()
 	_fireteam_security_refresh_time_remaining -= delta
 	if _fireteam_security_refresh_time_remaining <= 0.0:
 		_fireteam_security_refresh_time_remaining = FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS
@@ -5660,7 +5663,7 @@ func _find_friendly_unit_by_id_recursive(root_node: Node, unit_id: String) -> No
 	if root_node == null:
 		return null
 	if root_node.has_method("get_team_id") and root_node.has_method("get_unit_id"):
-		if String(root_node.call("get_team_id")).strip_edges() == FRIENDLY_TEAM_ID and String(root_node.call("get_unit_id")).strip_edges() == unit_id:
+		if String(root_node.call("get_team_id")).strip_edges() == get_local_command_team_id() and String(root_node.call("get_unit_id")).strip_edges() == unit_id:
 			return root_node
 	for child in root_node.get_children():
 		var found: Node = _find_friendly_unit_by_id_recursive(child, unit_id)
@@ -6033,10 +6036,11 @@ func _get_selected_friendly_units(include_hidden: bool = true) -> Array:
 
 	var selected_units: Array = []
 	var selected_fireteam_id: String = _get_selected_fireteam_id()
+	var local_team_id: String = get_local_command_team_id()
 	for child in mission_root.get_children():
 		if not child.has_method("get_team_id") or not child.has_method("get_unit_id") or not child.has_method("get_fireteam_id"):
 			continue
-		if String(child.call("get_team_id")).strip_edges() != FRIENDLY_TEAM_ID:
+		if String(child.call("get_team_id")).strip_edges() != local_team_id:
 			continue
 		var unit_id: String = String(child.call("get_unit_id"))
 		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
@@ -10098,6 +10102,23 @@ func build_review_session_identity_snapshot(args: Array = []) -> Dictionary:
 	}
 
 
+func get_local_command_team_id(args: Array = []) -> String:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	var peer: MultiplayerPeer = multiplayer.multiplayer_peer
+	if simulation_root != null and peer != null and not (peer is OfflineMultiplayerPeer) \
+			and peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
+		var peer_id: int = multiplayer.get_unique_id()
+		if peer_id > 0 and simulation_root.has_method("get_peer_team"):
+			var assigned_team_id: String = String(simulation_root.call("get_peer_team", peer_id)).strip_edges().to_lower()
+			if not assigned_team_id.is_empty():
+				return assigned_team_id
+	var session: Dictionary = build_review_session_identity_snapshot(args) if not args.is_empty() else _get_review_session_identity_snapshot()
+	var review_team_id: String = String(session.get("team_id", "")).strip_edges().to_lower()
+	if bool(session.get("active", false)) and not review_team_id.is_empty():
+		return review_team_id
+	return FRIENDLY_TEAM_ID
+
+
 func _build_review_session_team_label(team_id: String) -> String:
 	var normalized_team := team_id.strip_edges().to_lower()
 	match normalized_team:
@@ -11374,7 +11395,7 @@ func _build_mission_dropship_pilot_profile(card: Dictionary = {}):
 				"display_name": card_pilot_display_name if not card_pilot_display_name.is_empty() else "Unassigned Pilot",
 				"portrait_path": card_pilot_portrait_path,
 				"role_name": "Dropship Pilot",
-				"team_id": FRIENDLY_TEAM_ID,
+				"team_id": get_local_command_team_id(),
 			},
 			{
 				"secondary_text": _build_mission_dropship_pilot_text(card),
@@ -11396,7 +11417,7 @@ func _build_mission_dropship_pilot_profile(card: Dictionary = {}):
 			"display_name": _mission_drop_pilot_display_name if not _mission_drop_pilot_display_name.is_empty() else "Unassigned Pilot",
 			"portrait_path": _mission_drop_pilot_portrait_path,
 			"role_name": "Dropship Pilot",
-			"team_id": FRIENDLY_TEAM_ID,
+			"team_id": get_local_command_team_id(),
 		},
 		{
 			"secondary_text": _build_mission_dropship_pilot_text(),
@@ -12466,7 +12487,7 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 				"lz_label": _build_mission_dropship_lz_name(selected_craft_id, _mission_drop_display_name, _get_mission_dropship_card_order_number(selected_craft_id)),
 				"dropship_texture": _get_mission_dropship_texture(),
 				"approach_vector_shape": "wide_arrow",
-				"team_id": FRIENDLY_TEAM_ID,
+				"team_id": get_local_command_team_id(),
 				"selected": true,
 			}
 		)
@@ -12523,7 +12544,7 @@ func _build_mission_cargo_touchdown_visual_entry(index: int = 0) -> Dictionary:
 		"lz_position": target_position,
 		"lz_label": _build_mission_cargo_touchdown_lz_label(cargo_snapshot, index),
 		"dropship_texture": _get_mission_dropship_texture(),
-		"team_id": FRIENDLY_TEAM_ID,
+		"team_id": get_local_command_team_id(),
 		"selected": true,
 	}
 
@@ -12662,7 +12683,7 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 		"lz_position": lz_position,
 		"lz_label": lz_label,
 		"dropship_texture": _get_mission_dropship_texture(card),
-		"team_id": FRIENDLY_TEAM_ID,
+		"team_id": get_local_command_team_id(),
 		"selected": is_selected,
 	}
 
@@ -15060,9 +15081,16 @@ func get_unit_presence_audit_snapshot() -> Dictionary:
 
 
 func _ensure_default_fireteam_selection() -> void:
-	if not _selected_fireteam_ids.is_empty():
+	if _default_fireteam_selection_initialized:
 		return
-	_set_selected_fireteams(_get_available_fireteam_ids(), false)
+	if not _selected_fireteam_ids.is_empty():
+		_default_fireteam_selection_initialized = true
+		return
+	var available_fireteam_ids: PackedStringArray = _get_available_fireteam_ids()
+	if available_fireteam_ids.is_empty():
+		return
+	_default_fireteam_selection_initialized = true
+	_set_selected_fireteams(available_fireteam_ids, false)
 
 
 func _ensure_selection_overlay() -> void:
@@ -15306,10 +15334,11 @@ func _get_all_friendly_units(include_hidden: bool = true) -> Array:
 		return []
 
 	var result: Array = []
+	var local_team_id: String = get_local_command_team_id()
 	for child in mission_root.get_children():
 		if not child.has_method("get_team_id") or not child.has_method("get_unit_id") or not child.has_method("get_fireteam_id"):
 			continue
-		if String(child.call("get_team_id")).strip_edges() != FRIENDLY_TEAM_ID:
+		if String(child.call("get_team_id")).strip_edges() != local_team_id:
 			continue
 		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
 			continue
@@ -15324,11 +15353,12 @@ func _get_all_enemy_units(include_hidden: bool = true) -> Array:
 	if mission_root == null:
 		return []
 	var result: Array = []
+	var local_team_id: String = get_local_command_team_id()
 	for child in mission_root.get_children():
 		if not child.has_method("get_team_id") or not child.has_method("get_unit_id"):
 			continue
 		var child_team_id: String = String(child.call("get_team_id")).strip_edges()
-		if child_team_id == FRIENDLY_TEAM_ID or child_team_id.is_empty() or child_team_id == "team_unused":
+		if child_team_id == local_team_id or child_team_id.is_empty() or child_team_id == "team_unused":
 			continue
 		if not include_hidden and child is CanvasItem and not (child as CanvasItem).visible:
 			continue
@@ -15501,10 +15531,11 @@ func _resolve_fireteam_leader_for_behavior(fireteam_id: String):
 		return _get_selection_anchor_for_fireteam(normalized_fireteam_id)
 	var best_unit = null
 	var best_leadership: float = -1.0
+	var local_team_id: String = get_local_command_team_id()
 	for unit in mission_root.get_children():
 		if unit == null or not unit.has_method("get_team_id") or not unit.has_method("get_fireteam_id"):
 			continue
-		if String(unit.call("get_team_id")).strip_edges() != FRIENDLY_TEAM_ID:
+		if String(unit.call("get_team_id")).strip_edges() != local_team_id:
 			continue
 		if String(unit.call("get_fireteam_id")).strip_edges().to_lower() != normalized_fireteam_id:
 			continue
@@ -25122,8 +25153,9 @@ func _store_mission_interaction_door_use_breach_hook_result(result: Dictionary) 
 
 
 func _build_mission_interaction_runtime_use_context_for_readability() -> Dictionary:
+	var local_team_id: String = get_local_command_team_id()
 	return {
-		"current_team_id": FRIENDLY_TEAM_ID,
+		"current_team_id": local_team_id,
 		"fireteam_positions": _build_mission_interaction_fireteam_positions_for_readability(),
 		"interaction_states": _get_mission_interaction_states_for_readability(),
 	}
@@ -25131,6 +25163,7 @@ func _build_mission_interaction_runtime_use_context_for_readability() -> Diction
 
 func _build_mission_interaction_fireteam_positions_for_readability() -> Array:
 	var entries: Array = []
+	var local_team_id: String = get_local_command_team_id()
 	for fireteam_id_variant in _get_available_fireteam_ids():
 		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
 		if fireteam_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
@@ -25140,7 +25173,7 @@ func _build_mission_interaction_fireteam_positions_for_readability() -> Array:
 			continue
 		entries.append({
 			"fireteam_id": fireteam_id,
-			"team_id": FRIENDLY_TEAM_ID,
+			"team_id": local_team_id,
 			"position": Vector2(anchor_position),
 			"active": true,
 			"selected": _selected_fireteam_ids.has(fireteam_id),
@@ -27315,7 +27348,7 @@ func _build_multi_fireteam_context(fireteam_id: String) -> Dictionary:
 	var divisor: float = float(maxi(member_count, 1))
 	return {
 		"fireteam_id": normalized_fireteam_id,
-		"team_id": FRIENDLY_TEAM_ID,
+		"team_id": get_local_command_team_id(),
 		"display_label": _get_fireteam_display_label(normalized_fireteam_id),
 		"position": position,
 		"member_count": member_count,
@@ -30056,7 +30089,7 @@ func _publish_mission_interaction_runtime_progress_for_waypoint(fireteam_id: Str
 		"duration_seconds": duration_seconds,
 		"progress": progress,
 		"fireteam_id": fireteam_id.strip_edges().to_lower(),
-		"team_id": FRIENDLY_TEAM_ID,
+		"team_id": get_local_command_team_id(),
 		"step_id": String(metadata.get("step_id", "")).strip_edges(),
 		"gate_id": String(metadata.get("gate_id", metadata.get("step_id", ""))).strip_edges(),
 		"required_state": String(metadata.get("required_state", "")).strip_edges(),

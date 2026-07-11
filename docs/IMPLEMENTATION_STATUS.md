@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1090 - Two-Player Station Route Decision Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1090_two_player_station_route_decision_playtest.md`, TASK_712, TASK_714, TASK_1082, TASK_1083
+- Stand: Der aktuelle Godot-4.6.2-Zwei-Fensterlauf zeigt Host `P1 ALPHA` und Client `P2 BRAVO` mit derselben Station-Route-Karte, lokal getrennten Fireteam-Mini-Cards und initial ausgewählten lokalen Mitgliedern.
+- Architektur: Controller-Commands und UI lesen die lokale Peer-/Review-Team-Perspektive. Der Szenario-Bootstrap bleibt unveraendert autoritativ; nur die FoW-Darstellung erhaelt mit `fog_viewer_team_id` eine getrennte lokale Sichtperspektive.
+- Ursache/Fix: Der Controller war an mehreren Stellen fest auf `team_alpha` verdrahtet, Bravo-Szenario-Gruppen verloren ihre Fireteam-ID, und es gab keine stabile initiale Auswahl. Diese drei Uebergaben sind jetzt lokal-perspektivisch und regressionsgesichert.
+- Risiken/offen: Der Capture-Helfer startet zwei unabhaengige Sichtinstanzen und ist noch kein echter verbundener Station-Route-Match. Der 192x192-Unterbau ist fuer parallele Debug-Instanzen schwer; feste Capture-Wartezeiten sind unzuverlaessig.
+- Lokale Pruefung: TASK_1090 16/16, TASK_714 37/37, TASK_712 62/62, TASK_1082 21/21 und TASK_1083 24/24; sichtbarer 4.6.2-Capture zeigt beide Karten und Teamkontexte.
+- Naechster Schritt: TASK_1091 - Connected Station Route Two-Player Command Playtest. Zwei echte Netzwerk-Instanzen fuehren mit eigenen Fireteams Door, Computer und Cargo ueber Host-Autoritaet aus.
+
 ### TASK_1089 - Release Trace Observer-Effect Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1089_release_trace_observer_effect_guard.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_879, TASK_1088

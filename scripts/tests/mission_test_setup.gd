@@ -81,6 +81,7 @@ const LEGACY_FALLBACK_SURFACE_BY_TILE: Dictionary = {
 @export var use_2_5d_primary_view: bool = true
 @export var fog_of_war_mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
 @export var fog_of_war_sight_range_world: float = FOW_DEFAULT_SIGHT_RANGE_WORLD
+@export var fog_viewer_team_id: String = ""
 
 var member_loadouts: Dictionary = {}
 var unit_loadout_modifiers_by_unit_id: Dictionary = {}
@@ -116,6 +117,7 @@ func _ready() -> void:
 		return
 
 	apply_cmdline_scenario_override()
+	apply_cmdline_fog_viewer_team_override()
 	_load_mission_scenario_if_available()
 	if _should_defer_runtime_enemy_slot_creation():
 		call_deferred("_finish_ready_after_scenario_loaded", runtime_leader, unit_registry, ftl_registry, simulation_root)
@@ -144,6 +146,30 @@ func apply_cmdline_scenario_override(args: Array = []) -> Dictionary:
 		"previous_scenario_file_path": previous_path,
 		"scenario_file_path": scenario_file_path,
 		"override_applied": not override_path.is_empty(),
+		"read_only": false,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func apply_cmdline_fog_viewer_team_override(args: Array = []) -> Dictionary:
+	var raw_args: Array = args.duplicate()
+	var source := "provided_args"
+	if raw_args.is_empty():
+		raw_args = OS.get_cmdline_user_args()
+		source = "OS.get_cmdline_user_args"
+	var previous_team_id: String = fog_viewer_team_id
+	var override_team_id := ""
+	for arg_variant in raw_args:
+		var arg := String(arg_variant).strip_edges()
+		if arg.begins_with("--team="):
+			override_team_id = arg.substr("--team=".length()).strip_edges().to_lower()
+	if not override_team_id.is_empty():
+		fog_viewer_team_id = override_team_id
+	return {
+		"source": source,
+		"previous_team_id": previous_team_id,
+		"fog_viewer_team_id": _get_fog_viewer_team_id(),
+		"override_applied": not override_team_id.is_empty(),
 		"read_only": false,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -974,12 +1000,14 @@ func set_fog_of_war_mode(mode: String) -> void:
 
 
 func get_fog_of_war_runtime_snapshot() -> Dictionary:
+	var viewer_team_id: String = _get_fog_viewer_team_id()
 	if _fog_of_war_system == null:
 		return {
 			"mode": FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF,
+			"team_id": viewer_team_id,
 			"active": false,
 		}
-	var snapshot: Dictionary = Dictionary(_fog_of_war_system.call("build_team_visual_state_snapshot", team_id, _fog_terrain_registry))
+	var snapshot: Dictionary = Dictionary(_fog_of_war_system.call("build_team_visual_state_snapshot", viewer_team_id, _fog_terrain_registry))
 	snapshot["active"] = String(snapshot.get("mode", FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF)) != FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
 	snapshot["runtime_signature"] = _fog_runtime_signature
 	snapshot["observer_count"] = _get_active_fog_observers().size()
@@ -992,11 +1020,12 @@ func _initialize_fog_of_war(unit_nodes: Array, terrain_registry) -> void:
 	_fog_terrain_registry = terrain_registry
 	_fog_unit_nodes = unit_nodes.duplicate()
 	_fog_observer_unit_nodes.clear()
+	var viewer_team_id: String = _get_fog_viewer_team_id()
 	for unit in _fog_unit_nodes:
-		if unit != null and unit.has_method("get_team_id") and String(unit.call("get_team_id")).strip_edges() == team_id:
+		if unit != null and unit.has_method("get_team_id") and String(unit.call("get_team_id")).strip_edges() == viewer_team_id:
 			_fog_observer_unit_nodes.append(unit)
 	fog_of_war_mode = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
-	_fog_of_war_system.call("set_mode_for_team", team_id, fog_of_war_mode)
+	_fog_of_war_system.call("set_mode_for_team", viewer_team_id, fog_of_war_mode)
 	call_deferred("_sync_fog_of_war_visual_state", true)
 
 
@@ -1008,11 +1037,12 @@ func _sync_fog_of_war_visual_state(force: bool = false) -> void:
 		call_deferred("_sync_fog_of_war_visual_state", force)
 		return
 	var mode: String = String(FOG_OF_WAR_MODE_CONTRACT_SCRIPT.call("normalize_mode", fog_of_war_mode))
-	_fog_of_war_system.call("set_mode_for_team", team_id, mode)
+	var viewer_team_id: String = _get_fog_viewer_team_id()
+	_fog_of_war_system.call("set_mode_for_team", viewer_team_id, mode)
 	if mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
 		_fog_runtime_signature = "off"
 		if view.has_method("set_fog_of_war_state"):
-			view.call("set_fog_of_war_state", {"mode": mode, "team_id": team_id})
+			view.call("set_fog_of_war_state", {"mode": mode, "team_id": viewer_team_id})
 		return
 	var next_signature: String = _build_fog_runtime_signature(mode)
 	if not force and next_signature == _fog_runtime_signature:
@@ -1020,7 +1050,7 @@ func _sync_fog_of_war_visual_state(force: bool = false) -> void:
 	_fog_runtime_signature = next_signature
 	_fog_of_war_system.call(
 		"update_tile_visibility_for_team",
-		team_id,
+		viewer_team_id,
 		_fog_observer_unit_nodes,
 		_fog_terrain_registry,
 		_fog_of_war_los_system,
@@ -1028,17 +1058,18 @@ func _sync_fog_of_war_visual_state(force: bool = false) -> void:
 	)
 	_sync_fog_dynamic_target_visibility()
 	if view.has_method("set_fog_of_war_state"):
-		view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_visual_state_snapshot", team_id, _fog_terrain_registry))
+		view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_visual_state_snapshot", viewer_team_id, _fog_terrain_registry))
 
 
 func _sync_fog_dynamic_target_visibility() -> void:
 	if _fog_of_war_system == null:
 		return
 	var observers: Array = _get_active_fog_observers()
+	var viewer_team_id: String = _get_fog_viewer_team_id()
 	for unit in _fog_unit_nodes:
 		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
 			continue
-		if String(unit.call("get_team_id")).strip_edges() == team_id:
+		if String(unit.call("get_team_id")).strip_edges() == viewer_team_id:
 			continue
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges()
 		if unit_id.is_empty():
@@ -1054,9 +1085,9 @@ func _sync_fog_dynamic_target_visibility() -> void:
 			if has_line_of_sight:
 				visible = true
 				break
-		_fog_of_war_system.call("set_visible", team_id, unit_id, visible)
+		_fog_of_war_system.call("set_visible", viewer_team_id, unit_id, visible)
 		if visible:
-			_fog_of_war_system.call("record_last_known_contact", team_id, {
+			_fog_of_war_system.call("record_last_known_contact", viewer_team_id, {
 				"target_id": unit_id,
 				"team_id": String(unit.call("get_team_id")).strip_edges(),
 				"last_known_position": target_position,
@@ -1093,7 +1124,7 @@ func _get_effective_fog_sight_range_world(observer: Node) -> float:
 func _build_fog_runtime_signature(mode: String) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append(mode)
-	parts.append(team_id)
+	parts.append(_get_fog_viewer_team_id())
 	for unit in _fog_unit_nodes:
 		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
 			continue
@@ -1109,6 +1140,11 @@ func _build_fog_runtime_signature(mode: String) -> String:
 		])
 	parts.sort()
 	return "|".join(parts)
+
+
+func _get_fog_viewer_team_id() -> String:
+	var normalized_viewer_team_id: String = fog_viewer_team_id.strip_edges().to_lower()
+	return normalized_viewer_team_id if not normalized_viewer_team_id.is_empty() else team_id.strip_edges().to_lower()
 
 
 func _get_fog_unit_sight_range_factor(unit: Node) -> float:
@@ -1223,7 +1259,8 @@ func _apply_fob_loadout_override(unit, unit_id: String, unit_team_id: String) ->
 
 func _get_fireteam_id_for_friendly_slot(slot_index: int, unit_id: String, unit_team_id: String) -> String:
 	if unit_team_id != team_id:
-		return ""
+		var enemy_group: Dictionary = _find_scenario_enemy_group_for_unit(unit_id)
+		return String(enemy_group.get("group_id", "")).strip_edges().to_lower()
 
 	var configured_fireteam_id: String = _get_definition_fireteam_id_for_unit(unit_id)
 	if not configured_fireteam_id.is_empty():
