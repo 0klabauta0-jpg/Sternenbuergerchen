@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1094 - Connected Client GO Interaction RPC Handoff
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1094_connected_client_go_interaction_rpc_handoff.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1093
+- Stand: Der sichtbare GO-Pfad eines verbundenen Clients sendet den vorhandenen Interaction-Intent genau einmal zum Host, fuehrt lokal keinen Waypoint aus und zeigt Pending/Accepted/Blocked aus Host-Feedback.
+- Architektur: Client sendet Absicht; `SimulationRoot` validiert und antwortet; Host-Driver besitzt Progress. Einzelspieler verwendet unveraendert lokale Waypoints.
+- Risiken/offen: Microcopy und Timing von `HOST PENDING`/`HOST OK` brauchen einen sichtbaren Zwei-Fenster-Lesbarkeitspass.
+- Lokale Pruefung: TASK_1094 6/6, TASK_1093 19/19 und TASK_1070 23/23.
+- Naechster Schritt: TASK_1095 - Connected Interaction Feedback Visual Polish and Two-Window Readability.
+
 ### TASK_1093 - Connected Station Route Full Interaction Trace
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1093_connected_station_route_full_interaction_trace.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1092

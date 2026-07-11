@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1094 - Connected Client GO Interaction RPC Handoff (implementiert im Arbeitsstand)
+- Grundlage: Der Network-Route-Contract war vollstaendig, aber der echte Client-GO-Griff startete noch lokale Planung.
+- Ergebnis: Verbundener Client-GO sendet genau einmal zum Host, blockiert Doppel-GO, enqueued lokal nichts und liest Accepted/Blocked aus Host-Feedback. Einzelspieler-GO bleibt lokal.
+- Verifikation: TASK_1094 6/6, TASK_1093 19/19 und TASK_1070 23/23.
+- Naechster Schritt: TASK_1095 - Connected Interaction Feedback Visual Polish and Two-Window Readability.
+
 ## TASK_1093 - Connected Station Route Full Interaction Trace (implementiert im Arbeitsstand)
 - Grundlage: Door war verbunden, fuer AA, Computer und Cargo fehlte eine neutrale Network-Projektion.
 - Ergebnis: Ein generischer Intent-Builder und der Host-Arrival-/Hold-Pfad fuehren AA, Door, Computer und Cargo ueber echte ENet-RPC bis zum gemeinsamen fertigen Gate-Snapshot.

@@ -701,6 +701,8 @@ func _send_network_command_result(peer_id: int, result: Dictionary, command: Dic
 		"team_id": String(result.get("team_id", command.get("team_id", ""))).strip_edges(),
 		"fireteam_id": String(result.get("fireteam_id", command.get("fireteam_id", ""))).strip_edges().to_lower(),
 		"fire_rule": String(command.get("fire_rule", "")).strip_edges().to_lower(),
+		"source_context": String(command.get("source_context", "")).strip_edges(),
+		"interaction_id": String(command.get("interaction_id", "")).strip_edges(),
 		"peer_id": peer_id,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
