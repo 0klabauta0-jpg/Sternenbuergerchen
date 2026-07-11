@@ -626,6 +626,8 @@ var _comic_bubble_runtime_gate = null
 var _active_coordination_by_id: Dictionary = {}
 var _leader_initiated_flank_ready_at_msec_by_fireteam: Dictionary = {}
 var _contact_overlay_pending: bool = false
+var _connected_first_contact_world_frame_signature: String = ""
+var _last_network_contact_visual_signature: String = ""
 var _last_planning_state_issue: String = ""
 
 
@@ -2102,6 +2104,11 @@ func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	var combat_driver = _get_combat_loop_driver()
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_combat_snapshot"):
 		combat_driver.call("apply_multiplayer_combat_snapshot", snapshot)
+		var contact_snapshot: Array = get_contact_snapshot()
+		var contact_signature: String = JSON.stringify(contact_snapshot)
+		if contact_signature != _last_network_contact_visual_signature:
+			_last_network_contact_visual_signature = contact_signature
+			refresh_contact_overlay()
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
 		combat_driver.call("apply_multiplayer_interaction_snapshot", mission_interactions)
 	_apply_network_mission_interaction_progress_surface(mission_interactions)
@@ -9104,19 +9111,50 @@ func _get_release_first_exchange_fire_visual_event_dicts() -> Array:
 	var fire_events: Array = get_fire_event_snapshot()
 	var status_source: Dictionary = _get_release_first_exchange_visible_status_source_evidence()
 	if not bool(status_source.get("active", false)):
-		return fire_events
+		return _select_connected_first_contact_fire_visual_events(fire_events, _selected_fireteam_ids, _is_connected_multiplayer_hud_session())
 	var persisted_fire_event: Dictionary = Dictionary(status_source.get("fire_event", {})).duplicate(true)
 	if persisted_fire_event.is_empty():
-		return fire_events
+		return _select_connected_first_contact_fire_visual_events(fire_events, _selected_fireteam_ids, _is_connected_multiplayer_hud_session())
 	var persisted_event_id: String = String(persisted_fire_event.get("event_id", "")).strip_edges()
 	if persisted_event_id.is_empty():
-		return fire_events
+		return _select_connected_first_contact_fire_visual_events(fire_events, _selected_fireteam_ids, _is_connected_multiplayer_hud_session())
 	for event_variant in fire_events:
 		var event: Dictionary = Dictionary(event_variant)
 		if String(event.get("event_id", "")).strip_edges() == persisted_event_id:
-			return fire_events
+			return _select_connected_first_contact_fire_visual_events(fire_events, _selected_fireteam_ids, _is_connected_multiplayer_hud_session())
 	fire_events.append(persisted_fire_event)
-	return fire_events
+	return _select_connected_first_contact_fire_visual_events(fire_events, _selected_fireteam_ids, _is_connected_multiplayer_hud_session())
+
+
+func _select_connected_first_contact_fire_visual_events(fire_events: Array, selected_fireteam_ids: PackedStringArray, connected_session: bool) -> Array:
+	var sanitized_events: Array = []
+	for event_variant in fire_events:
+		if typeof(event_variant) == TYPE_DICTIONARY:
+			sanitized_events.append(Dictionary(event_variant).duplicate(true))
+	if not connected_session or selected_fireteam_ids.is_empty():
+		return sanitized_events
+	var selected_lookup: Dictionary = {}
+	for fireteam_id_variant in selected_fireteam_ids:
+		selected_lookup[String(fireteam_id_variant).strip_edges().to_lower()] = true
+	var latest_by_fireteam: Dictionary = {}
+	for event_variant in sanitized_events:
+		var event: Dictionary = Dictionary(event_variant)
+		var fireteam_id: String = String(event.get("attacker_fireteam_id", event.get("fireteam_id", ""))).strip_edges().to_lower()
+		if not selected_lookup.has(fireteam_id):
+			continue
+		var existing: Dictionary = Dictionary(latest_by_fireteam.get(fireteam_id, {}))
+		var event_time: int = int(event.get("created_msec", event.get("tick", 0)))
+		var existing_time: int = int(existing.get("created_msec", existing.get("tick", -1)))
+		if existing.is_empty() or event_time >= existing_time:
+			var selected_event: Dictionary = event.duplicate(true)
+			selected_event["suppress_world_status_label"] = true
+			latest_by_fireteam[fireteam_id] = selected_event
+	var result: Array = []
+	for fireteam_id_variant in selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if latest_by_fireteam.has(fireteam_id):
+			result.append(Dictionary(latest_by_fireteam[fireteam_id]).duplicate(true))
+	return result
 
 
 func _build_release_fire_exchange_visibility_compact_line(diagnostics: Dictionary, cover_readout: Dictionary, fire_event: Dictionary) -> String:
@@ -21666,6 +21704,7 @@ func _dedupe_release_first_contact_display_entries(entries: Array) -> Dictionary
 	var result: Array = []
 	var contact_groups: Dictionary = {}
 	var collapsed_repeat_count: int = 0
+	var contact_group_count: int = 0
 	for entry_variant in entries:
 		if typeof(entry_variant) != TYPE_DICTIONARY:
 			continue
@@ -21675,20 +21714,23 @@ func _dedupe_release_first_contact_display_entries(entries: Array) -> Dictionary
 			result.append(entry)
 			continue
 		var created_msec: int = int(entry.get("created_msec", 0))
-		var time_bucket: int = created_msec / CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC
-		var semantic_key: String = "%s|%s|%s|%d" % [
+		var semantic_key: String = "%s|%s|%s" % [
 			String(entry.get("fireteam_id", "")).strip_edges().to_lower(),
 			String(entry.get("unit_id", "")).strip_edges(),
 			event_type,
-			time_bucket,
 		]
-		if not contact_groups.has(semantic_key):
+		var group_state: Dictionary = Dictionary(contact_groups.get(semantic_key, {}))
+		var retained_index: int = int(group_state.get("result_index", -1))
+		var retained_entry: Dictionary = Dictionary(result[retained_index]) if retained_index >= 0 and retained_index < result.size() else {}
+		var within_window: bool = not retained_entry.is_empty() and absi(created_msec - int(group_state.get("last_seen_msec", retained_entry.get("created_msec", 0)))) <= CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC
+		if not within_window:
 			entry["repeat_count"] = 1
 			entry["collapsed_event_ids"] = [String(entry.get("event_id", ""))]
-			contact_groups[semantic_key] = result.size()
+			contact_groups[semantic_key] = {"result_index": result.size(), "last_seen_msec": created_msec}
 			result.append(entry)
+			contact_group_count += 1
 			continue
-		var result_index: int = int(contact_groups[semantic_key])
+		var result_index: int = retained_index
 		var retained: Dictionary = Dictionary(result[result_index]).duplicate(true)
 		var collapsed_ids: Array = Array(retained.get("collapsed_event_ids", [])).duplicate()
 		collapsed_ids.append(String(entry.get("event_id", "")))
@@ -21700,10 +21742,12 @@ func _dedupe_release_first_contact_display_entries(entries: Array) -> Dictionary
 			retained["repeat_count"] = repeat_count
 			retained["collapsed_event_ids"] = collapsed_ids
 		result[result_index] = retained
+		group_state["last_seen_msec"] = created_msec
+		contact_groups[semantic_key] = group_state
 		collapsed_repeat_count += 1
 	return {
 		"entries": result,
-		"contact_group_count": contact_groups.size(),
+		"contact_group_count": contact_group_count,
 		"collapsed_repeat_count": collapsed_repeat_count,
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
@@ -28090,12 +28134,52 @@ func refresh_contact_overlay() -> void:
 	_emit_contact_report_events_from_snapshot(contact_snapshot)
 	if primary_3d_view != null:
 		_primary_view_bridge.call("sync_contact_entries", get_parent(), contact_snapshot, _selected_fireteam_ids)
+		_focus_connected_first_contact_world(contact_snapshot)
 	if overlay == null:
 		return
 	if overlay is CanvasItem:
 		_primary_view_bridge.call("hide_canvas_item_when_primary", get_parent(), overlay as CanvasItem)
 	overlay.call("set_selected_fireteam_ids", _selected_fireteam_ids)
 	overlay.call("set_contact_entries", contact_snapshot)
+
+
+func _focus_connected_first_contact_world(contact_snapshot: Array) -> Dictionary:
+	if not _is_connected_multiplayer_hud_session() or _selected_fireteam_ids.is_empty() or contact_snapshot.is_empty():
+		return {"framed": false, "reason": "inactive_connected_contact"}
+	var primary_view: Node = _get_primary_3d_view()
+	if primary_view == null or not primary_view.has_method("frame_world_positions"):
+		return {"framed": false, "reason": "primary_view_not_ready"}
+	var world_positions: Array = []
+	var signature_tokens: PackedStringArray = PackedStringArray(Array(_selected_fireteam_ids))
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var anchor: Node = _get_selection_anchor_for_fireteam(String(fireteam_id_variant))
+		if anchor is Node2D:
+			world_positions.append((anchor as Node2D).global_position)
+	for contact_variant in contact_snapshot:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
+		if not _selected_fireteam_ids.has(fireteam_id):
+			continue
+		var position_variant: Variant = contact.get("approximate_position", contact.get("last_known_position", contact.get("position", null)))
+		if typeof(position_variant) != TYPE_VECTOR2:
+			continue
+		var position: Vector2 = Vector2(position_variant)
+		world_positions.append(position)
+		signature_tokens.append("%s:%d:%d" % [String(contact.get("target_id", contact.get("unit_id", ""))), roundi(position.x), roundi(position.y)])
+	if world_positions.size() < 2:
+		return {"framed": false, "reason": "insufficient_world_positions"}
+	var signature: String = "|".join(signature_tokens)
+	if signature == _connected_first_contact_world_frame_signature:
+		return {"framed": false, "reason": "already_framed", "signature": signature}
+	var result: Dictionary = Dictionary(primary_view.call("frame_world_positions", world_positions, 9.0, 24.0, 30.0)).duplicate(true)
+	if bool(result.get("framed", false)):
+		_connected_first_contact_world_frame_signature = signature
+	result["signature"] = signature
+	result["one_shot"] = true
+	result["read_only"] = true
+	return result
 
 
 func _sync_primary_3d_order_visuals() -> void:
@@ -28108,6 +28192,7 @@ func _sync_primary_3d_order_visuals() -> void:
 		{
 			"phase_index": _get_live_order_phase_index(),
 			"world_label_density_mode": world_label_density_mode,
+			"world_label_focus_mode": "connected_contact" if _is_connected_multiplayer_hud_session() and not _selected_fireteam_ids.is_empty() else "default",
 			"release_firefight_insertion_residue_declutter": _get_release_firefight_insertion_residue_declutter_enabled(world_label_density_mode),
 			"release_fire_exchange_focused_visual_polish": _get_release_fire_exchange_focused_visual_polish_enabled(world_label_density_mode),
 			"release_fire_exchange_focused_visual_polish_style_id": RELEASE_FIRE_EXCHANGE_FOCUSED_VISUAL_POLISH_STYLE_ID if _get_release_fire_exchange_focused_visual_polish_enabled(world_label_density_mode) else "",

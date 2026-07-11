@@ -111,6 +111,8 @@ func _run() -> void:
 		var perspective: Dictionary = Dictionary(controller.call("get_connected_first_contact_hud_perspective_snapshot"))
 		var primary_line: String = String(perspective.get("primary_line", ""))
 		var feedback: Dictionary = Dictionary(controller.call("get_command_feedback_snapshot"))
+		var primary_view: Node = mission.get_node_or_null("Primary3DView")
+		var primary_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot")) if primary_view != null and primary_view.has_method("get_render_snapshot") else {}
 		var client_simulation: Node = mission.get_node("SimulationRoot")
 		var client_driver: Node = mission.get_node("CombatLoopDriver")
 		var snapshot_debug: Dictionary = Dictionary(client_simulation.call("get_multiplayer_snapshot_debug_snapshot"))
@@ -125,6 +127,14 @@ func _run() -> void:
 		_assert(String(perspective.get("fireteam_token", "")) == fireteam_id.to_upper() and not String(perspective.get("fire_event_id", "")).is_empty(), "%s product peer reads its own real First-Fire event" % fireteam_id.to_upper())
 		_assert(primary_line.begins_with("%s | CONTACT FIRE" % fireteam_id.to_upper()) and primary_line.contains("ROE") and primary_line.contains("NEXT"), "%s product peer exposes Contact, ROE and next grip" % fireteam_id.to_upper())
 		_assert(String(feedback.get("selected_fireteam_status_label_text", "")).contains(primary_line) and String(feedback.get("mission_control_status_text", "")).contains(primary_line), "%s product Selected Fireteam and Mission Control agree" % fireteam_id.to_upper())
+		var frame_debug: Dictionary = {
+			"camera_size": float(primary_snapshot.get("camera_size", 99.0)),
+			"frame_signature": String(controller.get("_connected_first_contact_world_frame_signature")),
+			"contact_count": Array(controller.call("get_contact_snapshot")).size(),
+			"selection": Array(controller.get("_selected_fireteam_ids")),
+		}
+		print("TASK1119 %s FRAME DEBUG %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
+		_assert(float(primary_snapshot.get("camera_size", 99.0)) >= 24.0 and float(primary_snapshot.get("camera_size", 99.0)) <= 30.0 and not String(controller.get("_connected_first_contact_world_frame_signature")).is_empty(), "%s product world frames local Fireteam and Contact once: %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
 		perspective_signatures.append(String(perspective.get("perspective_signature", "")))
 	_assert(perspective_signatures.size() == 2 and not perspective_signatures[0].is_empty() and perspective_signatures[0] != perspective_signatures[1], "Product peers expose distinct stable HUD perspectives")
 	var active_client_index: int = int(index_by_fireteam.get("gold", -1)) if int(index_by_fireteam.get("gold", -1)) != 0 else int(index_by_fireteam.get("blue", -1))
@@ -213,6 +223,9 @@ func _capture_product_perspective(lobbies: Array, target_index: int, path: Strin
 		lobby.visible = true
 		if mission is Node2D:
 			(mission as Node2D).visible = is_target
+		var primary_view: CanvasLayer = mission.get_node_or_null("Primary3DView") as CanvasLayer
+		if primary_view != null:
+			primary_view.visible = is_target
 		var tactical_ui: CanvasLayer = mission.get_node_or_null("TacticalUI") as CanvasLayer
 		if tactical_ui != null:
 			tactical_ui.visible = is_target

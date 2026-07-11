@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1122_connected_mission_world_camera_exposure_contact_cluster_readability.md`, `docs/tasks/TASK_1121_connected_first_contact_tactical_world_readability.md`, `docs/dev/tactical_decision_clarity_contract.md`
+- Befund: Die nach TASK_1121 sichtbare Welt war real ueberstrahlt, zeigte den Erstkontakt am Kartenrand und stapelte globale historische Fire-/Tactic-/Security-Texte am selben Ziel. Client/GOLD erhielt Contactdaten, aktualisierte danach aber die Welt nicht. Die Dedupe trennte fortlaufende Meldungen an einer Zeitgrenze.
+- Aenderung: Filmic-Tonemapping kalibriert die zentrale Environment. Ein bounds-basierter, einmaliger Camera-Fokus rahmt lokales Fireteam und Kontakt bei Size 24. Client-Contact-Visuals refreshen signaturgedrosselt. Die Welt zeigt nur das neueste lokale Fire-Event und unterdrueckt redundante Contact-Taktiktexte. Dedupe folgt einer gleitenden Kette.
+- Multiplayer/Performance: Kein neues Snapshotfeld, RPC, Command, Effect oder Gameplay-State. Contact-Refreshes erfolgen nur bei geaenderter serialisierter Contactliste; Kamera und Labelmodus sind lokale Lesedarstellung. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Fireteam-Proxies bilden am Kontakt noch eine schwer lesbare vertikale Reihe. Ein isolierter Assetblock ausserhalb der Kartenflaeche zieht Aufmerksamkeit ab. Diese Weltkomposition ist der naechste sichtbare Polish-Schritt.
+- Lokale Pruefung: TASK_1122 11/11, TASK_1120 11/11, TASK_1121 8/8, TASK_293 17/17, TASK_1117 15/15, TASK_1119 23/23 headless und 24/24 je BLUE/GOLD Real Window, TASK_1104 31/31 und TASK_222 82/82.
+- Naechster Schritt: TASK_1123 - Connected First Contact Unit Formation and World Residue Readability.
+
 ### TASK_1121 - Connected First Contact Tactical World Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1121_connected_first_contact_tactical_world_readability.md`, `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `scripts/mission/mission_primary_view_bridge.gd`

@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability (implementiert im Arbeitsstand)
+- Grundlage: Die erstmals sichtbare Produktwelt war ueberstrahlt, zu weit gerahmt und am Kontaktpunkt mit mehreren globalen Fire-/Taktiklabels ueberladen. Client-Contactdaten loesten keinen Weltrefresh aus; fortlaufende Contact-Reports konnten an der Fuenf-Sekunden-Grenze geteilt werden.
+- Ergebnis: Filmic-Tonemapping erhaelt helle Flaechen. BLUE und GOLD rahmen lokales Fireteam plus Kontakt einmalig bei Camera-Size 24. Nur das neueste lokale Fire-Event wird visualisiert; redundante World-Taktiktexte treten zurueck. Die Display-Dedupe folgt einer kontinuierlichen gleitenden Kette.
+- Architektur: Environment, Kamera, Labelmodus und Eventauswahl bleiben lokale read-only Darstellung. Client-Refresh ist signaturgedrosselt. Kein neues Snapshotfeld, RPC, Command, Effect oder Gameplay-State.
+- Verifikation: TASK_1122 11/11, TASK_1120 11/11, TASK_1121 8/8, TASK_293 17/17, TASK_1117 15/15, TASK_1119 23/23 headless und 24/24 je Real Window, TASK_1104 31/31 und Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1123 - Connected First Contact Unit Formation and World Residue Readability.
+
 ## TASK_1121 - Connected First Contact Tactical World Readability (implementiert im Arbeitsstand)
 - Grundlage: Im echten Mehrspielerprodukt blieben Lobby-Background und Shade ueber der laufenden Mission. Der Sichtbeleg mischte ausserdem Host-Welt mit der UI des aufgenommenen Client-Peers.
 - Ergebnis: Missionsstart blendet die gesamte Lobby-Chrome aus und legt die vorhandene 3D-Taktikkarte frei. Rueckkehrpfade stellen sie wieder her. BLUE- und GOLD-Captures zeigen jeweils Welt, Auswahl und HUD desselben Peers.
