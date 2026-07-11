@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1129_tactical_communication_bubble_typography_mode_contract_reconciliation.md`, `docs/tasks/TASK_211_comic_bubble_toggles_cooldowns_and_settings.md`, `docs/tasks/TASK_212_npc_thought_bubble_hold_to_peek_overlay.md`, `docs/tasks/TASK_214_comic_bubble_feedback_playability_smoke.md`
+- Befund: Full-HD-Bubbles nutzten 8-px-Schrift. World-Gedanken verschiedener Units kollabierten wegen Fireteam-first-Dedupe. Ein Context-Fallback umging im Minimalmodus das zentrale Gate; TASK_214 erwartete alte Text-/Rohpayload-Semantik.
+- Aenderung: HUD-Schrift ist 10 px und messbar. HUD dedupliziert pro Fireteam, World pro Unit. Der Context-Fallback fragt die zentrale Settings-Freigabe ab. TASK_214 folgt `command_context` und sichtbarer Per-Anchor-Dedupe.
+- Multiplayer/Performance: Reine Visual-/Settings-Grenze; keine Gameplay-, Event-, Command-, Effect-, RPC- oder Snapshotmutation. Bubble-Gesamtlimits bleiben unveraendert.
+- Risiken/offen: Die Bubble ist im Full-HD-Beleg angenehmer lesbar. Die Mini-Card darunter zeigt weiterhin kleine Statuszeilen und `FT ?` trotz bekannter Teamidentitaet.
+- Lokale Pruefung: TASK_1129 4/4; TASK_212 19/19; TASK_214 36/36; TASK_1128 8/8 Real Window.
+- Naechster Schritt: TASK_1130 - Fireteam Mini-Card Identity and Typography Polish.
+
 ### TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1128_tactical_communication_hud_bubble_density_real_window_readability.md`, `docs/tasks/TASK_1127_tactical_communication_hud_bubble_event_mini_card_anchor_repair.md`
 - Befund: Nach TASK_1127 war die Datenzuordnung gruen, aber Abstand, Bildschirmgrenzen und sichtbare Tail-Zuordnung zweier gleichzeitiger Fireteam-Bubbles waren nicht im echten Fenster belegt.
 - Aenderung: Ein Full-HD-Verifier liest echte HUD-Renderrechtecke, Event-IDs und Mini-Card-Anker. Ein optionaler D3D12-Fensterlauf erzeugt einen PNG-Sichtbeleg. Der bestehende Layoutpfad bestand alle Gates; Produktionscode wurde bewusst nicht veraendert.
 - Multiplayer/Performance: Reiner read-only Sicht-/Geometrievertrag. Keine Gameplay-, Command-, Effect-, Event-, RPC- oder Snapshotmutation und keine neue Runtimearbeit.
-- Risiken/offen: Die 8-px-Bubble-Typografie wirkt im Full-HD-Beleg klein. TASK_214 enthaelt weiterhin vier veraltete Bubble-Erwartungen.
+- Risiken/offen: Die damalige Bubble-Typografie und TASK-214-Vertragsdrift sind mit TASK_1129 geschlossen.
 - Lokale Pruefung: TASK_1128 7/7 headless und 8/8 Real Window; Sichtbeleg `tmp/task_1128_tactical_communication_hud_bubble_density.png`.
-- Naechster Schritt: TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation.
+- Naechster Schritt: abgeschlossen durch TASK_1129.
 
 ### TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair
 - Status: implementiert im Arbeitsstand

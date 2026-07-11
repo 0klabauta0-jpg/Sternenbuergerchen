@@ -15949,6 +15949,9 @@ func record_fireteamleader_feedback_bubble_for_unit(
 func _should_replace_command_feedback_bubble_after_cooldown(payload: Dictionary) -> bool:
 	if payload.is_empty():
 		return false
+	var settings: Dictionary = get_fireteamleader_feedback_bubble_settings()
+	if not bool(COMIC_BUBBLE_SETTINGS_SCRIPT.call("is_category_allowed", settings, COMIC_BUBBLE_SETTINGS_SCRIPT.CATEGORY_FTL_COMMAND_FEEDBACK, payload, false)):
+		return false
 	if String(payload.get("source", "")).strip_edges() != "fireteamleader_command_feedback":
 		return false
 	if String(payload.get("text", "")).strip_edges().is_empty():

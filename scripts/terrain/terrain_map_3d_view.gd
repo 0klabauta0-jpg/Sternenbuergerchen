@@ -6430,11 +6430,13 @@ func _is_feedback_bubble_visual_candidate(feedback_bubble: Dictionary) -> bool:
 func _build_feedback_bubble_anchor_key(feedback_bubble: Dictionary) -> String:
 	var anchor_space: String = String(feedback_bubble.get("anchor_space", "")).strip_edges().to_lower()
 	var fireteam_id: String = String(feedback_bubble.get("fireteam_id", "")).strip_edges().to_lower()
-	if not fireteam_id.is_empty():
+	if anchor_space == "hud" and not fireteam_id.is_empty():
 		return "%s:ft:%s" % [anchor_space, fireteam_id]
 	var unit_id: String = String(feedback_bubble.get("unit_id", "")).strip_edges()
 	if not unit_id.is_empty():
 		return "%s:unit:%s" % [anchor_space, unit_id]
+	if not fireteam_id.is_empty():
+		return "%s:ft:%s" % [anchor_space, fireteam_id]
 	if anchor_space == "hud" and typeof(feedback_bubble.get("hud_anchor_position", null)) == TYPE_VECTOR2:
 		var hud_anchor_position: Vector2 = Vector2(feedback_bubble.get("hud_anchor_position", Vector2.ZERO))
 		return "hud:pos:%d:%d" % [roundi(hud_anchor_position.x / 8.0), roundi(hud_anchor_position.y / 8.0)]
@@ -8644,7 +8646,8 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	label.add_theme_color_override("font_color", TACTICAL_UI_THEME_SCRIPT.COLOR_FEEDBACK_BUBBLE_TEXT)
-	label.add_theme_font_size_override("font_size", 8)
+	var hud_font_size: int = 10
+	label.add_theme_font_size_override("font_size", hud_font_size)
 	label.position = Vector2(8.0, 6.0)
 	label.size = Vector2(maxf(bubble_size.x - 16.0, 1.0), maxf(bubble_size.y - 12.0, 1.0))
 	bubble_root.add_child(label)
@@ -8676,6 +8679,7 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		"hud_bubble_position": bubble_position,
 		"hud_bubble_size": bubble_size,
 		"hud_text_alignment": "top_left",
+		"hud_font_size": hud_font_size,
 		"wrapped_text": display_text,
 		"hud_tail_side": "left",
 		"hud_tail_points_to_anchor": true,

@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1128: Zwei gleichzeitige Fireteam-Rueckmeldungen sind jetzt auch im echten Full-HD-Fenster kollisionsfrei belegt.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1129: Fireteam-Rueckmeldungen sind groesser lesbar, Minimalmodus und NPC-Gedanken folgen wieder ihrem Spieler-Vertrag.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1128</span>
+      <span class="pill good">Letzter Abschluss: TASK_1129</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -291,6 +291,11 @@
           <p>Der echte Full-HD-Lauf zeigt BLUE und GOLD mit je einer eigenen Sprechblase direkt rechts der passenden Mini-Card. Die Blasen schneiden sich nicht, bleiben im Fenster und ihr linker Tail macht die Zuordnung ohne Zusatztext sichtbar.</p>
           <div class="callout success">TASK_1128 7/7 headless und 8/8 Real Window. Die bestehende Positionierungslogik brauchte keine Produktionsaenderung.</div>
         </article>
+        <article class="card wide">
+          <h2>Groessere Bubbles, Ruhiger Minimalmodus TASK_1129</h2>
+          <p>Die Sprechblasen nutzen jetzt 10 statt 8 px. Im Minimalmodus verschwinden normale Bestaetigungen wieder, Warnungen bleiben. Beim gehaltenen Gedankenblick koennen unterschiedliche Teammitglieder ihre eigene kurze Bubble behalten.</p>
+          <div class="callout success">TASK_1129 4/4, Hold-to-Peek 19/19, Bubble-Playability 36/36 und der neue Full-HD-Capture 8/8.</div>
+        </article>
       </div>
     </section>
 
@@ -330,7 +335,8 @@
             <li><strong>Marker-Hierarchie geschlossen:</strong> Contact ist staerker als Selection, Routine-Labels verschwinden und kritische HP-/Vitalhinweise bleiben. Es werden keine Unit- oder Contact-Positionen veraendert.</li>
             <li><strong>FTL-Bubble-Anker geschlossen:</strong> BLUE und GOLD behalten gleichzeitig eventgebundene Rueckmeldungen an ihren linken Mini-Cards. Gesamtlimit und Dedupe bleiben aktiv.</li>
             <li><strong>Bubble-Dichtetest geschlossen:</strong> Zwei eventgebundene Mini-Card-Bubbles bleiben in Full HD kollisionsfrei, im Viewport und eindeutig ihrem Fireteam zugeordnet.</li>
-            <li><strong>Bubble-Typografie offen:</strong> Die aktuelle 8-px-Schrift ist funktional lesbar, wirkt fuer entspanntes Spielen aber klein. Das wird mit den alten TASK-214-Modusannahmen in TASK_1129 geklaert.</li>
+            <li><strong>Bubble-Typografie geschlossen:</strong> 10-px-Schrift bleibt in beiden Full-HD-Bubbles kollisionsfrei und ist im Render-Snapshot messbar.</li>
+            <li><strong>Mini-Card-Identitaet offen:</strong> Die linken Karten zeigen weiterhin sehr kleine Statuszeilen und `FT ?`, obwohl BLUE und GOLD bekannt sind. TASK_1130 nimmt diesen sichtbaren Befund auf.</li>
             <li><strong>Sichttest offen:</strong> Headless-Verifier sind gruen, aber der echte Zwei-Fenster-Blick ist noch nicht abgenommen.</li>
             <li><strong>Preview-Sprache:</strong> Ohne klares Wort <code>PREVIEW</code> kann ein geplanter Move wie ein laufender Move wirken.</li>
           <li><strong>Host/Client:</strong> Beide Fenster sehen denselben naechsten Auftrag; die Fireteam-Karten-Relation ist jetzt als OWN/VIEW/FT ? lesbar.</li>
@@ -382,15 +388,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1128 belegt zwei gleichzeitige, kollisionsfreie Fireteam-Bubbles im echten Full-HD-Fenster. Als naechstes wird die kleine Schrift angenehm lesbar gemacht und der alte Bubble-Modusvertrag mit dem heutigen Verhalten abgeglichen.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1129 macht die Fireteam-Bubbles groesser lesbar, stellt den Minimalmodus wieder her und zeigt Unit-Gedanken getrennt. Als naechstes werden Identitaet und kleine Statuszeilen der linken Fireteam-Mini-Cards bereinigt.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability (7/7 headless, 8/8 Real Window)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation (TASK_212 19/19, TASK_214 36/36)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1130 - Fireteam Mini-Card Identity and Typography Polish" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1026,10 +1032,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation"
+            recommended_next_task: "TASK_1130 - Fireteam Mini-Card Identity and Typography Polish"
           },
           metadata: {
-            generated_for_task: "TASK_1128",
+            generated_for_task: "TASK_1129",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
