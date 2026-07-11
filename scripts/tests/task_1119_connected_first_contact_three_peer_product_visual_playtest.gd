@@ -139,7 +139,8 @@ func _run() -> void:
 			"selection": Array(controller.get("_selected_fireteam_ids")),
 		}
 		print("TASK1119 %s FRAME DEBUG %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
-		_assert(float(primary_snapshot.get("camera_size", 99.0)) >= 24.0 and float(primary_snapshot.get("camera_size", 99.0)) <= 30.0 and not String(controller.get("_connected_first_contact_world_frame_signature")).is_empty(), "%s product world frames local Fireteam and Contact once: %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
+		_assert(float(primary_snapshot.get("camera_size", 99.0)) >= 24.0 and float(primary_snapshot.get("camera_size", 99.0)) <= 32.0 and not String(controller.get("_connected_first_contact_world_frame_signature")).is_empty(), "%s product world frames the complete local Fireteam and Contact once: %s" % [fireteam_id.to_upper(), JSON.stringify(frame_debug)])
+		_assert(_local_contact_frame_is_hud_clear(controller, primary_view), "%s complete local Fireteam and Contact stay inside the HUD-clear tactical area" % fireteam_id.to_upper())
 		_assert(int(primary_snapshot.get("dropship_visual_count", -1)) == 0, "%s product Contact world removes completed empty return Dropships" % fireteam_id.to_upper())
 		perspective_signatures.append(String(perspective.get("perspective_signature", "")))
 	_assert(perspective_signatures.size() == 2 and not perspective_signatures[0].is_empty() and perspective_signatures[0] != perspective_signatures[1], "Product peers expose distinct stable HUD perspectives")
@@ -194,7 +195,7 @@ func _prepare_parallel_live_contacts(controller: Node) -> void:
 
 func _place_fireteam(controller: Node, fireteam_id: String, center: Vector2) -> void:
 	var units: Array = Array(controller.call("_get_fireteam_units", fireteam_id, true))
-	var offsets: Array[Vector2] = [Vector2(-32.0, -32.0), Vector2(32.0, -32.0), Vector2(-32.0, 32.0), Vector2(32.0, 32.0)]
+	var offsets: Array[Vector2] = [Vector2(-32.0, -32.0), Vector2(32.0, -32.0), Vector2(-32.0, 32.0), Vector2(32.0, 32.0), Vector2.ZERO]
 	for index in range(mini(units.size(), offsets.size())):
 		if units[index] is Node2D:
 			(units[index] as Node2D).global_position = center + offsets[index]
@@ -234,6 +235,22 @@ func _fireteam_projection_is_readable(controller: Node, view: Node, fireteam_id:
 	if not readable:
 		print("TASK1119 FORMATION DEBUG %s" % JSON.stringify(metrics))
 	return readable
+
+
+func _local_contact_frame_is_hud_clear(controller: Node, view: Node) -> bool:
+	if view == null or not view.has_method("world_to_screen_position") or not controller.has_method("_build_connected_first_contact_frame_positions"):
+		return false
+	var positions: Array = Array(controller.call("_build_connected_first_contact_frame_positions", controller.call("get_contact_snapshot")))
+	if positions.size() < 2:
+		return false
+	var tactical_area := Rect2(Vector2(340.0, 110.0), Vector2(1180.0, 670.0))
+	for position_variant in positions:
+		if typeof(position_variant) != TYPE_VECTOR2:
+			return false
+		var screen_position: Vector2 = Vector2(view.call("world_to_screen_position", Vector2(position_variant)))
+		if not tactical_area.has_point(screen_position):
+			return false
+	return true
 
 
 func _has_fireteam_event(events: Array, fireteam_id: String) -> bool:
