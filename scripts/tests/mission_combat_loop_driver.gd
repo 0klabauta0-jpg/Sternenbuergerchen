@@ -449,7 +449,7 @@ func get_pending_network_mission_interaction_snapshot() -> Dictionary:
 
 
 func _on_network_command_accepted(command: Dictionary, peer_id: int) -> void:
-	if String(command.get("source_context", "")).strip_edges() != "mission_interaction_door_breach_command":
+	if not ["mission_interaction_door_breach_command", "mission_interaction_use_intent_command"].has(String(command.get("source_context", "")).strip_edges()):
 		return
 	var interaction_id: String = String(command.get("interaction_id", "")).strip_edges()
 	var unit_id: String = String(command.get("unit_id", "")).strip_edges()
