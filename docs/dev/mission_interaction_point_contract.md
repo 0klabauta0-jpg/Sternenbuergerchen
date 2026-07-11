@@ -654,5 +654,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Der lokale Guard prueft 2000 Snapshots mit acht parallelen States gegen 250 ms und maximal 250 Label-Updates.
 - TASK_1098 misst rund 75 ms und 201 Updates; kein `_update_ui()` wird in den Progress-Hotpath eingefuehrt.
 
+## Connected Interaction Snapshot Payload Contract
+- Interaction-State bleibt Bestandteil des bestehenden autoritativen State-Snapshots; es entsteht kein eigenes RPC und keine zweite Replikationswahrheit.
+- `MultiplayerSnapshotContract.build_serialization_metrics()` misst denselben `var_to_bytes`-/ZSTD-/1000-Byte-Chunk-Pfad wie der Runtime-Transport, ohne RPCs oder State-Mutation auszufuehren.
+- Die Metrik meldet Interaction-Anzahl, Raw-Bytes, Wire-Bytes, Kompressionsstatus, Kompressionsverhaeltnis, Chunkzahl und Messzeit.
+- Der Guard misst leere sowie 1, 8, 32 und 64 parallele Interaction-States. 64 States duerfen gegenueber leerer Baseline maximal 8 KiB Wire-Payload und acht Chunks addieren.
+- TASK_1099 misst lokal 1775 zusaetzliche Wire-Bytes, zwei zusaetzliche Chunks und deutlich unter 1 ms fuer 64 States. Dieser Befund rechtfertigt aktuell keine Delta-Sonderarchitektur.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

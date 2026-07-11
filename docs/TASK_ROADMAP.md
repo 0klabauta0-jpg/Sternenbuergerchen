@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1099 - Connected Interaction Snapshot Payload Budget (implementiert im Arbeitsstand)
+- Grundlage: Der lokale HUD-Hotpath war begrenzt, die zusaetzlichen Host-Client-Kosten wachsender Interaction-States aber noch ungemessen.
+- Ergebnis: Gemeinsame Snapshot-Metriken messen Raw-/Wire-Bytes, ZSTD, Chunkzahl und Interaction-Anzahl. 64 States addieren nur 1775 Wire-Bytes und zwei Chunks gegenueber leerer Baseline.
+- Verifikation: TASK_1099 38/38 inklusive Conditional-ZSTD-Fallback und Reverse-Order-Determinismus; groesste lokale Transportmessung deutlich unter 1 ms.
+- Entscheidung: Kein Interaction-Sonderprotokoll und keine Delta-Replikation ohne spaetere Budgetverletzung.
+- Naechster Schritt: TASK_1100 - Connected Interaction Snapshot Loss/Jitter Resilience.
+
 ## TASK_1098 - Connected Interaction Progress Performance Budget (implementiert im Arbeitsstand)
 - Grundlage: Mehrere parallele Fireteams durften weder die falsche Interaction anzeigen noch Snapshot-HUD-Arbeit vervielfachen.
 - Ergebnis: Bevorzugte aktive Interaction gewinnt; 2000 Snapshots mit acht States benoetigen rund 75 ms und 201 Label-Updates.
