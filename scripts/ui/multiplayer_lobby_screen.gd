@@ -3,6 +3,7 @@ extends Control
 signal back_requested
 
 const MAIN_MENU_SCENE_PATH: String = "res://scenes/ui/main_menu.tscn"
+const MISSION_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const MULTIPLAYER_SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_session.gd")
 const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
@@ -54,6 +55,8 @@ var _map_consent_state: Dictionary = {
 var _audio_event_bus = null
 var _background_rect: TextureRect = null
 var _background_shade: ColorRect = null
+var _mission_host: Node = null
+var _active_mission: Node = null
 var _player_name_edit: LineEdit = null
 var _player_roster_option: OptionButton = null
 var _player_team_option: OptionButton = null
@@ -68,6 +71,7 @@ func _ready() -> void:
 	_ensure_background_nodes()
 	_apply_background_texture()
 	_ensure_multiplayer_session()
+	_ensure_mission_host()
 	_ensure_audio_event_bus()
 	_ensure_lobby_setup_controls()
 	_enforce_lobby_panel_geometry()
@@ -124,6 +128,10 @@ func start_mission() -> bool:
 	var ok: bool = bool(_session.call("request_start_mission"))
 	_play_ui_sfx("confirm" if ok else "warning", "start_mission")
 	return ok
+
+
+func has_active_mission() -> bool:
+	return _active_mission != null and is_instance_valid(_active_mission)
 
 
 func return_to_main_menu() -> void:
@@ -494,8 +502,20 @@ func _ensure_multiplayer_session() -> void:
 		_session.session_snapshot_changed.connect(_on_session_snapshot_changed)
 	if not _session.mission_start_requested.is_connected(_on_session_mission_start_requested):
 		_session.mission_start_requested.connect(_on_session_mission_start_requested)
+	if not _session.mission_assignments_changed.is_connected(_on_session_mission_assignments_changed):
+		_session.mission_assignments_changed.connect(_on_session_mission_assignments_changed)
+	if not _session.mission_rejoin_peer_block_changed.is_connected(_on_session_rejoin_peer_block_changed):
+		_session.mission_rejoin_peer_block_changed.connect(_on_session_rejoin_peer_block_changed)
 	if not _session.session_disconnected.is_connected(_on_session_disconnected):
 		_session.session_disconnected.connect(_on_session_disconnected)
+
+
+func _ensure_mission_host() -> void:
+	_mission_host = get_node_or_null("MissionHost")
+	if _mission_host == null:
+		_mission_host = Node.new()
+		_mission_host.name = "MissionHost"
+		add_child(_mission_host)
 
 
 func _configure_default_inputs() -> void:
@@ -622,18 +642,106 @@ func _on_map_reject_pressed() -> void:
 
 
 func _on_session_snapshot_changed(snapshot: Dictionary) -> void:
+	if has_active_mission() and not bool(snapshot.get("mission_started", false)):
+		_retire_active_mission()
+		_set_lobby_panel_visible(true)
 	_apply_session_snapshot(snapshot)
 
 
 func _on_session_mission_start_requested(assignments: Dictionary) -> void:
 	_mission_start_request_count += 1
 	_last_start_assignments = assignments.duplicate(true)
-	_status_label.text = "Mission start requested by host."
+	_launch_mission(assignments)
+	_status_label.text = "Mission running."
 	_refresh_lobby_controls(get_session_snapshot())
 
 
+func _on_session_mission_assignments_changed(assignments: Dictionary) -> void:
+	_last_start_assignments = assignments.duplicate(true)
+	if has_active_mission():
+		_apply_session_assignments_to_simulation_root(_active_mission.get_node_or_null("SimulationRoot"), assignments)
+	_apply_session_snapshot(get_session_snapshot())
+
+
+func _on_session_rejoin_peer_block_changed(peer_id: int, blocked: bool) -> void:
+	if not has_active_mission():
+		return
+	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("set_snapshot_peer_blocked"):
+		simulation_root.call("set_snapshot_peer_blocked", peer_id, blocked)
+
+
 func _on_session_disconnected(_message: String) -> void:
+	_release_active_mission()
+	_set_lobby_panel_visible(true)
 	_refresh_from_session()
+
+
+func _launch_mission(assignments: Dictionary) -> void:
+	_release_active_mission()
+	_ensure_mission_host()
+	var mission_instance: Node = MISSION_SCENE.instantiate()
+	_apply_session_assignments_to_simulation_root(mission_instance.get_node_or_null("SimulationRoot"), assignments)
+	_mission_host.add_child(mission_instance)
+	_active_mission = mission_instance
+	var combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
+	if combat_driver != null and combat_driver.has_signal("combat_resolved"):
+		var resolved_callable := Callable(self, "_on_product_mission_resolved")
+		if not combat_driver.is_connected("combat_resolved", resolved_callable):
+			combat_driver.connect("combat_resolved", resolved_callable)
+	if not bool(get_session_snapshot().get("is_host", false)):
+		_session.rpc_id(1, "notify_mission_runtime_ready")
+	_set_lobby_panel_visible(false)
+
+
+func _release_active_mission() -> void:
+	if _active_mission != null and is_instance_valid(_active_mission):
+		_active_mission.queue_free()
+	_active_mission = null
+
+
+func _retire_active_mission() -> void:
+	if not has_active_mission():
+		return
+	var retiring_mission: Node = _active_mission
+	_active_mission = null
+	_free_retired_mission_after_network_drain(retiring_mission)
+
+
+func _free_retired_mission_after_network_drain(retiring_mission: Node) -> void:
+	for _frame in range(4):
+		await get_tree().process_frame
+	if retiring_mission != null and is_instance_valid(retiring_mission):
+		retiring_mission.queue_free()
+
+
+func _set_lobby_panel_visible(visible: bool) -> void:
+	var panel := get_node_or_null("Panel") as Control
+	if panel != null:
+		panel.visible = visible
+
+
+func _on_product_mission_resolved(_mission_result: Dictionary) -> void:
+	if not bool(get_session_snapshot().get("is_host", false)):
+		return
+	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot") if has_active_mission() else null
+	if simulation_root != null and simulation_root.has_method("set_snapshot_broadcast_paused"):
+		simulation_root.call("set_snapshot_broadcast_paused", true)
+	_retire_active_mission()
+	_set_lobby_panel_visible(true)
+	_session.call("complete_mission")
+
+
+func _apply_session_assignments_to_simulation_root(simulation_root: Node, assignments: Dictionary) -> void:
+	if simulation_root == null:
+		return
+	simulation_root.set("is_server_authoritative", true)
+	if simulation_root.has_method("set_peer_team_assignments"):
+		simulation_root.call("set_peer_team_assignments", Dictionary(assignments.get("peer_teams", {})).duplicate(true))
+	if simulation_root.has_method("set_peer_role_assignments"):
+		simulation_root.call("set_peer_role_assignments", Dictionary(assignments.get("peer_roles", {})).duplicate(true))
+	if simulation_root.has_method("set_peer_fireteam_assignments"):
+		simulation_root.call("set_peer_fireteam_assignments", Dictionary(assignments.get("peer_fireteams", {})).duplicate(true))
 
 
 func _refresh_from_session() -> void:

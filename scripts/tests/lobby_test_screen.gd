@@ -81,6 +81,10 @@ func _ensure_multiplayer_session() -> void:
 		_session.session_snapshot_changed.connect(_on_session_snapshot_changed)
 	if not _session.mission_start_requested.is_connected(_on_session_mission_start_requested):
 		_session.mission_start_requested.connect(_on_session_mission_start_requested)
+	if not _session.mission_assignments_changed.is_connected(_on_session_mission_assignments_changed):
+		_session.mission_assignments_changed.connect(_on_session_mission_assignments_changed)
+	if not _session.mission_rejoin_peer_block_changed.is_connected(_on_session_rejoin_peer_block_changed):
+		_session.mission_rejoin_peer_block_changed.connect(_on_session_rejoin_peer_block_changed)
 	if not _session.session_disconnected.is_connected(_on_session_disconnected):
 		_session.session_disconnected.connect(_on_session_disconnected)
 
@@ -144,6 +148,20 @@ func _on_session_mission_start_requested(assignments: Dictionary) -> void:
 	_launch_mission(assignments)
 
 
+func _on_session_mission_assignments_changed(assignments: Dictionary) -> void:
+	if _active_mission == null:
+		return
+	_apply_session_assignments_to_simulation_root(_active_mission.get_node_or_null("SimulationRoot"), assignments)
+
+
+func _on_session_rejoin_peer_block_changed(peer_id: int, blocked: bool) -> void:
+	if _active_mission == null:
+		return
+	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("set_snapshot_peer_blocked"):
+		simulation_root.call("set_snapshot_peer_blocked", peer_id, blocked)
+
+
 func _on_session_disconnected(_message: String) -> void:
 	_release_active_mission()
 	_hide_debrief()
@@ -166,6 +184,8 @@ func _launch_mission(assignments: Dictionary) -> void:
 
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	if not bool(get_session_snapshot().get("is_host", false)):
+		_session.rpc_id(1, "notify_mission_runtime_ready")
 	_connect_mission_signals(mission_instance)
 	_set_lobby_visible(false)
 	_set_status_text("Mission running...")
@@ -181,7 +201,9 @@ func _apply_session_assignments_to_simulation_root(simulation_root: Node, assign
 	if simulation_root.has_method("set_peer_team_assignments"):
 		simulation_root.call("set_peer_team_assignments", team_assignments)
 
-	if simulation_root.has_method("set_peer_role"):
+	if simulation_root.has_method("set_peer_role_assignments"):
+		simulation_root.call("set_peer_role_assignments", Dictionary(assignments.get("peer_roles", {})).duplicate(true))
+	elif simulation_root.has_method("set_peer_role"):
 		var role_assignments: Dictionary = Dictionary(assignments.get("peer_roles", {}))
 		for peer_id_variant in role_assignments.keys():
 			simulation_root.call("set_peer_role", int(peer_id_variant), String(role_assignments[peer_id_variant]))

@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1101 - Connected Interaction Reconnect State Recovery
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1101_connected_interaction_reconnect_state_recovery.md`, `docs/dev/mission_interaction_point_contract.md`, `scripts/multiplayer/multiplayer_session.gd`
+- Stand: Ein Client-Disconnect setzt den Host-Sessionstatus nicht mehr auf Lobby zurueck. Host-Mission und Interaction-State laufen weiter.
+- Rejoin: Ein separater, nicht publizierter 256-Bit-Token bindet die host-autorisierte Identitaet an die neue Peer-ID. Malformed/falsche Tokens erhalten weder Mission noch Slot; Client-Setup darf Live-Team-Autoritaet nicht umschreiben.
+- Produktpfad: `scenes/ui/multiplayer_lobby.tscn` startet Host-/Client-Missioninstanzen. Nur der noch nicht authentifizierte Peer ist fuer Snapshot-RPCs gesperrt; sein reliable Mission-Ready-ACK hebt die Sperre auf. Combat-Result beendet beide Seiten sauber.
+- Risiken/offen: Host-Abbruch/Host-Migration bleibt ausserhalb des Scopes. Zwei gleichzeitig arbeitende Fireteams sind als naechster Konsistenzfall offen.
+- Lokale Pruefung: TASK_1101 46/46 auf der Produkt-Lobby, TASK_1083 24/24, TASK_1091 17/17, TASK_167 22/22, TASK_227 27/27, TASK_166 15/15 und TASK_1100 31/31.
+- Naechster Schritt: TASK_1102 - Parallel Fireteam Interaction Ownership and Recovery.
+
 ### TASK_1100 - Connected Interaction Snapshot Loss/Jitter Resilience
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1100_connected_interaction_snapshot_loss_jitter_resilience.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1099

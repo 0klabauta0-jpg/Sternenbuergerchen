@@ -3,6 +3,8 @@ extends Node
 
 signal session_snapshot_changed(snapshot: Dictionary)
 signal mission_start_requested(assignments: Dictionary)
+signal mission_assignments_changed(assignments: Dictionary)
+signal mission_rejoin_peer_block_changed(peer_id: int, blocked: bool)
 signal session_disconnected(message: String)
 
 const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
@@ -60,6 +62,9 @@ var _last_status_text: String = "Ready. Host or join a local test session."
 var _last_error: String = ""
 var _mission_started: bool = false
 var _last_start_assignments: Dictionary = {}
+var _pending_rejoin_identities_by_token: Dictionary = {}
+var _reconnect_tokens_by_peer_id: Dictionary = {}
+var _local_reconnect_token: String = ""
 var _local_is_host: bool = false
 var _host_map_manifest: Dictionary = {}
 var _map_transfer_state: Dictionary = {
@@ -84,6 +89,7 @@ var _upnp_mapping: Dictionary = {
 
 
 func _ready() -> void:
+	_ensure_local_reconnect_token()
 	_connect_multiplayer_signals()
 	_emit_snapshot()
 
@@ -176,6 +182,8 @@ func complete_mission() -> void:
 		_connection_state = STATE_HOSTING if _is_authority_session() else STATE_JOINED
 	for peer_id in _peers_by_id.keys():
 		_set_peer_ready(int(peer_id), false)
+	_pending_rejoin_identities_by_token.clear()
+	_reconnect_tokens_by_peer_id.clear()
 	_refresh_status_text()
 	_emit_snapshot()
 	_broadcast_snapshot()
@@ -295,7 +303,7 @@ func set_lobby_player_setup(setup: Dictionary) -> bool:
 	if _peers_by_id.has(_get_local_peer_id()):
 		_apply_local_setup_to_peer(_get_local_peer_id())
 	if _connection_state == STATE_JOINED and not _is_authority_session() and _has_active_peer():
-		request_update_player_setup.rpc_id(HOST_PEER_ID, get_lobby_setup_snapshot())
+		request_update_player_setup.rpc_id(HOST_PEER_ID, _build_player_setup_request())
 	if changed:
 		_emit_snapshot()
 		_broadcast_snapshot()
@@ -442,14 +450,32 @@ func request_update_player_setup(setup: Dictionary) -> void:
 	if not _peers_by_id.has(peer_id):
 		_upsert_peer(peer_id, peer_id == HOST_PEER_ID)
 	var peer_data: Dictionary = Dictionary(_peers_by_id.get(peer_id, {})).duplicate(true)
+	var reconnect_token: String = _normalize_reconnect_token(String(setup.get("reconnect_token", "")))
+	var rebound: bool = false
+	if _mission_started and peer_id != HOST_PEER_ID:
+		if not reconnect_token.is_empty():
+			rebound = _apply_pending_rejoin_identity(peer_id, reconnect_token)
+			peer_data = Dictionary(_peers_by_id.get(peer_id, {})).duplicate(true)
+		var bound_token: String = String(_reconnect_tokens_by_peer_id.get(peer_id, ""))
+		if not rebound and (reconnect_token.is_empty() or bound_token.is_empty() or bound_token != reconnect_token):
+			_reject_rejoin_peer(peer_id)
+			return
 	peer_data["display_name"] = _normalize_player_name(String(setup.get("player_name", peer_data.get("display_name", "Player"))))
-	peer_data["team_id"] = _normalize_team_slot(String(setup.get("team_slot", peer_data.get("team_id", client_team_id))))
-	peer_data["roster_entry_path"] = String(setup.get("roster_path", peer_data.get("roster_entry_path", ""))).strip_edges()
-	peer_data["connection_mode"] = _normalize_connection_mode(String(setup.get("connection_mode", CONNECTION_MODE_LAN)))
+	if not _mission_started:
+		peer_data["team_id"] = _normalize_team_slot(String(setup.get("team_slot", peer_data.get("team_id", client_team_id))))
+		peer_data["roster_entry_path"] = String(setup.get("roster_path", peer_data.get("roster_entry_path", ""))).strip_edges()
+		peer_data["connection_mode"] = _normalize_connection_mode(String(setup.get("connection_mode", CONNECTION_MODE_LAN)))
+		if not reconnect_token.is_empty():
+			_reconnect_tokens_by_peer_id[peer_id] = reconnect_token
 	_peers_by_id[peer_id] = peer_data
+	if rebound:
+		_last_start_assignments = build_session_assignments()
+		mission_assignments_changed.emit(_last_start_assignments.duplicate(true))
 	_refresh_status_text()
 	_emit_snapshot()
 	_broadcast_snapshot()
+	if rebound:
+		_receive_start_mission.rpc_id(peer_id, _last_start_assignments)
 
 
 @rpc("any_peer", "reliable")
@@ -474,6 +500,8 @@ func _receive_session_snapshot(snapshot: Dictionary) -> void:
 		return
 
 	_apply_authority_snapshot(snapshot)
+	if _mission_started:
+		mission_assignments_changed.emit(Dictionary(snapshot.get("assignments", {})).duplicate(true))
 	_emit_snapshot()
 
 
@@ -488,6 +516,23 @@ func _receive_start_mission(assignments: Dictionary) -> void:
 	_last_status_text = "Mission running..."
 	_emit_snapshot()
 	mission_start_requested.emit(assignments.duplicate(true))
+
+
+@rpc("authority", "reliable")
+func _receive_rejoin_rejected(message: String) -> void:
+	if _is_authority_session():
+		return
+	call_deferred("_handle_disconnect", message)
+
+
+@rpc("any_peer", "reliable")
+func notify_mission_runtime_ready() -> void:
+	if not _is_authority_session() or not _mission_started:
+		return
+	var peer_id: int = multiplayer.get_remote_sender_id()
+	if peer_id <= HOST_PEER_ID or not _reconnect_tokens_by_peer_id.has(peer_id):
+		return
+	mission_rejoin_peer_block_changed.emit(peer_id, false)
 
 
 func _connect_multiplayer_signals() -> void:
@@ -507,6 +552,11 @@ func _on_peer_connected(peer_id: int) -> void:
 	if not _is_authority_session():
 		return
 	_upsert_peer(peer_id, false)
+	if _mission_started:
+		mission_rejoin_peer_block_changed.emit(peer_id, true)
+		_refresh_status_text()
+		_emit_snapshot()
+		return
 	_refresh_status_text()
 	_emit_snapshot()
 	_broadcast_snapshot()
@@ -514,8 +564,17 @@ func _on_peer_connected(peer_id: int) -> void:
 
 func _on_peer_disconnected(peer_id: int) -> void:
 	if _is_authority_session():
+		if _mission_started and _peers_by_id.has(peer_id):
+			var disconnected_identity: Dictionary = Dictionary(_peers_by_id.get(peer_id, {})).duplicate(true)
+			var reconnect_token: String = _normalize_reconnect_token(String(_reconnect_tokens_by_peer_id.get(peer_id, "")))
+			if not reconnect_token.is_empty():
+				_pending_rejoin_identities_by_token[reconnect_token] = disconnected_identity
+		_reconnect_tokens_by_peer_id.erase(peer_id)
 		_peers_by_id.erase(peer_id)
-		_mission_started = false
+		if _mission_started:
+			_last_start_assignments = build_session_assignments()
+			mission_assignments_changed.emit(_last_start_assignments.duplicate(true))
+			mission_rejoin_peer_block_changed.emit(peer_id, false)
 		_refresh_status_text()
 		_emit_snapshot()
 		_broadcast_snapshot()
@@ -527,7 +586,7 @@ func _on_peer_disconnected(peer_id: int) -> void:
 func _on_connected_to_server() -> void:
 	_connection_state = STATE_JOINED
 	_last_status_text = "Connected to host. Waiting for lobby state..."
-	request_update_player_setup.rpc_id(HOST_PEER_ID, get_lobby_setup_snapshot())
+	request_update_player_setup.rpc_id(HOST_PEER_ID, _build_player_setup_request())
 	_emit_snapshot()
 
 
@@ -564,6 +623,8 @@ func _reset_session_state(emit_signal: bool = true) -> void:
 	_last_status_text = "Ready. Host or join a local test session."
 	_mission_started = false
 	_last_start_assignments.clear()
+	_pending_rejoin_identities_by_token.clear()
+	_reconnect_tokens_by_peer_id.clear()
 	_host_map_manifest.clear()
 	_clear_upnp_mapping()
 	_reset_upnp_mapping_snapshot()
@@ -602,6 +663,50 @@ func _upsert_peer(peer_id: int, is_host_peer: bool) -> void:
 	_peers_by_id[peer_id] = existing
 	if peer_id == _get_local_peer_id() or (is_host_peer and _local_is_host):
 		_apply_local_setup_to_peer(peer_id)
+
+
+func _apply_pending_rejoin_identity(peer_id: int, reconnect_token: String) -> bool:
+	if peer_id <= HOST_PEER_ID or reconnect_token.is_empty() or not _pending_rejoin_identities_by_token.has(reconnect_token):
+		return false
+	var pending_identity: Dictionary = Dictionary(_pending_rejoin_identities_by_token.get(reconnect_token, {})).duplicate(true)
+	var current: Dictionary = Dictionary(_peers_by_id.get(peer_id, {})).duplicate(true)
+	for key in ["display_name", "team_id", "role_id", "fireteam_ids", "roster_entry_path", "connection_mode"]:
+		if pending_identity.has(key):
+			current[key] = pending_identity[key]
+	current["peer_id"] = peer_id
+	current["is_host"] = false
+	current["ready"] = true
+	current["fireteam_ids"] = _normalize_fireteam_ids(current.get("fireteam_ids", client_fireteam_ids))
+	current = _apply_peer_roster_identity(peer_id, current, false)
+	_peers_by_id[peer_id] = current
+	_reconnect_tokens_by_peer_id[peer_id] = reconnect_token
+	_pending_rejoin_identities_by_token.erase(reconnect_token)
+	return true
+
+
+func _reject_rejoin_peer(peer_id: int) -> void:
+	_peers_by_id.erase(peer_id)
+	_receive_rejoin_rejected.rpc_id(peer_id, "Reconnect identity rejected. Back in lobby.")
+
+
+func _ensure_local_reconnect_token() -> void:
+	if not _local_reconnect_token.is_empty():
+		return
+	_local_reconnect_token = Crypto.new().generate_random_bytes(32).hex_encode()
+
+
+func _normalize_reconnect_token(value: String) -> String:
+	var token: String = value.strip_edges().to_lower()
+	if token.length() != 64 or not token.is_valid_hex_number(false):
+		return ""
+	return token
+
+
+func _build_player_setup_request() -> Dictionary:
+	_ensure_local_reconnect_token()
+	var setup: Dictionary = get_lobby_setup_snapshot()
+	setup["reconnect_token"] = _local_reconnect_token
+	return setup
 
 
 func _set_peer_ready(peer_id: int, ready: bool) -> void:
