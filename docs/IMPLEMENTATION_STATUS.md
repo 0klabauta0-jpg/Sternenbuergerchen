@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1108 - Embarked Selected Fireteam HUD Contract Reconciliation
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1108_embarked_selected_fireteam_hud_contract_reconciliation.md`, `docs/tasks/TASK_1058_embarked_fireteam_selected_hud_truth.md`, `scripts/tests/task_503_mission_dropship_fireteam_hud_truth.gd`
+- Befund: TASK_180 erwartete noch disabled Boden-Member-Cards fuer ein eingeschifftes Fireteam. Das widersprach dem spaeteren TASK_1058-Vertrag und interpretierte ausserdem die erste beliebige Mini-Card als das ausgewaehlte Inbound-Team.
+- Aenderung: TASK_180 prueft jetzt die konkrete Fireteam-ID. Das eingeschiffte Team fehlt in der Boden-Mini-Liste, bleibt Quelle des #17-Kontexts und zeigt genau den Dropship-Hinweis ohne Operator-Cards.
+- Runtime: Keine Produktionsaenderung. Nach Deboarding erscheinen dieselben Member-Cards ueber den bestehenden Ground-Unit-Pfad wieder.
+- Risiken/offen: Der Einzelteam-Handoff ist klar. Wechsel zwischen mehreren gleichzeitig eingeschifften oder unterschiedlich weit deboardeten Fireteams braucht noch einen fokussierten HUD-Konsistenztrace.
+- Lokale Pruefung: TASK_180 98/98, TASK_503 10/10, TASK_396 17/17 und TASK_1107 9/9.
+- Naechster Schritt: TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency.
+
 ### TASK_1107 - Mission Control Fixed Layout Repair
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1107_mission_control_fixed_layout_repair.md`, `scripts/meta/drop_light_layout_contract.gd`, `docs/reports/playability_layout_clipping_scrollbar_report.md`

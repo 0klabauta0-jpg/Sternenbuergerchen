@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1108 - Embarked Selected Fireteam HUD Contract Reconciliation (implementiert im Arbeitsstand)
+- Grundlage: TASK_180 meldete eine leere Member-Card-Lane, erwartete dabei aber den durch TASK_1058 bewusst ersetzten alten Inbound-Card-Vertrag.
+- Ergebnis: Der historische Verifier prueft jetzt die konkrete Auswahl- und Ground-Truth: #17 behaelt die Fireteam-ID, zeigt `Fireteam im Dropship.`, rendert keine Boden-Operator-Cards und fuehrt das Team nicht in der linken Boden-Mini-Liste.
+- Architektur: Keine UI- oder Gameplay-Produktion geaendert. Der aktuelle Embarked-/Deployed-Filter bleibt die gemeinsame Wahrheit fuer Mini- und Selected-Cards.
+- Verifikation: TASK_180 98/98, TASK_503 10/10, Zwei-Dropship-Deboarding TASK_396 17/17, TASK_1107 9/9.
+- Naechster Schritt: TASK_1109 - Multi-Dropship Fireteam Selection HUD Consistency.
+
 ## TASK_1107 - Mission Control Fixed Layout Repair (implementiert im Arbeitsstand)
 - Grundlage: Nach TASK_1106 blieb in TASK_258 nur `#18 Mission Control` ausserhalb seines festen Contract-Rechtecks.
 - Ursache: Eine historische TASK_835-Mindestbreite von 420 Pixeln verbreiterte das 344-Pixel-Panel inklusive Innenraendern auf 448 Pixel.

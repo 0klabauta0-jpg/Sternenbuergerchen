@@ -40,7 +40,7 @@ func _run_tests() -> void:
 	print("=== TASK_180 Mission Drop Light Fixed HUD Layout Verifier ===")
 	await _test_mission_hud_fixed_window_positions()
 	await _test_mission_hud_buttons_keep_existing_paths()
-	await _test_inbound_fireteam_cards_remain_selectable()
+	await _test_embarked_fireteam_selection_keeps_dropship_truth()
 	await _test_styling_pass_does_not_mutate_simulation_root()
 	_test_mission_runtime_boundary_files()
 
@@ -159,7 +159,7 @@ func _test_mission_hud_buttons_keep_existing_paths() -> void:
 	await _wait_frames(2)
 
 
-func _test_inbound_fireteam_cards_remain_selectable() -> void:
+func _test_embarked_fireteam_selection_keeps_dropship_truth() -> void:
 	var scene: Node = MISSION_TEST_SCENE.instantiate()
 	root.add_child(scene)
 	await _wait_frames(4)
@@ -195,18 +195,19 @@ func _test_inbound_fireteam_cards_remain_selectable() -> void:
 
 	var mini_host := scene.get_node("TacticalUI/FireteamMiniPanel/MiniMargin/MiniVBox/MiniCardsScroll/MiniCardsVBox") as VBoxContainer
 	var selected_card_row := scene.get_node("TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow") as HBoxContainer
-	_assert(mini_host.get_child_count() > 0, "Inbound dropship fireteam stays visible in the top-left mini cards")
-	var mini_card: Control = null
-	if mini_host.get_child_count() > 0:
-		mini_card = mini_host.get_child(0) as Control
-	_assert(mini_card != null and mini_card.modulate.a < 1.0, "Inbound dropship fireteam mini card is greyed out while in transit")
-	_assert(mini_card != null and bool(mini_card.get_meta("fob_fireteam_reference_card", false)), "Top-left inbound fireteam uses the same reference-card component as dropship fireteams")
-	var leader_portrait: TextureRect = null
-	if mini_card != null:
-		leader_portrait = mini_card.get_node_or_null("Margin/VBox/HeaderRow/LeaderPortraitRect") as TextureRect
-	_assert(leader_portrait != null and leader_portrait.texture != null, "Top-left fireteam mini card shows the fireteam leader portrait")
+	var mini_fireteam_ids := PackedStringArray()
+	for mini_card_variant in mini_host.get_children():
+		var mini_card := mini_card_variant as Control
+		if mini_card == null:
+			continue
+		var mini_fireteam_id: String = String(mini_card.get_meta("fireteam_id", "")).strip_edges().to_lower()
+		if not mini_fireteam_id.is_empty():
+			mini_fireteam_ids.append(mini_fireteam_id)
+	_assert(not mini_fireteam_ids.has(fireteam_id), "Embarked selected fireteam stays out of the left ground mini-card list")
 	_assert(String(selected_card_row.get_meta("selected_member_cards_fireteam_id", "")).strip_edges().to_lower() == fireteam_id, "#17 member-card lane is sourced from the selected fireteam")
-	_assert(selected_card_row.get_child_count() >= max(1, units.size()), "Selecting the inbound fireteam populates #17's right member-card lane")
+	_assert(selected_card_row.get_child_count() == 1 and selected_card_row.get_child(0) is Label, "Selected embarked fireteam renders one status hint instead of ground member cards")
+	var embarked_hint := selected_card_row.get_child(0) as Label if selected_card_row.get_child_count() == 1 else null
+	_assert(embarked_hint != null and embarked_hint.text == "Fireteam im Dropship.", "Selected embarked fireteam explains its Dropship state in #17")
 
 	scene.queue_free()
 	await _wait_frames(2)
