@@ -10,15 +10,25 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1130 - Fireteam Mini-Card Identity and Typography Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1130_fireteam_mini_card_identity_typography_polish.md`, `docs/tasks/TASK_773_station_reentry_host_client_identity_cue_polish.md`, `docs/tasks/TASK_1129_tactical_communication_bubble_typography_mode_contract_reconciliation.md`
+- Befund: Normale lokale Missionen zeigten `FT ?`, weil ein inaktiver Review-Session-Snapshot wie eine aktive unbekannte Session dargestellt wurde. Mission-Mini-Cards reduzierten Name/Status auf 10/8/8 px.
+- Aenderung: Inaktive Session-Kontexte sind explizit verborgen; aktive OWN/VIEW/Unknown-Semantik bleibt. Mini-Card-Titel ist 12 px, beide Statuszeilen sind 10 px.
+- Multiplayer/Performance: Keine Team-/Peer-/Fireteam-Wahrheit geaendert. Reine vorhandene UI-Aktualisierung; keine neue Framearbeit, RPCs, Commands, Effects oder Snapshotfelder.
+- Risiken/offen: Der Full-HD-Beleg ist lesbarer und kollisionsfrei. BLUE/GOLD wirkt unter den oberen Bars noch kontrastarm.
+- Lokale Pruefung: TASK_1130 6/6; TASK_773 25/25; TASK_431 19/19; TASK_1128 8/8 Real Window.
+- Naechster Schritt: TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression.
+
 ### TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1129_tactical_communication_bubble_typography_mode_contract_reconciliation.md`, `docs/tasks/TASK_211_comic_bubble_toggles_cooldowns_and_settings.md`, `docs/tasks/TASK_212_npc_thought_bubble_hold_to_peek_overlay.md`, `docs/tasks/TASK_214_comic_bubble_feedback_playability_smoke.md`
 - Befund: Full-HD-Bubbles nutzten 8-px-Schrift. World-Gedanken verschiedener Units kollabierten wegen Fireteam-first-Dedupe. Ein Context-Fallback umging im Minimalmodus das zentrale Gate; TASK_214 erwartete alte Text-/Rohpayload-Semantik.
 - Aenderung: HUD-Schrift ist 10 px und messbar. HUD dedupliziert pro Fireteam, World pro Unit. Der Context-Fallback fragt die zentrale Settings-Freigabe ab. TASK_214 folgt `command_context` und sichtbarer Per-Anchor-Dedupe.
 - Multiplayer/Performance: Reine Visual-/Settings-Grenze; keine Gameplay-, Event-, Command-, Effect-, RPC- oder Snapshotmutation. Bubble-Gesamtlimits bleiben unveraendert.
-- Risiken/offen: Die Bubble ist im Full-HD-Beleg angenehmer lesbar. Die Mini-Card darunter zeigt weiterhin kleine Statuszeilen und `FT ?` trotz bekannter Teamidentitaet.
+- Risiken/offen: Die damalige Mini-Card-Identitaets-/Typografieluecke ist mit TASK_1130 geschlossen.
 - Lokale Pruefung: TASK_1129 4/4; TASK_212 19/19; TASK_214 36/36; TASK_1128 8/8 Real Window.
-- Naechster Schritt: TASK_1130 - Fireteam Mini-Card Identity and Typography Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1130.
 
 ### TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability
 - Status: implementiert im Arbeitsstand
