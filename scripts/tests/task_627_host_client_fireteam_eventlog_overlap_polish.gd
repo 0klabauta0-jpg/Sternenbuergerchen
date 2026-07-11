@@ -51,7 +51,7 @@ func _test_docs_reports_and_contract() -> void:
 	_assert(status_text.contains("TASK_722 - Station Route HUD Visual Polish"), "Implementation status advances beyond TASK_627")
 	_assert(roadmap_text.contains("TASK_722 - Station Route HUD Visual Polish"), "Roadmap advances beyond TASK_627")
 	_assert(controller_text.contains("_apply_fixed_hud_window_contract(TACTICAL_EVENT_LOG_PANEL_PATH, layout.get(\"event_log\"))"), "Controller applies event log from layout contract")
-	_assert(scene_text.contains("offset_top = 432.0") and scene_text.contains("offset_bottom = 616.0"), "Mission scene default event log follows the compact TASK_722 left-HUD contract")
+	_assert(scene_text.contains("offset_top = 456.0") and scene_text.contains("offset_bottom = 640.0"), "Mission scene default event log follows the readable TASK_1131 left-HUD contract")
 
 
 func _test_mission_left_hud_regions_do_not_overlap() -> void:

@@ -4537,7 +4537,7 @@ func _refresh_fireteam_mini_cards() -> void:
 		var static_signature: String = _build_fireteam_mini_card_static_signature(normalized_fireteam_id, lead, lead_summary)
 		var static_configuration_changed: bool = is_new_card or String(card.get_meta("mission_fireteam_mini_card_static_signature", "")) != static_signature
 		if static_configuration_changed:
-			card.custom_minimum_size = Vector2(0.0, 112.0)
+			card.custom_minimum_size = Vector2(0.0, 110.0)
 			card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			card.mouse_filter = Control.MOUSE_FILTER_STOP
 			card.set_meta("mission_fireteam_mini_card", true)
@@ -4960,23 +4960,51 @@ func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Diction
 	var stage_label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
 	var member_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
 	if stage_label != null:
-		stage_label.text = String(status_snapshot.get("secondary_text", "")).strip_edges()
+		stage_label.text = String(status_snapshot.get("primary_text", "")).strip_edges()
 		stage_label.visible = not stage_label.text.is_empty()
 		stage_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		stage_label.set_meta("mission_fireteam_status_secondary", true)
+		stage_label.set_meta("mission_fireteam_visible_primary_status", true)
 		stage_label.set_meta("review_session_fireteam_context_text", String(status_snapshot.get("review_session_context_text", "")))
 		stage_label.set_meta("review_session_fireteam_context_visible", bool(status_snapshot.get("review_session_context_visible", false)))
 		stage_label.set_meta("review_session_fireteam_context_style_id", String(status_snapshot.get("review_session_context_style_id", "")))
 	if member_label != null:
-		var primary_text: String = String(status_snapshot.get("primary_text", "")).strip_edges()
 		var lead_summary: String = String(card.get_meta("mission_fireteam_lead_summary", "")).strip_edges()
-		if not lead_summary.is_empty() and not primary_text.contains(lead_summary):
-			member_label.text = "%s\n%s" % [lead_summary, primary_text] if not primary_text.is_empty() else lead_summary
-		else:
-			member_label.text = primary_text
+		member_label.text = _compact_fireteam_mini_identity_text(lead_summary, int(status_snapshot.get("member_count", 0)))
 		member_label.visible = not member_label.text.is_empty()
 		member_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		member_label.set_meta("mission_fireteam_status_primary", true)
+		member_label.set_meta("mission_fireteam_visible_identity_summary", true)
+
+
+func _compact_fireteam_mini_identity_text(lead_summary: String, member_count: int) -> String:
+	var normalized_summary := lead_summary.strip_edges()
+	var lead_name := "-"
+	var lead_marker_index := normalized_summary.find("Lead ")
+	if lead_marker_index >= 0:
+		lead_name = normalized_summary.substr(lead_marker_index + 5).strip_edges()
+	elif normalized_summary.begins_with("Lead"):
+		lead_name = normalized_summary.trim_prefix("Lead").strip_edges()
+	if lead_name.contains(" |"):
+		lead_name = lead_name.get_slice(" |", 0).strip_edges()
+	return "Lead %s | %d Ops" % [lead_name, maxi(member_count, 0)]
+
+
+func _get_fireteam_mini_header_status_row(card: Control) -> HBoxContainer:
+	var vbox := card.get_node_or_null("Margin/VBox") as VBoxContainer if card != null else null
+	if vbox == null:
+		return null
+	var row := vbox.get_node_or_null("HeaderStatusRow") as HBoxContainer
+	if row == null:
+		row = HBoxContainer.new()
+		row.name = "HeaderStatusRow"
+		row.custom_minimum_size = Vector2(0.0, 20.0)
+		row.add_theme_constant_override("separation", 3)
+		vbox.add_child(row)
+		var member_label := vbox.get_node_or_null("MemberLabel") as Label
+		if member_label != null:
+			vbox.move_child(row, mini(member_label.get_index() + 1, vbox.get_child_count() - 1))
+	return row
 
 
 func _apply_fireteam_mini_suppression_indicator(card: Control, status_snapshot: Dictionary) -> void:
@@ -5181,6 +5209,9 @@ func _apply_fireteam_member_status_row(card: Control, fireteam_id: String, units
 		_increment_mission_fireteam_card_delta_rendering_count("member_status_row_apply")
 	row.set_meta("mission_fireteam_member_status_row", true)
 	row.set_meta("mission_fireteam_member_status_snapshot", Dictionary(row.call("get_row_snapshot")).duplicate(true))
+	row.visible = false
+	row.custom_minimum_size = Vector2.ZERO
+	row.set_meta("mission_fireteam_member_status_compacted_to_portraits", true)
 	card.set_meta("mission_fireteam_member_status_host", true)
 
 
@@ -5274,7 +5305,7 @@ func _apply_fireteam_mini_readiness_footer(card: Control, status_snapshot: Dicti
 
 
 func _apply_fireteam_mini_contact_badge(card: Control, contact_context: Dictionary) -> void:
-	var header_row := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
+	var header_row := _get_fireteam_mini_header_status_row(card)
 	if header_row == null:
 		return
 	var badge := header_row.get_node_or_null("ContactBadge") as Label
@@ -5362,7 +5393,7 @@ func _apply_fireteam_mini_ftl_quality_indicator(card: Control, profile_dict: Dic
 
 
 func _apply_fireteam_mini_morale_indicator(card: Control, profile_dict: Dictionary) -> void:
-	var header_row := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
+	var header_row := _get_fireteam_mini_header_status_row(card)
 	if header_row == null:
 		return
 	var context: Dictionary = _build_morale_badge_context(profile_dict)
@@ -5387,7 +5418,7 @@ func _apply_fireteam_mini_morale_indicator(card: Control, profile_dict: Dictiona
 
 
 func _apply_fireteam_mini_coordination_badge(card: Control, coordination_context: Dictionary) -> void:
-	var header_row := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
+	var header_row := _get_fireteam_mini_header_status_row(card)
 	if header_row == null:
 		return
 	var badge := header_row.get_node_or_null("CoordinationBadge") as Label
@@ -5410,7 +5441,7 @@ func _apply_fireteam_mini_coordination_badge(card: Control, coordination_context
 
 
 func _apply_fireteam_mini_stance_toggle(card: Control, fireteam_id: String) -> void:
-	var header_row := card.get_node_or_null("Margin/VBox/HeaderRow") as HBoxContainer
+	var header_row := _get_fireteam_mini_header_status_row(card)
 	if header_row == null:
 		return
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
@@ -15132,8 +15163,8 @@ func get_station_route_hud_visual_polish_snapshot() -> Dictionary:
 	var fireteam_area: float = float(mini_rect.size.x * mini_rect.size.y)
 	var map_safe_margin_enabled: bool = (
 		mini_rect.size.x <= 240
-		and mini_rect.size.y <= 288
-		and fireteam_area <= prior_fireteam_area * 0.70
+		and mini_rect.size.y <= 312
+		and fireteam_area <= prior_fireteam_area * 0.75
 		and mini_panel != null
 		and bool(mini_panel.get_meta("station_route_hud_map_safe_margin_enabled", false))
 	)

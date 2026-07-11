@@ -233,7 +233,24 @@ func _apply_density(
 		stage_label.add_theme_font_size_override("font_size", 10)
 		member_label.add_theme_font_size_override("font_size", 10)
 		title_edit.add_theme_font_size_override("font_size", 12)
+		_apply_mission_mini_title_style(title_edit)
 	set_meta("fob_fireteam_reference_card", true)
+
+
+func _apply_mission_mini_title_style(title_edit: LineEdit) -> void:
+	if title_edit == null:
+		return
+	title_edit.add_theme_color_override("font_color", Color(0.96, 0.98, 1.0, 1.0))
+	title_edit.add_theme_color_override("font_uneditable_color", Color(0.96, 0.98, 1.0, 1.0))
+	var title_style := StyleBoxFlat.new()
+	title_style.bg_color = Color(0.055, 0.075, 0.095, 0.96)
+	title_style.border_width_left = 2
+	title_style.border_color = Color(0.30, 0.74, 0.80, 0.95)
+	title_style.content_margin_left = 6.0
+	title_style.content_margin_right = 4.0
+	title_edit.add_theme_stylebox_override("normal", title_style)
+	title_edit.add_theme_stylebox_override("read_only", title_style)
+	title_edit.set_meta("mission_mini_high_contrast_header", true)
 
 
 func _can_drop_data(_at_position: Vector2, data) -> bool:
