@@ -626,5 +626,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Offline-/Einzelspieler-GO faellt unveraendert in den lokalen Waypoint-/Arrival-/Hold-Pfad.
 - TASK_1094 belegt echten Controller-GO ueber ENet und den unveraenderten lokalen AA-GO-Pfad.
 
+## Connected Interaction Feedback Contract
+- Sichtbare Kompaktzeilen verwenden nur `AA`, `DOOR`, `COM` oder `CARGO`, keine JSON-/Interaction-IDs.
+- Pending liest `<TOKEN> -> HOST`, Accepted `<TOKEN> HOST OK | LAEUFT`, Blocked `<TOKEN> BLOCKIERT | <GRUND>`.
+- Rohgruende bleiben in `reason`; `reason_label` uebersetzt bekannte Ownership-/Authority-Fehler fuer Spieler.
+- `tone` darf `pending`, `success` oder `blocked` fuer Presenter liefern, setzt aber keinen Runtime-State.
+- TASK_1095 prueft Textbudget, technische-ID-Hygiene und unveraenderten Client-GO-Handoff.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

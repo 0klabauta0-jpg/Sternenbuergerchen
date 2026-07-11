@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1095 - Connected Interaction Feedback Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1095_connected_interaction_feedback_visual_polish.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1094
+- Stand: Client-Interaction-Feedback verwendet stabile AA-/DOOR-/COM-/CARGO-Tokens, kurze Pending/OK/Blocked-Zeilen, menschliche Reject-Gruende und Tone-Metadaten.
+- Architektur: Feedback liest Host-Ergebnis und bleibt read-only; technische IDs bleiben in Daten, nicht in der sichtbaren Primaerzeile.
+- Risiken/offen: Replizierter Hold-Fortschritt sollte als naechstes mit derselben ruhigen Sprache auf Host und Client erscheinen.
+- Lokale Pruefung: TASK_1095 8/8 und TASK_1094 6/6.
+- Naechster Schritt: TASK_1096 - Connected Interaction Feedback Runtime Progress Surface.
+
 ### TASK_1094 - Connected Client GO Interaction RPC Handoff
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1094_connected_client_go_interaction_rpc_handoff.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1093

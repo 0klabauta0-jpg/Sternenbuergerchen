@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1094: aktueller Reentry-Stand, verbundener AA-/Door-/Computer-/Cargo-Authority-Trace und derselbe sichtbare GO-Griff fuer Einzelspieler und Client.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1095: verbundener Stationsweg, gemeinsamer GO-Griff und kurze spielerlesbare Host-Pending-/OK-/Blocked-Rueckmeldungen.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1094</span>
+      <span class="pill good">Letzter Abschluss: TASK_1095</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -116,6 +116,7 @@
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_station_arrival_hold"> Door wird durch Host-Ankunft und Hold statt Test-Commit abgeschlossen</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_station_full_route_trace"> AA, Door, Computer und Cargo laufen verbunden bis Route Complete</label>
           <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_client_go_rpc"> Client-GO sendet zum Host und bewegt lokal nicht</label>
+          <label class="checkline"><input checked type="checkbox" data-export-key="status.connected_interaction_feedback_readable"> Host-Pending/OK/Blocked ohne technische IDs lesbar</label>
         </article>
       </div>
     </section>
@@ -845,10 +846,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1095 - Connected Interaction Feedback Visual Polish and Two-Window Readability"
+            recommended_next_task: "TASK_1096 - Connected Interaction Feedback Runtime Progress Surface"
           },
           metadata: {
-            generated_for_task: "TASK_1094",
+            generated_for_task: "TASK_1095",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false
