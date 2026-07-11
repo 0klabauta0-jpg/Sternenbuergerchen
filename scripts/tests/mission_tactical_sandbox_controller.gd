@@ -6,6 +6,7 @@ const TACTICAL_CARD_SCRIPT: GDScript = preload("res://scripts/ui/components/tact
 const STATUS_BADGE_SCRIPT: GDScript = preload("res://scripts/ui/components/status_badge.gd")
 const COMMAND_BUTTON_SCRIPT: GDScript = preload("res://scripts/ui/components/command_button.gd")
 const SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/selected_fireteam_decision_presenter.gd")
+const MISSION_CONTROL_STATE_PRESENTER_SCRIPT: GDScript = preload("res://scripts/ui/mission_control_state_presenter.gd")
 const PROGRESS_LINE_SCRIPT: GDScript = preload("res://scripts/ui/components/progress_line.gd")
 const TACTICAL_UI_THEME_SCRIPT: GDScript = preload("res://scripts/ui/tactical_ui_theme.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
@@ -498,6 +499,7 @@ var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
 var _release_candidate_firefight_decision_line_build_depth: int = 0
 var _release_first_decision_loop_two_hud_build_depth: int = 0
 var _selected_fireteam_player_decision_snapshot: Dictionary = {}
+var _mission_control_state_snapshot: Dictionary = {}
 var _release_first_decision_loop_two_polish_hud_build_depth: int = 0
 var _release_first_decision_loop_two_visual_polish_hud_build_depth: int = 0
 var _release_first_decision_loop_two_player_loop_choice_confirm_last_trace: Dictionary = {}
@@ -3908,6 +3910,9 @@ func _update_ui() -> void:
 		var strategic_decision_tooltip: String = _build_selected_fireteam_live_decision_detail_tooltip()
 		if not strategic_decision_tooltip.is_empty():
 			strategic_status_label.tooltip_text = "%s\n\n%s" % [strategic_status_label.tooltip_text, strategic_decision_tooltip] if not strategic_status_label.tooltip_text.is_empty() else strategic_decision_tooltip
+		var mission_state_tooltip: String = String(_mission_control_state_snapshot.get("tooltip_text", "")).strip_edges()
+		if not mission_state_tooltip.is_empty():
+			strategic_status_label.tooltip_text = "%s\n\n%s" % [strategic_status_label.tooltip_text, mission_state_tooltip] if not strategic_status_label.tooltip_text.is_empty() else mission_state_tooltip
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
 		if profile_enabled:
 			scopes_usec["secondary_tooltip_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -8320,45 +8325,28 @@ func _format_compass_direction_label(direction: Vector2, short_label: bool = fal
 func _build_strategic_status_text() -> String:
 	if not _last_planning_state_issue.is_empty():
 		return "Alte Planungsdaten erkannt\nBitte Plan im aktuellen\nPhasensystem neu anlegen."
-	var lz_text: String = "LZ offen" if not _has_lz_position else "LZ %s" % _format_world_position(_lz_position)
-	var ship_text: String = "Drop wartend"
-	if _mission_drop_state == "to_mission":
-		ship_text = "Dropship unterwegs zur Mission (%ds)" % _mission_drop_eta_seconds
-	elif _mission_drop_state == "waiting":
-		ship_text = "Dropship wartet off-map"
-	elif _mission_drop_state == "to_fob":
-		ship_text = "Dropship Rueckflug zur FOB (%ds)" % _mission_drop_eta_seconds
-	elif _mission_drop_state == "to_homebase":
-		ship_text = "Dropship Rueckflug zur Homebase (%ds)" % _mission_drop_eta_seconds
-	if _mission_drop_state.is_empty() and _drop_ship_staged and not _drop_ship_requested and _drop_sequence_phase.is_empty():
-		ship_text = "Dropship staged off-map"
-	if _drop_ship_requested:
-		ship_text = "Drop aus %s angefordert" % _get_approach_angle_name()
-	if preview_mode:
-		ship_text = "%s (Preview)" % ship_text
-	if not preview_mode and _drop_ship_cooldown_remaining > 0.0 and _drop_sequence_phase.is_empty():
-		ship_text = "Drop bereit in %.1fs" % _drop_ship_cooldown_remaining
+	var selected_card_state: String = ""
 	if _has_live_drop_sequence_for_craft(_mission_drop_craft_id) and not _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
 		var selected_card: Dictionary = _find_mission_dropship_card_entry(_mission_drop_craft_id)
-		var selected_state: String = String(selected_card.get("state", "")).strip_edges().to_lower()
-		ship_text = "Dropship %s" % (selected_state if not selected_state.is_empty() else "aktiv")
-	elif _is_drop_sequence_active() and not _is_active_drop_sequence_for_craft(_mission_drop_craft_id):
-		ship_text = "Anderes Dropship aktiv"
-	elif _drop_sequence_phase == DROP_SEQUENCE_INBOUND:
-		ship_text = "Dropship inbound"
-	elif _drop_sequence_phase == DROP_SEQUENCE_LANDED:
-		ship_text = "Dropship gelandet"
-	elif _drop_sequence_phase == DROP_SEQUENCE_UNLOADING:
-		ship_text = "Deboarding %d/%d" % [_drop_sequence_unit_index, _drop_sequence_units.size()]
-	elif _drop_sequence_phase == DROP_SEQUENCE_OUTBOUND:
-		ship_text = "Dropship outbound"
-	elif _drop_sequence_phase == DROP_SEQUENCE_COMPLETE:
-		ship_text = "Fireteam entladen"
-	var lines: PackedStringArray = [
-		lz_text,
-		"Approach %s" % _get_approach_angle_name(),
-		ship_text,
-	]
+		selected_card_state = String(selected_card.get("state", "")).strip_edges().to_lower()
+	_mission_control_state_snapshot = Dictionary(MISSION_CONTROL_STATE_PRESENTER_SCRIPT.call("build_snapshot", {
+		"has_lz": _has_lz_position,
+		"lz_text": _format_world_position(_lz_position) if _has_lz_position else "",
+		"approach_name": _get_approach_angle_name(),
+		"drop_state": _mission_drop_state,
+		"eta_seconds": _mission_drop_eta_seconds,
+		"preview_mode": preview_mode,
+		"drop_requested": _drop_ship_requested,
+		"drop_staged": _drop_ship_staged,
+		"cooldown_seconds": _drop_ship_cooldown_remaining,
+		"sequence_phase": _drop_sequence_phase,
+		"unit_index": _drop_sequence_unit_index,
+		"unit_count": _drop_sequence_units.size(),
+		"has_live_other_craft": _has_live_drop_sequence_for_craft(_mission_drop_craft_id) and not _is_active_drop_sequence_for_craft(_mission_drop_craft_id),
+		"other_drop_active": _is_drop_sequence_active() and not _is_active_drop_sequence_for_craft(_mission_drop_craft_id),
+		"selected_craft_state": selected_card_state,
+	}))
+	var lines: PackedStringArray = PackedStringArray(_mission_control_state_snapshot.get("visible_lines", PackedStringArray()))
 	var transfer_text: String = _build_meta_transfer_status_text()
 	if not transfer_text.is_empty():
 		lines.append(transfer_text)
@@ -8408,13 +8396,15 @@ func _build_strategic_status_text() -> String:
 	lines = _prioritize_release_firefight_bottom_dock_lines(lines, combat_hud_density)
 	if not _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density).is_empty():
 		return "\n".join(lines)
+	var compact_player_decision: String = _compact_release_first_exchange_contact_fire_secondary_line(_build_release_candidate_firefight_decision_line())
+	var player_decision_visible: bool = not compact_player_decision.is_empty() and lines.has(compact_player_decision)
 	var loop_two_line_after_priority: String = _build_release_first_decision_loop_two_hud_line()
-	if not loop_two_line_after_priority.is_empty() and not lines.has(loop_two_line_after_priority):
+	if not player_decision_visible and not loop_two_line_after_priority.is_empty() and not lines.has(loop_two_line_after_priority):
 		lines.append(loop_two_line_after_priority)
 	var loop_two_polish_line_after_priority: String = _build_release_first_decision_loop_two_polish_hud_line()
-	if not loop_two_polish_line_after_priority.is_empty() and not lines.has(loop_two_polish_line_after_priority):
+	if not player_decision_visible and not loop_two_polish_line_after_priority.is_empty() and not lines.has(loop_two_polish_line_after_priority):
 		lines.append(loop_two_polish_line_after_priority)
-	if bool(order_preview_threat_overlay.get("active", false)) and not order_preview_threat_overlay_line.is_empty() and not lines.has(order_preview_threat_overlay_line):
+	if not player_decision_visible and bool(order_preview_threat_overlay.get("active", false)) and not order_preview_threat_overlay_line.is_empty() and not lines.has(order_preview_threat_overlay_line):
 		lines.append(order_preview_threat_overlay_line)
 	return "\n".join(lines)
 
@@ -8434,6 +8424,12 @@ func _prioritize_release_firefight_bottom_dock_lines(source_lines: PackedStringA
 		prioritized.append(_compact_release_first_exchange_contact_fire_secondary_line(decision_line))
 	if not contact_fire_primary_line.is_empty():
 		return prioritized
+	for priority_line_variant in source_lines:
+		var priority_line: String = String(priority_line_variant).strip_edges()
+		var priority_upper: String = priority_line.to_upper()
+		if priority_upper.contains("AA ") and priority_upper.contains("COM ") and priority_upper.contains("OBJ") and priority_upper.contains("CARGO"):
+			prioritized.append(priority_line)
+			break
 	if not combat_line.is_empty() and decision_line.is_empty():
 		prioritized.append("Kampf %s" % combat_line)
 	for line_variant in source_lines:
@@ -8447,7 +8443,8 @@ func _prioritize_release_firefight_bottom_dock_lines(source_lines: PackedStringA
 		if not combat_line.is_empty() and (line == combat_line or line == "Kampf %s" % combat_line):
 			continue
 		prioritized.append(line)
-		if prioritized.size() >= RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MAX_LINES:
+		var visible_line_budget: int = 3 if not decision_line.is_empty() else RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MAX_LINES
+		if prioritized.size() >= visible_line_budget:
 			break
 	return prioritized
 
@@ -8457,18 +8454,19 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 	var station_route_line: String = String(station_route_readout.get("compact_line", "")).strip_edges()
 	var station_route_cue: Dictionary = station_route_cue_override.duplicate(true) if not station_route_cue_override.is_empty() else get_station_scenario_route_cue_polish_snapshot()
 	var station_route_cue_line: String = String(station_route_cue.get("cue_line", "")).strip_edges()
+	var station_route_cue_runtime_status: String = String(station_route_cue.get("runtime_status", "")).strip_edges().to_lower()
 	var station_route_line_deferred_to_identity: bool = not station_route_line.is_empty() and not station_route_cue_line.is_empty()
-	var objective_cargo_deferred_to_route_cue: bool = not station_route_cue_line.is_empty()
+	var objective_cargo_deferred_to_route_cue: bool = not station_route_cue_line.is_empty() and station_route_cue_runtime_status != "complete"
 	var objective_line: String = _build_mission_objective_interaction_line().strip_edges()
 	var cargo_line: String = _build_mission_cargo_extract_line().strip_edges()
 	var interaction_progress_readability: Dictionary = interaction_progress_readability_override.duplicate(true) if not interaction_progress_readability_override.is_empty() else _build_mission_interaction_progress_readability_snapshot()
 	var interaction_progress_line: String = String(interaction_progress_readability.get("compact_line", "")).strip_edges()
-	var station_route_cue_runtime_status: String = String(station_route_cue.get("runtime_status", "")).strip_edges().to_lower()
 	var interaction_progress_deferred_to_route_cue: bool = not station_route_cue_line.is_empty() and station_route_cue_runtime_status != "in_progress"
 	var contact_diagnostics_text: String = _build_mission_control_contact_diagnostics_text().strip_edges()
 	var combat_hud_snapshot: Dictionary = _build_mission_combat_hud_density_snapshot()
 	var combat_hud_line: String = String(combat_hud_snapshot.get("mission_control_line", "")).strip_edges()
 	var combat_or_contact_line: String = combat_hud_line if not combat_hud_line.is_empty() else contact_diagnostics_text
+	var combat_deferred_to_complete_route: bool = station_route_cue_runtime_status == "complete" and bool(SELECTED_FIRETEAM_DECISION_PRESENTER_SCRIPT.call("is_raw_combat_diagnostic_line", combat_or_contact_line))
 	var fire_rule_text: String = _compact_fire_rule_for_hud(_get_selected_fire_rule_consensus())
 	var fire_rule_consequence: Dictionary = get_fire_rule_consequence_readability_snapshot()
 	var fire_rule_consequence_token: String = String(fire_rule_consequence.get("hud_token", "")).strip_edges().to_upper()
@@ -8500,7 +8498,7 @@ func _build_mission_hud_interaction_density_snapshot(station_route_readout_overr
 		compact_parts.append("ROE %s" % fire_rule_consequence_token)
 	elif not fire_rule_text.is_empty():
 		compact_parts.append("ROE %s" % fire_rule_text)
-	if not combat_or_contact_line.is_empty():
+	if not combat_or_contact_line.is_empty() and not combat_deferred_to_complete_route:
 		compact_parts.append(combat_or_contact_line)
 	var mission_control_line: String = ""
 	if not compact_parts.is_empty():
@@ -11502,7 +11500,7 @@ func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
 	var authority_visible_action_text: String = String(authority_visual.get("visible_action_text", result.get("authority_visible_action_text", ""))).strip_edges()
 	var authority_tooltip_text: String = String(authority_visual.get("tooltip_text", result.get("authority_tooltip_text", ""))).strip_edges()
 	var authority_visible: bool = bool(authority_visual.get("visible", result.get("authority_visible", false))) and not authority_compact_text.is_empty()
-	var base_text: String = String(result.get("compact_status_text", result.get("status_text", ""))).strip_edges()
+	var base_text: String = String(result.get("display_text", result.get("compact_status_text", result.get("status_text", "")))).strip_edges()
 	var display_text := base_text
 	var display_tokens: PackedStringArray = PackedStringArray()
 	if not badge_text.is_empty():
@@ -26003,10 +26001,9 @@ func get_frontier_probe_multiplayer_f6_hover_panel_polish_snapshot() -> Dictiona
 			"visible_teamchip_line_is_short",
 			not compact_text.is_empty()
 				and compact_text.length() <= 56
-				and compact_text.contains("[A]")
-				and compact_text.contains("[B]")
-				and compact_text.contains("Host")
-				and compact_text.contains("P2")
+				and compact_text.begins_with("Einsatz:")
+				and compact_text.contains("A Host")
+				and compact_text.contains("B P2")
 				and compact_text.contains("A-LZ")
 				and compact_text.contains("B-LZ")
 				and not compact_text.contains("Host Peer 1"),
