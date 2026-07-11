@@ -696,5 +696,14 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Ohne registrierten Preflight-Validator bleibt die bestehende Multiplayer-Command-Validierung unveraendert.
 - TASK_1102 belegt echten ENet-Reject, parallelen Fortschritt, read-only Client-Replikation, Fireteam-basierten Peer-Rebind und einen 2000-Validierungen-Performance-Guard.
 
+## Parallel Interaction Ownership Feedback Contract
+- Network-Accept und -Reject nennen das anfragende Fireteam als kompakten Grossbuchstaben-Token, ohne Peer-ID oder technische Interaction-ID.
+- `interaction_reserved_by_other_fireteam` wird als `ANDERES FIRETEAM AKTIV` angezeigt.
+- Ein einzelner laufender Snapshot-State zeigt Interaction, Prozent/Hold und Besitzer in der bestehenden `LAST`-Zeile.
+- Bei mindestens zwei laufenden States zeigt dieselbe Zeile maximal zwei Eintraege im Format `<TOKEN> <PROZENT> <FIRETEAM>`, getrennt durch ` | ` und auf insgesamt 72 Zeichen begrenzt.
+- Die Auswahl bleibt deterministisch: Die bisher bevorzugte Interaction steht zuerst, danach folgen IDs sortiert. Weitere States bleiben im Snapshot, werden aber nicht in eine unlesbare Statuszeile gepresst.
+- Der Dedupe-Fingerprint umfasst die zwei sichtbaren Display-Tokens, Besitzer, Fortschritts-, Hold- und Dauerwerte. Reine Tick-Aenderungen erzeugen keine Textarbeit; ein echter Owner- oder Token-Wechsel wird sichtbar.
+- TASK_1103 belegt Single-/Parallelzeile, echte `LAST`-HUD-Aktualisierung bei stabiler Label-Dimension, menschlichen Reservierungs-Reject, technische-ID-Hygiene, Owner-Dedupe und read-only UI. TASK_1098 misst mit acht States 2000 Snapshots in rund 120 ms bei 201 Label-Updates.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

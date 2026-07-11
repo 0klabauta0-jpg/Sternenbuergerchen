@@ -13,11 +13,17 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1103 - Parallel Interaction Ownership Feedback Readability (implementiert im Arbeitsstand)
+- Grundlage: TASK_1102 replizierte `fireteam_id`, aber die sichtbare Network-Progress-Zeile verwarf den Besitzer und der Reservierungs-Reject blieb technisch.
+- Ergebnis: Single- und Parallel-Progress nennen Fireteams in derselben kompakten `LAST`-Zeile. Zwei sichtbare States bleiben unter 72 Zeichen; Owner-Wechsel invalidiert den Dedupe-Fingerprint.
+- Verifikation: TASK_1103 18/18 inklusive echter `LAST`-HUD-Zeile, stabiler Label-Dimension und Dedupe bei sichtbarem Zweit-Token-Wechsel; bestehende Feedback-, Progress-, Performance- und Ownership-Regressionen gruen. Acht States/2000 Snapshots rund 120 ms bei 201 Updates.
+- Naechster Schritt: TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest.
+
 ## TASK_1102 - Parallel Fireteam Interaction Ownership and Recovery (implementiert im Arbeitsstand)
 - Grundlage: Pending-Interactions waren nach Interaction-ID indiziert, konnten aber durch einen spaeter akzeptierten Command eines anderen Fireteams still ueberschrieben werden.
 - Ergebnis: Ein optionaler autoritativer Preflight fragt die bestehende Pending-Wahrheit vor Queue/Accept ab. Fremde Fireteams erhalten einen expliziten Reservierungs-Reject; gleiche Fireteams behalten Hold-Fortschritt auch nach Peer-ID-Rebind.
 - Verifikation: Echter ENet-Konflikt, zwei parallele Fireteam-States, Client-Snapshot, Rebind, kanonisches Same-Fireteam-Payload in Queue/Signal/Client-Ergebnis/Pending und Performance TASK_1102 26/26; Full-Route-, Reconnect-, Authority- und Door-Regressionen gruen.
-- Naechster Schritt: TASK_1103 - Parallel Interaction Ownership Feedback Readability.
+- Naechster Schritt: TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest.
 
 ## TASK_1101 - Connected Interaction Reconnect State Recovery (implementiert im Arbeitsstand)
 - Grundlage: Client-Disconnect setzte `_mission_started` auf false, obwohl die Host-Mission weiterlief; Rejoin konnte keine Mission oder Interaction-Wahrheit wiederherstellen.
