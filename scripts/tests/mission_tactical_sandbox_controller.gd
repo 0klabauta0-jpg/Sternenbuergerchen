@@ -16258,6 +16258,14 @@ func _clear_selection() -> void:
 	_set_selected_fireteams(PackedStringArray())
 
 
+func apply_local_multiplayer_fireteam_perspective(fireteam_ids: Variant) -> PackedStringArray:
+	var assigned_fireteam_ids := _sanitize_fireteam_ids(PackedStringArray(Array(fireteam_ids)))
+	_set_selected_fireteams(assigned_fireteam_ids, false)
+	if not assigned_fireteam_ids.is_empty():
+		_focus_primary_view_on_selected_fireteams()
+	return _selected_fireteam_ids.duplicate()
+
+
 func _set_selected_fireteams(next_selected_fireteam_ids: PackedStringArray, should_emit_signal: bool = true) -> void:
 	_selected_fireteam_ids = _sanitize_fireteam_ids(next_selected_fireteam_ids)
 	_update_focused_fireteam_from_selection()

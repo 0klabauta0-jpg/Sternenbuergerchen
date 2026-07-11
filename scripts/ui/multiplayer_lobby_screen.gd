@@ -57,6 +57,7 @@ var _background_rect: TextureRect = null
 var _background_shade: ColorRect = null
 var _mission_host: Node = null
 var _active_mission: Node = null
+const PRODUCT_MISSION_COMBAT_STARTUP_GRACE_TICKS := 180
 var _player_name_edit: LineEdit = null
 var _player_roster_option: OptionButton = null
 var _player_team_option: OptionButton = null
@@ -667,6 +668,7 @@ func _on_session_mission_assignments_changed(assignments: Dictionary) -> void:
 	_last_start_assignments = assignments.duplicate(true)
 	if has_active_mission():
 		_apply_session_assignments_to_simulation_root(_active_mission.get_node_or_null("SimulationRoot"), assignments)
+		_apply_local_mission_fireteam_perspective(_active_mission, assignments)
 	_apply_session_snapshot(get_session_snapshot())
 
 
@@ -689,8 +691,12 @@ func _launch_mission(assignments: Dictionary) -> void:
 	_ensure_mission_host()
 	var mission_instance: Node = MISSION_SCENE.instantiate()
 	_apply_session_assignments_to_simulation_root(mission_instance.get_node_or_null("SimulationRoot"), assignments)
+	var startup_combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
+	if startup_combat_driver != null and startup_combat_driver.has_method("set_combat_startup_grace_ticks"):
+		startup_combat_driver.call("set_combat_startup_grace_ticks", PRODUCT_MISSION_COMBAT_STARTUP_GRACE_TICKS)
 	_mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	_apply_local_mission_fireteam_perspective(mission_instance, assignments)
 	var combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
 	if combat_driver != null and combat_driver.has_signal("combat_resolved"):
 		var resolved_callable := Callable(self, "_on_product_mission_resolved")
@@ -699,6 +705,17 @@ func _launch_mission(assignments: Dictionary) -> void:
 	if not bool(get_session_snapshot().get("is_host", false)):
 		_session.rpc_id(1, "notify_mission_runtime_ready")
 	_set_lobby_panel_visible(false)
+
+
+func _apply_local_mission_fireteam_perspective(mission_instance: Node, assignments: Dictionary) -> void:
+	if mission_instance == null:
+		return
+	var controller: Node = mission_instance.get_node_or_null("TacticalController")
+	if controller == null or not controller.has_method("apply_local_multiplayer_fireteam_perspective"):
+		return
+	var local_peer_id: int = multiplayer.get_unique_id()
+	var peer_fireteams: Dictionary = Dictionary(assignments.get("peer_fireteams", {}))
+	controller.call("apply_local_multiplayer_fireteam_perspective", PackedStringArray(peer_fireteams.get(local_peer_id, PackedStringArray())))
 
 
 func _release_active_mission() -> void:

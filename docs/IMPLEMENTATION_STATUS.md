@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1119 - Connected First Contact Three-Peer Product Visual Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1119_connected_first_contact_three_peer_product_visual_playtest.md`, `docs/tasks/TASK_1104_product_lobby_multi_client_parallel_interaction_playtest.md`, `scripts/multiplayer/multiplayer_snapshot_contract.gd`
+- Befund: Der echte Produktlauf startete alle Fenster mit der Szenen-Defaultauswahl, sodass GOLD und selbst Spectators einen falschen lokalen Fireteam-Fokus hatten. Combat begann vor stabil sichtbarer Mission, die globale First-Pair-Auswahl bevorzugte BLUE, und der Snapshot verwarf Fireteam-/Outcome-Felder bei nur 12 Ticks Event-Retention.
+- Aenderung: Lobbyzuweisungen initialisieren ausschliesslich die lokale HUD-Perspektive. Produktmissionen erhalten 180 Ticks Startup-Grace. Standardangriffe priorisieren nach einem Schuss andere Fireteams. Der Snapshot transportiert Fireteam/Outcome; hoechstens acht Events bleiben 72 Ticks erhalten.
+- Multiplayer/Performance: Host bleibt alleinige Combat-Autoritaet. Client und Spectator erzeugen keine Commands oder Effects. Kein neuer RPC; Event-Payload bleibt hart auf acht Eintraege begrenzt. Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Die Funktion ist im echten Drei-Peer-Produktpfad und in zwei Full-HD-Perspektiven belegt. Die Bilder zeigen als naechste UX-Reibung viele wiederholte Contact-Logzeilen und zwei leere Dropship-Karten, obwohl der erste Feuerkontakt die wichtigste Information ist.
+- Lokale Pruefung: TASK_1119 headless 21/21 und Real-Window 22/22 je Perspektive, TASK_1104 31/31, TASK_1117 15/15, TASK_1118 13/13, TASK_168 20/20, TASK_466 22/22, TASK_467 14/14 und TASK_222 82/82.
+- Naechster Schritt: TASK_1120 - Connected First Contact Event Log Dedupe and HUD Declutter.
+
 ### TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1118_connected_first_contact_hud_perspective_visual_evidence.md`, `docs/tasks/TASK_1117_connected_post_deboard_first_contact_combat_handoff.md`, `scripts/tests/mission_tactical_sandbox_controller.gd`
