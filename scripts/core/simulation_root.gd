@@ -28,6 +28,7 @@ const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
 const SNAPSHOT_CHUNK_PAYLOAD_BYTES: int = 1000
 const SNAPSHOT_MAX_CHUNK_COUNT: int = 256
+const NETWORK_COMMAND_DEDUPE_MAX_IDS: int = 2048
 const SNAPSHOT_COMPRESSION_MODE: int = FileAccess.COMPRESSION_ZSTD
 
 const HIT_CHANCE_MIN: float = 0.05
@@ -90,6 +91,9 @@ var _last_network_command_rejection: Dictionary = {}
 var _last_network_command_result: Dictionary = {}
 var _network_command_accept_count: int = 0
 var _network_command_reject_count: int = 0
+var _accepted_network_dropship_command_ids: Dictionary = {}
+var _accepted_network_dropship_command_id_order: Array = []
+var _network_command_dedupe_hit_count: int = 0
 var _network_command_preflight_validator: Callable = Callable()
 var _multiplayer_snapshot_context: Dictionary = {}
 var _authoritative_fire_rules_by_fireteam: Dictionary = {}
@@ -737,6 +741,8 @@ func _send_network_command_result(peer_id: int, result: Dictionary, command: Dic
 		"team_id": String(result.get("team_id", command.get("team_id", ""))).strip_edges(),
 		"fireteam_id": String(result.get("fireteam_id", command.get("fireteam_id", ""))).strip_edges().to_lower(),
 		"craft_id": String(command.get("craft_id", "")).strip_edges(),
+		"command_id": String(command.get("command_id", "")).strip_edges(),
+		"duplicate": bool(result.get("duplicate", false)),
 		"fire_rule": String(command.get("fire_rule", "")).strip_edges().to_lower(),
 		"source_context": String(command.get("source_context", "")).strip_edges(),
 		"interaction_id": String(command.get("interaction_id", "")).strip_edges(),
@@ -794,11 +800,40 @@ func submit_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1)
 		_record_network_command_rejection(validation, command_dict, sending_peer_id)
 		return validation
 
-	_network_command_accept_count += 1
 	var accepted_command: Dictionary = Dictionary(validation.get("command", command_dict)).duplicate(true)
+	var command_id: String = String(accepted_command.get("command_id", "")).strip_edges()
+	if String(validation.get("category", "")).strip_edges() == "dropship_command" and not command_id.is_empty():
+		if _accepted_network_dropship_command_ids.has(command_id):
+			_network_command_dedupe_hit_count += 1
+			validation["duplicate"] = true
+			validation["command"] = accepted_command
+			return validation
+		_register_accepted_network_dropship_command_id(command_id)
+	_network_command_accept_count += 1
 	enqueue_command(accepted_command)
 	network_command_accepted.emit(accepted_command.duplicate(true), sending_peer_id)
 	return validation
+
+
+func _register_accepted_network_dropship_command_id(command_id: String) -> void:
+	var normalized_command_id: String = command_id.strip_edges()
+	if normalized_command_id.is_empty() or _accepted_network_dropship_command_ids.has(normalized_command_id):
+		return
+	_accepted_network_dropship_command_ids[normalized_command_id] = true
+	_accepted_network_dropship_command_id_order.append(normalized_command_id)
+	while _accepted_network_dropship_command_id_order.size() > NETWORK_COMMAND_DEDUPE_MAX_IDS:
+		var expired_command_id: String = String(_accepted_network_dropship_command_id_order.pop_front())
+		_accepted_network_dropship_command_ids.erase(expired_command_id)
+
+
+func get_network_command_dedupe_debug_snapshot() -> Dictionary:
+	return {
+		"cached_id_count": _accepted_network_dropship_command_ids.size(),
+		"max_cached_ids": NETWORK_COMMAND_DEDUPE_MAX_IDS,
+		"dedupe_hit_count": _network_command_dedupe_hit_count,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
 
 
 @rpc("authority", "unreliable_ordered")

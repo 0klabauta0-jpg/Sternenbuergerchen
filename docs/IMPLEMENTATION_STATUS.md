@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1112_connected_parallel_dropship_command_lifecycle_recovery.md`, `docs/tasks/TASK_1111_connected_dropship_command_authority_ownership.md`, `scripts/core/simulation_root.gd`
+- Befund: Parallele Craft-Commands und Disconnect-Rebind waren nicht gemeinsam verifiziert. Identische Dropship-Command-IDs wurden ausserdem mehrfach gequeued und committed.
+- Aenderung: UI-Requests erhalten stabile IDs. `SimulationRoot` dedupliziert akzeptierte Dropship-IDs vor Queue/Commit in einem bounded 2048-ID-Cache. Ein echter Drei-Peer-ENet-Test setzt BLUE/GOLD parallel, prueft beide Client-Snapshots, Disconnect-State und Assignment-Rebind.
+- Multiplayer/Performance: Dedupe speichert nur IDs, keine Payloads oder UI-Wahrheit. 2100 Probe-IDs bestaetigen Eviction am Hard-Limit; andere Command-Kategorien bleiben unveraendert.
+- Risiken/offen: Schnelle UI-Doppelklicks erzeugen weiterhin unterschiedliche IDs. Ein sichtbarer per-Craft Pending-Guard soll als naechstes Buttons bis Result/Snapshot sperren und bei Reject/Timeout wieder freigeben.
+- Lokale Pruefung: TASK_1112 13/13, TASK_1111 30/30, TASK_281 33/33, TASK_1110 20/20, TASK_396 17/17, TASK_399 9/9 und TASK_1104 31/31.
+- Naechster Schritt: TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard.
+
 ### TASK_1111 - Connected Dropship Command Authority and Ownership
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1111_connected_dropship_command_authority_ownership.md`, `docs/tasks/TASK_1110_connected_multi_dropship_fireteam_selection_perspective.md`, `scripts/multiplayer/multiplayer_command_contract.gd`

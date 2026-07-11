@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1112 - Connected Parallel Dropship Command Lifecycle and Recovery (implementiert im Arbeitsstand)
+- Grundlage: Zwei Crafts konnten autoritativ bedient werden, aber Retransmits committed mehrfach und Disconnect-/Rebind-Verhalten war nicht parallel verifiziert.
+- Ergebnis: BLUE und GOLD setzen ueber drei echte ENet-Peers parallel LZs. Identische Dropship-Command-IDs committen einmal; der bounded 2048-ID-Cache evicted alte Eintraege. GOLD bleibt nach Disconnect erhalten und kann nach Rebind fortgesetzt werden, ohne BLUE zu aendern.
+- Architektur: Dedupe liegt vor Queue/Commit in `SimulationRoot`, speichert nur IDs und gilt bewusst nur fuer Dropship-Commands. Snapshot und bestehender Mission-Transportstate bleiben unveraendert.
+- Verifikation: TASK_1112 13/13, TASK_1111 30/30, TASK_281 33/33, TASK_1110 20/20, TASK_396 17/17, TASK_399 9/9 und Drei-Peer-Produktlauf TASK_1104 31/31.
+- Naechster Schritt: TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard.
+
 ## TASK_1111 - Connected Dropship Command Authority and Ownership (implementiert im Arbeitsstand)
 - Grundlage: Der Mehrschiff-Snapshot konvergierte, aber Client-Callbacks konnten Transportstate lokal aendern; akzeptierte Dropship-Commands hatten keinen autoritativen Commit-Pfad.
 - Ergebnis: LZ, Approach, Drop und Return laufen ueber Craft-/Fireteam-/Peer-Validierung und werden erst im `SimulationRoot`-Physiktick committed. Client-HUD bleibt bis Result/Snapshot read-only.
