@@ -4439,7 +4439,7 @@ func _refresh_selected_fireteam_cards() -> void:
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit != null and unit.has_method("get_unit_id") else ""
 		var in_drop_transit: bool = not unit_id.is_empty() and hud_embarked_unit_state.has(unit_id) and not _deployed_unit_ids.has(unit_id)
-		card.custom_minimum_size = Vector2(156.0, 118.0)
+		card.custom_minimum_size = Vector2(176.0, 118.0)
 		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		card.call(
 			"setup_from_profile",
@@ -4449,15 +4449,16 @@ func _refresh_selected_fireteam_cards() -> void:
 				"compact_mode": true,
 				"drag_enabled": false,
 				"show_lead_indicator": true,
+				"show_badges": false,
 				"is_lead": _is_unit_current_fireteam_lead(unit),
 				"selected": _is_selected_member_card_unit(unit, selected_cards_fireteam_id),
 				"disabled": in_drop_transit,
 				"fixed_size": true,
-				"fixed_card_size": Vector2(156.0, 118.0),
+				"fixed_card_size": Vector2(176.0, 118.0),
 				"compact_wrap_text": true,
 				"compact_data_a_max_lines": 2,
 				"compact_data_b_max_lines": 4,
-				"compact_text_min_width": 76.0,
+				"compact_text_min_width": 94.0,
 				"card_tooltip_override": _build_live_fireteam_card_technical_tooltip(unit) if not preview_mode else "",
 			}
 		)
@@ -6365,35 +6366,35 @@ func _build_tactical_character_status_text(unit: Node) -> String:
 func _build_live_fireteam_card_runtime_line(unit: Node) -> String:
 	if unit == null:
 		return "Runtime unavailable"
-	var parts: PackedStringArray = []
+	var primary_parts: PackedStringArray = []
+	var secondary_parts: PackedStringArray = []
 	var vital_state: String = String(unit.call("get_vital_state")) if unit.has_method("get_vital_state") else "fit"
 	if vital_state != "fit":
-		parts.append(_format_unit_vital_state_text(unit))
+		primary_parts.append(_format_unit_vital_state_text(unit))
 	else:
 		var runtime_status = unit.call("get_runtime_status") if unit.has_method("get_runtime_status") else null
 		var source_command_type: String = ""
 		var status_name: String = ""
-		var phase_index: int = -1
 		if runtime_status != null and runtime_status.has_method("get"):
 			source_command_type = String(runtime_status.get("source_command_type"))
 			status_name = String(runtime_status.get("status"))
-			phase_index = int(runtime_status.get("phase"))
 		var command_label: String = source_command_type.to_upper()
 		if command_label.is_empty():
 			command_label = status_name.to_upper()
 		if command_label.is_empty():
 			command_label = "IDLE"
-		parts.append(_format_unit_command_label(command_label))
-		if unit.has_method("get_fire_status"):
-			parts.append(_format_unit_fire_status_text(String(unit.call("get_fire_status"))))
-		var stance_label: String = _build_unit_tactical_stance_long_label(unit)
+		primary_parts.append(_format_unit_command_label(command_label))
+		var stance_label: String = _build_unit_tactical_stance_compact_label(unit)
 		if not stance_label.is_empty():
-			parts.append(stance_label)
-		if phase_index >= 0:
-			parts.append(COMMANDER_COMMAND_SCRIPT.get_phase_short_name(phase_index))
-	if unit.has_method("get_effective_cover_score"):
-		parts.append("COV %d" % int(unit.call("get_effective_cover_score")))
-	return " | ".join(parts)
+			primary_parts.append(stance_label)
+		if unit.has_method("get_fire_status"):
+			secondary_parts.append(_format_unit_fire_status_text(String(unit.call("get_fire_status"))))
+	var lines: PackedStringArray = []
+	if not primary_parts.is_empty():
+		lines.append(" | ".join(primary_parts))
+	if not secondary_parts.is_empty():
+		lines.append(" | ".join(secondary_parts))
+	return "\n".join(lines)
 
 
 func _build_live_fireteam_card_detail_line(unit: Node) -> String:
@@ -6415,13 +6416,28 @@ func _build_live_fireteam_card_detail_line(unit: Node) -> String:
 func _build_live_fireteam_card_technical_tooltip(unit: Node) -> String:
 	if unit == null:
 		return ""
-	var lines: PackedStringArray = ["Taktische Details"]
+	var display_name: String = String(unit.call("get_display_name")).strip_edges() if unit.has_method("get_display_name") else ""
+	var lines: PackedStringArray = []
+	if not display_name.is_empty():
+		lines.append(display_name)
+	lines.append("Taktische Details")
 	var runtime_line: String = _build_live_fireteam_card_runtime_line(unit)
 	if not runtime_line.is_empty():
 		lines.append(runtime_line)
 	var detail_line: String = _build_live_fireteam_card_detail_line(unit)
 	if not detail_line.is_empty():
 		lines.append(detail_line)
+	var stance_label: String = _build_unit_tactical_stance_long_label(unit)
+	if not stance_label.is_empty():
+		lines.append("Haltung: %s" % stance_label)
+	if unit.has_method("get_effective_cover_score"):
+		lines.append("Deckung: %d" % int(unit.call("get_effective_cover_score")))
+	if unit.has_method("get_runtime_status"):
+		var runtime_status = unit.call("get_runtime_status")
+		if runtime_status != null and runtime_status.has_method("get"):
+			var phase_index: int = int(runtime_status.get("phase"))
+			if phase_index >= 0:
+				lines.append("Phase: %s" % COMMANDER_COMMAND_SCRIPT.get_phase_short_name(phase_index))
 	if unit.has_method("get_skill_summary_text"):
 		var skill_text: String = String(unit.call("get_skill_summary_text")).strip_edges()
 		if not skill_text.is_empty():
@@ -6503,6 +6519,20 @@ func _build_unit_tactical_stance_long_label(unit: Node) -> String:
 			return ""
 
 
+func _build_unit_tactical_stance_compact_label(unit: Node) -> String:
+	if unit == null or not unit.has_method("get_tactical_stance_indicator_id"):
+		return ""
+	match String(unit.call("get_tactical_stance_indicator_id")).strip_edges().to_lower():
+		"cautious":
+			return "VORS"
+		"aggressive":
+			return "OFF"
+		"normal":
+			return "NORM"
+		_:
+			return ""
+
+
 func _build_unit_posture_readability_text(unit: Node) -> String:
 	if unit == null:
 		return ""
@@ -6514,7 +6544,7 @@ func _build_unit_posture_readability_text(unit: Node) -> String:
 	var aim_readiness: float = _get_unit_aim_readiness_percent(unit)
 	if aim_readiness > 0.01:
 		parts.append("Zielbereit %d%%" % int(round(aim_readiness)))
-	return " | ".join(parts)
+	return "\n".join(parts)
 
 
 func _format_unit_weapon_posture_text(weapon_posture: String) -> String:

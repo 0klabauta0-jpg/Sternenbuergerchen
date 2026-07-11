@@ -125,7 +125,7 @@ func _test_selected_cards_use_readable_runtime_labels() -> void:
 	unit.call("set_runtime_status", "engaging", "move_to_position", 12, "fire_at_will", "engage", 0.65, 75.0, 8.0, -1, Vector2(64.0, 0.0), "engage", "aimed", "task464", 1.2, 80.0)
 	var runtime_line: String = String(controller.call("_build_live_fireteam_card_runtime_line", unit))
 	var detail_line: String = String(controller.call("_build_live_fireteam_card_detail_line", unit))
-	_assert(runtime_line.contains("Angreifen") and runtime_line.contains("Feuer frei") and runtime_line.contains("vorsichtig"), "#17 runtime line uses readable command/fire/stance labels: %s" % runtime_line)
+	_assert(runtime_line.contains("Angreifen") and runtime_line.contains("Feuer frei") and runtime_line.contains("VORS"), "#17 runtime line uses readable compact command/fire/stance labels: %s" % runtime_line)
 	_assert(detail_line.contains("Waffe im Anschlag") and detail_line.contains("Kampfbewegung") and detail_line.contains("Zielbereit 80%"), "#17 detail line explains weapon posture, movement posture and aim readiness")
 	controller.queue_free()
 	unit.queue_free()

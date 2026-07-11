@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1138_selected_fireteam_member_card_name_priority_fit_polish.md`, `docs/tasks/TASK_1137_selected_fireteam_member_card_player_language_polish.md`, `docs/tasks/TASK_472_fireteam_contact_perf_bubble_card_readability.md`
+- Befund: Nach der Sprachbereinigung konkurrierten Rangbadges, Lead-Stern, lange Namen und Status in 156 Pixel breiten Karten. Der echte Full-HD-Blick schnitt Operatornamen ab und brach Pipe-Zeilen zufaellig um.
+- Aenderung: Mission-Member-Cards sind 176 x 118 Pixel breit, reservieren 94 Pixel fuer Text und blenden Rangbadges nur in diesem dichten taktischen Kontext aus. Command/Haltung und Feuerregel besitzen zwei feste Zeilen; Waffenhaltung und Bewegung folgen darunter. Vollname, Haltung, Deckung, Phase, Skills und Merkmale bleiben im Tooltip.
+- Sicht-/Runtime-Beleg: Vier Karten passen gleichzeitig in den Full-HD-Dock. `Anja Voss`, `Darius Holt`, `Leona Rhee` und `Milo Saren` sind voll lesbar; `Bewegen | OFF`, `Feuer frei`, `Waffe gesenkt`, `Rennt` bilden eine stabile Hierarchie.
+- Multiplayer/Performance: Reiner Card-/Presenter-Polish. Keine Gameplay-, Rank-, Lead-, Fireteam-, Combat-, Command-, Effect-, RPC- oder Snapshotaenderung; keine neue Framearbeit.
+- Lokale Pruefung: TASK_1138 7/7; TASK_1137 13/13; TASK_464 15/15; TASK_472 13/13; TASK_207 31/31; TASK_1136 19/19 Real Window; TASK_503 10/10; TASK_1109 18/18; TASK_222 82/82.
+- Naechster Schritt: TASK_1139 - Command Matrix Player Language and Icon Hierarchy Polish.
+
 ### TASK_1137 - Selected Fireteam Member Card Player Language Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1137_selected_fireteam_member_card_player_language_polish.md`, `docs/tasks/TASK_1136_live_tactical_stance_effect_playtest_feedback.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Multiplayer/Performance: Reiner Presenter auf bestehenden read-only Unit-Daten. Card-Instanzen, Dirty-Signatur, SimulationRoot, Commands, Effects, RPCs und Snapshots bleiben unveraendert.
 - Sicht-/Runtime-Beleg: Der echte Full-HD-Lauf zeigt `Bewegen`, `Waffe gesenkt` und `Rennt` ohne rohe Skillzeile; der laufende OFF-Move bleibt funktional.
 - Lokale Pruefung: TASK_1137 13/13; TASK_464 15/15; TASK_1136 17/17 headless und 19/19 Real Window; TASK_503 10/10; TASK_1109 18/18; TASK_773 25/25; TASK_222 82/82.
-- Naechster Schritt: TASK_1138 - Selected Fireteam Member Card Name and Priority Fit Polish.
+- Naechster Schritt: abgeschlossen durch TASK_1138.
 
 ### TASK_1136 - Live Tactical Stance Effect Playtest and Feedback
 - Status: implementiert im Arbeitsstand

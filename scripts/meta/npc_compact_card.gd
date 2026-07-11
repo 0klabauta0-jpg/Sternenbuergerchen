@@ -36,6 +36,7 @@ var _drag_enabled: bool = true
 var _compact_mode: bool = false
 var _is_lead: bool = false
 var _show_lead_indicator: bool = false
+var _show_badges: bool = true
 var _show_progress: bool = false
 var _progress_value: float = 0.0
 var _show_remove_action: bool = false
@@ -97,6 +98,7 @@ func setup_from_profile(profile, options: Dictionary = {}) -> void:
 	_compact_mode = bool(options.get("compact_mode", _compact_mode))
 	_is_lead = bool(options.get("is_lead", _is_lead))
 	_show_lead_indicator = bool(options.get("show_lead_indicator", _show_lead_indicator))
+	_show_badges = bool(options.get("show_badges", _show_badges))
 	_show_progress = bool(options.get("show_progress", _show_progress))
 	_progress_value = clampf(float(options.get("progress_value", _progress_value)), 0.0, 100.0)
 	_show_remove_action = bool(options.get("show_remove_action", _show_remove_action))
@@ -181,6 +183,7 @@ func get_card_userology_snapshot() -> Dictionary:
 		"badge_layout": "right_of_main_text",
 		"badge_minimum_size": min_badge_size,
 		"badge_tooltips_available": _badge_tooltips_available(badge_row),
+		"show_badges": _show_badges,
 		"compact_remove_action": remove_button != null and remove_button.visible,
 		"fixed_size": _fixed_size,
 		"uses_readonly_profile_reference": _uses_readonly_profile_reference,
@@ -593,6 +596,9 @@ func _populate_badge_row(badge_row: HBoxContainer) -> void:
 	for child in badge_row.get_children():
 		badge_row.remove_child(child)
 		child.queue_free()
+	if not _show_badges:
+		badge_row.visible = false
+		return
 	var badges: Array = Array(NPC_RANK_BADGE_RESOLVER_SCRIPT.call("get_badges_for_profile", _profile))
 	badge_row.visible = not badges.is_empty()
 	if badges.is_empty():
