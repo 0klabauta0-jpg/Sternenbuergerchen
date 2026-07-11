@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1131_fireteam_mini_card_header_contrast_status_compression.md`, `docs/tasks/TASK_1130_fireteam_mini_card_identity_typography_polish.md`, `scripts/meta/drop_light_layout_contract.gd`
+- Befund: Titel, Kontakt-/Moral-/Koordinationsbadges und Stance-Buttons konkurrierten in einer schmalen Zeile. Der taktische Primaerstatus lag hinter einer abgeschnittenen Lead-Zeile; zwei echte Karten passten nicht vollstaendig in den 248-px-Scrollbereich.
+- Aenderung: BLUE/GOLD besitzen einen kontrastreichen Titelstreifen. Badge-/Stance-Bedienung sitzt getrennt. Sichtbar folgen `EX | Kontakt | HP` und `Lead | Ops`; Bewegung, Position, Suppression und Readiness bleiben im Tooltip. Der redundante Member-Chip-Render ist verborgen, sein read-only Snapshot bleibt erhalten. Der linke Contract bietet 312 px Kartenhoehe und verschiebt das Event-Log rastertreu darunter.
+- Multiplayer/Performance: Keine Gameplay-, Fireteam-, Combat-, Command-, Effect-, RPC- oder Snapshotmutation. Bestehende Card-Instanzen und Dirty-/Delta-Pfade bleiben erhalten; TASK_1065 ist 13/13 und TASK_222 82/82 gruen.
+- Risiken/offen: Die Karten sind geometrisch sauber, verwenden aber noch technische Kurzformen wie `EX -`, `C0` und `RDY N/A`. TASK_370 enthaelt sechs veraltete direkte-Child-/96-px-Annahmen; seine aktuelle Nachfolgepruefung TASK_1065 ist gruen.
+- Lokale Pruefung: TASK_1131 8/8; TASK_1128 8/8 Real Window; TASK_1130 6/6; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1065 13/13; TASK_180 98/98; TASK_258 71/71; TASK_627 21/21; TASK_222 82/82.
+- Naechster Schritt: TASK_1132 - Fireteam Mini-Card Tactical State Language Polish.
+
 ### TASK_1130 - Fireteam Mini-Card Identity and Typography Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1130_fireteam_mini_card_identity_typography_polish.md`, `docs/tasks/TASK_773_station_reentry_host_client_identity_cue_polish.md`, `docs/tasks/TASK_1129_tactical_communication_bubble_typography_mode_contract_reconciliation.md`
@@ -18,7 +28,7 @@
 - Multiplayer/Performance: Keine Team-/Peer-/Fireteam-Wahrheit geaendert. Reine vorhandene UI-Aktualisierung; keine neue Framearbeit, RPCs, Commands, Effects oder Snapshotfelder.
 - Risiken/offen: Der Full-HD-Beleg ist lesbarer und kollisionsfrei. BLUE/GOLD wirkt unter den oberen Bars noch kontrastarm.
 - Lokale Pruefung: TASK_1130 6/6; TASK_773 25/25; TASK_431 19/19; TASK_1128 8/8 Real Window.
-- Naechster Schritt: TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression.
+- Naechster Schritt: abgeschlossen durch TASK_1131.
 
 ### TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation
 - Status: implementiert im Arbeitsstand

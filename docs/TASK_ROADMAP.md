@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression (implementiert im Arbeitsstand)
+- Grundlage: BLUE/GOLD konkurrierte im Header mit vier Status-/Bediengruppen. Die wichtigste taktische Zeile wurde hinter einer abgeschnittenen Lead-Zeile verborgen; zwei Karten passten nicht vollstaendig in den linken Scrollbereich.
+- Ergebnis: Kontrastreicher Titel, getrennte Badge-/Stance-Zeile, primaerer `EX | Kontakt | HP`-Status zuerst und kompakte `Lead | Ops`-Identitaet. Vollstaendige Details bleiben im Tooltip; der Member-Snapshot bleibt trotz entfallener redundanter Chip-Zeile read-only erhalten. Der linke HUD-Contract zeigt beide Karten vollstaendig und setzt das Event-Log darunter.
+- Architektur: Reine UI-Leseschicht und fester Layoutcontract; keine Gameplay-, Fireteam-, Combat-, RPC-, Command-, Effect- oder Snapshotmutation. Delta-Rendering und Performance-Gates bleiben gruen.
+- Verifikation: TASK_1131 8/8; TASK_1128 8/8 Real Window; TASK_1130 6/6; TASK_431 19/19; TASK_503 10/10; TASK_773 25/25; TASK_1065 13/13; TASK_180 98/98; TASK_258 71/71; TASK_627 21/21; TASK_222 82/82.
+- Naechster Schritt: TASK_1132 - Fireteam Mini-Card Tactical State Language Polish. Technische Kurzformen wie `EX -`, `C0` und `RDY N/A` sollen spielsprachlich lesbar werden.
+
 ## TASK_1130 - Fireteam Mini-Card Identity and Typography Polish (implementiert im Arbeitsstand)
 - Grundlage: Der Full-HD-Beleg zeigte `FT ?` ohne aktive Review-Session sowie 10/8/8-px-Mini-Card-Typografie.
 - Ergebnis: Inaktive lokale Sessions blenden den Relation-Kontext aus; aktive Host/Client-Semantik bleibt ehrlich. BLUE/GOLD nutzen 12 px, beide Statuszeilen 10 px. Bubbles bleiben kollisionsfrei verankert.
 - Architektur: Reine UI-Leseschicht; keine Fireteam-, Team-, Peer-, Gameplay-, RPC-, Command-, Effect- oder Snapshotmutation.
 - Verifikation: TASK_1130 6/6; TASK_773 25/25; TASK_431 19/19; TASK_1128 8/8 Real Window.
-- Naechster Schritt: TASK_1131 - Fireteam Mini-Card Header Contrast and Status Compression. BLUE/GOLD soll sich klarer von oberen Bars und Statusrauschen abheben.
+- Naechster Schritt: abgeschlossen durch TASK_1131.
 
 ## TASK_1129 - Tactical Communication Bubble Typography and Mode Contract Reconciliation (implementiert im Arbeitsstand)
 - Grundlage: Der TASK-1128-Capture zeigte 8-px-Bubbletext. TASK_212 verlor mehrere Unit-Gedanken im Fireteam-Dedupe; TASK_214 belegte ein echtes Minimalmodus-Leck sowie veraltete Text-/Rohpayload-Annahmen.
