@@ -274,6 +274,32 @@ func get_contact_decision_diagnostics_snapshot() -> Dictionary:
 	return snapshot
 
 
+func get_contact_decision_diagnostics_for_fireteams(fireteam_ids: Variant) -> Dictionary:
+	var selected: Dictionary = {}
+	for fireteam_id_variant in Array(fireteam_ids):
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not fireteam_id.is_empty():
+			selected[fireteam_id] = true
+	if selected.is_empty():
+		return get_contact_decision_diagnostics_snapshot()
+	for index in range(_recent_fire_events.size() - 1, -1, -1):
+		var event_variant: Variant = _recent_fire_events[index]
+		if typeof(event_variant) != TYPE_DICTIONARY:
+			continue
+		var fire_event: Dictionary = Dictionary(event_variant)
+		var attacker_fireteam_id: String = String(fire_event.get("attacker_fireteam_id", "")).strip_edges().to_lower()
+		var target_fireteam_id: String = String(fire_event.get("target_fireteam_id", "")).strip_edges().to_lower()
+		if bool(selected.get(attacker_fireteam_id, false)) or bool(selected.get(target_fireteam_id, false)):
+			return _build_remote_fire_event_diagnostics(fire_event)
+	for contact_variant in _remote_contact_snapshot:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		if bool(selected.get(String(contact.get("fireteam_id", "")).strip_edges().to_lower(), false)):
+			return _build_remote_contact_diagnostics(contact)
+	return {}
+
+
 func get_suppress_fire_outcome_aar_diagnostic_snapshot() -> Dictionary:
 	var last_outcome: Dictionary = _last_suppress_fire_outcome_diagnostic.duplicate(true)
 	return {
@@ -849,35 +875,42 @@ func _sanitize_remote_combat_entries(entries_variant: Variant, identity_key: Str
 
 func _build_remote_contact_decision_diagnostics() -> Dictionary:
 	if not _recent_fire_events.is_empty():
-		var fire_event: Dictionary = Dictionary(_recent_fire_events.back()).duplicate(true)
-		return {
-			"status": "fired",
-			"reason": "fired",
-			"fire_event_id": String(fire_event.get("event_id", "")),
-			"attacker_unit_id": String(fire_event.get("attacker_unit_id", "")),
-			"attacker_team_id": String(fire_event.get("attacker_team_id", "")),
-			"attacker_fireteam_id": String(fire_event.get("attacker_fireteam_id", "")),
-			"target_unit_id": String(fire_event.get("target_unit_id", "")),
-			"target_team_id": String(fire_event.get("target_team_id", "")),
-			"weapon_id": String(fire_event.get("weapon_id", "")),
-			"combat_outcome": String(fire_event.get("combat_outcome", fire_event.get("result", ""))),
-			"source": "multiplayer_combat_snapshot",
-			"read_only": true,
-			"ui_sets_gameplay_truth": false,
-		}
+		return _build_remote_fire_event_diagnostics(Dictionary(_recent_fire_events.back()))
 	if not _remote_contact_snapshot.is_empty():
-		var contact: Dictionary = Dictionary(_remote_contact_snapshot[0]).duplicate(true)
-		return {
-			"status": "contact",
-			"reason": "contact_visible",
-			"target_unit_id": String(contact.get("unit_id", "")),
-			"target_team_id": String(contact.get("team_id", "")),
-			"target_position": contact.get("last_known_position", Vector2.ZERO),
-			"source": "multiplayer_combat_snapshot",
-			"read_only": true,
-			"ui_sets_gameplay_truth": false,
-		}
+		return _build_remote_contact_diagnostics(Dictionary(_remote_contact_snapshot[0]))
 	return {}
+
+
+func _build_remote_fire_event_diagnostics(fire_event: Dictionary) -> Dictionary:
+	return {
+		"status": "fired",
+		"reason": "fired",
+		"fire_event_id": String(fire_event.get("event_id", "")),
+		"attacker_unit_id": String(fire_event.get("attacker_unit_id", "")),
+		"attacker_team_id": String(fire_event.get("attacker_team_id", "")),
+		"attacker_fireteam_id": String(fire_event.get("attacker_fireteam_id", "")),
+		"target_unit_id": String(fire_event.get("target_unit_id", "")),
+		"target_team_id": String(fire_event.get("target_team_id", "")),
+		"target_fireteam_id": String(fire_event.get("target_fireteam_id", "")),
+		"weapon_id": String(fire_event.get("weapon_id", "")),
+		"combat_outcome": String(fire_event.get("combat_outcome", fire_event.get("result", ""))),
+		"source": "multiplayer_combat_snapshot",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _build_remote_contact_diagnostics(contact: Dictionary) -> Dictionary:
+	return {
+		"status": "contact",
+		"reason": "contact_visible",
+		"target_unit_id": String(contact.get("unit_id", "")),
+		"target_team_id": String(contact.get("team_id", "")),
+		"target_position": contact.get("last_known_position", Vector2.ZERO),
+		"source": "multiplayer_combat_snapshot",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
 
 
 func _publish_multiplayer_snapshot_context(simulation_root: Node) -> void:
@@ -1082,8 +1115,10 @@ func _build_fire_event(
 		"sequence": sequence,
 		"attacker_unit_id": attacker_unit_id,
 		"attacker_team_id": attacker_team_id,
+		"attacker_fireteam_id": _get_unit_fireteam_id(attacker),
 		"target_unit_id": target_unit_id,
 		"target_team_id": target_team_id,
+		"target_fireteam_id": _get_unit_fireteam_id(target),
 		"weapon_id": weapon_id,
 		"weapon_tile_range": weapon_tile_range,
 		"weapon_range_world": weapon_range_world,
