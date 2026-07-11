@@ -466,7 +466,9 @@ var _network_mission_interaction_feedback: Dictionary = {}
 var _network_mission_interaction_request_pending: bool = false
 var _network_dropship_command_sequence: int = 0
 const NETWORK_DROPSHIP_PENDING_TIMEOUT_SECONDS: float = 8.0
+const NETWORK_DROPSHIP_RESULT_FEEDBACK_SECONDS: float = 3.0
 var _pending_network_dropship_commands_by_craft: Dictionary = {}
+var _network_dropship_feedback_by_craft: Dictionary = {}
 var _network_dropship_pending_timeout_count: int = 0
 var _network_dropship_pending_blocked_submit_count: int = 0
 var _network_mission_interaction_progress_fingerprint: String = ""
@@ -2129,6 +2131,8 @@ func _apply_network_dropship_command_result(result: Dictionary) -> void:
 		else:
 			_pending_network_dropship_commands_by_craft.erase(craft_id)
 	_last_command_text = "%s %s HOST OK" % [action_label, craft_id] if accepted else "%s BLOCKIERT | %s" % [action_label, _build_network_mission_interaction_reason_label(reason)]
+	if not accepted and not craft_id.is_empty():
+		_set_network_dropship_result_feedback(craft_id, _last_command_text, "blocked")
 	_update_ui()
 
 
@@ -2148,7 +2152,7 @@ func get_network_dropship_pending_debug_snapshot() -> Dictionary:
 
 
 func _advance_network_dropship_pending(delta: float) -> void:
-	if _pending_network_dropship_commands_by_craft.is_empty() or delta <= 0.0:
+	if delta <= 0.0:
 		return
 	var expired_craft_ids: Array[String] = []
 	for craft_id_variant in _pending_network_dropship_commands_by_craft.keys():
@@ -2159,13 +2163,36 @@ func _advance_network_dropship_pending(delta: float) -> void:
 			expired_craft_ids.append(craft_id)
 		else:
 			_pending_network_dropship_commands_by_craft[craft_id] = pending
-	if expired_craft_ids.is_empty():
-		return
 	for craft_id in expired_craft_ids:
 		_pending_network_dropship_commands_by_craft.erase(craft_id)
 		_network_dropship_pending_timeout_count += 1
 		_last_command_text = "DROPSHIP %s HOST TIMEOUT" % craft_id
-	_update_ui()
+		_set_network_dropship_result_feedback(craft_id, _last_command_text, "blocked")
+	var expired_feedback_craft_ids: Array[String] = []
+	for craft_id_variant in _network_dropship_feedback_by_craft.keys():
+		var craft_id: String = String(craft_id_variant)
+		var feedback: Dictionary = Dictionary(_network_dropship_feedback_by_craft.get(craft_id, {}))
+		feedback["remaining_seconds"] = maxf(float(feedback.get("remaining_seconds", NETWORK_DROPSHIP_RESULT_FEEDBACK_SECONDS)) - delta, 0.0)
+		if float(feedback.get("remaining_seconds", 0.0)) <= 0.0:
+			expired_feedback_craft_ids.append(craft_id)
+		else:
+			_network_dropship_feedback_by_craft[craft_id] = feedback
+	for craft_id in expired_feedback_craft_ids:
+		_network_dropship_feedback_by_craft.erase(craft_id)
+	if not expired_craft_ids.is_empty() or not expired_feedback_craft_ids.is_empty():
+		_update_ui()
+
+
+func _set_network_dropship_result_feedback(craft_id: String, compact_line: String, tone: String) -> void:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty() or compact_line.strip_edges().is_empty():
+		return
+	_network_dropship_feedback_by_craft[normalized_craft_id] = {
+		"compact_line": compact_line.strip_edges(),
+		"tone": tone.strip_edges().to_lower(),
+		"remaining_seconds": NETWORK_DROPSHIP_RESULT_FEEDBACK_SECONDS,
+		"read_only": true,
+	}
 
 
 func _apply_authoritative_dropship_pending_snapshot(incoming_cards: Array) -> void:
@@ -2185,6 +2212,8 @@ func _apply_authoritative_dropship_pending_snapshot(incoming_cards: Array) -> vo
 			continue
 		var pending: Dictionary = Dictionary(_pending_network_dropship_commands_by_craft.get(craft_id, {}))
 		if _does_authoritative_dropship_card_satisfy_pending(Dictionary(incoming_by_craft[craft_id]), pending):
+			var action_label: String = _build_dropship_command_action_label(String(pending.get("command_type", "")))
+			_set_network_dropship_result_feedback(craft_id, "%s %s HOST OK" % [action_label, craft_id], "success")
 			_pending_network_dropship_commands_by_craft.erase(craft_id)
 
 
@@ -2286,6 +2315,7 @@ func request_network_authoritative_dropship_command(command_type: String, craft_
 		_last_command_text = "%s %s | WARTE AUF HOST" % [_build_dropship_command_action_label(command_type), normalized_craft_id]
 		_update_ui()
 		return false
+	_network_dropship_feedback_by_craft.erase(normalized_craft_id)
 	var peer_id: int = multiplayer.get_unique_id()
 	var team_id: String = String(simulation_root.call("get_peer_team", peer_id)).strip_edges() if simulation_root.has_method("get_peer_team") else ""
 	if team_id.is_empty():
@@ -11169,6 +11199,7 @@ func _populate_mission_dropship_passenger_content(card_panel: PanelContainer, ca
 		feedback_label.add_theme_font_size_override("font_size", 9)
 		feedback_label.set_meta("mission_dropship_card_feedback_text", feedback_text)
 		META_UI_SKIN_SCRIPT.style_body_label(feedback_label, 9)
+		_apply_mission_dropship_card_feedback_style(feedback_label, _get_mission_dropship_card_feedback_tone(card))
 		host.add_child(feedback_label)
 	if payload_ids.is_empty():
 		if feedback_text == "Trupp ab":
@@ -11857,7 +11888,32 @@ func _get_mission_dropship_card_feedback_text(card: Dictionary) -> String:
 	var pending: Dictionary = Dictionary(_pending_network_dropship_commands_by_craft.get(craft_id, {}))
 	if not pending.is_empty():
 		return String(pending.get("compact_line", "WARTE AUF HOST")).strip_edges()
+	var feedback: Dictionary = Dictionary(_network_dropship_feedback_by_craft.get(craft_id, {}))
+	if not feedback.is_empty():
+		return String(feedback.get("compact_line", "")).strip_edges()
 	return String(card.get("card_feedback_text", "")).strip_edges()
+
+
+func _get_mission_dropship_card_feedback_tone(card: Dictionary) -> String:
+	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
+	if _pending_network_dropship_commands_by_craft.has(craft_id):
+		return "pending"
+	var feedback: Dictionary = Dictionary(_network_dropship_feedback_by_craft.get(craft_id, {}))
+	return String(feedback.get("tone", "neutral")).strip_edges().to_lower()
+
+
+func _apply_mission_dropship_card_feedback_style(label: Label, tone: String) -> void:
+	if label == null:
+		return
+	var normalized_tone: String = tone.strip_edges().to_lower()
+	var style_key: String = _build_network_mission_interaction_tone_style_key(normalized_tone)
+	var tone_color: Color = TACTICAL_UI_THEME_SCRIPT.call("status_color", style_key)
+	label.add_theme_color_override("font_color", tone_color)
+	label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+	label.add_theme_constant_override("outline_size", 2)
+	label.set_meta("mission_dropship_feedback_tone", normalized_tone)
+	label.set_meta("mission_dropship_feedback_style_key", style_key)
+	label.set_meta("mission_dropship_feedback_font_color", tone_color.to_html(true))
 
 
 func _refresh_legacy_mission_dropship_panel() -> void:
@@ -17301,6 +17357,10 @@ func _build_mission_dropship_card_ui_readability_snapshot(craft_id: String) -> D
 		"set_lz_button_disabled": true,
 		"drop_button_present": false,
 		"drop_button_disabled": true,
+		"feedback_text": "",
+		"feedback_tone": "",
+		"feedback_style_key": "",
+		"feedback_color": "",
 		"commands": {},
 	}
 	if panel == null:
@@ -17315,6 +17375,16 @@ func _build_mission_dropship_card_ui_readability_snapshot(craft_id: String) -> D
 			if String(control.get_meta("mission_dropship_craft_id", "")).strip_edges() == normalized_craft_id:
 				result["selected_card_present"] = true
 				result["selected_card_visible"] = control.visible and control.is_visible_in_tree()
+		var feedback_label := node as Label
+		if feedback_label != null and String(feedback_label.name) == "MissionDropshipCardFeedbackLabel":
+			var feedback_card := feedback_label.get_parent()
+			while feedback_card != null and not bool(feedback_card.get_meta("mission_dropship_card", false)):
+				feedback_card = feedback_card.get_parent()
+			if feedback_card != null and String(feedback_card.get_meta("mission_dropship_craft_id", "")).strip_edges() == normalized_craft_id:
+				result["feedback_text"] = feedback_label.text
+				result["feedback_tone"] = String(feedback_label.get_meta("mission_dropship_feedback_tone", ""))
+				result["feedback_style_key"] = String(feedback_label.get_meta("mission_dropship_feedback_style_key", ""))
+				result["feedback_color"] = String(feedback_label.get_meta("mission_dropship_feedback_font_color", ""))
 		var button := node as Button
 		if button == null or not bool(button.get_meta("mission_dropship_card_command_button", false)):
 			continue

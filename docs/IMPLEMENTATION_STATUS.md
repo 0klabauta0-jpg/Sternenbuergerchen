@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1114 - Connected Dropship Pending Card Visual Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1114_connected_dropship_pending_card_visual_polish.md`, `docs/tasks/TASK_1113_connected_dropship_pending_feedback_double_submit_guard.md`, `scripts/ui/tactical_ui_theme.gd`
+- Befund: TASK_1113 sperrte Requests korrekt, aber die Craft-Karte unterschied Pending, Success und Reject/Timeout visuell nicht stabil. Nach Result oder Snapshot blieb die Rueckmeldung primaer in der globalen Command-Zeile.
+- Aenderung: Ein kleines read-only Result-Feedback pro Craft behaelt Erfolg, Reject oder Timeout drei Sekunden. Die vorhandene Kartenzeile nutzt Warning/Gelb fuer Pending, Success/Gruen fuer Snapshot-OK und Danger/Rot fuer Blocked/Timeout. Der UI-Snapshot exponiert Text, Tone, Style-Key und Farbe fuer Verifier.
+- Multiplayer/Performance: Pending bleibt im bestehenden Guard; Result-Feedback ist keine Transportwahrheit und wird nicht repliziert. Der Timer aktualisiert Dictionaries billig und baut das HUD nur beim tatsaechlichen Ablauf neu.
+- Sichtbefund: Echter D3D12-Readback in 1920x1080 zeigt getrennte BLUE-/GOLD-Karten, gruene HOST-OK-Zeile direkt unter den Craft-Aktionen und keine Ueberlagerung mit Karte oder Bottom-Dock.
+- Lokale Pruefung: TASK_1114 headless 13/13, Real-Window 15/15, TASK_1113 16/16, TASK_1112 13/13 und TASK_399 9/9.
+- Naechster Schritt: TASK_1115 - Connected Parallel Dropship Drop Deboard Return Playthrough.
+
 ### TASK_1113 - Connected Dropship Pending Feedback and Double-Submit Guard
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1113_connected_dropship_pending_feedback_double_submit_guard.md`, `docs/tasks/TASK_1112_connected_parallel_dropship_command_lifecycle_recovery.md`
