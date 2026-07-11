@@ -13,6 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1093 - Connected Station Route Full Interaction Trace (implementiert im Arbeitsstand)
+- Grundlage: Door war verbunden, fuer AA, Computer und Cargo fehlte eine neutrale Network-Projektion.
+- Ergebnis: Ein generischer Intent-Builder und der Host-Arrival-/Hold-Pfad fuehren AA, Door, Computer und Cargo ueber echte ENet-RPC bis zum gemeinsamen fertigen Gate-Snapshot.
+- Verifikation: TASK_1093 19/19, TASK_1092 15/15 und TASK_697 42/42.
+- Naechster Schritt: TASK_1094 - Connected Client GO Interaction RPC Handoff. Der echte UI-GO-Griff soll bei einer Client-Verbindung den projizierten Command an den Host senden.
+
 ## TASK_1092 - Connected Station Route Runtime Arrival Hold (implementiert im Arbeitsstand)
 - Grundlage: TASK_1091 replizierte Interaction-State, schloss ihn im Verifier aber noch direkt ab. Netzwerkbewegung erreichte den lokalen Waypoint-Progress-Produzenten nicht.
 - Ergebnis: Akzeptierter Client-Command registriert auf dem Host eine Pending-Interaction. Autoritative Unit-Ankunft und Tick-Hold schliessen Door ab; Rejects erzeugen keinen Pending-State; der Client spiegelt den Abschluss read-only.

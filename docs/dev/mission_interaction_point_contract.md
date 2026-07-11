@@ -611,5 +611,12 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - Abschluss laeuft ueber `update_mission_interaction_runtime_progress()` und danach ueber den TASK-1091-Snapshot. Weder Client noch UI besitzen einen Timer oder setzen Door-State.
 - TASK_1092 belegt Door-Arrival/Hold ueber echte lokale ENet-RPC. Rejects erzeugen keinen Pending-State.
 
+## Connected Full Route Interaction Contract
+- `MissionInteractionMultiplayerCommand` projiziert einen akzeptierten Interaction-Intent in einen normalen `commander_command`.
+- Erlaubte Payloaddaten sind Besitzer, Ziel, Interaction-/Step-/Gate-ID, erforderlicher Zustand, Dauer und Radius. Runtime-State, Progress und Complete bleiben ausgeschlossen.
+- Der Host behandelt `mission_interaction_use_intent_command` ueber denselben Arrival-/Hold-Produzenten wie den spezialisierten Door-Pfad.
+- AA, Door, Computer und Cargo muessen sequenziell ueber Host-Progress abschliessen; der Client liest nur den TASK-1091-Snapshot.
+- TASK_1093 belegt den vollstaendigen verbundenen Gate-Trace. Die sichtbare Client-GO-Taste ist noch nicht auf diese Projektion verdrahtet.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

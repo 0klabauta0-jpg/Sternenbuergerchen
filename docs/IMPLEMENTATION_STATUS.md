@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1093 - Connected Station Route Full Interaction Trace
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1093_connected_station_route_full_interaction_trace.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1092
+- Stand: AA, Door, Computer und Cargo werden als neutrale Interaction-Commands per echter ENet-RPC gesendet, vom Host ueber Arrival/Hold abgeschlossen und zum Client repliziert.
+- Architektur: Der Builder transportiert nur Intent-/Authoring-Daten. `SimulationRoot` validiert Ownership; `MissionCombatLoopDriver` besitzt Progress und Gates; Client/UI setzen keine Runtime-Wahrheit.
+- Risiken/offen: Der sichtbare Client-GO-Button verwendet noch den lokalen Waypoint-Pfad. Der naechste Slice muss bei echter Client-Verbindung die vorhandene Projektion senden.
+- Lokale Pruefung: TASK_1093 19/19, TASK_1092 15/15 und TASK_697 42/42.
+- Naechster Schritt: TASK_1094 - Connected Client GO Interaction RPC Handoff.
+
 ### TASK_1092 - Connected Station Route Runtime Arrival Hold
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1092_connected_station_route_runtime_arrival_hold.md`, `docs/dev/mission_interaction_point_contract.md`, TASK_1091, TASK_714

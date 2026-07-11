@@ -136,6 +136,7 @@ const MISSION_INTERACTION_VISUAL_STATE_SCRIPT: GDScript = preload("res://scripts
 const MISSION_INTERACTION_OBJECT_REACTION_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_object_reaction.gd")
 const MISSION_INTERACTION_DOOR_RUNTIME_COLLISION_LOS_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_runtime_collision_los.gd")
 const MISSION_INTERACTION_DOOR_MULTIPLAYER_AUTHORITY_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_door_multiplayer_authority.gd")
+const MISSION_INTERACTION_MULTIPLAYER_COMMAND_SCRIPT: GDScript = preload("res://scripts/mission/mission_interaction_multiplayer_command.gd")
 const MISSION_MULTIPLAYER_DOOR_FEEDBACK_CAPTURE_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_door_feedback_capture.gd")
 const MISSION_MULTIPLAYER_TEAM_OWNERSHIP_CONTRACT_SCRIPT: GDScript = preload("res://scripts/mission/mission_multiplayer_team_ownership_contract.gd")
 const MISSION_TEAM_CHIP_PRESENTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_team_chip_presenter.gd")
@@ -24829,6 +24830,11 @@ func build_mission_interaction_door_multiplayer_network_command(unit_id: String 
 	)).duplicate(true)
 
 
+func build_mission_interaction_multiplayer_network_command(intent_snapshot: Dictionary = {}, unit_id: String = "", team_id: String = FRIENDLY_TEAM_ID, target_position: Variant = null) -> Dictionary:
+	var intent: Dictionary = intent_snapshot.duplicate(true) if not intent_snapshot.is_empty() else get_mission_interaction_use_intent_snapshot()
+	return Dictionary(MISSION_INTERACTION_MULTIPLAYER_COMMAND_SCRIPT.build_network_command(intent, unit_id, team_id, target_position)).duplicate(true)
+
+
 func get_mission_interaction_door_multiplayer_authority_snapshot(authority_results: Dictionary = {}) -> Dictionary:
 	var network_snapshot: Dictionary = {}
 	var simulation_root := get_node_or_null("../SimulationRoot")
@@ -25086,6 +25092,10 @@ func _build_mission_interaction_use_intent_result(accepted: bool, blocked_reason
 		"interaction_type": String(extra.get("interaction_type", interaction_feedback.get("interaction_type", ""))).strip_edges().to_lower(),
 		"required_order": String(extra.get("required_order", interaction_feedback.get("required_order", ""))).strip_edges().to_lower(),
 		"duration_seconds": maxf(float(extra.get("duration_seconds", interaction_feedback.get("duration_seconds", 0.0))), 0.0),
+		"interaction_radius_world": maxf(float(extra.get("interaction_radius_world", interaction_feedback.get("radius_world", 72.0))), 1.0),
+		"step_id": String(extra.get("step_id", interaction_feedback.get("step_id", ""))).strip_edges(),
+		"gate_id": String(extra.get("gate_id", interaction_feedback.get("gate_id", interaction_feedback.get("step_id", "")))).strip_edges(),
+		"required_state": String(extra.get("required_state", interaction_feedback.get("required_state", ""))).strip_edges(),
 		"target_position": extra.get("target_position", null),
 		"waypoint_id": String(extra.get("waypoint_id", "")).strip_edges(),
 		"phase": int(extra.get("phase", -1)),
