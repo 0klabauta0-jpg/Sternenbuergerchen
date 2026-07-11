@@ -72,11 +72,11 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1117: BLUE und GOLD sehen nach dem Ausstieg dieselben hostautoritativen Kontakte, Feuerereignisse und Vitalwerte, ohne lokalen Client-Combat.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1118: BLUE und GOLD lesen nach dem Ausstieg ihren eigenen Kontakt, ihre ROE und den Ausgang des ersten Feuerwechsels in derselben klaren HUD-Zeile.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1117</span>
+      <span class="pill good">Letzter Abschluss: TASK_1118</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -236,6 +236,11 @@
           <p>Nach Deboarding und Bodenbefehl erkennen BLUE und GOLD ihre Kontakte, waehrend ausschliesslich der Host Zielwahl, ROE, Treffer und Schaden verarbeitet. Beide Clients erhalten dasselbe First-Fire-Event und denselben Ziel-Vitalstatus ueber den bestehenden State-Snapshot.</p>
           <div class="callout">Der Drei-Peer-Lauf fand und reparierte drei versteckte Brueche: spaete Client-Autoritaetsumschaltung, Contact-Dedupe nur nach Gegner-ID und ignorierte flache Runtime-/Vitalfelder. Ergebnis: Health 74 auf Host, BLUE und GOLD; keine Client-Commands oder Client-Effects. Performance-Gate: 82/82.</div>
         </article>
+        <article class="card wide">
+          <h2>Eigene HUD-Perspektive Beim Erstkontakt TASK_1118</h2>
+          <p>Die Auswahl eines Fireteams bestimmt jetzt, welches hostautoritative First-Fire-Ereignis angezeigt wird. BLUE liest <code>ROE FW | HIT | NEXT HOLD / FLANK / SUP</code>, GOLD liest <code>ROE RF | MISS | NEXT HOLD / MOVE</code>. Selected Fireteam und Mission Control widersprechen sich dabei nicht mehr.</p>
+          <div class="callout success">Der allgemeine Combat-Diagnosevertrag bleibt erhalten; nur die HUD-Leseschicht filtert nach der aktuellen Fireteam-Auswahl. Headless 13/13, Real-Window 15/15 und Performance 82/82. Beide Perspektiven wurden als vollstaendige Full-HD-Aufnahme kontrolliert.</div>
+        </article>
       </div>
     </section>
 
@@ -321,15 +326,15 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1117 schliesst den verbundenen Handoff von Deboarding und Bodenbewegung bis zum ersten echten Feuerkontakt. Host, BLUE und GOLD sehen dieselben Fire-Events und Vitalwerte; nur der Host fuehrt Combat aus. Als naechstes soll TASK_1118 die Drei-Fenster-Lesbarkeit von Kontakt, ROE, Treffer und naechstem Spielergriff pruefen und gezielt polieren.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1118 macht den ersten verbundenen Feuerkontakt pro Fireteam lesbar. BLUE und GOLD sehen in Selected Fireteam und Mission Control jeweils Besitzer, ROE, Hit/Miss und den naechsten sinnvollen Griff; nur der Host fuehrt Combat aus. Als naechstes soll TASK_1119 diese Perspektiven in einem echten Host-/BLUE-/GOLD-Produktlauf statt in einer kontrollierten Snapshot-Fixture belegen.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1117 - Connected Post-Deboard First Contact Combat Handoff (15/15)" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence (13/13 headless, 15/15 real window)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1119 - Connected First Contact Three-Peer Product Visual Playtest" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -965,10 +970,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence"
+            recommended_next_task: "TASK_1119 - Connected First Contact Three-Peer Product Visual Playtest"
           },
           metadata: {
-            generated_for_task: "TASK_1117",
+            generated_for_task: "TASK_1118",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

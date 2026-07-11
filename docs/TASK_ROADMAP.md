@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence (implementiert im Arbeitsstand)
+- Grundlage: Der normale Snapshot transportierte Contact, First Fire und Vitalstatus korrekt, aber eine gemeinsame Diagnoseauswahl konnte BLUE und GOLD im HUD dasselbe letzte Ereignis zeigen. Mission Control priorisierte Phasencontrols vor dem aktuellen Kampfstatus.
+- Ergebnis: Selected Fireteam und Mission Control zeigen pro Auswahl dieselbe kompakte Zeile mit Fireteam-Besitz, Contact Fire, ROE, Hit/Miss und naechstem Griff. BLUE und GOLD besitzen unterschiedliche stabile Perspektivsignaturen.
+- Architektur: Der allgemeine read-only Diagnosevertrag bleibt bestehen; nur die HUD-Perspektive fordert fireteam-gefilterte Snapshotdaten an. Kein RPC, kein Client-Combat, keine Commands oder Effects und kein per-frame Control-Rebuild.
+- Verifikation: TASK_1118 headless 13/13 und Real-Window 15/15, TASK_1117 15/15, TASK_1107 9/9, TASK_258 71/71 und Performance-Gate TASK_222 82/82. Zwei Full-HD-Sichtbelege liegen unter `tmp/`.
+- Naechster Schritt: TASK_1119 - Connected First Contact Three-Peer Product Visual Playtest.
+
 ## TASK_1117 - Connected Post-Deboard First Contact Combat Handoff (implementiert im Arbeitsstand)
 - Grundlage: Clients stoppten ihren lokalen Combat nach spaetem Verbindungsaufbau nicht sicher, und der bereits transportierte Contact-/Fire-/Vital-Snapshot erreichte den bestehenden Combat-HUD-Lesepfad nicht vollstaendig.
 - Ergebnis: Nur der Host erkennt Ziele, entscheidet Feuer und mutiert Vitalstatus. BLUE und GOLD lesen getrennte Kontakte zum selben Gegner, dasselbe First-Fire-Event, read-only Diagnostics und denselben Health-Wert aus dem normalen Snapshot.

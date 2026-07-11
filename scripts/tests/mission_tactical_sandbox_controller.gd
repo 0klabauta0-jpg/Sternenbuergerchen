@@ -1703,6 +1703,55 @@ func get_contact_decision_diagnostics_snapshot() -> Dictionary:
 	return Dictionary(combat_driver.call("get_contact_decision_diagnostics_snapshot")).duplicate(true)
 
 
+func get_connected_first_contact_hud_perspective_snapshot() -> Dictionary:
+	var fireteam_ids: Array = Array(_selected_fireteam_ids)
+	if fireteam_ids.is_empty():
+		return {}
+	var fireteam_tokens: PackedStringArray = PackedStringArray()
+	var contact_count: int = 0
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		fireteam_tokens.append(fireteam_id.to_upper())
+		contact_count += get_fireteam_contact_snapshot(fireteam_id).size()
+	if fireteam_tokens.is_empty():
+		return {}
+	var diagnostics: Dictionary = get_contact_decision_diagnostics_snapshot()
+	var combat_driver = _get_combat_loop_driver()
+	if combat_driver != null and combat_driver.has_method("get_contact_decision_diagnostics_for_fireteams"):
+		diagnostics = Dictionary(combat_driver.call("get_contact_decision_diagnostics_for_fireteams", fireteam_ids)).duplicate(true)
+	if String(diagnostics.get("source", "")) != "multiplayer_combat_snapshot":
+		return {}
+	var fire_event_id: String = String(diagnostics.get("fire_event_id", "")).strip_edges()
+	var contact_state: String = "CONTACT FIRE" if not fire_event_id.is_empty() else "CONTACT"
+	var fire_rule: String = _get_selected_fire_rule_consensus()
+	var roe_token: String = _compact_fire_rule_for_hud(fire_rule)
+	var outcome: String = String(diagnostics.get("combat_outcome", "fire")).strip_edges().to_upper()
+	if outcome.is_empty() or outcome == "FIRED":
+		outcome = "FIRE"
+	var next_actions: String = "HOLD / MOVE" if fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_RETURN else "HOLD / FLANK / SUP"
+	var primary_line: String = "%s | %s | ROE %s | %s | NEXT %s" % ["+".join(fireteam_tokens), contact_state, roe_token, outcome, next_actions]
+	var signature: String = "%s|%s|%s|%s" % ["+".join(fireteam_tokens), fire_event_id, fire_rule, outcome]
+	return {
+		"schema": "sternenbuergerchen.connected_first_contact_hud_perspective.v1",
+		"fireteam_ids": fireteam_ids.duplicate(),
+		"fireteam_token": "+".join(fireteam_tokens),
+		"fire_event_id": fire_event_id,
+		"contact_count": contact_count,
+		"fire_rule": fire_rule,
+		"roe_token": roe_token,
+		"outcome": outcome,
+		"primary_line": primary_line,
+		"perspective_signature": signature,
+		"diagnostics": diagnostics.duplicate(true),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+	}
+
+
 func _enrich_contact_entries_with_recon(contact_entries: Array, fallback_fireteam_id: String = "") -> Array:
 	var tactics_by_unit_id: Dictionary = _build_enemy_tactics_by_unit_id()
 	var result: Array = []
@@ -8845,6 +8894,9 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 	var fire_events: Array = get_fire_event_snapshot()
 	var first_fire_event: Dictionary = _find_first_relevant_fire_event_for_fireteams(Array(_selected_fireteam_ids), fire_events, diagnostics)
 	var compact_line: String = _build_mission_combat_hud_compact_line(diagnostics, cover_readout, first_fire_event)
+	var connected_perspective: Dictionary = get_connected_first_contact_hud_perspective_snapshot()
+	if not connected_perspective.is_empty():
+		compact_line = String(connected_perspective.get("primary_line", compact_line)).strip_edges()
 	var detail_snapshot: Dictionary = _build_mission_combat_hud_detail_tooltip_snapshot_from_data(diagnostics, cover_readout, first_fire_event, compact_line)
 	var visibility_persistence: Dictionary = _update_release_fire_exchange_visibility_persistence(
 		diagnostics,
@@ -8862,7 +8914,9 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 			visibility_persistence = first_exchange_status_source
 			compact_line = String(first_exchange_status_source.get("compact_line", compact_line)).strip_edges()
 			detail_snapshot = Dictionary(first_exchange_status_source.get("detail_tooltip", detail_snapshot)).duplicate(true)
-	var selected_line: String = "Kampf %s" % compact_line if not compact_line.is_empty() else ""
+	if not connected_perspective.is_empty():
+		compact_line = String(connected_perspective.get("primary_line", compact_line)).strip_edges()
+	var selected_line: String = compact_line if not connected_perspective.is_empty() else ("Kampf %s" % compact_line if not compact_line.is_empty() else "")
 	var line_limit: int = 96
 	var snapshot: Dictionary = {
 		"active": not compact_line.is_empty(),
@@ -8889,6 +8943,7 @@ func _build_mission_combat_hud_density_snapshot() -> Dictionary:
 		"contains_range_context": compact_line.contains("RNG"),
 		"visibility_persistence": visibility_persistence,
 		"visibility_persistence_active": bool(visibility_persistence.get("active", false)),
+		"connected_first_contact_perspective": connected_perspective,
 	}
 	if bool(visibility_persistence.get("active", false)):
 		snapshot["source"] = "contact_decision_cover_fireevent_snapshot_visibility_persistence"
@@ -9450,6 +9505,9 @@ func _build_selected_fireteam_combat_hud_line() -> String:
 
 
 func _build_release_fire_exchange_contact_fire_primary_hud_line(combat_hud_density: Dictionary) -> String:
+	var connected_perspective: Dictionary = Dictionary(combat_hud_density.get("connected_first_contact_perspective", {}))
+	if not connected_perspective.is_empty():
+		return String(connected_perspective.get("primary_line", "")).strip_edges()
 	if not bool(combat_hud_density.get("visibility_persistence_active", false)):
 		return ""
 	var compact_line: String = String(combat_hud_density.get("compact_line", "")).strip_edges()
@@ -9652,6 +9710,8 @@ func _compact_release_first_exchange_contact_fire_line(raw_line: String, max_len
 	var line: String = raw_line.strip_edges()
 	if line.is_empty():
 		return ""
+	if line.to_upper().contains("| CONTACT FIRE | ROE ") and line.to_upper().contains("| NEXT "):
+		return line if line.length() <= max_length else line.substr(0, maxi(max_length - 1, 1)).strip_edges() + "..."
 	if not line.to_upper().begins_with("CONTACT FIRE"):
 		line = "CONTACT FIRE | %s" % line
 	var parts: PackedStringArray = line.split("|", false)
@@ -9832,7 +9892,7 @@ func _apply_release_firefight_hud_real_window_label_contract(label: Label) -> vo
 	if label == null:
 		return
 	var text: String = String(label.text).strip_edges()
-	var active: bool = (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE")
+	var active: bool = (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
 	label.set_meta("release_firefight_hud_real_window_active", active)
 	if not active:
 		return
@@ -9854,7 +9914,7 @@ func _apply_release_firefight_bottom_dock_density_label_contract(label: Label) -
 	if label == null:
 		return
 	var text: String = String(label.text).strip_edges()
-	var active: bool = (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE")
+	var active: bool = (text.begins_with("NEXT ") and text.contains(" | WHY ")) or text.begins_with("CONTACT FIRE") or text.to_upper().contains("| CONTACT FIRE |")
 	label.set_meta("release_firefight_bottom_dock_density_active", active)
 	if not active:
 		return
@@ -11183,25 +11243,28 @@ func _ensure_mission_team_chip_label() -> void:
 	if strategic_vbox == null:
 		return
 	var label := strategic_vbox.get_node_or_null("MissionTeamChipLabel") as Label
-	if label != null:
-		return
-	label = Label.new()
-	label.name = "MissionTeamChipLabel"
-	label.autowrap_mode = TextServer.AUTOWRAP_OFF
-	label.clip_text = true
-	label.add_theme_font_size_override("font_size", 10)
-	label.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0, 1.0))
-	label.add_theme_color_override("font_shadow_color", Color(0.02, 0.05, 0.07, 0.8))
-	label.add_theme_constant_override("shadow_offset_x", 1)
-	label.add_theme_constant_override("shadow_offset_y", 1)
-	label.mouse_filter = Control.MOUSE_FILTER_STOP
-	label.mouse_default_cursor_shape = Control.CURSOR_HELP
-	label.set_meta("mission_team_chip_tooltip_style_id", MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID)
-	label.set_meta("mission_team_chip_tooltip_task", "TASK_560")
-	label.set_meta("mission_team_chip_panel_polish_task", "TASK_566")
-	label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
-	label.set_meta("review_session_badge_task", "TASK_619")
-	strategic_vbox.add_child(label)
+	if label == null:
+		label = Label.new()
+		label.name = "MissionTeamChipLabel"
+		label.autowrap_mode = TextServer.AUTOWRAP_OFF
+		label.clip_text = true
+		label.add_theme_font_size_override("font_size", 10)
+		label.add_theme_color_override("font_color", Color(0.82, 0.93, 1.0, 1.0))
+		label.add_theme_color_override("font_shadow_color", Color(0.02, 0.05, 0.07, 0.8))
+		label.add_theme_constant_override("shadow_offset_x", 1)
+		label.add_theme_constant_override("shadow_offset_y", 1)
+		label.mouse_filter = Control.MOUSE_FILTER_STOP
+		label.mouse_default_cursor_shape = Control.CURSOR_HELP
+		label.set_meta("mission_team_chip_tooltip_style_id", MISSION_TEAM_CHIP_TOOLTIP_STYLE_ID)
+		label.set_meta("mission_team_chip_tooltip_task", "TASK_560")
+		label.set_meta("mission_team_chip_panel_polish_task", "TASK_566")
+		label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
+		label.set_meta("review_session_badge_task", "TASK_619")
+		strategic_vbox.add_child(label)
+	strategic_vbox.move_child(label, 1)
+	var strategic_status := strategic_vbox.get_node_or_null("StrategicStatusLabel") as Label
+	if strategic_status != null:
+		strategic_vbox.move_child(strategic_status, 2)
 
 
 func _refresh_mission_team_chip_label() -> void:

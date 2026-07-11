@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1118 - Connected First Contact HUD Perspective and Visual Evidence
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1118_connected_first_contact_hud_perspective_visual_evidence.md`, `docs/tasks/TASK_1117_connected_post_deboard_first_contact_combat_handoff.md`, `scripts/tests/mission_tactical_sandbox_controller.gd`
+- Befund: Der autoritative Combat-Snapshot war verbunden konsistent, aber die gemeinsame Diagnosezeile konnte beim Wechsel zwischen BLUE und GOLD das falsche First-Fire-Ereignis zeigen. Mission Control platzierte den aktuellen Kampfstatus zudem hinter seinen Phasencontrols und gab ihm fuer den vollstaendigen Text zu wenig Hoehe.
+- Aenderung: Der Combat-Driver bietet einen read-only Fireteam-Filter fuer Contact-/First-Fire-Diagnostik. Selected Fireteam und Mission Control lesen daraus dieselbe kompakte Perspektive mit Besitzer, Kontakt, ROE, Ausgang und naechstem Griff. Der allgemeine Diagnosevertrag bleibt vollstaendig und rueckwaertskompatibel.
+- Multiplayer/Performance: Keine neue Gameplay-Wahrheit, kein RPC, kein Command und kein Effect. Die HUD-Zeile wird aus vorhandenen Snapshotdaten nur bei den bestehenden Dirty-Refreshes abgeleitet. Full-HD-Belege fuer BLUE und GOLD zeigen getrennte Perspektiven; Performance-Gate bleibt 82/82 gruen.
+- Risiken/offen: Der D3D12-Backbuffer lieferte beim zweiten Bild in demselben Prozess nur Dirty-Regionen; belastbare Belegbilder laufen deshalb je Perspektive als eigener Compatibility-Renderer-Prozess. Der bestehende allgemeine `ObjectDB instances leaked`-Hinweis beim Testprozessende bleibt Folgearbeit. Als naechstes fehlt ein echter Drei-Fenster-Produktlauf statt der kontrollierten read-only Fixture.
+- Lokale Pruefung: TASK_1118 headless 13/13 und Real-Window 15/15, TASK_1117 15/15, TASK_1107 9/9, TASK_258 71/71 sowie TASK_222 82/82. Sichtbelege: `tmp/task_1118_connected_first_contact_blue.png` und `tmp/task_1118_connected_first_contact_gold.png`.
+- Naechster Schritt: TASK_1119 - Connected First Contact Three-Peer Product Visual Playtest.
+
 ### TASK_1117 - Connected Post-Deboard First Contact Combat Handoff
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1117_connected_post_deboard_first_contact_combat_handoff.md`, `docs/tasks/TASK_1116_connected_post_deboard_fireteam_command_handoff.md`, `scripts/core/simulation_root.gd`
