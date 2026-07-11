@@ -8572,6 +8572,7 @@ func _add_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 		_world_label_declutter_rendered_count += 1
 	_feedback_bubble_entries.append({
 		"bubble_id": bubble_id,
+		"tactical_communication_event_id": String(feedback_bubble.get("tactical_communication_event_id", "")).strip_edges(),
 		"fireteam_id": String(feedback_bubble.get("fireteam_id", "")).strip_edges().to_lower(),
 		"unit_id": String(feedback_bubble.get("unit_id", "")).strip_edges(),
 		"feedback_action": String(feedback_bubble.get("feedback_action", "")).strip_edges(),
@@ -8652,6 +8653,7 @@ func _add_hud_feedback_bubble_visual(feedback_bubble: Dictionary) -> void:
 	_feedback_bubble_visual_count += 1
 	_feedback_bubble_entries.append({
 		"bubble_id": bubble_id,
+		"tactical_communication_event_id": String(feedback_bubble.get("tactical_communication_event_id", "")).strip_edges(),
 		"fireteam_id": String(feedback_bubble.get("fireteam_id", "")).strip_edges().to_lower(),
 		"unit_id": String(feedback_bubble.get("unit_id", "")).strip_edges(),
 		"feedback_action": String(feedback_bubble.get("feedback_action", "")).strip_edges(),

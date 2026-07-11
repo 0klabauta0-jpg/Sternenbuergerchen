@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair (implementiert im Arbeitsstand)
+- Grundlage: Command- und Tactical-Event-Feedback konkurrierten im selben Gate und globalen Ein-Bubble-Speicher. Bei zwei Fireteams verlor TASK_274 Eventbindung oder Mini-Card-Anker vor dem Render-Snapshot.
+- Ergebnis: Tactical Events binden ihre ID an die aktive Command-Bubble desselben Fireteams. BLUE und GOLD behalten gleichzeitig begrenzte HUD-Bubbles; Primary3D transportiert Event-ID und Mini-Card-Anker. Zwoelf Mindestframes verhindern, dass schwere Frames die Bubble vor dem sichtbaren Snapshot aufzehren.
+- Architektur: Read-only Feedbackdarstellung; keine Gameplay-, Command-, Effect-, Event- oder Netzwerk-Snapshotmutation. Dedupe und Gesamtlimit bleiben bestehende Runtime-Grenzen.
+- Verifikation: TASK_1127 5/5; TASK_274 76/76; TASK_431 19/19; TASK_219 48/48; TASK_1126 13/13; TASK_1119 33/33; TASK_1104 31/31; Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1128 - Tactical Communication HUD Bubble Density and Real-Window Readability. Zwei gleichzeitige Mini-Card-Bubbles werden im echten Fenster auf Ueberlagerung, Dauer und Lesbarkeit geprueft.
+
 ## TASK_1126 - Connected First Contact Local Marker and Label Hierarchy (implementiert im Arbeitsstand)
 - Grundlage: Der vollstaendig gerahmte Erstkontakt wurde durch grosse Selection-Ringe, Routine-Unit-Badges und doppelte Tactical-Communication-Contact-Reports ueberlagert.
 - Ergebnis: Selection tritt im Connected-Fokus hinter den Contact-Marker zurueck. Routine-Badges und redundante `contact_report`-Mapvisuals verschwinden; HP-/Vitalhinweise bleiben. Detached Mission-Konfiguration erzeugt keinen MultiplayerAPI-Scriptfehler mehr.
 - Architektur: Read-only Renderhierarchie aus dem bestehenden `world_label_focus_mode`; keine Positions-, Gameplay-, RPC-, Command-, Effect- oder Netzwerk-Snapshotmutation.
 - Verifikation: TASK_1126 13/13; TASK_1119 33/33 headless und 39/39 je Real Window; TASK_1125 10/10; TASK_1124 11/11; TASK_839 31/31; TASK_1104 31/31; Performance-Gate TASK_222 82/82.
-- Naechster Schritt: TASK_1127 - Tactical Communication HUD Bubble Event and Mini-Card Anchor Repair. TASK_274 ist ohne Script Error, aber zwei Bubble-/Ankerassertions bleiben bei 74/76 offen.
+- Naechster Schritt: abgeschlossen durch TASK_1127; TASK_274 ist wieder 76/76 gruen.
 
 ## TASK_1125 - Connected First Contact Local Team and Contact Cluster Readability (implementiert im Arbeitsstand)
 - Grundlage: Das verbundene Contact-Framing kannte nur einen Fireteam-Anker plus Kontakt. Bei BLUE blieb ausserdem das fuenfte Fixture-Mitglied ausserhalb der Viererslots und wurde hinter dem HUD mitgerahmt.
