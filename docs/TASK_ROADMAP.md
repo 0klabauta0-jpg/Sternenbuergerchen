@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1121 - Connected First Contact Tactical World Readability (implementiert im Arbeitsstand)
+- Grundlage: Im echten Mehrspielerprodukt blieben Lobby-Background und Shade ueber der laufenden Mission. Der Sichtbeleg mischte ausserdem Host-Welt mit der UI des aufgenommenen Client-Peers.
+- Ergebnis: Missionsstart blendet die gesamte Lobby-Chrome aus und legt die vorhandene 3D-Taktikkarte frei. Rueckkehrpfade stellen sie wieder her. BLUE- und GOLD-Captures zeigen jeweils Welt, Auswahl und HUD desselben Peers.
+- Architektur: Reine Canvas-Sichtbarkeit und Capture-Perspektive; keine neue Gameplay-Wahrheit, kein RPC, Command, Effect oder Snapshotfeld. Bestehende Primary-3D-Kontakt-/Fire-/FOW-Visuals bleiben der einzige Weltpfad.
+- Verifikation: TASK_1121 7/7, TASK_1119 21/21 headless und 22/22 je Real Window, TASK_1104 31/31, TASK_1120 11/11 und Performance-Gate TASK_222 82/82.
+- Naechster Schritt: TASK_1122 - Connected Mission World Camera, Exposure and Contact Cluster Readability.
+
 ## TASK_1120 - Connected First Contact Event Log Dedupe and HUD Declutter (implementiert im Arbeitsstand)
 - Grundlage: Der echte Produktcapture zeigte zwar korrekte BLUE-/GOLD-Perspektiven, aber wiederholte Wahrnehmungszeilen und abgeschlossene leere Dropships konkurrierten mit der aktuellen Contact-Fire-Entscheidung.
 - Ergebnis: Contact-Reports werden nur in der Anzeige innerhalb von Fuenf Sekunden zusammengefasst, behalten alle Quell-IDs und zeigen ihre Wiederholungszahl. Contact Fire steht zuerst; verbundene Spieler starten lokal gefiltert. Leere `to_fob 0s`-Karten verschwinden im Contact Focus, aktive Crafts bleiben.
