@@ -887,6 +887,17 @@ func _build_release_first_exchange_exported_status_trace_sample(stage: String, c
 			command_feedback = Dictionary(controller.call("get_command_feedback_snapshot")).duplicate(true)
 		if controller.has_method("get_release_first_exchange_visible_status_source_reconciliation_snapshot"):
 			status_source_snapshot = Dictionary(controller.call("get_release_first_exchange_visible_status_source_reconciliation_snapshot")).duplicate(true)
+	else:
+		var compact_density: Dictionary = Dictionary(extra.get("combat_hud_density", {})).duplicate(true)
+		var compact_event_log_text: String = String(extra.get("event_log_short_text", "")).strip_edges()
+		command_feedback = {
+			"combat_hud_density": compact_density,
+			"selected_fireteam_status_label_text": String(extra.get("selected_fireteam_status_text", "")),
+			"mission_control_status_text": String(extra.get("mission_control_status_text", "")),
+			"release_firefight_event_log_display": {
+				"fallback_entry": {"short_text": compact_event_log_text},
+			},
+		}
 	var combat_hud_density: Dictionary = Dictionary(command_feedback.get("combat_hud_density", {})).duplicate(true)
 	var visibility_persistence: Dictionary = Dictionary(combat_hud_density.get("visibility_persistence", {})).duplicate(true)
 	var event_log_display: Dictionary = Dictionary(command_feedback.get("release_firefight_event_log_display", {})).duplicate(true)
@@ -943,6 +954,33 @@ func _build_release_first_exchange_exported_status_trace_sample(stage: String, c
 		"event_log_contains_contact_pressure": event_log_text.to_upper().contains("CONTACT PRESSURE"),
 		"extra": extra.duplicate(true),
 	}
+
+
+func _build_release_first_exchange_compact_trace_extra(extra: Dictionary = {}) -> Dictionary:
+	var result: Dictionary = extra.duplicate(true)
+	var evidence: Dictionary = _release_first_exchange_contact_fire_readability_fix_evidence
+	var source_density: Dictionary = Dictionary(evidence.get("combat_hud_density", {}))
+	var source_visibility: Dictionary = Dictionary(source_density.get("visibility_persistence", {}))
+	result["combat_hud_density"] = {
+		"active": bool(source_density.get("active", false)),
+		"source": String(source_density.get("source", "")),
+		"compact_line": String(source_density.get("compact_line", "")),
+		"visibility_persistence_active": bool(source_density.get("visibility_persistence_active", false)),
+		"release_first_exchange_visible_status_source_active": bool(source_density.get("release_first_exchange_visible_status_source_active", false)),
+		"release_first_exchange_visible_status_source_style_id": String(source_density.get("release_first_exchange_visible_status_source_style_id", "")),
+		"visibility_persistence": {
+			"task_id": String(source_visibility.get("task_id", "")),
+			"style_id": String(source_visibility.get("style_id", "")),
+		},
+	}
+	for key in [
+		"selected_fireteam_status_text",
+		"mission_control_status_text",
+		"event_log_short_text",
+	]:
+		if evidence.has(key):
+			result[key] = evidence.get(key)
+	return result
 
 
 func _write_release_first_exchange_exported_status_trace(trace_path: String, latest_sample: Dictionary) -> void:
@@ -1023,7 +1061,7 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 		_release_first_go_firefight_deeplink_reason = "mission_runtime_nodes_missing"
 		_append_release_first_exchange_exported_status_trace_sample("blocked_mission_runtime_nodes_missing", controller, {"reason": _release_first_go_firefight_deeplink_reason}, args)
 		return
-	_append_release_first_exchange_exported_status_trace_sample("mission_runtime_nodes_ready", controller, {}, args)
+	_append_release_first_exchange_exported_status_trace_sample("mission_runtime_nodes_ready", null, {}, args)
 
 	var pre_go: Dictionary = get_release_candidate_lz_drop_preview_actionability_snapshot()
 	var first_move: Dictionary = Dictionary(pre_go.get("first_move", {}))
@@ -1046,9 +1084,9 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	controller.call("_refresh_world_overlays")
 	controller.call("_refresh_button_state")
 	controller.call("_update_ui")
-	_append_release_first_exchange_exported_status_trace_sample("after_go_execute_refresh", controller, {"selected_fireteam_id": selected_fireteam_id}, args)
+	_append_release_first_exchange_exported_status_trace_sample("after_go_execute_refresh", null, {"selected_fireteam_id": selected_fireteam_id}, args)
 	var go_ready: Dictionary = await _wait_release_first_go_runtime_ready(controller, simulation_root)
-	_append_release_first_exchange_exported_status_trace_sample("after_go_runtime_ready", controller, go_ready, args)
+	_append_release_first_exchange_exported_status_trace_sample("after_go_runtime_ready", null, go_ready, args)
 	if not bool(go_ready.get("ready", false)):
 		_release_first_go_firefight_deeplink_status = "blocked"
 		_release_first_go_firefight_deeplink_reason = "go_runtime_not_ready"
@@ -1063,7 +1101,7 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 		return
 	_release_first_exchange_los_setup_polish_evidence = contact_setup.duplicate(true)
 	set_meta("release_first_exchange_los_setup_polish_evidence", _release_first_exchange_los_setup_polish_evidence)
-	_append_release_first_exchange_exported_status_trace_sample("after_contact_setup", controller, {"contact_setup": contact_setup.duplicate(true)}, args)
+	_append_release_first_exchange_exported_status_trace_sample("after_contact_setup", null, {"contact_setup": contact_setup.duplicate(true)}, args)
 	_prepare_release_fireteam_for_first_engagement(controller, selected_fireteam_id, Vector2(contact_setup.get("enemy_position", Vector2.ZERO)))
 	_stabilize_release_first_exchange_target_enemy(controller, contact_setup)
 	_append_release_first_exchange_exported_status_trace_sample("engagement_commands_ready", null, {
@@ -1096,7 +1134,7 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 		"immediate_exchange_status": String(immediate_exchange_evidence.get("status", "")),
 		"first_exchange_visible": bool(immediate_exchange_evidence.get("first_exchange_visible", false)),
 	}, args)
-	_append_release_first_exchange_exported_status_trace_sample("after_immediate_exchange_evidence", controller, {"immediate_exchange_status": String(immediate_exchange_evidence.get("status", ""))}, args)
+	_append_release_first_exchange_exported_status_trace_sample("after_immediate_exchange_evidence", null, {"immediate_exchange_status": String(immediate_exchange_evidence.get("status", ""))}, args)
 	var immediate_tactical_exchange: Dictionary = Dictionary(immediate_exchange_evidence.get("tactical_exchange", {})).duplicate(true)
 	if controller.has_method("apply_release_first_exchange_contact_fire_readability_fix"):
 		_release_first_exchange_contact_fire_readability_fix_evidence = Dictionary(controller.call(
@@ -1104,12 +1142,15 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 			immediate_tactical_exchange
 		)).duplicate(true)
 		set_meta("release_first_exchange_contact_fire_readability_fix_evidence", _release_first_exchange_contact_fire_readability_fix_evidence)
-		_append_release_first_exchange_exported_status_trace_sample("after_contact_fire_readability_fix", controller, _release_first_exchange_contact_fire_readability_fix_evidence.duplicate(true), args)
+		_append_release_first_exchange_exported_status_trace_sample("after_contact_fire_readability_fix", null, _build_release_first_exchange_compact_trace_extra({
+			"readability_status": String(_release_first_exchange_contact_fire_readability_fix_evidence.get("status", "")),
+			"readability_active": bool(_release_first_exchange_contact_fire_readability_fix_evidence.get("active", false)),
+		}), args)
 	elif controller.has_method("record_release_fire_exchange_visibility_evidence"):
 		controller.call("record_release_fire_exchange_visibility_evidence", immediate_tactical_exchange)
 		controller.call("_refresh_world_overlays")
 		controller.call("_update_ui")
-		_append_release_first_exchange_exported_status_trace_sample("after_visibility_evidence_fallback", controller, {"fallback": true}, args)
+		_append_release_first_exchange_exported_status_trace_sample("after_visibility_evidence_fallback", null, _build_release_first_exchange_compact_trace_extra({"fallback": true}), args)
 	var immediate_exchange_applied: bool = String(immediate_exchange_evidence.get("status", "")) == "pass" \
 		and bool(immediate_exchange_evidence.get("first_exchange_visible", false))
 	if immediate_exchange_applied:
@@ -1117,9 +1158,9 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 		_release_first_go_firefight_deeplink_status = "applied"
 		_release_first_go_firefight_deeplink_reason = ""
 		set_meta("release_first_go_firefight_deeplink_applied", true)
-	_append_release_first_exchange_exported_status_trace_sample("after_immediate_exchange_applied_gate", controller, {"immediate_exchange_applied": immediate_exchange_applied}, args)
+	_append_release_first_exchange_exported_status_trace_sample("after_immediate_exchange_applied_gate", null, _build_release_first_exchange_compact_trace_extra({"immediate_exchange_applied": immediate_exchange_applied}), args)
 	var visible_ready: Dictionary = await _wait_release_first_exchange_visible_ready(controller)
-	_append_release_first_exchange_exported_status_trace_sample("after_final_wait_before_snapshot", controller, visible_ready, args)
+	_append_release_first_exchange_exported_status_trace_sample("after_final_wait_before_snapshot", null, _build_release_first_exchange_compact_trace_extra(visible_ready), args)
 	if not bool(visible_ready.get("ready", false)):
 		_release_first_go_firefight_deeplink_applied = false
 		_release_first_go_firefight_deeplink_status = "blocked"
@@ -1137,7 +1178,7 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	_release_first_go_firefight_deeplink_status = "applied" if _release_first_go_firefight_deeplink_applied else "blocked"
 	_release_first_go_firefight_deeplink_reason = "" if _release_first_go_firefight_deeplink_applied else "firefight_snapshot_not_pass"
 	set_meta("release_first_go_firefight_deeplink_applied", _release_first_go_firefight_deeplink_applied)
-	_append_release_first_exchange_exported_status_trace_sample("deeplink_final", controller, snapshot.duplicate(true), args)
+	_append_release_first_exchange_exported_status_trace_sample("deeplink_final", null, _build_release_first_exchange_compact_trace_extra(snapshot), args)
 
 
 func _wait_release_first_go_runtime_ready(controller: Node, simulation_root: Node, max_checks: int = 8) -> Dictionary:

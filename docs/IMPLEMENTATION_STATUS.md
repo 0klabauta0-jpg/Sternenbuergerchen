@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1089 - Release Trace Observer-Effect Guard
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1089_release_trace_observer_effect_guard.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_879, TASK_1088
+- Stand: TASK_1089 ist 8/8 gruen. Erfolgreiche Release-Trace-Stufen bauen nach Pre-GO keine mehrfachen Controller-/HUD-Vollsnapshots mehr auf, sondern verwenden die bereits berechnete CONTACT-FIRE-/Visibility-Evidence.
+- Architektur: Der kompakte Trace ist read-only und kopiert nur Darstellungsdaten. SimulationRoot, Combat, LOS, ROE und Multiplayer-Wahrheit bleiben unveraendert. Blocked-Pfade duerfen weiterhin reichhaltige Controller-Diagnose lesen.
+- Robustheit: Der TASK-879-Analyzer behandelt `runtime_trace: null` in einem fehlgeschlagenen Capture-Manifest als leere Trace statt als `Dictionary(null)`-Scriptfehler.
+- Performance: Der vergleichbare TASK-1088-Headless-Pfad sank von 11.527 auf 8.856 ms. TASK_1086 liegt im Regressionslauf bei 8.211 ms, TASK_1087 bei 5.028 ms.
+- Lokale Pruefung: TASK_1089 8/8, TASK_879 63/63, TASK_1088 21/21, TASK_1087 19/19, TASK_1086 16/16, TASK_1085 15/15, TASK_1084 12/12, TASK_1083 24/24 und TASK_1082 21/21.
+- Naechster Schritt: Frischen Godot-4.6.2-Release messen; danach einen sichtbaren Zwei-Spieler-Station-Route-Playtest als naechsten spielnahen Slice priorisieren.
+
 ### TASK_1088 - Release Contact/Fire Ready-Time Pass
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1088_release_contact_fire_ready_time_pass.md`, `docs/dev/combat_loop_authority_contract.md`, `docs/dev/contact_report_contract.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_844, TASK_1087

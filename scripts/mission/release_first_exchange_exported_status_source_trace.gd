@@ -15,7 +15,8 @@ const NEXT_VISUAL_TASK: String = "TASK_880 - Release First Exchange Fire Visual 
 
 
 static func build_snapshot(capture_manifest: Dictionary) -> Dictionary:
-	var runtime_trace: Dictionary = Dictionary(capture_manifest.get("runtime_trace", {})).duplicate(true)
+	var runtime_trace_variant: Variant = capture_manifest.get("runtime_trace", {})
+	var runtime_trace: Dictionary = Dictionary(runtime_trace_variant).duplicate(true) if typeof(runtime_trace_variant) == TYPE_DICTIONARY else {}
 	var capture_schema: String = String(capture_manifest.get("schema", "")).strip_edges()
 	var runtime_schema: String = String(capture_manifest.get("runtime_trace_schema", runtime_trace.get("schema", ""))).strip_edges()
 	var sample_count: int = int(capture_manifest.get("runtime_trace_sample_count", runtime_trace.get("sample_count", 0)))
