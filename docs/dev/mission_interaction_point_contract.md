@@ -618,5 +618,13 @@ Ein gebundener Interaction Point soll spaeter mindestens diese Daten liefern:
 - AA, Door, Computer und Cargo muessen sequenziell ueber Host-Progress abschliessen; der Client liest nur den TASK-1091-Snapshot.
 - TASK_1093 belegt den vollstaendigen verbundenen Gate-Trace. Die sichtbare Client-GO-Taste ist noch nicht auf diese Projektion verdrahtet.
 
+## Connected Client GO Contract
+- `execute_selected_fireteam_orders()` prueft vor lokaler Ausfuehrung, ob ein verbundener nicht-autoritiver Client einen bestaetigten Interaction-Intent besitzt.
+- In diesem Fall projiziert GO genau einen Network-Command, entfernt den lokalen Pending-Waypoint und startet keine lokale Bewegung.
+- Solange die Host-Antwort aussteht, blockiert `HOST PENDING` erneutes Senden.
+- `network_command_result_received` liefert Interaction-ID, Source und Accepted/Reason. Nur dieses Host-Feedback setzt `HOST OK` oder `BLOCKED`.
+- Offline-/Einzelspieler-GO faellt unveraendert in den lokalen Waypoint-/Arrival-/Hold-Pfad.
+- TASK_1094 belegt echten Controller-GO ueber ENet und den unveraenderten lokalen AA-GO-Pfad.
+
 ## Naechste Slices
 - Echter FullHD-Fenster-Sichtlauf fuer Interaction-Labels im Editor und Missionsbild mit menschlichem Sichtentscheid.

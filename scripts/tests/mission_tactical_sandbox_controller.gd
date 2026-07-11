@@ -462,6 +462,8 @@ var _npc_thought_peek_active_last_frame: bool = false
 var _npc_thought_bubble_refresh_msec: int = 0
 var _last_command_text: String = "AWAITING INPUT"
 var _last_mission_interaction_use_intent_snapshot: Dictionary = {}
+var _network_mission_interaction_feedback: Dictionary = {}
+var _network_mission_interaction_request_pending: bool = false
 var _last_mission_interaction_door_use_breach_hook_snapshot: Dictionary = {}
 var _last_mission_interaction_door_runtime_override_fingerprint: String = ""
 var _last_mission_interaction_door_runtime_snapshot: Dictionary = {}
@@ -1354,6 +1356,9 @@ func execute_selected_fireteam_orders() -> bool:
 		_refresh_order_visuals()
 		_update_ui()
 		return false
+	var network_interaction_handoff: Dictionary = _try_submit_connected_client_mission_interaction()
+	if bool(network_interaction_handoff.get("handled", false)):
+		return bool(network_interaction_handoff.get("accepted", false))
 	var target_phase_index: int = _get_live_order_phase_index()
 	var issued_fireteams: PackedStringArray = []
 	var already_active_fireteams: PackedStringArray = []
@@ -1990,6 +1995,9 @@ func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 
 
 func _on_network_command_result_received(result: Dictionary) -> void:
+	if String(result.get("source_context", "")).strip_edges() == "mission_interaction_use_intent_command":
+		_apply_network_mission_interaction_result(result)
+		return
 	if String(result.get("command_type", "")).strip_edges().to_lower() != "set_fire_rule":
 		return
 	var accepted: bool = bool(result.get("accepted", false))
@@ -2009,6 +2017,72 @@ func _on_network_command_result_received(result: Dictionary) -> void:
 		"ui_sets_gameplay_truth": false,
 	}
 	_last_command_text = compact_line
+	_update_ui()
+
+
+func get_network_mission_interaction_feedback_snapshot() -> Dictionary:
+	return _network_mission_interaction_feedback.duplicate(true)
+
+
+func _try_submit_connected_client_mission_interaction() -> Dictionary:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	var multiplayer_api: MultiplayerAPI = multiplayer
+	var peer: MultiplayerPeer = multiplayer_api.multiplayer_peer if multiplayer_api != null else null
+	if simulation_root == null or simulation_root.get("is_server_authoritative") != true or peer == null or peer is OfflineMultiplayerPeer or peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED or multiplayer_api.is_server():
+		return {"handled": false, "accepted": false}
+	var intent: Dictionary = get_mission_interaction_use_intent_snapshot()
+	if not bool(intent.get("accepted", false)) or not bool(intent.get("requires_go", false)):
+		return {"handled": false, "accepted": false}
+	if _network_mission_interaction_request_pending:
+		_last_command_text = "INTERACTION HOST PENDING"
+		_update_ui()
+		return {"handled": true, "accepted": false}
+	var fireteam_id: String = String(intent.get("fireteam_id", "")).strip_edges().to_lower()
+	var units: Array = _get_fireteam_units(fireteam_id, true)
+	var unit_id: String = ""
+	for unit in units:
+		if unit != null and unit.has_method("get_unit_id"):
+			unit_id = String(unit.call("get_unit_id")).strip_edges()
+			if not unit_id.is_empty():
+				break
+	var command: Dictionary = build_mission_interaction_multiplayer_network_command(intent, unit_id, get_local_command_team_id(), intent.get("target_position", null))
+	if command.is_empty():
+		_last_command_text = "INTERACTION NETWORK BLOCKED"
+		_update_ui()
+		return {"handled": true, "accepted": false}
+	_network_mission_interaction_request_pending = true
+	_network_mission_interaction_feedback = {
+		"status": "pending",
+		"interaction_id": String(intent.get("interaction_id", "")),
+		"fireteam_id": fireteam_id,
+		"compact_line": "INTERACTION HOST PENDING",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	_replace_next_orders_for_fireteams(PackedStringArray([fireteam_id]), int(intent.get("phase", _get_live_order_phase_index())))
+	simulation_root.rpc_id(1, "request_command", command)
+	_last_command_text = "INTERACTION HOST PENDING"
+	_refresh_order_visuals()
+	_update_ui()
+	return {"handled": true, "accepted": true}
+
+
+func _apply_network_mission_interaction_result(result: Dictionary) -> void:
+	_network_mission_interaction_request_pending = false
+	var accepted: bool = bool(result.get("accepted", false))
+	var interaction_id: String = String(result.get("interaction_id", "")).strip_edges()
+	var reason: String = String(result.get("reason", "")).strip_edges()
+	var line: String = "INTERACTION %s HOST OK" % interaction_id.to_upper() if accepted else "INTERACTION BLOCKED %s" % reason.to_upper()
+	_network_mission_interaction_feedback = {
+		"status": "accepted" if accepted else "blocked",
+		"accepted": accepted,
+		"interaction_id": interaction_id,
+		"reason": reason,
+		"compact_line": line,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	_last_command_text = line
 	_update_ui()
 
 
