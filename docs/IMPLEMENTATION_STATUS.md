@@ -10,15 +10,26 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1104_product_lobby_multi_client_parallel_interaction_playtest.md`, `docs/dev/mission_interaction_point_contract.md`, `scripts/multiplayer/multiplayer_session.gd`
+- Stand: Drei echte Produkt-Lobbys verbinden sich ueber ENet. Im Coop erhalten Host und erster Client die vorhandenen Fireteams `blue` und `gold`; der dritte Peer wird expliziter Spectator.
+- Mission: Alle drei starten eine echte Missioninstanz. Zwei Fireteams halten Interactions parallel, beide Clients konvergieren auf dieselben Owner/Progress-States und zeigen dieselbe TASK_1103-Kompaktzeile.
+- Authority: Aktiver Fremdzugriff zeigt `ANDERES FIRETEAM AKTIV`; Spectator-Command zeigt `ZUSCHAUER KANN NICHT BEFEHLEN` und erreicht keine Gameplay-Queue.
+- Lifecycle: Premission-Disconnect eines aktiven Clients befoerdert den wartenden Spectator deterministisch in das freie Fireteam. Versus-Zweispieler bleibt unveraendert.
+- Risiken/offen: Die automatische Rolle ist technisch korrekt, muss aber bereits vor Start in der Lobby unmissverstaendlich sichtbar sein.
+- Lokale Pruefung: TASK_1104 31/31, TASK_167 22/22, TASK_227 27/27, TASK_1101 46/46, TASK_1102 26/26 und TASK_1103 18/18.
+- Naechster Schritt: TASK_1105 - Coop Lobby Active and Spectator Role Readability.
+
 ### TASK_1103 - Parallel Interaction Ownership Feedback Readability
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1103_parallel_interaction_ownership_feedback_readability.md`, `docs/dev/mission_interaction_point_contract.md`, `scripts/tests/mission_tactical_sandbox_controller.gd`
 - Stand: Die bestehende `LAST`-Zeile zeigt bei einem laufenden State den Fireteam-Besitzer und kombiniert bei paralleler Arbeit maximal zwei kompakte Eintraege wie `COM 42% BLUE | CARGO 58% GOLD`.
 - Konfliktfeedback: Der Reservierungs-Reject lautet sichtbar `ANDERES FIRETEAM AKTIV`, nennt das anfragende Fireteam und verbirgt technische IDs.
 - Performance: Owner und zwei sichtbare Parallel-States sind Teil des Dedupe-Fingerprints. Acht States und 2000 Snapshots benoetigen lokal rund 120 ms und 201 Label-Updates.
-- Risiken/offen: Mehr als zwei parallele States bleiben bewusst aus der einen Kompaktzeile heraus. Ein echter Produkt-Lobby-Lauf mit mehreren Clients ist der naechste Beleg.
+- Risiken/offen: Mehr als zwei parallele States bleiben bewusst aus der einen Kompaktzeile heraus. Die Produkt-Lobby muss aktive und Spectator-Rollen vor Start klar zeigen.
 - Lokale Pruefung: TASK_1103 18/18, TASK_1095 8/8, TASK_1096 10/10, TASK_1098 5/5 und TASK_1102 26/26.
-- Naechster Schritt: TASK_1104 - Product Lobby Multi-Client Parallel Interaction Playtest.
+- Naechster Schritt: TASK_1105 - Coop Lobby Active and Spectator Role Readability.
 
 ### TASK_1102 - Parallel Fireteam Interaction Ownership and Recovery
 - Status: implementiert im Arbeitsstand

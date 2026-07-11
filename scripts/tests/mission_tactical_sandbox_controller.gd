@@ -2290,6 +2290,8 @@ func _build_network_mission_interaction_reason_label(reason: String) -> String:
 			return "FIRETEAM NICHT ZUGEWIESEN"
 		"interaction_reserved_by_other_fireteam":
 			return "ANDERES FIRETEAM AKTIV"
+		"spectator_cannot_command":
+			return "ZUSCHAUER KANN NICHT BEFEHLEN"
 		"request_on_non_authority", "host_required":
 			return "HOST ERFORDERLICH"
 		"command_not_whitelisted":
