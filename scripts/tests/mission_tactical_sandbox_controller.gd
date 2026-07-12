@@ -15998,6 +15998,121 @@ func get_mission_first_move_execution_feedback_release_recapture_snapshot() -> D
 	}
 
 
+func get_mission_first_contact_readability_release_recapture_snapshot(execution_recapture_override: Dictionary = {}, first_contact_readability_override: Dictionary = {}) -> Dictionary:
+	var execution_recapture: Dictionary = execution_recapture_override.duplicate(true) if not execution_recapture_override.is_empty() else get_mission_first_move_execution_feedback_release_recapture_snapshot()
+	var first_contact_readability: Dictionary = first_contact_readability_override.duplicate(true) if not first_contact_readability_override.is_empty() else get_mission_first_contact_readability_snapshot()
+	var release_provenance: Dictionary = _build_left_tactical_stack_1280_release_provenance_evidence()
+	var capture_manifest: Dictionary = _build_left_tactical_stack_1280_capture_manifest_evidence()
+	var host_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("host_window_path", "tmp/release_host_client_first_contact_host_window.png")))
+	var client_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("client_window_path", "tmp/release_host_client_first_contact_client_window.png")))
+	var first_contact: Dictionary = Dictionary(first_contact_readability.get("first_contact", {})).duplicate(true)
+	var selected_contact_count: int = int(first_contact_readability.get("selected_contact_count", 0))
+	var contact_overlay_visible: bool = int(first_contact_readability.get("contact_overlay_visible_count", 0)) > 0 \
+		or int(Dictionary(first_contact_readability.get("primary_contact_snapshot", {})).get("contact_count", 0)) > 0
+	var tactical_context_visible: bool = bool(_first_contact_check_passed(first_contact_readability, "threat_or_cover_context_visible")) \
+		or int(first_contact_readability.get("tactical_communication_event_count", 0)) > 0 \
+		or int(first_contact_readability.get("tactical_event_log_count", 0)) > 0
+	var execution_handoff_read: bool = String(execution_recapture.get("task_id", "")) == "TASK_1171" \
+		and bool(execution_recapture.get("ready_for_first_contact_recapture", false))
+	var first_contact_gate_passes: bool = String(first_contact_readability.get("gate", "")) == "pass"
+	var release_context_present: bool = bool(release_provenance.get("valid", false)) \
+		and bool(release_provenance.get("matches_git_head", false)) \
+		and bool(capture_manifest.get("gate_passed", false)) \
+		and bool(capture_manifest.get("release_gate_passed", false)) \
+		and bool(capture_manifest.get("deployment_converged", false)) \
+		and bool(host_window.get("exists", false)) \
+		and bool(client_window.get("exists", false)) \
+		and int(host_window.get("size_bytes", 0)) > 0 \
+		and int(client_window.get("size_bytes", 0)) > 0
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"execution_recapture_handoff_read",
+			execution_handoff_read,
+			"TASK_1171 first-move execution recapture is read as the handoff source."
+		),
+		_build_mission_first_move_readability_check(
+			"first_contact_readability_gate_passes",
+			first_contact_gate_passes,
+			"TASK_542 first-contact readability remains green after the reproduced contact."
+		),
+		_build_mission_first_move_readability_check(
+			"selected_fireteam_contact_visible",
+			selected_contact_count > 0,
+			"Selected fireteam exposes at least one contact entry."
+		),
+		_build_mission_first_move_readability_check(
+			"first_contact_report_visible",
+			not String(first_contact.get("report_text", "")).strip_edges().is_empty(),
+			"First contact contains player-facing report text."
+		),
+		_build_mission_first_move_readability_check(
+			"contact_overlay_visible",
+			contact_overlay_visible,
+			"Contact reaches ContactMapOverlay or Primary3D render snapshot."
+		),
+		_build_mission_first_move_readability_check(
+			"tactical_context_visible",
+			tactical_context_visible,
+			"Threat, cover, security or event context explains why the contact matters."
+		),
+		_build_mission_first_move_readability_check(
+			"release_host_client_context_present",
+			release_context_present,
+			"Current release provenance and host/client FirstContact evidence are present."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(execution_recapture.get("ui_sets_gameplay_truth", true))
+				and not bool(first_contact_readability.get("ui_sets_gameplay_truth", true)),
+			"Snapshot reads existing execution and contact feedback without creating gameplay state."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	var recaptured: bool = failed_checks.is_empty()
+	return {
+		"schema": "sternenbuergerchen.mission_first_contact_readability_release_recapture.v1",
+		"task_id": "TASK_1172",
+		"source_task_id": "TASK_1171",
+		"source_task_ids": PackedStringArray(["TASK_1171", "TASK_542"]),
+		"status": "recaptured" if recaptured else "blocked_by_missing_contact_or_release_context",
+		"ready_for_first_engagement_recapture": recaptured,
+		"execution_recapture": execution_recapture,
+		"first_contact_readability": first_contact_readability,
+		"release_provenance": release_provenance,
+		"capture_manifest": capture_manifest,
+		"host_window_artifact": host_window,
+		"client_window_artifact": client_window,
+		"execution_handoff_read": execution_handoff_read,
+		"selected_contact_count": selected_contact_count,
+		"first_contact": first_contact,
+		"contact_overlay_visible": contact_overlay_visible,
+		"tactical_context_visible": tactical_context_visible,
+		"contact_report_text": String(first_contact.get("report_text", "")).strip_edges(),
+		"contact_feedback_text": String(first_contact_readability.get("contact_feedback_text", "")).strip_edges(),
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"accepted_surfaces": [
+			"first_contact_report_after_first_move",
+			"contact_overlay_or_primary3d",
+			"tactical_context_for_contact",
+			"release_host_client_context",
+		] if recaptured else [],
+		"recommended_next_task": "TASK_1173 - First Engagement Feedback Release Recapture",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_contact": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
 func _build_left_tactical_stack_1280_air_anchor_surface() -> Dictionary:
 	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
 	var mini_layout_rect: Rect2i = layout.get("fireteam_mini", Rect2i())
@@ -28975,6 +29090,16 @@ func _contact_entry_has_readability_fields(contact: Dictionary) -> bool:
 	if not contact.has("confidence") and not contact.has("confidence_level") and not contact.has("detection_confidence"):
 		return false
 	return true
+
+
+func _first_contact_check_passed(snapshot: Dictionary, check_id: String) -> bool:
+	for check_variant in Array(snapshot.get("checks", [])):
+		if typeof(check_variant) != TYPE_DICTIONARY:
+			continue
+		var check: Dictionary = Dictionary(check_variant)
+		if String(check.get("id", "")) == check_id:
+			return bool(check.get("passed", false))
+	return false
 
 
 func _does_first_contact_feedback_text_show_contact(text: String) -> bool:

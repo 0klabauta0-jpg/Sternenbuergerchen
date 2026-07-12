@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1172 - First Contact Readability Release Recapture (implementiert im Arbeitsstand)
+- Grundlage: TASK_1171 belegt die erste laufende Bewegung nach `GO`; TASK_542 belegt den bestehenden First-Contact-Readability-Snapshot.
+- Ziel: Den ersten Feindkontakt nach der Bewegung, TASK_542-Readability und aktuellen Release-Kontext als read-only Recapture buendeln.
+- Ergebnis: `get_mission_first_contact_readability_release_recapture_snapshot()` belegt Kontaktanzahl, ersten Kontakt, Report-Text, Overlay-/Primary3D-Sichtbarkeit, taktischen Kontext und Release-Provenance, ohne Kontakte, Commands, Fire- oder Damage-Events zu erzeugen.
+- Verifikation: TASK_1172 plus TASK_1171/TASK_542-nahe Contact-Fixture.
+- Naechster Schritt: TASK_1173 - First Engagement Feedback Release Recapture.
+
 ## TASK_1171 - First Move Execution Feedback Release Recapture (implementiert im Arbeitsstand)
 - Grundlage: TASK_1170 belegt die erste Move-Entscheidung vor `GO`; TASK_541 belegt den laufenden Movement-Feedback-Snapshot nach `GO`.
 - Ziel: Den echten `execute_selected_fireteam_orders()`-Anschluss, TASK_541-Execution-Feedback und aktuellen Release-Kontext als read-only Recapture buendeln.

@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1172 - First Contact Readability Release Recapture
+- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1172_first_contact_readability_release_recapture.md`, `docs/tasks/TASK_1171_first_move_execution_feedback_release_recapture.md`, `docs/tasks/TASK_542_mission_first_contact_readability_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Ausgangsbefund: TASK_1171 belegt die laufende erste Bewegung nach `GO`; offen war der naechste spielerische Moment, dass ein Feindkontakt nach dieser Bewegung als heutiger Release-Flow lesbar bleibt.
+- Aenderung: `get_mission_first_contact_readability_release_recapture_snapshot()` fasst TASK_1171, TASK_542, Release-Provenance und Host-/Client-Capture-Kontext zusammen. Der Verifier nutzt leichte Handoff-Fixtures, damit der Recapture den schweren Contact-/Release-Pfad nicht doppelt stapelt; der Snapshot selbst liest nur Kontaktanzahl, ersten Kontakt, Report-Text, Overlay-/Primary3D-Sichtbarkeit und taktischen Kontext.
+- Architektur: Der Snapshot erzeugt keine zusaetzlichen Kontakte, Commands, Effects, Fire-/Damage-Events oder Multiplayer-Wahrheit.
+- Lokale Pruefung: TASK_1172.
+- Risiken/offen: Der Task belegt den ersten Kontakt, nicht den ersten Schusswechsel. Naechster sinnvoller Schritt ist TASK_1173 - First Engagement Feedback Release Recapture.
+
 ### TASK_1171 - First Move Execution Feedback Release Recapture
 - Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
 - Relevante Docs/Contracts: `docs/tasks/TASK_1171_first_move_execution_feedback_release_recapture.md`, `docs/tasks/TASK_1170_first_move_decision_preview_readability_recapture.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`
