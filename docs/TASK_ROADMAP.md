@@ -13,6 +13,14 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1163 - Left Tactical Stack 1280 Release Recapture (implementiert und im Release sichtbar verifiziert)
+- Grundlage: TASK_1162 war headless gruen, aber linker Stack, Ereignislog und Mini-Cards mussten im tatsaechlich exportierten 1280x720-Host/Client-Fenster belegt werden.
+- Ziel: Den Release-Stand auf aktuellem Commit pruefen, den bestehenden FirstContact-Harness laufen lassen und den linken taktischen Stack sichtbar bewerten, ohne weiteres Layout im selben Task nachzuschieben.
+- Ergebnis: `get_left_tactical_stack_1280_release_recapture_snapshot()` benennt TASK_1162 als Quelle, den Release-Harness, 1280x720, Host-/Client-Fensterbilder und bleibt strikt read-only ohne Commands, Effects, Fire-/Damage-Events oder Multiplayer-Wahrheit.
+- Verifikation: TASK_1163 24/24; TASK_1162 34/34; TASK_1161 39/39; TASK_222 82/82. Release-Startcheck ist auf dem aktuellen Branch-HEAD laut `release_build_provenance.json` gruen; Host/Client-FirstContact `pass` nach 85,312 Sekunden mit geschriebenen Fensterbildern.
+- Folgefund: Die separaten Host-/Client-Bilder zeigen den linken Stack brauchbar lesbar; das kombinierte Desktop-Capture ist wegen fremder Fensterueberlagerung kein belastbarer visueller Ausschnitt.
+- Naechster Schritt: TASK_1164 - Left Tactical Stack 1280 Visual Findings.
+
 ## TASK_1162 - Left Tactical Stack 1280 Readability and Focus Balance (implementiert im Arbeitsstand)
 - Grundlage: TASK_1161 zeigte im echten 1280x720-FirstContact, dass die linke taktische Stack-Flaeche aus Fireteam-Mini-Cards und Ereignislog noch dicht und klein bleibt.
 - Ziel: Fireteam-Auswahl, primaeren Fokus, Lead-/Statuszeilen und #19-Ereignisse links gemeinsam lesbar machen, ohne Gameplay-State oder HUD-Hotpaths umzubauen.
