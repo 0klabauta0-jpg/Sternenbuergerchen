@@ -19,6 +19,12 @@ const CONNECTION_MODE_LAN: String = "lan"
 const CONNECTION_MODE_DIRECT_WAN: String = "direct_wan"
 const CONNECTION_MODE_UPNP: String = "upnp"
 const DEFAULT_MAP_FILE_NAME: String = "Ground_Mission01_32x32.json"
+const RELEASE_HOST_ARG: String = "--release-multiplayer-host"
+const RELEASE_JOIN_ARG: String = "--release-multiplayer-join"
+const RELEASE_ADDRESS_ARG: String = "--release-multiplayer-address="
+const RELEASE_PORT_ARG: String = "--release-multiplayer-port="
+const RELEASE_AUTO_START_ARG: String = "--release-multiplayer-auto-start"
+const RELEASE_TRACE_ARG: String = "--release-multiplayer-trace="
 
 @onready var _status_label: Label = get_node("Panel/Margin/VBox/StatusLabel")
 @onready var _team_readability_label: Label = get_node("Panel/Margin/VBox/TeamReadabilityLabel")
@@ -71,10 +77,16 @@ var _role_readability_snapshot: Dictionary = {
 	"spectator_count": 0,
 	"local_role_label": "",
 }
+var _release_playtest_config: Dictionary = {}
+var _release_playtest_stage: String = "disabled"
+var _release_playtest_action_started: bool = false
+var _release_playtest_ready_sent: bool = false
+var _release_playtest_last_trace_key: String = ""
 
 
 func _ready() -> void:
 	set_meta("multiplayer_lobby_screen", true)
+	set_process(false)
 	_ensure_background_nodes()
 	_apply_background_texture()
 	_ensure_multiplayer_session()
@@ -86,7 +98,121 @@ func _ready() -> void:
 	_connect_ui_signals()
 	_apply_contextual_help_ids()
 	_refresh_from_session()
+	_release_playtest_config = get_release_multiplayer_deeplink_snapshot()
+	if bool(_release_playtest_config.get("enabled", false)):
+		_release_playtest_stage = "configured"
+		set_process(true)
+		call_deferred("_start_release_multiplayer_playtest")
 	call_deferred("_enforce_lobby_panel_geometry")
+
+
+func _process(_delta: float) -> void:
+	if not bool(_release_playtest_config.get("enabled", false)):
+		return
+	_advance_release_multiplayer_playtest()
+
+
+func get_release_multiplayer_deeplink_snapshot(user_args: Array = []) -> Dictionary:
+	var args: Array = user_args.duplicate() if not user_args.is_empty() else Array(_get_release_multiplayer_cmdline_args())
+	var role := ""
+	var address := MULTIPLAYER_SESSION_SCRIPT.DEFAULT_ADDRESS
+	var port: int = MULTIPLAYER_SESSION_SCRIPT.DEFAULT_PORT
+	var auto_start := false
+	var trace_path := ""
+	for value in args:
+		var arg: String = String(value).strip_edges()
+		if arg == RELEASE_HOST_ARG:
+			role = "host"
+		elif arg == RELEASE_JOIN_ARG:
+			role = "client"
+		elif arg.begins_with(RELEASE_ADDRESS_ARG):
+			address = arg.trim_prefix(RELEASE_ADDRESS_ARG).strip_edges()
+		elif arg.begins_with(RELEASE_PORT_ARG):
+			port = maxi(1, int(arg.trim_prefix(RELEASE_PORT_ARG)))
+		elif arg == RELEASE_AUTO_START_ARG:
+			auto_start = true
+		elif arg.begins_with(RELEASE_TRACE_ARG):
+			trace_path = arg.trim_prefix(RELEASE_TRACE_ARG).strip_edges()
+	return {
+		"schema": "sternenbuergerchen.release_multiplayer_deeplink.v1",
+		"task_id": "TASK_1147",
+		"enabled": not role.is_empty(),
+		"role": role,
+		"address": address,
+		"port": port,
+		"auto_ready": not role.is_empty(),
+		"auto_start": auto_start and role == "host",
+		"trace_path": trace_path,
+		"read_only_config": true,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func get_release_multiplayer_playtest_snapshot() -> Dictionary:
+	return {
+		"schema": "sternenbuergerchen.release_multiplayer_playtest.v1",
+		"task_id": "TASK_1147",
+		"stage": _release_playtest_stage,
+		"config": _release_playtest_config.duplicate(true),
+		"session": get_session_snapshot(),
+		"active_mission": has_active_mission(),
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _get_release_multiplayer_cmdline_args() -> PackedStringArray:
+	var result := PackedStringArray()
+	for value in OS.get_cmdline_args() + OS.get_cmdline_user_args():
+		var arg: String = String(value).strip_edges()
+		if not arg.is_empty() and not result.has(arg):
+			result.append(arg)
+	return result
+
+
+func _start_release_multiplayer_playtest() -> void:
+	var role: String = String(_release_playtest_config.get("role", ""))
+	var port: int = int(_release_playtest_config.get("port", MULTIPLAYER_SESSION_SCRIPT.DEFAULT_PORT))
+	_release_playtest_action_started = host_game(port) if role == "host" else join_game(String(_release_playtest_config.get("address", MULTIPLAYER_SESSION_SCRIPT.DEFAULT_ADDRESS)), port)
+	_release_playtest_stage = "hosting" if role == "host" and _release_playtest_action_started else "connecting" if _release_playtest_action_started else "start_failed"
+	_write_release_multiplayer_trace()
+
+
+func _advance_release_multiplayer_playtest() -> void:
+	var snapshot: Dictionary = get_session_snapshot()
+	if not _release_playtest_action_started:
+		_write_release_multiplayer_trace()
+		return
+	if bool(snapshot.get("mission_started", false)) or has_active_mission():
+		_release_playtest_stage = "mission_started"
+	elif bool(snapshot.get("can_toggle_ready", false)) and not bool(snapshot.get("local_ready", false)) and not _release_playtest_ready_sent:
+		_release_playtest_ready_sent = set_ready(true)
+		_release_playtest_stage = "ready_sent" if _release_playtest_ready_sent else "ready_failed"
+	elif String(_release_playtest_config.get("role", "")) == "host" and bool(_release_playtest_config.get("auto_start", false)) and bool(snapshot.get("can_start_mission", false)):
+		_release_playtest_stage = "mission_start_sent" if start_mission() else "mission_start_failed"
+	elif bool(snapshot.get("has_active_peer", false)):
+		_release_playtest_stage = "connected"
+	_write_release_multiplayer_trace()
+
+
+func _write_release_multiplayer_trace() -> void:
+	var trace_path: String = String(_release_playtest_config.get("trace_path", "")).strip_edges()
+	if trace_path.is_empty():
+		return
+	var snapshot: Dictionary = get_release_multiplayer_playtest_snapshot()
+	var trace_key := "%s|%s|%s|%s" % [
+		_release_playtest_stage,
+		str(snapshot.session.get("connected_count", 0)),
+		str(snapshot.session.get("ready_count", 0)),
+		str(snapshot.get("active_mission", false)),
+	]
+	if trace_key == _release_playtest_last_trace_key:
+		return
+	_release_playtest_last_trace_key = trace_key
+	var absolute_path: String = ProjectSettings.globalize_path(trace_path) if trace_path.begins_with("res://") or trace_path.begins_with("user://") else trace_path
+	DirAccess.make_dir_recursive_absolute(absolute_path.get_base_dir())
+	var file := FileAccess.open(absolute_path, FileAccess.WRITE)
+	if file != null:
+		file.store_string(JSON.stringify(snapshot, "\t"))
 
 
 func host_game(port: int = -1) -> bool:
