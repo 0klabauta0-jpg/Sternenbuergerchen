@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1171 - First Move Execution Feedback Release Recapture
+- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1171_first_move_execution_feedback_release_recapture.md`, `docs/tasks/TASK_1170_first_move_decision_preview_readability_recapture.md`, `docs/tasks/TASK_541_mission_first_move_execution_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`
+- Ausgangsbefund: TASK_1170 belegt den Move vor `GO`; offen war der direkte Anschluss, dass `GO` angenommen wird und die erste Bewegung lesbar laeuft.
+- Aenderung: `get_mission_first_move_execution_feedback_release_recapture_snapshot()` fasst TASK_1170, TASK_541, Release-Provenance und Host-/Client-Capture-Kontext zusammen. Der Verifier fuehrt `GO` ueber den bestehenden Pfad aus, der Snapshot selbst liest danach nur Execution-Feedback, Movement-State, Running-Text und Order-Trace.
+- Architektur: Der Snapshot erzeugt keine zusaetzlichen Commands, Effects, Fire-/Damage-Events oder Multiplayer-Wahrheit.
+- Lokale Pruefung: TASK_1171.
+- Risiken/offen: Der Task belegt den Start der Ausfuehrung, nicht den ersten Kontakt. Naechster sinnvoller Schritt ist TASK_1172 - First Contact Readability Release Recapture.
+
 ### TASK_1170 - First Move Decision Preview Readability Recapture
 - Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
 - Relevante Docs/Contracts: `docs/tasks/TASK_1170_first_move_decision_preview_readability_recapture.md`, `docs/tasks/TASK_1169_left_stack_air_anchor_release_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`

@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1171 - First Move Execution Feedback Release Recapture (implementiert im Arbeitsstand)
+- Grundlage: TASK_1170 belegt die erste Move-Entscheidung vor `GO`; TASK_541 belegt den laufenden Movement-Feedback-Snapshot nach `GO`.
+- Ziel: Den echten `execute_selected_fireteam_orders()`-Anschluss, TASK_541-Execution-Feedback und aktuellen Release-Kontext als read-only Recapture buendeln.
+- Ergebnis: `get_mission_first_move_execution_feedback_release_recapture_snapshot()` belegt Movement-State, Ziel-/Progressdaten, Running-/GO-Feedback, Order-Trace und Release-Provenance, ohne weitere Commands oder Effects zu erzeugen.
+- Verifikation: TASK_1171 plus TASK_1170/TASK_541-nahe Execution-Fixture.
+- Naechster Schritt: TASK_1172 - First Contact Readability Release Recapture.
+
 ## TASK_1170 - First Move Decision Preview Readability Recapture (implementiert im Arbeitsstand)
 - Grundlage: TASK_1169 akzeptiert den linken taktischen Stack im aktuellen Release; der naechste Spielbarkeitsgriff ist wieder die erste Move-Entscheidung vor `GO`.
 - Ziel: TASK_540 First-Move, TASK_567 Threat-Preview, TASK_950 F6-Decision-Overlay und TASK_1169 Release-Acceptance zu einem read-only Release-Recapture buendeln.
