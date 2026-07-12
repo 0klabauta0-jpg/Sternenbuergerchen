@@ -245,6 +245,10 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot") if has_active_mission() else null
 	var simulation_tick: int = int(simulation_root.call("get_tick")) if simulation_root != null and simulation_root.has_method("get_tick") else 0
 	var unit_movement_evidence: Dictionary = _build_release_fireteam_unit_movement_evidence(simulation_root)
+	var runtime_tick_budget: Dictionary = Dictionary(simulation_root.call("get_runtime_tick_budget_debug_snapshot")).duplicate(true) if simulation_root != null and simulation_root.has_method("get_runtime_tick_budget_debug_snapshot") else {}
+	var mission_visible_frame_timing: Dictionary = Dictionary(controller.call("get_mission_visible_frame_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_visible_frame_timing_debug_snapshot") else {}
+	var mission_ui_refresh_timing: Dictionary = Dictionary(controller.call("get_mission_ui_refresh_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_ui_refresh_timing_debug_snapshot") else {}
+	var mission_runtime_surface_timing: Dictionary = Dictionary(controller.call("get_mission_runtime_surface_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_runtime_surface_timing_debug_snapshot") else {}
 	return {
 		"schema": "sternenbuergerchen.release_multiplayer_first_contact.v1",
 		"task_id": "TASK_1150",
@@ -269,6 +273,10 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"fireteam_unit_positions": Dictionary(unit_movement_evidence.get("fireteam_unit_positions", {})).duplicate(true),
 		"terrain_move_debug": Dictionary(unit_movement_evidence.get("terrain_move_debug", {})).duplicate(true),
 		"local_avoidance_debug": Dictionary(unit_movement_evidence.get("local_avoidance_debug", {})).duplicate(true),
+		"runtime_tick_budget": runtime_tick_budget,
+		"mission_visible_frame_timing": mission_visible_frame_timing,
+		"mission_ui_refresh_timing": mission_ui_refresh_timing,
+		"mission_runtime_surface_timing": mission_runtime_surface_timing,
 		"contact_approach_evidence": _release_contact_approach_evidence.duplicate(true),
 		"contact_count": contacts.size(),
 		"contacts": contacts,
@@ -465,6 +473,10 @@ func _submit_release_contact_advance(controller: Node) -> bool:
 	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot")
 	if simulation_root != null and simulation_root.has_method("set_local_avoidance_debug_enabled"):
 		simulation_root.call("set_local_avoidance_debug_enabled", true)
+	if simulation_root != null and simulation_root.has_method("set_runtime_tick_budget_debug_enabled"):
+		simulation_root.call("set_runtime_tick_budget_debug_enabled", true)
+	if controller.has_method("set_mission_visible_frame_timing_debug_enabled"):
+		controller.call("set_mission_visible_frame_timing_debug_enabled", true)
 	var pace_snapshot: Dictionary = get_release_multiplayer_first_contact_snapshot()
 	var start_position := Vector2(Dictionary(pace_snapshot.get("fireteam_position", {})).get("world_position", Vector2.ZERO))
 	var local_team_id: String = ""
