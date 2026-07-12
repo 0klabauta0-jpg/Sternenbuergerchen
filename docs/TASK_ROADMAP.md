@@ -13,15 +13,21 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1148 - Connected Release Dropship First Decision Playtest (naechster Schritt)
-- Grundlage: TASK_1147 beweist zwei echte Release-Prozesse bis zur gemeinsamen Mission, aber noch keinen manuell lesbaren Multiplayer-Drop und keine erste getrennte Entscheidung in Full HD.
-- Ziel: Host und Client im Release durch LZ, Drop, Deboard und erste Fireteam-Entscheidung fuehren; beide Perspektiven, Wartezeiten und Authority-Feedback getrennt belegen.
-- Randbedingung: Windows-Firewall-Erststart als Testumgebungsgrenze dokumentieren, keine Firewall-Regel automatisiert veraendern.
+## TASK_1149 - Connected Fireteam Card and Route Convergence Polish (naechster Schritt)
+- Grundlage: Der echte 1600x900-Release-Lauf erreicht Drop, Deboard und erstes GO, zeigt danach aber stale/widerspruechliche Mini-Card-Zustaende und eine Client-Route ausserhalb des Kartenfokus.
+- Ziel: Mini-Card und Member-Cards aus demselben autoritativen Movement-Snapshot lesen lassen und den sichtbaren Routenzielpunkt innerhalb der taktischen Karte halten.
+- Verifikation: Host-/Client-Recapture nach erstem verbundenem GO, Perspektiv- und Authority-Regressionen.
+
+## TASK_1148 - Connected Release Dropship First Decision Playtest (implementiert im Arbeitsstand)
+- Ergebnis: Produkt-Multiplayer startet mit Host-autoritativen Blue-/Gold-Dropships. Beide Release-Prozesse setzen LZ, droppen, deboarden und senden eine erste getrennte Entscheidung.
+- Beleg: Nach 57,6 Sekunden melden beide `first_decision_accepted`, 8 deployte, 0 embarked Units und `deployment_converged = true`; Client Gold erhaelt Host-OK.
+- Performance/Robustheit: Keine Playtest-Arbeit ohne explizites Argument. Craft-Selektion erfolgt nur bei Command-Submission statt per Frame. Das Gate wartet auf echte Deployment-Konvergenz.
+- Naechster Schritt: TASK_1149 - Connected Fireteam Card and Route Convergence Polish.
 
 ## TASK_1147 - Release Executable Singleplayer and Connected Multiplayer Entry Playtest (implementiert im Arbeitsstand)
 - Ergebnis: Singleplayer erreicht in der exportierten EXE den ersten Feuerwechsel. Zwei weitere Release-Prozesse verbinden sich lokal, werden bereit und starten nach rund 10 Sekunden dieselbe Mission mit Host-`blue`- und Client-`gold`-Perspektive.
 - Harness: Explizite Release-Argumente aktivieren den vorhandenen Lobby-Host/Join/Ready/Start-Pfad und getrennte read-only Traces. Ohne Argument bleibt der Pfad aus. Direkte Fensterbilder umgehen einen davorliegenden Windows-Firewall-Dialog, ohne dessen Einstellung zu veraendern.
-- Verifikation: TASK_1147 12/12 und 10/10; TASK_829 26/26; TASK_1106 10/10; ENet 3/3; echter Host/Join-Release-Lauf `pass`; Singleplayer First-GO `review_ready`.
+- Verifikation: TASK_1147 11/11 und 10/10; TASK_829 26/26; TASK_1106 10/10; ENet 3/3; echter Host/Join-Release-Lauf `pass`; Singleplayer First-GO `review_ready`.
 - Naechster Schritt: TASK_1148 - Connected Release Dropship First Decision Playtest.
 
 ## TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene (implementiert im Arbeitsstand)

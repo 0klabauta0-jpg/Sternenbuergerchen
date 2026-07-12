@@ -10,6 +10,17 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1148 - Connected Release Dropship First Decision Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1148_connected_release_dropship_first_decision_playtest.md`, `scripts/mission/multiplayer_dropship_bootstrap.gd`, `scripts/tools/capture_release_host_client_entry_playtest.ps1`
+- Ursache: Der Produkt-Multiplayer setzte beim Missionsstart nur Peer-/Fireteam-Zuweisungen. Ohne Transport-Bootstrap begann die Mission direkt auf der Karte und umging LZ, Drop und Deboard.
+- Aenderung: Ein Mission-Contract baut aus oeffentlichen Fireteam-Member-Snapshots je eine Blue-/Gold-Dropshipkarte. Nur der Host setzt den initialen Planning-State; SimulationRoot repliziert LZ, Drop, Embarked und Deployed weiter autoritativ. Der explizite Release-Playtestmodus nutzt vorhandene Dropship- und Commander-Command-APIs.
+- Echter Release-Beleg: Host/Blue und Client/Gold erreichen nach 57,6 Sekunden `first_decision_accepted`; beide sehen 8 deployte und 0 embarked Units, `deployment_converged = true`. Der Client erhaelt `COMMANDER_INTENT GOLD HOST OK`. 1600x900-Fensterbilder fuer beide Perspektiven sind geschrieben.
+- Gefundener Hotpath-Fallstrick: Per-frame Craft-Selektion im Testtreiber wechselte parallele Sequenzen und liess Blue bei etwa 55 Prozent Inbound stehen. Selektion passiert jetzt nur vor LZ-/Drop-Submission.
+- Sichtbarer Folgefund: Mini-Card-Zustand (`STABIL`/`WARTET`) widerspricht nach GO teilweise den bereits marschierenden Member-Cards; die Client-Route verlaesst den Kartenfokus.
+- Lokale Pruefung: TASK_1148 14/14, 7/7 und 10/10; TASK_1104 31/31; TASK_1101 46/46; echter Zwei-EXE-Lauf `pass`.
+- Naechster Schritt: TASK_1149 - Connected Fireteam Card and Route Convergence Polish.
+
 ### TASK_1147 - Release Executable Singleplayer and Connected Multiplayer Entry Playtest
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1147_release_executable_singleplayer_connected_multiplayer_entry_playtest.md`, `scripts/tools/capture_release_host_client_entry_playtest.ps1`, `scripts/tools/capture_release_first_go_firefight_real_window.ps1`
@@ -17,7 +28,7 @@
 - Multiplayer: Zwei Prozesse derselben exportierten EXE verbinden sich lokal ueber ENet, melden beide Spieler bereit und starten nach rund 10 Sekunden dieselbe Mission. Host besitzt Fireteam `blue`, Client `gold`; beide Traces melden `connected_count = 2`, `ready_count = 2`, `mission_started = true` und eine aktive Mission.
 - Aenderung: Das Main Menu routet nur bei expliziten `--release-multiplayer-host`/`--release-multiplayer-join`-Argumenten in die Produktlobby. Die Lobby benutzt ihre vorhandenen Host-, Join-, Ready- und Startmethoden und schreibt read-only Traces. Ohne Argument ist der neue `_process`-Pfad abgeschaltet. Ein PowerShell-Harness startet und beendet beide Release-Prozesse und erzeugt getrennte Fensterbilder.
 - Befund: Der erste Multiplayer-Start kann den Windows-Defender-Firewall-Dialog zeigen. Loopback funktionierte dennoch; keine Firewall-Regel wurde automatisiert veraendert. Bei 900x700 sind die Perspektiven konsistent, aber Command-/Member-Flaechen fuer einen echten Spieler zu klein. Ein manueller Multiplayer-Drop ist noch nicht belegt.
-- Lokale Pruefung: TASK_1147 Deeplink 12/12; Harness 10/10; TASK_829 26/26; TASK_1106 10/10; ENet 3/3; echter Release Host/Join `pass` nach 9.9-10.0 s; Singleplayer First-GO `review_ready`; PCK SHA256 `C656340E070EB3CA26301095E260A9B63A3C5B70133F01F8261E5681C5D88059`.
+- Lokale Pruefung: TASK_1147 Deeplink 11/11; Harness 10/10; TASK_829 26/26; TASK_1106 10/10; ENet 3/3; echter Release Host/Join `pass` nach 9.9-10.0 s; Singleplayer First-GO `review_ready`.
 - Naechster Schritt: TASK_1148 - Connected Release Dropship First Decision Playtest.
 
 ### TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene

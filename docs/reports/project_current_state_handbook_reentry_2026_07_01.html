@@ -72,13 +72,13 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1147: Singleplayer und ein echtes Host/Join-Paar erreichen aus dem exportierten Spieleordner die taktische Mission.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1148: Ein echtes Host/Join-Paar setzt getrennte LZs, droppt Blue und Gold und erreicht die erste Host-bestaetigte Entscheidung.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
-      <span class="pill good">Letzter Abschluss: TASK_1147</span>
-      <span class="pill good">Letzter Stand: TASK_1147</span>
-      <span class="pill warn">Naechster Kandidat: TASK_1148</span>
+      <span class="pill good">Letzter Abschluss: TASK_1148</span>
+      <span class="pill good">Letzter Stand: TASK_1148</span>
+      <span class="pill warn">Naechster Kandidat: TASK_1149</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -377,6 +377,12 @@
           <div class="callout success">Host und Client melden jeweils <code>connected_count = 2</code>, <code>ready_count = 2</code> und <code>mission_started = true</code>. Host fuehrt <code>blue</code>, Client <code>gold</code>. Direkte Fensterbilder zeigen die getrennten Member-Cards bei identischer Karte.</div>
           <div class="callout">Offen bleiben der echte Multiplayer-Drop und die erste verbundene Entscheidung. Beim ersten Netzwerkstart kann Windows Defender einen Firewall-Dialog vorlegen; der Test hat keine Systemregel veraendert.</div>
         </article>
+        <article class="card wide">
+          <h2>Verbundener Drop und erstes GO TASK_1148</h2>
+          <p>Der Multiplayer-Missionsstart erzeugt jetzt je ein Host-autorisiertes Dropship fuer Blue und Gold. Beide exportierten EXEs setzen ihre eigene LZ, deboarden und senden danach eine erste Fireteam-Entscheidung.</p>
+          <div class="callout success">Finaler Zwei-Fenster-Lauf: 57,6 Sekunden, Host und Client jeweils <code>first_decision_accepted</code>, 8 deployte, 0 embarked Units und <code>deployment_converged = true</code>. Client Gold zeigt <code>COMMANDER_INTENT GOLD HOST OK</code>.</div>
+          <div class="callout">Der 1600x900-Capture zeigt als naechsten Befund stale Mini-Card-Zustaende gegen bereits marschierende Member-Cards sowie eine Client-Route ausserhalb des Kartenfokus. Das ist eng als TASK_1149 geschnitten.</div>
+        </article>
       </div>
     </section>
 
@@ -473,16 +479,16 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1147 beweist den exportierten Singleplayer bis zum ersten Feuerwechsel und zwei echte Host/Join-Prozesse bis zur gemeinsamen aktiven Mission. Die Multiplayer-Konvergenz dauert lokal rund zehn Sekunden.</p>
-          <p><strong>Naechster sinnvoller Schritt:</strong> TASK_1148 fuehrt beide Release-Perspektiven durch LZ, Drop, Deboard und die erste getrennte Fireteam-Entscheidung. Damit wird aus erfolgreichem Verbinden ein echter gemeinsamer Spielergriff.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1148 beweist den echten verbundenen Spielergriff von Host/Join ueber getrennte LZs und Drops bis zur ersten Host-bestaetigten Blue-/Gold-Entscheidung.</p>
+          <p><strong>Naechster sinnvoller Schritt:</strong> TASK_1149 gleicht Fireteam-Mini-Card, Member-Cards und sichtbare Route gegen denselben autoritativen Movement-State ab. Der Spieler soll nach GO nicht gleichzeitig <code>WARTET</code> und <code>Marschiert</code> lesen.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1147 - Release EXE Singleplayer und Host/Join bis Mission gruen" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1148 - Connected Release Dropship First Decision Playtest" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1148 - Release Host/Join Drop, Deboard und erstes GO gruen" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1149 - Connected Fireteam Card and Route Convergence Polish" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1118,10 +1124,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1148 - Connected Release Dropship First Decision Playtest"
+            recommended_next_task: "TASK_1149 - Connected Fireteam Card and Route Convergence Polish"
           },
           metadata: {
-            generated_for_task: "TASK_1147",
+            generated_for_task: "TASK_1148",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

@@ -8,6 +8,7 @@ const MULTIPLAYER_SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/
 const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const MULTIPLAYER_ROSTER_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_roster_contract.gd")
+const MULTIPLAYER_DROPSHIP_BOOTSTRAP_SCRIPT: GDScript = preload("res://scripts/mission/multiplayer_dropship_bootstrap.gd")
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
@@ -25,6 +26,7 @@ const RELEASE_ADDRESS_ARG: String = "--release-multiplayer-address="
 const RELEASE_PORT_ARG: String = "--release-multiplayer-port="
 const RELEASE_AUTO_START_ARG: String = "--release-multiplayer-auto-start"
 const RELEASE_TRACE_ARG: String = "--release-multiplayer-trace="
+const RELEASE_DROP_DECISION_ARG: String = "--release-multiplayer-drop-decision"
 
 @onready var _status_label: Label = get_node("Panel/Margin/VBox/StatusLabel")
 @onready var _team_readability_label: Label = get_node("Panel/Margin/VBox/TeamReadabilityLabel")
@@ -82,6 +84,13 @@ var _release_playtest_stage: String = "disabled"
 var _release_playtest_action_started: bool = false
 var _release_playtest_ready_sent: bool = false
 var _release_playtest_last_trace_key: String = ""
+var _release_drop_decision_stage: String = "disabled"
+var _release_drop_lz_sent: bool = false
+var _release_drop_call_sent: bool = false
+var _release_first_decision_sent: bool = false
+var _release_first_decision_accepted: bool = false
+var _release_local_fireteam_id: String = ""
+var _release_local_craft_id: String = ""
 
 
 func _ready() -> void:
@@ -118,6 +127,7 @@ func get_release_multiplayer_deeplink_snapshot(user_args: Array = []) -> Diction
 	var address := MULTIPLAYER_SESSION_SCRIPT.DEFAULT_ADDRESS
 	var port: int = MULTIPLAYER_SESSION_SCRIPT.DEFAULT_PORT
 	var auto_start := false
+	var drop_decision := false
 	var trace_path := ""
 	for value in args:
 		var arg: String = String(value).strip_edges()
@@ -131,6 +141,8 @@ func get_release_multiplayer_deeplink_snapshot(user_args: Array = []) -> Diction
 			port = maxi(1, int(arg.trim_prefix(RELEASE_PORT_ARG)))
 		elif arg == RELEASE_AUTO_START_ARG:
 			auto_start = true
+		elif arg == RELEASE_DROP_DECISION_ARG:
+			drop_decision = true
 		elif arg.begins_with(RELEASE_TRACE_ARG):
 			trace_path = arg.trim_prefix(RELEASE_TRACE_ARG).strip_edges()
 	return {
@@ -142,6 +154,7 @@ func get_release_multiplayer_deeplink_snapshot(user_args: Array = []) -> Diction
 		"port": port,
 		"auto_ready": not role.is_empty(),
 		"auto_start": auto_start and role == "host",
+		"drop_decision": drop_decision and not role.is_empty(),
 		"trace_path": trace_path,
 		"read_only_config": true,
 		"ui_sets_gameplay_truth": false,
@@ -156,6 +169,29 @@ func get_release_multiplayer_playtest_snapshot() -> Dictionary:
 		"config": _release_playtest_config.duplicate(true),
 		"session": get_session_snapshot(),
 		"active_mission": has_active_mission(),
+		"drop_decision": get_release_multiplayer_drop_decision_snapshot(),
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func get_release_multiplayer_drop_decision_snapshot() -> Dictionary:
+	var controller: Node = _active_mission.get_node_or_null("TacticalController") if has_active_mission() else null
+	var planning_state: Dictionary = Dictionary(controller.call("get_planning_state")) if controller != null and controller.has_method("get_planning_state") else {}
+	var feedback: Dictionary = Dictionary(controller.call("get_network_fireteam_command_feedback_snapshot")) if controller != null and controller.has_method("get_network_fireteam_command_feedback_snapshot") else {}
+	return {
+		"schema": "sternenbuergerchen.release_multiplayer_drop_decision.v1",
+		"task_id": "TASK_1148",
+		"stage": _release_drop_decision_stage,
+		"fireteam_id": _release_local_fireteam_id,
+		"craft_id": _release_local_craft_id,
+		"lz_sent": _release_drop_lz_sent,
+		"drop_sent": _release_drop_call_sent,
+		"decision_sent": _release_first_decision_sent,
+		"decision_accepted": _release_first_decision_accepted,
+		"mission_drop_cards": Array(planning_state.get("mission_drop_cards", [])).duplicate(true),
+		"embarked_unit_ids": Array(planning_state.get("embarked_unit_ids", [])).duplicate(),
+		"deployed_unit_ids": Array(planning_state.get("deployed_unit_ids", [])).duplicate(),
+		"command_feedback": feedback,
 		"ui_sets_gameplay_truth": false,
 	}
 
@@ -183,7 +219,11 @@ func _advance_release_multiplayer_playtest() -> void:
 		_write_release_multiplayer_trace()
 		return
 	if bool(snapshot.get("mission_started", false)) or has_active_mission():
-		_release_playtest_stage = "mission_started"
+		if bool(_release_playtest_config.get("drop_decision", false)):
+			_advance_release_multiplayer_drop_decision()
+			_release_playtest_stage = "drop_decision:%s" % _release_drop_decision_stage
+		else:
+			_release_playtest_stage = "mission_started"
 	elif bool(snapshot.get("can_toggle_ready", false)) and not bool(snapshot.get("local_ready", false)) and not _release_playtest_ready_sent:
 		_release_playtest_ready_sent = set_ready(true)
 		_release_playtest_stage = "ready_sent" if _release_playtest_ready_sent else "ready_failed"
@@ -192,6 +232,124 @@ func _advance_release_multiplayer_playtest() -> void:
 	elif bool(snapshot.get("has_active_peer", false)):
 		_release_playtest_stage = "connected"
 	_write_release_multiplayer_trace()
+
+
+func _advance_release_multiplayer_drop_decision() -> void:
+	if not has_active_mission():
+		_release_drop_decision_stage = "waiting_for_mission"
+		return
+	var controller: Node = _active_mission.get_node_or_null("TacticalController")
+	if controller == null or not controller.has_method("get_planning_state"):
+		_release_drop_decision_stage = "controller_missing"
+		return
+	if _release_drop_decision_stage == "disabled":
+		_release_drop_decision_stage = "waiting_for_dropship"
+	_resolve_release_local_drop_assignment(controller)
+	if _release_local_fireteam_id.is_empty() or _release_local_craft_id.is_empty():
+		return
+	var planning_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+	var card: Dictionary = _find_release_drop_card(Array(planning_state.get("mission_drop_cards", [])), _release_local_craft_id)
+	if card.is_empty():
+		_release_drop_decision_stage = "waiting_for_dropship"
+		return
+	var pending_count: int = int(Dictionary(controller.call("get_network_dropship_pending_debug_snapshot")).get("pending_count", 0)) if controller.has_method("get_network_dropship_pending_debug_snapshot") else 0
+	if not bool(card.get("has_lz_position", false)):
+		if not _release_drop_lz_sent and pending_count <= 0:
+			controller.call("select_mission_dropship_fireteam", _release_local_craft_id, _release_local_fireteam_id)
+			var lz_position := Vector2(384.0, 224.0) if _release_local_fireteam_id == "blue" else Vector2(704.0, 384.0)
+			var approach := "NW" if _release_local_fireteam_id == "blue" else "SE"
+			_release_drop_lz_sent = bool(controller.call("request_network_authoritative_dropship_command", "set_lz", _release_local_craft_id, _release_local_fireteam_id, {"lz_position": lz_position, "approach_angle": approach}))
+			_release_drop_decision_stage = "lz_requested" if _release_drop_lz_sent else "lz_request_failed"
+		return
+	if not _release_drop_call_sent and pending_count <= 0 and String(card.get("state", "")).strip_edges().to_lower() == "waiting":
+		controller.call("select_mission_dropship_fireteam", _release_local_craft_id, _release_local_fireteam_id)
+		_release_drop_call_sent = bool(controller.call("request_network_authoritative_dropship_command", "call_dropship", _release_local_craft_id, _release_local_fireteam_id))
+		_release_drop_decision_stage = "drop_requested" if _release_drop_call_sent else "drop_request_failed"
+		return
+	var local_member_ids: Array = _release_fireteam_member_ids(controller, _release_local_fireteam_id)
+	var deployed_ids: Array = Array(planning_state.get("deployed_unit_ids", []))
+	if not local_member_ids.is_empty() and _all_release_ids_present(local_member_ids, deployed_ids):
+		if not _release_first_decision_sent:
+			_release_first_decision_sent = _submit_release_first_move_decision(controller, card)
+			_release_drop_decision_stage = "decision_submitted" if _release_first_decision_sent else "decision_submit_failed"
+			if _release_first_decision_sent and bool(get_session_snapshot().get("is_host", false)):
+				_release_first_decision_accepted = true
+				_release_drop_decision_stage = "first_decision_accepted"
+			return
+		var feedback: Dictionary = Dictionary(controller.call("get_network_fireteam_command_feedback_snapshot")) if controller.has_method("get_network_fireteam_command_feedback_snapshot") else {}
+		if bool(feedback.get("accepted", false)) and String(feedback.get("fireteam_id", "")).strip_edges().to_lower() == _release_local_fireteam_id:
+			_release_first_decision_accepted = true
+			_release_drop_decision_stage = "first_decision_accepted"
+		else:
+			_release_drop_decision_stage = "waiting_for_host_decision"
+		return
+	if _release_drop_call_sent:
+		_release_drop_decision_stage = "drop_in_progress"
+
+
+func _resolve_release_local_drop_assignment(controller: Node) -> void:
+	if not _release_local_fireteam_id.is_empty() and not _release_local_craft_id.is_empty():
+		return
+	var assignments: Dictionary = Dictionary(get_session_snapshot().get("assignments", {}))
+	var peer_fireteams: Dictionary = Dictionary(assignments.get("peer_fireteams", {}))
+	var local_peer_id: int = int(get_session_snapshot().get("local_peer_id", 0))
+	var fireteams := PackedStringArray(peer_fireteams.get(local_peer_id, PackedStringArray()))
+	if fireteams.is_empty():
+		return
+	_release_local_fireteam_id = String(fireteams[0]).strip_edges().to_lower()
+	var planning_state: Dictionary = Dictionary(controller.call("get_planning_state"))
+	for card_variant in Array(planning_state.get("mission_drop_cards", [])):
+		var card: Dictionary = Dictionary(card_variant)
+		if Array(card.get("boarded_fireteam_ids", [])).has(_release_local_fireteam_id):
+			_release_local_craft_id = String(card.get("craft_id", "")).strip_edges()
+			return
+
+
+func _find_release_drop_card(cards: Array, craft_id: String) -> Dictionary:
+	for card_variant in cards:
+		var card: Dictionary = Dictionary(card_variant)
+		if String(card.get("craft_id", "")).strip_edges() == craft_id:
+			return card.duplicate(true)
+	return {}
+
+
+func _release_fireteam_member_ids(controller: Node, fireteam_id: String) -> Array:
+	for row_variant in Array(controller.call("get_fireteam_member_status_row_snapshot")):
+		var row: Dictionary = Dictionary(row_variant)
+		if String(row.get("fireteam_id", "")).strip_edges().to_lower() != fireteam_id:
+			continue
+		var result: Array = []
+		for member_variant in Array(row.get("members", [])):
+			var unit_id: String = String(Dictionary(member_variant).get("unit_id", "")).strip_edges()
+			if not unit_id.is_empty():
+				result.append(unit_id)
+		return result
+	return []
+
+
+func _all_release_ids_present(expected_ids: Array, actual_ids: Array) -> bool:
+	for unit_id in expected_ids:
+		if not actual_ids.has(unit_id):
+			return false
+	return not expected_ids.is_empty()
+
+
+func _submit_release_first_move_decision(controller: Node, card: Dictionary) -> bool:
+	var lz_position: Vector2 = Vector2(card.get("lz_position", Vector2.ZERO))
+	var requested_target := lz_position + (Vector2(128.0, 64.0) if _release_local_fireteam_id == "blue" else Vector2(-128.0, 64.0))
+	var terrain_registry: Node = _active_mission.get_node_or_null("TerrainRegistry")
+	if terrain_registry != null and terrain_registry.has_method("resolve_walkable_target"):
+		var resolved: Dictionary = Dictionary(terrain_registry.call("resolve_walkable_target", requested_target))
+		requested_target = Vector2(resolved.get("replacement_position", requested_target))
+	var state: Dictionary = Dictionary(controller.call("get_planning_state"))
+	state["selected_fireteam"] = _release_local_fireteam_id
+	state["selected_fireteams"] = [_release_local_fireteam_id]
+	state["has_selected_tile"] = true
+	state["selected_tile_world_position"] = requested_target
+	controller.call("set_planning_state", state)
+	if not bool(controller.call("issue_move")):
+		return false
+	return bool(controller.call("execute_selected_fireteam_orders"))
 
 
 func _write_release_multiplayer_trace() -> void:
@@ -205,6 +363,11 @@ func _write_release_multiplayer_trace() -> void:
 		str(snapshot.session.get("ready_count", 0)),
 		str(snapshot.get("active_mission", false)),
 	]
+	trace_key += "|%s" % _release_drop_decision_stage
+	var drop_snapshot: Dictionary = Dictionary(snapshot.get("drop_decision", {}))
+	var drop_deployed_count: int = Array(drop_snapshot.get("deployed_unit_ids", [])).size()
+	var drop_embarked_count: int = Array(drop_snapshot.get("embarked_unit_ids", [])).size()
+	trace_key += "|dep:%d|emb:%d" % [drop_deployed_count, drop_embarked_count]
 	if trace_key == _release_playtest_last_trace_key:
 		return
 	_release_playtest_last_trace_key = trace_key
@@ -822,6 +985,7 @@ func _launch_mission(assignments: Dictionary) -> void:
 		startup_combat_driver.call("set_combat_startup_grace_ticks", PRODUCT_MISSION_COMBAT_STARTUP_GRACE_TICKS)
 	_mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	initialize_multiplayer_mission_dropships(mission_instance, assignments, bool(get_session_snapshot().get("is_host", false)))
 	_apply_local_mission_fireteam_perspective(mission_instance, assignments)
 	var combat_driver: Node = mission_instance.get_node_or_null("CombatLoopDriver")
 	if combat_driver != null and combat_driver.has_signal("combat_resolved"):
@@ -831,6 +995,19 @@ func _launch_mission(assignments: Dictionary) -> void:
 	if not bool(get_session_snapshot().get("is_host", false)):
 		_session.rpc_id(1, "notify_mission_runtime_ready")
 	_set_lobby_panel_visible(false)
+
+
+func initialize_multiplayer_mission_dropships(mission_instance: Node, assignments: Dictionary, is_host: bool) -> bool:
+	if not is_host or mission_instance == null:
+		return false
+	var controller: Node = mission_instance.get_node_or_null("TacticalController")
+	if controller == null or not controller.has_method("set_planning_state"):
+		return false
+	var planning_state: Dictionary = Dictionary(MULTIPLAYER_DROPSHIP_BOOTSTRAP_SCRIPT.call("build_initial_planning_state", controller, assignments))
+	if planning_state.is_empty():
+		return false
+	controller.call("set_planning_state", planning_state)
+	return true
 
 
 func _apply_local_mission_fireteam_perspective(mission_instance: Node, assignments: Dictionary) -> void:
