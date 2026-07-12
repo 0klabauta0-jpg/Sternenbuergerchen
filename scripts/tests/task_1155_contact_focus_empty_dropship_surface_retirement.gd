@@ -34,6 +34,8 @@ func _run() -> void:
 		var empty_outbound := [_card("dropship_blue", "outbound", []), _card("dropship_gold", "outbound", [])]
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", empty_outbound, true)).is_empty(), "Contact focus retires empty outbound Dropship surfaces")
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", empty_outbound, false)).size() == 2, "Outside Contact focus outbound Dropships remain visible")
+		var completed_returns := [_card("dropship_returned", "to_fob", [])]
+		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", completed_returns, false)).is_empty(), "Completed empty return cards retire even when Contact timing lags")
 		var loaded_outbound := [_card("dropship_loaded", "outbound", ["unit_alpha"])]
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", loaded_outbound, true)).size() == 1, "Loaded outbound Dropship remains visible")
 		var waiting_empty := [_card("dropship_waiting", "waiting", [])]

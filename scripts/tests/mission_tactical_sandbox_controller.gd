@@ -11334,7 +11334,9 @@ func _build_contact_focused_mission_dropship_card_entries(entries: Array, contac
 		if typeof(card_variant) != TYPE_DICTIONARY:
 			continue
 		var card: Dictionary = Dictionary(card_variant).duplicate(true)
-		if contact_focus_active and _is_completed_empty_mission_dropship_card(card):
+		var state: String = String(card.get("state", "")).strip_edges().to_lower()
+		var completed_return: bool = state == "to_fob" and int(card.get("eta_seconds", 0)) <= 0
+		if (contact_focus_active or completed_return) and _is_completed_empty_mission_dropship_card(card):
 			continue
 		result.append(card)
 	return result
