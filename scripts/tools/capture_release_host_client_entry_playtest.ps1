@@ -33,14 +33,17 @@ $screenshotPath = Join-Path $tmp $(if ($DropDecision) { "release_host_client_dro
 $hostWindowPath = Join-Path $tmp $(if ($DropDecision) { "release_host_client_drop_decision_host_window.png" } else { "release_host_client_host_window.png" })
 $clientWindowPath = Join-Path $tmp $(if ($DropDecision) { "release_host_client_drop_decision_client_window.png" } else { "release_host_client_client_window.png" })
 Remove-Item -LiteralPath $hostTrace,$clientTrace -Force -ErrorAction SilentlyContinue
+$windowResolution = if ($DropDecision) { "1600x900" } else { "900x700" }
+$hostWindowPosition = if ($DropDecision) { "20,80" } else { "20,80" }
+$clientWindowPosition = if ($DropDecision) { "360,120" } else { "960,80" }
 
 $hostArgs = @(
-	"--resolution", "900x700", "--position", "20,80", "--",
+	"--resolution", $windowResolution, "--position", $hostWindowPosition, "--",
 	"--release-multiplayer-host", "--release-multiplayer-port=$Port",
 	"--release-multiplayer-auto-start", "--release-multiplayer-trace=$hostTrace"
 )
 $clientArgs = @(
-	"--resolution", "900x700", "--position", "960,80", "--",
+	"--resolution", $windowResolution, "--position", $clientWindowPosition, "--",
 	"--release-multiplayer-join", "--release-multiplayer-address=127.0.0.1",
 	"--release-multiplayer-port=$Port", "--release-multiplayer-trace=$clientTrace"
 )

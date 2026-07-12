@@ -17,9 +17,10 @@ func _initialize() -> void:
 		"deployed_unit_ids",
 		"embarked_unit_ids",
 		"deployment_converged",
+		"1600x900",
 	]:
 		_assert(source.contains(token), "Release harness contains %s" % token)
-	print("TASK_1148 release Drop/Decision harness: %d/9 PASS" % (9 - _failed))
+	print("TASK_1148 release Drop/Decision harness: %d/10 PASS" % (10 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
