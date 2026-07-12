@@ -453,6 +453,9 @@ var _last_contact_report_event_signature_by_id: Dictionary = {}
 var _last_release_firefight_command_matrix_visual_signature: String = ""
 var _last_selected_fireteam_cards_runtime_signature: String = ""
 var _last_fireteam_mini_cards_runtime_signature: String = ""
+var _last_periodic_strategic_status_signature: String = ""
+var _last_periodic_craft_controls_signature: String = ""
+var _last_periodic_fireteam_cards_signature: String = ""
 var _mission_fireteam_card_delta_rendering_counts: Dictionary = {
 	"static_apply": 0,
 	"static_skip": 0,
@@ -468,11 +471,17 @@ var _mission_hud_runtime_surface_guard_apply_counts: Dictionary = {
 	"command_matrix": 0,
 	"selected_cards": 0,
 	"mini_cards": 0,
+	"strategic_status": 0,
+	"craft_controls": 0,
+	"fireteam_card_group": 0,
 }
 var _mission_hud_runtime_surface_guard_skip_counts: Dictionary = {
 	"command_matrix": 0,
 	"selected_cards": 0,
 	"mini_cards": 0,
+	"strategic_status": 0,
+	"craft_controls": 0,
+	"fireteam_card_group": 0,
 }
 var _tactical_breakout_resolver = null
 var _tactical_breakout_records: Array = []
@@ -765,7 +774,7 @@ func _process(delta: float) -> void:
 	var heavy_refresh_due: bool = _runtime_hud_heavy_refresh_time_remaining <= 0.0
 	if heavy_refresh_due:
 		_runtime_hud_heavy_refresh_time_remaining = RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS
-	_update_ui(heavy_refresh_due)
+	_update_ui(heavy_refresh_due, false)
 	if profile_enabled:
 		scopes_usec["ui_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
 		_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, true)
@@ -3846,7 +3855,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 		overlay.visible = is_visible and _character_overlay_open
 
 
-func _update_ui(include_heavy_surfaces: bool = true) -> void:
+func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true) -> void:
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -3911,14 +3920,18 @@ func _update_ui(include_heavy_surfaces: bool = true) -> void:
 			scopes_usec["secondary_labels_usec"] = 0
 			_record_mission_ui_refresh_timing_snapshot(refresh_started_usec, scopes_usec)
 		return
-	_refresh_runtime_mission_hud_surfaces()
+	_refresh_runtime_mission_hud_surfaces(force_heavy_surfaces)
 	_apply_release_firefight_command_matrix_visual_polish()
 	if profile_enabled:
 		scopes_usec["runtime_surfaces_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 
 	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
-	if strategic_status_label != null:
+	var strategic_status_signature: String = _build_periodic_strategic_status_signature()
+	var refresh_strategic_status: bool = force_heavy_surfaces or strategic_status_signature != _last_periodic_strategic_status_signature
+	if strategic_status_label != null and refresh_strategic_status:
+		_last_periodic_strategic_status_signature = strategic_status_signature
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "strategic_status")
 		if profile_enabled:
 			scope_started_usec = Time.get_ticks_usec()
 		_set_mission_label_text_delta(strategic_status_label, _build_strategic_status_text())
@@ -3952,6 +3965,15 @@ func _update_ui(include_heavy_surfaces: bool = true) -> void:
 		if profile_enabled:
 			scopes_usec["secondary_density_contract_usec"] = Time.get_ticks_usec() - scope_started_usec
 			scope_started_usec = Time.get_ticks_usec()
+	elif strategic_status_label != null:
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "strategic_status")
+		if profile_enabled:
+			scopes_usec["secondary_strategic_text_usec"] = 0
+			scopes_usec["secondary_tooltip_usec"] = 0
+			scopes_usec["secondary_frontier_contract_usec"] = 0
+			scopes_usec["secondary_preview_contract_usec"] = 0
+			scopes_usec["secondary_decision_contract_usec"] = 0
+			scopes_usec["secondary_density_contract_usec"] = 0
 	_apply_release_first_exchange_real_window_hud_source_sync_to_labels()
 	if profile_enabled:
 		scopes_usec["secondary_release_sync_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -4016,19 +4038,25 @@ func _refresh_tactical_event_log_panel() -> void:
 	panel.call("set_feedback_snapshot", feedback_snapshot)
 
 
-func _refresh_runtime_mission_hud_surfaces() -> void:
+func _refresh_runtime_mission_hud_surfaces(force_refresh: bool = true) -> void:
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
 	var scope_started_usec: int = 0
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
-	_refresh_mission_control_craft_summary()
-	_refresh_mission_evacuation_button()
-	_refresh_dynamic_button_styles()
-	_apply_drop_light_hud_button_labels()
-	_apply_command_hierarchy_metadata()
-	_enforce_drop_light_fixed_hud_layout()
+	var craft_controls_signature: String = _build_periodic_craft_controls_signature()
+	if force_refresh or craft_controls_signature != _last_periodic_craft_controls_signature:
+		_last_periodic_craft_controls_signature = craft_controls_signature
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "craft_controls")
+		_refresh_mission_control_craft_summary()
+		_refresh_mission_evacuation_button()
+		_refresh_dynamic_button_styles()
+		_apply_drop_light_hud_button_labels()
+		_apply_command_hierarchy_metadata()
+		_enforce_drop_light_fixed_hud_layout()
+	else:
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "craft_controls")
 	if profile_enabled:
 		scopes_usec["craft_controls_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -4041,11 +4069,17 @@ func _refresh_runtime_mission_hud_surfaces() -> void:
 	if profile_enabled:
 		scopes_usec["primary_status_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
-	_refresh_ad_hoc_panel_visibility()
-	_refresh_selected_fireteam_cards()
-	_refresh_fireteam_mini_cards()
-	if _character_overlay_open:
-		_update_character_overlay()
+	var fireteam_cards_signature: String = _build_periodic_fireteam_cards_signature()
+	if force_refresh or fireteam_cards_signature != _last_periodic_fireteam_cards_signature:
+		_last_periodic_fireteam_cards_signature = fireteam_cards_signature
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_apply_counts, "fireteam_card_group")
+		_refresh_ad_hoc_panel_visibility()
+		_refresh_selected_fireteam_cards()
+		_refresh_fireteam_mini_cards()
+		if _character_overlay_open:
+			_update_character_overlay()
+	else:
+		_increment_mission_hud_runtime_surface_guard_count(_mission_hud_runtime_surface_guard_skip_counts, "fireteam_card_group")
 	if profile_enabled:
 		scopes_usec["fireteam_cards_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -4753,6 +4787,50 @@ func _build_mission_hud_unit_runtime_signature(unit: Node, hud_embarked_unit_sta
 	]
 
 
+func _build_periodic_strategic_status_signature() -> String:
+	return JSON.stringify({
+		"planning_issue": _last_planning_state_issue,
+		"preview_mode": preview_mode,
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"focused_fireteam_id": _focused_fireteam_id,
+		"last_command_text": _last_command_text,
+		"drop": _build_periodic_craft_controls_signature(),
+		"mission_time": _build_mission_time_limit_text(),
+		"network_interaction_fingerprint": _network_mission_interaction_progress_fingerprint,
+		"network_interaction_pending": _network_mission_interaction_request_pending,
+		"contacts": get_contact_snapshot(),
+		"fire_events": get_fire_event_snapshot(),
+	})
+
+
+func _build_periodic_craft_controls_signature() -> String:
+	return JSON.stringify({
+		"craft_id": _mission_drop_craft_id,
+		"drop_state": _mission_drop_state,
+		"drop_eta_seconds": _mission_drop_eta_seconds,
+		"drop_requested": _drop_ship_requested,
+		"drop_staged": _drop_ship_staged,
+		"drop_cooldown_second": int(ceil(_drop_ship_cooldown_remaining)),
+		"sequence_phase": _drop_sequence_phase,
+		"sequence_unit_index": _drop_sequence_unit_index,
+		"sequence_unit_count": _drop_sequence_units.size(),
+		"return_requested": _mission_drop_return_requested,
+		"has_lz": _has_lz_position,
+		"lz_position": _lz_position,
+		"approach_index": _current_approach_index,
+		"preview_mode": preview_mode,
+	})
+
+
+func _build_periodic_fireteam_cards_signature() -> String:
+	return "%s\n%s\n%s\n%s" % [
+		_build_selected_fireteam_cards_runtime_signature(),
+		_build_fireteam_mini_cards_runtime_signature(),
+		str(_character_overlay_open),
+		_focused_fireteam_id,
+	]
+
+
 func _increment_mission_hud_runtime_surface_guard_count(counters: Dictionary, key: String) -> void:
 	counters[key] = int(counters.get(key, 0)) + 1
 
@@ -4765,6 +4843,12 @@ func get_mission_hud_runtime_surface_guard_snapshot() -> Dictionary:
 		"selected_cards_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("selected_cards", 0)),
 		"mini_cards_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("mini_cards", 0)),
 		"mini_cards_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("mini_cards", 0)),
+		"strategic_status_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("strategic_status", 0)),
+		"strategic_status_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("strategic_status", 0)),
+		"craft_controls_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("craft_controls", 0)),
+		"craft_controls_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("craft_controls", 0)),
+		"fireteam_card_group_apply_count": int(_mission_hud_runtime_surface_guard_apply_counts.get("fireteam_card_group", 0)),
+		"fireteam_card_group_skip_count": int(_mission_hud_runtime_surface_guard_skip_counts.get("fireteam_card_group", 0)),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,
