@@ -73,7 +73,7 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(controller_text.contains("get_release_first_exchange_hud_density_fire_visual_polish_snapshot"), "Controller exposes TASK_889 snapshot")
 	_assert(controller_text.contains("release_first_exchange_hud_density_fire_visual_polish"), "Controller sends TASK_889 payload")
 	_assert(panel_text.contains("apply_release_first_exchange_hud_density_fire_visual_polish"), "Event log panel exposes TASK_889 style hook")
-	_assert(panel_text.contains("RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS: int = 5"), "Event log caps visible density")
+	_assert(panel_text.contains("RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS: int = 4"), "Event log uses the TASK 1159 readable density cap")
 	_assert(terrain_text.contains("RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID"), "Terrain view declares TASK_889 style")
 	_assert(terrain_text.contains("_is_release_first_exchange_hud_density_fire_visual_polish_active"), "Terrain view detects TASK_889 payload")
 	_assert(terrain_text.contains("RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_TRACE_WIDTH: float = 0.07"), "Terrain view raises trace width")

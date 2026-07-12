@@ -224,6 +224,20 @@ Runtime-Signatur-/Dirty-Guard bleibt die Refreshgrenze.
 setzt `read_only = true` sowie `ui_sets_gameplay_truth = false` und erzeugt
 weder Commands, Effects noch Multiplayer-State.
 
+### Tactical Event Log bei 1280x720 (TASK_1159)
+
+Im First-Exchange-Fokus zeigt #19 hoechstens die vier neuesten Ereignisse mit
+32 Pixel Zeilenhoehe, 13 Pixel Meldung/Header, 12 Pixel Zeit und 10 Pixel
+Auswahlfilter. Severity-Streifen, Newest-first-Sortierung, Selected-only-Filter
+und ScrollContainer bleiben bestehen. Weitere normale Logeintraege bleiben
+ausserhalb des Fokus scrollbar.
+
+Der Snapshotwert und `RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS`
+verwenden denselben Vier-Zeilen-Vertrag. Dadurch darf ein identischer
+Feedback-Snapshot weder den Polish erneut anwenden noch Rows neu bauen; er
+erhoeht nur `feedback_snapshot_skip_count`. Das Panel bleibt read-only und
+setzt keine Gameplay-, Combat- oder Multiplayer-Wahrheit.
+
 ## Insertion-/First-Order-Readability
 `get_mission_insertion_first_order_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten spielbaren Missionsmoment nach dem Homebase-Launch. Der Snapshot darf nur bestehende Planning-, Dropship-Karten-, Command-Feedback- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: Dropship-Payload vorhanden, Card sichtbar, LZ-Zustand sichtbar, Drop ohne LZ blockiert, ausgewaehltes Fireteam sichtbar, erste Order-Kontrollen vorhanden, und nach LZ-Setzung ein sichtbarer LZ-Marker plus bereiter Drop-Button.
 

@@ -72,12 +72,12 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1158: Befehlsmatrix und ausgewaehlte Operatoren werden im kleinen Releasefenster Schritt fuer Schritt als lesbare Spielerwerkzeuge statt als technische Debugflaechen behandelt.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1159: Befehlsmatrix, Operatoren und Ereignisprotokoll werden im kleinen Releasefenster als lesbare Spielerwerkzeuge behandelt, ohne neue HUD-Wahrheit oder Hotpath-Arbeit einzufuehren.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
       <span class="pill good">Release-Gate: First Contact + First Fire gruen</span>
-      <span class="pill good">Letzter gruener Stand: TASK_1158</span>
+      <span class="pill good">Letzter gruener Stand: TASK_1159</span>
       <span class="pill good">TASK_1152: periodischer HUD-Pfad -74%</span>
       <span class="pill good">TASK_1153: HUD-Pfad jetzt ca. 51,7 ms</span>
       <span class="pill good">TASK_1154: Kontaktverlust eindeutig</span>
@@ -85,6 +85,7 @@
       <span class="pill good">TASK_1156: Movement-Verifier wieder vertrauenswuerdig</span>
       <span class="pill good">TASK_1157: Befehlsmatrix 1280 lesbar</span>
       <span class="pill good">TASK_1158: Member-Karten 1280 lesbar</span>
+      <span class="pill good">TASK_1159: Ereignisprotokoll 1280 lesbar</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -497,7 +498,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1158 vergroessert nur die Missions-Member-Karten auf 196x132 interne Pixel. Namen nutzen 15 Pixel, Live-Zustand und taktische Details 12 Pixel, Portraits 42 Pixel. Vier Karten passen weiterhin in die vorhandene Lane; groessere Teams bleiben scrollbar.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1159 zeigt im dichten First-Exchange-Fokus vier neueste Ereignisse mit 13-Pixel-Meldung/Header, 12-Pixel-Zeit und 32-Pixel-Zeilen. Severity, Auswahlfilter, Sortierung und Scroll bleiben erhalten.</p>
           <p><strong>Performance-Stand:</strong> TASK_1152 senkte den periodischen Host-HUD-Pfad von rund 266 auf 68 ms. TASK_1153 entfernt nun den doppelten Station-Route-Aufbau zwischen Command-Feedback und Mission-Identity und senkt den gemessenen Pfad weiter auf rund 51,7 ms. Direkte Spieleraktionen, Kontakt, Timer und Befehlsfeedback bleiben sofort sichtbar.</p>
           <p><strong>Sichtbarer Playtest-Befund:</strong> Der Host zeigt jetzt <code>BND | 1 KONTAKT WEG | FIT 5/5</code>, der Client <code>MARSCHIERT | 1 KONTAKT WEG | FIT 5/5</code>. Die vollstaendige BND-Formation bleibt im Tooltip, waehrend die Kartenzeile nicht mehr abgeschnitten wird.</p>
           <p><strong>Dropship-Surface-Befund:</strong> Der erste Filter griff wegen zeitversetzter Combat-/Dropship-Snapshots und konserviertem <code>HOST TIMEOUT</code>-Text nicht. Jetzt teilen sichtbare CONTACT-FIRE-Zeile und Dropship-Panel dieselbe read-only Fokusentscheidung; nur echte Pending-Commands halten eine leere Karte sichtbar.</p>
@@ -505,15 +506,16 @@
           <p><strong>Release-Sichtbeleg:</strong> Zwei exportierte 1280x720-Instanzen erreichen nach rund 73,8 Sekunden Deployment, Contact und denselben First Fire. <code>BW/NM/HL/FL/ZL</code> sowie <code>FH/AF/FF/UN</code> stehen vollstaendig neben ihren Icons; GO bleibt dominant und technische Slotmarker sind verschwunden.</p>
           <p><strong>Architektur:</strong> Die Karten lesen weiterhin dieselben Unit-/Fireteam-Snapshots und werden nur bei geaenderter Runtime-Signatur neu aufgebaut. Roster, FOB und Dropship-Pilot behalten ihre bisherigen Compact-Card-Werte.</p>
           <p><strong>Release-Sichtbeleg:</strong> Host und Client erreichen nach rund 74,0 Sekunden Deployment, Contact und denselben First Fire. Namen, Befehl, Feuerstatus und Live-Zustand sind sichtbar groesser; vier Karten passen sauber in die Lane, die fuenfte bleibt horizontal erreichbar.</p>
-          <p><strong>Naechster sinnvoller Schritt:</strong> Das linke Ereignisprotokoll ist jetzt die kleinste primaere HUD-Schrift im 1280er Fenster. Zeit, Meldung und Auswahlstatus brauchen als TASK 1159 eine klarere Hierarchie, ohne mehr Logzeilen oder Event-Arbeit pro Refresh zu erzeugen.</p>
+          <p><strong>Performance-Fund:</strong> Snapshot und alter Polish-Default verlangten vier beziehungsweise fuenf Zeilen. Dadurch konnte ein identischer Snapshot den Layoutpfad erneut anwenden. Der gemeinsame Vier-Zeilen-Vertrag laesst den vorhandenen Duplicate-Skip wieder greifen.</p>
+          <p><strong>Naechster sinnvoller Schritt:</strong> Den exportierten Host/Client-First-Contact bei 1280x720 pruefen und danach nur aus dem sichtbaren Bild den naechsten HUD-/Spielerfluss-Slice ableiten.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1158 - Selected Fireteam Member Cards 1280 Readability" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1159 - Tactical Event Log 1280 Readability" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1159 - Tactical Event Log 1280 Readability" data-export-key="reentry_handbook.current_task">
+          <input readonly value="Naechster Schritt - 1280x720 First-Contact-Recapture" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1149,10 +1151,10 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "TASK_1159 - Tactical Event Log 1280 Readability"
+            recommended_next_task: "1280x720 First Contact Recapture"
           },
           metadata: {
-            generated_for_task: "TASK_1158",
+            generated_for_task: "TASK_1159",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

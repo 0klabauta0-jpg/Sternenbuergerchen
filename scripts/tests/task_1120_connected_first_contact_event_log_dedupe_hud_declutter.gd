@@ -50,7 +50,7 @@ func _run() -> void:
 		]
 		var active_cards: Array = inactive_cards + [_card("dropship_ready", "waiting", 0, ["unit_alpha"])]
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", inactive_cards, true)).is_empty(), "First Contact hides only completed empty return cards")
-		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", inactive_cards, false)).size() == 2, "Without Contact focus transport cards remain unchanged")
+		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", inactive_cards, false)).is_empty(), "Completed empty return cards retire even without Contact focus")
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", active_cards, true)).size() == 1, "Loaded or actionable Dropship remains visible during Contact")
 
 	mission.queue_free()
