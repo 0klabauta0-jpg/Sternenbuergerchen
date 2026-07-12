@@ -31354,6 +31354,18 @@ func _record_recent_movement_trace(fireteam_id: String, movement_state: Dictiona
 	_recent_movement_trace_by_fireteam[normalized_fireteam_id] = trace
 
 
+func get_recent_fireteam_movement_trace(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var trace: Dictionary = Dictionary(_recent_movement_trace_by_fireteam.get(normalized_fireteam_id, {})).duplicate(true)
+	if trace.is_empty():
+		return {}
+	trace["read_only"] = true
+	trace["ui_sets_gameplay_truth"] = false
+	return trace
+
+
 func _build_fireteam_engage_contact_halt_context(fireteam_id: String) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():

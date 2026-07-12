@@ -222,6 +222,7 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 	var diagnostics: Dictionary = Dictionary(controller.call("get_contact_decision_diagnostics_snapshot")).duplicate(true) if controller != null and controller.has_method("get_contact_decision_diagnostics_snapshot") else {}
 	var perspective: Dictionary = Dictionary(controller.call("get_connected_first_contact_hud_perspective_snapshot")).duplicate(true) if controller != null and controller.has_method("get_connected_first_contact_hud_perspective_snapshot") else {}
 	var movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", _release_local_fireteam_id)).duplicate(true) if controller != null and controller.has_method("get_fireteam_movement_state") and not _release_local_fireteam_id.is_empty() else {}
+	var recent_movement_trace: Dictionary = Dictionary(controller.call("get_recent_fireteam_movement_trace", _release_local_fireteam_id)).duplicate(true) if controller != null and controller.has_method("get_recent_fireteam_movement_trace") and not _release_local_fireteam_id.is_empty() else {}
 	var fireteam_status: Dictionary = {}
 	if controller != null and controller.has_method("get_fireteam_status_card_snapshot"):
 		for status_variant in Array(controller.call("get_fireteam_status_card_snapshot")):
@@ -254,6 +255,7 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"initial_movement_observe_frames": _release_initial_movement_observe_frames,
 		"requested_target_position": _release_first_contact_target_position,
 		"movement_state": movement_state,
+		"recent_movement_trace": recent_movement_trace,
 		"fireteam_position": Dictionary(fireteam_status.get("position", {})).duplicate(true),
 		"movement_wall_time_msec": movement_wall_time_msec,
 		"simulation_tick": simulation_tick,

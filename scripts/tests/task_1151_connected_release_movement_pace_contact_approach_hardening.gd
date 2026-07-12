@@ -23,6 +23,8 @@ func _initialize() -> void:
 		_assert(lobby_source.contains(token), "Release First Contact trace exposes %s" % token)
 	_assert(lobby_source.contains("Time.get_ticks_msec() - _release_first_contact_advance_started_msec"), "Movement wall time is derived from a monotonic clock")
 	_assert(lobby_source.contains("trace_heartbeat_bucket"), "Unchanged First Contact stages still write periodic movement evidence")
+	_assert(lobby_source.contains("get_recent_fireteam_movement_trace"), "Release trace reads authoritative movement lifecycle evidence")
+	_assert(lobby_source.contains('"recent_movement_trace"'), "Release trace preserves completed movement lifecycle evidence")
 	_assert(lobby_source.contains('get_mission_marker_world_position", "spawn_bravo"'), "Release Contact Approach follows the runtime enemy spawn marker")
 	_assert(not lobby_source.contains('"spawn_enemy_defense"') and not lobby_source.contains('"spawn_enemy_patrol"'), "Release Contact Approach does not treat decorative enemy markers as runtime truth")
 	_assert(lobby_source.contains("enemy_positions.append(requested_target)"), "Clients without hidden enemy nodes resolve against the shared spawn marker")
@@ -51,8 +53,10 @@ func _initialize() -> void:
 	_assert(combat_source.contains("_should_run_combat_decision_tick"), "Combat listener exposes an explicit decision cadence guard")
 	_assert(combat_source.find("_advance_detection_timers()") < combat_source.find("_should_run_combat_decision_tick"), "Detection timers advance before the expensive decision cadence guard")
 	_assert(combat_source.find("_update_contact_tracking()") < combat_source.find("_should_run_combat_decision_tick"), "Contact tracking advances before the expensive decision cadence guard")
+	var controller_source := FileAccess.get_file_as_string("res://scripts/tests/mission_tactical_sandbox_controller.gd")
+	_assert(controller_source.contains("func get_recent_fireteam_movement_trace"), "Tactical controller exposes a public read-only movement trace")
 
-	print("TASK_1151 connected release movement pace evidence: %d/37 PASS" % (37 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/40 PASS" % (40 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
