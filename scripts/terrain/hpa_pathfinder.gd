@@ -11,6 +11,11 @@ const STATUS_NO_ABSTRACT_ROUTE: String = "no_abstract_route"
 const STATUS_LOCAL_PATH_FAILED: String = "local_path_failed"
 
 var _terrain_pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
+var _cached_adjacency_graph = null
+var _cached_adjacency_revision: int = -1
+var _cached_portal_adjacency: Dictionary = {}
+var _portal_adjacency_build_count: int = 0
+var _portal_adjacency_hit_count: int = 0
 
 
 func find_path(from_grid: Vector2i, to_grid: Vector2i, registry, graph) -> Array:
@@ -45,7 +50,7 @@ func find_path_with_status(from_grid: Vector2i, to_grid: Vector2i, registry, gra
 
 
 func _find_portal_route(from_component: String, to_component: String, to_grid: Vector2i, graph, registry, options: Dictionary = {}) -> Array:
-	var adjacency: Dictionary = _build_portal_adjacency(graph)
+	var adjacency: Dictionary = _get_portal_adjacency(graph)
 	var open_set: Array = [from_component]
 	var came_from_edge: Dictionary = {}
 	var g_score: Dictionary = {from_component: 0.0}
@@ -106,6 +111,26 @@ func _build_portal_adjacency(graph) -> Dictionary:
 		_append_edge(adjacency, forward_edge)
 		_append_edge(adjacency, reverse_edge)
 	return adjacency
+
+
+func _get_portal_adjacency(graph) -> Dictionary:
+	var revision: int = int(graph.call("get_revision")) if graph != null and graph.has_method("get_revision") else -1
+	if graph == _cached_adjacency_graph and revision == _cached_adjacency_revision and not _cached_portal_adjacency.is_empty():
+		_portal_adjacency_hit_count += 1
+		return _cached_portal_adjacency
+	_cached_portal_adjacency = _build_portal_adjacency(graph)
+	_cached_adjacency_graph = graph
+	_cached_adjacency_revision = revision
+	_portal_adjacency_build_count += 1
+	return _cached_portal_adjacency
+
+
+func get_portal_adjacency_cache_snapshot() -> Dictionary:
+	return {
+		"build_count": _portal_adjacency_build_count,
+		"hit_count": _portal_adjacency_hit_count,
+		"graph_revision": _cached_adjacency_revision,
+	}
 
 
 func _append_edge(adjacency: Dictionary, edge: Dictionary) -> void:

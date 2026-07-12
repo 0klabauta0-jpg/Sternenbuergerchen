@@ -22,6 +22,7 @@ func _run_tests() -> void:
 	print("=== TASK_127 HPA Pathfinder Integration Verifier ===")
 	_test_same_cluster_uses_local_path()
 	_test_multi_cluster_path_uses_portals()
+	_test_portal_adjacency_cache_invalidates_on_graph_rebuild()
 	_test_disconnected_components_fail_early()
 	_test_simulation_root_executes_hpa_path()
 	_test_simulation_root_simplifies_collinear_hpa_path()
@@ -56,6 +57,22 @@ func _test_multi_cluster_path_uses_portals() -> void:
 	_assert(String(result.get("status", "")) == HPA_PATHFINDER_SCRIPT.STATUS_HPA, "Multi-cluster path uses HPA status")
 	_assert(_path_starts_and_ends(path, Vector2i(0, 0), Vector2i(5, 1)), "Multi-cluster HPA path preserves start and target")
 	_assert(_path_steps_are_traversable(path, registry), "Multi-cluster HPA path uses traversable grid steps")
+	registry.free()
+
+
+func _test_portal_adjacency_cache_invalidates_on_graph_rebuild() -> void:
+	var registry = _make_registry(_make_rect_positions(Vector2i(0, 0), Vector2i(5, 1)), {})
+	var graph = HPA_NAVIGATION_GRAPH_SCRIPT.new()
+	graph.call("build_from_registry", registry, 2)
+	var pathfinder = HPA_PATHFINDER_SCRIPT.new()
+	pathfinder.call("find_path_with_status", Vector2i(0, 0), Vector2i(5, 1), registry, graph)
+	pathfinder.call("find_path_with_status", Vector2i(0, 0), Vector2i(5, 1), registry, graph)
+	var cached: Dictionary = Dictionary(pathfinder.call("get_portal_adjacency_cache_snapshot"))
+	_assert(int(cached.get("build_count", 0)) == 1 and int(cached.get("hit_count", 0)) >= 1, "Repeated HPA query reuses portal adjacency")
+	graph.call("build_from_registry", registry, 2)
+	pathfinder.call("find_path_with_status", Vector2i(0, 0), Vector2i(5, 1), registry, graph)
+	var rebuilt: Dictionary = Dictionary(pathfinder.call("get_portal_adjacency_cache_snapshot"))
+	_assert(int(rebuilt.get("build_count", 0)) == 2, "Graph rebuild invalidates cached portal adjacency")
 	registry.free()
 
 

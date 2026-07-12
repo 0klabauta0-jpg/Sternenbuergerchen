@@ -1,5 +1,10 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1177 - HPA Portal Adjacency Cache
+- Status: implementiert und headless geprueft
+- Aenderung: Portal-Adjazenz wird je Graphrevision einmal gebaut und bei Full-/Dirty-Rebuild sicher invalidiert.
+- Lokale Pruefung: TASK_127 13/13 gruen.
+
 ### TASK_1176 - Station Route Phase Profile
 - Status: implementiert im Arbeitsstand und headless geprueft
 - Relevante Docs/Contracts: `docs/tasks/TASK_1176_station_route_phase_profile.md`, `docs/tasks/TASK_1175_station_route_live_aa_pressure.md`, `docs/performance/simulation_combat_ai_tick_profile_report.md`

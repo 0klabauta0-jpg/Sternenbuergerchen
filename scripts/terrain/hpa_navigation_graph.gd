@@ -14,6 +14,7 @@ var _portal_ids_seen: Dictionary = {}
 var _portals_by_cluster: Dictionary = {}
 var _abstract_neighbors_by_component: Dictionary = {}
 var _last_build_stats: Dictionary = {}
+var _revision: int = 0
 var _pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()
 
 
@@ -60,6 +61,8 @@ func build_from_registry(registry, next_cluster_size: int = DEFAULT_CLUSTER_SIZE
 	_build_portals(registry)
 	var built: bool = not _clusters_by_id.is_empty()
 	_store_build_stats(built, cluster_size, tiles.size(), Time.get_ticks_usec() - started_usec, {"incremental": false})
+	if built:
+		_revision += 1
 	return built
 
 
@@ -101,11 +104,16 @@ func rebuild_dirty_clusters_from_registry(registry, dirty_grids: Array, next_clu
 		"dirty_cluster_count": dirty_cluster_lookup.size(),
 		"rebuilt_cluster_count": rebuild_cluster_lookup.size(),
 	})
+	_revision += 1
 	return true
 
 
 func get_last_build_stats() -> Dictionary:
 	return _last_build_stats.duplicate(true)
+
+
+func get_revision() -> int:
+	return _revision
 
 
 func get_cluster_id_for_grid(grid_position: Vector2i) -> Vector2i:
