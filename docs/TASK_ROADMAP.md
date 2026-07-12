@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1177 - HPA Portal Adjacency Cache (implementiert im Arbeitsstand)
+- Ergebnis: HPA cached Portal-Adjazenz pro Graphrevision; Full-/Dirty-Rebuild invalidiert korrekt.
+- Verifikation: TASK_127 13/13 gruen.
+- Naechster Schritt: reale Formation-Route erneut profilieren und Path-/Combat-Anteile vergleichen.
+
+---
+
 ## TASK_1176 - Station Route Phase Profile (implementiert im Arbeitsstand)
 - Grundlage: Vollstaendige Station-Route-Traces waren extrem langsam, ohne den dominanten Abschnitt zu benennen.
 - Ziel: Den bestehenden realen AA-Trace in Setup, Route und Interaction zerlegen und die teuerste autoritative Tick-Scope sichtbar machen.
