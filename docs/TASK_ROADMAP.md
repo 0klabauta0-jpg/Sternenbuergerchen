@@ -13,10 +13,16 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1149 - Connected Fireteam Card and Route Convergence Polish (naechster Schritt)
-- Grundlage: Der echte 1600x900-Release-Lauf erreicht Drop, Deboard und erstes GO, zeigt danach aber stale/widerspruechliche Mini-Card-Zustaende und eine Client-Route ausserhalb des Kartenfokus.
-- Ziel: Mini-Card und Member-Cards aus demselben autoritativen Movement-Snapshot lesen lassen und den sichtbaren Routenzielpunkt innerhalb der taktischen Karte halten.
-- Verifikation: Host-/Client-Recapture nach erstem verbundenem GO, Perspektiv- und Authority-Regressionen.
+## TASK_1150 - Connected Release First Contact Handoff Playtest (naechster Schritt)
+- Grundlage: Der Release-Lauf ist bis zur konsistent sichtbaren ersten Blue-/Gold-Bewegungsentscheidung belegt.
+- Ziel: Zwei exportierte Prozesse zustandsbasiert bis Ankunft, erstem Kontakt und taktischem Feuer-Handoff weiterfuehren.
+- Verifikation: Host-/Client-Trace und 1600x900-Recapture am ersten verbundenen Kontakt; bestehende Contact-/Combat-/Performance-Gates.
+
+## TASK_1149 - Connected Fireteam Card and Route Convergence Polish (implementiert im Arbeitsstand)
+- Ergebnis: Host und Client zeigen Blue und Gold nach GO konsistent als `MARSCHIERT`. Ein Member-Runtime-Fallback schliesst den kurzen Movement-Snapshot-Uebergang.
+- Visual: Leere abgeflogene Personal-Dropships zeichnen keinen Approach-Vektor quer ueber die Karte; beladene Planung und Cargo bleiben sichtbar.
+- Verifikation: TASK_1149 6/6; TASK_369 14/14; TASK_842 33/33; TASK_1109 18/18; TASK_1110 20/20; TASK_222 82/82; echter Release-Recapture `pass`.
+- Naechster Schritt: TASK_1150 - Connected Release First Contact Handoff Playtest.
 
 ## TASK_1148 - Connected Release Dropship First Decision Playtest (implementiert im Arbeitsstand)
 - Ergebnis: Produkt-Multiplayer startet mit Host-autoritativen Blue-/Gold-Dropships. Beide Release-Prozesse setzen LZ, droppen, deboarden und senden eine erste getrennte Entscheidung.

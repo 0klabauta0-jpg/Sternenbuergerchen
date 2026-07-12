@@ -5963,8 +5963,10 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 	var visible_execution_text: String = _format_fireteam_visible_execution_text(resolved_profile)
 	var visible_contact_text: String = _format_fireteam_visible_contact_text(contact_state, contact_count)
 	var visible_health_text: String = _format_fireteam_visible_health_text(health_context)
+	var busy_member_count: int = int(Dictionary(member_status.get("counts", {})).get("busy", 0))
+	var visible_activity_text: String = movement_text if not movement_state.is_empty() and movement_text != "-" else ("MARSCHIERT" if busy_member_count > 0 else visible_execution_text)
 	var primary_text: String = "%s | %s | %s" % [
-		visible_execution_text,
+		visible_activity_text,
 		visible_contact_text,
 		visible_health_text,
 	]
@@ -5998,6 +6000,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		"review_session_context_style_id": String(review_session_context.get("style_id", "")),
 		"execution_text": execution_text,
 		"visible_execution_text": visible_execution_text,
+		"visible_activity_text": visible_activity_text,
 		"execution_label": String(resolved_profile.get("execution_label", "STEADY")).strip_edges().to_upper(),
 		"readiness_state": String(readiness_context.get("state", "unavailable")),
 		"readiness_label": String(readiness_context.get("label", "N/A")),
@@ -14039,6 +14042,7 @@ func _build_mission_dropship_visual_entry(card: Dictionary, index: int, primary_
 		"lz_position": lz_position,
 		"lz_label": lz_label,
 		"dropship_texture": _get_mission_dropship_texture(card),
+		"passenger_count": maxi(int(card.get("passenger_count", 0)), Array(card.get("embarked_unit_ids", [])).size()),
 		"team_id": get_local_command_team_id(),
 		"selected": is_selected,
 	}

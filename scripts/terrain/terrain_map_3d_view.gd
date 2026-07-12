@@ -6387,6 +6387,10 @@ func _should_suppress_release_firefight_dropship_lz_label(entry: Dictionary, lab
 
 
 func _should_suppress_release_firefight_dropship_approach_line(entry: Dictionary) -> bool:
+	var state: String = String(entry.get("state", "")).strip_edges().to_lower()
+	var passenger_count: int = maxi(int(entry.get("passenger_count", 0)), 0)
+	if not bool(entry.get("cargo_visual", false)) and passenger_count == 0 and state in ["outbound", "to_homebase", "complete"]:
+		return true
 	if not _is_release_firefight_insertion_residue_declutter_active():
 		return false
 	return not bool(entry.get("cargo_visual", false))
