@@ -483,6 +483,7 @@ var _mission_hud_runtime_surface_guard_skip_counts: Dictionary = {
 	"craft_controls": 0,
 	"fireteam_card_group": 0,
 }
+var _mission_hud_station_route_snapshot_build_count: int = 0
 var _tactical_breakout_resolver = null
 var _tactical_breakout_records: Array = []
 var _npc_thought_bubbles: Array = []
@@ -3864,17 +3865,42 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		scope_started_usec = Time.get_ticks_usec()
 	_apply_block_labels()
 	_sync_unit_tactical_stance_badges()
+	if profile_enabled:
+		scopes_usec["primary_block_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
+	var shared_station_route_readout: Dictionary = {}
+	if profile_enabled:
+		scopes_usec["shared_station_route_snapshot_usec"] = 0
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
+	if profile_enabled:
+		for command_scope_name in ["primary_command_door_usec", "primary_command_route_usec", "primary_command_decision_usec", "primary_command_target_waypoint_usec"]:
+			scopes_usec[command_scope_name] = 0
 	if command_feedback_label != null:
 		if not _last_planning_state_issue.is_empty():
 			_set_mission_label_text_delta(command_feedback_label, "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen.")
 		else:
+			var command_scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 			var door_authority_line: String = _build_visible_door_authority_command_line()
-			var station_route_line: String = String(_build_station_route_run_readout_snapshot().get("compact_line", "")).strip_edges()
-			var last_line: String = "%s\nDEC %s" % [_last_command_text, _build_selected_decision_status_text()]
+			if profile_enabled:
+				scopes_usec["primary_command_door_usec"] = Time.get_ticks_usec() - command_scope_started_usec
+				command_scope_started_usec = Time.get_ticks_usec()
+			var shared_route_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			shared_station_route_readout = _build_shared_station_route_readout_for_hud()
+			if profile_enabled:
+				scopes_usec["shared_station_route_snapshot_usec"] = Time.get_ticks_usec() - shared_route_started_usec
+				command_scope_started_usec = Time.get_ticks_usec()
+			var station_route_line: String = String(shared_station_route_readout.get("compact_line", "")).strip_edges()
+			if profile_enabled:
+				scopes_usec["primary_command_route_usec"] = Time.get_ticks_usec() - command_scope_started_usec
+				command_scope_started_usec = Time.get_ticks_usec()
+			var decision_status_text: String = _build_selected_decision_status_text()
+			var last_line: String = "%s\nDEC %s" % [_last_command_text, decision_status_text]
 			if not door_authority_line.is_empty():
 				last_line = "%s\n%s" % [door_authority_line, last_line]
 			var route_block: String = "\n%s" % station_route_line if not station_route_line.is_empty() else ""
+			if profile_enabled:
+				scopes_usec["primary_command_decision_usec"] = Time.get_ticks_usec() - command_scope_started_usec
+				command_scope_started_usec = Time.get_ticks_usec()
 			_set_mission_label_text_delta(command_feedback_label, "TEAM %s | PHASE %s\nTARGET %s%s\n%s\nLAST %s" % [
 				_get_fireteam_name(),
 				_get_phase_name(),
@@ -3883,6 +3909,11 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 				_build_selected_waypoint_info_text(),
 				last_line,
 			])
+			if profile_enabled:
+				scopes_usec["primary_command_target_waypoint_usec"] = Time.get_ticks_usec() - command_scope_started_usec
+	if profile_enabled:
+		scopes_usec["primary_command_feedback_usec"] = int(scopes_usec.get("primary_command_door_usec", 0)) + int(scopes_usec.get("primary_command_route_usec", 0)) + int(scopes_usec.get("primary_command_decision_usec", 0)) + int(scopes_usec.get("primary_command_target_waypoint_usec", 0))
+		scope_started_usec = Time.get_ticks_usec()
 
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
 	if hotkey_legend_label != null:
@@ -3890,10 +3921,22 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 			_set_mission_label_text_delta(hotkey_legend_label, "MISSION PREVIEW | Homebase Start unlocks GO/orders | RMB waypoints | DEL removes")
 		else:
 			_set_mission_label_text_delta(hotkey_legend_label, HOTKEY_LEGEND if _can_issue_local_commands() else "OBSERVER MODE | Host controls mission orders in multiplayer V1")
+	if shared_station_route_readout.is_empty():
+		var shared_route_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+		shared_station_route_readout = _build_shared_station_route_readout_for_hud()
+		if profile_enabled:
+			scopes_usec["shared_station_route_snapshot_usec"] = Time.get_ticks_usec() - shared_route_started_usec
+	if profile_enabled:
+		scopes_usec["primary_hotkey_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
 		_set_mission_label_text_delta(fireteam_status_label, _build_fireteam_status_text())
+	if profile_enabled:
+		scopes_usec["primary_fireteam_status_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
+	if fireteam_status_label != null:
 		var combat_tooltip: String = _build_mission_combat_hud_detail_tooltip_text()
 		var decision_tooltip: String = _build_selected_fireteam_live_decision_detail_tooltip()
 		fireteam_status_label.tooltip_text = combat_tooltip
@@ -3902,17 +3945,35 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		_apply_combat_hud_detail_tooltip_label_contract(fireteam_status_label)
 		_apply_release_firefight_hud_real_window_label_contract(fireteam_status_label)
 	if profile_enabled:
-		scopes_usec["primary_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["primary_fireteam_tooltips_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["primary_labels_usec"] = int(scopes_usec.get("shared_station_route_snapshot_usec", 0)) + int(scopes_usec.get("primary_block_labels_usec", 0)) + int(scopes_usec.get("primary_command_feedback_usec", 0)) + int(scopes_usec.get("primary_hotkey_usec", 0)) + int(scopes_usec.get("primary_fireteam_status_usec", 0)) + int(scopes_usec.get("primary_fireteam_tooltips_usec", 0))
 		scope_started_usec = Time.get_ticks_usec()
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
+	if profile_enabled:
+		scopes_usec["panel_fireteam_phase_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_nav_timer_label()
-	_refresh_mission_identity_session_badge()
+	if profile_enabled:
+		scopes_usec["panel_nav_timer_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
+	_refresh_mission_identity_session_badge(shared_station_route_readout)
+	if profile_enabled:
+		scopes_usec["panel_identity_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_team_chip_label()
+	if profile_enabled:
+		scopes_usec["panel_team_chip_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["panel_nav_identity_usec"] = int(scopes_usec.get("panel_nav_timer_usec", 0)) + int(scopes_usec.get("panel_identity_usec", 0)) + int(scopes_usec.get("panel_team_chip_usec", 0))
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_dropship_panel()
+	if profile_enabled:
+		scopes_usec["panel_dropship_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_tactical_event_log_panel()
 	if profile_enabled:
-		scopes_usec["mission_panels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["panel_event_log_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["mission_panels_usec"] = int(scopes_usec.get("panel_fireteam_phase_usec", 0)) + int(scopes_usec.get("panel_nav_identity_usec", 0)) + int(scopes_usec.get("panel_dropship_usec", 0)) + int(scopes_usec.get("panel_event_log_usec", 0))
 		scope_started_usec = Time.get_ticks_usec()
 	if not include_heavy_surfaces:
 		if profile_enabled:
@@ -11694,7 +11755,25 @@ func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
 	return result
 
 
-func _refresh_mission_identity_session_badge() -> void:
+func _build_shared_station_route_readout_for_hud() -> Dictionary:
+	_mission_hud_station_route_snapshot_build_count += 1
+	return _build_station_route_run_readout_snapshot()
+
+
+func get_mission_hud_light_path_snapshot_consolidation_snapshot() -> Dictionary:
+	return {
+		"station_route_snapshot_build_count": _mission_hud_station_route_snapshot_build_count,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _refresh_mission_identity_session_badge(route_readout: Dictionary = {}) -> void:
 	var session_snapshot: Dictionary = _get_review_session_identity_snapshot()
 	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
 	var header_label := get_node_or_null(MISSION_IDENTITY_HEADER_LABEL_PATH) as Label
@@ -11706,7 +11785,7 @@ func _refresh_mission_identity_session_badge() -> void:
 		header_label.set_meta("review_session_badge_task", "TASK_619")
 	var body_label := get_node_or_null(MISSION_IDENTITY_BODY_LABEL_PATH) as Label
 	if body_label != null:
-		var identity_body: Dictionary = build_station_scenario_identity_body_snapshot()
+		var identity_body: Dictionary = build_station_scenario_identity_body_snapshot(route_readout)
 		_set_mission_label_text_delta(body_label, String(identity_body.get("display_text", identity_body.get("text", "Einsatzdaten in Echtzeit | Fireteam im Einsatz"))))
 		body_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
 		body_label.set_meta("review_session_badge_text", badge_text)
