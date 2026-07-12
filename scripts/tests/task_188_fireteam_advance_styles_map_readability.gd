@@ -33,12 +33,14 @@ func _run_tests() -> void:
 	_test_controller_snapshots_distinguish_all_advance_styles()
 	await _test_primary_map_snapshot_mirrors_advance_styles()
 	await _test_scene_selected_fireteam_status_matches_map_phase()
+	if OS.get_cmdline_user_args().has("--task188-force-failure"):
+		_assert(false, "Forced failure proves TASK_188 returns a nonzero process exit")
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
+	quit(1 if _failed > 0 else 0)
 
 
 func _test_controller_snapshots_distinguish_all_advance_styles() -> void:
@@ -152,7 +154,7 @@ func _start_style_context(prefix: String, advance_style: String) -> Dictionary:
 	var result: Dictionary = Dictionary(controller.call(
 		"start_execution",
 		prefix,
-		"move",
+		"flank",
 		1,
 		Vector2(0.0, 384.0),
 		_make_profile(prefix, advance_style),
