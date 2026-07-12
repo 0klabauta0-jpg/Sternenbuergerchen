@@ -20,6 +20,7 @@ const PORTRAIT_IDENTITY_CATALOG_SCRIPT: GDScript = preload("res://scripts/meta/p
 const CHARACTER_SHEET_FORMATTER_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_formatter.gd")
 const CHARACTER_SHEET_VIEW_SCRIPT: GDScript = preload("res://scripts/meta/character_sheet_view.gd")
 const MISSION_PRIMARY_VIEW_BRIDGE_SCRIPT: GDScript = preload("res://scripts/mission/mission_primary_view_bridge.gd")
+const MISSION_RELEASE_RECAPTURE_SERVICE_SCRIPT: GDScript = preload("res://scripts/mission/mission_release_recapture_service.gd")
 const MISSION_DROPSHIP_EFFECT_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_dropship_effect_adapter.gd")
 const MISSION_FIRETEAM_RUNTIME_STATE_SCRIPT: GDScript = preload("res://scripts/mission/mission_fireteam_runtime_state.gd")
 const AIR_ASSET_STATUS_SCRIPT: GDScript = preload("res://scripts/mission/air_asset_status.gd")
@@ -16005,112 +16006,15 @@ func get_mission_first_contact_readability_release_recapture_snapshot(execution_
 	var capture_manifest: Dictionary = _build_left_tactical_stack_1280_capture_manifest_evidence()
 	var host_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("host_window_path", "tmp/release_host_client_first_contact_host_window.png")))
 	var client_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("client_window_path", "tmp/release_host_client_first_contact_client_window.png")))
-	var first_contact: Dictionary = Dictionary(first_contact_readability.get("first_contact", {})).duplicate(true)
-	var selected_contact_count: int = int(first_contact_readability.get("selected_contact_count", 0))
-	var contact_overlay_visible: bool = int(first_contact_readability.get("contact_overlay_visible_count", 0)) > 0 \
-		or int(Dictionary(first_contact_readability.get("primary_contact_snapshot", {})).get("contact_count", 0)) > 0
-	var tactical_context_visible: bool = bool(_first_contact_check_passed(first_contact_readability, "threat_or_cover_context_visible")) \
-		or int(first_contact_readability.get("tactical_communication_event_count", 0)) > 0 \
-		or int(first_contact_readability.get("tactical_event_log_count", 0)) > 0
-	var execution_handoff_read: bool = String(execution_recapture.get("task_id", "")) == "TASK_1171" \
-		and bool(execution_recapture.get("ready_for_first_contact_recapture", false))
-	var first_contact_gate_passes: bool = String(first_contact_readability.get("gate", "")) == "pass"
-	var release_context_present: bool = bool(release_provenance.get("valid", false)) \
-		and bool(release_provenance.get("matches_git_head", false)) \
-		and bool(capture_manifest.get("gate_passed", false)) \
-		and bool(capture_manifest.get("release_gate_passed", false)) \
-		and bool(capture_manifest.get("deployment_converged", false)) \
-		and bool(host_window.get("exists", false)) \
-		and bool(client_window.get("exists", false)) \
-		and int(host_window.get("size_bytes", 0)) > 0 \
-		and int(client_window.get("size_bytes", 0)) > 0
-	var checks: Array = [
-		_build_mission_first_move_readability_check(
-			"execution_recapture_handoff_read",
-			execution_handoff_read,
-			"TASK_1171 first-move execution recapture is read as the handoff source."
-		),
-		_build_mission_first_move_readability_check(
-			"first_contact_readability_gate_passes",
-			first_contact_gate_passes,
-			"TASK_542 first-contact readability remains green after the reproduced contact."
-		),
-		_build_mission_first_move_readability_check(
-			"selected_fireteam_contact_visible",
-			selected_contact_count > 0,
-			"Selected fireteam exposes at least one contact entry."
-		),
-		_build_mission_first_move_readability_check(
-			"first_contact_report_visible",
-			not String(first_contact.get("report_text", "")).strip_edges().is_empty(),
-			"First contact contains player-facing report text."
-		),
-		_build_mission_first_move_readability_check(
-			"contact_overlay_visible",
-			contact_overlay_visible,
-			"Contact reaches ContactMapOverlay or Primary3D render snapshot."
-		),
-		_build_mission_first_move_readability_check(
-			"tactical_context_visible",
-			tactical_context_visible,
-			"Threat, cover, security or event context explains why the contact matters."
-		),
-		_build_mission_first_move_readability_check(
-			"release_host_client_context_present",
-			release_context_present,
-			"Current release provenance and host/client FirstContact evidence are present."
-		),
-		_build_mission_first_move_readability_check(
-			"read_only",
-			not bool(execution_recapture.get("ui_sets_gameplay_truth", true))
-				and not bool(first_contact_readability.get("ui_sets_gameplay_truth", true)),
-			"Snapshot reads existing execution and contact feedback without creating gameplay state."
-		),
-	]
-	var failed_checks: Array = []
-	for check_variant in checks:
-		var check: Dictionary = Dictionary(check_variant)
-		if not bool(check.get("passed", false)):
-			failed_checks.append(String(check.get("id", "")))
-	var recaptured: bool = failed_checks.is_empty()
-	return {
-		"schema": "sternenbuergerchen.mission_first_contact_readability_release_recapture.v1",
-		"task_id": "TASK_1172",
-		"source_task_id": "TASK_1171",
-		"source_task_ids": PackedStringArray(["TASK_1171", "TASK_542"]),
-		"status": "recaptured" if recaptured else "blocked_by_missing_contact_or_release_context",
-		"ready_for_first_engagement_recapture": recaptured,
-		"execution_recapture": execution_recapture,
-		"first_contact_readability": first_contact_readability,
-		"release_provenance": release_provenance,
-		"capture_manifest": capture_manifest,
-		"host_window_artifact": host_window,
-		"client_window_artifact": client_window,
-		"execution_handoff_read": execution_handoff_read,
-		"selected_contact_count": selected_contact_count,
-		"first_contact": first_contact,
-		"contact_overlay_visible": contact_overlay_visible,
-		"tactical_context_visible": tactical_context_visible,
-		"contact_report_text": String(first_contact.get("report_text", "")).strip_edges(),
-		"contact_feedback_text": String(first_contact_readability.get("contact_feedback_text", "")).strip_edges(),
-		"checks": checks,
-		"failed_checks": failed_checks,
-		"accepted_surfaces": [
-			"first_contact_report_after_first_move",
-			"contact_overlay_or_primary3d",
-			"tactical_context_for_contact",
-			"release_host_client_context",
-		] if recaptured else [],
-		"recommended_next_task": "TASK_1173 - First Engagement Feedback Release Recapture",
-		"read_only": true,
-		"ui_sets_gameplay_truth": false,
-		"creates_command": false,
-		"creates_effect": false,
-		"creates_contact": false,
-		"creates_fire_event": false,
-		"creates_damage_event": false,
-		"sets_multiplayer_truth": false,
-	}
+	return Dictionary(MISSION_RELEASE_RECAPTURE_SERVICE_SCRIPT.call(
+		"build_first_contact_recapture",
+		execution_recapture,
+		first_contact_readability,
+		release_provenance,
+		capture_manifest,
+		host_window,
+		client_window
+	))
 
 
 func get_mission_first_engagement_feedback_release_recapture_snapshot(first_contact_recapture_override: Dictionary = {}, engagement_feedback_override: Dictionary = {}) -> Dictionary:
@@ -16120,125 +16024,15 @@ func get_mission_first_engagement_feedback_release_recapture_snapshot(first_cont
 	var capture_manifest: Dictionary = _build_left_tactical_stack_1280_capture_manifest_evidence()
 	var host_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("host_window_path", "tmp/release_host_client_first_contact_host_window.png")))
 	var client_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("client_window_path", "tmp/release_host_client_first_contact_client_window.png")))
-	var first_fire_event: Dictionary = Dictionary(engagement_feedback.get("first_fire_event", {})).duplicate(true)
-	var diagnostics: Dictionary = Dictionary(engagement_feedback.get("contact_decision_diagnostics", {})).duplicate(true)
-	var first_contact_handoff_read: bool = String(first_contact_recapture.get("task_id", "")) == "TASK_1172" \
-		and bool(first_contact_recapture.get("ready_for_first_engagement_recapture", false))
-	var engagement_gate_passes: bool = String(engagement_feedback.get("task_id", "")) == "TASK_543" \
-		and String(engagement_feedback.get("gate", "")) == "pass"
-	var engagement_decision_visible: bool = _first_contact_check_passed(engagement_feedback, "engagement_decision_visible")
-	var target_or_block_reason_visible: bool = _first_contact_check_passed(engagement_feedback, "target_or_block_reason_visible")
-	var fire_event_or_block_visible: bool = _first_contact_check_passed(engagement_feedback, "fire_event_or_block_visible")
-	var cover_range_los_context_visible: bool = _first_contact_check_passed(engagement_feedback, "cover_range_los_context_visible")
-	var feedback_text_visible: bool = _first_contact_check_passed(engagement_feedback, "feedback_text_visible")
-	var release_context_present: bool = bool(release_provenance.get("valid", false)) \
-		and bool(release_provenance.get("matches_git_head", false)) \
-		and bool(capture_manifest.get("gate_passed", false)) \
-		and bool(capture_manifest.get("release_gate_passed", false)) \
-		and bool(capture_manifest.get("deployment_converged", false)) \
-		and bool(capture_manifest.get("first_fire_converged", false)) \
-		and bool(host_window.get("exists", false)) \
-		and bool(client_window.get("exists", false)) \
-		and int(host_window.get("size_bytes", 0)) > 0 \
-		and int(client_window.get("size_bytes", 0)) > 0
-	var checks: Array = [
-		_build_mission_first_move_readability_check(
-			"first_contact_recapture_handoff_read",
-			first_contact_handoff_read,
-			"TASK_1172 first-contact release recapture is read before engagement feedback."
-		),
-		_build_mission_first_move_readability_check(
-			"first_engagement_feedback_gate_passes",
-			engagement_gate_passes,
-			"TASK_543 first-engagement feedback remains green after contact."
-		),
-		_build_mission_first_move_readability_check(
-			"engagement_decision_visible",
-			engagement_decision_visible,
-			"The first engagement reports fired, waiting or blocked state."
-		),
-		_build_mission_first_move_readability_check(
-			"target_or_block_reason_visible",
-			target_or_block_reason_visible,
-			"The first engagement names target/attacker or a concrete wait/block reason."
-		),
-		_build_mission_first_move_readability_check(
-			"fire_event_or_block_visible",
-			fire_event_or_block_visible,
-			"The first engagement exposes a fire event or the blocking decision."
-		),
-		_build_mission_first_move_readability_check(
-			"cover_range_los_context_visible",
-			cover_range_los_context_visible,
-			"The first engagement retains cover, range or LOS context."
-		),
-		_build_mission_first_move_readability_check(
-			"feedback_text_visible",
-			feedback_text_visible,
-			"Mission feedback names the first engagement decision for the player."
-		),
-		_build_mission_first_move_readability_check(
-			"release_host_client_first_fire_context_present",
-			release_context_present,
-			"Current release provenance and host/client first-fire evidence are present."
-		),
-		_build_mission_first_move_readability_check(
-			"read_only",
-			not bool(first_contact_recapture.get("ui_sets_gameplay_truth", true))
-				and not bool(engagement_feedback.get("ui_sets_gameplay_truth", true)),
-			"Snapshot reads existing contact and engagement feedback without creating gameplay state."
-		),
-	]
-	var failed_checks: Array = []
-	for check_variant in checks:
-		var check: Dictionary = Dictionary(check_variant)
-		if not bool(check.get("passed", false)):
-			failed_checks.append(String(check.get("id", "")))
-	var recaptured: bool = failed_checks.is_empty()
-	return {
-		"schema": "sternenbuergerchen.mission_first_engagement_feedback_release_recapture.v1",
-		"task_id": "TASK_1173",
-		"source_task_id": "TASK_1172",
-		"source_task_ids": PackedStringArray(["TASK_1172", "TASK_543"]),
-		"status": "recaptured" if recaptured else "blocked_by_missing_engagement_or_release_context",
-		"ready_for_first_fire_visual_recapture": recaptured,
-		"first_contact_recapture": first_contact_recapture,
-		"engagement_feedback": engagement_feedback,
-		"release_provenance": release_provenance,
-		"capture_manifest": capture_manifest,
-		"host_window_artifact": host_window,
-		"client_window_artifact": client_window,
-		"first_contact_handoff_read": first_contact_handoff_read,
-		"engagement_decision_visible": engagement_decision_visible,
-		"target_or_block_reason_visible": target_or_block_reason_visible,
-		"fire_event_or_block_visible": fire_event_or_block_visible,
-		"cover_range_los_context_visible": cover_range_los_context_visible,
-		"feedback_text_visible": feedback_text_visible,
-		"engagement_status": String(engagement_feedback.get("engagement_status", "")).strip_edges().to_lower(),
-		"engagement_reason": String(engagement_feedback.get("engagement_reason", diagnostics.get("reason", ""))).strip_edges(),
-		"first_fire_event": first_fire_event,
-		"contact_decision_diagnostics": diagnostics,
-		"contact_decision_text": String(engagement_feedback.get("contact_decision_text", "")).strip_edges(),
-		"mission_control_status_text": String(engagement_feedback.get("mission_control_status_text", "")).strip_edges(),
-		"selected_fireteam_status_text": String(engagement_feedback.get("selected_fireteam_status_text", "")).strip_edges(),
-		"checks": checks,
-		"failed_checks": failed_checks,
-		"accepted_surfaces": [
-			"first_engagement_after_contact",
-			"fire_event_or_wait_block_reason",
-			"cover_range_los_context",
-			"release_host_client_first_fire_context",
-		] if recaptured else [],
-		"recommended_next_task": "TASK_1174 - First Fire Visual Readability Release Recapture",
-		"read_only": true,
-		"ui_sets_gameplay_truth": false,
-		"creates_command": false,
-		"creates_effect": false,
-		"creates_contact": false,
-		"creates_fire_event": false,
-		"creates_damage_event": false,
-		"sets_multiplayer_truth": false,
-	}
+	return Dictionary(MISSION_RELEASE_RECAPTURE_SERVICE_SCRIPT.call(
+		"build_first_engagement_recapture",
+		first_contact_recapture,
+		engagement_feedback,
+		release_provenance,
+		capture_manifest,
+		host_window,
+		client_window
+	))
 
 
 func _build_left_tactical_stack_1280_air_anchor_surface() -> Dictionary:

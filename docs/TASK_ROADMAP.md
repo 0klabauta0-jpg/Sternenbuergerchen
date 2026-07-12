@@ -13,6 +13,15 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1174 - Mission Release Recapture Extraction (implementiert im Arbeitsstand)
+- Grundlage: TASK_1172/TASK_1173 sind datenrein, lagen aber noch als weitere Methoden im Legacy-Testcontroller.
+- Ziel: Die beiden Recapture-Builder in einen Mission-Service ziehen und die Controller-Methoden als schmale Evidence-Adapter behalten.
+- Ergebnis: `MissionReleaseRecaptureService` bewertet nur uebergebene Dictionaries; TASK_1172-/TASK_1173-Schema, Read-only-Flags und sichtbarer Spielerflow bleiben unveraendert.
+- Verifikation: TASK_1174 plus bestehende TASK_1172-/TASK_1173-Recapture-Regressionen.
+- Naechster Schritt: Station-Route unter NPC-Druck bis Outcome und Debriefing als kurzer spielbarer Szenario-Flow.
+
+---
+
 ## TASK_1173 - First Engagement Feedback Release Recapture (implementiert im Arbeitsstand)
 - Grundlage: TASK_1172 belegt den ersten Kontakt im heutigen Release-Flow; TASK_543 belegt die bestehende Engagement-Entscheidung.
 - Ziel: Den ersten Feuerentscheid nach dem Kontakt, TASK_543-Readability und aktuellen Release-Kontext als read-only Recapture buendeln.
