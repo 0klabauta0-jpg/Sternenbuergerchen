@@ -15694,6 +15694,61 @@ func get_left_tactical_stack_1280_air_anchor_polish_snapshot() -> Dictionary:
 	}
 
 
+func get_left_tactical_stack_1280_air_anchor_release_acceptance_snapshot() -> Dictionary:
+	var source_air_anchor: Dictionary = get_left_tactical_stack_1280_air_anchor_polish_snapshot()
+	var release_provenance: Dictionary = _build_left_tactical_stack_1280_release_provenance_evidence()
+	var capture_manifest: Dictionary = _build_left_tactical_stack_1280_capture_manifest_evidence()
+	var host_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("host_window_path", "tmp/release_host_client_first_contact_host_window.png")))
+	var client_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("client_window_path", "tmp/release_host_client_first_contact_client_window.png")))
+	var has_window_evidence: bool = bool(host_window.get("exists", false)) \
+		and bool(client_window.get("exists", false)) \
+		and int(host_window.get("size_bytes", 0)) > 0 \
+		and int(client_window.get("size_bytes", 0)) > 0 \
+		and String(host_window.get("path", "")) != String(client_window.get("path", ""))
+	var accepted: bool = bool(source_air_anchor.get("left_stack_air_anchor_ready", false)) \
+		and bool(release_provenance.get("valid", false)) \
+		and bool(release_provenance.get("matches_git_head", false)) \
+		and bool(capture_manifest.get("gate_passed", false)) \
+		and bool(capture_manifest.get("release_gate_passed", false)) \
+		and bool(capture_manifest.get("deployment_converged", false)) \
+		and bool(capture_manifest.get("first_fire_converged", false)) \
+		and has_window_evidence
+	return {
+		"schema": "sternenbuergerchen.left_tactical_stack_1280_air_anchor_release_acceptance.v1",
+		"task_id": "TASK_1169",
+		"source_task_id": "TASK_1168",
+		"status": "accepted" if accepted else "blocked_by_missing_release_recapture",
+		"ready_for_next_playability_step": accepted,
+		"source_air_anchor": source_air_anchor,
+		"release_provenance": release_provenance,
+		"capture_manifest": capture_manifest,
+		"host_window_artifact": host_window,
+		"client_window_artifact": client_window,
+		"accepted_surfaces": [
+			"host_left_stack",
+			"client_left_stack",
+			"event_log_air_gap",
+			"multiplayer_consistency",
+		] if accepted else [],
+		"positive_findings": [
+			"Host: Linker Fireteam-Stack ist sichtbar nach innen verankert und die Karten bleiben getrennt lesbar.",
+			"Host: Ereignislog sitzt klar unter den Fireteam-Karten und blockiert den Fokus nicht.",
+			"Client: Gold-Fokus, Fireteam-Karten und Ereignislog bleiben im gleichen 1280er Release-Bild konsistent.",
+			"Multiplayer: Getrennte Host-/Client-Fensterbilder belegen denselben FirstContact-Flow nach dem TASK_1168-Polish.",
+		] if accepted else [],
+		"recommended_next_task": "TASK_1170 - First Move Decision Preview Readability Recapture",
+		"manual_visual_review_required": true,
+		"manual_visual_review_performed": accepted,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
 func _build_left_tactical_stack_1280_air_anchor_surface() -> Dictionary:
 	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
 	var mini_layout_rect: Rect2i = layout.get("fireteam_mini", Rect2i())

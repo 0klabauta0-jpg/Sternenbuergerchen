@@ -1,13 +1,22 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1169 - Left Stack Air Anchor Release Acceptance
+- Status: implementiert, headless-regressionsgeprueft und anhand frischer Host-/Client-FirstContact-Fensterbilder akzeptiert
+- Relevante Docs/Contracts: `docs/tasks/TASK_1169_left_stack_air_anchor_release_acceptance.md`, `docs/tasks/TASK_1168_left_tactical_stack_air_anchor_polish.md`, `docs/dev/mission_command_feedback_contract.md`
+- Ausgangsbefund: TASK_1168 hatte den linken Stack luftiger verankert; offen war der belastbare Release-Abschluss auf dem aktuellen Merge-HEAD.
+- Aenderung: `get_left_tactical_stack_1280_air_anchor_release_acceptance_snapshot()` bindet TASK_1168, Release-Provenance, FirstContact-Capture-Manifest und getrennte Host-/Client-Fensterbilder zusammen. Host und Client zeigen den linken Stack nach innen verankert, mit besser getrennten Fireteam-Karten und klar untergeordnetem Eventlog.
+- Architektur: Der Snapshot liest nur vorhandene Artefakte und Surface-Vertraege. Er erzeugt keine Commands, Effects, Fire-/Damage-Events, Movement- oder Multiplayer-Wahrheit.
+- Lokale Pruefung: TASK_1169 36/36.
+- Risiken/offen: Die Sichtabnahme ist bewusst menschlich/artefaktbasiert, keine Pixelanalyse. Naechster sinnvoller Schritt ist wieder spielerische Entscheidungslesbarkeit: First-Move-Preview/Threat/GO-Ablesbarkeit im echten Release-Flow.
+
 ### TASK_1168 - Left Tactical Stack Air And Anchor Polish
-- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Status: implementiert, headless-regressionsgeprueft und im Release durch TASK_1169 akzeptiert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1168_left_tactical_stack_air_anchor_polish.md`, `docs/tasks/TASK_1167_left_tactical_stack_1280_detail_visual_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`
 - Ausgangsbefund: TASK_1167 akzeptierte den linken Stack, hielt aber als minor Follow-up fest, dass Fireteam-Mini-Cards und Eventlog im 1280er Bild noch randnah und eng wirken.
 - Aenderung: Das Drop-Light-Mission-HUD verankert `fireteam_mini` und `event_log` jetzt auf einem gemeinsamen 32-Pixel-Linksraster. Die Mini-Flaeche bleibt kompakt genug fuer mindestens 24 Pixel Abstand zum Eventlog, der Card-Host bekommt stabile 8 Pixel Kartenabstand, und `get_left_tactical_stack_1280_air_anchor_polish_snapshot()` belegt den read-only UI-Polish.
 - Architektur: Der Task aendert nur Layout-/Anzeigevertrag und Metadaten. Er erzeugt keine Commands, Effects, Fire-/Damage-Events, Movement- oder Multiplayer-Wahrheit.
 - Lokale Pruefung: TASK_1168 31/31.
-- Risiken/offen: Der Polish ersetzt keine spaetere grosse HUD-Kompositionsarbeit; er schliesst nur die konkrete TASK_1167-Restreibung fuer den naechsten kleinen Spielbarkeits-Slice.
+- Risiken/offen: Der Polish ersetzt keine spaetere grosse HUD-Kompositionsarbeit; der konkrete TASK_1167-Folgepunkt ist durch TASK_1169 im Release akzeptiert.
 
 ### TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance
 - Status: implementiert und anhand der getrennten 1280x720-Host-/Client-Fensterbilder visuell akzeptiert
