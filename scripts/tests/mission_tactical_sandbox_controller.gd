@@ -15749,6 +15749,132 @@ func get_left_tactical_stack_1280_air_anchor_release_acceptance_snapshot() -> Di
 	}
 
 
+func get_mission_first_move_decision_preview_release_recapture_snapshot() -> Dictionary:
+	var first_move_decision: Dictionary = get_mission_first_move_decision_readability_snapshot()
+	var threat_preview: Dictionary = get_frontier_probe_first_move_threat_preview_readability_snapshot()
+	var decision_overlay: Dictionary = get_order_preview_threat_overlay_f6_hud_snapshot()
+	var release_acceptance: Dictionary = get_left_tactical_stack_1280_air_anchor_release_acceptance_snapshot()
+	var release_provenance: Dictionary = _build_left_tactical_stack_1280_release_provenance_evidence()
+	var capture_manifest: Dictionary = _build_left_tactical_stack_1280_capture_manifest_evidence()
+	var host_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("host_window_path", "tmp/release_host_client_first_contact_host_window.png")))
+	var client_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("client_window_path", "tmp/release_host_client_first_contact_client_window.png")))
+	var first_preview: Dictionary = Dictionary(threat_preview.get("first_waypoint_preview", first_move_decision.get("first_waypoint_preview", {}))).duplicate(true)
+	var risk_state: String = String(threat_preview.get("risk_state", first_preview.get("risk_state", "unknown"))).strip_edges().to_lower()
+	var risk_text: String = String(threat_preview.get("risk_preview_text", "")).strip_edges()
+	var planned_waypoint_present: bool = int(first_move_decision.get("planned_waypoint_count", 0)) > 0
+	var waypoint_preview_present: bool = int(first_move_decision.get("waypoint_intent_preview_count", 0)) > 0 or not first_preview.is_empty()
+	var ghost_and_path_visible: bool = int(threat_preview.get("render_preview_path_line_count", 0)) > 0 \
+		and (
+			int(threat_preview.get("render_preview_visual_count", 0)) > 0
+			or int(threat_preview.get("render_preview_ghost_entry_count", 0)) > 0
+		)
+	var risk_readout_visible: bool = ["safe", "risky", "suicidal", "unknown"].has(risk_state) and not risk_text.is_empty()
+	var go_ready_before_commit: bool = bool(first_move_decision.get("go_ready", false))
+	var release_acceptance_source_read: bool = String(release_acceptance.get("task_id", "")) == "TASK_1169" \
+		and String(release_acceptance.get("recommended_next_task", "")).begins_with("TASK_1170")
+	var release_context_present: bool = release_acceptance_source_read \
+		and bool(release_provenance.get("valid", false)) \
+		and bool(release_provenance.get("matches_git_head", false)) \
+		and bool(capture_manifest.get("gate_passed", false)) \
+		and bool(capture_manifest.get("release_gate_passed", false)) \
+		and bool(capture_manifest.get("deployment_converged", false)) \
+		and bool(host_window.get("exists", false)) \
+		and bool(client_window.get("exists", false)) \
+		and int(host_window.get("size_bytes", 0)) > 0 \
+		and int(client_window.get("size_bytes", 0)) > 0
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"first_move_gate_passes",
+			String(first_move_decision.get("gate", "")) == "pass",
+			"TASK_540 first-move decision readability remains green."
+		),
+		_build_mission_first_move_readability_check(
+			"threat_preview_gate_passes",
+			String(threat_preview.get("gate", "")) == "pass",
+			"TASK_567 first-move threat preview remains green."
+		),
+		_build_mission_first_move_readability_check(
+			"decision_overlay_gate_passes",
+			String(decision_overlay.get("gate", "")) == "pass",
+			"TASK_950 decision overlay remains visible and read-only."
+		),
+		_build_mission_first_move_readability_check(
+			"planned_waypoint_and_preview_present",
+			planned_waypoint_present and waypoint_preview_present,
+			"Planned waypoint and waypoint-intent preview exist before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"ghost_path_and_risk_visible",
+			ghost_and_path_visible and risk_readout_visible,
+			"Primary3D ghost/path and compact risk text are visible before GO."
+		),
+		_build_mission_first_move_readability_check(
+			"go_ready_without_commit",
+			go_ready_before_commit,
+			"GO is ready, but this recapture snapshot does not execute it."
+		),
+		_build_mission_first_move_readability_check(
+			"release_host_client_context_present",
+			release_context_present,
+			"Current release provenance, TASK_1169 handoff and host/client FirstContact evidence are present."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(first_move_decision.get("ui_sets_gameplay_truth", true))
+				and not bool(threat_preview.get("ui_sets_gameplay_truth", true))
+				and not bool(decision_overlay.get("ui_sets_gameplay_truth", true)),
+			"All source snapshots are read-only and UI-owned gameplay truth stays false."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	var recaptured: bool = failed_checks.is_empty()
+	return {
+		"schema": "sternenbuergerchen.mission_first_move_decision_preview_release_recapture.v1",
+		"task_id": "TASK_1170",
+		"source_task_id": "TASK_1169",
+		"source_task_ids": PackedStringArray(["TASK_540", "TASK_567", "TASK_950", "TASK_1169"]),
+		"status": "recaptured" if recaptured else "blocked_by_missing_preview_or_release_context",
+		"ready_for_first_move_execution_recapture": recaptured,
+		"first_move_decision": first_move_decision,
+		"threat_preview": threat_preview,
+		"decision_overlay": decision_overlay,
+		"release_acceptance": release_acceptance,
+		"release_provenance": release_provenance,
+		"capture_manifest": capture_manifest,
+		"host_window_artifact": host_window,
+		"client_window_artifact": client_window,
+		"release_acceptance_source_read": release_acceptance_source_read,
+		"planned_waypoint_present": planned_waypoint_present,
+		"waypoint_preview_present": waypoint_preview_present,
+		"ghost_and_path_visible": ghost_and_path_visible,
+		"risk_readout_visible": risk_readout_visible,
+		"risk_state": risk_state,
+		"risk_preview_text": risk_text,
+		"go_ready_before_commit": go_ready_before_commit,
+		"go_executed": false,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"accepted_surfaces": [
+			"first_move_preview_before_go",
+			"ghost_path_risk_readout",
+			"go_ready_without_commit",
+			"release_host_client_context",
+		] if recaptured else [],
+		"recommended_next_task": "TASK_1171 - First Move Execution Feedback Release Recapture",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
 func _build_left_tactical_stack_1280_air_anchor_surface() -> Dictionary:
 	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
 	var mini_layout_rect: Rect2i = layout.get("fireteam_mini", Rect2i())

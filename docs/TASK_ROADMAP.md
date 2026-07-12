@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1170 - First Move Decision Preview Readability Recapture (implementiert im Arbeitsstand)
+- Grundlage: TASK_1169 akzeptiert den linken taktischen Stack im aktuellen Release; der naechste Spielbarkeitsgriff ist wieder die erste Move-Entscheidung vor `GO`.
+- Ziel: TASK_540 First-Move, TASK_567 Threat-Preview, TASK_950 F6-Decision-Overlay und TASK_1169 Release-Acceptance zu einem read-only Release-Recapture buendeln.
+- Ergebnis: `get_mission_first_move_decision_preview_release_recapture_snapshot()` belegt geplanten Waypoint, Ghost/Path, Risikozeile, GO-Bereitschaft vor Commit und aktuellen Host-/Client-Release-Kontext, ohne Commands oder Effects zu erzeugen.
+- Verifikation: TASK_1170 plus TASK_567, TASK_950 und TASK_1169.
+- Naechster Schritt: TASK_1171 - First Move Execution Feedback Release Recapture.
+
 ## TASK_1169 - Left Stack Air Anchor Release Acceptance (implementiert und im Release akzeptiert)
 - Grundlage: TASK_1168 hat den linken taktischen Stack luftiger verankert; der frische Release-FirstContact-Capture auf dem Merge-HEAD ist vorhanden.
 - Ziel: Den TASK_1168-Polish mit Release-Provenance, FirstContact-Manifest und getrennten Host-/Client-Fensterbildern als echten Spielerblick akzeptieren.
