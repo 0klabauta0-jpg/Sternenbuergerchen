@@ -15367,6 +15367,48 @@ func get_left_tactical_stack_1280_readability_snapshot() -> Dictionary:
 	}
 
 
+func get_left_tactical_stack_1280_release_recapture_snapshot() -> Dictionary:
+	var source_snapshot: Dictionary = get_left_tactical_stack_1280_readability_snapshot()
+	var source_stack: Dictionary = Dictionary(source_snapshot.get("stack", {}))
+	var source_mini: Dictionary = Dictionary(source_snapshot.get("fireteam_mini", {}))
+	var source_event_log: Dictionary = Dictionary(source_snapshot.get("event_log", {}))
+	var source_ready: bool = bool(source_stack.get("left_stack_readability_ready", false)) \
+		and bool(source_mini.get("readability_ready", false)) \
+		and bool(source_event_log.get("readability_ready", false))
+	return {
+		"schema": "sternenbuergerchen.left_tactical_stack_1280_release_recapture.v1",
+		"task_id": "TASK_1163",
+		"source_task_id": "TASK_1162",
+		"source_readability": {
+			"schema": String(source_snapshot.get("schema", "")),
+			"style_id": String(source_snapshot.get("style_id", "")),
+			"readability_ready": source_ready,
+			"visible_card_count": int(source_mini.get("visible_card_count", 0)),
+			"focused_card_count": int(source_mini.get("focused_card_count", 0)),
+			"event_log_readability_ready": bool(source_event_log.get("readability_ready", false)),
+			"mini_event_no_overlap": bool(source_stack.get("mini_event_no_overlap", false)),
+		},
+		"release_capture": {
+			"script": "scripts/tools/capture_release_host_client_entry_playtest.ps1",
+			"mode": "-FirstContact",
+			"expected_resolution": "1280x720",
+			"manifest": "tmp/release_host_client_first_contact_playtest.json",
+			"host_window_artifact": "tmp/release_host_client_first_contact_host_window.png",
+			"client_window_artifact": "tmp/release_host_client_first_contact_client_window.png",
+			"requires_current_release_export": true,
+			"manual_visual_review_required": true,
+		},
+		"recommended_next_task": "TASK_1164 - Left Tactical Stack 1280 Visual Findings",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
 func _build_left_tactical_stack_1280_fireteam_mini_surface() -> Dictionary:
 	var host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
 	var cards: Array = []
