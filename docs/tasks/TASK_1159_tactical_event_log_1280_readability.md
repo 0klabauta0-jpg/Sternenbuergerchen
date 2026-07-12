@@ -17,6 +17,8 @@ fuer Zeit; fuenf 30-Pixel-Zeilen konkurrieren mit Header und Innenabstand.
 - First-Exchange-Log auf vier sichtbare, groessere Zeilen begrenzen.
 - Meldung 13 Pixel, Zeit 12 Pixel, Header 13 Pixel und Filter 10 Pixel.
 - Zeilenhoehe auf 32 Pixel stabilisieren.
+- Im First-Exchange-Fokus eine ruhige, nahezu opake Panel-Flaeche verwenden,
+  damit Kartenraster und Weltobjekte nicht durch Meldungen laufen.
 - Severity-Streifen, Sortierung, Auswahlfilter und Scrollbarkeit erhalten.
 - Bestehenden Feedback-Snapshot-Dedupe unveraendert nutzen.
 
@@ -39,6 +41,7 @@ fuer Zeit; fuenf 30-Pixel-Zeilen konkurrieren mit Header und Innenabstand.
 - First Exchange zeigt hoechstens vier neueste Eintraege.
 - Meldung mindestens 13 Pixel, Zeit mindestens 12 Pixel, Header mindestens 13 Pixel.
 - Vier Zeilen passen in den bestehenden 240x184-Vertrag.
+- Der Panel-Hintergrund besitzt mindestens 0,94 Alpha.
 - Severity und Auswahlfilter bleiben sichtbar.
 - Ein identischer Feedback-Snapshot baut keine Rows neu und erhoeht den Skip-Zaehler.
 - Panel und Snapshot setzen keine Gameplay- oder Multiplayer-Wahrheit.

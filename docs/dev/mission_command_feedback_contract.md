@@ -228,7 +228,8 @@ weder Commands, Effects noch Multiplayer-State.
 
 Im First-Exchange-Fokus zeigt #19 hoechstens die vier neuesten Ereignisse mit
 32 Pixel Zeilenhoehe, 13 Pixel Meldung/Header, 12 Pixel Zeit und 10 Pixel
-Auswahlfilter. Severity-Streifen, Newest-first-Sortierung, Selected-only-Filter
+Auswahlfilter. Ein 0,96-opaker, lokal erzeugter Panel-Hintergrund verhindert,
+dass Kartenraster und Weltobjekte durch Meldungen laufen. Severity-Streifen, Newest-first-Sortierung, Selected-only-Filter
 und ScrollContainer bleiben bestehen. Weitere normale Logeintraege bleiben
 ausserhalb des Fokus scrollbar.
 
