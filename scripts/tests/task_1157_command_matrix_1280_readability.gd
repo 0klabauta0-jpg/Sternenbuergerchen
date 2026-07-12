@@ -26,6 +26,8 @@ func _initialize() -> void:
 		_check(button != null and font_size >= 12, "%s is readable at 1280 (font=%d)" % [button_name, font_size])
 		_check(button != null and button.icon != null, "%s keeps its tactical icon" % button_name)
 		_check(button != null and button.text == String(primary_labels[button_name]), "%s keeps its German player-language code" % button_name)
+		var normal_style := button.get_theme_stylebox("normal") if button != null else null
+		_check(normal_style != null and normal_style.content_margin_left <= 4.0 and normal_style.content_margin_right <= 4.0, "%s reserves enough width for icon and code" % button_name)
 
 	for button_name in ["FireRuleHoldButton", "FireRuleReturnButton", "FireRuleFreeButton", "FireRuleSuppressButton"]:
 		var button := scene.get_node_or_null("%s/%s" % [GRID_PATH, button_name]) as Button

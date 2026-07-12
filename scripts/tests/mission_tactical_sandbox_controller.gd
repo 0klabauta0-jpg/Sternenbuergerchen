@@ -212,6 +212,7 @@ const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 11
 const COMMAND_MATRIX_1280_READABILITY_STYLE_ID: String = "task_1157_command_matrix_1280_readability_v1"
 const COMMAND_MATRIX_1280_SECONDARY_FONT_SIZE: int = 10
 const COMMAND_MATRIX_1280_ICON_SIZE: int = 14
+const COMMAND_MATRIX_1280_HORIZONTAL_CONTENT_MARGIN: float = 4.0
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC: int = 5000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
@@ -15000,8 +15001,22 @@ func _apply_command_matrix_1280_readability() -> void:
 		button.add_theme_font_size_override("font_size", font_size)
 		button.add_theme_constant_override("icon_max_width", COMMAND_MATRIX_1280_ICON_SIZE)
 		button.add_theme_constant_override("h_separation", 3)
+		_apply_command_matrix_compact_content_margins(button)
 		button.set_meta("command_matrix_1280_font_size", font_size)
 		button.set_meta("command_matrix_1280_readability_style_id", COMMAND_MATRIX_1280_READABILITY_STYLE_ID)
+
+
+func _apply_command_matrix_compact_content_margins(button: Button) -> void:
+	if button == null:
+		return
+	for state in ["normal", "hover", "pressed", "disabled", "focus"]:
+		var source := button.get_theme_stylebox(state)
+		if source == null:
+			continue
+		var compact := source.duplicate() as StyleBox
+		compact.content_margin_left = COMMAND_MATRIX_1280_HORIZONTAL_CONTENT_MARGIN
+		compact.content_margin_right = COMMAND_MATRIX_1280_HORIZONTAL_CONTENT_MARGIN
+		button.add_theme_stylebox_override(state, compact)
 
 
 func get_command_matrix_1280_readability_snapshot() -> Dictionary:
@@ -15025,6 +15040,8 @@ func get_command_matrix_1280_readability_snapshot() -> Dictionary:
 				"font_size": button.get_theme_font_size("font_size"),
 				"has_icon": button.icon != null,
 				"callback_count": button.pressed.get_connections().size(),
+				"content_margin_left": button.get_theme_stylebox("normal").content_margin_left,
+				"content_margin_right": button.get_theme_stylebox("normal").content_margin_right,
 			})
 	return {
 		"schema": "sternenbuergerchen.command_matrix_1280_readability.v1",
