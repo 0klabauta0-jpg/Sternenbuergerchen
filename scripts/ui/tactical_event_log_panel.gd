@@ -11,7 +11,9 @@ const RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS: int = 4
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE: Vector2 = Vector2(360.0, 220.0)
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_MIN_HEIGHT: float = 32.0
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_HEADER_FONT_SIZE: int = 13
-const RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE: int = 11
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE: int = 12
+const LEFT_TACTICAL_STACK_DETAIL_EVENT_FILTER_FONT_SIZE: int = 13
+const LEFT_TACTICAL_STACK_DETAIL_EVENT_FILTER_MIN_WIDTH: float = 96.0
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE: int = 13
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE: int = 12
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_STRIP_WIDTH: float = 5.0
@@ -143,6 +145,9 @@ func get_panel_snapshot() -> Dictionary:
 		"time_font_size": _get_time_font_size(),
 		"header_font_size": _get_header_font_size(),
 		"count_font_size": _get_count_font_size(),
+		"filter_font_size": _selected_filter_button.get_theme_font_size("font_size") if _selected_filter_button != null else 0,
+		"filter_min_width": _selected_filter_button.custom_minimum_size.x if _selected_filter_button != null else 0.0,
+		"count_separated_from_filter": _count_label != null and _selected_filter_button != null and _count_label.get_parent() == _selected_filter_button.get_parent(),
 		"background_alpha": panel_style.bg_color.a if panel_style != null else 0.0,
 		"custom_minimum_size_x": custom_minimum_size.x,
 		"custom_minimum_size_y": custom_minimum_size.y,
@@ -225,8 +230,8 @@ func _ensure_structure() -> void:
 	_selected_filter_button.focus_mode = Control.FOCUS_NONE
 	_selected_filter_button.text = String(TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT.call("selected_filter_label"))
 	_selected_filter_button.button_pressed = selected_only
-	_selected_filter_button.custom_minimum_size = Vector2(48.0, 0.0)
-	_selected_filter_button.add_theme_font_size_override("font_size", 8)
+	_selected_filter_button.custom_minimum_size = Vector2(LEFT_TACTICAL_STACK_DETAIL_EVENT_FILTER_MIN_WIDTH, 0.0)
+	_selected_filter_button.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_DETAIL_EVENT_FILTER_FONT_SIZE)
 	_selected_filter_button.toggled.connect(_on_selected_filter_toggled)
 	header.add_child(_selected_filter_button)
 
@@ -342,7 +347,11 @@ func _apply_release_first_exchange_event_log_header_style() -> void:
 	if _count_label != null:
 		_count_label.add_theme_font_size_override("font_size", _get_count_font_size())
 	if _selected_filter_button != null:
-		_selected_filter_button.add_theme_font_size_override("font_size", 10)
+		_selected_filter_button.custom_minimum_size = Vector2(
+			maxf(_selected_filter_button.custom_minimum_size.x, LEFT_TACTICAL_STACK_DETAIL_EVENT_FILTER_MIN_WIDTH),
+			_selected_filter_button.custom_minimum_size.y
+		)
+		_selected_filter_button.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_DETAIL_EVENT_FILTER_FONT_SIZE)
 	if _entry_list != null:
 		_entry_list.add_theme_constant_override("separation", 4 if _release_first_exchange_hud_density_fire_visual_polish_active else 3)
 

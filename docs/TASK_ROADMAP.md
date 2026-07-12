@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1165 - Left Tactical Stack 1280 Detail Polish (implementiert im Arbeitsstand)
+- Grundlage: TASK_1164 nennt die letzten konkreten 1280er Reibungen im linken Stack: Mini-Card-Detailstrip, Eventlog-Filter/Zaehler und unzuverlaessiges kombiniertes Desktop-Capture.
+- Ziel: Genau diese Detailflaechen verbessern, ohne neues HUD-Layout, neue Gameplay-Wahrheit oder neue Capture-Architektur.
+- Ergebnis: Mission-Mini-Cards bekommen eine detailfreundlichere 120-Pixel-Dichte mit groesserer Lead-/Detailschrift; das Tactical Event Log bekommt groesseren Filtertext, feste Filter-Hitflaeche und klareren Zaehler. `get_left_tactical_stack_1280_detail_polish_snapshot()` belegt den read-only Abschluss.
+- Verifikation: TASK_1165 plus TASK_1164/TASK_1162/TASK_1159/TASK_222.
+- Naechster Schritt: TASK_1166 - Left Tactical Stack 1280 Detail Recapture, wenn der echte Host-/Client-Spielerblick nach dem Polish erneut sichtbar belegt werden soll.
+
 ## TASK_1164 - Left Tactical Stack 1280 Visual Findings (implementiert im Arbeitsstand)
 - Grundlage: TASK_1163 belegt den linken Stack im echten 1280x720-Host/Client-Release und nennt den Bedarf, Folgepunkte statt weiterer Blind-Gates zu schneiden.
 - Ziel: Positive Sichtbefunde und konkrete Restreibung an Mini-Card-Detailstrip, Eventlog-Filter/Zaehler und Desktop-Capture-Hygiene als read-only Vertrag sammeln.

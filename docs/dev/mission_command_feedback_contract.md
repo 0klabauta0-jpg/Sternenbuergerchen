@@ -125,6 +125,11 @@ Erwartete Struktur: Ohne Trace bleiben Status und Gate `needs_first_contact_inte
 ## Left Tactical Stack 1280 Visual Findings (TASK_1164)
 `get_left_tactical_stack_1280_visual_findings_snapshot()` ist der read-only Sichtbefund nach dem TASK_1163-Release-Recapture. Der Snapshot darf nur den TASK_1163-Recapture und explizite Review-Notizen bewerten. Ohne Notizen bleibt `needs_left_stack_visual_review`; belegte Reibung an Mini-Card-Member-Strip, Eventlog-Filter/Zaehler oder Capture-Hygiene wird `ready_for_left_stack_visual_polish` und routet zu TASK_1165 Detail Polish. Saubere Notizen setzen `accepted_for_left_stack_acceptance_slice`. Der Snapshot setzt keine Commands, Effects, Fire-/Damage-Events oder Multiplayer-Wahrheit.
 
+## Left Tactical Stack 1280 Detail Polish (TASK_1165)
+`get_left_tactical_stack_1280_detail_polish_snapshot()` ist der read-only Abschluss fuer den TASK_1164-Detailbefund. Er darf nur bestehende Mini-Card-, Eventlog- und Visual-Findings-Daten lesen und keine Gameplay- oder Multiplayer-Wahrheit setzen. Der Snapshot meldet `left_stack_detail_polish_ready`, wenn Mission-Mini-Cards mindestens 120 Pixel Hoehe, 12-Pixel-Lead-/Detailschrift, sichtbare Portrait-/Member-Strips und TASK_1165-Metadaten tragen, und wenn das Eventlog einen 13-Pixel-Filter, mindestens 96 Pixel Filter-Hitflaeche, 12-Pixel-Zaehler und getrennte Filter-/Count-Flaechen meldet.
+
+Nach TASK_1165 duerfen die Default-Review-Notizen des TASK_1164-Snapshots nicht mehr zu `TASK_1165 - Left Tactical Stack 1280 Detail Polish` routen. Ein erneuter echter Host-/Client-1280-Capture bleibt ein Sichtbeleg-Task und darf nicht durch den headless Detail-Snapshot ersetzt werden. Der Snapshot setzt keine Commands, Effects, Fire-/Damage-Events oder Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 `get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
 
