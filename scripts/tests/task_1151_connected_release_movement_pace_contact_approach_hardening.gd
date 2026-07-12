@@ -31,6 +31,8 @@ func _initialize() -> void:
 	var resolver_source := FileAccess.get_file_as_string(APPROACH_RESOLVER_PATH)
 	for token in ["find_reachable_approach", "find_path", "has_line_of_sight_between_points", "get_all_units"]:
 		_assert(resolver_source.contains(token) or lobby_source.contains(token), "Contact approach selection uses %s" % token)
+	_assert(resolver_source.contains("FORMATION_SAMPLE_OFFSETS"), "Contact approach validates the formation footprint, not only its anchor")
+	_assert(resolver_source.contains("MIN_FORMATION_LOS_SAMPLE_COUNT"), "Contact approach requires stable LOS across multiple formation slots")
 
 	var harness_source := FileAccess.get_file_as_string(HARNESS_PATH)
 	for token in [
@@ -48,7 +50,7 @@ func _initialize() -> void:
 	_assert(combat_source.find("_advance_detection_timers()") < combat_source.find("_should_run_combat_decision_tick"), "Detection timers advance before the expensive decision cadence guard")
 	_assert(combat_source.find("_update_contact_tracking()") < combat_source.find("_should_run_combat_decision_tick"), "Contact tracking advances before the expensive decision cadence guard")
 
-	print("TASK_1151 connected release movement pace evidence: %d/29 PASS" % (29 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/31 PASS" % (31 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
