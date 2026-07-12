@@ -1,5 +1,11 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1154 - Fireteam Contact Loss Language Clarity
+- Status: in Arbeit
+- Relevante Docs/Contracts: `docs/tasks/TASK_1154_fireteam_contact_loss_language_clarity.md`, `docs/tasks/TASK_1132_fireteam_mini_card_tactical_state_language_polish.md`
+- Ausgangsbefund: Im echten First-Contact-Capture steht `1 VERLOREN` direkt neben `FIT 5/5`; gemeint ist ein abgerissener Kontakt, kein Operatorverlust.
+- Ziel: Contact- und Health-Wahrheit in der kompakten Mini-Card sprachlich eindeutig trennen und Host/Client sichtbar neu pruefen.
+
 ### TASK_1153 - Mission HUD Light Path Snapshot Consolidation
 - Status: implementiert und im exportierten Zwei-EXE-Release verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1153_mission_hud_light_path_snapshot_consolidation.md`, `docs/tasks/TASK_1152_mission_hud_heavy_refresh_budget_pass.md`

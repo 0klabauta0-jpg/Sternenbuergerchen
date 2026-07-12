@@ -6377,19 +6377,20 @@ func _format_fireteam_visible_contact_text(contact_state: String, contact_count:
 	var count: int = maxi(contact_count, 0)
 	if count <= 0:
 		return "KEIN KONTAKT"
+	var contact_label: String = "KONTAKT" if count == 1 else "KONTAKTE"
 	var state_label: String
 	match contact_state.strip_edges().to_lower():
 		"confirmed":
-			state_label = "BESTAETIGT"
+			state_label = "BEST."
 		"spotted":
-			state_label = "GESICHTET"
+			state_label = "SICHT"
 		"suspected":
-			state_label = "VERMUTET"
+			state_label = "VERM."
 		"lost":
-			state_label = "VERLOREN"
+			state_label = "WEG"
 		_:
-			state_label = "KONTAKT"
-	return "%d %s" % [count, state_label]
+			state_label = ""
+	return "%d %s%s" % [count, contact_label, " %s" % state_label if not state_label.is_empty() else ""]
 
 
 func _format_fireteam_visible_health_text(health_context: Dictionary) -> String:
