@@ -1,10 +1,13 @@
 # IMPLEMENTATION_STATUS
 
 ### TASK_1153 - Mission HUD Light Path Snapshot Consolidation
-- Status: in Arbeit
+- Status: implementiert und im exportierten Zwei-EXE-Release verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1153_mission_hud_light_path_snapshot_consolidation.md`, `docs/tasks/TASK_1152_mission_hud_heavy_refresh_budget_pass.md`
 - Ausgangsbefund: Periodischer Host-HUD-Pfad rund 68 ms; davon etwa 29 ms Primary Labels und 40 ms Mission Panels.
-- Ziel: Unterpfade einzeln messen und nur den dominanten unveraenderten Builder guardieren.
+- Aenderung: Ein gemeinsam gebauter Station-Route-Readout versorgt Command-Feedback und Mission-Identity; granulare Profiler-Surfaces trennen Route, Commands, Hotkey, Status, Tooltips und Panels ohne Doppelzaehlung.
+- Release-Beleg: Gate `pass` nach 71,6 Sekunden mit gemeinsamem Kontakt und First Fire; periodischer Host-HUD-Pfad rund 51,7 ms statt 68 ms aus TASK_1152 und 266 ms vor dem Performance-Block.
+- Lokale Pruefung: TASK_1153 40/40; TASK_1152 18/18; TASK_1043 14/14; TASK_1044 15/15; TASK_1150 18/18; TASK_1151 64/64; TASK_1117 15/15; TASK_222 82/82.
+- Naechster Schritt: Sichtbare First-Contact-Runde und HUD-Lesbarkeit pruefen; weitere Route-/Identity-Extraktion nur aus einem belegten Playtest- oder Profiling-Befund schneiden.
 
 ### TASK_1152 - Mission HUD Heavy Refresh Budget Pass
 - Status: implementiert und im exportierten Zwei-EXE-Release verifiziert

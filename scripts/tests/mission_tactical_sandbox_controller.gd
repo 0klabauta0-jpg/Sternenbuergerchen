@@ -3911,6 +3911,9 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 			])
 			if profile_enabled:
 				scopes_usec["primary_command_target_waypoint_usec"] = Time.get_ticks_usec() - command_scope_started_usec
+	if profile_enabled:
+		scopes_usec["primary_command_feedback_usec"] = int(scopes_usec.get("primary_command_door_usec", 0)) + int(scopes_usec.get("primary_command_route_usec", 0)) + int(scopes_usec.get("primary_command_decision_usec", 0)) + int(scopes_usec.get("primary_command_target_waypoint_usec", 0))
+		scope_started_usec = Time.get_ticks_usec()
 
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
 	if hotkey_legend_label != null:
@@ -3924,7 +3927,7 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		if profile_enabled:
 			scopes_usec["shared_station_route_snapshot_usec"] = Time.get_ticks_usec() - shared_route_started_usec
 	if profile_enabled:
-		scopes_usec["primary_command_feedback_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["primary_hotkey_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
@@ -3943,7 +3946,7 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		_apply_release_firefight_hud_real_window_label_contract(fireteam_status_label)
 	if profile_enabled:
 		scopes_usec["primary_fireteam_tooltips_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scopes_usec["primary_labels_usec"] = int(scopes_usec.get("shared_station_route_snapshot_usec", 0)) + int(scopes_usec.get("primary_block_labels_usec", 0)) + int(scopes_usec.get("primary_command_feedback_usec", 0)) + int(scopes_usec.get("primary_fireteam_status_usec", 0)) + int(scopes_usec.get("primary_fireteam_tooltips_usec", 0))
+		scopes_usec["primary_labels_usec"] = int(scopes_usec.get("shared_station_route_snapshot_usec", 0)) + int(scopes_usec.get("primary_block_labels_usec", 0)) + int(scopes_usec.get("primary_command_feedback_usec", 0)) + int(scopes_usec.get("primary_hotkey_usec", 0)) + int(scopes_usec.get("primary_fireteam_status_usec", 0)) + int(scopes_usec.get("primary_fireteam_tooltips_usec", 0))
 		scope_started_usec = Time.get_ticks_usec()
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()

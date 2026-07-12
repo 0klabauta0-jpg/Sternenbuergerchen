@@ -43,3 +43,20 @@ Die aktuellen Profiler-Surfaces fassen mehrere Builder zusammen. Dadurch ist noc
 
 ## Risiken / offene Punkte
 Ein grober Gesamt-Guard koennte legitime Timer- oder Kontaktupdates verschlucken. Deshalb wird erst granular gemessen und danach nur die belegte Unterflaeche angefasst.
+
+## Ergebnis
+- Status: implementiert und im exportierten Zwei-EXE-Release verifiziert.
+- Der Station-Route-Readout wird pro `_update_ui()` nur noch einmal gebaut und sowohl vom Command-Feedback als auch vom Mission-Identity-Badge gelesen.
+- Die Profiler-Surfaces trennen Route-Snapshot, Command-Teilpfade, Hotkey, Fireteam-Status, Tooltips und Panels ohne Doppelzaehlung.
+- Der gemessene periodische Host-HUD-Pfad sank von rund 68 auf 51,7 ms; gegenueber dem urspruenglichen 266-ms-Pfad sind damit rund 81 Prozent entfernt.
+- Das Zwei-EXE-Gate erreichte nach 71,6 Sekunden gemeinsamen Kontakt und First Fire; beide Prozesse blieben aktiv.
+
+## Lokaler Abschlussnachweis
+- TASK_1153: 40/40.
+- TASK_1152: 18/18.
+- TASK_1043: 14/14; TASK_1044: 15/15.
+- TASK_1150: 18/18; TASK_1151: 64/64; TASK_1117: 15/15.
+- TASK_222: 82/82.
+
+## Naechster Befund
+Der verbleibende leichte Pfad wird vor allem durch den gemeinsamen Route-Readout selbst und den Identity-Readout gepraegt. Nach der deutlichen Reduktion soll der naechste Schritt wieder die sichtbare Spielrunde und HUD-Lesbarkeit am echten First Contact pruefen; weitere Builder-Extraktion folgt nur bei belegter Stoerung.

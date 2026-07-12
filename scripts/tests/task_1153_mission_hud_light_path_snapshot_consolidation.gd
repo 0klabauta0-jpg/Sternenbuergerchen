@@ -11,6 +11,7 @@ const EXPECTED_LIGHT_SCOPES: PackedStringArray = [
 	"primary_command_route_usec",
 	"primary_command_decision_usec",
 	"primary_command_target_waypoint_usec",
+	"primary_hotkey_usec",
 	"primary_fireteam_status_usec",
 	"primary_fireteam_tooltips_usec",
 	"panel_fireteam_phase_usec",
