@@ -2,6 +2,7 @@ extends SceneTree
 
 const LOBBY_SOURCE_PATH := "res://scripts/ui/multiplayer_lobby_screen.gd"
 const HARNESS_PATH := "res://scripts/tools/capture_release_host_client_entry_playtest.ps1"
+const APPROACH_RESOLVER_PATH := "res://scripts/tactical/contact_approach_resolver.gd"
 
 var _failed := 0
 
@@ -23,6 +24,11 @@ func _initialize() -> void:
 	_assert(lobby_source.contains("trace_heartbeat_bucket"), "Unchanged First Contact stages still write periodic movement evidence")
 	_assert(lobby_source.contains('get_mission_marker_world_position", "spawn_bravo"'), "Release Contact Approach follows the runtime enemy spawn marker")
 	_assert(not lobby_source.contains('"spawn_enemy_defense"') and not lobby_source.contains('"spawn_enemy_patrol"'), "Release Contact Approach does not treat decorative enemy markers as runtime truth")
+	_assert(lobby_source.contains("CONTACT_APPROACH_RESOLVER_SCRIPT"), "Release flow delegates approach selection to a tactical resolver")
+	_assert(FileAccess.file_exists(APPROACH_RESOLVER_PATH), "Contact approach resolver exists")
+	var resolver_source := FileAccess.get_file_as_string(APPROACH_RESOLVER_PATH)
+	for token in ["find_reachable_approach", "find_path", "has_line_of_sight_between_points", "get_all_units"]:
+		_assert(resolver_source.contains(token) or lobby_source.contains(token), "Contact approach selection uses %s" % token)
 
 	var harness_source := FileAccess.get_file_as_string(HARNESS_PATH)
 	for token in [
@@ -34,7 +40,7 @@ func _initialize() -> void:
 		_assert(harness_source.contains(token), "Release harness preserves %s evidence" % token)
 	_assert(harness_source.contains('"TASK_1151"'), "First Contact pace manifest identifies TASK_1151")
 
-	print("TASK_1151 connected release movement pace evidence: %d/17 PASS" % (17 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/23 PASS" % (23 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 

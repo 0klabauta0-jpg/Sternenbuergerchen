@@ -9,6 +9,7 @@ const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multipl
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const MULTIPLAYER_ROSTER_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_roster_contract.gd")
 const MULTIPLAYER_DROPSHIP_BOOTSTRAP_SCRIPT: GDScript = preload("res://scripts/mission/multiplayer_dropship_bootstrap.gd")
+const CONTACT_APPROACH_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_approach_resolver.gd")
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
 const AUDIO_EVENT_BUS_SCRIPT: GDScript = preload("res://scripts/audio/audio_event_bus.gd")
 const BACKGROUND_IMAGE_CATALOG_SCRIPT: GDScript = preload("res://scripts/assets/background_image_catalog.gd")
@@ -102,6 +103,7 @@ var _release_first_contact_target_position: Vector2 = Vector2.ZERO
 var _release_first_contact_advance_started_msec: int = 0
 var _release_first_contact_advance_started_tick: int = 0
 var _release_first_contact_start_position: Vector2 = Vector2.ZERO
+var _release_contact_approach_evidence: Dictionary = {}
 
 
 func _ready() -> void:
@@ -261,6 +263,7 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"movement_distance_travelled": movement_distance_travelled,
 		"movement_remaining_distance": movement_remaining_distance,
 		"movement_progress_ratio": movement_progress_ratio,
+		"contact_approach_evidence": _release_contact_approach_evidence.duplicate(true),
 		"contact_count": contacts.size(),
 		"contacts": contacts,
 		"fire_event_count": fire_events.size(),
@@ -426,13 +429,33 @@ func _submit_release_contact_advance(controller: Node) -> bool:
 	if controller.has_method("get_mission_marker_world_position"):
 		requested_target = Vector2(controller.call("get_mission_marker_world_position", "spawn_bravo", requested_target))
 	var terrain_registry: Node = _active_mission.get_node_or_null("TerrainRegistry")
+	var unit_registry: Node = _active_mission.get_node_or_null("UnitRegistry")
+	var pace_snapshot: Dictionary = get_release_multiplayer_first_contact_snapshot()
+	var start_position := Vector2(Dictionary(pace_snapshot.get("fireteam_position", {})).get("world_position", Vector2.ZERO))
+	var local_team_id: String = ""
+	var enemy_positions: Array = []
+	if unit_registry != null and unit_registry.has_method("get_all_units"):
+		var all_units: Array = unit_registry.call("get_all_units")
+		for unit in all_units:
+			if unit == null or not unit.has_method("get_team_id"):
+				continue
+			if unit.has_method("get_fireteam_id") and String(unit.call("get_fireteam_id")).strip_edges().to_lower() == _release_local_fireteam_id:
+				local_team_id = String(unit.call("get_team_id")).strip_edges()
+		for unit in all_units:
+			if unit == null or not (unit is Node2D) or not unit.has_method("get_team_id"):
+				continue
+			if not local_team_id.is_empty() and String(unit.call("get_team_id")).strip_edges() != local_team_id:
+				enemy_positions.append((unit as Node2D).global_position)
+	if terrain_registry != null and not enemy_positions.is_empty():
+		_release_contact_approach_evidence = Dictionary(CONTACT_APPROACH_RESOLVER_SCRIPT.new().call("find_reachable_approach", start_position, enemy_positions, terrain_registry))
+		if bool(_release_contact_approach_evidence.get("found", false)):
+			requested_target = Vector2(_release_contact_approach_evidence.get("position", requested_target))
 	if terrain_registry != null and terrain_registry.has_method("resolve_walkable_target"):
 		var resolved: Dictionary = Dictionary(terrain_registry.call("resolve_walkable_target", requested_target))
 		requested_target = Vector2(resolved.get("replacement_position", requested_target))
 	_release_first_contact_target_position = requested_target
 	var accepted: bool = bool(controller.call("request_network_authoritative_fireteam_intent", _release_local_fireteam_id, "move", requested_target))
 	if accepted:
-		var pace_snapshot: Dictionary = get_release_multiplayer_first_contact_snapshot()
 		_release_first_contact_start_position = Vector2(Dictionary(pace_snapshot.get("fireteam_position", {})).get("world_position", Vector2.ZERO))
 		_release_first_contact_advance_started_msec = Time.get_ticks_msec()
 		_release_first_contact_advance_started_tick = int(pace_snapshot.get("simulation_tick", 0))
