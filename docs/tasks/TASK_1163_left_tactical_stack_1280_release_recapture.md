@@ -46,5 +46,14 @@ Die Release-EXE kann hinter dem Git-Stand zurueckliegen. Ein gruener Headless-Ve
 - Regressionen: TASK_1162, TASK_1161, TASK_222, `git diff --check`.
 - Release: `scripts/tools/export_runtime_release.ps1`, `scripts/tools/release_runtime_start_check.ps1 -JsonOnly`, `scripts/tools/capture_release_host_client_entry_playtest.ps1 -FirstContact -StopRunningReleaseProcesses`.
 
+## Release-Beleg
+- Exportierter Release-Stand: aktueller Branch-HEAD laut `release_build_provenance.json`.
+- `release_runtime_start_check.ps1 -JsonOnly`: Gate `pass`, PCK frisch, Provenance-Commit passt, keine laufenden Release-Prozesse.
+- `capture_release_host_client_entry_playtest.ps1 -FirstContact -StopRunningReleaseProcesses`: Gate `pass` nach 85,312 Sekunden.
+- Manifest: `tmp/release_host_client_first_contact_playtest.json`.
+- Host-Fensterbild: `tmp/release_host_client_first_contact_host_window.png`.
+- Client-Fensterbild: `tmp/release_host_client_first_contact_client_window.png`.
+- Sichtbefund: Host und Client zeigen den linken Stack im echten 1280x720-Fenster brauchbar lesbar. Das kombinierte Desktop-Capture ist als visueller Einzelbeleg ungeeignet, weil andere Fenster hineinragen koennen.
+
 ## Risiken / offene Punkte
-Der Capture schreibt Belege und Gate-Status. Die endgueltige menschliche Sichtentscheidung bleibt ein Folgefund: Wenn links noch zu dicht wirkt, wird daraus TASK_1164 geschnitten.
+Der Capture schreibt Belege und Gate-Status. Die endgueltige menschliche Sichtentscheidung bleibt ein Folgefund: TASK_1164 soll konkrete visuelle Restbefunde aus den Host-/Client-Fensterbildern schneiden, statt im selben Task weiter am Layout zu ziehen.

@@ -1,5 +1,15 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1163 - Left Tactical Stack 1280 Release Recapture
+- Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert
+- Relevante Docs/Contracts: `docs/tasks/TASK_1163_left_tactical_stack_1280_release_recapture.md`, `docs/tasks/TASK_1162_left_tactical_stack_1280_readability_focus_balance.md`, `docs/dev/mission_command_feedback_contract.md`
+- Ausgangsbefund: TASK_1162 haertete die linke taktische Stack-Flaeche headless, aber die exportierte Release-EXE konnte hinter dem Git-Stand zurueckliegen und der echte 1280er Spielerblick war noch nicht erneut belegt.
+- Aenderung: `MissionTacticalSandboxController` liefert `get_left_tactical_stack_1280_release_recapture_snapshot()` als read-only Vertrag fuer TASK_1163. Der Snapshot verknuepft TASK_1162, aktuellen Release-Export, FirstContact-Harness, 1280x720-Zielaufloesung, Host-/Client-Fensterbilder und den empfohlenen Folge-Task.
+- Lokale Pruefung: TASK_1163 24/24; TASK_1162 34/34; TASK_1161 39/39; TASK_222 82/82; `git diff --check`.
+- Release-Beleg: `release_runtime_start_check.ps1 -JsonOnly` ist gruen auf dem aktuellen Branch-HEAD laut `release_build_provenance.json`. `capture_release_host_client_entry_playtest.ps1 -FirstContact -StopRunningReleaseProcesses` laeuft mit Gate `pass` nach 85,312 Sekunden; Deployment und First Fire konvergieren, Host- und Client-Fensterbilder wurden geschrieben.
+- Sichtbarer Befund: Die separaten Host-/Client-Fensterbilder zeigen die linke Fireteam-Stack-Zone im echten 1280x720-Spielbild brauchbar, mit lesbaren Mini-Cards, sichtbarem Primaerfokus und Ereignislog ohne Blockade der Fireteam-Karten. Das kombinierte Desktop-Capture kann durch andere Fenster ueberlagert werden und ist deshalb nur als technischer Gesamtbeleg, nicht als visueller Einzelbefund geeignet.
+- Risiken/offen: Naechster sinnvoller Schritt ist TASK_1164 - Left Tactical Stack 1280 Visual Findings, um echte Spieler-Folgepunkte aus dem Host-/Client-Bild zu schneiden, statt noch mehr strukturelle Gates blind zu stapeln.
+
 ### TASK_1162 - Left Tactical Stack 1280 Readability and Focus Balance
 - Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
 - Relevante Docs/Contracts: `docs/tasks/TASK_1162_left_tactical_stack_1280_readability_focus_balance.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_1130, TASK_1131, TASK_1132, TASK_1133, TASK_1154, TASK_1159, TASK_1161
