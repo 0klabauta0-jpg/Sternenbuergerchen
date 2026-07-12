@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1179 - Ground Mission Objective Playthrough (implementiert im Arbeitsstand)
+- Ergebnis: Der Singleplayer-Standard `grid_sweep` laeuft jetzt von Homebase ueber Drop und Take bis Objective-Sieg und Debrief. Alpha-LZ, Stationszugang und zentrale Rampe sind fuer A*/HPA legal authoriert.
+- Verifikation: TASK_1179 18/18 gruen.
+- Naechster Schritt: ersten sichtbaren Ground-Contact und Feuerentscheid als kleinen separaten Playthrough pruefen.
+
+---
+
 ## TASK_1178 - HPA Cache Performance Recapture (implementiert im Arbeitsstand)
 - Ergebnis: Route rund 152,4 s -> 101,8 s; langsamste Command-Queue rund 1,37 s -> 0,60 s. Neuer Restblock: `tick_signal_emit_usec` rund 0,89 s.
 - Naechster Schritt: Combat-Subscriber-Cadence nur nach eigener Profil-/Contract-Pruefung verbessern.
