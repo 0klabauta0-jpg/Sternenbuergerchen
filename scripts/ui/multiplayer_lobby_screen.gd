@@ -28,6 +28,7 @@ const RELEASE_AUTO_START_ARG: String = "--release-multiplayer-auto-start"
 const RELEASE_TRACE_ARG: String = "--release-multiplayer-trace="
 const RELEASE_DROP_DECISION_ARG: String = "--release-multiplayer-drop-decision"
 const RELEASE_FIRST_CONTACT_ARG: String = "--release-multiplayer-first-contact"
+const RELEASE_TRACE_HEARTBEAT_MSEC: int = 1000
 
 @onready var _status_label: Label = get_node("Panel/Margin/VBox/StatusLabel")
 @onready var _team_readability_label: Label = get_node("Panel/Margin/VBox/TeamReadabilityLabel")
@@ -98,6 +99,9 @@ var _release_initial_movement_observed: bool = false
 var _release_initial_movement_observe_frames: int = 0
 var _release_first_contact_advance_attempted: bool = false
 var _release_first_contact_target_position: Vector2 = Vector2.ZERO
+var _release_first_contact_advance_started_msec: int = 0
+var _release_first_contact_advance_started_tick: int = 0
+var _release_first_contact_start_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -229,6 +233,14 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		var event_id: String = String(Dictionary(event_variant).get("event_id", "")).strip_edges()
 		if not event_id.is_empty() and not fire_event_ids.has(event_id):
 			fire_event_ids.append(event_id)
+	var current_position: Vector2 = Vector2(Dictionary(fireteam_status.get("position", {})).get("world_position", Vector2.ZERO))
+	var movement_wall_time_msec: int = maxi(Time.get_ticks_msec() - _release_first_contact_advance_started_msec, 0) if _release_first_contact_advance_started_msec > 0 else 0
+	var initial_distance: float = _release_first_contact_start_position.distance_to(_release_first_contact_target_position)
+	var movement_distance_travelled: float = _release_first_contact_start_position.distance_to(current_position) if _release_first_contact_advance_started_msec > 0 else 0.0
+	var movement_remaining_distance: float = current_position.distance_to(_release_first_contact_target_position) if _release_first_contact_advance_started_msec > 0 else 0.0
+	var movement_progress_ratio: float = clampf(1.0 - (movement_remaining_distance / initial_distance), 0.0, 1.0) if initial_distance > 0.001 else 0.0
+	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot") if has_active_mission() else null
+	var simulation_tick: int = int(simulation_root.call("get_tick")) if simulation_root != null and simulation_root.has_method("get_tick") else 0
 	return {
 		"schema": "sternenbuergerchen.release_multiplayer_first_contact.v1",
 		"task_id": "TASK_1150",
@@ -241,6 +253,14 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"requested_target_position": _release_first_contact_target_position,
 		"movement_state": movement_state,
 		"fireteam_position": Dictionary(fireteam_status.get("position", {})).duplicate(true),
+		"movement_wall_time_msec": movement_wall_time_msec,
+		"simulation_tick": simulation_tick,
+		"simulation_ticks_since_advance": maxi(simulation_tick - _release_first_contact_advance_started_tick, 0),
+		"physics_fps": Engine.get_frames_per_second(),
+		"movement_start_position": _release_first_contact_start_position,
+		"movement_distance_travelled": movement_distance_travelled,
+		"movement_remaining_distance": movement_remaining_distance,
+		"movement_progress_ratio": movement_progress_ratio,
 		"contact_count": contacts.size(),
 		"contacts": contacts,
 		"fire_event_count": fire_events.size(),
@@ -411,7 +431,13 @@ func _submit_release_contact_advance(controller: Node) -> bool:
 		var resolved: Dictionary = Dictionary(terrain_registry.call("resolve_walkable_target", requested_target))
 		requested_target = Vector2(resolved.get("replacement_position", requested_target))
 	_release_first_contact_target_position = requested_target
-	return bool(controller.call("request_network_authoritative_fireteam_intent", _release_local_fireteam_id, "move", requested_target))
+	var accepted: bool = bool(controller.call("request_network_authoritative_fireteam_intent", _release_local_fireteam_id, "move", requested_target))
+	if accepted:
+		var pace_snapshot: Dictionary = get_release_multiplayer_first_contact_snapshot()
+		_release_first_contact_start_position = Vector2(Dictionary(pace_snapshot.get("fireteam_position", {})).get("world_position", Vector2.ZERO))
+		_release_first_contact_advance_started_msec = Time.get_ticks_msec()
+		_release_first_contact_advance_started_tick = int(pace_snapshot.get("simulation_tick", 0))
+	return accepted
 
 
 func _resolve_release_local_drop_assignment(controller: Node) -> void:
@@ -488,11 +514,14 @@ func _write_release_multiplayer_trace() -> void:
 	var drop_embarked_count: int = Array(drop_snapshot.get("embarked_unit_ids", [])).size()
 	trace_key += "|dep:%d|emb:%d" % [drop_deployed_count, drop_embarked_count]
 	var first_contact_snapshot: Dictionary = Dictionary(snapshot.get("first_contact", {}))
+	var trace_heartbeat_bucket: int = int(first_contact_snapshot.get("movement_wall_time_msec", 0)) / RELEASE_TRACE_HEARTBEAT_MSEC
 	trace_key += "|fc:%s|contacts:%d|fire:%d" % [
 		String(first_contact_snapshot.get("stage", "")),
 		int(first_contact_snapshot.get("contact_count", 0)),
 		int(first_contact_snapshot.get("fire_event_count", 0)),
 	]
+	if bool(_release_playtest_config.get("first_contact", false)):
+		trace_key += "|pace:%d" % trace_heartbeat_bucket
 	if trace_key == _release_playtest_last_trace_key:
 		return
 	_release_playtest_last_trace_key = trace_key

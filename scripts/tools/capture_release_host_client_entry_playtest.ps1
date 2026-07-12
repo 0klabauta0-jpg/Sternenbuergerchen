@@ -165,6 +165,19 @@ $manifest = [ordered]@{
 	first_decision_accepted = $deploymentConverged -and $dropMode
 	deployment_converged = $deploymentConverged
 	first_fire_converged = $firstFireConverged
+	movement_pace = $(if ($FirstContact) { [ordered]@{
+		task_id = "TASK_1151"
+		host = [ordered]@{
+			movement_remaining_distance = $hostState.first_contact.movement_remaining_distance
+			movement_distance_travelled = $hostState.first_contact.movement_distance_travelled
+			movement_progress_ratio = $hostState.first_contact.movement_progress_ratio
+		}
+		client = [ordered]@{
+			movement_remaining_distance = $clientState.first_contact.movement_remaining_distance
+			movement_distance_travelled = $clientState.first_contact.movement_distance_travelled
+			movement_progress_ratio = $clientState.first_contact.movement_progress_ratio
+		}
+	} } else { $null })
 	screenshot_path = $screenshotPath
 	screenshot_written = $screenshotWritten
 	host_window = $windowCaptures.host
