@@ -13,10 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1152 - Mission HUD Heavy Refresh Budget Pass (in Arbeit)
+## TASK_1152 - Mission HUD Heavy Refresh Budget Pass (implementiert)
 - Grundlage: TASK_1151 ist im Zwei-EXE-Release gruen, misst aber weiterhin rund 266 ms fuer einen kompletten Host-HUD-Refresh.
 - Ziel: Unveraenderte schwere HUD-Teilflaechen per stabiler Signatur/Dirty-State ueberspringen, waehrend direkte Eingaben sofort sichtbar bleiben.
 - Verifikation: Bestehende HUD-/Performance-Gates plus echter Zwei-EXE-First-Contact-Recapture.
+- Ergebnis: Periodische Signatur-Guards und guardierte Dropship-/Snapshot-/Flank-Feedbackpfade reduzieren den gemessenen Host-HUD-Pfad von rund 266 auf 68 ms. Das Zwei-EXE-Gate bleibt mit Contact und First Fire gruen.
+- Naechster Schritt: Primary Labels und Mission Panels im leichten 68-ms-Pfad separat signaturbasiert pruefen.
 
 ## TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening (implementiert)
 - Grundlage: TASK_1150 belegt korrekte autoritative Ziele und Commands, aber keinen Kontakt innerhalb von 180 Sekunden realer Zwei-EXE-Laufzeit.

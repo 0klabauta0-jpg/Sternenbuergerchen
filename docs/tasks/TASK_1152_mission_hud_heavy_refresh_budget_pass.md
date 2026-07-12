@@ -44,3 +44,16 @@ Der periodische Refresh baut trotz vorhandener Delta-Guards weiterhin teure Stra
 
 ## Risiken / offene Punkte
 Ein Signatur-Guard darf keine echte Zustandsaenderung verschlucken. Deshalb muessen Signaturen aus den gelesenen Runtime-Snapshots entstehen und direkte Eventpfade weiterhin einen erzwungenen Refresh ausloesen koennen.
+
+## Abschluss 2026-07-12
+- Strategiestatus, Craft Controls und die Fireteam-Kartengruppe besitzen stabile periodische Signaturen. Direkte Bedienereignisse behalten `force_heavy_surfaces = true`.
+- Dropship-Runtime-Feedback, autoritative Dropship-Snapshots und Flank-Feedback nutzen den guardierten Runtime-Pfad statt den Vollrefresh zu erzwingen.
+- Der Release-Trace fuehrt Apply-/Skip-Zaehler fuer alle schweren Teilflaechen mit.
+- Echter Zwei-EXE-Beleg: Gate `pass` nach 69,8 Sekunden, beide Prozesse aktiv, gemeinsamer Kontakt und First Fire.
+- Gemessener periodischer Host-HUD-Pfad: rund 68 ms statt rund 266 ms im TASK_1151-Ausgangslauf, etwa 74 Prozent weniger.
+- Host-Guard-Evidence: Craft Controls 56 Apply / 45 Skip, Strategiestatus 55 Apply / 46 Skip, Fireteam-Kartengruppe 84 Apply / 17 Skip.
+- Client-FPS im vergleichbaren Zwei-EXE-Lauf: rund 30 statt zuvor rund 24. Der Host-FPS-Einzelwert bleibt wegen der Snapshot-Lage kein belastbarer Durchschnittswert.
+- Verifier: TASK_1152 18/18, TASK_1043 14/14, TASK_1044 15/15, TASK_399 9/9, TASK_479 25/25, TASK_1150 18/18, TASK_1151 64/64, TASK_1117 15/15, TASK_222 82/82.
+
+## Naechster Befund
+Der leichte periodische Pfad kostet im gemessenen Host-Snapshot noch rund 68 ms, davon etwa 29 ms Primary Labels und 40 ms Mission Panels. Das ist der naechste klar abgegrenzte Performance-Slice.
