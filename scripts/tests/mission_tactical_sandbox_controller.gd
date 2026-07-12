@@ -3864,6 +3864,9 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		scope_started_usec = Time.get_ticks_usec()
 	_apply_block_labels()
 	_sync_unit_tactical_stance_badges()
+	if profile_enabled:
+		scopes_usec["primary_block_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
 	if command_feedback_label != null:
 		if not _last_planning_state_issue.is_empty():
@@ -3890,10 +3893,17 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 			_set_mission_label_text_delta(hotkey_legend_label, "MISSION PREVIEW | Homebase Start unlocks GO/orders | RMB waypoints | DEL removes")
 		else:
 			_set_mission_label_text_delta(hotkey_legend_label, HOTKEY_LEGEND if _can_issue_local_commands() else "OBSERVER MODE | Host controls mission orders in multiplayer V1")
+	if profile_enabled:
+		scopes_usec["primary_command_feedback_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 
 	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
 	if fireteam_status_label != null:
 		_set_mission_label_text_delta(fireteam_status_label, _build_fireteam_status_text())
+	if profile_enabled:
+		scopes_usec["primary_fireteam_status_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
+	if fireteam_status_label != null:
 		var combat_tooltip: String = _build_mission_combat_hud_detail_tooltip_text()
 		var decision_tooltip: String = _build_selected_fireteam_live_decision_detail_tooltip()
 		fireteam_status_label.tooltip_text = combat_tooltip
@@ -3902,17 +3912,28 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		_apply_combat_hud_detail_tooltip_label_contract(fireteam_status_label)
 		_apply_release_firefight_hud_real_window_label_contract(fireteam_status_label)
 	if profile_enabled:
-		scopes_usec["primary_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["primary_fireteam_tooltips_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["primary_labels_usec"] = int(scopes_usec.get("primary_block_labels_usec", 0)) + int(scopes_usec.get("primary_command_feedback_usec", 0)) + int(scopes_usec.get("primary_fireteam_status_usec", 0)) + int(scopes_usec.get("primary_fireteam_tooltips_usec", 0))
 		scope_started_usec = Time.get_ticks_usec()
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
+	if profile_enabled:
+		scopes_usec["panel_fireteam_phase_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_nav_timer_label()
 	_refresh_mission_identity_session_badge()
 	_refresh_mission_team_chip_label()
+	if profile_enabled:
+		scopes_usec["panel_nav_identity_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_dropship_panel()
+	if profile_enabled:
+		scopes_usec["panel_dropship_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_tactical_event_log_panel()
 	if profile_enabled:
-		scopes_usec["mission_panels_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["panel_event_log_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["mission_panels_usec"] = int(scopes_usec.get("panel_fireteam_phase_usec", 0)) + int(scopes_usec.get("panel_nav_identity_usec", 0)) + int(scopes_usec.get("panel_dropship_usec", 0)) + int(scopes_usec.get("panel_event_log_usec", 0))
 		scope_started_usec = Time.get_ticks_usec()
 	if not include_heavy_surfaces:
 		if profile_enabled:

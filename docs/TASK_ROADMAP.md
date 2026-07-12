@@ -13,6 +13,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1153 - Mission HUD Light Path Snapshot Consolidation (in Arbeit)
+- Grundlage: TASK_1152 reduziert den periodischen Host-HUD-Pfad auf rund 68 ms.
+- Ziel: Primary Labels und Mission Panels granular messen und den dominanten unveraenderten Unterpfad signaturbasiert konsolidieren.
+- Verifikation: Headless-HUD-Gates plus echter Zwei-EXE-First-Contact-Recapture.
+
 ## TASK_1152 - Mission HUD Heavy Refresh Budget Pass (implementiert)
 - Grundlage: TASK_1151 ist im Zwei-EXE-Release gruen, misst aber weiterhin rund 266 ms fuer einen kompletten Host-HUD-Refresh.
 - Ziel: Unveraenderte schwere HUD-Teilflaechen per stabiler Signatur/Dirty-State ueberspringen, waehrend direkte Eingaben sofort sichtbar bleiben.

@@ -1,5 +1,11 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1153 - Mission HUD Light Path Snapshot Consolidation
+- Status: in Arbeit
+- Relevante Docs/Contracts: `docs/tasks/TASK_1153_mission_hud_light_path_snapshot_consolidation.md`, `docs/tasks/TASK_1152_mission_hud_heavy_refresh_budget_pass.md`
+- Ausgangsbefund: Periodischer Host-HUD-Pfad rund 68 ms; davon etwa 29 ms Primary Labels und 40 ms Mission Panels.
+- Ziel: Unterpfade einzeln messen und nur den dominanten unveraenderten Builder guardieren.
+
 ### TASK_1152 - Mission HUD Heavy Refresh Budget Pass
 - Status: implementiert und im exportierten Zwei-EXE-Release verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1152_mission_hud_heavy_refresh_budget_pass.md`, `docs/tasks/TASK_1151_connected_release_movement_pace_contact_approach_hardening.md`
