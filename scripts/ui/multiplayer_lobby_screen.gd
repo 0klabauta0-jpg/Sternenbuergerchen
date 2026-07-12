@@ -252,16 +252,17 @@ func _advance_release_multiplayer_drop_decision() -> void:
 	if card.is_empty():
 		_release_drop_decision_stage = "waiting_for_dropship"
 		return
-	controller.call("select_mission_dropship_fireteam", _release_local_craft_id, _release_local_fireteam_id)
 	var pending_count: int = int(Dictionary(controller.call("get_network_dropship_pending_debug_snapshot")).get("pending_count", 0)) if controller.has_method("get_network_dropship_pending_debug_snapshot") else 0
 	if not bool(card.get("has_lz_position", false)):
 		if not _release_drop_lz_sent and pending_count <= 0:
+			controller.call("select_mission_dropship_fireteam", _release_local_craft_id, _release_local_fireteam_id)
 			var lz_position := Vector2(384.0, 224.0) if _release_local_fireteam_id == "blue" else Vector2(704.0, 384.0)
 			var approach := "NW" if _release_local_fireteam_id == "blue" else "SE"
 			_release_drop_lz_sent = bool(controller.call("request_network_authoritative_dropship_command", "set_lz", _release_local_craft_id, _release_local_fireteam_id, {"lz_position": lz_position, "approach_angle": approach}))
 			_release_drop_decision_stage = "lz_requested" if _release_drop_lz_sent else "lz_request_failed"
 		return
 	if not _release_drop_call_sent and pending_count <= 0 and String(card.get("state", "")).strip_edges().to_lower() == "waiting":
+		controller.call("select_mission_dropship_fireteam", _release_local_craft_id, _release_local_fireteam_id)
 		_release_drop_call_sent = bool(controller.call("request_network_authoritative_dropship_command", "call_dropship", _release_local_craft_id, _release_local_fireteam_id))
 		_release_drop_decision_stage = "drop_requested" if _release_drop_call_sent else "drop_request_failed"
 		return
