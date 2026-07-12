@@ -1901,6 +1901,10 @@ func _apply_move_command_with_terrain_avoidance(
 	var desired_step_distance: float = minf(step_distance, distance_to_waypoint)
 	var desired_velocity: Vector2 = direction_to_waypoint.normalized() * (desired_step_distance / maxf(delta, 0.0001))
 	var safe_velocity: Vector2 = _resolve_local_avoidance_velocity(cmd, unit_node, current_position, desired_velocity, step_distance / maxf(delta, 0.0001), delta, terrain_registry)
+	if safe_velocity.length_squared() <= 0.0001 \
+		and bool(cmd.get("local_avoidance_deadlock", false)) \
+		and _is_local_avoidance_position_walkable(next_waypoint, terrain_registry):
+		safe_velocity = desired_velocity
 	var displacement: Vector2 = safe_velocity * delta
 	if displacement.length() > desired_step_distance:
 		displacement = displacement.normalized() * desired_step_distance

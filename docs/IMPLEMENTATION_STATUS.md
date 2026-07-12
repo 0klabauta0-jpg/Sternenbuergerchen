@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1179 - Ground Mission Objective Playthrough
+- Status: implementiert und headless geprueft
+- Aenderung: `grid_sweep` hat jetzt einen echten Homebase -> Dropship -> LZ -> Deboard -> Take -> Objective -> Debrief-Trace. Die Ground Map hat eine begehbare Alpha-LZ, einen Stationszugang und einen legalen zentralen Rampenkorridor fuer A* und HPA.
+- Architektur: Der Verifier nutzt nur bestehende Handoff-, Commander-, SimulationRoot-, Objective- und Debrief-Pfade. Er teleportiert keine Units und setzt weder Objective noch MissionResult direkt.
+- Lokale Pruefung: TASK_1179 18/18 zweimal hintereinander (maximal 256 beschleunigte Missions-Ticks); TASK_344 40/40; TASK_501 10/10; TASK_475 17/17; TASK_479 25/25 gruen.
+- Risiken/offen: Der End-to-End-Gate ist absichtlich teuer. Der naechste Gameplay-Slice sollte den sichtbaren Gegnerkontakt und Feuerentscheid auf `grid_sweep` als kurzen, getrennten Playthrough pruefen.
+
 ### TASK_1178 - HPA Cache Performance Recapture
 - Status: implementiert und headless geprueft
 - Befund: TASK_1177 senkt im gleichen Station-AA-Trace Route von rund 152,4 s auf 101,8 s und Command-Queue im langsamsten Tick von rund 1,37 s auf 0,60 s.

@@ -7282,31 +7282,31 @@
 		},
 		{
 			"blocks_los": false,
-			"cover_value": 30,
+			"cover_value": 0,
 			"edge_type": "cliff",
 			"grid_position": {
 				"x": 15,
 				"y": 27
 			},
 			"height_level": 0,
-			"object_height": 1,
+			"object_height": 0,
 			"surface_type": "ground",
-			"type_id": "rock_small",
-			"walkable": false
+			"type_id": "ground_flat",
+			"walkable": true
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 50,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "cliff",
 			"grid_position": {
 				"x": 15,
 				"y": 28
 			},
 			"height_level": 0,
-			"object_height": 2,
+			"object_height": 0,
 			"surface_type": "ground",
-			"type_id": "rock_large",
-			"walkable": false
+			"type_id": "ground_flat",
+			"walkable": true
 		},
 		{
 			"blocks_los": true,
@@ -8796,22 +8796,21 @@
 			"walkable": false
 		},
 		{
-			"blocks_los": true,
-			"cover_value": 25,
+			"blocks_los": false,
+			"cover_value": 0,
 			"edge_type": "cliff",
 			"grid_position": {
 				"x": 19,
 				"y": 7
 			},
 			"height_level": 0,
-			"object_height": 2,
-			"object_type_id": "station_computer",
+			"object_height": 0,
 			"surface_type": "road",
-			"type_id": "wall_straight_nw",
-			"walkable": false
+			"type_id": "station_floor_panel",
+			"walkable": true
 		},
 		{
-			"blocks_los": true,
+			"blocks_los": false,
 			"cover_value": 0,
 			"edge_type": "cliff",
 			"grid_position": {
@@ -8819,10 +8818,10 @@
 				"y": 8
 			},
 			"height_level": 0,
-			"object_height": 2,
+			"object_height": 0,
 			"surface_type": "road",
-			"type_id": "wall_straight_nw",
-			"walkable": false
+			"type_id": "station_floor_panel",
+			"walkable": true
 		},
 		{
 			"blocks_los": true,
@@ -8979,18 +8978,18 @@
 			"walkable": false
 		},
 		{
-			"blocks_los": true,
+			"blocks_los": false,
 			"cover_value": 0,
-			"edge_type": "none",
+			"edge_type": "slope",
 			"grid_position": {
 				"x": 19,
 				"y": 20
 			},
-			"height_level": 0,
+			"height_level": 1,
 			"object_height": 0,
 			"surface_type": "ground",
-			"type_id": "cliff_straight_se",
-			"walkable": false
+			"type_id": "slope_se",
+			"walkable": true
 		},
 		{
 			"blocks_los": true,
