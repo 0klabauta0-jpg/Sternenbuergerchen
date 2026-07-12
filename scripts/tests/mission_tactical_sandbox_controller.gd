@@ -3868,16 +3868,30 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		scopes_usec["primary_block_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
+	if profile_enabled:
+		for command_scope_name in ["primary_command_door_usec", "primary_command_route_usec", "primary_command_decision_usec", "primary_command_target_waypoint_usec"]:
+			scopes_usec[command_scope_name] = 0
 	if command_feedback_label != null:
 		if not _last_planning_state_issue.is_empty():
 			_set_mission_label_text_delta(command_feedback_label, "PLANUNG NICHT GELADEN\nAlte Planungsdaten erkannt.\nBitte Plan im aktuellen Phasensystem neu anlegen.")
 		else:
+			var command_scope_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 			var door_authority_line: String = _build_visible_door_authority_command_line()
+			if profile_enabled:
+				scopes_usec["primary_command_door_usec"] = Time.get_ticks_usec() - command_scope_started_usec
+				command_scope_started_usec = Time.get_ticks_usec()
 			var station_route_line: String = String(_build_station_route_run_readout_snapshot().get("compact_line", "")).strip_edges()
-			var last_line: String = "%s\nDEC %s" % [_last_command_text, _build_selected_decision_status_text()]
+			if profile_enabled:
+				scopes_usec["primary_command_route_usec"] = Time.get_ticks_usec() - command_scope_started_usec
+				command_scope_started_usec = Time.get_ticks_usec()
+			var decision_status_text: String = _build_selected_decision_status_text()
+			var last_line: String = "%s\nDEC %s" % [_last_command_text, decision_status_text]
 			if not door_authority_line.is_empty():
 				last_line = "%s\n%s" % [door_authority_line, last_line]
 			var route_block: String = "\n%s" % station_route_line if not station_route_line.is_empty() else ""
+			if profile_enabled:
+				scopes_usec["primary_command_decision_usec"] = Time.get_ticks_usec() - command_scope_started_usec
+				command_scope_started_usec = Time.get_ticks_usec()
 			_set_mission_label_text_delta(command_feedback_label, "TEAM %s | PHASE %s\nTARGET %s%s\n%s\nLAST %s" % [
 				_get_fireteam_name(),
 				_get_phase_name(),
@@ -3886,6 +3900,8 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 				_build_selected_waypoint_info_text(),
 				last_line,
 			])
+			if profile_enabled:
+				scopes_usec["primary_command_target_waypoint_usec"] = Time.get_ticks_usec() - command_scope_started_usec
 
 	var hotkey_legend_label := get_node_or_null(hotkey_legend_label_path) as Label
 	if hotkey_legend_label != null:
@@ -3921,10 +3937,17 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		scopes_usec["panel_fireteam_phase_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_nav_timer_label()
+	if profile_enabled:
+		scopes_usec["panel_nav_timer_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_identity_session_badge()
+	if profile_enabled:
+		scopes_usec["panel_identity_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_team_chip_label()
 	if profile_enabled:
-		scopes_usec["panel_nav_identity_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["panel_team_chip_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["panel_nav_identity_usec"] = int(scopes_usec.get("panel_nav_timer_usec", 0)) + int(scopes_usec.get("panel_identity_usec", 0)) + int(scopes_usec.get("panel_team_chip_usec", 0))
 		scope_started_usec = Time.get_ticks_usec()
 	_refresh_mission_dropship_panel()
 	if profile_enabled:

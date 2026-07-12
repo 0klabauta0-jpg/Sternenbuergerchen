@@ -6,10 +6,17 @@ const CONTROLLER_SOURCE_PATH: String = "res://scripts/tests/mission_tactical_san
 const EXPECTED_LIGHT_SCOPES: PackedStringArray = [
 	"primary_block_labels_usec",
 	"primary_command_feedback_usec",
+	"primary_command_door_usec",
+	"primary_command_route_usec",
+	"primary_command_decision_usec",
+	"primary_command_target_waypoint_usec",
 	"primary_fireteam_status_usec",
 	"primary_fireteam_tooltips_usec",
 	"panel_fireteam_phase_usec",
 	"panel_nav_identity_usec",
+	"panel_nav_timer_usec",
+	"panel_identity_usec",
+	"panel_team_chip_usec",
 	"panel_dropship_usec",
 	"panel_event_log_usec",
 ]
