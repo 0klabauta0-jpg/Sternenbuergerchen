@@ -15610,6 +15610,57 @@ func get_left_tactical_stack_1280_detail_recapture_snapshot() -> Dictionary:
 	}
 
 
+func get_left_tactical_stack_1280_detail_visual_acceptance_snapshot() -> Dictionary:
+	var recapture: Dictionary = get_left_tactical_stack_1280_detail_recapture_snapshot()
+	var host_window: Dictionary = Dictionary(recapture.get("host_window_artifact", {}))
+	var client_window: Dictionary = Dictionary(recapture.get("client_window_artifact", {}))
+	var has_window_evidence: bool = bool(host_window.get("exists", false)) \
+		and bool(client_window.get("exists", false)) \
+		and int(host_window.get("size_bytes", 0)) > 0 \
+		and int(client_window.get("size_bytes", 0)) > 0 \
+		and String(host_window.get("path", "")) != String(client_window.get("path", ""))
+	var accepted: bool = bool(recapture.get("detail_recapture_ready", false)) and has_window_evidence
+	return {
+		"schema": "sternenbuergerchen.left_tactical_stack_1280_detail_visual_acceptance.v1",
+		"task_id": "TASK_1167",
+		"source_task_id": "TASK_1166",
+		"status": "accepted_with_followup" if accepted else "blocked_by_missing_recapture",
+		"ready_for_playability_slice": accepted,
+		"accepted_surfaces": [
+			"fireteam_mini_cards",
+			"primary_focus",
+			"event_log",
+			"selected_member_cards",
+		] if accepted else [],
+		"positive_findings": [
+			"Host: Fireteam-Mini-Cards sind unterscheidbar; Lead, Status und Memberstrip bleiben lesbar.",
+			"Host: Ereignislog blockiert die Fireteam-Karten nicht mehr funktional.",
+			"Client: Gold-Fokus, Auswahlkante und Kartenstatus sind klar erkennbar.",
+			"Client: Ausgewaehlte Memberkarten sind im 1280er Fenster lesbar und handlungsnah.",
+		] if accepted else [],
+		"followup_findings": [
+			{
+				"id": "left_stack_air_anchor",
+				"severity": "minor",
+				"summary": "Linker Stack bleibt randnah und eng; Eventlog und Karten koennen luftiger verankert werden.",
+				"route_to": "TASK_1168 - Left Tactical Stack Air And Anchor Polish",
+				"blocks_playability_slice": false,
+			}
+		] if accepted else [],
+		"recapture": recapture,
+		"manual_visual_review_required": true,
+		"manual_visual_review_performed": accepted,
+		"recommended_next_task": "TASK_1168 - Left Tactical Stack Air And Anchor Polish",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
 func _build_left_tactical_stack_1280_release_provenance_evidence() -> Dictionary:
 	var provenance_path: String = "C:/dev/Sternenbuergerchen_rel/release_build_provenance.json"
 	var provenance: Dictionary = _read_json_dictionary_from_path(provenance_path)
