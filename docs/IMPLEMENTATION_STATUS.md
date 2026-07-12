@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1175 - Station Route Live AA Pressure
+- Status: implementiert im Arbeitsstand und headless geprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1175_station_route_live_aa_pressure.md`, `docs/tasks/TASK_1071_station_route_full_victory_debrief_trace.md`, `docs/tasks/TASK_1078_station_route_approach_contact_timing.md`, `docs/tasks/TASK_1079_station_route_real_first_exchange.md`, `docs/dev/mission_interaction_point_contract.md`
+- Ausgangsbefund: Die volle Station-Route nutzte fuer jede Interaction Positionsbeschleunigung. Der direkte reale Marsch zur AA lief ohne Gegnerkontakt, weil die NPC-AA-Wache am entfernten PvP-Spawn stand.
+- Aenderung: `bravo_air_defense` startet im Einzelspieler am bestehenden `factory_danger_zone`. TASK_1175 nutzt nur die vorhandenen Homebase-, Dropship-, Controller-, SimulationRoot- und Interaction-Pfade und prueft Formation-Bewegung, Contact, AA-Context-Intent, getrenntes GO und `aa_disabled`.
+- Architektur: Keine UI- oder Test-Wahrheit. Der Verifier setzt weder Unit-Position, Gate, Contact, Fire-/Damage-Event noch MissionResult. Die beschleunigte Delta-Zeit bleibt auf den Test begrenzt.
+- Lokale Pruefung: TASK_1175 16/16 gruen in rund 266 Sekunden.
+- Risiken/offen: Der 192x192-Headless-Aufbau ist sehr teuer. Ein gezielter Harness-/Fixture-Performancepass muss getrennt vom Gameplay-Contract erfolgen. Der naechste Spielergriff ist die zweite Route-Entscheidung unter aktivem Contact.
+
 ### TASK_1174 - Mission Release Recapture Extraction
 - Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
 - Relevante Docs/Contracts: `docs/tasks/TASK_1174_mission_release_recapture_extraction.md`, `docs/tasks/TASK_1172_first_contact_readability_release_recapture.md`, `docs/tasks/TASK_1173_first_engagement_feedback_release_recapture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`

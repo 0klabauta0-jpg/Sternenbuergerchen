@@ -13,6 +13,15 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1175 - Station Route Live AA Pressure (implementiert im Arbeitsstand)
+- Grundlage: TASK_1071 erreichte Victory mit testseitiger Formation-Positionierung; der echte erste Zielweg unter NPC-Druck war nicht geschlossen.
+- Ziel: Homebase -> Drop -> normaler Move zur AA -> Bravo-Contact -> sichtbares AA -> GO -> vorhandene AA-Completion ohne Positions-, Gate- oder Contact-Override pruefen.
+- Ergebnis: Die NPC-AA-Wache startet am vorhandenen `factory_danger_zone` statt am entfernten PvP-Spawn. TASK_1175 belegt reale Formation-Bewegung, Contact, Context-Intent, getrenntes GO und `aa_disabled` auf dem normalen Runtime-Pfad.
+- Verifikation: TASK_1175 16/16 gruen; der große 192x192-Headless-Trace kostet rund 266 Sekunden und bleibt als Harness-Performancepunkt offen.
+- Naechster Schritt: Den zweiten Spielermoment nach AA unter aktivem Contact auswaehlen: Stationstuer/Computer mit klarer Fire-, Hold- oder Rueckzugsentscheidung, ohne wieder Positionshilfen einzufuehren.
+
+---
+
 ## TASK_1174 - Mission Release Recapture Extraction (implementiert im Arbeitsstand)
 - Grundlage: TASK_1172/TASK_1173 sind datenrein, lagen aber noch als weitere Methoden im Legacy-Testcontroller.
 - Ziel: Die beiden Recapture-Builder in einen Mission-Service ziehen und die Controller-Methoden als schmale Evidence-Adapter behalten.
