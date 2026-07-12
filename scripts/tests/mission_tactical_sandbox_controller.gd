@@ -11345,7 +11345,7 @@ func _is_completed_empty_mission_dropship_card(card: Dictionary) -> bool:
 		return false
 	if not Array(card.get("embarked_unit_ids", [])).is_empty() or int(card.get("passenger_count", 0)) > 0:
 		return false
-	if not craft_id.is_empty() and (_pending_network_dropship_commands_by_craft.has(craft_id) or _network_dropship_feedback_by_craft.has(craft_id)):
+	if not craft_id.is_empty() and _pending_network_dropship_commands_by_craft.has(craft_id):
 		return false
 	return is_empty_departure or not _is_active_drop_sequence_for_craft(craft_id)
 

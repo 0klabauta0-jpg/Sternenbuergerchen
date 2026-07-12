@@ -28,7 +28,10 @@ func _run() -> void:
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", waiting_empty, true)).size() == 1, "Actionable waiting Dropship remains visible")
 		controller.set("_network_dropship_feedback_by_craft", {"dropship_feedback": {"compact_line": "HOST OK", "tone": "success"}})
 		var feedback_outbound := [_card("dropship_feedback", "outbound", [])]
-		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", feedback_outbound, true)).size() == 1, "Recent craft feedback keeps its Dropship surface visible")
+		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", feedback_outbound, true)).is_empty(), "Historical craft feedback cannot pin an empty Dropship surface over Contact")
+		controller.set("_pending_network_dropship_commands_by_craft", {"dropship_pending": {"remaining_seconds": 3.0}})
+		var pending_outbound := [_card("dropship_pending", "outbound", [])]
+		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", pending_outbound, true)).size() == 1, "A real pending craft command keeps its Dropship surface visible")
 	mission.queue_free()
 	await process_frame
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])

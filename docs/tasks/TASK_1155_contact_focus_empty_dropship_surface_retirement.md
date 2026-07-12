@@ -9,7 +9,8 @@ Der vorhandene TASK-1120-Filter blendet nur leere Karten im Zustand `to_fob` mit
 ## Umfang
 - Leere `outbound`-Dropship-Karten bei aktivem Contact-Fokus aus der grossen Bedienflaeche entfernen.
 - Leere abgeschlossene `to_fob`-Karten weiterhin entfernen.
-- Beladene, wartende, gelandete, pending oder mit Feedback versehene Karten sichtbar lassen.
+- Beladene, wartende, gelandete oder wirklich pending Karten sichtbar lassen.
+- Abgelaufener, nur noch in der replizierten Karte konservierter Result-Text darf eine leere Surface im Contact-Fokus nicht festhalten.
 - Karten-/Transportdaten und autoritative Sequenz unveraendert lassen.
 
 ## Nicht-Ziele
@@ -20,7 +21,7 @@ Der vorhandene TASK-1120-Filter blendet nur leere Karten im Zustand `to_fob` mit
 ## Akzeptanzkriterien
 - Zwei leere `outbound`-Karten ergeben bei `CONTACT FIRE` keine grossen Bedienkarten mehr.
 - Dieselben Karten bleiben ohne Contact-Fokus sichtbar.
-- Payload, Pending/Feedback und noch bedienbare Craft-Zustaende bleiben sichtbar.
+- Payload, echte Pending-Commands und noch bedienbare Craft-Zustaende bleiben sichtbar.
 - Host und Client behalten Deployment, Contact und First Fire.
 - TASK_1120, TASK_1109, TASK_1110, TASK_1150 und TASK_222 bleiben gruen.
 
@@ -36,4 +37,4 @@ Der vorhandene TASK-1120-Filter blendet nur leere Karten im Zustand `to_fob` mit
 - `git diff --check`.
 
 ## Risiken / offene Punkte
-Eine leere Karte kann noch kurzfristiges Host-Feedback tragen. Pending- oder Feedbackzustand verhindert deshalb das Ausblenden, bis der vorhandene Feedback-Lifecycle abgeschlossen ist.
+Eine leere Karte kann noch historischen Host-Text tragen. Nur ein echter Pending-Command verhindert das Ausblenden; Result-Feedback bleibt weiterhin in Command-/Event-Feedback nachvollziehbar, darf aber im Feuerkontakt keine nicht mehr bedienbare Grosskarte festhalten.
