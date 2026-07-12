@@ -13,11 +13,18 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance (implementiert und visuell akzeptiert)
+- Grundlage: TASK_1166 liefert getrennte Host-/Client-Fensterbilder aus dem aktuellen 1280x720-Release.
+- Ziel: Den echten Spielerblick auf Fireteam-Mini-Cards, Primaerfokus, Ereignislog und Memberkarten bewerten, ohne im selben Task weiteres Layout zu veraendern.
+- Ergebnis: `get_left_tactical_stack_1280_detail_visual_acceptance_snapshot()` akzeptiert den linken Stack fuer den naechsten Spielbarkeits-Slice und dokumentiert einen minor Follow-up: linker Stack/Eventlog sind noch eng und koennen luftiger verankert werden.
+- Verifikation: TASK_1167 33/33 plus Sichtpruefung der getrennten Host-/Client-Fensterbilder.
+- Naechster Schritt: TASK_1168 - Left Tactical Stack Air And Anchor Polish.
+
 ## TASK_1166 - Left Tactical Stack 1280 Detail Recapture (implementiert und im Release sichtbar verifiziert)
 - Grundlage: TASK_1165 hat die belegten Detailreibungen im linken 1280er Stack headless behoben, aber noch nicht im frisch exportierten Host-/Client-Spielbild bestaetigt.
 - Ziel: Den aktuellen Release-Stand, das FirstContact-Capture-Manifest und getrennte Host-/Client-Fensterbilder als read-only Beleg an TASK_1165 binden.
 - Ergebnis: `get_left_tactical_stack_1280_detail_recapture_snapshot()` prueft TASK_1165-Bereitschaft, Release-Provenance gegen Git-HEAD, FirstContact-Gates, getrennte Host-/Client-Bilder und markiert kombinierte Desktop-Captures als untrusted.
-- Verifikation: TASK_1166 plus TASK_1165/TASK_1164/TASK_222 und die Dropship-/Fireteam-HUD-Konsistenztests TASK_1109/TASK_1110. Nach Merge wurde der Release frisch exportiert; Startcheck ist gruen auf `b0e3053c`, FirstContact-Capture ist mit verlaengertem 300s-Zeitbudget `pass`.
+- Verifikation: TASK_1166 plus TASK_1165/TASK_1164/TASK_222 und die Dropship-/Fireteam-HUD-Konsistenztests TASK_1109/TASK_1110. Nach Merge wurde der Release frisch exportiert; Startcheck ist gruen auf dem aktuellen Git-HEAD, FirstContact-Capture ist mit verlaengertem 300s-Zeitbudget `pass`.
 - Naechster Schritt: TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance.
 
 ## TASK_1165 - Left Tactical Stack 1280 Detail Polish (implementiert im Arbeitsstand)

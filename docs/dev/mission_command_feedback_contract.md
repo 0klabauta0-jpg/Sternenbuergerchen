@@ -135,6 +135,11 @@ Nach TASK_1165 duerfen die Default-Review-Notizen des TASK_1164-Snapshots nicht 
 
 Das kombinierte Desktop-Capture bleibt fuer TASK_1166 ausdruecklich untrusted, weil fremde Fenster den visuellen Befund ueberdecken koennen. Der Snapshot setzt keine Commands, Effects, Fire-/Damage-Events, Movement- oder Multiplayer-Wahrheit. Der naechste Schritt nach einem gruenen Recapture ist TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance.
 
+## Left Tactical Stack 1280 Detail Visual Acceptance (TASK_1167)
+`get_left_tactical_stack_1280_detail_visual_acceptance_snapshot()` ist der read-only Sichtentscheid nach TASK_1166. Der Snapshot darf nur den TASK_1166-Recapture und die getrennten Host-/Client-Fensterartefakte lesen. Er meldet `accepted_with_followup`, wenn der Recapture bereit ist und beide Fensterbilder vorhanden, nicht leer und getrennt sind.
+
+Die Akzeptanz umfasst Fireteam-Mini-Cards, Primaerfokus, Ereignislog und ausgewaehlte Memberkarten. Ein akzeptierter Befund darf den naechsten Spielbarkeits-Slice oeffnen, muss aber Restreibung als Follow-up behalten, wenn die linke Stack-Flaeche noch randnah oder eng wirkt. Der Snapshot setzt keine Commands, Effects, Fire-/Damage-Events, Movement- oder Multiplayer-Wahrheit.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 `get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
 
