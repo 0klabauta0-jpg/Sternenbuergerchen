@@ -11338,15 +11338,16 @@ func _build_contact_focused_mission_dropship_card_entries(entries: Array, contac
 
 func _is_completed_empty_mission_dropship_card(card: Dictionary) -> bool:
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
-	if String(card.get("state", "")).strip_edges().to_lower() != "to_fob" or int(card.get("eta_seconds", 0)) > 0:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	var is_completed_return: bool = state == "to_fob" and int(card.get("eta_seconds", 0)) <= 0
+	var is_empty_departure: bool = state == DROP_SEQUENCE_OUTBOUND or state == DROP_SEQUENCE_COMPLETE
+	if not is_completed_return and not is_empty_departure:
 		return false
 	if not Array(card.get("embarked_unit_ids", [])).is_empty() or int(card.get("passenger_count", 0)) > 0:
 		return false
-	if not String(card.get("pilot_unit_id", "")).strip_edges().is_empty():
-		return false
 	if not craft_id.is_empty() and (_pending_network_dropship_commands_by_craft.has(craft_id) or _network_dropship_feedback_by_craft.has(craft_id)):
 		return false
-	return not _is_active_drop_sequence_for_craft(craft_id)
+	return is_empty_departure or not _is_active_drop_sequence_for_craft(craft_id)
 
 
 func _find_mission_dropship_card_entry(craft_id: String) -> Dictionary:

@@ -1,5 +1,11 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1155 - Contact Focus Empty Dropship Surface Retirement
+- Status: in Arbeit
+- Relevante Docs/Contracts: `docs/tasks/TASK_1155_contact_focus_empty_dropship_surface_retirement.md`, `docs/tasks/TASK_1120_connected_first_contact_event_log_dedupe_hud_declutter.md`
+- Ausgangsbefund: Zwei leere `Leaving mission map`-Karten belegen im echten Host-/Client-First-Contact weiterhin grosse rechte HUD-Flaechen.
+- Ziel: Leere outbound-Transportsurfaces nur im Contact-Fokus ausblenden; aktive, beladene oder feedbacktragende Karten bleiben sichtbar.
+
 ### TASK_1154 - Fireteam Contact Loss Language Clarity
 - Status: implementiert und im exportierten Zwei-EXE-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1154_fireteam_contact_loss_language_clarity.md`, `docs/tasks/TASK_1132_fireteam_mini_card_tactical_state_language_polish.md`
