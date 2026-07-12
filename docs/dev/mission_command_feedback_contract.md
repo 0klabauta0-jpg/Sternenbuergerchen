@@ -130,6 +130,11 @@ Erwartete Struktur: Ohne Trace bleiben Status und Gate `needs_first_contact_inte
 
 Nach TASK_1165 duerfen die Default-Review-Notizen des TASK_1164-Snapshots nicht mehr zu `TASK_1165 - Left Tactical Stack 1280 Detail Polish` routen. Ein erneuter echter Host-/Client-1280-Capture bleibt ein Sichtbeleg-Task und darf nicht durch den headless Detail-Snapshot ersetzt werden. Der Snapshot setzt keine Commands, Effects, Fire-/Damage-Events oder Multiplayer-Wahrheit.
 
+## Left Tactical Stack 1280 Detail Recapture (TASK_1166)
+`get_left_tactical_stack_1280_detail_recapture_snapshot()` ist der read-only Sichtbeleg nach TASK_1165. Der Snapshot darf nur den TASK_1165-Detail-Polish, die Release-Provenance, das FirstContact-Capture-Manifest und getrennte Host-/Client-Fensterbilder lesen. Er meldet `detail_recapture_ready`, wenn TASK_1165 bereit ist, der exportierte Release-Commit dem aktuellen Git-HEAD entspricht, FirstContact-Manifest und Release-Gate `pass` melden, Deployment und First Fire konvergieren und Host-/Client-Fensterbilder getrennt sowie nicht leer vorliegen.
+
+Das kombinierte Desktop-Capture bleibt fuer TASK_1166 ausdruecklich untrusted, weil fremde Fenster den visuellen Befund ueberdecken koennen. Der Snapshot setzt keine Commands, Effects, Fire-/Damage-Events, Movement- oder Multiplayer-Wahrheit. Der naechste Schritt nach einem gruenen Recapture ist TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance.
+
 ## Release First Decision Loop Two Player Loop Micro Objective Round Loop Real Window Capture (TASK_1004)
 `get_release_first_decision_loop_two_player_loop_micro_objective_round_loop_real_window_capture_snapshot()` ist der read-only Pruefpunkt fuer den echten Fenster-Capture-Rahmen nach TASK_1003. Der Snapshot darf nur den TASK_1003-Runtime-Polish und ein optionales Capture-Manifest bewerten. Er muss im Command-Feedback als Snapshot, Status, Gate und Window-Screenshot-Pfad exportiert werden.
 

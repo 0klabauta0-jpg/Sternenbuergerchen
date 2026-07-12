@@ -15569,6 +15569,132 @@ func get_left_tactical_stack_1280_detail_polish_snapshot() -> Dictionary:
 	}
 
 
+func get_left_tactical_stack_1280_detail_recapture_snapshot() -> Dictionary:
+	var source_detail: Dictionary = get_left_tactical_stack_1280_detail_polish_snapshot()
+	var release_provenance: Dictionary = _build_left_tactical_stack_1280_release_provenance_evidence()
+	var capture_manifest: Dictionary = _build_left_tactical_stack_1280_capture_manifest_evidence()
+	var host_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("host_window_path", "tmp/release_host_client_first_contact_host_window.png")))
+	var client_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("client_window_path", "tmp/release_host_client_first_contact_client_window.png")))
+	var ready: bool = bool(source_detail.get("left_stack_detail_polish_ready", false)) \
+		and bool(release_provenance.get("valid", false)) \
+		and bool(release_provenance.get("matches_git_head", false)) \
+		and bool(capture_manifest.get("gate_passed", false)) \
+		and bool(capture_manifest.get("release_gate_passed", false)) \
+		and bool(capture_manifest.get("deployment_converged", false)) \
+		and bool(capture_manifest.get("first_fire_converged", false)) \
+		and bool(host_window.get("exists", false)) \
+		and bool(client_window.get("exists", false)) \
+		and int(host_window.get("size_bytes", 0)) > 0 \
+		and int(client_window.get("size_bytes", 0)) > 0 \
+		and String(host_window.get("path", "")) != String(client_window.get("path", ""))
+	return {
+		"schema": "sternenbuergerchen.left_tactical_stack_1280_detail_recapture.v1",
+		"task_id": "TASK_1166",
+		"source_task_id": "TASK_1165",
+		"style_id": "task_1166_left_tactical_stack_1280_detail_recapture_v1",
+		"detail_recapture_ready": ready,
+		"source_detail_polish": source_detail,
+		"release_provenance": release_provenance,
+		"capture_manifest": capture_manifest,
+		"host_window_artifact": host_window,
+		"client_window_artifact": client_window,
+		"combined_desktop_capture_untrusted": true,
+		"recommended_next_task": "TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _build_left_tactical_stack_1280_release_provenance_evidence() -> Dictionary:
+	var provenance_path: String = "C:/dev/Sternenbuergerchen_rel/release_build_provenance.json"
+	var provenance: Dictionary = _read_json_dictionary_from_path(provenance_path)
+	var git_head: String = _read_current_git_head()
+	var provenance_commit: String = String(provenance.get("git_commit", "")).strip_edges()
+	var valid: bool = not provenance.is_empty() and String(provenance.get("schema", "")) == "sternenbuergerchen.release_build_provenance.v1"
+	var matches_git_head: bool = valid and not git_head.is_empty() and provenance_commit == git_head
+	return {
+		"path": provenance_path,
+		"exists": FileAccess.file_exists(provenance_path),
+		"valid": valid,
+		"git_head": git_head,
+		"git_head_short": git_head.substr(0, 8) if git_head.length() >= 8 else git_head,
+		"git_commit": provenance_commit,
+		"matches_git_head": matches_git_head,
+		"pck_size_bytes": int(provenance.get("pck_size_bytes", 0)),
+		"tracked_worktree_clean": bool(provenance.get("tracked_worktree_clean", false)),
+	}
+
+
+func _build_left_tactical_stack_1280_capture_manifest_evidence() -> Dictionary:
+	var manifest_path: String = "res://tmp/release_host_client_first_contact_playtest.json"
+	var manifest: Dictionary = _read_json_dictionary_from_path(manifest_path)
+	var host_window_path: String = "res://tmp/release_host_client_first_contact_host_window.png"
+	var client_window_path: String = "res://tmp/release_host_client_first_contact_client_window.png"
+	if typeof(manifest.get("host_window", null)) == TYPE_DICTIONARY:
+		host_window_path = String(Dictionary(manifest.get("host_window", {})).get("path", host_window_path))
+	if typeof(manifest.get("client_window", null)) == TYPE_DICTIONARY:
+		client_window_path = String(Dictionary(manifest.get("client_window", {})).get("path", client_window_path))
+	return {
+		"path": manifest_path,
+		"manifest_exists": FileAccess.file_exists(manifest_path),
+		"schema": String(manifest.get("schema", "")),
+		"gate": String(manifest.get("gate", "")),
+		"gate_passed": String(manifest.get("gate", "")) == "pass",
+		"release_gate": String(manifest.get("release_gate", "")),
+		"release_gate_passed": String(manifest.get("release_gate", "")) == "pass",
+		"first_contact_requested": bool(manifest.get("first_contact_requested", false)),
+		"first_decision_accepted": bool(manifest.get("first_decision_accepted", false)),
+		"deployment_converged": bool(manifest.get("deployment_converged", false)),
+		"first_fire_converged": bool(manifest.get("first_fire_converged", false)),
+		"wait_msec": int(manifest.get("wait_msec", 0)),
+		"screenshot_written": bool(manifest.get("screenshot_written", false)),
+		"host_window_path": host_window_path,
+		"client_window_path": client_window_path,
+	}
+
+
+func _build_file_artifact_evidence(path: String) -> Dictionary:
+	var normalized_path: String = path.strip_edges()
+	var exists: bool = FileAccess.file_exists(normalized_path)
+	var size_bytes: int = 0
+	if exists:
+		var file := FileAccess.open(normalized_path, FileAccess.READ)
+		if file != null:
+			size_bytes = int(file.get_length())
+			file.close()
+	return {
+		"path": normalized_path,
+		"exists": exists,
+		"size_bytes": size_bytes,
+	}
+
+
+func _read_json_dictionary_from_path(path: String) -> Dictionary:
+	if not FileAccess.file_exists(path):
+		return {}
+	var text: String = FileAccess.get_file_as_string(path)
+	var parsed: Variant = JSON.parse_string(text)
+	return Dictionary(parsed) if typeof(parsed) == TYPE_DICTIONARY else {}
+
+
+func _read_current_git_head() -> String:
+	var head_path: String = "res://.git/HEAD"
+	if not FileAccess.file_exists(head_path):
+		return ""
+	var head_text: String = FileAccess.get_file_as_string(head_path).strip_edges()
+	if head_text.begins_with("ref:"):
+		var ref_path: String = "res://.git/%s" % head_text.trim_prefix("ref:").strip_edges()
+		if FileAccess.file_exists(ref_path):
+			return FileAccess.get_file_as_string(ref_path).strip_edges()
+		return ""
+	return head_text
+
+
 func _build_left_tactical_stack_1280_mini_card_detail_polish_surface() -> Dictionary:
 	var host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
 	var cards: Array = []
