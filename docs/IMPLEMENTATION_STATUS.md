@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1170 - First Move Decision Preview Readability Recapture
+- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1170_first_move_decision_preview_readability_recapture.md`, `docs/tasks/TASK_1169_left_stack_air_anchor_release_acceptance.md`, `docs/dev/mission_command_feedback_contract.md`
+- Ausgangsbefund: Nach TASK_1169 ist der linke Stack im Release akzeptiert; der naechste spielerische Griff ist die erste Move-Entscheidung vor `GO`.
+- Aenderung: `get_mission_first_move_decision_preview_release_recapture_snapshot()` fasst TASK_540 First-Move, TASK_567 Threat-Preview, TASK_950 Decision-Overlay, TASK_1169 Release-Acceptance, Release-Provenance und getrennte Host-/Client-Artefakte zusammen. Der Snapshot belegt geplante Waypoints, Ghost/Path, Risikozeile und GO-Bereitschaft vor Commit.
+- Architektur: Der Snapshot ist read-only, setzt keine UI-Gameplay-Wahrheit, fuehrt kein `GO` aus und mutiert weder Command- noch Effect-Queue.
+- Lokale Pruefung: TASK_1170, TASK_567, TASK_950, TASK_1169.
+- Risiken/offen: Der Task ist ein Recapture-Gate, kein neuer Screenshot-Review. Naechster sinnvoller Schritt ist TASK_1171 - First Move Execution Feedback Release Recapture.
+
 ### TASK_1169 - Left Stack Air Anchor Release Acceptance
 - Status: implementiert, headless-regressionsgeprueft und anhand frischer Host-/Client-FirstContact-Fensterbilder akzeptiert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1169_left_stack_air_anchor_release_acceptance.md`, `docs/tasks/TASK_1168_left_tactical_stack_air_anchor_polish.md`, `docs/dev/mission_command_feedback_contract.md`
