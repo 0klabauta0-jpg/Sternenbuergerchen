@@ -11336,6 +11336,23 @@ func _build_contact_focused_mission_dropship_card_entries(entries: Array, contac
 	return result
 
 
+func _is_mission_contact_focus_active() -> bool:
+	return _is_contact_focus_active_from_snapshots(
+		get_connected_first_contact_hud_perspective_snapshot(),
+		_get_release_first_exchange_visible_status_source_evidence()
+	)
+
+
+func _is_contact_focus_active_from_snapshots(contact_perspective: Dictionary, visible_status_source: Dictionary) -> bool:
+	var perspective_line: String = String(contact_perspective.get("primary_line", "")).strip_edges().to_upper()
+	if perspective_line.contains("CONTACT FIRE"):
+		return true
+	if not bool(visible_status_source.get("active", false)):
+		return false
+	var persisted_line: String = String(visible_status_source.get("compact_line", visible_status_source.get("contact_fire_primary_line", ""))).strip_edges().to_upper()
+	return persisted_line.contains("CONTACT FIRE")
+
+
 func _is_completed_empty_mission_dropship_card(card: Dictionary) -> bool:
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
 	var state: String = String(card.get("state", "")).strip_edges().to_lower()
@@ -11908,8 +11925,7 @@ func _refresh_mission_dropship_panel() -> void:
 	if panel == null:
 		return
 	_enforce_mission_dropship_panel_geometry(panel)
-	var contact_perspective: Dictionary = get_connected_first_contact_hud_perspective_snapshot()
-	var contact_focus_active: bool = String(contact_perspective.get("primary_line", "")).contains("CONTACT FIRE")
+	var contact_focus_active: bool = _is_mission_contact_focus_active()
 	var card_entries: Array = _build_contact_focused_mission_dropship_card_entries(_get_mission_dropship_card_entries(), contact_focus_active)
 	var show_panel: bool = _tactical_ui_visible and not card_entries.is_empty()
 	if not show_panel:
@@ -14045,8 +14061,7 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 	var seen_craft_ids: Dictionary = {}
 	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
 	var cards: Array = _get_mission_dropship_card_entries()
-	var contact_perspective: Dictionary = get_connected_first_contact_hud_perspective_snapshot()
-	var contact_focus_active: bool = String(contact_perspective.get("primary_line", "")).contains("CONTACT FIRE")
+	var contact_focus_active: bool = _is_mission_contact_focus_active()
 	cards = _build_contact_focused_mission_dropship_card_entries(cards, contact_focus_active)
 	for index in range(cards.size()):
 		var card: Dictionary = Dictionary(cards[index])

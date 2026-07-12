@@ -19,6 +19,10 @@ func _run() -> void:
 	var controller := mission.get_node_or_null("TacticalController")
 	_assert(controller != null, "Mission exposes tactical controller")
 	if controller != null:
+		_assert(controller.has_method("_is_contact_focus_active_from_snapshots"), "Controller exposes one Contact-focus decision for HUD surfaces")
+		if controller.has_method("_is_contact_focus_active_from_snapshots"):
+			_assert(bool(controller.call("_is_contact_focus_active_from_snapshots", {}, {"active": true, "compact_line": "CONTACT FIRE | BLUE"})), "Persisted First-Fire status activates Contact focus when connected diagnostics lag")
+			_assert(not bool(controller.call("_is_contact_focus_active_from_snapshots", {}, {})), "Empty HUD snapshots do not activate Contact focus")
 		var empty_outbound := [_card("dropship_blue", "outbound", []), _card("dropship_gold", "outbound", [])]
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", empty_outbound, true)).is_empty(), "Contact focus retires empty outbound Dropship surfaces")
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", empty_outbound, false)).size() == 2, "Outside Contact focus outbound Dropships remain visible")
