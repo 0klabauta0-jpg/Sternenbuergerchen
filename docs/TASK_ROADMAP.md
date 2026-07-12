@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1168 - Left Tactical Stack Air And Anchor Polish (implementiert im Arbeitsstand)
+- Grundlage: TASK_1167 akzeptierte den linken Stack visuell, benannte aber als minor Follow-up die randnahe/enge Wirkung von Fireteam-Mini-Cards und Eventlog.
+- Ziel: Linken Stack luftiger und stabiler verankern, ohne neues HUD-System und ohne Gameplay-Wahrheit im UI.
+- Ergebnis: `fireteam_mini` und `event_log` teilen einen 32-Pixel-Linksrasteranker, zwischen Mini-Panel und Eventlog bleiben mindestens 24 Pixel Luft, Mini-Cards haben 8 Pixel Card-Host-Abstand, und `get_left_tactical_stack_1280_air_anchor_polish_snapshot()` belegt den Zustand read-only.
+- Verifikation: TASK_1168 31/31.
+- Naechster Schritt: Regressions, Release-Export und FirstContact-Recapture auf dem Merge-Stand.
+
 ## TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance (implementiert und visuell akzeptiert)
 - Grundlage: TASK_1166 liefert getrennte Host-/Client-Fensterbilder aus dem aktuellen 1280x720-Release.
 - Ziel: Den echten Spielerblick auf Fireteam-Mini-Cards, Primaerfokus, Ereignislog und Memberkarten bewerten, ohne im selben Task weiteres Layout zu veraendern.

@@ -275,6 +275,13 @@ fasst Mini-Cards, Primaerfokus, feste Stack-Rechtecke und den TASK-1159-Eventlog
 read-only zusammen. Der Snapshot erzeugt keine Commands, Effects, Fire-/Damage-
 Events oder Multiplayer-Wahrheit.
 
+TASK_1168 verankert denselben linken Stack luftiger: `fireteam_mini` und
+`event_log` teilen einen 32-Pixel-Linksrasteranker, zwischen Fireteam-Mini und
+Eventlog bleiben mindestens 24 Pixel Luft, und Mini-Cards behalten mindestens
+8 Pixel Abstand im Card-Host. `get_left_tactical_stack_1280_air_anchor_polish_snapshot()`
+belegt diesen UI-Polish read-only; Gameplay-, Combat-, Movement- und
+Multiplayer-Wahrheit bleiben unveraendert bei den bestehenden Runtime-Pfaden.
+
 ## Insertion-/First-Order-Readability
 `get_mission_insertion_first_order_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten spielbaren Missionsmoment nach dem Homebase-Launch. Der Snapshot darf nur bestehende Planning-, Dropship-Karten-, Command-Feedback- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: Dropship-Payload vorhanden, Card sichtbar, LZ-Zustand sichtbar, Drop ohne LZ blockiert, ausgewaehltes Fireteam sichtbar, erste Order-Kontrollen vorhanden, und nach LZ-Setzung ein sichtbarer LZ-Marker plus bereiter Drop-Button.
 

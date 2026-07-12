@@ -231,6 +231,10 @@ const LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE: int = 13
 const LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE: int = 11
 const LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE: int = 11
 const LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH: int = 3
+const LEFT_TACTICAL_STACK_1280_AIR_ANCHOR_STYLE_ID: String = "task_1168_left_tactical_stack_air_anchor_v1"
+const LEFT_TACTICAL_STACK_1280_MIN_LEFT_ANCHOR: float = 32.0
+const LEFT_TACTICAL_STACK_1280_MIN_EVENT_GAP: float = 24.0
+const LEFT_TACTICAL_STACK_1280_MIN_CARD_SEPARATION: int = 8
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC: int = 5000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
@@ -14904,6 +14908,7 @@ func _enforce_drop_light_fixed_hud_layout() -> void:
 	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel", layout.get("command_matrix"))
 	_apply_fixed_hud_window_contract(FIRETEAM_PANEL_PATH, layout.get("selected_fireteam"))
 	_apply_fixed_hud_window_contract("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel", layout.get("mission_control"))
+	_apply_left_tactical_stack_1280_air_anchor_polish()
 
 
 func _deferred_enforce_drop_light_fixed_hud_layout() -> void:
@@ -15658,6 +15663,89 @@ func get_left_tactical_stack_1280_detail_visual_acceptance_snapshot() -> Diction
 		"creates_fire_event": false,
 		"creates_damage_event": false,
 		"sets_multiplayer_truth": false,
+	}
+
+
+func get_left_tactical_stack_1280_air_anchor_polish_snapshot() -> Dictionary:
+	_refresh_fireteam_mini_cards()
+	_refresh_tactical_event_log_panel()
+	_enforce_drop_light_fixed_hud_layout()
+	var source_visual_acceptance: Dictionary = get_left_tactical_stack_1280_detail_visual_acceptance_snapshot()
+	var air_anchor_surface: Dictionary = _build_left_tactical_stack_1280_air_anchor_surface()
+	var ready: bool = String(source_visual_acceptance.get("status", "")) == "accepted_with_followup" \
+		and bool(source_visual_acceptance.get("ready_for_playability_slice", false)) \
+		and bool(air_anchor_surface.get("air_anchor_ready", false))
+	return {
+		"schema": "sternenbuergerchen.left_tactical_stack_1280_air_anchor_polish.v1",
+		"task_id": "TASK_1168",
+		"source_task_id": "TASK_1167",
+		"style_id": LEFT_TACTICAL_STACK_1280_AIR_ANCHOR_STYLE_ID,
+		"status": "air_anchor_polished" if ready else "review",
+		"left_stack_air_anchor_ready": ready,
+		"source_visual_acceptance": source_visual_acceptance,
+		"air_anchor_surface": air_anchor_surface,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _build_left_tactical_stack_1280_air_anchor_surface() -> Dictionary:
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
+	var mini_layout_rect: Rect2i = layout.get("fireteam_mini", Rect2i())
+	var event_layout_rect: Rect2i = layout.get("event_log", Rect2i())
+	var bottom_layout_rect: Rect2i = layout.get("bottom_dock", Rect2i())
+	var mini_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
+	var event_log_panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	var card_host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
+	var mini_rect := Rect2(mini_panel.position, mini_panel.size) if mini_panel != null else Rect2()
+	var event_rect := Rect2(event_log_panel.position, event_log_panel.size) if event_log_panel != null else Rect2()
+	var bottom_rect := Rect2(Vector2(bottom_layout_rect.position), Vector2(bottom_layout_rect.size))
+	var mini_event_gap: float = event_rect.position.y - (mini_rect.position.y + mini_rect.size.y)
+	var left_anchor: float = mini_rect.position.x
+	var card_separation: int = card_host.get_theme_constant("separation") if card_host != null else 0
+	var shared_left_anchor: bool = absf(mini_rect.position.x - event_rect.position.x) <= 0.5
+	var event_below: bool = event_rect.position.y >= mini_rect.position.y + mini_rect.size.y + LEFT_TACTICAL_STACK_1280_MIN_EVENT_GAP
+	var event_above_bottom: bool = event_rect.position.y + event_rect.size.y <= bottom_rect.position.y - 8.0
+	var layout_grid_aligned: bool = bool(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("is_rect_on_base_grid", mini_layout_rect)) \
+		and bool(DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("is_rect_on_base_grid", event_layout_rect))
+	var style_applied: bool = mini_panel != null \
+		and event_log_panel != null \
+		and String(mini_panel.get_meta("left_tactical_stack_1280_air_anchor_style_id", "")) == LEFT_TACTICAL_STACK_1280_AIR_ANCHOR_STYLE_ID \
+		and String(event_log_panel.get_meta("left_tactical_stack_1280_air_anchor_style_id", "")) == LEFT_TACTICAL_STACK_1280_AIR_ANCHOR_STYLE_ID
+	var ready: bool = mini_panel != null \
+		and event_log_panel != null \
+		and card_host != null \
+		and left_anchor >= LEFT_TACTICAL_STACK_1280_MIN_LEFT_ANCHOR \
+		and shared_left_anchor \
+		and event_below \
+		and event_above_bottom \
+		and card_separation >= LEFT_TACTICAL_STACK_1280_MIN_CARD_SEPARATION \
+		and layout_grid_aligned \
+		and style_applied
+	return {
+		"source_task_id": "TASK_1168",
+		"style_id": LEFT_TACTICAL_STACK_1280_AIR_ANCHOR_STYLE_ID,
+		"air_anchor_ready": ready,
+		"fireteam_mini_rect": _rect_to_audit_dictionary(mini_rect),
+		"event_log_rect": _rect_to_audit_dictionary(event_rect),
+		"layout_fireteam_mini_rect": _rect_to_audit_dictionary(Rect2(mini_layout_rect.position, mini_layout_rect.size)),
+		"layout_event_log_rect": _rect_to_audit_dictionary(Rect2(event_layout_rect.position, event_layout_rect.size)),
+		"left_anchor_px": left_anchor,
+		"shared_left_anchor": shared_left_anchor,
+		"mini_event_gap_px": mini_event_gap,
+		"card_host_separation_px": float(card_separation),
+		"event_log_below_fireteam_mini": event_below,
+		"event_log_above_bottom_dock": event_above_bottom,
+		"layout_contract_grid_aligned": layout_grid_aligned,
+		"style_applied": style_applied,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
 	}
 
 
@@ -16632,6 +16720,35 @@ func _apply_fireteam_mini_overlay_style() -> void:
 		var passive_control := get_node_or_null(path) as Control
 		if passive_control != null:
 			passive_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_apply_left_tactical_stack_1280_air_anchor_polish()
+
+
+func _apply_left_tactical_stack_1280_air_anchor_polish() -> void:
+	var mini_panel := get_node_or_null(FIRETEAM_MINI_PANEL_PATH) as Control
+	var event_log_panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	var card_host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
+	if card_host != null:
+		card_host.add_theme_constant_override("separation", LEFT_TACTICAL_STACK_1280_MIN_CARD_SEPARATION)
+		card_host.set_meta("left_tactical_stack_1280_air_anchor_style_id", LEFT_TACTICAL_STACK_1280_AIR_ANCHOR_STYLE_ID)
+		card_host.set_meta("left_tactical_stack_1280_card_separation_px", LEFT_TACTICAL_STACK_1280_MIN_CARD_SEPARATION)
+		card_host.set_meta("left_tactical_stack_1280_ui_sets_gameplay_truth", false)
+	if mini_panel == null or event_log_panel == null:
+		return
+	var shared_left: float = maxf(mini_panel.position.x, LEFT_TACTICAL_STACK_1280_MIN_LEFT_ANCHOR)
+	var mini_position := Vector2(shared_left, mini_panel.position.y)
+	var event_position := Vector2(shared_left, maxf(event_log_panel.position.y, mini_panel.position.y + mini_panel.size.y + LEFT_TACTICAL_STACK_1280_MIN_EVENT_GAP))
+	mini_panel.position = mini_position
+	event_log_panel.position = event_position
+	mini_panel.set_deferred("position", mini_position)
+	event_log_panel.set_deferred("position", event_position)
+	for panel_variant in [mini_panel, event_log_panel]:
+		var panel := panel_variant as Control
+		panel.set_meta("left_tactical_stack_1280_air_anchor_style_id", LEFT_TACTICAL_STACK_1280_AIR_ANCHOR_STYLE_ID)
+		panel.set_meta("left_tactical_stack_1280_air_anchor_applied", true)
+		panel.set_meta("left_tactical_stack_1280_left_anchor_px", shared_left)
+		panel.set_meta("left_tactical_stack_1280_ui_sets_gameplay_truth", false)
+	event_log_panel.set_meta("left_tactical_stack_1280_event_gap_px", event_log_panel.position.y - (mini_panel.position.y + mini_panel.size.y))
+	mini_panel.set_meta("left_tactical_stack_1280_event_gap_px", event_log_panel.position.y - (mini_panel.position.y + mini_panel.size.y))
 
 
 func get_station_route_hud_visual_polish_snapshot() -> Dictionary:
