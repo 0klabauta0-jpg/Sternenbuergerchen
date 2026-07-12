@@ -295,6 +295,7 @@ const DOOR_AUTHORITY_BLOCKED_AFFORDANCE_STYLE_ID: String = "door_authority_block
 const DOOR_AUTHORITY_NEUTRAL_AFFORDANCE_STYLE_ID: String = "door_authority_neutral_v1"
 const SUPPRESS_FIRE_PREVIEW_RADIUS_WORLD: float = 148.0
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
+const RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS: float = 1.0
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
 const AREA_ORDER_PREVIEW_REFRESH_MSEC: int = 80
 const AREA_ORDER_PREVIEW_SIGNATURE_STEP: float = 8.0
@@ -543,6 +544,7 @@ var _air_asset_lz_secure_level: float = 0.0
 var _meta_transfer_routes: Array = []
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
+var _runtime_hud_heavy_refresh_time_remaining: float = 0.0
 var _fireteam_security_refresh_time_remaining: float = 0.0
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
@@ -753,13 +755,17 @@ func _process(delta: float) -> void:
 		scopes_usec["feedback_and_security_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	_card_refresh_time_remaining -= delta
+	_runtime_hud_heavy_refresh_time_remaining -= delta
 	if _card_refresh_time_remaining > 0.0:
 		if profile_enabled:
 			scopes_usec["ui_refresh_usec"] = 0
 			_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, false)
 		return
 	_card_refresh_time_remaining = CARD_REFRESH_INTERVAL_SECONDS
-	_update_ui()
+	var heavy_refresh_due: bool = _runtime_hud_heavy_refresh_time_remaining <= 0.0
+	if heavy_refresh_due:
+		_runtime_hud_heavy_refresh_time_remaining = RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS
+	_update_ui(heavy_refresh_due)
 	if profile_enabled:
 		scopes_usec["ui_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
 		_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, true)
@@ -2556,6 +2562,7 @@ func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
 	if fireteam_id.is_empty() or typeof(target_variant) != TYPE_VECTOR2 or not _is_fireteam_runtime_active(fireteam_id):
 		return false
 	var target_position := Vector2(target_variant)
+	_post_drop_security_pending_fireteam_ids.erase(fireteam_id)
 	var phase_index: int = int(command.get("phase", LIVE_ORDER_PHASE_INDEX))
 	var waypoint = FIRETEAM_WAYPOINT_SCRIPT.new({
 		"waypoint_id": String(command.get("command_id", "")),
@@ -2576,8 +2583,13 @@ func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
 		"hold_elapsed": 0.0,
 		"resolved_target_position": target_position,
 		"started_msec": Time.get_ticks_msec(),
+		"execution_owner": "standalone_network_intent",
+		"standalone_network_intent": true,
 	}
-	return _issue_waypoint_for_fireteam(fireteam_id, waypoint, phase_index, behavior_profile)
+	var started: bool = _issue_waypoint_for_fireteam(fireteam_id, waypoint, phase_index, behavior_profile)
+	if not started:
+		_phase_execution_by_fireteam.erase(fireteam_id)
+	return started
 
 
 func _get_dropship_command_fireteam_id(craft_id: String) -> String:
@@ -3834,7 +3846,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 		overlay.visible = is_visible and _character_overlay_open
 
 
-func _update_ui() -> void:
+func _update_ui(include_heavy_surfaces: bool = true) -> void:
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -3893,6 +3905,12 @@ func _update_ui() -> void:
 	if profile_enabled:
 		scopes_usec["mission_panels_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
+	if not include_heavy_surfaces:
+		if profile_enabled:
+			scopes_usec["runtime_surfaces_usec"] = 0
+			scopes_usec["secondary_labels_usec"] = 0
+			_record_mission_ui_refresh_timing_snapshot(refresh_started_usec, scopes_usec)
+		return
 	_refresh_runtime_mission_hud_surfaces()
 	_apply_release_firefight_command_matrix_visual_polish()
 	if profile_enabled:
@@ -30561,6 +30579,7 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 		command.source_command_type = "hold_position"
 		command.source_task_type = POST_DROP_SECURITY_ORIGIN
+		command.command_token = "post_drop_security:%s:%d:%s" % [fireteam_id, phase_index, unit_id]
 		command.phase = phase_index
 		_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 		if not bool(command.call("is_valid")):
@@ -31354,6 +31373,18 @@ func _record_recent_movement_trace(fireteam_id: String, movement_state: Dictiona
 	_recent_movement_trace_by_fireteam[normalized_fireteam_id] = trace
 
 
+func get_recent_fireteam_movement_trace(fireteam_id: String) -> Dictionary:
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return {}
+	var trace: Dictionary = Dictionary(_recent_movement_trace_by_fireteam.get(normalized_fireteam_id, {})).duplicate(true)
+	if trace.is_empty():
+		return {}
+	trace["read_only"] = true
+	trace["ui_sets_gameplay_truth"] = false
+	return trace
+
+
 func _build_fireteam_engage_contact_halt_context(fireteam_id: String) -> Dictionary:
 	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
 	if normalized_fireteam_id.is_empty():
@@ -31705,6 +31736,9 @@ func _update_active_phase_execution(delta: float) -> void:
 		var phase_index: int = int(execution_state.get("phase", -1))
 		var plan = _order_plans_by_key.get(_build_order_plan_key(String(fireteam_id), phase_index), null)
 		if plan == null:
+			if String(execution_state.get("execution_owner", "")) == "standalone_network_intent":
+				did_change = _update_standalone_network_intent_execution(String(fireteam_id), execution_state) or did_change
+				continue
 			_phase_execution_by_fireteam.erase(fireteam_id)
 			_ensure_fireteam_movement_controller()
 			if _fireteam_movement_controller != null:
@@ -31780,6 +31814,25 @@ func _update_active_phase_execution(delta: float) -> void:
 	_refresh_order_visuals()
 	_update_ui()
 	_emit_planning_state_changed()
+
+
+func _update_standalone_network_intent_execution(fireteam_id: String, execution_state: Dictionary) -> bool:
+	_ensure_fireteam_movement_controller()
+	if _fireteam_movement_controller == null:
+		_phase_execution_by_fireteam.erase(fireteam_id)
+		return true
+	var had_active_execution: bool = bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id))
+	if not had_active_execution:
+		_phase_execution_by_fireteam.erase(fireteam_id)
+		return true
+	var movement_result: Dictionary = _update_fireteam_movement_execution(fireteam_id)
+	var still_active: bool = bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id))
+	if bool(movement_result.get("finished", false)) or not still_active:
+		_phase_execution_by_fireteam.erase(fireteam_id)
+		_notify_fireteam_ready_for_coordination(fireteam_id)
+		return true
+	_phase_execution_by_fireteam[fireteam_id] = execution_state
+	return not Dictionary(movement_result.get("bound_complete", {})).is_empty()
 
 
 func _publish_mission_interaction_runtime_progress_for_waypoint(fireteam_id: String, waypoint, execution_state: Dictionary, complete: bool) -> void:

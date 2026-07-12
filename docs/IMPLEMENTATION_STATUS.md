@@ -1,12 +1,19 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening
+- Status: implementiert und im exportierten Zwei-EXE-Release verifiziert
+- Relevante Docs/Contracts: `docs/tasks/TASK_1151_connected_release_movement_pace_contact_approach_hardening.md`, `scripts/tactical/contact_approach_resolver.gd`, `scripts/tests/task_1151_connected_release_movement_pace_contact_approach_hardening.gd`
+- Aenderung: Standalone-Intent-Lifecycle, tokenisierte Post-Drop-Security-Supersession, leichte/schwere HUD-Cadence, prozess- und performancebezogene Release-Evidence sowie formationsweit erreichbare A*/LOS-Approaches mit Engage-Semantik.
+- Release-Beleg: Gate nach 73,2 Sekunden `pass`; beide Prozesse aktiv, Deployment/First Decision konvergent, Kontakt rund 16 Sekunden nach Engage und gemeinsames First Fire.
+- Restbefund: Ein kompletter Host-HUD-Refresh kostet weiterhin rund 266 ms und wird als eigener Performance-Task weitergefuehrt.
+
 ### TASK_1150 - Connected Release First Contact Handoff Playtest
-- Status: Release-Finding implementiert; First-Contact-Gate noch rot
+- Status: durch TASK_1151 im echten Release gruen abgeschlossen
 - Relevante Docs/Contracts: `docs/tasks/TASK_1150_connected_release_first_contact_handoff_playtest.md`, `scripts/tests/task_1150_connected_release_first_contact_handoff_playtest.gd`, `scripts/tools/capture_release_host_client_entry_playtest.ps1`
 - Aenderung: Expliziter First-Contact-Modus, read-only Contact/Fire/Movement-Evidence, autoritative Fireteam-Intents und mapgebundene Contact-Approach-Ziele. Normaler Multiplayer bleibt unautomatisiert.
-- Echter Release-Befund: Commands und Ziele konvergieren, aber Blue/Gold erreichen in 180 Sekunden weder Defense-/Patrol-Marker noch Kontakt. Das Gate meldet korrekt `fail`; Gegner oder Units wurden nicht teleportiert.
+- Echter Release-Befund: Commands, Deployment, Kontakt und First Fire konvergieren in 73,2 Sekunden; Gegner oder Units werden nicht teleportiert.
 - Lokale Pruefung: TASK_1150 18/18; TASK_1116 16/16; TASK_1117 15/15; TASK_1148 7/7 und 10/10.
-- Naechster Schritt: TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening.
+- Naechster Schritt: Missions-HUD-Vollrefresh weiter zerlegen und dessen 266-ms-Spike reduzieren.
 
 ### TASK_1149 - Connected Fireteam Card and Route Convergence Polish
 - Status: implementiert im Arbeitsstand

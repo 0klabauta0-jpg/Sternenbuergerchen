@@ -13,14 +13,17 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening (naechster Schritt)
+## TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening (implementiert)
 - Grundlage: TASK_1150 belegt korrekte autoritative Ziele und Commands, aber keinen Kontakt innerhalb von 180 Sekunden realer Zwei-EXE-Laufzeit.
 - Ziel: Wall-Time-/Tick-/Speed-/Pfadfortschritt messen und die echte Ursache der zu langsamen verbundenen Einsatzbewegung korrigieren.
 - Verifikation: Contact-Approach in zunaechst 45 bis 75 Sekunden, gemeinsamer Kontakt/First Fire und bestehende Movement-/Performance-Gates.
+- Ergebnis: Standalone Network Intents bleiben aktiv, Spielerbefehle superseden Post-Drop-Security, Contact-Approaches sind formationsweit erreichbar und laufen kampfbereit als Engage. Der periodische HUD-Pfad trennt leichte und schwere Aktualisierungen.
+- Release-Beleg: Zwei exportierte EXEs erreichen nach 73,2 Sekunden gemeinsames First Fire; beide Prozesse bleiben aktiv und das Gate meldet `pass`.
+- Restbefund: Der komplette Host-HUD-Refresh hat noch einen gemessenen Spike von rund 266 ms.
 
-## TASK_1150 - Connected Release First Contact Handoff Playtest (Release-Finding implementiert)
-- Ergebnis: Expliziter First-Contact-Modus, read-only Evidence, autoritative Fireteam-Intents und Map-Marker-Ziele funktionieren. Der echte Lauf bleibt vor Kontakt stehen, weil die Fireteams in 180 Sekunden zu wenig Wegfortschritt erzielen.
-- Beleg: Blue Ziel `(768,896)`, Position etwa `(385,385)`; Gold Ziel `(1152,768)`, Position etwa `(621,507)`; Contact/Fire jeweils 0; Gate `fail`.
+## TASK_1150 - Connected Release First Contact Handoff Playtest (durch TASK_1151 gruen)
+- Ergebnis: Expliziter First-Contact-Modus, read-only Evidence, autoritative Fireteam-Intents und Contact-Approach funktionieren bis First Fire.
+- Beleg: Release-Gate `pass` nach 73,2 Sekunden; beide Prozesse aktiv, Contact und Fire auf Host und Client sichtbar.
 - Naechster Schritt: TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening.
 
 ## TASK_1149 - Connected Fireteam Card and Route Convergence Polish (implementiert im Arbeitsstand)
