@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1160 - Mission Control 1280 Readability
+- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1160_mission_control_1280_readability.md`, TASK_1107, TASK_1118, TASK_1141, TASK_1142, TASK_1157, TASK_1158, TASK_1159
+- Ausgangsbefund: Nach Befehlsmatrix, Member-Karten und Ereignislog war `#18 EINSATZKONTROLLE` im 1280x720-Release die kleinste primaere Entscheidungsflaeche. Der alte Pfad nutzte 10/11-Pixel-Schrift und konnte bei gekapptem Text alte Meta-Zeilen wiederherstellen.
+- Aenderung: Mission-Control-Header und Statuslabel haben einen eigenen 1280er Readability-Vertrag mit 13-Pixel-Schrift, Outline, 92-Pixel-Mindesthoehe, Wrap, maximal vier sichtbaren Statuszeilen und Tooltip als Detailtraeger. Connected-First-Contact-Perspektiven spiegeln ihre CONTACT-FIRE-Zeile wieder sichtbar ins Label, ohne Commands, Effects oder Gameplay-Wahrheit zu erzeugen.
+- Lokale Pruefung: TASK_1160 21/21; TASK_1107 9/9; TASK_1118 13/13; TASK_1141 14/14; TASK_1142 78/78; TASK_1157 35/35; TASK_1158 28/28; TASK_1159 26/26; TASK_1109 18/18; TASK_1110 20/20; TASK_222 82/82.
+- Risiken/offen: Der echte 1280x720-Zwei-EXE-Sichtbeleg und Export folgen nach dem Dokumentations-/Commit-Schritt. Die Flaeche bleibt eng; langfristig kann Mission Control als groesserer Kontext-Inspector sinnvoll werden.
+- Naechster Schritt: TASK_1161 - 1280 Release Recapture and Primary HUD Balance. Der naechste Schnitt sollte den echten Host/Client-Release nach allen vier 1280er HUD-Polishes erneut aufnehmen und entscheiden, ob Mission Control, Event Log, Map oder Bottom-Dock noch visuell konkurrieren.
+
 ### TASK_1159 - Tactical Event Log 1280 Readability
 - Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1159_tactical_event_log_1280_readability.md`, TASK_366, TASK_1043, TASK_1120, TASK_889
