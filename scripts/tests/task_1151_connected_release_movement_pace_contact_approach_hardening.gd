@@ -42,6 +42,9 @@ func _initialize() -> void:
 		_assert(resolver_source.contains(token) or lobby_source.contains(token), "Contact approach selection uses %s" % token)
 	_assert(resolver_source.contains("FORMATION_SAMPLE_OFFSETS"), "Contact approach validates the formation footprint, not only its anchor")
 	_assert(resolver_source.contains("MIN_FORMATION_LOS_SAMPLE_COUNT"), "Contact approach requires stable LOS across multiple formation slots")
+	_assert(resolver_source.contains("MIN_FORMATION_REACHABLE_SAMPLE_COUNT"), "Contact approach requires the complete formation footprint to remain reachable")
+	_assert(resolver_source.contains('"reachable_sample_count"'), "Contact approach evidence exposes formation reachability")
+	_assert(resolver_source.contains("_path_reaches_sample"), "Formation footprint validation path-checks every sampled slot")
 
 	var harness_source := FileAccess.get_file_as_string(HARNESS_PATH)
 	for token in [
@@ -75,7 +78,7 @@ func _initialize() -> void:
 	_assert(controller_source.contains("func _update_ui(include_heavy_surfaces: bool = true)"), "Direct UI events can still request an immediate complete refresh")
 	_assert(controller_source.contains("_update_ui(heavy_refresh_due)"), "Periodic frames use the split light/heavy HUD refresh path")
 
-	print("TASK_1151 connected release movement pace evidence: %d/60 PASS" % (60 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/63 PASS" % (63 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
