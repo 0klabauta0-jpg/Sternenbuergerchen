@@ -15875,6 +15875,129 @@ func get_mission_first_move_decision_preview_release_recapture_snapshot() -> Dic
 	}
 
 
+func get_mission_first_move_execution_feedback_release_recapture_snapshot() -> Dictionary:
+	var preview_recapture: Dictionary = get_mission_first_move_decision_preview_release_recapture_snapshot()
+	var execution_feedback: Dictionary = get_mission_first_move_execution_feedback_snapshot()
+	var release_provenance: Dictionary = _build_left_tactical_stack_1280_release_provenance_evidence()
+	var capture_manifest: Dictionary = _build_left_tactical_stack_1280_capture_manifest_evidence()
+	var host_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("host_window_path", "tmp/release_host_client_first_contact_host_window.png")))
+	var client_window: Dictionary = _build_file_artifact_evidence(String(capture_manifest.get("client_window_path", "tmp/release_host_client_first_contact_client_window.png")))
+	var movement_state: Dictionary = Dictionary(execution_feedback.get("movement_state", {})).duplicate(true)
+	var preview_handoff_read: bool = String(preview_recapture.get("task_id", "")) == "TASK_1170" \
+		and String(preview_recapture.get("recommended_next_task", "")).begins_with("TASK_1171")
+	var running_feedback_visible: bool = _does_execution_feedback_text_show_go_or_running("%s\n%s\n%s\n%s" % [
+		String(execution_feedback.get("last_command_text", "")).strip_edges(),
+		String(execution_feedback.get("selected_fireteam_status_text", "")).strip_edges(),
+		String(execution_feedback.get("selected_order_text", "")).strip_edges(),
+		String(execution_feedback.get("mission_control_status_text", "")).strip_edges(),
+	])
+	var movement_state_visible: bool = not movement_state.is_empty()
+	var movement_target_visible: bool = _movement_state_has_target_data(movement_state)
+	var movement_readability_visible: bool = _movement_state_has_readability_data(movement_state)
+	var order_trace_visible: bool = not Dictionary(execution_feedback.get("order_plan", {})).is_empty() \
+		or not Dictionary(execution_feedback.get("visualized_waypoint", {})).is_empty()
+	var release_context_present: bool = bool(release_provenance.get("valid", false)) \
+		and bool(release_provenance.get("matches_git_head", false)) \
+		and bool(capture_manifest.get("gate_passed", false)) \
+		and bool(capture_manifest.get("release_gate_passed", false)) \
+		and bool(capture_manifest.get("deployment_converged", false)) \
+		and bool(host_window.get("exists", false)) \
+		and bool(client_window.get("exists", false)) \
+		and int(host_window.get("size_bytes", 0)) > 0 \
+		and int(client_window.get("size_bytes", 0)) > 0
+	var checks: Array = [
+		_build_mission_first_move_readability_check(
+			"preview_recapture_handoff_read",
+			preview_handoff_read,
+			"TASK_1170 first-move preview recapture is read as the handoff source; it does not need to remain active after GO."
+		),
+		_build_mission_first_move_readability_check(
+			"execution_feedback_gate_passes",
+			String(execution_feedback.get("gate", "")) == "pass",
+			"TASK_541 execution feedback remains green after GO."
+		),
+		_build_mission_first_move_readability_check(
+			"movement_state_visible",
+			movement_state_visible,
+			"Movement controller state is visible after GO."
+		),
+		_build_mission_first_move_readability_check(
+			"movement_target_visible",
+			movement_target_visible,
+			"Movement state exposes target/progress data after GO."
+		),
+		_build_mission_first_move_readability_check(
+			"movement_readability_visible",
+			movement_readability_visible,
+			"Movement state exposes a compact readability/status line."
+		),
+		_build_mission_first_move_readability_check(
+			"running_feedback_visible",
+			running_feedback_visible,
+			"Command feedback names GO, running movement or accepted execution."
+		),
+		_build_mission_first_move_readability_check(
+			"order_trace_visible",
+			order_trace_visible,
+			"Order plan or visualized waypoint remains traceable after GO."
+		),
+		_build_mission_first_move_readability_check(
+			"release_host_client_context_present",
+			release_context_present,
+			"Current release provenance and host/client FirstContact evidence are present."
+		),
+		_build_mission_first_move_readability_check(
+			"read_only",
+			not bool(preview_recapture.get("ui_sets_gameplay_truth", true))
+				and not bool(execution_feedback.get("ui_sets_gameplay_truth", true)),
+			"Snapshot reads existing execution feedback without issuing additional commands."
+		),
+	]
+	var failed_checks: Array = []
+	for check_variant in checks:
+		var check: Dictionary = Dictionary(check_variant)
+		if not bool(check.get("passed", false)):
+			failed_checks.append(String(check.get("id", "")))
+	var recaptured: bool = failed_checks.is_empty()
+	return {
+		"schema": "sternenbuergerchen.mission_first_move_execution_feedback_release_recapture.v1",
+		"task_id": "TASK_1171",
+		"source_task_id": "TASK_1170",
+		"source_task_ids": PackedStringArray(["TASK_1170", "TASK_541"]),
+		"status": "recaptured" if recaptured else "blocked_by_missing_execution_or_release_context",
+		"ready_for_first_contact_recapture": recaptured,
+		"preview_recapture": preview_recapture,
+		"execution_feedback": execution_feedback,
+		"release_provenance": release_provenance,
+		"capture_manifest": capture_manifest,
+		"host_window_artifact": host_window,
+		"client_window_artifact": client_window,
+		"preview_handoff_read": preview_handoff_read,
+		"go_executed_before_snapshot": true,
+		"movement_state_visible": movement_state_visible,
+		"movement_target_visible": movement_target_visible,
+		"movement_readability_visible": movement_readability_visible,
+		"running_feedback_visible": running_feedback_visible,
+		"order_trace_visible": order_trace_visible,
+		"checks": checks,
+		"failed_checks": failed_checks,
+		"accepted_surfaces": [
+			"first_move_execution_after_go",
+			"movement_state_target_progress",
+			"running_feedback_text",
+			"release_host_client_context",
+		] if recaptured else [],
+		"recommended_next_task": "TASK_1172 - First Contact Readability Release Recapture",
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
 func _build_left_tactical_stack_1280_air_anchor_surface() -> Dictionary:
 	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
 	var mini_layout_rect: Rect2i = layout.get("fireteam_mini", Rect2i())
