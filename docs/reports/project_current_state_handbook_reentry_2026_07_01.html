@@ -501,7 +501,8 @@
           <p><strong>Sichtbarer Playtest-Befund:</strong> Der Host zeigt jetzt <code>BND | 1 KONTAKT WEG | FIT 5/5</code>, der Client <code>MARSCHIERT | 1 KONTAKT WEG | FIT 5/5</code>. Die vollstaendige BND-Formation bleibt im Tooltip, waehrend die Kartenzeile nicht mehr abgeschnitten wird.</p>
           <p><strong>Dropship-Surface-Befund:</strong> Der erste Filter griff wegen zeitversetzter Combat-/Dropship-Snapshots und konserviertem <code>HOST TIMEOUT</code>-Text nicht. Jetzt teilen sichtbare CONTACT-FIRE-Zeile und Dropship-Panel dieselbe read-only Fokusentscheidung; nur echte Pending-Commands halten eine leere Karte sichtbar.</p>
           <p><strong>Command-Matrix-Befund:</strong> TASK_836 hatte die zuvor deutschen Primaerbefehle spaeter wieder mit <code>Move/Take/Hold/Flank/Target</code> ueberschrieben. TASK_1157 stellt <code>BW/NM/HL/FL/ZL</code> samt deutschen Tooltips wieder her und blendet die nur fuer Diagnose gedachten <code>16.x</code>-Marker im Spielerbild aus.</p>
-          <p><strong>Naechster sinnvoller Schritt:</strong> Den exportierten 1280x720-Fensterblick pruefen. Danach wird nur aus einem sichtbaren Spielerfluss-, Multiplayer- oder gemessenen Performancebefund der naechste Task geschnitten.</p>
+          <p><strong>Release-Sichtbeleg:</strong> Zwei exportierte 1280x720-Instanzen erreichen nach rund 73,8 Sekunden Deployment, Contact und denselben First Fire. <code>BW/NM/HL/FL/ZL</code> sowie <code>FH/AF/FF/UN</code> stehen vollstaendig neben ihren Icons; GO bleibt dominant und technische Slotmarker sind verschwunden.</p>
+          <p><strong>Naechster sinnvoller Schritt:</strong> Die Member-Karten in <code>#17 AUSGEWAEHLTES FIRETEAM</code> sind im selben 1280er Screenshot noch stark herunterskaliert. Namen, aktuelle Aktion und Waffenstatus sollten als naechster sichtbarer Slice eine klare Typografiehierarchie erhalten, ohne die Karten erneut zu vergroessern.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
@@ -509,7 +510,7 @@
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
           <input readonly value="TASK_1157 - Command Matrix 1280 Readability" data-export-key="reentry_handbook.current_task">
-          <input readonly value="Naechster Schritt - exportierter 1280x720-Sichtcheck" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1158 - Selected Fireteam Member Cards 1280 Readability" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1145,7 +1146,7 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "Exported 1280x720 Command Matrix Sight Check"
+            recommended_next_task: "TASK_1158 - Selected Fireteam Member Cards 1280 Readability"
           },
           metadata: {
             generated_for_task: "TASK_1157",

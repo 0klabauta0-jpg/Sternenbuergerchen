@@ -13,12 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1157 - Command Matrix 1280 Readability (implementiert, Release-Sichtcheck folgt)
+## TASK_1157 - Command Matrix 1280 Readability (implementiert und im Release sichtbar verifiziert)
 - Grundlage: Das 1920er HUD skaliert im 1280x720-Release die Command-Matrix auf unlesbare 6-Pixel-Spielschrift; sichtbare technische Slotnummern konkurrieren mit den Befehlen.
 - Ziel: Echte Befehle, ROE und GO innerhalb der stabilen fuenfspaltigen Matrix lesbar machen, ohne Command- oder Multiplayer-Verhalten anzufassen.
 - Ergebnis: 12/11/13-Pixel-Hierarchie, 14-Pixel-Icons, matrix-lokale 4-Pixel-Innenabstaende, verborgene technische Marker und wiederhergestellte deutsche `BW/NM/HL/FL/ZL`-Sprache. Alle 20 Slots und Callbacks bleiben bestehen.
 - Verifikation: TASK_1157 35/35; TASK_1139 51/51; TASK_180 98/98; TASK_836 29/29; Combat und Mehr-Dropship Host/Client gruen.
-- Naechster Schritt: Exportierter 1280x720-Sichtcheck und anschliessend der naechste echte Spielerbefund.
+- Release-Beleg: Zwei exportierte 1280x720-Instanzen erreichen nach rund 73,8 Sekunden denselben First Fire; alle Primaer-/ROE-Codes sind im vergroesserten Matrixausschnitt vollstaendig sichtbar.
+- Naechster Schritt: 1280er Lesbarkeit der ausgewaehlten Fireteam-Member-Karten pruefen.
 
 ## TASK_1156 - TASK 188 Advance Style Verifier Trust Repair (implementiert)
 - Grundlage: TASK 188 gibt trotz 13 fehlgeschlagener Assertions Exit 0 zurueck und erzeugt Bounding/Caterpillar mit einem heute absichtlich auf Rush normalisierten Move-Command.
