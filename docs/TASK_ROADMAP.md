@@ -13,10 +13,15 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1150 - Connected Release First Contact Handoff Playtest (naechster Schritt)
-- Grundlage: Der Release-Lauf ist bis zur konsistent sichtbaren ersten Blue-/Gold-Bewegungsentscheidung belegt.
-- Ziel: Zwei exportierte Prozesse zustandsbasiert bis Ankunft, erstem Kontakt und taktischem Feuer-Handoff weiterfuehren.
-- Verifikation: Host-/Client-Trace und 1600x900-Recapture am ersten verbundenen Kontakt; bestehende Contact-/Combat-/Performance-Gates.
+## TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening (naechster Schritt)
+- Grundlage: TASK_1150 belegt korrekte autoritative Ziele und Commands, aber keinen Kontakt innerhalb von 180 Sekunden realer Zwei-EXE-Laufzeit.
+- Ziel: Wall-Time-/Tick-/Speed-/Pfadfortschritt messen und die echte Ursache der zu langsamen verbundenen Einsatzbewegung korrigieren.
+- Verifikation: Contact-Approach in zunaechst 45 bis 75 Sekunden, gemeinsamer Kontakt/First Fire und bestehende Movement-/Performance-Gates.
+
+## TASK_1150 - Connected Release First Contact Handoff Playtest (Release-Finding implementiert)
+- Ergebnis: Expliziter First-Contact-Modus, read-only Evidence, autoritative Fireteam-Intents und Map-Marker-Ziele funktionieren. Der echte Lauf bleibt vor Kontakt stehen, weil die Fireteams in 180 Sekunden zu wenig Wegfortschritt erzielen.
+- Beleg: Blue Ziel `(768,896)`, Position etwa `(385,385)`; Gold Ziel `(1152,768)`, Position etwa `(621,507)`; Contact/Fire jeweils 0; Gate `fail`.
+- Naechster Schritt: TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening.
 
 ## TASK_1149 - Connected Fireteam Card and Route Convergence Polish (implementiert im Arbeitsstand)
 - Ergebnis: Host und Client zeigen Blue und Gold nach GO konsistent als `MARSCHIERT`. Ein Member-Runtime-Fallback schliesst den kurzen Movement-Snapshot-Uebergang.
