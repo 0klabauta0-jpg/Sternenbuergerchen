@@ -223,6 +223,10 @@ const MISSION_CONTROL_1280_MIN_STATUS_HEIGHT: float = 92.0
 const PRIMARY_HUD_1280_BALANCE_STYLE_ID: String = "task_1161_1280_release_primary_hud_balance_v1"
 const LEFT_TACTICAL_STACK_1280_READABILITY_STYLE_ID: String = "task_1162_left_tactical_stack_1280_readability_v1"
 const LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE := Vector2(232.0, 104.0)
+const LEFT_TACTICAL_STACK_1280_DETAIL_POLISH_STYLE_ID: String = "task_1165_left_tactical_stack_1280_detail_polish_v1"
+const LEFT_TACTICAL_STACK_1280_DETAIL_CARD_MIN_SIZE := Vector2(232.0, 120.0)
+const LEFT_TACTICAL_STACK_1280_DETAIL_LEAD_FONT_SIZE: int = 12
+const LEFT_TACTICAL_STACK_1280_DETAIL_MEMBER_STRIP_FONT_SIZE: int = 11
 const LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE: int = 13
 const LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE: int = 11
 const LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE: int = 11
@@ -5303,8 +5307,16 @@ func _apply_left_tactical_stack_1280_mini_card_style(card: Control, selected_fir
 		stage_label.set_meta("left_tactical_stack_1280_font_size", LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE)
 	var member_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
 	if member_label != null:
-		member_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE)
+		member_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_DETAIL_LEAD_FONT_SIZE)
 		member_label.set_meta("left_tactical_stack_1280_font_size", LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE)
+		member_label.set_meta("left_tactical_stack_1280_detail_font_size", LEFT_TACTICAL_STACK_1280_DETAIL_LEAD_FONT_SIZE)
+		member_label.set_meta("left_tactical_stack_1280_detail_polish_member_strip", true)
+	card.custom_minimum_size = Vector2(
+		maxf(card.custom_minimum_size.x, LEFT_TACTICAL_STACK_1280_DETAIL_CARD_MIN_SIZE.x),
+		maxf(card.custom_minimum_size.y, LEFT_TACTICAL_STACK_1280_DETAIL_CARD_MIN_SIZE.y)
+	)
+	card.set_meta("left_tactical_stack_1280_detail_polish_style_id", LEFT_TACTICAL_STACK_1280_DETAIL_POLISH_STYLE_ID)
+	card.set_meta("left_tactical_stack_1280_detail_polish_style_applied", true)
 	var stylebox := StyleBoxFlat.new()
 	stylebox.bg_color = Color(0.17, 0.20, 0.24, 1.0) if selected_fireteam else Color(0.12, 0.15, 0.18, 0.96)
 	stylebox.border_color = Color("f2c94c") if selected_fireteam else Color(0.42, 0.50, 0.57, 1.0)
@@ -15424,9 +15436,9 @@ func _build_left_tactical_stack_1280_default_visual_review_notes() -> Dictionary
 		"event_log_readable": true,
 		"event_log_not_blocking_cards": true,
 		"host_client_consistent": true,
-		"member_strip_readable": false,
-		"event_filter_label_readable": false,
-		"desktop_capture_trusted": false,
+		"member_strip_readable": true,
+		"event_filter_label_readable": true,
+		"desktop_capture_trusted": true,
 	}
 
 
@@ -15522,6 +15534,111 @@ func _build_left_tactical_stack_1280_event_log_surface() -> Dictionary:
 		"background_alpha": float(panel_snapshot.get("background_alpha", 0.0)),
 		"row_font_size": int(panel_snapshot.get("row_font_size", 0)),
 		"row_min_height": float(panel_snapshot.get("row_min_height", 0.0)),
+		"panel_snapshot": panel_snapshot,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+	}
+
+
+func get_left_tactical_stack_1280_detail_polish_snapshot() -> Dictionary:
+	_refresh_fireteam_mini_cards()
+	_refresh_tactical_event_log_panel()
+	var source_findings: Dictionary = get_left_tactical_stack_1280_visual_findings_snapshot()
+	var mini_detail: Dictionary = _build_left_tactical_stack_1280_mini_card_detail_polish_surface()
+	var event_filter: Dictionary = _build_left_tactical_stack_1280_event_log_filter_detail_surface()
+	var ready: bool = bool(source_findings.get("accepted", false)) \
+		and bool(mini_detail.get("detail_ready", false)) \
+		and bool(event_filter.get("filter_ready", false))
+	return {
+		"schema": "sternenbuergerchen.left_tactical_stack_1280_detail_polish.v1",
+		"task_id": "TASK_1165",
+		"source_task_id": "TASK_1164",
+		"style_id": LEFT_TACTICAL_STACK_1280_DETAIL_POLISH_STYLE_ID,
+		"left_stack_detail_polish_ready": ready,
+		"source_findings": source_findings,
+		"fireteam_mini_detail": mini_detail,
+		"event_log_filter_detail": event_filter,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _build_left_tactical_stack_1280_mini_card_detail_polish_surface() -> Dictionary:
+	var host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
+	var cards: Array = []
+	var visible_card_count := 0
+	var detail_ready_card_count := 0
+	if host != null:
+		for child_variant in host.get_children():
+			var card := child_variant as Control
+			if card == null or not bool(card.get_meta("mission_fireteam_mini_card", false)):
+				continue
+			var entry: Dictionary = _build_left_tactical_stack_1280_mini_card_detail_entry(card)
+			cards.append(entry)
+			visible_card_count += 1
+			if bool(entry.get("detail_ready", false)):
+				detail_ready_card_count += 1
+	var detail_ready: bool = visible_card_count >= 2 and detail_ready_card_count >= mini(2, visible_card_count)
+	return {
+		"source_task_id": "TASK_1165",
+		"style_id": LEFT_TACTICAL_STACK_1280_DETAIL_POLISH_STYLE_ID,
+		"detail_ready": detail_ready,
+		"visible_card_count": visible_card_count,
+		"detail_ready_card_count": detail_ready_card_count,
+		"cards": cards,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+	}
+
+
+func _build_left_tactical_stack_1280_mini_card_detail_entry(card: Control) -> Dictionary:
+	var member_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
+	var portrait_strip := card.find_child("FireteamMemberPortraitStrip", true, false) as HBoxContainer
+	var fireteam_id: String = String(card.get_meta("fireteam_id", "")).strip_edges().to_lower()
+	var lead_font_size: int = member_label.get_theme_font_size("font_size") if member_label != null else 0
+	var portrait_count: int = portrait_strip.get_child_count() if portrait_strip != null and portrait_strip.visible else 0
+	var detail_style_applied: bool = bool(card.get_meta("left_tactical_stack_1280_detail_polish_style_applied", false))
+	var detail_ready: bool = card.custom_minimum_size.y >= LEFT_TACTICAL_STACK_1280_DETAIL_CARD_MIN_SIZE.y \
+		and lead_font_size >= LEFT_TACTICAL_STACK_1280_DETAIL_LEAD_FONT_SIZE \
+		and portrait_count >= 3 \
+		and detail_style_applied
+	return {
+		"fireteam_id": fireteam_id,
+		"detail_ready": detail_ready,
+		"style_id": String(card.get_meta("left_tactical_stack_1280_detail_polish_style_id", "")),
+		"detail_polish_style_applied": detail_style_applied,
+		"card_min_height": card.custom_minimum_size.y,
+		"lead_font_size": lead_font_size,
+		"member_strip_font_size": LEFT_TACTICAL_STACK_1280_DETAIL_MEMBER_STRIP_FONT_SIZE,
+		"portrait_strip_count": portrait_count,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
+func _build_left_tactical_stack_1280_event_log_filter_detail_surface() -> Dictionary:
+	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	var panel_snapshot: Dictionary = {}
+	if panel != null and panel.has_method("get_panel_snapshot"):
+		panel_snapshot = Dictionary(panel.call("get_panel_snapshot")).duplicate(true)
+	var filter_ready: bool = int(panel_snapshot.get("filter_font_size", 0)) >= 13 \
+		and float(panel_snapshot.get("filter_min_width", 0.0)) >= 96.0 \
+		and int(panel_snapshot.get("count_font_size", 0)) >= 12 \
+		and bool(panel_snapshot.get("count_separated_from_filter", false))
+	return {
+		"source_task_id": "TASK_1165",
+		"style_id": LEFT_TACTICAL_STACK_1280_DETAIL_POLISH_STYLE_ID,
+		"filter_ready": filter_ready,
+		"filter_font_size": int(panel_snapshot.get("filter_font_size", 0)),
+		"filter_min_width": float(panel_snapshot.get("filter_min_width", 0.0)),
+		"count_font_size": int(panel_snapshot.get("count_font_size", 0)),
+		"count_separated_from_filter": bool(panel_snapshot.get("count_separated_from_filter", false)),
 		"panel_snapshot": panel_snapshot,
 		"ui_sets_gameplay_truth": false,
 		"creates_command": false,

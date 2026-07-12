@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1165 - Left Tactical Stack 1280 Detail Polish
+- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1165_left_tactical_stack_1280_detail_polish.md`, `docs/tasks/TASK_1164_left_tactical_stack_1280_visual_findings.md`, `docs/dev/mission_command_feedback_contract.md`
+- Ausgangsbefund: TASK_1164 routete die belegten Restreibungen im linken 1280er Stack zu Detail-Polish: Mini-Card-Member-/Detailstrip zu klein, Eventlog-Filter/Zaehler gedrungen, kombiniertes Desktop-Capture als Sichtbeleg unzuverlaessig.
+- Aenderung: Mission-Mini-Cards nutzen eine detailfreundlichere Dichte mit 120-Pixel-Mindesthoehe, 12-Pixel-Lead-/Detailtext und TASK_1165-Metadaten. Das Tactical Event Log nutzt 13-Pixel-Filtertext, 96-Pixel-Filter-Hitflaeche und 12-Pixel-Zaehler. `get_left_tactical_stack_1280_detail_polish_snapshot()` belegt den abgeschlossenen read-only Polish und routet TASK_1164 Default-Findings nicht mehr zu Detail-Polish.
+- Lokale Pruefung: TASK_1165 40/40.
+- Risiken/offen: Ein erneuter echter 1280x720-Host/Client-Capture bleibt als naechster sinnvoller Sichtbeleg offen, wenn der subjektive Spielerblick nach dem Detail-Polish abgenommen werden soll.
+
 ### TASK_1164 - Left Tactical Stack 1280 Visual Findings
 - Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
 - Relevante Docs/Contracts: `docs/tasks/TASK_1164_left_tactical_stack_1280_visual_findings.md`, `docs/tasks/TASK_1163_left_tactical_stack_1280_release_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
