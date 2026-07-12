@@ -13,10 +13,11 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening (naechster Schritt)
+## TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening (in Arbeit)
 - Grundlage: TASK_1150 belegt korrekte autoritative Ziele und Commands, aber keinen Kontakt innerhalb von 180 Sekunden realer Zwei-EXE-Laufzeit.
 - Ziel: Wall-Time-/Tick-/Speed-/Pfadfortschritt messen und die echte Ursache der zu langsamen verbundenen Einsatzbewegung korrigieren.
 - Verifikation: Contact-Approach in zunaechst 45 bis 75 Sekunden, gemeinsamer Kontakt/First Fire und bestehende Movement-/Performance-Gates.
+- Zwischenstand: Sekuendliche Pace-Evidence, A*/LOS-ContactApproachResolver und 20-Hz-Cadence fuer teure Combat-Neuentscheidungen sind implementiert. Host-Ticks stiegen real von ca. 18,5 auf 30,3/s; der finale Zwei-EXE-Recapture bleibt wegen eines fruehen Client-First-Decision-Flakes offen.
 
 ## TASK_1150 - Connected Release First Contact Handoff Playtest (Release-Finding implementiert)
 - Ergebnis: Expliziter First-Contact-Modus, read-only Evidence, autoritative Fireteam-Intents und Map-Marker-Ziele funktionieren. Der echte Lauf bleibt vor Kontakt stehen, weil die Fireteams in 180 Sekunden zu wenig Wegfortschritt erzielen.

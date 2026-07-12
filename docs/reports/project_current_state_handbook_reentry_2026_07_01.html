@@ -72,13 +72,13 @@
 <body data-report-id="project_current_state_handbook_reentry_2026_07_01" data-report-schema="sternenbuergerchen.html_workbench.v1">
   <header>
     <h1>SternenBuergerchen Ist-Stand + Handbuch</h1>
-    <p>Arbeitsbericht, fortgeschrieben mit TASK_1150: Der echte Host/Client-Lauf erreicht autoritative Contact-Approach-Befehle und legt dabei die noch zu langsame verbundene Einsatzbewegung offen.</p>
+    <p>Arbeitsbericht, fortgeschrieben mit TASK_1151: Die verbundene Einsatzbewegung ist jetzt sekündlich messbar, Contact-Approaches nutzen A* und LOS, und teure Combat-Neuentscheidungen blockieren nicht mehr jeden Sim-Tick.</p>
     <div class="meta-row">
       <span class="pill good">Schema v1</span>
       <span class="pill warn">Branchbasis: integration/core-foundation</span>
       <span class="pill warn">Letzter Release-Befund: TASK_1150 Gate rot</span>
       <span class="pill good">Letzter gruener Stand: TASK_1149</span>
-      <span class="pill warn">Naechster Kandidat: TASK_1151</span>
+      <span class="pill warn">Aktuell in Arbeit: TASK_1151</span>
       <span class="pill good">Mission/LZ: zustandsbasiert statt Blind-Frames</span>
       <span class="pill good">Release-Provenance: TASK_1073</span>
       <span class="pill good">Hotfix: Partial-Save-Start repariert</span>
@@ -392,8 +392,8 @@
         <article class="card wide">
           <h2>Verbundener Erstkontakt-Befund TASK_1150</h2>
           <p>Der neue explizite Release-Modus fuehrt Host und Client nach Drop und erstem GO weiter, liest echte Map-Marker und sammelt Contact-, Fire-, Movement- und Positionsdaten ohne Gameplay-State zu erzeugen.</p>
-          <div class="callout success">Die wichtigen technischen Grenzen stimmen: Host und Client senden autoritative Fireteam-Intents, erhalten Host-OK und zielen auf <code>spawn_enemy_defense</code> beziehungsweise <code>spawn_enemy_patrol</code>.</div>
-          <div class="callout">Der echte Lauf deckt aber eine Spieltempo-Reibung auf: Nach 180 Sekunden ist noch kein Kontakt entstanden. Das Gate bleibt absichtlich rot. TASK_1151 misst deshalb reale Wegstrecke pro Wall-Time und Sim-Tick, statt Gegner naeher zu teleportieren.</div>
+          <div class="callout success">Die wichtigen technischen Grenzen stimmen: Host und Client senden autoritative Fireteam-Intents und erhalten Host-OK. TASK_1151 hat korrigiert, dass dekorative Enemy-Marker faelschlich als Runtime-Gegnerspawn gelesen wurden.</div>
+          <div class="callout">Der neue Trace schreibt sekündlich Wandzeit, Sim-Ticks, FPS, Wegfortschritt und Restdistanz. Ein A*/LOS-Resolver sucht erreichbare Kontaktanfluege und prueft den Formation-Footprint. Das Release-Gate bleibt bis zum gemeinsamen First-Fire-Recapture absichtlich rot.</div>
         </article>
       </div>
     </section>
@@ -491,16 +491,16 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1150 beweist den echten verbundenen Ablauf bis zum autoritativ angenommenen Contact-Advance. Der First-Contact-Lauf bleibt fachlich rot, weil Blue und Gold in 180 Sekunden zu wenig Strecke zuruecklegen.</p>
-          <p><strong>Naechster sinnvoller Schritt:</strong> TASK_1151 misst Movement-Pace gegen Wall-Time, Sim-Ticks, Terrain, Formation und Avoidance. Ziel ist ein echter Contact-Approach in etwa 45 bis 75 Sekunden, ohne Teleport oder Test-Sonderregeln.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1151 misst Movement-Pace gegen Wall-Time und Sim-Ticks. Der Host stieg durch 20-Hz-Tactical-Decisions von rund 18,5 auf 30,3 autoritative Ticks pro Sekunde; Detection und Contact-Tracking bleiben pro Tick aktiv.</p>
+          <p><strong>Naechster sinnvoller Schritt:</strong> Den Client-Drop/First-Decision-Flake isolieren und danach denselben echten Zwei-EXE-Lauf bis gemeinsamem Kontakt und First Fire wiederholen. Keine Teleports und keine verschobenen Gegner.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
           <p>Der Spieleordner wird zusaetzlich durch TASK_1073 abgesichert: Ein Export hinterlegt Commit und PCK-Hash, der Startcheck akzeptiert nur den passenden Build.</p>
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
-          <input readonly value="TASK_1150 - Connected First Contact Release-Finding" data-export-key="reentry_handbook.current_task">
-          <input readonly value="TASK_1151 - Connected Release Movement Pace Hardening" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1151 - Connected Release Movement Pace Hardening (in Arbeit)" data-export-key="reentry_handbook.current_task">
+          <input readonly value="TASK_1151 - Client First-Decision-Flake isolieren und First Contact recapturen" data-export-key="reentry_handbook.recommended_next_task">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1139,7 +1139,7 @@
             recommended_next_task: "TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening"
           },
           metadata: {
-            generated_for_task: "TASK_1150",
+            generated_for_task: "TASK_1151",
             source_branch_base: "integration/core-foundation",
             read_only: true,
             ui_sets_gameplay_truth: false

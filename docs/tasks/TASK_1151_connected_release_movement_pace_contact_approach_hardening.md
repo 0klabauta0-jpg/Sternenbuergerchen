@@ -30,3 +30,12 @@ Im echten Zwei-EXE-Lauf werden Blue- und Gold-Moves autoritativ angenommen und a
 
 ## Risiken / offene Punkte
 Der synthetische Performance-Gate kann gruen sein, waehrend zwei sichtbare Release-Prozesse zu wenig reale Simulationsfortschritte pro Sekunde liefern. Die Korrektur muss deshalb Wall-Time und autoritative Sim-Ticks gemeinsam betrachten.
+
+## Zwischenstand 2026-07-12
+- Der First-Contact-Trace schreibt sekuendlich Wall-Time, Sim-Ticks, FPS, Start-/Ziel-/Istposition, Fortschritt und Restdistanz.
+- Der alte 180-Sekunden-Befund enthielt einen eingefrorenen Frueh-Snapshot; aktuelle Traces zeigen kontinuierliche Bewegung.
+- Dekorative `spawn_enemy_*`-Marker waren keine Runtime-Gegnerwahrheit. Ein read-only ContactApproachResolver nutzt registrierte Gegner beziehungsweise den gemeinsamen `spawn_bravo`-Proxy, A* und LOS.
+- Der Resolver prueft den Formation-Footprint statt nur den Ankerpunkt.
+- Profilbefund: Der direkte Combat-Tick kostete etwa 17 ms, davon rund 13 ms Overwatch. Teure Tactical Decisions laufen jetzt mit 20 Hz; Detection und Contact-Tracking bleiben pro Sim-Tick aktiv.
+- Echter Effekt: Host-Durchsatz stieg von rund 18,5 auf 30,3 autoritative Ticks pro Sekunde. TASK_1117 bleibt mit gemeinsamem Kontakt, First Fire und identischen Vitalwerten 15/15 gruen.
+- Das echte TASK_1150-Gate bleibt offen. Der letzte Recapture brach bereits im Client-Drop/First-Decision-Pfad ab und ist kein gueltiger First-Contact-Beleg.

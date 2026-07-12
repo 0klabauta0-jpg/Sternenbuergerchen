@@ -1,5 +1,11 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening
+- Status: in Arbeit; Telemetrie, Contact-Approach-Resolver und Combat-Decision-Cadence implementiert, echter Release-Abschluss noch offen
+- Relevante Docs/Contracts: `docs/tasks/TASK_1151_connected_release_movement_pace_contact_approach_hardening.md`, `scripts/tactical/contact_approach_resolver.gd`, `scripts/tests/task_1151_connected_release_movement_pace_contact_approach_hardening.gd`
+- Messbefund: Host-Simulation stieg durch 20-Hz-Tactical-Decisions von rund 18,5 auf 30,3 Ticks/s. Detection/Contact bleiben pro Tick. TASK_1117 bleibt 15/15 gruen.
+- Release offen: Der letzte Zwei-EXE-Lauf scheiterte vor dem Contact-Approach im Client-First-Decision-Pfad; TASK_1150 bleibt rot.
+
 ### TASK_1150 - Connected Release First Contact Handoff Playtest
 - Status: Release-Finding implementiert; First-Contact-Gate noch rot
 - Relevante Docs/Contracts: `docs/tasks/TASK_1150_connected_release_first_contact_handoff_playtest.md`, `scripts/tests/task_1150_connected_release_first_contact_handoff_playtest.gd`, `scripts/tools/capture_release_host_client_entry_playtest.ps1`
