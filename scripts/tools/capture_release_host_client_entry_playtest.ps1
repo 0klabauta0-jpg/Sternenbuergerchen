@@ -30,22 +30,24 @@ if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) { throw "Missing Sternenb
 $artifactPrefix = if ($FirstContact) { "release_host_client_first_contact" } elseif ($DropDecision) { "release_host_client_drop_decision" } else { "release_host_client" }
 $hostTrace = Join-Path $tmp ("{0}_host_trace.json" -f $artifactPrefix)
 $clientTrace = Join-Path $tmp ("{0}_client_trace.json" -f $artifactPrefix)
+$hostLog = Join-Path $tmp ("{0}_host.log" -f $artifactPrefix)
+$clientLog = Join-Path $tmp ("{0}_client.log" -f $artifactPrefix)
 $manifestPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_playtest.json" } elseif ($DropDecision) { "release_host_client_drop_decision_playtest.json" } else { "release_host_client_entry_playtest.json" })
 $screenshotPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_playtest.png" } elseif ($DropDecision) { "release_host_client_drop_decision_playtest.png" } else { "release_host_client_entry_playtest.png" })
 $hostWindowPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_host_window.png" } elseif ($DropDecision) { "release_host_client_drop_decision_host_window.png" } else { "release_host_client_host_window.png" })
 $clientWindowPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_client_window.png" } elseif ($DropDecision) { "release_host_client_drop_decision_client_window.png" } else { "release_host_client_client_window.png" })
-Remove-Item -LiteralPath $hostTrace,$clientTrace -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $hostTrace,$clientTrace,$hostLog,$clientLog -Force -ErrorAction SilentlyContinue
 $windowResolution = if ($FirstContact) { "1280x720" } elseif ($dropMode) { "1600x900" } else { "900x700" }
 $hostWindowPosition = "20,80"
 $clientWindowPosition = if ($dropMode) { "360,120" } else { "960,80" }
 
 $hostArgs = @(
-	"--resolution", $windowResolution, "--position", $hostWindowPosition, "--",
+	"--log-file", $hostLog, "--resolution", $windowResolution, "--position", $hostWindowPosition, "--",
 	"--release-multiplayer-host", "--release-multiplayer-port=$Port",
 	"--release-multiplayer-auto-start", "--release-multiplayer-trace=$hostTrace"
 )
 $clientArgs = @(
-	"--resolution", $windowResolution, "--position", $clientWindowPosition, "--",
+	"--log-file", $clientLog, "--resolution", $windowResolution, "--position", $clientWindowPosition, "--",
 	"--release-multiplayer-join", "--release-multiplayer-address=127.0.0.1",
 	"--release-multiplayer-port=$Port", "--release-multiplayer-trace=$clientTrace"
 )
@@ -107,6 +109,11 @@ do {
 	}
 } while (-not $connected -and [DateTimeOffset]::UtcNow -lt $deadline -and -not $hostProcess.HasExited -and -not $clientProcess.HasExited)
 
+$hostExitedBeforeGate = $hostProcess.HasExited
+$clientExitedBeforeGate = $clientProcess.HasExited
+$hostExitCode = if ($hostExitedBeforeGate) { $hostProcess.ExitCode } else { $null }
+$clientExitCode = if ($clientExitedBeforeGate) { $clientProcess.ExitCode } else { $null }
+
 $screenshotWritten = $false
 try {
 	Add-Type -AssemblyName System.Drawing
@@ -157,6 +164,12 @@ $manifest = [ordered]@{
 	client_process_id = $clientProcess.Id
 	host_trace_path = $hostTrace
 	client_trace_path = $clientTrace
+	host_log_path = $hostLog
+	client_log_path = $clientLog
+	host_exited_before_gate = $hostExitedBeforeGate
+	client_exited_before_gate = $clientExitedBeforeGate
+	host_exit_code = $hostExitCode
+	client_exit_code = $clientExitCode
 	host = $hostState
 	client = $clientState
 	mission_started = $connected

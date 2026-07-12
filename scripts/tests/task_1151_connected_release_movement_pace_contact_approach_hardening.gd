@@ -44,13 +44,15 @@ func _initialize() -> void:
 		_assert(harness_source.contains(token), "Release harness preserves %s evidence" % token)
 	_assert(harness_source.contains('"TASK_1151"'), "First Contact pace manifest identifies TASK_1151")
 	_assert(harness_source.contains('if ($FirstContact) { "1280x720" }'), "Two-process First Contact gate uses a per-machine representative render budget")
+	for token in ["host_log_path", "client_log_path", "host_exited_before_gate", "client_exited_before_gate", "host_exit_code", "client_exit_code"]:
+		_assert(harness_source.contains(token), "Release harness preserves process-boundary evidence %s" % token)
 	var combat_source := FileAccess.get_file_as_string(COMBAT_DRIVER_PATH)
 	_assert(combat_source.contains("COMBAT_DECISION_INTERVAL_TICKS: int = 3"), "Expensive tactical decisions use a 20 Hz cadence on a 60 Hz simulation")
 	_assert(combat_source.contains("_should_run_combat_decision_tick"), "Combat listener exposes an explicit decision cadence guard")
 	_assert(combat_source.find("_advance_detection_timers()") < combat_source.find("_should_run_combat_decision_tick"), "Detection timers advance before the expensive decision cadence guard")
 	_assert(combat_source.find("_update_contact_tracking()") < combat_source.find("_should_run_combat_decision_tick"), "Contact tracking advances before the expensive decision cadence guard")
 
-	print("TASK_1151 connected release movement pace evidence: %d/31 PASS" % (31 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/37 PASS" % (37 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
