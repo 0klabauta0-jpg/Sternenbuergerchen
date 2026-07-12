@@ -13956,6 +13956,10 @@ func _get_mission_marker_world_position(marker_id: String, fallback: Vector2 = V
 	return fallback
 
 
+func get_mission_marker_world_position(marker_id: String, fallback: Vector2 = Vector2.ZERO) -> Vector2:
+	return _get_mission_marker_world_position(marker_id, fallback)
+
+
 func _get_mission_setup_marker_node(marker_id: String) -> Node2D:
 	var mission_setup: Node = get_node_or_null("../MissionSetup")
 	if mission_setup == null:
