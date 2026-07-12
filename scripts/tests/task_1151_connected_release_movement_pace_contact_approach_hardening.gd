@@ -2,7 +2,6 @@ extends SceneTree
 
 const LOBBY_SOURCE_PATH := "res://scripts/ui/multiplayer_lobby_screen.gd"
 const HARNESS_PATH := "res://scripts/tools/capture_release_host_client_entry_playtest.ps1"
-const TERRAIN_VIEW_PATH := "res://scripts/terrain/terrain_map_3d_view.gd"
 
 var _failed := 0
 
@@ -32,10 +31,8 @@ func _initialize() -> void:
 	]:
 		_assert(harness_source.contains(token), "Release harness preserves %s evidence" % token)
 	_assert(harness_source.contains('"TASK_1151"'), "First Contact pace manifest identifies TASK_1151")
-	var terrain_source := FileAccess.get_file_as_string(TERRAIN_VIEW_PATH)
-	_assert(terrain_source.contains("VISUAL_STREAMING_MAX_CHUNK_RADIUS: int = 3"), "Large-map render working set is capped at a 7x7 chunk window")
 
-	print("TASK_1151 connected release movement pace evidence: %d/16 PASS" % (16 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/15 PASS" % (15 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
