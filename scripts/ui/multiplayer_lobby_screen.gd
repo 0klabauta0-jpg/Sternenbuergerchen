@@ -422,10 +422,9 @@ func _release_fireteam_has_busy_members(controller: Node, fireteam_id: String) -
 
 
 func _submit_release_contact_advance(controller: Node) -> bool:
-	var marker_id: String = "spawn_enemy_defense" if _release_local_fireteam_id == "blue" else "spawn_enemy_patrol"
-	var requested_target := Vector2(768.0, 960.0)
+	var requested_target := Vector2(1344.0, 992.0)
 	if controller.has_method("get_mission_marker_world_position"):
-		requested_target = Vector2(controller.call("get_mission_marker_world_position", marker_id, requested_target))
+		requested_target = Vector2(controller.call("get_mission_marker_world_position", "spawn_bravo", requested_target))
 	var terrain_registry: Node = _active_mission.get_node_or_null("TerrainRegistry")
 	if terrain_registry != null and terrain_registry.has_method("resolve_walkable_target"):
 		var resolved: Dictionary = Dictionary(terrain_registry.call("resolve_walkable_target", requested_target))

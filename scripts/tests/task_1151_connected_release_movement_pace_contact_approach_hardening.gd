@@ -21,6 +21,8 @@ func _initialize() -> void:
 		_assert(lobby_source.contains(token), "Release First Contact trace exposes %s" % token)
 	_assert(lobby_source.contains("Time.get_ticks_msec() - _release_first_contact_advance_started_msec"), "Movement wall time is derived from a monotonic clock")
 	_assert(lobby_source.contains("trace_heartbeat_bucket"), "Unchanged First Contact stages still write periodic movement evidence")
+	_assert(lobby_source.contains('get_mission_marker_world_position", "spawn_bravo"'), "Release Contact Approach follows the runtime enemy spawn marker")
+	_assert(not lobby_source.contains('"spawn_enemy_defense"') and not lobby_source.contains('"spawn_enemy_patrol"'), "Release Contact Approach does not treat decorative enemy markers as runtime truth")
 
 	var harness_source := FileAccess.get_file_as_string(HARNESS_PATH)
 	for token in [
@@ -32,7 +34,7 @@ func _initialize() -> void:
 		_assert(harness_source.contains(token), "Release harness preserves %s evidence" % token)
 	_assert(harness_source.contains('"TASK_1151"'), "First Contact pace manifest identifies TASK_1151")
 
-	print("TASK_1151 connected release movement pace evidence: %d/15 PASS" % (15 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/17 PASS" % (17 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
