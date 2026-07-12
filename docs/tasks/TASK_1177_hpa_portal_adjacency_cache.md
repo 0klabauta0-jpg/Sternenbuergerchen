@@ -16,3 +16,8 @@ bleiben Terrain-Aenderungen sicher invalidierend.
 - Wiederholte Query: ein Adjazenz-Build, mindestens ein Cache-Hit.
 - Full-Rebuild: erneuter Build.
 - Bestehende HPA- und SimulationRoot-Pfade bleiben gruen.
+
+## Performance-Recapture
+
+TASK_1178 misst auf demselben AA-Route-Trace rund 33 Prozent weniger Route-
+Walltime und rund 56 Prozent weniger Command-Queue im langsamsten Tick.
