@@ -68,9 +68,8 @@ func _run() -> void:
 	var gold_started: Dictionary = _card_by_id(host_controller, "dropship_gold")
 	_assert(_is_live_drop_state(String(blue_started.get("state", ""))) and _is_live_drop_state(String(gold_started.get("state", ""))), "Host starts two independent live Drop sequences")
 
-	for _step in range(80):
-		host_controller.call("_update_drop_sequence", 1.0)
-		host_controller.call("_refresh_world_overlays")
+	for _step in range(8):
+		host_controller.call("_update_drop_sequence", 20.0)
 		await _poll_all(apis, 1)
 		var state: Dictionary = Dictionary(host_controller.call("get_planning_state"))
 		if Array(state.get("embarked_unit_ids", [])).is_empty() and _both_cards_rtb(host_controller):

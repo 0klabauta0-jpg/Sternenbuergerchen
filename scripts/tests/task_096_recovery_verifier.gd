@@ -24,7 +24,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
+	quit(1 if _failed > 0 else 0)
 
 
 func _test_live_mission_block_labels_use_shared_ids() -> void:
@@ -84,39 +84,42 @@ func _test_character_sheet_layout_uses_german_sections_and_core_bars() -> void:
 
 	screen.call("set_available_units", UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster"))
 	await process_frame
-	screen.call("_open_character_overlay", "unit_delta")
+	var roster: Array = Array(UNIT_ROSTER_PRESETS_SCRIPT.call("get_homebase_roster"))
+	var inspected_unit_id := String(Dictionary(roster[0]).get("unit_id", "")) if not roster.is_empty() else ""
+	screen.call("_open_character_overlay", inspected_unit_id)
 	await process_frame
 
 	var overlay := screen.get_node("CharacterOverlay") as Control
 	var overlay_header := screen.get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow/OverlayHeaderLabel") as Label
 	var content_host := screen.get_node("CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox/GeneratedOverlayContent") as VBoxContainer
 	var sheet_root := content_host.get_node_or_null("SheetRoot") as VBoxContainer if content_host != null else null
-	var section_headers: Array = _collect_section_headers(sheet_root)
-	var core_rows := sheet_root.get_child(6) as VBoxContainer if sheet_root != null and sheet_root.get_child_count() > 6 else null
+	var values_column := sheet_root.get_node_or_null("CharacterSheetTwoColumnBody/CharacterSheetValuesColumn") if sheet_root != null else null
+	var context_column := sheet_root.get_node_or_null("CharacterSheetTwoColumnBody/CharacterSheetContextColumn") if sheet_root != null else null
+	var values_section_headers: Array = _collect_section_headers(values_column)
+	var context_section_headers: Array = _collect_section_headers(context_column)
 	var core_row_labels: Array = []
 	var core_bar_count: int = 0
-	if core_rows != null:
-		for row_variant in core_rows.get_children():
-			var row := row_variant as HBoxContainer
-			if row == null or row.get_child_count() < 3:
-				continue
-			var label := row.get_child(0) as Label
-			var progress_bar := row.get_child(1) as ProgressBar
-			if label != null:
-				core_row_labels.append(label.text)
-			if progress_bar != null:
-				core_bar_count += 1
+	for core_id in ["accuracy", "speed", "toughness", "awareness", "recognition", "stealth", "discipline", "leadership"]:
+		var row := _find_descendant_by_name(values_column, "ReadOnlyMetricRow_%s" % core_id) as HBoxContainer
+		var label := row.get_node_or_null("ReadOnlyMetricLabel_%s" % core_id) as Label if row != null else null
+		var progress_bar := row.get_node_or_null("ReadOnlyMetricBar_%s" % core_id) as ProgressBar if row != null else null
+		if label != null:
+			core_row_labels.append(label.text)
+		if progress_bar != null:
+			core_bar_count += 1
 
 	_assert(overlay != null and overlay.visible, "FOB character overlay opens as a visible sheet")
 	_assert(overlay_header != null and overlay_header.text == UI_BLOCK_LABELS_SCRIPT.CHARACTER_OVERLAY, "Character overlay uses the shared #20 block label")
-	_assert(section_headers == [
-		"TRAIT:",
-		"KURZBESCHREIBUNG:",
+	_assert(values_section_headers == [
 		"KERNWERTE (0,00 - 1,00):",
 		"KOMMUNIKATION:",
-		"ABGELEITET:",
 		"VERHALTENSPROFIL:",
-	], "Character sheet keeps the German section order from TASK_096")
+	], "Character sheet values column keeps the current section order")
+	_assert(context_section_headers == [
+		"TRAIT:",
+		"KURZBESCHREIBUNG:",
+		"ABGELEITET:",
+	], "Character sheet context column keeps the current section order")
 	_assert(core_row_labels == [
 		"Accuracy:",
 		"Speed:",
@@ -183,13 +186,28 @@ func _collect_section_headers(host: Node) -> Array:
 	]
 	if host == null:
 		return label_texts
+	_collect_section_headers_recursive(host, expected_headers, label_texts)
+	return label_texts
+
+
+func _collect_section_headers_recursive(host: Node, expected_headers: Array, result: Array) -> void:
 	for child in host.get_children():
 		var label := child as Label
-		if label == null:
-			continue
-		if expected_headers.has(label.text):
-			label_texts.append(label.text)
-	return label_texts
+		if label != null and expected_headers.has(label.text):
+			result.append(label.text)
+		_collect_section_headers_recursive(child, expected_headers, result)
+
+
+func _find_descendant_by_name(host: Node, target_name: String) -> Node:
+	if host == null:
+		return null
+	if host.name == target_name:
+		return host
+	for child in host.get_children():
+		var match_node := _find_descendant_by_name(child, target_name)
+		if match_node != null:
+			return match_node
+	return null
 
 
 func _collect_button_texts(host: Node) -> Array:

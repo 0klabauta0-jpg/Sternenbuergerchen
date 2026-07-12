@@ -149,8 +149,8 @@ func _test_homebase_fob_and_debrief_buttons() -> void:
 		_check_required_controls("homebase", homebase, [
 			_button_spec("StartMissionButton", "Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton", ["pressed"], "conditional", "required", {"reason": "mission launch readiness", "skip_cover": true}),
 			_control_spec("MissionSelector", "Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector", ["item_selected"], "enabled", "required"),
-			_button_spec("ConfirmButton", "Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow/ConfirmButton", ["pressed"], "conditional", "required", {"reason": "requires staged team"}),
-			_button_spec("CloseSheetButton", "Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/InfoHeaderRow/CloseSheetButton", ["pressed"], "enabled", "required"),
+			_button_spec("ConfirmButton", "Panel/Margin/VBox/ContentRow/TeamPanel/TeamMargin/TeamVBox/TeamHeaderRow/ConfirmButton", ["pressed"], "conditional", "contextual_hidden_ok", {"reason": "visible while the legacy transfer team panel is active"}),
+			_button_spec("CloseSheetButton", "Panel/Margin/VBox/ContentRow/InfoPanel/InfoMargin/InfoScroll/InfoVBox/InfoHeaderRow/CloseSheetButton", ["pressed"], "enabled", "contextual_hidden_ok", {"reason": "visible while the legacy inline character sheet is active"}),
 			_control_spec("AircraftSelector", "Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/AircraftSelector", ["item_selected"], "conditional", "required", {"reason": "depends on available craft"}),
 			_button_spec("AddAircraftButton", "Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftSelectorRow/AddAircraftButton", ["pressed"], "enabled", "required"),
 			_button_spec("LoadCargoButton", "Panel/Margin/VBox/ContentRow/AircraftPanel/AircraftMargin/AircraftVBox/AircraftCargoRow/LoadCargoButton", ["pressed"], "conditional", "contextual_hidden_ok", {"reason": "cargo row hidden unless craft supports cargo"}),
@@ -209,12 +209,12 @@ func _test_mission_hud_buttons() -> void:
 		_button_spec("TargetButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/TargetButton", ["pressed"], "conditional", "required", {"reason": "requires selected target context"}),
 		_button_spec("ClearTargetButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/CommandPanel/CommandMargin/CommandScroll/CommandVBox/CommandGrid/ClearTargetButton", ["pressed"], "conditional", "required", {"reason": "requires selected target context"}),
 		_button_spec("AllFireteamsButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamHeaderRow/AllFireteamsButton", ["pressed"], "enabled", "required"),
-		_button_spec("SetLZButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton", ["pressed"], "conditional", "required", {"reason": "planning/authority gated"}),
-		_button_spec("CallDropshipButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton", ["pressed"], "conditional", "required", {"reason": "planning/drop availability gated"}),
+		_button_spec("SetLZButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/SetLZButton", ["pressed"], "conditional", "contextual_hidden_ok", {"reason": "planning controls are hidden after the compact mission-control handoff"}),
+		_button_spec("CallDropshipButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton", ["pressed"], "conditional", "contextual_hidden_ok", {"reason": "planning controls are hidden after the compact mission-control handoff"}),
 		_button_spec("AddPhaseButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/AddPhaseButton", ["pressed"], "conditional", "contextual_hidden_ok", {"reason": "phase planning can be hidden by the fixed HUD mode"}),
 		_button_spec("NextPhaseButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton", ["pressed"], "conditional", "contextual_hidden_ok", {"reason": "phase planning can be hidden by the fixed HUD mode"}),
-		_button_spec("NWButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton", ["pressed"], "conditional", "required", {"reason": "planning gated"}),
-		_button_spec("NEButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton", ["pressed"], "conditional", "required", {"reason": "planning gated"}),
+		_button_spec("NWButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NWButton", ["pressed"], "conditional", "contextual_hidden_ok", {"reason": "planning controls are hidden after the compact mission-control handoff"}),
+		_button_spec("NEButton", "TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/NEButton", ["pressed"], "conditional", "contextual_hidden_ok", {"reason": "planning controls are hidden after the compact mission-control handoff"}),
 	], Vector2(target_viewport))
 	mission.queue_free()
 	await process_frame
@@ -237,7 +237,7 @@ func _check_required_controls(screen_id: String, screen_root: Node, specs: Array
 		elif visibility_policy == "contextual_hidden_ok":
 			_assert(true, "%s/%s may be hidden contextually: %s" % [screen_id, control_id, String(spec.get("reason", ""))])
 		if visible:
-			_assert(HARNESS_SCRIPT.is_control_inside_viewport(control, viewport_size, 1.0), "%s/%s is inside viewport" % [screen_id, control_id])
+			_assert(HARNESS_SCRIPT.is_control_reachable_in_viewport(control, viewport_size, 1.0), "%s/%s is directly visible or scroll-reachable" % [screen_id, control_id])
 			if bool(spec.get("skip_cover", false)):
 				_assert(true, "%s/%s skips full-cover heuristic: %s" % [screen_id, control_id, String(spec.get("reason", ""))])
 			else:

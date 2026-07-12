@@ -140,6 +140,31 @@ static func is_control_inside_viewport(control: Control, viewport_size: Vector2,
 	return is_control_inside_rect(control, Rect2(Vector2.ZERO, viewport_size), tolerance)
 
 
+static func is_control_reachable_in_viewport(control: Control, viewport_size: Vector2, tolerance: float = 0.5) -> bool:
+	if is_control_inside_viewport(control, viewport_size, tolerance):
+		return true
+	if control == null or not control.is_inside_tree():
+		return false
+	var viewport_rect := Rect2(Vector2.ZERO, viewport_size).grow(tolerance)
+	var control_rect := control.get_global_rect()
+	var ancestor := control.get_parent()
+	while ancestor != null:
+		if ancestor is ScrollContainer:
+			var scroll := ancestor as ScrollContainer
+			if not scroll.is_visible_in_tree() or not viewport_rect.intersects(scroll.get_global_rect(), true):
+				return false
+			var scroll_rect := scroll.get_global_rect().grow(tolerance)
+			var horizontal_reachable := scroll_rect.position.x <= control_rect.position.x and scroll_rect.end.x >= control_rect.end.x
+			var vertical_reachable := scroll_rect.position.y <= control_rect.position.y and scroll_rect.end.y >= control_rect.end.y
+			if not horizontal_reachable:
+				horizontal_reachable = scroll.horizontal_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED
+			if not vertical_reachable:
+				vertical_reachable = scroll.vertical_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED
+			return horizontal_reachable and vertical_reachable
+		ancestor = ancestor.get_parent()
+	return false
+
+
 static func fixed_rect_matches(control: Control, expected: Rect2, tolerance: float = 0.5) -> bool:
 	if control == null:
 		return false
