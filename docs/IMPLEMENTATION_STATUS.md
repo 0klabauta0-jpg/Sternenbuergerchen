@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1155 - Contact Focus Empty Dropship Surface Retirement
+- Status: implementiert und im exportierten Zwei-EXE-Release sichtbar verifiziert
+- Relevante Docs/Contracts: `docs/tasks/TASK_1155_contact_focus_empty_dropship_surface_retirement.md`, `docs/tasks/TASK_1120_connected_first_contact_event_log_dedupe_hud_declutter.md`
+- Ausgangsbefund: Zwei leere `Leaving mission map`-Karten belegen im echten Host-/Client-First-Contact weiterhin grosse rechte HUD-Flaechen.
+- Aenderung: Leere outbound-Surfaces verschwinden im Contact-Fokus, abgeschlossene `to_fob 0s`-Surfaces generell. Historisches Result-Feedback pinnt keine Grosskarte; echte Pending-Commands bleiben sichtbar. Contact-/Dropship-State-Wechsel triggern nur einen gezielten Panel-Refresh.
+- Release-Beleg: Host und Client erreichen Contact/First Fire und zeigen rechts keine leeren Dropship-Karten mehr.
+- Lokale Pruefung: TASK_1155 17/17; TASK_1120 11/11; TASK_1114 13/13; TASK_1109 18/18; TASK_1110 20/20; TASK_1117 15/15; TASK_1150 18/18; TASK_222 82/82.
+- Naechster Schritt: TASK-188-Verifier muss bei seinen 13 Assertion-Fehlern nonzero enden und seine Advance-Style-Fixtures wieder belastbar machen; danach Command-Matrix-Lesbarkeit im 1280er Release.
+
 ### TASK_1154 - Fireteam Contact Loss Language Clarity
 - Status: implementiert und im exportierten Zwei-EXE-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1154_fireteam_contact_loss_language_clarity.md`, `docs/tasks/TASK_1132_fireteam_mini_card_tactical_state_language_polish.md`

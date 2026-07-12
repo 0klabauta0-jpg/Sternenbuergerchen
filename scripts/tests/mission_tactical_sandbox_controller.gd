@@ -585,6 +585,7 @@ var _mission_dropship_runtime_ui_refresh_remaining: float = 0.0
 var _mission_dropship_runtime_feedback_flush_count: int = 0
 var _mission_dropship_runtime_planning_emit_count: int = 0
 var _last_authoritative_dropship_snapshot_signature: String = ""
+var _last_mission_dropship_contact_focus_active: bool = false
 var _authoritative_dropship_snapshot_apply_count: int = 0
 var _authoritative_dropship_snapshot_dedupe_count: int = 0
 var _map_world_bounds_cache: Rect2 = Rect2()
@@ -2133,7 +2134,7 @@ func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
 
 func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	apply_authoritative_fire_rule_snapshot(snapshot.get("tactical_rules", []))
-	apply_authoritative_mission_dropship_snapshot(Dictionary(snapshot.get("dropship", {})))
+	var dropship_snapshot_changed: bool = apply_authoritative_mission_dropship_snapshot(Dictionary(snapshot.get("dropship", {})))
 	var mission_interactions: Dictionary = Dictionary(snapshot.get("mission_interactions", {}))
 	mission_interactions["source_tick"] = maxi(int(snapshot.get("tick", -1)), -1)
 	var combat_driver = _get_combat_loop_driver()
@@ -2144,6 +2145,9 @@ func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 		if contact_signature != _last_network_contact_visual_signature:
 			_last_network_contact_visual_signature = contact_signature
 			refresh_contact_overlay()
+		var contact_focus_active: bool = _is_mission_contact_focus_active()
+		if _should_refresh_dropship_panel_for_contact_focus(contact_focus_active, dropship_snapshot_changed):
+			_refresh_mission_dropship_panel()
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
 		combat_driver.call("apply_multiplayer_interaction_snapshot", mission_interactions)
 	_apply_network_mission_interaction_progress_surface(mission_interactions)
@@ -11330,23 +11334,53 @@ func _build_contact_focused_mission_dropship_card_entries(entries: Array, contac
 		if typeof(card_variant) != TYPE_DICTIONARY:
 			continue
 		var card: Dictionary = Dictionary(card_variant).duplicate(true)
-		if contact_focus_active and _is_completed_empty_mission_dropship_card(card):
+		var state: String = String(card.get("state", "")).strip_edges().to_lower()
+		var completed_return: bool = state == "to_fob" and int(card.get("eta_seconds", 0)) <= 0
+		if (contact_focus_active or completed_return) and _is_completed_empty_mission_dropship_card(card):
 			continue
 		result.append(card)
 	return result
 
 
+func _is_mission_contact_focus_active() -> bool:
+	return _is_contact_focus_active_from_snapshots(
+		get_connected_first_contact_hud_perspective_snapshot(),
+		_get_release_first_exchange_visible_status_source_evidence(),
+		_build_mission_combat_hud_density_snapshot()
+	)
+
+
+func _should_refresh_dropship_panel_for_contact_focus(contact_focus_active: bool, dropship_snapshot_changed: bool = false) -> bool:
+	var contact_focus_changed: bool = contact_focus_active != _last_mission_dropship_contact_focus_active
+	_last_mission_dropship_contact_focus_active = contact_focus_active
+	return contact_focus_changed or (contact_focus_active and dropship_snapshot_changed)
+
+
+func _is_contact_focus_active_from_snapshots(contact_perspective: Dictionary, visible_status_source: Dictionary, combat_hud_density: Dictionary = {}) -> bool:
+	var perspective_line: String = String(contact_perspective.get("primary_line", "")).strip_edges().to_upper()
+	if perspective_line.contains("CONTACT FIRE"):
+		return true
+	var density_line: String = String(combat_hud_density.get("compact_line", combat_hud_density.get("selected_fireteam_line", ""))).strip_edges().to_upper()
+	if density_line.contains("CONTACT FIRE"):
+		return true
+	if not bool(visible_status_source.get("active", false)):
+		return false
+	var persisted_line: String = String(visible_status_source.get("compact_line", visible_status_source.get("contact_fire_primary_line", ""))).strip_edges().to_upper()
+	return persisted_line.contains("CONTACT FIRE")
+
+
 func _is_completed_empty_mission_dropship_card(card: Dictionary) -> bool:
 	var craft_id: String = String(card.get("craft_id", "")).strip_edges()
-	if String(card.get("state", "")).strip_edges().to_lower() != "to_fob" or int(card.get("eta_seconds", 0)) > 0:
+	var state: String = String(card.get("state", "")).strip_edges().to_lower()
+	var is_completed_return: bool = state == "to_fob" and int(card.get("eta_seconds", 0)) <= 0
+	var is_empty_departure: bool = state == DROP_SEQUENCE_OUTBOUND or state == DROP_SEQUENCE_COMPLETE
+	if not is_completed_return and not is_empty_departure:
 		return false
 	if not Array(card.get("embarked_unit_ids", [])).is_empty() or int(card.get("passenger_count", 0)) > 0:
 		return false
-	if not String(card.get("pilot_unit_id", "")).strip_edges().is_empty():
+	if not craft_id.is_empty() and _pending_network_dropship_commands_by_craft.has(craft_id):
 		return false
-	if not craft_id.is_empty() and (_pending_network_dropship_commands_by_craft.has(craft_id) or _network_dropship_feedback_by_craft.has(craft_id)):
-		return false
-	return not _is_active_drop_sequence_for_craft(craft_id)
+	return is_empty_departure or not _is_active_drop_sequence_for_craft(craft_id)
 
 
 func _find_mission_dropship_card_entry(craft_id: String) -> Dictionary:
@@ -11907,8 +11941,7 @@ func _refresh_mission_dropship_panel() -> void:
 	if panel == null:
 		return
 	_enforce_mission_dropship_panel_geometry(panel)
-	var contact_perspective: Dictionary = get_connected_first_contact_hud_perspective_snapshot()
-	var contact_focus_active: bool = String(contact_perspective.get("primary_line", "")).contains("CONTACT FIRE")
+	var contact_focus_active: bool = _is_mission_contact_focus_active()
 	var card_entries: Array = _build_contact_focused_mission_dropship_card_entries(_get_mission_dropship_card_entries(), contact_focus_active)
 	var show_panel: bool = _tactical_ui_visible and not card_entries.is_empty()
 	if not show_panel:
@@ -14044,8 +14077,7 @@ func _build_mission_dropship_visual_entries(primary_visible: bool, primary_posit
 	var seen_craft_ids: Dictionary = {}
 	var selected_craft_id: String = _mission_drop_craft_id.strip_edges()
 	var cards: Array = _get_mission_dropship_card_entries()
-	var contact_perspective: Dictionary = get_connected_first_contact_hud_perspective_snapshot()
-	var contact_focus_active: bool = String(contact_perspective.get("primary_line", "")).contains("CONTACT FIRE")
+	var contact_focus_active: bool = _is_mission_contact_focus_active()
 	cards = _build_contact_focused_mission_dropship_card_entries(cards, contact_focus_active)
 	for index in range(cards.size()):
 		var card: Dictionary = Dictionary(cards[index])
