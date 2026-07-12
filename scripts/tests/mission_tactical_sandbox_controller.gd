@@ -2556,6 +2556,7 @@ func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
 	if fireteam_id.is_empty() or typeof(target_variant) != TYPE_VECTOR2 or not _is_fireteam_runtime_active(fireteam_id):
 		return false
 	var target_position := Vector2(target_variant)
+	_post_drop_security_pending_fireteam_ids.erase(fireteam_id)
 	var phase_index: int = int(command.get("phase", LIVE_ORDER_PHASE_INDEX))
 	var waypoint = FIRETEAM_WAYPOINT_SCRIPT.new({
 		"waypoint_id": String(command.get("command_id", "")),
@@ -30566,6 +30567,7 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 		command.fire_status = UNIT_COMMAND_SCRIPT.FIRE_STATUS_FIRE_AT_WILL
 		command.source_command_type = "hold_position"
 		command.source_task_type = POST_DROP_SECURITY_ORIGIN
+		command.command_token = "post_drop_security:%s:%d:%s" % [fireteam_id, phase_index, unit_id]
 		command.phase = phase_index
 		_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 		if not bool(command.call("is_valid")):

@@ -61,8 +61,13 @@ func _initialize() -> void:
 	_assert(controller_source.contains('"standalone_network_intent": true'), "Authoritative network intents declare plan-independent lifecycle ownership")
 	_assert(controller_source.contains("_update_standalone_network_intent_execution"), "Plan-independent network movement receives normal runtime updates")
 	_assert(controller_source.contains('String(execution_state.get("execution_owner", "")) == "standalone_network_intent"'), "Missing UI plans do not reset standalone network movement")
+	var intent_start: int = controller_source.find("func _apply_authoritative_fireteam_intent")
+	var intent_end: int = controller_source.find("func _get_dropship_command_fireteam_id", intent_start)
+	var intent_source: String = controller_source.substr(intent_start, intent_end - intent_start)
+	_assert(intent_source.contains("_post_drop_security_pending_fireteam_ids.erase(fireteam_id)"), "Explicit network intent cancels pending automatic post-drop security")
+	_assert(controller_source.contains('command.command_token = "post_drop_security:'), "Post-drop security moves carry stale-command tokens")
 
-	print("TASK_1151 connected release movement pace evidence: %d/47 PASS" % (47 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/49 PASS" % (49 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
