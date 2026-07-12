@@ -241,6 +241,22 @@ Feedback-Snapshot weder den Polish erneut anwenden noch Rows neu bauen; er
 erhoeht nur `feedback_snapshot_skip_count`. Das Panel bleibt read-only und
 setzt keine Gameplay-, Combat- oder Multiplayer-Wahrheit.
 
+### Linke taktische Stack-Lesbarkeit bei 1280x720 (TASK_1162)
+
+Die linke Mission-HUD-Spalte aus `fireteam_mini` und `event_log` bleibt ein
+eigener Lesebereich: Fireteam-Mini-Cards zeigen Auswahl, primaeren Fokus,
+Lead-/Statuszeilen und Stance; #19 zeigt die juengsten Ereignisse. Mehrere
+Fireteams duerfen gleichzeitig ausgewaehlt sein, aber nur ein Fireteam traegt
+die starke Primaerfokus-Kante fuer den ersten Spielerblick.
+
+Mission-Mini-Cards verwenden im linken Stack einen lokalen 1280er Vertrag:
+232x104 interne Mindestgroesse, 13 Pixel Titel, 11 Pixel Status und 11 Pixel
+Lead-Zeile. Der Vertrag ergaenzt die vorhandenen Mini-Card-Tasks zu Identitaet,
+Kontrast, Sprache und Stance, ersetzt sie aber nicht. `get_left_tactical_stack_1280_readability_snapshot()`
+fasst Mini-Cards, Primaerfokus, feste Stack-Rechtecke und den TASK-1159-Eventlog
+read-only zusammen. Der Snapshot erzeugt keine Commands, Effects, Fire-/Damage-
+Events oder Multiplayer-Wahrheit.
+
 ## Insertion-/First-Order-Readability
 `get_mission_insertion_first_order_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten spielbaren Missionsmoment nach dem Homebase-Launch. Der Snapshot darf nur bestehende Planning-, Dropship-Karten-, Command-Feedback- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: Dropship-Payload vorhanden, Card sichtbar, LZ-Zustand sichtbar, Drop ohne LZ blockiert, ausgewaehltes Fireteam sichtbar, erste Order-Kontrollen vorhanden, und nach LZ-Setzung ein sichtbarer LZ-Marker plus bereiter Drop-Button.
 

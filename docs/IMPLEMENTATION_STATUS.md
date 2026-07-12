@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1162 - Left Tactical Stack 1280 Readability and Focus Balance
+- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1162_left_tactical_stack_1280_readability_focus_balance.md`, `docs/dev/mission_command_feedback_contract.md`, TASK_1130, TASK_1131, TASK_1132, TASK_1133, TASK_1154, TASK_1159, TASK_1161
+- Ausgangsbefund: Der TASK_1161-Release-Recapture machte Bottom-Dock und Einsatzkontrolle brauchbar, aber links blieb die taktische Stack-Flaeche aus Fireteam-Mini-Cards und Ereignislog dicht und klein.
+- Aenderung: `MissionTacticalSandboxController` liefert `get_left_tactical_stack_1280_readability_snapshot()` als read-only Vertrag fuer Fireteam-Mini-Cards, Primaerfokus, Stack-Rechtecke und TASK_1159-Eventlog. Mission-Mini-Cards bekommen lokal 232x104 Mindestgroesse, 13-Pixel-Titel, 11-Pixel-Status/Lead und eine starke Fokus-Kante fuer genau ein primaeres Fireteam.
+- Architektur: Mehrfachauswahl bleibt erlaubt und unveraendert; der visuelle Primaerfokus ist nur ein Anzeigeanker. Der Snapshot erzeugt keine Commands, Effects, Fire-/Damage-Events, Combat- oder Multiplayer-Wahrheit und nutzt den bestehenden Mini-Card-Refreshpfad.
+- Lokale Pruefung: TASK_1162 34/34; TASK_1130 6/6; TASK_1131 8/8; TASK_1132 15/15; TASK_1133 19/19; TASK_1154 10/10; TASK_1159 26/26; TASK_1109 18/18; TASK_1110 20/20.
+- Risiken/offen: Der Vertrag ist strukturell gruen, ersetzt aber noch keinen echten 1280x720-Release-Sichttest. Naechster Schritt ist ein linker-Stack-Recapture, um subjektive Blickruhe und Kartenabdeckung im exportierten Fenster zu bestaetigen.
+
 ### TASK_1161 - 1280 Release Recapture and Primary HUD Balance
 - Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1161_1280_release_recapture_primary_hud_balance.md`, TASK_1157, TASK_1158, TASK_1159, TASK_1160
