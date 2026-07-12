@@ -282,6 +282,13 @@ Eventlog bleiben mindestens 24 Pixel Luft, und Mini-Cards behalten mindestens
 belegt diesen UI-Polish read-only; Gameplay-, Combat-, Movement- und
 Multiplayer-Wahrheit bleiben unveraendert bei den bestehenden Runtime-Pfaden.
 
+TASK_1169 akzeptiert diesen Air-/Anchor-Polish im exportierten Host-/Client-
+FirstContact-Release. `get_left_tactical_stack_1280_air_anchor_release_acceptance_snapshot()`
+verknuepft TASK_1168, Release-Provenance, FirstContact-Manifest sowie getrennte
+Host-/Client-Fensterbilder. Der Snapshot ist weiterhin reine Lesbarkeitsevidenz
+und darf keine Commands, Effects, Fire-/Damage-Events oder Multiplayer-Wahrheit
+erzeugen.
+
 ## Insertion-/First-Order-Readability
 `get_mission_insertion_first_order_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten spielbaren Missionsmoment nach dem Homebase-Launch. Der Snapshot darf nur bestehende Planning-, Dropship-Karten-, Command-Feedback- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: Dropship-Payload vorhanden, Card sichtbar, LZ-Zustand sichtbar, Drop ohne LZ blockiert, ausgewaehltes Fireteam sichtbar, erste Order-Kontrollen vorhanden, und nach LZ-Setzung ein sichtbarer LZ-Marker plus bereiter Drop-Button.
 
