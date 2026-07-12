@@ -226,9 +226,11 @@ weder Commands, Effects noch Multiplayer-State.
 
 ### Tactical Event Log bei 1280x720 (TASK_1159)
 
-Im First-Exchange-Fokus zeigt #19 hoechstens die vier neuesten Ereignisse mit
-32 Pixel Zeilenhoehe, 13 Pixel Meldung/Header, 12 Pixel Zeit und 10 Pixel
-Auswahlfilter. Ein 0,96-opaker, lokal erzeugter Panel-Hintergrund verhindert,
+Als stabiler Panel-Grundvertrag verwendet #19 32 Pixel Zeilenhoehe, 13 Pixel
+Meldung/Header, 12 Pixel Zeit, 10 Pixel Auswahlfilter und einen 0,96-opaken,
+lokal erzeugten Hintergrund. Dieser Vertrag gilt auch ohne historischen
+TASK-889-Payload. Im First-Exchange-Fokus zeigt #19 hoechstens die vier
+neuesten Ereignisse. Der Hintergrund verhindert,
 dass Kartenraster und Weltobjekte durch Meldungen laufen. Severity-Streifen, Newest-first-Sortierung, Selected-only-Filter
 und ScrollContainer bleiben bestehen. Weitere normale Logeintraege bleiben
 ausserhalb des Fokus scrollbar.

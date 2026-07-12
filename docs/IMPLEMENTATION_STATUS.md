@@ -4,10 +4,10 @@
 - Status: implementiert, Event-/Hotpath-/Multiplayer-/Performance-Gates gruen; Release-Sichtcheck folgt
 - Relevante Docs/Contracts: `docs/tasks/TASK_1159_tactical_event_log_1280_readability.md`, TASK_366, TASK_1043, TASK_1120, TASK_889
 - Ausgangsbefund: Das feste 240x184-Eventlog skaliert 11/10-Pixel-Text im 1280x720-Release auf etwa 7,3/6,7 Pixel. Fuenf 30-Pixel-Zeilen konkurrieren mit Header und Innenabstand.
-- Aenderung: First Exchange verwendet vier neueste 32-Pixel-Zeilen, 13-Pixel-Meldung/Header, 12-Pixel-Zeit und 10-Pixel-Auswahlfilter. Ein 0,96-opaker taktischer Hintergrund trennt Text von Kartenraster und Weltobjekten. Severity, Sortierung, Filter und Scroll bleiben erhalten.
+- Aenderung: Das Panel verwendet stabil 32-Pixel-Zeilen, 13-Pixel-Meldung/Header, 12-Pixel-Zeit, 10-Pixel-Auswahlfilter und einen 0,96-opaken Hintergrund. Der First-Exchange-Fokus begrenzt zusaetzlich auf vier neueste Ereignisse. Der Grundvertrag gilt auch ohne historischen TASK-889-Payload.
 - Hotpath-Fund: Snapshot und interner Default widersprachen sich bei vier gegen fuenf Zeilen; dadurch konnte ein identischer Snapshot den Polish-Pfad erneut anwenden. Der gemeinsame Vier-Zeilen-Vertrag laesst den vorhandenen Duplicate-Skip wieder greifen.
 - Verifier-Hygiene: TASK_1120 erwartet jetzt wieder den seit TASK_1155 gueltigen Vertrag, dass leere abgeschlossene `to_fob 0s`-Karten auch ohne Contact-Fokus verschwinden. TASK_889 prueft den neuen Vier-Zeilen-Cap.
-- Lokale Pruefung: TASK_1159 23/23; TASK_366 19/19; TASK_1043 14/14; TASK_1120 11/11; TASK_889 74/74; TASK_1109 18/18; TASK_1110 20/20; TASK_222 82/82.
+- Lokale Pruefung: TASK_1159 26/26; TASK_366 19/19; TASK_1043 14/14; TASK_1120 11/11; TASK_889 74/74; TASK_1109 18/18; TASK_1110 20/20; TASK_222 82/82.
 - Naechster Schritt: Exportierter 1280x720-First-Contact-Recapture und naechsten sichtbaren Befund ableiten.
 
 ### TASK_1158 - Selected Fireteam Member Cards 1280 Readability

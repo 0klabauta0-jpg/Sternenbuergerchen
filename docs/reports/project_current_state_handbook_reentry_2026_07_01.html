@@ -498,7 +498,7 @@
       <div class="grid">
         <article class="card wide">
           <h2>Naechste Schritte</h2>
-          <p><strong>Aktueller Stand:</strong> TASK_1159 zeigt im dichten First-Exchange-Fokus vier neueste Ereignisse mit 13-Pixel-Meldung/Header, 12-Pixel-Zeit und 32-Pixel-Zeilen. Ein 0,96-opaker Hintergrund verhindert, dass Kartenraster und Felsen durch Meldungen laufen. Severity, Auswahlfilter, Sortierung und Scroll bleiben erhalten.</p>
+          <p><strong>Aktueller Stand:</strong> TASK_1159 gibt dem Ereignisprotokoll stabil 13-Pixel-Meldung/Header, 12-Pixel-Zeit, 32-Pixel-Zeilen und einen 0,96-opaken Hintergrund. Das gilt auch ohne historischen TASK-889-Payload; First Exchange begrenzt zusaetzlich auf vier neueste Ereignisse.</p>
           <p><strong>Performance-Stand:</strong> TASK_1152 senkte den periodischen Host-HUD-Pfad von rund 266 auf 68 ms. TASK_1153 entfernt nun den doppelten Station-Route-Aufbau zwischen Command-Feedback und Mission-Identity und senkt den gemessenen Pfad weiter auf rund 51,7 ms. Direkte Spieleraktionen, Kontakt, Timer und Befehlsfeedback bleiben sofort sichtbar.</p>
           <p><strong>Sichtbarer Playtest-Befund:</strong> Der Host zeigt jetzt <code>BND | 1 KONTAKT WEG | FIT 5/5</code>, der Client <code>MARSCHIERT | 1 KONTAKT WEG | FIT 5/5</code>. Die vollstaendige BND-Formation bleibt im Tooltip, waehrend die Kartenzeile nicht mehr abgeschnitten wird.</p>
           <p><strong>Dropship-Surface-Befund:</strong> Der erste Filter griff wegen zeitversetzter Combat-/Dropship-Snapshots und konserviertem <code>HOST TIMEOUT</code>-Text nicht. Jetzt teilen sichtbare CONTACT-FIRE-Zeile und Dropship-Panel dieselbe read-only Fokusentscheidung; nur echte Pending-Commands halten eine leere Karte sichtbar.</p>
