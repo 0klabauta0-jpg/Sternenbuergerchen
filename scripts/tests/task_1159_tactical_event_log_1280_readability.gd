@@ -14,6 +14,10 @@ func _initialize() -> void:
 	panel.custom_minimum_size = Vector2(240.0, 184.0)
 	root.add_child(panel)
 	await _wait_frames(2)
+	var baseline_snapshot: Dictionary = panel.get_panel_snapshot()
+	_check(bool(baseline_snapshot.get("task_1159_readability_active", false)), "1280 readability is a stable panel contract")
+	_check(float(baseline_snapshot.get("background_alpha", 0.0)) >= 0.94, "Baseline Event Log has tactical background contrast")
+	_check(int(baseline_snapshot.get("row_font_size", 0)) >= 13, "Baseline Event Log keeps readable text")
 
 	var entries: Array = []
 	for index in range(6):

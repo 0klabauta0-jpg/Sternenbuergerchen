@@ -42,6 +42,7 @@ var _release_first_exchange_hud_density_fire_visual_polish_active: bool = false
 
 func _ready() -> void:
 	_ensure_structure()
+	_apply_task_1159_background_style()
 	_refresh_display()
 
 
@@ -88,7 +89,6 @@ func apply_release_first_exchange_hud_density_fire_visual_polish(snapshot: Dicti
 				maxf(custom_minimum_size.y, RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE.y)
 			)
 	else:
-		remove_theme_stylebox_override("panel")
 		max_visible_events = DEFAULT_MAX_VISIBLE_EVENTS
 	_refresh_display(true)
 
@@ -137,6 +137,7 @@ func get_panel_snapshot() -> Dictionary:
 		"release_first_exchange_hud_density_fire_visual_polish_active": _release_first_exchange_hud_density_fire_visual_polish_active,
 		"release_first_exchange_hud_density_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID if _release_first_exchange_hud_density_fire_visual_polish_active else "",
 		"task_1159_readability_style_id": TASK_1159_EVENT_LOG_1280_READABILITY_STYLE_ID,
+		"task_1159_readability_active": true,
 		"row_min_height": _get_row_min_height(),
 		"row_font_size": _get_row_font_size(),
 		"time_font_size": _get_time_font_size(),
@@ -335,34 +336,35 @@ func _add_empty_row() -> void:
 
 
 func _apply_release_first_exchange_event_log_header_style() -> void:
+	_apply_task_1159_background_style()
 	if _header_label != null:
 		_header_label.add_theme_font_size_override("font_size", _get_header_font_size())
 	if _count_label != null:
 		_count_label.add_theme_font_size_override("font_size", _get_count_font_size())
 	if _selected_filter_button != null:
-		_selected_filter_button.add_theme_font_size_override("font_size", 10 if _release_first_exchange_hud_density_fire_visual_polish_active else 8)
+		_selected_filter_button.add_theme_font_size_override("font_size", 10)
 	if _entry_list != null:
 		_entry_list.add_theme_constant_override("separation", 4 if _release_first_exchange_hud_density_fire_visual_polish_active else 3)
 
 
 func _get_row_min_height() -> float:
-	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_MIN_HEIGHT if _release_first_exchange_hud_density_fire_visual_polish_active else ROW_MIN_HEIGHT
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_MIN_HEIGHT
 
 
 func _get_header_font_size() -> int:
-	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_HEADER_FONT_SIZE if _release_first_exchange_hud_density_fire_visual_polish_active else 10
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_HEADER_FONT_SIZE
 
 
 func _get_count_font_size() -> int:
-	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE if _release_first_exchange_hud_density_fire_visual_polish_active else 9
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE
 
 
 func _get_row_font_size() -> int:
-	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE if _release_first_exchange_hud_density_fire_visual_polish_active else 9
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE
 
 
 func _get_time_font_size() -> int:
-	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE if _release_first_exchange_hud_density_fire_visual_polish_active else 9
+	return RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE
 
 
 func _get_severity_strip_width() -> float:
