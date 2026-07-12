@@ -213,6 +213,12 @@ const COMMAND_MATRIX_1280_READABILITY_STYLE_ID: String = "task_1157_command_matr
 const COMMAND_MATRIX_1280_SECONDARY_FONT_SIZE: int = 10
 const COMMAND_MATRIX_1280_ICON_SIZE: int = 14
 const COMMAND_MATRIX_1280_HORIZONTAL_CONTENT_MARGIN: float = 4.0
+const MISSION_CONTROL_1280_READABILITY_STYLE_ID: String = "task_1160_mission_control_1280_readability_v1"
+const MISSION_CONTROL_1280_HEADER_FONT_SIZE: int = 13
+const MISSION_CONTROL_1280_STATUS_FONT_SIZE: int = 13
+const MISSION_CONTROL_1280_OUTLINE_SIZE: int = 3
+const MISSION_CONTROL_1280_MAX_VISIBLE_LINES: int = 4
+const MISSION_CONTROL_1280_MIN_STATUS_HEIGHT: float = 92.0
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC: int = 5000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
@@ -1776,6 +1782,7 @@ func get_connected_first_contact_hud_perspective_snapshot() -> Dictionary:
 	var next_actions: String = "HOLD / MOVE" if fire_rule == TACTICAL_COMMAND_RULES_SCRIPT.FIRE_RULE_RETURN else "HOLD / FLANK / SUP"
 	var primary_line: String = "%s | %s | ROE %s | %s | NEXT %s" % ["+".join(fireteam_tokens), contact_state, roe_token, outcome, next_actions]
 	var signature: String = "%s|%s|%s|%s" % ["+".join(fireteam_tokens), fire_event_id, fire_rule, outcome]
+	_apply_connected_first_contact_hud_perspective_line_to_labels(primary_line)
 	return {
 		"schema": "sternenbuergerchen.connected_first_contact_hud_perspective.v1",
 		"fireteam_ids": fireteam_ids.duplicate(),
@@ -4015,10 +4022,12 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		if not mission_state_tooltip.is_empty():
 			strategic_status_label.tooltip_text = "%s\n\n%s" % [strategic_status_label.tooltip_text, mission_state_tooltip] if not strategic_status_label.tooltip_text.is_empty() else mission_state_tooltip
 		_apply_combat_hud_detail_tooltip_label_contract(strategic_status_label)
+		_apply_mission_control_1280_readability()
 		if profile_enabled:
 			scopes_usec["secondary_tooltip_usec"] = Time.get_ticks_usec() - scope_started_usec
 			scope_started_usec = Time.get_ticks_usec()
 		_apply_frontier_probe_one_screen_visual_polish_label_contract(strategic_status_label)
+		_apply_mission_control_1280_readability()
 		if profile_enabled:
 			scopes_usec["secondary_frontier_contract_usec"] = Time.get_ticks_usec() - scope_started_usec
 			scope_started_usec = Time.get_ticks_usec()
@@ -10089,6 +10098,7 @@ func _apply_release_fire_exchange_real_window_primary_hud_runtime_text() -> void
 		strategic_status_label.text = _build_strategic_status_text()
 		strategic_status_label.set_meta("release_fire_exchange_real_window_runtime_text_style_id", RELEASE_FIRE_EXCHANGE_REAL_WINDOW_PRIMARY_HUD_RUNTIME_TEXT_POLISH_STYLE_ID)
 		strategic_status_label.set_meta("release_fire_exchange_real_window_runtime_text_task", "TASK_862")
+		_apply_mission_control_1280_readability()
 
 
 func _build_release_first_exchange_real_window_hud_source_sync_source(
@@ -10298,6 +10308,8 @@ func _count_text_lines(text: String) -> int:
 
 
 func _apply_release_first_exchange_real_window_hud_source_sync_to_labels() -> void:
+	if _apply_connected_first_contact_hud_perspective_to_labels():
+		return
 	var status_source: Dictionary = _get_release_first_exchange_visible_status_source_evidence()
 	if not bool(status_source.get("active", false)):
 		return
@@ -10345,6 +10357,33 @@ func _apply_release_first_exchange_real_window_hud_source_sync_to_labels() -> vo
 		strategic_status_label.set_meta("release_first_exchange_real_window_hud_source_sync_task", "TASK_883")
 		strategic_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_style_id", RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID)
 		strategic_status_label.set_meta("release_first_exchange_hud_density_fire_visual_polish_task", "TASK_889")
+		_apply_mission_control_1280_readability()
+
+
+func _apply_connected_first_contact_hud_perspective_to_labels() -> bool:
+	var perspective: Dictionary = get_connected_first_contact_hud_perspective_snapshot()
+	var primary_line: String = String(perspective.get("primary_line", "")).strip_edges()
+	if primary_line.is_empty():
+		return false
+	return _apply_connected_first_contact_hud_perspective_line_to_labels(primary_line)
+
+
+func _apply_connected_first_contact_hud_perspective_line_to_labels(primary_line: String) -> bool:
+	var line: String = primary_line.strip_edges()
+	if line.is_empty():
+		return false
+	var fireteam_status_label := get_node_or_null(FIRETEAM_STATUS_LABEL_PATH) as Label
+	if fireteam_status_label != null:
+		_set_mission_label_text_delta(fireteam_status_label, line)
+		fireteam_status_label.set_meta("connected_first_contact_hud_perspective_style_id", "connected_first_contact_hud_perspective_v1")
+		fireteam_status_label.set_meta("connected_first_contact_hud_perspective_task", "TASK_1118")
+	var strategic_status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	if strategic_status_label != null:
+		_set_mission_label_text_delta(strategic_status_label, line)
+		strategic_status_label.set_meta("connected_first_contact_hud_perspective_style_id", "connected_first_contact_hud_perspective_v1")
+		strategic_status_label.set_meta("connected_first_contact_hud_perspective_task", "TASK_1118")
+		_apply_mission_control_1280_readability()
+	return true
 
 
 func _build_release_first_exchange_player_fire_line(status_source: Dictionary, fallback_compact_line: String) -> String:
@@ -15023,6 +15062,116 @@ func _apply_command_matrix_compact_content_margins(button: Button) -> void:
 		button.add_theme_stylebox_override(state, compact)
 
 
+func _apply_mission_control_1280_readability() -> void:
+	var header := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel") as Label
+	if header != null:
+		header.add_theme_font_size_override("font_size", MISSION_CONTROL_1280_HEADER_FONT_SIZE)
+		header.add_theme_color_override("font_color", Color(0.82, 1.0, 0.94, 1.0))
+		header.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.9))
+		header.add_theme_constant_override("outline_size", 2)
+		header.set_meta("mission_control_1280_readability_style_id", MISSION_CONTROL_1280_READABILITY_STYLE_ID)
+		header.set_meta("mission_control_1280_ui_sets_gameplay_truth", false)
+	var status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	if status_label == null:
+		return
+	var original_text: String = String(status_label.text).strip_edges()
+	var previous_full_text: String = String(status_label.get_meta("mission_control_1280_full_status_text", "")).strip_edges()
+	var previous_visible_text: String = _build_mission_control_1280_visible_text(previous_full_text)
+	var original_is_new_source: bool = not original_text.is_empty() \
+		and original_text != previous_full_text \
+		and original_text != previous_visible_text
+	if not original_text.is_empty() and (not bool(status_label.get_meta("mission_control_1280_visible_trimmed", false)) or previous_full_text.is_empty() or original_is_new_source):
+		status_label.set_meta("mission_control_1280_full_status_text", original_text)
+	var source_text: String = String(status_label.get_meta("mission_control_1280_full_status_text", original_text)).strip_edges()
+	if source_text.is_empty():
+		source_text = original_text
+	var visible_lines: PackedStringArray = source_text.split("\n", false)
+	var trimmed: bool = visible_lines.size() > MISSION_CONTROL_1280_MAX_VISIBLE_LINES
+	if trimmed:
+		var capped_lines := PackedStringArray()
+		for index in range(MISSION_CONTROL_1280_MAX_VISIBLE_LINES):
+			capped_lines.append(String(visible_lines[index]).strip_edges())
+		status_label.text = "\n".join(capped_lines)
+		status_label.set_meta("mission_control_1280_visible_trimmed", true)
+	else:
+		status_label.text = source_text
+		status_label.set_meta("mission_control_1280_visible_trimmed", false)
+	status_label.tooltip_text = _merge_mission_control_1280_tooltip(status_label.tooltip_text, source_text)
+	status_label.visible = true
+	status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	status_label.clip_text = false
+	status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	status_label.add_theme_color_override("font_color", Color(0.82, 1.0, 0.94, 1.0))
+	status_label.add_theme_color_override("font_outline_color", Color(0.0, 0.0, 0.0, 0.94))
+	status_label.add_theme_font_size_override("font_size", MISSION_CONTROL_1280_STATUS_FONT_SIZE)
+	status_label.add_theme_constant_override("outline_size", MISSION_CONTROL_1280_OUTLINE_SIZE)
+	status_label.custom_minimum_size = Vector2(
+		maxf(status_label.custom_minimum_size.x, 0.0),
+		maxf(status_label.custom_minimum_size.y, MISSION_CONTROL_1280_MIN_STATUS_HEIGHT)
+	)
+	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	status_label.mouse_default_cursor_shape = Control.CURSOR_HELP
+	status_label.set_meta("mission_control_1280_readability_style_id", MISSION_CONTROL_1280_READABILITY_STYLE_ID)
+	status_label.set_meta("mission_control_1280_font_size", MISSION_CONTROL_1280_STATUS_FONT_SIZE)
+	status_label.set_meta("mission_control_1280_visible_line_count", min(visible_lines.size(), MISSION_CONTROL_1280_MAX_VISIBLE_LINES))
+	status_label.set_meta("mission_control_1280_ui_sets_gameplay_truth", false)
+
+
+func _build_mission_control_1280_visible_text(source_text: String) -> String:
+	var text: String = source_text.strip_edges()
+	if text.is_empty():
+		return ""
+	var lines: PackedStringArray = text.split("\n", false)
+	if lines.size() <= MISSION_CONTROL_1280_MAX_VISIBLE_LINES:
+		return text
+	var capped_lines := PackedStringArray()
+	for index in range(MISSION_CONTROL_1280_MAX_VISIBLE_LINES):
+		capped_lines.append(String(lines[index]).strip_edges())
+	return "\n".join(capped_lines)
+
+
+func _merge_mission_control_1280_tooltip(existing_tooltip: String, full_status_text: String) -> String:
+	var normalized_tooltip: String = existing_tooltip.strip_edges()
+	var normalized_status: String = full_status_text.strip_edges()
+	if normalized_status.is_empty():
+		return normalized_tooltip
+	if normalized_tooltip.contains(normalized_status):
+		return normalized_tooltip
+	if normalized_tooltip.is_empty():
+		return normalized_status
+	return "%s\n\n%s" % [normalized_tooltip, normalized_status]
+
+
+func get_mission_control_1280_readability_snapshot() -> Dictionary:
+	_apply_mission_control_1280_readability()
+	var panel := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel") as Control
+	var scroll := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll") as ScrollContainer
+	var header := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicHeaderLabel") as Label
+	var status_label := get_node_or_null(STRATEGIC_STATUS_LABEL_PATH) as Label
+	var status_text: String = String(status_label.text if status_label != null else "").strip_edges()
+	var visible_lines: PackedStringArray = status_text.split("\n", false)
+	var panel_rect: Rect2 = _get_control_global_rect_or_empty(panel)
+	var label_rect: Rect2 = _get_control_global_rect_or_empty(status_label)
+	return {
+		"schema": "sternenbuergerchen.mission_control_1280_readability.v1",
+		"task_id": "TASK_1160",
+		"style_id": String(status_label.get_meta("mission_control_1280_readability_style_id", "")) if status_label != null else "",
+		"header_font_size": header.get_theme_font_size("font_size") if header != null else 0,
+		"status_font_size": status_label.get_theme_font_size("font_size") if status_label != null else 0,
+		"outline_size": status_label.get_theme_constant("outline_size") if status_label != null else 0,
+		"visible_line_count": visible_lines.size(),
+		"max_visible_lines": MISSION_CONTROL_1280_MAX_VISIBLE_LINES,
+		"tooltip_available": status_label != null and not status_label.tooltip_text.strip_edges().is_empty(),
+		"status_min_height": status_label.custom_minimum_size.y if status_label != null else 0.0,
+		"status_wrap_enabled": status_label != null and int(status_label.autowrap_mode) != int(TextServer.AUTOWRAP_OFF),
+		"status_clip_text": bool(status_label.clip_text) if status_label != null else true,
+		"vertical_scroll_enabled": scroll != null and scroll.vertical_scroll_mode != ScrollContainer.SCROLL_MODE_DISABLED,
+		"label_inside_panel": panel_rect.encloses(label_rect) if panel != null and status_label != null else false,
+		"ui_sets_gameplay_truth": false,
+	}
+
+
 func get_command_matrix_1280_readability_snapshot() -> Dictionary:
 	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
 	var button_entries: Array = []
@@ -15237,6 +15386,7 @@ func _apply_card_bound_mission_control_layout() -> void:
 		status_label.visible = true
 		_apply_combat_hud_detail_tooltip_label_contract(status_label)
 		status_label.set_meta("mission_control_card_bound_hidden", false)
+	_apply_mission_control_1280_readability()
 
 
 func _apply_command_grid_hierarchy_order(command_grid: GridContainer) -> void:

@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1160 - Mission Control 1280 Readability (implementiert im Arbeitsstand)
+- Grundlage: Nach TASK_1157 bis TASK_1159 ist `#18 EINSATZKONTROLLE` im 1280er First-Contact die kleinste verbliebene primaere HUD-Entscheidungsflaeche.
+- Ziel: Mission-Control-Header, CONTACT-FIRE-Zeile und kompakte Missions-/ROE-/Objective-Status lesbar machen, ohne Mission-State oder Command-Pfad zu veraendern.
+- Ergebnis: Eigener Readability-Vertrag mit 13-Pixel-Header/Status, 3-Pixel-Outline, Wrap, 92-Pixel-Statushoehe, maximal vier sichtbaren Zeilen und Tooltip-Detail. Connected-First-Contact-Perspektiven werden wieder ins echte Label gespiegelt.
+- Verifikation: TASK_1160 21/21; Mission-Control-Sprach-/Layout-/Connected-Perspektivgates, 1280-Nachbarpanels, Multi-Dropship und TASK_222 gruen.
+- Naechster Schritt: TASK_1161 - 1280 Release Recapture and Primary HUD Balance.
+
 ## TASK_1159 - Tactical Event Log 1280 Readability (implementiert und im Release sichtbar verifiziert)
 - Grundlage: Nach Matrix und Member-Karten ist #19 im 1280er First-Contact die kleinste primaere HUD-Schrift; fuenf Zeilen passen nicht lesbar in 240x184.
 - Ziel: Vier neueste Ereignisse mit klarer Zeit-/Meldungshierarchie zeigen und den bestehenden Snapshot-Skip erhalten.
