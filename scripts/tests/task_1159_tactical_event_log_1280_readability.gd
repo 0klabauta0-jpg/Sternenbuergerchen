@@ -47,6 +47,7 @@ func _initialize() -> void:
 	_check(int(snapshot.get("row_font_size", 0)) >= 13, "Event text uses the 1280 font floor")
 	_check(header != null and header.get_theme_font_size("font_size") >= 13, "Header uses the 1280 font floor")
 	_check(filter != null and filter.get_theme_font_size("font_size") >= 10, "Selection filter remains readable")
+	_check(float(snapshot.get("background_alpha", 0.0)) >= 0.94, "Event text has an opaque tactical background")
 	_check(rows != null and rows.get_child_count() == 4, "Row tree matches the capped event set")
 	if rows != null:
 		for row_variant in rows.get_children():

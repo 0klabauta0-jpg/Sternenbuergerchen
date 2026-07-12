@@ -15,6 +15,8 @@ const RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE: int = 11
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE: int = 13
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE: int = 12
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_STRIP_WIDTH: float = 5.0
+const TASK_1159_EVENT_LOG_BACKGROUND_COLOR: Color = Color(0.035, 0.052, 0.060, 0.96)
+const TASK_1159_EVENT_LOG_BORDER_COLOR: Color = Color(0.24, 0.34, 0.39, 0.96)
 
 @export var max_visible_events: int = DEFAULT_MAX_VISIBLE_EVENTS
 @export var selected_only: bool = false
@@ -76,6 +78,7 @@ func apply_release_first_exchange_hud_density_fire_visual_polish(snapshot: Dicti
 		return
 	_release_first_exchange_hud_density_fire_visual_polish_active = active
 	if active:
+		_apply_task_1159_background_style()
 		max_visible_events = int(snapshot.get("event_log_max_visible_events", RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS))
 		if custom_minimum_size == Vector2.ZERO:
 			custom_minimum_size = RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE
@@ -85,6 +88,7 @@ func apply_release_first_exchange_hud_density_fire_visual_polish(snapshot: Dicti
 				maxf(custom_minimum_size.y, RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE.y)
 			)
 	else:
+		remove_theme_stylebox_override("panel")
 		max_visible_events = DEFAULT_MAX_VISIBLE_EVENTS
 	_refresh_display(true)
 
@@ -119,6 +123,7 @@ func get_panel_snapshot() -> Dictionary:
 	var first_event_id: String = ""
 	if not _rendered_entries.is_empty() and typeof(_rendered_entries[0]) == TYPE_DICTIONARY:
 		first_event_id = String(Dictionary(_rendered_entries[0]).get("event_id", ""))
+	var panel_style := get_theme_stylebox("panel") as StyleBoxFlat
 	return {
 		"event_count": _event_entries.size(),
 		"rendered_entry_count": _rendered_entries.size(),
@@ -137,6 +142,7 @@ func get_panel_snapshot() -> Dictionary:
 		"time_font_size": _get_time_font_size(),
 		"header_font_size": _get_header_font_size(),
 		"count_font_size": _get_count_font_size(),
+		"background_alpha": panel_style.bg_color.a if panel_style != null else 0.0,
 		"custom_minimum_size_x": custom_minimum_size.x,
 		"custom_minimum_size_y": custom_minimum_size.y,
 		"severity_counts": severity_counts,
@@ -152,6 +158,15 @@ func get_panel_snapshot() -> Dictionary:
 		"feedback_snapshot_sets_gameplay_truth": false,
 		"selected_only_default_initialized": _selected_only_default_initialized,
 	}
+
+
+func _apply_task_1159_background_style() -> void:
+	var style := StyleBoxFlat.new()
+	style.bg_color = TASK_1159_EVENT_LOG_BACKGROUND_COLOR
+	style.border_color = TASK_1159_EVENT_LOG_BORDER_COLOR
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	add_theme_stylebox_override("panel", style)
 
 
 func get_rendered_event_entries() -> Array:
