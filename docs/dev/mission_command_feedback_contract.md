@@ -209,6 +209,21 @@ Verifier und Diagnose erhalten, sind im Spielerbild aber verborgen.
 Callback- und Markerzustand, setzt `ui_sets_gameplay_truth = false` und erzeugt
 weder Commands, Effects noch Multiplayer-Snapshots.
 
+### Selected-Fireteam-Member-Karten bei 1280x720 (TASK_1158)
+
+Der Kontext `mission_selected_fireteam_member` verwendet 196x132 interne
+Pixel, 15 Pixel fuer Namen, 12 Pixel fuer Runtime-/Detailtext, 14 Pixel
+Zeilenhoehe und 42 Pixel Portraitgroesse. Vier Karten plus drei bestehende
+8-Pixel-Abstaende passen in die 840-Pixel-Member-Lane; groessere Fireteams
+bleiben horizontal scrollbar.
+
+Die Werte laufen ueber den bestehenden `NPCCompactCard`-Optionspfad und
+aendern keine Defaults anderer Compact-Card-Kontexte. Der vorhandene
+Runtime-Signatur-/Dirty-Guard bleibt die Refreshgrenze.
+`get_compact_readability_snapshot()` liest nur Card-, Label- und Portraitwerte,
+setzt `read_only = true` sowie `ui_sets_gameplay_truth = false` und erzeugt
+weder Commands, Effects noch Multiplayer-State.
+
 ## Insertion-/First-Order-Readability
 `get_mission_insertion_first_order_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten spielbaren Missionsmoment nach dem Homebase-Launch. Der Snapshot darf nur bestehende Planning-, Dropship-Karten-, Command-Feedback- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: Dropship-Payload vorhanden, Card sichtbar, LZ-Zustand sichtbar, Drop ohne LZ blockiert, ausgewaehltes Fireteam sichtbar, erste Order-Kontrollen vorhanden, und nach LZ-Setzung ein sichtbarer LZ-Marker plus bereiter Drop-Button.
 

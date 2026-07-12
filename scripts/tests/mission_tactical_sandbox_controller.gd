@@ -4585,7 +4585,7 @@ func _refresh_selected_fireteam_cards() -> void:
 		var card = NPC_COMPACT_CARD_SCENE.instantiate()
 		var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit != null and unit.has_method("get_unit_id") else ""
 		var in_drop_transit: bool = not unit_id.is_empty() and hud_embarked_unit_state.has(unit_id) and not _deployed_unit_ids.has(unit_id)
-		card.custom_minimum_size = Vector2(176.0, 118.0)
+		card.custom_minimum_size = Vector2(196.0, 132.0)
 		card.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		card.call(
 			"setup_from_profile",
@@ -4600,11 +4600,15 @@ func _refresh_selected_fireteam_cards() -> void:
 				"selected": _is_selected_member_card_unit(unit, selected_cards_fireteam_id),
 				"disabled": in_drop_transit,
 				"fixed_size": true,
-				"fixed_card_size": Vector2(176.0, 118.0),
+				"fixed_card_size": Vector2(196.0, 132.0),
 				"compact_wrap_text": true,
 				"compact_data_a_max_lines": 2,
 				"compact_data_b_max_lines": 4,
-				"compact_text_min_width": 94.0,
+				"compact_text_min_width": 108.0,
+				"compact_name_font_size": 15,
+				"compact_data_font_size": 12,
+				"compact_line_height": 14.0,
+				"compact_portrait_size": 42.0,
 				"card_tooltip_override": _build_live_fireteam_card_technical_tooltip(unit) if not preview_mode else "",
 			}
 		)

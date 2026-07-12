@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1158 - Selected Fireteam Member Cards 1280 Readability (implementiert, Release-Sichtcheck folgt)
+- Grundlage: Der TASK-1157-Recapture zeigt korrekt lesbare Befehle, aber weiterhin stark herunterskalierte Operatornamen und Live-Zustaende in #17.
+- Ziel: Die vorhandene Member-Lane fuer moderate missionsspezifische Karten-/Typografievergroesserung nutzen, ohne Card-State oder Bottom-Dock umzubauen.
+- Ergebnis: 196x132-Karten, 15-Pixel-Namen, 12-Pixel-Live-Text, 14-Pixel-Zeilenhoehe und 42-Pixel-Portraits nur im Mission-Member-Kontext. Vier Karten passen weiterhin in 840 Pixel.
+- Verifikation: TASK_1158 28/28; Sprach-/Fit-/Layoutgates, Mehr-Dropship Host/Client und TASK_222 82/82 gruen.
+- Naechster Schritt: Exportierter 1280x720-Recapture und danach der naechste reale Spielerbefund.
+
 ## TASK_1157 - Command Matrix 1280 Readability (implementiert und im Release sichtbar verifiziert)
 - Grundlage: Das 1920er HUD skaliert im 1280x720-Release die Command-Matrix auf unlesbare 6-Pixel-Spielschrift; sichtbare technische Slotnummern konkurrieren mit den Befehlen.
 - Ziel: Echte Befehle, ROE und GO innerhalb der stabilen fuenfspaltigen Matrix lesbar machen, ohne Command- oder Multiplayer-Verhalten anzufassen.
