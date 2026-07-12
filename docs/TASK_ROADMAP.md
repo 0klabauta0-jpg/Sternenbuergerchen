@@ -13,10 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1155 - Contact Focus Empty Dropship Surface Retirement (in Arbeit)
+## TASK_1155 - Contact Focus Empty Dropship Surface Retirement (implementiert)
 - Grundlage: TASK_1154-Capture zeigt zwei leere, nicht mehr bedienbare `Leaving mission map`-Karten ueber der taktischen Welt.
 - Ziel: Den bestehenden TASK-1120-Contact-Filter auf leere outbound-Crafts erweitern, ohne Transportstate oder aktive Karten zu veraendern.
 - Verifikation: Dropship-HUD-, Host/Client-First-Contact- und Performance-Gates plus Release-Capture.
+- Ergebnis: Leere abgeschlossene Transportkarten geben im echten Host-/Client-First-Contact die rechte Kartenflaeche frei; Payload, Pending und Authority bleiben unveraendert.
+- Naechster Schritt: TASK-188-Testvertrauen reparieren, danach die Befehlsmatrix im kleinen Release-Fenster lesbarer machen.
 
 ## TASK_1154 - Fireteam Contact Loss Language Clarity (implementiert)
 - Grundlage: Der sichtbare TASK-1153-Release zeigt `1 VERLOREN | FIT 5/5`, obwohl `VERLOREN` den ContactTracker-Zustand und keinen personellen Verlust bezeichnet.

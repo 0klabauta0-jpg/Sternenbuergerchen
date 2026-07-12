@@ -38,3 +38,21 @@ Der vorhandene TASK-1120-Filter blendet nur leere Karten im Zustand `to_fob` mit
 
 ## Risiken / offene Punkte
 Eine leere Karte kann noch historischen Host-Text tragen. Nur ein echter Pending-Command verhindert das Ausblenden; Result-Feedback bleibt weiterhin in Command-/Event-Feedback nachvollziehbar, darf aber im Feuerkontakt keine nicht mehr bedienbare Grosskarte festhalten.
+
+## Ergebnis
+- Status: implementiert und im exportierten Host-/Client-First-Contact sichtbar verifiziert.
+- Leere `outbound`-Karten verschwinden im Contact-Fokus; leere `to_fob 0s`-Karten verschwinden generell, weil sie keine Aktion mehr besitzen.
+- Historischer `HOST TIMEOUT`-Text pinnt keine leere Grosskarte mehr. Echte Pending-Commands halten ihre Surface weiterhin sichtbar.
+- Connected Perspective, persistierte First-Fire-Evidence und die tatsaechlich sichtbare Combat-HUD-Density speisen dieselbe Contact-Fokus-Entscheidung.
+- Multiplayer-Snapshots loesen nur bei Contact-Fokus-Wechsel oder geaendertem Dropship-State im aktiven Fokus einen Panel-Refresh aus.
+
+## Abschlusspruefung
+- TASK_1155: 17/17.
+- TASK_1120: 11/11; TASK_1114: 13/13.
+- TASK_1109: 18/18; TASK_1110: 20/20.
+- TASK_1117: 15/15; TASK_1150: 18/18.
+- TASK_222: 82/82.
+- Exportierter Zwei-EXE-Lauf `pass`; finale Host-/Client-PNGs zeigen rechts keine leeren Dropship-Karten mehr.
+
+## Naechster Befund
+TASK 188 meldet 13 fehlgeschlagene Assertions, beendet sich aber mit Exit 0. Diese Testvertrauensluecke sollte zuerst geschlossen werden. Danach ist im 1280x720-Release die kleine Befehlsmatrix links unten der naechste sichtbare Lesbarkeitskandidat.
