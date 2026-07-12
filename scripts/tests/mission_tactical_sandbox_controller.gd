@@ -206,9 +206,12 @@ const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_OUTLINE_SIZE: int = 3
 const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MIN_HEIGHT: float = 84.0
 const RELEASE_FIREFIGHT_BOTTOM_DOCK_DENSITY_MAX_LINES: int = 5
 const RELEASE_FIREFIGHT_COMMAND_MATRIX_VISUAL_STYLE_ID: String = "task_836_release_firefight_command_matrix_visual_v1"
-const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE: int = 9
-const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE: int = 12
-const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 9
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE: int = 12
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE: int = 13
+const RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE: int = 11
+const COMMAND_MATRIX_1280_READABILITY_STYLE_ID: String = "task_1157_command_matrix_1280_readability_v1"
+const COMMAND_MATRIX_1280_SECONDARY_FONT_SIZE: int = 10
+const COMMAND_MATRIX_1280_ICON_SIZE: int = 14
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC: int = 5000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
@@ -10656,32 +10659,32 @@ func _get_release_firefight_command_primary_button_specs() -> Array:
 	return [
 		{
 			"path": "%s/MoveButton" % COMMAND_GRID_PATH,
-			"text": "Move",
-			"tooltip": "Move: Ziel anklicken, Preview lesen, dann GO.",
+			"text": "BW",
+			"tooltip": "Bewegen: Ziel anklicken, Vorschau lesen, dann GO.",
 			"role": "primary_command",
 		},
 		{
 			"path": "%s/TakeButton" % COMMAND_GRID_PATH,
-			"text": "Take",
-			"tooltip": "Take: Kontakt oder Gebiet aggressiv nehmen.",
+			"text": "NM",
+			"tooltip": "Nehmen: Kontakt oder Gebiet aggressiv besetzen.",
 			"role": "primary_command",
 		},
 		{
 			"path": "%s/HoldButton" % COMMAND_GRID_PATH,
-			"text": "Hold",
-			"tooltip": "Hold: Position halten und Deckung/Sicherung nutzen.",
+			"text": "HL",
+			"tooltip": "Halten: Position halten und Deckung/Sicherung nutzen.",
 			"role": "primary_command",
 		},
 		{
 			"path": "%s/FlankButton" % COMMAND_GRID_PATH,
-			"text": "Flank",
-			"tooltip": "Flank: Risiko nehmen, Winkel verbessern.",
+			"text": "FL",
+			"tooltip": "Flankieren: Risiko nehmen und den Angriffswinkel verbessern.",
 			"role": "primary_command",
 		},
 		{
 			"path": "%s/TargetButton" % COMMAND_GRID_PATH,
-			"text": "Pick" if _is_target_placement_armed else "Target",
-			"tooltip": "Target: Ziel-/Area-Fokus fuer Fireteam setzen.",
+			"text": "ST" if _is_target_placement_armed else "ZL",
+			"tooltip": "Ziel: Ziel- oder Gebietsfokus fuer das Fireteam setzen.",
 			"role": "primary_command",
 		},
 	]
@@ -14917,6 +14920,7 @@ func _apply_drop_light_hud_button_labels() -> void:
 		drop_button.text = _build_drop_light_drop_button_label()
 		drop_button.tooltip_text = "Call dropship"
 	_apply_command_button_markers()
+	_apply_command_matrix_1280_readability()
 
 
 func _get_command_matrix_player_tooltip(path: String, fallback: String) -> String:
@@ -14953,7 +14957,7 @@ func _apply_command_matrix_player_icons() -> void:
 			continue
 		button.icon = _get_compact_command_matrix_icon(String(path_variant), icons_by_path[path_variant] as Texture2D)
 		button.expand_icon = false
-		button.add_theme_font_size_override("font_size", 6)
+		button.add_theme_font_size_override("font_size", RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE)
 
 
 func _get_compact_command_matrix_icon(cache_key: String, source: Texture2D) -> Texture2D:
@@ -14964,10 +14968,74 @@ func _get_compact_command_matrix_icon(cache_key: String, source: Texture2D) -> T
 	var image: Image = source.get_image()
 	if image == null or image.is_empty():
 		return source
-	image.resize(10, 10, Image.INTERPOLATE_LANCZOS)
+	image.resize(COMMAND_MATRIX_1280_ICON_SIZE, COMMAND_MATRIX_1280_ICON_SIZE, Image.INTERPOLATE_LANCZOS)
 	var compact_texture := ImageTexture.create_from_image(image)
 	_command_matrix_icon_cache[cache_key] = compact_texture
 	return compact_texture
+
+
+func _apply_command_matrix_1280_readability() -> void:
+	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
+	if command_grid == null:
+		return
+	command_grid.set_meta("command_matrix_1280_readability_style_id", COMMAND_MATRIX_1280_READABILITY_STYLE_ID)
+	command_grid.set_meta("command_matrix_1280_ui_sets_gameplay_truth", false)
+	for child_variant in command_grid.get_children():
+		var button := child_variant as Button
+		if button == null:
+			continue
+		var marker := button.get_node_or_null("TinyButtonMarker") as Label
+		if marker != null:
+			marker.visible = false
+			marker.set_meta("command_matrix_player_hidden", true)
+		if bool(button.get_meta("drop_light_command_placeholder", false)):
+			continue
+		var font_size := COMMAND_MATRIX_1280_SECONDARY_FONT_SIZE
+		if button.name == "GoCommandMatrixButton":
+			font_size = RELEASE_FIREFIGHT_COMMAND_MATRIX_GO_FONT_SIZE
+		elif bool(button.get_meta("fire_rule_control", false)):
+			font_size = RELEASE_FIREFIGHT_COMMAND_MATRIX_FIRE_RULE_FONT_SIZE
+		elif ["MoveButton", "TakeButton", "HoldButton", "FlankButton", "TargetButton"].has(String(button.name)):
+			font_size = RELEASE_FIREFIGHT_COMMAND_MATRIX_PRIMARY_FONT_SIZE
+		button.add_theme_font_size_override("font_size", font_size)
+		button.add_theme_constant_override("icon_max_width", COMMAND_MATRIX_1280_ICON_SIZE)
+		button.add_theme_constant_override("h_separation", 3)
+		button.set_meta("command_matrix_1280_font_size", font_size)
+		button.set_meta("command_matrix_1280_readability_style_id", COMMAND_MATRIX_1280_READABILITY_STYLE_ID)
+
+
+func get_command_matrix_1280_readability_snapshot() -> Dictionary:
+	var command_grid := get_node_or_null(COMMAND_GRID_PATH) as GridContainer
+	var button_entries: Array = []
+	var visible_marker_count := 0
+	var marker_count := 0
+	if command_grid != null:
+		for child_variant in command_grid.get_children():
+			var button := child_variant as Button
+			if button == null:
+				continue
+			var marker := button.get_node_or_null("TinyButtonMarker") as Label
+			if marker != null:
+				marker_count += 1
+				if marker.visible:
+					visible_marker_count += 1
+			button_entries.append({
+				"name": String(button.name),
+				"slot_id": String(button.get_meta("command_matrix_slot_id", "")),
+				"font_size": button.get_theme_font_size("font_size"),
+				"has_icon": button.icon != null,
+				"callback_count": button.pressed.get_connections().size(),
+			})
+	return {
+		"schema": "sternenbuergerchen.command_matrix_1280_readability.v1",
+		"style_id": String(command_grid.get_meta("command_matrix_1280_readability_style_id", "")) if command_grid != null else "",
+		"columns": command_grid.columns if command_grid != null else 0,
+		"button_count": button_entries.size(),
+		"marker_count": marker_count,
+		"visible_marker_count": visible_marker_count,
+		"buttons": button_entries,
+		"ui_sets_gameplay_truth": false,
+	}
 
 
 func _build_drop_light_drop_button_label() -> String:
@@ -15129,6 +15197,7 @@ func _apply_compact_mission_control_layout() -> void:
 	_apply_fireteam_panel_action_button_contract()
 	_apply_card_bound_mission_control_layout()
 	_enforce_drop_light_fixed_hud_layout()
+	_apply_command_matrix_1280_readability()
 
 
 func _apply_card_bound_mission_control_layout() -> void:
@@ -15625,6 +15694,7 @@ func _refresh_dynamic_button_styles() -> void:
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/StrategicActionRow/CallDropshipButton") as Button, _drop_ship_requested)
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/PhaseControlPanel/PhaseControlMargin/PhaseControlVBox/PhaseActionRow/NextPhaseButton") as Button, PHASE_PLANNING_ENABLED and not preview_mode and _can_issue_local_commands() and not _phase_execution_by_fireteam.is_empty())
 	META_UI_SKIN_SCRIPT.style_tactical_button(get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/StrategicPanel/StrategicMargin/StrategicScroll/StrategicVBox/ApproachGrid/%sButton" % _get_approach_angle_name()) as Button, true)
+	_apply_command_matrix_1280_readability()
 
 
 func _apply_block_labels() -> void:
