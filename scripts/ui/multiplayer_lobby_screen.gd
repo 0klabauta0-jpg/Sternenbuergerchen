@@ -446,7 +446,9 @@ func _submit_release_contact_advance(controller: Node) -> bool:
 				continue
 			if not local_team_id.is_empty() and String(unit.call("get_team_id")).strip_edges() != local_team_id:
 				enemy_positions.append((unit as Node2D).global_position)
-	if terrain_registry != null and not enemy_positions.is_empty():
+	if enemy_positions.is_empty():
+		enemy_positions.append(requested_target)
+	if terrain_registry != null:
 		_release_contact_approach_evidence = Dictionary(CONTACT_APPROACH_RESOLVER_SCRIPT.new().call("find_reachable_approach", start_position, enemy_positions, terrain_registry))
 		if bool(_release_contact_approach_evidence.get("found", false)):
 			requested_target = Vector2(_release_contact_approach_evidence.get("position", requested_target))

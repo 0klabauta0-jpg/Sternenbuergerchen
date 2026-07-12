@@ -35,7 +35,7 @@ $screenshotPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_fir
 $hostWindowPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_host_window.png" } elseif ($DropDecision) { "release_host_client_drop_decision_host_window.png" } else { "release_host_client_host_window.png" })
 $clientWindowPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_client_window.png" } elseif ($DropDecision) { "release_host_client_drop_decision_client_window.png" } else { "release_host_client_client_window.png" })
 Remove-Item -LiteralPath $hostTrace,$clientTrace -Force -ErrorAction SilentlyContinue
-$windowResolution = if ($dropMode) { "1600x900" } else { "900x700" }
+$windowResolution = if ($FirstContact) { "1280x720" } elseif ($dropMode) { "1600x900" } else { "900x700" }
 $hostWindowPosition = "20,80"
 $clientWindowPosition = if ($dropMode) { "360,120" } else { "960,80" }
 
