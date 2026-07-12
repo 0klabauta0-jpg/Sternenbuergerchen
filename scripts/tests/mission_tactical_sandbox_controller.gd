@@ -11343,7 +11343,8 @@ func _build_contact_focused_mission_dropship_card_entries(entries: Array, contac
 func _is_mission_contact_focus_active() -> bool:
 	return _is_contact_focus_active_from_snapshots(
 		get_connected_first_contact_hud_perspective_snapshot(),
-		_get_release_first_exchange_visible_status_source_evidence()
+		_get_release_first_exchange_visible_status_source_evidence(),
+		_build_mission_combat_hud_density_snapshot()
 	)
 
 
@@ -11353,9 +11354,12 @@ func _should_refresh_dropship_panel_for_contact_focus(contact_focus_active: bool
 	return contact_focus_changed or (contact_focus_active and dropship_snapshot_changed)
 
 
-func _is_contact_focus_active_from_snapshots(contact_perspective: Dictionary, visible_status_source: Dictionary) -> bool:
+func _is_contact_focus_active_from_snapshots(contact_perspective: Dictionary, visible_status_source: Dictionary, combat_hud_density: Dictionary = {}) -> bool:
 	var perspective_line: String = String(contact_perspective.get("primary_line", "")).strip_edges().to_upper()
 	if perspective_line.contains("CONTACT FIRE"):
+		return true
+	var density_line: String = String(combat_hud_density.get("compact_line", combat_hud_density.get("selected_fireteam_line", ""))).strip_edges().to_upper()
+	if density_line.contains("CONTACT FIRE"):
 		return true
 	if not bool(visible_status_source.get("active", false)):
 		return false

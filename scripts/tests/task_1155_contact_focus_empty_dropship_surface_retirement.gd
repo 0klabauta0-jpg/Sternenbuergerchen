@@ -22,6 +22,7 @@ func _run() -> void:
 		_assert(controller.has_method("_is_contact_focus_active_from_snapshots"), "Controller exposes one Contact-focus decision for HUD surfaces")
 		if controller.has_method("_is_contact_focus_active_from_snapshots"):
 			_assert(bool(controller.call("_is_contact_focus_active_from_snapshots", {}, {"active": true, "compact_line": "CONTACT FIRE | BLUE"})), "Persisted First-Fire status activates Contact focus when connected diagnostics lag")
+			_assert(bool(controller.call("_is_contact_focus_active_from_snapshots", {}, {}, {"compact_line": "BLUE | CONTACT FIRE | HIT"})), "Visible Combat HUD density activates the same Contact focus as the primary line")
 			_assert(not bool(controller.call("_is_contact_focus_active_from_snapshots", {}, {})), "Empty HUD snapshots do not activate Contact focus")
 		_assert(controller.has_method("_should_refresh_dropship_panel_for_contact_focus"), "Dropship panel exposes a transition-only Contact refresh guard")
 		if controller.has_method("_should_refresh_dropship_panel_for_contact_focus"):
