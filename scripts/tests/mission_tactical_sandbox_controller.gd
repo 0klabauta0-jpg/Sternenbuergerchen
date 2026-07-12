@@ -295,6 +295,7 @@ const DOOR_AUTHORITY_BLOCKED_AFFORDANCE_STYLE_ID: String = "door_authority_block
 const DOOR_AUTHORITY_NEUTRAL_AFFORDANCE_STYLE_ID: String = "door_authority_neutral_v1"
 const SUPPRESS_FIRE_PREVIEW_RADIUS_WORLD: float = 148.0
 const CARD_REFRESH_INTERVAL_SECONDS: float = 0.35
+const RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS: float = 1.0
 const FIRETEAM_SECURITY_REFRESH_INTERVAL_SECONDS: float = 0.20
 const AREA_ORDER_PREVIEW_REFRESH_MSEC: int = 80
 const AREA_ORDER_PREVIEW_SIGNATURE_STEP: float = 8.0
@@ -543,6 +544,7 @@ var _air_asset_lz_secure_level: float = 0.0
 var _meta_transfer_routes: Array = []
 var _drop_ship_cooldown_remaining: float = 0.0
 var _card_refresh_time_remaining: float = 0.0
+var _runtime_hud_heavy_refresh_time_remaining: float = 0.0
 var _fireteam_security_refresh_time_remaining: float = 0.0
 var _mission_visible_frame_timing_debug_enabled: bool = false
 var _mission_visible_frame_timing_debug_snapshot: Dictionary = {}
@@ -753,13 +755,17 @@ func _process(delta: float) -> void:
 		scopes_usec["feedback_and_security_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
 	_card_refresh_time_remaining -= delta
+	_runtime_hud_heavy_refresh_time_remaining -= delta
 	if _card_refresh_time_remaining > 0.0:
 		if profile_enabled:
 			scopes_usec["ui_refresh_usec"] = 0
 			_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, false)
 		return
 	_card_refresh_time_remaining = CARD_REFRESH_INTERVAL_SECONDS
-	_update_ui()
+	var heavy_refresh_due: bool = _runtime_hud_heavy_refresh_time_remaining <= 0.0
+	if heavy_refresh_due:
+		_runtime_hud_heavy_refresh_time_remaining = RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS
+	_update_ui(heavy_refresh_due)
 	if profile_enabled:
 		scopes_usec["ui_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
 		_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, true)
@@ -3840,7 +3846,7 @@ func set_tactical_ui_visible(is_visible: bool) -> void:
 		overlay.visible = is_visible and _character_overlay_open
 
 
-func _update_ui() -> void:
+func _update_ui(include_heavy_surfaces: bool = true) -> void:
 	var profile_enabled: bool = _mission_visible_frame_timing_debug_enabled
 	var refresh_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -3899,6 +3905,12 @@ func _update_ui() -> void:
 	if profile_enabled:
 		scopes_usec["mission_panels_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
+	if not include_heavy_surfaces:
+		if profile_enabled:
+			scopes_usec["runtime_surfaces_usec"] = 0
+			scopes_usec["secondary_labels_usec"] = 0
+			_record_mission_ui_refresh_timing_snapshot(refresh_started_usec, scopes_usec)
+		return
 	_refresh_runtime_mission_hud_surfaces()
 	_apply_release_firefight_command_matrix_visual_polish()
 	if profile_enabled:
