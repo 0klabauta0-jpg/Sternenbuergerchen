@@ -27,6 +27,8 @@ const RELEASE_SINGLEPLAYER_DEEPLINK_ARG: String = "--release-singleplayer"
 const RELEASE_SINGLEPLAYER_START_MISSION_DEEPLINK_ARG: String = "--release-singleplayer-start-mission"
 const RELEASE_SINGLEPLAYER_LZ_DROP_PREVIEW_DEEPLINK_ARG: String = "--release-singleplayer-lz-drop-preview"
 const RELEASE_SINGLEPLAYER_FIRST_GO_FIREFIGHT_DEEPLINK_ARG: String = "--release-singleplayer-first-go-firefight"
+const RELEASE_MULTIPLAYER_HOST_DEEPLINK_ARG: String = "--release-multiplayer-host"
+const RELEASE_MULTIPLAYER_JOIN_DEEPLINK_ARG: String = "--release-multiplayer-join"
 const TEAM_EDITOR_POINT_DELTA: int = 1
 const TEAM_EDITOR_VIEW_SIX: String = "six"
 const TEAM_EDITOR_VIEW_NINE: String = "nine"
@@ -160,7 +162,7 @@ func _ready() -> void:
 	_configure_routes()
 	_connect_signals()
 	close_settings_panel()
-	call_deferred("_apply_release_singleplayer_deeplink")
+	call_deferred("_apply_release_deeplink")
 
 
 func get_background_path() -> String:
@@ -275,6 +277,15 @@ func _apply_release_singleplayer_deeplink() -> void:
 	set_meta("release_singleplayer_deeplink_target", SINGLEPLAYER_SCENE_PATH)
 	_status_label.text = "Singleplayer wird gestartet"
 	_on_singleplayer_pressed()
+
+
+func _apply_release_deeplink() -> void:
+	var args: PackedStringArray = _get_release_cmdline_user_args()
+	if args.has(RELEASE_MULTIPLAYER_HOST_DEEPLINK_ARG) or args.has(RELEASE_MULTIPLAYER_JOIN_DEEPLINK_ARG):
+		_status_label.text = "Multiplayer-Lobby wird gestartet"
+		_on_multiplayer_pressed()
+		return
+	_apply_release_singleplayer_deeplink()
 
 
 func is_settings_panel_visible() -> bool:
