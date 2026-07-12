@@ -14,9 +14,12 @@ func _initialize() -> void:
 		"release_host_client_drop_decision_playtest.json",
 		"release_host_client_drop_decision_host_window.png",
 		"release_host_client_drop_decision_client_window.png",
+		"deployed_unit_ids",
+		"embarked_unit_ids",
+		"deployment_converged",
 	]:
 		_assert(source.contains(token), "Release harness contains %s" % token)
-	print("TASK_1148 release Drop/Decision harness: %d/6 PASS" % (6 - _failed))
+	print("TASK_1148 release Drop/Decision harness: %d/9 PASS" % (9 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 

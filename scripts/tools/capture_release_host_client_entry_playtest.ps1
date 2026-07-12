@@ -58,6 +58,7 @@ $deadline = $startedAt.AddSeconds($effectiveTimeoutSeconds)
 $hostState = $null
 $clientState = $null
 $connected = $false
+$deploymentConverged = $false
 do {
 	Start-Sleep -Milliseconds 250
 	try { if (Test-Path $hostTrace) { $hostState = Get-Content $hostTrace -Raw | ConvertFrom-Json } } catch {}
@@ -65,9 +66,18 @@ do {
 	$baseReady = $null -ne $hostState -and $null -ne $clientState `
 		-and [bool]$hostState.active_mission -and [bool]$clientState.active_mission
 	if ($DropDecision) {
+		$hostDeployed = @($hostState.drop_decision.deployed_unit_ids)
+		$clientDeployed = @($clientState.drop_decision.deployed_unit_ids)
+		$hostEmbarked = @($hostState.drop_decision.embarked_unit_ids)
+		$clientEmbarked = @($clientState.drop_decision.embarked_unit_ids)
+		$deploymentConverged = $hostDeployed.Count -gt 0 `
+			-and $hostDeployed.Count -eq $clientDeployed.Count `
+			-and $hostEmbarked.Count -eq 0 `
+			-and $clientEmbarked.Count -eq 0
 		$connected = $baseReady `
 			-and [string]$hostState.drop_decision.stage -eq "first_decision_accepted" `
-			-and [string]$clientState.drop_decision.stage -eq "first_decision_accepted"
+			-and [string]$clientState.drop_decision.stage -eq "first_decision_accepted" `
+			-and $deploymentConverged
 	} else {
 		$connected = $baseReady `
 			-and [string]$hostState.stage -eq "mission_started" `
@@ -130,6 +140,7 @@ $manifest = [ordered]@{
 	mission_started = $connected
 	drop_decision_requested = [bool]$DropDecision
 	first_decision_accepted = $connected -and [bool]$DropDecision
+	deployment_converged = $deploymentConverged
 	screenshot_path = $screenshotPath
 	screenshot_written = $screenshotWritten
 	host_window = $windowCaptures.host

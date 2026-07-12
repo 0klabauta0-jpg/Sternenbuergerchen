@@ -27,9 +27,10 @@ func _initialize() -> void:
 	var advance_end := source.find("func _resolve_release_local_drop_assignment", advance_start)
 	var advance_source := source.substr(advance_start, advance_end - advance_start)
 	_assert(advance_source.count("select_mission_dropship_fireteam") == 2, "Drop polling selects craft only for the two explicit command submissions")
+	_assert(source.contains("drop_deployed_count") and source.contains("drop_embarked_count"), "Release trace refreshes when deployment convergence changes")
 	lobby.queue_free()
 	await process_frame
-	print("TASK_1148 release Drop/Decision deeplink: %d/6 PASS" % (6 - _failed))
+	print("TASK_1148 release Drop/Decision deeplink: %d/7 PASS" % (7 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 

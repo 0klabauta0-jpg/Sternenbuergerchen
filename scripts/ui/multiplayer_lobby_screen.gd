@@ -364,6 +364,10 @@ func _write_release_multiplayer_trace() -> void:
 		str(snapshot.get("active_mission", false)),
 	]
 	trace_key += "|%s" % _release_drop_decision_stage
+	var drop_snapshot: Dictionary = Dictionary(snapshot.get("drop_decision", {}))
+	var drop_deployed_count: int = Array(drop_snapshot.get("deployed_unit_ids", [])).size()
+	var drop_embarked_count: int = Array(drop_snapshot.get("embarked_unit_ids", [])).size()
+	trace_key += "|dep:%d|emb:%d" % [drop_deployed_count, drop_embarked_count]
 	if trace_key == _release_playtest_last_trace_key:
 		return
 	_release_playtest_last_trace_key = trace_key
