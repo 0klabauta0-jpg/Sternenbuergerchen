@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1149 - Connected Fireteam Card and Route Convergence Polish
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1149_connected_fireteam_card_and_route_convergence_polish.md`, `scripts/tests/task_1149_connected_fireteam_card_route_convergence_polish.gd`
+- Ursache: Die Mini-Card zeigte Ausfuehrungsqualitaet (`STABIL`/`WARTET`) waehrend Member-Runtime bereits `Marschiert` meldete. Die vermeintliche Client-Route war ein Approach-Vektor eines leeren, weit ausserhalb abfliegenden Dropships.
+- Aenderung: Aktives Movement beziehungsweise beschaeftigte Member-Runtime priorisiert `MARSCHIERT` in der sichtbaren Mini-Card. Leere abgeflogene Personal-Dropships verlieren ihren Approach-Vektor; beladene Planungs- und Cargo-Vektoren bleiben erhalten.
+- Echter Release-Beleg: Host und Client zeigen Blue und Gold auf beiden Seiten als `MARSCHIERT`; die lange gruene Kartenquerlinie ist verschwunden. Der Zwei-EXE-Lauf bleibt `pass` und deployment-konvergent.
+- Lokale Pruefung: TASK_1149 6/6; TASK_369 14/14; TASK_842 33/33; TASK_1109 18/18; TASK_1110 20/20; TASK_1148 7/7 und 10/10; TASK_222 82/82.
+- Naechster Schritt: TASK_1150 - Connected Release First Contact Handoff Playtest.
+
 ## Template
 ### Bereich
 - Status:
