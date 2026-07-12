@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1156 - TASK 188 Advance Style Verifier Trust Repair (implementiert)
+- Grundlage: TASK 188 gibt trotz 13 fehlgeschlagener Assertions Exit 0 zurueck und erzeugt Bounding/Caterpillar mit einem heute absichtlich auf Rush normalisierten Move-Command.
+- Ziel: Exit-Vertrag reparieren und die drei vorhandenen Stile mit einer stiltreuen Fixture pruefen.
+- Verifikation: TASK 188 plus Movement-, Pathfinding- und Performance-Gates.
+- Ergebnis: 37/37 Style-/Map-Assertions gruen; absichtlicher Fehler liefert Exit 1, normaler Lauf Exit 0. Runtime-Doctrine blieb unveraendert.
+- Naechster Schritt: Sichtbarer 1280x720-Polish der kleinen Befehlsmatrix.
+
 ## TASK_1155 - Contact Focus Empty Dropship Surface Retirement (implementiert)
 - Grundlage: TASK_1154-Capture zeigt zwei leere, nicht mehr bedienbare `Leaving mission map`-Karten ueber der taktischen Welt.
 - Ziel: Den bestehenden TASK-1120-Contact-Filter auf leere outbound-Crafts erweitern, ohne Transportstate oder aktive Karten zu veraendern.

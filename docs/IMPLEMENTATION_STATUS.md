@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1156 - TASK 188 Advance Style Verifier Trust Repair
+- Status: implementiert und mit echtem Exit-1-Selbsttest verifiziert
+- Relevante Docs/Contracts: `docs/tasks/TASK_1156_task188_advance_style_verifier_trust_repair.md`, `docs/tasks/TASK_188_fireteam_advance_styles_map_readability.md`
+- Ausgangsbefund: TASK 188 meldet 13 Assertions rot, liefert durch `quit()` ohne Code aber Exit 0; seine `move`-Fixture widerspricht der aktuellen Baseline-Doctrine `move -> rush`.
+- Aenderung: Stiltreue `flank`-Fixture fuer Rush/Bounding/Caterpillar; Baseline-`move -> rush` bleibt Produktdoctrine. Assertion-Fehler beenden den Prozess jetzt nonzero; `--task188-force-failure` prueft den Vertrag explizit.
+- Lokale Pruefung: TASK 188 normal 37/37 Exit 0; Forced Failure Exit 1; TASK 501 10/10; TASK 222 82/82.
+- Offener Harness-Befund: TASK 110 lief isoliert in ein 120-Sekunden-Timeout; bei Wiederholung separat schneiden.
+- Naechster Schritt: Befehlsmatrix-Lesbarkeit im 1280x720-Release verbessern.
+
 ### TASK_1155 - Contact Focus Empty Dropship Surface Retirement
 - Status: implementiert und im exportierten Zwei-EXE-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1155_contact_focus_empty_dropship_surface_retirement.md`, `docs/tasks/TASK_1120_connected_first_contact_event_log_dedupe_hud_declutter.md`
