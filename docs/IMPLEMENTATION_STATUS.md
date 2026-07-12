@@ -1,13 +1,23 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1161 - 1280 Release Recapture and Primary HUD Balance
+- Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert
+- Relevante Docs/Contracts: `docs/tasks/TASK_1161_1280_release_recapture_primary_hud_balance.md`, TASK_1157, TASK_1158, TASK_1159, TASK_1160
+- Ausgangsbefund: Nach vier isolierten 1280er HUD-Polishes fehlte ein gemeinsamer Blick auf das echte First-Contact-Bild. Einzelne Panels waren gruen, aber die Primaerflaechen mussten wieder zusammen gegen Spielerlesbarkeit, Wahrheitstrennung und visuelle Konkurrenz geprueft werden.
+- Aenderung: `MissionTacticalSandboxController` liefert `get_primary_hud_1280_balance_snapshot()` als read-only Vertrag fuer Befehlsmatrix, ausgewaehlte Fireteam-Member, Ereignislog und Einsatzkontrolle. Der Snapshot verweist auf den bestehenden Host/Client-FirstContact-Capture und erzeugt keine Commands, Effects oder Gameplay-Wahrheit.
+- Lokale Pruefung: TASK_1161 39/39; TASK_1157 35/35; TASK_1158 28/28; TASK_1159 26/26; TASK_1160 21/21; TASK_1109 18/18; TASK_1110 20/20; TASK_222 82/82.
+- Release-Beleg: `capture_release_host_client_entry_playtest.ps1 -FirstContact` laeuft im 1280x720-Release mit Gate `pass` nach 69,5 Sekunden. Deployment und First Fire konvergieren; Host- und Client-Fensterbilder wurden geschrieben.
+- Sichtbarer Folgefund: Bottom-Dock und Mission Control sind jetzt brauchbar lesbar. Die linke Stack-Flaeche aus Fireteam-Mini-Cards plus Eventlog bleibt im 1280er Release dicht und klein; dort entsteht die naechste echte Spielerreibungsstelle.
+- Naechster Schritt: TASK_1162 - Left Tactical Stack 1280 Readability and Focus Balance. Ziel: Fireteam-Mini-Cards und Ereignislog links so ordnen/skalieren, dass Kontaktstatus, Auswahl und letzte Meldungen schneller lesbar sind, ohne die Karte oder Bottom-Dock weiter zu verdraengen.
+
 ### TASK_1160 - Mission Control 1280 Readability
 - Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
 - Relevante Docs/Contracts: `docs/tasks/TASK_1160_mission_control_1280_readability.md`, TASK_1107, TASK_1118, TASK_1141, TASK_1142, TASK_1157, TASK_1158, TASK_1159
 - Ausgangsbefund: Nach Befehlsmatrix, Member-Karten und Ereignislog war `#18 EINSATZKONTROLLE` im 1280x720-Release die kleinste primaere Entscheidungsflaeche. Der alte Pfad nutzte 10/11-Pixel-Schrift und konnte bei gekapptem Text alte Meta-Zeilen wiederherstellen.
 - Aenderung: Mission-Control-Header und Statuslabel haben einen eigenen 1280er Readability-Vertrag mit 13-Pixel-Schrift, Outline, 92-Pixel-Mindesthoehe, Wrap, maximal vier sichtbaren Statuszeilen und Tooltip als Detailtraeger. Connected-First-Contact-Perspektiven spiegeln ihre CONTACT-FIRE-Zeile wieder sichtbar ins Label, ohne Commands, Effects oder Gameplay-Wahrheit zu erzeugen.
 - Lokale Pruefung: TASK_1160 21/21; TASK_1107 9/9; TASK_1118 13/13; TASK_1141 14/14; TASK_1142 78/78; TASK_1157 35/35; TASK_1158 28/28; TASK_1159 26/26; TASK_1109 18/18; TASK_1110 20/20; TASK_222 82/82.
-- Risiken/offen: Der echte 1280x720-Zwei-EXE-Sichtbeleg und Export folgen nach dem Dokumentations-/Commit-Schritt. Die Flaeche bleibt eng; langfristig kann Mission Control als groesserer Kontext-Inspector sinnvoll werden.
-- Naechster Schritt: TASK_1161 - 1280 Release Recapture and Primary HUD Balance. Der naechste Schnitt sollte den echten Host/Client-Release nach allen vier 1280er HUD-Polishes erneut aufnehmen und entscheiden, ob Mission Control, Event Log, Map oder Bottom-Dock noch visuell konkurrieren.
+- Risiken/offen: Die Flaeche bleibt eng; langfristig kann Mission Control als groesserer Kontext-Inspector sinnvoll werden.
+- Naechster Schritt: abgeschlossen durch TASK_1161.
 
 ### TASK_1159 - Tactical Event Log 1280 Readability
 - Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert

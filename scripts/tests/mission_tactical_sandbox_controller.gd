@@ -219,6 +219,7 @@ const MISSION_CONTROL_1280_STATUS_FONT_SIZE: int = 13
 const MISSION_CONTROL_1280_OUTLINE_SIZE: int = 3
 const MISSION_CONTROL_1280_MAX_VISIBLE_LINES: int = 4
 const MISSION_CONTROL_1280_MIN_STATUS_HEIGHT: float = 92.0
+const PRIMARY_HUD_1280_BALANCE_STYLE_ID: String = "task_1161_1280_release_primary_hud_balance_v1"
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC: int = 5000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
@@ -15205,6 +15206,135 @@ func get_command_matrix_1280_readability_snapshot() -> Dictionary:
 		"visible_marker_count": visible_marker_count,
 		"buttons": button_entries,
 		"ui_sets_gameplay_truth": false,
+	}
+
+
+func get_primary_hud_1280_balance_snapshot() -> Dictionary:
+	_apply_command_matrix_1280_readability()
+	_apply_mission_control_1280_readability()
+	_refresh_selected_fireteam_cards()
+	_refresh_tactical_event_log_panel()
+	var command_snapshot: Dictionary = get_command_matrix_1280_readability_snapshot()
+	var member_snapshot: Dictionary = _build_selected_fireteam_members_1280_balance_surface()
+	var event_log_snapshot: Dictionary = _build_tactical_event_log_1280_balance_surface()
+	var mission_control_snapshot: Dictionary = get_mission_control_1280_readability_snapshot()
+	var surfaces: Dictionary = {
+		"command_matrix": _build_primary_hud_1280_surface_result(
+			"TASK_1157",
+			String(command_snapshot.get("style_id", "")) == COMMAND_MATRIX_1280_READABILITY_STYLE_ID
+				and int(command_snapshot.get("columns", 0)) == 5
+				and int(command_snapshot.get("button_count", 0)) >= 20
+				and int(command_snapshot.get("visible_marker_count", 1)) == 0,
+			command_snapshot,
+		),
+		"selected_fireteam_members": member_snapshot,
+		"tactical_event_log": event_log_snapshot,
+		"mission_control": _build_primary_hud_1280_surface_result(
+			"TASK_1160",
+			String(mission_control_snapshot.get("style_id", "")) == MISSION_CONTROL_1280_READABILITY_STYLE_ID
+				and int(mission_control_snapshot.get("status_font_size", 0)) >= MISSION_CONTROL_1280_STATUS_FONT_SIZE
+				and int(mission_control_snapshot.get("visible_line_count", 99)) <= MISSION_CONTROL_1280_MAX_VISIBLE_LINES
+				and not bool(mission_control_snapshot.get("status_clip_text", true)),
+			mission_control_snapshot,
+		),
+	}
+	var all_surfaces_readable := true
+	var no_gameplay_truth_claim := true
+	for surface_variant in surfaces.values():
+		var surface: Dictionary = Dictionary(surface_variant)
+		all_surfaces_readable = all_surfaces_readable and bool(surface.get("readability_ready", false))
+		no_gameplay_truth_claim = no_gameplay_truth_claim and not bool(surface.get("ui_sets_gameplay_truth", true))
+	return {
+		"schema": "sternenbuergerchen.primary_hud_1280_balance.v1",
+		"task_id": "TASK_1161",
+		"style_id": PRIMARY_HUD_1280_BALANCE_STYLE_ID,
+		"surfaces": surfaces,
+		"balance": {
+			"primary_surface_count": surfaces.size(),
+			"all_surfaces_readable": all_surfaces_readable,
+			"no_gameplay_truth_claim": no_gameplay_truth_claim,
+			"recommended_next_task": "TASK_1162 - Release 1280 Visual Findings Followup",
+		},
+		"release_capture": {
+			"script": "scripts/tools/capture_release_host_client_entry_playtest.ps1",
+			"mode": "-FirstContact",
+			"expected_resolution": "1280x720",
+			"host_window_artifact": "tmp/release_host_client_first_contact_host_window.png",
+			"client_window_artifact": "tmp/release_host_client_first_contact_client_window.png",
+			"manifest": "tmp/release_host_client_first_contact_playtest.json",
+			"manual_visual_review_required": true,
+		},
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _build_selected_fireteam_members_1280_balance_surface() -> Dictionary:
+	var card_row := get_node_or_null("../TacticalUI/BottomDock/BottomMargin/BottomRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamBodyRow/FireteamCardsScroll/FireteamCardsBody/FireteamCardsRow") as HBoxContainer
+	var inspected_cards := 0
+	var readable_cards := 0
+	var card_entries: Array = []
+	if card_row != null:
+		for child_variant in card_row.get_children():
+			var card := child_variant as Control
+			if card == null or not card.has_method("get_source_context") or String(card.call("get_source_context")) != "mission_selected_fireteam_member":
+				continue
+			inspected_cards += 1
+			var name_label := card.get_node_or_null("Margin/HBox/TextVBox/NameRow/NameLabel") as Label
+			var runtime_label := card.get_node_or_null("Margin/HBox/TextVBox/DataALabel") as Label
+			var detail_label := card.get_node_or_null("Margin/HBox/TextVBox/DataBLabel") as Label
+			var card_readable: bool = card.custom_minimum_size == Vector2(196.0, 132.0) \
+				and name_label != null and name_label.get_theme_font_size("font_size") >= 15 \
+				and runtime_label != null and runtime_label.get_theme_font_size("font_size") >= 12 \
+				and detail_label != null and detail_label.get_theme_font_size("font_size") >= 12
+			if card_readable:
+				readable_cards += 1
+			card_entries.append({
+				"name": String(card.name),
+				"readable": card_readable,
+				"card_minimum_size": card.custom_minimum_size,
+				"name_font_size": name_label.get_theme_font_size("font_size") if name_label != null else 0,
+				"runtime_font_size": runtime_label.get_theme_font_size("font_size") if runtime_label != null else 0,
+				"detail_font_size": detail_label.get_theme_font_size("font_size") if detail_label != null else 0,
+			})
+	return _build_primary_hud_1280_surface_result(
+		"TASK_1158",
+		inspected_cards >= 3 and readable_cards >= 3,
+		{
+			"inspected_cards": inspected_cards,
+			"readable_cards": readable_cards,
+			"cards": card_entries,
+			"four_cards_fit_existing_lane": 4.0 * 196.0 + 3.0 * 8.0 <= 840.0,
+		}
+	)
+
+
+func _build_tactical_event_log_1280_balance_surface() -> Dictionary:
+	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	var panel_snapshot: Dictionary = {}
+	if panel != null and panel.has_method("get_panel_snapshot"):
+		panel_snapshot = Dictionary(panel.call("get_panel_snapshot")).duplicate(true)
+	var readability_ready: bool = bool(panel_snapshot.get("task_1159_readability_active", false)) \
+		and int(panel_snapshot.get("max_visible_events", 0)) <= 8 \
+		and int(panel_snapshot.get("row_font_size", 0)) >= 13 \
+		and float(panel_snapshot.get("row_min_height", 0.0)) >= 32.0 \
+		and float(panel_snapshot.get("background_alpha", 0.0)) >= 0.94
+	return _build_primary_hud_1280_surface_result("TASK_1159", readability_ready, panel_snapshot)
+
+
+func _build_primary_hud_1280_surface_result(source_task_id: String, readability_ready: bool, snapshot: Dictionary) -> Dictionary:
+	return {
+		"source_task_id": source_task_id,
+		"readability_ready": readability_ready,
+		"snapshot": snapshot.duplicate(true),
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
 	}
 
 

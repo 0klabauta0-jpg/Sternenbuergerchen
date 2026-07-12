@@ -13,12 +13,20 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1161 - 1280 Release Recapture and Primary HUD Balance (implementiert und im Release sichtbar verifiziert)
+- Grundlage: Nach TASK_1157 bis TASK_1160 waren die vier primaeren 1280er HUD-Flaechen einzeln verbessert, aber noch nicht wieder gemeinsam im echten Host/Client-FirstContact geprueft.
+- Ziel: Einen kombinierten read-only Vertrag fuer Befehlsmatrix, ausgewaehlte Fireteam-Member, Ereignislog und Einsatzkontrolle schaffen und den echten 1280x720-Release erneut aufnehmen.
+- Ergebnis: `get_primary_hud_1280_balance_snapshot()` fasst die vier Einzelvertraege zusammen, verweist auf den bestehenden FirstContact-Capture und bleibt strikt ohne Commands, Effects oder Gameplay-Wahrheit.
+- Verifikation: TASK_1161 39/39; TASK_1157, TASK_1158, TASK_1159, TASK_1160, Multi-Dropship und TASK_222 gruen. Release-Host/Client-FirstContact `pass` nach 69,5 Sekunden mit geschriebenen Host-/Client-Fensterbildern.
+- Folgefund: Bottom-Dock und Einsatzkontrolle sind jetzt brauchbar. Die linke taktische Stack-Flaeche aus Mini-Cards und Ereignislog ist im 1280er Bild noch dicht und klein.
+- Naechster Schritt: TASK_1162 - Left Tactical Stack 1280 Readability and Focus Balance.
+
 ## TASK_1160 - Mission Control 1280 Readability (implementiert im Arbeitsstand)
 - Grundlage: Nach TASK_1157 bis TASK_1159 ist `#18 EINSATZKONTROLLE` im 1280er First-Contact die kleinste verbliebene primaere HUD-Entscheidungsflaeche.
 - Ziel: Mission-Control-Header, CONTACT-FIRE-Zeile und kompakte Missions-/ROE-/Objective-Status lesbar machen, ohne Mission-State oder Command-Pfad zu veraendern.
 - Ergebnis: Eigener Readability-Vertrag mit 13-Pixel-Header/Status, 3-Pixel-Outline, Wrap, 92-Pixel-Statushoehe, maximal vier sichtbaren Zeilen und Tooltip-Detail. Connected-First-Contact-Perspektiven werden wieder ins echte Label gespiegelt.
 - Verifikation: TASK_1160 21/21; Mission-Control-Sprach-/Layout-/Connected-Perspektivgates, 1280-Nachbarpanels, Multi-Dropship und TASK_222 gruen.
-- Naechster Schritt: TASK_1161 - 1280 Release Recapture and Primary HUD Balance.
+- Naechster Schritt: abgeschlossen durch TASK_1161.
 
 ## TASK_1159 - Tactical Event Log 1280 Readability (implementiert und im Release sichtbar verifiziert)
 - Grundlage: Nach Matrix und Member-Karten ist #19 im 1280er First-Contact die kleinste primaere HUD-Schrift; fuenf Zeilen passen nicht lesbar in 240x184.
