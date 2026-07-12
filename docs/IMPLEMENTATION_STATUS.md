@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1174 - Mission Release Recapture Extraction
+- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1174_mission_release_recapture_extraction.md`, `docs/tasks/TASK_1172_first_contact_readability_release_recapture.md`, `docs/tasks/TASK_1173_first_engagement_feedback_release_recapture.md`, `docs/dev/mission_command_feedback_contract.md`, `docs/dev/runtime_script_layout_contract.md`
+- Ausgangsbefund: Die neuen Release-Recaptures lagen noch im uebergrossen Legacy-Testcontroller, obwohl sie nur vorhandene Handoff- und Release-Daten auswerten.
+- Aenderung: `MissionReleaseRecaptureService` baut TASK_1172- und TASK_1173-Contracts datenrein; der Controller bleibt Adapter fuer Runtime-/Release-Evidence und behaelt seine oeffentlichen Methoden.
+- Architektur: Der Service liest keine Nodes, UI, Registries oder Simulation und erzeugt keine Commands, Effects, Contacts, Fire-/Damage-Events oder Multiplayer-Wahrheit.
+- Lokale Pruefung: TASK_1174 plus TASK_1172/TASK_1173.
+- Risiken/offen: Dieser kleine Schnitt entlastet nur die zwei aktuellen Recaptures. Der naechste spielerische Schritt sollte die Station-Route unter NPC-Druck bis zum Outcome/Debriefing als echten kurzen Szenario-Flow pruefen.
+
 ### TASK_1173 - First Engagement Feedback Release Recapture
 - Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
 - Relevante Docs/Contracts: `docs/tasks/TASK_1173_first_engagement_feedback_release_recapture.md`, `docs/tasks/TASK_1172_first_contact_readability_release_recapture.md`, `docs/tasks/TASK_543_mission_first_engagement_feedback_pass.md`, `docs/dev/mission_command_feedback_contract.md`
