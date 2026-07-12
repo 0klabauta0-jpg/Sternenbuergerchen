@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1145 - Player-Flow Regression Harness Trust Repair
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1145_player_flow_regression_harness_trust_repair.md`, `docs/tasks/TASK_1144_tactical_panel_header_navigation_player_language_polish.md`, `scripts/tests/run_task_1145_player_flow_regression_gate.ps1`
+- Befund: TASK_257 meldete elf falsche Sichtbarkeitsfehler, weil Scrollinhalte und kontextuell verborgene Controls wie feste Viewport-Controls behandelt wurden. TASK_096 und der historische Dropship-Monolith lieferten bei Fehlern Exitcode 0; letzterer hing nach zahlreichen veralteten Assertions laenger als sechs Minuten und hinterliess Godot-Prozesse.
+- Aenderung: Reachability unterscheidet direkte Sicht und echte Scroll-Erreichbarkeit. TASK_257 kennt die aktuellen kompakten Mission-/Homebase-Kontexte. TASK_096 prueft den zweispaltigen Character-Sheet-Vertrag und liefert ehrliche Exitcodes. Der historische Dropship-Monolith bricht mit Verweis auf ein neues isoliertes Prozessgate ab. Dieses startet sieben aktuelle Player-Flow-/Multiplayer-Verifier mit 180-Sekunden-Timeout und beendet Haenger.
+- Dropship-Performance: TASK_1115 simuliert denselben Inbound/Landed/Unloading/Outbound-Automaten in acht groesseren Zeitschritten und entfernt einen doppelten World-Overlay-Refresh. Alle 25 Host-/Client-/Payload-/Return-Assertions bleiben erhalten; Laufzeit liegt lokal bei rund 104 Sekunden statt Timeout.
+- Lokale Pruefung: TASK_1145 12/12; TASK_096 19/19; TASK_257 429/429; TASK_1115 25/25; isoliertes Player-Flow-Gate 7/7 Prozesse; TASK_222 82/82 direkt; `git diff --check`.
+- Risiken: Godot meldet in mehreren Headless-Laufen weiterhin bekannte `ObjectDB`-/RID-Leaks beim Exit. Das neue Gate zeigt diese Warnungen sichtbar, wertet sie aber noch nicht als funktionalen Player-Flow-Fehler.
+- Naechster Schritt: TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene.
+
 ### TASK_1144 - Tactical Panel Header and Navigation Player Language Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1144_tactical_panel_header_navigation_player_language_polish.md`, `docs/tasks/TASK_1143_tactical_hud_remaining_player_language_audit_polish.md`, `docs/dev/mission_command_feedback_contract.md`
@@ -18,7 +28,7 @@
 - Sicht-/Runtime-Beleg: Der echte Full-HD-Lauf zeigt alle vier Bezeichnungen vollstaendig und ohne Layoutverschiebung; Command-Grid, Member-Cards, Mission Control und Karte bleiben lesbar.
 - Multiplayer/Performance: Keine Aenderung an Navigation, Simulation, Commands, Effects, Combat, Contact, Transport, RPC oder Snapshots. TASK_1118 bleibt 13/13 und TASK_222 82/82 direkt.
 - Lokale Pruefung: TASK_1144 16/16; TASK_180 98/98; TASK_1118 13/13; TASK_1136 19/19 Real Window; TASK_222 82/82 direkt; `git diff --check`.
-- Naechster Schritt: TASK_1145 - Player-Flow Regression Harness Trust Repair. TASK_257 meldet 11 oberflaechenuebergreifende Sichtbarkeitsfehler, TASK_096 liefert trotz 4 Fehlern Exitcode 0 und der historische Dropship-Gesamttest ueberschreitet 180 Sekunden.
+- Naechster Schritt: abgeschlossen durch TASK_1145.
 
 ### TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish
 - Status: implementiert im Arbeitsstand

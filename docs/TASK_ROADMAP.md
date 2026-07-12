@@ -13,12 +13,19 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1145 - Player-Flow Regression Harness Trust Repair (implementiert im Arbeitsstand)
+- Grundlage: Breite Regressionen meldeten falsche Scroll-/Sichtfehler, konnten trotz Assertions Exitcode 0 liefern und liessen im historischen Dropship-Monolith einen Prozess laenger als sechs Minuten laufen.
+- Ergebnis: Scroll-aware Reachability, aktuelle Kontextregeln, ehrliche Exitcodes und ein isoliertes Sieben-Verifier-Gate mit 180-Sekunden-Prozessgrenze. Der alte Monolith verweist fail-fast auf das neue Gate.
+- Performance: TASK_1115 behaelt alle 25 Parallel-Dropship-Assertions, nutzt aber acht groessere Simulationsschritte und keinen doppelten Overlay-Refresh mehr.
+- Verifikation: TASK_1145 12/12; TASK_096 19/19; TASK_257 429/429; TASK_1115 25/25; Player-Flow-Gate 7/7; TASK_222 82/82 direkt.
+- Naechster Schritt: TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene.
+
 ## TASK_1144 - Tactical Panel Header and Navigation Player Language Polish (implementiert im Arbeitsstand)
 - Grundlage: Die grossen unteren Paneltitel und der obere Missions-Tab blieben als letzter auffaelliger englischer Sprachmix im aktuellen Full-HD-HUD.
 - Ergebnis: `#16 BEFEHLE`, `#17 AUSGEWAEHLTES FIRETEAM`, `#18 EINSATZKONTROLLE` und `Einsatz` sind sichtbar; `Homebase`, `FOB`, Blocknummern, Node-Namen und Callbacks bleiben stabil.
 - Architektur: Statische Szenen- und gemeinsame Blocklabel-Texte ohne neue Lokalisierungsschicht. Keine Aenderung an Gameplay-, Multiplayer- oder Snapshot-Wahrheit.
 - Verifikation: TASK_1144 16/16; TASK_180 98/98; TASK_1118 13/13; TASK_1136 19/19 Real Window; TASK_222 82/82 direkt.
-- Naechster Schritt: TASK_1145 - Player-Flow Regression Harness Trust Repair.
+- Naechster Schritt: abgeschlossen durch TASK_1145.
 
 ## TASK_1143 - Tactical HUD Remaining Player Language Audit and Polish (implementiert im Arbeitsstand)
 - Grundlage: Im oberen Einsatzstatus, Event Log und Live-Haltungsfeedback blieb nach TASK_1142 ein sichtbarer Mix aus englischen Steuerwoertern und deutscher Spielersprache.

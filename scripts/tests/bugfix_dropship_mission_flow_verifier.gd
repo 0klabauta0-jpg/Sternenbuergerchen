@@ -5,6 +5,7 @@ const META_LAYER_TEST_SCENE: PackedScene = preload("res://scenes/meta/meta_layer
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const UI_BLOCK_LABELS_SCRIPT: GDScript = preload("res://scripts/meta/ui_block_labels.gd")
+const SUPERSEDED_BY_TASK_1145_GATE: String = "res://scripts/tests/run_task_1145_player_flow_regression_gate.ps1"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -16,6 +17,9 @@ func _init() -> void:
 
 func _run_tests() -> void:
 	print("=== Dropship Mission Bugfix Verifier ===")
+	print("FAIL: Historical monolith superseded by %s" % SUPERSEDED_BY_TASK_1145_GATE)
+	quit(1)
+	return
 	await _test_fob_refresh_preserves_boarded_units()
 	await _test_shipcard_start_dispatches_boarded_craft_without_full_team_boarded()
 	await _test_send_blocks_while_dropship_boarding_is_incomplete()
@@ -47,7 +51,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
+	quit(1 if _failed > 0 else 0)
 
 
 func _test_fob_refresh_preserves_boarded_units() -> void:
