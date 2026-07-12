@@ -13,10 +13,12 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1154 - Fireteam Contact Loss Language Clarity (in Arbeit)
+## TASK_1154 - Fireteam Contact Loss Language Clarity (implementiert)
 - Grundlage: Der sichtbare TASK-1153-Release zeigt `1 VERLOREN | FIT 5/5`, obwohl `VERLOREN` den ContactTracker-Zustand und keinen personellen Verlust bezeichnet.
 - Ziel: Kompakte Kontakttexte mit explizitem Bezugswort; Health bleibt getrennt.
 - Verifikation: Mini-Card-, Host/Client-First-Contact- und Performance-Gates plus neuer Release-Capture.
+- Ergebnis: Kontaktverlust ist eindeutig von Operatorverlust getrennt; lange BND-Diagnose bleibt im Tooltip und die sichtbare Zeile passt auf Host und Client vollstaendig.
+- Naechster Schritt: Abgeschlossene leere Dropship-Surfaces nach Deboard kompakt zusammenfassen, damit die taktische Karte wieder mehr Raum erhaelt.
 
 ## TASK_1153 - Mission HUD Light Path Snapshot Consolidation (implementiert)
 - Grundlage: TASK_1152 reduziert den periodischen Host-HUD-Pfad auf rund 68 ms.

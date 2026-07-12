@@ -1,10 +1,14 @@
 # IMPLEMENTATION_STATUS
 
 ### TASK_1154 - Fireteam Contact Loss Language Clarity
-- Status: in Arbeit
+- Status: implementiert und im exportierten Zwei-EXE-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1154_fireteam_contact_loss_language_clarity.md`, `docs/tasks/TASK_1132_fireteam_mini_card_tactical_state_language_polish.md`
 - Ausgangsbefund: Im echten First-Contact-Capture steht `1 VERLOREN` direkt neben `FIT 5/5`; gemeint ist ein abgerissener Kontakt, kein Operatorverlust.
-- Ziel: Contact- und Health-Wahrheit in der kompakten Mini-Card sprachlich eindeutig trennen und Host/Client sichtbar neu pruefen.
+- Aenderung: Contact-Zustaende nennen ihren Bereich explizit (`1 KONTAKT WEG`, `2 KONTAKTE BEST.`). Lange Movement-Diagnosen werden nur in der Mini-Card auf den Stilcode gekuerzt; Tooltip und Snapshot behalten den vollen Readout.
+- Release-Beleg: Host zeigt `BND | 1 KONTAKT WEG | FIT 5/5`, Client `MARSCHIERT | 1 KONTAKT WEG | FIT 5/5`; beide Karten sind vollstaendig lesbar, First Contact und First Fire bleiben `pass`.
+- Lokale Pruefung: TASK_1154 10/10; TASK_1132 15/15; TASK_1109 18/18; TASK_1110 20/20; TASK_1150 18/18; TASK_222 82/82.
+- Offener Testbefund: TASK_188 reproduziert 13 historische Fixture-Ausfaelle, liefert trotz `FAIL` aber Exit 0. Das ist kein TASK-1154-Verhaltensregress, sollte aber als eigener Testvertrauens-Task repariert werden.
+- Naechster Schritt: Leere, abgeflogene Dropship-Karten nach Deboard platzsparend zusammenfassen; aktive oder beladene Transportsurfaces bleiben voll sichtbar.
 
 ### TASK_1153 - Mission HUD Light Path Snapshot Consolidation
 - Status: implementiert und im exportierten Zwei-EXE-Release verifiziert

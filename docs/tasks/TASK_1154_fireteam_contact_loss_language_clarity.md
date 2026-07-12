@@ -38,3 +38,20 @@ Der ContactTracker liefert den Zustand `lost`; die Mini-Card uebersetzt ihn ohne
 
 ## Risiken / offene Punkte
 Die Karte hat wenig Breite. Die Formulierungen bleiben deshalb bewusst kurz und werden mit Singular/Plural statt technischen Codes gebaut.
+
+## Ergebnis
+- Status: implementiert und im exportierten Host-/Client-First-Contact-Release sichtbar verifiziert.
+- ContactTracker-`lost` erscheint als `1 KONTAKT WEG` beziehungsweise `n KONTAKTE WEG`; bestaetigte, gesichtete und vermutete Kontakte nennen ebenfalls explizit den Kontaktbereich.
+- Lange Movement-Readouts wie `BND 1/18 ... move ... cover` werden in der Mini-Card auf den Stilcode gekuerzt. Die vollstaendige Formation-/Stage-Diagnose bleibt im Tooltip und Snapshot erhalten.
+- Host zeigt im finalen Capture `BND | 1 KONTAKT WEG | FIT 5/5`; Client zeigt `MARSCHIERT | 1 KONTAKT WEG | FIT 5/5`. Beide Zeilen passen vollstaendig in die Karte.
+
+## Abschlusspruefung
+- TASK_1154: 10/10.
+- TASK_1132: 15/15.
+- TASK_1109: 18/18; TASK_1110: 20/20.
+- TASK_1150: 18/18; exportierter Zwei-EXE-Lauf `pass`.
+- TASK_222: 82/82.
+- TASK_188 meldet in seinem historischen Fixture weiterhin 24 bestandene und 13 fehlgeschlagene Assertions, beendet den Prozess aber faelschlich mit Exit 0. Der Fehler reproduziert isoliert und liegt ausserhalb des geaenderten Formatierpfads; ein separater Testvertrauens-Task ist sinnvoll.
+
+## Naechster sichtbarer Befund
+Nach Deboard und Abflug bleiben rechts zwei grosse, weitgehend leere Dropship-Karten sichtbar und verdecken Kartenflaeche. Als naechster Spielbarkeits-Task sollten abgeschlossene leere Transportsurfaces kompakt in einen Verlauf zusammenfallen, waehrend aktive/beladene Dropships unveraendert voll bedienbar bleiben.
