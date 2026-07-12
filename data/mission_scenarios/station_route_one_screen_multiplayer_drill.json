@@ -44,7 +44,7 @@
 			"group_id": "bravo_air_defense",
 			"display_name": "Bravo AA Watch",
 			"team_id": "team_bravo",
-			"spawn_marker_id": "spawn_bravo",
+			"spawn_marker_id": "factory_danger_zone",
 			"enemy_ids": ["bravo_aa_01", "bravo_aa_02", "bravo_aa_03", "bravo_aa_04"],
 			"tactics": {
 				"profile_id": "sniper_watch",
