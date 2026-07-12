@@ -48,7 +48,7 @@ func _test_live_mission_block_labels_use_shared_ids() -> void:
 	_assert(command_grid_uses_current_contract and legacy_team_button_missing, "Mission command panel keeps #16 command-only and no longer shows old team-selection buttons")
 
 	scene.queue_free()
-	await process_frame
+	await _wait_cleanup_frames()
 
 
 func _test_fob_transit_card_is_disabled_and_shows_progress() -> void:
@@ -74,7 +74,7 @@ func _test_fob_transit_card_is_disabled_and_shows_progress() -> void:
 	_assert(transit_card != null and transit_card.mouse_default_cursor_shape == Control.CURSOR_ARROW, "Inbound FOB transit card is visibly disabled while the operator is still in transit")
 
 	screen.queue_free()
-	await process_frame
+	await _wait_cleanup_frames()
 
 
 func _test_character_sheet_layout_uses_german_sections_and_core_bars() -> void:
@@ -133,7 +133,7 @@ func _test_character_sheet_layout_uses_german_sections_and_core_bars() -> void:
 	_assert(core_bar_count == 8, "Character sheet renders one progress bar for each core value")
 
 	screen.queue_free()
-	await process_frame
+	await _wait_cleanup_frames()
 
 
 func _test_transport_craft_cards_do_not_expose_tracked_button() -> void:
@@ -161,7 +161,7 @@ func _test_transport_craft_cards_do_not_expose_tracked_button() -> void:
 	if craft_card != null:
 		craft_card.free()
 	screen.queue_free()
-	await process_frame
+	await _wait_cleanup_frames()
 
 
 func _build_homebase_unit(unit_id: String) -> Dictionary:
@@ -208,6 +208,11 @@ func _find_descendant_by_name(host: Node, target_name: String) -> Node:
 		if match_node != null:
 			return match_node
 	return null
+
+
+func _wait_cleanup_frames(frame_count: int = 6) -> void:
+	for _frame in range(frame_count):
+		await process_frame
 
 
 func _collect_button_texts(host: Node) -> Array:

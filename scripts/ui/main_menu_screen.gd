@@ -117,6 +117,7 @@ var _team_editor_close_button: Button = null
 var _team_editor_refresh_queued: bool = false
 var _team_editor_metric_save_queued: bool = false
 var _team_editor_metric_save_reason: String = ""
+var _team_editor_metric_save_timer: Timer = null
 var _start_roster: Dictionary = {}
 var _start_roster_seed: String = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_SEED
 var _start_roster_size: int = START_ROSTER_GENERATOR_SCRIPT.DEFAULT_ROSTER_SIZE
@@ -134,6 +135,9 @@ var _global_help_button: Button = null
 var _active_help_control: Control = null
 var _active_help_id: String = ""
 var _help_hover_token: int = 0
+var _help_compact_timer: Timer = null
+var _help_detail_timer: Timer = null
+var _help_hide_timer: Timer = null
 var _release_singleplayer_deeplink_requested: bool = false
 var _release_singleplayer_deeplink_applied: bool = false
 var _release_singleplayer_deeplink_target: String = ""
@@ -141,6 +145,7 @@ var _release_singleplayer_deeplink_target: String = ""
 
 func _ready() -> void:
 	set_meta("main_menu_shell", true)
+	_ensure_owned_ui_timers()
 	_apply_background_texture()
 	_load_comic_bubble_settings()
 	_ensure_audio_event_bus()
@@ -1688,7 +1693,7 @@ func _queue_team_editor_metric_save(save_reason: String) -> Dictionary:
 	if not _team_editor_metric_save_queued:
 		_team_editor_metric_save_queued = true
 		if is_inside_tree():
-			get_tree().create_timer(0.12).timeout.connect(Callable(self, "_flush_team_editor_metric_save"))
+			_team_editor_metric_save_timer.start(0.12)
 		else:
 			call_deferred("_flush_team_editor_metric_save")
 	return {
@@ -1699,6 +1704,8 @@ func _queue_team_editor_metric_save(save_reason: String) -> Dictionary:
 
 
 func _flush_team_editor_metric_save() -> Dictionary:
+	if _team_editor_metric_save_timer != null and is_instance_valid(_team_editor_metric_save_timer) and not _team_editor_metric_save_timer.is_stopped():
+		_team_editor_metric_save_timer.stop()
 	if not _team_editor_metric_save_queued and _team_editor_metric_save_reason.strip_edges().is_empty():
 		return {}
 	_team_editor_metric_save_queued = false
@@ -3293,25 +3300,72 @@ func _on_help_target_exited(control: Control) -> void:
 
 
 func _schedule_help_popup(token: int, help_id: String, control: Control) -> void:
-	var compact_delay: float = 0.0 if bool(_help_service.call("is_global_help_active")) else CONTEXTUAL_HELP_SERVICE_SCRIPT.DEFAULT_COMPACT_DELAY_SECONDS
-	if compact_delay > 0.0:
-		await get_tree().create_timer(compact_delay).timeout
+	_stop_help_delay_timers()
 	if not _help_hover_is_current(token, help_id, control):
 		return
+	var compact_delay: float = 0.0 if bool(_help_service.call("is_global_help_active")) else CONTEXTUAL_HELP_SERVICE_SCRIPT.DEFAULT_COMPACT_DELAY_SECONDS
+	if compact_delay > 0.0:
+		if _help_compact_timer != null and _help_compact_timer.is_inside_tree():
+			_help_compact_timer.start(compact_delay)
+		return
 	_show_contextual_help_for(help_id, control, false)
+	_start_help_detail_timer(0.0)
+
+
+func _on_help_compact_timer_timeout() -> void:
+	if not _help_hover_is_current(_help_hover_token, _active_help_id, _active_help_control):
+		return
+	_show_contextual_help_for(_active_help_id, _active_help_control, false)
+	_start_help_detail_timer(CONTEXTUAL_HELP_SERVICE_SCRIPT.DEFAULT_COMPACT_DELAY_SECONDS)
+
+
+func _start_help_detail_timer(elapsed_delay: float) -> void:
 	if String(_help_service.call("get_help_mode")) != CONTEXTUAL_HELP_SERVICE_SCRIPT.MODE_EXPANDED:
 		return
-	var detail_delay: float = maxf(0.0, CONTEXTUAL_HELP_SERVICE_SCRIPT.DEFAULT_DETAIL_DELAY_SECONDS - compact_delay)
+	var detail_delay: float = maxf(0.0, CONTEXTUAL_HELP_SERVICE_SCRIPT.DEFAULT_DETAIL_DELAY_SECONDS - elapsed_delay)
 	if detail_delay > 0.0:
-		await get_tree().create_timer(detail_delay).timeout
-	if _help_hover_is_current(token, help_id, control):
-		_show_contextual_help_for(help_id, control, true)
+		if _help_detail_timer != null and _help_detail_timer.is_inside_tree():
+			_help_detail_timer.start(detail_delay)
+
+
+func _on_help_detail_timer_timeout() -> void:
+	if _help_hover_is_current(_help_hover_token, _active_help_id, _active_help_control):
+		_show_contextual_help_for(_active_help_id, _active_help_control, true)
 
 
 func _hide_help_after_delay(token: int) -> void:
-	await get_tree().create_timer(0.15).timeout
-	if token == _help_hover_token and _contextual_help_popup != null:
+	_stop_help_delay_timers()
+	if _help_hide_timer == null or not _help_hide_timer.is_inside_tree():
+		return
+	_help_hide_timer.set_meta("help_hover_token", token)
+	_help_hide_timer.start(0.15)
+
+
+func _on_help_hide_timer_timeout() -> void:
+	if int(_help_hide_timer.get_meta("help_hover_token", -1)) == _help_hover_token and _contextual_help_popup != null:
 		_contextual_help_popup.call("hide_help")
+
+
+func _stop_help_delay_timers() -> void:
+	for timer in [_help_compact_timer, _help_detail_timer, _help_hide_timer]:
+		if timer != null and not timer.is_stopped():
+			timer.stop()
+
+
+func _ensure_owned_ui_timers() -> void:
+	_team_editor_metric_save_timer = _create_owned_ui_timer("TeamEditorMetricSaveTimer", Callable(self, "_flush_team_editor_metric_save"))
+	_help_compact_timer = _create_owned_ui_timer("HelpCompactTimer", Callable(self, "_on_help_compact_timer_timeout"))
+	_help_detail_timer = _create_owned_ui_timer("HelpDetailTimer", Callable(self, "_on_help_detail_timer_timeout"))
+	_help_hide_timer = _create_owned_ui_timer("HelpHideTimer", Callable(self, "_on_help_hide_timer_timeout"))
+
+
+func _create_owned_ui_timer(timer_name: String, callback: Callable) -> Timer:
+	var timer := Timer.new()
+	timer.name = timer_name
+	timer.one_shot = true
+	timer.timeout.connect(callback)
+	add_child(timer)
+	return timer
 
 
 func _help_hover_is_current(token: int, help_id: String, control) -> bool:

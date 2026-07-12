@@ -13,12 +13,18 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene (implementiert im Arbeitsstand)
+- Grundlage: Funktional gruene Recovery- und Performance-Laufe hinterliessen einen Dropship-Label-Orphan sowie zwei Main-Menu-Delay-Timer beim Engine-Exit.
+- Ergebnis: Payload-Labels entstehen nur bei echtem Inhalt. Vier vorab angelegte Main-Menu-Timer besitzen Metric-Save und Context-Help-Delays; keine Coroutine oder Engine-Timer ueberlebt den Screen. Ein verbose Gate blockiert Leaks und Enginefehler verbindlich.
+- Verifikation: TASK_1146 11/11; TASK_096 19/19 und TASK_222 82/82 verbose leakfrei; Leak-Gate 2/2; Player-Flow-Gate 7/7.
+- Naechster Schritt: TASK_1147 - Release Executable Singleplayer and Connected Multiplayer Entry Playtest.
+
 ## TASK_1145 - Player-Flow Regression Harness Trust Repair (implementiert im Arbeitsstand)
 - Grundlage: Breite Regressionen meldeten falsche Scroll-/Sichtfehler, konnten trotz Assertions Exitcode 0 liefern und liessen im historischen Dropship-Monolith einen Prozess laenger als sechs Minuten laufen.
 - Ergebnis: Scroll-aware Reachability, aktuelle Kontextregeln, ehrliche Exitcodes und ein isoliertes Sieben-Verifier-Gate mit 180-Sekunden-Prozessgrenze. Der alte Monolith verweist fail-fast auf das neue Gate.
 - Performance: TASK_1115 behaelt alle 25 Parallel-Dropship-Assertions, nutzt aber acht groessere Simulationsschritte und keinen doppelten Overlay-Refresh mehr.
 - Verifikation: TASK_1145 12/12; TASK_096 19/19; TASK_257 429/429; TASK_1115 25/25; Player-Flow-Gate 7/7; TASK_222 82/82 direkt.
-- Naechster Schritt: TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene.
+- Naechster Schritt: abgeschlossen durch TASK_1146.
 
 ## TASK_1144 - Tactical Panel Header and Navigation Player Language Polish (implementiert im Arbeitsstand)
 - Grundlage: Die grossen unteren Paneltitel und der obere Missions-Tab blieben als letzter auffaelliger englischer Sprachmix im aktuellen Full-HD-HUD.

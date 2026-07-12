@@ -10,6 +10,15 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1146_headless_runtime_resource_leak_ownership_exit_hygiene.md`, `docs/tasks/TASK_1145_player_flow_regression_harness_trust_repair.md`, `scripts/tests/run_task_1146_headless_resource_leak_gate.ps1`
+- Befund: TASK_096 hielt ueber ein nie eingehangenes Dropship-Label Theme-, Font-, Image- und Texture-Ressourcen fest. TASK_222 beendete das Main Menu mit zwei laufenden Context-Help-`SceneTreeTimer`; ein erster Eigentumsumbau erzeugte waehrend des Node-Aufbaus einen neuen Timer-Orphan und wurde verworfen.
+- Aenderung: Das leere Dropship-Label wird nur bei echtem Payload erzeugt. Main-Menu-Metric-Save sowie Compact-, Detail- und Hide-Help-Delays verwenden vier vorab angelegte, vom Main Menu besessene Timer-Nodes. Sie behalten dieselben UX-Zeiten und werden mit dem Screen freigegeben. Shutdown-Callbacks starten keine bereits ausgehangen Timer.
+- Gate: Ein neues verbose Prozessgate blockiert `Leaked instance`, RID-, ObjectDB-, Resource-, `ERROR:`- und `SCRIPT ERROR:`-Zeilen, ohne dokumentierende PASS-Texte falsch zu erkennen.
+- Lokale Pruefung: TASK_1146 11/11; TASK_096 19/19 verbose leakfrei; TASK_222 82/82 verbose leakfrei; TASK_1146 Leak-Gate 2/2; TASK_1145 Player-Flow-Gate 7/7 isolierte Prozesse; `git diff --check`.
+- Naechster Schritt: TASK_1147 - Release Executable Singleplayer and Connected Multiplayer Entry Playtest.
+
 ### TASK_1145 - Player-Flow Regression Harness Trust Repair
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1145_player_flow_regression_harness_trust_repair.md`, `docs/tasks/TASK_1144_tactical_panel_header_navigation_player_language_polish.md`, `scripts/tests/run_task_1145_player_flow_regression_gate.ps1`
@@ -17,8 +26,8 @@
 - Aenderung: Reachability unterscheidet direkte Sicht und echte Scroll-Erreichbarkeit. TASK_257 kennt die aktuellen kompakten Mission-/Homebase-Kontexte. TASK_096 prueft den zweispaltigen Character-Sheet-Vertrag und liefert ehrliche Exitcodes. Der historische Dropship-Monolith bricht mit Verweis auf ein neues isoliertes Prozessgate ab. Dieses startet sieben aktuelle Player-Flow-/Multiplayer-Verifier mit 180-Sekunden-Timeout und beendet Haenger.
 - Dropship-Performance: TASK_1115 simuliert denselben Inbound/Landed/Unloading/Outbound-Automaten in acht groesseren Zeitschritten und entfernt einen doppelten World-Overlay-Refresh. Alle 25 Host-/Client-/Payload-/Return-Assertions bleiben erhalten; Laufzeit liegt lokal bei rund 104 Sekunden statt Timeout.
 - Lokale Pruefung: TASK_1145 12/12; TASK_096 19/19; TASK_257 429/429; TASK_1115 25/25; isoliertes Player-Flow-Gate 7/7 Prozesse; TASK_222 82/82 direkt; `git diff --check`.
-- Risiken: Godot meldet in mehreren Headless-Laufen weiterhin bekannte `ObjectDB`-/RID-Leaks beim Exit. Das neue Gate zeigt diese Warnungen sichtbar, wertet sie aber noch nicht als funktionalen Player-Flow-Fehler.
-- Naechster Schritt: TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene.
+- Risiken: Die damals reproduzierten ObjectDB-/RID-Leaks sind durch TASK_1146 abgeschlossen.
+- Naechster Schritt: abgeschlossen durch TASK_1146.
 
 ### TASK_1144 - Tactical Panel Header and Navigation Player Language Polish
 - Status: implementiert im Arbeitsstand
