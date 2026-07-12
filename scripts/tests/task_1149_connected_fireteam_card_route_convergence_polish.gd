@@ -41,6 +41,11 @@ func _test_active_movement_leads_mini_card_status() -> void:
 	_assert(not movement_text.is_empty() and movement_text != "-", "Mini-card snapshot translates active movement into player text")
 	_assert(primary_text.begins_with(movement_text + " | "), "Visible mini-card status leads with the same active movement snapshot")
 	_assert(bool(snapshot.get("ui_sets_gameplay_truth", false)) == false, "Mini-card convergence remains read-only")
+	var movement_controller = controller.get("_fireteam_movement_controller")
+	if movement_controller != null:
+		movement_controller.call("reset_fireteam", "blue")
+	var transition_snapshot: Dictionary = _find_fireteam_snapshot(Array(controller.call("get_fireteam_status_card_snapshot")), "blue")
+	_assert(String(transition_snapshot.get("primary_text", "")).begins_with("MARSCHIERT | "), "Busy member runtime keeps the mini-card moving during snapshot transition")
 	scene.queue_free()
 	await _wait_frames(2)
 

@@ -5963,7 +5963,8 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 	var visible_execution_text: String = _format_fireteam_visible_execution_text(resolved_profile)
 	var visible_contact_text: String = _format_fireteam_visible_contact_text(contact_state, contact_count)
 	var visible_health_text: String = _format_fireteam_visible_health_text(health_context)
-	var visible_activity_text: String = movement_text if not movement_state.is_empty() and movement_text != "-" else visible_execution_text
+	var busy_member_count: int = int(Dictionary(member_status.get("counts", {})).get("busy", 0))
+	var visible_activity_text: String = movement_text if not movement_state.is_empty() and movement_text != "-" else ("MARSCHIERT" if busy_member_count > 0 else visible_execution_text)
 	var primary_text: String = "%s | %s | %s" % [
 		visible_activity_text,
 		visible_contact_text,
