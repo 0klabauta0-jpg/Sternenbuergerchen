@@ -66,3 +66,21 @@ fuer Zeit; fuenf 30-Pixel-Zeilen konkurrieren mit Header und Innenabstand.
 
 Weitere Eintraege bleiben in normalen Logzustaenden scrollbar. Im dichten
 First-Exchange-Fokus priorisiert das HUD die vier neuesten taktischen Fakten.
+
+## Release-Beleg
+
+Der exportierte Zwei-EXE-First-Contact-Lauf ist nach 83,58 Sekunden mit
+Deployment, gemeinsamem Kontakt und demselben ersten Feuerwechsel auf Host und
+Client gruen. Beide 1280x720-Fenster zeigen das Ereignisprotokoll auf einer
+stabilen dunklen Flaeche; Zeit und Meldung sind lesbar, vier Ereignisse passen
+ohne Kollision mit Fireteam-Karten, Befehlsmatrix oder Selected-Fireteam-Dock.
+
+Belegdateien:
+
+- `tmp/release_host_client_first_contact_playtest.json`
+- `tmp/release_host_client_first_contact_host_window.png`
+- `tmp/release_host_client_first_contact_client_window.png`
+
+Der naechste sichtbare Befund liegt nicht mehr im Ereignisprotokoll: Die
+Spielertexte in `#18 EINSATZKONTROLLE` sind im selben 1280er Fenster weiterhin
+deutlich kleiner als die angrenzenden primaeren Bedienflaechen.
