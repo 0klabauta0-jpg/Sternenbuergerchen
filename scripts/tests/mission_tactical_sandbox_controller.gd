@@ -4794,13 +4794,55 @@ func _build_periodic_strategic_status_signature() -> String:
 		"selected_fireteam_ids": Array(_selected_fireteam_ids),
 		"focused_fireteam_id": _focused_fireteam_id,
 		"last_command_text": _last_command_text,
-		"drop": _build_periodic_craft_controls_signature(),
-		"mission_time": _build_mission_time_limit_text(),
+		"drop_state": _mission_drop_state,
+		"drop_eta_bucket": int(_mission_drop_eta_seconds / 5),
+		"drop_sequence_phase": _drop_sequence_phase,
+		"drop_sequence_unit_index": _drop_sequence_unit_index,
+		"cooldown_bucket": int(ceil(_drop_ship_cooldown_remaining / 5.0)),
+		"mission_time_bucket": _get_periodic_mission_time_bucket(),
 		"network_interaction_fingerprint": _network_mission_interaction_progress_fingerprint,
 		"network_interaction_pending": _network_mission_interaction_request_pending,
-		"contacts": get_contact_snapshot(),
-		"fire_events": get_fire_event_snapshot(),
+		"contacts": _build_periodic_contact_signature(),
+		"fire_events": _build_periodic_fire_event_signature(),
 	})
+
+
+func _get_periodic_mission_time_bucket() -> int:
+	var combat_driver: Node = get_node_or_null("../CombatLoopDriver")
+	if combat_driver == null or not combat_driver.has_method("get_remaining_time_limit_seconds"):
+		return -1
+	return int(floor(maxf(float(combat_driver.call("get_remaining_time_limit_seconds")), 0.0) / 5.0))
+
+
+func _build_periodic_contact_signature() -> String:
+	var tokens: PackedStringArray = PackedStringArray()
+	for contact_variant in get_contact_snapshot():
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var position := Vector2(contact.get("last_known_position", contact.get("position", Vector2.ZERO)))
+		var age_seconds: float = float(contact.get("last_seen_age_seconds", contact.get("age_seconds", 0.0)))
+		tokens.append("%s:%d:%d:%d:%d" % [
+			String(contact.get("target_id", contact.get("unit_id", ""))),
+			int(round(position.x / 32.0)),
+			int(round(position.y / 32.0)),
+			int(floor(maxf(age_seconds, 0.0) / 5.0)),
+			int(round(clampf(float(contact.get("confidence", 0.0)), 0.0, 1.0) * 10.0)),
+		])
+	tokens.sort()
+	return "|".join(tokens)
+
+
+func _build_periodic_fire_event_signature() -> String:
+	var event_ids: PackedStringArray = PackedStringArray()
+	for event_variant in get_fire_event_snapshot():
+		if typeof(event_variant) != TYPE_DICTIONARY:
+			continue
+		var event_id: String = String(Dictionary(event_variant).get("event_id", "")).strip_edges()
+		if not event_id.is_empty():
+			event_ids.append(event_id)
+	event_ids.sort()
+	return "|".join(event_ids)
 
 
 func _build_periodic_craft_controls_signature() -> String:

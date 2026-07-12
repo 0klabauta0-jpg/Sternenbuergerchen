@@ -2,6 +2,7 @@ extends SceneTree
 
 const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
 const CONTROLLER_SOURCE_PATH: String = "res://scripts/tests/mission_tactical_sandbox_controller.gd"
+const LOBBY_SOURCE_PATH: String = "res://scripts/ui/multiplayer_lobby_screen.gd"
 
 var _passed: int = 0
 var _failed: int = 0
@@ -26,6 +27,8 @@ func _test_contract_is_present() -> void:
 	_assert(source.contains("_build_periodic_fireteam_cards_signature"), "Fireteam card group reuses runtime signatures before entering card refreshes")
 	_assert(source.contains("func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true)"), "Direct UI calls default to a forced complete refresh")
 	_assert(source.contains("_update_ui(heavy_refresh_due, false)"), "Recurring UI cadence uses guarded heavy surfaces")
+	var lobby_source: String = FileAccess.get_file_as_string(LOBBY_SOURCE_PATH)
+	_assert(lobby_source.contains('"mission_hud_runtime_surface_guard"'), "Release trace preserves heavy HUD apply/skip evidence")
 
 
 func _test_periodic_heavy_surfaces_skip_unchanged_state() -> void:
@@ -48,7 +51,7 @@ func _test_periodic_heavy_surfaces_skip_unchanged_state() -> void:
 	_assert(int(unchanged.get("craft_controls_skip_count", 0)) > int(primed.get("craft_controls_skip_count", 0)), "Unchanged periodic craft controls are skipped")
 	_assert(int(unchanged.get("fireteam_card_group_skip_count", 0)) > int(primed.get("fireteam_card_group_skip_count", 0)), "Unchanged periodic fireteam card group is skipped")
 
-	controller.set("_mission_drop_eta_seconds", int(controller.get("_mission_drop_eta_seconds")) + 1)
+	controller.set("_mission_drop_eta_seconds", int(controller.get("_mission_drop_eta_seconds")) + 5)
 	controller.call("_update_ui", true, false)
 	var changed: Dictionary = Dictionary(controller.call("get_mission_hud_runtime_surface_guard_snapshot"))
 	_assert(int(changed.get("strategic_status_apply_count", 0)) > int(unchanged.get("strategic_status_apply_count", 0)), "Changed ETA reapplies strategic status")
