@@ -3852,8 +3852,8 @@ func _build_transport_craft_card(craft_state: Dictionary) -> Control:
 	craft_card.set_meta("transport_craft_payload_visible", not visible_fireteam_ids.is_empty() or visible_member_count > 0)
 	craft_card.set_meta("transport_craft_visible_fireteam_ids", Array(visible_fireteam_ids))
 	if is_boardable or not visible_fireteam_ids.is_empty() or visible_member_count > 0:
-		var drop_label := Label.new()
 		if not visible_fireteam_ids.is_empty() or visible_member_count > 0:
+			var drop_label := Label.new()
 			if _get_transport_craft_remaining_capacity(craft_state) <= 0 and is_boardable:
 				drop_label.text = "Full %d/%d NPC assigned + pilot" % [visible_member_count, DROPSHIP_NPC_CAPACITY]
 			elif _has_boarded_mission_payload(craft_id):

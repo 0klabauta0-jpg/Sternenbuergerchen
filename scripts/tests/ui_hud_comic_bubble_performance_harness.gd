@@ -22,6 +22,7 @@ func run_all(scene_parent: Node) -> Dictionary:
 	screens["fob"] = await _measure_scene(scene_parent, "fob", FOB_SCENE_PATH)
 	screens["mission_hud"] = await _measure_scene(scene_parent, "mission_hud", MISSION_SCENE_PATH)
 	screens["main_menu"] = await _measure_scene(scene_parent, "main_menu", MAIN_MENU_SCENE_PATH)
+	await _drain_owned_ui_delays(scene_parent)
 	var bubbles: Dictionary = await _measure_bubble_modes(scene_parent)
 	var theme: Dictionary = _measure_theme_reuse()
 	return {
@@ -242,3 +243,9 @@ func _wait_frames(scene_parent: Node, frame_count: int) -> void:
 	var tree := scene_parent.get_tree()
 	for _index in range(maxi(frame_count, 0)):
 		await tree.process_frame
+
+
+func _drain_owned_ui_delays(scene_parent: Node) -> void:
+	if scene_parent == null:
+		return
+	await _wait_frames(scene_parent, 4)
