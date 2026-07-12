@@ -483,6 +483,7 @@ var _mission_hud_runtime_surface_guard_skip_counts: Dictionary = {
 	"craft_controls": 0,
 	"fireteam_card_group": 0,
 }
+var _mission_hud_station_route_snapshot_build_count: int = 0
 var _tactical_breakout_resolver = null
 var _tactical_breakout_records: Array = []
 var _npc_thought_bubbles: Array = []
@@ -3867,6 +3868,9 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 	if profile_enabled:
 		scopes_usec["primary_block_labels_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
+	var shared_station_route_readout: Dictionary = {}
+	if profile_enabled:
+		scopes_usec["shared_station_route_snapshot_usec"] = 0
 	var command_feedback_label := get_node_or_null(command_feedback_label_path) as Label
 	if profile_enabled:
 		for command_scope_name in ["primary_command_door_usec", "primary_command_route_usec", "primary_command_decision_usec", "primary_command_target_waypoint_usec"]:
@@ -3880,7 +3884,12 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 			if profile_enabled:
 				scopes_usec["primary_command_door_usec"] = Time.get_ticks_usec() - command_scope_started_usec
 				command_scope_started_usec = Time.get_ticks_usec()
-			var station_route_line: String = String(_build_station_route_run_readout_snapshot().get("compact_line", "")).strip_edges()
+			var shared_route_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+			shared_station_route_readout = _build_shared_station_route_readout_for_hud()
+			if profile_enabled:
+				scopes_usec["shared_station_route_snapshot_usec"] = Time.get_ticks_usec() - shared_route_started_usec
+				command_scope_started_usec = Time.get_ticks_usec()
+			var station_route_line: String = String(shared_station_route_readout.get("compact_line", "")).strip_edges()
 			if profile_enabled:
 				scopes_usec["primary_command_route_usec"] = Time.get_ticks_usec() - command_scope_started_usec
 				command_scope_started_usec = Time.get_ticks_usec()
@@ -3909,6 +3918,11 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 			_set_mission_label_text_delta(hotkey_legend_label, "MISSION PREVIEW | Homebase Start unlocks GO/orders | RMB waypoints | DEL removes")
 		else:
 			_set_mission_label_text_delta(hotkey_legend_label, HOTKEY_LEGEND if _can_issue_local_commands() else "OBSERVER MODE | Host controls mission orders in multiplayer V1")
+	if shared_station_route_readout.is_empty():
+		var shared_route_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
+		shared_station_route_readout = _build_shared_station_route_readout_for_hud()
+		if profile_enabled:
+			scopes_usec["shared_station_route_snapshot_usec"] = Time.get_ticks_usec() - shared_route_started_usec
 	if profile_enabled:
 		scopes_usec["primary_command_feedback_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -3929,7 +3943,7 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 		_apply_release_firefight_hud_real_window_label_contract(fireteam_status_label)
 	if profile_enabled:
 		scopes_usec["primary_fireteam_tooltips_usec"] = Time.get_ticks_usec() - scope_started_usec
-		scopes_usec["primary_labels_usec"] = int(scopes_usec.get("primary_block_labels_usec", 0)) + int(scopes_usec.get("primary_command_feedback_usec", 0)) + int(scopes_usec.get("primary_fireteam_status_usec", 0)) + int(scopes_usec.get("primary_fireteam_tooltips_usec", 0))
+		scopes_usec["primary_labels_usec"] = int(scopes_usec.get("shared_station_route_snapshot_usec", 0)) + int(scopes_usec.get("primary_block_labels_usec", 0)) + int(scopes_usec.get("primary_command_feedback_usec", 0)) + int(scopes_usec.get("primary_fireteam_status_usec", 0)) + int(scopes_usec.get("primary_fireteam_tooltips_usec", 0))
 		scope_started_usec = Time.get_ticks_usec()
 	_refresh_fireteam_status_panel()
 	_refresh_fireteam_phase_panel()
@@ -3940,7 +3954,7 @@ func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool 
 	if profile_enabled:
 		scopes_usec["panel_nav_timer_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
-	_refresh_mission_identity_session_badge()
+	_refresh_mission_identity_session_badge(shared_station_route_readout)
 	if profile_enabled:
 		scopes_usec["panel_identity_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -11738,7 +11752,25 @@ func _with_review_session_badge(team_chip_snapshot: Dictionary) -> Dictionary:
 	return result
 
 
-func _refresh_mission_identity_session_badge() -> void:
+func _build_shared_station_route_readout_for_hud() -> Dictionary:
+	_mission_hud_station_route_snapshot_build_count += 1
+	return _build_station_route_run_readout_snapshot()
+
+
+func get_mission_hud_light_path_snapshot_consolidation_snapshot() -> Dictionary:
+	return {
+		"station_route_snapshot_build_count": _mission_hud_station_route_snapshot_build_count,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"creates_movement": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _refresh_mission_identity_session_badge(route_readout: Dictionary = {}) -> void:
 	var session_snapshot: Dictionary = _get_review_session_identity_snapshot()
 	var badge_text: String = String(session_snapshot.get("badge_text", "")).strip_edges()
 	var header_label := get_node_or_null(MISSION_IDENTITY_HEADER_LABEL_PATH) as Label
@@ -11750,7 +11782,7 @@ func _refresh_mission_identity_session_badge() -> void:
 		header_label.set_meta("review_session_badge_task", "TASK_619")
 	var body_label := get_node_or_null(MISSION_IDENTITY_BODY_LABEL_PATH) as Label
 	if body_label != null:
-		var identity_body: Dictionary = build_station_scenario_identity_body_snapshot()
+		var identity_body: Dictionary = build_station_scenario_identity_body_snapshot(route_readout)
 		_set_mission_label_text_delta(body_label, String(identity_body.get("display_text", identity_body.get("text", "Einsatzdaten in Echtzeit | Fireteam im Einsatz"))))
 		body_label.set_meta("review_session_badge_style_id", REVIEW_SESSION_BADGE_STYLE_ID)
 		body_label.set_meta("review_session_badge_text", badge_text)
