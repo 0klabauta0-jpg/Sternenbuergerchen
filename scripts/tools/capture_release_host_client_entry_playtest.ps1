@@ -42,12 +42,12 @@ $hostWindowPosition = "20,80"
 $clientWindowPosition = if ($dropMode) { "360,120" } else { "960,80" }
 
 $hostArgs = @(
-	"--log-file", $hostLog, "--resolution", $windowResolution, "--position", $hostWindowPosition, "--",
+	"--log-file", $hostLog, "--rendering-method", "gl_compatibility", "--resolution", $windowResolution, "--position", $hostWindowPosition, "--",
 	"--release-multiplayer-host", "--release-multiplayer-port=$Port",
 	"--release-multiplayer-auto-start", "--release-multiplayer-trace=$hostTrace"
 )
 $clientArgs = @(
-	"--log-file", $clientLog, "--resolution", $windowResolution, "--position", $clientWindowPosition, "--",
+	"--log-file", $clientLog, "--rendering-method", "gl_compatibility", "--resolution", $windowResolution, "--position", $clientWindowPosition, "--",
 	"--release-multiplayer-join", "--release-multiplayer-address=127.0.0.1",
 	"--release-multiplayer-port=$Port", "--release-multiplayer-trace=$clientTrace"
 )

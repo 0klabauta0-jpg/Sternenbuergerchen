@@ -244,6 +244,7 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 	var movement_progress_ratio: float = clampf(1.0 - (movement_remaining_distance / initial_distance), 0.0, 1.0) if initial_distance > 0.001 else 0.0
 	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot") if has_active_mission() else null
 	var simulation_tick: int = int(simulation_root.call("get_tick")) if simulation_root != null and simulation_root.has_method("get_tick") else 0
+	var unit_movement_evidence: Dictionary = _build_release_fireteam_unit_movement_evidence(simulation_root)
 	return {
 		"schema": "sternenbuergerchen.release_multiplayer_first_contact.v1",
 		"task_id": "TASK_1150",
@@ -265,6 +266,9 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"movement_distance_travelled": movement_distance_travelled,
 		"movement_remaining_distance": movement_remaining_distance,
 		"movement_progress_ratio": movement_progress_ratio,
+		"fireteam_unit_positions": Dictionary(unit_movement_evidence.get("fireteam_unit_positions", {})).duplicate(true),
+		"terrain_move_debug": Dictionary(unit_movement_evidence.get("terrain_move_debug", {})).duplicate(true),
+		"local_avoidance_debug": Dictionary(unit_movement_evidence.get("local_avoidance_debug", {})).duplicate(true),
 		"contact_approach_evidence": _release_contact_approach_evidence.duplicate(true),
 		"contact_count": contacts.size(),
 		"contacts": contacts,
@@ -276,6 +280,32 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
+
+
+func _build_release_fireteam_unit_movement_evidence(simulation_root: Node) -> Dictionary:
+	var positions: Dictionary = {}
+	var terrain_debug: Dictionary = {}
+	var avoidance_debug: Dictionary = {}
+	var unit_registry: Node = _active_mission.get_node_or_null("UnitRegistry") if has_active_mission() else null
+	if unit_registry == null or not unit_registry.has_method("get_all_units"):
+		return {"fireteam_unit_positions": positions, "terrain_move_debug": terrain_debug, "local_avoidance_debug": avoidance_debug}
+	for unit in Array(unit_registry.call("get_all_units")):
+		if unit == null or not (unit is Node2D) or not unit.has_method("get_fireteam_id"):
+			continue
+		if String(unit.call("get_fireteam_id")).strip_edges().to_lower() != _release_local_fireteam_id:
+			continue
+		var unit_id: String = String(unit.call("get_unit_id")).strip_edges() if unit.has_method("get_unit_id") else String(unit.name)
+		var command_snapshot: Dictionary = {}
+		if unit.has_method("get_current_unit_command"):
+			var command = unit.call("get_current_unit_command")
+			if command != null and command.has_method("to_dict"):
+				command_snapshot = Dictionary(command.call("to_dict")).duplicate(true)
+		positions[unit_id] = {"position": (unit as Node2D).global_position, "command": command_snapshot}
+		if simulation_root != null and simulation_root.has_method("get_terrain_move_debug_snapshot"):
+			terrain_debug[unit_id] = simulation_root.call("get_terrain_move_debug_snapshot", unit_id)
+		if simulation_root != null and simulation_root.has_method("get_local_avoidance_debug_snapshot"):
+			avoidance_debug[unit_id] = simulation_root.call("get_local_avoidance_debug_snapshot", unit_id)
+	return {"fireteam_unit_positions": positions, "terrain_move_debug": terrain_debug, "local_avoidance_debug": avoidance_debug}
 
 
 func _get_release_multiplayer_cmdline_args() -> PackedStringArray:
@@ -432,6 +462,9 @@ func _submit_release_contact_advance(controller: Node) -> bool:
 		requested_target = Vector2(controller.call("get_mission_marker_world_position", "spawn_bravo", requested_target))
 	var terrain_registry: Node = _active_mission.get_node_or_null("TerrainRegistry")
 	var unit_registry: Node = _active_mission.get_node_or_null("UnitRegistry")
+	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot")
+	if simulation_root != null and simulation_root.has_method("set_local_avoidance_debug_enabled"):
+		simulation_root.call("set_local_avoidance_debug_enabled", true)
 	var pace_snapshot: Dictionary = get_release_multiplayer_first_contact_snapshot()
 	var start_position := Vector2(Dictionary(pace_snapshot.get("fireteam_position", {})).get("world_position", Vector2.ZERO))
 	var local_team_id: String = ""

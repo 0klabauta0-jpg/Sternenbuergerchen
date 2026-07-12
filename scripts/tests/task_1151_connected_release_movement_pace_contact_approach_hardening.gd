@@ -25,6 +25,8 @@ func _initialize() -> void:
 	_assert(lobby_source.contains("trace_heartbeat_bucket"), "Unchanged First Contact stages still write periodic movement evidence")
 	_assert(lobby_source.contains("get_recent_fireteam_movement_trace"), "Release trace reads authoritative movement lifecycle evidence")
 	_assert(lobby_source.contains('"recent_movement_trace"'), "Release trace preserves completed movement lifecycle evidence")
+	for token in ["fireteam_unit_positions", "terrain_move_debug", "local_avoidance_debug"]:
+		_assert(lobby_source.contains(token), "Release trace exposes lower movement boundary %s" % token)
 	_assert(lobby_source.contains('get_mission_marker_world_position", "spawn_bravo"'), "Release Contact Approach follows the runtime enemy spawn marker")
 	_assert(not lobby_source.contains('"spawn_enemy_defense"') and not lobby_source.contains('"spawn_enemy_patrol"'), "Release Contact Approach does not treat decorative enemy markers as runtime truth")
 	_assert(lobby_source.contains("enemy_positions.append(requested_target)"), "Clients without hidden enemy nodes resolve against the shared spawn marker")
@@ -46,6 +48,7 @@ func _initialize() -> void:
 		_assert(harness_source.contains(token), "Release harness preserves %s evidence" % token)
 	_assert(harness_source.contains('"TASK_1151"'), "First Contact pace manifest identifies TASK_1151")
 	_assert(harness_source.contains('if ($FirstContact) { "1280x720" }'), "Two-process First Contact gate uses a per-machine representative render budget")
+	_assert(harness_source.count('"--rendering-method", "gl_compatibility"') == 2, "Two-process functional gate isolates both instances from the D3D12 driver crash")
 	for token in ["host_log_path", "client_log_path", "host_exited_before_gate", "client_exited_before_gate", "host_exit_code", "client_exit_code"]:
 		_assert(harness_source.contains(token), "Release harness preserves process-boundary evidence %s" % token)
 	var combat_source := FileAccess.get_file_as_string(COMBAT_DRIVER_PATH)
@@ -59,7 +62,7 @@ func _initialize() -> void:
 	_assert(controller_source.contains("_update_standalone_network_intent_execution"), "Plan-independent network movement receives normal runtime updates")
 	_assert(controller_source.contains('String(execution_state.get("execution_owner", "")) == "standalone_network_intent"'), "Missing UI plans do not reset standalone network movement")
 
-	print("TASK_1151 connected release movement pace evidence: %d/43 PASS" % (43 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/47 PASS" % (47 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
