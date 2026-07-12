@@ -585,6 +585,7 @@ var _mission_dropship_runtime_ui_refresh_remaining: float = 0.0
 var _mission_dropship_runtime_feedback_flush_count: int = 0
 var _mission_dropship_runtime_planning_emit_count: int = 0
 var _last_authoritative_dropship_snapshot_signature: String = ""
+var _last_mission_dropship_contact_focus_active: bool = false
 var _authoritative_dropship_snapshot_apply_count: int = 0
 var _authoritative_dropship_snapshot_dedupe_count: int = 0
 var _map_world_bounds_cache: Rect2 = Rect2()
@@ -2144,6 +2145,9 @@ func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 		if contact_signature != _last_network_contact_visual_signature:
 			_last_network_contact_visual_signature = contact_signature
 			refresh_contact_overlay()
+		var contact_focus_active: bool = _is_mission_contact_focus_active()
+		if _should_refresh_dropship_panel_for_contact_focus(contact_focus_active):
+			_refresh_mission_dropship_panel()
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
 		combat_driver.call("apply_multiplayer_interaction_snapshot", mission_interactions)
 	_apply_network_mission_interaction_progress_surface(mission_interactions)
@@ -11341,6 +11345,13 @@ func _is_mission_contact_focus_active() -> bool:
 		get_connected_first_contact_hud_perspective_snapshot(),
 		_get_release_first_exchange_visible_status_source_evidence()
 	)
+
+
+func _should_refresh_dropship_panel_for_contact_focus(contact_focus_active: bool) -> bool:
+	if contact_focus_active == _last_mission_dropship_contact_focus_active:
+		return false
+	_last_mission_dropship_contact_focus_active = contact_focus_active
+	return true
 
 
 func _is_contact_focus_active_from_snapshots(contact_perspective: Dictionary, visible_status_source: Dictionary) -> bool:
