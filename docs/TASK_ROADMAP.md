@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1162 - Left Tactical Stack 1280 Readability and Focus Balance (implementiert im Arbeitsstand)
+- Grundlage: TASK_1161 zeigte im echten 1280x720-FirstContact, dass die linke taktische Stack-Flaeche aus Fireteam-Mini-Cards und Ereignislog noch dicht und klein bleibt.
+- Ziel: Fireteam-Auswahl, primaeren Fokus, Lead-/Statuszeilen und #19-Ereignisse links gemeinsam lesbar machen, ohne Gameplay-State oder HUD-Hotpaths umzubauen.
+- Ergebnis: `get_left_tactical_stack_1280_readability_snapshot()` prueft Mini-Cards, Primaerfokus, Stack-Rechtecke und TASK_1159-Eventlog read-only. Mission-Mini-Cards nutzen lokal 232x104, 13-Pixel-Titel, 11-Pixel-Status/Lead und eine starke Fokus-Kante fuer genau ein primaeres Fireteam.
+- Verifikation: TASK_1162 34/34; Mini-Card-Identitaet/Kontrast/Sprache/Stance, Contact-Loss-Sprache, Eventlog, Multi-Dropship HUD und Connected-Perspektive gruen.
+- Naechster Schritt: TASK_1163 - Left Tactical Stack 1280 Release Recapture.
+
 ## TASK_1161 - 1280 Release Recapture and Primary HUD Balance (implementiert und im Release sichtbar verifiziert)
 - Grundlage: Nach TASK_1157 bis TASK_1160 waren die vier primaeren 1280er HUD-Flaechen einzeln verbessert, aber noch nicht wieder gemeinsam im echten Host/Client-FirstContact geprueft.
 - Ziel: Einen kombinierten read-only Vertrag fuer Befehlsmatrix, ausgewaehlte Fireteam-Member, Ereignislog und Einsatzkontrolle schaffen und den echten 1280x720-Release erneut aufnehmen.

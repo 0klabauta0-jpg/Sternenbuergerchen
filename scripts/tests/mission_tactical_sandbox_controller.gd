@@ -220,6 +220,12 @@ const MISSION_CONTROL_1280_OUTLINE_SIZE: int = 3
 const MISSION_CONTROL_1280_MAX_VISIBLE_LINES: int = 4
 const MISSION_CONTROL_1280_MIN_STATUS_HEIGHT: float = 92.0
 const PRIMARY_HUD_1280_BALANCE_STYLE_ID: String = "task_1161_1280_release_primary_hud_balance_v1"
+const LEFT_TACTICAL_STACK_1280_READABILITY_STYLE_ID: String = "task_1162_left_tactical_stack_1280_readability_v1"
+const LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE := Vector2(232.0, 104.0)
+const LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE: int = 13
+const LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE: int = 11
+const LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE: int = 11
+const LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH: int = 3
 const RELEASE_FIREFIGHT_EVENT_LOG_FINDINGS_STYLE_ID: String = "task_838_release_firefight_event_log_findings_v1"
 const CONNECTED_FIRST_CONTACT_EVENT_LOG_DEDUPE_WINDOW_MSEC: int = 5000
 const RELEASE_FIREFIGHT_WORLD_LABEL_DECLUTTER_STYLE_ID: String = "task_839_release_firefight_world_label_declutter_v1"
@@ -4706,6 +4712,7 @@ func _refresh_fireteam_mini_cards() -> void:
 
 	var active_fireteam_ids: Dictionary = {}
 	var desired_index: int = 0
+	var primary_focus_fireteam_id: String = _get_left_tactical_stack_primary_focus_fireteam_id(available_fireteam_ids)
 	for fireteam_id in available_fireteam_ids:
 		var normalized_fireteam_id: String = String(fireteam_id).strip_edges().to_lower()
 		var units: Array = _filter_ground_fireteam_card_units(_get_fireteam_units(normalized_fireteam_id, not _use_visible_units_for_fireteam_ui()))
@@ -4754,6 +4761,7 @@ func _refresh_fireteam_mini_cards() -> void:
 			card.call("set_selected", selected_fireteam)
 		card.set_meta("mission_fireteam_mini_card_selected", selected_fireteam)
 		_apply_fireteam_mini_card_status_context(card, normalized_fireteam_id, units)
+		_apply_left_tactical_stack_1280_mini_card_style(card, normalized_fireteam_id == primary_focus_fireteam_id)
 		_increment_mission_fireteam_card_delta_rendering_count("runtime_status_apply")
 		_apply_fireteam_mini_card_leader_portrait(card, lead)
 		card.modulate = Color(1.0, 1.0, 1.0, 0.58) if runtime_inactive else Color.WHITE
@@ -4791,6 +4799,20 @@ func _build_fireteam_mini_card_static_signature(fireteam_id: String, lead, lead_
 		lead_id,
 		lead_summary.strip_edges(),
 	]
+
+
+func _get_left_tactical_stack_primary_focus_fireteam_id(available_fireteam_ids: PackedStringArray = PackedStringArray()) -> String:
+	for selected_id_variant in _selected_fireteam_ids:
+		var selected_id: String = String(selected_id_variant).strip_edges().to_lower()
+		if selected_id.is_empty():
+			continue
+		if available_fireteam_ids.is_empty() or available_fireteam_ids.has(selected_id):
+			return selected_id
+	for fireteam_id_variant in available_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not fireteam_id.is_empty():
+			return fireteam_id
+	return ""
 
 
 func _build_selected_fireteam_cards_runtime_signature() -> String:
@@ -5258,6 +5280,42 @@ func _apply_fireteam_mini_status_summary(card: Control, status_snapshot: Diction
 		member_label.tooltip_text = String(status_snapshot.get("tooltip_text", ""))
 		member_label.set_meta("mission_fireteam_status_primary", true)
 		member_label.set_meta("mission_fireteam_visible_identity_summary", true)
+
+
+func _apply_left_tactical_stack_1280_mini_card_style(card: Control, selected_fireteam: bool) -> void:
+	if card == null:
+		return
+	card.custom_minimum_size = Vector2(
+		maxf(card.custom_minimum_size.x, LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE.x),
+		maxf(card.custom_minimum_size.y, LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE.y)
+	)
+	card.set_meta("left_tactical_stack_1280_style_id", LEFT_TACTICAL_STACK_1280_READABILITY_STYLE_ID)
+	card.set_meta("left_tactical_stack_1280_focus_style_applied", selected_fireteam)
+	card.set_meta("left_tactical_stack_1280_ui_sets_gameplay_truth", false)
+	var title_edit := card.get_node_or_null("Margin/VBox/HeaderRow/TitleEdit") as LineEdit
+	if title_edit != null:
+		title_edit.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE)
+		title_edit.set_meta("left_tactical_stack_1280_font_size", LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE)
+	var stage_label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
+	if stage_label != null:
+		stage_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE)
+		stage_label.set_meta("left_tactical_stack_1280_font_size", LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE)
+	var member_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
+	if member_label != null:
+		member_label.add_theme_font_size_override("font_size", LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE)
+		member_label.set_meta("left_tactical_stack_1280_font_size", LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE)
+	var stylebox := StyleBoxFlat.new()
+	stylebox.bg_color = Color(0.17, 0.20, 0.24, 1.0) if selected_fireteam else Color(0.12, 0.15, 0.18, 0.96)
+	stylebox.border_color = Color("f2c94c") if selected_fireteam else Color(0.42, 0.50, 0.57, 1.0)
+	stylebox.border_width_left = LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
+	stylebox.border_width_top = LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
+	stylebox.border_width_right = LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
+	stylebox.border_width_bottom = LEFT_TACTICAL_STACK_1280_FOCUS_BORDER_WIDTH if selected_fireteam else 2
+	stylebox.corner_radius_top_left = 6
+	stylebox.corner_radius_top_right = 6
+	stylebox.corner_radius_bottom_left = 6
+	stylebox.corner_radius_bottom_right = 6
+	card.add_theme_stylebox_override("panel", stylebox)
 
 
 func _compact_fireteam_mini_identity_text(lead_summary: String, member_count: int) -> String:
@@ -15271,6 +15329,140 @@ func get_primary_hud_1280_balance_snapshot() -> Dictionary:
 		"creates_fire_event": false,
 		"creates_damage_event": false,
 		"sets_multiplayer_truth": false,
+	}
+
+
+func get_left_tactical_stack_1280_readability_snapshot() -> Dictionary:
+	_refresh_fireteam_mini_cards()
+	_refresh_tactical_event_log_panel()
+	var mini_surface: Dictionary = _build_left_tactical_stack_1280_fireteam_mini_surface()
+	var event_surface: Dictionary = _build_left_tactical_stack_1280_event_log_surface()
+	var layout: Dictionary = DROP_LIGHT_LAYOUT_CONTRACT_SCRIPT.call("get_mission_hud_layout")
+	var mini_rect: Rect2i = layout.get("fireteam_mini", Rect2i())
+	var event_rect: Rect2i = layout.get("event_log", Rect2i())
+	var mini_event_no_overlap: bool = not Rect2(mini_rect.position, mini_rect.size).intersects(Rect2(event_rect.position, event_rect.size))
+	var stack_ready: bool = bool(mini_surface.get("readability_ready", false)) \
+		and bool(event_surface.get("readability_ready", false)) \
+		and mini_event_no_overlap
+	return {
+		"schema": "sternenbuergerchen.left_tactical_stack_1280_readability.v1",
+		"task_id": "TASK_1162",
+		"style_id": LEFT_TACTICAL_STACK_1280_READABILITY_STYLE_ID,
+		"stack": {
+			"expected_resolution": "1280x720",
+			"fireteam_mini_rect": _rect_to_audit_dictionary(Rect2(mini_rect.position, mini_rect.size)),
+			"event_log_rect": _rect_to_audit_dictionary(Rect2(event_rect.position, event_rect.size)),
+			"mini_event_no_overlap": mini_event_no_overlap,
+			"left_stack_readability_ready": stack_ready,
+		},
+		"fireteam_mini": mini_surface,
+		"event_log": event_surface,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+		"creates_fire_event": false,
+		"creates_damage_event": false,
+		"sets_multiplayer_truth": false,
+	}
+
+
+func _build_left_tactical_stack_1280_fireteam_mini_surface() -> Dictionary:
+	var host := get_node_or_null(FIRETEAM_MINI_CARDS_VBOX_PATH) as VBoxContainer
+	var cards: Array = []
+	var visible_card_count := 0
+	var readable_card_count := 0
+	var focused_card_count := 0
+	var stance_ready_card_count := 0
+	var primary_focus_fireteam_id: String = _get_left_tactical_stack_primary_focus_fireteam_id(_get_displayable_fireteam_ids())
+	if host != null:
+		for child_variant in host.get_children():
+			var card := child_variant as Control
+			if card == null or not bool(card.get_meta("mission_fireteam_mini_card", false)):
+				continue
+			var card_fireteam_id: String = String(card.get_meta("fireteam_id", "")).strip_edges().to_lower()
+			_apply_left_tactical_stack_1280_mini_card_style(card, card_fireteam_id == primary_focus_fireteam_id)
+			var entry: Dictionary = _build_left_tactical_stack_1280_mini_card_entry(card, primary_focus_fireteam_id)
+			cards.append(entry)
+			visible_card_count += 1
+			if bool(entry.get("primary_focus", false)):
+				focused_card_count += 1
+			if bool(entry.get("readable", false)):
+				readable_card_count += 1
+			if bool(entry.get("stance_ready", false)):
+				stance_ready_card_count += 1
+	var readability_ready: bool = visible_card_count >= 2 \
+		and readable_card_count >= mini(2, visible_card_count) \
+		and focused_card_count == 1 \
+		and stance_ready_card_count >= mini(2, visible_card_count)
+	return {
+		"source_task_id": "TASK_1162",
+		"style_id": LEFT_TACTICAL_STACK_1280_READABILITY_STYLE_ID,
+		"readability_ready": readability_ready,
+		"visible_card_count": visible_card_count,
+		"readable_card_count": readable_card_count,
+		"focused_card_count": focused_card_count,
+		"stance_ready_card_count": stance_ready_card_count,
+		"primary_focus_fireteam_id": primary_focus_fireteam_id,
+		"cards": cards,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
+	}
+
+
+func _build_left_tactical_stack_1280_mini_card_entry(card: Control, primary_focus_fireteam_id: String) -> Dictionary:
+	var title_edit := card.get_node_or_null("Margin/VBox/HeaderRow/TitleEdit") as LineEdit
+	var stage_label := card.get_node_or_null("Margin/VBox/StageLabel") as Label
+	var member_label := card.get_node_or_null("Margin/VBox/MemberLabel") as Label
+	var stance_toggle := card.find_child("StanceToggle", true, false) as HBoxContainer
+	var fireteam_id: String = String(card.get_meta("fireteam_id", "")).strip_edges().to_lower()
+	var selected: bool = bool(card.get_meta("mission_fireteam_mini_card_selected", false))
+	var primary_focus: bool = fireteam_id == primary_focus_fireteam_id
+	var title_font: int = title_edit.get_theme_font_size("font_size") if title_edit != null else 0
+	var status_font: int = stage_label.get_theme_font_size("font_size") if stage_label != null else 0
+	var lead_font: int = member_label.get_theme_font_size("font_size") if member_label != null else 0
+	var focus_style_applied: bool = bool(card.get_meta("left_tactical_stack_1280_focus_style_applied", false))
+	var stance_ready: bool = stance_toggle != null and stance_toggle.get_child_count() >= 3
+	var readable: bool = title_font >= LEFT_TACTICAL_STACK_1280_TITLE_FONT_SIZE \
+		and status_font >= LEFT_TACTICAL_STACK_1280_STATUS_FONT_SIZE \
+		and lead_font >= LEFT_TACTICAL_STACK_1280_LEAD_FONT_SIZE \
+		and card.custom_minimum_size.y >= LEFT_TACTICAL_STACK_1280_CARD_MIN_SIZE.y
+	return {
+		"fireteam_id": fireteam_id,
+		"selected": selected,
+		"primary_focus": primary_focus,
+		"style_id": String(card.get_meta("left_tactical_stack_1280_style_id", "")),
+		"focus_style_applied": focus_style_applied,
+		"title_font_size": title_font,
+		"status_font_size": status_font,
+		"lead_font_size": lead_font,
+		"card_minimum_size": card.custom_minimum_size,
+		"stance_ready": stance_ready,
+		"readable": readable,
+		"ui_sets_gameplay_truth": bool(card.get_meta("left_tactical_stack_1280_ui_sets_gameplay_truth", false)),
+	}
+
+
+func _build_left_tactical_stack_1280_event_log_surface() -> Dictionary:
+	var panel := get_node_or_null(TACTICAL_EVENT_LOG_PANEL_PATH) as Control
+	var panel_snapshot: Dictionary = {}
+	if panel != null and panel.has_method("get_panel_snapshot"):
+		panel_snapshot = Dictionary(panel.call("get_panel_snapshot")).duplicate(true)
+	var readability_ready: bool = bool(panel_snapshot.get("task_1159_readability_active", false)) \
+		and int(panel_snapshot.get("row_font_size", 0)) >= 13 \
+		and float(panel_snapshot.get("row_min_height", 0.0)) >= 32.0 \
+		and float(panel_snapshot.get("background_alpha", 0.0)) >= 0.94
+	return {
+		"source_task_id": "TASK_1159",
+		"readability_ready": readability_ready,
+		"background_alpha": float(panel_snapshot.get("background_alpha", 0.0)),
+		"row_font_size": int(panel_snapshot.get("row_font_size", 0)),
+		"row_min_height": float(panel_snapshot.get("row_min_height", 0.0)),
+		"panel_snapshot": panel_snapshot,
+		"ui_sets_gameplay_truth": false,
+		"creates_command": false,
+		"creates_effect": false,
 	}
 
 
