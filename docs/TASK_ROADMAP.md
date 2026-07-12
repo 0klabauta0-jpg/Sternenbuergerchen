@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1164 - Left Tactical Stack 1280 Visual Findings (implementiert im Arbeitsstand)
+- Grundlage: TASK_1163 belegt den linken Stack im echten 1280x720-Host/Client-Release und nennt den Bedarf, Folgepunkte statt weiterer Blind-Gates zu schneiden.
+- Ziel: Positive Sichtbefunde und konkrete Restreibung an Mini-Card-Detailstrip, Eventlog-Filter/Zaehler und Desktop-Capture-Hygiene als read-only Vertrag sammeln.
+- Ergebnis: `get_left_tactical_stack_1280_visual_findings_snapshot()` nutzt den TASK_1163-Recapture, Review-Notizen und routet belegte Reibung zu TASK_1165 Detail Polish.
+- Verifikation: TASK_1164 plus TASK_1163/TASK_1162/TASK_222.
+- Naechster Schritt: TASK_1165 - Left Tactical Stack 1280 Detail Polish.
+
 ## TASK_1163 - Left Tactical Stack 1280 Release Recapture (implementiert und im Release sichtbar verifiziert)
 - Grundlage: TASK_1162 war headless gruen, aber linker Stack, Ereignislog und Mini-Cards mussten im tatsaechlich exportierten 1280x720-Host/Client-Fenster belegt werden.
 - Ziel: Den Release-Stand auf aktuellem Commit pruefen, den bestehenden FirstContact-Harness laufen lassen und den linken taktischen Stack sichtbar bewerten, ohne weiteres Layout im selben Task nachzuschieben.

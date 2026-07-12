@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1164 - Left Tactical Stack 1280 Visual Findings
+- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Relevante Docs/Contracts: `docs/tasks/TASK_1164_left_tactical_stack_1280_visual_findings.md`, `docs/tasks/TASK_1163_left_tactical_stack_1280_release_recapture.md`, `docs/dev/mission_command_feedback_contract.md`
+- Ausgangsbefund: TASK_1163 zeigte Host/Client links brauchbar, aber die Detail-/Member-Zeile der Mini-Cards, der Eventlog-Filterbereich und das kombinierte Desktop-Capture bleiben sichtbare Folgepunkte.
+- Aenderung: `scripts/mission/left_tactical_stack_1280_visual_findings.gd` erzeugt einen read-only Befundvertrag. `MissionTacticalSandboxController` exportiert `get_left_tactical_stack_1280_visual_findings_snapshot()` und routet die belegten Detailpunkte zu TASK_1165.
+- Lokale Pruefung: TASK_1164 49/49; TASK_1163 24/24; TASK_1162 34/34; TASK_222 82/82; `git diff --check`.
+- Risiken/offen: TASK_1164 aendert bewusst noch kein Layout. Der naechste sinnvolle Schritt ist TASK_1165 - Left Tactical Stack 1280 Detail Polish.
+
 ### TASK_1163 - Left Tactical Stack 1280 Release Recapture
 - Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1163_left_tactical_stack_1280_release_recapture.md`, `docs/tasks/TASK_1162_left_tactical_stack_1280_readability_focus_balance.md`, `docs/dev/mission_command_feedback_contract.md`
