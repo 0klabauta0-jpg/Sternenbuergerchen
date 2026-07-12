@@ -1,5 +1,11 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1152 - Mission HUD Heavy Refresh Budget Pass
+- Status: in Arbeit
+- Relevante Docs/Contracts: `docs/tasks/TASK_1152_mission_hud_heavy_refresh_budget_pass.md`, `docs/tasks/TASK_1151_connected_release_movement_pace_contact_approach_hardening.md`
+- Ausgangsbefund: Simulationstick etwa 0,4 bis 1,3 ms; kompletter Host-HUD-Refresh rund 266 ms. TASK_1151 trennt bereits leichte und schwere Cadence.
+- Ziel: Unveraenderte schwere Teilflaechen signaturbasiert ueberspringen und den echten Release erneut messen.
+
 ### TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening
 - Status: implementiert und im exportierten Zwei-EXE-Release verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1151_connected_release_movement_pace_contact_approach_hardening.md`, `scripts/tactical/contact_approach_resolver.gd`, `scripts/tests/task_1151_connected_release_movement_pace_contact_approach_hardening.gd`
