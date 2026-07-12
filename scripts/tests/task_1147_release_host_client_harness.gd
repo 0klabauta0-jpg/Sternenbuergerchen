@@ -18,14 +18,21 @@ func _initialize() -> void:
 		"--release-multiplayer-trace=",
 		"mission_started",
 		"release_host_client_entry_playtest.json",
+		"release_host_client_host_window.png",
+		"release_host_client_client_window.png",
 	]:
 		if source.contains(token):
 			print("PASS: harness contains %s" % token)
 		else:
 			failures += 1
 			push_error("FAIL: harness contains %s" % token)
+	if source.to_lower().contains("$host = start-process"):
+		failures += 1
+		push_error("FAIL: harness does not overwrite PowerShell's reserved Host variable")
+	else:
+		print("PASS: harness avoids PowerShell's reserved Host variable")
 	if failures == 0:
-		print("TASK_1147 release Host/Join harness: 7/7 PASS")
+		print("TASK_1147 release Host/Join harness: 10/10 PASS")
 		quit(0)
 	else:
 		quit(1)

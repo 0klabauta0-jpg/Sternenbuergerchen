@@ -40,7 +40,7 @@ func _initialize() -> void:
 	lobby.queue_free()
 	await process_frame
 	if _failures == 0:
-		print("TASK_1147 release multiplayer entry deeplink: 12/12 PASS")
+		print("TASK_1147 release multiplayer entry deeplink: 11/11 PASS")
 		quit(0)
 	else:
 		push_error("TASK_1147 release multiplayer entry deeplink failed: %d" % _failures)

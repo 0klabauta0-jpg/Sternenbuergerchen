@@ -28,6 +28,8 @@ $hostTrace = Join-Path $tmp "release_host_client_host_trace.json"
 $clientTrace = Join-Path $tmp "release_host_client_client_trace.json"
 $manifestPath = Join-Path $tmp "release_host_client_entry_playtest.json"
 $screenshotPath = Join-Path $tmp "release_host_client_entry_playtest.png"
+$hostWindowPath = Join-Path $tmp "release_host_client_host_window.png"
+$clientWindowPath = Join-Path $tmp "release_host_client_client_window.png"
 Remove-Item -LiteralPath $hostTrace,$clientTrace -Force -ErrorAction SilentlyContinue
 
 $hostArgs = @(
@@ -41,9 +43,9 @@ $clientArgs = @(
 	"--release-multiplayer-port=$Port", "--release-multiplayer-trace=$clientTrace"
 )
 
-$host = Start-Process -FilePath $exe -WorkingDirectory ([string]$check.release_directory) -ArgumentList $hostArgs -PassThru
+$hostProcess = Start-Process -FilePath $exe -WorkingDirectory ([string]$check.release_directory) -ArgumentList $hostArgs -PassThru
 Start-Sleep -Milliseconds 900
-$client = Start-Process -FilePath $exe -WorkingDirectory ([string]$check.release_directory) -ArgumentList $clientArgs -PassThru
+$clientProcess = Start-Process -FilePath $exe -WorkingDirectory ([string]$check.release_directory) -ArgumentList $clientArgs -PassThru
 $startedAt = [DateTimeOffset]::UtcNow
 $deadline = $startedAt.AddSeconds([Math]::Max(5, $TimeoutSeconds))
 $hostState = $null
@@ -57,7 +59,7 @@ do {
 		-and [string]$hostState.stage -eq "mission_started" `
 		-and [string]$clientState.stage -eq "mission_started" `
 		-and [bool]$hostState.active_mission -and [bool]$clientState.active_mission
-} while (-not $connected -and [DateTimeOffset]::UtcNow -lt $deadline -and -not $host.HasExited -and -not $client.HasExited)
+} while (-not $connected -and [DateTimeOffset]::UtcNow -lt $deadline -and -not $hostProcess.HasExited -and -not $clientProcess.HasExited)
 
 $screenshotWritten = $false
 try {
@@ -73,6 +75,28 @@ try {
 	} finally { $graphics.Dispose(); $bitmap.Dispose() }
 } catch {}
 
+$windowCaptureScript = Join-Path $repoRoot "scripts\tools\capture_release_singleplayer_visible_window.ps1"
+$windowCaptures = @{}
+foreach ($entry in @(
+	@{ name = "host"; process = $hostProcess; path = $hostWindowPath },
+	@{ name = "client"; process = $clientProcess; path = $clientWindowPath }
+)) {
+	$captureDir = Join-Path $tmp ("task_1147_{0}_capture" -f $entry.name)
+	New-Item -ItemType Directory -Force -Path $captureDir | Out-Null
+	& powershell -ExecutionPolicy Bypass -File $windowCaptureScript -OutputDirectory $captureDir -ProcessId $entry.process.Id -SkipFocusWindow -JsonOnly | Out-Null
+	$captureManifestPath = Join-Path $captureDir "release_singleplayer_visible_window_findings.json"
+	$written = $false
+	if (Test-Path -LiteralPath $captureManifestPath) {
+		$captureManifest = Get-Content -LiteralPath $captureManifestPath -Raw | ConvertFrom-Json
+		$sourceWindow = [string]$captureManifest.window_screenshot_full_path
+		if (Test-Path -LiteralPath $sourceWindow) {
+			Copy-Item -LiteralPath $sourceWindow -Destination $entry.path -Force
+			$written = Test-Path -LiteralPath $entry.path
+		}
+	}
+	$windowCaptures[$entry.name] = [ordered]@{ path = $entry.path; written = $written }
+}
+
 $manifest = [ordered]@{
 	schema = "sternenbuergerchen.release_host_client_entry_playtest.v1"
 	task_id = "TASK_1147"
@@ -81,8 +105,8 @@ $manifest = [ordered]@{
 	release_gate = [string]$check.gate
 	port = $Port
 	wait_msec = [int]([DateTimeOffset]::UtcNow - $startedAt).TotalMilliseconds
-	host_process_id = $host.Id
-	client_process_id = $client.Id
+	host_process_id = $hostProcess.Id
+	client_process_id = $clientProcess.Id
 	host_trace_path = $hostTrace
 	client_trace_path = $clientTrace
 	host = $hostState
@@ -90,13 +114,15 @@ $manifest = [ordered]@{
 	mission_started = $connected
 	screenshot_path = $screenshotPath
 	screenshot_written = $screenshotWritten
+	host_window = $windowCaptures.host
+	client_window = $windowCaptures.client
 	product_release_exe = $true
 	manual_visual_review_required = $true
 }
 $manifest | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $manifestPath -Encoding UTF8
 
 if (-not $KeepProcessesRunning) {
-	foreach ($process in @($client, $host)) {
+	foreach ($process in @($clientProcess, $hostProcess)) {
 		if ($null -ne $process -and -not $process.HasExited) { Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue }
 	}
 }

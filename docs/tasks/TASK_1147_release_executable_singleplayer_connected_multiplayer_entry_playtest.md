@@ -36,3 +36,17 @@ Nach der HUD-, Player-Flow- und Exit-Hygiene-Serie fehlt ein frischer produktnah
 
 ## Risiken / offene Punkte
 Godot-Canvas-Inhalte koennen in Windows UI Automation nur schwach semantisch exponiert sein. In diesem Fall werden stabile sichtbare Koordinaten aus frischen Window-Captures verwendet und jeder Zustandswechsel erneut beobachtet.
+
+## Ergebnis
+- Singleplayer-Release erreicht den ersten Feuerwechsel im Full-HD-Fenster.
+- Zwei echte Release-Prozesse verbinden sich ueber `127.0.0.1:28747`, melden beide Spieler bereit und starten nach rund 10 Sekunden eine aktive Mission.
+- Host und Client erhalten konsistente, getrennte Perspektiven (`blue`/`gold`).
+- Der Windows-Defender-Firewall-Dialog ist eine Erststart-Reibung; die lokale Verbindung funktioniert, ohne dass der Test eine Firewall-Regel veraendert.
+- Der Multiplayer-Drop selbst bleibt bewusst als TASK_1148 offen.
+
+## Abschlusspruefung
+- [x] Release-Provenance und Export gruen.
+- [x] Singleplayer First-GO/Firefight als echtes Release-Fenster erfasst.
+- [x] Host und Client als zwei Prozesse der exportierten EXE bis `mission_started` erfasst.
+- [x] Getrennte Host-/Client-Fensterbilder und Traces vorhanden.
+- [x] Findings und Folge-Task dokumentiert.

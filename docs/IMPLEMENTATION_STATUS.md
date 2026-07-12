@@ -10,6 +10,16 @@
 - Lokale Pruefung:
 - Naechster Schritt:
 
+### TASK_1147 - Release Executable Singleplayer and Connected Multiplayer Entry Playtest
+- Status: implementiert im Arbeitsstand
+- Relevante Docs/Contracts: `docs/tasks/TASK_1147_release_executable_singleplayer_connected_multiplayer_entry_playtest.md`, `scripts/tools/capture_release_host_client_entry_playtest.ps1`, `scripts/tools/capture_release_first_go_firefight_real_window.ps1`
+- Singleplayer: Die exportierte EXE erreicht per bestehendem Produkt-Deeplink den ersten Feuerwechsel. Full-HD zeigt Fireteam, Dropship, Event Log, Command Matrix, Member-Cards und Einsatzkontrolle gleichzeitig lesbar.
+- Multiplayer: Zwei Prozesse derselben exportierten EXE verbinden sich lokal ueber ENet, melden beide Spieler bereit und starten nach rund 10 Sekunden dieselbe Mission. Host besitzt Fireteam `blue`, Client `gold`; beide Traces melden `connected_count = 2`, `ready_count = 2`, `mission_started = true` und eine aktive Mission.
+- Aenderung: Das Main Menu routet nur bei expliziten `--release-multiplayer-host`/`--release-multiplayer-join`-Argumenten in die Produktlobby. Die Lobby benutzt ihre vorhandenen Host-, Join-, Ready- und Startmethoden und schreibt read-only Traces. Ohne Argument ist der neue `_process`-Pfad abgeschaltet. Ein PowerShell-Harness startet und beendet beide Release-Prozesse und erzeugt getrennte Fensterbilder.
+- Befund: Der erste Multiplayer-Start kann den Windows-Defender-Firewall-Dialog zeigen. Loopback funktionierte dennoch; keine Firewall-Regel wurde automatisiert veraendert. Bei 900x700 sind die Perspektiven konsistent, aber Command-/Member-Flaechen fuer einen echten Spieler zu klein. Ein manueller Multiplayer-Drop ist noch nicht belegt.
+- Lokale Pruefung: TASK_1147 Deeplink 12/12; Harness 10/10; TASK_829 26/26; TASK_1106 10/10; ENet 3/3; echter Release Host/Join `pass` nach 9.9-10.0 s; Singleplayer First-GO `review_ready`; PCK SHA256 `C656340E070EB3CA26301095E260A9B63A3C5B70133F01F8261E5681C5D88059`.
+- Naechster Schritt: TASK_1148 - Connected Release Dropship First Decision Playtest.
+
 ### TASK_1146 - Headless Runtime Resource Leak Ownership and Exit Hygiene
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1146_headless_runtime_resource_leak_ownership_exit_hygiene.md`, `docs/tasks/TASK_1145_player_flow_regression_harness_trust_repair.md`, `scripts/tests/run_task_1146_headless_resource_leak_gate.ps1`
