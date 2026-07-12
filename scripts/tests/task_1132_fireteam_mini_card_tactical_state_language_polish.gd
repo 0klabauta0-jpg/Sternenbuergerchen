@@ -51,7 +51,7 @@ func _test_active_snapshot_language(controller: Node) -> void:
 	}))
 	var visible_text := String(snapshot.get("primary_text", ""))
 	_assert(visible_text.begins_with("STABIL 82% | "), "Active execution translates STEADY and preserves useful fidelity")
-	_assert(visible_text.contains("2 BESTAETIGT"), "Confirmed contacts are readable without C-prefix")
+	_assert(visible_text.contains("2 KONTAKTE BEST."), "Confirmed contacts name the contact domain without a diagnostic C-prefix")
 	_assert(String(snapshot.get("execution_text", "")).contains("STEADY"), "Technical execution detail remains in the snapshot")
 	_assert(String(snapshot.get("tooltip_text", "")).contains("Execution:"), "Tooltip retains technical execution diagnostics")
 

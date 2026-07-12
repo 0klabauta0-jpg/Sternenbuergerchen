@@ -6156,6 +6156,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 	var health_context: Dictionary = _build_fireteam_health_status_context(resolved_units)
 	var movement_state: Dictionary = get_fireteam_movement_state(normalized_fireteam_id)
 	var movement_text: String = _compact_fireteam_movement_text(movement_state, resolved_profile)
+	var movement_detail_text: String = _format_movement_state_text(movement_state)
 	var position_context: Dictionary = _build_fireteam_position_status_context(normalized_fireteam_id)
 	var review_session_context: Dictionary = _build_fireteam_review_session_card_context(normalized_fireteam_id, _resolve_fireteam_team_id_from_units(resolved_units))
 	var execution_text: String = _format_execution_quality_text(resolved_profile)
@@ -6191,7 +6192,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 	tooltip_parts.append("Suppression: %s (%d%%)" % [String(suppression_context.get("label", "READY")), int(suppression_context.get("percent", 0))])
 	tooltip_parts.append("Contact: %s" % contact_text)
 	tooltip_parts.append("Health: %s" % String(health_context.get("detail_text", health_context.get("text", ""))))
-	tooltip_parts.append("Move: %s" % movement_text)
+	tooltip_parts.append("Move: %s" % movement_detail_text)
 	tooltip_parts.append("Position: %s" % String(position_context.get("text", "--")))
 	return {
 		"fireteam_id": normalized_fireteam_id,
@@ -6223,6 +6224,7 @@ func _build_fireteam_status_card_entry(fireteam_id: String, units: Array = [], p
 		"visible_contact_text": visible_contact_text,
 		"visible_health_text": visible_health_text,
 		"movement_text": movement_text,
+		"movement_detail_text": movement_detail_text,
 		"movement_state": movement_state.duplicate(true),
 		"advance_style": String(resolved_profile.get("advance_style", movement_state.get("effective_style", ""))).strip_edges().to_lower(),
 		"position": position_context.duplicate(true),
@@ -6377,19 +6379,20 @@ func _format_fireteam_visible_contact_text(contact_state: String, contact_count:
 	var count: int = maxi(contact_count, 0)
 	if count <= 0:
 		return "KEIN KONTAKT"
+	var contact_label: String = "KONTAKT" if count == 1 else "KONTAKTE"
 	var state_label: String
 	match contact_state.strip_edges().to_lower():
 		"confirmed":
-			state_label = "BESTAETIGT"
+			state_label = "BEST."
 		"spotted":
-			state_label = "GESICHTET"
+			state_label = "SICHT"
 		"suspected":
-			state_label = "VERMUTET"
+			state_label = "VERM."
 		"lost":
-			state_label = "VERLOREN"
+			state_label = "WEG"
 		_:
-			state_label = "KONTAKT"
-	return "%d %s" % [count, state_label]
+			state_label = ""
+	return "%d %s%s" % [count, contact_label, " %s" % state_label if not state_label.is_empty() else ""]
 
 
 func _format_fireteam_visible_health_text(health_context: Dictionary) -> String:
@@ -6401,7 +6404,10 @@ func _format_fireteam_visible_health_text(health_context: Dictionary) -> String:
 func _compact_fireteam_movement_text(movement_state: Dictionary, profile_dict: Dictionary) -> String:
 	var movement_text: String = _format_movement_state_text(movement_state)
 	if not movement_text.is_empty() and movement_text != "-":
-		return movement_text
+		if movement_text.length() <= 18:
+			return movement_text
+		var movement_style_label: String = _get_movement_style_short_label(String(movement_state.get("effective_style", "")))
+		return movement_style_label if movement_style_label != "-" else "MARSCHIERT"
 	var advance_style: String = String(profile_dict.get("advance_style", movement_state.get("effective_style", ""))).strip_edges().to_lower()
 	if advance_style.is_empty():
 		return "-"
