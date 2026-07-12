@@ -46,6 +46,10 @@ var _compact_wrap_text_enabled: bool = false
 var _compact_data_a_max_lines: int = 1
 var _compact_data_b_max_lines: int = 1
 var _compact_text_min_width_override: float = 0.0
+var _compact_name_font_size_override: int = 0
+var _compact_data_font_size_override: int = 0
+var _compact_line_height_override: float = 0.0
+var _compact_portrait_size_override: float = 0.0
 var _is_drag_preview: bool = false
 var _drag_preview_size: Vector2 = Vector2.ZERO
 var _drag_preview_text_width: float = 0.0
@@ -107,6 +111,10 @@ func setup_from_profile(profile, options: Dictionary = {}) -> void:
 	_compact_data_a_max_lines = maxi(1, int(options.get("compact_data_a_max_lines", _compact_data_a_max_lines)))
 	_compact_data_b_max_lines = maxi(1, int(options.get("compact_data_b_max_lines", _compact_data_b_max_lines)))
 	_compact_text_min_width_override = maxf(0.0, float(options.get("compact_text_min_width", _compact_text_min_width_override)))
+	_compact_name_font_size_override = maxi(0, int(options.get("compact_name_font_size", _compact_name_font_size_override)))
+	_compact_data_font_size_override = maxi(0, int(options.get("compact_data_font_size", _compact_data_font_size_override)))
+	_compact_line_height_override = maxf(0.0, float(options.get("compact_line_height", _compact_line_height_override)))
+	_compact_portrait_size_override = maxf(0.0, float(options.get("compact_portrait_size", _compact_portrait_size_override)))
 	var requested_fixed_size = options.get("fixed_card_size", _fixed_card_size)
 	if typeof(requested_fixed_size) == TYPE_VECTOR2:
 		_fixed_card_size = requested_fixed_size
@@ -187,6 +195,24 @@ func get_card_userology_snapshot() -> Dictionary:
 		"compact_remove_action": remove_button != null and remove_button.visible,
 		"fixed_size": _fixed_size,
 		"uses_readonly_profile_reference": _uses_readonly_profile_reference,
+	}
+
+
+func get_compact_readability_snapshot() -> Dictionary:
+	var name_label := get_node_or_null("Margin/HBox/TextVBox/NameRow/NameLabel") as Label
+	var data_a_label := get_node_or_null("Margin/HBox/TextVBox/DataALabel") as Label
+	var data_b_label := get_node_or_null("Margin/HBox/TextVBox/DataBLabel") as Label
+	var portrait_rect := get_node_or_null("Margin/HBox/PortraitRect") as TextureRect
+	return {
+		"schema": "sternenbuergerchen.npc_compact_card_readability.v1",
+		"source_context": _source_context,
+		"card_size": custom_minimum_size,
+		"name_font_size": name_label.get_theme_font_size("font_size") if name_label != null else 0,
+		"data_a_font_size": data_a_label.get_theme_font_size("font_size") if data_a_label != null else 0,
+		"data_b_font_size": data_b_label.get_theme_font_size("font_size") if data_b_label != null else 0,
+		"portrait_size": portrait_rect.custom_minimum_size if portrait_rect != null else Vector2.ZERO,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
 	}
 
 
@@ -538,7 +564,10 @@ func _apply_density(
 		var compact_name_row := name_label.get_parent() as HBoxContainer
 		if compact_name_row != null:
 			compact_name_row.add_theme_constant_override("separation", 3)
-		portrait_rect.custom_minimum_size = Vector2(30.0, 30.0) if is_mission_drop_pilot else PORTRAIT_IDENTITY_CATALOG_SCRIPT.get_target_size("compact")
+		var portrait_size: Vector2 = Vector2(30.0, 30.0) if is_mission_drop_pilot else PORTRAIT_IDENTITY_CATALOG_SCRIPT.get_target_size("compact")
+		if _compact_portrait_size_override > 0.0:
+			portrait_size = Vector2(_compact_portrait_size_override, _compact_portrait_size_override)
+		portrait_rect.custom_minimum_size = portrait_size
 		portrait_rect.set_meta("portrait_target_size", portrait_rect.custom_minimum_size)
 		var compact_text_width := 76.0 if is_mission_drop_pilot else COMPACT_TEXT_MIN_WIDTH
 		if _drag_preview_text_width > compact_text_width:
@@ -547,14 +576,16 @@ func _apply_density(
 			compact_text_width = _compact_text_min_width_override
 		text_vbox.custom_minimum_size = Vector2(compact_text_width, 0.0)
 		name_label.custom_minimum_size = Vector2(0.0, 12.0 if is_mission_drop_pilot else 14.0)
-		var data_a_line_height: float = 10.0 if is_mission_drop_pilot else 12.0
-		var data_b_line_height: float = 10.0 if is_mission_drop_pilot else 12.0
+		var data_a_line_height: float = _compact_line_height_override if _compact_line_height_override > 0.0 else (10.0 if is_mission_drop_pilot else 12.0)
+		var data_b_line_height: float = data_a_line_height
 		data_a_label.custom_minimum_size = Vector2(0.0, data_a_line_height * float(_compact_data_a_max_lines if _compact_wrap_text_enabled else 1))
 		data_b_label.custom_minimum_size = Vector2(0.0, data_b_line_height * float(_compact_data_b_max_lines if _compact_wrap_text_enabled else 1))
 		badge_row.custom_minimum_size = Vector2(0.0, 22.0)
-		name_label.add_theme_font_size_override("font_size", 10 if is_mission_drop_pilot else 12)
-		data_a_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)
-		data_b_label.add_theme_font_size_override("font_size", 8 if is_mission_drop_pilot else 10)
+		var name_font_size: int = _compact_name_font_size_override if _compact_name_font_size_override > 0 else (10 if is_mission_drop_pilot else 12)
+		var data_font_size: int = _compact_data_font_size_override if _compact_data_font_size_override > 0 else (8 if is_mission_drop_pilot else 10)
+		name_label.add_theme_font_size_override("font_size", name_font_size)
+		data_a_label.add_theme_font_size_override("font_size", data_font_size)
+		data_b_label.add_theme_font_size_override("font_size", data_font_size)
 		progress_bar.custom_minimum_size = Vector2(0.0, 8.0)
 		return
 

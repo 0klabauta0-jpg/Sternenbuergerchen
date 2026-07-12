@@ -1,5 +1,14 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1158 - Selected Fireteam Member Cards 1280 Readability
+- Status: implementiert, automatische Karten-/Multiplayer-/Performance-Gates gruen; Release-Sichtcheck folgt
+- Relevante Docs/Contracts: `docs/tasks/TASK_1158_selected_fireteam_member_cards_1280_readability.md`, TASK_1137, TASK_1138, TASK_1157
+- Ausgangsbefund: 176x118-Karten mit 12/10-Pixel-Text werden im 1280x720-Release auf etwa 117x79 und effektiv 8/6,7 Textpixel skaliert. Namen und Live-Zustand sind dadurch nur mit Anstrengung lesbar.
+- Aenderung: Nur `mission_selected_fireteam_member` verwendet 196x132, 15-Pixel-Namen, 12-Pixel-Runtime-/Detailtext, 14-Pixel-Zeilenhoehe und 42-Pixel-Portraits. Roster, FOB und Dropship-Pilot behalten ihre Defaults.
+- Architektur: Der bestehende Runtime-Signatur-/Dirty-Pfad bleibt bestehen; der Optionspfad aendert nur Darstellung. Read-only Snapshot und Refresh erzeugen keine Commands, Effects oder Multiplayer-Wahrheit.
+- Lokale Pruefung: TASK_1158 28/28; TASK_1137 13/13; TASK_1138 7/7; TASK_472 13/13; TASK_180 98/98; TASK_1109 18/18; TASK_1110 20/20; TASK_222 82/82.
+- Naechster Schritt: Exportierter 1280x720-Host/Client-Recapture; danach naechsten sichtbaren HUD-Befund schneiden.
+
 ### TASK_1157 - Command Matrix 1280 Readability
 - Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1157_command_matrix_1280_readability.md`, `docs/tasks/TASK_1139_command_matrix_player_language_icon_hierarchy_polish.md`, `docs/tasks/TASK_836_release_firefight_command_matrix_visual_polish.md`
