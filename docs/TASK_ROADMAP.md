@@ -13,6 +13,15 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1173 - First Engagement Feedback Release Recapture (implementiert im Arbeitsstand)
+- Grundlage: TASK_1172 belegt den ersten Kontakt im heutigen Release-Flow; TASK_543 belegt die bestehende Engagement-Entscheidung.
+- Ziel: Den ersten Feuerentscheid nach dem Kontakt, TASK_543-Readability und aktuellen Release-Kontext als read-only Recapture buendeln.
+- Ergebnis: `get_mission_first_engagement_feedback_release_recapture_snapshot()` belegt Feuerstatus, Ziel-/Blockgrund, FireEvent oder Warte-/Blockzustand, Deckung-/Range-/LOS-Kontext und FirstFire-Release-Provenance, ohne Commands, Contacts, Fire- oder Damage-Events zu erzeugen.
+- Verifikation: TASK_1173 plus TASK_1172/TASK_543-nahe Engagement-Fixtures.
+- Naechster Schritt: TASK_1174 - First Fire Visual Readability Release Recapture.
+
+---
+
 ## TASK_1172 - First Contact Readability Release Recapture (implementiert im Arbeitsstand)
 - Grundlage: TASK_1171 belegt die erste laufende Bewegung nach `GO`; TASK_542 belegt den bestehenden First-Contact-Readability-Snapshot.
 - Ziel: Den ersten Feindkontakt nach der Bewegung, TASK_542-Readability und aktuellen Release-Kontext als read-only Recapture buendeln.
