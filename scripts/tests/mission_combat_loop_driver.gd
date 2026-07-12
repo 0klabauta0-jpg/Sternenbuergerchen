@@ -5,6 +5,7 @@ const OVERWATCH_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/ov
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tactical/enemy_team_tactics_profile.gd")
 const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/local_avoidance_resolver.gd")
+const COMBAT_DECISION_INTERVAL_TICKS: int = 3
 const CONTACT_TRACKER_SCRIPT: GDScript = preload("res://scripts/tactical/contact_tracker.gd")
 const FLANK_VULNERABILITY_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/flank_vulnerability_resolver.gd")
 const MEDIC_SUPPORT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/medic_support_resolver.gd")
@@ -1405,6 +1406,11 @@ func _on_tick_processed(tick: int) -> void:
 	if profile_enabled:
 		profile_scopes["contact_tracking_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
+	if not _should_run_combat_decision_tick(tick):
+		if profile_enabled:
+			_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "decision_cadence_skip")
+		_close_hotpath_unit_cache_scope()
+		return
 	_update_enemy_security_state()
 	if profile_enabled:
 		profile_scopes["enemy_security_usec"] = Time.get_ticks_usec() - scope_started_usec
@@ -1471,6 +1477,10 @@ func _on_tick_processed(tick: int) -> void:
 	if profile_enabled:
 		_record_combat_tick_budget_debug_snapshot(tick, tick_started_usec, profile_scopes, simulation_root, "active")
 	_close_hotpath_unit_cache_scope()
+
+
+func _should_run_combat_decision_tick(tick: int) -> bool:
+	return tick % COMBAT_DECISION_INTERVAL_TICKS == 0
 
 
 func _refresh_runtime_authority(simulation_root: Node) -> bool:

@@ -3,6 +3,7 @@ extends SceneTree
 const LOBBY_SOURCE_PATH := "res://scripts/ui/multiplayer_lobby_screen.gd"
 const HARNESS_PATH := "res://scripts/tools/capture_release_host_client_entry_playtest.ps1"
 const APPROACH_RESOLVER_PATH := "res://scripts/tactical/contact_approach_resolver.gd"
+const COMBAT_DRIVER_PATH := "res://scripts/tests/mission_combat_loop_driver.gd"
 
 var _failed := 0
 
@@ -41,8 +42,13 @@ func _initialize() -> void:
 		_assert(harness_source.contains(token), "Release harness preserves %s evidence" % token)
 	_assert(harness_source.contains('"TASK_1151"'), "First Contact pace manifest identifies TASK_1151")
 	_assert(harness_source.contains('if ($FirstContact) { "1280x720" }'), "Two-process First Contact gate uses a per-machine representative render budget")
+	var combat_source := FileAccess.get_file_as_string(COMBAT_DRIVER_PATH)
+	_assert(combat_source.contains("COMBAT_DECISION_INTERVAL_TICKS: int = 3"), "Expensive tactical decisions use a 20 Hz cadence on a 60 Hz simulation")
+	_assert(combat_source.contains("_should_run_combat_decision_tick"), "Combat listener exposes an explicit decision cadence guard")
+	_assert(combat_source.find("_advance_detection_timers()") < combat_source.find("_should_run_combat_decision_tick"), "Detection timers advance before the expensive decision cadence guard")
+	_assert(combat_source.find("_update_contact_tracking()") < combat_source.find("_should_run_combat_decision_tick"), "Contact tracking advances before the expensive decision cadence guard")
 
-	print("TASK_1151 connected release movement pace evidence: %d/25 PASS" % (25 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/29 PASS" % (29 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
