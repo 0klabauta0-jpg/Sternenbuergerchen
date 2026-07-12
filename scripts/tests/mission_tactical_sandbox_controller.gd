@@ -2576,8 +2576,13 @@ func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
 		"hold_elapsed": 0.0,
 		"resolved_target_position": target_position,
 		"started_msec": Time.get_ticks_msec(),
+		"execution_owner": "standalone_network_intent",
+		"standalone_network_intent": true,
 	}
-	return _issue_waypoint_for_fireteam(fireteam_id, waypoint, phase_index, behavior_profile)
+	var started: bool = _issue_waypoint_for_fireteam(fireteam_id, waypoint, phase_index, behavior_profile)
+	if not started:
+		_phase_execution_by_fireteam.erase(fireteam_id)
+	return started
 
 
 func _get_dropship_command_fireteam_id(craft_id: String) -> String:
@@ -31717,6 +31722,9 @@ func _update_active_phase_execution(delta: float) -> void:
 		var phase_index: int = int(execution_state.get("phase", -1))
 		var plan = _order_plans_by_key.get(_build_order_plan_key(String(fireteam_id), phase_index), null)
 		if plan == null:
+			if String(execution_state.get("execution_owner", "")) == "standalone_network_intent":
+				did_change = _update_standalone_network_intent_execution(String(fireteam_id), execution_state) or did_change
+				continue
 			_phase_execution_by_fireteam.erase(fireteam_id)
 			_ensure_fireteam_movement_controller()
 			if _fireteam_movement_controller != null:
@@ -31792,6 +31800,25 @@ func _update_active_phase_execution(delta: float) -> void:
 	_refresh_order_visuals()
 	_update_ui()
 	_emit_planning_state_changed()
+
+
+func _update_standalone_network_intent_execution(fireteam_id: String, execution_state: Dictionary) -> bool:
+	_ensure_fireteam_movement_controller()
+	if _fireteam_movement_controller == null:
+		_phase_execution_by_fireteam.erase(fireteam_id)
+		return true
+	var had_active_execution: bool = bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id))
+	if not had_active_execution:
+		_phase_execution_by_fireteam.erase(fireteam_id)
+		return true
+	var movement_result: Dictionary = _update_fireteam_movement_execution(fireteam_id)
+	var still_active: bool = bool(_fireteam_movement_controller.call("has_active_execution", fireteam_id))
+	if bool(movement_result.get("finished", false)) or not still_active:
+		_phase_execution_by_fireteam.erase(fireteam_id)
+		_notify_fireteam_ready_for_coordination(fireteam_id)
+		return true
+	_phase_execution_by_fireteam[fireteam_id] = execution_state
+	return not Dictionary(movement_result.get("bound_complete", {})).is_empty()
 
 
 func _publish_mission_interaction_runtime_progress_for_waypoint(fireteam_id: String, waypoint, execution_state: Dictionary, complete: bool) -> void:

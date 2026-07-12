@@ -55,8 +55,11 @@ func _initialize() -> void:
 	_assert(combat_source.find("_update_contact_tracking()") < combat_source.find("_should_run_combat_decision_tick"), "Contact tracking advances before the expensive decision cadence guard")
 	var controller_source := FileAccess.get_file_as_string("res://scripts/tests/mission_tactical_sandbox_controller.gd")
 	_assert(controller_source.contains("func get_recent_fireteam_movement_trace"), "Tactical controller exposes a public read-only movement trace")
+	_assert(controller_source.contains('"standalone_network_intent": true'), "Authoritative network intents declare plan-independent lifecycle ownership")
+	_assert(controller_source.contains("_update_standalone_network_intent_execution"), "Plan-independent network movement receives normal runtime updates")
+	_assert(controller_source.contains('String(execution_state.get("execution_owner", "")) == "standalone_network_intent"'), "Missing UI plans do not reset standalone network movement")
 
-	print("TASK_1151 connected release movement pace evidence: %d/40 PASS" % (40 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/43 PASS" % (43 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
