@@ -3,10 +3,12 @@ param(
 	[int]$TimeoutSeconds = 35,
 	[switch]$StopRunningReleaseProcesses,
 	[switch]$KeepProcessesRunning,
-	[switch]$DropDecision
+	[switch]$DropDecision,
+	[switch]$FirstContact
 )
 
 $ErrorActionPreference = "Stop"
+$dropMode = [bool]$DropDecision -or [bool]$FirstContact
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $tmp = Join-Path $repoRoot "tmp"
 New-Item -ItemType Directory -Force -Path $tmp | Out-Null
@@ -25,17 +27,17 @@ if ($StopRunningReleaseProcesses) {
 
 $exe = [string]$check.exe_path
 if (-not (Test-Path -LiteralPath $exe -PathType Leaf)) { throw "Missing Sternenbuergerchen_rel.exe: $exe" }
-$artifactPrefix = if ($DropDecision) { "release_host_client_drop_decision" } else { "release_host_client" }
+$artifactPrefix = if ($FirstContact) { "release_host_client_first_contact" } elseif ($DropDecision) { "release_host_client_drop_decision" } else { "release_host_client" }
 $hostTrace = Join-Path $tmp ("{0}_host_trace.json" -f $artifactPrefix)
 $clientTrace = Join-Path $tmp ("{0}_client_trace.json" -f $artifactPrefix)
-$manifestPath = Join-Path $tmp $(if ($DropDecision) { "release_host_client_drop_decision_playtest.json" } else { "release_host_client_entry_playtest.json" })
-$screenshotPath = Join-Path $tmp $(if ($DropDecision) { "release_host_client_drop_decision_playtest.png" } else { "release_host_client_entry_playtest.png" })
-$hostWindowPath = Join-Path $tmp $(if ($DropDecision) { "release_host_client_drop_decision_host_window.png" } else { "release_host_client_host_window.png" })
-$clientWindowPath = Join-Path $tmp $(if ($DropDecision) { "release_host_client_drop_decision_client_window.png" } else { "release_host_client_client_window.png" })
+$manifestPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_playtest.json" } elseif ($DropDecision) { "release_host_client_drop_decision_playtest.json" } else { "release_host_client_entry_playtest.json" })
+$screenshotPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_playtest.png" } elseif ($DropDecision) { "release_host_client_drop_decision_playtest.png" } else { "release_host_client_entry_playtest.png" })
+$hostWindowPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_host_window.png" } elseif ($DropDecision) { "release_host_client_drop_decision_host_window.png" } else { "release_host_client_host_window.png" })
+$clientWindowPath = Join-Path $tmp $(if ($FirstContact) { "release_host_client_first_contact_client_window.png" } elseif ($DropDecision) { "release_host_client_drop_decision_client_window.png" } else { "release_host_client_client_window.png" })
 Remove-Item -LiteralPath $hostTrace,$clientTrace -Force -ErrorAction SilentlyContinue
-$windowResolution = if ($DropDecision) { "1600x900" } else { "900x700" }
-$hostWindowPosition = if ($DropDecision) { "20,80" } else { "20,80" }
-$clientWindowPosition = if ($DropDecision) { "360,120" } else { "960,80" }
+$windowResolution = if ($dropMode) { "1600x900" } else { "900x700" }
+$hostWindowPosition = "20,80"
+$clientWindowPosition = if ($dropMode) { "360,120" } else { "960,80" }
 
 $hostArgs = @(
 	"--resolution", $windowResolution, "--position", $hostWindowPosition, "--",
@@ -47,28 +49,33 @@ $clientArgs = @(
 	"--release-multiplayer-join", "--release-multiplayer-address=127.0.0.1",
 	"--release-multiplayer-port=$Port", "--release-multiplayer-trace=$clientTrace"
 )
-if ($DropDecision) {
+if ($dropMode) {
 	$hostArgs += "--release-multiplayer-drop-decision"
 	$clientArgs += "--release-multiplayer-drop-decision"
+}
+if ($FirstContact) {
+	$hostArgs += "--release-multiplayer-first-contact"
+	$clientArgs += "--release-multiplayer-first-contact"
 }
 
 $hostProcess = Start-Process -FilePath $exe -WorkingDirectory ([string]$check.release_directory) -ArgumentList $hostArgs -PassThru
 Start-Sleep -Milliseconds 900
 $clientProcess = Start-Process -FilePath $exe -WorkingDirectory ([string]$check.release_directory) -ArgumentList $clientArgs -PassThru
 $startedAt = [DateTimeOffset]::UtcNow
-$effectiveTimeoutSeconds = if ($DropDecision) { [Math]::Max(90, $TimeoutSeconds) } else { [Math]::Max(5, $TimeoutSeconds) }
+$effectiveTimeoutSeconds = if ($FirstContact) { [Math]::Max(150, $TimeoutSeconds) } elseif ($DropDecision) { [Math]::Max(90, $TimeoutSeconds) } else { [Math]::Max(5, $TimeoutSeconds) }
 $deadline = $startedAt.AddSeconds($effectiveTimeoutSeconds)
 $hostState = $null
 $clientState = $null
 $connected = $false
 $deploymentConverged = $false
+$firstFireConverged = $false
 do {
 	Start-Sleep -Milliseconds 250
 	try { if (Test-Path $hostTrace) { $hostState = Get-Content $hostTrace -Raw | ConvertFrom-Json } } catch {}
 	try { if (Test-Path $clientTrace) { $clientState = Get-Content $clientTrace -Raw | ConvertFrom-Json } } catch {}
 	$baseReady = $null -ne $hostState -and $null -ne $clientState `
 		-and [bool]$hostState.active_mission -and [bool]$clientState.active_mission
-	if ($DropDecision) {
+	if ($dropMode) {
 		$hostDeployed = @($hostState.drop_decision.deployed_unit_ids)
 		$clientDeployed = @($clientState.drop_decision.deployed_unit_ids)
 		$hostEmbarked = @($hostState.drop_decision.embarked_unit_ids)
@@ -77,10 +84,22 @@ do {
 			-and $hostDeployed.Count -eq $clientDeployed.Count `
 			-and $hostEmbarked.Count -eq 0 `
 			-and $clientEmbarked.Count -eq 0
-		$connected = $baseReady `
-			-and [string]$hostState.drop_decision.stage -eq "first_decision_accepted" `
-			-and [string]$clientState.drop_decision.stage -eq "first_decision_accepted" `
-			-and $deploymentConverged
+		if ($FirstContact) {
+			$hostFireIds = @($hostState.first_contact.fire_event_ids)
+			$clientFireIds = @($clientState.first_contact.fire_event_ids)
+			$sharedFireIds = @($hostFireIds | Where-Object { $clientFireIds -contains $_ })
+			$firstFireConverged = [int]$hostState.first_contact.contact_count -gt 0 `
+				-and [int]$clientState.first_contact.contact_count -gt 0 `
+				-and $sharedFireIds.Count -gt 0
+			$connected = $baseReady -and $deploymentConverged -and $firstFireConverged `
+				-and [string]$hostState.first_contact.stage -eq "first_fire_observed" `
+				-and [string]$clientState.first_contact.stage -eq "first_fire_observed"
+		} else {
+			$connected = $baseReady `
+				-and [string]$hostState.drop_decision.stage -eq "first_decision_accepted" `
+				-and [string]$clientState.drop_decision.stage -eq "first_decision_accepted" `
+				-and $deploymentConverged
+		}
 	} else {
 		$connected = $baseReady `
 			-and [string]$hostState.stage -eq "mission_started" `
@@ -108,7 +127,7 @@ foreach ($entry in @(
 	@{ name = "host"; process = $hostProcess; path = $hostWindowPath },
 	@{ name = "client"; process = $clientProcess; path = $clientWindowPath }
 )) {
-	$captureDirPattern = if ($DropDecision) { "task_1148_{0}_capture" } else { "task_1147_{0}_capture" }
+	$captureDirPattern = if ($FirstContact) { "task_1150_{0}_capture" } elseif ($DropDecision) { "task_1148_{0}_capture" } else { "task_1147_{0}_capture" }
 	$captureDirName = $captureDirPattern -f $entry.name
 	$captureDir = Join-Path $tmp $captureDirName
 	New-Item -ItemType Directory -Force -Path $captureDir | Out-Null
@@ -127,8 +146,8 @@ foreach ($entry in @(
 }
 
 $manifest = [ordered]@{
-	schema = $(if ($DropDecision) { "sternenbuergerchen.release_host_client_drop_decision_playtest.v1" } else { "sternenbuergerchen.release_host_client_entry_playtest.v1" })
-	task_id = $(if ($DropDecision) { "TASK_1148" } else { "TASK_1147" })
+	schema = $(if ($FirstContact) { "sternenbuergerchen.release_host_client_first_contact_playtest.v1" } elseif ($DropDecision) { "sternenbuergerchen.release_host_client_drop_decision_playtest.v1" } else { "sternenbuergerchen.release_host_client_entry_playtest.v1" })
+	task_id = $(if ($FirstContact) { "TASK_1150" } elseif ($DropDecision) { "TASK_1148" } else { "TASK_1147" })
 	gate = $(if ($connected) { "pass" } else { "fail" })
 	exe_path = $exe
 	release_gate = [string]$check.gate
@@ -141,9 +160,11 @@ $manifest = [ordered]@{
 	host = $hostState
 	client = $clientState
 	mission_started = $connected
-	drop_decision_requested = [bool]$DropDecision
-	first_decision_accepted = $connected -and [bool]$DropDecision
+	drop_decision_requested = $dropMode
+	first_contact_requested = [bool]$FirstContact
+	first_decision_accepted = $deploymentConverged -and $dropMode
 	deployment_converged = $deploymentConverged
+	first_fire_converged = $firstFireConverged
 	screenshot_path = $screenshotPath
 	screenshot_written = $screenshotWritten
 	host_window = $windowCaptures.host

@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1150 - Connected Release First Contact Handoff Playtest
+- Status: Release-Finding implementiert; First-Contact-Gate noch rot
+- Relevante Docs/Contracts: `docs/tasks/TASK_1150_connected_release_first_contact_handoff_playtest.md`, `scripts/tests/task_1150_connected_release_first_contact_handoff_playtest.gd`, `scripts/tools/capture_release_host_client_entry_playtest.ps1`
+- Aenderung: Expliziter First-Contact-Modus, read-only Contact/Fire/Movement-Evidence, autoritative Fireteam-Intents und mapgebundene Contact-Approach-Ziele. Normaler Multiplayer bleibt unautomatisiert.
+- Echter Release-Befund: Commands und Ziele konvergieren, aber Blue/Gold erreichen in 180 Sekunden weder Defense-/Patrol-Marker noch Kontakt. Das Gate meldet korrekt `fail`; Gegner oder Units wurden nicht teleportiert.
+- Lokale Pruefung: TASK_1150 18/18; TASK_1116 16/16; TASK_1117 15/15; TASK_1148 7/7 und 10/10.
+- Naechster Schritt: TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening.
+
 ### TASK_1149 - Connected Fireteam Card and Route Convergence Polish
 - Status: implementiert im Arbeitsstand
 - Relevante Docs/Contracts: `docs/tasks/TASK_1149_connected_fireteam_card_and_route_convergence_polish.md`, `scripts/tests/task_1149_connected_fireteam_card_route_convergence_polish.gd`
