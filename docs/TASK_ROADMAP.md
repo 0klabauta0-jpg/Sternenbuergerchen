@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1166 - Left Tactical Stack 1280 Detail Recapture (implementiert im Arbeitsstand)
+- Grundlage: TASK_1165 hat die belegten Detailreibungen im linken 1280er Stack headless behoben, aber noch nicht im frisch exportierten Host-/Client-Spielbild bestaetigt.
+- Ziel: Den aktuellen Release-Stand, das FirstContact-Capture-Manifest und getrennte Host-/Client-Fensterbilder als read-only Beleg an TASK_1165 binden.
+- Ergebnis: `get_left_tactical_stack_1280_detail_recapture_snapshot()` prueft TASK_1165-Bereitschaft, Release-Provenance gegen Git-HEAD, FirstContact-Gates, getrennte Host-/Client-Bilder und markiert kombinierte Desktop-Captures als untrusted.
+- Verifikation: TASK_1166 plus TASK_1165/TASK_1164/TASK_222 und die Dropship-/Fireteam-HUD-Konsistenztests TASK_1109/TASK_1110. Nach Merge ist ein frischer Release-Export samt FirstContact-Capture Pflicht, damit die Provenance wieder auf HEAD zeigt.
+- Naechster Schritt: TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance.
+
 ## TASK_1165 - Left Tactical Stack 1280 Detail Polish (implementiert im Arbeitsstand)
 - Grundlage: TASK_1164 nennt die letzten konkreten 1280er Reibungen im linken Stack: Mini-Card-Detailstrip, Eventlog-Filter/Zaehler und unzuverlaessiges kombiniertes Desktop-Capture.
 - Ziel: Genau diese Detailflaechen verbessern, ohne neues HUD-Layout, neue Gameplay-Wahrheit oder neue Capture-Architektur.
