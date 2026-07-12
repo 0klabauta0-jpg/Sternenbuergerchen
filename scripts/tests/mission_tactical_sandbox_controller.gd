@@ -2134,7 +2134,7 @@ func _on_authoritative_fire_rule_committed(state: Dictionary) -> void:
 
 func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 	apply_authoritative_fire_rule_snapshot(snapshot.get("tactical_rules", []))
-	apply_authoritative_mission_dropship_snapshot(Dictionary(snapshot.get("dropship", {})))
+	var dropship_snapshot_changed: bool = apply_authoritative_mission_dropship_snapshot(Dictionary(snapshot.get("dropship", {})))
 	var mission_interactions: Dictionary = Dictionary(snapshot.get("mission_interactions", {}))
 	mission_interactions["source_tick"] = maxi(int(snapshot.get("tick", -1)), -1)
 	var combat_driver = _get_combat_loop_driver()
@@ -2146,7 +2146,7 @@ func _on_multiplayer_authority_snapshot_applied(snapshot: Dictionary) -> void:
 			_last_network_contact_visual_signature = contact_signature
 			refresh_contact_overlay()
 		var contact_focus_active: bool = _is_mission_contact_focus_active()
-		if _should_refresh_dropship_panel_for_contact_focus(contact_focus_active):
+		if _should_refresh_dropship_panel_for_contact_focus(contact_focus_active, dropship_snapshot_changed):
 			_refresh_mission_dropship_panel()
 	if combat_driver != null and combat_driver.has_method("apply_multiplayer_interaction_snapshot"):
 		combat_driver.call("apply_multiplayer_interaction_snapshot", mission_interactions)
@@ -11347,11 +11347,10 @@ func _is_mission_contact_focus_active() -> bool:
 	)
 
 
-func _should_refresh_dropship_panel_for_contact_focus(contact_focus_active: bool) -> bool:
-	if contact_focus_active == _last_mission_dropship_contact_focus_active:
-		return false
+func _should_refresh_dropship_panel_for_contact_focus(contact_focus_active: bool, dropship_snapshot_changed: bool = false) -> bool:
+	var contact_focus_changed: bool = contact_focus_active != _last_mission_dropship_contact_focus_active
 	_last_mission_dropship_contact_focus_active = contact_focus_active
-	return true
+	return contact_focus_changed or (contact_focus_active and dropship_snapshot_changed)
 
 
 func _is_contact_focus_active_from_snapshots(contact_perspective: Dictionary, visible_status_source: Dictionary) -> bool:

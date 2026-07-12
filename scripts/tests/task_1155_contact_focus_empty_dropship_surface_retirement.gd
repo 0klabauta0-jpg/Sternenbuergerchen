@@ -29,6 +29,7 @@ func _run() -> void:
 			_assert(not bool(controller.call("_should_refresh_dropship_panel_for_contact_focus", false)), "Stable non-Contact snapshots do not rebuild Dropship UI")
 			_assert(bool(controller.call("_should_refresh_dropship_panel_for_contact_focus", true)), "First Contact transition requests one Dropship UI refresh")
 			_assert(not bool(controller.call("_should_refresh_dropship_panel_for_contact_focus", true)), "Repeated Contact snapshots do not rebuild Dropship UI")
+			_assert(bool(controller.call("_should_refresh_dropship_panel_for_contact_focus", true, true)), "Changed Dropship state refreshes once while Contact focus remains active")
 		var empty_outbound := [_card("dropship_blue", "outbound", []), _card("dropship_gold", "outbound", [])]
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", empty_outbound, true)).is_empty(), "Contact focus retires empty outbound Dropship surfaces")
 		_assert(Array(controller.call("_build_contact_focused_mission_dropship_card_entries", empty_outbound, false)).size() == 2, "Outside Contact focus outbound Dropships remain visible")
