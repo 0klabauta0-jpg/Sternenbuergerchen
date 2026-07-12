@@ -13,12 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
-## TASK_1159 - Tactical Event Log 1280 Readability (implementiert, Release-Sichtcheck folgt)
+## TASK_1159 - Tactical Event Log 1280 Readability (implementiert und im Release sichtbar verifiziert)
 - Grundlage: Nach Matrix und Member-Karten ist #19 im 1280er First-Contact die kleinste primaere HUD-Schrift; fuenf Zeilen passen nicht lesbar in 240x184.
 - Ziel: Vier neueste Ereignisse mit klarer Zeit-/Meldungshierarchie zeigen und den bestehenden Snapshot-Skip erhalten.
 - Ergebnis: Stabiler Panel-Grundvertrag mit 32-Pixel-Zeilen, 13-Pixel-Meldung/Header, 12-Pixel-Zeit, 10-Pixel-Filter und 0,96-opakem Hintergrund; First Exchange cappt auf vier. Der gemeinsame Vier-Zeilen-Default verhindert erneutes Polish bei identischen Snapshots.
 - Verifikation: TASK_1159 26/26; Event-Panel/Hotpath/Contact/Firefight, Mehr-Dropship und TASK_222 82/82 gruen.
-- Naechster Schritt: Exportierter 1280x720-Recapture und danach der naechste reale Spielerbefund.
+- Release-Beleg: Zwei exportierte 1280x720-Instanzen erreichen nach 83,58 Sekunden denselben First Fire. Das Ereignislog ist auf Host und Client opak, groesser und frei von HUD-Kollisionen.
+- Naechster Schritt: TASK_1160 - Mission Control 1280 Readability.
 
 ## TASK_1158 - Selected Fireteam Member Cards 1280 Readability (implementiert und im Release sichtbar verifiziert)
 - Grundlage: Der TASK-1157-Recapture zeigt korrekt lesbare Befehle, aber weiterhin stark herunterskalierte Operatornamen und Live-Zustaende in #17.

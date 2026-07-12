@@ -1,14 +1,15 @@
 # IMPLEMENTATION_STATUS
 
 ### TASK_1159 - Tactical Event Log 1280 Readability
-- Status: implementiert, Event-/Hotpath-/Multiplayer-/Performance-Gates gruen; Release-Sichtcheck folgt
+- Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1159_tactical_event_log_1280_readability.md`, TASK_366, TASK_1043, TASK_1120, TASK_889
 - Ausgangsbefund: Das feste 240x184-Eventlog skaliert 11/10-Pixel-Text im 1280x720-Release auf etwa 7,3/6,7 Pixel. Fuenf 30-Pixel-Zeilen konkurrieren mit Header und Innenabstand.
 - Aenderung: Das Panel verwendet stabil 32-Pixel-Zeilen, 13-Pixel-Meldung/Header, 12-Pixel-Zeit, 10-Pixel-Auswahlfilter und einen 0,96-opaken Hintergrund. Der First-Exchange-Fokus begrenzt zusaetzlich auf vier neueste Ereignisse. Der Grundvertrag gilt auch ohne historischen TASK-889-Payload.
 - Hotpath-Fund: Snapshot und interner Default widersprachen sich bei vier gegen fuenf Zeilen; dadurch konnte ein identischer Snapshot den Polish-Pfad erneut anwenden. Der gemeinsame Vier-Zeilen-Vertrag laesst den vorhandenen Duplicate-Skip wieder greifen.
 - Verifier-Hygiene: TASK_1120 erwartet jetzt wieder den seit TASK_1155 gueltigen Vertrag, dass leere abgeschlossene `to_fob 0s`-Karten auch ohne Contact-Fokus verschwinden. TASK_889 prueft den neuen Vier-Zeilen-Cap.
 - Lokale Pruefung: TASK_1159 26/26; TASK_366 19/19; TASK_1043 14/14; TASK_1120 11/11; TASK_889 74/74; TASK_1109 18/18; TASK_1110 20/20; TASK_222 82/82.
-- Naechster Schritt: Exportierter 1280x720-First-Contact-Recapture und naechsten sichtbaren Befund ableiten.
+- Release-Beleg: Host und Client erreichen nach 83,58 Sekunden Deployment, Contact und denselben First Fire. Das Log bleibt auf beiden Fenstern opak und lesbar; vier Meldungen passen ohne Kollision mit den angrenzenden HUD-Flaechen.
+- Naechster Schritt: TASK_1160 - Mission Control 1280 Readability. Die Spieltexte in `#18 EINSATZKONTROLLE` sind im gleichen Releasefenster der naechste klar belegte Lesbarkeitsbefund.
 
 ### TASK_1158 - Selected Fireteam Member Cards 1280 Readability
 - Status: implementiert und im exportierten 1280x720-Host/Client-Release sichtbar verifiziert

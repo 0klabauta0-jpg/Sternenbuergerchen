@@ -507,7 +507,8 @@
           <p><strong>Architektur:</strong> Die Karten lesen weiterhin dieselben Unit-/Fireteam-Snapshots und werden nur bei geaenderter Runtime-Signatur neu aufgebaut. Roster, FOB und Dropship-Pilot behalten ihre bisherigen Compact-Card-Werte.</p>
           <p><strong>Release-Sichtbeleg:</strong> Host und Client erreichen nach rund 74,0 Sekunden Deployment, Contact und denselben First Fire. Namen, Befehl, Feuerstatus und Live-Zustand sind sichtbar groesser; vier Karten passen sauber in die Lane, die fuenfte bleibt horizontal erreichbar.</p>
           <p><strong>Performance-Fund:</strong> Snapshot und alter Polish-Default verlangten vier beziehungsweise fuenf Zeilen. Dadurch konnte ein identischer Snapshot den Layoutpfad erneut anwenden. Der gemeinsame Vier-Zeilen-Vertrag laesst den vorhandenen Duplicate-Skip wieder greifen.</p>
-          <p><strong>Naechster sinnvoller Schritt:</strong> Den exportierten Host/Client-First-Contact bei 1280x720 pruefen und danach nur aus dem sichtbaren Bild den naechsten HUD-/Spielerfluss-Slice ableiten.</p>
+          <p><strong>Release-Sichtbeleg TASK_1159:</strong> Host und Client erreichen nach 83,58 Sekunden Deployment, Contact und denselben First Fire. Das Ereignislog bleibt in beiden 1280x720-Fenstern opak und lesbar; vier Meldungen passen ohne Kollision mit Fireteam-Karten, Befehlsmatrix oder Selected-Fireteam-Dock.</p>
+          <p><strong>Naechster sinnvoller Schritt:</strong> TASK_1160 - Mission Control 1280 Readability. Die Spielertexte in <code>#18 EINSATZKONTROLLE</code> sind im gleichen echten Releasefenster nun die kleinste primaere Entscheidungsflaeche.</p>
           <p>TASK_1079 beweist den echten Guard-Contact, TASK_1080 die sofortige ROE-Propagation, TASK_1081 die sichtbare Konsequenz, TASK_1082 die Authority und TASK_1083 den echten lokalen ENet-Rundweg. Die Mission-Control-Zeile zeigt beispielsweise <code>ROE HF HOLD</code>, <code>ROE RF WAIT</code>, <code>ROE RF RETURN</code>, <code>ROE FW READY</code> oder <code>ROE FW ENGAGE</code>.</p>
           <p>Im echten Zwei-Instanzen-Test sendet der Client-Setter nur einen Request. Der Host prueft Peer, Team, Fireteam und Regel, committed eine neue Revision und repliziert sie. Eigene Requests zeigen <code>HOST OK</code>, fremde Fireteams <code>ROE BLOCKED fireteam_not_assigned_to_peer</code>.</p>
           <p>Der Test fand außerdem einen realen Transportengpass: Der volle Missionsstate war 14.740 Bytes gross und lag damit weit ueber der MTU fuer ein einzelnes unzuverlaessiges Paket. Der frische Lauf komprimiert ihn auf 2.282 Wire-Bytes in drei ungeordnete Chunks; Packen benoetigte 151 us, Reassembly und Apply 1.590 us. Auch absichtlich rueckwaerts zugestellte Chunks werden korrekt zusammengesetzt.</p>
@@ -515,7 +516,10 @@
           <div class="callout success">TASK_1090 ist abgeschlossen: Host P1 ALPHA und Client P2 BRAVO zeigen im aktuellen Godot-4.6.2-Capture dieselbe Station-Route-Karte, aber ihre jeweils eigenen Fireteams, Mitglieder und Team-Badges. Szenario-Bootstrap, lokale Sicht und HUD-Perspektive bleiben getrennt.</div>
           <p><strong>Performancebefund:</strong> Der schwere 192x192-Unterbau macht parallele Debug-Instanzen empfindlich gegen andere laufende Godot-Prozesse. Feste Screenshot-Wartezeiten sind deshalb kein belastbares Ready-Signal. Der naechste Capture-/Playtest-Pfad soll auf echte Runtime-Readiness warten und zugleich als verbundene Netzwerksession laufen.</p>
           <input readonly value="TASK_1159 - Tactical Event Log 1280 Readability" data-export-key="reentry_handbook.current_task">
-          <input readonly value="Naechster Schritt - 1280x720 First-Contact-Recapture" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="TASK_1160 - Mission Control 1280 Readability" data-export-key="reentry_handbook.recommended_next_task">
+          <input readonly value="83.58" data-export-key="reentry_handbook.task_1159_release_wait_seconds">
+          <input readonly value="tmp/release_host_client_first_contact_host_window.png" data-export-key="reentry_handbook.task_1159_host_capture">
+          <input readonly value="tmp/release_host_client_first_contact_client_window.png" data-export-key="reentry_handbook.task_1159_client_capture">
           <input readonly value="TASK_505 - Streaming gruen, nach Sieg 5 sichtbare Tactical-Badges" data-export-key="reentry_handbook.large_map_badge_finding">
           <input readonly value="TASK_1073 - Release Build Provenance Guard (13/13)" data-export-key="reentry_handbook.release_provenance_task">
           <input readonly value="release_build_provenance.json" data-export-key="reentry_handbook.release_provenance_file">
@@ -1151,7 +1155,9 @@
           active_choices: activeChoices,
           computed: {
             manual_done: Boolean(controls.manual && controls.manual.first_preview_visible && controls.manual.path_and_ghost_visible && controls.manual.risk_readable && controls.manual.no_go_committed),
-            recommended_next_task: "1280x720 First Contact Recapture"
+            recommended_next_task: "TASK_1160 - Mission Control 1280 Readability",
+            task_1159_release_wait_seconds: 83.58,
+            task_1159_release_gate: "pass"
           },
           metadata: {
             generated_for_task: "TASK_1159",
