@@ -26,6 +26,9 @@ func _initialize() -> void:
 		_assert(snapshot.has("contacts") and snapshot.has("fire_events") and snapshot.has("diagnostics"), "First Contact trace reads contact, fire and diagnostic snapshots")
 	var normal: Dictionary = Dictionary(lobby.call("get_release_multiplayer_deeplink_snapshot", ["--release-multiplayer-host"]))
 	_assert(not bool(normal.get("first_contact", true)), "Ordinary multiplayer Host start does not automate First Contact")
+	var lobby_source := FileAccess.get_file_as_string("res://scripts/ui/multiplayer_lobby_screen.gd")
+	_assert(lobby_source.count("request_network_authoritative_fireteam_intent") >= 2, "Both release moves use the public authoritative Fireteam intent contract")
+	_assert(not lobby_source.contains("controller.call(\"issue_move\")"), "Release automation does not bypass waypoint planning through the legacy host command flow")
 
 	var harness_source := FileAccess.get_file_as_string(HARNESS_PATH)
 	for token in [
@@ -40,7 +43,7 @@ func _initialize() -> void:
 		_assert(harness_source.contains(token), "Release harness contains %s" % token)
 	lobby.queue_free()
 	await process_frame
-	print("TASK_1150 connected release First Contact: %d/14 PASS" % (14 - _failed))
+	print("TASK_1150 connected release First Contact: %d/16 PASS" % (16 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
