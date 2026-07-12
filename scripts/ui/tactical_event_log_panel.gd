@@ -6,13 +6,14 @@ const TACTICAL_HUD_LANGUAGE_PRESENTER_SCRIPT: GDScript = preload("res://scripts/
 const DEFAULT_MAX_VISIBLE_EVENTS: int = 8
 const ROW_MIN_HEIGHT: float = 22.0
 const RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID: String = "task_889_release_first_exchange_hud_density_fire_visual_polish_v1"
-const RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS: int = 5
+const TASK_1159_EVENT_LOG_1280_READABILITY_STYLE_ID: String = "task_1159_tactical_event_log_1280_readability_v1"
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_MAX_VISIBLE_EVENTS: int = 4
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_MIN_SIZE: Vector2 = Vector2(360.0, 220.0)
-const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_MIN_HEIGHT: float = 30.0
-const RELEASE_FIRST_EXCHANGE_EVENT_LOG_HEADER_FONT_SIZE: int = 11
-const RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE: int = 10
-const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE: int = 11
-const RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE: int = 10
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_MIN_HEIGHT: float = 32.0
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_HEADER_FONT_SIZE: int = 13
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_COUNT_FONT_SIZE: int = 11
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_ROW_FONT_SIZE: int = 13
+const RELEASE_FIRST_EXCHANGE_EVENT_LOG_TIME_FONT_SIZE: int = 12
 const RELEASE_FIRST_EXCHANGE_EVENT_LOG_STRIP_WIDTH: float = 5.0
 
 @export var max_visible_events: int = DEFAULT_MAX_VISIBLE_EVENTS
@@ -130,8 +131,12 @@ func get_panel_snapshot() -> Dictionary:
 		"source_event_count": _event_entries.size(),
 		"release_first_exchange_hud_density_fire_visual_polish_active": _release_first_exchange_hud_density_fire_visual_polish_active,
 		"release_first_exchange_hud_density_fire_visual_polish_style_id": RELEASE_FIRST_EXCHANGE_HUD_DENSITY_FIRE_VISUAL_POLISH_STYLE_ID if _release_first_exchange_hud_density_fire_visual_polish_active else "",
+		"task_1159_readability_style_id": TASK_1159_EVENT_LOG_1280_READABILITY_STYLE_ID,
 		"row_min_height": _get_row_min_height(),
 		"row_font_size": _get_row_font_size(),
+		"time_font_size": _get_time_font_size(),
+		"header_font_size": _get_header_font_size(),
+		"count_font_size": _get_count_font_size(),
 		"custom_minimum_size_x": custom_minimum_size.x,
 		"custom_minimum_size_y": custom_minimum_size.y,
 		"severity_counts": severity_counts,
@@ -320,7 +325,7 @@ func _apply_release_first_exchange_event_log_header_style() -> void:
 	if _count_label != null:
 		_count_label.add_theme_font_size_override("font_size", _get_count_font_size())
 	if _selected_filter_button != null:
-		_selected_filter_button.add_theme_font_size_override("font_size", 9 if _release_first_exchange_hud_density_fire_visual_polish_active else 8)
+		_selected_filter_button.add_theme_font_size_override("font_size", 10 if _release_first_exchange_hud_density_fire_visual_polish_active else 8)
 	if _entry_list != null:
 		_entry_list.add_theme_constant_override("separation", 4 if _release_first_exchange_hud_density_fire_visual_polish_active else 3)
 
