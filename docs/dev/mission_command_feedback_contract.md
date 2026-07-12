@@ -192,6 +192,21 @@ Erwartete Struktur: Der Polish erzeugt sieben Surface-Specs fuer FOB-Entry, Obje
 
 Erwartete Lesbarkeit: #16 Command Matrix traegt `task_836_release_firefight_command_matrix_visual_v1`, GO ist prominent, Move/Take/Hold/Flank/Target sind als Primaerbefehle lesbar, genau eine aktive Fire-Rule ist sichtbar und Reserve-Slots sind ruhig markiert. Der echte Release-Fensterblick bleibt danach als manueller Capture offen.
 
+### 1280x720 Command-Matrix-Lesbarkeit (TASK_1157)
+
+Die feste fuenfspaltige Matrix behaelt alle 20 Slots, NodePaths, Command-IDs und
+Callbacks. Im skalierten 1280x720-Spielerfenster verwenden Primaerbefehle
+mindestens 12 Pixel interne Schriftgroesse, Feuerregeln mindestens 11 Pixel und
+GO mindestens 13 Pixel. Vorhandene taktische Icons werden mit 14 Pixeln
+bereitgestellt. Die sichtbaren Primaercodes sind deutsch: `BW`, `NM`, `HL`,
+`FL` und `ZL`; Langform und Folge stehen im deutschen Tooltip.
+
+Die technischen `16.x`-Marker bleiben als Nodes und Metadaten fuer bestehende
+Verifier und Diagnose erhalten, sind im Spielerbild aber verborgen.
+`get_command_matrix_1280_readability_snapshot()` liest nur Layout-, Icon-,
+Callback- und Markerzustand, setzt `ui_sets_gameplay_truth = false` und erzeugt
+weder Commands, Effects noch Multiplayer-Snapshots.
+
 ## Insertion-/First-Order-Readability
 `get_mission_insertion_first_order_readability_snapshot()` ist der Headless-Pruefpunkt fuer den ersten spielbaren Missionsmoment nach dem Homebase-Launch. Der Snapshot darf nur bestehende Planning-, Dropship-Karten-, Command-Feedback- und Render-Snapshots zusammenfassen. Er muss `ui_sets_gameplay_truth = false` setzen und darf keine Commands enqueuen. Erwartete Lesbarkeit: Dropship-Payload vorhanden, Card sichtbar, LZ-Zustand sichtbar, Drop ohne LZ blockiert, ausgewaehltes Fireteam sichtbar, erste Order-Kontrollen vorhanden, und nach LZ-Setzung ein sichtbarer LZ-Marker plus bereiter Drop-Button.
 
