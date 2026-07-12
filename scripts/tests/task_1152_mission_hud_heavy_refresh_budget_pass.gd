@@ -27,6 +27,9 @@ func _test_contract_is_present() -> void:
 	_assert(source.contains("_build_periodic_fireteam_cards_signature"), "Fireteam card group reuses runtime signatures before entering card refreshes")
 	_assert(source.contains("func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true)"), "Direct UI calls default to a forced complete refresh")
 	_assert(source.contains("_update_ui(heavy_refresh_due, false)"), "Recurring UI cadence uses guarded heavy surfaces")
+	_assert(_function_body(source, "_flush_mission_dropship_runtime_feedback").contains("_update_ui(true, false)"), "Dropship runtime feedback uses guarded heavy surfaces")
+	_assert(_function_body(source, "apply_authoritative_mission_dropship_snapshot").contains("_update_ui(true, false)"), "Authoritative dropship snapshots use guarded heavy surfaces")
+	_assert(_function_body(source, "refresh_flank_vulnerability_state").contains("_update_ui(true, false)"), "Recurring flank feedback uses guarded heavy surfaces")
 	var lobby_source: String = FileAccess.get_file_as_string(LOBBY_SOURCE_PATH)
 	_assert(lobby_source.contains('"mission_hud_runtime_surface_guard"'), "Release trace preserves heavy HUD apply/skip evidence")
 
@@ -70,6 +73,14 @@ func _test_periodic_heavy_surfaces_skip_unchanged_state() -> void:
 func _wait_frames(frame_count: int) -> void:
 	for _index in range(frame_count):
 		await process_frame
+
+
+func _function_body(source: String, function_name: String) -> String:
+	var start: int = source.find("func %s(" % function_name)
+	if start < 0:
+		return ""
+	var finish: int = source.find("\n\nfunc ", start + 5)
+	return source.substr(start) if finish < 0 else source.substr(start, finish - start)
 
 
 func _assert(condition: bool, message: String) -> void:

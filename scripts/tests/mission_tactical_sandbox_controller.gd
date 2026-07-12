@@ -796,7 +796,7 @@ func _flush_mission_dropship_runtime_feedback(force: bool = false, refresh_world
 	_mission_dropship_runtime_planning_emit_count += 1
 	_emit_planning_state_changed()
 	_mission_dropship_runtime_feedback_flush_count += 1
-	_update_ui()
+	_update_ui(true, false)
 	return true
 
 
@@ -2182,7 +2182,7 @@ func apply_authoritative_mission_dropship_snapshot(dropship_snapshot: Dictionary
 	_refresh_button_state()
 	_refresh_selection_visuals()
 	_refresh_world_overlays()
-	_update_ui()
+	_update_ui(true, false)
 	_last_authoritative_dropship_snapshot_signature = snapshot_signature
 	_authoritative_dropship_snapshot_apply_count += 1
 	return not local_craft_id.is_empty()
@@ -28844,7 +28844,7 @@ func _get_release_firefight_insertion_residue_declutter_enabled(world_label_dens
 
 func refresh_flank_vulnerability_state() -> void:
 	_refresh_fireteam_status_panel()
-	_update_ui()
+	_update_ui(true, false)
 
 
 func _try_open_waypoint_menu_at_position(screen_position: Vector2, append_mode: bool = false) -> bool:
