@@ -1,5 +1,10 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1178 - HPA Cache Performance Recapture
+- Status: implementiert und headless geprueft
+- Befund: TASK_1177 senkt im gleichen Station-AA-Trace Route von rund 152,4 s auf 101,8 s und Command-Queue im langsamsten Tick von rund 1,37 s auf 0,60 s.
+- Risiken/offen: `tick_signal_emit_usec` mit rund 0,89 s ist jetzt dominant; Combat-Subscriber-Cadence braucht einen eigenen Contract-Slice.
+
 ### TASK_1177 - HPA Portal Adjacency Cache
 - Status: implementiert und headless geprueft
 - Aenderung: Portal-Adjazenz wird je Graphrevision einmal gebaut und bei Full-/Dirty-Rebuild sicher invalidiert.
