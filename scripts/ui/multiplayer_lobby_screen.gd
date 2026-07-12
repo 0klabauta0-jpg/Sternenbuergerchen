@@ -243,9 +243,11 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 	var movement_remaining_distance: float = current_position.distance_to(_release_first_contact_target_position) if _release_first_contact_advance_started_msec > 0 else 0.0
 	var movement_progress_ratio: float = clampf(1.0 - (movement_remaining_distance / initial_distance), 0.0, 1.0) if initial_distance > 0.001 else 0.0
 	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot") if has_active_mission() else null
+	var combat_driver: Node = _active_mission.get_node_or_null("CombatLoopDriver") if has_active_mission() else null
 	var simulation_tick: int = int(simulation_root.call("get_tick")) if simulation_root != null and simulation_root.has_method("get_tick") else 0
 	var unit_movement_evidence: Dictionary = _build_release_fireteam_unit_movement_evidence(simulation_root)
 	var runtime_tick_budget: Dictionary = Dictionary(simulation_root.call("get_runtime_tick_budget_debug_snapshot")).duplicate(true) if simulation_root != null and simulation_root.has_method("get_runtime_tick_budget_debug_snapshot") else {}
+	var combat_tick_budget: Dictionary = Dictionary(combat_driver.call("get_combat_tick_budget_debug_snapshot")).duplicate(true) if combat_driver != null and combat_driver.has_method("get_combat_tick_budget_debug_snapshot") else {}
 	var mission_visible_frame_timing: Dictionary = Dictionary(controller.call("get_mission_visible_frame_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_visible_frame_timing_debug_snapshot") else {}
 	var mission_ui_refresh_timing: Dictionary = Dictionary(controller.call("get_mission_ui_refresh_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_ui_refresh_timing_debug_snapshot") else {}
 	var mission_runtime_surface_timing: Dictionary = Dictionary(controller.call("get_mission_runtime_surface_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_runtime_surface_timing_debug_snapshot") else {}
@@ -274,6 +276,7 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"terrain_move_debug": Dictionary(unit_movement_evidence.get("terrain_move_debug", {})).duplicate(true),
 		"local_avoidance_debug": Dictionary(unit_movement_evidence.get("local_avoidance_debug", {})).duplicate(true),
 		"runtime_tick_budget": runtime_tick_budget,
+		"combat_tick_budget": combat_tick_budget,
 		"mission_visible_frame_timing": mission_visible_frame_timing,
 		"mission_ui_refresh_timing": mission_ui_refresh_timing,
 		"mission_runtime_surface_timing": mission_runtime_surface_timing,
@@ -471,10 +474,13 @@ func _submit_release_contact_advance(controller: Node) -> bool:
 	var terrain_registry: Node = _active_mission.get_node_or_null("TerrainRegistry")
 	var unit_registry: Node = _active_mission.get_node_or_null("UnitRegistry")
 	var simulation_root: Node = _active_mission.get_node_or_null("SimulationRoot")
+	var combat_driver: Node = _active_mission.get_node_or_null("CombatLoopDriver")
 	if simulation_root != null and simulation_root.has_method("set_local_avoidance_debug_enabled"):
 		simulation_root.call("set_local_avoidance_debug_enabled", true)
 	if simulation_root != null and simulation_root.has_method("set_runtime_tick_budget_debug_enabled"):
 		simulation_root.call("set_runtime_tick_budget_debug_enabled", true)
+	if combat_driver != null and combat_driver.has_method("set_combat_tick_budget_debug_enabled"):
+		combat_driver.call("set_combat_tick_budget_debug_enabled", true)
 	if controller.has_method("set_mission_visible_frame_timing_debug_enabled"):
 		controller.call("set_mission_visible_frame_timing_debug_enabled", true)
 	var pace_snapshot: Dictionary = get_release_multiplayer_first_contact_snapshot()

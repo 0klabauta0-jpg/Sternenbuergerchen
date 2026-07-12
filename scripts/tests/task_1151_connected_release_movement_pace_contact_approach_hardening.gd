@@ -27,9 +27,10 @@ func _initialize() -> void:
 	_assert(lobby_source.contains('"recent_movement_trace"'), "Release trace preserves completed movement lifecycle evidence")
 	for token in ["fireteam_unit_positions", "terrain_move_debug", "local_avoidance_debug"]:
 		_assert(lobby_source.contains(token), "Release trace exposes lower movement boundary %s" % token)
-	for token in ["runtime_tick_budget", "mission_visible_frame_timing", "mission_ui_refresh_timing", "mission_runtime_surface_timing"]:
+	for token in ["runtime_tick_budget", "combat_tick_budget", "mission_visible_frame_timing", "mission_ui_refresh_timing", "mission_runtime_surface_timing"]:
 		_assert(lobby_source.contains(token), "Release trace exposes runtime performance boundary %s" % token)
 	_assert(lobby_source.contains('set_runtime_tick_budget_debug_enabled", true'), "Explicit First Contact run enables authoritative tick profiling")
+	_assert(lobby_source.contains('set_combat_tick_budget_debug_enabled", true'), "Explicit First Contact run enables combat-listener profiling")
 	_assert(lobby_source.contains('set_mission_visible_frame_timing_debug_enabled", true'), "Explicit First Contact run enables mission frame profiling")
 	_assert(lobby_source.contains('get_mission_marker_world_position", "spawn_bravo"'), "Release Contact Approach follows the runtime enemy spawn marker")
 	_assert(not lobby_source.contains('"spawn_enemy_defense"') and not lobby_source.contains('"spawn_enemy_patrol"'), "Release Contact Approach does not treat decorative enemy markers as runtime truth")
@@ -71,7 +72,7 @@ func _initialize() -> void:
 	_assert(intent_source.contains("_post_drop_security_pending_fireteam_ids.erase(fireteam_id)"), "Explicit network intent cancels pending automatic post-drop security")
 	_assert(controller_source.contains('command.command_token = "post_drop_security:'), "Post-drop security moves carry stale-command tokens")
 
-	print("TASK_1151 connected release movement pace evidence: %d/55 PASS" % (55 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/57 PASS" % (57 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 
