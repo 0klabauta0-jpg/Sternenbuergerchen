@@ -38,4 +38,13 @@ Der synthetische Performance-Gate kann gruen sein, waehrend zwei sichtbare Relea
 - Der Resolver prueft den Formation-Footprint statt nur den Ankerpunkt.
 - Profilbefund: Der direkte Combat-Tick kostete etwa 17 ms, davon rund 13 ms Overwatch. Teure Tactical Decisions laufen jetzt mit 20 Hz; Detection und Contact-Tracking bleiben pro Sim-Tick aktiv.
 - Echter Effekt: Host-Durchsatz stieg von rund 18,5 auf 30,3 autoritative Ticks pro Sekunde. TASK_1117 bleibt mit gemeinsamem Kontakt, First Fire und identischen Vitalwerten 15/15 gruen.
-- Das echte TASK_1150-Gate bleibt offen. Der letzte Recapture brach bereits im Client-Drop/First-Decision-Pfad ab und ist kein gueltiger First-Contact-Beleg.
+- Standalone Network Intents besitzen jetzt einen eigenen Lifecycle und werden nicht mehr durch fehlende UI-Plans beendet. Ein expliziter Spielerbefehl verwirft ausstehende automatische Post-Drop-Security und deren tokenisierte Altbefehle.
+- Der periodische Missions-HUD-Refresh trennt schnelle Statusdaten von schweren Runtime-/Strategieoberflaechen. Direkte Spieleraktionen behalten den sofortigen kompletten Refresh.
+- Contact-Approaches pruefen neben LOS auch die Erreichbarkeit der gesamten Formation. Der Release-Anflug nutzt `engage`, weil ein normaler Travel-Move Waffen und Wahrnehmung absichtlich absenkt.
+- Abschlussbeleg: Der echte Zwei-EXE-Lauf ist nach 73,2 Sekunden gruen. Host und Client bleiben aktiv, Deployment und First Decision konvergieren, Kontakt entsteht rund 16 Sekunden nach Engage, und beide sehen dasselbe erste Fire-Event.
+- Restbefund: Der schwere Host-HUD-Refresh kostet im gemessenen Vollpfad weiterhin rund 266 ms. Das blockiert TASK_1151 nicht mehr, ist aber die naechste klar abgegrenzte Performance-Arbeit.
+
+## Abschluss
+- Status: implementiert und im exportierten Release verifiziert.
+- Verifier: TASK_1151 64/64, TASK_1117 15/15, TASK_1043 14/14, TASK_1044 15/15, TASK_479 25/25, TASK_399 9/9.
+- Release-Artefakt: `tmp/release_host_client_first_contact_playtest.json`, Gate `pass`.
