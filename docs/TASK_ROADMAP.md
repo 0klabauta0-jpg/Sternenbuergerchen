@@ -13,6 +13,15 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1176 - Station Route Phase Profile (implementiert im Arbeitsstand)
+- Grundlage: Vollstaendige Station-Route-Traces waren extrem langsam, ohne den dominanten Abschnitt zu benennen.
+- Ziel: Den bestehenden realen AA-Trace in Setup, Route und Interaction zerlegen und die teuerste autoritative Tick-Scope sichtbar machen.
+- Ergebnis: TASK_1175 exportiert Profil-Evidence. Der langsamste Route-Tick misst rund 1,37 s Command-Queue und 0,78 s Tick-Subscriber; HUD, Effects, Avoidance und Spacing sind nicht der dominante Block.
+- Verifikation: TASK_1175 16/16 gruen mit Profilzeile.
+- Naechster Schritt: Formations-Path-Request-/Combat-Subscriber-Cadence als eigenen kleinen Runtime-Performance-Slice verbessern, ohne Bewegungs- oder Multiplayer-Autoritaet zu veraendern.
+
+---
+
 ## TASK_1175 - Station Route Live AA Pressure (implementiert im Arbeitsstand)
 - Grundlage: TASK_1071 erreichte Victory mit testseitiger Formation-Positionierung; der echte erste Zielweg unter NPC-Druck war nicht geschlossen.
 - Ziel: Homebase -> Drop -> normaler Move zur AA -> Bravo-Contact -> sichtbares AA -> GO -> vorhandene AA-Completion ohne Positions-, Gate- oder Contact-Override pruefen.

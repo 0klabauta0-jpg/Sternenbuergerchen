@@ -24,6 +24,7 @@ func _run_tests() -> void:
 
 
 func _test_live_route_reaches_and_completes_aa_without_position_override() -> void:
+	var trace_started_usec: int = Time.get_ticks_usec()
 	root.size = Vector2i(1920, 1080)
 	var flow: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(flow)
@@ -63,6 +64,7 @@ func _test_live_route_reaches_and_completes_aa_without_position_override() -> vo
 	await _wait_frames(8)
 
 	var fireteam_id: String = _first_displayable_fireteam(controller)
+	simulation_root.call("set_runtime_tick_budget_debug_enabled", true)
 	var initial_center: Vector2 = _fireteam_center(controller, fireteam_id)
 	_assert(not fireteam_id.is_empty() and initial_center != Vector2.ZERO, "Live AA trace has a deboarded fireteam")
 	_assert(bool(controller.call("issue_right_click_command_for_test", AA_TARGET, "move", false)), "Live AA trace plans a normal Move to AA")
@@ -70,8 +72,19 @@ func _test_live_route_reaches_and_completes_aa_without_position_override() -> vo
 
 	var observed_contact: bool = false
 	var reached_aa_range: bool = false
+	var route_started_usec: int = Time.get_ticks_usec()
+	var route_tick_max_usec: int = 0
+	var route_simulation_tick_max_usec: int = 0
+	var route_slowest_tick_scopes: Dictionary = {}
 	for _tick in range(MAX_ROUTE_TICKS):
+		var tick_started_usec: int = Time.get_ticks_usec()
 		simulation_root.call("_physics_process", SIMULATED_TICK_DELTA)
+		var tick_wall_usec: int = Time.get_ticks_usec() - tick_started_usec
+		var tick_snapshot: Dictionary = Dictionary(simulation_root.call("get_runtime_tick_budget_debug_snapshot"))
+		if tick_wall_usec >= route_tick_max_usec:
+			route_tick_max_usec = tick_wall_usec
+			route_slowest_tick_scopes = Dictionary(tick_snapshot.get("scopes_usec", {})).duplicate(true)
+		route_simulation_tick_max_usec = maxi(route_simulation_tick_max_usec, int(tick_snapshot.get("total_tick_usec", 0)))
 		controller.call("_update_active_phase_execution", SIMULATED_TICK_DELTA)
 		combat_driver.call("_update_contact_tracking")
 		combat_driver.call("_advance_detection_timers")
@@ -106,6 +119,7 @@ func _test_live_route_reaches_and_completes_aa_without_position_override() -> vo
 	_assert(bool(intent.get("accepted", false)) and String(intent.get("interaction_id", "")) == AA_INTERACTION_ID, "AA click creates only the existing interaction intent")
 	_assert(bool(intent.get("requires_go", false)), "AA intent keeps GO separate")
 	_assert(bool(controller.call("execute_selected_fireteam_orders")), "AA GO starts existing interaction execution")
+	var interaction_started_usec: int = Time.get_ticks_usec()
 	var aa_state: Dictionary = {}
 	for _tick in range(16):
 		simulation_root.call("_physics_process", SIMULATED_TICK_DELTA)
@@ -116,6 +130,7 @@ func _test_live_route_reaches_and_completes_aa_without_position_override() -> vo
 			break
 	var aa_movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", fireteam_id))
 	var aa_feedback: Dictionary = Dictionary(controller.call("get_mission_interaction_use_feedback_snapshot"))
+	print("TASK_1176_PHASE_PROFILE setup_usec=%d route_usec=%d interaction_usec=%d route_tick_max_usec=%d simulation_tick_max_usec=%d slowest_tick_scopes=%s total_usec=%d" % [route_started_usec - trace_started_usec, interaction_started_usec - route_started_usec, Time.get_ticks_usec() - interaction_started_usec, route_tick_max_usec, route_simulation_tick_max_usec, JSON.stringify(route_slowest_tick_scopes), Time.get_ticks_usec() - trace_started_usec])
 	print("LIVE_AA_INTERACTION_DIAGNOSTIC complete=%s required_state=%s executing=%s stage=%s feedback=%s" % [bool(aa_state.get("complete", false)), String(aa_state.get("required_state", "")), bool(aa_movement_state.get("is_executing", false)), int(aa_movement_state.get("stage_index", -1)), String(aa_feedback.get("feedback_line", ""))])
 	_assert(bool(aa_state.get("complete", false)) and String(aa_state.get("required_state", "")) == "aa_disabled", "AA completion remains on the existing runtime interaction path")
 	await _cleanup(flow)
