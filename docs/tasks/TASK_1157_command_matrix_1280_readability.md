@@ -19,6 +19,8 @@ der Fix muss deshalb innerhalb der stabilen Matrixgeometrie arbeiten.
 - Lesbare Mindestschrift fuer Primaerbefehle, Feuerregeln und GO.
 - Vorhandene kuratierte Icons innerhalb der quadratischen Buttons groesser
   und stabil zentrieren.
+- Nur in der Command-Matrix die horizontalen Skin-Innenabstaende reduzieren,
+  damit Icon und Zweibuchstaben-Code gemeinsam sichtbar bleiben.
 - Technische `16.x`-Slotmarker im Spielerbild ausblenden, als Node/Metadatum
   fuer bestehende Vertraege und Diagnose aber erhalten.
 - Read-only Layout-Snapshot fuer den 1280x720-Akzeptanzfall.
@@ -43,6 +45,7 @@ der Fix muss deshalb innerhalb der stabilen Matrixgeometrie arbeiten.
 - Bei einem 1280x720-Viewport verwenden Primaerbefehle mindestens 12 Pixel
   interne Schriftgroesse und die vorhandenen Icons bleiben sichtbar.
 - Feuerregeln verwenden mindestens 11 Pixel, GO mindestens 13 Pixel.
+- Horizontale Matrix-Innenabstaende bleiben bei hoechstens 4 Pixeln pro Seite.
 - Technische Slotmarker bleiben vorhanden, sind im Spielerbild aber nicht
   sichtbar.
 - Fuenf Spalten, 20 Slots, Slot-IDs, Buttonnamen und Callbacks bleiben

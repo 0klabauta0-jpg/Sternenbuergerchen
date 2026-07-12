@@ -4,10 +4,10 @@
 - Status: implementiert, automatische Command-/Layout-/Multiplayer-Gates gruen; Release-Sichtcheck folgt
 - Relevante Docs/Contracts: `docs/tasks/TASK_1157_command_matrix_1280_readability.md`, `docs/tasks/TASK_1139_command_matrix_player_language_icon_hierarchy_polish.md`, `docs/tasks/TASK_836_release_firefight_command_matrix_visual_polish.md`
 - Ausgangsbefund: Das feste 1920x1080-HUD skaliert 9-Pixel-Befehlstext und sichtbare 6-Pixel-Slotmarker im 1280x720-Release auf effektiv etwa 6 beziehungsweise 4 Pixel. TASK_836 ueberschrieb ausserdem den deutschen TASK-1139-Vertrag wieder mit englischen Primaerlabels.
-- Aenderung: Primaerbefehle 12 Pixel, Feuerregeln 11 Pixel, GO 13 Pixel und vorhandene Icons 14 Pixel. Technische `16.x`-Marker bleiben als Nodes/Metadaten erhalten, sind im Spielerbild aber verborgen. `BW/NM/HL/FL/ZL` und deutsche Tooltips sind wieder der sichtbare Vertrag.
+- Aenderung: Primaerbefehle 12 Pixel, Feuerregeln 11 Pixel, GO 13 Pixel und vorhandene Icons 14 Pixel. Matrix-lokale 4-Pixel-Innenabstaende lassen Icon und Zweibuchstaben-Code gemeinsam stehen. Technische `16.x`-Marker bleiben als Nodes/Metadaten erhalten, sind im Spielerbild aber verborgen. `BW/NM/HL/FL/ZL` und deutsche Tooltips sind wieder der sichtbare Vertrag.
 - Architektur: Fuenf Spalten, 20 Slots, NodePaths, Command-IDs, Callbacks, SimulationRoot und Multiplayer-Ownership bleiben unveraendert. Der Diagnose-Snapshot ist read-only.
-- Lokale Pruefung: TASK_1157 30/30; TASK_1139 51/51; TASK_180 98/98; TASK_836 29/29; TASK_513 26/26; TASK_1109 18/18; TASK_1110 20/20.
-- Naechster Schritt: Exportierter 1280x720-Sichtcheck; danach den naechsten belegten Spielerfluss-/HUD-Befund schneiden.
+- Lokale Pruefung: TASK_1157 35/35; TASK_1139 51/51; TASK_180 98/98; TASK_836 29/29; TASK_513 26/26; TASK_1109 18/18; TASK_1110 20/20.
+- Naechster Schritt: Exportierter 1280x720-Recapture nach Innenabstandskorrektur; danach den naechsten belegten Spielerfluss-/HUD-Befund schneiden.
 
 ### TASK_1156 - TASK 188 Advance Style Verifier Trust Repair
 - Status: implementiert und mit echtem Exit-1-Selbsttest verifiziert

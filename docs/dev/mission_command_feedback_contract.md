@@ -198,7 +198,9 @@ Die feste fuenfspaltige Matrix behaelt alle 20 Slots, NodePaths, Command-IDs und
 Callbacks. Im skalierten 1280x720-Spielerfenster verwenden Primaerbefehle
 mindestens 12 Pixel interne Schriftgroesse, Feuerregeln mindestens 11 Pixel und
 GO mindestens 13 Pixel. Vorhandene taktische Icons werden mit 14 Pixeln
-bereitgestellt. Die sichtbaren Primaercodes sind deutsch: `BW`, `NM`, `HL`,
+bereitgestellt. Die horizontalen Skin-Innenabstaende werden nur fuer diese
+Matrix auf hoechstens 4 Pixel pro Seite reduziert, damit Icon und Code in der
+48-Pixel-Zelle gemeinsam sichtbar bleiben. Die sichtbaren Primaercodes sind deutsch: `BW`, `NM`, `HL`,
 `FL` und `ZL`; Langform und Folge stehen im deutschen Tooltip.
 
 Die technischen `16.x`-Marker bleiben als Nodes und Metadaten fuer bestehende
