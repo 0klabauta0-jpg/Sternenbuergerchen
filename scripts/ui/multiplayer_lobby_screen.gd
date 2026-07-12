@@ -95,6 +95,8 @@ var _release_local_craft_id: String = ""
 var _release_first_contact_stage: String = "disabled"
 var _release_first_contact_advance_sent: bool = false
 var _release_initial_movement_observed: bool = false
+var _release_initial_movement_observe_frames: int = 0
+var _release_first_contact_advance_attempted: bool = false
 
 
 func _ready() -> void:
@@ -225,7 +227,9 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"stage": _release_first_contact_stage,
 		"fireteam_id": _release_local_fireteam_id,
 		"advance_sent": _release_first_contact_advance_sent,
+		"advance_attempted": _release_first_contact_advance_attempted,
 		"initial_movement_observed": _release_initial_movement_observed,
+		"initial_movement_observe_frames": _release_initial_movement_observe_frames,
 		"contact_count": contacts.size(),
 		"contacts": contacts,
 		"fire_event_count": fire_events.size(),
@@ -354,15 +358,21 @@ func _advance_release_multiplayer_first_contact() -> void:
 	if _release_first_contact_advance_sent:
 		_release_first_contact_stage = "waiting_for_contact"
 		return
+	if _release_first_contact_advance_attempted:
+		_release_first_contact_stage = "contact_advance_failed"
+		return
 	var movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", _release_local_fireteam_id)) if controller.has_method("get_fireteam_movement_state") else {}
 	var member_busy: bool = _release_fireteam_has_busy_members(controller, _release_local_fireteam_id)
 	if not movement_state.is_empty() or member_busy:
 		_release_initial_movement_observed = true
-		_release_first_contact_stage = "waiting_for_initial_move"
-		return
+		_release_initial_movement_observe_frames += 1
+		if _release_initial_movement_observe_frames < 30:
+			_release_first_contact_stage = "waiting_for_initial_move"
+			return
 	if not _release_initial_movement_observed:
 		_release_first_contact_stage = "waiting_for_initial_move_start"
 		return
+	_release_first_contact_advance_attempted = true
 	_release_first_contact_advance_sent = _submit_release_contact_advance(controller)
 	_release_first_contact_stage = "contact_advance_submitted" if _release_first_contact_advance_sent else "contact_advance_failed"
 
