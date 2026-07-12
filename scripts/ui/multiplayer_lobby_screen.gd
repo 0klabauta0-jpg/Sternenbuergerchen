@@ -251,6 +251,7 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 	var mission_visible_frame_timing: Dictionary = Dictionary(controller.call("get_mission_visible_frame_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_visible_frame_timing_debug_snapshot") else {}
 	var mission_ui_refresh_timing: Dictionary = Dictionary(controller.call("get_mission_ui_refresh_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_ui_refresh_timing_debug_snapshot") else {}
 	var mission_runtime_surface_timing: Dictionary = Dictionary(controller.call("get_mission_runtime_surface_timing_debug_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_runtime_surface_timing_debug_snapshot") else {}
+	var mission_hud_runtime_surface_guard: Dictionary = Dictionary(controller.call("get_mission_hud_runtime_surface_guard_snapshot")).duplicate(true) if controller != null and controller.has_method("get_mission_hud_runtime_surface_guard_snapshot") else {}
 	return {
 		"schema": "sternenbuergerchen.release_multiplayer_first_contact.v1",
 		"task_id": "TASK_1150",
@@ -280,6 +281,7 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"mission_visible_frame_timing": mission_visible_frame_timing,
 		"mission_ui_refresh_timing": mission_ui_refresh_timing,
 		"mission_runtime_surface_timing": mission_runtime_surface_timing,
+		"mission_hud_runtime_surface_guard": mission_hud_runtime_surface_guard,
 		"contact_approach_evidence": _release_contact_approach_evidence.duplicate(true),
 		"contact_count": contacts.size(),
 		"contacts": contacts,

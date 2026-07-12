@@ -76,8 +76,8 @@ func _initialize() -> void:
 	_assert(intent_source.contains("_post_drop_security_pending_fireteam_ids.erase(fireteam_id)"), "Explicit network intent cancels pending automatic post-drop security")
 	_assert(controller_source.contains('command.command_token = "post_drop_security:'), "Post-drop security moves carry stale-command tokens")
 	_assert(controller_source.contains("RUNTIME_HUD_HEAVY_REFRESH_INTERVAL_SECONDS"), "Periodic HUD refresh has a separate heavy-surface cadence")
-	_assert(controller_source.contains("func _update_ui(include_heavy_surfaces: bool = true)"), "Direct UI events can still request an immediate complete refresh")
-	_assert(controller_source.contains("_update_ui(heavy_refresh_due)"), "Periodic frames use the split light/heavy HUD refresh path")
+	_assert(controller_source.contains("func _update_ui(include_heavy_surfaces: bool = true, force_heavy_surfaces: bool = true)"), "Direct UI events can still request an immediate complete refresh")
+	_assert(controller_source.contains("_update_ui(heavy_refresh_due, false)"), "Periodic frames use the guarded split light/heavy HUD refresh path")
 
 	print("TASK_1151 connected release movement pace evidence: %d/64 PASS" % (64 - _failed))
 	quit(1 if _failed > 0 else 0)

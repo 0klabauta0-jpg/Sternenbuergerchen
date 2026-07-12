@@ -1,11 +1,18 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1152 - Mission HUD Heavy Refresh Budget Pass
+- Status: implementiert und im exportierten Zwei-EXE-Release verifiziert
+- Relevante Docs/Contracts: `docs/tasks/TASK_1152_mission_hud_heavy_refresh_budget_pass.md`, `docs/tasks/TASK_1151_connected_release_movement_pace_contact_approach_hardening.md`
+- Aenderung: Periodische Signatur-Guards fuer Strategiestatus, Craft Controls und Fireteam-Kartengruppe; wiederkehrende Dropship-/Snapshot-/Flank-Pfade erzwingen keinen Vollrefresh mehr. Direkte Bedienereignisse bleiben sofort vollstaendig.
+- Release-Beleg: Gate `pass` nach 69,8 Sekunden; periodischer Host-HUD-Pfad rund 68 ms statt 266 ms, Client etwa 30 statt 24 FPS, gemeinsamer Kontakt und First Fire unveraendert gruen.
+- Naechster Befund: Primary Labels und Mission Panels bilden mit zusammen rund 68 ms den verbleibenden leichten UI-Pfad.
+
 ### TASK_1151 - Connected Release Movement Pace and Contact Approach Hardening
 - Status: implementiert und im exportierten Zwei-EXE-Release verifiziert
 - Relevante Docs/Contracts: `docs/tasks/TASK_1151_connected_release_movement_pace_contact_approach_hardening.md`, `scripts/tactical/contact_approach_resolver.gd`, `scripts/tests/task_1151_connected_release_movement_pace_contact_approach_hardening.gd`
 - Aenderung: Standalone-Intent-Lifecycle, tokenisierte Post-Drop-Security-Supersession, leichte/schwere HUD-Cadence, prozess- und performancebezogene Release-Evidence sowie formationsweit erreichbare A*/LOS-Approaches mit Engage-Semantik.
 - Release-Beleg: Gate nach 73,2 Sekunden `pass`; beide Prozesse aktiv, Deployment/First Decision konvergent, Kontakt rund 16 Sekunden nach Engage und gemeinsames First Fire.
-- Restbefund: Ein kompletter Host-HUD-Refresh kostet weiterhin rund 266 ms und wird als eigener Performance-Task weitergefuehrt.
+- Restbefund: TASK_1152 reduziert den periodischen Host-HUD-Pfad auf rund 68 ms; echte Zustandswechsel duerfen weiterhin einen teuren Vollrefresh ausloesen.
 
 ### TASK_1150 - Connected Release First Contact Handoff Playtest
 - Status: durch TASK_1151 im echten Release gruen abgeschlossen
