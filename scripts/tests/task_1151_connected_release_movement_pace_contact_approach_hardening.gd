@@ -36,6 +36,7 @@ func _initialize() -> void:
 	_assert(not lobby_source.contains('"spawn_enemy_defense"') and not lobby_source.contains('"spawn_enemy_patrol"'), "Release Contact Approach does not treat decorative enemy markers as runtime truth")
 	_assert(lobby_source.contains("enemy_positions.append(requested_target)"), "Clients without hidden enemy nodes resolve against the shared spawn marker")
 	_assert(lobby_source.contains("CONTACT_APPROACH_RESOLVER_SCRIPT"), "Release flow delegates approach selection to a tactical resolver")
+	_assert(lobby_source.contains('request_network_authoritative_fireteam_intent", _release_local_fireteam_id, "engage"'), "Release Contact Approach uses combat-ready Engage semantics")
 	_assert(FileAccess.file_exists(APPROACH_RESOLVER_PATH), "Contact approach resolver exists")
 	var resolver_source := FileAccess.get_file_as_string(APPROACH_RESOLVER_PATH)
 	for token in ["find_reachable_approach", "find_path", "has_line_of_sight_between_points", "get_all_units"]:
@@ -78,7 +79,7 @@ func _initialize() -> void:
 	_assert(controller_source.contains("func _update_ui(include_heavy_surfaces: bool = true)"), "Direct UI events can still request an immediate complete refresh")
 	_assert(controller_source.contains("_update_ui(heavy_refresh_due)"), "Periodic frames use the split light/heavy HUD refresh path")
 
-	print("TASK_1151 connected release movement pace evidence: %d/63 PASS" % (63 - _failed))
+	print("TASK_1151 connected release movement pace evidence: %d/64 PASS" % (64 - _failed))
 	quit(1 if _failed > 0 else 0)
 
 

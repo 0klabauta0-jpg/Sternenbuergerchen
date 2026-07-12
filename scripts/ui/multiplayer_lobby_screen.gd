@@ -509,7 +509,7 @@ func _submit_release_contact_advance(controller: Node) -> bool:
 		var resolved: Dictionary = Dictionary(terrain_registry.call("resolve_walkable_target", requested_target))
 		requested_target = Vector2(resolved.get("replacement_position", requested_target))
 	_release_first_contact_target_position = requested_target
-	var accepted: bool = bool(controller.call("request_network_authoritative_fireteam_intent", _release_local_fireteam_id, "move", requested_target))
+	var accepted: bool = bool(controller.call("request_network_authoritative_fireteam_intent", _release_local_fireteam_id, "engage", requested_target))
 	if accepted:
 		_release_first_contact_start_position = Vector2(Dictionary(pace_snapshot.get("fireteam_position", {})).get("world_position", Vector2.ZERO))
 		_release_first_contact_advance_started_msec = Time.get_ticks_msec()
