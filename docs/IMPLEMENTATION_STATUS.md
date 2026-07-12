@@ -1,13 +1,14 @@
 # IMPLEMENTATION_STATUS
 
 ### TASK_1166 - Left Tactical Stack 1280 Detail Recapture
-- Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
+- Status: implementiert, headless-regressionsgeprueft und im frisch exportierten Release recaptured
 - Relevante Docs/Contracts: `docs/tasks/TASK_1166_left_tactical_stack_1280_detail_recapture.md`, `docs/tasks/TASK_1165_left_tactical_stack_1280_detail_polish.md`, `docs/dev/mission_command_feedback_contract.md`
 - Ausgangsbefund: TASK_1165 verbesserte Mini-Card-Details und Eventlog-Filter headless, aber der echte exportierte 1280x720-Host-/Client-Blick nach dem Detail-Polish musste wieder als separater Beleg eingefangen werden.
 - Aenderung: `get_left_tactical_stack_1280_detail_recapture_snapshot()` fasst TASK_1165, Release-Provenance, FirstContact-Capture-Manifest und getrennte Host-/Client-Fensterbilder zu einem read-only Recapture-Vertrag zusammen. Das kombinierte Desktop-Capture bleibt ausdruecklich untrusted.
 - Architektur: Der Snapshot liest nur bestehende Artefakte und Surface-Vertraege. Er erzeugt keine Commands, Effects, Fire-/Damage-Events, Movement- oder Multiplayer-Wahrheit und vergleicht den exportierten Release-Commit gegen den aktuellen Git-HEAD.
 - Lokale Pruefung: TASK_1166 33/33; TASK_1165 40/40; TASK_1164 49/49; TASK_222 82/82; TASK_1109 18/18; TASK_1110 20/20; `git diff --check`.
-- Risiken/offen: Nach Commit/Merge muss der Release-Export erneut gebaut und der FirstContact-Capture neu geschrieben werden, weil der Provenance-Commit sonst hinter HEAD zurueckfaellt. Naechster sinnvoller Schritt ist TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance.
+- Release-Beleg: Nach Merge wurde der Release neu exportiert; `release_runtime_start_check.ps1 -JsonOnly` ist gruen auf Git-HEAD `b0e3053c`. Der FirstContact-Capture ist mit `-TimeoutSeconds 300` gruen; der alte 150s-Default war in diesem Lauf zu knapp, weil First Fire erst nach laengerer Bewegung konvergierte.
+- Risiken/offen: Naechster sinnvoller Schritt ist TASK_1167 - Left Tactical Stack 1280 Detail Visual Acceptance, also die getrennten Host-/Client-Fensterbilder menschlich gegen Lesbarkeit und Blickruhe abzunehmen.
 
 ### TASK_1165 - Left Tactical Stack 1280 Detail Polish
 - Status: implementiert im Arbeitsstand und headless-regressionsgeprueft
