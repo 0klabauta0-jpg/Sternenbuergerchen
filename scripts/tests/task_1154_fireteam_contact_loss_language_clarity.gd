@@ -27,6 +27,17 @@ func _run() -> void:
 		_assert(String(controller.call("_format_fireteam_visible_contact_text", "", 0)) == "KEIN KONTAKT", "No-contact state remains unchanged")
 		var health_text := String(controller.call("_format_fireteam_visible_health_text", {"fit_count": 5, "total_count": 5}))
 		_assert(health_text == "FIT 5/5", "Health remains a separate truthful status")
+		var long_movement_state := {
+			"effective_style": "bounding",
+			"readability_status_line": "BND 1/18 G2/2 | 3 move | 2 cover",
+		}
+		var compact_movement := String(controller.call("_compact_fireteam_movement_text", long_movement_state, {}))
+		_assert(compact_movement == "BND", "Mini-card movement keeps the short style instead of the full map diagnostic")
+		var snapshot := Dictionary(controller.call("_build_fireteam_status_card_entry", "blue", [], {}, {
+			"state": "lost",
+			"count": 1,
+		}))
+		_assert(snapshot.has("movement_detail_text"), "Full movement readability remains available outside the compact line")
 	mission.queue_free()
 	await process_frame
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
