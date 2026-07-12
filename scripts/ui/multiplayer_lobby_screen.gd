@@ -97,6 +97,7 @@ var _release_first_contact_advance_sent: bool = false
 var _release_initial_movement_observed: bool = false
 var _release_initial_movement_observe_frames: int = 0
 var _release_first_contact_advance_attempted: bool = false
+var _release_first_contact_target_position: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -214,6 +215,13 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 	var fire_events: Array = Array(controller.call("get_fire_event_snapshot")).duplicate(true) if controller != null and controller.has_method("get_fire_event_snapshot") else []
 	var diagnostics: Dictionary = Dictionary(controller.call("get_contact_decision_diagnostics_snapshot")).duplicate(true) if controller != null and controller.has_method("get_contact_decision_diagnostics_snapshot") else {}
 	var perspective: Dictionary = Dictionary(controller.call("get_connected_first_contact_hud_perspective_snapshot")).duplicate(true) if controller != null and controller.has_method("get_connected_first_contact_hud_perspective_snapshot") else {}
+	var movement_state: Dictionary = Dictionary(controller.call("get_fireteam_movement_state", _release_local_fireteam_id)).duplicate(true) if controller != null and controller.has_method("get_fireteam_movement_state") and not _release_local_fireteam_id.is_empty() else {}
+	var fireteam_status: Dictionary = {}
+	if controller != null and controller.has_method("get_fireteam_status_card_snapshot"):
+		for status_variant in Array(controller.call("get_fireteam_status_card_snapshot")):
+			if typeof(status_variant) == TYPE_DICTIONARY and String(Dictionary(status_variant).get("fireteam_id", "")).strip_edges().to_lower() == _release_local_fireteam_id:
+				fireteam_status = Dictionary(status_variant).duplicate(true)
+				break
 	var fire_event_ids: PackedStringArray = PackedStringArray()
 	for event_variant in fire_events:
 		if typeof(event_variant) != TYPE_DICTIONARY:
@@ -230,6 +238,9 @@ func get_release_multiplayer_first_contact_snapshot() -> Dictionary:
 		"advance_attempted": _release_first_contact_advance_attempted,
 		"initial_movement_observed": _release_initial_movement_observed,
 		"initial_movement_observe_frames": _release_initial_movement_observe_frames,
+		"requested_target_position": _release_first_contact_target_position,
+		"movement_state": movement_state,
+		"fireteam_position": Dictionary(fireteam_status.get("position", {})).duplicate(true),
 		"contact_count": contacts.size(),
 		"contacts": contacts,
 		"fire_event_count": fire_events.size(),
@@ -396,6 +407,7 @@ func _submit_release_contact_advance(controller: Node) -> bool:
 	if terrain_registry != null and terrain_registry.has_method("resolve_walkable_target"):
 		var resolved: Dictionary = Dictionary(terrain_registry.call("resolve_walkable_target", requested_target))
 		requested_target = Vector2(resolved.get("replacement_position", requested_target))
+	_release_first_contact_target_position = requested_target
 	var state: Dictionary = Dictionary(controller.call("get_planning_state"))
 	state["selected_fireteam"] = _release_local_fireteam_id
 	state["selected_fireteams"] = [_release_local_fireteam_id]
