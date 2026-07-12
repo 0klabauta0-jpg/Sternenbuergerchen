@@ -113,6 +113,7 @@ const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_VISUAL_
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_VISUAL_POLISH_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_first_contact_visual_polish.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_ACCEPTANCE_SLICE_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_first_contact_acceptance_slice.gd")
 const RELEASE_FIRST_DECISION_LOOP_TWO_PLAYER_LOOP_SCENARIO_FIRST_CONTACT_INTEGRATED_PLAYTEST_SCRIPT: GDScript = preload("res://scripts/mission/release_first_decision_loop_two_player_loop_scenario_first_contact_integrated_playtest.gd")
+const LEFT_TACTICAL_STACK_1280_VISUAL_FINDINGS_SCRIPT: GDScript = preload("res://scripts/mission/left_tactical_stack_1280_visual_findings.gd")
 const UNIT_COMMAND_SCRIPT: GDScript = preload("res://scripts/npc/unit_command.gd")
 const AREA_ORDER_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/area_order_resolver.gd")
 const TERRAIN_MARKER_CATALOG_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_marker_catalog.gd")
@@ -15406,6 +15407,26 @@ func get_left_tactical_stack_1280_release_recapture_snapshot() -> Dictionary:
 		"creates_fire_event": false,
 		"creates_damage_event": false,
 		"sets_multiplayer_truth": false,
+	}
+
+
+func get_left_tactical_stack_1280_visual_findings_snapshot(source_recapture_override: Dictionary = {}, review_notes_override: Dictionary = {}) -> Dictionary:
+	var source_recapture: Dictionary = source_recapture_override.duplicate(true) if not source_recapture_override.is_empty() else get_left_tactical_stack_1280_release_recapture_snapshot()
+	var review_notes: Dictionary = review_notes_override.duplicate(true) if not review_notes_override.is_empty() else _build_left_tactical_stack_1280_default_visual_review_notes()
+	return Dictionary(LEFT_TACTICAL_STACK_1280_VISUAL_FINDINGS_SCRIPT.call("build_snapshot", source_recapture, review_notes))
+
+
+func _build_left_tactical_stack_1280_default_visual_review_notes() -> Dictionary:
+	return {
+		"review_available": true,
+		"mini_cards_readable": true,
+		"primary_focus_clear": true,
+		"event_log_readable": true,
+		"event_log_not_blocking_cards": true,
+		"host_client_consistent": true,
+		"member_strip_readable": false,
+		"event_filter_label_readable": false,
+		"desktop_capture_trusted": false,
 	}
 
 
