@@ -15,6 +15,7 @@ Jeder aktuelle Claim braucht einen Evidence-Record mit Commit, Laufdatum, Typ, E
 | `task_1181_snapshot_workbench` | Datierte HTML-Workbench dokumentiert damalige Einordnung und lokale Bedienprüfung. | Unveränderlicher Snapshot, kein Build- oder Gameplay-Beweis. |
 | `n001_documentation_baseline` | Canonical-Truth- und Manifest-Vertrag werden auf dem N001-Ausgangscommit verankert. | Dokumentationsbeweis, kein Runtime- oder Release-Test. |
 | `n002_fresh_checkout_bootstrap` | Externer Clone importiert, startet minimal und erzeugt Windows-Release-Artefakte. | Konfigurationsbeweis; TASK-1179 hat weiter einen separaten Nachlaufdefekt. |
+| `n002_release_export_credentials_boundary` | Der versionierte lokale Windows-Release-Workflow endet auf Commit `97989559` mit nativem Exitcode 0 und dokumentiert EXE, PCK, DLLs und PCK-Hash. | Kein zweiter Fresh-Clone nach den zwei kleinen Export-Fixes; kein Ersatz für den TASK-1179-Vollnachweis. |
 | `n002_task_1179_recapture_incomplete` | Zwei aktuelle Assertion-Läufe erreichen jeweils 18/18 und Exitcode 0. | Beide Läufe melden danach eine bereits freigegebene Instanz; kein sauberer Vollnachweis. |
 
 ## Offene Evidenzgates

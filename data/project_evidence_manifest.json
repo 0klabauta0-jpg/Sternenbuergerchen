@@ -53,6 +53,16 @@
       "owning_paths": [".gitignore", "project.godot", "export_presets.cfg", "scripts/tests", "scripts/tools"]
     },
     {
+      "id": "n002_release_export_credentials_boundary",
+      "commit": "97989559132d55ae5e0d2c24e77fd901b9e02a6b",
+      "run_at": "2026-07-17",
+      "type": "versionierter lokaler Windows-Release-Export",
+      "result": "Preset- und JSON-Vertrag stimmen einschließlich export_credentials.cfg überein; offizieller Export endet mit nativem Exitcode 0, erzeugt EXE, PCK und Runtime-DLLs; PCK 193802168 Bytes, SHA-256 a5ff35d1a4ad998005fb9d830c0a63c129be179edde7d328aa46c3b5bb20bf0f",
+      "artifact": "docs/qa/TASK_N002_FRESH_CHECKOUT_2026-07-17.md",
+      "caveat": "Nach den zwei kleinen Export-Fixes wurde kein zweiter externer Fresh-Clone-Lauf ausgeführt. Der lokale Export belegt den aktuellen Workflow, ersetzt aber weder das Fresh-Clone-Gate noch den offenen TASK-1179-Vollnachweis.",
+      "owning_paths": ["data/export_runtime_package_contract.json", "export_presets.cfg", "scripts/tests/test_task_n002_checkout_config.ps1", "scripts/tests/task_511_export_runtime_package_hygiene.gd", "scripts/tools/export_runtime_release.ps1"]
+    },
+    {
       "id": "n002_task_1179_recapture_incomplete",
       "commit": "4393a6a9a6f036ef2ca152cf10a8702c3e713780",
       "run_at": "2026-07-17",

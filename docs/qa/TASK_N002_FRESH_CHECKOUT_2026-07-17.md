@@ -26,6 +26,37 @@ sein nachträglich abgefragter Exitcode war jedoch nicht mehr verfügbar. Der
 Artefaktsatz belegt daher den Exportpfad, nicht einen nachträglich erfundenen
 Exitcode.
 
+## Nachtrag: versionierter Release-Export
+
+Am 17. Juli 2026 wurde der offizielle Release-Workflow auf Commit
+`97989559132d55ae5e0d2c24e77fd901b9e02a6b` erneut ausgeführt:
+
+```text
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/tools/export_runtime_release.ps1
+```
+
+Der Workflow prüfte den versionierten Preset gegen den JSON-Vertrag, legte den
+ignorierten Zielordner `builds/` an und endete mit nativem Exitcode 0. Seine
+lokale, ignorierte Provenance-Datei `builds/release_build_provenance.json`
+nennt dieselbe Commit-ID sowie:
+
+- `Sternenbuergerchen_rel.exe`: 104553472 Bytes
+- `Sternenbuergerchen_rel.pck`: 193802168 Bytes
+- PCK-SHA-256:
+  `a5ff35d1a4ad998005fb9d830c0a63c129be179edde7d328aa46c3b5bb20bf0f`
+- `liblimboai.windows.template_release.x86_64.dll` und
+  `libterrain.windows.release.x86_64.dll`
+
+Der dazugehörige Contract enthält `export_credentials.cfg` explizit im
+`all_resources`-Exclude-Filter; der Test prüft den Eintrag in JSON und Preset
+sowie deren vollständige Reihenfolge. Für diesen Nachtrag wurde kein echter
+Credential-Wert angelegt oder versioniert.
+
+**Caveat:** Nach den zwei kleinen, versionierten Export-Fixes wurde kein zweiter
+externer Fresh-Clone-Lauf ausgeführt. Der erfolgreiche lokale Export belegt
+den aktuellen Workflow und seinen nativen Exitcode, ersetzt aber nicht das
+separate Fresh-Clone-Gate oder die offene TASK-1179-Recapture.
+
 ## TASK-1179-Recapture
 
 Run 1 und Run 2 erreichten jeweils `=== RESULTS: 18 passed, 0 failed ===` und
