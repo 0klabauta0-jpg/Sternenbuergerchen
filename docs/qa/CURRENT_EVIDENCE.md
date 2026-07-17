@@ -14,10 +14,12 @@ Jeder aktuelle Claim braucht einen Evidence-Record mit Commit, Laufdatum, Typ, E
 | `task_1180_recovered_candidate` | Ein hashgesicherter Kandidat für einen First-Contact-/Live-Fire-Trace; Quelle und SHA-256 stehen im versionierten Recovery-Manifest. | Nicht integriert, nicht im aktiven Checkout und deshalb keine Evidenz oder aktueller Produktclaim. |
 | `task_1181_snapshot_workbench` | Datierte HTML-Workbench dokumentiert damalige Einordnung und lokale Bedienprüfung. | Unveränderlicher Snapshot, kein Build- oder Gameplay-Beweis. |
 | `n001_documentation_baseline` | Canonical-Truth- und Manifest-Vertrag werden auf dem N001-Ausgangscommit verankert. | Dokumentationsbeweis, kein Runtime- oder Release-Test. |
+| `n002_fresh_checkout_bootstrap` | Externer Clone importiert, startet minimal und erzeugt Windows-Release-Artefakte. | Konfigurationsbeweis; TASK-1179 hat weiter einen separaten Nachlaufdefekt. |
+| `n002_task_1179_recapture_incomplete` | Zwei aktuelle Assertion-Läufe erreichen jeweils 18/18 und Exitcode 0. | Beide Läufe melden danach eine bereits freigegebene Instanz; kein sauberer Vollnachweis. |
 
 ## Offene Evidenzgates
 
-- N002: saubere Import-/Start-Evidenz und zwei echte TASK-1179-Ergebnisse.
+- N002A: TASK-1179-Lifecycle-Nachlauf ohne Zugriff auf bereits freigegebene Instanzen zweimal sauber recapturen.
 - N003: sichtbare Command-Producer mit Plan-dann-GO- und Host/Client-Parität.
 - N004: öffentliche Missionsszene sowie zweimal frisch integrierter TASK-1180-Trace.
 - N007: ein frischer, deeplink-freier First-Ten-Minutes-Release-Gate.

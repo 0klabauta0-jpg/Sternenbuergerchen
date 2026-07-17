@@ -85,3 +85,29 @@ ersetzt keinen späteren Objective-/Debrief-Nachweis.
 TASK_N003 darf erst beginnen, wenn der Fresh-Checkout-Befund und die beiden
 TASK-1179-Ergebnisse auf einem committed Checkout mit vollständiger Evidenz
 festgehalten sind.
+
+## Befund und Evidenzstand (17. Juli 2026)
+
+Die Ursache wurde mit zwei kontrollierten Fresh-Clone-Experimenten getrennt:
+Die elf Netfox-Autoloads als `uid://`-Einträge erzeugten vor dem Aufbau der
+UID-Registry 50 Parse-Fehler und elf unbekannte UIDs. Zusätzliche Netfox-
+Sidecars allein beseitigten diesen Startzirkel nicht. Die produktive Lösung
+bootstrapt deshalb genau diese Autoloads über stabile `res://`-Pfade und
+versioniert ihre Sidecars weiterhin für stabile Ressourcenidentitäten.
+Fünf Asset-Placer-Sidecars wurden ausschließlich aus konkreten textuellen
+UID-Referenzen abgeleitet; eine pauschale Aufnahme aller erzeugten Sidecars
+findet nicht statt.
+
+Ein externer Clone von Commit `4393a6a9a6f036ef2ca152cf10a8702c3e713780`
+importierte ohne UID-, Autoload-, Parse- oder Scriptfehler und startete den
+minimalen Headless-Pfad mit Exitcode 0. Ein Windows-Release-Export erzeugte
+EXE, PCK und beide Runtime-DLLs. Die vollständige Befundkette samt temporären
+Logpfaden, Testbefehlen und Caveats steht in
+`docs/qa/TASK_N002_FRESH_CHECKOUT_2026-07-17.md`.
+
+Die zwei anschließenden TASK-1179-Läufe erreichten jeweils 18/18 Assertions
+und Exitcode 0, meldeten danach aber beide eine bereits freigegebene Instanz.
+Das ist ein separater Harness-/Runtime-Nachlaufdefekt und **kein** sauberer
+Objective-/Debrief-Vollnachweis. Der aktuelle Produktstatus bleibt deshalb
+bei „historisch vollständig, aktuell nicht sauber recaptured“, bis der Defekt
+in einem folgenden, eng begrenzten Task behoben und frisch getestet ist.

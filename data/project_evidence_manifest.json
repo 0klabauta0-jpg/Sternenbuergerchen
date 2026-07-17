@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "delivery_state": "Dokumentationsbaseline vor reproduzierter Runtime-Freigabe",
-  "product_maturity": "Historisch belegter vertikaler Commander-Slice mit offenen Frische-, Autoritaets- und Produktpfad-Gates",
+  "delivery_state": "Reproduzierter Checkout-Bootstrap mit offener Gameplay-Lifecycle-Recapture",
+  "product_maturity": "Historisch belegter vertikaler Commander-Slice mit aktuellem Checkout-Konfigurationsbeweis sowie offenen Lifecycle-, Autoritaets- und Produktpfad-Gates",
   "scope": {
     "canonical_current_state": "docs/CURRENT_GAME_STATE.md",
     "evidence_summary": "docs/qa/CURRENT_EVIDENCE.md",
@@ -41,6 +41,26 @@
       "artifact": "docs/CURRENT_GAME_STATE.md",
       "caveat": "Dokumentationsprovenance, kein Gameplay-, Import- oder Release-Test.",
       "owning_paths": ["docs", "data/project_evidence_manifest.json"]
+    },
+    {
+      "id": "n002_fresh_checkout_bootstrap",
+      "commit": "4393a6a9a6f036ef2ca152cf10a8702c3e713780",
+      "run_at": "2026-07-17",
+      "type": "externer Fresh-Clone-Import, Minimalstart und Windows-Export",
+      "result": "Headless-Import ohne UID-, Autoload-, Parse- oder Scriptfehler; Minimalstart mit Exitcode 0; EXE, PCK und Runtime-DLLs erzeugt",
+      "artifact": "docs/qa/TASK_N002_FRESH_CHECKOUT_2026-07-17.md",
+      "caveat": "Der Artefaktsatz belegt den Konfigurationspfad. Der manuell beaufsichtigte Exportprozess lieferte nach Prozessabschluss keinen nachträglich lesbaren Exitcode.",
+      "owning_paths": [".gitignore", "project.godot", "export_presets.cfg", "scripts/tests", "scripts/tools"]
+    },
+    {
+      "id": "n002_task_1179_recapture_incomplete",
+      "commit": "4393a6a9a6f036ef2ca152cf10a8702c3e713780",
+      "run_at": "2026-07-17",
+      "type": "zweifacher headless Objective-/Debrief-Playthrough",
+      "result": "Zwei Läufe mit jeweils 18/18 Assertions und Prozess-Exitcode 0",
+      "artifact": "docs/qa/TASK_N002_FRESH_CHECKOUT_2026-07-17.md",
+      "caveat": "Beide Läufe melden nach dem Assertion-Ergebnis 'Cannot call method call on a previously freed instance' in task_1179_ground_mission_objective_playthrough.gd:150. Deshalb kein sauberer frischer Objective-/Debrief-Vollnachweis.",
+      "owning_paths": ["scripts/tests/task_1179_ground_mission_objective_playthrough.gd", "scripts/meta"]
     }
   ],
   "candidates": [
