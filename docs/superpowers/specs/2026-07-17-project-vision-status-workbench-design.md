@@ -79,4 +79,3 @@ Sie benennt weiterhin die Grenzen: menschliche Spielentscheidung, Geschmack, Bal
 - Browser-Smoke per lokalem `file://`: Navigation, Filter, Notizen, Persistenz, Export und Import.
 - Screenshots bei Desktop und Mobile zur Kontrolle von Ueberlagerungen, Textfluss und erstem Viewport.
 - `git diff --check` und Kontrolle, dass fremde ungetrackte Dateien unberuehrt bleiben.
-
