@@ -158,6 +158,10 @@ if ($SkipExport) {
 	exit 0
 }
 
+$runtimeExportPath = [System.IO.Path]::GetFullPath((Join-Path $repoRoot ([string]$contract.runtime_export_path)))
+$runtimeExportDirectory = Split-Path -Parent $runtimeExportPath
+New-Item -ItemType Directory -Force -Path $runtimeExportDirectory | Out-Null
+
 $pushedLocation = $false
 try {
 	Push-Location $repoRoot

@@ -32,9 +32,10 @@ Exportvertrag dokumentiert und darf nicht pauschal ausgeschlossen werden.
    vollstaendige `exclude_filter` (einschliesslich
    `export_credentials.cfg`) vom Vertrag abweichen.
 3. Es veraendert und restauriert den Preset nicht.
-4. Es ruft Godot mit dem gewaehlten Preset auf und schreibt Godot-stdout/stderr als normales Export-Log.
-5. Nach einem erfolgreichen Export schreibt es `release_build_provenance.json` neben EXE und PCK. Die Datei enthaelt den vollen Git-Commit, Branch, Exportzeit, PCK-Groesse und SHA-256 des PCK.
-6. Nach dem Export kann `scripts/tools/release_runtime_start_check.ps1` den vertraglichen Spieleordner read-only pruefen und ein Manifest unter `tmp/release_runtime_start_check.json` schreiben.
+4. Es legt den ignorierten, vertraglichen Buildordner vor dem Export an.
+5. Es ruft Godot mit dem gewaehlten Preset auf und schreibt Godot-stdout/stderr als normales Export-Log.
+6. Nach einem erfolgreichen Export schreibt es `release_build_provenance.json` neben EXE und PCK. Die Datei enthaelt den vollen Git-Commit, Branch, Exportzeit, PCK-Groesse und SHA-256 des PCK.
+7. Nach dem Export kann `scripts/tools/release_runtime_start_check.ps1` den vertraglichen Spieleordner read-only pruefen und ein Manifest unter `tmp/release_runtime_start_check.json` schreiben.
 
 Der Export verweigert bewusst getrackte, nicht committete Aenderungen. Lokale untracked Arbeitsordner bleiben davon unberuehrt. So kann die Provenance nicht eine Commit-ID behaupten, waehrend der PCK noch uncommitteten Code enthaelt.
 

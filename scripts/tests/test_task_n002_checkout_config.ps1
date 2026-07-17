@@ -141,6 +141,7 @@ $exportWorkflowPath = Join-Path $ProjectRoot "scripts\tools\export_runtime_relea
 $exportWorkflow = Get-Content -LiteralPath $exportWorkflowPath -Raw
 Assert-Contract -Condition (-not ($exportWorkflow -match 'runtime_backup|KeepPatchedPreset|Set-OrReplaceLine')) -Message "Exportworkflow mutiert oder restauriert den versionierten Preset nicht"
 Assert-Contract -Condition ($exportWorkflow -match 'Assert-ExportPresetMatchesContract') -Message "Exportworkflow validiert Preset und Vertrag vor dem Export"
+Assert-Contract -Condition ($exportWorkflow -match 'New-Item\s+-ItemType\s+Directory\s+-Force\s+-Path\s+\$runtimeExportDirectory') -Message "Exportworkflow legt den ignorierten Buildordner vor dem Export an"
 
 $freshVerifierRelative = "scripts/tests/verify_task_n002_fresh_checkout.ps1"
 $freshVerifierPath = Join-Path $ProjectRoot $freshVerifierRelative
