@@ -14,6 +14,7 @@ const REQUIRED_EXCLUDES: PackedStringArray = [
 	"addons/godot_open_rts_reference/**",
 	"addons/map_builder_workbench/**",
 	"docs/**",
+	"export_credentials.cfg",
 	"scripts/tests/**",
 	"scripts/tools/**",
 ]

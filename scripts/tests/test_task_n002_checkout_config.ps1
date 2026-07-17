@@ -72,7 +72,8 @@ if (Test-Path -LiteralPath $presetPath -PathType Leaf) {
 	Assert-Contract -Condition ($presetText -match '(?m)^name="Windows Desktop"$') -Message "Das Preset heißt Windows Desktop"
 	Assert-Contract -Condition ($presetText -match '(?m)^platform="Windows Desktop"$') -Message "Das Preset nutzt die Windows-Desktop-Plattform"
 	Assert-Contract -Condition ($presetText -match '(?m)^export_path="builds/Sternenbuergerchen_rel\.exe"$') -Message "Der Exportpfad ist repository-relativ und deterministisch"
-	Assert-Contract -Condition (-not ($presetText -match '(?im)([A-Z]:\\|/Users/|/home/|credential|password|private[_ -]?key|ssh|remote[_ -]?deploy)')) -Message "Das Preset enthält keine persönlichen Pfade, Credentials oder Remote-Deploy-Befehle"
+	$presetContentWithoutExcludeFilter = [regex]::Replace($presetText, '(?m)^exclude_filter="[^"]*"$', '')
+	Assert-Contract -Condition (-not ($presetContentWithoutExcludeFilter -match '(?im)([A-Z]:\\|/Users/|/home/|credential|password|private[_ -]?key|ssh|remote[_ -]?deploy)')) -Message "Das Preset enthält außerhalb des Exclude-Filters keine persönlichen Pfade, Credentials oder Remote-Deploy-Befehle"
 }
 
 
@@ -121,9 +122,20 @@ foreach ($uidFile in $uidFiles) {
 
 $contractPath = Join-Path $ProjectRoot "data\export_runtime_package_contract.json"
 $contract = Get-Content -LiteralPath $contractPath -Raw | ConvertFrom-Json
+$contractExcludePatterns = @($contract.exclude_filter_patterns | ForEach-Object { [string]$_ })
+$credentialExcludePattern = "export_credentials.cfg"
 Assert-Contract -Condition ([string]$contract.runtime_export_path -ceq "builds/Sternenbuergerchen_rel.exe") -Message "Exportvertrag nutzt denselben relativen Buildpfad"
 Assert-Contract -Condition ([bool]$contract.export_preset_tracked) -Message "Exportvertrag markiert das Preset als versioniert"
 Assert-Contract -Condition (-not [bool]$contract.restore_local_export_preset_after_run) -Message "Workflow restauriert keinen angeblich lokalen Preset mehr"
+Assert-Contract -Condition ($contractExcludePatterns -contains $credentialExcludePattern) -Message "Exportvertrag schließt lokale Credentials aus"
+
+$presetExcludeMatch = [regex]::Match($presetText, '(?m)^exclude_filter="(?<value>[^"]*)"$')
+Assert-Contract -Condition ($presetExcludeMatch.Success) -Message "Preset enthält einen auslesbaren Exclude-Filter"
+if ($presetExcludeMatch.Success) {
+	$presetExcludePatterns = @($presetExcludeMatch.Groups['value'].Value.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+	Assert-Contract -Condition ($presetExcludePatterns -contains $credentialExcludePattern) -Message "Preset schließt lokale Credentials aus"
+	Assert-Contract -Condition (($presetExcludePatterns -join "`n") -ceq ($contractExcludePatterns -join "`n")) -Message "Preset-Exclude-Filter entspricht vollständig dem Exportvertrag"
+}
 
 $exportWorkflowPath = Join-Path $ProjectRoot "scripts\tools\export_runtime_release.ps1"
 $exportWorkflow = Get-Content -LiteralPath $exportWorkflowPath -Raw

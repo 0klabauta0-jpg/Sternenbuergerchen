@@ -18,7 +18,8 @@ Einrichtungsfehler eindeutig von späteren Runtime-Defekten.
 - `*.uid` aus `.gitignore` entfernen und nur benötigte UID-Sidecars mit
   versionierter Quelle einchecken.
 - `/builds/` sowie `export_credentials.cfg` ignorieren und `.godot/` ignoriert
-  lassen.
+  lassen; `export_credentials.cfg` zusaetzlich im versionierten
+  `all_resources`-Exportfilter ausschliessen.
 - Einen bereinigten, versionierten Windows-Preset `export_presets.cfg` mit
   relativem Buildpfad und ohne Secrets oder persönliche Pfade bereitstellen.
 - Mit `test_task_n002_checkout_config.ps1` den statischen Vertrag prüfen.
@@ -47,8 +48,12 @@ Einrichtungsfehler eindeutig von späteren Runtime-Defekten.
 
 - Der Konfigurationsvertrag ist auf der Ausgangsbasis rot dokumentiert und auf
   dem versionierten Stand grün.
-- Alle elf Netfox-Autoload-UIDs stimmen bytegenau mit `project.godot` überein;
-  kein Cache-, Library-, tmp- oder Probe-Sidecar wird versioniert.
+- Alle elf Netfox-Autoloads booten ueber stabile `res://`-Pfade; ihre
+  versionierten Sidecars behalten die dokumentierten UID-Werte. Kein Cache-,
+  Library-, tmp- oder Probe-Sidecar wird versioniert.
+- Ein lokales `export_credentials.cfg` ist sowohl per Git-Ignore als auch
+  explizit im versionierten `all_resources`-Exportfilter von Release-Paketen
+  ausgeschlossen.
 - Der externe Fresh-Clone importiert und startet mit echten Exitcodes ohne
   UID-, Autoload-, Parse- oder Scriptfehler.
 - Der Windows-Export wird mit verfügbaren Templates tatsächlich versucht;

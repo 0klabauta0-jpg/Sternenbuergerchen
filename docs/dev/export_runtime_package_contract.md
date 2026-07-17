@@ -3,7 +3,7 @@
 ## Zweck
 Der Runtime-Export soll ein spielbares Release-Paket bauen, nicht die lokale Godot-Editor-/Authoring-Umgebung ausliefern.
 
-`export_presets.cfg` ist als bereinigter Windows-Desktop-Preset versioniert. Dadurch kann ein frischer Checkout denselben relativen Export nach `builds/Sternenbuergerchen_rel.exe` ausfuehren. Maschinennahe Credentials bleiben ausschliesslich in der ignorierten `export_credentials.cfg`. Der versionierte Release-Pfad besteht aus Preset, `scripts/tools/export_runtime_release.ps1` und `data/export_runtime_package_contract.json`.
+`export_presets.cfg` ist als bereinigter Windows-Desktop-Preset versioniert. Dadurch kann ein frischer Checkout denselben relativen Export nach `builds/Sternenbuergerchen_rel.exe` ausfuehren. Maschinennahe Credentials bleiben ausschliesslich in der ignorierten `export_credentials.cfg`. Weil `export_filter="all_resources"` Git-Ignores nicht als Paketgrenze behandelt, schliessen sowohl der versionierte JSON-Vertrag als auch der Preset diese Datei explizit aus. Der versionierte Release-Pfad besteht aus Preset, `scripts/tools/export_runtime_release.ps1` und `data/export_runtime_package_contract.json`.
 
 ## Runtime-Exclude-Grenze
 Aus dem Runtime-Paket ausgeschlossen sind:
@@ -12,6 +12,8 @@ Aus dem Runtime-Paket ausgeschlossen sind:
 - Dokumentation, Reports und Task-Dateien.
 - Headless-Verifier, Test-Harnesses und Generierungstools.
 - Temporaere Arbeitsordner.
+- Die lokale `export_credentials.cfg`; sie darf nie als Runtime-Ressource
+  verpackt werden.
 
 Nicht ausgeschlossen werden Runtime-Addons und GDExtensions, die im Spielpfad gebraucht werden koennen:
 - `addons/limboai`
@@ -26,7 +28,9 @@ Exportvertrag dokumentiert und darf nicht pauschal ausgeschlossen werden.
 
 ## Workflow
 1. Das Script liest den versionierten `export_presets.cfg` und den JSON-Vertrag.
-2. Es verweigert den Lauf, wenn Presetname, relativer Exportpfad oder `exclude_filter` voneinander abweichen.
+2. Es verweigert den Lauf, wenn Presetname, relativer Exportpfad oder der
+   vollstaendige `exclude_filter` (einschliesslich
+   `export_credentials.cfg`) vom Vertrag abweichen.
 3. Es veraendert und restauriert den Preset nicht.
 4. Es ruft Godot mit dem gewaehlten Preset auf und schreibt Godot-stdout/stderr als normales Export-Log.
 5. Nach einem erfolgreichen Export schreibt es `release_build_provenance.json` neben EXE und PCK. Die Datei enthaelt den vollen Git-Commit, Branch, Exportzeit, PCK-Groesse und SHA-256 des PCK.
