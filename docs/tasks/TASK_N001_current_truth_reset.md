@@ -10,10 +10,10 @@ The project has substantial historical documentation, but a task number or dated
 
 ## Scope
 
-- Create `docs/DOCS_INDEX.md`, `docs/CURRENT_GAME_STATE.md`, `docs/PRODUCT_MILESTONES.md`, `docs/qa/CURRENT_EVIDENCE.md`, and schema-v1 `data/project_evidence_manifest.json`.
+- Create `docs/DOCS_INDEX.md`, `docs/CURRENT_GAME_STATE.md`, `docs/PRODUCT_MILESTONES.md`, `docs/qa/CURRENT_EVIDENCE.md`, `docs/visual/WORLD_ART_DIRECTION.md`, `docs/reports/README.md`, and schema-v1 `data/project_evidence_manifest.json`.
 - Update project brief/rules/architecture with Commander fantasy, complete loop, V1 limits, Frontier Low-Poly pillar, current-truth precedence, and anti-monolith guidance.
 - Add compatibility banners to `docs/IMPLEMENTATION_STATUS.md` and `docs/TASK_ROADMAP.md` without removing history.
-- Index dated reports and handbooks as snapshots without rewriting the TASK-1181 HTML.
+- Index dated reports and handbooks as snapshots with `supersedes` metadata without rewriting the TASK-1181 HTML.
 
 ## Non-goals
 
@@ -35,7 +35,8 @@ The project has substantial historical documentation, but a task number or dated
 - Exactly one document is declared canonical current game state and exactly one milestone is marked `now`.
 - The manifest contains `delivery_state`, `product_maturity`, `scope`, and `evidence[]`; each record has `id`, `commit`, `run_at`, `type`, `result`, `artifact`, `caveat`, and `owning_paths`.
 - Current claims classify `TASK_1179` as historical 18/18 evidence with a fresh-rerun caveat and `TASK_1180` as recovered but unintegrated.
-- A docs-contract verifier fails before the hierarchy exists and passes after; the current documents meet their declared line budgets.
+- `scripts/tests/project_current_truth_contract.gd` fails before the hierarchy/manifest exists and passes after.
+- The verifier enforces these maximum line budgets: `DOCS_INDEX.md` 120, `CURRENT_GAME_STATE.md` 220, `PRODUCT_MILESTONES.md` 180, `CURRENT_EVIDENCE.md` 220, and `WORLD_ART_DIRECTION.md` 180.
 
 ## Affected areas
 

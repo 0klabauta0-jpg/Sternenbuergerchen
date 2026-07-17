@@ -1,5 +1,7 @@
 # IMPLEMENTATION_STATUS
 
+> **Kompatibilitaetsledger:** Diese Datei bleibt für historische Verifier vollständig erhalten. Sie ist kein kanonischer Gegenwartsstatus; aktuelle Produktclaims stehen in `docs/CURRENT_GAME_STATE.md`, Evidenz und Caveats in `docs/qa/CURRENT_EVIDENCE.md`.
+
 ### TASK_1181 - Project Vision And Status Workbench
 - Status: implementiert und lokal im Browser verifiziert
 - Aenderung: Ein eigenstaendiges taktisches HTML-Briefing erklaert Spielidee, Spielerreise, belastbaren Projektstand, Architektur fuer Einsteiger, Pflichtarbeit, Ausbauvision und den konkreten Nutzen von GPT-5.6. Eine lokale Workbench speichert Fokus, Reifegrad, Prioritaeten, Entscheidungen und Notizen und importiert beziehungsweise exportiert versioniertes JSON.

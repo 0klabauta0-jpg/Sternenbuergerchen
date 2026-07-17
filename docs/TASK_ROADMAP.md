@@ -1,5 +1,7 @@
 # TASK_ROADMAP
 
+> **Kompatibilitaetsledger:** Diese historische Reihenfolge bleibt für bestehende Verifier erhalten. Die aktive, outcome-orientierte Folge steht in `docs/tasks/README.md`; Gegenwartsclaims stehen in `docs/CURRENT_GAME_STATE.md`.
+
 ## Zweck
 Diese Roadmap definiert die Reihenfolge der Tasks fuer das Projekt.
 

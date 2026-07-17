@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "delivery_state": "Dokumentationsbaseline vor reproduzierter Runtime-Freigabe",
+  "product_maturity": "Historisch belegter vertikaler Commander-Slice mit offenen Frische-, Autoritäts- und Produktpfad-Gates",
+  "scope": {
+    "canonical_current_state": "docs/CURRENT_GAME_STATE.md",
+    "evidence_summary": "docs/qa/CURRENT_EVIDENCE.md",
+    "excludes": [
+      "Gameplay-Wahrheit in UI, Visuals oder Dokumenten",
+      "Unintegrierte TASK-1180-Evidenz als aktueller Produktclaim",
+      "Historische TASK-Zähler als Reifemetrik"
+    ]
+  },
+  "evidence": [
+    {
+      "id": "task_1179_historical_grid_sweep_18_of_18",
+      "commit": "29e81d82516708b7f609f4163e32710cad559ebf",
+      "run_at": "2026-07-12",
+      "type": "historischer headless Objective-/Debrief-Playthrough",
+      "result": "Zwei historische 18/18 grid_sweep-Runs über Homebase bis Debrief",
+      "artifact": "docs/tasks/TASK_1179_ground_mission_objective_playthrough.md",
+      "caveat": "Ein späterer isolierter Rerun stoppte vor den letzten Objective-/Debrief-Assertions; kein frischer Vollnachweis für diesen Checkout.",
+      "owning_paths": ["scripts/tests", "scripts/core", "scripts/mission", "scripts/tactical"]
+    },
+    {
+      "id": "task_1180_recovered_candidate",
+      "commit": "not-in-active-checkout",
+      "run_at": "2026-07-17",
+      "type": "wiederhergestellter First-Contact-/Live-Fire-Kandidat",
+      "result": "Trace erhalten, aber noch nicht auf den öffentlichen authored Pfad portiert",
+      "artifact": "C:/dev/SternenBuergerchen-recovery/2026-07-17-project-forward/TASK_1180_ground_mission_first_contact_live_fire_trace.md",
+      "caveat": "Nicht integriert und deshalb keine aktuelle Produkt- oder Release-Evidenz.",
+      "owning_paths": ["scripts/mission", "scripts/tactical", "scenes/mission"]
+    },
+    {
+      "id": "task_1181_snapshot_workbench",
+      "commit": "74b9f09f8c906d9fc2de9941f8b08005f6932e4d",
+      "run_at": "2026-07-17",
+      "type": "datierter HTML-Arbeitsreport",
+      "result": "Lokale Workbench und damalige Statusdarstellung geprüft",
+      "artifact": "docs/reports/STERNENBUERGERCHEN_SPIELIDEE_PROJEKTSTAND_GPT56_2026-07-17.html",
+      "caveat": "Unveränderlicher Snapshot, kein Runtime- oder aktueller Release-Beweis.",
+      "owning_paths": ["docs/reports"]
+    },
+    {
+      "id": "n001_documentation_baseline",
+      "commit": "abaaadc8",
+      "run_at": "2026-07-17",
+      "type": "Current-Truth-Dokumentationsbaseline",
+      "result": "Aktive N001-Ausgangsbasis vor dem dokumentierten Contract-Commit",
+      "artifact": "docs/history/TASK_HISTORY_SUMMARY.md",
+      "caveat": "Dokumentationsprovenance, kein Gameplay-, Import- oder Release-Test.",
+      "owning_paths": ["docs", "data/project_evidence_manifest.json"]
+    }
+  ]
+}

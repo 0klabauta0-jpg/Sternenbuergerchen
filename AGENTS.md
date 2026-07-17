@@ -43,6 +43,11 @@ UI ist nicht die Wahrheit. Gameplay-Zustand wird nicht in UI-Skripten verwaltet.
 
 ---
 
+## Current Truth und Dokumentationsgrenzen
+- Für Gegenwartsbehauptungen hat `docs/CURRENT_GAME_STATE.md` Vorrang; `docs/qa/CURRENT_EVIDENCE.md` und `data/project_evidence_manifest.json` belegen sie mit Frische und Caveats.
+- Historische TASK-Ledger, datierte HTML-Reports, Handbücher und Roadmaps sind Kompatibilitäts- oder Snapshot-Artefakte. Sie sind nicht allein aktuelle Produkt-, Runtime- oder Release-Wahrheit.
+- Keine Dokumentations-Monolithen: kurze aktuelle Seiten verweisen auf Contracts, Tasks, QA und Snapshots. Dokumente, UI und Visuals dürfen Gameplay-State nie speichern oder autorisieren.
+
 # 2. Immer zuerst lesen
 
 Vor jeder nicht-trivialen Aenderung muessen folgende Dateien gelesen werden:

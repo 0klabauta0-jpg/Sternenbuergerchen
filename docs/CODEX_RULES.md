@@ -65,6 +65,10 @@ Du arbeitest als vorsichtiger Senior-Entwickler im bestehenden Godot-4.6.2-Proje
 - `docs/IMPLEMENTATION_STATUS.md` nach Abschluss aktualisieren; Roadmap nur aendern, wenn Task-Reihenfolge oder Status betroffen ist.
 - Das alte DOCX ist nur nach `docs/GDD_STATUS.md` zu behandeln: Inspiration/Migrationsquelle, keine bindende Code-Wahrheit.
 
+## Current Truth und Dokumentationsgrenzen
+- Gegenwartsbehauptungen zuerst gegen `docs/CURRENT_GAME_STATE.md` und `docs/qa/CURRENT_EVIDENCE.md` prüfen. Historische TASK-Ledger, Roadmaps und datierte Reports bleiben Evidenz/Snapshots, bis ein frischer Record Commit, Lauf, Artefakt, Ergebnis und Caveat benennt.
+- Keine Dokumentations-Monolithen bauen: kurze aktuelle Dokumente indexieren tiefe Contracts, Tasks und QA-Artefakte statt sie zu kopieren. Dokumente und UI dürfen nie Gameplay-Wahrheit ersetzen.
+
 ## Git-/GitHub-Regeln
 - Wenn fuer die Aufgabe sinnvoll, lege oder nutze einen Branch nach Schema `task/<kurzname>`
 - Nach erfolgreicher lokaler Pruefung:

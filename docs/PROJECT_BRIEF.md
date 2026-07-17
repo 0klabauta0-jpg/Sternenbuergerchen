@@ -41,6 +41,12 @@ Heimatbasis -> Team zusammenstellen -> FOB -> Rollen / Loadout / Dropship -> Ein
 - Halten
 - Zurückziehen
 
+## Produktklarheit
+- Der Spieler ist Einsatz-Commander: Er stellt Teams zusammen, plant den Einsatz und führt Fire Team Leader, statt einzelne NPCs direkt zu steuern.
+- Die vollständige Produktschleife ist Heimatbasis -> Team/Loadout -> FOB/Dropship -> LZ/Deboard -> Fireteam-Befehle -> Missionsziel -> Ergebnis/Debrief -> Rückkehr/Entwicklung.
+- Der visuelle Pfeiler **Frontier Low-Poly** steht für raue Außenposten, klare Silhouetten und lesbare Einsatzräume. Visuals behaupten keine Navigation, Deckung oder Combat-Semantik, die die Simulation nicht besitzt.
+- V1 bleibt ein testbarer Commander-/Fireteam-Slice; neue Systeme dürfen die ausdrücklich ausgeschlossenen Grenzen nicht stillschweigend erweitern.
+
 ## V1 Respawn
 - Rover: 30 Sekunden
 - FOB: 2,5 Minuten

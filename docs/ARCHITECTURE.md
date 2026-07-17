@@ -61,6 +61,12 @@ Der aktuelle Runtime-Kernpfad ist `scripts/core/`, nicht `scripts/simulation/`.
 
 Details stehen in `docs/dev/runtime_script_layout_contract.md`.
 
+## Current Truth und Dokumentationsgrenzen
+- `docs/CURRENT_GAME_STATE.md` ist die einzige kanonische Kurzquelle für gegenwärtige Produktbehauptungen; `docs/qa/CURRENT_EVIDENCE.md` und `data/project_evidence_manifest.json` liefern Evidenz und Caveats.
+- Historische TASK-Ledger, Roadmaps, HTML-Reports und Handbücher bleiben Kompatibilitäts- oder Snapshot-Artefakte. Sie werden nicht durch Datum oder Tasknummer zu aktueller Runtime- oder Release-Wahrheit.
+- Neue Dokumentation darf keinen Monolithen bilden: kurze aktuelle Indizes verlinken auf Contracts, Tasks, QA-Artefakte und Snapshots statt deren Details zu duplizieren.
+- Dokumente, UI und Visuals beschreiben oder lesen State; sie erzeugen keine Gameplay-Autorität.
+
 ## UI-Regeln
 - UI liest State, setzt höchstens Commands
 - kein Gameplay-Commit in UI-Callbacks
