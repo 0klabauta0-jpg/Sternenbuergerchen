@@ -3,7 +3,7 @@
 ## Zweck
 Der Runtime-Export soll ein spielbares Release-Paket bauen, nicht die lokale Godot-Editor-/Authoring-Umgebung ausliefern.
 
-`export_presets.cfg` bleibt lokal ignoriert, weil Godot dort nutzer- und rechnernahe Exportdetails speichern kann. Der versionierte Release-Pfad ist `scripts/tools/export_runtime_release.ps1` plus `data/export_runtime_package_contract.json`.
+`export_presets.cfg` ist als bereinigter Windows-Desktop-Preset versioniert. Dadurch kann ein frischer Checkout denselben relativen Export nach `builds/Sternenbuergerchen_rel.exe` ausfuehren. Maschinennahe Credentials bleiben ausschliesslich in der ignorierten `export_credentials.cfg`. Der versionierte Release-Pfad besteht aus Preset, `scripts/tools/export_runtime_release.ps1` und `data/export_runtime_package_contract.json`.
 
 ## Runtime-Exclude-Grenze
 Aus dem Runtime-Paket ausgeschlossen sind:
@@ -25,13 +25,12 @@ Bis ein eigener Extraction-Task diesen Legacy-Bridge-Pfad migriert, ist
 Exportvertrag dokumentiert und darf nicht pauschal ausgeschlossen werden.
 
 ## Workflow
-1. Das Script liest den lokalen `export_presets.cfg`.
-2. Es schreibt einen Backup-Snapshot.
-3. Es ersetzt nur den `exclude_filter` fuer den Exportlauf.
+1. Das Script liest den versionierten `export_presets.cfg` und den JSON-Vertrag.
+2. Es verweigert den Lauf, wenn Presetname, relativer Exportpfad oder `exclude_filter` voneinander abweichen.
+3. Es veraendert und restauriert den Preset nicht.
 4. Es ruft Godot mit dem gewaehlten Preset auf und schreibt Godot-stdout/stderr als normales Export-Log.
 5. Nach einem erfolgreichen Export schreibt es `release_build_provenance.json` neben EXE und PCK. Die Datei enthaelt den vollen Git-Commit, Branch, Exportzeit, PCK-Groesse und SHA-256 des PCK.
-6. Es stellt den lokalen Preset wieder her, ausser `-KeepPatchedPreset` ist explizit gesetzt.
-7. Nach dem Export kann `scripts/tools/release_runtime_start_check.ps1` den vertraglichen Spieleordner read-only pruefen und ein Manifest unter `tmp/release_runtime_start_check.json` schreiben.
+6. Nach dem Export kann `scripts/tools/release_runtime_start_check.ps1` den vertraglichen Spieleordner read-only pruefen und ein Manifest unter `tmp/release_runtime_start_check.json` schreiben.
 
 Der Export verweigert bewusst getrackte, nicht committete Aenderungen. Lokale untracked Arbeitsordner bleiben davon unberuehrt. So kann die Provenance nicht eine Commit-ID behaupten, waehrend der PCK noch uncommitteten Code enthaelt.
 
@@ -59,7 +58,8 @@ Der Helfer schreibt `tmp/release_runtime_checked_launcher.json` und ersetzt kein
 Wenn `-Launch` gesetzt ist, darf der Nachcheck den dadurch gestarteten Prozess als erwarteten Lauf behandeln. Weitere laufende Release-Prozesse bleiben Warnungen, damit ein Altfenster nicht als erfolgreicher Neustart durchrutscht.
 
 ## Regeln
-- Keine privaten Codesigning- oder User-Pfade in getrackte Dateien schreiben.
+- Keine privaten Codesigning-, Credential- oder User-Pfade in getrackte Dateien schreiben.
+- `export_presets.cfg` nicht waehrend des Release-Workflows patchen; Aenderungen am Preset und JSON-Vertrag muessen gemeinsam reviewt werden.
 - Exclude-Pattern nur ueber `data/export_runtime_package_contract.json` erweitern.
 - Nach Export-Hygiene-Aenderungen mindestens den TASK_511-Verifier und `git diff --check` ausfuehren.
 - Ein echter Release-Export soll das Pack-Log stichprobenartig gegen ausgeschlossene Pfade pruefen.

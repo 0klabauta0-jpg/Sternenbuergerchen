@@ -1,8 +1,7 @@
 param(
 	[string]$Preset = "",
 	[string]$ContractPath = "",
-	[switch]$SkipExport,
-	[switch]$KeepPatchedPreset
+	[switch]$SkipExport
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,18 +19,39 @@ function Read-JsonFile {
 	return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
 }
 
-function Set-OrReplaceLine {
+function Get-ConfigQuotedValue {
 	param(
 		[string]$Content,
-		[string]$Key,
-		[string]$Value
+		[string]$Key
 	)
 	$escapedKey = [regex]::Escape($Key)
-	$line = "$Key=`"$Value`""
-	if ($Content -match "(?m)^$escapedKey=") {
-		return [regex]::Replace($Content, "(?m)^$escapedKey=.*$", $line)
+	$match = [regex]::Match($Content, "(?m)^$escapedKey=`"([^`"]*)`"$")
+	if (-not $match.Success) {
+		throw "Missing quoted export preset setting: $Key"
 	}
-	return $Content.TrimEnd() + [Environment]::NewLine + $line + [Environment]::NewLine
+	return $match.Groups[1].Value
+}
+
+function Assert-ExportPresetMatchesContract {
+	param(
+		[string]$Content,
+		[object]$Contract,
+		[string]$PresetName
+	)
+	$configuredName = Get-ConfigQuotedValue -Content $Content -Key "name"
+	if ($configuredName -cne $PresetName) {
+		throw "Tracked export preset name '$configuredName' does not match contract '$PresetName'."
+	}
+	$configuredPath = Get-ConfigQuotedValue -Content $Content -Key "export_path"
+	$contractPath = [string]$Contract.runtime_export_path
+	if ($configuredPath -cne $contractPath) {
+		throw "Tracked export path '$configuredPath' does not match contract '$contractPath'."
+	}
+	$configuredExcludes = @((Get-ConfigQuotedValue -Content $Content -Key "exclude_filter").Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+	$contractExcludes = @($Contract.exclude_filter_patterns | ForEach-Object { [string]$_ })
+	if (($configuredExcludes -join "`n") -cne ($contractExcludes -join "`n")) {
+		throw "Tracked exclude_filter does not match data/export_runtime_package_contract.json."
+	}
 }
 
 function Get-GitValue {
@@ -124,31 +144,17 @@ $excludePatterns = @($contract.exclude_filter_patterns | ForEach-Object { [strin
 if ($excludePatterns.Count -eq 0) {
 	throw "Export runtime package contract contains no exclude_filter_patterns."
 }
-$excludeFilter = ($excludePatterns -join ",")
 
 if (-not $SkipExport -and -not (Test-GitTrackedWorktreeClean -RepoRoot $repoRoot)) {
 	throw "Refusing runtime export with tracked Git changes. Commit or stash the tracked worktree first."
 }
 
 $originalContent = Get-Content -LiteralPath $exportPresetPath -Raw
-$patchedContent = Set-OrReplaceLine -Content $originalContent -Key "exclude_filter" -Value $excludeFilter
-$patchedContent = Set-OrReplaceLine -Content $patchedContent -Key "export_path" -Value ([string]$contract.runtime_export_path)
-
-if ($patchedContent -eq $originalContent) {
-	Write-Host "Export preset already matches runtime package contract."
-} else {
-	$backupPath = "$exportPresetPath.runtime_backup"
-	[System.IO.File]::WriteAllText($backupPath, $originalContent, [System.Text.UTF8Encoding]::new($false))
-	[System.IO.File]::WriteAllText($exportPresetPath, $patchedContent, [System.Text.UTF8Encoding]::new($false))
-	Write-Host "Patched local export preset for runtime export."
-}
+Assert-ExportPresetMatchesContract -Content $originalContent -Contract $contract -PresetName $Preset
+Write-Host "Tracked export preset matches runtime package contract."
 
 if ($SkipExport) {
-	Write-Host "SkipExport set; validated and patched export preset only."
-	if (-not $KeepPatchedPreset -and (Test-Path -LiteralPath "$exportPresetPath.runtime_backup")) {
-		Move-Item -LiteralPath "$exportPresetPath.runtime_backup" -Destination $exportPresetPath -Force
-		Write-Host "Restored local export preset after SkipExport."
-	}
+	Write-Host "SkipExport set; validated tracked export preset only."
 	exit 0
 }
 
@@ -181,10 +187,6 @@ try {
 } finally {
 	if ($pushedLocation) {
 		try { Pop-Location } catch {}
-	}
-	if (-not $KeepPatchedPreset -and (Test-Path -LiteralPath "$exportPresetPath.runtime_backup")) {
-		Move-Item -LiteralPath "$exportPresetPath.runtime_backup" -Destination $exportPresetPath -Force
-		Write-Host "Restored local export preset."
 	}
 }
 

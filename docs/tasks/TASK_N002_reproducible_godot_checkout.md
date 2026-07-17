@@ -1,51 +1,87 @@
-# TASK_N002 — Reproducible Godot Checkout
+# TASK_N002 — Reproduzierbarer Godot-Checkout
 
-## Goal / problem
+## Ziel / Problem
 
-Make a clean checkout import and start in Godot 4.6.2 without UID, autoload, parse, or export-configuration failures.
+Ein frischer Checkout muss sich mit Godot 4.6.2 ohne UID-, Autoload-, Parse-
+oder Exportkonfigurationsfehler importieren und minimal starten lassen.
 
-## Cause / value
+## Ursache / Sinnhaftigkeit
 
-The isolated `TASK_1179` rerun stopped before final assertions in conditions involving UID/autoload and an already-instanced runtime. Product evidence is not trustworthy until a clean tracked checkout can reproduce the project entry and clearly separate setup faults from runtime defects.
+Der isolierte TASK-1179-Rerun endete unter Bedingungen mit UID-/Autoload-
+Problemen und einer bereits instanziierten Runtime vor den letzten Assertions.
+Solange ein ausschließlich versionierter Checkout den Projekteinstieg nicht
+reproduziert, ist die Produktevidenz nicht belastbar. Dieses Gate trennt
+Einrichtungsfehler eindeutig von späteren Runtime-Defekten.
 
-## Scope
+## Umfang
 
-- Remove `*.uid` from `.gitignore`; track required Godot UID sidecars.
-- Add `/builds/`, ignore `export_credentials.cfg`, and retain `.godot/` ignore behavior.
-- Add a sanitized tracked Windows `export_presets.cfg` with selected project resources and no secrets or personal absolute paths.
-- Add a fresh-checkout verifier that copies or clones tracked files to an external temporary directory, imports headlessly, checks parse/autoload output, starts minimally, and validates export configuration.
+- `*.uid` aus `.gitignore` entfernen und nur benötigte UID-Sidecars mit
+  versionierter Quelle einchecken.
+- `/builds/` sowie `export_credentials.cfg` ignorieren und `.godot/` ignoriert
+  lassen.
+- Einen bereinigten, versionierten Windows-Preset `export_presets.cfg` mit
+  relativem Buildpfad und ohne Secrets oder persönliche Pfade bereitstellen.
+- Mit `test_task_n002_checkout_config.ps1` den statischen Vertrag prüfen.
+- Mit `verify_task_n002_fresh_checkout.ps1` einen externen Git-Clone ohne
+  Hardlinks erzeugen, headless importieren, minimal starten und optional
+  exportieren. UID-, Autoload-, Parse- und Scriptfehler sind harte Gates.
+- TASK 1179 nach bestandenem Checkout-Gate zweimal bis zu seinem tatsächlichen
+  Objective-/Debrief-Ergebnis ausführen und ehrlich als Evidenz festhalten.
 
-## Non-goals
+## Nicht-Ziele
 
-- Do not conceal a distinct runtime failure by weakening the verifier.
-- Do not change mission logic, move product entry paths, add credentials, or claim that `TASK_1180` is integrated.
+- Keinen separaten Runtime-Fehler durch Abschwächen des Verifiers verdecken.
+- Keine Missionslogik, keinen sichtbaren Produktpfad und keine
+  Command-Autorität umbauen.
+- TASK 1180 weder integrieren noch als aktuelle Evidenz ausgeben.
 
-## Relevant contracts / documents
+## Relevante Dokumente und Contracts
 
-- `docs/CURRENT_GAME_STATE.md` and `docs/qa/CURRENT_EVIDENCE.md` created by `TASK_N001`
-- `project.godot`, `.gitignore`, and existing export/resource configuration
+- `docs/CURRENT_GAME_STATE.md` und `docs/qa/CURRENT_EVIDENCE.md`
+- `project.godot`, `.gitignore` und der Export-/Ressourcenvertrag
+- `docs/dev/export_runtime_package_contract.md`
 - `docs/tasks/TASK_1179_ground_mission_objective_playthrough.md`
 - `docs/dev/fireteam_runtime_execution_path_contract.md`
 
-## Acceptance criteria
+## Akzeptanzkriterien
 
-- A configuration contract test fails before the tracked config/UID changes and passes after.
-- A fresh external checkout reports no UID, autoload, or parse failures and its minimal headless start exits successfully.
-- The export configuration is sanitized and reproducibly valid.
-- `TASK_1179` runs twice after fresh import to its true outcome/debrief gate; if it exposes a distinct defect, evidence records the command, artifact, and caveat rather than overstating success.
+- Der Konfigurationsvertrag ist auf der Ausgangsbasis rot dokumentiert und auf
+  dem versionierten Stand grün.
+- Alle elf Netfox-Autoload-UIDs stimmen bytegenau mit `project.godot` überein;
+  kein Cache-, Library-, tmp- oder Probe-Sidecar wird versioniert.
+- Der externe Fresh-Clone importiert und startet mit echten Exitcodes ohne
+  UID-, Autoload-, Parse- oder Scriptfehler.
+- Der Windows-Export wird mit verfügbaren Templates tatsächlich versucht;
+  fehlende externe Templates werden mit Befehl, Exitcode und Log als Blocker
+  dokumentiert.
+- TASK 1179 wird zweimal zum tatsächlichen Ergebnis ausgeführt. Ein eigener
+  Runtime-Defekt erhält Commit, Datum, Testart, Artefakt und Caveat, niemals
+  einen erfundenen Erfolg.
 
-## Affected areas
+## Betroffene Bereiche
 
-Git ignore/export configuration, generated UID sidecars, focused fresh-checkout verifier, and current evidence documentation. No command-authority or scene-architecture refactor.
+`.gitignore`, `project.godot`-referenzierte UID-Sidecars,
+`export_presets.cfg`, der Exportvertrag, der TASK-511-Hygiene-Verifier sowie
+die fokussierten N002-Checkout-Verifier. Gameplay, Szenen und Command-Pfade
+bleiben unverändert.
 
-## Verification
+## Lokale Prüfung
 
-Capture the red configuration test; run the verifier in a newly created external temporary directory; headlessly import and start; run `TASK_1179` twice; record exact evidence; run `git diff --check`.
+1. `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/tests/test_task_n002_checkout_config.ps1`
+2. `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/tests/verify_task_n002_fresh_checkout.ps1`
+3. Zwei TASK-1179-Läufe nach erfolgreichem Fresh-Clone-Gate.
+4. `godot_console.exe --headless --path . --script scripts/tests/task_511_export_runtime_package_hygiene.gd`
+5. `git diff --check`
 
-## Risks / open points
+## Risiken / offene Punkte
 
-Generated sidecars may expose missing resource references. The end-to-end trace is intentionally expensive; a setup pass does not excuse a later runtime failure.
+Godot erzeugt beim Import zusätzliche UID-Sidecars. Nur Sidecars mit
+versionierter Quelle dürfen nach einer bewussten Prüfung aufgenommen werden.
+Der End-to-End-Trace bleibt wegen Meta-/3D-Aufbau teuer; ein sauberer Import
+ersetzt keinen späteren Objective-/Debrief-Nachweis.
 
-## Dependency / exit gate
+## Abhängigkeit / Exit-Gate
 
-Requires the N001 evidence vocabulary and baseline. `TASK_N003` may start only when clean-checkout results and the `TASK_1179` outcome are recorded honestly on the committed checkout.
+TASK_N003 darf erst beginnen, wenn der Fresh-Checkout-Befund und die beiden
+TASK-1179-Ergebnisse auf einem committed Checkout mit vollständiger Evidenz
+festgehalten sind.

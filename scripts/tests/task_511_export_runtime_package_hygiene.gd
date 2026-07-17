@@ -41,19 +41,18 @@ func _run_tests() -> void:
 	_test_export_script_uses_contract(contract)
 	_test_docs_reference_task()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
-	if _failed > 0:
-		print("FAIL")
-	else:
-		print("ALL TESTS PASSED")
-	quit()
+	var exit_code := 1 if _failed > 0 else 0
+	print("FAIL" if exit_code != 0 else "ALL TESTS PASSED")
+	quit(exit_code)
 
 
 func _test_contract_shape(contract: Dictionary) -> void:
 	_assert(not contract.is_empty(), "Runtime export package contract is valid JSON")
 	_assert(String(contract.get("preset_name", "")) == "Windows Desktop", "Contract targets the Windows Desktop preset")
-	_assert(String(contract.get("export_preset_path", "")) == "export_presets.cfg", "Contract documents local ignored export preset path")
+	_assert(String(contract.get("export_preset_path", "")) == "export_presets.cfg", "Contract documents tracked export preset path")
 	_assert(String(contract.get("runtime_export_path", "")).ends_with("Sternenbuergerchen_rel.exe"), "Contract keeps the runtime export executable target")
-	_assert(bool(contract.get("restore_local_export_preset_after_run", false)), "Contract requires restoring the local export preset after the run")
+	_assert(bool(contract.get("export_preset_tracked", false)), "Contract requires a tracked sanitized export preset")
+	_assert(not bool(contract.get("restore_local_export_preset_after_run", true)), "Contract forbids restore semantics for the tracked preset")
 
 
 func _test_contract_excludes(contract: Dictionary) -> void:
@@ -71,8 +70,8 @@ func _test_contract_excludes(contract: Dictionary) -> void:
 func _test_export_script_uses_contract(contract: Dictionary) -> void:
 	var script_text: String = _read_text(EXPORT_SCRIPT_PATH)
 	_assert(script_text.contains("export_runtime_package_contract.json"), "Export script loads the runtime package contract")
-	_assert(script_text.contains("exclude_filter"), "Export script patches the Godot exclude_filter")
-	_assert(script_text.contains("runtime_backup"), "Export script backs up and restores the local export preset")
+	_assert(script_text.contains("Assert-ExportPresetMatchesContract"), "Export script validates the tracked Godot preset against the contract")
+	_assert(not script_text.contains("runtime_backup") and not script_text.contains("KeepPatchedPreset"), "Export script does not mutate or restore the tracked preset")
 	_assert(script_text.contains("godot_console.exe") and script_text.contains("--export-release"), "Export script uses Godot headless release export")
 	_assert(script_text.contains("RedirectStandardError") and script_text.contains(".ExitCode"), "Export script treats Godot stderr warnings as log output and gates failure on the native exit code")
 	for required in PackedStringArray(Array(contract.get("exclude_filter_patterns", []))):

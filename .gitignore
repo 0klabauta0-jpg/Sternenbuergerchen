@@ -1,7 +1,8 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
-*.uid
+/builds/
+/export_credentials.cfg
 
 # Root-level Unity editor artifacts created by accidental repo-root opens.
 /Library/

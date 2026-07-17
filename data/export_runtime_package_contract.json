@@ -2,7 +2,8 @@
   "schema_version": 1,
   "preset_name": "Windows Desktop",
   "export_preset_path": "export_presets.cfg",
-  "runtime_export_path": "../Sternenbuergerchen_rel/Sternenbuergerchen_rel.exe",
+  "runtime_export_path": "builds/Sternenbuergerchen_rel.exe",
+  "export_preset_tracked": true,
   "runtime_provenance_file": "release_build_provenance.json",
   "exclude_filter_patterns": [
     "addons/asset_placer/**",
@@ -22,7 +23,7 @@
   "runtime_script_dependency_roots": [
     "scripts/tests/"
   ],
-  "restore_local_export_preset_after_run": true,
+  "restore_local_export_preset_after_run": false,
   "release_workflow_script": "scripts/tools/export_runtime_release.ps1",
-  "notes": "The local export_presets.cfg is ignored. Use the release workflow script for runtime package hygiene."
+  "notes": "The sanitized export_presets.cfg is tracked. Credentials remain local; the release workflow validates the preset against this contract before exporting."
 }
