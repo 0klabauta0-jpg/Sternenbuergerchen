@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "candidate_id": "task_1180_recovered_candidate",
+  "source_path": "C:/dev/SternenBuergerchen-recovery/2026-07-17-project-forward/docs/tasks/TASK_1180_ground_mission_first_contact_live_fire_trace.md",
+  "sha256": "D290C5115B3BE6044C2CFCD3086DBFDCF92EE55294FE7B0DED21EDDCB25119E6",
+  "recovery_status": "hashgesicherter Kandidat ausserhalb des aktiven Checkouts",
+  "caveat": "Nicht integriert; keine aktuelle Produkt-, Runtime- oder Release-Evidenz vor Portierung und zwei frischen TASK_N004-Laeufen.",
+  "recorded_at": "2026-07-17"
+}

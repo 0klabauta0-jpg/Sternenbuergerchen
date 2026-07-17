@@ -11,7 +11,7 @@ Jeder aktuelle Claim braucht einen Evidence-Record mit Commit, Laufdatum, Typ, E
 | Record | Aussage | Einschränkung |
 | --- | --- | --- |
 | `task_1179_historical_grid_sweep_18_of_18` | Zwei historische 18/18-Runs decken Homebase bis Debrief auf `grid_sweep` ab. | Der isolierte spätere Rerun endete vor Objective/Debrief; kein frischer Vollnachweis. |
-| `task_1180_recovered_candidate` | Wiederhergestellter First-Contact-/Live-Fire-Trace ist als Kandidat erhalten. | Nicht integriert, nicht im aktiven Checkout und kein aktueller Produktclaim. |
+| `task_1180_recovered_candidate` | Ein hashgesicherter Kandidat für einen First-Contact-/Live-Fire-Trace; Quelle und SHA-256 stehen im versionierten Recovery-Manifest. | Nicht integriert, nicht im aktiven Checkout und deshalb keine Evidenz oder aktueller Produktclaim. |
 | `task_1181_snapshot_workbench` | Datierte HTML-Workbench dokumentiert damalige Einordnung und lokale Bedienprüfung. | Unveränderlicher Snapshot, kein Build- oder Gameplay-Beweis. |
 | `n001_documentation_baseline` | Canonical-Truth- und Manifest-Vertrag werden auf dem N001-Ausgangscommit verankert. | Dokumentationsbeweis, kein Runtime- oder Release-Test. |
 

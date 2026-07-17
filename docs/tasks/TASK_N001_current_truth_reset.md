@@ -1,55 +1,56 @@
-# TASK_N001 — Current Truth Reset
+# TASK_N001 — Reset der aktuellen Wahrheit
 
-## Goal / problem
+## Ziel / Problem
 
-Create one short, human-facing source of current product truth and a machine-readable evidence manifest without deleting the historical ledgers that existing verifiers reference.
+Eine kurze, menschenlesbare Quelle für den aktuellen Produktstand und ein maschinenlesbares Evidenzmanifest schaffen, ohne die historischen Ledger zu löschen, die bestehende Verifier verwenden.
 
-## Cause / value
+## Ursache / Nutzen
 
-The project has substantial historical documentation, but a task number or dated report cannot safely express present readiness. A current evidence contract lets players, reviewers, and later tasks distinguish implemented behavior, fresh proof, caveats, and vision.
+Das Projekt besitzt umfangreiche historische Dokumentation, doch weder Tasknummer noch datierter Report drücken sichere gegenwärtige Reife aus. Der Evidenzvertrag trennt für Spieler, Reviewer und Folgetasks implementiertes Verhalten, frische Nachweise, Caveats und Vision.
 
-## Scope
+## Umfang
 
-- Create `docs/DOCS_INDEX.md`, `docs/CURRENT_GAME_STATE.md`, `docs/PRODUCT_MILESTONES.md`, `docs/qa/CURRENT_EVIDENCE.md`, `docs/visual/WORLD_ART_DIRECTION.md`, `docs/reports/README.md`, and schema-v1 `data/project_evidence_manifest.json`.
-- Update project brief/rules/architecture with Commander fantasy, complete loop, V1 limits, Frontier Low-Poly pillar, current-truth precedence, and anti-monolith guidance.
-- Add compatibility banners to `docs/IMPLEMENTATION_STATUS.md` and `docs/TASK_ROADMAP.md` without removing history.
-- Index dated reports and handbooks as snapshots with `supersedes` metadata without rewriting the TASK-1181 HTML.
+- `docs/DOCS_INDEX.md`, `docs/CURRENT_GAME_STATE.md`, `docs/PRODUCT_MILESTONES.md`, `docs/qa/CURRENT_EVIDENCE.md`, `docs/visual/WORLD_ART_DIRECTION.md`, `docs/reports/README.md` sowie `data/project_evidence_manifest.json` nach Schema v1 anlegen.
+- Projektbrief, Regeln und Architektur um Commander-Fantasie, vollständige Schleife, V1-Grenzen, Frontier-Low-Poly-Pfeiler, Current-Truth-Vorrang und Anti-Monolith-Leitplanken ergänzen.
+- Kompatibilitätsbanner in `docs/IMPLEMENTATION_STATUS.md` und `docs/TASK_ROADMAP.md` additiv einfügen.
+- Datierte Reports und Handbücher mit `supersedes`-Metadaten als Snapshots indexieren, ohne die TASK-1181-HTML zu verändern.
+- TASK_1180 ausschließlich als hashgesicherten Kandidaten außerhalb des aktiven Checkouts mit versioniertem Recovery-Manifest führen; nicht als Evidence-Record.
 
-## Non-goals
+## Nicht-Ziele
 
-- Do not claim a fresh `TASK_1179` objective/debrief rerun.
-- Do not integrate recovered `TASK_1180`, alter runtime behavior, or prune legacy documentation.
+- Keinen frischen TASK-1179-Objective-/Debrief-Lauf behaupten.
+- TASK_1180 nicht integrieren, kein Runtime-Verhalten ändern und keine Legacy-Dokumentation bereinigen.
+- Keine Szenen, Karten, UI- oder Gameplay-Wahrheit ändern.
 
-## Relevant contracts / documents
+## Relevante Contracts / Dokumente
 
-- `docs/history/TASK_HISTORY_SUMMARY.md`
-- `docs/PROJECT_BRIEF.md`
-- `docs/ARCHITECTURE.md`
-- `docs/CODEX_RULES.md`
-- `AGENTS.md`
-- `docs/IMPLEMENTATION_STATUS.md`
-- `docs/TASK_ROADMAP.md`
+- `docs/DOCS_INDEX.md`, `docs/CURRENT_GAME_STATE.md`, `docs/PRODUCT_MILESTONES.md`, `docs/qa/CURRENT_EVIDENCE.md`
+- `docs/history/TASK_HISTORY_SUMMARY.md` und `docs/history/recovery/TASK_1180_recovery_manifest.json`
+- `docs/PROJECT_BRIEF.md`, `docs/ARCHITECTURE.md`, `docs/CODEX_RULES.md`, `AGENTS.md`
+- `docs/IMPLEMENTATION_STATUS.md` und `docs/TASK_ROADMAP.md` als Kompatibilitätsledger
 
-## Acceptance criteria
+## Akzeptanzkriterien
 
-- Exactly one document is declared canonical current game state and exactly one milestone is marked `now`.
-- The manifest contains `delivery_state`, `product_maturity`, `scope`, and `evidence[]`; each record has `id`, `commit`, `run_at`, `type`, `result`, `artifact`, `caveat`, and `owning_paths`.
-- Current claims classify `TASK_1179` as historical 18/18 evidence with a fresh-rerun caveat and `TASK_1180` as recovered but unintegrated.
-- `scripts/tests/project_current_truth_contract.gd` fails before the hierarchy/manifest exists and passes after.
-- The verifier enforces these maximum line budgets: `DOCS_INDEX.md` 120, `CURRENT_GAME_STATE.md` 220, `PRODUCT_MILESTONES.md` 180, `CURRENT_EVIDENCE.md` 220, and `WORLD_ART_DIRECTION.md` 180.
+- Genau ein Dokument deklariert den kanonischen aktuellen Spielstand, genau ein Meilenstein ist mit `now` markiert.
+- Das Manifest enthält `delivery_state`, `product_maturity`, `scope`, `evidence[]` und `candidates[]`; jeder Evidence-Record hat `id`, `commit`, `run_at`, `type`, `result`, `artifact`, `caveat` und `owning_paths`.
+- Jeder Evidence-Commit ist ein 7- bis 40-stelliger Hex-SHA, jedes repo-relative Evidence-Artefakt existiert.
+- TASK_1180 steht nur in `candidates[]`, verweist auf den exakten Recovery-Pfad unter `docs/tasks/`, den SHA-256 `D290C5115B3BE6044C2CFCD3086DBFDCF92EE55294FE7B0DED21EDDCB25119E6` und ein versioniertes Recovery-Manifest.
+- Aktuelle Claims nennen TASK_1179 als historische 18/18-Evidenz mit Frische-Caveat und TASK_1180 als nicht integrierten hashgesicherten Kandidaten.
+- `scripts/tests/project_current_truth_contract.gd` akzeptiert `--project-root <absoluter-pfad>`, läuft aus einem externen Verzeichnis ohne Projekt-Autoloads und prüft RED vor sowie GREEN nach der Hierarchie/Provenance-Implementierung.
+- Der Verifier erzwingt diese Maximalbudgets: `DOCS_INDEX.md` 120, `CURRENT_GAME_STATE.md` 220, `PRODUCT_MILESTONES.md` 180, `CURRENT_EVIDENCE.md` 220 und `WORLD_ART_DIRECTION.md` 180 Zeilen.
 
-## Affected areas
+## Betroffene Bereiche
 
-Documentation indexes, evidence manifest, project guidance, status/roadmap compatibility banners, and a focused documentation verifier. No gameplay scene, runtime script, map, or legacy task file.
+Dokumentationsindizes, Evidenz- und Recovery-Manifest, Projektleitlinien, Status-/Roadmap-Banner und ein fokussierter Dokumentationsverifier. Keine Gameplay-Szene, kein Runtime-Script, keine Karte und keine historische Task-Datei.
 
-## Verification
+## Lokale Prüfung
 
-Run the new docs-contract verifier red then green; validate the JSON manifest; inspect canonical/`now` uniqueness; run `git diff --check`.
+Den Dokumentationscontract aus einem externen Verzeichnis mit absolutem `--project-root` erst rot und dann grün ausführen; JSON, Evidence-Provenance und Kandidaten prüfen; Budgets sowie canonical-/now-Einzigkeit prüfen; TASK-1181-Hash und `git diff --check` prüfen.
 
-## Risks / open points
+## Risiken / offene Punkte
 
-Compatibility ledgers are consumed by legacy tools, so edits must be additive. Evidence wording must not turn a recovered file or historical green run into a current release claim.
+Kompatibilitätsledger werden von Legacy-Tools verwendet und bleiben daher additiv. Evidenzsprache darf weder einen wiederhergestellten Kandidaten noch einen historischen grünen Lauf zu einer aktuellen Release-Behauptung machen. Ein reproduzierbarer Checkout bleibt Aufgabe von TASK_N002.
 
-## Dependency / exit gate
+## Abhängigkeit / Exit-Gate
 
-This is the first active task. `TASK_N002` may start only after the canonical index, manifest, uniqueness checks, and compatibility banners are committed.
+Dieser erste aktive Task liefert Index, Manifest, Einzigkeits- und Kompatibilitätsvertrag. TASK_N002 darf erst starten, wenn diese Elemente inklusive isoliert laufendem Verifier committed sind.

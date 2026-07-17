@@ -52,13 +52,16 @@ UI ist nicht die Wahrheit. Gameplay-Zustand wird nicht in UI-Skripten verwaltet.
 
 Vor jeder nicht-trivialen Aenderung muessen folgende Dateien gelesen werden:
 
+- `docs/DOCS_INDEX.md`
+- `docs/CURRENT_GAME_STATE.md`
+- `docs/PRODUCT_MILESTONES.md`
+- `docs/qa/CURRENT_EVIDENCE.md`
 - `docs/PROJECT_BRIEF.md`
 - `docs/ARCHITECTURE.md`
 - `docs/CODEX_RULES.md`
-- `docs/IMPLEMENTATION_STATUS.md`
 
 Wenn vorhanden und relevant:
-- `docs/TASK_ROADMAP.md`
+- `docs/IMPLEMENTATION_STATUS.md` und `docs/TASK_ROADMAP.md` nur als Kompatibilitaetsledger lesen, wenn ein Claim, Verifier oder eine Migration historische Eintraege beruehrt; nicht als vollstaendige Gegenwartsquelle.
 - konkrete Task-Datei unter `docs/tasks/...`
 - relevante Contracts unter `docs/dev/...`
 - relevante Reviews unter `docs/reviews/...`

@@ -12,11 +12,14 @@ Du arbeitest als vorsichtiger Senior-Entwickler im bestehenden Godot-4.6.2-Proje
 ## Pflicht vor jeder Aenderung
 1. Lies:
    - `AGENTS.md`
+   - `docs/DOCS_INDEX.md`
+   - `docs/CURRENT_GAME_STATE.md`
+   - `docs/PRODUCT_MILESTONES.md`
+   - `docs/qa/CURRENT_EVIDENCE.md`
    - `docs/PROJECT_BRIEF.md`
    - `docs/ARCHITECTURE.md`
    - `docs/CODEX_RULES.md`
-   - `docs/IMPLEMENTATION_STATUS.md`
-   - `docs/TASK_ROADMAP.md`, wenn die Aufgabe ein Task ist oder Roadmap-Status beruehrt
+   - `docs/IMPLEMENTATION_STATUS.md` und `docs/TASK_ROADMAP.md` nur als relevante Kompatibilitaetsledger, wenn historische Claims, Verifier oder Migrationen betroffen sind; sie sind nicht vollstaendig als Gegenwartsquelle zu lesen.
    - die konkrete Task-Datei unter `docs/tasks/`
    - relevante Contracts unter `docs/dev/`
    - relevante Review-, QA- oder Performance-Dokumente, wenn die Aufgabe daraus entsteht

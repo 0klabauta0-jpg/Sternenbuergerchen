@@ -13,7 +13,7 @@ Historische Verifier belegen Teile dieser Schleife, darunter den authored `grid_
 ## Gegenwärtige Evidenzlage
 
 - `TASK_1179` ist historische 18/18-Evidenz für zwei vollständige `grid_sweep`-Objective-/Debrief-Läufe auf dem Homebase-zu-Debrief-Pfad. Ein späterer isolierter Versuch endete vor den letzten Assertions; das ist kein frischer Vollnachweis für diesen Checkout.
-- `TASK_1180` ist ein wertvoller wiederhergestellter First-Contact-/Live-Fire-Trace, aber nicht integriert. Er liegt außerhalb dieses Checkouts und darf erst nach Portierung auf den öffentlichen authored Pfad in `TASK_N004` als aktuelle Evidenz gelten.
+- `TASK_1180` ist ein hashgesicherter Kandidat für einen First-Contact-/Live-Fire-Trace, aber nicht integriert. Seine Quelle liegt außerhalb dieses Checkouts unter `C:/dev/SternenBuergerchen-recovery/2026-07-17-project-forward/docs/tasks/TASK_1180_ground_mission_first_contact_live_fire_trace.md`; SHA-256 und Status stehen im versionierten Recovery-Manifest. Erst die Portierung auf den öffentlichen authored Pfad und zwei frische N004-Läufe können ihn zu Evidenz machen.
 - Der datierte TASK-1181-HTML-Bericht ist eine unveränderliche Momentaufnahme und Arbeits-Workbench, kein Produktbuild und keine kanonische Gegenwartsquelle.
 
 Exakte Commits, Artefakte, Läufe und Caveats stehen im Evidence-Manifest und in der lesbaren QA-Zusammenfassung.

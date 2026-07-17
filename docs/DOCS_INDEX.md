@@ -19,6 +19,7 @@ Diese drei kurzen Dokumente ersetzen keine Runtime-Wahrheit. Gameplay-State blei
 - [CURRENT_EVIDENCE.md](qa/CURRENT_EVIDENCE.md) — lesbare Evidenz mit Frische und Caveats.
 - [project_evidence_manifest.json](../data/project_evidence_manifest.json) — maschinenlesbarer Schema-v1-Vertrag.
 - [TASK_HISTORY_SUMMARY.md](history/TASK_HISTORY_SUMMARY.md) — unverändertes historisches Ledger; keine Gegenwartsfreigabe.
+- [TASK_1180_recovery_manifest.json](history/recovery/TASK_1180_recovery_manifest.json) — hashgesicherter, nicht integrierter Kandidat außerhalb des Checkouts.
 - [README.md](reports/README.md) — datierte HTML-Reports und Handbücher als unveränderliche Momentaufnahmen.
 - [GDD_STATUS.md](GDD_STATUS.md) — Alt-GDD als Inspiration/Migrationsquelle.
 - [IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md) und [TASK_ROADMAP.md](TASK_ROADMAP.md) — Kompatibilitätsledger für bestehende Verifier.
