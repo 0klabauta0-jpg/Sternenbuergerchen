@@ -75,29 +75,35 @@ if (Test-Path -LiteralPath $presetPath -PathType Leaf) {
 	Assert-Contract -Condition (-not ($presetText -match '(?im)([A-Z]:\\|/Users/|/home/|credential|password|private[_ -]?key|ssh|remote[_ -]?deploy)')) -Message "Das Preset enthält keine persönlichen Pfade, Credentials oder Remote-Deploy-Befehle"
 }
 
+
 $expectedAutoloads = [ordered]@{
-	"addons/netfox/network-time.gd.uid" = "uid://cnqdxyjptkfvp"
-	"addons/netfox/network-time-synchronizer.gd.uid" = "uid://5rmn2ik3kjo8"
-	"addons/netfox/rollback/network-rollback.gd.uid" = "uid://gas743comroj"
-	"addons/netfox/network-events.gd.uid" = "uid://bdmobxxptryj0"
-	"addons/netfox/network-performance.gd.uid" = "uid://cqgf7aqmjfoa3"
-	"addons/netfox/servers/rollback-simulation-server.gd.uid" = "uid://d5vx6blln3jr"
-	"addons/netfox/servers/network-history-server.gd.uid" = "uid://c554fbsy6yos3"
-	"addons/netfox/servers/network-synchronization-server.gd.uid" = "uid://yrhqsbd5ubhs"
-	"addons/netfox/servers/network-identity-server.gd.uid" = "uid://pc8gwg1lbusp"
-	"addons/netfox/servers/network-command-server.gd.uid" = "uid://mkgjb8gdl0fp"
-	"addons/netfox/servers/rollback-liveness-server.gd.uid" = "uid://beo1554xbapmy"
+	"NetworkTime" = @{ Path = "addons/netfox/network-time.gd"; Uid = "uid://cnqdxyjptkfvp" }
+	"NetworkTimeSynchronizer" = @{ Path = "addons/netfox/network-time-synchronizer.gd"; Uid = "uid://5rmn2ik3kjo8" }
+	"NetworkRollback" = @{ Path = "addons/netfox/rollback/network-rollback.gd"; Uid = "uid://gas743comroj" }
+	"NetworkEvents" = @{ Path = "addons/netfox/network-events.gd"; Uid = "uid://bdmobxxptryj0" }
+	"NetworkPerformance" = @{ Path = "addons/netfox/network-performance.gd"; Uid = "uid://cqgf7aqmjfoa3" }
+	"RollbackSimulationServer" = @{ Path = "addons/netfox/servers/rollback-simulation-server.gd"; Uid = "uid://d5vx6blln3jr" }
+	"NetworkHistoryServer" = @{ Path = "addons/netfox/servers/network-history-server.gd"; Uid = "uid://c554fbsy6yos3" }
+	"NetworkSynchronizationServer" = @{ Path = "addons/netfox/servers/network-synchronization-server.gd"; Uid = "uid://yrhqsbd5ubhs" }
+	"NetworkIdentityServer" = @{ Path = "addons/netfox/servers/network-identity-server.gd"; Uid = "uid://pc8gwg1lbusp" }
+	"NetworkCommandServer" = @{ Path = "addons/netfox/servers/network-command-server.gd"; Uid = "uid://mkgjb8gdl0fp" }
+	"RollbackLivenessServer" = @{ Path = "addons/netfox/servers/rollback-liveness-server.gd"; Uid = "uid://beo1554xbapmy" }
 }
 
+$projectText = Get-Content -LiteralPath (Join-Path $ProjectRoot "project.godot") -Raw
 foreach ($entry in $expectedAutoloads.GetEnumerator()) {
-	$uidRelative = [string]$entry.Key
+	$autoloadName = [string]$entry.Key
+	$sourceRelative = [string]$entry.Value.Path
+	$expectedUid = [string]$entry.Value.Uid
+	$uidRelative = "$sourceRelative.uid"
 	$uidPath = Join-Path $ProjectRoot $uidRelative
-	$sourceRelative = $uidRelative.Substring(0, $uidRelative.Length - 4)
+	$expectedProjectEntry = "$autoloadName=`"*res://$sourceRelative`""
+	Assert-Contract -Condition ($projectText.Contains($expectedProjectEntry)) -Message "Autoload bootstrapt ueber stabilen Pfad: $autoloadName"
 	Assert-Contract -Condition ($tracked.Contains($sourceRelative)) -Message "Autoload-Quelle ist versioniert: $sourceRelative"
 	Assert-Contract -Condition ($tracked.Contains($uidRelative)) -Message "Autoload-UID ist versioniert: $uidRelative"
 	if (Test-Path -LiteralPath $uidPath -PathType Leaf) {
 		$actualUid = (Get-Content -LiteralPath $uidPath -Raw).Trim()
-		Assert-Contract -Condition ($actualUid -ceq [string]$entry.Value) -Message "Autoload-UID bleibt stabil: $uidRelative"
+		Assert-Contract -Condition ($actualUid -ceq $expectedUid) -Message "Autoload-UID bleibt stabil: $uidRelative"
 	} else {
 		Assert-Contract -Condition $false -Message "Autoload-UID ist vorhanden: $uidRelative"
 	}
@@ -132,8 +138,12 @@ if (Test-Path -LiteralPath $freshVerifierPath -PathType Leaf) {
 	$freshVerifier = Get-Content -LiteralPath $freshVerifierPath -Raw
 	Assert-Contract -Condition ($freshVerifier -match '(?s)clone.*--no-local.*--no-hardlinks') -Message "Verifier nutzt einen echten externen Git-Clone"
 	Assert-Contract -Condition ($freshVerifier -match 'test_task_n002_checkout_config\.ps1') -Message "Verifier führt den statischen Vertrag im Clone aus"
-	Assert-Contract -Condition ($freshVerifier -match '--headless' -and $freshVerifier -match '--editor' -and $freshVerifier -match '--quit') -Message "Verifier importiert den Clone headless"
+	Assert-Contract -Condition ($freshVerifier -match '--headless' -and $freshVerifier -match '--editor' -and $freshVerifier -match '--import' -and $freshVerifier -match '--quit') -Message "Verifier erzwingt einen headless Godot-Import"
 	Assert-Contract -Condition ($freshVerifier -match '--quit-after') -Message "Verifier startet den Clone mit endlichem Zeitbudget"
+	Assert-Contract -Condition ($freshVerifier -match 'TimeoutSeconds' -and $freshVerifier -match 'Timed out after') -Message "Verifier begrenzt hÃ¤ngende Godot-Prozesse mit einem harten Timeout"
+	Assert-Contract -Condition ($freshVerifier -match 'ConvertTo-ProcessArgument' -and $freshVerifier -match 'Windows Desktop') -Message "Verifier quotet Prozessargumente mit Leerzeichen deterministisch"
+	Assert-Contract -Condition ($freshVerifier -match 'nativeExitCode') -Message "Verifier liest den nativen Prozess-Exitcode vor seiner Bewertung"
+	Assert-Contract -Condition ($freshVerifier -match 'New-Item -ItemType Directory -Force -Path') -Message "Verifier legt den ignorierten Buildordner vor dem Export an"
 	Assert-Contract -Condition ($freshVerifier -match 'UID|Autoload|Parse Error|SCRIPT ERROR') -Message "Verifier behandelt Setup-Fehlermuster als hartes Gate"
 	Assert-Contract -Condition ($freshVerifier -match 'KEEP' -or $freshVerifier -match 'behalten') -Message "Verifier behält Temp und Logs bei Fehlern"
 }

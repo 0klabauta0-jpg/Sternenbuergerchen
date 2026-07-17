@@ -24,23 +24,73 @@ $snapshotCommit = ""
 $sourceRefCreated = $false
 $passed = $false
 
+function ConvertTo-ProcessArgument {
+	param([string]$Value)
+	if ($Value.Length -eq 0) {
+		return '""'
+	}
+	if ($Value -notmatch '[\s"]') {
+		return $Value
+	}
+	$escaped = [regex]::Replace($Value, '(\\*)"', '$1$1\\"')
+	$escaped = [regex]::Replace($escaped, '(\\+)$', '$1$1')
+	return '"' + $escaped + '"'
+}
+
 function Invoke-NativeLogged {
 	param(
 		[string]$FilePath,
 		[string[]]$Arguments,
 		[string]$LogName,
-		[string]$WorkingDirectory
+		[string]$WorkingDirectory,
+		[int]$TimeoutSeconds = 180
 	)
+	if ($TimeoutSeconds -le 0) {
+		throw "$LogName requires a positive TimeoutSeconds value."
+	}
 	$stdoutPath = Join-Path $logRoot "$LogName.stdout.log"
 	$stderrPath = Join-Path $logRoot "$LogName.stderr.log"
-	$process = Start-Process -FilePath $FilePath -ArgumentList $Arguments -WorkingDirectory $WorkingDirectory -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+	$startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+	$startInfo.FileName = $FilePath
+	$startInfo.Arguments = (@($Arguments | ForEach-Object { ConvertTo-ProcessArgument -Value ([string]$_) }) -join ' ')
+	$startInfo.WorkingDirectory = $WorkingDirectory
+	$startInfo.UseShellExecute = $false
+	$startInfo.CreateNoWindow = $true
+	$startInfo.RedirectStandardOutput = $true
+	$startInfo.RedirectStandardError = $true
+	$stdoutWriter = [System.IO.StreamWriter]::new($stdoutPath, $false, [System.Text.UTF8Encoding]::new($false))
+	$stderrWriter = [System.IO.StreamWriter]::new($stderrPath, $false, [System.Text.UTF8Encoding]::new($false))
+	$process = [System.Diagnostics.Process]::new()
+	$process.StartInfo = $startInfo
+	$process.add_OutputDataReceived({ param($sender, $eventArgs) if ($null -ne $eventArgs.Data) { $stdoutWriter.WriteLine($eventArgs.Data) } })
+	$process.add_ErrorDataReceived({ param($sender, $eventArgs) if ($null -ne $eventArgs.Data) { $stderrWriter.WriteLine($eventArgs.Data) } })
+	if (-not $process.Start()) {
+		$stdoutWriter.Dispose()
+		$stderrWriter.Dispose()
+		throw "$LogName could not start $FilePath."
+	}
+	$process.BeginOutputReadLine()
+	$process.BeginErrorReadLine()
+	if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+		# Godot's console shim can launch a GUI child. taskkill /T only receives
+		# the exact process tree created for this verifier stage.
+		& taskkill.exe /PID $process.Id /T /F | Out-Null
+		$process.WaitForExit()
+		$stdoutWriter.Dispose()
+		$stderrWriter.Dispose()
+		throw "$LogName timed out after $TimeoutSeconds seconds; kept partial stdout/stderr under $logRoot."
+	}
+	$process.WaitForExit()
+	$nativeExitCode = [int]$process.ExitCode
+	$stdoutWriter.Dispose()
+	$stderrWriter.Dispose()
 	$stdout = if (Test-Path -LiteralPath $stdoutPath) { Get-Content -LiteralPath $stdoutPath -Raw } else { "" }
 	$stderr = if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath -Raw } else { "" }
-	Write-Host "[$LogName] exit=$($process.ExitCode)"
+	Write-Host "[$LogName] exit=$nativeExitCode"
 	if (-not [string]::IsNullOrWhiteSpace($stdout)) { Write-Output $stdout.TrimEnd() }
 	if (-not [string]::IsNullOrWhiteSpace($stderr)) { Write-Output $stderr.TrimEnd() }
 	return [pscustomobject]@{
-		ExitCode = [int]$process.ExitCode
+		ExitCode = $nativeExitCode
 		Stdout = [string]$stdout
 		Stderr = [string]$stderr
 		Combined = "$stdout`n$stderr"
@@ -113,37 +163,38 @@ try {
 	$sourceRefCreated = $true
 
 	# The clone flags are contract-significant: clone --no-local --no-hardlinks.
-	$cloneResult = Invoke-NativeLogged -FilePath "git" -Arguments @("clone", "--no-local", "--no-hardlinks", "--branch", $tempBranch, "--no-checkout", $ProjectRoot, $cloneRoot) -LogName "01-clone" -WorkingDirectory $runRoot
+	$cloneResult = Invoke-NativeLogged -FilePath "git" -Arguments @("clone", "--no-local", "--no-hardlinks", "--branch", $tempBranch, "--no-checkout", $ProjectRoot, $cloneRoot) -LogName "01-clone" -WorkingDirectory $runRoot -TimeoutSeconds 300
 	Assert-NativeSuccess -Result $cloneResult -Stage "External clone"
 	& git -C $ProjectRoot update-ref -d $tempRef
 	$sourceRefCreated = $false
 
-	$checkoutResult = Invoke-NativeLogged -FilePath "git" -Arguments @("checkout", "--detach", $snapshotCommit) -LogName "02-checkout" -WorkingDirectory $cloneRoot
+	$checkoutResult = Invoke-NativeLogged -FilePath "git" -Arguments @("checkout", "--detach", $snapshotCommit) -LogName "02-checkout" -WorkingDirectory $cloneRoot -TimeoutSeconds 300
 	Assert-NativeSuccess -Result $checkoutResult -Stage "Detached checkout"
 
-	$versionResult = Invoke-NativeLogged -FilePath $GodotPath -Arguments @("--version") -LogName "03-godot-version" -WorkingDirectory $cloneRoot
+	$versionResult = Invoke-NativeLogged -FilePath $GodotPath -Arguments @("--version") -LogName "03-godot-version" -WorkingDirectory $cloneRoot -TimeoutSeconds 30
 	Assert-NativeSuccess -Result $versionResult -Stage "Godot version"
 	if ($versionResult.Combined -notmatch '^4\.6\.2') {
 		throw "TASK_N002 requires Godot 4.6.2, got: $($versionResult.Combined.Trim())"
 	}
 
-	$configResult = Invoke-NativeLogged -FilePath "powershell" -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $cloneRoot "scripts\tests\test_task_n002_checkout_config.ps1"), "-ProjectRoot", $cloneRoot) -LogName "04-static-contract" -WorkingDirectory $cloneRoot
+	$configResult = Invoke-NativeLogged -FilePath "powershell" -Arguments @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", (Join-Path $cloneRoot "scripts\tests\test_task_n002_checkout_config.ps1"), "-ProjectRoot", $cloneRoot) -LogName "04-static-contract" -WorkingDirectory $cloneRoot -TimeoutSeconds 60
 	Assert-NativeSuccess -Result $configResult -Stage "Static checkout contract"
 
-	$importResult = Invoke-NativeLogged -FilePath $GodotPath -Arguments @("--headless", "--editor", "--path", $cloneRoot, "--quit") -LogName "05-headless-import" -WorkingDirectory $cloneRoot
+	$importResult = Invoke-NativeLogged -FilePath $GodotPath -Arguments @("--headless", "--editor", "--import", "--path", $cloneRoot, "--quit") -LogName "05-headless-import" -WorkingDirectory $cloneRoot -TimeoutSeconds 600
 	Assert-NativeSuccess -Result $importResult -Stage "Headless import"
 	Assert-NoGodotSetupErrors -Text $importResult.Combined -Stage "Headless import"
 
-	$startResult = Invoke-NativeLogged -FilePath $GodotPath -Arguments @("--headless", "--path", $cloneRoot, "--quit-after", "10") -LogName "06-minimal-start" -WorkingDirectory $cloneRoot
+	$startResult = Invoke-NativeLogged -FilePath $GodotPath -Arguments @("--headless", "--path", $cloneRoot, "--quit-after", "10") -LogName "06-minimal-start" -WorkingDirectory $cloneRoot -TimeoutSeconds 120
 	Assert-NativeSuccess -Result $startResult -Stage "Minimal project start"
 	Assert-NoGodotSetupErrors -Text $startResult.Combined -Stage "Minimal project start"
 
 	if (-not $SkipExport) {
-		$exportResult = Invoke-NativeLogged -FilePath $GodotPath -Arguments @("--headless", "--path", $cloneRoot, "--export-release", "Windows Desktop") -LogName "07-windows-export" -WorkingDirectory $cloneRoot
-		Assert-NativeSuccess -Result $exportResult -Stage "Windows release export"
-		Assert-NoGodotSetupErrors -Text $exportResult.Combined -Stage "Windows release export"
 		$expectedExe = Join-Path $cloneRoot "builds\Sternenbuergerchen_rel.exe"
 		$expectedPck = Join-Path $cloneRoot "builds\Sternenbuergerchen_rel.pck"
+		New-Item -ItemType Directory -Force -Path (Split-Path -Parent $expectedExe) | Out-Null
+		$exportResult = Invoke-NativeLogged -FilePath $GodotPath -Arguments @("--headless", "--path", $cloneRoot, "--export-release", "Windows Desktop") -LogName "07-windows-export" -WorkingDirectory $cloneRoot -TimeoutSeconds 600
+		Assert-NativeSuccess -Result $exportResult -Stage "Windows release export"
+		Assert-NoGodotSetupErrors -Text $exportResult.Combined -Stage "Windows release export"
 		if (-not (Test-Path -LiteralPath $expectedExe -PathType Leaf) -or -not (Test-Path -LiteralPath $expectedPck -PathType Leaf)) {
 			throw "Windows export returned success without expected EXE and PCK under builds/."
 		}
