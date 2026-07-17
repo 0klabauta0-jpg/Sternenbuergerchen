@@ -3,7 +3,7 @@ extends Control
 signal back_requested
 
 const MAIN_MENU_SCENE_PATH: String = "res://scenes/ui/main_menu.tscn"
-const MISSION_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const MISSION_SCENE: PackedScene = preload("res://scenes/mission/mission_runtime.tscn")
 const MULTIPLAYER_SESSION_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_session.gd")
 const MAP_MANIFEST_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_map_manifest.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")

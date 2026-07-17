@@ -1,6 +1,6 @@
 extends Node
 
-const MISSION_TEST_SCENE: PackedScene = preload("res://scenes/tests/mission_reactivity_test.tscn")
+const MISSION_RUNTIME_SCENE: PackedScene = preload("res://scenes/mission/mission_runtime.tscn")
 const META_UI_SKIN_SCRIPT: GDScript = preload("res://scripts/meta/meta_ui_skin.gd")
 const UNIT_ROSTER_PRESETS_SCRIPT: GDScript = preload("res://scripts/npc/unit_roster_presets.gd")
 const PLAYER_ROSTER_STORE_SCRIPT: GDScript = preload("res://scripts/meta/player_roster_store.gd")
@@ -4160,7 +4160,7 @@ func _start_mission() -> void:
 		_active_mission.queue_free()
 		_active_mission = null
 
-	var mission_instance = MISSION_TEST_SCENE.instantiate()
+	var mission_instance = MISSION_RUNTIME_SCENE.instantiate()
 	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
@@ -6821,7 +6821,7 @@ func _ensure_preview_mission() -> void:
 	if _preview_mission != null and _preview_mission_signature == desired_signature:
 		return
 	_release_preview_mission()
-	var preview_instance = MISSION_TEST_SCENE.instantiate()
+	var preview_instance = MISSION_RUNTIME_SCENE.instantiate()
 	_configure_mission_instance(preview_instance, _selected_unit_ids, _selected_fireteam_ids, true)
 	mission_host.add_child(preview_instance)
 	_preview_mission = preview_instance

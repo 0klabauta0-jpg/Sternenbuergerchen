@@ -21,10 +21,10 @@ Nicht ausgeschlossen werden Runtime-Addons und GDExtensions, die im Spielpfad ge
 - `addons/netfox`
 - `addons/netfox.internals`
 
-Der sichtbare Mission-Controller liegt historisch noch unter `scripts/tests/`.
-Bis ein eigener Extraction-Task diesen Legacy-Bridge-Pfad migriert, ist
-`scripts/tests/` deshalb als explizite Runtime-Script-Abhaengigkeit im
-Exportvertrag dokumentiert und darf nicht pauschal ausgeschlossen werden.
+Der sichtbare Mission-Controller und seine Mission-/Tactical-Komponenten liegen
+unter `scripts/mission/` und `scripts/tactical/`. `scripts/tests/` enthaelt
+nur noch Legacy-Adapter und Headless-Verifier und wird deshalb vollstaendig
+aus dem Runtime-Paket ausgeschlossen.
 
 ## Workflow
 1. Das Script liest den versionierten `export_presets.cfg` und den JSON-Vertrag.

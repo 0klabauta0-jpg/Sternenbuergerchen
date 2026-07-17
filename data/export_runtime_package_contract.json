@@ -12,6 +12,7 @@
     "addons/map_builder_workbench/**",
     "docs/**",
     "export_credentials.cfg",
+    "scripts/tests/**",
     "scripts/tools/**",
     "tmp/**"
   ],
@@ -21,9 +22,7 @@
     "addons/netfox",
     "addons/netfox.internals"
   ],
-  "runtime_script_dependency_roots": [
-    "scripts/tests/"
-  ],
+  "runtime_script_dependency_roots": [],
   "restore_local_export_preset_after_run": false,
   "release_workflow_script": "scripts/tools/export_runtime_release.ps1",
   "notes": "The sanitized export_presets.cfg is tracked. Credentials remain local; the release workflow validates the preset against this contract before exporting."
