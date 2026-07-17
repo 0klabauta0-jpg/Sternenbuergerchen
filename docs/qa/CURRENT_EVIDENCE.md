@@ -21,7 +21,7 @@ Jeder aktuelle Claim braucht einen Evidence-Record mit Commit, Laufdatum, Typ, E
 ## Offene Evidenzgates
 
 - N002A: TASK-1179-Lifecycle-Nachlauf ohne Zugriff auf bereits freigegebene Instanzen zweimal sauber recapturen.
-- N003: sichtbare Command-Producer mit Plan-dann-GO- und Host/Client-Parität.
+- N003: Ein lokal geprüfter Plan-dann-GO-Implementierungskandidat ist in Task und Gateway-Vertrag beschrieben; bis Commit, datierter Lauf und Artefakt im Manifest stehen, bleibt die Host/Client-Parität ein offenes Gate.
 - N004: öffentliche Missionsszene sowie zweimal frisch integrierter TASK-1180-Trace.
 - N007: ein frischer, deeplink-freier First-Ten-Minutes-Release-Gate.
 

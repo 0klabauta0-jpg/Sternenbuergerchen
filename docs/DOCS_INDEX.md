@@ -8,6 +8,7 @@ Diese drei kurzen Dokumente ersetzen keine Runtime-Wahrheit. Gameplay-State blei
 
 ## Produkt und Arbeit
 
+- [fireteam_command_gateway_contract.md](dev/fireteam_command_gateway_contract.md) â€” gemeinsamer Plan-dann-GO-Pfad fuer Buttons, Hotkeys, RMB und Netzwerk.
 - [PROJECT_BRIEF.md](PROJECT_BRIEF.md) — Commander-Fantasie, Core Loop, V1-Grenzen und visueller Pfeiler.
 - [ARCHITECTURE.md](ARCHITECTURE.md) — Autorität, Runtime-Grenzen und technische Leitplanken.
 - [WORLD_ART_DIRECTION.md](visual/WORLD_ART_DIRECTION.md) — Frontier Low-Poly als visuelle Richtung ohne neue Kartenregeln.

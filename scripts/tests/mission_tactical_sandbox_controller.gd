@@ -123,6 +123,8 @@ const TACTICAL_STANCE_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tacti
 const TACTICAL_COMMAND_RULES_SCRIPT: GDScript = preload("res://scripts/tactical/tactical_command_rules.gd")
 const FIRE_RULE_CONSEQUENCE_READABILITY_SCRIPT: GDScript = preload("res://scripts/tactical/fire_rule_consequence_readability.gd")
 const FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_movement_controller.gd")
+const FIRETEAM_COMMAND_GATEWAY_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_command_gateway.gd")
+const MISSION_COMMAND_ENTRY_ADAPTER_SCRIPT: GDScript = preload("res://scripts/mission/mission_command_entry_adapter.gd")
 const FIRETEAM_SECURITY_CONTROLLER_SCRIPT: GDScript = preload("res://scripts/tactical/fireteam_security_controller.gd")
 const CONTACT_MAP_OVERLAY_SCRIPT: GDScript = preload("res://scripts/tactical/visuals/contact_map_overlay.gd")
 const FIRETEAMLEADER_FEEDBACK_BUBBLE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/ui/fireteamleader_feedback_bubble_resolver.gd")
@@ -676,6 +678,8 @@ var _suppression_near_miss_ready_at_msec_by_fireteam: Dictionary = {}
 var _tracked_health_by_unit_id: Dictionary = {}
 var _coordination_manager = null
 var _fireteam_movement_controller = null
+var _fireteam_command_gateway = null
+var _mission_command_entry_adapter = null
 var _recent_movement_trace_by_fireteam: Dictionary = {}
 var _fireteam_security_controller = null
 var _waypoint_intent_preview_resolver = WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT.new()
@@ -728,6 +732,7 @@ func _ready() -> void:
 	_ensure_tactical_stance_controller()
 	_ensure_coordination_manager()
 	_ensure_fireteam_movement_controller()
+	_ensure_n003_command_entry()
 	_ensure_fireteam_security_controller()
 	_connect_fire_rule_authority_signals()
 	_get_comic_bubble_runtime_gate()
@@ -954,16 +959,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			_on_sort_fireteam_pressed()
 			get_viewport().set_input_as_handled()
 		KEY_1:
-			issue_move()
+			_issue_command_from_entry("hotkey", "move", "MOVE ORDER")
 			get_viewport().set_input_as_handled()
 		KEY_2:
-			issue_defend()
+			_issue_command_from_entry("hotkey", "defend", "HOLD / DEFEND")
 			get_viewport().set_input_as_handled()
 		KEY_3:
-			issue_flank()
+			_issue_command_from_entry("hotkey", "flank", "FLANK")
 			get_viewport().set_input_as_handled()
 		KEY_4:
-			issue_take()
+			_issue_command_from_entry("hotkey", "take", "TAKE / ENGAGE")
 			get_viewport().set_input_as_handled()
 		KEY_B:
 			if issue_breach_door_interaction():
@@ -1044,7 +1049,7 @@ func issue_move() -> bool:
 		_last_command_text = "PREVIEW MODE"
 		_update_ui()
 		return false
-	return _issue_command("move", "MOVE ORDER")
+	return _issue_command_from_entry("button", "move", "MOVE ORDER")
 
 
 func issue_defend() -> bool:
@@ -1052,7 +1057,7 @@ func issue_defend() -> bool:
 		_last_command_text = "PREVIEW MODE"
 		_update_ui()
 		return false
-	return _issue_command("defend", "HOLD / DEFEND")
+	return _issue_command_from_entry("button", "defend", "HOLD / DEFEND")
 
 
 func issue_flank() -> bool:
@@ -1060,7 +1065,7 @@ func issue_flank() -> bool:
 		_last_command_text = "PREVIEW MODE"
 		_update_ui()
 		return false
-	return _issue_command("flank", "FLANK")
+	return _issue_command_from_entry("button", "flank", "FLANK")
 
 
 func issue_take() -> bool:
@@ -1068,7 +1073,7 @@ func issue_take() -> bool:
 		_last_command_text = "PREVIEW MODE"
 		_update_ui()
 		return false
-	return _issue_command("take", "TAKE / ENGAGE")
+	return _issue_command_from_entry("button", "take", "TAKE / ENGAGE")
 
 
 func issue_breach_door_interaction() -> bool:
@@ -1441,6 +1446,10 @@ func execute_selected_fireteam_orders() -> bool:
 	var network_interaction_handoff: Dictionary = _try_submit_connected_client_mission_interaction()
 	if bool(network_interaction_handoff.get("handled", false)):
 		return bool(network_interaction_handoff.get("accepted", false))
+	var n003_fireteam_handoff: Dictionary = _try_submit_n003_fireteam_orders()
+	if bool(n003_fireteam_handoff.get("handled", false)):
+		return bool(n003_fireteam_handoff.get("accepted", false))
+	# Untagged plans originate from historical test/compatibility entry points only.
 	var network_fireteam_handoff: Dictionary = _try_submit_connected_client_fireteam_orders()
 	if bool(network_fireteam_handoff.get("handled", false)):
 		return bool(network_fireteam_handoff.get("accepted", false))
@@ -2151,6 +2160,9 @@ func _connect_fire_rule_authority_signals() -> void:
 	var commander_intent_commit_callable := Callable(self, "_on_authoritative_commander_intent_committed")
 	if simulation_root.has_signal("commander_intent_committed") and not simulation_root.is_connected("commander_intent_committed", commander_intent_commit_callable):
 		simulation_root.connect("commander_intent_committed", commander_intent_commit_callable)
+	var remote_commander_commit_callable := Callable(self, "_on_n003_authoritative_commit_received")
+	if simulation_root.has_signal("commander_intent_commit_received") and not simulation_root.is_connected("commander_intent_commit_received", remote_commander_commit_callable):
+		simulation_root.connect("commander_intent_commit_received", remote_commander_commit_callable)
 	var result_callable := Callable(self, "_on_network_command_result_received")
 	if simulation_root.has_signal("network_command_result_received") and not simulation_root.is_connected("network_command_result_received", result_callable):
 		simulation_root.connect("network_command_result_received", result_callable)
@@ -2261,6 +2273,11 @@ func _on_network_command_result_received(result: Dictionary) -> void:
 		_apply_network_mission_interaction_result(result)
 		return
 	if String(result.get("source_context", "")).strip_edges() == "mission_fireteam_go":
+		_apply_network_fireteam_command_result(result)
+		return
+	if String(result.get("source_context", "")).strip_edges() == "mission_n003_fireteam_go":
+		if _fireteam_command_gateway != null and _fireteam_command_gateway.has_method("resolve_network_result"):
+			_fireteam_command_gateway.call("resolve_network_result", result)
 		_apply_network_fireteam_command_result(result)
 		return
 	if String(result.get("command_type", "")).strip_edges().to_lower() != "set_fire_rule":
@@ -2592,9 +2609,112 @@ func get_network_fireteam_command_feedback_snapshot() -> Dictionary:
 
 
 func _on_authoritative_commander_intent_committed(command: Dictionary) -> void:
-	if String(command.get("source_context", "")).strip_edges() != "mission_fireteam_go":
+	var source_context: String = String(command.get("source_context", "")).strip_edges()
+	if source_context == "mission_n003_fireteam_go":
+		_apply_n003_authoritative_fireteam_intent(command)
 		return
-	_apply_authoritative_fireteam_intent(command)
+	if source_context == "mission_fireteam_go":
+		_apply_authoritative_fireteam_intent(command)
+
+
+func _on_n003_authoritative_commit_received(command: Dictionary) -> void:
+	if String(command.get("source_context", "")).strip_edges() != "mission_n003_fireteam_go":
+		return
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var command_type: String = String(command.get("command_type", command.get("verb", "move"))).strip_edges().to_lower()
+	if fireteam_id.is_empty():
+		return
+	_network_fireteam_command_feedback = {
+		# Keep the established UI contract: the Host accepted the request.  The
+		# separate commit flag records the stronger N003 lifecycle fact without
+		# turning an existing accepted-result consumer into a new status enum.
+		"status": "accepted",
+		"accepted": true,
+		"committed": true,
+		"commit_state": "committed",
+		"plan_id": String(command.get("plan_id", "")).strip_edges(),
+		"command_token": String(command.get("command_token", "")).strip_edges(),
+		"fireteam_id": fireteam_id,
+		"command_type": command_type,
+		"compact_line": "%s %s HOST COMMITTED" % [command_type.to_upper(), fireteam_id.to_upper()],
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+	}
+	_last_command_text = String(_network_fireteam_command_feedback.get("compact_line", "GO HOST COMMITTED"))
+	_refresh_button_state()
+	_refresh_order_visuals()
+	_update_ui()
+
+
+func _apply_n003_authoritative_fireteam_intent(command: Dictionary) -> bool:
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var plan_id: String = String(command.get("plan_id", "")).strip_edges()
+	var phase_index: int = int(command.get("phase", LIVE_ORDER_PHASE_INDEX))
+	if fireteam_id.is_empty() or plan_id.is_empty() or not _is_fireteam_runtime_active(fireteam_id):
+		return false
+	var command_metadata: Dictionary = Dictionary(command.get("metadata", {})).duplicate(true)
+	if String(command_metadata.get("n003_order_kind", "")).strip_edges().to_lower() == "area":
+		return _finalize_n003_authoritative_fireteam_activation(_activate_n003_area_order(command, command_metadata, phase_index), phase_index)
+	var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, phase_index), null)
+	if plan == null:
+		return _finalize_n003_authoritative_fireteam_activation(_apply_authoritative_fireteam_intent(command), phase_index)
+	for waypoint_index in range(plan.waypoints.size()):
+		var waypoint = plan.waypoints[waypoint_index]
+		if waypoint == null:
+			continue
+		var metadata: Dictionary = Dictionary(waypoint.metadata)
+		if String(metadata.get("n003_plan_id", "")).strip_edges() != plan_id:
+			continue
+		if String(waypoint.status).strip_edges().to_lower() == FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE:
+			return _finalize_n003_authoritative_fireteam_activation(true, phase_index)
+		if String(waypoint.status).strip_edges().to_lower() != FIRETEAM_WAYPOINT_SCRIPT.STATUS_PENDING:
+			return false
+		_post_drop_security_pending_fireteam_ids.erase(fireteam_id)
+		plan.status = FIRETEAM_ORDER_PLAN_SCRIPT.STATUS_PENDING
+		if _activate_next_waypoint_for_plan(plan, fireteam_id, waypoint_index):
+			return _finalize_n003_authoritative_fireteam_activation(true, phase_index)
+		break
+	# An accepted command may outlive a locally reloaded/deduplicated preview.
+	# The authoritative payload is still the source of truth, so use the same
+	# SimulationRoot-backed mission execution bridge rather than reviving a
+	# flow-driver fallback.
+	return _finalize_n003_authoritative_fireteam_activation(_apply_authoritative_fireteam_intent(command), phase_index)
+
+
+func _activate_n003_area_order(command: Dictionary, command_metadata: Dictionary, phase_index: int) -> bool:
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var plan_id: String = String(command.get("plan_id", "")).strip_edges()
+	var area_order_id: String = String(command_metadata.get("area_order_id", command.get("target_area_id", ""))).strip_edges()
+	if fireteam_id.is_empty() or plan_id.is_empty() or area_order_id.is_empty():
+		return false
+	var area_order = _area_orders_by_id.get(area_order_id, null)
+	if area_order == null:
+		var payload: Dictionary = Dictionary(command_metadata.get("area_order_payload", {})).duplicate(true)
+		if payload.is_empty():
+			return false
+		area_order = AREA_ORDER_SCRIPT.call("from_dict", payload)
+		if area_order == null or not area_order.is_valid() or String(area_order.area_order_id).strip_edges() != area_order_id:
+			return false
+		_area_orders_by_id[area_order_id] = area_order
+	if String(area_order.fireteam_id).strip_edges().to_lower() != fireteam_id:
+		return false
+	var area_metadata: Dictionary = Dictionary(area_order.metadata)
+	if String(area_metadata.get("n003_plan_id", plan_id)).strip_edges() != plan_id:
+		return false
+	if String(area_order.status).strip_edges().to_lower() != AREA_ORDER_SCRIPT.STATUS_PENDING:
+		return false
+	var command_type: String = String(command.get("command_type", command.get("verb", area_order.command_type))).strip_edges().to_lower()
+	if bool(AREA_ORDER_SCRIPT.call("is_allowed_command_type", command_type)):
+		area_order.command_type = command_type
+	if command_type == AREA_ORDER_SCRIPT.COMMAND_TYPE_DEFEND:
+		return _start_defend_area_order(fireteam_id, area_order, phase_index)
+	return _start_attack_area_order(fireteam_id, area_order, phase_index)
+
+
+func _finalize_n003_authoritative_fireteam_activation(started: bool, phase_index: int) -> bool:
+	if started:
+		_apply_fireteam_coordination_for_phase(phase_index)
+	return started
 
 
 func _apply_authoritative_fireteam_intent(command: Dictionary) -> bool:
@@ -3402,6 +3522,12 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 
 
 func _issue_command(command_type: String, display_text: String) -> bool:
+	# Historical callers use this compatibility name. Visible buttons and hotkeys
+	# use the same public plan boundary below instead of flow-driver execution.
+	return _issue_command_from_entry("button", command_type, display_text)
+
+
+func _issue_command_from_entry(entry_source: String, command_type: String, display_text: String) -> bool:
 	if not _can_issue_local_commands():
 		_last_command_text = "OBSERVER MODE"
 		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "observer")
@@ -3434,37 +3560,52 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 		return false
 	if requires_tile:
 		_apply_selected_tile_to_target_marker()
-	if _is_connected_network_snapshot_client():
-		return _plan_connected_client_fireteam_command(command_type, display_text, _selected_tile_world_position if requires_tile else _get_target_position())
-
-	var issued_count: int = 0
-	for driver in _get_active_flow_drivers():
-		if driver == null or (not driver.has_method("issue_command") and not driver.has_method("issue_command_at_position")):
-			continue
-
-		var did_issue: bool = false
-		if requires_tile and driver.has_method("issue_command_at_position"):
-			did_issue = bool(driver.call("issue_command_at_position", _selected_tile_world_position, command_type, _get_live_order_phase_index()))
-		elif driver.has_method("issue_command"):
-			did_issue = bool(driver.call("issue_command", command_type, _get_live_order_phase_index()))
-		if did_issue:
-			issued_count += 1
-
-	if issued_count == 0:
+	if not _ensure_n003_command_entry():
+		_last_command_text = "%s BLOCKED (COMMAND GATEWAY)" % display_text
+		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "gateway")
+		_refresh_order_visuals()
+		_update_ui()
+		return false
+	var target_position: Vector2 = _selected_tile_world_position if requires_tile else _get_target_position()
+	var waypoint_refs: Array = _create_waypoints_for_selected_fireteams(target_position, true, false)
+	if waypoint_refs.is_empty():
 		_last_command_text = "%s FAILED" % display_text
 		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "failed")
 		_refresh_order_visuals()
 		_update_ui()
 		return false
-
-	_last_command_text = _build_selected_command_order_summary(command_type, display_text)
-	_record_fireteamleader_feedback_for_selected_fireteams(command_type, "accepted", "accepted")
+	var plan_result = _mission_command_entry_adapter.call(
+		"plan_from_entry",
+		entry_source,
+		command_type,
+		_sanitize_fireteam_ids(_selected_fireteam_ids),
+		target_position,
+		_get_live_order_phase_index(),
+		multiplayer.get_unique_id(),
+		get_local_command_team_id()
+	)
+	var result_dict: Dictionary = Dictionary(plan_result.call("to_dict")) if plan_result != null and plan_result.has_method("to_dict") else {}
+	var plan_id: String = String(result_dict.get("plan_id", "")).strip_edges()
+	if not bool(result_dict.get("accepted", false)) or plan_id.is_empty():
+		var rejection_reason: String = String(result_dict.get("reason", "invalid_plan")).strip_edges()
+		_mark_n003_waypoints_blocked(waypoint_refs, rejection_reason, entry_source)
+		_last_command_text = "%s BLOCKED | %s" % [display_text, rejection_reason.to_upper()]
+		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "plan_rejected")
+		_refresh_order_visuals()
+		_update_ui()
+		return false
+	_tag_n003_waypoints(waypoint_refs, plan_id, entry_source, command_type)
+	_last_command_text = "%s GEPLANT | GO" % display_text
+	_record_fireteamleader_feedback_for_selected_fireteams(command_type, "accepted", "planned")
 	_refresh_order_visuals()
 	_update_ui()
+	_emit_planning_state_changed()
 	return true
 
 
 func _plan_connected_client_fireteam_command(command_type: String, display_text: String, target_position: Vector2) -> bool:
+	# Compatibility bridge for historical callers. Visible controls use
+	# _issue_command_from_entry and the N003 gateway instead.
 	var phase_index: int = _get_live_order_phase_index()
 	var waypoint_refs: Array = _create_waypoints_for_selected_fireteams(target_position, true, false)
 	if waypoint_refs.is_empty():
@@ -3491,6 +3632,156 @@ func _plan_connected_client_fireteam_command(command_type: String, display_text:
 	_update_ui()
 	_emit_planning_state_changed()
 	return true
+
+
+func _tag_n003_waypoints(waypoint_refs: Array, plan_id: String, entry_source: String, command_type: String) -> void:
+	var normalized_plan_id: String = plan_id.strip_edges()
+	if normalized_plan_id.is_empty():
+		return
+	for waypoint_ref_variant in waypoint_refs:
+		if typeof(waypoint_ref_variant) != TYPE_DICTIONARY:
+			continue
+		var waypoint = _get_waypoint_from_ref(Dictionary(waypoint_ref_variant))
+		if waypoint == null:
+			continue
+		waypoint.command_type = command_type.strip_edges().to_lower()
+		var metadata: Dictionary = Dictionary(waypoint.metadata).duplicate(true)
+		metadata["n003_plan_id"] = normalized_plan_id
+		metadata["n003_entry_source"] = entry_source.strip_edges().to_lower()
+		metadata.erase("n003_submission_state")
+		metadata.erase("n003_block_reason")
+		waypoint.metadata = metadata
+
+
+func _mark_n003_waypoints_blocked(waypoint_refs: Array, reason: String, entry_source: String = "") -> void:
+	var normalized_reason: String = reason.strip_edges().to_lower()
+	if normalized_reason.is_empty():
+		normalized_reason = "plan_rejected"
+	for waypoint_ref_variant in waypoint_refs:
+		if typeof(waypoint_ref_variant) != TYPE_DICTIONARY:
+			continue
+		var waypoint = _get_waypoint_from_ref(Dictionary(waypoint_ref_variant))
+		if waypoint == null:
+			continue
+		var metadata: Dictionary = Dictionary(waypoint.metadata).duplicate(true)
+		metadata.erase("n003_plan_id")
+		metadata["n003_submission_state"] = "blocked"
+		metadata["n003_block_reason"] = normalized_reason
+		if not entry_source.strip_edges().is_empty():
+			metadata["n003_entry_source"] = entry_source.strip_edges().to_lower()
+		waypoint.metadata = metadata
+
+
+func _try_submit_n003_fireteam_orders() -> Dictionary:
+	var plan_ids: PackedStringArray = PackedStringArray()
+	var fireteams_with_executable_waypoints: Dictionary = {}
+	var phase_index: int = _get_live_order_phase_index()
+	var blocked_reason: String = _get_n003_blocked_plan_reason(phase_index)
+	if not blocked_reason.is_empty():
+		_last_command_text = "GO BLOCKED | %s" % blocked_reason.to_upper()
+		_record_fireteamleader_feedback_for_selected_fireteams("go", "blocked", "plan_rejected")
+		_refresh_order_visuals()
+		_update_ui()
+		return {"handled": true, "accepted": false}
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, phase_index), null)
+		if plan == null:
+			continue
+		var waypoint_index: int = _find_next_executable_waypoint_index(plan)
+		if waypoint_index < 0 or waypoint_index >= plan.waypoints.size():
+			continue
+		var waypoint = plan.waypoints[waypoint_index]
+		if waypoint == null:
+			continue
+		fireteams_with_executable_waypoints[fireteam_id] = true
+		var metadata: Dictionary = Dictionary(waypoint.metadata)
+		var plan_id: String = String(metadata.get("n003_plan_id", "")).strip_edges()
+		if not plan_id.is_empty() and not plan_ids.has(plan_id):
+			plan_ids.append(plan_id)
+	for area_plan_id in _collect_n003_area_plan_ids(phase_index, fireteams_with_executable_waypoints):
+		if not plan_ids.has(area_plan_id):
+			plan_ids.append(area_plan_id)
+	if plan_ids.is_empty():
+		return {"handled": false, "accepted": false}
+	if not _ensure_n003_command_entry():
+		_last_command_text = "GO BLOCKED (COMMAND GATEWAY)"
+		_update_ui()
+		return {"handled": true, "accepted": false}
+
+	var accepted_count: int = 0
+	var rejection_reason: String = ""
+	for plan_id in plan_ids:
+		var submission = _mission_command_entry_adapter.call("submit_go", plan_id)
+		var submission_dict: Dictionary = Dictionary(submission.call("to_dict")) if submission != null and submission.has_method("to_dict") else {}
+		if bool(submission_dict.get("accepted", false)):
+			accepted_count += 1
+		else:
+			rejection_reason = String(submission_dict.get("reason", "command_rejected")).strip_edges()
+	if accepted_count <= 0:
+		_last_command_text = "GO BLOCKED | %s" % rejection_reason.to_upper()
+		_record_fireteamleader_feedback_for_selected_fireteams("go", "blocked", "authority_rejected")
+		_refresh_order_visuals()
+		_update_ui()
+		return {"handled": true, "accepted": false}
+	_last_command_text = "GO PENDING | %d PLAN%s" % [accepted_count, "S" if accepted_count != 1 else ""]
+	_record_fireteamleader_feedback_for_selected_fireteams("go", "accepted", "pending_authority")
+	_refresh_button_state()
+	_refresh_order_visuals()
+	_update_ui()
+	_emit_planning_state_changed()
+	return {"handled": true, "accepted": true, "submitted_count": accepted_count}
+
+
+func _collect_n003_area_plan_ids(phase_index: int, fireteams_with_executable_waypoints: Dictionary = {}) -> PackedStringArray:
+	var plan_ids: PackedStringArray = PackedStringArray()
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty() or fireteams_with_executable_waypoints.has(fireteam_id):
+			continue
+		for area_order_variant in _area_orders_by_id.values():
+			var area_order = area_order_variant
+			if area_order == null or String(area_order.fireteam_id).strip_edges().to_lower() != fireteam_id:
+				continue
+			if String(area_order.status).strip_edges().to_lower() != AREA_ORDER_SCRIPT.STATUS_PENDING:
+				continue
+			var metadata: Dictionary = Dictionary(area_order.metadata)
+			if int(metadata.get("created_phase", phase_index)) != phase_index:
+				continue
+			var plan_id: String = String(metadata.get("n003_plan_id", "")).strip_edges()
+			if not plan_id.is_empty() and not plan_ids.has(plan_id):
+				plan_ids.append(plan_id)
+	return plan_ids
+
+
+func _get_n003_blocked_plan_reason(phase_index: int) -> String:
+	for fireteam_id_variant in _selected_fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if fireteam_id.is_empty():
+			continue
+		var plan = _order_plans_by_key.get(_build_order_plan_key(fireteam_id, phase_index), null)
+		if plan != null:
+			var waypoint_index: int = _find_next_executable_waypoint_index(plan)
+			if waypoint_index >= 0 and waypoint_index < plan.waypoints.size():
+				var waypoint = plan.waypoints[waypoint_index]
+				if waypoint != null:
+					var waypoint_metadata: Dictionary = Dictionary(waypoint.metadata)
+					if String(waypoint_metadata.get("n003_submission_state", "")).strip_edges().to_lower() == "blocked":
+						return String(waypoint_metadata.get("n003_block_reason", "plan_rejected")).strip_edges()
+	for area_order_variant in _area_orders_by_id.values():
+		var area_order = area_order_variant
+		if area_order == null:
+			continue
+		if not _selected_fireteam_ids.has(String(area_order.fireteam_id).strip_edges().to_lower()):
+			continue
+		if String(area_order.status).strip_edges().to_lower() != AREA_ORDER_SCRIPT.STATUS_PENDING:
+			continue
+		var area_metadata: Dictionary = Dictionary(area_order.metadata)
+		if int(area_metadata.get("created_phase", phase_index)) != phase_index:
+			continue
+		if String(area_metadata.get("n003_submission_state", "")).strip_edges().to_lower() == "blocked":
+			return String(area_metadata.get("n003_block_reason", "plan_rejected")).strip_edges()
+	return ""
 
 
 func _change_fireteam(delta: int) -> void:
@@ -30102,6 +30393,19 @@ func _ensure_fireteam_movement_controller() -> void:
 	_fireteam_movement_controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
 
 
+func _ensure_n003_command_entry() -> bool:
+	var simulation_root := get_node_or_null("../SimulationRoot")
+	if simulation_root == null:
+		return false
+	if _fireteam_command_gateway == null:
+		_fireteam_command_gateway = FIRETEAM_COMMAND_GATEWAY_SCRIPT.new()
+		_fireteam_command_gateway.call("configure", simulation_root)
+	if _mission_command_entry_adapter == null:
+		_mission_command_entry_adapter = MISSION_COMMAND_ENTRY_ADAPTER_SCRIPT.new()
+		_mission_command_entry_adapter.call("configure", _fireteam_command_gateway)
+	return true
+
+
 func _ensure_fireteam_security_controller() -> void:
 	if _fireteam_security_controller != null:
 		return
@@ -32215,8 +32519,6 @@ func _issue_fireteam_post_drop_360_security_positions(fireteam_id: String, phase
 		_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 		if not bool(command.call("is_valid")):
 			continue
-		if unit.has_method("assign_unit_command"):
-			unit.call("assign_unit_command", command)
 		var command_dict: Dictionary = command.to_dict()
 		command_dict["requeue_until_target"] = command_type == UNIT_COMMAND_SCRIPT.TYPE_MOVE_TO_POSITION
 		command_dict["security_mode"] = POST_DROP_SECURITY_MODE
@@ -32461,8 +32763,6 @@ func _issue_fireteam_hold_current_positions(fireteam_id: String, phase_index: in
 		_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 		if not bool(command.call("is_valid")):
 			continue
-		if unit.has_method("assign_unit_command"):
-			unit.call("assign_unit_command", command)
 		var command_dict: Dictionary = command.to_dict()
 		command_dict["requeue_until_target"] = false
 		command_dict["security_mode"] = "360"
@@ -32621,9 +32921,21 @@ func _issue_cover_hold_for_fireteam(fireteam_id: String, phase_index: int) -> vo
 	var anchor = _get_selection_anchor_for_fireteam(fireteam_id)
 	if anchor == null:
 		return
-	for driver in _get_flow_drivers_for_fireteam(fireteam_id):
-		if driver != null and driver.has_method("issue_command_at_position"):
-			driver.call("issue_command_at_position", anchor.global_position, "defend", phase_index)
+	var target_position: Vector2 = anchor.global_position
+	var waypoint = FIRETEAM_WAYPOINT_SCRIPT.new({
+		"waypoint_id": "coord_cover:%s:%d" % [fireteam_id, phase_index],
+		"command_type": FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_DEFEND,
+		"status": FIRETEAM_WAYPOINT_SCRIPT.STATUS_ACTIVE,
+		"target_position": target_position,
+	})
+	var behavior_profile = _resolve_fireteam_behavior_profile(fireteam_id, "defend", target_position)
+	if behavior_profile != null:
+		var metadata: Dictionary = Dictionary(behavior_profile.metadata).duplicate(true)
+		metadata["origin"] = "authoritative_coordination_cover"
+		metadata["phase"] = phase_index
+		behavior_profile.metadata = metadata
+	_set_active_behavior_profile(fireteam_id, behavior_profile)
+	_issue_waypoint_for_fireteam(fireteam_id, waypoint, phase_index, behavior_profile)
 
 
 func _notify_fireteam_ready_for_coordination(fireteam_id: String) -> void:
@@ -32870,30 +33182,12 @@ func _issue_waypoint_for_fireteam(fireteam_id: String, waypoint, phase_index: in
 		if requires_mission_tactical_path:
 			_record_mission_tactical_behavior_path_failure(fireteam_id, command_type, "movement_controller_start_failed")
 			return false
-	var issued_count: int = 0
-	for driver in _get_flow_drivers_for_fireteam(fireteam_id):
-		if driver == null:
-			continue
-		if driver.has_method("issue_command_at_position"):
-			if bool(driver.call("issue_command_at_position", target_position, command_type, phase_index)):
-				issued_count += 1
-		elif driver.has_method("issue_command"):
-			var target_marker := get_node_or_null(target_marker_path) as Node2D
-			var previous_position: Vector2 = target_marker.global_position if target_marker != null else Vector2.ZERO
-			if target_marker != null:
-				target_marker.global_position = target_position
-			if bool(driver.call("issue_command", command_type, phase_index)):
-				issued_count += 1
-			if target_marker != null:
-				target_marker.global_position = previous_position
-	if issued_count > 0 and command_type == FIRETEAM_WAYPOINT_SCRIPT.COMMAND_TYPE_FLANK:
-		_notify_flank_initiated(fireteam_id, waypoint.target_position, target_position, behavior_profile)
-	return issued_count > 0
+	return false
 
 
 func _requires_mission_tactical_behavior_path(command_type: String) -> bool:
 	match command_type.strip_edges().to_lower():
-		"move", "defend", "take", "engage", "hold", "hold_position", "attack":
+		"move", "defend", "flank", "take", "engage", "hold", "hold_position", "attack":
 			return true
 		_:
 			return false
@@ -33159,8 +33453,6 @@ func _issue_area_defense_unit_command(fireteam_id: String, assignment: Dictionar
 	_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 	if not bool(command.call("is_valid")):
 		return false
-	if unit.has_method("assign_unit_command"):
-		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
 	command_dict["requeue_until_target"] = not hold_position
 	_append_behavior_modifier_fields(command_dict, modifiers)
@@ -33343,8 +33635,6 @@ func _issue_area_attack_unit_command(fireteam_id: String, assignment: Dictionary
 	_apply_explicit_fire_rule_to_unit_command(command, fireteam_id)
 	if not bool(command.call("is_valid")):
 		return false
-	if unit.has_method("assign_unit_command"):
-		unit.call("assign_unit_command", command)
 	var command_dict: Dictionary = command.to_dict()
 	command_dict["requeue_until_target"] = not hold_position
 	_append_behavior_modifier_fields(command_dict, modifiers)
@@ -34039,14 +34329,18 @@ func _on_area_order_menu_id_pressed(item_id: int) -> void:
 
 
 func _set_waypoint_command_for_targets(waypoint_targets: Array, command_type: String) -> bool:
-	var did_change: bool = false
+	var valid_waypoint_targets: Array = []
 	for waypoint_target in waypoint_targets:
 		var waypoint = _get_waypoint_from_ref(Dictionary(waypoint_target))
 		if waypoint == null:
 			continue
-		waypoint.command_type = command_type
-		did_change = true
-	if not did_change:
+		valid_waypoint_targets.append(Dictionary(waypoint_target).duplicate(true))
+	if valid_waypoint_targets.is_empty():
+		return false
+	if not _plan_n003_rmb_waypoints(valid_waypoint_targets, command_type):
+		_mark_n003_waypoints_blocked(valid_waypoint_targets, "plan_rejected", "rmb")
+		_last_command_text = "WAYPOINT BLOCKED (COMMAND GATEWAY)"
+		_update_ui()
 		return false
 	_refresh_order_visuals()
 	_last_command_text = "WAYPOINT %s%s" % [command_type.to_upper(), " APPEND" if _waypoint_menu_append_mode else ""]
@@ -34055,10 +34349,84 @@ func _set_waypoint_command_for_targets(waypoint_targets: Array, command_type: St
 	return true
 
 
+func _plan_n003_rmb_waypoints(waypoint_targets: Array, command_type: String) -> bool:
+	if not _ensure_n003_command_entry():
+		return false
+	var grouped_targets: Dictionary = {}
+	for waypoint_target_variant in waypoint_targets:
+		if typeof(waypoint_target_variant) != TYPE_DICTIONARY:
+			continue
+		var waypoint_target: Dictionary = Dictionary(waypoint_target_variant).duplicate(true)
+		var waypoint = _get_waypoint_from_ref(waypoint_target)
+		if waypoint == null or typeof(waypoint.target_position) != TYPE_VECTOR2:
+			continue
+		var target_position: Vector2 = Vector2(waypoint.target_position)
+		var group_key: String = "%s@%.3f,%.3f" % [command_type.strip_edges().to_lower(), target_position.x, target_position.y]
+		var group: Dictionary = Dictionary(grouped_targets.get(group_key, {})).duplicate(true)
+		if group.is_empty():
+			group = {
+				"target_position": target_position,
+				"fireteam_ids": PackedStringArray(),
+				"waypoint_refs": [],
+			}
+		var fireteam_ids: PackedStringArray = PackedStringArray(group.get("fireteam_ids", PackedStringArray()))
+		var fireteam_id: String = String(waypoint_target.get("fireteam_id", "")).strip_edges().to_lower()
+		if not fireteam_id.is_empty() and not fireteam_ids.has(fireteam_id):
+			fireteam_ids.append(fireteam_id)
+		var refs: Array = Array(group.get("waypoint_refs", [])).duplicate(true)
+		refs.append(waypoint_target)
+		group["fireteam_ids"] = fireteam_ids
+		group["waypoint_refs"] = refs
+		grouped_targets[group_key] = group
+	if grouped_targets.is_empty():
+		return false
+	var planned_groups: Array = []
+	for group_key_variant in grouped_targets.keys():
+		var group: Dictionary = Dictionary(grouped_targets[group_key_variant]).duplicate(true)
+		var fireteam_ids: PackedStringArray = PackedStringArray(group.get("fireteam_ids", PackedStringArray()))
+		var target_position: Vector2 = Vector2(group.get("target_position", Vector2.ZERO))
+		if fireteam_ids.is_empty():
+			return false
+		var plan_result = _mission_command_entry_adapter.call(
+			"plan_from_rmb",
+			command_type,
+			fireteam_ids,
+			target_position,
+			_get_live_order_phase_index(),
+			multiplayer.get_unique_id(),
+			get_local_command_team_id()
+		)
+		var result_dict: Dictionary = Dictionary(plan_result.call("to_dict")) if plan_result != null and plan_result.has_method("to_dict") else {}
+		var plan_id: String = String(result_dict.get("plan_id", "")).strip_edges()
+		if not bool(result_dict.get("accepted", false)) or plan_id.is_empty():
+			return false
+		planned_groups.append({
+			"waypoint_refs": Array(group.get("waypoint_refs", [])).duplicate(true),
+			"plan_id": plan_id,
+		})
+	for planned_group_variant in planned_groups:
+		var planned_group: Dictionary = Dictionary(planned_group_variant)
+		_tag_n003_waypoints(Array(planned_group.get("waypoint_refs", [])), String(planned_group.get("plan_id", "")), "rmb", command_type)
+	return true
+
+
 func _set_area_order_command_for_targets(area_order_targets: Array, command_type: String) -> bool:
 	var normalized_command_type: String = _normalize_area_order_command_type(command_type)
-	var did_change: bool = false
+	var valid_area_order_targets: Array = []
 	for area_order_target in area_order_targets:
+		var area_order = _get_area_order_from_ref(Dictionary(area_order_target))
+		if area_order == null or typeof(area_order.center_position) != TYPE_VECTOR2:
+			continue
+		valid_area_order_targets.append(Dictionary(area_order_target).duplicate(true))
+	if valid_area_order_targets.is_empty():
+		return false
+	if not _plan_n003_area_orders(valid_area_order_targets, normalized_command_type):
+		_mark_n003_area_orders_blocked(valid_area_order_targets, "plan_rejected")
+		_last_command_text = "AREA BLOCKED (COMMAND GATEWAY)"
+		_update_ui()
+		return false
+	var did_change: bool = false
+	for area_order_target in valid_area_order_targets:
 		var area_order = _get_area_order_from_ref(Dictionary(area_order_target))
 		if area_order == null:
 			continue
@@ -34071,6 +34439,86 @@ func _set_area_order_command_for_targets(area_order_targets: Array, command_type
 	_update_ui()
 	_emit_planning_state_changed()
 	return true
+
+
+func _plan_n003_area_orders(area_order_targets: Array, command_type: String) -> bool:
+	if not _ensure_n003_command_entry():
+		return false
+	var planned_targets: Array = []
+	for target_variant in area_order_targets:
+		if typeof(target_variant) != TYPE_DICTIONARY:
+			continue
+		var target: Dictionary = Dictionary(target_variant).duplicate(true)
+		var area_order = _get_area_order_from_ref(target)
+		if area_order == null or typeof(area_order.center_position) != TYPE_VECTOR2:
+			return false
+		var fireteam_id: String = String(area_order.fireteam_id).strip_edges().to_lower()
+		var target_area_id: String = String(area_order.area_order_id).strip_edges()
+		if fireteam_id.is_empty() or target_area_id.is_empty():
+			return false
+		var area_order_payload: Dictionary = Dictionary(area_order.to_dict()).duplicate(true)
+		area_order_payload["command_type"] = command_type
+		var plan_result = _mission_command_entry_adapter.call(
+			"plan_from_rmb",
+			command_type,
+			PackedStringArray([fireteam_id]),
+			Vector2(area_order.center_position),
+			_get_live_order_phase_index(),
+			multiplayer.get_unique_id(),
+			get_local_command_team_id(),
+			target_area_id,
+			{
+				"n003_order_kind": "area",
+				"area_order_id": target_area_id,
+				"area_order_payload": area_order_payload,
+			}
+		)
+		var result_dict: Dictionary = Dictionary(plan_result.call("to_dict")) if plan_result != null and plan_result.has_method("to_dict") else {}
+		var plan_id: String = String(result_dict.get("plan_id", "")).strip_edges()
+		if not bool(result_dict.get("accepted", false)) or plan_id.is_empty():
+			return false
+		planned_targets.append({"target": target, "plan_id": plan_id})
+	if planned_targets.is_empty():
+		return false
+	for planned_target_variant in planned_targets:
+		var planned_target: Dictionary = Dictionary(planned_target_variant)
+		_tag_n003_area_order(Dictionary(planned_target.get("target", {})), String(planned_target.get("plan_id", "")), command_type)
+	return true
+
+
+func _tag_n003_area_order(area_order_target: Dictionary, plan_id: String, command_type: String) -> void:
+	var normalized_plan_id: String = plan_id.strip_edges()
+	if normalized_plan_id.is_empty():
+		return
+	var area_order = _get_area_order_from_ref(area_order_target)
+	if area_order == null:
+		return
+	var metadata: Dictionary = Dictionary(area_order.metadata).duplicate(true)
+	metadata["n003_plan_id"] = normalized_plan_id
+	metadata["n003_entry_source"] = "rmb"
+	metadata["n003_order_kind"] = "area"
+	metadata["n003_command_type"] = command_type.strip_edges().to_lower()
+	metadata.erase("n003_submission_state")
+	metadata.erase("n003_block_reason")
+	area_order.metadata = metadata
+
+
+func _mark_n003_area_orders_blocked(area_order_targets: Array, reason: String) -> void:
+	var normalized_reason: String = reason.strip_edges().to_lower()
+	if normalized_reason.is_empty():
+		normalized_reason = "plan_rejected"
+	for area_order_target_variant in area_order_targets:
+		if typeof(area_order_target_variant) != TYPE_DICTIONARY:
+			continue
+		var area_order = _get_area_order_from_ref(Dictionary(area_order_target_variant))
+		if area_order == null:
+			continue
+		var metadata: Dictionary = Dictionary(area_order.metadata).duplicate(true)
+		metadata.erase("n003_plan_id")
+		metadata["n003_submission_state"] = "blocked"
+		metadata["n003_block_reason"] = normalized_reason
+		metadata["n003_entry_source"] = "rmb"
+		area_order.metadata = metadata
 
 
 func _update_waypoint_targets(waypoint_targets: Array, world_position: Vector2) -> bool:

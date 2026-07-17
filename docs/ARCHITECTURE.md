@@ -50,6 +50,16 @@ Simulation, Darstellung und UI strikt trennen.
 - dirty-basierte Batch-Verarbeitung
 - keine Vollupdates aller Units pro Frame
 
+## Commander order gateway (for dummies)
+
+Buttons, hotkeys and right-clicks only write the same fireteam plan. `GO` sends
+that plan through `FireteamCommandGateway` to `SimulationRoot`; the authority
+validates it and starts tactical execution on its tick. In short: the UI asks,
+the gateway carries the request, and `SimulationRoot` decides. A client waits
+for the authoritative commit receipt instead of starting its own local movement.
+
+The detailed contract is [fireteam_command_gateway_contract.md](dev/fireteam_command_gateway_contract.md).
+
 ## Script-Layout
 Der aktuelle Runtime-Kernpfad ist `scripts/core/`, nicht `scripts/simulation/`.
 

@@ -6,6 +6,7 @@ signal damage_effect_resolved(result: Dictionary)
 signal fire_rule_committed(state: Dictionary)
 signal dropship_command_committed(command: Dictionary)
 signal commander_intent_committed(command: Dictionary)
+signal commander_intent_commit_received(command: Dictionary)
 signal multiplayer_snapshot_applied(snapshot: Dictionary)
 signal network_command_result_received(result: Dictionary)
 signal network_command_accepted(command: Dictionary, peer_id: int)
@@ -24,6 +25,7 @@ const LOCAL_AVOIDANCE_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactica
 const BOTTLENECK_RESERVATION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/tactical/bottleneck_reservation_resolver.gd")
 const MULTIPLAYER_COMMAND_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_command_contract.gd")
 const MULTIPLAYER_SNAPSHOT_CONTRACT_SCRIPT: GDScript = preload("res://scripts/multiplayer/multiplayer_snapshot_contract.gd")
+const COMMANDER_ORDER_INTENT_SCRIPT: GDScript = preload("res://scripts/mission/commander_order_intent.gd")
 const WEAPON_DATA_SCRIPT: GDScript = preload("res://scripts/core/weapon_data.gd")
 const CAPTURE_PROGRESS_PER_TICK: float = 0.01
 const HPA_NAVIGATION_CLUSTER_SIZE: int = 8
@@ -94,6 +96,10 @@ var _network_command_accept_count: int = 0
 var _network_command_reject_count: int = 0
 var _accepted_network_dropship_command_ids: Dictionary = {}
 var _accepted_network_dropship_command_id_order: Array = []
+var _accepted_commander_order_tokens: Dictionary = {}
+var _accepted_commander_order_token_order: Array = []
+var _latest_commander_order_revision_by_peer_fireteam: Dictionary = {}
+var _n003_commander_order_origin_peer_by_token: Dictionary = {}
 var _network_command_dedupe_hit_count: int = 0
 var _network_command_preflight_validator: Callable = Callable()
 var _multiplayer_snapshot_context: Dictionary = {}
@@ -549,6 +555,15 @@ func get_last_network_command_result() -> Dictionary:
 	return _last_network_command_result.duplicate(true)
 
 
+func get_next_commander_order_revision_for_peer_fireteam(peer_id: int, fireteam_id: String) -> int:
+	var normalized_peer_id: int = peer_id if peer_id > 0 else 1
+	var normalized_fireteam_id: String = fireteam_id.strip_edges().to_lower()
+	if normalized_fireteam_id.is_empty():
+		return 1
+	var revision_key: String = "%d:%s" % [normalized_peer_id, normalized_fireteam_id]
+	return maxi(int(_latest_commander_order_revision_by_peer_fireteam.get(revision_key, 0)) + 1, 1)
+
+
 func set_network_command_preflight_validator(validator: Callable) -> void:
 	_network_command_preflight_validator = validator
 
@@ -720,6 +735,9 @@ func request_command(command_dict: Dictionary) -> void:
 		sending_peer_id = 1
 
 	var result: Dictionary = submit_network_command_for_peer(command_dict, sending_peer_id)
+	if bool(result.get("accepted", false)) and _is_n003_commander_order(command_dict):
+		result["pending"] = true
+		result["committed"] = false
 	_send_network_command_result(sending_peer_id, result, command_dict)
 	if not bool(result.get("accepted", false)):
 		push_warning("SimulationRoot rejected a network command: %s." % String(result.get("reason", "unknown")))
@@ -730,6 +748,14 @@ func request_command(command_dict: Dictionary) -> void:
 func _receive_network_command_result(result: Dictionary) -> void:
 	_last_network_command_result = result.duplicate(true)
 	network_command_result_received.emit(_last_network_command_result.duplicate(true))
+
+
+@rpc("authority", "reliable")
+func _receive_commander_intent_commit(command: Dictionary) -> void:
+	if not _is_n003_commander_order(command):
+		return
+	_mirror_n003_commander_order_revision(command)
+	commander_intent_commit_received.emit(command.duplicate(true))
 
 
 func _send_network_command_result(peer_id: int, result: Dictionary, command: Dictionary) -> void:
@@ -743,6 +769,11 @@ func _send_network_command_result(peer_id: int, result: Dictionary, command: Dic
 		"fireteam_id": String(result.get("fireteam_id", command.get("fireteam_id", ""))).strip_edges().to_lower(),
 		"craft_id": String(command.get("craft_id", "")).strip_edges(),
 		"command_id": String(command.get("command_id", "")).strip_edges(),
+		"plan_id": String(command.get("plan_id", "")).strip_edges(),
+		"plan_revision": int(command.get("plan_revision", 0)),
+		"command_token": String(command.get("command_token", "")).strip_edges(),
+		"pending": bool(result.get("pending", false)),
+		"committed": bool(result.get("committed", false)),
 		"duplicate": bool(result.get("duplicate", false)),
 		"fire_rule": String(command.get("fire_rule", "")).strip_edges().to_lower(),
 		"source_context": String(command.get("source_context", "")).strip_edges(),
@@ -786,16 +817,24 @@ func validate_network_command_for_peer(command_dict: Dictionary, peer_id: int = 
 
 
 func submit_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1) -> Dictionary:
+	var sending_peer_id: int = peer_id if peer_id > 0 else 1
+	if _is_n003_commander_order(command_dict):
+		var n003_preflight: Dictionary = _validate_n003_commander_order_submission(command_dict, sending_peer_id)
+		if not bool(n003_preflight.get("accepted", false)):
+			if is_server_authoritative:
+				_record_network_command_rejection(n003_preflight, command_dict, sending_peer_id)
+			return n003_preflight
 	if not is_server_authoritative:
 		enqueue_command(command_dict)
+		if _is_n003_commander_order(command_dict):
+			_register_n003_commander_order_submission(command_dict, sending_peer_id)
 		return {
 			"accepted": true,
 			"reason": "",
-			"peer_id": peer_id,
+			"peer_id": sending_peer_id,
 			"command": command_dict.duplicate(true),
 		}
 
-	var sending_peer_id: int = peer_id if peer_id > 0 else 1
 	var validation: Dictionary = validate_network_command_for_peer(command_dict, sending_peer_id)
 	if not bool(validation.get("accepted", false)):
 		_record_network_command_rejection(validation, command_dict, sending_peer_id)
@@ -812,8 +851,127 @@ func submit_network_command_for_peer(command_dict: Dictionary, peer_id: int = 1)
 		_register_accepted_network_dropship_command_id(command_id)
 	_network_command_accept_count += 1
 	enqueue_command(accepted_command)
+	if _is_n003_commander_order(accepted_command):
+		_register_n003_commander_order_submission(accepted_command, sending_peer_id)
 	network_command_accepted.emit(accepted_command.duplicate(true), sending_peer_id)
 	return validation
+
+
+func submit_commander_order_intent_for_peer(command_dict: Dictionary, peer_id: int = 1) -> Dictionary:
+	if typeof(command_dict) != TYPE_DICTIONARY:
+		return {"accepted": false, "reason": "command_not_dictionary"}
+	var sending_peer_id: int = peer_id if peer_id > 0 else 1
+	var command: Dictionary = command_dict.duplicate(true)
+	command["contract_category"] = "commander_intent"
+	command["source_context"] = "mission_n003_fireteam_go"
+	command["source_peer_id"] = sending_peer_id
+	var preflight: Dictionary = preflight_commander_order_intent_for_peer(command, sending_peer_id)
+	if not bool(preflight.get("accepted", false)):
+		if is_server_authoritative:
+			_record_network_command_rejection(preflight, command, sending_peer_id)
+		return preflight
+	if is_server_authoritative and _has_active_multiplayer_peer() and not multiplayer.is_server():
+		rpc_id(1, "request_command", command)
+		return {
+			"accepted": true,
+			"pending": true,
+			"reason": "",
+			"command": command.duplicate(true),
+			"peer_id": sending_peer_id,
+		}
+	if is_server_authoritative:
+		return submit_network_command_for_peer(command, sending_peer_id)
+	enqueue_command(command)
+	_register_n003_commander_order_submission(command, sending_peer_id)
+	return {
+		"accepted": true,
+		"pending": false,
+		"reason": "",
+		"command": command.duplicate(true),
+		"peer_id": sending_peer_id,
+}
+
+
+func preflight_commander_order_intent_for_peer(command_dict: Dictionary, peer_id: int = 1) -> Dictionary:
+	if typeof(command_dict) != TYPE_DICTIONARY:
+		return {"accepted": false, "reason": "command_not_dictionary"}
+	var sending_peer_id: int = peer_id if peer_id > 0 else 1
+	var command: Dictionary = command_dict.duplicate(true)
+	command["contract_category"] = "commander_intent"
+	command["source_context"] = "mission_n003_fireteam_go"
+	command["source_peer_id"] = sending_peer_id
+	var n003_preflight: Dictionary = _validate_n003_commander_order_submission(command, sending_peer_id)
+	if not bool(n003_preflight.get("accepted", false)):
+		return n003_preflight
+	# A connected client can validate the immutable N003 envelope locally, but the
+	# server remains responsible for ownership and final acceptance.
+	if is_server_authoritative and (not _has_active_multiplayer_peer() or multiplayer.is_server()):
+		var network_validation: Dictionary = validate_network_command_for_peer(command, sending_peer_id)
+		if not bool(network_validation.get("accepted", false)):
+			return network_validation
+		return {
+			"accepted": true,
+			"reason": "",
+			"command": Dictionary(network_validation.get("command", command)).duplicate(true),
+		}
+	return {
+		"accepted": true,
+		"reason": "",
+		"command": command.duplicate(true),
+	}
+
+
+func _is_n003_commander_order(command: Dictionary) -> bool:
+	return String(command.get("contract_category", "")).strip_edges().to_lower() == "commander_intent" and String(command.get("source_context", "")).strip_edges() == "mission_n003_fireteam_go"
+
+
+func _validate_n003_commander_order_submission(command: Dictionary, peer_id: int) -> Dictionary:
+	var commander_intent = COMMANDER_ORDER_INTENT_SCRIPT.call("from_dict", command)
+	if commander_intent == null or not commander_intent.has_method("is_valid") or not bool(commander_intent.call("is_valid")):
+		return {"accepted": false, "reason": "invalid_commander_intent"}
+	var claimed_source_peer_id: int = int(command.get("source_peer_id", peer_id))
+	if claimed_source_peer_id != peer_id:
+		return {"accepted": false, "reason": "commander_order_source_peer_mismatch"}
+	var plan_id: String = String(command.get("plan_id", "")).strip_edges()
+	var command_token: String = String(command.get("command_token", "")).strip_edges()
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	var plan_revision: int = int(command.get("plan_revision", 0))
+	if plan_id.is_empty() or command_token.is_empty() or fireteam_id.is_empty() or plan_revision <= 0:
+		return {"accepted": false, "reason": "commander_order_missing_plan_token_or_fireteam"}
+	if _accepted_commander_order_tokens.has(command_token):
+		return {"accepted": false, "reason": "duplicate_commander_order_token"}
+	var revision_key: String = "%d:%s" % [peer_id, fireteam_id]
+	var latest_revision: int = int(_latest_commander_order_revision_by_peer_fireteam.get(revision_key, 0))
+	if plan_revision <= latest_revision:
+		return {"accepted": false, "reason": "stale_commander_order_revision"}
+	return {"accepted": true, "reason": ""}
+
+
+func _register_n003_commander_order_submission(command: Dictionary, peer_id: int) -> void:
+	var command_token: String = String(command.get("command_token", "")).strip_edges()
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	if command_token.is_empty() or fireteam_id.is_empty() or _accepted_commander_order_tokens.has(command_token):
+		return
+	_accepted_commander_order_tokens[command_token] = true
+	_accepted_commander_order_token_order.append(command_token)
+	while _accepted_commander_order_token_order.size() > NETWORK_COMMAND_DEDUPE_MAX_IDS:
+		var expired_token: String = String(_accepted_commander_order_token_order.pop_front())
+		_accepted_commander_order_tokens.erase(expired_token)
+		_n003_commander_order_origin_peer_by_token.erase(expired_token)
+	var revision_key: String = "%d:%s" % [peer_id, fireteam_id]
+	_latest_commander_order_revision_by_peer_fireteam[revision_key] = int(command.get("plan_revision", 0))
+	_n003_commander_order_origin_peer_by_token[command_token] = peer_id
+
+
+func _mirror_n003_commander_order_revision(command: Dictionary) -> void:
+	var peer_id: int = int(command.get("source_peer_id", 1))
+	var fireteam_id: String = String(command.get("fireteam_id", "")).strip_edges().to_lower()
+	if peer_id <= 0 or fireteam_id.is_empty():
+		return
+	var revision_key: String = "%d:%s" % [peer_id, fireteam_id]
+	var incoming_revision: int = int(command.get("plan_revision", 0))
+	if incoming_revision > int(_latest_commander_order_revision_by_peer_fireteam.get(revision_key, 0)):
+		_latest_commander_order_revision_by_peer_fireteam[revision_key] = incoming_revision
 
 
 func _register_accepted_network_dropship_command_id(command_id: String) -> void:
@@ -1554,6 +1712,8 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 		return
 	if String(cmd.get("contract_category", "")).strip_edges().to_lower() == "commander_intent":
 		commander_intent_committed.emit(cmd.duplicate(true))
+		if _is_n003_commander_order(cmd):
+			_send_n003_commander_intent_commit_receipt(cmd)
 		return
 
 	match _extract_command_type(cmd):
@@ -1570,6 +1730,21 @@ func _apply_command(cmd: Dictionary, delta: float) -> void:
 		_:
 			# TODO: Authoritative gameplay state commits belong here once systems exist.
 			pass
+
+
+func _send_n003_commander_intent_commit_receipt(command: Dictionary) -> void:
+	var command_token: String = String(command.get("command_token", "")).strip_edges()
+	if command_token.is_empty():
+		return
+	var origin_peer_id: int = int(_n003_commander_order_origin_peer_by_token.get(command_token, int(command.get("source_peer_id", 1))))
+	# A receipt is a one-shot transport detail.  Drop its origin entry even for
+	# local commands or a disconnect before the send, instead of retaining it
+	# until the bounded token-deduplication cache eventually evicts it.
+	_n003_commander_order_origin_peer_by_token.erase(command_token)
+	if origin_peer_id <= 1:
+		return
+	if _has_active_multiplayer_peer() and multiplayer.is_server() and multiplayer.get_peers().has(origin_peer_id):
+		_receive_commander_intent_commit.rpc_id(origin_peer_id, command.duplicate(true))
 
 
 func _apply_dropship_command(command: Dictionary) -> void:
@@ -1941,12 +2116,14 @@ func _is_stale_tokenized_move_command(cmd: Dictionary, unit) -> bool:
 		return false
 	var current_command = unit.call("get_current_unit_command")
 	if current_command == null:
-		return true
+		return false
 	var current_token: String = ""
 	if typeof(current_command) == TYPE_DICTIONARY:
 		current_token = String(Dictionary(current_command).get("command_token", "")).strip_edges()
 	elif current_command is Object:
 		current_token = String(current_command.get("command_token")).strip_edges()
+	if current_token.is_empty():
+		return false
 	return current_token != command_token
 
 
