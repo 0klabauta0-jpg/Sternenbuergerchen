@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1181 - Project Vision And Status Workbench
+- Status: implementiert und lokal im Browser verifiziert
+- Aenderung: Ein eigenstaendiges taktisches HTML-Briefing erklaert Spielidee, Spielerreise, belastbaren Projektstand, Architektur fuer Einsteiger, Pflichtarbeit, Ausbauvision und den konkreten Nutzen von GPT-5.6. Eine lokale Workbench speichert Fokus, Reifegrad, Prioritaeten, Entscheidungen und Notizen und importiert beziehungsweise exportiert versioniertes JSON.
+- Architektur: Reines Dokumentations- und Planungsartefakt unter `docs/reports/`; keine Gameplay-, Simulations-, UI- oder Runtime-Wahrheit wurde veraendert. Der Bericht trennt frisch gepruefte Evidence, implementierte Pfade, Teilstaende und Vision explizit.
+- Lokale Pruefung: Statische Inhalts- und Schema-Checks; exakter `file://`-Aufruf mit Navigation, Evidence-Filter, Local-Storage-Persistenz, JSON-Import/-Export und Reset. Desktop bei 1440 x 1000 und Mobile bei 390 x 844 ohne horizontalen Overflow; Browser-Konsole ohne Fehler oder Warnungen.
+- Risiken/offen: Das HTML ist eine lokale Arbeitsgrundlage, kein neuer Spielbuild. Der frische TASK_1179-Lauf erreichte 18 fruehe Checks, brach in diesem isolierten Worktree jedoch wegen UID-/Autoload-Problemen und einer bereits freigegebenen Instanz vor den letzten Objective-/Debrief-Assertions ab; die historischen 18/18 sind deshalb nicht als heute vollstaendig neu bestaetigt dargestellt. Menschliche Produktabnahme und echter externer Playtest bleiben offen.
+- Naechster Schritt: In der Workbench zuerst `Evidence-Vertrauen`, danach die `ersten 10 Minuten` als priorisierte Gates festlegen und den exportierten Entscheidungsstand als Grundlage fuer den naechsten Gameplay-Slice verwenden.
+
 ### TASK_1179 - Ground Mission Objective Playthrough
 - Status: implementiert und headless geprueft
 - Aenderung: `grid_sweep` hat jetzt einen echten Homebase -> Dropship -> LZ -> Deboard -> Take -> Objective -> Debrief-Trace. Die Ground Map hat eine begehbare Alpha-LZ, einen Stationszugang und einen legalen zentralen Rampenkorridor fuer A* und HPA.
