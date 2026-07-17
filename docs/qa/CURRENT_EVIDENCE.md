@@ -17,11 +17,11 @@ Jeder aktuelle Claim braucht einen Evidence-Record mit Commit, Laufdatum, Typ, E
 | `n002_fresh_checkout_bootstrap` | Externer Clone importiert, startet minimal und erzeugt Windows-Release-Artefakte. | Konfigurationsbeweis; TASK-1179 hat weiter einen separaten Nachlaufdefekt. |
 | `n002_release_export_credentials_boundary` | Der versionierte lokale Windows-Release-Workflow endet auf Commit `97989559` mit nativem Exitcode 0 und dokumentiert EXE, PCK, DLLs und PCK-Hash. | Kein zweiter Fresh-Clone nach den zwei kleinen Export-Fixes; kein Ersatz für den TASK-1179-Vollnachweis. |
 | `n002_task_1179_recapture_incomplete` | Zwei aktuelle Assertion-Läufe erreichen jeweils 18/18 und Exitcode 0. | Beide Läufe melden danach eine bereits freigegebene Instanz; kein sauberer Vollnachweis. |
+| `n003_command_authority_parity` | Commit `8da36b…` belegt Plan-dann-GO-Parität mit 88/0 Fokus- und 95/0 Folgeassertions sowie ohne blockierenden Review-Befund. | Kein N004-Produktmissions- oder Release-Nachweis; TASK-1179-Recapture und Legacy-Controller-Extraktion bleiben offen. |
 
 ## Offene Evidenzgates
 
 - N002A: TASK-1179-Lifecycle-Nachlauf ohne Zugriff auf bereits freigegebene Instanzen zweimal sauber recapturen.
-- N003: Ein lokal geprüfter Plan-dann-GO-Implementierungskandidat ist in Task und Gateway-Vertrag beschrieben; bis Commit, datierter Lauf und Artefakt im Manifest stehen, bleibt die Host/Client-Parität ein offenes Gate.
 - N004: öffentliche Missionsszene sowie zweimal frisch integrierter TASK-1180-Trace.
 - N007: ein frischer, deeplink-freier First-Ten-Minutes-Release-Gate.
 

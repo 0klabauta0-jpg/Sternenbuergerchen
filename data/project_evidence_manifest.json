@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "delivery_state": "Reproduzierter Checkout-Bootstrap mit offener Gameplay-Lifecycle-Recapture",
-  "product_maturity": "Historisch belegter vertikaler Commander-Slice mit aktuellem Checkout-Konfigurationsbeweis sowie offenen Lifecycle-, Autoritaets- und Produktpfad-Gates",
+  "delivery_state": "Reproduzierter Checkout-Bootstrap und commitgebundene Command-Authority-Paritaet mit offener Gameplay-Lifecycle-Recapture",
+  "product_maturity": "Historisch belegter vertikaler Commander-Slice mit aktuellem Checkout-Konfigurations- und Command-Authority-Beweis sowie offenen Lifecycle- und Produktpfad-Gates",
   "scope": {
     "canonical_current_state": "docs/CURRENT_GAME_STATE.md",
     "evidence_summary": "docs/qa/CURRENT_EVIDENCE.md",
@@ -71,6 +71,16 @@
       "artifact": "docs/qa/TASK_N002_FRESH_CHECKOUT_2026-07-17.md",
       "caveat": "Beide Läufe melden nach dem Assertion-Ergebnis 'Cannot call method call on a previously freed instance' in task_1179_ground_mission_objective_playthrough.gd:150. Deshalb kein sauberer frischer Objective-/Debrief-Vollnachweis.",
       "owning_paths": ["scripts/tests/task_1179_ground_mission_objective_playthrough.gd", "scripts/meta"]
+    },
+    {
+      "id": "n003_command_authority_parity",
+      "commit": "8da36b3755e54da887dbaee64ed55c2cc5db498f",
+      "run_at": "2026-07-17",
+      "type": "fokussierte Command-Authority-/Plan-dann-GO-Paritaetstests, kompatible Missionsregressionen und unabhaengiger Abschlussreview",
+      "result": "task_n003_command_authority_parity 88/0; task_1116_connected_post_deboard_fireteam_command_handoff 16/0; bugfix_mission_right_click_order_flow 21/0; task_1060_multi_fireteam_first_command_player_grip 14/0; task_281_tactical_command_multiplayer_authority_snapshot 34/0; task_501_integrated_movement_command_lifecycle_hardening 10/0; Abschlussreview ohne blockierende Befunde",
+      "artifact": "docs/qa/TASK_N003_COMMAND_AUTHORITY_2026-07-17.md",
+      "caveat": "Kein Nachweis einer oeffentlichen Produktmission (TASK_N004) oder Release-Freigabe. TASK_1179 muss weiter ohne Zugriff auf bereits freigegebene Instanzen recaptured werden; die Legacy-Controller-Extraktion bleibt ausstehend.",
+      "owning_paths": ["scripts/core/simulation_root.gd", "scripts/mission", "scripts/tactical", "scripts/tests"]
     }
   ],
   "candidates": [

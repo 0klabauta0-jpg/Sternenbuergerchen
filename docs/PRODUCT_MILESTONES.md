@@ -10,18 +10,21 @@ Ein Commander führt Fireteams durch eine nachvollziehbare Heimatbasis-zu-Missio
 
 <!-- milestone: now -->
 
-`TASK_N001 — Current Truth Reset`: Gegenwartsbehauptungen, Evidenz und historische Momentaufnahmen sind eindeutig getrennt. Dieser Meilenstein schafft den Vertrag, aber keinen neuen Gameplay- oder Release-Nachweis.
+`TASK_N004 — Canonical Product Mission`: Eine öffentliche Missionsszene verbindet den Commander-Einstieg mit zweimal frisch integrierter TASK-1180-First-Contact-/Entscheidungsevidenz. N003 liefert dafür den commitgebundenen Plan-dann-GO-Command-Pfad; N002A bleibt ein unabhängiges Lifecycle-Release-Gate.
 
 ## Als Nächstes
 
-1. `TASK_N002 — Reproducible Godot Checkout`: Frischer Import, UID-/Autoload-Start und zwei ehrliche TASK-1179-Ergebnisse.
-2. `TASK_N003 — Command Authority and Parity`: Ein Plan-dann-GO-Pfad für sichtbare Commander-Eingaben; SimulationRoot bleibt Mutationsautorität.
-3. `TASK_N004 — Canonical Product Mission`: Öffentliche Missionsszene und zweimal integrierter TASK-1180-First-Contact-/Entscheidungspfad.
-4. `TASK_N005 — Frontier Desert Outpost`: Sichtbarer Frontier-Low-Poly-Slice ohne Änderung von Karten- oder Cover-Semantik.
-5. `TASK_N006 — Combat Cadence and Release-Playtest Boundary`: Messbare Cadence mit öffentlicher Playtest-Grenze.
-6. `TASK_N007 — First-Ten-Minutes Release Gate`: Keine Deeplinks; die ersten zehn Minuten als Produktgate.
-7. `TASK_N008 — Workspace Cleanup and Integration`: Kompatibilität bewahren und den Strangler sauber integrieren.
+1. `TASK_N005 — Frontier Desert Outpost`: Sichtbarer Frontier-Low-Poly-Slice ohne Änderung von Karten- oder Cover-Semantik.
+2. `TASK_N006 — Combat Cadence and Release-Playtest Boundary`: Messbare Cadence mit öffentlicher Playtest-Grenze.
+3. `TASK_N007 — First-Ten-Minutes Release Gate`: Keine Deeplinks; die ersten zehn Minuten als Produktgate.
+4. `TASK_N008 — Workspace Cleanup and Integration`: Kompatibilität bewahren und den Strangler sauber integrieren.
+
+## Unabhängige Gates
+
+- `N002A`: TASK-1179-Lifecycle-Nachlauf zweimal ohne Zugriff auf bereits
+  freigegebene Instanzen recapturen. Dieses Gate blockiert Release-Behauptungen,
+  aber nicht den N004-Produktslice.
 
 ## Historische Orientierung
 
-TASK_1179, TASK_1180 und TASK_1181 bleiben nützlich, aber sie markieren keine aktuelle Meilensteinreife. Ihre Aussagekraft wird ausschließlich über aktuelle Evidence-Records mit Commit, Laufdatum, Artefakt und Caveat aktualisiert.
+TASK_1179, TASK_1180 und TASK_1181 bleiben nützlich, aber sie markieren keine aktuelle Meilensteinreife. Ihre Aussagekraft wird ausschließlich über aktuelle Evidence-Records mit Commit, Laufdatum, Testtyp, Artefakt und Caveat aktualisiert.
