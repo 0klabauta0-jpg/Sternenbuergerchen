@@ -7,7 +7,7 @@ const LEGACY_PATH_ID: String = "runtime_leader_ftltask"
 const LEGACY_POLICY: String = "compatibility_adapter_only"
 const RUNTIME_AUTHORITY: String = "SimulationRoot"
 const SIMULATION_ENQUEUE_METHOD: String = "SimulationRoot.enqueue_command"
-const CONTROLLER_SCRIPT_PATH: String = "res://scripts/tests/mission_tactical_sandbox_controller.gd"
+const CONTROLLER_SCRIPT_PATH: String = "res://scripts/tactical/mission_tactical_sandbox_controller.gd"
 const MOVEMENT_CONTROLLER_SCRIPT_PATH: String = "res://scripts/tactical/fireteam_movement_controller.gd"
 const SECURITY_CONTROLLER_SCRIPT_PATH: String = "res://scripts/tactical/fireteam_security_controller.gd"
 
@@ -58,8 +58,8 @@ static func build_snapshot(controller_script_path: String = CONTROLLER_SCRIPT_PA
 		"ui_sets_unit_truth": false,
 		"ui_sets_gameplay_truth": false,
 		"snapshots_are_truth": false,
-		"production_extraction_needed": true,
-		"production_extraction_policy": "Extract MissionTacticalSandboxController from scripts/tests before large runtime expansion.",
+		"production_extraction_needed": false,
+		"production_extraction_policy": "MissionTacticalSandboxController is extracted to scripts/tactical; scripts/tests paths are compatibility adapters only.",
 	}
 
 
