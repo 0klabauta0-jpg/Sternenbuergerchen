@@ -1,0 +1,2225 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>SternenBuergerchen – Spielidee, Projektstand &amp; GPT-5.6</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07100f;
+      --bg-deep: #040908;
+      --surface: #101a18;
+      --surface-raised: #15231f;
+      --surface-soft: #0c1513;
+      --line: #2a423b;
+      --line-strong: #46665b;
+      --text: #edf4ef;
+      --muted: #9aada5;
+      --faint: #667b73;
+      --signal: #80e6b0;
+      --signal-strong: #40c987;
+      --amber: #f2ba61;
+      --amber-soft: #4d3a1f;
+      --danger: #ff7f6e;
+      --danger-soft: #4f2823;
+      --cyan: #7bd8db;
+      --verified: #80e6b0;
+      --implemented: #7bd8db;
+      --partial: #f2ba61;
+      --vision: #b8a6ff;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+      --radius: 18px;
+      --radius-small: 10px;
+      --content: 1240px;
+      font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 86px; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(128, 230, 176, 0.026) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(128, 230, 176, 0.026) 1px, transparent 1px),
+        radial-gradient(circle at 80% 4%, rgba(64, 201, 135, 0.1), transparent 28rem),
+        var(--bg);
+      background-size: 42px 42px, 42px 42px, auto, auto;
+      line-height: 1.55;
+    }
+
+    a { color: inherit; }
+    button, input, select, textarea { font: inherit; }
+    button, select, textarea, input, [contenteditable="true"] {
+      border-radius: 8px;
+    }
+    button, select {
+      min-height: 42px;
+    }
+    button {
+      border: 1px solid var(--line-strong);
+      background: var(--text);
+      color: var(--bg-deep);
+      padding: 9px 14px;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button.secondary {
+      color: var(--text);
+      background: transparent;
+    }
+    button.choice {
+      color: var(--muted);
+      background: var(--surface-soft);
+    }
+    button.choice.active {
+      color: #04110b;
+      background: var(--signal);
+      border-color: var(--signal);
+    }
+    button.danger {
+      color: #ffeceb;
+      border-color: rgba(255, 127, 110, 0.5);
+      background: transparent;
+    }
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [contenteditable="true"]:focus-visible {
+      outline: 3px solid var(--amber);
+      outline-offset: 3px;
+    }
+    select, textarea, input[type="text"], [contenteditable="true"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #08110f;
+      color: var(--text);
+      padding: 10px 12px;
+    }
+    textarea {
+      min-height: 124px;
+      resize: vertical;
+    }
+    [contenteditable="true"] {
+      min-height: 104px;
+      white-space: pre-wrap;
+    }
+    [contenteditable="true"]:empty::before {
+      content: attr(data-placeholder);
+      color: var(--faint);
+    }
+
+    .skip-link {
+      position: fixed;
+      left: 12px;
+      top: -70px;
+      z-index: 99;
+      background: var(--amber);
+      color: #111;
+      padding: 10px 14px;
+      border-radius: 0 0 8px 8px;
+      font-weight: 800;
+    }
+    .skip-link:focus { top: 0; }
+
+    .shell {
+      width: min(var(--content), calc(100vw - 36px));
+      margin-inline: auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--signal);
+      font-size: 0.76rem;
+      font-weight: 850;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 64px 0 48px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(115deg, rgba(16, 26, 24, 0.98), rgba(7, 16, 15, 0.85));
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -52% 35%;
+      height: 440px;
+      border: 1px solid rgba(128, 230, 176, 0.12);
+      border-radius: 50%;
+      transform: rotate(-8deg);
+      pointer-events: none;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.55fr);
+      gap: clamp(34px, 6vw, 84px);
+      align-items: center;
+    }
+    .hero-grid > *,
+    .section-head > *,
+    .statement > *,
+    .dummy-callout > *,
+    .gpt-card > *,
+    .gpt-proof > *,
+    .workbench-grid > * {
+      min-width: 0;
+    }
+    h1, h2, h3, h4, p { margin-top: 0; }
+    h1 {
+      max-width: 900px;
+      margin-bottom: 18px;
+      font-size: clamp(2.55rem, 6.2vw, 5.4rem);
+      line-height: 0.92;
+      letter-spacing: -0.06em;
+    }
+    h1 span {
+      display: block;
+      margin-top: 13px;
+      color: var(--muted);
+      font-size: clamp(1.05rem, 2.1vw, 1.55rem);
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+    .hero-lead {
+      max-width: 770px;
+      margin-bottom: 24px;
+      color: #d1ddd7;
+      font-size: clamp(1.05rem, 1.7vw, 1.26rem);
+    }
+    .hero-lead strong { color: var(--text); }
+    .hero-meta, .chip-row, .button-row, .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+    }
+    .chip {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.025);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .chip::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 12px currentColor;
+    }
+    .chip.good { color: var(--signal); }
+    .chip.warn { color: var(--amber); }
+    .chip.danger { color: var(--danger); }
+    .chip.info { color: var(--cyan); }
+
+    .radar-card {
+      position: relative;
+      min-height: 340px;
+      border: 1px solid var(--line);
+      border-radius: 28px 28px 28px 4px;
+      background:
+        radial-gradient(circle, transparent 0 22%, rgba(128, 230, 176, 0.13) 22.4% 22.9%, transparent 23.2% 43%, rgba(128, 230, 176, 0.11) 43.4% 44%, transparent 44.4% 64%, rgba(128, 230, 176, 0.09) 64.4% 65%, transparent 65.4%),
+        linear-gradient(90deg, transparent 49.7%, rgba(128, 230, 176, 0.13) 50%, transparent 50.3%),
+        linear-gradient(transparent 49.7%, rgba(128, 230, 176, 0.13) 50%, transparent 50.3%),
+        #091311;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .radar-sweep {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 46%;
+      height: 2px;
+      transform-origin: left center;
+      background: linear-gradient(90deg, var(--signal), transparent);
+      animation: sweep 10s linear infinite;
+      opacity: 0.65;
+    }
+    @keyframes sweep { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .radar-sweep { animation: none; transform: rotate(32deg); }
+    }
+    .radar-dot {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 18px var(--amber);
+    }
+    .radar-dot.one { left: 31%; top: 34%; }
+    .radar-dot.two { right: 25%; top: 52%; background: var(--signal); box-shadow: 0 0 18px var(--signal); }
+    .radar-dot.three { left: 46%; bottom: 20%; background: var(--danger); box-shadow: 0 0 18px var(--danger); }
+    .radar-label {
+      position: absolute;
+      inset: auto 18px 18px;
+      border-left: 3px solid var(--signal);
+      padding: 10px 12px;
+      background: rgba(4, 9, 8, 0.78);
+    }
+    .radar-label strong {
+      display: block;
+      color: var(--signal);
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .radar-label span { color: var(--muted); font-size: 0.82rem; }
+
+    .reality-strip {
+      border-bottom: 1px solid var(--line);
+      background: #0b1513;
+    }
+    .reality-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .reality-item {
+      min-height: 108px;
+      padding: 20px 22px;
+      border-right: 1px solid var(--line);
+    }
+    .reality-item:last-child { border-right: 0; }
+    .reality-item small {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--faint);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .reality-item strong {
+      display: block;
+      font-size: 1.08rem;
+      line-height: 1.25;
+    }
+    .reality-item span { color: var(--muted); font-size: 0.82rem; }
+
+    .topnav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(70, 102, 91, 0.72);
+      background: rgba(7, 16, 15, 0.93);
+      backdrop-filter: blur(14px);
+    }
+    .topnav .shell {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+    .topnav a {
+      flex: 0 0 auto;
+      padding: 15px 12px 13px;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+    .topnav a:hover,
+    .topnav a[aria-current="true"] {
+      color: var(--text);
+      border-bottom-color: var(--signal);
+    }
+
+    main { overflow: clip; }
+    .band {
+      position: relative;
+      padding: clamp(66px, 8vw, 108px) 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .band:nth-of-type(even) { background: rgba(12, 21, 19, 0.56); }
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.7fr) minmax(320px, 1.3fr);
+      gap: 36px;
+      align-items: end;
+      margin-bottom: 38px;
+    }
+    .section-index {
+      display: inline-block;
+      margin-bottom: 12px;
+      color: var(--signal);
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+    }
+    h2 {
+      max-width: 720px;
+      margin-bottom: 0;
+      font-size: clamp(2rem, 4vw, 3.6rem);
+      line-height: 1.02;
+      letter-spacing: -0.045em;
+    }
+    h3 {
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+      line-height: 1.25;
+    }
+    h4 {
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+    }
+    .section-intro {
+      max-width: 720px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 1.03rem;
+    }
+    .section-intro strong { color: var(--text); }
+
+    .statement {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+    .statement-main {
+      min-height: 330px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(24px, 4vw, 44px);
+      background:
+        linear-gradient(145deg, rgba(128, 230, 176, 0.075), transparent 52%),
+        var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .statement-main blockquote {
+      max-width: 770px;
+      margin: 0 0 34px;
+      font-size: clamp(1.55rem, 3vw, 2.55rem);
+      line-height: 1.18;
+      letter-spacing: -0.035em;
+    }
+    .statement-main blockquote strong { color: var(--signal); }
+    .command-set {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .command {
+      border-top: 1px solid var(--line-strong);
+      padding-top: 10px;
+      color: var(--muted);
+      font-family: Consolas, monospace;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+    }
+    .principles {
+      display: grid;
+      gap: 12px;
+    }
+    .principle {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      padding: 20px;
+      background: var(--surface-raised);
+    }
+    .principle b {
+      display: block;
+      margin-bottom: 7px;
+      color: var(--amber);
+      font-size: 0.74rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .principle p { margin: 0; color: var(--muted); }
+
+    .journey {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(150px, 1fr));
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+    }
+    .journey-step {
+      position: relative;
+      min-width: 158px;
+      min-height: 235px;
+      border-block: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+      padding: 24px 17px 20px;
+      background: var(--surface);
+    }
+    .journey-step:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+    .journey-step:last-child {
+      border-right: 1px solid var(--line);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .journey-step::after {
+      content: "";
+      position: absolute;
+      top: 40px;
+      right: -5px;
+      z-index: 2;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--signal);
+      box-shadow: 0 0 13px var(--signal);
+    }
+    .journey-step:last-child::after { display: none; }
+    .step-no {
+      display: block;
+      margin-bottom: 24px;
+      color: var(--signal);
+      font-family: Consolas, monospace;
+      font-size: 0.74rem;
+    }
+    .journey-step h3 { min-height: 48px; }
+    .journey-step p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+    .journey-caption {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-top: 18px;
+      border-left: 3px solid var(--amber);
+      padding: 12px 14px;
+      color: var(--muted);
+      background: rgba(242, 186, 97, 0.05);
+    }
+    .journey-caption strong { color: var(--amber); }
+
+    .evidence-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      padding: 14px;
+      background: var(--surface-soft);
+    }
+    .filter-row label {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.78rem;
+    }
+    .filter-row input { accent-color: var(--signal); }
+    .evidence-count {
+      color: var(--muted);
+      font-family: Consolas, monospace;
+      font-size: 0.78rem;
+    }
+    .evidence-warning {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 18px;
+      border: 1px solid rgba(255, 127, 110, 0.4);
+      border-radius: var(--radius-small);
+      padding: 17px;
+      background: linear-gradient(90deg, rgba(255, 127, 110, 0.09), transparent);
+    }
+    .evidence-warning .mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--danger);
+      border-radius: 50%;
+      color: var(--danger);
+      font-weight: 900;
+    }
+    .evidence-warning strong { display: block; color: #ffd6d0; }
+    .evidence-warning p { margin: 4px 0 0; color: var(--muted); }
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 13px;
+    }
+    .evidence-card {
+      position: relative;
+      min-height: 245px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      padding: 20px;
+      background: var(--surface);
+    }
+    .evidence-card[hidden] { display: none; }
+    .evidence-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      border-radius: var(--radius-small) 0 0 var(--radius-small);
+      background: var(--evidence-color, var(--muted));
+    }
+    .evidence-card[data-evidence="verified"] { --evidence-color: var(--verified); }
+    .evidence-card[data-evidence="implemented"] { --evidence-color: var(--implemented); }
+    .evidence-card[data-evidence="partial"] { --evidence-color: var(--partial); }
+    .evidence-card[data-evidence="vision"] { --evidence-color: var(--vision); }
+    .evidence-badge {
+      align-self: flex-start;
+      margin-bottom: 16px;
+      border: 1px solid color-mix(in srgb, var(--evidence-color) 52%, transparent);
+      border-radius: 999px;
+      padding: 4px 8px;
+      color: var(--evidence-color);
+      font-size: 0.68rem;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .evidence-card p {
+      margin-bottom: 15px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .task-ref {
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid rgba(70, 102, 91, 0.55);
+      color: var(--faint);
+      font-family: Consolas, monospace;
+      font-size: 0.72rem;
+    }
+
+    .architecture-board {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: clamp(20px, 3vw, 34px);
+      background:
+        linear-gradient(rgba(128, 230, 176, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(128, 230, 176, 0.025) 1px, transparent 1px),
+        var(--surface-soft);
+      background-size: 28px 28px;
+      box-shadow: var(--shadow);
+    }
+    .architecture-flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(130px, 1fr));
+      gap: 20px;
+      align-items: stretch;
+    }
+    .architecture-node {
+      position: relative;
+      min-height: 166px;
+      border: 1px solid var(--line-strong);
+      border-radius: 12px;
+      padding: 17px;
+      background: rgba(16, 26, 24, 0.96);
+    }
+    .architecture-node:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      right: -18px;
+      z-index: 2;
+      color: var(--signal);
+      font-size: 1.25rem;
+      transform: translate(50%, -50%);
+    }
+    .architecture-node small {
+      display: block;
+      margin-bottom: 9px;
+      color: var(--signal);
+      font-family: Consolas, monospace;
+      font-size: 0.69rem;
+      text-transform: uppercase;
+    }
+    .architecture-node p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+    .architecture-support {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .support-node {
+      border-top: 2px solid var(--amber);
+      padding: 16px;
+      background: rgba(242, 186, 97, 0.045);
+    }
+    .support-node p { margin: 0; color: var(--muted); font-size: 0.86rem; }
+    .dummy-callout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .dummy-callout article {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      padding: 22px;
+      background: var(--surface);
+    }
+    .dummy-callout article:first-child { border-color: rgba(128, 230, 176, 0.38); }
+    .dummy-callout p, .dummy-callout li { color: var(--muted); }
+    .dummy-callout ol { margin: 14px 0 0; padding-left: 20px; }
+    .dummy-callout li + li { margin-top: 7px; }
+
+    .future-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .future-controls button.active {
+      color: #08110f;
+      border-color: var(--amber);
+      background: var(--amber);
+    }
+    .work-columns {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+    .work-column {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .work-column > header {
+      padding: 23px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-raised);
+    }
+    .work-column > header p { margin: 6px 0 0; color: var(--muted); }
+    .work-list { display: grid; }
+    .work-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 13px;
+      align-items: start;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(70, 102, 91, 0.45);
+    }
+    .work-item[hidden] { display: none; }
+    .work-item:last-child { border-bottom: 0; }
+    .priority {
+      min-width: 38px;
+      border-radius: 5px;
+      padding: 4px 6px;
+      color: var(--amber);
+      background: var(--amber-soft);
+      font-family: Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 850;
+      text-align: center;
+    }
+    .work-item[data-work-type="can"] .priority {
+      color: var(--vision);
+      background: rgba(184, 166, 255, 0.12);
+    }
+    .work-item h3 { font-size: 0.98rem; }
+    .work-item p { margin: 5px 0 0; color: var(--muted); font-size: 0.84rem; }
+    .work-item select { width: 110px; min-height: 36px; padding: 6px 8px; font-size: 0.78rem; }
+
+    .roadmap {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .roadmap-stage {
+      min-height: 190px;
+      border-top: 3px solid var(--line-strong);
+      padding: 17px 14px;
+      background: rgba(16, 26, 24, 0.72);
+    }
+    .roadmap-stage:first-child { border-top-color: var(--danger); }
+    .roadmap-stage:nth-child(2) { border-top-color: var(--amber); }
+    .roadmap-stage:nth-child(3) { border-top-color: var(--signal); }
+    .roadmap-stage:nth-child(4) { border-top-color: var(--cyan); }
+    .roadmap-stage:nth-child(5) { border-top-color: var(--vision); }
+    .roadmap-stage small {
+      color: var(--faint);
+      font-family: Consolas, monospace;
+      font-size: 0.68rem;
+    }
+    .roadmap-stage p { color: var(--muted); font-size: 0.82rem; }
+
+    .gpt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 13px;
+    }
+    .gpt-card {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-small);
+      padding: 20px;
+      background: var(--surface);
+    }
+    .gpt-icon {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border: 1px solid rgba(128, 230, 176, 0.44);
+      border-radius: 50%;
+      color: var(--signal);
+      font-family: Consolas, monospace;
+      font-weight: 900;
+    }
+    .gpt-card p { margin: 4px 0 0; color: var(--muted); font-size: 0.88rem; }
+    .gpt-card h3,
+    .gpt-card p {
+      overflow-wrap: anywhere;
+    }
+    .gpt-proof {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .proof-panel, .limits-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      background: var(--surface-soft);
+    }
+    .proof-panel { border-color: rgba(128, 230, 176, 0.34); }
+    .limits-panel { border-color: rgba(242, 186, 97, 0.34); }
+    .proof-panel ul, .limits-panel ul { margin: 14px 0 0; padding-left: 20px; }
+    .proof-panel li, .limits-panel li { color: var(--muted); }
+    .proof-panel li + li, .limits-panel li + li { margin-top: 8px; }
+
+    .workbench-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(320px, 1.2fr);
+      gap: 18px;
+    }
+    .control-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      background: var(--surface);
+    }
+    .control-panel + .control-panel { margin-top: 14px; }
+    .control-panel > p { color: var(--muted); }
+    .field { display: grid; gap: 7px; margin-top: 16px; }
+    .field label, .field > span {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 750;
+    }
+    .decision-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .checklist {
+      display: grid;
+      margin-top: 12px;
+    }
+    .checkline {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 11px 0;
+      border-bottom: 1px solid rgba(70, 102, 91, 0.42);
+      color: var(--muted);
+    }
+    .checkline:last-child { border-bottom: 0; }
+    .checkline input { margin-top: 5px; accent-color: var(--signal); }
+    .note-stack { display: grid; gap: 14px; }
+    .output-panel {
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+      background: #06100d;
+    }
+    .output-panel textarea {
+      min-height: 220px;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.75rem;
+    }
+    .workbench-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 13px;
+    }
+    .file-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      padding: 9px 14px;
+      color: var(--text);
+      background: transparent;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .file-label input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+    }
+    .status-line {
+      min-height: 24px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    .status-line[data-tone="good"] { color: var(--signal); }
+    .status-line[data-tone="warn"] { color: var(--amber); }
+    .status-line[data-tone="bad"] { color: var(--danger); }
+
+    .sources {
+      padding: 30px 0 40px;
+      background: var(--bg-deep);
+    }
+    .sources-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: start;
+    }
+    .sources-grid > * { min-width: 0; }
+    .sources h2 {
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+      letter-spacing: 0;
+    }
+    .sources p { max-width: 900px; color: var(--muted); font-size: 0.78rem; }
+    .source-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .source-list code {
+      max-width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 5px 8px;
+      color: var(--faint);
+      background: var(--surface-soft);
+      font-size: 0.7rem;
+      overflow-wrap: anywhere;
+    }
+    .back-top {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    @media (max-width: 1100px) {
+      .hero-grid, .section-head, .statement, .gpt-proof { grid-template-columns: 1fr; }
+      .radar-card { min-height: 250px; }
+      .reality-grid { grid-template-columns: repeat(2, 1fr); }
+      .reality-item:nth-child(2) { border-right: 0; }
+      .reality-item:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .evidence-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .architecture-flow { grid-template-columns: repeat(3, 1fr); }
+      .architecture-node:nth-child(3)::after { display: none; }
+      .architecture-support, .roadmap { grid-template-columns: repeat(2, 1fr); }
+      .roadmap-stage:last-child { grid-column: span 2; }
+    }
+
+    @media (max-width: 760px) {
+      .shell { width: min(calc(100% - 24px), var(--content)); }
+      .hero { padding-top: 42px; }
+      h1 { font-size: clamp(2.45rem, 15vw, 4rem); }
+      .hero-grid { gap: 28px; }
+      .hero-meta { align-items: stretch; }
+      .chip { width: 100%; justify-content: flex-start; }
+      .radar-card { min-height: 220px; }
+      .reality-grid { grid-template-columns: 1fr; }
+      .reality-item {
+        min-height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .reality-item:last-child { border-bottom: 0; }
+      .topnav a { padding-inline: 10px; }
+      .band { padding-block: 58px; }
+      .section-head { grid-template-columns: 1fr; gap: 16px; }
+      .section-intro { font-size: 0.96rem; }
+      .statement-main { min-height: auto; }
+      .command-set { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .journey { scroll-snap-type: x proximity; }
+      .journey-step { min-width: 78vw; scroll-snap-align: start; }
+      .journey-step:first-child, .journey-step:last-child { border-radius: 0; }
+      .evidence-toolbar { align-items: stretch; }
+      .filter-row { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+      .filter-row label { border-radius: 8px; }
+      .evidence-grid,
+      .architecture-flow,
+      .architecture-support,
+      .dummy-callout,
+      .work-columns,
+      .gpt-grid,
+      .workbench-grid,
+      .sources-grid {
+        grid-template-columns: 1fr;
+      }
+      .architecture-node:not(:last-child)::after {
+        content: "↓";
+        top: auto;
+        right: 50%;
+        bottom: -20px;
+        transform: translate(50%, 50%);
+      }
+      .architecture-node:nth-child(3)::after { display: block; }
+      .work-item { grid-template-columns: auto 1fr; }
+      .work-item select { grid-column: 2; width: 100%; }
+      .roadmap { grid-template-columns: 1fr; }
+      .roadmap-stage:last-child { grid-column: auto; }
+      .workbench-actions > * { flex: 1 1 100%; justify-content: center; }
+      .button-row button, .decision-row button { flex: 1 1 46%; }
+    }
+
+    @media print {
+      body { background: #fff; color: #111; }
+      .topnav, .workbench-actions, .output-panel, .radar-sweep { display: none !important; }
+      .hero, .band, .sources { background: #fff; color: #111; }
+      .band, .hero, .sources { border-color: #bbb; }
+      .statement-main, .principle, .evidence-card, .architecture-board,
+      .architecture-node, .work-column, .gpt-card, .control-panel {
+        color: #111;
+        background: #fff;
+        box-shadow: none;
+        break-inside: avoid;
+      }
+      p, li, .section-intro { color: #333 !important; }
+    }
+  </style>
+</head>
+<body data-report-id="project_vision_status_gpt56_2026_07_17" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+  <header class="hero" id="top">
+    <div class="shell hero-grid">
+      <div>
+        <p class="eyebrow">Projektbriefing · TASK_1181 · 17. Juli 2026</p>
+        <h1>Sternen<wbr>Buergerchen
+          <span>Commander-Taktik zwischen Menschenführung, Feuerteam-Autonomie und einem wachsenden Meta-Spiel.</span>
+        </h1>
+        <p class="hero-lead">
+          Du bist <strong>nicht die einzelne Figur mit dem Gewehr</strong>. Du bist der Commander,
+          der Ziele, Prioritäten und Risiken vorgibt – und dessen Fire Team Leader (FTL) daraus
+          Handlungen für echte Teams machen. Das Spiel soll sich wie Verantwortung anfühlen,
+          nicht wie Mikromanagement.
+        </p>
+        <div class="hero-meta" aria-label="Kurzstatus">
+          <span class="chip good">Commander-Fantasie steht</span>
+          <span class="chip info">Spielbarer technischer Slice</span>
+          <span class="chip warn">Noch kein fertiges Produkt</span>
+          <span class="chip danger">Frischer Endtrace mit Warnung</span>
+        </div>
+      </div>
+      <aside class="radar-card" aria-label="Abstrakte taktische Lageanzeige">
+        <div class="radar-sweep"></div>
+        <span class="radar-dot one"></span>
+        <span class="radar-dot two"></span>
+        <span class="radar-dot three"></span>
+        <div class="radar-label">
+          <strong>Lagebild</strong>
+          <span>Systeme weit entwickelt · Spielerlebnis noch zu schärfen</span>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <div class="reality-strip" aria-label="Aktuelle Gesamteinordnung">
+    <div class="shell reality-grid">
+      <div class="reality-item">
+        <small>Spielkern</small>
+        <strong>Commander → Fireteam</strong>
+        <span>Delegierte Echtzeit-Taktik statt Einzel-NPC-Steuerung.</span>
+      </div>
+      <div class="reality-item">
+        <small>Ist-Stand</small>
+        <strong>Belastbarer Systemprototyp</strong>
+        <span>Mehrere echte Player- und Release-Pfade, aber keine Vollreife.</span>
+      </div>
+      <div class="reality-item">
+        <small>Größte Lücke</small>
+        <strong>Erlebnis vor Umfang</strong>
+        <span>Freies Spielgefühl, Lesbarkeit, Balance und Contentbreite.</span>
+      </div>
+      <div class="reality-item">
+        <small>Nächster Maßstab</small>
+        <strong>Die ersten 10 Minuten</strong>
+        <span>Ohne Deep-Link, ohne Erklärer, im frischen Build.</span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="topnav" aria-label="Briefing-Bereiche">
+    <div class="shell">
+      <a href="#vision">Spielidee</a>
+      <a href="#journey">Spielerreise</a>
+      <a href="#status">Projektstand</a>
+      <a href="#architecture">Architektur</a>
+      <a href="#future">Muss &amp; Kann</a>
+      <a href="#gpt56">GPT-5.6</a>
+      <a href="#workbench">Workbench</a>
+    </div>
+  </nav>
+
+  <main id="main">
+    <section class="band" id="vision">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="section-index">01 / SPIELIDEE</span>
+            <h2>Du führst. Deine Leute handeln.</h2>
+          </div>
+          <p class="section-intro">
+            <strong>SternenBuergerchen</strong> ist ein Commander-gesteuertes Echtzeit-Taktikspiel.
+            Der zentrale Reiz entsteht aus der Distanz zwischen Absicht und Ausführung:
+            Du gibst einem Fireteam ein Ziel – die FTLs und ihre Soldaten müssen unter Sicht,
+            Deckung, Druck, Haltung und Gelände damit umgehen.
+          </p>
+        </div>
+
+        <div class="statement">
+          <article class="statement-main">
+            <blockquote>
+              „Ich sage <strong>was</strong> erreicht werden soll. Meine Fireteams entscheiden,
+              <strong>wie</strong> sie dort lebend ankommen.“
+            </blockquote>
+            <div class="command-set" aria-label="Commander-Befehle der V1">
+              <span class="command">01 · Bewegen</span>
+              <span class="command">02 · Nehmen</span>
+              <span class="command">03 · Verteidigen</span>
+              <span class="command">04 · Flankieren</span>
+            </div>
+          </article>
+          <div class="principles">
+            <article class="principle">
+              <b>Commander-Fantasie</b>
+              <h3>Entscheiden statt klicken</h3>
+              <p>Der Spieler kontrolliert Fireteams bis zur FTL-Ebene. Einzel-NPCs bleiben Menschen mit Aufgabe – keine Spielfiguren für Dauer-Mikromanagement.</p>
+            </article>
+            <article class="principle">
+              <b>Echtzeit ohne Pause</b>
+              <h3>Planung hat Gewicht</h3>
+              <p>Waypoints, Haltungen, Feuerregeln und GO erzeugen Spannung, weil die Lage weiterläuft und Entscheidungen Konsequenzen bekommen.</p>
+            </article>
+            <article class="principle">
+              <b>Meta + Einsatz</b>
+              <h3>Menschen kommen zurück</h3>
+              <p>Homebase, FOB, Loadout, Dropship, Debrief und Entwicklung schließen den Einsatz an ein längerfristiges Teamgefühl an.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="journey">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="section-index">02 / SO SPIELT ES SICH</span>
+            <h2>Eine Mission beginnt lange vor dem ersten Schuss.</h2>
+          </div>
+          <p class="section-intro">
+            Der Core Loop verbindet Vorbereitung, Transport, taktische Ausführung und Rückkehr.
+            Der wichtige Unterschied zu einer reinen Gefechtsdemo: <strong>Das Team vor und nach
+            dem Einsatz gehört genauso zum Spiel wie der Kampf.</strong>
+          </p>
+        </div>
+
+        <div class="journey" role="list" aria-label="Core Loop">
+          <article class="journey-step" role="listitem">
+            <span class="step-no">01 / HOMEBASE</span>
+            <h3>Menschen &amp; Auftrag</h3>
+            <p>Roster lesen, Mission wählen, Fähigkeiten und letzte Ergebnisse verstehen.</p>
+          </article>
+          <article class="journey-step" role="listitem">
+            <span class="step-no">02 / FOB</span>
+            <h3>Teams &amp; Loadout</h3>
+            <p>Fireteams füllen, Leader bestimmen, Waffen, Rollen und Dropship-Zuordnung vorbereiten.</p>
+          </article>
+          <article class="journey-step" role="listitem">
+            <span class="step-no">03 / TRANSPORT</span>
+            <h3>Dropship &amp; LZ</h3>
+            <p>Einfliegen, Landezone setzen, Boarding- und Drop-Status als taktisches Asset führen.</p>
+          </article>
+          <article class="journey-step" role="listitem">
+            <span class="step-no">04 / EINSTIEG</span>
+            <h3>Deboard &amp; Lagebild</h3>
+            <p>Teams verlassen das Dropship, bauen Sicherheit auf und lesen Gelände, Kontakte und Auftrag.</p>
+          </article>
+          <article class="journey-step" role="listitem">
+            <span class="step-no">05 / TAKTIK</span>
+            <h3>Plan, Haltung, GO</h3>
+            <p>Move, Take, Defend oder Flank planen; Risiken, Feuerregeln und Fireteam-Verhalten abwägen.</p>
+          </article>
+          <article class="journey-step" role="listitem">
+            <span class="step-no">06 / WIRKUNG</span>
+            <h3>Kontakt &amp; Objective</h3>
+            <p>FTLs führen aus, Soldaten suchen Deckung, kämpfen, werden unterdrückt und nehmen Ziele.</p>
+          </article>
+          <article class="journey-step" role="listitem">
+            <span class="step-no">07 / RÜCKKEHR</span>
+            <h3>Debrief &amp; Entwicklung</h3>
+            <p>Ergebnis, Verluste und Fortschritt werden ausgewertet; die nächste Mission beginnt mit einem veränderten Team.</p>
+          </article>
+        </div>
+        <div class="journey-caption">
+          <strong>Der emotionale Loop:</strong>
+          <span>Du stellst keine abstrakten Einheiten zusammen. Du schickst bekannte Leute los,
+          erlebst ihre Entscheidungen und trägst das Ergebnis zurück in die Homebase.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="status">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="section-index">03 / BELASTBARER IST-STAND</span>
+            <h2>Viel gebaut. Nicht alles gleich reif.</h2>
+          </div>
+          <p class="section-intro">
+            Über tausend kleine Tasks bedeuten nicht automatisch ein fertiges Spiel.
+            Diese Einordnung folgt deshalb der Spielerwirkung und trennt vier Stufen:
+            <strong>sichtbar verifiziert, implementiert, teilweise ausgereift und Vision.</strong>
+          </p>
+        </div>
+
+        <div class="evidence-warning" role="note">
+          <span class="mark">!</span>
+          <div>
+            <strong>Frischer Prüfhinweis vom 17.07.2026</strong>
+            <p>
+              TASK_1179 ist in Roadmap und Task-Dokument als Homebase→Drop→Take→Objective→Debrief mit
+              18/18 dokumentiert. Im heute isolierten Worktree liefen 18 frühe Checks grün; danach
+              stoppten UID/Autoload-Fehler und eine bereits freigegebene Instanz den Trace, bevor die
+              finalen Objective-/Debrief-Assertions erreicht wurden. Darum ist der Pfad hier als
+              implementierter, historisch belegter Arbeitsstand markiert – nicht als heute komplett
+              neu bewiesen.
+            </p>
+          </div>
+        </div>
+
+        <div class="evidence-toolbar">
+          <div class="filter-row" aria-label="Evidenzfilter">
+            <label><input type="checkbox" checked data-evidence-filter="verified" data-export-key="filters.evidence.verified"> Verifiziert</label>
+            <label><input type="checkbox" checked data-evidence-filter="implemented" data-export-key="filters.evidence.implemented"> Implementiert</label>
+            <label><input type="checkbox" checked data-evidence-filter="partial" data-export-key="filters.evidence.partial"> Teilweise</label>
+            <label><input type="checkbox" checked data-evidence-filter="vision" data-export-key="filters.evidence.vision"> Vision</label>
+          </div>
+          <span class="evidence-count" id="evidenceCount">0 Elemente sichtbar</span>
+        </div>
+
+        <div class="evidence-grid" id="evidenceGrid">
+          <article class="evidence-card" data-evidence="implemented">
+            <span class="evidence-badge">Implementiert</span>
+            <h3>Homebase, FOB &amp; Team-Staging</h3>
+            <p>Mission wählen, NPCs und Fireteams überblicken, Teams füllen, Rollen/Loadout vorbereiten und den Übergang in den Einsatz auslösen.</p>
+            <span class="task-ref">TASK_033 · 049 · 071–081 · 596</span>
+          </article>
+          <article class="evidence-card" data-evidence="verified">
+            <span class="evidence-badge">Release / Verifier</span>
+            <h3>Dropship, Drop &amp; Deboard</h3>
+            <p>LZ, Transport-Payload, getrennte Fireteams, Boarding, Drop, Deboarding und Rückkehr wurden bis zu parallelen Host-/Client-Pfaden geprüft.</p>
+            <span class="task-ref">TASK_1057 · 1115 (25/25) · 1147</span>
+          </article>
+          <article class="evidence-card" data-evidence="verified">
+            <span class="evidence-badge">Release / Verifier</span>
+            <h3>Taktischer erster Griff</h3>
+            <p>Fireteam-Auswahl, Waypoints, Move-Preview, Risikoanzeige, Haltung, GO und laufendes Movement-Feedback existieren als echter Mission-HUD-Pfad.</p>
+            <span class="task-ref">TASK_540–541 · 1136 · 1170–1171</span>
+          </article>
+          <article class="evidence-card" data-evidence="implemented">
+            <span class="evidence-badge">Historisch belegt</span>
+            <h3>Kurze Ground-Mission bis Debrief</h3>
+            <p><code>grid_sweep</code> ist als schneller Singleplayer-Loop von Homebase über Dropship und Take bis Sieg/Debrief angelegt. Die frische Komplettbestätigung ist wegen des oben genannten Trace-Abbruchs offen.</p>
+            <span class="task-ref">TASK_1179 · frischer Lauf: 18 frühe Checks, dann Abbruch</span>
+          </article>
+          <article class="evidence-card" data-evidence="verified">
+            <span class="evidence-badge">Release / Verifier</span>
+            <h3>Kontakt, Feuer &amp; Schaden</h3>
+            <p>Host-autoritative Zielerkennung, Fire-Events, Vitalstatus und CONTACT-FIRE-Rückmeldung laufen bis in HUD, Ereignislog und 3D-/Iso-Weltbild.</p>
+            <span class="task-ref">TASK_1117 · 1119 · 1151 · 1161</span>
+          </article>
+          <article class="evidence-card" data-evidence="partial">
+            <span class="evidence-badge">Weiter schärfen</span>
+            <h3>Kampflesbarkeit &amp; Spielgefühl</h3>
+            <p>FireTrace, Impact, Source-to-target-Lane und Ziel-Fokus sind sichtbar. Der erste Blick fällt aber noch zu oft auf Label-/Halo-Cluster statt auf die natürliche Schussbewegung.</p>
+            <span class="task-ref">TASK_897–909 · Bericht 09.07.</span>
+          </article>
+          <article class="evidence-card" data-evidence="verified">
+            <span class="evidence-badge">Lokaler Multiplayer</span>
+            <h3>Host, Client &amp; Spectator</h3>
+            <p>Godot/ENet-Host-Join, zwei aktive Team-Perspektiven, ein Spectator, Command-Ownership und host-autoritativer Combat sind lokal mehrfach geprüft.</p>
+            <span class="task-ref">TASK_1090 · 1104 · 1119 · 1147</span>
+          </article>
+          <article class="evidence-card" data-evidence="implemented">
+            <span class="evidence-badge">Implementiert</span>
+            <h3>Terrain, Navigation &amp; Authoring</h3>
+            <p>Terrain-Registry, Walkability, A*, HPA, Cover, Höhe, Straßen, JSON-Maps und Missions-/Map-Editor-Werkzeuge bilden eine breite technische Basis.</p>
+            <span class="task-ref">TASK_054–069 · 125–160 · 1178</span>
+          </article>
+          <article class="evidence-card" data-evidence="implemented">
+            <span class="evidence-badge">Implementiert</span>
+            <h3>Debrief, AAR &amp; sichtbare Entwicklung</h3>
+            <p>MissionResult, Rückkehrpfad, AAR-Flächen und MISSION-GAIN-Visuals existieren. Der langfristige Motivations- und Persistenzwert ist noch nicht als fertiges Spielsystem bewiesen.</p>
+            <span class="task-ref">TASK_034 · 591 · 595–596 · 743–758</span>
+          </article>
+          <article class="evidence-card" data-evidence="partial">
+            <span class="evidence-badge">Weiter schärfen</span>
+            <h3>Performance &amp; frischer Release</h3>
+            <p>Ready-Time und Navigation wurden messbar verbessert; einzelne schwere HUD-Refreshes und lange Routenprofile zeigen weiterhin Optimierungs- und Abnahmedruck.</p>
+            <span class="task-ref">TASK_1086 · 1151 (~266 ms HUD-Spike) · 1178</span>
+          </article>
+          <article class="evidence-card" data-evidence="partial">
+            <span class="evidence-badge">Weiter schärfen</span>
+            <h3>Content, Balance &amp; echte Wiederholung</h3>
+            <p>Mechaniken und Szenario-Pfade sind zahlreich. Noch fehlen die wenigen, wirklich polierten Missionen, Balancekurven und Wiederholungsgründe, die aus Technik ein dauerhaftes Spiel machen.</p>
+            <span class="task-ref">Produktreife, nicht einzelner Task</span>
+          </article>
+          <article class="evidence-card" data-evidence="vision">
+            <span class="evidence-badge">Vision / Option</span>
+            <h3>Große Kampagne &amp; persistente PvP-Welt</h3>
+            <p>Persistente Teams, größere operative Ebenen, tiefere soziale Dynamik, komplexe Fahrzeuge und umfangreicher Content bleiben Langfristoptionen – bewusst nicht V1.</p>
+            <span class="task-ref">PROJECT_BRIEF · GDD_STATUS</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="architecture">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="section-index">04 / ARCHITEKTUR FÜR DUMMIES</span>
+            <h2>Eine Befehlskette – eine Wahrheit.</h2>
+          </div>
+          <p class="section-intro">
+            Die Architektur wirkt kompliziert, verfolgt aber eine einfache Idee:
+            <strong>Viele Systeme dürfen Vorschläge, Befehle und Anzeigen erzeugen –
+            nur eine autoritative Stelle darf den echten Spielzustand verändern.</strong>
+          </p>
+        </div>
+
+        <div class="architecture-board">
+          <div class="architecture-flow" aria-label="Aktiver Fireteam-Laufzeitpfad">
+            <article class="architecture-node">
+              <small>01 · Absicht</small>
+              <h3>Commander / HUD</h3>
+              <p>Der Spieler wählt ein Fireteam und sagt: Move, Take, Defend oder Flank.</p>
+            </article>
+            <article class="architecture-node">
+              <small>02 · Einsatzleitung</small>
+              <h3>MissionTactical<wbr>SandboxController</h3>
+              <p>Sammelt Auswahl, Waypoints, Area Orders, Haltung und GO in einem Missionsplan.</p>
+            </article>
+            <article class="architecture-node">
+              <small>03 · Taktik</small>
+              <h3>Resolver</h3>
+              <p>Entscheiden über Verhalten, Formation, Risiko, Deckung, Stance und Security.</p>
+            </article>
+            <article class="architecture-node">
+              <small>04 · Übersetzung</small>
+              <h3>Movement &amp; Security</h3>
+              <p>Machen aus dem Teamplan konkrete UnitCommand-Daten für jedes Mitglied.</p>
+            </article>
+            <article class="architecture-node">
+              <small>05 · Schiedsrichter</small>
+              <h3>SimulationRoot</h3>
+              <p>Prüft Queues und verändert als autoritative Stelle Position, Combat und Objective.</p>
+            </article>
+            <article class="architecture-node">
+              <small>06 · Lagebild</small>
+              <h3>Snapshots → UI</h3>
+              <p>HUD und Weltansicht lesen das Ergebnis. Sie zeigen Wahrheit, erfinden aber keine.</p>
+            </article>
+          </div>
+          <div class="architecture-support">
+            <article class="support-node">
+              <h3>EventRouter = Funknetz</h3>
+              <p>Verteilt wichtige Ereignisse, ohne jedes System direkt mit jedem anderen zu verdrahten.</p>
+            </article>
+            <article class="support-node">
+              <h3>UnitRegistry / FTLRegistry = Adressbuch</h3>
+              <p>Findet Units und Leader schnell, ohne den gesamten SceneTree immer wieder abzusuchen.</p>
+            </article>
+            <article class="support-node">
+              <h3>UpdateManager = Änderungsdienst</h3>
+              <p>Aktualisiert nur, was schmutzig geworden ist, statt jedes Panel und jede Unit pro Frame neu zu bauen.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="dummy-callout">
+          <article>
+            <h3>Beispiel: „Nehmt dieses Gebäude.“</h3>
+            <ol>
+              <li>Das HUD speichert nicht „Gebäude erobert“, sondern nur deine Absicht.</li>
+              <li>Die Missionsleitung baut daraus Waypoints, Haltung und einen Take-Plan.</li>
+              <li>Taktik-Resolver und Fireteam-Controller erzeugen einzelne Bewegungsbefehle.</li>
+              <li>SimulationRoot bewegt Units, verarbeitet Kampf und zählt die Objective-Eroberung.</li>
+              <li>Das HUD liest Fortschritt und Ergebnis zurück. So bleibt Multiplayer erklärbar.</li>
+            </ol>
+          </article>
+          <article>
+            <h3>Und was ist RuntimeLeader / FTL?</h3>
+            <p>
+              RuntimeLeader, FTLTask und der alte Übersetzungspfad waren die ursprüngliche
+              Architekturgrundlage und bleiben für Basistests, Compatibility und Adapter bestehen.
+              Der <strong>sichtbare aktive Missionspfad</strong> läuft heute aber über
+              MissionTacticalSandboxController, Tactical Resolver, FireteamMovementController und
+              SimulationRoot. Wichtig: RuntimeLeader darf nicht heimlich eine zweite
+              Gameplay-Wahrheit daneben aufbauen.
+            </p>
+            <div class="chip-row">
+              <span class="chip info">Legacy: RuntimeLeader / FTLTask</span>
+              <span class="chip good">Aktiv: Mission Tactical Path</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="future">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="section-index">05 / WAS NOCH MUSS &amp; KANN</span>
+            <h2>Erst ein überzeugendes Spiel. Dann eine größere Welt.</h2>
+          </div>
+          <p class="section-intro">
+            „Muss“ bedeutet: Ohne diese Arbeit bleibt der Slice technisch interessant, aber als
+            Spiel zu rau oder zu fragil. „Kann“ bedeutet: starke Zukunftsvision, die V1 nicht
+            still aufblasen darf.
+          </p>
+        </div>
+
+        <div class="future-controls" aria-label="Arbeitsfilter">
+          <button class="secondary active" type="button" data-work-filter="all">Alles zeigen</button>
+          <button class="secondary" type="button" data-work-filter="must">Nur Muss</button>
+          <button class="secondary" type="button" data-work-filter="can">Nur Kann</button>
+        </div>
+
+        <div class="work-columns">
+          <section class="work-column">
+            <header>
+              <p class="eyebrow">Pflichtarbeit</p>
+              <h3>Muss für ein überzeugendes Spiel</h3>
+              <p>Priorisieren, stabilisieren, spielen lassen.</p>
+            </header>
+            <div class="work-list">
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P0</span>
+                <div>
+                  <h3>Belegvertrauen im frischen Checkout</h3>
+                  <p>UID-/Autoload-Auflösung, ehrliche Exitcodes und TASK_1179 bis zu den finalen Objective-/Debrief-Assertions reproduzierbar machen.</p>
+                </div>
+                <select aria-label="Priorität Belegvertrauen" data-export-key="priorities.evidence_trust">
+                  <option value="now">Jetzt</option><option value="next">Danach</option><option value="later">Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P0</span>
+                <div>
+                  <h3>Die ersten 10 Minuten als echter Spieler</h3>
+                  <p>Vom normalen EXE-Start ohne Deep-Link bis zum ersten sinnvollen Befehl, Kontakt, Ergebnis und Rückkehr – verständlich ohne Entwicklerwissen.</p>
+                </div>
+                <select aria-label="Priorität erste zehn Minuten" data-export-key="priorities.first_ten_minutes">
+                  <option value="now">Jetzt</option><option value="next">Danach</option><option value="later">Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P0</span>
+                <div>
+                  <h3>Kampf natürlich lesbar machen</h3>
+                  <p>Weniger Diagnose-Look, klarere Source-to-target-Bewegung, verständliche Trefferwirkung und weniger Konkurrenz zwischen HUD, Labels und Weltbild.</p>
+                </div>
+                <select aria-label="Priorität Kampflesbarkeit" data-export-key="priorities.combat_readability">
+                  <option value="now">Jetzt</option><option value="next" selected>Danach</option><option value="later">Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P1</span>
+                <div>
+                  <h3>Wenige Missionen wirklich polieren</h3>
+                  <p>Kurze Ground-Mission und Station Route als klare, unterschiedliche, wiederholbar spielbare Slices mit belastbarem Objective-, Gegner- und Outcome-Design.</p>
+                </div>
+                <select aria-label="Priorität Missionspolish" data-export-key="priorities.mission_polish">
+                  <option value="now">Jetzt</option><option value="next" selected>Danach</option><option value="later">Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P1</span>
+                <div>
+                  <h3>Balance, Tempo &amp; Konsequenzen</h3>
+                  <p>Schaden, Unterdrückung, ROE, Respawn, Skills, Traits, Fireteam-Tempo und Objectives so abstimmen, dass Entscheidungen spürbar verschieden sind.</p>
+                </div>
+                <select aria-label="Priorität Balance" data-export-key="priorities.balance">
+                  <option value="now">Jetzt</option><option value="next">Danach</option><option value="later" selected>Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P1</span>
+                <div>
+                  <h3>Progression wirklich schließen</h3>
+                  <p>Debrief, Mission Gain, Verletzung/Verlust, Skills, Loadout und nächste Teamentscheidung müssen eine verständliche, persistente Rückkopplung bilden.</p>
+                </div>
+                <select aria-label="Priorität Progression" data-export-key="priorities.progression">
+                  <option value="now">Jetzt</option><option value="next">Danach</option><option value="later" selected>Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P1</span>
+                <div>
+                  <h3>Release- und Performance-Härtung</h3>
+                  <p>Frische Builds, Startzeit, Mission-Setup, HUD-Spikes, längere freie Runs, Save-Reste, Warnungen und Ressourcenlecks als Produktgate behandeln.</p>
+                </div>
+                <select aria-label="Priorität Release-Härtung" data-export-key="priorities.release_hardening">
+                  <option value="now">Jetzt</option><option value="next" selected>Danach</option><option value="later">Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P2</span>
+                <div>
+                  <h3>Produktive Monolithen weiter trennen</h3>
+                  <p>MissionTacticalSandboxController und weitere produktive Logik aus historischen Testpfaden lösen, ohne den aktiven Runtime-Vertrag umzubauen.</p>
+                </div>
+                <select aria-label="Priorität Architekturpflege" data-export-key="priorities.architecture_debt">
+                  <option value="now">Jetzt</option><option value="next">Danach</option><option value="later" selected>Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="must">
+                <span class="priority">P2</span>
+                <div>
+                  <h3>Externe Playtests &amp; Zugänglichkeit</h3>
+                  <p>Neue Spieler beobachten, Eingaben/Tooltips/Fokus prüfen, Begriffe reduzieren und echte Verwirrung statt Entwicklerannahmen priorisieren.</p>
+                </div>
+                <select aria-label="Priorität externe Tests" data-export-key="priorities.external_playtests">
+                  <option value="now">Jetzt</option><option value="next">Danach</option><option value="later" selected>Später</option><option value="park">Parken</option>
+                </select>
+              </article>
+            </div>
+          </section>
+
+          <section class="work-column">
+            <header>
+              <p class="eyebrow">Spätere Möglichkeiten</p>
+              <h3>Kann die Vision erweitern</h3>
+              <p>Erst nach einem stabilen, guten Kern.</p>
+            </header>
+            <div class="work-list">
+              <article class="work-item" data-work-type="can">
+                <span class="priority">V2</span>
+                <div>
+                  <h3>Persistente PvP-Teams &amp; Kampagnen</h3>
+                  <p>Langfristige Verbände, Rivalität, Saison- oder Frontfortschritt.</p>
+                </div>
+                <select aria-label="Priorität PvP Vision" data-export-key="priorities.persistent_pvp">
+                  <option value="later">Später</option><option value="park" selected>Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="can">
+                <span class="priority">V2</span>
+                <div>
+                  <h3>Deep Space, Orbit &amp; größere Operationen</h3>
+                  <p>Mehrere operative Ebenen oberhalb der heutigen Homebase-/FOB-/Missionskarte.</p>
+                </div>
+                <select aria-label="Priorität operative Ebenen" data-export-key="priorities.operational_layers">
+                  <option value="later">Später</option><option value="park" selected>Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="can">
+                <span class="priority">V2</span>
+                <div>
+                  <h3>Tiefere NPC-Beziehungen</h3>
+                  <p>Sympathie, Moral, Konflikte, Loyalität und stärkere persönliche Geschichten.</p>
+                </div>
+                <select aria-label="Priorität NPC Beziehungen" data-export-key="priorities.social_systems">
+                  <option value="later">Später</option><option value="park" selected>Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="can">
+                <span class="priority">V2</span>
+                <div>
+                  <h3>Komplexere Fahrzeuge &amp; Air Assets</h3>
+                  <p>Mehr Fahrzeugtypen, Verlust-/Recovery-Loop, Dropship-Gefahr und tiefere Logistik.</p>
+                </div>
+                <select aria-label="Priorität Fahrzeuge" data-export-key="priorities.vehicles">
+                  <option value="later">Später</option><option value="park" selected>Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="can">
+                <span class="priority">V2</span>
+                <div>
+                  <h3>Spieler-Map-Editor &amp; Modding</h3>
+                  <p>Das vorhandene Authoring zu einem robusten, erklärten Spielerwerkzeug ausbauen.</p>
+                </div>
+                <select aria-label="Priorität Modding" data-export-key="priorities.mod_tools">
+                  <option value="later">Später</option><option value="park" selected>Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="can">
+                <span class="priority">V3</span>
+                <div>
+                  <h3>Größere Verbände &amp; Content-Mengen</h3>
+                  <p>Mehr Teams, Karten, Fraktionen und Missionstypen – erst wenn Lesbarkeit und Performance tragen.</p>
+                </div>
+                <select aria-label="Priorität größere Verbände" data-export-key="priorities.large_scale">
+                  <option value="later">Später</option><option value="park" selected>Parken</option>
+                </select>
+              </article>
+              <article class="work-item" data-work-type="can">
+                <span class="priority">V3</span>
+                <div>
+                  <h3>Echte Ballistik &amp; komplexe Feuerregeln</h3>
+                  <p>Bewusst kein V1-Ziel. Datenbasiertes Combat bleibt bis zu einer klaren Produktentscheidung die bessere Basis.</p>
+                </div>
+                <select aria-label="Priorität Ballistik" data-export-key="priorities.ballistics">
+                  <option value="later">Später</option><option value="park" selected>Parken</option>
+                </select>
+              </article>
+            </div>
+          </section>
+        </div>
+
+        <div class="roadmap" aria-label="Empfohlene Etappen">
+          <article class="roadmap-stage">
+            <small>ETAPPE 01</small>
+            <h3>Vertrauen reparieren</h3>
+            <p>Frischer Checkout, UID-Pfade, ehrliche Verifier, TASK_1179-Ende.</p>
+          </article>
+          <article class="roadmap-stage">
+            <small>ETAPPE 02</small>
+            <h3>10-Minuten-Slice</h3>
+            <p>Normaler Start bis Debrief, ohne Spezialpfad und ohne Entwickler.</p>
+          </article>
+          <article class="roadmap-stage">
+            <small>ETAPPE 03</small>
+            <h3>Kampf fühlen</h3>
+            <p>Lesbarkeit, Tempo, Konsequenz und taktische Unterschiede.</p>
+          </article>
+          <article class="roadmap-stage">
+            <small>ETAPPE 04</small>
+            <h3>Loop schließen</h3>
+            <p>Progression, Persistenz, zwei polierte Missionen, freie Runs.</p>
+          </article>
+          <article class="roadmap-stage">
+            <small>ETAPPE 05</small>
+            <h3>Skalierung wählen</h3>
+            <p>Multiplayer-Produktisierung oder Content-Ausbau – evidenzbasiert.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="gpt56">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="section-index">06 / WAS GPT-5.6 BESSER BEITRAGEN KANN</span>
+            <h2>Mehr Zusammenhang. Härtere Belege. Kleinere Irrwege.</h2>
+          </div>
+          <p class="section-intro">
+            Der Vorteil ist kein „magisches Spielbauen“. Gegenüber früheren Modellgenerationen kann
+            ich lange Repo-, Task- und Gameplay-Ketten konsistenter zusammenhalten, technische und
+            visuelle Evidenz besser trennen und mehr echte Prüfpfade selbst ausführen.
+            <strong>Das erhöht Arbeitsqualität – es garantiert keine Spielqualität.</strong>
+          </p>
+        </div>
+
+        <div class="gpt-grid">
+          <article class="gpt-card">
+            <span class="gpt-icon">01</span>
+            <div>
+              <h3>Große Repo-Geschichte zusammenführen</h3>
+              <p>Architektur, über tausend Tasks, Release-Berichte und aktuelle Branches als eine konsistente Spielererzählung lesen, ohne die Taskliste zum Produkt zu erklären.</p>
+            </div>
+          </article>
+          <article class="gpt-card">
+            <span class="gpt-icon">02</span>
+            <div>
+              <h3>Aktiven und alten Pfad auseinanderhalten</h3>
+              <p>Mission Tactical Path, SimulationRoot und Legacy-RuntimeLeader korrekt einordnen, statt versehentlich eine zweite Fireteam-Wahrheit auszubauen.</p>
+            </div>
+          </article>
+          <article class="gpt-card">
+            <span class="gpt-icon">03</span>
+            <div>
+              <h3>Lange Gameplay-Wege reproduzieren</h3>
+              <p>Homebase→Dropship→Deboard→Command→Objective→Debrief als echten Ablauf prüfen und nicht bei einem isolierten grünen Snapshot stehen bleiben.</p>
+            </div>
+          </article>
+          <article class="gpt-card">
+            <span class="gpt-icon">04</span>
+            <div>
+              <h3>Verifier-Vertrauen kritisch lesen</h3>
+              <p>Nicht nur Exitcode 0 akzeptieren, sondern Ergebniszeile, Assertion-Reichweite, Callback-Cadence und tatsächliches Ende eines Godot-Scripts prüfen.</p>
+            </div>
+          </article>
+          <article class="gpt-card">
+            <span class="gpt-icon">05</span>
+            <div>
+              <h3>Godot systematisch debuggen</h3>
+              <p>Class-Cache, UID-Auflösung, Imports, Autoloads, GDScript-Stacktraces und Runtime-Ownership getrennt untersuchen, bevor ein „Fix“ vorgeschlagen wird.</p>
+            </div>
+          </article>
+          <article class="gpt-card">
+            <span class="gpt-icon">06</span>
+            <div>
+              <h3>Technik und echten Spielerblick verbinden</h3>
+              <p>Headless-Verifier, Release-Fenster, Desktop-/Mobile-Screenshots und lesbare HTML-Artefakte als unterschiedliche Belegarten behandeln.</p>
+            </div>
+          </article>
+          <article class="gpt-card">
+            <span class="gpt-icon">07</span>
+            <div>
+              <h3>Architekturtreu kleine Slices schneiden</h3>
+              <p>Owning Path, Nicht-Ziele, Verifier und Git-Hygiene pro Task festhalten, statt das Repo bei jeder Idee groß umzubauen.</p>
+            </div>
+          </article>
+          <article class="gpt-card">
+            <span class="gpt-icon">08</span>
+            <div>
+              <h3>Arbeitsartefakte statt Chat-Eintagsfliegen</h3>
+              <p>Reports, Workbenches, JSON-Entscheidungen, Pläne und reproduzierbare Checks so bauen, dass der Stand später wieder geöffnet und weitergeführt werden kann.</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="gpt-proof">
+          <article class="proof-panel">
+            <h3>Konkretes Beispiel aus diesem Briefing</h3>
+            <ul>
+              <li>Der sichtbare Checkout stand auf dem alten <code>main</code>, der echte Projektstand auf <code>integration/core-foundation</code>; TASK_1181 wurde deshalb isoliert bearbeitet.</li>
+              <li>Die Roadmap behauptet TASK_1179 18/18 grün. Der frische Lauf zeigte trotzdem, dass die finalen Objective-/Debrief-Assertions heute nicht erreicht wurden.</li>
+              <li>Beides landet nicht als versteckte Fußnote im Chat, sondern sichtbar als Evidenzgrenze in der Workbench.</li>
+            </ul>
+          </article>
+          <article class="limits-panel">
+            <h3>Was GPT-5.6 nicht ersetzt</h3>
+            <ul>
+              <li>deinen Geschmack und die Spielvision;</li>
+              <li>echte Spieler, Frust und Überraschung;</li>
+              <li>Balancegefühl nach längeren Sessions;</li>
+              <li>Prioritäts- und Scope-Entscheidungen;</li>
+              <li>verlässliche Tests, Builds und menschliche Abnahme.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="workbench">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <span class="section-index">07 / ENTSCHEIDUNGS-WORKBENCH</span>
+            <h2>Aus dem Bericht wird ein Arbeitsstand.</h2>
+          </div>
+          <p class="section-intro">
+            Wähle den nächsten Fokus, ändere Prioritäten, schreibe Entscheidungen und exportiere
+            alles als JSON. Diese Daten bleiben <strong>lokale Projektnotizen</strong> und erzeugen
+            keine zweite Gameplay-Wahrheit.
+          </p>
+        </div>
+
+        <div class="workbench-grid">
+          <div>
+            <article class="control-panel">
+              <h3>Nächster Schwerpunkt</h3>
+              <p>Welche Etappe soll als Nächstes den größten zusammenhängenden Wert liefern?</p>
+              <div class="decision-row" data-choice-group="decisions.next_focus">
+                <button class="choice active" type="button" data-choice-value="evidence_trust">Belegvertrauen</button>
+                <button class="choice" type="button" data-choice-value="first_ten_minutes">Erste 10 Minuten</button>
+                <button class="choice" type="button" data-choice-value="combat_feel">Kampfgefühl</button>
+                <button class="choice" type="button" data-choice-value="progression">Progression</button>
+                <button class="choice" type="button" data-choice-value="multiplayer">Multiplayer</button>
+              </div>
+              <div class="field">
+                <label for="maturitySelect">Gewünschte nächste Reifestufe</label>
+                <select id="maturitySelect" data-export-key="status.target_maturity">
+                  <option value="trusted_slice">Vertraubarer technischer Slice</option>
+                  <option value="guided_playable" selected>Geführter spielbarer Slice</option>
+                  <option value="external_playtest">Externer Playtest-Kandidat</option>
+                  <option value="release_candidate">Release-Kandidat</option>
+                </select>
+              </div>
+            </article>
+
+            <article class="control-panel">
+              <h3>Entscheidungs-Gates</h3>
+              <div class="checklist">
+                <label class="checkline"><input type="checkbox" data-export-key="status.gates.fresh_checkout_green"> Frischer Checkout läuft ohne UID-/Autoload-Bruch.</label>
+                <label class="checkline"><input type="checkbox" data-export-key="status.gates.task1179_final_assertions"> TASK_1179 erreicht Objective- und Debrief-Assertions.</label>
+                <label class="checkline"><input type="checkbox" data-export-key="status.gates.first_ten_minutes_played"> Normaler 10-Minuten-Start wurde ohne Entwicklerhilfe gespielt.</label>
+                <label class="checkline"><input type="checkbox" data-export-key="status.gates.combat_world_readable"> Erster Feuerwechsel liest zuerst als Weltbewegung, nicht als Marker-Cluster.</label>
+                <label class="checkline"><input type="checkbox" data-export-key="status.gates.progression_meaningful"> Debrief und Mission Gain verändern die nächste Entscheidung verständlich.</label>
+                <label class="checkline"><input type="checkbox" data-export-key="status.gates.external_player_seen"> Mindestens ein externer Spieler wurde beobachtet.</label>
+              </div>
+            </article>
+          </div>
+
+          <div class="note-stack">
+            <article class="control-panel">
+              <h3>Eigene Entscheidung</h3>
+              <div class="field">
+                <span>Warum ist dieser Schwerpunkt jetzt richtig?</span>
+                <div contenteditable="true" data-note-key="decision_reason" data-placeholder="Entscheidung, Nutzen und bewusst vertagte Dinge festhalten..."></div>
+              </div>
+            </article>
+            <article class="control-panel">
+              <h3>Nächster Playtest</h3>
+              <div class="field">
+                <label for="playtestGoal">Was soll ein Spieler schaffen?</label>
+                <textarea id="playtestGoal" data-export-key="notes.next_playtest_goal" placeholder="Beispiel: Vom normalen Einzelspieler-Start bis zum ersten Take-Befehl ohne Erklärung."></textarea>
+              </div>
+              <div class="field">
+                <span>Beobachtungen</span>
+                <div contenteditable="true" data-note-key="playtest_observations" data-placeholder="Wo stockt der Spieler? Was versteht er sofort? Was ignoriert er?"></div>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="output-panel">
+          <h3>Arbeitsstand sichern</h3>
+          <p>Speichern nutzt nur Local Storage dieses Browsers. Export erzeugt das Workbench-v1-JSON als Datei und zeigt es zusätzlich im Textfeld.</p>
+          <div class="workbench-actions">
+            <button id="saveStateButton" type="button">Arbeitsstand speichern</button>
+            <button id="exportJsonButton" type="button">JSON exportieren</button>
+            <button id="chooseExportFolderButton" class="secondary" type="button">Reports-Ordner verbinden</button>
+            <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+            <label class="file-label">JSON importieren
+              <input id="importJsonInput" type="file" accept="application/json,.json">
+            </label>
+            <button id="resetStateButton" class="danger" type="button">Zurücksetzen</button>
+          </div>
+          <p class="status-line" id="workbenchStatus" role="status" aria-live="polite">Noch kein lokaler Arbeitsstand geladen.</p>
+          <textarea id="jsonOutput" readonly aria-label="JSON-Ausgabe" placeholder="Export erscheint hier..."></textarea>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="sources">
+    <div class="shell sources-grid">
+      <div>
+        <h2>Quellen im Repository</h2>
+        <p>
+          Verdichtet aus Projektbrief, Architektur, Implementierungsstatus, Roadmap, dem aktiven
+          Fireteam-Laufzeitvertrag, TASK_1179 und vorhandenen Release-/Spielstandsberichten.
+          Task-Nummern sind Belege – nicht die primäre Erzählung.
+        </p>
+        <div class="source-list" aria-label="Quelldateien">
+          <code>docs/PROJECT_BRIEF.md</code>
+          <code>docs/ARCHITECTURE.md</code>
+          <code>docs/TASK_ROADMAP.md</code>
+          <code>docs/IMPLEMENTATION_STATUS.md</code>
+          <code>docs/dev/fireteam_runtime_execution_path_contract.md</code>
+          <code>docs/tasks/TASK_1179_ground_mission_objective_playthrough.md</code>
+        </div>
+      </div>
+      <a class="back-top" href="#top">↑ Nach oben</a>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const schema = "sternenbuergerchen.html_workbench.v1";
+      const reportId = "project_vision_status_gpt56_2026_07_17";
+      const storageKey = schema + ":" + reportId;
+      const output = document.getElementById("jsonOutput");
+      const status = document.getElementById("workbenchStatus");
+      const evidenceCount = document.getElementById("evidenceCount");
+      let exportDirectoryHandle = null;
+      let exportSequence = 0;
+
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+
+      function getPath(source, path) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        let cursor = source;
+        for (const part of parts) {
+          if (!cursor || typeof cursor !== "object" || !(part in cursor)) return undefined;
+          cursor = cursor[part];
+        }
+        return cursor;
+      }
+
+      function readControlValue(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        if (element.type === "number" || element.type === "range") return Number(element.value);
+        return element.value;
+      }
+
+      function setStatus(message, tone) {
+        status.textContent = message;
+        status.dataset.tone = tone || "";
+      }
+
+      function applyEvidenceFilters() {
+        const active = new Set();
+        document.querySelectorAll("[data-evidence-filter]").forEach(function (control) {
+          if (control.checked) active.add(control.dataset.evidenceFilter);
+        });
+        let visible = 0;
+        document.querySelectorAll("[data-evidence]").forEach(function (card) {
+          const show = active.has(card.dataset.evidence);
+          card.hidden = !show;
+          if (show) visible += 1;
+        });
+        evidenceCount.textContent = String(visible) + " Elemente sichtbar";
+      }
+
+      function applyWorkFilter(filter) {
+        document.querySelectorAll("[data-work-filter]").forEach(function (button) {
+          button.classList.toggle("active", button.dataset.workFilter === filter);
+        });
+        document.querySelectorAll("[data-work-type]").forEach(function (item) {
+          item.hidden = filter !== "all" && item.dataset.workType !== filter;
+        });
+      }
+
+      function buildExport() {
+        const payload = {
+          schema: schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: new Date().toISOString(),
+          controls: {},
+          notes: {},
+          active_choices: {},
+          computed: {},
+          metadata: {
+            report_date: "2026-07-17",
+            task: "TASK_1181",
+            source_branch: "task/task-1181-project-vision-status-workbench",
+            url: window.location.href,
+            evidence_cards_visible: document.querySelectorAll("[data-evidence]:not([hidden])").length
+          }
+        };
+
+        document.querySelectorAll("[data-export-key]").forEach(function (element) {
+          const value = readControlValue(element);
+          if (value !== undefined) setPath(payload.controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach(function (element) {
+          setPath(payload.notes, element.dataset.noteKey, element.innerText.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach(function (group) {
+          const active = group.querySelector(".choice.active[data-choice-value]");
+          if (active) setPath(payload.active_choices, group.dataset.choiceGroup, active.dataset.choiceValue);
+        });
+        const selectedPriorities = Array.from(document.querySelectorAll("[data-export-key^='priorities.']")).map(function (element) {
+          return element.value;
+        });
+        payload.computed.priority_summary = selectedPriorities.reduce(function (summary, value) {
+          summary[value] = (summary[value] || 0) + 1;
+          return summary;
+        }, {});
+        return payload;
+      }
+
+      function applyImport(payload) {
+        if (!payload || typeof payload !== "object") throw new Error("JSON enthält kein Objekt.");
+        if (payload.schema !== schema) throw new Error("Falsches Schema: " + String(payload.schema || "fehlt"));
+        if (payload.report_id !== reportId) throw new Error("Falsche Report-ID: " + String(payload.report_id || "fehlt"));
+
+        document.querySelectorAll("[data-export-key]").forEach(function (element) {
+          const value = getPath(payload.controls || {}, element.dataset.exportKey);
+          if (value === undefined) return;
+          if (element.type === "checkbox") element.checked = Boolean(value);
+          else if (element.type === "radio") element.checked = String(element.value) === String(value);
+          else element.value = String(value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach(function (element) {
+          const value = getPath(payload.notes || {}, element.dataset.noteKey);
+          if (value !== undefined) element.innerText = String(value);
+        });
+        document.querySelectorAll("[data-choice-group]").forEach(function (group) {
+          const value = getPath(payload.active_choices || {}, group.dataset.choiceGroup);
+          if (value === undefined) return;
+          group.querySelectorAll(".choice").forEach(function (button) {
+            button.classList.toggle("active", button.dataset.choiceValue === String(value));
+          });
+        });
+        applyEvidenceFilters();
+        saveLocalState(false);
+        writeOutput(payload);
+      }
+
+      function saveLocalState(announce) {
+        const payload = buildExport();
+        localStorage.setItem(storageKey, JSON.stringify(payload));
+        if (announce !== false) setStatus("Arbeitsstand lokal gespeichert.", "good");
+        return payload;
+      }
+
+      function loadLocalState() {
+        const text = localStorage.getItem(storageKey);
+        if (!text) {
+          applyEvidenceFilters();
+          return false;
+        }
+        try {
+          applyImport(JSON.parse(text));
+          setStatus("Lokaler Arbeitsstand geladen.", "good");
+          return true;
+        } catch (error) {
+          localStorage.removeItem(storageKey);
+          setStatus("Lokaler Arbeitsstand war ungültig und wurde verworfen.", "warn");
+          return false;
+        }
+      }
+
+      function writeOutput(payload) {
+        const text = JSON.stringify(payload || buildExport(), null, 2);
+        output.value = text;
+        return text;
+      }
+
+      function buildExportFilename(exportedAt) {
+        exportSequence += 1;
+        const stamp = String(exportedAt || new Date().toISOString()).replace(/[:.]/g, "-");
+        return reportId + "_" + stamp + "_" + String(exportSequence).padStart(2, "0") + ".json";
+      }
+
+      function supportsFolderExport() {
+        return typeof window.showDirectoryPicker === "function";
+      }
+
+      async function requestExportFolder() {
+        if (!supportsFolderExport()) {
+          setStatus("Ordnerzugriff ist in diesem Browser nicht verfügbar. Download bleibt aktiv.", "warn");
+          return null;
+        }
+        try {
+          exportDirectoryHandle = await window.showDirectoryPicker({
+            id: "sternenbuergerchen-reports",
+            mode: "readwrite"
+          });
+          setStatus("Reports-Ordner verbunden: " + exportDirectoryHandle.name, "good");
+          return exportDirectoryHandle;
+        } catch (error) {
+          if (error && error.name === "AbortError") setStatus("Ordnerauswahl abgebrochen.", "warn");
+          else setStatus("Ordnerzugriff fehlgeschlagen: " + String(error && error.message ? error.message : error), "warn");
+          return null;
+        }
+      }
+
+      async function hasWritePermission(handle) {
+        if (!handle) return false;
+        if (typeof handle.queryPermission !== "function" || typeof handle.requestPermission !== "function") return true;
+        const options = { mode: "readwrite" };
+        if (await handle.queryPermission(options) === "granted") return true;
+        return await handle.requestPermission(options) === "granted";
+      }
+
+      async function writeToExportFolder(text, filename) {
+        if (!exportDirectoryHandle || !(await hasWritePermission(exportDirectoryHandle))) return false;
+        try {
+          const fileHandle = await exportDirectoryHandle.getFileHandle(filename, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(text);
+          await writable.close();
+          setStatus("JSON geschrieben: " + exportDirectoryHandle.name + "/" + filename, "good");
+          return true;
+        } catch (error) {
+          setStatus("Ordnerexport fehlgeschlagen; Download wird genutzt.", "warn");
+          return false;
+        }
+      }
+
+      function downloadExport(text, filename) {
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        setStatus("JSON-Download gestartet: " + filename, "good");
+      }
+
+      function resetState() {
+        localStorage.removeItem(storageKey);
+        document.querySelectorAll("[data-export-key]").forEach(function (element) {
+          if (element.type === "checkbox") element.checked = element.hasAttribute("data-evidence-filter");
+          else if (element.type === "radio") element.checked = false;
+          else if (element.tagName === "SELECT") {
+            const defaultIndex = Array.from(element.options).findIndex(function (option) { return option.defaultSelected; });
+            element.selectedIndex = defaultIndex >= 0 ? defaultIndex : 0;
+          }
+          else element.value = "";
+        });
+        document.querySelectorAll("[data-note-key]").forEach(function (element) {
+          element.innerText = "";
+        });
+        document.querySelectorAll("[data-choice-group]").forEach(function (group) {
+          group.querySelectorAll(".choice").forEach(function (button, index) {
+            button.classList.toggle("active", index === 0);
+          });
+        });
+        output.value = "";
+        applyEvidenceFilters();
+        applyWorkFilter("all");
+        setStatus("Lokaler Arbeitsstand zurückgesetzt.", "warn");
+      }
+
+      document.querySelectorAll("[data-evidence-filter]").forEach(function (control) {
+        control.addEventListener("change", function () {
+          applyEvidenceFilters();
+          saveLocalState(false);
+        });
+      });
+
+      document.querySelectorAll("[data-work-filter]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          applyWorkFilter(button.dataset.workFilter);
+        });
+      });
+
+      document.querySelectorAll("[data-choice-group] .choice").forEach(function (button) {
+        button.addEventListener("click", function () {
+          const group = button.closest("[data-choice-group]");
+          group.querySelectorAll(".choice").forEach(function (item) {
+            item.classList.remove("active");
+          });
+          button.classList.add("active");
+          saveLocalState(false);
+        });
+      });
+
+      document.querySelectorAll("[data-export-key], [data-note-key]").forEach(function (element) {
+        const eventName = element.hasAttribute("contenteditable") ? "input" : "change";
+        element.addEventListener(eventName, function () { saveLocalState(false); });
+      });
+
+      document.getElementById("saveStateButton").addEventListener("click", function () {
+        saveLocalState(true);
+      });
+
+      document.getElementById("exportJsonButton").addEventListener("click", async function () {
+        const payload = saveLocalState(false);
+        const text = writeOutput(payload);
+        const filename = buildExportFilename(payload.exported_at);
+        const written = await writeToExportFolder(text, filename);
+        if (!written) downloadExport(text, filename);
+      });
+
+      document.getElementById("chooseExportFolderButton").addEventListener("click", requestExportFolder);
+
+      document.getElementById("copyJsonButton").addEventListener("click", async function () {
+        const text = writeOutput(saveLocalState(false));
+        try {
+          await navigator.clipboard.writeText(text);
+          setStatus("JSON in die Zwischenablage kopiert.", "good");
+        } catch (error) {
+          output.focus();
+          output.select();
+          setStatus("Kopieren nicht erlaubt. JSON ist im Textfeld markiert.", "warn");
+        }
+      });
+
+      document.getElementById("importJsonInput").addEventListener("change", async function (event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        try {
+          applyImport(JSON.parse(await file.text()));
+          setStatus("JSON importiert: " + file.name, "good");
+        } catch (error) {
+          setStatus("Import abgelehnt: " + String(error && error.message ? error.message : error), "bad");
+        } finally {
+          event.target.value = "";
+        }
+      });
+
+      document.getElementById("resetStateButton").addEventListener("click", function () {
+        if (window.confirm("Lokale Notizen, Entscheidungen und Prioritäten dieses Reports zurücksetzen?")) resetState();
+      });
+
+      const navLinks = Array.from(document.querySelectorAll(".topnav a"));
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            navLinks.forEach(function (link) {
+              link.setAttribute("aria-current", String(link.getAttribute("href") === "#" + entry.target.id));
+            });
+          });
+        }, { rootMargin: "-20% 0px -72% 0px", threshold: 0 });
+        document.querySelectorAll("main > section[id]").forEach(function (section) { observer.observe(section); });
+      }
+
+      applyWorkFilter("all");
+      loadLocalState();
+    })();
+  </script>
+</body>
+</html>
