@@ -144,6 +144,7 @@ if (Test-Path -LiteralPath $freshVerifierPath -PathType Leaf) {
 	Assert-Contract -Condition ($freshVerifier -match 'ConvertTo-ProcessArgument' -and $freshVerifier -match 'Windows Desktop') -Message "Verifier quotet Prozessargumente mit Leerzeichen deterministisch"
 	Assert-Contract -Condition ($freshVerifier -match 'nativeExitCode') -Message "Verifier liest den nativen Prozess-Exitcode vor seiner Bewertung"
 	Assert-Contract -Condition ($freshVerifier -match 'New-Item -ItemType Directory -Force -Path') -Message "Verifier legt den ignorierten Buildordner vor dem Export an"
+	Assert-Contract -Condition ($freshVerifier -match '00-verifier.failure.log') -Message "Verifier protokolliert eigene Steuerfehler neben den Stage-Logs"
 	Assert-Contract -Condition ($freshVerifier -match 'UID|Autoload|Parse Error|SCRIPT ERROR') -Message "Verifier behandelt Setup-Fehlermuster als hartes Gate"
 	Assert-Contract -Condition ($freshVerifier -match 'KEEP' -or $freshVerifier -match 'behalten') -Message "Verifier behält Temp und Logs bei Fehlern"
 }

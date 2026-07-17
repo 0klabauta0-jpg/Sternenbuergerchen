@@ -204,7 +204,10 @@ try {
 	Write-Host "TASK_N002_FRESH_CHECKOUT: PASSED commit=$snapshotCommit"
 	Write-Host "Logs: $logRoot"
 } catch {
-	Write-Error $_
+	$failurePath = Join-Path $logRoot "00-verifier.failure.log"
+	$failureText = "$($_.Exception.GetType().FullName): $($_.Exception.Message)`n$($_.ScriptStackTrace)"
+	[System.IO.File]::WriteAllText($failurePath, $failureText, [System.Text.UTF8Encoding]::new($false))
+	Write-Error $failureText
 } finally {
 	if ($sourceRefCreated) {
 		& git -C $ProjectRoot update-ref -d $tempRef 2>$null
