@@ -6,6 +6,11 @@ const HOMEBASE_PATH := "res://scenes/meta/homebase_screen.tscn"
 const MISSION_RUNTIME_PATH := "res://scenes/mission/mission_runtime.tscn"
 const MISSION_RUNTIME_SETUP_PATH := "res://scripts/mission/mission_runtime_setup.gd"
 const UNIT_RUNTIME_PATH := "res://scripts/npc/unit_runtime.gd"
+const MAIN_MENU_STATIC_SCENE_TARGETS := [
+	META_LAYER_PATH,
+	"res://scenes/ui/multiplayer_lobby.tscn",
+	"res://scenes/editor/map_editor.tscn",
+]
 const FORBIDDEN_PATH_PREFIXES := ["res://scripts/tests/", "res://scenes/tests/"]
 const MAX_READY_FRAMES := 120
 
@@ -107,7 +112,9 @@ func _test_singleplayer_product_dependency_walk() -> void:
 		for forbidden_prefix in FORBIDDEN_PATH_PREFIXES:
 			if child.begins_with(forbidden_prefix):
 				_assert(false, "product dependency avoids forbidden test path: %s" % " -> ".join(PackedStringArray(edge.get("chain", PackedStringArray()))))
-	_assert(true, "singleplayer product dependency walk has no reachable scripts/tests or scenes/tests edge")
+	for scene_target in MAIN_MENU_STATIC_SCENE_TARGETS:
+		_assert(_has_dependency_edge_to(scene_target), "dependency walk resolves static MainMenu scene target %s" % scene_target)
+	_assert(true, "product dependency walk has no reachable scripts/tests or scenes/tests edge")
 
 
 func _find_product_dependencies(path: String) -> PackedStringArray:
@@ -120,12 +127,8 @@ func _find_product_dependencies(path: String) -> PackedStringArray:
 	if not path.ends_with(".gd") or not FileAccess.file_exists(path):
 		return dependencies
 	var source := FileAccess.get_file_as_string(path)
-	for resource_path in _extract_literal_resource_edges(source):
+	for resource_path in _extract_static_resource_edges(source):
 		dependencies.append(resource_path)
-	if path == "res://scripts/ui/main_menu_screen.gd":
-		var singleplayer_path := _extract_string_constant(source, "SINGLEPLAYER_SCENE_PATH")
-		if not singleplayer_path.is_empty():
-			dependencies.append(singleplayer_path)
 	return dependencies
 
 
@@ -138,11 +141,38 @@ func _extract_literal_resource_edges(source: String) -> PackedStringArray:
 	return resources
 
 
-func _extract_string_constant(source: String, constant_name: String) -> String:
+func _extract_static_resource_edges(source: String) -> PackedStringArray:
+	var resources := _extract_literal_resource_edges(source)
+	var constants := _extract_resource_constants(source)
 	var expression := RegEx.new()
-	expression.compile("const\\s+%s[^=]*=\\s*\\\"(res://[^\\\"]+)\\\"" % constant_name)
-	var result := expression.search(source)
-	return String(result.get_string(1)) if result != null else ""
+	expression.compile("(?:load|change_scene_to_file|change_scene_to_packed|_change_scene)\\(\\s*(?:\\\"(res://[^\\\"]+)\\\"|([A-Z][A-Z0-9_]*))")
+	for result in expression.search_all(source):
+		var literal_path := String(result.get_string(1))
+		var constant_name := String(result.get_string(2))
+		if not literal_path.is_empty():
+			resources.append(literal_path)
+		elif constants.has(constant_name):
+			resources.append(String(constants[constant_name]))
+	return resources
+
+
+func _extract_resource_constants(source: String) -> Dictionary:
+	var constants: Dictionary = {}
+	var expression := RegEx.new()
+	expression.compile("const\\s+([A-Z][A-Z0-9_]*)[^=]*=\\s*(?:\\\"(res://[^\\\"]+)\\\"|preload\\(\\s*\\\"(res://[^\\\"]+)\\\"\\s*\\))")
+	for result in expression.search_all(source):
+		var resource_path := String(result.get_string(2))
+		if resource_path.is_empty():
+			resource_path = String(result.get_string(3))
+		constants[String(result.get_string(1))] = resource_path
+	return constants
+
+
+func _has_dependency_edge_to(path: String) -> bool:
+	for edge_variant in _dependency_edges:
+		if String(Dictionary(edge_variant).get("child", "")) == path:
+			return true
+	return false
 
 
 func _wait_for_scene(scene_path: String) -> bool:

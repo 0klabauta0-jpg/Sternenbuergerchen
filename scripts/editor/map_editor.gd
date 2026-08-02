@@ -79,7 +79,7 @@ const PRIMARY_VIEW_LEGACY_CLEAR_NODES: PackedStringArray = [
 ]
 const DEFAULT_SCENARIO_PATH: String = "res://data/mission_scenarios/new_mission_scenario.json"
 const DEFAULT_SCENARIO_DIR: String = "res://data/mission_scenarios"
-const LIVE_TEST_SCENE_PATH: String = "res://scenes/tests/mission_reactivity_test.tscn"
+const LIVE_TEST_SCENE_PATH: String = "res://scenes/mission/mission_runtime.tscn"
 const LIVE_TEST_SCENARIO_SCRATCH_PATH: String = "user://mission_editor_live_test_scenario.json"
 const SCENARIO_POSITION_META: String = "__position__"
 const HEIGHT_TOOL_MODE_RAISE: String = "raise"
