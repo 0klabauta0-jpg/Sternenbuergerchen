@@ -608,6 +608,16 @@ func _apply_release_start_mission_deeplink(user_args: PackedStringArray = Packed
 	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
 	if not _has_release_start_mission_deeplink_arg(args):
 		return
+	# Legacy release flags must not start or alter a product mission. Their former
+	# forced-flow implementation remains below only as a temporary historical
+	# compatibility body; this entry point is deliberately terminal.
+	_release_start_mission_deeplink_requested = true
+	_release_start_mission_deeplink_applied = false
+	_release_start_mission_deeplink_status = "blocked"
+	_release_start_mission_deeplink_reason = "legacy_deeplink_no_public_path"
+	set_meta("release_start_mission_deeplink_requested", true)
+	set_meta("release_start_mission_deeplink_applied", false)
+	return
 	_release_start_mission_deeplink_requested = true
 	_release_start_mission_deeplink_status = "requested"
 	_release_start_mission_deeplink_reason = ""
@@ -681,6 +691,15 @@ func _apply_release_lz_drop_preview_deeplink(user_args: PackedStringArray = Pack
 	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
 	if not _has_release_lz_drop_preview_deeplink_arg(args):
 		return
+	# See _apply_release_start_mission_deeplink: only normal public player input
+	# may enter planning or request a drop.
+	_release_lz_drop_preview_deeplink_requested = true
+	_release_lz_drop_preview_deeplink_applied = false
+	_release_lz_drop_preview_deeplink_status = "blocked"
+	_release_lz_drop_preview_deeplink_reason = "legacy_deeplink_no_public_path"
+	set_meta("release_lz_drop_preview_deeplink_requested", true)
+	set_meta("release_lz_drop_preview_deeplink_applied", false)
+	return
 	_release_lz_drop_preview_deeplink_requested = true
 	_release_lz_drop_preview_deeplink_status = "requested"
 	_release_lz_drop_preview_deeplink_reason = ""
@@ -1026,6 +1045,16 @@ func _apply_release_first_go_firefight_deeplink(user_args: PackedStringArray = P
 	var args: PackedStringArray = user_args if user_args.size() > 0 else _get_release_cmdline_args()
 	if not _has_release_first_go_firefight_deeplink_arg(args):
 		return
+	# A release flag must never fabricate contact, orders, or combat. Preserve a
+	# stable observable status while the legacy evidence helpers are retired.
+	_release_first_go_firefight_deeplink_requested = true
+	_release_first_go_firefight_deeplink_applied = false
+	_release_first_go_firefight_deeplink_status = "blocked"
+	_release_first_go_firefight_deeplink_reason = "legacy_deeplink_no_public_path"
+	_release_first_go_firefight_pre_go_passed = false
+	set_meta("release_first_go_firefight_deeplink_requested", true)
+	set_meta("release_first_go_firefight_deeplink_applied", false)
+	return
 	_release_first_exchange_exported_status_trace_samples = []
 	_release_first_go_firefight_deeplink_requested = true
 	_release_first_go_firefight_deeplink_status = "requested"
@@ -4170,7 +4199,8 @@ func _start_mission() -> void:
 func _start_or_update_active_mission() -> void:
 	if _active_mission != null:
 		_release_preview_mission()
-		_configure_mission_instance(_active_mission, _selected_unit_ids, _selected_fireteam_ids, false)
+		# An entered MissionSetup owns an immutable launch identity. A refresh may
+		# only forward mutable planning state; map, scenario and identity stay frozen.
 		_apply_planning_state_to_mission(_active_mission)
 		_show_mission()
 		return

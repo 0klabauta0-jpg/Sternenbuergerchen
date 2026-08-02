@@ -2,6 +2,7 @@ extends SceneTree
 
 const MISSION_SCENE_PATH := "res://scenes/mission/mission_runtime.tscn"
 const META_SCENE_PATH := "res://scenes/meta/meta_layer.tscn"
+const MAIN_MENU_SCENE_PATH := "res://scenes/ui/main_menu.tscn"
 const MISSION_IDENTITY_SCRIPT_PATH := "res://scripts/mission/mission_runtime_identity.gd"
 const CONTROLLER_SOURCE_PATH := "res://scripts/tactical/mission_tactical_sandbox_controller.gd"
 const MENU_SOURCE_PATH := "res://scripts/ui/main_menu_screen.gd"
@@ -14,6 +15,9 @@ var _failed := 0
 
 
 func _init() -> void:
+	if OS.get_cmdline_user_args().has("--n004b-release-deeplink-probe"):
+		call_deferred("_run_release_deeplink_probe")
+		return
 	call_deferred("_run")
 
 
@@ -22,6 +26,7 @@ func _run() -> void:
 	await _test_canonical_mission_public_boundary()
 	await _test_visible_homebase_identity_handoffs()
 	_test_release_deeplinks_are_deprecated()
+	await _test_meta_legacy_release_helpers_are_blocked()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -58,6 +63,9 @@ func _test_canonical_mission_public_boundary() -> void:
 		"get_mission_identity_snapshot",
 	]:
 		_assert(_public_method_body_is_safe(controller_source, method_name), "Public %s contains no direct authority/test bypass" % method_name)
+	_assert(controller_source.contains("_issue_command_from_entry(\"public_world_waypoint\", command_type.strip_edges().to_lower(), \"WAYPOINT\", append_mode)"), "Public waypoint forwards append_mode into N003 planning")
+	_assert(controller_source.contains("\"expected_command_tokens\": expected_command_tokens"), "Public waypoint receipt reports exact expected command tokens")
+	_assert(controller_source.contains("func _request_selected_mission_dropship_drop") and controller_source.contains("-> Dictionary"), "Dropship request producer returns a structured acceptance result")
 	mission.queue_free()
 	await process_frame
 
@@ -82,6 +90,7 @@ func _test_visible_homebase_identity_handoffs() -> void:
 		_assert(float(receipt_position.get("x", 0.0)) == 768.0 and float(receipt_position.get("y", 0.0)) == 960.0, "%s receipt resolves authored objective world position" % mission_id)
 		receipts_by_mission[mission_id] = receipt.duplicate(true)
 		var setup = handoff.get("setup") as Node
+		var meta = handoff.get("meta") as Node
 		if setup != null:
 			var before := JSON.stringify(receipt)
 			var identity_before: Dictionary = Dictionary(handoff.get("identity", {}))
@@ -95,7 +104,8 @@ func _test_visible_homebase_identity_handoffs() -> void:
 			var controller: Node = setup.get_parent().get_node_or_null("TacticalController")
 			var identity_after: Dictionary = Dictionary(controller.call("get_mission_identity_snapshot")) if controller != null else {}
 			_assert(JSON.stringify(Dictionary(identity_before.get("pre_tree_handoff", {}))) == JSON.stringify(Dictionary(identity_after.get("pre_tree_handoff", {}))), "%s locked override leaves controller receipt unchanged" % mission_id)
-		var meta = handoff.get("meta") as Node
+			if mission_id == "grid_sweep":
+				await _assert_active_refresh_cannot_replace_identity(meta, setup, receipt)
 		if meta != null and is_instance_valid(meta):
 			meta.queue_free()
 			await process_frame
@@ -103,6 +113,20 @@ func _test_visible_homebase_identity_handoffs() -> void:
 	var fob_receipt: Dictionary = Dictionary(receipts_by_mission.get("fob_transfer", {}))
 	_assert(String(grid_receipt.get("mission_id", "")) != String(fob_receipt.get("mission_id", "")), "Shared authored files do not erase distinct mission IDs")
 	_assert(String(grid_receipt.get("identity_fingerprint", "")) != String(fob_receipt.get("identity_fingerprint", "")), "Distinct mission provenance produces distinct fingerprints")
+
+
+func _assert_active_refresh_cannot_replace_identity(meta: Node, setup: Node, receipt: Dictionary) -> void:
+	var selector := meta.get_node_or_null(HOMEBASE_SELECTOR_PATH) as OptionButton
+	var start := meta.get_node_or_null(HOMEBASE_START_PATH) as Button
+	_assert(selector != null and start != null, "Active refresh test retains visible Homebase controls")
+	if selector == null or start == null:
+		return
+	_select_visible_mission(selector, "fob_transfer")
+	start.emit_signal("pressed")
+	await process_frame
+	await process_frame
+	_assert(JSON.stringify(Dictionary(setup.call("get_runtime_identity_handoff_receipt"))) == JSON.stringify(receipt), "Active refresh cannot replace frozen identity receipt")
+	_assert(String(setup.get("map_file_path")) == String(receipt.get("map_path", "")) and String(setup.get("scenario_file_path")) == String(receipt.get("scenario_path", "")), "Active refresh preserves frozen map and scenario")
 
 
 func _launch_visible_homebase_mission(mission_id: String) -> Dictionary:
@@ -166,6 +190,104 @@ func _test_release_deeplinks_are_deprecated() -> void:
 		menu.free()
 	var source := FileAccess.get_file_as_string(MENU_SOURCE_PATH)
 	_assert(not source.contains("_apply_release_start_mission_deeplink"), "MainMenu no longer invokes MetaLayer release start chain")
+	var meta_source := FileAccess.get_file_as_string("res://scripts/meta/meta_layer_flow.gd")
+	_assert(not meta_source.contains("call_deferred(\"_apply_release_"), "MetaLayerFlow schedules no release automation chain")
+	_assert(not source.contains("change_scene_to_file(SINGLEPLAYER_SCENE_PATH)"), "MainMenu release arguments cannot transition into MetaLayer")
+	for argument in ["--release-singleplayer", "--release-singleplayer-start-mission", "--release-singleplayer-lz-drop-preview", "--release-singleplayer-first-go-firefight"]:
+		var probe: Dictionary = _run_release_deeplink_probe_process(argument)
+		_assert(bool(probe.get("probe_completed", false)), "%s starts the real MainMenu probe" % argument)
+		_assert(String(probe.get("scene_path", "")) == MAIN_MENU_SCENE_PATH, "%s leaves the real MainMenu scene active" % argument)
+		_assert(bool(probe.get("requested", false)) and not bool(probe.get("applied", true)), "%s has no Meta handoff in the real MainMenu run" % argument)
+		_assert(bool(probe.get("deprecated", false)) and String(probe.get("status", "")) == "blocked" and String(probe.get("reason", "")) == "legacy_deeplink_no_public_path", "%s reports the stable public block reason in the real MainMenu run" % argument)
+		_assert(not bool(probe.get("meta_layer_present", true)), "%s real MainMenu run creates no MetaLayer" % argument)
+
+
+func _test_meta_legacy_release_helpers_are_blocked() -> void:
+	var scene := load(META_SCENE_PATH) as PackedScene
+	_assert(scene != null, "MetaLayer scene loads for legacy helper containment")
+	if scene == null:
+		return
+	for spec in [
+		{"method": "_apply_release_start_mission_deeplink", "arg": "--release-singleplayer-start-mission", "snapshot": "get_release_start_mission_deeplink_snapshot"},
+		{"method": "_apply_release_lz_drop_preview_deeplink", "arg": "--release-singleplayer-lz-drop-preview", "snapshot": "get_release_lz_drop_preview_deeplink_snapshot"},
+		{"method": "_apply_release_first_go_firefight_deeplink", "arg": "--release-singleplayer-first-go-firefight", "snapshot": "get_release_first_go_firefight_deeplink_snapshot"},
+	]:
+		var meta := scene.instantiate()
+		root.add_child(meta)
+		await process_frame
+		var argument := String(Dictionary(spec).get("arg", ""))
+		var helper_name := String(Dictionary(spec).get("method", ""))
+		meta.call(helper_name, PackedStringArray([argument]))
+		await process_frame
+		await process_frame
+		var snapshot_name := String(Dictionary(spec).get("snapshot", ""))
+		var snapshot: Dictionary = Dictionary(meta.call(snapshot_name, PackedStringArray([argument])))
+		_assert(String(snapshot.get("status", "")) == "blocked" and String(snapshot.get("reason", "")) == "legacy_deeplink_no_public_path", "%s reports the stable legacy block" % helper_name)
+		_assert(meta.call("get_active_mission") == null and String(snapshot.get("current_meta_view", "homebase")) != "mission", "%s cannot create a mission or switch into mission view" % helper_name)
+		meta.queue_free()
+		await process_frame
+
+
+func _run_release_deeplink_probe_process(argument: String) -> Dictionary:
+	var output: Array = []
+	var arguments := PackedStringArray([
+		"--headless",
+		"--path",
+		ProjectSettings.globalize_path("res://"),
+		"--script",
+		"res://scripts/tests/task_n004b_public_grid_sweep_contract.gd",
+		"--",
+		"--n004b-release-deeplink-probe",
+		argument,
+	])
+	var exit_code := OS.execute(OS.get_executable_path(), arguments, output, true)
+	var combined_output := "\n".join(PackedStringArray(output))
+	var marker := "N004B_RELEASE_PROBE:"
+	var marker_index := combined_output.rfind(marker)
+	if exit_code != 0 or marker_index < 0:
+		return {
+			"probe_completed": false,
+			"exit_code": exit_code,
+			"output": combined_output,
+		}
+	var payload_text := combined_output.substr(marker_index + marker.length()).split("\n", false)[0].strip_edges()
+	var parsed: Variant = JSON.parse_string(payload_text)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return {
+			"probe_completed": false,
+			"exit_code": exit_code,
+			"output": combined_output,
+		}
+	var result: Dictionary = Dictionary(parsed)
+	result["probe_completed"] = true
+	result["exit_code"] = exit_code
+	return result
+
+
+func _run_release_deeplink_probe() -> void:
+	var transition_error := change_scene_to_file(MAIN_MENU_SCENE_PATH)
+	if transition_error != OK:
+		print("N004B_RELEASE_PROBE:%s" % JSON.stringify({"transition_error": transition_error}))
+		quit(1)
+	for _frame in 6:
+		await process_frame
+	var menu := current_scene
+	var snapshot: Dictionary = Dictionary(menu.call("get_release_singleplayer_deeplink_snapshot")) if menu != null and menu.has_method("get_release_singleplayer_deeplink_snapshot") else {}
+	var root_children: Array = root.get_children()
+	var meta_layer_present := false
+	for child in root_children:
+		if child != null and (String(child.name) == "MetaLayer" or String(child.scene_file_path) == META_SCENE_PATH):
+			meta_layer_present = true
+	print("N004B_RELEASE_PROBE:%s" % JSON.stringify({
+		"scene_path": String(menu.scene_file_path) if menu != null else "",
+		"requested": bool(snapshot.get("requested", false)),
+		"applied": bool(snapshot.get("applied", false)),
+		"deprecated": bool(snapshot.get("deprecated", false)),
+		"status": String(snapshot.get("status", "")),
+		"reason": String(snapshot.get("reason", "")),
+		"meta_layer_present": meta_layer_present,
+	}))
+	quit(0)
 
 
 func _public_method_body_is_safe(source: String, method_name: String) -> bool:

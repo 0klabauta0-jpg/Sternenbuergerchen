@@ -680,6 +680,7 @@ var _coordination_manager = null
 var _fireteam_movement_controller = null
 var _fireteam_command_gateway = null
 var _mission_command_entry_adapter = null
+var _last_public_waypoint_plan_result: Dictionary = {}
 var _recent_movement_trace_by_fireteam: Dictionary = {}
 var _fireteam_security_controller = null
 var _waypoint_intent_preview_resolver = WAYPOINT_INTENT_PREVIEW_RESOLVER_SCRIPT.new()
@@ -3502,8 +3503,14 @@ func request_mission_dropship_drop(craft_id: String) -> Dictionary:
 		return {"accepted": false, "reason": "unknown_craft", "craft_id": normalized_craft_id, "read_only": false}
 	if not _has_lz_position:
 		return {"accepted": false, "reason": "lz_required", "craft_id": normalized_craft_id, "read_only": false}
-	_request_selected_mission_dropship_drop(true)
-	return {"accepted": true, "reason": "", "craft_id": normalized_craft_id, "drop_state": _mission_drop_state, "read_only": false}
+	var request_result: Dictionary = _request_selected_mission_dropship_drop(true)
+	return {
+		"accepted": bool(request_result.get("accepted", false)),
+		"reason": String(request_result.get("reason", "drop_rejected")),
+		"craft_id": normalized_craft_id,
+		"drop_state": _mission_drop_state,
+		"read_only": false,
+	}
 
 
 func plan_selected_fireteam_waypoint_from_world_position(world_position: Vector2, command_type: String = "take", append_mode: bool = false) -> Dictionary:
@@ -3511,14 +3518,33 @@ func plan_selected_fireteam_waypoint_from_world_position(world_position: Vector2
 	if tile_context.is_empty() or _selected_fireteam_ids.is_empty():
 		return {"accepted": false, "reason": "invalid_world_position_or_selection", "planned_fireteam_ids": [], "expected_command_tokens": [], "read_only": false}
 	_set_selected_tile_context(tile_context, "", false, false)
-	var accepted: bool = _issue_command_from_entry("public_world_waypoint", command_type.strip_edges().to_lower(), "WAYPOINT")
-	var plan_ids: Array = []
-	for plan_variant in get_order_plans_snapshot():
-		var plan: Dictionary = Dictionary(plan_variant)
-		var plan_id: String = String(plan.get("plan_id", "")).strip_edges()
-		if not plan_id.is_empty() and not plan_ids.has(plan_id):
-			plan_ids.append(plan_id)
-	return {"accepted": accepted, "reason": "" if accepted else "plan_rejected", "planned_fireteam_ids": Array(_selected_fireteam_ids), "plan_id": String(plan_ids.back()) if not plan_ids.is_empty() else "", "expected_command_tokens": [], "append_mode": append_mode, "read_only": false}
+	_last_public_waypoint_plan_result = {}
+	var accepted: bool = _issue_command_from_entry("public_world_waypoint", command_type.strip_edges().to_lower(), "WAYPOINT", append_mode)
+	var submission: Dictionary = _last_public_waypoint_plan_result.duplicate(true)
+	var plan_id: String = String(submission.get("plan_id", "")).strip_edges()
+	var planned_fireteam_ids: PackedStringArray = _sanitize_fireteam_ids(_selected_fireteam_ids)
+	var expected_command_tokens: Array = _build_expected_command_tokens_for_plan(plan_id, planned_fireteam_ids) if accepted and not plan_id.is_empty() else []
+	return {
+		"accepted": accepted and bool(submission.get("accepted", false)) and not plan_id.is_empty(),
+		"reason": String(submission.get("reason", "")) if accepted else String(submission.get("reason", "plan_rejected")),
+		"planned_fireteam_ids": Array(planned_fireteam_ids),
+		"plan_id": plan_id,
+		"expected_command_tokens": expected_command_tokens,
+		"append_mode": append_mode,
+		"read_only": false,
+	}
+
+
+func _build_expected_command_tokens_for_plan(plan_id: String, fireteam_ids: PackedStringArray) -> Array:
+	var tokens: Array = []
+	var normalized_plan_id: String = plan_id.strip_edges()
+	if normalized_plan_id.is_empty():
+		return tokens
+	for fireteam_id_variant in fireteam_ids:
+		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
+		if not fireteam_id.is_empty():
+			tokens.append("n003:%s:p%d:%s" % [normalized_plan_id, multiplayer.get_unique_id(), fireteam_id])
+	return tokens
 
 
 func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
@@ -3610,7 +3636,8 @@ func _issue_command(command_type: String, display_text: String) -> bool:
 	return _issue_command_from_entry("button", command_type, display_text)
 
 
-func _issue_command_from_entry(entry_source: String, command_type: String, display_text: String) -> bool:
+func _issue_command_from_entry(entry_source: String, command_type: String, display_text: String, append_mode: bool = false) -> bool:
+	_last_public_waypoint_plan_result = {}
 	if not _can_issue_local_commands():
 		_last_command_text = "OBSERVER MODE"
 		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "observer")
@@ -3650,7 +3677,7 @@ func _issue_command_from_entry(entry_source: String, command_type: String, displ
 		_update_ui()
 		return false
 	var target_position: Vector2 = _selected_tile_world_position if requires_tile else _get_target_position()
-	var waypoint_refs: Array = _create_waypoints_for_selected_fireteams(target_position, true, false)
+	var waypoint_refs: Array = _create_waypoints_for_selected_fireteams(target_position, not append_mode, false)
 	if waypoint_refs.is_empty():
 		_last_command_text = "%s FAILED" % display_text
 		_record_fireteamleader_feedback_for_selected_fireteams(command_type, "blocked", "failed")
@@ -3668,6 +3695,7 @@ func _issue_command_from_entry(entry_source: String, command_type: String, displ
 		get_local_command_team_id()
 	)
 	var result_dict: Dictionary = Dictionary(plan_result.call("to_dict")) if plan_result != null and plan_result.has_method("to_dict") else {}
+	_last_public_waypoint_plan_result = result_dict.duplicate(true)
 	var plan_id: String = String(result_dict.get("plan_id", "")).strip_edges()
 	if not bool(result_dict.get("accepted", false)) or plan_id.is_empty():
 		var rejection_reason: String = String(result_dict.get("reason", "invalid_plan")).strip_edges()
@@ -4031,46 +4059,54 @@ func _on_call_dropship_pressed() -> void:
 	_request_selected_mission_dropship_drop(false)
 
 
-func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = false, authority_committed: bool = false) -> void:
+func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = false, authority_committed: bool = false) -> Dictionary:
 	if not _can_edit_planning():
 		_last_command_text = "OBSERVER MODE"
 		_update_ui()
-		return
+		return {"accepted": false, "reason": "planning_locked"}
 	if not _is_mission_drop_available():
 		_last_command_text = "DROP SHIP NOT ON MISSION MAP"
 		_update_ui()
-		return
+		return {"accepted": false, "reason": "mission_drop_unavailable"}
 	if not ignore_global_cooldown and not preview_mode and _drop_ship_cooldown_remaining > 0.0:
 		_last_command_text = "DROP COOLDOWN %.1FS" % _drop_ship_cooldown_remaining
 		_update_ui()
-		return
+		return {"accepted": false, "reason": "drop_cooldown"}
 	if not _has_lz_position:
 		_last_command_text = "SET LZ BEFORE DROP CALL"
 		_update_ui()
-		return
+		return {"accepted": false, "reason": "lz_required"}
 	if not authority_committed and _should_route_dropship_command_through_network_authority():
-		request_network_authoritative_dropship_command("call_dropship", _mission_drop_craft_id, _get_dropship_command_fireteam_id(_mission_drop_craft_id))
-		return
+		var network_accepted: bool = request_network_authoritative_dropship_command("call_dropship", _mission_drop_craft_id, _get_dropship_command_fireteam_id(_mission_drop_craft_id))
+		return {"accepted": network_accepted, "reason": "" if network_accepted else "network_drop_rejected"}
 	_drop_ship_staged = true
 	_mission_drop_return_requested = false
+	var drop_accepted: bool = false
+	var drop_reason: String = ""
 	if preview_mode:
 		_drop_ship_requested = true
 		if _try_start_drop_sequence(ignore_global_cooldown):
 			_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
+			drop_accepted = true
 		else:
 			_last_command_text = "DROP %s" % _get_approach_angle_name()
+			drop_reason = "drop_sequence_unavailable"
 	elif _has_live_drop_sequence_for_craft(_mission_drop_craft_id):
 		_last_command_text = "DROP ALREADY ACTIVE"
+		drop_reason = "drop_already_active"
 	elif _try_start_drop_sequence(ignore_global_cooldown):
 		_drop_ship_requested = true
 		_last_command_text = "DROP INBOUND %s" % _get_approach_angle_name()
+		drop_accepted = true
 	else:
 		_drop_ship_requested = false
 		_last_command_text = "NO DROP TEAM AVAILABLE"
+		drop_reason = "no_drop_team_available"
 	_store_selected_mission_dropship_plan()
 	_refresh_world_overlays()
 	_update_ui()
 	_emit_planning_state_changed()
+	return {"accepted": drop_accepted, "reason": drop_reason}
 
 
 func _on_approach_nw_pressed() -> void:
