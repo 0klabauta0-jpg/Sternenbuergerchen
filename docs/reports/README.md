@@ -6,6 +6,7 @@ Datierte HTML-Reports und Handbücher sind unveränderliche Momentaufnahmen. Sie
 
 | Artefakt | Klassifikation | supersedes |
 | --- | --- | --- |
+| `STERNENBUERGERCHEN_STATUS_VERSIONS_DOSSIER_2026-07-19.html` | immutable snapshot; interaktive Status-, Versions- und Zukunfts-Workbench, mit getrennten Ebenen für Current Truth, Branch-Evidenz, historische Belege und Vision | Ersetzt keine kanonische Gegenwartsquelle; ergänzt den TASK-1181-Snapshot als ausführlicheres Dossier. Current Truth bleibt in `CURRENT_GAME_STATE.md` und `qa/CURRENT_EVIDENCE.md`. |
 | `STERNENBUERGERCHEN_SPIELIDEE_PROJEKTSTAND_GPT56_2026-07-17.html` (TASK_1181) | immutable snapshot; lokale Arbeits-Workbench, kein Build | Keine aktuelle Quelle; der Gegenwartsclaim liegt in CURRENT_GAME_STATE. |
 | `project_current_state_handbook_*.html` | immutable snapshots; historische Handbücher | Keine aktuelle Quelle; zeitlich spätere Dateien ersetzen nicht automatisch Evidenz. |
 | `project_status_handbook_2026_06_29.html`, `project_state_handbook_2026_06_30.html` | immutable snapshots | Keine aktuelle Quelle; Einordnung nur über das Evidence-Manifest. |

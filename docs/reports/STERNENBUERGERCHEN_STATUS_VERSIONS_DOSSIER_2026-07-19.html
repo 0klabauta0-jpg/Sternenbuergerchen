@@ -1,0 +1,1332 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Interaktives Status-, Versions- und Zukunftsdossier für SternenBuergerchen.">
+  <link rel="icon" href="data:,">
+  <title>SternenBuergerchen – Status, Systembaum &amp; Ausbaupfad</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #eaf1ec;
+      --muted: #a9b7ae;
+      --faint: #6e8378;
+      --night: #07100e;
+      --night-2: #0b1612;
+      --panel: #101e18;
+      --panel-2: #152a21;
+      --line: #2b493d;
+      --line-soft: rgba(142, 185, 161, .16);
+      --green: #72e5a7;
+      --cyan: #68dce4;
+      --amber: #f2bf62;
+      --red: #fb897b;
+      --violet: #bba8ff;
+      --sand: #d6a564;
+      --radius: 18px;
+      --shadow: 0 18px 55px rgba(0, 0, 0, .33);
+      --content: 1280px;
+      font-family: Inter, "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 92px; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      overflow-x: hidden;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(113, 178, 142, .026) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(113, 178, 142, .026) 1px, transparent 1px),
+        radial-gradient(circle at 87% 4%, rgba(114, 229, 167, .11), transparent 27rem),
+        radial-gradient(circle at 3% 44%, rgba(214, 165, 100, .075), transparent 30rem),
+        var(--night);
+      background-size: 44px 44px, 44px 44px, auto, auto, auto;
+      line-height: 1.58;
+    }
+
+    a { color: var(--cyan); text-underline-offset: 3px; }
+    a:hover { color: var(--green); }
+    button, input, select, textarea { font: inherit; }
+    button, select, input, textarea, [contenteditable="true"] { border-radius: 9px; }
+    button {
+      min-height: 40px;
+      padding: 9px 13px;
+      color: #08110d;
+      background: var(--ink);
+      border: 1px solid var(--ink);
+      cursor: pointer;
+      font-weight: 760;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease, color .16s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button.secondary { background: transparent; color: var(--ink); border-color: var(--line); }
+    button.choice { background: var(--night-2); color: var(--muted); border-color: var(--line); }
+    button.choice.active { background: var(--green); border-color: var(--green); color: #06100a; }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [contenteditable="true"]:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+    input, select, textarea, [contenteditable="true"] { width: 100%; color: var(--ink); background: #08130f; border: 1px solid var(--line); padding: 10px 12px; }
+    textarea { min-height: 118px; resize: vertical; }
+    [contenteditable="true"] { min-height: 94px; white-space: pre-wrap; }
+    [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: var(--faint); }
+    h1, h2, h3, h4, p { margin-top: 0; }
+    h1 { font-size: clamp(2.2rem, 5.2vw, 4.85rem); max-width: 960px; margin-bottom: 18px; letter-spacing: -.056em; line-height: .98; }
+    h2 { font-size: clamp(1.55rem, 2.5vw, 2.35rem); letter-spacing: -.034em; line-height: 1.1; margin-bottom: 10px; }
+    h3 { font-size: 1.08rem; line-height: 1.25; margin-bottom: 7px; }
+    h4 { font-size: .9rem; margin-bottom: 6px; }
+    p { color: var(--muted); }
+    strong { color: var(--ink); }
+    code { color: #d1f4dc; font-family: "Cascadia Code", Consolas, monospace; font-size: .9em; overflow-wrap: anywhere; word-break: break-word; }
+    ul, ol { color: var(--muted); padding-left: 1.25rem; }
+    li + li { margin-top: .42rem; }
+
+    .skip-link { position: fixed; z-index: 99; left: 14px; top: -80px; padding: 10px 14px; border-radius: 0 0 10px 10px; background: var(--amber); color: #201507; font-weight: 800; text-decoration: none; }
+    .skip-link:focus { top: 0; }
+    .wrap { width: min(var(--content), calc(100vw - 36px)); margin-inline: auto; }
+    .eyebrow { margin-bottom: 11px; color: var(--green); font-size: .74rem; letter-spacing: .18em; text-transform: uppercase; font-weight: 850; }
+    .lead { max-width: 780px; font-size: clamp(1rem, 1.55vw, 1.25rem); color: #c6d2ca; }
+    .muted { color: var(--muted); }
+    .note { font-size: .86rem; color: var(--faint); }
+    .fine { font-size: .78rem; color: var(--faint); }
+
+    .hero { position: relative; isolation: isolate; overflow: hidden; padding: 68px 0 48px; border-bottom: 1px solid var(--line); background: linear-gradient(126deg, rgba(10, 25, 18, .98), rgba(8, 16, 14, .72)); }
+    .hero::before, .hero::after { content: ""; position: absolute; z-index: -1; pointer-events: none; }
+    .hero::before { inset: auto -12vw -17rem 32vw; width: 65rem; height: 36rem; border: 1px solid rgba(114, 229, 167, .14); border-radius: 52% 48% 0 0; transform: rotate(-7deg); }
+    .hero::after { left: -10%; right: -10%; bottom: -100px; height: 230px; background: repeating-linear-gradient(151deg, transparent 0 45px, rgba(214, 165, 100, .06) 46px 48px, transparent 49px 89px); clip-path: polygon(0 75%, 12% 44%, 21% 68%, 33% 26%, 46% 63%, 60% 19%, 71% 58%, 82% 33%, 100% 67%, 100% 100%, 0 100%); }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(290px, .65fr); gap: clamp(30px, 5vw, 78px); align-items: end; }
+    .hero-copy, .hero-aside, .section-heading > *, .fact-card, .architecture-card, .tree-node, .roadmap-card, .work-card { min-width: 0; }
+    .hero-aside { display: grid; gap: 13px; }
+    .mission-card { padding: 20px; border: 1px solid rgba(114, 229, 167, .36); border-radius: var(--radius); background: rgba(7, 17, 13, .8); box-shadow: var(--shadow); }
+    .mission-card h2 { font-size: 1.22rem; }
+    .truth-card { border-left: 3px solid var(--amber); }
+    .meta-row, .chip-row, .button-row, .filter-row, .legend { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .meta-row { margin-top: 22px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: rgba(255,255,255,.025); font-size: .8rem; font-weight: 720; }
+    .chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .chip.current { color: var(--green); border-color: rgba(114,229,167,.4); }
+    .chip.branch { color: var(--cyan); border-color: rgba(104,220,228,.38); }
+    .chip.history { color: var(--amber); border-color: rgba(242,191,98,.38); }
+    .chip.vision { color: var(--violet); border-color: rgba(187,168,255,.38); }
+    .chip.risk { color: var(--red); border-color: rgba(251,137,123,.42); }
+
+    .topnav { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid var(--line); background: rgba(7,16,14,.92); backdrop-filter: blur(16px); }
+    .topnav .wrap { display: flex; align-items: center; gap: 12px; overflow-x: auto; min-height: 55px; scrollbar-width: thin; }
+    .brand { flex: 0 0 auto; color: var(--ink); text-decoration: none; letter-spacing: .05em; font-size: .8rem; font-weight: 900; text-transform: uppercase; }
+    .topnav a:not(.brand) { flex: 0 0 auto; color: var(--muted); font-size: .86rem; text-decoration: none; padding: 17px 1px 14px; border-bottom: 2px solid transparent; }
+    .topnav a[aria-current="true"] { color: var(--green); border-bottom-color: var(--green); }
+
+    main { padding-bottom: 54px; }
+    .section { padding: clamp(50px, 7vw, 92px) 0; border-bottom: 1px solid var(--line-soft); }
+    .section.alt { background: linear-gradient(100deg, rgba(21,42,33,.42), rgba(7,16,14,0) 60%); }
+    .section-heading { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(260px, .5fr); gap: 24px; align-items: end; margin-bottom: 26px; }
+    .section-heading .side-copy { border-left: 2px solid var(--line); padding-left: 16px; color: var(--faint); font-size: .92rem; }
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 14px; }
+    .card { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(20,40,31,.91), rgba(10,22,16,.88)); box-shadow: 0 10px 30px rgba(0,0,0,.13); padding: clamp(16px, 2vw, 22px); }
+    .card p:last-child { margin-bottom: 0; }
+    .span-3 { grid-column: span 3; }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .span-9 { grid-column: span 9; }
+    .span-12 { grid-column: 1 / -1; }
+    .fact-card { position: relative; min-height: 176px; overflow: hidden; }
+    .fact-card::after { content: attr(data-index); position: absolute; right: 13px; bottom: -17px; color: rgba(255,255,255,.045); font-size: 6rem; font-weight: 900; line-height: 1; }
+    .fact-card h3 { position: relative; z-index: 1; }
+    .fact-card.current { border-top: 3px solid var(--green); }
+    .fact-card.branch { border-top: 3px solid var(--cyan); }
+    .fact-card.history { border-top: 3px solid var(--amber); }
+    .fact-card.vision { border-top: 3px solid var(--violet); }
+    .kicker { font-size: .75rem; font-weight: 830; letter-spacing: .11em; text-transform: uppercase; }
+    .kicker.current { color: var(--green); }
+    .kicker.branch { color: var(--cyan); }
+    .kicker.history { color: var(--amber); }
+    .kicker.vision { color: var(--violet); }
+    .stat-line { display: flex; align-items: baseline; gap: 9px; margin: 10px 0 6px; }
+    .stat-value { color: var(--ink); font-size: clamp(1.45rem, 3vw, 2.25rem); line-height: 1; font-weight: 860; letter-spacing: -.05em; }
+    .stat-label { color: var(--faint); font-size: .82rem; }
+    .callout { border: 1px solid rgba(242,191,98,.34); background: rgba(96,69,27,.18); border-radius: 14px; padding: 16px; }
+    .callout strong { color: #ffd991; }
+    .callout.cyan { border-color: rgba(104,220,228,.34); background: rgba(24,84,88,.16); }
+    .callout.cyan strong { color: #9cf0f4; }
+    .callout.green { border-color: rgba(114,229,167,.34); background: rgba(37,96,64,.17); }
+    .callout.green strong { color: #a2f3c4; }
+
+    .version-table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+    .version-table th, .version-table td { padding: 11px 9px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line-soft); }
+    .version-table th { color: var(--faint); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; }
+    .version-table td { color: var(--muted); }
+    .version-table td:first-child { color: var(--ink); font-weight: 730; }
+    .badge { display: inline-flex; align-items: center; border: 1px solid currentColor; border-radius: 999px; padding: 2px 8px; font-size: .72rem; font-weight: 800; white-space: nowrap; }
+    .badge.current { color: var(--green); }
+    .badge.branch { color: var(--cyan); }
+    .badge.history { color: var(--amber); }
+    .badge.vision { color: var(--violet); }
+    .badge.risk { color: var(--red); }
+
+    .architecture-figure { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: #07130f; padding: clamp(10px, 2vw, 22px); }
+    .architecture-figure svg { width: 100%; height: auto; display: block; }
+    .diagram-label { fill: #eaf1ec; font-family: Inter, "Segoe UI", sans-serif; font-size: 14px; font-weight: 760; }
+    .diagram-sub { fill: #9bb1a5; font-family: Inter, "Segoe UI", sans-serif; font-size: 11px; }
+    .diagram-small { fill: #738b7e; font-family: Inter, "Segoe UI", sans-serif; font-size: 10px; }
+    .diagram-box { stroke-width: 1.5; }
+    .architecture-rules { display: grid; gap: 10px; }
+    .rule { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
+    .rule:last-child { border-bottom: 0; }
+    .rule-index { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; background: var(--panel-2); color: var(--green); font-weight: 880; font-size: .78rem; }
+    .rule p { margin: 3px 0 0; font-size: .9rem; }
+    details { border: 1px solid var(--line); border-radius: 12px; background: rgba(0,0,0,.12); padding: 0 14px; }
+    details + details { margin-top: 9px; }
+    summary { cursor: pointer; padding: 13px 26px 13px 0; font-weight: 760; color: var(--ink); }
+    summary::marker { color: var(--green); }
+    details > div { padding: 0 0 14px; }
+
+    .loop { display: grid; grid-template-columns: repeat(8, minmax(0,1fr)); gap: 8px; align-items: stretch; }
+    .loop-step { position: relative; padding: 13px 11px; min-height: 122px; border: 1px solid var(--line); border-radius: 13px; background: rgba(15,31,24,.86); }
+    .loop-step::after { content: "→"; position: absolute; right: -13px; top: 42%; z-index: 2; color: var(--green); font-size: 1.35rem; font-weight: 800; }
+    .loop-step:last-child::after { content: "↺"; right: 8px; top: auto; bottom: 5px; color: var(--amber); }
+    .loop-step h3 { color: var(--ink); font-size: .91rem; }
+    .loop-step p { font-size: .79rem; margin-bottom: 0; }
+    .loop-step.now { border-color: rgba(104,220,228,.46); }
+    .loop-step.gate { border-color: rgba(242,191,98,.46); }
+    .loop-step.future { border-color: rgba(187,168,255,.42); }
+    .loop-step strong { display: block; color: var(--cyan); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; }
+    .loop-step.gate strong { color: var(--amber); }
+    .loop-step.future strong { color: var(--violet); }
+
+    .economy-ring { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 9px; align-items: center; }
+    .economy-node { min-height: 160px; padding: 15px 12px; border: 1px solid var(--line); border-radius: 14px; background: rgba(6,16,12,.4); }
+    .economy-node h3 { font-size: .92rem; color: var(--ink); }
+    .economy-node p { font-size: .8rem; margin-bottom: 0; }
+    .economy-node .node-number { display: block; margin-bottom: 9px; color: var(--sand); font-size: 1.8rem; font-weight: 880; line-height: 1; }
+    .economy-node.vision { border-color: rgba(187,168,255,.42); }
+    .economy-node.gate { border-color: rgba(242,191,98,.42); }
+
+    .tree-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+    .tree-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 13px; }
+    .tree-lane { position: relative; padding: 14px; min-height: 100%; border: 1px solid var(--line); border-radius: var(--radius); background: rgba(6,16,12,.28); }
+    .tree-lane::before { content: attr(data-lane); display: block; margin-bottom: 12px; color: var(--faint); font-size: .72rem; font-weight: 820; letter-spacing: .1em; text-transform: uppercase; }
+    .tree-node { position: relative; margin-bottom: 11px; padding: 14px; border: 1px solid var(--line); border-left-width: 4px; border-radius: 12px; background: var(--panel); transition: opacity .16s ease, transform .16s ease; }
+    .tree-node:last-child { margin-bottom: 0; }
+    .tree-node h3 { color: var(--ink); font-size: .98rem; }
+    .tree-node p { margin-bottom: 0; font-size: .83rem; }
+    .tree-node[data-tree-state="present"] { border-left-color: var(--green); }
+    .tree-node[data-tree-state="gate"] { border-left-color: var(--amber); }
+    .tree-node[data-tree-state="design"] { border-left-color: var(--cyan); }
+    .tree-node[data-tree-state="horizon"] { border-left-color: var(--violet); }
+    .tree-node[hidden] { display: none; }
+    .requires { display: block; margin-top: 9px; color: var(--faint); font-size: .76rem; }
+    .requires b { color: var(--muted); }
+    .tree-key { color: var(--faint); font-size: .83rem; }
+
+    .base-flow { display: grid; grid-template-columns: .8fr 1.1fr .95fr .95fr; gap: 10px; align-items: stretch; }
+    .base-stage { position: relative; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(15,31,24,.74); }
+    .base-stage:not(:last-child)::after { content: "→"; position: absolute; right: -16px; top: 42%; z-index: 1; color: var(--green); font-size: 1.35rem; font-weight: 800; }
+    .base-stage h3 { font-size: .96rem; color: var(--ink); }
+    .base-stage p { font-size: .82rem; margin-bottom: 0; }
+    .base-stage.draft { border-color: rgba(104,220,228,.42); }
+    .base-stage.authority { border-color: rgba(114,229,167,.45); }
+    .base-stage.result { border-color: rgba(242,191,98,.45); }
+
+    .asset-swatch { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 8px; }
+    .asset-swatch > div { min-height: 112px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(145deg, #3b3022, #151e18 72%); }
+    .asset-swatch > div:nth-child(2) { background: linear-gradient(145deg, #54432d, #17231d 72%); }
+    .asset-swatch > div:nth-child(3) { background: linear-gradient(145deg, #354036, #132019 72%); }
+    .asset-swatch > div:nth-child(4) { background: linear-gradient(145deg, #25363c, #111c1e 72%); }
+    .asset-swatch > div:nth-child(5) { background: linear-gradient(145deg, #4a3722, #1e1710 72%); }
+    .asset-swatch h3 { margin-top: 26px; font-size: .88rem; color: var(--ink); }
+    .asset-swatch p { font-size: .76rem; margin-bottom: 0; color: #c0cabc; }
+    .asset-list { columns: 2; column-gap: 26px; }
+    .asset-list li { break-inside: avoid; font-size: .9rem; }
+
+    .multiplayer-flow { display: grid; grid-template-columns: .88fr .8fr 1fr .8fr; gap: 11px; }
+    .network-node { padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: rgba(11,24,18,.8); }
+    .network-node h3 { color: var(--ink); font-size: .98rem; }
+    .network-node p { font-size: .84rem; margin-bottom: 0; }
+    .network-node.authority { border-color: rgba(114,229,167,.52); background: rgba(24,72,46,.27); }
+    .network-node.transport { border-color: rgba(104,220,228,.42); }
+    .network-node.readonly { border-color: rgba(242,191,98,.42); }
+    .network-node .arrow { display: block; margin-top: 8px; color: var(--green); font-size: 1.2rem; }
+
+    .scale-ladder { display: grid; gap: 11px; }
+    .scale-row { display: grid; grid-template-columns: minmax(110px,.5fr) minmax(0,1.3fr) minmax(0,1.15fr) minmax(0,.85fr); gap: 13px; align-items: center; padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: rgba(14,30,22,.68); }
+    .scale-row h3 { color: var(--ink); font-size: .97rem; margin-bottom: 0; }
+    .scale-row p { font-size: .82rem; margin: 0; }
+    .scale-row .meter { height: 8px; overflow: hidden; border-radius: 99px; background: #0a130f; border: 1px solid var(--line); }
+    .scale-row .meter > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--cyan)); }
+    .scale-row .meter.warn > span { background: linear-gradient(90deg, var(--amber), var(--red)); }
+
+    .risk-matrix { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+    .risk-card { padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(9,19,14,.65); }
+    .risk-card h3 { color: var(--ink); font-size: .97rem; }
+    .risk-card p { font-size: .84rem; margin-bottom: 0; }
+    .risk-card.high { border-top: 3px solid var(--red); }
+    .risk-card.medium { border-top: 3px solid var(--amber); }
+    .risk-card.opportunity { border-top: 3px solid var(--cyan); }
+
+    .roadmap-controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+    .roadmap { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+    .roadmap-card { display: grid; align-content: start; gap: 10px; min-height: 280px; padding: 17px; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(155deg, rgba(23,45,35,.9), rgba(8,18,13,.82)); }
+    .roadmap-card[hidden] { display: none; }
+    .roadmap-card h3 { color: var(--ink); }
+    .roadmap-card p { font-size: .86rem; }
+    .roadmap-card .impact { color: var(--green); font-size: .8rem; font-weight: 770; }
+    .roadmap-card .time { color: var(--amber); font-size: .78rem; font-weight: 760; }
+    .roadmap-card .dependency { color: var(--faint); font-size: .78rem; }
+    .roadmap-card .risk { color: var(--red); font-size: .78rem; }
+    .roadmap-card.gate { border-top: 3px solid var(--amber); }
+    .roadmap-card.now { border-top: 3px solid var(--cyan); }
+    .roadmap-card.future { border-top: 3px solid var(--violet); }
+
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .comparison > article { padding: 18px; border-radius: 15px; border: 1px solid var(--line); }
+    .comparison .do { border-color: rgba(114,229,167,.36); background: rgba(34,91,59,.16); }
+    .comparison .avoid { border-color: rgba(251,137,123,.36); background: rgba(96,39,31,.17); }
+    .comparison h3 { color: var(--ink); }
+    .comparison li { font-size: .9rem; }
+
+    .workbench { border: 1px solid var(--line); border-radius: 22px; overflow: hidden; background: linear-gradient(130deg, rgba(17,37,28,.98), rgba(8,18,13,.97)); box-shadow: var(--shadow); }
+    .workbench-head { padding: 22px 22px 17px; border-bottom: 1px solid var(--line); }
+    .workbench-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .work-card { padding: 20px 22px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .work-card:nth-child(2n) { border-right: 0; }
+    .work-card:nth-last-child(-n + 2) { border-bottom: 0; }
+    .work-card h3 { color: var(--ink); }
+    .checkline { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 9px; padding: 8px 0; border-bottom: 1px solid var(--line-soft); color: var(--muted); font-size: .9rem; }
+    .checkline:last-child { border-bottom: 0; }
+    .checkline input { width: auto; min-height: auto; margin-top: 4px; accent-color: var(--green); }
+    .status-line { padding: 10px 22px 14px; margin: 0; color: var(--faint); font-size: .85rem; }
+    .status-line[data-tone="good"] { color: var(--green); }
+    .status-line[data-tone="warn"] { color: var(--amber); }
+    .status-line[data-tone="bad"] { color: var(--red); }
+    .export-panel { padding: 16px 22px 22px; border-top: 1px solid var(--line); }
+    .export-panel textarea { margin-top: 12px; min-height: 132px; font-family: "Cascadia Code", Consolas, monospace; font-size: .77rem; }
+    .source-list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px 20px; }
+    .source-list a { display: block; font-size: .9rem; }
+    .source-list p { margin: 3px 0 0; font-size: .78rem; }
+    .footer { padding: 28px 0 48px; color: var(--faint); font-size: .82rem; }
+    .footer p { color: var(--faint); }
+
+    @media (max-width: 1100px) {
+      .hero-grid, .section-heading { grid-template-columns: 1fr; }
+      .span-3 { grid-column: span 6; }
+      .span-4, .span-5 { grid-column: span 6; }
+      .tree-grid, .roadmap { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .economy-ring { grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .loop { grid-template-columns: repeat(4, minmax(0,1fr)); }
+      .loop-step:nth-child(4)::after { content: "↓"; right: 9px; top: auto; bottom: 4px; }
+      .loop-step:nth-child(8)::after { content: "↺"; }
+      .asset-swatch { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
+    @media (max-width: 820px) {
+      .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-9 { grid-column: 1 / -1; }
+      .loop { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .loop-step:nth-child(2)::after, .loop-step:nth-child(4)::after, .loop-step:nth-child(6)::after { content: "↓"; right: 9px; top: auto; bottom: 4px; }
+      .loop-step:nth-child(8)::after { content: "↺"; }
+      .economy-ring, .multiplayer-flow, .base-flow { grid-template-columns: 1fr 1fr; }
+      .base-stage:nth-child(2)::after { content: "↓"; right: 9px; top: auto; bottom: 4px; }
+      .base-stage:last-child::after { display: none; }
+      .risk-matrix { grid-template-columns: 1fr 1fr; }
+      .scale-row { grid-template-columns: 1fr; gap: 8px; }
+      .workbench-grid { grid-template-columns: 1fr; }
+      .work-card, .work-card:nth-child(2n) { border-right: 0; }
+      .work-card:nth-last-child(-n + 2) { border-bottom: 1px solid var(--line); }
+      .work-card:last-child { border-bottom: 0; }
+      .source-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .wrap { width: min(var(--content), calc(100vw - 24px)); }
+      .hero { padding-top: 48px; }
+      .section { padding: 48px 0; }
+      .tree-grid, .roadmap, .comparison, .risk-matrix, .asset-swatch, .economy-ring, .multiplayer-flow, .base-flow { grid-template-columns: 1fr; }
+      .loop { grid-template-columns: 1fr; }
+      .loop-step::after, .loop-step:nth-child(2)::after, .loop-step:nth-child(4)::after, .loop-step:nth-child(6)::after { content: "↓"; right: 9px; top: auto; bottom: 3px; }
+      .loop-step:last-child::after { content: "↺"; }
+      .base-stage::after, .base-stage:nth-child(2)::after { content: "↓"; right: 9px; top: auto; bottom: 3px; }
+      .base-stage:last-child::after { display: none; }
+      .asset-list { columns: 1; }
+      .version-table { font-size: .82rem; }
+      .version-table th, .version-table td { padding: 9px 6px; }
+    }
+    @media print {
+      body { background: white; color: #152018; }
+      .hero, .section.alt { background: white; }
+      .topnav, .workbench, .skip-link { display: none !important; }
+      .card, .architecture-figure, .tree-lane, .tree-node, .roadmap-card, .risk-card, .comparison > article { color: #152018; background: white; box-shadow: none; }
+      p, li, .version-table td { color: #405047; }
+      a { color: #144f59; }
+    }
+  </style>
+</head>
+<body data-report-id="sternenbuergerchen_status_versions_dossier_2026_07_19" data-report-schema="sternenbuergerchen.html_workbench.v1">
+  <a class="skip-link" href="#overview">Zum Dossierinhalt springen</a>
+
+  <header class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Kommandobriefing · Statusdossier · 19. Juli 2026 · Godot 4.6.2</p>
+        <h1>Ein Commander-Spiel, das klein beginnt – und groß werden darf.</h1>
+        <p class="lead">SternenBuergerchen soll nicht einfach viele Einheiten bewegen lassen. Es soll die Geschichte einer wachsenden Einsatzorganisation erzählen: Teams zusammenstellen, Einsätze mit unvollständiger Information führen, Beute und Erkenntnisse in die Basis zurückbringen – und aus einer kleinen Außenposten-Crew Schritt für Schritt eine glaubwürdige Frontier-Operation machen.</p>
+        <div class="meta-row" aria-label="Evidenzlegende">
+          <span class="chip current">kanonische Gegenwart</span>
+          <span class="chip branch">Branch-verifiziert</span>
+          <span class="chip history">historischer Beleg</span>
+          <span class="chip vision">Entwurfshorizont</span>
+        </div>
+      </div>
+      <aside class="hero-aside" aria-label="Leseschlüssel">
+        <section class="mission-card truth-card">
+          <p class="eyebrow">Wichtige Ehrlichkeit</p>
+          <h2>Kein Alpha-Claim.</h2>
+          <p>Der aktuelle Branch besitzt nun eine kanonische Produktmissionsszene und einen produktiven Command-Vertrag. Die öffentliche First-Contact-Spur und ein sauberer Lifecycle-Recapture fehlen jedoch noch als frische Evidenz.</p>
+        </section>
+        <section class="mission-card">
+          <h2>Wie dieses Dossier liest</h2>
+          <p><strong>Grün</strong> steht für die kanonische Gegenwartsquelle. <strong>Cyan</strong> ist sichtbarer, branchverifizierter Code. <strong>Gelb</strong> bewahrt historische Belege samt Caveat. <strong>Violett</strong> ist bewusst noch Zukunft.</p>
+        </section>
+      </aside>
+    </div>
+  </header>
+
+  <nav class="topnav" aria-label="Dossiernavigation">
+    <div class="wrap">
+      <a class="brand" href="#top">SB / DOSSIER</a>
+      <a href="#overview">Status</a>
+      <a href="#architecture">Architektur</a>
+      <a href="#game-loop">Spielschleife</a>
+      <a href="#tech-tree">Ausbaubaum</a>
+      <a href="#world">Welt &amp; Assets</a>
+      <a href="#multiplayer">Multiplayer</a>
+      <a href="#scale">Größe &amp; Risiken</a>
+      <a href="#roadmap">Reise</a>
+      <a href="#workbench">Workbench</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="section" id="overview">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">01 / Status statt Task-Zähler</p>
+            <h2>Der echte Stand: ein breiter Systemprototyp mit einem klarer werdenden Rückgrat.</h2>
+            <p>Die Spielreise, viele Runtime-Systeme und historische Verifier existieren. Was fehlt, ist nicht „noch eine Tasknummer“, sondern die frisch belegte Produktkante: die normale Spielerreise muss ohne Testabkürzung über Mission, ersten Kontakt, Ergebnis und Rückkehr gehen.</p>
+          </div>
+          <p class="side-copy">Der historische TASK‑1181-Bericht bleibt unangetasteter Snapshot. Dieses Dossier ordnet ihn ein, ersetzt ihn aber nicht als kanonische Gegenwart.</p>
+        </div>
+
+        <div class="grid">
+          <article class="card fact-card current span-3" data-index="01">
+            <p class="kicker current">Kanonische Gegenwart</p>
+            <h3>Spielerfantasie &amp; V1-Grenzen</h3>
+            <p>Commander führt Fireteams in Echtzeit. Einzel-NPCs sind keine direkte Spielfigur; Homebase und FOB bleiben UI-/Staging-first.</p>
+            <div class="stat-line"><span class="stat-value">4</span><span class="stat-label">V1-Commander-Befehle</span></div>
+            <p class="fine">Bewegen · Nehmen · Verteidigen · Flankieren</p>
+          </article>
+          <article class="card fact-card branch span-3" data-index="02">
+            <p class="kicker branch">Branch-verifiziert</p>
+            <h3>Kanonische Produktmission</h3>
+            <p><code>mission_runtime.tscn</code> löst den sichtbaren Einstieg vom Testpfad. Die alte Szene ist ein Wrapper, nicht mehr die Produktquelle.</p>
+            <div class="stat-line"><span class="stat-value">28/28</span><span class="stat-label">N004A-Architekturtest</span></div>
+            <p class="fine">Commit <code>b34e5fce</code> · keine N004B-Evidenzbehauptung</p>
+          </article>
+          <article class="card fact-card history span-3" data-index="03">
+            <p class="kicker history">Historische Evidenz</p>
+            <h3>Autorisierter Commander-Pfad</h3>
+            <p>N003 bindet Button, Hotkey und Rechtsklick an denselben Plan‑dann‑GO‑Vertrag.</p>
+            <div class="stat-line"><span class="stat-value">88/0</span><span class="stat-label">Fokusassertions</span></div>
+            <p class="fine">Plus 95/0 kompatible Folgeassertions · kein Releasebeweis</p>
+          </article>
+          <article class="card fact-card vision span-3" data-index="04">
+            <p class="kicker vision">Ausbauhorizont</p>
+            <h3>Basis → Wissen → Einsatzfähigkeit</h3>
+            <p>Blueprints, Rohstoffe, Forschung, Fertigung und Hangar sind die richtige spätere Progressionsschleife – heute aber noch keine Runtime-Wahrheit.</p>
+            <div class="stat-line"><span class="stat-value">0</span><span class="stat-label">produktive Ökonomie-Contracts</span></div>
+            <p class="fine">Absichtlich nicht aus bestehendem UI herbeigedeutet</p>
+          </article>
+
+          <article class="card span-8">
+            <h3>Versionskarte: Was darf man ehrlich sagen?</h3>
+            <div style="overflow-x:auto;">
+              <table class="version-table">
+                <thead><tr><th>Ebene</th><th>Stand</th><th>Was es bedeutet</th><th>Was ausdrücklich nicht folgt</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="badge current">Current Truth</span></td><td>17.07.2026</td><td>Commander-Loop, V1-Grenzen, historische Evidenz und offene Gates sind kanonisch beschrieben.</td><td>Kein neuer Release- oder N004-First-Contact-Claim.</td></tr>
+                  <tr><td><span class="badge branch">Branch</span></td><td>18.07.2026 · <code>b04ceef4</code> → <code>b34e5fce</code></td><td>Produktmissionsszene, Wrapper-Migration und produktiver Runtime-Contract sind im Branch umgesetzt; N004A-Architekturtest 28/28, Release-Dependency-Contracttest 8/8.</td><td>Kein Ersatz für zwei frische öffentliche First-Contact-Läufe.</td></tr>
+                  <tr><td><span class="badge history">Historie</span></td><td>TASK‑1179 / TASK‑1180</td><td>Grid-Sweep und First-Contact liefern wertvolle Route-/Designbelege.</td><td>Ein alter grüner Harness wird nicht automatisch zum heutigen Produktbeweis.</td></tr>
+                  <tr><td><span class="badge vision">Vision</span></td><td>Basis, Forschung, Mining, Industrie</td><td>Ein stimmiger langfristiger Kurs für eine XCOM-artige Kampagne.</td><td>Keine schon vorhandenen Speicherdaten, UI-Felder oder Assets behaupten diese Systeme.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+          <aside class="card span-4">
+            <h3>Die eine wichtige Zeile</h3>
+            <p><strong>Heute:</strong> ein glaubwürdiger Commander-/Fireteam-Kern mit echter Authority-Architektur.</p>
+            <p><strong>Als Nächstes:</strong> diesen Kern über den normalen Produktpfad beweisen, bevor größere Welt-, Wirtschafts- oder Multiplayer-Versprechen darauf gestapelt werden.</p>
+            <div class="callout"><strong>Arbeitsregel:</strong> Sichtbarer Codefortschritt und frische Produkterkenntnis werden getrennt berichtet. Das schützt vor „es sieht fertig aus“.</div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="architecture">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">02 / Architektur für Menschen</p>
+            <h2>Die UI fragt. Die Simulation entscheidet. Die Welt zeigt das Ergebnis.</h2>
+            <p>Das ist der wichtigste Skalierungshebel des Spiels. Wenn jede sichtbare Eingabe in denselben Command-Vertrag läuft, können Singleplayer, Host und Client dieselbe Absicht verstehen – ohne dass ein UI-Button heimlich Spielzustand verändert.</p>
+          </div>
+          <p class="side-copy">Die Architektur ist kein Selbstzweck. Sie verhindert, dass ein schöner Screen, ein Verifier oder ein Multiplayer-Client plötzlich eigene Wahrheit über Units, Kampf oder Transport besitzt.</p>
+        </div>
+
+        <figure class="architecture-figure" aria-labelledby="architecture-caption">
+          <svg viewBox="0 0 1160 540" role="img" aria-labelledby="architecture-title architecture-desc">
+            <title id="architecture-title">SternenBuergerchen Command- und Darstellungsarchitektur</title>
+            <desc id="architecture-desc">Eingaben werden über Adapter und Gateway an SimulationRoot gesendet. Die Simulation erzeugt autoritative Ereignisse und Snapshots für UI, Welt und Netzwerk.</desc>
+            <defs>
+              <linearGradient id="gGreen" x1="0" x2="1"><stop stop-color="#2a8155"/><stop offset="1" stop-color="#72e5a7"/></linearGradient>
+              <linearGradient id="gCyan" x1="0" x2="1"><stop stop-color="#205e63"/><stop offset="1" stop-color="#68dce4"/></linearGradient>
+              <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#72e5a7"/></marker>
+              <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#68dce4"/></marker>
+              <marker id="arrowAmber" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#f2bf62"/></marker>
+            </defs>
+            <rect x="16" y="20" width="1128" height="499" rx="18" fill="#08150f" stroke="#28463a"/>
+            <text x="52" y="57" class="diagram-small">ABSICHT / PLAN</text>
+            <text x="486" y="57" class="diagram-small">AUTORITATIVE AUSFÜHRUNG</text>
+            <text x="884" y="57" class="diagram-small">LESEN / DARSTELLEN / TRANSPORTIEREN</text>
+
+            <rect class="diagram-box" x="50" y="94" width="220" height="84" rx="13" fill="#153126" stroke="#68dce4"/>
+            <text x="70" y="126" class="diagram-label">Buttons · Hotkeys · RMB</text><text x="70" y="150" class="diagram-sub">Spielerabsicht, keine Mutation</text>
+            <rect class="diagram-box" x="50" y="260" width="220" height="84" rx="13" fill="#153126" stroke="#68dce4"/>
+            <text x="70" y="292" class="diagram-label">Lobby · Homebase · FOB</text><text x="70" y="316" class="diagram-sub">Planung, Payload, Staging</text>
+            <rect class="diagram-box" x="50" y="426" width="220" height="56" rx="13" fill="#153126" stroke="#68dce4"/>
+            <text x="70" y="460" class="diagram-label">Host / Client-Transport</text>
+
+            <rect class="diagram-box" x="338" y="94" width="230" height="84" rx="13" fill="#12382c" stroke="#72e5a7"/>
+            <text x="358" y="126" class="diagram-label">MissionCommandEntryAdapter</text><text x="358" y="150" class="diagram-sub">normalisiert jede Eingabe</text>
+            <rect class="diagram-box" x="338" y="260" width="230" height="84" rx="13" fill="#12382c" stroke="#72e5a7"/>
+            <text x="358" y="292" class="diagram-label">FireteamCommandGateway</text><text x="358" y="316" class="diagram-sub">Plan, Token, Revision, GO</text>
+            <rect class="diagram-box" x="338" y="426" width="230" height="56" rx="13" fill="#183124" stroke="#f2bf62"/>
+            <text x="358" y="460" class="diagram-label">MissionSetup / Manifest</text>
+
+            <rect class="diagram-box" x="635" y="173" width="220" height="165" rx="16" fill="url(#gGreen)" stroke="#9af0be"/>
+            <text x="665" y="215" fill="#06150b" font-family="Inter, Segoe UI, sans-serif" font-size="20" font-weight="900">SimulationRoot</text>
+            <text x="665" y="245" fill="#0b2a16" font-family="Inter, Segoe UI, sans-serif" font-size="12">einziger Schiedsrichter</text>
+            <text x="665" y="270" fill="#0b2a16" font-family="Inter, Segoe UI, sans-serif" font-size="12">Queue · Validierung · Tick</text>
+            <text x="665" y="295" fill="#0b2a16" font-family="Inter, Segoe UI, sans-serif" font-size="12">Authority · Commit-Receipt</text>
+
+            <rect class="diagram-box" x="635" y="401" width="220" height="74" rx="13" fill="#173124" stroke="#f2bf62"/>
+            <text x="655" y="430" class="diagram-label">Tactical Resolver &amp; Combat</text><text x="655" y="452" class="diagram-sub">Movement · Cover · Contact · Objective</text>
+
+            <rect class="diagram-box" x="922" y="94" width="172" height="84" rx="13" fill="#17323a" stroke="#68dce4"/>
+            <text x="942" y="126" class="diagram-label">UI &amp; HUD</text><text x="942" y="150" class="diagram-sub">read-only Snapshots</text>
+            <rect class="diagram-box" x="922" y="260" width="172" height="84" rx="13" fill="#17323a" stroke="#68dce4"/>
+            <text x="942" y="292" class="diagram-label">Terrain &amp; Welt</text><text x="942" y="316" class="diagram-sub">Renderer, nicht Wahrheit</text>
+            <rect class="diagram-box" x="922" y="426" width="172" height="56" rx="13" fill="#17323a" stroke="#68dce4"/>
+            <text x="942" y="460" class="diagram-label">Netzwerk-Snapshots</text>
+
+            <path d="M270 136 H338" stroke="#72e5a7" stroke-width="3" marker-end="url(#arrowGreen)"/>
+            <path d="M270 302 H312 V302 H338" stroke="#72e5a7" stroke-width="3" marker-end="url(#arrowGreen)"/>
+            <path d="M270 454 H310 V302 H338" fill="none" stroke="#f2bf62" stroke-width="3" marker-end="url(#arrowAmber)"/>
+            <path d="M568 136 H606 V220 H635" fill="none" stroke="#72e5a7" stroke-width="3" marker-end="url(#arrowGreen)"/>
+            <path d="M568 302 H635" stroke="#72e5a7" stroke-width="3" marker-end="url(#arrowGreen)"/>
+            <path d="M568 454 H610 V320 H635" fill="none" stroke="#f2bf62" stroke-width="3" marker-end="url(#arrowAmber)"/>
+            <path d="M745 338 V401" stroke="#72e5a7" stroke-width="3" marker-end="url(#arrowGreen)"/>
+            <path d="M855 220 H922" stroke="#68dce4" stroke-width="3" marker-end="url(#arrowCyan)"/>
+            <path d="M855 257 H900 V302 H922" fill="none" stroke="#68dce4" stroke-width="3" marker-end="url(#arrowCyan)"/>
+            <path d="M855 293 H885 V454 H922" fill="none" stroke="#68dce4" stroke-width="3" marker-end="url(#arrowCyan)"/>
+            <path d="M745 401 V365" stroke="#f2bf62" stroke-width="2" stroke-dasharray="6 7" marker-end="url(#arrowAmber)"/>
+            <text x="767" y="382" class="diagram-small">Effekte / Ergebnisse</text>
+          </svg>
+          <figcaption id="architecture-caption" class="note" style="margin:12px 4px 0;">Architekturlesart: Ein Plan ist noch kein Befehl. Erst der autoritative Tick bestätigt die Ausführung. Renderer, UI und Playtest-Ansichten bleiben Leser und Anforderer.</figcaption>
+        </figure>
+
+        <div class="grid" style="margin-top:14px;">
+          <article class="card span-5">
+            <h3>Die drei Regeln, die spätere Größe überhaupt möglich machen</h3>
+            <div class="architecture-rules">
+              <div class="rule"><span class="rule-index">1</span><div><strong>Eine Wahrheit für Gameplay.</strong><p><code>SimulationRoot</code> verarbeitet State-Mutationen. Kein UI-Panel, Renderer oder Multiplayer-Client darf Units, Kampf oder Transport „nebenbei“ führen.</p></div></div>
+              <div class="rule"><span class="rule-index">2</span><div><strong>Eine Eingabesprache.</strong><p>Button, Hotkey, Rechtsklick, Singleplayer und Netzwerk werden über Plan → GO vereinheitlicht. Das vermeidet Sonderfälle, die sich später gegenseitig widersprechen.</p></div></div>
+              <div class="rule"><span class="rule-index">3</span><div><strong>Eine visuelle Grenze.</strong><p>Terrain, Props und HUD erklären die Welt. Sie erfinden keine Walkability, Deckung, Sichtlinie oder Damage-Semantik.</p></div></div>
+            </div>
+          </article>
+          <article class="card span-7">
+            <h3>Der Spielbaum, nicht nur der Codebaum</h3>
+            <details open><summary>Meta-Layer: Wer geht wohin – und mit welchem Material?</summary><div><p><strong>Homebase / FOB</strong> wählen Crew, Fireteams, Loadouts, Karte und Dropship-Planung. Beim Start entsteht ein klarer Übergabezustand für die Mission. Später gehört hier ein validiertes Kampagnen-Manifest hin, nicht ein in mehreren Panels verteilter Inventarzustand.</p></div></details>
+            <details><summary>Mission: Was passiert auf dem Boden?</summary><div><p><strong>MissionSetup</strong> übergibt Team, Karte, Szenario und Planung. Der Tactical Controller interpretiert Kommandos; TerrainRegistry, Navigation, Combat, Objective und Respawn arbeiten mit dem autoritativen Kern. Die neue <code>mission_runtime.tscn</code> ist der sichtbare Produktanker.</p></div></details>
+            <details><summary>Feedback: Was darf der Spieler sehen und planen?</summary><div><p>UI, 2D/3D-Ansicht, Map, Contact- und Order-Marker lesen Snapshots und zeigen Feedback. Sie dürfen Requests formulieren, aber nicht eine zweite Wahrheit über Bewegung, Deckung, Verletzung oder Erfolg speichern.</p></div></details>
+            <details><summary>Multiplayer: Was ändert sich, was bleibt gleich?</summary><div><p>Der Transport und die Peer-Ownership ändern sich; die Command-Sprache und die Simulation-Authority nicht. Deshalb ist die N003-Plan→GO-Arbeit wichtiger als ein weiterer Spezial-UI-Pfad.</p></div></details>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="game-loop">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">03 / Was spielt man eigentlich?</p>
+            <h2>Von einer guten Mission zur tragfähigen Kampagne.</h2>
+            <p>Die heutige Schleife ist bereits richtig gewählt: Heimatbasis → Team/Loadout → Dropship → Echtzeit-Taktik → Ergebnis. Die spätere Kampagne wird stark, wenn <em>jedes</em> Ergebnis die nächste Entscheidung verändert – nicht, wenn sie nur weitere Menüs darüberlegt.</p>
+          </div>
+          <p class="side-copy">Der Grundsatz für jede spätere Progression: Ein neues System muss eine neue Commander-Entscheidung erzeugen. Sonst ist es nur Verwaltung.</p>
+        </div>
+
+        <div class="loop" aria-label="Spielreise">
+          <article class="loop-step now"><strong>Heute / Codepfad</strong><h3>Heimatbasis</h3><p>Crew, Fireteam, Loadout und Missionswahl bilden die Ausgangslage.</p></article>
+          <article class="loop-step now"><strong>Heute / Codepfad</strong><h3>FOB &amp; Hangar</h3><p>Staging, Dropship-Planung und Übergabe in die Mission.</p></article>
+          <article class="loop-step gate"><strong>Jetzt schließen</strong><h3>LZ &amp; Deboard</h3><p>Öffentliche Befehle statt privater Harness-Abkürzungen.</p></article>
+          <article class="loop-step now"><strong>Heute / Kern</strong><h3>Plan → GO</h3><p>Commander plant Fireteam-Absicht; Authority bestätigt die Ausführung.</p></article>
+          <article class="loop-step gate"><strong>Jetzt schließen</strong><h3>Kontakt &amp; Kampf</h3><p>Realer Erstkontakt auf authored Route, mit ehrlichem fired/waiting/blocked.</p></article>
+          <article class="loop-step now"><strong>Vorhanden / teils belegt</strong><h3>Objective &amp; Debrief</h3><p>Historisch im Route-Harness sichtbar, Lifecycle noch frisch zu recapturen.</p></article>
+          <article class="loop-step future"><strong>Später / Contract nötig</strong><h3>Blueprint &amp; Material</h3><p>Belohnung erzeugt die nächste Wahl: Forschung, Fertigung oder Ausbau.</p></article>
+          <article class="loop-step future"><strong>Später / Kampagne</strong><h3>Basis wächst</h3><p>Neue Kapazität öffnet anspruchsvollere Einsätze – und die Schleife beginnt auf höherem Niveau.</p></article>
+        </div>
+
+        <div class="grid" style="margin-top:22px;">
+          <article class="card span-7">
+            <p class="kicker vision">Vorgeschlagene Kampagnenschleife</p>
+            <h3>Blueprints und Rohstoffe: nicht „Loot“, sondern Commander-Kapital.</h3>
+            <p>Die Idee passt sehr gut zum Spiel: Ein Einsatz kann Informationen, seltene Baupläne, Rohstoffe, intakte Komponenten oder Erfahrung zurückbringen. Daraus entsteht ein Grund, gezielt Risiko einzugehen – und nicht nur eine Zahl, die nach oben läuft.</p>
+            <div class="economy-ring" style="margin-top:16px;">
+              <article class="economy-node vision"><span class="node-number">01</span><h3>Auftrag wählen</h3><p>Ein Ziel verspricht z. B. Intel, Material, Blueprint oder Crew-Entwicklung. Risiko und benötigte Ausrüstung sind sichtbar.</p></article>
+              <article class="economy-node gate"><span class="node-number">02</span><h3>Einsatz bestehen</h3><p>Nur realer Missionsfortschritt und Debrief erzeugen Ergebnisdaten. Kein UI-Screen darf Belohnung „auszahlen“.</p></article>
+              <article class="economy-node vision"><span class="node-number">03</span><h3>Ressourcen verwerten</h3><p>Rohstoff wird gelagert oder verarbeitet; Blueprint wird erforscht oder produziert. Jede Ausgabe konkurriert mit einer anderen.</p></article>
+              <article class="economy-node vision"><span class="node-number">04</span><h3>Kapazität bauen</h3><p>Hangar, Forschung, Fertigung oder Logistik erweitern genau eine nachvollziehbare Option – nicht alles zugleich.</p></article>
+              <article class="economy-node vision"><span class="node-number">05</span><h3>Neue Missionen</h3><p>Größere Reichweite, Spezialausrüstung oder mehr Sitze erschließen Missionstypen mit anderen Entscheidungen.</p></article>
+            </div>
+          </article>
+          <aside class="card span-5">
+            <h3>Warum das XCOM-artig funktionieren kann</h3>
+            <ul>
+              <li><strong>Konsequenz statt Grind:</strong> Belohnungen verändern konkrete Einsatzmöglichkeiten, nicht nur Zahlenwerte.</li>
+              <li><strong>Lesbare Knappheit:</strong> Ein Blueprint hilft nur, wenn Forschung, Material, Zeit oder Hangar-Kapazität mitgedacht werden.</li>
+              <li><strong>Entscheidbares Risiko:</strong> Mining- oder Bergungsmissionen sind nicht Nebenjobs, sondern eine Wahl zwischen Sicherheit, Versorgung und Fortschritt.</li>
+              <li><strong>Commander-Fantasie:</strong> Der Spieler optimiert ein Operationsnetz, nicht bloß eine einzelne Figur.</li>
+            </ul>
+            <div class="callout cyan"><strong>Star-Citizen-Prinzip, nicht Kopie:</strong> Die nützliche Anleihe ist die Kette entdecken → bewerten → bergen → verarbeiten → einsetzen. Nicht nötig ist ein gigantischer persistenter Wirtschaftsserver, bevor der erste Kernloop Spaß macht.</div>
+          </aside>
+        </div>
+
+        <div class="grid" style="margin-top:14px;">
+          <article class="card span-6">
+            <h3>Blueprints: gute Beuteformate</h3>
+            <div style="overflow-x:auto;"><table class="version-table"><thead><tr><th>Belohnung</th><th>Gewinnt man wo?</th><th>Öffnet welche Wahl?</th><th>Gefahr</th></tr></thead><tbody>
+              <tr><td>Forschungsblueprint</td><td>Relais, Labor, Absturzstelle</td><td>neue Upgrade-Linie / neue Ausrüstungskategorie</td><td>„Forschungsbaum nur zum Abhaken“</td></tr>
+              <tr><td>Rohmaterial</td><td>Mining, Bergung, Konvoi, Außenposten</td><td>Fertigung oder Reparatur statt sofortiger Belohnung</td><td>unsichtbare Materialwährung ohne Konsequenz</td></tr>
+              <tr><td>Bauteil / Beute</td><td>Elitegegner, Zielobjekt, Missionsabschluss</td><td>ein konkretes, sichtbares Loadout-Upgrade</td><td>Loot-Tabelle entwertet taktische Entscheidung</td></tr>
+              <tr><td>Intel</td><td>Aufklärung, Terminal, lebende Rückkehr</td><td>Missionen, bessere LZ, Risikowissen, Routen</td><td>„+5 Intel“ ohne veränderte Karte</td></tr>
+            </tbody></table></div>
+          </article>
+          <article class="card span-6">
+            <h3>Mining: ein eigener Missionstyp, nicht ein leerer Sammelbalken</h3>
+            <p>Eine gute erste Mining-Mission hätte drei Commander-Fragen: <strong>Wo</strong> ist der ertragreiche, aber unsichere Bereich? <strong>Wie</strong> sichere ich Team und Transport, während gearbeitet wird? <strong>Wann</strong> breche ich ab und bringe Material heim? Das erzeugt Planen, Verteidigen, Zeitdruck und Logistik – also Dinge, die zu Fireteam-Taktik passen.</p>
+            <div class="comparison" style="margin-top:14px;">
+              <article class="do"><h3>Erste glaubwürdige Version</h3><ul><li>Ein authored Abbauziel, ein kapazitätsbegrenztes Craft, ein Rückkehrentscheid.</li><li>Rohstoffmenge, Feinddruck und Rückweg sind lesbar.</li><li>Material schaltet genau eine echte Fertigungsentscheidung frei.</li></ul></article>
+              <article class="avoid"><h3>Nicht zu früh</h3><ul><li>Prozedurale Galaxie, Wirtschaftssimulation, Marktpreise, hunderte Erze.</li><li>Automatisierte Produktion ohne Eingriffe.</li><li>Mining als UI-Klick ohne taktischen Raum.</li></ul></article>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="tech-tree">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">04 / Technologie-, Bau- und Forschungsbaum</p>
+            <h2>Erst den Einsatz beweisen. Dann Technologie und Organisation ausbauen.</h2>
+            <p>Der Baum ist absichtlich kein Versprechen, dass alles schon existiert. Er ist ein Abhängigkeitsmodell: Was muss zuerst vertrauenswürdig sein, damit eine neue Kapazität nicht nur Dekoration wird?</p>
+          </div>
+          <p class="side-copy">Tipp: Filtere nach Evidenzstatus. Damit sieht man sofort, was heute Grundlage ist und was bewusst noch keine Implementierungszusage trägt.</p>
+        </div>
+
+        <div class="tree-controls">
+          <div class="filter-row" aria-label="Ausbaubaum filtern">
+            <button class="choice active" type="button" data-tree-filter="all">Alles</button>
+            <button class="choice" type="button" data-tree-filter="present">Heute</button>
+            <button class="choice" type="button" data-tree-filter="gate">Muss zuerst</button>
+            <button class="choice" type="button" data-tree-filter="design">Nächster Entwurf</button>
+            <button class="choice" type="button" data-tree-filter="horizon">Späterer Horizont</button>
+          </div>
+          <p class="tree-key">Strichfarbe: <span style="color:var(--green)">Gegenwart</span> · <span style="color:var(--amber)">Gate</span> · <span style="color:var(--cyan)">Entwurf</span> · <span style="color:var(--violet)">Horizont</span></p>
+        </div>
+
+        <div class="tree-grid">
+          <section class="tree-lane" data-lane="A · Einsatzfundament">
+            <article class="tree-node" data-tree-state="present"><span class="badge current">Heute</span><h3>Commander- und Fireteam-Kern</h3><p>Teamführung, Plan → GO und autoritativer Command-Pfad bilden den spielerischen Kern.</p><span class="requires"><b>Trägt:</b> jede spätere Mission, Fähigkeit und Co-op-Entscheidung.</span></article>
+            <article class="tree-node" data-tree-state="present"><span class="badge branch">Branch</span><h3>Kanonische Produktmission</h3><p>Der sichtbare Einstieg ist aus Testpfaden extrahiert; Contract zeigt auf den produktiven Tactical Controller.</p><span class="requires"><b>Fehlt noch:</b> N004B-Lauf und Current-Truth-Integration.</span></article>
+            <article class="tree-node" data-tree-state="gate"><span class="badge history">Gate</span><h3>Öffentlicher First Contact</h3><p>Grid Sweep muss über normale Produktbefehle zu Kontakt und einer ehrlichen Combat-Entscheidung führen.</p><span class="requires"><b>Danach:</b> N005-Welt und N006-Cadence dürfen sicher folgen.</span></article>
+          </section>
+          <section class="tree-lane" data-lane="B · Lesbare Welt">
+            <article class="tree-node" data-tree-state="gate"><span class="badge history">Gate</span><h3>Lifecycle-Recapture</h3><p>Der freed-instance-Nachlauf in TASK‑1179 muss zweimal sauber verschwinden, bevor man Release behauptet.</p><span class="requires"><b>Unabhängig:</b> blockiert Release, nicht automatisch N004A-Codearbeit.</span></article>
+            <article class="tree-node" data-tree-state="design"><span class="badge branch">Entwurf</span><h3>Frontier Desert Outpost</h3><p>Wüstenboden, braune Klippen, wenige Props, Landmarken, Licht und Staub – ohne Tile-/LOS-/Cover-Änderung.</p><span class="requires"><b>Voraussetzung:</b> N004-Pfad + visueller Semantikhash + Performancebaseline.</span></article>
+            <article class="tree-node" data-tree-state="design"><span class="badge branch">Entwurf</span><h3>Combat-Cadence</h3><p>Detection, Enemy-Tactics, Fire-Decisions und Results werden messbar getrennt, statt einen Monolithen schneller zu drehen.</p><span class="requires"><b>Voraussetzung:</b> echte Messbasis, keine Wunschzahl.</span></article>
+          </section>
+          <section class="tree-lane" data-lane="C · Kampagnenkern">
+            <article class="tree-node" data-tree-state="design"><span class="badge branch">Entwurf</span><h3>MissionManifest &amp; DebriefResult</h3><p>Ein validierter Übergang von Homebase-Draft in Mission und ein klarer Rückweg aus Ergebnisdaten.</p><span class="requires"><b>Voraussetzung:</b> eine normale Ende-zu-Ende-Spielreise.</span></article>
+            <article class="tree-node" data-tree-state="horizon"><span class="badge vision">Horizont</span><h3>Kampagnenzeit &amp; Operationsresolver</h3><p>Nicht geladene Bereiche werden grob, deterministisch und zeitgestempelt aufgelöst – nie als heimlich laufende zweite Unit-/Combat-Simulation.</p><span class="requires"><b>Voraussetzung:</b> Kampagnen-Owner, Eingabe-/Ausgabe-Contract und Debrief-Apply.</span></article>
+            <article class="tree-node" data-tree-state="horizon"><span class="badge vision">Horizont</span><h3>Blueprints &amp; Forschung</h3><p>Forschungsentscheidungen schalten nachvollziehbare Ausrüstung, Optionen oder Missionen frei.</p><span class="requires"><b>Voraussetzung:</b> persistenter Kampagnencontract und echte Debrief-Belohnung.</span></article>
+            <article class="tree-node" data-tree-state="horizon"><span class="badge vision">Horizont</span><h3>Fertigung &amp; Lager</h3><p>Reservierte Ressourcen, ein Auftrag, klare Eingabe/Ausgabe; keine unendliche Produktionssimulation.</p><span class="requires"><b>Voraussetzung:</b> Materialquelle + atomare Persistenzregeln.</span></article>
+          </section>
+          <section class="tree-lane" data-lane="D · Organisation &amp; Reichweite">
+            <article class="tree-node" data-tree-state="horizon"><span class="badge vision">Horizont</span><h3>Hangar &amp; Logistik</h3><p>Mehr Sitze, Fracht, Reparatur oder Spezialcraft erweitern die Missionen, nicht nur die Kulisse.</p><span class="requires"><b>Voraussetzung:</b> Loadout-/Transportcontract + ein spürbarer Engpass.</span></article>
+            <article class="tree-node" data-tree-state="horizon"><span class="badge vision">Horizont</span><h3>Mining &amp; Bergung</h3><p>Taktische Extraktion mit Risiko, Rückweg und Materialentscheidung als eigene Einsatzfamilie.</p><span class="requires"><b>Voraussetzung:</b> Ergebnisdaten + Materialinventar + Rückkehr.</span></article>
+            <article class="tree-node" data-tree-state="horizon"><span class="badge vision">Horizont</span><h3>Co-op-Ausbau</h3><p>Zwei Menschen steuern dieselbe Operationskette mit klaren Rollen und einem gemeinsamen autoritativen Ergebnis.</p><span class="requires"><b>Voraussetzung:</b> First-ten-minutes-Releasegate, Netzwerk-Recapture, Ownership-UX.</span></article>
+          </section>
+        </div>
+
+        <div class="grid" style="margin-top:18px;">
+          <article class="card span-7">
+            <h3>Wie die Base später funktionieren sollte</h3>
+            <p>Die Basis muss nicht frei begehbar sein, um sich wie eine Basis anzufühlen. Die richtige erste Form ist eine <strong>Operationskonsole</strong>: ein Ort, an dem Verfügbarkeit, Crew, Transport, Forschung und Produktion sichtbar zusammenkommen. Der Spieler baut zuerst <em>Kapazität</em>, nicht hübsche leere Räume.</p>
+            <div class="base-flow" style="margin-top:15px;">
+              <article class="base-stage"><h3>Persistenter Kampagnenstand</h3><p>Crew, Bestand, freigeschaltete Optionen, laufende Aufträge. Ein Besitzer, keine Panelkopien.</p></article>
+              <article class="base-stage draft"><h3>MissionPlanDraft</h3><p>Temporär: Fireteams, Dropship, reserviertes Loadout, Ziel und LZ. Darf verworfen werden.</p></article>
+              <article class="base-stage authority"><h3>MissionManifest</h3><p>Ein expliziter Start erzeugt einen validierten, unveränderlichen Übergabestand für die Runtime.</p></article>
+              <article class="base-stage result"><h3>DebriefResult</h3><p>Verluste, Verbrauch, XP, Intel und Belohnung kommen zurück. Erst ein Apply-Schritt ändert Kampagnenstand.</p></article>
+            </div>
+          </article>
+          <article class="card span-5">
+            <h3>Tactical Suite / KlabsCom als Referenz</h3>
+            <p>Die lokale Tactical Suite ist eine <strong>nicht-kanonische Inspirationsquelle</strong>, keine Basisbau- oder Wirtschaftssimulation. Sie ist aber eine gute Informationsarchitektur-Referenz: Teamboard, nicht zugeteilte Crew, Karte, Auftragsmarker und Notizen sind sichtbar getrennt.</p>
+            <ul>
+              <li><strong>Übernehmen:</strong> Team → Reserve → Dropship als klare, dragbare Planung; Karte und Auftrag getrennt.</li>
+              <li><strong>Nicht übernehmen:</strong> Firestore-/UI-Writes als Gameplay-Wahrheit, ein riesiger UI-Monolith, frei verschiebbare Fenster ohne Ownership.</li>
+              <li><strong>Homebase V1:</strong> drei Tabs – Crew, Hangar, Mission – plus ein einziges gültiges Missions-Draft.</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="grid" style="margin-top:14px;">
+          <article class="card span-12">
+            <p class="kicker vision">Vorschlag für späteren Kampagnencontract</p>
+            <h3>Was passiert, wenn der Spieler nicht auf einer Karte ist?</h3>
+            <p>Für V1 sollte außerhalb einer geladenen Mission <strong>keine</strong> zweite, unsichtbar in Echtzeit laufende Schlacht simuliert werden. Das wäre teuer, schwer zu erklären und würde dieselbe Authority-Frage noch einmal erzeugen. Stattdessen besitzt der Kampagnen-Owner eine kleine, nachvollziehbare Operationszeit: explizite Aufträge werden bei klaren Zeitpunkten oder einem Kampagnen-Tick grob und deterministisch aufgelöst.</p>
+            <div class="comparison" style="margin-top:14px;">
+              <article class="do"><h3>Erste belastbare Lösung</h3><ul><li><strong>Eingaben:</strong> Operationsart, Region, Mannschaft, Loadout, Vorräte, bekannte Bedrohung, Seed und Startzeit.</li><li><strong>Resolver:</strong> eine regelbasierte, zeitgestempelte Berechnung mit klarer Cadence; kein verstecktes Nachspielen jeder Unit.</li><li><strong>Ausgaben:</strong> Dauer, Verbrauch, Verletzung/Risiko, Intel, Material, neue Regionstags und ein erklärbarer Ergebnistext.</li><li><strong>Apply:</strong> erst <code>DebriefResult</code> bzw. <code>OperationResult</code> verändert Lager, Crew und Missionsangebote atomar.</li></ul></article>
+              <article class="avoid"><h3>Was bewusst nicht simuliert wird</h3><ul><li>Keine off-map Units mit eigener Bewegung, Combat-AI oder Parallel-Authority.</li><li>Keine stündliche Wirtschaft für hundert Rohstofftypen, solange eine einzige Bergungsentscheidung nicht spielbar ist.</li><li>Keine zufälligen Crew-Verluste ohne sichtbare Eingaben, Risikoanzeige und erklärbaren Ergebnisvertrag.</li><li>Keine Kartenänderung im Hintergrund ohne Version, Zeitstempel und eine reversible/prüfbare Ergebnisakte.</li></ul></article>
+            </div>
+            <p class="note" style="margin-top:14px;"><strong>Spätere Ausbauoption:</strong> Wenn mehrere Regionen wichtig werden, kann derselbe Contract eine Warteschlange aus Forschungs-, Reparatur-, Bergungs- und Außenpostenoperationen bedienen. Erst dann lohnt ein gröberes Zonenmodell; eine persistente Galaxie oder Live-Simulation bleibt davon getrennt.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="world">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">05 / Welt, Assets &amp; Engine</p>
+            <h2>Die Welt kann schön werden, weil sie nicht schummeln muss.</h2>
+            <p>Die Karte besitzt bereits taktische Wahrheit: walkable, Höhe, Sichtblocker, Cover, Marker und Szenariodaten. Die Landschaft soll diese Wahrheit lesbar machen – niemals durch ein hübsches Modell heimlich neue Regeln erfinden.</p>
+          </div>
+          <p class="side-copy">Frontier Low‑Poly bedeutet Sand, Fels, modulare Außenposten und starke Silhouetten. Nicht: überall Props, die wie Deckung aussehen, aber keine sind.</p>
+        </div>
+
+        <div class="grid">
+          <article class="card span-5">
+            <h3>Ground Mission 01: echte Kartenfakten</h3>
+            <div style="overflow-x:auto;"><table class="version-table"><thead><tr><th>Signal</th><th>Bestand</th><th>Bedeutung</th></tr></thead><tbody>
+              <tr><td>Grid</td><td>32 × 32 = 1.024 Tiles</td><td>Ein guter erster visueller Slice, klein genug für deterministische Validierung.</td></tr>
+              <tr><td>Bewegung</td><td>741 walkable / 283 nicht walkable</td><td>Visuelle Kanten dürfen diese Regeln nicht übermalen.</td></tr>
+              <tr><td>LOS</td><td>237 blockierend</td><td>Ein hoher Fels oder eine Wand darf nur dann „echt“ blocken, wenn die Tilewahrheit es trägt.</td></tr>
+              <tr><td>Cover</td><td>92 Tiles mit Wert 5–60</td><td>Ein Kaktus, Kran oder Zaun ist nicht automatisch Cover.</td></tr>
+              <tr><td>Marker</td><td>Objective, Spawns, Patrol</td><td>Landmarken helfen Orientierung, bleiben aber Darstellungsrepräsentanten.</td></tr>
+            </tbody></table></div>
+          </article>
+          <article class="card span-7">
+            <p class="kicker branch">Vorhandene lokale Familien</p>
+            <h3>Aus vorhandenen Assets lässt sich bereits ein markanter Desert Outpost kuratieren.</h3>
+            <div class="asset-swatch" aria-label="Assetfamilien">
+              <div><h3>Wüstenboden</h3><p>Nature Kit: Dirt, braune Klippen, Stufen.</p></div>
+              <div><h3>Fels &amp; Kaktus</h3><p>Felsen, rare Vegetationscluster, keine Kiefernwüste.</p></div>
+              <div><h3>Landmarke</h3><p>Dish, Generator, Platform, Hangar als klare Rollen.</p></div>
+              <div><h3>Industrie</h3><p>Factory, Rohre, Kran, Container – sparsam und lesbar.</p></div>
+              <div><h3>Feedback</h3><p>Sand-/Rock-Schritte, Thruster, UI und Combat-SFX als Startpunkt.</p></div>
+            </div>
+            <p class="note" style="margin-top:13px;">Vorhanden heißt nicht aktiv: Die aktuelle Höhenkanten-Policy bleibt noch <code>legacy_space</code>; <code>frontier_desert_outpost_v1</code> und <code>terrain_visual_theme_id</code> sind für N005 zu erstellen, nicht bereits geliefert.</p>
+          </article>
+          <article class="card span-7">
+            <h3>Der geplante erste Visual Slice: „Frontier Desert Outpost“</h3>
+            <ol>
+              <li><strong>Eine Grundfamilie:</strong> Dirt/Sand + braune Klippen; graues Gestein nur als bewusster Kontrast, nicht als zweites Thema.</li>
+              <li><strong>12–20 gezielte Props:</strong> Felsen, Büsche, Kakteen, wenige Industriefragmente – deterministisch verteilt und immer anhand bestehender Tile-Semantik geprüft.</li>
+              <li><strong>Ein Orientierungsgerüst:</strong> LZ, Energie-/Forschungssignal, Factory/Station und Objective bekommen klare Silhouetten und unterschiedliche Werte.</li>
+              <li><strong>Atmosphäre mit Funktion:</strong> warmes Licht, dezenter Distanznebel, Staub; keine Backdrops im taktischen Raum und keine Dekoration, die Routen verdeckt.</li>
+              <li><strong>Drei Zoomtests:</strong> Fireteams, Waypoints, Objective, LZ und echte gefährliche Kanten bleiben auf jeder Stufe lesbar.</li>
+            </ol>
+            <div class="callout green"><strong>Wichtige Regel:</strong> Der Gameplay-/Tile-Hash bleibt identisch. Visuals sind ein additiver Renderer-Slice, keine Map-Regeländerung im Tarnanzug.</div>
+          </article>
+          <article class="card span-5">
+            <h3>Plugin- und Engine-Entscheidung</h3>
+            <ul>
+              <li><strong>Terrain3D:</strong> vorhanden, aber nicht als N005-Schnellweg nutzen. Die Produktwelt hat eine eigene JSON-/Registry-/Renderer-Pipeline; ein Wechsel wäre ein Daten- und Semantikprojekt.</li>
+              <li><strong>LimboAI:</strong> vorhanden und tatsächlich über einen Behavior-Tree-Adapter genutzt. Erst Determinismus, Cadence und Multiplayer-Semantik messen, bevor ein neues AI-Framework dazukommt.</li>
+              <li><strong>Netfox:</strong> echte Netzwerk-/Rollback-Infrastruktur. Neue Visuals und Playtests dürfen daran keine lokale Nebenautorität vorbei bauen.</li>
+              <li><strong>Asset Placer / Map Builder:</strong> sinnvoll für Authoring, aber editor-only. Die Laufzeit bleibt in Contracts, Karten- und Runtimepfaden.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="multiplayer">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">06 / Multiplayer ohne Zauberei</p>
+            <h2>Co-op wächst aus der gleichen Command-Sprache – nicht aus einem zweiten Spiel.</h2>
+            <p>Der Lobby-/Session-Pfad kann dieselbe Produktmission laden. Die spannende Arbeit ist nun nicht „mehr RPCs“, sondern Ownership, Commit-Quittungen, Sichtbarkeit und verständliches Feedback für zwei Menschen, die gleichzeitig planen.</p>
+          </div>
+          <p class="side-copy">Die Star-Citizen-Referenz lehrt hier vor allem Vorsicht: Skalierung braucht Authority-, Replikations- und Streaming-Grenzen. Sie ist kein Auftrag, Server Meshing in Godot nachzubauen.</p>
+        </div>
+
+        <div class="multiplayer-flow" aria-label="Multiplayerfluss">
+          <article class="network-node"><h3>Host / Client</h3><p>Wählen Rolle, Team und Ready-Status über die Lobby. Beide sehen die gleiche Produktszene.</p><span class="arrow">→</span></article>
+          <article class="network-node transport"><h3>Adapter &amp; Gateway</h3><p>Normalisieren die Commander-Absicht. Plan ist lokal sichtbar, aber noch kein laufender Command.</p><span class="arrow">→</span></article>
+          <article class="network-node authority"><h3>SimulationRoot</h3><p>Prüft Peer, Token, Revision und Ownership; queued und committet auf dem autoritativen Tick.</p><span class="arrow">→</span></article>
+          <article class="network-node readonly"><h3>Snapshots &amp; Feedback</h3><p>Client wartet auf Commit-Receipt; UI zeigt Pending, Accepted, Committed oder Blocked – ohne eigene Bewegung zu starten.</p></article>
+        </div>
+
+        <div class="grid" style="margin-top:18px;">
+          <article class="card span-6">
+            <h3>Was heute schon die richtige Richtung ist</h3>
+            <ul>
+              <li>Singleplayer, Host und Client teilen den Plan‑dann‑GO-Command-Vertrag.</li>
+              <li>Ein Client darf nicht schon loslaufen, nur weil sein lokaler Button grün leuchtet.</li>
+              <li>SimulationRoot validiert Source Peer, Token, Fireteam und Revision vor dem Commit.</li>
+              <li>Die Lobby instanziiert die kanonische <code>mission_runtime.tscn</code>, nicht die alte Testszene.</li>
+            </ul>
+          </article>
+          <article class="card span-6">
+            <h3>Was Co-op wirklich braucht, bevor es „größer“ wird</h3>
+            <ul>
+              <li>Öffentliche Mission-, LZ-, Drop- und Deboard-Fassaden statt private Testcalls.</li>
+              <li>Eine klare Antwort auf „wem gehört dieses Fireteam / Dropship / Objective gerade?“</li>
+              <li>Read-only Snapshots, die nicht nur technisch, sondern für Menschen verständlich erklären: pending, waiting, blocked, warum.</li>
+              <li>Ein Zwei-Menschen-Playtest über die echte Homebase→Mission→Debrief-Schleife, erst danach größere Sessions.</li>
+            </ul>
+          </article>
+          <article class="card span-12">
+            <h3>Wie groß kann Multiplayer werden?</h3>
+            <p>Eine seriöse Antwort ist zunächst <strong>„in Stufen, gemessen“</strong>. Der vorhandene Authority-Pfad kann für kleine Co-op-Einsätze wachsen. Große persistente Shards, dutzende ständig simulierte Teams oder eine globale Ökonomie verlangen später andere Dienstleistungen: Persistenzmodell, Zonen-/Interessenmanagement, Lastbudgets, Replikationsprofil und Betriebsmonitoring. Das ist ein eigenes Produktprogramm, kein nächster Task.</p>
+            <div class="callout cyan"><strong>Inspiration aus Star Citizen:</strong> Die nützliche Lehre ist die Trennung von Entity Authority, Replikation und Sichtbarkeit. Selbst dort ist die Clientleistung nicht einfach durch mehr Backend-Skalierung „gelöst“ – die sichtbare Welt bleibt ein CPU-/GPU-/Speicherbudget. Für SternenBuergerchen heißt das: erst lokale Messgates, dann schrittweise größere Räume.</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="scale">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">07 / Größe, Performance &amp; Gefahren</p>
+            <h2>Es kann wachsen – wenn der Code und die Welt in Schichten wachsen.</h2>
+            <p>Der größte aktuelle Performancewert ist nicht eine FPS-Zahl, sondern die Fähigkeit, später zu messen: Render-Snapshots, MultiMesh-Zähler, Cadence, Contracts und Verifier existieren. Was fehlt, sind frische Baselines und konsequente Grenzen für die großen Besitzer.</p>
+          </div>
+          <p class="side-copy">Keine erfundene Ziel-FPS: Erst Baseline aufnehmen, dann den langsamsten Pfad verbessern und erneut messen. Das ist auch die offizielle Godot-Empfehlung.</p>
+        </div>
+
+        <div class="scale-ladder">
+          <article class="scale-row"><h3>Stufe 1 · Kernmission</h3><p>Ein Fireteam, eine 32×32-Map, erste Fireteam-Orders, ehrlicher Kontakt und Debrief.</p><div class="meter"><span style="width:28%"></span></div><p><span class="badge current">heute / teils belegt</span><br><span class="fine">N004/N002A schließen</span></p></article>
+          <article class="scale-row"><h3>Stufe 2 · Polierter Slice</h3><p>Frontier Outpost, sauberer Combat-Tick, drei Zoomstufen, Export- und First-Ten-Minutes-Gate.</p><div class="meter"><span style="width:46%"></span></div><p><span class="badge branch">N005–N007</span><br><span class="fine">Messen vor / nach jeder Kante</span></p></article>
+          <article class="scale-row"><h3>Stufe 3 · Kampagne</h3><p>Manifest, DebriefResult, Blueprints, ein Materialkreislauf, ein Hangar-/Forschungsentscheid.</p><div class="meter warn"><span style="width:66%"></span></div><p><span class="badge vision">neuer Vertrag</span><br><span class="fine">erst nach End-to-End-Produktgate</span></p></article>
+          <article class="scale-row"><h3>Stufe 4 · Operationsnetz</h3><p>Mehrere Missionstypen, Logistics, Mining/Bergung, mehr Craft und Zwei-Menschen-Co-op.</p><div class="meter warn"><span style="width:83%"></span></div><p><span class="badge vision">groß</span><br><span class="fine">Ownership, Persistenz, Load test</span></p></article>
+        </div>
+
+        <div class="grid" style="margin-top:20px;">
+          <article class="card span-6">
+            <h3>Messvertrag für Welt und Kampf</h3>
+            <ol>
+              <li><strong>Renderer:</strong> Draw Calls, Objects, Primitives, VRAM, MultiMesh-/Individualmodelle, fehlende Asset-Mappings.</li>
+              <li><strong>Framezeit:</strong> 60–120 Sekunden Warm-up, dann Median und p95 an drei festen Zoomstufen: Leerlauf, Orders, Kontakt, Dropship.</li>
+              <li><strong>Cadence:</strong> Detection, Enemy-Tactics, Fire-Decisions und Objective/Result getrennt timen; nicht nur den großen Combat-Driver pauschal messen.</li>
+              <li><strong>Semantik:</strong> Kartenhash, Marker, Patrol, Tilewerte und Objectivekonfiguration vor/nach Visual Slice vergleichen.</li>
+              <li><strong>Regel:</strong> Erst Profiling, dann Optimierung, dann dieselbe Messung erneut. Keine „gefühlt schneller“-Behauptung.</li>
+            </ol>
+          </article>
+          <article class="card span-6">
+            <h3>Die echten Architektur-Gefahren</h3>
+            <p class="note">Zeilenstand des produktiven Branches <code>b34e5fce</code>; diese Messung ist ein Warnsignal, keine Qualitätsmetrik.</p>
+            <div class="risk-matrix">
+              <article class="risk-card high"><h3>35.989 Zeilen</h3><p>Der Tactical Controller ist ein Monolith. Jeder berührte Slice muss ihn durch kleine Besitzer/Adapter schrumpfen oder wenigstens nicht weiter aufblasen.</p></article>
+              <article class="risk-card high"><h3>5.314 Zeilen</h3><p>Combat-Driver: erst instrumentieren, dann Detection, Tactics, Fire und Result-Cadence stranglen.</p></article>
+              <article class="risk-card medium"><h3>7.135 Zeilen</h3><p>MetaFlow: Base, Transport und Debrief sind wertvoll, aber eine Kampagnenökonomie darf nicht einfach weitere Zustände hineinladen.</p></article>
+              <article class="risk-card high"><h3>Evidence Drift</h3><p>Grüne Assertions mit nachgelagertem freed-instance-Fehler sind kein sauberer Releasebeweis.</p></article>
+              <article class="risk-card medium"><h3>Assets als Regeln</h3><p>Props und 3D-Kante dürfen nicht aus Versehen Cover, Blocker oder Wege vorgaukeln.</p></article>
+              <article class="risk-card opportunity"><h3>Gute Chance</h3><p>Die produktive Szene, Command-Gateway, Terrain-Read-Model und vorhandenen Assets erlauben gezieltes Wachstum statt Rewrite.</p></article>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="roadmap">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">08 / Die Reise ab hier</p>
+            <h2>Ein Plan mit Abhängigkeiten, nicht eine riesige Wunschliste.</h2>
+            <p>Die Zeitangaben sind bewusst <strong>relative Arbeitsgrößen</strong>, keine Kalenderzusagen. Jede Karte endet mit einer überprüfbaren Produktkante. Erst danach wird der nächste Ausbau wirklich günstig und sicher.</p>
+          </div>
+          <p class="side-copy">Wähle einen Horizont, um die Reihenfolge zu sehen. „Groß“ meint mehrere eigenständige, überprüfbare Slices – nicht automatisch viele Wochen oder Personen.</p>
+        </div>
+
+        <div class="roadmap-controls" aria-label="Roadmap filtern">
+          <button class="choice active" type="button" data-roadmap-filter="all">Alle Horizonte</button>
+          <button class="choice" type="button" data-roadmap-filter="now">Jetzt schließen</button>
+          <button class="choice" type="button" data-roadmap-filter="product">Produktkante</button>
+          <button class="choice" type="button" data-roadmap-filter="campaign">Kampagnenentwurf</button>
+          <button class="choice" type="button" data-roadmap-filter="long">Langfristig</button>
+        </div>
+
+        <div class="roadmap">
+          <article class="roadmap-card gate" data-roadmap-state="now"><span class="badge history">Jetzt</span><h3>N004B &amp; N002A: Belege schließen</h3><p>Öffentlicher Grid-Sweep-First-Contact zweimal frisch; TASK‑1179-Lifecycle zweimal ohne freed-instance-Nachlauf. Danach Current Truth und Evidence-Manifest aktualisieren.</p><span class="impact">Nutzen: Vertrauen in den echten Spielerpfad</span><span class="time">Größe: klein bis mittel, aber zwingend</span><span class="dependency">Voraussetzung: N003 + N004A vorhanden</span><span class="risk">Risiko: Ein frischer Lauf deckt geerbte Lifecycle- oder Authority-Fehler auf.</span></article>
+          <article class="roadmap-card now" data-roadmap-state="product"><span class="badge branch">Danach</span><h3>N005: Frontier Desert Outpost</h3><p>Eine lesbare, performante Landschaft auf derselben semantischen Karte. Keine neue Gameplay-Regel, aber sichtbar bessere Orientierung und Atmosphäre.</p><span class="impact">Nutzen: Welt wird zum glaubwürdigen Einsatzraum</span><span class="time">Größe: mittel, klar begrenzbar</span><span class="dependency">Voraussetzung: public-path-clean + Performancebaseline</span><span class="risk">Risiko: Attraktive Props werden mit ungültigen Deckungs- oder Blockersignalen verwechselt.</span></article>
+          <article class="roadmap-card now" data-roadmap-state="product"><span class="badge branch">Danach</span><h3>N006 / N007: Cadence &amp; erste 10 Minuten</h3><p>Combat in messbare Cadences zerlegen und die echte Homebase→Mission→Debrief-Reise ohne Deeplink spielen.</p><span class="impact">Nutzen: spielbar statt nur systemreich</span><span class="time">Größe: mittel bis groß</span><span class="dependency">Voraussetzung: N004, dann N005</span><span class="risk">Risiko: Eine Extraktion ohne Messbasis verschiebt nur Arbeit und bricht Determinismus.</span></article>
+          <article class="roadmap-card future" data-roadmap-state="campaign"><span class="badge vision">Entwurf</span><h3>Kampagnenvertrag</h3><p>MissionPlanDraft, MissionManifest und DebriefResult als explizite Datenübergänge; danach eine persistente, kleine Kampagnenquelle.</p><span class="impact">Nutzen: Ergebnis verändert nächste Entscheidung</span><span class="time">Größe: mittel, eigener Contract</span><span class="dependency">Voraussetzung: E2E-Spielreise und klarer Owner</span><span class="risk">Risiko: Persistenz vor einer klaren End-to-End-Reise konserviert falsche Zustände.</span></article>
+          <article class="roadmap-card future" data-roadmap-state="campaign"><span class="badge vision">Entwurf</span><h3>Eine Kapazitätslinie</h3><p>Entweder Forschung <em>oder</em> Hangar <em>oder</em> Fertigung zuerst. Nur ein Engpass, eine Belohnung, eine neue Missionsoption.</p><span class="impact">Nutzen: spürbare Progression ohne Verwaltungsballast</span><span class="time">Größe: klein bis mittel je Linie</span><span class="dependency">Voraussetzung: Kampagnenvertrag + Debriefbelohnung</span><span class="risk">Risiko: Mehrere Linien zugleich verwandeln Strategie in bloße Menüpflege.</span></article>
+          <article class="roadmap-card future" data-roadmap-state="campaign"><span class="badge vision">Entwurf</span><h3>Mining-/Bergungsmission</h3><p>Eine authored Rohstoffmission mit Sicherheits-, Zeit- und Rückkehrentscheidung. Der erste Materialkreislauf, kein Wirtschaftssimulator.</p><span class="impact">Nutzen: neue taktische Rollen und echter Grund für Logistik</span><span class="time">Größe: mittel, eigener Player Slice</span><span class="dependency">Voraussetzung: Rückkehr, Material, ein Produktresultat</span><span class="risk">Risiko: Ein Sammelbalken ohne Raum-, Zeit- und Rückkehrdruck trägt die Fireteam-Fantasie nicht.</span></article>
+          <article class="roadmap-card future" data-roadmap-state="long"><span class="badge vision">Langfristig</span><h3>Zwei Menschen, eine Operation</h3><p>Co-op über dieselbe Base-, Dropship- und Mission-Kette: Rollen, Ownership, Resync, klare Warten-/Blockiert-Feedbacks.</p><span class="impact">Nutzen: Commander-Fantasie wird sozial</span><span class="time">Größe: groß, viele echte Playtests</span><span class="dependency">Voraussetzung: First-ten-minutes + Authority + UX</span><span class="risk">Risiko: Netzwerk-Transport wird fälschlich zu einer zweiten Gameplay-Authority.</span></article>
+          <article class="roadmap-card future" data-roadmap-state="long"><span class="badge vision">Langfristig</span><h3>Große Operationsräume</h3><p>Mehr Maps, Craft, Außenposten und vielleicht persistente Regionseffekte – nur wenn Client-/Server-/Save-Budgets belastbar sind.</p><span class="impact">Nutzen: größere Reise, nicht nur größere Karte</span><span class="time">Größe: groß bis sehr groß</span><span class="dependency">Voraussetzung: Messdaten, Zonenmodell, Persistenzstrategie</span><span class="risk">Risiko: Größe ohne Streaming-, Save- und Sichtbarkeitsbudget skaliert nur Wartezeit und Fehler.</span></article>
+        </div>
+
+        <div class="grid" style="margin-top:18px;">
+          <article class="card span-6"><h3>Was jetzt bewusst <em>nicht</em> beginnen sollte</h3><ul><li>Ein frei begehbarer 3D-Base-Builder, bevor Homebase-Übergaben und Campaign State einen Owner haben.</li><li>Neue Terrain-/AI-/Netzwerkplugins, bevor vorhandene Terrain3D-, LimboAI- und Netfox-Pfade gemessen sind.</li><li>Eine große prozedurale Wirtschaft, bevor eine einzige Bergungs-/Produktionsentscheidung in einem echten Debrief funktioniert.</li><li>Großes PvP oder persistent Teams, bevor Co-op-Ownership und First-Ten-Minutes-Gate sauber sind.</li></ul></article>
+          <article class="card span-6"><h3>Was die Größe des Spiels gesund hält</h3><ul><li>Jeder neue Besitzstand hat einen Datenowner, einen Snapshot und einen expliziten Übergang.</li><li>Jeder sichtbare Slice macht den aktuell berührten Monolithen kleiner oder kapselt ihn messbar besser.</li><li>Jede Weltverbesserung besitzt einen Semantikhash und ein Performancebudget.</li><li>Jede Roadmap-Aussage hat ein Gate, einen Caveat und eine reale Spielerentscheidung.</li></ul></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="workbench">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">09 / Lokale Entscheidungs-Workbench</p>
+            <h2>Aus dem Dossier eine gemeinsame Arbeitsentscheidung machen.</h2>
+            <p>Diese Eingaben verändern kein Spiel und keine Projektdatei. Sie speichern nur lokale Notizen im Browser und können als JSON an Codex zurückgegeben werden.</p>
+          </div>
+          <p class="side-copy">Der Default setzt den produktiven Vertrauensaufbau vor Kampagnenbreite. Du kannst ihn lokal umstellen, ohne damit den Codeplan zu verändern.</p>
+        </div>
+
+        <section class="workbench" aria-label="Dossier-Workbench">
+          <div class="workbench-head">
+            <h3>Fokus, Risiken und nächste Entscheidung</h3>
+            <p>Die Workbench ist ein Arbeitsnotiz-Speicher. Gameplay-State bleibt bei Runtime, Contracts und Datenmodellen.</p>
+          </div>
+          <div class="workbench-grid">
+            <article class="work-card">
+              <h3>Was soll als Nächstes im Mittelpunkt stehen?</h3>
+              <div class="button-row" data-choice-group="decisions.primary_focus">
+                <button class="choice active" type="button" data-choice-value="evidence_path">Echter Spielerpfad</button>
+                <button class="choice" type="button" data-choice-value="frontier_world">Frontier-Welt</button>
+                <button class="choice" type="button" data-choice-value="campaign_contract">Kampagnenvertrag</button>
+                <button class="choice" type="button" data-choice-value="coop">Co-op</button>
+              </div>
+              <label style="display:block; margin-top:14px;">Gewünschte Ausbauhaltung
+                <select data-export-key="decisions.expansion_stance">
+                  <option value="prove_then_expand" selected>Erst beweisen, dann ausbauen</option>
+                  <option value="world_after_gate">Nach Gate sichtbar polieren</option>
+                  <option value="campaign_design_parallel">Kampagne als Entwurf parallel schärfen</option>
+                  <option value="coop_after_first_ten">Co-op nach First Ten Minutes priorisieren</option>
+                </select>
+              </label>
+            </article>
+            <article class="work-card">
+              <h3>Gates, die du bewusst mitverfolgen willst</h3>
+              <label class="checkline"><input type="checkbox" data-export-key="gates.n004_public_path"> Öffentlicher N004B-First-Contact zweimal frisch</label>
+              <label class="checkline"><input type="checkbox" data-export-key="gates.n002a_lifecycle"> N002A ohne freed-instance-Nachlauf</label>
+              <label class="checkline"><input type="checkbox" data-export-key="gates.n005_visual_hash"> N005: Semantikhash und p95-Performancebudget</label>
+              <label class="checkline"><input type="checkbox" data-export-key="gates.n007_first_ten"> N007: erste zehn Minuten ohne Deeplink</label>
+            </article>
+            <article class="work-card">
+              <h3>Welcher Kampagnenzweig reizt am meisten?</h3>
+              <div class="button-row" data-choice-group="decisions.campaign_branch">
+                <button class="choice active" type="button" data-choice-value="research">Forschung / Blueprints</button>
+                <button class="choice" type="button" data-choice-value="hangar">Hangar / Logistik</button>
+                <button class="choice" type="button" data-choice-value="mining">Mining / Bergung</button>
+                <button class="choice" type="button" data-choice-value="crew">Crew / Rollen</button>
+              </div>
+              <label style="display:block; margin-top:14px;">Gewünschte erste Base-Entscheidung
+                <select data-export-key="campaign.first_choice">
+                  <option value="one_blueprint">Ein Blueprint, eine klare Freischaltung</option>
+                  <option value="one_craft_capacity">Ein Hangar- / Sitzplatzengpass</option>
+                  <option value="one_material_loop">Eine Materialquelle und ein Auftrag</option>
+                  <option value="one_intel_route">Intel für eine bessere Missionsroute</option>
+                </select>
+              </label>
+            </article>
+            <article class="work-card">
+              <h3>Notizen für die nächste Designrunde</h3>
+              <div contenteditable="true" data-note-key="decisions.reason" data-placeholder="Was soll sich der Spieler nach der ersten Mission unbedingt merken oder wünschen?"></div>
+            </article>
+            <article class="work-card">
+              <h3>Risiko-Check</h3>
+              <label class="checkline"><input type="checkbox" data-export-key="risks.no_second_authority"> Keine UI-/Visual-/Test-Parallelwahrheit</label>
+              <label class="checkline"><input type="checkbox" data-export-key="risks.measured_performance"> Keine Performancebehauptung ohne Messbaseline</label>
+              <label class="checkline"><input type="checkbox" data-export-key="risks.no_fake_progression"> Keine Ressourcen-/Blueprint-Zahl ohne echte Entscheidung</label>
+              <label class="checkline"><input type="checkbox" data-export-key="risks.world_semantics"> Keine schöne Deko, die falsche Deckung/Blockade suggeriert</label>
+            </article>
+            <article class="work-card">
+              <h3>Konkrete nächste Frage</h3>
+              <textarea data-export-key="notes.next_question" placeholder="Zum Beispiel: Welcher Blueprint verändert nach einer Grid-Sweep-Mission wirklich die nächste Taktikentscheidung?"></textarea>
+            </article>
+          </div>
+          <p class="status-line" id="workbenchStatus" role="status" aria-live="polite">Lokaler Arbeitsstand noch nicht gespeichert.</p>
+          <div class="export-panel">
+            <div class="button-row">
+              <button id="saveStateButton" class="secondary" type="button">Lokal speichern</button>
+              <button id="exportJsonButton" type="button">JSON exportieren</button>
+              <button id="chooseExportFolderButton" class="secondary" type="button">Reports-Ordner verbinden</button>
+              <button id="copyJsonButton" class="secondary" type="button">JSON kopieren</button>
+              <label class="secondary" style="display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;cursor:pointer;">JSON importieren<input id="importJsonInput" type="file" accept="application/json,.json" style="width:0;min-height:0;padding:0;border:0;opacity:0;position:absolute;"></label>
+              <button id="resetStateButton" class="secondary" type="button">Lokale Eingaben zurücksetzen</button>
+            </div>
+            <textarea id="jsonOutput" readonly aria-label="JSON-Export" placeholder="Der JSON-Export erscheint hier. Unter file:// funktioniert mindestens der Download-/Kopierfallback."></textarea>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section alt" id="sources">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">10 / Quellen, Grenzen &amp; Lesestoff</p>
+            <h2>Dieses Dossier ist reichhaltig – aber es ersetzt keine Evidenz.</h2>
+            <p>Lokale Gegenwartsquellen haben Vorrang. Externe Quellen liefern nur Gestaltungsprinzipien. Der Bericht ist ein datierter Denk- und Entscheidungsraum, keine zweite Runtime- oder Release-Wahrheit.</p>
+          </div>
+          <p class="side-copy">Neue Angaben zu Gameplay, Performance oder Release bleiben erst dann wahr, wenn ein Current-Evidence-Record Commit, Datum, Testart, Ergebnis, Artefakt und Caveat nennt.</p>
+        </div>
+
+        <div class="grid">
+          <article class="card span-6">
+            <h3>Lokale Primärquellen</h3>
+            <div class="source-list">
+              <div><a href="../CURRENT_GAME_STATE.md">CURRENT_GAME_STATE.md</a><p>Kanonische Kurzbeschreibung des heutigen Spielstands.</p></div>
+              <div><a href="../qa/CURRENT_EVIDENCE.md">qa/CURRENT_EVIDENCE.md</a><p>Frische, Commit-gebundene Evidenz plus Caveats.</p></div>
+              <div><a href="../ARCHITECTURE.md">ARCHITECTURE.md</a><p>Authority, Module, Runtime- und UI-Grenzen.</p></div>
+              <div><a href="../PROJECT_BRIEF.md">PROJECT_BRIEF.md</a><p>Commander-Fantasie, Core Loop und V1-Grenzen.</p></div>
+              <div><a href="../PRODUCT_MILESTONES.md">PRODUCT_MILESTONES.md</a><p>Verbindliche Produktreihenfolge, nicht Taskmenge.</p></div>
+              <div><a href="../visual/WORLD_ART_DIRECTION.md">WORLD_ART_DIRECTION.md</a><p>Frontier-Low-Poly und semantische Visualgrenze.</p></div>
+              <div><a href="../tasks/TASK_N004_canonical_product_mission.md">TASK_N004</a><p>Produktmission und öffentliche First-Contact-Anforderung.</p></div>
+              <div><a href="../tasks/TASK_N005_frontier_desert_outpost.md">TASK_N005</a><p>Desert-Outpost-Visual Slice samt Semantik-/Performance-Gate.</p></div>
+            </div>
+          </article>
+          <article class="card span-6">
+            <h3>Externe Prinzipienstudien (keine Implementierungszusage)</h3>
+            <p class="note">Alle verlinkten externen Quellen wurden am 19.07.2026 abgerufen. Sie liefern Prinzipien, aber keine SternenBuergerchen-Evidenz.</p>
+            <div class="source-list">
+              <div><a href="https://support.robertsspaceindustries.com/hc/en-us/articles/360007611573-Mining-Basics">Star Citizen: Mining Basics</a><p>Nutzen: Scan → bewerten → extrahieren als lesbarer Beruf-/Risikoablauf.</p></div>
+              <div><a href="https://robertsspaceindustries.com/en/comm-link/citcon-featured-content/20262-CitizenCon-2954-Recap">Star Citizen: Crafting &amp; Base Building (Recap)</a><p>Nutzen: Blueprint, Crafting und Base als langfristige Legacy-Idee, nicht als kurzfristiger Scope.</p></div>
+              <div><a href="https://robertsspaceindustries.com/en/comm-link/transmission/18397-Server-Meshing-And-Persistent-Streaming-Q-A">Star Citizen: Server Meshing Q&amp;A</a><p>Nutzen: Authority, Replikation und Sichtbarkeit sind getrennte Skalierungsprobleme.</p></div>
+              <div><a href="https://docs.godotengine.org/en/stable/tutorials/performance/general_optimization.html">Godot: General Optimization Tips</a><p>Nutzen: Engpass messen, gezielt verbessern, erneut messen.</p></div>
+              <div><a href="https://docs.godotengine.org/en/stable/classes/class_scenemultiplayer.html">Godot: SceneMultiplayer</a><p>Nutzen: High-level Multiplayer und Scene-Replikation als Engine-Kontext.</p></div>
+              <div><a href="https://godotengine.org/asset-library/asset/3134">Godot Asset Library: Terrain3D</a><p>Nutzen: vorhandenes Plugin nur bewusst evaluieren, nicht unbesehen parallel einsetzen.</p></div>
+            </div>
+          </article>
+          <article class="card span-12">
+            <div class="callout"><strong>Snapshot-Metadaten:</strong> Report-ID <code>sternenbuergerchen_status_versions_dossier_2026_07_19</code> · Datum 19.07.2026 · Quelle-Branch <code>task/project-forward-strangler</code> auf <code>b34e5fce</code> · Evidenzstatus: branchverifizierte N004A-Architekturarbeit, aber noch keine integrierte N004B-Laufzeitevidenz. <br><span class="note">Supersedes: als ausführlicherer Lese- und Entscheidungsbericht die inhaltliche Orientierung des TASK‑1181-Snapshots; ersetzt weder dessen unveränderlichen historischen Inhalt noch die Current-Truth-Dokumente.</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p><strong>SternenBuergerchen · Status-, Versions- und Zukunftsdossier</strong></p>
+      <p>Interaktive Arbeitsnotizen dieser Seite bleiben lokal im Browser. Sie verändern weder Mission, Units, Economy noch Combat. Für echte Produktbehauptungen gelten die verlinkten Current-Truth- und Evidence-Dokumente.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const reportId = document.body.dataset.reportId || "sternenbuergerchen_dossier";
+      const schema = document.body.dataset.reportSchema || "sternenbuergerchen.html_workbench.v1";
+      const storageKey = `${schema}:${reportId}`;
+      const output = document.getElementById("jsonOutput");
+      const status = document.getElementById("workbenchStatus");
+      let exportDirectoryHandle = null;
+      let exportSequence = 0;
+
+      function setStatus(message, tone) {
+        if (!status) return;
+        status.textContent = message;
+        status.dataset.tone = tone || "";
+      }
+      function setPath(target, path, value) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        if (!parts.length) return;
+        let cursor = target;
+        for (let index = 0; index < parts.length - 1; index += 1) {
+          const part = parts[index];
+          if (!cursor[part] || typeof cursor[part] !== "object") cursor[part] = {};
+          cursor = cursor[part];
+        }
+        cursor[parts[parts.length - 1]] = value;
+      }
+      function getPath(source, path) {
+        const parts = String(path || "").split(".").filter(Boolean);
+        let cursor = source;
+        for (const part of parts) {
+          if (!cursor || typeof cursor !== "object" || !(part in cursor)) return undefined;
+          cursor = cursor[part];
+        }
+        return cursor;
+      }
+      function readControl(element) {
+        if (element.type === "checkbox") return element.checked;
+        if (element.type === "radio") return element.checked ? element.value : undefined;
+        if (element.type === "number" || element.type === "range") return Number(element.value);
+        return element.value;
+      }
+      function buildExport() {
+        const payload = {
+          schema,
+          report_id: reportId,
+          title: document.title,
+          exported_at: new Date().toISOString(),
+          controls: {},
+          notes: {},
+          active_choices: {},
+          computed: {
+            tree_filter: document.querySelector("[data-tree-filter].active")?.dataset.treeFilter || "all",
+            roadmap_filter: document.querySelector("[data-roadmap-filter].active")?.dataset.roadmapFilter || "all",
+            visible_tree_nodes: document.querySelectorAll("[data-tree-state]:not([hidden])").length,
+            visible_roadmap_cards: document.querySelectorAll("[data-roadmap-state]:not([hidden])").length
+          },
+          metadata: {
+            report_date: "2026-07-19",
+            source_branch: "task/project-forward-strangler",
+            source_commit: "b34e5fce",
+            evidence_boundary: "N004A branch verification; N004B and N002A remain open gates",
+            url: window.location.href
+          }
+        };
+        document.querySelectorAll("[data-export-key]").forEach(function (element) {
+          const value = readControl(element);
+          if (value !== undefined) setPath(payload.controls, element.dataset.exportKey, value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach(function (element) {
+          setPath(payload.notes, element.dataset.noteKey, element.innerText.trim());
+        });
+        document.querySelectorAll("[data-choice-group]").forEach(function (group) {
+          const active = group.querySelector(".choice.active[data-choice-value]");
+          if (active) setPath(payload.active_choices, group.dataset.choiceGroup, active.dataset.choiceValue);
+        });
+        return payload;
+      }
+      function writeOutput(payload) {
+        const text = JSON.stringify(payload || buildExport(), null, 2);
+        if (output) output.value = text;
+        return text;
+      }
+      function saveLocalState(announce) {
+        const payload = buildExport();
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(payload));
+          if (announce) setStatus("Arbeitsstand lokal gespeichert. Export bleibt bewusst eine Notiz, keine Gameplay-Wahrheit.", "good");
+        } catch (error) {
+          setStatus("Lokale Speicherung nicht verfügbar: " + String(error && error.message ? error.message : error), "warn");
+        }
+        return payload;
+      }
+      function applyImport(payload) {
+        if (!payload || typeof payload !== "object") throw new Error("JSON enthält kein Objekt.");
+        if (payload.schema !== schema) throw new Error("Falsches Schema: " + String(payload.schema || "fehlt"));
+        if (payload.report_id !== reportId) throw new Error("Falsche Report-ID: " + String(payload.report_id || "fehlt"));
+        document.querySelectorAll("[data-export-key]").forEach(function (element) {
+          const value = getPath(payload.controls || {}, element.dataset.exportKey);
+          if (value === undefined) return;
+          if (element.type === "checkbox") element.checked = Boolean(value);
+          else if (element.type === "radio") element.checked = String(element.value) === String(value);
+          else element.value = String(value);
+        });
+        document.querySelectorAll("[data-note-key]").forEach(function (element) {
+          const value = getPath(payload.notes || {}, element.dataset.noteKey);
+          if (value !== undefined) element.innerText = String(value);
+        });
+        document.querySelectorAll("[data-choice-group]").forEach(function (group) {
+          const value = getPath(payload.active_choices || {}, group.dataset.choiceGroup);
+          if (value === undefined) return;
+          group.querySelectorAll(".choice").forEach(function (button) {
+            button.classList.toggle("active", button.dataset.choiceValue === String(value));
+          });
+        });
+        const tree = payload.computed && payload.computed.tree_filter;
+        const roadmap = payload.computed && payload.computed.roadmap_filter;
+        if (tree) applyTreeFilter(tree);
+        if (roadmap) applyRoadmapFilter(roadmap);
+        writeOutput(payload);
+        saveLocalState(false);
+      }
+      function resetState() {
+        try { localStorage.removeItem(storageKey); } catch (_error) {}
+        document.querySelectorAll("[data-export-key]").forEach(function (element) {
+          if (element.type === "checkbox" || element.type === "radio") element.checked = element.defaultChecked;
+          else if (element.tagName === "SELECT") element.selectedIndex = 0;
+          else element.value = "";
+        });
+        document.querySelectorAll("[data-note-key]").forEach(function (element) { element.innerText = ""; });
+        document.querySelectorAll("[data-choice-group]").forEach(function (group) {
+          group.querySelectorAll(".choice").forEach(function (button, index) { button.classList.toggle("active", index === 0); });
+        });
+        applyTreeFilter("all");
+        applyRoadmapFilter("all");
+        if (output) output.value = "";
+        setStatus("Lokale Entscheidungen und Notizen zurückgesetzt.", "warn");
+      }
+      function loadLocalState() {
+        try {
+          const text = localStorage.getItem(storageKey);
+          if (!text) return false;
+          applyImport(JSON.parse(text));
+          setStatus("Lokaler Arbeitsstand geladen.", "good");
+          return true;
+        } catch (error) {
+          try { localStorage.removeItem(storageKey); } catch (_error) {}
+          setStatus("Gespeicherter Arbeitsstand war ungültig und wurde verworfen.", "warn");
+          return false;
+        }
+      }
+      function activateButton(button, selector) {
+        document.querySelectorAll(selector).forEach(function (item) { item.classList.remove("active"); });
+        button.classList.add("active");
+      }
+      function applyTreeFilter(filter) {
+        document.querySelectorAll("[data-tree-state]").forEach(function (node) {
+          node.hidden = filter !== "all" && node.dataset.treeState !== filter;
+        });
+        document.querySelectorAll("[data-tree-filter]").forEach(function (button) {
+          button.classList.toggle("active", button.dataset.treeFilter === filter);
+        });
+        saveLocalState(false);
+      }
+      function applyRoadmapFilter(filter) {
+        document.querySelectorAll("[data-roadmap-state]").forEach(function (card) {
+          card.hidden = filter !== "all" && card.dataset.roadmapState !== filter;
+        });
+        document.querySelectorAll("[data-roadmap-filter]").forEach(function (button) {
+          button.classList.toggle("active", button.dataset.roadmapFilter === filter);
+        });
+        saveLocalState(false);
+      }
+      function buildExportFilename(exportedAt) {
+        exportSequence += 1;
+        const stamp = String(exportedAt || new Date().toISOString()).replace(/[:.]/g, "-");
+        return reportId + "_" + stamp + "_" + String(exportSequence).padStart(2, "0") + ".json";
+      }
+      function supportsFolderExport() { return typeof window.showDirectoryPicker === "function"; }
+      async function requestExportFolder() {
+        if (!supportsFolderExport()) {
+          setStatus("Ordnerzugriff ist in diesem Browser nicht verfügbar. Der JSON-Download bleibt aktiv.", "warn");
+          return null;
+        }
+        try {
+          exportDirectoryHandle = await window.showDirectoryPicker({ id: "sternenbuergerchen-reports", mode: "readwrite" });
+          setStatus("Reports-Ordner verbunden: " + exportDirectoryHandle.name, "good");
+          return exportDirectoryHandle;
+        } catch (error) {
+          if (error && error.name === "AbortError") setStatus("Ordnerauswahl abgebrochen. Download bleibt aktiv.", "warn");
+          else setStatus("Ordnerzugriff fehlgeschlagen: " + String(error && error.message ? error.message : error), "warn");
+          return null;
+        }
+      }
+      async function hasWritePermission(handle) {
+        if (!handle) return false;
+        if (typeof handle.queryPermission !== "function" || typeof handle.requestPermission !== "function") return true;
+        const options = { mode: "readwrite" };
+        if (await handle.queryPermission(options) === "granted") return true;
+        return await handle.requestPermission(options) === "granted";
+      }
+      async function writeToExportFolder(text, filename) {
+        if (!exportDirectoryHandle && supportsFolderExport()) await requestExportFolder();
+        if (!exportDirectoryHandle || !(await hasWritePermission(exportDirectoryHandle))) return false;
+        try {
+          const fileHandle = await exportDirectoryHandle.getFileHandle(filename, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(text);
+          await writable.close();
+          setStatus("JSON geschrieben: " + exportDirectoryHandle.name + "/" + filename, "good");
+          return true;
+        } catch (error) {
+          setStatus("Ordnerexport fehlgeschlagen; Download wird genutzt.", "warn");
+          return false;
+        }
+      }
+      function downloadExport(text, filename) {
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        setStatus("JSON-Download gestartet: " + filename, "good");
+      }
+
+      document.querySelectorAll("[data-tree-filter]").forEach(function (button) {
+        button.addEventListener("click", function () { applyTreeFilter(button.dataset.treeFilter); });
+      });
+      document.querySelectorAll("[data-roadmap-filter]").forEach(function (button) {
+        button.addEventListener("click", function () { applyRoadmapFilter(button.dataset.roadmapFilter); });
+      });
+      document.querySelectorAll("[data-choice-group] .choice").forEach(function (button) {
+        button.addEventListener("click", function () {
+          const group = button.closest("[data-choice-group]");
+          group.querySelectorAll(".choice").forEach(function (item) { item.classList.remove("active"); });
+          button.classList.add("active");
+          saveLocalState(false);
+        });
+      });
+      document.querySelectorAll("[data-export-key], [data-note-key]").forEach(function (element) {
+        element.addEventListener(element.hasAttribute("contenteditable") ? "input" : "change", function () { saveLocalState(false); });
+      });
+      document.getElementById("saveStateButton").addEventListener("click", function () { saveLocalState(true); });
+      document.getElementById("exportJsonButton").addEventListener("click", async function () {
+        const payload = saveLocalState(false);
+        const text = writeOutput(payload);
+        const filename = buildExportFilename(payload.exported_at);
+        if (!(await writeToExportFolder(text, filename))) downloadExport(text, filename);
+      });
+      document.getElementById("chooseExportFolderButton").addEventListener("click", requestExportFolder);
+      document.getElementById("copyJsonButton").addEventListener("click", async function () {
+        const text = writeOutput(saveLocalState(false));
+        try { await navigator.clipboard.writeText(text); setStatus("JSON in die Zwischenablage kopiert.", "good"); }
+        catch (_error) { output.focus(); output.select(); setStatus("Kopieren nicht erlaubt. JSON ist im Textfeld markiert.", "warn"); }
+      });
+      document.getElementById("importJsonInput").addEventListener("change", async function (event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+        try { applyImport(JSON.parse(await file.text())); setStatus("JSON importiert: " + file.name, "good"); }
+        catch (error) { setStatus("Import abgelehnt: " + String(error && error.message ? error.message : error), "bad"); }
+        finally { event.target.value = ""; }
+      });
+      document.getElementById("resetStateButton").addEventListener("click", function () {
+        if (window.confirm("Lokale Notizen, Prioritäten und Entscheidungen dieses Dossiers zurücksetzen?")) resetState();
+      });
+      const navLinks = Array.from(document.querySelectorAll(".topnav a:not(.brand)"));
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            navLinks.forEach(function (link) { link.setAttribute("aria-current", String(link.getAttribute("href") === "#" + entry.target.id)); });
+          });
+        }, { rootMargin: "-22% 0px -70% 0px", threshold: 0 });
+        document.querySelectorAll("main > section[id]").forEach(function (section) { observer.observe(section); });
+      }
+      applyTreeFilter("all");
+      applyRoadmapFilter("all");
+      loadLocalState();
+    })();
+  </script>
+</body>
+</html>
