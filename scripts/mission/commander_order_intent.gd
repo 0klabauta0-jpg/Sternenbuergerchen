@@ -21,6 +21,7 @@ const ALLOWED_ENTRY_SOURCES: PackedStringArray = [
 	"rmb",
 	"go",
 	"compatibility",
+	"public_world_waypoint",
 ]
 
 var command_type: String = COMMAND_MOVE

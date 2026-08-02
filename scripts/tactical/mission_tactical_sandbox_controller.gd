@@ -3503,7 +3503,7 @@ func request_mission_dropship_drop(craft_id: String) -> Dictionary:
 		return {"accepted": false, "reason": "unknown_craft", "craft_id": normalized_craft_id, "read_only": false}
 	if not _has_lz_position:
 		return {"accepted": false, "reason": "lz_required", "craft_id": normalized_craft_id, "read_only": false}
-	var request_result: Dictionary = _request_selected_mission_dropship_drop(true)
+	var request_result: Dictionary = _request_selected_mission_dropship_drop(false)
 	return {
 		"accepted": bool(request_result.get("accepted", false)),
 		"reason": String(request_result.get("reason", "drop_rejected")),
@@ -3519,32 +3519,21 @@ func plan_selected_fireteam_waypoint_from_world_position(world_position: Vector2
 		return {"accepted": false, "reason": "invalid_world_position_or_selection", "planned_fireteam_ids": [], "expected_command_tokens": [], "read_only": false}
 	_set_selected_tile_context(tile_context, "", false, false)
 	_last_public_waypoint_plan_result = {}
-	var accepted: bool = _issue_command_from_entry("public_world_waypoint", command_type.strip_edges().to_lower(), "WAYPOINT", append_mode)
+	_issue_command_from_entry("public_world_waypoint", command_type.strip_edges().to_lower(), "WAYPOINT", append_mode)
 	var submission: Dictionary = _last_public_waypoint_plan_result.duplicate(true)
-	var plan_id: String = String(submission.get("plan_id", "")).strip_edges()
-	var planned_fireteam_ids: PackedStringArray = _sanitize_fireteam_ids(_selected_fireteam_ids)
-	var expected_command_tokens: Array = _build_expected_command_tokens_for_plan(plan_id, planned_fireteam_ids) if accepted and not plan_id.is_empty() else []
+	if not submission.is_empty():
+		return submission
 	return {
-		"accepted": accepted and bool(submission.get("accepted", false)) and not plan_id.is_empty(),
-		"reason": String(submission.get("reason", "")) if accepted else String(submission.get("reason", "plan_rejected")),
-		"planned_fireteam_ids": Array(planned_fireteam_ids),
-		"plan_id": plan_id,
-		"expected_command_tokens": expected_command_tokens,
-		"append_mode": append_mode,
-		"read_only": false,
+		"accepted": false,
+		"reason": "plan_rejected",
+		"plan_id": "",
+		"planned_fireteam_ids": [],
+		"expected_command_tokens": [],
+		"pending": false,
+		"committed": false,
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
 	}
-
-
-func _build_expected_command_tokens_for_plan(plan_id: String, fireteam_ids: PackedStringArray) -> Array:
-	var tokens: Array = []
-	var normalized_plan_id: String = plan_id.strip_edges()
-	if normalized_plan_id.is_empty():
-		return tokens
-	for fireteam_id_variant in fireteam_ids:
-		var fireteam_id: String = String(fireteam_id_variant).strip_edges().to_lower()
-		if not fireteam_id.is_empty():
-			tokens.append("n003:%s:p%d:%s" % [normalized_plan_id, multiplayer.get_unique_id(), fireteam_id])
-	return tokens
 
 
 func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
@@ -4069,7 +4058,7 @@ func _request_selected_mission_dropship_drop(ignore_global_cooldown: bool = fals
 		_update_ui()
 		return {"accepted": false, "reason": "mission_drop_unavailable"}
 	if not ignore_global_cooldown and not preview_mode and _drop_ship_cooldown_remaining > 0.0:
-		_last_command_text = "DROP COOLDOWN %.1FS" % _drop_ship_cooldown_remaining
+		_last_command_text = "DROP COOLDOWN %.1fS" % _drop_ship_cooldown_remaining
 		_update_ui()
 		return {"accepted": false, "reason": "drop_cooldown"}
 	if not _has_lz_position:

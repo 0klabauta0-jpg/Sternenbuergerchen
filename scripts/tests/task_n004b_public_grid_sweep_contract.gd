@@ -6,6 +6,10 @@ const MAIN_MENU_SCENE_PATH := "res://scenes/ui/main_menu.tscn"
 const MISSION_IDENTITY_SCRIPT_PATH := "res://scripts/mission/mission_runtime_identity.gd"
 const CONTROLLER_SOURCE_PATH := "res://scripts/tactical/mission_tactical_sandbox_controller.gd"
 const MENU_SOURCE_PATH := "res://scripts/ui/main_menu_screen.gd"
+const META_FLOW_SOURCE_PATH := "res://scripts/meta/meta_layer_flow.gd"
+const COMMAND_SUBMISSION_RESULT_PATH := "res://scripts/mission/command_submission_result.gd"
+const COMMAND_ENTRY_ADAPTER_PATH := "res://scripts/mission/mission_command_entry_adapter.gd"
+const COMMAND_GATEWAY_PATH := "res://scripts/tactical/fireteam_command_gateway.gd"
 const HANDOFF_SCHEMA := "sternenbuergerchen.mission_runtime_identity_handoff.v1"
 const HOMEBASE_SELECTOR_PATH := NodePath("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/MissionSelector")
 const HOMEBASE_START_PATH := NodePath("HomebaseScreen/Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/StartMissionButton")
@@ -23,10 +27,11 @@ func _init() -> void:
 
 func _run() -> void:
 	print("=== TASK_N004B Public grid_sweep structural contract ===")
+	_test_n003_plan_receipt_is_canonical_and_defensive()
 	await _test_canonical_mission_public_boundary()
+	await _test_public_drop_respects_cooldown()
 	await _test_visible_homebase_identity_handoffs()
 	_test_release_deeplinks_are_deprecated()
-	await _test_meta_legacy_release_helpers_are_blocked()
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	quit(1 if _failed > 0 else 0)
 
@@ -64,8 +69,72 @@ func _test_canonical_mission_public_boundary() -> void:
 	]:
 		_assert(_public_method_body_is_safe(controller_source, method_name), "Public %s contains no direct authority/test bypass" % method_name)
 	_assert(controller_source.contains("_issue_command_from_entry(\"public_world_waypoint\", command_type.strip_edges().to_lower(), \"WAYPOINT\", append_mode)"), "Public waypoint forwards append_mode into N003 planning")
-	_assert(controller_source.contains("\"expected_command_tokens\": expected_command_tokens"), "Public waypoint receipt reports exact expected command tokens")
+	_assert(not _public_method_body(controller_source, "plan_selected_fireteam_waypoint_from_world_position").contains("_build_expected_command_tokens_for_plan"), "Public waypoint does not derive command tokens locally")
+	_assert(_public_method_body(controller_source, "plan_selected_fireteam_waypoint_from_world_position").contains("return submission"), "Public waypoint passes the canonical N003 receipt through unchanged")
 	_assert(controller_source.contains("func _request_selected_mission_dropship_drop") and controller_source.contains("-> Dictionary"), "Dropship request producer returns a structured acceptance result")
+	mission.queue_free()
+	await process_frame
+
+
+func _test_n003_plan_receipt_is_canonical_and_defensive() -> void:
+	var gateway_script := load(COMMAND_GATEWAY_PATH) as GDScript
+	var adapter_script := load(COMMAND_ENTRY_ADAPTER_PATH) as GDScript
+	_assert(gateway_script != null and adapter_script != null, "N003 gateway and adapter scripts load")
+	if gateway_script == null or adapter_script == null:
+		return
+	var gateway = gateway_script.new()
+	var adapter = adapter_script.new()
+	adapter.call("configure", gateway)
+	var plan_result = adapter.call("plan_from_entry", "button", "take", PackedStringArray(["Bravo", "alpha", "bravo"]), Vector2(128.0, 96.0), 2, 7, "team_alpha")
+	var receipt: Dictionary = Dictionary(plan_result.call("to_dict")) if plan_result != null and plan_result.has_method("to_dict") else {}
+	var plan_id := String(receipt.get("plan_id", "")).strip_edges()
+	var expected_tokens: Array = Array(receipt.get("expected_command_tokens", [])).duplicate(true)
+	_assert(bool(receipt.get("accepted", false)) and not plan_id.is_empty(), "N003 adapter yields an accepted canonical plan receipt")
+	_assert(Array(receipt.get("planned_fireteam_ids", [])) == ["bravo", "alpha"], "Canonical plan receipt exposes normalized planned Fireteams")
+	_assert(expected_tokens == ["n003:%s:p7:bravo" % plan_id, "n003:%s:p7:alpha" % plan_id], "Canonical plan receipt exposes Gateway-owned expected tokens")
+	_assert(not bool(receipt.get("pending", true)) and not bool(receipt.get("committed", true)), "Canonical plan receipt remains plan-only before GO")
+	expected_tokens.append("tampered")
+	receipt["expected_command_tokens"] = expected_tokens
+	var defensive_receipt: Dictionary = Dictionary(plan_result.call("to_dict")) if plan_result != null and plan_result.has_method("to_dict") else {}
+	_assert(not Array(defensive_receipt.get("expected_command_tokens", [])).has("tampered"), "Canonical plan receipt defensively copies expected tokens")
+	var public_waypoint_plan = adapter.call("plan_from_entry", "public_world_waypoint", "take", PackedStringArray(["alpha"]), Vector2(160.0, 96.0), 2, 7, "team_alpha")
+	var public_waypoint_receipt: Dictionary = Dictionary(public_waypoint_plan.call("to_dict")) if public_waypoint_plan != null and public_waypoint_plan.has_method("to_dict") else {}
+	_assert(bool(public_waypoint_receipt.get("accepted", false)) and not Array(public_waypoint_receipt.get("expected_command_tokens", [])).is_empty(), "N003 accepts the public waypoint entry and returns its canonical receipt")
+
+
+func _test_public_drop_respects_cooldown() -> void:
+	var scene := load(MISSION_SCENE_PATH) as PackedScene
+	_assert(scene != null, "Canonical mission loads for public drop cooldown behavior")
+	if scene == null:
+		return
+	var mission := scene.instantiate()
+	root.add_child(mission)
+	await process_frame
+	var controller := mission.get_node_or_null("TacticalController")
+	_assert(controller != null, "Cooldown behavior uses the public TacticalController")
+	if controller != null:
+		var craft_id := "cooldown_probe"
+		controller.call("set_planning_state", {
+			"mission_drop_craft_id": craft_id,
+			"mission_drop_state": "waiting",
+			"drop_ship_staged": true,
+			"has_lz_position": true,
+			"lz_position": Vector2(128.0, 96.0),
+			"mission_drop_cards": [{
+				"craft_id": craft_id,
+				"display_name": "Cooldown Probe",
+				"state": "waiting",
+				"has_lz_position": true,
+				"lz_position": Vector2(128.0, 96.0),
+				"drop_ship_staged": true,
+			}],
+		})
+		controller.set("_drop_ship_cooldown_remaining", 12.0)
+		var requested_before := bool(controller.get("_drop_ship_requested"))
+		var receipt: Dictionary = Dictionary(controller.call("request_mission_dropship_drop", craft_id))
+		_assert(not bool(receipt.get("accepted", true)) and String(receipt.get("reason", "")) == "drop_cooldown", "Public drop rejects a cooldown without a false acceptance")
+		_assert(String(controller.get("_last_command_text")) == "DROP COOLDOWN 12.0S", "Public cooldown rejection formats its visible status without a runtime formatting error")
+		_assert(bool(controller.get("_drop_ship_requested")) == requested_before, "Cooldown rejection does not start a drop sequence")
 	mission.queue_free()
 	await process_frame
 
@@ -182,50 +251,114 @@ func _test_release_deeplinks_are_deprecated() -> void:
 	_assert(menu_script != null, "MainMenuScreen script loads")
 	if menu_script == null:
 		return
+	var menu_call_graph := _build_local_call_graph(MENU_SOURCE_PATH)
+	var meta_call_graph := _build_local_call_graph(META_FLOW_SOURCE_PATH)
+	for forced_handler in [
+		"_apply_release_start_mission_deeplink",
+		"_apply_release_lz_drop_preview_deeplink",
+		"_apply_release_first_go_firefight_deeplink",
+		"_request_release_start_mission_from_homebase_for_deeplink",
+		"_complete_release_lz_drop_preview_craft_arrival",
+		"_force_release_first_engagement_decision",
+	]:
+		_assert(not Dictionary(meta_call_graph.get("functions", {})).has(forced_handler), "Product MetaLayer no longer compiles forced release handler %s" % forced_handler)
 	for argument in ["--release-singleplayer", "--release-singleplayer-start-mission", "--release-singleplayer-lz-drop-preview", "--release-singleplayer-first-go-firefight"]:
 		var menu = menu_script.new()
 		var snapshot: Dictionary = Dictionary(menu.call("get_release_singleplayer_deeplink_snapshot", PackedStringArray([argument])))
 		_assert(bool(snapshot.get("requested", false)), "%s remains observable in deeplink snapshot" % argument)
 		_assert(bool(snapshot.get("deprecated", false)) and String(snapshot.get("status", "")) == "blocked" and String(snapshot.get("reason", "")) == "legacy_deeplink_no_public_path", "%s is deprecated without a gameplay handoff" % argument)
 		menu.free()
-	var source := FileAccess.get_file_as_string(MENU_SOURCE_PATH)
-	_assert(not source.contains("_apply_release_start_mission_deeplink"), "MainMenu no longer invokes MetaLayer release start chain")
-	var meta_source := FileAccess.get_file_as_string("res://scripts/meta/meta_layer_flow.gd")
-	_assert(not meta_source.contains("call_deferred(\"_apply_release_"), "MetaLayerFlow schedules no release automation chain")
-	_assert(not source.contains("change_scene_to_file(SINGLEPLAYER_SCENE_PATH)"), "MainMenu release arguments cannot transition into MetaLayer")
-	for argument in ["--release-singleplayer", "--release-singleplayer-start-mission", "--release-singleplayer-lz-drop-preview", "--release-singleplayer-first-go-firefight"]:
+		var call_chain: Array = _build_release_flag_call_chain(argument)
+		_assert(_call_chain_is_reachable(menu_call_graph, call_chain), "%s follows the actual MainMenu blocked-release call graph: %s" % [argument, " -> ".join(PackedStringArray(call_chain))])
+		_assert(not _call_graph_reaches_forbidden(menu_call_graph, String(call_chain.front()), ["_on_singleplayer_pressed", "_apply_release_start_mission_deeplink", "_apply_release_lz_drop_preview_deeplink", "_apply_release_first_go_firefight_deeplink"]), "%s reaches no forced/test handler from the blocked MainMenu entry branch" % argument)
+		print("N004B_RELEASE_CALL_GRAPH %s: %s" % [argument, " -> ".join(PackedStringArray(call_chain))])
 		var probe: Dictionary = _run_release_deeplink_probe_process(argument)
 		_assert(bool(probe.get("probe_completed", false)), "%s starts the real MainMenu probe" % argument)
 		_assert(String(probe.get("scene_path", "")) == MAIN_MENU_SCENE_PATH, "%s leaves the real MainMenu scene active" % argument)
 		_assert(bool(probe.get("requested", false)) and not bool(probe.get("applied", true)), "%s has no Meta handoff in the real MainMenu run" % argument)
 		_assert(bool(probe.get("deprecated", false)) and String(probe.get("status", "")) == "blocked" and String(probe.get("reason", "")) == "legacy_deeplink_no_public_path", "%s reports the stable public block reason in the real MainMenu run" % argument)
-		_assert(not bool(probe.get("meta_layer_present", true)), "%s real MainMenu run creates no MetaLayer" % argument)
+		_assert(not bool(probe.get("meta_layer_present", true)) and not bool(probe.get("mission_runtime_present", true)) and not bool(probe.get("simulation_root_present", true)), "%s real MainMenu run creates no MetaLayer or mission runtime" % argument)
 
 
-func _test_meta_legacy_release_helpers_are_blocked() -> void:
-	var scene := load(META_SCENE_PATH) as PackedScene
-	_assert(scene != null, "MetaLayer scene loads for legacy helper containment")
-	if scene == null:
-		return
-	for spec in [
-		{"method": "_apply_release_start_mission_deeplink", "arg": "--release-singleplayer-start-mission", "snapshot": "get_release_start_mission_deeplink_snapshot"},
-		{"method": "_apply_release_lz_drop_preview_deeplink", "arg": "--release-singleplayer-lz-drop-preview", "snapshot": "get_release_lz_drop_preview_deeplink_snapshot"},
-		{"method": "_apply_release_first_go_firefight_deeplink", "arg": "--release-singleplayer-first-go-firefight", "snapshot": "get_release_first_go_firefight_deeplink_snapshot"},
-	]:
-		var meta := scene.instantiate()
-		root.add_child(meta)
-		await process_frame
-		var argument := String(Dictionary(spec).get("arg", ""))
-		var helper_name := String(Dictionary(spec).get("method", ""))
-		meta.call(helper_name, PackedStringArray([argument]))
-		await process_frame
-		await process_frame
-		var snapshot_name := String(Dictionary(spec).get("snapshot", ""))
-		var snapshot: Dictionary = Dictionary(meta.call(snapshot_name, PackedStringArray([argument])))
-		_assert(String(snapshot.get("status", "")) == "blocked" and String(snapshot.get("reason", "")) == "legacy_deeplink_no_public_path", "%s reports the stable legacy block" % helper_name)
-		_assert(meta.call("get_active_mission") == null and String(snapshot.get("current_meta_view", "homebase")) != "mission", "%s cannot create a mission or switch into mission view" % helper_name)
-		meta.queue_free()
-		await process_frame
+func _build_release_flag_call_chain(_argument: String) -> Array:
+	# Every accepted legacy singleplayer flag reaches the same explicitly blocked
+	# MainMenu branch. The caller/callee edges themselves are verified below.
+	return ["_apply_release_deeplink", "_apply_release_singleplayer_deeplink"]
+
+
+func _build_local_call_graph(source_path: String) -> Dictionary:
+	var function_bodies := _extract_local_function_bodies(FileAccess.get_file_as_string(source_path))
+	var edges: Dictionary = {}
+	for function_name_variant in function_bodies:
+		var function_name := String(function_name_variant)
+		edges[function_name] = _find_direct_local_calls(String(function_bodies[function_name]), function_bodies)
+	return {"source_path": source_path, "functions": function_bodies, "edges": edges}
+
+
+func _extract_local_function_bodies(source: String) -> Dictionary:
+	var lines := source.split("\n")
+	var headers: Array = []
+	for line_index in range(lines.size()):
+		var stripped := String(lines[line_index]).strip_edges()
+		if not stripped.begins_with("func "):
+			continue
+		var open_paren := stripped.find("(")
+		if open_paren < 5:
+			continue
+		var function_name := stripped.substr(5, open_paren - 5).strip_edges()
+		if not function_name.is_empty():
+			headers.append({"line": line_index, "name": function_name})
+	var functions: Dictionary = {}
+	for header_index in range(headers.size()):
+		var header: Dictionary = Dictionary(headers[header_index])
+		var start_line: int = int(header.get("line", 0)) + 1
+		var end_line: int = int(Dictionary(headers[header_index + 1]).get("line", lines.size())) if header_index + 1 < headers.size() else lines.size()
+		var body_lines := PackedStringArray()
+		for body_line_index in range(start_line, end_line):
+			body_lines.append(String(lines[body_line_index]))
+		functions[String(header.get("name", ""))] = "\n".join(body_lines)
+	return functions
+
+
+func _find_direct_local_calls(body: String, local_functions: Dictionary) -> Array:
+	var pattern := RegEx.new()
+	pattern.compile("\\b([A-Za-z_][A-Za-z0-9_]*)\\s*\\(")
+	var calls: Array = []
+	for match in pattern.search_all(body):
+		var candidate := String(match.get_string(1))
+		if local_functions.has(candidate) and not calls.has(candidate):
+			calls.append(candidate)
+	return calls
+
+
+func _call_chain_is_reachable(call_graph: Dictionary, call_chain: Array) -> bool:
+	if call_chain.size() < 2:
+		return false
+	var edges: Dictionary = Dictionary(call_graph.get("edges", {}))
+	for index in range(1, call_chain.size()):
+		var caller := String(call_chain[index - 1])
+		var callee := String(call_chain[index])
+		if not Array(edges.get(caller, [])).has(callee):
+			return false
+	return true
+
+
+func _call_graph_reaches_forbidden(call_graph: Dictionary, start_function: String, forbidden_functions: Array) -> bool:
+	var edges: Dictionary = Dictionary(call_graph.get("edges", {}))
+	var pending: Array = [start_function]
+	var visited: Dictionary = {}
+	while not pending.is_empty():
+		var current := String(pending.pop_front())
+		if visited.has(current):
+			continue
+		visited[current] = true
+		if forbidden_functions.has(current):
+			return true
+		for next_function_variant in Array(edges.get(current, [])):
+			var next_function := String(next_function_variant)
+			if not visited.has(next_function):
+				pending.append(next_function)
+	return false
 
 
 func _run_release_deeplink_probe_process(argument: String) -> Dictionary:
@@ -275,9 +408,20 @@ func _run_release_deeplink_probe() -> void:
 	var snapshot: Dictionary = Dictionary(menu.call("get_release_singleplayer_deeplink_snapshot")) if menu != null and menu.has_method("get_release_singleplayer_deeplink_snapshot") else {}
 	var root_children: Array = root.get_children()
 	var meta_layer_present := false
+	var mission_runtime_present := false
+	var simulation_root_present := false
 	for child in root_children:
 		if child != null and (String(child.name) == "MetaLayer" or String(child.scene_file_path) == META_SCENE_PATH):
 			meta_layer_present = true
+		if child != null and (String(child.name) == "MissionRuntime" or String(child.scene_file_path) == MISSION_SCENE_PATH):
+			mission_runtime_present = true
+		if child != null and child.get_node_or_null("SimulationRoot") != null:
+			simulation_root_present = true
+	var release_argument := ""
+	for argument in OS.get_cmdline_user_args():
+		if String(argument).begins_with("--release-singleplayer"):
+			release_argument = String(argument)
+			break
 	print("N004B_RELEASE_PROBE:%s" % JSON.stringify({
 		"scene_path": String(menu.scene_file_path) if menu != null else "",
 		"requested": bool(snapshot.get("requested", false)),
@@ -286,16 +430,25 @@ func _run_release_deeplink_probe() -> void:
 		"status": String(snapshot.get("status", "")),
 		"reason": String(snapshot.get("reason", "")),
 		"meta_layer_present": meta_layer_present,
+		"mission_runtime_present": mission_runtime_present,
+		"simulation_root_present": simulation_root_present,
+		"release_call_chain": _build_release_flag_call_chain(release_argument),
 	}))
 	quit(0)
 
 
-func _public_method_body_is_safe(source: String, method_name: String) -> bool:
+func _public_method_body(source: String, method_name: String) -> String:
 	var start := source.find("func %s(" % method_name)
 	if start < 0:
-		return false
+		return ""
 	var end := source.find("\nfunc ", start + 1)
-	var body := source.substr(start, end - start if end >= 0 else source.length() - start)
+	return source.substr(start, end - start if end >= 0 else source.length() - start)
+
+
+func _public_method_body_is_safe(source: String, method_name: String) -> bool:
+	var body := _public_method_body(source, method_name)
+	if body.is_empty():
+		return false
 	for forbidden in ["_for_test", ".call(\"_", "enqueue_command", "UnitCommand", "teleport", "combat_event", "mission_result"]:
 		if body.to_lower().contains(forbidden.to_lower()):
 			return false

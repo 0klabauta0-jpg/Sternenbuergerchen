@@ -8,6 +8,8 @@ var command_token: String = ""
 var pending: bool = false
 var committed: bool = false
 var fireteam_results: Array = []
+var planned_fireteam_ids: PackedStringArray = PackedStringArray()
+var expected_command_tokens: PackedStringArray = PackedStringArray()
 
 
 func _init(data: Dictionary = {}) -> void:
@@ -19,6 +21,8 @@ func _init(data: Dictionary = {}) -> void:
 		pending = bool(data.get("pending", false))
 		committed = bool(data.get("committed", false))
 		fireteam_results = Array(data.get("fireteam_results", [])).duplicate(true)
+		planned_fireteam_ids = _normalize_strings(data.get("planned_fireteam_ids", []))
+		expected_command_tokens = _normalize_strings(data.get("expected_command_tokens", []))
 	_normalize()
 
 
@@ -70,6 +74,8 @@ func to_dict() -> Dictionary:
 		"pending": pending,
 		"committed": committed,
 		"fireteam_results": fireteam_results.duplicate(true),
+		"planned_fireteam_ids": PackedStringArray(planned_fireteam_ids),
+		"expected_command_tokens": PackedStringArray(expected_command_tokens),
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -79,5 +85,15 @@ func _normalize() -> void:
 	if not accepted:
 		pending = false
 		committed = false
+		expected_command_tokens = PackedStringArray()
 	elif committed:
 		pending = false
+
+
+static func _normalize_strings(values: Variant) -> PackedStringArray:
+	var normalized := PackedStringArray()
+	for value in Array(values):
+		var text := String(value).strip_edges()
+		if not text.is_empty():
+			normalized.append(text)
+	return normalized

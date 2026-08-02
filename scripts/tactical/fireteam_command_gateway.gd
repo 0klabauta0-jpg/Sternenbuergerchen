@@ -47,11 +47,25 @@ func plan_intent(intent) -> RefCounted:
 	if not bool(normalized.call("is_valid")):
 		return COMMAND_SUBMISSION_RESULT_SCRIPT.call("rejected", String(normalized.plan_id), "invalid_commander_order_intent")
 	_planned_intents_by_id[String(normalized.plan_id)] = Dictionary(normalized.call("to_dict")).duplicate(true)
+	var planned_commands: Array = _build_fireteam_commands(normalized)
+	var planned_fireteam_ids := PackedStringArray()
+	var expected_command_tokens := PackedStringArray()
+	for command_variant in planned_commands:
+		var command: Dictionary = Dictionary(command_variant)
+		var fireteam_id := String(command.get("fireteam_id", "")).strip_edges().to_lower()
+		var command_token := String(command.get("command_token", "")).strip_edges()
+		if not fireteam_id.is_empty():
+			planned_fireteam_ids.append(fireteam_id)
+		if not command_token.is_empty():
+			expected_command_tokens.append(command_token)
 	return COMMAND_SUBMISSION_RESULT_SCRIPT.call("from_dict", {
 		"accepted": true,
 		"plan_id": String(normalized.plan_id),
+		"command_token": String(expected_command_tokens[0]) if not expected_command_tokens.is_empty() else "",
 		"pending": false,
 		"committed": false,
+		"planned_fireteam_ids": planned_fireteam_ids,
+		"expected_command_tokens": expected_command_tokens,
 	})
 
 
