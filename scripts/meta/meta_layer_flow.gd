@@ -8,6 +8,7 @@ const MISSION_PROGRESSION_RESOLVER_SCRIPT: GDScript = preload("res://scripts/met
 const PERSONNEL_EVENT_RESOLVER_SCRIPT: GDScript = preload("res://scripts/meta/personnel_event_resolver.gd")
 const AIR_ASSET_RECOVERY_STATE_SCRIPT: GDScript = preload("res://scripts/meta/air_asset_recovery_state.gd")
 const TERRAIN_MAP_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_map_data.gd")
+const MISSION_RUNTIME_IDENTITY_SCRIPT: GDScript = preload("res://scripts/mission/mission_runtime_identity.gd")
 const GAME_SETTINGS_CONTRACT_SCRIPT: GDScript = preload("res://scripts/ui/game_settings_contract.gd")
 const REAL_WINDOW_FIREFIGHT_SIGHT_REVIEW_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_release_candidate_real_window_firefight_sight_review.gd")
 const VISIBLE_FIREFIGHT_FINDINGS_SCRIPT: GDScript = preload("res://scripts/mission/station_reentry_release_candidate_visible_firefight_findings.gd")
@@ -248,9 +249,6 @@ func _ready() -> void:
 	_ensure_transport_timer_state()
 	_show_homebase()
 	call_deferred("_sync_mission_host_visibility")
-	call_deferred("_apply_release_start_mission_deeplink")
-	call_deferred("_apply_release_lz_drop_preview_deeplink")
-	call_deferred("_apply_release_first_go_firefight_deeplink")
 
 
 func _process(_delta: float) -> void:
@@ -4207,6 +4205,11 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 				mission_setup.set("selected_team_unit_configs", Array(fob_screen_for_configs.call("get_selected_unit_configs")).duplicate(true))
 		mission_setup.set("map_file_path", String(selected_mission.get("map_file_path", DEFAULT_META_MAP_PATH)).strip_edges())
 		mission_setup.set("scenario_file_path", String(selected_mission.get("scenario_file_path", NO_SCENARIO_FILE_PATH)).strip_edges())
+		if not mission_setup.is_inside_tree() and mission_setup.has_method("configure_runtime_identity"):
+			var runtime_identity = MISSION_RUNTIME_IDENTITY_SCRIPT.call("from_selected_mission_definition", selected_mission)
+			var identity_result: Dictionary = Dictionary(mission_setup.call("configure_runtime_identity", runtime_identity))
+			if not bool(identity_result.get("accepted", false)):
+				push_warning("MetaLayerFlow could not configure pre-tree MissionRuntimeIdentity: %s" % String(identity_result.get("reason", "unknown")))
 		mission_setup.set("defer_friendly_runtime_activation", _should_defer_friendly_runtime_activation())
 		mission_setup.set("allow_full_roster_when_selection_empty", false)
 		var gameplay_settings: Dictionary = Dictionary(GAME_SETTINGS_CONTRACT_SCRIPT.call("load_settings"))
@@ -4985,6 +4988,7 @@ func get_singleplayer_start_bootstrap_snapshot() -> Dictionary:
 		"visible_homebase_deadend_repaired": bool(get_meta("singleplayer_visible_homebase_deadend_repaired", false)),
 		"visible_homebase_deadend_repair_mode": String(get_meta("singleplayer_visible_homebase_deadend_repair_mode", "")).strip_edges(),
 		"visible_homebase_post_show_guard_ran": bool(get_meta("singleplayer_visible_homebase_post_show_guard_ran", false)),
+		"visible_homebase_post_show_guard_pending": bool(get_meta("singleplayer_visible_homebase_post_show_guard_pending", false)),
 		"visible_homebase_post_show_guard_before_actionable": bool(get_meta("singleplayer_visible_homebase_post_show_guard_before_actionable", false)),
 		"visible_homebase_post_show_guard_after_actionable": bool(get_meta("singleplayer_visible_homebase_post_show_guard_after_actionable", false)),
 		"visible_homebase_post_show_guard_repaired": bool(get_meta("singleplayer_visible_homebase_post_show_guard_repaired", false)),

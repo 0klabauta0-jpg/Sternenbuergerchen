@@ -237,6 +237,9 @@ func get_release_singleplayer_deeplink_snapshot(user_args: PackedStringArray = P
 		"applied": _release_singleplayer_deeplink_applied,
 		"would_route_to": SINGLEPLAYER_SCENE_PATH if requested else "",
 		"target": _release_singleplayer_deeplink_target,
+		"deprecated": requested,
+		"status": "blocked" if requested else "inactive",
+		"reason": "legacy_deeplink_no_public_path" if requested else "",
 		"read_only": true,
 		"ui_sets_gameplay_truth": false,
 	}
@@ -271,12 +274,11 @@ func _apply_release_singleplayer_deeplink() -> void:
 	if not _has_release_singleplayer_deeplink_arg(args):
 		return
 	_release_singleplayer_deeplink_requested = true
-	_release_singleplayer_deeplink_applied = true
-	_release_singleplayer_deeplink_target = SINGLEPLAYER_SCENE_PATH
+	_release_singleplayer_deeplink_applied = false
+	_release_singleplayer_deeplink_target = ""
 	set_meta("release_singleplayer_deeplink_requested", true)
-	set_meta("release_singleplayer_deeplink_target", SINGLEPLAYER_SCENE_PATH)
-	_status_label.text = "Singleplayer wird gestartet"
-	_on_singleplayer_pressed()
+	set_meta("release_singleplayer_deeplink_target", "")
+	_status_label.text = "Legacy-Startparameter blockiert – bitte Singleplayer waehlen"
 
 
 func _apply_release_deeplink() -> void:

@@ -13,6 +13,7 @@ const ENEMY_TEAM_TACTICS_PROFILE_SCRIPT: GDScript = preload("res://scripts/tacti
 const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
 const FOG_OF_WAR_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_system.gd")
 const LINE_OF_SIGHT_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
+const MISSION_RUNTIME_IDENTITY_SCRIPT: GDScript = preload("res://scripts/mission/mission_runtime_identity.gd")
 
 const FOW_UPDATE_INTERVAL_SECONDS: float = 0.35
 const FOW_DEFAULT_SIGHT_RANGE_WORLD: float = 640.0
@@ -101,6 +102,44 @@ var _fog_terrain_registry = null
 var _fog_runtime_signature: String = ""
 var _fog_update_elapsed: float = 0.0
 var _friendly_unit_slot_paths: Array[NodePath] = []
+var _runtime_identity = null
+var _runtime_identity_handoff_receipt: Dictionary = {}
+
+
+func configure_runtime_identity(identity: MissionRuntimeIdentity) -> Dictionary:
+	if is_inside_tree() or not _runtime_identity_handoff_receipt.is_empty():
+		return {
+			"accepted": false,
+			"rejected": true,
+			"reason": "runtime_identity_already_frozen",
+			"read_only": true,
+		}
+	if identity == null or not identity.is_valid():
+		return {
+			"accepted": false,
+			"rejected": true,
+			"reason": "invalid_runtime_identity",
+			"read_only": true,
+		}
+	_runtime_identity = MISSION_RUNTIME_IDENTITY_SCRIPT.call("from_snapshot", identity.snapshot())
+	var snapshot: Dictionary = _runtime_identity.snapshot()
+	map_file_path = String(snapshot.get("map_path", map_file_path))
+	scenario_file_path = String(snapshot.get("scenario_path", scenario_file_path))
+	return {
+		"accepted": true,
+		"rejected": false,
+		"reason": "",
+		"read_only": true,
+	}
+
+
+func get_runtime_identity_handoff_receipt() -> Dictionary:
+	return _runtime_identity_handoff_receipt.duplicate(true)
+
+
+func _enter_tree() -> void:
+	if _runtime_identity != null and _runtime_identity.is_valid():
+		_runtime_identity_handoff_receipt = Dictionary(_runtime_identity.build_pre_tree_handoff_receipt()).duplicate(true)
 
 
 func _ready() -> void:
@@ -127,6 +166,17 @@ func _ready() -> void:
 
 
 func apply_cmdline_scenario_override(args: Array = []) -> Dictionary:
+	if not _runtime_identity_handoff_receipt.is_empty():
+		return {
+			"source": "runtime_identity",
+			"previous_scenario_file_path": scenario_file_path,
+			"scenario_file_path": scenario_file_path,
+			"override_applied": false,
+			"rejected": true,
+			"reason": "runtime_identity_locked",
+			"read_only": true,
+			"ui_sets_gameplay_truth": false,
+		}
 	var raw_args: Array = args.duplicate()
 	var source := "provided_args"
 	if raw_args.is_empty():

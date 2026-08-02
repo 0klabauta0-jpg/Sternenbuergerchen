@@ -3450,7 +3450,90 @@ func try_place_target_from_screen_position(screen_position: Vector2) -> bool:
 	return true
 
 
+func get_mission_identity_snapshot() -> Dictionary:
+	var mission_setup: Node = get_node_or_null("../MissionSetup")
+	var receipt: Dictionary = Dictionary(mission_setup.call("get_runtime_identity_handoff_receipt")) if mission_setup != null and mission_setup.has_method("get_runtime_identity_handoff_receipt") else {}
+	var planning: Dictionary = get_planning_state()
+	return {
+		"mission_id": String(receipt.get("mission_id", "")),
+		"scenario_path": String(receipt.get("scenario_path", "")),
+		"map_path": String(receipt.get("map_path", "")),
+		"objective_position": Dictionary(receipt.get("objective_world_position", {})).duplicate(true),
+		"pre_tree_handoff": receipt.duplicate(true),
+		"selected_craft_id": String(planning.get("mission_drop_craft_id", _mission_drop_craft_id)),
+		"payload_unit_ids": Array(planning.get("embarked_unit_ids", [])).duplicate(true),
+		"deboarded_unit_ids": Array(planning.get("deployed_unit_ids", [])).duplicate(true),
+		"selected_fireteam_ids": Array(_selected_fireteam_ids),
+		"read_only": true,
+		"ui_sets_gameplay_truth": false,
+		"snapshots_are_truth": false,
+	}
+
+
+func begin_dropship_lz_placement(craft_id: String) -> Dictionary:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty():
+		return {"accepted": false, "reason": "missing_craft_id", "craft_id": "", "read_only": false}
+	if not _select_mission_dropship_craft(normalized_craft_id, false):
+		return {"accepted": false, "reason": "unknown_craft", "craft_id": normalized_craft_id, "read_only": false}
+	if not _can_edit_planning():
+		return {"accepted": false, "reason": "planning_locked", "craft_id": normalized_craft_id, "read_only": false}
+	_is_lz_placement_armed = true
+	_lz_placement_craft_id = normalized_craft_id
+	_refresh_button_state()
+	_update_ui()
+	return {"accepted": true, "reason": "", "craft_id": normalized_craft_id, "lz_placement_armed": true, "read_only": false}
+
+
+func place_dropship_lz_from_world_position(world_position: Vector2) -> Dictionary:
+	var accepted: bool = _place_lz_from_world_position(world_position)
+	return {
+		"accepted": accepted,
+		"reason": "" if accepted else "lz_placement_rejected",
+		"craft_id": _mission_drop_craft_id.strip_edges(),
+		"world_position": {"x": world_position.x, "y": world_position.y},
+		"read_only": false,
+	}
+
+
+func request_mission_dropship_drop(craft_id: String) -> Dictionary:
+	var normalized_craft_id: String = craft_id.strip_edges()
+	if normalized_craft_id.is_empty() or not _select_mission_dropship_craft(normalized_craft_id, false):
+		return {"accepted": false, "reason": "unknown_craft", "craft_id": normalized_craft_id, "read_only": false}
+	if not _has_lz_position:
+		return {"accepted": false, "reason": "lz_required", "craft_id": normalized_craft_id, "read_only": false}
+	_request_selected_mission_dropship_drop(true)
+	return {"accepted": true, "reason": "", "craft_id": normalized_craft_id, "drop_state": _mission_drop_state, "read_only": false}
+
+
+func plan_selected_fireteam_waypoint_from_world_position(world_position: Vector2, command_type: String = "take", append_mode: bool = false) -> Dictionary:
+	var tile_context: Dictionary = _build_tile_context_from_world_position(world_position)
+	if tile_context.is_empty() or _selected_fireteam_ids.is_empty():
+		return {"accepted": false, "reason": "invalid_world_position_or_selection", "planned_fireteam_ids": [], "expected_command_tokens": [], "read_only": false}
+	_set_selected_tile_context(tile_context, "", false, false)
+	var accepted: bool = _issue_command_from_entry("public_world_waypoint", command_type.strip_edges().to_lower(), "WAYPOINT")
+	var plan_ids: Array = []
+	for plan_variant in get_order_plans_snapshot():
+		var plan: Dictionary = Dictionary(plan_variant)
+		var plan_id: String = String(plan.get("plan_id", "")).strip_edges()
+		if not plan_id.is_empty() and not plan_ids.has(plan_id):
+			plan_ids.append(plan_id)
+	return {"accepted": accepted, "reason": "" if accepted else "plan_rejected", "planned_fireteam_ids": Array(_selected_fireteam_ids), "plan_id": String(plan_ids.back()) if not plan_ids.is_empty() else "", "expected_command_tokens": [], "append_mode": append_mode, "read_only": false}
+
+
 func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
+	var tile_context: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	if _has_primary_grid_for_command_selection() and tile_context.is_empty():
+		_last_command_text = "NO TILE UNDER CURSOR"
+		_update_ui()
+		return false
+	var world_position: Vector2 = Vector2(tile_context.get("world_position", _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))))
+	if not tile_context.is_empty():
+		_set_selected_tile_context(tile_context, "", false, false)
+	return _place_lz_from_world_position(world_position)
+
+
+func _place_lz_from_world_position(world_position: Vector2) -> bool:
 	var profile_enabled: bool = _lz_drop_timing_debug_enabled
 	var started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
@@ -3461,7 +3544,7 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 	if profile_enabled:
 		scopes_usec["craft_selection_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
-	var tile_context: Dictionary = _build_tile_context_from_screen_position(screen_position)
+	var tile_context: Dictionary = _build_tile_context_from_world_position(world_position)
 	if profile_enabled:
 		scopes_usec["tile_context_usec"] = Time.get_ticks_usec() - scope_started_usec
 		scope_started_usec = Time.get_ticks_usec()
@@ -3469,7 +3552,7 @@ func _place_lz_from_screen_position(screen_position: Vector2) -> bool:
 		_last_command_text = "NO TILE UNDER CURSOR"
 		_update_ui()
 		return false
-	var candidate_lz_position: Vector2 = Vector2(tile_context.get("world_position", _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position))))) if not tile_context.is_empty() else _snap_world_position_to_primary_tile(_clamp_world_position_to_viewport(_screen_to_world_position(screen_position)))
+	var candidate_lz_position: Vector2 = Vector2(tile_context.get("world_position", _snap_world_position_to_primary_tile(world_position))) if not tile_context.is_empty() else _snap_world_position_to_primary_tile(world_position)
 	if not tile_context.is_empty():
 		_set_selected_tile_context(tile_context, "", false, false)
 	if _should_route_dropship_command_through_network_authority():
