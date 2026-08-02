@@ -1,0 +1,642 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/meta/fob_screen.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/meta/fob_drop_panel.gd" id="2_drop"]
+[ext_resource type="Script" path="res://scripts/meta/fob_available_drop_panel.gd" id="3_available"]
+
+[node name="FOBScreen" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 24.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MissionPanel" type="PanelContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 80)
+size_flags_horizontal = 3
+clip_contents = true
+
+[node name="MissionMargin" type="MarginContainer" parent="Panel/Margin/VBox/MissionPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 3
+
+[node name="MissionVBox" type="VBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin"]
+layout_mode = 2
+theme_override_constants/separation = 2
+size_flags_horizontal = 3
+
+[node name="HeaderRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
+size_flags_horizontal = 3
+
+[node name="NavButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="HomebaseNavButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 18)
+text = "Homebase"
+theme_override_font_sizes/font_size = 8
+
+[node name="FOBNavButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 18)
+text = "FOB"
+theme_override_font_sizes/font_size = 8
+
+[node name="MissionNavButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/HeaderRow/NavButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 18)
+text = "Mission"
+theme_override_font_sizes/font_size = 8
+
+[node name="MissionHeaderLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+text = "FOB MISSION BRIEF"
+theme_override_font_sizes/font_size = 11
+
+[node name="MissionInfoRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+
+[node name="StartMissionButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(28, 28)
+text = "Start"
+theme_override_font_sizes/font_size = 7
+
+[node name="TeamStatusLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mission slots: 0 / 3"
+theme_override_font_sizes/font_size = 9
+
+[node name="FireteamStatusLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mission: FOB Transfer"
+theme_override_font_sizes/font_size = 9
+
+[node name="DropshipStatusLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Map: test_mission"
+theme_override_font_sizes/font_size = 9
+
+[node name="RespawnHeaderPanel" type="PanelContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow"]
+visible = false
+layout_mode = 2
+custom_minimum_size = Vector2(156, 0)
+
+[node name="RespawnHeaderMargin" type="MarginContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 1
+
+[node name="RespawnHeaderVBox" type="VBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="RespawnHeaderLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin/RespawnHeaderVBox"]
+visible = false
+layout_mode = 2
+text = "FOB Respawn"
+theme_override_font_sizes/font_size = 10
+
+[node name="RespawnStatusLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin/RespawnHeaderVBox"]
+layout_mode = 2
+text = "Respawn anchor: not set"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 7
+
+[node name="RespawnButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin/RespawnHeaderVBox"]
+layout_mode = 2
+theme_override_constants/separation = 1
+
+[node name="SetRespawnButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin/RespawnHeaderVBox/RespawnButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(20, 0)
+text = "Set"
+theme_override_font_sizes/font_size = 7
+
+[node name="ClearRespawnButton" type="Button" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin/RespawnHeaderVBox/RespawnButtonRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(22, 0)
+text = "Clear"
+theme_override_font_sizes/font_size = 7
+
+[node name="RespawnDropPanel" type="PanelContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin/RespawnHeaderVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 10)
+size_flags_horizontal = 3
+script = ExtResource("2_drop")
+drop_kind = "respawn"
+
+[node name="RespawnDropMargin" type="MarginContainer" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin/RespawnHeaderVBox/RespawnDropPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 2
+theme_override_constants/margin_top = 1
+theme_override_constants/margin_right = 2
+theme_override_constants/margin_bottom = 1
+
+[node name="RespawnDropLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox/MissionInfoRow/RespawnHeaderPanel/RespawnHeaderMargin/RespawnHeaderVBox/RespawnDropPanel/RespawnDropMargin"]
+layout_mode = 2
+text = "Drop FT here"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 6
+
+[node name="MissionSummaryLabel" type="Label" parent="Panel/Margin/VBox/MissionPanel/MissionMargin/MissionVBox"]
+layout_mode = 2
+text = "Operators: 0 | Fireteams: 0 active | Dropship: waiting"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 9
+
+[node name="ContentRow" type="HBoxContainer" parent="Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+
+[node name="AvailablePanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.82
+custom_minimum_size = Vector2(150, 0)
+clip_contents = true
+script = ExtResource("3_available")
+
+[node name="AvailableMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/AvailablePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="AvailableVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="AvailableHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox"]
+layout_mode = 2
+text = "1 Available Operators"
+theme_override_font_sizes/font_size = 13
+
+[node name="AvailableHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox"]
+layout_mode = 2
+text = "Waehle links eine uebertragene Person aus, bevor sie einem Fireteam zugeordnet wird."
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="AvailableScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="AvailableList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/AvailablePanel/AvailableMargin/AvailableVBox/AvailableScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="FireteamPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.95
+custom_minimum_size = Vector2(180, 0)
+clip_contents = true
+script = ExtResource("2_drop")
+drop_kind = "fireteam_pool"
+
+[node name="FireteamMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/FireteamPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="FireteamVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="FireteamHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox"]
+layout_mode = 2
+text = "2 Fireteams"
+theme_override_font_sizes/font_size = 13
+
+[node name="FireteamToolbar" type="HBoxContainer" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="AddTeamButton" type="Button" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar"]
+layout_mode = 2
+custom_minimum_size = Vector2(28, 0)
+text = "+"
+theme_override_font_sizes/font_size = 10
+
+[node name="RemoveTeamButton" type="Button" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar"]
+layout_mode = 2
+custom_minimum_size = Vector2(28, 0)
+text = "-"
+theme_override_font_sizes/font_size = 10
+
+[node name="AssignFocusedUnitButton" type="Button" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar"]
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+text = "Assign"
+theme_override_font_sizes/font_size = 9
+
+[node name="ClearFocusedUnitButton" type="Button" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamToolbar"]
+layout_mode = 2
+custom_minimum_size = Vector2(48, 0)
+text = "Clear FT"
+theme_override_font_sizes/font_size = 9
+
+[node name="FireteamSummaryLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox"]
+layout_mode = 2
+text = "Focused fireteam: FT1 | Assigned operators: 0 / 0"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="FireteamScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="FireteamList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/FireteamPanel/FireteamMargin/FireteamVBox/FireteamScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="StagingPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 1.45
+custom_minimum_size = Vector2(280, 0)
+clip_contents = true
+
+[node name="StagingMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="StagingVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="StagingHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox"]
+layout_mode = 2
+text = "3 Loadout Staging"
+theme_override_font_sizes/font_size = 13
+
+[node name="RespawnPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+size_flags_horizontal = 3
+script = ExtResource("2_drop")
+drop_kind = "respawn"
+
+[node name="RespawnMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="RespawnVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin"]
+layout_mode = 2
+theme_override_constants/separation = 3
+size_flags_horizontal = 3
+
+[node name="RespawnHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox"]
+layout_mode = 2
+text = "3.1 FOB Respawn"
+theme_override_font_sizes/font_size = 10
+
+[node name="RespawnStatusLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox"]
+layout_mode = 2
+text = "Respawn anchor: not set"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 9
+
+[node name="RespawnButtonRow" type="HBoxContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SetRespawnButton" type="Button" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox/RespawnButtonRow"]
+layout_mode = 2
+text = "Set"
+
+[node name="ClearRespawnButton" type="Button" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox/RespawnButtonRow"]
+layout_mode = 2
+text = "Clear"
+
+[node name="RespawnHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox"]
+layout_mode = 2
+text = "Kleines FOB-Respawn-Flag fuer das fokussierte Fireteam."
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 9
+
+[node name="RespawnFireteamList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/RespawnPanel/RespawnMargin/RespawnVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 54)
+theme_override_constants/separation = 4
+
+[node name="LoadoutPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("2_drop")
+drop_kind = "loadout"
+
+[node name="LoadoutMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="LoadoutVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LoadoutHeaderRow" type="HBoxContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LoadoutHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "3.2 Loadout"
+theme_override_font_sizes/font_size = 12
+
+[node name="ClearLoadoutButton" type="Button" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutHeaderRow"]
+layout_mode = 2
+text = "Clear"
+
+[node name="LoadoutStatusLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox"]
+layout_mode = 2
+text = "Lead: none | No fireteam focused"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="LoadoutHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox"]
+layout_mode = 2
+text = "Jedes Mitglied erhaelt Armor sowie zwei Waffen-Slots direkt in seiner eigenen Karte."
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="LoadoutFireteamList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 60)
+theme_override_constants/separation = 4
+
+[node name="LoadoutMemberScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LoadoutMemberList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/StagingPanel/StagingMargin/StagingVBox/LoadoutPanel/LoadoutMargin/LoadoutVBox/LoadoutMemberScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="DropshipPanel" type="PanelContainer" parent="Panel/Margin/VBox/ContentRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.68
+custom_minimum_size = Vector2(140, 0)
+clip_contents = true
+script = ExtResource("2_drop")
+drop_kind = "dropship"
+
+[node name="DropshipMargin" type="MarginContainer" parent="Panel/Margin/VBox/ContentRow/DropshipPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+size_flags_vertical = 3
+
+[node name="DropshipVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin"]
+layout_mode = 2
+theme_override_constants/separation = 4
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DropshipHeaderRow" type="HBoxContainer" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="DropshipHeaderLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "4 Dropship Wait Zone"
+theme_override_font_sizes/font_size = 13
+
+[node name="StartBoardingButton" type="Button" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow"]
+layout_mode = 2
+text = "Start Boarding"
+
+[node name="RemoveDropshipFireteamButton" type="Button" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipHeaderRow"]
+layout_mode = 2
+text = "Remove Focused"
+
+[node name="DropshipTopRow" type="HBoxContainer" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+size_flags_horizontal = 3
+
+[node name="DropshipInfoVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="DropshipStatusLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipInfoVBox"]
+layout_mode = 2
+text = "Dropship: waiting for active fireteams"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="DropshipEtaLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipInfoVBox"]
+layout_mode = 2
+text = "Arrival ETA: no transport queued"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="BoardingQueueLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipInfoVBox"]
+layout_mode = 2
+text = "Boarding queue: no active fireteams"
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="DropshipVisualVBox" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(108, 0)
+theme_override_constants/separation = 4
+
+[node name="DropshipSpriteRect" type="TextureRect" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipVisualVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(96, 56)
+stretch_mode = 5
+expand_mode = 1
+
+[node name="DropshipArrivalProgress" type="ProgressBar" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipVisualVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(96, 10)
+max_value = 100.0
+show_percentage = false
+
+[node name="DropshipArrivalLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipTopRow/DropshipVisualVBox"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "No craft"
+theme_override_font_sizes/font_size = 9
+
+[node name="DropshipHelpLabel" type="Label" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox"]
+layout_mode = 2
+text = "Boarding-Status der aktiven Fireteams."
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 11
+
+[node name="DropshipQueueScroll" type="ScrollContainer" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="DropshipQueueList" type="VBoxContainer" parent="Panel/Margin/VBox/ContentRow/DropshipPanel/DropshipMargin/DropshipVBox/DropshipQueueScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="DropshipTimer" type="Timer" parent="."]
+wait_time = 1.0
+autostart = false
+
+[node name="CharacterOverlay" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="OverlayShade" type="ColorRect" parent="CharacterOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="OverlayPanel" type="PanelContainer" parent="CharacterOverlay"]
+layout_mode = 1
+anchor_left = 0.21
+anchor_top = 0.12
+anchor_right = 0.79
+anchor_bottom = 0.88
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OverlayMargin" type="MarginContainer" parent="CharacterOverlay/OverlayPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+size_flags_vertical = 3
+
+[node name="OverlayVBox" type="VBoxContainer" parent="CharacterOverlay/OverlayPanel/OverlayMargin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="OverlayHeaderRow" type="HBoxContainer" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox"]
+layout_mode = 2
+
+[node name="OverlayHeaderLabel" type="Label" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "#20 CHARACTER OVERLAY"
+theme_override_font_sizes/font_size = 16
+
+[node name="CloseOverlayButton" type="Button" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayHeaderRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(84, 0)
+text = "Close"
+
+[node name="OverlayScroll" type="ScrollContainer" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="OverlayContentVBox" type="VBoxContainer" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll"]
+layout_mode = 2
+theme_override_constants/separation = 6
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="GeneratedOverlayContent" type="VBoxContainer" parent="CharacterOverlay/OverlayPanel/OverlayMargin/OverlayVBox/OverlayScroll/OverlayContentVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8

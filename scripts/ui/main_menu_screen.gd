@@ -1,7 +1,7 @@
 extends Control
 
 const BACKGROUND_PATH: String = "res://Assets/curated/main_menu/sternenbuerger_main_menu_bg.jpeg"
-const SINGLEPLAYER_SCENE_PATH: String = "res://scenes/meta/meta_layer_test.tscn"
+const SINGLEPLAYER_SCENE_PATH: String = "res://scenes/meta/meta_layer.tscn"
 const MULTIPLAYER_SCENE_PATH: String = "res://scenes/ui/multiplayer_lobby.tscn"
 const EDITOR_SCENE_PATH: String = "res://scenes/editor/map_editor.tscn"
 const COMIC_BUBBLE_SETTINGS_SCRIPT: GDScript = preload("res://scripts/ui/comic_bubble_settings.gd")

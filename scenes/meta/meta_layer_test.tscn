@@ -1,20 +1,5 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/meta/meta_layer_flow.gd" id="1_flow"]
-[ext_resource type="PackedScene" path="res://scenes/meta/homebase_test_screen.tscn" id="2_homebase"]
-[ext_resource type="PackedScene" path="res://scenes/meta/fob_test_screen.tscn" id="3_fob"]
-[ext_resource type="PackedScene" path="res://scenes/meta/debrief_test_screen.tscn" id="4_debrief"]
-[node name="MetaLayerTest" type="Node"]
-script = ExtResource("1_flow")
+[ext_resource type="PackedScene" path="res://scenes/meta/meta_layer.tscn" id="1_meta"]
 
-[node name="HomebaseScreen" parent="." instance=ExtResource("2_homebase")]
-
-[node name="FOBScreen" parent="." instance=ExtResource("3_fob")]
-
-[node name="DebriefScreen" parent="." instance=ExtResource("4_debrief")]
-
-[node name="MissionHost" type="Node" parent="."]
-
-[node name="TransportTimer" type="Timer" parent="."]
-wait_time = 1.0
-one_shot = false
+[node name="MetaLayerTest" instance=ExtResource("1_meta")]
