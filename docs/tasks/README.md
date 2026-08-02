@@ -18,6 +18,10 @@ After `TASK_N001`, the canonical current-state and evidence documents it creates
 2. `TASK_N002` — reproducible Godot checkout.
 3. `TASK_N003` — command authority and parity.
 4. `TASK_N004` — canonical product mission and public first-contact trace.
+   `TASK_N004B` is its active, explicit public-`grid_sweep` evidence gate;
+   N004 is not complete until two fresh N004B runs are committed as evidence.
+   The gate starts at the actual Main Menu Singleplayer route and records the
+   executed runtime code commit separately from its later evidence commit.
 5. `TASK_N005` — Frontier Desert Outpost visual slice.
 6. `TASK_N006` — combat cadence and public release-playtest boundary.
 7. `TASK_N007` — first-ten-minutes release gate.

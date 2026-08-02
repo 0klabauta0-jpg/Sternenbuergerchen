@@ -2,7 +2,10 @@
 
 ## Goal / problem
 
-Move the player-visible mission entry off test paths while retaining legacy-verifier compatibility and integrate the recovered first-contact/live-fire trace on the public authored route.
+Move the actual player-visible path from Main Menu through Singleplayer,
+Homebase, and mission off test paths and test identities while retaining
+legacy-verifier compatibility, then integrate the recovered first-contact
+trace on the public authored route.
 
 ## Cause / value
 
@@ -10,6 +13,11 @@ The product must not depend on `scripts/tests` or `scenes/tests` for its visible
 
 ## Scope
 
+- Make scenes/meta/meta_layer.tscn and canonical Homebase/FOB/Debrief scenes
+  the Main Menu's actual Singleplayer route; retain former test-named scenes
+  as compatibility wrappers.
+- Give the active mission canonical setup and unit runtime implementations;
+  retain their historical test-named paths/classes as compatibility wrappers.
 - Add `scenes/mission/mission_runtime.tscn` as the canonical product mission.
 - Move or wrap productive controllers/drivers under `scripts/mission` and `scripts/tactical`.
 - Retain `scenes/tests/mission_reactivity_test.tscn` as a compatibility wrapper around the product scene.
@@ -31,6 +39,8 @@ The product must not depend on `scripts/tests` or `scenes/tests` for its visible
 
 ## Acceptance criteria
 
+- The actual Main Menu -> Singleplayer route reaches canonical MetaLayer,
+  Homebase, and MissionRuntime, not a test-named scene wrapper.
 - Product scene graph has no dependency on `scripts/tests` or `scenes/tests`.
 - The old test scene remains a working compatibility wrapper.
 - Singleplayer and multiplayer lobby use the canonical product scene.
@@ -43,6 +53,11 @@ Mission scene entry graph, mission/tactical adapters, lobby entry points, legacy
 
 ## Verification
 
+N004B adds a main-menu route contract and commits runtime/test code before two
+fresh first-contact processes create versioned JSON artefacts. A later evidence
+commit names that prior code commit and the two artefacts; it does not claim it
+ran itself.
+
 Run architecture test red then green; run existing test-scene verifiers; run `TASK_1180` twice plus `TASK_1179`, `TASK_542`, and `TASK_543` regressions; inspect the product dependency graph; run `git diff --check`.
 
 ## Risks / open points
@@ -52,3 +67,15 @@ Scene/resource extraction can break UIDs or autoload ownership, which N002 must 
 ## Dependency / exit gate
 
 Requires N003 command parity. `TASK_N005` and N006 may proceed only after the product entry is public-path clean, compatibility tests pass, and the formerly recovered `TASK_1180` is integrated with two fresh runs.
+
+## Active sub-gate
+
+`TASK_N004B_public_grid_sweep_first_contact.md` turns the remaining
+first-contact requirement into a narrow, public-player-path task. N004A's
+scene extraction is necessary but not sufficient: N005 and N006 remain
+blocked until N004B has two fresh authored `grid_sweep` traces and committed
+current evidence.
+
+N004B additionally closes the visible Main Menu route and blocks stale/private
+release-deeplink shortcuts from serving as a substitute for a real player
+path.
