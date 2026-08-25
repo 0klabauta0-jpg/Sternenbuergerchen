@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>SternenBuergerchen – Projektkompass</title>
+  <style>
+    :root {
+      --ink: #e7edf4;
+      --muted: #a7b4c4;
+      --bg: #07101b;
+      --panel: #101d2d;
+      --panel-2: #14283d;
+      --line: #29435c;
+      --cyan: #70d6ff;
+      --green: #77e2a5;
+      --amber: #ffd166;
+      --violet: #c9a7ff;
+      --red: #ff8b8b;
+      --shadow: 0 20px 60px rgba(0, 0, 0, .28);
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body { margin: 0; font: 16px/1.55 Inter, Segoe UI, system-ui, sans-serif; color: var(--ink); background: radial-gradient(circle at 90% -10%, #183d57 0, transparent 35rem), var(--bg); }
+    a { color: var(--cyan); }
+    button, textarea { font: inherit; }
+    button { border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: #183451; min-height: 40px; padding: 8px 13px; cursor: pointer; }
+    button:hover, button:focus-visible { border-color: var(--cyan); outline: none; }
+    button.choice.active, .tab.active { color: #06101c; background: var(--cyan); border-color: var(--cyan); font-weight: 750; }
+    .page { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 60px 0 28px; }
+    .eyebrow { color: var(--cyan); font-size: .82rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { max-width: 950px; margin: 8px 0 12px; font-size: clamp(2.2rem, 6vw, 4.8rem); line-height: 1.03; letter-spacing: -.04em; }
+    h2 { margin: 0 0 10px; font-size: clamp(1.35rem, 3vw, 2rem); line-height: 1.15; }
+    h3 { margin: 0 0 8px; font-size: 1.06rem; }
+    p { margin: 0 0 12px; }
+    .lede { max-width: 800px; color: #ced9e7; font-size: clamp(1.05rem, 2vw, 1.28rem); }
+    .meta, .chips, .toolbar { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; }
+    .meta { margin-top: 20px; color: var(--muted); font-size: .9rem; }
+    .chip { border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px; font-size: .8rem; }
+    .chip.good { color: var(--green); border-color: color-mix(in srgb, var(--green) 48%, var(--line)); }
+    .chip.warn { color: var(--amber); border-color: color-mix(in srgb, var(--amber) 48%, var(--line)); }
+    .tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 0; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(12px); }
+    .tab { background: transparent; }
+    .panel { display: none; padding: 28px 0 50px; }
+    .panel.active { display: block; }
+    .hero-grid, .grid { display: grid; gap: 16px; }
+    .hero-grid { grid-template-columns: 1.3fr .7fr; }
+    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .card { background: linear-gradient(145deg, color-mix(in srgb, var(--panel) 94%, white 6%), var(--panel)); border: 1px solid var(--line); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
+    .card > :last-child { margin-bottom: 0; }
+    .card.accent { border-top: 3px solid var(--cyan); }
+    .card.good { border-top: 3px solid var(--green); }
+    .card.warn { border-top: 3px solid var(--amber); }
+    .card.vision { border-top: 3px solid var(--violet); }
+    .stage-list { display: grid; gap: 9px; padding: 0; margin: 15px 0 0; list-style: none; }
+    .stage-list li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); }
+    .stage-list li:first-child { border-top: 0; }
+    .stage-number { color: var(--cyan); font-weight: 800; }
+    .status { display: inline-flex; border-radius: 999px; padding: 3px 8px; font-size: .76rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+    .status.verified { background: color-mix(in srgb, var(--green) 15%, transparent); color: var(--green); }
+    .status.implemented { background: color-mix(in srgb, var(--cyan) 15%, transparent); color: var(--cyan); }
+    .status.open { background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber); }
+    .status.vision { background: color-mix(in srgb, var(--violet) 15%, transparent); color: var(--violet); }
+    .architecture { margin: 20px 0; display: grid; gap: 10px; }
+    .architecture .node { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 14px; }
+    .architecture .node strong { display: block; }
+    .architecture .arrow { height: 18px; color: var(--cyan); text-align: center; font-weight: 900; }
+    .truth { border-left: 4px solid var(--green); background: color-mix(in srgb, var(--green) 7%, var(--panel)); padding: 15px; border-radius: 0 12px 12px 0; }
+    .note { color: var(--muted); font-size: .92rem; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; min-width: 650px; }
+    th, td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-size: .78rem; letter-spacing: .07em; text-transform: uppercase; }
+    tr:last-child td { border-bottom: 0; }
+    .control-card { margin-top: 18px; }
+    .choices { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    textarea { width: 100%; min-height: 130px; resize: vertical; color: var(--ink); background: #081523; border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+    textarea:focus { outline: 2px solid color-mix(in srgb, var(--cyan) 70%, transparent); border-color: var(--cyan); }
+    .checks { display: grid; gap: 8px; margin: 14px 0; }
+    label { cursor: pointer; }
+    input { accent-color: var(--cyan); }
+    .export { margin-top: 16px; }
+    pre { overflow: auto; max-height: 360px; margin: 14px 0 0; padding: 14px; border: 1px solid var(--line); border-radius: 10px; color: #c4d8eb; background: #06111d; font: 12px/1.45 ui-monospace, Consolas, monospace; white-space: pre-wrap; }
+    footer { padding: 28px 0 55px; color: var(--muted); font-size: .88rem; }
+    @media (max-width: 820px) { .hero-grid, .grid { grid-template-columns: 1fr; } header { padding-top: 36px; } .page { width: min(100% - 22px, 1180px); } .tabs { top: 0; } }
+  </style>
+</head>
+<body data-report-id="sternenbuergerchen_projektkompass_2026_08_25">
+  <main class="page">
+    <header>
+      <div class="eyebrow">Projektkompass · dokumentierter Referenzstand</div>
+      <h1>SternenBuergerchen:<br>Du führst. Deine Leute handeln.</h1>
+      <p class="lede">Ein Commander-gesteuertes Echtzeit-Taktikspiel: Du planst für Fireteams, gibst den Rahmen vor und musst mit den Folgen leben. Deine Leute führen den Auftrag im Gelände aus.</p>
+      <div class="meta">
+        <span class="chip">Stand: 25. August 2026</span>
+        <span class="chip">Code-Referenz: integration/core-foundation</span>
+        <span class="chip">Commit: 29e81d8 · 12. Juli 2026</span>
+        <span class="chip good">HTML funktioniert lokal per file://</span>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Reportbereiche">
+      <button class="tab active" type="button" data-tab="idea">Das Spiel</button>
+      <button class="tab" type="button" data-tab="status">Was läuft bereits?</button>
+      <button class="tab" type="button" data-tab="tech">Technischer Aufbau</button>
+      <button class="tab" type="button" data-tab="workbench">Mein Arbeitsstand</button>
+    </nav>
+
+    <section id="idea" class="panel active">
+      <div class="hero-grid">
+        <article class="card accent">
+          <h2>Was soll es werden?</h2>
+          <p>Kein Spiel, in dem du jede Figur hektisch einzeln klickst. Du bist der Commander: Du stellst Leute, Rollen und Loadouts zusammen, wählst eine Landezone, gibst einem Fireteam eine Absicht – und beobachtest, wie die Gruppe sie unter Gefahr umsetzt.</p>
+          <p>Die wichtige Entscheidung liegt beim Auftrag: <em>Wo hin? Wie offensiv? Welches Team? Wann halten, wann flankieren, wann zurück?</em></p>
+        </article>
+        <aside class="card vision">
+          <h2>V1-Grenze</h2>
+          <p>Eine kleine, überzeugende taktische Runde zuerst. Keine riesige Kampagne, keine echte Ballistik und keine komplexe, persistente PvP-Welt als Voraussetzung.</p>
+        </aside>
+      </div>
+
+      <article class="card" style="margin-top:16px">
+        <h2>Der gewünschte Spielerweg</h2>
+        <ol class="stage-list">
+          <li><span class="stage-number">01</span><span><strong>Heimatbasis</strong><br>Team ansehen, Auftrag auswählen, Leute vorbereiten.</span></li>
+          <li><span class="stage-number">02</span><span><strong>Rollen, Loadout, Dropship</strong><br>Wer fliegt mit, was braucht das Team, wo landet es?</span></li>
+          <li><span class="stage-number">03</span><span><strong>Einsatz</strong><br>Fireteam deboarden, Lage lesen, Befehle planen und mit <strong>GO</strong> freigeben.</span></li>
+          <li><span class="stage-number">04</span><span><strong>Kontakt und Objective</strong><br>Unter Druck entscheiden: bewegen, nehmen, verteidigen oder flankieren.</span></li>
+          <li><span class="stage-number">05</span><span><strong>Debrief und Rückkehr</strong><br>Ergebnis verstehen; später sollen daraus Entwicklung und nächste Entscheidungen wachsen.</span></li>
+        </ol>
+      </article>
+    </section>
+
+    <section id="status" class="panel">
+      <div class="card warn">
+        <h2>Wichtig zur Ehrlichkeit dieses Berichts</h2>
+        <p>Dieser Kompass beschreibt den dokumentierten Stand des Integrationsbranches vom <strong>12. Juli 2026</strong>. „Verifiziert“ bedeutet: dafür ist dort eine konkrete Headless-Prüfung dokumentiert. Es ist keine Behauptung, dass heute ein frischer Godot-Fensterlauf oder ein Release-Build geprüft wurde.</p>
+      </div>
+
+      <div class="grid" style="margin-top:16px">
+        <article class="card good">
+          <span class="status verified">Dokumentiert verifiziert</span>
+          <h3>Kurze Ground-Mission bis Debrief</h3>
+          <p><code>grid_sweep</code> läuft nach dem dokumentierten TASK_1179 über Homebase → Dropship → LZ → Deboard → Take → Objective-Sieg → Debrief.</p>
+          <p class="note">Der Trace nutzt die vorhandenen Handoff-, Commander-, Movement- und SimulationRoot-Pfade; keine Test-Teleports oder direkten Resultat-Setzer.</p>
+        </article>
+        <article class="card good">
+          <span class="status verified">Dokumentiert verifiziert</span>
+          <h3>Bewegung auf authored Terrain</h3>
+          <p>Alpha-LZ, Stationszugang und zentraler Vormarschkorridor sind für A* und HPA als legaler Weg abgesichert.</p>
+          <p class="note">TASK_1179 dokumentiert 18/18 Checks, zuvor zweimal hintereinander ausgeführt.</p>
+        </article>
+        <article class="card implemented">
+          <span class="status implemented">Implementiert</span>
+          <h3>Taktische Befehle</h3>
+          <p>Bewegen, Nehmen, Verteidigen und Flankieren sind als Commander-Absicht vorgesehen und führen zu Fireteam- und Unit-Kommandos.</p>
+          <p class="note">Die Umsetzung bleibt beim Fireteam; der Spieler verwaltet nicht einzelne NPCs direkt.</p>
+        </article>
+        <article class="card implemented">
+          <span class="status implemented">Implementiert</span>
+          <h3>Basis für Combat und Einsatz</h3>
+          <p>Datenbasiertes Combat, Objectives, Respawn, Terraindaten, Wegfindung, Cover, Höhen und ein früher Multiplayer-Authority-Pfad sind vorhanden.</p>
+          <p class="note">Reifegrad und vollständige Spielbarkeit sind je Teilbereich unterschiedlich.</p>
+        </article>
+        <article class="card open">
+          <span class="status open">Nächster echter Spielschritt</span>
+          <h3>Ground-Contact → Feuerentscheidung</h3>
+          <p>Auf <code>grid_sweep</code> fehlt noch der kurze, getrennte Nachweis: sichtbarer Gegnerkontakt und eine echte Feuerentscheidung über den bestehenden autoritativen Pfad.</p>
+          <p class="note">Das ist ausdrücklich der nächste Schritt der Roadmap – nicht bereits als erledigt markiert.</p>
+        </article>
+        <article class="card vision">
+          <span class="status vision">Spätere Vision</span>
+          <h3>Mehr Welt erst nach dem Kern</h3>
+          <p>Persistente PvP-Teams, größere Operationen, tiefere NPC-Beziehungen, komplexere Fahrzeuge und umfangreiches Content-Wachstum gehören danach.</p>
+        </article>
+      </div>
+
+      <h2 style="margin-top:30px">Was bedeutet „kann es bis jetzt“ praktisch?</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Spielmoment</th><th>Stand im Referenzbranch</th><th>Einordnung</th></tr></thead>
+          <tbody>
+            <tr><td>Mission aus der Heimatbasis auswählen</td><td><span class="status verified">verifiziert</span></td><td><code>grid_sweep</code> ist der dokumentierte Singleplayer-Standard.</td></tr>
+            <tr><td>Dropship platzieren und Fireteam absetzen</td><td><span class="status verified">verifiziert</span></td><td>Teil des echten Ground-Objective-Traces.</td></tr>
+            <tr><td>Take planen und mit GO ausführen</td><td><span class="status verified">verifiziert</span></td><td>Der Controller erzeugt Befehle; die Bewegung folgt dem autoritativen Pfad.</td></tr>
+            <tr><td>Objective einnehmen und Debrief erreichen</td><td><span class="status verified">verifiziert</span></td><td>Objective-Sieg und Resultat-Handoff sind im Trace geprüft.</td></tr>
+            <tr><td>Ersten Gegnerkontakt und Feuerentscheidung im selben Ground-Loop</td><td><span class="status open">offen</span></td><td>Nächster gezielter Gameplay-Nachweis; kein neuer Kampf-Rewrite.</td></tr>
+            <tr><td>Voll polierte, wiederholt spielbare Kampagne</td><td><span class="status vision">Vision</span></td><td>Erst nach einem überzeugenden, robusten kleinen Einsatzloop.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tech" class="panel">
+      <div class="card accent">
+        <h2>Eine Befehlskette, eine Wahrheit</h2>
+        <p>Der sichtbare Missionspfad ist bewusst getrennt. Das verhindert, dass ein HUD-Paneel oder ein Test-Controller nebenbei zum zweiten Spielsystem wird.</p>
+        <div class="architecture" aria-label="Technischer Ablauf">
+          <div class="node"><strong>Commander / Missions-HUD</strong>Auswahl, Waypoint, Area Order und GO. Das UI zeigt an und löst Befehle aus; es besitzt keinen dauerhaften Unit- oder Combat-State.</div>
+          <div class="arrow">↓ Commander-Absicht</div>
+          <div class="node"><strong>MissionTacticalSandboxController</strong>Hält den missionslokalen Planungs- und Ausführungskontext zusammen.</div>
+          <div class="arrow">↓ Plan- und Profildaten</div>
+          <div class="node"><strong>Tactical Resolver / Fireteam Movement &amp; Security</strong>Leiten aus der Absicht Bewegung, Haltung, Sicherheit und konkrete <code>UnitCommand</code>-Dictionaries ab.</div>
+          <div class="arrow">↓ <code>SimulationRoot.enqueue_command()</code></div>
+          <div class="node"><strong>SimulationRoot</strong>Die einzige Autorität für Gameplay-Mutationen: Commands, Effects, Units, Combat, Objective, Respawn und autoritativer Runtime-Zustand.</div>
+          <div class="arrow">↓ read-only Status</div>
+          <div class="node"><strong>Snapshots, HUD und Visuals</strong>Lesen Ergebnis und Feedback. Sie dürfen keine zweite Mission-, Fireteam- oder Combat-Wahrheit führen.</div>
+        </div>
+        <div class="truth"><strong>Merksatz:</strong> Das UI fragt an, Tactical-Code bereitet vor, <code>SimulationRoot</code> entscheidet und verändert den Spielzustand.</div>
+      </div>
+
+      <div class="grid" style="margin-top:16px">
+        <article class="card"><h3>Registries</h3><p><code>UnitRegistry</code>, <code>FTLRegistry</code> und Terrain-Lookups sind das Adressbuch der Laufzeit. Sie vermeiden breite SceneTree-Suchen, sind aber nicht die Gameplay-Autorität.</p></article>
+        <article class="card"><h3>Terrain &amp; Navigation</h3><p>Terraindaten enthalten Walkability, Sichtblocker, Cover, Höhe und Oberfläche. A* und HPA finden Wege auf dem Iso-Grid; ohne Terrain bleibt ein klar begrenzter Fallback.</p></article>
+        <article class="card"><h3>Legacy klar begrenzt</h3><p><code>RuntimeLeader</code> und <code>FTLTask</code> bleiben für Compatibility, Adapter und Basistests vorhanden. Neue sichtbare Mission-Features sollen dort nicht als zweiter Pfad entstehen.</p></article>
+      </div>
+    </section>
+
+    <section id="workbench" class="panel">
+      <div class="hero-grid">
+        <article class="card accent">
+          <h2>Dein nächster Schwerpunkt</h2>
+          <p>Diese Auswahl und die Notizen sind nur lokale Arbeitsnotizen in diesem Browser. Sie verändern weder Projektdateien noch das Spiel.</p>
+          <div class="choices" data-choice-group="next_focus">
+            <button class="choice active" type="button" data-choice="ground_contact">Ground-Contact &amp; Feuer</button>
+            <button class="choice" type="button" data-choice="ground_loop">Ground-Loop polieren</button>
+            <button class="choice" type="button" data-choice="performance">Performance prüfen</button>
+            <button class="choice" type="button" data-choice="architecture">Architekturpflege</button>
+          </div>
+          <div class="checks">
+            <label><input type="checkbox" data-key="status.report_read" checked> Bericht gelesen</label>
+            <label><input type="checkbox" data-key="status.ground_contact_priority" checked> Nächsten Ground-Contact-Schritt priorisieren</label>
+            <label><input type="checkbox" data-key="status.fresh_godot_run_needed"> Frischen Godot-/Release-Lauf vor Gameplay-Entscheidungen einplanen</label>
+          </div>
+        </article>
+        <article class="card warn">
+          <h2>Nächster sinnvoller Slice</h2>
+          <p><strong>Kein großer Combat-Umbau.</strong> Ein kurzer Verifier soll nach Deboard und normalem Move auf <code>grid_sweep</code> einen legalen Gegnerkontakt sowie eine durch <code>SimulationRoot</code> eingereihte Feuerentscheidung nachweisen.</p>
+          <p class="note">Danach erst entscheiden, ob etwas im realen Ablauf fehlt – nicht vorher weitere Systeme bauen.</p>
+        </article>
+      </div>
+
+      <article class="card control-card">
+        <h2>Eigene Notizen</h2>
+        <textarea data-key="notes" placeholder="Was soll als Nächstes konkret geprüft, verbessert oder verworfen werden?"></textarea>
+        <div class="toolbar export">
+          <button id="exportButton" type="button">JSON exportieren</button>
+          <button id="copyButton" type="button">JSON kopieren</button>
+          <span id="exportState" class="note" aria-live="polite">Lokaler Arbeitsstand wird im Browser gespeichert.</span>
+        </div>
+        <pre id="jsonOutput" aria-label="JSON Export" hidden></pre>
+      </article>
+    </section>
+
+    <footer>
+      <p><strong>Quellen im Referenzbranch:</strong> <code>docs/PROJECT_BRIEF.md</code>, <code>docs/ARCHITECTURE.md</code>, <code>docs/IMPLEMENTATION_STATUS.md</code>, <code>docs/TASK_ROADMAP.md</code>, <code>docs/dev/fireteam_runtime_execution_path_contract.md</code> und <code>docs/tasks/TASK_1179_ground_mission_objective_playthrough.md</code>.</p>
+      <p>Dieser Bericht ist eine Lesefläche und Workbench. Er ersetzt keinen frischen Godot-Lauf und besitzt keine Gameplay-Wahrheit.</p>
+    </footer>
+  </main>
+  <script>
+    (() => {
+      const reportId = document.body.dataset.reportId;
+      const storageKey = `${reportId}.local_state.v1`;
+      const output = document.getElementById('jsonOutput');
+      const exportState = document.getElementById('exportState');
+      let activeTab = 'idea';
+      let activeChoice = 'ground_contact';
+
+      const controls = () => Object.fromEntries([...document.querySelectorAll('[data-key]')].map((element) => [element.dataset.key, element.type === 'checkbox' ? element.checked : element.value]));
+      const save = () => localStorage.setItem(storageKey, JSON.stringify({ activeTab, activeChoice, controls: controls() }));
+      const restore = () => {
+        try {
+          const state = JSON.parse(localStorage.getItem(storageKey) || '{}');
+          document.querySelectorAll('[data-key]').forEach((element) => {
+            if (!(element.dataset.key in (state.controls || {}))) return;
+            if (element.type === 'checkbox') element.checked = Boolean(state.controls[element.dataset.key]);
+            else element.value = state.controls[element.dataset.key];
+          });
+          activeChoice = state.activeChoice || activeChoice;
+          activeTab = state.activeTab || activeTab;
+        } catch (_) { localStorage.removeItem(storageKey); }
+      };
+      const selectTab = (tab) => {
+        activeTab = tab;
+        document.querySelectorAll('.tab').forEach((button) => button.classList.toggle('active', button.dataset.tab === tab));
+        document.querySelectorAll('.panel').forEach((panel) => panel.classList.toggle('active', panel.id === tab));
+        save();
+      };
+      const selectChoice = (choice) => {
+        activeChoice = choice;
+        document.querySelectorAll('[data-choice-group="next_focus"] .choice').forEach((button) => button.classList.toggle('active', button.dataset.choice === choice));
+        save();
+      };
+      const payload = () => ({
+        schema: 'sternenbuergerchen.html_workbench.v1',
+        report_id: reportId,
+        title: document.title,
+        exported_at: new Date().toISOString(),
+        controls: controls(),
+        notes: { next_steps: document.querySelector('[data-key="notes"]').value },
+        active_choices: { next_focus: activeChoice },
+        computed: { reference_branch: 'integration/core-foundation', reference_commit: '29e81d82516708b7f609f4163e32710cad559ebf', active_tab: activeTab },
+        metadata: { local_only: true, url: window.location.href }
+      });
+      const showPayload = () => {
+        const text = JSON.stringify(payload(), null, 2);
+        output.hidden = false;
+        output.textContent = text;
+        return text;
+      };
+
+      restore();
+      selectChoice(activeChoice);
+      selectTab(activeTab);
+      document.querySelectorAll('.tab').forEach((button) => button.addEventListener('click', () => selectTab(button.dataset.tab)));
+      document.querySelectorAll('[data-choice-group="next_focus"] .choice').forEach((button) => button.addEventListener('click', () => selectChoice(button.dataset.choice)));
+      document.querySelectorAll('[data-key]').forEach((element) => element.addEventListener('input', save));
+      document.querySelectorAll('[data-key]').forEach((element) => element.addEventListener('change', save));
+      document.getElementById('exportButton').addEventListener('click', () => {
+        const text = showPayload();
+        const blob = new Blob([text], { type: 'application/json' });
+        const link = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${reportId}_${new Date().toISOString().replace(/[:.]/g, '-')}.json` });
+        link.click();
+        URL.revokeObjectURL(link.href);
+        exportState.textContent = 'JSON wurde lokal erzeugt; der Inhalt steht außerdem unten zum Kopieren bereit.';
+      });
+      document.getElementById('copyButton').addEventListener('click', async () => {
+        const text = showPayload();
+        try { await navigator.clipboard.writeText(text); exportState.textContent = 'JSON wurde in die Zwischenablage kopiert.'; }
+        catch (_) { exportState.textContent = 'Zwischenablage war nicht verfügbar; JSON steht unten zum manuellen Kopieren bereit.'; }
+      });
+    })();
+  </script>
+</body>
+</html>
