@@ -1700,9 +1700,9 @@ func build_homebase_direct_drop_state_for_craft(craft_id: String) -> Dictionary:
 	var selected_payload_fireteam_ids: PackedStringArray = boarded_fireteam_ids
 	var payload_fireteam_definitions: Array = _filter_fireteam_definitions_for_ids(fireteam_definitions, selected_payload_fireteam_ids)
 	var member_loadouts: Dictionary = _build_homebase_member_loadouts(selected_payload_fireteam_ids)
-	var mission_setup_payload_fireteam_ids: PackedStringArray = _get_homebase_direct_ready_payload_fireteam_ids()
-	if mission_setup_payload_fireteam_ids.is_empty() and direct_ready:
-		mission_setup_payload_fireteam_ids = selected_payload_fireteam_ids.duplicate()
+	# A launch consumes exactly the craft requested by the Mission button. Other
+	# ready crafts remain staged at Homebase and must not expand this handoff.
+	var mission_setup_payload_fireteam_ids: PackedStringArray = selected_payload_fireteam_ids.duplicate() if direct_ready else PackedStringArray()
 	var mission_setup_unit_ids: PackedStringArray = _build_unit_ids_for_fireteams(mission_setup_payload_fireteam_ids)
 	var mission_setup_fireteam_ids: PackedStringArray = _build_fireteam_ids_for_units(mission_setup_unit_ids)
 	var mission_setup_fireteam_definitions: Array = _filter_fireteam_definitions_for_ids(fireteam_definitions, mission_setup_payload_fireteam_ids)

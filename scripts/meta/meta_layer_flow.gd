@@ -266,6 +266,10 @@ func get_active_mission():
 
 
 func get_homebase_to_mission_handoff_snapshot() -> Dictionary:
+	# The snapshot is diagnostic only, but it must report the active mission's
+	# authoritative Homebase-direct payload if hidden Homebase controls refreshed
+	# their local staging selection after the launch.
+	_sync_active_homebase_direct_selection_from_mission_setup()
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 	var active_mission: Node = _active_mission
 	var mission_setup: Node = active_mission.get_node_or_null("MissionSetup") if active_mission != null else null
@@ -4164,6 +4168,7 @@ func _start_mission() -> void:
 	_configure_mission_instance(mission_instance, _selected_unit_ids, _selected_fireteam_ids, false)
 	mission_host.add_child(mission_instance)
 	_active_mission = mission_instance
+	_sync_active_homebase_direct_selection_from_mission_setup()
 	_connect_planning_state_bridge(_active_mission)
 	_connect_mission_end(_active_mission)
 	_show_mission()
@@ -4174,6 +4179,7 @@ func _start_or_update_active_mission() -> void:
 		_release_preview_mission()
 		_configure_mission_instance(_active_mission, _selected_unit_ids, _selected_fireteam_ids, false)
 		_apply_planning_state_to_mission(_active_mission)
+		_sync_active_homebase_direct_selection_from_mission_setup()
 		_show_mission()
 		return
 	_start_mission()
@@ -4250,6 +4256,34 @@ func _configure_mission_instance(mission_instance: Node, selected_unit_ids: Pack
 		_disable_node_processing(mission_instance.get_node_or_null("AlphaFlowDriver"))
 		_disable_node_processing(mission_instance.get_node_or_null("BravoFlowDriver"))
 		_disable_node_processing(mission_instance.get_node_or_null("CharlieFlowDriver"))
+
+
+func _sync_active_homebase_direct_selection_from_mission_setup() -> void:
+	if _active_mission == null:
+		return
+	if String(_mission_planning_state.get("mission_drop_source", "")).strip_edges().to_lower() != MISSION_DROP_SOURCE_HOMEBASE_DIRECT:
+		return
+	var mission_unit_ids := PackedStringArray(Array(_mission_planning_state.get("embarked_unit_ids", [])))
+	var mission_setup: Node = _active_mission.get_node_or_null("MissionSetup")
+	if mission_unit_ids.is_empty() and mission_setup != null:
+		mission_unit_ids = PackedStringArray(mission_setup.get("selected_team_unit_ids"))
+	if mission_unit_ids.is_empty():
+		return
+	var mission_fireteam_ids: PackedStringArray = []
+	if mission_setup != null:
+		mission_fireteam_ids = PackedStringArray(mission_setup.get("selected_team_fireteam_ids"))
+	if mission_fireteam_ids.size() != mission_unit_ids.size():
+		var launched_craft_id: String = String(_mission_planning_state.get("mission_drop_craft_id", "")).strip_edges()
+		for card_variant in Array(_mission_planning_state.get("mission_drop_cards", [])):
+			if typeof(card_variant) != TYPE_DICTIONARY:
+				continue
+			var card: Dictionary = Dictionary(card_variant)
+			if String(card.get("craft_id", "")).strip_edges() != launched_craft_id:
+				continue
+			mission_fireteam_ids = PackedStringArray(_build_homebase_direct_card_fireteam_selection(card, Array(mission_unit_ids)))
+			break
+	_selected_unit_ids = mission_unit_ids.duplicate()
+	_selected_fireteam_ids = _normalize_homebase_fireteam_selection(_selected_unit_ids, mission_fireteam_ids)
 
 
 func _connect_mission_end(mission_instance: Node) -> void:
@@ -6145,10 +6179,14 @@ func _apply_homebase_direct_setup_selection_from_drop_cards(drop_state: Dictiona
 	var setup_unit_ids: PackedStringArray = []
 	var setup_fireteam_ids: PackedStringArray = []
 	var seen_unit_ids: Dictionary = {}
+	var launched_craft_id: String = String(result.get("mission_drop_craft_id", "")).strip_edges()
 	for card_variant in Array(result.get("mission_drop_cards", [])):
 		if typeof(card_variant) != TYPE_DICTIONARY:
 			continue
 		var card: Dictionary = Dictionary(card_variant)
+		var card_craft_id: String = String(card.get("craft_id", "")).strip_edges()
+		if not launched_craft_id.is_empty() and card_craft_id != launched_craft_id:
+			continue
 		var state: String = String(card.get("state", "")).strip_edges().to_lower()
 		if state == "to_fob" or state == "to_homebase":
 			continue
