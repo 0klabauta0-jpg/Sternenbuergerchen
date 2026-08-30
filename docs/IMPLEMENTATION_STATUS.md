@@ -4,7 +4,7 @@
 - Status: implementiert und headless gemessen
 - Aenderung: Ein rein messender Tactical-Map-Harness erfasst echte `grid_sweep`-Process-Frames, mindestens 600 Grid-Sweep- und 600 16v12-Combat-Fixture-Ticks sowie die benannten Terrain-, Controller-, Combat- und Interaktionsscopes. Jeder Scope liefert Invocation Counter, Quantile, Maxima und einen expliziten `pass`- oder `budget_exceeded`-Status.
 - Architektur: Die Messung ist read-only gegen Gameplay- und UI-Wahrheit; rote Budgets bleiben Befund und erzwingen keinen Testfehler.
-- Lokale Pruefung: Vollserie 3 Kalt- plus 5 Warmstarts auf `d93871371` ohne Harness-Fehler; nach Contract-Klarstellung wird die Serie erneut auf dem finalen Commit ausgefuehrt.
+- Lokale Pruefung: Finaler Vollserie-Lauf 3 Kalt- plus 5 Warmstarts auf `2c82db0d4` ohne Harness- oder Contract-Fehler; pro Warmstart mindestens 600 Fixture-Ticks und mehr als 6.000 Process-Frames, reale `grid_sweep`-Runtime mit 11 Units.
 - Risiken/offen: Simulation/Combat, FoW, LZ-Eingabe und Proxy-Sync liegen auf der Baseline noch ueber ihren Budgets. Die folgenden Hotpath-Tasks senken sie jeweils getrennt und werden danach gegen denselben Harness nachgemessen.
 
 ### TASK_1179 - Ground Mission Objective Playthrough
