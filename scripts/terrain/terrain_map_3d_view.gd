@@ -203,6 +203,8 @@ const AIR_LAYER_DEFAULT_CLEARANCE: float = 1.28
 const FOW_OVERLAY_HEIGHT: float = 0.032
 const FOW_OVERLAY_SURFACE_Y_OFFSET: float = 0.074
 const FOW_BLACKOUT_COVER_Y_OFFSET: float = 0.42
+const FOW_OVERLAY_CHUNK_SIZE: int = GROUND_MULTIMESH_CHUNK_SIZE
+const FOW_OVERLAY_FULL_REBUILD_BATCH_SIZE: int = 512
 const FOW_KNOWN_DIM_COLOR: Color = Color(0.02, 0.05, 0.06, 0.28)
 const FOW_EXPLORED_DIM_COLOR: Color = Color(0.02, 0.04, 0.06, 0.62)
 const FOW_UNKNOWN_BLACK_COLOR: Color = Color(0.0, 0.0, 0.0, 1.0)
@@ -1132,9 +1134,32 @@ var _fow_explored_tile_count: int = 0
 var _fow_unknown_tile_count: int = 0
 var _fow_tile_total_count: int = 0
 var _fow_overlay_rebuild_count: int = 0
+var _fow_overlay_full_rebuild_count: int = 0
+var _fow_overlay_dirty_chunk_rebuild_count: int = 0
+var _fow_overlay_delta_apply_count: int = 0
+var _fow_overlay_visibility_revision: int = -1
+var _fow_overlay_blackout_y: float = 0.0
+var _fow_overlay_tile_by_id: Dictionary = {}
+var _fow_overlay_tile_states_by_id: Dictionary = {}
+var _fow_overlay_slot_by_tile_id: Dictionary = {}
+var _fow_overlay_multimesh: MultiMesh = null
+var _fow_overlay_multimesh_instance: MultiMeshInstance3D = null
+var _fow_overlay_render_tile_ids: PackedStringArray = PackedStringArray()
+var _fow_overlay_render_tiles: Array = []
+var _fow_overlay_pending_tile_ids: PackedStringArray = PackedStringArray()
+var _fow_overlay_pending_cursor: int = 0
+var _fow_overlay_full_rebuild_pending: bool = false
+var _fow_overlay_safety_cover: MeshInstance3D = null
+var _fow_overlay_cached_blackout_y: float = 0.0
+var _fow_overlay_safety_min: Vector3 = Vector3.ZERO
+var _fow_overlay_safety_max: Vector3 = Vector3.ZERO
 var _fow_hidden_order_visual_count: int = 0
 var _fow_hidden_contact_count: int = 0
 var _fow_hidden_unit_proxy_count: int = 0
+var _fow_contact_visibility_refresh_count: int = 0
+var _fow_order_rebuild_skip_count: int = 0
+var _fow_density_rebuild_skip_count: int = 0
+var _fow_drop_rebuild_skip_count: int = 0
 var _fow_allowed_contact_count: int = 0
 var _lz_tile_marker_count: int = 0
 var _requested_lz_marker_count: int = 0
@@ -1184,6 +1209,7 @@ func _process(delta: float) -> void:
 	var frame_started_usec: int = Time.get_ticks_usec() if profile_enabled else 0
 	var scopes_usec: Dictionary = {}
 	var scope_started_usec: int = 0
+	_process_pending_fow_overlay_full_rebuild()
 	if profile_enabled:
 		scope_started_usec = Time.get_ticks_usec()
 	_resize_subviewport()
@@ -1242,6 +1268,7 @@ func render_map(terrain_map_data = null) -> void:
 	_clear_children(_map_root)
 	_clear_children(_marker_root)
 	_clear_children(_fow_root)
+	_clear_fow_overlay_runtime_cache()
 	_clear_children(_patrol_root)
 	_clear_children(_network_preview_root)
 	_clear_children(_selection_root)
@@ -1360,6 +1387,7 @@ func render_map(terrain_map_data = null) -> void:
 	for tile_data in render_tiles:
 		_add_height_edge_visuals(tile_data)
 	_flush_height_edge_model_batches()
+	_cache_fow_overlay_render_tiles(render_tiles)
 	_rebuild_fog_of_war_visuals()
 	_rebuild_marker_visuals()
 	_rebuild_patrol_visuals()
@@ -1676,6 +1704,8 @@ func _build_live_fireteam_orientation_signature(fireteam_ids: PackedStringArray)
 
 func set_contact_entries(contact_entries: Array, selected_fireteam_ids: PackedStringArray = PackedStringArray()) -> void:
 	_contact_payload_apply_count += 1
+	if _contact_density_root != null and is_instance_valid(_contact_density_root):
+		_contact_density_root.visible = true
 	_contact_entries.clear()
 	for entry_variant in contact_entries:
 		if typeof(entry_variant) == TYPE_DICTIONARY:
@@ -1728,14 +1758,23 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	if next_signature == _fog_of_war_state_signature:
 		return
 	var work_started_usec: int = Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
+	var can_apply_overlay_delta: bool = _can_apply_fow_overlay_delta(normalized_state)
+	var previous_dynamic_visibility_signature: String = _build_fow_dynamic_visibility_signature(_fog_of_war_state)
 	_fog_of_war_state_signature = next_signature
 	_apply_fog_of_war_visual_state(normalized_state)
-	_rebuild_fog_of_war_visuals()
-	_rebuild_order_visuals()
+	if not can_apply_overlay_delta or not _apply_fow_overlay_delta(normalized_state):
+		_rebuild_fog_of_war_visuals()
 	_rebuild_contact_visuals()
-	_rebuild_contact_density_heatmap(true)
-	_rebuild_drop_visuals()
-	_sync_unit_proxies(false)
+	_fow_contact_visibility_refresh_count += 1
+	if previous_dynamic_visibility_signature != _build_fow_dynamic_visibility_signature(normalized_state):
+		_rebuild_order_visuals()
+	else:
+		_fow_order_rebuild_skip_count += 1
+	_fow_density_rebuild_skip_count += 1
+	_fow_drop_rebuild_skip_count += 1
+	_suppress_contact_density_for_fow_delta()
+	_refresh_drop_visual_visibility_for_fow_delta()
+	_refresh_unit_proxy_fow_visibility()
 	_request_viewport_redraw()
 	if _runtime_frame_timing_debug_enabled:
 		_last_fow_work_usec = Time.get_ticks_usec() - work_started_usec
@@ -1757,6 +1796,7 @@ func set_mission_drop_visual_state(drop_payload: Dictionary) -> void:
 	else:
 		_drop_visual_static_signature = next_static_signature
 		_rebuild_drop_visuals()
+	_refresh_drop_visual_visibility_for_fow_delta()
 	_request_viewport_redraw()
 
 
@@ -2823,6 +2863,14 @@ func get_render_snapshot() -> Dictionary:
 		"fow_unknown_tile_count": _fow_unknown_tile_count,
 		"fow_overlay_tile_count": _fow_overlay_tile_count,
 		"fow_overlay_rebuild_count": _fow_overlay_rebuild_count,
+		"fow_overlay_full_rebuild_count": _fow_overlay_full_rebuild_count,
+		"fow_overlay_dirty_chunk_rebuild_count": _fow_overlay_dirty_chunk_rebuild_count,
+		"fow_overlay_delta_apply_count": _fow_overlay_delta_apply_count,
+		"fow_overlay_visibility_revision": _fow_overlay_visibility_revision,
+		"fow_contact_visibility_refresh_count": _fow_contact_visibility_refresh_count,
+		"fow_order_rebuild_skip_count": _fow_order_rebuild_skip_count,
+		"fow_density_rebuild_skip_count": _fow_density_rebuild_skip_count,
+		"fow_drop_rebuild_skip_count": _fow_drop_rebuild_skip_count,
 		"fow_hidden_order_visual_count": _fow_hidden_order_visual_count,
 		"fow_hidden_contact_count": _fow_hidden_contact_count,
 		"fow_hidden_unit_proxy_count": _fow_hidden_unit_proxy_count,
@@ -5397,17 +5445,23 @@ func _normalize_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> Diction
 			"visible_event_ids": _normalize_fow_string_array(current_visibility.get("visible_event_ids", fog_of_war_state.get("visible_event_ids", []))),
 		},
 		"last_known_contacts": _normalize_fow_last_known_contacts(fog_of_war_state.get("last_known_contacts", [])),
+		"visibility_revision": maxi(int(fog_of_war_state.get("visibility_revision", 0)), 0),
+		"visibility_delta": Dictionary(fog_of_war_state.get("visibility_delta", {})).duplicate(true),
 	}
 
 
 func _build_fog_of_war_visual_signature(fog_of_war_state: Dictionary) -> String:
 	var terrain_knowledge: Dictionary = Dictionary(fog_of_war_state.get("terrain_knowledge", {}))
 	var current_visibility: Dictionary = Dictionary(fog_of_war_state.get("current_visibility", {}))
+	var visibility_revision: int = maxi(int(fog_of_war_state.get("visibility_revision", 0)), 0)
+	var terrain_signature: String = "revision:%d" % visibility_revision if visibility_revision > 0 else "%s/%s" % [
+		_join_fow_string_array(PackedStringArray(terrain_knowledge.get("visible_tile_ids", PackedStringArray()))),
+		_join_fow_string_array(PackedStringArray(terrain_knowledge.get("explored_tile_ids", PackedStringArray()))),
+	]
 	var parts: PackedStringArray = PackedStringArray([
 		String(fog_of_war_state.get("mode", FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF)),
 		String(fog_of_war_state.get("team_id", "")),
-		_join_fow_string_array(PackedStringArray(terrain_knowledge.get("visible_tile_ids", PackedStringArray()))),
-		_join_fow_string_array(PackedStringArray(terrain_knowledge.get("explored_tile_ids", PackedStringArray()))),
+		terrain_signature,
 		_join_fow_string_array(PackedStringArray(current_visibility.get("visible_target_ids", PackedStringArray()))),
 		_join_fow_string_array(PackedStringArray(current_visibility.get("visible_event_ids", PackedStringArray()))),
 	])
@@ -5421,6 +5475,26 @@ func _build_fog_of_war_visual_signature(fog_of_war_state: Dictionary) -> String:
 			int(contact.get("last_seen_tick", 0)),
 		]
 		parts.append(contact_part)
+	return "|".join(parts)
+
+
+func _build_fow_dynamic_visibility_signature(fog_of_war_state: Dictionary) -> String:
+	var current_visibility: Dictionary = Dictionary(fog_of_war_state.get("current_visibility", {}))
+	var parts: PackedStringArray = PackedStringArray([
+		String(fog_of_war_state.get("mode", FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF)),
+		String(fog_of_war_state.get("team_id", "")),
+		_join_fow_string_array(PackedStringArray(current_visibility.get("visible_target_ids", PackedStringArray()))),
+		_join_fow_string_array(PackedStringArray(current_visibility.get("visible_event_ids", PackedStringArray()))),
+	])
+	for contact_variant in Array(fog_of_war_state.get("last_known_contacts", [])):
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		parts.append("%s:%s:%d" % [
+			String(contact.get("target_id", "")),
+			_format_fow_position(contact.get("last_known_position", null)),
+			int(contact.get("last_seen_tick", 0)),
+		])
 	return "|".join(parts)
 
 
@@ -5551,10 +5625,34 @@ func _reset_fow_overlay_counters(preserve_rebuild_count: bool = true) -> void:
 	_fow_allowed_contact_count = 0
 	if not preserve_rebuild_count:
 		_fow_overlay_rebuild_count = 0
+		_fow_overlay_full_rebuild_count = 0
+		_fow_overlay_dirty_chunk_rebuild_count = 0
+		_fow_overlay_delta_apply_count = 0
+		_fow_contact_visibility_refresh_count = 0
+		_fow_order_rebuild_skip_count = 0
+		_fow_density_rebuild_skip_count = 0
+		_fow_drop_rebuild_skip_count = 0
+
+
+func _suppress_contact_density_for_fow_delta() -> void:
+	if _contact_density_root == null or not is_instance_valid(_contact_density_root):
+		return
+	_contact_density_root.visible = not _is_fog_of_war_visual_filter_active()
+
+
+func _refresh_drop_visual_visibility_for_fow_delta() -> void:
+	if _drop_root == null or not is_instance_valid(_drop_root):
+		return
+	if not _is_fog_of_war_visual_filter_active():
+		_drop_root.visible = true
+		return
+	var payload_team_id: String = String(_drop_payload.get("team_id", "")).strip_edges()
+	_drop_root.visible = not _fog_of_war_team_id.is_empty() and payload_team_id == _fog_of_war_team_id
 
 
 func _rebuild_fog_of_war_visuals() -> void:
 	_clear_children(_fow_root)
+	_clear_fow_overlay_runtime_cache(true)
 	_fow_overlay_tile_count = 0
 	_fow_visible_tile_count = 0
 	_fow_known_dim_tile_count = 0
@@ -5563,38 +5661,243 @@ func _rebuild_fog_of_war_visuals() -> void:
 	_fow_tile_total_count = 0
 	if _fow_root == null or _terrain_map_data == null:
 		return
-	var all_tiles: Array = Array(_terrain_map_data.call("get_tiles"))
-	var tiles: Array = _select_tiles_for_visual_overlay(all_tiles)
-	_fow_tile_total_count = all_tiles.size()
+	_fow_tile_total_count = Array(_terrain_map_data.call("get_tiles")).size()
+	if _fow_overlay_render_tiles.is_empty():
+		_cache_fow_overlay_render_tiles(_select_tiles_for_visual_overlay(Array(_terrain_map_data.call("get_tiles"))))
 	if not _is_fog_of_war_visual_filter_active():
-		_fow_visible_tile_count = tiles.size()
+		_fow_visible_tile_count = _fow_overlay_render_tile_ids.size()
+		_fow_overlay_visibility_revision = int(_fog_of_war_state.get("visibility_revision", 0))
 		return
+	_fow_overlay_blackout_y = _fow_overlay_cached_blackout_y
+	for tile_id in _fow_overlay_render_tile_ids:
+		_fow_overlay_slot_by_tile_id[tile_id] = _fow_overlay_slot_by_tile_id.size()
+	_create_fow_overlay_multimesh()
+	_fow_overlay_pending_tile_ids = PackedStringArray(_fow_overlay_render_tile_ids)
+	_fow_overlay_pending_cursor = 0
+	_fow_overlay_full_rebuild_pending = not _fow_overlay_pending_tile_ids.is_empty()
+	_create_fow_overlay_safety_cover()
+	if not _fow_overlay_full_rebuild_pending:
+		_finalize_fow_overlay_full_rebuild()
 
-	var known_dim_transforms: Array = []
-	var explored_transforms: Array = []
-	var unknown_transforms: Array = []
-	var blackout_y: float = _get_fow_blackout_cover_y(tiles)
+
+func _cache_fow_overlay_render_tiles(tiles: Array) -> void:
+	_fow_overlay_render_tiles.clear()
+	_fow_overlay_render_tile_ids = PackedStringArray()
+	_fow_overlay_tile_by_id.clear()
+	_fow_overlay_cached_blackout_y = 0.0
+	var has_bounds: bool = false
 	for tile_data in tiles:
 		if tile_data == null:
 			continue
-		var tile_state: String = _get_fow_tile_state(tile_data)
-		match tile_state:
-			FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE:
-				_fow_visible_tile_count += 1
-			FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN:
-				_fow_known_dim_tile_count += 1
-				known_dim_transforms.append(_get_fow_surface_overlay_transform(tile_data))
-			FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED:
-				_fow_explored_tile_count += 1
-				explored_transforms.append(_get_fow_surface_overlay_transform(tile_data))
-			_:
-				_fow_unknown_tile_count += 1
-				unknown_transforms.append(_get_fow_blackout_overlay_transform(tile_data, blackout_y))
-	_fow_overlay_tile_count = known_dim_transforms.size() + explored_transforms.size() + unknown_transforms.size()
-	_add_fow_overlay_multimesh("FoWKnownDimOverlay", known_dim_transforms, FOW_KNOWN_DIM_COLOR, true)
-	_add_fow_overlay_multimesh("FoWExploredOverlay", explored_transforms, FOW_EXPLORED_DIM_COLOR, true)
-	_add_fow_overlay_multimesh("FoWUnknownBlackoutOverlay", unknown_transforms, FOW_UNKNOWN_BLACK_COLOR, false)
+		var tile_id: String = _get_explicit_tile_id_for_fow(tile_data)
+		if tile_id.is_empty():
+			continue
+		_fow_overlay_render_tiles.append(tile_data)
+		_fow_overlay_render_tile_ids.append(tile_id)
+		_fow_overlay_tile_by_id[tile_id] = tile_data
+		var surface_origin: Vector3 = _get_fow_surface_overlay_transform(tile_data).origin
+		if not has_bounds:
+			_fow_overlay_safety_min = surface_origin
+			_fow_overlay_safety_max = surface_origin
+			has_bounds = true
+		else:
+			_fow_overlay_safety_min.x = minf(_fow_overlay_safety_min.x, surface_origin.x)
+			_fow_overlay_safety_min.z = minf(_fow_overlay_safety_min.z, surface_origin.z)
+			_fow_overlay_safety_max.x = maxf(_fow_overlay_safety_max.x, surface_origin.x)
+			_fow_overlay_safety_max.z = maxf(_fow_overlay_safety_max.z, surface_origin.z)
+		var tile_top_y: float = float(tile_data.height_level) * _get_3d_height_step()
+		var object_top_y: float = tile_top_y + (maxf(float(tile_data.object_height), 0.0) * OBJECT_HEIGHT_STEP)
+		_fow_overlay_cached_blackout_y = maxf(_fow_overlay_cached_blackout_y, object_top_y)
+	_fow_overlay_cached_blackout_y += FOW_BLACKOUT_COVER_Y_OFFSET
+
+
+func _process_pending_fow_overlay_full_rebuild() -> void:
+	if not _fow_overlay_full_rebuild_pending:
+		return
+	var end_cursor: int = mini(_fow_overlay_pending_cursor + FOW_OVERLAY_FULL_REBUILD_BATCH_SIZE, _fow_overlay_pending_tile_ids.size())
+	while _fow_overlay_pending_cursor < end_cursor:
+		var tile_id: String = String(_fow_overlay_pending_tile_ids[_fow_overlay_pending_cursor])
+		_fow_overlay_pending_cursor += 1
+		var tile_data = _fow_overlay_tile_by_id.get(tile_id, null)
+		if tile_data == null:
+			continue
+		_set_fow_overlay_tile_state(tile_id, _get_fow_tile_state(tile_data))
+		_apply_fow_overlay_tile_to_multimesh(tile_id)
+	if _fow_overlay_pending_cursor >= _fow_overlay_pending_tile_ids.size():
+		_finalize_fow_overlay_full_rebuild()
+
+
+func _finalize_fow_overlay_full_rebuild() -> void:
+	_fow_overlay_full_rebuild_pending = false
+	_fow_overlay_pending_tile_ids = PackedStringArray()
+	_fow_overlay_pending_cursor = 0
+	if _fow_overlay_multimesh_instance != null and is_instance_valid(_fow_overlay_multimesh_instance):
+		_fow_overlay_multimesh_instance.visible = true
+	if _fow_overlay_safety_cover != null and is_instance_valid(_fow_overlay_safety_cover):
+		_fow_overlay_safety_cover.free()
+	_fow_overlay_safety_cover = null
+	_fow_overlay_visibility_revision = int(_fog_of_war_state.get("visibility_revision", 0))
 	_fow_overlay_rebuild_count += 1
+	_fow_overlay_full_rebuild_count += 1
+	_request_viewport_redraw()
+
+
+func _create_fow_overlay_safety_cover() -> void:
+	if _fow_root == null or _fow_overlay_render_tile_ids.is_empty():
+		return
+	var cell_size: float = _get_3d_cell_size()
+	var width: float = maxf(_fow_overlay_safety_max.x - _fow_overlay_safety_min.x + cell_size * 2.0, cell_size)
+	var depth: float = maxf(_fow_overlay_safety_max.z - _fow_overlay_safety_min.z + cell_size * 2.0, cell_size)
+	var cover := MeshInstance3D.new()
+	cover.name = "FoWPendingSafetyBlackout"
+	cover.mesh = _make_box_mesh(Vector3(width, FOW_OVERLAY_HEIGHT, depth))
+	cover.material_override = _make_material(FOW_UNKNOWN_BLACK_COLOR, false)
+	cover.position = Vector3(
+		(_fow_overlay_safety_min.x + _fow_overlay_safety_max.x) * 0.5,
+		_fow_overlay_blackout_y,
+		(_fow_overlay_safety_min.z + _fow_overlay_safety_max.z) * 0.5
+	)
+	_fow_root.add_child(cover)
+	_fow_overlay_safety_cover = cover
+
+
+func _can_apply_fow_overlay_delta(next_fog_state: Dictionary) -> bool:
+	if not _is_fog_of_war_visual_filter_active():
+		return false
+	if String(next_fog_state.get("mode", "")) != _fog_of_war_mode:
+		return false
+	if String(next_fog_state.get("team_id", "")) != _fog_of_war_team_id:
+		return false
+	if _fow_overlay_slot_by_tile_id.is_empty() or _fow_overlay_multimesh == null:
+		return false
+	if _fow_overlay_full_rebuild_pending:
+		return false
+	var next_revision: int = int(next_fog_state.get("visibility_revision", 0))
+	return next_revision > _fow_overlay_visibility_revision and not Dictionary(next_fog_state.get("visibility_delta", {})).is_empty()
+
+
+func _apply_fow_overlay_delta(next_fog_state: Dictionary) -> bool:
+	var delta: Dictionary = Dictionary(next_fog_state.get("visibility_delta", {}))
+	var changed_tiles: Array = Array(delta.get("changed_tiles", []))
+	var dirty_chunks: Dictionary = {}
+	for changed_tile_variant in changed_tiles:
+		if typeof(changed_tile_variant) != TYPE_DICTIONARY:
+			continue
+		var changed_tile: Dictionary = Dictionary(changed_tile_variant)
+		var tile_id: String = String(changed_tile.get("tile_id", "")).strip_edges()
+		if tile_id.is_empty() or not _fow_overlay_tile_by_id.has(tile_id):
+			continue
+		var tile_data = _fow_overlay_tile_by_id[tile_id]
+		var tile_state: String = _get_fow_tile_state(tile_data)
+		_set_fow_overlay_tile_state(tile_id, tile_state)
+		_apply_fow_overlay_tile_to_multimesh(tile_id)
+		dirty_chunks[_get_fow_overlay_chunk_position(tile_data)] = true
+	_fow_overlay_dirty_chunk_rebuild_count += dirty_chunks.size()
+	_fow_overlay_delta_apply_count += 1
+	_fow_overlay_visibility_revision = int(next_fog_state.get("visibility_revision", _fow_overlay_visibility_revision))
+	_fow_overlay_rebuild_count += 1
+	return true
+
+
+func _clear_fow_overlay_runtime_cache(preserve_render_tiles: bool = false) -> void:
+	if not preserve_render_tiles:
+		_fow_overlay_render_tiles.clear()
+		_fow_overlay_render_tile_ids = PackedStringArray()
+		_fow_overlay_tile_by_id.clear()
+		_fow_overlay_cached_blackout_y = 0.0
+		_fow_overlay_safety_min = Vector3.ZERO
+		_fow_overlay_safety_max = Vector3.ZERO
+	_fow_overlay_tile_states_by_id.clear()
+	_fow_overlay_slot_by_tile_id.clear()
+	_fow_overlay_multimesh = null
+	_fow_overlay_multimesh_instance = null
+	_fow_overlay_pending_tile_ids = PackedStringArray()
+	_fow_overlay_pending_cursor = 0
+	_fow_overlay_full_rebuild_pending = false
+	_fow_overlay_safety_cover = null
+	_fow_overlay_blackout_y = 0.0
+	_fow_overlay_visibility_revision = -1
+
+
+func _get_fow_overlay_chunk_position(tile_data) -> Vector2i:
+	return Vector2i(
+		floori(float(Vector2i(tile_data.grid_position).x) / float(FOW_OVERLAY_CHUNK_SIZE)),
+		floori(float(Vector2i(tile_data.grid_position).y) / float(FOW_OVERLAY_CHUNK_SIZE))
+	)
+
+
+func _set_fow_overlay_tile_state(tile_id: String, next_state: String) -> void:
+	var previous_state: String = String(_fow_overlay_tile_states_by_id.get(tile_id, ""))
+	if previous_state == next_state:
+		return
+	_adjust_fow_overlay_state_count(previous_state, -1)
+	_fow_overlay_tile_states_by_id[tile_id] = next_state
+	_adjust_fow_overlay_state_count(next_state, 1)
+
+
+func _adjust_fow_overlay_state_count(tile_state: String, delta: int) -> void:
+	match tile_state:
+		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE:
+			_fow_visible_tile_count += delta
+		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN:
+			_fow_known_dim_tile_count += delta
+			_fow_overlay_tile_count += delta
+		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED:
+			_fow_explored_tile_count += delta
+			_fow_overlay_tile_count += delta
+		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_UNKNOWN:
+			_fow_unknown_tile_count += delta
+			_fow_overlay_tile_count += delta
+
+
+func _create_fow_overlay_multimesh() -> void:
+	if _fow_root == null or _fow_overlay_slot_by_tile_id.is_empty():
+		return
+	var cell_size: float = _get_3d_cell_size()
+	var multi_mesh := MultiMesh.new()
+	multi_mesh.transform_format = MultiMesh.TRANSFORM_3D
+	multi_mesh.use_colors = true
+	multi_mesh.mesh = _make_box_mesh(Vector3(cell_size * 0.99, FOW_OVERLAY_HEIGHT, cell_size * 0.99))
+	multi_mesh.instance_count = _fow_overlay_slot_by_tile_id.size()
+	var instance := MultiMeshInstance3D.new()
+	instance.name = "FoWUnknownBlackoutOverlay"
+	instance.multimesh = multi_mesh
+	instance.material_override = _make_fow_dynamic_overlay_material()
+	instance.visible = false
+	_fow_root.add_child(instance)
+	_fow_overlay_multimesh = multi_mesh
+	_fow_overlay_multimesh_instance = instance
+
+
+func _apply_fow_overlay_tile_to_multimesh(tile_id: String) -> void:
+	if _fow_overlay_multimesh == null or not _fow_overlay_slot_by_tile_id.has(tile_id):
+		return
+	var slot: int = int(_fow_overlay_slot_by_tile_id[tile_id])
+	var tile_data = _fow_overlay_tile_by_id.get(tile_id, null)
+	var tile_state: String = String(_fow_overlay_tile_states_by_id.get(tile_id, FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_VISIBLE))
+	match tile_state:
+		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_KNOWN:
+			_fow_overlay_multimesh.set_instance_transform(slot, _get_fow_surface_overlay_transform(tile_data))
+			_fow_overlay_multimesh.set_instance_color(slot, FOW_KNOWN_DIM_COLOR)
+		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_EXPLORED:
+			_fow_overlay_multimesh.set_instance_transform(slot, _get_fow_surface_overlay_transform(tile_data))
+			_fow_overlay_multimesh.set_instance_color(slot, FOW_EXPLORED_DIM_COLOR)
+		FOG_OF_WAR_MODE_CONTRACT_SCRIPT.TERRAIN_STATE_UNKNOWN:
+			_fow_overlay_multimesh.set_instance_transform(slot, _get_fow_blackout_overlay_transform(tile_data, _fow_overlay_blackout_y))
+			_fow_overlay_multimesh.set_instance_color(slot, FOW_UNKNOWN_BLACK_COLOR)
+		_:
+			_fow_overlay_multimesh.set_instance_transform(slot, Transform3D(Basis(), Vector3(0.0, -100000.0, 0.0)))
+			_fow_overlay_multimesh.set_instance_color(slot, Color(0.0, 0.0, 0.0, 0.0))
+
+
+func _make_fow_dynamic_overlay_material() -> StandardMaterial3D:
+	var material := StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo = true
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	material.disable_receive_shadows = true
+	return material
 
 
 func _select_tiles_for_visual_overlay(all_tiles: Array) -> Array:
@@ -5655,8 +5958,9 @@ func _get_fow_blackout_cover_y(tiles: Array) -> float:
 	return max_y + FOW_BLACKOUT_COVER_Y_OFFSET
 
 
-func _add_fow_overlay_multimesh(node_name: String, transforms: Array, color: Color, transparent: bool) -> void:
-	if _fow_root == null or transforms.is_empty():
+func _add_fow_overlay_multimesh(node_name: String, transforms: Array, color: Color, transparent: bool, parent_root: Node3D = null) -> void:
+	var target_root: Node3D = parent_root if parent_root != null else _fow_root
+	if target_root == null or transforms.is_empty():
 		return
 	var cell_size: float = _get_3d_cell_size()
 	var multi_mesh := MultiMesh.new()
@@ -5670,7 +5974,7 @@ func _add_fow_overlay_multimesh(node_name: String, transforms: Array, color: Col
 	instance.name = node_name
 	instance.multimesh = multi_mesh
 	instance.material_override = _make_material(color, transparent)
-	_fow_root.add_child(instance)
+	target_root.add_child(instance)
 
 
 func _fow_is_target_currently_visible(target_id: String) -> bool:
@@ -5718,6 +6022,23 @@ func _fow_allows_unit_proxy(unit: Node) -> bool:
 	if unit is Node2D:
 		return _fow_is_world_position_currently_visible((unit as Node2D).global_position)
 	return false
+
+
+func _refresh_unit_proxy_fow_visibility() -> void:
+	var hidden_proxy_count: int = 0
+	for unit in _unit_nodes:
+		if unit == null or not is_instance_valid(unit):
+			continue
+		var unit_id: String = _get_unit_id(unit)
+		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
+		if proxy == null or not is_instance_valid(proxy):
+			continue
+		var base_visible: bool = _is_unit_base_world_visible(unit)
+		var fow_allowed: bool = _fow_allows_unit_proxy(unit)
+		if base_visible and not fow_allowed:
+			hidden_proxy_count += 1
+		proxy.visible = base_visible and fow_allowed
+	_fow_hidden_unit_proxy_count = hidden_proxy_count
 
 
 func _fow_allows_enemy_security_visual(security_state: Dictionary) -> bool:

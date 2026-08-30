@@ -1,5 +1,13 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1189 - FOW Dirty Region Fan-out
+- Status: implementiert, skaliert und headless regressionsgeprueft
+- Aenderung: `FogOfWarSystem` plant bei Observer-Bewegung nur alte/neue Sichtregionen, sammelt deren Kandidaten und wertet sie in begrenzten Scheiben aus. Der alte Full-Scan bleibt fuer Erstaufbau, Terrainrevision und Force als Oracle erhalten. Die publizierte Team-Sicht bleibt bis zum Abschluss unveraendert; danach liefert eine Revision mit Tile-Delta den neuen atomaren Stand.
+- Renderpfad: `TerrainMap3DView` nutzt einen festen farbigen MultiMesh-Slot pro gerendertem Tile. FOW-Deltas aktualisieren nur betroffene Instanzen, ohne Unit-Proxies neu zu erstellen. Ein grosser Neuaufbau wird mit 512 Instanzen pro Frame hinter einer schwarzen Sicherheitsabdeckung fertiggestellt; dadurch ist bis zur atomaren Sicht keine Terraininformation offen sichtbar. Nur wenn Target-/Event-/Kontakt-Sicht wirklich wechselt, wird der betroffene Order-Visualpfad neu aufgebaut.
+- Scheduler: Die Missionsaktualisierung fragt Sicht alle 100 ms an und verarbeitet 512 Tiles pro Arbeitsscheibe. Die pro Frame laufende Proxy-Visualsynchronisation wird bei einem reinen FOW-Wechsel durch eine gezielte Sichtbarkeitsaktualisierung ersetzt.
+- Lokale Pruefung: TASK_1189 25/25: 128x128 Dirty-Anfrage 1.85 ms/Slice 5.83 ms, 256x256 4.16 ms/5.58 ms; beide atomar innerhalb von 350 ms. TASK_224 25/25, TASK_225 34/34 und TASK_1188 31/31 sind gruen. Im TASK_1187-Schnellvertrag (0 Fehler) liegt `terrain.fow_work_usec` bei p99 1.816 ms gegen das 2-ms-Budget.
+- Risiken/offen: Der Schnellvertrag markiert unveraendert andere, nicht zu TASK_1189 gehoerende Budgets fuer Combat, Controller, HUD, LZ-Interaktion, Dynamic Overlay und Proxy-p95 als ueberschritten. Die bekannten Homebase-UID-Warnungen bleiben unveraendert.
+
 ### TASK_1188 - Unit Proxy Dirty Sync
 - Status: implementiert, skaliert und headless regressionsgeprueft
 - Aenderung: `TerrainMap3DView` cached pro Unit die statischen Proxy-Nodes (AnimationPlayer, Skeleton, Weapon, Modelroot und Badge), loest FireEvents je Order-/FOW-Revision einmal auf und indexiert sichtbare Kontakte je Fireteam. Die laufende Proxy-Synchronisation verwendet diese Caches; Visual-Input-Revisionen schreiben ihren erfolgreichen Cache-Stand auch dann fort, wenn das effektive Modell identisch bleibt. Nichtvisuelle Felder aus `enemy_tactics_config` loesen dadurch keine Mapping-Aufloesung mehr aus.

@@ -2,6 +2,8 @@ class_name FogOfWarSystem
 extends RefCounted
 
 const MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_mode_contract.gd")
+const DEFAULT_WORK_BUDGET_TILES: int = 256
+const DEFAULT_DIRTY_CHUNK_SIZE: int = 8
 
 var _visibility_by_team: Dictionary = {}
 var _mode_by_team: Dictionary = {}
@@ -11,6 +13,12 @@ var _visible_events_by_team: Dictionary = {}
 var _last_known_contacts_by_team: Dictionary = {}
 var _peer_team_by_peer_id: Dictionary = {}
 var _last_tile_visibility_update: Dictionary = {}
+var _visibility_revision_by_team: Dictionary = {}
+var _last_visibility_delta_by_team: Dictionary = {}
+var _committed_observer_states_by_team: Dictionary = {}
+var _committed_visibility_mode_by_team: Dictionary = {}
+var _committed_terrain_revision_by_team: Dictionary = {}
+var _pending_tile_visibility_by_team: Dictionary = {}
 
 
 func set_visible(team_id: String, target_id: String, visible: bool) -> void:
@@ -134,7 +142,7 @@ func should_show_dynamic_target(team_id: String, target_id: String) -> bool:
 
 
 func build_team_state_snapshot(team_id: String, peer_id: int = 0) -> Dictionary:
-	return MODE_CONTRACT_SCRIPT.call(
+	var snapshot: Dictionary = MODE_CONTRACT_SCRIPT.call(
 		"normalize_team_state",
 		{
 			"team_id": team_id,
@@ -147,6 +155,12 @@ func build_team_state_snapshot(team_id: String, peer_id: int = 0) -> Dictionary:
 			"last_known_contacts": Dictionary(_last_known_contacts_by_team.get(team_id, {})).values(),
 		}
 	)
+	# The public mode contract deliberately normalizes only authoritative FoW
+	# fields.  Keep the render-only revision metadata outside that normalization
+	# so UI consumers can apply a bounded delta without making it gameplay truth.
+	snapshot["visibility_revision"] = int(_visibility_revision_by_team.get(team_id, 0))
+	snapshot["visibility_delta"] = Dictionary(_last_visibility_delta_by_team.get(team_id, {})).duplicate(true)
+	return snapshot
 
 
 func build_peer_state_snapshot(peer_id: int) -> Dictionary:
@@ -198,7 +212,7 @@ func build_terrain_visibility_counters(team_id: String, terrain_registry) -> Dic
 	return counters
 
 
-func update_tile_visibility_for_team(
+func request_tile_visibility_update_for_team(
 	team_id: String,
 	observers: Array,
 	terrain_registry,
@@ -209,61 +223,415 @@ func update_tile_visibility_for_team(
 	if team_id.is_empty() or terrain_registry == null or not terrain_registry.has_method("get_all_tiles"):
 		return {}
 
-	var started_usec: int = Time.get_ticks_usec()
 	var mode: String = get_mode_for_team(team_id)
-	var visible_tiles: Dictionary = {}
-	var visible_count: int = 0
-	var explored_before: int = _true_keys(Dictionary(_explored_tiles_by_team.get(team_id, {}))).size()
-	var observer_count: int = 0
-	var checked_tile_count: int = 0
-	var los_blocked_count: int = 0
-	var sorted_tiles: Array = terrain_registry.call("get_sorted_tiles") if terrain_registry.has_method("get_sorted_tiles") else terrain_registry.call("get_all_tiles")
 	var active_observers: Array = _filter_active_observers(observers, options)
-	observer_count = active_observers.size()
-	if mode == MODE_CONTRACT_SCRIPT.MODE_OFF:
-		for tile_data in sorted_tiles:
-			var tile_id: String = _tile_id_for_tile(tile_data)
-			if tile_id.is_empty():
-				continue
-			visible_tiles[tile_id] = true
-			mark_tile_explored(team_id, tile_id)
-			visible_count += 1
+	var observer_states: Dictionary = _build_observer_states(active_observers, terrain_registry, sight_range_world)
+	var terrain_revision: int = int(terrain_registry.call("get_revision")) if terrain_registry.has_method("get_revision") else -1
+	var previous_observer_states: Dictionary = Dictionary(_committed_observer_states_by_team.get(team_id, {}))
+	var force_full: bool = bool(options.get("force_full", false))
+	var full_scan: bool = force_full or not _committed_terrain_revision_by_team.has(team_id) or int(_committed_terrain_revision_by_team.get(team_id, -2)) != terrain_revision or String(_committed_visibility_mode_by_team.get(team_id, "")) != mode
+	if not full_scan and _observer_states_equal(previous_observer_states, observer_states):
+		return _build_visibility_work_snapshot(team_id, {}, true)
+	if not full_scan and _has_unbounded_changed_observer(previous_observer_states, observer_states):
+		full_scan = true
+	if not full_scan and (not terrain_registry.has_method("get_tile_at_grid") or not terrain_registry.has_method("world_to_grid") or not terrain_registry.has_method("grid_to_world")):
+		full_scan = true
+
+	var candidate_tiles: Array = []
+	var dirty_regions: Array = []
+	if full_scan:
+		candidate_tiles = terrain_registry.call("get_sorted_tiles") if terrain_registry.has_method("get_sorted_tiles") else terrain_registry.call("get_all_tiles")
 	else:
-		for tile_data in sorted_tiles:
-			var tile_id: String = _tile_id_for_tile(tile_data)
-			if tile_id.is_empty():
-				continue
-			var tile_visible: bool = false
-			for observer_variant in active_observers:
-				var observer := observer_variant as Node2D
-				if observer == null:
-					continue
-				checked_tile_count += 1
-				if _observer_can_see_tile(observer, tile_data, terrain_registry, los_system, sight_range_world):
-					tile_visible = true
-					break
-				los_blocked_count += 1
-			if tile_visible:
-				visible_tiles[tile_id] = true
-				mark_tile_explored(team_id, tile_id)
-				visible_count += 1
-	_current_visible_tiles_by_team[team_id] = visible_tiles
-	var explored_after: int = _true_keys(Dictionary(_explored_tiles_by_team.get(team_id, {}))).size()
-	_last_tile_visibility_update = {
+		dirty_regions = _build_dirty_candidate_regions(previous_observer_states, observer_states, terrain_registry)
+	var dirty_chunk_size: int = maxi(int(options.get("dirty_chunk_size", DEFAULT_DIRTY_CHUNK_SIZE)), 1)
+	var dirty_chunks: Dictionary = _collect_dirty_chunks(candidate_tiles, dirty_chunk_size)
+	var work: Dictionary = {
 		"team_id": team_id,
 		"mode": mode,
-		"tile_count": sorted_tiles.size(),
-		"observer_count": observer_count,
-		"visible_tile_count": visible_count,
-		"explored_before": explored_before,
-		"explored_after": explored_after,
-		"checked_tile_count": checked_tile_count,
-		"los_blocked_count": los_blocked_count,
-		"duration_usec": Time.get_ticks_usec() - started_usec,
+		"terrain_registry": terrain_registry,
+		"los_system": los_system,
 		"sight_range_world": sight_range_world,
-		"update_policy": "on_movement_command_tick_budget_or_relevant_state_change",
+		"terrain_revision": terrain_revision,
+		"observer_states": observer_states,
+		"candidate_tiles": candidate_tiles,
+		"candidate_tile_ids": {},
+		"candidate_tile_list": [],
+		"candidate_scan_pending": not full_scan,
+		"candidate_scan_processed": 0,
+		"candidate_scan_region_index": 0,
+		"candidate_scan_x": int(Dictionary(dirty_regions[0]).get("min_x", 0)) if not dirty_regions.is_empty() else 0,
+		"candidate_scan_y": int(Dictionary(dirty_regions[0]).get("min_y", 0)) if not dirty_regions.is_empty() else 0,
+		"dirty_regions": dirty_regions,
+		"estimated_candidate_tile_count": _estimate_dirty_candidate_tile_count(dirty_regions),
+		"estimated_dirty_chunk_count": _estimate_dirty_chunk_count(dirty_regions, dirty_chunk_size),
+		"dirty_chunk_size": dirty_chunk_size,
+		"dirty_chunks": dirty_chunks,
+		"cursor": 0,
+		"processed_tile_count": 0,
+		"checked_tile_count": 0,
+		"los_blocked_count": 0,
+		"next_visible_tiles": Dictionary(_current_visible_tiles_by_team.get(team_id, {})).duplicate(),
+		"next_explored_tiles": Dictionary(_explored_tiles_by_team.get(team_id, {})).duplicate(),
+		"explored_before": _count_true(Dictionary(_explored_tiles_by_team.get(team_id, {}))),
+		"changed_tiles": [],
+		"full_scan": full_scan,
+		"started_usec": Time.get_ticks_usec(),
+		"work_budget_tiles": maxi(int(options.get("work_budget_tiles", DEFAULT_WORK_BUDGET_TILES)), 1),
 	}
-	return _last_tile_visibility_update.duplicate(true)
+	_pending_tile_visibility_by_team[team_id] = work
+	return _build_visibility_work_snapshot(team_id, work, false)
+
+
+func process_pending_tile_visibility_work(team_id: String, work_budget_tiles: int = DEFAULT_WORK_BUDGET_TILES) -> Dictionary:
+	if team_id.is_empty() or not _pending_tile_visibility_by_team.has(team_id):
+		return _build_visibility_work_snapshot(team_id, {}, true)
+	var work: Dictionary = Dictionary(_pending_tile_visibility_by_team.get(team_id, {}))
+	var started_usec: int = Time.get_ticks_usec()
+	if bool(work.get("candidate_scan_pending", false)):
+		_collect_pending_dirty_candidate_tiles(work, maxi(work_budget_tiles, 1) * 4)
+		_pending_tile_visibility_by_team[team_id] = work
+		var collection_snapshot: Dictionary = _build_visibility_work_snapshot(team_id, work, false)
+		collection_snapshot["slice_duration_usec"] = Time.get_ticks_usec() - started_usec
+		collection_snapshot["processed_in_slice"] = 0
+		return collection_snapshot
+	var candidate_tiles: Array = Array(work.get("candidate_tiles", []))
+	var cursor: int = maxi(int(work.get("cursor", 0)), 0)
+	var budget: int = maxi(work_budget_tiles, 1)
+	var processed_in_slice: int = 0
+	var next_visible_tiles: Dictionary = Dictionary(work.get("next_visible_tiles", {}))
+	var next_explored_tiles: Dictionary = Dictionary(work.get("next_explored_tiles", {}))
+	var changed_tiles: Array = Array(work.get("changed_tiles", []))
+	var checked_tile_count: int = int(work.get("checked_tile_count", 0))
+	var los_blocked_count: int = int(work.get("los_blocked_count", 0))
+	while cursor < candidate_tiles.size() and processed_in_slice < budget:
+		var tile_data = candidate_tiles[cursor]
+		cursor += 1
+		processed_in_slice += 1
+		var tile_id: String = _tile_id_for_tile(tile_data)
+		if tile_id.is_empty():
+			continue
+		var visible_before: bool = bool(next_visible_tiles.get(tile_id, false))
+		var explored_before: bool = bool(next_explored_tiles.get(tile_id, false))
+		var evaluation: Dictionary = _evaluate_tile_visibility(tile_data, String(work.get("mode", MODE_CONTRACT_SCRIPT.MODE_OFF)), Dictionary(work.get("observer_states", {})), work.get("terrain_registry", null), work.get("los_system", null))
+		var visible_after: bool = bool(evaluation.get("visible", false))
+		checked_tile_count += int(evaluation.get("checked_tile_count", 0))
+		los_blocked_count += int(evaluation.get("los_blocked_count", 0))
+		if visible_after:
+			next_visible_tiles[tile_id] = true
+			next_explored_tiles[tile_id] = true
+		else:
+			next_visible_tiles.erase(tile_id)
+		var explored_after: bool = bool(next_explored_tiles.get(tile_id, false))
+		if visible_before != visible_after or explored_before != explored_after:
+			changed_tiles.append({"tile_id": tile_id, "visible": visible_after, "explored": explored_after})
+	work["cursor"] = cursor
+	work["processed_tile_count"] = int(work.get("processed_tile_count", 0)) + processed_in_slice
+	work["next_visible_tiles"] = next_visible_tiles
+	work["next_explored_tiles"] = next_explored_tiles
+	work["changed_tiles"] = changed_tiles
+	work["checked_tile_count"] = checked_tile_count
+	work["los_blocked_count"] = los_blocked_count
+	if cursor < candidate_tiles.size():
+		_pending_tile_visibility_by_team[team_id] = work
+		var pending_snapshot: Dictionary = _build_visibility_work_snapshot(team_id, work, false)
+		pending_snapshot["slice_duration_usec"] = Time.get_ticks_usec() - started_usec
+		pending_snapshot["processed_in_slice"] = processed_in_slice
+		return pending_snapshot
+
+	_current_visible_tiles_by_team[team_id] = Dictionary(work.get("next_visible_tiles", {}))
+	_explored_tiles_by_team[team_id] = Dictionary(work.get("next_explored_tiles", {}))
+	_committed_observer_states_by_team[team_id] = Dictionary(work.get("observer_states", {})).duplicate(true)
+	_committed_visibility_mode_by_team[team_id] = String(work.get("mode", MODE_CONTRACT_SCRIPT.MODE_OFF))
+	_committed_terrain_revision_by_team[team_id] = int(work.get("terrain_revision", -1))
+	var visibility_revision: int = int(_visibility_revision_by_team.get(team_id, 0)) + 1
+	_visibility_revision_by_team[team_id] = visibility_revision
+	var delta: Dictionary = {
+		"visibility_revision": visibility_revision,
+		"changed_tiles": Array(work.get("changed_tiles", [])).duplicate(true),
+		"dirty_chunk_count": Dictionary(work.get("dirty_chunks", {})).size(),
+		"candidate_tile_count": candidate_tiles.size(),
+		"full_scan": bool(work.get("full_scan", false)),
+	}
+	_last_visibility_delta_by_team[team_id] = delta
+	_last_tile_visibility_update = {
+		"team_id": team_id,
+		"mode": String(work.get("mode", MODE_CONTRACT_SCRIPT.MODE_OFF)),
+		"tile_count": candidate_tiles.size(),
+		"observer_count": Dictionary(work.get("observer_states", {})).size(),
+		"visible_tile_count": _count_true(Dictionary(_current_visible_tiles_by_team.get(team_id, {}))),
+		"explored_before": int(work.get("explored_before", 0)),
+		"explored_after": _count_true(Dictionary(_explored_tiles_by_team.get(team_id, {}))),
+		"checked_tile_count": int(work.get("checked_tile_count", 0)),
+		"los_blocked_count": int(work.get("los_blocked_count", 0)),
+		"duration_usec": Time.get_ticks_usec() - int(work.get("started_usec", Time.get_ticks_usec())),
+		"sight_range_world": float(work.get("sight_range_world", 0.0)),
+		"update_policy": "on_movement_command_tick_budget_dirty_region_or_full_scan_oracle",
+		"visibility_revision": visibility_revision,
+		"changed_tiles": Array(work.get("changed_tiles", [])).duplicate(true),
+		"dirty_chunk_count": Dictionary(work.get("dirty_chunks", {})).size(),
+		"full_scan": bool(work.get("full_scan", false)),
+	}
+	_pending_tile_visibility_by_team.erase(team_id)
+	var completed_snapshot: Dictionary = _last_tile_visibility_update.duplicate(true)
+	completed_snapshot["completed"] = true
+	completed_snapshot["processed_tile_count"] = int(work.get("processed_tile_count", 0))
+	completed_snapshot["processed_in_slice"] = processed_in_slice
+	completed_snapshot["slice_duration_usec"] = Time.get_ticks_usec() - started_usec
+	return completed_snapshot
+
+
+func update_tile_visibility_for_team(
+	team_id: String,
+	observers: Array,
+	terrain_registry,
+	los_system = null,
+	sight_range_world: float = 640.0,
+	options: Dictionary = {}
+) -> Dictionary:
+	var request_options: Dictionary = options.duplicate(true)
+	request_options["force_full"] = true
+	request_options["work_budget_tiles"] = maxi(int(options.get("work_budget_tiles", DEFAULT_WORK_BUDGET_TILES)), 1)
+	request_tile_visibility_update_for_team(team_id, observers, terrain_registry, los_system, sight_range_world, request_options)
+	var update: Dictionary = process_pending_tile_visibility_work(team_id, 2147483647)
+	return update
+
+
+func _build_visibility_work_snapshot(team_id: String, work: Dictionary, completed: bool) -> Dictionary:
+	if work.is_empty():
+		return {
+			"team_id": team_id,
+			"completed": completed,
+			"visibility_revision": int(_visibility_revision_by_team.get(team_id, 0)),
+			"candidate_tile_count": 0,
+			"dirty_chunk_count": 0,
+			"processed_tile_count": 0,
+			"full_scan": false,
+		}
+	var candidate_scan_pending: bool = bool(work.get("candidate_scan_pending", false))
+	var candidate_tile_count: int = int(work.get("estimated_candidate_tile_count", 0)) if candidate_scan_pending else Array(work.get("candidate_tiles", [])).size()
+	var dirty_chunk_count: int = int(work.get("estimated_dirty_chunk_count", 0)) if candidate_scan_pending else Dictionary(work.get("dirty_chunks", {})).size()
+	return {
+		"team_id": team_id,
+		"completed": completed,
+		"visibility_revision": int(_visibility_revision_by_team.get(team_id, 0)),
+		"candidate_tile_count": candidate_tile_count,
+		"dirty_chunk_count": dirty_chunk_count,
+		"candidate_scan_pending": candidate_scan_pending,
+		"candidate_scan_processed": int(work.get("candidate_scan_processed", 0)),
+		"processed_tile_count": int(work.get("processed_tile_count", 0)),
+		"full_scan": bool(work.get("full_scan", false)),
+	}
+
+
+func _build_observer_states(observers: Array, terrain_registry, base_sight_range_world: float) -> Dictionary:
+	var states: Dictionary = {}
+	for observer_variant in observers:
+		var observer := observer_variant as Node2D
+		if observer == null:
+			continue
+		var observer_id: String = str(observer.get_instance_id())
+		if observer.has_method("get_unit_id"):
+			var unit_id: String = String(observer.call("get_unit_id")).strip_edges()
+			if not unit_id.is_empty():
+				observer_id = unit_id
+		var position: Vector2 = observer.global_position
+		states[observer_id] = {
+			"position": position,
+			"grid_position": terrain_registry.call("world_to_grid", position) if terrain_registry.has_method("world_to_grid") else Vector2i.ZERO,
+			"sight_range_world": _get_observer_sight_range_world(observer, base_sight_range_world),
+		}
+	return states
+
+
+func _observer_states_equal(previous: Dictionary, current: Dictionary) -> bool:
+	if previous.size() != current.size():
+		return false
+	for observer_id_variant in previous.keys():
+		var observer_id: String = String(observer_id_variant)
+		if not current.has(observer_id):
+			return false
+		var old_state: Dictionary = Dictionary(previous.get(observer_id, {}))
+		var next_state: Dictionary = Dictionary(current.get(observer_id, {}))
+		if Vector2(old_state.get("position", Vector2.ZERO)).distance_squared_to(Vector2(next_state.get("position", Vector2.ZERO))) > 0.0001:
+			return false
+		if not is_equal_approx(float(old_state.get("sight_range_world", 0.0)), float(next_state.get("sight_range_world", 0.0))):
+			return false
+	return true
+
+
+func _has_unbounded_changed_observer(previous: Dictionary, current: Dictionary) -> bool:
+	var observer_ids: Dictionary = {}
+	for observer_id_variant in previous.keys():
+		observer_ids[String(observer_id_variant)] = true
+	for observer_id_variant in current.keys():
+		observer_ids[String(observer_id_variant)] = true
+	for observer_id_variant in observer_ids.keys():
+		var observer_id: String = String(observer_id_variant)
+		var old_state: Dictionary = Dictionary(previous.get(observer_id, {}))
+		var next_state: Dictionary = Dictionary(current.get(observer_id, {}))
+		if old_state == next_state:
+			continue
+		if float(old_state.get("sight_range_world", 0.0)) < 0.0 or float(next_state.get("sight_range_world", 0.0)) < 0.0:
+			return true
+	return false
+
+
+func _build_dirty_candidate_regions(previous_observers: Dictionary, current_observers: Dictionary, terrain_registry) -> Array:
+	var regions: Array = []
+	var observer_ids: Dictionary = {}
+	for observer_id_variant in previous_observers.keys():
+		observer_ids[String(observer_id_variant)] = true
+	for observer_id_variant in current_observers.keys():
+		observer_ids[String(observer_id_variant)] = true
+	var ordered_observer_ids: PackedStringArray = PackedStringArray()
+	for observer_id_variant in observer_ids.keys():
+		ordered_observer_ids.append(String(observer_id_variant))
+	ordered_observer_ids.sort()
+	for observer_id in ordered_observer_ids:
+		var old_state: Dictionary = Dictionary(previous_observers.get(observer_id, {}))
+		var next_state: Dictionary = Dictionary(current_observers.get(observer_id, {}))
+		if old_state == next_state:
+			continue
+		for observer_state in [old_state, next_state]:
+			if observer_state.is_empty():
+				continue
+			var grid_radius: int = _get_observer_reach_grid_radius(observer_state, terrain_registry)
+			var center_grid: Vector2i = Vector2i(observer_state.get("grid_position", Vector2i.ZERO))
+			regions.append({
+				"observer_state": observer_state,
+				"min_x": center_grid.x - grid_radius,
+				"max_x": center_grid.x + grid_radius,
+				"min_y": center_grid.y - grid_radius,
+				"max_y": center_grid.y + grid_radius,
+			})
+	return regions
+
+
+func _get_observer_reach_grid_radius(observer_state: Dictionary, terrain_registry) -> int:
+	var sight_range_world: float = float(observer_state.get("sight_range_world", 0.0))
+	if sight_range_world < 0.0:
+		return 0
+	var origin: Vector2 = terrain_registry.call("grid_to_world", Vector2i.ZERO)
+	var axis_x_spacing: float = origin.distance_to(Vector2(terrain_registry.call("grid_to_world", Vector2i(1, 0))))
+	var axis_y_spacing: float = origin.distance_to(Vector2(terrain_registry.call("grid_to_world", Vector2i(0, 1))))
+	var grid_spacing: float = maxf(minf(axis_x_spacing, axis_y_spacing), 0.001)
+	return maxi(ceili(sight_range_world / grid_spacing) + 2, 1)
+
+
+func _estimate_dirty_candidate_tile_count(regions: Array) -> int:
+	var estimated_count: int = 0
+	for region_variant in regions:
+		var region: Dictionary = Dictionary(region_variant)
+		estimated_count += maxi(int(region.get("max_x", -1)) - int(region.get("min_x", 0)) + 1, 0) * maxi(int(region.get("max_y", -1)) - int(region.get("min_y", 0)) + 1, 0)
+	return estimated_count
+
+
+func _estimate_dirty_chunk_count(regions: Array, chunk_size: int) -> int:
+	var chunks: Dictionary = {}
+	for region_variant in regions:
+		var region: Dictionary = Dictionary(region_variant)
+		var min_chunk_x: int = floori(float(int(region.get("min_x", 0))) / float(chunk_size))
+		var max_chunk_x: int = floori(float(int(region.get("max_x", -1))) / float(chunk_size))
+		var min_chunk_y: int = floori(float(int(region.get("min_y", 0))) / float(chunk_size))
+		var max_chunk_y: int = floori(float(int(region.get("max_y", -1))) / float(chunk_size))
+		for chunk_x in range(min_chunk_x, max_chunk_x + 1):
+			for chunk_y in range(min_chunk_y, max_chunk_y + 1):
+				chunks[Vector2i(chunk_x, chunk_y)] = true
+	return chunks.size()
+
+
+func _collect_pending_dirty_candidate_tiles(work: Dictionary, lookup_budget_tiles: int) -> void:
+	var regions: Array = Array(work.get("dirty_regions", []))
+	var region_index: int = maxi(int(work.get("candidate_scan_region_index", 0)), 0)
+	var grid_x: int = int(work.get("candidate_scan_x", 0))
+	var grid_y: int = int(work.get("candidate_scan_y", 0))
+	var candidate_tile_ids: Dictionary = Dictionary(work.get("candidate_tile_ids", {}))
+	var candidate_tile_list: Array = Array(work.get("candidate_tile_list", []))
+	var terrain_registry = work.get("terrain_registry", null)
+	var scanned_tiles: int = 0
+	while terrain_registry != null and region_index < regions.size() and scanned_tiles < lookup_budget_tiles:
+		var region: Dictionary = Dictionary(regions[region_index])
+		var observer_state: Dictionary = Dictionary(region.get("observer_state", {}))
+		var tile_data = terrain_registry.call("get_tile_at_grid", Vector2i(grid_x, grid_y))
+		if tile_data != null and _tile_is_within_observer_reach(tile_data, observer_state):
+			var tile_id: String = _tile_id_for_tile(tile_data)
+			if not tile_id.is_empty() and not candidate_tile_ids.has(tile_id):
+				candidate_tile_ids[tile_id] = true
+				candidate_tile_list.append(tile_data)
+		scanned_tiles += 1
+		grid_y += 1
+		if grid_y > int(region.get("max_y", -1)):
+			grid_y = int(region.get("min_y", 0))
+			grid_x += 1
+			if grid_x > int(region.get("max_x", -1)):
+				region_index += 1
+				if region_index < regions.size():
+					var next_region: Dictionary = Dictionary(regions[region_index])
+					grid_x = int(next_region.get("min_x", 0))
+					grid_y = int(next_region.get("min_y", 0))
+	work["candidate_tile_ids"] = candidate_tile_ids
+	work["candidate_tile_list"] = candidate_tile_list
+	work["candidate_scan_region_index"] = region_index
+	work["candidate_scan_x"] = grid_x
+	work["candidate_scan_y"] = grid_y
+	work["candidate_scan_processed"] = int(work.get("candidate_scan_processed", 0)) + scanned_tiles
+	if region_index < regions.size():
+		return
+	work["candidate_tiles"] = candidate_tile_list
+	work["dirty_chunks"] = _collect_dirty_chunks(candidate_tile_list, maxi(int(work.get("dirty_chunk_size", DEFAULT_DIRTY_CHUNK_SIZE)), 1))
+	work["candidate_scan_pending"] = false
+
+
+func _tile_is_within_observer_reach(tile_data, observer_state: Dictionary) -> bool:
+	if tile_data == null:
+		return false
+	var sight_range_world: float = float(observer_state.get("sight_range_world", 0.0))
+	return sight_range_world < 0.0 or Vector2(observer_state.get("position", Vector2.ZERO)).distance_to(Vector2(tile_data.world_position)) <= sight_range_world
+
+
+func _collect_dirty_chunks(candidate_tiles: Array, chunk_size: int) -> Dictionary:
+	var chunks: Dictionary = {}
+	for tile_data in candidate_tiles:
+		if tile_data == null:
+			continue
+		var grid_position: Vector2i = Vector2i(tile_data.grid_position)
+		chunks[Vector2i(floori(float(grid_position.x) / float(chunk_size)), floori(float(grid_position.y) / float(chunk_size)))] = true
+	return chunks
+
+
+func _evaluate_tile_visibility(tile_data, mode: String, observer_states: Dictionary, terrain_registry, los_system) -> Dictionary:
+	if mode == MODE_CONTRACT_SCRIPT.MODE_OFF:
+		return {"visible": true, "checked_tile_count": 0, "los_blocked_count": 0}
+	if tile_data == null:
+		return {"visible": false, "checked_tile_count": 0, "los_blocked_count": 0}
+	var checked_tile_count: int = 0
+	var los_blocked_count: int = 0
+	var target_position: Vector2 = tile_data.world_position
+	for observer_state_variant in observer_states.values():
+		var observer_state: Dictionary = Dictionary(observer_state_variant)
+		var observer_position: Vector2 = Vector2(observer_state.get("position", Vector2.ZERO))
+		var sight_range_world: float = float(observer_state.get("sight_range_world", 0.0))
+		checked_tile_count += 1
+		if sight_range_world >= 0.0 and observer_position.distance_to(target_position) > sight_range_world:
+			los_blocked_count += 1
+			continue
+		if los_system != null:
+			if los_system.has_method("has_line_of_sight_between_points") and not bool(los_system.call("has_line_of_sight_between_points", observer_position, target_position, sight_range_world, terrain_registry)):
+				los_blocked_count += 1
+				continue
+			if los_system.has_method("has_line_of_sight_with_terrain") and not bool(los_system.call("has_line_of_sight_with_terrain", observer_position, target_position, terrain_registry, sight_range_world)):
+				los_blocked_count += 1
+				continue
+		return {"visible": true, "checked_tile_count": checked_tile_count, "los_blocked_count": los_blocked_count}
+	return {"visible": false, "checked_tile_count": checked_tile_count, "los_blocked_count": los_blocked_count}
+
+
+func _count_true(source: Dictionary) -> int:
+	var count: int = 0
+	for value_variant in source.values():
+		if bool(value_variant):
+			count += 1
+	return count
 
 
 func get_last_tile_visibility_update_snapshot() -> Dictionary:
@@ -397,6 +765,12 @@ func clear() -> void:
 	_last_known_contacts_by_team.clear()
 	_peer_team_by_peer_id.clear()
 	_last_tile_visibility_update.clear()
+	_visibility_revision_by_team.clear()
+	_last_visibility_delta_by_team.clear()
+	_committed_observer_states_by_team.clear()
+	_committed_visibility_mode_by_team.clear()
+	_committed_terrain_revision_by_team.clear()
+	_pending_tile_visibility_by_team.clear()
 
 
 func _true_keys(source: Dictionary) -> PackedStringArray:

@@ -105,14 +105,13 @@ func _test_fow_modes_overlay_and_dynamic_filtering() -> void:
 	await _wait_frames(6)
 	var blackout_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
 	var unknown_overlay := _find_scene_node(primary_view, "FoWUnknownBlackoutOverlay") as MultiMeshInstance3D
-	var explored_overlay := _find_scene_node(primary_view, "FoWExploredOverlay") as MultiMeshInstance3D
 	_assert(String(blackout_snapshot.get("fog_of_war_mode", "")) == "unexplored_blackout", "Blackout mode reaches the 2.5D snapshot")
 	_assert(int(blackout_snapshot.get("fow_visible_tile_count", 0)) == 1, "Blackout keeps current sight normal")
 	_assert(int(blackout_snapshot.get("fow_explored_tile_count", 0)) == 1, "Blackout keeps explored memory dimmed")
 	_assert(int(blackout_snapshot.get("fow_unknown_tile_count", 0)) == 23, "Blackout marks never-seen tiles unknown")
-	_assert(unknown_overlay != null and unknown_overlay.multimesh != null and unknown_overlay.multimesh.instance_count == 23, "Unknown blackout overlay is batched into one MultiMesh node")
-	_assert(explored_overlay != null and explored_overlay.multimesh != null and explored_overlay.multimesh.instance_count == 1, "Explored overlay is batched separately")
-	_assert(_overlay_is_black(unknown_overlay), "Unknown blackout material is really black")
+	_assert(unknown_overlay != null and unknown_overlay.multimesh != null and unknown_overlay.multimesh.instance_count == 25, "FoW overlay reserves one batched slot per fixture tile")
+	_assert(_overlay_uses_instance_colors(unknown_overlay), "FoW overlay applies blackout and explored states through instance colors")
+	_assert(_overlay_has_instance_color(unknown_overlay, Color(0.0, 0.0, 0.0, 1.0)), "Unknown blackout instances are really black")
 
 	var moved_state: Dictionary = blackout_state.duplicate(true)
 	moved_state["terrain_knowledge"] = {
@@ -123,10 +122,20 @@ func _test_fow_modes_overlay_and_dynamic_filtering() -> void:
 		"visible_target_ids": PackedStringArray(["enemy_hidden"]),
 		"visible_event_ids": PackedStringArray(["fire_hidden"]),
 	}
+	moved_state["visibility_revision"] = 1
+	moved_state["visibility_delta"] = {
+		"visibility_revision": 1,
+		"changed_tiles": [
+			{"tile_id": "tile_0_0", "visible": false, "explored": true},
+			{"tile_id": "tile_1_0", "visible": false, "explored": true},
+			{"tile_id": "tile_4_4", "visible": true, "explored": true},
+		],
+	}
 	primary_view.call("set_fog_of_war_state", moved_state)
 	await _wait_frames(6)
 	var moved_snapshot: Dictionary = Dictionary(primary_view.call("get_render_snapshot"))
-	_assert(int(moved_snapshot.get("fow_overlay_rebuild_count", 0)) > int(blackout_snapshot.get("fow_overlay_rebuild_count", 0)), "FoW overlay rebuilds when sight changes")
+	_assert(int(moved_snapshot.get("fow_overlay_full_rebuild_count", 0)) == int(blackout_snapshot.get("fow_overlay_full_rebuild_count", -1)), "FoW delta changes do not rebuild the full overlay")
+	_assert(int(moved_snapshot.get("fow_overlay_delta_apply_count", 0)) == int(blackout_snapshot.get("fow_overlay_delta_apply_count", 0)) + 1, "FoW delta updates one batched overlay in place")
 	_assert(int(moved_snapshot.get("fow_explored_tile_count", 0)) == 2, "Moved sight leaves previous tiles as explored memory")
 	_assert(_entry_array_has_id(Array(moved_snapshot.get("enemy_security_entries", [])), "security_group_id", "hidden_sec"), "Enemy sector appears when its tile becomes visible")
 	_assert(not primary_view.has_method("submit_command") and not primary_view.has_method("enqueue_effect"), "2.5D FoW view exposes no gameplay mutation API")
@@ -238,13 +247,21 @@ func _entry_array_has_id(entries: Array, key: String, expected_value: String) ->
 	return false
 
 
-func _overlay_is_black(overlay: MultiMeshInstance3D) -> bool:
+func _overlay_uses_instance_colors(overlay: MultiMeshInstance3D) -> bool:
 	if overlay == null:
 		return false
 	var material := overlay.material_override as StandardMaterial3D
-	if material == null:
+	return material != null and material.vertex_color_use_as_albedo
+
+
+func _overlay_has_instance_color(overlay: MultiMeshInstance3D, expected_color: Color) -> bool:
+	if overlay == null or overlay.multimesh == null:
 		return false
-	return material.albedo_color.r <= 0.01 and material.albedo_color.g <= 0.01 and material.albedo_color.b <= 0.01 and material.albedo_color.a >= 0.99
+	for index in range(overlay.multimesh.instance_count):
+		var color: Color = overlay.multimesh.get_instance_color(index)
+		if is_equal_approx(color.r, expected_color.r) and is_equal_approx(color.g, expected_color.g) and is_equal_approx(color.b, expected_color.b) and is_equal_approx(color.a, expected_color.a):
+			return true
+	return false
 
 
 func _find_scene_node(root_node: Node, node_name: String) -> Node:

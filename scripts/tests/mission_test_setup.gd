@@ -13,8 +13,9 @@ const FOG_OF_WAR_MODE_CONTRACT_SCRIPT: GDScript = preload("res://scripts/core/fo
 const FOG_OF_WAR_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/fog_of_war_system.gd")
 const LINE_OF_SIGHT_SYSTEM_SCRIPT: GDScript = preload("res://scripts/core/los_system.gd")
 
-const FOW_UPDATE_INTERVAL_SECONDS: float = 0.35
+const FOW_UPDATE_INTERVAL_SECONDS: float = 0.10
 const FOW_DEFAULT_SIGHT_RANGE_WORLD: float = 640.0
+const FOW_DEFAULT_WORK_BUDGET_TILES: int = 512
 const LEGACY_FALLBACK_BLOCKED_TILES: Array[Vector2i] = [
 	Vector2i(4, 1),
 	Vector2i(4, 2),
@@ -82,6 +83,7 @@ const LEGACY_FALLBACK_SURFACE_BY_TILE: Dictionary = {
 @export var fog_of_war_mode: String = FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
 @export var fog_of_war_sight_range_world: float = FOW_DEFAULT_SIGHT_RANGE_WORLD
 @export var fog_viewer_team_id: String = ""
+@export_range(16, 2048, 16) var fog_of_war_work_budget_tiles: int = FOW_DEFAULT_WORK_BUDGET_TILES
 
 var member_loadouts: Dictionary = {}
 var unit_loadout_modifiers_by_unit_id: Dictionary = {}
@@ -98,6 +100,8 @@ var _fog_observer_unit_nodes: Array = []
 var _fog_unit_nodes: Array = []
 var _fog_terrain_registry = null
 var _fog_runtime_signature: String = ""
+var _fog_requested_runtime_signature: String = ""
+var _fog_pending_visibility_started_msec: int = 0
 var _fog_update_elapsed: float = 0.0
 var _friendly_unit_slot_paths: Array[NodePath] = []
 
@@ -294,6 +298,7 @@ func _process(delta: float) -> void:
 		return
 	if String(fog_of_war_mode).strip_edges().to_lower() == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
 		return
+	_advance_fog_of_war_visibility_work()
 	_fog_update_elapsed += delta
 	if _fog_update_elapsed < FOW_UPDATE_INTERVAL_SECONDS:
 		return
@@ -1011,6 +1016,8 @@ func get_fog_of_war_runtime_snapshot() -> Dictionary:
 	snapshot["active"] = String(snapshot.get("mode", FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF)) != FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF
 	snapshot["runtime_signature"] = _fog_runtime_signature
 	snapshot["observer_count"] = _get_active_fog_observers().size()
+	snapshot["pending_visibility_revision"] = not _fog_requested_runtime_signature.is_empty()
+	snapshot["pending_visibility_age_msec"] = maxi(Time.get_ticks_msec() - _fog_pending_visibility_started_msec, 0) if not _fog_requested_runtime_signature.is_empty() else 0
 	return snapshot
 
 
@@ -1041,23 +1048,55 @@ func _sync_fog_of_war_visual_state(force: bool = false) -> void:
 	_fog_of_war_system.call("set_mode_for_team", viewer_team_id, mode)
 	if mode == FOG_OF_WAR_MODE_CONTRACT_SCRIPT.MODE_OFF:
 		_fog_runtime_signature = "off"
+		_fog_requested_runtime_signature = ""
+		_fog_pending_visibility_started_msec = 0
 		if view.has_method("set_fog_of_war_state"):
 			view.call("set_fog_of_war_state", {"mode": mode, "team_id": viewer_team_id})
 		return
 	var next_signature: String = _build_fog_runtime_signature(mode)
 	if not force and next_signature == _fog_runtime_signature:
 		return
-	_fog_runtime_signature = next_signature
+	if not force and next_signature == _fog_requested_runtime_signature:
+		return
+	_fog_requested_runtime_signature = next_signature
+	_fog_pending_visibility_started_msec = Time.get_ticks_msec()
 	_fog_of_war_system.call(
-		"update_tile_visibility_for_team",
+		"request_tile_visibility_update_for_team",
 		viewer_team_id,
 		_fog_observer_unit_nodes,
 		_fog_terrain_registry,
 		_fog_of_war_los_system,
-		fog_of_war_sight_range_world
+		fog_of_war_sight_range_world,
+		{"work_budget_tiles": fog_of_war_work_budget_tiles}
 	)
-	_sync_fog_dynamic_target_visibility()
+	# The previous state may contain information the new observer position must no
+	# longer expose.  Until the authoritative revision is complete, use the
+	# conservative visual state: known terrain is dimmed and blackout terrain is
+	# covered, while gameplay truth remains in FogOfWarSystem.
 	if view.has_method("set_fog_of_war_state"):
+		view.call("set_fog_of_war_state", {
+			"mode": mode,
+			"team_id": viewer_team_id,
+			"terrain_knowledge": {"visible_tile_ids": PackedStringArray(), "explored_tile_ids": PackedStringArray()},
+			"current_visibility": {"visible_target_ids": PackedStringArray(), "visible_event_ids": PackedStringArray()},
+			"visibility_pending": true,
+		})
+	_advance_fog_of_war_visibility_work()
+
+
+func _advance_fog_of_war_visibility_work() -> void:
+	if _fog_of_war_system == null or _fog_requested_runtime_signature.is_empty():
+		return
+	var viewer_team_id: String = _get_fog_viewer_team_id()
+	var update: Dictionary = Dictionary(_fog_of_war_system.call("process_pending_tile_visibility_work", viewer_team_id, fog_of_war_work_budget_tiles))
+	if not bool(update.get("completed", false)):
+		return
+	_fog_runtime_signature = _fog_requested_runtime_signature
+	_fog_requested_runtime_signature = ""
+	_fog_pending_visibility_started_msec = 0
+	_sync_fog_dynamic_target_visibility()
+	var view = _terrain_3d_view
+	if view != null and is_instance_valid(view) and view.has_method("set_fog_of_war_state"):
 		view.call("set_fog_of_war_state", _fog_of_war_system.call("build_team_visual_state_snapshot", viewer_team_id, _fog_terrain_registry))
 
 
@@ -1125,6 +1164,8 @@ func _build_fog_runtime_signature(mode: String) -> String:
 	var parts: PackedStringArray = PackedStringArray()
 	parts.append(mode)
 	parts.append(_get_fog_viewer_team_id())
+	if _fog_terrain_registry != null and _fog_terrain_registry.has_method("get_revision"):
+		parts.append("terrain_revision:%d" % int(_fog_terrain_registry.call("get_revision")))
 	for unit in _fog_unit_nodes:
 		if unit == null or not (unit is Node2D) or not unit.has_method("get_unit_id") or not unit.has_method("get_team_id"):
 			continue
