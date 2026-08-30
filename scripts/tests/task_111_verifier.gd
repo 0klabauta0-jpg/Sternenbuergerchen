@@ -35,9 +35,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_security_controller_assigns_360_sectors_for_high_leadership() -> void:
 	var controller = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.new()
 	var leader = _make_unit("sec_lead", "blue", true, Vector2(0.0, 0.0), 0.42, 0.62, 0.82, ["steady"])

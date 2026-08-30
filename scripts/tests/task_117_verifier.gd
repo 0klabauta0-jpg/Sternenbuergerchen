@@ -23,9 +23,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_embark_effect_moves_known_unregistered_unit_offmap() -> void:
 	var context: Dictionary = _make_context()
 	var simulation_root: Node = context["simulation_root"]

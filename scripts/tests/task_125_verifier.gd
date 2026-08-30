@@ -28,9 +28,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_non_walkable_rock_target_resolves_stably() -> void:
 	var registry = _make_registry([Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)], {Vector2i(1, 0): false})
 	var rock_world: Vector2 = registry.grid_to_world(Vector2i(1, 0))

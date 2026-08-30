@@ -21,9 +21,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_area_order_data_roundtrip() -> void:
 	var area_order = AREA_ORDER_SCRIPT.new({
 		"area_order_id": "area_0001",

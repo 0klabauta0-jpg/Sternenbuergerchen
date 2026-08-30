@@ -25,9 +25,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_contact_tracker_progresses_spotted_to_confirmed() -> void:
 	var tracker = CONTACT_TRACKER_SCRIPT.new()
 	var fireteams: Array = ["blue", "gold"]

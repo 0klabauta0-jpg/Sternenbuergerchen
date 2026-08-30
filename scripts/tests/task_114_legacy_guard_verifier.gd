@@ -24,9 +24,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_legacy_wall_map_is_rejected() -> void:
 	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", "res://maps/legacy_wall_type_unsupported.json")
 	_assert(map_data != null, "Legacy wall fixture returns a TerrainMapData instance")

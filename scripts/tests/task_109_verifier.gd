@@ -27,9 +27,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_stance_controller_snapshot_roundtrip() -> void:
 	var controller = TACTICAL_STANCE_CONTROLLER_SCRIPT.new()
 	controller.call("set_requested_stance", "blue", "aggressive")

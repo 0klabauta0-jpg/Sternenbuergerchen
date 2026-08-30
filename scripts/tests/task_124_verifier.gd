@@ -19,9 +19,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_planned_defend_area_feedback_includes_size_and_waiting_contact() -> void:
 	var scene = await _load_scene()
 	var controller = scene.get_node("TacticalController")

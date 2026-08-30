@@ -60,9 +60,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_rush_moves_all_fit_members_with_cohesion_clamp() -> void:
 	var controller = FIRETEAM_MOVEMENT_CONTROLLER_SCRIPT.new()
 	var simulation = SimulationStub.new()

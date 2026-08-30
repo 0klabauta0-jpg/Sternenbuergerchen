@@ -35,9 +35,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_resolver_builds_edge_approach() -> void:
 	var units: Array = [
 		_make_unit("blue_lead", "team_alpha", "blue", true, Vector2(-220.0, 96.0)),

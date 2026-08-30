@@ -21,9 +21,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_terrain_marker_roundtrip() -> void:
 	var map_data = TERRAIN_MAP_DATA_SCRIPT.call("load_from_file", "res://maps/test_mission_32x32_slots8.json")
 	_assert(map_data != null, "TerrainMapData loads a map with legacy marker positions")

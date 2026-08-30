@@ -20,9 +20,7 @@ func _run_tests() -> void:
 		print("FAIL")
 		quit(1)
 	print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_mission_nav_starts_live_mission_with_fireteam_cards() -> void:
 	var scene: Node = META_LAYER_TEST_SCENE.instantiate()
 	root.add_child(scene)

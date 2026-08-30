@@ -43,9 +43,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_resolver_detects_directional_flank_and_bonuses() -> void:
 	var resolver = FLANK_VULNERABILITY_RESOLVER_SCRIPT.new()
 	var security_controller = FIRETEAM_SECURITY_CONTROLLER_SCRIPT.new()

@@ -30,9 +30,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_execution_profile_separates_high_and_low_quality_teams() -> void:
 	var high_units: Array = _make_quality_team("high", 0.88, 0.82, 0.92, 0.86, 0.9, 0.9, ["calm", "steady"])
 	var low_units: Array = _make_quality_team("low", 0.28, 0.34, 0.16, 0.32, 0.14, 0.18, ["reckless", "aggressive"])

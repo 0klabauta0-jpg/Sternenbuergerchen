@@ -41,9 +41,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_same_seed_replays_same_damage_result() -> void:
 	var first: int = _run_seeded_damage_once(5, 0.5)
 	var second: int = _run_seeded_damage_once(5, 0.5)

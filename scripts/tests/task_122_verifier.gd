@@ -21,9 +21,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_resolver_spreads_members_and_keeps_leader() -> void:
 	var units: Array = [
 		_make_unit("blue_lead", "blue", true, Vector2.ZERO),

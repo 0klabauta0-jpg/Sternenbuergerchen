@@ -32,9 +32,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_medic_resolver_returns_heal_and_move_actions() -> void:
 	var medic := _make_unit("medic_resolver", "team_alpha", "blue", Vector2.ZERO, "Combat Medic")
 	medic.weapon_2_id = "medictool"
