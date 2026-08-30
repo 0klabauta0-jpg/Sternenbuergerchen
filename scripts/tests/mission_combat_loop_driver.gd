@@ -179,6 +179,7 @@ var _hotpath_friendly_combat_units: Array = []
 var _hotpath_enemy_combat_units: Array = []
 var _last_contact_tracking_scan_pair_count: int = 0
 var _last_contact_tracking_los_check_count: int = 0
+var _last_contact_tracking_los_cache_hit_count: int = 0
 var _last_fire_candidate_pair_scan_count: int = 0
 var _last_tactical_combat_visual_refresh_msec: int = 0
 var _tactical_combat_visual_refresh_pending: bool = false
@@ -790,6 +791,8 @@ func get_combat_hotpath_audit_snapshot() -> Dictionary:
 		"potential_combat_pair_count": combat_friendly_units.size() * combat_enemy_units.size(),
 		"last_contact_tracking_scan_pair_count": _last_contact_tracking_scan_pair_count,
 		"last_contact_tracking_los_check_count": _last_contact_tracking_los_check_count,
+		"last_contact_tracking_los_cache_hit_count": _last_contact_tracking_los_cache_hit_count,
+		"contact_tracking_los_cache_status": "not_implemented",
 		"last_fire_candidate_pair_scan_count": _last_fire_candidate_pair_scan_count,
 		"spatial_bucket_status": "diagnostic_next_step_not_runtime_filter",
 		"spatial_bucket_cell_size": COMBAT_HOTPATH_AUDIT_BUCKET_CELL_SIZE,
@@ -1707,6 +1710,7 @@ func _record_contact_decision_diagnostics(reason: String, data: Dictionary = {})
 		"potential_combat_pair_count": _get_friendly_combat_units().size() * _get_enemy_combat_units().size(),
 		"last_contact_tracking_scan_pair_count": _last_contact_tracking_scan_pair_count,
 		"last_contact_tracking_los_check_count": _last_contact_tracking_los_check_count,
+		"last_contact_tracking_los_cache_hit_count": _last_contact_tracking_los_cache_hit_count,
 		"contact_count": get_contact_snapshot().size(),
 		"detection_pending_count": _detection_progress.size(),
 	}
@@ -2869,6 +2873,7 @@ func _update_contact_tracking() -> void:
 	var active_friendlies: Array = _get_friendly_combat_units()
 	_last_contact_tracking_scan_pair_count = 0
 	_last_contact_tracking_los_check_count = 0
+	_last_contact_tracking_los_cache_hit_count = 0
 	for friendly in active_friendlies:
 		if friendly == null or not friendly.has_method("get_fireteam_id") or not friendly.has_method("get_unit_id"):
 			continue

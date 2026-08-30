@@ -791,12 +791,14 @@ func _process(delta: float) -> void:
 		refresh_fireteam_security_state()
 	if profile_enabled:
 		scopes_usec["feedback_and_security_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["hud_light_usec"] = scopes_usec["feedback_and_security_usec"]
 		scope_started_usec = Time.get_ticks_usec()
 	_card_refresh_time_remaining -= delta
 	_runtime_hud_heavy_refresh_time_remaining -= delta
 	if _card_refresh_time_remaining > 0.0:
 		if profile_enabled:
 			scopes_usec["ui_refresh_usec"] = 0
+			scopes_usec["hud_heavy_usec"] = 0
 			_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, false)
 		return
 	_card_refresh_time_remaining = CARD_REFRESH_INTERVAL_SECONDS
@@ -806,6 +808,7 @@ func _process(delta: float) -> void:
 	_update_ui(heavy_refresh_due, false)
 	if profile_enabled:
 		scopes_usec["ui_refresh_usec"] = Time.get_ticks_usec() - scope_started_usec
+		scopes_usec["hud_heavy_usec"] = scopes_usec["ui_refresh_usec"] if heavy_refresh_due else 0
 		_record_mission_visible_frame_timing_snapshot(frame_started_usec, scopes_usec, true)
 
 

@@ -1026,6 +1026,8 @@ var _dropship_rotation_y: float = 0.0
 var _map_render_duration_msec: int = 0
 var _runtime_frame_timing_debug_enabled: bool = false
 var _runtime_frame_timing_debug_snapshot: Dictionary = {}
+var _last_fow_work_usec: int = -1
+var _fow_work_invocation_count: int = 0
 var _marker_count: int = 0
 var _compass_marker_count: int = 0
 var _patrol_segment_count: int = 0
@@ -1186,6 +1188,8 @@ func _process(delta: float) -> void:
 			"enabled": _runtime_frame_timing_debug_enabled,
 			"total_usec": Time.get_ticks_usec() - frame_started_usec,
 			"scopes_usec": scopes_usec.duplicate(true),
+			"conditional_scopes_usec": {"fow_work_usec": _last_fow_work_usec},
+			"counters": {"fow_work_invocation_count": _fow_work_invocation_count},
 			"read_only": true,
 			"ui_sets_gameplay_truth": false,
 			"sets_gameplay_truth": false,
@@ -1707,6 +1711,7 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	var next_signature: String = _build_fog_of_war_visual_signature(normalized_state)
 	if next_signature == _fog_of_war_state_signature:
 		return
+	var work_started_usec: int = Time.get_ticks_usec() if _runtime_frame_timing_debug_enabled else 0
 	_fog_of_war_state_signature = next_signature
 	_apply_fog_of_war_visual_state(normalized_state)
 	_rebuild_fog_of_war_visuals()
@@ -1716,6 +1721,9 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	_rebuild_drop_visuals()
 	_sync_unit_proxies(true)
 	_request_viewport_redraw()
+	if _runtime_frame_timing_debug_enabled:
+		_last_fow_work_usec = Time.get_ticks_usec() - work_started_usec
+		_fow_work_invocation_count += 1
 
 
 func set_fog_of_war_visual_state(fog_of_war_state: Dictionary) -> void:
