@@ -25,9 +25,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_navigation_snapshot_counts_path_queries() -> void:
 	var context: Dictionary = _make_simulation_context(_make_rect_positions(Vector2i(0, 0), Vector2i(9, 1)), {}, [])
 	var simulation_root = context["simulation_root"]

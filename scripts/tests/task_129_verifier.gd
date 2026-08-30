@@ -28,9 +28,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_cover_aware_path_reduces_exposure() -> void:
 	var registry = _make_cover_test_registry(6)
 	var pathfinder = TERRAIN_PATHFINDER_SCRIPT.new()

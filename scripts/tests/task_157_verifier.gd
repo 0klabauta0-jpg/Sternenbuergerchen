@@ -26,9 +26,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_editor_load_edit_save() -> void:
 	var editor: Node = await _create_editor()
 	if editor == null:

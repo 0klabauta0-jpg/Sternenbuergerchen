@@ -27,9 +27,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_theme_tokens_and_curated_assets() -> void:
 	var success_color: Color = TACTICAL_UI_THEME_SCRIPT.call("status_color", "success")
 	var danger_color: Color = TACTICAL_UI_THEME_SCRIPT.call("status_color", "danger")

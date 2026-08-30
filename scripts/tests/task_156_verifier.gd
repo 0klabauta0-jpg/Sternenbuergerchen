@@ -32,9 +32,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_roundtrip_load_save() -> void:
 	var scenario = MISSION_SCENARIO_DATA_SCRIPT.new(_valid_scenario_dict("roundtrip_contract"))
 	var validation: Dictionary = Dictionary(scenario.call("validate"))

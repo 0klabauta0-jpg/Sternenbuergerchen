@@ -23,9 +23,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_required_presets_parse_and_validate() -> void:
 	var required_ids: PackedStringArray = PRESET_LOADER_SCRIPT.get_required_preset_ids()
 	_assert(required_ids.size() == 5, "Preset library exposes all five TASK_155 preset ids")

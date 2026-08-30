@@ -23,9 +23,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_editor_saved_scenario_reaches_live_mission() -> void:
 	var scenario = MISSION_SCENARIO_DATA_SCRIPT.call("load_from_file", SMOKE_SCENARIO_PATH)
 	var validation: Dictionary = Dictionary(scenario.call("validate")) if scenario != null else {}

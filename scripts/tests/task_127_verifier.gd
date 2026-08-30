@@ -32,9 +32,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_same_cluster_uses_local_path() -> void:
 	var registry = _make_registry(_make_rect_positions(Vector2i(0, 0), Vector2i(3, 3)), {})
 	var graph = HPA_NAVIGATION_GRAPH_SCRIPT.new()

@@ -24,9 +24,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_valid_move_is_enqueued_server_side() -> void:
 	var context: Dictionary = _make_context()
 	var simulation_root: Node = context["simulation_root"]

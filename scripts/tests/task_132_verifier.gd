@@ -53,9 +53,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_asset_audit(audit: Dictionary, catalog) -> void:
 	var complete_families: Array = Array(audit.get("complete_families", []))
 	var curated_families: Array = Array(audit.get("curated_families", []))

@@ -24,9 +24,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_contract_lists_authority_boundaries() -> void:
 	var contract: Dictionary = Dictionary(MISSION_COMBAT_AUTHORITY_CONTRACT_SCRIPT.call("get_contract_snapshot"))
 	var playability_keys: Array = Array(contract.get("playability_snapshot_keys", []))
