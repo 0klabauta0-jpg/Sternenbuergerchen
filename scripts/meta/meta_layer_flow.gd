@@ -266,10 +266,6 @@ func get_active_mission():
 
 
 func get_homebase_to_mission_handoff_snapshot() -> Dictionary:
-	# The snapshot is diagnostic only, but it must report the active mission's
-	# authoritative Homebase-direct payload if hidden Homebase controls refreshed
-	# their local staging selection after the launch.
-	_sync_active_homebase_direct_selection_from_mission_setup()
 	var selected_mission: Dictionary = _get_selected_mission_definition()
 	var active_mission: Node = _active_mission
 	var mission_setup: Node = active_mission.get_node_or_null("MissionSetup") if active_mission != null else null
@@ -280,6 +276,14 @@ func get_homebase_to_mission_handoff_snapshot() -> Dictionary:
 	var checks: Array = []
 	var selected_unit_ids: Array = Array(_selected_unit_ids)
 	var selected_fireteam_ids: Array = Array(_selected_fireteam_ids)
+	# A handoff snapshot is read-only. For a Homebase-direct launch, report the
+	# instantiated MissionSetup payload instead of mutating the flow's retained
+	# UI selection while the mission is active.
+	if String(planning_state.get("mission_drop_source", "")).strip_edges().to_lower() == MISSION_DROP_SOURCE_HOMEBASE_DIRECT and mission_setup != null:
+		var mission_setup_selected_unit_ids: Array = Array(PackedStringArray(mission_setup.get("selected_team_unit_ids")))
+		if not mission_setup_selected_unit_ids.is_empty():
+			selected_unit_ids = mission_setup_selected_unit_ids
+			selected_fireteam_ids = Array(PackedStringArray(mission_setup.get("selected_team_fireteam_ids")))
 	var embarked_unit_ids: Array = Array(planning_state.get("embarked_unit_ids", []))
 	var mission_setup_unit_ids: Array = Array(mission_setup_snapshot.get("selected_team_unit_ids", []))
 	var mission_setup_fireteam_ids: Array = Array(mission_setup_snapshot.get("selected_team_fireteam_ids", []))
