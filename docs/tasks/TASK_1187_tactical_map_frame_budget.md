@@ -30,12 +30,15 @@ werden nur durch ein separates Fensterprofil belegt.
 
 ## Verifizierte Baseline
 
-- Finaler Serienlauf auf `2c82db0d4`: 3 Kalt- plus 5 Warmstarts ohne
-  Harness- oder Contract-Fehler.
+- Finaler Serienlauf auf `72ac241651ced0ec8ee1174a2e9d03aa67755327`: 3 Kalt-
+  plus 5 Warmstarts ohne Harness- oder Contract-Fehler, nach der
+  SimulationRoot- und Combat-Posture-Autoritaetsumstellung.
 - Der reale `grid_sweep`-Lauf hatte 11 aktive Runtime-Units, mindestens 600
-  Physik-Ticks je Fixture und mehr als 6.000 gemessene Process-Frames pro
+  Physik-Ticks je Fixture und 6.075 gemessene Process-Frames im letzten
   Warmstart.
 - Die roten Baseline-Budgets bleiben absichtlich sichtbar: Simulation/Combat,
   FoW, Proxy-Sync und LZ-Eingabe. Sie sind die Ausgangswerte für die
   nachfolgenden Hotpath-Tasks, nicht die Bedingung für einen grünen
-  Harness-Vertrag.
+  Harness-Vertrag. Im letzten Warmstart lag der Proxy-Sync bei 3,815 ms p95
+  und 5,466 ms p99; damit ist er ein eng abgegrenzter, reproduzierbar
+  vermessener Startpunkt für TASK_1188.
