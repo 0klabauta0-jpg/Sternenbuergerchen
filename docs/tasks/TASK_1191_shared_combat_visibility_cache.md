@@ -43,6 +43,7 @@ godot_console.exe --headless --path . --script scripts/tests/task_1191_shared_co
 godot_console.exe --headless --path . --script scripts/tests/task_162_combat_authority_contract_verifier.gd
 godot_console.exe --headless --path . --script scripts/tests/task_202_enemy_security_direction_and_los_patch.gd
 godot_console.exe --headless --path . --script scripts/tests/task_208_enemy_team_tactics_playability_smoke.gd
+godot_console.exe --headless --path . --script scripts/tests/task_218_simulation_combat_ai_tick_budget_pass.gd
 godot_console.exe --headless --path . --script scripts/tests/task_542_mission_first_contact_readability_pass.gd
 godot_console.exe --headless --path . --script scripts/tests/task_543_mission_first_engagement_feedback_pass.gd
 pwsh -NoProfile -File scripts/tests/run_task_1187_tactical_map_frame_budget.ps1 -Mode Measure -ColdRuns 3 -WarmRuns 5

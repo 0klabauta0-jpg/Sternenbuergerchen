@@ -49,9 +49,11 @@ func _run_tests() -> void:
 
 func _test_contract_is_present() -> void:
 	var source: String = FileAccess.get_file_as_string(DRIVER_SOURCE_PATH)
+	var fixture_harness_source: String = FileAccess.get_file_as_string("res://scripts/tests/simulation_combat_ai_tick_budget_harness.gd")
 	_assert(source.contains("COMBAT_VISIBILITY_CACHE_SCRIPT"), "Combat driver loads the shared visibility cache")
 	_assert(source.contains("combat_visibility_cache_path"), "Combat driver wires a derived cache node")
 	_assert(source.contains("contact_tracking_los_cache_status"), "Combat hotpath audit exposes cache status")
+	_assert(fixture_harness_source.contains("COMBAT_VISIBILITY_CACHE_SCRIPT") and fixture_harness_source.contains("combat_visibility_cache_path"), "16v12 performance fixture enables the shared visibility cache")
 
 
 func _test_same_tick_query_is_evaluated_once() -> void:
@@ -137,12 +139,7 @@ func _run_16v12_fixture(cache_enabled: bool) -> Dictionary:
 	# sides. Minimum-spacing is covered by the dedicated Task 1187 fixture and
 	# would otherwise only dominate this 600-tick visibility regression.
 	simulation_root.call("set_unit_minimum_spacing_enabled", false)
-	if cache_enabled:
-		var cache: Node = COMBAT_VISIBILITY_CACHE_SCRIPT.new()
-		cache.name = "CombatVisibilityCache"
-		scene.add_child(cache)
-		driver.set("combat_visibility_cache_path", NodePath("../CombatVisibilityCache"))
-	else:
+	if not cache_enabled:
 		driver.set("combat_visibility_cache_path", NodePath("../MissingCombatVisibilityCache"))
 	await process_frame
 	harness.call("_prime_state", context, true)

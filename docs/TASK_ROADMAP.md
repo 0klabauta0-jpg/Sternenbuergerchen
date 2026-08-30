@@ -15,7 +15,7 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ## TASK_1191 - Gemeinsamer Combat-Visibility-Cache (implementiert im Arbeitsstand)
 - Ergebnis: Eine ticklokale, abgeleitete `CombatVisibilityCache`-Node teilt reine Terrain-Occlusion zwischen Contact Tracking, Enemy Security und Fire-Decision-Resolver. Ihre Key-Reihenfolge bleibt absichtlich source-/target-gerichtet; Weltpositionen sichern Wall-Segment-LoS auch innerhalb derselben Grid-Zelle ab. Gameplay-Entscheidungen und Snapshots bleiben außerhalb des Caches.
-- Verifikation: TASK_1191 11/11, mit 16v12/600 Ticks, aktiver Bewegung, sichtbaren Cache-Hits und bit-exaktem Cache-an/aus-Oracle; TASK_162 23/23 und TASK_208 57/57 gruen. TASK_202 22/2 ist auf `dd69cbffc` identisch rot; TASK_543 erreichte im historischen Meta-Gesamtpfad keinen Abschluss und ist nicht als gruen gewertet.
+- Verifikation: TASK_1191 12/12, mit 16v12/600 Ticks, aktiver Bewegung, sichtbaren Cache-Hits und bit-exaktem Cache-an/aus-Oracle; TASK_162 23/23, TASK_208 57/57 und der cache-verdrahtete TASK_218 81/81 sind gruen. TASK_202 22/2 ist auf `dd69cbffc` identisch rot; TASK_543 erreichte im historischen Meta-Gesamtpfad keinen Abschluss und ist nicht als gruen gewertet.
 - Naechster Schritt: Synthetische First-Contact-/First-Fire-Abkuerzungen aus dem normalen Meta-Flow in eine explizite Release-Fixture auslagern, damit der Produktpfad keine Testmutationen enthaelt.
 
 ---

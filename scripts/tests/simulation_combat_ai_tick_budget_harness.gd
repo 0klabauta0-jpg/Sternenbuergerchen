@@ -7,6 +7,7 @@ const TERRAIN_REGISTRY_SCRIPT: GDScript = preload("res://scripts/terrain/terrain
 const TERRAIN_TILE_DATA_SCRIPT: GDScript = preload("res://scripts/terrain/terrain_tile_data.gd")
 const TEST_UNIT_SCRIPT: GDScript = preload("res://scripts/npc/test_unit.gd")
 const MISSION_COMBAT_LOOP_DRIVER_SCRIPT: GDScript = preload("res://scripts/tests/mission_combat_loop_driver.gd")
+const COMBAT_VISIBILITY_CACHE_SCRIPT: GDScript = preload("res://scripts/mission/combat_visibility_cache.gd")
 
 const DEFAULT_REPETITIONS: int = 3
 const TICKS_PER_RUN: int = 4
@@ -111,10 +112,14 @@ func _make_combat_context(scene_parent: Node, scenario_id: String, friendly_coun
 		simulation_root.call("register_known_unit", enemy.unit_id, enemy)
 		enemy_paths.append(NodePath("../%s" % String(enemy.name)))
 		enemy_units.append(enemy)
+	var combat_visibility_cache: Node = COMBAT_VISIBILITY_CACHE_SCRIPT.new()
+	combat_visibility_cache.name = "CombatVisibilityCache"
+	scene.add_child(combat_visibility_cache)
 	var combat_driver = MISSION_COMBAT_LOOP_DRIVER_SCRIPT.new()
 	combat_driver.name = "CombatDriver"
 	combat_driver.simulation_root_path = NodePath("../SimulationRoot")
 	combat_driver.terrain_registry_path = NodePath("../TerrainRegistry")
+	combat_driver.combat_visibility_cache_path = NodePath("../CombatVisibilityCache")
 	combat_driver.friendly_unit_paths = friendly_paths
 	combat_driver.enemy_unit_paths = enemy_paths
 	combat_driver.preview_mode = true
