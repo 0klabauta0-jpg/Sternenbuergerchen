@@ -29,9 +29,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_commander_command_supports_engage() -> void:
 	var command = COMMANDER_COMMAND_SCRIPT.new(
 		{

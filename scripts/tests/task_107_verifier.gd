@@ -22,9 +22,7 @@ func _run() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_resolver_builds_modifier_dict() -> void:
 	var resolver = LOADOUT_MODIFIER_RESOLVER_SCRIPT.new()
 	var modifiers_by_unit: Dictionary = resolver.resolve_for_member_loadouts(

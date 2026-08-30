@@ -20,9 +20,7 @@ func _run() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_patrol_data_contract_roundtrip() -> void:
 	var map_data = TERRAIN_MAP_DATA_SCRIPT.create_empty("patrol_test", Vector2i(4, 4), Vector2.ZERO, 64.0, 32.0)
 	map_data.set_patrol_path("enemy_delta", [Vector2(100.0, 120.0), Vector2(180.0, 160.0)])

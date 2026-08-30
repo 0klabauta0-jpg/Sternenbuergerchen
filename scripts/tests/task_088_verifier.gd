@@ -35,9 +35,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_leadership_bonus_applied() -> void:
 	var unit = _make_unit("u1", "ft1", false, 0.5, 0.8)
 	unit.apply_leadership_bonus(0.12)

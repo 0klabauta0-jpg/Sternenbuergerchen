@@ -22,9 +22,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_attack_area_assignments_keep_buddy_pairs_close() -> void:
 	var units: Array = [
 		_make_unit("buddy_lead", true, Vector2(-220.0, 96.0)),

@@ -20,9 +20,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_scene_has_active_mission_camera() -> void:
 	var scene: Node = MISSION_TEST_SCENE.instantiate()
 	root.add_child(scene)

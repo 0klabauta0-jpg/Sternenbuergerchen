@@ -22,9 +22,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_single_unit_keeps_anchor() -> void:
 	var leader = RUNTIME_LEADER_SCRIPT.new()
 	var unit = _make_unit("solo", false, Vector2.ZERO)

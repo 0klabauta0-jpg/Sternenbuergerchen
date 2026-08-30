@@ -33,9 +33,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_heal_effect_revives_before_bleedout() -> void:
 	var context: Dictionary = _make_simulation_context()
 	var simulation_root = context["simulation_root"]

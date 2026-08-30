@@ -36,9 +36,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_cautious_profile_mapping() -> void:
 	var leader = _make_unit("leader_cautious", "blue", true, 0.7, 0.8, ["cautious", "steady"])
 	var profile = FIRETEAM_BEHAVIOR_RESOLVER_SCRIPT.call("resolve_profile", "blue", [leader], leader, "flank", Vector2(240.0, 180.0), null)

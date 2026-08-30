@@ -23,9 +23,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_combat_effects_include_accuracy_multiplier() -> void:
 	var unit = _make_unit({"skill_accuracy": 0.8})
 	var effects: Dictionary = unit.get_combat_effects()
