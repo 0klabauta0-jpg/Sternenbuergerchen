@@ -48,6 +48,7 @@ foreach ($verifier in $verifiers) {
 		$process.WaitForExit()
 		$failures.Add("${verifier}: timeout after ${TimeoutSeconds}s")
 	}
+	$verifierExit = $process.ExitCode
 	$stdout = $stdoutTask.Result
 	$stderr = $stderrTask.Result
 	$combined = "$stdout`n$stderr"
@@ -55,8 +56,8 @@ foreach ($verifier in $verifiers) {
 	if (-not [string]::IsNullOrWhiteSpace($stderr)) {
 		$stderr.TrimEnd() | Write-Output
 	}
-	if ($process.ExitCode -ne 0 -or $combined -match "(?m)^\s*(FAIL|ERROR:.*FAIL)(:|$)") {
-		$failures.Add("${verifier}: functional exit=$($process.ExitCode) or FAIL output")
+	if ($verifierExit -ne 0 -or $combined -match "(?m)^\s*(FAIL|ERROR:.*FAIL)(:|$)") {
+		$failures.Add("${verifier}: functional exit=$verifierExit or FAIL output")
 	}
 	foreach ($line in ($combined -split "`r?`n")) {
 		$trimmed = $line.Trim()

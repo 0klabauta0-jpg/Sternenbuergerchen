@@ -26,6 +26,7 @@ func _initialize() -> void:
 	_check(gate_source.contains("ObjectDB instances leaked"), "Leak gate blocks ObjectDB cleanup warnings")
 	_check(gate_source.contains('"^ERROR:"'), "Leak gate blocks engine errors during cleanup")
 	_check(gate_source.contains("task_222_performance_regression_gate_and_manual_profile_checklist.gd"), "Leak gate covers TASK_222")
+	_check(gate_source.contains("$verifierExit = $process.ExitCode"), "Leak gate captures each verifier exit before later commands can overwrite it")
 	_finish()
 
 
