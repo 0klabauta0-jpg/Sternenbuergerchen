@@ -251,6 +251,7 @@ func _stage_within_budget() -> bool:
 		return true
 	_trace_status = "budget_exceeded"
 	_trace_blocker_stage = _stage_id
+	_fail("Stage budget exceeded: %s (%d ms > %d ms)" % [_stage_id, Time.get_ticks_msec() - _stage_started_msec, STAGE_BUDGET_MSEC])
 	_finish_stage("budget_exceeded")
 	return false
 
