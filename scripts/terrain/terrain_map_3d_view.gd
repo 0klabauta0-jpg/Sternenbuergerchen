@@ -886,6 +886,22 @@ var _space_kit_terrain_top_color: Color = Color.TRANSPARENT
 var _render_tile_by_grid: Dictionary = {}
 var _unit_nodes: Array = []
 var _unit_proxies_by_id: Dictionary = {}
+var _unit_proxy_runtime_by_id: Dictionary = {}
+var _unit_proxy_active_fire_event_by_unit_id: Dictionary = {}
+var _unit_proxy_contacts_by_fireteam_id: Dictionary = {}
+var _unit_proxy_contact_direction_by_unit_id: Dictionary = {}
+var _unit_proxy_fire_event_index_signature: String = ""
+var _unit_proxy_contact_index_revision: int = -1
+var _unit_proxy_rebuild_count: int = 0
+var _unit_proxy_badge_rebuild_count: int = 0
+var _unit_proxy_recursive_node_lookup_count: int = 0
+var _unit_proxy_runtime_cache_build_count: int = 0
+var _unit_proxy_fire_event_index_build_count: int = 0
+var _unit_proxy_contact_index_build_count: int = 0
+var _unit_proxy_contact_direction_resolution_count: int = 0
+var _unit_proxy_idle_static_state_skip_count: int = 0
+var _unit_proxy_cached_static_summary_read_count: int = 0
+var _unit_proxy_visual_signature_build_count: int = 0
 var _selected_grid_positions: Array = []
 var _order_payload: Dictionary = {}
 var _area_order_preview_payload: Dictionary = {}
@@ -1719,7 +1735,7 @@ func set_fog_of_war_state(fog_of_war_state: Dictionary) -> void:
 	_rebuild_contact_visuals()
 	_rebuild_contact_density_heatmap(true)
 	_rebuild_drop_visuals()
-	_sync_unit_proxies(true)
+	_sync_unit_proxies(false)
 	_request_viewport_redraw()
 	if _runtime_frame_timing_debug_enabled:
 		_last_fow_work_usec = Time.get_ticks_usec() - work_started_usec
@@ -2101,6 +2117,22 @@ func set_runtime_frame_timing_debug_enabled(enabled: bool) -> void:
 
 func get_runtime_frame_timing_debug_snapshot() -> Dictionary:
 	return _runtime_frame_timing_debug_snapshot.duplicate(true)
+
+
+func get_unit_proxy_sync_diagnostics() -> Dictionary:
+	return {
+		"runtime_cache_count": _unit_proxy_runtime_by_id.size(),
+		"proxy_rebuild_count": _unit_proxy_rebuild_count,
+		"badge_rebuild_count": _unit_proxy_badge_rebuild_count,
+		"recursive_node_lookup_count": _unit_proxy_recursive_node_lookup_count,
+		"runtime_cache_build_count": _unit_proxy_runtime_cache_build_count,
+		"fire_event_index_build_count": _unit_proxy_fire_event_index_build_count,
+		"contact_index_build_count": _unit_proxy_contact_index_build_count,
+		"contact_direction_resolution_count": _unit_proxy_contact_direction_resolution_count,
+		"idle_static_state_skip_count": _unit_proxy_idle_static_state_skip_count,
+		"cached_static_summary_read_count": _unit_proxy_cached_static_summary_read_count,
+		"visual_signature_build_count": _unit_proxy_visual_signature_build_count,
+	}
 
 
 func get_map_visual_bounds_snapshot() -> Dictionary:
@@ -7614,17 +7646,16 @@ func _resolve_unit_visible_contact_direction(unit: Node, current_world_position:
 	var fireteam_id: String = _get_unit_fireteam_id(unit)
 	if fireteam_id.is_empty():
 		return Vector2.ZERO
+	var unit_id: String = _get_unit_id(unit)
+	var cached: Dictionary = Dictionary(_unit_proxy_contact_direction_by_unit_id.get(unit_id, {}))
+	var cached_position: Variant = cached.get("world_position", null)
+	if int(cached.get("contact_revision", -1)) == _unit_proxy_contact_index_revision and typeof(cached_position) == TYPE_VECTOR2 and Vector2(cached_position).distance_squared_to(current_world_position) <= 0.0001:
+		return Vector2(cached.get("direction", Vector2.ZERO))
 	var best_position: Vector2 = Vector2.ZERO
 	var best_distance_squared: float = INF
-	for contact_variant in _contact_entries:
-		if typeof(contact_variant) != TYPE_DICTIONARY:
-			continue
+	var indexed_contacts: Array = Array(_unit_proxy_contacts_by_fireteam_id.get(fireteam_id, []))
+	for contact_variant in indexed_contacts:
 		var contact: Dictionary = Dictionary(contact_variant)
-		if String(contact.get("fireteam_id", "")).strip_edges().to_lower() != fireteam_id:
-			continue
-		var detection_state: String = String(contact.get("detection_state", "")).strip_edges().to_lower()
-		if detection_state != "spotted" and detection_state != "confirmed":
-			continue
 		var position_variant: Variant = contact.get("last_known_position", contact.get("position", null))
 		if typeof(position_variant) != TYPE_VECTOR2:
 			continue
@@ -7634,9 +7665,15 @@ func _resolve_unit_visible_contact_direction(unit: Node, current_world_position:
 			continue
 		best_distance_squared = distance_squared
 		best_position = contact_position
-	if best_distance_squared == INF:
-		return Vector2.ZERO
-	return (best_position - current_world_position).normalized()
+	var direction: Vector2 = Vector2.ZERO if best_distance_squared == INF else (best_position - current_world_position).normalized()
+	if not unit_id.is_empty():
+		_unit_proxy_contact_direction_by_unit_id[unit_id] = {
+			"contact_revision": _unit_proxy_contact_index_revision,
+			"world_position": current_world_position,
+			"direction": direction,
+		}
+	_unit_proxy_contact_direction_resolution_count += 1
+	return direction
 
 
 func _resolve_unit_motion_or_target_direction(proxy: Node3D, unit: Node, current_world_position: Vector2) -> Vector2:
@@ -10254,10 +10291,140 @@ func _get_surface_type_for_world_position(world_position: Vector2) -> String:
 	return surface_type
 
 
+func _ensure_unit_proxy_payload_indexes() -> void:
+	var fire_event_signature: String = "%s|%s" % [_order_visual_signature, _fog_of_war_state_signature]
+	if fire_event_signature != _unit_proxy_fire_event_index_signature:
+		_unit_proxy_active_fire_event_by_unit_id.clear()
+		var fire_events: Array = Array(_order_payload.get("fire_event_dicts", []))
+		for index in range(fire_events.size() - 1, -1, -1):
+			var fire_event_variant: Variant = fire_events[index]
+			if typeof(fire_event_variant) != TYPE_DICTIONARY:
+				continue
+			var fire_event: Dictionary = Dictionary(fire_event_variant)
+			var attacker_unit_id: String = String(fire_event.get("attacker_unit_id", "")).strip_edges()
+			if attacker_unit_id.is_empty() or _unit_proxy_active_fire_event_by_unit_id.has(attacker_unit_id):
+				continue
+			if _fow_allows_fire_event_visual(fire_event):
+				_unit_proxy_active_fire_event_by_unit_id[attacker_unit_id] = fire_event
+		_unit_proxy_fire_event_index_signature = fire_event_signature
+		_unit_proxy_fire_event_index_build_count += 1
+
+	if _unit_proxy_contact_index_revision == _contact_payload_apply_count:
+		return
+	_unit_proxy_contacts_by_fireteam_id.clear()
+	_unit_proxy_contact_direction_by_unit_id.clear()
+	for contact_variant in _contact_entries:
+		if typeof(contact_variant) != TYPE_DICTIONARY:
+			continue
+		var contact: Dictionary = Dictionary(contact_variant)
+		var fireteam_id: String = String(contact.get("fireteam_id", "")).strip_edges().to_lower()
+		var detection_state: String = String(contact.get("detection_state", "")).strip_edges().to_lower()
+		var position_variant: Variant = contact.get("last_known_position", contact.get("position", null))
+		if fireteam_id.is_empty() or (detection_state != "spotted" and detection_state != "confirmed") or typeof(position_variant) != TYPE_VECTOR2:
+			continue
+		var entries: Array = Array(_unit_proxy_contacts_by_fireteam_id.get(fireteam_id, []))
+		entries.append(contact)
+		_unit_proxy_contacts_by_fireteam_id[fireteam_id] = entries
+	_unit_proxy_contact_index_revision = _contact_payload_apply_count
+	_unit_proxy_contact_index_build_count += 1
+
+
+func _get_indexed_active_fire_event_for_unit(unit_id: String) -> Dictionary:
+	var normalized_unit_id: String = unit_id.strip_edges()
+	if normalized_unit_id.is_empty():
+		return {}
+	var fire_event: Dictionary = Dictionary(_unit_proxy_active_fire_event_by_unit_id.get(normalized_unit_id, {}))
+	return fire_event
+
+
+func _has_valid_unit_proxy_runtime(unit_id: String, proxy: Node3D) -> bool:
+	var runtime: Dictionary = Dictionary(_unit_proxy_runtime_by_id.get(unit_id, {}))
+	if runtime.is_empty() or runtime.get("proxy", null) != proxy:
+		return false
+	for node_key in ["animation_player", "skeleton", "weapon_node", "model_root", "status_badge"]:
+		var cached_node: Variant = runtime.get(node_key, null)
+		if cached_node != null and cached_node is Object and not is_instance_valid(cached_node):
+			return false
+	return true
+
+
+func _get_unit_proxy_runtime(unit_id: String, proxy: Node3D) -> Dictionary:
+	if not _has_valid_unit_proxy_runtime(unit_id, proxy):
+		_cache_unit_proxy_runtime(unit_id, proxy, String(proxy.get_meta("unit_visual_signature", "")), "")
+	return Dictionary(_unit_proxy_runtime_by_id.get(unit_id, {}))
+
+
+func _cache_unit_proxy_runtime(unit_id: String, proxy: Node3D, visual_revision: String, visual_input_signature: String) -> void:
+	if unit_id.is_empty() or proxy == null or not is_instance_valid(proxy):
+		return
+	_unit_proxy_recursive_node_lookup_count += 4
+	_unit_proxy_runtime_by_id[unit_id] = {
+		"proxy": proxy,
+		"animation_player": _find_unit_visual_animation_player(proxy),
+		"skeleton": _find_first_skeleton(proxy),
+		"weapon_node": _find_unit_blaster_visual_node(proxy),
+		"model_root": _find_unit_model_root(proxy),
+		"status_badge": proxy.get_node_or_null("UnitStateBadge") as Label3D,
+		"visual_revision": visual_revision,
+		"visual_input_signature": visual_input_signature,
+		"static_summary": _build_unit_proxy_static_summary(proxy),
+	}
+	_unit_proxy_runtime_cache_build_count += 1
+
+
+func _build_unit_proxy_static_summary(proxy: Node3D) -> Dictionary:
+	if proxy == null or not is_instance_valid(proxy):
+		return {}
+	return {
+		"uses_unit_texture": bool(proxy.get_meta("uses_unit_texture", false)),
+		"uses_kenney_model": bool(proxy.get_meta("uses_kenney_model", false)),
+		"uses_animated_character_model": bool(proxy.get_meta("uses_animated_character_model", false)),
+		"unit_visual_error": bool(proxy.get_meta("unit_visual_error", false)),
+		"unit_animation_player_available": bool(proxy.get_meta("unit_animation_player_available", false)),
+		"unit_animation_error": bool(proxy.get_meta("unit_animation_error", false)),
+		"unit_helmet_attachment_available": bool(proxy.get_meta("unit_helmet_attachment_available", false)),
+		"unit_helmet_error": bool(proxy.get_meta("unit_helmet_error", false)),
+		"unit_skeleton_available": bool(proxy.get_meta("unit_skeleton_available", false)),
+		"unit_socket_count": int(proxy.get_meta("unit_socket_count", 0)),
+		"unit_socket_fallback_count": int(proxy.get_meta("unit_socket_fallback_count", 0)),
+		"unit_head_socket_available": bool(proxy.get_meta("unit_head_socket_available", false)),
+		"unit_right_hand_socket_available": bool(proxy.get_meta("unit_right_hand_socket_available", false)),
+		"unit_animation_retarget_fallback_count": int(proxy.get_meta("unit_animation_retarget_fallback_count", 0)),
+		"unit_animation_heading_sanitized_track_count": int(proxy.get_meta("unit_animation_heading_sanitized_track_count", 0)),
+		"unit_blaster_attachment_available": bool(proxy.get_meta("unit_blaster_attachment_available", false)),
+		"unit_blaster_error": bool(proxy.get_meta("unit_blaster_error", false)),
+		"unit_visual_loadout_available": bool(proxy.get_meta("unit_visual_loadout_available", false)),
+		"unit_visual_loadout_error": bool(proxy.get_meta("unit_visual_loadout_error", false)),
+		"missing_unit_model": bool(proxy.get_meta("missing_unit_model", false)),
+	}
+
+
+func _update_unit_proxy_runtime_visual_revision(unit_id: String, proxy: Node3D, visual_revision: String, visual_input_signature: String) -> void:
+	if unit_id.is_empty() or proxy == null or not is_instance_valid(proxy):
+		return
+	var runtime: Dictionary = Dictionary(_unit_proxy_runtime_by_id.get(unit_id, {}))
+	if runtime.is_empty() or runtime.get("proxy", null) != proxy:
+		return
+	runtime["visual_revision"] = visual_revision
+	runtime["visual_input_signature"] = visual_input_signature
+	_unit_proxy_runtime_by_id[unit_id] = runtime
+
+
+func _set_cached_unit_proxy_status_badge(unit_id: String, label: Label3D) -> void:
+	if unit_id.is_empty():
+		return
+	var runtime: Dictionary = Dictionary(_unit_proxy_runtime_by_id.get(unit_id, {}))
+	if runtime.is_empty():
+		return
+	runtime["status_badge"] = label
+	_unit_proxy_runtime_by_id[unit_id] = runtime
+
+
 func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> void:
 	_ensure_nodes()
 	if _unit_root == null:
 		return
+	_ensure_unit_proxy_payload_indexes()
 	var seen_ids: Dictionary = {}
 	var unit_texture_count: int = 0
 	var unit_model_count: int = 0
@@ -10292,18 +10459,34 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 			continue
 		seen_ids[unit_id] = true
 		var proxy := _unit_proxies_by_id.get(unit_id, null) as Node3D
-		var unit_visual_signature: String = _build_unit_visual_signature(unit)
+		var cached_proxy_runtime: Dictionary = Dictionary(_unit_proxy_runtime_by_id.get(unit_id, {}))
+		var visual_input_signature: String = _build_unit_visual_input_signature(unit)
+		var unit_visual_signature: String = String(cached_proxy_runtime.get("visual_revision", ""))
+		var cached_visual_input_signature: String = String(cached_proxy_runtime.get("visual_input_signature", ""))
+		var visual_input_signature_changed: bool = cached_visual_input_signature != visual_input_signature
+		if unit_visual_signature.is_empty() or visual_input_signature_changed:
+			unit_visual_signature = _build_unit_visual_signature(unit)
+			_unit_proxy_visual_signature_build_count += 1
+			_update_unit_proxy_runtime_visual_revision(unit_id, proxy, unit_visual_signature, visual_input_signature)
 		var proxy_visual_signature: String = String(proxy.get_meta("unit_visual_signature", "")) if proxy != null and is_instance_valid(proxy) else ""
 		var visual_signature_changed: bool = not proxy_visual_signature.is_empty() and proxy_visual_signature != unit_visual_signature
 		if proxy == null or force_rebuild or not is_instance_valid(proxy) or visual_signature_changed:
 			if proxy != null and is_instance_valid(proxy):
 				proxy.queue_free()
+			_unit_proxy_runtime_by_id.erase(unit_id)
+			_unit_proxy_contact_direction_by_unit_id.erase(unit_id)
 			proxy = _create_unit_proxy(unit)
 			proxy.name = "UnitProxy_%s" % unit_id
 			_unit_root.add_child(proxy)
 			_unit_proxies_by_id[unit_id] = proxy
+			_cache_unit_proxy_runtime(unit_id, proxy, unit_visual_signature, visual_input_signature)
+			_unit_proxy_rebuild_count += 1
 			changed = true
-		proxy.set_meta("unit_visual_signature", unit_visual_signature)
+		elif not _has_valid_unit_proxy_runtime(unit_id, proxy):
+			_cache_unit_proxy_runtime(unit_id, proxy, unit_visual_signature, visual_input_signature)
+		var proxy_runtime: Dictionary = _get_unit_proxy_runtime(unit_id, proxy)
+		if String(proxy.get_meta("unit_visual_signature", "")) != unit_visual_signature:
+			proxy.set_meta("unit_visual_signature", unit_visual_signature)
 		var base_visible: bool = _is_unit_base_world_visible(unit)
 		var fow_allowed: bool = _fow_allows_unit_proxy(unit)
 		if base_visible and not fow_allowed:
@@ -10312,40 +10495,82 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		if proxy.visible != next_visible:
 			changed = true
 		proxy.visible = next_visible
-		proxy.set_meta("unit_id", unit_id)
-		proxy.set_meta("team_id", _get_unit_team_id(unit))
-		proxy.set_meta("vital_state", _get_unit_vital_state(unit))
-		proxy.set_meta("overwatch_ready", bool(unit.get_meta("overwatch_ready", false)) if unit != null and unit.has_meta("overwatch_ready") else false)
-		proxy.set_meta("overwatch_shot_ready", bool(unit.get_meta("overwatch_shot_ready", false)) if unit != null and unit.has_meta("overwatch_shot_ready") else false)
-		proxy.set_meta("overwatch_cooldown_remaining_ticks", int(unit.get_meta("overwatch_cooldown_remaining_ticks", 0)) if unit != null and unit.has_meta("overwatch_cooldown_remaining_ticks") else 0)
-		proxy.set_meta("unit_security_facing_active", bool(unit.get_meta("security_facing_active", false)) if unit != null and unit.has_meta("security_facing_active") else false)
-		proxy.set_meta("unit_security_facing_angle", float(unit.get_meta("security_facing_angle", 0.0)) if unit != null and unit.has_meta("security_facing_angle") else 0.0)
-		proxy.set_meta("unit_security_coverage_role", String(unit.get_meta("security_coverage_role", "")) if unit != null and unit.has_meta("security_coverage_role") else "")
-		var active_fire_event: Dictionary = _get_active_fire_event_for_unit(unit_id)
+		var active_fire_event: Dictionary = _get_indexed_active_fire_event_for_unit(unit_id)
 		var runtime_posture: Dictionary = _get_unit_runtime_posture_snapshot(unit)
 		var runtime_aim_readiness_percent: float = float(runtime_posture.get("aim_readiness_percent", 0.0))
 		var displayed_weapon_posture: String = _resolve_displayed_weapon_posture_from_readiness(active_fire_event, String(runtime_posture.get("weapon_posture", "lowered")), runtime_aim_readiness_percent)
 		var displayed_movement_posture: String = "engage" if not active_fire_event.is_empty() else String(runtime_posture.get("movement_posture", "idle"))
-		proxy.set_meta("unit_movement_posture", displayed_movement_posture)
-		proxy.set_meta("unit_weapon_posture", displayed_weapon_posture)
-		proxy.set_meta("unit_runtime_weapon_posture", String(runtime_posture.get("weapon_posture", "lowered")))
-		proxy.set_meta("unit_posture_policy_id", String(runtime_posture.get("posture_policy_id", "")))
-		proxy.set_meta("unit_sight_range_factor", float(runtime_posture.get("sight_range_factor", 1.0)))
-		proxy.set_meta("unit_aim_readiness_percent", runtime_aim_readiness_percent)
-		proxy.set_meta("unit_aim_readiness_visible_override", active_fire_event.is_empty() and displayed_weapon_posture != String(runtime_posture.get("weapon_posture", "lowered")))
-		proxy.set_meta("unit_posture_source", "fire_event" if not active_fire_event.is_empty() else "runtime")
-		proxy.set_meta("unit_aim_pose_active", displayed_weapon_posture == "aimed")
-		proxy.set_meta("unit_ready_pose_active", displayed_weapon_posture == "ready")
-		proxy.set_meta("unit_aim_pose_source_event_id", String(active_fire_event.get("event_id", "")))
-		proxy.set_meta("unit_aim_pose_target_unit_id", String(active_fire_event.get("target_unit_id", "")))
+		var unit_team_id: String = _get_unit_team_id(unit)
+		var unit_vital_state: String = _get_unit_vital_state(unit)
+		var overwatch_ready: bool = bool(unit.get_meta("overwatch_ready", false)) if unit != null and unit.has_meta("overwatch_ready") else false
+		var overwatch_shot_ready: bool = bool(unit.get_meta("overwatch_shot_ready", false)) if unit != null and unit.has_meta("overwatch_shot_ready") else false
+		var overwatch_cooldown_remaining_ticks: int = int(unit.get_meta("overwatch_cooldown_remaining_ticks", 0)) if unit != null and unit.has_meta("overwatch_cooldown_remaining_ticks") else 0
+		var security_facing_active: bool = bool(unit.get_meta("security_facing_active", false)) if unit != null and unit.has_meta("security_facing_active") else false
+		var security_facing_angle: float = float(unit.get_meta("security_facing_angle", 0.0)) if unit != null and unit.has_meta("security_facing_angle") else 0.0
+		var security_coverage_role: String = String(unit.get_meta("security_coverage_role", "")) if unit != null and unit.has_meta("security_coverage_role") else ""
+		var runtime_weapon_posture: String = String(runtime_posture.get("weapon_posture", "lowered"))
+		var posture_policy_id: String = String(runtime_posture.get("posture_policy_id", ""))
+		var sight_range_factor: float = float(runtime_posture.get("sight_range_factor", 1.0))
+		var aim_readiness_visible_override: bool = active_fire_event.is_empty() and displayed_weapon_posture != runtime_weapon_posture
+		var posture_source: String = "fire_event" if not active_fire_event.is_empty() else "runtime"
+		var aim_pose_source_event_id: String = String(active_fire_event.get("event_id", ""))
+		var aim_pose_target_unit_id: String = String(active_fire_event.get("target_unit_id", ""))
+		var static_state_signature: String = "%s|%s|%s|%s|%s|%d|%s|%.2f|%s|%s|%s|%s|%s|%.3f|%.2f|%s|%s|%s|%s" % [
+			unit_id,
+			unit_team_id,
+			unit_vital_state,
+			str(overwatch_ready),
+			str(overwatch_shot_ready),
+			overwatch_cooldown_remaining_ticks,
+			str(security_facing_active),
+			security_facing_angle,
+			security_coverage_role,
+			displayed_movement_posture,
+			displayed_weapon_posture,
+			runtime_weapon_posture,
+			posture_policy_id,
+			sight_range_factor,
+			runtime_aim_readiness_percent,
+			str(aim_readiness_visible_override),
+			posture_source,
+			aim_pose_source_event_id,
+			aim_pose_target_unit_id,
+		]
+		if String(proxy.get_meta("unit_proxy_static_state_signature", "")) != static_state_signature:
+			proxy.set_meta("unit_proxy_static_state_signature", static_state_signature)
+			proxy.set_meta("unit_id", unit_id)
+			proxy.set_meta("team_id", unit_team_id)
+			proxy.set_meta("vital_state", unit_vital_state)
+			proxy.set_meta("overwatch_ready", overwatch_ready)
+			proxy.set_meta("overwatch_shot_ready", overwatch_shot_ready)
+			proxy.set_meta("overwatch_cooldown_remaining_ticks", overwatch_cooldown_remaining_ticks)
+			proxy.set_meta("unit_security_facing_active", security_facing_active)
+			proxy.set_meta("unit_security_facing_angle", security_facing_angle)
+			proxy.set_meta("unit_security_coverage_role", security_coverage_role)
+			proxy.set_meta("unit_movement_posture", displayed_movement_posture)
+			proxy.set_meta("unit_weapon_posture", displayed_weapon_posture)
+			proxy.set_meta("unit_runtime_weapon_posture", runtime_weapon_posture)
+			proxy.set_meta("unit_posture_policy_id", posture_policy_id)
+			proxy.set_meta("unit_sight_range_factor", sight_range_factor)
+			proxy.set_meta("unit_aim_readiness_percent", runtime_aim_readiness_percent)
+			proxy.set_meta("unit_aim_readiness_visible_override", aim_readiness_visible_override)
+			proxy.set_meta("unit_posture_source", posture_source)
+			proxy.set_meta("unit_aim_pose_active", displayed_weapon_posture == "aimed")
+			proxy.set_meta("unit_ready_pose_active", displayed_weapon_posture == "ready")
+			proxy.set_meta("unit_aim_pose_source_event_id", aim_pose_source_event_id)
+			proxy.set_meta("unit_aim_pose_target_unit_id", aim_pose_target_unit_id)
+		else:
+			_unit_proxy_idle_static_state_skip_count += 1
 		var unit_is_moving: bool = false
 		var weapon_pose_direction: Vector2 = Vector2.ZERO
+		var visible_contact_direction: Vector2 = Vector2.ZERO
 		if unit is Node2D:
 			var unit_world_position: Vector2 = (unit as Node2D).global_position
 			if not active_fire_event.is_empty():
 				weapon_pose_direction = _get_fire_event_direction_for_unit(active_fire_event, unit_world_position)
 			if weapon_pose_direction.length_squared() <= 0.0001:
-				weapon_pose_direction = _resolve_unit_visible_contact_direction(unit, unit_world_position)
+				visible_contact_direction = _resolve_unit_visible_contact_direction(unit, unit_world_position)
+				weapon_pose_direction = visible_contact_direction
 			if weapon_pose_direction.length_squared() <= 0.0001:
 				weapon_pose_direction = _resolve_unit_motion_or_target_direction(proxy, unit, unit_world_position)
 			if weapon_pose_direction.length_squared() <= 0.0001:
@@ -10362,7 +10587,7 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				proxy.position = next_position
 			else:
 				proxy.position = proxy.position.lerp(next_position, clampf(delta * UNIT_PROXY_SMOOTH_SPEED, 0.0, 1.0))
-			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position, active_fire_event)
+			var next_rotation_y: float = _get_unit_proxy_rotation_y(proxy, unit, unit_world_position, active_fire_event, visible_contact_direction)
 			if absf(wrapf(proxy.rotation_degrees.y - next_rotation_y, -180.0, 180.0)) > 0.01:
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
@@ -10375,53 +10600,63 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 				changed = true
 			proxy.rotation_degrees.y = next_rotation_y
 		proxy.set_meta("last_rotation_y", proxy.rotation_degrees.y)
-		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty(), delta, displayed_weapon_posture, displayed_movement_posture):
+		if _update_unit_visual_animation(proxy, unit_is_moving, not active_fire_event.is_empty(), delta, displayed_weapon_posture, displayed_movement_posture, proxy_runtime.get("animation_player", null) as AnimationPlayer):
 			changed = true
-		if _update_unit_weapon_aim_pose(proxy, active_fire_event, displayed_weapon_posture, weapon_pose_direction):
-			changed = true
-		if _update_unit_vital_visual(proxy, unit):
-			changed = true
-		if _update_unit_status_badge(proxy, unit):
-			unit_status_badge_count += 1
+		var visual_payload_signature: String = _build_unit_proxy_visual_payload_signature(unit, active_fire_event, displayed_weapon_posture, displayed_movement_posture, weapon_pose_direction, proxy.rotation_degrees.y)
+		var visual_payload_changed: bool = String(proxy.get_meta("unit_proxy_visual_payload_signature", "")) != visual_payload_signature
+		if visual_payload_changed:
+			proxy.set_meta("unit_proxy_visual_payload_signature", visual_payload_signature)
+			if _update_unit_weapon_aim_pose(proxy, active_fire_event, displayed_weapon_posture, weapon_pose_direction, proxy_runtime.get("weapon_node", null) as Node3D, proxy_runtime.get("skeleton", null) as Skeleton3D, proxy_runtime.get("animation_player", null) as AnimationPlayer):
+				changed = true
+			if _update_unit_vital_visual(proxy, unit, proxy_runtime.get("model_root", null) as Node3D):
+				changed = true
+			if _update_unit_status_badge(proxy, unit, proxy_runtime.get("status_badge", null) as Label3D, unit_id):
+				unit_status_badge_count += 1
+		else:
+			var cached_badge: Label3D = proxy_runtime.get("status_badge", null) as Label3D
+			if cached_badge != null and is_instance_valid(cached_badge) and cached_badge.visible:
+				unit_status_badge_count += 1
 		if bool(proxy.get_meta("unit_status_badge_suppressed_by_declutter", false)):
 			world_label_declutter_unit_badge_suppressed_count += 1
-		if bool(proxy.get_meta("uses_unit_texture", false)):
+		var static_summary: Dictionary = Dictionary(proxy_runtime.get("static_summary", {}))
+		_unit_proxy_cached_static_summary_read_count += 1
+		if bool(static_summary.get("uses_unit_texture", false)):
 			unit_texture_count += 1
-		if bool(proxy.get_meta("uses_kenney_model", false)):
+		if bool(static_summary.get("uses_kenney_model", false)):
 			unit_model_count += 1
-		if bool(proxy.get_meta("uses_animated_character_model", false)):
+		if bool(static_summary.get("uses_animated_character_model", false)):
 			animated_unit_model_count += 1
-			if _get_unit_team_id(unit) != "team_alpha":
+			if unit_team_id != "team_alpha":
 				enemy_animated_unit_model_count += 1
-		if bool(proxy.get_meta("unit_visual_error", false)):
+		if bool(static_summary.get("unit_visual_error", false)):
 			unit_visual_error_count += 1
-		if bool(proxy.get_meta("unit_animation_player_available", false)):
+		if bool(static_summary.get("unit_animation_player_available", false)):
 			unit_animation_player_count += 1
-		if bool(proxy.get_meta("unit_animation_error", false)):
+		if bool(static_summary.get("unit_animation_error", false)):
 			unit_animation_error_count += 1
-		if bool(proxy.get_meta("unit_helmet_attachment_available", false)):
+		if bool(static_summary.get("unit_helmet_attachment_available", false)):
 			unit_helmet_attachment_count += 1
-		if bool(proxy.get_meta("unit_helmet_error", false)):
+		if bool(static_summary.get("unit_helmet_error", false)):
 			unit_helmet_error_count += 1
-		if bool(proxy.get_meta("unit_skeleton_available", false)):
+		if bool(static_summary.get("unit_skeleton_available", false)):
 			unit_skeleton_count += 1
-		unit_socket_count += int(proxy.get_meta("unit_socket_count", 0))
-		unit_socket_fallback_count += int(proxy.get_meta("unit_socket_fallback_count", 0))
-		if bool(proxy.get_meta("unit_head_socket_available", false)):
+		unit_socket_count += int(static_summary.get("unit_socket_count", 0))
+		unit_socket_fallback_count += int(static_summary.get("unit_socket_fallback_count", 0))
+		if bool(static_summary.get("unit_head_socket_available", false)):
 			unit_head_socket_count += 1
-		if bool(proxy.get_meta("unit_right_hand_socket_available", false)):
+		if bool(static_summary.get("unit_right_hand_socket_available", false)):
 			unit_right_hand_socket_count += 1
-		unit_animation_retarget_fallback_count += int(proxy.get_meta("unit_animation_retarget_fallback_count", 0))
-		unit_animation_heading_sanitized_track_count += int(proxy.get_meta("unit_animation_heading_sanitized_track_count", 0))
-		if bool(proxy.get_meta("unit_blaster_attachment_available", false)):
+		unit_animation_retarget_fallback_count += int(static_summary.get("unit_animation_retarget_fallback_count", 0))
+		unit_animation_heading_sanitized_track_count += int(static_summary.get("unit_animation_heading_sanitized_track_count", 0))
+		if bool(static_summary.get("unit_blaster_attachment_available", false)):
 			unit_blaster_attachment_count += 1
-		if bool(proxy.get_meta("unit_blaster_error", false)):
+		if bool(static_summary.get("unit_blaster_error", false)):
 			unit_blaster_error_count += 1
-		if bool(proxy.get_meta("unit_visual_loadout_available", false)):
+		if bool(static_summary.get("unit_visual_loadout_available", false)):
 			unit_visual_loadout_count += 1
-		if bool(proxy.get_meta("unit_visual_loadout_error", false)):
+		if bool(static_summary.get("unit_visual_loadout_error", false)):
 			unit_visual_loadout_error_count += 1
-		if bool(proxy.get_meta("missing_unit_model", false)):
+		if bool(static_summary.get("missing_unit_model", false)):
 			missing_unit_model_count += 1
 	for unit_id_variant in _unit_proxies_by_id.keys():
 		var unit_id := String(unit_id_variant)
@@ -10431,6 +10666,8 @@ func _sync_unit_proxies(force_rebuild: bool = false, delta: float = -1.0) -> voi
 		if proxy_to_remove != null and is_instance_valid(proxy_to_remove):
 			proxy_to_remove.queue_free()
 		_unit_proxies_by_id.erase(unit_id)
+		_unit_proxy_runtime_by_id.erase(unit_id)
+		_unit_proxy_contact_direction_by_unit_id.erase(unit_id)
 		changed = true
 	if _unit_texture_count != unit_texture_count:
 		changed = true
@@ -10558,6 +10795,42 @@ func _build_unit_visual_signature(unit: Node) -> String:
 	return "|".join(parts)
 
 
+func _build_unit_visual_input_signature(unit: Node) -> String:
+	var parts: PackedStringArray = PackedStringArray([
+		_get_unit_id(unit),
+		_get_unit_team_id(unit),
+		String(unit.call("get_weapon_1_id")) if unit != null and unit.has_method("get_weapon_1_id") else "",
+		String(unit.call("get_weapon_2_id")) if unit != null and unit.has_method("get_weapon_2_id") else "",
+	])
+	if unit != null:
+		for meta_key in ["visual_archetype_id", "enemy_visual_archetype_id", "visual_archetype", "enemy_visual_archetype"]:
+			if unit.has_meta(meta_key):
+				parts.append("%s:%s" % [meta_key, var_to_str(unit.get_meta(meta_key))])
+		if unit.has_meta("enemy_tactics_config"):
+			var tactics_variant: Variant = unit.get_meta("enemy_tactics_config")
+			if typeof(tactics_variant) == TYPE_DICTIONARY:
+				parts.append("enemy_tactics_config.visual_archetype:%s" % String(Dictionary(tactics_variant).get("visual_archetype", "")).strip_edges().to_lower())
+	return "|".join(parts)
+
+
+func _build_unit_proxy_visual_payload_signature(unit: Node, active_fire_event: Dictionary, weapon_posture: String, movement_posture: String, weapon_pose_direction: Vector2, proxy_rotation_y: float) -> String:
+	var damage_context: Dictionary = _get_unit_last_damage_context(unit)
+	return "%s|%d|%d|%s|%s|%s|%.3f|%.3f|%.2f|%s|%s|%s" % [
+		_get_unit_vital_state(unit),
+		_get_unit_health_points(unit),
+		_get_unit_max_health_points(unit),
+		String(damage_context.get("fire_event_id", damage_context.get("event_id", ""))).strip_edges(),
+		String(active_fire_event.get("event_id", "")).strip_edges(),
+		weapon_posture,
+		weapon_pose_direction.x,
+		weapon_pose_direction.y,
+		proxy_rotation_y,
+		movement_posture,
+		str(unit.get_meta("overwatch_ready", false)) if unit != null and unit.has_meta("overwatch_ready") else "false",
+		str(unit.get_meta("security_facing_angle", "")) if unit != null and unit.has_meta("security_facing_angle") else "",
+	]
+
+
 func _normalize_unit_movement_posture(value: String) -> String:
 	match value.strip_edges().to_lower():
 		"travel", "walk", "move", "march":
@@ -10590,7 +10863,7 @@ func _normalize_unit_weapon_posture(value: String) -> String:
 			return "lowered"
 
 
-func _update_unit_vital_visual(proxy: Node3D, unit: Node) -> bool:
+func _update_unit_vital_visual(proxy: Node3D, unit: Node, cached_model_root: Node3D = null) -> bool:
 	if proxy == null:
 		return false
 	var vital_state: String = _get_unit_vital_state(unit)
@@ -10611,7 +10884,7 @@ func _update_unit_vital_visual(proxy: Node3D, unit: Node) -> bool:
 	changed = _set_proxy_bool_meta(proxy, "unit_damage_visual_active", damaged_visual_active) or changed
 	changed = _set_proxy_bool_meta(proxy, "unit_down_pose_active", down_pose_active) or changed
 	changed = _set_proxy_string_meta(proxy, "unit_last_damage_event_id", String(last_damage_context.get("fire_event_id", last_damage_context.get("event_id", ""))).strip_edges()) or changed
-	var model_root: Node3D = _find_unit_model_root(proxy)
+	var model_root: Node3D = cached_model_root if cached_model_root != null and is_instance_valid(cached_model_root) else _find_unit_model_root(proxy)
 	changed = _set_proxy_bool_meta(proxy, "unit_vital_visual_target_node_available", model_root != null) or changed
 	if model_root == null:
 		return changed
@@ -10651,10 +10924,10 @@ func _find_unit_model_root(node: Node) -> Node3D:
 	return null
 
 
-func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
+func _update_unit_status_badge(proxy: Node3D, unit: Node, cached_label: Label3D = null, unit_id: String = "") -> bool:
 	if proxy == null:
 		return false
-	var label := proxy.get_node_or_null("UnitStateBadge") as Label3D
+	var label: Label3D = cached_label if cached_label != null and is_instance_valid(cached_label) else null
 	var badge_text: String = _get_unit_status_badge_text(unit)
 	var suppressed_by_declutter: bool = _should_suppress_release_firefight_unit_badge(badge_text)
 	proxy.set_meta("unit_status_badge_suppressed_by_declutter", suppressed_by_declutter)
@@ -10669,6 +10942,8 @@ func _update_unit_status_badge(proxy: Node3D, unit: Node) -> bool:
 		label = _add_label3d(proxy, badge_text, Vector3(0.0, 0.98, 0.0), "UnitStateBadge", _get_unit_status_badge_color(unit), 13)
 		label.pixel_size = 0.014
 		label.outline_size = 3
+		_unit_proxy_badge_rebuild_count += 1
+		_set_cached_unit_proxy_status_badge(unit_id, label)
 	else:
 		label.text = badge_text
 		label.modulate = _get_unit_status_badge_color(unit)
@@ -10780,13 +11055,13 @@ func _get_unit_respawn_remaining_seconds(unit: Node) -> int:
 	return 0
 
 
-func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2, active_fire_event: Dictionary = {}) -> float:
+func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_position: Vector2, active_fire_event: Dictionary = {}, visible_contact_direction: Vector2 = Vector2.ZERO) -> float:
 	var fallback_yaw: float = proxy.rotation_degrees.y if proxy != null else 0.0
 	if not active_fire_event.is_empty():
 		var fire_direction: Vector2 = _get_fire_event_direction_for_unit(active_fire_event, current_world_position)
 		if fire_direction.length_squared() > 0.0001:
 			return _get_unit_world_direction_yaw(current_world_position, current_world_position + fire_direction, fallback_yaw)
-	var contact_direction: Vector2 = _resolve_unit_visible_contact_direction(unit, current_world_position)
+	var contact_direction: Vector2 = visible_contact_direction if visible_contact_direction.length_squared() > 0.0001 else _resolve_unit_visible_contact_direction(unit, current_world_position)
 	if contact_direction.length_squared() > 0.0001:
 		return _get_unit_world_direction_yaw(current_world_position, current_world_position + contact_direction, fallback_yaw)
 	var motion_or_target_direction: Vector2 = _resolve_unit_motion_or_target_direction(proxy, unit, current_world_position)
@@ -10812,23 +11087,8 @@ func _get_unit_proxy_rotation_y(proxy: Node3D, unit: Node, current_world_positio
 
 
 func _get_active_fire_event_for_unit(unit_id: String) -> Dictionary:
-	var normalized_unit_id: String = unit_id.strip_edges()
-	if normalized_unit_id.is_empty() or _order_payload.is_empty():
-		return {}
-	var fire_events: Array = Array(_order_payload.get("fire_event_dicts", []))
-	var index: int = fire_events.size() - 1
-	while index >= 0:
-		var fire_event_variant = fire_events[index]
-		index -= 1
-		if typeof(fire_event_variant) != TYPE_DICTIONARY:
-			continue
-		var fire_event: Dictionary = Dictionary(fire_event_variant)
-		if String(fire_event.get("attacker_unit_id", "")).strip_edges() != normalized_unit_id:
-			continue
-		if not _fow_allows_fire_event_visual(fire_event):
-			continue
-		return fire_event.duplicate(true)
-	return {}
+	_ensure_unit_proxy_payload_indexes()
+	return _get_indexed_active_fire_event_for_unit(unit_id).duplicate(true)
 
 
 func _get_fire_event_direction_for_unit(fire_event: Dictionary, current_world_position: Vector2) -> Vector2:
@@ -11275,8 +11535,8 @@ func _is_unit_locomotion_heading_control_track(track_path: String) -> bool:
 	return false
 
 
-func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false, delta: float = -1.0, weapon_posture: String = "", movement_posture: String = "") -> bool:
-	var animation_player: AnimationPlayer = _find_unit_visual_animation_player(proxy)
+func _update_unit_visual_animation(proxy: Node3D, is_moving: bool, is_firing: bool = false, delta: float = -1.0, weapon_posture: String = "", movement_posture: String = "", cached_animation_player: AnimationPlayer = null) -> bool:
+	var animation_player: AnimationPlayer = cached_animation_player if cached_animation_player != null and is_instance_valid(cached_animation_player) else _find_unit_visual_animation_player(proxy)
 	if animation_player == null:
 		return false
 	var normalized_weapon_posture: String = _normalize_unit_weapon_posture(weapon_posture)
@@ -11339,14 +11599,14 @@ func _resolve_unit_visual_animation_name(animation_player: AnimationPlayer, is_m
 	return String(animation_list[0]) if animation_list.size() > 0 else ""
 
 
-func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, weapon_posture: String = "lowered", aim_direction: Vector2 = Vector2.ZERO) -> bool:
+func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, weapon_posture: String = "lowered", aim_direction: Vector2 = Vector2.ZERO, cached_weapon_node: Node3D = null, cached_skeleton: Skeleton3D = null, cached_animation_player: AnimationPlayer = null) -> bool:
 	if proxy == null:
 		return false
 	var normalized_weapon_posture: String = _normalize_unit_weapon_posture("aimed" if not active_fire_event.is_empty() else weapon_posture)
 	var is_active: bool = normalized_weapon_posture == "aimed"
 	var is_ready: bool = normalized_weapon_posture == "ready"
 	var changed: bool = false
-	var weapon_node: Node3D = _find_unit_blaster_visual_node(proxy)
+	var weapon_node: Node3D = cached_weapon_node if cached_weapon_node != null and is_instance_valid(cached_weapon_node) else _find_unit_blaster_visual_node(proxy)
 	proxy.set_meta("unit_aim_pose_weapon_node_available", weapon_node != null)
 	var aim_yaw_delta_degrees: float = 0.0
 	var has_aim_yaw: bool = false
@@ -11360,7 +11620,7 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	if bool(proxy.get_meta("unit_aim_pose_yaw_active", false)) != has_aim_yaw:
 		proxy.set_meta("unit_aim_pose_yaw_active", has_aim_yaw)
 		changed = true
-	if _update_unit_weapon_upper_body_pose(proxy, normalized_weapon_posture):
+	if _update_unit_weapon_upper_body_pose(proxy, normalized_weapon_posture, cached_skeleton, cached_animation_player):
 		changed = true
 	if weapon_node == null:
 		return changed
@@ -11396,13 +11656,13 @@ func _update_unit_weapon_aim_pose(proxy: Node3D, active_fire_event: Dictionary, 
 	return changed
 
 
-func _update_unit_weapon_upper_body_pose(proxy: Node3D, weapon_posture: String) -> bool:
+func _update_unit_weapon_upper_body_pose(proxy: Node3D, weapon_posture: String, cached_skeleton: Skeleton3D = null, cached_animation_player: AnimationPlayer = null) -> bool:
 	if proxy == null:
 		return false
 	var normalized_weapon_posture: String = _normalize_unit_weapon_posture(weapon_posture)
 	var should_apply_pose: bool = normalized_weapon_posture == "aimed"
-	var skeleton: Skeleton3D = _find_first_skeleton(proxy)
-	var animation_player: AnimationPlayer = _find_unit_visual_animation_player(proxy)
+	var skeleton: Skeleton3D = cached_skeleton if cached_skeleton != null and is_instance_valid(cached_skeleton) else _find_first_skeleton(proxy)
+	var animation_player: AnimationPlayer = cached_animation_player if cached_animation_player != null and is_instance_valid(cached_animation_player) else _find_unit_visual_animation_player(proxy)
 	var pose_animation: Animation = _get_unit_weapon_upper_body_pose_animation(animation_player)
 	var changed: bool = false
 	if skeleton == null or animation_player == null or pose_animation == null:

@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1188 - Unit Proxy Dirty Sync
+- Status: implementiert, skaliert und headless regressionsgeprueft
+- Aenderung: `TerrainMap3DView` cached pro Unit die statischen Proxy-Nodes (AnimationPlayer, Skeleton, Weapon, Modelroot und Badge), loest FireEvents je Order-/FOW-Revision einmal auf und indexiert sichtbare Kontakte je Fireteam. Die laufende Proxy-Synchronisation verwendet diese Caches; Visual-Input-Revisionen schreiben ihren erfolgreichen Cache-Stand auch dann fort, wenn das effektive Modell identisch bleibt. Nichtvisuelle Felder aus `enemy_tactics_config` loesen dadurch keine Mapping-Aufloesung mehr aus.
+- Architektur: Der Cache ist nur Visual-Instanzzustand und wird beim Proxy-Abbau geloescht. FOW aendert nur Proxy-Sichtbarkeit, erzeugt aber keine Proxies neu. Commands, Unit-, Combat- und Missionswahrheit bleiben unveraendert bei ihren bestehenden autoritativen Systemen.
+- Lokale Pruefung: TASK_1188 31/31 (zehn Revision-Grenzen plus 28-Proxies-Lasttest); TASK_459 10/10; TASK_471 20/20; TASK_186 46/46; TASK_1187-Schnellvertrag 0 Fehler. Die finale TASK_1187-Serie mit drei Kalt- und fuenf Warmlauefen bestand fuer `terrain.unit_proxy_sync_usec` in allen 8/8 Laeufen: p95 2.265-2.806 ms (Grenze 3 ms), p99 2.763-3.314 ms (Grenze 5 ms). Der finale 28-Proxies-Test erfasste 8.695 Frames in 60.005 s bei p99 5.003 ms (Grenze 8 ms). Bekannte UID-Warnungen der Homebase-Szene blieben unveraendert; es gab keine neuen Scriptfehler.
+- Risiken/offen: Die Messung ist bewusst getrennt von den noch roten Simulation/Combat-, FOW- und LZ-Budgets. Ein historischer TASK_171-Verifier bleibt an zwei ueberholten Inventar-Annahmen rot, waehrend sein Live-Proxy-Abschnitt und die hier beruehrten Modell-/Visualpfade gruen sind.
+
 ### TASK_1186 - SimulationRoot Command Authority
 - Status: implementiert und headless regressionsgeprueft
 - Aenderung: Fireteam- und Sandbox-Producer reihen UnitCommands nur noch in `SimulationRoot.enqueue_command()` ein. Der Root verwaltet Queue- und Commit-Token je Unit, committed angenommene Commands im Physics-Tick und verwirft stale Tokens ohne sichtbare Mutation. Combat reiht Facing- und Enemy-Posture als `set_unit_combat_posture`-Effect ein; der Root committed Runtime-Status und Sichtmetadaten erst im Effect-Slot.
