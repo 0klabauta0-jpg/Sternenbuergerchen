@@ -6,6 +6,7 @@ const ROADMAP_PATH := "res://docs/TASK_ROADMAP.md"
 const CONTRACT_PATH := "res://docs/dev/mission_command_feedback_contract.md"
 const REPORT_PATH := "res://docs/reports/spielstand_zwischenbericht_task868_verified_2026_07_08.html"
 const META_LAYER_SCRIPT_PATH := "res://scripts/meta/meta_layer_flow.gd"
+const FIXTURE_SCRIPT_PATH := "res://scripts/tests/release_first_exchange_fixture.gd"
 const META_LAYER_SCENE_PATH := "res://scenes/meta/meta_layer_test.tscn"
 const FIRST_GO_FIREFIGHT_ARG := "--release-singleplayer-first-go-firefight"
 const SCHEMA := "sternenbuergerchen.release_first_exchange_los_setup_polish.v1"
@@ -39,6 +40,7 @@ func _test_docs_and_static_hooks() -> void:
 	var contract_text: String = _read_text(CONTRACT_PATH)
 	var report_text: String = _read_text(REPORT_PATH)
 	var meta_text: String = _read_text(META_LAYER_SCRIPT_PATH)
+	var fixture_text: String = _read_text(FIXTURE_SCRIPT_PATH)
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_868 task file exists")
 	_assert(task_text.contains("Release First Exchange LOS Setup Polish"), "Task names LOS setup polish")
 	_assert(status_text.contains("TASK_868 - Release First Exchange LOS Setup Polish"), "Implementation status tracks TASK_868")
@@ -49,8 +51,11 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(meta_text.contains("get_release_first_exchange_los_setup_polish_snapshot"), "MetaLayer exposes TASK_868 snapshot")
 	_assert(meta_text.contains(STYLE_ID), "MetaLayer exposes TASK_868 style id")
 	_assert(meta_text.contains("pair_candidate_count"), "Placement records bounded pair candidate count")
-	_assert(meta_text.contains("_stabilize_release_first_exchange_target_enemy"), "Release target enemy is stabilized")
-	_assert(meta_text.contains("enemy_ids.append(enemy_id)"), "Force step keeps validated target enemy first")
+	_assert(FileAccess.file_exists(FIXTURE_SCRIPT_PATH), "Release fixture isolates deterministic setup")
+	_assert(meta_text.contains("release_first_exchange_fixture.gd"), "MetaLayer delegates release setup to explicit fixture")
+	_assert(fixture_text.contains("_stabilize_target_enemy"), "Release target enemy is stabilized inside fixture")
+	_assert(fixture_text.contains("enemy_ids.append(enemy_id)"), "Fixture force step keeps validated target enemy first")
+	_assert(fixture_text.contains("\"synthetic_fixture\": true"), "Fixture marks setup evidence as synthetic")
 	_assert(meta_text.contains("\"creates_fire_event\": false"), "TASK_868 snapshot declares no fire-event creation")
 	_assert(meta_text.contains("\"creates_damage_event\": false"), "TASK_868 snapshot declares no damage-event creation")
 	_assert(meta_text.contains("\"sets_multiplayer_truth\": false"), "TASK_868 snapshot declares no multiplayer truth mutation")

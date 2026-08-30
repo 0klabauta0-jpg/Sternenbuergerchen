@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1192 - Release First Exchange Fixture Isolation
+- Status: implementiert und headless regressionsgeprueft
+- Aenderung: Der ausschliesslich fuer `--release-singleplayer-first-go-firefight` benoetigte deterministische Aufbau liegt nun in `scripts/tests/release_first_exchange_fixture.gd`. Teleport, Hold-Staging, private Detection-/Tick-Schreibzugriffe und der private Attack-Trigger stehen nicht mehr im normalen `MetaLayerFlow`-Deeplink.
+- Evidenz/Architektur: Der Deeplink delegiert nur bei dem expliziten Testargument und markiert Trace-, Setup- und Snapshot-Evidenz mit `synthetic_fixture=true`. TASK_284 beschraenkt den neuen Scan auf den Body genau dieser Deeplink-Funktion und beweist ihn mit einem injizierten Teleport bzw. Tick-Schreibversuch; es gibt keinen neuen pauschalen Token-Scan ueber Meta-Code.
+- Lokale Pruefung: TASK_1192 10/10, TASK_284 66/66, TASK_832 40/40 und TASK_868 44/44 gruen. Der neue Worktree erhielt ausschliesslich lokal erzeugte, ignorierte Godot-Importartefakte; keine Asset-Datei wurde kopiert oder versioniert.
+- Risiken/offen: Die Fixture bleibt ein bewusst synthetischer Release-/Capture-Aufbau und kein Ersatz fuer einen realen Spielerpfad. Der folgende Release-Gate darf sie daher nur als Test-Evidenz, nicht als Playtest- oder Performance-Beweis werten.
+
 ### TASK_1191 - Gemeinsamer Combat-Visibility-Cache
 - Status: implementiert und mit Cache-an/aus-Oracle geprueft
 - Aenderung: `CombatVisibilityCache` memoisiert nur die reine Terrain-Occlusion innerhalb eines Simulationsticks. Der Key enthaelt Tick, geordnete Unit-IDs, Grid-/Hoehenklasse sowie Terrain-/Cover-/Navigation-Revision und zusaetzlich die Weltpositionen fuer Wall-Segment-LoS. Reichweite, Arc, Vitalstatus, Weapon- und Command-Regeln bleiben in Contact Tracking, Enemy Security und Combat-Resolvern.

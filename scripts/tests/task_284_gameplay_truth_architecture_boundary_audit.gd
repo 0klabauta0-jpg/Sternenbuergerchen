@@ -43,6 +43,7 @@ func _run_tests() -> void:
 	print("=== TASK_284 Gameplay Truth Architecture Boundary Audit ===")
 	_test_report_task_status_and_roadmap()
 	_test_static_ui_editor_visualizer_boundaries()
+	_test_release_deeplink_has_no_embedded_synthetic_runtime_mutation()
 	_test_help_layer_has_no_runtime_authority_terms()
 	_test_authority_source_anchors()
 	await _test_ui_help_runtime_actions_do_not_mutate_simulation_root()
@@ -96,6 +97,46 @@ func _test_static_ui_editor_visualizer_boundaries() -> void:
 	var terrain_view_text: String = _read_text("res://scripts/terrain/terrain_map_3d_view.gd")
 	for token in ["enqueue_command", "enqueue_effect", "set_runtime_status", "apply_damage("]:
 		_assert(not terrain_view_text.contains(token), "TerrainMap3DView does not contain %s" % token)
+
+
+func _test_release_deeplink_has_no_embedded_synthetic_runtime_mutation() -> void:
+	var meta_source: String = _read_text("res://scripts/meta/meta_layer_flow.gd")
+	var actual_violations: PackedStringArray = _collect_release_deeplink_synthetic_runtime_mutations(meta_source)
+	_assert(actual_violations.is_empty(), "Release deeplink delegates synthetic setup instead of mutating combat runtime: %s" % "; ".join(actual_violations))
+
+	var injected_source := "func _apply_release_first_go_firefight_deeplink() -> void:\n\tcombat_driver.set(\"_current_tick\", 120)\n\nfunc harmless() -> void:\n\tpass\n"
+	var injected_violations: PackedStringArray = _collect_release_deeplink_synthetic_runtime_mutations(injected_source)
+	_assert(injected_violations.has(".set(\"_current_tick\""), "Focused deeplink scanner rejects an injected private tick write")
+
+
+func _collect_release_deeplink_synthetic_runtime_mutations(source: String) -> PackedStringArray:
+	var body: String = _function_body(source, "_apply_release_first_go_firefight_deeplink")
+	var violations := PackedStringArray()
+	for token in [
+		"_position_release_first_enemy_near_fireteam(",
+		"_prepare_release_fireteam_for_first_engagement(",
+		"_stabilize_release_first_exchange_target_enemy(",
+		"_force_release_first_engagement_decision(",
+		"_update_release_contact_tracking(",
+		".global_position =",
+		".set(\"_detection_progress\"",
+		".set(\"_current_tick\"",
+		".set(\"_next_attack_tick\"",
+		"._try_enqueue_attacks",
+	]:
+		if body.contains(token):
+			violations.append(token)
+	return violations
+
+
+func _function_body(source: String, function_name: String) -> String:
+	var start: int = source.find("func %s(" % function_name)
+	if start < 0:
+		return ""
+	var finish: int = source.find("\n\nfunc ", start + 5)
+	if finish < 0:
+		finish = source.length()
+	return source.substr(start, finish - start)
 
 
 func _test_help_layer_has_no_runtime_authority_terms() -> void:

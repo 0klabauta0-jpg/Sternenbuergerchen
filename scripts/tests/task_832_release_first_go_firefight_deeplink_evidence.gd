@@ -7,6 +7,7 @@ const MAIN_MENU_SCENE_PATH := "res://scenes/ui/main_menu.tscn"
 const META_LAYER_SCENE_PATH := "res://scenes/meta/meta_layer_test.tscn"
 const MAIN_MENU_SCRIPT_PATH := "res://scripts/ui/main_menu_screen.gd"
 const META_LAYER_SCRIPT_PATH := "res://scripts/meta/meta_layer_flow.gd"
+const FIXTURE_SCRIPT_PATH := "res://scripts/tests/release_first_exchange_fixture.gd"
 const SINGLEPLAYER_ROUTE := "res://scenes/meta/meta_layer_test.tscn"
 const FIRST_GO_FIREFIGHT_ARG := "--release-singleplayer-first-go-firefight"
 
@@ -38,6 +39,7 @@ func _test_docs_and_static_hooks() -> void:
 	var roadmap_text: String = _read_text(ROADMAP_PATH)
 	var menu_text: String = _read_text(MAIN_MENU_SCRIPT_PATH)
 	var meta_text: String = _read_text(META_LAYER_SCRIPT_PATH)
+	var fixture_text: String = _read_text(FIXTURE_SCRIPT_PATH)
 	_assert(FileAccess.file_exists(TASK_PATH), "TASK_832 task file exists")
 	_assert(task_text.contains("Release First GO Firefight Deep-Link Evidence"), "Task names first GO/firefight deep-link evidence")
 	_assert(status_text.contains("TASK_832 - Release First GO Firefight Deep-Link Evidence"), "Implementation status tracks TASK_832")
@@ -46,7 +48,9 @@ func _test_docs_and_static_hooks() -> void:
 	_assert(meta_text.contains("RELEASE_SINGLEPLAYER_FIRST_GO_FIREFIGHT_DEEPLINK_ARG"), "MetaLayer declares first GO/firefight deep-link arg")
 	_assert(meta_text.contains("get_release_first_go_firefight_deeplink_snapshot"), "MetaLayer exposes TASK_832 snapshot")
 	_assert(meta_text.contains("execute_selected_fireteam_orders"), "Deep-link uses existing GO execution path")
-	_assert(meta_text.contains("_try_enqueue_attacks"), "Deep-link uses existing combat driver engagement path")
+	_assert(FileAccess.file_exists(FIXTURE_SCRIPT_PATH), "Synthetic release fixture exists explicitly")
+	_assert(meta_text.contains("release_first_exchange_fixture.gd"), "Deep-link delegates synthetic setup to fixture")
+	_assert(fixture_text.contains("_try_enqueue_attacks"), "Fixture retains the existing combat driver engagement setup")
 
 
 func _test_main_menu_accepts_first_go_firefight_arg() -> void:
@@ -92,6 +96,7 @@ func _test_meta_layer_first_go_firefight_deeplink() -> void:
 
 	var snapshot: Dictionary = Dictionary(scene.call("get_release_first_go_firefight_deeplink_snapshot", PackedStringArray([FIRST_GO_FIREFIGHT_ARG])))
 	_assert(bool(snapshot.get("requested", false)), "Explicit arg requests first GO/firefight deep-link")
+	_assert(bool(snapshot.get("synthetic_fixture", false)), "Explicit deep-link evidence labels the synthetic fixture")
 	_assert(bool(snapshot.get("applied", false)), "First GO/firefight deep-link is applied")
 	_assert(String(snapshot.get("status", "")) == "applied", "Deep-link status is applied")
 	_assert(String(snapshot.get("reason", "")) == "", "Applied deep-link has no blocker reason")

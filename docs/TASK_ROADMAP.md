@@ -13,6 +13,14 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1192 - Release First Exchange Fixture Isolation (implementiert im Arbeitsstand)
+- Ergebnis: Der bisher im Meta-Flow versteckte, synthetische First-Contact-/First-Fire-Aufbau lebt als explizite Test-Fixture unter `scripts/tests`. Der Meta-Flow delegiert nur nach dem vorhandenen Release-Testargument und schreibt `synthetic_fixture=true` in seine Evidenz.
+- Architektur: Teleport, private Detection-/Tick-Schreibzugriffe und der private Attack-Trigger sind aus dem Deeplink-Body entfernt. TASK_284 prueft diese eine Funktion gezielt und belegt die Wirksamkeit mit einem injizierten Verstoss statt mit einem unpraezisen Komplettscan.
+- Verifikation: TASK_1192 10/10, TASK_284 66/66, TASK_832 40/40 und TASK_868 44/44 gruen.
+- Naechster Schritt: Die Release-Abnahme auf den vorhandenen, echten Spieler-/Performance-Belegen zusammensetzen; synthetische Fixture-Evidence muss darin sichtbar getrennt bleiben.
+
+---
+
 ## TASK_1191 - Gemeinsamer Combat-Visibility-Cache (implementiert im Arbeitsstand)
 - Ergebnis: Eine ticklokale, abgeleitete `CombatVisibilityCache`-Node teilt reine Terrain-Occlusion zwischen Contact Tracking, Enemy Security und Fire-Decision-Resolver. Ihre Key-Reihenfolge bleibt absichtlich source-/target-gerichtet; Weltpositionen sichern Wall-Segment-LoS auch innerhalb derselben Grid-Zelle ab. Gameplay-Entscheidungen und Snapshots bleiben außerhalb des Caches.
 - Verifikation: TASK_1191 12/12, mit 16v12/600 Ticks, aktiver Bewegung, sichtbaren Cache-Hits und bit-exaktem Cache-an/aus-Oracle; TASK_162 23/23, TASK_208 57/57 und der cache-verdrahtete TASK_218 81/81 sind gruen. TASK_202 22/2 ist auf `dd69cbffc` identisch rot; TASK_543 erreichte im historischen Meta-Gesamtpfad keinen Abschluss und ist nicht als gruen gewertet.
