@@ -77,7 +77,7 @@ func is_thought_peek_active() -> bool:
 		return _thought_peek_override_value
 	var hold_action: String = String(normalized_settings.get("thought_peek_hold_action", SETTINGS_SCRIPT.INPUT_SHOW_NPC_THOUGHTS))
 	SETTINGS_SCRIPT.call("ensure_input_map_actions")
-	return InputMap.has_action(hold_action) and Input.is_action_pressed(hold_action)
+	return Input.is_action_pressed(hold_action)
 
 
 func should_emit_payload(payload: Dictionary, category: String = "", now_msec: int = -1) -> bool:

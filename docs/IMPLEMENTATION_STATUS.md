@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1185 - Tactical Input Ownership
+- Status: implementiert und headless regressionsgeprueft
+- Aenderung: Tactical-Kamera, Tactical-Controller und Gedanken-Hold verwenden benannte InputMap-Actions mit einer festen Owner-Matrix. Q/E drehen nur die Kamera, RMB erstellt nur Orders, MMB dreht nur die Kamera, G bleibt GO, T bleibt Sort, V bleibt Thoughts und Tab respektiert UI-Fokus.
+- Architektur: Die Umstellung betrifft nur Input-Routing und Anzeige-/Settings-Deskriptoren. Sie erzeugt keine Command-, Combat-, Missions- oder Multiplayer-Wahrheit.
+- Lokale Pruefung: TASK_1185 116/116; TASK_315 31/31; TASK_406 8/8. Die neuen Worktree-Assets wurden zuvor vollstaendig durch `--import` erzeugt.
+- Risiken/offen: Der vollstaendige Fenstercheck der Owner-Matrix bleibt ein manueller Playtest; automatisiert sind die Default-Bindings, die Alias-Ausschluesse und die betroffenen Missionspfade abgedeckt.
+
 ### TASK_1187 - Tactical Map Frame Budget
 - Status: implementiert und headless gemessen
 - Aenderung: Ein rein messender Tactical-Map-Harness erfasst echte `grid_sweep`-Process-Frames, mindestens 600 Grid-Sweep- und 600 16v12-Combat-Fixture-Ticks sowie die benannten Terrain-, Controller-, Combat- und Interaktionsscopes. Jeder Scope liefert Invocation Counter, Quantile, Maxima und einen expliziten `pass`- oder `budget_exceeded`-Status.

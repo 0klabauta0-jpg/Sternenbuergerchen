@@ -149,7 +149,7 @@ static func build_snapshot(settings: Dictionary = {}) -> Dictionary:
 			KEY_AMBIENT_VOLUME: float(normalized_settings.get(KEY_AMBIENT_VOLUME, 100.0)),
 		},
 		"input": {
-			"rebindable": false,
+			"rebindable": true,
 			"actions": get_input_action_descriptors(),
 		},
 		"gameplay": {
@@ -170,10 +170,34 @@ static func build_snapshot(settings: Dictionary = {}) -> Dictionary:
 
 static func get_input_action_descriptors() -> Array:
 	return [
-		{"action": "camera_pan", "label": "Kamera", "prompt": "WASD / Pfeile"},
-		{"action": "select", "label": "Auswahl", "prompt": "Linksklick"},
-		{"action": "command", "label": "Befehl", "prompt": "Rechtsklick / Buttons"},
-		{"action": "show_npc_thoughts", "label": "Thought-Hold", "prompt": "T"},
+		{"action": "tactical_camera_pan_up", "label": "Kamera hoch", "prompt": "W / Pfeil hoch"},
+		{"action": "tactical_camera_pan_down", "label": "Kamera runter", "prompt": "S / Pfeil runter"},
+		{"action": "tactical_camera_pan_left", "label": "Kamera links", "prompt": "A / Pfeil links"},
+		{"action": "tactical_camera_pan_right", "label": "Kamera rechts", "prompt": "D / Pfeil rechts"},
+		{"action": "tactical_camera_rotate_left", "label": "Kamera drehen links", "prompt": "Q"},
+		{"action": "tactical_camera_rotate_right", "label": "Kamera drehen rechts", "prompt": "E"},
+		{"action": "tactical_camera_rotate_drag", "label": "Kamera drehen", "prompt": "MMB ziehen"},
+		{"action": "tactical_camera_zoom_in", "label": "Kamera zoomen", "prompt": "Mausrad hoch"},
+		{"action": "tactical_camera_zoom_out", "label": "Kamera herauszoomen", "prompt": "Mausrad runter"},
+		{"action": "tactical_select", "label": "Auswahl", "prompt": "Linksklick / ziehen"},
+		{"action": "tactical_select_additive", "label": "Auswahl erweitern", "prompt": "Ctrl + Linksklick"},
+		{"action": "tactical_order", "label": "Befehl", "prompt": "Rechtsklick / ziehen"},
+		{"action": "tactical_order_append", "label": "Befehl anhaengen", "prompt": "Shift + Rechtsklick"},
+		{"action": "tactical_cycle_fireteam_next", "label": "Naechstes Fireteam", "prompt": "Tab"},
+		{"action": "tactical_cycle_fireteam_previous", "label": "Vorheriges Fireteam", "prompt": "Shift + Tab"},
+		{"action": "tactical_execute_orders", "label": "Orders ausfuehren", "prompt": "G"},
+		{"action": "tactical_delete_order", "label": "Order loeschen", "prompt": "Entf"},
+		{"action": "tactical_issue_move", "label": "Move", "prompt": "1"},
+		{"action": "tactical_issue_defend", "label": "Defend", "prompt": "2"},
+		{"action": "tactical_issue_flank", "label": "Flank", "prompt": "3"},
+		{"action": "tactical_issue_take", "label": "Take", "prompt": "4"},
+		{"action": "tactical_issue_breach", "label": "Breach", "prompt": "B"},
+		{"action": "tactical_toggle_fire_sector", "label": "Fire Arc", "prompt": "C"},
+		{"action": "tactical_toggle_los", "label": "LOS", "prompt": "L"},
+		{"action": "tactical_sort_fireteam", "label": "Fireteam sortieren", "prompt": "T"},
+		{"action": "tactical_phase_previous", "label": "Phase zurueck", "prompt": "R (Planning)"},
+		{"action": "tactical_phase_next", "label": "Phase vor", "prompt": "F (Planning)"},
+		{"action": "show_npc_thoughts", "label": "Gedanken halten", "prompt": "V halten"},
 		{"action": "ui_cancel", "label": "Zurueck", "prompt": "Escape"},
 	]
 

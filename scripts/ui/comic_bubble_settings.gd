@@ -117,7 +117,7 @@ static func ensure_input_map_actions() -> void:
 		InputMap.add_action(INPUT_SHOW_NPC_THOUGHTS, 0.2)
 	if InputMap.action_get_events(INPUT_SHOW_NPC_THOUGHTS).is_empty():
 		var event := InputEventKey.new()
-		event.keycode = KEY_T
+		event.keycode = KEY_V
 		InputMap.action_add_event(INPUT_SHOW_NPC_THOUGHTS, event)
 
 

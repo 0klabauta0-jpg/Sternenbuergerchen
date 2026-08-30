@@ -279,7 +279,25 @@ const TACTICAL_COMMUNICATION_BUBBLE_MIN_VISIBLE_FRAMES: int = 12
 
 const ALL_FIRETEAM_LABEL: String = "ALL"
 const APPROACH_ANGLES: PackedStringArray = ["NW", "NE", "SW", "SE"]
-const HOTKEY_LEGEND: String = "LMB Select | Fireteam Card Center | RMB Order | RMB Drag Area | Shift+RMB Append | CTRL+LMB Add | B Breach Door | C Fire Arc | L LOS | DEL Order | T Sort | G GO"
+const HOTKEY_LEGEND: String = "LMB Select | RMB Order/Area | Shift+RMB Append | Ctrl+LMB Add | MMB Camera | Q/E Camera | Tab Team | B Breach | C Fire Arc | L LOS | Del Order | T Sort | G GO | V Thoughts"
+const ACTION_SELECT: StringName = &"tactical_select"
+const ACTION_SELECT_ADDITIVE: StringName = &"tactical_select_additive"
+const ACTION_ORDER: StringName = &"tactical_order"
+const ACTION_ORDER_APPEND: StringName = &"tactical_order_append"
+const ACTION_CYCLE_FIRETEAM_NEXT: StringName = &"tactical_cycle_fireteam_next"
+const ACTION_CYCLE_FIRETEAM_PREVIOUS: StringName = &"tactical_cycle_fireteam_previous"
+const ACTION_EXECUTE_ORDERS: StringName = &"tactical_execute_orders"
+const ACTION_DELETE_ORDER: StringName = &"tactical_delete_order"
+const ACTION_ISSUE_MOVE: StringName = &"tactical_issue_move"
+const ACTION_ISSUE_DEFEND: StringName = &"tactical_issue_defend"
+const ACTION_ISSUE_FLANK: StringName = &"tactical_issue_flank"
+const ACTION_ISSUE_TAKE: StringName = &"tactical_issue_take"
+const ACTION_ISSUE_BREACH: StringName = &"tactical_issue_breach"
+const ACTION_TOGGLE_FIRE_SECTOR: StringName = &"tactical_toggle_fire_sector"
+const ACTION_TOGGLE_LOS: StringName = &"tactical_toggle_los"
+const ACTION_SORT_FIRETEAM: StringName = &"tactical_sort_fireteam"
+const ACTION_PHASE_PREVIOUS: StringName = &"tactical_phase_previous"
+const ACTION_PHASE_NEXT: StringName = &"tactical_phase_next"
 const LIVE_ORDER_PHASE_INDEX: int = 1
 const PHASE_PLANNING_ENABLED: bool = false
 const FRIENDLY_TEAM_ID: String = "team_alpha"
@@ -855,26 +873,19 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
-		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT and mouse_button_event.pressed:
+		if mouse_button_event.is_action_pressed(ACTION_ORDER):
 			if _is_pointer_over_control(mouse_button_event.position) or _is_lz_placement_armed or _is_target_placement_armed:
 				return
-			if _begin_right_order_context_interaction(mouse_button_event.position, mouse_button_event.shift_pressed):
+			if _begin_right_order_context_interaction(mouse_button_event.position, mouse_button_event.is_action_pressed(ACTION_ORDER_APPEND, false, true)):
 				get_viewport().set_input_as_handled()
 			return
 
-		if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT and not mouse_button_event.pressed:
-			if _finish_right_order_context_interaction(mouse_button_event.position, mouse_button_event.shift_pressed):
+		if mouse_button_event.is_action_released(ACTION_ORDER):
+			if _finish_right_order_context_interaction(mouse_button_event.position, mouse_button_event.is_action_pressed(ACTION_ORDER_APPEND, false, true)):
 				get_viewport().set_input_as_handled()
 			return
 
-		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and mouse_button_event.pressed:
-			if mouse_button_event.shift_pressed:
-				if _is_pointer_over_control(mouse_button_event.position):
-					return
-				if _begin_area_order_interaction(mouse_button_event.position):
-					get_viewport().set_input_as_handled()
-				return
-
+		if mouse_button_event.is_action_pressed(ACTION_SELECT):
 			if _is_lz_placement_armed:
 				if _is_pointer_over_control(mouse_button_event.position):
 					return
@@ -907,11 +918,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 				return
 
-			_begin_selection_interaction(mouse_button_event.position, mouse_button_event.ctrl_pressed)
+			_begin_selection_interaction(mouse_button_event.position, mouse_button_event.is_action_pressed(ACTION_SELECT_ADDITIVE, false, true))
 			get_viewport().set_input_as_handled()
 			return
 
-		if mouse_button_event.button_index == MOUSE_BUTTON_LEFT and not mouse_button_event.pressed:
+		if mouse_button_event.is_action_released(ACTION_SELECT):
 			if _finish_area_order_interaction(mouse_button_event.position):
 				get_viewport().set_input_as_handled()
 				return
@@ -942,53 +953,50 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key_event := event as InputEventKey
 	if not key_event.pressed or key_event.echo:
 		return
-
-	match key_event.physical_keycode:
-		KEY_DELETE:
-			if _delete_selected_order():
-				get_viewport().set_input_as_handled()
-		KEY_C:
-			_toggle_fire_sector_overlay()
+	if _has_tactical_ui_focus():
+		return
+	if key_event.is_action_pressed(ACTION_DELETE_ORDER):
+		if _delete_selected_order():
 			get_viewport().set_input_as_handled()
-		KEY_L:
-			_toggle_los_debug_overlay()
+	elif key_event.is_action_pressed(ACTION_TOGGLE_FIRE_SECTOR):
+		_toggle_fire_sector_overlay()
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_TOGGLE_LOS):
+		_toggle_los_debug_overlay()
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_SORT_FIRETEAM):
+		_on_sort_fireteam_pressed()
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_ISSUE_MOVE):
+		issue_move()
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_ISSUE_DEFEND):
+		issue_defend()
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_ISSUE_FLANK):
+		issue_flank()
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_ISSUE_TAKE):
+		issue_take()
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_ISSUE_BREACH):
+		if issue_breach_door_interaction():
 			get_viewport().set_input_as_handled()
-		KEY_T:
-			_on_sort_fireteam_pressed()
+	elif key_event.is_action_pressed(ACTION_CYCLE_FIRETEAM_PREVIOUS, false, true):
+		_change_fireteam(-1)
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_CYCLE_FIRETEAM_NEXT, false, true):
+		_change_fireteam(1)
+		get_viewport().set_input_as_handled()
+	elif PHASE_PLANNING_ENABLED and key_event.is_action_pressed(ACTION_PHASE_PREVIOUS):
+		_change_phase(-1)
+		get_viewport().set_input_as_handled()
+	elif PHASE_PLANNING_ENABLED and key_event.is_action_pressed(ACTION_PHASE_NEXT):
+		_change_phase(1)
+		get_viewport().set_input_as_handled()
+	elif key_event.is_action_pressed(ACTION_EXECUTE_ORDERS):
+		if execute_selected_fireteam_orders():
 			get_viewport().set_input_as_handled()
-		KEY_1:
-			issue_move()
-			get_viewport().set_input_as_handled()
-		KEY_2:
-			issue_defend()
-			get_viewport().set_input_as_handled()
-		KEY_3:
-			issue_flank()
-			get_viewport().set_input_as_handled()
-		KEY_4:
-			issue_take()
-			get_viewport().set_input_as_handled()
-		KEY_B:
-			if issue_breach_door_interaction():
-				get_viewport().set_input_as_handled()
-		KEY_Q:
-			_change_fireteam(-1)
-			get_viewport().set_input_as_handled()
-		KEY_E:
-			if execute_selected_fireteam_orders():
-				get_viewport().set_input_as_handled()
-		KEY_TAB:
-			_change_fireteam(1)
-			get_viewport().set_input_as_handled()
-		KEY_R:
-			_change_phase(-1)
-			get_viewport().set_input_as_handled()
-		KEY_F:
-			_change_phase(1)
-			get_viewport().set_input_as_handled()
-		KEY_G:
-			if execute_selected_fireteam_orders():
-				get_viewport().set_input_as_handled()
 
 
 func is_fire_sector_overlay_enabled() -> bool:
@@ -13395,6 +13403,11 @@ func _is_pointer_over_control(screen_position: Vector2 = Vector2(INF, INF)) -> b
 			return true
 		control = control.get_parent() as Control
 	return false
+
+
+func _has_tactical_ui_focus() -> bool:
+	var focus_owner := get_viewport().gui_get_focus_owner()
+	return focus_owner != null and focus_owner.is_visible_in_tree()
 
 
 func _get_target_position() -> Vector2:

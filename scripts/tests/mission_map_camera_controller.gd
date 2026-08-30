@@ -5,6 +5,15 @@ const CAMERA_PAN_SPEED: float = 780.0
 const CAMERA_ZOOM_STEP: float = 0.08
 const MIN_CAMERA_ZOOM: float = 0.55
 const MAX_CAMERA_ZOOM: float = 1.9
+const ACTION_PAN_UP: StringName = &"tactical_camera_pan_up"
+const ACTION_PAN_DOWN: StringName = &"tactical_camera_pan_down"
+const ACTION_PAN_LEFT: StringName = &"tactical_camera_pan_left"
+const ACTION_PAN_RIGHT: StringName = &"tactical_camera_pan_right"
+const ACTION_ROTATE_LEFT: StringName = &"tactical_camera_rotate_left"
+const ACTION_ROTATE_RIGHT: StringName = &"tactical_camera_rotate_right"
+const ACTION_ROTATE_DRAG: StringName = &"tactical_camera_rotate_drag"
+const ACTION_ZOOM_IN: StringName = &"tactical_camera_zoom_in"
+const ACTION_ZOOM_OUT: StringName = &"tactical_camera_zoom_out"
 
 @export var focus_marker_path: NodePath
 
@@ -28,31 +37,31 @@ func _process(delta: float) -> void:
 	if primary_3d_view != null:
 		_deactivate_camera()
 		var primary_direction := Vector2.ZERO
-		if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+		if Input.is_action_pressed(ACTION_PAN_UP):
 			primary_direction.y -= 1.0
-		if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+		if Input.is_action_pressed(ACTION_PAN_DOWN):
 			primary_direction.y += 1.0
-		if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+		if Input.is_action_pressed(ACTION_PAN_LEFT):
 			primary_direction.x -= 1.0
-		if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+		if Input.is_action_pressed(ACTION_PAN_RIGHT):
 			primary_direction.x += 1.0
 		if primary_direction != Vector2.ZERO:
 			primary_3d_view.call("pan_camera", primary_direction.normalized(), delta)
-		if Input.is_key_pressed(KEY_Q):
+		if Input.is_action_pressed(ACTION_ROTATE_LEFT):
 			primary_3d_view.call("rotate_camera", -80.0 * delta)
-		if Input.is_key_pressed(KEY_E):
+		if Input.is_action_pressed(ACTION_ROTATE_RIGHT):
 			primary_3d_view.call("rotate_camera", 80.0 * delta)
 		return
 	if not _is_camera_active():
 		return
 	var direction := Vector2.ZERO
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
+	if Input.is_action_pressed(ACTION_PAN_UP):
 		direction.y -= 1.0
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
+	if Input.is_action_pressed(ACTION_PAN_DOWN):
 		direction.y += 1.0
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+	if Input.is_action_pressed(ACTION_PAN_LEFT):
 		direction.x -= 1.0
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+	if Input.is_action_pressed(ACTION_PAN_RIGHT):
 		direction.x += 1.0
 	if direction == Vector2.ZERO:
 		return
@@ -64,17 +73,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if primary_3d_view != null:
 		if event is InputEventMouseButton:
 			var mouse_button_event := event as InputEventMouseButton
-			if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_button_event.pressed and not _is_pointer_over_control():
+			if mouse_button_event.is_action_pressed(ACTION_ZOOM_IN) and not _is_pointer_over_control():
 				primary_3d_view.call("zoom_camera", 1.0)
 				get_viewport().set_input_as_handled()
 				return
-			if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed and not _is_pointer_over_control():
+			if mouse_button_event.is_action_pressed(ACTION_ZOOM_OUT) and not _is_pointer_over_control():
 				primary_3d_view.call("zoom_camera", -1.0)
 				get_viewport().set_input_as_handled()
 				return
-			if mouse_button_event.button_index == MOUSE_BUTTON_RIGHT:
-				_is_panning = mouse_button_event.pressed and not _is_pointer_over_control()
-				if mouse_button_event.pressed:
+			if mouse_button_event.is_action_pressed(ACTION_ROTATE_DRAG) or mouse_button_event.is_action_released(ACTION_ROTATE_DRAG):
+				_is_panning = mouse_button_event.is_action_pressed(ACTION_ROTATE_DRAG) and not _is_pointer_over_control()
+				if _is_panning:
 					get_viewport().set_input_as_handled()
 				return
 		if event is InputEventMouseMotion and _is_panning:
@@ -87,17 +96,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton:
 		var mouse_button_event := event as InputEventMouseButton
-		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP and mouse_button_event.pressed and not _is_pointer_over_control():
+		if mouse_button_event.is_action_pressed(ACTION_ZOOM_IN) and not _is_pointer_over_control():
 			_adjust_camera_zoom(CAMERA_ZOOM_STEP)
 			get_viewport().set_input_as_handled()
 			return
-		if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_DOWN and mouse_button_event.pressed and not _is_pointer_over_control():
+		if mouse_button_event.is_action_pressed(ACTION_ZOOM_OUT) and not _is_pointer_over_control():
 			_adjust_camera_zoom(-CAMERA_ZOOM_STEP)
 			get_viewport().set_input_as_handled()
 			return
-		if mouse_button_event.button_index == MOUSE_BUTTON_MIDDLE:
-			_is_panning = mouse_button_event.pressed and not _is_pointer_over_control()
-			if mouse_button_event.pressed:
+		if mouse_button_event.is_action_pressed(ACTION_ROTATE_DRAG) or mouse_button_event.is_action_released(ACTION_ROTATE_DRAG):
+			_is_panning = mouse_button_event.is_action_pressed(ACTION_ROTATE_DRAG) and not _is_pointer_over_control()
+			if _is_panning:
 				get_viewport().set_input_as_handled()
 			return
 
