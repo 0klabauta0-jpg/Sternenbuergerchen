@@ -30,9 +30,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_spawn_cluster_is_authoritatively_separated() -> void:
 	var context: Dictionary = _make_context(true)
 	var registry: Node = context["unit_registry"]

@@ -67,9 +67,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_terrain_renderer_wall_mapping() -> void:
 	var map_root := Node2D.new()
 	root.add_child(map_root)

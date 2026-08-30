@@ -27,9 +27,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_blaster_import_subset_and_license() -> void:
 	var blaster_paths: PackedStringArray = _list_files_recursive("%s/models" % BLASTER_IMPORT_ROOT, ".glb")
 	_assert(blaster_paths.size() == EXPECTED_BLASTER_COUNT, "Blaster subset imports the expected GLB model count")

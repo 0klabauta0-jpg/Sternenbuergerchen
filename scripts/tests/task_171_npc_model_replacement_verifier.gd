@@ -24,9 +24,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_mapping_and_import_subset() -> void:
 	var mapping: Dictionary = _load_json(NPC_VISUAL_MAPPING_PATH)
 	_assert(not mapping.is_empty(), "NPC unit visual mapping exists")

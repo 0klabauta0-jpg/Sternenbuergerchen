@@ -25,9 +25,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_3d_hill_edges_surfaces_and_anchors() -> void:
 	var map_data = _build_hill_fixture_map()
 	var center_world: Vector2 = map_data.call("get_tile_at_grid", Vector2i(2, 2)).world_position

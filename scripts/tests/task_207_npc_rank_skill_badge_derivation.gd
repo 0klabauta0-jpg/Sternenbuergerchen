@@ -27,9 +27,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_catalog_badge_assets_are_loadable() -> void:
 	var catalog: Dictionary = _load_json(RANK_CATALOG_PATH)
 	_assert(not catalog.is_empty(), "Rank particle catalog is loadable")

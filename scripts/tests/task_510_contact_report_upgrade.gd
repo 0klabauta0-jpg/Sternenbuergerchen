@@ -26,9 +26,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_contact_tracker_builds_report_fields() -> void:
 	var tracker = CONTACT_TRACKER_SCRIPT.new()
 	tracker.update(10, [_build_observation("blue", "enemy_a", Vector2(94.0, 130.0), false, "rifleman")], ["blue"], {"blue": 0.5})

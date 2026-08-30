@@ -23,9 +23,7 @@ func _run_tests() -> void:
 		print("FAIL")
 	else:
 		print("ALL TESTS PASSED")
-	quit()
-
-
+	quit(1 if _failed > 0 else 0)
 func _test_tile_id_lookup_handles_reregister_and_in_place_changes() -> void:
 	var registry = TERRAIN_REGISTRY_SCRIPT.new()
 	registry.configure_iso_grid(Vector2.ZERO, 64.0, 32.0)
