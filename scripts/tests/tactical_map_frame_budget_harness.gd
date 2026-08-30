@@ -291,7 +291,7 @@ func _build_measurement_budget_status(scopes: Dictionary) -> Dictionary:
 			if measured_value > limit:
 				violations.append({"percentile": percentile, "measured": measured_value, "limit": limit})
 		status[scope_name] = {
-			"status": "budget_exceeded" if not violations.is_empty() else "within_budget",
+			"status": "budget_exceeded" if not violations.is_empty() else "pass",
 			"thresholds": thresholds,
 			"violations": violations,
 		}

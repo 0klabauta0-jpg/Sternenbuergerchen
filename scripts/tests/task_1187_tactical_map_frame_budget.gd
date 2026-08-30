@@ -33,6 +33,10 @@ func _run() -> void:
 	var budget_status: Dictionary = Dictionary(report.get("budget_status", {}))
 	var frame_budget: Dictionary = Dictionary(budget_status.get("frame_script_total_usec", {}))
 	_assert(Dictionary(frame_budget.get("thresholds", {})).has("p95"), "Frame-budget report loads the tactical-map p95 threshold")
+	for scope_name_variant in budget_status.keys():
+		var scope_name: String = String(scope_name_variant)
+		var scope_budget_status: String = String(Dictionary(budget_status[scope_name]).get("status", ""))
+		_assert(scope_budget_status == "pass" or scope_budget_status == "budget_exceeded", "%s has an explicit pass-or-exceeded budget status" % scope_name)
 	print("=== RESULTS: %d failed ===" % _failed)
 	quit(1 if _failed > 0 else 0)
 
