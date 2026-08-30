@@ -115,6 +115,29 @@
 		"missing_asset_counters_must_be_zero": true,
 		"fallback_texture_counters_must_be_zero": true
 	},
+	"release_acceptance": {
+		"schema": "sternenbuergerchen.tactical_release_acceptance.v1",
+		"supported_max_map_size": {"width": 128, "height": 128, "tile_count": 16384},
+		"withheld_map_sizes": [
+			{"width": 256, "height": 256, "reason": "logical_profile_only_requires_full_viewport_validation"}
+		],
+		"require_tactical_budget_enforcers_pass": true,
+		"require_manual_playtest_evidence": true,
+		"manual_playtest_may_not_be_synthesized": true,
+		"synthetic_fixture_is_not_manual_evidence": true,
+		"manual_evidence_path": "res://docs/performance/tactical_release_manual_playtest_evidence.md",
+		"manual_evidence_required_fields": [
+			"result: PASS",
+			"reviewed_by:",
+			"git_sha:",
+			"map_size: 128x128",
+			"first_move: PASS",
+			"first_contact: PASS",
+			"first_fire: PASS",
+			"stutter_check: PASS",
+			"synthetic_fixture: false"
+		]
+	},
 	"manual_checks": {
 		"checklist": "res://docs/dev/performance_manual_profile_checklist.md",
 		"required_tools": [

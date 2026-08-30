@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1193 - Tactical Release Acceptance Gate
+- Status: Gate implementiert; Release nicht freigegeben
+- Entscheidung: `128x128` ist die groesste automatisiert unterstuetzte Release-Kandidatenkarte. `256x256` bleibt logische Profil-/Streaming-Evidenz und ist ohne eigenen Viewport-/Visual-Profiler- und Spielercheck nicht release-faehig.
+- Gate: `run_task_1193_tactical_release_acceptance.ps1` fuehrt TASK_1179, TASK_1192, TASK_284, TASK_832, TASK_868, TASK_411, TASK_222 und TASK_1187 aus. Jeder Test-, Script- oder Budgetfehler sowie fehlende oder synthetische manuelle Evidenz endet mit `release_status=blocked`; der Runner kann keine menschliche Evidenz erzeugen.
+- Lokale Pruefung: TASK_1193 15/15, TASK_411 30/30, TASK_1179 22/22, TASK_1192 10/10, TASK_284 66/66, TASK_832 40/40, TASK_868 44/44 und TASK_222 82/82. Der echte erweiterte Gate-Lauf auf `d86c7f2fa0ea6487464c30dd526ef2555c130674` fand alle acht Enforcer gruen, meldete aber korrekt `blocked`.
+- Blocker: Der Gate-Messlauf hat `combat.total_tick_usec` p99 110,940 ms gegen 8 ms, `simulation.total_tick_usec` p99 112,198 ms gegen 8 ms und `interaction.lz_input_usec` p95 156,668 ms gegen 100 ms. Zusaetzlich fehlt `docs/performance/tactical_release_manual_playtest_evidence.md` als reale 128x128-Evidenz auf dem gemessenen SHA. Es gibt keine Release-Freigabe.
+
 ### TASK_1192 - Release First Exchange Fixture Isolation
 - Status: implementiert und headless regressionsgeprueft
 - Aenderung: Der ausschliesslich fuer `--release-singleplayer-first-go-firefight` benoetigte deterministische Aufbau liegt nun in `scripts/tests/release_first_exchange_fixture.gd`. Teleport, Hold-Staging, private Detection-/Tick-Schreibzugriffe und der private Attack-Trigger stehen nicht mehr im normalen `MetaLayerFlow`-Deeplink.
@@ -12,7 +19,7 @@
 - Aenderung: `CombatVisibilityCache` memoisiert nur die reine Terrain-Occlusion innerhalb eines Simulationsticks. Der Key enthaelt Tick, geordnete Unit-IDs, Grid-/Hoehenklasse sowie Terrain-/Cover-/Navigation-Revision und zusaetzlich die Weltpositionen fuer Wall-Segment-LoS. Reichweite, Arc, Vitalstatus, Weapon- und Command-Regeln bleiben in Contact Tracking, Enemy Security und Combat-Resolvern.
 - Integration: `MissionCombatLoopDriver` startet den abgeleiteten Cache je autoritativem Tick, leitet Contact Tracking, Enemy Security, Cover-Scoring, Hold-Entscheidung und Fire-Decision-Kontext durch ihn und legt keine Cache-Daten in Missions- oder Multiplayer-Snapshots ab. Der 16v12-Performance-Harness verdrahtet denselben Cache explizit. Der Hotpath-Audit meldet Sichtbarkeitsanfragen, echte Terrain-Checks, Hits und Tactics-Rebuilds.
 - Lokale Pruefung: TASK_1191 12/12, einschliesslich 16v12/600 Ticks mit aktiver Bewegung und bit-exaktem Cache-an/aus-Vergleich fuer Kontakt, Detection, Fire-Events, Treffer-/Unit-State und Missionsresultat; TASK_162 23/23, TASK_208 57/57 und TASK_218 81/81 gruen.
-- Risiken/offen: TASK_202 endet unveraendert gegenueber `dd69cbffc` bei 22/2 (zwei Flank-Assertions; kein Cache-Regressionsbefund). Der historische TASK_543-Meta-Gesamtpfad kam nach seinem gruenden Strukturteil nicht bis zum Missionsabschluss und wurde nicht als bestanden gewertet. Die TASK_1187-Gesamtmessung bleibt der anschliessende Budgetnachweis.
+- Risiken/offen: TASK_202 endet unveraendert gegenueber `dd69cbffc` bei 22/2 (zwei Flank-Assertions; kein Cache-Regressionsbefund). Der historische TASK_543-Meta-Gesamtpfad kam nach seinem gruenden Strukturteil nicht bis zum Missionsabschluss und wurde nicht als bestanden gewertet. Die vollstaendige TASK_1187-Serie auf `4146816410ca7a72ff60f6205f9ea15b7bdd8cbf` lief 3 kalt plus 5 warm ohne Harness- oder Scriptfehler und mit p99 66 LOS-Cache-Hits. Sie belegt aber weiter Combat-p99 115,790-258,550 ms und Simulation-p99 117,110-261,650 ms gegen jeweils 8 ms sowie LZ-Input in 8/8 Laeufen als rot; sie ist Mess-Evidenz, keine Freigabe.
 
 ### TASK_1190 - Mission Runtime Index und HUD-Deltas
 - Status: implementiert und headless regressionsgeprueft

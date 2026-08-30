@@ -13,6 +13,13 @@ Tasks duerfen nicht in anderer Reihenfolge umgesetzt werden, ausser es ist expli
 
 ---
 
+## TASK_1193 - Tactical Release Acceptance Gate (implementiert; Release blockiert)
+- Ergebnis: Der gemeinsame Gate fuehrt den realen Ground-Playthrough, Architektur-/Deeplink-Regressionen, die 128x128-/256x256-Skalenpruefung, den breiten Performance-Gate und die Tactical-Map-Messung aus. `128x128` ist die groesste automatisiert unterstuetzte Release-Kandidatenkarte; `256x256` bleibt vor einem echten Fensterprofil gesperrt.
+- Ehrlichkeit: Alle acht automatischen Enforcer waren im Gate-Lauf auf `d86c7f2fa0ea6487464c30dd526ef2555c130674` gruen. Der Gate endet dennoch mit `blocked`, weil Combat-p99 110,940 ms, Simulation-p99 112,198 ms und LZ-Input-p95 156,668 ms ihre harten Budgets reissen und eine reale SHA-gebundene 128x128-Manuell-Evidenz fehlt. Synthetische First-Exchange-Fixtures zaehlen explizit nicht.
+- Naechster Schritt: Combat-/Simulation- und LZ-Input-Budgets auf einem eigenen Performance-Slice senken; danach einen echten 128x128-FullHD-Spieltest protokollieren und erst dann den unveraenderten Gate erneut starten.
+
+---
+
 ## TASK_1192 - Release First Exchange Fixture Isolation (implementiert im Arbeitsstand)
 - Ergebnis: Der bisher im Meta-Flow versteckte, synthetische First-Contact-/First-Fire-Aufbau lebt als explizite Test-Fixture unter `scripts/tests`. Der Meta-Flow delegiert nur nach dem vorhandenen Release-Testargument und schreibt `synthetic_fixture=true` in seine Evidenz.
 - Architektur: Teleport, private Detection-/Tick-Schreibzugriffe und der private Attack-Trigger sind aus dem Deeplink-Body entfernt. TASK_284 prueft diese eine Funktion gezielt und belegt die Wirksamkeit mit einem injizierten Verstoss statt mit einem unpraezisen Komplettscan.

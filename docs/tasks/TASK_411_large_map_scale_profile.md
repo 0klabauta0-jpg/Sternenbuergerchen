@@ -72,3 +72,12 @@ Nach den Terrain-/HPA-/Batching-Arbeiten ist offen, welche Kartengroesse als nae
 - 256x256 ist headless logisch gruen, kann aber im echten Viewport weiter GPU-/Culling-/Editor-UX-Probleme zeigen. Der manuelle Godot-Profiler bleibt danach Pflicht.
 - Der Test erzeugt grosse In-Memory-Strukturen. Er ist bewusst ein gezielter Profil-Smoke und sollte nicht in jeden schnellen Regression-Run aufgenommen werden.
 - Full-Render ueber 64x64 bleibt bewusst ausserhalb dieses automatisierten Gates, bis der Renderer/Editor fuer grosse Karten gestreamt oder sichtbar gechunkt wird.
+
+## TASK_1193 Release-Entscheidung
+
+- `128x128` ist die groesste automatisiert unterstuetzte
+  Release-Kandidatenkarte. Sie bleibt bis zu einem echten FullHD-Spiel- und
+  Fensterprofil als Kandidat markiert, nicht als automatisch freigegeben.
+- `256x256` bleibt eine logische Profilkarte. Sie darf vor einem eigenen
+  Viewport-/Visual-Profiler- und Spielercheck nicht als release-faehige Karte
+  ausgewiesen werden.

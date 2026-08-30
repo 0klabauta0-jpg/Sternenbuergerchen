@@ -41,6 +41,16 @@ Der lokale Headless-Gate rendert eine 128x128-Karte mit Streaming, ohne in den f
 
 256x256 ist als logische Missionskarte nach TASK_411/TASK_412 erreichbar. Als voll aktive, komplett sichtbare Karte ist 256x256 noch nicht freigegeben. Die naechste harte Grenze liegt jetzt weniger im HPA-Graphen und mehr in echter Viewport-/Editor-Interaktion, Materials, Draw Calls, Labels und Overlay-Dichte.
 
+## TASK_1193 Release-Kandidatengrenze
+
+Die groesste automatisiert unterstuetzte Release-Kandidatenkarte ist `128x128`.
+Diese Entscheidung stuetzt sich auf die vorhandene Logik-/Streaming-Evidenz,
+ist aber keine automatische Fensterfreigabe: Ein echter FullHD-Spieltest muss
+LZ, ersten Move, ersten Contact, ersten Fire-Event und Kamera-/Overlay-Wechsel
+auf demselben Git-SHA belegen. `256x256` bleibt bis zu einem separaten
+Viewport-/Visual-Profiler- und Spielercheck von der Release-Freigabe
+ausgeschlossen.
+
 ## Naechster Schritt
 
 Vor echten 256x256-Content-Maps:

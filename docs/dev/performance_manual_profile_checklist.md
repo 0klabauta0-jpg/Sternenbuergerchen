@@ -44,6 +44,24 @@ Diese Checkliste ist fuer Godot 4.6 ausgerichtet und ergaenzt das TASK_222-Headl
 - Sichtbare Hitches mit Szene und Asset-ID notieren.
 - Warmup nur verdeckt und ohne Gameplay-Event einfuehren.
 
+## Tactical Release Acceptance (TASK_1193)
+- Die groesste automatisiert unterstuetzte Release-Kandidatenkarte ist
+  `128x128`. Die Kartenlogik und das Visual-Streaming sind dort Voraussetzung,
+  aber kein Ersatz fuer diesen Fenster- und Spielercheck.
+- Bei fester FullHD-Groesse eine echte 128x128-Mission frisch und warm jeweils
+  durchspielen: LZ/De-board, erster Move, erster Contact, erster Fire-Event,
+  Kamera-Pan/Zoom sowie Rueckkehr aus einer Overlay-/Menueinteraktion.
+- Mit Git-SHA, Datum, Hardware, verantwortlicher Person und einer klaren
+  `PASS`- oder `FAIL`-Entscheidung dokumentieren. Die verwendete Evidenz muss
+  `synthetic_fixture: false` ausweisen; eine Capture-Fixture ist keine manuelle
+  Spielpruefung.
+- `256x256` bleibt bis zu einem eigenen Viewport-/Visual-Profiler- und
+  Spielercheck nicht release-faehig. Nicht als bestanden markieren, nur weil
+  HPA, FoW oder Headless-Logik gruen sind.
+- Das erwartete menschliche Protokoll liegt unter
+  `docs/performance/tactical_release_manual_playtest_evidence.md`. Diese Datei
+  wird nicht automatisch erzeugt; ihr Fehlen blockiert den Release-Gate.
+
 ## Abschluss
 - Headless TASK_222-Gate laufen lassen.
 - TASK_170-Warning-Gate laufen lassen.

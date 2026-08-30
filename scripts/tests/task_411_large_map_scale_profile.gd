@@ -18,6 +18,8 @@ const BROAD_HPA_BUILD_BUDGET_USEC: int = 120000000
 const BROAD_FOW_UPDATE_BUDGET_USEC: int = 120000000
 const BROAD_RENDER_CONFIGURE_BUDGET_USEC: int = 240000000
 const MAX_AUTOMATED_FULL_RENDER_TILE_COUNT: int = 64 * 64
+const RELEASE_SUPPORTED_MAX_MAP_SIZE := Vector2i(128, 128)
+const RELEASE_WITHHELD_MAP_SIZE := Vector2i(256, 256)
 const PROFILE_SIZES: Array[Vector2i] = [
 	Vector2i(128, 128),
 	Vector2i(256, 256),
@@ -54,6 +56,7 @@ func _run_tests() -> void:
 	print("=== TASK_411 Large Map Scale Profile ===")
 	for size in PROFILE_SIZES:
 		await _profile_large_map(Vector2i(size))
+	_test_task_1193_release_acceptance_snapshot()
 	print("TASK_411 profile summary: %s" % JSON.stringify(_profiles))
 	print("=== RESULTS: %d passed, %d failed ===" % [_passed, _failed])
 	if _failed > 0:
@@ -62,6 +65,33 @@ func _run_tests() -> void:
 	else:
 		print("ALL TESTS PASSED")
 		quit(0)
+
+
+func get_task_1193_release_acceptance_snapshot() -> Dictionary:
+	return {
+		"schema": "sternenbuergerchen.tactical_release_map_scale_acceptance.v1",
+		"task_id": "TASK_1193",
+		"supported_max_map_size": RELEASE_SUPPORTED_MAX_MAP_SIZE,
+		"supported_max_map_label": "%dx%d" % [RELEASE_SUPPORTED_MAX_MAP_SIZE.x, RELEASE_SUPPORTED_MAX_MAP_SIZE.y],
+		"supported_max_map_tile_count": RELEASE_SUPPORTED_MAX_MAP_SIZE.x * RELEASE_SUPPORTED_MAX_MAP_SIZE.y,
+		"requires_manual_fullhd_playtest": true,
+		"requires_tactical_budget_enforcers": true,
+		"withheld_map_size": RELEASE_WITHHELD_MAP_SIZE,
+		"withheld_map_label": "%dx%d" % [RELEASE_WITHHELD_MAP_SIZE.x, RELEASE_WITHHELD_MAP_SIZE.y],
+		"withheld_reason": "256x256 is logical-profile evidence only; full viewport release acceptance is missing.",
+		"automated_full_render_tile_limit": MAX_AUTOMATED_FULL_RENDER_TILE_COUNT,
+		"synthetic_fixture_is_manual_evidence": false,
+	}
+
+
+func _test_task_1193_release_acceptance_snapshot() -> void:
+	var snapshot: Dictionary = get_task_1193_release_acceptance_snapshot()
+	_assert(String(snapshot.get("schema", "")) == "sternenbuergerchen.tactical_release_map_scale_acceptance.v1", "TASK_1193 release scale schema is stable")
+	_assert(String(snapshot.get("task_id", "")) == "TASK_1193", "TASK_1193 release scale snapshot identifies its task")
+	_assert(Vector2i(snapshot.get("supported_max_map_size", Vector2i.ZERO)) == Vector2i(128, 128), "128x128 is the supported release candidate maximum")
+	_assert(bool(snapshot.get("requires_manual_fullhd_playtest", false)), "128x128 candidate requires manual FullHD playtest evidence")
+	_assert(Vector2i(snapshot.get("withheld_map_size", Vector2i.ZERO)) == Vector2i(256, 256), "256x256 remains withheld from release")
+	_assert(not bool(snapshot.get("synthetic_fixture_is_manual_evidence", true)), "Synthetic fixture evidence never counts as manual release evidence")
 
 
 func _profile_large_map(size: Vector2i) -> void:
