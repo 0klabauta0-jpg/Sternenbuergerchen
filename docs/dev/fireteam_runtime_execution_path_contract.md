@@ -67,6 +67,8 @@ Sie sollen nicht mehr erweitert werden als:
 - Producer reihen Commands nur ein. Command-Token und Supersession leitet der
   `SimulationRoot` aus Queue- und Commit-Status ab; ein Producer setzt keinen
   UnitCommand als Vorabmutation.
+- Combat-Producer reihen Facing- und Posture-Aenderungen als typisierte Effects
+  ein. Erst der `SimulationRoot` schreibt sie in Runtime-Status und Snapshot.
 - Snapshots bleiben read-only und duerfen UI/Tests versorgen, aber keine Gameplay-Wahrheit bilden.
 - Wenn RuntimeLeader wieder eine Rolle im sichtbaren Pfad bekommt, dann nur als Adapter um den Mission-Tactical-Pfad, nicht als zweiter Besitzer.
 - Vor groesserem Ausbau soll der historisch benannte `MissionTacticalSandboxController` aus `scripts/tests` in einen Produktionspfad extrahiert werden.

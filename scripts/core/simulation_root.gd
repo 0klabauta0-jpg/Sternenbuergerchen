@@ -1648,6 +1648,8 @@ func _apply_effect(effect: Dictionary, delta: float) -> void:
 			_apply_air_asset_status_update_effect(effect)
 		"apply_loadout_modifiers":
 			_apply_loadout_modifiers_effect(effect)
+		"set_unit_combat_posture":
+			_apply_unit_combat_posture_effect(effect)
 		_:
 			# TODO: Deterministic effect commits belong here once systems exist.
 			pass
@@ -3570,6 +3572,61 @@ func _apply_loadout_modifiers_effect(effect: Dictionary) -> void:
 			"range_class": String(effect.get("range_class", "medium")),
 		}
 	unit.call("apply_loadout_modifiers", modifiers_dict)
+
+
+func _apply_unit_combat_posture_effect(effect: Dictionary) -> void:
+	var unit_id: String = String(effect.get("unit_id", "")).strip_edges()
+	if unit_id.is_empty():
+		push_warning("SimulationRoot combat posture effect expects a non-empty unit_id.")
+		return
+	var unit = _resolve_known_unit(unit_id)
+	if unit == null or not (unit is Node):
+		push_warning("SimulationRoot could not resolve the target unit for a combat posture effect.")
+		return
+	var unit_node: Node = unit as Node
+	var facing_value: Variant = effect.get("facing_angle", null)
+	if typeof(facing_value) == TYPE_FLOAT or typeof(facing_value) == TYPE_INT:
+		var facing_angle: float = float(facing_value)
+		unit_node.set_meta("facing_angle", facing_angle)
+		unit_node.set_meta("map_facing_angle", facing_angle)
+		if bool(effect.get("enemy_facing", false)):
+			unit_node.set_meta("enemy_facing_angle", facing_angle)
+
+	if not bool(effect.get("apply_posture", false)):
+		return
+	if not unit.has_method("get_runtime_status") or not unit.has_method("set_runtime_status"):
+		push_warning("SimulationRoot combat posture effect expects a unit runtime status interface.")
+		return
+	var runtime_status = unit.call("get_runtime_status")
+	if runtime_status == null or not runtime_status.has_method("get"):
+		push_warning("SimulationRoot combat posture effect requires a readable runtime status.")
+		return
+	var movement_posture: String = String(effect.get("movement_posture", runtime_status.get("movement_posture"))).strip_edges().to_lower()
+	var weapon_posture: String = String(effect.get("weapon_posture", runtime_status.get("weapon_posture"))).strip_edges().to_lower()
+	var posture_policy_id: String = String(effect.get("posture_policy_id", runtime_status.get("posture_policy_id"))).strip_edges().to_lower()
+	var move_speed_factor: float = float(effect.get("move_speed_factor", runtime_status.get("move_speed_factor")))
+	unit.call(
+		"set_runtime_status",
+		String(runtime_status.get("status")),
+		String(runtime_status.get("active_command_type")),
+		int(runtime_status.get("priority")),
+		String(runtime_status.get("fire_status")),
+		String(runtime_status.get("source_command_type")),
+		move_speed_factor,
+		float(runtime_status.get("cover_score")),
+		float(runtime_status.get("attack_bonus")),
+		int(runtime_status.get("phase")),
+		runtime_status.get("target_position"),
+		movement_posture,
+		weapon_posture,
+		posture_policy_id,
+		float(runtime_status.get("sight_range_factor")),
+		float(runtime_status.get("aim_readiness_percent"))
+	)
+	if bool(effect.get("enemy_facing", false)):
+		unit_node.set_meta("enemy_movement_posture", movement_posture)
+		unit_node.set_meta("enemy_weapon_posture", weapon_posture)
+		unit_node.set_meta("enemy_posture_policy_id", posture_policy_id)
 
 
 func _coerce_vector2(value: Variant, fallback: Vector2) -> Vector2:

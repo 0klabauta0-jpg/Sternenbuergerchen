@@ -1,5 +1,12 @@
 # IMPLEMENTATION_STATUS
 
+### TASK_1186 - SimulationRoot Command Authority
+- Status: implementiert und headless regressionsgeprueft
+- Aenderung: Fireteam- und Sandbox-Producer reihen UnitCommands nur noch in `SimulationRoot.enqueue_command()` ein. Der Root verwaltet Queue- und Commit-Token je Unit, committed angenommene Commands im Physics-Tick und verwirft stale Tokens ohne sichtbare Mutation. Combat reiht Facing- und Enemy-Posture als `set_unit_combat_posture`-Effect ein; der Root committed Runtime-Status und Sichtmetadaten erst im Effect-Slot.
+- Architektur: Kein Producer setzt vor dem Tick UnitCommand, Facing oder Enemy-Posture. Die bestehende Command- vor Effect-Reihenfolge, der Runtime-Snapshot und die Multiplayer-Contracts bleiben erhalten.
+- Lokale Pruefung: TASK_1186 Command Authority 8/8; TASK_1186 Combat Posture Effect 8/8; TASK_162 23/23; TASK_166 15/15; TASK_168 20/20; TASK_501 10/10.
+- Risiken/offen: Sichtbare Fenster- und Mehrprozessabnahme sind weiterhin Teil der spaeteren Release-Abnahme. Dieser Task aendert keine Gameplay- oder Balance-Regeln.
+
 ### TASK_1185 - Tactical Input Ownership
 - Status: implementiert und headless regressionsgeprueft
 - Aenderung: Tactical-Kamera, Tactical-Controller und Gedanken-Hold verwenden benannte InputMap-Actions mit einer festen Owner-Matrix. Q/E drehen nur die Kamera, RMB erstellt nur Orders, MMB dreht nur die Kamera, G bleibt GO, T bleibt Sort, V bleibt Thoughts und Tab respektiert UI-Fokus.

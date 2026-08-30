@@ -1219,19 +1219,32 @@ func _get_facing_angle_between_positions(from_position: Vector2, to_position: Ve
 
 
 func _store_combat_attacker_facing(attacker, target) -> void:
-	if attacker == null or target == null or not (attacker is Node):
+	if attacker == null or target == null or not (attacker is Node) or not attacker.has_method("get_unit_id"):
+		return
+	var simulation_root = get_node_or_null(simulation_root_path)
+	if simulation_root == null or not simulation_root.has_method("enqueue_effect"):
 		return
 	var attacker_position: Vector2 = _get_unit_world_position(attacker)
 	var target_position: Vector2 = _get_unit_world_position(target)
 	if attacker_position.distance_squared_to(target_position) <= 0.0001:
 		return
 	var facing_angle: float = _get_facing_angle_between_positions(attacker_position, target_position)
-	var attacker_node: Node = attacker as Node
-	attacker_node.set_meta("facing_angle", facing_angle)
-	attacker_node.set_meta("map_facing_angle", facing_angle)
-	if attacker.has_method("get_team_id") and String(attacker.call("get_team_id")) != friendly_team_id:
-		attacker_node.set_meta("enemy_facing_angle", facing_angle)
-		_apply_enemy_runtime_posture(attacker, ENEMY_POSTURE_ENGAGE, ENEMY_WEAPON_AIMED, "fire_event", _get_enemy_aim_move_speed_factor(attacker))
+	var is_enemy_attacker: bool = attacker.has_method("get_team_id") and String(attacker.call("get_team_id")) != friendly_team_id
+	var effect: Dictionary = {
+		"effect_type": "set_unit_combat_posture",
+		"unit_id": String(attacker.call("get_unit_id")).strip_edges(),
+		"facing_angle": facing_angle,
+		"enemy_facing": is_enemy_attacker,
+		"apply_posture": is_enemy_attacker,
+	}
+	if String(effect.get("unit_id", "")).is_empty():
+		return
+	if is_enemy_attacker:
+		effect["movement_posture"] = ENEMY_POSTURE_ENGAGE
+		effect["weapon_posture"] = ENEMY_WEAPON_AIMED
+		effect["posture_policy_id"] = "fire_event"
+		effect["move_speed_factor"] = _get_enemy_aim_move_speed_factor(attacker)
+	simulation_root.call("enqueue_effect", effect)
 
 
 func _ensure_audio_event_bus(create_if_missing: bool = true):
@@ -4524,37 +4537,6 @@ func _get_enemy_aim_move_speed_factor(unit) -> float:
 		if not state.is_empty():
 			return maxf(float(state.get("aim_move_speed_factor", 0.18)), 0.0)
 	return 0.18
-
-
-func _apply_enemy_runtime_posture(unit, movement_posture: String, weapon_posture: String, posture_policy_id: String, move_speed_factor: float = -1.0) -> bool:
-	if unit == null or not unit.has_method("get_runtime_status") or not unit.has_method("set_runtime_status"):
-		return false
-	var runtime_status = unit.call("get_runtime_status")
-	if runtime_status == null:
-		return false
-	var effective_speed_factor: float = move_speed_factor
-	if effective_speed_factor < 0.0 and runtime_status.has_method("get"):
-		effective_speed_factor = float(runtime_status.get("move_speed_factor"))
-	var effective_policy_id: String = posture_policy_id.strip_edges().to_lower()
-	if effective_policy_id.is_empty() and runtime_status.has_method("get"):
-		effective_policy_id = String(runtime_status.get("posture_policy_id")).strip_edges().to_lower()
-	return bool(unit.call(
-		"set_runtime_status",
-		String(runtime_status.get("status")) if runtime_status.has_method("get") else "assigned",
-		String(runtime_status.get("active_command_type")) if runtime_status.has_method("get") else "",
-		int(runtime_status.get("priority")) if runtime_status.has_method("get") else 0,
-		String(runtime_status.get("fire_status")) if runtime_status.has_method("get") else "fire_at_will",
-		String(runtime_status.get("source_command_type")) if runtime_status.has_method("get") else "",
-		effective_speed_factor,
-		float(runtime_status.get("cover_score")) if runtime_status.has_method("get") else 0.0,
-		float(runtime_status.get("attack_bonus")) if runtime_status.has_method("get") else 0.0,
-		int(runtime_status.get("phase")) if runtime_status.has_method("get") else -1,
-		runtime_status.get("target_position") if runtime_status.has_method("get") else null,
-		movement_posture,
-		weapon_posture,
-		effective_policy_id,
-		float(runtime_status.get("sight_range_factor")) if runtime_status.has_method("get") else 1.0
-	))
 
 
 func _build_enemy_team_tactics_label(state: Dictionary) -> String:
